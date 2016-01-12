@@ -870,14 +870,14 @@ contains
 !     The arguments are:
 !     \begin{description}
 !     \item [<object>]
-!           An {\tt ESMF} object
+!           An {\tt ESMF} object.
 !     \item [specList]
 !           A character list of values which identify the Attribute package, such as
-!           convention, purpose, and instancename
+!           convention, purpose, and instancename.
 !     \item [{[attpack]}]
-!           An optional handle to the Attribute package that is to be created
+!           An optional handle to the Attribute package that is to be created.
 !     \item [{[rc]}]
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
 !
@@ -921,18 +921,18 @@ contains
 !     The arguments are:
 !     \begin{description}
 !     \item [<object>]
-!           An {\tt ESMF} object
+!           An {\tt ESMF} object.
 !     \item [specList]
 !           A character list of values which identify the Attribute package, such as
-!           convention, purpose, and instancename
+!           convention, purpose, and instancename.
 !     \item [attrList]
-!           The list of Attribute names to specify the custom Attribute package
+!           The list of Attribute names to specify the custom Attribute package.
 !     \item [{[count]}]
-!           The number of Attributes to add to the custom Attribute package
+!           The number of Attributes to add to the custom Attribute package.
 !     \item [{[attpack]}]
-!           An optional handle to the Attribute package that is to be created
+!           An optional handle to the Attribute package that is to be created.
 !     \item [{[rc]}]
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
 !
@@ -970,15 +970,15 @@ contains
 !     The arguments are:
 !     \begin{description}
 !     \item [<object>]
-!           An {\tt ESMF} object
+!           An {\tt ESMF} object.
 !     \item [convention]
-!           The convention of the new Attribute package
+!           The convention of the new Attribute package.
 !     \item [purpose]
-!           The purpose of the new Attribute package
+!           The purpose of the new Attribute package.
 !     \item [{[attpack]}]
-!           An optional handle to the Attribute package that is to be created
+!           An optional handle to the Attribute package that is to be created.
 !     \item [{[rc]}]
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
 !
@@ -1026,17 +1026,17 @@ contains
 !     The arguments are:
 !     \begin{description}
 !     \item [<object>]
-!           An {\tt ESMF} object
+!           An {\tt ESMF} object.
 !     \item [convention]
-!           The convention of the new Attribute package
+!           The convention of the new Attribute package.
 !     \item [purpose]
-!           The purpose of the new Attribute package
+!           The purpose of the new Attribute package.
 !     \item [nestConvention]
 !           The convention(s) of the standard Attribute package(s) around
-!           which to nest the new Attribute package
+!           which to nest the new Attribute package.
 !     \item [nestPurpose]
 !           The purpose(s) of the standard Attribute package(s) around
-!           which to nest the new Attribute package
+!           which to nest the new Attribute package.
 !     \item [nestAttPackInstanceCountList]
 !           The desired number of nested Attribute package instances for each
 !           nested (nestConvention, nestPurpose) package type. Note: if only one
@@ -1053,9 +1053,9 @@ contains
 !     \item [{[nestAttPackInstanceNameCount]}]
 !           The number of nested Attribute package instance names.
 !     \item [{[attpack]}]
-!           An optional handle to the Attribute package that is to be created
+!           An optional handle to the Attribute package that is to be created.
 !     \item [{[rc]}]
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
 !
@@ -1099,19 +1099,19 @@ contains
 !     The arguments are:
 !     \begin{description}
 !     \item [<object>]
-!           An {\tt ESMF} object
+!           An {\tt ESMF} object.
 !     \item [convention]
-!           The convention of the Attribute package
+!           The convention of the Attribute package.
 !     \item [purpose]
-!           The purpose of the Attribute package
+!           The purpose of the Attribute package.
 !     \item [attrList]
-!           The list of Attribute names to specify the custom Attribute package
+!           The list of Attribute names to specify the custom Attribute package.
 !     \item [{[count]}]
-!           The number of Attributes to add to the custom Attribute package
+!           The number of Attributes to add to the custom Attribute package.
 !     \item [{[attpack]}]
-!           An optional handle to the Attribute package that is to be created
+!           An optional handle to the Attribute package that is to be created.
 !     \item [{[rc]}]
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
 !
@@ -1160,28 +1160,28 @@ contains
 !     The arguments are:
 !     \begin{description}
 !     \item [<object>]
-!           An {\tt ESMF} object
+!           An {\tt ESMF} object.
 !     \item [convention]
-!           The convention of the Attribute package
+!           The convention of the Attribute package.
 !     \item [purpose]
-!           The purpose of the Attribute package
+!           The purpose of the Attribute package.
 !     \item [{[attrList]}]
-!           The list of Attribute names to specify the custom Attribute package
+!           The list of Attribute names to specify the custom Attribute package.
 !     \item [{[count]}]
-!           The number of Attributes to add to the custom Attribute package
+!           The number of Attributes to add to the custom Attribute package.
 !     \item [nestConvention]
 !           The convention(s) of the Attribute package(s) around which to nest
-!           the new Attribute package
+!           the new Attribute package.
 !     \item [nestPurpose]
 !           The purpose(s) of the Attribute package(s) around which to nest the
-!           new Attribute package
+!           new Attribute package.
 !     \item [{[nestCount]}]
 !           The number of nested Attribute packages to add to the custom
-!           Attribute package
+!           Attribute package.
 !     \item [{[attpack]}]
-!           An optional handle to the Attribute package that is to be created
+!           An optional handle to the Attribute package that is to be created.
 !     \item [{[rc]}]
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
 !
@@ -1229,25 +1229,25 @@ contains
 !     The arguments are:
 !     \begin{description}
 !     \item [<object>]
-!           An {\tt ESMF} object
+!           An {\tt ESMF} object.
 !     \item [convention]
-!           The convention of the Attribute package
+!           The convention of the Attribute package.
 !     \item [purpose]
-!           The purpose of the Attribute package
+!           The purpose of the Attribute package.
 !     \item [{[attrList]}]
-!           The list of Attribute names to specify the custom Attribute package
+!           The list of Attribute names to specify the custom Attribute package.
 !     \item [{[count]}]
-!           The number of Attributes to add to the custom Attribute package
+!           The number of Attributes to add to the custom Attribute package.
 !     \item [nestConvention]
 !           The convention of the Attribute package around which to nest
-!           the new Attribute package
+!           the new Attribute package.
 !     \item [nestPurpose]
 !           The purpose of the Attribute package around which to nest the
-!           new Attribute package
+!           new Attribute package.
 !     \item [{[attpack]}]
-!           An optional handle to the Attribute package that is to be created
+!           An optional handle to the Attribute package that is to be created.
 !     \item [{[rc]}]
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
 !
@@ -1294,9 +1294,9 @@ contains
 !     The arguments are:
 !     \begin{description}
 !     \item [<object1>]
-!           An {\tt ESMF} object
+!           An {\tt ESMF} object.
 !     \item [<object2>]
-!           An {\tt ESMF} object
+!           An {\tt ESMF} object.
 !     \item [copyflag]
 !           A flag to determine if the copy is to be by reference, value,
 !           or both.  This flag is documented in section \ref{const:copy}.
@@ -1304,7 +1304,7 @@ contains
 !           A flag to determine if the copy is supposed to descend the
 !           Attribute hierarchy. This flag is documented in section \ref{const:atttree}.
 !     \item [{[rc]}]
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
 !EOP
@@ -1376,22 +1376,24 @@ contains
 !     The arguments are:
 !     \begin{description}
 !     \item [<object>]
-!           An {\tt ESMF} object
+!           An {\tt ESMF} object.
 !     \item [name]
-!           The name of the Attribute to retrieve
+!           The name of the Attribute to retrieve.
 !     \item [attpack]
-!           A handle to the Attribute package
+!           A handle to the Attribute package.
 !     \item [<value>]
-!           The value of the named Attribute
+!           The value of the named Attribute.
 !     \item [{[<defaultvalue>]}]
-!           The default value of the named Attribute
+!           The default value of the named Attribute.
 !     \item [{[attnestflag]}]
 !           A flag to determine whether to descend the
-!           Attribute hierarchy when looking for this Attribute
+!           Attribute hierarchy when looking for this Attribute, the default
+!           is {\tt ESMF\_ATTNEST\_ON}.  This flag is documented in section
+!           \ref{const:attnest}.
 !     \item [{[isPresent]}]
-!           A logical flag to tell if this Attribute is present or not
+!           A logical flag to tell if this Attribute is present or not.
 !     \item [{[rc]}]
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
 !
@@ -1448,24 +1450,26 @@ contains
 !     The arguments are:
 !     \begin{description}
 !     \item [<object>]
-!           An {\tt ESMF} object
+!           An {\tt ESMF} object.
 !     \item [name]
-!           The name of the Attribute to retrieve
+!           The name of the Attribute to retrieve.
 !     \item [attpack]
-!           A handle to the Attribute package
+!           A handle to the Attribute package.
 !     \item [<value argument>]
-!           The value of the named Attribute
+!           The value of the named Attribute.
 !     \item [{[<defaultvalue argument>]}]
-!           The default value of the named Attribute
+!           The default value of the named Attribute.
 !     \item [{[inputList]}]
-!           A list of the input parameters required to retrieve internal info
+!           A list of the input parameters required to retrieve internal info.
 !     \item [{[attnestflag]}]
 !           A flag to determine whether to descend the
-!           Attribute hierarchy when looking for this Attribute
+!           Attribute hierarchy when looking for this Attribute, the default
+!           is {\tt ESMF\_ATTNEST\_ON}.  This flag is documented in section
+!           \ref{const:attnest}.
 !     \item [{[isPresent]}]
-!           A logical flag to tell if this Attribute is present or not
+!           A logical flag to tell if this Attribute is present or not.
 !     \item [{[rc]}]
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
 !
@@ -1539,24 +1543,26 @@ contains
 !     The arguments are:
 !     \begin{description}
 !     \item [<object>]
-!           An {\tt ESMF} object
+!           An {\tt ESMF} object.
 !     \item [name]
-!           The name of the Attribute to retrieve
+!           The name of the Attribute to retrieve.
 !     \item [attpack]
-!           A handle to the Attribute package
+!           A handle to the Attribute package.
 !     \item [<valueList>]
-!           The valueList of the named Attribute
+!           The valueList of the named Attribute.
 !     \item [{[<defaultvalueList>]}]
-!           The default value list of the named Attribute
+!           The default value list of the named Attribute.
 !     \item [{[attnestflag]}]
 !           A flag to determine whether to descend the
-!           Attribute hierarchy when looking for this Attribute
+!           Attribute hierarchy when looking for this Attribute, the default
+!           is {\tt ESMF\_ATTNEST\_ON}.  This flag is documented in section
+!           \ref{const:attnest}.
 !     \item [{[itemCount]}]
-!           The number of items in a multi-valued Attribute
+!           The number of items in a multi-valued Attribute.
 !     \item [{[isPresent]}]
-!           A logical flag to tell if this Attribute is present or not
+!           A logical flag to tell if this Attribute is present or not.
 !     \item [{[rc]}]
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
 !
@@ -1616,26 +1622,28 @@ contains
 !     The arguments are:
 !     \begin{description}
 !     \item [<object>]
-!           An {\tt ESMF} object
+!           An {\tt ESMF} object.
 !     \item [name]
-!           The name of the Attribute to retrieve
+!           The name of the Attribute to retrieve.
 !     \item [attpack]
-!           A handle to the Attribute package
+!           A handle to the Attribute package.
 !     \item [<valueList>]
-!           The valueList of the named Attribute
+!           The valueList of the named Attribute.
 !     \item [{[<defaultvalueList>]}]
-!           The default value list of the named Attribute
+!           The default value list of the named Attribute.
 !     \item [{[inputList]}]
-!           A list of the input parameters required to retrieve internal info
+!           A list of the input parameters required to retrieve internal info.
 !     \item [{[attnestflag]}]
 !           A flag to determine whether to descend the
-!           Attribute hierarchy when looking for this Attribute
+!           Attribute hierarchy when looking for this Attribute, the default
+!           is {\tt ESMF\_ATTNEST\_ON}.  This flag is documented in section
+!           \ref{const:attnest}.
 !     \item [{[itemCount]}]
-!           The number of items in a multi-valued Attribute
+!           The number of items in a multi-valued Attribute.
 !     \item [{[isPresent]}]
-!           A logical flag to tell if this Attribute is present or not
+!           A logical flag to tell if this Attribute is present or not.
 !     \item [{[rc]}]
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
 !
@@ -1710,13 +1718,13 @@ contains
 !     The arguments are:
 !     \begin{description}
 !     \item [<object>]
-!           An {\tt ESMF} object
+!           An {\tt ESMF} object.
 !     \item [name]
-!           The name of the Attribute to retrieve
+!           The name of the Attribute to retrieve.
 !     \item [<value>]
-!           The value of the named Attribute
+!           The value of the named Attribute.
 !     \item [{[<defaultvalue>]}]
-!           The default value of the named Attribute
+!           The default value of the named Attribute.
 !     \item [{[convention]}]
 !           The convention of the Attribute package.
 !     \item [{[purpose]}]
@@ -1728,11 +1736,13 @@ contains
 !           first instance.
 !     \item [{[attnestflag]}]
 !           A flag to determine whether to descend the
-!           Attribute hierarchy when looking for this Attribute
+!           Attribute hierarchy when looking for this Attribute, the default
+!           is {\tt ESMF\_ATTNEST\_ON}.  This flag is documented in section
+!           \ref{const:attnest}.
 !     \item [{[isPresent]}]
-!           A logical flag to tell if this Attribute is present or not
+!           A logical flag to tell if this Attribute is present or not.
 !     \item [{[rc]}]
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
 !
@@ -1792,15 +1802,15 @@ contains
 !     The arguments are:
 !     \begin{description}
 !     \item [<object>]
-!           An {\tt ESMF} object
+!           An {\tt ESMF} object.
 !     \item [name]
-!           The name of the Attribute to retrieve
+!           The name of the Attribute to retrieve.
 !     \item [<value argument>]
-!           The value of the named Attribute
+!           The value of the named Attribute.
 !     \item [{[<defaultvalue argument>]}]
-!           The default value of the named Attribute
+!           The default value of the named Attribute.
 !     \item [{[inputList]}]
-!           A list of the input parameters required to retrieve internal info
+!           A list of the input parameters required to retrieve internal info.
 !     \item [{[convention]}]
 !           The convention of the Attribute package.
 !     \item [{[purpose]}]
@@ -1812,11 +1822,13 @@ contains
 !           first instance.
 !     \item [{[attnestflag]}]
 !           A flag to determine whether to descend the
-!           Attribute hierarchy when looking for this Attribute
+!           Attribute hierarchy when looking for this Attribute, the default
+!           is {\tt ESMF\_ATTNEST\_ON}.  This flag is documented in section
+!           \ref{const:attnest}.
 !     \item [{[isPresent]}]
-!           A logical flag to tell if this Attribute is present or not
+!           A logical flag to tell if this Attribute is present or not.
 !     \item [{[rc]}]
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
 !
@@ -1892,13 +1904,13 @@ contains
 !     The arguments are:
 !     \begin{description}
 !     \item [<object>]
-!           An {\tt ESMF} object
+!           An {\tt ESMF} object.
 !     \item [name]
-!           The name of the Attribute to retrieve
+!           The name of the Attribute to retrieve.
 !     \item [<valueList>]
-!           The valueList of the named Attribute
+!           The valueList of the named Attribute.
 !     \item [{[<defaultvalueList>]}]
-!           The default value list of the named Attribute
+!           The default value list of the named Attribute.
 !     \item [{[convention]}]
 !           The convention of the Attribute package.
 !     \item [{[purpose]}]
@@ -1910,13 +1922,15 @@ contains
 !           first instance.
 !     \item [{[attnestflag]}]
 !           A flag to determine whether to descend the
-!           Attribute hierarchy when looking for this Attribute
+!           Attribute hierarchy when looking for this Attribute, the default
+!           is {\tt ESMF\_ATTNEST\_ON}.  This flag is documented in section
+!           \ref{const:attnest}.
 !     \item [{[itemCount]}]
-!           The number of items in a multi-valued Attribute
+!           The number of items in a multi-valued Attribute.
 !     \item [{[isPresent]}]
-!           A logical flag to tell if this Attribute is present or not
+!           A logical flag to tell if this Attribute is present or not.
 !     \item [{[rc]}]
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
 !
@@ -1978,15 +1992,15 @@ contains
 !     The arguments are:
 !     \begin{description}
 !     \item [<object>]
-!           An {\tt ESMF} object
+!           An {\tt ESMF} object.
 !     \item [name]
-!           The name of the Attribute to retrieve
+!           The name of the Attribute to retrieve.
 !     \item [<valueList>]
-!           The valueList of the named Attribute
+!           The valueList of the named Attribute.
 !     \item [{[<defaultvalueList>]}]
-!           The default value list of the named Attribute
+!           The default value list of the named Attribute.
 !     \item [{[inputList]}]
-!           A list of the input parameters required to retrieve internal info
+!           A list of the input parameters required to retrieve internal info.
 !     \item [{[convention]}]
 !           The convention of the Attribute package.
 !     \item [{[purpose]}]
@@ -1998,13 +2012,15 @@ contains
 !           first instance.
 !     \item [{[attnestflag]}]
 !           A flag to determine whether to descend the
-!           Attribute hierarchy when looking for this Attribute
+!           Attribute hierarchy when looking for this Attribute, the default
+!           is {\tt ESMF\_ATTNEST\_ON}.  This flag is documented in section
+!           \ref{const:attnest}.
 !     \item [{[itemCount]}]
-!           The number of items in a multi-valued Attribute
+!           The number of items in a multi-valued Attribute.
 !     \item [{[isPresent]}]
-!           A logical flag to tell if this Attribute is present or not
+!           A logical flag to tell if this Attribute is present or not.
 !     \item [{[rc]}]
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
 !
@@ -2045,7 +2061,7 @@ contains
 !     The arguments are:
 !     \begin{description}
 !     \item [<object>]
-!           An {\tt ESMF} object
+!           An {\tt ESMF} object.
 !     \item [count]
 !           The number of all existing Attributes of the type designated in the
 !           {\it attcountflag}, not just Attribute that have been set.
@@ -2055,9 +2071,11 @@ contains
 !           in section \ref{const:attgetcount}.
 !     \item [{[attnestflag]}]
 !           A flag to determine whether to descend the
-!           Attribute hierarchy when looking for this Attribute
+!           Attribute hierarchy when looking for this Attribute, the default
+!           is {\tt ESMF\_ATTNEST\_ON}.  This flag is documented in section
+!           \ref{const:attnest}.
 !     \item [{[rc]}]
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
 !EOP
@@ -2102,22 +2120,24 @@ contains
 !     The arguments are:
 !     \begin{description}
 !     \item [<object>]
-!           An {\tt ESMF} object
+!           An {\tt ESMF} object.
 !     \item [name]
-!           The name of the Attribute to query
+!           The name of the Attribute to query.
 !     \item [attpack]
-!           A handle to the Attribute package
+!           A handle to the Attribute package.
 !     \item [{[attnestflag]}]
 !           A flag to determine whether to descend the
-!           Attribute hierarchy when looking for this Attribute
+!           Attribute hierarchy when looking for this Attribute, the default
+!           is {\tt ESMF\_ATTNEST\_ON}.  This flag is documented in section
+!           \ref{const:attnest}.
 !     \item [{[typekind}]]
-!           The typekind of the Attribute
+!           The typekind of the Attribute.
 !     \item [{[itemCount]}]
-!           The number of items in this Attribute
-!     \item [{[isPresent]}] @\
-!           A logical flag to tell if this Attribute is present or not @\
+!           The number of items in this Attribute.
+!     \item [{[isPresent]}]
+!           A logical flag to tell if this Attribute is present or not.
 !     \item [{[rc]}]
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
 !
@@ -2167,9 +2187,9 @@ contains
 !     The arguments are:
 !     \begin{description}
 !     \item [<object>]
-!           An {\tt ESMF} object
+!           An {\tt ESMF} object.
 !     \item [name]
-!           The name of the Attribute to query
+!           The name of the Attribute to query.
 !     \item [{[convention]}]
 !           The convention of the Attribute package.
 !     \item [{[purpose]}]
@@ -2181,15 +2201,17 @@ contains
 !           first instance.  (Not implemented yet)
 !     \item [{[attnestflag]}]
 !           A flag to determine whether to descend the
-!           Attribute hierarchy when looking for this Attribute
+!           Attribute hierarchy when looking for this Attribute, the default
+!           is {\tt ESMF\_ATTNEST\_ON}.  This flag is documented in section
+!           \ref{const:attnest}.
 !     \item [{[typekind}]]
-!           The typekind of the Attribute
+!           The typekind of the Attribute.
 !     \item [{[itemCount]}]
-!           The number of items in this Attribute
-!     \item [{[isPresent]}] @\
-!           A logical flag to tell if this Attribute is present or not @\
+!           The number of items in this Attribute.
+!     \item [{[isPresent]}]
+!           A logical flag to tell if this Attribute is present or not.
 !     \item [{[rc]}]
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
 !
@@ -2234,20 +2256,22 @@ contains
 !     The arguments are:
 !     \begin{description}
 !     \item [<object>]
-!           An {\tt ESMF} object
+!           An {\tt ESMF} object.
 !     \item [attributeIndex]
-!           The index number of the Attribute to query
+!           The index number of the Attribute to query.
 !     \item [name]
-!           The name of the Attribute
+!           The name of the Attribute.
 !     \item [{[attnestflag]}]
 !           A flag to determine whether to descend the
-!           Attribute hierarchy when looking for this Attribute
+!           Attribute hierarchy when looking for this Attribute, the default
+!           is {\tt ESMF\_ATTNEST\_ON}.  This flag is documented in section
+!           \ref{const:attnest}.
 !     \item [{[typekind]}]
-!           The typekind of the Attribute
+!           The typekind of the Attribute.
 !     \item [{[itemCount]}]
-!           The number of items in this Attribute
+!           The number of items in this Attribute.
 !     \item [{[rc]}]
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
 !
@@ -2286,19 +2310,21 @@ contains
 !     The arguments are:
 !     \begin{description}
 !     \item [<object>]
-!           An {\tt ESMF} object
+!           An {\tt ESMF} object.
 !     \item [attpack]
-!           A handle to the Attribute package
+!           A handle to the Attribute package.
 !     \item [attPackInstanceNameList]
 !           The name(s) of the Attribute package instances of the given
 !           convention and purpose.
 !     \item [attPackInstanceNameCount]
 !           The number of Attribute package instance names.
 !     \item [{[attnestflag]}]
-!           A flag to determine whether to descend the @\
-!           Attribute hierarchy when searching for this Attribute package @\
+!           A flag to determine whether to descend the
+!           Attribute hierarchy when searching for this Attribute package,
+!           the default is {\tt ESMF\_ATTNEST\_ON}. This flag is documented
+!           in section \ref{const:attnest}.
 !     \item [{[rc]}]
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
 !
@@ -2337,7 +2363,7 @@ contains
 !     The arguments are:
 !     \begin{description}
 !     \item [<object>]
-!           An {\tt ESMF} object
+!           An {\tt ESMF} object.
 !     \item [convention]
 !           The convention of the Attribute package instances.
 !     \item [purpose]
@@ -2348,10 +2374,12 @@ contains
 !     \item [attPackInstanceNameCount]
 !           The number of Attribute package instance names.
 !     \item [{[attnestflag]}]
-!           A flag to determine whether to descend the @\
-!           Attribute hierarchy when searching for this Attribute package @\
+!           A flag to determine whether to descend the
+!           Attribute hierarchy when searching for this Attribute package,
+!           the default is {\tt ESMF\_ATTNEST\_ON}. This flag is documented
+!           in section \ref{const:attnest}.
 !     \item [{[rc]}]
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
 !
@@ -2395,19 +2423,21 @@ contains
 !     The arguments are:
 !     \begin{description}
 !     \item [<object>]
-!           An {\tt ESMF} object
+!           An {\tt ESMF} object.
 !     \item [specList]
 !           A character list of values which identify the Attribute package, 
-!           such as convention, purpose, and instancename
+!           such as convention, purpose, and instancename.
 !     \item [{[attpack]}]
-!           A handle to the Attribute package
+!           A handle to the Attribute package.
 !     \item [{[attnestflag]}]
 !           A flag to determine whether to descend the
-!           Attribute hierarchy when searching for this Attribute package
+!           Attribute hierarchy when searching for this Attribute package, the
+!           default is {\tt ESMF\_ATTNEST\_ON}.  This flag is documented in
+!           section \ref{const:attnest}.
 !     \item [{[isPresent]}]
-!           A logical flag to tell if this Attribute package is present or not
+!           A logical flag to tell if this Attribute package is present or not.
 !     \item [{[rc]}]
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
 !
@@ -2453,25 +2483,27 @@ contains
 !     The arguments are:
 !     \begin{description}
 !     \item [<object>]
-!           An {\tt ESMF} object
+!           An {\tt ESMF} object.
 !     \item [convention]
-!           The convention of the Attribute package
+!           The convention of the Attribute package.
 !     \item [purpose]
-!           The purpose of the Attribute package
+!           The purpose of the Attribute package.
 !     \item [{[attPackInstanceName]}]
 !           The name of an Attribute package instance, specifying which one
 !           of multiple Attribute package instances of the same convention
 !           and purpose, within a nest.  If not specified, defaults to the
 !           first instance.
 !     \item [{[attpack]}]
-!           A handle to the Attribute package
+!           A handle to the Attribute package.
 !     \item [{[attnestflag]}]
 !           A flag to determine whether to descend the
-!           Attribute hierarchy when searching for this Attribute package
+!           Attribute hierarchy when searching for this Attribute package, the
+!           default is {\tt ESMF\_ATTNEST\_ON}.  This flag is documented in
+!           section \ref{const:attnest}.
 !     \item [{[isPresent]}]
-!           A logical flag to tell if this Attribute package is present or not
+!           A logical flag to tell if this Attribute package is present or not.
 !     \item [{[rc]}]
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
 !
@@ -2514,11 +2546,11 @@ contains
 !     The arguments are:
 !     \begin{description}
 !     \item [<object1>]
-!       The \textit{parent} object in the Attribute hierarchy link
+!       The \textit{parent} object in the Attribute hierarchy link.
 !     \item [<object2>]
-!       The \textit{child} object in the Attribute hierarchy link
+!       The \textit{child} object in the Attribute hierarchy link.
 !     \item [{[rc]}]
-!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
 !
@@ -2553,11 +2585,11 @@ contains
 !     The arguments are:
 !     \begin{description}
 !     \item [state]
-!       An {\tt ESMF\_State} object
+!       An {\tt ESMF\_State} object.
 !     \item [<object>]
-!       The object with which to link hierarchies
+!       The object with which to link hierarchies.
 !     \item [{[rc]}]
-!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
 !
@@ -2583,11 +2615,11 @@ contains
 !     The arguments are:
 !     \begin{description}
 !     \item [fieldbundle]
-!       An {\tt ESMF\_FieldBundle} object
+!       An {\tt ESMF\_FieldBundle} object.
 !     \item [field]
-!       An {\tt ESMF\_Field} object
+!       An {\tt ESMF\_Field} object.
 !     \item [{[rc]}]
-!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
 !
@@ -2613,11 +2645,11 @@ contains
 !     The arguments are:
 !     \begin{description}
 !     \item [field]
-!       An {\tt ESMF\_Field} object
+!       An {\tt ESMF\_Field} object.
 !     \item [grid]
-!       An {\tt ESMF\_Grid} object
+!       An {\tt ESMF\_Grid} object.
 !     \item [{[rc]}]
-!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
 !
@@ -2643,11 +2675,11 @@ contains
 !     The arguments are:
 !     \begin{description}
 !     \item [arraybundle]
-!       An {\tt ESMF\_ArrayBundle} object
+!       An {\tt ESMF\_ArrayBundle} object.
 !     \item [array]
-!       An {\tt ESMF\_Array} object
+!       An {\tt ESMF\_Array} object.
 !     \item [{[rc]}]
-!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
 !
@@ -2689,11 +2721,11 @@ contains
 !     The arguments are:
 !     \begin{description}
 !     \item [<object1>]
-!       The \textit{parent} object in the Attribute hierarchy link
+!       The \textit{parent} object in the Attribute hierarchy link.
 !     \item [<object2>]
-!       The \textit{child} object in the Attribute hierarchy link
+!       The \textit{child} object in the Attribute hierarchy link.
 !     \item [{[rc]}]
-!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
 !
@@ -2728,11 +2760,11 @@ contains
 !     The arguments are:
 !     \begin{description}
 !     \item [state]
-!       An {\tt ESMF\_State} object
+!       An {\tt ESMF\_State} object.
 !     \item [<object>]
-!       The object with which to unlink hierarchies
+!       The object with which to unlink hierarchies.
 !     \item [{[rc]}]
-!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
 !
@@ -2758,11 +2790,11 @@ contains
 !     The arguments are:
 !     \begin{description}
 !     \item [fieldbundle]
-!       An {\tt ESMF\_FieldBundle} object
+!       An {\tt ESMF\_FieldBundle} object.
 !     \item [field]
-!       An {\tt ESMF\_Field} object
+!       An {\tt ESMF\_Field} object.
 !     \item [{[rc]}]
-!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
 !
@@ -2788,11 +2820,11 @@ contains
 !     The arguments are:
 !     \begin{description}
 !     \item [field]
-!       An {\tt ESMF\_Field} object
+!       An {\tt ESMF\_Field} object.
 !     \item [grid]
-!       An {\tt ESMF\_Grid} object
+!       An {\tt ESMF\_Grid} object.
 !     \item [{[rc]}]
-!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
 !
@@ -2818,11 +2850,11 @@ contains
 !     The arguments are:
 !     \begin{description}
 !     \item [arraybundle]
-!       An {\tt ESMF\_ArrayBundle} object
+!       An {\tt ESMF\_ArrayBundle} object.
 !     \item [array]
-!       An {\tt ESMF\_Array} object
+!       An {\tt ESMF\_Array} object.
 !     \item [{[rc]}]
-!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
 !
@@ -2871,13 +2903,13 @@ contains
 !     The arguments are:
 !     \begin{description}
 !     \item [<object>]
-!           The {\tt ESMF} object onto which the read Attributes will be placed
+!           The {\tt ESMF} object onto which the read Attributes will be placed.
 !     \item [{[fileName]}]
-!           The name of the XML file to read
+!           The name of the XML file to read.
 !     \item [{[schemaFileName]}]
-!           The name of the XSD file to validate the contents of fileName
+!           The name of the XSD file to validate the contents of fileName.
 !     \item [{[rc]}]
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
 !EOP
@@ -2918,13 +2950,13 @@ contains
 !     The arguments are:
 !     \begin{description}
 !     \item [<object>]
-!           An {\tt ESMF} object
+!           An {\tt ESMF} object.
 !     \item [{[name]}]
-!           The name of the Attribute to remove
+!           The name of the Attribute to remove.
 !     \item [attpack]
-!           A handle to the Attribute package
+!           A handle to the Attribute package.
 !     \item [{[rc]}]
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
 !     NOTE:  An entire Attribute package can be removed by specifying
@@ -2974,9 +3006,9 @@ contains
 !     The arguments are:
 !     \begin{description}
 !     \item [<object>]
-!           An {\tt ESMF} object
+!           An {\tt ESMF} object.
 !     \item [{[name]}]
-!           The name of the Attribute to remove
+!           The name of the Attribute to remove.
 !     \item [{[convention]}]
 !           The convention of the Attribute package.
 !     \item [{[purpose]}]
@@ -2987,7 +3019,7 @@ contains
 !           and purpose, within a nest.  If not specified, defaults to the
 !           first instance.
 !     \item [{[rc]}]
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
 !     NOTE:  An entire Attribute package can be removed by specifying
@@ -3048,15 +3080,15 @@ contains
 !     The arguments are:
 !     \begin{description}
 !     \item [<object>]
-!           An {\tt ESMF} object
+!           An {\tt ESMF} object.
 !     \item [name]
-!           The name of the Attribute to set
+!           The name of the Attribute to set.
 !     \item [<value argument>]
-!           The value of the Attribute to set
+!           The value of the Attribute to set.
 !     \item [attpack]
-!           A handle to the Attribute package
+!           A handle to the Attribute package.
 !     \item [{[rc]}]
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
 !
@@ -3100,17 +3132,17 @@ contains
 !     The arguments are:
 !     \begin{description}
 !     \item [<object>]
-!           An {\tt ESMF} object
+!           An {\tt ESMF} object.
 !     \item [name]
-!           The name of the Attribute to set
+!           The name of the Attribute to set.
 !     \item [<value argument>]
-!           The value of the Attribute to set
+!           The value of the Attribute to set.
 !     \item [attpack]
-!           A handle to the Attribute package
+!           A handle to the Attribute package.
 !     \item [{[inputList]}]
-!           A list of the input parameters required to set internal info
+!           A list of the input parameters required to set internal info.
 !     \item [{[rc]}]
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
 !
@@ -3166,17 +3198,17 @@ contains
 !     The arguments are:
 !     \begin{description}
 !     \item [<object>]
-!           An {\tt ESMF} object
+!           An {\tt ESMF} object.
 !     \item [name]
-!           The name of the Attribute to set
+!           The name of the Attribute to set.
 !     \item [<valueList argument>]
-!           The valueList of the Attribute to set
+!           The valueList of the Attribute to set.
 !     \item [attpack]
-!           A handle to the Attribute package
+!           A handle to the Attribute package.
 !     \item [{[itemCount]}]
-!           The number of items in a multi-valued Attribute
+!           The number of items in a multi-valued Attribute.
 !     \item [{[rc]}]
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
 !
@@ -3231,11 +3263,11 @@ contains
 !     The arguments are:
 !     \begin{description}
 !     \item [<object>]
-!           An {\tt ESMF} object
+!           An {\tt ESMF} object.
 !     \item [name]
-!           The name of the Attribute to set
+!           The name of the Attribute to set.
 !     \item [<value argument>]
-!           The value of the Attribute to set
+!           The value of the Attribute to set.
 !     \item [{[convention]}]
 !           The convention of the Attribute package.
 !     \item [{[purpose]}]
@@ -3246,7 +3278,7 @@ contains
 !           and purpose, within a nest.  If not specified, defaults to the
 !           first instance. (Not implemented yet)
 !     \item [{[rc]}]
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
 !
@@ -3292,13 +3324,13 @@ contains
 !     The arguments are:
 !     \begin{description}
 !     \item [<object>]
-!           An {\tt ESMF} object
+!           An {\tt ESMF} object.
 !     \item [name]
-!           The name of the Attribute to set
+!           The name of the Attribute to set.
 !     \item [<value argument>]
-!           The value of the Attribute to set
+!           The value of the Attribute to set.
 !     \item [{[inputList]}]
-!           A list of the input parameters required to set internal info
+!           A list of the input parameters required to set internal info.
 !     \item [{[convention]}]
 !           The convention of the Attribute package.
 !     \item [{[purpose]}]
@@ -3309,7 +3341,7 @@ contains
 !           and purpose, within a nest.  If not specified, defaults to the
 !           first instance. (Not implemented yet)
 !     \item [{[rc]}]
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
 !
@@ -3367,11 +3399,11 @@ contains
 !     The arguments are:
 !     \begin{description}
 !     \item [<object>]
-!           An {\tt ESMF} object
+!           An {\tt ESMF} object.
 !     \item [name]
-!           The name of the Attribute to set
+!           The name of the Attribute to set.
 !     \item [<valueList argument>]
-!           The valueList of the Attribute to set
+!           The valueList of the Attribute to set.
 !     \item [{[convention]}]
 !           The convention of the Attribute package.
 !     \item [{[purpose]}]
@@ -3382,9 +3414,9 @@ contains
 !           and purpose, within a nest.  If not specified, defaults to the
 !           first instance. (Not implemented yet)
 !     \item [{[itemCount]}]
-!           The number of items in a multi-valued Attribute
+!           The number of items in a multi-valued Attribute.
 !     \item [{[rc]}]
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
 !
@@ -3426,14 +3458,14 @@ contains
 !     The arguments are:
 !     \begin{description}
 !     \item [<object>]
-!           An {\tt ESMF} object
+!           An {\tt ESMF} object.
 !     \item [vm]
 !           The virtural machine over which this Attribute hierarchy
-!           should be updated
+!           should be updated.
 !     \item [rootList]
-!           The list of \textit{root} PETs that are to be used to update
+!           The list of \textit{root} PETs that are to be used to update.
 !     \item [{[rc]}]
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
 !
@@ -3504,17 +3536,17 @@ contains
 !     The arguments are:
 !     \begin{description}
 !     \item [<object>]
-!           An {\tt ESMF} object
+!           An {\tt ESMF} object.
 !     \item [{[convention]}]
-!           The convention of the Attribute package
+!           The convention of the Attribute package.
 !     \item [{[purpose]}]
-!           The purpose of the Attribute package
+!           The purpose of the Attribute package.
 !     \item [{[attwriteflag]}]
 !           The flag to specify which format is desired for the write, the
 !           default is ESMF\_ATTWRITE\_TAB.  This flag is documented in
 !           section \ref{const:attwrite}.
 !     \item [{[rc]}]
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
 !EOP
@@ -3584,7 +3616,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !           The Attribute package to return. @\
 !     \item [{[attnestflag]}] @\
 !           A flag to determine whether to descend the @\
-!           Attribute hierarchy when searching for this Attribute package @\
+!           Attribute hierarchy when searching for this Attribute package, @\
+!           the default is {\tt ESMF\_ATTNEST\_ON}. This flag is documented @\
+!           in section \ref{const:attnest}. @\
 !     \item [{[isPresent]}] @\
 !           A logical flag to tell if this Attribute package is present or not @\
 !     \item [{[rc]}]  @\
@@ -3707,7 +3741,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !           The Attribute package to return. @\
 !     \item [{[attnestflag]}] @\
 !           A flag to determine whether to descend the @\
-!           Attribute hierarchy when searching for this Attribute package @\
+!           Attribute hierarchy when searching for this Attribute package, @\
+!           the default is {\tt ESMF\_ATTNEST\_ON}. This flag is documented @\
+!           in section \ref{const:attnest}. @\
 !     \item [{[isPresent]}] @\
 !           A logical flag to tell if this Attribute package is present or not @\
 !     \item [{[rc]}]  @\
@@ -4845,7 +4881,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !           A list of the input parameters required to retrieve internal info. @\
 !     \item [{[attnestflag]}] @\
 !           A flag to determine whether to descend the @\
-!           Attribute hierarchy when searching for this Attribute @\
+!           Attribute hierarchy when searching for this Attribute, @\
+!           the default is {\tt ESMF\_ATTNEST\_ON}. This flag is documented @\
+!           in section \ref{const:attnest}. @\
 !     \item [{[isPresent]}] @\
 !           A logical flag to tell if this Attribute is present or not @\
 !     \item [{[rc]}]  @\
@@ -4981,6 +5019,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     \item [{[attnestflag]}] @\
 !           A flag to determine whether to descend the @\
 !           Attribute hierarchy when searching for this Attribute @\
+!           the default is {\tt ESMF\_ATTNEST\_ON}. This flag is documented @\
+!           in section \ref{const:attnest}. @\
 !     \item [{[isPresent]}] @\
 !           A logical flag to tell if this Attribute is present or not @\
 !     \item [{[rc]}]  @\
@@ -5141,7 +5181,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !           A list of the input parameters required to retrieve internal info. @\
 !     \item [{[attnestflag]}] @\
 !           A flag to determine whether to descend the @\
-!           Attribute hierarchy when searching for this Attribute @\
+!           Attribute hierarchy when searching for this Attribute, @\
+!           the default is {\tt ESMF\_ATTNEST\_ON}. This flag is documented @\
+!           in section \ref{const:attnest}. @\
 !     \item [{[itemCount]}] @\
 !           The number of values in the Attribute. @\
 !     \item [{[isPresent]}] @\
@@ -5309,7 +5351,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !           An Attribute package handle containing identifying information. @\
 !     \item [{[attnestflag]}] @\
 !           A flag to determine whether to descend the @\
-!           Attribute hierarchy when searching for this Attribute @\
+!           Attribute hierarchy when searching for this Attribute, @\
+!           the default is {\tt ESMF\_ATTNEST\_ON}. This flag is documented @\
+!           in section \ref{const:attnest}. @\
 !     \item [{[itemCount]}] @\
 !           The number of values in the Attribute. @\
 !     \item [{[isPresent]}] @\
@@ -5495,7 +5539,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !           The logical default value of the named Attribute. @\
 !     \item [{[attnestflag]}] @\
 !           A flag to determine whether to descend the @\
-!           Attribute hierarchy when searching for this Attribute @\
+!           Attribute hierarchy when searching for this Attribute, @\
+!           the default is {\tt ESMF\_ATTNEST\_ON}. This flag is documented @\
+!           in section \ref{const:attnest}. @\
 !     \item [{[isPresent]}] @\
 !           A logical flag to tell if this Attribute is present or not @\
 !     \item [{[rc]}]  @\
@@ -5609,7 +5655,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !           first instance.  (Not implemented yet) @\
 !     \item [{[attnestflag]}] @\
 !           A flag to determine whether to descend the @\
-!           Attribute hierarchy when searching for this Attribute @\
+!           Attribute hierarchy when searching for this Attribute, @\
+!           the default is {\tt ESMF\_ATTNEST\_ON}. This flag is documented @\
+!           in section \ref{const:attnest}. @\
 !     \item [{[isPresent]}] @\
 !           A logical flag to tell if this Attribute is present or not @\
 !     \item [{[rc]}]  @\
@@ -5750,7 +5798,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !           A list of the input parameters required to retrieve internal info. @\
 !     \item [{[attnestflag]}] @\
 !           A flag to determine whether to descend the @\
-!           Attribute hierarchy when searching for this Attribute @\
+!           Attribute hierarchy when searching for this Attribute, @\
+!           the default is {\tt ESMF\_ATTNEST\_ON}. This flag is documented @\
+!           in section \ref{const:attnest}. @\
 !     \item [{[itemCount]}] @\
 !           The number of values in the Attribute. @\
 !     \item [{[isPresent]}] @\
@@ -5918,7 +5968,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !           first instance.  (Not implemented yet) @\
 !     \item [{[attnestflag]}] @\
 !           A flag to determine whether to descend the @\
-!           Attribute hierarchy when searching for this Attribute @\
+!           Attribute hierarchy when searching for this Attribute, @\
+!           the default is {\tt ESMF\_ATTNEST\_ON}. This flag is documented @\
+!           in section \ref{const:attnest}. @\
 !     \item [{[itemCount]}] @\
 !           The number of values in the Attribute. @\
 !     \item [{[isPresent]}] @\
@@ -6103,7 +6155,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !           The character default value of the named Attribute. @\
 !     \item [{[attnestflag]}] @\
 !           A flag to determine whether to descend the @\
-!           Attribute hierarchy when searching for this Attribute @\
+!           Attribute hierarchy when searching for this Attribute, @\
+!           the default is {\tt ESMF\_ATTNEST\_ON}. This flag is documented @\
+!           in section \ref{const:attnest}. @\
 !     \item [{[isPresent]}] @\
 !           A logical flag to tell if this Attribute is present or not @\
 !     \item [{[rc]}]  @\
@@ -6236,7 +6290,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !           first instance. @\
 !     \item [{[attnestflag]}] @\
 !           A flag to determine whether to descend the @\
-!           Attribute hierarchy when searching for this Attribute @\
+!           Attribute hierarchy when searching for this Attribute, @\
+!           the default is {\tt ESMF\_ATTNEST\_ON}. This flag is documented @\
+!           in section \ref{const:attnest}. @\
 !     \item [{[isPresent]}] @\
 !           A logical flag to tell if this Attribute is present or not @\
 !     \item [{[rc]}]  @\
@@ -6391,7 +6447,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !           The character list default value of the named Attribute. @\
 !     \item [{[attnestflag]}] @\
 !           A flag to determine whether to descend the @\
-!           Attribute hierarchy when searching for this Attribute @\
+!           Attribute hierarchy when searching for this Attribute, @\
+!           the default is {\tt ESMF\_ATTNEST\_ON}. This flag is documented @\
+!           in section \ref{const:attnest}. @\
 !     \item [{[itemCount]}] @\
 !           The itemCount of the character items to retrieve @\
 !     \item [{[isPresent]}] @\
@@ -6548,7 +6606,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !           first instance.  (Not implemented yet) @\
 !     \item [{[attnestflag]}] @\
 !           A flag to determine whether to descend the @\
-!           Attribute hierarchy when searching for this Attribute @\
+!           Attribute hierarchy when searching for this Attribute, @\
+!           the default is {\tt ESMF\_ATTNEST\_ON}. This flag is documented @\
+!           in section \ref{const:attnest}. @\
 !     \item [{[itemCount]}] @\
 !           The itemCount of the character items to retrieve @\
 !     \item [{[isPresent]}] @\
@@ -6727,7 +6787,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !           The real default value of the named Attribute. @\
 !     \item [{[attnestflag]}] @\
 !           A flag to determine whether to descend the @\
-!           Attribute hierarchy when searching for this Attribute @\
+!           Attribute hierarchy when searching for this Attribute, @\
+!           the default is {\tt ESMF\_ATTNEST\_ON}. This flag is documented @\
+!           in section \ref{const:attnest}. @\
 !     \item [{[isPresent]}] @\
 !           A logical flag to tell if this Attribute is present or not @\
 !     \item [{[rc]}]  @\
@@ -6837,7 +6899,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !           first instance.  @\
 !     \item [{[attnestflag]}] @\
 !           A flag to determine whether to descend the @\
-!           Attribute hierarchy when searching for this Attribute @\
+!           Attribute hierarchy when searching for this Attribute, @\
+!           the default is {\tt ESMF\_ATTNEST\_ON}. This flag is documented @\
+!           in section \ref{const:attnest}. @\
 !     \item [{[isPresent]}] @\
 !           A logical flag to tell if this Attribute is present or not @\
 !     \item [{[rc]}]  @\
@@ -6973,7 +7037,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !           The list of real default values of the named Attribute. @\
 !     \item [{[attnestflag]}] @\
 !           A flag to determine whether to descend the @\
-!           Attribute hierarchy when searching for this Attribute @\
+!           Attribute hierarchy when searching for this Attribute, @\
+!           the default is {\tt ESMF\_ATTNEST\_ON}. This flag is documented @\
+!           in section \ref{const:attnest}. @\
 !     \item [{[itemCount]}] @\
 !           The itemCount of the Attribute value to retrieve @\
 !     \item [{[isPresent]}] @\
@@ -7117,7 +7183,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !           first instance.  (Not implemented yet) @\
 !     \item [{[attnestflag]}] @\
 !           A flag to determine whether to descend the @\
-!           Attribute hierarchy when searching for this Attribute @\
+!           Attribute hierarchy when searching for this Attribute, @\
+!           the default is {\tt ESMF\_ATTNEST\_ON}. This flag is documented @\
+!           in section \ref{const:attnest}. @\
 !     \item [{[itemCount]}] @\
 !           The itemCount of the Attribute value to retrieve @\
 !     \item [{[isPresent]}] @\
@@ -7283,7 +7351,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !           The logical default value of the named Attribute. @\
 !     \item [{[attnestflag]}] @\
 !           A flag to determine whether to descend the @\
-!           Attribute hierarchy when searching for this Attribute @\
+!           Attribute hierarchy when searching for this Attribute, @\
+!           the default is {\tt ESMF\_ATTNEST\_ON}. This flag is documented @\
+!           in section \ref{const:attnest}. @\
 !     \item [{[isPresent]}] @\
 !           A logical flag to tell if this Attribute is present or not @\
 !     \item [{[rc]}]  @\
@@ -7396,7 +7466,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !           first instance.  (Not implemented yet) @\
 !     \item [{[attnestflag]}] @\
 !           A flag to determine whether to descend the @\
-!           Attribute hierarchy when searching for this Attribute @\
+!           Attribute hierarchy when searching for this Attribute, @\
+!           the default is {\tt ESMF\_ATTNEST\_ON}. This flag is documented @\
+!           in section \ref{const:attnest}. @\
 !     \item [{[isPresent]}] @\
 !           A logical flag to tell if this Attribute is present or not @\
 !     \item [{[rc]}]  @\
@@ -7534,7 +7606,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !           The logical default value of the named Attribute. @\
 !     \item [{[attnestflag]}] @\
 !           A flag to determine whether to descend the @\
-!           Attribute hierarchy when searching for this Attribute @\
+!           Attribute hierarchy when searching for this Attribute, @\
+!           the default is {\tt ESMF\_ATTNEST\_ON}. This flag is documented @\
+!           in section \ref{const:attnest}. @\
 !     \item [{[itemCount]}] @\
 !           The number of values in the Attribute. @\
 !     \item [{[isPresent]}] @\
@@ -7678,7 +7752,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !           first instance.  (Not implemented yet) @\
 !     \item [{[attnestflag]}] @\
 !           A flag to determine whether to descend the @\
-!           Attribute hierarchy when searching for this Attribute @\
+!           Attribute hierarchy when searching for this Attribute, @\
+!           the default is {\tt ESMF\_ATTNEST\_ON}. This flag is documented @\
+!           in section \ref{const:attnest}. @\
 !     \item [{[itemCount]}] @\
 !           The number of values in the Attribute. @\
 !     \item [{[isPresent]}] @\
@@ -7842,7 +7918,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !           The character default value of the named Attribute. @\
 !     \item [{[attnestflag]}] @\
 !           A flag to determine whether to descend the @\
-!           Attribute hierarchy when searching for this Attribute @\
+!           Attribute hierarchy when searching for this Attribute, @\
+!           the default is {\tt ESMF\_ATTNEST\_ON}. This flag is documented @\
+!           in section \ref{const:attnest}. @\
 !     \item [{[isPresent]}] @\
 !           A logical flag to tell if this Attribute is present or not @\
 !     \item [{[rc]}]  @\
@@ -7954,7 +8032,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !           first instance. @\
 !     \item [{[attnestflag]}] @\
 !           A flag to determine whether to descend the @\
-!           Attribute hierarchy when searching for this Attribute @\
+!           Attribute hierarchy when searching for this Attribute, @\
+!           the default is {\tt ESMF\_ATTNEST\_ON}. This flag is documented @\
+!           in section \ref{const:attnest}. @\
 !     \item [{[isPresent]}] @\
 !           A logical flag to tell if this Attribute is present or not @\
 !     \item [{[rc]}]  @\
@@ -8089,7 +8169,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !           The character list default value of the named Attribute. @\
 !     \item [{[attnestflag]}] @\
 !           A flag to determine whether to descend the @\
-!           Attribute hierarchy when searching for this Attribute @\
+!           Attribute hierarchy when searching for this Attribute, @\
+!           the default is {\tt ESMF\_ATTNEST\_ON}. This flag is documented @\
+!           in section \ref{const:attnest}. @\
 !     \item [{[itemCount]}] @\
 !           The itemCount of the character items to retrieve @\
 !     \item [{[isPresent]}] @\
@@ -8246,7 +8328,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !           first instance.  (Not implemented yet) @\
 !     \item [{[attnestflag]}] @\
 !           A flag to determine whether to descend the @\
-!           Attribute hierarchy when searching for this Attribute @\
+!           Attribute hierarchy when searching for this Attribute, @\
+!           the default is {\tt ESMF\_ATTNEST\_ON}. This flag is documented @\
+!           in section \ref{const:attnest}. @\
 !     \item [{[itemCount]}] @\
 !           The itemCount of the character items to retrieve @\
 !     \item [{[isPresent]}] @\
@@ -8432,7 +8516,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !           Flag to determine which Attribute count to return. @\
 !     \item [{[attnestflag]}] @\
 !           A flag to determine whether to descend the @\
-!           Attribute hierarchy when counting Attributes @\
+!           Attribute hierarchy when counting Attributes, @\
+!           the default is {\tt ESMF\_ATTNEST\_ON}. This flag is documented @\
+!           in section \ref{const:attnest}. @\
 !     \item [{[rc]}]  @\
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
 !     \end{description} @\
@@ -8536,7 +8622,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !           Flag to determine which Attribute count to return. @\
 !     \item [{[attnestflag]}] @\
 !           A flag to determine whether to descend the @\
-!           Attribute hierarchy when counting Attributes @\
+!           Attribute hierarchy when counting Attributes, @\
+!           the default is {\tt ESMF\_ATTNEST\_ON}. This flag is documented @\
+!           in section \ref{const:attnest}. @\
 !     \item [{[rc]}]  @\
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
 !     \end{description} @\
@@ -8617,7 +8705,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !           An Attribute package handle containing identifying information. @\
 !     \item [{[attnestflag]}] @\
 !           A flag to determine whether to descend the @\
-!           Attribute hierarchy when searching for this Attribute @\
+!           Attribute hierarchy when searching for this Attribute, @\
+!           the default is {\tt ESMF\_ATTNEST\_ON}. This flag is documented @\
+!           in section \ref{const:attnest}. @\
 !     \item [{[typekind]}] @\
 !           The typekind of the Attribute. @\
 !     \item [{[itemCount]}] @\
@@ -8735,7 +8825,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !           first instance.  (Not implemented yet) @\
 !     \item [{[attnestflag]}] @\
 !           A flag to determine whether to descend the @\
-!           Attribute hierarchy when searching for this Attribute @\
+!           Attribute hierarchy when searching for this Attribute, @\
+!           the default is {\tt ESMF\_ATTNEST\_ON}. This flag is documented @\
+!           in section \ref{const:attnest}. @\
 !     \item [{[typekind]}] @\
 !           The typekind of the Attribute. @\
 !     \item [{[itemCount]}] @\
@@ -8873,7 +8965,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !           Returns the name of the Attribute. @\
 !     \item [{[attnestflag]}] @\
 !           A flag to determine whether to descend the @\
-!           Attribute hierarchy when searching for this Attribute @\
+!           Attribute hierarchy when searching for this Attribute, @\
+!           the default is {\tt ESMF\_ATTNEST\_ON}. This flag is documented @\
+!           in section \ref{const:attnest}. @\
 !     \item [{[typekind]}] @\
 !           Returns the typekind of the Attribute. @\
 !     \item [{[itemCount]}] @\
@@ -8996,7 +9090,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !           Returns the name of the Attribute. @\
 !     \item [{[attnestflag]}] @\
 !           A flag to determine whether to descend the @\
-!           Attribute hierarchy when searching for this Attribute @\
+!           Attribute hierarchy when searching for this Attribute, @\
+!           the default is {\tt ESMF\_ATTNEST\_ON}. This flag is documented @\
+!           in section \ref{const:attnest}. @\
 !     \item [{[typekind]}] @\
 !           Returns the typekind of the Attribute. @\
 !     \item [{[itemCount]}] @\
@@ -9140,7 +9236,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      The number of Attribute package instance names. @\
 !     \item [{[attnestflag]}] @\
 !      A flag to determine whether to descend the @\
-!      Attribute hierarchy when searching for this Attribute package @\
+!      Attribute hierarchy when searching for this Attribute package, @\
+!      the default is {\tt ESMF\_ATTNEST\_ON}. This flag is documented @\
+!      in section \ref{const:attnest}. @\
 !     \item [{[rc]}]  @\
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
 !     \end{description} @\
@@ -9231,7 +9329,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      The number of Attribute package instance names. @\
 !     \item [{[attnestflag]}] @\
 !      A flag to determine whether to descend the @\
-!      Attribute hierarchy when searching for this Attribute package @\
+!      Attribute hierarchy when searching for this Attribute package, @\
+!      the default is {\tt ESMF\_ATTNEST\_ON}. This flag is documented @\
+!      in section \ref{const:attnest}. @\
 !     \item [{[rc]}]  @\
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
 !     \end{description} @\
@@ -9691,7 +9791,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !           An Attribute package handle containing identifying information. @\
 !     \item [{[attnestflag]}] @\
 !           A flag to determine whether to descend the @\
-!           Attribute hierarchy when searching for this Attribute @\
+!           Attribute hierarchy when searching for this Attribute, @\
+!           the default is {\tt ESMF\_ATTNEST\_ON}. This flag is documented @\
+!           in section \ref{const:attnest}. @\
 !     \item [{[rc]}]  @\
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
 !     \end{description} @\
@@ -9770,7 +9872,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !           first instance. @\
 !     \item [{[attnestflag]}] @\
 !           A flag to determine whether to descend the @\
-!           Attribute hierarchy when searching for this Attribute @\
+!           Attribute hierarchy when searching for this Attribute, @\
+!           the default is {\tt ESMF\_ATTNEST\_ON}. This flag is documented @\
+!           in section \ref{const:attnest}. @\
 !     \item [{[rc]}]  @\
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
 !     \end{description} @\
@@ -9881,7 +9985,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !           An Attribute package handle containing identifying information. @\
 !     \item [{[attnestflag]}] @\
 !           A flag to determine whether to descend the @\
-!           Attribute hierarchy when setting this Attribute @\
+!           Attribute hierarchy when setting this Attribute, @\
+!           the default is {\tt ESMF\_ATTNEST\_ON}. This flag is documented @\
+!           in section \ref{const:attnest}. @\
 !     \item [{[rc]}]  @\
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
 !     \end{description} @\
@@ -9982,7 +10088,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !           first instance.  (Not implemented yet) @\
 !     \item [{[attnestflag]}] @\
 !           A flag to determine whether to descend the @\
-!           Attribute hierarchy when setting this Attribute @\
+!           Attribute hierarchy when setting this Attribute, @\
+!           the default is {\tt ESMF\_ATTNEST\_ON}. This flag is documented @\
+!           in section \ref{const:attnest}. @\
 !     \item [{[rc]}]  @\
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
 !     \end{description} @\
@@ -10103,7 +10211,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !           The number of integers in the {\tt valueList}. @\
 !     \item [{[attnestflag]}] @\
 !           A flag to determine whether to descend the @\
-!           Attribute hierarchy when setting this Attribute @\
+!           Attribute hierarchy when setting this Attribute, @\
+!           the default is {\tt ESMF\_ATTNEST\_ON}. This flag is documented @\
+!           in section \ref{const:attnest}. @\
 !     \item [{[rc]}]  @\
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
 !     \end{description} @\
@@ -10223,7 +10333,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !           The number of integers in the {\tt valueList}. @\
 !     \item [{[attnestflag]}] @\
 !           A flag to determine whether to descend the @\
-!           Attribute hierarchy when setting this Attribute @\
+!           Attribute hierarchy when setting this Attribute, @\
+!           the default is {\tt ESMF\_ATTNEST\_ON}. This flag is documented @\
+!           in section \ref{const:attnest}. @\
 !     \item [{[rc]}]  @\
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
 !     \end{description} @\
@@ -10357,7 +10469,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !           An Attribute package handle containing identifying information. @\
 !     \item [{[attnestflag]}] @\
 !           A flag to determine whether to descend the @\
-!           Attribute hierarchy when setting this Attribute @\
+!           Attribute hierarchy when setting this Attribute, @\
+!           the default is {\tt ESMF\_ATTNEST\_ON}. This flag is documented @\
+!           in section \ref{const:attnest}. @\
 !     \item [{[rc]}]  @\
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
 !     \end{description} @\
@@ -10460,6 +10574,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     \item [{[attnestflag]}] @\
 !           A flag to determine whether to descend the @\
 !           Attribute hierarchy when setting this Attribute @\
+!           the default is {\tt ESMF\_ATTNEST\_ON}. This flag is documented, @\
+!           in section \ref{const:attnest}. @\
 !     \item [{[rc]}]  @\
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
 !     \end{description} @\
@@ -10582,7 +10698,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !           The number of logicals in the {\tt valueList}. @\
 !     \item [{[attnestflag]}] @\
 !           A flag to determine whether to descend the @\
-!           Attribute hierarchy when setting this Attribute @\
+!           Attribute hierarchy when setting this Attribute, @\
+!           the default is {\tt ESMF\_ATTNEST\_ON}. This flag is documented @\
+!           in section \ref{const:attnest}. @\
 !     \item [{[rc]}]  @\
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
 !     \end{description} @\
@@ -10702,7 +10820,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !           The number of logicals in the {\tt valueList}. @\
 !     \item [{[attnestflag]}] @\
 !           A flag to determine whether to descend the @\
-!           Attribute hierarchy when setting this Attribute @\
+!           Attribute hierarchy when setting this Attribute, @\
+!           the default is {\tt ESMF\_ATTNEST\_ON}. This flag is documented @\
+!           in section \ref{const:attnest}. @\
 !     \item [{[rc]}]  @\
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
 !     \end{description} @\
@@ -10836,7 +10956,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !           An Attribute package handle containing identifying information. @\
 !     \item [{[attnestflag]}] @\
 !           A flag to determine whether to descend the @\
-!           Attribute hierarchy when setting this Attribute @\
+!           Attribute hierarchy when setting this Attribute, @\
+!           the default is {\tt ESMF\_ATTNEST\_ON}. This flag is documented @\
+!           in section \ref{const:attnest}. @\
 !     \item [{[rc]}]  @\
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
 !     \end{description} @\
@@ -10937,7 +11059,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !           first instance. @\
 !     \item [{[attnestflag]}] @\
 !           A flag to determine whether to descend the @\
-!           Attribute hierarchy when setting this Attribute @\
+!           Attribute hierarchy when setting this Attribute, @\
+!           the default is {\tt ESMF\_ATTNEST\_ON}. This flag is documented @\
+!           in section \ref{const:attnest}. @\
 !     \item [{[rc]}]  @\
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
 !     \end{description} @\
@@ -11055,7 +11179,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !           An Attribute package handle containing identifying information. @\
 !     \item [{[attnestflag]}] @\
 !           A flag to determine whether to descend the @\
-!           Attribute hierarchy when setting this Attribute @\
+!           Attribute hierarchy when setting this Attribute, @\
+!           the default is {\tt ESMF\_ATTNEST\_ON}. This flag is documented @\
+!           in section \ref{const:attnest}. @\
 !     \item [{[rc]}]  @\
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
 !     \end{description} @\
@@ -11179,7 +11305,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !           first instance. (Not implemented yet) @\
 !     \item [{[attnestflag]}] @\
 !           A flag to determine whether to descend the @\
-!           Attribute hierarchy when setting this Attribute @\
+!           Attribute hierarchy when setting this Attribute, @\
+!           the default is {\tt ESMF\_ATTNEST\_ON}. This flag is documented @\
+!           in section \ref{const:attnest}. @\
 !     \item [{[rc]}]  @\
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
 !     \end{description} @\
@@ -11324,7 +11452,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !           A list of the input parameters required to set internal info. @\
 !     \item [{[attnestflag]}] @\
 !           A flag to determine whether to descend the @\
-!           Attribute hierarchy when setting this Attribute @\
+!           Attribute hierarchy when setting this Attribute, @\
+!           the default is {\tt ESMF\_ATTNEST\_ON}. This flag is documented @\
+!           in section \ref{const:attnest}. @\
 !     \item [{[rc]}]  @\
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
 !     \end{description} @\
@@ -11492,7 +11622,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !           first instance. @\
 !     \item [{[attnestflag]}] @\
 !           A flag to determine whether to descend the @\
-!           Attribute hierarchy when setting this Attribute @\
+!           Attribute hierarchy when setting this Attribute, @\
+!           the default is {\tt ESMF\_ATTNEST\_ON}. This flag is documented @\
+!           in section \ref{const:attnest}. @\
 !     \item [{[rc]}]  @\
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
 !     \end{description} @\
@@ -11674,7 +11806,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !           An Attribute package handle containing identifying information. @\
 !     \item [{[attnestflag]}] @\
 !           A flag to determine whether to descend the @\
-!           Attribute hierarchy when setting this Attribute @\
+!           Attribute hierarchy when setting this Attribute, @\
+!           the default is {\tt ESMF\_ATTNEST\_ON}. This flag is documented @\
+!           in section \ref{const:attnest}. @\
 !     \item [{[rc]}]  @\
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
 !     \end{description} @\
@@ -11798,7 +11932,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !           first instance. (Not implemented yet) @\
 !     \item [{[attnestflag]}] @\
 !           A flag to determine whether to descend the @\
-!           Attribute hierarchy when setting this Attribute @\
+!           Attribute hierarchy when setting this Attribute, @\
+!           the default is {\tt ESMF\_ATTNEST\_ON}. This flag is documented @\
+!           in section \ref{const:attnest}. @\
 !     \item [{[rc]}]  @\
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
 !     \end{description} @\
