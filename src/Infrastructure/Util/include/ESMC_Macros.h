@@ -55,9 +55,9 @@
 #define ESMF_VERSION_REVISION     0
 #define ESMF_VERSION_PATCHLEVEL   0
 #define ESMF_VERSION_PUBLIC       'F'
-#define ESMF_VERSION_BETASNAPSHOT 'T'
+#define ESMF_VERSION_BETASNAPSHOT 'F'
 
-#define ESMF_VERSION_STRING "7.0.0 beta snapshot"
+#define ESMF_VERSION_STRING "7.0.0"
 
 #endif   // ESMC_MACROS_H
 
