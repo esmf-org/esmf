@@ -3410,7 +3410,6 @@ shared:
 		echo making shared libraries in $(ESMF_LDIR); \
 		cd $(ESMF_LDIR) ; \
 		$(ESMF_RM) -r tmp_* ; \
-		echo ESMF_SL_LIBS_TO_MAKE = $(ESMF_SL_LIBS_TO_MAKE) ; \
 		for NEXTLIB in $(ESMF_SL_LIBS_TO_MAKE) foo ;\
 		do \
 		if [ -f $$NEXTLIB.$(ESMF_LIB_SUFFIX) ] ; then \
