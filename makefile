@@ -476,7 +476,7 @@ install_apps:
 
 # Ranlib on the libraries
 ranlib:
-	$(ESMF_RANLIB) $(wildcard $(ESMF_LIBDIR)/lib*.a)
+	$(ESMF_RANLIB) $(wildcard $(ESMF_LIBDIR)/lib*.$(ESMF_LIB_SUFFIX))
 
 # Deletes ESMF libraries
 deletelibs: chkopts_basic
