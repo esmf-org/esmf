@@ -360,7 +360,7 @@ ifeq ($(ESMF_OS),Linux)
 export ESMF_COMPILER = gfortran
 endif
 ifeq ($(ESMF_OS),MinGW)
-export ESMF_COMPILER = intel
+export ESMF_COMPILER = gfortran
 endif
 ifeq ($(ESMF_OS),Unicos)
 ifeq ($(ESMF_MACHINE),x86_64)
