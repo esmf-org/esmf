@@ -293,6 +293,8 @@
 !     1.) Only text files are supported
 !     2.) On systems which do not support recursive I/O, this function
 !     should not be called from the I/O list of an I/O statement.
+!     3.) On Windows, extraneous empty lines at the end of a file may be
+!     ignored.
 !
 !     The arguments are:
 !     \begin{description}
@@ -357,7 +359,10 @@ read_loop:  &
       do
         read (unit1, '(a)', iostat=ioerr1) string1
         read (unit2, '(a)', iostat=ioerr2) string2
-        if (ioerr1 /= ioerr2) exit
+        if (ioerr1 /= ioerr2) then
+!         print *, ESMF_METHOD, ': read iostats differ:', ioerr1, ioerr2
+          exit
+        end if
 
 #if defined (ESMF_OS_MinGW)
         ! Ignore Windows carraige return character
@@ -386,21 +391,51 @@ exclusion_loop:  &
               end do exclusion_loop
               if (i > size (exclusionList)) exit read_loop
             else
+#if 0
+              print *, ESMF_METHOD, ': comparison error:'
+              print *, '  string1 = >', trim (string1), '<'
+              print *, '  string2 = >', trim (string2), '<'
+#endif
               exit read_loop
             end if
           end if
 
         case (1:)
+          print *, ESMF_METHOD, ': unknown iostat =', ioerr1
           exit
         end select
 
       end do read_loop
 
-#if 0
-      if (.not. ESMF_TestFileCompare) then
-        print *, 'ESMF_TestFileCompare: comparison error:'
-        print *, '  string1 = >', trim (string1), '<'
-        print *, '  string2 = >', trim (string2), '<'
+#if defined (ESMF_OS_MinGW)
+      if ((ioerr1 == -1 .and. ioerr2 ==  0) .or.  &
+         ( ioerr1 ==  0 .and. ioerr2 == -1)) then
+! On Windows, if one file is at EOF and the other is not, ignore extraneous
+! empty lines which may be simply due to variations in how Fortran run-time
+! libraries handle CR/LFs.
+
+        print *, ESMF_METHOD, ': entering Windows EOF handler'
+        if (ioerr1 == 0) then
+          do
+            read (unit1,'(a)', iostat=ioerr1) string1
+            if (ioerr1 /= 0) then
+              ESMF_TestFileCompare = .true.
+              exit
+            end if
+            if (string1 /= ' ') exit
+          end do
+        end if
+
+        if (ioerr2 == 0) then
+          do
+            read (unit2,'(a)', iostat=ioerr2) string2
+            if (ioerr2 /= 0) then
+              ESMF_TestFileCompare = .true.
+              exit
+            end if
+            if (string2 /= ' ') exit
+          end do
+        end if
       end if
 #endif
 
