@@ -550,11 +550,10 @@ static void triangulate_warea(int sdim, int num_p, double *p, int oeid,
                    " - can't triangulate a polygon with less than 3 sides", 
                                                 ESMC_CONTEXT, &localrc)) throw localrc;
             } else if (ret == ESMCI_TP_CLOCKWISE_POLY) {
-              char errmsg[1024];
-              sprintf(errmsg," - there was a problem (e.g. repeated points, clockwise poly, etc.) with the triangulation of elem id=%d",oeid);
-              if (ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
-                                                errmsg,
-                                                ESMC_CONTEXT, &localrc)) throw localrc;
+              char msg[1024];
+              sprintf(msg," - there was a problem (e.g. repeated points, clockwise poly, etc.) with the triangulation of the element with id=%d ",oeid); 
+              if (ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP, msg,
+                                              ESMC_CONTEXT, &localrc)) throw localrc;
             } else {
               if (ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
                                                 " - unknown error in triangulation", ESMC_CONTEXT, &localrc)) throw localrc;
