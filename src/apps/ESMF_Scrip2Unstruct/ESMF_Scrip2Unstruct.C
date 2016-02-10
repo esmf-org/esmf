@@ -291,7 +291,8 @@ int create_ugrid(char* filename, char* infilename, int dualflag, size_t nnodes, 
   status = nc_put_att_text(ncid2, varid, "cf_role", strlen(strbuf), strbuf);
   if (status != NC_NOERR) handle_error(status,__LINE__);
   var = 2;
-  status = nc_put_att_int(ncid2, varid, "dimension", NC_INT, 1, &var);
+  // change dimension attribute to topology_dimension based on the v0.9.0 ugrid-convention
+  status = nc_put_att_int(ncid2, varid, "topology_dimension", NC_INT, 1, &var);
   if (status != NC_NOERR) handle_error(status,__LINE__);
   if (nocenter) 
     strbuf = "node";
