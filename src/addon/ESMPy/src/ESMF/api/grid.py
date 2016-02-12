@@ -51,10 +51,10 @@ class Grid(object):
 
     :param int num_peri_dims: The number of periodic dimensions, either ``0``
         or ``1``. If ``None``, defaults to ``0``.
-    :param int periodic_dim: The periodic dimension: ``1``, ``2`` or ``3``.
+    :param int periodic_dim: The periodic dimension: ``0``, ``1`` or ``2``.
+        If ``None``, defaults to ``0``.
+    :param int pole_dim: The pole dimension ``0`` or ``1``.
         If ``None``, defaults to ``1``.
-    :param int pole_dim: The pole dimension ``1`` or ``2``.
-        If ``None``, defaults to ``2``.
     :param CoordSys coord_sys: Coordinate system for the
         :class:`~ESMF.api.grid.Grid`.
         If ``None``, defaults to :attr:`~ESMF.api.constants.CoordSys.SPH_DEG`.
