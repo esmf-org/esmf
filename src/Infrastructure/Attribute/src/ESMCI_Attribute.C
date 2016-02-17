@@ -8,7 +8,7 @@
 // NASA Goddard Space Flight Center.
 // Licensed under the University of Illinois-NCSA License.
 
-#define ESMF_FILENAME "ESMCI_Attribute.C"
+#define ESMC_FILENAME "./src/Infrastructure/Attribute/src/ESMCI_Attribute.C"
 
 // Attribute method implementation (body) file
 

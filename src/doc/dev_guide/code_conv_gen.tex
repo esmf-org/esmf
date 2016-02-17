@@ -423,6 +423,18 @@ example:
 \end{verbatim}
 This will allow developers to 'grep' source files before software releases. 
 
+\subsubsection{FILENAME Macros}
+Source code files should define the {/tt ESMF\_FILENAME} or {/tt ESMC\_FILENAME}
+macros to ensure that the filename is correctly displayed from the ESMF logging.
+This can be done using the following code:
+
+\begin{verbatim}
+#define ESMC_FILENAME "./src/Infrastructure/Attribute/src/ESMCI_Attribute.C"
+\end{verbatim}
+
+with the appropriate filename.  Note that the path is relative to the ESMF
+root directory.
+
 \subsection{Code: Style Rules for Source Code}
 
 General style recommendations for source code include the following:
