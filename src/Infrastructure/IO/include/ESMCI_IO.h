@@ -39,6 +39,7 @@
 
 #include <cstdio>
 #include <vector>
+#include <string>
 
 //-------------------------------------------------------------------------
 
@@ -59,6 +60,7 @@ namespace ESMCI {
     enum IOListObjectType type;
     IO_ObjectType object;           // e.g., Array, Attribute
     char name[ESMF_MAXSTR];
+    std::vector<std::string> dimLabels;
     ESMC_I8 number;
 
     IO_ObjectContainer () {
@@ -67,7 +69,7 @@ namespace ESMCI {
       name[0] = '\0';
       number = 0;
     }
-    IO_ObjectContainer (Array *arr_p, const char * const arrName) {
+    IO_ObjectContainer (Array *arr_p, const char * const arrName, const std::vector<std::string> &dimLabels) {
       type = IO_ARRAY;
       object.arr = arr_p;
       if ((const char * const)NULL != arrName) {
@@ -81,6 +83,8 @@ namespace ESMCI {
       } else {
         name[0] = '\0';
       }
+      if (dimLabels.size() > 0)
+        this->dimLabels = dimLabels;
       number = 0;
     }
     ~IO_ObjectContainer() {
@@ -182,8 +186,10 @@ namespace ESMCI {
     int close(void);
 
     // add and remove objects
+    int addArray(Array *arr_p);
     int addArray(Array *arr_p,
-                 const char * const variableName);
+                 const std::string &variableName,
+                 const std::vector<std::string> &dimLabels);
 // TBI
 #if 0
     void addAttributes(ESMC_Base *obj_p,

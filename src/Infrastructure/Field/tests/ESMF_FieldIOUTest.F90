@@ -207,6 +207,7 @@ program ESMF_FieldIOUTest
   !NEX_UTest_Multi_Proc_Only
   ! Write Fortran array in nohalo Field
   call ESMF_FieldWrite(field_w_nohalo, fileName="fieldNoHalo.nc",        &
+       dimLabels=(/ "temperature_x", "temperature_y" /),  &
        status=ESMF_FILESTATUS_REPLACE, rc=rc)
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   write(name, *) "Write Fortran array in nohalo Field"

@@ -94,6 +94,7 @@ namespace ESMCI {
     // write()
     // Non-atomic writes which are only successful on an open IO stream
     virtual void arrayWrite(Array *arr_p, const char *name,
+                            const std::vector<std::string> &dimLabels,
                             int *timeslice = NULL, int *rc = NULL) = 0;
 
     // get() and set()
