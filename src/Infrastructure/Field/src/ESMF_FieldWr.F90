@@ -112,11 +112,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !    supports variable name. If the IO format does not support this 
 !    (such as binary format), ESMF will return an error code.
 !   \item[{[dimLabels]}]
-!    An array of dimension names for the Field data in the output file; default is
-!    the variable name with {\tt \_dimnnn}, where nnn is the dimension number,
-!    appended.  Use this argument only in the IO format (such as NetCDF) that
-!    supports variable and dimension names. If the IO format does not support t
-!    (such as binary format), ESMF will return an error code.
+!     An array of dimension labels for the Field data in the output file.  Enough
+!     label names must be provided to label each axis; default is
+!     the variable name with {\tt \_dimnnn}, where nnn is the dimension number,
+!     appended.  When using the {\tt timeslice} option, the {\tt time} dimension
+!     is unaffected.  Use this argument only in the IO format (such as NetCDF) that
+!     supports variable and dimension names. If the IO format does not support it
+!     (such as binary format), ESMF will return an error code.
 !   \item[{[overwrite]}]
 !    \begin{sloppypar}
 !      A logical flag, the default is .false., i.e., existing field data may
@@ -142,8 +144,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   \item[{[timeslice]}]
 !    \begin{sloppypar}
 !    Some IO formats (e.g. NetCDF) support the output of data in form of
-!    time slices. The {\tt timeslice} argument provides access to this
-!    capability. {\tt timeslice} must be positive. The behavior of this
+!    time slices.  An unlimited dimension called {\tt time} is defined in the
+!    file variable for this capability.
+!    The {\tt timeslice} argument provides access to the {\tt time} dimension,
+!    and must have a positive value. The behavior of this
 !    option may depend on the setting of the {\tt overwrite} flag:
 !    \begin{description}
 !    \item[{\tt overwrite = .false.}:]\ If the timeslice value is

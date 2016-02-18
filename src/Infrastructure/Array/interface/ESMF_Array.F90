@@ -1785,11 +1785,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !    supports variable name. If the IO format does not support this 
 !    (such as binary format), ESMF will return an error code.
 !   \item[{[dimLabels]}]
-!    An array of dimension names for the Array in the output file; default is
-!    the variable name with {\tt \_dimnnn}, where nnn is the dimension number,
-!    appended.  Use this argument only in the IO format (such as NetCDF) that
-!    supports variable and dimension names. If the IO format does not support this 
-!    (such as binary format), ESMF will return an error code.
+!     An array of dimension labels for the Field data in the output file.  Enough
+!     label names must be provided to label each axis; default is
+!     the variable name with {\tt \_dimnnn}, where nnn is the dimension number,
+!     appended.  When using the {\tt timeslice} option, the {\tt time} dimension
+!     is unaffected.  Use this argument only in the IO format (such as NetCDF) that
+!     supports variable and dimension names. If the IO format does not support it
+!     (such as binary format), ESMF will return an error code.
 !   \item[{[overwrite]}]
 !    \begin{sloppypar}
 !      A logical flag, the default is .false., i.e., existing Array data may
