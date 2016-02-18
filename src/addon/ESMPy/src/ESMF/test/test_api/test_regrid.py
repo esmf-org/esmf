@@ -254,6 +254,75 @@ class TestRegrid(TestBase):
         self.assertAlmostEqual(meanrel, 0.0016447124122954575)
         self.assertAlmostEqual(csrvrel, 0.0)
 
+    def test_grid_grid_3d_bilinear_cartesian(self):
+        parallel = False
+        if ESMF.pet_count() > 1:
+            if ESMF.pet_count() != 4:
+                raise NameError('MPI rank must be 4 in parallel mode!')
+            parallel = True
+
+        # create a grid
+        srcgrid = grid_create_3d([0, 21], [0, 21], [0, 21], 21, 21, 21, corners=False)
+        dstgrid = grid_create_3d([0.5, 19.5], [0.5, 19.5], [0.5, 19.5], 19, 19, 19, corners=False)
+
+        # create Field objects on the Meshes
+        srcfield = ESMF.Field(srcgrid, name='srcfield')
+        dstfield = ESMF.Field(dstgrid, name='dstfield')
+        exactfield = ESMF.Field(dstgrid, name='exactfield')
+
+        # initialize the Fields to an analytic function
+        srcfield = initialize_field_grid_3d(srcfield)
+        exactfield = initialize_field_grid_3d(exactfield)
+
+        # run the ESMF regridding
+        regridSrc2Dst = ESMF.Regrid(srcfield, dstfield,
+                                    regrid_method=ESMF.RegridMethod.BILINEAR,
+                                    unmapped_action=ESMF.UnmappedAction.ERROR)
+        dstfield = regridSrc2Dst(srcfield, dstfield)
+
+        # compare results and output PASS or FAIL
+        meanrel, csrvrel, correct = compare_fields(dstfield, exactfield, 
+                                                   10E-03, 10E-03, 10E-16, 
+                                                   parallel=parallel)
+
+        self.assertAlmostEqual(meanrel, 0.00215601743167)
+        self.assertAlmostEqual(csrvrel, 0.0)
+
+    def test_grid_grid_3d_bilinear_spherical(self):
+        parallel = False
+        if ESMF.pet_count() > 1:
+            if ESMF.pet_count() != 4:
+                raise NameError('MPI rank must be 4 in parallel mode!')
+            parallel = True
+
+        # create a grid
+        srcgrid = grid_create_periodic_3d(60, 60, 14, corners=False)
+        dstgrid = grid_create_periodic_3d(50, 50, 11, corners=False)
+
+        # create Field objects on the Meshes
+        srcfield = ESMF.Field(srcgrid, name='srcfield')
+        dstfield = ESMF.Field(dstgrid, name='dstfield')
+        exactfield = ESMF.Field(dstgrid, name='exactfield')
+
+        # initialize the Fields to an analytic function
+        srcfield = initialize_field_grid_periodic_3d(srcfield)
+        exactfield = initialize_field_grid_periodic_3d(exactfield)
+
+        # run the ESMF regridding
+        regridSrc2Dst = ESMF.Regrid(srcfield, dstfield,
+                                    regrid_method=ESMF.RegridMethod.BILINEAR,
+                                    unmapped_action=ESMF.UnmappedAction.IGNORE)
+        dstfield = regridSrc2Dst(srcfield, dstfield)
+
+        # compare results and output PASS or FAIL
+        meanrel, csrvrel, correct = compare_fields(dstfield, exactfield,
+                                                   10E-03, 10E-03, 10E-16,
+                                                   parallel=parallel)
+
+        self.assertAlmostEqual(meanrel, 0.00061587737764545617)
+        self.assertAlmostEqual(csrvrel, 0.0)
+
+
     def test_grid_grid_regrid_csrv_mask_3D(self):
         parallel = False
         if ESMF.pet_count() > 1:
@@ -290,10 +359,10 @@ class TestRegrid(TestBase):
         dstmass = compute_mass_grid(dstfield)
 
         # compare results and output PASS or FAIL
-        meanrel, csrvrel, correct = compare_fields(dstfield, exactfield, 
-                                                   10E-03, 10E-03, 10E-16, 
+        meanrel, csrvrel, correct = compare_fields(dstfield, exactfield,
+                                                   10E-03, 10E-03, 10E-16,
                                                    parallel=parallel,
-                                                   dstfracfield=dstfracfield, 
+                                                   dstfracfield=dstfracfield,
                                                    mass1=srcmass, mass2=dstmass)
 
         self.assertAlmostEqual(meanrel, 0.0021560174316746865)
