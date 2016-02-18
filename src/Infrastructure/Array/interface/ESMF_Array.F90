@@ -1747,13 +1747,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !INTERFACE:
   subroutine ESMF_ArrayWrite(array, fileName, keywordEnforcer, &
-     variableName, overwrite, status, timeslice, iofmt, rc)
+     variableName, dimLabels, overwrite, status, timeslice, iofmt, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_Array),           intent(in)            :: array
     character(*),               intent(in)            :: fileName
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     character(*),               intent(in),  optional :: variableName
+    character(*),               intent(in),  optional :: dimLabels(:)
     logical,                    intent(in),  optional :: overwrite
     type(ESMF_FileStatus_Flag), intent(in),  optional :: status
     integer,                    intent(in),  optional :: timeslice
@@ -1783,6 +1784,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !    Use this argument only in the IO format (such as NetCDF) that
 !    supports variable name. If the IO format does not support this 
 !    (such as binary format), ESMF will return an error code.
+!   \item[{[dimLabels]}]
+!     An array of dimension labels for the Field data in the output file.  Enough
+!     label names must be provided to label each axis; default is
+!     the variable name with {\tt \_dimnnn}, where nnn is the dimension number,
+!     appended.  When using the {\tt timeslice} option, the {\tt time} dimension
+!     is unaffected.  Use this argument only in the IO format (such as NetCDF) that
+!     supports variable and dimension names. If the IO format does not support it
+!     (such as binary format), ESMF will return an error code.
 !   \item[{[overwrite]}]
 !    \begin{sloppypar}
 !      A logical flag, the default is .false., i.e., existing Array data may
@@ -1840,10 +1849,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Local vars
     integer                    :: localrc           ! local return code
     integer                    :: len_varName       ! helper variable
+    integer                    :: size_dimLabels    ! helper variable
     type(ESMF_Logical)         :: opt_overwriteflag ! helper variable
     type(ESMF_FileStatus_Flag) :: opt_status        ! helper variable
     type(ESMF_IOFmt_Flag)      :: opt_iofmt         ! helper variable
     integer                    :: file_ext_p
+    integer                    :: ndims
+    character                  :: dimLabels_dummy(1)
 
     ! Initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
@@ -1887,10 +1899,33 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       len_varName = 0
     endif
 
+    if (present (dimLabels)) then
+      size_dimlabels = size (dimLabels)
+      call ESMF_ArrayGet (array, dimCount=ndims, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU,         &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+
+      if (size_dimlabels < ndims) then
+        if (ESMF_LogFoundError(ESMF_RC_ARG_SIZE,  &
+            msg="size (dimLabels) must be >= number of Array dimensions",  &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+      end if
+    else
+      size_dimlabels = 0
+    end if
+
     ! Call into the C++ interface, which will call IO object
-    call c_esmc_arraywrite(array, fileName,                    &
-        variableName, len_varName, opt_overwriteflag,          &
-        opt_status, timeslice, opt_iofmt, localrc)
+    if (present (dimLabels)) then
+      call c_esmc_arraywrite(array, fileName,                    &
+          variableName, len_varName, dimLabels, size_dimlabels,  &
+          opt_overwriteflag,          &
+          opt_status, timeslice, opt_iofmt, localrc)
+    else
+      call c_esmc_arraywrite(array, fileName,                    &
+          variableName, len_varName, dimLabels_dummy, 0,         &
+          opt_overwriteflag,          &
+          opt_status, timeslice, opt_iofmt, localrc)
+    end if
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU,         &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
