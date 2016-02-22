@@ -9,7 +9,7 @@
 // Licensed under the University of Illinois-NCSA License.
 //
 //==============================================================================
-#define ESMF_FILENAME "ESMCI_Base.C"
+#define ESMC_FILENAME "ESMCI_Base.C"
 //==============================================================================
 //
 // Base class implementation (body) file

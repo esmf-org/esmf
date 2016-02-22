@@ -9,7 +9,7 @@
 // Licensed under the University of Illinois-NCSA License.
 
 // ESMC Attribute method interface (from F90 to C++) file
-#define ESMF_FILENAME "ESMCI_Attribute_F.C"
+#define ESMC_FILENAME "ESMCI_Attribute_F.C"
 
 //-----------------------------------------------------------------------------
 //
