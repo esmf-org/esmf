@@ -9,7 +9,7 @@
 // Licensed under the University of Illinois-NCSA License.
 //
 //==============================================================================
-#define ESMF_FILENAME "ESMCI_Base_F.C"
+#define ESMC_FILENAME "ESMCI_Base_F.C"
 //==============================================================================
 //
 // This file contains the Fortran interface code to link F90 and C++.

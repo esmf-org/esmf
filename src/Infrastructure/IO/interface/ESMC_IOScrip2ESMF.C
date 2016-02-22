@@ -24,8 +24,6 @@
 #include "ESMCI_Util.h"
 #include "ESMCI_LogErr.h"
 #include "ESMCI_CoordSys.h"
-#include "ESMCI_Macros.h"
-#include "ESMCI_F90Interface.h"
 #include "Mesh/include/ESMCI_ClumpPnts.h"
 
 #ifdef ESMF_NETCDF
@@ -244,55 +242,6 @@ extern "C" {
     *rc = 0;
     *ncid = id;
     delete [] c_infile;
-    return;
-#else
-  ESMC_LogDefault.MsgFoundError(ESMC_RC_LIB_NOT_PRESENT, "Have to compile with "
-    "ESMF_NETCDF environment variable defined", ESMC_CONTEXT, rc);
-  return;
-#endif
-  }
-}
-
-#undef ESMC_METHOD
-#define ESMC_METHOD "c_nc_get_vlen_var"
-extern "C" {
-  void FTN_X(c_nc_get_vlen_var)(
-			  int *ncid,
-                          int *varid,
-                          ESMCI::InterfaceInt *_buffer,
-                          int *start,
-                          int *count,
-			  int *rc)
-
-  {
-    int status;
-    size_t start1[1], count1[1];
-    
-#ifdef ESMF_NETCDF
-
-    *rc = 1;
-    start1[0]=*start-1;
-    count1[0]=*count;
-
-    nc_vlen_t *elmtConn = new nc_vlen_t[*count];
-    status = nc_get_vara(*ncid, *varid, start1, count1, elmtConn);
-    if (handle_error(status,__LINE__)) return; //bail out
-    printf("read elementConn from %d with %d count\n", *start, *count);
-    // copy elmtConn to a contiguous 1D array buffer
-    int k=0;
-    //printf("elemConn len %ld\n", elmtConn[0].len);
-    printf("elemConn len %ld and values %d \n", elmtConn[0].len, *(int*)(elmtConn[0].p));
-    for (int i=0; i<*count; i++) {
-      for (int j=0; j<elmtConn[i].len; j++) {
-        (_buffer)->array[k++] = *((int*)(elmtConn[i].p)+j);
-      }
-      //memcpy(*buffer+j, elmtConn[i].p, sizeof(int)*elmtConn[i].len);
-      //j += elmtConn[i].len;
-      free(elmtConn[i].p);
-    }
-    delete [] elmtConn;
-    *rc = 0;
-
     return;
 #else
   ESMC_LogDefault.MsgFoundError(ESMC_RC_LIB_NOT_PRESENT, "Have to compile with "
