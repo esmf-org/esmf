@@ -247,19 +247,16 @@ class TestRegrid(TestBase):
         # compare results and output PASS or FAIL
         meanrel, csrvrel, correct = compare_fields(dstfield, exact_field, 
                                                    10E-2, 10E-2, 10e-15, 
-                                                   parallel=parallel,
-                                                   dstfracfield=dstfracfield, 
+                                                   dstfracfield=dstfracfield,
                                                    mass1=srcmass, mass2=dstmass)
 
         self.assertAlmostEqual(meanrel, 0.0016447124122954575)
         self.assertAlmostEqual(csrvrel, 0.0)
 
     def test_grid_grid_3d_bilinear_cartesian(self):
-        parallel = False
         if ESMF.pet_count() > 1:
             if ESMF.pet_count() != 4:
                 raise NameError('MPI rank must be 4 in parallel mode!')
-            parallel = True
 
         # create a grid
         srcgrid = grid_create_3d([0, 21], [0, 21], [0, 21], 21, 21, 21, corners=False)
@@ -282,18 +279,15 @@ class TestRegrid(TestBase):
 
         # compare results and output PASS or FAIL
         meanrel, csrvrel, correct = compare_fields(dstfield, exactfield, 
-                                                   10E-03, 10E-03, 10E-16, 
-                                                   parallel=parallel)
+                                                   10E-03, 10E-03, 10E-16)
 
         self.assertAlmostEqual(meanrel, 0.00215601743167)
         self.assertAlmostEqual(csrvrel, 0.0)
 
     def test_grid_grid_3d_bilinear_spherical(self):
-        parallel = False
         if ESMF.pet_count() > 1:
             if ESMF.pet_count() != 4:
                 raise NameError('MPI rank must be 4 in parallel mode!')
-            parallel = True
 
         # create a grid
         srcgrid = grid_create_periodic_3d(60, 60, 14, corners=False)
@@ -316,19 +310,16 @@ class TestRegrid(TestBase):
 
         # compare results and output PASS or FAIL
         meanrel, csrvrel, correct = compare_fields(dstfield, exactfield,
-                                                   10E-03, 10E-03, 10E-16,
-                                                   parallel=parallel)
+                                                   10E-03, 10E-03, 10E-16)
 
         self.assertAlmostEqual(meanrel, 0.00061587737764545617)
         self.assertAlmostEqual(csrvrel, 0.0)
 
 
     def test_grid_grid_regrid_csrv_mask_3D(self):
-        parallel = False
         if ESMF.pet_count() > 1:
             if ESMF.pet_count() != 4:
                 raise NameError('MPI rank must be 4 in parallel mode!')
-            parallel = True
 
         # create a grid
         srcgrid = grid_create_3d([0, 21], [0, 21], [0, 21], 21, 21, 21, corners=True)
@@ -361,7 +352,6 @@ class TestRegrid(TestBase):
         # compare results and output PASS or FAIL
         meanrel, csrvrel, correct = compare_fields(dstfield, exactfield,
                                                    10E-03, 10E-03, 10E-16,
-                                                   parallel=parallel,
                                                    dstfracfield=dstfracfield,
                                                    mass1=srcmass, mass2=dstmass)
 
@@ -369,11 +359,9 @@ class TestRegrid(TestBase):
         self.assertAlmostEqual(csrvrel, 0.0)
 
     def test_grid_grid_regrid_csrv_mask(self):
-        parallel = False
         if ESMF.pet_count() > 1:
             if ESMF.pet_count() != 4:
                 raise NameError('MPI rank must be 4 in parallel mode!')
-            parallel = True
 
         # create two unique Grid objects
         srcgrid = grid_create([0, 21], [0, 21], 21, 21, corners=True, domask=True)
@@ -407,8 +395,7 @@ class TestRegrid(TestBase):
         # compare results and output PASS or FAIL
         meanrel, csrvrel, correct = compare_fields(dstfield, dstfield2, 
                                                    10E-3, 10E-3, 10E-16, 
-                                                   parallel=parallel,
-                                                   dstfracfield=dstfracfield, 
+                                                   dstfracfield=dstfracfield,
                                                    mass1=srcmass, mass2=dstmass)
 
         self.assertAlmostEqual(meanrel, 0.0024803189848013785)
@@ -417,11 +404,9 @@ class TestRegrid(TestBase):
     def test_grid_grid_regrid_srcmask_types(self):
         # NOTE: this tests an old issue where the items of a grid were not properly set when
         # the grid coord_typekind differed from the field typekind.
-        parallel = False
         if ESMF.pet_count() > 1:
             if ESMF.pet_count() != 4:
                 raise NameError('MPI rank must be 4 in parallel mode!')
-            parallel = True
 
         # create two unique Grid objects
         srcgrid = grid_create([0, 21], [0, 21], 21, 21, corners=True, domask=True,
@@ -456,8 +441,7 @@ class TestRegrid(TestBase):
         # compare results and output PASS or FAIL
         meanrel, csrvrel, correct = compare_fields(dstfield, dstfield2, 
                                                    10E-3, 10E-3, 10E-16, 
-                                                   parallel=parallel,
-                                                   dstfracfield=dstfracfield, 
+                                                   dstfracfield=dstfracfield,
                                                    mass1=srcmass, mass2=dstmass)
 
         self.assertAlmostEqual(meanrel, 0.0024803189848013785)
@@ -512,8 +496,7 @@ class TestRegrid(TestBase):
         # compare results and output PASS or FAIL
         meanrel, csrvrel, correct = compare_fields(dstfield, exactfield, 
                                                    80E-1, 80E-1, 10E-15, 
-                                                   parallel=parallel,
-                                                   dstfracfield=dstfracfield, 
+                                                   dstfracfield=dstfracfield,
                                                    mass1=srcmass, mass2=dstmass)
 
         self.assertAlmostEqual(meanrel, 0.038806630051265847)
@@ -566,8 +549,7 @@ class TestRegrid(TestBase):
         # compare results and output PASS or FAIL
         meanrel, csrvrel, correct = compare_fields(dstfield, exactfield, 
                                                    50E-1, 50E-1, 10E-16, 
-                                                   parallel=parallel,
-                                                   dstfracfield=dstfracfield, 
+                                                   dstfracfield=dstfracfield,
                                                    mass1=srcmass, mass2=dstmass)
 
         self.assertAlmostEqual(meanrel, 0.037733241800767432)
@@ -610,7 +592,6 @@ class TestRegrid(TestBase):
         # compare results and output PASS or FAIL
         meanrel, csrvrel, correct = compare_fields(dstfield, exactfield, 
                                                    20E-1, 20E-1, 10E-16, 
-                                                   parallel=parallel,
                                                    regrid_method=ESMF.RegridMethod.BILINEAR)
 
         self.assertAlmostEqual(meanrel, 0.0)
@@ -652,7 +633,6 @@ class TestRegrid(TestBase):
         # compare results and output PASS or FAIL
         meanrel, csrvrel, correct = compare_fields(dstfield, exactfield, 
                                                    40E-2, 40E-2, 10E-16, 
-                                                   parallel=parallel,
                                                    regrid_method=ESMF.RegridMethod.BILINEAR)
 
         self.assertAlmostEqual(meanrel, 0.0)
@@ -709,8 +689,7 @@ class TestRegrid(TestBase):
         # compare results and output PASS or FAIL
         meanrel, csrvrel, correct = compare_fields(dstfield, exactfield, 
                                                    20E-2, 20E-2, 10E-16, 
-                                                   parallel=parallel,
-                                                   dstfracfield=dstfracfield, 
+                                                   dstfracfield=dstfracfield,
                                                    mass1=srcmass, mass2=dstmass)
 
         self.assertAlmostEqual(meanrel, 0.037109375)
@@ -766,8 +745,7 @@ class TestRegrid(TestBase):
         # compare results and output PASS or FAIL
         meanrel, csrvrel, correct = compare_fields(dstfield, exactfield, 
                                                    80E-1, 80E-1, 10E-15, 
-                                                   parallel=parallel,
-                                                   dstfracfield=dstfracfield, 
+                                                   dstfracfield=dstfracfield,
                                                    mass1=srcmass, mass2=dstmass)
 
         assert (meanrel < 10E-2)
@@ -862,7 +840,6 @@ class TestRegrid(TestBase):
         dstfield = regridSrc2Dst(srcfield, dstfield)
 
         # compare results and output PASS or FAIL
-        meanrel, _, _ = compare_fields(dstfield, exactfield, 80E-1, 80E-1, 10E-16, 
-                                    parallel=parallel)
+        meanrel, _, _ = compare_fields(dstfield, exactfield, 80E-1, 80E-1, 10E-16)
 
         self.assertAlmostEqual(meanrel, 0)

@@ -2,31 +2,35 @@
 Utilities for Fields
 """
 
-import sys
-
-try:
-    import numpy as np
-except:
-    raise ImportError('The Numpy library cannot be found!')
-
-try:
-    import ESMF
-except:
-    raise ImportError('The ESMF library cannot be found!')
+import numpy as np
+import ESMF
 
 def compare_fields(field1, field2, itrp_mean_tol, itrp_max_tol, csrv_tol, 
-                   parallel=False, dstfracfield=None, mass1=None, mass2=None, 
+                   dstfracfield=None, mass1=None, mass2=None,
                    regrid_method=ESMF.RegridMethod.CONSERVE, 
                    uninitval=422397696., mask_values=[0]):
-    '''
-    PRECONDITIONS: Two Fields have been created and a comparison of the
-                   the values is desired between 'field1' and 
-                   'field2'.  The fields should be the same size on have
-                   rank=2 or 3.
-    POSTCONDITIONS: The values on 'field1' and 'field2' are 
-                    compared against the each other.
-    '''
+    """
+    Compare the values of two fields to verify the accuracy of a Regrid.  The
+    Fields should be the same size and have rank = 2 or 3.
+    :param field1: The Field that received the interpolation values.
+    :param field2: The Field holding the values of the exact solution.
+    :param itrp_mean_tol: The mean relative error tolerance.
+    :param itrp_max_tol: The maximum relative error tolerance.
+    :param csrv_tol: The conservation relative error tolerance.
+    :param parallel: True or False value to tell whether this is a parallel run
+    :param dstfracfield:
+    :param mass1: The mass of Field 1.
+    :param mass2: The mass of Field 2.
+    :param regrid_method: The regrid method that was used.
+    :param uninitval: The uninitialized value for Field1.
+    :param mask_values: Any masked values to skip when comparing the Fields.
+    :return:
+    """
     import numpy.ma as ma
+
+    parallel = False
+    if ESMF.pet_count() > 1:
+        parallel = True
 
     correct = False
     # verify that the fields are the same size
