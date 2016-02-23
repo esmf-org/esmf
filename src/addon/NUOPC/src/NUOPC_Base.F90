@@ -335,6 +335,7 @@ module NUOPC_Base
     character(*),     intent(in),  optional :: TransferOfferGeomObject
     integer,          intent(out), optional :: rc
 ! !DESCRIPTION:
+!   \label{NUOPC_AdvertiseFields}
 !   Advertise a list of fields in a state. This creates a list of empty fields
 !   and adds it to the {\tt state}. The "StandardName", and 
 !   "TransferOfferGeomObject" attributes of all the fields are set according to
@@ -1809,6 +1810,8 @@ module NUOPC_Base
     character(len=*),         intent(in),  optional :: dataFillScheme    
     integer,                  intent(out), optional :: rc
 ! !DESCRIPTION:
+!   \label{NUOPC_RealizeComplete}
+!
 !   Realize or remove fields inside of {\tt state} according to {\tt selection}.
 !   All of the fields that are realized are created internally on the same 
 !   {\tt grid} object, allocating memory for as many field dimensions as there 
@@ -1963,6 +1966,8 @@ module NUOPC_Base
     type(ESMF_Field), intent(in)            :: field
     integer,          intent(out), optional :: rc
 ! !DESCRIPTION:
+!   \label{NUOPC_RealizeField}
+!
 !   Realize a previously advertised field in {\tt state} by replacing the
 !   advertised field with {\tt field} of the same name.
 !
