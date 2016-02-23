@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2015, University Corporation for Atmospheric Research, 
+// Copyright 2002-2016, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -519,11 +519,12 @@ static void triangulate(int sdim, int num_p, double *p, double *td, int *ti, int
 // sdim = spatial dim
 // num_p = number of points in poly
 // p     = poly coords size=num_p*sdim
+// oeid  = id of original element for debug output
 // td    = temporary buffer size=num_p*sdim
 // ti    = temporary integer buffer size = num_p
 // tri_ind = output array  size = 3*(nump-2)
 // tri_area = area of each sub-triangle is of whole poly size=(num_p-2)
-static void triangulate_warea(int sdim, int num_p, double *p, 
+static void triangulate_warea(int sdim, int num_p, double *p, int oeid,
                               double *td, int *ti, int *tri_ind, 
                               double *tri_area) {
           int localrc;
@@ -549,9 +550,10 @@ static void triangulate_warea(int sdim, int num_p, double *p,
                    " - can't triangulate a polygon with less than 3 sides", 
                                                 ESMC_CONTEXT, &localrc)) throw localrc;
             } else if (ret == ESMCI_TP_CLOCKWISE_POLY) {
-              if (ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
-                   " - there was a problem with triangulation (e.g. repeated points, clockwise poly, etc.)",
-                                                ESMC_CONTEXT, &localrc)) throw localrc;
+              char msg[1024];
+              sprintf(msg," - there was a problem (e.g. repeated points, clockwise poly, etc.) with the triangulation of the element with id=%d ",oeid); 
+              if (ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP, msg,
+                                              ESMC_CONTEXT, &localrc)) throw localrc;
             } else {
               if (ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
                                                 " - unknown error in triangulation", ESMC_CONTEXT, &localrc)) throw localrc;
@@ -1018,7 +1020,7 @@ void ESMCI_meshaddelements(Mesh **meshpp,
           }
 
           // Triangulate polygon
-          triangulate_warea(sdim, subelem_size, subelem_coords,
+          triangulate_warea(sdim, subelem_size, subelem_coords, elemId[e],
                             subelem_dbl_buf, subelem_int_buf, 
                             subelem_tri_ind, subelem_tri_area); 
           

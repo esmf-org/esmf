@@ -15,6 +15,23 @@ An integer named constant which is used to indicate that a particular dimension 
 \subsection{ESMF\_ATTGETCOUNT}
 This flag is documented in section \ref{const:attgetcount}.
 
+\subsection{ESMF\_ATTNEST\_FLAG}
+\label{const:attnest}
+{\sf DESCRIPTION:\\}
+Indicate whether or not to descend the Attribute hierarchy.
+
+The type of this flag is:
+
+{\tt type(ESMF\_AttNest\_Flag)}
+
+The valid values are:
+\begin{description}
+    \item[ESMF\_ATTNEST\_ON]
+    Indicates that the Attribute hierarchy should be traversed.
+    \item[ESMF\_ATTNEST\_OFF]
+    Indicates that the Attribute hierarchy should not be traversed.
+\end{description}
+
 
 \subsection{ESMF\_ATTRECONCILE}
 \label{const:attreconcile}

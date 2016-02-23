@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2015, University Corporation for Atmospheric Research, 
+! Copyright 2002-2016, University Corporation for Atmospheric Research, 
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 ! Laboratory, University of Michigan, National Centers for Environmental 
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -843,7 +843,8 @@ contains
 !        Single data variable to be received. All PETs must specify a
 !        valid result variable.
 !   \item[count] 
-!        Number of elements in sendData. Must be the same on all PETs.
+!        Number of elements in sendData. Allowed to be different across the 
+!        PETs, as long as {\tt count} > 0.
 !   \item[reduceflag] 
 !        Reduction operation. See section \ref{const:reduce} for a list of 
 !        valid reduce operations.

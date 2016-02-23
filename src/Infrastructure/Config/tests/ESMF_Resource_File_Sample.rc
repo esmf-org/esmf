@@ -19,7 +19,6 @@ u-wind_error:   u_UprAir  6  2.0   2.0   2.2   2.3   2.7   3.2
 v-wind_error:   v_UprAir  6  2.2   2.2   2.3   2.7   3.2   3.4
 v-wind_flag:    v_Flag    6  T     F     T     T     F     F
 
-
 # EXAMPLE 3 - retrieval of group of parameters multiple lines
 #---------------------------------------------------------------
 
@@ -53,3 +52,6 @@ ObsErr*vCor_HH-7::
 #-------------------------------------------------
 Token_Example_1:  'This is a token example'
 Token_Example_2:  "This is a token example"
+
+directions:     'north' 'north east' 'east' 'south east' 'south' 'south west' 'west' 'north west'
+

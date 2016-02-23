@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2015, University Corporation for Atmospheric Research, 
+// Copyright 2002-2016, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -349,7 +349,7 @@ int ArrayBundle::read(
     for (it = arrayContainer.begin();
          it != arrayContainer.end(); ++it) {
       if (ESMF_SUCCESS == localrc) {
-        localrc = newIO->addArray(it->second->second, (char *)NULL);
+        localrc = newIO->addArray(it->second->second);
         ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
           &rc);
       }
@@ -366,7 +366,7 @@ int ArrayBundle::read(
     for (it = arrayContainer.begin();
          it != arrayContainer.end(); ++it) {
       if (ESMF_SUCCESS == localrc) {
-        localrc = newIO->addArray(it->second->second, (char *)NULL);
+        localrc = newIO->addArray(it->second->second);
         ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
           &rc);
       }
@@ -472,7 +472,7 @@ int ArrayBundle::write(
     for (it = arrayContainer.begin();
          it != arrayContainer.end(); ++it) {
       if (ESMF_SUCCESS == localrc) {
-        localrc = newIO->addArray(it->second->second, (char *)NULL);
+        localrc = newIO->addArray(it->second->second);
         ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
           &rc);
       }
@@ -490,7 +490,7 @@ int ArrayBundle::write(
     for (it = arrayContainer.begin();
          it != arrayContainer.end(); ++it) {
       if (ESMF_SUCCESS == localrc) {
-        localrc = newIO->addArray(it->second->second, (char *)NULL);
+        localrc = newIO->addArray(it->second->second);
         ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
           &rc);
       }

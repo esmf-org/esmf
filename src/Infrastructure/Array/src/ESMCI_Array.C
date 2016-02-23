@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2015, University Corporation for Atmospheric Research, 
+// Copyright 2002-2016, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -2613,30 +2613,34 @@ int Array::read(
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
   ESMC_IOFmt_Flag localiofmt;
-
-  IO *newIO = IO::create(&localrc);
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
-    &rc)) return rc;
-  // For here on, we have to be sure to clean up before returning
-  if (ESMF_SUCCESS == localrc) {
-    localrc = newIO->addArray(this, variableName.c_str());
-    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
-      &rc);
-  }
-  // Set optional parameters which are not optional at next layer
+ 
+ // Set optional parameters which are not optional at next layer
   if ((ESMC_IOFmt_Flag *)NULL != iofmt) {
     localiofmt = *iofmt;
   } else {
     localiofmt = ESMF_IOFMT_NETCDF;
   }
   // It is an error to supply a variable name if not in NetCDF mode
-  if (ESMF_IOFMT_NETCDF != localiofmt)
-     if (variableName.size() > 0) {
-    ESMC_LogDefault.Write("Array variable name not allowed in binary mode",
-                          ESMC_LOGMSG_ERROR, ESMC_CONTEXT);
+  if (ESMF_IOFMT_NETCDF != localiofmt) {
+    if (variableName.size() > 0) {
+      ESMC_LogDefault.MsgFoundError(ESMF_RC_ARG_BAD, 
+          "Array variable name not allowed in binary mode",
+          ESMC_CONTEXT, &rc);
+      return rc;
+    }
+  }
+
+  IO *newIO = IO::create(&localrc);
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      &rc)) return rc;
+  // For here on, we have to be sure to clean up before returning
+  vector<string> labNames;  // dummy vector for reads
+  localrc = newIO->addArray(this, variableName, labNames);
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      &rc)) {
     IO::destroy(&newIO);
-    newIO = (IO *)NULL;
-    return ESMF_RC_ARG_BAD;
+    newIO = (IO *) NULL;
+    return rc;
   }
 
   // Call the IO read function
@@ -2670,6 +2674,7 @@ int Array::write(
 //
   const std::string &file,        // in    - name of file being written
   const std::string &variableName,// in    - optional variable name
+  const std::vector<std::string> &dimLabels, // in - optional dimension labels
   bool  *overwrite,               // in    - OK to overwrite file data
   ESMC_FileStatus_Flag *status,   // in    - file status flag
   int   *timeslice,               // in    - timeslice option
@@ -2688,18 +2693,6 @@ int Array::write(
   ESMC_IOFmt_Flag localiofmt;              // For default handling
   bool localoverwrite;                    // For default handling
   ESMC_FileStatus_Flag localstatus;        // For default handling
-
-  IO *newIO = IO::create(&rc);
-  if (ESMC_LogDefault.MsgFoundError(rc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)){
-    return rc;
-  }
-  // From now on, we have to be sure to clean up before returning
-  rc = newIO->addArray(this, variableName.c_str());
-  if (ESMC_LogDefault.MsgFoundError(rc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) {
-    IO::destroy(&newIO);
-    newIO = (IO *)NULL;
-    return rc;
-  }
 
   // Handle format default
   if ((ESMC_IOFmt_Flag *)NULL == iofmt) {
@@ -2721,13 +2714,25 @@ int Array::write(
   }
 
   // It is an error to supply a variable name in binary mode
-  if (ESMF_IOFMT_NETCDF != localiofmt)
-     if (variableName.size() > 0) {
-    ESMC_LogDefault.Write("Array variable name not allowed in binary mode",
-                          ESMC_LOGMSG_ERROR, ESMC_CONTEXT);
+  if (ESMF_IOFMT_NETCDF != localiofmt) {
+    if (variableName.size() > 0) {
+      ESMC_LogDefault.MsgFoundError(ESMF_RC_ARG_BAD, 
+          "Array variable name not allowed in binary mode",
+          ESMC_CONTEXT, &rc);
+      return rc;
+    }
+  }
+
+  IO *newIO = IO::create(&rc);
+  if (ESMC_LogDefault.MsgFoundError(rc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)){
+    return rc;
+  }
+  // From now on, we have to be sure to clean up before returning
+  rc = newIO->addArray(this, variableName, dimLabels);
+  if (ESMC_LogDefault.MsgFoundError(rc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) {
     IO::destroy(&newIO);
     newIO = (IO *)NULL;
-    return ESMF_RC_ARG_BAD;
+    return rc;
   }
 
   // Call the IO write function

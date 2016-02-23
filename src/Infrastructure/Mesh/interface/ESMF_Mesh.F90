@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2015, University Corporation for Atmospheric Research, 
+! Copyright 2002-2016, University Corporation for Atmospheric Research, 
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 ! Laboratory, University of Michigan, National Centers for Environmental 
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -47,7 +47,7 @@ module ESMF_MeshMod
   use ESMF_VMMod
   use ESMF_DELayoutMod
   use ESMF_DistGridMod
-  use ESMF_RHandleMod
+   use ESMF_RHandleMod
   use ESMF_F90InterfaceMod  ! ESMF F90-C++ interface helper
   use ESMF_IOScripMod
   use ESMF_IOUGridMod
@@ -96,7 +96,7 @@ module ESMF_MeshMod
     integer :: origElemCount
 
       ESMF_INIT_DECLARE
-  end type
+   end type
 
   type ESMF_MeshElement
 #ifndef ESMF_NO_SEQUENCE
@@ -145,7 +145,7 @@ module ESMF_MeshMod
 ! !PUBLIC TYPES:
   public ESMF_Mesh               
   public ESMF_MESHELEMTYPE_QUAD, ESMF_MESHELEMTYPE_TRI, &
-         ESMF_MESHELEMTYPE_HEX, ESMF_MESHELEMTYPE_TETRA
+          ESMF_MESHELEMTYPE_HEX, ESMF_MESHELEMTYPE_TETRA
   public ESMF_MeshLoc
   public ESMF_MESHLOC_NODE, ESMF_MESHLOC_ELEMENT
 
@@ -194,7 +194,7 @@ module ESMF_MeshMod
 !------------------------------------------------------------------------------
 
 !------------------------------------------------------------------------------
-! The following line turns the CVS identifier string into a printable variable.
+ ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
     '$Id$'
 
@@ -243,7 +243,7 @@ module ESMF_MeshMod
 !     ESMF MeshLoc.  It is provided for easy comparisons of 
 !     these types with defined values.
 !
-!EOPI
+ !EOPI
       end interface
 
 !------------------------------------------------------------------------------
@@ -292,7 +292,7 @@ module ESMF_MeshMod
 ! !IROUTINE: ESMF_MeshOperator(==) - Mesh equality operator
 !
 ! !INTERFACE:
-  interface operator(==)
+   interface operator(==)
 !   if (mesh1 == mesh2) then ... endif
 !             OR
 !   result = (mesh1 == mesh2)
@@ -341,7 +341,7 @@ module ESMF_MeshMod
 !   if (mesh1 /= mesh2) then ... endif
 !             OR
 !   result = (mesh1 /= mesh2)
-! !RETURN VALUE:
+ ! !RETURN VALUE:
 !   logical :: result
 !
 ! !ARGUMENTS:
@@ -390,7 +390,7 @@ contains
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_MeshEQ()"
 !BOPI
-! !IROUTINE:  ESMF_MeshEQ - Compare two Meshes for equality
+ ! !IROUTINE:  ESMF_MeshEQ - Compare two Meshes for equality
 !
 ! !INTERFACE:
   function ESMF_MeshEQ(mesh1, mesh2)
@@ -1663,8 +1663,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !         for a list of valid options. 
 !   \item[{[convertToDual]}] 
 !         if {\tt .true.}, the mesh will be converted to its dual. If not specified,
-!         defaults to {\tt .false.}. Converting to dual is not supported when the 
-!         file format is {\tt ESMF\_FILEFORMAT\_GRIDSPEC}.
+!         defaults to {\tt .false.}. 
 !   \item[{[addUserArea]}] 
 !         if {\tt .true.}, the cell area will be read in from the GRID file.  This feature is
 !         only supported when the grid file is in the SCRIP or ESMF format. If not specified, 
@@ -1873,7 +1872,7 @@ end function ESMF_MeshCreateFromFile
     integer                             :: localrc      ! local return code
     integer			        :: PetNo, PetCnt 
     real(ESMF_KIND_R8),pointer          :: nodeCoords(:,:), faceCoords(:,:)
-    integer(ESMF_KIND_I4),pointer       :: elementConn(:,:)
+    integer(ESMF_KIND_I4),pointer       :: elementConn(:)
     integer(ESMF_KIND_I4),pointer       :: elmtNum(:)
     integer                             :: startElmt
     integer                             :: NodeNo
@@ -2033,6 +2032,8 @@ end function ESMF_MeshCreateFromFile
                                  centerCoords=faceCoords, &
 				 convertToDeg=convertToDeg, rc=localrc)
        endif
+       ElemCnt = ubound (elmtNum, 1)
+       totalConnects = ubound(elementConn, 1)
        if (associated(faceCoords)) then
             hasFaceCoords = .true.
        endif
@@ -2055,9 +2056,9 @@ end function ESMF_MeshCreateFromFile
        ! Chenk if the grid is 3D or 2D
        coordDim = ubound(nodeCoords,1)
        nodeCnt = ubound(nodeCoords,2)
+       ElemCnt = ubound (elmtNum, 1)
+       totalConnects = ubound(elementConn, 1)
 
-       ! Check elementConn to find out the max edges
-       maxEdges = ubound(elementConn,1)
        if ( associated(faceCoords)) then
        	  hasFaceCoords = .true.
        endif
@@ -2065,7 +2066,6 @@ end function ESMF_MeshCreateFromFile
        if (coordDim == 2 .and. localAddMask == ESMF_MESHLOC_ELEMENT) then
 	  !Get the variable and the missing value attribute from file
 	  ! Total number of local elements
-          ElemCnt = ubound (elementConn, 2)
           allocate(varbuffer(ElemCnt))
 	  call ESMF_UGridGetVarByName(filename, varname, varbuffer, startind=startElmt, &
 		count=ElemCnt, location="face", &
@@ -2138,38 +2138,38 @@ end function ESMF_MeshCreateFromFile
     ! the local elements and we will do a global reduce to find the minimal values
     NodeUsed(:)=PetCnt+100
 
-    ! Total number of local elements
-    ElemCnt = ubound (elementConn, 2)
-
     ! Set the coorsponding NodeUsed(:) value to my PetNo if it is used by the local element 
     ! Also calculate the total number of mesh elements based on elmtNum
     totalElements = ElemCnt
-    totalConnects = 0
     maxNumPoly=0
     if (parametricDim .eq. 2) then
-       do ElemNo =1, ElemCnt
+       j=1
+       do ElemNo = 1, ElemCnt
           do i=1,elmtNum(ElemNo)	
-             if (elementConn(i,ElemNo) /= ESMF_MESH_POLYBREAK) then
-                NodeUsed(elementConn(i,ElemNo))=PetNo
+            if (elementConn(j) /= ESMF_MESH_POLYBREAK) then
+                NodeUsed(elementConn(j))=PetNo
              endif
+             j=j+1
           enddo
-          TotalConnects = TotalConnects+elmtNum(ElemNo)
-
           if (elmtNum(ElemNo) > maxNumPoly) then
              maxNumPoly=elmtNum(ElemNo)
           endif
        end do
     else ! If not parametricDim==2, assuming parmetricDim==3
+       j=1
        do ElemNo =1, ElemCnt
           do i=1,elmtNum(ElemNo)
-             if (elementConn(i,ElemNo) /= ESMF_MESH_POLYBREAK) then
-                NodeUsed(elementConn(i,ElemNo))=PetNo
+             if (elementConn(j) /= ESMF_MESH_POLYBREAK) then
+                NodeUsed(elementConn(j))=PetNo
              endif
+             j=j+1
           enddo
-          TotalConnects = TotalConnects+elmtNum(ElemNo)
        end do       
     endif
 
+    if (totalConnects /= (j-1)) then
+         print *, 'Total number of connection mismatch:', j, ElemCnt, totalConnects
+    endif
    ! write(*,*) "maxNumPoly=",maxNumPoly
 
     ! Do a global reduce to find out the lowest PET No that owns each node, the result is in
@@ -2297,16 +2297,18 @@ end function ESMF_MeshCreateFromFile
     ConnNo = 0
     if (parametricDim .eq. 2) then
        ! Loop through creating Mesh appropriate elements
+       k=1
        do j = 1, ElemCnt
           if (elmtNum(j)==3) then        
              ElemId(ElemNo) = myStartElmt+ElemNo
              ElemType (ElemNo) = ESMF_MESHELEMTYPE_TRI
              do i=1,3
-                if (elementConn(i,j) /= ESMF_MESH_POLYBREAK) then
-                   ElemConn (ConnNo+i) = NodeUsed(elementConn(i,j))
+                if (elementConn(k) /= ESMF_MESH_POLYBREAK) then
+                   ElemConn (ConnNo+i) = NodeUsed(elementConn(k))
                 else
                    ElemConn (ConnNo+i) = ESMF_MESH_POLYBREAK
                 endif
+                k=k+1
              end do
 	     if (haveElmtMask) ElemMask(ElemNo) = elementMask(j)
 	     if (localAddUserArea) ElemArea(ElemNo) = elementArea(j)
@@ -2316,11 +2318,12 @@ end function ESMF_MeshCreateFromFile
              ElemId(ElemNo) = myStartElmt+ElemNo
              ElemType (ElemNo) = ESMF_MESHELEMTYPE_QUAD
              do i=1,4
-                if (elementConn(i,j) /= ESMF_MESH_POLYBREAK) then
-                   ElemConn (ConnNo+i) = NodeUsed(elementConn(i,j))
+                if (elementConn(k) /= ESMF_MESH_POLYBREAK) then
+                   ElemConn (ConnNo+i) = NodeUsed(elementConn(k))
                 else
                    ElemConn (ConnNo+i) = ESMF_MESH_POLYBREAK
                 endif
+                k=k+1
              end do
 	     if (haveElmtMask) ElemMask(ElemNo) = elementMask(j)
 	     if (localAddUserArea) ElemArea(ElemNo) = elementArea(j)
@@ -2330,11 +2333,12 @@ end function ESMF_MeshCreateFromFile
              ElemId(ElemNo) = myStartElmt+ElemNo
              ElemType (ElemNo) = elmtNum(j)
              do i=1,elmtNum(j)
-                if (elementConn(i,j) /= ESMF_MESH_POLYBREAK) then
-                   ElemConn (ConnNo+i) = NodeUsed(elementConn(i,j))
+                if (elementConn(k) /= ESMF_MESH_POLYBREAK) then
+                   ElemConn (ConnNo+i) = NodeUsed(elementConn(k))
                 else
                    ElemConn (ConnNo+i) = ESMF_MESH_POLYBREAK
                 endif
+                k=k+1
              end do
 	     if (haveElmtMask) ElemMask(ElemNo) = elementMask(j)
 	     if (localAddUserArea) ElemArea(ElemNo) = elementArea(j)
@@ -2343,6 +2347,7 @@ end function ESMF_MeshCreateFromFile
           endif
        enddo
     else ! If not parametricDim==2, assuming parmetricDim==3
+       k=1
        do j = 1, ElemCnt
           if (elmtNum(j)==4) then        
              ElemType (ElemNo) = ESMF_MESHELEMTYPE_TETRA
@@ -2356,11 +2361,12 @@ end function ESMF_MeshCreateFromFile
           endif
 
           do i=1,elmtNum(j)
-             if (elementConn(i,j) /= ESMF_MESH_POLYBREAK) then
-                ElemConn (ConnNo+i) = NodeUsed(elementConn(i,j))
+             if (elementConn(k) /= ESMF_MESH_POLYBREAK) then
+                ElemConn (ConnNo+i) = NodeUsed(elementConn(k))
              else
                 ElemConn (ConnNo+i) = ESMF_MESH_POLYBREAK
              endif
+             k=k+1
           end do
           ElemId(ElemNo) = myStartElmt+ElemNo
           if (haveElmtMask) ElemMask(ElemNo) = elementMask(j)
@@ -2370,9 +2376,9 @@ end function ESMF_MeshCreateFromFile
        end do
     endif
 
-    if (ElemNo /= TotalElements+1) then
+    if ((ElemNo /= TotalElements+1) .or. (ConnNo /= TotalConnects)) then
 	write (ESMF_UtilIOStdout,*)  &
-            PetNo, ' TotalElements does not match ',ElemNo-1, TotalElements
+            PetNo, ' TotalElements does not match ',ElemNo-1, TotalElements, ConnNo, TotalConnects
     end if
     ! Add elements
     
@@ -2737,51 +2743,6 @@ end function ESMF_MeshCreateFromScrip
   end function ESMF_MeshCreateFromIntPtr
 !------------------------------------------------------------------------------
 
-
-!------------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_MeshSetMOAB()"
-!BOPI
-! !IROUTINE: ESMF_MeshSetMOAB -- Turn on or off moab
-!
-! !INTERFACE:
-   subroutine ESMF_MeshSetMOAB(moabOn, rc)
-!
-! !ARGUMENTS:
-    logical, intent(in)                        :: moabOn
-    integer, intent(out) , optional            :: rc
-!
-! !DESCRIPTION:
-!   Turn on Moab 
-!
-!   \begin{description}
-!   \item [moabOn]
-!         Variable used to turn MOAB on or off
-!   \item [{[rc]}]
-!         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!EOPI
-!------------------------------------------------------------------------------
-    integer :: localrc 
-    integer :: intMoabOn    
-
-    ! Init localrc
-    localrc = ESMF_SUCCESS
-    
-   ! Translate to integer
-   intMoabOn=0
-   if (moabOn) then
-      intMoabOn=1
-   endif
-
-    call c_esmc_meshsetMOAB(intMoabOn, localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-         ESMF_CONTEXT, rcToReturn=rc)) return
-    
-    if (present(rc)) rc = ESMF_SUCCESS
-    
-    end subroutine ESMF_MeshSetMOAB
 
     
 !------------------------------------------------------------------------------
@@ -3809,6 +3770,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   end function ESMF_MeshMatch
 !------------------------------------------------------------------------------
 
+
+
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_MeshSerialize"
@@ -4027,6 +3990,55 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
      end function ESMF_MeshDeserialize
 
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_MeshSetMOAB()"
+!BOP
+! !IROUTINE: ESMF_MeshSetMOAB -- Toggle using the MOAB library internally. 
+!
+! !INTERFACE:
+   subroutine ESMF_MeshSetMOAB(moabOn, rc)
+!
+! !ARGUMENTS:
+    logical, intent(in)                        :: moabOn
+    integer, intent(out) , optional            :: rc
+!
+! !DESCRIPTION:
+!   This method can be employed to turn on or off using the MOAB library 
+!   to hold the internal structure of the Mesh. When set to .true. the following
+!   Mesh create calls create a Mesh using MOAB internally. When set to .false. the following
+!   Mesh create calls use the ESMF native internal mesh respresentation. Note that ESMF Meshes 
+!   created on MOAB are only supported in a limited set of operations and should be used
+!   with caution as they haven't yet been tested as thoroughly as the native version.  
+!
+!   \begin{description}
+!   \item [moabOn]
+!         Variable used to turn MOAB on or off
+!   \item [{[rc]}]
+!         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+!------------------------------------------------------------------------------
+    integer :: localrc 
+    integer :: intMoabOn    
+
+    ! Init localrc
+    localrc = ESMF_SUCCESS
+    
+   ! Translate to integer
+   intMoabOn=0
+   if (moabOn) then
+      intMoabOn=1
+   endif
+
+    call c_esmc_meshsetMOAB(intMoabOn, localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return
+    
+    if (present(rc)) rc = ESMF_SUCCESS
+    
+    end subroutine ESMF_MeshSetMOAB
 
 !------------------------------------------------------------------------------
 

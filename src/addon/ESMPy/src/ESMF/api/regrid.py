@@ -18,13 +18,72 @@ from ESMF.api.field import *
 
 class Regrid(object):
     """
-    The Regrid object represents a regridding operator between two Fields.  The creation of this object is
-    analogous to ESMF_FieldRegridStore(), and calling this object corresponds to ESMF_FieldRegrid().
-    ESMF_FieldRegridRelease() is called when the Regrid object goes out of scope (this only happens when the
-    Manager goes out of scope, there is a destroy() call for explicit deallocation of the Regrid).
+    The Regrid object represents a regridding operator between two Fields.  The
+    creation of this object is analogous to ESMF_FieldRegridStore(), and
+    calling this object corresponds to ESMF_FieldRegrid().
+    ESMF_FieldRegridRelease() is called when the Regrid object goes out of
+    scope (this only happens when the Manager goes out of scope, there is a
+    destroy() call for explicit deallocation of the Regrid).
 
-    For more information about the ESMF Regridding functionality, please see the `ESMF Regrid documentation
+    For more information about the ESMF Regridding functionality, please see
+    the `ESMF Regrid documentation
     <http://www.earthsystemmodeling.org/esmf_releases/public/last/ESMF_refdoc/node5.html#SECTION05012000000000000000>`_.
+
+    The following arguments are used to create a handle to a Regridding
+    operation between two Fields.
+
+    *REQUIRED:*
+
+    :param Field srcfield: source Field associated with an underlying Grid,
+        Mesh or LocStream.
+    :param Field dstfield: destination Field associated with an underlying
+        Grid, Mesh or LocStream.  The data in this Field may be overwritten
+        by this call.
+
+    *OPTIONAL:*
+
+    :param ndarray src_mask_values: a numpy array of values that should be
+        considered masked value on the source Field.
+    :param ndarray dst_mask_values: a numpy array of values that should be
+        considered masked value on the destination Field.
+    :param RegridMethod regrid_method: specifies which
+        :attr:`~ESMF.api.constants.RegridMethod` to use.  If ``None``, defaults
+        to :attr:`~ESMF.api.constants.RegridMethod.BILINEAR`.
+    :param PoleMethod pole_method: specifies which type of artificial pole
+        to construct on the source Grid for regridding.  If ``None``, defaults
+        to: :attr:`~ESMF.api.constants.PoleMethod.NONE` for
+        regridmethod == :attr:`~ESMF.api.constants.RegridMethod.CONSERVE`, or
+        :attr:`~ESMF.api.constants.PoleMethod.ALLAVG` for
+        regridmethod != :attr:`~ESMF.api.constants.RegridMethod.CONSERVE`.
+    :param int regrid_pole_npoints: specifies how many points to average over
+        if polemethod == :attr:`~ESMF.api.constants.PoleMethod.ALLAVG`.
+    :param LineType line_type: select the path of the line that connects two
+        points on the surface of a sphere.  This in turn controls the path along
+        which distances are calculated and the shape of the edges that make up a
+        cell.  If ``None``, defaults to:
+        :attr:`~ESMF.api.constants.LineType.GREAT_CIRCLE` for
+        regridmethod == :attr:`~ESMF.api.constants.RegridMethod.CONSERVE`, or
+        :attr:`~ESMF.api.constants.LineType.CART` for
+        regridmethod != :attr:`~ESMF.api.constants.RegridMethod.CONSERVE`.
+    :param NormType norm_type: control which type of normalization to do when
+        generating conservative regridding weights. If ``None``, defaults to
+        :attr:`~ESMF.api.constants.NormType.DSTAREA`.
+    :param UnmappedAction unmapped_action: specifies which action to take if a
+        destination point is found which does not map to any source point. If
+        ``None``, defaults to :attr:`~ESMF.api.constants.UnmappedAction.ERROR`.
+    :param bool ignore_degenerate: Ignore degenerate cells when checking the
+        input Grids or Meshes for errors. If this is set to True, then the
+        regridding proceeds, but degenerate cells will be skipped. If set to
+        False, a degenerate cell produces an error. This currently only applies
+        to :attr:`~ESMF.api.constants.RegridMethod.CONSERVE`, other regrid
+        methods currently always skip degenerate cells. If ``None``, defaults to
+        False.
+    :param ndarray src_frac_field: return a numpy array of values containing
+        weights corresponding to the amount of each Field value which
+        contributes to the total mass of the Field.
+    :param ndarray dst_frac_field: return a numpy array of values containing
+        weights corresponding to the amount of each Field value which
+        contributes to the total mass of the Field.
     """
 
     # call RegridStore
@@ -41,82 +100,8 @@ class Regrid(object):
                  ignore_degenerate=None,
                  src_frac_field=None,
                  dst_frac_field=None):
-        """
-        Create a handle to a Regridding operation between two Fields. \n
-        Required Arguments: \n
-            srcfield: source Field associated with an underlying Grid,
-                      Mesh or LocStream. \n
-            dstfield: destination Field associated with an underlying 
-                      Grid, Mesh or LocStream.  The data in this Field may be
-                      overwritten by this call.\n
-        Optional Arguments: \n
-            src_mask_values: a numpy array (internally cast to 
-                             dtype=numpy.int32)of values that can be 
-                             used to specify a masked value on the 
-                             source Field. \n
-                type: numpy.array \n
-                shape: (n, 1) where n is the number of values \n
-            dst_mask_values: a numpy array (internally cast to 
-                             dtype=numpy.int32)of values that can be 
-                             used to specify a masked value on the 
-                             destination Field. \n
-                type: numpy.array \n
-                shape: (n, 1) where n is the number of values \n
-            regrid_method: specifies which regridding method to use. \n
-                Argument values are: \n
-                    (default) RegridMethod.BILINEAR\n
-                    RegridMethod.PATCH\n
-                    RegridMethod.CONSERVE\n
-                    RegridMethod.NEAREST_STOD\n
-                    RegridMethod.NEAREST_DTOS\n
-            pole_method: specifies which type of artificial pole
-                         to construct on the source Grid for regridding.\n
-                Argument values are:\n
-                    (default for regridmethod == RegridMethod.CONSERVE) PoleMethod.NONE\n
-                    (default for regridmethod != RegridMethod.CONSERVE) PoleMethod.ALLAVG\n
-                    PoleMethod.NPNTAVG\n
-                    PoleMethod.TEETH\n
-            regrid_pole_npoints: specifies how many points to average over 
-                             if polemethod == PoleMethod.NPNTAVG\n
-            line_type:  this argument allows the user to select the path of the line which connects two points
-                        on the surface of a sphere.  This in turn controls the path along which distances are
-                        calculated and the shape of the edges that make up a cell.
-                Argument values are: \n
-                    NOTE: default value is dependent on the value of regridMethod
-                    LineType.CART \n
-                    LineType.GREAT_CIRCLE \n
-            norm_type: control which type of normalization to do when generating conservative regridding weights. \n
-                Argument values are: \n
-                    (default) NormType.DSTAREA \n
-                    NormType.FRACAREA \n
-            unmapped_action: specifies which action to take if a
-                             destination point is found which does not 
-                             map to any source point.\n
-                Argument values are : \n
-                    (default) UnmappedAction.ERROR\n
-                    UnmappedAction.IGNORE\n
-            ignore_degenerate: Ignore degenerate cells when checking the input
-                               Grids or Meshes for errors. If this is set to True,
-                               then the regridding proceeds, but degenerate cells
-                               will be skipped. If set to False, a degenerate cell
-                               produces an error. This currently only applies to
-                               RegridMethod.CONSERVE, other regrid methods currently
-                               always skip degenerate cells.  The default value is
-                               False.\n
-            src_frac_field: return a numpy array of values containing 
-                            weights corresponding to the amount of 
-                            each Field value which contributes to the 
-                            total mass of the Field. \n
-            dst_frac_field: return a numpy array of values containing 
-                            weights corresponding to the amount of each 
-                            Field value which contributes to the total 
-                            mass of the Field. \n
-        Returns: \n
-            Regrid \n
-        """
-        
         # routehandle storage
-        self.routehandle = 0
+        self._routehandle = 0
 
         # type checking
         if src_mask_values is not None:
@@ -129,12 +114,13 @@ class Regrid(object):
         # else case handled by initialization to None
 
         # call into the ctypes layer
-        self.routehandle = ESMP_FieldRegridStore(srcfield, dstfield,
+        self._routehandle = ESMP_FieldRegridStore(srcfield, dstfield,
                            srcMaskValues=src_mask_values,
                            dstMaskValues=dst_mask_values,
                            regridmethod=regrid_method,
                            polemethod=pole_method,
                            regridPoleNPnts=regrid_pole_npoints,
+                           lineType=line_type,
                            normType=norm_type,
                            unmappedaction=unmapped_action,
                            ignoreDegenerate=ignore_degenerate,
@@ -163,43 +149,32 @@ class Regrid(object):
 
     def __call__(self, srcfield, dstfield, zero_region=None):
         """
-        Call a regridding operation from srcfield to dstfield. \n
-        Required Arguments: \n
-            srcfield: the Field of source data to regrid. \n
-            dstfield: the Field to hold the regridded data. \n
-        Optional Arguments: \n
-            zero_region: specify which region of the field indices will
-                         be zeroed out before adding the values resulting 
-                         from the interpolation. \n
-                Argument values are: \n
-                    (default)TOTAL = the entire Field \n
-                    SELECT = only the Field indices which participate 
-                             in regridding \n
-                    EMPTY = none of the Field \n
-        Returns: \n
-            dstfield
+        Call a regridding operation from srcfield to dstfield.
+
+        *REQUIRED:*
+
+        :param Field srcfield: the Field of source data to regrid.
+        :param Field dstfield: the Field to hold the regridded data.
+
+        *OPTIONAL:*
+
+        :param Region zero_region: specify which region of the field indices
+            will be zeroed out before adding the values resulting from the
+            interpolation.  If ``None``, defaults to
+            :attr:`~ESMF.api.constants.Region.TOTAL`.
+
+        :return: dstfield
         """
+
         # call into the ctypes layer
         ESMP_FieldRegrid(srcfield, dstfield,
-                         self.routehandle, zeroregion=zero_region)
+                         self._routehandle, zeroregion=zero_region)
         return dstfield
 
     def __del__(self):
-        """
-        Release the memory associated with a Regrid operation. \n
-        Required Arguments: \n
-            None \n
-        Optional Arguments: \n
-            None \n
-        Returns: \n
-            None \n
-        """
         self.destroy()
 
     def __repr__(self):
-        """
-        Return a string containing a printable representation of the object
-        """
         string = ("Regrid:\n"
                   "    routehandle = %r\n"
                   "    src_mask_values = %r\n"
@@ -211,7 +186,7 @@ class Regrid(object):
                   "    srcfield = %r\n"
                   "    dstfield = %r\n"
                   %
-                  (self.routehandle,
+                  (self._routehandle,
                    self.src_mask_values,
                    self.dst_mask_values,
                    self.regrid_method,
@@ -237,6 +212,12 @@ class Regrid(object):
 
     @property
     def finalized(self):
+        """
+        :rtype: bool
+        :return: Indicate if the underlying ESMF memory for this object has
+            been deallocated.
+        """
+
         return self._finalized
 
     @property
@@ -245,6 +226,11 @@ class Regrid(object):
 
     @property
     def meta(self):
+        """
+        :rtype: tdk
+        :return: tdk
+        """
+
         return self._meta
 
     @property
@@ -264,6 +250,10 @@ class Regrid(object):
         return self._regrid_pole_npoints
 
     @property
+    def routehandle(self):
+        return self._routehandle
+
+    @property
     def srcfield(self):
         return self._srcfield
 
@@ -276,19 +266,26 @@ class Regrid(object):
         return self._src_mask_values
 
     @property
+    def struct(self):
+        """
+        :rtype: pointer
+        :return: A pointer to the underlying ESMF allocation for this
+            :class:`~ESMF.api.regrid.Regrid`.
+        """
+
+        return self.routehandle
+
+    @property
     def unmapped_action(self):
         return self._unmapped_action
 
     def copy(self):
         """
-        Copy a Regrid object in an ESMF-safe manner. \n
-        Required Arguments: \n
-            None \n
-        Optional Arguments: \n
-            None \n
-        Returns: \n
-            A new Regrid copy. \n
+        Copy a :class:`~ESMF.api.regrid.Regrid` in an ESMF-safe manner.
+
+        :return: A :class:`~ESMF.api.regrid.Regrid` shallow copy.
         """
+
         # shallow copy
         ret = copy(self)
         # don't call ESMF destructor twice on the same shallow Python object
@@ -298,14 +295,9 @@ class Regrid(object):
 
     def destroy(self):
         """
-        Release the memory associated with a Regrid operation. \n
-        Required Arguments: \n
-            None \n
-        Optional Arguments: \n
-            None \n
-        Returns: \n
-            None \n
+        Release the memory associated with a :class:`~ESMF.api.regrid.Regrid`.
         """
+
         if hasattr(self, '_finalized'):
             if not self._finalized:
                 ESMP_FieldRegridRelease(self.routehandle)

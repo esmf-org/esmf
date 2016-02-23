@@ -3,4 +3,4 @@ Regrid
 ~~~~~~
 
 .. autoclass:: ESMF.api.regrid.Regrid
-    :members:
+    :members: copy, destroy, __call__

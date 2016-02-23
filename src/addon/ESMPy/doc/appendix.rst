@@ -23,12 +23,13 @@ Named Constants
 .. toctree::
 
     CoordSys
-    DecompFlag
     FileFormat
     GridItem
+    LineType
     LogKind
     MeshElemType
     MeshLoc
+    NormType
     PoleMethod
     Region
     RegridMethod

@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2015, University Corporation for Atmospheric Research,
+// Copyright 2002-2016, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -9,7 +9,7 @@
 // Licensed under the University of Illinois-NCSA License.
 //
 //==============================================================================
-#define ESMF_FILENAME "ESMCI_Util_F.C"
+#define ESMC_FILENAME "ESMCI_Util_F.C"
 //==============================================================================
 
 //-----------------------------------------------------------------------------
@@ -362,11 +362,11 @@ extern "C" {
     return;
   }
 #else
-  int winrt = GetCurrentDirectory (pathname_l, pathname)
-  if (winrt == 0 || winrt > pathname_l)
+  int winrt = GetCurrentDirectory (pathname_l, pathname);
+  if (winrt == 0 || winrt > pathname_l) {
     *rc = ESMF_FAILURE;
     return;
-  else
+  } else
     *rc = ESMF_SUCCESS;
 #endif
   int len = strlen (pathname);

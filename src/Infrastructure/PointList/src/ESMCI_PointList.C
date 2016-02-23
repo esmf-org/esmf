@@ -9,7 +9,7 @@
 // Licensed under the University of Illinois-NCSA License.
 //
 //==============================================================================
-#define ESMF_FILENAME "ESMCI_PointList.C"
+#define ESMC_FILENAME "ESMCI_PointList.C"
 //==============================================================================
 //
 // PointList class implementation (body) file

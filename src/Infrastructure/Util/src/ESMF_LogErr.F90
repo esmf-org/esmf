@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2015, University Corporation for Atmospheric Research,
+! Copyright 2002-2016, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -1531,8 +1531,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      it with the {\tt ESMF\_Log}.  When {\tt logkindflag} is set to
 !      {\tt ESMF\_LOGKIND\_MULTI} the file name is prepended with PET
 !      number identification.  If the incoming log is already open,
-!      no new Log is opened, an error is returned and the existing log
-!      remains open.
+!      an error is returned.
 !
 !      The arguments are:
 !      \begin{description}
@@ -1754,8 +1753,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      it with the default log.  When {\tt logkindflag} is set to
 !      {\tt ESMF\_LOGKIND\_MULTI} the file name is prepended with PET
 !      number identification.  If the incoming default log is already open,
-!      no new Log is opened, an error is returned and the existing log
-!      remains open.
+!      an error is returned.
 !
 !      The arguments are:
 !      \begin{description}

@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2015, University Corporation for Atmospheric Research,
+// Copyright 2002-2016, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -595,7 +595,7 @@ int IO::write(
 
       // Write the Array
       ioHandler->arrayWrite(temp_array_p,
-                            (*it)->getName(), timeslice, &localrc);
+                            (*it)->getName(), (*it)->dimLabels, timeslice, &localrc);
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc))
         return rc;
 
@@ -836,8 +836,35 @@ int IO::addArray(
 // !RETURN VALUE:
 //     int error return code
 // !ARGUMENTS:
-  Array *arr_p,               // (in)    - The array to add
-  const char * const variableName  // (in)    - Name to use for array
+  Array *arr_p  // (in) - The array to add
+  ) {
+// !DESCRIPTION:
+//      Add an array to the list of objects to read or write.
+//      {\tt arr_p} is required
+//
+//EOP
+//-----------------------------------------------------------------------------
+
+  std::string varname;                 // no name
+  std::vector<std::string> dimLabels;  // no labels
+  return IO::addArray(arr_p, varname, dimLabels);
+}
+
+//-------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::IO::addArray()"
+//BOP
+// !IROUTINE:  IO::addArray - Add an array to the list of I/O objects
+//
+// !INTERFACE:
+int IO::addArray(
+//
+// !RETURN VALUE:
+//     int error return code
+// !ARGUMENTS:
+  Array *arr_p,                             // (in) - The array to add
+  const std::string &variableName,          // (in) - Name to use for array
+  const std::vector<std::string> &dimLabels // (in) - Optional dimension labels
   ) {
 // !DESCRIPTION:
 //      Add an array to the list of objects to read or write. The 
@@ -846,6 +873,7 @@ int IO::addArray(
 //      {\tt arr_p} is required
 //      {\tt variableName} is not required (may be NULL), however, this
 //         may cause an error when I/O is attempted.
+//      {\tt dimLabels} optional dimension labels
 //
 //EOP
 //-----------------------------------------------------------------------------
@@ -862,8 +890,7 @@ int IO::addArray(
     return localrc;
   }
 
-  if ((NULL != variableName) &&
-      (strlen(variableName) > ESMF_MAXSTR)) {
+  if (variableName.size() > ESMF_MAXSTR) {
     ESMC_LogDefault.Write("Array name length exceeds ESMF_MAXSTR",
                           ESMC_LOGMSG_WARN, ESMC_CONTEXT);
     return ESMF_RC_LONG_STR;
@@ -871,7 +898,8 @@ int IO::addArray(
 
 // Push Array onto the list
   try {
-    IO_ObjectContainer *newObj = new IO_ObjectContainer((Array *)arr_p, variableName);
+    const char *varname = (variableName.length() != 0)?variableName.c_str():NULL;
+    IO_ObjectContainer *newObj = new IO_ObjectContainer((Array *)arr_p, varname, dimLabels);
 
     if ((IO_ObjectContainer *)NULL == newObj) {
       localrc = ESMC_RC_MEM_ALLOCATE;

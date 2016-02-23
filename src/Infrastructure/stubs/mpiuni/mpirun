@@ -21,8 +21,8 @@ do
 	shift; shift
 	;;
 
-    --version|-v)
-	echo "ESMF mpirun:"
+    --version|-v|-V)
+	echo "ESMF mpiuni:"
 	echo "  revision $Id$"
 	exit 0
 	;;

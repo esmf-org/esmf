@@ -2,5 +2,6 @@
 GridItem
 ~~~~~~~~
 
-.. autoclass:: ESMF.api.constants._GridItem
+.. autoclass:: ESMF.api.constants.GridItem
     :members:
+    :exclude-members: __new__

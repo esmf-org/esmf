@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2015, University Corporation for Atmospheric Research,
+! Copyright 2002-2016, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -282,8 +282,8 @@ end interface
 ! !ARGUMENTS:
       type (ESMF_StaggerLoc), intent(in)  :: staggerloc
       integer,                intent(in)  :: dim
-      integer,                intent(out) :: loc
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+      integer, optional,      intent(out) :: loc
       integer, optional                   :: rc 
 
 ! !DESCRIPTION:
@@ -300,7 +300,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !          Stagger location for which to get information. 
 !     \item[dim]
 !          Dimension for which to get information (1-7).
-!     \item[loc]
+!     \item[{[loc]}]
 !          Output position data (should be either 0,1).
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -313,8 +313,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
      ! Get stagger location value
-     tmp=(staggerloc%staggerloc)/(2**(dim-1))
-     loc=mod(tmp,2)
+     if (present(loc)) then
+        tmp=(staggerloc%staggerloc)/(2**(dim-1))
+        loc=mod(tmp,2)
+     endif
 
      ! Set return values.
      if (present(rc)) rc = ESMF_SUCCESS

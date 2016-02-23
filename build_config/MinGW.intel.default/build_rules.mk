@@ -189,7 +189,6 @@ ESMF_ARDEFAULT              = lib
 ESMF_ARCREATEFLAGSDEFAULT   =
 ESMF_ARCREATEPREFIX         = -OUT:
 ESMF_AREXTRACTDEFAULT       = $(ESMF_ARDEFAULT) -extract:
-ESMF_RANLIBDEFAULT          = true
 
 ############################################################
 # Blank out variables to prevent rpath encoding

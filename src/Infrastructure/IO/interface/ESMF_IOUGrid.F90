@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2015, University Corporation for Atmospheric Research,
+! Copyright 2002-2016, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -794,7 +794,7 @@ subroutine ESMF_GetMeshFromUGridFile (filename, meshname, nodeCoords, elmtConn, 
     character(len=*), intent(in)   :: filename
     character(len=*), intent(in)   :: meshname
     real(ESMF_KIND_R8), pointer    :: nodeCoords (:,:)
-    integer(ESMF_KIND_I4), pointer :: elmtConn (:,:)
+    integer(ESMF_KIND_I4), pointer :: elmtConn (:)
     integer(ESMF_KIND_I4), pointer :: elmtNums (:)
     integer,           intent(out) :: startElmt
     real(ESMF_KIND_R8), pointer, optional    :: faceCoords (:,:)
@@ -921,7 +921,7 @@ subroutine ESMF_GetMesh2DFromUGrid (filename, ncid, meshid, nodeCoords, elmtConn
     character(len=*), intent(in)   :: filename
     integer,           intent(in)  :: ncid, meshid				
     real(ESMF_KIND_R8), pointer    :: nodeCoords (:,:)
-    integer(ESMF_KIND_I4), pointer :: elmtConn (:,:)
+    integer(ESMF_KIND_I4), pointer :: elmtConn (:)
     integer(ESMF_KIND_I4), pointer :: elmtNums (:)
     integer,           intent(out) :: startElmt
     real(ESMF_KIND_R8), pointer, optional   :: faceCoords(:,:)
@@ -948,6 +948,7 @@ subroutine ESMF_GetMesh2DFromUGrid (filename, ncid, meshid, nodeCoords, elmtConn
     logical :: convertToDegLocal
     integer, parameter :: nf90_noerror = 0
     real(ESMF_KIND_R8), allocatable:: nodeCoord1D(:), faceCoord1D(:)
+    integer :: totalConnections
 
 #ifdef ESMF_NETCDF
 
@@ -1132,10 +1133,10 @@ subroutine ESMF_GetMesh2DFromUGrid (filename, ncid, meshid, nodeCoords, elmtConn
     remain = mod (elmtCount,PetCnt) 
     startElmt = localCount*PetNo +1
     if (PetNo==PetCnt-1) localCount=localCount+remain
-    allocate(elmtConn(MaxNodePerElmt,localCount) )
+    allocate(elmtConnT(MaxNodePerElmt,localCount) )
     allocate( elmtNums(localCount) )
     ! Get element connectivity... transposed
-    ncStatus = nf90_get_var (ncid, VarId, elmtConn, start=(/1,startElmt/), &
+    ncStatus = nf90_get_var (ncid, VarId, elmtConnT, start=(/1,startElmt/), &
                             count=(/MaxNodePerElmt,localCount/))
     if (CDFCheckError (ncStatus, &
       ESMF_METHOD,  &
@@ -1200,29 +1201,35 @@ subroutine ESMF_GetMesh2DFromUGrid (filename, ncid, meshid, nodeCoords, elmtConn
 
     ! Get the number of nodes for each element
     ! if indexBase is 0, change it to 1 based index
+    totalConnections = 0
     elmtNums(:)=MaxNodePerElmt
     if (indexBase == 0) then
       do i=1,localcount
         do j=1,MaxNodePerElmt
 	  ! change 0-base to 1-base
-          if (elmtConn(j,i) /= localFillValue) then 
-             if (elmtConn(j,i) /= localPolyBreakValue) then 
-                elmtConn(j,i)=elmtConn(j,i)+1
+          if (elmtConnT(j,i) /= localFillValue) then 
+             if (elmtConnT(j,i) /= localPolyBreakValue) then 
+                elmtConnT(j,i)=elmtConnT(j,i)+1
              endif
 	  else
 	     ! find the first FillValue
 	     elmtNums(i) = j-1
+             totalConnections = totalConnections+elmtNums(i)
 	     exit
 	  endif
          enddo	
+         if (elmtNums(j)==MaxNodePerElmt) then
+            totalConnections = totalconnections+elmtNums(i)
+         endif
       enddo
     else
       do i=1,localcount
         j = MaxNodePerElmt
-        do while (elmtConn(j,i) == localFillValue)
+        do while (elmtConnT(j,i) == localFillValue)
  	  j = j - 1
         enddo
         elmtNums(i) = j
+        totalConnections = totalConnections+elmtNums(i)
       enddo
     endif
 
@@ -1231,13 +1238,20 @@ subroutine ESMF_GetMesh2DFromUGrid (filename, ncid, meshid, nodeCoords, elmtConn
     if (localPolyBreakValue /= localFillValue) then
        do i=1,localcount
           do j=1,elmtNums(i)
-             if (elmtConn(j,i)==localPolyBreakValue) then
-                elmtConn(j,i)=ESMF_MESH_POLYBREAK
+             if (elmtConnT(j,i)==localPolyBreakValue) then
+                elmtConnT(j,i)=ESMF_MESH_POLYBREAK
              endif
           enddo
        enddo
     endif
 
+    allocate(elmtConn(totalConnections))
+    j=1
+    do i=1,localcount
+       elmtConn(j:j+elmtNums(i)-1)=elmtConnT(1:elmtNums(i),i)
+       j = j + elmtNums(i)
+    enddo
+    deallocate(elmtConnT)
 
     ! Deallocations
     deallocate( nodeCoordNames, nodeCoord1D )
@@ -1265,7 +1279,7 @@ subroutine ESMF_GetMesh3DFromUGrid (filename, ncid, meshid, nodeCoords, elmtConn
     character(len=*), intent(in)   :: filename
     integer,           intent(in)  :: ncid, meshid				
     real(ESMF_KIND_R8), pointer    :: nodeCoords (:,:)
-    integer(ESMF_KIND_I4), pointer :: elmtConn (:,:)
+    integer(ESMF_KIND_I4), pointer :: elmtConn (:)
     integer(ESMF_KIND_I4), pointer :: elmtNums (:)
     integer,           intent(out) :: startElmt
     real(ESMF_KIND_R8), pointer, optional   :: faceCoords(:,:)
@@ -1293,6 +1307,7 @@ subroutine ESMF_GetMesh3DFromUGrid (filename, ncid, meshid, nodeCoords, elmtConn
     integer, parameter :: nf90_noerror = 0
     real(ESMF_KIND_R8), allocatable:: nodeCoord1D(:), faceCoord1D(:)
     integer            :: localrc
+    integer            :: totalConnections
 
 #ifdef ESMF_NETCDF
 
@@ -1507,10 +1522,10 @@ subroutine ESMF_GetMesh3DFromUGrid (filename, ncid, meshid, nodeCoords, elmtConn
     remain = mod (elmtCount,PetCnt) 
     startElmt = localCount*PetNo +1
     if (PetNo==PetCnt-1) localCount=localCount+remain
-    allocate(elmtConn(MaxNodePerElmt,localCount) )
+    allocate(elmtConnT(MaxNodePerElmt,localCount) )
     allocate( elmtNums(localCount) )
     ! Get element connectivity... transposed
-    ncStatus = nf90_get_var (ncid, VarId, elmtConn, start=(/1,startElmt/), &
+    ncStatus = nf90_get_var (ncid, VarId, elmtConnT, start=(/1,startElmt/), &
                             count=(/MaxNodePerElmt,localCount/))
     if (CDFCheckError (ncStatus, &
       ESMF_METHOD,  &
@@ -1544,29 +1559,32 @@ subroutine ESMF_GetMesh3DFromUGrid (filename, ncid, meshid, nodeCoords, elmtConn
 
     ! Get the number of nodes for each element
     ! if indexBase is 0, change it to 1 based index
+    totalConnections = 0
     elmtNums(:)=MaxNodePerElmt
     if (indexBase == 0) then
       do i=1,localcount
         do j=1,MaxNodePerElmt
 	  ! change 0-base to 1-base
-          if (elmtConn(j,i) /= localFillValue) then 
-             if (elmtConn(j,i) /= localPolyBreakValue) then 
-                elmtConn(j,i)=elmtConn(j,i)+1
+          if (elmtConnT(j,i) /= localFillValue) then 
+             if (elmtConnT(j,i) /= localPolyBreakValue) then 
+                elmtConnT(j,i)=elmtConnT(j,i)+1
              endif
 	  else
 	     ! find the first FillValue
-	     elmtNums(i) = j-1
-	     exit
+	     elmtNums(i) = j-1	
+             totalConnections = totalConnections+elmtNums(i)
+             exit
 	  endif
          enddo	
       enddo
     else
       do i=1,localcount
         j = MaxNodePerElmt
-        do while (elmtConn(j,i) == localFillValue)
+        do while (elmtConnT(j,i) == localFillValue)
 	  j = j - 1
         enddo
         elmtNums(i) = j
+        totalConnections = totalConnections+elmtNums(i)
       enddo
     endif
 
@@ -1575,12 +1593,24 @@ subroutine ESMF_GetMesh3DFromUGrid (filename, ncid, meshid, nodeCoords, elmtConn
     if (localPolyBreakValue /= localFillValue) then
        do i=1,localcount
           do j=1,elmtNums(i)
-             if (elmtConn(j,i)==localPolyBreakValue) then
-                elmtConn(j,i)=ESMF_MESH_POLYBREAK
+             if (elmtConnT(j,i)==localPolyBreakValue) then
+                elmtConnT(j,i)=ESMF_MESH_POLYBREAK
              endif
           enddo
        enddo
     endif
+
+    allocate(elmtConn(totalConnections))
+    j=1
+    do i=1,localcount
+       elmtConn(j:j+elmtNums(i)-1)=elmtConnT(1:elmtNums(i),i)
+       j = j + elmtNums(i)
+    enddo
+
+    if (totalConnections /= j-1) then
+      print *, PetNo, 'totalconnection does match ', totalConnections, j-1
+    endif
+    deallocate(elmtConnT)
 
     ! Deallocations
     deallocate( nodeCoordNames, nodeCoord1D )
@@ -1608,7 +1638,7 @@ subroutine ESMF_GetElemFromUGridFile (filename, meshname, elmtConn, &
 
     character(len=*), intent(in)   :: filename
     character(len=*), intent(in)   :: meshname
-    integer(ESMF_KIND_I4), pointer :: elmtConn (:,:)
+    integer(ESMF_KIND_I4), pointer :: elmtConn (:)
     integer(ESMF_KIND_I4), pointer :: elmtNums (:)
     integer,           intent(out) :: startElmt
     integer, intent(out), optional :: rc
@@ -1631,6 +1661,7 @@ subroutine ESMF_GetElemFromUGridFile (filename, meshname, elmtConn, &
     character(len=256) :: errmsg
     character(len=24) :: attbuf
     logical :: convertToDegLocal
+    integer :: totalConnections
     integer, parameter :: nf90_noerror = 0
     
 #ifdef ESMF_NETCDF
@@ -1742,11 +1773,11 @@ subroutine ESMF_GetElemFromUGridFile (filename, meshname, elmtConn, &
     startElmt = localCount*PetNo +1
     if (PetNo==PetCnt-1) localCount=localCount+remain
     print *, PetNo, 'Before allocating elmtConn', localCount
-    allocate(elmtConn(MaxNodePerElmt,localCount) )
+    allocate(elmtConnT(MaxNodePerElmt,localCount) )
     allocate( elmtNums(localCount) )
     ! Get element connectivity... transposed
-    print *, PetNo, 'Before nf90_get_var()', startElmt,localCount
-    ncStatus = nf90_get_var (ncid, VarId, elmtConn, start=(/1,startElmt/), &
+    ! print *, PetNo, 'Before nf90_get_var()', startElmt,localCount
+    ncStatus = nf90_get_var (ncid, VarId, elmtConnT, start=(/1,startElmt/), &
                             count=(/MaxNodePerElmt,localCount/))
     if (CDFCheckError (ncStatus, &
       ESMF_METHOD,  &
@@ -1755,30 +1786,46 @@ subroutine ESMF_GetElemFromUGridFile (filename, meshname, elmtConn, &
 
     ! Get the number of nodes for each element
     ! if indexBase is 0, change it to 1 based index
+    totalConnections = 0
     elmtNums(:)=MaxNodePerElmt
     if (indexBase == 0) then
       do i=1,localcount
         do j=1,MaxNodePerElmt
 	  ! change 0-base to 1-base
-          if (elmtConn(j,i) /= localFillValue) then 
-	     elmtConn(j,i)=elmtConn(j,i)+1
+          if (elmtConnT(j,i) /= localFillValue) then 
+	     elmtConnT(j,i)=elmtConnT(j,i)+1
 	  else
 	     ! find the first FillValue
 	     elmtNums(i) = j-1
+             totalConnections = totalConnections+elmtNums(i)
 	     exit
 	  endif
          enddo	
+         if (elmtNums(i)==MaxNodePerElmt) then
+             totalConnections = totalConnections+elmtNums(i)
+         endif
       enddo
     else
       do i=1,localcount
         j = MaxNodePerElmt
-        do while (elmtConn(j,i) == localFillValue)
+        do while (elmtConnT(j,i) == localFillValue)
 	  j = j - 1
         enddo
         elmtNums(i) = j
+        totalConnections = totalConnections+elmtNums(i)
       enddo
     endif
 
+    allocate(elmtConn(totalConnections))
+    j=1
+    do i=1,localcount
+       elmtConn(j:j+elmtNums(i)-1)=elmtConnT(1:elmtNums(i),i)
+       j = j + elmtNums(i)
+    enddo
+    if (totalConnections /= j-1) then
+      print *, PetNo, 'totalconnection does match ', totalConnections, j-1
+    endif
+    deallocate(elmtConnT)
     ncStatus = nf90_close (ncid=ncid)
     if (CDFCheckError (ncStatus, &
       ESMF_METHOD,  &

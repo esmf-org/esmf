@@ -19,17 +19,90 @@ from ESMF.util.slicing import get_formatted_slice, get_none_or_slice, get_none_o
 
 class Grid(object):
     """
-    The Grid class is a Python wrapper object for the ESMF Grid.
-    The individual values of all coordinate and mask arrays are referenced to those of the
+    The Grid class is a Python wrapper object for the ESMF Grid.  The individual 
+    values of all coordinate and mask arrays are referenced to those of the
     underlying Fortran ESMF object.
 
-    The Grid class is used to describe the geometry and discretization of logically rectangular physical grids.
-    It also contains the description of the grid's underlying topology and the decomposition of the physical grid
-    across the available computational resources. The most frequent use of the Grid class is to describe physical
-    grids in user code so that sufficient information is available to perform regridding operations.
+    The :class:`~ESMF.api.grid.Grid` class is used to describe the geometry and
+    discretization of logically rectangular physical grids.  It also contains
+    the description of the underlying topology and decomposition of the physical
+    grid across the available computational resources. The most frequent use of
+    the :class:`~ESMF.api.grid.Grid` class is to describe physical grids in user
+    code so that sufficient information is available to perform regridding
+    operations.
 
-    For more information about the ESMF Grid class, please see the `ESMF Grid documentation
+    For more information about the ESMF Grid class, please see the 
+    `ESMF Grid documentation
     <http://www.earthsystemmodeling.org/esmf_releases/public/last/ESMF_refdoc/node5.html#SECTION05080000000000000000>`_.
+ 
+    A :class:`~ESMF.api.grid.Grid` can be created in two different ways, as a
+    Grid in memory, or from SCRIP formatted or CF compliant GRIDSPEC file. The
+    arguments for each type of :class:`~ESMF.api.grid.Grid` creation are
+    outlined below.
+
+    **Created in-memory:**
+
+    *REQUIRED:*
+
+    :param list max_index: An integer list of length 2 or 3, with the
+        number of grid cells in each dimension.
+
+    *OPTIONAL:*
+
+    :param int num_peri_dims: The number of periodic dimensions, either ``0``
+        or ``1``. If ``None``, defaults to ``0``.
+    :param int periodic_dim: The periodic dimension: ``0``, ``1`` or ``2``.
+        If ``None``, defaults to ``0``.
+    :param int pole_dim: The pole dimension ``0`` or ``1``.
+        If ``None``, defaults to ``1``.
+    :param CoordSys coord_sys: Coordinate system for the
+        :class:`~ESMF.api.grid.Grid`.
+        If ``None``, defaults to :attr:`~ESMF.api.constants.CoordSys.SPH_DEG`.
+    :param TypeKind coord_typekind: Type of the :class:`~ESMF.api.grid.Grid`
+        coordinates.
+        If ``None``, defaults to :attr:`~ESMF.api.constants.TypeKind.R8`.
+
+    **Created either from file or in-memory:**
+
+    :param StaggerLoc staggerloc: The stagger location of the coordinate values.
+        If ``None``, defaults to :attr:`~ESMF.api.constants.StaggerLoc.CENTER`
+        in 2D and :attr:`~ESMF.api.constants.StaggerLoc.CENTER_VCENTER` in 3D.
+
+    **Created from file:**
+
+    *REQUIRED:*
+
+    :param str filename: The name of the NetCDF grid file.
+    :param FileFormat filetype: The grid :attr:`~ESMF.api.constants.FileFormat`.
+
+    *OPTIONAL:*
+
+    :param bool is_sphere: Set to ``True`` for a spherical grid, or ``False``
+        for regional. Defaults to ``True``.
+    :param bool add_corner_stagger: Set to ``True`` to use the information in
+        the grid file to add the corner stagger to the grid. The coordinates for
+        the corner stagger are required for conservative regridding. If
+        not specified, defaults to ``False``.
+    :param bool add_user_area: Set to ``True`` to read in the cell area from the
+        grid file; otherwise, ESMF will calculate it. Defaults to ``False``.
+    :param bool add_mask: Set to ``True`` to generate the mask using the
+        ``missing_value`` attribute defined in ``varname``.  This argument is
+        only supported with filetype
+        :attr:`~ESMF.api.constants.FileFormat.GRIDSPEC`.
+        Defaults to ``False``.
+    :param str varname: If add_mask is ``True``, provide a variable name stored
+        in the grid file and the mask will be generated using the missing value
+        of the data value of this variable.  The first two dimensions of the
+        variable has to be the longitude and the latitude dimension and the
+        mask is derived from the first 2D values of this variable even if this
+        data is a 3D, or 4D array. This argument is only supported with
+        filetype :attr:`~ESMF.api.constants.FileFormat.GRIDSPEC`.
+        Defaults to ``None``.
+    :param list coord_names:  A two-element array containing the longitude and
+        latitude variable names in a GRIDSPEC file if there are multiple
+        coordinates defined in the file. This argument is only supported with
+        filetype :attr:`~ESMF.api.constants.FileFormat.GRIDSPEC`.
+        Defaults to ``None``.
     """
 
     @initialize
@@ -50,100 +123,7 @@ class Grid(object):
                  add_mask=None,
                  varname=None,
                  coord_names=None):
-        """
-        Create a logically rectangular Grid object and optionally 
-        allocate space for coordinates at a specified stagger location. 
-        A grid can be created in memory or from file, there are different
-        arguments required for each method, outlined below. \n
-        The following arguments apply to a Grid created in memory: \n
-            Required arguments: \n
-                max_index: a numpy array which specifies the maximum
-                           index of each dimension of the Grid. \n
-                    type: np.array \n
-                    shape: [number of dimensions, 1] \n
-            Optional arguments: \n
-                num_peri_dims: the number of periodic dimensions (0 or 1). \n
-                periodic_dim: the periodic dimension (defaults to 1). \n
-                pole_dim: the pole dimension (defaults to 2). \n
-                coord_sys: the coordinates system for the Grid. \n
-                    Argument values are:\n
-                        CoordSys.CART\n
-                        (default) CoordSys.SPH_DEG\n
-                        CoordSys.SPH_RAD\n
-                coord_typekind: the type of the Grid coordinates. \n
-                    Argument values are: \n
-                        TypeKind.I4\n
-                        TypeKind.I8\n
-                        TypeKind.R4\n
-                        (default) TypeKind.R8\n
-        The following arguments apply to a Grid created either from file
-        or in memory. \n
-            Optional arguments: \n
-                staggerloc: the stagger location of the coordinate data. \n
-                    Argument values are: \n
-                        2D: \n
-                        (default) StaggerLoc.CENTER\n
-                        StaggerLoc.EDGE1\n
-                        StaggerLoc.EDGE2\n
-                        StaggerLoc.CORNER\n
-                        3D: \n
-                        (default) StaggerLoc.CENTER_VCENTER\n
-                        StaggerLoc.EDGE1_VCENTER\n
-                        StaggerLoc.EDGE2_VCENTER\n
-                        StaggerLoc.CORNER_VCENTER\n
-                        StaggerLoc.CENTER_VFACE\n
-                        StaggerLoc.EDGE1_VFACE\n
-                        StaggerLoc.EDGE2_VFACE\n
-                        StaggerLoc.CORNER_VFACE\n
-        The following argument applies only to a Grid created from file: \n
-            Required arguments: \n
-                filename: the name of NetCDF file containing the Grid. \n
-                filetype: the input file type of the Grid. \n
-                    Argument values are: \n
-                        FileFormat.SCRIP \n
-                        FileFormat.GRIDSPEC \n
-            Optional arguments: \n
-                reg_decomp: A 2 element integer list specifying how the grid
-                            is decomposed.  Each entry is the number of decounts
-                            for that dimension.  The total decounts cannot
-                            exceed the total number of PETs.  In other words,
-                            at most one DE is allowed per processor. \n
-                decompflag: List of decomposition flags indicating how each
-                            dimension of the tile is to be divided between the
-                            DEs. The default setting is BALANCED in all
-                            dimensions. \n
-                is_sphere: Set to True for a spherical grid, or False for
-                           regional. Defaults to True. \n
-                add_corner_stagger: Set to True to use the information in the
-                                    grid file to add the corner stagger to the
-                                    Grid. The coordinates for the corner stagger
-                                    are required for conservative regridding. If 
-                                    not specified, defaults to False. \n
-                add_user_area: Set to True to read in the cell area from the Grid 
-                               file; otherwise, ESMF will calculate it. 
-                               Defaults to False. \n
-                add_mask: Set to True to generate the mask using the missing_value 
-                          attribute defined in 'varname'.  This 
-                          argument is only supported with filetype 
-                          FileFormat.GRIDSPEC.  Defaults to False. \n
-                varname: If add_mask is True, provide a variable name stored in 
-                         the grid file and the mask will be generated using the 
-                         missing value of the data value of this variable.  The 
-                         first two dimensions of the variable has to be the 
-                         longitude and the latitude dimension and the mask is 
-                         derived from the first 2D values of this variable even 
-                         if this data is a 3D, or 4D array.  This 
-                         argument is only supported with filetype 
-                         FileFormat.GRIDSPEC.  Defaults to None. \n
-                coord_names:  A two-element array containing the longitude and 
-                             latitude variable names in a GRIDSPEC file if there 
-                             are multiple coordinates defined in the file. This 
-                             argument is only supported with filetype 
-                             FileFormat.GRIDSPEC.  Defaults to None. \n
-        Returns: \n
-            Grid \n
-        """
-
+ 
         # initialize the from_file flag to False
         from_file = False
         
@@ -354,15 +334,6 @@ class Grid(object):
         self._finalized = False
 
     def __del__(self):
-        """
-        Release the memory associated with a Grid. \n
-        Required Arguments: \n
-            None \n
-        Optional Arguments: \n
-            None \n
-        Returns: \n
-            None \n
-        """
         self.destroy()
 
     def __getitem__(self, slc):
@@ -389,23 +360,20 @@ class Grid(object):
         return ret
 
     def __repr__(self):
-        """
-        Return a string containing a printable representation of the object
-        """
         string = ("Grid:\n"
-                  "    type = %r \n"
-                  "    areatype = %r \n"
-                  "    rank = %r \n"
-                  "    num_peri_dims = %r \n"
-                  "    periodic_dim = %r \n"
-                  "    pole_dim = %r \n"
-                  "    coord_sys = %r \n"
-                  "    staggerloc = %r \n"
-                  "    lower bounds = %r \n"
-                  "    upper bounds = %r \n"
-                  "    coords = %r \n"
-                  "    mask = %r \n"
-                  "    area = %r \n"
+                  "    type = %r"
+                  "    areatype = %r"
+                  "    rank = %r"
+                  "    num_peri_dims = %r"
+                  "    periodic_dim = %r"
+                  "    pole_dim = %r"
+                  "    coord_sys = %r"
+                  "    staggerloc = %r"
+                  "    lower bounds = %r"
+                  "    upper bounds = %r"
+                  "    coords = %r"
+                  "    mask = %r"
+                  "    area = %r"
                   %
                   (self.type,
                    self.areatype,
@@ -426,156 +394,233 @@ class Grid(object):
     @property
     def area(self):
         """
-        :return: the Grid area represented as a numpy array of floats of size given by upper_bounds - lower_bounds
+        :rtype: A list of numpy arrays with an entry for every stagger location
+            of the :class:`~ESMF.api.grid.Grid`.
+        :return: The :class:`~ESMF.api.grid.Grid` cell areas represented as
+            numpy arrays of floats of size given by
+            ``upper_bounds - lower_bounds``.
         """
+
         return self._area
 
     @property
     def areatype(self):
         """
-        :return: the ESMF typekind of the Grid area
+        :rtype: :attr:`~ESMF.api.constants.TypeKind`
+        :return: The ESMF typekind of the :class:`~ESMF.api.grid.Grid` cell
+            areas.
         """
+
         return self._areatype
 
     @property
     def coords(self):
         """
-        :return: Grid coordinates represented as a 2D list of numpy arrays, indexing with the first dimension
-        representing the stagger location and the second representing the coordinate dimension will return a numpy
-        array of size given by upper_bounds - lower_bounds
+        :rtype: 2D list of numpy arrays of size given by
+            ``upper_bounds - lower_bounds``, where the first index represents
+            the stagger locations of the :class:`~ESMF.api.grid.Grid` and the
+            second index represent the coordinate dimensions of the
+            :class:`~ESMF.api.grid.Grid`.
+        :return: The coordinates of the :class:`~ESMF.api.grid.Grid`.
         """
+
         return self._coords
 
     @property
     def coord_sys(self):
         """
-        :return: the type of the coordinate system for this Grid
+        :rtype: :attr:`~ESMF.api.constants.CoordSys`
+        :return: The coordinate system of the :class:`~ESMF.api.grid.Grid`.
         """
+
         return self._coord_sys
 
     @property
     def finalized(self):
+        """
+        :rtype: bool
+        :return: Indicate if the underlying ESMF memory for this object has
+            been deallocated.
+        """
+
         return self._finalized
 
     @property
     def has_corners(self):
         """
-        :return: a boolean value to tell whether or not a Grid has corners allocated
+        :rtype: bool
+        :return: A boolean value to tell if the :class:`~ESMF.api.grid.Grid`
+            has corners allocated.
         """
+
         return self._has_corners
 
     @property
     def lower_bounds(self):
         """
-        :return: the lower bounds, a numpy array with an entry for every dimension of the Grid
+        :rtype: A list of numpy arrays with an entry for every stagger location
+            of the :class:`~ESMF.api.grid.Grid`.
+        :return: The lower bounds of the :class:`~ESMF.api.grid.Grid`
+            represented as numpy arrays of ints of size given by
+            ``upper_bounds - lower_bounds``.
         """
+
         return self._lower_bounds
 
     @property
     def mask(self):
         """
-        :return: the Grid mask represented as a numpy array of integers of size given by upper_bounds - lower_bounds
+        :rtype: A list of numpy arrays with an entry for every stagger location
+            of the :class:`~ESMF.api.grid.Grid`.
+        :return: The mask of the :class:`~ESMF.api.grid.Grid` represented as
+            numpy arrays of ints of size given by `
+            `upper_bounds - lower_bounds``.
         """
+
         return self._mask
 
     @property
     def max_index(self):
+        """
+        :rtype: A numpy array with as many values as the
+            :class:`~ESMF.api.grid.Grid` rank.
+        :return: The number of :class:`~ESMF.api.grid.Grid` cells in each
+            dimension of the grid.
+        """
+
         return self._max_index
 
     @property
     def meta(self):
+        """
+        :rtype: tdk
+        :return: tdk
+        """
+
         return self._meta
 
     @property
     def ndims(self):
+        """
+        :rtype: int
+        :return: The rank of the coordinate arrays of the
+            :class:`~ESMF.api.grid.Grid`.
+        """
+
         return self._ndims
 
     @property
     def num_peri_dims(self):
         """
-        :return: the total number of periodic dimensions in the Grid
+        :rtype: int
+        :return: The total number of periodic dimensions in the
+            :class:`~ESMF.api.grid.Grid`.
         """
+
         return self._num_peri_dims
 
     @property
     def periodic_dim(self):
         """
-        :return: the periodic dimension of the Grid (e.g. 0 for x or longitude, 1 for y or latitude, etc.)
+        :rtype: int
+        :return: The periodic dimension of the :class:`~ESMF.api.grid.Grid`
+            (e.g. ``0`` for ``x`` or ``longitude``, ``1`` for ``y`` or
+            ``latitude``, etc.).
         """
+
         return self._periodic_dim
 
     @property
     def pole_dim(self):
         """
-        :return: the pole dimension of the Grid (e.g. 0 for x or longitude, 1 for y or latitude, etc.)
+        :rtype: int
+        :return: The pole dimension of the :class:`~ESMF.api.grid.Grid`
+            (e.g. ``0`` for ``x`` or ``longitude``, ``1`` for ``y`` or
+            ``latitude``, etc.).
         """
+
         return self._pole_dim
 
     @property
     def rank(self):
         """
-        :return: the rank of the Grid
+        :rtype: int
+        :return: The rank of the :class:`~ESMF.api.grid.Grid`.
         """
+
         return self._rank
 
     @property
     def size(self):
+        """
+        :rtype: A list of numpy arrays with an entry for every stagger location
+            of the :class:`~ESMF.api.grid.Grid`.
+        :return: The size of the :class:`~ESMF.api.grid.Grid` represented as
+            numpy arrays of ints of size given by
+            ``upper_bounds - lower_bounds``.
+        """
+
         return self._size
 
     @property
     def staggerloc(self):
         """
-        :return: a boolean list of the stagger locations that have been allocated for this Grid
+        :rtype: list of bools
+        :return: The stagger locations that have been allocated for the
+            :class:`~ESMF.api.grid.Grid`.
         """
+
         return self._staggerloc
 
     @property
     def struct(self):
+        """
+        :rtype: pointer
+        :return: A pointer to the underlying ESMF allocation for the
+            :class:`~ESMF.api.grid.Grid`.
+        """
+
         return self._struct
 
     @property
     def type(self):
         """
-        :return: the ESMF typekind of the Grid coordinates
+        :rtype: :attr:`~ESMF.api.constants.TypeKind`
+        :return: The ESMF typekind of the :class:`~ESMF.api.grid.Grid`
+            coordinates.
         """
         return self._type
 
     @property
     def upper_bounds(self):
         """
-        :return: the upper bounds, a numpy array with an entry for every dimension of the Grid
+        :rtype: A list of numpy arrays with an entry for every stagger location
+            of the :class:`~ESMF.api.grid.Grid`.
+        :return: The upper bounds of the :class:`~ESMF.api.grid.Grid`
+            represented as numpy arrays of ints of size given by
+            ``upper_bounds - lower_bounds``.
         """
         return self._upper_bounds
 
     def add_coords(self, staggerloc=None, coord_dim=None, from_file=False):
         """
-        Add coordinates to a Grid at the specified
-        stagger location. \n
-        Required Arguments: \n
-            None \n
-        Optional Arguments: \n
-            staggerloc: the stagger location of the coordinate data. \n
-                Argument values are: \n
-                    2D: \n
-                    (default) StaggerLoc.CENTER\n
-                    StaggerLoc.EDGE1\n
-                    StaggerLoc.EDGE2\n
-                    StaggerLoc.CORNER\n
-                    3D: \n
-                    (default) StaggerLoc.CENTER_VCENTER\n
-                    StaggerLoc.EDGE1_VCENTER\n
-                    StaggerLoc.EDGE2_VCENTER\n
-                    StaggerLoc.CORNER_VCENTER\n
-                    StaggerLoc.CENTER_VFACE\n
-                    StaggerLoc.EDGE1_VFACE\n
-                    StaggerLoc.EDGE2_VFACE\n
-            coord_dim: the dimension number of the coordinates to 
-                       return (coordinates will not be returned if
-                       coord_dim is not specified and staggerlocs is
-                       a list with more than one element). \n
-            from_file: boolean for internal use to determine whether Grid has already been created from file. \n
-        Returns: \n
-            A numpy array of coordinate values if staggerloc and coord_dim are specified, otherwise return None. \n
+        Add coordinates to the :class:`~ESMF.api.grid.Grid` at the specified
+        stagger location.
+
+        :param StaggerLoc staggerloc: The stagger location of the coordinate
+            values. If ``None``, defaults to
+            :attr:`~ESMF.api.constants.StaggerLoc.CENTER`
+            in 2D and :attr:`~ESMF.api.constants.StaggerLoc.CENTER_VCENTER` in
+            3D.
+        :param int coord_dim: The dimension number of the coordinates to return
+            e.g. ``[x, y, z] = (0, 1, 2)``, or ``[lat, lon] = (0, 1)``
+            (coordinates will not be returned if coord_dim is not specified and
+            staggerlocs is a list with more than one element).
+        :param bool from_file: Boolean for internal use to determine whether the
+            :class:`~ESMF.api.grid.Grid` has already been created from file.
+
+        :return: A numpy array of coordinate values if staggerloc and
+            coord_dim are specified, otherwise return None.
         """
         if staggerloc is None:
             staggerloc = [StaggerLoc.CENTER]
@@ -604,32 +649,26 @@ class Grid(object):
 
     def add_item(self, item, staggerloc=None, from_file=False):
         """
-        Allocate space for a Grid item (mask or areas)
-        at a specified stagger location. \n
-        Required Arguments: \n
-            item: the Grid item to allocate. \n
-                Argument values are: \n
-                    GridItem.AREA\n
-                    GridItem.MASK\n
-        Optional Arguments: \n
-            staggerloc: the stagger location of the coordinate data. \n
-                Argument values are: \n
-                    2D: \n
-                    (default) StaggerLoc.CENTER\n
-                    StaggerLoc.EDGE1\n
-                    StaggerLoc.EDGE2\n
-                    StaggerLoc.CORNER\n
-                    3D: \n
-                    (default) StaggerLoc.CENTER_VCENTER\n
-                    StaggerLoc.EDGE1_VCENTER\n
-                    StaggerLoc.EDGE2_VCENTER\n
-                    StaggerLoc.CORNER_VCENTER\n
-                    StaggerLoc.CENTER_VFACE\n
-                    StaggerLoc.EDGE1_VFACE\n
-                    StaggerLoc.EDGE2_VFACE\n
-            from_file: boolean for internal use to determine whether Grid has already been created from file. \n
-        Returns: \n
-            A numpy array of the mask or area values if a single staggerloc is given, otherwise return None. \n
+        Allocate space for a :class:`~ESMF.api.grid.Grid` item (mask or areas)
+        at a specified stagger location.
+
+        *REQUIRED:*
+
+        :param GridItem item: The :attr:`~ESMF.api.constants.GridItem` to
+            allocate.
+
+        *OPTIONAL:*
+
+        :param StaggerLoc staggerloc: The stagger location of the item
+            values. If ``None``, defaults to
+            :attr:`~ESMF.api.constants.StaggerLoc.CENTER`
+            in 2D and :attr:`~ESMF.api.constants.StaggerLoc.CENTER_VCENTER` in
+            3D.
+        :param bool from_file: Boolean for internal use to determine whether the
+            :class:`~ESMF.api.grid.Grid` has already been created from file.
+
+        :return: A numpy array of the mask or area values if a single
+            staggerloc is given, otherwise return None.
         """
         if staggerloc is None:
             staggerloc = [StaggerLoc.CENTER]
@@ -671,13 +710,9 @@ class Grid(object):
 
     def copy(self):
         """
-        Copy a Grid in an ESMF-safe manner. \n
-        Required Arguments: \n
-            None \n
-        Optional Arguments: \n
-            None \n
-        Returns: \n
-            A new Grid copy. \n
+        Copy a :class:`~ESMF.api.grid.Grid` in an ESMF-safe manner.
+
+        :return: A :class:`~ESMF.api.grid.Grid` shallow copy.
         """
         # shallow copy
         ret = copy(self)
@@ -688,13 +723,7 @@ class Grid(object):
 
     def destroy(self):
         """
-        Release the memory associated with a Grid. \n
-        Required Arguments: \n
-            None \n
-        Optional Arguments: \n
-            None \n
-        Returns: \n
-            None \n
+        Release the memory associated with a :class:`~ESMF.api.grid.Grid`.
         """
         if hasattr(self, '_finalized'):
             if not self._finalized:
@@ -705,28 +734,24 @@ class Grid(object):
         """
         Return a numpy array of coordinates at a specified stagger 
         location. The returned array is NOT a copy, it is
-        directly aliased to the underlying memory allocated by ESMF.\n
-        Required Arguments: \n
-            coord_dim: the dimension number of the coordinates to return:
-                       e.g. [x, y, z] = (0, 1, 2), or [lat, lon] = (0, 1) \n
-        Optional Arguments: \n
-            staggerloc: the stagger location of the coordinate data. \n
-                Argument values are: \n
-                    2D: \n
-                    (default) StaggerLoc.CENTER\n
-                    StaggerLoc.EDGE1\n
-                    StaggerLoc.EDGE2\n
-                    StaggerLoc.CORNER\n
-                    3D: \n
-                    (default) StaggerLoc.CENTER_VCENTER\n
-                    StaggerLoc.EDGE1_VCENTER\n
-                    StaggerLoc.EDGE2_VCENTER\n
-                    StaggerLoc.CORNER_VCENTER\n
-                    StaggerLoc.CENTER_VFACE\n
-                    StaggerLoc.EDGE1_VFACE\n
-                    StaggerLoc.EDGE2_VFACE\n
-        Returns: \n
-            A numpy array of coordinate values at the specified staggerloc. \n
+        directly aliased to the underlying memory allocated by ESMF.
+
+        *REQUIRED:*
+
+        :param int coord_dim: The dimension number of the coordinates to return
+            e.g. ``[x, y, z] = (0, 1, 2)``, or ``[lat, lon] = (0, 1)``
+            (coordinates will not be returned if ``coord_dim`` is not specified
+            and ``staggerlocs`` is a list with more than one element).
+
+        *OPTIONAL:*
+
+        :param StaggerLoc staggerloc: The stagger location of the coordinate
+            values. If ``None``, defaults to
+            :attr:`~ESMF.api.constants.StaggerLoc.CENTER`
+            in 2D and :attr:`~ESMF.api.constants.StaggerLoc.CENTER_VCENTER` in
+            3D.
+
+        :return: A numpy array of coordinate values at the specified staggerloc.
         """
 
         ret = None
@@ -745,32 +770,23 @@ class Grid(object):
 
     def get_item(self, item, staggerloc=None):
         """
-        Return a numpy array for a Grid item at a specified stagger 
+        Return a numpy array of item values at a specified stagger
         location.  The returned array is NOT a copy, it is
-        directly aliased to the underlying memory allocated by ESMF.\n
-        Required Arguments: \n
-            item: the Grid item to allocate. \n
-                Argument values are: \n
-                    GridItem.AREA\n
-                    GridItem.MASK\n
-        Optional Arguments: \n
-            staggerloc: the stagger location of the coordinate data. \n
-                Argument values are: \n
-                    2D: \n
-                    (default) StaggerLoc.CENTER\n
-                    StaggerLoc.EDGE1\n
-                    StaggerLoc.EDGE2\n
-                    StaggerLoc.CORNER\n
-                    3D: \n
-                    (default) StaggerLoc.CENTER_VCENTER\n
-                    StaggerLoc.EDGE1_VCENTER\n
-                    StaggerLoc.EDGE2_VCENTER\n
-                    StaggerLoc.CORNER_VCENTER\n
-                    StaggerLoc.CENTER_VFACE\n
-                    StaggerLoc.EDGE1_VFACE\n
-                    StaggerLoc.EDGE2_VFACE\n
-        Returns: \n
-            A numpy array of mask or area values at the specified staggerloc. \n
+        directly aliased to the underlying memory allocated by ESMF.
+
+        *REQUIRED:*
+
+        :param GridItem item: The :attr:`~ESMF.api.constants.GridItem` to
+            return.
+
+        *OPTIONAL:*
+
+        :param StaggerLoc staggerloc: The stagger location of the item
+            values. If ``None``, defaults to
+            :attr:`~ESMF.api.constants.StaggerLoc.CENTER` in 2D and
+            :attr:`~ESMF.api.constants.StaggerLoc.CENTER_VCENTER` in 3D.
+
+        :return: A numpy array of mask or area values at the specified staggerloc.
         """
 
         ret = None
@@ -956,27 +972,18 @@ class Grid(object):
     def _write_(self, filename, staggerloc=None):
         """
         Write a Grid to vtk formatted file at a specified stagger 
-        location. \n
-        Required Arguments: \n
-            filename: the name of the file, .vtk will be appended. \n
-        Optional Arguments: \n
-            staggerloc: the stagger location of the coordinate data. \n
-                Argument values are: \n
-                    2D: \n
-                    (default) StaggerLoc.CENTER\n
-                    StaggerLoc.EDGE1\n
-                    StaggerLoc.EDGE2\n
-                    StaggerLoc.CORNER\n
-                    3D: \n
-                    (default) StaggerLoc.CENTER_VCENTER\n
-                    StaggerLoc.EDGE1_VCENTER\n
-                    StaggerLoc.EDGE2_VCENTER\n
-                    StaggerLoc.CORNER_VCENTER\n
-                    StaggerLoc.CENTER_VFACE\n
-                    StaggerLoc.EDGE1_VFACE\n
-                    StaggerLoc.EDGE2_VFACE\n
-        Returns: \n
-            None \n
+        location.
+
+        *REQUIRED:*
+
+        :param str filename: The name of the file, .vtk will be appended.
+
+        *OPTIONAL:*
+
+        :param StaggerLoc staggerloc: The stagger location of the item
+            values. If ``None``, defaults to
+            :attr:`~ESMF.api.constants.StaggerLoc.CENTER` in 2D and
+            :attr:`~ESMF.api.constants.StaggerLoc.CENTER_VCENTER` in 3D.
         """
 
         # handle the default case

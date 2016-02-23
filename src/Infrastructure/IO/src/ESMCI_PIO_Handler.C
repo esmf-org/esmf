@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2015, University Corporation for Atmospheric Research,
+// Copyright 2002-2016, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -790,6 +790,7 @@ void PIO_Handler::arrayWrite(
 // !ARGUMENTS:
   Array *arr_p,                           // (in) Destination of write
   const char * const name,                // (in) Optional array name
+  const std::vector<std::string> &dimLabels, // (in) Optional dimension labels
   int *timeslice,                         // (in) Optional timeslice
   int *rc                                 // (out) - Error return code
 //
@@ -843,7 +844,11 @@ void PIO_Handler::arrayWrite(
       if (ESMC_LogDefault.MsgFoundError (ESMF_RC_INTNRL_BAD, "array dimension extent < 0",
             ESMC_CONTEXT, rc)) return;
     }
-  }      
+  }
+
+  if (dimLabels.size() > 0 && dimLabels.size() < nioDims)
+    if (ESMC_LogDefault.MsgFoundError(ESMF_RC_ARG_SIZE, "dimension label extend < nioDims",
+            ESMC_CONTEXT, rc)) return;
 
   vardesc = (pio_var_desc_t)calloc(PIO_SIZE_VAR_DESC, 1);
   if (!vardesc)
@@ -1087,10 +1092,16 @@ void PIO_Handler::arrayWrite(
   if ((getFormat() != ESMF_IOFMT_BIN) && !varExists) {
     // Create the variable
     for (int i = 0; i < nioDims; i++) {
-      char axis[128];
-      sprintf(axis, "%s_dim%03d", varname, (i + 1));
+      std::string axis;
+      if (dimLabels.size() > 0)
+        axis = dimLabels[i];
+      else {
+        char axis_tmp[128];
+        sprintf(axis_tmp, "%s_dim%03d", varname, (i + 1));
+        axis = axis_tmp;
+      }
       PRINTMSG("Defining dimension " << i);
-      piorc = pio_cpp_def_dim(pioFileDesc, axis,
+      piorc = pio_cpp_def_dim(pioFileDesc, axis.c_str(),
                                 ioDims[i], &ncDims[i]);
       if (!CHECKPIOERROR(piorc, "Defining dimension",
           localrc))

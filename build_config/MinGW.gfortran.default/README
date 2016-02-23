@@ -1,0 +1,14 @@
+Settings for MinGW/MSYS, using gfortran 4.3 or later.
+
+Supports the following environment settings:
+
+  ESMF_COMPILER gfortran
+
+Notes:
+
+1.) This port was performed under Windows HPC Server 2008,
+using MinGW 6.1 and MSYS 1.0.11.  MinGW and MSYS are available
+from http://www.mingw.org.
+
+2.) The MinGW version of gcc is required for preprocessing.
+

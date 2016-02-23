@@ -2,7 +2,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2015, University Corporation for Atmospheric Research,
+! Copyright 2002-2016, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -790,7 +790,28 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
-      else
+      else if (localRegridMethod == ESMF_REGRIDMETHOD_CONSERVE) then
+        if (useSrcMask) then 
+          srcMesh = ESMF_MeshCreate(srcfile, localsrcfiletype, &
+              meshname = trim(srcVarStr), maskFlag =srcmeshloc, &
+	    ! BOB: NEVER DO DUAL WHEN CONSERVE 
+              convertToDual= .false., &
+  	      varname=trim(srcVarName), rc=localrc)
+        else
+          srcMesh = ESMF_MeshCreate(srcfile, localsrcfiletype, &
+              meshname = trim(srcVarStr), &
+	    ! BOB: NEVER DO DUAL WHEN CONSERVE 
+              convertToDual= .false., &
+  	      rc=localrc)
+        endif
+        if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+        srcField=ESMF_FieldCreate(srcMesh,arrayspec,meshloc=srcmeshloc,rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+      else ! Non-conservative, but also not nearest neighbor (this would be things like bilinear, etc.)
         if (useSrcMask) then 
           srcMesh = ESMF_MeshCreate(srcfile, localsrcfiletype, &
               meshname = trim(srcVarStr), maskFlag =srcmeshloc, &
@@ -889,12 +910,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         if (useDstMask) then
           dstMesh = ESMF_MeshCreate(dstfile, localdstfiletype, &
             meshname = trim(dstVarStr), maskFlag=dstmeshloc, &
-	    convertToDual= .not. useDstCorner, &
+	    ! BOB: NEVER DO DUAL WHEN CONSERVE
+	    convertToDual= .false., &
             varname=trim(dstVarName), rc=localrc)
         else  
           dstMesh = ESMF_MeshCreate(dstfile, localdstfiletype, &
             meshname = trim(dstVarStr), &
-	    convertToDual=.not. useDstCorner, &
+	    ! BOB: NEVER DO DUAL WHEN CONSERVE
+	    convertToDual= .false., &
             rc=localrc)
         endif
         if (ESMF_LogFoundError(localrc, &
@@ -919,6 +942,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 	      ignoreDegenerate=localIgnoreDegenerate, &
               regridmethod = localRegridMethod, &
               polemethod = localPoleMethod, regridPoleNPnts = localPoleNPnts, &
+              normType=ESMF_NORMTYPE_FRACAREA, &
 	      routehandle = routehandle, &
 	      rc=localrc)
       if (ESMF_LogFoundError(localrc, &
@@ -931,6 +955,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 	      ignoreDegenerate=localIgnoreDegenerate, &
               regridmethod = localRegridMethod, &
               polemethod = localPoleMethod, regridPoleNPnts = localPoleNPnts, &
+              normType=ESMF_NORMTYPE_FRACAREA, &
 	      routehandle = routehandle, &
 	      rc=localrc)
       if (ESMF_LogFoundError(localrc, &
@@ -943,6 +968,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 	      ignoreDegenerate=localIgnoreDegenerate, &
               regridmethod = localRegridMethod, &
               polemethod = localPoleMethod, regridPoleNPnts = localPoleNPnts, &
+              normType=ESMF_NORMTYPE_FRACAREA, &
 	      routehandle = routehandle, &
 	      rc=localrc)
       if (ESMF_LogFoundError(localrc, &
@@ -954,6 +980,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 	      ignoreDegenerate=localIgnoreDegenerate, &
               regridmethod = localRegridMethod, &
               polemethod = localPoleMethod, regridPoleNPnts = localPoleNPnts, &
+              normType=ESMF_NORMTYPE_FRACAREA, &
 	      routehandle = routehandle, &
 	      rc=localrc)
       if (ESMF_LogFoundError(localrc, &

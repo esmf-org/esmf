@@ -2,5 +2,6 @@
 LogKind
 ~~~~~~~
 
-.. autoclass:: ESMF.api.constants._LogKind
+.. autoclass:: ESMF.api.constants.LogKind
     :members:
+    :exclude-members: __new__

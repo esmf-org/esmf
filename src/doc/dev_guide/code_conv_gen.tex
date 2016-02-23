@@ -405,7 +405,7 @@ copyright header:
 
 \begin{verbatim}
 ! Earth System Modeling Framework
-! Copyright 2002-2015, University Corporation for Atmospheric Research,
+! Copyright 2002-2016, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -422,6 +422,18 @@ example:
 ! TODO: add support for other data types (CMD 4/01).
 \end{verbatim}
 This will allow developers to 'grep' source files before software releases. 
+
+\subsubsection{FILENAME Macros}
+Source code files should define the {/tt ESMF\_FILENAME} or {/tt ESMC\_FILENAME}
+macros to ensure that the filename is correctly displayed from the ESMF logging.
+This can be done using the following code:
+
+\begin{verbatim}
+#define ESMC_FILENAME "./src/Infrastructure/Attribute/src/ESMCI_Attribute.C"
+\end{verbatim}
+
+with the appropriate filename.  Note that the path is relative to the ESMF
+root directory.
 
 \subsection{Code: Style Rules for Source Code}
 

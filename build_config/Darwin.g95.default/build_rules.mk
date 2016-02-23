@@ -1,6 +1,6 @@
 # $Id$
 #
-# Dawin.g95.default
+# Darwin.g95.default
 #
 
 ############################################################
@@ -91,6 +91,11 @@ ESMF_F90COMPILER_VERSION    = ${ESMF_F90COMPILER} -v --version
 ESMF_CXXCOMPILER_VERSION    = ${ESMF_CXXCOMPILER} -v --version
 
 ############################################################
+# See if g++ is really clang
+#
+ESMF_CLANGSTR := $(findstring clang, $(shell $(ESMF_CXXCOMPILER) --version))
+
+############################################################
 # g95 runtime library is not currently thread-safe
 #
 ESMF_PTHREADS := OFF
@@ -126,13 +131,6 @@ endif
 ############################################################
 # Construct the ABISTRING
 #
-ifeq ($(ESMF_MACHINE),ia64)
-ifeq ($(ESMF_ABI),64)
-ESMF_ABISTRING := $(ESMF_MACHINE)_64
-else
-$(error Invalid ESMF_MACHINE / ESMF_ABI combination: $(ESMF_MACHINE) / $(ESMF_ABI))
-endif
-endif
 ifeq ($(ESMF_MACHINE),x86_64)
 ifeq ($(ESMF_ABI),32)
 ESMF_ABISTRING := $(ESMF_MACHINE)_32
@@ -175,14 +173,6 @@ ESMF_CXXLINKOPTS    += -pthread
 endif
 
 ############################################################
-# OpenMP compiler and linker flags
-#
-ESMF_OPENMP_F90COMPILEOPTS += -fopenmp
-ESMF_OPENMP_CXXCOMPILEOPTS += -fopenmp
-ESMF_OPENMP_F90LINKOPTS    += -fopenmp
-ESMF_OPENMP_CXXLINKOPTS    += -fopenmp
-
-############################################################
 # Need this until the file convention is fixed (then remove these two lines)
 #
 ESMF_F90COMPILEFREENOCPP = -ffree-form
@@ -194,12 +184,6 @@ ESMF_F90COMPILEFIXCPP    = -cpp -ffixed-form
 ESMF_F90COMPILEOPTS += -ffree-line-length-huge
 
 ############################################################
-# Blank out variables to prevent rpath encoding
-#
-ESMF_F90LINKRPATHS      =
-ESMF_CXXLINKRPATHS      =
-
-############################################################
 # Determine where gcc's libraries are located
 #
 ESMF_LIBSTDCXX := $(shell $(ESMF_CXXCOMPILER) -print-file-name=libstdc++.dylib)
@@ -209,9 +193,18 @@ endif
 ESMF_F90LINKPATHS += -L$(dir $(ESMF_LIBSTDCXX))
 
 ############################################################
+# Blank out variables to prevent rpath encoding
+#
+ESMF_F90LINKRPATHS      =
+ESMF_CXXLINKRPATHS      =
+
+############################################################
 # Link against libesmf.a using the F90 linker front-end
 #
 ESMF_F90LINKLIBS += -lstdc++
+ifeq ($(ESMF_CLANGSTR), clang)
+ESMF_F90LINKLIBS += -lc++
+endif
 
 ############################################################
 # Link against libesmf.a using the C++ linker front-end

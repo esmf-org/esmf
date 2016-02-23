@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2015, University Corporation for Atmospheric Research,
+// Copyright 2002-2016, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -9,7 +9,7 @@
 // Licensed under the University of Illinois-NCSA License.
 
 // ESMC Attribute method interface (from F90 to C++) file
-#define ESMF_FILENAME "ESMCI_Attribute_F.C"
+#define ESMC_FILENAME "ESMCI_Attribute_F.C"
 
 //-----------------------------------------------------------------------------
 //

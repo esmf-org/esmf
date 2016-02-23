@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2015, University Corporation for Atmospheric Research, 
+! Copyright 2002-2016, University Corporation for Atmospheric Research, 
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 ! Laboratory, University of Michigan, National Centers for Environmental 
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -2193,7 +2193,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     \item[{[fileformat]}]
 !          Flag that indicates the file format of the grid file.  Please see
 !          Section~\ref{const:grid:fileformat} and Section~\ref{const:mesh:fileformat} for a 
-!          list of valid options.  If not specified, the default is {\tt ESMF\_FILEFORMAT\_SCRIP}.
+!          list of valid options (note that the {\tt ESMF\_FILEFORMAT\_GRIDSPEC} format is not
+!          supported).  If not specified, the default is {\tt ESMF\_FILEFORMAT\_SCRIP}.
 !     \item[{[meshname]}]
 !         The dummy variable for the mesh metadata in the UGRID file if the {\tt fileformat}
 !         is {\tt ESMF\_FILEFORMAT\_UGRID}.  This argument is optional.

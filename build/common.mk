@@ -360,7 +360,7 @@ ifeq ($(ESMF_OS),Linux)
 export ESMF_COMPILER = gfortran
 endif
 ifeq ($(ESMF_OS),MinGW)
-export ESMF_COMPILER = intel
+export ESMF_COMPILER = gfortran
 endif
 ifeq ($(ESMF_OS),Unicos)
 ifeq ($(ESMF_MACHINE),x86_64)
@@ -510,7 +510,7 @@ ESMF_BENCHMARK_PREFIX_ABSPATH := $(shell $(ESMF_DIR)/scripts/abspath $(ESMF_BENC
 
 
 ifndef ESMF_BENCHMARK_TOLERANCE
-ESMF_BENCHMARK_TOLERANCE := 3%
+ESMF_BENCHMARK_TOLERANCE := 20%
 endif
 
 ifndef ESMF_BENCHMARK_THRESHOLD
@@ -956,6 +956,9 @@ ESMF_SL_SUFFIX        = dylib
 endif
 ifeq ($(ESMF_OS),Cygwin)
 ESMF_SL_SUFFIX        = dll.a
+endif
+ifeq ($(ESMF_OS),MinGW)
+ESMF_SL_SUFFIX        = dll
 endif
 ifeq ($(ESMF_SHARED_LIB_BUILD),ON)
 ESMF_SL_LIBS_TO_MAKE  = libesmf
@@ -3409,15 +3412,15 @@ shared:
 		$(ESMF_RM) -r tmp_* ; \
 		for NEXTLIB in $(ESMF_SL_LIBS_TO_MAKE) foo ;\
 		do \
-		if [ -f $$NEXTLIB.a ] ; then \
+		if [ -f $$NEXTLIB.$(ESMF_LIB_SUFFIX) ] ; then \
 		    $(ESMF_RM) $$NEXTLIB.$(ESMF_SL_SUFFIX) ; \
 		    echo Converting $$NEXTLIB.a to $$NEXTLIB.$(ESMF_SL_SUFFIX) ;\
 		    mkdir tmp_$$NEXTLIB ;\
 		    cd tmp_$$NEXTLIB  ;\
-	                $(ESMF_AREXTRACT) ../$$NEXTLIB.a ;\
+	                $(ESMF_AREXTRACT) ../$$NEXTLIB.$(ESMF_LIB_SUFFIX) ;\
                     echo $(ESMF_SL_LIBLINKER) $(ESMF_SL_LIBOPTS) -o $(ESMF_LDIR)/$$NEXTLIB.$(ESMF_SL_SUFFIX) *.o $(ESMF_SL_LIBLIBS) ;\
 		    $(ESMF_SL_LIBLINKER) $(ESMF_SL_LIBOPTS) -o $(ESMF_LDIR)/$$NEXTLIB.$(ESMF_SL_SUFFIX) *.o $(ESMF_SL_LIBLIBS) ;\
-		    echo Converting $$NEXTLIB.a to $$NEXTLIB\_fullylinked.$(ESMF_SL_SUFFIX) ;\
+		    echo Converting $$NEXTLIB.$$ESMF_LIB_SUFFIX to $$NEXTLIB\_fullylinked.$(ESMF_SL_SUFFIX) ;\
                     echo $(ESMF_SL_LIBLINKER) $(ESMF_SL_LIBOPTS) -o $(ESMF_LDIR)/$$NEXTLIB\_fullylinked.$(ESMF_SL_SUFFIX) *.o $(ESMF_CXXLINKOPTS) $(ESMF_CXXLINKPATHS) $(ESMF_CXXLINKRPATHS) $(ESMF_CXXLINKLIBS) ;\
 		    $(ESMF_SL_LIBLINKER) $(ESMF_SL_LIBOPTS) -o $(ESMF_LDIR)/$$NEXTLIB\_fullylinked.$(ESMF_SL_SUFFIX) *.o $(ESMF_CXXLINKOPTS) $(ESMF_CXXLINKPATHS) $(ESMF_CXXLINKRPATHS) $(ESMF_CXXLINKLIBS) ;\
 		    cd .. ;\
