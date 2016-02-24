@@ -73,7 +73,7 @@
       character(2) :: argshort
       integer :: arg_len
       integer :: nargs
-      character(ESMF_MAXSTR) :: program_path
+      character(ESMF_MAXPATHLEN) :: program_path
       integer :: argindex
 
       real(ESMF_KIND_R8) :: random_values(50) = (/  &
