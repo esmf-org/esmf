@@ -674,8 +674,8 @@ variables:
      int elementConn(elementCount, maxNodePElement) ;
             elementConn:long_name = "Node Indices that define the element /
                                      connectivity";
-            elementConn:start_index = 1 ;
             elementConn:_FillValue = -1 ;
+            elementConn:start_index = 1 ;
      byte numElementConn(elementCount) ;
             numElementConn:long_name = "Number of nodes per element" ;
      double centerCoords(elementCount, coordDim) ;
@@ -709,23 +709,23 @@ coordinates. {\tt nodeCoords(:,1)} contains the x coordinates and
  and {\tt nodeCoords(:,3)} contains the z coordinates.  The same order applies to {\tt centerCoords}.
 A 2D grid in the Cartesian coordinate can only be regridded into another 2D grid in the Cartesian coordinate.
  
- The {\tt elementConn} variable describes how the nodes are connected together to form each element. For each element (i.e. each iteration of the first
- dimension of the variable), this variable contains a list of indices into the {\tt nodeCoords} variable pointing to the nodes which make up that
+ The {\tt elementConn} variable describes how the nodes are connected together to form each element. For each element, this variable contains a list of indices into the {\tt nodeCoords} variable pointing to the nodes which make up that
  element. By default, the index is 1-based.  It can be changed to 0-based by adding an attribute 
-{\tt start_index} of value 0 to the {\tt elementConn} variable.  The order of the indices describing the element is important.
+{\tt start\_index} of value 0 to the {\tt elementConn} variable.  The order of the indices describing the element is important.
  The proper order for elements available in an ESMF mesh can be found in Section~\ref{const:meshelemtype}. The file format does support 2D polygons with more
  corners than those in that section, but internally these are broken into triangles. For these polygons, the corners should
  be listed such that they are in counter-clockwise order around the element.  
-{\tt elementConn} can be either a 2D array or a 1D array.  If it is a 2D array,the second
+{\tt elementConn} can be either a 2D array or a 1D array.  If it is a 2D array, the second
  dimension of the {\tt elementConn} variable has to be the size of the largest number of nodes in any element (i.e. {\tt maxNodePElement}), the actual number of
  nodes in an element is given by the {\tt numElementConn} variable. For a given dimension (i.e. {\tt coordDim}) the number of nodes in the element
  indicates the element shape, for example in 2D, if {\tt numElementConn} is 4 then the element is a quadrilateral. In 3D, if {\tt numElementConn} is 8
  then the element is a hexahedron.
 
-If the grid contains some elements with large number of edges, using a 2D array for {\tt elementConn} could be very space-consuming.  
+If the grid contains some elements with large number of edges, using a 2D array for {\tt elementConn} could take a lot of space.  
 In that case, {\tt elementConn} can be represented as a 1D array that stores the edges of all the elments contineously.  When {\tt elementConn} is a 1D array, the dimension {\tt maxNodePElement} is no longer needed, instead, a new dimension variable {\tt connectionCount} 
-is required to define the size of {\tt elementConn}.  {\tt connectionCount} is the sum of all the values in {\tt numElementConn}.
-Following is an example grid file using 1D array for {\tt elementConn}:
+is required to define the size of {\tt elementConn}.  The value of {\tt connectionCount} is the sum of all the values in {\tt numElementConn}.
+
+The following is an example grid file using 1D array for {\tt elementConn}:
 
 \begin{verbatim}
 netcdf catchments_esmf1 {
@@ -750,7 +750,7 @@ In some cases, one mesh element may contain multiple polygons and these polygons
  {\tt polygon_break_value}. 
    
  The rest of the variables in the format are optional. The {\tt centerCoords} variable gives the coordinates of the center of the corresponding element.
- This variable is currently not used by ESMF. The {\tt elementArea} variable gives the area (or volume in 3D) of the corresponding element. This
+ This variable is used by ESMF for non-conservative interpolation on the data field residing at the center of the elements.  The {\tt elementArea} variable gives the area (or volume in 3D) of the corresponding element. This
  area is used by ESMF during conservative interpolation. If not specified, ESMF calculates the area (or volume) based on the coordinates of the nodes
  making up the element. The final variable is the {\tt elementMask} variable. This variable allows the user to specify a mask value for
  the corresponding element. If the value is 1, then the element is unmasked and if the value is 0 the element is masked.
