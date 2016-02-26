@@ -1872,7 +1872,7 @@ end function ESMF_MeshCreateFromFile
     integer                             :: localrc      ! local return code
     integer			        :: PetNo, PetCnt 
     real(ESMF_KIND_R8),pointer          :: nodeCoords(:,:), faceCoords(:,:)
-    integer(ESMF_KIND_I4),pointer       :: elementConn(:,:)
+    integer(ESMF_KIND_I4),pointer       :: elementConn(:)
     integer(ESMF_KIND_I4),pointer       :: elmtNum(:)
     integer                             :: startElmt
     integer                             :: NodeNo
@@ -2032,6 +2032,8 @@ end function ESMF_MeshCreateFromFile
                                  centerCoords=faceCoords, &
 				 convertToDeg=convertToDeg, rc=localrc)
        endif
+       ElemCnt = ubound (elmtNum, 1)
+       totalConnects = ubound(elementConn, 1)
        if (associated(faceCoords)) then
             hasFaceCoords = .true.
        endif
@@ -2054,9 +2056,9 @@ end function ESMF_MeshCreateFromFile
        ! Chenk if the grid is 3D or 2D
        coordDim = ubound(nodeCoords,1)
        nodeCnt = ubound(nodeCoords,2)
+       ElemCnt = ubound (elmtNum, 1)
+       totalConnects = ubound(elementConn, 1)
 
-       ! Check elementConn to find out the max edges
-       maxEdges = ubound(elementConn,1)
        if ( associated(faceCoords)) then
        	  hasFaceCoords = .true.
        endif
@@ -2064,7 +2066,6 @@ end function ESMF_MeshCreateFromFile
        if (coordDim == 2 .and. localAddMask == ESMF_MESHLOC_ELEMENT) then
 	  !Get the variable and the missing value attribute from file
 	  ! Total number of local elements
-          ElemCnt = ubound (elementConn, 2)
           allocate(varbuffer(ElemCnt))
 	  call ESMF_UGridGetVarByName(filename, varname, varbuffer, startind=startElmt, &
 		count=ElemCnt, location="face", &
@@ -2137,38 +2138,38 @@ end function ESMF_MeshCreateFromFile
     ! the local elements and we will do a global reduce to find the minimal values
     NodeUsed(:)=PetCnt+100
 
-    ! Total number of local elements
-    ElemCnt = ubound (elementConn, 2)
-
     ! Set the coorsponding NodeUsed(:) value to my PetNo if it is used by the local element 
     ! Also calculate the total number of mesh elements based on elmtNum
     totalElements = ElemCnt
-    totalConnects = 0
     maxNumPoly=0
     if (parametricDim .eq. 2) then
-       do ElemNo =1, ElemCnt
+       j=1
+       do ElemNo = 1, ElemCnt
           do i=1,elmtNum(ElemNo)	
-             if (elementConn(i,ElemNo) /= ESMF_MESH_POLYBREAK) then
-                NodeUsed(elementConn(i,ElemNo))=PetNo
+            if (elementConn(j) /= ESMF_MESH_POLYBREAK) then
+                NodeUsed(elementConn(j))=PetNo
              endif
+             j=j+1
           enddo
-          TotalConnects = TotalConnects+elmtNum(ElemNo)
-
           if (elmtNum(ElemNo) > maxNumPoly) then
              maxNumPoly=elmtNum(ElemNo)
           endif
        end do
     else ! If not parametricDim==2, assuming parmetricDim==3
+       j=1
        do ElemNo =1, ElemCnt
           do i=1,elmtNum(ElemNo)
-             if (elementConn(i,ElemNo) /= ESMF_MESH_POLYBREAK) then
-                NodeUsed(elementConn(i,ElemNo))=PetNo
+             if (elementConn(j) /= ESMF_MESH_POLYBREAK) then
+                NodeUsed(elementConn(j))=PetNo
              endif
+             j=j+1
           enddo
-          TotalConnects = TotalConnects+elmtNum(ElemNo)
        end do       
     endif
 
+    if (totalConnects /= (j-1)) then
+         print *, 'Total number of connection mismatch:', j, ElemCnt, totalConnects
+    endif
    ! write(*,*) "maxNumPoly=",maxNumPoly
 
     ! Do a global reduce to find out the lowest PET No that owns each node, the result is in
@@ -2296,16 +2297,18 @@ end function ESMF_MeshCreateFromFile
     ConnNo = 0
     if (parametricDim .eq. 2) then
        ! Loop through creating Mesh appropriate elements
+       k=1
        do j = 1, ElemCnt
           if (elmtNum(j)==3) then        
              ElemId(ElemNo) = myStartElmt+ElemNo
              ElemType (ElemNo) = ESMF_MESHELEMTYPE_TRI
              do i=1,3
-                if (elementConn(i,j) /= ESMF_MESH_POLYBREAK) then
-                   ElemConn (ConnNo+i) = NodeUsed(elementConn(i,j))
+                if (elementConn(k) /= ESMF_MESH_POLYBREAK) then
+                   ElemConn (ConnNo+i) = NodeUsed(elementConn(k))
                 else
                    ElemConn (ConnNo+i) = ESMF_MESH_POLYBREAK
                 endif
+                k=k+1
              end do
 	     if (haveElmtMask) ElemMask(ElemNo) = elementMask(j)
 	     if (localAddUserArea) ElemArea(ElemNo) = elementArea(j)
@@ -2315,11 +2318,12 @@ end function ESMF_MeshCreateFromFile
              ElemId(ElemNo) = myStartElmt+ElemNo
              ElemType (ElemNo) = ESMF_MESHELEMTYPE_QUAD
              do i=1,4
-                if (elementConn(i,j) /= ESMF_MESH_POLYBREAK) then
-                   ElemConn (ConnNo+i) = NodeUsed(elementConn(i,j))
+                if (elementConn(k) /= ESMF_MESH_POLYBREAK) then
+                   ElemConn (ConnNo+i) = NodeUsed(elementConn(k))
                 else
                    ElemConn (ConnNo+i) = ESMF_MESH_POLYBREAK
                 endif
+                k=k+1
              end do
 	     if (haveElmtMask) ElemMask(ElemNo) = elementMask(j)
 	     if (localAddUserArea) ElemArea(ElemNo) = elementArea(j)
@@ -2329,11 +2333,12 @@ end function ESMF_MeshCreateFromFile
              ElemId(ElemNo) = myStartElmt+ElemNo
              ElemType (ElemNo) = elmtNum(j)
              do i=1,elmtNum(j)
-                if (elementConn(i,j) /= ESMF_MESH_POLYBREAK) then
-                   ElemConn (ConnNo+i) = NodeUsed(elementConn(i,j))
+                if (elementConn(k) /= ESMF_MESH_POLYBREAK) then
+                   ElemConn (ConnNo+i) = NodeUsed(elementConn(k))
                 else
                    ElemConn (ConnNo+i) = ESMF_MESH_POLYBREAK
                 endif
+                k=k+1
              end do
 	     if (haveElmtMask) ElemMask(ElemNo) = elementMask(j)
 	     if (localAddUserArea) ElemArea(ElemNo) = elementArea(j)
@@ -2342,6 +2347,7 @@ end function ESMF_MeshCreateFromFile
           endif
        enddo
     else ! If not parametricDim==2, assuming parmetricDim==3
+       k=1
        do j = 1, ElemCnt
           if (elmtNum(j)==4) then        
              ElemType (ElemNo) = ESMF_MESHELEMTYPE_TETRA
@@ -2355,11 +2361,12 @@ end function ESMF_MeshCreateFromFile
           endif
 
           do i=1,elmtNum(j)
-             if (elementConn(i,j) /= ESMF_MESH_POLYBREAK) then
-                ElemConn (ConnNo+i) = NodeUsed(elementConn(i,j))
+             if (elementConn(k) /= ESMF_MESH_POLYBREAK) then
+                ElemConn (ConnNo+i) = NodeUsed(elementConn(k))
              else
                 ElemConn (ConnNo+i) = ESMF_MESH_POLYBREAK
              endif
+             k=k+1
           end do
           ElemId(ElemNo) = myStartElmt+ElemNo
           if (haveElmtMask) ElemMask(ElemNo) = elementMask(j)
@@ -2369,9 +2376,9 @@ end function ESMF_MeshCreateFromFile
        end do
     endif
 
-    if (ElemNo /= TotalElements+1) then
+    if ((ElemNo /= TotalElements+1) .or. (ConnNo /= TotalConnects)) then
 	write (ESMF_UtilIOStdout,*)  &
-            PetNo, ' TotalElements does not match ',ElemNo-1, TotalElements
+            PetNo, ' TotalElements does not match ',ElemNo-1, TotalElements, ConnNo, TotalConnects
     end if
     ! Add elements
     

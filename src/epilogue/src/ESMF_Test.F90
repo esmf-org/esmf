@@ -293,8 +293,7 @@
 !     1.) Only text files are supported
 !     2.) On systems which do not support recursive I/O, this function
 !     should not be called from the I/O list of an I/O statement.
-!     3.) On Windows, extraneous empty lines at the end of a file may be
-!     ignored.
+!     3.) On Windows, blank lines are ignored to avoid issues with cr/lfs.
 !
 !     The arguments are:
 !     \begin{description}
@@ -357,23 +356,35 @@
 
 read_loop:  &
       do
+#if !defined (ESMF_OS_MinGW)
         read (unit1, '(a)', iostat=ioerr1) string1
         read (unit2, '(a)', iostat=ioerr2) string2
+#else
+        do
+          read (unit1, '(a)', iostat=ioerr1) string1
+          if (ioerr1 /= 0) exit
+          ! Ignore blank lines due to cr/lf vs newline issues
+          do, i=1, len (string1)
+            string1(i:i) = merge (string1(i:i), ' ', string1(i:i) /= achar (13))
+          end do
+          if (string1 /= ' ') exit
+        end do
+
+        do
+          read (unit2, '(a)', iostat=ioerr2) string2
+          if (ioerr2 /= 0) exit
+          ! Ignore blank lines due to cr/lf vs newline issues
+          do, i=1, len (string2)
+            string2(i:i) = merge (string2(i:i), ' ', string2(i:i) /= achar (13))
+          end do
+          if (string2 /= ' ') exit
+        end do
+#endif
         if (ioerr1 /= ioerr2) then
-!         print *, ESMF_METHOD, ': read iostats differ:', ioerr1, ioerr2
+!          print *, ESMF_METHOD, ': read iostats differ:', ioerr1, ioerr2
           exit
         end if
 
-#if defined (ESMF_OS_MinGW)
-        ! Ignore Windows carraige return character
-        do, i=1, len (string1)
-            string1(i:i) = merge (string1(i:i), ' ', string1(i:i) /= achar (13))
-        end do
-
-        do, i=1, len (string2)
-            string2(i:i) = merge (string2(i:i), ' ', string2(i:i) /= achar (13))
-        end do
-#endif
         select case (ioerr1)
         case (:-1)
           ESMF_TestFileCompare = .true.
@@ -406,38 +417,6 @@ exclusion_loop:  &
         end select
 
       end do read_loop
-
-#if defined (ESMF_OS_MinGW)
-      if ((ioerr1 == -1 .and. ioerr2 ==  0) .or.  &
-         ( ioerr1 ==  0 .and. ioerr2 == -1)) then
-! On Windows, if one file is at EOF and the other is not, ignore extraneous
-! empty lines which may be simply due to variations in how Fortran run-time
-! libraries handle CR/LFs.
-
-        print *, ESMF_METHOD, ': entering Windows EOF handler'
-        if (ioerr1 == 0) then
-          do
-            read (unit1,'(a)', iostat=ioerr1) string1
-            if (ioerr1 /= 0) then
-              ESMF_TestFileCompare = .true.
-              exit
-            end if
-            if (string1 /= ' ') exit
-          end do
-        end if
-
-        if (ioerr2 == 0) then
-          do
-            read (unit2,'(a)', iostat=ioerr2) string2
-            if (ioerr2 /= 0) then
-              ESMF_TestFileCompare = .true.
-              exit
-            end if
-            if (string2 /= ' ') exit
-          end do
-        end if
-      end if
-#endif
 
       close (unit2)
       close (unit1)
