@@ -585,7 +585,6 @@ class Mesh(object):
             coords_elem, num_elems, num_dims_e = ESMP_MeshGetElemCoordPtr(self)
             assert num_dims == num_dims_e
         except:
-            warnings.warn("Mesh element coordinates are not available")
             elemcoords = False
 
         if not self.parametric_dim:
