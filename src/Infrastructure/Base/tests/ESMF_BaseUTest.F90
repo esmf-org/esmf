@@ -167,6 +167,14 @@
 
       
       !EX_UTest
+      ! test creation of base objects with slash in its name
+      call ESMF_BaseCreate(base, "Base", "test/object", 0, rc=rc)
+      write(name, *) "ESMF_BaseCreate with slash in name"
+      write(failMsg, *) "rc =", rc
+      call ESMF_Test((rc /= ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      
+      !EX_UTest
       ! test creation of base objects
       call ESMF_BaseCreate(base, "Base", "test object", 0, rc=rc)
       write(name, *) "ESMF_BaseCreate"
@@ -174,6 +182,15 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
 
+
+      !EX_UTest
+      ! test setting of ESMF_Base members values with slash in its name
+      name_set = "fred/jones"
+      call ESMF_SetName(base, name_set, "Base", rc=rc)
+      write(name, *) "ESMF_SetName with slash in its name"
+      write(failMsg, *) "rc =", rc, ", name =", trim(name_set)
+      call ESMF_Test((rc /= ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
 
       !EX_UTest
       ! test setting of ESMF_Base members values
