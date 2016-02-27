@@ -196,7 +196,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     real(ESMF_KIND_R8), pointer :: dstArea(:)
     real(ESMF_KIND_R8), pointer :: dstFrac(:), srcFrac(:)
     integer            :: regridScheme
-    integer            :: i,j, k,l, bigFac, xpets, ypets, xpart, ypart, xdim, ydim
+    integer            :: i,j, k,l, ii, bigFac, xpets, ypets, xpart, ypart, xdim, ydim
     logical            :: wasCompacted
     integer(ESMF_KIND_I4), pointer:: compactedFactorIndexList(:,:)
     real(ESMF_KIND_R8), pointer :: compactedFactorList(:)
@@ -222,13 +222,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer                :: ungridrank
     integer, pointer   :: start(:), count(:)
     real(ESMF_KIND_R8) :: srcMissingVal, dstMissingVal
-    real(ESMF_KIND_R8), pointer::  varBuf1D(:), varBuf2D(:,:), varBuf3D(:,:,:), varBuf4D(:,:,:,:)
+    real(ESMF_KIND_R8), pointer:: varBuf1D(:), varBuf2D(:,:), varBuf3D(:,:,:), varBuf4D(:,:,:,:)
+    real(ESMF_KIND_R8), pointer:: sendbuf(:), recvbuf(:)
     real(ESMF_KIND_R8), pointer::  fptr1d(:), fptr2d(:,:), fptr3d(:,:,:), fptr4d(:,:,:,:)
     integer                 :: gridid, varid, start2(2), count2(2), start3(3), count3(3)
     real(ESMF_KIND_R8), pointer :: tmpfptr(:)
     type(ESMF_Array) :: tmparray
     real(ESMF_KIND_R8), pointer :: varbuffer(:)
     integer                 :: totalnodecnt, totalelmtcnt, totalcount
+    integer                 :: total, totalrecv
     type(ESMF_Distgrid) :: nodalDG, elementDG
     character(len=20) :: location
     integer                 :: ncStatus
@@ -236,6 +238,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer, parameter :: nf90_noerror = 0
     !real(ESMF_KIND_R8) :: starttime, endtime
     logical            :: localIgnoreDegenerate
+    integer            :: dgsize(1)
    
 #ifdef ESMF_NETCDF     
     !------------------------------------------------------------------------
@@ -389,7 +392,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (dstLocStr .eq. 'node' .and. (localdstFileType == ESMF_FILEFORMAT_GRIDSPEC .or. &
           localRegridMethod == ESMF_REGRIDMETHOD_CONSERVE)) then
             call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
-  	        msg = " The source variable has to be located at the center of the grid ", &
+  	        msg = " The destination variable has to be located at the center of the grid ", &
                 ESMF_CONTEXT, rcToReturn=rc)
            terminateProg = .TRUE.
            goto 1110
@@ -1146,12 +1149,23 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
          if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
+
+         !call ESMF_DistgridGet(nodalDG, elementCountPTile=dgsize, rc=localrc)
+         !print *, PetNo, 'srcmesh nodalDG size', dgsize(1)
+         !call ESMF_DistgridGet(elementDG, elementCountPTile=dgsize, rc=localrc)
+         !print *, PetNo, 'srcmesh elementDG size', dgsize(1)
      	    
          call ESMF_ArraySpecSet(arrayspec, 1, ESMF_TYPEKIND_R8, rc=localrc)
          if (ESMF_LogFoundError(localrc, &
                ESMF_ERR_PASSTHRU, &
                ESMF_CONTEXT, rcToReturn=rc)) return
-         if (srcmeshloc == ESMF_MESHLOC_NODE) then
+         ! For a UGRID file,  the variable has to be located at the center for a conservative regridding
+         ! For a non-conservative regridding, the variable can be located at either the center or at the
+         ! corner, however, when it is located at the center, a dual mesh is generated to move it to the
+         ! corner.  Therefore, the distgrid should be decided by the regrid method and the meshloc
+
+         !if (srcmeshloc == ESMF_MESHLOC_NODE) then
+         if (localRegridMethod /= ESMF_REGRIDMETHOD_CONSERVE) then
        	    tmpArray=ESMF_ArrayCreate(nodalDG, arrayspec, indexflag=ESMF_INDEX_DELOCAL, rc=localrc)
             if (ESMF_LogFoundError(localrc, &
                ESMF_ERR_PASSTHRU, &
@@ -1174,6 +1188,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        endif
     
        call ESMF_ArrayGet(tmpArray, farrayPtr=tmpfptr, rc=localrc)
+       !print *, PetNo, 'tmpArray dimension: ', size(tmpfptr)
        if (ESMF_LogFoundError(localrc, &
                ESMF_ERR_PASSTHRU, &
                ESMF_CONTEXT, rcToReturn=rc)) return
@@ -1234,6 +1249,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                   ESMF_SRCLINE,&
                   errmsg, &
                   rc)) return
+              !print *, PetNo, 'varbuffer size', size(varbuffer)
    	      call ESMF_ArrayScatter(tmpArray, varbuffer, 0, rc=localrc)
               if (ESMF_LogFoundError(localrc, &
                   ESMF_ERR_PASSTHRU, &
@@ -1269,6 +1285,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 	    return
 	 endif    
 	 deallocate(varbuffer)
+         ncStatus=nf90_close(gridid)
+         if (CDFCheckError (ncStatus, &
+               ESMF_METHOD, &
+               ESMF_SRCLINE,&
+               errmsg, &
+               rc)) return
        else  !! non-root
         if (srcVarRank == 1) then
            call ESMF_ArrayScatter(srcArray,varbuffer, 0, rc=localrc)		 
@@ -1414,6 +1436,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
     ! write out the destination array sequentially
+    ! It seems to crash the queue on yellowstone even if the write is done in sequence from different
+    ! processors.  Change the code to send the data to PET0 to write
     if (localdstfiletype == ESMF_FILEFORMAT_GRIDSPEC) then
       allocate(tlbound(dstRank,petCnt),tubound(dstRank, petCnt))
       call ESMF_ArrayGet(dstArray, distgrid=distgrid, rc=localrc)
@@ -1424,66 +1448,127 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       if (ESMF_LogFoundError(localrc, &
           ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
-      do i=0, PetCnt
-      if (PetNo == i) then
-    	  if (dstVarRank == 2) then
-            call ESMF_ArrayGet(dstArray, farrayPtr=fptr2d, rc=localrc)
-            if (ESMF_LogFoundError(localrc, &
+      if (dstVarRank == 2) then
+          call ESMF_ArrayGet(dstArray, farrayPtr=fptr2d, rc=localrc)
+          if (ESMF_LogFoundError(localrc, &
                   ESMF_ERR_PASSTHRU, &
           	  ESMF_CONTEXT, rcToReturn=rc)) return
-            allocate(start(2), count(2))
-  	    start(1:dstRank) = tlbound(:,PetNo+1)
-            count(1:dstRank) = tubound(:,PetNo+1)-tlbound(:,PetNo+1)+1
-            call ESMF_IO_NCPutGetVar(dstFile, dstVarName, fptr2d, start=start, count=count, &
-	         putflag=.TRUE.,rc=localrc)
+          allocate(start(2), count(2))
+          start(1:dstRank) = tlbound(:,PetNo+1)
+          count(1:dstRank) = tubound(:,PetNo+1)-tlbound(:,PetNo+1)+1
+          total = count(1)*count(2)
+          allocate(sendbuf(total))
+          sendbuf=reshape(fptr2d,(/total/))
+      else if (dstVarRank == 3) then
+          call ESMF_ArrayGet(dstArray, farrayPtr=fptr3d, rc=localrc)
+          if (ESMF_LogFoundError(localrc, &
+               ESMF_ERR_PASSTHRU, &
+               ESMF_CONTEXT, rcToReturn=rc)) return
+          allocate(start(3), count(3))
+          start(1:dstRank)=tlbound(:,PetNo+1)
+          start(dstRank+1:3)=1
+          count(1:dstRank)=tubound(:,PetNo+1)-tlbound(:,PetNo+1)+1
+          count(dstRank+1:3)=ubnd
+          total=count(1)*count(2)*count(3)
+          allocate(sendbuf(total))
+          ii=1
+          do j=1,count(1)
+            do i=1,count(2)
+              do k=1,count(3)
+                sendbuf(ii)=fptr3d(k,j,i)
+                ii=ii+1
+              enddo
+            enddo
+          enddo
+      else if (dstVarRank == 4) then
+          call ESMF_ArrayGet(dstArray, farrayPtr=fptr4d, rc=localrc)
+          allocate(start(4), count(4))
+          start(1:dstRank)=tlbound(:,PetNo+1)
+          start(dstRank+1:4)=1
+          count(1:dstRank)=tubound(:,PetNo+1)-tlbound(:,PetNo+1)+1
+          count(dstRank+1:4)=ubnd
+          total = count(1)*count(2)*count(3)*count(4)
+          allocate(sendbuf(total))
+          ii=1
+          do j=1,count(1)
+            do i=1,count(2)
+              do k=1,count(3)
+                do l=1,count(4)
+                  sendbuf(ii)=fptr4d(k,l,j,i)
+                  ii=ii+1
+                enddo
+              enddo
+            enddo
+          enddo
+      endif
+      if (PetNo /= 0) then
+        call ESMF_VMSend(vm, sendbuf, total, 0, rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
+                  ESMF_ERR_PASSTHRU, &
+          	  ESMF_CONTEXT, rcToReturn=rc)) return
+        deallocate(sendbuf)
+      else
+        do i=0,PetCnt-1
+          if (i /= 0) then
+             ! Find the total count from remote processor
+             totalrecv = 1
+             do j=1,dstRank
+                totalrecv = totalrecv*(tubound(j,i+1)-tlbound(j,i+1)+1)
+             enddo
+             do j=1,ungridrank 
+                totalrecv = totalrecv*ubnd(j)
+             enddo
+             allocate(recvbuf(totalrecv))
+             call ESMF_VMRecv(vm, recvbuf, totalrecv, i, rc=localrc)
+             if (ESMF_LogFoundError(localrc, &
+                  ESMF_ERR_PASSTHRU, &
+          	  ESMF_CONTEXT, rcToReturn=rc)) return
+          else
+             recvbuf => sendbuf
+          endif
+   	  if (dstVarRank == 2) then
+  	    start(1:dstRank) = tlbound(:,i+1)
+            count(1:dstRank) = tubound(:,i+1)-tlbound(:,i+1)+1
+            allocate(varBuf2D(count(1),count(2)))
+            varBuf2D=reshape(recvbuf, (/count(1), count(2)/))
+            call ESMF_IO_NCPutGetVar(dstFile, dstVarName, varBuf2D, &
+                 start=start, count=count, putflag=.TRUE.,rc=localrc)
             if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rcToReturn=rc)) return
-            deallocate(start, count)
+            deallocate(varBuf2D)
+            !print *, 'put out variable from ', start, count
           else if (dstVarRank == 3) then
-            call ESMF_ArrayGet(dstArray, farrayPtr=fptr3d, rc=localrc)
-            if (ESMF_LogFoundError(localrc, &
-               ESMF_ERR_PASSTHRU, &
-               ESMF_CONTEXT, rcToReturn=rc)) return
-            allocate(start(3), count(3))
-            start(1:dstRank)=tlbound(:,PetNo+1)
+            start(1:dstRank)=tlbound(:,i+1)
             start(dstRank+1:3)=1
-            count(1:dstRank)=tubound(:,PetNo+1)-tlbound(:,PetNo+1)+1
+            count(1:dstRank)=tubound(:,i+1)-tlbound(:,i+1)+1
             count(dstRank+1:3)=ubnd
-	    allocate(varBuf3D(count(1),count(2),count(3)))
-            do j=1,count(3)
-	         varBuf3D(:,:,j)=fptr3d(j,:,:)
-            enddo
-            call ESMF_IO_NCPutGetVar(dstFile, dstVarName, varBuf3D, start=start, count=count, &
-	    	 putflag=.TRUE.,rc=localrc)
+            allocate(varBuf3D(count(1),count(2), count(3)))
+            varBuf3D = reshape(recvbuf, (/count(1), count(2), count(3)/))
+            call ESMF_IO_NCPutGetVar(dstFile, dstVarName, varBuf3D, &
+                 start=start, count=count, putflag=.TRUE.,rc=localrc)
             if (ESMF_LogFoundError(localrc, &
                ESMF_ERR_PASSTHRU, &
                ESMF_CONTEXT, rcToReturn=rc)) return
             deallocate(varBuf3D)
-            deallocate(start, count)
           else if (dstVarRank == 4) then
-            call ESMF_ArrayGet(dstArray, farrayPtr=fptr4d, rc=localrc)
-            allocate(start(4), count(4))
-            start(1:dstRank)=tlbound(:,PetNo+1)
+            start(1:dstRank)=tlbound(:,i+1)
             start(dstRank+1:4)=1
-            count(1:dstRank)=tubound(:,PetNo+1)-tlbound(:,PetNo+1)+1
+            count(1:dstRank)=tubound(:,i+1)-tlbound(:,i+1)+1
             count(dstRank+1:4)=ubnd
-	    allocate(varBuf4D(count(1),count(2),count(3),count(4)))
-            do k=1,count(3)
-  	        do j=1,count(4)
-	         varBuf4D(:,:,k,j)=fptr4d(k,j,:,:)
-	        enddo
-            enddo
-            call ESMF_IO_NCPutGetVar(dstFile, dstVarName, varBuf4D, start=start, count=count, putflag=.TRUE.,rc=localrc)
+            allocate(varBuf4D(count(1),count(2), count(3), count(4)))
+            varBuf4D = reshape(recvbuf, (/count(1), count(2), count(3), count(4)/))
+            call ESMF_IO_NCPutGetVar(dstFile, dstVarName, varBuf4D, &
+                 start=start, count=count, putflag=.TRUE.,rc=localrc)
             if (ESMF_LogFoundError(localrc, &
                ESMF_ERR_PASSTHRU, &
                ESMF_CONTEXT, rcToReturn=rc)) return
-	    deallocate(varBuf4D)
-            deallocate(start, count)
+            deallocate(varBuf4D)
           endif
-        endif
-        call ESMF_VMBarrier(vm)
-      enddo
+          deallocate(recvbuf)
+        enddo
+      endif
+      deallocate(start, count)
       deallocate(tlbound, tubound)
     else ! for UGRID
       ! Gather every slice into the root and write out from the root one slice at a time
@@ -1790,6 +1875,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                  ESMF_CONTEXT, rcToReturn=rc) 
            return
          endif
+         ! if the file is GRIDSPEC, the location is always at the "face"
+         if (present(locStr)) then
+            locStr = "face"
+         endif
        endif
        ! Get missing value attribute
        ncStatus = nf90_get_att(gridid, varid, "_FillValue", missingval)
@@ -2029,6 +2118,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 	         return
               endif
             endif !coordname is not present
+            ! if the file is GRIDSPEC, the location is always at the "face"
+            if (present(locStr)) then
+               locStr = "face"
+            endif
          endif ! not UGRID
 	 ! find the lon, lat dimension
          ncStatus=nf90_inquire_variable(gridid, varids(1), ndims=ndims, dimids=dimids)
@@ -2055,6 +2148,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
              ndims=2
          endif
      endif ! not varExist 
+     ncStatus = nf90_close(gridid)
+     if (CDFCheckError (ncStatus, &
+              ESMF_METHOD, &
+              ESMF_SRCLINE,&
+              errmsg, &
+              rc)) return
      rc = ESMF_SUCCESS
      return
 #else
@@ -2156,7 +2255,6 @@ subroutine CreateDstVar(srcFile, dstFile, fileType, srcVarName, dstVarName, &
           errmsg, &
           rc)) return
       enddo
-      ! ncStatus = nf90_close(gridid)
       ! check if the last dimension is "time"
       if (dimnames(extradim) .eq. "time") then
         ! the last dimension of the srcVariable is time, check if there is one in the dstFile
