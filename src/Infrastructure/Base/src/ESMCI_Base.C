@@ -485,7 +485,6 @@ static const char *const version = "$Id$";
        sprintf(msgbuf, "%s must not have a slash (/) in its name\n", name);
        ESMC_LogDefault.MsgFoundError (ESMC_RC_ARG_VALUE, msgbuf, ESMC_CONTEXT,
            &rc);
-       ESMC_Backtrace ();
        return rc;
      }
      defname = 0;
