@@ -35,3 +35,6 @@ class TestExamples(TestBase):
 
     def test_locstreamgridregrid(self):
         import locstream_grid_regrid
+
+    def test_ugrid_latlon_regrid(self):
+        import ugrid_latlon_regrid

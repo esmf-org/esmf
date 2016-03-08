@@ -26,11 +26,11 @@ time = 5
 
 # Create a uniform global latlon grid from a SCRIP formatted file
 srcgrid = ESMF.Grid(filename=grid1, filetype=ESMF.FileFormat.SCRIP,
-                 add_corner_stagger=True)
+                    add_corner_stagger=True)
 
 # Create a uniform global latlon grid from a SCRIP formatted file
 dstgrid = ESMF.Grid(filename=grid2, filetype=ESMF.FileFormat.SCRIP,
-                 add_corner_stagger=True)
+                    add_corner_stagger=True)
 
 # create a field on the center stagger locations of the source grid
 srcfield = ESMF.Field(srcgrid, name='srcfield',
@@ -54,7 +54,7 @@ srcareafield = ESMF.Field(srcgrid, name='srcareafield')
 dstareafield = ESMF.Field(dstgrid, name='dstareafield')
 
 
-# get the coordinate pointers and set the coordinates
+# get the coordinate pointers and initialize the source field
 [lon,lat] = [0, 1]
 gridXCoord = srcfield.grid.get_coords(lon, ESMF.StaggerLoc.CENTER)
 gridYCoord = srcfield.grid.get_coords(lat, ESMF.StaggerLoc.CENTER)
@@ -63,17 +63,23 @@ deg2rad = 3.14159/180
 
 for timestep in range(time):
     for level in range(levels):
-        srcfield.data[level,timestep,:,:]=10.0*(level+timestep+1) + (gridXCoord*deg2rad)**2 + \
-                                 (gridXCoord*deg2rad)*(gridYCoord*deg2rad) + (gridYCoord*deg2rad)**2
+        srcfield.data[level,timestep,:,:]=10.0*(level+timestep+1) + \
+                                          (gridXCoord*deg2rad)**2 + \
+                                          (gridXCoord*deg2rad)*\
+                                          (gridYCoord*deg2rad) + \
+                                          (gridYCoord*deg2rad)**2
 
-# get the coordinate pointers and set the coordinates
+# get the coordinate pointers and initialize the exact solution
 gridXCoord = xctfield.grid.get_coords(lon, ESMF.StaggerLoc.CENTER)
 gridYCoord = xctfield.grid.get_coords(lat, ESMF.StaggerLoc.CENTER)
 
 for timestep in range(time):
     for level in range(levels):
-        xctfield.data[level,timestep,:,:]=10.0*(level+timestep+1) + (gridXCoord*deg2rad)**2 + \
-                                 (gridXCoord*deg2rad)*(gridYCoord*deg2rad) + (gridYCoord*deg2rad)**2
+        xctfield.data[level,timestep,:,:]=10.0*(level+timestep+1) + \
+                                          (gridXCoord*deg2rad)**2 + \
+                                          (gridXCoord*deg2rad)*\
+                                          (gridYCoord*deg2rad) + \
+                                          (gridYCoord*deg2rad)**2
 
 dstfield.data[...] = 1e20
 
@@ -97,11 +103,14 @@ dstmass = 0
 relerr = 0
 for timestep in range(time):
     for level in range(levels):
-        srcmass += numpy.sum(numpy.abs(srcareafield.data*srcfracfield.data*srcfield.data[level, timestep, :, :]))
-        dstmass += numpy.sum(numpy.abs(dstareafield.data*dstfield.data[level, timestep, :, :]))
+        srcmass += numpy.sum(numpy.abs(srcareafield.data*srcfracfield.data*
+                                       srcfield.data[level, timestep, :, :]))
+        dstmass += numpy.sum(numpy.abs(dstareafield.data*
+                                       dstfield.data[level, timestep, :, :]))
         relerr += numpy.sum(numpy.abs(dstfield.data[level, timestep, :, :] /
-                                      dstfracfield.data - xctfield.data[level, timestep, :, :]) /
-                            numpy.abs(xctfield.data[level, timestep, :, :]))
+                                      dstfracfield.data -
+                                      xctfield.data[level, timestep, :, :]) /
+                                      numpy.abs(xctfield.data[level, timestep, :, :]))
 
 # compute the mean relative interpolation and conservation error
 from operator import mul
@@ -134,4 +143,29 @@ if ESMF.local_pet() is 0:
     print "  interpolation mean relative error = {0}".format(meanrelerr)
     print "  mass conservation relative error  = {0}".format(csrverr)
 
-    assert (meanrelerr < 8e-4)
+# try:
+#     import matplotlib.pyplot as plt
+#     from matplotlib import animation
+#
+#     lons = dstfield.grid.get_coords(0)
+#     lats = dstfield.grid.get_coords(1)
+#
+#     fig = plt.figure()
+#     ax = plt.axes(xlim=(numpy.min(lons), numpy.max(lons)),
+#               ylim=(numpy.min(lats), numpy.max(lats)))
+#     ax.set_xlabel("Longitude")
+#     ax.set_ylabel("Latitude")
+#     ax.set_title("Regrid Solution")
+#
+#     def animate(i):
+#         z = dstfield.data[0,i,:,:]
+#         cont = plt.contourf(lons, lats, z)
+#         return cont
+#
+#     anim = animation.FuncAnimation(fig, animate, frames=time)
+#
+#     anim.save('ESMPyRegrid.mp4')
+#
+#     plt.show()
+# except:
+#     raise ImportError("matplotlib is not available on this machine")

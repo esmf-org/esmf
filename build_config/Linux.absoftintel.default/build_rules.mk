@@ -41,6 +41,14 @@ ESMF_CXXDEFAULT         = mpicxx
 ESMF_MPIRUNDEFAULT      = mpirun $(ESMF_MPILAUNCHOPTIONS)
 ESMF_MPIMPMDRUNDEFAULT  = mpiexec $(ESMF_MPILAUNCHOPTIONS)
 else
+ifeq ($(ESMF_COMM),mpich3)
+# Mpich3 ---------------------------------------------------
+ESMF_F90DEFAULT         = mpif90
+ESMF_CXXDEFAULT         = mpicxx
+ESMF_CXXLINKLIBS       += -lmpifort
+ESMF_MPIRUNDEFAULT      = mpirun $(ESMF_MPILAUNCHOPTIONS)
+ESMF_MPIMPMDRUNDEFAULT  = mpiexec $(ESMF_MPILAUNCHOPTIONS)
+else
 ifeq ($(ESMF_COMM),lam)
 # LAM (assumed to be built with absoft f90) ----------------
 ESMF_CXXCOMPILECPPFLAGS+= -DESMF_NO_SIGUSR2
@@ -68,6 +76,7 @@ ifeq ($(ESMF_COMM),user)
 # User specified flags -------------------------------------
 else
 $(error Invalid ESMF_COMM setting: $(ESMF_COMM))
+endif
 endif
 endif
 endif

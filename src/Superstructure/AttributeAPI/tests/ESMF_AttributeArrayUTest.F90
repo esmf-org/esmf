@@ -58,6 +58,10 @@ program ESMF_AttributeArrayUTest
       character(ESMF_MAXSTR)           :: inChar, outChar, defaultChar, dfltoutChar
       real(ESMF_KIND_R8), dimension(4)       :: defaultR8lWrong
 
+      character(3*ESMF_MAXSTR)               :: inASCII, outASCII
+      logical                                :: correct
+      integer                                :: i
+
       ! non exhaustive constant value variables
       real(ESMF_KIND_R8)                        :: outConstantR8
       real(ESMF_KIND_R8), dimension(3)          :: outConstantR8l
@@ -187,6 +191,32 @@ program ESMF_AttributeArrayUTest
       write(name, *) "Adding a long value character Attribute to an Array Test"
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
+
+    !-------------------------------------------------------------------------
+    !  ASCII characters
+    !-------------------------------------------------------------------------
+      !EX_UTest
+      ! Add ASCII characters to an Attribute on an Array Test
+      correct = .true.
+      inASCII = "!""#$%&'()*+,-./0123456789"//&
+                ":;<=>?@"//&
+                "ABCDEFGHIJKLMNOPQRSTUVWXYZ"//&
+                "[\]^_`"//&
+                "abcdefghijklmnopqrstuvwxyz"//&
+                "{|}~"
+      do i=1,len(trim(inASCII))
+        call ESMF_AttributeSet(array, name=inASCII(i:i), value=inASCII, rc=rc)
+        if (rc /= ESMF_SUCCESS) then
+            correct = .false.
+        endif
+        call ESMF_AttributeGet(array, name=inASCII(i:i), value=outASCII, rc=rc)
+        if (rc /= ESMF_SUCCESS) correct = .false.
+        if (inASCII /= outASCII) correct = .false.
+      enddo
+
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Use all ASCII characters as Attribute names on an Array Test"
+      call ESMF_Test((correct .eqv. .true.), name, failMsg, result, ESMF_SRCLINE)
 
     !-------------------------------------------------------------------------
     !  Get an Attribute which was not set

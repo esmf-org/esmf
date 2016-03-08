@@ -73,13 +73,11 @@ extern "C" {
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       ESMC_NOT_PRESENT_FILTER(rc))) return;
     // set the name in the Array object
-    char *cname = ESMC_F90toCstring(name, *len_name);
-    if (cname){
-      (*ptr)->setName(cname);
-      delete [] cname;
-    }else if(*len_name){
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
-        "- Not a valid string", ESMC_CONTEXT, ESMC_NOT_PRESENT_FILTER(rc));
+    string cname = string(name, ESMC_F90lentrim (name, *len_name));
+    if (cname.length() > 0) {
+      localrc = (*ptr)->setName(cname);
+      ESMC_LogDefault.MsgFoundError(localrc,
+        ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, ESMC_NOT_PRESENT_FILTER(rc));
       return;
     }
   }
@@ -125,14 +123,12 @@ extern "C" {
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
         ESMC_NOT_PRESENT_FILTER(rc))) return; // bail out
       // set the name in the Array object
-      char *cname = ESMC_F90toCstring(name, *len_name);
-      if (cname){
-        (*ptr)->setName(cname);
-        delete [] cname;
-      }else if(*len_name){
-        ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
-          "- Not a valid string", ESMC_CONTEXT, ESMC_NOT_PRESENT_FILTER(rc));
-        return; // bail out
+      string cname = string(name, ESMC_F90lentrim (name, *len_name));
+      if (cname.length() > 0) {
+        localrc = (*ptr)->setName(cname);
+        ESMC_LogDefault.MsgFoundError(localrc,
+          ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, ESMC_NOT_PRESENT_FILTER(rc));
+        return;
       }
     }
     // return successfully

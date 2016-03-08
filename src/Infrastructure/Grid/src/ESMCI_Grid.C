@@ -4028,7 +4028,9 @@ int Grid::constructInternal(
   }
 
   // Set the name for this Grid object in the Base class
-  ESMC_BaseSetName(nameArg, "Grid");
+  localrc = ESMC_BaseSetName(nameArg, "Grid");
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc))
+    return rc;
 
   // allocate and fill minIndex and maxIndex 
   minIndex = new int[dimCount];

@@ -1052,6 +1052,9 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
 	   errmsg,&
            rc)) return
 
+        ! if src_grid_corner < 0 -- the input file is a ESMF Mesh file with ragged array
+        ! do not define nv_a, xv_a and yv_a
+        if (src_grid_corner > 0) then
         ! define max number of vertices
          ncStatus = nf90_def_dim(ncid,"nv_a",src_grid_corner, nvaDimId)
          errmsg = "Dimension nv_a in "//trim(wgtfile)
@@ -1060,7 +1063,9 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
            ESMF_SRCLINE,&
 	   errmsg,&
            rc)) return
+         endif
 
+         if (dst_grid_corner > 0) then
          ncStatus = nf90_def_dim(ncid,"nv_b",dst_grid_corner, nvbDimId)
          errmsg = "Dimension nv_b in "//trim(wgtfile)
          if (CDFCheckError (ncStatus, &
@@ -1068,6 +1073,7 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
            ESMF_SRCLINE,&
 	   errmsg,&
            rc)) return
+         endif
 
         ! define max number of vertices
          ncStatus = nf90_def_dim(ncid,"num_wgts",1, VarId)
@@ -1172,7 +1178,8 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
            ESMF_SRCLINE,&
 	   errmsg,&
            rc)) return
-
+    
+        if (src_grid_corner > 0) then
         ! yv_a: source corner coordinate (latitude)
          ncStatus = nf90_def_var(ncid,"yv_a",NF90_DOUBLE, (/nvaDimId,naDimId/),  VarId)
          errmsg = "Variable yv_a in "//trim(wgtfile)
@@ -1202,7 +1209,9 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
            ESMF_SRCLINE,&
 	   errmsg,&
            rc)) return
+         endif
 
+         if (dst_grid_corner > 0) then 
         ! yv_b: source corner coordinate (latitude)
          ncStatus = nf90_def_var(ncid,"yv_b",NF90_DOUBLE, (/nvbDimId,nbDimId/),  VarId)
          errmsg = "Variable yv_b in "//trim(wgtfile)
@@ -1232,6 +1241,7 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
            ESMF_SRCLINE,&
 	   errmsg,&
            rc)) return
+         endif
 
         ! mask_a
          ncStatus = nf90_def_var(ncid,"mask_a",NF90_INT, (/naDimId/),  VarId)
@@ -1403,6 +1413,7 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
   	     errmsg,&
              rc)) return
            deallocate(latBuffer, lonBuffer)
+            
           ! Write xv_a, yv_a	
            allocate(latBuffer2(src_grid_corner,srcDim),lonBuffer2(src_grid_corner,srcDim))         
            call ESMF_ScripGetVar(srcFile, grid_corner_lon=lonBuffer2, &
@@ -1658,6 +1669,7 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
            ! output xv_a and yv_a is harder, we have to read in the nodeCoords and
            ! elementConn and construct the the latitudes and longitudes for
            ! all the corner vertices
+             if (src_grid_corner > 0) then
              allocate(latBuffer2(src_grid_corner,srcDim),lonBuffer2(src_grid_corner,srcDim))         
              call ESMF_EsmfGetVerts(ncid1, srcFile, srcDim, src_grid_corner, srcNodeDim, &
 		  latBuffer2, lonBuffer2,status) 
@@ -1680,6 +1692,7 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
                ESMF_SRCLINE,errmsg,&
                rc)) return
              deallocate(latBuffer2, lonBuffer2) 
+             endif
            endif
            allocate(mask(srcDim))         
   	   if (.not. useSrcCornerlocal .and. &
@@ -2110,6 +2123,7 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
            ! all the corner vertices
   	   if (.not. useDstCornerlocal .or. &
 	      methodlocal%regridmethod ==ESMF_REGRIDMETHOD_CONSERVE%regridmethod) then 
+           if (dst_grid_corner > 0) then
            allocate(latBuffer2(dst_grid_corner,dstDim),lonBuffer2(dst_grid_corner,dstDim))         
            call ESMF_EsmfGetVerts(ncid1, dstFile, dstDim, dst_grid_corner, dstNodeDim, &
 		latBuffer2, lonBuffer2, status) 
@@ -2132,6 +2146,7 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
              ESMF_SRCLINE,errmsg,&
              rc)) return
            deallocate(latBuffer2, lonBuffer2) 
+           endif
            endif
            ! Write mask_b
            allocate(mask(dstDim))         

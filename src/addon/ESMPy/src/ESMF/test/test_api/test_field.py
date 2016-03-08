@@ -84,6 +84,14 @@ class TestField(TestBase):
             field.data[:, :, :, i] = i
         assert field.data[0, 0, 0, ::2].all() == np.array([0, 2, 4, 6, 8]).all()
 
+        # extended slices
+        for i in range(10):
+            field.data[:,:,:,i] = i
+        assert field.data[0,0,0,::2].all() == np.array([0, 2, 4, 6, 8]).all()
+
+
+
+
     @attr('serial')
     @attr('slow')
     #nosetests src/ESMF/test/test_api/test_field.py:TestField.test_field_create_2d_grid
