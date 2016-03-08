@@ -75,6 +75,7 @@ class DustCommand(Command):
         os.system('find . -name "*ESMF_LogFile*" -exec rm -f {} \;')
         os.system('find . -name "*.log" -exec rm -f {} \;')
         os.system('find . -name "*.vtk" -exec rm -f {} \;')
+        os.system('find . -name "*.pyc" -exec rm -f {} \;')
 
 class TestCommand(Command):
     description = "test"
