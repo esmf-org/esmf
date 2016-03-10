@@ -5,16 +5,16 @@
 While there is no one right way to write the \emph{NUOPC Model cap} code, the following
 recommended steps represent an incremental approach to developing the cap.
 \begin{enumerate}
-\item \nameref{sec:installesmf}
-\item \nameref{sec:preparemodel}
-\item \nameref{sec:chooseconfig}
-\item \nameref{sec:integratecap}
-\item \nameref{sec:genmakefrag}
-\item \nameref{sec:initmodelfromcap}
-\item \nameref{sec:callrunfromcap}
-\item \nameref{sec:runcapwithdriver}
-\item \nameref{sec:splitinit}
-\item \nameref{sec:validatecap}
+\item Install ESMF and NUOPC on the Target Machine (\ref{sec:installesmf})
+\item Prepare Your Model Code (\ref{sec:preparemodel})
+\item Choose a Configuration of Your Model for Development (\ref{sec:chooseconfig})
+\item Integrate a Cap Template into Your Codebase (\ref{sec:integratecap})
+\item Modify Your Build to Generate a NUOPC Makefile Fragment (\ref{sec:genmakefrag})
+\item Initialize Your Model from the Cap (\ref{sec:initmodelfromcap})
+\item Call Your Model's Run Subroutine from the Cap (\ref{sec:callrunfromcap})
+\item Run the Cap with a NUOPC Driver (\ref{sec:runcapwithdriver})
+\item Split Up the Initialization Phases (\ref{sec:splitinit})
+\item Test and Validate Your Cap (\ref{sec:validatecap})
 \end{enumerate}
 
 \subsection{Install ESMF and NUOPC on the Target Machine}
@@ -33,7 +33,7 @@ $ git archive --remote=git://git.code.sf.net/p/esmf/esmf \
     --format=tar --prefix=esmf/ ESMF\_7\_0\_0 | tar xf - 
 \end{verbatim}
 
-\textbf{Compile and install ESMF.}  Full installation details can be found in the \href{http://www.earthsystemmodeling.org/esmf\_releases/public/last/ESMF\_usrdoc/node6.html\#SECTION00064000000000000000}{ESMF User Guide}.  An example of the basic procedure
+\textbf{Compile and install ESMF.}  Full installation details can be found in the \htmladdnormallink{ESMF User Guide}{http://www.earthsystemmodeling.org/esmf\_releases/public/last/ESMF\_usrdoc/node6.html\#SECTION00064000000000000000}.  An example of the basic procedure
 for one particular system is outlined below.
 
 \begin{verbatim}
@@ -77,7 +77,7 @@ Your NUOPC cap code will be cleanest if your model exposes data
 structures for input and output variables with clear, well-documented
 naming conventions. This will simplify the process of hooking up fields
 in the NUOPC cap to your model's data structures.  The NUOPC Field
-Dictionary uses the \href{http://cfconventions.org/}{Climate and Forecast conventions}
+Dictionary uses the \htmladdnormallink{Climate and Forecast conventions}{http://cfconventions.org/}
 for defining field standard names, but can support field name aliases.
 
 Finally, the model should not use the global MPI\_WORLD\_COMM communicator
@@ -115,7 +115,7 @@ differences introduced when grid interpolation is used between models.)
 
 If your model is already using ESMF, \textbf{you will need to
 update your build to link against ESMF version 7 or later.}  Instructions for checking out this version of ESMF
-appear in the section above entitled \nameref{sec:installesmf}.
+appear in section \ref{sec:installesmf}.
 
 
 \subsection{Integrate a Cap Template into Your Codebase}
@@ -138,14 +138,14 @@ To acquire a cap template you can:
 \begin{itemize}
 \item use the cap template below,
 
-\item copy code from one of the \href{https://sourceforge.net/p/esmfcontrib/svn/HEAD/tree/NUOPC/tags/ESMF\_7\_0\_0}{NUOPC Prototype Applications} or
+\item copy code from one of the \htmladdnormallink{NUOPC Prototype Applications}{https://sourceforge.net/p/esmfcontrib/svn/HEAD/tree/NUOPC/tags/ESMF\_7\_0\_0} or
 
-\item use the \href{https://www.earthsystemcog.org/projects/cupid/}{Cupid plugin for Eclipse}
+\item use the \htmladdnormallink{Cupid plugin for Eclipse}{https://www.earthsystemcog.org/projects/cupid/}
 to generate code.  Cupid automatically generates NUOPC compliant
 code fragments for specialization points and presents NUOPC API reference
 documentation based on where you are in your NUOPC cap code.
 Installation instructions are provided on the Cupid website, and for additional support please
-\href{mailto:esmf\_support@list.woc.noaa.gov}{email the ESMF support list}.
+\htmladdnormallink{email the ESMF support list}{mailto:esmf\_support@list.woc.noaa.gov}.
 
 \end{itemize}
 
@@ -155,7 +155,7 @@ rest of your model code.  Unless your model is already using ESMF,
 you'll need to add ESMF compile and linking flags in order to build
 the cap.  \textbf{When ESMF is installed, a Makefile fragment named esmf.mk
 is generated that contains variables that can be appended to your compile and
-link flags.}  The \href{http://www.earthsystemmodeling.org/esmf\_releases/public/last/ESMF\_usrdoc/node7.html}{ESMF User Guide}
+link flags.}  The \htmladdnormallink{ESMF User Guide}{http://www.earthsystemmodeling.org/esmf\_releases/public/last/ESMF\_usrdoc/node7.html}
 explains how to use these variables in your Makefile.
 
 
@@ -230,7 +230,7 @@ Makefile to include a new target:
    abc.mk: $(OBJS)
 \end{verbatim}
 
-The \href{http://www.earthsystemmodeling.org/esmf\_releases/last\_built/NUOPC\_refdoc/node5.html}{Standardized Component Dependencies}
+The \htmladdnormallink{Standardized Component Dependencies}{http://www.earthsystemmodeling.org/esmf\_releases/last\_built/NUOPC\_refdoc/node5.html}
 section of the NUOPC Reference Manual contains more details on setting up NUOPC makefile fragments.
 
 \textbf{Finally, if your build procedure typically produces an executable, it is
@@ -305,17 +305,15 @@ you will need to create one now.
 \label{sec:runcapwithdriver}
 Now you should test the basic cap you have implemented. First,
 build your model along with the cap code using your model's build
-script or Makefile.  If you followed the procedure in the \nameref{sec:genmakefrag}
-section, your build process should have produced a NUOPC Makefile
+script or Makefile.  If you followed the procedure in section \ref{sec:genmakefrag}, 
+your build process should have produced a NUOPC Makefile
 fragment file in addition to the compiled object files (or library).
 
-One option for testing the cap is to run it using the \href{https://www.earthsystemcog.org/projects/nuopc/compliance\_testing}{NUOPC
-Component Explorer}, a specialized {\tt NUOPC\_Driver} designed to execute any {\tt NUOPC\_Model}.  
-\href{https://www.earthsystemcog.org/projects/nuopc/compliance\_test}{Complete instructions} for acquiring 
+One option for testing the cap is to run it using the \htmladdnormallink{NUOPC Component Explorer}{https://www.earthsystemcog.org/projects/nuopc/compliance\_testing}, a specialized {\tt NUOPC\_Driver} designed to execute any {\tt NUOPC\_Model}.  
+\htmladdnormallink{Complete instructions}{https://www.earthsystemcog.org/projects/nuopc/compliance\_test} for acquiring 
 the Component Explorer and linking it to your NUOPC cap are available.
 
-The instructions above also describe how to turn on the \href{https://www.earthsystemcog.org/projects/nuopc/compliance\_testing}{NUOPC
-Compliance Checker} while running the Component Explorer.  The
+The instructions above also describe how to turn on the \htmladdnormallink{NUOPC Compliance Checker}{https://www.earthsystemcog.org/projects/nuopc/compliance\_testing} while running the Component Explorer.  The
 Compliance Checker produces additional output in the ESMF log
 files that is useful for debugging.  It also produces WARNINGS
 in the logs if a compliance issue is identified.  When running with

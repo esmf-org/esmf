@@ -1,12 +1,12 @@
 % $Id$
 
-The \href{http://www.nws.noaa.gov/nuopc/}{National Unified Operational Prediction Capability}
-(NUOPC) a strategic initiative to fundamentally advance the nation's computational
+The \htmladdnormallink{National Unified Operational Prediction Capability}{http://www.nws.noaa.gov/nuopc/}
+(NUOPC) is a strategic initiative to fundamentally advance the nation's computational
 weather prediction systems and improve forecast models used by National Weather Service,
 Air Force and Navy meteorologists, mission planners, and decision makers.  The
-\href{https://www.earthsystemcog.org/projects/nuopc/}{NUOPC Layer} is
+\htmladdnormallink{NUOPC Layer}{https://www.earthsystemcog.org/projects/nuopc/} is
 a software layer built on top of the
-\href{https://www.earthsystemcog.org/projects/esmf/}{Earth System Modeling Framework} (ESMF).
+\htmladdnormallink{Earth System Modeling Framework}{https://www.earthsystemcog.org/projects/esmf/} (ESMF).
 ESMF is a high-performance modeling framework that provides
 data structures, interfaces, and operations suited for building coupled models
 from a set of components.  \textbf{NUOPC refines the capabilities of
@@ -47,13 +47,13 @@ model codebase NUOPC Layer compliant.}
 The document is divided into the following sections:
 \begin{itemize}
 
-\item \nameref{sec:bigidea} section describes important parts of the NUOPC design that
+\item Section \ref{sec:bigidea} describes important parts of the NUOPC design that
 are critical for anyone planning to write code using the NUOPC API.
 
-\item The \nameref{sec:approach} section describes the development steps involved
+\item Section \ref{sec:approach} describes the development steps involved
 in making your model code NUOPC Layer compliant.
 
-\item In \nameref{sec:atmexample}, we walk through the code of a basic example cap, describing 
+\item Section \ref{sec:atmexample} presents the code of a basic example cap, describing 
 each part in detail.
 
 \end{itemize}
@@ -64,31 +64,31 @@ This document is not exhaustive, but should help you navigate the process of cre
 a NUOPC component from your model.  As such this document is a companion to other NUOPC 
 resources available:
 \begin{itemize}
-\item \href{https://www.earthsystemcog.org/projects/nuopc}{The NUOPC website}
+\item \htmladdnormallink{The NUOPC website}{https://www.earthsystemcog.org/projects/nuopc}
 is the main source of information on NUOPC, including instructions
 for acquiring and using the NUOPC Layer software.
 
-\item \href{https://www.earthsystemcog.org/projects/nuopc/refmans}{The NUOPC Reference Manual}
+\item \htmladdnormallink{The NUOPC Reference Manual}{https://www.earthsystemcog.org/projects/nuopc/refmans}
 is the primary technical reference for the NUOPC API and includes
 a detailed description of the NUOPC generic components.
 
-\item \href{https://www.earthsystemcog.org/projects/nuopc/proto\_codes}{The NUOPC Prototype Codes page}
-and \href{https://sourceforge.net/p/esmfcontrib/svn/HEAD/tree/NUOPC/tags/ESMF\_7\_0\_0/}{Subversion repository}
+\item \htmladdnormallink{The NUOPC Prototype Codes page}{https://www.earthsystemcog.org/projects/nuopc/proto\_codes}
+and \htmladdnormallink{Subversion repository}{https://sourceforge.net/p/esmfcontrib/svn/HEAD/tree/NUOPC/tags/ESMF\_7\_0\_0/}
 include a set of prototype applications that use the NUOPC Layer software. These
 applications are architectural skeletons that represent typical
 configurations of NUOPC components and provide numerous examples
 of using the NUOPC API.
 
-\item Several \href{https://www.earthsystemcog.org/projects/nuopc/compliance\_testing}{Compliance Testing Tools}
+\item Several \htmladdnormallink{Compliance Testing Tools}{https://www.earthsystemcog.org/projects/nuopc/compliance\_testing}
 are provided to help you test your code to determine if it is NUOPC Layer compliant.
 
-\item \href{https://www.earthsystemcog.org/projects/cupid/}{Cupid}
-is a plugin for the \href{https://eclipse.org/}{Eclipse Integrated Development Environment}
+\item \htmladdnormallink{Cupid}{https://www.earthsystemcog.org/projects/cupid/}
+is a plugin for the \htmladdnormallink{Eclipse Integrated Development Environment}{https://eclipse.org/}
 that automatically generates NUOPC Layer compliant code and checks existing
 source code for compliance.
 
-\item A \href{https://www2.ametsoc.org/ams/index.cfm/publications/bulletin-of-the-american-meteorological-society-bams/}{BAMS}
-article entitled \href{http://journals.ametsoc.org/doi/abs/10.1175/BAMS-D-14-00164.1}{The Earth System Prediction Suite: Toward a Coordinated U.S. Modeling Capability}
+\item A \htmladdnormallink{BAMS}{https://www2.ametsoc.org/ams/index.cfm/publications/bulletin-of-the-american-meteorological-society-bams/}
+article entitled \htmladdnormallink{The Earth System Prediction Suite: Toward a Coordinated U.S. Modeling Capability}{http://journals.ametsoc.org/doi/abs/10.1175/BAMS-D-14-00164.1}
 describes NUOPC and how NUOPC Layer compliant components are being used in coupled modeling
 systems across U.S. agencies.
 

@@ -10,7 +10,6 @@
 %\usepackage{subsections}
 \usepackage{graphicx}
 \usepackage{hyperref}
-\usepackage{nameref}
 \usepackage[T1]{fontenc}
 
 \textwidth 6.5in
