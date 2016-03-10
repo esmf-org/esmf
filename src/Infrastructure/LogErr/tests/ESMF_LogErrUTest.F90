@@ -82,8 +82,6 @@
       logical :: trace_flag
       type(ESMF_LogMsg_Flag), pointer :: logabort_flags(:)
       character(2) :: tooshortstr
- character(ESMF_MAXSTR) :: errmsg
- integer :: errmsg_l
 #endif
 
 !------------------------------------------------------------------------------
