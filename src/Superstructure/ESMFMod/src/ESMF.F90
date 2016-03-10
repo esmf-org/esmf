@@ -16,6 +16,7 @@ module ESMF
 
     use ESMF_UtilTypesMod
     use ESMF_UtilSortMod
+    use ESMF_UtilStringMod
     use ESMF_UtilMod
 
     use ESMF_LogErrMod

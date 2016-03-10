@@ -82,8 +82,9 @@
       logical :: trace_flag
       type(ESMF_LogMsg_Flag), pointer :: logabort_flags(:)
       character(2) :: tooshortstr
+ character(ESMF_MAXSTR) :: errmsg
+ integer :: errmsg_l
 #endif
-
 
 !------------------------------------------------------------------------------
 ! The unit tests are divided into Sanity and Exhaustive. The Sanity tests are
@@ -196,8 +197,7 @@
       write(failMsg, *) "Did not return ESMF_FAILURE"
       write(name, *) " LogFlush of unopened log Test"
       call ESMF_LogFlush(log6, rc=rc)
-      call ESMF_Test((rc.eq.ESMF_FAILURE), name, failMsg, result, ESMF_SRCLINE)
-      print *, " rc = ", rc
+      call ESMF_Test(rc /= ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
       !EX_UTest
@@ -504,7 +504,7 @@
       write(failMsg, *) "Did not return ESMF_FAILURE"
       write(name, *) " LogFlush of unopened log Test"
       call ESMF_LogFlush(log2, rc=rc)
-      call ESMF_Test((rc.eq.ESMF_FAILURE), name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_Test(rc /= ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
       !EX_UTest
@@ -713,7 +713,7 @@ if (time_diff < zero) stop 1
       !------------------------------------------------------------------------
       !EX_UTest
       ! Test LogFlush of new unopened log
-      write(failMsg, *) "Did not return ESMF_FAILURE"
+      write(failMsg, *) "Did not return ESMF_RC_FILE_OPEN"
       write(name, *) " LogFlush of unopened log Test"
       call ESMF_LogFlush(log2, rc=rc)
       call ESMF_Test((rc == ESMF_RC_FILE_OPEN), name, failMsg, result, ESMF_SRCLINE)
@@ -721,7 +721,7 @@ if (time_diff < zero) stop 1
       !------------------------------------------------------------------------
       !EX_UTest
       ! Test LogFlush of default log
-      write(failMsg, *) "Did not return ESMF_FAILURE"
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) " LogFlush of default log Test"
       call ESMF_LogFlush( rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -729,7 +729,7 @@ if (time_diff < zero) stop 1
       !------------------------------------------------------------------------
       !EX_UTest
       ! Test logmsgList filter
-      write(failMsg, *) "Did not return ESMF_FAILURE"
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) " LogSet with logmsgList set to info only Test"
       call ESMF_LogSet (  &
           logmsgList=(/ ESMF_LOGMSG_INFO /),  &
@@ -825,7 +825,7 @@ if (time_diff < zero) stop 1
       !------------------------------------------------------------------------
       !EX_UTest
       ! Test logmsgList filter
-      write(failMsg, *) "Did not return ESMF_FAILURE"
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) " LogSet with logmsgList set for warnings and info Test"
       call ESMF_LogSet (  &
           logmsgList=(/ ESMF_LOGMSG_WARNING, ESMF_LOGMSG_INFO /),  &

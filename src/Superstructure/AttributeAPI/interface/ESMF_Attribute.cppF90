@@ -71,7 +71,7 @@ module ESMF_AttributeMod
   use ESMF_StateTypesMod
   use ESMF_StateVaMod
   use ESMF_StateMod
-  use ESMF_UtilMod
+  use ESMF_UtilStringMod
   use ESMF_VMMod
   use ESMF_AttributeInternalsMod
 
@@ -11540,7 +11540,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       if (len_trim(value) > 0) then @\
         ! also for internal Attributes, must append inputList to the Attribute value @\
         lens(1) = len_trim(value) @\
-        valueString(1:lens(1)) = ESMF_String2Array(trim(value)) @\
+        valueString(1:lens(1)) = ESMF_UtilString2Array(trim(value)) @\
       endif @\
       if (present(inputList)) then @\
         j = lens(1) + 1 @\
@@ -11548,10 +11548,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           if (len_trim(inputList(i-1)) > 0) then @\
             ! put inputList values into valueString @\
             lens(i) = len_trim(inputList(i-1))+tag_size @\
-            valueString(j:(j+tag_size-1)) = ESMF_String2Array("Input:") @\
+            valueString(j:(j+tag_size-1)) = ESMF_UtilString2Array("Input:") @\
             j = j + tag_size @\
             valueString(j:(j+lens(i)-tag_size-1)) =  & @\
-              ESMF_String2Array(trim(inputList(i-1))) @\
+              ESMF_UtilString2Array(trim(inputList(i-1))) @\
             j = j + lens(i) @\
           endif @\
         enddo @\
@@ -11712,7 +11712,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       if (len_trim(value) > 0) then @\
         ! also for internal Attributes, must append inputList to the Attribute value @\
         lens(1) = len_trim(value) @\
-        valueString(1:lens(1)) = ESMF_String2Array(trim(value)) @\
+        valueString(1:lens(1)) = ESMF_UtilString2Array(trim(value)) @\
       endif @\
       if (present(inputList)) then @\
         j = lens(1) + 1 @\
@@ -11720,10 +11720,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           if (len_trim(inputList(i-1)) > 0) then @\
             ! put inputList values into valueString @\
             lens(i) = len_trim(inputList(i-1))+tag_size @\
-            valueString(j:(j+tag_size-1)) = ESMF_String2Array("Input:") @\
+            valueString(j:(j+tag_size-1)) = ESMF_UtilString2Array("Input:") @\
             j = j + tag_size @\
             valueString(j:(j+lens(i)-tag_size-1)) =  & @\
-              ESMF_String2Array(trim(inputList(i-1))) @\
+              ESMF_UtilString2Array(trim(inputList(i-1))) @\
             j = j + lens(i) @\
           endif @\
         enddo @\

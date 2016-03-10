@@ -56,6 +56,7 @@ module ESMF_StateAPIMod
       use ESMF_IO_NetCDFMod
       use ESMF_IOUtilMod
       use ESMF_UtilMod
+      use ESMF_UtilStringMod
       
       implicit none
       

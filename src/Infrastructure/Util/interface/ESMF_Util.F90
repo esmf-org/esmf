@@ -84,11 +84,8 @@
       public :: ESMF_UtilIORmDir
       public :: ESMF_UtilIOGetCWD
 
-!  Misc methods
-      public :: ESMF_Array2String
-      public :: ESMF_String2Array
+!  Misc string methods
       public :: ESMF_UtilString2Int
-      public :: ESMF_StringConcat
       public :: ESMF_UtilStringLowerCase
       public :: ESMF_UtilStringUpperCase
 
@@ -737,72 +734,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
   end subroutine ESMF_UtilIORmDir
 
-!------------------------------------------------------------------------- 
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_Array2String"
-!BOPI
-!  !IROUTINE:  ESMF_Array2String - convert character array to string
-!  
-! !INTERFACE: 
-    function ESMF_Array2String (charArray) 
-!
-! !ARGUMENTS:
-      character(len=1), intent(in) :: charArray(:)
-
-!
-! !RETURN VALUE:
-      character(len=size (charArray)) :: ESMF_Array2String
-
-!
-! !DESCRIPTION:
-!   Converts given an array of characters to a string.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[charArray]
-!       An array of characters.
-!     \end{description}
-!
-!
-!EOPI
-
-      ESMF_Array2String = transfer (charArray, mold=ESMF_Array2String)
-
-    end function ESMF_Array2String
 
 !------------------------------------------------------------------------- 
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_String2Array"
-!BOPI
-!  !IROUTINE:  ESMF_String2Array - convert character string to array
-!  
-! !INTERFACE: 
-      function ESMF_String2Array (string) 
-!
-! !ARGUMENTS:
-      character(len=*), intent(in) :: string
-!
-! !RETURN VALUE:
-      character(len=1) :: ESMF_String2Array(len (string))
-
-!
-! !DESCRIPTION:
-!   Converts given a string to an array of characters.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[string]
-!       A character string.
-!     \end{description}
-!
-!
-!EOPI
-
-      ESMF_String2Array = transfer (string, mold=ESMF_String2Array)
-
-      end function ESMF_String2Array
-
-!-----------------------------------------------------------------------------
+!------------------------------------------------------------------------- 
+! misc string routines
+!------------------------------------------------------------------------- 
+!------------------------------------------------------------------------- 
 !BOP
 ! !IROUTINE: ESMF_UtilString2Int - Convert a string to an integer
 ! !INTERFACE:
@@ -919,44 +856,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   !-----------------------------------------------------------------------------
 
 
-!------------------------------------------------------------------------- 
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_StringConcat"
-!BOPI
-!  !IROUTINE:  ESMF_StringConcat - concatenate two strings
-!  
-! !INTERFACE: 
-    function ESMF_StringConcat (string1, string2) 
-!
-! !ARGUMENTS:
-      character(len=*), intent(in) :: string1
-      character(len=*), intent(in) :: string2
-!
-! !RETURN VALUE:
-      character(len=len (string1) + len (string2)) :: ESMF_StringConcat
-
-!
-! !DESCRIPTION:
-!   Concatenates two strings.  Useful for .cppF90 files where the first pass preprocessing
-!   may treat the Fortran // operator to be a C++ inline comment.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[string1]
-!       A character string.
-!     \item[string2]
-!       A character string.
-!     \end{description}
-!
-!
-!EOP
-
-      ESMF_StringConcat(:len (string1))    = string1
-      ESMF_StringConcat( len (string1)+1:) = string2
-
-    end function ESMF_StringConcat
-
-!------------------------------------------------------------------------- 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_UtilStringLowerCase"
 !BOP
