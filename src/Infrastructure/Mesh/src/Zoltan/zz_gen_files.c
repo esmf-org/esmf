@@ -49,7 +49,7 @@ static int fan_in_edge_global_ids(ZZ *zz, int numEdges, ZOLTAN_ID_PTR egids);
 /*****************************************************************************/
 /*****************************************************************************/
 
-int Zoltan_Generate_Files(ZZ *zz, char *fname, int base_index,
+int Zoltan_Generate_Files(ZZ *zz, const char *fname, int base_index,
 int gen_geom, int gen_graph, int gen_hg)
 {
 /*

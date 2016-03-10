@@ -44,7 +44,7 @@ int main(void){
   // LocStream variables
   ESMC_LocStream srclocstream;
   int ls_size=9;
-  char *keyName="AnyNameHere";
+  const char *keyName="AnyNameHere";
   int cLBound,cUBound;
   double *farray;
   double *farray2;
