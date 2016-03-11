@@ -498,34 +498,34 @@ module DRIVER
 contains
   !-----------------------------------------------------------------------------
 
-  subroutine SetServices(driver, rc)
-    type(ESMF_GridComp)  :: driver
+  subroutine SetServices(drvr, rc)
+    type(ESMF_GridComp)  :: drvr
     integer, intent(out) :: rc
 
     rc = ESMF_SUCCESS
 
     ! NUOPC_Driver registers the generic methods
-    call NUOPC_CompDerive(driver, driver_routine_SS, rc=rc)
+    call NUOPC_CompDerive(drvr, driver_routine_SS, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
          line=__LINE__, &
          file=__FILE__)) &
          return  ! bail out
 
-    call NUOPC_CompSetInternalEntryPoint(driver, ESMF_METHOD_INITIALIZE, &
+    call NUOPC_CompSetInternalEntryPoint(drvr, ESMF_METHOD_INITIALIZE, &
          phaseLabelList=(/"IPDv05p1"/), userRoutine=InitializeP1, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
          line=__LINE__, &
          file=__FILE__)) &
          return  ! bail out
 
-    call NUOPC_CompSetInternalEntryPoint(driver, ESMF_METHOD_INITIALIZE, &
+    call NUOPC_CompSetInternalEntryPoint(drvr, ESMF_METHOD_INITIALIZE, &
          phaseLabelList=(/"IPDv05p6"/), userRoutine=RealizeMirroredFields, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
          line=__LINE__, &
          file=__FILE__)) &
          return  ! bail out
 
-    call NUOPC_CompSetInternalEntryPoint(driver, ESMF_METHOD_INITIALIZE, &
+    call NUOPC_CompSetInternalEntryPoint(drvr, ESMF_METHOD_INITIALIZE, &
          phaseLabelList=(/"IPDv05p8"/), userRoutine=TimestampMirroredFields, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
          line=__LINE__, &
@@ -533,7 +533,7 @@ contains
          return  ! bail out
 
     ! attach specializing method(s)
-    call NUOPC_CompSpecialize(driver, specLabel=driver_label_SetModelServices, &
+    call NUOPC_CompSpecialize(drvr, specLabel=driver_label_SetModelServices, &
          specRoutine=SetModelServices, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
          line=__LINE__, &
@@ -544,8 +544,8 @@ contains
 
   !-----------------------------------------------------------------------------
 
-  subroutine SetModelServices(driver, rc)
-    type(ESMF_GridComp)  :: driver
+  subroutine SetModelServices(drvr, rc)
+    type(ESMF_GridComp)  :: drvr
     integer, intent(out) :: rc
 
     ! local variables
@@ -565,21 +565,21 @@ contains
          file=__FILE__)) &
          return  ! bail out
 
-    call NUOPC_CompAttributeSet(driver, name="CompLabel", &
+    call NUOPC_CompAttributeSet(drvr, name="CompLabel", &
          value="Driver", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
          line=__LINE__, &
          file=__FILE__)) &
          call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
-    call NUOPC_DriverAddComp(driver, "ATM", atmSS, comp=child, rc=rc)
+    call NUOPC_DriverAddComp(drvr, "ATM", atmSS, comp=child, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
          line=__LINE__, &
          file=__FILE__)) &
          return  ! bail out
 
     ! Add connectors for field mirroring
-    call NUOPC_DriverAddComp(driver, srcCompLabel="Driver", &
+    call NUOPC_DriverAddComp(drvr, srcCompLabel="Driver", &
          dstCompLabel="ATM", compSetServicesRoutine=cplSS, &
          rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -587,7 +587,7 @@ contains
          file=__FILE__)) &
          return  ! bail out
 
-    call NUOPC_DriverAddComp(driver, srcCompLabel="ATM", &
+    call NUOPC_DriverAddComp(drvr, srcCompLabel="ATM", &
          dstCompLabel="Driver", compSetServicesRoutine=cplSS, &
          rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -621,7 +621,7 @@ contains
          file=__FILE__)) &
          call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
-    call ESMF_GridCompSet(driver, clock=internalClock, rc=rc)
+    call ESMF_GridCompSet(drvr, clock=internalClock, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
          line=__LINE__, &
          file=__FILE__)) &
@@ -629,8 +629,8 @@ contains
 
   end subroutine SetModelServices
 
-  subroutine InitializeP1(driver, importState, exportState, clock, rc)
-    type(ESMF_GridComp)  :: driver
+  subroutine InitializeP1(drvr, importState, exportState, clock, rc)
+    type(ESMF_GridComp)  :: drvr
     type(ESMF_State)     :: importState, exportState
     type(ESMF_Clock)     :: clock
     integer, intent(out) :: rc
@@ -640,7 +640,7 @@ contains
 
     rc = ESMF_SUCCESS
 
-    call NUOPC_DriverGetComp(driver, compLabel="ATM", &
+    call NUOPC_DriverGetComp(drvr, compLabel="ATM", &
          comp=comp, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
          line=__LINE__, &
@@ -683,8 +683,8 @@ contains
 
   end subroutine InitializeP1
 
-  subroutine RealizeMirroredFields(driver, importState, exportState, clock, rc)
-    type(ESMF_GridComp)  :: driver
+  subroutine RealizeMirroredFields(drvr, importState, exportState, clock, rc)
+    type(ESMF_GridComp)  :: drvr
     type(ESMF_State)     :: importState, exportState
     type(ESMF_Clock)     :: clock
     integer, intent(out) :: rc
@@ -886,8 +886,8 @@ contains
   end subroutine MirrorFieldsInState
 
 
-  subroutine TimestampMirroredFields(driver, importState, exportState, clock, rc)
-    type(ESMF_GridComp)  :: driver
+  subroutine TimestampMirroredFields(drvr, importState, exportState, clock, rc)
+    type(ESMF_GridComp)  :: drvr
     type(ESMF_State)     :: importState, exportState
     type(ESMF_Clock)     :: clock
     integer, intent(out) :: rc
@@ -910,7 +910,7 @@ contains
          file=__FILE__)) &
          call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
-    call ESMF_AttributeSet(driver, name="InitializeDataComplete", &
+    call ESMF_AttributeSet(drvr, name="InitializeDataComplete", &
          value="true", convention="NUOPC",  purpose="Instance", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
          line=__LINE__, &
@@ -941,7 +941,7 @@ end module
     implicit none
 
     ! Local variables
-    type(ESMF_GridComp) :: driver
+    type(ESMF_GridComp) :: drvr
     type(ESMF_State) :: importState, exportState
     integer :: rc
     integer :: finalrc
@@ -974,28 +974,28 @@ end module
        stateintent=ESMF_STATEINTENT_EXPORT, rc=rc)
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
-    driver = ESMF_GridCompCreate(name="Driver", rc=rc)
+    drvr = ESMF_GridCompCreate(name="Driver", rc=rc)
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
-    call ESMF_GridCompSetServices(driver, userRoutine=driverSS, rc=rc)
+    call ESMF_GridCompSetServices(drvr, userRoutine=driverSS, rc=rc)
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
-    call ESMF_GridCompInitialize(driver, phase=0, rc=rc)
+    call ESMF_GridCompInitialize(drvr, phase=0, rc=rc)
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
-    call ESMF_GridCompInitialize(driver, importState=importState, &
+    call ESMF_GridCompInitialize(drvr, importState=importState, &
          exportState=exportState, rc=rc)
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
-    call ESMF_GridCompRun(driver, importState=importState, &
+    call ESMF_GridCompRun(drvr, importState=importState, &
          exportState=exportState, rc=rc)
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
-    call ESMF_GridCompFinalize(driver, importState=importState, &
+    call ESMF_GridCompFinalize(drvr, importState=importState, &
          exportState=exportState, rc=rc)
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
-    call ESMF_GridCompDestroy(driver, rc=rc)
+    call ESMF_GridCompDestroy(drvr, rc=rc)
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 
