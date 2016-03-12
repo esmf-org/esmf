@@ -969,17 +969,15 @@ type(ESMF_KeywordEnforcer),optional::keywordEnforcer !must use keywords below
           write (alog%unitNumber, *)
 
         end do
-        localrc = ESMF_SUCCESS
-      else
-        localrc = ESMF_FAILURE
       end if
+      localrc = ESMF_SUCCESS
    
       alog%fIndex = 1 
 
       call ESMF_UtilIOUnitFlush (alog%unitNumber, rc=localrc2)
       if (localrc2 /= ESMF_SUCCESS) then
+        write (ESMF_UtilIOStderr,*) 'unit flush failed, rc =', localrc2
         localrc = localrc2
-        print *, 'unit flush failed, rc =', localrc2
       end if
  
       alog%flushed = ESMF_TRUE
