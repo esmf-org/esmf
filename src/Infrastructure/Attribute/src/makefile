@@ -3,7 +3,8 @@
 # default rule if no explicit target is given to make
 ALL: build_here
 
-SOURCEC	  = ESMCI_Attribute.C ESMCI_AttributeUpdate.C ESMCI_AttributeWrite.C
+SOURCEC	  = ESMCI_Attribute.C ESMCI_AttributeUpdate.C ESMCI_AttributeWrite.C \
+            ESMCI_AttributeWriteJSON.C
 SOURCEF	  = 
 STOREH    = ESMCI_Attribute.h 
 

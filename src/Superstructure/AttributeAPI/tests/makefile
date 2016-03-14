@@ -21,7 +21,9 @@ LOCDIR	  = src/Superstructure/AttributeAPI/tests
 
 .NOTPARALLEL:
 
-TESTS_BUILD = $(ESMF_TESTDIR)/ESMF_AttPackABundleUTest \
+TESTS_BUILD =  $(ESMF_TESTDIR)/ESMF_AttributeJSONUTest
+
+DOO = $(ESMF_TESTDIR)/ESMF_AttPackABundleUTest \
 		$(ESMF_TESTDIR)/ESMF_AttPackArrayUTest \
 		$(ESMF_TESTDIR)/ESMF_AttPackCplCompUTest \
 		$(ESMF_TESTDIR)/ESMF_AttPackDistGridUTest \

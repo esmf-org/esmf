@@ -111,6 +111,8 @@ module ESMF_AttributeMod
 !  Attribute methods
       public ESMF_AttributeGetInit
 
+      public ESMF_AttPackStreamJSON
+
       public ESMF_AttributeAdd
       public ESMF_AttributeCopy
       public ESMF_AttributeGet
@@ -3565,6 +3567,63 @@ contains
     end function ESMF_AttributeGetInit
 
 !-----------------------------------------------------------------------------
+
+^undef ESMF_METHOD
+^define ESMF_METHOD "AttPackStreamJSON"
+
+!BOPI
+! !IROUTINE: ESMF_AttPackStreamJSON - Stream AttPack to JSON formatted string.
+!
+! !INTERFACE:
+      subroutine ESMF_AttPackStreamJSON(attpack, output, rc)
+
+      type(ESMF_AttPack), intent(inout)   :: attpack
+      character(len=:), allocatable, intent(out) :: output
+      integer, intent(out), optional      :: rc
+
+!
+! !DESCRIPTION:
+!     Streams an Attpack into a JSON formatted string.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [attpack]
+!           The Attribute package to stream.
+!     \item [output]
+!           The allocatable character output variable, user is responsible for
+!           deallocating!
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOPI
+
+      integer :: localrc, jsonstrlen
+
+      ! Initialize
+      localrc = ESMF_RC_NOT_IMPL
+
+      ! Use an inquiry function to find the length of the string needed
+      ! for the JSON string.  This will be used to allocate the Fortran string,
+      ! the user will be responsible for deallocating it.
+      call C_ESMC_AttPackStreamJSONstrlen(attpack, jsonstrlen, localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+
+      ! allocate the output string
+      allocate(character(len=jsonstrlen) :: output)
+
+      ! call the C++ function to stream JSON to the output string
+      call C_ESMC_AttPackStreamJSON(attpack, output, localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_AttPackStreamJSON
+!------------------------------------------------------------------------------
+
 
 !-------------------------------------------------------------------------
 !  Macro versions of the routines

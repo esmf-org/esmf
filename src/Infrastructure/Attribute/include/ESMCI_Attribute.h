@@ -63,7 +63,7 @@ class Attribute
     int items;                  // number of items (NOT byte count) for lists
 
     ESMC_Logical attrRoot;
-	ESMC_Logical attrUpdateDone; // hack for non-ordered containers
+	  ESMC_Logical attrUpdateDone; // hack for non-ordered containers
   
     std::string attrConvention;             // Convention of Attpack
     std::string attrPurpose;                // Purpose of Attpack
@@ -193,6 +193,9 @@ class Attribute
 
     // query whether an Attribute is "present" or "set"
     bool isSet() const;
+
+    int streamJSON(std::string &output) const;
+    int streamJSONiter(std::ostringstream &os, unsigned int level) const;
 
     // return an Attribute by name or number
     Attribute *AttributeGet(const std::string &name) const;
@@ -425,6 +428,11 @@ extern "C" {
 // TODO:  intel 11.0.083 compiler on Columbia errors out on ESMCI_Attribute_F.C
 //        with the following prototype:
 // error: more than one instance of overloaded function "c_esmc_attpackremove_" has "C" linkage
+  void FTN_X(c_esmc_attpackstreamjson)(ESMCI::Attribute **attpack,
+                                     char *output, int *rc,
+                                     ESMCI_FortranStrLenArg olen);
+  void FTN_X(c_esmc_attpackstreamjsonstrlen)(ESMCI::Attribute **attpack,
+                                     int *jsonstrlen, int *rc);
   void FTN_X(c_esmc_attpackget)(ESMC_Base **base, ESMCI::Attribute **attpack,
                                   int *count, char *specList, int *lens,
 								  ESMC_AttNest_Flag *anflag,
@@ -488,10 +496,10 @@ extern "C" {
 								                  ESMCI_FortranStrLenArg sfnlen);
   void FTN_X(c_esmc_attributewritetab)(ESMC_Base **base,
                                   char *convention, char *purpose,
-                                  char *object, char *targetobj, int *rc, 
+                                  char *object, char *targetobj, int *rc,
                                   ESMCI_FortranStrLenArg clen, 
                                   ESMCI_FortranStrLenArg plen, 
-                                  ESMCI_FortranStrLenArg olen, 
+                                  ESMCI_FortranStrLenArg olen,
                                   ESMCI_FortranStrLenArg tlen);
   void FTN_X(c_esmc_attributewritexml)(ESMC_Base **base,
                                   char *convention, char *purpose,

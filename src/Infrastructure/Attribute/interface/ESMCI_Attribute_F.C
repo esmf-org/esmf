@@ -3853,6 +3853,104 @@ void FTN_X(c_esmc_attributewritexml)(
 
 }  // end c_ESMC_AttributeWriteXML
 
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  c_ESMC_AttPackStreamJSON - write json from attpack to string
+//
+// !INTERFACE:
+void FTN_X(c_esmc_attpackstreamjson)(
+//
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_attpackstreamjson()"
+//
+// !RETURN VALUE:
+//    none.  return code is passed thru the parameter list
+//
+// !ARGUMENTS:
+        ESMCI::Attribute **attpack,    // in - attpack
+        char *output,                  // out - output string
+        int *rc,                       // out - return code
+        ESMCI_FortranStrLenArg olen) { // hidden/in - strlen count for target object
+//
+// !DESCRIPTION:
+//     Write attpack contents to json formatted output
+//
+//EOP
+
+  int status;
+
+  // Initialize return code; assume routine not implemented
+  if (rc) *rc = ESMC_RC_NOT_IMPL;
+
+  if (!attpack) {
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+                                  "bad attpack", ESMC_CONTEXT, &status);
+    if (rc) *rc = status;
+    return;
+  }
+
+  string coutput;
+
+  // Write the attributes from the object.
+  status = (*attpack)->streamJSON(coutput);
+  ESMC_LogDefault.MsgFoundError(status, ESMCI_ERR_PASSTHRU,
+                                ESMC_CONTEXT, ESMC_NOT_PRESENT_FILTER(rc));
+
+  // convert strings to F90 using F90 length
+  status = ESMC_CtoF90string(coutput.c_str(), &output[0], olen);
+  ESMC_LogDefault.MsgFoundError(status, ESMCI_ERR_PASSTHRU,
+                                ESMC_CONTEXT, ESMC_NOT_PRESENT_FILTER(rc));
+
+}  // end c_ESMC_AttPackStreamJSON
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  c_ESMC_AttPackStreamJSONstrlen - get the string length required
+//                                              to write json from attpack to
+//                                              string
+//
+// !INTERFACE:
+void FTN_X(c_esmc_attpackstreamjsonstrlen)(
+//
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_attpackstreamjsonstrlen()"
+//
+// !RETURN VALUE:
+//    none.  return code is passed thru the parameter list
+//
+// !ARGUMENTS:
+        ESMCI::Attribute **attpack,    // in - attpack
+        int *jsonstrlen,               // out - output stringlength
+        int *rc) {                     // out - return code
+//
+// !DESCRIPTION:
+//     Get the string length required to write attpack contents to json
+//     formatted output
+//
+//EOP
+
+  int status;
+
+  // Initialize return code; assume routine not implemented
+  if (rc) *rc = ESMC_RC_NOT_IMPL;
+
+  if (!attpack) {
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+                                  "bad attpack", ESMC_CONTEXT, &status);
+    if (rc) *rc = status;
+    return;
+  }
+
+  string coutput;
+
+  // Write the attributes from the object.
+  status = (*attpack)->streamJSON(coutput);
+  ESMC_LogDefault.MsgFoundError(status, ESMCI_ERR_PASSTHRU,
+                                ESMC_CONTEXT, ESMC_NOT_PRESENT_FILTER(rc));
+
+  *jsonstrlen = coutput.length();
+}  // end c_ESMC_AttPackStreamJSON
+
 #undef  ESMC_METHOD
 
 } // extern "C"
