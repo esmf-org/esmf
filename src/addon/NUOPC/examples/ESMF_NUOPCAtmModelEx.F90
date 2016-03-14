@@ -23,16 +23,16 @@
 ! \textbf{Finding More NUOPC Code Examples}
 ! \\
 ! In addition to the example code in this section, the
-! \href{https://sourceforge.net/p/esmfcontrib/svn/HEAD/tree/NUOPC/tags/ESMF\_7\_0\_0/}{NUOPC Prototypes Subversion}
+! \htmladdnormallink{NUOPC Prototypes Subversion}{https://sourceforge.net/p/esmfcontrib/svn/HEAD/tree/NUOPC/tags/ESMF\_7\_0\_0/}
 ! repository contains many small example applications that are helpful
 ! for understanding the architecture of NUOPC applications and showing
 ! example uses of the NUOPC API.  These example applications can be
 ! compiled and executed on your system.
 !
 ! A good starting point is the
-! \href{https://sourceforge.net/p/esmfcontrib/svn/HEAD/tree/NUOPC/tags/ESMF\_7\_0\_0/SingleModelProto}{SingleModelProto application},
+! \htmladdnormallink{SingleModelProto application}{https://sourceforge.net/p/esmfcontrib/svn/HEAD/tree/NUOPC/tags/ESMF\_7\_0\_0/SingleModelProto},
 ! which includes a single Model with a Driver and the
-! \href{https://sourceforge.net/p/esmfcontrib/svn/HEAD/tree/NUOPC/tags/ESMF\_7\_0\_0/AtmOcnProto}{AtmOcnProto application}
+! \htmladdnormallink{AtmOcnProto application}{https://sourceforge.net/p/esmfcontrib/svn/HEAD/tree/NUOPC/tags/ESMF\_7\_0\_0/AtmOcnProto}
 ! which includes two Models, a Connector, and a Driver.
 !
 ! \subsection{Module Imports}
@@ -175,7 +175,7 @@ module ATM
 ! is registered for the initialize phase with label IPDv03p1.
 ! The full list of initialization phases,
 ! how they are ordered, and what happens during each phase is described in the
-! \href{http://www.earthsystemmodeling.org/esmf\_releases/non_public/ESMF\_7\_0\_0/NUOPC\_refdoc/node3.html#IPD}{NUOPC Reference Manual}.
+! \htmladdnormallink{NUOPC Reference Manual}{http://www.earthsystemmodeling.org/esmf\_releases/non_public/ESMF\_7\_0\_0/NUOPC\_refdoc/node3.html\#IPD}.
 !
 ! For now you should notice a few things:
 ! \begin{itemize}
@@ -190,7 +190,7 @@ module ATM
 ! \item If the subroutine succeeds, it should return {\tt ESMF\_SUCCESS} in
 !  the return code.  Otherwise it should return an error code. The
 !  list of pre-defined ESMF error codes is provided in the
-!  \href{http://www.earthsystemmodeling.org/esmf\_releases/public/last/ESMF\_refdoc/node9.html\#SECTION09030000000000000000}{ESMF Reference Manual}.
+!  \htmladdnormallink{ESMF Reference Manual}{http://www.earthsystemmodeling.org/esmf\_releases/public/last/ESMF\_refdoc/node9.html\#SECTION09030000000000000000}.
 !\end{itemize}
 
 ! The purpose of this phase is for your model to \textbf{advertise its import and
@@ -208,7 +208,7 @@ module ATM
 ! \begin{itemize}
 ! \item either the {\tt importState} or {\tt exportState} object
 ! \item the standard name of the field, based on the
-! \href{http://cfconventions.org/standard-names.html}{CF conventions}
+! \htmladdnormallink{CF conventions}{http://cfconventions.org/standard-names.html}
 ! \item an optional name for the field, which can be used to
 !  retrieve it later from its {\tt ESMF\_State}; if ommited
 !  the standard name will be used as the field name
@@ -295,11 +295,11 @@ module ATM
 ! ESMF representation is  one of the most important parts of creating
 ! a NUOPC cap. The ESMF geometric types are described in detail in the ESMF Reference Manual:
 ! \begin{itemize}
-! \item \href{http://www.earthsystemmodeling.org/esmf\_releases/public/last/ESMF\_refdoc/node5.html\#SECTION05080000000000000000}{ESMF\_Grid}
+! \item \htmladdnormallink{ESMF\_Grid}{http://www.earthsystemmodeling.org/esmf\_releases/public/last/ESMF\_refdoc/node5.html\#SECTION05080000000000000000}
 ! - logically rectangular grids
-! \item \href{http://www.earthsystemmodeling.org/esmf\_releases/public/last/ESMF\_refdoc/node5.html\#SECTION050100000000000000000}{ESMF\_Mesh}
+! \item \htmladdnormallink{ESMF\_Mesh}{http://www.earthsystemmodeling.org/esmf\_releases/public/last/ESMF\_refdoc/node5.html\#SECTION050100000000000000000}
 ! - unstructured grids
-! \item \href{http://www.earthsystemmodeling.org/esmf\_releases/public/last/ESMF\_refdoc/node5.html\#SECTION05090000000000000000}{ESMF\_LocStream}
+! \item \htmladdnormallink{ESMF\_LocStream}{http://www.earthsystemmodeling.org/esmf\_releases/public/last/ESMF\_refdoc/node5.html\#SECTION05090000000000000000}
 ! - a set of observational points
 ! \end{itemize}
 !
