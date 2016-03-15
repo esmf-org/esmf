@@ -74,14 +74,14 @@ namespace ESMCI {
 
       // open the JSON
       // TODO: add attrObject to root Attributes
-      os << "\n{\n  \"" << getObject() <<"\" :{\n";
+      os << "{  \"" << getObject() <<"\" :{";
 
       // stream the JSON, starting from root
       if (attrRoot == ESMF_FALSE) attr = &(attrBase->root);
       attr->streamJSONiter(os, 2);
 
       // close the JSON
-      os << "  }\n}\n";
+      os << "  }}";
 
       // set the return value to the ostringstream
       output = os.str();
@@ -129,7 +129,7 @@ namespace ESMCI {
         if (vv.size() == 1) {
           os << indent << quote << attrList.at(i)->attrName
              << quote << separator
-             << quote << vv.at(0) << quote << comma << newline;
+             << quote << vv.at(0) << quote << comma;
         }
       }
 
@@ -159,7 +159,7 @@ namespace ESMCI {
         }
 
         // open new object
-        os << opencb << newline;
+        os << opencb;
 
         // recurse
         localrc = linkList.at(k)->streamJSONiter(os, level + 1);
@@ -168,11 +168,14 @@ namespace ESMCI {
                                           &localrc))
           return localrc;
 
+        // remove comma from last object, json is silly..
+        os.seekp(-1,os.cur);
+
         // only close arrays once
         if (k<linkList.size()-1)
           os << indent << closecb << comma << space;
         else
-          os << indent << closecb << closeb << newline;
+          os << indent << closecb << closeb;
       }
 
       return ESMF_SUCCESS;
