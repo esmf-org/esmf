@@ -389,7 +389,7 @@ module ATM
 ! \subsection{Model Advance Specialization}
 ! \label{sec:atmexample_advancespec}
 !
-! As described in the \nameref{sec:atmexample_setservices} section,
+! As described in the section \ref{sec:atmexample_setservices},
 ! the subroutine {\tt ModelAdvance} (shown below) has been
 ! registered to the \emph{specialization point} with the label
 ! {\tt model\_label\_Advance} in the {\tt SetServices} subroutine. This
