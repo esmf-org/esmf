@@ -191,7 +191,11 @@ ifeq ($(ESMF_LIBSTDCXX),libstdc++.dylib)
 ESMF_LIBSTDCXX := $(shell $(ESMF_CXXCOMPILER) -print-file-name=libstdc++.a)
 endif
 ESMF_F90LINKPATHS += -L$(dir $(ESMF_LIBSTDCXX))
+ifeq ((ESMF_CLANGSTR), clang)
+ESMF_F90LINKLIBS  += -lstdc++
+else
 ESMF_F90LINKLIBS  += -lstdc++ -lgcc_eh
+endif
 
 ############################################################
 # Blank out variables to prevent rpath encoding
