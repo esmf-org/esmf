@@ -3577,9 +3577,9 @@ contains
 ! !INTERFACE:
       subroutine ESMF_AttPackStreamJSON(attpack, output, rc)
 
-      type(ESMF_AttPack), intent(inout)   :: attpack
-      character(len=:), allocatable, intent(out) :: output
-      integer, intent(out), optional      :: rc
+      type(ESMF_AttPack), intent(in)   :: attpack
+      character(len=*),   intent(out)  :: output
+      integer,            intent(out), optional   :: rc
 
 !
 ! !DESCRIPTION:
@@ -3590,8 +3590,7 @@ contains
 !     \item [attpack]
 !           The Attribute package to stream.
 !     \item [output]
-!           The allocatable character output variable, user is responsible for
-!           deallocating!
+!           The character string output variable.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -3599,7 +3598,7 @@ contains
 !
 !EOPI
 
-      integer :: localrc, jsonstrlen
+      integer :: localrc, errflag, jsonstrlen
 
       ! Initialize
       localrc = ESMF_RC_NOT_IMPL
@@ -3611,8 +3610,9 @@ contains
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
 
-      ! allocate the output string
-      allocate(character(len=jsonstrlen) :: output)
+      errflag = merge (ESMF_SUCCESS, ESMF_RC_BUFFER_SHORT, jsonstrlen <= len (output))
+      if (ESMF_LogFoundError(errflag, msg='JSON output string too short',  &
+              ESMF_CONTEXT, rcToReturn=rc)) return
 
       ! call the C++ function to stream JSON to the output string
       call C_ESMC_AttPackStreamJSON(attpack, output, localrc)

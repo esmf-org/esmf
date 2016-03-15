@@ -82,6 +82,15 @@
       logical :: trace_flag
       type(ESMF_LogMsg_Flag), pointer :: logabort_flags(:)
       character(2) :: tooshortstr
+      character(128), parameter :: json_string = &
+          '{ ' //  &
+            '"comp" :{ ' //  &
+              '"event": "start_phase", ' //  &
+              '"phaseLabel": "IPDv01p2", ' //  &
+              '"phase": "0", '//   &
+            '} ' //  &
+          '}'
+
 #endif
 
 !------------------------------------------------------------------------------
@@ -205,6 +214,14 @@
       write(name, *) "Use of default log Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       print *, " rc = ", rc
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! Test writing a JSON string
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "JSON output Test"
+      call ESMF_LogWrite (msg=json_string, logmsgFlag=ESMF_LOGMSG_JSON, rc=rc)
+      call ESMF_Test(rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
       !EX_UTest

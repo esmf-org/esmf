@@ -59,7 +59,7 @@ program ESMF_AttributeJSONUTest
   character(ESMF_MAXSTR)  :: conv, purp
   character(ESMF_MAXSTR), dimension(3)  :: attpackNames
 
-  character(len=:), allocatable  :: output
+  character(1024)         :: output
 
 #endif
 !-------------------------------------------------------------------------------
@@ -200,13 +200,11 @@ program ESMF_AttributeJSONUTest
     !-------------------------------------------------------------------------
     !EX_UTest
     ! Write JSON stream to the default log
-    call ESMF_LogWrite(output, ESMF_LOGMSG_INFO, rc=rc)
+    call ESMF_LogWrite(output, ESMF_LOGMSG_JSON, rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Write JSON stream to the default log"
     call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
     !-------------------------------------------------------------------------
-
-    deallocate(output)
 
     call ESMF_AttributeAdd(gridcomp, convention=conv, purpose=purp, &
                            attrList=(/"event     ", "phaseLabel", "phase     " /), &
@@ -231,13 +229,11 @@ program ESMF_AttributeJSONUTest
     !-------------------------------------------------------------------------
     !EX_UTest
     ! Write JSON stream to the default log
-    call ESMF_LogWrite(output, ESMF_LOGMSG_INFO, rc=rc)
+    call ESMF_LogWrite(output, ESMF_LOGMSG_JSON, rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Write JSON stream to the default log"
     call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
     !-------------------------------------------------------------------------
-
-    deallocate(output)
 
   !------------------------------------------------------------------------
   ! clean up
