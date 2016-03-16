@@ -206,7 +206,27 @@ program ESMF_AttributeJSONUTest
     call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
     !-------------------------------------------------------------------------
 
-    check = '{  "state" :{    "intent": "import",    "name": "myImport",    "fields": [{      "name": "sst",      "standard_name": "sea_surface_temp",      "units": "C",      "connected": "false",      "timestamp": "20091201000000",      "transferOfferGeomObject": "will provide"    }, {      "name": "ssaf",      "standard_name": "sea_ice_area_fraction",      "units": "C",      "connected": "false",      "timestamp": "20091201000000",      "transferOfferGeomObject": "will provide"    }]  }}'
+    check = '{&
+            &  "state" :{&
+            &    "intent": "import",&
+            &    "name": "myImport",&
+            &    "fields": [{&
+            &      "name": "sst",&
+            &      "standard_name": "sea_surface_temp",&
+            &      "units": "C",&
+            &      "connected": "false",&
+            &      "timestamp": "20091201000000",&
+            &      "transferOfferGeomObject": "will provide"&
+            &    }, {&
+            &      "name": "ssaf",&
+            &      "standard_name": "sea_ice_area_fraction",&
+            &      "units": "C",&
+            &      "connected": "false",&
+            &      "timestamp": "20091201000000",&
+            &      "transferOfferGeomObject": "will provide"&
+            &    }]&
+            &  }&
+            &}'
 
     !-------------------------------------------------------------------------
     !EX_UTest
