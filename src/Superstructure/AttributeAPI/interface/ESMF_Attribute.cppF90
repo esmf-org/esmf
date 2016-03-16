@@ -12236,13 +12236,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         endif @\
  @\
         if (attpack == ESMF_TRUE) then @\
-          if (writeflag%value .eq. ESMF_ATTWRITE_TAB%value) then @\
-            call c_ESMC_AttributeWriteTab(mthisfield, convention, & @\
-              purpose, object, ftarobj, localrc) @\
-          else if (writeflag%value .eq. ESMF_ATTWRITE_XML%value) then @\
-            call c_ESMC_AttributeWriteXML(mthisfield, convention, & @\
-              purpose, object, ftarobj, localrc) @\
-          endif @\
+          call c_ESMC_AttributeWrite(mthisfield, convention, & @\
+            purpose, object, ftarobj, writeflag, localrc) @\
         endif @\
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
           ESMF_CONTEXT, rcToReturn=rc)) return @\
