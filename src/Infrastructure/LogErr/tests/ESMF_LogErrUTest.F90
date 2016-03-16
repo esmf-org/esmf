@@ -83,13 +83,13 @@
       type(ESMF_LogMsg_Flag), pointer :: logabort_flags(:)
       character(2) :: tooshortstr
       character(128), parameter :: json_string = &
-          '{ ' //  &
-            '"comp" :{ ' //  &
-              '"event": "start_phase", ' //  &
-              '"phaseLabel": "IPDv01p2", ' //  &
-              '"phase": "0", '//   &
-            '} ' //  &
-          '}'
+          '{&
+          &   "comp" :{&
+          &     "event": "start_phase",&
+          &     "phaseLabel": "IPDv01p2",&
+          &     "phase": "0",&
+          &   }&
+          &}'
 
 #endif
 
