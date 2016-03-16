@@ -80,6 +80,11 @@ namespace ESMCI {
       if (attrRoot == ESMF_FALSE) attr = &(attrBase->root);
       attr->streamJSONiter(os, 2);
 
+      // TODO: this is hacky
+      // for flat lists, remove comma from last object, json is silly..
+      if (attr->linkList.size() == 0)
+        os.seekp(-1,os.cur);
+
       // close the JSON
       os << "  }}";
 
@@ -151,6 +156,8 @@ namespace ESMCI {
             obj = linkList.at(k)->attrList.at(0)->getObject();
           else if (linkList.at(k)->packList.size() > 0)
             obj = linkList.at(k)->packList.at(0)->getObject();
+
+          // TODO: this is hacky
           // pluralize the object.. nitty gritty here
           obj += "s";
 
@@ -168,6 +175,7 @@ namespace ESMCI {
                                           &localrc))
           return localrc;
 
+        // TODO: this is hacky
         // remove comma from last object, json is silly..
         os.seekp(-1,os.cur);
 

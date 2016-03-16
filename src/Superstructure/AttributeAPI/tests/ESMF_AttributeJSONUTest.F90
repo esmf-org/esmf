@@ -59,7 +59,7 @@ program ESMF_AttributeJSONUTest
   character(ESMF_MAXSTR)  :: conv, purp
   character(ESMF_MAXSTR), dimension(3)  :: attpackNames
 
-  character(1024)         :: output
+  character(1024)         :: output, check
 
 #endif
 !-------------------------------------------------------------------------------
@@ -206,6 +206,17 @@ program ESMF_AttributeJSONUTest
     call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
     !-------------------------------------------------------------------------
 
+    check = '{  "state" :{    "intent": "import",    "name": "myImport",    "fields": [{      "name": "sst",      "standard_name": "sea_surface_temp",      "units": "C",      "connected": "false",      "timestamp": "20091201000000",      "transferOfferGeomObject": "will provide"    }, {      "name": "ssaf",      "standard_name": "sea_ice_area_fraction",      "units": "C",      "connected": "false",      "timestamp": "20091201000000",      "transferOfferGeomObject": "will provide"    }]  }}'
+
+    !-------------------------------------------------------------------------
+    !EX_UTest
+    ! Validate JSON string
+    write(failMsg, *) "JSON string is no longer the same"
+    write(name, *) "Validate JSON string"
+    call ESMF_Test((output==check), name, failMsg, result, ESMF_SRCLINE)
+    !-------------------------------------------------------------------------
+
+
     call ESMF_AttributeAdd(gridcomp, convention=conv, purpose=purp, &
                            attrList=(/"event     ", "phaseLabel", "phase     " /), &
                            attpack=attpack, rc=rc)
@@ -233,6 +244,16 @@ program ESMF_AttributeJSONUTest
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Write JSON stream to the default log"
     call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+    !-------------------------------------------------------------------------
+
+    check = '{  "comp" :{    "event": "start_phase",    "phaseLabel": "IPDv01p2",    "phase": "0"  }}'
+
+    !-------------------------------------------------------------------------
+    !EX_UTest
+    ! Validate JSON string
+    write(failMsg, *) "JSON string is no longer the same"
+    write(name, *) "Validate JSON string"
+    call ESMF_Test((output==check), name, failMsg, result, ESMF_SRCLINE)
     !-------------------------------------------------------------------------
 
   !------------------------------------------------------------------------

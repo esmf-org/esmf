@@ -116,8 +116,7 @@ TESTS_RUN_UNI = RUN_ESMF_AttPackArrayUTestUNI \
 		RUN_ESMF_AttReadCplCompUTestUNI \
 		RUN_ESMF_AttReadGridCompUTestUNI \
 		RUN_ESMF_AttReadFieldUTestUNI \
-		RUN_ESMF_AttributeJSONUTest
-
+		RUN_ESMF_AttributeJSONUTestUNI
 
 
 include ${ESMF_DIR}/makefile
@@ -379,6 +378,14 @@ RUN_ESMF_AttributeStateUTest:
 RUN_ESMF_AttributeStateUTestUNI:
 	$(MAKE) TNAME=AttributeState NP=1 ftest
 
+# --- JSON
+
+RUN_ESMF_AttributeJSONUTest:
+	$(MAKE) TNAME=AttributeJSON NP=4 ftest
+
+RUN_ESMF_AttributeJSONUTestUNI:
+	$(MAKE) TNAME=AttributeJSON NP=1 ftest
+
 # --- Update
 
 RUN_ESMF_AttributeUpdateUTest:
@@ -423,10 +430,3 @@ RUN_ESMF_AttributeXMLUTestUNI:
 	cp -f $(ESMF_DIR)/src/Superstructure/AttributeAPI/tests/data/baseline_gridded_comp_cust_rp.xml $(ESMF_TESTDIR)
 	$(MAKE) TNAME=AttributeXML NP=1 ftest
 
-# --- JSON
-
-RUN_ESMF_AttributeJSONUTest:
-	$(MAKE) TNAME=AttributeJSON NP=4 ftest
-
-RUN_ESMF_AttributeJSONUTestUNI:
-	$(MAKE) TNAME=AttributeJSON NP=1 ftest
