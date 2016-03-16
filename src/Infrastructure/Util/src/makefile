@@ -8,6 +8,7 @@ AUTOGEN   = ESMF_FortranWordsize.F90 ESMF_TypeKindGet.F90 \
 SOURCEC	  = ESMCI_Util.C ESMCI_Fraction.C ESMCI_F90Interface.C \
 	    ESMCI_CoordSys.C
 SOURCEF	  = ESMF_UtilTypes.F90 \
+	    ESMF_UtilString.F90 \
             ESMF_LogErr.F90  \
             $(AUTOGEN) \
             ESMF_InitMacros.F90 \

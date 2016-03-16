@@ -21,7 +21,7 @@
 !EOE
 
 !BOC
-module MODEL
+module MYMODEL
 
   !-----------------------------------------------------------------------------
   ! Basic NUOPC Model cap
@@ -40,7 +40,7 @@ module MODEL
   
   private
   
-  public SetServices
+  public :: SetServices
   
   !-----------------------------------------------------------------------------
   contains
@@ -168,6 +168,112 @@ end module
 !EOC
 
 
+! A basic NUOPC Driver
+module DRIVER
+
+  use ESMF
+  use NUOPC
+  use NUOPC_Driver, &
+       driver_routine_SS             => SetServices, &
+       driver_label_SetModelServices => label_SetModelServices
+
+  use MYMODEL, only: mymodelSS => SetServices
+
+  implicit none
+
+  private
+
+  integer, parameter            :: stepCount = 5
+  real(ESMF_KIND_R8), parameter :: stepTime  = 30.D0  ! step time [s]
+
+
+  public :: SetServices
+
+  !-----------------------------------------------------------------------------
+contains
+  !-----------------------------------------------------------------------------
+
+  subroutine SetServices(drvr, rc)
+    type(ESMF_GridComp)  :: drvr
+    integer, intent(out) :: rc
+
+    rc = ESMF_SUCCESS
+
+    ! NUOPC_Driver registers the generic methods
+    call NUOPC_CompDerive(drvr, driver_routine_SS, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+         line=__LINE__, &
+         file=__FILE__)) &
+         return  ! bail out
+
+    ! attach specializing method(s)
+    call NUOPC_CompSpecialize(drvr, specLabel=driver_label_SetModelServices, &
+         specRoutine=SetModelServices, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+         line=__LINE__, &
+         file=__FILE__)) &
+         return  ! bail out
+
+  end subroutine SetServices
+
+  !-----------------------------------------------------------------------------
+
+  subroutine SetModelServices(drvr, rc)
+    type(ESMF_GridComp)  :: drvr
+    integer, intent(out) :: rc
+
+    ! local variables
+    integer                       :: localrc
+    type(ESMF_GridComp)           :: child
+    type(ESMF_CplComp)            :: connector
+    type(ESMF_Time)               :: startTime
+    type(ESMF_Time)               :: stopTime
+    type(ESMF_TimeInterval)       :: timeStep
+    type(ESMF_Clock)              :: internalClock
+
+    rc = ESMF_SUCCESS
+
+    call NUOPC_DriverAddComp(drvr, "MYMODEL", mymodelSS, comp=child, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+         line=__LINE__, &
+         file=__FILE__)) &
+         return  ! bail out
+
+    ! set the driver clock
+    call ESMF_TimeSet(startTime, s = 0, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+         line=__LINE__, &
+         file=__FILE__)) &
+         call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+    call ESMF_TimeSet(stopTime, s_r8 = stepTime * stepCount, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+         line=__LINE__, &
+         file=__FILE__)) &
+         call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+    call ESMF_TimeIntervalSet(timeStep, s_r8 = stepTime, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+         line=__LINE__, &
+         file=__FILE__)) &
+         call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+    internalClock = ESMF_ClockCreate(name="Driver Clock", &
+         timeStep=timeStep, startTime=startTime, stopTime=stopTime, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+         line=__LINE__, &
+         file=__FILE__)) &
+         call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+    call ESMF_GridCompSet(drvr, clock=internalClock, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+         line=__LINE__, &
+         file=__FILE__)) &
+         return  ! bail out
+
+  end subroutine SetModelServices
+
+end module
 
 
     program ESMF_NUOPCBasicModelEx
@@ -180,12 +286,12 @@ end module
     ! ESMF Framework module
     use ESMF
     use ESMF_TestMod
-    use MODEL, only: modelSS => SetServices
-
+    use DRIVER, only: driverSS => SetServices
+    
     implicit none
 
     ! Local variables
-    type(ESMF_GridComp) :: cap
+    type(ESMF_GridComp) :: drvr
     integer :: rc
     integer :: finalrc
     integer :: result = 0     ! all pass
@@ -203,31 +309,32 @@ end module
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
     call ESMF_Initialize(defaultlogfilename="NUOPCBasicModelEx.Log", &
+                     defaultCalKind=ESMF_CALKIND_GREGORIAN, &
                      logkindflag=ESMF_LOGKIND_MULTI, rc=rc)
 
 !-------------------------------------------------------------------------
     print *, "NUOPC Basic Model template run"
 
     ! instantiate the cap and do a sanity check run
-    cap = ESMF_GridCompCreate(name="cap", rc=rc)
+    drvr = ESMF_GridCompCreate(name="Driver", rc=rc)
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
-    call ESMF_GridCompSetServices(cap, userRoutine=modelSS, rc=rc)
+    call ESMF_GridCompSetServices(drvr, userRoutine=driverSS, rc=rc)
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
-    call ESMF_GridCompInitialize(cap, phase=1, rc=rc)
+    call ESMF_GridCompInitialize(drvr, phase=0, rc=rc)
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
-    call ESMF_GridCompInitialize(cap, phase=2, rc=rc)
+    call ESMF_GridCompInitialize(drvr, rc=rc)
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
-    call ESMF_GridCompRun(cap, rc=rc)
+    call ESMF_GridCompRun(drvr, rc=rc)
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
-    call ESMF_GridCompFinalize(cap, rc=rc)
+    call ESMF_GridCompFinalize(drvr, rc=rc)
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
-    call ESMF_GridCompDestroy(cap, rc=rc)
+    call ESMF_GridCompDestroy(drvr, rc=rc)
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 

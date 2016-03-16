@@ -52,9 +52,9 @@ int main(void){
   // LocStream variables 
   ESMC_LocStream dstlocstream;
   int ls_size=16;
-  char *keyNameX="ESMF:X";
-  char *keyNameY="ESMF:Y";
-  char *keyNameM="ESMF:Mask";
+  const char *keyNameX="ESMF:X";
+  const char *keyNameY="ESMF:Y";
+  const char *keyNameM="ESMF:Mask";
   ESMC_Array keyArray;
   double *farray;
   double *farray2;

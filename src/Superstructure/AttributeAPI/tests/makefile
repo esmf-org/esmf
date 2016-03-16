@@ -52,7 +52,8 @@ TESTS_BUILD = $(ESMF_TESTDIR)/ESMF_AttPackABundleUTest \
 		$(ESMF_TESTDIR)/ESMF_AttributeXMLUTest \
 		$(ESMF_TESTDIR)/ESMF_AttReadCplCompUTest \
 		$(ESMF_TESTDIR)/ESMF_AttReadGridCompUTest \
-		$(ESMF_TESTDIR)/ESMF_AttReadFieldUTest
+		$(ESMF_TESTDIR)/ESMF_AttReadFieldUTest \
+		$(ESMF_TESTDIR)/ESMF_AttributeJSONUTest
 
 TESTS_RUN = RUN_ESMF_AttPackABundleUTest \
 		RUN_ESMF_AttPackArrayUTest \
@@ -85,7 +86,8 @@ TESTS_RUN = RUN_ESMF_AttPackABundleUTest \
 		RUN_ESMF_AttributeXMLUTest \
 		RUN_ESMF_AttReadCplCompUTest \
 		RUN_ESMF_AttReadGridCompUTest \
-		RUN_ESMF_AttReadFieldUTest
+		RUN_ESMF_AttReadFieldUTest \
+		RUN_ESMF_AttributeJSONUTest
 
 TESTS_RUN_UNI = RUN_ESMF_AttPackArrayUTestUNI \
 		RUN_ESMF_AttPackABundleUTestUNI \
@@ -113,7 +115,8 @@ TESTS_RUN_UNI = RUN_ESMF_AttPackArrayUTestUNI \
 		RUN_ESMF_AttributeXMLUTestUNI \
 		RUN_ESMF_AttReadCplCompUTestUNI \
 		RUN_ESMF_AttReadGridCompUTestUNI \
-		RUN_ESMF_AttReadFieldUTestUNI
+		RUN_ESMF_AttReadFieldUTestUNI \
+		RUN_ESMF_AttributeJSONUTestUNI
 
 
 include ${ESMF_DIR}/makefile
@@ -374,6 +377,14 @@ RUN_ESMF_AttributeStateUTest:
 
 RUN_ESMF_AttributeStateUTestUNI:
 	$(MAKE) TNAME=AttributeState NP=1 ftest
+
+# --- JSON
+
+RUN_ESMF_AttributeJSONUTest:
+	$(MAKE) TNAME=AttributeJSON NP=4 ftest
+
+RUN_ESMF_AttributeJSONUTestUNI:
+	$(MAKE) TNAME=AttributeJSON NP=1 ftest
 
 # --- Update
 

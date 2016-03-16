@@ -93,7 +93,7 @@ sub run_benchmark {
 	} else {
 		$th = 1;  
 	}
-	if ( $ET_ave == 0) {
+	if (( $ET_ave == 0) || ( $BM_ave == 0)){
 		return($ET_ave, $BM_ave, $ans, $th, 0);
 	}
 	$ans=(($ET_ave - $BM_ave)/$BM_ave);

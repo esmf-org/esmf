@@ -29,7 +29,7 @@ module ESMF_IO_NCPutGetMod
 ! !USES:
 
   use ESMF_LogErrMod
-  use ESMF_UtilMod
+  use ESMF_UtilStringMod
   use ESMF_UtilTypesMod
 
 ^ifdef ESMF_NETCDF
