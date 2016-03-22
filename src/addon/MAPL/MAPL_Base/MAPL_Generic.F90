@@ -448,7 +448,8 @@ enddo
 recursive subroutine MAPL_GenericSetServices ( GC, RC )
 
   !ARGUMENTS:
-  type(ESMF_GridComp),                  intent(INOUT) :: GC  ! Gridded component
+  !RSD - removed intent(INOUT) on GC parameter
+  type(ESMF_GridComp)                                 :: GC ! Gridded component
   integer,                              intent(  OUT) :: RC  ! Return code
 
 ! !DESCRIPTION: {\tt MAPL\_GenericSetServices} performs the following tasks:

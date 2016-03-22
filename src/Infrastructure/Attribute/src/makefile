@@ -4,8 +4,10 @@
 ALL: build_here
 
 SOURCEC	  = ESMCI_Attribute.C ESMCI_AttributeUpdate.C ESMCI_AttributeWrite.C \
+	        ESMCI_AttributeWriteCIM.C ESMCI_AttributeWriteCIMgrids.C \
+	        ESMCI_AttributeWriteTab.C ESMCI_AttributeWriteXML.C \
             ESMCI_AttributeWriteJSON.C
-SOURCEF	  = 
+SOURCEF	  =
 STOREH    = ESMCI_Attribute.h 
 
 OBJSC     = $(addsuffix .o, $(basename $(SOURCEC)))
