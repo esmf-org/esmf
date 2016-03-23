@@ -61,6 +61,9 @@ program ESMF_AttributeJSONUTest
 
   character(1024)         :: output, check
 
+  integer                 :: i
+  logical                 :: tf
+
 #endif
 !-------------------------------------------------------------------------------
 !  The unit tests are divided into Sanity and Exhaustive. The Sanity tests are
@@ -233,7 +236,14 @@ program ESMF_AttributeJSONUTest
     ! Validate JSON string
     write(failMsg, *) "JSON string is no longer the same"
     write(name, *) "Validate JSON string"
-    call ESMF_Test((output==check), name, failMsg, result, ESMF_SRCLINE)
+    do, i=1, len (output)
+      if (output(i:i) /= check(i:i)) exit
+    end do
+    tf = i > len (output)
+    if (.not. tf) then
+      write(failMsg, *) "JSON string is no longer the same starting at character", i
+    endif
+    call ESMF_Test(tf, name, failMsg, result, ESMF_SRCLINE)
     !-------------------------------------------------------------------------
 
 
@@ -266,14 +276,27 @@ program ESMF_AttributeJSONUTest
     call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
     !-------------------------------------------------------------------------
 
-    check = '{  "comp" :{    "event": "start_phase",    "phaseLabel": "IPDv01p2",    "phase": "0"  }}'
+    check = '{&
+            &  "comp" :{&
+            &    "event": "start_phase",&
+            &    "phaseLabel": "IPDv01p2",&
+            &    "phase": "0"&
+            &  }&
+            &}'
 
     !-------------------------------------------------------------------------
     !EX_UTest
     ! Validate JSON string
     write(failMsg, *) "JSON string is no longer the same"
     write(name, *) "Validate JSON string"
-    call ESMF_Test((output==check), name, failMsg, result, ESMF_SRCLINE)
+    do, i=1, len (output)
+      if (output(i:i) /= check(i:i)) exit
+    end do
+    tf = i > len (output)
+    if (.not. tf) then
+      write(failMsg, *) "JSON string is no longer the same starting at character", i
+    endif
+    call ESMF_Test(tf, name, failMsg, result, ESMF_SRCLINE)
     !-------------------------------------------------------------------------
 
   !------------------------------------------------------------------------
