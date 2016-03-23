@@ -62,7 +62,7 @@ program ESMF_AttributeJSONUTest
   character(1024)         :: output, check
 
   integer                 :: i
-  logical                 :: tf
+  logical                 :: passed
 
 #endif
 !-------------------------------------------------------------------------------
@@ -239,11 +239,11 @@ program ESMF_AttributeJSONUTest
     do, i=1, len (output)
       if (output(i:i) /= check(i:i)) exit
     end do
-    tf = i > len (output)
-    if (.not. tf) then
+    passed = i > len (output)
+    if (.not. passed) then
       write(failMsg, *) "JSON string is no longer the same starting at character", i
     endif
-    call ESMF_Test(tf, name, failMsg, result, ESMF_SRCLINE)
+    call ESMF_Test(passed, name, failMsg, result, ESMF_SRCLINE)
     !-------------------------------------------------------------------------
 
 
@@ -292,11 +292,11 @@ program ESMF_AttributeJSONUTest
     do, i=1, len (output)
       if (output(i:i) /= check(i:i)) exit
     end do
-    tf = i > len (output)
-    if (.not. tf) then
+    passed = i > len (output)
+    if (.not. passed) then
       write(failMsg, *) "JSON string is no longer the same starting at character", i
     endif
-    call ESMF_Test(tf, name, failMsg, result, ESMF_SRCLINE)
+    call ESMF_Test(passed, name, failMsg, result, ESMF_SRCLINE)
     !-------------------------------------------------------------------------
 
   !------------------------------------------------------------------------
