@@ -451,7 +451,7 @@ ifeq ($(ARCH),Linux)
 
       fFLAGS   += $(FPIC) $(D)__GFORTRAN__ $(EXTENDED_SOURCE) $(NO_RANGE_CHECK)
       FFLAGS   += $(FPIC) $(D)__GFORTRAN__ $(EXTENDED_SOURCE) $(NO_RANGE_CHECK)
-      f90FLAGS += $(FPIC) $(D)__GFORTRAN__ -ffree-line-length-none $(NO_RANGE_CHECK)
+      f90FLAGS += $(FPIC) $(D)__GFORTRAN__ -ffree-line-length-none $(NO_RANGE_CHECK) -cpp
       F90FLAGS += $(FPIC) $(D)__GFORTRAN__ -ffree-line-length-none $(NO_RANGE_CHECK)
 
       ifdef OPENMPI
@@ -737,6 +737,6 @@ endif  #    Darwin
 
 include $(ESMFMKFILE)
 FC := $(ESMF_F90COMPILER)
-CC := $(ESMF_CXXCOMPILER)
+#CC := $(ESMF_CXXCOMPILER)
 CXX := $(ESMF_CXXCOMPILER)
 $(info Compiler is set to $(FC) and $(CC), make sure this is the MPI wrapper of the actual compiler)

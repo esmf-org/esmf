@@ -31,3 +31,4 @@
   void c_mapl_locstreamrestoreptr_(void **ptr, long *addr) {
     *ptr = (void *)(*addr);
   }
+
