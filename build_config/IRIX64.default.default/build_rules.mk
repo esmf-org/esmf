@@ -79,7 +79,7 @@ ESMF_LAPACKDEFAULT         = scsl
 
 ############################################################
 # Disable PIO due to no F2003 C Interop support
-ESMF_PIO               =
+ESMF_PIO               = OFF
 
 ############################################################
 # Special compiler flags

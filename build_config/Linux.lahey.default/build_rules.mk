@@ -105,7 +105,7 @@ ESMF_CXXCOMPILER_VERSION    = ${ESMF_CXXCOMPILER} --version
 
 ############################################################
 # Disable PIO until F2003 C Interop is verified to work
-ESMF_PIO               =
+ESMF_PIO               = OFF
 
 ############################################################
 # Conditionally add pthread compiler and linker flags
