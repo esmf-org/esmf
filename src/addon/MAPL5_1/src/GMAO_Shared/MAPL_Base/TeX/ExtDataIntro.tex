@@ -1,0 +1,256 @@
+{\tt MAPL\_ExtDataGridCompMod} is an internal MAPL gridded component 
+used to fulfill imports fields in a MAPL hierarchy from netcdf files
+on disk.
+It is usually one of the
+three gridded components in the ``cap'' or main program of a MAPL application,
+the others being the root of the MAPL hierarchy it is servicing and {\tt MAPL\_HistoryGridCompMod}. It is
+instanciated and all its registered methods are run automatically by
+{\tt MAPL\_Cap,} if that is used.
+{\tt MAPL\_ExtDataGridCompMod} will provide
+data to fields in the Import states of MAPL components that are not satisfied by a \texttt{MAPL\_AddConnectivity} call
+in the MAPL
+hierarchy. In a MAPL application fields added to the Import state of a component
+are passed up the MAPL hierarchy looking for a connectivity to another component that will
+provide data to fill the import. If a connectivity is not found these fields will eventually reach
+the ''cap``. At this point any fields that have not have their connectivity satisfied
+are passed to the {\tt MAPL\_ExtDataGridCompMod} through its Export state.
+{\tt MAPL\_ExtDataGridCompMod} is in essence a provider of last resort for Import fields that
+need to be filled with data.
+
+The user provides a resource file available to the {\tt MAPL\_ExtDataGridCompMod} GC.
+At its heart this resource file provides a connection between a field name and a variable name in
+a netcdf file on disk. The component receives a list of fields that need to be filled
+and parses the resource file to determine if {\tt MAPL\_ExtDataGridCompMod} can fill a variable of that name.
+We will refer to each field name-file variable combination as a primary export.
+Each primary export is an
+announcment that {\tt MAPL\_ExtDataGridCompMod} is capable of filling a field named A with data contained in variable B on file xyz.
+Note that the field name in each primary export does not need to actually be a field
+that needs to be filled by the model. The component only processes primary exports that are needed
+The resource file should be viewed as an anncountment of what {\tt MAPL\_ExtDataGridCompMod} can provide.
+In addition to simply announcing what {\tt MAPL\_ExtDataGridCompMod} can provide
+the user can specify other information such as how frequently to update the data from
+disk. This could be at every step, just once when starting the model run, or at a particular
+time each days. {\tt MAPL\_ExtDataGridCompMod} also allows data to be shifted and scaled.
+
+{\tt MAPL\_ExtDataGridCompMod} uses {\tt MAPL\_CFIO} to perform the actual file IO and thus the
+IO capabilities are limited to files {\tt MAPL\_CFIO} is capable of reading.
+
+{\tt MAPL\_ExtDataGridCompMod} provides an additional method to fill fields. The user can specify
+any number of derived exports. Each derived export should once again be viewed as an announcement that
+{\tt MAPL\_ExtDataGridCompMod} has the capability to fill a field with a given name.
+Instead of the data coming from disk now the user provides a mathematical expression used to evaluate the field
+which could include fields from the primary exports.
+The function is any character string that obeys
+the rules of the {\tt MAPL\_NewArthParserMod}. Any primary export can be used as a variable in the expression,
+regardless of whether
+that particular primary export is needed to fulfill an import. Care must be taken however
+to ensure that the fields are conformal (i.e. on the same grid). For example each field in the expression must have the
+same number of levels. Likewise attempting to fill a 2D field from a 3D field is nonsensical
+(see the description of {\tt MAPL\_NewArthParserMod} for an exception). 
+Any derived exports not needed to fulfill a field are ignored when processing the resource file.
+As a simple example suppose we have two primary exports with field names A and B. We could
+define a derived export C that is the sum of A and B.
+
+Finally the component provides the user the capability of creating masks based on a Lat-Lon bounding box.
+The resulting mask is a real value inside the box and another outside the box. The mask is genereated
+when the component is initialized and my be used in subsequent derived expressions.
+
+The ExtData.rc file has the following structure. Each entry for the primary exports, derived exports, or mask entry with space separated arguements.
+\begin{verbatim}
+PrimaryExports:
+field_name Units field_dims level_type climatology 
+    refresh_template shift scale Name_On_File FileTemplate
+    reference_time frequency_units frequency
+::
+Masks::
+mask_name mask_function
+::
+# the only currently supported mask function is the bounding box called as
+# bbox(field_name,lat_min,lat_max,lon_min,lon_max,real_in,real_out)
+# field_name is a field_name from the primary export list the function will
+# use the grid from this field as the grid of the new maks we create
+# lat_min,lat_max, lon_min, and lon_max are the corners of the box
+# a real number (see mapl_parser for legal syntax for this). Inside the box
+# the mask will be this number. If it is set to "undef" then the value will
+# be MAPL_Undef
+# a real number, same as above but mask will be this number outside of box
+DerivedExports::
+field_name expression refresh_template
+::
+\end{verbatim}
+
+Currently for the primary exports, the last 3 keywords in each entry are optional, however all 3 must be specified if used.
+
+The following is a description of a primary export entry:
+\begin{trivlist}
+\item[\tt field\_name]        Name of the field to be filled. This should be the same 
+                              name as the field in the Import state {\tt MAPL\_ExtDataGridCompMod}
+                              is attempting to fill.
+\item[\tt Units]              Units - this is a place holder for the time being and while text must
+                              be there is not used
+\item[\tt field\_dims]        Field dimension - 'xyz' if 3D and 'xy' if 2D
+\item[\tt level\_type]        'c' if MAPL\_VLocationCenter and 'e' if MAPL\_VlocationEdge 'NA' if 2D
+\item[\tt climatology]        'Y' if variable represents climatological data. 'N' if not.
+\item[\tt refresh\_template]  Refresh template. See section on the refresh template below for more details and function.
+\item[\tt shift]              number to shift data, currently the data is always shifted so enter 0.0 if you want no shifting
+\item[\tt scale]              number to scale data, currently the data is always scaled so enter 1.0 if you want no scaling
+\item[\tt name\_on\_file]     name of the variable on the file
+\item[\tt FileTemplate]       The full path to the file. The actual filename can be the real file name or a grads
+                              style template. In addition you can simply set the import to a constant by specifying the 
+                              entry as /dev/null:real\_constant. if no constant is specified after /dev/null with the colon
+                              the import is set to zero.
+\item[\tt reference\_time]    Reference time in the form YYYY-MM-DDThh:mm:ss
+\item[\tt frequency\_units]   Units of the frequency of the primary export. Valid entries are years, months, days, hours, minutes
+\item[\tt frequency]          An integer frequency of the file for this primary export.
+\end{trivlist}
+
+The following are descriptions of a mask entry:
+\begin{trivlist}
+\item[\tt mask\_name]         Name of the mask
+\item[\tt mask\_function]     The function used to generate the mask. 
+                              Currently the only supported function is the bounding box which is specified as
+                              bbox(field\_name,lat\_min,lat\_max,lon\_min,lon\_max,real\_in,real\_out).
+                              The arguements are as follows: field\_name is an input field whose grid
+                              will be used to create the mask. The next four arguments define the corners
+                              of a rectangular bounding box by specifiy the maximum latitudes and longitudes.
+                              Finally real\_in and real\_out are numbers specify what the value of the mask
+                              will be inside and outside of the box. In addition to specifying a real number
+                              the user may specify "UNDEF" which will make the value MAPL\_UNDEF
+\end{trivlist}
+
+The following is a description of a derived export entry:
+\begin{trivlist}
+\item[\tt field\_name]        Name of the field to be filled
+\item[\tt expression]         Legal expression understood by the MAPL parser, for more information see details
+                              on legal expressions in the parser documentation. Legal variable names
+                              are any field\_name in the primary export list or mask\_name in
+                              the mask list. Remember that the fields in an expression
+                              must have the same grid, otherwise an error will result.
+\item[\tt refresh\_template]  Same options as with the primary export
+\end{trivlist}
+
+The Refresh Template controls when the data in the field being satisfied by Extdata is updated and currently has three options:
+
+The first option is set the refresh template to '-'. In this case the field will only be updated once, the first time
+the run method of {\tt MAPL\_ExtDataGridCompMod} is called. The data will be read from the file
+obtained from evaluating the file template at the current model time.
+
+The second option is to provide a template of the form \%y4-\%m2-\%d2T\%h2:\%n2:00 where
+y4, m2, d2, h2, and n2 are the year,month, day, time, and minute. The user then
+substitutes the time they wish the variable to be periodically updated. This is best illustrated by examples.
+For example to update the variable daily at 21Z the refresh template should read
+\%y4-\%m2-\%d2T21:00:00. At 21Z every day {\tt MAPL\_ExtDataGridCompMod} will attempt to read a
+variable from the file obtained by apply the current time to the file template.
+To update the variable monthly on the 1st of the month at 21Z the refresh
+template should read \%y4-\%m2-01T21:00:00.
+
+Finally the refresh\_template can be set to '0'. In this case the field will be updated
+at every time step in the model run. Simply because the field is being updated at every timestep does not mean
+there has to be data on file for each timestep. If you have the data on file at a larger frequency than the model
+timestep ExtData can interpolate between the times for which data exists, even if that data is distributed among multiple files.
+
+In order to understand how to use Extdata when the refresh\_template is '0' it is helpful to understand what it does it in this case.
+The basic idea is that for a given model time ExtData tries to find two times, the
+left and right bracketing time, on the available files that bracket the current time.
+It then reads the data at those times and performs a linear interpolation to get the data at the current time.
+It stores the bracketing data for later times to minimize the IO and updates the bracketing data as neccessary when the current time passes the
+right bracketing time.
+The data need not reside all on one file.
+
+To get the data Extdata needs to the know what files are available and where to look for the data.
+Extdata accomplishes this by assuming
+that the files containing the data are timestamped starting at a reference time at some frequency when the
+refresh\_template is '0'.
+For example you could have a daily file, a monthly file, or a file every two hours starting at 13:30 on a particular day,
+as long as there is data on the files that covers the time you want to run you application and that any times on the file
+fall within the range of the timestamp. Thus if you have a file with the template myfile.\%y4\%m2\%d2.nc4, one particular
+file might be myfile.20010414.nc4 and any times in this file must be sometime on the 14th of march 2001.
+
+There are two ways to specify the reference time and frequency.
+The first is to use the three optional keywords for a primary export. As described in the section on primary exports
+you specify a reference time, and a frequency with some units. When ExtData tries to find the bracketing data it
+starts by finding a file with a timestamp closest to but less than or equal to the current time. If it does not find a bracketing time
+there it checks the file with the timestamp at the frequency interval before and after the file it just checked.
+
+The second is to let ExtData figure out the frequency from the file template itself and leaving the final three entries in the
+primary export blank. In that case it determines the rightmost token in the grads template and uses that as the frequency.
+For example if the template is filename.\%y4\%m2\%d2.nc4 the frequency will be assumed to be days. The reference time is taken
+to be the application start time at the beginning with any time units less than the frequency assumed to be zero. So using
+the same file template again if we start on 2001-04-14 at 21z the reference time will be set to 2001-04-14 at 0z.
+
+To hopefully make this clearer here are several concrete examples showing how it might be used.
+
+Suppose we have data on daily files and each file has data at 0Z, 6Z, 12Z, and 18Z.
+The file template is myfile.\%y4\%m2\%d2.nc4 and we leave the reference time and frequency blank.
+
+\begin{verbatim}
+if the clock starts at 21Z on January 1, 2001 these are the initial bracketing
+times data is read from
+
+myfile.20010101.nc4
+0Z
+6Z
+12Z
+18Z    Left bracket time
+myfile.20010102.nc4
+0Z     Right bracket time
+6Z
+12Z
+18Z
+
+When the time passes 0Z on 2nd of month we must update bracket time
+and now the new bracketing times, for example
+when it is 2Z on 2nd of month the data for the following times will be in memory
+
+myfile.20010101.nc4
+0Z
+6Z
+12Z
+18Z 
+myfile.20010102.nc4
+0Z     Left bracket time
+6Z     Right bracket time
+12Z
+18Z
+\end{verbatim}
+
+Now suppose we have data on files every two hours with one time per file, the time on file
+being the same as the timestamp on the file. The first file is at 2001-01-01 at 01:30:00
+Then the reference time is 2001-01-01T01:30:00, with a frequency of 2 hours.
+The file template must be of the form myfile.\%y4\%m2\%d2\_\%h2\%n2z.nc4
+
+\begin{verbatim}
+if the clock starts at 2Z on January 1, 2001 and we have a series of files.
+The initial bracket times are:
+
+myfile.20010101_0130.nc4 Left bracket Time
+myfile.20010101_0330.nc4 Right bracket Time
+myfile.20010101_0530.nc4
+
+Now when it is 4Z the bracket times are
+
+myfile.20010101_0130.nc4
+myfile.20010101_0330.nc4 Left bracket Time
+myfile.20010101_0530.nc4 Right bracket Time
+
+\end{verbatim}
+
+Now suppose we have monthly climatologies. The file template is of the form
+myfile.\%y4\%m2.nc4
+Each file has data for one time, at noon on the 15th of the month. We leave the
+reference time and frequency blank.
+
+\begin{verbatim}
+if the clock starts at 2001-04-01 0z then initial bracket times and data stored are 
+myfile.200103.nc4
+2001-03-15T12:00:00 left bracket time
+myfile.200104.nc4
+2001-04-15T12:00:00 right bracket time
+
+later then time is 2001-04-17 0z then the bracket times and data stored are
+myfile.200104.nc4
+2001-04-15T12:00:00 left bracket time
+myfile.200105.nc4
+2001-05-15T12:00:00 right bracket time
+
+\end{verbatim}

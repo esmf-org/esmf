@@ -1,0 +1,19 @@
+%
+\section{Bookeeping Memory Allocation}
+%
+{\tt m\_mall} is a bookkeeper of user allocated memories.
+It performs operations such as checking in and checking out allocated 
+activity, generating word count output, searching/inserting a name in a list,
+initializing the module data structure, etc.
+%
+\begin{verbatim}
+EXAMPLE:
+
+    . call mall_ci(size(marg),thread)
+           is used to check-in the allocated activity.
+           "thread" is a chain of characters, and
+           "marg" can be an integer, a real, a logical, or a character.
+
+    . call mall_co(size(marg),thread)
+           is used to check-in the allocated activity.
+\end{verbatim}

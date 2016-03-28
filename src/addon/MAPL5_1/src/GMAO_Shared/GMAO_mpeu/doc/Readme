@@ -1,0 +1,13 @@
+
+In this subdirectory, you can generate the MPEU user's documentation.
+You need to have LaTex.
+
+To obtain the document, type
+
+          make doc
+
+If everything goes well, you will have a postscript file "mpeu.ps".
+
+To clean up all the uncessary files (*.toc, *.aux, *.log, *.dvi), type
+
+         make clean

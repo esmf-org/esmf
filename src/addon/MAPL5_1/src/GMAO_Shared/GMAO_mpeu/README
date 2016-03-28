@@ -1,0 +1,90 @@
+28Dec2005 - Jing Guo <jguo@gmao.gsfc.nasa.gov>
+	  - tag := jg-mpeu-\[fvgsi-1_0beta4]-m2
+	  - baseline := jg-mpeu-\[fvgsi-1_0beta4]-m1
+	  - merage to jg-mpeu-\[fvgsi-1_0beta3p6]-d1
+
+20Dec2005 - Jing Guo <jguo@gmao.gsfc.nasa.gov>
+	  - tag := jg-mpeu-\[fvgsi-1_0beta4]-m1
+	  - merged tag fvgsi-1_0beta4 of mpeu with tag m-rel-r3p6, for
+	    fixes and extensions.  Merging details are listed below:
+	    . changes included:
+		+ m_IndexBin_char.F90 (1.1.2.3-1.1.2.2)
+		+ m_IndexBin_integer.F90 (1.1.2.3-1.1.2.2)
+		+ m_IndexBin_logical.F90 (1.1.2.3-1.1.2.2)
+		+ m_StrTemplate.F90 (1.1.2.9-1.1.2.6)
+		+ m_ioutil.F90 (1.1.2.8-1.1.2.6)
+		+ m_mall.F90 (1.1.2.11 is used)
+		+ m_mpif90.F90 (1.1.2.8-1.1.2.6)
+		+ m_zeit.F90 (1.1.2.12-1.1.2.9)
+		+ mpi0/mpi0_copy.F90 (1.1.2.4-1.1.2.2)
+	    . differences dropped:
+		. LCupdate.sh (1.1.2.3 dropped)
+		. Makefile.dependency (1.1.2.17 dropped)
+		. Makefile.rules (1.1.2.5 dropped)
+		. README (1.1.2.2 dropped)
+		. UCupdate.sh (1.1.2.3 dropped)
+		. assert.H (1.1.2.6 dropped)
+		. m_die.F90 (1.1.2.9 dropped)
+		. m_mpif.F (1.1.2.5 dropped)
+		. m_showDistrib.F90 (1.1.2.4 dropped)
+		. mpi0/Const_MPItype.H (1.1.2.5 dropped)
+		. mpi0/Makefile.rules (1.1.2.5 dropped)
+		. mpi0/mpi_zzz.F90 (1.1 dropped)
+	    . "new" (in baseline):
+		. GNUmakefile (new)
+		. m_random.F (new)
+		. mpi0/GNUmakefile (new)
+	    . removed:
+		. Makefile (removed)
+		. Makefile.conf.AIX (removed)
+		. Makefile.conf.IRIX (removed)
+		. Makefile.conf.IRIX64 (removed)
+		. Makefile.conf.Linux (removed)
+		. Makefile.conf.Linux.LF95 (removed)
+		. Makefile.conf.Linux.PGI (removed)
+		. Makefile.conf.OSF1 (removed)
+		. Makefile.conf.SUPER-UX (removed)
+		. Makefile.conf.SunOS (removed)
+		. Makefile.conf.T3E (removed)
+		. Makefile.conf.UNICOS (removed)
+		. Makefile.conf.hera (removed)
+		. mpi0/Makefile (removed)
+		. mpi0/Makefile.conf.AIX (removed)
+		. mpi0/Makefile.conf.IRIX (removed)
+		. mpi0/Makefile.conf.IRIX64 (removed)
+		. mpi0/Makefile.conf.Linux (removed)
+		. mpi0/Makefile.conf.Linux.LF95 (removed)
+		. mpi0/Makefile.conf.Linux.PGI (removed)
+		. mpi0/Makefile.conf.OSF1 (removed)
+		. mpi0/Makefile.conf.SUPER-UX (removed)
+		. mpi0/Makefile.conf.SunOS (removed)
+		. mpi0/Makefile.conf.T3E (removed)
+		. mpi0/Makefile.conf.UNICOS (removed)
+		. mpi0/configure (removed)
+		. mpi0/mpif.H (removed)
+		
+28Sep99	- Jing Guo
+	- Changed supported libraries to
+
+	mpeu:	libmpeu.a libeu.a with the _same_ interface in mpeu/
+
+	- Implemented several design changes:
+
+	  . Removed -r8/_R8_ compiler flags in Makefile.conf.IRIX64.
+	    The current design is expected to support both single and
+	    double precision REAL kinds.  The selection should be made
+	    by the compiler through Fortran 90 generic interface
+	    feature.
+
+	  . Added MP_type() function in mpif90.F90 to allow a more
+	    portable approach of using MPI_REAL.
+
+	  . Removed _SINGLE_PE_ flag to make the interface in mpeu/
+	    portable to both library versions.
+
+
+14Sep99	- Jing Guo	- Targets supported in this directory
+
+	mpeu:	make -f Makefile all		for MPI env
+	eu:	make -f Makefile.1pe all	for single PE env
+

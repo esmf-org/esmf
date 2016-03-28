@@ -1,0 +1,13 @@
+Prerequisites:
+- NetCDF is required by MAPL, so your ESMF build should include it
+- The command "gmake" must be available.  If your distirbution is called "make", add a symlink from gmake to make.  
+
+Build instructions:
+
+1. Set the ESMF environment variables, build and install ESMF.  
+
+2. Set the ESMFMKFILE environment variable to the makefile fragment in the installation from step 1.  More information about this variable can be found here: http://www.earthsystemmodeling.org/esmf_releases/public/last/ESMF_usrdoc/node7.html. 
+
+3. In MAPL5_1/src directory, make install && make esma_doc
+
+4. To run the tests using the ESMF testing infrastructure, first ensure that ESMF_DIR has been set to the source root (you had to do this for step 1 anyway).  Then in the tests directory execute "make" followed by "make run".  The messages will tell you where to find the test output.

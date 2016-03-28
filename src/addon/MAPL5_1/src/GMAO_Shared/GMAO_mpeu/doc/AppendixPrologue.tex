@@ -1,0 +1,5623 @@
+\appendix
+\addcontentsline{toc}{part}{APPENDIX}
+ 
+  
+%/////////////////////////////////////////////////////////////
+\newpage
+%
+%\markboth{Left}
+%   {Source File: m\_Filename.F90, Date: Thu Nov 15 22:24:22 GMT 2001}
+% 
+%/////////////////////////////////////////////////////////////
+\section{Programming References} \label{app:ProLogues}
+%
+  \subsection{Module m\_Filename - Filename manipulation routines }
+  
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     module m_Filename
+       public :: Filename_base		! basename()
+       public :: Filename_dir		! dirname()
+ \end{verbatim}
+%
+%{\sf REVISION HISTORY:}
+%\begin{verbatim}   	14Feb00	- Jing Guo <guo@dao.gsfc.nasa.gov>
+%  		- initial prototype/prolog/code\end
+%{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+
+  \subsubsection{Filename\_base - basename}
+  
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     function Filename_base(cstr,sfx)
+       character(len=*)         ,intent(in) :: cstr
+       character(len=*),optional,intent(in) :: sfx
+       character(len=len(cstr))             :: Filename_base
+ \end{verbatim}
+%
+%{\sf REVISION HISTORY:}
+%\begin{verbatim}   	14Feb00	- Jing Guo <guo@dao.gsfc.nasa.gov>
+%  		- initial prototype/prolog/code\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+
+  \subsubsection{Filename\_dir - dirname}
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     function Filename_dir(cstr)
+       character(len=*),intent(in) :: cstr
+       character(len=len(cstr))    :: Filename_dir
+ \end{verbatim}
+%
+%{\sf REVISION HISTORY:}
+%\begin{verbatim}   	14Feb00	- Jing Guo <guo@dao.gsfc.nasa.gov>
+%  		- initial prototype/prolog/code\end{verbatim}
+
+%\markboth{Left}{Source File: m\_IndexBin\_char.F90,  Date: Thu Nov 15 22:24:22 GMT 2001
+%}
+
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+\subsection{Module m\_IndexBin\_char - Template of indexed bin-sorting module }
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     module m_IndexBin_char
+       public :: IndexBin
+ \end{verbatim}
+%
+%{\sf REVISION HISTORY:}
+%\begin{verbatim}   	17Feb99 - Jing Guo <guo@thunder> - initial prototype/prolog/code\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+\subsubsection{IndexBin - Indexed sorting for a single value}
+ 
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     subroutine IndexBin(n,indx,keys,key0,ln0)
+       integer, intent(in)                        :: n
+       integer, dimension(n), intent(inout)       :: indx
+       character(len=*), dimension(n), intent(in) :: keys
+       character(len=*), intent(in)               :: key0 ! value
+       integer,optional,intent(out)               :: ln0
+ \end{verbatim}
+%
+%{\sf REVISION HISTORY:}
+%\begin{verbatim}   	16Feb99 - Jing Guo <guo@thunder> - initial prototype/prolog/code
+%  	27Sep99 - Jing Guo <guo@thunder> - Fixed a bug pointed out by
+%  					   Chris Redder\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+  \subsubsection{IndexBin - Indexed sorting into a set of given bins}
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     subroutine IndexBin(n,indx,keys,bins,lcs,lns)
+       integer, intent(in)                      :: n
+       integer, dimension(n),intent(inout)      :: indx
+       character(len=*),dimension(n),intent(in) :: keys
+       character(len=*),dimension(:),intent(in) :: bins ! values
+       integer, dimension(:),intent(out)        :: lcs ! locs. of the bins
+       integer, dimension(:),intent(out)        :: lns ! sizes of the bins
+ \end{verbatim}
+%
+%{\sf REVISION HISTORY:}
+%\begin{verbatim}   	16Feb99 - Jing Guo <guo@thunder> - initial prototype/prolog/code\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+
+  \subsubsection{IndexBin - IndexBin wrapped without working arrays}
+  
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     subroutine IndexBin(n,indx,keys,bins)
+       integer,             intent(in)           :: n
+       integer,dimension(n),intent(inout)        :: indx
+       character(len=*),dimension(n),intent(in)  :: keys
+       character(len=*),dimension(:),intent(in)  :: bins ! values
+ \end{verbatim}
+%
+%{\sf REVISION HISTORY:}
+%\begin{verbatim}   	17Feb99 - Jing Guo <guo@thunder> - initial prototype/prolog/code\end{verbatim}
+
+%\markboth{Left}{Source File: m\_IndexBin\_integer.F90,  Date: Thu Nov 15 22:24:22 GMT 2001
+%}
+
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+
+  \subsection{Module m\_IndexBin\_integer - Template of indexed bin-sorting module }
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     module m_IndexBin_integer
+       public :: IndexBin
+       interface IndexBin
+          module procedure IndexBin0_, IndexBin1_, IndexBin1w_
+       end interface
+ \end{verbatim}
+%
+%{\sf REVISION HISTORY:}
+%\begin{verbatim}   	17Feb99 - Jing Guo <guo@thunder> - initial prototype/prolog/code\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+  \subsubsection{IndexBin0\_ - Indexed sorting for a single value}
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     subroutine IndexBin0_(n,indx,keys,key0,ln0)
+       integer, intent(in) :: n
+       integer, dimension(n), intent(inout) :: indx
+       integer, dimension(n), intent(in) :: keys
+       integer, intent(in) :: key0 ! The key value to be moved to front
+       integer,optional,intent(out) :: ln0
+ \end{verbatim} %{\sf REVISION HISTORY:}
+%\begin{verbatim}   	16Feb99 - Jing Guo <guo@thunder> - initial prototype/prolog/code
+%  	27Sep99 - Jing Guo <guo@thunder> - Fixed a bug pointed out by
+%  					   Chris Redder\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+  \subsubsection{IndexBin1\_ - Indexed sorting into a set of given bins}
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     subroutine IndexBin1_(n,indx,keys,bins,lcs,lns)
+       integer, intent(in) :: n
+       integer, dimension(n),intent(inout) :: indx
+       integer, dimension(n),intent(in)    :: keys
+       integer, dimension(:),intent(in)    :: bins! values of the bins
+       integer, dimension(:),intent(out)   :: lcs ! locs. of the bins
+       integer, dimension(:),intent(out)   :: lns ! sizes of the bins
+ \end{verbatim} %{\sf REVISION HISTORY:}
+%\begin{verbatim}   	16Feb99 - Jing Guo <guo@thunder> - initial prototype/prolog/code\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+  \subsubsection{IndexBin1w\_ - IndexBin1\_ wrapped without working arrays}
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     subroutine IndexBin1w_(n,indx,keys,bins)
+       integer,             intent(in)    :: n
+       integer,dimension(n),intent(inout) :: indx
+       integer,dimension(n),intent(in)    :: keys
+       integer,dimension(:),intent(in)    :: bins ! values of the bins
+ \end{verbatim} %{\sf REVISION HISTORY:}
+%\begin{verbatim}   	17Feb99 - Jing Guo <guo@thunder> - initial prototype/prolog/code\end{verbatim}
+
+%\markboth{Left}{Source File: m\_IndexBin\_logical.F90,  Date: Thu Nov 15 22:24:22 GMT 2001
+%}
+
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+  \subsection{Module m\_IndexBin\_logical - Template of indexed bin-sorting module }
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     module m_IndexBin_logical
+       public :: IndexBin
+       interface IndexBin
+         module procedure IndexBin0_
+       end interface
+ \end{verbatim} %{\sf REVISION HISTORY:}
+%\begin{verbatim}   	17Feb99 - Jing Guo <guo@thunder> - initial prototype/prolog/code\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+
+  \subsubsection{IndexBin0\_ - Indexed sorting for a single value}
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     subroutine IndexBin0_(n,indx,keys,key0,ln0)
+       integer, intent(in) :: n
+       integer, dimension(n), intent(inout) :: indx
+       logical, dimension(n), intent(in) :: keys
+       logical, intent(in) :: key0 ! The key value to be moved to front
+       integer,optional,intent(out) :: ln0
+ \end{verbatim} %{\sf REVISION HISTORY:}
+%\begin{verbatim}   	16Feb99 - Jing Guo <guo@thunder> - initial prototype/prolog/code
+%  	27Sep99 - Jing Guo <guo@thunder> - Fixed a bug pointed out by
+%  					   Chris Redder\end{verbatim}
+
+%\markboth{Left}{Source File: m\_List.F90,  Date: Thu Nov 15 22:24:22 GMT 2001
+%}
+
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+  \subsection{Module m\_List - a list manager }
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     module m_List 
+       public :: List		! The class data structure
+       public :: init
+       public :: clean
+       public :: index
+       public :: nitem
+       public :: get
+       public :: assignment(=)
+ 
+     type List
+       character(len=1),dimension(:),pointer :: bf
+       integer,       dimension(:,:),pointer :: lc
+     end type List
+ \end{verbatim} %{\sf REVISION HISTORY:}
+%\begin{verbatim}   	22Apr98 - Jing Guo <guo@thunder> - initial prototype/prolog/code\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+  \subsubsection{init\_ - initialized a List from a character string}
+
+  	A list is a string in the form of ``\verb"cat:tiger:lion"'',
+     or ``\verb"lat:lon:lev"''.  Through the initialization call, the
+     items delimited by ``\verb":"'' are stored as an array of sub-
+     strings of a long string, accessible through an array of substring
+     indices.  The only constraints now on the valid list entries are,
+     (1) the value of an entry does not contain ``\verb":"'', and (2)
+     The leading and the trailing blanks are insignificant, although
+     any imbeded blanks are.
+  
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     subroutine init_(aList,Values)
+       type(List),intent(out)	  :: aList  ! an indexed string values
+       character(len=*),intent(in) :: Values ! ":" delimited names
+ \end{verbatim} %{\sf REVISION HISTORY:}
+%\begin{verbatim}   	22Apr98 - Jing Guo <guo@thunder> - initial prototype/prolog/code\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+  \subsubsection{initStr\_ initialize with a String type}
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     subroutine initStr_(aList,pstr)
+       type(List),intent(out)     :: aList  ! an indexed string values
+       type(String),intent(in)	  :: pstr
+ \end{verbatim} %{\sf REVISION HISTORY:}
+%\begin{verbatim}   	23Apr98 - Jing Guo <guo@thunder> - initial prototype/prolog/code\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+  \subsubsection{initStr1\_ initialize with an array of Strings}
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     subroutine initStr1_(aList,strs)
+       type(List),intent(out)               :: aList  ! an indexed string values
+       type(String),dimension(:),intent(in) :: strs
+ \end{verbatim} %{\sf REVISION HISTORY:}
+%\begin{verbatim}   	23Apr98 - Jing Guo <guo@thunder> - initial prototype/prolog/code\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+
+  \subsubsection{clean\_ - clean a List variable}
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     subroutine clean_(aList)
+       type(List),intent(inout) :: aList
+ \end{verbatim} %{\sf REVISION HISTORY:}
+%\begin{verbatim}   	22Apr98 - Jing Guo <guo@thunder> - initial prototype/prolog/code\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+\subsubsection{nitem\_ - number of items in the list}
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     function nitem_(aList)
+       type(List),intent(in) :: aList
+       integer               :: nitem_
+ \end{verbatim} %{\sf REVISION HISTORY:}
+%\begin{verbatim}   	22Apr98 - Jing Guo <guo@thunder> - initial prototype/prolog/code\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+ \subsubsection{index\_ - lookup a list for a given item name}
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     function index_(aList,item)
+       type(List),      intent(in) :: aList	! a List of names
+       character(len=*),intent(in) :: item	! a given item name
+       integer                     :: index_
+ \end{verbatim} %{\sf REVISION HISTORY:}
+%\begin{verbatim}   	22Apr98 - Jing Guo <guo@thunder> - initial prototype/prolog/code\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+
+  \subsubsection{indexStr\_ - lookup a list for a given item name}
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     function indexStr_(aList,itemStr)
+       type(List),      intent(in) :: aList	! a List of names
+       type(String),    intent(in) :: itemStr
+       integer                     :: indexStr_
+ \end{verbatim} %{\sf REVISION HISTORY:}
+%\begin{verbatim}   	22Apr98 - Jing Guo <guo@thunder> - initial prototype/prolog/code\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+  \subsubsection{copy\_ - Copy a List. Pointers are copied as allocatables}
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     subroutine copy_(yL,xL)	! yL=xL
+       type(List),intent(out) :: yL
+       type(List),intent(in)  :: xL
+ \end{verbatim} %{\sf REVISION HISTORY:}
+%\begin{verbatim}   	22Apr98 - Jing Guo <guo@thunder> - initial prototype/prolog/code\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+
+  \subsubsection{get\_ - return a numbered item from the List}
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     subroutine get_(itemStr,ith,aList)
+       type(String),intent(out) :: itemStr
+       integer,     intent(in)  :: ith
+       type(List),  intent(in)  :: aList
+ \end{verbatim} %{\sf REVISION HISTORY:}
+%\begin{verbatim}   	23Apr98 - Jing Guo <guo@thunder> - initial prototype/prolog/code\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+
+  \subsubsection{getall\_ - return all items from the List}
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     subroutine getall_(itemStr,aList)
+       type(String),intent(out) :: itemStr
+       type(List),  intent(in)  :: aList
+ \end{verbatim} %{\sf REVISION HISTORY:}
+%\begin{verbatim}   	23Apr98 - Jing Guo <guo@thunder> - initial prototype/prolog/code\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+  \subsubsection{getrange\_ - return a range of items from the List}
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     subroutine getrange_(itemStr,i1,i2,aList)
+       type(String),intent(out) :: itemStr
+       integer,     intent(in)  :: i1
+       integer,     intent(in)  :: i2
+       type(List),  intent(in)  :: aList
+ \end{verbatim} %{\sf REVISION HISTORY:}
+%\begin{verbatim}   	23Apr98 - Jing Guo <guo@thunder> - initial prototype/prolog/code\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+  \subsubsection{set\_indices\_ - set the indices of given items}
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     subroutine set_indices_(indices,aList,values)
+       integer,dimension(:),intent(out) :: indices
+       type(List),intent(in)            :: aList  ! an indexed string values
+       character(len=*),intent(in)      :: Values ! ":" delimited names
+ \end{verbatim} %{\sf REVISION HISTORY:}
+%\begin{verbatim}   	31May98 - Jing Guo <guo@thunder> - initial prototype/prolog/code\end{verbatim}
+
+%\markboth{Left}{Source File: m\_MergeSorts.F90,  Date: Thu Nov 15 22:24:22 GMT 2001
+%}
+
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+
+  \subsection{Module m\_MergeSorts - Tools for incremental indexed-sorting }
+
+     This tool module contains basic sorting procedures, that in
+     addition to a couple of standard Fortran 90 statements in the
+     array syntex, allow a full range sort or unsort operations.
+     The main characteristics of the sorting algorithm used in this
+     module are, a) stable, and b) index sorting.
+  
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     module m_MergeSorts
+       public :: IndexSet
+       public :: IndexSort
+ 
+       interface IndexSet
+         module procedure setn_
+         module procedure set_
+       end interface
+       interface IndexSort
+         module procedure iSortn_
+         module procedure rSortn_
+         module procedure dSortn_
+         module procedure cSortn_
+         module procedure iSort_
+         module procedure rSort_
+         module procedure dSort_
+         module procedure cSort_
+         module procedure iSort1_
+         module procedure rSort1_
+         module procedure dSort1_
+         module procedure cSort1_
+       end interface
+\end{verbatim}
+ 
+%   !EXAMPLES:
+%  	...
+%  	integer, intent(in) :: No
+%  	type(Observations), dimension(No), intent(inout) :: obs
+%  	integer, dimension(No) :: indx	! automatic array
+%  	call IndexSet(No,indx)
+%  	call IndexSort(No,indx,obs(1:No)%lev,descend=.false.)
+%  	call IndexSort(No,indx,obs(1:No)%lon,descend=.false.)
+%  	call IndexSort(No,indx,obs(1:No)%lat,descend=.false.)
+%  	call IndexSort(No,indx,obs(1:No)%kt,descend=.false.)
+%  	call IndexSort(No,indx,obs(1:No)%ks,descend=.false.)
+%  	call IndexSort(No,indx,obs(1:No)%kx,descend=.false.)
+%  	call IndexSort(No,indx,obs(1:No)%kr,descend=.false.)
+%  		! Sorting
+%  	obs(1:No) = obs( (/ (indx(i),i=1,No) /) )
+%       	...
+%  		! Unsorting
+%  	obs( (/ (indx(i),i=1,No) /) ) = obs(1:No)
+%       \end{verbatim}
+%{\sf REVISION HISTORY:}
+%\begin{verbatim}  	15Mar00	- Jing Guo
+%  		. Added interfaces without the explicit size
+%  		. Added interfaces for two dimensional arrays
+%  	02Feb99 - Jing Guo <guo@thunder> - Added if(present(stat)) ...
+%   	04Jan99 - Jing Guo <guo@thunder> - revised
+%   	09Sep97 - Jing Guo <guo@thunder> - initial prototype/prolog/code\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+  \subsubsection{setn\_ - Initialize an array of data location indices}
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     subroutine setn_(n,indx)
+       integer, intent(in)                :: n		! size of indx(:)
+       integer, dimension(n), intent(out) :: indx	! indices
+ \end{verbatim} %{\sf REVISION HISTORY:}
+%\begin{verbatim}  	15Mar00	- Jing Guo
+%  		. initial prototype/prolog/code
+%  		. redefined for the original interface\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+  \subsubsection{set\_ - Initialize an array of data location indices}
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     subroutine set_(indx)
+       integer, dimension(:), intent(out) :: indx	! indices
+ \end{verbatim} %{\sf REVISION HISTORY:}
+%\begin{verbatim}  	15Mar00	- Jing Guo
+%  		. Modified the interface, by removing the explicit size
+%   	09Sep97 - Jing Guo <guo@thunder> - initial prototype/prolog/code
+%   	04Jan99 - Jing Guo <guo@thunder> - revised prolog format\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+
+  \subsubsection{iSortn\_ - A stable merge index sorting of INTs.}
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     subroutine iSortn_(n,indx,keys,descend,stat)
+       integer,intent(in) :: n
+       integer, dimension(n), intent(inout) :: indx
+       integer, dimension(n), intent(in)    :: keys
+       logical, optional, intent(in)        :: descend
+       integer, optional, intent(out)       :: stat
+ \end{verbatim} %{\sf REVISION HISTORY:}
+%\begin{verbatim}  	15Mar00	- Jing Guo
+%  		. initial prototype/prolog/code
+%  		. redefined for the original interface\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+
+  \subsubsection{rSortn\_ - A stable merge index sorting REALs.}
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     subroutine rSortn_(n,indx,keys,descend,stat)
+       integer,intent(in)                   :: n
+       integer, dimension(n), intent(inout) :: indx
+       real(SP),dimension(n), intent(in)    :: keys
+       logical, optional, intent(in)        :: descend
+       integer, optional, intent(out)       :: stat
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}  	15Mar00	- Jing Guo
+%  		. initial prototype/prolog/code
+%  		. redefined for the original interface\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+
+  \subsubsection{dSortn\_ - A stable merge index sorting DOUBLEs.}
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     subroutine dSortn_(n,indx,keys,descend,stat)
+       integer,intent(in)                   :: n
+       integer, dimension(n), intent(inout) :: indx
+       real(DP), dimension(n), intent(in)   :: keys
+       logical, optional, intent(in)        :: descend
+       integer, optional, intent(out)       :: stat
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}  	15Mar00	- Jing Guo
+%  		. initial prototype/prolog/code
+%  		. redefined for the original interface\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+
+  \subsubsection{cSortn\_ - A stable merge index sorting of CHAR(*)s.}
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     subroutine cSortn_(n,indx,keys,descend,stat)
+       integer,intent(in)                         :: n
+       integer, dimension(n), intent(inout)       :: indx
+       character(len=*), dimension(n), intent(in) :: keys
+       logical, optional, intent(in)              :: descend
+       integer, optional, intent(out)             :: stat
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}  	15Mar00	- Jing Guo
+%  		. initial prototype/prolog/code
+%  		. redefined for the original interface\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+
+  \subsubsection{iSort\_ - A stable merge index sorting of INTs.}
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     subroutine iSort_(indx,keys,descend,stat)
+       integer, dimension(:), intent(inout) :: indx
+       integer, dimension(:), intent(in)    :: keys
+       logical, optional, intent(in)        :: descend
+       integer, optional, intent(out)       :: stat
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}  	15Mar00	- Jing Guo
+%  		. Modified the interface, by removing the explicit size
+%  	02Feb99 - Jing Guo <guo@thunder> - Added if(present(stat)) ...
+%   	04Jan99 - Jing Guo <guo@thunder> - revised the prolog
+%   	09Sep97 - Jing Guo <guo@thunder> - initial prototype/prolog/code\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+
+  \subsubsection{rSort\_ - A stable merge index sorting REALs.}
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     subroutine rSort_(indx,keys,descend,stat)
+       integer, dimension(:), intent(inout) :: indx
+       real(SP),dimension(:), intent(in)    :: keys
+       logical, optional, intent(in)        :: descend
+       integer, optional, intent(out)       :: stat
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}  	15Mar00	- Jing Guo
+%  		. Modified the interface, by removing the explicit size
+%  	02Feb99 - Jing Guo <guo@thunder> - Added if(present(stat)) ...
+%   	04Jan99 - Jing Guo <guo@thunder> - revised the prolog
+%   	09Sep97 - Jing Guo <guo@thunder> - initial prototype/prolog/code\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+  \subsubsection{dSort\_ - A stable merge index sorting DOUBLEs.}
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     subroutine dSort_(indx,keys,descend,stat)
+       integer, dimension(:), intent(inout) :: indx
+       real(DP), dimension(:), intent(in)   :: keys
+       logical, optional, intent(in)        :: descend
+       integer, optional, intent(out)       :: stat
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}  	15Mar00	- Jing Guo
+%  		. Modified the interface, by removing the explicit size
+%  	02Feb99 - Jing Guo <guo@thunder> - Added if(present(stat)) ...
+%   	04Jan99 - Jing Guo <guo@thunder> - revised the prolog
+%   	09Sep97 - Jing Guo <guo@thunder> - initial prototype/prolog/code\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+
+  \subsubsection{cSort\_ - A stable merge index sorting of CHAR(*)s.}
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     subroutine cSort_(indx,keys,descend,stat)
+       integer, dimension(:), intent(inout)       :: indx
+       character(len=*), dimension(:), intent(in) :: keys
+       logical, optional, intent(in)              :: descend
+       integer, optional, intent(out)             :: stat
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}  	15Mar00	- Jing Guo
+%  		. Modified the interface, by removing the explicit size
+%  	02Feb99 - Jing Guo <guo@thunder> - Added if(present(stat)) ...
+%   	04Jan99 - Jing Guo <guo@thunder> - revised the prolog
+%   	09Sep97 - Jing Guo <guo@thunder> - initial prototype/prolog/code\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+  \subsubsection{iSort1\_ - A stable merge index sorting of INTs.}
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     subroutine iSort1_(indx,keys,ikey,descend,stat)
+       integer, dimension(:), intent(inout) :: indx
+       integer, dimension(:,:), intent(in)  :: keys
+       integer,intent(in)                   :: ikey
+       logical, optional, intent(in)        :: descend
+       integer, optional, intent(out)       :: stat
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}  	15Mar00	- Jing Guo
+%  		. initial prototype/prolog/code
+%  		. Copied code from iSort_
+%  		. Extended the interface and the algorithm to handle
+%  		  2-d arrays with an index.\end{verbatim}
+% 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+  \subsubsection{rSort1\_ - A stable merge index sorting REALs.}
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     subroutine rSort1_(indx,keys,ikey,descend,stat)
+       integer, dimension(:), intent(inout) :: indx
+       real(SP),dimension(:,:), intent(in)  :: keys
+       integer,intent(in)                   :: ikey
+       logical, optional, intent(in)        :: descend
+       integer, optional, intent(out)       :: stat
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}  	15Mar00	- Jing Guo
+%  		. initial prototype/prolog/code
+%  		. Copied code from rSort_
+%  		. Extended the interface and the algorithm to handle
+%  		  2-d arrays with an index.\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+  \subsubsection{dSort1\_ - A stable merge index sorting DOUBLEs.}
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     subroutine dSort1_(indx,keys,ikey,descend,stat)
+       integer, dimension(:), intent(inout) :: indx
+       real(DP), dimension(:,:), intent(in) :: keys
+       integer,intent(in)                   :: ikey
+       logical, optional, intent(in)        :: descend
+       integer, optional, intent(out)       :: stat
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}  	15Mar00	- Jing Guo
+%  		. initial prototype/prolog/code
+%  		. Copied code from dSort_
+%  		. Extended the interface and the algorithm to handle
+%  		  2-d arrays with an index.\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+  \subsubsection{cSort1\_ - A stable merge index sorting of CHAR(*)s.}
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     subroutine cSort1_(indx,keys,ikey,descend,stat)
+       integer, dimension(:), intent(inout)         :: indx
+       character(len=*), dimension(:,:), intent(in) :: keys
+       integer,intent(in)                           :: ikey
+       logical, optional, intent(in)                :: descend
+       integer, optional, intent(out)               :: stat
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}  	15Mar00	- Jing Guo
+%  		. initial prototype/prolog/code
+%  		. Copied code from cSort_
+%  		. Extended the interface and the algorithm to handle
+%  		  2-d arrays with an index.\end{verbatim}
+
+%\markboth{Left}{Source File: m\_Permuter.F90,  Date: Thu Nov 15 22:24:23 GMT 2001
+%}
+
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+  \subsection{Module m\_Permuter - permute/unpermute }
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     module m_Permuter
+       public :: permute	
+       public :: unpermute
+ 
+     interface permute
+       module procedure	
+         permutei_,	&	! integer in place
+         permuteio_,	&	! integer with an output
+         permutei1_,	&	! integer in place
+         permuteio1_,	&	! integer with an output
+         permuter_,	&	! real in place
+         permutero_,	&	! real with an output
+         permuter1_,	&	! real in place
+         permutero1_,	&	! real with an output
+         permuted_,	&	! dble in place
+         permutedo_,	&	! dble with an output
+         permuted1_,	&	! dble in place
+         permutedo1_,	&	! dble with an output
+         permutel_,	&	! logical in place
+         permutelo_,	&	! logical with an output
+         permutel1_,	&	! logical in place
+         permutelo1_		! logical with an output
+     end interface
+ 
+     interface unpermute
+       module procedure	&
+         unpermutei_,	&	! integer in place
+         unpermuteio_,	&	! integer with an output
+         unpermutei1_,	&	! integer in place
+         unpermuteio1_,	&	! integer with an output
+         unpermuter_,	&	! real in place
+         unpermutero_,	&	! real with an output
+         unpermuter1_,	&	! real in place
+         unpermutero1_,	&	! real with an output
+         unpermuted_,	&	! dble in place
+         unpermutedo_,	&	! dble with an output
+         unpermuted1_,	&	! dble in place
+         unpermutedo1_,	&	! dble with an output
+         unpermutel_,	&	! logical in place
+         unpermutelo_,	&	! logical with an output
+         unpermutel1_,	&	! logical in place
+         unpermutelo1_		! logical with an output
+     end interface
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}   	25Aug99	- Jing Guo <guo@dao.gsfc.nasa.gov>
+%  		- initial prototype/prolog/code\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+
+  \subsubsection{permutei\_ - permute an integer array according to indx[]}
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     subroutine permutei_(ary,indx,n)
+       integer,dimension(:),intent(inout) :: ary
+       integer,dimension(:),intent(in)    :: indx
+       integer,             intent(in)    :: n
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}   	25Aug99	- Jing Guo <guo@dao.gsfc.nasa.gov>
+%  		- initial prototype/prolog/code\end{verbatim}
+% 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+
+  \subsubsection{permuteio\_ - permute an integer array according to indx[]}
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     subroutine permuteio_(aout,ary,indx,n)
+       integer,dimension(:),intent(inout) :: aout
+       integer,dimension(:),intent(in )   :: ary
+       integer,dimension(:),intent(in)    :: indx
+       integer,             intent(in)    :: n
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}   	25Aug99	- Jing Guo <guo@dao.gsfc.nasa.gov>
+%  		- initial prototype/prolog/code\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+
+  \subsubsection{unpermutei\_ - unpermute a \_permuted\_ integer array}
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     subroutine unpermutei_(ary,indx,n)
+       integer,dimension(:),intent(inout) :: ary
+       integer,dimension(:),intent(in)    :: indx
+       integer,             intent(in)    :: n
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}   	25Aug99	- Jing Guo <guo@dao.gsfc.nasa.gov>
+%  		- initial prototype/prolog/code\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+
+  \subsubsection{unpermuteio\_ - unpermute a \_permuted\_ integer array}
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     subroutine unpermuteio_(aout,ary,indx,n)
+       integer,dimension(:),intent(inout) :: aout
+       integer,dimension(:),intent(in)    :: ary
+       integer,dimension(:),intent(in)    :: indx
+       integer,             intent(in)    :: n
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}   	25Aug99	- Jing Guo <guo@dao.gsfc.nasa.gov>
+%  		- initial prototype/prolog/code\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+
+  \subsubsection{permuter\_ - permute a real array according to indx[]}
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     subroutine permuter_(ary,indx,n)
+       real(SP),dimension(:),intent(inout) :: ary
+       integer ,dimension(:),intent(in)    :: indx
+       integer ,             intent(in)    :: n
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}   	25Aug99	- Jing Guo <guo@dao.gsfc.nasa.gov>
+%  		- initial prototype/prolog/code\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+  \subsubsection{permutero\_ - permute a real array according to indx[]}
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     subroutine permutero_(aout,ary,indx,n)
+       real(SP),dimension(:),intent(inout) :: aout
+       real(SP),dimension(:),intent(in)    :: ary
+       integer ,dimension(:),intent(in)    :: indx
+       integer ,             intent(in)    :: n
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}   	25Aug99	- Jing Guo <guo@dao.gsfc.nasa.gov>
+%  		- initial prototype/prolog/code\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+
+  \subsubsection{unpermuter\_ - unpermute a \_permuted\_ real array}
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     subroutine unpermuter_(ary,indx,n)
+       real(SP),dimension(:),intent(inout) :: ary
+       integer ,dimension(:),intent(in)    :: indx
+       integer ,             intent(in)    :: n
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}   	25Aug99	- Jing Guo <guo@dao.gsfc.nasa.gov>
+%  		- initial prototype/prolog/code\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+
+  \subsubsection{unpermutero\_ - unpermute a \_permuted\_ real array}
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     subroutine unpermutero_(aout,ary,indx,n)
+       real(SP),dimension(:),intent(inout) :: aout
+       real(SP),dimension(:),intent(in)    :: ary
+       integer ,dimension(:),intent(in)    :: indx
+       integer ,             intent(in)    :: n
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}   	25Aug99	- Jing Guo <guo@dao.gsfc.nasa.gov>
+%  		- initial prototype/prolog/code\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+  \subsubsection{permuted\_ - permute a double precision array}
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     subroutine permuted_(ary,indx,n)
+       real(DP),dimension(:),intent(inout) :: ary
+       integer ,dimension(:),intent(in)    :: indx
+       integer ,             intent(in)    :: n
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}   	25Aug99	- Jing Guo <guo@dao.gsfc.nasa.gov>
+%  		- initial prototype/prolog/code\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+  \subsubsection{permutedo\_ - permute a double precision array}
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     subroutine permutedo_(aout,ary,indx,n)
+       real(DP),dimension(:),intent(inout) :: aout
+       real(DP),dimension(:),intent(in)    :: ary
+       integer ,dimension(:),intent(in)    :: indx
+       integer ,             intent(in)    :: n
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}   	25Aug99	- Jing Guo <guo@dao.gsfc.nasa.gov>
+%  		- initial prototype/prolog/code\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+  \subsubsection{unpermuted\_ - unpermute a double precision array}
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     subroutine unpermuted_(ary,indx,n)
+       real(DP),dimension(:),intent(inout) :: ary
+       integer ,dimension(:),intent(in)    :: indx
+       integer ,             intent(in)    :: n
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}   	25Aug99	- Jing Guo <guo@dao.gsfc.nasa.gov>
+%  		- initial prototype/prolog/code\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+
+  \subsubsection{unpermutedo\_ - unpermute a double precision array}
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     subroutine unpermutedo_(aout,ary,indx,n)
+       real(DP),dimension(:),intent(inout) :: aout
+       real(DP),dimension(:),intent(in)    :: ary
+       integer ,dimension(:),intent(in)    :: indx
+       integer ,             intent(in)    :: n
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}   	25Aug99	- Jing Guo <guo@dao.gsfc.nasa.gov>
+%  		- initial prototype/prolog/code\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+
+  \subsubsection{permutel\_ - permute a real array according to indx[]}
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     subroutine permutel_(ary,indx,n)
+       logical,dimension(:),intent(inout) :: ary
+       integer,dimension(:),intent(in)    :: indx
+       integer,             intent(in)    :: n
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}   	25Aug99	- Jing Guo <guo@dao.gsfc.nasa.gov>
+%  		- initial prototype/prolog/code\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+
+  \subsubsection{permutelo\_ - permute a real array according to indx[]}
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     subroutine permutelo_(aout,ary,indx,n)
+       logical,dimension(:),intent(inout) :: aout
+       logical,dimension(:),intent(in)    :: ary
+       integer,dimension(:),intent(in)    :: indx
+       integer,             intent(in)    :: n
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}   	25Aug99	- Jing Guo <guo@dao.gsfc.nasa.gov>
+%  		- initial prototype/prolog/code\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+  \subsubsection{unpermutel\_ - unpermute a \_permuted\_ logical array}
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     subroutine unpermutel_(ary,indx,n)
+       logical,dimension(:),intent(inout) :: ary
+       integer,dimension(:),intent(in)    :: indx
+       integer,             intent(in)    :: n
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}   	25Aug99	- Jing Guo <guo@dao.gsfc.nasa.gov>
+%  		- initial prototype/prolog/code\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+  \subsubsection{unpermutelo\_ - unpermute a \_permuted\_ logical array}
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     subroutine unpermutelo_(aout,ary,indx,n)
+       logical,dimension(:),intent(inout) :: aout
+       logical,dimension(:),intent(in)    :: ary
+       integer,dimension(:),intent(in)    :: indx
+       integer,             intent(in)    :: n
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}   	25Aug99	- Jing Guo <guo@dao.gsfc.nasa.gov>
+%  		- initial prototype/prolog/code\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+  \subsubsection{permutei1\_ - permute an integer array according to indx[]}
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     subroutine permutei1_(ary,indx,n)
+       integer,dimension(:,:),intent(inout) :: ary
+       integer,dimension(:),intent(in)      :: indx
+       integer,             intent(in)      :: n
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}   	25Aug99	- Jing Guo <guo@dao.gsfc.nasa.gov>
+%  		- initial prototype/prolog/code\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+  \subsubsection{permuteio1\_ - permute an integer array according to indx[]}
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     subroutine permuteio1_(aout,ary,indx,n)
+       integer,dimension(:,:),intent(inout) :: aout
+       integer,dimension(:,:),intent(in )   :: ary
+       integer,dimension(:),intent(in)      :: indx
+       integer,             intent(in)      :: n
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}   	25Aug99	- Jing Guo <guo@dao.gsfc.nasa.gov>
+%  		- initial prototype/prolog/code\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+
+  \subsubsection{unpermutei1\_ - unpermute a \_permuted\_ integer array}
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     subroutine unpermutei1_(ary,indx,n)
+       integer,dimension(:,:),intent(inout) :: ary
+       integer,dimension(:),intent(in)      :: indx
+       integer,             intent(in)      :: n
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}   	25Aug99	- Jing Guo <guo@dao.gsfc.nasa.gov>
+%  		- initial prototype/prolog/code\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+
+  \subsubsection{unpermuteio1\_ - unpermute a \_permuted\_ integer array}
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     subroutine unpermuteio1_(aout,ary,indx,n)
+       integer,dimension(:,:),intent(inout) :: aout
+       integer,dimension(:,:),intent(in)    :: ary
+       integer,dimension(:),intent(in)      :: indx
+       integer,             intent(in)      :: n
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}   	25Aug99	- Jing Guo <guo@dao.gsfc.nasa.gov>
+%  		- initial prototype/prolog/code\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+  \subsubsection{permuter1\_ - permute a real array according to indx[]}
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     subroutine permuter1_(ary,indx,n)
+       real(SP),dimension(:,:),intent(inout) :: ary
+       integer ,dimension(:),intent(in)      :: indx
+       integer ,             intent(in)      :: n
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}   	25Aug99	- Jing Guo <guo@dao.gsfc.nasa.gov>
+%  		- initial prototype/prolog/code\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+  \subsubsection{permutero1\_ - permute a real array according to indx[]}
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     subroutine permutero1_(aout,ary,indx,n)
+       real(SP),dimension(:,:),intent(inout) :: aout
+       real(SP),dimension(:,:),intent(in)    :: ary
+       integer ,dimension(:),intent(in)      :: indx
+       integer ,             intent(in)      :: n
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}   	25Aug99	- Jing Guo <guo@dao.gsfc.nasa.gov>
+%  		- initial prototype/prolog/code\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+
+  \subsubsection{unpermuter1\_ - unpermute a \_permuted\_ real array}
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     subroutine unpermuter1_(ary,indx,n)
+       real(SP),dimension(:,:),intent(inout) :: ary
+       integer ,dimension(:),intent(in)      :: indx
+       integer ,             intent(in)      :: n
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}   	25Aug99	- Jing Guo <guo@dao.gsfc.nasa.gov>
+%  		- initial prototype/prolog/code\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+
+  \subsubsection{unpermutero1\_ - unpermute a \_permuted\_ real array}
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     subroutine unpermutero1_(aout,ary,indx,n)
+       real(SP),dimension(:,:),intent(inout) :: aout
+       real(SP),dimension(:,:),intent(in)    :: ary
+       integer ,dimension(:),intent(in)      :: indx
+       integer ,             intent(in)      :: n
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}   	25Aug99	- Jing Guo <guo@dao.gsfc.nasa.gov>
+%  		- initial prototype/prolog/code\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+
+  \subsubsection{permuted1\_ - permute a double precision array}
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     subroutine permuted1_(ary,indx,n)
+       real(DP),dimension(:,:),intent(inout) :: ary
+       integer ,dimension(:),intent(in)      :: indx
+       integer ,             intent(in)      :: n
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}   	25Aug99	- Jing Guo <guo@dao.gsfc.nasa.gov>
+%  		- initial prototype/prolog/code\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+
+  \subsubsection{permutedo1\_ - permute a double precision array}
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     subroutine permutedo1_(aout,ary,indx,n)
+       real(DP),dimension(:,:),intent(inout) :: aout
+       real(DP),dimension(:,:),intent(in)    :: ary
+       integer ,dimension(:),intent(in)      :: indx
+       integer ,             intent(in)      :: n
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}   	25Aug99	- Jing Guo <guo@dao.gsfc.nasa.gov>
+%  		- initial prototype/prolog/code\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+
+  \subsubsection{unpermuted1\_ - unpermute a double precision array}
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     subroutine unpermuted1_(ary,indx,n)
+       real(DP),dimension(:,:),intent(inout) :: ary
+       integer ,dimension(:),intent(in)      :: indx
+       integer ,             intent(in)      :: n
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}   	25Aug99	- Jing Guo <guo@dao.gsfc.nasa.gov>
+%  		- initial prototype/prolog/code\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+
+  \subsubsection{unpermutedo1\_ - unpermute a double precision array}
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     subroutine unpermutedo1_(aout,ary,indx,n)
+       real(DP),dimension(:,:),intent(inout) :: aout
+       real(DP),dimension(:,:),intent(in)    :: ary
+       integer ,dimension(:),intent(in)      :: indx
+       integer ,             intent(in)      :: n
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}   	25Aug99	- Jing Guo <guo@dao.gsfc.nasa.gov>
+%  		- initial prototype/prolog/code\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+
+  \subsubsection{permutel1\_ - permute a real array according to indx[]}
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     subroutine permutel1_(ary,indx,n)
+       logical,dimension(:,:),intent(inout) :: ary
+       integer,dimension(:),intent(in)      :: indx
+       integer,             intent(in)      :: n
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}   	25Aug99	- Jing Guo <guo@dao.gsfc.nasa.gov>
+%  		- initial prototype/prolog/code\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+
+  \subsubsection{permutelo1\_ - permute a real array according to indx[]}
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     subroutine permutelo1_(aout,ary,indx,n)
+       logical,dimension(:,:),intent(inout) :: aout
+       logical,dimension(:,:),intent(in)    :: ary
+       integer,dimension(:),intent(in)      :: indx
+       integer,             intent(in)      :: n
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}   	25Aug99	- Jing Guo <guo@dao.gsfc.nasa.gov>
+%  		- initial prototype/prolog/code\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+
+  \subsubsection{unpermutel1\_ - unpermute a \_permuted\_ logical array}
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     subroutine unpermutel1_(ary,indx,n)
+       logical,dimension(:,:),intent(inout) :: ary
+       integer,dimension(:),intent(in)      :: indx
+       integer,             intent(in)      :: n
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}   	25Aug99	- Jing Guo <guo@dao.gsfc.nasa.gov>
+%  		- initial prototype/prolog/code\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+
+  \subsubsection{unpermutelo1\_ - unpermute a \_permuted\_ logical array}
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     subroutine unpermutelo1_(aout,ary,indx,n)
+       logical,dimension(:,:),intent(inout) :: aout
+       logical,dimension(:,:),intent(in)    :: ary
+       integer,dimension(:),intent(in)      :: indx
+       integer,             intent(in)      :: n
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}   	25Aug99	- Jing Guo <guo@dao.gsfc.nasa.gov>
+%  		- initial prototype/prolog/code\end{verbatim}
+
+%\markboth{Left}{Source File: m\_SortingTools.F90,  Date: Thu Nov 15 22:24:23 GMT 2001
+%}
+
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+
+  \subsection{Module m\_SortingTools - A collection of different sorting tools }
+%
+%  	This module contains a collection of sorting utilities.  The
+%     utilities are accessed through three generic interfaces, IndexSet(),
+%     IndexSort(), and IndexBin().
+%  
+%  	Note that, a version of IndexBin() for real arguments is not
+%     implemented due to the difficulty of comparing two real values as
+%     being equal.  For example, a bin for real values may be specified
+%     as a single number, a range of two numbers, a number with an
+%     absolute error-bar, or a number with a relative error-bar.
+%  
+%  	In general, one may have to map both keys(:) and bins(:) to
+%     integer indices by the a given rule, then use the integer version
+%     of IndexBin() with the two integer index arrays to do the sorting.
+%     This mapping rule, however, is application dependent.
+%  
+%  	Also note that, in principle, it is possible to use both 
+%     IndexSort() and IndexBin() in the same sorting task.
+  
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     module m_SortingTools
+       public :: IndexSet	! define an initial list of indices
+       public :: IndexSort	! index for a new rank out of the old
+       public :: IndexBin	! index for sorting bins
+       public :: RankSet		! define an initial list of ranks
+       public :: RankMerge	! merge two arrays by re-ranking
+       public :: IndexedRankMerge ! index-merge two array segments
+\end{verbatim}
+%
+%   !EXAMPLES:
+%  	- An example of using IndexSet()/IndexSort() in combination with
+%     the convenience of the Fortran 90 array syntex can be found in the
+%     prolog of m_MergeSorts.
+%  	- An example of using IndexSet()/IndexBin(): Copying all "good"
+%     data to another array.
+%  	integer :: indx(n)
+%  	call IndexSet(n,indx)
+%  	call IndexBin(n,indx,allObs(:)%qcflag,GOOD,ln0=ln_GOOD)
+%  		! Copy all "good" data to another array
+%  	goodObs(1:ln_GOOD)=allObs( indx(1:ln_GOOD) )
+%  		! Refill all "good" data back to their original places
+%  	allObs( indx(1:ln_GOOD) ) = goodObs(1:ln_GOOD)
+%  	- Similarily, multiple keys may be used in an IndexBin() call
+%     to selectively sort the data.  The following code will move data
+%     with kt = kt_Us,kt_U,kt_Vs,kt_V up to the front:
+%  	call IndexBin(n,indx,allObs(:)%kt,(/kt_Us,kt_U,kt_Vs,kt_V/))
+%  	allObs(1:n) = allObs( indx(1:n) )
+%  	- Additional applications can also be implemented with other
+%     argument combinations.\end{verbatim} 
+%{\sf REVISION HISTORY:}
+%\begin{verbatim}  	15Mar00	- Jing Guo
+%  		. Added m_rankMerge module interface
+%  	20Apr99 - Jing Guo
+%  		- Commented "only" in use m_IndexBin_xxx to avoid an
+%  		  apperent compiler bug on DEC/OSF1
+%   	17Feb99 - Jing Guo <guo@thunder> - initial prototype/prolog/code\end{verbatim}
+
+%\markboth{Left}{Source File: m\_StrTemplate.F90,  Date: Thu Nov 15 22:24:24 GMT 2001
+%}
+
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+
+  \subsection{Module m\_StrTemplate - A template formatting a string with variables }
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     module m_StrTemplate
+       public :: StrTemplate	! Substitute variables in a template
+       interface StrTemplate
+         module procedure strTemplate_
+       end interface
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}   	01Jun99	- Jing Guo <guo@dao.gsfc.nasa.gov>
+%  		- initial prototype/prolog/code\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+
+  \subsubsection{strTemplate\_ - expanding a format template to a string}
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     subroutine strTemplate_(str,tmpl,class,xid,nymd,nhms,stat)
+       character(len=*),intent(out)          :: str   ! the output
+       character(len=*),intent(in )          :: tmpl  ! a "format"
+       character(len=*),intent(in ),optional :: class
+                ! choose a UNIX or a GrADS(default) type format
+       character(len=*),intent(in ),optional :: xid
+                ! a string substituting a  "%s". Trailing spaces will be 
+                ! ignored
+       integer,intent(in ),optional          :: nymd
+                ! yyyymmdd, substituting "%y4", "%y2", "%m1", "%m2", "%mc", 
+                ! "%Mc', and "%MC"
+       integer,intent(in ),optional          :: nhms
+                ! hhmmss, substituting "%h1", "%h2", "%h3", and "%n2"
+       integer,intent(out),optional          :: stat
+                ! error code
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}   	03Jun99	- Jing Guo <guo@dao.gsfc.nasa.gov>
+%  		- initial prototype/prolog/code
+%         08Jan01 - da Silva: moved uppercase() to outside select() to
+%                   avoid coredump on Linux/PGI.\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+
+  \subsubsection{GX\_ - evaluate a GrADS style string template}
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     subroutine GX_(str,tmpl,xid,nymd,nhms,stat)
+       character(len=*),intent(out)         :: str
+       character(len=*),intent(in )         :: tmpl
+       character(len=*),optional,intent(in) :: xid
+       integer,optional,intent(in)          :: nymd
+       integer,optional,intent(in)          :: nhms
+       integer,optional,intent(out)         :: stat
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}   	01Jun99	- Jing Guo <guo@dao.gsfc.nasa.gov>
+%  		- initial prototype/prolog/code\end{verbatim}
+
+%\markboth{Left}{Source File: m\_String.F90,  Date: Thu Nov 15 22:24:24 GMT 2001
+%}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+  \subsection{Module m\_String - string pointers }
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     module m_String
+       public :: String		! The class data structure
+       public :: toChar		! convert to a CHARACTER(*)
+       public :: char		! convert to a CHARACTER(*)
+       public :: String_init
+       public :: init		! set a CHARACTER(*) type to a String
+       public :: String_clean
+       public :: clean		! clean a String
+       public :: String_len
+       public :: len		! length of a String 
+       public :: String_bcast
+       public :: bcast		! Broadcast a String 
+       public :: String_mci
+       public :: String_mco
+       public :: ptr_chars
+     type String
+       character(len=1),dimension(:),pointer :: c
+     end type String
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}   	22Apr98 - Jing Guo <guo@thunder> - initial prototype/prolog/code\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+  \subsubsection{str2ch0\_ - convert a String to a variable of characters}
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     function str2ch0_(str)
+       type(String),intent(in)    :: str
+       character(len=size(str%c)) :: str2ch0_
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}   	23Apr98 - Jing Guo <guo@thunder> - initial prototype/prolog/code\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+  \subsubsection{ch12ch0\_ - convert a rank-1 char-array to a rank-0 char(*)}
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     function ch12ch0_(ch1)
+       character(len=1),dimension(:),intent(in) :: ch1
+       character(len=size(ch1)) :: ch12ch0_
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}   	22Apr98 - Jing Guo <guo@thunder> - initial prototype/prolog/code\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+
+  \subsubsection{initc\_ - convert a character object to a String object}
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     subroutine initc_(str,chr)
+       type(String),intent(out)    :: str
+       character(len=*),intent(in) :: chr
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}   	23Apr98 - Jing Guo <guo@thunder> - initial prototype/prolog/code\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+
+  \subsubsection{inits\_ - convert a String object to a String}
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     subroutine inits_(oStr,iStr)
+       type(String),intent(out) :: oStr
+       type(String),intent(in ) :: iStr
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}   	07Feb00	- Jing Guo <guo@dao.gsfc.nasa.gov>
+%  		- initial prototype/prolog/code\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+  \subsubsection{clean\_ - clean a defined String object}
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     subroutine clean_(str)
+       type(String),intent(inout) :: str
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}   	23Apr98 - Jing Guo <guo@thunder> - initial prototype/prolog/code\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+  \subsubsection{bcast\_ - broadcast a rank-0 String}
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     subroutine bcast_(Str,root,comm,stat)
+       type(String)                 :: Str   ! (IN) on the root, (OUT) elsewhere
+       integer,intent(in)           :: root
+       integer,intent(in)           :: comm
+       integer,optional,intent(out) :: stat
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}   	27Apr98 - Jing Guo <guo@thunder> - initial prototype/prolog/code\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+  \subsubsection{mci0\_ - checking in a String scalar}
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     subroutine mci0_(marg,thread)
+       type(String),    intent(in) :: marg
+       character(len=*),intent(in) :: thread
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}   	07Feb00	- Jing Guo <guo@dao.gsfc.nasa.gov>
+%  		- initial prototype/prolog/code\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+
+  \subsubsection{mco0\_ - checking out a String scalar}
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     subroutine mco0_(marg,thread)
+       type(String),    intent(in) :: marg
+       character(len=*),intent(in) :: thread
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}   	07Feb00	- Jing Guo <guo@dao.gsfc.nasa.gov>
+%  		- initial prototype/prolog/code\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+  \subsubsection{mci1\_ - checking in a String scalar}
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     subroutine mci1_(marg,thread)
+       type(String),dimension(:),intent(in) :: marg
+       character(len=*)         ,intent(in) :: thread
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}   	07Feb00	- Jing Guo <guo@dao.gsfc.nasa.gov>
+%  		- initial prototype/prolog/code\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+
+  \subsubsection{mco1\_ - checking out a String scalar}
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     subroutine mco1_(marg,thread)
+       type(String),dimension(:),intent(in) :: marg
+       character(len=*)         ,intent(in) :: thread
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}   	07Feb00	- Jing Guo <guo@dao.gsfc.nasa.gov>
+%  		- initial prototype/prolog/code\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+  \subsubsection{mci2\_ - checking in a String scalar}
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     subroutine mci2_(marg,thread)
+       type(String),dimension(:,:),intent(in) :: marg
+       character(len=*)           ,intent(in) :: thread
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}   	07Feb00	- Jing Guo <guo@dao.gsfc.nasa.gov>
+%  		- initial prototype/prolog/code\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+  \subsubsection{mco2\_ - checking out a String scalar}
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     subroutine mco2_(marg,thread)
+       type(String),dimension(:,:),intent(in) :: marg
+       character(len=*)           ,intent(in) :: thread
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}   	07Feb00	- Jing Guo <guo@dao.gsfc.nasa.gov>
+%  		- initial prototype/prolog/code\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+
+  \subsubsection{mci3\_ - checking in a String scalar}
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     subroutine mci3_(marg,thread)
+       type(String),dimension(:,:,:),intent(in) :: marg
+       character(len=*)             ,intent(in) :: thread
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}   	07Feb00	- Jing Guo <guo@dao.gsfc.nasa.gov>
+%  		- initial prototype/prolog/code\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+  \subsubsection{mco3\_ - checking out a String scalar}
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     subroutine mco3_(marg,thread)
+       type(String),dimension(:,:,:),intent(in) :: marg
+       character(len=*)             ,intent(in) :: thread
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}   	07Feb00	- Jing Guo <guo@dao.gsfc.nasa.gov>
+%  		- initial prototype/prolog/code\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+  \subsubsection{len\_ = len of a String}
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     function len_(str)
+       type(String),intent(in) :: str
+       integer :: len_
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}   	10Apr00	- Jing Guo <guo@dao.gsfc.nasa.gov>
+%  		- initial prototype/prolog/code\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+  \subsubsection{ptr\_chars\_ - direct}
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     function ptr_chars_(str)
+       type(String),intent(in)               :: str
+       character(len=1),pointer,dimension(:) :: ptr_chars_
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}   	10Apr00	- Jing Guo <guo@dao.gsfc.nasa.gov>
+%  		- initial prototype/prolog/code\end{verbatim}
+
+%\markboth{Left}{Source File: m\_StringLinkedList.F90,  Date: Thu Nov 15 22:24:24 GMT 2001
+%}
+
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+  \subsection{Module m\_StringLinkedList - A linked-list of String }
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     module m_StringLinkedList
+       public :: StringLinkedList	! The class data structure
+ 
+ 		! o An object of a StringLinkedList should be defined
+ 		!   as a pointer of a StringLinkedList.  It is often
+ 		!   represented by a pointer to the head-node of the
+ 		!   linked-list.
+ 		! o A node in a StringLinkedList is specificed by a
+ 		!   reference pointer.  A reference pointer is a
+ 		!   logical reference of a node in the list.  However,
+ 		!   it does not physically point to that node.  In
+ 		!   fact, a reference pointer normally references to
+ 		!   the node physically pointed by the pointer in the
+ 		!   node physically pointed by the reference pointer,
+ 		!	[this] -> [..|next] -> [..|next]
+ 		!   where the last node is the logically referenced
+ 		!   node.
+ 
+       public :: StringLinkedList_init	! constructor
+       public :: StringLinkedList_clean  ! destructor
+ 
+ 		! A _clean() action will reset a StringLinkedList to its
+ 		! pre-_init() status.
+ 
+       public :: StringLinkedList_insert ! grower, insert a node
+       public :: StringLinkedList_delete ! ungrower, delete a node
+ 
+ 		! Both procedures processing the node through a given
+ 		! reference pointer.  The reference pointer will not
+ 		! be modified directly through either _insert() or
+ 		! _delete().  It is the pointer in the node physically
+ 		! pointed by a reference pointer got modified.  Also,
+ 		! the node logically referenced by the reference
+ 		! pointer is either the new node for an _insert(), and
+ 		! the removed node for a _delete().
+ 
+       public :: StringLinkedList_eol	! inquirer, is an end-node?
+ 
+ 		! An end-of-list situation occurs when the reference
+ 		! pointer is logically referencing to the end-node or
+ 		! beyond.  Note that an end-node links to itself.
+ 
+       public :: StringLinkedList_next	! iterator, go to the next node.
+ 
+       public :: StringLinkedList_count	! counter
+       
+ 		! Count the number of nodes from this reference pointer,
+ 		! starting from and including the logical node but
+ 		! excluding the end-node.
+ 
+       public :: StringLinkedList_get	! fetcher
+ 
+ 		! Get the value logically referenced by a reference
+ 		! pointer.  Return EOL if the referenced node is an
+ 		! EOL().  The reference pointer will be iterated to
+ 		! the next node if the referenced node is not an EOL.
+ 
+     type StringLinkedList
+       type(String)                   :: str
+       type(StringLinkedList),pointer :: next
+     end type StringLinkedList
+ 
+     interface StringLinkedList_init  ; module procedure	&
+        init_
+     end interface
+ 
+     interface StringLinkedList_clean ; module procedure	&
+        clean_
+     end interface
+ 
+     interface StringLinkedList_insert; module procedure	&
+        insertc_,      &        ! insert a CHARACTER(len=*) argument
+        inserts_                ! insert a String argument
+     end interface
+ 
+     interface StringLinkedList_delete; module procedure	&
+        delete_
+     end interface
+ 
+     interface StringLinkedList_eol   ; module procedure	&
+        eol_
+     end interface
+ 
+     interface StringLinkedList_next  ; module procedure	&
+        next_
+     end interface
+ 
+     interface StringLinkedList_count ; module procedure	&
+        count_
+     end interface
+ 
+     interface StringLinkedList_get   ; module procedure	&
+        getc_,          &       ! get as a CHARACTER(len=*)
+        gets_                   ! get as a String
+     end interface
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}   	16Feb00	- Jing Guo <guo@dao.gsfc.nasa.gov>
+%  		- initial prototype/prolog/code\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+
+  \subsubsection{init\_ - initialize a StringLinkedList from a pointer}
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     subroutine init_(head)
+       type(StringLinkedList),pointer :: head	! (out) a list
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}   	22Feb00	- Jing Guo <guo@dao.gsfc.nasa.gov>
+%  		- initial prototype/prolog/code\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+  \subsubsection{insertc\_ - insert before the logically referenced node}
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     subroutine insertc_(cstr,this)
+       character(len=*),intent(in)    :: cstr ! a new entry
+       type(StringLinkedList),pointer :: this ! (in) a node
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}   	16Feb00	- Jing Guo <guo@dao.gsfc.nasa.gov>
+%  		- initial prototype/prolog/code\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+  \subsubsection{inserts\_ - insert before the logically referenced node}
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     subroutine inserts_(str,this)
+       type(String),intent(in)        :: str  ! a new entry
+       type(StringLinkedList),pointer :: this ! (in) a node
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}   	16Feb00	- Jing Guo <guo@dao.gsfc.nasa.gov>
+%  		- initial prototype/prolog/code\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+
+  \subsubsection{delete\_ - delete the logically referenced node}
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     subroutine delete_(this)
+       type(StringLinkedList),pointer :: this ! (in) a node
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}   	17Feb00	- Jing Guo <guo@dao.gsfc.nasa.gov>
+%  		- initial prototype/prolog/code\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+  \subsubsection{eol\_ - if the logically referenced node is an end-node}
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     function eol_(this)
+       type(StringLinkedList),pointer :: this ! (in) a node
+       logical                        :: eol_ ! returned value
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}   	23Feb00	- Jing Guo <guo@dao.gsfc.nasa.gov>
+%  		- initial prototype/prolog/code\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+  \subsubsection{next\_ - point a reference pointer to the next node}
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     subroutine next_(this)
+       type(StringLinkedList),pointer :: this ! (inout) a node
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}   	23Feb00	- Jing Guo <guo@dao.gsfc.nasa.gov>
+%  		- initial prototype/prolog/code\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+
+  \subsubsection{count\_ - count the number of nodes}
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     function count_(this)
+       type(StringLinkedList),pointer :: this ! (in) a node
+       integer :: count_		! returned value
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}   	24Feb00	- Jing Guo <guo@dao.gsfc.nasa.gov>
+%  		- initial prototype/prolog/code\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+
+  \subsubsection{getc\_ - get the logically referenced value as CHARACTERs}
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     subroutine getc_(this,cstr,eol)
+       type(StringLinkedList),pointer :: this ! (inout) a node
+       character(len=*),intent(out)   :: cstr ! the referenced value
+       logical         ,intent(out)   :: eol  ! if the node is an end-node
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}   	17Feb00	- Jing Guo <guo@dao.gsfc.nasa.gov>
+%  		- initial prototype/prolog/code\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+
+  \subsubsection{gets\_ - get the logically referenced value as a String}
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     subroutine gets_(this,str,eol)
+       type(StringLinkedList),pointer :: this ! (inout) a node
+       type(String),intent(out)       :: str  ! the referenced value
+       logical     ,intent(out)       :: eol  ! if the node is an end-node
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}   	17Feb00	- Jing Guo <guo@dao.gsfc.nasa.gov>
+%  		- initial prototype/prolog/code\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+
+  \subsubsection{clean\_ - clean the whole object from this point}
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     subroutine clean_(head,stat)
+       type(StringLinkedList),pointer :: head ! (inout) a head-node
+       integer,optional,intent(out)   :: stat ! return status
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}   	17Feb00	- Jing Guo <guo@dao.gsfc.nasa.gov>
+%  		- initial prototype/prolog/code\end{verbatim}
+
+%\markboth{Left}{Source File: m\_chars.F90,  Date: Thu Nov 15 22:24:24 GMT 2001
+%}
+
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+
+  \subsection{Module m\_chars - a module for character class object operations }
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+      module m_chars
+        public	:: operator (.upper.)	! convert a string to uppercase
+        public	:: uppercase
+ 
+        public	:: operator (.lower.)	! convert a string to lowercase
+        public	:: lowercase
+ 
+        interface operator (.upper.)
+          module procedure upper_case
+        end interface
+        interface uppercase
+          module procedure upper_case
+        end interface
+ 
+        interface operator (.lower.)
+          module procedure lower_case
+        end interface
+        interface lowercase
+          module procedure lower_case
+        end interface
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}   	16Jul96 - J. Guo	- (to do)\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+
+  \subsubsection{upper\_case - convert lowercase letters to uppercase.}
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+   function upper_case(str) result(ustr)
+     character(len=*), intent(in) :: str
+     character(len=len(str))      :: ustr
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}   	13Aug96 - J. Guo	- (to do)\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+  \subsubsection{lower\_case - convert uppercase letters to lowercase.}
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+   function lower_case(str) result(lstr)
+     character(len=*), intent(in) :: str
+     character(len=len(str))      :: lstr
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}   	13Aug96 - J. Guo	- (to do)\end{verbatim}
+%
+%\markboth{Left}{Source File: m\_die.F90,  Date: Thu Nov 15 22:24:24 GMT 2001
+%}
+
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+  \subsection{Module m\_die - die with mpout flushed }
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     module m_die
+       public :: die		! signal an exception
+       public :: diex		! a special die() supporting macros
+       public :: perr,warn	! message(s) to stderr
+       public :: perr_die	! to be phased out
+       public :: MP_die		! a special die() for MPI errors
+       public :: MP_perr		! perr for MPI errors, from m_mpif90
+       public :: MP_perr_die	! a special die() for MPI errors
+       public :: assert_		! used by ASSERT() macro of assert.H
+ 
+       interface die
+         module procedure
+           die0_,	& ! die(where)
+           die1_,	& ! die(where,message)
+           die2_,	& ! die(where,proc,ier)
+           die4_	  ! die(where,mesg1,ival1,mesg2,ival2)
+       end interface
+ 
+       interface diex
+         module procedure
+           diex_	  ! diex(where,filename,lineno)
+       end interface
+ 
+       interface perr
+         module procedure
+           perr1_,	 ! perr(where,message)
+           perr2_,	 ! perr(where,proc,ier)
+           perr4_	 ! perr(where,mesg1,ival1,mesg2,ival2)
+       end interface
+       interface warn
+         module procedure	
+           perr1_,	 ! perr(where,message)
+           perr2_,	 ! perr(where,proc,ier)
+           perr4_	 ! perr(where,mesg1,ival1,mesg2,ival2)
+       end interface
+ 
+       interface perr_die
+         module procedure
+           die2_	  ! perr_die(where,proc,ier)
+       end interface
+ 
+       interface MP_die
+         module procedure
+           MPdie2_	  ! MP_die(where,proc,ier)
+       end interface
+       interface MP_perr_die
+         module procedure
+           MPdie2_	  ! MP_die(where,proc,ier)
+       end interface
+ 
+       interface assert_
+         module procedure
+           assertmsg_,	
+           assertnomsg_
+       end interface
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}   	26Feb98 - Jing Guo <guo@thunder> - initial prototype/prolog/code\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+
+  \subsubsection{die0\_ - flush(mpout) before die()}
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     subroutine die0_(where)
+       character(len=*),intent(in) :: where
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}   	26Feb98 - Jing Guo <guo@thunder> - initial prototype/prolog/code\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+
+  \subsubsection{die1\_ - flush(mpout) before die()}
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     subroutine die1_(where,message)
+       character(len=*),intent(in) :: where
+       character(len=*),intent(in) :: message
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}   	26Feb98 - Jing Guo <guo@thunder> - initial prototype/prolog/code\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\  
+
+  \subsubsection{die2\_ - flush(mpout) before die()}
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     subroutine die2_(where,proc,ier)
+       character(len=*),intent(in) :: where
+       character(len=*),intent(in) :: proc
+       integer,intent(in)          :: ier
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}   	26Feb98 - Jing Guo <guo@thunder> - initial prototype/prolog/code\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+
+  \subsubsection{die4\_ - flush(mpout) before die()}
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     subroutine die4_(where,mesg1,ival1,mesg2,ival2)
+       character(len=*),intent(in) :: where
+       character(len=*),intent(in) :: mesg1
+       integer,intent(in)          :: ival1
+       character(len=*),intent(in) :: mesg2
+       integer,intent(in)          :: ival2
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}   	26Feb98 - Jing Guo <guo@thunder> - initial prototype/prolog/code\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+
+  \subsubsection{diex\_ - flush(mpout) before die()}
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     subroutine diex_(where,filename,line)
+       character(len=*),intent(in) :: where
+       character(len=*),intent(in) :: filename
+       integer,intent(in)          :: line
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}   	26Feb98 - Jing Guo <guo@thunder> - initial prototype/prolog/code\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+  \subsubsection{perr1\_ - send a simple error message to \_stderr\_}
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     subroutine perr1_(where,message)
+       character(len=*),intent(in) :: where
+       character(len=*),intent(in) :: message
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}   	27Apr98 - Jing Guo <guo@thunder> - initial prototype/prolog/code\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+
+  \subsubsection{perr2\_ - send a simple error message to \_stderr\_}
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     subroutine perr2_(where,proc,ier)
+       character(len=*),intent(in) :: where
+       character(len=*),intent(in) :: proc
+       integer,intent(in)          :: ier
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}   	27Apr98 - Jing Guo <guo@thunder> - initial prototype/prolog/code\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+  \subsubsection{perr4\_ - send a simple error message to \_stderr\_}
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     subroutine perr4_(where,mesg1,ival1,mesg2,ival2)
+       character(len=*),intent(in) :: where
+       character(len=*),intent(in) :: mesg1
+       integer,intent(in)          :: ival1
+       character(len=*),intent(in) :: mesg2
+       integer,intent(in)          :: ival2
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}   	27Apr98 - Jing Guo <guo@thunder> - initial prototype/prolog/code\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+
+  \subsubsection{MPdie2\_ - invoke MP\_perr before die\_}
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     subroutine MPdie2_(where,proc,ier)
+       character(len=*),intent(in) :: where
+       character(len=*),intent(in) :: proc
+       integer,intent(in)          :: ier
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}   	27Apr98 - Jing Guo <guo@thunder> - initial prototype/prolog/code\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+  \subsubsection{assertmsg\_ - an utility called by ASSERT() macro only}
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     subroutine assertmsg_(str, file, line)
+       Character(Len=*), Intent(In) :: str	! a message
+       Character(Len=*), Intent(In) :: file	! a filename
+       Integer, Intent(In)          :: line	! a line number
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}   	25Aug00	- Jing Guo <guo@dao.gsfc.nasa.gov>
+%  		- modified
+%  		- included into m_die for easier module management
+%  	before	- Tom Clune
+%  		- Created for MPI PSAS implementation as a separate
+%  		  module\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+  \subsubsection{assertnomsg\_ - an utility called by ASSERT() macro only}
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     subroutine assertnomsg_(file, line)
+       Character(Len=*), Intent(In) :: file	! a filename
+       Integer, Intent(In)          :: line	! a line number
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}   	25Aug00	- Jing Guo <guo@dao.gsfc.nasa.gov>
+%  		- modified
+%  		- included into m_die for easier module management
+%  	before	- Tom Clune
+%  		- Created for MPI PSAS implementation as a separate
+%  		  module\end{verbatim}
+
+%\markboth{Left}{Source File: m\_dropdead.F90,  Date: Thu Nov 15 22:24:25 GMT 2001
+%}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+
+  \subsection{Module m\_dropdead - An abort() with a style }
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     module m_dropdead
+       public	:: die	! terminate a program with a condition
+ 
+       interface die
+         module procedure
+           die_,	
+           diex_
+       end interface
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}   	20Feb97 - Jing Guo <guo@eramus> - defined template\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+\subsubsection{die\_ - Clean up and raise an exception to the OS}
+
+     A call to die() exits the program with minimum information for
+     both the user and the operating system.
+  
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     subroutine die_(where)
+       character(len=*),intent(in) :: where	! where it is called
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}   	20Feb97 - Jing Guo <guo@eramus> - defined template\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+  \subsubsection{diex\_ - Clean up and raise an exception to the OS}
+
+     A call to die() exits the program with minimum information for
+     both the user and the operating system.  This implementation,
+     however, may be used in conjunction with with a source preprocessor
+     to produce more detailed location information.
+  
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     subroutine diex_(where,fnam,line)
+       character(len=*),intent(in) :: where	! where it is called
+       character(len=*),intent(in) :: fnam
+       integer,intent(in)          :: line
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}   	20Feb97 - Jing Guo <guo@eramus> - defined template\end{verbatim}
+
+%\markboth{Left}{Source File: m\_flow.F90,  Date: Thu Nov 15 22:24:25 GMT 2001
+%}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+  \subsection{Module m\_flow - tracing the program calling tree }
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     module m_flow
+       public :: flow_ci
+       public :: flow_co
+       public :: flow_flush
+       public :: flow_reset
+ 
+       interface flow_ci;    module procedure ci_;    end interface
+       interface flow_co;    module procedure co_;    end interface
+       interface flow_flush; module procedure flush_; end interface
+       interface flow_reset; module procedure reset_; end interface
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}   	26Feb98 - Jing Guo <guo@thunder> - initial prototype/prolog/code\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+  \subsubsection{ci\_ - checking in a level}
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     subroutine ci_(name)
+       character(len=*),intent(in) :: name
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}   	26Feb98 - Jing Guo <guo@thunder> - initial prototype/prolog/code\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+
+  \subsubsection{co\_ - checking out a level}
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     subroutine co_(name)
+       character(len=*),intent(in) :: name
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}   	26Feb98 - Jing Guo <guo@thunder> - initial prototype/prolog/code\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+  \subsubsection{flush\_ - print all remaining entries in the list}
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     subroutine flush_(lu)
+       integer,intent(in) :: lu
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}   	26Feb98 - Jing Guo <guo@thunder> - initial prototype/prolog/code\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+\subsubsection{reset\_ - set the stack to empty}
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     subroutine reset_()
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}   	26Feb98 - Jing Guo <guo@thunder> - initial prototype/prolog/code\end{verbatim}
+
+%\markboth{Left}{Source File: m\_inpak90.F90,  Date: Thu Nov 15 22:24:25 GMT 2001
+%}  
+
+%/////////////////////////////////////////////////////////////
+
+\mbox{}\hrulefill\
+
+\subsection{Module m\_inpack90}
+ 
+  \subsubsection{I90\_allLoadF - populate a rooted database to all PEs}
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     subroutine I90_allLoadF(fname,root,comm,istat)
+       character(len=*),intent(in) :: fname
+       integer,intent(in)          :: root
+       integer,intent(in)          :: comm
+       integer,intent(out)         :: istat
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}   	28Jul98 - Jing Guo <guo@thunder> - initial prototype/prolog/code\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+  \subsubsection{push\_ - push on a new layer of the internal file \_i90\_now\_}
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     subroutine push_(ier)
+       integer,intent(out) :: ier
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}   	05Aug98 - Jing Guo <guo@thunder> - initial prototype/prolog/code\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+  \subsubsection{pop\_ - pop off a layer of the internal file \_i90\_now\_}
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     subroutine pop_(ier)
+       integer,intent(out) :: ier
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}   	05Aug98 - Jing Guo <guo@thunder> - initial prototype/prolog/code\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+
+  \subsubsection{i90\_fullRelease - releases the whole stack led by \_i90\_now\_}
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     subroutine i90_fullRelease(ier)
+       integer,intent(out) :: ier
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}   	05Aug98 - Jing Guo <guo@thunder> - initial prototype/prolog/code\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+
+  \subsubsection{I90\_LoadF() --- Loads resource file into memory. }
+
+    Reads resource file, strips out comments, translate TAB's into
+    blanks, and loads the modified file contents into memory.
+    Must be called only once for each resource file.
+  
+\bigskip{\sf CALLING SEQUENCE:}
+\begin{verbatim}       call i90_LoadF ( filen, iret )\end{verbatim}
+%{\em INPUT PARAMETERS:}
+%\end{verbatim}
+%{\em OUTPUT PARAMETERS:}
+%\begin{verbatim} 
+\begin{verbatim}
+       character*(*),intent(in)  :: filen    ! file name
+       integer,      intent(out) :: iret     ! Return code:
+                                             !   0    no error
+                                             ! -98    coult not get unit number
+                                             !        (strange!)
+                                             ! -98    talk to a wizzard
+                                             ! -99    out of memory: increase
+                                             !        NBUF_MAX in 'i90.h'
+                                             ! other iostat from open statement.
+\end{verbatim}
+{\sf BUGS:}
+\begin{verbatim}    It does not perform dynamic allocation, mostly to keep vanilla f77
+    compatibility. Overall amount of static memory is small (~100K
+    for default NBUF_MAX = 400*256).\end{verbatim}{\sf SEE ALSO:}
+\begin{verbatim}    i90_label()   selects a label (key)\end{verbatim}{\sf FILES USED:}
+\begin{verbatim}    File name supplied on input. The file is opened, read and then closed.\end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}    19Jun96   da Silva   Original code.\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+
+  \subsubsection{I90\_Label() --- Selects a label (record). }
+
+    Once the buffer has been loaded with {\tt i90\_loadf()}, this routine
+    selects a given ``line'' (record/table) associated with ``label''. 
+    Think of ``label'' as a resource name or data base ``key''.
+  
+\bigskip{\sf CALLING SEQUENCE:}
+\begin{verbatim}             
+       call i90_Label ( label, iret )
+\end{verbatim}
+%{\em INPUT PARAMETERS:}
+%\end{verbatim}
+%{\em OUTPUT PARAMETERS:}
+%\begin{verbatim} 
+\begin{verbatim}
+       character(len=*),intent(in)  :: label     ! input label
+       integer,         intent(out) :: iret      ! Return code:
+                                                 !   0    no error
+                                                 !  -1    buffer not loaded
+                                                 !  -2    could not find label
+\end{verbatim}
+{\sf SEE ALSO:}
+\begin{verbatim}    i90_loadf()    load file into buffer
+    i90_gtoken()   get next token
+    i90_gline()    get next line (for tables)
+    atof()         convert word (string) to float
+    atoi()         convert word (string) to integer
+    \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}    19Jun96   da Silva   Original code.\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+  \subsubsection{I90\_GLine() --- Selects next line. }
+  
+       Selects next line, irrespective of of label. If the next line starts
+   with :: (end of table mark), then it lets the user know. This sequential
+   access of the buffer is useful to assess tables, a concept introduced
+   in Inpak 77 by Jing Guo. A table is a construct like this:
+  
+   \begin{verbatim}
+   my_table_name::
+    1000     3000     263.0   
+     925     3000     263.0
+     850     3000     263.0
+     700     3000     269.0
+     500     3000     287.0
+     400     3000     295.8
+     300     3000     295.8    
+   ::
+   \end{verbatim}
+  
+   To access this table, the user first must use {\tt i90\_label()} to 
+   locate the beginning of the table, e.g.,
+  
+   \begin{verbatim}
+         call i90_label ( 'my_table_name::', iret )
+   \end{verbatim}
+  
+   Subsequently, {\tt i90\_gline()} can be used to gain acess to each
+   row of the table. Here is a code fragment to read the above
+   table (7 rows, 3 columns):
+  
+   \begin{verbatim}
+         real          table(7,3)
+         character*20  word
+         integer       iret
+         call i90_label ( 'my_table_name::', iret )
+         do i = 1, 7
+            call i90_gline ( iret )
+            do j = 1, 3
+               table(i,j) = fltget ( 0. )
+            end do                   
+         end do
+   \end{verbatim}
+  
+    For simplicity we have assumed that the dimensions of table were
+    known. It is relatively simple to infer the table dimensions
+    by manipulating ``iret''.
+  
+\bigskip{\sf CALLING SEQUENCE:}
+\begin{verbatim}       call i90_gline ( iret )\end{verbatim}
+%{\em INPUT PARAMETERS:}
+%\begin{verbatim}
+%       None.
+%\end{verbatim}
+%{\em OUTPUT PARAMETERS:}
+\begin{verbatim}
+       integer,intent(out) :: iret       ! Return code:
+                                          !   0    no error
+                                          !  -1    end of buffer reached
+                                          !  +1    end of table  reached
+ \end{verbatim}
+{\sf SEE ALSO:}
+\begin{verbatim}    i90_label()    selects a line (record/table)\end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}    10feb95   Guo        Wrote rdnext(), Inpak 77 extension.
+%    19Jun96   da Silva   Original code with functionality of rdnext()\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+
+  \subsubsection{I90\_GToken() --- Gets next token. }
+
+    Get next token from current line. The current line is defined by a
+    call to {\tt i90\_label()}. Tokens are sequences of characters (including
+    blanks) which may be enclosed by single (') or double (") quotes. 
+    If no quotes are present, the token from the current position to the next
+    blank of TAB is returned.
+    
+    {\em Examples of valid token:}
+  
+    \begin{verbatim}
+                 single_token "second token on line"
+                 "this is a token"
+                 'Another example of a token'
+                 'this is how you get a " inside a token'
+                 "this is how you get a ' inside a token"
+                 This is valid too   # the line ends before the #
+    \end{verbatim}
+    The last line has 4 valid tokens: {\tt This, is, valid} and {\tt too}.
+    
+    {\em Invalid string constructs:}
+  
+    \begin{verbatim}
+                 'cannot handle mixed quotes"
+                 'escaping like this \' is not implemented'
+                 'this # will not work because of the #'
+    \end{verbatim}
+    The \# character is reserved for comments and cannot be included
+    inside quotation marks.
+  
+\bigskip{\sf CALLING SEQUENCE:}
+\begin{verbatim}       call i90_GToken ( token, iret )\end{verbatim}
+%{\em INPUT PARAMETERS:}
+%\begin{verbatim}
+%       None.
+%\end{verbatim}
+%{\em OUTPUT PARAMETERS:}
+\begin{verbatim}
+       character*(*),intent(out) :: token     ! Next token from current line
+       integer,      intent(out) :: iret      ! Return code:
+                                              !   0    no error
+                                              !  -1    either nothing left
+                                              !        on line or mismatched
+                                              !        quotation marks.
+ \end{verbatim}{\sf BUGS:}
+\begin{verbatim}       Standard Unix escaping is not implemented at the moment.
+       \end{verbatim}{\sf SEE ALSO:}
+\begin{verbatim}    i90_label()    selects a line (record/table)
+    i90_gline()    get next line (for tables)
+    atof()         convert word (string) to float
+    atoi()         convert word (string) to integer
+    \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}    19Jun96   da Silva   Original code.\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+  \subsubsection{i90\_GFloat() --- Returns next float number. }
+
+    Returns next float (real number) from the current line.
+    If an error occurs a zero value is returned.
+  
+\bigskip{\sf CALLING SEQUENCE:}
+\begin{verbatim}        real  rnumber
+        rnumber = i90_gfloat ( iret )\end{verbatim}
+%{\em OUTPUT PARAMETERS:}
+\begin{verbatim}       integer,intent(out) :: iret    ! Return code:
+                                      !   0    no error
+                                      !  -1    either nothing left
+                                      !        on line or mismatched
+                                      !        quotation marks.
+                                      !  -2    parsing error
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}    19Jun96   da Silva   Original code.\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+
+  \subsubsection{I90\_GInt() --- Returns next integer number. }
+
+    Returns next integer number from the current line.
+    If an error occurs a zero value is returned.
+  
+\bigskip{\sf CALLING SEQUENCE:}
+\begin{verbatim}        integer number
+        number = i90_gint ( default )\end{verbatim}
+%{\em OUTPUT PARAMETERS:}
+\begin{verbatim}
+       integer,intent(out) :: iret    ! Return code:
+                                      !   0    no error
+                                      !  -1    either nothing left
+                                      !        on line or mismatched
+                                      !        quotation marks.
+                                      !  -2    parsing error
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}    19Jun96   da Silva   Original code.
+%    24may00   da Silva   delcared x as real*8 in case this module is compiled
+%                         with real*4\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+  \subsubsection{i90\_AtoF() --- Translates ASCII (string) to float. }
+
+       Converts string to real number. Same as obsolete {\tt str2rn()}.
+  
+\bigskip{\sf CALLING SEQUENCE:}
+\begin{verbatim}       real  rnumber
+       rnumber = i90_atof ( string, iret )\end{verbatim}
+%{\em INPUT PARAMETERS:}
+%\end{verbatim}
+%{\em OUTPUT PARAMETERS:}
+%\begin{verbatim}
+\begin{verbatim}
+       character(len=*),intent(in) :: string  ! a string
+       integer,intent(out)         :: iret    ! Return code:
+                                              !   0    no error
+                                              !  -1    could not convert, probably
+                                              !        string is not a number
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}    19Jun96   da Silva   Original code.\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+
+  \subsubsection{I90\_AtoI() --- Translates ASCII (strings) to integer. }
+
+       Converts string to integer number.
+  
+\bigskip{\sf CALLING SEQUENCE:}
+\begin{verbatim}       integer number
+       number = i90_atoi ( string, iret )\end{verbatim}
+%{\em INPUT PARAMETERS:}
+%\end{verbatim}
+%{\em OUTPUT PARAMETERS:}
+%\begin{verbatim}
+\begin{verbatim}
+       character*(*),inten(in) :: string   ! a string
+       integer,intent(out)     :: iret     ! Return code:
+                                           !   0    no error
+                                           !  -1    could not convert, probably
+                                           !        string is not a number
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}    19Jun96   da Silva   Original code.\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+  \subsubsection{I90\_Len() --- Returns length of string. }
+
+    Returns the length of a string excluding trailing blanks.
+    It follows that 
+    \begin{verbatim}
+                i90_len(string) .le. len(string),
+    \end{verbatim}
+    where {\tt len} is the intrinsic string length function.  
+    Example:
+    \begin{verbatim}
+           ls = len('abc  ')       ! results in ls = 5
+           ls = i90_len ('abc  ')  ! results in ls = 3
+    \end{verbatim}
+  
+\bigskip{\sf CALLING SEQUENCE:}
+\begin{verbatim}         integer ls
+         ls = i90_len ( string )\end{verbatim}
+{\em INPUT PARAMETERS:}
+\begin{verbatim}
+          character*(*),intent(in) :: string     ! a string
+\end{verbatim}
+%{\em OUTPUT PARAMETERS:}
+%\begin{verbatim}
+%          The length of the string, excluding trailing blanks.
+%\end{verbatim}
+%{\sf REVISION HISTORY:}
+%\begin{verbatim}    01Apr94   Guo        Original code (a.k.a. luavail())
+%    19Jun96   da Silva   Minor modification + prologue.\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+  \subsubsection{I90\_Lua() --- Returns available logical unit number. }
+
+    Look for an available (not opened) Fortran logical unit for i/o.
+  
+\bigskip{\sf CALLING SEQUENCE:}
+\begin{verbatim}         integer lu
+         lu = i90_lua()\end{verbatim}
+%{\em INPUT PARAMETERS:}
+%\begin{verbatim}
+%         None.
+%\end{verbatim}
+%{\em OUTPUT PARAMETERS:}
+\begin{verbatim}
+         The desired unit number if positive, -1 if unsucessful.
+\end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}    01Apr94   Guo        Original code (a.k.a. luavail())
+%    19Jun96   da Silva   Minor modification + prologue.\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+  \subsubsection{I90\_Pad() --- Pad strings. }
+
+       Pads from the right with the comment character (\#). It also
+    replaces TAB's with blanks for convenience. This is a low level
+    i90 routine.
+  
+\bigskip{\sf CALLING SEQUENCE:}
+\begin{verbatim}        call i90_pad ( string )\end{verbatim}
+%{\em INPUT PARAMETERS:}
+%\begin{verbatim}
+%        character*256 string       ! input string
+% \end{verbatim}
+%{\em OUTPUT PARAMETERS:}
+\begin{verbatim}
+        character*256,intent(inout) :: string
+\end{verbatim}
+{\sf BUGS:}
+\begin{verbatim}        It alters TAB's even inside strings.\end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}    19Jun96   da Silva   Original code.\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+  \subsubsection{I90\_Trim() - Removes leading blanks from strings. }
+
+      Removes blanks and TABS from begenning of string. 
+      This is a low level i90 routine.
+   
+\bigskip{\sf CALLING SEQUENCE:}
+\begin{verbatim}       call i90_Trim ( string )\end{verbatim}
+%{\em INPUT PARAMETERS:}
+\begin{verbatim}
+       character*256,ntent(inout) ::  string 
+\end{verbatim}
+%{\em OUTPUT PARAMETERS:}
+%\begin{verbatim}
+%       character*256 string    ! the modified string
+%\end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}    19Jun96   da Silva   Original code.\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+
+  \subsubsection{Lablin() --- Selects a Label (Inpak 77) }
+
+      Selects a given ``line'' (record/table) associated with ``label''. 
+      Similar to {\tt i90\_label()}, but prints a message to {\tt stdout}
+      if it cannot locate the label. Kept for Inpak 77 upward compatibility.
+  
+\bigskip{\sf CALLING SEQUENCE:}
+\begin{verbatim}       call lablin ( label )\end{verbatim}
+%{\em INPUT PARAMETERS:}
+\begin{verbatim} 
+       character(len=*),intent(in) :: label   ! string with label name
+\end{verbatim}
+%{\em OUTPUT PARAMETERS:}
+%\begin{verbatim}      None.\end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}    19Jun96   da Silva   Original code.\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+  \subsubsection{FltGetsp() --- Returns next float (Inpak 77, single precision) }
+
+    Returns next float (real number, single precision) from the current 
+    line, or a default value if it fails to obtain the desired number.
+    Kept for Inpak 77 upward compatibility.
+  
+\bigskip{\sf CALLING SEQUENCE:}
+\begin{verbatim}        real  rnumber, default
+        rnumber = fltgetsp ( default )\end{verbatim}
+%{\em INPUT PARAMETERS:}
+\begin{verbatim}       real(SP), intent(IN) ::    default       ! default value.
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}    19Jun96   da Silva   Original code.
+%    12Oct99   Guo/Larson - Built from original FltGet() function.\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+  \subsubsection{FltGetdp() --- Returns next float (Inpak 77) }
+
+    Returns next float (real number) from the current line, or a 
+    default value (double precision) if it fails to obtain the desired 
+    number.  Kept for Inpak 77 upward compatibility.
+  
+\bigskip{\sf CALLING SEQUENCE:}
+\begin{verbatim}        real(DP) :: default
+        real :: rnumber 
+        rnumber = FltGetdp(default)\end{verbatim}
+%{\em INPUT PARAMETERS:}
+\begin{verbatim}       real(DP), intent(IN) ::    default       ! default value.
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}    19Jun96   da Silva   Original code.
+%    12Oct99   Guo/Larson - Built from original FltGet() function.\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+
+  \subsubsection{IntGet() --- Returns next integer (Inpak 77).  }
+
+    Returns next integer number from the current line, or a default 
+    value if it fails to obtain the desired number.
+    Kept for Inpak 77 upward compatibility.
+  
+\bigskip{\sf CALLING SEQUENCE:}
+\begin{verbatim}        integer number, default
+        number = intget ( default )\end{verbatim}
+%{\em INPUT PARAMETERS:}
+\begin{verbatim}        integer, intent(IN) ::    default       ! default value.
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}    19Jun96   da Silva   Original code.\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+  \subsubsection{ChrGet() --- Returns next character (Inpak 77). }
+
+    Returns next non-blank character from the current line, or a default 
+    character if it fails for whatever reason.
+    Kept for Inpak 77 upward compatibility.
+  
+\bigskip{\sf CALLING SEQUENCE:}
+\begin{verbatim}       character*1 ch, default
+       ch = chrget ( default )\end{verbatim}
+%{\em INPUT PARAMETERS:}
+\begin{verbatim}       character*1, intent(IN) ::  default      ! default value.
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}    19Jun96   da Silva   Original code.\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+  \subsubsection{TokGet() --- Gets next token (Inpakk 77 like). }
+
+    Returns next token from the current line, or a default 
+    word if it fails for whatever reason.
+  
+\bigskip{\sf CALLING SEQUENCE:}
+\begin{verbatim}        call TokGet ( token, default )\end{verbatim}
+%{\em INPUT PARAMETERS:}
+%\end{verbatim}
+%{\em OUTPUT PARAMETERS:}
+%\begin{verbatim}
+\begin{verbatim}
+        character*(*), intent(IN) :: default     ! default token
+        character*(*), intent(OUT) :: token      ! desired token
+\end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}    19Jun96   da Silva   Original code.\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+
+  \subsubsection{index\_ Extension of the Fortran 77 intrinsic "index" for }
+
+    "string" (input) with length that can exceed 2**15-1 (=MAXLEN).  
+  Finds the starting location = "index\_", of the first character in "tok"  
+    within "string", where string is of "arbitrary" length.  If tok occurs more than
+    once in "string", then the value of index\_ is based on the first occurrence of "tok". 
+  
+\bigskip{\sf CALLING SEQUENCE:}
+\begin{verbatim}        index_( string,tok )\end{verbatim}
+%{\em INPUT PARAMETERS:}
+\begin{verbatim}       character(len=*), intent(in) :: string, tok\end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}    2001Apr25   G. Gaspari   Original code.\end{verbatim}
+
+%\markboth{Left}{Source File: m\_ioutil.F90,  Date: Thu Nov 15 22:24:26 GMT 2001
+%}
+
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+
+  \subsection{Module m\_ioutil - a F90 module for several convenient I/O functions }
+%
+%  	m\_ioutil is a module containing several portable interfaces for
+%  	some highly system dependent, but frequently used I/O functions.
+  
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+ 	public	:: opntext,clstext ! open/close a text file
+ 	public	:: opnieee,clsieee ! open/close a binary sequential file
+ 	public	:: luavail	   ! return a free logical unit
+ 	public	:: luflush	   ! flush the buffer of a given unit
+ 	!public	:: MX_LU
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}   	16Jul96 - J. Guo	- (to do)
+%   	02Apr97 - Jing Guo <guo@eramus> - finished the coding
+%  	11Feb97 - Jing Guo <guo@thunder> - added luflush()\end{verbatim}
+% 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+
+  \subsubsection{opnieee - portablly open an IEEE format file}
+%
+%  	Open a file in `IEEE' format.
+%  
+%  	`IEEE' format is refered as a FORTRAN "unformatted" file with
+%  	"sequantial" access and variable record lengths.  Under common
+%  	Unix, it is only a file with records packed with a leading 4-
+%  	byte word and a trailing 4-byte word indicating the size of
+%  	the record in bytes.  However, under UNICOS, it is also assumed
+%  	to have numerical data representations represented according to
+%  	the IEEE standard corresponding KIND conversions.  Under a DEC
+%  	machine, it means that compilations of the source code should
+%  	have the "-bigendian" option specified.
+  
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     subroutine opnieee(lu,fname,status,ier,recl)
+       integer,         intent(in) :: lu     ! logical unit number
+       character(len=*),intent(in) :: fname  ! filename to be opended
+       character(len=*),intent(in) :: status ! the value for STATUS=
+       integer,         intent(out):: ier    ! the status
+       integer,optional,intent(in) :: recl   ! record length
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}  	02Feb95 - Jing G. - First version included in PSAS.  It is not
+%  		used in the libpsas.a calls, since no binary data input/
+%  		output is to be handled.
+%   	09Oct96 - J. Guo  - Check for any previous assign() call under
+%  		UNICOS.\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+  \subsubsection{clsieee - Close a logical unit opened by opnieee()}
+
+%  	The reason for a paired clsieee() for opnieee() instead of a
+%  	simple close(), is for the portability reason.  For example,
+%  	under UNICOS, special system calls may be need to set up the
+%  	unit right, and the status of the unit should be restored upon
+%  	close.
+%  
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+ 	subroutine clsieee(lu,ier)
+ 	  integer, intent(in)  :: lu	! the unit used by opnieee()
+ 	  integer, intent(out) :: ier	! the status
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}   	10Oct96 - J. Guo	- (to do)\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+  \subsubsection{opntext - portablly open a text file}
+
+%  	Open a text (ASCII) file.  Under FORTRAN, it is defined as
+%  	"formatted" with "sequential" access.
+%  
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     subroutine opntext(lu,fname,status,ier)
+       integer,         intent(in) :: lu     ! logical unit number
+       character(len=*),intent(in) :: fname  ! filename to be opended
+       character(len=*),intent(in) :: status ! the value for STATUS=<>
+       integer,         intent(out):: ier    ! the status
+ 
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}  	02Feb95 - Jing G. - First version included in PSAS and libpsas.a
+%   	09Oct96 - J. Guo  - modified to allow assign() call under UNICOS
+%  			  = and now, it is a module in Fortran 90.\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+  \subsubsection{clstext - close a text file opend with an opntext() call}
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     subroutine clstext(lu,ier)
+       integer, intent(in)  :: lu  ! a logical unit to close
+       integer, intent(out) :: ier ! the status
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}   	09Oct96 - J. Guo	- (to do)\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+
+  \subsubsection{luavail - locate the next available unit}
+
+%      luavail() Look for an available (not opened and not statically
+%      assigned to any I/O attributes to) logical unit.
+  
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+ 	function luavail()
+ 	  integer :: luavail	! result
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}   	23Apr98 - Jing Guo <guo@thunder> - new prototype/prolog/code
+%  			- with additional unit constraints for SunOS.
+%   	: Jing Guo, [09-Oct-96]
+%   		+ Checking also Cray assign() attributes, with some
+%   		  changes to the code.  See also other routines.
+%   	: Jing Guo, [01-Apr-94]
+%   		+ Initial code.\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+
+  \subsubsection{luflush - a uniform interface of system flush()}
+
+%  	Flush() calls available on many systems are often implementation
+%  	dependent.  This subroutine provides a uniform interface.  It
+%  	also ignores invalid logical unit value.
+  
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     subroutine luflush(unit)
+       integer,optional,intent(in) :: unit
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}   	13Mar98 - Jing Guo <guo@thunder> - initial prototype/prolog/code\end{verbatim}
+
+%\markboth{Left}{Source File: m\_mall.F90,  Date: Thu Nov 15 22:24:26 GMT 2001
+%}
+
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+
+  \subsection{Module m\_mall - A bookkeeper of user allocated memories }
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     module m_mall
+       public :: mall_ci
+       public :: mall_co
+       public :: mall_mci
+       public :: mall_mco
+       public :: mall_flush
+       public :: mall_reset
+ 
+ 		! mall_ activity controls
+ 
+       public :: mall_ison
+       public :: mall_set
+ 
+       interface mall_ci
+         module procedure 
+           ci_
+       end interface
+       interface mall_co
+         module procedure 
+           co_
+       end interface
+ 
+       interface mall_mci
+         module procedure
+           ciI0_, ciI1_, ciI2_,	ciI3_, ciI4_, ciR0_, ciR1_, ciR2_, ciR3_, 
+           ciR4_, ciD0_, ciD1_, ciD2_, ciD3_, ciD4_, ciL0_, ciL1_, ciL2_, 
+           ciL3_, ciL4_, ciC0_, ciC1_, ciC2_, ciC3_, ciC4_
+       end interface
+ 
+       interface mall_mco
+         module procedure
+           coI0_, coI1_, coI2_, coI3_, coI4_, coR0_, coR1_, coR2_, coR3_, 
+           coR4_, coD0_, coD1_, coD2_, coD3_, coD4_, coL0_, coL1_, coL2_, 
+           coL3_, coL4_, coC0_, coC1_, coC2_, coC3_, coC4_
+       end interface
+ 
+       interface mall_flush
+         module procedure 
+           flush_
+       end interface
+       interface mall_reset
+         module procedure 
+           reset_
+       end interface
+ 
+       interface mall_ison
+         module procedure 
+           ison_
+       end interface
+       interface mall_set
+         module procedure 
+           set_
+       end interface
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}   	13Feb98 - Jing Guo <guo@thunder> - initial prototype/prolog/code\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+  \subsubsection{ison\_ -}
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     function ison_()
+       logical :: ison_
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}   	25Oct99	- Jing Guo <guo@dao.gsfc.nasa.gov>
+%  		- initial prototype/prolog/code\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+  \subsubsection{set\_ - set the switch on}
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     subroutine set_(on)
+       logical,optional,intent(in) :: on
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}   	25Oct99	- Jing Guo <guo@dao.gsfc.nasa.gov>
+%  		- initial prototype/prolog/code\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+  \subsubsection{ciI0\_ - check in as an integer scalar}
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     subroutine ciI0_(marg,thread)
+       integer,intent(in) :: marg
+       character(len=*),intent(in) :: thread
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}   	21Oct99	- Jing Guo <guo@dao.gsfc.nasa.gov>
+%  		- initial prototype/prolog/code\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+  \subsubsection{ciI1\_ - check in as an integer rank 1 array}
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     subroutine ciI1_(marg,thread)
+       integer,dimension(:),intent(in) :: marg
+       character(len=*),intent(in)     :: thread
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}   	21Oct99	- Jing Guo <guo@dao.gsfc.nasa.gov>
+%  		- initial prototype/prolog/code\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+
+  \subsubsection{ciI2\_ - check in as an integer rank 2 array}
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     subroutine ciI2_(marg,thread)
+       integer,dimension(:,:),intent(in) :: marg
+       character(len=*),intent(in)       :: thread
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}   	21Oct99	- Jing Guo <guo@dao.gsfc.nasa.gov>
+%  		- initial prototype/prolog/code\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+
+  \subsubsection{ciI3\_ - check in as an integer rank 3 array}
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     subroutine ciI3_(marg,thread)
+       integer,dimension(:,:,:),intent(in) :: marg
+       character(len=*),intent(in)         :: thread
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}   	21Oct99	- Jing Guo <guo@dao.gsfc.nasa.gov>
+%  		- initial prototype/prolog/code\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+
+  \subsubsection{ciI4\_ - check in as an integer rank 4 array}
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     subroutine ciI4_(marg,thread)
+       integer,dimension(:,:,:,:),intent(in) :: marg
+       character(len=*),intent(in)           :: thread
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}   	21Oct99	- Jing Guo <guo@dao.gsfc.nasa.gov>
+%  		- initial prototype/prolog/code\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+  \subsubsection{ciR0\_ - check in as a real(SP) scalar}
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     subroutine ciR0_(marg,thread)
+       real(SP),intent(in)         :: marg
+       character(len=*),intent(in) :: thread
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}   	21Oct99	- Jing Guo <guo@dao.gsfc.nasa.gov>
+%  		- initial prototype/prolog/code\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+  \subsubsection{ciR1\_ - check in as a real(SP) rank 1 array}
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     subroutine ciR1_(marg,thread)
+       real(SP),dimension(:),intent(in) :: marg
+       character(len=*),intent(in)      :: thread
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}   	21Oct99	- Jing Guo <guo@dao.gsfc.nasa.gov>
+%  		- initial prototype/prolog/code\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+  \subsubsection{ciR2\_ - check in as a real(SP) rank 2 array}
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     subroutine ciR2_(marg,thread)
+       real(SP),dimension(:,:),intent(in) :: marg
+       character(len=*),intent(in)        :: thread
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}   	21Oct99	- Jing Guo <guo@dao.gsfc.nasa.gov>
+%  		- initial prototype/prolog/code\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+
+  \subsubsection{ciR3\_ - check in as a real(SP) rank 3 array}
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     subroutine ciR3_(marg,thread)
+       real(SP),dimension(:,:,:),intent(in) :: marg
+       character(len=*),intent(in)          :: thread
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}   	21Oct99	- Jing Guo <guo@dao.gsfc.nasa.gov>
+%  		- initial prototype/prolog/code\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+  \subsubsection{ciR4\_ - check in as a real(SP) rank 4 array}
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     subroutine ciR4_(marg,thread)
+       real(SP),dimension(:,:,:,:),intent(in) :: marg
+       character(len=*),intent(in)            :: thread
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}   	21Oct99	- Jing Guo <guo@dao.gsfc.nasa.gov>
+%  		- initial prototype/prolog/code\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+  \subsubsection{ciD0\_ - check in as a real(DP) scalar}
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     subroutine ciD0_(marg,thread)
+       real(DP),intent(in)         :: marg
+       character(len=*),intent(in) :: thread
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}   	21Oct99	- Jing Guo <guo@dao.gsfc.nasa.gov>
+%  		- initial prototype/prolog/code\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+  \subsubsection{ciD1\_ - check in as a real(DP) rank 1 array}
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     subroutine ciD1_(marg,thread)
+       real(DP),dimension(:),intent(in) :: marg
+       character(len=*),intent(in)      :: thread
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}   	21Oct99	- Jing Guo <guo@dao.gsfc.nasa.gov>
+%  		- initial prototype/prolog/code\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+
+  \subsubsection{ciD2\_ - check in as a real(DP) rank 2 array}
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     subroutine ciD2_(marg,thread)
+       real(DP),dimension(:,:),intent(in) :: marg
+       character(len=*),intent(in)        :: thread
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}   	21Oct99	- Jing Guo <guo@dao.gsfc.nasa.gov>
+%  		- initial prototype/prolog/code\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+  \subsubsection{ciD3\_ - check in as a real(DP) rank 3 array}
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     subroutine ciD3_(marg,thread)
+       real(DP),dimension(:,:,:),intent(in) :: marg
+       character(len=*),intent(in)          :: thread
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}   	21Oct99	- Jing Guo <guo@dao.gsfc.nasa.gov>
+%  		- initial prototype/prolog/code\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+
+  \subsubsection{ciD4\_ - check in as a real(DP) rank 4 array}
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     subroutine ciD4_(marg,thread)
+       real(DP),dimension(:,:,:,:),intent(in) :: marg
+       character(len=*),intent(in)            :: thread
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}   	21Oct99	- Jing Guo <guo@dao.gsfc.nasa.gov>
+%  		- initial prototype/prolog/code\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+  \subsubsection{ciL0\_ - check in as a logical scalar}
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     subroutine ciL0_(marg,thread)
+       logical,intent(in)          :: marg
+       character(len=*),intent(in) :: thread
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}   	21Oct99	- Jing Guo <guo@dao.gsfc.nasa.gov>
+%  		- initial prototype/prolog/code\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+  \subsubsection{ciL1\_ - check in as a logical rank 1 array}
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     subroutine ciL1_(marg,thread)
+       logical,dimension(:),intent(in) :: marg
+       character(len=*),intent(in)     :: thread
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}   	21Oct99	- Jing Guo <guo@dao.gsfc.nasa.gov>
+%  		- initial prototype/prolog/code\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+  \subsubsection{ciL2\_ - check in as a logical rank 2 array}
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     subroutine ciL2_(marg,thread)
+       logical,dimension(:,:),intent(in) :: marg
+       character(len=*),intent(in)       :: thread
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}   	21Oct99	- Jing Guo <guo@dao.gsfc.nasa.gov>
+%  		- initial prototype/prolog/code\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+  \subsubsection{ciL3\_ - check in as a logical rank 3 array}
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     subroutine ciL3_(marg,thread)
+       logical,dimension(:,:,:),intent(in) :: marg
+       character(len=*),intent(in)         :: thread
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}   	21Oct99	- Jing Guo <guo@dao.gsfc.nasa.gov>
+%  		- initial prototype/prolog/code\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+  \subsubsection{ciL4\_ - check in as a logical rank 4 array}
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     subroutine ciL4_(marg,thread)
+       logical,dimension(:,:,:,:),intent(in) :: marg
+       character(len=*),intent(in)           :: thread
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}   	21Oct99	- Jing Guo <guo@dao.gsfc.nasa.gov>
+%  		- initial prototype/prolog/code\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+  \subsubsection{ciC0\_ - check in as a character scalar} 
+  
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     subroutine ciC0_(marg,thread)
+       character(len=*),intent(in) :: marg
+       character(len=*),intent(in) :: thread
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}   	21Oct99	- Jing Guo <guo@dao.gsfc.nasa.gov>
+%  		- initial prototype/prolog/code\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+
+  \subsubsection{ciC1\_ - check in as a character rank 1 array}
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     subroutine ciC1_(marg,thread)
+       character(len=*),dimension(:),intent(in) :: marg
+       character(len=*),intent(in)              :: thread
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}   	21Oct99	- Jing Guo <guo@dao.gsfc.nasa.gov>
+%  		- initial prototype/prolog/code\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+
+  \subsubsection{ciC2\_ - check in as a character rank 2 array}
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     subroutine ciC2_(marg,thread)
+       character(len=*),dimension(:,:),intent(in) :: marg
+       character(len=*),intent(in)                :: thread
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}   	21Oct99	- Jing Guo <guo@dao.gsfc.nasa.gov>
+%  		- initial prototype/prolog/code\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+  \subsubsection{ciC3\_ - check in as a character rank 3 array}
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     subroutine ciC3_(marg,thread)
+       character(len=*),dimension(:,:,:),intent(in) :: marg
+       character(len=*),intent(in)                  :: thread
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}   	21Oct99	- Jing Guo <guo@dao.gsfc.nasa.gov>
+%  		- initial prototype/prolog/code\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+
+  \subsubsection{ciC4\_ - check in as a character rank 4 array}
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     subroutine ciC4_(marg,thread)
+       character(len=*),dimension(:,:,:,:),intent(in) :: marg
+       character(len=*),intent(in)                    :: thread
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}   	21Oct99	- Jing Guo <guo@dao.gsfc.nasa.gov>
+%  		- initial prototype/prolog/code\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+  \subsubsection{ci\_ - check-in allocate activity}
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     subroutine ci_(nword,thread)
+       integer,intent(in)          :: nword
+       character(len=*),intent(in) :: thread
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}   	13Feb98 - Jing Guo <guo@thunder> - initial prototype/prolog/code\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+  \subsubsection{coI0\_ - check in as an integer scalar}
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     subroutine coI0_(marg,thread)
+       integer,intent(in)          :: marg
+       character(len=*),intent(in) :: thread
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}   	21Oct99	- Jing Guo <guo@dao.gsfc.nasa.gov>
+%  		- initial prototype/prolog/code\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+  \subsubsection{coI1\_ - check in as an integer rank 1 array}
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     subroutine coI1_(marg,thread)
+       integer,dimension(:),intent(in) :: marg
+       character(len=*),intent(in)     :: thread
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}   	21Oct99	- Jing Guo <guo@dao.gsfc.nasa.gov>
+%  		- initial prototype/prolog/code\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+  \subsubsection{coI2\_ - check in as an integer rank 2 array}
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     subroutine coI2_(marg,thread)
+       integer,dimension(:,:),intent(in) :: marg
+       character(len=*),intent(in)       :: thread
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}   	21Oct99	- Jing Guo <guo@dao.gsfc.nasa.gov>
+%  		- initial prototype/prolog/code\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+  \subsubsection{coI3\_ - check in as an integer rank 3 array}
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     subroutine coI3_(marg,thread)
+       integer,dimension(:,:,:),intent(in) :: marg
+       character(len=*),intent(in)         :: thread
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}   	21Oct99	- Jing Guo <guo@dao.gsfc.nasa.gov>
+%  		- initial prototype/prolog/code\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+  \subsubsection{coI4\_ - check in as an integer rank 4 array}
+  
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     subroutine coI4_(marg,thread)
+       integer,dimension(:,:,:,:),intent(in) :: marg
+       character(len=*),intent(in)           :: thread
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}   	21Oct99	- Jing Guo <guo@dao.gsfc.nasa.gov>
+%  		- initial prototype/prolog/code\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+  \subsubsection{coR0\_ - check in as a real(SP) scalar}
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     subroutine coR0_(marg,thread)
+       real(SP),intent(in)         :: marg
+       character(len=*),intent(in) :: thread
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}   	21Oct99	- Jing Guo <guo@dao.gsfc.nasa.gov>
+%  		- initial prototype/prolog/code\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+  \subsubsection{coR1\_ - check in as a real(SP) rank 1 array}
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     subroutine coR1_(marg,thread)
+       real(SP),dimension(:),intent(in) :: marg
+       character(len=*),intent(in)      :: thread
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}   	21Oct99	- Jing Guo <guo@dao.gsfc.nasa.gov>
+%  		- initial prototype/prolog/code\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+
+  \subsubsection{coR2\_ - check in as a real(SP) rank 2 array}
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     subroutine coR2_(marg,thread)
+       real(SP),dimension(:,:),intent(in) :: marg
+       character(len=*),intent(in)        :: thread
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}   	21Oct99	- Jing Guo <guo@dao.gsfc.nasa.gov>
+%  		- initial prototype/prolog/code\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+  \subsubsection{coR3\_ - check in as a real(SP) rank 3 array}
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     subroutine coR3_(marg,thread)
+       real(SP),dimension(:,:,:),intent(in) :: marg
+       character(len=*),intent(in)          :: thread
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}   	21Oct99	- Jing Guo <guo@dao.gsfc.nasa.gov>
+%  		- initial prototype/prolog/code\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+  \subsubsection{coR4\_ - check in as a real(SP) rank 4 array}
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     subroutine coR4_(marg,thread)
+       real(SP),dimension(:,:,:,:),intent(in) :: marg
+       character(len=*),intent(in)            :: thread
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}   	21Oct99	- Jing Guo <guo@dao.gsfc.nasa.gov>
+%  		- initial prototype/prolog/code\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+  \subsubsection{coD0\_ - check in as a real(DP) scalar}
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     subroutine coD0_(marg,thread)
+       real(DP),intent(in)         :: marg
+       character(len=*),intent(in) :: thread
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}   	21Oct99	- Jing Guo <guo@dao.gsfc.nasa.gov>
+%  		- initial prototype/prolog/code\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+  \subsubsection{coD1\_ - check in as a real(DP) rank 1 array}
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     subroutine coD1_(marg,thread)
+       real(DP),dimension(:),intent(in) :: marg
+       character(len=*),intent(in)      :: thread
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}   	21Oct99	- Jing Guo <guo@dao.gsfc.nasa.gov>
+%  		- initial prototype/prolog/code\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+
+  \subsubsection{coD2\_ - check in as a real(DP) rank 2 array}
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     subroutine coD2_(marg,thread)
+       real(DP),dimension(:,:),intent(in) :: marg
+       character(len=*),intent(in)        :: thread
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}   	21Oct99	- Jing Guo <guo@dao.gsfc.nasa.gov>
+%  		- initial prototype/prolog/code\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+  \subsubsection{coD3\_ - check in as a real(DP) rank 3 array}
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     subroutine coD3_(marg,thread)
+       real(DP),dimension(:,:,:),intent(in) :: marg
+       character(len=*),intent(in)          :: thread
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}   	21Oct99	- Jing Guo <guo@dao.gsfc.nasa.gov>
+%  		- initial prototype/prolog/code\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+  \subsubsection{coD4\_ - check in as a real(DP) rank 4 array}
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     subroutine coD4_(marg,thread)
+       real(DP),dimension(:,:,:,:),intent(in) :: marg
+       character(len=*),intent(in)            :: thread
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}   	21Oct99	- Jing Guo <guo@dao.gsfc.nasa.gov>
+%  		- initial prototype/prolog/code\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+  \subsubsection{coL0\_ - check in as a logical scalar}
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     subroutine coL0_(marg,thread)
+       logical,intent(in)          :: marg
+       character(len=*),intent(in) :: thread
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}   	21Oct99	- Jing Guo <guo@dao.gsfc.nasa.gov>
+%  		- initial prototype/prolog/code\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+  \subsubsection{coL1\_ - check in as a logical rank 1 array}
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     subroutine coL1_(marg,thread)
+       logical,dimension(:),intent(in) :: marg
+       character(len=*),intent(in)     :: thread
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}   	21Oct99	- Jing Guo <guo@dao.gsfc.nasa.gov>
+%  		- initial prototype/prolog/code\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+  \subsubsection{coL2\_ - check in as a logical rank 2 array}
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     subroutine coL2_(marg,thread)
+       logical,dimension(:,:),intent(in) :: marg
+       character(len=*),intent(in)       :: thread
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}   	21Oct99	- Jing Guo <guo@dao.gsfc.nasa.gov>
+%  		- initial prototype/prolog/code\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+  \subsubsection{coL3\_ - check in as a logical rank 3 array}
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     subroutine coL3_(marg,thread)
+       logical,dimension(:,:,:),intent(in) :: marg
+       character(len=*),intent(in)         :: thread
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}   	21Oct99	- Jing Guo <guo@dao.gsfc.nasa.gov>
+%  		- initial prototype/prolog/code\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+
+  \subsubsection{coL4\_ - check in as a logical rank 4 array}
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     subroutine coL4_(marg,thread)
+       logical,dimension(:,:,:,:),intent(in) :: marg
+       character(len=*),intent(in)           :: thread
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}   	21Oct99	- Jing Guo <guo@dao.gsfc.nasa.gov>
+%  		- initial prototype/prolog/code\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+  \subsubsection{coC0\_ - check in as a character scalar}
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     subroutine coC0_(marg,thread)
+       character(len=*),intent(in) :: marg
+       character(len=*),intent(in) :: thread
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}   	21Oct99	- Jing Guo <guo@dao.gsfc.nasa.gov>
+%  		- initial prototype/prolog/code\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+  \subsubsection{coC1\_ - check in as a character rank 1 array}
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     subroutine coC1_(marg,thread)
+       character(len=*),dimension(:),intent(in) :: marg
+       character(len=*),intent(in)              :: thread
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}   	21Oct99	- Jing Guo <guo@dao.gsfc.nasa.gov>
+%  		- initial prototype/prolog/code\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+
+  \subsubsection{coC2\_ - check in as a character rank 2 array}
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     subroutine coC2_(marg,thread)
+       character(len=*),dimension(:,:),intent(in) :: marg
+       character(len=*),intent(in)                :: thread
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}   	21Oct99	- Jing Guo <guo@dao.gsfc.nasa.gov>
+%  		- initial prototype/prolog/code\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+
+  \subsubsection{coC3\_ - check in as a character rank 3 array}
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     subroutine coC3_(marg,thread)
+       character(len=*),dimension(:,:,:),intent(in) :: marg
+       character(len=*),intent(in)                  :: thread
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}   	21Oct99	- Jing Guo <guo@dao.gsfc.nasa.gov>
+%  		- initial prototype/prolog/code\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+  \subsubsection{coC4\_ - check in as a character rank 4 array}
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     subroutine coC4_(marg,thread)
+       character(len=*),dimension(:,:,:,:),intent(in) :: marg
+       character(len=*),intent(in)                    :: thread
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}   	21Oct99	- Jing Guo <guo@dao.gsfc.nasa.gov>
+%  		- initial prototype/prolog/code\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+  \subsubsection{co\_ - check-out allocate activity}
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     subroutine co_(nword,thread)
+       integer,intent(in)          :: nword
+       character(len=*),intent(in) :: thread
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}   	13Feb98 - Jing Guo <guo@thunder> - initial prototype/prolog/code\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+  \subsubsection{cix\_ - handling macro ALLOC\_() error}
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     subroutine cix_(thread,stat,fnam,line)
+       character(len=*),intent(in) :: thread
+       integer,intent(in)          :: stat
+       character(len=*),intent(in) :: fnam
+       integer,intent(in)          :: line
+ 
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}   	13Feb98 - Jing Guo <guo@thunder> - initial prototype/prolog/code\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+  \subsubsection{cox\_ - handling macro DEALLOC\_() error}
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     subroutine cox_(thread,stat,fnam,line)
+       character(len=*),intent(in) :: thread
+       integer,intent(in)          :: stat
+       character(len=*),intent(in) :: fnam
+       integer,intent(in)          :: line
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}   	13Feb98 - Jing Guo <guo@thunder> - initial prototype/prolog/code\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+  \subsubsection{flush\_ - balancing the up-to-date ci/co calls}
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     subroutine flush_(lu)
+       integer,intent(in) :: lu
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}   	17Feb98 - Jing Guo <guo@thunder> - initial prototype/prolog/code\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+  \subsubsection{wcount\_ - generate word count output with unit}
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     subroutine wcount_(wknt,cknt)
+       integer,         intent(in)  :: wknt ! given an integer value
+       character(len=6),intent(out) :: cknt ! return a string value
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}   	17Feb98 - Jing Guo <guo@thunder> - initial prototype/prolog/code\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+  \subsubsection{lookup\_ - search/insert a name in a list}
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     function lookup_(thread)
+       character(len=*),intent(in) :: thread
+       integer                     :: lookup_
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}   	17Feb98 - Jing Guo <guo@thunder> - initial prototype/prolog/code\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+  \subsubsection{reset\_ - initialize the module data structure}
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     subroutine reset_()
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}   	16Mar98 - Jing Guo <guo@thunder> - initial prototype/prolog/code\end{verbatim}
+
+%\markboth{Left}{Source File: m\_mpif90.F90,  Date: Thu Nov 15 22:24:27 GMT 2001
+%}
+
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+  \subsection{Module m\_mpif90 - a Fortran 90 style MPI module interface. }
+
+     By wrapping \verb'include "mpif.h"' into a module, \verb"m_mpif()"
+     provides an easy way to
+  \begin{itemize}
+    \item avoid the problem with {\sl fixed} or {\sl free} formatted
+  	Fortran 90 files;
+    \item provide protections with only a limited set of \verb"PUBLIC"
+  	variables; and
+    \item be extended to a MPI Fortran 90 binding.
+  \end{itemize}
+  
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     module m_mpif90
+       public :: MP_type
+       public :: MP_2type
+ 
+       public :: MP_INTEGER
+       public :: MP_REAL
+       public :: MP_DOUBLE_PRECISION
+       public :: MP_LOGICAL
+       public :: MP_CHARACTER
+ 
+       public :: MP_REAL4
+       public :: MP_REAL8
+ 
+       public :: MP_2INTEGER
+       public :: MP_2REAL
+       public :: MP_2DOUBLE_PRECISION
+ 
+       public :: MP_COMM_WORLD
+       public :: MP_COMM_NULL
+ 
+       public :: MP_SUM
+       public :: MP_PROD
+       public :: MP_MIN
+       public :: MP_MAX
+ 
+       public :: MP_MINLOC
+       public :: MP_MAXLOC
+ 
+       public :: MP_MAX_ERROR_STRING
+ 
+       public :: MP_init
+       public :: MP_initialized
+       public :: MP_finalize
+       public :: MP_abort
+ 
+       public :: MP_wtime
+       public :: MP_wtick
+ 
+       public :: MP_comm_size
+       public :: MP_comm_rank
+       public :: MP_comm_dup
+       public :: MP_comm_free
+ 
+       public :: MP_cart_create
+       public :: MP_dims_create
+       public :: MP_cart_coords
+       public :: MP_cart_rank
+ 
+       public :: MP_error_string
+ 
+       public :: MP_perr
+ 
+       public :: MP_STATUS_SIZE
+       public :: MP_status
+ 
+       public :: MP_log2
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}   	09Dec97 - Jing Guo <guo@thunder> - initial prototyping/coding.
+%  		. started with everything public, without any interface
+%  		  declaration.
+%  		. Then limited to only variables current expected to
+%  		  be used.
+%  	\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+
+  \subsubsection{typeI\_ - return MPI datatype of INTEGER}
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     function typeI_(ival)
+       integer,intent(in) :: ival
+       integer            :: typeI_
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}   	28Sep99	- Jing Guo <guo@dao.gsfc.nasa.gov>
+%  		- initial prototype/prolog/code\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+  \subsubsection{typeL\_ - return MPI datatype of LOGICAL}
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     function typeL_(lval)
+       logical,intent(in) :: lval
+       integer            :: typeL_
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}   	28Sep99	- Jing Guo <guo@dao.gsfc.nasa.gov>
+%  		- initial prototype/prolog/code\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+
+  \subsubsection{typeC\_ - return MPI datatype of CHARACTER}
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     function typeC_(cval)
+       character(len=*),intent(in) :: cval
+       integer                     :: typeC_
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}   	28Sep99	- Jing Guo <guo@dao.gsfc.nasa.gov>
+%  		- initial prototype/prolog/code\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+  \subsubsection{typeSP\_ - return MPI datatype of single precision REAL}
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     function typeSP_(rval)
+       real(SP),intent(in) :: rval
+       integer             :: typeSP_
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}   	28Sep99	- Jing Guo <guo@dao.gsfc.nasa.gov>
+%  		- initial prototype/prolog/code\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+
+  \subsubsection{typeDP\_ - return MPI datatype of double precision REAL}
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     function typeDP_(rval)
+       real(DP),intent(in) :: rval
+       integer             :: typeDP_
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}   	28Sep99	- Jing Guo <guo@dao.gsfc.nasa.gov>
+%  		- initial prototype/prolog/code\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+
+  \subsubsection{typeI1\_ - return MPI datatype of INTEGER}
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     function typeI1_(ival)
+       integer,dimension(:),intent(in) :: ival
+       integer                         :: typeI1_
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}   	28Sep99	- Jing Guo <guo@dao.gsfc.nasa.gov>
+%  		- initial prototype/prolog/code\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+  \subsubsection{typeL1\_ - return MPI datatype of LOGICAL}
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     function typeL1_(lval)
+       logical,dimension(:),intent(in) :: lval
+       integer                         :: typeL1_
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}   	28Sep99	- Jing Guo <guo@dao.gsfc.nasa.gov>
+%  		- initial prototype/prolog/code\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+  \subsubsection{typeC1\_ - return MPI datatype of CHARACTER}
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     function typeC1_(cval)
+       character(len=*),dimension(:),intent(in) :: cval
+       integer                                  :: typeC1_
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}   	28Sep99	- Jing Guo <guo@dao.gsfc.nasa.gov>
+%  		- initial prototype/prolog/code\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+  \subsubsection{typeSP1\_ - return MPI datatype of single precision REAL}
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     function typeSP1_(rval)
+       real(SP),dimension(:),intent(in) :: rval
+       integer                          :: typeSP1_
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}   	28Sep99	- Jing Guo <guo@dao.gsfc.nasa.gov>
+%  		- initial prototype/prolog/code\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\  
+
+  \subsubsection{typeDP1\_ - return MPI datatype of double precision REAL}
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     function typeDP1_(rval)
+       real(DP),dimension(:),intent(in) :: rval
+       integer                          :: typeDP1_
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}   	28Sep99	- Jing Guo <guo@dao.gsfc.nasa.gov>
+%  		- initial prototype/prolog/code\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+  \subsubsection{typeI2\_ - return MPI datatype of INTEGER}
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     function typeI2_(ival)
+       integer,dimension(:,:),intent(in) :: ival
+       integer                           :: typeI2_
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}   	28Sep99	- Jing Guo <guo@dao.gsfc.nasa.gov>
+%  		- initial prototype/prolog/code\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+  \subsubsection{typeL2\_ - return MPI datatype of LOGICAL}
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     function typeL2_(lval)
+       logical,dimension(:,:),intent(in) :: lval
+       integer                           :: typeL2_
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}   	28Sep99	- Jing Guo <guo@dao.gsfc.nasa.gov>
+%  		- initial prototype/prolog/code\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+
+  \subsubsection{typeC2\_ - return MPI datatype of CHARACTER}
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     function typeC2_(cval)
+       character(len=*),dimension(:,:),intent(in) :: cval
+       integer                                    :: typeC2_
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}   	28Sep99	- Jing Guo <guo@dao.gsfc.nasa.gov>
+%  		- initial prototype/prolog/code\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+  \subsubsection{typeSP2\_ - return MPI datatype of single precision REAL}
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     function typeSP2_(rval)
+       real(SP),dimension(:,:),intent(in) :: rval
+       integer                            :: typeSP2_
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}   	28Sep99	- Jing Guo <guo@dao.gsfc.nasa.gov>
+%  		- initial prototype/prolog/code\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+  \subsubsection{typeDP2\_ - return MPI datatype of double precision REAL}
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     function typeDP2_(rval)
+       real(DP),dimension(:,:),intent(in) :: rval
+       integer                            :: typeDP2_
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}   	28Sep99	- Jing Guo <guo@dao.gsfc.nasa.gov>
+%  		- initial prototype/prolog/code\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+
+  \subsubsection{typeI3\_ - return MPI datatype of INTEGER}
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     function typeI3_(ival)
+       integer,dimension(:,:,:),intent(in) :: ival
+       integer                             :: typeI3_
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}   	28Sep99	- Jing Guo <guo@dao.gsfc.nasa.gov>
+%  		- initial prototype/prolog/code\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+
+  \subsubsection{typeL3\_ - return MPI datatype of LOGICAL}
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     function typeL3_(lval)
+       logical,dimension(:,:,:),intent(in) :: lval
+       integer                             :: typeL3_
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}   	28Sep99	- Jing Guo <guo@dao.gsfc.nasa.gov>
+%  		- initial prototype/prolog/code\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+
+  \subsubsection{typeC3\_ - return MPI datatype of CHARACTER}
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     function typeC3_(cval)
+       character(len=*),dimension(:,:,:),intent(in) :: cval
+       integer                                      :: typeC3_
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}   	28Sep99	- Jing Guo <guo@dao.gsfc.nasa.gov>
+%  		- initial prototype/prolog/code\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+  \subsubsection{typeSP3\_ - return MPI datatype of single precision REAL}
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     function typeSP3_(rval)
+       real(SP),dimension(:,:,:),intent(in) :: rval
+       integer                              :: typeSP3_
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}   	28Sep99	- Jing Guo <guo@dao.gsfc.nasa.gov>
+%  		- initial prototype/prolog/code\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+  \subsubsection{typeDP3\_ - return MPI datatype of double precision REAL}
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     function typeDP3_(rval)
+       real(DP),dimension(:,:,:),intent(in) :: rval
+       integer                              :: typeDP3_
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}   	28Sep99	- Jing Guo <guo@dao.gsfc.nasa.gov>
+%  		- initial prototype/prolog/code\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+
+  \subsubsection{type2I\_ - return MPI datatype of 2INTEGER}
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     function type2I_(ival)
+       integer,intent(in) :: ival
+       integer            :: type2I_
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}   	28Sep99	- Jing Guo <guo@dao.gsfc.nasa.gov>
+%  		- initial prototype/prolog/code\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+  \subsubsection{type2SP\_ - return MPI datatype of single precision 2REAL}
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     function type2SP_(rval)
+       real(SP),intent(in) :: rval
+       integer             :: type2SP_
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}   	28Sep99	- Jing Guo <guo@dao.gsfc.nasa.gov>
+%  		- initial prototype/prolog/code\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+  \subsubsection{type2DP\_ - return MPI datatype of double precision 2REAL}
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     function type2DP_(rval)
+       real(DP),intent(in) :: rval
+       integer             :: type2DP_
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}   	28Sep99	- Jing Guo <guo@dao.gsfc.nasa.gov>
+%  		- initial prototype/prolog/code\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+  \subsubsection{perr\_ - MPI error information hanlder}
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     subroutine perr_(proc,MP_proc,ierror)
+       character(len=*),intent(in) :: proc
+       character(len=*),intent(in) :: MP_proc
+       integer,intent(in)          :: ierror
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}   	21Apr98 - Jing Guo <guo@thunder> - initial prototype/prolog/code\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+  \subsubsection{MP\_log2 - The smallest integer its power of 2 is >= nPE}
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     function MP_log2(nPE)
+       integer,intent(in) :: nPE
+       integer            :: MP_log2
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}   	01Feb00	- Jing Guo <guo@dao.gsfc.nasa.gov>
+%  		- initial prototype/prolog/code\end{verbatim}
+
+%\markboth{Left}{Source File: m\_mpout.F90,  Date: Thu Nov 15 22:24:27 GMT 2001
+%}
+
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+  \subsection{Module m\_mpout - a multiple but mergable parallel output module }
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     module m_mpout
+       public :: mpout	! The file handle as a Fortran logical unit
+ 
+       public :: mpout_open      ! open the multiple output streams
+       public :: mpout_close     ! close the multiple output streams
+       public :: mpout_sync      ! sync. the multiple output streams
+       public :: mpout_flush     ! flush the multople output streams
+       public :: mpout_ison      ! verify if mpout is proper defined
+       public :: mpout_log       ! write a message to mpout
+       public :: mpout_MASK      ! mask of all but PE 0
+       public :: mpout_setflush  ! modify default flush behavior after
+                                 ! writes using mpout_log().
+ 
+       interface mpout_open;  module procedure open_;  end interface
+       interface mpout_close; module procedure close_; end interface
+       interface mpout_sync;  module procedure sync_;  end interface
+       interface mpout_flush; module procedure flush_; end interface
+       interface mpout_ison;  module procedure ison_;  end interface
+       interface mpout_log;   module procedure	&
+                   logi_,	&
+                   logr_,	&
+                   logd_,	&
+                   log_;   end interface
+       interface mpout_setflush; module procedure	&
+                   setflush_; end interface
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}  	
+%         06Feb01 - Tom Clune
+%  	        . Added interface to modify default flush
+%                   behavior in log routines.
+%  	12Oct00	- Jing Guo
+%  		. Revised the module to make its behaviors closer to
+%  		  what developers might want to see.  The conflict
+%  		  between the principles for lately added procedures
+%  		  and for the earlier implementation is merged.
+%  		  The earlier design expected more disciplined usage,
+%  		  while the later additions expected applications with
+%  		  less care.
+%  		. Added EXAMPLES for the module.
+%  	28Sep99 - Jing Guo <guo@thunder>
+%  		- Added additional calls to support the "Violet" system
+%  		  development.
+%   	25Feb98 - Jing Guo <guo@thunder> - initial prototype/prolog/code\end{verbatim}
+{\sf SEE ALSO:}
+\begin{verbatim}  	
+   !DESIGN ISSUES:
+\end{verbatim}
+   \begin{itemize}
+   \item	It might be considered useful to implement this module to be
+  	applicable to a given {\sl communicator}.   The argument
+  	taken now is to only have one multiple output stream handle
+  	per excution.  This is consistent with \verb"stdout" in the
+  	traditional sense. (Jing Guo, 25Feb98)
+   \item \verb"mpout_log()" is implemented in a way producing output
+  	only if \verb"mpout_ison()" (being \verb".true.").  The reason
+  	of not implementing a default output such as \verb"stdout", is
+  	hoping to provent too many unexpected output when the system is
+  	switched to a multiple PE system.  The design principle for
+  	this module is that \verb"mpout" is basically {\sl not} the same
+  	module as \verb"stdout". (Jing Guo, 28Sep99)
+   \end{itemize}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+  \subsubsection{open\_ - open a multiple files with the same name prefix}
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     subroutine open_(mask,pfix,append)
+       integer,optional,intent(in) :: mask
+ 
+                ! It is a mask of PE ranks where mpout will _not_ be on
+                ! ("on" == a file is opened).
+                !   condition           : status
+                ! .not.present(mask)    : on PE 0 only
+                ! mask  == -1           : off
+                !       ==  0           : on
+                ! iand(mask,rank) == 0  : on
+                ! iand(maxk,rank) /= 0  : off
+ 
+       character(len=*),optional,intent(in) :: pfix
+ 
+                ! The leading filename component of the mpout file set.
+                ! If the argument is not present, pfix='mpout' is
+                ! assumed.  Filenames of the mpout file set opened by
+                ! this open() are in the form of "pfix.zzz", where
+                ! "pfix" is the string defined by argument pfix, and
+                ! "zzz" is the PE rank in hexidecimal.
+ 
+       logical,optional,intent(in) :: append
+ 
+                ! If the file is to be positioned as 'append'.  The
+                ! default is not to append.
+ 
+   !EXAMPLES:
+     . mpout_ison() on no PE but PE 0, where mpout is opened to file
+       "mpout.000":
+  	call mpout_open()
+     . mpout_ison() on every 4 PE starting from 0, where mpout is opened
+       to files named, "out.000", "out.004", "out.007", "out.00a", etc.
+ 
+  	call mpout_open(mask=3,pfix='out')
+       Note that 3 = "11"b.  Therefore,
+  	mask="000011"b
+  	PE 0="000000"b	is "clean", mpout_ison()
+  	   1="000001"b	is "dirty", .not. on
+  	   2="000010"b	is "dirty", .not. on
+  	   3="000011"b	is "dirty", .not. on
+  	   4="000100"b	is "clean", mpout_ison()
+  	   5="000101"b	is "dirty", .not. on
+  	   6="000110"b	is "dirty", .not. on
+  	   7="000111"b	is "dirty", .not. on
+  	   8="001000"b	is "clean", mpout_ison()
+  	   9="001001"b	is "dirty", .not. on
+  	  10="001010"b	is "dirty", .not. on
+  	  11="001011"b	is "dirty", .not. on
+  	  12="001100"b	is "clean", mpout_ison()
+  	  13="001101"b	is "dirty", .not. on
+  	  14="001110"b	is "dirty", .not. on
+  	  15="001111"b	is "dirty", .not. on\end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}  	12Oct00	- Jing Guo
+%  		. Revised argument describtions.
+%  		. Revised EXAMPLES.
+%  		. Removed default sync_() action, which should be a
+%  		  choice by users.
+%   	25Feb98 - Jing Guo <guo@thunder> - initial prototype/prolog/code\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+  \subsubsection{close\_ - close the unit opened by open\_}
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     subroutine close_()
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}  	12Oct00	- Jing Guo
+%  		. Removed default sync_() action, which should be a
+%  		  choice of users.
+%   	25Feb98 - Jing Guo <guo@thunder> - initial prototype/prolog/code\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+
+  \subsubsection{sync\_ - write a mark for posible later file merging}
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     subroutine sync_(tag)
+       character(len=*),intent(in) :: tag
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}   	25Feb98 - Jing Guo <guo@thunder> - initial prototype/prolog/code
+%\end{verbatim}
+{\sf SEE ALSO:}
+\begin{verbatim}
+   !DESIGN ISSUES:
+\end{verbatim}
+   \begin{itemize}
+   \item	Should the variable \verb"tag" be implemented as an optional
+  	argument?  Because the current implementation does not require
+  	actual synchronization between all threads of the multiple
+  	output streams, forcing the user to supply a unique \verb"tag"
+  	would make the final multi-stream merging verifiable.  However,
+  	since the \verb"tag"s have not been forced to be unique, the
+  	synchronization operations are still symbolic.
+  	
+   \end{itemize}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+  \subsubsection{flush\_ - flush the multiple output streams}
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     subroutine flush_()
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}   	27Feb98 - Jing Guo <guo@thunder> - initial prototype/prolog/code\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+
+  \subsubsection{ison\_ - decide if the current PE has a defined mpout}
+
+     It needs to be checked to avoid undesired output.
+  
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     function ison_()
+       logical :: ison_
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}   	14Sep99	- Jing Guo <guo@dao.gsfc.nasa.gov>
+%  		- initial prototype/prolog/code\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+  \subsubsection{log\_ - write a message to mpout}
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     subroutine log_(where,message,showrank,flush)
+       character(len=*),intent(in) :: where
+       character(len=*),intent(in) :: message
+       logical,optional,intent(in) :: showrank
+       logical,optional,intent(in) :: flush
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}   	14Sep99	- Jing Guo <guo@dao.gsfc.nasa.gov>
+%  		- initial prototype/prolog/code\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+
+  \subsubsection{logi\_ - write a message to mpout}
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     subroutine logi_(where,message,num,showrank,flush)
+       character(len=*),intent(in) :: where
+       character(len=*),intent(in) :: message
+       integer,intent(in)          :: num
+       logical,optional,intent(in) :: showrank
+       logical,optional,intent(in) :: flush
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}   	14Sep99	- Jing Guo <guo@dao.gsfc.nasa.gov>
+%  		- initial prototype/prolog/code\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+
+  \subsubsection{logd\_ - write a message to mpout}
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     subroutine logd_(where,message,val,showrank,flush)
+       character(len=*),intent(in) :: where
+       character(len=*),intent(in) :: message
+       real(DP),intent(in)         :: val
+       logical,optional,intent(in) :: showrank
+       logical,optional,intent(in) :: flush
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}   	14Sep99	- Jing Guo <guo@dao.gsfc.nasa.gov>
+%  		- initial prototype/prolog/code\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+  \subsubsection{logr\_ - write a message to mpout}
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     subroutine logr_(where,message,val,showrank,flush)
+       character(len=*),intent(in) :: where
+       character(len=*),intent(in) :: message
+       real(SP),intent(in)         :: val
+       logical,optional,intent(in) :: showrank
+       logical,optional,intent(in) :: flush
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}   	14Sep99	- Jing Guo <guo@dao.gsfc.nasa.gov>
+%  		- initial prototype/prolog/code\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+  \subsubsection{initialize\_ - initialize to a default setting}
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     subroutine initialize_()
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}   	05Oct00	- Jing Guo <guo@dao.gsfc.nasa.gov>
+%  		- initial prototype/prolog/code\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+
+  \subsubsection{setflush\_ - initialize to a default setting}
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     subroutine setflush_(flush)
+       logical, intent(in) :: flush
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}   	06Feb01	- Tom Clune <clune@sgi.com>
+%  		- initial prototype/prolog/code\end{verbatim}
+
+%\markboth{Left}{Source File: m\_rankMerge.F90,  Date: Thu Nov 15 22:24:28 GMT 2001
+%}
+
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+
+  \subsection{Module m\_rankMerge - A merging tool through ranking }
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     module m_rankMerge
+       public :: rankSet		! set inital ranks
+       public :: rankMerge	! merge two ranks
+       public :: IndexedRankMerge ! index-merge two array segments
+ 
+       interface rankSet; module procedure set_; end interface
+ 
+       interface rankMerge; module procedure	&
+          imerge_,   &    ! rank-merging two integer arrays
+          rmerge_,   &    ! rank-merging two real arrays
+          dmerge_,   &    ! rank-merging two dble arrays
+          uniq_	          ! merging to rank arrays
+       end interface
+ 
+       interface IndexedRankMerge; module procedure	&
+          iindexmerge_,   &       ! merging two index arrays of integers
+          rindexmerge_,   &       ! merging two index arrays of reals
+          dindexmerge_            ! merging two index arrays of dbles
+       end interface
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}   	13Mar00	- Jing Guo <guo@dao.gsfc.nasa.gov>
+%  		- initial prototype/prolog/code\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+  \subsubsection{set\_ - set initial ranking}
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     subroutine set_(rank)
+       integer,dimension(:),intent(out) :: rank
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}   	13Mar00	- Jing Guo <guo@dao.gsfc.nasa.gov>
+%  		- initial prototype/prolog/code\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+
+  \subsubsection{imerge\_ - merge two sorted integer arrays by ranking}
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     subroutine imerge_(value_i,value_j,krank_i,krank_j,descend)
+       integer,dimension(:),intent(in)    :: value_j	! value of j-vec
+       integer,dimension(:),intent(in)    :: value_i	! value of i-vec
+ 
+       integer,dimension(:),intent(inout) :: krank_i	! rank of i-vec
+       integer,dimension(:),intent(inout) :: krank_j	! rank of j-vec
+ 
+       logical,optional,intent(in) :: descend
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}   	13Mar00	- Jing Guo <guo@dao.gsfc.nasa.gov>
+%  		- initial prototype/prolog/code\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+  \subsubsection{rmerge\_ - merge two sorted real arrays by ranking}
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     subroutine rmerge_(value_i,value_j,krank_i,krank_j,descend)
+       real(SP),dimension(:),intent(in)    :: value_i	! value of i-vec
+       real(SP),dimension(:),intent(in)    :: value_j	! value of j-vec
+ 
+       integer,dimension(:),intent(inout) :: krank_i	! rank of i-vec
+       integer,dimension(:),intent(inout) :: krank_j	! rank of j-vec
+ 
+       logical,optional,intent(in) :: descend
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}   	13Mar00	- Jing Guo <guo@dao.gsfc.nasa.gov>
+%  		- initial prototype/prolog/code\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+  \subsubsection{dmerge\_ - merge two sorted real arrays by ranking}
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     subroutine dmerge_(value_i,value_j,krank_i,krank_j,descend)
+       real(DP),dimension(:),intent(in)   :: value_i	! value of i-vec
+       real(DP),dimension(:),intent(in)   :: value_j	! value of j-vec
+ 
+       integer,dimension(:),intent(inout) :: krank_i	! rank of i-vec
+       integer,dimension(:),intent(inout) :: krank_j	! rank of j-vec
+ 
+       logical,optional,intent(in) :: descend
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}   	13Mar00	- Jing Guo <guo@dao.gsfc.nasa.gov>
+%  		- initial prototype/prolog/code\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+  \subsubsection{iindexmerge\_ - merge two sorted integer arrays by ranking}
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     subroutine iindexmerge_(indx_i,indx_j,value,krank_i,krank_j,descend)
+       integer,dimension(:),intent(in)    :: indx_i	! of the i-vec
+       integer,dimension(:),intent(in)    :: indx_j	! of the j-vec
+       integer,dimension(:),intent(in)    :: value	! of the full
+ 
+       integer,dimension(:),intent(inout) :: krank_i	! rank of i-vec
+       integer,dimension(:),intent(inout) :: krank_j	! rank of j-vec
+ 
+       logical,optional,intent(in) :: descend
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}   	13Mar00	- Jing Guo <guo@dao.gsfc.nasa.gov>
+%  		- initial prototype/prolog/code\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+
+  \subsubsection{rindexmerge\_ - merge two sorted real arrays by ranking}
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     subroutine rindexmerge_(indx_i,indx_j,value,krank_i,krank_j,descend)
+       integer,dimension(:),intent(in)    :: indx_i	! of the i-vec
+       integer,dimension(:),intent(in)    :: indx_j	! of the j-vec
+       real(SP),dimension(:),intent(in)   :: value	! of the full
+ 
+       integer,dimension(:),intent(inout) :: krank_i	! rank of i-vec
+       integer,dimension(:),intent(inout) :: krank_j	! rank of j-vec
+ 
+       logical,optional,intent(in) :: descend
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}   	13Mar00	- Jing Guo <guo@dao.gsfc.nasa.gov>
+%  		- initial prototype/prolog/code\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+  \subsubsection{dindexmerge\_ - merge two sorted real arrays by ranking}
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     subroutine dindexmerge_(indx_i,indx_j,value,krank_i,krank_j,descend)
+       integer,dimension(:),intent(in)    :: indx_i	! of the i-vec
+       integer,dimension(:),intent(in)    :: indx_j	! of the j-vec
+       real(DP),dimension(:),intent(in)   :: value	! of the full
+ 
+       integer,dimension(:),intent(inout) :: krank_i	! rank of i-vec
+       integer,dimension(:),intent(inout) :: krank_j	! rank of j-vec
+ 
+       logical,optional,intent(in) :: descend
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}   	13Mar00	- Jing Guo <guo@dao.gsfc.nasa.gov>
+%  		- initial prototype/prolog/code\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+  \subsubsection{uniq\_ - merge two rank arrays with unique rank values}
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     subroutine uniq_(krank_i,krank_j)
+       integer,dimension(:),intent(inout) :: krank_i	! rank of i-vec
+       integer,dimension(:),intent(inout) :: krank_j	! rank of j-vec
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}   	13Mar00	- Jing Guo <guo@dao.gsfc.nasa.gov>
+%  		- initial prototype/prolog/code\end{verbatim}
+
+%\markboth{Left}{Source File: m\_realkinds.F90,  Date: Thu Nov 15 22:24:28 GMT 2001
+%}
+
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+  \subsection{Module m\_realkinds - real KIND definitions }
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     module m_realkinds
+       public :: kind_r4		! real*4
+       public :: kind_r8		! real*8
+       public :: kind_r		! default real
+       public :: SP		! default REAL
+       public :: DP		! default DOUBLE_PRECISION
+ 
+       real*4,parameter :: R4=1.
+       real*8,parameter :: R8=1.
+       real,  parameter :: R =1.
+ 
+       integer,parameter :: SP = kind(1.  )
+       integer,parameter :: DP = kind(1.D0)
+ 
+       integer,parameter :: kind_r4=kind(R4)
+       integer,parameter :: kind_r8=kind(R8)
+       integer,parameter :: kind_r =kind(R )
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}   	19Feb98 - Jing Guo <guo@thunder> - initial prototype/prolog/code\end{verbatim}
+%
+%\markboth{Left}{Source File: m\_showDistrib.F90,  Date: Thu Nov 15 22:24:28 GMT 2001
+%}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+  \subsection{Module m\_showDistrib - show distributions }
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     module m_showDistrib
+       public :: showDistrib		! The class data structure
+ 
+       interface showDistrib; module procedure	&
+ 	 showalli_,	&
+ 	 showallr_,	&
+ 	 showalld_
+       end interface
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}   	02Mar01	- Jing Guo <guo@dao.gsfc.nasa.gov>
+%  		- initial prototype/prolog/code\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+
+  \subsubsection{showalli\_ - show all INTEGER values}
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     subroutine showalli_(lu,vnam,ival,root,comm,listall)
+       integer,intent(in) :: lu		! output unit
+       character(len=*),intent(in) :: vnam	! variable name
+       integer,intent(in) :: ival	! to be listed value
+       integer,intent(in) :: root	! root PE
+       integer,intent(in) :: comm	! communicator
+       logical,optional,intent(in) :: listall
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}   	02Mar01	- Jing Guo <guo@dao.gsfc.nasa.gov>
+%  		- initial prototype/prolog/code\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+  \subsubsection{showallr\_ - show all INTEGER values}
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     subroutine showallr_(lu,vnam,rval,root,comm,listall,scalar)
+       integer,intent(in) :: lu		! output unit
+       character(len=*),intent(in) :: vnam	! variable name
+       real(SP),intent(in) :: rval	! to be listed value
+       integer,intent(in) :: root	! root PE
+       integer,intent(in) :: comm	! communicator
+       logical,optional,intent(in) :: listall
+       real(SP),optional,intent(in) :: scalar
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}   	02Mar01	- Jing Guo <guo@dao.gsfc.nasa.gov>
+%  		- initial prototype/prolog/code\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+  \subsubsection{showalld\_ - show all INTEGER values}
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     subroutine showalld_(lu,vnam,rval,root,comm,listall,scalar)
+       integer,intent(in) :: lu		! output unit
+       character(len=*),intent(in) :: vnam	! variable name
+       real(DP),intent(in) :: rval	! to be listed value
+       integer,intent(in) :: root	! root PE
+       integer,intent(in) :: comm	! communicator
+       logical,optional,intent(in) :: listall
+       real(DP),optional,intent(in) :: scalar
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}   	02Mar01	- Jing Guo <guo@dao.gsfc.nasa.gov>
+%  		- initial prototype/prolog/code\end{verbatim}
+
+%\markboth{Left}{Source File: m\_stdio.F90,  Date: Thu Nov 15 22:24:28 GMT 2001
+%}
+
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+  \subsection{Module m\_stdio - a F90 module defines std. I/O parameters }
+
+  	Define system dependent I/O parameters.
+  
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     module m_stdio
+       public	:: stdin	! a unit linked to UNIX stdin
+       public	:: stdout	! a unit linked to UNIX stdout
+       public	:: stderr	! a unit linked to UNIX stderr
+ 
+       public	:: LEN_FILENAME
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}  	10oct96 - Jing G.	- Defined\end{verbatim}
+
+%\markboth{Left}{Source File: m\_zeit.F90,  Date: Thu Nov 15 22:24:28 GMT 2001
+%}
+
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+  \subsection{Module m\_zeit - a multi-timer of process times and wall-clock times }
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     module m_zeit
+       public :: zeit_ci		! push a new name to the timer
+       public :: zeit_co		! pop the current name on the timer
+       public :: zeit_flush	! print per PE timing
+       public :: zeit_allflush	! print all PE timing
+       public :: zeit_reset	! reset the timers to its initial state
+ 
+ 	! Flags of all printable timers
+ 
+       public ::  MWTIME	! MPI_Wtime() wall-clock time
+       public ::  XWTIME	! times() wall-clock time
+       public ::  PUTIME	! times() process user time
+       public ::  PSTIME	! times() process system time
+       public ::  CUTIME	! times() user time of all child-processes
+       public ::  CSTIME	! times() system time of all child-processes
+       public :: ALLTIME	! all of above
+       public ::  UWRATE ! (putime+cutime)/xwtime
+ 
+       interface zeit_ci;    module procedure ci_;    end interface
+       interface zeit_co;    module procedure co_;    end interface
+       interface zeit_flush; module procedure flush_; end interface
+       interface zeit_allflush; module procedure allflush_; end interface
+       interface zeit_reset; module procedure reset_; end interface
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}   	05Mar98 - Jing Guo <guo@thunder>	-
+%  		. rewritten for possible MPI applications, with
+%  		  additional functionalities and new performance
+%  		  analysis information.
+%  		. Interface names have been redefined to ensure all
+%  		  use cases to be verified.
+%  		. removed the type(pzeit) data structure, therefore,
+%  		  limited to single _instance_ applications.
+%  		. added additional data components for more detailed
+%  		  timing analysis.
+%  		. used times() for the XPG4 standard conforming
+%  		  timing functions.
+%  		. used MPI_Wtime() for the MPI standard conforming
+%  		  high-resolution timing functions.
+%   	20Feb97 - Jing Guo <guo@eramus>		-
+%  		. rewritten in Fortran 90 as the first modular
+%  		  version, with a type(pzeit) data structure.
+%  	10may96 - Jing G. -	Add _TZEITS macro for the testing code
+%  	09may96 - Jing G. -	Changed output format also modifed
+%  				comments
+%  	11Oct95 - Jing G. -	Removed earlier way of letting clock
+%  				timing (clkknt and clktot) to be no less
+%  				then the CPU timing, following a
+%  				suggestion by James Abeles from Cray.
+%  				This way, users may use the routings to
+%  				timing multitasking speedup as well.
+%  	12May95	- Jing G. -	Merged zeitCRAY.f and zeitIRIS.f.
+%  	Before	- ?	  -	See zeitCRAY.f and zeitIRIS.f for more
+%  				information.  Authors of those files are
+%  				not known to me.
+%\end{verbatim}
+%\begin{verbatim}
+%   !DESIGN ISSUES:
+%  	05Mar98	- Jing Guo <guo@thunder>	-
+%  		. Removing the data structure may be consider as a 
+%  		  limitation to future changes to multiple _instance_
+%  		  applications.  However, it is unlikely there will be
+%  		  any neccessary multi-_intance_ application soon, if
+%  		  ever for this module.
+%  		. Without an additional layer with the derived
+%  		  datatype, one may worry less the tricky performance
+%  		  issues associated with ci_/co_.
+%  		. Performance issue with the flush_() calls are not
+%  		  considered.
+%  	20Feb97	- Jing Guo <guo@eramus>		-
+%  		. Currently a single threaded module.  May be easily
+%  		  extended to multi-threaded module by adding the name
+%  		  of an instance of the class to the argument list.  It
+%  		  requires some but very limited interface extensions.
+%  		  Right now, the backward compatibility is the main
+%  		  issue.
+%        10may96 - Jing Guo <guo@eramus>		-
+%               + This `zeit' subroutine collection replaces original zeit files
+%  	used in PSAS on both systems, UNICOS and IRIX, with following
+%  	changes:
+%  	      +	Removed the some bugs in zeitCRAY.f that overite the
+%  		first user defined name entry in a special situation
+%  		(but not being able to correct in zeitCRAY.f).
+%  	      + Unified both zeitCRAY.f and zeitIRIS.f in to one file
+%  		(this file), that handles system dependency in only
+%  		one subroutine syszeit_() with a couple of lines of
+%  		differences.
+%  	      + Added system CPU time counts for system supporting
+%  		the function.
+%  	      + Added some error checking and reporting functions.
+%  	      + According to zeitCRAY.f, "zeit" is "time" in Germen.
+%  		The name is used through the code as another name for
+%  		"time".
+%  	      + This version does not work for parallelized processes.
+%       + Elapsed time records since the first call are used.  Although
+%  	it may loose accuracy when the values of the time records
+%  	become large, it will keep the total time values conserved.
+%       +	The accuracy of the elapsed times at a IEEE real*4 accuracy
+%  	(ffrac = 2^23 ~= 1.19e-7) should be no worse than +- 1 second
+%  	in 97 days, if only the numerical accuracy is considered.
+%       +	The precision of "wall clock" time returned by syszeit_() is
+%  	only required to be reliable upto seconds.
+%       +	The "wall clock" time for individual `name' (clkknt) is
+%  	accumulated by adding the differences between two integer
+%  	values, iclk and iclksv.  Care must be taken to compute the
+%  	differences of iclk and iclksv first.  That is, doing
+%  		clkknt()=clkknt() + (iclk-iclksv)
+%  	not
+%  		clkknt()=clkknt() + iclk-iclksv
+%  	The latter statement may ignore the difference between the two
+%  	integer values (iclk and iclksv).
+%\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+  \subsubsection{ci\_ - push an entry into the timer}
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     subroutine ci_(name)
+       character(len=*), intent(in) :: name
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}   	05Mar98 - Jing Guo <guo@thunder> - initial prototype/prolog/code\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+  \subsubsection{co\_ - pop the current level}
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     subroutine co_(name,tms)
+       character(len=*), intent(in) :: name	! account name
+       real*8,optional,dimension(0:5,0:1),intent(out) :: tms ! timings
+ 
+       The returned variable tms(0:5,0:1) contains two sets of timing
+     information.  tms(0:5,0) is the NET timing data charged under the
+     account name only, and tms(0:5,1) is the SCOPE timing data since
+     the last ci() with the same account name and at the out most level.\end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}   	11Oct99 - J.W. Larson - <jlarson@dao> explicit definition of 
+%                   tms as real*8
+%   	05Mar98 - Jing Guo <guo@thunder> - initial prototype/prolog/code\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+
+  \subsubsection{reset\_ - reset module m\_zeit to an initial state}
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     subroutine reset_()
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}   	04Mar98 - Jing Guo <guo@thunder> - initial prototype/prolog/code\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+  \subsubsection{lookup\_ search/insert a name}
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     function lookup_(name)
+       character(len=*),intent(in) :: name
+       integer :: lookup_
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}   	04Mar98 - Jing Guo <guo@thunder> - initial prototype/prolog/code\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+  \subsubsection{flush\_ - print the timing data}
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     subroutine flush_(lu,umask)
+       integer,intent(in) :: lu	! logical unit for the output
+       integer,optional,intent(in) :: umask
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}   	05Mar98 - Jing Guo <guo@thunder> - initial prototype/prolog/code\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+  \subsubsection{sp\_balances\_ - print a table of a given timer}
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     subroutine sp_balances_(lu,itm,zti)
+       integer,intent(in) :: lu
+       integer,intent(in) :: itm
+       real*8,intent(in) :: zti
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}   	06Mar98 - Jing Guo <guo@thunder> - initial prototype/prolog/code\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+  \subsubsection{allflush\_ - print a summary of all PEs.}
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     subroutine allflush_(comm,root,lu,umask)
+       integer,intent(in) :: comm
+       integer,intent(in) :: root
+       integer,intent(in) :: lu
+       integer,optional,intent(in) :: umask
+ \end{verbatim}%{\sf REVISION HISTORY:}
+%\begin{verbatim}   	09Mar98 - Jing Guo <guo@thunder> - initial prototype/prolog/code\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+  \subsubsection{mp\_balances\_ - summarize the timing data of all PEs}
+
+%   \newcommand{\tb}{\overline{t}}
+  
+  	\verb"mp_balances_"() summarizes the timing data of all PEs
+     with quantified load balancing measures:
+     \begin{eqnarray*}
+  	x &=& \frac{\max(t) - \tb}{N\tb}	\times 100\%	\\
+  	i &=& \frac{\max(t) - \tb}{\max(t)}	\times 100\%	\\
+  	r &=& \frac{1}{N\tb} \sum^{t>\tb}{(t-\tb)}
+  		\times 100\%
+     \end{eqnarray*}
+     where
+     \begin{center}
+       \begin{tabular}{rl}
+         $t$: & time by any process element			\\
+       $\tb$: & mean time by all process elements		\\
+  	$x$: & the ma{\bf x}imum percentage load deviation	\\
+  	$i$: & percentage {\bf i}dle process-time or
+  					load {\bf i}mbalance	\\
+  	$r$: & percentage {\bf r}elocatable loads		\\
+  	$N$: & {\bf n}umber of process elements
+       \end{tabular}
+     \end{center}
+  
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     subroutine mp_balances_(lu,item,nPEs,names,zsum,zavg,zabv,zmax)
+       integer,intent(in) :: lu
+       integer,intent(in) :: item
+       integer,intent(in) :: nPEs
+       character(len=1),dimension(:,0:),intent(in) :: names
+       real*8,   dimension(0:,0:,0:   ),intent(in) :: zsum
+       real*8,   dimension(0:,0:,0:   ),intent(in) :: zavg
+       real*8,   dimension(0:,0:,0:   ),intent(in) :: zabv
+       real*8,   dimension(0:,0:,0:,0:),intent(in) :: zmax
+\end{verbatim}
+%{\sf REVISION HISTORY:}
+%\begin{verbatim}   	10Mar98 - Jing Guo <guo@thunder> - initial prototype/prolog/code\end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+  \subsubsection{allreduce\_ -}
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim} 
+     subroutine allreduce_(ztmp,zsum,zavg,zabv,zmax,myID,nPEs,comm)
+       real*8,dimension(0:,0:,0:   ),intent(in ) :: ztmp
+       real*8,dimension(0:,0:,0:   ),intent(out) :: zsum
+       real*8,dimension(0:,0:,0:   ),intent(out) :: zavg
+       real*8,dimension(0:,0:,0:   ),intent(out) :: zabv
+       real*8,dimension(0:,0:,0:,0:),intent(out) :: zmax
+       integer,intent(in) :: myID
+       integer,intent(in) :: nPEs
+       integer,intent(in) :: comm
+ \end{verbatim}
+%{\sf REVISION HISTORY:}
+%\begin{verbatim}   	15Mar01	- Jing Guo <guo@dao.gsfc.nasa.gov>
+%  		- initial prototype/prolog/code\end{verbatim}
+
