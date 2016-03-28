@@ -1096,13 +1096,15 @@ logical function MAPL_VRFY(A,iam,line,rc)
    character*(*),     intent(IN ) :: iam
    integer,           intent(IN ) :: line
    integer, optional, intent(OUT) :: RC
-     MAPL_VRFY = A/=ESMF_SUCCESS 
-     if(MAPL_VRFY)then
+   MAPL_VRFY = A/=ESMF_SUCCESS    
+   !RSD add for debug log output
+   if (ESMF_LogFoundError(rcToCheck=A, msg=ESMF_LOGERR_PASSTHRU, &
+      line=line, file=iam)) then
        if(present(RC)) then
          print'(A40,I10)',Iam,line
          RC=A
        endif
-     endif
+   endif
 end function MAPL_VRFY
 
 logical function MAPL_ASRT(A,iam,line,rc)
@@ -1112,12 +1114,43 @@ logical function MAPL_ASRT(A,iam,line,rc)
    integer, optional, intent(OUT) :: RC
      MAPL_ASRT = .not.A 
      if(MAPL_ASRT)then
+     !RSD add for debug log output
+       call ESMF_LogWrite(msg="MAPL Assertion failed", &
+            line=line, file=iam)
        if(present(RC))then
          print'(A40,I10)',Iam,LINE
          RC=ESMF_FAILURE
        endif
      endif
 end function MAPL_ASRT
+
+!!$logical function MAPL_VRFY(A,iam,line,rc)
+!!$   integer,           intent(IN ) :: A
+!!$   character*(*),     intent(IN ) :: iam
+!!$   integer,           intent(IN ) :: line
+!!$   integer, optional, intent(OUT) :: RC
+!!$     MAPL_VRFY = A/=ESMF_SUCCESS 
+!!$     if(MAPL_VRFY)then
+!!$       if(present(RC)) then
+!!$         print'(A40,I10)',Iam,line
+!!$         RC=A
+!!$       endif
+!!$     endif
+!!$end function MAPL_VRFY
+!!$
+!!$logical function MAPL_ASRT(A,iam,line,rc)
+!!$   logical,           intent(IN ) :: A
+!!$   character*(*),     intent(IN ) :: iam
+!!$   integer,           intent(IN ) :: line
+!!$   integer, optional, intent(OUT) :: RC
+!!$     MAPL_ASRT = .not.A 
+!!$     if(MAPL_ASRT)then
+!!$       if(present(RC))then
+!!$         print'(A40,I10)',Iam,LINE
+!!$         RC=ESMF_FAILURE
+!!$       endif
+!!$     endif
+!!$end function MAPL_ASRT
 
 logical function MAPL_RTRNt(A,text,iam,line,rc)
    integer,           intent(IN ) :: A
