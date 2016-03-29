@@ -198,6 +198,18 @@ script_info:
 	    echo "ESMF_PIO_LIBPATH:       $(ESMF_PIO_LIBPATH)" ; \
           fi; \
          fi
+	-@if [ -n "$(ESMF_PROJ4)" ] ; then \
+	  echo "ESMF_PROJ4:               $(ESMF_PROJ4)" ; \
+	  if [ -n "$(ESMF_PROJ4_INCLUDE)" ] ; then \
+	    echo "ESMF_PROJ4_INCLUDE:       $(ESMF_PROJ4_INCLUDE)" ; \
+          fi; \
+	  if [ -n "$(ESMF_PROJ4_LIBS)" ] ; then \
+	    echo "ESMF_PROJ4_LIBS:          $(ESMF_PROJ4_LIBS)" ; \
+          fi; \
+	  if [ -n "$(ESMF_PROJ4_LIBPATH)" ] ; then \
+	    echo "ESMF_PROJ4_LIBPATH:       $(ESMF_PROJ4_LIBPATH)" ; \
+          fi; \
+         fi
 	-@echo " "
 	-@echo "--------------------------------------------------------------"
 	-@echo " * ESMF environment variables for final installation *"
@@ -462,6 +474,18 @@ info_mk: chkdir_lib
           fi; \
 	  if [ -n "$(ESMF_PIO_LIBPATH)" ] ; then \
 	    echo "# ESMF_PIO_LIBPATH:       $(ESMF_PIO_LIBPATH)" >> $(MKINFO) ; \
+          fi; \
+         fi
+	-@if [ -n "$(ESMF_PROJ4)" ] ; then \
+	  echo "# ESMF_PROJ4:               $(ESMF_PROJ4)" >> $(MKINFO) ; \
+	  if [ -n "$(ESMF_PROJ4_INCLUDE)" ] ; then \
+	    echo "# ESMF_PROJ4_INCLUDE:       $(ESMF_PROJ4_INCLUDE)" >> $(MKINFO) ; \
+          fi; \
+	  if [ -n "$(ESMF_PROJ4_LIBS)" ] ; then \
+	    echo "# ESMF_PROJ4_LIBS:          $(ESMF_PROJ4_LIBS)" >> $(MKINFO) ; \
+          fi; \
+	  if [ -n "$(ESMF_PROJ4_LIBPATH)" ] ; then \
+	    echo "# ESMF_PROJ4_LIBPATH:       $(ESMF_PROJ4_LIBPATH)" >> $(MKINFO) ; \
           fi; \
          fi
 

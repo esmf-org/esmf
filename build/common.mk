@@ -671,6 +671,7 @@ endif
 # user's environment.
 #-------------------------------------------------------------------------------
 ESMF_PIODEFAULT             = internal
+ESMF_PROJ4DEFAULT           = OFF
 ESMF_PTHREADSDEFAULT        = ON
 ESMF_OPENMPDEFAULT          = ON
 ESMF_OPENACCDEFAULT         = OFF
@@ -1349,6 +1350,44 @@ ESMF_CPPFLAGS += -DESMF_MPIIO
 endif
 endif
 
+#-------------------------------------------------------------------------------
+# Proj.4
+#-------------------------------------------------------------------------------
+ifneq ($(origin ESMF_PROJ4), environment)
+ifdef ESMF_PROJ4DEFAULT
+export ESMF_PROJ4 = $(ESMF_PROJ4DEFAULT)
+endif
+endif
+
+ifeq ($(ESMF_PROJ4),OFF)
+ESMF_PROJ4=
+endif
+
+ifeq ($(ESMF_PROJ4),external)
+ifneq ($(origin ESMF_PROJ4_LIBS), environment)
+ESMF_PROJ4_LIBS = -lproj
+endif
+endif
+
+ifdef ESMF_PROJ4
+ESMF_CPPFLAGS                += -DESMF_PROJ4=1
+ifdef ESMF_PROJ4_INCLUDE
+ESMF_CXXCOMPILEPATHSTHIRD    += -I$(ESMF_PROJ4_INCLUDE)
+ESMF_F90COMPILEPATHSTHIRD    += -I$(ESMF_PROJ4_INCLUDE)
+endif
+ifdef ESMF_PROJ4_LIBS
+ESMF_CXXLINKLIBS          += $(ESMF_PROJ4_LIBS)
+ESMF_CXXLINKRPATHSTHIRD   += $(addprefix $(ESMF_CXXRPATHPREFIX),$(subst -L,,$(filter -L%,$(ESMF_PROJ4_LIBS))))
+ESMF_F90LINKLIBS          += $(ESMF_PROJ4_LIBS)
+ESMF_F90LINKRPATHSTHIRD   += $(addprefix $(ESMF_F90RPATHPREFIX),$(subst -L,,$(filter -L%,$(ESMF_PROJ4_LIBS))))
+endif
+ifdef ESMF_PROJ4_LIBPATH
+ESMF_CXXLINKPATHSTHIRD    += -L$(ESMF_PROJ4_LIBPATH)
+ESMF_F90LINKPATHSTHIRD    += -L$(ESMF_PROJ4_LIBPATH)
+ESMF_CXXLINKRPATHSTHIRD   += $(ESMF_CXXRPATHPREFIX)$(ESMF_PROJ4_LIBPATH)
+ESMF_F90LINKRPATHSTHIRD   += $(ESMF_F90RPATHPREFIX)$(ESMF_PROJ4_LIBPATH)
+endif
+endif
 
 #-------------------------------------------------------------------------------
 # Set the correct MPIRUN command with appropriate options
