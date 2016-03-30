@@ -795,7 +795,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   subroutine ESMF_GridCompGet(gridcomp, keywordEnforcer, gridIsPresent, grid, &
     importStateIsPresent, importState, exportStateIsPresent, exportState, &
     configIsPresent, config, configFileIsPresent, configFile, &
-    clockIsPresent, clock, localPet, petCount, contextflag, &
+    clockIsPresent, clock, localPet, petCount, petList, contextflag, &
     currentMethod, currentPhase, comptype, vmIsPresent, vm, name, rc)
 !
 ! !ARGUMENTS:
@@ -815,6 +815,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_Clock),         intent(out), optional :: clock
     integer,                  intent(out), optional :: localPet
     integer,                  intent(out), optional :: petCount
+    integer,                  intent(out), pointer, optional :: petList(:)
     type(ESMF_Context_Flag),  intent(out), optional :: contextflag
     type(ESMF_Method_Flag),   intent(out), optional :: currentMethod
     integer,                  intent(out), optional :: currentPhase
@@ -930,7 +931,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       grid=grid, importState=importState, exportState=exportState, clock=clock,&
       configFile=configFile, config=config, currentMethod=currentMethod, &
       currentPhase=currentPhase, localPet=localPet, petCount=petCount, &
-      comptype=comptype, compStatus=compStatus, rc=localrc)
+      petList=petList, comptype=comptype, compStatus=compStatus, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
