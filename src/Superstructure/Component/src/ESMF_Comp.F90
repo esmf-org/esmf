@@ -101,7 +101,8 @@ module ESMF_CompMod
     ESMF_METHOD_SERVICELOOPIC   = ESMF_Method_Flag(12), &
     ESMF_METHOD_SETVM           = ESMF_Method_Flag(13), &
     ESMF_METHOD_SETSERVICES     = ESMF_Method_Flag(14), &
-    ESMF_METHOD_WAIT            = ESMF_Method_Flag(15)
+    ESMF_METHOD_USERNEGROUTINE  = ESMF_Method_Flag(15), &
+    ESMF_METHOD_WAIT            = ESMF_Method_Flag(16)
     
 !------------------------------------------------------------------------------
 ! ! ESMF_CompStatus
@@ -167,6 +168,37 @@ module ESMF_CompMod
   end type
 
 !------------------------------------------------------------------------------
+! ! ESMF_GridCompUserNegInfo accInfo types
+
+  integer, parameter ::&
+    ESMF_COMP_NO_ACC=0, ESMF_COMP_CAN_ACC=1, ESMF_COMP_MUST_ACC=2
+
+!------------------------------------------------------------------------------
+! ! ESMF_GridCompUserNegInfo state types
+
+  integer, parameter ::&
+    ESMF_COMP_USER_NEG_NOTPRESENT=0,&
+    ESMF_COMP_USER_NEG_INIT=1, ESMF_COMP_USER_NEG_FINALIZE=2,&
+    ESMF_COMP_USER_NEG_INPROGRESS=3
+
+!------------------------------------------------------------------------------
+! ! ESMF_GridCompUserNegInfo
+!
+! ! GridCompUserNegInfo wrapper
+
+  type ESMF_GridCompUserNegInfo
+#ifndef ESMF_SEQUENCE_BUG
+#ifndef ESMF_NO_SEQUENCE
+    sequence
+#endif
+#endif
+    !private
+    integer                     :: state
+    integer                     :: accInfo
+    integer, pointer            :: negPetList(:)
+  end type
+
+!------------------------------------------------------------------------------
 ! ! ESMF_CompClass
 !
 ! ! Component internal class data.
@@ -184,6 +216,10 @@ module ESMF_CompMod
     type(ESMF_CompType_Flag):: compType     ! component type
     
     type(ESMF_CompTunnel)   :: compTunnel   ! in case this is a dual component
+
+    type(ESMF_GridCompUserNegInfo) :: negInfo ! User negotiation info for this comp
+    !integer             :: accInfo
+    !integer, pointer    :: negPetList(:)
     
     type(ESMF_Config)   :: config           ! configuration object
     type(ESMF_Clock)    :: clock            ! private component clock
@@ -270,6 +306,10 @@ module ESMF_CompMod
 !------------------------------------------------------------------------------
 ! !PUBLIC TYPES:
   public ESMF_GridComp, ESMF_CplComp, ESMF_SciComp
+  public ESMF_GridCompUserNegInfo
+  public ESMF_COMP_NO_ACC, ESMF_COMP_CAN_ACC, ESMF_COMP_MUST_ACC
+  public ESMF_COMP_USER_NEG_INIT, ESMF_COMP_USER_NEG_FINALIZE
+  public ESMF_COMP_USER_NEG_NOTPRESENT, ESMF_COMP_USER_NEG_INPROGRESS
 
   public ESMF_Method_Flag, ESMF_METHOD_NONE
   public ESMF_METHOD_INITIALIZE, ESMF_METHOD_RUN, ESMF_METHOD_FINALIZE
@@ -279,6 +319,7 @@ module ESMF_CompMod
   public ESMF_METHOD_WRITERESTARTIC, ESMF_METHOD_READRESTARTIC
   public ESMF_METHOD_SERVICELOOPIC
   public ESMF_METHOD_SETVM, ESMF_METHOD_SETSERVICES, ESMF_METHOD_WAIT
+  public ESMF_METHOD_USERNEGROUTINE
   
   ! These have to be public so other component types can use them, but 
   ! are not intended to be used outside the Framework code.
@@ -538,7 +579,8 @@ contains
 
 ! !INTERFACE:
   recursive subroutine ESMF_CompConstruct(compp, compType, name, &
-    dirPath, configFile, config, grid, clock, petlist, contextflag, rc)
+    dirPath, configFile, config, grid, clock, petlist, &
+    contextflag, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_CompClass),    pointer               :: compp
@@ -612,6 +654,9 @@ contains
     compp%base%this = ESMF_NULL_POINTER
     compp%compType = compType
     compp%compTunnel%this = ESMF_NULL_POINTER
+    compp%negInfo%state = ESMF_COMP_USER_NEG_NOTPRESENT
+    compp%negInfo%accInfo = ESMF_COMP_NO_ACC
+    nullify(compp%negInfo%negPetList)
     compp%configFile = "uninitialized"
     compp%dirPath = "uninitialized"
     compp%grid%this = ESMF_NULL_POINTER
@@ -1294,7 +1339,7 @@ contains
     integer,                  intent(out), optional :: timeout
     integer,                  intent(out), optional :: localPet
     integer,                  intent(out), optional :: petCount
-    integer,                  pointer,     optional :: petList(:)
+    integer,                  intent(out), pointer, optional :: petList(:)
     type(ESMF_CompStatus),    intent(out), optional :: compStatus
     type(ESMF_CompTunnel),    intent(out), optional :: compTunnel
     integer,                  intent(out), optional :: rc

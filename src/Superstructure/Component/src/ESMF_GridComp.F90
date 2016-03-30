@@ -81,6 +81,7 @@ module ESMF_GridCompMod
   public ESMF_GridCompSetEntryPoint
   public ESMF_GridCompSetServices
   public ESMF_GridCompSetVM
+  public ESMF_GridCompSetUserNegRoutine
   public ESMF_GridCompSetVMMaxPEs
   public ESMF_GridCompSetVMMaxThreads
   public ESMF_GridCompSetVMMinThreads
@@ -361,7 +362,8 @@ contains
 !
 ! !INTERFACE:
   recursive function ESMF_GridCompCreate(keywordEnforcer, grid, &
-    config, configFile, clock, petList, contextflag, name, rc)
+    config, configFile, clock, petList, userNegRoutine, &
+    contextflag, name, rc)
 !
 ! !RETURN VALUE:
     type(ESMF_GridComp) :: ESMF_GridCompCreate
@@ -373,6 +375,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     character(len=*),        intent(in),    optional :: configFile
     type(ESMF_Clock),        intent(in),    optional :: clock
     integer,                 intent(in),    optional :: petList(:)
+    interface
+      subroutine userNegRoutine(gridcomp, rc)
+        use ESMF_CompMod
+        implicit none
+        type(ESMF_GridComp)        :: gridcomp ! must not be optional
+        integer, intent(out)       :: rc       ! must not be optional
+      end subroutine
+    end interface
+    optional                                         :: userNegRoutine
     type(ESMF_Context_Flag), intent(in),    optional :: contextflag
     character(len=*),        intent(in),    optional :: name
     integer,                 intent(out),   optional :: rc
@@ -469,7 +480,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! call Comp method
     call ESMF_CompConstruct(compclass, ESMF_COMPTYPE_GRID, name, &
       configFile=configFile, config=config, &
-      grid=grid, clock=clock, petList=petList, contextflag=contextflag, &
+      grid=grid, clock=clock, petList=petList, &
+      contextflag=contextflag, &
       rc=localrc)
     if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
@@ -484,8 +496,16 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       
     ! Set return values
     ESMF_GridCompCreate%compp => compclass
-    
+
     ESMF_INIT_SET_CREATED(ESMF_GridCompCreate)
+
+    if(present(userNegRoutine)) then
+      !call c_ESMC_SetUserNegRoutine(gcomp, userNegRoutine, localrc)
+      call c_ESMC_SetUserNegRoutine(ESMF_GridCompCreate, userNegRoutine, localrc)
+      if (ESMF_LogFoundError(localrc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    end if
 
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
@@ -2507,6 +2527,185 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   end subroutine ESMF_GridCompSetServicesSock
 !------------------------------------------------------------------------------
 
+  subroutine ESMFI_GridCompReCreate(gridcomp, keyWordEnforcer, petList, rc)
+! !ARGUMENTS:
+    type(ESMF_GridComp), intent(inout)         :: gridcomp
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    integer,                 intent(in),    optional :: petList(:)
+    integer,             intent(out), optional :: rc
+
+    integer :: localrc                       ! local error status
+    character(len=ESMF_MAXSTR) :: cname
+    type(ESMF_VM) :: vm
+
+    print *, "Getting info about the gridcomp : name"
+    call ESMF_GridCompGet(gridcomp, name=cname, rc=localRc)
+    if (ESMF_LogFoundError(localrc, &
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    print *, "Destroying old gridcomp"
+    call ESMF_GridCompDestroy(gridcomp, rc=localRc)
+    if (ESMF_LogFoundError(localrc, &
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    print *, "Recreating gridcomp"
+    if(present(petList)) then
+      ! Use the petList in the argument
+      gridcomp = ESMF_GridCompCreate(name=cname, petList=petList, rc=localRc)
+    else
+      gridcomp = ESMF_GridCompCreate(name=cname, rc=localRc)
+    end if
+    if (ESMF_LogFoundError(localrc, &
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end subroutine ESMFI_GridCompReCreate
+
+  subroutine ESMFI_GetAccPetList(gridcomp, petList, rc)
+    type(ESMF_GridComp), intent(inout)          :: gridcomp
+    integer, allocatable, dimension(:), target, intent(inout)  :: petList
+    integer,             intent(out)            :: rc
+
+    integer :: localRc                       ! local error status
+    type(ESMF_VM) :: vm
+    integer :: petCount, i
+    integer, pointer :: ppetList(:)
+
+    print *, "Getting info about the gridcomp : vm, petCount"
+    call ESMF_GridCompGet(gridcomp, vm=vm, petCount=petCount, rc=localRc)
+    if(localRc /= ESMF_SUCCESS) then
+      print *, "WARNING : Unable to get VM for the component"
+      print *, "WARNING : Trying global VM"
+      call ESMF_VMGetGlobal(vm, rc=localRc)
+      if (ESMF_LogFoundError(localRc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+
+      print *, "Getting info about the global vm : petCount"
+      call ESMF_VMGet(vm, petCount=petCount, rc=localRc)
+      if (ESMF_LogFoundError(localRc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+
+      ! PET list with all PETs
+      if(allocated(petList)) then
+        deallocate(petList)
+      end if
+      print *, "Creating a petlist of size : ", petCount
+      allocate(petList(petCount))
+      do i=1,petCount
+        petList(i) = i-1
+      end do
+    else
+      if(allocated(petList)) then
+        deallocate(petList)
+      end if
+      ! Get current PET list
+      print *, "Creating a petlist of size : ", petCount
+      allocate(petList(petCount))
+      ppetList => petList
+      print *, "Trying to get the current petList"
+      call ESMF_GridCompGet(gridcomp, petList=ppetList, rc=localRc)
+      if (ESMF_LogFoundError(localRc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    end if
+
+    ! return successfully
+    rc = ESMF_SUCCESS
+
+  end subroutine ESMFI_GetAccPetList
+
+  subroutine ESMFI_GridCompResNeg(gridcomp, userRc, rc)
+! !ARGUMENTS:
+    type(ESMF_GridComp), intent(inout)          :: gridcomp
+    integer,             intent(out)            :: userRc
+    integer,             intent(out)            :: rc
+
+    integer :: localrc                       ! local error status
+    integer, allocatable, dimension(:), target  :: apetList
+    integer :: neg_step
+    integer, parameter :: NUM_NEG_STEPS = 2
+
+    userRc = ESMF_RC_NOT_IMPL
+    gridcomp%compp%negInfo%state = ESMF_COMP_USER_NEG_INIT
+    call c_ESMC_CallUserNegRoutine(gridcomp, userRc, localrc)
+    if (ESMF_LogFoundError(localrc, &
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    if(userRc /= ESMF_RC_NOT_IMPL) then
+      gridcomp%compp%negInfo%state = ESMF_COMP_USER_NEG_INPROGRESS
+      if(userRc == ESMF_SUCCESS) then
+        print *, "User negotiation routine returned SUCCESS"
+        if((gridcomp%compp%negInfo%accInfo == ESMF_COMP_MUST_ACC) .or. &
+            (gridcomp%compp%negInfo%accInfo == ESMF_COMP_CAN_ACC)) then
+          print *, "Comp set MUST_ACC or CAN_ACC"
+          do neg_step=1,NUM_NEG_STEPS
+            if(neg_step == NUM_NEG_STEPS) then
+              ! Last step
+              gridcomp%compp%negInfo%state = ESMF_COMP_USER_NEG_FINALIZE
+            end if
+            print *, "Re-negotiating petlist with the user, step = ", neg_step
+
+            ! FIXME: For now renegotiating with the same PET
+            call ESMFI_GetAccPetList(gridcomp, apetList, rc=localrc)
+            if ((localrc /= ESMF_SUCCESS) .and. &
+                (gridcomp%compp%negInfo%accInfo == ESMF_COMP_CAN_ACC)) then
+              ! Not MUST_ACC - our best effort failed, so ignore
+              rc = ESMF_SUCCESS
+              return
+            end if
+            if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+
+            gridcomp%compp%negInfo%negPetList => apetList
+            userRc = ESMF_SUCCESS
+            call c_ESMC_CallUserNegRoutine(gridcomp, userRc, localrc)
+            if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+            if(userRc == ESMF_SUCCESS) exit
+          end do
+          if(userRc /= ESMF_SUCCESS) then
+            print *, "ERROR: User negotiation failed"
+            if (gridcomp%compp%negInfo%accInfo == ESMF_COMP_CAN_ACC) then
+              ! Not MUST_ACC - our best effort failed, so ignore
+              if(allocated(apetList)) then
+                deallocate(apetList)
+              end if
+              rc = ESMF_SUCCESS
+              return
+            end if
+          else
+            print *, "Trying to recreate comp with petlist = ", apetList
+            call ESMFI_GridCompReCreate(gridcomp, petList=apetList, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+          end if
+        end if
+      else
+        print *, "User negotiation routine FAILED"
+      end if
+    else
+      gridcomp%compp%negInfo%state = ESMF_COMP_USER_NEG_NOTPRESENT
+    end if
+
+    if(allocated(apetList)) then
+      deallocate(apetList)
+    end if
+
+    ! return successfully
+    rc = ESMF_SUCCESS
+
+  end subroutine ESMFI_GridCompResNeg
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -2579,7 +2778,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-      
+
+    call ESMFI_GridCompResNeg(gridcomp, localUserRc, localrc)
+    if (ESMF_LogFoundError(localrc, &
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
     ! pass back userRc
     if (present(userRc)) userRc = localUserRc
 
@@ -2588,6 +2792,45 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   end subroutine ESMF_GridCompSetVM
 !------------------------------------------------------------------------------
 
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridCompSetUserNegRoutine"
+!BOP
+!
+! !INTERFACE:
+  recursive subroutine ESMF_GridCompSetUserNegRoutine(gridcomp, userNegRoutine, &
+    keywordEnforcer, rc)
+! !ARGUMENTS:
+    type(ESMF_GridComp), intent(inout)         :: gridcomp
+    interface
+      subroutine userNegRoutine(gridcomp, rc)
+        use ESMF_CompMod
+        implicit none
+        type(ESMF_GridComp)        :: gridcomp ! must not be optional
+        integer, intent(out)       :: rc       ! must not be optional
+      end subroutine
+    end interface
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    integer,             intent(out), optional :: rc
+!------------------------------------------------------------------------------
+    integer :: localrc                       ! local error status
+
+    ! initialize return code; assume routine not implemented
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+    localrc = ESMF_RC_NOT_IMPL
+
+    ESMF_INIT_CHECK_DEEP(ESMF_GridCompGetInit, gridcomp, rc)
+  
+    !call c_ESMC_SetUserNegRoutine(gcomp, userNegRoutine, localrc)
+    call c_ESMC_SetUserNegRoutine(gridcomp, userNegRoutine, localrc)
+    if (ESMF_LogFoundError(localrc, &
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+  end subroutine ESMF_GridCompSetUserNegRoutine
+!------------------------------------------------------------------------------
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
