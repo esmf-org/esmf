@@ -133,14 +133,8 @@ ESMF_F90COMPILEOPTS       += -m32
 ESMF_F90LINKOPTS          += -m32
 endif
 ifeq ($(ESMF_ABISTRING),x86_64_small)
-ESMF_CXXCOMPILEOPTS       += -m64 -mcmodel=small
-ESMF_CXXLINKOPTS          += -m64 -mcmodel=small
-ESMF_F90COMPILEOPTS       += -m64
-ESMF_F90LINKOPTS          += -m64
-endif
-ifeq ($(ESMF_ABISTRING),x86_64_medium)
-ESMF_CXXCOMPILEOPTS       += -m64 -mcmodel=medium
-ESMF_CXXLINKOPTS          += -m64 -mcmodel=medium
+ESMF_CXXCOMPILEOPTS       += -m64
+ESMF_CXXLINKOPTS          += -m64
 ESMF_F90COMPILEOPTS       += -m64
 ESMF_F90LINKOPTS          += -m64
 endif
@@ -193,23 +187,7 @@ ESMF_F90LINKLIBS += $(shell $(ESMF_DIR)/scripts/libs.icpc "$(ESMF_CXXCOMPILER) $
 ESMF_CXXLINKLIBS += $(shell $(ESMF_DIR)/scripts/libs.ifort "$(ESMF_F90COMPILER) $(ESMF_F90COMPILEOPTS)")
 
 ############################################################
-# Linker option that ensures that the specified libraries are 
-# used to also resolve symbols needed by other libraries.
-#
-ESMF_F90LINKOPTS          += -Wl,--no-as-needed
-ESMF_CXXLINKOPTS          += -Wl,--no-as-needed
-
-############################################################
 # Shared library options
 #
-ESMF_SL_LIBOPTS  += -shared
-
-############################################################
-# Shared object options
-#
-ESMF_SO_F90COMPILEOPTS  = -fPIC
-ESMF_SO_F90LINKOPTS     = -shared
-ESMF_SO_F90LINKOPTSEXE  = -Wl,-export-dynamic
-ESMF_SO_CXXCOMPILEOPTS  = -fPIC
-ESMF_SO_CXXLINKOPTS     = -shared
-ESMF_SO_CXXLINKOPTSEXE  = -Wl,-export-dynamic
+ESMF_SL_LIBOPTS  +=  -dynamiclib
+ESMF_SL_LIBLIBS  += $(ESMF_F90LINKPATHS) $(ESMF_F90LINKLIBS) $(ESMF_CXXLINKPATHS) $(ESMF_CXXLINKLIBS)
