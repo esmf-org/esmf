@@ -1,0 +1,77 @@
+%
+ \section{MPI Module Interface}
+%
+\subsection{Portable Interface to the MPI "mpif.h"}
+%
+The purpose of \verb"m_mpif" module is to provide a portable
+interface of \verb"mpif.h" with different MPI implementation.
+By combining module \verb"m_mpif" and \verb"m_mpif90", it may be
+possible to build a Fortran 90 MPI binding module graduately.
+
+Although it is possible to use \verb'include "mpif.h"' directly
+in individual modules, it has several problems:
+\begin{itemize}
+\item It may conflict with either the source code of a {\sl fixed}
+      format or the code of a {\sl free} format;
+\item It does not provide the protection and the safety of using
+      these variables as what a \verb"MODULE" would provide.
+\end{itemize}
+
+\begin{verbatim}
+EXAMPLE 1:
+  Some of the m_mpif variable types (and the corresponding mpif.h ones)
+  are
+
+    MP_INTEGER          => MPI_INTEGER
+    MP_REAL             => MPI_REAL
+    MP_DOUBLE_PRECISION => MPI_DOUBLE_PRECISION
+    MP_LOGICAL          => MPI_LOGICAL
+    MP_CHARACTER        => MPI_CHARACTER
+    MP_REAL4            => MPI_REAL4
+    MP_REAL8            => MPI_REAL8
+\end{verbatim}
+
+More information may be found in the module \verb"m_mpif90".
+
+\subsection{Fortran 90 Style MPI Module Interface}
+ %
+{\tt m\_mpif90} is a Fortran 90 style MPI module interface.
+By wrapping \verb'include "mpif.h"' into a module, \verb"m_mpif()"
+provides an easy way to
+%
+\begin{itemize}
+\item Avoid the problem with {\sl fixed} or {\sl free} formatted
+      Fortran 90 files;
+\item Provide protections with only a limited set of \verb"PUBLIC"
+      variables; and
+\item Be extended to a MPI Fortran 90 binding.
+\end{itemize}
+%
+Subroutines defined in this module are named with the prefix
+{\sl MP\_} corresponding to the {\sl MPI\_} prefix used in MPI
+for similar subroutines.
+{\tt m\_mpif90} introduces new functions that for instance return
+the MPI datatype of a variable.
+%
+\begin{verbatim}
+EXAMPLE 2:
+  Code:
+      use m_mpif90,only : MP_init
+      use m_mpif90,only : MP_finalize
+      use m_mpif90,only : MP_comm_world
+      use m_mpif90,only : MP_comm_rank
+
+      integer :: ier
+      integer :: myID               ! Processor ID
+      integer,parameter :: ROOT=0   ! ID of the master processor
+      
+      call MP_init(ier)
+      call MP_comm_rank(MP_comm_world,myID,ier)
+      ...
+      if (myID==ROOT) then
+      ...
+      endif
+      ...
+      call MP_finalize(ier)
+\end{verbatim}
+%

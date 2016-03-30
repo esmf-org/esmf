@@ -4332,8 +4332,10 @@ end function MAPL_AddChildFromGC
     character(len=ESMF_MAXSTR), parameter :: IAm = "MAPL_GenericGridDestroy"
     integer :: STATUS
 
+    print *, "Enter "//IAm
     if (associated(GRID%LATS)) deallocate(GRID%LATS)
     if (associated(GRID%LONS)) deallocate(GRID%LONS)
+    print *, "Exit "//IAm
 
     RETURN_(ESMF_SUCCESS)
   end subroutine MAPL_GenericGridDestroy
@@ -8341,8 +8343,9 @@ subroutine MAPL_ReadForcingX(MPL,NAME,DATAFILE,CURRTIME,  &
     integer(kind=MPI_OFFSET_KIND)         :: offset
     logical       :: AmReader
     type(ArrDescr):: ArrDes
-    integer(kind=MPI_OFFSET_KIND)         :: _FTELL
-    external      :: _FTELL
+! RSD commented out below - is external really needed?
+!    integer(kind=MPI_OFFSET_KIND)         :: _FTELL
+!    external      :: _FTELL
     type(ESMF_Grid) :: TILEGRID
     integer       :: COUNTS(2)
   

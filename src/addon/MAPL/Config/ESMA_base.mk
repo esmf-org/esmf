@@ -103,7 +103,7 @@ RM          = /bin/rm -f
 SED         = /bin/sed                       
 TAR         = /bin/tar
 GZIP        = gzip -v
-BOPT        = O
+BOPT        = g
 M4          = m4
 FDP         = $(ESMABIN)/fdp
 FDP_FLAGS   = -v
@@ -318,6 +318,7 @@ LDFLAGS = $(LDPATH) $(USER_LDFLAGS)
 .SUFFIXES: .P90 .m4 .F90 .f90 .F .f .c .o .H .h .d .tex .dvi .pdf 
 
 .c.o:
+	echo "USING C COMPILER: $(CC)"
 	$(ESMA_TIMER) $(CC) -c $(CFLAGS) $<
 
 .C.o:
@@ -336,10 +337,11 @@ LDFLAGS = $(LDPATH) $(USER_LDFLAGS)
 	$(ESMA_TIMER) $(FC) -c $(F90FLAGS) $<
 
 .P90.o:
-	@sed -e "/\!.*'/s/'//g" $< | $(CPP) -C -ansi -DANSI_CPP $(FPPFLAGS) > $*___.s90
-	@sed -e "s/ ## //g" -e '/IAm=#/ s/\(^.*IAm=\)\(# \)\(.*\)/\1"\3"/g' $*___.s90 > $*___.f90
+	#sed -e "/\!.*'/s/'//g" $< | $(CPP) -C -ansi -DANSI_CPP $(FPPFLAGS) > $*___.s90
+	sed -e "/\!.*'/s/'//g" $< | $(CPP) -ansi -DANSI_CPP $(FPPFLAGS) > $*___.s90
+	sed -e "s/ ## //g" -e '/IAm=#/ s/\(^.*IAm=\)\(# \)\(.*\)/\1"\3"/g' $*___.s90 > $*___.f90
 	$(ESMA_TIMER) $(FC) -c $(f90FLAGS) -o $*.o $*___.f90
-	@$(RM) $*___.s90
+	$(RM) $*___.s90
 
 .H.h:
 	$(FPP) $(FPPFLAGS) $*.H > $*.h

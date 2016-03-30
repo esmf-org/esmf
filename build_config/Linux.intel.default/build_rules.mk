@@ -249,8 +249,3 @@ ESMF_SO_F90LINKOPTSEXE  = -Wl,-export-dynamic
 ESMF_SO_CXXCOMPILEOPTS  = -fPIC
 ESMF_SO_CXXLINKOPTS     = -shared
 ESMF_SO_CXXLINKOPTSEXE  = -Wl,-export-dynamic
-
-############################################################
-# 3rd party code dependency: PIO
-#
-#TODO: activate this once PIO support is stable: ESMF_PIODEFAULT = internal
