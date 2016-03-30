@@ -208,6 +208,46 @@ extern "C" {
   }
     
 #undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_setusernegroutine"
+  void FTN_X(c_esmc_setusernegroutine)(void *ptr, void (*func)(), int *rc){
+    int localrc = ESMC_RC_NOT_IMPL;
+    if (rc) *rc = ESMC_RC_NOT_IMPL;
+    ESMCI::FTable::setUserNegRoutine(ptr, func, &localrc);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      rc)) return;
+    // return successfully
+    if (rc) *rc = ESMF_SUCCESS;
+  }
+  
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_callusernegroutine"
+  void FTN_X(c_esmc_callusernegroutine)(void *ptr, int *userRc, int *rc){
+    int localrc = ESMC_RC_NOT_IMPL;
+    if (rc) *rc = ESMC_RC_NOT_IMPL;
+    // Check input
+    if ((ptr == ESMC_NULL_POINTER) || ((*(void**)ptr) == ESMC_NULL_POINTER)){
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD, "null pointer found", 
+        ESMC_CONTEXT, rc);
+      return;
+    }
+    
+    ESMCI::FTable *tabptr = **(ESMCI::FTable***)ptr;
+
+    std::string logMsg("WARNING: No user negotiation routine found");
+    int i = (tabptr)->getEntry(ESMCI::FTable::methodString(ESMCI::METHOD_USERNEGROUTINE), &localrc);
+    ESMC_LogDefault.Write(logMsg.c_str(), ESMC_LOGMSG_INFO, ESMC_CONTEXT);
+    
+    if(i != -1){
+      // Call into user code callback function - user negotiation routine
+      localrc = (tabptr)->callVFuncPtr(ESMCI::FTable::methodString(ESMCI::METHOD_USERNEGROUTINE), NULL, userRc);
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+        rc)) return;
+    }
+    // return successfully
+    if (rc) *rc = ESMF_SUCCESS;
+  }
+
+#undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_setvm"
   void FTN_X(c_esmc_setvm)(void *ptr, void (*func)(), int *userRc, int *rc){
     int localrc = ESMC_RC_NOT_IMPL;
@@ -1234,6 +1274,39 @@ void FTable::setServices(void *ptr, void (*func)(), int *userRc, int *rc) {
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::Ftable::setUserNegRoutine"
+void FTable::setUserNegRoutine(void *ptr, void (*func)(), int *rc) {
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;   // final return code
+  
+  // Check input
+  if ((ptr == ESMC_NULL_POINTER) || ((*(void**)ptr) == ESMC_NULL_POINTER)){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD, "null pointer found", 
+      ESMC_CONTEXT, rc);
+    return;
+  }
+  
+  // TODO: shouldn't need to expand the table here - should be done inside
+  // FTable code on demand.
+  ESMCI::FTable *tabptr = **(ESMCI::FTable***)ptr;
+  localrc = (tabptr)->extend(32, 2); // room for 32 funcs, 2 data
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+    rc)) return;
+
+  // Set callback function and arguments
+  ESMCI::Comp *f90comp = (ESMCI::Comp *)ptr;
+  localrc = (tabptr)->setFuncPtr(methodString(METHOD_USERNEGROUTINE),
+    (void *)func, f90comp);
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+    rc)) return;
+
+  // return successfully
+  if (rc) *rc = ESMF_SUCCESS;
+}
+//-----------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::Ftable::setVM"
 void FTable::setVM(void *ptr, void (*func)(), int *userRc, int *rc) {
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
@@ -2177,6 +2250,9 @@ char const *FTable::methodString(enum ESMCI::method method){
   case ESMCI::METHOD_SETSERVICES:
     return "Register";
     break;
+  case ESMCI::METHOD_USERNEGROUTINE:
+    return "UserNegRoutine";
+    break;
   case ESMCI::METHOD_WAIT:
     return "Wait";
     break;
@@ -2212,6 +2288,8 @@ enum method FTable::methodFromString(char const *methodString){
     return ESMCI::METHOD_READRESTART;
   else if (!strncmp(methodString, "Register", strlen("Register")))
     return ESMCI::METHOD_SETSERVICES;
+  else if (!strncmp(methodString, "UserNegRoutine", strlen("UserNegRoutine")))
+    return ESMCI::METHOD_USERNEGROUTINE;
   return ESMCI::METHOD_NONE;
 }
 //==============================================================================

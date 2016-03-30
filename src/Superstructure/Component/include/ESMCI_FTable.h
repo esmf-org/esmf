@@ -125,6 +125,7 @@ class FTable {
     int setDataPtr(char const *name, void **data, enum dtype dtype);
     // func
     static void setServices(void *ptr, void (*func)(), int *userRc, int *rc);
+    static void setUserNegRoutine(void *ptr, void (*func)(), int *rc);
     static void setVM(void *ptr, void (*func)(), int *userRc, int *rc);
     int getEntry(char const *name, int *rc);
     int setFuncPtr(char const *name, void *func, enum ftype ftype);
