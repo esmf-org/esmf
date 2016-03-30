@@ -219,15 +219,15 @@ program ESMF_AttributeJSONUTest
             &      "units": "C",&
             &      "connected": "false",&
             &      "timestamp": "20091201000000",&
-            &      "transferOfferGeomObject": "will provide"&
-            &    }, {&
+            &      "transferOfferGeomObject": "will provide"' // &
+            &'    }, {&
             &      "name": "ssaf",&
             &      "standard_name": "sea_ice_area_fraction",&
             &      "units": "C",&
             &      "connected": "false",&
             &      "timestamp": "20091201000000",&
-            &      "transferOfferGeomObject": "will provide"&
-            &    }]&
+            &      "transferOfferGeomObject": "will provide"' // &
+            &'    }]&
             &  }&
             &}'
 
