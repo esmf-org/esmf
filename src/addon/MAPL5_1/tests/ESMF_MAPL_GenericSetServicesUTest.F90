@@ -84,15 +84,15 @@ implicit none
   if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=__FILE__)) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
-  call ESMF_TimeSet(startTime, yy=2016, rc=rc)
+  call ESMF_TimeSet(startTime, yy=2016, mm=1, dd=1, rc=rc)
   if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=__FILE__)) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
-  call ESMF_TimeSet(stopTime, yy=2017, rc=rc)
+  call ESMF_TimeSet(stopTime, yy=2016, mm=1, dd=2, rc=rc)
   if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=__FILE__)) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
-  call ESMF_TimeIntervalSet(timeStep, s=3600*24, rc=rc)
+  call ESMF_TimeIntervalSet(timeStep, s=1800, rc=rc)
   if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=__FILE__)) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   
