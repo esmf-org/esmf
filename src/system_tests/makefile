@@ -9,6 +9,7 @@ include $(ESMF_DIR)/makefile
 # arranged roughly in order of complexity
 DIRS      = ESMF_CompCreate \
             ESMF_CompCreateWithResNeg \
+            ESMF_CompCreateTwoWithResNeg \
             ESMF_CompFortranAndC \
             ESMF_RecursiveComponent \
             ESMF_ArrayScatterGather \
