@@ -10,6 +10,10 @@
 //
 //==============================================================================
 
+#include <cstring>
+#include <cstdio>
+using namespace std;
+
 // ESMF header
 #include "ESMC.h"
 
