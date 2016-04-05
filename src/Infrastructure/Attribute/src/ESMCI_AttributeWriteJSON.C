@@ -80,10 +80,20 @@ namespace ESMCI {
       if (attrRoot == ESMF_FALSE) attr = &(attrBase->root);
       attr->streamJSONiter(os, 2);
 
+      // for flat lists, remove comma from last object
+      // - better yet would be to return a list of name/value pairs from an
+      //   iterator function and then assemble output in a flat function
       // TODO: this is hacky
-      // for flat lists, remove comma from last object, json is silly..
-      if (attr->linkList.size() == 0)
-        os.seekp(-1,os.cur);
+      // - removed the seekp call in favor of this other sequence of calls
+      // to appease the older pgi compilers
+      if (attr->linkList.size() == 0) {
+        //os.seekp(-1,os.cur);
+        string temp = os.str();
+        temp.erase(temp.end()-1);
+        os.str("");
+        os.clear();
+        os << temp;
+      }
 
       // close the JSON
       os << "  }}";
@@ -175,9 +185,18 @@ namespace ESMCI {
                                           &localrc))
           return localrc;
 
+        // remove comma from last object
+        // - better yet would be to return a list of name/value pairs from an
+        //   iterator function and then assemble output in a flat function
         // TODO: this is hacky
-        // remove comma from last object, json is silly..
-        os.seekp(-1,os.cur);
+        // - removed the seekp call in favor of this other sequence of calls
+        // to appease the older pgi compilers
+        //os.seekp(-1,os.cur);
+        string temp = os.str();
+        temp.erase(temp.end()-1);
+        os.str("");
+        os.clear();
+        os << temp;
 
         // only close arrays once
         if (k<linkList.size()-1)
