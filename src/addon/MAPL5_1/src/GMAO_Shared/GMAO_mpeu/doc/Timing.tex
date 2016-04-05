@@ -1,0 +1,427 @@
+\section{Timing}
+ %
+The module {\tt m\_zeit} is a multi-timer of process times and wall-clock 
+times. For a particular subroutine, this module produces the wall-clock 
+time per PE or for all the PEs. The timing data are automatically written 
+at the end of the run in the standard output file.
+There are three main procedures:
+
+\noindent {\tt zeit\_ci:} Pushes a new name to the timer. 
+It receives as argument the name of the subroutine to be measured.
+
+\noindent {\tt zeit\_co:} Pops the current name on the timer. It has a
+variable that returns (1) the NET timing data charged under the account 
+name only, and (2) the SCOPE timing data since the last zeit\_ci() call with 
+the same account name and at the out most level.
+Its argument is the same as zeit\_ci().
+
+\noindent {\tt zeit\_flush:} Prints the timing data (per PE) to the logical 
+unit provided as argument. This is called once at the end of the code.
+zeit\_flush has two integer arguments. The first one for the logical 
+unit for the output, and the second one (optional) describes the type of
+output to be presented.
+
+\noindent {\tt zeit\_allflush:} Prints all PE timing.
+It has four integers as arguments.
+The first two are the MPI communicator and the PE number of the master
+processor respectives and the last two are the same as in zeit\_flush.
+
+\newcommand{\tb}{\overline{t}}
+
+We can obtain a summary (obtained by calling {\tt zeit\_allflush:}) of the 
+timing data of all PEs with quantified load balancing measures:
+%
+\begin{eqnarray*}
+x &=& \frac{\max(t) - \tb}{N\tb}           \times 100\% \\
+i &=& \frac{\max(t) - \tb}{\max(t)}        \times 100\% \\
+r &=& \frac{1}{N\tb} \sum^{t\tb}{(t-\tb)} \times 100\%
+\end{eqnarray*}
+%
+where
+%
+\begin{center}
+\begin{tabular}{rl}
+$t$: & time by any process element			\\
+$\tb$: & mean time by all process elements		\\
+$x$: & the ma{\bf x}imum percentage load deviation	\\
+$i$: & percentage {\bf i}dle process-time or load {\bf i}mbalance \\
+$r$: & percentage {\bf r}elocatable loads		\\
+$N$: & {\bf n}umber of process elements
+\end{tabular}
+\end{center}
+ 
+\begin{verbatim}
+EXAMPLE 1:
+  Assume that we want to record the timing numbers from a code running
+  on three processors. Each processor (PE) calls its own subroutine:
+
+           PE 0 calls subA
+           PE 1 calls subB
+           PE 2 calls subC
+
+  We measure the time spent by each PE while executing its own section.
+  The ouput per PE is obtained from the call of zeit_flush. In addition,
+  PE 0 gives a summary of the timing results on all the PEs (call of
+  zeit_allflush). 
+ 
+  Code:
+
+      program runzeit
+      use m_mpout,only : mpout
+      use m_mpout,only : mpout_open
+      use m_mpout,only : mpout_log
+      use m_mpout,only : mpout_ison
+      use m_mpout,only : mpout_close
+
+      use m_mpif90,only : MP_init
+      use m_mpif90,only : MP_finalize
+      use m_mpif90,only : MP_comm_world
+      use m_mpif90,only : MP_comm_rank
+
+      use m_zeit,only : zeit_ci
+      use m_zeit,only : zeit_co
+      use m_zeit,only : zeit_flush
+      use m_zeit,only : zeit_allflush
+      use m_zeit,only : MWTIME          ! MPI_Wtime() wall-clock time
+      use m_zeit,only : PUTIME          ! times() process user time
+      use m_zeit,only : PSTIME          ! times() process system time
+
+      use m_die ,only : MP_die
+      implicit none
+      character(len=*),parameter :: myname='runzeit'
+      integer :: ier,myID
+
+      call MP_init(ier)
+      if(ier/=0) call MP_die(myname,'MP_init()',ier)
+
+      call zeit_ci(myname)
+
+      call MP_comm_rank(MP_comm_world,myID,ier)
+      if(ier/=0) call MP_die(myname,'MP_comm_rank()',ier)
+
+      select case(mod(myID,3))
+      case(0)
+        call zeit_ci('subA')
+        call subA(mpout)
+        call zeit_co('subA')
+      case(1)
+        call zeit_ci('subB')
+        call subB(mpout)
+        call zeit_co('subB')
+      case(2)
+        call zeit_ci('subC')
+        call subC(mpout)
+        call zeit_co('subC')
+      end select
+
+      call zeit_co(myname)
+
+      call mpout_open(pfix='zeit',mask=0)
+
+      call zeit_flush(lu=mpout,umask=MWTIME+PUTIME+PSTIME)
+      call zeit_allflush(comm=MP_comm_world,root=0,lu=mpout,        &
+         umask=MWTIME+PUTIME+PSTIME)
+
+      call mpout_close()
+
+      call MP_finalize(ier)
+      if(ier/=0) call MP_die(myname,'MP_init()',ier)
+
+      write(mpout,'(2a)') myname,': normal termination'
+      stop
+      end program runzeit
+
+  Output:
+
+    *****Timing on PE 0*****
+
+    Summary from zeit_flush()
+
+    ------------------------------------------------------------------------
+    [MWTIME]     counts period    NET    m:s      %    SCOPE    m:s      %
+    ------------------------------------------------------------------------
+    ..zeit.         1s  0/   2    0.0   00:00  57.9+     0.0   00:00 100.0+
+    runzeit          1    0.0     0.0   00:00   0.7%     0.0   00:00  42.1%
+    subA             1    0.0     0.0   00:00  41.4%     0.0   00:00  41.4%
+    ------------------------------------------------------------------------
+    [PUTIME]     counts period    NET    m:s      %    SCOPE    m:s      %
+    ------------------------------------------------------------------------
+    ..zeit.         1s  0/   2    0.0   00:00   0.0+     0.0   00:00   0.0+
+    runzeit          1    0.0     0.0   00:00   0.0%     0.0   00:00   0.0%
+    subA             1    0.0     0.0   00:00   0.0%     0.0   00:00   0.0%
+    ------------------------------------------------------------------------
+    [PSTIME]     counts period    NET    m:s      %    SCOPE    m:s      %
+    ------------------------------------------------------------------------
+    ..zeit.         1s  0/   2    0.0   00:00   0.0+     0.0   00:00   0.0+
+    runzeit          1    0.0     0.0   00:00   0.0%     0.0   00:00   0.0%
+    subA             1    0.0     0.0   00:00   0.0%     0.0   00:00   0.0%
+    ------------------------------------------------------------------------
+     
+    Summary from zeit_allflush()
+
+    ------------------------------------------------------------------------
+    [MWTIME]x5    NET avg     max imx x% r% i%  SCP avg     max imx x% r% i%
+    ------------------------------------------------------------------------
+    ..zeit.           0.0     0.0 001  5  7 19      0.0     0.0 001  3  4 13
+    runzeit           0.0     0.0 004  2  6  2      0.0     0.0 000 28 28 58
+    subA              0.0     0.0 000 62 62 75      0.0     0.0 000 62 62 75
+    subB              0.0     0.0 004 35 60 63      0.0     0.0 004 35 60 63
+    subC              0.0     0.0 002 80 80 80      0.0     0.0 002 80 80 80
+    ------------------------------------------------------------------------
+    [PUTIME]x5    NET avg     max imx x% r% i%  SCP avg     max imx x% r% i%
+    ------------------------------------------------------------------------
+    ..zeit.           0.0     0.0 004  5 20 20      0.0     0.0 004  5 20 20
+    runzeit           0.0     0.0 000  0  0  0      0.0     0.0 000  0  0  0
+    subA              0.0     0.0 000  0  0  0      0.0     0.0 000  0  0  0
+    subB              0.0     0.0 000  0  0  0      0.0     0.0 000  0  0  0
+    subC              0.0     0.0 000  0  0  0      0.0     0.0 000  0  0  0
+    ------------------------------------------------------------------------
+    [PSTIME]x5    NET avg     max imx x% r% i%  SCP avg     max imx x% r% i%
+    ------------------------------------------------------------------------
+    ..zeit.           0.0     0.0 002 80 80 80      0.0     0.0 002 80 80 80
+    runzeit           0.0     0.0 000  0  0  0      0.0     0.0 000  0  0  0
+    subA              0.0     0.0 000  0  0  0      0.0     0.0 000  0  0  0
+    subB              0.0     0.0 000  0  0  0      0.0     0.0 000  0  0  0
+    subC              0.0     0.0 000  0  0  0      0.0     0.0 000  0  0  0
+    ------------------------------------------------------------------------
+    
+    *****Timing on PE 1*****
+    
+    ------------------------------------------------------------------------
+    [MWTIME]     counts period    NET    m:s      %    SCOPE    m:s      %
+    ------------------------------------------------------------------------
+    ..zeit.         1s  0/   2    0.0   00:00  85.9+     0.0   00:00 100.0+
+    runzeit          1    0.0     0.0   00:00   0.5%     0.0   00:00  14.1%
+    subB             1    0.0     0.0   00:00  13.5%     0.0   00:00  13.5%
+    ------------------------------------------------------------------------
+    [PUTIME]     counts period    NET    m:s      %    SCOPE    m:s      %
+    ------------------------------------------------------------------------
+    ..zeit.         1s  0/   2    0.0   00:00   0.0+     0.0   00:00   0.0+
+    runzeit          1    0.0     0.0   00:00   0.0%     0.0   00:00   0.0%
+    subB             1    0.0     0.0   00:00   0.0%     0.0   00:00   0.0%
+    ------------------------------------------------------------------------
+    [PSTIME]     counts period    NET    m:s      %    SCOPE    m:s      %
+    ------------------------------------------------------------------------
+    ..zeit.         1s  0/   2    0.0   00:00   0.0+     0.0   00:00   0.0+
+    runzeit          1    0.0     0.0   00:00   0.0%     0.0   00:00   0.0%
+    subB             1    0.0     0.0   00:00   0.0%     0.0   00:00   0.0%
+    ------------------------------------------------------------------------
+
+    *****Timing on PE 2*****
+    
+    ------------------------------------------------------------------------
+    [MWTIME]     counts period    NET    m:s      %    SCOPE    m:s      %
+    ------------------------------------------------------------------------
+    ..zeit.         1s  0/   2    0.0   00:00  83.3+     0.0   00:00 100.0+
+    runzeit          1    0.0     0.0   00:00   1.0%     0.0   00:00  16.7%
+    subC             1    0.0     0.0   00:00  15.7%     0.0   00:00  15.7%
+    ------------------------------------------------------------------------
+    [PUTIME]     counts period    NET    m:s      %    SCOPE    m:s      %
+    ------------------------------------------------------------------------
+    ..zeit.         1s  0/   2    0.0   00:00   0.0+     0.0   00:00   0.0+
+    runzeit          1    0.0     0.0   00:00   0.0%     0.0   00:00   0.0%
+    subC             1    0.0     0.0   00:00   0.0%     0.0   00:00   0.0%
+    ------------------------------------------------------------------------
+    [PSTIME]     counts period    NET    m:s      %    SCOPE    m:s      %
+    ------------------------------------------------------------------------
+    ..zeit.         1s  0/   2    0.0   00:00   0.0+     0.0   00:00   0.0+
+    runzeit          1    0.0     0.0   00:00   0.0%     0.0   00:00   0.0%
+    subC             1    0.0     0.0   00:00   0.0%     0.0   00:00   0.0%
+    ------------------------------------------------------------------------
+\end{verbatim}
+
+\begin{verbatim}
+EXAMPLE 2:
+    Here we present only the timing results obtained by executing 
+    (on 12 PEs) another sample code (not shown). We only show the output 
+    from PE 0 where zeit_flush() and zeit_allflush() are called.
+
+    1) Output of an extented example of zeit_flush():
+
+    ------------------------------------------------------------------------
+    [MWTIME]     counts period    NET    m:s      %    SCOPE    m:s      %
+    ------------------------------------------------------------------------
+    .zeit.         1s  0/   5     0.5   00:00   0.3+   154.5   02:34 100.0+
+    run_             1    0.0     0.0   00:00   0.0%   154.0   02:34  99.7%
+    rootedObs_get    1   46.1    46.1   00:46  29.8%    46.1   00:46  29.8%
+    solve            1    0.5     0.5   00:00   0.3%   104.6   01:45  67.7%
+    rootedAIGrid     1    2.4     2.4   00:02   1.6%    11.9   00:12   7.7%
+    AIGrid_distr_3d  1    9.5     9.5   00:09   6.1%     9.5   00:09   6.1%
+    AE_solve         1   31.3    31.3   00:31  20.3%    91.4   01:31  59.2%
+    distribute_ob    1    2.7     2.7   00:03   1.8%     2.7   00:03   1.8%
+    distribute_ai    1    3.2     3.2   00:03   2.1%     3.2   00:03   2.1%
+    CGSolver_solve   1   18.0    18.0   00:18  11.6%    46.5   00:47  30.1%
+    localSolve_      9    0.2     2.2   00:02   1.4%     2.2   00:02   1.4%
+    sMatxU_agat     11    0.2     2.5   00:03   1.6%     2.5   00:03   1.6%
+    sMatxUxpy       11    0.0     0.0   00:00   0.0%     0.0   00:00   0.0%
+    sMatxU_rscat    11    0.2     2.0   00:02   1.3%     2.0   00:02   1.3%
+    sMatxO_agat     11    0.2     2.1   00:02   1.4%     2.1   00:02   1.4%
+    sMatxOxpy       11    0.0     0.0   00:00   0.0%     0.0   00:00   0.0%
+    sMatxO_rscat    11    0.2     2.0   00:02   1.3%     2.0   00:02   1.3%
+    sMatxF_agat     33    0.2     5.7   00:06   3.7%     5.7   00:06   3.7%
+    sMatxFxpy       33    0.1     4.0   00:04   2.6%     4.0   00:04   2.6%
+    sMatxF_rscat    33    0.2     8.0   00:08   5.2%     8.0   00:08   5.2%
+    FcstErrCovMatx_Cx
+                     1    0.4     0.4   00:00   0.3%     7.7   00:08   5.0%
+    rMatxF_agat      3    0.1     0.3   00:00   0.2%     0.3   00:00   0.2%
+    rMatxFxpy        3    1.1     3.3   00:03   2.1%     3.3   00:03   2.1%
+    rMatxF_rscat     3    1.2     3.7   00:04   2.4%     3.7   00:04   2.4%
+    rootedAIGrid_intp
+                     1    0.8     0.8   00:01   0.5%     0.8   00:01   0.5%
+    wGrADS           1    3.4     3.4   00:03   2.2%     3.4   00:03   2.2%
+    ------------------------------------------------------------------------
+    [PUTIME]     counts period    NET    m:s      %    SCOPE    m:s      %
+    ------------------------------------------------------------------------
+    .zeit.         1s  0/   5     0.0   00:00   0.0+    80.5   01:20 100.0+
+    run_             1    0.0     0.0   00:00   0.0%    80.4   01:20 100.0%
+    rootedObs_get    1   23.0    23.0   00:23  28.6%    23.0   00:23  28.6%
+    solve            1    0.1     0.1   00:00   0.1%    57.4   00:57  71.4%
+    rootedAIGrid     1    0.8     0.8   00:01   1.0%     6.3   00:06   7.8%
+    AIGrid_distr_3d  1    5.4     5.4   00:05   6.8%     5.4   00:05   6.8%
+    AE_solve         1   16.5    16.5   00:16  20.5%    50.5   00:51  62.8%
+    distribute_ob    1    1.5     1.5   00:02   1.9%     1.5   00:02   1.9%
+    distribute_ai    1    1.8     1.8   00:02   2.3%     1.8   00:02   2.3%
+    CGSolver_solve   1   10.5    10.5   00:10  13.1%    26.2   00:26  32.6%
+    localSolve_      9    0.1     1.1   00:01   1.4%     1.1   00:01   1.4%
+    sMatxU_agat     11    0.1     1.3   00:01   1.7%     1.3   00:01   1.7%
+    sMatxUxpy       11    0.0     0.0   00:00   0.0%     0.0   00:00   0.0%
+    sMatxU_rscat    11    0.1     1.3   00:01   1.6%     1.3   00:01   1.6%
+    sMatxO_agat     11    0.1     1.0   00:01   1.2%     1.0   00:01   1.2%
+    sMatxOxpy       11    0.0     0.0   00:00   0.0%     0.0   00:00   0.0%
+    sMatxO_rscat    11    0.1     1.1   00:01   1.3%     1.1   00:01   1.3%
+    sMatxF_agat     33    0.1     3.4   00:03   4.3%     3.4   00:03   4.3%
+    sMatxFxpy       33    0.1     2.3   00:02   2.8%     2.3   00:02   2.8%
+    sMatxF_rscat    33    0.1     4.2   00:04   5.2%     4.2   00:04   5.2%
+    FcstErrCovMatx_Cx
+                     1    0.2     0.2   00:00   0.3%     4.5   00:05   5.6%
+    rMatxF_agat      3    0.1     0.2   00:00   0.2%     0.2   00:00   0.2%
+    rMatxFxpy        3    0.6     1.9   00:02   2.3%     1.9   00:02   2.3%
+    rMatxF_rscat     3    0.8     2.3   00:02   2.8%     2.3   00:02   2.8%
+    rootedAIGrid_intp
+                     1    0.5     0.5   00:01   0.7%     0.5   00:01   0.7%
+    wGrADS           1    0.0     0.0   00:00   0.0%     0.0   00:00   0.0%
+    ------------------------------------------------------------------------
+    [PSTIME]     counts period    NET    m:s      %    SCOPE    m:s      %
+    ------------------------------------------------------------------------
+    .zeit.         1s  0/   5     0.0   00:00   0.8+     1.2   00:01 100.0+
+    run_             1    0.0     0.0   00:00   0.8%     1.2   00:01  99.2%
+    rootedObs_get    1    0.3     0.3   00:00  21.0%     0.3   00:00  21.0%
+    solve            1    0.0     0.0   00:00   0.0%     0.9   00:01  73.9%
+    rootedAIGrid     1    0.1     0.1   00:00   9.2%     0.3   00:00  26.1%
+    AIGrid_distr_3d  1    0.2     0.2   00:00  16.8%     0.2   00:00  16.8%
+    AE_solve         1    0.4     0.4   00:00  33.6%     0.5   00:01  44.5%
+    distribute_ob    1    0.0     0.0   00:00   0.0%     0.0   00:00   0.0%
+    distribute_ai    1    0.1     0.1   00:00   5.9%     0.1   00:00   5.9%
+    CGSolver_solve   1    0.0     0.0   00:00   0.0%     0.0   00:00   2.5%
+    localSolve_      9    0.0     0.0   00:00   0.8%     0.0   00:00   0.8%
+    sMatxU_agat     11    0.0     0.0   00:00   0.0%     0.0   00:00   0.0%
+    sMatxUxpy       11    0.0     0.0   00:00   0.0%     0.0   00:00   0.0%
+    sMatxU_rscat    11    0.0     0.0   00:00   0.0%     0.0   00:00   0.0%
+    sMatxO_agat     11    0.0     0.0   00:00   0.0%     0.0   00:00   0.0%
+    sMatxOxpy       11    0.0     0.0   00:00   0.0%     0.0   00:00   0.0%
+    sMatxO_rscat    11    0.0     0.0   00:00   0.0%     0.0   00:00   0.0%
+    sMatxF_agat     33    0.0     0.0   00:00   0.0%     0.0   00:00   0.0%
+    sMatxFxpy       33    0.0     0.0   00:00   1.7%     0.0   00:00   1.7%
+    sMatxF_rscat    33    0.0     0.0   00:00   0.0%     0.0   00:00   0.0%
+    FcstErrCovMatx_Cx
+                     1    0.0     0.0   00:00   0.0%     0.0   00:00   2.5%
+    rMatxF_agat      3    0.0     0.0   00:00   0.0%     0.0   00:00   0.0%
+    rMatxFxpy        3    0.0     0.0   00:00   0.0%     0.0   00:00   0.0%
+    rMatxF_rscat     3    0.0     0.0   00:00   2.5%     0.0   00:00   2.5%
+    rootedAIGrid_intp
+                     1    0.0     0.0   00:00   3.4%     0.0   00:00   3.4%
+    wGrADS           1    0.0     0.0   00:00   3.4%     0.0   00:00   3.4%
+    ------------------------------------------------------------------------
+    
+    2) Output of an extented example of 12 PE zeit_allflush():
+   
+    ------------------------------------------------------------------------
+    [MWTIME]x12   NET avg     max imx x% r% i%  SCP avg     max imx x% r% i%
+    ------------------------------------------------------------------------
+    .zeit.            4.9     5.4 006  1  7  9    155.4   155.5 008  0  0  0
+    run_              0.0     0.0 002 40 55 83    150.5   154.0 000  0  0  2
+    rootedObs_get    46.6    46.8 008  0  0  0     46.6    46.8 008  0  0  0
+    solve             0.1     0.5 000 32 42 79    103.6   104.6 000  0  0  1
+    rootedAIGrid      1.0     2.4 000 13 13 60     11.4    11.9 000  0  0  4
+    AIGrid_distr_3d  10.5    10.7 002  0  1  2     10.5    10.7 002  0  1  2
+    AE_solve         31.8    32.4 008  0  0  2     91.9    92.2 003  0  0  0
+    distribute_ob     2.6     2.7 000  0  1  4      2.6     2.7 000  0  1  4
+    distribute_ai     3.1     3.3 006  1  1  6      3.1     3.3 006  1  1  6
+    CGSolver_solve   17.7    21.4 007  2  6 17     46.6    46.8 006  0  0  0
+    localSolve_       2.8     8.9 00B 18 34 68      2.8     8.9 00B 18 34 68
+    sMatxU_agat       2.2     2.6 003  1  4 13      2.2     2.6 003  1  4 13
+    sMatxUxpy         0.0     0.1 002 17 38 67      0.0     0.1 002 17 38 67
+    sMatxU_rscat      2.0     2.3 009  1  3 12      2.0     2.3 009  1  3 12
+    sMatxO_agat       2.1     2.5 003  2  4 17      2.1     2.5 003  2  4 17
+    sMatxOxpy         0.0     0.0 003  2 14 21      0.0     0.0 003  2 14 21
+    sMatxO_rscat      2.0     2.6 004  2  4 22      2.0     2.6 004  2  4 22
+    sMatxF_agat       5.7     6.8 00B  2  4 16      5.7     6.8 00B  2  4 16
+    sMatxFxpy         3.2     4.0 000  2  7 20      3.2     4.0 000  2  7 20
+    sMatxF_rscat      8.8    10.5 001  2  3 16      8.8    10.5 001  2  3 16
+    FcstErrCovMatx_Cx 0.3     0.4 00B  5 13 39      7.8     7.9 006  0  0  2
+    rMatxF_agat       0.7     1.0 007  3 12 28      0.7     1.0 007  3 12 28
+    rMatxFxpy         3.3     3.8 006  1  4 14      3.3     3.8 006  1  4 14
+    rMatxF_rscat      3.5     4.0 00A  1  4 12      3.5     4.0 00A  1  4 12
+    rootedAIGrid_intp 0.2     0.8 000 34 34 80      0.2     0.8 000 34 34 80
+    wGrADS            0.3     3.4 000 92 92 92      0.3     3.4 000 92 92 92
+    ------------------------------------------------------------------------
+    [PUTIME]x12   NET avg     max imx x% r% i%  SCP avg     max imx x% r% i%
+    ------------------------------------------------------------------------
+    .zeit.            2.7     3.2 009  2  8 17     85.6    86.5 002  0  1  1
+    run_              0.0     0.0 000  0  0  0     82.9    83.5 007  0  0  1
+    rootedObs_get
+                     26.5    27.0 00B  0  1  2     26.5    27.0 00B  0  1  2
+    solve             0.0     0.1 000 50 50 86     56.4    57.4 000  0  0  2
+    rootedAIGrid      0.5     0.8 000  5  7 36      4.8     6.3 000  3  3 24
+    AIGrid_distr_3d   4.2     5.4 000  2  3 22      4.2     5.4 000  2  3 22
+    AE_solve         17.4    17.7 005  0  1  2     51.6    52.0 009  0  0  1
+    distribute_ob     1.5     1.6 002  1  2  8      1.5     1.6 002  1  2  8
+    distribute_ai     1.7     1.8 000  1  2  8      1.7     1.8 000  1  2  8
+    CGSolver_solve   10.0    12.4 007  2  6 19     26.5    26.8 002  0  0  1
+    localSolve_       1.6     4.8 00B 17 33 67      1.6     4.8 00B 17 33 67
+    sMatxU_agat       1.3     1.4 003  1  4 11      1.3     1.4 003  1  4 11
+    sMatxUxpy         0.0     0.1 002 11 39 57      0.0     0.1 002 11 39 57
+    sMatxU_rscat      1.1     1.3 00A  1  5 14      1.1     1.3 00A  1  5 14
+    sMatxO_agat       1.2     1.4 00B  1  4 15      1.2     1.4 00B  1  4 15
+    sMatxOxpy         0.0     0.0 00A 92 92 92      0.0     0.0 00A 92 92 92
+    sMatxO_rscat      1.2     1.4 004  1  4 13      1.2     1.4 004  1  4 13
+    sMatxF_agat       3.3     4.1 00B  2  4 19      3.3     4.1 00B  2  4 19
+    sMatxFxpy         2.0     2.5 009  2  7 19      2.0     2.5 009  2  7 19
+    sMatxF_rscat      4.8     5.9 001  2  4 19      4.8     5.9 001  2  4 19
+    FcstErrCovMatx_Cx 0.2     0.3 00B  2  6 19      4.4     4.6 003  0  1  4
+    rMatxF_agat       0.4     0.7 007  5 14 37      0.4     0.7 007  5 14 37
+    rMatxFxpy         1.8     2.0 006  1  2  6      1.8     2.0 006  1  2  6
+    rMatxF_rscat      2.0     2.3 000  1  3 13      2.0     2.3 000  1  3 13
+    rootedAIGrid_intp 0.1     0.5 000 37 41 82      0.1     0.5 000 37 41 82
+    wGrADS            0.0     0.0 000 92 92 92      0.0     0.0 000 92 92 92
+    ------------------------------------------------------------------------
+    [PSTIME]x12   NET avg     max imx x% r% i%  SCP avg     max imx x% r% i%
+    ------------------------------------------------------------------------
+    .zeit.            0.0     0.0 00A 14 33 63      2.0     2.4 00A  2  5 16
+    run_              0.0     0.0 00B 25 75 75      2.0     2.4 00A  2  5 16
+    rootedObs_get     0.2     0.3 000  4 11 35      0.2     0.3 000  4 11 35
+    solve             0.0     0.0 000  0  0  0      1.8     2.3 00A  2  6 20
+    rootedAIGrid      0.0     0.1 000 92 92 92      1.1     1.4 00A  3  9 24
+    AIGrid_distr_3d   1.1     1.4 00A  3 10 25      1.1     1.4 00A  3 10 25
+    AE_solve          0.5     0.6 00B  1  4 15      0.7     0.9 00B  2  5 15
+    distribute_ob     0.0     0.0 006 22 44 73      0.0     0.0 006 22 44 73
+    distribute_ai     0.1     0.1 001  4 10 31      0.1     0.1 001  4 10 31
+    CGSolver_solve    0.0     0.0 00B  8 33 50      0.1     0.1 001  7 22 46
+    localSolve_       0.0     0.1 001 11 33 58      0.0     0.1 001 11 33 58
+    sMatxU_agat       0.0     0.0 005 42 83 83      0.0     0.0 005 42 83 83
+    sMatxUxpy         0.0     0.0 005 42 83 83      0.0     0.0 005 42 83 83
+    sMatxU_rscat      0.0     0.0 006 92 92 92      0.0     0.0 006 92 92 92
+    sMatxO_agat       0.0     0.0 00B 92 92 92      0.0     0.0 00B 92 92 92
+    sMatxOxpy         0.0     0.0 000  0  0  0      0.0     0.0 000  0  0  0
+    sMatxO_rscat      0.0     0.0 002 92 92 92      0.0     0.0 002 92 92 92
+    sMatxF_agat       0.0     0.0 006 42 83 83      0.0     0.0 006 42 83 83
+    sMatxFxpy         0.0     0.0 000 32 67 79      0.0     0.0 000 32 67 79
+    sMatxF_rscat      0.0     0.0 003 25 75 75      0.0     0.0 003 25 75 75
+    FcstErrCovMatx_Cx 0.0     0.0 002 25 67 75      0.0     0.1 002 11 26 56
+    rMatxF_agat       0.0     0.0 002 42 83 83      0.0     0.0 002 42 83 83
+    rMatxFxpy         0.0     0.0 005  8 50 50      0.0     0.0 005  8 50 50
+    rMatxF_rscat      0.0     0.1 004 16 46 65      0.0     0.1 004 16 46 65
+    rootedAIGrid_intp 0.0     0.0 000 92 92 92      0.0     0.0 000 92 92 92
+    wGrADS            0.0     0.0 000 92 92 92      0.0     0.0 000 92 92 92
+    ------------------------------------------------------------------------
+\end{verbatim}

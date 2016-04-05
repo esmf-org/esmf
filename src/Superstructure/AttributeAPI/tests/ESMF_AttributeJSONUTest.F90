@@ -219,15 +219,15 @@ program ESMF_AttributeJSONUTest
             &      "units": "C",&
             &      "connected": "false",&
             &      "timestamp": "20091201000000",&
-            &      "transferOfferGeomObject": "will provide"&
-            &    }, {&
+            &      "transferOfferGeomObject": "will provide"' // &
+            &'    }, {&
             &      "name": "ssaf",&
             &      "standard_name": "sea_ice_area_fraction",&
             &      "units": "C",&
             &      "connected": "false",&
             &      "timestamp": "20091201000000",&
-            &      "transferOfferGeomObject": "will provide"&
-            &    }]&
+            &      "transferOfferGeomObject": "will provide"' // &
+            &'    }]&
             &  }&
             &}'
 
@@ -241,7 +241,8 @@ program ESMF_AttributeJSONUTest
     end do
     passed = i > len (output)
     if (.not. passed) then
-      write(failMsg, *) "JSON string is no longer the same starting at character", i
+      write(failMsg, *) "JSON string mismatch at character", i,  &
+        ' (', ichar (output(i:i)), ' vs', ichar (check(i:i)), ')'
     endif
     call ESMF_Test(passed, name, failMsg, result, ESMF_SRCLINE)
     !-------------------------------------------------------------------------
@@ -294,7 +295,8 @@ program ESMF_AttributeJSONUTest
     end do
     passed = i > len (output)
     if (.not. passed) then
-      write(failMsg, *) "JSON string is no longer the same starting at character", i
+      write(failMsg, *) "JSON string mismatch at character", i,  &
+        ' (', ichar (output(i:i)), ' vs', ichar (check(i:i)), ')'
     endif
     call ESMF_Test(passed, name, failMsg, result, ESMF_SRCLINE)
     !-------------------------------------------------------------------------

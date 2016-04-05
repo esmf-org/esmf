@@ -1,0 +1,89 @@
+\section{Sorting Tool}
+%
+This section presents the modules {\tt m\_MergeSorts} and
+{\tt m\_SortingTools}.
+
+\noindent
+The module {\tt m\_MergeSorts} contains basic sorting procedures, that in
+addition to a couple of standard Fortran 90 statements in the
+array syntex, allows a full range sort or unsort operations.
+The main characteristics of the sorting algorithm used in this
+module are, a) stable, and b) index sorting.
+
+It has two subroutines: {\tt IndexSet} that initializes an array of data
+location indices and {\tt IndexSort} that is stable merge index sorting
+integers, reals and characters.
+%
+\begin{verbatim}
+EXAMPLES 1:
+  Code:
+      use m_MergeSorts,only : IndexSet
+      use m_MergeSorts,only : IndexSort
+      ...
+      integer, intent(in) :: No
+      type(Observations), dimension(No), intent(inout) :: obs
+      integer, dimension(No) :: indx  ! automatic array
+      call IndexSet(No,indx)
+      call IndexSort(No,indx,obs(1:No)%lev,descend=.false.)
+      call IndexSort(No,indx,obs(1:No)%lon,descend=.false.)
+      call IndexSort(No,indx,obs(1:No)%lat,descend=.false.)
+      call IndexSort(No,indx,obs(1:No)%kt, descend=.false.)
+      call IndexSort(No,indx,obs(1:No)%ks, descend=.false.)
+      call IndexSort(No,indx,obs(1:No)%kx, descend=.false.)
+      call IndexSort(No,indx,obs(1:No)%kr, descend=.false.)
+                ! Sorting
+      obs(1:No) = obs( (/ (indx(i),i=1,No) /) )
+      ...
+                ! Unsorting
+      obs( (/ (indx(i),i=1,No) /) ) = obs(1:No)
+\end{verbatim}
+ 
+\noindent
+The module {\tt m\_SortingTools} contains a collection of sorting utilities.  
+The utilities are accessed through three generic interfaces, IndexSet(),
+IndexSort(), and IndexBin().
+
+Note that, a version of IndexBin() for real arguments is not implemented 
+due to the difficulty of comparing two real values as being equal.  
+For example, a bin for real values may be specified as a single number, 
+a range of two numbers, a number with an absolute error-bar, or a number 
+with a relative error-bar.
+ 
+In general, one may have to map both keys(:) and bins(:) to integer indices 
+by the a given rule, then use the integer version of IndexBin() with the 
+two integer index arrays to do the sorting.
+This mapping rule, however, is application dependent.
+ 
+Also note that, in principle, it is possible to use both IndexSort() and 
+IndexBin() in the same sorting task.
+%
+\begin{verbatim}
+EXAMPLES 2:
+  - An example of using IndexSet()/IndexSort() in combination with
+    the convenience of the Fortran 90 array syntex can be found in the
+    prolog of m_MergeSorts.
+  - An example of using IndexSet()/IndexBin(): Copying all "good"
+    data to another array.
+
+  Code:
+      integer :: indx(n)
+      call IndexSet(n,indx)
+      call IndexBin(n,indx,allObs(:)%qcflag,GOOD,ln0=ln_GOOD)
+                ! Copy all "good" data to another array
+      goodObs(1:ln_GOOD)=allObs( indx(1:ln_GOOD) )
+                ! Refill all "good" data back to their original places
+      allObs( indx(1:ln_GOOD) ) = goodObs(1:ln_GOOD)
+
+  - Similarily, multiple keys may be used in an IndexBin() call
+    to selectively sort the data.  The following code will move data
+    with kt = kt_Us,kt_U,kt_Vs,kt_V up to the front:
+
+  Code:
+      call IndexBin(n,indx,allObs(:)%kt,(/kt_Us,kt_U,kt_Vs,kt_V/))
+      allObs(1:n) = allObs( indx(1:n) )
+
+  - Additional applications can also be implemented with other argument 
+    combinations.
+\end{verbatim} 
+%
+

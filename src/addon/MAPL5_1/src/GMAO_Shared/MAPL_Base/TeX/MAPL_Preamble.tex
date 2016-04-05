@@ -1,0 +1,99 @@
+\documentclass[11pt,oneside]{book}
+\usepackage{amsmath}
+\usepackage{epsfig}
+%\usepackage{html}        % specially designed for LaTeX2HTML
+\usepackage{hyperref}
+\usepackage{graphicx}
+\usepackage{longtable}    % nicer tables, spanning across pages
+\usepackage{minitoc}      % partial toc - at the beginning of chapters
+\usepackage{makeidx}      % create index
+\usepackage{listings}     % include source code
+\usepackage{color}
+
+\makeindex
+
+\setcounter{secnumdepth}{5}
+\setcounter{tocdepth}{1}
+
+\definecolor{dkgreen}{rgb}{0,0.3,0}
+\definecolor{gray}{rgb}{0.5,0.5,0.5}
+
+\hypersetup{
+  bookmarks=true,         % show bookmarks bar?
+  pdfstartview={FitH},    % fits the width of the page to the window
+  pdftitle={My title},    % title
+  pdfauthor={Author},     % author
+  pdfcreator={Creator},   % creator of the document
+  colorlinks=true,        % false: boxed links; true: colored links
+  linkcolor=blue,         % color of internal links
+  citecolor=green,        % color of links to bibliography
+  filecolor=magenta,      % color of file links
+  urlcolor=blue           % color of external links
+}
+
+% customizations for listing source code
+\lstset{
+  language=[90]Fortran,
+  basicstyle=\footnotesize,       % font size used for the code
+  numbers=left,                   % where to put the line-numbers
+  numberstyle=\tiny\color{gray},  % the style used for the line-numbers
+  stepnumber=2,                   % step between two line numbers.
+                                  % If 1, every line is numbered
+  numbersep=5pt,                  % how far the line-numbers are from the code
+  commentstyle=\color{dkgreen},   % comment style
+  % title=\lstname                  % show filename
+}
+
+\textheight     8.5in
+\topmargin      -0.75pt
+%\headsep        1cm
+\headheight     0pt
+\textwidth      6in
+\oddsidemargin  0in
+\evensidemargin 0in
+\pagestyle{myheadings}
+\markboth{}{}
+\setlength{\parindent}{0pt}
+ 
+% New commands
+\newcommand{\ggn}{\textsc{Mapl}}
+\newcommand{\bdl}{{\tt ESMF\_Bundle}}
+\newcommand{\fld}{{\tt ESMF\_Field}}
+\newcommand{\stt}{{\tt ESMF\_State}}
+\newcommand{\grd}{{\tt ESMF\_Grid}}
+\newcommand{\loc}{{\tt MAPL\_LocationStream}}
+\newcommand{\ssv}{{\tt SetServices}}
+\newcommand{\egc}{{\tt ESMF\_GridComp}}
+\newcommand{\ecc}{\texttt{ESMF\_CplComp}}
+\newcommand{\ggc}{{\tt MAPL\_GridComp}}
+\newcommand{\gssv}{{\tt MAPL\_GenericSetServices}}
+\newcommand{\gint}{{\tt MAPL\_GenericInitialize}}
+\newcommand{\gfin}{{\tt MAPL\_GenericFinalize}}
+\newcommand{\ptx}{{\tt protex}}
+\newcommand{\im}{\texttt{Import}}
+\newcommand{\IM}{\texttt{IM}}
+\newcommand{\ex}{\texttt{Export}}
+\newcommand{\EX}{\texttt{EX}}
+\newcommand{\gin}{\texttt{Internal}}
+\newcommand{\gIN}{\texttt{IN}}
+\newcommand{\IRF}{\texttt{IRF}}
+
+% New counters
+\newcounter{genct}
+\newcounter{grdct}
+\newcounter{sttct}
+\setcounter{genct}{1}
+\setcounter{grdct}{1}
+\setcounter{sttct}{1}
+
+\title{\ggn\ Manual}
+\author{Max Suarez, Atanas Trayanov, Arlindo da Silva, Purnendu Chakraborty}
+\date{\today}
+
+\setlength{\parskip}{12pt}
+
+\begin{document}
+
+\maketitle
+\dominitoc
+\tableofcontents

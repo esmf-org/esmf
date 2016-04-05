@@ -1,0 +1,37 @@
+\section{Package Overview }
+%
+\pagenumbering{arabic}
+% 
+\setcounter{secnumdepth}{5}
+\setlength{\parskip}{0.5em}
+%
+The Message Passing Envionment Utility ({\tt mpeu}) is a library that
+was designed and developed at the Data Assimilation Office (DAO) to
+support its data assimilation system.
+It sits on top of vendors utilities such as MPI, BLAS, shared-memory
+primitives, etc. 
+%
+{\tt mpeu} is written is Fortran 90 and is portable to many platforms.
+It provides the following services:
+%
+\begin{itemize}
+\item Management of resources
+\item Manipulation of strings
+\item F90 module-style access to MPI
+\item Portable/flexible definition of types
+\item Support for multiprocessor stdout/stderr
+\item Error handling/shutdown
+\item Timing/load balance monitoring tools
+\item Sorting tools
+\end{itemize}
+%
+
+The {\tt mpeu} library can be easily included in any application (using
+MPI) and can be ported into any platform with little (or no) modification.
+
+This report is a user's documentation that describes the above {\tt mpeu}
+services.
+Each of the services is contained a module. 
+In the next sections, we present the functions of each module and provides 
+enough examples to show how the library can be efficiently employed in a 
+given application.
