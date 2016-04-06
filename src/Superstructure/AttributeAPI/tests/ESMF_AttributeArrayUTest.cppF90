@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2014, University Corporation for Atmospheric Research,
+! Copyright 2002-2016, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -10,7 +10,7 @@
 !
 !==============================================================================
 !
-program ESMF_AttributeGridUTest
+program ESMF_AttributeArrayUTest
 
 !------------------------------------------------------------------------------
 ! INCLUDES
@@ -19,11 +19,11 @@ program ESMF_AttributeGridUTest
 !
 !==============================================================================
 !BOP
-! !PROGRAM: ESMF_AttributeGridUTest - Attribute Grid Unit Tests
+! !PROGRAM: ESMF_AttributeArrayUTest - Attribute Array Unit Tests
 !
 ! !DESCRIPTION:
 !
-! The code in this file drives F90 Attribute Grid unit tests.
+! The code in this file drives F90 Attribute Array unit tests.
 ! The companion file ESMF\_Attribute.F90 contains the definitions for the
 ! Attribute methods.
 !
@@ -47,11 +47,10 @@ program ESMF_AttributeGridUTest
       character(ESMF_MAXSTR) :: name
 
       ! local variables
-      type(ESMF_AttPack)   :: attpack
-      
-      type(ESMF_Grid)       :: grid
-      character(ESMF_MAXSTR) :: conv, purp, attrname, &
-                                attrnameOut, attrvalue
+      type(ESMF_Array)       :: array
+      type(ESMF_ArraySpec)   :: arrayspec
+      type(ESMF_DistGrid)    :: distgrid
+      character(ESMF_MAXSTR) :: attrname, attrnameOut, attrvalue
       integer                :: rc, count, items
       type(ESMF_TypeKind_Flag)    :: attrTK
 
@@ -72,12 +71,12 @@ program ESMF_AttributeGridUTest
   
       ! cumulative result: count failures; no failures equals "all pass"
       integer :: result = 0
-
 ^ifdef ESMF_TESTEXHAUSTIVE
+      ! individual test failure message
 
       ! local variables
-      character(ESMF_MAXSTR) :: nestconv, nestpurp
       integer                :: itemCount
+      character(ESMF_MAXSTR) :: conv, purp
 
       integer(ESMF_KIND_I4)                     :: inI4, outI4, defaultI4, dfltoutI4
       integer(ESMF_KIND_I4), dimension(3)       :: inI4l, outI4l, defaultI4l, dfltoutI4l
@@ -92,7 +91,7 @@ program ESMF_AttributeGridUTest
       character(ESMF_MAXSTR), dimension(10)       :: outCharlLong
       logical                          :: inLog, outLog, defaultLog, dfltoutLog
       logical, dimension(3)            :: inLogl, defaultLogl, dfltoutLogl, outLogl
-      logical, dimension(4)       :: defaultLoglWrong
+      logical, dimension(4)             :: defaultLoglWrong
       logical, dimension(10)            :: outLoglLong
 
       ! exhaustive constant value variables
@@ -105,14 +104,8 @@ program ESMF_AttributeGridUTest
       logical                                   :: outConstantLogical
       logical, dimension(3)                     :: outConstantLogicall
 
-      character(ESMF_MAXSTR), dimension(3)  :: attpackList, attpackListOut, &
-                                               attpackListOut2, attpackDfltList, &
-                                               attpackListOut3, attpackListOut4, &
-                                               attpackDfltList2
-      character(ESMF_MAXSTR), dimension(12) :: attpackListTNames
-
-
 ^endif
+
 !-------------------------------------------------------------------------------
 !  The unit tests are divided into Sanity and Exhaustive. The Sanity tests are
 !  always run. When the environment variable, EXHAUSTIVE, is set to ON then
@@ -129,18 +122,23 @@ program ESMF_AttributeGridUTest
 
       !------------------------------------------------------------------------
       ! preparations
-      ! grids
-      grid = ESMF_GridEmptyCreate(rc=rc)
+      ! array and grid
+      call ESMF_ArraySpecSet(arrayspec, typekind=ESMF_TYPEKIND_R8, rank=2, rc=rc)
+      distgrid = ESMF_DistGridCreate(minIndex=(/1,1/), maxIndex=(/5,5/), &
+        regDecomp=(/2,3/), rc=rc)
+      array = ESMF_ArrayCreate(distgrid, arrayspec, rc=rc)
+      if (rc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 !-------------------------------------------------------------------------
-!  GRID
+!  ARRAY
 !-------------------------------------------------------------------------
-    
-AttributeTestMacro(grid, a Grid, EX_UTest, NEX_UTest)
+
+AttributeTestMacro(array, an Array, EX_UTest, NEX_UTest)
 
       !------------------------------------------------------------------------
       ! clean up
-      call ESMF_GridDestroy(grid, rc=rc)
+      call ESMF_ArrayDestroy(array, rc=rc)
+      call ESMF_DistGridDestroy(distGrid, rc=rc)
       
       if (rc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
@@ -148,4 +146,4 @@ AttributeTestMacro(grid, a Grid, EX_UTest, NEX_UTest)
   call ESMF_TestEnd(ESMF_SRCLINE)
   !-----------------------------------------------------------------------------
   
-end program ESMF_AttributeGridUTest
+end program ESMF_AttributeArrayUTest

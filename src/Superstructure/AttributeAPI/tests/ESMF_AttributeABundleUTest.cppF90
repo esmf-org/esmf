@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2014, University Corporation for Atmospheric Research,
+! Copyright 2002-2016, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -10,7 +10,7 @@
 !
 !==============================================================================
 !
-program ESMF_AttributeGridUTest
+program ESMF_AttributeArrayBundleUTest
 
 !------------------------------------------------------------------------------
 ! INCLUDES
@@ -19,11 +19,11 @@ program ESMF_AttributeGridUTest
 !
 !==============================================================================
 !BOP
-! !PROGRAM: ESMF_AttributeGridUTest - Attribute Grid Unit Tests
+! !PROGRAM: ESMF_AttributeArrayBundleUTest - Attribute ArrayBundle Unit Tests
 !
 ! !DESCRIPTION:
 !
-! The code in this file drives F90 Attribute Grid unit tests.
+! The code in this file drives F90 Attribute ArrayBundle unit tests.
 ! The companion file ESMF\_Attribute.F90 contains the definitions for the
 ! Attribute methods.
 !
@@ -47,17 +47,18 @@ program ESMF_AttributeGridUTest
       character(ESMF_MAXSTR) :: name
 
       ! local variables
-      type(ESMF_AttPack)   :: attpack
-      
-      type(ESMF_Grid)       :: grid
-      character(ESMF_MAXSTR) :: conv, purp, attrname, &
-                                attrnameOut, attrvalue
+      type(ESMF_ArrayBundle)    :: arraybundle
+      type(ESMF_Array), dimension(2) :: array
+      type(ESMF_Array)               :: afb
+      type(ESMF_ArraySpec) :: arrayspec
+      type(ESMF_DistGrid) :: distgrid
+      character(ESMF_MAXSTR) :: attrname, attrnameOut, attrvalue
       integer                :: rc, count, items
       type(ESMF_TypeKind_Flag)    :: attrTK
 
       real(ESMF_KIND_R8)                     :: inR8, outR8, defaultR8, dfltoutR8
       real(ESMF_KIND_R8), dimension(3)       :: inR8l, defaultR8l, dfltoutR8l, outR8l
-      character(ESMF_MAXSTR)           :: inChar, outChar, defaultChar, dfltoutChar
+      character(ESMF_MAXSTR)                     :: inChar, outChar, defaultChar, dfltoutChar
       real(ESMF_KIND_R8), dimension(4)       :: defaultR8lWrong
 
       character(3*ESMF_MAXSTR)               :: inASCII, outASCII
@@ -69,15 +70,15 @@ program ESMF_AttributeGridUTest
       real(ESMF_KIND_R8), dimension(3)          :: outConstantR8l
       character(ESMF_MAXSTR)                    :: outConstantChar
       character(ESMF_MAXSTR), dimension(3)      :: outConstantCharl
-  
+   
       ! cumulative result: count failures; no failures equals "all pass"
       integer :: result = 0
 
 ^ifdef ESMF_TESTEXHAUSTIVE
 
       ! local variables
-      character(ESMF_MAXSTR) :: nestconv, nestpurp
       integer                :: itemCount
+      character(ESMF_MAXSTR) :: conv, purp
 
       integer(ESMF_KIND_I4)                     :: inI4, outI4, defaultI4, dfltoutI4
       integer(ESMF_KIND_I4), dimension(3)       :: inI4l, outI4l, defaultI4l, dfltoutI4l
@@ -105,11 +106,8 @@ program ESMF_AttributeGridUTest
       logical                                   :: outConstantLogical
       logical, dimension(3)                     :: outConstantLogicall
 
-      character(ESMF_MAXSTR), dimension(3)  :: attpackList, attpackListOut, &
-                                               attpackListOut2, attpackDfltList, &
-                                               attpackListOut3, attpackListOut4, &
-                                               attpackDfltList2
-      character(ESMF_MAXSTR), dimension(12) :: attpackListTNames
+      logical :: rc_logical
+      character(ESMF_MAXSTR), dimension(1) :: exclusions
 
 
 ^endif
@@ -129,23 +127,81 @@ program ESMF_AttributeGridUTest
 
       !------------------------------------------------------------------------
       ! preparations
-      ! grids
-      grid = ESMF_GridEmptyCreate(rc=rc)
+      call ESMF_ArraySpecSet(arrayspec, typekind=ESMF_TYPEKIND_R8, rank=2, rc=rc)
+      distgrid = ESMF_DistGridCreate(minIndex=(/1,1/), maxIndex=(/5,5/), &
+        regDecomp=(/2,3/), rc=rc)
+      array(1) = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=distgrid, rc=rc)
+      array(2) = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=distgrid, rc=rc)
+      afb = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=distgrid, rc=rc)
+      arraybundle = ESMF_ArrayBundleCreate(arrayList=array, &
+        name="MyArrayBundle", rc=rc)
 
 !-------------------------------------------------------------------------
-!  GRID
+!  ARRAYBUNDLE
 !-------------------------------------------------------------------------
-    
-AttributeTestMacro(grid, a Grid, EX_UTest, NEX_UTest)
+
+AttributeTestMacro(arraybundle, an ArrayBundle, EX_UTest, NEX_UTest)
+
+    !-------------------------------------------------------------------------
+    !  Attribute hierarchy linking
+    !-------------------------------------------------------------------------
+
+      !NEX_UTest
+      ! Link an ArrayBundle Attribute hierarchy to a Array Attribute hierarchy ArrayBundle Test
+      call ESMF_AttributeLink(arraybundle, afb, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Linking an ArrayBundle hierarchy to a Array hierarchy Test"
+      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+^ifdef ESMF_TESTEXHAUSTIVE
+
+      !EX_UTest
+      ! Link an ArrayBundle Attribute hierarchy to a Array Attribute hierarchy ArrayBundle Test, again
+      call ESMF_AttributeLink(arraybundle, afb, rc=rc)
+      write(failMsg, *) "Did not return ESMC_RC_ATTR_LINK"
+      write(name, *) "Linking an ArrayBundle hierarchy to a Array hierarchy Test, again"
+      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Unlink an ArrayBundle Attribute hierarchy from a Array Attribute hierarchy ArrayBundle Test
+      call ESMF_AttributeLinkRemove(arraybundle, afb, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Unlinking an ArrayBundle hierarchy from a Array hierarchy Test"
+      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Unlink an ArrayBundle Attribute hierarchy from a Array Attribute hierarchy ArrayBundle Test 2
+      call ESMF_AttributeLinkRemove(arraybundle, afb, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Unlinking an ArrayBundle hierarchy from a Array hierarchy Test 2"
+      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Unlink an ArrayBundle Attribute hierarchy from a Array Attribute hierarchy ArrayBundle Test 3
+      call ESMF_AttributeLinkRemove(arraybundle, afb, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Unlinking an ArrayBundle hierarchy from a Array hierarchy Test 3"
+      call ESMF_Test((rc/=ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+^endif
 
       !------------------------------------------------------------------------
       ! clean up
-      call ESMF_GridDestroy(grid, rc=rc)
-      
+      call ESMF_ArrayBundleDestroy(arraybundle, rc=rc)
+      call ESMF_ArrayDestroy(afb, rc=rc)
+      call ESMF_ArrayDestroy(array(1), rc=rc)
+      call ESMF_ArrayDestroy(array(2), rc=rc)
+      call ESMF_DistGridDestroy(distgrid, rc=rc)
+
       if (rc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   !-----------------------------------------------------------------------------
   call ESMF_TestEnd(ESMF_SRCLINE)
   !-----------------------------------------------------------------------------
   
-end program ESMF_AttributeGridUTest
+end program ESMF_AttributeArrayBundleUTest

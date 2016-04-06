@@ -105,6 +105,32 @@
       !------------------------------------------------------------------------ @\
  @\
     !------------------------------------------------------------------------- @\
+    !  ASCII characters @\
+    !------------------------------------------------------------------------- @\
+      !mtag_ex @\
+      ! Add ASCII characters to an Attribute on an Array Test @\
+      correct = .true. @\
+      inASCII = "!""#$%&'()*+,-./0123456789" CONCAT/ & @\
+                ":;<=>?" CONCAT/ & @\
+                "ABCDEFGHIJKLMNOPQRSTUVWXYZ" CONCAT/ & @\
+                "[\]^_`" CONCAT/ & @\
+                "abcdefghijklmnopqrstuvwxyz" CONCAT/ & @\
+                "{|}~" @\
+      do i=1,len(trim(inASCII)) @\
+        call ESMF_AttributeSet(mname, name=inASCII(i:i), value=inASCII, rc=rc) @\
+        if (rc /= ESMF_SUCCESS) then @\
+            correct = .false. @\
+        endif @\
+        call ESMF_AttributeGet(mname, name=inASCII(i:i), value=outASCII, rc=rc) @\
+        if (rc /= ESMF_SUCCESS) correct = .false. @\
+        if (inASCII /= outASCII) correct = .false. @\
+      enddo @\
+ @\
+      write(failMsg, *) "Did not return ESMF_SUCCESS" @\
+      write(name, *) "Use all ASCII characters as Attribute names on an Array Test" @\
+      call ESMF_Test((correct .eqv. .true.), name, failMsg, result, ESMF_SRCLINE) @\
+ @\
+    !------------------------------------------------------------------------- @\
     !  Get an Attribute which was not set @\
     !------------------------------------------------------------------------- @\
  @\
