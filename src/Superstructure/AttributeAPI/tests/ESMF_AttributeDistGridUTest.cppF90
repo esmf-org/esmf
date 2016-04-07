@@ -1,0 +1,92 @@
+! $Id$
+!
+! Earth System Modeling Framework
+! Copyright 2002-2016, University Corporation for Atmospheric Research,
+! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
+! Laboratory, University of Michigan, National Centers for Environmental
+! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
+! NASA Goddard Space Flight Center.
+! Licensed under the University of Illinois-NCSA License.
+!
+!==============================================================================
+!
+program ESMF_AttributeDistGridUTest
+
+!------------------------------------------------------------------------------
+! INCLUDES
+^include "ESMF.h"
+#include "ESMF_AttributeTestMacros.hcppF90"
+!
+!==============================================================================
+!BOP
+! !PROGRAM: ESMF_AttributeDistGridUTest - Attribute DistGrid Unit Tests
+!
+! !DESCRIPTION:
+!
+! The code in this file drives F90 Attribute DistGrid unit tests.
+! The companion file ESMF\_Attribute.F90 contains the definitions for the
+! Attribute methods.
+!
+!-----------------------------------------------------------------------------
+! !USES:
+      use ESMF_TestMod     ! test methods
+      use ESMF         ! the ESMF Framework
+      implicit none
+
+!------------------------------------------------------------------------------
+! The following line turns the CVS identifier string into a printable variable.
+      character(*), parameter :: version = &
+      '$Id$'
+!------------------------------------------------------------------------------
+
+!-------------------------------------------------------------------------
+!=========================================================================
+      ! individual test failure message
+      character(ESMF_MAXSTR) :: failMsg, name
+
+      ! cumulative result: count failures; no failures equals "all pass"
+      integer :: result = 0
+
+      ! local variables
+      type(ESMF_DistGrid) :: distgrid
+
+      ! macro variables
+      AttributeTestVariablesMacro()
+
+!-------------------------------------------------------------------------------
+!  The unit tests are divided into Sanity and Exhaustive. The Sanity tests are
+!  always run. When the environment variable, EXHAUSTIVE, is set to ON then
+!  the EXHAUSTIVE and sanity tests both run. If the EXHAUSTIVE variable is set
+!  to OFF, then only the sanity unit tests.
+!  Special strings (Non-exhaustive and exhaustive) have been
+!  added to allow a script to count the number and types of unit tests.
+!-------------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+  call ESMF_TestStart(ESMF_SRCLINE, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  !-----------------------------------------------------------------------------
+
+      !------------------------------------------------------------------------
+      ! preparations
+      ! distgrid and grid
+      distgrid = ESMF_DistGridCreate(minIndex=(/1,1/), maxIndex=(/5,5/), &
+        regDecomp=(/2,3/), rc=rc)
+
+!-------------------------------------------------------------------------
+!  DISTGRID
+!-------------------------------------------------------------------------
+    
+AttributeTestMacro(distgrid, a DistGrid, EX_UTest, NEX_UTest)
+
+     !------------------------------------------------------------------------
+      ! clean up
+      call ESMF_DistGridDestroy(distgrid, rc=rc)
+      
+      if (rc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+  !-----------------------------------------------------------------------------
+  call ESMF_TestEnd(ESMF_SRCLINE)
+  !-----------------------------------------------------------------------------
+  
+end program ESMF_AttributeDistGridUTest
