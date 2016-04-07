@@ -1298,8 +1298,9 @@ endif
 # PIO
 #-------------------------------------------------------------------------------
 ifneq ($(origin ESMF_PIO), environment)
-ifdef ESMF_PIODEFAULT
+ifndef ESMF_PIO
 export ESMF_PIO = $(ESMF_PIODEFAULT)
+endif
 
 ifeq ($(ESMF_PIO),internal)
 ifeq ($(ESMF_COMM),mpiuni)
@@ -1310,7 +1311,6 @@ ESMF_PIO = OFF
 endif
 endif
 
-endif
 endif
 
 ifeq ($(ESMF_PIO),OFF)
