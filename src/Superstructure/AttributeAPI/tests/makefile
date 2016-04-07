@@ -14,10 +14,16 @@ AUTOGEN =  	ESMF_AttPackABundleUTest.F90 \
 			ESMF_AttPackGridUTest.F90 \
 			ESMF_AttPackSciCompUTest.F90 \
 			ESMF_AttPackStateUTest.F90 \
-			ESMF_AttributeGridUTest.F90 \
 			ESMF_AttributeABundleUTest.F90 \
 			ESMF_AttributeArrayUTest.F90 \
-			ESMF_AttributeCplCompUTest.F90
+			ESMF_AttributeCplCompUTest.F90 \
+			ESMF_AttributeDistGridUTest \
+			ESMF_AttributeFBundleUTest \
+			ESMF_AttributeFieldUTest \
+			ESMF_AttributeGridCompUTest.F90 \
+			ESMF_AttributeGridUTest.F90 \
+			ESMF_AttributeSciCompUTest \
+			ESMF_AttributeStateUTestmake
 
 .PRECIOUS: %.F90
 

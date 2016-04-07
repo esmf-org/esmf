@@ -10,7 +10,7 @@
 !
 !==============================================================================
 !
-program ESMF_AttributeArrayUTest
+program ESMF_AttributeDistGridUTest
 
 !------------------------------------------------------------------------------
 ! INCLUDES
@@ -19,11 +19,11 @@ program ESMF_AttributeArrayUTest
 !
 !==============================================================================
 !BOP
-! !PROGRAM: ESMF_AttributeArrayUTest - Attribute Array Unit Tests
+! !PROGRAM: ESMF_AttributeDistGridUTest - Attribute DistGrid Unit Tests
 !
 ! !DESCRIPTION:
 !
-! The code in this file drives F90 Attribute Array unit tests.
+! The code in this file drives F90 Attribute DistGrid unit tests.
 ! The companion file ESMF\_Attribute.F90 contains the definitions for the
 ! Attribute methods.
 !
@@ -48,9 +48,7 @@ program ESMF_AttributeArrayUTest
       integer :: result = 0
 
       ! local variables
-      type(ESMF_Array)     :: array
-      type(ESMF_ArraySpec) :: arrayspec
-      type(ESMF_DistGrid)  :: distgrid
+      type(ESMF_DistGrid) :: distgrid
 
       ! macro variables
       AttributeTestVariablesMacro()
@@ -71,23 +69,19 @@ program ESMF_AttributeArrayUTest
 
       !------------------------------------------------------------------------
       ! preparations
-      ! array and grid
-      call ESMF_ArraySpecSet(arrayspec, typekind=ESMF_TYPEKIND_R8, rank=2, rc=rc)
+      ! distgrid and grid
       distgrid = ESMF_DistGridCreate(minIndex=(/1,1/), maxIndex=(/5,5/), &
         regDecomp=(/2,3/), rc=rc)
-      array = ESMF_ArrayCreate(distgrid, arrayspec, rc=rc)
-      if (rc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 !-------------------------------------------------------------------------
-!  ARRAY
+!  DISTGRID
 !-------------------------------------------------------------------------
+    
+AttributeTestMacro(distgrid, a DistGrid, EX_UTest, NEX_UTest)
 
-AttributeTestMacro(array, an Array, EX_UTest, NEX_UTest)
-
-      !------------------------------------------------------------------------
+     !------------------------------------------------------------------------
       ! clean up
-      call ESMF_ArrayDestroy(array, rc=rc)
-      call ESMF_DistGridDestroy(distGrid, rc=rc)
+      call ESMF_DistGridDestroy(distgrid, rc=rc)
       
       if (rc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
@@ -95,4 +89,4 @@ AttributeTestMacro(array, an Array, EX_UTest, NEX_UTest)
   call ESMF_TestEnd(ESMF_SRCLINE)
   !-----------------------------------------------------------------------------
   
-end program ESMF_AttributeArrayUTest
+end program ESMF_AttributeDistGridUTest

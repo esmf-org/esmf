@@ -10,7 +10,7 @@
 !
 !==============================================================================
 !
-program ESMF_AttributeArrayBundleUTest
+program ESMF_AttributeFieldUTest
 
 !------------------------------------------------------------------------------
 ! INCLUDES
@@ -19,11 +19,11 @@ program ESMF_AttributeArrayBundleUTest
 !
 !==============================================================================
 !BOP
-! !PROGRAM: ESMF_AttributeArrayBundleUTest - Attribute ArrayBundle Unit Tests
+! !PROGRAM: ESMF_AttributeFieldUTest - Attribute Field Unit Tests
 !
 ! !DESCRIPTION:
 !
-! The code in this file drives F90 Attribute ArrayBundle unit tests.
+! The code in this file drives F90 Attribute Field unit tests.
 ! The companion file ESMF\_Attribute.F90 contains the definitions for the
 ! Attribute methods.
 !
@@ -48,11 +48,8 @@ program ESMF_AttributeArrayBundleUTest
       integer :: result = 0
 
       ! local variables
-      type(ESMF_ArrayBundle)         :: arraybundle
-      type(ESMF_Array), dimension(2) :: array
-      type(ESMF_Array)               :: afb
-      type(ESMF_ArraySpec)           :: arrayspec
-      type(ESMF_DistGrid)            :: distgrid
+      type(ESMF_Grid)  :: grid
+      type(ESMF_Field) :: field
 
       ! macro variables
       AttributeTestVariablesMacro()
@@ -73,64 +70,60 @@ program ESMF_AttributeArrayBundleUTest
 
       !------------------------------------------------------------------------
       ! preparations
-      call ESMF_ArraySpecSet(arrayspec, typekind=ESMF_TYPEKIND_R8, rank=2, rc=rc)
-      distgrid = ESMF_DistGridCreate(minIndex=(/1,1/), maxIndex=(/5,5/), &
-        regDecomp=(/2,3/), rc=rc)
-      array(1) = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=distgrid, rc=rc)
-      array(2) = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=distgrid, rc=rc)
-      afb = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=distgrid, rc=rc)
-      arraybundle = ESMF_ArrayBundleCreate(arrayList=array, &
-        name="MyArrayBundle", rc=rc)
+      ! fields
+      field = ESMF_FieldEmptyCreate(name="field", rc=rc)
+
+      grid = ESMF_GridEmptyCreate(rc=rc)
 
 !-------------------------------------------------------------------------
-!  ARRAYBUNDLE
+!  FIELD
 !-------------------------------------------------------------------------
-
-AttributeTestMacro(arraybundle, an ArrayBundle, EX_UTest, NEX_UTest)
+    
+AttributeTestMacro(field, a Field, EX_UTest, NEX_UTest)
 
     !-------------------------------------------------------------------------
     !  Attribute hierarchy linking
     !-------------------------------------------------------------------------
 
       !NEX_UTest
-      ! Link an ArrayBundle Attribute hierarchy to a Array Attribute hierarchy ArrayBundle Test
-      call ESMF_AttributeLink(arraybundle, afb, rc=rc)
+      ! Link a Field Attribute hierarchy to a Grid Attribute hierarchy Field Test, again
+      call ESMF_AttributeLink(field, grid, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Linking an ArrayBundle hierarchy to a Array hierarchy Test"
+      write(name, *) "Linking a Field hierarchy to a Grid hierarchy Test, again"
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
 ^ifdef ESMF_TESTEXHAUSTIVE
 
       !EX_UTest
-      ! Link an ArrayBundle Attribute hierarchy to a Array Attribute hierarchy ArrayBundle Test, again
-      call ESMF_AttributeLink(arraybundle, afb, rc=rc)
+      ! Link a Field Attribute hierarchy to a Grid Attribute hierarchy Field Test, again
+      call ESMF_AttributeLink(field, grid, rc=rc)
       write(failMsg, *) "Did not return ESMC_RC_ATTR_LINK"
-      write(name, *) "Linking an ArrayBundle hierarchy to a Array hierarchy Test, again"
+      write(name, *) "Linking a Field hierarchy to a Grid hierarchy Test, again"
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
       !EX_UTest
-      ! Unlink an ArrayBundle Attribute hierarchy from a Array Attribute hierarchy ArrayBundle Test
-      call ESMF_AttributeLinkRemove(arraybundle, afb, rc=rc)
+      ! Unlink a Field Attribute hierarchy from a Grid Attribute hierarchy Field Test
+      call ESMF_AttributeLinkRemove(field, grid, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Unlinking an ArrayBundle hierarchy from a Array hierarchy Test"
+      write(name, *) "Unlinking a Field hierarchy from a Grid hierarchy Test"
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
       !EX_UTest
-      ! Unlink an ArrayBundle Attribute hierarchy from a Array Attribute hierarchy ArrayBundle Test 2
-      call ESMF_AttributeLinkRemove(arraybundle, afb, rc=rc)
+      ! Unlink a Field Attribute hierarchy from a Grid Attribute hierarchy Field Test 2
+      call ESMF_AttributeLinkRemove(field, grid, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Unlinking an ArrayBundle hierarchy from a Array hierarchy Test 2"
+      write(name, *) "Unlinking a Field hierarchy from a Grid hierarchy Test 2"
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
       !EX_UTest
-      ! Unlink an ArrayBundle Attribute hierarchy from a Array Attribute hierarchy ArrayBundle Test 3
-      call ESMF_AttributeLinkRemove(arraybundle, afb, rc=rc)
+      ! Unlink a Field Attribute hierarchy from a Grid Attribute hierarchy Field Tes3
+      call ESMF_AttributeLinkRemove(field, grid, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Unlinking an ArrayBundle hierarchy from a Array hierarchy Test 3"
+      write(name, *) "Unlinking a Field hierarchy from a Grid hierarchy Test 3"
       call ESMF_Test((rc/=ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
@@ -138,11 +131,8 @@ AttributeTestMacro(arraybundle, an ArrayBundle, EX_UTest, NEX_UTest)
 
       !------------------------------------------------------------------------
       ! clean up
-      call ESMF_ArrayBundleDestroy(arraybundle, rc=rc)
-      call ESMF_ArrayDestroy(afb, rc=rc)
-      call ESMF_ArrayDestroy(array(1), rc=rc)
-      call ESMF_ArrayDestroy(array(2), rc=rc)
-      call ESMF_DistGridDestroy(distgrid, rc=rc)
+      call ESMF_FieldDestroy(field, rc=rc)
+      call ESMF_GridDestroy(grid, rc=rc)
 
       if (rc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
@@ -150,4 +140,4 @@ AttributeTestMacro(arraybundle, an ArrayBundle, EX_UTest, NEX_UTest)
   call ESMF_TestEnd(ESMF_SRCLINE)
   !-----------------------------------------------------------------------------
   
-end program ESMF_AttributeArrayBundleUTest
+end program ESMF_AttributeFieldUTest

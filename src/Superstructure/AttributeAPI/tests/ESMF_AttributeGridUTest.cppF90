@@ -41,78 +41,18 @@ program ESMF_AttributeGridUTest
 
 !-------------------------------------------------------------------------
 !=========================================================================
-
       ! individual test failure message
-      character(ESMF_MAXSTR) :: failMsg
-      character(ESMF_MAXSTR) :: name
+      character(ESMF_MAXSTR) :: failMsg, name
 
-      ! local variables
-      type(ESMF_AttPack)   :: attpack
-      
-      type(ESMF_Grid)       :: grid
-      character(ESMF_MAXSTR) :: conv, purp, attrname, &
-                                attrnameOut, attrvalue
-      integer                :: rc, count, items
-      type(ESMF_TypeKind_Flag)    :: attrTK
-
-      real(ESMF_KIND_R8)                     :: inR8, outR8, defaultR8, dfltoutR8
-      real(ESMF_KIND_R8), dimension(3)       :: inR8l, defaultR8l, dfltoutR8l, outR8l
-      character(ESMF_MAXSTR)           :: inChar, outChar, defaultChar, dfltoutChar
-      real(ESMF_KIND_R8), dimension(4)       :: defaultR8lWrong
-
-      character(3*ESMF_MAXSTR)               :: inASCII, outASCII
-      logical                                :: correct
-      integer                                :: i
-
-      ! non exhaustive constant value variables
-      real(ESMF_KIND_R8)                        :: outConstantR8
-      real(ESMF_KIND_R8), dimension(3)          :: outConstantR8l
-      character(ESMF_MAXSTR)                    :: outConstantChar
-      character(ESMF_MAXSTR), dimension(3)      :: outConstantCharl
-  
       ! cumulative result: count failures; no failures equals "all pass"
       integer :: result = 0
 
-^ifdef ESMF_TESTEXHAUSTIVE
-
       ! local variables
-      character(ESMF_MAXSTR) :: nestconv, nestpurp
-      integer                :: itemCount
+      type(ESMF_Grid) :: grid
 
-      integer(ESMF_KIND_I4)                     :: inI4, outI4, defaultI4, dfltoutI4
-      integer(ESMF_KIND_I4), dimension(3)       :: inI4l, outI4l, defaultI4l, dfltoutI4l
-      integer(ESMF_KIND_I8)                     :: inI8, outI8, defaultI8, dfltoutI8
-      integer(ESMF_KIND_I8), dimension(3)       :: inI8l, outI8l, defaultI8l, dfltoutI8l
-      real(ESMF_KIND_R4)                     :: inR4, outR4, defaultR4, dfltoutR4
-      real(ESMF_KIND_R4), dimension(3)       :: inR4l, outR4l, defaultR4l, dfltoutR4l
-      real(ESMF_KIND_R8), dimension(10)       :: outR8lLong
-      character(ESMF_MAXSTR)                     :: inEmpty, outEmpty
-      character(ESMF_MAXSTR), dimension(3)       :: inCharl, defaultCharl, dfltoutCharl, outCharl
-      character(ESMF_MAXSTR), dimension(4)       :: defaultCharlWrong
-      character(ESMF_MAXSTR), dimension(10)       :: outCharlLong
-      logical                          :: inLog, outLog, defaultLog, dfltoutLog
-      logical, dimension(3)            :: inLogl, defaultLogl, dfltoutLogl, outLogl
-      logical, dimension(4)       :: defaultLoglWrong
-      logical, dimension(10)            :: outLoglLong
+      ! macro variables
+      AttributeTestVariablesMacro()
 
-      ! exhaustive constant value variables
-      integer(ESMF_KIND_I4)                     :: outConstantI4
-      integer(ESMF_KIND_I4), dimension(3)       :: outConstantI4l
-      integer(ESMF_KIND_I8)                     :: outConstantI8
-      integer(ESMF_KIND_I8), dimension(3)       :: outConstantI8l
-      real(ESMF_KIND_R4)                        :: outConstantR4
-      real(ESMF_KIND_R4), dimension(3)          :: outConstantR4l
-      logical                                   :: outConstantLogical
-      logical, dimension(3)                     :: outConstantLogicall
-
-      character(ESMF_MAXSTR), dimension(3)  :: attpackList, attpackListOut, &
-                                               attpackListOut2, attpackDfltList, &
-                                               attpackListOut3, attpackListOut4, &
-                                               attpackDfltList2
-      character(ESMF_MAXSTR), dimension(12) :: attpackListTNames
-
-
-^endif
 !-------------------------------------------------------------------------------
 !  The unit tests are divided into Sanity and Exhaustive. The Sanity tests are
 !  always run. When the environment variable, EXHAUSTIVE, is set to ON then

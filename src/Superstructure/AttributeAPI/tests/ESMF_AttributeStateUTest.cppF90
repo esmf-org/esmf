@@ -10,7 +10,7 @@
 !
 !==============================================================================
 !
-program ESMF_AttributeCplCompUTest
+program ESMF_AttributeStateUTest
 
 !------------------------------------------------------------------------------
 ! INCLUDES
@@ -19,11 +19,11 @@ program ESMF_AttributeCplCompUTest
 !
 !==============================================================================
 !BOP
-! !PROGRAM: ESMF_AttributeCplCompUTest - Attribute CplComp Unit Tests
+! !PROGRAM: ESMF_AttributeStateUTest - Attribute StateUnit Tests
 !
 ! !DESCRIPTION:
 !
-! The code in this file drives F90 Attribute CplComp unit tests.
+! The code in this file drives F90 Attribute Stateunit tests.
 ! The companion file ESMF\_Attribute.F90 contains the definitions for the
 ! Attribute methods.
 !
@@ -48,9 +48,9 @@ program ESMF_AttributeCplCompUTest
       integer :: result = 0
 
       ! local variables
-      type(ESMF_CplComp)  :: cplcomp, cfc, cplcompValue, cplcompHybrid
-      type(ESMF_GridComp) :: gfc
-      type(ESMF_State)    :: sfc
+      type(ESMF_Field)       :: ffs
+      type(ESMF_State)       :: state, sfs, stateValue, stateHybrid
+      type(ESMF_FieldBundle) :: fbfs
 
       ! macro variables
       AttributeTestVariablesMacro()
@@ -71,48 +71,51 @@ program ESMF_AttributeCplCompUTest
 
       !------------------------------------------------------------------------
       ! preparations
+      ! fields
+      ffs = ESMF_FieldEmptyCreate(name="fieldforstate", rc=rc)
+      
+      ! field bundles
+      fbfs = ESMF_FieldBundleCreate(name="fieldbundleforstate", rc=rc)
+      
       ! states
-      sfc = ESMF_StateCreate(name="stateforcplcomp",  &
-                             stateintent=ESMF_STATEINTENT_EXPORT, rc=rc)
-      
-      ! coupler components
-      cplcomp = ESMF_CplCompCreate(name="cplcomp", petList=(/0/), rc=rc)
-      cfc = ESMF_CplCompCreate(name="cplcompforcplcomp", petList=(/0/), rc=rc)
-      cplcompValue = ESMF_CplCompCreate(name="cplcompforvaluecopy", petList=(/0/), rc=rc)
-      cplcompHybrid = ESMF_CplCompCreate(name="cplcompforhybridcopy", petList=(/0/), rc=rc)
-      
-      ! gridded components
-      gfc = ESMF_GridCompCreate(name="gridcompforcplcomp", petList=(/0/), rc=rc)
-      
+      state = ESMF_StateCreate(name="state",  &
+                               stateintent=ESMF_STATEINTENT_IMPORT, rc=rc)
+      sfs   = ESMF_StateCreate(name="stateforstatelink", &
+                               stateintent=ESMF_STATEINTENT_EXPORT, rc=rc)
+      stateValue = ESMF_StateCreate(name="stateforvaluecopy",  &
+                               stateintent=ESMF_STATEINTENT_EXPORT, rc=rc)
+      stateHybrid = ESMF_StateCreate(name="stateforhybridcopy",  &
+                               stateintent=ESMF_STATEINTENT_EXPORT, rc=rc)
+
       if (rc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-      
+
 !-------------------------------------------------------------------------
-!  CPLCOMP
+!  STATE
 !-------------------------------------------------------------------------
 
-AttributeTestMacro(cplcomp, a CplComp, EX_UTest, NEX_UTest)
+AttributeTestMacro(state, a State, EX_UTest, NEX_UTest)
 
-^ifdef  ESMF_TESTEXHAUSTIVE
+^ifdef ESMF_TESTEXHAUSTIVE
 
     !-------------------------------------------------------------------------
     !  AttributeCopy
     !-------------------------------------------------------------------------
 
       !EX_UTest
-      ! Copy a CplComp Attribute hierarchy VALUE ONE LEVEL Test
-      call ESMF_AttributeCopy(cplcomp, cplcompValue, &
+      ! Copy a State Attribute hierarchy VALUE ONE LEVEL Test
+      call ESMF_AttributeCopy(state, stateValue, &
         copyflag=ESMF_COPY_VALUE, atttreeflag=ESMF_ATTTREE_OFF, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Copying a CplComp Attribute hierarchy VALUE ONE LEVEL Test"
+      write(name, *) "Copying a State Attribute hierarchy VALUE ONE LEVEL Test"
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
       !EX_UTest
-      ! Copy a CplComp Attribute hierarchy HYBRID Test
-      call ESMF_AttributeCopy(cplcomp, cplcompHybrid, &
+      ! Copy a State Attribute hierarchy HYBRID Test
+      call ESMF_AttributeCopy(state, stateHybrid, &
         copyflag=ESMF_COPY_REFERENCE, atttreeflag=ESMF_ATTTREE_ON, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Copying a CplComp Attribute hierarchy HYBRID Test"
+      write(name, *) "Copying a State Attribute hierarchy HYBRID Test"
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
@@ -123,128 +126,128 @@ AttributeTestMacro(cplcomp, a CplComp, EX_UTest, NEX_UTest)
     !-------------------------------------------------------------------------
 
       !NEX_UTest
-      ! Link a CplComp Attribute hierarchy to a State Attribute hierarchy CplComp Test
-      call ESMF_AttributeLink(cplcomp, sfc, rc=rc)
+      ! Link a State Attribute hierarchy to a State Attribute hierarchy State Test
+      call ESMF_AttributeLink(state, sfs, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Linking a CplComp hierarchy to a State hierarchy Test"
+      write(name, *) "Linking a State hierarchy to a State hierarchy Test"
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
       !NEX_UTest
-      ! Link a CplComp Attribute hierarchy to a CplComp Attribute hierarchy CplComp Test
-      call ESMF_AttributeLink(cplcomp, cfc, rc=rc)
+      ! Link a State Attribute hierarchy to a Field Attribute hierarchy State Test
+      call ESMF_AttributeLink(state, ffs, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Linking a CplComp hierarchy to a CplComp hierarchy Test"
+      write(name, *) "Linking a State hierarchy to a Field hierarchy Test"
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
       !NEX_UTest
-      ! Link a CplComp Attribute hierarchy to a GridComp Attribute hierarchy CplComp Test
-      call ESMF_AttributeLink(cplcomp, gfc, rc=rc)
+      ! Link a State Attribute hierarchy to a FieldBundle Attribute hierarchy State Test
+      call ESMF_AttributeLink(state, fbfs, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Linking a CplComp hierarchy to a GridComp hierarchy Test"
+      write(name, *) "Linking a State hierarchy to a FieldBundle hierarchy Test"
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
 ^ifdef ESMF_TESTEXHAUSTIVE
 
       !EX_UTest
-      ! Link a CplComp Attribute hierarchy to a State Attribute hierarchy CplComp Test, again
-      call ESMF_AttributeLink(cplcomp, sfc, rc=rc)
+      ! Link a State Attribute hierarchy to a State Attribute hierarchy State Test, again
+      call ESMF_AttributeLink(state, sfs, rc=rc)
       write(failMsg, *) "Did not return ESMC_RC_ATTR_LINK"
-      write(name, *) "Linking a CplComp hierarchy to a State hierarchy Test, again"
+      write(name, *) "Linking a State hierarchy to a State hierarchy Test, again"
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
       !EX_UTest
-      ! Link a CplComp Attribute hierarchy to a CplComp Attribute hierarchy CplComp Test, again
-      call ESMF_AttributeLink(cplcomp, cfc, rc=rc)
+      ! Link a State Attribute hierarchy to a Field Attribute hierarchy State Test, again
+      call ESMF_AttributeLink(state, ffs, rc=rc)
       write(failMsg, *) "Did not return ESMC_RC_ATTR_LINK"
-      write(name, *) "Linking a CplComp hierarchy to a CplComp hierarchy Test, again"
+      write(name, *) "Linking a State hierarchy to a Field hierarchy Test, again"
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
       !EX_UTest
-      ! Link a CplComp Attribute hierarchy to a GridComp Attribute hierarchy CplComp Test, again
-      call ESMF_AttributeLink(cplcomp, gfc, rc=rc)
+      ! Link a State Attribute hierarchy to a FieldBundle Attribute hierarchy State Test, again
+      call ESMF_AttributeLink(state, fbfs, rc=rc)
       write(failMsg, *) "Did not return ESMC_RC_ATTR_LINK"
-      write(name, *) "Linking a CplComp hierarchy to a GridComp hierarchy Test, again"
+      write(name, *) "Linking a State hierarchy to a FieldBundle hierarchy Test, again"
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
 ^endif
 
       !NEX_UTest
-      ! Unlink a CplComp Attribute hierarchy from a State Attribute hierarchy CplComp Test
-      call ESMF_AttributeLinkRemove(cplcomp, sfc, rc=rc)
+      ! Unlink a State Attribute hierarchy from a State Attribute hierarchy State Test
+      call ESMF_AttributeLinkRemove(state, sfs, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Unlinking a CplComp hierarchy from a State hierarchy Test"
+      write(name, *) "Unlinking a State hierarchy from a State hierarchy Test"
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
       !NEX_UTest
-      ! Unlink a CplComp Attribute hierarchy to a CplComp Attribute hierarchy CplComp Test
-      call ESMF_AttributeLinkRemove(cplcomp, cfc, rc=rc)
+      ! Unlink a State Attribute hierarchy from a Field Attribute hierarchy State Test
+      call ESMF_AttributeLinkRemove(state, ffs, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Unlinking a CplComp hierarchy from a CplComp hierarchy Test"
+      write(name, *) "Unlinking a State hierarchy from a Field hierarchy Test"
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
       !NEX_UTest
-      ! Unlink a CplComp Attribute hierarchy to a GridComp Attribute hierarchy CplComp Test
-      call ESMF_AttributeLinkRemove(cplcomp, gfc, rc=rc)
+      ! Unlink a State Attribute hierarchy from a FieldBundle Attribute hierarchy State Test
+      call ESMF_AttributeLinkRemove(state, fbfs, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Unlinking a CplComp hierarchy from a GridComp hierarchy Test"
+      write(name, *) "Unlinking a State hierarchy from a FieldBundle hierarchy Test"
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
 ^ifdef ESMF_TESTEXHAUSTIVE
 
       !EX_UTest
-      ! Unlink a CplComp Attribute hierarchy from a State Attribute hierarchy CplComp Test 2
-      call ESMF_AttributeLinkRemove(cplcomp, sfc, rc=rc)
+      ! Unlink a State Attribute hierarchy from a State Attribute hierarchy State Test 2
+      call ESMF_AttributeLinkRemove(state, sfs, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Unlinking a CplComp hierarchy from a State hierarchy Test 2"
+      write(name, *) "Unlinking a State hierarchy from a State hierarchy Test 2"
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
       !EX_UTest
-      ! Unlink a CplComp Attribute hierarchy to a CplComp Attribute hierarchy CplComp Test 2
-      call ESMF_AttributeLinkRemove(cplcomp, cfc, rc=rc)
+      ! Unlink a State Attribute hierarchy from a Field Attribute hierarchy State Test 2
+      call ESMF_AttributeLinkRemove(state, ffs, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Unlinking a CplComp hierarchy from a CplComp hierarchy Test 2"
+      write(name, *) "Unlinking a State hierarchy from a Field hierarchy Test 2"
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
       !EX_UTest
-      ! Unlink a CplComp Attribute hierarchy to a GridComp Attribute hierarchy CplComp Test 2
-      call ESMF_AttributeLinkRemove(cplcomp, gfc, rc=rc)
+      ! Unlink a State Attribute hierarchy from a FieldBundle Attribute hierarchy State Test 2
+      call ESMF_AttributeLinkRemove(state, fbfs, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Unlinking a CplComp hierarchy from a GridComp hierarchy Test 2"
+      write(name, *) "Unlinking a State hierarchy from a FieldBundle hierarchy Test 2"
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
       !EX_UTest
-      ! Unlink a CplComp Attribute hierarchy from a State Attribute hierarchy CplComp Test 3
-      call ESMF_AttributeLinkRemove(cplcomp, sfc, rc=rc)
+      ! Unlink a State Attribute hierarchy from a State Attribute hierarchy State Test 3
+      call ESMF_AttributeLinkRemove(state, sfs, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Unlinking a CplComp hierarchy from a State hierarchy Test 3"
+      write(name, *) "Unlinking a State hierarchy from a State hierarchy Test 3"
       call ESMF_Test((rc/=ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
       !EX_UTest
-      ! Unlink a CplComp Attribute hierarchy to a CplComp Attribute hierarchy CplComp Test 3
-      call ESMF_AttributeLinkRemove(cplcomp, cfc, rc=rc)
+      ! Unlink a State Attribute hierarchy from a Field Attribute hierarchy State Test 3
+      call ESMF_AttributeLinkRemove(state, ffs, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Unlinking a CplComp hierarchy from a CplComp hierarchy Test 3"
+      write(name, *) "Unlinking a State hierarchy from a Field hierarchy Test 3"
       call ESMF_Test((rc/=ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
       !EX_UTest
-      ! Unlink a CplComp Attribute hierarchy to a GridComp Attribute hierarchy CplComp Test 3
-      call ESMF_AttributeLinkRemove(cplcomp, gfc, rc=rc)
+      ! Unlink a State Attribute hierarchy from a FieldBundle Attribute hierarchy State Test 3
+      call ESMF_AttributeLinkRemove(state, fbfs, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Unlinking a CplComp hierarchy from a GridComp hierarchy Test 3"
+      write(name, *) "Unlinking a State hierarchy from a FieldBundle hierarchy Test 3"
       call ESMF_Test((rc/=ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
@@ -252,19 +255,19 @@ AttributeTestMacro(cplcomp, a CplComp, EX_UTest, NEX_UTest)
 
       !------------------------------------------------------------------------
       ! clean up
-      call ESMF_CplCompDestroy(cplcomp, rc=rc)
-      call ESMF_CplCompDestroy(cfc, rc=rc)
-      call ESMF_CplCompDestroy(cplcompValue, rc=rc)
-      call ESMF_CplCompDestroy(cplcompHybrid, rc=rc)
+      call ESMF_FieldBundleDestroy(fbfs, rc=rc)
       
-      call ESMF_GridCompDestroy(gfc, rc=rc)
-
-      call ESMF_StateDestroy(sfc, rc=rc)
+      call ESMF_FieldDestroy(ffs, rc=rc)
       
+      call ESMF_StateDestroy(stateValue, rc=rc)
+      call ESMF_StateDestroy(stateHybrid, rc=rc)
+      call ESMF_StateDestroy(sfs, rc=rc)
+      call ESMF_StateDestroy(state, rc=rc)
+     
       if (rc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   !-----------------------------------------------------------------------------
   call ESMF_TestEnd(ESMF_SRCLINE)
   !-----------------------------------------------------------------------------
   
-end program ESMF_AttributeCplCompUTest
+end program ESMF_AttributeStateUTest
