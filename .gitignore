@@ -100,5 +100,5 @@ src/doc/ESMF_usrdoc.dvi
 src/doc/ESMF_usrdoc.tex
 src/doc/ESMF_usrdoc.tex.ORIG
 src/doc/ESMF_usrdoc.toc
-
+src/doc/.latex2html-init
 
