@@ -219,7 +219,7 @@ program ESMF_IO_PIOUTest
   rc = ESMF_SUCCESS
 #endif
   write(failMsg, *) "PIO file create failure"
-  write(name, *) "Create PIO NETCDF file: ", fname//'_netcdf'
+  write(name, *) "Create PIO NETCDF file: ", trim (fname)
   call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 !------------------------------------------------------------------------
 
@@ -367,7 +367,7 @@ program ESMF_IO_PIOUTest
   rc = ESMF_SUCCESS
 #endif
   write(failMsg, *) "PIO file open failure"
-  write(name, *) "Open PIO NETCDF file for read: ", fname//'_netcdf'
+  write(name, *) "Open PIO NETCDF file for read: ", trim (fname)
   call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 !------------------------------------------------------------------------
 
@@ -489,7 +489,7 @@ program ESMF_IO_PIOUTest
   rc = ESMF_SUCCESS
 #endif
   write(failMsg, *) "PIO file create failure"
-  write(name, *) "Create PNETCDF PIO file: ", fname//'_pnetcdf'
+  write(name, *) "Create PNETCDF PIO file: ", trim (fname)
   call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 !------------------------------------------------------------------------
 
@@ -637,7 +637,7 @@ program ESMF_IO_PIOUTest
   rc = ESMF_SUCCESS
 #endif
   write(failMsg, *) "PIO file open failure"
-  write(name, *) "Open PNETCDF PIO file for read: ", fname//'_pnetcdf'
+  write(name, *) "Open PNETCDF PIO file for read: ", trim (fname)
   call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 !------------------------------------------------------------------------
 
