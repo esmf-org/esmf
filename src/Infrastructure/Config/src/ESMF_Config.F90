@@ -775,7 +775,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
            return
          end if
          if (ESMF_LogFoundError(ESMF_RC_NOT_FOUND, &
-                                msg="label not found", &
+                                msg="label " // trim (label) // " not found", &
                                  ESMF_CONTEXT, rcToReturn=rc)) return
       elseif(i.le.0) then
          if (ESMF_LogFoundError(ESMF_RC_ARG_BAD, &
