@@ -1233,6 +1233,14 @@ subroutine MultPar_SingleLine_Vf
       !EX_UTest
       ! Config Find Label Test
       write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Config Bad Label Test"
+      call ESMF_ConfigFindLabel( cf,'Bad', rc=rc)
+      call ESMF_Test(rc /= ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
+
+     !------------------------------------------------------------------------
+      !EX_UTest
+      ! Config Find Label Test
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Config Find Label Test"
       call ESMF_ConfigFindLabel( cf,'ObsErr*vCor_HH-7::', rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
