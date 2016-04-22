@@ -99,10 +99,17 @@ private:
     int Set(int flush);
     int Write(const char msg[], int msgtype);
     int Write(const std::string& msg, int msgtype);
+    int Write(const std::stringstream& msg, int msgtype) {
+      return Write(msg.str(), msgtype);
+    }
     int Write(const char msg[], int msgtype, int LINE, const char FILE[],
       const char method[]);
     int Write(const std::string& msg, int msgtype, int LINE, const char FILE[],
       const char method[]);
+    int Write(const std::stringstream& msg, int msgtype, int LINE, const char FILE[],
+      const char method[]) {
+      return Write(msg.str(), msgtype, LINE, FILE, method);
+    }
     
 // !PUBLIC Variables:          
     std::FILE *ESMC_LogFile;
