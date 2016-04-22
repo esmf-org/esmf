@@ -35,6 +35,7 @@
 
 #include <cstdio>
 #include <string>
+#include <sstream>
 
 namespace ESMCI{
 
@@ -90,6 +91,10 @@ private:
       const char FILE[], const char method[], int *rcToReturn);
     bool MsgFoundError(int rcToCheck, const std::string& msg, int LINE,
       const char FILE[], const char method[], int *rcToReturn);
+    bool MsgFoundError(int rcToCheck, const std::stringstream& msg, int LINE,
+      const char FILE[], const char method[], int *rcToReturn) {
+      return MsgFoundError(rcToCheck, msg.str(), LINE, FILE, method, rcToReturn);
+    }
     void Open(const char filename[]);
     int Set(int flush);
     int Write(const char msg[], int msgtype);
