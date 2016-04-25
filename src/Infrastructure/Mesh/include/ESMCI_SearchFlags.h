@@ -14,6 +14,11 @@
 
 namespace ESMCI {
 
+// Regrid Status return
+#define ESMCI_REGRIDSTATUS_OUTSIDE_SRC
+#define ESMCI_REGRIDSTATUS_SRC_MASKED
+#define ESMCI_REGRIDSTATUS_DST_MASKED
+
 
 // What to do if dest points aren't found
 #define ESMCI_UNMAPPEDACTION_ERROR  0

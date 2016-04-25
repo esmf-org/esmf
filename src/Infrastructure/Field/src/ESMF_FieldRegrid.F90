@@ -330,14 +330,17 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                     routehandle, &
                     factorList, factorIndexList, & 
                     weights, indices, &  ! DEPRECATED ARGUMENTS
-                     srcFracField, dstFracField, unmappedDstList, rc)
+                    srcFracField, dstFracField, &
+                    dstStatusField, &
+                    unmappedDstList, &
+                    rc)
 !      
 ! !ARGUMENTS:
       type(ESMF_Field),               intent(in)              :: srcField
       type(ESMF_Field),               intent(inout)           :: dstField
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer(ESMF_KIND_I4),          intent(in),    optional :: srcMaskValues(:)
-      integer(ESMF_KIND_I4),          intent(in),    optional :: dstMaskValues(:)
+       integer(ESMF_KIND_I4),          intent(in),    optional :: dstMaskValues(:)
       type(ESMF_RegridMethod_Flag),   intent(in),    optional :: regridmethod
       type(ESMF_PoleMethod_Flag),     intent(in),    optional :: polemethod
       integer,                        intent(in),    optional :: regridPoleNPnts
@@ -354,6 +357,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer(ESMF_KIND_I4), pointer, optional :: indices(:,:) ! DEPRECATED ARG
       type(ESMF_Field),               intent(inout), optional :: srcFracField
       type(ESMF_Field),               intent(inout), optional :: dstFracField
+      type(ESMF_Field),               intent(inout), optional :: dstStatusField
       integer(ESMF_KIND_I4),          pointer,       optional :: unmappedDstList(:)
       integer,                        intent(out),   optional :: rc 
 !
@@ -382,6 +386,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !               a sphere.
 ! \item[6.3.0rp1] Added argument {\tt normType}. This argument allows the user to 
 !               control the type of normalization done during conservative weight generation. 
+! \item[7.1.0] Added argument {\tt dstStatusField}. This argument allows the user to 
+!              receive information about what happened to each location in the destination
+!              Field during regridding. 
 ! \end{description}
 ! \end{itemize}
 !
@@ -420,7 +427,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     \item [{[srcMaskValues]}]
 !           Mask information can be set in the Grid (see~\ref{sec:usage:items}) or Mesh (see~\ref{sec:mesh:mask}) 
 !           upon which the {\tt srcField} is built. The {\tt srcMaskValues} argument specifies the values in that 
-!           mask information which indicate a source point should be masked out. In other words, a location is masked if and only if the
+!           mask information which indicate a source point should be masked out. In other words, a locati on is masked if and only if the
 !           value for that location in the mask information matches one of the values listed in {\tt srcMaskValues}.  
 !           If {\tt srcMaskValues} is not specified, no masking will occur. 
 !     \item [{[dstMaskValues]}]
@@ -522,7 +529,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     parameter is determined internally using the auto-tuning scheme. In this
 !     case the {\tt pipelineDepth} argument is re-set to the internally
 !     determined value on return. Auto-tuning is also used if the optional 
-!     {\tt pipelineDepth} argument is omitted.
+  !     {\tt pipelineDepth} argument is omitted.
 !     \item [{[routehandle]}]
 !           The communication handle that implements the regrid operation and that can be used later in 
 !           the {\tt ESMF\_FieldRegrid()} call. The {\tt routehandle} is optional so that if the 
@@ -560,10 +567,16 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !           valid when regridmethod is {\tt ESMF\_REGRIDMETHOD\_CONSERVE}.
 !           This Field needs to be created on the same location (e.g staggerloc) 
 !           as the dstField. It is important to note that the current implementation
-!           of conservative regridding doesn't normalize the interpolation weights by the destination fraction. This means that for a destination
+!           of conservative regridding doesn't normalize the interpolation weights by the destination fraction. This   means that for a destination
 !           grid which only partially overlaps the source grid the destination field which is output from the 
 !           regrid operation should be divided by the corresponding destination fraction to yield the 
 !           true interpolated values for cells which are only partially covered by the  source grid. 
+!     \item [{[dstStatusField]}] 
+!           An ESMF Field which outputs a status value for each destination location.
+!           Section~\ref{opt:regridstatus} indicates the meaning of each value. The Field needs to 
+!           be built on the same grid-location (e.g. staggerloc) in the same Grid, Mesh, or LocStream as the {\tt dstField} argument. 
+!           The Field also needs to be of typekind {\tt ESMF\_TYPEKIND\_I4}.  This option currently doesn't work with 
+!           the {\tt ESMF\_REGRIDMETHOD\_NEAREST\_DTOS} regrid method.
 !     \item [{[unmappedDstList]}] 
 !           The list of the sequence indices for locations in {\tt dstField} which couldn't be mapped the {\tt srcField}. 
 !           The list on each PET only contains the unmapped locations for the piece of the {\tt dstField} on that PET. 
@@ -593,7 +606,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         type(ESMF_StaggerLoc) :: fracStaggerLoc
          integer              :: gridDimCount
         type(ESMF_PoleMethod_Flag):: localpolemethod
-        integer              :: localRegridPoleNPnts
+         integer              :: localRegridPoleNPnts
         logical              :: srcIsLatLonDeg, dstIsLatLonDeg
         integer              :: srcIsSphere, dstIsSphere
         type(ESMF_RegridConserve) :: regridConserveG2M
@@ -606,6 +619,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         logical :: srcDual, src_pl_used, dst_pl_used
         type(ESMF_PointList) :: dstPointList, srcPointList
         type(ESMF_LocStream) :: dstLocStream, srcLocStream
+        logical :: hasStatusArray
+        type(ESMF_Array) :: statusArray
+        type(ESMF_TypeKind_Flag) :: typekind
+
 
 !        real(ESMF_KIND_R8) :: beg_time, end_time
 !        call ESMF_VMWtime(beg_time)
@@ -631,6 +648,17 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
              ESMF_CONTEXT, rcToReturn=rc)) return
         endif
+
+        ! process status field argument
+        hasStatusArray=.false.
+        if (present(dstStatusField)) then
+           call ESMF_FieldGet(dstStatusField, array=statusArray, rc=localrc) 
+           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+             ESMF_CONTEXT, rcToReturn=rc)) return
+ 
+           hasStatusArray=.true.
+        endif
+
 
         ! global vm for now
         call ESMF_VMGetGlobal(vm, rc=localrc)
@@ -660,8 +688,23 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             return
         endif
 
+
+        ! Error check dstStatusField
+        if (present(dstStatusField)) then
+           call ESMF_FieldGet(dstStatusField, typekind=typekind, rc=localrc)
+           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rcToReturn=rc)) return
+           if (typekind .ne. ESMF_TYPEKIND_I4) then
+              call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, & 
+                   msg=" dstStatusField must have typekind = ESMF_TYPEKIND_I4.",  & 
+                   ESMF_CONTEXT, rcToReturn=rc) 
+              return
+           endif
+        endif
+
+
         ! Init variables
-        srcDual=.false.
+         srcDual=.false.
         src_pl_used=.false.
 	dst_pl_used=.false.
 
@@ -765,7 +808,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         else if (lregridScheme .eq. ESMF_REGRID_SCHEME_REGION3D) then
            srcIsSphere = 0
            srcIsLatLonDeg=.true.
-           dstIsSphere = 0
+            dstIsSphere = 0
            dstIsLatLonDeg=.true.
         else if (lregridScheme .eq. ESMF_REGRID_SCHEME_DCON3D) then
            srcIsSphere = 0
@@ -1121,12 +1164,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                                   localNormType, &
                                   localpolemethod, localRegridPoleNPnts, &
                                   lregridScheme, &
+                                  hasStatusArray, statusArray, &
                                   unmappedaction, &
                                   localIgnoreDegenerate, &
                                   srcTermProcessing, &
                                   pipeLineDepth, &
                                   routehandle, &
-                                  tmp_indices, tmp_weights, unmappedDstList, localrc)
+                                  tmp_indices, tmp_weights, &
+                                  unmappedDstList, &
+                                  localrc)
 
            if (ESMF_LogFoundError(localrc, &
              ESMF_ERR_PASSTHRU, &
@@ -1150,6 +1196,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                                   localNormType, &
                                   localpolemethod, localRegridPoleNPnts, &
                                   lregridScheme, &
+                                  hasStatusArray, statusArray, &
                                   unmappedaction, &
                                   localIgnoreDegenerate, &
                                   srcTermProcessing, &

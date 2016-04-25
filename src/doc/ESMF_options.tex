@@ -47,7 +47,7 @@ The valid values are:
 	\item[ESMF\_ATTRECONCILE\_ON]
 	Attribute reconciliation will be turned on.
 	\item[ESMF\_ATTRECONCILE\_OFF]
-	Attribute reconciliation will be turned off.
+ 	Attribute reconciliation will be turned off.
 \end{description}
 
 
@@ -96,7 +96,7 @@ The type of this flag is:
 The valid values are:
 \begin{description}
 
-\item [ESMF\_CONTEXT\_OWN\_VM]
+ \item [ESMF\_CONTEXT\_OWN\_VM]
          The component is running in its own, separate VM context. Resources
          are inherited from the parent but can be arranged to fit the
          component's requirements.
@@ -142,7 +142,7 @@ Indicates which type of copy behavior is used when copying ESMF objects.
 The type of this flag is:
 
 {\tt type(ESMF\_Copy\_Flag)}
-
+ 
 The valid values are:
 \begin{description}
 	\item[ESMF\_COPY\_ALIAS]
@@ -191,7 +191,7 @@ The valid values are:
       Divide elements over DEs. Assign the rest of this division to the first
       DE.
 \item [ESMF\_DECOMP\_RESTLAST]
-      Divide elements over DEs. Assign the rest of this division to the last DE.
+       Divide elements over DEs. Assign the rest of this division to the last DE.
 \end{description}
 
 \subsection{ESMF\_DIRECTION}
@@ -240,7 +240,7 @@ The valid values are:
 \label{const:geomtype}
 
 {\sf DESCRIPTION:\\}
-Different types of geometries upon which an ESMF Field or ESMF Fieldbundle may
+ Different types of geometries upon which an ESMF Field or ESMF Fieldbundle may
 be built. 
 
 The type of this flag is:
@@ -289,7 +289,7 @@ The valid values are:
       space starts at the global lower bound for each DE.
 \item [ESMF\_INDEX\_USER]
       Indicates that the DE-local index bounds are explicitly set by the user.
-\end{description}
+ \end{description}
 
 \subsection{ESMF\_IOFMT}
 \label{opt:iofmtflag}
@@ -338,7 +338,7 @@ The type of this flag is:
 
 The valid values are:
 \begin{description}
-\item [.true.]
+ \item [.true.]
       PIO features are enabled..
 \item [.false.]
       PIO  features are not enabled.
@@ -387,7 +387,7 @@ The valid values are:
 
 {\sf DESCRIPTION:\\}
 Named constants to be used as {\em kind-parameter} in Fortran variable
-declarations. For example:
+ declarations. For example:
 \begin{verbatim}
   integer(ESMF_KIND_I4)       :: integerVariable
   integer(kind=ESMF_KIND_I4)  :: integerVariable
@@ -436,7 +436,7 @@ The type of this flag is:
 {\tt type(ESMF\_LineType\_Flag)}
 
 The valid values are:
-\begin{description}
+ \begin{description}
 \item [ESMF\_LINETYPE\_CART]
    Cartesian line. When this option is specified distances are calculated in a straight line through the 3D Cartesian space
    in which the sphere is embedded. Cells are approximated by 3D planes bounded by 3D Cartesian lines between their corner vertices. 
@@ -485,7 +485,7 @@ The valid values are:
 \subsection{ESMF\_MESHOP}
 \label{const:meshop}
 {\sf DESCRIPTION:\\}  
-Specifies the spatial operation with two source Meshes, treating the Meshes as point sets.
+ Specifies the spatial operation with two source Meshes, treating the Meshes as point sets.
 
 The type of this flag is:
 
@@ -533,7 +533,7 @@ The valid values are:
 {\tt type(ESMF\_NormType\_Flag)}
 
 The valid values are:
-\begin{description}
+ \begin{description}
 \item [ESMF\_NORMTYPE\_DSTAREA]
  Destination area normalization. Here the weights are calculated by dividing the area of overlap of the source and 
  destination cells by the area of the entire destination cell. In other words, the weight is the fraction of the 
@@ -636,6 +636,34 @@ The valid values are:
       In this version of nearest neighbor interpolation each source point is mapped to the closest destination point. A given destination point may receive input from multiple source points, but no source point will go to more than one destination point. 
 \item [ESMF\_REGRIDMETHOD\_CONSERVE]
       First order conservative interpolation. Value of a destination cell is the weighted sum of the values of the source cells that it overlaps. The weights are determined by the amount the source cell overlaps the destination cell. Will typically give less accurate approximations to values than the other interpolation methods, however, will do a much better job preserving the integral of the value between the source and destination.  Needs corner coordinate values to be provided in the Grid. Currently only works for Fields created on the Grid center stagger (or the Mesh element location). 
+\end{description}
+
+
+\subsection{ESMF\_REGRIDSTATUS}
+\label{opt:regridstatus}
+
+{\sf DESCRIPTION:\\}  
+ These values can be output during regridding (e.g. from {\tt ESMF\_FieldRegridStore()} via the {\tt dstStatusField} argument). They indicate the status of each destination location.
+
+The type of this flag is:
+
+{\tt integer(ESMF\_KIND\_I4)}
+
+The valid values for all regrid methods are:
+\begin{description}
+\item [ESMF\_REGRIDSTATUS\_DSTMASKED] The destination location is masked, so no regridding has been peformed on it. 
+\item [ESMF\_REGRIDSTATUS\_SRCMASKED] The destination location is within a masked part of the source grid, so no regridding has been performed on it. 
+\item [ESMF\_REGRIDSTATUS\_OUTSIDE] The destination location is outside the source grid, so no regridding has been performed on it. 
+\item [ESMF\_REGRIDSTATUS\_MAPPED] The destination location is within the unmasked source grid, and so has been regridded (i.e. there is an entry for it within the factorIndexList or routeHandle). 
+\end{description}
+
+In addition to the above, regridding using the conservative method can result in other values. The reason for this is that in that method one destination cell can overlap multiple source cells, so a single destination can have a combination of values.  
+The following are the additional values that apply to the conservative method:
+\begin{description}
+\item [ESMF\_REGRIDSTATUS\_SMSK\_OUT] The destination cell overlaps a masked source cell, and extends outside the source grid. 
+\item [ESMF\_REGRIDSTATUS\_SMSK\_MP] The destination cell overlaps a masked source cell, and an unmasked source cell. (Because it overlaps with the unmasked source grid, there will be an entry for the destination cell within the factorIndexList or routeHandle).  
+\item [ESMF\_REGRIDSTATUS\_OUT\_MP] The destination cell overlaps an unmasked source cell, and extends outside the source grid.  (Because it overlaps with the unmasked source grid, there will be an entry for the destination cell within the factorIndexList or routeHandle). 
+\item [ESMF\_REGRIDSTATUS\_SMSK\_OUT\_MP] The destination cell overlaps a masked source cell, an unmasked source cell, and extends outside the source grid. (Because it overlaps with the unmasked source grid, there will be an entry for the destination cell within the factorIndexList or routeHandle).  
 \end{description}
 
 
@@ -817,7 +845,7 @@ The valid values are:
          For threaded components the calling PETs
          of the parent component will not be blocked and return immediately
          after initiating the requested child component method. In this
-         scenario parent and child components will run concurrently in
+          scenario parent and child components will run concurrently in
          identical VASs. This is the most complex mode of operation.
          It is unsafe to modify or use VAS local data that
          may be accessed by concurrently running components until the child

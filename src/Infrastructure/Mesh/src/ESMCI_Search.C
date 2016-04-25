@@ -11,6 +11,7 @@
 //==============================================================================
 #include <Mesh/include/ESMCI_Search.h>
 #include <Mesh/include/ESMCI_MeshTypes.h>
+#include <Mesh/include/ESMCI_MeshRegrid.h>
 #include <Mesh/include/ESMCI_MeshObjTopo.h>
 #include <Mesh/include/ESMCI_Mapping.h>
 #include <Mesh/include/ESMCI_MeshObj.h>
@@ -225,16 +226,16 @@ public:
 }
 
 struct OctSearchNodesData {
-
-Search_node_result snr;
-bool investigated;
-double coords[3];
-double best_dist;
-MEField<> *src_cfield;
-MEField<> *src_mask_field_ptr;
-MeshObj *elem;
-bool is_in;
+  Search_node_result snr;
+  bool investigated;
+  double coords[3];
+  double best_dist;
+  MEField<> *src_cfield;
+  MEField<> *src_mask_field_ptr;
+  MeshObj *elem;
+  bool is_in;
   bool elem_masked;
+  bool set_dst_status;
 };
 
 static int found_func(void *c, void *y) {
@@ -283,7 +284,7 @@ static int found_func(void *c, void *y) {
 
     // Instead of the above, if this element is masked then skip altogether
     // this prevents problems with bad coords in masked elements
-    if (elem_masked) return 0; 
+    if (!si.set_dst_status && elem_masked) return 0; 
 
     // Do the is_in calculation
   const MappingBase &map = GetMapping(elem);
@@ -701,7 +702,7 @@ BBox bbox_from_pl(PointList &dst_pl) {
 
 // The main routine
 // dst_pl is assumed to only contain non-masked points
-  void OctSearch(const Mesh &src, PointList &dst_pl, MAP_TYPE mtype, UInt dst_obj_type, int unmappedaction, SearchResult &result, double stol, std::vector<int> *revised_dst_loc, OTree *box_in) {
+  void OctSearch(const Mesh &src, PointList &dst_pl, MAP_TYPE mtype, UInt dst_obj_type, int unmappedaction, SearchResult &result, bool set_dst_status, WMat &dst_status, double stol, std::vector<int> *revised_dst_loc, OTree *box_in) {
     Trace __trace("OctSearch(const Mesh &src, PointList &dst_pl, MAP_TYPE mtype, UInt dst_obj_type, SearchResult &result, double stol, std::vector<const MeshObj*> *revised_dst_loc, OTree *box_in)");
 
   if (dst_pl.get_curr_num_pts() == 0)
@@ -777,6 +778,7 @@ BBox bbox_from_pl(PointList &dst_pl) {
     // Get info out of point list
     const double *pnt_crd=dst_pl.get_coord_ptr(loc);
     int pnt_id=dst_pl.get_id(loc);
+
     
     // Calc min max box around point 
     double pmin[3], pmax[3];    
@@ -797,6 +799,7 @@ BBox bbox_from_pl(PointList &dst_pl) {
     si.is_in=false;
     si.elem_masked=false;
     si.elem=NULL;  
+    si.set_dst_status=set_dst_status; 
 
     // The point coordinates.
     si.coords[0] = pnt_crd[0]; si.coords[1] = pnt_crd[1]; si.coords[2] = (sdim == 3 ? pnt_crd[2] : 0.0);
@@ -817,6 +820,24 @@ BBox bbox_from_pl(PointList &dst_pl) {
       again.push_back(loc);
     } else {
       if (si.elem_masked) {
+        // Mark this as unmapped due to src masking
+        if (set_dst_status) {
+           int dst_id=si.snr.dst_gid;
+
+           // Set col info
+           WMat::Entry col(ESMC_REGRID_STATUS_SRC_MASKED,
+                               0, 0.0, 0);           
+
+           // Set row info
+           WMat::Entry row(dst_id, 0, 0.0, 0);
+           
+           // Put weights into weight matrix
+           dst_status.InsertRowMergeSingle(row, col);  
+        }
+        
+        // This is actually handled at the top of regridding now, so that
+        // we have all the destination results on their home processor, but leave
+        // this in for now until we can take it out everywhere. 
 	if (unmappedaction == ESMCI_UNMAPPEDACTION_ERROR) {
 	  Throw() << " Some destination points cannot be mapped to source grid";
 	} else if (unmappedaction == ESMCI_UNMAPPEDACTION_IGNORE) {
@@ -825,6 +846,21 @@ BBox bbox_from_pl(PointList &dst_pl) {
 	  Throw() << " Unknown unmappedaction option";
 	}
       } else {
+        // Mark this as mapped
+        if (set_dst_status) {
+           int dst_id=si.snr.dst_gid;
+
+           // Set col info
+           WMat::Entry col(ESMC_REGRID_STATUS_MAPPED, 
+                               0, 0.0, 0);           
+
+           // Set row info
+           WMat::Entry row(dst_id, 0, 0.0, 0);
+           
+           // Put weights into weight matrix
+           dst_status.InsertRowMergeSingle(row, col);  
+        }
+
 	Search_result sr; sr.elem = si.elem;
 	std::set<Search_result>::iterator sri =
 	  tmp_sr.lower_bound(sr);
@@ -857,6 +893,26 @@ BBox bbox_from_pl(PointList &dst_pl) {
 
   if (!again.empty()) {
      if (stol > 1e-6) {
+ /* XMRKX */
+       // Mark anything that hasn't been mapped as unmapped
+       if (set_dst_status) {
+         for (UInt p = 0; p < again.size(); ++p) {
+           int loc = again[p];
+           int dst_id=dst_pl.get_id(loc);
+
+           // Set col info
+           WMat::Entry col(ESMC_REGRID_STATUS_OUTSIDE, 0, 
+                               0.0, 0);
+           
+           // Set row info
+           WMat::Entry row(dst_id, 0, 0.0, 0);
+           
+           // Put weights into weight matrix
+           dst_status.InsertRowMergeSingle(row, col);  
+         }
+       }
+
+
 	if (unmappedaction == ESMCI_UNMAPPEDACTION_ERROR) {
 	  Throw() << " Some destination points cannot be mapped to source grid";	} else if (unmappedaction == ESMCI_UNMAPPEDACTION_IGNORE) {
 	  // don't do anything
@@ -864,7 +920,7 @@ BBox bbox_from_pl(PointList &dst_pl) {
 	  Throw() << " Unknown unmappedaction option";
 	}
      } else {
-      OctSearch(src, dst_pl, mtype, dst_obj_type, unmappedaction, result, stol*1e+2, &again, box);
+       OctSearch(src, dst_pl, mtype, dst_obj_type, unmappedaction, result, set_dst_status, dst_status, stol*1e+2, &again, box);
      }
   }
 

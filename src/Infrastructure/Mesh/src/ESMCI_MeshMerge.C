@@ -116,8 +116,12 @@ void MeshMerge(Mesh &srcmesh, Mesh &dstmesh, Mesh **meshpp) {
   int npet = VM::getCurrent(&rc)->getPetCount();
   // No need to compute rendezvous meshes running uni. Make sure things are scoped correctly.
   if(npet > 1){
+    bool tmp_set_dst_status=false;
+    IWeights tmp_dst_status;
+
     // Build the rendezvous meshes and compute search result
-    interp = new Interp(&dstmesh, NULL, &srcmesh, NULL, NULL, true, Interp::INTERP_CONSERVE, MAP_TYPE_CART_APPROX, unmappedaction);
+    interp = new Interp(&dstmesh, NULL, &srcmesh, NULL, NULL, true, Interp::INTERP_CONSERVE, tmp_set_dst_status, tmp_dst_status, MAP_TYPE_CART_APPROX, unmappedaction);
+    
 
     // Get the rendevous meshes, the meaning of dst/src is flipped in interp
     mesh_dst = &(interp->get_grend().GetSrcRend());
@@ -302,8 +306,11 @@ void MeshCreateDiff(Mesh &srcmesh, Mesh &dstmesh, Mesh **meshpp, double threshol
   int npet = VM::getCurrent(&rc)->getPetCount();
   // No need to compute rendezvous meshes running uni. Make sure things are scoped correctly.
   if(npet > 1){
+    bool tmp_set_dst_status=false;
+    IWeights tmp_dst_status;
+    
     // Build the rendezvous meshes and compute search result
-    interp = new Interp(&dstmesh, NULL, &srcmesh, NULL, NULL, true, Interp::INTERP_CONSERVE, MAP_TYPE_CART_APPROX, unmappedaction);
+    interp = new Interp(&dstmesh, NULL, &srcmesh, NULL, NULL, true, Interp::INTERP_CONSERVE, tmp_set_dst_status, tmp_dst_status, MAP_TYPE_CART_APPROX, unmappedaction);
 
     // Get the rendevous meshes, the meaning of dst/src is flipped in interp
     mesh_dst = &(interp->get_grend().GetSrcRend());

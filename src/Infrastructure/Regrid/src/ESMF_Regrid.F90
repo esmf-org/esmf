@@ -153,6 +153,8 @@ end function my_xor
                  normType, &
                   polemethod, regridPoleNPnts, &
                  regridScheme, &
+                 hasStatusArray, &
+                 statusArray, &
                  unmappedaction, &
                  ignoreDegenerate, &
                  srcTermProcessing, &
@@ -185,6 +187,8 @@ end function my_xor
       integer(ESMF_KIND_I4), pointer, optional         :: indices(:,:)
       real(ESMF_KIND_R8), pointer, optional            :: weights(:)
       integer(ESMF_KIND_I4),       pointer, optional   :: unmappedDstList(:)
+      logical                     :: hasStatusArray
+      type(ESMF_Array)            :: statusArray
       integer,                  intent(  out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -235,6 +239,9 @@ end function my_xor
        logical :: isMemFreed
        integer :: localIgnoreDegenerate
        integer :: src_pl_used_int, dst_pl_used_int
+       integer ::  has_statusArrayInt
+
+
 
        ! Logic to determine if valid optional args are passed.  
 
@@ -323,6 +330,13 @@ end function my_xor
           dst_pl_used_int=1
        endif
 
+       ! Get statusArray if present and set appropriate flag
+       has_statusArrayInt=0
+       if (hasStatusArray) then
+          has_statusArrayInt=1
+       endif
+
+
         ! Call through to the C++ object that does the work
         call c_ESMC_regrid_create(vm, srcMesh%this, srcArray, srcPointList, src_pl_used_int, &
                    dstMesh%this, dstArray, dstPointList, dst_pl_used_int, &
@@ -336,6 +350,7 @@ end function my_xor
                    routehandle, has_rh, has_iw, &
                    nentries, tweights, &
                    has_udl, num_udl, tudl, &
+                   has_statusArrayInt, statusArray, &
                    localrc)
 
        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &

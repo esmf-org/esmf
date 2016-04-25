@@ -33,20 +33,20 @@
 #include "Mesh/include/ESMCI_Extrapolation.h"
 #include "Mesh/include/ESMCI_MathUtil.h"
 #include "Mesh/include/ESMCI_MathUtil.h"
-#include "Mesh/include/ESMCI_Phedra.h"
+ #include "Mesh/include/ESMCI_Phedra.h"
 #include "Mesh/include/ESMCI_Mesh_Regrid_Glue.h"
 #include "Mesh/include/ESMCI_MeshMerge.h"
 
 #include <iostream>
 #include <vector>
 #include <map>
-
+ 
   //------------------------------------------------------------------------------
 //BOP
 // !DESCRIPTION:
 //
 //
-//EOP
+ //EOP
 //-------------------------------------------------------------------------
 
 
@@ -68,7 +68,9 @@ static void translate_split_dst_elems_in_wts(Mesh *dstmesh, int num_entries,
 static void change_wts_to_be_fracarea(Mesh *mesh, int num_entries,
                                int *iientries, double *factors);
 
-
+static void copy_rs_from_WMat_to_Array(WMat *wmat, ESMCI::Array *array);
+static void copy_cnsv_rs_from_WMat_to_Array(WMat *wmat, ESMCI::Array *array);
+ 
 // external C functions
  extern "C" void FTN_X(c_esmc_arraysmmstore)(ESMCI::Array **srcArray,
     ESMCI::Array **dstArray, ESMCI::RouteHandle **routehandle,
@@ -95,12 +97,13 @@ void ESMCI_regrid_create(ESMCI::VM **vmpp,
                      ESMCI::RouteHandle **rh, int *has_rh, int *has_iw,
                      int *nentries, ESMCI::TempWeights **tweights,
                      int *has_udl, int *_num_udl, ESMCI::TempUDL **_tudl, 
+                     int *_has_statusArray, ESMCI::Array **_statusArray,
                      int*rc) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_regrid_create()" 
   Trace __trace(" FTN_X(regrid_test)(ESMCI::VM **vmpp, ESMCI::Grid **gridsrcpp, ESMCI::Grid **griddstcpp, int*rc");
 
-
+ 
   ESMCI::VM *vm = *vmpp;
   ESMCI::Array &srcarray = **arraysrcpp;
   ESMCI::Array &dstarray = **arraydstpp;
@@ -109,11 +112,13 @@ void ESMCI_regrid_create(ESMCI::VM **vmpp,
   int petCount = vm->getPetCount();
 
   Mesh *srcmesh = *meshsrcpp;
-
-
   Mesh *dstmesh = *meshdstpp;
+
   PointList *dstpointlist = *pldstpp;
   PointList *srcpointlist = *plsrcpp;
+
+  int has_statusArray=*_has_statusArray;
+  ESMCI::Array *statusArray=*_statusArray;
 
   // Old Regrid conserve turned off for now
   int regridConserve=ESMC_REGRID_CONSERVE_OFF;
@@ -135,7 +140,7 @@ void ESMCI_regrid_create(ESMCI::VM **vmpp,
     bool ignoreDegenerate=false;
     if (*_ignoreDegenerate == 1) ignoreDegenerate=true;
 
-    //// Precheck Meshes for errors
+     //// Precheck Meshes for errors
     bool degenerate=false;
  
     // If not ignoring, check for degenerate elements
@@ -181,9 +186,17 @@ void ESMCI_regrid_create(ESMCI::VM **vmpp,
 
     // Compute Weights matrix
     IWeights wts;
+
     // Turn off unmapped action checking in regrid because it's local to a proc, and can therefore
     // return false positives for multiproc cases, instead check below after gathering weights to a proc. 
     int temp_unmappedaction=ESMCI_UNMAPPEDACTION_IGNORE;
+
+    // Setup Destination status
+    bool set_dst_status=false;
+    if (has_statusArray) {
+      set_dst_status=true;
+    }
+    WMat dst_status;
 
 
     // to do NEARESTDTOS just do NEARESTSTOD and invert results
@@ -191,20 +204,19 @@ void ESMCI_regrid_create(ESMCI::VM **vmpp,
 
       if(!online_regrid(srcmesh, srcpointlist, dstmesh, dstpointlist, wts, &regridConserve, 
 			regridMethod, regridPoleType, regridPoleNPnts, 
-                        regridScheme, map_type, &temp_unmappedaction)) {
+                        regridScheme, map_type, &temp_unmappedaction, 
+                        set_dst_status, dst_status)) {
         Throw() << "Online regridding error" << std::endl;
       }
-
-
-
-
     } else {
       int tempRegridMethod=ESMC_REGRID_METHOD_NEAREST_SRC_TO_DST;
 
       if(!online_regrid(dstmesh, dstpointlist, srcmesh, srcpointlist, wts, &regridConserve, 
 			&tempRegridMethod, regridPoleType, regridPoleNPnts, 
-                        regridScheme, map_type, &temp_unmappedaction))
+                        regridScheme, map_type, &temp_unmappedaction,
+                        set_dst_status, dst_status)) {
         Throw() << "Online regridding error" << std::endl;
+      }
     }
 #ifdef PROGRESSLOG_on
     ESMC_LogDefault.Write("c_esmc_regrid_create(): Done with weight generation... check unmapped dest,", ESMC_LOGMSG_INFO);
@@ -365,6 +377,15 @@ void ESMCI_regrid_create(ESMCI::VM **vmpp,
     ///// If conservative then modify weights according to norm type //////
     if (*regridMethod==ESMC_REGRID_METHOD_CONSERVE) {
       if (*norm_type==ESMC_NORM_TYPE_FRACAREA) change_wts_to_be_fracarea(dstmesh, num_entries, iientries, factors);
+    }
+
+    // Copy status info from WMat to Array
+    if (has_statusArray) {
+      if (*regridMethod==ESMC_REGRID_METHOD_CONSERVE) {
+        copy_cnsv_rs_from_WMat_to_Array(&dst_status, statusArray);
+      } else {
+        copy_rs_from_WMat_to_Array(&dst_status, statusArray);
+      }
     }
 
 #ifdef PROGRESSLOG_on
@@ -2032,6 +2053,311 @@ void ESMCI_xgrid_getfrac2(Grid **gridpp,
   // Set return code 
   if (rc!=NULL) *rc = ESMF_SUCCESS;
 
+}
+
+
+void copy_rs_from_WMat_to_Array(WMat *wmat, ESMCI::Array *array) {
+
+  // Look at ESMCI_Grid.C getGlobalID() for how to get sequence ids
+
+  // Get Distgrid
+  DistGrid *distgrid=array->getDistGrid();
+
+  // Get reduced dimCount
+  int redDimCount=array->getRank()-array->getTensorCount();
+
+  // Only support up to a certian dim in this subroutine 
+#define CWTOA_MAXDIM 4
+  if (redDimCount > CWTOA_MAXDIM) {
+    int localrc;
+    if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
+        " Regridding only supports info Fields (e.g. dstStatusField) of dimensions 4 and below ",
+                                     ESMC_CONTEXT, &localrc)) throw localrc;
+  }
+
+  // Get computational bound arrays
+  const int *clb_array=array->getComputationalLBound();
+  const int *cub_array=array->getComputationalUBound();
+
+  // Get exclusive bound arrays
+  const int *elb_array=array->getExclusiveLBound();
+
+  // Get number of localDEs
+  int localDECount=distgrid->getDELayout()->getLocalDeCount();
+
+  // Loop over localDes
+  for (int lDE=0; lDE < localDECount; lDE++) {
+    // Only support up to 4D for regridding right now 
+    int lbnd[CWTOA_MAXDIM]={0,0,0,0}; 
+    int ubnd[CWTOA_MAXDIM]={0,0,0,0};
+    int elbnd[CWTOA_MAXDIM]={0,0,0,0};
+    int ind[CWTOA_MAXDIM]={0,0,0,0};
+    int ind_m_elbnd[CWTOA_MAXDIM]={0,0,0,0};
+
+
+    // Get localArray corresponding to this localDE
+    LocalArray *localArray=array->getLocalarrayList()[lDE];
+
+    // Get computational bounds of this DE
+    const int *clb=clb_array+lDE*redDimCount;
+    const int *cub=cub_array+lDE*redDimCount;
+
+    // Get exclusive lower bounds of this DE
+    const int *elb=elb_array+lDE*redDimCount;
+
+    // Copy DE Bounds
+    // NOTE: anything beyond array dimensions will be 0 & 0 so those loops won't iterate
+    for (int i=0; i<redDimCount; i++) {
+      lbnd[i]=clb[i];
+      ubnd[i]=cub[i];
+      elbnd[i]=elb[i];
+    }
+
+
+#if 0
+    // dump whole matrix for debugging
+    int j=0;
+    WMat::WeightMap::iterator wi = wmat->begin_row(), we = wmat->end_row();
+    for (; wi != we; ++wi) {
+        const WMat::Entry &w = wi->first;
+        std::vector<WMat::Entry> &wcol = wi->second;
+
+        printf("%d col_size=%d\n",j,wcol.size());
+
+        const WMat::Entry &wc = wcol[0];
+
+        printf("%d dst_id=%d rs=%d\n",j,w.id,wc.id);
+
+        j++;
+      }
+#endif
+
+    // Loop indices in DE
+    int pos=0;
+    for (int i3=lbnd[3]; i3<=ubnd[3]; i3++) {
+      ind[3]=i3;
+      ind_m_elbnd[3]=i3-elbnd[3];
+    for (int i2=lbnd[2]; i2<=ubnd[2]; i2++) {
+      ind[2]=i2;
+      ind_m_elbnd[2]=i2-elbnd[2];
+    for (int i1=lbnd[1]; i1<=ubnd[1]; i1++) {
+      ind[1]=i1;
+      ind_m_elbnd[1]=i1-elbnd[1];
+     for (int i0=lbnd[0]; i0<=ubnd[0]; i0++) {
+      ind[0]=i0;
+      ind_m_elbnd[0]=i0-elbnd[0];
+
+      // Get sequence index of this point
+      int localrc;
+      UInt seq_ind=distgrid->getSequenceIndexLocalDe(lDE,ind_m_elbnd,6,&localrc);
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+        ESMC_CONTEXT, NULL)) throw localrc;  // bail out with exception
+ /* XMRKX */
+
+      // If it's not in the WMat, then it's been masked out, so init. to masked
+      ESMC_I4 regrid_status=ESMC_REGRID_STATUS_DST_MASKED; 
+
+      // Get regrid_status from WMat
+      WMat::WeightMap::iterator wi = wmat->lower_bound_id_row(seq_ind);
+
+      // If it's not found in the matrix, then just leave at init value
+      if (wi != wmat->weights.end()) {
+
+        // Get information about this entry in the matrix 
+        const WMat::Entry &w = wi->first;        
+        std::vector<WMat::Entry> &wcol = wi->second;
+        
+        // Make sure this entry has the correct id
+        // (If it's not found in the matrix, then just leave at init value)
+        if (w.id == seq_ind) {
+
+          // Make sure there is only one answer
+          if (wcol.size() != 1) {
+            int localrc;
+            if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+                                             " more than one entry found for sequence id",
+                                             ESMC_CONTEXT, &localrc)) throw localrc;
+          }
+
+          // Get the one column entry
+          const WMat::Entry &wc = wcol[0];
+
+          // Get the colum id
+          regrid_status=wc.id;
+        } 
+      } 
+
+      // printf("%d# %d si=%d rs=%d\n",Par::Rank(),pos,seq_ind,regrid_status);
+      pos++;
+
+      // Set regrid_status in local Array
+      localArray->setData(ind, regrid_status);
+    }
+    }
+    }
+    }
+  }
+}
+
+
+void copy_cnsv_rs_from_WMat_to_Array(WMat *wmat, ESMCI::Array *array) {
+  // A small tolerence to take care of rounding effects
+#define ZERO_TOL 1.0E-14
+
+  // Look at ESMCI_Grid.C getGlobalID() for how to get sequence ids
+
+  // Get Distgrid
+  DistGrid *distgrid=array->getDistGrid();
+
+  // Get reduced dimCount
+  int redDimCount=array->getRank()-array->getTensorCount();
+
+  // Only support up to a certian dim in this subroutine 
+#define CWTOA_MAXDIM 4
+  if (redDimCount > CWTOA_MAXDIM) {
+    int localrc;
+    if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
+        " Regridding only supports info Fields (e.g. dstStatusField) of dimensions 4 and below ",
+                                     ESMC_CONTEXT, &localrc)) throw localrc;
+  }
+
+  // Get computational bound arrays
+  const int *clb_array=array->getComputationalLBound();
+  const int *cub_array=array->getComputationalUBound();
+
+  // Get exclusive bound arrays
+  const int *elb_array=array->getExclusiveLBound();
+
+  // Get number of localDEs
+  int localDECount=distgrid->getDELayout()->getLocalDeCount();
+
+  // Loop over localDes
+  for (int lDE=0; lDE < localDECount; lDE++) {
+    // Only support up to 4D for regridding right now 
+    int lbnd[CWTOA_MAXDIM]={0,0,0,0}; 
+    int ubnd[CWTOA_MAXDIM]={0,0,0,0};
+    int elbnd[CWTOA_MAXDIM]={0,0,0,0};
+    int ind[CWTOA_MAXDIM]={0,0,0,0};
+    int ind_m_elbnd[CWTOA_MAXDIM]={0,0,0,0};
+
+
+    // Get localArray corresponding to this localDE
+    LocalArray *localArray=array->getLocalarrayList()[lDE];
+
+    // Get computational bounds of this DE
+    const int *clb=clb_array+lDE*redDimCount;
+    const int *cub=cub_array+lDE*redDimCount;
+
+    // Get exclusive lower bounds of this DE
+    const int *elb=elb_array+lDE*redDimCount;
+
+    // Copy DE Bounds
+    // NOTE: anything beyond array dimensions will be 0 & 0 so those loops won't iterate
+    for (int i=0; i<redDimCount; i++) {
+      lbnd[i]=clb[i];
+      ubnd[i]=cub[i];
+      elbnd[i]=elb[i];
+    }
+
+
+#if 0
+    // dump whole matrix for debugging
+    int j=0;
+    WMat::WeightMap::iterator wi = wmat->begin_row(), we = wmat->end_row();
+    for (; wi != we; ++wi) {
+        const WMat::Entry &w = wi->first;
+        std::vector<WMat::Entry> &wcol = wi->second;
+
+        printf("%d col_size=%d\n",j,wcol.size());
+
+        const WMat::Entry &wc = wcol[0];
+
+        printf("%d dst_id=%d rs=%d\n",j,w.id,wc.id);
+
+        j++;
+      }
+#endif
+
+    // Loop indices in DE
+    int pos=0;
+    for (int i3=lbnd[3]; i3<=ubnd[3]; i3++) {
+      ind[3]=i3;
+      ind_m_elbnd[3]=i3-elbnd[3];
+    for (int i2=lbnd[2]; i2<=ubnd[2]; i2++) {
+      ind[2]=i2;
+      ind_m_elbnd[2]=i2-elbnd[2];
+    for (int i1=lbnd[1]; i1<=ubnd[1]; i1++) {
+      ind[1]=i1;
+      ind_m_elbnd[1]=i1-elbnd[1];
+     for (int i0=lbnd[0]; i0<=ubnd[0]; i0++) {
+      ind[0]=i0;
+      ind_m_elbnd[0]=i0-elbnd[0];
+
+      // Get sequence index of this point
+      int localrc;
+      UInt seq_ind=distgrid->getSequenceIndexLocalDe(lDE,ind_m_elbnd,6,&localrc);
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+        ESMC_CONTEXT, NULL)) throw localrc;  // bail out with exception
+
+      // If it's not in the WMat, then it's been masked out, so init. to masked
+      ESMC_I4 regrid_status=ESMC_REGRID_STATUS_OUTSIDE; 
+
+      // Get regrid_status from WMat
+      WMat::WeightMap::iterator wi = wmat->lower_bound_id_row(seq_ind);
+
+      // If it's not found in the matrix, then just leave at init value
+      if (wi != wmat->weights.end()) {
+
+        // Get information about this entry in the matrix 
+        const WMat::Entry &w = wi->first;        
+        std::vector<WMat::Entry> &wcol = wi->second;
+        
+        // Make sure this entry has the correct id
+        // (If it's not found in the matrix, then just leave at init value)
+        if (w.id == seq_ind) {
+
+          // If there are no entries then it's unmapped, so leave at unmapped and continue
+          if (wcol.size() < 1) continue;
+
+          // If this isn't a masked dst, then process
+          if (wcol[0].idx != ESMC_REGRID_STATUS_DST_MASKED) {
+
+            // Loop through processing 
+            regrid_status=0; // set to 0, so we can put in different statuses
+            double tot_frac_used=0.0;
+            for (UInt j = 0; j < wcol.size(); ++j) {
+              const WMat::Entry &wc = wcol[j];
+
+              //printf("dst_id=%d  type=%d src_id=%d frac=%g\n",w.id,wc.idx,wc.id,wc.value);
+
+              // Set the flag for this type
+              regrid_status |= (ESMC_I4)wc.idx;
+              
+              // Add in the fraction of the cell that's this type
+              tot_frac_used += wc.value;
+            }
+            
+            // If there's any left in the cell, then include an unmapped portion
+            if ((1.0-tot_frac_used) > ZERO_TOL) regrid_status |= ESMC_REGRID_STATUS_OUTSIDE;
+          } else {
+            regrid_status=ESMC_REGRID_STATUS_DST_MASKED;
+          }
+        }
+      }
+
+      // printf("%d# %d si=%d rs=%d\n",Par::Rank(),pos,seq_ind,regrid_status);
+      pos++;
+
+      // Set regrid_status in local Array
+      localArray->setData(ind, regrid_status);
+    }
+    }
+    }
+    }
+
+  }
+#undef ZERO_TOL
+#undef cWtoA_MAXDIM
 }
 
 #undef  ESMC_METHOD

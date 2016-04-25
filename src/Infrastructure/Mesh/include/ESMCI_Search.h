@@ -19,7 +19,7 @@
 #include <Mesh/include/ESMCI_MeshObj.h>
 #include <Mesh/include/ESMCI_Mapping.h>
 #include <Mesh/include/ESMCI_SearchFlags.h>
-
+#include <Mesh/include/ESMCI_WMat.h>
 #include "PointList/include/ESMCI_PointList.h"
 
 #include <vector>
@@ -45,8 +45,8 @@ struct Search_result {
 
   UInt dst_gid;
   UInt src_gid;
-
-
+ 
+ 
   // AN IDEA would be to do some kind of inheritence instead of having nodes and elems in the same struct
 
   bool operator<(const Search_result &rhs) const {
@@ -61,16 +61,15 @@ struct Search_result {
 };
 typedef std::vector<Search_result*> SearchResult;
 
+ void OctSearch(const Mesh &src, PointList &dst_pl, MAP_TYPE mtype, UInt dst_obj_type, int unmappedaction, SearchResult &result, bool set_dst_status, WMat &dst_status, double stol, std::vector<int> *revised_dst_loc=NULL, OTree *box_in=NULL);
 
- void OctSearch(const Mesh &src, PointList &dst_pl, MAP_TYPE mtype, UInt dst_obj_type, int unmappedaction, SearchResult &result, double stol, std::vector<int> *revised_dst_loc=NULL, OTree *box_in=NULL);
-
-  void OctSearchElems(const Mesh &meshA, int unmappedactionA, const Mesh &meshB, int unmappedactionB, 
+void OctSearchElems(const Mesh &meshA, int unmappedactionA, const Mesh &meshB, int unmappedactionB, 
                       double stol, SearchResult &result);
 
 
-void SearchNearestSrcToDst(const PointList &src_pl, const PointList &dst_pl, int unmappedaction, SearchResult &result);
+void SearchNearestSrcToDst(const PointList &src_pl, const PointList &dst_pl, int unmappedaction, SearchResult &result, bool set_dst_status, WMat &dst_status);
 
-void ParSearchNearestSrcToDst(const PointList &src_pl, const PointList &dst_pl, int unmappedaction, SearchResult &result);
+void ParSearchNearestSrcToDst(const PointList &src_pl, const PointList &dst_pl, int unmappedaction, SearchResult &result, bool set_dst_status, WMat &dst_status);
 
 void SearchNearestDstToSrc(const Mesh &src, const Mesh &dst, int unmappedaction, SearchResult &result);
 

@@ -19,6 +19,7 @@
 #include <Mesh/include/ESMCI_OTree.h>
 #include <Mesh/include/ESMCI_Mask.h>
 #include <Mesh/include/ESMCI_ParEnv.h>
+#include <Mesh/include/ESMCI_MeshRegrid.h>
 
 #include "PointList/include/ESMCI_PointList.h"
  
@@ -125,7 +126,7 @@ struct SearchData {
 
 
 // The main routine
-  void SearchNearestSrcToDst(const PointList &src_pl, const PointList &dst_pl, int unmappedaction, SearchResult &result) {
+  void SearchNearestSrcToDst(const PointList &src_pl, const PointList &dst_pl, int unmappedaction, SearchResult &result, bool set_dst_status, WMat &dst_status) {
   Trace __trace("Search(PointList &src_pl, PointList &dst_pl, int unmappedaction, SearchResult &result)");
 
 
@@ -209,7 +210,34 @@ struct SearchData {
       sr->dst_gid=pnt_id;
       sr->src_gid=sd.closest_src_id;
       result.push_back(sr);
+
+      // If necessary, set dst status
+      if (set_dst_status) {
+        // Set col info
+        WMat::Entry col(ESMC_REGRID_STATUS_MAPPED, 
+                        0, 0.0, 0);           
+        
+        // Set row info
+        WMat::Entry row(pnt_id, 0, 0.0, 0);
+        
+        // Put weights into weight matrix
+        dst_status.InsertRowMergeSingle(row, col);  
+      }
+
     } else { // ...otherwise deal with the unmapped point
+      // If necessary, set dst status
+      if (set_dst_status) {
+        // Set col info
+        WMat::Entry col(ESMC_REGRID_STATUS_OUTSIDE, 
+                        0, 0.0, 0);           
+        
+        // Set row info
+        WMat::Entry row(pnt_id, 0, 0.0, 0);
+        
+        // Put weights into weight matrix
+        dst_status.InsertRowMergeSingle(row, col);  
+      }
+
       if (unmappedaction == ESMCI_UNMAPPEDACTION_ERROR) {
         Throw() << " Some destination points cannot be mapped to the source grid";
       } else if (unmappedaction == ESMCI_UNMAPPEDACTION_IGNORE) {
@@ -239,7 +267,7 @@ struct CommData {
   
 
 
-  void ParSearchNearestSrcToDst(const PointList &src_pl, const PointList &dst_pl, int unmappedaction, SearchResult &result) {
+  void ParSearchNearestSrcToDst(const PointList &src_pl, const PointList &dst_pl, int unmappedaction, SearchResult &result, bool set_dst_status, WMat &dst_status) {
     Trace __trace("Search(const PointList &src_pl, const PointList &dst_pl, int unmappedaction, SearchResult &result)");
   //int FindPnts(const Mesh &mesh, int unmappedaction, int dim_pnts, int num_pnts, double *pnts, int *procs, int *gids) {
   //  Trace __trace("FindPnts()");
@@ -702,19 +730,46 @@ struct CommData {
   // Do output based on CommData
   result.clear();
   for (int i=0; i<dst_size; i++) {
+    // Get dst id of point
+    int dst_id=dst_pl.get_id(i);
+
+    // Do stuff depending on if nearest point was found
     if (closest_src_gid[i] > -1) {
 
       // We've found a nearest source point, so add to results list
       Search_result *sr=new Search_result();       
 
-      sr->dst_gid=dst_pl.get_id(i);
+      sr->dst_gid=dst_id;
       sr->src_gid=closest_src_gid[i];
 
       result.push_back(sr);
 
-    } else {  
+      // If necessary, set dst status
+      if (set_dst_status) {
+        // Set col info
+        WMat::Entry col(ESMC_REGRID_STATUS_MAPPED, 
+                        0, 0.0, 0);           
+        
+        // Set row info
+        WMat::Entry row(dst_id, 0, 0.0, 0);
+        
+        // Put weights into weight matrix
+        dst_status.InsertRowMergeSingle(row, col);  
+      }
 
-      //      printf("#%d BAD \n",Par::Rank());
+    } else {  
+      // If necessary, set dst status
+      if (set_dst_status) {
+        // Set col info
+        WMat::Entry col(ESMC_REGRID_STATUS_OUTSIDE, 
+                        0, 0.0, 0);           
+        
+        // Set row info
+        WMat::Entry row(dst_id, 0, 0.0, 0);
+        
+        // Put weights into weight matrix
+        dst_status.InsertRowMergeSingle(row, col);  
+      }
 
       //// check possible error condition
       if (unmappedaction == ESMCI_UNMAPPEDACTION_ERROR) {

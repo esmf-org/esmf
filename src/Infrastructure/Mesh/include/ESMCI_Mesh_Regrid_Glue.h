@@ -62,6 +62,7 @@ void ESMCI_regrid_create(ESMCI::VM **vmpp,
 			 ESMCI::RouteHandle **rh, int *has_rh, int *has_iw,
 			 int *nentries, ESMCI::TempWeights **tweights,
 			 int *has_udl, int *_num_udl, ESMCI::TempUDL **_tudl, 
+                         int *has_statusArray, ESMCI::Array **statusArray,
 			 int*rc);
 
 void ESMCI_regrid_getiwts(ESMCI::VM **vmpp, Grid **gridpp,
