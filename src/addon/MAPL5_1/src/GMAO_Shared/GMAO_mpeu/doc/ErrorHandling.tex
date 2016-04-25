@@ -1,0 +1,76 @@
+% 
+\section{Error Handling}
+%
+The module {\tt m\_die} handles the errors that occur in the code.
+When a problem is encountered, an error message is printed out and 
+the code stops running.
+The main procedures of this modules are:
+
+\noindent {\tt die:} Signals an exception and uses {\tt perr} to point to
+the location and the reason of the exception.
+
+\noindent {\tt perr:} Sends a simple error message to the standard error
+output.
+
+\noindent {\tt MP\_die:} A special die() for MPI errors.
+
+\noindent {\tt MP\_perr:} {\tt perr} for MPI errors, from the module
+   {\tt m\_mpif90}.
+%
+\begin{verbatim}
+EXAMPLE 1:
+  Assume that we want to read input data from a file and for whatever
+  reason (wrong format, missing data, etc.) the reading operation fails.
+
+  Code:
+      use m_die,only : die
+      character(len=*) :: myname
+      integer          :: rc
+      myname = "name_of_my_subroutine"
+      
+      call reading_file(other_arguments, rc)
+      if (rc.ne.0) then
+         call die(myname, 'could not read input file')
+      endif
+
+  Output:
+      name_of_my_subroutine: could not read input file
+
+EXAMPLE 2:
+  Assume that we read from a file a certain number of observations
+  (size of the variable ``rlat''). The code is expecting a number of
+  observations at least equal to ``nobs''.
+
+  Code:
+      use m_die,only : perr
+      character(len*) :: myname
+      integer
+      myname = ``name_of_my_subroutine''
+
+      if (size(rlat)<nobs) &
+         call perr(myname,'nobs',nobs,'size(rlat)',size(rlat))
+
+  Output:
+      name_of_my_subroutine: error, nobs=****, size(rlat)=$$$$
+
+EXAMPLE 3:
+  Here we describe the use of MP_die. We assume that we want to
+  broadcast a variable and a problem occurs.
+ 
+  Code:
+      use m_die,only : MP_die
+      use m_mpif90,only : MP_type
+      character(len=*) :: myname
+      real             :: rbcast(20)
+      integer          :: ier
+      integer          :: root, comm
+      myname = ``name_of_my_subroutine''
+      
+      call MPI_bcast(rbcast,size(rbcast),MP_type(rbcast),root,comm,ier)
+      if(ier/=0) call MP_die(myname,'MPI_bcast()',ier)
+
+  Output:
+      name_of_my_subroutine: MPI_bcast(), error, ierror=ier
+
+\end{verbatim}
+ 

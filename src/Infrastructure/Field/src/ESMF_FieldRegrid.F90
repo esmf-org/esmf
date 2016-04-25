@@ -572,7 +572,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !           regrid operation should be divided by the corresponding destination fraction to yield the 
 !           true interpolated values for cells which are only partially covered by the  source grid. 
 !     \item [{[dstStatusField]}] 
-!           An ESMF Field which outputs a status value for each destination location.
+!           An ESMF Field which outputs a regrid status value for each destination location.
 !           Section~\ref{opt:regridstatus} indicates the meaning of each value. The Field needs to 
 !           be built on the same grid-location (e.g. staggerloc) in the same Grid, Mesh, or LocStream as the {\tt dstField} argument. 
 !           The Field also needs to be of typekind {\tt ESMF\_TYPEKIND\_I4}.  This option currently doesn't work with 

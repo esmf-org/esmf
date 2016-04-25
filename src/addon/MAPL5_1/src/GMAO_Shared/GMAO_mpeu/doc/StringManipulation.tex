@@ -1,0 +1,88 @@
+\section{String Manipulation}
+%
+Three modules are described in this section: {\tt m\_StrTemplate},
+{\tt m\_String} and {\tt m\_chars}.
+
+\noindent
+The moodule {\tt m\_StrTemplate} is a template resolver formatting a 
+string with a string variable and time variables.  
+The format descriptors are similar to those used in the GrADS.
+%
+\begin{verbatim}
+      "%y4"   substitute with a 4 digit year
+      "%y2"   a 2 digit year
+      "%m1"   a 1 or 2 digit month
+      "%m2"   a 2 digit month
+      "%mc"   a 3 letter month in lower cases
+      "%Mc"   a 3 letter month with a leading letter in upper case
+      "%MC"   a 3 letter month in upper cases
+      "%d1"   a 1 or 2 digit day
+      "%d2"   a 2 digit day
+      "%h1"   a 1 or 2 digit hour
+      "%h2"   a 2 digit hour
+      "%h3"   a 3 digit hour (?)
+      "%n2"   a 2 digit minute
+      "%s"    a string variable
+      "%%"    a "%"
+\end{verbatim}
+%
+The main subroutine is {\tt StrTemplate}. It expands a format template 
+to a string.
+%
+\begin{verbatim}
+EXAMPLE 1:
+  Code:
+       use m_StrTemplate,only : StrTemplate
+       character(len=256) :: str               ! output string
+       character(len=*)   :: tmpl              ! format of the template
+     
+       tmpl="%s-cqc-obs.%y4%mc%d2-%h2%n2.ods"
+       call StrTemplate(str,tmpl,xid="test",nymd=20020311,nhms=060000)
+       write*, `` str = '', trim(str)
+
+  Output:
+       str = test-cqc-obs.02mar11-0600.ods
+\end{verbatim}
+
+\noindent
+The module {\tt m\_String} performs the following basic operations
+%
+\begin{itemize}
+\item Convert a string to a variable of characters,
+\item Convert a rank-1 character-array to a rank-0 character,
+\item Convert a character object to a string object,
+\item Convert a string object to a string.
+\end{itemize}
+ 
+\begin{verbatim}
+EXAMPLE 2:
+  Code:
+      use m_String
+      type(String) :: oStr, iStr
+      character(len=*) :: iChr, oChr
+
+      oChr = toChar(iStr)
+           ! string to variable of character conversion
+      oChr = toChar(iChr)
+           ! character to character coversion
+      call String_init(oStr,chr)
+           ! character to string conversion
+      call String_init(oStr,iStr)  
+           ! string to string coversion
+\end{verbatim}
+
+\noindent
+The module {\tt m\_chars} converts a string to uppercase or converts a string
+to lowercase characters.
+
+\begin{verbatim}
+EXAMPLE 3:
+   For uppercase conversion, use
+
+         ustr = upper_case(str)
+
+   For lowercase conversion, use
+
+         lstr = lower_case(str)
+\end{verbatim}
+% 

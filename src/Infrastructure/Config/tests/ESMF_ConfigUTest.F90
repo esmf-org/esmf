@@ -175,6 +175,7 @@ module config_subrs
       real(ESMF_KIND_R4), parameter      :: tau_0 = 14.0
       character(*), parameter :: restart_file_0 = 'RestartFile123'
       character(ESMF_MAXSTR), parameter   :: answer_0 = 'y'
+      character(ESMF_MAXSTR) :: token_string
       logical, parameter     :: optimize_0 = .false.
       character(ESMF_MAXSTR) :: failMsg
       character(ESMF_MAXSTR) :: name
@@ -336,6 +337,41 @@ module config_subrs
      write(name, *) "Verify Attribute String Value Test"
      call ESMF_Test((answer.eq.answer_0), name, failMsg, result, ESMF_SRCLINE)
 
+     !------------------------------------------------------------------------
+     !EX_UTest
+     ! Config Get Attribute String multi-word token Test
+     write(failMsg, *) "Did not return ESMF_SUCCESS"
+     write(name, *) "Config Get Attribute String Multi-word apostrophe Token Test"
+     call ESMF_ConfigGetAttribute( cf, token_string ,label='Token_Example_1:', &
+           rc = rc )
+     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+     !------------------------------------------------------------------------
+     !EX_UTest
+     ! Config Get Attribute String multi-word token value Test
+     write(failMsg, *) "Did not return ESMF_SUCCESS"
+     write(name, *) "Config Get Attribute String Multi-word apostrophe Token value Test"
+     rc = merge (ESMF_SUCCESS, ESMF_FAILURE, token_string == 'This is a token example')
+     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+     !------------------------------------------------------------------------
+     !EX_UTest
+     ! Config Get Attribute String multi-word token Test
+     write(failMsg, *) "Did not return ESMF_SUCCESS"
+     write(name, *) "Config Get Attribute String Multi-word quoted Token Test"
+     token_string = 'xxxx'
+     call ESMF_ConfigGetAttribute( cf, token_string ,label='Token_Example_2:', &
+           rc = rc )
+     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+     !------------------------------------------------------------------------
+     !EX_UTest
+     ! Config Get Attribute String multi-word token value Test
+     write(failMsg, *) "Did not return ESMF_SUCCESS"
+     write(name, *) "Config Get Attribute String Multi-word quoted Token value Test"
+     rc = merge (ESMF_SUCCESS, ESMF_FAILURE, token_string == "This is a token example")
+     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
 ! Logical
 
       rc = 0
@@ -378,9 +414,14 @@ module config_subrs
     subroutine MultPar_SingleLine_U()
 !--------------------------------------------------------------------
       character(len=12), parameter :: u_dataType_0 = 'u_UprAir'
+      character(len=10) :: directions_expected(8) = (/  &
+          'north     ', 'north east', 'east      ', 'south east', &
+          'south     ', 'south west', 'west      ', 'north west'  &
+      /)
       integer, parameter   :: nu_0 = 6
       real(ESMF_KIND_R4), dimension(nu_0), parameter :: sigU_0 = &
            (/ 2.0, 2.0, 2.2, 2.3, 2.7, 3.2 /)
+      character(len=10) :: directions(8)
  
       character(ESMF_MAXSTR) :: failMsg
       character(ESMF_MAXSTR) :: name
@@ -502,6 +543,23 @@ module config_subrs
      write(failMsg, *) "Attribute Floats values are incorrect"
      write(name, *) "Verify Attribute Floats Values Test"
      call ESMF_Test((all(sigU.eq.sigU_0)), name, failMsg, result, ESMF_SRCLINE)
+
+     ! Quoted strings
+
+     !------------------------------------------------------------------------
+     !EX_UTest
+     ! Config Get Attribute Quoted String Test
+     write(failMsg, *) "Did not return ESMF_SUCCESS"
+     write(name, *) "Config Get Quoted String Array Test"
+     call ESMF_ConfigGetAttribute( cf, directions, label='directions:', rc =rc )  ! first token   
+     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+     !------------------------------------------------------------------------
+     !EX_UTest
+     ! Config Get Attribute Quoted String Verification Test
+     write(failMsg, *) "Attribute String value is incorrect"
+     write(name, *) "Verify Attribute Quoted String Array Value Test"
+     call ESMF_Test(all (directions == directions_expected), name, failMsg, result, ESMF_SRCLINE)
 
     end subroutine MultPar_SingleLine_U
 
@@ -1171,6 +1229,14 @@ subroutine MultPar_SingleLine_Vf
 !            Looping over lines
 
 !''''''''''''''''''''''''''''   
+     !------------------------------------------------------------------------
+      !EX_UTest
+      ! Config Find Label Test
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Config Bad Label Test"
+      call ESMF_ConfigFindLabel( cf,'Bad', rc=rc)
+      call ESMF_Test(rc /= ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
+
      !------------------------------------------------------------------------
       !EX_UTest
       ! Config Find Label Test

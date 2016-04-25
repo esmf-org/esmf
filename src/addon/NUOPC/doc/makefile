@@ -4,9 +4,9 @@ All: onedoc
 
 LOCDIR    = src/addon/NUOPC/doc
 
-DVIFILES  = NUOPC_refdoc.dvi
-PDFFILES  = NUOPC_refdoc.pdf
-HTMLFILES = NUOPC_refdoc
+DVIFILES  = NUOPC_refdoc.dvi NUOPC_howtodoc.dvi
+PDFFILES  = NUOPC_refdoc.pdf NUOPC_howtodoc.pdf
+HTMLFILES = NUOPC_refdoc NUOPC_howtodoc
 
 #
 # Tex Files to make
@@ -33,11 +33,30 @@ REFDOC_DEP_FILES = $(TEXFILES_TO_MAKE) NUOPC_desc.tex NUOPC_implnotes.tex NUOPC_
 
 REFDOC_DEP_FILES += NUOPC_Driver_manual_fapi.tex NUOPC_ModelBase_manual_fapi.tex NUOPC_Model_manual_fapi.tex NUOPC_Mediator_manual_fapi.tex NUOPC_Connector_manual_fapi.tex
 
+HOWTO_DEP_FILES = $(REFDOC_DEP_FILES) NUOPC_howto_overview.tex NUOPC_howto_bigidea.tex NUOPC_howto_approach.tex NUOPC_howto_example.tex ESMF_NUOPCBasicModelEx_fapi.tex ESMF_NUOPCAtmModelEx_fapi.tex
+
 include $(ESMF_DIR)/makefile
 
 DIRS        = 
-CLEANDIRS   = NUOPC_refdoc $(HTMLFILES)
+CLEANDIRS   = NUOPC_refdoc NUOPC_howtodoc $(HTMLFILES)
 CLEANFILES  = $(TEXFILES_TO_MAKE) $(CLEAN_TEXFILES) \
-              NUOPC_refdoc.tex $(PDFFILES)
+              NUOPC_refdoc.tex NUOPC_howtodoc.tex $(PDFFILES)
 CLOBBERDIRS =
+
+
+## Rules for the howto doc, not covered by build/common.mk
+NUOPC_howtodoc.dvi: NUOPC_howtodoc.ctex $(HOWTODOC_DEP_FILES)
+	export TEXINPUTS=$(TEXINPUTS_VALUE) ;\
+	${DO_LATEX} NUOPC howto
+
+NUOPC_howtodoc.pdf: NUOPC_howtodoc.dvi
+	dvipdf NUOPC_howtodoc.dvi
+
+NUOPC_howtodoc: NUOPC_howtodoc.ctex
+	-rm -rf NUOPC_howtodoc
+	if [ $(TEXINPUTS_VALUE)foo != foo ] ; then \
+	  echo '$$TEXINPUTS = $(TEXINPUTS_VALUE)' > .latex2html-init ;\
+	fi;
+	${DO_L2H} NUOPC howto
+	rm -f .latex2html-init
 

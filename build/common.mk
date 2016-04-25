@@ -360,7 +360,7 @@ ifeq ($(ESMF_OS),Linux)
 export ESMF_COMPILER = gfortran
 endif
 ifeq ($(ESMF_OS),MinGW)
-export ESMF_COMPILER = intel
+export ESMF_COMPILER = gfortran
 endif
 ifeq ($(ESMF_OS),Unicos)
 ifeq ($(ESMF_MACHINE),x86_64)
@@ -510,7 +510,7 @@ ESMF_BENCHMARK_PREFIX_ABSPATH := $(shell $(ESMF_DIR)/scripts/abspath $(ESMF_BENC
 
 
 ifndef ESMF_BENCHMARK_TOLERANCE
-ESMF_BENCHMARK_TOLERANCE := 3%
+ESMF_BENCHMARK_TOLERANCE := 20%
 endif
 
 ifndef ESMF_BENCHMARK_THRESHOLD
@@ -671,6 +671,7 @@ endif
 # user's environment.
 #-------------------------------------------------------------------------------
 ESMF_PIODEFAULT             = internal
+ESMF_PROJ4DEFAULT           = OFF
 ESMF_PTHREADSDEFAULT        = ON
 ESMF_OPENMPDEFAULT          = ON
 ESMF_OPENACCDEFAULT         = OFF
@@ -956,6 +957,9 @@ ESMF_SL_SUFFIX        = dylib
 endif
 ifeq ($(ESMF_OS),Cygwin)
 ESMF_SL_SUFFIX        = dll.a
+endif
+ifeq ($(ESMF_OS),MinGW)
+ESMF_SL_SUFFIX        = dll
 endif
 ifeq ($(ESMF_SHARED_LIB_BUILD),ON)
 ESMF_SL_LIBS_TO_MAKE  = libesmf
@@ -1294,8 +1298,9 @@ endif
 # PIO
 #-------------------------------------------------------------------------------
 ifneq ($(origin ESMF_PIO), environment)
-ifdef ESMF_PIODEFAULT
+ifndef ESMF_PIO
 export ESMF_PIO = $(ESMF_PIODEFAULT)
+endif
 
 ifeq ($(ESMF_PIO),internal)
 ifeq ($(ESMF_COMM),mpiuni)
@@ -1306,7 +1311,6 @@ ESMF_PIO = OFF
 endif
 endif
 
-endif
 endif
 
 ifeq ($(ESMF_PIO),OFF)
@@ -1346,6 +1350,44 @@ ESMF_CPPFLAGS += -DESMF_MPIIO
 endif
 endif
 
+#-------------------------------------------------------------------------------
+# Proj.4
+#-------------------------------------------------------------------------------
+ifneq ($(origin ESMF_PROJ4), environment)
+ifdef ESMF_PROJ4DEFAULT
+export ESMF_PROJ4 = $(ESMF_PROJ4DEFAULT)
+endif
+endif
+
+ifeq ($(ESMF_PROJ4),OFF)
+ESMF_PROJ4=
+endif
+
+ifeq ($(ESMF_PROJ4),external)
+ifneq ($(origin ESMF_PROJ4_LIBS), environment)
+ESMF_PROJ4_LIBS = -lproj
+endif
+endif
+
+ifdef ESMF_PROJ4
+ESMF_CPPFLAGS                += -DESMF_PROJ4=1
+ifdef ESMF_PROJ4_INCLUDE
+ESMF_CXXCOMPILEPATHSTHIRD    += -I$(ESMF_PROJ4_INCLUDE)
+ESMF_F90COMPILEPATHSTHIRD    += -I$(ESMF_PROJ4_INCLUDE)
+endif
+ifdef ESMF_PROJ4_LIBS
+ESMF_CXXLINKLIBS          += $(ESMF_PROJ4_LIBS)
+ESMF_CXXLINKRPATHSTHIRD   += $(addprefix $(ESMF_CXXRPATHPREFIX),$(subst -L,,$(filter -L%,$(ESMF_PROJ4_LIBS))))
+ESMF_F90LINKLIBS          += $(ESMF_PROJ4_LIBS)
+ESMF_F90LINKRPATHSTHIRD   += $(addprefix $(ESMF_F90RPATHPREFIX),$(subst -L,,$(filter -L%,$(ESMF_PROJ4_LIBS))))
+endif
+ifdef ESMF_PROJ4_LIBPATH
+ESMF_CXXLINKPATHSTHIRD    += -L$(ESMF_PROJ4_LIBPATH)
+ESMF_F90LINKPATHSTHIRD    += -L$(ESMF_PROJ4_LIBPATH)
+ESMF_CXXLINKRPATHSTHIRD   += $(ESMF_CXXRPATHPREFIX)$(ESMF_PROJ4_LIBPATH)
+ESMF_F90LINKRPATHSTHIRD   += $(ESMF_F90RPATHPREFIX)$(ESMF_PROJ4_LIBPATH)
+endif
+endif
 
 #-------------------------------------------------------------------------------
 # Set the correct MPIRUN command with appropriate options
@@ -3409,15 +3451,15 @@ shared:
 		$(ESMF_RM) -r tmp_* ; \
 		for NEXTLIB in $(ESMF_SL_LIBS_TO_MAKE) foo ;\
 		do \
-		if [ -f $$NEXTLIB.a ] ; then \
+		if [ -f $$NEXTLIB.$(ESMF_LIB_SUFFIX) ] ; then \
 		    $(ESMF_RM) $$NEXTLIB.$(ESMF_SL_SUFFIX) ; \
 		    echo Converting $$NEXTLIB.a to $$NEXTLIB.$(ESMF_SL_SUFFIX) ;\
 		    mkdir tmp_$$NEXTLIB ;\
 		    cd tmp_$$NEXTLIB  ;\
-	                $(ESMF_AREXTRACT) ../$$NEXTLIB.a ;\
+	                $(ESMF_AREXTRACT) ../$$NEXTLIB.$(ESMF_LIB_SUFFIX) ;\
                     echo $(ESMF_SL_LIBLINKER) $(ESMF_SL_LIBOPTS) -o $(ESMF_LDIR)/$$NEXTLIB.$(ESMF_SL_SUFFIX) *.o $(ESMF_SL_LIBLIBS) ;\
 		    $(ESMF_SL_LIBLINKER) $(ESMF_SL_LIBOPTS) -o $(ESMF_LDIR)/$$NEXTLIB.$(ESMF_SL_SUFFIX) *.o $(ESMF_SL_LIBLIBS) ;\
-		    echo Converting $$NEXTLIB.a to $$NEXTLIB\_fullylinked.$(ESMF_SL_SUFFIX) ;\
+		    echo Converting $$NEXTLIB.$$ESMF_LIB_SUFFIX to $$NEXTLIB\_fullylinked.$(ESMF_SL_SUFFIX) ;\
                     echo $(ESMF_SL_LIBLINKER) $(ESMF_SL_LIBOPTS) -o $(ESMF_LDIR)/$$NEXTLIB\_fullylinked.$(ESMF_SL_SUFFIX) *.o $(ESMF_CXXLINKOPTS) $(ESMF_CXXLINKPATHS) $(ESMF_CXXLINKRPATHS) $(ESMF_CXXLINKLIBS) ;\
 		    $(ESMF_SL_LIBLINKER) $(ESMF_SL_LIBOPTS) -o $(ESMF_LDIR)/$$NEXTLIB\_fullylinked.$(ESMF_SL_SUFFIX) *.o $(ESMF_CXXLINKOPTS) $(ESMF_CXXLINKPATHS) $(ESMF_CXXLINKRPATHS) $(ESMF_CXXLINKLIBS) ;\
 		    cd .. ;\

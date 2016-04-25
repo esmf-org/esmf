@@ -44,6 +44,14 @@ ESMF_CXXDEFAULT         = mpicxx
 ESMF_MPIRUNDEFAULT      = mpirun $(ESMF_MPILAUNCHOPTIONS)
 ESMF_MPIMPMDRUNDEFAULT  = mpiexec $(ESMF_MPILAUNCHOPTIONS)
 else
+ifeq ($(ESMF_COMM),mpich3)
+# Mpich3 ---------------------------------------------------
+ESMF_F90DEFAULT         = mpif90
+ESMF_CXXDEFAULT         = mpicxx
+ESMF_CXXLINKLIBS       += -lmpifort
+ESMF_MPIRUNDEFAULT      = mpirun $(ESMF_MPILAUNCHOPTIONS)
+ESMF_MPIMPMDRUNDEFAULT  = mpiexec $(ESMF_MPILAUNCHOPTIONS)
+else
 ifeq ($(ESMF_COMM),mvapich2)
 # Mvapich2 ---------------------------------------------------
 ESMF_F90DEFAULT         = mpif90
@@ -87,6 +95,7 @@ endif
 endif
 endif
 endif
+endif
 
 ############################################################
 # Print compiler version string
@@ -96,7 +105,7 @@ ESMF_CXXCOMPILER_VERSION    = ${ESMF_CXXCOMPILER} --version
 
 ############################################################
 # Disable PIO until F2003 C Interop is verified to work
-ESMF_PIO               =
+ESMF_PIO               = OFF
 
 ############################################################
 # Conditionally add pthread compiler and linker flags

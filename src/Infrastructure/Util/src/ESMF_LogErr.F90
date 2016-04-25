@@ -47,6 +47,7 @@ module ESMF_LogErrMod
 ! !USES:
     ! inherit from ESMF base class
       use ESMF_IOUtilMod
+      use ESMF_UtilStringMod
       use ESMF_UtilTypesMod
  !!  use ESMF_InitMacrosMod Commented out to prevent circular dependency
  !!                         this is possible because since all the checks
@@ -73,22 +74,25 @@ type(ESMF_LogMsg_Flag), parameter           :: &
     ESMF_LOGMSG_INFO  =   ESMF_LogMsg_Flag(1), &
     ESMF_LOGMSG_WARNING = ESMF_LogMsg_Flag(2), &
     ESMF_LOGMSG_ERROR =   ESMF_LogMsg_Flag(3), &
-    ESMF_LOGMSG_TRACE =   ESMF_LogMsg_Flag(4)
+    ESMF_LOGMSG_TRACE =   ESMF_LogMsg_Flag(4), &
+    ESMF_LOGMSG_JSON  =   ESMF_LogMsg_Flag(5)
 
 character(8), parameter ::  &
-    ESMF_LogMsgString(4) = (/ &
+    ESMF_LogMsgString(5) = (/ &
       'INFO    ', &
       'WARNING ', &
       'ERROR   ', &
-      'TRACE   '  &
+      'TRACE   ', &
+      'JSON    '  &
     /)
 
 type(ESMF_LogMsg_Flag), parameter :: &
-    ESMF_LOGMSG_ALL(4) = (/ &
+    ESMF_LOGMSG_ALL(5) = (/ &
       ESMF_LOGMSG_INFO,     &
       ESMF_LOGMSG_WARNING,  &
       ESMF_LOGMSG_ERROR,    &
-      ESMF_LOGMSG_TRACE     &
+      ESMF_LOGMSG_TRACE,    &
+      ESMF_LOGMSG_JSON      &
     /)
 
 #if !defined (ESMF_PGI_NAMEDCONSTANT_BUG)
@@ -101,10 +105,11 @@ type(ESMF_LogMsg_Flag) :: &
 #endif
 
 type(ESMF_LogMsg_Flag), parameter :: &
-    ESMF_LOGMSG_NOTRACE(3) = (/ &
+   ESMF_LOGMSG_NOTRACE(4) = (/ &
       ESMF_LOGMSG_INFO,     &
       ESMF_LOGMSG_WARNING,  &
-      ESMF_LOGMSG_ERROR     &
+      ESMF_LOGMSG_ERROR,    &
+      ESMF_LOGMSG_JSON      &
     /)
 
 !     ! ESMF_LogKind_Flag
@@ -130,7 +135,7 @@ type ESMF_LogEntry
     integer             ::  h,m,s,ms
     integer             ::  line
     logical             ::  methodflag,lineflag,fileflag
-    character(len=2*ESMF_MAXSTR)   ::  msg
+    character, pointer  ::  msg(:)
     character(len=ESMF_MAXPATHLEN) ::  file
     character(len=32)   ::  method
     character(len=8)    ::  d
@@ -196,6 +201,7 @@ end type ESMF_LogPrivate
     public ESMF_LOGMSG_WARNING
     public ESMF_LOGMSG_ERROR
     public ESMF_LOGMSG_TRACE
+    public ESMF_LOGMSG_JSON
     public ESMF_LOGMSG_ALL
     public ESMF_LOGMSG_NONE
     public ESMF_LOGMSG_NOTRACE
@@ -879,9 +885,16 @@ type(ESMF_KeywordEnforcer),optional::keywordEnforcer !must use keywords below
 !EOP
     integer                         :: j
     type(ESMF_LogPrivate),pointer   :: alog
-    integer                         :: localrc
+    integer                         :: localrc, localrc2
+    integer                         :: memstat
     logical                         :: spaceflag
    
+    ! Initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) then
+      rc=localrc
+    endif
+
     ESMF_INIT_CHECK_SET_SHALLOW(ESMF_LogGetInit,ESMF_LogInit,log)
     
     nullify(alog) ! ensure that the association status is well defined
@@ -889,14 +902,11 @@ type(ESMF_KeywordEnforcer),optional::keywordEnforcer !must use keywords below
     if (present(log)) then
       if(log%logTableIndex>0) then
          alog => ESMF_LogTable(log%logTableIndex)
+      else
+         localrc = ESMF_RC_OBJ_NOT_CREATED
       endif
     else
       alog => ESMF_LogTable(ESMF_LogDefault%logTableIndex)
-    endif
-
-    ! Initialize return code; assume routine not implemented
-    if (present(rc)) then
-      rc=ESMF_FAILURE 
     endif
 
     if (associated(alog)) then
@@ -948,23 +958,41 @@ type(ESMF_KeywordEnforcer),optional::keywordEnforcer !must use keywords below
             write (alog%unitNumber, '(a)',  advance='no') ' '
           end if
 
-          write (alog%unitNumber, '(a)') trim(alog%LOG_ENTRY(j)%msg)
+          write (alog%unitNumber, '(a)',  advance='no')  &
+              trim (ESMF_UtilArray2String (alog%LOG_ENTRY(j)%msg))
+          deallocate (alog%LOG_ENTRY(j)%msg, stat=memstat)
+          if (memstat /= 0) then
+            write (ESMF_UtilIOStderr,*) ESMF_METHOD,  &
+                ": Deallocation error."
+            localrc = ESMF_RC_MEM_DEALLOCATE
+            if (present (rc)) then    
+              rc = localrc
+            end if
+            return
+          end if
+
+          write (alog%unitNumber, *)
 
         end do
       end if
+      localrc = ESMF_SUCCESS
    
       alog%fIndex = 1 
 
-      call ESMF_UtilIOUnitFlush (alog%unitNumber, rc=localrc)
+      call ESMF_UtilIOUnitFlush (alog%unitNumber, rc=localrc2)
+      if (localrc2 /= ESMF_SUCCESS) then
+        write (ESMF_UtilIOStderr,*) 'unit flush failed, rc =', localrc2
+        localrc = localrc2
+      end if
  
       alog%flushed = ESMF_TRUE
       alog%dirty = ESMF_FALSE
 
-      if (present (rc)) then    
-        rc = localrc
-      end if
-      
     endif
+
+    if (present (rc)) then    
+      rc = localrc
+    end if
 
 end subroutine ESMF_LogFlush
 
@@ -2218,6 +2246,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     character(len=ESMF_MAXPATHLEN)  :: tfile
     integer                         :: tline
     integer                         :: i
+    integer                         :: memstat
     integer                         :: rc2, index
     type(ESMF_LogPrivate), pointer  :: alog
     
@@ -2325,7 +2354,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         alog%LOG_ENTRY(alog%fIndex)%m  = timevals(6)
         alog%LOG_ENTRY(alog%fIndex)%s  = timevals(7)
         alog%LOG_ENTRY(alog%fIndex)%ms = timevals(8)
-        alog%LOG_ENTRY(alog%fIndex)%msg = msg
+        allocate (alog%LOG_ENTRY(alog%fIndex)%msg(len_trim (msg)), stat=memstat)
+        alog%LOG_ENTRY(alog%fIndex)%msg = ESMF_UtilString2Array (trim (msg))
         alog%flushed = ESMF_FALSE
 
         if (associated (alog%logmsgAbort)) then
@@ -2387,6 +2417,8 @@ end subroutine ESMF_LogWrite
 !      \end{description}
 ! 
 !EOPI
+
+    integer :: memstat
     
     ! Initialize return code; assume routine not implemented
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -2403,6 +2435,7 @@ end subroutine ESMF_LogWrite
     logEntryOut%lineflag   = logEntryIn%lineflag
     logEntryOut%fileflag   = logEntryIn%fileflag
 
+    allocate (logEntryOut%msg(size (logEntryIn%msg)), stat=memstat)
     logEntryOut%msg    = logEntryIn%msg
     logEntryOut%file   = logEntryIn%file
     logEntryOut%method = logEntryIn%method

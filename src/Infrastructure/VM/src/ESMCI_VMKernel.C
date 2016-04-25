@@ -5215,7 +5215,7 @@ typedef char* value_ptr_t;
 #define ECONNREFUSED WSAECONNREFUSED
 #define EINPROGRESS WSAEINPROGRESS
 #define EWOULDBLOCK WSAEWOULDBLOCK
-#define errno WSAGetLastError()
+// #define errno WSAGetLastError()
 
 #else
 

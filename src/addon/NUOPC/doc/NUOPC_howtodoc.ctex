@@ -1,0 +1,96 @@
+% $Id$ 
+
+#ifdef STANDALONE
+\documentclass[english]{article}
+
+\usepackage{babel}
+\usepackage{longtable}
+\usepackage{html}
+\usepackage{times}
+%\usepackage{subsections}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage[T1]{fontenc}
+
+\textwidth 6.5in
+\textheight 8.5in
+\addtolength{\oddsidemargin}{-.75in}
+\newcommand{\mytitle}{\Large {\bf Building a NUOPC Model}}
+\newcommand{\myauthors}{\large {\it Content Standards Committee (CSC) Members}}
+\newcommand{\myversion}{ESMF v7.1.0 beta snapshot}
+% set a standard paragraph style
+\setlength{\parskip}{0pt}
+\setlength{\parindent}{0pt}
+\setlength{\baselineskip}{11pt}
+% these are temporary patches until something more
+% permanent is done to the protex script.
+\newlength{\oldparskip}
+\newlength{\oldparindent}
+\newlength{\oldbaselineskip}
+
+\setlongtables
+#endif
+\sloppy
+#ifdef STANDALONE
+\begin{document}
+#endif
+
+\bodytext{BGCOLOR=white LINK=#083194 VLINK=#21004A}
+
+#ifdef STANDALONE
+% Title page
+\input{NUOPC_title}
+
+\newpage
+\tableofcontents
+
+\newpage
+\setlength{\parskip}{1.5ex}
+
+#endif
+
+
+%============================================================================
+% NUOPC Layer - Building a NUOPC Model
+%============================================================================
+
+\section{Overview}
+#ifdef STANDALONE
+\input{NUOPC_howto_overview}
+#elif defined(CONSTITUENT)
+\input{../addon/NUOPC/doc/NUOPC_howto_overview}
+#endif
+
+\newpage
+
+\section{The Big Idea}
+#ifdef STANDALONE
+\input{NUOPC_howto_bigidea}
+#elif defined(CONSTITUENT)
+\input{../addon/NUOPC/doc/NUOPC_howto_bigidea}
+#endif
+
+\newpage
+
+\section{Writing and Testing a NUOPC Cap for your Model}
+#ifdef STANDALONE
+\input{NUOPC_howto_approach}
+\input{ESMF_NUOPCBasicModelEx_fapi}
+#elif defined(CONSTITUENT)
+\input{../addon/NUOPC/doc/NUOPC_howto_approach}
+\input{../addon/NUOPC/doc/ESMF_NUOPCBasicModelEx_fapi}
+#endif
+
+\newpage
+
+\section{An Example Cap}
+#ifdef STANDALONE
+\input{ESMF_NUOPCAtmModelEx_fapi}
+#elif defined(CONSTITUENT)
+\input{../addon/NUOPC/doc/ESMF_NUOPCAtmModelEx_fapi}
+#endif
+
+#ifdef STANDALONE
+\end{document}
+#endif
+

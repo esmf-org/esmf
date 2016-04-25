@@ -349,7 +349,7 @@ int ArrayBundle::read(
     for (it = arrayContainer.begin();
          it != arrayContainer.end(); ++it) {
       if (ESMF_SUCCESS == localrc) {
-        localrc = newIO->addArray(it->second->second, (char *)NULL);
+        localrc = newIO->addArray(it->second->second);
         ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
           &rc);
       }
@@ -366,7 +366,7 @@ int ArrayBundle::read(
     for (it = arrayContainer.begin();
          it != arrayContainer.end(); ++it) {
       if (ESMF_SUCCESS == localrc) {
-        localrc = newIO->addArray(it->second->second, (char *)NULL);
+        localrc = newIO->addArray(it->second->second);
         ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
           &rc);
       }
@@ -472,7 +472,7 @@ int ArrayBundle::write(
     for (it = arrayContainer.begin();
          it != arrayContainer.end(); ++it) {
       if (ESMF_SUCCESS == localrc) {
-        localrc = newIO->addArray(it->second->second, (char *)NULL);
+        localrc = newIO->addArray(it->second->second);
         ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
           &rc);
       }
@@ -490,7 +490,7 @@ int ArrayBundle::write(
     for (it = arrayContainer.begin();
          it != arrayContainer.end(); ++it) {
       if (ESMF_SUCCESS == localrc) {
-        localrc = newIO->addArray(it->second->second, (char *)NULL);
+        localrc = newIO->addArray(it->second->second);
         ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
           &rc);
       }

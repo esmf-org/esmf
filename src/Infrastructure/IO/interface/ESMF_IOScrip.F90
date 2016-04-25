@@ -35,7 +35,7 @@
       use ESMF_LogErrMod        ! ESMF error handling
       use ESMF_VMMod
       use ESMF_IOUGridMod
-       use ESMF_IOGridspecMod
+      use ESMF_IOGridspecMod
 #ifdef ESMF_NETCDF
       use netcdf
 #endif
@@ -1052,6 +1052,9 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
 	   errmsg,&
            rc)) return
 
+        ! if src_grid_corner < 0 -- the input file is a ESMF Mesh file with ragged array
+        ! do not define nv_a, xv_a and yv_a
+        if (src_grid_corner > 0) then
         ! define max number of vertices
          ncStatus = nf90_def_dim(ncid,"nv_a",src_grid_corner, nvaDimId)
          errmsg = "Dimension nv_a in "//trim(wgtfile)
@@ -1060,7 +1063,9 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
            ESMF_SRCLINE,&
 	   errmsg,&
            rc)) return
+         endif
 
+         if (dst_grid_corner > 0) then
          ncStatus = nf90_def_dim(ncid,"nv_b",dst_grid_corner, nvbDimId)
          errmsg = "Dimension nv_b in "//trim(wgtfile)
          if (CDFCheckError (ncStatus, &
@@ -1068,6 +1073,7 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
            ESMF_SRCLINE,&
 	   errmsg,&
            rc)) return
+         endif
 
         ! define max number of vertices
          ncStatus = nf90_def_dim(ncid,"num_wgts",1, VarId)
@@ -1172,7 +1178,8 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
            ESMF_SRCLINE,&
 	   errmsg,&
            rc)) return
-
+    
+        if (src_grid_corner > 0) then
         ! yv_a: source corner coordinate (latitude)
          ncStatus = nf90_def_var(ncid,"yv_a",NF90_DOUBLE, (/nvaDimId,naDimId/),  VarId)
          errmsg = "Variable yv_a in "//trim(wgtfile)
@@ -1202,7 +1209,9 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
            ESMF_SRCLINE,&
 	   errmsg,&
            rc)) return
+         endif
 
+         if (dst_grid_corner > 0) then 
         ! yv_b: source corner coordinate (latitude)
          ncStatus = nf90_def_var(ncid,"yv_b",NF90_DOUBLE, (/nvbDimId,nbDimId/),  VarId)
          errmsg = "Variable yv_b in "//trim(wgtfile)
@@ -1232,6 +1241,7 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
            ESMF_SRCLINE,&
 	   errmsg,&
            rc)) return
+         endif
 
         ! mask_a
          ncStatus = nf90_def_var(ncid,"mask_a",NF90_INT, (/naDimId/),  VarId)
@@ -1403,6 +1413,7 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
   	     errmsg,&
              rc)) return
            deallocate(latBuffer, lonBuffer)
+            
           ! Write xv_a, yv_a	
            allocate(latBuffer2(src_grid_corner,srcDim),lonBuffer2(src_grid_corner,srcDim))         
            call ESMF_ScripGetVar(srcFile, grid_corner_lon=lonBuffer2, &
@@ -1658,6 +1669,7 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
            ! output xv_a and yv_a is harder, we have to read in the nodeCoords and
            ! elementConn and construct the the latitudes and longitudes for
            ! all the corner vertices
+             if (src_grid_corner > 0) then
              allocate(latBuffer2(src_grid_corner,srcDim),lonBuffer2(src_grid_corner,srcDim))         
              call ESMF_EsmfGetVerts(ncid1, srcFile, srcDim, src_grid_corner, srcNodeDim, &
 		  latBuffer2, lonBuffer2,status) 
@@ -1680,6 +1692,7 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
                ESMF_SRCLINE,errmsg,&
                rc)) return
              deallocate(latBuffer2, lonBuffer2) 
+             endif
            endif
            allocate(mask(srcDim))         
   	   if (.not. useSrcCornerlocal .and. &
@@ -2110,6 +2123,7 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
            ! all the corner vertices
   	   if (.not. useDstCornerlocal .or. &
 	      methodlocal%regridmethod ==ESMF_REGRIDMETHOD_CONSERVE%regridmethod) then 
+           if (dst_grid_corner > 0) then
            allocate(latBuffer2(dst_grid_corner,dstDim),lonBuffer2(dst_grid_corner,dstDim))         
            call ESMF_EsmfGetVerts(ncid1, dstFile, dstDim, dst_grid_corner, dstNodeDim, &
 		latBuffer2, lonBuffer2, status) 
@@ -2132,6 +2146,7 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
              ESMF_SRCLINE,errmsg,&
              rc)) return
            deallocate(latBuffer2, lonBuffer2) 
+           endif
            endif
            ! Write mask_b
            allocate(mask(dstDim))         
@@ -2595,7 +2610,7 @@ end subroutine ESMF_OutputScripVarFile
 !
 ! !INTERFACE:
 subroutine ESMF_EsmfInq(filename, nodeCount, elementCount, &
-	      		maxNodePElement, coordDim, &
+	      		maxNodePElement, coordDim,  &
 			haveNodeMask, haveElmtMask, haveArea, rc)    
 
 ! !ARGUMENTS:
@@ -2659,16 +2674,15 @@ subroutine ESMF_EsmfInq(filename, nodeCount, elementCount, &
     if (present(maxNodePElement)) then
       ncStatus = nf90_inq_dimid (ncid, "maxNodePElement", DimId)
       errmsg = "Dimension maxNodePElement in "//trim(filename)
-      if (CDFCheckError (ncStatus, &
-        ESMF_METHOD, &
-        ESMF_SRCLINE,errmsg,&
-        rc)) return
-
-      ncStatus = nf90_inquire_dimension (ncid, DimId, len=maxNodePElement)
-      if (CDFCheckError (ncStatus, &
-        ESMF_METHOD, &
-        ESMF_SRCLINE,errmsg,&
-        rc)) return
+      if (ncStatus /= nf90_noerror) then
+         maxNodePElement = -1
+      else
+         ncStatus = nf90_inquire_dimension (ncid, DimId, len=maxNodePElement)
+         if (CDFCheckError (ncStatus, &
+           ESMF_METHOD, &
+           ESMF_SRCLINE,errmsg,&
+           rc)) return
+      end if
     end if
 
     ! get number of elements
@@ -2997,7 +3011,7 @@ subroutine ESMF_EsmfGetElement (filename, elementConn, &
 				 elementArea, centerCoords, convertToDeg, rc)
 
     character(len=*), intent(in)   :: filename
-    integer(ESMF_KIND_I4), pointer :: elementConn (:,:)
+    integer(ESMF_KIND_I4), pointer :: elementConn (:)
     integer(ESMF_KIND_I4), pointer :: elmtNums (:)
     integer,           intent(out) :: startElmt
     integer(ESMF_KIND_I4), pointer, optional :: elementMask (:)
@@ -3010,7 +3024,7 @@ subroutine ESMF_EsmfGetElement (filename, elementConn, &
     integer :: PetNo, PetCnt
 
     integer :: ncid
-    integer :: ncStatus
+    integer :: ncStatus, status
     integer :: RecCnt (2)
 
     integer :: DimId
@@ -3023,12 +3037,17 @@ subroutine ESMF_EsmfGetElement (filename, elementConn, &
     integer :: len
     logical :: convertToDegLocal
     integer, parameter :: nf90_noerror = 0
-    integer :: localPolyBreakValue, i, j
+    integer :: localPolyBreakValue, startIndex, i, j, k
     logical :: PolyBreakFound
-
-
+    logical :: isRaggedArray
+    integer, allocatable :: elementConnLocal(:,:)
+    integer :: totalConn, startConn
+    integer :: senddata(1)
+    integer, allocatable :: recvdata(:)
+    
 #ifdef ESMF_NETCDF
      convertToDegLocal = .false.
+     isRaggedArray = .false.
     if (present(convertToDeg)) convertToDegLocal = convertToDeg
 
     call ESMF_VMGetCurrent(vm, rc=rc)
@@ -3037,7 +3056,7 @@ subroutine ESMF_EsmfGetElement (filename, elementConn, &
     call ESMF_VMGet(vm, localPet=PetNo, petCount=PetCnt, rc=rc)
     if (rc /= ESMF_SUCCESS) return
 
-    ncStatus = nf90_open (path=trim(filename), mode=nf90_nowrite, ncid=ncid)
+    ncStatus = nf90_open (path=trim(filename), mode=NF90_SHARE, ncid=ncid)
     if (CDFCheckError (ncStatus, &
       ESMF_METHOD,  &
       ESMF_SRCLINE, trim(filename), &
@@ -3060,49 +3079,31 @@ subroutine ESMF_EsmfGetElement (filename, elementConn, &
     ! Get max_verts_per_elmt
     ncStatus = nf90_inq_dimid (ncid, "maxNodePElement", DimId)
     errmsg = "Dimension maxNodePElement in "//trim(filename)
-    if (CDFCheckError (ncStatus, &
-       ESMF_METHOD,  &
-      ESMF_SRCLINE, errmsg, &
-      rc)) return
- 
-    ncStatus = nf90_inquire_dimension (ncid, DimId, len=MaxNodePerElmt)
-    if (CDFCheckError (ncStatus, &
-      ESMF_METHOD,  &
-      ESMF_SRCLINE, errmsg, &
-      rc)) return
+    ! if not exist, check if connectionCount dimension exists, if so it is ragged array
+    if (ncStatus /= nf90_noerror) then
+        ncStatus = nf90_inq_dimid (ncid, "connectionCount", DimId)
+        errmsg = "Either maxNodePElement or connectionCount does not exist"
+        if (CDFCheckError (ncStatus, &
+           ESMF_METHOD,  &
+           ESMF_SRCLINE, errmsg, &
+           rc)) return
+        isRaggedArray = .true.
+    else 
+      ncStatus = nf90_inquire_dimension (ncid, DimId, len=MaxNodePerElmt)
+      if (CDFCheckError (ncStatus, &
+        ESMF_METHOD,  &
+        ESMF_SRCLINE, errmsg, &
+        rc)) return
+    endif
 
     ! Decompose the elmt array evenly on all the PEs
     localcount = elmtCount/PetCnt
     remain = mod(elmtCount,PetCnt)
     startElmt = localcount * PetNo+1
     if (PetNo == (PetCnt-1)) localcount = localcount+remain
-
+    
     ! allocate memory for elmts
-    allocate (elementConn (MaxNodePerElmt, localcount))
     allocate (elmtNums (localcount))
-    
-    ! read elmt_verts data
-    ncStatus = nf90_inq_varid (ncid, "elementConn", VarNo)
-    errmsg = "Variable elementConn in "//trim(filename)
-    if (CDFCheckError (ncStatus, &
-      ESMF_METHOD,  &
-      ESMF_SRCLINE, errmsg, &
-      rc)) return
-
-     ncStatus = nf90_get_var (ncid, VarNo, elementConn, start=(/1,startElmt/), &
-    	       	      count=(/MaxNodePerElmt, localcount/))
-    if (CDFCheckError (ncStatus, &
-      ESMF_METHOD,  &
-      ESMF_SRCLINE, errmsg, &
-      rc)) return
-    
-    ! Get polybreak if it exists
-    PolyBreakFound=.false.    
-     ncStatus = nf90_get_att (ncid, VarNo, "polygon_break_value", &
-         values=localPolyBreakValue)
-    if (ncStatus == nf90_noerror) then
-       PolyBreakFound=.true.    
-    endif
 
     ! read num_elmt_verts
     ncStatus = nf90_inq_varid (ncid, "numElementConn", VarNo)
@@ -3118,17 +3119,87 @@ subroutine ESMF_EsmfGetElement (filename, elementConn, &
       ESMF_SRCLINE, errmsg, &
       rc)) return
 
-    ! If a Polygon break value was found, then change those to internal polygon break
-    if (PolyBreakFound) then
+    ! calculate the RaggedArray size 
+    totalConn = 0
+    do i=1,localcount
+      totalConn=totalConn+elmtNums(i)
+    enddo
+    allocate(elementConn(totalConn))
+    ! read elmt_verts data
+    ncStatus = nf90_inq_varid (ncid, "elementConn", VarNo)
+    errmsg = "Variable elementConn in "//trim(filename)
+    if (CDFCheckError (ncStatus, &
+       ESMF_METHOD,  &
+       ESMF_SRCLINE, errmsg, &
+       rc)) return
+
+    if (isRaggedArray) then
+      ! need to find out the start index, broadcast the totalConn
+      senddata(1)=totalConn
+      allocate(recvdata(PetCnt))
+      call ESMF_VMAllGather(vm, senddata, recvdata, 1, rc=status)
+      if (ESMF_LogFoundError(status, ESMF_ERR_PASSTHRU, &
+        	ESMF_CONTEXT, rcToReturn=rc)) return
+      startConn=1
+      do i=1,PetNo
+        startConn=startConn+recvdata(i)
+      enddo
+      deallocate(recvdata)
+      print *, PetNo, ' read block ', startConn, totalConn
+      ncStatus = nf90_get_var(ncid, VarNo, elementConn, start=(/startConn/), &
+    	       	      count=(/totalConn/))
+      if (CDFCheckError (ncStatus, &
+          ESMF_METHOD,  &
+          ESMF_SRCLINE, errmsg, &
+          rc)) return
+    else
+       ! allocate local 2D array to read the data
+       allocate (elementConnLocal (MaxNodePerElmt, localcount))
+       ncStatus = nf90_get_var(ncid, VarNo, elementConnLocal, start=(/1,startElmt/), &
+    	       	      count=(/MaxNodePerElmt, localcount/))
+       if (CDFCheckError (ncStatus, &
+          ESMF_METHOD,  &
+          ESMF_SRCLINE, errmsg, &
+          rc)) return
+       ! copy it to elementConn
+       j=1
        do i=1,localcount
-          do j=1,elmtNums(i)
-             if (elementConn(j,i)==localPolyBreakValue) then
-                elementConn(j,i)=ESMF_MESH_POLYBREAK
-             endif
-          enddo
-        enddo
+          elementConn(j:j+elmtNums(i)-1)=elementConnLocal(1:elmtNums(i),i)
+          j = j + elmtNums(i)
+       end do
+       deallocate(elementConnLocal)
     endif
 
+    ! Get polybreak if it exists
+    PolyBreakFound=.false.    
+     ncStatus = nf90_get_att (ncid, VarNo, "polygon_break_value", &
+         values=localPolyBreakValue)
+    if (ncStatus == nf90_noerror) then
+       PolyBreakFound=.true.    
+    endif
+
+    ! If a Polygon break value was found, then change those to internal polygon break
+    if (PolyBreakFound) then
+       do i=1,totalConn
+          if (elementConn(i)==localPolyBreakValue) then
+             elementConn(i)=ESMF_MESH_POLYBREAK
+          endif
+       enddo
+    endif
+
+    ! Get start_index attribute if it exists
+    ! change it to 1-based if it is zero-based
+    ncStatus = nf90_get_att (ncid, VarNo, "start_index", &
+         values=startIndex)
+    if (ncStatus == nf90_noerror) then
+      if (startIndex == 0) then 
+         do i=1,totalConn
+           if (elementConn(i) /= ESMF_MESH_POLYBREAK) then
+              elementConn(i)=elementConn(i)+1
+           endif
+         enddo
+      endif
+    endif
 
     if (present(elementMask)) then
        allocate(elementMask(localcount))

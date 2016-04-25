@@ -3047,7 +3047,7 @@ extern int Zoltan_LB_Set_Part_Sizes(struct Zoltan_Struct *zz, int global_num,
  *  Output:
  *    Return value  --  Error code.
  */
-extern int Zoltan_Generate_Files(struct Zoltan_Struct *zz, char *fname, int base_index, int gen_geom, int gen_graph, int gen_hg);
+extern int Zoltan_Generate_Files(struct Zoltan_Struct *zz, const char *fname, int base_index, int gen_geom, int gen_graph, int gen_hg);
 
 #ifdef __cplusplus
 } /* closing bracket for extern "C" */

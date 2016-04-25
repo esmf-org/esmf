@@ -73,13 +73,11 @@ extern "C" {
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       ESMC_NOT_PRESENT_FILTER(rc))) return;
     // set the name in the Array object
-    char *cname = ESMC_F90toCstring(name, *len_name);
-    if (cname){
-      (*ptr)->setName(cname);
-      delete [] cname;
-    }else if(*len_name){
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
-        "- Not a valid string", ESMC_CONTEXT, ESMC_NOT_PRESENT_FILTER(rc));
+    string cname = string(name, ESMC_F90lentrim (name, *len_name));
+    if (cname.length() > 0) {
+      localrc = (*ptr)->setName(cname);
+      ESMC_LogDefault.MsgFoundError(localrc,
+        ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, ESMC_NOT_PRESENT_FILTER(rc));
       return;
     }
   }
@@ -125,14 +123,12 @@ extern "C" {
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
         ESMC_NOT_PRESENT_FILTER(rc))) return; // bail out
       // set the name in the Array object
-      char *cname = ESMC_F90toCstring(name, *len_name);
-      if (cname){
-        (*ptr)->setName(cname);
-        delete [] cname;
-      }else if(*len_name){
-        ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
-          "- Not a valid string", ESMC_CONTEXT, ESMC_NOT_PRESENT_FILTER(rc));
-        return; // bail out
+      string cname = string(name, ESMC_F90lentrim (name, *len_name));
+      if (cname.length() > 0) {
+        localrc = (*ptr)->setName(cname);
+        ESMC_LogDefault.MsgFoundError(localrc,
+          ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, ESMC_NOT_PRESENT_FILTER(rc));
+        return;
       }
     }
     // return successfully
@@ -643,12 +639,14 @@ extern "C" {
   void FTN_X(c_esmc_arraywrite)(ESMCI::Array **array,
                                 char *file,
                                 char *variableName, int *len_variableName,
+                                char *dimensionLabels, int *size_dimLabels,
                                 ESMC_Logical *opt_overwriteflag,
                                 ESMC_FileStatus_Flag *status,
                                 int *timeslice, ESMC_IOFmt_Flag *iofmt,
                                 int *rc,
                                 ESMCI_FortranStrLenArg file_l,
-                                ESMCI_FortranStrLenArg varname_l) {
+                                ESMCI_FortranStrLenArg varname_l,
+                                ESMCI_FortranStrLenArg dimlabels_l) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_arraywrite()"
     bool overwriteflag;
@@ -667,9 +665,21 @@ extern "C" {
       varName = string (variableName,
         ESMC_F90lentrim (variableName, *len_variableName));
 
+    vector<string> dimLabels;
+    int n_labels = *size_dimLabels;
+    if (n_labels > 0) {
+      dimLabels.reserve (n_labels);
+      char *cp = dimensionLabels;
+      for (int i=0; i<n_labels; i++) {
+        dimLabels.push_back(
+          string (cp, ESMC_F90lentrim (cp, dimlabels_l)));
+        cp += dimlabels_l;
+      }
+    }
+
     overwriteflag = (*opt_overwriteflag == ESMF_TRUE);
     // Call into the actual C++ method wrapped inside LogErr handling
-    localrc = (*array)->write(fileName, varName,
+    localrc = (*array)->write(fileName, varName, dimLabels,
                               &overwriteflag, status, timeslice, iofmt);
     ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       ESMC_NOT_PRESENT_FILTER(rc));

@@ -69,11 +69,11 @@
       integer :: ioerr
 
 #ifdef ESMF_TESTEXHAUSTIVE
-      character(ESMF_MAXSTR) :: arg
+      character(ESMF_MAXPATHLEN) :: arg
       character(2) :: argshort
       integer :: arg_len
       integer :: nargs
-      character(ESMF_MAXSTR) :: program_path
+      character(ESMF_MAXPATHLEN) :: program_path
       integer :: argindex
 
       real(ESMF_KIND_R8) :: random_values(50) = (/  &

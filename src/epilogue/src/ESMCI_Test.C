@@ -24,7 +24,11 @@
 //
 // insert any higher level, 3rd party or system includes here
 #include <stdio.h>
+#if !defined (ESMF_OS_MinGW)
 #include <sys/time.h>
+#else
+#include <windows.h>
+#endif
 #include "ESMCI.h"
 #include "ESMC.h"
 
@@ -166,9 +170,13 @@ int TestEnd(
   }
 
   // Calculate & print test elapsed time.
+#if !defined (ESMF_OS_MinGW)
   gettimeofday(&end_time, NULL);
   elapsed_time = (end_time.tv_sec - start_time.tv_sec) ;
   elapsed_time += (end_time.tv_usec - start_time.tv_usec) / 1000.0;   // us to ms
+#else
+  elapsed_time = 0.0;
+#endif
   sprintf(msgbuf, " PET %d Test Elapsed Time  %f msec. \n", PETnum, elapsed_time);
   fprintf(stdout, "%s", msgbuf);
  
@@ -462,7 +470,9 @@ int TestStart(
   }
 
   // Get test start time
+#if !defined (ESMF_OS_MinGW)
   gettimeofday(&start_time, NULL);
+#endif
 
   globalVM = ESMCI::VM::getGlobal(&rc);
   if ((globalVM == NULL) || (rc != ESMF_SUCCESS)) {

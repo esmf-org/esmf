@@ -1,0 +1,44 @@
+The {\tt MAPL\_CFIOServer} is a MAPL component that may run concurrently with the GEOS5 model.
+The server provides a capability to offload I/O in {\tt MAPL\_History} (via CFIO of course) to special nodes that have been set aside for I/O rather than
+performing the I/O on the nodes running the GEOS5 model as is normally done.
+Essentially it allows I/O to be performed asynchronously with the model computation assuming it is used properly.
+The I/O server is started
+from {\tt MAPL\_Cap} where the global mpi communicator is split. Some processes will run the model as normal and others will run the I/O server, at the discretion of the user.
+The advantage here is that computation can be
+overlapped with the I/O rather than having to wait for the History to finish before going on to the next step.
+The {\tt MAPL\_CFIOServer} runs a master process that continually pulls for I/O
+requests coming from {\tt MAPL\_History} to use the I/O server to process a collection.
+All other processes on the I/O server are considered ''workers``.
+If it receives a request then a worker process on the server gets assigned to handle this collection.
+If no workers are free the request will block in {\tt MAPL\_History} until one becomes free.
+When CFIO is run the data is sent to the worker process on the I/O server rather than written by CFIO. 
+The data on the I/O server is not immediately written but buffered in memory until all levels of the collection have been received. As soon as CFIO has sent all the data to the {\tt MAPL\_CFIOServer} the model is free to leave {\tt MAPL\_History} and to go on to the next model timestep, independent of any I/O occuring on the server.
+
+The I/O server is normally turned off by default. To use it the user must do three things.
+They must supply a namelist file to start the server and control the relative number of nodes being dedicated to the model and the I/O server.
+Additionally it must be specified in the History.rc file that the collection will be written with the I/O server.
+This is accomplished by changing the format keyword of the collection from ''CFIO`` to ''CFIOasync``.
+Not all collections need to be written with the I/O server. If the format is still ''CFIO`` and the I/O server has been started the I/O proceeds as normal.
+Finally the model must be started with a number of processors greater than the product of the layout as it normally would be.
+For example if the layout is NX = 4 and NY = 24, the GEOS executable would be started on 96 processors.
+If you want to run the I/O server with this layout you would need to start the model on more than 96 processors, consistent with the namelist file.
+The namelist file must be named ioserver.nml and has the following format:
+\begin{verbatim}
+&ioserver
+nnodes = 24 ! number of nodes for used for the model
+CoresPerNode = 16  ! cores per node
+MaxMem = 26000 ! maximum memory that can be used per node on io server in megabytes
+/
+\end{verbatim}
+The first line of the namelist file is the number of nodes that will be used to run the model (NX*NY).
+Next you must specify the number of cores per node you will be running on.
+Finally you must specify the maximum memory that can be used per node on the I/O server in megabytes.
+The I/O server is run on any extra nodes.
+
+The following are some things to consider to make efficient use of the I/O server.
+The first consideration is that for small jobs, the I/O server is almost certainly not efficient.
+The reason is that any nodes used by the I/O server could always be used to run the model itself. The incremental speedup when using these nodes for the full model is probably greater than devoting them to speedup just the I/O.
+Only testing can tell you this.
+Assuming your problem is I/O bound then make sure the following is true to see the full benefits.
+First devote sufficient number of nodes such that each time History runs you have at least as many workers as collections and that all the data to be written in a step can be buffered in memory on the I/O nodes. Ideally after History runs and sends the data to the I/O nodes, by the time History runs again the I/O should have occured on the I/O nodes.
+If any of these are not true you could run into a case where History will have to wait for a free worker on the I/O server, thus negating the purpose of the I/O server.

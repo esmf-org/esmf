@@ -9,7 +9,7 @@
 // Licensed under the University of Illinois-NCSA License.
 
 // ESMC Attribute method interface (from F90 to C++) file
-#define ESMF_FILENAME "ESMCI_Attribute_F.C"
+#define ESMC_FILENAME "ESMCI_Attribute_F.C"
 
 //-----------------------------------------------------------------------------
 //
@@ -3617,13 +3617,13 @@ void FTN_X(c_esmc_attributeread)(ESMC_Base **base,
 
 //-----------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  c_ESMC_AttributeWriteTab - Setup the attribute package
+// !IROUTINE:  c_ESMC_AttributeWrite - write out attributes to file
 //
 // !INTERFACE:
-void FTN_X(c_esmc_attributewritetab)(
+void FTN_X(c_esmc_attributewrite)(
 //
 #undef  ESMC_METHOD
-#define ESMC_METHOD "c_esmc_attributewritetab()"
+#define ESMC_METHOD "c_esmc_attributewrite()"
 //
 // !RETURN VALUE:
 //    none.  return code is passed thru the parameter list
@@ -3634,6 +3634,7 @@ void FTN_X(c_esmc_attributewritetab)(
       char *purpose,             // in - purpose
       char *object,              // in - object type
       char *targetobj,           // in - target object for writing
+      ESMC_AttWriteFlag *attwriteflag, // in - attwriteflag
       int *rc,                   // in - return code
       ESMCI_FortranStrLenArg clen,// hidden/in - strlen count for convention
       ESMCI_FortranStrLenArg plen,// hidden/in - strlen count for purpose
@@ -3683,10 +3684,18 @@ void FTN_X(c_esmc_attributewritetab)(
 
   // simple sanity check before doing any more work
   if ((!targetobj) || (tlen <= 0) || (targetobj[0] == '\0')) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                         "bad attribute target object", ESMC_CONTEXT, &status);
-      if (rc) *rc = status;
-      return;
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+                                  "bad attribute target object", ESMC_CONTEXT, &status);
+    if (rc) *rc = status;
+    return;
+  }
+
+  // simple sanity check before doing any more work
+  if (!attwriteflag) {
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+                                  "bad attwriteflag", ESMC_CONTEXT, &status);
+    if (rc) *rc = status;
+    return;
   }
 
   string cconv(convention, clen);
@@ -3727,131 +3736,110 @@ void FTN_X(c_esmc_attributewritetab)(
   }
 
   // Write the attributes from the object.
-  status = (**base).root.AttributeWriteTab(cconv, cpurp, cobj, ctarobj,
-    (*base)->ESMC_Base::ESMC_BaseGetName());
+  status = (**base).root.AttributeWrite(cconv, cpurp, cobj, ctarobj,
+    (*base)->ESMC_Base::ESMC_BaseGetName(), *attwriteflag);
   ESMC_LogDefault.MsgFoundError(status, ESMCI_ERR_PASSTHRU,
         ESMC_CONTEXT, ESMC_NOT_PRESENT_FILTER(rc));
 
-}  // end c_ESMC_AttributeWriteTab
+}  // end c_ESMC_AttributeWrite
 
 //-----------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  c_ESMC_AttributeWriteXML - Setup the attribute package
+// !IROUTINE:  c_ESMC_AttPackStreamJSON - write json from attpack to string
 //
 // !INTERFACE:
-void FTN_X(c_esmc_attributewritexml)(
+void FTN_X(c_esmc_attpackstreamjson)(
 //
 #undef  ESMC_METHOD
-#define ESMC_METHOD "c_esmc_attributewritexml()"
+#define ESMC_METHOD "c_esmc_attpackstreamjson()"
 //
 // !RETURN VALUE:
 //    none.  return code is passed thru the parameter list
-// 
+//
 // !ARGUMENTS:
-      ESMC_Base **base,          // in/out - base object
-      char *convention,          // in - convention
-      char *purpose,             // in - purpose
-      char *object,              // in - object type
-      char *targetobj,           // in - target object for writing
-      int *rc,                   // in - return code
-      ESMCI_FortranStrLenArg clen,// hidden/in - strlen count for convention
-      ESMCI_FortranStrLenArg plen,// hidden/in - strlen count for purpose
-      ESMCI_FortranStrLenArg olen,// hidden/in - strlen count for object
-      ESMCI_FortranStrLenArg tlen) { // hidden/in - strlen count for target object
-// 
+        ESMCI::Attribute **attpack,    // in - attpack
+        char *output,                  // out - output string
+        int *rc,                       // out - return code
+        ESMCI_FortranStrLenArg olen) { // hidden/in - strlen count for target object
+//
 // !DESCRIPTION:
-//     Associate a convention, purpose, and object type with an attribute package
+//     Write attpack contents to json formatted output
 //
 //EOP
 
   int status;
-  
+
   // Initialize return code; assume routine not implemented
   if (rc) *rc = ESMC_RC_NOT_IMPL;
 
-  if (!base) {
+  if (!attpack) {
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                         "bad base", ESMC_CONTEXT, &status);
-    if (rc) *rc = status;    
-    return;
-  }
-
-  // simple sanity check before doing any more work
-  if ((!convention) || (clen <= 0) || (convention[0] == '\0')) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                         "bad attribute convention", ESMC_CONTEXT, &status);
-      if (rc) *rc = status;
-      return;
-  }
-  
-  // simple sanity check before doing any more work
-  if ((!purpose) || (plen <= 0) || (purpose[0] == '\0')) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                         "bad attribute purpose", ESMC_CONTEXT, &status);
-      if (rc) *rc = status;
-      return;
-  }
-  
-  // simple sanity check before doing any more work
-  if ((!object) || (olen <= 0) || (object[0] == '\0')) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                         "bad attribute object", ESMC_CONTEXT, &status);
-      if (rc) *rc = status;
-      return;
-  }
-
-  // simple sanity check before doing any more work
-  if ((!targetobj) || (tlen <= 0) || (targetobj[0] == '\0')) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                         "bad attribute target object", ESMC_CONTEXT, &status);
-      if (rc) *rc = status;
-      return;
-  }
-
-  string cconv(convention, clen);
-  string cpurp(purpose, plen);
-  string cobj(object, olen);
-  string ctarobj(targetobj, tlen);
-  cconv.resize(cconv.find_last_not_of(" ")+1);
-  cpurp.resize(cpurp.find_last_not_of(" ")+1);
-  cobj.resize(cobj.find_last_not_of(" ")+1);
-  ctarobj.resize(ctarobj.find_last_not_of(" ")+1);
-
-  if (cconv.empty()) {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                         "bad attribute convention conversion", ESMC_CONTEXT, &status);
+                                  "bad attpack", ESMC_CONTEXT, &status);
     if (rc) *rc = status;
     return;
   }
 
-  if (cpurp.empty()) {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                         "bad attribute purpose conversion", ESMC_CONTEXT, &status);
-    if (rc) *rc = status;
-    return;
-  }
-
-  if (cobj.empty()) {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                         "bad attribute object conversion", ESMC_CONTEXT, &status);
-    if (rc) *rc = status;
-    return;
-  }
-
-  if (ctarobj.empty()) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                         "bad attribute target object conversion", ESMC_CONTEXT, &status);
-      if (rc) *rc = status;
-      return;
-  }
+  string coutput;
 
   // Write the attributes from the object.
-  status = (**base).root.AttributeWriteXML(cconv, cpurp, cobj, ctarobj, 
-    (*base)->ESMC_Base::ESMC_BaseGetName());
+  status = (*attpack)->streamJSON(coutput);
   ESMC_LogDefault.MsgFoundError(status, ESMCI_ERR_PASSTHRU,
-        ESMC_CONTEXT, ESMC_NOT_PRESENT_FILTER(rc));
+                                ESMC_CONTEXT, ESMC_NOT_PRESENT_FILTER(rc));
 
-}  // end c_ESMC_AttributeWriteXML
+  // convert strings to F90 using F90 length
+  status = ESMC_CtoF90string(coutput.c_str(), &output[0], olen);
+  ESMC_LogDefault.MsgFoundError(status, ESMCI_ERR_PASSTHRU,
+                                ESMC_CONTEXT, ESMC_NOT_PRESENT_FILTER(rc));
+
+}  // end c_ESMC_AttPackStreamJSON
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  c_ESMC_AttPackStreamJSONstrlen - get the string length required
+//                                              to write json from attpack to
+//                                              string
+//
+// !INTERFACE:
+void FTN_X(c_esmc_attpackstreamjsonstrlen)(
+//
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_attpackstreamjsonstrlen()"
+//
+// !RETURN VALUE:
+//    none.  return code is passed thru the parameter list
+//
+// !ARGUMENTS:
+        ESMCI::Attribute **attpack,    // in - attpack
+        int *jsonstrlen,               // out - output stringlength
+        int *rc) {                     // out - return code
+//
+// !DESCRIPTION:
+//     Get the string length required to write attpack contents to json
+//     formatted output
+//
+//EOP
+
+  int status;
+
+  // Initialize return code; assume routine not implemented
+  if (rc) *rc = ESMC_RC_NOT_IMPL;
+
+  if (!attpack) {
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+                                  "bad attpack", ESMC_CONTEXT, &status);
+    if (rc) *rc = status;
+    return;
+  }
+
+  string coutput;
+
+  // Write the attributes from the object.
+  status = (*attpack)->streamJSON(coutput);
+  ESMC_LogDefault.MsgFoundError(status, ESMCI_ERR_PASSTHRU,
+                                ESMC_CONTEXT, ESMC_NOT_PRESENT_FILTER(rc));
+
+  *jsonstrlen = coutput.length();
+}  // end c_ESMC_AttPackStreamJSON
 
 #undef  ESMC_METHOD
 

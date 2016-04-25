@@ -13,7 +13,7 @@ include ${ESMF_DIR}/makefile
 # directly below this directory, and have either library,
 # example/test code, or documents which need to be generated.
 
-DIRS      = src tests doc
+DIRS      = src tests doc examples
 
 CLEANDIRS   =
 CLEANFILES  =

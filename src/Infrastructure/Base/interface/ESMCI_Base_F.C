@@ -9,7 +9,7 @@
 // Licensed under the University of Illinois-NCSA License.
 //
 //==============================================================================
-#define ESMF_FILENAME "ESMCI_Base_F.C"
+#define ESMC_FILENAME "ESMCI_Base_F.C"
 //==============================================================================
 //
 // This file contains the Fortran interface code to link F90 and C++.
@@ -68,6 +68,17 @@ extern "C" {
 
   string scname = string (superclass, ESMC_F90lentrim (superclass, sclen));
   string cname  = string (name, ESMC_F90lentrim (name, nlen));
+
+  // look for slash in name.  Conflicts with syntax used in StateGet for items in
+  // nested States.
+  size_t slc = cname.find_first_of ("/");
+  if (slc != string::npos) {
+    ESMC_LogDefault.Write(cname+" must not have a slash (/) in its name", ESMC_LOGMSG_INFO,
+      ESMC_CONTEXT);
+    if (rc) *rc = ESMF_RC_ARG_VALUE;
+    return;
+  }
+
   (*base) = new ESMC_Base(scname.c_str(), cname.c_str(), *nattrs);
   if (*base != NULL)
       *rc = ESMF_SUCCESS;
@@ -413,6 +424,17 @@ extern "C" {
  
   string oname = string (objname, ESMC_F90lentrim (objname, olen));
   string cname = string (classname, ESMC_F90lentrim (classname, clen));
+
+  // look for slash in name.  Conflicts with syntax used in StateGet for items in
+  // nested States.
+  size_t slc = oname.find_first_of ("/");
+  if (slc != string::npos) {
+    ESMC_LogDefault.Write(oname+" must not have a slash (/) in its name", ESMC_LOGMSG_INFO,
+      ESMC_CONTEXT);
+    if (rc) *rc = ESMF_RC_ARG_VALUE;
+    return;
+  }
+
   (*rc) = (*base)->ESMC_BaseSetName(oname.c_str(), cname.c_str());
 
   return;

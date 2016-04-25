@@ -157,7 +157,10 @@
 !------------------------------------------------------------------------------
 ! Revised parameter table to fit Fortran 90 standard.
 
-       integer,   parameter :: LSZ = 256  ! Maximum line size
+       integer,   parameter :: LSZ = max (1024,ESMF_MAXPATHLEN)  ! Maximum line size
+                                          ! should be at least long enough
+                                          ! to read in a file name with full
+                                          ! path prepended.
        integer,   parameter :: MSZ = 1024 ! Used to size buffer; this is
                                           ! usually *less* than the number
                                           ! of non-blank/comment lines
@@ -772,7 +775,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
            return
          end if
          if (ESMF_LogFoundError(ESMF_RC_NOT_FOUND, &
-                                msg="label not found", &
+                                msg="label " // trim (label) // " not found", &
                                  ESMF_CONTEXT, rcToReturn=rc)) return
       elseif(i.le.0) then
          if (ESMF_LogFoundError(ESMF_RC_ARG_BAD, &

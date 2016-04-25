@@ -64,7 +64,7 @@ class CoordSys(IntEnum):
     """
     Cartesian coordinate system. In this system, the Cartesian
     coordinates are mapped to the Grid coordinate dimensions in the
-    following order: x,y,z. (e.g. using coord_dim=1 in
+    following order: x, y, z. (e.g. using coord_dim=1 in
     Grid.get_coords() references the y dimension)
     """
     SPH_DEG = 1
@@ -72,20 +72,14 @@ class CoordSys(IntEnum):
     Spherical coordinates in degrees. In this system, the spherical
     coordinates are mapped to the Grid coordinate dimensions in the
     following order: longitude, latitude, radius. (E.g. using
-    coord_dim=1 in Grid.get_coords() references the latitude dimension)
-    Note, however, that Regrid() currently just supports longitude and
-    latitude (i.e. with this system, only Grids of dimension 2 are
-    supported in the regridding).
+    coord_dim=1 in Grid.get_coords() references the latitude dimension).
     """
     SPH_RAD = 2
     """
     Spherical coordinates in radians. In this system, the spherical
     coordinates are mapped to the Grid coordinate dimensions in the
     following order: longitude, latitude, radius. (E.g. using
-    coord_dim=1 in Grid.get_coords() references the latitude dimension)
-    Note, however, that Regrid() currently just supports longitude and
-    latitude (i.e. with this system, only Grids of dimension 2 are
-    supported in the regridding).
+    coord_dim=1 in Grid.get_coords() references the latitude dimension).
     """
 
 # DecompFlag

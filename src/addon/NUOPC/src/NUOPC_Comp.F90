@@ -1939,6 +1939,8 @@ module NUOPC_Comp
     type(ESMF_TimeInterval), intent(in),  optional :: stabilityTimeStep
     integer,                 intent(out), optional :: rc
 ! !DESCRIPTION:
+!   \label{NUOPC_GridCompSetClock}
+!
 !   Set the component internal clock as a copy of {\tt externalClock}, but
 !   with a timeStep that is less than or equal to the stabilityTimeStep.
 !   At the same time ensure that the timeStep of the external clock is

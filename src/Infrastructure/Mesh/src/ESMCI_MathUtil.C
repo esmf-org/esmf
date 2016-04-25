@@ -915,7 +915,7 @@ template <class GEOM>
 
     //    printf("%d pnt0=%f %f turn=%f\n",i,pntip0[0],pntip0[1],cross);
 
-    if (cross < 0.0) {
+    if (cross <= 0.0) {
       return false;
     }
   }

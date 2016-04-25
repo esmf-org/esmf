@@ -178,14 +178,13 @@ class TestGrid(TestBase):
     @attr('serial')
     @attr('slow')
     def test_grid_create_2d(self):
-        # NOTE: most are commented out to prevent average nose users from using up all available machine memory
         keywords = dict(
             # periodic specifies all valid combos of [num_peri_dims, periodic_dim, pole_dim]
-            # periodic=[[None, None, None], [None, None, 0], [None, None, 1],
-            #           [0, None, None], [0, None, 0], [0, None, 1],
-            #           [1, None, None], [1, 0, 1], [1, 1, 0]],
-            # staggerloc=[None, StaggerLoc.CENTER, StaggerLoc.EDGE1, StaggerLoc.EDGE2, StaggerLoc.CORNER],
-            # coord_sys=[None, CoordSys.CART, CoordSys.SPH_DEG, CoordSys.SPH_RAD],
+            periodic=[[None, None, None], [None, None, 0], [None, None, 1],
+                      [0, None, None], [0, None, 0], [0, None, 1],
+                      [1, None, None], [1, 0, 1], [1, 1, 0]],
+            staggerloc=[None, StaggerLoc.CENTER, StaggerLoc.EDGE1, StaggerLoc.EDGE2, StaggerLoc.CORNER],
+            coord_sys=[None, CoordSys.CART, CoordSys.SPH_DEG, CoordSys.SPH_RAD],
             typekind=[None, TypeKind.I4, TypeKind.I8, TypeKind.R4, TypeKind.R8],
         )
 
@@ -194,13 +193,19 @@ class TestGrid(TestBase):
         for a in testcases:
             try:
                 grid = Grid(np.array([12, 12]),
-                            num_peri_dims=a.periodic[0], periodic_dim=a.periodic[1], pole_dim=a.periodic[2],
-                            coord_sys=a.coord_sys, coord_typekind=a.typekind, staggerloc=a.staggerloc)
+                            num_peri_dims=a.periodic[0],
+                            periodic_dim=a.periodic[1],
+                            pole_dim=a.periodic[2],
+                            coord_sys=a.coord_sys,
+                            coord_typekind=a.typekind,
+                            staggerloc=a.staggerloc)
                 grid.add_item(GridItem.MASK)
                 grid.add_item(GridItem.AREA)
                 grid2 = grid[2:10, 4:7]
                 self.examine_grid_attributes(grid)
                 self.examine_grid_attributes(grid2)
+                grid.destroy()
+                grid2.destroy()
             except:
                 fail += a
 
@@ -211,16 +216,15 @@ class TestGrid(TestBase):
     @attr('serial')
     @attr('slow')
     def test_grid_create_3d(self):
-        # NOTE: most are commented out to prevent average nose users from using up all available machine memory
         keywords = dict(
             # periodic specifies all valid combos of [num_peri_dims, periodic_dim, pole_dim]
-            # periodic=[[None, None, None], [None, None, 0], [None, None, 1], [None, None, 2],
-            #           [0, None, None], [0, None, 0], [0, None, 1], [0, None, 2],
-            #           [1, None, None], [1, 0, 1], [1, 0, 2], [1, 1, 0], [1, 1, 2], [1, 2, 0], [1, 2, 1]],
-            # staggerloc=[None, StaggerLoc.CENTER_VCENTER, StaggerLoc.EDGE1_VCENTER, StaggerLoc.EDGE2_VCENTER,
-            #             StaggerLoc.CORNER_VCENTER, StaggerLoc.CENTER_VFACE, StaggerLoc.EDGE1_VFACE,
-            #             StaggerLoc.EDGE2_VFACE, StaggerLoc.CORNER_VFACE],
-            # coord_sys=[None, CoordSys.CART, CoordSys.SPH_DEG, CoordSys.SPH_RAD],
+            periodic=[[None, None, None], [None, None, 0], [None, None, 1], [None, None, 2],
+                      [0, None, None], [0, None, 0], [0, None, 1], [0, None, 2],
+                      [1, None, None], [1, 0, 1], [1, 0, 2], [1, 1, 0], [1, 1, 2], [1, 2, 0], [1, 2, 1]],
+            staggerloc=[None, StaggerLoc.CENTER_VCENTER, StaggerLoc.EDGE1_VCENTER, StaggerLoc.EDGE2_VCENTER,
+                        StaggerLoc.CORNER_VCENTER, StaggerLoc.CENTER_VFACE, StaggerLoc.EDGE1_VFACE,
+                        StaggerLoc.EDGE2_VFACE, StaggerLoc.CORNER_VFACE],
+            coord_sys=[None, CoordSys.CART, CoordSys.SPH_DEG, CoordSys.SPH_RAD],
             typekind=[None, TypeKind.I4, TypeKind.I8, TypeKind.R4, TypeKind.R8])
 
         testcases = self.iter_product_keywords(keywords)
@@ -235,6 +239,8 @@ class TestGrid(TestBase):
                 grid2 = grid[2:10, 4:7, 1:9]
                 self.examine_grid_attributes(grid)
                 self.examine_grid_attributes(grid2)
+                grid.destroy()
+                grid2.destroy()
             except:
                 fail += a
 

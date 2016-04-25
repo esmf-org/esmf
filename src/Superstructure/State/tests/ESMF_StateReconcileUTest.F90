@@ -955,7 +955,7 @@ program ESMF_StateReconcileUTest
 
     !-------------------------------------------------------------------------
     !NEX_UTest_Multi_Proc_Only
-    statename = 'state w/attributes'
+    statename = 'state with attributes'
     state_attr = ESMF_StateCreate (name=statename, rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Creating a State for attributes"

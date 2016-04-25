@@ -84,21 +84,28 @@ class TestField(TestBase):
             field.data[:, :, :, i] = i
         assert field.data[0, 0, 0, ::2].all() == np.array([0, 2, 4, 6, 8]).all()
 
+        # extended slices
+        for i in range(10):
+            field.data[:,:,:,i] = i
+        assert field.data[0,0,0,::2].all() == np.array([0, 2, 4, 6, 8]).all()
+
+
+
+
     @attr('serial')
     @attr('slow')
     #nosetests src/ESMF/test/test_api/test_field.py:TestField.test_field_create_2d_grid
     def test_field_create_2d_grid(self):
-        # NOTE: most are commented out to prevent average nose users from using up all available machine memory
         keywords = dict(
             # periodic specifies all valid combos of [num_peri_dims, periodic_dim, pole_dim]
-            # periodic=[[None, None, None], [None, None, 0], [None, None, 1],
-            #           [0, None, None], [0, None, 0], [0, None, 1],
-            #           [1, None, None], [1, 0, 1], [1, 1, 0]],
-            # staggerloc=[None, StaggerLoc.CENTER, StaggerLoc.EDGE1, StaggerLoc.EDGE2, StaggerLoc.CORNER],
-            # coord_sys=[None, CoordSys.CART, CoordSys.SPH_DEG, CoordSys.SPH_RAD],
+            periodic=[[None, None, None], [None, None, 0], [None, None, 1],
+                      [0, None, None], [0, None, 0], [0, None, 1],
+                      [1, None, None], [1, 0, 1], [1, 1, 0]],
+            staggerloc=[None, StaggerLoc.CENTER, StaggerLoc.EDGE1, StaggerLoc.EDGE2, StaggerLoc.CORNER],
+            coord_sys=[None, CoordSys.CART, CoordSys.SPH_DEG, CoordSys.SPH_RAD],
             typekind_grid=[None, TypeKind.I4, TypeKind.I8, TypeKind.R4, TypeKind.R8],
             typekind_field=[None, TypeKind.I4, TypeKind.I8, TypeKind.R4, TypeKind.R8],
-            # ndbounds=[None, [2], [2, 5]]
+            ndbounds=[None, [2], [2, 5]]
             )
 
         testcases = self.iter_product_keywords(keywords)
@@ -108,10 +115,10 @@ class TestField(TestBase):
                 grid = Grid(np.array([12, 12]),
                             num_peri_dims=a.periodic[0], periodic_dim=a.periodic[1], pole_dim=a.periodic[2],
                             coord_sys=a.coord_sys, coord_typekind=a.typekind_grid, staggerloc=a.staggerloc)
-                if a.mask_values is not None and a.staggerloc is not None:
-                    grid.add_item(GridItem.MASK, staggerloc=a.staggerloc)
-                    for b in a.mask_values:
-                        grid.mask[a.staggerloc][:, b] = b
+                # if a.mask_values is not None and a.staggerloc is not None:
+                #     grid.add_item(GridItem.MASK, staggerloc=a.staggerloc)
+                #     for b in a.mask_values:
+                #         grid.mask[a.staggerloc][:, b] = b
 
                 field = Field(grid, name="test_field_grid_2d", typekind=a.typekind_field,
                               staggerloc=a.staggerloc, ndbounds=a.ndbounds)
@@ -126,10 +133,11 @@ class TestField(TestBase):
                     field2 = field[2:10, 7:9]
                 self.examine_field_attributes(field)
                 self.examine_field_attributes(field2)
+                field2.destroy()
+                field.destroy()
+                grid.destroy()
             except:
                 fail += 1
-                print a
-                break
 
         if fail > 0:
             raise ValueError(
@@ -138,20 +146,19 @@ class TestField(TestBase):
     @attr('serial')
     @attr('slow')
     def test_field_create_3d_grid(self):
-        # NOTE: most are commented out to prevent average nose users from using up all available machine memory
         keywords = dict(
             # periodic specifies all valid combos of [num_peri_dims, periodic_dim, pole_dim]
-            # periodic=[[None, None, None], [None, None, 0], [None, None, 1], [None, None, 2],
-            #           [0, None, None], [0, None, 0], [0, None, 1], [0, None, 2],
-            #           [1, None, None], [1, 0, 1], [1, 0, 2], [1, 1, 0], [1, 1, 2], [1, 2, 0], [1, 2, 1]],
-            # staggerloc=[None, StaggerLoc.CENTER_VCENTER, StaggerLoc.EDGE1_VCENTER, StaggerLoc.EDGE2_VCENTER,
-            #             StaggerLoc.CORNER_VCENTER, StaggerLoc.CENTER_VFACE, StaggerLoc.EDGE1_VFACE,
-            #             StaggerLoc.EDGE2_VFACE, StaggerLoc.CORNER_VFACE],
-            # coord_sys=[None, CoordSys.CART, CoordSys.SPH_DEG, CoordSys.SPH_RAD],
-            # mask_values=[None, [2], [2, 3, 4]],
+            periodic=[[None, None, None], [None, None, 0], [None, None, 1], [None, None, 2],
+                      [0, None, None], [0, None, 0], [0, None, 1], [0, None, 2],
+                      [1, None, None], [1, 0, 1], [1, 0, 2], [1, 1, 0], [1, 1, 2], [1, 2, 0], [1, 2, 1]],
+            staggerloc=[None, StaggerLoc.CENTER_VCENTER, StaggerLoc.EDGE1_VCENTER, StaggerLoc.EDGE2_VCENTER,
+                        StaggerLoc.CORNER_VCENTER, StaggerLoc.CENTER_VFACE, StaggerLoc.EDGE1_VFACE,
+                        StaggerLoc.EDGE2_VFACE, StaggerLoc.CORNER_VFACE],
+            coord_sys=[None, CoordSys.CART, CoordSys.SPH_DEG, CoordSys.SPH_RAD],
+            mask_values=[None, [2], [2, 3, 4]],
             typekind_grid=[None, TypeKind.I4, TypeKind.I8, TypeKind.R4, TypeKind.R8],
             typekind_field=[None, TypeKind.I4, TypeKind.I8, TypeKind.R4, TypeKind.R8],
-            # ndbounds=[None, [2], [2, 5]]
+            ndbounds=[None, [2], [2, 5]]
             )
 
         testcases = self.iter_product_keywords(keywords)
@@ -178,7 +185,9 @@ class TestField(TestBase):
                 else:
                     field2 = field[2:10, 7:9, 4:11]
                 self.examine_field_attributes(field2)
-
+                field2.destroy()
+                field.destroy()
+                grid.destroy()
             except:
                 fail += a
 
@@ -209,10 +218,10 @@ class TestField(TestBase):
                 # create mesh
                 mesh = None
                 if parallel:
-                    mesh, nodeCoord, nodeOwner, elemType, elemConn = \
+                    mesh, nodeCoord, nodeOwner, elemType, elemConn, elemCoord = \
                         mesh_create_50_parallel()
                 else:
-                    mesh, nodeCoord, nodeOwner, elemType, elemConn = \
+                    mesh, nodeCoord, nodeOwner, elemType, elemConn, elemCoord = \
                         mesh_create_50()
 
                 field = Field(mesh, name="test_field_mesh_2d",
@@ -220,7 +229,9 @@ class TestField(TestBase):
                 self.examine_field_attributes(field)
                 field2 = field[2:10]
                 self.examine_field_attributes(field2)
-
+                field2.destroy()
+                field.destroy()
+                mesh.destroy()
             except:
                 fail += a
 
@@ -263,7 +274,7 @@ class TestField(TestBase):
         POSTCONDITIONS: A Field has been created.\n
         RETURN VALUES: \n Field :: field \n
         '''
-        field = ESMF.Field(gml, name=name)
+        field = Field(gml, name=name)
 
         return field
 
@@ -527,7 +538,8 @@ class TestField(TestBase):
 
     @attr('serial')
     def test_field_reshape(self):
-        field = self.make_field(np.array([10, 10], dtype=np.int32), ndbounds=False)
+        field = self.make_field(np.array([10, 10], dtype=np.int32),
+                                ndbounds=False)
 
         field.data[...] = 4
 

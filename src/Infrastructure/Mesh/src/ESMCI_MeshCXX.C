@@ -8,6 +8,7 @@
 // NASA Goddard Space Flight Center.
 // Licensed under the University of Illinois-NCSA License.
 //
+#define ESMC_FILENAME "./src/Infrastructure/Mesh/src/ESMCI_MeshCXX.C"
 //==============================================================================
 //------------------------------------------------------------------------------
 // INCLUDES    

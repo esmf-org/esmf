@@ -9,7 +9,7 @@
 // Licensed under the University of Illinois-NCSA License.
 //
 //==============================================================================
-#define ESMF_FILENAME "ESMCI_Base.C"
+#define ESMC_FILENAME "ESMCI_Base.C"
 //==============================================================================
 //
 // Base class implementation (body) file
@@ -479,6 +479,14 @@ static const char *const version = "$Id$";
            &rc);
        return rc;
      }
+     // look for slash in name.  Conflicts with syntax used in StateGet for items in
+     // nested States.
+     if (strchr (name, '/') != NULL) {
+       sprintf(msgbuf, "%s must not have a slash (/) in its name\n", name);
+       ESMC_LogDefault.MsgFoundError (ESMC_RC_ARG_VALUE, msgbuf, ESMC_CONTEXT,
+           &rc);
+       return rc;
+     }
      defname = 0;
   } 
 
@@ -541,6 +549,15 @@ static const char *const version = "$Id$";
        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, ESMC_CONTEXT, 
            &rc);
        return rc;
+  }
+  // look for slash in name.  Conflicts with syntax used in StateGet for items in
+  // nested States.
+  if (memchr (name, '/', nlen) != NULL) {
+    std::string name_s(name,nlen);
+    std::string msgbuf_s = name_s + " must not have a slash (/) in its name";
+    ESMC_LogDefault.MsgFoundError (ESMC_RC_ARG_VALUE, msgbuf_s, ESMC_CONTEXT,
+        &rc);
+    return rc;
   }
 
   memcpy(baseNameF90, name, nlen);

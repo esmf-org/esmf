@@ -1,0 +1,141 @@
+\section{File I/O}
+%
+To take care of the code I/O, the following modules are utilized.
+
+\noindent
+{\tt m\_stdio} defines standard I/O parameters (system dependent) in 
+particular the I/O file unit numbers and the length (number of characters)
+ of any file name.
+%
+\begin{verbatim}
+EXAMPLE 1:
+  Here are the actual parameter definitions contain in the modules.
+
+     ! Standard i/o units.
+     integer, parameter :: stdin  = 5
+     integer, parameter :: stdout = 6
+
+     #ifdef sysHP-UX        ! Special setting for HP-UX
+        integer, parameter :: stderr = 7
+     #else                  ! Generic setting for UNIX other than HP-UX
+        integer, parameter :: stderr = 0
+     #endif
+     integer, parameter :: LEN_FILENAME = 128
+\end{verbatim}
+%
+{\tt m\_ioutil} is a module containing several portable interfaces for
+some highly system dependent, but frequently used I/O functions.
+It performs operations such as opening and closing Fortran ``unformatted''
+and ``formatted'' files regardless of the file options used.
+It has the following subroutines.
+%
+\begin{itemize}
+\item {\tt opniee:} Opens a file in `IEEE' format.
+  	`IEEE' format is refered as a Fortran ``unformatted'' file with
+  	``sequantial'' access and variable record lengths. Under common
+  	Unix, it is only a file with records packed with a leading 4-byte
+  	word and a trailing 4-byte word indicating the size of the record 
+        in bytes. However, under UNICOS, it is also assumed to have 
+        numerical data representations represented according to the IEEE 
+        standard corresponding KIND conversions. Under a DEC machine, it 
+        means that compilations of the source code should have the 
+       ``-bigendian'' option specified.
+\item {\tt clsieee:} Closes a logical unit opened by opnieee().
+  	The reason for a paired clsieee() for opnieee() instead of a
+  	simple close(), is for the portability reason. For example,
+  	under UNICOS, special system calls may be need to set up the
+  	unit right, and the status of the unit should be restored upon
+  	close.
+\item {\tt opntext:} Opens a text (ASCII) file. Under Fortran, it is 
+      defined as ``formatted'' with ``sequential'' access.
+\item {\tt clstext:} Closes a text file opend with an opntext() call.
+\item {\tt luavail:} Looks for an available (not opened and not statically
+      assigned to any I/O attributes to) logical unit.
+\item {\tt luflush:} Calls available on many systems are often implementation
+      dependent. This subroutine provides a uniform interface. It also 
+      ignores invalid logical unit value. 
+\end{itemize}
+%
+\begin{verbatim}
+EXAMPLE 2:
+  Code:
+      use m_ioutil,only : luavail, opntext, clstext
+      use m_ioutil,only : opnieee, clsieee
+      integer :: unit1, unit2
+      integer :: ier                        | to check possible error
+      character*128 :: infile1='text_file.in'
+      character*128 :: infile2='ieee_file.in'
+
+      unit1 = luavail()
+      call opntext(unit1,infile1,''unknown'',ier)
+      ...
+      unit2 = luavail()
+      call opnieee(unit2,infile2,''unknown'',ier)
+      ...
+      call clstext(unit1,ier)
+      call clsieee(unit2,ier)
+\end{verbatim}
+%
+{\tt m\_FileResolv} provides routines for resolving GrADS-like file name 
+templates.
+The main subroutine is {\tt FileResolv:} that resolves file name templates, 
+scp'ing files from remote and performing gunzip'ing as necessary
+%
+\begin{verbatim}
+EXAMPLE 3:
+  Code:
+      use m_FileResolv,only : FileResolv
+      character(len=*) :: expid          ! Experiment id
+      integer          :: nymd           ! Year-month-day
+      integer          :: nhms           ! Hour-min-sec
+      character(len=*) :: templ          ! file name template
+      character(len=*) :: fname          ! resolved file name (output)
+
+      call FileResolv (expid, nymd, nhms, templ, fname)
+            
+\end{verbatim}
+%
+{\tt m\_mpout} is a multiple but mergable parallel output module that
+performs operations such as opening/closing multiple files with the same 
+name prefix, synchonizing and flushing the multiple output streams. 
+The main operation are:
+\begin{itemize}
+\item {\tt mpout\_open}: Opens the multiple output streams.
+\item {\tt mpout\_close}: Closes the multiple output streams.
+\item {\tt mpout\_ison}: Verifies if "mpout" is properly defined by
+      deciding if the current PE has a defined "mpout".
+\end{itemize}
+%
+\begin{verbatim}
+EXAMPLE 4:
+   - mpout_ison() on no PE but PE 0, where mpout is opened to file
+     "mpout.000":
+
+       call mpout_open()
+
+   - mpout_ison() on every 4 PE starting from 0, where mpout is opened
+     to files named, "out.000", "out.004", "out.007", "out.00a", etc.
+
+       call mpout_open(mask=3,pfix='out')
+
+     Note that 3 = "11"b.  Therefore,
+
+       mask="000011"b
+       PE 0="000000"b  is "clean", mpout_ison()
+          1="000001"b  is "dirty", .not. on
+          2="000010"b  is "dirty", .not. on
+          3="000011"b  is "dirty", .not. on
+          4="000100"b  is "clean", mpout_ison()
+          5="000101"b  is "dirty", .not. on
+          6="000110"b  is "dirty", .not. on
+          7="000111"b  is "dirty", .not. on
+          8="001000"b  is "clean", mpout_ison()
+          9="001001"b  is "dirty", .not. on
+         10="001010"b  is "dirty", .not. on
+         11="001011"b  is "dirty", .not. on
+         12="001100"b  is "clean", mpout_ison()
+         13="001101"b  is "dirty", .not. on
+         14="001110"b  is "dirty", .not. on
+         15="001111"b  is "dirty", .not. on
+\end{verbatim}
+%

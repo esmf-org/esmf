@@ -1,0 +1,270 @@
+! $Id$
+!
+! Earth System Modeling Framework
+! Copyright 2002-2016, University Corporation for Atmospheric Research,
+! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
+! Laboratory, University of Michigan, National Centers for Environmental
+! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
+! NASA Goddard Space Flight Center.
+! Licensed under the University of Illinois-NCSA License.
+!
+!==============================================================================
+!
+program ESMF_AttributeCplCompUTest
+
+!------------------------------------------------------------------------------
+! INCLUDES
+^include "ESMF.h"
+#include "ESMF_AttributeTestMacros.hcppF90"
+!
+!==============================================================================
+!BOP
+! !PROGRAM: ESMF_AttributeCplCompUTest - Attribute CplComp Unit Tests
+!
+! !DESCRIPTION:
+!
+! The code in this file drives F90 Attribute CplComp unit tests.
+! The companion file ESMF\_Attribute.F90 contains the definitions for the
+! Attribute methods.
+!
+!-----------------------------------------------------------------------------
+! !USES:
+      use ESMF_TestMod     ! test methods
+      use ESMF         ! the ESMF Framework
+      implicit none
+
+!------------------------------------------------------------------------------
+! The following line turns the CVS identifier string into a printable variable.
+      character(*), parameter :: version = &
+      '$Id$'
+!------------------------------------------------------------------------------
+
+!-------------------------------------------------------------------------
+!=========================================================================
+      ! individual test failure message
+      character(ESMF_MAXSTR) :: failMsg, name
+
+      ! cumulative result: count failures; no failures equals "all pass"
+      integer :: result = 0
+
+      ! local variables
+      type(ESMF_CplComp)  :: cplcomp, cfc, cplcompValue, cplcompHybrid
+      type(ESMF_GridComp) :: gfc
+      type(ESMF_State)    :: sfc
+
+      ! macro variables
+      AttributeTestVariablesMacro()
+
+!-------------------------------------------------------------------------------
+!  The unit tests are divided into Sanity and Exhaustive. The Sanity tests are
+!  always run. When the environment variable, EXHAUSTIVE, is set to ON then
+!  the EXHAUSTIVE and sanity tests both run. If the EXHAUSTIVE variable is set
+!  to OFF, then only the sanity unit tests.
+!  Special strings (Non-exhaustive and exhaustive) have been
+!  added to allow a script to count the number and types of unit tests.
+!-------------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+  call ESMF_TestStart(ESMF_SRCLINE, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  !-----------------------------------------------------------------------------
+
+      !------------------------------------------------------------------------
+      ! preparations
+      ! states
+      sfc = ESMF_StateCreate(name="stateforcplcomp",  &
+                             stateintent=ESMF_STATEINTENT_EXPORT, rc=rc)
+      
+      ! coupler components
+      cplcomp = ESMF_CplCompCreate(name="cplcomp", petList=(/0/), rc=rc)
+      cfc = ESMF_CplCompCreate(name="cplcompforcplcomp", petList=(/0/), rc=rc)
+      cplcompValue = ESMF_CplCompCreate(name="cplcompforvaluecopy", petList=(/0/), rc=rc)
+      cplcompHybrid = ESMF_CplCompCreate(name="cplcompforhybridcopy", petList=(/0/), rc=rc)
+      
+      ! gridded components
+      gfc = ESMF_GridCompCreate(name="gridcompforcplcomp", petList=(/0/), rc=rc)
+      
+      if (rc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+      
+!-------------------------------------------------------------------------
+!  CPLCOMP
+!-------------------------------------------------------------------------
+
+AttributeTestMacro(cplcomp, a CplComp, EX_UTest, NEX_UTest)
+
+^ifdef  ESMF_TESTEXHAUSTIVE
+
+    !-------------------------------------------------------------------------
+    !  AttributeCopy
+    !-------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Copy a CplComp Attribute hierarchy VALUE ONE LEVEL Test
+      call ESMF_AttributeCopy(cplcomp, cplcompValue, &
+        copyflag=ESMF_COPY_VALUE, atttreeflag=ESMF_ATTTREE_OFF, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Copying a CplComp Attribute hierarchy VALUE ONE LEVEL Test"
+      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Copy a CplComp Attribute hierarchy HYBRID Test
+      call ESMF_AttributeCopy(cplcomp, cplcompHybrid, &
+        copyflag=ESMF_COPY_REFERENCE, atttreeflag=ESMF_ATTTREE_ON, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Copying a CplComp Attribute hierarchy HYBRID Test"
+      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+^endif
+
+    !-------------------------------------------------------------------------
+    !  Attribute hierarchy linking
+    !-------------------------------------------------------------------------
+
+      !NEX_UTest
+      ! Link a CplComp Attribute hierarchy to a State Attribute hierarchy CplComp Test
+      call ESMF_AttributeLink(cplcomp, sfc, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Linking a CplComp hierarchy to a State hierarchy Test"
+      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      !NEX_UTest
+      ! Link a CplComp Attribute hierarchy to a CplComp Attribute hierarchy CplComp Test
+      call ESMF_AttributeLink(cplcomp, cfc, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Linking a CplComp hierarchy to a CplComp hierarchy Test"
+      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      !NEX_UTest
+      ! Link a CplComp Attribute hierarchy to a GridComp Attribute hierarchy CplComp Test
+      call ESMF_AttributeLink(cplcomp, gfc, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Linking a CplComp hierarchy to a GridComp hierarchy Test"
+      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+^ifdef ESMF_TESTEXHAUSTIVE
+
+      !EX_UTest
+      ! Link a CplComp Attribute hierarchy to a State Attribute hierarchy CplComp Test, again
+      call ESMF_AttributeLink(cplcomp, sfc, rc=rc)
+      write(failMsg, *) "Did not return ESMC_RC_ATTR_LINK"
+      write(name, *) "Linking a CplComp hierarchy to a State hierarchy Test, again"
+      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Link a CplComp Attribute hierarchy to a CplComp Attribute hierarchy CplComp Test, again
+      call ESMF_AttributeLink(cplcomp, cfc, rc=rc)
+      write(failMsg, *) "Did not return ESMC_RC_ATTR_LINK"
+      write(name, *) "Linking a CplComp hierarchy to a CplComp hierarchy Test, again"
+      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Link a CplComp Attribute hierarchy to a GridComp Attribute hierarchy CplComp Test, again
+      call ESMF_AttributeLink(cplcomp, gfc, rc=rc)
+      write(failMsg, *) "Did not return ESMC_RC_ATTR_LINK"
+      write(name, *) "Linking a CplComp hierarchy to a GridComp hierarchy Test, again"
+      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+^endif
+
+      !NEX_UTest
+      ! Unlink a CplComp Attribute hierarchy from a State Attribute hierarchy CplComp Test
+      call ESMF_AttributeLinkRemove(cplcomp, sfc, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Unlinking a CplComp hierarchy from a State hierarchy Test"
+      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      !NEX_UTest
+      ! Unlink a CplComp Attribute hierarchy to a CplComp Attribute hierarchy CplComp Test
+      call ESMF_AttributeLinkRemove(cplcomp, cfc, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Unlinking a CplComp hierarchy from a CplComp hierarchy Test"
+      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      !NEX_UTest
+      ! Unlink a CplComp Attribute hierarchy to a GridComp Attribute hierarchy CplComp Test
+      call ESMF_AttributeLinkRemove(cplcomp, gfc, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Unlinking a CplComp hierarchy from a GridComp hierarchy Test"
+      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+^ifdef ESMF_TESTEXHAUSTIVE
+
+      !EX_UTest
+      ! Unlink a CplComp Attribute hierarchy from a State Attribute hierarchy CplComp Test 2
+      call ESMF_AttributeLinkRemove(cplcomp, sfc, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Unlinking a CplComp hierarchy from a State hierarchy Test 2"
+      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Unlink a CplComp Attribute hierarchy to a CplComp Attribute hierarchy CplComp Test 2
+      call ESMF_AttributeLinkRemove(cplcomp, cfc, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Unlinking a CplComp hierarchy from a CplComp hierarchy Test 2"
+      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Unlink a CplComp Attribute hierarchy to a GridComp Attribute hierarchy CplComp Test 2
+      call ESMF_AttributeLinkRemove(cplcomp, gfc, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Unlinking a CplComp hierarchy from a GridComp hierarchy Test 2"
+      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Unlink a CplComp Attribute hierarchy from a State Attribute hierarchy CplComp Test 3
+      call ESMF_AttributeLinkRemove(cplcomp, sfc, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Unlinking a CplComp hierarchy from a State hierarchy Test 3"
+      call ESMF_Test((rc/=ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Unlink a CplComp Attribute hierarchy to a CplComp Attribute hierarchy CplComp Test 3
+      call ESMF_AttributeLinkRemove(cplcomp, cfc, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Unlinking a CplComp hierarchy from a CplComp hierarchy Test 3"
+      call ESMF_Test((rc/=ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Unlink a CplComp Attribute hierarchy to a GridComp Attribute hierarchy CplComp Test 3
+      call ESMF_AttributeLinkRemove(cplcomp, gfc, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Unlinking a CplComp hierarchy from a GridComp hierarchy Test 3"
+      call ESMF_Test((rc/=ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+^endif
+
+      !------------------------------------------------------------------------
+      ! clean up
+      call ESMF_CplCompDestroy(cplcomp, rc=rc)
+      call ESMF_CplCompDestroy(cfc, rc=rc)
+      call ESMF_CplCompDestroy(cplcompValue, rc=rc)
+      call ESMF_CplCompDestroy(cplcompHybrid, rc=rc)
+      
+      call ESMF_GridCompDestroy(gfc, rc=rc)
+
+      call ESMF_StateDestroy(sfc, rc=rc)
+      
+      if (rc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+  !-----------------------------------------------------------------------------
+  call ESMF_TestEnd(ESMF_SRCLINE)
+  !-----------------------------------------------------------------------------
+  
+end program ESMF_AttributeCplCompUTest

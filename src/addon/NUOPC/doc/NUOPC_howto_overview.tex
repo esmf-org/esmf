@@ -1,0 +1,96 @@
+% $Id$
+
+The \htmladdnormallink{National Unified Operational Prediction Capability}{http://www.nws.noaa.gov/nuopc/}
+(NUOPC) is a strategic initiative to fundamentally advance the nation's computational
+weather prediction systems and improve forecast models used by National Weather Service,
+Air Force and Navy meteorologists, mission planners, and decision makers.  The
+\htmladdnormallink{NUOPC Layer}{https://www.earthsystemcog.org/projects/nuopc/} is
+a software layer built on top of the
+\htmladdnormallink{Earth System Modeling Framework}{https://www.earthsystemcog.org/projects/esmf/} (ESMF).
+ESMF is a high-performance modeling framework that provides
+data structures, interfaces, and operations suited for building coupled models
+from a set of components.  \textbf{NUOPC refines the capabilities of
+ESMF by providing a more precise definition of what it means for a model
+to be a component and how components should interact and share data
+in a coupled system.}  The NUOPC Layer software is designed to work
+with typical high-performance models in the Earth sciences domain, most
+of which are written in Fortran and are based on a distributed memory
+model of parallelism (MPI).
+
+The NUOPC Layer implements a set of \emph{generic component}s that
+serve as building blocks that can be assembled together in different ways
+to build up a coupled modeling application.  In some cases, a generic
+component can be used as is, and in other cases the generic component
+must be \emph{specialized} (customized) for a particular model or application.
+Additionally, the NUOPC Layer defines a set of technical rules for how components
+should behave and interact with each other.  These technical rules form the
+backbone of component interoperability.  NUOPC defines this effective interoperability
+as the ability of a model component to execute without code changes in a driver that
+provides the fields that it requires, and to return with informative messages if its
+input requirements are not met. A component that follows the NUOPC Layer technical
+rules is considered to be NUOPC Layer compliant.
+
+For brevity, throughout this document we will often use the
+term ``NUOPC'' to refer to the ``NUOPC Layer software'' that is
+the current technical implementation of the NUOPC specification.
+Also, the term ``NUOPC component'' is shorthand for a component
+that is NUOPC Layer compliant and can be used in NUOPC-based
+systems.
+
+\subsection{Document Roadmap}
+
+\textbf{This document is a starting point for model developers
+and technical managers who are new to the NUOPC Layer software
+and need to understand the steps involved in making an existing
+model codebase NUOPC Layer compliant.}
+
+The document is divided into the following sections:
+\begin{itemize}
+
+\item Section \ref{sec:bigidea} describes important parts of the NUOPC design that
+are critical for anyone planning to write code using the NUOPC API.
+
+\item Section \ref{sec:approach} describes the development steps involved
+in making your model code NUOPC Layer compliant.
+
+\item Section \ref{sec:atmexample} presents the code of a basic example cap, describing 
+each part in detail.
+
+\end{itemize}
+
+
+\subsection{Additional NUOPC Resources}
+This document is not exhaustive, but should help you navigate the process of creating
+a NUOPC component from your model.  As such this document is a companion to other NUOPC 
+resources available:
+\begin{itemize}
+\item \htmladdnormallink{The NUOPC website}{https://www.earthsystemcog.org/projects/nuopc}
+is the main source of information on NUOPC, including instructions
+for acquiring and using the NUOPC Layer software.
+
+\item \htmladdnormallink{The NUOPC Reference Manual}{https://www.earthsystemcog.org/projects/nuopc/refmans}
+is the primary technical reference for the NUOPC API and includes
+a detailed description of the NUOPC generic components.
+
+\item \htmladdnormallink{The NUOPC Prototype Codes page}{https://www.earthsystemcog.org/projects/nuopc/proto\_codes}
+and \htmladdnormallink{Subversion repository}{https://sourceforge.net/p/esmfcontrib/svn/HEAD/tree/NUOPC/tags/ESMF\_7\_0\_0/}
+include a set of prototype applications that use the NUOPC Layer software. These
+applications are architectural skeletons that represent typical
+configurations of NUOPC components and provide numerous examples
+of using the NUOPC API.
+
+\item Several \htmladdnormallink{Compliance Testing Tools}{https://www.earthsystemcog.org/projects/nuopc/compliance\_testing}
+are provided to help you test your code to determine if it is NUOPC Layer compliant.
+
+\item \htmladdnormallink{Cupid}{https://www.earthsystemcog.org/projects/cupid/}
+is a plugin for the \htmladdnormallink{Eclipse Integrated Development Environment}{https://eclipse.org/}
+that automatically generates NUOPC Layer compliant code and checks existing
+source code for compliance.
+
+\item A \htmladdnormallink{BAMS}{https://www2.ametsoc.org/ams/index.cfm/publications/bulletin-of-the-american-meteorological-society-bams/}
+article entitled \htmladdnormallink{The Earth System Prediction Suite: Toward a Coordinated U.S. Modeling Capability}{http://journals.ametsoc.org/doi/abs/10.1175/BAMS-D-14-00164.1}
+describes NUOPC and how NUOPC Layer compliant components are being used in coupled modeling
+systems across U.S. agencies.
+
+\end{itemize}
+

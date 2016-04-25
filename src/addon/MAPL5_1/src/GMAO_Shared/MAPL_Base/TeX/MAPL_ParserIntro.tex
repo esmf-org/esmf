@@ -1,0 +1,58 @@
+{\tt MAPL\_NewArthParserMod} is a module that provides a mathematical
+parsing capabiltiy to MAPL and ESMF components. The module evaluates an ESMF field element by element
+using an expression which could contain other ESMF fields as variables.
+Examples of use for this component would be to take the Log of every element in a field
+or add two fields element by element.
+The heart of the module is
+a simple public routine MAPL\_StateEval(state,expression,field,rc) with three required arguments.
+The arguments are as follows: \newline
+state is an \texttt{ESMF\_State} type containing some number of fields.\newline
+expression is a character string containing a valid mathematical function string.\newline
+field is an \texttt{ESMF\_Field} type that will be filled using the expression.\newline
+
+The expression can contain the names of any fields in the state as variables.
+
+The following can appear in the expression string\\
+1. The function string can contain the following mathematical operators +, -, *, /, \^{} and ()\\
+2. Variable names - these can be any field name in the input state. Parsing of variable names is case sensitive.\\
+3. The following single argument fortran intrinsic functions and user defined functions are implmented:
+exp, log10, log, sqrt, sinh, cosh, tanh, sin, cos, tan, asin,
+acos, atan, heav (the Heaviside step function).
+Parsing of functions is case insensitive.\\
+4. Integers or real constants.
+To be recognized
+as explicit constants these must conform to the format
+
+[+\textbar-][nnn][.nnn][e\textbar E\textbar d\textbar D[+\textbar-]nnn]
+
+where nnn means any number of digits. The mantissa must contain at least
+one digit before or following an optional decimal point. Valid exponent
+identifiers are 'e', 'E', 'd' or 'D'. If they appear they must be followed
+by a valid exponent!
+
+Operations are evaluated in the order
+\begin{enumerate}
+\item ()      expressions in brackets
+\item -X      unary minux
+\item X\^{}Y  exponentiation
+\item X*Y X/Y multiplicaiton and division
+\item A+B X-Y addition and subtraction
+\end{enumerate}
+
+One logical requirement is that the fields in the state and the field being filled are on the same grid,
+including vertical levels. For example, 3D fields in an expression must ALL have been created with
+the same vertical levels (MAPL\_DimsVLocationEdge or MAPL\_DimsVLocationCenter). If not an error will result.
+The one exception is operations involving 3D and 2D fields when
+the resultant field is a 3D field. In this case, the operation is performed between each level
+of the 3D field and the 2D field. This is useful if one wanted to scale each level of a 3D
+field with the same 2D field. Of course the first two dimensions of the 3D field must be same as the 2D field.
+
+The parser also obeys undef arithmetic. Any arithemtic operation involving MAPL\_Undef or function of MAPL\_Undef
+results in MAPL\_Undef.
+
+The following are several examples of valid expressions. For the examples we will assume that the input state
+has 4 fields A, B, C, and D.\newline
+1. B*2.0e0\newline
+2. sqrt(A*A+B*B)\newline
+3. A*heav(B)\newline
+4. A\^{}(C+D)-2.0e-3

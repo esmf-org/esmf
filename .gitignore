@@ -59,6 +59,16 @@ src/Superstructure/AttributeAPI/tests/ESMF_AttPackGridCompUTest.F90
 src/Superstructure/AttributeAPI/tests/ESMF_AttPackGridUTest.F90
 src/Superstructure/AttributeAPI/tests/ESMF_AttPackSciCompUTest.F90
 src/Superstructure/AttributeAPI/tests/ESMF_AttPackStateUTest.F90
+src/Superstructure/AttributeAPI/tests/ESMF_AttributeABundleUTest.F90
+src/Superstructure/AttributeAPI/tests/ESMF_AttributeArrayUTest.F90
+src/Superstructure/AttributeAPI/tests/ESMF_AttributeCplCompUTest.F90
+src/Superstructure/AttributeAPI/tests/ESMF_AttributeDistGridUTest.F90
+src/Superstructure/AttributeAPI/tests/ESMF_AttributeFBundleUTest.F90
+src/Superstructure/AttributeAPI/tests/ESMF_AttributeFieldUTest.F90
+src/Superstructure/AttributeAPI/tests/ESMF_AttributeGridCompUTest.F90
+src/Superstructure/AttributeAPI/tests/ESMF_AttributeGridUTest.F90
+src/Superstructure/AttributeAPI/tests/ESMF_AttributeSciCompUTest.F90
+src/Superstructure/AttributeAPI/tests/ESMF_AttributeStateUTest.F90
 src/Superstructure/AttributeAPI/tests/fieldbundle.stdout
 src/Superstructure/AttributeAPI/tests/fieldbundle.xml
 src/Superstructure/State/src/ESMF_StateAPI.F90
@@ -90,5 +100,5 @@ src/doc/ESMF_usrdoc.dvi
 src/doc/ESMF_usrdoc.tex
 src/doc/ESMF_usrdoc.tex.ORIG
 src/doc/ESMF_usrdoc.toc
-
+src/doc/.latex2html-init
 

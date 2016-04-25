@@ -198,6 +198,18 @@ script_info:
 	    echo "ESMF_PIO_LIBPATH:       $(ESMF_PIO_LIBPATH)" ; \
           fi; \
          fi
+	-@if [ -n "$(ESMF_PROJ4)" ] ; then \
+	  echo "ESMF_PROJ4:               $(ESMF_PROJ4)" ; \
+	  if [ -n "$(ESMF_PROJ4_INCLUDE)" ] ; then \
+	    echo "ESMF_PROJ4_INCLUDE:       $(ESMF_PROJ4_INCLUDE)" ; \
+          fi; \
+	  if [ -n "$(ESMF_PROJ4_LIBS)" ] ; then \
+	    echo "ESMF_PROJ4_LIBS:          $(ESMF_PROJ4_LIBS)" ; \
+          fi; \
+	  if [ -n "$(ESMF_PROJ4_LIBPATH)" ] ; then \
+	    echo "ESMF_PROJ4_LIBPATH:       $(ESMF_PROJ4_LIBPATH)" ; \
+          fi; \
+         fi
 	-@echo " "
 	-@echo "--------------------------------------------------------------"
 	-@echo " * ESMF environment variables for final installation *"
@@ -464,6 +476,18 @@ info_mk: chkdir_lib
 	    echo "# ESMF_PIO_LIBPATH:       $(ESMF_PIO_LIBPATH)" >> $(MKINFO) ; \
           fi; \
          fi
+	-@if [ -n "$(ESMF_PROJ4)" ] ; then \
+	  echo "# ESMF_PROJ4:               $(ESMF_PROJ4)" >> $(MKINFO) ; \
+	  if [ -n "$(ESMF_PROJ4_INCLUDE)" ] ; then \
+	    echo "# ESMF_PROJ4_INCLUDE:       $(ESMF_PROJ4_INCLUDE)" >> $(MKINFO) ; \
+          fi; \
+	  if [ -n "$(ESMF_PROJ4_LIBS)" ] ; then \
+	    echo "# ESMF_PROJ4_LIBS:          $(ESMF_PROJ4_LIBS)" >> $(MKINFO) ; \
+          fi; \
+	  if [ -n "$(ESMF_PROJ4_LIBPATH)" ] ; then \
+	    echo "# ESMF_PROJ4_LIBPATH:       $(ESMF_PROJ4_LIBPATH)" >> $(MKINFO) ; \
+          fi; \
+         fi
 
 # Rewrite esmf.mk during installation to ensure correct installation paths are encoded
 install_info_mk:
@@ -476,7 +500,7 @@ install_apps:
 
 # Ranlib on the libraries
 ranlib:
-	$(ESMF_RANLIB) $(wildcard $(ESMF_LIBDIR)/lib*.a)
+	$(ESMF_RANLIB) $(wildcard $(ESMF_LIBDIR)/lib*.$(ESMF_LIB_SUFFIX))
 
 # Deletes ESMF libraries
 deletelibs: chkopts_basic
@@ -509,7 +533,9 @@ install:
 	mkdir -p $(ESMF_INSTALL_LIBDIR_ABSPATH)
 	cp -f $(ESMF_LIBDIR)/lib*.* $(ESMF_INSTALL_LIBDIR_ABSPATH)
 ifneq ($(ESMF_OS),Cygwin)
-	$(ESMF_RANLIB) $(ESMF_INSTALL_LIBDIR_ABSPATH)/lib*.a
+	$(ESMF_RANLIB) $(ESMF_INSTALL_LIBDIR_ABSPATH)/lib*.$(ESMF_LIB_SUFFIX)
+else
+	$(ESMF_RANLIB) $(ESMF_INSTALL_LIBDIR_ABSPATH)/libesmf.$(ESMF_LIB_SUFFIX)
 endif
 	$(MAKE) install_apps
 	mkdir -p $(ESMF_INSTALL_DOCDIR_ABSPATH)

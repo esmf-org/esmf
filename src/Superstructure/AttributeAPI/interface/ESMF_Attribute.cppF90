@@ -71,7 +71,7 @@ module ESMF_AttributeMod
   use ESMF_StateTypesMod
   use ESMF_StateVaMod
   use ESMF_StateMod
-  use ESMF_UtilMod
+  use ESMF_UtilStringMod
   use ESMF_VMMod
   use ESMF_AttributeInternalsMod
 
@@ -110,6 +110,8 @@ module ESMF_AttributeMod
 
 !  Attribute methods
       public ESMF_AttributeGetInit
+
+      public ESMF_AttPackStreamJSON
 
       public ESMF_AttributeAdd
       public ESMF_AttributeCopy
@@ -3565,6 +3567,63 @@ contains
     end function ESMF_AttributeGetInit
 
 !-----------------------------------------------------------------------------
+
+^undef ESMF_METHOD
+^define ESMF_METHOD "AttPackStreamJSON"
+
+!BOPI
+! !IROUTINE: ESMF_AttPackStreamJSON - Stream AttPack to JSON formatted string.
+!
+! !INTERFACE:
+      subroutine ESMF_AttPackStreamJSON(attpack, output, rc)
+
+      type(ESMF_AttPack), intent(in)   :: attpack
+      character(len=*),   intent(out)  :: output
+      integer,            intent(out), optional   :: rc
+
+!
+! !DESCRIPTION:
+!     Streams an Attpack into a JSON formatted string.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [attpack]
+!           The Attribute package to stream.
+!     \item [output]
+!           The character string output variable.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOPI
+
+      integer :: localrc, errflag, jsonstrlen
+
+      ! Initialize
+      localrc = ESMF_RC_NOT_IMPL
+
+      ! Use an inquiry function to find the length of the string needed
+      ! for the JSON string.  This will be used to allocate the Fortran string,
+      ! the user will be responsible for deallocating it.
+      call C_ESMC_AttPackStreamJSONstrlen(attpack, jsonstrlen, localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+
+      errflag = merge (ESMF_SUCCESS, ESMF_RC_BUFFER_SHORT, jsonstrlen <= len (output))
+      if (ESMF_LogFoundError(errflag, msg='JSON output string too short',  &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+
+      ! call the C++ function to stream JSON to the output string
+      call C_ESMC_AttPackStreamJSON(attpack, output, localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_AttPackStreamJSON
+!------------------------------------------------------------------------------
+
 
 !-------------------------------------------------------------------------
 !  Macro versions of the routines
@@ -11540,7 +11599,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       if (len_trim(value) > 0) then @\
         ! also for internal Attributes, must append inputList to the Attribute value @\
         lens(1) = len_trim(value) @\
-        valueString(1:lens(1)) = ESMF_String2Array(trim(value)) @\
+        valueString(1:lens(1)) = ESMF_UtilString2Array(trim(value)) @\
       endif @\
       if (present(inputList)) then @\
         j = lens(1) + 1 @\
@@ -11548,10 +11607,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           if (len_trim(inputList(i-1)) > 0) then @\
             ! put inputList values into valueString @\
             lens(i) = len_trim(inputList(i-1))+tag_size @\
-            valueString(j:(j+tag_size-1)) = ESMF_String2Array("Input:") @\
+            valueString(j:(j+tag_size-1)) = ESMF_UtilString2Array("Input:") @\
             j = j + tag_size @\
             valueString(j:(j+lens(i)-tag_size-1)) =  & @\
-              ESMF_String2Array(trim(inputList(i-1))) @\
+              ESMF_UtilString2Array(trim(inputList(i-1))) @\
             j = j + lens(i) @\
           endif @\
         enddo @\
@@ -11712,7 +11771,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       if (len_trim(value) > 0) then @\
         ! also for internal Attributes, must append inputList to the Attribute value @\
         lens(1) = len_trim(value) @\
-        valueString(1:lens(1)) = ESMF_String2Array(trim(value)) @\
+        valueString(1:lens(1)) = ESMF_UtilString2Array(trim(value)) @\
       endif @\
       if (present(inputList)) then @\
         j = lens(1) + 1 @\
@@ -11720,10 +11779,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           if (len_trim(inputList(i-1)) > 0) then @\
             ! put inputList values into valueString @\
             lens(i) = len_trim(inputList(i-1))+tag_size @\
-            valueString(j:(j+tag_size-1)) = ESMF_String2Array("Input:") @\
+            valueString(j:(j+tag_size-1)) = ESMF_UtilString2Array("Input:") @\
             j = j + tag_size @\
             valueString(j:(j+lens(i)-tag_size-1)) =  & @\
-              ESMF_String2Array(trim(inputList(i-1))) @\
+              ESMF_UtilString2Array(trim(inputList(i-1))) @\
             j = j + lens(i) @\
           endif @\
         enddo @\
@@ -12177,13 +12236,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         endif @\
  @\
         if (attpack == ESMF_TRUE) then @\
-          if (writeflag%value .eq. ESMF_ATTWRITE_TAB%value) then @\
-            call c_ESMC_AttributeWriteTab(mthisfield, convention, & @\
-              purpose, object, ftarobj, localrc) @\
-          else if (writeflag%value .eq. ESMF_ATTWRITE_XML%value) then @\
-            call c_ESMC_AttributeWriteXML(mthisfield, convention, & @\
-              purpose, object, ftarobj, localrc) @\
-          endif @\
+          call c_ESMC_AttributeWrite(mthisfield, convention, & @\
+            purpose, object, ftarobj, writeflag, localrc) @\
         endif @\
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
           ESMF_CONTEXT, rcToReturn=rc)) return @\
