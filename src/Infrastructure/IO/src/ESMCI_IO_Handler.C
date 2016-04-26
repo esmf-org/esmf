@@ -24,10 +24,6 @@
 #include "ESMCI_IO_Handler.h"
 
 // higher level, 3rd party or system includes here
-#include <stdio.h>
-#include <string.h>
-#include <ctype.h>
-#include <vector>
 #include <iostream>
 #include <fstream>
 
@@ -121,7 +117,7 @@ IO_Handler *IO_Handler::create (
 //-----------------------------------------------------------------------------
   // initialize return code; assume routine not implemented
   int localrc = ESMF_RC_NOT_IMPL;            // local return code
-  char errmsg[256];                          // Specific error message
+  std::string errmsg;                        // Specific error message
   IO_Handler *iohandler = ESMC_NULL_POINTER; // New handler to return
   if (rc != NULL) {
     *rc = ESMF_RC_NOT_IMPL;               // final return code
@@ -149,7 +145,7 @@ IO_Handler *IO_Handler::create (
 #if  defined(ESMF_PIO) && (defined(ESMF_NETCDF) || defined(ESMF_PNETCDF))
       iohandler = new PIO_Handler(iofmt, &localrc);
 #else // defined(ESMF_PIO) && (defined(ESMF_NETCDF) || defined(ESMF_PNETCDF))
-      sprintf(errmsg, "PIO & (P)NetCDF libraries required for I/O operation");
+      errmsg = "PIO & (P)NetCDF libraries required for I/O operation";
       localrc = ESMF_RC_LIB_NOT_PRESENT;
 #endif // defined(ESMF_PIO) && (defined(ESMF_NETCDF) || defined(ESMF_PNETCDF))
       break;
@@ -284,8 +280,8 @@ int IO_Handler::destroy (
     PIO_Handler::finalize(&localrc);
     PRINTMSG("after finalize, localrc = " << localrc);
     if (ESMF_SUCCESS != localrc) {
-      char errmsg[256];
-      sprintf(errmsg, "PIO_Handler::finalize error = %d", localrc);
+      std::stringstream errmsg;
+      errmsg << "PIO_Handler::finalize error = " << localrc;
       ESMC_LogDefault.Write(errmsg, ESMC_LOGMSG_WARN, ESMC_CONTEXT);
     }
 #endif // ESMF_PIO
@@ -338,8 +334,8 @@ void IO_Handler::finalize (
     PIO_Handler::finalize(&localrc);
     PRINTMSG("after finalize, localrc = " << localrc);
     if (ESMF_SUCCESS != localrc) {
-      char errmsg[256];
-      sprintf(errmsg, "PIO_Handler::finalize error = %d", localrc);
+      std::stringstream errmsg;
+      errmsg << "PIO_Handler::finalize error = " << localrc;
       ESMC_LogDefault.Write(errmsg, ESMC_LOGMSG_WARN, ESMC_CONTEXT);
     }
 #endif // ESMF_PIO
@@ -470,8 +466,7 @@ bool IO_Handler::fileExists(
       localrc = vm->broadcast(&fileOK, sizeof(bool), ROOT_PET);
     }
     if (ESMF_SUCCESS != localrc) {
-      char errmsg[ESMF_MAXSTR + 64];
-      sprintf(errmsg, "Error finding file status for \"%s\"", name.c_str());
+      std::string errmsg = "Error finding status for file: " + name;
       ESMC_LogDefault.Write(errmsg, ESMC_LOGMSG_ERROR, ESMC_CONTEXT);
     }
   } else {

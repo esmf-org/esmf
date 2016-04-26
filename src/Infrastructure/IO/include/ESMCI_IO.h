@@ -144,7 +144,7 @@ namespace ESMCI {
   public:
     // read()
     // An atomic read function which transparently handles open and close
-    int read(const char * const file, ESMC_IOFmt_Flag iofmt,
+    int read(const std::string &file, ESMC_IOFmt_Flag iofmt,
              int *timeslice = NULL);
 
     // A non-atomic read which is only successful on an open IO stream
@@ -155,7 +155,7 @@ namespace ESMCI {
     // This version closely matches the functionality in the ESMF
     // interface. If NULL is passed for any arguments (except for file which is
     // is required), defaults will be used.
-    int write(const char * const file,
+    int write(const std::string &file,
               ESMC_IOFmt_Flag iofmt,
               bool overwrite,
               ESMC_FileStatus_Flag status,
@@ -177,7 +177,7 @@ namespace ESMCI {
     }
 
     // open() and close()
-    int open(const char * const file,
+    int open(const std::string &file,
              ESMC_FileStatus_Flag filestatusflag,
              ESMC_IOFmt_Flag iofmt,
              bool overwrite = false,

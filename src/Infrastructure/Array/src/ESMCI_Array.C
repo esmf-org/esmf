@@ -975,6 +975,9 @@ Array *Array::create(
           // distributed dimension
           if (temp_counts[jj] < 
             totalUBound[i*redDimCount+j] - totalLBound[i*redDimCount+j] + 1){
+std::cerr << ESMC_METHOD << ": " << temp_counts[jj] << " < "
+  << totalUBound[i*redDimCount+j] << " - " << totalLBound[i*redDimCount+j]
+  << " + 1" << std::endl;
             ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
               "- LocalArray does not accommodate requested element count",
               ESMC_CONTEXT, rc);
@@ -2644,7 +2647,7 @@ int Array::read(
   }
 
   // Call the IO read function
-  localrc = newIO->read(file.c_str(), localiofmt, timeslice);
+  localrc = newIO->read(file, localiofmt, timeslice);
   ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
     &rc);
 
@@ -2736,7 +2739,7 @@ int Array::write(
   }
 
   // Call the IO write function
-  rc = newIO->write(file.c_str(), localiofmt,
+  rc = newIO->write(file, localiofmt,
                     localoverwrite, localstatus, timeslice);
   ESMC_LogDefault.MsgFoundError(rc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc);
 
