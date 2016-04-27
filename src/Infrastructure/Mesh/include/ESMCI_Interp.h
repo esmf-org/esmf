@@ -46,7 +46,7 @@ class IWeights : public WMat {
 
 public:
 
-  IWeights();
+    IWeights();
   
   IWeights(const IWeights &);
   
@@ -57,7 +57,7 @@ public:
    * tv()(const MeshObj &node, const MEField<> &coords, double U[], double V[]) 
    * to return the
    * tangent vectors.  The vectors are returned as (U V), a 3x2 matrix, unless
-   * transpose=true, where they we be a 2x3 matrix, (U V)^T.
+     * transpose=true, where they we be a 2x3 matrix, (U V)^T.
    */ 
   template <typename TVECT>
   void GatherTangentVectors(const Mesh &mesh, TVECT tv, bool transpose = false); 
@@ -94,7 +94,7 @@ void IWeights::GatherTangentVectors(const Mesh &mesh, TVECT tv, bool transpose) 
     
     tv(node, coords, U, V);
 
-    if (!transpose) {
+     if (!transpose) {
       
       for (UInt r = 0; r < 3; r++) {
         Entry row(node.get_id(), r);
@@ -116,7 +116,7 @@ void IWeights::GatherTangentVectors(const Mesh &mesh, TVECT tv, bool transpose) 
           } // r
     }
   } // ni
-  
+    
 }
 
 /*
@@ -142,22 +142,24 @@ public:
   MEField<> *first, *second;
   UChar idata; // interpolation specification.
   UChar patch_order;
-  };
+   };
   
   /* 
    * Build the interpolation object.  The MEFields must be compatible in the
    * sense that they are all element based, or node based, etc...
    */
   Interp(Mesh *src, PointList *srcplist, Mesh *dest, PointList *destplist, Mesh *midmesh, bool freeze_dst_, int imethod,
+         bool set_dst_status, WMat &dst_status,
          MAP_TYPE mtype=MAP_TYPE_CART_APPROX, int unmappedaction=ESMCI_UNMAPPEDACTION_ERROR);
-  
+
   ~Interp();
   
   // Actually process the interpolation
   void operator()();
   
   // Form a matrix of the interpolant for the fpair_num field
-  void operator()(int fpair_num, IWeights &iw);
+  void operator()(int fpair_num, IWeights &iw, bool set_dst_status, WMat &dst_status);
+
 
   // L2 conservative interpolation - generate conservative interpolation weights
   // this routine will not work unless iwts is defined as a MEField<> on both meshes
@@ -172,8 +174,10 @@ public:
   private:
 
   // interpolation type
-  void mat_transfer_serial(int fpair_num, IWeights &iw, IWeights &src_frac, IWeights &dst_frac);
-  void mat_transfer_parallel(int fpair_num, IWeights &, IWeights &, IWeights &);
+  void mat_transfer_serial(int fpair_num, IWeights &iw, IWeights &src_frac, IWeights &dst_frac, 
+                           bool set_dst_status, WMat &dst_status); 
+  void mat_transfer_parallel(int fpair_num, IWeights &, IWeights &, IWeights &, 
+                           bool set_dst_status, WMat &dst_status); 
 
   // L2 conservative interpolation matrix generation parallel?
   void interpL2csrvM_serial(const IWeights &, IWeights *, MEField<> const * const, MEField<> const * const);

@@ -3679,7 +3679,7 @@ CONTAINS
 !-------------------------------------------------------------------------
   SUBROUTINE ESMFL_HALO_R4_2D(GRID, INPUT, RC)
 !-------------------------------------------------------------------------
-     TYPE(ESMF_Grid),         INTENT(INout) :: GRID
+     TYPE(ESMF_Grid),         INTENT(IN)    :: GRID
      REAL,                    INTENT(INOUT) :: INPUT(:,:)
      integer, optional,       intent(OUT)   :: RC
 

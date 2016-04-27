@@ -35,6 +35,7 @@
 
 #include <cstdio>
 #include <string>
+#include <sstream>
 
 namespace ESMCI{
 
@@ -90,14 +91,25 @@ private:
       const char FILE[], const char method[], int *rcToReturn);
     bool MsgFoundError(int rcToCheck, const std::string& msg, int LINE,
       const char FILE[], const char method[], int *rcToReturn);
+    bool MsgFoundError(int rcToCheck, const std::stringstream& msg, int LINE,
+      const char FILE[], const char method[], int *rcToReturn) {
+      return MsgFoundError(rcToCheck, msg.str(), LINE, FILE, method, rcToReturn);
+    }
     void Open(const char filename[]);
     int Set(int flush);
     int Write(const char msg[], int msgtype);
     int Write(const std::string& msg, int msgtype);
+    int Write(const std::stringstream& msg, int msgtype) {
+      return Write(msg.str(), msgtype);
+    }
     int Write(const char msg[], int msgtype, int LINE, const char FILE[],
       const char method[]);
     int Write(const std::string& msg, int msgtype, int LINE, const char FILE[],
       const char method[]);
+    int Write(const std::stringstream& msg, int msgtype, int LINE, const char FILE[],
+      const char method[]) {
+      return Write(msg.str(), msgtype, LINE, FILE, method);
+    }
     
 // !PUBLIC Variables:          
     std::FILE *ESMC_LogFile;

@@ -421,6 +421,7 @@ void MeshCap::regrid_create(ESMCI::VM **vmpp,
                     ESMCI::RouteHandle **rh, int *has_rh, int *has_iw,
                     int *nentries, ESMCI::TempWeights **tweights,
                     int *has_udl, int *_num_udl, ESMCI::TempUDL **_tudl, 
+                    int *has_statusArray, ESMCI::Array **statusArray,
                     int*rc) {
 #undef ESMC_METHOD
 #define ESMC_METHOD "MeshCap::regrid_create()"                           
@@ -509,6 +510,7 @@ void MeshCap::regrid_create(ESMCI::VM **vmpp,
                         rh, has_rh, has_iw,
                         nentries, tweights,
                         has_udl, _num_udl, _tudl, 
+                        has_statusArray, statusArray, 
                         &localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
                                       ESMC_CONTEXT, rc)) return;

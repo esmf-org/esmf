@@ -38,7 +38,7 @@ int print_debug_info(IWeights &wts) {
   double badrowid = 0;
 
 
-  IWeights::WeightMap::iterator wit = wts.begin_row(), wet = wts.end_row();
+   IWeights::WeightMap::iterator wit = wts.begin_row(), wet = wts.end_row();
   //IWeights::WeightMap::iterator wit = stw.begin_row(), wet = stw.end_row();
   for (; wit != wet; ++wit) {
     const IWeights::Entry &_row = wit->first;
@@ -118,7 +118,8 @@ int form_neg_wts_field(IWeights &wts, Mesh &srcmesh, MEField<> *src_neg_wts,
 		    int *regridConserve, int *regridMethod, 
 		    int *regridPoleType, int *regridPoleNPnts, 
 		    int *regridScheme, 
-		    int *map_type, int *unmappedaction) {
+		    int *map_type, int *unmappedaction, 
+                    bool set_dst_status, WMat &dst_status) {
 
 
     // Conservative regridding
@@ -143,7 +144,8 @@ int form_neg_wts_field(IWeights &wts, Mesh &srcmesh, MEField<> *src_neg_wts,
 
       if (!regrid(srcmesh, srcpointlist, dstmesh, dstpointlist, NULL, 
 		  wts, regridMethod, regridScheme, 
-                  regridPoleType, regridPoleNPnts, map_type, unmappedaction)) {
+                  regridPoleType, regridPoleNPnts, map_type, unmappedaction,
+                  set_dst_status, dst_status)) {
         Throw() << "Regridding error" << std::endl;
       }
 
@@ -233,9 +235,14 @@ int offline_regrid(Mesh &srcmesh, Mesh &dstmesh, Mesh &dstmeshcpy,
       dstmesh.Commit();
       dstmeshcpy.Commit();
 
+      bool tmp_set_dst_status=false;
+      WMat tmp_dst_status;
+
       int map_type=0;
       if (!regrid(&srcmesh, NULL, &dstmesh, NULL, NULL, wts, regridMethod, &regridScheme,
-                  regridPoleType, regridPoleNPnts, &map_type,  &unmappedaction))
+                  regridPoleType, regridPoleNPnts, &map_type,  &unmappedaction, 
+                  tmp_set_dst_status, tmp_dst_status))
+
         Throw() << "Regridding error" << std::endl;
 
       // the mask
@@ -279,7 +286,8 @@ int offline_regrid(Mesh &srcmesh, Mesh &dstmesh, Mesh &dstmeshcpy,
 	    Mesh *midmesh, IWeights &wts,
 	    int *regridMethod, int *regridScheme, 
 	    int *regridPoleType, int *regridPoleNPnts, 
-	    int *map_type, int *unmappedaction) {
+	    int *map_type, int *unmappedaction,
+            bool set_dst_status, WMat &dst_status) {
 
 
    // See if it could have a pole
@@ -298,7 +306,7 @@ int offline_regrid(Mesh &srcmesh, Mesh &dstmesh, Mesh &dstmeshcpy,
 
 
     IWeights pole_constraints, stw;
-    if (maybe_pole) {
+     if (maybe_pole) {
       // Pole constraints
       UInt constraint_id = srcmesh->DefineContext("pole_constraints");
       if (*regridPoleType == ESMC_REGRID_POLETYPE_ALL) {
@@ -313,7 +321,7 @@ int offline_regrid(Mesh &srcmesh, Mesh &dstmesh, Mesh &dstmeshcpy,
       }
     }
 
-    // Output Mesh for Debugging
+     // Output Mesh for Debugging
 #ifdef ESMF_REGRID_DEBUG_WRITE_MESH
     if (srcmesh != NULL) WriteMesh(*srcmesh, "src_rgd_mesh");
     else if (srcpointlist != NULL) srcpointlist->WriteVTK("src_rgd_mesh");
@@ -337,7 +345,7 @@ int offline_regrid(Mesh &srcmesh, Mesh &dstmesh, Mesh &dstmeshcpy,
       snd[num_snd]=psc;
       rcv[num_snd]=psc;
       num_snd++;
-
+ 
       // Load mask field
       MEField<> *psm = srcmesh->GetField("mask");
       if (psm != NULL) {
@@ -359,10 +367,13 @@ int offline_regrid(Mesh &srcmesh, Mesh &dstmesh, Mesh &dstmeshcpy,
 
     // Build the rendezvous grids
     Interp interp(srcmesh, srcpointlist, dstmesh, dstpointlist, 
-		  midmesh, false, *regridMethod, mtype, *unmappedaction);
+		  midmesh, false, *regridMethod, 
+                  set_dst_status, dst_status,
+                  mtype, *unmappedaction);
+                  
     
      // Create the weight matrix
-     interp(0, wts);
+    interp(0, wts, set_dst_status, dst_status);
 
      // Release the Zoltan struct if we used it for the mid mesh
      if(midmesh) interp.release_zz();
@@ -491,12 +502,17 @@ int offline_regrid(Mesh &srcmesh, Mesh &dstmesh, Mesh &dstmeshcpy,
       dstmesh.GhostComm().SendFields(num_snd, snd, rcv);
     }
 
+    // tmp variables
+    bool tmp_set_dst_status=false;
+    WMat tmp_dst_status;
 
     // Build the rendezvous grids
-    Interp interp(&dstmesh, NULL, &srcmesh, NULL, NULL, false, *regridMethod, MAP_TYPE_CART_APPROX, *unmappedaction);
+    Interp interp(&dstmesh, NULL, &srcmesh, NULL, NULL, false, *regridMethod, 
+                  tmp_set_dst_status, tmp_dst_status, 
+                  MAP_TYPE_CART_APPROX, *unmappedaction);
 
     // Generate the backwards interpolation matrix
-    interp(0, stw);
+    interp(0, stw, tmp_set_dst_status, tmp_dst_status);
 
 
      // Factor out poles if they exist

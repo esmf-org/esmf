@@ -195,6 +195,7 @@
               ESMCI::RouteHandle **rh, int *has_rh, int *has_iw,
               int *nentries, ESMCI::TempWeights **tweights,
               int *has_udl, int *_num_udl, ESMCI::TempUDL **_tudl, 
+              int *has_statusArray, ESMCI::Array **statusArray,
               int*rc);
 
     static void regrid_getiwts(ESMCI::VM **vmpp, Grid **gridpp,

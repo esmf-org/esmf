@@ -241,7 +241,7 @@ int IO::read(
 //
 // !ARGUMENTS:
 
-  char const * const file,        // (in)    - name of file being read
+  const std::string &file,        // (in)    - name of file being read
   ESMC_IOFmt_Flag iofmt,          // (in)    - IO format flag
   int   *timeslice                // (in)    - timeslice option
   ) {
@@ -433,7 +433,7 @@ int IO::write(
 //     int error return code
 //
 // !ARGUMENTS:
-  char const * const file,        // (in)    - name of file being written
+  const std::string &file,        // (in)    - name of file being written
   ESMC_IOFmt_Flag iofmt,          // (in)    - IO format flag
   bool overwrite,                 // (in)    - overwrite fields if true
   ESMC_FileStatus_Flag status,    // (in)    - file status flag
@@ -646,7 +646,7 @@ int IO::open(
 //
 // !ARGUMENTS:
 
-  char const * const file,             // (in)  - name of file being read
+  const std::string &file,             // (in)  - name of file being read
   ESMC_FileStatus_Flag filestatusflag, // (in)  - file status flag
   ESMC_IOFmt_Flag iofmt,               // (in)  - IO format flag
   bool overwrite,                      // (in)  - overwrite fields?
@@ -665,7 +665,7 @@ int IO::open(
 
   PRINTPOS;
   // Make sure pointer inputs have something in them
-  if (NULL == file) {
+  if (file.empty()) {
     localrc = ESMC_RC_PTR_NULL;
     ESMC_LogDefault.Write("Filename to open cannot be NULL",
                           ESMC_LOGMSG_ERROR, ESMC_CONTEXT);
@@ -700,7 +700,7 @@ int IO::open(
   }
 
   // Open the file
-  ioHandler->open(file, filestatusflag, overwrite, readonly, &localrc);
+  ioHandler->open(file.c_str(), filestatusflag, overwrite, readonly, &localrc);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
     &rc)) {
     PRINTMSG("IO_Handler::open returned " << localrc);
