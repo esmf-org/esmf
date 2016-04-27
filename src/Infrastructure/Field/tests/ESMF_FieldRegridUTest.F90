@@ -14895,8 +14895,7 @@ write(*,*) "LOCALRC=",localrc
   enddo    ! lDE
 
 
-
-#if 1
+#if 0
   call ESMF_GridWriteVTK(srcGrid,staggerloc=ESMF_STAGGERLOC_CENTER, &
        filename="srcGrid", array1=srcArray, &
        rc=localrc)
