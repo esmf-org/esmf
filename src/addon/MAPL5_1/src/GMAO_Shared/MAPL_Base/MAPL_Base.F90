@@ -2409,7 +2409,7 @@ and so on.
 
   subroutine MAPL_GridGet(GRID, globalCellCountPerDim, localCellCountPerDim, &
        gridCornerLons, gridCornerLats, RC)
-      type (ESMF_Grid), intent(INOUT) :: GRID
+      type (ESMF_Grid), intent(IN) :: GRID
       integer, optional, intent(INout) :: globalCellCountPerDim(:)
       integer, optional, intent(INout) :: localCellCountPerDim(:)
       real(ESMF_KIND_R8), optional, intent(INOUT) :: gridCornerLons(:,:)
