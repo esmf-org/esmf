@@ -55,7 +55,7 @@
     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
  
 #ifdef ESMF_TESTEXHAUSTIVE
-
+ 
 ! This #if surrounds all the tests to enable turning on just one test
 #if 1
      !------------------------------------------------------------------------
@@ -603,10 +603,7 @@
       ! return result
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
-
-#if 0
-      !------------------------------------------------------------------------
-      !EX_disable_UTest
+      !EX_UTest
       ! Test regrid with 2 tile distgrid"
       write(failMsg, *) "Test unsuccessful"
       write(name, *) "Test regridding from a 2 tile distgrid"
@@ -619,10 +616,8 @@
 
       ! return result
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-      !------------------------------------------------------------------------
-#endif
 
-       !------------------------------------------------------------------------
+      !------------------------------------------------------------------------
       !EX_UTest
       ! Test regrid between Fields where srcGrid has holes in index space"
       write(failMsg, *) "Test unsuccessful"
@@ -1248,6 +1243,7 @@ contains
      enddo
 
   enddo    ! lDE
+
 
   !!! Regrid forward from the 0 to 360 grid to the -180 to 180 grid
   ! Regrid store
@@ -14419,6 +14415,7 @@ write(*,*) "LOCALRC=",localrc
 
  end subroutine test_regridNearestMeshToMesh
 
+
  subroutine test_regrid2TileDG(rc)
    integer, intent(out)  :: rc
   logical :: correct
@@ -14502,8 +14499,8 @@ write(*,*) "LOCALRC=",localrc
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
 
-  ! Establish the resolution of the grids
-  ! tile 1
+  ! Set src coordinates and resolution
+  !! Src tile 1
   src_nx(1) = 20
   src_ny(1) = 20
 
@@ -14513,25 +14510,26 @@ write(*,*) "LOCALRC=",localrc
   src_maxx(1) = 10.0
   src_maxy(1) = 10.0
 
-  ! tile 2
+  !! Src tile 2
   src_nx(2) = 20
   src_ny(2) = 20
 
   src_minx(2) = 11.0
-  src_miny(2) = 11.0
+  src_miny(2) = 0.0
   
   src_maxx(2) = 21.0
-  src_maxy(2) = 21.0
+  src_maxy(2) = 10.0
 
-
+  ! Set dst coordinates and resolution
+  ! dst grid is set so that it fits entirely within src grid 
   dst_nx = 20
   dst_ny = 20
 
-  dst_minx = 0.0
-  dst_miny = 0.0
+  dst_minx = 0.5
+  dst_miny = 0.5
   
-  dst_maxx = 21.0
-  dst_maxy = 21.0
+  dst_maxx = 20.5
+  dst_maxy = 9.5
 
 
 
@@ -14632,8 +14630,6 @@ write(*,*) "LOCALRC=",localrc
       ESMF_CONTEXT, rcToReturn=rc)) return
 
 
-
-
   ! Get arrays
   ! dstArray
   call ESMF_FieldGet(dstField, array=dstArray, rc=localrc)
@@ -14703,6 +14699,7 @@ write(*,*) "LOCALRC=",localrc
 
 
      !! Get Tile from localDE
+     tile=deToTileMap(localDEtoDEMap(lDE+1)+1)  
 
 
      !! Set values based on tile
@@ -14808,17 +14805,6 @@ write(*,*) "LOCALRC=",localrc
       ESMF_CONTEXT, rcToReturn=rc)) return
 #endif
 
-! LEAVE HERE AND JUST WRITE OUT THE GRIDS AS A TEST FOR NOW
-
-  ! return answer based on correct flag
-  if (correct) then
-    rc=ESMF_SUCCESS
-  else
-    rc=ESMF_FAILURE
-  endif
-
-return 
-
 
   !!! Regrid forward from the A grid to the B grid
   ! Regrid store
@@ -14855,6 +14841,13 @@ return
         return
      endif
 
+     call ESMF_FieldGet(xdstField, lDE, xfarrayPtr, computationalLBound=clbnd, &
+                             computationalUBound=cubnd,  rc=localrc)
+     if (localrc /=ESMF_SUCCESS) then
+        rc=ESMF_FAILURE
+        return
+     endif
+
 
      !! make sure we're not using any bad points
      do i1=clbnd(1),cubnd(1)
@@ -14862,6 +14855,7 @@ return
         ! if working everything should be really close to 20.0
         if (abs(farrayPtr(i1,i2)-xfarrayPtr(i1,i2)) .gt. 0.001) then
             correct=.false.
+            write(*,*) "ERROR:",farrayPtr(i1,i2),".ne.",xfarrayPtr(i1,i2)
 	endif
      enddo
      enddo
@@ -14870,9 +14864,9 @@ return
 
 
 
-#if 0
+#if 1
   call ESMF_GridWriteVTK(srcGrid,staggerloc=ESMF_STAGGERLOC_CENTER, &
-       isSphere=.false., isLatLonDeg=.true., filename="srcGrid", array1=srcArray, &
+       filename="srcGrid", array1=srcArray, &
        rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
      rc=ESMF_FAILURE
@@ -14880,7 +14874,7 @@ return
   endif
 
   call ESMF_GridWriteVTK(dstGrid,staggerloc=ESMF_STAGGERLOC_CENTER, &
-       isSphere=.true., isLatLonDeg=.true., filename="dstGrid", array1=dstArray, &
+       filename="dstGrid", array1=dstArray, &
        rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
      rc=ESMF_FAILURE
@@ -14909,14 +14903,14 @@ return
       rc=ESMF_FAILURE
       return
    endif
-#if 0
+
   ! Free the srcDistgrid
   call ESMF_DistgridDestroy(srcDistgrid, rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
       rc=ESMF_FAILURE
       return
    endif
-#endif
+
 
   call ESMF_GridDestroy(dstGrid, rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
@@ -14932,7 +14926,6 @@ return
   endif
 
  end subroutine test_regrid2TileDG
-
 
  subroutine test_regridMeshToMeshMask(rc)
         integer, intent(out)  :: rc

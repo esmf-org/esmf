@@ -5045,7 +5045,7 @@ int Grid::getStaggerDistgrid(
 // !ARGUMENTS:
 //
                           int staggerloc,      // (in) optional
-                          DistGrid **distgridArg   // (in) optional 
+                           DistGrid **distgridArg   // (in) optional 
   ) {
 //
 // !DESCRIPTION:
@@ -5067,61 +5067,154 @@ int Grid::getStaggerDistgrid(
       "- stagger location out of range", ESMC_CONTEXT, &rc);
     return rc;
   }
- 
+
+  // Get TileCount
+  int tileCount=distgrid_wo_poles->getTileCount();
+
   // If non-arbitrary get a stagger distgrid
   if (decompType == ESMC_GRID_NONARBITRARY) {
     
     //  DistGrid **staggerDistgridList; // [staggerloc]
     // If a stagger distgrid doesn't exist then create one
     if (staggerDistgridList[staggerloc] == ESMC_NULL_POINTER) {
-      int extent[1];
+      if (tileCount <= 1) {
+        int extent[1];
       
-      // Create InterfaceInts holding stagger padding
-      extent[0]=dimCount;
-      int *staggerEdgeLWidthIntIntArray=new int[dimCount];
-      InterfaceInt *staggerEdgeLWidthIntInt=new InterfaceInt(staggerEdgeLWidthIntIntArray,1,extent);
+        // Create InterfaceInts holding stagger padding
+        extent[0]=dimCount;
+        int *staggerEdgeLWidthIntIntArray=new int[dimCount];
+        InterfaceInt *staggerEdgeLWidthIntInt=new InterfaceInt(staggerEdgeLWidthIntIntArray,1,extent);
 
-      int *staggerEdgeUWidthIntIntArray=new int[dimCount];
-      InterfaceInt *staggerEdgeUWidthIntInt=new InterfaceInt(staggerEdgeUWidthIntIntArray,1,extent);
+        int *staggerEdgeUWidthIntIntArray=new int[dimCount];
+        InterfaceInt *staggerEdgeUWidthIntInt=new InterfaceInt(staggerEdgeUWidthIntIntArray,1,extent);
       
-      // Map offsets into distgrid space
-      for (int i=0; i<dimCount; i++) {
-        staggerEdgeLWidthIntIntArray[i]=staggerEdgeLWidthList[staggerloc][distgridToGridMap[i]];
-        staggerEdgeUWidthIntIntArray[i]=staggerEdgeUWidthList[staggerloc][distgridToGridMap[i]];
-      }
+        // Map offsets into distgrid space
+        for (int i=0; i<dimCount; i++) {
+          staggerEdgeLWidthIntIntArray[i]=staggerEdgeLWidthList[staggerloc][distgridToGridMap[i]];
+          staggerEdgeUWidthIntIntArray[i]=staggerEdgeUWidthList[staggerloc][distgridToGridMap[i]];
+        }
 
 
-      // Get connection List with pole added back in
-      InterfaceInt *connListWPoles=NULL;
-      _add_poles_to_conn(distgrid_wo_poles,
-                         staggerEdgeLWidthIntIntArray,
-                         staggerEdgeUWidthIntIntArray,
-                         connL,connU, &connListWPoles, &localrc);
-      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
-          &rc)) return rc;
+        // Get connection List with pole added back in
+         InterfaceInt *connListWPoles=NULL;
+        _add_poles_to_conn(distgrid_wo_poles,
+                           staggerEdgeLWidthIntIntArray,
+                           staggerEdgeUWidthIntIntArray,
+                           connL,connU, &connListWPoles, &localrc);
+        if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+                                          &rc)) return rc;
 
 
-      // Create stagger distgrid w no poles with this padding
-      staggerDistgridList[staggerloc]=DistGrid::create(distgrid_wo_poles,
-                                                       ///   DistGrid *staggerdistgrid_wo_poles=DistGrid::create(distgrid_wo_poles,
-                                                       staggerEdgeLWidthIntInt, 
-                                                       staggerEdgeUWidthIntInt, 
-                                                       NULL,
-                                                       connListWPoles, NULL,
-                                                       &localrc);
-      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
-         &rc)) return rc;
+        // Create stagger distgrid w no poles with this padding
+        staggerDistgridList[staggerloc]=DistGrid::create(distgrid_wo_poles,
+                                                         ///   DistGrid *staggerdistgrid_wo_poles=DistGrid::create(distgrid_wo_poles,
+                                                         staggerEdgeLWidthIntInt, 
+                                                         staggerEdgeUWidthIntInt, 
+                                                         NULL,
+                                                         connListWPoles, NULL,
+                                                         &localrc);
+        if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+                                          &rc)) return rc;
+        
+        // Get rid of Interface ints
+        delete staggerEdgeLWidthIntInt;
+        delete [] staggerEdgeLWidthIntIntArray;
+        
+        delete staggerEdgeUWidthIntInt;
+        delete [] staggerEdgeUWidthIntIntArray;
+        
+        if (connListWPoles!=NULL) {
+          if (connListWPoles->array !=NULL) delete[] connListWPoles->array;
+          delete connListWPoles;
+        }
+       } else { // Multi-tile grids
+        int extent[2];
 
-      // Get rid of Interface ints
-      delete staggerEdgeLWidthIntInt;
-      delete [] staggerEdgeLWidthIntIntArray;
+        // Create InterfaceInts holding stagger padding
+        extent[0]=dimCount;
+        extent[1]=tileCount;
+        int *staggerEdgeLWidthIntIntArray=new int[dimCount*tileCount];
+        InterfaceInt *staggerEdgeLWidthIntInt=new InterfaceInt(staggerEdgeLWidthIntIntArray,2,extent);
+         
+        int *staggerEdgeUWidthIntIntArray=new int[dimCount*tileCount];
+        InterfaceInt *staggerEdgeUWidthIntInt=new InterfaceInt(staggerEdgeUWidthIntIntArray,2,extent);
 
-      delete staggerEdgeUWidthIntInt;
-      delete [] staggerEdgeUWidthIntIntArray;
+#if 0
+        // A problem with non-center stagger multi-tile is that the padding needs to be different for 
+        // each tile (based on the connections). The distgrid create with extra padding should handle
+        // this, but it doesn't appear to. This is the start of a hack to fix this. 
+        // (but it would be really better to handle it in Distgrid... 
 
-      if (connListWPoles!=NULL) {
-        if (connListWPoles->array !=NULL) delete[] connListWPoles->array;
-        delete connListWPoles;
+        /// Oh...DARN... I don't think that this will work, because all the DEs may not
+        /// be on this processor...hmmmm
+
+         // Get the DELayout
+        DELayout *delayout=distgrid->getDELayout();
+        
+        // Get the number of local DEs
+        const int localDECount=delayout->getLocalDeCount();
+
+        // Get map between local and global DEs
+        const int *localDEList=delayout->getLocalDeToDeMap();
+   
+        // Get map between DEs and tiles
+        const int *DETileList = distgrid->getTileListPDe();
+
+        // Loop through tiles
+        for (int t=0; t<tileCount; t++) {
+          
+          //// For each tile loop through DEs to see if the are in this tile, and if they are then see if they are on
+          //// the edge, if there are none on edge, then it doesnt't have a connection along that dimension, so add padding
+          for (lDE=0; lDE<localDECount; lDE++) {
+
+            ////// Get tile of lDE
+            int lDE_tile=DETileList[localDEList[lDE]];
+
+            ///// If it's not this tile then skip
+            if (lDE_tile != t) continue;
+
+            //// See if it's a boundary
+
+
+          }
+        }
+#endif
+         
+        // Map offsets into distgrid space
+        int k=0;
+        for (int i=0; i<dimCount; i++) {
+          for (int j=0; j<tileCount; j++) {
+            staggerEdgeLWidthIntIntArray[k]=staggerEdgeLWidthList[staggerloc][distgridToGridMap[i]];
+            staggerEdgeUWidthIntIntArray[k]=staggerEdgeUWidthList[staggerloc][distgridToGridMap[i]];
+
+            // printf("%d sELW=%d SEUW=%d\n",k,staggerEdgeLWidthIntIntArray[k],staggerEdgeUWidthIntIntArray[k]);
+            k++;
+          }
+        }
+         
+        // NOTE: Right now with multi-tile grids we aren't taking out the poles, because we need to rewrite 
+        //       the pole taking out methods to work with more tiles (see _create_nopole_distgrid() and _translate_distgrid_conn()). This 
+        //       probably isn't an issue because having a pole with multi-tiles seems uncommon. If you have a multi-tile
+        //       grid with a pole and you are getting bowtie shaped elements, this is probably why. Ask Bob how to fix. 
+        //       (If you take out the poles, then you need to add them back in here. See _add_poles_to_conn(), etc. in the if part above)
+
+
+        // Create stagger distgrid w no poles with this padding
+        staggerDistgridList[staggerloc]=DistGrid::create(distgrid_wo_poles,
+                                                         staggerEdgeLWidthIntInt, 
+                                                         staggerEdgeUWidthIntInt, 
+                                                         NULL,
+                                                         NULL, NULL, 
+                                                         &localrc);
+        if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+                                          &rc)) return rc;
+ 
+        // Get rid of Interface ints
+        delete staggerEdgeLWidthIntInt;
+        delete [] staggerEdgeLWidthIntIntArray;
+        
+        delete staggerEdgeUWidthIntInt;
+        delete [] staggerEdgeUWidthIntIntArray;
       }
    }
     
@@ -5973,7 +6066,6 @@ static  void _free3D(Type ****array)
             isDELBnd[lDE] &= ~(0x1<<distgridToGridMap[d]);
           } 
           
-
           // if we're not an upper bound turn off the bit
           bool isUBnd=distgrid->isLocalDeOnEdgeU(lDE,d+1,&localrc);
           if (ESMC_LogDefault.MsgFoundError(localrc,
@@ -9968,6 +10060,50 @@ void _create_nopole_distgrid(DistGrid *distgrid, DistGrid **distgrid_nopole, int
     return;
   }
 
+
+  // NOTE: Right now with multi-tile grids we aren't taking out the poles, because we need to rewrite 
+  //       the pole taking out methods to work with more tiles. This 
+  //       probably isn't an issue because having a pole with multi-tiles seems uncommon. If you have a multi-tile
+  //       grid with a pole and you are getting bowtie shaped elements, this is probably why. Ask Bob how to fix. 
+  //       (If you take out the poles, then you need to add them back in later. See _add_poles_to_conn(), etc. 
+  //       in getStaggerDistgrid())
+  if (distgrid->getTileCount() > 1) {
+    // Copy connection list to enable copy of distgrid
+    int dimCount=distgrid->getDimCount();
+    int connSize=2+2*dimCount; 
+    int connCount=distgrid->getConnectionCount();
+    int * const* connList=distgrid->getConnectionList();
+    int *newConnList=NULL;
+    if (connCount*connSize > 0) newConnList=new int[connCount*connSize];
+    int k=0;
+    for (int i=0; i<connCount; i++) {
+      for (int j=0; j<connSize; j++) {
+        newConnList[k]=connList[i][j];
+        k++;
+      }
+    }  
+    int extent[2];
+    extent[0]=connSize;
+    extent[1]=connCount;
+    InterfaceInt *newConnListII=new InterfaceInt(newConnList,2,extent);
+
+    // Copy distgrid
+    *distgrid_nopole=DistGrid::create(distgrid,
+                                   (InterfaceInt *)NULL, (InterfaceInt *)NULL,
+                                   (ESMC_IndexFlag *)NULL, newConnListII, 
+                                   NULL, &localrc);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+                                      rc)) return; 
+
+    // Free memory connection list memory
+    delete newConnListII;
+    if (newConnList != NULL) delete [] newConnList;
+
+    return;
+  }
+
+
+
 // Get some info
  int dimCount=distgrid->getDimCount();
  int const *minIndexPTile=distgrid->getMinIndexPDimPTile();
@@ -10053,7 +10189,17 @@ void _translate_distgrid_conn(DistGrid *distgrid,
   bool isLower;
   int  poleDim, periodicDim;
 
-// Get some info
+  // NOTE: Right now with multi-tile grids we aren't taking out the poles, because we need to rewrite 
+  //       the pole taking out methods to work with more tiles (e.g.  _create_nopole_distgrid()). This 
+  //       probably isn't an issue because having a pole with multi-tiles seems uncommon. If you have a multi-tile
+  //       grid with a pole and you are getting bowtie shaped elements, this is probably why. Ask Bob how to fix. 
+  //       (If you take out the poles, then you need to add them back in later. See _add_poles_to_conn(), etc. in getStaggerDistgrid())
+  if (distgrid->getTileCount() > 1) {
+    if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully 
+    return;
+  }
+
+  // Get some info
  int dimCount=distgrid->getDimCount();
  int const *minIndexPTile=distgrid->getMinIndexPDimPTile();
  int const *maxIndexPTile=distgrid->getMaxIndexPDimPTile();
@@ -10063,15 +10209,6 @@ void _translate_distgrid_conn(DistGrid *distgrid,
  int * const* connList=distgrid->getConnectionList();
  int connSize=2+2*dimCount;
  
-#if 0
- printf("ORIG CONNECTIONS\n");
- for (int i=0; i<connCount; i++) {
-   for (int j=0; j<connSize; j++) {
-     printf("%d ",connList[i][j]);
-   }
-   printf("\n");
- }
-#endif
 
   // Loop through  translating connections
  for (int i=0; i<connCount; i++) {
