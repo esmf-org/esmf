@@ -27,6 +27,9 @@ MAPL_LINKLIBS     = -lMAPL_Base -lMAPL_Base_stubs -lMAPL_cfio_r4 -lGMAO_mpeu
 ESMF_F90COMPILEPATHS      += $(MAPL_INCLUDEPATHS)
 ESMF_F90LINKPATHS         += $(MAPL_LINKPATHS)
 ESMF_F90LINKLIBS          += $(MAPL_LINKLIBS)
+ifeq ($(ESMF_OS),Unicos)
+ESMF_F90LINKLIBS          += -lesmf
+endif
 
 CLEANDIRS   = 
 CLEANFILES  = $(TESTS_BUILD) $(CPFILES) *.nc
