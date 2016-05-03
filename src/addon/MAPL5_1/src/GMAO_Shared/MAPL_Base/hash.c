@@ -29,6 +29,9 @@ typedef struct {
 hash_t *hash_heap=(hash_t *)NULL;
 int hash_heap_size = HEAPCHUNK;
 
+static int hash1(int i);
+static int hash2(int i, int j);
+
 void init_hash(hash_t *h, int nbuckets) {
   int l;
   bucket_t *bucket;
@@ -255,7 +258,7 @@ int increment_hash(int h, int i, int j, int k)
 
 // Hash function from 2 ints to 1 int
 
-int hash2(int i, int j)
+static int hash2(int i, int j)
 { unsigned long long key;
   key = (unsigned long long)i << 32 | (unsigned long long)j;
   key = (~key) + (key << 18); // key = (key << 18) - key - 1;
@@ -269,7 +272,7 @@ int hash2(int i, int j)
 
 // Hash function from 1 ints to 1 int
 
-int hash1(int key)
+static int hash1(int key)
 {
   key = ~key + (key << 15); // key = (key << 15) - key - 1;
   key = key ^ (key >> 12);
