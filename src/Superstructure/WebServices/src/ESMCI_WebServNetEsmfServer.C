@@ -1702,7 +1702,7 @@ void  ESMCI_WebServNetEsmfServer::copyFile(
 	fstream	fin(srcFilename, ios::in | ios::binary);
 	fstream	fout(destFilename, ios::out | ios::binary);
 
-	if ((fin == NULL)  ||  (fout == NULL))
+	if ((!fin.is_open())  ||  (!fout.is_open()))
 	{
 		cerr << "Error copying file" << endl;
 		return;
