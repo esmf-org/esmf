@@ -128,14 +128,8 @@ ESMF_F90COMPILEOPTS       += -m32
 ESMF_F90LINKOPTS          += -m32
 endif
 ifeq ($(ESMF_ABISTRING),x86_64_small)
-ESMF_CXXCOMPILEOPTS       += -m64 -mcmodel=small
-ESMF_CXXLINKOPTS          += -m64 -mcmodel=small
-ESMF_F90COMPILEOPTS       += -m64
-ESMF_F90LINKOPTS          += -m64
-endif
-ifeq ($(ESMF_ABISTRING),x86_64_medium)
-ESMF_CXXCOMPILEOPTS       += -m64 -mcmodel=medium
-ESMF_CXXLINKOPTS          += -m64 -mcmodel=medium
+ESMF_CXXCOMPILEOPTS       += -m64
+ESMF_CXXLINKOPTS          += -m64
 ESMF_F90COMPILEOPTS       += -m64
 ESMF_F90LINKOPTS          += -m64
 endif
@@ -157,15 +151,17 @@ endif
 ESMF_OPENMP=OFF
 
 ############################################################
-# Need this until the file convention is fixed (then remove these two lines)
+# Set rpath syntax
 #
-ESMF_F90COMPILEFREENOCPP = -fpp0 -FR
-ESMF_F90COMPILEFIXCPP    = -fpp
+ESMF_F90RPATHPREFIX         = -Wl,-rpath,
+ESMF_CXXRPATHPREFIX         = -Wl,-rpath,
 
 ############################################################
 # Determine where ifort's libraries are located
 #
 ESMF_CXXLINKPATHS += -L$(dir $(shell $(ESMF_DIR)/scripts/libpath.ifort $(ESMF_F90COMPILER)))
+ESMF_CXXLINKRPATHS += \
+  $(ESMF_CXXRPATHPREFIX)$(dir $(shell $(ESMF_DIR)/scripts/libpath.ifort $(ESMF_F90COMPILER)))
 
 ############################################################
 # Link against the stdc++ library

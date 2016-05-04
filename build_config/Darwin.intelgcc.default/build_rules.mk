@@ -111,13 +111,6 @@ ESMF_PTHREADS := OFF
 ############################################################
 # Construct the ABISTRING
 #
-ifeq ($(ESMF_MACHINE),ia64)
-ifeq ($(ESMF_ABI),64)
-ESMF_ABISTRING := $(ESMF_MACHINE)_64
-else
-$(error Invalid ESMF_MACHINE / ESMF_ABI combination: $(ESMF_MACHINE) / $(ESMF_ABI))
-endif
-endif
 ifeq ($(ESMF_MACHINE),x86_64)
 ifeq ($(ESMF_ABI),32)
 ESMF_ABISTRING := $(ESMF_MACHINE)_32
@@ -163,7 +156,7 @@ endif
 ############################################################
 # OpenMP compiler and linker flags
 #
-ifneq ((ESMF_CLANGSTR), clang)
+ifneq ($(ESMF_CLANGSTR), clang)
 ESMF_OPENMP_F90COMPILEOPTS += -openmp
 ESMF_OPENMP_CXXCOMPILEOPTS += -fopenmp
 ESMF_OPENMP_F90LINKOPTS    += -openmp
@@ -173,15 +166,17 @@ ESMF_OPENMP=OFF
 endif
 
 ############################################################
-# Need this until the file convention is fixed (then remove these two lines)
+# Set rpath syntax
 #
-ESMF_F90COMPILEFREENOCPP = -fpp0 -FR
-ESMF_F90COMPILEFIXCPP    = -fpp
+ESMF_F90RPATHPREFIX         = -Wl,-rpath,
+ESMF_CXXRPATHPREFIX         = -Wl,-rpath,
 
 ############################################################
 # Determine where ifort's libraries are located
 #
 ESMF_CXXLINKPATHS += -L$(dir $(shell $(ESMF_DIR)/scripts/libpath.ifort $(ESMF_F90COMPILER)))
+ESMF_CXXLINKRPATHS += \
+  $(ESMF_CXXRPATHPREFIX)$(dir $(shell $(ESMF_DIR)/scripts/libpath.ifort $(ESMF_F90COMPILER)))
 
 ############################################################
 # Link against GCC's stdc++ library (because g++ is used)
@@ -212,8 +207,12 @@ ESMF_F90LINKLIBS += -lm
 # Link against libesmf.a using the C++ linker front-end
 #
 ESMF_CXXLINKLIBS += $(shell $(ESMF_DIR)/scripts/libs.ifort "$(ESMF_F90COMPILER) $(ESMF_F90COMPILEOPTS)" | sed 's/\-lcrt1\.o //g')
+ifeq ($(ESMF_CLANGSTR), clang)
+ESMF_CXXLINKLIBS += -lsvml -lifcore -limf -ldl -lirc -stdlib=libstdc++
+endif
 
 ############################################################
-# Blank out shared library options
-#
-ESMF_SL_LIBS_TO_MAKE  =
+# Shared library options
+ESMF_SL_LIBOPTS  += -dynamiclib
+ESMF_SL_LIBLIBS  += $(ESMF_F90LINKPATHS) $(ESMF_F90LINKLIBS) $(ESMF_CXXLINKPATHS) $(ESMF_CXXLINKLIBS)
+
