@@ -798,8 +798,6 @@ program ESMF_AttributeXMLUTest
     call ESMF_Test(rc_logical.eqv..true., name, failMsg, result, ESMF_SRCLINE)
     !------------------------------------------------------------------------
 
-call ESMF_BasePrint(gridcomp2%compp%base)
-
   !-------------------------------------------------------------------------
   !   <CIMDocument> attribute representation and output test for
   !   <modelComponent>, <simulationRun>, including <input>s (fields) and
