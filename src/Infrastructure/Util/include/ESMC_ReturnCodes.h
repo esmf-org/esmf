@@ -93,9 +93,10 @@ Fortran Symmetric Return Codes 1-500
 #define  ESMF_RC_FILE_EXISTS       63
 #define  ESMF_RC_FILE_NOTDIR       64
 #define  ESMF_RC_MOAB_ERROR        65
+#define  ESMF_RC_NOOP              66
 
 #if 0
-66-499 reserved for future Fortran symmetric return code definitions
+67-499 reserved for future Fortran symmetric return code definitions
 #endif
 
 #if 0
@@ -169,9 +170,10 @@ C/C++ Symmetric Return Codes 501-999
 #define  ESMC_RC_FILE_EXISTS      563
 #define  ESMC_RC_FILE_NOTDIR      564
 #define  ESMC_RC_MOAB_ERROR       565
+#define  ESMC_RC_NOOP             566
 
 #if 0
-566-999 reserved for future C/C++ symmetric return code definitions
+567-999 reserved for future C/C++ symmetric return code definitions
 #endif
 
 #if 0

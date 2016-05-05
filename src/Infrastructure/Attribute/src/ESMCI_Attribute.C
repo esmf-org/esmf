@@ -158,7 +158,7 @@ const char Attribute::GRIDS_PURP[]   = "grids";
   // Search for the attpack, make it if not found
   string attPackInstanceName;
   attpack = AttPackGet(convention, purpose, object, attPackInstanceName,
-		               ESMC_ATTNEST_ON);
+                   ESMC_ATTNEST_ON);
   if(!attpack) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_OBJ_NOT_CREATED, 
         "Cannot find the specified Attribute package\n", ESMC_CONTEXT, &localrc);
@@ -233,7 +233,7 @@ const char Attribute::GRIDS_PURP[]   = "grids";
       "failed adding an attpack Attribute", ESMC_CONTEXT, &localrc);
     return localrc;
   }
-  
+
   return ESMF_SUCCESS;
 
 }  // end AttPackAddAttribute()
@@ -244,7 +244,7 @@ const char Attribute::GRIDS_PURP[]   = "grids";
 // !IROUTINE:  AttPackCreateCustom() - create an attpack
 //
 // !INTERFACE:
-      int Attribute::AttPackCreateCustom(
+      Attribute *Attribute::AttPackCreateCustom(
 //
 // !RETURN VALUE:
 //    {\tt ESMF\_SUCCESS} or error code on failure.
@@ -253,7 +253,7 @@ const char Attribute::GRIDS_PURP[]   = "grids";
       const string &convention,              // in - Attribute convention
       const string &purpose,                 // in - Attribute purpose
       const string &object) {                // in - Attribute object type
-// 
+//
 // !DESCRIPTION:
 //     Setup the name, convention and purpose of an attpack.
 //
@@ -261,7 +261,6 @@ const char Attribute::GRIDS_PURP[]   = "grids";
 
   int localrc;
   Attribute *attpack;
-  
   attpack = NULL;
 
   // Initialize local return code; assume routine not implemented
@@ -272,17 +271,17 @@ const char Attribute::GRIDS_PURP[]   = "grids";
   if (!attpack) {
     ESMC_LogDefault.MsgFoundError(ESMC_RC_OBJ_NOT_CREATED,
       "failed initializing an attpack", ESMC_CONTEXT, &localrc);
-    return localrc;
+    return NULL;
   }
 
   localrc = AttPackSet(attpack);
   if (localrc != ESMF_SUCCESS) {
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ATTR_NOTSET,
       "failed adding an attpack to an Attribute", ESMC_CONTEXT, &localrc);
-    return localrc;
+    return NULL;
   }
-    
-  return ESMF_SUCCESS;
+
+  return attpack;
 
 }  // end AttPackCreateCustom()
 //-----------------------------------------------------------------------------
@@ -322,15 +321,19 @@ const char Attribute::GRIDS_PURP[]   = "grids";
          purpose.compare(GRIDS_PURP)==0) {
 
       // create an Attribute package for grids which uses internal Grid info
-      localrc = AttPackCreateCustom(convention, GRIDS_PURP, object);
-      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
-            ESMC_CONTEXT, &localrc)) return localrc;
+      attpack = AttPackCreateCustom(convention, GRIDS_PURP, object);
+      if (attpack == NULL) {
+          ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+                                        ESMC_CONTEXT, &localrc);
+          return localrc;
+      }
 
       // add Attributes to the grids Attribute package
       // and set the Attributes in this Attpack to have links to internal info
-      string attPackInstanceName;
+      //RLO: this removed when AttPackCreateCustom changed to return attpack
+      /*string attPackInstanceName;
       attpack = AttPackGet(convention, GRIDS_PURP, object, attPackInstanceName,
-    		               ESMC_ATTNEST_ON);
+                       ESMC_ATTNEST_ON);*/
   
       string name, value;
       vector<string> vv;
@@ -396,11 +399,14 @@ const char Attribute::GRIDS_PURP[]   = "grids";
       localrc = attpack->AttributeSet(name, vv.size(), &vv);
     }
     if (convention.compare(ESMF_CONV)==0 && purpose.compare(GENERAL_PURP)==0) {
-      localrc = AttPackCreateCustom(ESMF_CONV, GENERAL_PURP, object);
-      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
-            ESMC_CONTEXT, &localrc)) return localrc;
-      localrc = AttPackAddAttribute("RegDecompX", ESMF_CONV, GENERAL_PURP, object);
-      localrc = AttPackAddAttribute("RegDecompY", ESMF_CONV, GENERAL_PURP, object);
+      attpack = AttPackCreateCustom(ESMF_CONV, GENERAL_PURP, object);
+      if (attpack == NULL) {
+        ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+                                      ESMC_CONTEXT, &localrc);
+        return localrc;
+      }
+      localrc = attpack->AttPackAddAttribute("RegDecompX");
+      localrc = attpack->AttPackAddAttribute("RegDecompY");
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
             ESMC_CONTEXT, &localrc)) return localrc;
     }
@@ -414,12 +420,15 @@ const char Attribute::GRIDS_PURP[]   = "grids";
          ((convention.compare(CIM_1_5_CONV)==0 ||
           convention.compare(CIM_1_5_1_CONV)==0 ||
           convention.compare(CIM_1_7_1_CONV)==0) && purpose.compare(INPUTS_PURP)==0)) {
-      localrc = AttPackCreateCustom(CF_CONV, GENERAL_PURP, object);
-      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
-            ESMC_CONTEXT, &localrc)) return localrc;
-      localrc = AttPackAddAttribute("LongName", CF_CONV, GENERAL_PURP,object);
-      localrc = AttPackAddAttribute("ShortName", CF_CONV, GENERAL_PURP, object);
-      localrc = AttPackAddAttribute("Units", CF_CONV, GENERAL_PURP, object);
+      attpack = AttPackCreateCustom(CF_CONV, GENERAL_PURP, object);
+      if (attpack == NULL) {
+        ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+                                      ESMC_CONTEXT, &localrc);
+        return localrc;
+      }
+      localrc = attpack->AttPackAddAttribute("LongName");
+      localrc = attpack->AttPackAddAttribute("ShortName");
+      localrc = attpack->AttPackAddAttribute("Units");
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
             ESMC_CONTEXT, &localrc)) return localrc;
     }
@@ -488,10 +497,13 @@ const char Attribute::GRIDS_PURP[]   = "grids";
     
   } else if (object.compare("state")==0) {
   // State standard Attribute package
-    localrc = AttPackCreateCustom(ESMF_CONV, GENERAL_PURP, object);
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
-          ESMC_CONTEXT, &localrc)) return localrc;
-    localrc = AttPackAddAttribute("Intent", ESMF_CONV, GENERAL_PURP, object);
+    attpack = AttPackCreateCustom(ESMF_CONV, GENERAL_PURP, object);
+    if (attpack == NULL) {
+        ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+                                      ESMC_CONTEXT, &localrc);
+        return localrc;
+    }
+    localrc = attpack->AttPackAddAttribute("Intent");
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
           ESMC_CONTEXT, &localrc)) return localrc;
 
@@ -499,19 +511,22 @@ const char Attribute::GRIDS_PURP[]   = "grids";
   // Component standard Attribute packages
     if ((convention.compare(ESG_CONV)==0 ||
          convention.compare(ESMF_CONV)==0) && purpose.compare(GENERAL_PURP)==0) {
-      localrc = AttPackCreateCustom(ESG_CONV, GENERAL_PURP, object);
-      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
-            ESMC_CONTEXT, &localrc)) return localrc;
-      localrc = AttPackAddAttribute("Agency", ESG_CONV, GENERAL_PURP, object);
-      localrc = AttPackAddAttribute("Author", ESG_CONV, GENERAL_PURP, object);
-      localrc = AttPackAddAttribute("CodingLanguage", ESG_CONV, GENERAL_PURP, object);
-      localrc = AttPackAddAttribute("ComponentLongName", ESG_CONV, GENERAL_PURP, object);
-      localrc = AttPackAddAttribute("ComponentShortName", ESG_CONV, GENERAL_PURP, object);
-      localrc = AttPackAddAttribute("Discipline", ESG_CONV, GENERAL_PURP, object);
-      localrc = AttPackAddAttribute("Institution", ESG_CONV, GENERAL_PURP, object);
-      localrc = AttPackAddAttribute("ModelComponentFramework", ESG_CONV, GENERAL_PURP, object);
-      localrc = AttPackAddAttribute("PhysicalDomain", ESG_CONV, GENERAL_PURP, object);
-      localrc = AttPackAddAttribute("Version", ESG_CONV, GENERAL_PURP, object);
+      attpack = AttPackCreateCustom(ESG_CONV, GENERAL_PURP, object);
+      if (attpack == NULL) {
+        ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+                                      ESMC_CONTEXT, &localrc);
+        return localrc;
+      }
+      localrc = attpack->AttPackAddAttribute("Agency");
+      localrc = attpack->AttPackAddAttribute("Author");
+      localrc = attpack->AttPackAddAttribute("CodingLanguage");
+      localrc = attpack->AttPackAddAttribute("ComponentLongName");
+      localrc = attpack->AttPackAddAttribute("ComponentShortName");
+      localrc = attpack->AttPackAddAttribute("Discipline");
+      localrc = attpack->AttPackAddAttribute("Institution");
+      localrc = attpack->AttPackAddAttribute("ModelComponentFramework");
+      localrc = attpack->AttPackAddAttribute("PhysicalDomain");
+      localrc = attpack->AttPackAddAttribute("Version");
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
             ESMC_CONTEXT, &localrc)) return localrc;
     }
@@ -528,12 +543,18 @@ const char Attribute::GRIDS_PURP[]   = "grids";
       // TODO: uncomment and expand when we have better definition from CIM
       //localrc = AttPackCreateCustom(convention,
       //                              "Scientific Property Description", object);
-      //if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
-      //      ESMC_CONTEXT, &localrc)) return localrc;
+      //if (attpack == NULL) {
+      //  ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+      //                                ESMC_CONTEXT, &localrc);
+      //  return localrc;
+      //}
 
-        localrc = AttPackCreateCustom("ISO 19115", RESP_PARTY_PURP, object);
-        if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
-                                          ESMC_CONTEXT, &localrc)) return localrc;
+        attpack = AttPackCreateCustom("ISO 19115", RESP_PARTY_PURP, object);
+        if (attpack == NULL) {
+          ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+                                        ESMC_CONTEXT, &localrc);
+          return localrc;
+        }
 
         // nest the newly created package inside of this package
         localrc = AttPackNest("ISO 19115", CITATION_PURP, object, "ISO 19115", RESP_PARTY_PURP);
@@ -1111,7 +1132,7 @@ const char Attribute::GRIDS_PURP[]   = "grids";
       const string &purpose,             // in - Attribute purpose to retrieve
       const string &object,              // in - Attribute object type to retrieve
       const string &attPackInstanceName, // in - attPack name
-	  ESMC_AttNest_Flag anflag) const {
+    ESMC_AttNest_Flag anflag) const {
 
 // !DESCRIPTION:
 //    Get an attpack on an {\tt Attribute} given it's convention, 
@@ -1124,9 +1145,11 @@ const char Attribute::GRIDS_PURP[]   = "grids";
 
   // look for the attpack on this Attribute, at this level, and return the
   // first one if any matches there, or the desired attPackInstanceName one
-  for (i=0; i<packList.size(); i++) {
-    ap = packList.at(i);
-    if (convention.compare(ap->attrConvention) == 0 && 
+  //for (i=0; i<packList.size(); i++) {
+  //  ap = packList.at(i);
+  for (i=packList.size(); i > 0; i--) {
+    ap = packList.at(i-1);
+    if (convention.compare(ap->attrConvention) == 0 &&
         purpose.compare(ap->attrPurpose) == 0 &&
         object.compare(ap->attrObject) == 0 &&
         (attPackInstanceName.empty() ||
@@ -1185,7 +1208,7 @@ const char Attribute::GRIDS_PURP[]   = "grids";
   // first check if given attpack is set on *this* esmf object's attribute tree
   string attPackInstanceName;
   attpack = AttPackGet(convention, purpose, object, attPackInstanceName,
-		               ESMC_ATTNEST_ON);
+                   ESMC_ATTNEST_ON);
   if (attpack) {
     if (attpack->AttributeGet(name)->isSet()) {
       attpack->AttributeGet(name)->get(&vv);
@@ -1226,7 +1249,7 @@ const char Attribute::GRIDS_PURP[]   = "grids";
       const string &object,            // in - Attribute object type to retrieve
       vector<string> &attPackInstanceNameList, // out - Attribute package instance names
       int &attPackInstanceNameCount,            // out - # of attPack instance names
-	  ESMC_AttNest_Flag anflag) const {        // in - attnestflag
+    ESMC_AttNest_Flag anflag) const {        // in - attnestflag
 // !DESCRIPTION:
 //    Get the attpack instance names given its convention, 
 //    purpose, and object type.  Looks for all the instance names to be 
@@ -1327,10 +1350,10 @@ const char Attribute::GRIDS_PURP[]   = "grids";
   int localrc;
 
   if (num >= attrList.size()) {
-	  ESMC_LogDefault.MsgFoundError(ESMC_RC_VAL_OUTOFRANGE,
-	          "index number is too large for Attribute list\n",
-			  ESMC_CONTEXT, &localrc);
-  	  return NULL;
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_VAL_OUTOFRANGE,
+            "index number is too large for Attribute list\n",
+        ESMC_CONTEXT, &localrc);
+      return NULL;
   }
 
   return attrList.at(num);
@@ -1351,8 +1374,8 @@ const char Attribute::GRIDS_PURP[]   = "grids";
 //
 // !ARGUMENTS:
       const string &name,         // in - Attribute name to retrieve)
-	  ESMC_AttNest_Flag anflag    // in - attnestflag
-	  ) const {
+    ESMC_AttNest_Flag anflag    // in - attnestflag
+    ) const {
 //
 // !DESCRIPTION:
 //     Get an {\tt Attribute} from an attpack given its name, convention,
@@ -1371,11 +1394,11 @@ const char Attribute::GRIDS_PURP[]   = "grids";
 
   // recurse through the nested Attribute packages
   if (anflag == ESMC_ATTNEST_ON) {
-	  for (i=packList.size(); i > 0; i--) {
-		  attr = packList.at(i-1)->AttPackGetAttribute(name, anflag);
-		  // return first that is found (highest in nested tree)
-  	  	  if (attr) return attr;
-	  }
+    for (i=packList.size(); i > 0; i--) {
+      attr = packList.at(i-1)->AttPackGetAttribute(name, anflag);
+      // return first that is found (highest in nested tree)
+          if (attr) return attr;
+    }
   }
 
 
@@ -1398,8 +1421,8 @@ const char Attribute::GRIDS_PURP[]   = "grids";
 //
 // !ARGUMENTS:
       const int &num,              // in - Attribute index
-	  ESMC_AttNest_Flag anflag    // in - attnestflag
-	  ) const {
+    ESMC_AttNest_Flag anflag    // in - attnestflag
+    ) const {
 //
 // !DESCRIPTION:
 //     Get an {\tt Attribute} from an attpack given its index.
@@ -1414,23 +1437,23 @@ const char Attribute::GRIDS_PURP[]   = "grids";
 
   // if num is valid on this attribute return immediately
   if (num < attrList.size())
-	  return attrList.at(num);
+    return attrList.at(num);
   // recurse packages until we get a valid index
   else {
-	  if (anflag == ESMC_ATTNEST_ON) {
-		  for (i=packList.size(); i > 0; i--) {
-			  attr = packList.at(i-1)->AttPackGetAttribute(num-attrList.size(),
-					                                     anflag);
-		  	  // return first that is found (highest in nested tree)
-		      if (attr) return attr;
-		  }
-	  }
-	  else {
-		  ESMC_LogDefault.MsgFoundError(ESMC_RC_VAL_OUTOFRANGE,
-		  	          "index number is too large for Attribute list\n",
-		  			  ESMC_CONTEXT, &localrc);
-		  return NULL;
-	  }
+    if (anflag == ESMC_ATTNEST_ON) {
+      for (i=packList.size(); i > 0; i--) {
+        attr = packList.at(i-1)->AttPackGetAttribute(num-attrList.size(),
+                                               anflag);
+          // return first that is found (highest in nested tree)
+          if (attr) return attr;
+      }
+    }
+    else {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_VAL_OUTOFRANGE,
+                  "index number is too large for Attribute list\n",
+              ESMC_CONTEXT, &localrc);
+      return NULL;
+    }
   }
 
   // if nothing is found return NULL initialized attr
@@ -1442,7 +1465,7 @@ const char Attribute::GRIDS_PURP[]   = "grids";
 #undef  ESMC_METHOD
 #define ESMC_METHOD "AttPackIsPresent"
 //BOPI
-// !IROUTINE:  AttPackIsPresent - query an {\tt Attribute} for an attpack
+// !IROUTINE:  AttPackIsPresent - query an {\tt Attpack} about existence
 //
 // !INTERFACE:
       int Attribute::AttPackIsPresent(
@@ -1451,11 +1474,44 @@ const char Attribute::GRIDS_PURP[]   = "grids";
 //    Value of the present flag.
 // 
 // !ARGUMENTS:
+      const Attribute *attpack,          // in - Attribute package
+      ESMC_Logical *present) {     // in/out - the present flag
+// 
+// !DESCRIPTION:
+//     Query an Attribute package for an {\tt Attribute} given its name.
+//
+//EOPI
+
+  // get the attpack
+  if (!attpack || !attrPackHead) {
+    *present = ESMF_FALSE;
+    return ESMF_SUCCESS;
+  }
+  else *present = ESMF_TRUE;
+
+  // return
+  return ESMF_SUCCESS;
+
+}  // end AttPackIsPresent
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "AttPackIsPresent"
+//BOPI
+// !IROUTINE:  AttPackIsPresent - query an {\tt Attribute} for an attpack
+//
+// !INTERFACE:
+      int Attribute::AttPackIsPresent(
+//
+// !RETURN VALUE:
+//    Value of the present flag.
+//
+// !ARGUMENTS:
       const string &name,                // in - Attribute name
       const Attribute *attpack,          // in - Attribute package
       ESMC_AttNest_Flag anflag,          // in - attgetcount flag
       ESMC_Logical *present) const {     // in/out - the present flag
-// 
+//
 // !DESCRIPTION:
 //     Query an Attribute package for an {\tt Attribute} given its name.
 //
@@ -1463,7 +1519,7 @@ const char Attribute::GRIDS_PURP[]   = "grids";
 
   unsigned int i;
   Attribute *attr;
-  
+
   attr = NULL;
 
   // get the attpack
@@ -1560,7 +1616,7 @@ const char Attribute::GRIDS_PURP[]   = "grids";
 
   // first check if given attpack is set on *this* esmf object's attribute tree
   attpack = AttPackGet(convention, purpose, object, attPackInstanceName,
-		               ESMC_ATTNEST_ON);
+                   ESMC_ATTNEST_ON);
   if (attpack != NULL) {
     if (attpack->AttPackIsSet(inNestedAttPacks)) return true;
   }
@@ -1708,7 +1764,7 @@ const char Attribute::GRIDS_PURP[]   = "grids";
 // !ARGUMENTS:
       const string &name,         // in - name
       ESMCI::Attribute *attpack,  // in - attPack name
-	  ESMC_AttNest_Flag anflag) { // in - attnestflag
+    ESMC_AttNest_Flag anflag) { // in - attnestflag
 // 
 // !DESCRIPTION:
 //     Remove an {\tt Attribute} from an {\tt Attribute} package
@@ -1848,8 +1904,8 @@ const char Attribute::GRIDS_PURP[]   = "grids";
     return localrc;
   }
 
-#if 0
 // ERS: commented out to allow duplicate attpacks
+#if 0
 
   // first, see if you are replacing an existing Attribute
   for (i=0; i<packList.size(); i++) {
@@ -1884,10 +1940,10 @@ const char Attribute::GRIDS_PURP[]   = "grids";
 
 /*
 if (attrRoot == ESMF_TRUE) {
-	printf("BIG PROBLEM - setting attrPack on a root Attribute");
-	ESMC_LogDefault.MsgFoundError(ESMC_RC_OBJ_BAD, 
+  printf("BIG PROBLEM - setting attrPack on a root Attribute");
+  ESMC_LogDefault.MsgFoundError(ESMC_RC_OBJ_BAD, 
         "BIG PROBLEM - setting attrPack on a root Attribute", ESMC_CONTEXT, &localrc);
-	return localrc;
+  return localrc;
 }
   // RLO: removed this because attrPack should only be set on attpack attributes, 
   //      *this is the attribute holding the attpack, which could be root.
@@ -2329,7 +2385,7 @@ if (attrRoot == ESMF_TRUE) {
  
   string attPackInstanceName;
   attpack = AttPackGet(convention, purpose, object, attPackInstanceName,
-		               ESMC_ATTNEST_ON);
+                   ESMC_ATTNEST_ON);
   if (attpack) {
     numattrs = 0;
     objcount++;
@@ -2424,7 +2480,7 @@ if (attrRoot == ESMF_TRUE) {
   
   string attPackInstanceName;
   attpack = AttPackGet(convention, purpose, object, attPackInstanceName,
-		               ESMC_ATTNEST_ON);
+                   ESMC_ATTNEST_ON);
   if (attpack) {
     index = 0;
     localrc = attpack->AttributeCountTreeLensAttpack(index, attrLens, attrNames);
@@ -2858,8 +2914,8 @@ if (attrRoot == ESMF_TRUE) {
 // 
 // !ARGUMENTS:
       ESMC_AttGetCountFlag gcflag,  // in - attgetcount flag
-	  int *count                     // out - the count to return
-	  ) const {
+    int *count                     // out - the count to return
+    ) const {
 //
 // !DESCRIPTION:
 //      Returns number of {\tt Attributes} present
@@ -2906,8 +2962,8 @@ if (attrRoot == ESMF_TRUE) {
 // !ARGUMENTS:
       ESMC_AttGetCountFlag gcflag,   // in - attgetcount flag
       ESMC_AttNest_Flag anflag,      // in - attnestflag
-	  int *count                     // out - the count to return
-	  ) const {
+    int *count                     // out - the count to return
+    ) const {
 //
 // !DESCRIPTION:
 //      Returns number of {\tt Attributes} present
@@ -2926,12 +2982,12 @@ if (attrRoot == ESMF_TRUE) {
   /*
   printf("getCount, count = %d, lcount = %d\n", *count, lcount);
   printf("getCount attpack convention=%s, purpose=%s\n",
-		  getConvention().c_str(), getPurpose().c_str());
+      getConvention().c_str(), getPurpose().c_str());
   */
 
   if (anflag == ESMC_ATTNEST_ON)
-	  for (int i=0; i<this->packList.size(); ++i)
-		  this->packList.at(i)->getCount(gcflag, anflag, count);
+    for (int i=0; i<this->packList.size(); ++i)
+      this->packList.at(i)->getCount(gcflag, anflag, count);
 
   return ESMF_SUCCESS;
 
@@ -3089,13 +3145,13 @@ if (attrRoot == ESMF_TRUE) {
 //EOPI
 
   if (this == NULL) {
-	  ESMC_LogDefault.Write("isSet - this == NULL",
-	        ESMC_LOGMSG_WARN, ESMC_CONTEXT);
-	  return false;
+    ESMC_LogDefault.Write("isSet - this == NULL",
+          ESMC_LOGMSG_WARN, ESMC_CONTEXT);
+    return false;
   }
 
   if (items > 0 && tk != ESMF_NOKIND)
-	  return true;  // set
+    return true;  // set
 
   ESMC_LogDefault.Write("isSet - items <= 0 or tk == ESMF_NOKIND",
      ESMC_LOGMSG_WARN, ESMC_CONTEXT);
@@ -3836,7 +3892,7 @@ if (attrRoot == ESMF_TRUE) {
 
   id = ++count;  // TODO: inherit from ESMC_Base class?
 
-  // create unique name (within this address space)
+  // create unique attPackInstanceName (within this address space)
   sprintf(name, "Attribute package - %s %s %s %d", 
     conv.c_str(), purp.c_str(), obj.c_str(), id);
   attrName = name;

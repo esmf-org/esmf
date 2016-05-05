@@ -29,50 +29,26 @@ program ESMF_AttPackGridCompUTest
 !EOP
 !-----------------------------------------------------------------------------
 ! !USES:
-      use ESMF_TestMod     ! test methods
-      use ESMF             ! the ESMF Framework
-      implicit none
+  use ESMF_TestMod     ! test methods
+  use ESMF             ! the ESMF Framework
+  implicit none
 
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
-      character(*), parameter :: version = &
-      '$Id$'
+  character(*), parameter :: version = '$Id$'
 !------------------------------------------------------------------------------
 
-      ! individual test failure message
-      character(ESMF_MAXSTR) :: failMsg
-      character(ESMF_MAXPATHLEN) :: name
-      integer                :: rc
-      integer                :: result = 0
+  ! individual test failure message
+  character(ESMF_MAXSTR)     :: failMsg
+  character(ESMF_MAXPATHLEN) :: name
+  integer                    :: rc
+  integer                    :: result = 0
 
-      ! local variables
-      type(ESMF_GridComp)    :: gridcomp
+  ! local variables
+  type(ESMF_GridComp) :: gridcomp
 
-^ifdef ESMF_TESTEXHAUSTIVE
-      ! local variables
-      integer :: i
-      type(ESMF_AttPack)     :: attpack
-      character(ESMF_MAXSTR) :: conv, nestconv, purp, nestpurp
+  AttPackTestVariablesMacro()
 
-      integer(ESMF_KIND_I4)  :: inI4, outI4, inI4l(3), outI4l(3)
-      integer(ESMF_KIND_I8)  :: inI8, outI8, inI8l(3), outI8l(3)
-      real(ESMF_KIND_R4)     :: inR4, outR4, inR4l(3), outR4l(3)
-      real(ESMF_KIND_R4)     :: inR8, outR8, inR8l(3), outR8l(3)
-      character(ESMF_MAXSTR) :: inChar, outChar, inCharl(3), outCharl(3)
-      logical                :: inLog, outLog, inLogl(3), outLogl(3)
-
-      character(ESMF_MAXSTR), dimension(12) :: attpackList, attpackListTNames, &
-                                               attpackListTNames2
-      character(ESMF_MAXSTR), dimension(3) :: attpackListOut2, attpackListOut3, &
-                                              attpackListOut4, &
-                                              attpackDfltList, attpackDfltList2
-      character(ESMF_MAXSTR) :: attrname, attrvalue, filename, baseline
-
-      logical                :: rc_logical, isPresent
-      integer                :: count
-      character(ESMF_MAXSTR), dimension(1) :: exclusions
-
-^endif
 !-------------------------------------------------------------------------------
 !  The unit tests are divided into Sanity and Exhaustive. The Sanity tests are
 !  always run. When the environment variable, EXHAUSTIVE, is set to ON then
@@ -86,21 +62,21 @@ program ESMF_AttPackGridCompUTest
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   !-----------------------------------------------------------------------------
 
-      gridcomp = ESMF_GridCompCreate(name="gridcomp", petList=(/0/), rc=rc)
+  gridcomp = ESMF_GridCompCreate(name="gridcomp", petList=(/0/), rc=rc)
 
-      AttPackTestMacro(gridcomp, "a GridComp", EX_UTest, "gridcomp")
-      AttPackStandardTestMacro(gridcomp, "a GridComp", "ESMF   ", "General", EX_UTest)
-      AttPackStandardTestMacro(gridcomp, "a GridComp", "CIM 1.5  ", "ModelComp", EX_UTest)
+  AttPackTestMacro(gridcomp, "a GridComp", EX_UTest, "gridcomp")
+  AttPackStandardTestMacro(gridcomp, "a GridComp", "ESMF   ", "General", EX_UTest)
+  AttPackStandardTestMacro(gridcomp, "a GridComp", "CIM 1.5  ", "ModelComp", EX_UTest)
 ^if 0
-      ! THESE ARE DISABLED
-      AttPackStandardTestMacro(gridcomp, "a GridComp", "CIM 1.5 ", "Platform", EX_disabledUTest)
-      AttPackStandardTestMacro(gridcomp, "a GridComp", "CIM 1.5", "SciProp", EX_disabledUTest)
-      AttPackStandardTestMacro(gridcomp, "a GridComp", "CIM 1.5 ", "CompProp", EX_disabledUTest)
-      AttPackStandardTestMacro(gridcomp, "a GridComp", "ISO 19115", "RespParty", EX_disabledUTest)
-      AttPackStandardTestMacro(gridcomp, "a GridComp", "ISO 19115", "Citation ", EX_disabledUTest)
+  ! THESE ARE DISABLED
+  AttPackStandardTestMacro(gridcomp, "a GridComp", "CIM 1.5 ", "Platform", EX_disabledUTest)
+  AttPackStandardTestMacro(gridcomp, "a GridComp", "CIM 1.5", "SciProp", EX_disabledUTest)
+  AttPackStandardTestMacro(gridcomp, "a GridComp", "CIM 1.5 ", "CompProp", EX_disabledUTest)
+  AttPackStandardTestMacro(gridcomp, "a GridComp", "ISO 19115", "RespParty", EX_disabledUTest)
+  AttPackStandardTestMacro(gridcomp, "a GridComp", "ISO 19115", "Citation ", EX_disabledUTest)
 ^endif
 
-      call ESMF_GridCompDestroy(gridcomp, rc=rc)
+  call ESMF_GridCompDestroy(gridcomp, rc=rc)
 
   !-----------------------------------------------------------------------------
   call ESMF_TestEnd(ESMF_SRCLINE)

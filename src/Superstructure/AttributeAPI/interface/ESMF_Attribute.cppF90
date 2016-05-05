@@ -891,7 +891,7 @@ contains
 ! !INTERFACE:
 !     ! Private name; call using ESMF_AttributeAdd()
 !     subroutine ESMF_AttAddPackCstSL(<object>, specList, &
-!       attrList, keywordEnforcer, count, attpack, rc)
+!       attrList, keywordEnforcer, count, redundant, attpack, rc)
 !
 ! !ARGUMENTS:
 !     <object>, see below for supported values
@@ -899,11 +899,16 @@ contains
 !     character (len = *), intent(in)              :: attrList(:)
 !type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     integer,             intent(in),    optional :: count
+!     logical,             intent(in),    optional :: redundant
 !     type(ESMF_AttPack),  intent(inout), optional :: attpack
 !     integer,             intent(out),   optional :: rc
 !
 ! !DESCRIPTION:
-!     Add a custom Attribute package to <object>.
+!     Add a custom Attribute package to <object>, or add
+!     Attributes to an existing Attribute package. The {\tt redundant} flag can
+!     be set to {\tt .true.} to create redundant Attribute packages. Otherwise,
+!     Attributes will be added to an existing package. The {\tt attpack} will be
+!     used instead of {\tt specList} if both are present.
 !     See Section~\ref{sec:AttPacks} for a description of Attribute packages.
 !
 !     Supported values for <object> are:
@@ -925,14 +930,22 @@ contains
 !     \item [<object>]
 !           An {\tt ESMF} object.
 !     \item [specList]
-!           A character list of values which identify the Attribute package, such as
-!           convention, purpose, and instancename.
+!           A character list of values which identify the Attribute package,
+!           such as convention, purpose, and instancename.
 !     \item [attrList]
 !           The list of Attribute names to specify the custom Attribute package.
 !     \item [{[count]}]
 !           The number of Attributes to add to the custom Attribute package.
+!     \item [{[redundant]}]
+!           A flag to determine whether or not to create redundant Attribute
+!           packages. If an Attribute package already exists with the specified
+!           {\tt specList} and {\tt redundant} is set to
+!           {\tt .true.} then a redundant Attribute package will be created.
+!           The default value is {\tt .false.}.
 !     \item [{[attpack]}]
-!           An optional handle to the Attribute package that is to be created.
+!           The handle to the Attribute package that was created.
+!           This can also be used as an input parameter to indicate the
+!           Attribute package to which additional Attributes should be added.
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -1069,7 +1082,7 @@ contains
 ! !INTERFACE:
 !     ! Private name; call using ESMF_AttributeAdd()
 !     subroutine ESMF_AttAddPackCst(<object>, convention, purpose, &
-!       attrList, count, attpack, rc)
+!       attrList, count, redundant, attpack, rc)
 !
 ! !ARGUMENTS:
 !     <object>, see below for supported values
@@ -1077,11 +1090,16 @@ contains
 !     character (len = *), intent(in)              :: purpose
 !     character (len = *), intent(in)              :: attrList(:)
 !     integer,             intent(in),    optional :: count
+!     logical,             intent(in),    optional :: redundant
 !     type(ESMF_AttPack),  intent(inout), optional :: attpack
 !     integer,             intent(out),   optional :: rc
 !
 ! !DESCRIPTION:
-!     Add a custom Attribute package to <object>.
+!     Add a custom Attribute package to <object>, or add
+!     Attributes to an existing Attribute package. The {\tt redundant} flag can
+!     be set to {\tt .true.} to create redundant Attribute packages. Otherwise,
+!     Attributes will be added to an existing package. The {\tt attpack} will be
+!     used instead of {\tt convention} and {\tt purpose} if both are present.
 !     See Section~\ref{sec:AttPacks} for a description of Attribute packages.
 !
 !     Supported values for <object> are:
@@ -1110,8 +1128,16 @@ contains
 !           The list of Attribute names to specify the custom Attribute package.
 !     \item [{[count]}]
 !           The number of Attributes to add to the custom Attribute package.
+!     \item [{[redundant]}]
+!           A flag to determine whether or not to create redundant Attribute
+!           packages. If an Attribute package already exists with the specified
+!           {\tt convention} and {\tt purpose} and {\tt redundant} is set to
+!           {\tt .true.} then a redundant Attribute package will be created.
+!           The default value is {\tt .false.}.
 !     \item [{[attpack]}]
-!           An optional handle to the Attribute package that is to be created.
+!           The handle to the Attribute package that was created.
+!           This can also be used as an input parameter to indicate the
+!           Attribute package to which additional Attributes should be added.
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -1120,7 +1146,7 @@ contains
 !EOP
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_AttributeAdd  - Add a custom Attribute package with nested Attribute packages or modify an existing Attribute package
+! !IROUTINE: ESMF_AttributeAdd  - Add a custom Attribute package with nested Attribute packages
 !
 ! !INTERFACE:
 !     ! Private name; call using ESMF_AttributeAdd()
@@ -1190,7 +1216,7 @@ contains
 !EOP
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_AttributeAdd  - Add a custom Attribute package with a single nested Atrribute package, or modify an existing Attribute package
+! !IROUTINE: ESMF_AttributeAdd  - Add a custom Attribute package with a single nested Atrribute package
 !
 ! !INTERFACE:
 !     ! Private name; call using ESMF_AttributeAdd()
@@ -2388,7 +2414,7 @@ contains
 !EOP
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_AttributeGetAttPack  - Get an ESMF Attribute package object using a specification list
+! !IROUTINE: ESMF_AttributeGetAttPack  - Get an ESMF Attribute package object and/or query for presence using a specification list
 !
 ! !INTERFACE:
 !     ! Private name; call using ESMF_AttributeGetAttPack()
@@ -2405,8 +2431,10 @@ contains
 !     integer,                 intent(out),   optional :: rc
 !
 ! !DESCRIPTION:
-!     Get an ESMF Attribute package object.  See Section~\ref{sec:AttPacks}
-!     for a description of Attribute packages.
+!     Get an ESMF Attribute package object. If there are redundant Attribute
+!     packages on this object then the {\it most recently created} one will be
+!     retrieved.
+!     See Section~\ref{sec:AttPacks} for a description of Attribute packages.
 !
 !     Supported values for <object> are:
 !     \begin{description}
@@ -2446,7 +2474,7 @@ contains
 !EOP
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_AttributeGetAttPack  - Get an ESMF Attribute package object
+! !IROUTINE: ESMF_AttributeGetAttPack  - Get an ESMF Attribute package object and/or query for presence
 !
 ! !INTERFACE:
 !     ! Private name; call using ESMF_AttributeGetAttPack()
@@ -2465,8 +2493,10 @@ contains
 !     integer,                 intent(out),    optional :: rc
 !
 ! !DESCRIPTION:
-!     Get an ESMF Attribute package object.  See Section~\ref{sec:AttPacks}
-!     for a description of Attribute packages.
+!     Get an ESMF Attribute package object. If there are redundant Attribute
+!     packages on this object then the {\it most recently created} one will be
+!     retrieved.
+!     See Section~\ref{sec:AttPacks} for a description of Attribute packages.
 !
 !     Supported values for <object> are:
 !     \begin{description}
@@ -3656,7 +3686,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
  @\
 ! @\
 ! !DESCRIPTION: @\
-!      Returns an Attribute from the object. @\
+!      Returns an Attribute from the object.@\
 ! @\
 !     The arguments are: @\
 !     \begin{description} @\
@@ -3751,10 +3781,18 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       endif @\
  @\
       if (present(attpack)) then @\
-        attpack = lattpack @\
- @\
-        ! set the created macro @\
-        ESMF_INIT_SET_CREATED(attpack) @\
+        if (lisPresent == ESMF_TRUE) then @\
+          attpack = lattpack @\
+          ! set the created macro @\
+          ESMF_INIT_SET_CREATED(attpack) @\
+        else @\
+          if (.not. present (isPresent)) then @\
+            call ESMF_LogSetError(rcToCheck=ESMF_RC_NOT_FOUND, & @\
+              msg="attpack cannot be found and ispresent not supplied", & @\
+              ESMF_CONTEXT, rcToReturn=rc) @\
+            return @\
+          endif @\
+        endif @\
       endif @\
  @\
       if (present(rc)) rc = ESMF_SUCCESS @\
@@ -3877,10 +3915,18 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       endif @\
  @\
       if (present(attpack)) then @\
-        attpack = lattpack @\
- @\
-        ! set the created macro @\
-        ESMF_INIT_SET_CREATED(attpack) @\
+        if (lisPresent == ESMF_TRUE) then @\
+          attpack = lattpack @\
+          ! set the created macro @\
+          ESMF_INIT_SET_CREATED(attpack) @\
+        else @\
+          if (.not. present (isPresent)) then @\
+            call ESMF_LogSetError(rcToCheck=ESMF_RC_NOT_FOUND, & @\
+              msg="attpack cannot be found and ispresent not supplied", & @\
+              ESMF_CONTEXT, rcToReturn=rc) @\
+            return @\
+          endif @\
+        endif @\
       endif @\
  @\
       if (present(rc)) rc = ESMF_SUCCESS @\
@@ -4326,7 +4372,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE: @\
       ! Private name; call using ESMF_AttributeAdd() @\
       subroutine mclass##AttAddPackCst(mthis, convention, purpose, attrList, & @\
-        count, attpack, rc) @\
+        count, redundant, attpack, rc) @\
 ! @\
 ! !ARGUMENTS: @\
       type(mclass), intent(inout) :: mthis   @\
@@ -4334,6 +4380,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       character (len = *), intent(in) :: purpose @\
       character (len = *), dimension(:), intent(in) :: attrList @\
       integer, intent(in), optional :: count @\
+      logical, intent(in), optional :: redundant @\
       type(ESMF_AttPack), intent(inout), optional :: attpack @\
       integer, intent(out), optional :: rc    @\
  @\
@@ -4354,6 +4401,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      An array of character strings specifying the names of the user defined Attributes @\
 !     \item [{[count]}] @\
 !      The count of the number of Attributes to add to the package @\
+!     \item [{[redundant]}] @\
+!      A flag to determine whether or not to create redundant Attribute  @\
+!      packages. If an Attribute package already exists with the specified @\
+!      {\tt convention} and {\tt purpose} and {\tt redundant} is set to @\
+!      {\tt .true.} then a redundant Attribute package will be created. @\
+!      The default value is {\tt .false.}. @\
 !     \item [{[attpack]}] @\
 !      An optional handle to the Attribute package that is to be created. @\
 !     \item [{[rc]}]  @\
@@ -4364,16 +4417,22 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !EOPI @\
  @\
       integer :: localrc, i, j, localCount @\
-      character(len=*), parameter :: object=#mthis @\
       character(len=max(len(convention), len(purpose))), dimension(2) :: specList @\
-      integer, dimension(size(specList)+1) :: lens @\
-      character(len=(max(len(specList),len(object))*(size(specList)+1))) :: specString @\
+      type(ESMF_AttPack) :: lattpack @\
+      logical :: lispresent, lredundant @\
  @\
       ! Initialize return code; assume failure until success is certain @\
       if (present(rc)) rc = ESMF_RC_NOT_IMPL @\
  @\
       ! check input variables @\
       ESMF_INIT_CHECK_DEEP(mclass##GetInit,mthis,rc) @\
+ @\
+      ! handle redundant @\
+      if ( present (redundant) ) then @\
+        lredundant = redundant @\
+      else @\
+        lredundant = .false. @\
+      endif @\
  @\
       if (present(count)) then @\
         if (count > size(attrList)) then @\
@@ -4397,40 +4456,20 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       specList(1) = trim(convention) @\
       specList(2) = trim(purpose) @\
  @\
-      ! collapse the specList into a string to pass down to the C glue layer @\
-      i = 1 @\
-      j = 1 @\
-      lens(i) = len(object) @\
-      specString(j:(j+lens(i)-1)) = object @\
-      j = j+lens(i) @\
-      do  i=2,(size(specList)+1) @\
-        lens(i) = len_trim(specList(i-1)) @\
-        specString(j:(j+lens(i)-1)) = trim(specList(i-1)) @\
-        j = j + lens(i) @\
-      enddo @\
- @\
-      call c_ESMC_AttPackCreateCustom(mthisfield, & @\
-        size(lens), specString, lens, localrc) @\
+      call mclass##AttAddPackCstSL(mthis, specList, attrList, & @\
+                                   count=localcount, redundant=lredundant, & @\
+                                   attpack=lattpack, rc=localrc) @\
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
-         ESMF_CONTEXT, rcToReturn=rc)) return @\
- @\
-      do i = 1, localCount @\
-        call c_ESMC_AttPackAddAttribute(mthisfield, attrList(i), & @\
-          size(lens), specString, lens, localrc) @\
-      end do @\
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
-         ESMF_CONTEXT, rcToReturn=rc)) return @\
+            ESMF_CONTEXT, rcToReturn=rc)) return @\
  @\
       if ( present(attpack) ) then @\
         ! retrieve the optional attribute package handle @\
-        call mclass##AttGetAttPackSL(mthis, & @\
-                                     specList, & @\
-                                     attpack=attpack, rc=localrc) @\
-        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
-          ESMF_CONTEXT, rcToReturn=rc)) return @\
+        attpack = lattpack @\
+        ! set the created macro @\
+        ESMF_INIT_SET_CREATED(attpack) @\
       end if @\
  @\
-      if (present(rc)) rc = ESMF_SUCCESS @\
+     if (present(rc)) rc = ESMF_SUCCESS @\
  @\
       end subroutine mclass##AttAddPackCst
 
@@ -4445,7 +4484,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE: @\
       ! Private name; call using ESMF_AttributeAdd() @\
       subroutine mclass##AttAddPackCstSL(mthis, specList, attrList, & @\
-        keywordEnforcer, count, attpack, rc) @\
+        keywordEnforcer, count, redundant, attpack, rc) @\
 ! @\
 ! !ARGUMENTS: @\
       type(mclass), intent(inout) :: mthis   @\
@@ -4453,6 +4492,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       character (len = *), dimension(:), intent(in) :: attrList @\
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below @\
       integer, intent(in), optional :: count @\
+      logical, intent(in), optional :: redundant @\
       type(ESMF_AttPack), intent(inout), optional :: attpack @\
       integer, intent(out), optional :: rc    @\
  @\
@@ -4473,6 +4513,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     \item [{[count]}] @\
 !      The count of the number of Attributes to add to the package @\
 !      convention, purpose, and instancename. @\
+!     \item [{[redundant]}] @\
+!      A flag to determine whether or not to create redundant Attribute  @\
+!      packages. If an Attribute package already exists with the specified @\
+!      {\tt specList} and {\tt redundant} is set to @\
+!      {\tt .true.} then a redundant Attribute package will be created. @\
+!      The default value is {\tt .false.}. @\
 !     \item [{[attpack}]] @\
 !      An optional handle to the Attribute package that is to be created. @\
 !     \item [{[rc]}]  @\
@@ -4486,12 +4532,26 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       character(len=*), parameter :: object=#mthis @\
       integer, dimension(size(specList)+1) :: lens @\
       character(len=(max(len(specList),len(object))*(size(specList)+1))) :: specString @\
+      type(ESMF_AttPack) :: lattpack @\
+      logical :: attpackpresent, lredundant @\
+      logical :: lispresent, createnewattpack, addtoattpack @\
  @\
       ! Initialize return code; assume failure until success is certain @\
       if (present(rc)) rc = ESMF_RC_NOT_IMPL @\
  @\
       ! check input variables @\
       ESMF_INIT_CHECK_DEEP(mclass##GetInit,mthis,rc) @\
+ @\
+      lispresent = .false. @\
+      createnewattpack = .false. @\
+      addtoattpack = .false. @\
+ @\
+      ! handle redundant @\
+      if ( present (redundant) ) then @\
+        lredundant = redundant @\
+      else @\
+        lredundant = .false. @\
+      endif @\
  @\
       ! verify that the count and number of attribute names are reasonable @\
       if (present(count)) then @\
@@ -4537,27 +4597,45 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         j = j + lens(i) @\
       enddo @\
  @\
-      ! create the attribute package @\
-      call c_ESMC_AttPackCreateCustom(mthisfield, & @\
-        size(lens), specString, lens, localrc) @\
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
-         ESMF_CONTEXT, rcToReturn=rc)) return @\
- @\
-      ! add attributes to the package @\
-      do i = 1, localCount @\
-        call c_ESMC_AttPackAddAttribute(mthisfield, attrList(i), & @\
-          size(lens), specString, lens, localrc) @\
-      end do @\
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
-         ESMF_CONTEXT, rcToReturn=rc)) return @\
- @\
-      ! retrieve the optional attribute package handle @\
-      if (present(attpack)) then @\
- @\
-        call mclass##AttGetAttPackSL(mthis, specList, attpack=attpack, rc=localrc) @\
+      if ( lredundant .eqv. .true. ) then @\
+        createnewattpack = .true. @\
+      else @\
+        call mclass##AttGetAttPackSL(mthis, specList, attpack=lattpack, & @\
+                                     isPresent=lispresent, rc=localrc) @\
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
-          ESMF_CONTEXT, rcToReturn=rc)) return @\
-      end if @\
+            ESMF_CONTEXT, rcToReturn=rc)) return @\
+        if (lispresent .eqv. .false.) then @\
+          createnewattpack = .true. @\
+        else @\
+          addtoattpack = .true. @\
+        endif @\
+      endif @\
+ @\
+      if ( createnewattpack .eqv. .true. ) then @\
+        call c_ESMC_AttPackCreateCustom(mthisfield, & @\
+          size(lens), specString, lens, & @\
+          lattpack, localrc) @\
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
+           ESMF_CONTEXT, rcToReturn=rc)) return @\
+        do i = 1, localCount @\
+          call c_ESMC_AttPackAddAtt(attrList(i), lattpack, localrc) @\
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
+             ESMF_CONTEXT, rcToReturn=rc)) return @\
+        end do @\
+      else if ( addtoattpack .eqv. .true. ) then @\
+        do i = 1, localCount @\
+          call c_ESMC_AttPackAddAtt(attrList(i), lattpack, localrc) @\
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
+              ESMF_CONTEXT, rcToReturn=rc)) return @\
+        end do @\
+      endif @\
+ @\
+      if ( present(attpack) ) then @\
+        ! retrieve the optional attribute package handle @\
+        attpack = lattpack @\
+        ! set the created macro @\
+        ESMF_INIT_SET_CREATED(attpack) @\
+      endif @\
  @\
       if (present(rc)) rc = ESMF_SUCCESS @\
  @\
@@ -4778,7 +4856,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     \item [mthis] @\
 !      An ESMF object. @\
 !     \item [convention] @\
-!      The convention of the new Attribute package. @\
+!      The convention of the new Attribvute package. @\
 !     \item [purpose] @\
 !      The purpose of the new Attribute package. @\
 !     \item [{[attrList]}] @\
@@ -4994,7 +5072,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
  @\
       count = 1 @\
  @\
-      call c_ESMC_AttPackIsPresent(mthisfield, name, attpack, & @\
+      call c_ESMC_AttPackIsPresentAtt(mthisfield, name, attpack, & @\
                                    lisPresent, localrc) @\
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
         ESMF_CONTEXT, rcToReturn=rc)) return @\
@@ -5151,7 +5229,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                                 attnestflag=lattnestflag, rc=localrc) @\
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
           ESMF_CONTEXT, rcToReturn=rc)) return @\
-        call c_ESMC_AttPackIsPresent(mthisfield, name, attpack, & @\
+        call c_ESMC_AttPackIsPresentAtt(mthisfield, name, attpack, & @\
                                      lisPresent, localrc) @\
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
           ESMF_CONTEXT, rcToReturn=rc)) return @\
@@ -5296,7 +5374,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
  @\
       litemcount = size(valueList) @\
  @\
-      call c_ESMC_AttPackIsPresent(mthisfield, name, attpack, & @\
+      call c_ESMC_AttPackIsPresentAtt(mthisfield, name, attpack, & @\
                        lisPresent, localrc) @\
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
         ESMF_CONTEXT, rcToReturn=rc)) return @\
@@ -5485,7 +5563,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                                 attnestflag=lattnestflag, rc=localrc) @\
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
           ESMF_CONTEXT, rcToReturn=rc)) return @\
-        call c_ESMC_AttPackIsPresent(mthisfield, name, attpack, & @\
+        call c_ESMC_AttPackIsPresentAtt(mthisfield, name, attpack, & @\
           lisPresent, localrc) @\
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
           ESMF_CONTEXT, rcToReturn=rc)) return @\
@@ -5633,7 +5711,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
  @\
       count = 1 @\
  @\
-      call c_ESMC_AttPackIsPresent(mthisfield, name, attpack, & @\
+      call c_ESMC_AttPackIsPresentAtt(mthisfield, name, attpack, & @\
                        lisPresent, localrc) @\
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
         ESMF_CONTEXT, rcToReturn=rc)) return @\
@@ -5768,7 +5846,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                                 attnestflag=lattnestflag, rc=localrc) @\
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
           ESMF_CONTEXT, rcToReturn=rc)) return @\
-        call c_ESMC_AttPackIsPresent(mthisfield, name, attpack, & @\
+        call c_ESMC_AttPackIsPresentAtt(mthisfield, name, attpack, & @\
           lisPresent, localrc) @\
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
           ESMF_CONTEXT, rcToReturn=rc)) return @\
@@ -5913,7 +5991,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
  @\
       litemCount = size(valueList) @\
  @\
-      call c_ESMC_AttPackIsPresent(mthisfield, name, attpack, & @\
+      call c_ESMC_AttPackIsPresentAtt(mthisfield, name, attpack, & @\
                        lisPresent, localrc) @\
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
         ESMF_CONTEXT, rcToReturn=rc)) return @\
@@ -6102,7 +6180,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                                 attnestflag=lattnestflag, rc=localrc) @\
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
           ESMF_CONTEXT, rcToReturn=rc)) return @\
-        call c_ESMC_AttPackIsPresent(mthisfield, name, attpack, & @\
+        call c_ESMC_AttPackIsPresentAtt(mthisfield, name, attpack, & @\
           lisPresent, localrc) @\
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
           ESMF_CONTEXT, rcToReturn=rc)) return @\
@@ -6270,7 +6348,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       lens(1) = len(value) @\
       count = 1 @\
  @\
-      call c_ESMC_AttPackIsPresent(mthisfield, name, attpack, & @\
+      call c_ESMC_AttPackIsPresentAtt(mthisfield, name, attpack, & @\
                        lisPresent, localrc) @\
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
         ESMF_CONTEXT, rcToReturn=rc)) return @\
@@ -6424,7 +6502,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                                 attnestflag=lattnestflag, rc=localrc) @\
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
           ESMF_CONTEXT, rcToReturn=rc)) return @\
-        call c_ESMC_AttPackIsPresent(mthisfield, name, attpack, & @\
+        call c_ESMC_AttPackIsPresentAtt(mthisfield, name, attpack, & @\
           lisPresent, localrc) @\
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
           ESMF_CONTEXT, rcToReturn=rc)) return @\
@@ -6549,7 +6627,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         lens(i) = len(valueList) @\
       enddo @\
  @\
-      call c_ESMC_AttPackIsPresent(mthisfield, name, attpack, & @\
+      call c_ESMC_AttPackIsPresentAtt(mthisfield, name, attpack, & @\
                      lisPresent, localrc) @\
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
         ESMF_CONTEXT, rcToReturn=rc)) return @\
@@ -6727,7 +6805,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                                 attnestflag=lattnestflag, rc=localrc) @\
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
           ESMF_CONTEXT, rcToReturn=rc)) return @\
-        call c_ESMC_AttPackIsPresent(mthisfield, name, attpack, & @\
+        call c_ESMC_AttPackIsPresentAtt(mthisfield, name, attpack, & @\
           lisPresent, localrc) @\
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
           ESMF_CONTEXT, rcToReturn=rc)) return @\
@@ -6880,7 +6958,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
  @\
       count = 1 @\
  @\
-      call c_ESMC_AttPackIsPresent(mthisfield, name, attpack, & @\
+      call c_ESMC_AttPackIsPresentAtt(mthisfield, name, attpack, & @\
                      lisPresent, localrc) @\
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
         ESMF_CONTEXT, rcToReturn=rc)) return @\
@@ -7011,7 +7089,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                                 attnestflag=lattnestflag, rc=localrc) @\
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
           ESMF_CONTEXT, rcToReturn=rc)) return @\
-        call c_ESMC_AttPackIsPresent(mthisfield, name, attpack, & @\
+        call c_ESMC_AttPackIsPresentAtt(mthisfield, name, attpack, & @\
           lisPresent, localrc) @\
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
           ESMF_CONTEXT, rcToReturn=rc)) return @\
@@ -7132,7 +7210,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
  @\
       litemcount = size(valueList) @\
  @\
-      call c_ESMC_AttPackIsPresent(mthisfield, name, attpack, & @\
+      call c_ESMC_AttPackIsPresentAtt(mthisfield, name, attpack, & @\
                      lisPresent, localrc) @\
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
         ESMF_CONTEXT, rcToReturn=rc)) return @\
@@ -7297,7 +7375,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                                 attnestflag=lattnestflag, rc=localrc) @\
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
           ESMF_CONTEXT, rcToReturn=rc)) return @\
-        call c_ESMC_AttPackIsPresent(mthisfield, name, attpack, & @\
+        call c_ESMC_AttPackIsPresentAtt(mthisfield, name, attpack, & @\
           lisPresent, localrc) @\
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
           ESMF_CONTEXT, rcToReturn=rc)) return @\
@@ -7445,7 +7523,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
  @\
       count = 1 @\
  @\
-      call c_ESMC_AttPackIsPresent(mthisfield, name, attpack, & @\
+      call c_ESMC_AttPackIsPresentAtt(mthisfield, name, attpack, & @\
                      lisPresent, localrc) @\
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
         ESMF_CONTEXT, rcToReturn=rc)) return @\
@@ -7579,7 +7657,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                                 attnestflag=lattnestflag, rc=localrc) @\
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
           ESMF_CONTEXT, rcToReturn=rc)) return @\
-        call c_ESMC_AttPackIsPresent(mthisfield, name, attpack, & @\
+        call c_ESMC_AttPackIsPresentAtt(mthisfield, name, attpack, & @\
           lisPresent, localrc) @\
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
           ESMF_CONTEXT, rcToReturn=rc)) return @\
@@ -7701,7 +7779,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
  @\
       litemCount = size(valueList) @\
  @\
-      call c_ESMC_AttPackIsPresent(mthisfield, name, attpack, & @\
+      call c_ESMC_AttPackIsPresentAtt(mthisfield, name, attpack, & @\
                      lisPresent, localrc) @\
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
         ESMF_CONTEXT, rcToReturn=rc)) return @\
@@ -7865,7 +7943,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                                 attnestflag=lattnestflag, rc=localrc) @\
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
           ESMF_CONTEXT, rcToReturn=rc)) return @\
-        call c_ESMC_AttPackIsPresent(mthisfield, name, attpack, & @\
+        call c_ESMC_AttPackIsPresentAtt(mthisfield, name, attpack, & @\
           lisPresent, localrc) @\
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
           ESMF_CONTEXT, rcToReturn=rc)) return @\
@@ -8013,7 +8091,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       lens(1) = len(value) @\
       count = 1 @\
  @\
-      call c_ESMC_AttPackIsPresent(mthisfield, name, attpack, & @\
+      call c_ESMC_AttPackIsPresentAtt(mthisfield, name, attpack, & @\
                      lisPresent, localrc) @\
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
         ESMF_CONTEXT, rcToReturn=rc)) return @\
@@ -8146,7 +8224,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                                 attnestflag=lattnestflag, rc=localrc) @\
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
           ESMF_CONTEXT, rcToReturn=rc)) return @\
-        call c_ESMC_AttPackIsPresent(mthisfield, name, attpack, & @\
+        call c_ESMC_AttPackIsPresentAtt(mthisfield, name, attpack, & @\
           lisPresent, localrc) @\
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
           ESMF_CONTEXT, rcToReturn=rc)) return @\
@@ -8271,7 +8349,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         lens(i) = len(valueList) @\
       enddo @\
  @\
-      call c_ESMC_AttPackIsPresent(mthisfield, name, attpack, & @\
+      call c_ESMC_AttPackIsPresentAtt(mthisfield, name, attpack, & @\
                      lisPresent, localrc) @\
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
         ESMF_CONTEXT, rcToReturn=rc)) return @\
@@ -8449,7 +8527,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                                 attnestflag=lattnestflag, rc=localrc) @\
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
           ESMF_CONTEXT, rcToReturn=rc)) return @\
-        call c_ESMC_AttPackIsPresent(mthisfield, name, attpack, & @\
+        call c_ESMC_AttPackIsPresentAtt(mthisfield, name, attpack, & @\
           lisPresent, localrc) @\
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
           ESMF_CONTEXT, rcToReturn=rc)) return @\
@@ -8802,7 +8880,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         lattnestflag = ESMF_ATTNEST_ON @\
       endif @\
  @\
-      call c_ESMC_AttPackIsPresent(mthisfield, name, attpack, & @\
+      call c_ESMC_AttPackIsPresentAtt(mthisfield, name, attpack, & @\
                        lisPresent, localrc) @\
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
         ESMF_CONTEXT, rcToReturn=rc)) return @\
@@ -8941,7 +9019,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                                 attnestflag=lattnestflag, rc=localrc) @\
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
           ESMF_CONTEXT, rcToReturn=rc)) return @\
-        call c_ESMC_AttPackIsPresent(mthisfield, name, attpack, & @\
+        call c_ESMC_AttPackIsPresentAtt(mthisfield, name, attpack, & @\
           lisPresent, localrc) @\
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
           ESMF_CONTEXT, rcToReturn=rc)) return @\

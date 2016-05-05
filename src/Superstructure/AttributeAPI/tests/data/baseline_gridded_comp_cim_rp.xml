@@ -5,23 +5,55 @@
       <gmd:individualName>
         <gco:CharacterString>John Doe</gco:CharacterString>
           <!-- from ESMF: CIM/ResponsibleParty, 'Name'. -->
-          <!--    to ESG: Ingested and stored for role code "", but not displayed yet. -->
+          <!--    to ESG: Ingested and stored for role code "author", but not displayed yet. -->
       </gmd:individualName>
+      <gmd:contactInfo>
+        <gmd:CI_Contact>
+          <gmd:address>
+            <gmd:CI_Address>
+              <gmd:deliveryPoint>
+                <gco:CharacterString>Department of Meteorology, University of ABC</gco:CharacterString>
+                  <!-- from ESMF: CIM/ResponsibleParty, 'PhysicalAddress'. -->
+                  <!--    to ESG: Not ingested yet. -->
+              </gmd:deliveryPoint>
+              <gmd:electronicMailAddress>
+                <gco:CharacterString>john.doe@earthsys.org</gco:CharacterString>
+                  <!-- from ESMF: CIM/ResponsibleParty, 'EmailAddress'. -->
+                  <!--    to ESG: Ingested and stored for role code "author", but not displayed yet. -->
+              </gmd:electronicMailAddress>
+            </gmd:CI_Address>
+          </gmd:address>
+          <gmd:onlineResource>
+            <gmd:CI_OnlineResource>
+              <gmd:linkage>
+                <gmd:URL>www.earthsys.org</gmd:URL>
+                  <!-- from ESMF: CIM/ResponsibleParty, 'URL'. -->
+                  <!--    to ESG: Not ingested yet. -->
+              </gmd:linkage>
+            </gmd:CI_OnlineResource>
+          </gmd:onlineResource>
+        </gmd:CI_Contact>
+      </gmd:contactInfo>
+      <gmd:role>
+        <gmd:CI_RoleCode codeList="" codeListValue="author"></gmd:CI_RoleCode>
+          <!-- from ESMF: CIM/ResponsibleParty, 'ResponsiblePartyRole'. -->
+          <!--    to ESG: Ingested, but only used to control display. -->
+      </gmd:role>
       <abbreviation>JD</abbreviation>
         <!-- from ESMF: CIM/ResponsibleParty, abbreviation (initials) of 'Name'. -->
         <!--    to ESG: Not ingested yet. -->
     </responsibleParty>
-    <documentID>031fc38a-b1b8-d6f6-f729-74319007dc8c</documentID>
+    <documentID>336f7150-570a-f7cf-a3f3-36ff95cd5eef</documentID>
     <documentVersion>1.0</documentVersion>
     <documentAuthor>
       <gmd:individualName>
-        <gco:CharacterString>ESMF Version 7.0.0 beta snapshot</gco:CharacterString>
+        <gco:CharacterString>ESMF Version 7.1.0 beta snapshot</gco:CharacterString>
       </gmd:individualName>
       <gmd:role>
         <gmd:CI_RoleCode codeList="" codeListValue="documentAuthor"></gmd:CI_RoleCode>
       </gmd:role>
     </documentAuthor>
-    <documentCreationDate>2014-06-17T10:00:24</documentCreationDate>
+    <documentCreationDate>2016-05-03T15:16:58</documentCreationDate>
   </modelComponent>
   <simulationRun>
     <supports>
@@ -37,17 +69,17 @@
     <model>
       <reference></reference>
     </model>
-    <documentID>2b3f656a-0898-5c75-c643-38f98be69aa0</documentID>
+    <documentID>05940841-3c06-6d6c-3ea3-3170c250fa61</documentID>
     <documentVersion>1.0</documentVersion>
-    <documentCreationDate>2014-06-17T10:00:24</documentCreationDate>
+    <documentCreationDate>2016-05-03T15:16:58</documentCreationDate>
   </simulationRun>
   <platform>
     <unit>
       <machine>
       </machine>
     </unit>
-    <documentID>47d7ade3-bff9-8119-c9f3-7ff4cb5e2854</documentID>
+    <documentID>31e165ad-dac1-5dd7-8d61-6432f6eb4213</documentID>
     <documentVersion>1.0</documentVersion>
-    <documentCreationDate>2014-06-17T10:00:24</documentCreationDate>
+    <documentCreationDate>2016-05-03T15:16:58</documentCreationDate>
   </platform>
 </CIMDocumentSet>

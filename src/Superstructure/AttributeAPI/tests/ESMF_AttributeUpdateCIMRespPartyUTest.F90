@@ -238,17 +238,14 @@ module ESMF_AttributeUpdateCIMRespPartyUTestMod
 
     ! Responsible party attributes (for Principal Investigator)
     call ESMF_AttributeSet(comp, 'Name', &
-      'John Doe', &
-        convention=convISO, purpose=purpRP, rc=rc)
+      'John Doe', attpack=attpack1, rc=rc)
     call ESMF_AttributeSet(comp, 'PhysicalAddress', &
      'Department of Meteorology, University of ABC',&
-        convention=convISO, purpose=purpRP, rc=rc)
+        attpack=attpack1, rc=rc)
     call ESMF_AttributeSet(comp, 'EmailAddress', &
-      'john.doe@earthsys.org', &
-        convention=convISO, purpose=purpRP, rc=rc)
+      'john.doe@earthsys.org', attpack=attpack1, rc=rc)
     call ESMF_AttributeSet(comp, 'ResponsiblePartyRole', &
-      'PI', &
-        convention=convISO, purpose=purpRP, rc=rc)
+      'PI', attpack=attpack1, rc=rc)
     if (rc .ne. ESMF_SUCCESS) return
 
     call ESMF_AttributeGetAttPack(comp, convISO, purpRP, &
@@ -595,8 +592,7 @@ program ESMF_AttributeUpdateCIMRespPartyUTest
 
     !EX_UTest_Multi_Proc_Only
     call ESMF_AttributeGet(gridcomp1, 'Name', value=outVal, &
-      convention=convISO, purpose=purpRP, &
-      attPackInstanceName=attPackInstNames(2), rc=rc)  ! in 2nd RP instance
+      attpack=attpack, rc=rc)  ! in 2nd RP instance
     write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
     write(name, *) "Getting an updated Attribute value from a GridComp test"
     call ESMF_Test((rc==ESMF_SUCCESS).and.(outVal=='University of CBA'), &
@@ -614,7 +610,7 @@ program ESMF_AttributeUpdateCIMRespPartyUTest
 
     !EX_UTest_Multi_Proc_Only
     call ESMF_AttributeGet(gridcomp1, 'Name', value=outVal, &
-      convention=convISO, purpose=purpRP, rc=rc)  ! in 1st RP instance
+      attpack=attpack, rc=rc)  ! in 1st RP instance
     write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
     write(name, *) "Getting an updated Attribute value from a GridComp test"
     call ESMF_Test((rc==ESMF_SUCCESS).and.(outVal=='John Doe'), &

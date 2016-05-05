@@ -247,7 +247,8 @@ class Attribute
     int AttPackAddAttribute(const std::string &name, const std::string &convention, 
       const std::string &purpose, const std::string &object);
     int AttPackAddAttribute(const std::string &name);
-    int AttPackCreateCustom(const std::string &convention, 
+
+    Attribute *AttPackCreateCustom(const std::string &convention,
       const std::string &purpose, const std::string &object);
     int AttPackCreateStandard(const std::string &convention, 
       const std::string &purpose, const std::string &object);
@@ -257,6 +258,7 @@ class Attribute
       const std::vector<int> &nestAttPackInstanceCountList, int nestCount,
       std::vector<std::string> &nestAttPackInstanceNameList,
       int &nestAttPackInstanceNameCount);
+
     Attribute *AttPackGet(const std::string &convention, 
       const std::string &purpose, const std::string &object,
       const std::string &attPackInstanceName, ESMC_AttNest_Flag anflag) const;
@@ -267,35 +269,45 @@ class Attribute
       const std::string &purpose, const std::string &object,
       std::vector<std::string> &attPackInstanceNameList, 
       int &attPackInstanceNameCount, ESMC_AttNest_Flag anflag) const;
+
     Attribute *AttPackGetAttribute(const std::string &name) const;
     Attribute *AttPackGetAttribute(const int &num) const;
     Attribute *AttPackGetAttribute(const std::string &name,
-                               ESMC_AttNest_Flag anflag) const;
+                                   ESMC_AttNest_Flag anflag) const;
     Attribute *AttPackGetAttribute(const int &num,
-                               ESMC_AttNest_Flag anflag) const;
-    int AttPackIsPresent(const std::string &name, 
+                                   ESMC_AttNest_Flag anflag) const;
+
+    // for an Attpack given a pointer
+    int AttPackIsPresent(const ESMCI::Attribute *attpack,
+                         ESMC_Logical *present);
+
+    // for Attribute in an Attpack
+    int AttPackIsPresent(const std::string &name,
                          const ESMCI::Attribute *attpack,
-             ESMC_AttNest_Flag anflag, ESMC_Logical *present) const;
+                         ESMC_AttNest_Flag anflag, ESMC_Logical *present) const;
     int AttPackIsPresent(const int &num,
                          const ESMCI::Attribute *attpack,
-             ESMC_AttNest_Flag anflag, ESMC_Logical *present) const;
+                         ESMC_AttNest_Flag anflag, ESMC_Logical *present) const;
     bool AttPackIsSet(const std::string &convention, const std::string &purpose,
                       const std::string &object, 
                       const bool &inObjectTree,
                       const bool &inThisCompTreeOnly,
                       const bool &inNestedAttPacks) const;
     bool AttPackIsSet(const bool &inNestedAttPacks) const;
+
     int AttPackNest(const std::string &convention, const std::string &purpose,
-      const std::string &object, 
-      const std::string &nestConvention, const std::string &nestPurpose);
+                    const std::string &object,
+                    const std::string &nestConvention, const std::string &nestPurpose);
     int AttPackNest(const std::string &convention, const std::string &purpose,
-      const std::string &object, 
-      int nestCount, const std::vector<std::string> &nestConvention,
-                     const std::vector<std::string> &nestPurpose);
+                    const std::string &object,
+                    int nestCount, const std::vector<std::string> &nestConvention,
+                    const std::vector<std::string> &nestPurpose);
+
     int AttPackRemove(ESMCI::Attribute *attpack);
     int AttPackRemoveAttribute(const std::string &name,
-                         ESMCI::Attribute *attpack,
-                 ESMC_AttNest_Flag anflag);
+                               ESMCI::Attribute *attpack,
+                               ESMC_AttNest_Flag anflag);
+
     int AttPackSet(Attribute *attr);
     
 
@@ -388,15 +400,18 @@ class Attribute
 
 // fortran interface functions to attribute objects
 extern "C" {
+  void FTN_X(c_esmc_attpackaddatt)(char *name,
+                                  ESMCI::Attribute **attribute, int *rc,
+                                  ESMCI_FortranStrLenArg nlen);
   void FTN_X(c_esmc_attpackaddattribute)(ESMC_Base **base, char *name,
                                   int *count, char *specList, 
                                   int *lens, int *rc,
                                   ESMCI_FortranStrLenArg nlen,
                                   ESMCI_FortranStrLenArg slen);
   void FTN_X(c_esmc_attpackcreatecustom)(ESMC_Base **base,
-                                  int *count, char *specList, 
-                                  int *lens, int *rc,
-                                  ESMCI_FortranStrLenArg slen);
+                                  int *count, char *specList, int *lens,
+                                  ESMCI::Attribute **attpack,
+                                  int *rc, ESMCI_FortranStrLenArg slen);
   void FTN_X(c_esmc_attpackcreatestandard)(ESMC_Base **base,
                                   int *count, char *specList, 
                                   int *lens, int *rc,
@@ -472,7 +487,10 @@ extern "C" {
                                   ESMC_AttNest_Flag *anflag,
                                   int *rc,
                                   ESMCI_FortranStrLenArg napinlen);
-  void FTN_X(c_esmc_attpackispresent)(ESMC_Base **base, char *name,
+  void FTN_X(c_esmc_attpackispresent)(ESMC_Base **base,
+                                  ESMCI::Attribute **attpack,
+                                  ESMC_Logical *present, int *rc);
+  void FTN_X(c_esmc_attpackispresentatt)(ESMC_Base **base, char *name,
                                   ESMCI::Attribute **attpack,
                                   //ESMC_AttNest_Flag *anflag,
                                   ESMC_Logical *present, int *rc,

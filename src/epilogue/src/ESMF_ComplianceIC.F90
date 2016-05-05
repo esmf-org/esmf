@@ -1100,104 +1100,105 @@ module ESMF_ComplianceICMod
         line=__LINE__, &
         file=FILENAME)) &
         return  ! bail out
-    endif
-    call ESMF_AttributeGet(state, name=attributeName, attpack=attpack, &
-      typekind=typekind, itemCount=itemCount, isPresent=isPresent, rc=rc)
-    if (ESMF_LogFoundError(rc, &
-      line=__LINE__, &
-      file=FILENAME)) &
-      return  ! bail out
-    if (.not.isPresent) then      
-      ! attribute not present
-      call ESMF_LogWrite(trim(prefix)//" ==> State level attribute: <"// &
-        trim(attributeName)//"> is NOT present!", &
-        ESMF_LOGMSG_WARNING, rc=rc)
-      if (ESMF_LogFoundError(rc, &
-        line=__LINE__, &
-        file=FILENAME)) &
-        return  ! bail out
-    else if (itemCount == 0) then
-      ! attribute present but not set
-      call ESMF_LogWrite(trim(prefix)//" ==> State level attribute: <"// &
-        trim(attributeName)//"> present but NOT set!", &
-        ESMF_LOGMSG_WARNING, rc=rc)
-      if (ESMF_LogFoundError(rc, &
-        line=__LINE__, &
-        file=FILENAME)) &
-        return  ! bail out
     else
-      ! attribute present and set
-      if (typekind == ESMF_TYPEKIND_CHARACTER) then
-        allocate(valueStringList(itemCount))
-        call ESMF_AttributeGet(state, name=attributeName, &
-          valueList=valueStringList, &
-          convention=convention, purpose=purpose, rc=rc)
-        if (itemCount == 1) then
-          ! single valued
-          call ESMF_LogWrite(trim(prefix)//" State level attribute: <"// &
-            trim(attributeName)//"> "// &
-            "present and set: "// trim(valueStringList(1)), &
-            ESMF_LOGMSG_INFO, rc=rc)
-          if (ESMF_LogFoundError(rc, &
-            line=__LINE__, &
-            file=FILENAME)) &
-            return  ! bail out
-        else
-          ! multi valued -> requires loop
-          do i=1, itemCount
-            write(iStr,*) i
+      call ESMF_AttributeGet(state, name=attributeName, attpack=attpack, &
+        typekind=typekind, itemCount=itemCount, isPresent=isPresent, rc=rc)
+      if (ESMF_LogFoundError(rc, &
+        line=__LINE__, &
+        file=FILENAME)) &
+        return  ! bail out
+      if (.not.isPresent) then
+        ! attribute not present
+        call ESMF_LogWrite(trim(prefix)//" ==> State level attribute: <"// &
+          trim(attributeName)//"> is NOT present!", &
+          ESMF_LOGMSG_WARNING, rc=rc)
+        if (ESMF_LogFoundError(rc, &
+          line=__LINE__, &
+          file=FILENAME)) &
+          return  ! bail out
+      else if (itemCount == 0) then
+        ! attribute present but not set
+        call ESMF_LogWrite(trim(prefix)//" ==> State level attribute: <"// &
+          trim(attributeName)//"> present but NOT set!", &
+          ESMF_LOGMSG_WARNING, rc=rc)
+        if (ESMF_LogFoundError(rc, &
+          line=__LINE__, &
+          file=FILENAME)) &
+          return  ! bail out
+      else
+        ! attribute present and set
+        if (typekind == ESMF_TYPEKIND_CHARACTER) then
+          allocate(valueStringList(itemCount))
+          call ESMF_AttributeGet(state, name=attributeName, &
+            valueList=valueStringList, &
+            convention=convention, purpose=purpose, rc=rc)
+          if (itemCount == 1) then
+            ! single valued
             call ESMF_LogWrite(trim(prefix)//" State level attribute: <"// &
-              trim(attributeName)//">["//trim(adjustl(iStr))//"] "// &
-              "present and set: "// trim(valueStringList(i)), &
+              trim(attributeName)//"> "// &
+              "present and set: "// trim(valueStringList(1)), &
               ESMF_LOGMSG_INFO, rc=rc)
             if (ESMF_LogFoundError(rc, &
               line=__LINE__, &
               file=FILENAME)) &
               return  ! bail out
-          enddo
-        endif
-        deallocate(valueStringList)
-      else if (typekind == ESMF_TYPEKIND_I4) then
-        allocate(valueI4List(itemCount))
-        call ESMF_AttributeGet(state, name=attributeName, &
-          valueList=valueI4List, &
-          convention=convention, purpose=purpose, rc=rc)
-        if (itemCount == 1) then
-          ! single valued
-          write(vStr,*) valueI4List(1)
-          call ESMF_LogWrite(trim(prefix)//" State level attribute: <"// &
-            trim(attributeName)//"> "// &
-            "present and set: "// vStr, &
-            ESMF_LOGMSG_INFO, rc=rc)
-          if (ESMF_LogFoundError(rc, &
-            line=__LINE__, &
-            file=FILENAME)) &
-            return  ! bail out
-        else
-          ! multi valued -> requires loop
-          do i=1, itemCount
-            write(iStr,*) i
-            write(vStr,*) valueI4List(i)
+          else
+            ! multi valued -> requires loop
+            do i=1, itemCount
+              write(iStr,*) i
+              call ESMF_LogWrite(trim(prefix)//" State level attribute: <"// &
+                trim(attributeName)//">["//trim(adjustl(iStr))//"] "// &
+                "present and set: "// trim(valueStringList(i)), &
+                ESMF_LOGMSG_INFO, rc=rc)
+              if (ESMF_LogFoundError(rc, &
+                line=__LINE__, &
+                file=FILENAME)) &
+                return  ! bail out
+            enddo
+          endif
+          deallocate(valueStringList)
+        else if (typekind == ESMF_TYPEKIND_I4) then
+          allocate(valueI4List(itemCount))
+          call ESMF_AttributeGet(state, name=attributeName, &
+            valueList=valueI4List, &
+            convention=convention, purpose=purpose, rc=rc)
+          if (itemCount == 1) then
+            ! single valued
+            write(vStr,*) valueI4List(1)
             call ESMF_LogWrite(trim(prefix)//" State level attribute: <"// &
-              trim(attributeName)//">["//trim(adjustl(iStr))//"] "// &
+              trim(attributeName)//"> "// &
               "present and set: "// vStr, &
               ESMF_LOGMSG_INFO, rc=rc)
             if (ESMF_LogFoundError(rc, &
               line=__LINE__, &
               file=FILENAME)) &
               return  ! bail out
-          enddo
+          else
+            ! multi valued -> requires loop
+            do i=1, itemCount
+              write(iStr,*) i
+              write(vStr,*) valueI4List(i)
+              call ESMF_LogWrite(trim(prefix)//" State level attribute: <"// &
+                trim(attributeName)//">["//trim(adjustl(iStr))//"] "// &
+                "present and set: "// vStr, &
+                ESMF_LOGMSG_INFO, rc=rc)
+              if (ESMF_LogFoundError(rc, &
+                line=__LINE__, &
+                file=FILENAME)) &
+                return  ! bail out
+            enddo
+          endif
+          deallocate(valueI4List)
+        else
+          call ESMF_LogWrite(trim(prefix)//" State level attribute: <"// &
+            trim(attributeName)//"> "// &
+            "present and set: <unsupported data type>", &
+            ESMF_LOGMSG_INFO, rc=rc)
+          if (ESMF_LogFoundError(rc, &
+            line=__LINE__, &
+            file=FILENAME)) &
+            return  ! bail out
         endif
-        deallocate(valueI4List)
-      else
-        call ESMF_LogWrite(trim(prefix)//" State level attribute: <"// &
-          trim(attributeName)//"> "// &
-          "present and set: <unsupported data type>", &
-          ESMF_LOGMSG_INFO, rc=rc)
-        if (ESMF_LogFoundError(rc, &
-          line=__LINE__, &
-          file=FILENAME)) &
-          return  ! bail out
       endif
     endif
 
@@ -1573,104 +1574,105 @@ module ESMF_ComplianceICMod
         line=__LINE__, &
         file=FILENAME)) &
         return  ! bail out
-    endif
-    call ESMF_AttributeGet(comp, name=attributeName, attpack=attpack, &
-      typekind=typekind, itemCount=itemCount, isPresent=isPresent, rc=rc)
-    if (ESMF_LogFoundError(rc, &
-      line=__LINE__, &
-      file=FILENAME)) &
-      return  ! bail out
-    if (.not.isPresent) then      
-      ! attribute not present
-      call ESMF_LogWrite(trim(prefix)//" ==> Component level attribute: <"// &
-        trim(attributeName)//"> is NOT present!", &
-        ESMF_LOGMSG_WARNING, rc=rc)
-      if (ESMF_LogFoundError(rc, &
-        line=__LINE__, &
-        file=FILENAME)) &
-        return  ! bail out
-    else if (itemCount == 0) then
-      ! attribute present but not set
-      call ESMF_LogWrite(trim(prefix)//" ==> Component level attribute: <"// &
-        trim(attributeName)//"> present but NOT set!", &
-        ESMF_LOGMSG_WARNING, rc=rc)
-      if (ESMF_LogFoundError(rc, &
-        line=__LINE__, &
-        file=FILENAME)) &
-        return  ! bail out
     else
-      ! attribute present and set
-      if (typekind == ESMF_TYPEKIND_CHARACTER) then
-        allocate(valueStringList(itemCount))
-        call ESMF_AttributeGet(comp, name=attributeName, &
-          valueList=valueStringList, &
-          convention=convention, purpose=purpose, rc=rc)
-        if (itemCount == 1) then
-          ! single valued
-          call ESMF_LogWrite(trim(prefix)//" Component level attribute: <"// &
-            trim(attributeName)//"> "// &
-            "present and set: "// trim(valueStringList(1)), &
-            ESMF_LOGMSG_INFO, rc=rc)
-          if (ESMF_LogFoundError(rc, &
-            line=__LINE__, &
-            file=FILENAME)) &
-            return  ! bail out
-        else
-          ! multi valued -> requires loop
-          do i=1, itemCount
-            write(iStr,*) i
+      call ESMF_AttributeGet(comp, name=attributeName, attpack=attpack, &
+        typekind=typekind, itemCount=itemCount, isPresent=isPresent, rc=rc)
+      if (ESMF_LogFoundError(rc, &
+        line=__LINE__, &
+        file=FILENAME)) &
+        return  ! bail out
+      if (.not.isPresent) then
+        ! attribute not present
+        call ESMF_LogWrite(trim(prefix)//" ==> Component level attribute: <"// &
+          trim(attributeName)//"> is NOT present!", &
+          ESMF_LOGMSG_WARNING, rc=rc)
+        if (ESMF_LogFoundError(rc, &
+          line=__LINE__, &
+          file=FILENAME)) &
+          return  ! bail out
+      else if (itemCount == 0) then
+        ! attribute present but not set
+        call ESMF_LogWrite(trim(prefix)//" ==> Component level attribute: <"// &
+          trim(attributeName)//"> present but NOT set!", &
+          ESMF_LOGMSG_WARNING, rc=rc)
+        if (ESMF_LogFoundError(rc, &
+          line=__LINE__, &
+          file=FILENAME)) &
+          return  ! bail out
+      else
+        ! attribute present and set
+        if (typekind == ESMF_TYPEKIND_CHARACTER) then
+          allocate(valueStringList(itemCount))
+          call ESMF_AttributeGet(comp, name=attributeName, &
+            valueList=valueStringList, &
+            convention=convention, purpose=purpose, rc=rc)
+          if (itemCount == 1) then
+            ! single valued
             call ESMF_LogWrite(trim(prefix)//" Component level attribute: <"// &
-              trim(attributeName)//">["//trim(adjustl(iStr))//"] "// &
-              "present and set: "// trim(valueStringList(i)), &
+              trim(attributeName)//"> "// &
+              "present and set: "// trim(valueStringList(1)), &
               ESMF_LOGMSG_INFO, rc=rc)
             if (ESMF_LogFoundError(rc, &
               line=__LINE__, &
               file=FILENAME)) &
               return  ! bail out
-          enddo
-        endif
-        deallocate(valueStringList)
-      else if (typekind == ESMF_TYPEKIND_I4) then
-        allocate(valueI4List(itemCount))
-        call ESMF_AttributeGet(comp, name=attributeName, &
-          valueList=valueI4List, &
-          convention=convention, purpose=purpose, rc=rc)
-        if (itemCount == 1) then
-          ! single valued
-          write(vStr,*) valueI4List(1)
-          call ESMF_LogWrite(trim(prefix)//" Component level attribute: <"// &
-            trim(attributeName)//"> "// &
-            "present and set: "// vStr, &
-            ESMF_LOGMSG_INFO, rc=rc)
-          if (ESMF_LogFoundError(rc, &
-            line=__LINE__, &
-            file=FILENAME)) &
-            return  ! bail out
-        else
-          ! multi valued -> requires loop
-          do i=1, itemCount
-            write(iStr,*) i
-            write(vStr,*) valueI4List(i)
+          else
+            ! multi valued -> requires loop
+            do i=1, itemCount
+              write(iStr,*) i
+              call ESMF_LogWrite(trim(prefix)//" Component level attribute: <"// &
+                trim(attributeName)//">["//trim(adjustl(iStr))//"] "// &
+                "present and set: "// trim(valueStringList(i)), &
+                ESMF_LOGMSG_INFO, rc=rc)
+              if (ESMF_LogFoundError(rc, &
+                line=__LINE__, &
+                file=FILENAME)) &
+                return  ! bail out
+            enddo
+          endif
+          deallocate(valueStringList)
+        else if (typekind == ESMF_TYPEKIND_I4) then
+          allocate(valueI4List(itemCount))
+          call ESMF_AttributeGet(comp, name=attributeName, &
+            valueList=valueI4List, &
+            convention=convention, purpose=purpose, rc=rc)
+          if (itemCount == 1) then
+            ! single valued
+            write(vStr,*) valueI4List(1)
             call ESMF_LogWrite(trim(prefix)//" Component level attribute: <"// &
-              trim(attributeName)//">["//trim(adjustl(iStr))//"] "// &
+              trim(attributeName)//"> "// &
               "present and set: "// vStr, &
               ESMF_LOGMSG_INFO, rc=rc)
             if (ESMF_LogFoundError(rc, &
               line=__LINE__, &
               file=FILENAME)) &
               return  ! bail out
-          enddo
+          else
+            ! multi valued -> requires loop
+            do i=1, itemCount
+              write(iStr,*) i
+              write(vStr,*) valueI4List(i)
+              call ESMF_LogWrite(trim(prefix)//" Component level attribute: <"// &
+                trim(attributeName)//">["//trim(adjustl(iStr))//"] "// &
+                "present and set: "// vStr, &
+                ESMF_LOGMSG_INFO, rc=rc)
+              if (ESMF_LogFoundError(rc, &
+                line=__LINE__, &
+                file=FILENAME)) &
+                return  ! bail out
+            enddo
+          endif
+          deallocate(valueI4List)
+        else
+          call ESMF_LogWrite(trim(prefix)//" Component level attribute: <"// &
+            trim(attributeName)//"> "// &
+            "present and set: <unsupported data type>", &
+            ESMF_LOGMSG_INFO, rc=rc)
+          if (ESMF_LogFoundError(rc, &
+            line=__LINE__, &
+            file=FILENAME)) &
+            return  ! bail out
         endif
-        deallocate(valueI4List)
-      else
-        call ESMF_LogWrite(trim(prefix)//" Component level attribute: <"// &
-          trim(attributeName)//"> "// &
-          "present and set: <unsupported data type>", &
-          ESMF_LOGMSG_INFO, rc=rc)
-        if (ESMF_LogFoundError(rc, &
-          line=__LINE__, &
-          file=FILENAME)) &
-          return  ! bail out
       endif
     endif
     
@@ -1844,104 +1846,105 @@ module ESMF_ComplianceICMod
         line=__LINE__, &
         file=FILENAME)) &
         return  ! bail out
-    endif
-    call ESMF_AttributeGet(field, name=attributeName, attpack=attpack, &
-      typekind=typekind, itemCount=itemCount, isPresent=isPresent, rc=rc)
-    if (ESMF_LogFoundError(rc, &
-      line=__LINE__, &
-      file=FILENAME)) &
-      return  ! bail out
-    if (.not.isPresent) then      
-      ! attribute not present
-      call ESMF_LogWrite(trim(prefix)//" ==> Field level attribute: <"// &
-        trim(attributeName)//"> is NOT present!", &
-        ESMF_LOGMSG_WARNING, rc=rc)
-      if (ESMF_LogFoundError(rc, &
-        line=__LINE__, &
-        file=FILENAME)) &
-        return  ! bail out
-    else if (itemCount == 0) then
-      ! attribute present but not set
-      call ESMF_LogWrite(trim(prefix)//" ==> Field level attribute: <"// &
-        trim(attributeName)//"> present but NOT set!", &
-        ESMF_LOGMSG_WARNING, rc=rc)
-      if (ESMF_LogFoundError(rc, &
-        line=__LINE__, &
-        file=FILENAME)) &
-        return  ! bail out
     else
-      ! attribute present and set
-      if (typekind == ESMF_TYPEKIND_CHARACTER) then
-        allocate(valueStringList(itemCount))
-        call ESMF_AttributeGet(field, name=attributeName, &
-          valueList=valueStringList, &
-          convention=convention, purpose=purpose, rc=rc)
-        if (itemCount == 1) then
-          ! single valued
-          call ESMF_LogWrite(trim(prefix)//" Field level attribute: <"// &
-            trim(attributeName)//"> "// &
-            "present and set: "// trim(valueStringList(1)), &
-            ESMF_LOGMSG_INFO, rc=rc)
-          if (ESMF_LogFoundError(rc, &
-            line=__LINE__, &
-            file=FILENAME)) &
-            return  ! bail out
-        else
-          ! multi valued -> requires loop
-          do i=1, itemCount
-            write(iStr,*) i
+      call ESMF_AttributeGet(field, name=attributeName, attpack=attpack, &
+        typekind=typekind, itemCount=itemCount, isPresent=isPresent, rc=rc)
+      if (ESMF_LogFoundError(rc, &
+        line=__LINE__, &
+        file=FILENAME)) &
+        return  ! bail out
+      if (.not.isPresent) then
+        ! attribute not present
+        call ESMF_LogWrite(trim(prefix)//" ==> Field level attribute: <"// &
+          trim(attributeName)//"> is NOT present!", &
+          ESMF_LOGMSG_WARNING, rc=rc)
+        if (ESMF_LogFoundError(rc, &
+          line=__LINE__, &
+          file=FILENAME)) &
+          return  ! bail out
+      else if (itemCount == 0) then
+        ! attribute present but not set
+        call ESMF_LogWrite(trim(prefix)//" ==> Field level attribute: <"// &
+          trim(attributeName)//"> present but NOT set!", &
+          ESMF_LOGMSG_WARNING, rc=rc)
+        if (ESMF_LogFoundError(rc, &
+          line=__LINE__, &
+          file=FILENAME)) &
+          return  ! bail out
+      else
+        ! attribute present and set
+        if (typekind == ESMF_TYPEKIND_CHARACTER) then
+          allocate(valueStringList(itemCount))
+          call ESMF_AttributeGet(field, name=attributeName, &
+            valueList=valueStringList, &
+            convention=convention, purpose=purpose, rc=rc)
+          if (itemCount == 1) then
+            ! single valued
             call ESMF_LogWrite(trim(prefix)//" Field level attribute: <"// &
-              trim(attributeName)//">["//trim(adjustl(iStr))//"] "// &
-              "present and set: "// trim(valueStringList(i)), &
+              trim(attributeName)//"> "// &
+              "present and set: "// trim(valueStringList(1)), &
               ESMF_LOGMSG_INFO, rc=rc)
             if (ESMF_LogFoundError(rc, &
               line=__LINE__, &
               file=FILENAME)) &
               return  ! bail out
-          enddo
-        endif
-        deallocate(valueStringList)
-      else if (typekind == ESMF_TYPEKIND_I4) then
-        allocate(valueI4List(itemCount))
-        call ESMF_AttributeGet(field, name=attributeName, &
-          valueList=valueI4List, &
-          convention=convention, purpose=purpose, rc=rc)
-        if (itemCount == 1) then
-          ! single valued
-          write(vStr,*) valueI4List(1)
-          call ESMF_LogWrite(trim(prefix)//" Field level attribute: <"// &
-            trim(attributeName)//"> "// &
-            "present and set: "// vStr, &
-            ESMF_LOGMSG_INFO, rc=rc)
-          if (ESMF_LogFoundError(rc, &
-            line=__LINE__, &
-            file=FILENAME)) &
-            return  ! bail out
-        else
-          ! multi valued -> requires loop
-          do i=1, itemCount
-            write(iStr,*) i
-            write(vStr,*) valueI4List(i)
+          else
+            ! multi valued -> requires loop
+            do i=1, itemCount
+              write(iStr,*) i
+              call ESMF_LogWrite(trim(prefix)//" Field level attribute: <"// &
+                trim(attributeName)//">["//trim(adjustl(iStr))//"] "// &
+                "present and set: "// trim(valueStringList(i)), &
+                ESMF_LOGMSG_INFO, rc=rc)
+              if (ESMF_LogFoundError(rc, &
+                line=__LINE__, &
+                file=FILENAME)) &
+                return  ! bail out
+            enddo
+          endif
+          deallocate(valueStringList)
+        else if (typekind == ESMF_TYPEKIND_I4) then
+          allocate(valueI4List(itemCount))
+          call ESMF_AttributeGet(field, name=attributeName, &
+            valueList=valueI4List, &
+            convention=convention, purpose=purpose, rc=rc)
+          if (itemCount == 1) then
+            ! single valued
+            write(vStr,*) valueI4List(1)
             call ESMF_LogWrite(trim(prefix)//" Field level attribute: <"// &
-              trim(attributeName)//">["//trim(adjustl(iStr))//"] "// &
+              trim(attributeName)//"> "// &
               "present and set: "// vStr, &
               ESMF_LOGMSG_INFO, rc=rc)
             if (ESMF_LogFoundError(rc, &
               line=__LINE__, &
               file=FILENAME)) &
               return  ! bail out
-          enddo
+          else
+            ! multi valued -> requires loop
+            do i=1, itemCount
+              write(iStr,*) i
+              write(vStr,*) valueI4List(i)
+              call ESMF_LogWrite(trim(prefix)//" Field level attribute: <"// &
+                trim(attributeName)//">["//trim(adjustl(iStr))//"] "// &
+                "present and set: "// vStr, &
+                ESMF_LOGMSG_INFO, rc=rc)
+              if (ESMF_LogFoundError(rc, &
+                line=__LINE__, &
+                file=FILENAME)) &
+                return  ! bail out
+            enddo
+          endif
+          deallocate(valueI4List)
+        else
+          call ESMF_LogWrite(trim(prefix)//" Field level attribute: <"// &
+            trim(attributeName)//"> "// &
+            "present and set: <unsupported data type>", &
+            ESMF_LOGMSG_INFO, rc=rc)
+          if (ESMF_LogFoundError(rc, &
+            line=__LINE__, &
+            file=FILENAME)) &
+            return  ! bail out
         endif
-        deallocate(valueI4List)
-      else
-        call ESMF_LogWrite(trim(prefix)//" Field level attribute: <"// &
-          trim(attributeName)//"> "// &
-          "present and set: <unsupported data type>", &
-          ESMF_LOGMSG_INFO, rc=rc)
-        if (ESMF_LogFoundError(rc, &
-          line=__LINE__, &
-          file=FILENAME)) &
-          return  ! bail out
       endif
     endif
     

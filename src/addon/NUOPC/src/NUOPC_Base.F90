@@ -1299,7 +1299,7 @@ module NUOPC_Base
         convention="NUOPC", purpose="Instance", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME)) return  ! bail out
-    
+
   end subroutine
   !-----------------------------------------------------------------------------
   

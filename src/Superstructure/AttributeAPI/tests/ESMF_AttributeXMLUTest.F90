@@ -722,9 +722,7 @@ program ESMF_AttributeXMLUTest
     call ESMF_AttributeGetAttPack(gridcomp2, convCIM, &
       purpComp, attpack=attpack, rc=rc)
     call ESMF_AttributeSet(gridcomp2, 'Name', 'John Doe', &
-                           convention=convCIM, &
-                           purpose=purpComp, &
-                           rc=rc)
+                           attpack=attpack, rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Set 1st attribute value in last CIM RP package test"
     call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -736,7 +734,7 @@ program ESMF_AttributeXMLUTest
     ! Set the 2nd attribute value within the last CIM RP package
     call ESMF_AttributeSet(gridcomp2, 'PhysicalAddress', &
       'Department of Meteorology, University of ABC', &
-      convention=convISO, purpose=purpRP, rc=rc)
+      attpack=attpack, rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Set 2nd attribute value in last CIM RP package test"
     call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -746,7 +744,7 @@ program ESMF_AttributeXMLUTest
     ! Set the 3rd attribute value within the last CIM RP package
     call ESMF_AttributeSet(gridcomp2, 'EmailAddress', &
                                       'john.doe@earthsys.org', &
-      convention=convISO, purpose=purpRP, rc=rc)
+                                      attpack=attpack, rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Set 3rd attribute value in last CIM RP package test"
     call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -756,7 +754,7 @@ program ESMF_AttributeXMLUTest
     ! Set the 4th attribute value within the last CIM RP package
     call ESMF_AttributeSet(gridcomp2, 'URL', &
                                       'www.earthsys.org', &
-      convention=convISO, purpose=purpRP, rc=rc)
+                                      attpack=attpack, rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Set 4th attribute value in last CIM RP package test"
     call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -766,7 +764,7 @@ program ESMF_AttributeXMLUTest
     ! Set the 5th attribute value within the last CIM RP package
     ! This is set as an XML element attribute to ensure proper output format
     call ESMF_AttributeSet(gridcomp2, 'ResponsiblePartyRole', 'author', &
-      convention=convISO, purpose=purpRP, rc=rc)
+      attpack=attpack, rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Set 5th attribute value in last CIM RP package test"
     call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -800,6 +798,7 @@ program ESMF_AttributeXMLUTest
     call ESMF_Test(rc_logical.eqv..true., name, failMsg, result, ESMF_SRCLINE)
     !------------------------------------------------------------------------
 
+call ESMF_BasePrint(gridcomp2%compp%base)
 
   !-------------------------------------------------------------------------
   !   <CIMDocument> attribute representation and output test for
