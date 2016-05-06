@@ -172,6 +172,32 @@ ESMF_F90RPATHPREFIX         = -Wl,-rpath,
 ESMF_CXXRPATHPREFIX         = -Wl,-rpath,
 
 ############################################################
+# Determine where gcc's stdc++ or clang's c++ libraries are located, depending
+# on which underlying compiler is in use.
+#
+ifeq ($(ESMF_CLANGSTR), clang)
+ESMF_LIBSTDCXX := $(shell $(ESMF_CXXCOMPILER) -print-file-name=libc++.dylib)
+ifeq ($(ESMF_LIBSTDCXX),libc++.dylib)
+ESMF_LIBSTDCXX := $(shell $(ESMF_CXXCOMPILER) -print-file-name=libc++.a)
+endif
+ESMF_F90LINKPATHS += -L$(dir $(ESMF_LIBSTDCXX))
+ESMF_F90LINKRPATHS += $(ESMF_F90RPATHPREFIX)$(dir $(ESMF_LIBSTDCXX))
+else
+ESMF_LIBSTDCXX := $(shell $(ESMF_CXXCOMPILER) -print-file-name=libstdc++.dylib)
+ifeq ($(ESMF_LIBSTDCXX),libstdc++.dylib)
+ESMF_LIBSTDCXX := $(shell $(ESMF_CXXCOMPILER) -print-file-name=libstdc++.a)
+endif
+ESMF_F90LINKPATHS += -L$(dir $(ESMF_LIBSTDCXX))
+ESMF_F90LINKRPATHS += $(ESMF_F90RPATHPREFIX)$(dir $(ESMF_LIBSTDCXX))
+ESMF_LIBGCCEH := $(shell $(ESMF_CXXCOMPILER) -print-file-name=libgcc_eh.dylib)
+ifeq ($(ESMF_LIBGCCEH),libgcc_eh.dylib)
+ESMF_LIBGCCEH := $(shell $(ESMF_CXXCOMPILER) -print-file-name=libgcc_eh.a)
+endif
+ESMF_F90LINKPATHS += -L$(dir $(ESMF_LIBGCCEH))
+ESMF_F90LINKRPATHS += $(ESMF_F90RPATHPREFIX)$(dir $(ESMF_LIBGCCEH))
+endif
+
+############################################################
 # Determine where ifort's libraries are located
 #
 ESMF_CXXLINKPATHS += -L$(dir $(shell $(ESMF_DIR)/scripts/libpath.ifort $(ESMF_F90COMPILER)))
@@ -179,37 +205,19 @@ ESMF_CXXLINKRPATHS += \
   $(ESMF_CXXRPATHPREFIX)$(dir $(shell $(ESMF_DIR)/scripts/libpath.ifort $(ESMF_F90COMPILER)))
 
 ############################################################
-# Link against GCC's stdc++ library (because g++ is used)
+# Link against libesmf.a using the F90 linker front-end
 #
-ESMF_LIBSTDCXX := $(shell $(ESMF_CXXCOMPILER) -print-file-name=libstdc++.dylib)
-ifeq ($(ESMF_LIBSTDCXX),libstdc++.dylib)
-ESMF_LIBSTDCXX := $(shell $(ESMF_CXXCOMPILER) -print-file-name=libstdc++.a)
-endif
-ESMF_F90LINKPATHS += -L$(dir $(ESMF_LIBSTDCXX))
 ifeq ($(ESMF_CLANGSTR), clang)
-ESMF_F90LINKLIBS  += -lstdc++
+ESMF_F90LINKLIBS  += -lc++
 else
 ESMF_F90LINKLIBS  += -lstdc++ -lgcc_eh
 endif
-
-############################################################
-# Blank out variables to prevent rpath encoding
-#
-ESMF_F90LINKRPATHS      =
-ESMF_CXXLINKRPATHS      =
-
-############################################################
-# Link against libesmf.a using the F90 linker front-end
-#
 ESMF_F90LINKLIBS += -lm 
 
 ############################################################
 # Link against libesmf.a using the C++ linker front-end
 #
 ESMF_CXXLINKLIBS += $(shell $(ESMF_DIR)/scripts/libs.ifort "$(ESMF_F90COMPILER) $(ESMF_F90COMPILEOPTS)" | sed 's/\-lcrt1\.o //g')
-ifeq ($(ESMF_CLANGSTR), clang)
-ESMF_CXXLINKLIBS += -lsvml -lifcore -limf -ldl -lirc -stdlib=libstdc++
-endif
 
 ############################################################
 # Shared library options
