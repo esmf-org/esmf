@@ -126,7 +126,11 @@ ESMF_CXXLINKRPATHS      =
 ifeq ($(ESMF_PGIVERSION_MAJOR),7)
 ESMF_F90LINKLIBS += -lstd -lrt -lC -ldl
 else
+ifeq ($(shell $(ESMF_DIR)/scripts/compiler.pgcxx $(ESMF_CXXCOMPILER)),pgc++)
+ESMF_F90LINKLIBS += -pgc++libs -ldl
+else
 ESMF_F90LINKLIBS += -pgcpplibs
+endif
 endif
 
 ############################################################

@@ -1,0 +1,5 @@
+#!/bin/sh
+# this script returns the underlying PGI compiler name, since the
+# command used in the build system may be an overcompiler (e.g., mpicxx).
+PGCC=`$1 --version -c | grep pg | head -1 | cut -f1 -d" "`
+echo $PGCC

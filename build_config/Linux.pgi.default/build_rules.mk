@@ -7,7 +7,13 @@
 # Default compiler setting.
 #
 ESMF_F90DEFAULT         = pgf90
+# In PGI 15.x, prefer the newer pgc++ front end.  (From 16.x onward
+# the pgCC front end is no longer available.)
+ifeq ($(shell $(ESMF_DIR)/scripts/available pgc++),pgc++)
+ESMF_CXXDEFAULT         = pgc++
+else
 ESMF_CXXDEFAULT         = pgCC
+endif
 
 ############################################################
 # Default MPI setting.
@@ -231,7 +237,11 @@ ESMF_F90LINKRPATHS += $(ESMF_F90RPATHPREFIX)$(shell $(ESMF_DIR)/scripts/libpath.
 ifeq ($(ESMF_PGIVERSION_MAJOR),7)
 ESMF_F90LINKLIBS += -lrt -lstd -lC $(shell $(ESMF_DIR)/scripts/libs.pgCC $(ESMF_CXXCOMPILER)) -ldl
 else
+ifeq ($(shell $(ESMF_DIR)/scripts/compiler.pgcxx $(ESMF_CXXCOMPILER)),pgc++)
+ESMF_F90LINKLIBS += -pgc++libs -ldl
+else
 ESMF_F90LINKLIBS += -pgcpplibs -ldl
+endif
 endif
 
 ############################################################

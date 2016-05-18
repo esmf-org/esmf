@@ -239,6 +239,7 @@ info:   script_info
 	-@echo "Location of the C++ linker:       " `which $(word 1, $(ESMF_CXXLINKER))`
 	-@echo ""
 	-@echo "Fortran compiler flags:"
+	-@echo "ESMF_F90COMPILER: $(ESMF_F90COMPILER)"
 	-@echo "ESMF_F90COMPILEOPTS: $(ESMF_F90COMPILEOPTS)"
 	-@echo "ESMF_F90COMPILEPATHS: $(ESMF_F90COMPILEPATHS)"
 	-@echo "ESMF_F90COMPILECPPFLAGS: $(ESMF_F90COMPILECPPFLAGS)"
@@ -255,6 +256,7 @@ info:   script_info
 	-@echo "ESMF_F90ESMFLINKLIBS: $(ESMF_F90ESMFLINKLIBS)"
 	-@echo ""
 	-@echo "C++ compiler flags:"
+	-@echo "ESMF_CXXCOMPILER: $(ESMF_CXXCOMPILER)"
 	-@echo "ESMF_CXXCOMPILEOPTS: $(ESMF_CXXCOMPILEOPTS)"
 	-@echo "ESMF_CXXCOMPILEPATHS: $(ESMF_CXXCOMPILEPATHS)"
 	-@echo "ESMF_CXXCOMPILECPPFLAGS: $(ESMF_CXXCOMPILECPPFLAGS)"
