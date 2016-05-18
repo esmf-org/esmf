@@ -2,11 +2,11 @@
 # this script expects the pgc++ or pgCC command (or a wrapper, e.g. mpiCC)
 # and returns the version information from pgc++/pgCC and the optional wrapper
 PATHEXE=`which $1`
-PGEXERC=`$1 -dryrun 2>&1 | grep "\/\.pg" | head -1 | cut -f3 -d" "`
-PGBINDIR=`dirname $PGEXERC`
-if [ $? = 1 ]; then
+if [ $? != 0 ]; then
   echo unknown PGI compiler: $1; exit 1
 fi
+PGEXERC=`$1 -dryrun 2>&1 | grep "\/\.pg" | head -1 | cut -f3 -d" "`
+PGBINDIR=`dirname $PGEXERC`
 if [ $PGBINDIR/pgc++ = $PATHEXE ]; then
   $PGBINDIR/pgc++ -V
 elif [ $PGBINDIR/pgCC = $PATHEXE ]; then
