@@ -1,14 +1,25 @@
 #!/bin/sh
-# this script expects the pgCC command (or a wrapper to pgCC, e.g. mpiCC)
-# and returns the version of pgCC and the optional wrapper
+# this script expects the pgc++ or pgCC command (or a wrapper, e.g. mpiCC)
+# and returns the version information from pgc++/pgCC and the optional wrapper
 PATHEXE=`which $1`
-PGCCEXE=`$1 -dryrun 2>&1 | grep "\/\.pg" | head -1 | awk '{ print $3} '`
-PGCCEXE=$PGCCEXE"TermX"
-PGCCEXE=`echo $PGCCEXE | sed 's/\.pg.*TermX/pgCC/g'`
-if [ $PGCCEXE = $PATHEXE ]; then
-$PGCCEXE -V
+PGEXERC=`$1 -dryrun 2>&1 | grep "\/\.pg" | head -1 | cut -f3 -d" "`
+PGBINDIR=`dirname $PGEXERC`
+if [ $? = 1 ]; then
+  echo unknown PGI compiler: $1; exit 1
+fi
+if [ $PGBINDIR/pgc++ = $PATHEXE ]; then
+  $PGBINDIR/pgc++ -V
+elif [ $PGBINDIR/pgCC = $PATHEXE ]; then
+  $PGBINDIR/pgCC -V
 else
-$1 -v -c
-$PGCCEXE -V
+  $1 -v -c
+  PGEXERC=`basename $PGEXERC`
+  if [ $PGEXERC = .pgc++rc ]; then
+    $PGBINDIR/pgc++ -V
+  elif [ $PGEXERC = .pgcpprc ]; then
+    $PGBINDIR/pgCC -V
+  else
+    echo unknown PGI compiler: $1; exit 1
+  fi
 fi
 
