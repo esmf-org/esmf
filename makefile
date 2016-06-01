@@ -567,6 +567,21 @@ installcheck:
 	-@echo "ESMF installation check complete."
 	-@echo " "
 
+
+# ------------------------------------------------------------------
+# MAPL_INSTALL target
+mapl_install:
+	-@echo " "
+	-@echo "Installing MAPL"
+	-@echo " "
+	cd $(ESMF_DIR)/src/addon/MAPL5_1/src ;\
+        $(MAKE) clean
+	cd $(ESMF_DIR)/src/addon/MAPL5_1/src ;\
+	$(MAKE) install
+	-@echo " "
+	-@echo "MAPL installation complete."
+	-@echo " "
+
 # ------------------------------------------------------------------
 # Add dummy rules here to avoid gnumake trying to remake the actual
 # makefiles themselves; this might not be much of an overhead but 
