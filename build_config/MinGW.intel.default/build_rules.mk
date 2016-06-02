@@ -204,6 +204,14 @@ ESMF_OPENMP_CXXCOMPILEOPTS += -Qopenmp
 ESMF_OPENMP_F90LINKOPTS    += -Qopenmp
 ESMF_OPENMP_CXXLINKOPTS    += -Qopenmp
 
+############################################################
+# MKL specific options for external LAPACK
+ifeq ($(ESMF_LAPACK),mkl)
+ifndef ESMF_LAPACK_LIBS
+ESMF_LAPACK_LIBS = -mkl
+endif
+endif
+
 ###########################################################
 # Determine where libraries are located
 #

@@ -159,6 +159,14 @@ ESMF_OPENMP_F90LINKOPTS    += -openmp
 ESMF_OPENMP_CXXLINKOPTS    += -openmp
 
 ############################################################
+# MKL specific options for external LAPACK
+ifeq ($(ESMF_LAPACK),mkl)
+ifndef ESMF_LAPACK_LIBS
+ESMF_LAPACK_LIBS = -mkl
+endif
+endif
+
+############################################################
 # Set rpath syntax
 #
 ESMF_F90RPATHPREFIX         = -Wl,-rpath,

@@ -1094,19 +1094,19 @@ endif
 endif
 
 ifeq ($(ESMF_LAPACK),netlib)
-ifneq ($(origin ESMF_LAPACK_LIBS), environment)
+ifndef ESMF_LAPACK_LIBS
 ESMF_LAPACK_LIBS = -llapack -lblas
 endif
 endif
 
 ifeq ($(ESMF_LAPACK),mkl)
-ifneq ($(origin ESMF_LAPACK_LIBS), environment)
+ifndef ESMF_LAPACK_LIBS
 ESMF_LAPACK_LIBS = -lmkl_lapack -lmkl
 endif
 endif
 
 ifeq ($(ESMF_LAPACK),scsl)
-ifneq ($(origin ESMF_LAPACK_LIBS), environment)
+ifndef ESMF_LAPACK_LIBS
 ESMF_LAPACK_LIBS = -lscs
 endif
 endif

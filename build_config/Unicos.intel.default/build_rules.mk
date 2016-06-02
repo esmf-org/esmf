@@ -83,6 +83,14 @@ ESMF_PTHREADS := OFF
 ESMF_OPENMP := OFF
 
 ############################################################
+# MKL specific options for external LAPACK
+ifeq ($(ESMF_LAPACK),mkl)
+ifndef ESMF_LAPACK_LIBS
+ESMF_LAPACK_LIBS = -mkl
+endif
+endif
+
+############################################################
 # Blank out variables to prevent rpath encoding
 #
 ESMF_F90LINKRPATHS      =
