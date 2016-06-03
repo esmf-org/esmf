@@ -34,9 +34,9 @@ local least squares problems. It uses the
 to carry out this task.
 
 The following environment variables control whether a minimal set of
-Lapack code that comes with ESMF is used, or whether ESMF should link against
-an externally available Lapack installation. Alternatively, ESMF's
-Lapack-dependent features can be turned off altogether.
+LAPACK code that comes with ESMF is used, or whether ESMF should link against
+an externally available LAPACK installation. Alternatively, ESMF's
+LAPACK-dependent features can be turned off altogether.
 
 \begin{description}
 
@@ -44,30 +44,31 @@ Lapack-dependent features can be turned off altogether.
  {\tt "system"}, {\tt "mkl"}, {\tt "netlib"}, {\tt "scsl"}, {\it <userstring>}.
 
 \begin{description}
-\item[{\tt "internal"} (default)] ESMF will be compiled with Lapack-dependent
-features. A minimal set of Lapack/BLAS code included in ESMF will be used
+\item[{\tt "internal"} (default)] ESMF will be compiled with LAPACK-dependent
+features. A minimal set of LAPACK/BLAS code included in ESMF will be used
 to satisfy the dependencies.
 
-\item[{\tt "OFF"}] Disables Lapack-dependent code.
+\item[{\tt "OFF"}] Disables LAPACK-dependent code.
  
-\item[{\tt "system"}] A system-dependent external Lapack/BLAS installation
-is used to satisfy the external dependencies of the Lapack-dependent ESMF code.
+\item[{\tt "system"}] A system-dependent external LAPACK/BLAS installation
+is used to satisfy the external dependencies of the LAPACK-dependent ESMF code.
 Sets {\tt ESMF\_LAPACK\_LIBS} appropriately.
 
 \item[{\tt "mkl"}] The Intel MKL library is used to satisfy the external 
-dependencies of the Lapack-dependent ESMF code. Sets {\tt ESMF\_LAPACK\_LIBS} to
-{\tt "-lmkl\_lapack -lmkl"}, unless it is already defined in the user 
+dependencies of the LAPACK-dependent ESMF code. When {\tt ESMF\_COMPILER} is set to
+{\tt "intel"}, {\tt ESMF\_LAPACK\_LIBS} is set to {\tt "-mkl"}.  Otherwise {\tt ESMF\_LAPACK\_LIBS}
+is set to {\tt "-lmkl\_lapack -lmkl"}, unless it is already defined in the user 
 environment.
 
 \item[{\tt "netlib"}] The NETLIB library is used to satisfy the external 
-dependencies of the Lapack-dependent ESMF code. Sets {\tt ESMF\_LAPACK\_LIBS} to
+dependencies of the LAPACK-dependent ESMF code. Sets {\tt ESMF\_LAPACK\_LIBS} to
 {\tt "-llapack -lblas"}, unless it is already defined in the user environment.
 
 \item[{\tt "scsl"}] The SCSL library is used to satisfy the external 
-dependencies of the Lapack-dependent ESMF code. Sets {\tt ESMF\_LAPACK\_LIBS} to
+dependencies of the LAPACK-dependent ESMF code. Sets {\tt ESMF\_LAPACK\_LIBS} to
 {\tt "-lscs"}, unless it is already defined in the user environment.
 
-\item[{\it <userstring>}] Enables ESMF's Lapack-dependent code, but does not set
+\item[{\it <userstring>}] Enables ESMF's LAPACK-dependent code, but does not set
 a default for {\tt ESMF\_LAPACK\_LIBS}.  {\tt ESMF\_LAPACK\_LIBS}, and if 
 required, {\tt ESMF\_LAPACK\_LIBPATH}, must be set explicitly in the user 
 environment.
