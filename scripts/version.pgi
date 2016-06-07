@@ -4,7 +4,7 @@
 # the numeric version number triplet.
 VIND=$1
 shift 1
-VNUM=`$* 2>&1 | grep "pgf90 " | awk '{ print $2} ' | sed 's/\./ /g' | sed 's/-/ /g' `
+VNUM=`$* 2>&1 | grep -E '(pgf90|pgfortran|pgCC|pgc++)' | awk '{ print $2} ' | sed 's/\./ /g' | sed 's/-/ /g' `
 V1=`echo $VNUM | awk '{ print $1}' `
 V2=`echo $VNUM | awk '{ print $2}' `
 V3=`echo $VNUM | awk '{ print $3}' `
