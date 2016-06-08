@@ -3413,7 +3413,7 @@ write(*,*) "LOCALRC=",localrc
     return
   endif
 
-
+ 
   ! srcArrayA
   call ESMF_FieldGet(srcFieldA, array=srcArrayA, rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
@@ -3454,7 +3454,7 @@ write(*,*) "LOCALRC=",localrc
 
      !! set coords, interpolated function
      do i1=clbnd(1),cubnd(1)
-     do i2=clbnd(2),cubnd(2)
+      do i2=clbnd(2),cubnd(2)
 
         ! Set source coordinates as 0 to 360
         farrayPtrXC(i1,i2) = REAL(i1-1)*A_dx
@@ -3495,7 +3495,7 @@ write(*,*) "LOCALRC=",localrc
                            itemflag=ESMF_GRIDITEM_MASK, farrayPtr=maskB, rc=localrc)
      if (localrc /=ESMF_SUCCESS) then
         rc=ESMF_FAILURE
-        return
+         return
      endif
 
      call ESMF_FieldGet(fieldB, lDE, farrayPtr, computationalLBound=fclbnd, &
@@ -3536,7 +3536,7 @@ write(*,*) "LOCALRC=",localrc
         farrayPtrPatch(i1,i2)=0.0
 
      enddo
-     enddo
+      enddo
 
   enddo    ! lDE
 
@@ -3577,7 +3577,7 @@ write(*,*) "LOCALRC=",localrc
           rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
       rc=ESMF_FAILURE
-      return
+       return
    endif
 
   ! Do regrid
@@ -3596,7 +3596,7 @@ write(*,*) "LOCALRC=",localrc
 
 
   ! Check if we're using any of the bad source points
-  do lDE=0,localDECount-1
+   do lDE=0,localDECount-1
 
      call ESMF_FieldGet(fieldB, lDE, farrayPtr, computationalLBound=clbnd, &
                              computationalUBound=cubnd,  rc=localrc)
@@ -3637,7 +3637,7 @@ write(*,*) "LOCALRC=",localrc
 
   enddo    ! lDE
 
-  ! Uncomment these calls to see some actual regrid results
+   ! Uncomment these calls to see some actual regrid results
 #if 0
   spherical_grid = 1
   call ESMF_MeshIO(vm, gridA, ESMF_STAGGERLOC_CENTER, &
@@ -3678,7 +3678,7 @@ write(*,*) "LOCALRC=",localrc
      return
    endif
 
-
+ 
   ! Free the grids
   call ESMF_GridDestroy(gridA, rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
@@ -21674,6 +21674,7 @@ write(*,*) "LOCALRC=",localrc
   integer :: src_nx, src_ny, dst_nx, dst_ny
   integer :: cl,cu,idx
   integer :: localPet, petCount
+  real(ESMF_KIND_R8) :: beg_time, end_time  
 
   ! init success flag
   correct=.true.
@@ -21696,7 +21697,7 @@ write(*,*) "LOCALRC=",localrc
     print*,'ERROR:  test must be run using exactly 1 or 4 PETS - detected ',petCount
     rc=ESMF_FAILURE
     return
-  endif
+   endif
 
 
   ! Establish the resolution of the grids
@@ -21736,7 +21737,7 @@ write(*,*) "LOCALRC=",localrc
   ! Get number of local DEs
   call ESMF_GridGet(srcGrid, localDECount=localDECount, rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
-    rc=ESMF_FAILURE
+     rc=ESMF_FAILURE
     return
   endif
 
@@ -21777,7 +21778,7 @@ write(*,*) "LOCALRC=",localrc
         ! Set source coordinates as 0 to 360
         farrayPtrXC(i1,i2) = REAL(i1-1)*src_dx
         farrayPtrYC(i1,i2) = -90. + (REAL(i2-1)*src_dy + 0.5*src_dy)
-        lon = farrayPtrXC(i1,i2)
+         lon = farrayPtrXC(i1,i2)
         lat = farrayPtrYC(i1,i2)
 
        ! Set the source to be a function of the x,y,z coordinate
@@ -21818,8 +21819,8 @@ write(*,*) "LOCALRC=",localrc
   call  ESMF_LocStreamGet(dstLocStream, localDECount=localDECount, rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
     print*,'ERROR:  trouble with locStreamGet'
-    rc=ESMF_FAILURE
-    return
+     rc=ESMF_FAILURE
+     return
   endif
 
   !-------------------------------------------------------------------
@@ -21859,7 +21860,7 @@ write(*,*) "LOCALRC=",localrc
       rc=ESMF_FAILURE
       return
     endif
-
+ 
     !-------------------------------------------------------------------
     ! Get key data.
     !-------------------------------------------------------------------
@@ -21900,7 +21901,7 @@ write(*,*) "LOCALRC=",localrc
     print*,'ERROR:  trouble calling ArraySpecSet'
     rc=ESMF_FAILURE
     return
-  endif
+   endif
 
   dstField = ESMF_FieldCreate(dstLocStream, arrayspec, &
                         name="dest", rc=localrc)
@@ -21941,7 +21942,7 @@ write(*,*) "LOCALRC=",localrc
   call ESMF_FieldRegridStore( &
 	  srcField, &
           dstField=dstField, &
-          routeHandle=routeHandle, &
+           routeHandle=routeHandle, &
           regridmethod=ESMF_REGRIDMETHOD_BILINEAR, &
           rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
@@ -21960,9 +21961,13 @@ write(*,*) "LOCALRC=",localrc
   if (localrc /=ESMF_SUCCESS) then
       rc=ESMF_FAILURE
       return
-   endif
+    endif
 
   !!! Regrid forward from the Src grid to the LocStream - this time with PATCH
+
+  ! Get start time
+  call ESMF_VMWtime(beg_time)
+
   ! Regrid store
   call ESMF_FieldRegridStore( &
           srcField, &
@@ -21975,6 +21980,10 @@ write(*,*) "LOCALRC=",localrc
       return
    endif
 
+  ! Get end time
+  call ESMF_VMWtime(end_time)
+  write(*,*) localPet," Time to do Patch FieldRegridStore()=",end_time-beg_time
+
   ! Do regrid
   call ESMF_FieldRegrid(srcField, dstFieldPatch, routeHandlePatch, rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
@@ -21982,7 +21991,7 @@ write(*,*) "LOCALRC=",localrc
       return
    endif
 
-  call ESMF_FieldRegridRelease(routeHandlePatch, rc=localrc)
+   call ESMF_FieldRegridRelease(routeHandlePatch, rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
       rc=ESMF_FAILURE
       return
