@@ -1,8 +1,8 @@
 # $Id$ 
 
-ALL:      build_unit_tests
-run:      run_unit_tests
-run_uni:  run_unit_tests_uni
+ALL:      build_mapl_tests
+run:      run_mapl_tests
+run_uni:  run_mapl_tests_uni
 
 LOCDIR	  = src/addon/MAPL5_1/tests
 
