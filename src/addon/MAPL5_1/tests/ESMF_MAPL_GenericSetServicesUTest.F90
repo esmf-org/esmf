@@ -147,6 +147,8 @@ implicit none
   if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
      line=__LINE__, file=__FILE__)) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
+  !NEX_UTest
+
   write(name, *) "MAPL_GenericSetServices test"
   write(failMsg, *) "Failed"
   ! if we get here before abort, test passes
