@@ -109,7 +109,16 @@ use File::Find
         foreach $file ( @c_files) {
                 push (@F90_files, $file);               
         }
-	@st_ut_files = @F90_files;
+	# Remove ESM*_MAPL_* unit tests from list
+	foreach $file (@F90_files) {
+		if ((grep(/ESMF_MAPL_/, $file)) ||
+		    (grep(/ESMC_MAPL_/, $file)) ||
+		    (grep(/ESMCI_MAPL_/, $file))) {
+			push (@mapl_files, $file);
+		} else {
+		        push (@st_ut_files, $file);
+		}
+	}
         @ut_files = @st_ut_files;
         foreach ( @st_ut_files) {
                 s/\.\///; # Delete all the "./"
