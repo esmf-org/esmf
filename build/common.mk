@@ -3151,6 +3151,27 @@ run_mapl_tests:  reqdir_tests verify_mapl_exhaustive_flag
 	$(MAKE) ACTION=tree_run_unit_tests tree
 	$(MAKE) check_mapl_tests
 
+
+
+#
+# run_mapl_tests_uni
+#
+run_mapl_tests_uni:  reqdir_tests verify_mapl_exhaustive_flag
+	@if [ $(ESMF_DIR) = `pwd` ] ; then \
+          $(MAKE) dust_unit_tests ; \
+        fi
+	@if [ -f $(MAPL_TESTS_CONFIG) ] ; then \
+           $(ESMF_SED) -e 's/ [A-Za-z][A-Za-z]*processor/ Uniprocessor/' $(MAPL_TESTS_CONFIG) > $(MAPL_TESTS_CONFIG).temp; \
+           $(ESMF_MV) $(MAPL_TESTS_CONFIG).temp $(MAPL_TESTS_CONFIG); \
+        fi
+	cd $(ESMF_DIR)/src/addon/MAPL5_1/tests ;\
+	$(MAKE) ACTION=tree_run_unit_tests_uni tree 
+	$(MAKE) check_mapl_tests
+
+tree_run_unit_tests_uni: $(TESTS_RUN_UNI)
+
+
+
 #
 # config_mapl_tests
 #
