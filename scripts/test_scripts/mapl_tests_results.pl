@@ -341,11 +341,18 @@ use File::Find
                 print "exhaustive ";
         }
         if ($processor == 0) {
-                print "single processor mapl tests";
+                print "single processor mapl ";
         }
         else {
-                print "multi-processor mapl tests";
+                print "multi-processor mapl ";
         }
+	if ($total_test_count == 1) {
+		print "test";
+	}
+	else {
+		print "tests";
+	}
+
 	if ($total_test_count == 0) {
 		print ".\n\n";
 	}
