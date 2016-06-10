@@ -13,8 +13,8 @@ TESTS_BUILD   = \
 TESTS_RUN     = \
 		RUN_ESMF_MAPL_GenericSetServicesUTest
 
-#TESTS_RUN_UNI = \
-#		RUN_ESMF_MAPL_GenericSetServicesUTestUNI
+TESTS_RUN_UNI = \
+		RUN_ESMF_MAPL_GenericSetServicesUTestUNI
 
 include ${ESMF_DIR}/makefile
 
@@ -44,4 +44,8 @@ DIRS        =
 RUN_ESMF_MAPL_GenericSetServicesUTest:
 	cp MAPL.rc $(ESMF_TESTDIR)
 	$(MAKE) TNAME=MAPL_GenericSetServices NP=4 ftest
+
+RUN_ESMF_MAPL_GenericSetServicesUTestUNI:
+	cp MAPL.rc $(ESMF_TESTDIR)
+	$(MAKE) TNAME=MAPL_GenericSetServices NP=1 ftest
 
