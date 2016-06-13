@@ -1019,6 +1019,7 @@ call ESMF_VMLogMemInfo("aftP2 Reconcile")
     logical                         :: foundFlag
     character(ESMF_MAXSTR)          :: connectionString
     character(ESMF_MAXSTR)          :: name, valueString
+    character(ESMF_MAXSTR)          :: geomobjname
     character(ESMF_MAXSTR)          :: iTransferAction, eTransferAction
     integer                         :: verbosity
     integer(ESMF_KIND_I4), pointer  :: ungriddedLBound(:), ungriddedUBound(:)
@@ -1201,7 +1202,7 @@ call ESMF_VMLogMemInfo("aftP3 Reconcile")
           call ESMF_FieldGet(providerField, grid=grid, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-          call ESMF_GridGet(grid, distgrid=providerDG, rc=rc)
+          call ESMF_GridGet(grid, distgrid=providerDG, name=geomobjname, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
           call ESMF_FieldGet(acceptorField, vm=vm, rc=rc)
@@ -1210,7 +1211,7 @@ call ESMF_VMLogMemInfo("aftP3 Reconcile")
           acceptorDG = ESMF_DistGridCreate(providerDG, vm=vm, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-          grid = ESMF_GridCreate(acceptorDG, vm=vm, rc=rc)
+          grid = ESMF_GridCreate(acceptorDG, name=geomobjname, vm=vm, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
           call ESMF_FieldEmptySet(acceptorField, grid=grid, rc=rc)
@@ -1280,6 +1281,7 @@ call ESMF_VMLogMemInfo("aftP3 Reconcile")
           acceptorDG_nodal = ESMF_DistGridCreate(providerDG_nodal, vm=vm, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          !TODO: When Mesh implements a name, make sure to transfer it here!
           mesh = ESMF_MeshCreate(acceptorDG, nodalDistgrid=acceptorDG_nodal, &
             rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -1291,7 +1293,8 @@ call ESMF_VMLogMemInfo("aftP3 Reconcile")
           call ESMF_FieldGet(providerField, locstream=locstream, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-          call ESMF_LocStreamGet(locstream, distgrid=providerDG, rc=rc)
+          call ESMF_LocStreamGet(locstream, distgrid=providerDG, &
+            name=geomobjname, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
           call ESMF_FieldGet(acceptorField, vm=vm, rc=rc)
@@ -1300,7 +1303,8 @@ call ESMF_VMLogMemInfo("aftP3 Reconcile")
           acceptorDG = ESMF_DistGridCreate(providerDG, vm=vm, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-          locstream = ESMF_LocStreamCreate(distgrid=acceptorDG, vm=vm, rc=rc)
+          locstream = ESMF_LocStreamCreate(distgrid=acceptorDG, &
+            name=geomobjname, vm=vm, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
           call ESMF_FieldEmptySet(acceptorField, locstream=locstream, rc=rc)
@@ -1370,6 +1374,7 @@ call ESMF_VMLogMemInfo("aftP3 Reconcile")
     logical                         :: foundFlag
     character(ESMF_MAXSTR)          :: connectionString
     character(ESMF_MAXSTR)          :: name, valueString
+    character(ESMF_MAXSTR)          :: geomobjname
     character(ESMF_MAXSTR)          :: iTransferAction, eTransferAction
     integer                         :: verbosity
 
@@ -1550,13 +1555,17 @@ call ESMF_VMLogMemInfo("aftP4 Reconcile")
           call ESMF_FieldGet(providerField, grid=providerGrid, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          call ESMF_GridGet(providerGrid, name=geomobjname, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
           call ESMF_FieldGet(acceptorField, grid=acceptorGrid, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
           call ESMF_GridGet(acceptorGrid, distgrid=distgrid, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-          acceptorGrid = ESMF_GridCreate(providerGrid, distgrid, rc=rc)
+          acceptorGrid = ESMF_GridCreate(providerGrid, distgrid, &
+            name=geomobjname, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
           call ESMF_FieldEmptySet(acceptorField, grid=acceptorGrid, rc=rc)
@@ -1579,6 +1588,7 @@ call ESMF_VMLogMemInfo("aftP4 Reconcile")
           if (meshNoConnections) then
             ! provider Mesh does not have connections
             ! -> need both DistGrids on the acceptor side
+            !TODO: When Mesh implements a name, make sure to transfer it here!
             acceptorMesh = ESMF_MeshCreate(providerMesh, &
               nodalDistgrid=nDistgrid, elementDistgrid=eDistgrid, rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -1586,6 +1596,7 @@ call ESMF_VMLogMemInfo("aftP4 Reconcile")
           else
             ! provider Mesh does have connections
             ! -> only need one DistGrid on the acceptor side -> use eDistgrid
+            !TODO: When Mesh implements a name, make sure to transfer it here!
             acceptorMesh = ESMF_MeshCreate(providerMesh, &
               elementDistgrid=eDistgrid, rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -1598,6 +1609,9 @@ call ESMF_VMLogMemInfo("aftP4 Reconcile")
           call ESMF_FieldGet(providerField, locstream=providerLocstream, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          call ESMF_LocStreamGet(providerLocstream, name=geomobjname, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
           call ESMF_FieldGet(acceptorField, locstream=acceptorLocstream, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
@@ -1605,7 +1619,7 @@ call ESMF_VMLogMemInfo("aftP4 Reconcile")
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
           acceptorLocstream = ESMF_LocStreamCreate(providerLocstream, &
-            distgrid=distgrid, rc=rc)
+            distgrid=distgrid, name=geomobjname, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
           call ESMF_FieldEmptySet(acceptorField, locstream=acceptorLocstream, &
