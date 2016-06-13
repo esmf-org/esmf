@@ -3197,9 +3197,9 @@ endif
 #
 verify_mapl_exhaustive_flag:
 ifeq ($(ESMF_TESTEXHAUSTIVE),ON)
-        @$(MAKE) MAPL_TEST_STRING="Exhaustive" mapl_exhaustive_flag_check
+	@$(MAKE) MAPL_TEST_STRING="Exhaustive" mapl_exhaustive_flag_check
 else
-        @$(MAKE) MAPL_TEST_STRING="Non-exhaustive" mapl_exhaustive_flag_check
+	@$(MAKE) MAPL_TEST_STRING="Non-exhaustive" mapl_exhaustive_flag_check
 endif
 
 #
@@ -3231,9 +3231,9 @@ mapl_exhaustive_flag_check:
 
 clean_if_mapl_exhaustive_flag_mismatch:
 ifeq ($(ESMF_TESTEXHAUSTIVE),ON)
-        @$(MAKE) MAPL_TEST_STRING="Exhaustive" mapl_exhaustive_flag_clobber
+	@$(MAKE) MAPL_TEST_STRING="Exhaustive" mapl_exhaustive_flag_clobber
 else
-        @$(MAKE) MAPL_TEST_STRING="Non-exhaustive" mapl_exhaustive_flag_clobber
+	@$(MAKE) MAPL_TEST_STRING="Non-exhaustive" mapl_exhaustive_flag_clobber
 endif
 
 #
