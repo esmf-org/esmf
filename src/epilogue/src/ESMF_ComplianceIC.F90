@@ -1345,6 +1345,9 @@ module ESMF_ComplianceICMod
     character(ESMF_MAXSTR)                :: attributeName
     character(ESMF_MAXSTR)                :: convention
     character(ESMF_MAXSTR)                :: purpose
+    type(ESMF_AttPack)                    :: attpack
+    character(1024)                       :: jsonstring
+    logical                               :: isPresent
       
     if (present(rc)) rc = ESMF_SUCCESS
     
@@ -1668,6 +1671,28 @@ module ESMF_ComplianceICMod
     else
       ! currently there is no other type by GridComp or CplComp
     endif
+
+    ! output JSON
+    call ESMF_AttributeGetAttPack(comp, attpack=attpack, &
+      convention=convention, purpose=purpose, isPresent=isPresent, rc=rc)
+    if (ESMF_LogFoundError(rc, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
+
+    if (isPresent) then
+        call ESMF_AttPackStreamJSON(attpack, jsonstring, rc=rc)
+        if (ESMF_LogFoundError(rc, &
+          line=__LINE__, &
+          file=FILENAME)) &
+          return  ! bail out
+
+        call ESMF_LogWrite(jsonstring, ESMF_LOGMSG_JSON, rc=rc)
+        if (ESMF_LogFoundError(rc, &
+          line=__LINE__, &
+          file=FILENAME)) &
+          return  ! bail out
+    endif
       
   end subroutine
     
@@ -1818,6 +1843,9 @@ module ESMF_ComplianceICMod
     character(ESMF_MAXSTR)                :: attributeName
     character(ESMF_MAXSTR)                :: convention
     character(ESMF_MAXSTR)                :: purpose
+    type(ESMF_AttPack)                    :: attpack
+    character(1024)                       :: jsonstring
+    logical                               :: isPresent
       
     if (present(rc)) rc = ESMF_SUCCESS
     
@@ -1941,6 +1969,30 @@ module ESMF_ComplianceICMod
       file=FILENAME)) &
       return  ! bail out
       
+
+    ! write JSON
+
+    call ESMF_AttributeGetAttPack(field, attpack=attpack, &
+      convention=convention, purpose=purpose, isPresent=isPresent, rc=rc)
+    if (ESMF_LogFoundError(rc, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
+
+    if (isPresent) then
+        call ESMF_AttPackStreamJSON(attpack, jsonstring, rc=rc)
+        if (ESMF_LogFoundError(rc, &
+          line=__LINE__, &
+          file=FILENAME)) &
+          return  ! bail out
+
+        call ESMF_LogWrite(jsonstring, ESMF_LOGMSG_JSON, rc=rc)
+        if (ESMF_LogFoundError(rc, &
+          line=__LINE__, &
+          file=FILENAME)) &
+          return  ! bail out
+    endif
+
   end subroutine
     
   recursive subroutine checkFieldAttribute(prefix, field, attributeName, &

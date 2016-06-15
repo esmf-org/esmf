@@ -196,6 +196,8 @@ class Attribute
 
     int streamJSON(std::string &output) const;
     int streamJSONiter(std::ostringstream &os, unsigned int level) const;
+    template<typename T>
+    std::string attrValuesToString(const std::vector<T> *vec) const;
 
     // return an Attribute by name or number
     Attribute *AttributeGet(const std::string &name) const;
