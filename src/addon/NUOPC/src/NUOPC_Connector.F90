@@ -1705,7 +1705,7 @@ call ESMF_VMLogMemInfo("aftP5 Reconcile")
     integer                         :: localrc
     logical                         :: existflag
     character(ESMF_MAXSTR)          :: connectionString
-    character(ESMF_MAXSTR)          :: name, valueString
+    character(ESMF_MAXSTR)          :: name, valueString, msgString
     integer                         :: verbosity
 
     rc = ESMF_SUCCESS
@@ -1780,13 +1780,21 @@ call ESMF_VMLogMemInfo("aftP5 Reconcile")
     
     ! main loop over all entries in the cplList
     do i=1, cplListSize
-!print *, "cplList(",i,")=", trim(cplList(i))
       call chopString(cplList(i), chopChar=":", chopStringList=chopStringList, &
         rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
       cplName = chopStringList(1) ! first part is the standard name of cpl field
       deallocate(chopStringList)
+
+      if (btest(verbosity,3)) then
+        write (msgString,*) "loop over all entries in cplList: ", i, &
+          trim(cplName)
+        call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+          return  ! bail out
+      endif
       
       ! find import and export side match
       foundFlag = .false. ! reset
@@ -1836,7 +1844,7 @@ call ESMF_VMLogMemInfo("aftP5 Reconcile")
       
       if (.not.foundFlag) then
         call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
-          msg="Bad internal error - should never get here!",&
+          msg="Should never get here: "//trim(cplName),&
           line=__LINE__, file=trim(name)//":"//FILENAME, &
           rcToReturn=rc)
         return  ! bail out
