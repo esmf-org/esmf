@@ -114,6 +114,7 @@ endif
 #
 ESMF_F90COMPILER_VERSION    = ${ESMF_F90COMPILER} -V -v
 ESMF_CXXCOMPILER_VERSION    = ${ESMF_CXXCOMPILER} -v --version
+ESMF_F90MAJORVERSION      = $(shell $(ESMF_DIR)/scripts/version.intel 1 ${ESMF_F90COMPILER} -V)
 
 ############################################################
 # Construct the ABISTRING
@@ -176,9 +177,14 @@ endif
 ############################################################
 # OpenMP compiler and linker flags
 #
+ifeq ($(shell [ $(ESMF_F90MAJORVERSION) -ge 16 ] && echo true), true)
+ESMF_OPENMP_F90COMPILEOPTS += -qopenmp
+ESMF_OPENMP_F90LINKOPTS    += -qopenmp
+else
 ESMF_OPENMP_F90COMPILEOPTS += -openmp
-ESMF_OPENMP_CXXCOMPILEOPTS += -fopenmp
 ESMF_OPENMP_F90LINKOPTS    += -openmp
+endif
+ESMF_OPENMP_CXXCOMPILEOPTS += -fopenmp
 ESMF_OPENMP_CXXLINKOPTS    += -fopenmp
 
 ############################################################

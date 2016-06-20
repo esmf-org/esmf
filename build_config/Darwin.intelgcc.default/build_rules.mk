@@ -97,6 +97,7 @@ endif
 #
 ESMF_F90COMPILER_VERSION    = ${ESMF_F90COMPILER} -V -v
 ESMF_CXXCOMPILER_VERSION    = ${ESMF_CXXCOMPILER} -v --version
+ESMF_F90MAJORVERSION      = $(shell $(ESMF_DIR)/scripts/version.intel 1 ${ESMF_F90COMPILER} -V)
 
 ############################################################
 # See if g++ is really clang
@@ -156,13 +157,18 @@ endif
 ############################################################
 # OpenMP compiler and linker flags
 #
-ifneq ($(ESMF_CLANGSTR), clang)
-ESMF_OPENMP_F90COMPILEOPTS += -openmp
-ESMF_OPENMP_CXXCOMPILEOPTS += -fopenmp
-ESMF_OPENMP_F90LINKOPTS    += -openmp
-ESMF_OPENMP_CXXLINKOPTS    += -fopenmp
-else
+ifeq ($(ESMF_CLANGSTR), clang)
 ESMF_OPENMP=OFF
+else
+ifeq ($(shell [ $(ESMF_F90MAJORVERSION) -ge 16 ] && echo true), true)
+ESMF_OPENMP_F90COMPILEOPTS += -qopenmp
+ESMF_OPENMP_F90LINKOPTS    += -qopenmp
+else
+ESMF_OPENMP_F90COMPILEOPTS += -openmp
+ESMF_OPENMP_F90LINKOPTS    += -openmp
+endif
+ESMF_OPENMP_CXXCOMPILEOPTS += -fopenmp
+ESMF_OPENMP_CXXLINKOPTS    += -fopenmp
 endif
 
 ############################################################
