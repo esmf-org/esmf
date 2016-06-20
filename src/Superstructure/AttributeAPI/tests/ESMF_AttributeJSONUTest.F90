@@ -183,6 +183,19 @@ program ESMF_AttributeJSONUTest
     call ESMF_AttributeSet(state, name="name", value="myImport", &
                            attpack=attpack, rc=rc)
 
+    ! Add nested
+    call ESMF_AttributeAdd(state, "json", "not-so-general", &
+                           attrList=(/ "nestAttr1", "nestAttr2" /), &
+                           nestConvention=(/ "json" /), &
+                           nestPurpose=(/ "general" /), &
+                           attpack=attpack, rc=rc)
+
+    call ESMF_AttributeSet(state, name="nestAttr1", value="nestAttr1Val", &
+                           attpack=attpack, rc=rc)
+    call ESMF_AttributeSet(state, name="nestAttr2", value="nestAttr2Val", &
+                           attpack=attpack, rc=rc)
+
+
 
     !-------------------------------------------------------------------------
     !EX_UTest
@@ -194,7 +207,7 @@ program ESMF_AttributeJSONUTest
     !-------------------------------------------------------------------------
     !EX_UTest
     ! Write JSON stream for the State
-    call ESMF_AttPackStreamJSON(attpack, output, rc=rc)
+    call ESMF_AttPackStreamJSON(attpack, .true., .true., output, rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Write JSON stream for the State"
     call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -209,27 +222,29 @@ program ESMF_AttributeJSONUTest
     call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
     !-------------------------------------------------------------------------
 
-    check = '{&
-            &  "state" :{&
-            &    "intent": "import",&
-            &    "name": "myImport",&
-            &    "fields": [{&
-            &      "name": "sst",&
-            &      "standard_name": "sea_surface_temp",&
-            &      "units": "C",&
-            &      "connected": "false",&
-            &      "timestamp": "20091201000000",&
-            &      "transferOfferGeomObject": "will provide"' // &
-            &'    }, {&
-            &      "name": "ssaf",&
-            &      "standard_name": "sea_ice_area_fraction",&
-            &      "units": "C",&
-            &      "connected": "false",&
-            &      "timestamp": "20091201000000",&
-            &      "transferOfferGeomObject": "will provide"' // &
-            &'    }]&
-            &  }&
-            &}'
+!    check = '{&
+!            &  "state" :{&
+!            &    "intent": "import",&
+!            &    "name": "myImport",&
+!            &    "fields": [{&
+!            &      "name": "sst",&
+!            &      "standard_name": "sea_surface_temp",&
+!            &      "units": "C",&
+!            &      "connected": "false",&
+!            &      "timestamp": "20091201000000",&
+!            &      "transferOfferGeomObject": "will provide"' // &
+!            &'    }, {&
+!            &      "name": "ssaf",&
+!            &      "standard_name": "sea_ice_area_fraction",&
+!            &      "units": "C",&
+!            &      "connected": "false",&
+!            &      "timestamp": "20091201000000",&
+!            &      "transferOfferGeomObject": "will provide"' // &
+!            &'    }]&
+!            &  }&
+!            &}'
+
+    check = '{"state":{"nestAttr1$json$not-so-general":"nestAttr1Val","nestAttr2$json$not-so-general":"nestAttr2Val","intent$json$general":"import","name$json$general":"myImport","linkList":[{"field":{"name$json$general":"sst","standard_name$json$general":"sea_surface_temp","units$json$general":"C","connected$json$extended":"false","timestamp$json$extended":"20091201000000","transferOfferGeomObject$json$extended":"will provide"}},{"field":{"name$json$general":"ssaf","standard_name$json$general":"sea_ice_area_fraction","units$json$general":"C","connected$json$extended":"false","timestamp$json$extended":"20091201000000","transferOfferGeomObject$json$extended":"will provide"}}]}}'
 
     !-------------------------------------------------------------------------
     !EX_UTest
@@ -248,6 +263,44 @@ program ESMF_AttributeJSONUTest
     !-------------------------------------------------------------------------
 
 
+    !-------------------------------------------------------------------------
+    !EX_UTest
+    ! Write JSON stream for the State
+    call ESMF_AttPackStreamJSON(attpack, .false., .true., output, rc=rc)
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Write JSON stream for the State"
+    call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+    !-------------------------------------------------------------------------
+
+    !-------------------------------------------------------------------------
+    !EX_UTest
+    ! Write JSON stream to the default log
+    call ESMF_LogWrite(output, ESMF_LOGMSG_JSON, rc=rc)
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Write JSON stream to the default log"
+    call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+    !-------------------------------------------------------------------------
+
+    check = '{"state":{"packList":[{"attrList":{"nestAttr1$json$not-so-general":"nestAttr1Val","nestAttr2$json$not-so-general":"nestAttr2Val"},"packList":[{"attrList":{"intent$json$general":"import","name$json$general":"myImport"}}]}],"linkList":[{"field":{"packList":[{"attrList":{"name$json$general":"sst","standard_name$json$general":"sea_surface_temp","units$json$general":"C"},"packList":[{"attrList":{"connected$json$extended":"false","timestamp$json$extended":"20091201000000","transferOfferGeomObject$json$extended":"will provide"}}]}]}},{"field":{"packList":[{"attrList":{"name$json$general":"ssaf","standard_name$json$general":"sea_ice_area_fraction","units$json$general":"C"},"packList":[{"attrList":{"connected$json$extended":"false","timestamp$json$extended":"20091201000000","transferOfferGeomObject$json$extended":"will provide"}}]}]}}]}}'
+
+    !-------------------------------------------------------------------------
+    !EX_UTest
+    ! Validate JSON string
+    write(failMsg, *) "JSON string is no longer the same"
+    write(name, *) "Validate JSON string"
+    do, i=1, len (output)
+      if (output(i:i) /= check(i:i)) exit
+    end do
+    passed = i > len (output)
+    if (.not. passed) then
+      write(failMsg, *) "JSON string mismatch at character", i,  &
+        ' (', ichar (output(i:i)), ' vs', ichar (check(i:i)), ')'
+    endif
+    call ESMF_Test(passed, name, failMsg, result, ESMF_SRCLINE)
+    !-------------------------------------------------------------------------
+
+
+
     call ESMF_AttributeAdd(gridcomp, convention=conv, purpose=purp, &
                            attrList=(/"event     ", "phaseLabel", "phase     " /), &
                            attpack=attpack, rc=rc)
@@ -262,7 +315,7 @@ program ESMF_AttributeJSONUTest
     !-------------------------------------------------------------------------
     !EX_UTest
     ! Write JSON stream for the GridComp
-    call ESMF_AttPackStreamJSON(attpack, output, rc=rc)
+    call ESMF_AttPackStreamJSON(attpack, .true., .true., output, rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Write JSON stream for the GridComp"
     call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -277,13 +330,15 @@ program ESMF_AttributeJSONUTest
     call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
     !-------------------------------------------------------------------------
 
-    check = '{&
-            &  "comp" :{&
-            &    "event": "start_phase",&
-            &    "phaseLabel": "IPDv01p2",&
-            &    "phase": "0"&
-            &  }&
-            &}'
+!    check = '{&
+!            &  "comp" :{&
+!            &    "event": "start_phase",&
+!            &    "phaseLabel": "IPDv01p2",&
+!            &    "phase": "0"&
+!            &  }&
+!            &}'
+
+    check = '{"comp":{"event$json$general":"start_phase","phaseLabel$json$general":"IPDv01p2","phase$json$general":"0"}}'
 
     !-------------------------------------------------------------------------
     !EX_UTest

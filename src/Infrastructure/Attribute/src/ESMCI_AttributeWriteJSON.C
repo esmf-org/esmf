@@ -30,6 +30,7 @@
 #include "ESMCI_Macros.h"
 #include "ESMCI_IO_XML.h"
 #include "ESMCI_LogErr.h"
+#include "ESMCI_State.h"
 
 #include <cstdlib>
 #include <cstring>
@@ -61,7 +62,10 @@ namespace ESMCI {
 //    {\tt ESMF\_SUCCESS} or error code on failure.
 //
 // !ARGUMENTS:
-            string &output) const {
+    		ESMC_Logical flattenPackList,
+    		ESMC_Logical includeUnset,
+    		string &output
+			) const {
 //
 // !DESCRIPTION:
 //    stream an Attpack to JSON formatted output
@@ -69,208 +73,323 @@ namespace ESMCI {
 //EOPI
 
       // helper variables
-      ostringstream os;
       Attribute *attr;
-
-      // open the JSON
-      // TODO: add attrObject to root Attributes
-      os << "{  \"" << getObject() <<"\" :{";
+      int totalStreamed = 0;
+      int localrc = ESMF_SUCCESS;
 
       // stream the JSON, starting from root
-      if (attrRoot == ESMF_FALSE) attr = &(attrBase->root);
-      attr->streamJSONiter(os, 2);
-
-      // for flat lists, remove comma from last object
-      // - better yet would be to return a list of name/value pairs from an
-      //   iterator function and then assemble output in a flat function
-      // TODO: this is hacky
-      // - removed the seekp call in favor of this other sequence of calls
-      // to appease the older pgi compilers
-
-      if (attr->linkList.size() == 0) {
-        //os.seekp(-1,os.cur);
-        string temp = os.str();
-        temp.erase(temp.end()-1);
-        os.str("");
-        os.clear();
-        os << temp;
+      if (attrRoot == ESMF_FALSE) {
+    	  attr = &(attrBase->root);
+    	  localrc = attr->streamAttributeRootToJSON(flattenPackList, includeUnset, output, &totalStreamed);
+		  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+		           		&localrc)) return localrc;
       }
-
-      // close the JSON
-      os << "  }}";
-
-      // set the return value to the ostringstream
-      output = os.str();
+      else {
+    	  localrc = streamAttributeRootToJSON(flattenPackList, includeUnset, output, &totalStreamed);
+    	  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+    	           		&localrc)) return localrc;
+      }
 
       return ESMF_SUCCESS;
 
     } // end streamJSON
 
-//-----------------------------------------------------------------------------
-#undef  ESMC_METHOD
-#define ESMC_METHOD "streamJSONiter"
 
-    int Attribute::streamJSONiter(ostringstream &os, unsigned int level) const {
+    //-----------------------------------------------------------------------------
+    #undef  ESMC_METHOD
+	#define ESMC_METHOD "streamAttributeRootToJSON"
 
-      int localrc;
+    int Attribute::streamAttributeRootToJSON(ESMC_Logical flattenPackList,
+    		ESMC_Logical includeUnset, string &output, int *totalStreamed) const {
 
-      vector<string> 		vecs;		// vector of strings
-      vector<ESMC_I4>       veci;       // vector of integers
-      vector<ESMC_I8>       vecl;       // vector of longs
-      vector<ESMC_R4>       vecf;       // vector of floats (real*4)
-      vector<ESMC_R8>       vecd;       // vector of doubles (real*8)
-      vector<ESMC_Logical>  vecb;       // vector of booleans (logical)
+    	int localrc;
+   		ostringstream ostream;
+   		string stringJSON;
+   		string objName;
 
-      bool newlevel;
-      newlevel = false;
+   		//For some reason attrObject is not being set on root
+   		//attributes.  This should be fixed.  In the meantime,
+   		//we need to traverse a bit to get the object name.
+   		objName = getObject();
+   		if (objName.length() == 0) {
+   			if (attrList.size() > 0) {
+   			   	objName = attrList.at(0)->getObject();
+   			}
+   			if (objName.length() == 0) {
+   				if (packList.size() > 0) {
+   					objName = packList.at(0)->getObject();
+   				}
+   			}
+   			if (objName.length() == 0) {
+   				objName = "Unknown";
+   			}
+   		}
 
-      string newline = "\n";
-      string opencb = "{";
-      string closecb = "}";
-      string openb = "[";
-      string closeb = "]";
-      string indent = "";
-      string indent_inc = "  ";
-      string separator = ": ";
-      string comma = ",";
-      string quote = "\"";
-      string space = " ";
+   		//char warnMsg[ESMF_MAXSTR];
+		//sprintf(warnMsg, "Cannot determine object name for JSON output: %.25s", getName().c_str());
+		//ESMC_LogDefault.Write(warnMsg, ESMC_LOGMSG_WARN, ESMC_CONTEXT);
 
-      /*printf("debug:\n  level=%d\n  object=%s\n  name=%s\n",
-             level, getObject().c_str(), getName().c_str());*/
+   		ostream << "{\"" << objName << "\":";
+   		if (flattenPackList == ESMF_TRUE) {
+   			ostream << "{";
+   		}
+   		localrc = streamAttributeToJSON(flattenPackList, includeUnset, stringJSON, totalStreamed);
+   		if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+   										&localrc)) return localrc;
 
-      // set the indent
-      for (unsigned int l = 0; l < level; ++l) indent += indent_inc;
+   		ostream << stringJSON;
+   		if (flattenPackList == ESMF_TRUE) {
+   			ostream << "}";
+   		}
+   		ostream << "}";
 
-      // Stream all the Attributes
-      for (unsigned int i=0; i<attrList.size(); ++i) {
+   		output = ostream.str();
 
-        // write json to stream
-        if (attrList.at(i)->isSet()) {
+   		return ESMF_SUCCESS;
+    }
 
-        	string val;
-        	int attrCount = -1;
 
-        	localrc = attrList.at(i)->getCount(ESMC_ATTGETCOUNT_ATTRIBUTE, &attrCount);
-        	if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
-        	        				&localrc)) return localrc;
+    //-----------------------------------------------------------------------------
+    #undef  ESMC_METHOD
+    #define ESMC_METHOD "streamAttributeToJSON"
 
-        	if (attrList.at(i)->tk == ESMC_TYPEKIND_CHARACTER) {
-        		localrc = attrList.at(i)->get(&vecs);
-        		if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
-        				&localrc)) return localrc;
-        		val = attrValuesToString(&vecs);
-        	}
-        	else if (attrList.at(i)->tk == ESMC_TYPEKIND_I4) {
-        		localrc = attrList.at(i)->get(&attrCount, &veci);
-				if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
-						&localrc)) return localrc;
-				val = attrValuesToString(&veci);
-        	}
-        	else if (attrList.at(i)->tk == ESMC_TYPEKIND_I8) {
-				localrc = attrList.at(i)->get(&attrCount, &vecl);
-				if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
-						&localrc)) return localrc;
-				val = attrValuesToString(&vecl);
+   	int Attribute::streamAttributeToJSON(ESMC_Logical flattenPackList,
+   			ESMC_Logical includeUnset, string &output, int *totalStreamed) const {
+
+   		int localrc;
+		ostringstream ostream;
+		const char *separator = "";
+		*totalStreamed = 0;
+		int localStreamed = 0;
+
+		string stringJSON;
+		if (flattenPackList == ESMF_FALSE) {
+			ostream << "{";
+		}
+
+		localrc = streamAttributeListToJSON(attrList,
+				flattenPackList, includeUnset, stringJSON, &localStreamed);
+		if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+								&localrc)) return localrc;
+		if (localStreamed > 0) {
+			if (flattenPackList == ESMF_FALSE) {
+				ostream << "\"attrList\":";
 			}
-        	else if (attrList.at(i)->tk == ESMC_TYPEKIND_R4) {
-				localrc = attrList.at(i)->get(&attrCount, &vecf);
-				if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
-						&localrc)) return localrc;
-				val = attrValuesToString(&vecf);
+			ostream << stringJSON;
+			separator = ",";
+			*totalStreamed = *totalStreamed + localStreamed;
+		}
+
+		localrc = streamAttributePackToJSON(packList,
+				flattenPackList, includeUnset, stringJSON, &localStreamed);
+		if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+								&localrc)) return localrc;
+		if (localStreamed > 0) {
+			ostream << separator;
+			if (flattenPackList == ESMF_FALSE) {
+				ostream << "\"packList\":";
 			}
-        	else if (attrList.at(i)->tk == ESMC_TYPEKIND_R4) {
-				localrc = attrList.at(i)->get(&attrCount, &vecd);
+			ostream << stringJSON;
+			separator = ",";
+			*totalStreamed = *totalStreamed + localStreamed;
+		}
+
+		localrc = streamAttributeLinksToJSON(linkList,
+				flattenPackList, includeUnset, stringJSON, &localStreamed);
+		if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+									&localrc)) return localrc;
+		if (localStreamed > 0) {
+			ostream << separator << "\"linkList\":" << stringJSON;
+			*totalStreamed = *totalStreamed + localStreamed;
+		}
+
+		if (flattenPackList == ESMF_FALSE) {
+			ostream << "}";
+		}
+
+		output = ostream.str();
+
+		//printf("Exit streamComposite\n");
+
+		return ESMF_SUCCESS;
+   	}
+
+
+    //-----------------------------------------------------------------------------
+	#undef  ESMC_METHOD
+    #define ESMC_METHOD "streamAttributeListToJSON"
+
+   	int Attribute::streamAttributeListToJSON(vector<Attribute *> attrVector,
+   			ESMC_Logical flattenPackList, ESMC_Logical includeUnset,
+			string &output, int *totalStreamed) const {
+
+   		int localrc;
+   		ostringstream ostream;
+   		const char *separator = "";
+   		*totalStreamed = 0;
+
+   		vector<string> 		  vecs;		  // vector of strings
+   		vector<ESMC_I4>       veci;       // vector of integers
+   		vector<ESMC_I8>       vecl;       // vector of longs
+   		vector<ESMC_R4>       vecf;       // vector of floats (real*4)
+   		vector<ESMC_R8>       vecd;       // vector of doubles (real*8)
+   		vector<ESMC_Logical>  vecb;       // vector of booleans (logical)
+
+   		if (flattenPackList == ESMF_FALSE) {
+			ostream << "{";
+   		}
+
+		for (int i = 0; i < attrVector.size(); i++) {
+
+			Attribute *cur = attrVector.at(i);
+
+			if (cur->isSet()) {
+				string val;
+				int attrCount = -1;
+
+				localrc = cur->getCount(ESMC_ATTGETCOUNT_ATTRIBUTE, &attrCount);
 				if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
-						&localrc)) return localrc;
-				val = attrValuesToString(&vecd);
+										&localrc)) return localrc;
+
+				if (cur->tk == ESMC_TYPEKIND_CHARACTER) {
+					localrc = cur->get(&vecs);
+					if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+							&localrc)) return localrc;
+					val = attrValuesToString(&vecs);
+				}
+				else if (cur->tk == ESMC_TYPEKIND_I4) {
+					localrc = cur->get(&attrCount, &veci);
+					if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+							&localrc)) return localrc;
+					val = attrValuesToString(&veci);
+				}
+				else if (cur->tk == ESMC_TYPEKIND_I8) {
+					localrc = cur->get(&attrCount, &vecl);
+					if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+							&localrc)) return localrc;
+					val = attrValuesToString(&vecl);
+				}
+				else if (cur->tk == ESMC_TYPEKIND_R4) {
+					localrc = cur->get(&attrCount, &vecf);
+					if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+							&localrc)) return localrc;
+					val = attrValuesToString(&vecf);
+				}
+				else if (cur->tk == ESMC_TYPEKIND_R4) {
+					localrc = cur->get(&attrCount, &vecd);
+					if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+							&localrc)) return localrc;
+					val = attrValuesToString(&vecd);
+				}
+				else if (cur->tk == ESMC_TYPEKIND_LOGICAL) {
+					localrc = cur->get(&attrCount, &vecb);
+					if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+							&localrc)) return localrc;
+					val = attrValuesToString(&vecb);
+				}
+				else {
+					val = "\"UNSUPPORTED-TYPE\"";
+				}
+
+				ostream << separator << "\"" << cur->attrName << "$" << cur->attrConvention << "$" << cur->attrPurpose << "\":" << val;
+				separator = ",";
+				(*totalStreamed)++;
 			}
-        	else if (attrList.at(i)->tk == ESMC_TYPEKIND_LOGICAL) {
-				localrc = attrList.at(i)->get(&attrCount, &vecb);
-				if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
-						&localrc)) return localrc;
-				val = attrValuesToString(&vecb);
-        	}
-        	else {
-        		val = "\"UNSUPPORTED-TYPE\"";
-        	}
+			else if (includeUnset == ESMF_TRUE){
+				//leaf that is unset
+				ostream << separator << "\"" << cur->attrName << "$" << cur->attrConvention << "$" << cur->attrPurpose << "\":\"UNSET\"";
+				separator = ",";
+				(*totalStreamed)++;
+			}
+		}
 
-        	os << indent << quote << attrList.at(i)->attrName << quote
-        			<< separator << val;
+		if (flattenPackList == ESMF_FALSE) {
+			ostream << "}";
+		}
+   		output = ostream.str();
 
-        	//add comma if needed
-        	if (i < attrList.size()-1 || packList.size() > 0) {
-        		os << comma;
-        	}
+   		return ESMF_SUCCESS;
+   	}
 
-        }
-      }
+    //-----------------------------------------------------------------------------
+   	#undef  ESMC_METHOD
+    #define ESMC_METHOD "streamAttributePackToJSON"
 
-      // Recurse the Attpack tree, this version compacts all nested attpacks
-      // into the same json object block
-      for (unsigned int j=0; j<packList.size(); ++j) {
-        localrc = packList.at(j)->streamJSONiter(os, level);
-        if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
-                                          &localrc)) return localrc;
-      }
+	int Attribute::streamAttributePackToJSON(vector<Attribute *> attrVector,
+			ESMC_Logical flattenPackList, ESMC_Logical includeUnset,
+			string &output, int *totalStreamed) const {
+
+		int localrc;
+		ostringstream ostream;
+		const char *separator = "";
+		*totalStreamed = 0;
+		int localStreamed = 0;
+
+		//printf("Enter streamAttributePackToJSON\n");
+
+		if (flattenPackList == ESMF_FALSE) {
+			ostream << "[";
+		}
+
+		for (int i = 0; i < attrVector.size(); i++) {
+			string stringJSON;
+			localrc = attrVector.at(i)->streamAttributeToJSON(flattenPackList,
+					includeUnset, stringJSON, &localStreamed);
+			if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+					  &localrc)) return localrc;
+			if (localStreamed > 0) {
+				ostream << separator << stringJSON;
+				separator = ",";
+				*totalStreamed = *totalStreamed + localStreamed;
+			}
+		}
+
+		if (flattenPackList == ESMF_FALSE) {
+			ostream << "]";
+		}
+		output = ostream.str();
+
+		//printf("Exit streamAttributePackToJSON\n");
+
+		return ESMF_SUCCESS;
+	}
 
 
-      // Recurse the object hierarchy
-      // RSD - this is not working now, sometimes obj below is
-      //       an empty string, not sure why?
-      /*
-      for (unsigned int k=0; k<linkList.size(); ++k) {
-        // only open arrays once
-        if (k == 0) {
-          // TODO: add attrObject to root Attributes
-          string obj = "";
-          if (linkList.at(k)->attrList.size() > 0)
-            obj = linkList.at(k)->attrList.at(0)->getObject();
-          else if (linkList.at(k)->packList.size() > 0)
-            obj = linkList.at(k)->packList.at(0)->getObject();
+    //-----------------------------------------------------------------------------
+   	#undef  ESMC_METHOD
+    #define ESMC_METHOD "streamAttributeLinksToJSON"
 
-          // TODO: this is hacky
-          // pluralize the object.. nitty gritty here
-          obj += "s";
+	int Attribute::streamAttributeLinksToJSON(vector<Attribute *> attrVector,
+			ESMC_Logical flattenPackList, ESMC_Logical includeUnset,
+			string &output, int *totalStreamed) const {
 
-          os << indent << quote << obj
-             << quote << separator << openb;
-        }
+		int localrc;
+		ostringstream ostream;
+		const char *separator = "";
+		*totalStreamed = 0;
+		int localStreamed = 0;
 
-        // open new object
-        os << opencb;
+		ostream << "[";
 
-        // recurse
-        localrc = linkList.at(k)->streamJSONiter(os, level + 1);
-        if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
-                                          ESMC_CONTEXT,
-                                          &localrc))
-          return localrc;
+		for (int i = 0; i < attrVector.size(); i++) {
+			string stringJSON;
+			localrc = attrVector.at(i)->streamAttributeRootToJSON(flattenPackList,
+					includeUnset, stringJSON, &localStreamed);
+			if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+					  &localrc)) return localrc;
+			if (localStreamed > 0) {
+				ostream << separator << stringJSON;
+				separator = ",";
+				*totalStreamed = *totalStreamed + localStreamed;
+			}
+		}
 
-        // remove comma from last object
-        // - better yet would be to return a list of name/value pairs from an
-        //   iterator function and then assemble output in a flat function
-        // TODO: this is hacky
-        // - removed the seekp call in favor of this other sequence of calls
-        // to appease the older pgi compilers
-        //os.seekp(-1,os.cur);
-        string temp = os.str();
-        temp.erase(temp.end()-1);
-        os.str("");
-        os.clear();
-        os << temp;
+		ostream << "]";
 
-        // only close arrays once
-        if (k<linkList.size()-1)
-          os << indent << closecb << comma << space;
-        else
-          os << indent << closecb << closeb;
-      }
-	  */
+		output = ostream.str();
 
-      return ESMF_SUCCESS;
-
-    } // end streamJSONiter
+		return ESMF_SUCCESS;
+	}
 
 
     //-----------------------------------------------------------------------------
