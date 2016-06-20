@@ -35,6 +35,7 @@
 #endif
 
 // include ESMF headers
+#include "ESMCI_Base.h"
 #include "ESMCI_Comp.h"
 #include "ESMCI_CompTunnel.h"
 #include "ESMCI_LogErr.h"
@@ -1771,45 +1772,119 @@ int FTable::callVFuncPtr(
         if (complianceCheckFlag){
           int registerIcUserRc;
           
-//TODO: for now disable the DLFCN based lookup until we correctly build PIC
-//TODO: on all combos for which we have DLFCN enabled
+          // inspect the ESMF_RUNTIME_COMPLIANCEICOBJECT attribute on comp
+          ESMC_Base *base;
+          localrc = comp->getBase(&base);
+          if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+            ESMC_CONTEXT, &rc)) return rc; // bail out
+          ESMC_Logical presentFlag;
+          base->root.AttributeIsPresent("ESMF_RUNTIME_COMPLIANCEICREGISTER", 
+            &presentFlag);
+          
+          if (presentFlag==ESMF_TRUE){
+            
+printf("*** found ESMF_RUNTIME_COMPLIANCEICREGISTER attribute\n");
+
+            // access the attribute object in base
+            ESMCI::Attribute *attr=base->root.AttributeGet(
+              "ESMF_RUNTIME_COMPLIANCEICREGISTER");
+            
+            // retrieve the string value of the attribute
+            std::vector<string> value;
+            localrc = attr->get(&value);
+            if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+              ESMC_CONTEXT, &rc)) return rc; // bail out
+            
+            // check the number of strings associated with the attribute
+            if (value.size()!=1){
+              ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD, 
+                "Attribute must contain single string", ESMC_CONTEXT, &rc);
+              return rc;
+            }
+            
+            // convert routine name according to name mangeling mode
+            //TODO: this would be a good Util method to have
+#if defined(ESMF_LOWERCASE_SINGLEUNDERSCORE)
+            std::transform(value[0].begin(), value[0].end(), value[0].begin(), 
+              ::tolower);
+            value[0]+="_";
+#elif defined(ESMF_LOWERCASE_DOUBLEUNDERSCORE)
+            std::transform(value[0].begin(), value[0].end(), value[0].begin(), 
+              ::tolower);
+            value[0]+="__";
+#else
+            value[0]="Unknown_Name_Mageling_Mode"
+#endif
+            
+std::cout << "ESMF_RUNTIME_COMPLIANCEICREGISTER attribute:" << value[0] <<"\n";
+            
+            // check and see if an alternate compliance ic object was specified
+            envVar = VM::getenv("ESMF_RUNTIME_COMPLIANCEICOBJECT");
+            void *lib;
+            lib = dlopen(envVar, RTLD_LAZY);  // envVar==NULL -> look into exe
+            if (lib == NULL){
+              ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD, 
+                "- shared object not found", ESMC_CONTEXT, &rc);
+              return rc;
+            }
+            void *pointer = (void *)dlsym(lib, value[0].c_str());
+            if (pointer == NULL){
+              ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD, 
+                "- compliance IC register routine not found", ESMC_CONTEXT, &rc);
+              return rc;
+            }
+          
+            VoidP1IntPFunc vf = (VoidP1IntPFunc)pointer;
+            (*vf)((void *)comp, &registerIcUserRc);
+            // compliance IC for register is an internal routine -> look at rc
+            if (ESMC_LogDefault.MsgFoundError(registerIcUserRc,
+              ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc; // bail out
+            
+          }else{
+            //TODO: In the long run the else branch could be refactored with 
+            //TODO: the if branch. Both in principle should be using dlopen()
+            //TODO: for DLFCN based lookup. However, we do not currently build
+            //TODO: correct PIC on all combos for which we have DLFCN enabled,
+            //TODO: and so lookup inside the executable is not yet guaranteed.
+            //TODO: Until this is fixed, the else branch will use hardcoded
+            //TODO: Fortran function directly.
 #define ESMF_NO_DLFCNdummy
           
 #ifdef ESMF_NO_DLFCNdummy
-          FTN_X(esmf_complianceicregister)((void *)comp, &registerIcUserRc);
+            FTN_X(esmf_complianceicregister)((void *)comp, &registerIcUserRc);
 #else
-          
 #define QUOTEMACRO_(x) #x
 #define QUOTEMACRO(x) QUOTEMACRO_(x)
+
+            envVar = VM::getenv("ESMF_RUNTIME_COMPLIANCEICOBJECT");
+            void *lib;
+            lib = dlopen(envVar, RTLD_LAZY);  // envVar==NULL -> look into exe
+            if (lib == NULL){
+              ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD, 
+                "- shared object not found", ESMC_CONTEXT, &rc);
+              return rc;
+            }
+            envVar = VM::getenv("ESMF_RUNTIME_COMPLIANCEICREGISTER");
+            void *pointer;
+            if (envVar != NULL)
+              pointer = (void *)dlsym(lib, envVar);
+            else
+              pointer = (void *)dlsym(lib,
+                QUOTEMACRO(FTN(esmf_complianceicregister)) );
+            if (pointer == NULL){
+              ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD, 
+                "- compliance IC register routine not found", ESMC_CONTEXT, &rc);
+              return rc;
+            }
           
-          envVar = VM::getenv("ESMF_RUNTIME_COMPLIANCEICOBJECT");
-          void *lib;
-          lib = dlopen(envVar, RTLD_LAZY);  // envVar==NULL -> look into exe
-          if (lib == NULL){
-            ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD, 
-              "- shared object not found", ESMC_CONTEXT, &rc);
-            return rc;
-          }
-          envVar = VM::getenv("ESMF_RUNTIME_COMPLIANCEICREGISTER");
-          void *pointer;
-          if (envVar != NULL)
-            pointer = (void *)dlsym(lib, envVar);
-          else
-            pointer = (void *)dlsym(lib,
-              QUOTEMACRO(FTN(esmf_complianceicregister)) );
-          if (pointer == NULL){
-            ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD, 
-              "- compliance IC register routine not found", ESMC_CONTEXT, &rc);
-            return rc;
-          }
-          
-          VoidP1IntPFunc vf = (VoidP1IntPFunc)pointer;
-          (*vf)((void *)comp, &registerIcUserRc);
+            VoidP1IntPFunc vf = (VoidP1IntPFunc)pointer;
+            (*vf)((void *)comp, &registerIcUserRc);
 #endif
           
-          // compliance IC for register is an internal routine -> look at rc
-          if (ESMC_LogDefault.MsgFoundError(registerIcUserRc,
-            ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc; // bail out
+            // compliance IC for register is an internal routine -> look at rc
+            if (ESMC_LogDefault.MsgFoundError(registerIcUserRc,
+              ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc; // bail out
+          }
         }
       }
       

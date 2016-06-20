@@ -29,6 +29,7 @@
 //EOPI
 //-----------------------------------------------------------------------------
 
+#include "ESMCI_Base.h"
 #include "ESMCI_State.h"
 #include "ESMCI_Clock.h"
 #include "ESMCI_Grid.h"
@@ -73,6 +74,7 @@ class Comp{
     int getVmParent(VM **vmparent) const;
     int getVmPlan(VMPlan **vmplan) const;
     int getFTable(FTable **ftable) const;
+    int getBase(ESMC_Base **base) const;
     int getTunnel(CompTunnel **tunnel) const;
     static int getComplianceCheckerDepth(int *depth);
 };
