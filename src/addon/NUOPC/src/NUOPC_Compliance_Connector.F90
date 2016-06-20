@@ -321,7 +321,7 @@ contains
         ! Local variables
         integer                 :: userrc
         character(ESMF_MAXSTR)  :: prefix
-        character(ESMF_MAXSTR)  :: output
+        character(ESMF_MAXSTR)  :: output, pString
         type(ESMF_Clock)        :: clockCopy
         integer                 :: phase
         character(NUOPC_PhaseMapStringLength) :: phaseLabel
@@ -341,9 +341,10 @@ contains
             file=FILENAME)) &
             return  ! bail out
 
-        ! try to get phase label
+        ! format phase
+        write(pString,*) phase
         call NUOPC_CompSearchPhaseMapByIndex(comp, ESMF_METHOD_INITIALIZE, &
-           phaseIndex=phase, phaseLabel=phaseLabel, rc=rc)
+          phaseIndex=phase, phaseLabel=phaseLabel, rc=rc)
         if (ESMF_LogFoundError(rc, &
           line=__LINE__, &
           file=FILENAME)) &
@@ -352,8 +353,9 @@ contains
         !---------------------------------------------------------------------------
         ! Start Compliance Checking: InitializePrologue
         if (ccfDepth <= maxDepth .or. maxDepth < 0) then
-
-            write(output,*) ">START InitializePrologue for phase", phase, " (", trim(phaseLabel), ")"
+        
+            write(output,*) ">START InitializePrologue for phase:", &
+              trim(adjustl(pString)), ": ", trim(phaseLabel)
             call ESMF_LogWrite(trim(prefix)//trim(output), &
                 ESMF_LOGMSG_INFO, rc=rc)
             if (ESMF_LogFoundError(rc, &
@@ -406,7 +408,8 @@ contains
                 file=FILENAME)) &
                 return  ! bail out
 
-            write(output,*) ">STOP InitializePrologue for phase=", phase, " (", trim(phaseLabel), ")"
+            write(output,*) ">STOP InitializePrologue for phase:", &
+              trim(adjustl(pString)), ": ", trim(phaseLabel)
             call ESMF_LogWrite(trim(prefix)//trim(output), &
                 ESMF_LOGMSG_INFO, rc=rc)
             if (ESMF_LogFoundError(rc, &
@@ -439,7 +442,8 @@ contains
                 file=FILENAME)) &
                 return  ! bail out
 
-            write(output,*) ">START InitializeEpilogue for phase=", phase, " (", trim(phaseLabel), ")"
+            write(output,*) ">START InitializeEpilogue for phase:", &
+              trim(adjustl(pString)), ": ", trim(phaseLabel)
             call ESMF_LogWrite(trim(prefix)//trim(output), &
                 ESMF_LOGMSG_INFO, rc=rc)
             if (ESMF_LogFoundError(rc, &
@@ -491,8 +495,8 @@ contains
                 file=FILENAME)) &
                 return  ! bail out
 
-
-            write(output,*) ">STOP InitializeEpilogue for phase=", phase, " (", trim(phaseLabel), ")"
+            write(output,*) ">STOP InitializeEpilogue for phase:", &
+              trim(adjustl(pString)), ": ", trim(phaseLabel)
             call ESMF_LogWrite(trim(prefix)//trim(output), &
                 ESMF_LOGMSG_INFO, rc=rc)
             if (ESMF_LogFoundError(rc, &
@@ -524,10 +528,11 @@ contains
         ! Local variables
         integer                 :: userrc
         character(ESMF_MAXSTR)  :: prefix
-        character(ESMF_MAXSTR)  :: output
+        character(ESMF_MAXSTR)  :: output, pString
         type(ESMF_Clock)        :: clockCopy
         integer                 :: phase
-    
+        character(NUOPC_PhaseMapStringLength) :: phaseLabel
+
         ! Initialize user return code
         rc = ESMF_SUCCESS
 
@@ -543,11 +548,21 @@ contains
             file=FILENAME)) &
             return  ! bail out
 
+        ! format phase
+        write(pString,*) phase
+        call NUOPC_CompSearchPhaseMapByIndex(comp, ESMF_METHOD_RUN, &
+          phaseIndex=phase, phaseLabel=phaseLabel, rc=rc)
+        if (ESMF_LogFoundError(rc, &
+          line=__LINE__, &
+          file=FILENAME)) &
+          return  ! bail out
+
         !---------------------------------------------------------------------------
         ! Start Compliance Checking: RunPrologue
         if (ccfDepth <= maxDepth .or. maxDepth < 0) then
 
-            write(output,*) ">START RunPrologue for phase=", phase
+            write(output,*) ">START RunPrologue for phase:", &
+              trim(adjustl(pString)), ": ", trim(phaseLabel)
             call ESMF_LogWrite(trim(prefix)//trim(output), &
                 ESMF_LOGMSG_INFO, rc=rc)
             if (ESMF_LogFoundError(rc, &
@@ -593,7 +608,8 @@ contains
 !                file=FILENAME)) &
 !                return  ! bail out
 
-            write(output,*) ">STOP RunPrologue for phase=", phase
+            write(output,*) ">STOP RunPrologue for phase:", &
+              trim(adjustl(pString)), ": ", trim(phaseLabel)
             call ESMF_LogWrite(trim(prefix)//trim(output), &
                 ESMF_LOGMSG_INFO, rc=rc)
             if (ESMF_LogFoundError(rc, &
@@ -625,7 +641,8 @@ contains
                 file=FILENAME)) &
                 return  ! bail out
 
-            write(output,*) ">START RunEpilogue for phase=", phase
+            write(output,*) ">START RunEpilogue for phase:", &
+              trim(adjustl(pString)), ": ", trim(phaseLabel)
             call ESMF_LogWrite(trim(prefix)//trim(output), &
                 ESMF_LOGMSG_INFO, rc=rc)
             if (ESMF_LogFoundError(rc, &
@@ -671,7 +688,8 @@ contains
 !                file=FILENAME)) &
 !                return  ! bail out
 
-            write(output,*) ">STOP RunEpilogue for phase=", phase
+            write(output,*) ">STOP RunEpilogue for phase:", &
+              trim(adjustl(pString)), ": ", trim(phaseLabel)
             call ESMF_LogWrite(trim(prefix)//trim(output), &
                 ESMF_LOGMSG_INFO, rc=rc)
             if (ESMF_LogFoundError(rc, &
@@ -702,10 +720,11 @@ contains
         ! Local variables
         integer                 :: userrc
         character(ESMF_MAXSTR)  :: prefix
-        character(ESMF_MAXSTR)  :: output
+        character(ESMF_MAXSTR)  :: output, pString
         type(ESMF_Clock)        :: clockCopy
         integer                 :: phase
-    
+        character(NUOPC_PhaseMapStringLength) :: phaseLabel
+
         ! Initialize user return code
         rc = ESMF_SUCCESS
 
@@ -721,11 +740,21 @@ contains
             file=FILENAME)) &
             return  ! bail out
 
+        ! format phase
+        write(pString,*) phase
+        call NUOPC_CompSearchPhaseMapByIndex(comp, ESMF_METHOD_FINALIZE, &
+          phaseIndex=phase, phaseLabel=phaseLabel, rc=rc)
+        if (ESMF_LogFoundError(rc, &
+          line=__LINE__, &
+          file=FILENAME)) &
+          return  ! bail out
+
         !---------------------------------------------------------------------------
         ! Start Compliance Checking: FinalizePrologue
         if (ccfDepth <= maxDepth .or. maxDepth < 0) then
 
-            write(output,*) ">START FinalizePrologue for phase=", phase
+            write(output,*) ">START FinalizePrologue for phase:", &
+              trim(adjustl(pString)), ": ", trim(phaseLabel)
             call ESMF_LogWrite(trim(prefix)//trim(output), &
                 ESMF_LOGMSG_INFO, rc=rc)
             if (ESMF_LogFoundError(rc, &
@@ -763,7 +792,8 @@ contains
 !                file=FILENAME)) &
 !                return  ! bail out
 
-            write(output,*) ">STOP FinalizePrologue for phase=", phase
+            write(output,*) ">STOP FinalizePrologue for phase:", &
+              trim(adjustl(pString)), ": ", trim(phaseLabel)
             call ESMF_LogWrite(trim(prefix)//trim(output), &
                 ESMF_LOGMSG_INFO, rc=rc)
             if (ESMF_LogFoundError(rc, &
@@ -795,7 +825,8 @@ contains
                 file=FILENAME)) &
                 return  ! bail out
 
-            write(output,*) ">START FinalizeEpilogue for phase=", phase
+            write(output,*) ">START FinalizeEpilogue for phase:", &
+              trim(adjustl(pString)), ": ", trim(phaseLabel)
             call ESMF_LogWrite(trim(prefix)//trim(output), &
                 ESMF_LOGMSG_INFO, rc=rc)
             if (ESMF_LogFoundError(rc, &
@@ -833,7 +864,8 @@ contains
 !                file=FILENAME)) &
 !                return  ! bail out
 
-            write(output,*) ">STOP FinalizeEpilogue for phase=", phase
+            write(output,*) ">STOP FinalizeEpilogue for phase:", &
+              trim(adjustl(pString)), ": ", trim(phaseLabel)
             call ESMF_LogWrite(trim(prefix)//trim(output), &
                 ESMF_LOGMSG_INFO, rc=rc)
             if (ESMF_LogFoundError(rc, &
