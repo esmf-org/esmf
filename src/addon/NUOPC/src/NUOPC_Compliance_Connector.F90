@@ -950,3 +950,22 @@ contains
 
 
 end module NUOPC_Compliance_Connector
+
+
+!-------------------------------------------------------------------------
+! The register routine of internal ICs must be available as an external routine
+
+recursive subroutine NUOPC_Connector_ComplianceICR(comp, rc)
+  use ESMF
+  use NUOPC_Compliance_Connector
+  implicit none
+  type(ESMF_CplComp)    :: comp
+  integer               :: rc
+  
+  call registerIC(comp, rc)   ! simply call the internal IC module's register
+  if (ESMF_LogFoundError(rc, &
+    line=__LINE__, &
+    file=FILENAME)) &
+    return  ! bail out
+  
+end subroutine

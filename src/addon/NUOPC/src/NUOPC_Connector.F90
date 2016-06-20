@@ -74,6 +74,12 @@ module NUOPC_Connector
 
     rc = ESMF_SUCCESS
 
+    ! set the ESMF compliance checker register Attribute
+    call ESMF_AttributeSet(connector, name="ESMF_RUNTIME_COMPLIANCEICREGISTER", &
+      value="NUOPC_Connector_ComplianceICR", rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+
     ! query the Component for info
     call ESMF_CplCompGet(connector, name=name, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -2015,7 +2021,7 @@ call ESMF_VMLogMemInfo("aftP5 Reconcile")
     integer                   :: localrc
     logical                   :: existflag
     integer                   :: rootPet, rootVas, vas, petCount
-    character(ESMF_MAXSTR)    :: compName, msgString, valueString
+    character(ESMF_MAXSTR)    :: compName, msgString, valueString, pLabel
     integer                   :: phase
     integer                   :: verbosity
     integer                   :: profiling
@@ -2061,8 +2067,14 @@ call ESMF_VMLogMemInfo("aftP5 Reconcile")
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
+    ! conditionally output diagnostic to Log file
     if (btest(verbosity,0)) then
-      write (msgString,"(A)") ">>>"//trim(compName)//" entered Run"
+      call NUOPC_CompSearchRevPhaseMap(cplcomp, ESMF_METHOD_RUN, &
+        phaseIndex=phase, phaseLabel=pLabel, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+      write (msgString,"(A)") ">>>"//trim(compName)//&
+      " entered Run (phase="//trim(adjustl(pLabel))//")"
       call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
@@ -2233,7 +2245,8 @@ call ESMF_VMLogMemInfo("aftP5 Reconcile")
 
     ! conditionally output diagnostic to Log file
     if (btest(verbosity,0)) then
-      write (msgString,"(A)") "<<<"//trim(compName)//" leaving Run"
+      write (msgString,"(A)") "<<<"//trim(compName)//&
+      " leaving Run (phase="//trim(adjustl(pLabel))//")"
       call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &

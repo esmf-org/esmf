@@ -1243,8 +1243,23 @@ contains
 
     end subroutine
 
-
-
-
-
 end module NUOPC_Compliance_Driver
+
+
+!-------------------------------------------------------------------------
+! The register routine of internal ICs must be available as an external routine
+
+recursive subroutine NUOPC_Driver_ComplianceICR(comp, rc)
+  use ESMF
+  use NUOPC_Compliance_Driver
+  implicit none
+  type(ESMF_GridComp)   :: comp
+  integer               :: rc
+  
+  call registerIC(comp, rc)   ! simply call the internal IC module's register
+  if (ESMF_LogFoundError(rc, &
+    line=__LINE__, &
+    file=FILENAME)) &
+    return  ! bail out
+  
+end subroutine
