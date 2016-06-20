@@ -531,6 +531,33 @@ listed on the {\bf Test \& Validation} page of the ESMF website.  They
 are not distributed with the ESMF software; instead they are stored in
 a separate module in the main repository called {\tt use\_test\_cases}.
 
+\subsubsection{MAPL Testing}
+
+MAPL is a software layer that establishes usage standards and software
+tools for building ESMF compliant components. The MAPL User's Guide can be found
+ \htmladdnormallink{{\it here.}}{http://www.earthsystemmodeling.org/esmf\_releases/last\_built/MAPL\_UsersGuide.pdf}
+MAPL is included in the ESMF distribution, below are the installation and testing instructions.
+
+Before MAPL can be installed and tested, ESMF has to be built with NetCDF and installed.
+Refer to the ESMF User's Guide for information on building
+ESMF with NetCDF. After ESMF is installed successfully, do the following:
+\begin{verbatim}
+
+	Using "setenv" or "export" depending on the shell being used:
+	set ESMFMKFILE = $ESMF_DIR/lib/lib$ESMF_BOPT/$ESMF_OS.$ESMF_COMPILER.
+                        $ESMF_ABI.$ESMF_COMM.$ESMF_SITE/esmf.mk.
+
+	To install MAPL, enter "gmake install_mapl".
+
+	To build the MAPL tests, enter "gmake build_mapl_tests".
+
+	To run the tests, enter "gmake run_mapl_tests" or "run_mapl_test_uni".
+
+\end{verbatim}
+
+The MAPL tests follow the same structure and testing options as
+the ESMF unit tests, see section {\bf Unit Tests} of this document for details.
+
 \subsubsection{Beta Testing}
 
 ESMF software is released in a beta form, as an Internal Release,
@@ -544,27 +571,15 @@ The purpose of regression testing is to reveal faults caused by new
 or modified software (e.g. side effects, incompatibility between 
 releases, and bad bug fixes).  
 Regression tests regularly exercise all interfaces of the code on 
-all target platforms.  The Integrator runs 
-automated nightly builds on a wide variety of machines, listed on the
-{\bf Test and Validation} website. This site stores log files of the
-build results.
-The log files are kept on a monthly basis in 
-separate directories. For example, the December 2002 directory is named {\tt 0212\_test}. The 
-directory contains an {\tt ESMFdailyLog} file which has a one line entry for each platform on 
-which the build was attempted indicating whether the build was successful or not. 
+all target platforms.  
+The regression test results for the last two weeks can be found 
+\htmladdnormallink{{\it here.}}{http://www.earthsystemmodeling.org/developers/test/daily/2week_results/trunk_results_noheader/platform_sort.shtml}
+This web page provides a complete color-coded current view of the state of the trunk ESMF software, sorting options by platform or compiler are provided.
+A similiar test results web page for the branch is also available.
+Clicking on any of the cells will display the specific test report for that day.
+Hovering over the test name i.e., Blues gfortran, will reveal notes particular to that platform/compiler.
 
-The {\tt ESMFdailyLog} file for the current month is available on the {\bf Test and Validation} website.
-
-If the build is not successful, then a file containing the build output is stored in 
-the:\\
-{\tt /fs/projects/css/esmf/esmf\_test/daily\_builds}\\
-directory on the NCAR fileserver. The file naming convention for the build output file is:\\
-{\tt build\_BOPT\_(day)(platform)ESMF\_ARCH}.\\
-For example, if the build fails on longs on the 19th of the month with {\tt BOPT=g},
-the file would be called:\\
-{\tt build\_g\_19longslinux\_lf95}. 
-
-Email is sent daily to the ESMF core team listing all the platforms on which the build was attempted with a {\tt PASS/FAIL} indication. 
+The platforms that run the regression tests, email the test results to a server that updates the test results web page. A script checks for test reports every 15 minutes, and updates the web page. The time of the last update appears on the web page.
 
 \subsubsection{Testing for Releases}
 
