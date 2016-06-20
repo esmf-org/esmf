@@ -1783,8 +1783,6 @@ int FTable::callVFuncPtr(
           
           if (presentFlag==ESMF_TRUE){
             
-printf("*** found ESMF_RUNTIME_COMPLIANCEICREGISTER attribute\n");
-
             // access the attribute object in base
             ESMCI::Attribute *attr=base->root.AttributeGet(
               "ESMF_RUNTIME_COMPLIANCEICREGISTER");
@@ -1815,8 +1813,10 @@ printf("*** found ESMF_RUNTIME_COMPLIANCEICREGISTER attribute\n");
 #else
             value[0]="Unknown_Name_Mageling_Mode"
 #endif
-            
+
+#if 0            
 std::cout << "ESMF_RUNTIME_COMPLIANCEICREGISTER attribute:" << value[0] <<"\n";
+#endif
             
             // check and see if an alternate compliance ic object was specified
             envVar = VM::getenv("ESMF_RUNTIME_COMPLIANCEICOBJECT");
