@@ -291,12 +291,6 @@ module ESMF_ComplianceICMod
     character(ESMF_MAXSTR)  :: output
     type(ESMF_Clock)        :: clockCopy
     integer                 :: phase
-    character(ESMF_MAXSTR)  :: conv, purp
-    type(ESMF_AttPack)      :: attpack
-    character(1024)         :: jsonstring
-    type(ESMF_Field)        :: dummyField
-    character(2)            :: phaseString
-    character(ESMF_MAXSTR)  :: compName
     
     ! Initialize user return code
     rc = ESMF_SUCCESS
@@ -308,12 +302,6 @@ module ESMF_ComplianceICMod
       return  ! bail out
     
     call ESMF_GridCompGet(comp, currentPhase=phase, rc=rc)
-    if (ESMF_LogFoundError(rc, &
-      line=__LINE__, &
-      file=FILENAME)) &
-      return  ! bail out
-
-    call ESMF_GridCompGet(comp, name=compName, rc=rc)
     if (ESMF_LogFoundError(rc, &
       line=__LINE__, &
       file=FILENAME)) &
@@ -375,100 +363,6 @@ module ESMF_ComplianceICMod
       line=__LINE__, &
       file=FILENAME)) &
       return  ! bail out
-
-    ! JSON output to log
-    conv = "json"
-    purp = "general"
-
-    !call ESMF_AttributeAdd(comp, convention="json", purpose="firstLevel", &
-    !    attrList=(/"firstLevelAttr"/), attpack=attpack, &
-    !    rc=rc)
-    !if (ESMF_LogFoundError(rc, &
-    !  line=__LINE__, &
-    !  file=FILENAME)) &
-    !  return  ! bail out
-
-
-    !call ESMF_AttributeSet(comp, name="firstLevelAttr", value="silly", &
-    !                       attpack=attpack, rc=rc)
-    !if (ESMF_LogFoundError(rc, &
-    !  line=__LINE__, &
-    !  file=FILENAME)) &
-    !  return  ! bail out
-
-    !call ESMF_AttributeAdd(comp, convention="json", purpose="extended", &
-    !                       attpack=attpack, rc=rc)
-    !if (ESMF_LogFoundError(rc, &
-    !  line=__LINE__, &
-    !  file=FILENAME)) &
-    !  return  ! bail out
-
-    dummyField = ESMF_FieldEmptyCreate(name="dummyField", rc=rc)
-    if (ESMF_LogFoundError(rc, &
-      line=__LINE__, &
-      file=FILENAME)) &
-      return  ! bail out
-
-    call ESMF_AttributeAdd(dummyField, convention=conv, purpose=purp, &
-                           attrList=(/"event     ", &
-                                      "compName  ", &
-                                      "method    ", &
-                                      "phase     "/), &
-                           attpack=attpack, rc=rc)
-    if (ESMF_LogFoundError(rc, &
-      line=__LINE__, &
-      file=FILENAME)) &
-      return  ! bail out
-
-    call ESMF_AttributeSet(dummyField, name="event", value="start_phase", &
-                           attpack=attpack, rc=rc)
-    if (ESMF_LogFoundError(rc, &
-      line=__LINE__, &
-      file=FILENAME)) &
-      return  ! bail out
-
-    call ESMF_AttributeSet(dummyField, name="compName", value=compName, &
-                           attpack=attpack, rc=rc)
-    if (ESMF_LogFoundError(rc, &
-      line=__LINE__, &
-      file=FILENAME)) &
-      return  ! bail out
-
-    call ESMF_AttributeSet(dummyField, name="method", value="init", &
-                           attpack=attpack, rc=rc)
-    if (ESMF_LogFoundError(rc, &
-      line=__LINE__, &
-      file=FILENAME)) &
-      return  ! bail out
-
-    !call ESMF_AttributeSet(comp, name="phaseLabel", value="??", &
-    !                       attpack=attpack, rc=rc)
-    !if (ESMF_LogFoundError(rc, &
-    !  line=__LINE__, &
-    !  file=FILENAME)) &
-    !  return  ! bail out
-
-    write(phaseString, "(I0)") phase
-    call ESMF_AttributeSet(dummyField, name="phase", value=trim(phaseString), &
-                           attpack=attpack, rc=rc)
-    if (ESMF_LogFoundError(rc, &
-      line=__LINE__, &
-      file=FILENAME)) &
-      return  ! bail out
-
-    call ESMF_AttPackStreamJSON(attpack, jsonstring, rc=rc)
-    if (ESMF_LogFoundError(rc, &
-      line=__LINE__, &
-      file=FILENAME)) &
-      return  ! bail out
-
-    call ESMF_LogWrite(jsonstring, ESMF_LOGMSG_JSON, rc=rc)
-    if (ESMF_LogFoundError(rc, &
-      line=__LINE__, &
-      file=FILENAME)) &
-      return  ! bail out
-    ! end JSON write
-
     
     endif
     ! Stop Compliance Checking: InitializePrologue
@@ -487,30 +381,6 @@ module ESMF_ComplianceICMod
     !---------------------------------------------------------------------------
     ! Start Compliance Checking: InitializeEpilogue
     if (ccfDepth <= maxDepth .or. maxDepth < 0) then
-
-    ! output JSON
-
-    call ESMF_AttributeSet(dummyField, name="event", value="stop_phase", &
-                           attpack=attpack, rc=rc)
-    if (ESMF_LogFoundError(rc, &
-      line=__LINE__, &
-      file=FILENAME)) &
-      return  ! bail out
-
-    call ESMF_AttPackStreamJSON(attpack, jsonstring, rc=rc)
-    if (ESMF_LogFoundError(rc, &
-      line=__LINE__, &
-      file=FILENAME)) &
-      return  ! bail out
-
-    call ESMF_LogWrite(jsonstring, ESMF_LOGMSG_JSON, rc=rc)
-    if (ESMF_LogFoundError(rc, &
-      line=__LINE__, &
-      file=FILENAME)) &
-      return  ! bail out
-
-    ! end output JSON
-
 
     call prefixString(comp, prefix=prefix, forward=.false., rc=rc)
     if (ESMF_LogFoundError(rc, &
@@ -1345,9 +1215,6 @@ module ESMF_ComplianceICMod
     character(ESMF_MAXSTR)                :: attributeName
     character(ESMF_MAXSTR)                :: convention
     character(ESMF_MAXSTR)                :: purpose
-    type(ESMF_AttPack)                    :: attpack
-    character(1024)                       :: jsonstring
-    logical                               :: isPresent
       
     if (present(rc)) rc = ESMF_SUCCESS
     
@@ -1671,28 +1538,6 @@ module ESMF_ComplianceICMod
     else
       ! currently there is no other type by GridComp or CplComp
     endif
-
-    ! output JSON
-    call ESMF_AttributeGetAttPack(comp, attpack=attpack, &
-      convention=convention, purpose=purpose, isPresent=isPresent, rc=rc)
-    if (ESMF_LogFoundError(rc, &
-      line=__LINE__, &
-      file=FILENAME)) &
-      return  ! bail out
-
-    if (isPresent) then
-        call ESMF_AttPackStreamJSON(attpack, jsonstring, rc=rc)
-        if (ESMF_LogFoundError(rc, &
-          line=__LINE__, &
-          file=FILENAME)) &
-          return  ! bail out
-
-        call ESMF_LogWrite(jsonstring, ESMF_LOGMSG_JSON, rc=rc)
-        if (ESMF_LogFoundError(rc, &
-          line=__LINE__, &
-          file=FILENAME)) &
-          return  ! bail out
-    endif
       
   end subroutine
     
@@ -1843,9 +1688,6 @@ module ESMF_ComplianceICMod
     character(ESMF_MAXSTR)                :: attributeName
     character(ESMF_MAXSTR)                :: convention
     character(ESMF_MAXSTR)                :: purpose
-    type(ESMF_AttPack)                    :: attpack
-    character(1024)                       :: jsonstring
-    logical                               :: isPresent
       
     if (present(rc)) rc = ESMF_SUCCESS
     
@@ -1969,30 +1811,6 @@ module ESMF_ComplianceICMod
       file=FILENAME)) &
       return  ! bail out
       
-
-    ! write JSON
-
-    call ESMF_AttributeGetAttPack(field, attpack=attpack, &
-      convention=convention, purpose=purpose, isPresent=isPresent, rc=rc)
-    if (ESMF_LogFoundError(rc, &
-      line=__LINE__, &
-      file=FILENAME)) &
-      return  ! bail out
-
-    if (isPresent) then
-        call ESMF_AttPackStreamJSON(attpack, jsonstring, rc=rc)
-        if (ESMF_LogFoundError(rc, &
-          line=__LINE__, &
-          file=FILENAME)) &
-          return  ! bail out
-
-        call ESMF_LogWrite(jsonstring, ESMF_LOGMSG_JSON, rc=rc)
-        if (ESMF_LogFoundError(rc, &
-          line=__LINE__, &
-          file=FILENAME)) &
-          return  ! bail out
-    endif
-
   end subroutine
     
   recursive subroutine checkFieldAttribute(prefix, field, attributeName, &
