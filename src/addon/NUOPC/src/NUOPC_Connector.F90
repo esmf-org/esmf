@@ -503,6 +503,8 @@ print *, "bondLevelMax:", bondLevelMax, "bondLevel:", bondLevel
     character(ESMF_MAXSTR), pointer       :: importNamespaceList(:)
     character(ESMF_MAXSTR), pointer       :: exportNamespaceList(:)
     character(ESMF_MAXSTR), pointer       :: cplList(:)
+    character(ESMF_MAXSTR)                :: msgString, valueString
+    integer                               :: verbosity
 
     rc = ESMF_SUCCESS
 
@@ -524,6 +526,17 @@ call ESMF_VMLogMemInfo("befP1b Reconcile")
 #ifdef RECONCILE_MEMORY_DEBUG_on
 call ESMF_VMLogMemInfo("aftP1b Reconcile")
 #endif
+
+    ! determine verbosity
+    call NUOPC_CompAttributeGet(cplcomp, name="Verbosity", value=valueString, &
+      rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    verbosity = ESMF_UtilString2Int(valueString, &
+      specialStringList=(/"high", "max "/), specialValueList=(/255, 255/), &
+      rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
     ! set Attributes
     call NUOPC_CompAttributeSet(cplcomp, &
@@ -583,8 +596,37 @@ call printStringList("exportNamespaceList", exportNamespaceList)
 print *, "current bondLevel=", bondLevel
 #endif
 
-print *, j, i, exportStandardNameList(j), importStandardNameList(i), &
-exportNamespaceList(j), importNamespaceList(i)
+            if (btest(verbosity,4)) then
+              write (msgString,'(A, ": ", A30, I3, "): ", A30)') trim(name), &
+                "exportStandardNameList(j=", j, exportStandardNameList(j)
+              call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+                if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+                return  ! bail out
+              write (msgString,'(A, ": ", A30, I3, "): ", A30)') trim(name), &
+                "exportNamespaceList(j=", j, exportNamespaceList(j)
+              call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+                if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+                return  ! bail out
+              write (msgString,'(A, ": ", A30, I3, "): ", A30)') trim(name), &
+                "importStandardNameList(i=", i, importStandardNameList(i)
+              call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+                if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+                return  ! bail out
+              write (msgString,'(A, ": ", A30, I3, "): ", A30)') trim(name), &
+                "importNamespaceList(i=", i, importNamespaceList(i)
+              call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+                if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+                return  ! bail out
+              write (msgString,'(A, ": bondLevel=", I2)') trim(name), bondLevel
+              call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+                if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+                return  ! bail out
+            endif
 
             if (bondLevel == -1) cycle  ! break out and look for next match
                        
@@ -624,7 +666,15 @@ exportNamespaceList(j), importNamespaceList(i)
                   return  ! bail out
                 endif
                 cplList(count) = importStandardNameList(i)
-print *, "Just added cplList(", count, ")=", cplList(count)
+                if (btest(verbosity,4)) then
+                  write (msgString,'(A, ": added cplList(", I3, ")=", A30)') &
+                    trim(name), count, cplList(count)
+                  call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+                  if (ESMF_LogFoundError(rcToCheck=rc, &
+                    msg=ESMF_LOGERR_PASSTHRU, &
+                    line=__LINE__, file=trim(name)//":"//FILENAME, &
+                    rcToReturn=rc)) return  ! bail out
+                endif
                 ! make the targeted entry to the ConsumerConnection attribute
                 write (connectionString, "('targeted:', i10)") bondLevel
                 call NUOPC_SetAttribute(field, name="ConsumerConnection", &
