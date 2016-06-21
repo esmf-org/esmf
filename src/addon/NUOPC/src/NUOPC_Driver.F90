@@ -152,12 +152,6 @@ module NUOPC_Driver
 
     rc = ESMF_SUCCESS
 
-    ! set the ESMF compliance checker register Attribute
-    call ESMF_AttributeSet(gcomp, name="ESMF_RUNTIME_COMPLIANCEICREGISTER", &
-      value="NUOPC_Driver_ComplianceICR", rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-
     ! query the Component for info
     call ESMF_GridCompGet(gcomp, name=name, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -165,6 +159,12 @@ module NUOPC_Driver
     
     ! add standard NUOPC GridComp Attribute Package to the Model
     call NUOPC_CompAttributeInit(gcomp, kind="Driver", rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+
+    ! set the ESMF compliance checker register Attribute
+    call ESMF_AttributeSet(gcomp, name="ESMF_RUNTIME_COMPLIANCEICREGISTER", &
+      value="NUOPC_Driver_ComplianceICR", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 

@@ -1891,8 +1891,6 @@ module NUOPC_Comp
       attnestflag=ESMF_ATTNEST_ON, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-
-print *, name, trim(attributeName), itemCount
     
     ! search the phaseMap
     if (itemCount > 0) then

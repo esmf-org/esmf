@@ -84,7 +84,11 @@ module NUOPC_Connector
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
-#if 0
+#ifdef FIXED_ATTRIBUTE_ISSUE
+!TODO: there is currently an Attribute problem that if I turn on the 
+!TODO: AttributeSet below, then the standard NUOPC CplComp AttPack does not
+!TODO: get updated across all the PETs in the Driver. This leads to problems
+!TODO: when trying to look up RunMap or similar across all PETs.
     ! set the ESMF compliance checker register Attribute
     call ESMF_AttributeSet(connector, name="ESMF_RUNTIME_COMPLIANCEICREGISTER", &
       value="NUOPC_Connector_ComplianceICR", rc=rc)
