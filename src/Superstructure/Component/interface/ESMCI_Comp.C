@@ -122,6 +122,17 @@ extern "C" {
     // return successfully
     if (rc) *rc = ESMF_SUCCESS;
   }
+
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_getcompliancecheckjson"
+  void FTN_X(c_esmc_getcompliancecheckjson)(int *jsonIsOn, int *rc){
+    if (rc) *rc = ESMC_RC_NOT_IMPL;
+    int localrc = ESMCI::Comp::getComplianceCheckerJSON(jsonIsOn);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      rc)) return;
+    // return successfully
+    if (rc) *rc = ESMF_SUCCESS;
+  }
 } // extern "C"
 //==============================================================================
 
@@ -782,6 +793,53 @@ int Comp::getComplianceCheckerDepth(
     //printf("depth = %d\n", *depth);
   }
   
+  // return successfully
+  rc = ESMF_SUCCESS;
+  return rc;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::Comp:getComplianceCheckerJSON()"
+//BOPI
+// !IROUTINE:  ESMCI::Comp:getComplianceCheckerJSON
+//
+// !INTERFACE:
+int Comp::getComplianceCheckerJSON(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+//
+    int *jsonIsOn
+  ){
+//
+// !DESCRIPTION:
+//
+//EOPI
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
+
+  // check input
+  char const *envVar = VM::getenv("ESMF_RUNTIME_COMPLIANCECHECK");
+  if (envVar != NULL && jsonIsOn != NULL){
+    std::string value(envVar);
+    // see if JSON is specified in ESMF_RUNTIME_COMPLIANCECHECK
+    int index;
+    *jsonIsOn=0;
+    index = value.find("json=on");
+    if (index == std::string::npos)
+      index = value.find("JSON=ON");
+    if (index != std::string::npos){
+      *jsonIsOn=1;
+    }
+  }
+
   // return successfully
   rc = ESMF_SUCCESS;
   return rc;
