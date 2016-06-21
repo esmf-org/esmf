@@ -74,12 +74,6 @@ module NUOPC_Connector
 
     rc = ESMF_SUCCESS
 
-    ! set the ESMF compliance checker register Attribute
-    call ESMF_AttributeSet(connector, name="ESMF_RUNTIME_COMPLIANCEICREGISTER", &
-      value="NUOPC_Connector_ComplianceICR", rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-
     ! query the Component for info
     call ESMF_CplCompGet(connector, name=name, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -89,7 +83,15 @@ module NUOPC_Connector
     call NUOPC_CompAttributeInit(connector, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-        
+
+#if 0
+    ! set the ESMF compliance checker register Attribute
+    call ESMF_AttributeSet(connector, name="ESMF_RUNTIME_COMPLIANCEICREGISTER", &
+      value="NUOPC_Connector_ComplianceICR", rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+#endif
+    
     ! Initialize phases
     
     ! Phase 0 requires use of ESMF method.
@@ -577,6 +579,9 @@ call printStringList("exportNamespaceList", exportNamespaceList)
 print *, "current bondLevel=", bondLevel
 #endif
 
+print *, j, i, exportStandardNameList(j), importStandardNameList(i), &
+exportNamespaceList(j), importNamespaceList(i)
+
             if (bondLevel == -1) cycle  ! break out and look for next match
                        
             ! Getting to this place in the double loop means that the 
@@ -615,6 +620,7 @@ print *, "current bondLevel=", bondLevel
                   return  ! bail out
                 endif
                 cplList(count) = importStandardNameList(i)
+print *, "Just added cplList(", count, ")=", cplList(count)
                 ! make the targeted entry to the ConsumerConnection attribute
                 write (connectionString, "('targeted:', i10)") bondLevel
                 call NUOPC_SetAttribute(field, name="ConsumerConnection", &
@@ -1711,7 +1717,7 @@ call ESMF_VMLogMemInfo("aftP5 Reconcile")
     integer                         :: localrc
     logical                         :: existflag
     character(ESMF_MAXSTR)          :: connectionString
-    character(ESMF_MAXSTR)          :: name, valueString, msgString
+    character(ESMF_MAXSTR)          :: name, valueString, msgString, iString
     integer                         :: verbosity
 
     rc = ESMF_SUCCESS
@@ -1794,8 +1800,9 @@ call ESMF_VMLogMemInfo("aftP5 Reconcile")
       deallocate(chopStringList)
 
       if (btest(verbosity,3)) then
-        write (msgString,*) "loop over all entries in cplList: ", i, &
-          trim(cplName)
+        write (iString,'(I4)') i
+        write (msgString,*) "loop over all entries in cplList: "// &
+          trim(adjustl(iString))//": "//trim(cplName)
         call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &

@@ -1802,16 +1802,14 @@ int FTable::callVFuncPtr(
             
             // convert routine name according to name mangeling mode
             //TODO: this would be a good Util method to have
-#if defined(ESMF_LOWERCASE_SINGLEUNDERSCORE)
-            std::transform(value[0].begin(), value[0].end(), value[0].begin(), 
-              ::tolower);
-            value[0]+="_";
-#elif defined(ESMF_LOWERCASE_DOUBLEUNDERSCORE)
+#ifdef ESMF_LOWERCASE_DOUBLEUNDERSCORE
             std::transform(value[0].begin(), value[0].end(), value[0].begin(), 
               ::tolower);
             value[0]+="__";
 #else
-            value[0]="Unknown_Name_Mageling_Mode"
+            std::transform(value[0].begin(), value[0].end(), value[0].begin(),
+              ::tolower);
+            value[0]+="_";
 #endif
 
 #if 0            

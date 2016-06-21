@@ -2732,9 +2732,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         return  ! bail out
       else
         ! bail out with error
-        call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
-          msg="run phase: '"//trim(phaseLabel)//"' could not be identified.", &
-          line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)
+        if (present(phaseLabel)) then
+          call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
+            msg="run phase: '"//trim(phaseLabel)//"' could not be identified.", &
+            line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)
+        else
+          call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
+            msg="run phase without label could not be identified.", &
+            line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)
+        endif
         return  ! bail out
       endif
     endif
@@ -2879,9 +2885,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         return  ! bail out
       else
         ! bail out with error
-        call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
-          msg="run phase: '"//trim(phaseLabel)//"' could not be identified.", &
-          line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)
+        if (present(phaseLabel)) then
+          call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
+            msg="run phase: '"//trim(phaseLabel)//"' could not be identified.", &
+            line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)
+        else
+          call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
+            msg="run phase without label could not be identified.", &
+            line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)
+        endif
         return  ! bail out
       endif
     endif
