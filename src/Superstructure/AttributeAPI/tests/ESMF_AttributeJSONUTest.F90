@@ -222,29 +222,13 @@ program ESMF_AttributeJSONUTest
     call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
     !-------------------------------------------------------------------------
 
-!    check = '{&
-!            &  "state" :{&
-!            &    "intent": "import",&
-!            &    "name": "myImport",&
-!            &    "fields": [{&
-!            &      "name": "sst",&
-!            &      "standard_name": "sea_surface_temp",&
-!            &      "units": "C",&
-!            &      "connected": "false",&
-!            &      "timestamp": "20091201000000",&
-!            &      "transferOfferGeomObject": "will provide"' // &
-!            &'    }, {&
-!            &      "name": "ssaf",&
-!            &      "standard_name": "sea_ice_area_fraction",&
-!            &      "units": "C",&
-!            &      "connected": "false",&
-!            &      "timestamp": "20091201000000",&
-!            &      "transferOfferGeomObject": "will provide"' // &
-!            &'    }]&
-!            &  }&
-!            &}'
-
-    check = '{"state":{"nestAttr1$json$not-so-general":"nestAttr1Val","nestAttr2$json$not-so-general":"nestAttr2Val","intent$json$general":"import","name$json$general":"myImport","linkList":[{"field":{"name$json$general":"sst","standard_name$json$general":"sea_surface_temp","units$json$general":"C","connected$json$extended":"false","timestamp$json$extended":"20091201000000","transferOfferGeomObject$json$extended":"will provide"}},{"field":{"name$json$general":"ssaf","standard_name$json$general":"sea_ice_area_fraction","units$json$general":"C","connected$json$extended":"false","timestamp$json$extended":"20091201000000","transferOfferGeomObject$json$extended":"will provide"}}]}}'
+    check = '{"state":{"nestAttr1$json$not-so-general":"nestAttr1Val","nestAttr2$json$not-so-general":"nestAttr2Val"&
+    &,"intent$json$general":"import","name$json$general":"myImport","linkList":[{"field":{"name$json$general":"sst",&
+    &"standard_name$json$general":"sea_surface_temp","units$json$general":"C","connected$json$extended":"false",&
+    &"timestamp$json$extended":"20091201000000","transferOfferGeomObject$json$extended":"will provide"}},{"field":&
+    &{"name$json$general":"ssaf","standard_name$json$general":"sea_ice_area_fraction","units$json$general":"C",&
+    &"connected$json$extended":"false","timestamp$json$extended":"20091201000000",&
+    &"transferOfferGeomObject$json$extended":"will provide"}}]}}'
 
     !-------------------------------------------------------------------------
     !EX_UTest
@@ -281,7 +265,15 @@ program ESMF_AttributeJSONUTest
     call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
     !-------------------------------------------------------------------------
 
-    check = '{"state":{"packList":[{"attrList":{"nestAttr1$json$not-so-general":"nestAttr1Val","nestAttr2$json$not-so-general":"nestAttr2Val"},"packList":[{"attrList":{"intent$json$general":"import","name$json$general":"myImport"}}]}],"linkList":[{"field":{"packList":[{"attrList":{"name$json$general":"sst","standard_name$json$general":"sea_surface_temp","units$json$general":"C"},"packList":[{"attrList":{"connected$json$extended":"false","timestamp$json$extended":"20091201000000","transferOfferGeomObject$json$extended":"will provide"}}]}]}},{"field":{"packList":[{"attrList":{"name$json$general":"ssaf","standard_name$json$general":"sea_ice_area_fraction","units$json$general":"C"},"packList":[{"attrList":{"connected$json$extended":"false","timestamp$json$extended":"20091201000000","transferOfferGeomObject$json$extended":"will provide"}}]}]}}]}}'
+    check = '{"state":{"packList":[{"attrList":{"nestAttr1$json$not-so-general":"nestAttr1Val",&
+    &"nestAttr2$json$not-so-general":"nestAttr2Val"},"packList":[{"attrList":{"intent$json$general":"import",&
+    &"name$json$general":"myImport"}}]}],"linkList":[{"field":{"packList":[{"attrList":{"name$json$general":&
+    &"sst","standard_name$json$general":"sea_surface_temp","units$json$general":"C"},"packList":[{"attrList":&
+    &{"connected$json$extended":"false","timestamp$json$extended":"20091201000000",&
+    &"transferOfferGeomObject$json$extended":"will provide"}}]}]}},{"field":{"packList":[{"attrList":&
+    &{"name$json$general":"ssaf","standard_name$json$general":"sea_ice_area_fraction",&
+    &"units$json$general":"C"},"packList":[{"attrList":{"connected$json$extended":"false",&
+    &"timestamp$json$extended":"20091201000000","transferOfferGeomObject$json$extended":"will provide"}}]}]}}]}}'
 
     !-------------------------------------------------------------------------
     !EX_UTest
@@ -298,8 +290,6 @@ program ESMF_AttributeJSONUTest
     endif
     call ESMF_Test(passed, name, failMsg, result, ESMF_SRCLINE)
     !-------------------------------------------------------------------------
-
-
 
     call ESMF_AttributeAdd(gridcomp, convention=conv, purpose=purp, &
                            attrList=(/"event     ", "phaseLabel", "phase     " /), &
@@ -329,14 +319,6 @@ program ESMF_AttributeJSONUTest
     write(name, *) "Write JSON stream to the default log"
     call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
     !-------------------------------------------------------------------------
-
-!    check = '{&
-!            &  "comp" :{&
-!            &    "event": "start_phase",&
-!            &    "phaseLabel": "IPDv01p2",&
-!            &    "phase": "0"&
-!            &  }&
-!            &}'
 
     check = '{"comp":{"event$json$general":"start_phase","phaseLabel$json$general":"IPDv01p2","phase$json$general":"0"}}'
 
