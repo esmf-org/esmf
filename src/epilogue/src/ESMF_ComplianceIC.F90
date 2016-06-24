@@ -910,7 +910,7 @@ module ESMF_ComplianceICMod
         write(jsonString,*) '{"event":{' // &
             '"name":"end_phase",' // &
             '"compName":"' // trim(compName) //'",'// &
-            '"method":"run",'// &
+            '"method":"final",'// &
             '"phase":"'//trim(phaseString)//'"'// &
             '}}'
 
