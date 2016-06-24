@@ -26,6 +26,7 @@ module ESMF_ComplianceICMod
   
   integer, save :: ccfDepth = 1   ! component control flow depth
   integer, save :: maxDepth = -2  ! maximum depth of compliance checker
+  logical, save :: doJSON = .false. ! whether to output JSON
   
   public setvmIC, registerIC
         
@@ -67,6 +68,7 @@ module ESMF_ComplianceICMod
     character(ESMF_MAXSTR)  :: output
     integer                 :: phaseCount, phase
     logical                 :: phaseZeroFlag
+    integer                 :: jsonIsOn
     
     ! Initialize user return code
     rc = ESMF_SUCCESS
@@ -91,6 +93,18 @@ module ESMF_ComplianceICMod
         file=FILENAME)) &
         return  ! bail out
     endif
+
+    call c_esmc_getComplianceCheckJSON(jsonIsOn, rc)
+    if (ESMF_LogFoundError(rc, &
+        line=__LINE__, &
+        file=FILENAME)) &
+        return  ! bail out
+    if (jsonIsOn == 1) then
+      doJSON = .true.
+    else
+      doJSON = .false.
+    endif
+
 
     !---------------------------------------------------------------------------
     ! Start Compliance Checking and IC method Registration
@@ -291,6 +305,9 @@ module ESMF_ComplianceICMod
     character(ESMF_MAXSTR)  :: output
     type(ESMF_Clock)        :: clockCopy
     integer                 :: phase
+    character(1024)         :: jsonString
+    character(2)            :: phaseString
+    character(ESMF_MAXSTR)  :: compName
     
     ! Initialize user return code
     rc = ESMF_SUCCESS
@@ -301,7 +318,7 @@ module ESMF_ComplianceICMod
       file=FILENAME)) &
       return  ! bail out
     
-    call ESMF_GridCompGet(comp, currentPhase=phase, rc=rc)
+    call ESMF_GridCompGet(comp, currentPhase=phase, name=compName, rc=rc)
     if (ESMF_LogFoundError(rc, &
       line=__LINE__, &
       file=FILENAME)) &
@@ -311,6 +328,23 @@ module ESMF_ComplianceICMod
     ! Start Compliance Checking: InitializePrologue
     if (ccfDepth <= maxDepth .or. maxDepth < 0) then
     
+    if (doJSON) then
+        ! write JSON
+        write(phaseString, "(I0)") phase
+        write(jsonString,*) '{"event":{' // &
+            '"name":"start_phase",' // &
+            '"compName":"' // trim(compName) //'",'// &
+            '"method":"init",'// &
+            '"phase":"'//trim(phaseString)//'"'// &
+            '}}'
+
+        call ESMF_LogWrite(jsonString, ESMF_LOGMSG_JSON, rc=rc)
+        if (ESMF_LogFoundError(rc, &
+          line=__LINE__, &
+          file=FILENAME)) &
+          return  ! bail out
+    endif
+
     write(output,*) ">START InitializePrologue for phase=", phase
     call ESMF_LogWrite(trim(prefix)//trim(output), &
       ESMF_LOGMSG_INFO, rc=rc)
@@ -363,7 +397,7 @@ module ESMF_ComplianceICMod
       line=__LINE__, &
       file=FILENAME)) &
       return  ! bail out
-    
+
     endif
     ! Stop Compliance Checking: InitializePrologue
     !---------------------------------------------------------------------------
@@ -458,6 +492,22 @@ module ESMF_ComplianceICMod
       line=__LINE__, &
       file=FILENAME)) &
       return  ! bail out
+
+    if (doJSON) then
+        ! write JSON
+        write(jsonString,*) '{"event":{' // &
+            '"name":"end_phase",' // &
+            '"compName":"' // trim(compName) //'",'// &
+            '"method":"init",'// &
+            '"phase":"'//trim(phaseString)//'"'// &
+            '}}'
+
+        call ESMF_LogWrite(jsonString, ESMF_LOGMSG_JSON, rc=rc)
+        if (ESMF_LogFoundError(rc, &
+          line=__LINE__, &
+          file=FILENAME)) &
+          return  ! bail out
+    endif
     
     endif  
     ! Stop Compliance Checking: InitializeEpilogue
@@ -485,6 +535,9 @@ module ESMF_ComplianceICMod
     character(ESMF_MAXSTR)  :: output
     type(ESMF_Clock)        :: clockCopy
     integer                 :: phase
+    character(1024)         :: jsonString
+    character(2)            :: phaseString
+    character(ESMF_MAXSTR)  :: compName
     
     ! Initialize user return code
     rc = ESMF_SUCCESS
@@ -495,7 +548,7 @@ module ESMF_ComplianceICMod
       file=FILENAME)) &
       return  ! bail out
     
-    call ESMF_GridCompGet(comp, currentPhase=phase, rc=rc)
+    call ESMF_GridCompGet(comp, currentPhase=phase, name=compName, rc=rc)
     if (ESMF_LogFoundError(rc, &
       line=__LINE__, &
       file=FILENAME)) &
@@ -505,6 +558,23 @@ module ESMF_ComplianceICMod
     ! Start Compliance Checking: RunPrologue
     if (ccfDepth <= maxDepth .or. maxDepth < 0) then
     
+    if (doJSON) then
+        ! write JSON
+        write(phaseString, "(I0)") phase
+        write(jsonString,*) '{"event":{' // &
+            '"name":"start_phase",' // &
+            '"compName":"' // trim(compName) //'",'// &
+            '"method":"run",'// &
+            '"phase":"'//trim(phaseString)//'"'// &
+            '}}'
+
+        call ESMF_LogWrite(jsonString, ESMF_LOGMSG_JSON, rc=rc)
+        if (ESMF_LogFoundError(rc, &
+          line=__LINE__, &
+          file=FILENAME)) &
+          return  ! bail out
+    endif
+
     write(output,*) ">START RunPrologue for phase=", phase
     call ESMF_LogWrite(trim(prefix)//trim(output), &
       ESMF_LOGMSG_INFO, rc=rc)
@@ -636,7 +706,23 @@ module ESMF_ComplianceICMod
       line=__LINE__, &
       file=FILENAME)) &
       return  ! bail out
-    
+
+    if (doJSON) then
+        ! write JSON
+        write(jsonString,*) '{"event":{' // &
+            '"name":"end_phase",' // &
+            '"compName":"' // trim(compName) //'",'// &
+            '"method":"run",'// &
+            '"phase":"'//trim(phaseString)//'"'// &
+            '}}'
+
+        call ESMF_LogWrite(jsonString, ESMF_LOGMSG_JSON, rc=rc)
+        if (ESMF_LogFoundError(rc, &
+          line=__LINE__, &
+          file=FILENAME)) &
+          return  ! bail out
+    endif
+
     endif
     ! Stop Compliance Checking: RunEpilogue
     !---------------------------------------------------------------------------
@@ -663,6 +749,9 @@ module ESMF_ComplianceICMod
     character(ESMF_MAXSTR)  :: output
     type(ESMF_Clock)        :: clockCopy
     integer                 :: phase
+    character(1024)         :: jsonString
+    character(2)            :: phaseString
+    character(ESMF_MAXSTR)  :: compName
     
     ! Initialize user return code
     rc = ESMF_SUCCESS
@@ -673,7 +762,7 @@ module ESMF_ComplianceICMod
       file=FILENAME)) &
       return  ! bail out
     
-    call ESMF_GridCompGet(comp, currentPhase=phase, rc=rc)
+    call ESMF_GridCompGet(comp, currentPhase=phase, name=compName, rc=rc)
     if (ESMF_LogFoundError(rc, &
       line=__LINE__, &
       file=FILENAME)) &
@@ -683,6 +772,23 @@ module ESMF_ComplianceICMod
     ! Start Compliance Checking: FinalizePrologue
     if (ccfDepth <= maxDepth .or. maxDepth < 0) then
     
+    if (doJSON) then
+        ! write JSON
+        write(phaseString, "(I0)") phase
+        write(jsonString,*) '{"event":{' // &
+            '"name":"start_phase",' // &
+            '"compName":"' // trim(compName) //'",'// &
+            '"method":"final",'// &
+            '"phase":"'//trim(phaseString)//'"'// &
+            '}}'
+
+        call ESMF_LogWrite(jsonString, ESMF_LOGMSG_JSON, rc=rc)
+        if (ESMF_LogFoundError(rc, &
+          line=__LINE__, &
+          file=FILENAME)) &
+          return  ! bail out
+    endif
+
     write(output,*) ">START FinalizePrologue for phase=", phase
     call ESMF_LogWrite(trim(prefix)//trim(output), &
       ESMF_LOGMSG_INFO, rc=rc)
@@ -798,6 +904,22 @@ module ESMF_ComplianceICMod
       line=__LINE__, &
       file=FILENAME)) &
       return  ! bail out
+
+    if (doJSON) then
+        ! write JSON
+        write(jsonString,*) '{"event":{' // &
+            '"name":"end_phase",' // &
+            '"compName":"' // trim(compName) //'",'// &
+            '"method":"run",'// &
+            '"phase":"'//trim(phaseString)//'"'// &
+            '}}'
+
+        call ESMF_LogWrite(jsonString, ESMF_LOGMSG_JSON, rc=rc)
+        if (ESMF_LogFoundError(rc, &
+          line=__LINE__, &
+          file=FILENAME)) &
+          return  ! bail out
+    endif
     
     endif
     ! Stop Compliance Checking: FinalizeEpilogue
@@ -867,6 +989,9 @@ module ESMF_ComplianceICMod
     character(ESMF_MAXSTR)                :: attributeName
     character(ESMF_MAXSTR)                :: convention
     character(ESMF_MAXSTR)                :: purpose
+    type(ESMF_AttPack)                    :: attpack
+    character(1024*20)                    :: jsonstring
+    logical                               :: isPresent
 
     if (present(rc)) rc = ESMF_SUCCESS
 
@@ -884,6 +1009,7 @@ module ESMF_ComplianceICMod
     endif
 
     if (stateValid) then
+
       ! Provide name and type of State
       call ESMF_StateGet(state, name=name, stateintent=stateintent, &
         itemCount=itemCount, rc=rc)
@@ -916,6 +1042,55 @@ module ESMF_ComplianceICMod
       ! set NUOPC convention and purpose specifiers
       convention = "NUOPC"
       purpose = "Instance"
+
+      if (doJSON) then
+          ! add a few attributes so they appear in the JSON
+          ! TODO: this should really only be done once
+          call ESMF_AttributeAdd(state, convention=convention, purpose=purpose, &
+                               attrList=(/"name  ", &
+                                          "intent"/), &
+                               attpack=attpack, rc=rc)
+          if (ESMF_LogFoundError(rc, &
+            line=__LINE__, &
+            file=FILENAME)) &
+            return  ! bail out
+
+          call ESMF_AttributeSet(state, name="name", value=name, &
+                               attpack=attpack, rc=rc)
+          if (ESMF_LogFoundError(rc, &
+            line=__LINE__, &
+            file=FILENAME)) &
+            return  ! bail out
+
+          call ESMF_AttributeSet(state, name="intent", value=tempString, &
+                               attpack=attpack, rc=rc)
+          if (ESMF_LogFoundError(rc, &
+            line=__LINE__, &
+            file=FILENAME)) &
+            return  ! bail out
+
+          call ESMF_AttributeGetAttPack(state, attpack=attpack, &
+              convention=convention, purpose=purpose, isPresent=isPresent, rc=rc)
+          if (ESMF_LogFoundError(rc, &
+              line=__LINE__, &
+              file=FILENAME)) &
+              return  ! bail out
+
+          if (isPresent) then
+              call ESMF_AttPackStreamJSON(attpack, .true., .false., jsonstring, rc=rc)
+              if (ESMF_LogFoundError(rc, &
+                  line=__LINE__, &
+                  file=FILENAME)) &
+                  return  ! bail out
+
+              call ESMF_LogWrite(jsonstring, ESMF_LOGMSG_JSON, rc=rc)
+              if (ESMF_LogFoundError(rc, &
+                 line=__LINE__, &
+                 file=FILENAME)) &
+                 return  ! bail out
+          endif
+      endif ! doJSON
+
       
       call ESMF_LogWrite(trim(prefix)//" State level attribute check: "// &
         "convention: '"//trim(convention)//"', purpose: '"//trim(purpose)//"'.", &
@@ -1215,11 +1390,15 @@ module ESMF_ComplianceICMod
     character(ESMF_MAXSTR)                :: attributeName
     character(ESMF_MAXSTR)                :: convention
     character(ESMF_MAXSTR)                :: purpose
+    character(ESMF_MAXSTR)                :: compName
+    type(ESMF_AttPack)                    :: attpack
+    character(16384)                      :: jsonstring
+    logical                               :: isPresent
       
     if (present(rc)) rc = ESMF_SUCCESS
     
     ! get Component type and branch on it
-    call ESMF_GridCompGet(comp, comptype=comptype, rc=rc)
+    call ESMF_GridCompGet(comp, comptype=comptype, name=compName, rc=rc)
     if (ESMF_LogFoundError(rc, &
       line=__LINE__, &
       file=FILENAME)) &
@@ -1537,6 +1716,46 @@ module ESMF_ComplianceICMod
         
     else
       ! currently there is no other type by GridComp or CplComp
+    endif
+
+    if (doJSON) then
+
+        call ESMF_AttributeAdd(comp, convention="NUOPC", purpose="Instance", &
+                               attrList=(/"CompName"/), &
+                               attpack=attpack, rc=rc)
+        if (ESMF_LogFoundError(rc, &
+          line=__LINE__, &
+          file=FILENAME)) &
+          return  ! bail out
+
+        call ESMF_AttributeSet(comp, name="CompName", value=compName, &
+                               attpack=attpack, rc=rc)
+        if (ESMF_LogFoundError(rc, &
+          line=__LINE__, &
+          file=FILENAME)) &
+          return  ! bail out
+
+        ! output JSON
+        call ESMF_AttributeGetAttPack(comp, attpack=attpack, &
+          convention=convention, purpose=purpose, isPresent=isPresent, rc=rc)
+        if (ESMF_LogFoundError(rc, &
+          line=__LINE__, &
+          file=FILENAME)) &
+          return  ! bail out
+
+        if (isPresent) then
+            call ESMF_AttPackStreamJSON(attpack, .true., .false., jsonstring, rc=rc)
+            if (ESMF_LogFoundError(rc, &
+              line=__LINE__, &
+              file=FILENAME)) &
+              return  ! bail out
+
+            call ESMF_LogWrite(jsonstring, ESMF_LOGMSG_JSON, rc=rc)
+            if (ESMF_LogFoundError(rc, &
+              line=__LINE__, &
+              file=FILENAME)) &
+              return  ! bail out
+        endif
     endif
       
   end subroutine
