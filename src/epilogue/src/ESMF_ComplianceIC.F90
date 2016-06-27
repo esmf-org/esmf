@@ -308,6 +308,9 @@ module ESMF_ComplianceICMod
     character(1024)         :: jsonString
     character(2)            :: phaseString
     character(ESMF_MAXSTR)  :: compName
+    type(ESMF_Clock)        :: clockInternal
+    character(64)           :: currTimeJSON
+    logical                 :: clockIsPresent
     
     ! Initialize user return code
     rc = ESMF_SUCCESS
@@ -318,7 +321,8 @@ module ESMF_ComplianceICMod
       file=FILENAME)) &
       return  ! bail out
     
-    call ESMF_GridCompGet(comp, currentPhase=phase, name=compName, rc=rc)
+    call ESMF_GridCompGet(comp, currentPhase=phase, name=compName, &
+        clockIsPresent=clockIsPresent, rc=rc)
     if (ESMF_LogFoundError(rc, &
       line=__LINE__, &
       file=FILENAME)) &
@@ -329,20 +333,15 @@ module ESMF_ComplianceICMod
     if (ccfDepth <= maxDepth .or. maxDepth < 0) then
     
     if (doJSON) then
-        ! write JSON
-        write(phaseString, "(I0)") phase
-        write(jsonString,*) '{"event":{' // &
-            '"name":"start_phase",' // &
-            '"compName":"' // trim(compName) //'",'// &
-            '"method":"init",'// &
-            '"phase":"'//trim(phaseString)//'"'// &
-            '}}'
-
-        call ESMF_LogWrite(jsonString, ESMF_LOGMSG_JSON, rc=rc)
-        if (ESMF_LogFoundError(rc, &
-          line=__LINE__, &
-          file=FILENAME)) &
-          return  ! bail out
+        if (clockIsPresent) then
+            call ESMF_GridCompGet(comp, clock=clockInternal, rc=rc)
+            if (ESMF_LogFoundError(rc, &
+              line=__LINE__, &
+              file=FILENAME)) &
+              return  ! bail out
+        endif
+        call logPhaseEvent("start_phase", compName, "init", phase, &
+            clockInternal, rc)
     endif
 
     write(output,*) ">START InitializePrologue for phase=", phase
@@ -494,19 +493,8 @@ module ESMF_ComplianceICMod
       return  ! bail out
 
     if (doJSON) then
-        ! write JSON
-        write(jsonString,*) '{"event":{' // &
-            '"name":"end_phase",' // &
-            '"compName":"' // trim(compName) //'",'// &
-            '"method":"init",'// &
-            '"phase":"'//trim(phaseString)//'"'// &
-            '}}'
-
-        call ESMF_LogWrite(jsonString, ESMF_LOGMSG_JSON, rc=rc)
-        if (ESMF_LogFoundError(rc, &
-          line=__LINE__, &
-          file=FILENAME)) &
-          return  ! bail out
+        call logPhaseEvent("end_phase", compName, "init", phase, &
+            clockInternal, rc)
     endif
     
     endif  
@@ -538,6 +526,8 @@ module ESMF_ComplianceICMod
     character(1024)         :: jsonString
     character(2)            :: phaseString
     character(ESMF_MAXSTR)  :: compName
+    type(ESMF_Clock)        :: clockInternal
+    logical                 :: clockIsPresent
     
     ! Initialize user return code
     rc = ESMF_SUCCESS
@@ -548,7 +538,8 @@ module ESMF_ComplianceICMod
       file=FILENAME)) &
       return  ! bail out
     
-    call ESMF_GridCompGet(comp, currentPhase=phase, name=compName, rc=rc)
+    call ESMF_GridCompGet(comp, currentPhase=phase, &
+        clockIsPresent=clockIsPresent, name=compName, rc=rc)
     if (ESMF_LogFoundError(rc, &
       line=__LINE__, &
       file=FILENAME)) &
@@ -559,20 +550,15 @@ module ESMF_ComplianceICMod
     if (ccfDepth <= maxDepth .or. maxDepth < 0) then
     
     if (doJSON) then
-        ! write JSON
-        write(phaseString, "(I0)") phase
-        write(jsonString,*) '{"event":{' // &
-            '"name":"start_phase",' // &
-            '"compName":"' // trim(compName) //'",'// &
-            '"method":"run",'// &
-            '"phase":"'//trim(phaseString)//'"'// &
-            '}}'
-
-        call ESMF_LogWrite(jsonString, ESMF_LOGMSG_JSON, rc=rc)
-        if (ESMF_LogFoundError(rc, &
-          line=__LINE__, &
-          file=FILENAME)) &
-          return  ! bail out
+        if (clockIsPresent) then
+            call ESMF_GridCompGet(comp, clock=clockInternal, rc=rc)
+            if (ESMF_LogFoundError(rc, &
+              line=__LINE__, &
+              file=FILENAME)) &
+              return  ! bail out
+        endif
+        call logPhaseEvent("start_phase", compName, "run", phase, &
+            clockInternal, rc)
     endif
 
     write(output,*) ">START RunPrologue for phase=", phase
@@ -708,19 +694,8 @@ module ESMF_ComplianceICMod
       return  ! bail out
 
     if (doJSON) then
-        ! write JSON
-        write(jsonString,*) '{"event":{' // &
-            '"name":"end_phase",' // &
-            '"compName":"' // trim(compName) //'",'// &
-            '"method":"run",'// &
-            '"phase":"'//trim(phaseString)//'"'// &
-            '}}'
-
-        call ESMF_LogWrite(jsonString, ESMF_LOGMSG_JSON, rc=rc)
-        if (ESMF_LogFoundError(rc, &
-          line=__LINE__, &
-          file=FILENAME)) &
-          return  ! bail out
+        call logPhaseEvent("end_phase", compName, "run", phase, &
+            clockInternal, rc)
     endif
 
     endif
@@ -752,6 +727,8 @@ module ESMF_ComplianceICMod
     character(1024)         :: jsonString
     character(2)            :: phaseString
     character(ESMF_MAXSTR)  :: compName
+    type(ESMF_Clock)        :: clockInternal
+    logical                 :: clockIsPresent
     
     ! Initialize user return code
     rc = ESMF_SUCCESS
@@ -762,7 +739,8 @@ module ESMF_ComplianceICMod
       file=FILENAME)) &
       return  ! bail out
     
-    call ESMF_GridCompGet(comp, currentPhase=phase, name=compName, rc=rc)
+    call ESMF_GridCompGet(comp, currentPhase=phase, &
+        clockIsPresent=clockIsPresent, name=compName, rc=rc)
     if (ESMF_LogFoundError(rc, &
       line=__LINE__, &
       file=FILENAME)) &
@@ -773,20 +751,15 @@ module ESMF_ComplianceICMod
     if (ccfDepth <= maxDepth .or. maxDepth < 0) then
     
     if (doJSON) then
-        ! write JSON
-        write(phaseString, "(I0)") phase
-        write(jsonString,*) '{"event":{' // &
-            '"name":"start_phase",' // &
-            '"compName":"' // trim(compName) //'",'// &
-            '"method":"final",'// &
-            '"phase":"'//trim(phaseString)//'"'// &
-            '}}'
-
-        call ESMF_LogWrite(jsonString, ESMF_LOGMSG_JSON, rc=rc)
-        if (ESMF_LogFoundError(rc, &
-          line=__LINE__, &
-          file=FILENAME)) &
-          return  ! bail out
+        if (clockIsPresent) then
+            call ESMF_GridCompGet(comp, clock=clockInternal, rc=rc)
+            if (ESMF_LogFoundError(rc, &
+              line=__LINE__, &
+              file=FILENAME)) &
+              return  ! bail out
+        endif
+        call logPhaseEvent("start_phase", compName, "final", phase, &
+            clockInternal, rc)
     endif
 
     write(output,*) ">START FinalizePrologue for phase=", phase
@@ -906,19 +879,8 @@ module ESMF_ComplianceICMod
       return  ! bail out
 
     if (doJSON) then
-        ! write JSON
-        write(jsonString,*) '{"event":{' // &
-            '"name":"end_phase",' // &
-            '"compName":"' // trim(compName) //'",'// &
-            '"method":"final",'// &
-            '"phase":"'//trim(phaseString)//'"'// &
-            '}}'
-
-        call ESMF_LogWrite(jsonString, ESMF_LOGMSG_JSON, rc=rc)
-        if (ESMF_LogFoundError(rc, &
-          line=__LINE__, &
-          file=FILENAME)) &
-          return  ! bail out
+       call logPhaseEvent("end_phase", compName, "final", phase, &
+            clockInternal, rc)
     endif
     
     endif
@@ -2556,7 +2518,102 @@ module ESMF_ComplianceICMod
     
   end function
  
+
 !-------------------------------------------------------------------------
+! Convert time to JSON to string
+
+    recursive subroutine toJSON(clock, options, stringJSON, rc)
+        type(ESMF_Clock), intent(in) :: clock
+        character(len=*), intent(in) :: options
+        character(len=*), intent(out) :: stringJSON
+        integer, intent(out) :: rc
+
+        ! locals
+        type(ESMF_Time) :: time
+        integer(ESMF_KIND_I4) :: yy, mm, dd, h, m, s
+
+        rc = ESMF_SUCCESS
+
+  !      if (trim(options) == "currTime") then
+
+   !         call ESMF_ClockGet(clock, currTime=time, rc=rc)
+   !         if (ESMF_LogFoundError(rc, &
+   !             line=__LINE__, &
+   !             file=FILENAME)) &
+   !             return  ! bail out
+
+            call ESMF_ClockPrint(clock, options=options, &
+                unit=stringJSON, rc=rc)
+            if (ESMF_LogFoundError(rc, &
+                line=__LINE__, &
+                file=FILENAME)) &
+                return  ! bail out
+
+  !          call ESMF_TimePrint(time, options="string", &
+  !              unit=stringJSON, rc=rc)
+  !          if (ESMF_LogFoundError(rc, &
+  !              line=__LINE__, &
+  !              file=FILENAME)) &
+  !              return  ! bail out
+
+            stringJSON = '"'//trim(stringJSON)//'"'
+
+ !           call ESMF_TimeGet(time, yy=yy, mm=mm, dd=dd, h=h, &
+ !               m=m, s=s, rc=rc)
+ !           if (ESMF_LogFoundError(rc, &
+ !               line=__LINE__, &
+ !               file=FILENAME)) &
+ !               return  ! bail out
+ !            write (stringJSON, '("[",(I4),"]")'), yy
+
+ !       endif
+
+    end subroutine
+
+    recursive subroutine logPhaseEvent(event, compName, method, phase, clock, rc)
+
+        character(len=*), intent(in) :: event, compName, method
+        integer, intent(in) :: phase
+        type(ESMF_Clock), intent(in), optional :: clock
+        integer, intent(out), optional :: rc
+
+        ! locals
+        character(len=16) :: phaseString
+        character(len=64) :: timeStamp
+        character(len=512) :: jsonString
+
+        rc = ESMF_SUCCESS
+
+        write(phaseString, "(I0)") phase
+
+        timeStamp = '""'
+        if (present(clock)) then
+            if (ESMF_ClockIsCreated(clock)) then
+                call ESMF_ClockPrint(clock, options="currTime", &
+                    unit=timeStamp, rc=rc)
+                if (ESMF_LogFoundError(rc, &
+                    line=__LINE__, &
+                    file=FILENAME)) &
+                    return  ! bail out
+                timeStamp = '"'//trim(timeStamp)//'"'
+            endif
+        endif
+
+        write(jsonString,*) '{"event":{&
+            &"name":"'//trim(event)//'",&
+            &"compName":"'// trim(compName) //'",&
+            &"method":"'//trim(method)//'",&
+            &"phase":"'//trim(phaseString)//'",&
+            &"currTime":'//trim(timeStamp)//'}}'
+
+        call ESMF_LogWrite(jsonString, ESMF_LOGMSG_JSON, rc=rc)
+        if (ESMF_LogFoundError(rc, &
+          line=__LINE__, &
+          file=FILENAME)) &
+          return  ! bail out
+
+    end subroutine
+
 
 
 end module ESMF_ComplianceICMod
@@ -2579,3 +2636,4 @@ recursive subroutine ESMF_ComplianceICRegister(comp, rc)
     return  ! bail out
   
 end subroutine
+
