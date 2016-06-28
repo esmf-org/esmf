@@ -915,6 +915,24 @@
         ESMF_MESHOP_DIFFERENCE    = ESMF_MeshOp_Flag(0)
 
 !------------------------------------------------------------------------------
+!     ! ESMF_RWGCheckMethod_Flag
+!
+!     ! Flag for selecting the method to compute route handles in
+!     ! ESMF_RegridWeightGenCheck.
+
+      type ESMF_RWGCheckMethod_Flag
+#ifndef ESMF_NO_SEQUENCE
+      sequence
+#endif
+      private
+        integer :: flag
+      end type
+
+      type(ESMF_RWGCheckMethod_Flag), parameter ::  &
+        ESMF_RWGCHECKMETHOD_ARRAY = ESMF_RWGCheckMethod_Flag(0), &
+        ESMF_RWGCHECKMETHOD_FIELD = ESMF_RWGCheckMethod_Flag(1)
+
+!------------------------------------------------------------------------------
 !BOPI
 !
 ! !PUBLIC TYPES:
@@ -1095,6 +1113,8 @@
 
       public ESMF_MESH_POLYBREAK
 
+      public ESMF_RWGCheckMethod_Flag
+      public ESMF_RWGCHECKMETHOD_ARRAY, ESMF_RWGCHECKMETHOD_FIELD
       
 !  Overloaded = operator functions
       public operator(==), operator(/=), assignment(=)
@@ -1128,6 +1148,7 @@ interface operator (==)
   module procedure ESMF_CoordSysEqual
   module procedure ESMF_LineTypeEqual
   module procedure ESMF_NormTypeEqual
+  module procedure ESMF_RWGCheckMethodEqual
 end interface
 
 interface operator (/=)
@@ -1147,6 +1168,7 @@ interface operator (/=)
   module procedure ESMF_CoordSysNotEqual
   module procedure ESMF_LineTypeNotEqual
   module procedure ESMF_NormTypeNotEqual
+  module procedure ESMF_RWGCheckMethodNotEqual
 end interface
 
 interface assignment (=)
@@ -1919,6 +1941,76 @@ end function
 
       end function ESMF_LineTypeNotEqual
 
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_RWGCheckMethodEqual"
+!BOPI
+! !IROUTINE: ESMF_RWGCheckMethodEqual - Check equality of RWGCheckMethod flags.
+!
+! !INTERFACE:
+      function ESMF_RWGCheckMethodEqual(CheckMethod1, CheckMethod2)
+
+! !RETURN VALUE:
+      logical :: ESMF_RWGCheckMethodEqual
+
+! !ARGUMENTS:
+
+      type (ESMF_RWGCheckMethod_Flag), intent(in) :: &
+         CheckMethod1,      & ! Two statuses to compare
+         CheckMethod2
+
+! !DESCRIPTION:
+!     This routine compares two ESMF RWGCheckMethod statuses to see
+!     if they are equivalent.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[CheckMethod1, CheckMethod2]
+!          Two statuses to compare for equality.
+!     \end{description}
+!
+!EOPI
+
+      ESMF_RWGCheckMethodEqual = (CheckMethod1%flag == &
+                                  CheckMethod2%flag)
+
+      end function ESMF_RWGCheckMethodEqual
+!-------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_RWGCheckMethodNotEqual"
+!BOPI
+! !IROUTINE: ESMF_RWGCheckMethodNotEqual - Check equality of RWGCheckMethod flags.
+!
+! !INTERFACE:
+      function ESMF_RWGCheckMethodNotEqual(CheckMethod1, CheckMethod2)
+
+! !RETURN VALUE:
+      logical :: ESMF_RWGCheckMethodNotEqual
+
+! !ARGUMENTS:
+
+      type (ESMF_RWGCheckMethod_Flag), intent(in) :: &
+         CheckMethod1,      & ! Two statuses to compare
+         CheckMethod2
+
+! !DESCRIPTION:
+!     This routine compares two ESMF RWGCheckMethod statuses to see
+!     if they are equivalent.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[CheckMethod1, CheckMethod2]
+!          Two statuses to compare for equality.
+!     \end{description}
+!
+!EOPI
+
+      ESMF_RWGCheckMethodNotEqual = (CheckMethod1%flag /= &
+                                     CheckMethod2%flag)
+
+      end function ESMF_RWGCheckMethodNotEqual
+!-------------------------------------------------------------------------------
 
 !------------------------------------------------------------------------- 
 #undef  ESMF_METHOD

@@ -34,7 +34,8 @@ TESTS_BUILD   = \
 		$(ESMF_TESTDIR)/ESMF_FieldSMMUTest   \
 		$(ESMF_TESTDIR)/ESMF_FieldRedistArbUTest \
 		$(ESMF_TESTDIR)/ESMF_FieldMeshSMMUTest \
-		$(ESMF_TESTDIR)/ESMF_FieldHaloUTest
+		$(ESMF_TESTDIR)/ESMF_FieldHaloUTest \
+		$(ESMF_TESTDIR)/ESMF_FieldSMMFromFileUTest
                
 TESTS_RUN     = \
 		RUN_ESMC_FieldUTest \
@@ -62,7 +63,8 @@ TESTS_RUN     = \
 		RUN_ESMF_FieldSMMUTest   \
 		RUN_ESMF_FieldRedistArbUTest \
 		RUN_ESMF_FieldMeshSMMUTest \
-		RUN_ESMF_FieldHaloUTest
+		RUN_ESMF_FieldHaloUTest \
+		RUN_ESMF_FieldSMMFromFileUTest
 
 #		RUN_ESMC_FieldGridRegridParUTest \
 
@@ -81,7 +83,8 @@ TESTS_RUN_UNI = \
 		RUN_ESMF_FieldRegridXGUTestUNI \
 		RUN_ESMF_FieldArbGridUTestUNI \
 		RUN_ESMF_FieldRedistArbUTestUNI \
-		RUN_ESMF_FieldRegridCsrvUTestUNI
+		RUN_ESMF_FieldRegridCsrvUTestUNI \
+		RUN_ESMF_FieldSMMFromFileUTestUNI
 
 
 #
@@ -261,4 +264,18 @@ RUN_ESMF_TestHarnessFieldUNI_default:
 RUN_ESMF_TestHarnessFieldUNI_1:
 	$(MAKE) TESTHARNESSCASE=field_1 NP=1 run_test_harness
 
-##
+# ---
+
+RUN_ESMF_FieldSMMFromFileUTest:
+	mkdir -p $(ESMF_TESTDIR)/data
+	cp -f ../../IO/tests/T42_grid.nc $(ESMF_TESTDIR)/data
+	chmod u+rw $(ESMF_TESTDIR)/data/*
+	$(MAKE) TNAME=FieldSMMFromFile NP=4 ftest
+
+RUN_ESMF_FieldSMMFromFileUTestUNI:
+	mkdir -p $(ESMF_TESTDIR)/data
+	cp -f ../../IO/tests/T42_grid.nc $(ESMF_TESTDIR)/data
+	chmod u+rw $(ESMF_TESTDIR)/data/*
+	$(MAKE) TNAME=FieldSMMFromFile NP=1 ftest
+
+# ---

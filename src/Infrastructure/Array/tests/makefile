@@ -13,6 +13,7 @@ TESTS_BUILD   = $(ESMF_TESTDIR)/ESMF_ArrayCreateGetUTest \
                 $(ESMF_TESTDIR)/ESMF_ArrayGatherUTest \
                 $(ESMF_TESTDIR)/ESMF_ArrayIOUTest \
                 $(ESMF_TESTDIR)/ESMF_ArraySMMUTest \
+                $(ESMF_TESTDIR)/ESMF_ArraySMMFromFileUTest \
                 $(ESMF_TESTDIR)/ESMF_ArrayArbIdxSMMUTest \
                 $(ESMF_TESTDIR)/ESMF_ArrayRedistUTest \
                 $(ESMF_TESTDIR)/ESMF_ArrayHaloUTest \
@@ -24,6 +25,7 @@ TESTS_RUN     = RUN_ESMF_ArrayCreateGetUTest \
                 RUN_ESMF_ArrayGatherUTest \
                 RUN_ESMF_ArrayIOUTest \
                 RUN_ESMF_ArraySMMUTest \
+                RUN_ESMF_ArraySMMFromFileUTest \
                 RUN_ESMF_ArrayArbIdxSMMUTest \
                 RUN_ESMF_ArrayRedistUTest \
                 RUN_ESMF_ArrayHaloUTest \
@@ -31,6 +33,7 @@ TESTS_RUN     = RUN_ESMF_ArrayCreateGetUTest \
 
 TESTS_RUN_UNI = RUN_ESMF_ArrayDataUTestUNI \
                 RUN_ESMF_ArraySMMUTestUNI \
+                RUN_ESMF_ArraySMMFromFileUTestUNI \
                 RUN_ESMC_ArrayUTestUNI
 
 #
@@ -90,6 +93,20 @@ RUN_ESMF_ArraySMMUTest:
 
 RUN_ESMF_ArraySMMUTestUNI:
 	$(MAKE) TNAME=ArraySMM NP=1 ftest
+
+# ---
+
+RUN_ESMF_ArraySMMFromFileUTest:
+	mkdir -p $(ESMF_TESTDIR)/data
+	cp -f ../../IO/tests/T42_grid.nc $(ESMF_TESTDIR)/data
+	chmod u+rw $(ESMF_TESTDIR)/data/*
+	$(MAKE) TNAME=ArraySMMFromFile NP=4 ftest
+
+RUN_ESMF_ArraySMMFromFileUTestUNI:
+	mkdir -p $(ESMF_TESTDIR)/data
+	cp -f ../../IO/tests/T42_grid.nc $(ESMF_TESTDIR)/data
+	chmod u+rw $(ESMF_TESTDIR)/data/*
+	$(MAKE) TNAME=ArraySMMFromFile NP=1 ftest
 
 # ---
 

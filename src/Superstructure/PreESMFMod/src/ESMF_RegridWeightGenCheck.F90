@@ -41,6 +41,7 @@ module ESMF_RegridWeightGenCheckMod
   use ESMF_FieldSMMMod
   use ESMF_FieldRegridMod
   use ESMF_RHandleMod
+  use ESMF_FactorReadMod
 
   ! unused imports
   !use ESMF_LogPublicMod
@@ -77,13 +78,15 @@ contains
 !BOPI
 ! !IROUTINE: ESMF_RegridWeightGenCheck - Check regridding weights
 ! !INTERFACE:
-  subroutine ESMF_RegridWeightGenCheck(weightFile, keywordEnforcer, rc)
+  subroutine ESMF_RegridWeightGenCheck(weightFile, keywordEnforcer, &
+                                       checkMethod, rc)
 
 ! !ARGUMENTS:
 
-  character(len=*),             intent(in)            :: weightFile
+  character(len=*),             intent(in)                           :: weightFile
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-  integer,                      intent(out), optional :: rc
+  type(ESMF_RWGCheckMethod_Flag), intent(in),  optional  :: checkMethod
+  integer,                                    intent(out), optional  :: rc
 
 ! !DESCRIPTION:
 ! 
@@ -91,6 +94,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   \begin{description}
 !   \item [weightFile]
 !     The interpolation weight file name.
+!   \item [{[checkMethod]}]
+!     Method to use when checking sparse matrix multiplication. There are two
+!     options. {\tt ESMF\_CHECKMETHOD\_FIELD} (the default) uses field sparse
+!     matrix multiplication. {\tt ESMF\_CHECKMETHOD\_ARRAY} uses array sparse
+!     matrix multiplication. The underlying sparse matrix multiplication code
+!     does not change between field and array. The difference is in how the
+!     higher level objects call into the sparse matrix multiplication.
 !   \item [{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -105,8 +115,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     character(ESMF_MAXPATHLEN) :: title
 
-    real(ESMF_KIND_R8), pointer :: factorList(:)
-    integer, pointer            :: factorIndexList(:,:)
+    real(ESMF_KIND_R8), allocatable :: factorList(:)
+    integer, allocatable            :: factorIndexList(:,:)
 
     real(ESMF_KIND_R8), pointer :: src_lat(:), src_lon(:), &
                                    dst_lat(:), dst_lon(:), &
@@ -141,9 +151,17 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     real(ESMF_KIND_R8), pointer :: grid1areaXX(:), grid2areaXX(:)
     type(ESMF_NormType_Flag) :: normType
     type(ESMF_RegridMethod_Flag) :: regridmethod
+    type(ESMF_RWGCheckMethod_Flag) :: checkMethodLocal
     !--------------------------------------------------------------------------
     ! EXECUTION
     !--------------------------------------------------------------------------
+
+    ! Set the default for the SMM check method.
+    if (.not. present(checkMethod)) then
+      checkMethodLocal = ESMF_RWGCHECKMETHOD_FIELD
+    else
+      checkMethodLocal = ESMF_RWGCHECKMETHOD_ARRAY
+    endif
 
 #ifdef ESMF_NETCDF
     ! set log to flush after every message
@@ -290,15 +308,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ESMF_CONTEXT, &
       rcToReturn=rc)) return
 
-    if (localPet == 0) then
-      ! read in the regriding weights from specified file -> factorList and factorIndex list
-      call ESMF_FieldRegridReadSCRIPFileP(weightFile, factorList, factorIndexList, rc=status)
-      if (ESMF_LogFoundError(status, &
-        ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, &
-        rcToReturn=rc)) return
-    endif
-
 #if 0
     !-------------------- diagnostics -----------------------------------------
     print *, "size of factorList = (", size(factorList,1),")"
@@ -313,64 +322,53 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     enddo
 #endif
 
-#if 1
-    ! Field and Grid way of doing things
-    ! store the factorList and factorIndex list into a routehandle for SMM
-    if (localPet == 0) then
-      call ESMF_FieldSMMStore(srcField=srcField, dstField=dstField, routehandle=routehandle, &
-        factorList=factorList, factorIndexList=factorIndexList, rc=status)
-    else
-      call ESMF_FieldSMMStore(srcField=srcField, dstField=dstField, routehandle=routehandle, &
-        rc=status)
-    endif      
-    if (ESMF_LogFoundError(status, &
-      ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, &
-      rcToReturn=rc)) return
-     
-    ! compute a Regrid from srcField to dstField
-    call ESMF_FieldRegrid(srcField, dstField, routehandle, &
-      zeroregion=ESMF_REGION_SELECT, rc=status)
-    if (ESMF_LogFoundError(status, &
-      ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, &
-      rcToReturn=rc)) return
-    call ESMF_FieldRegridRelease(routehandle, rc=status)
-    if (ESMF_LogFoundError(status, &
-      ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, &
-      rcToReturn=rc)) return
-#endif
+    if (checkMethodLocal .eq. ESMF_RWGCHECKMETHOD_FIELD) then
+      ! Field and Grid way of doing things
+      call ESMF_FieldSMMStore(srcField=srcField, dstField=dstField, &
+        filename=weightFile, routehandle=routehandle, rc=status)
+      if (ESMF_LogFoundError(status, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, &
+        rcToReturn=rc)) return
 
-#if 0
-    ! Array way of doing things
-    ! store the factorList and factorIndex list into a routehandle for SMM
-    if (localPet == 0) then
-      call ESMF_ArraySMMStore(srcArray=srcArray, dstArray=dstArray, routehandle=routehandle, &
-        factorList=factorList, factorIndexList=factorIndexList, rc=status)
+      ! compute a Regrid from srcField to dstField
+      call ESMF_FieldRegrid(srcField, dstField, routehandle, &
+        zeroregion=ESMF_REGION_SELECT, rc=status)
+      if (ESMF_LogFoundError(status, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, &
+        rcToReturn=rc)) return
+      call ESMF_FieldRegridRelease(routehandle, rc=status)
+      if (ESMF_LogFoundError(status, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, &
+        rcToReturn=rc)) return
+    else if (checkMethodLocal .eq. ESMF_RWGCHECKMETHOD_ARRAY) then
+      ! Array way of doing things
+      call ESMF_ArraySMMStore(srcArray=srcArray, dstArray=dstArray, &
+        filename=weightFile, routehandle=routehandle, rc=status)
+      if (ESMF_LogFoundError(status, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, &
+        rcToReturn=rc)) return
+
+      ! *************************************************************
+      ! compute a SMM from srcArray to dstArray
+      call ESMF_ArraySMM(srcArray, dstArray, routehandle, &
+        zeroregion=ESMF_REGION_SELECT, rc=status)
+      if (ESMF_LogFoundError(status, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, &
+        rcToReturn=rc)) return
+      call ESMF_ArraySMMRelease(routehandle, rc=status)
+      if (ESMF_LogFoundError(status, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, &
+        rcToReturn=rc)) return
     else
-      call ESMF_ArraySMMStore(srcArray=srcArray, dstArray=dstArray, routehandle=routehandle, &
-        rc=status)
-    endif      
-    if (ESMF_LogFoundError(status, &
-      ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, &
-      rcToReturn=rc)) return
-    
-    ! *************************************************************
-    ! compute a SMM from srcArray to dstArray
-    call ESMF_ArraySMM(srcArray, dstArray, routehandle, &
-      zeroregion=ESMF_REGION_SELECT, rc=status)
-    if (ESMF_LogFoundError(status, &
-      ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, &
-      rcToReturn=rc)) return
-    call ESMF_ArraySMMRelease(routehandle, rc=status)
-    if (ESMF_LogFoundError(status, &
-      ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, &
-      rcToReturn=rc)) return
-#endif
+      if (ESMF_LogFoundError(ESMF_RC_ARG_BAD, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, &
+          rcToReturn=rc)) return
+    endif
 
     ! ArrayGather the dst array
     call ESMF_ArrayGather(dstArray, farray=FdstArray, rootPet=0, rc=status)
@@ -444,6 +442,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           if (FdstArray(i) > grid2max) grid2max = FdstArray(i)
         endif
       enddo
+
+      ! Read factors from weights file. Factors are allocated in the
+      ! subroutine. Only the factorList is needed for error assessment.
+      call ESMF_FactorRead(weightFile, factorList, factorIndexList, rc=status)
+      if (ESMF_LogFoundError(status, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, &
+        rcToReturn=rc)) return
 
       ! maximum negative weight
       maxneg = 0
@@ -1103,212 +1109,5 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 #endif
 
   end subroutine GridReadCoords
-
-  !----------------------------------------------------------------------------
-
-  subroutine ESMF_FieldRegridReadSCRIPFileP(remapFile, factorList, factorIndexList, rc)
-    !-----------------------------------------------------------------------
-    !    call arguments
-    !-----------------------------------------------------------------------
-
-    character (len=*), intent(in)  :: remapFile
-    real(ESMF_KIND_R8), pointer    :: factorList(:)
-    integer, pointer               :: factorIndexList(:,:)
-    integer, intent(out), optional :: rc
-
-    !-----------------------------------------------------------------------
-    !    local variables
-    !-----------------------------------------------------------------------
-
-    integer :: ncstat,  nc_file_id,  nc_numlinks_id, nc_numwgts_id, &
-    nc_dstgrdadd_id, nc_srcgrdadd_id, nc_rmpmatrix_id
-
-    integer :: num_links, num_wts
-
-    character (ESMF_MAXPATHLEN) :: nm, msg
-
-    integer, allocatable  :: address(:), localSize(:), localOffset(:)
-    type(ESMF_VM)         :: vm
-    integer               :: i, localpet, npet, nlinksPPet, FlocalPet
-
-#ifdef ESMF_NETCDF
-
-    ! get lpe number
-    call ESMF_VMGetCurrent(vm, rc=rc)
-    if(rc /= ESMF_SUCCESS) then
-      write (msg, '(a,i4)') "- failed to get current vm", ncstat
-      call ESMF_LogSetError(ESMF_RC_SYS, msg=msg, &
-        line=__LINE__, file=__FILE__, rcToReturn=rc)
-      return
-    endif
-
-    call ESMF_VMGet(vm, localPet=localPet, petCount=npet, rc=rc)
-    if(rc /= ESMF_SUCCESS) then
-      write (msg, '(a,i4)') "- failed to get current vm", ncstat
-      call ESMF_LogSetError(ESMF_RC_SYS, msg=msg, &
-        line=__LINE__, file=__FILE__, rcToReturn=rc)
-      return
-    endif
-
-    ! set the localPet to localPet +1 for fortran array indices
-    FlocalPet = localPet+1
-
-    !-----------------------------------------------------------------------
-    !     open remap file and read meta data
-    !-----------------------------------------------------------------------
-    !-----------------------------------------------------------------
-    ! open netcdf file
-    !-----------------------------------------------------------------
-
-    ncstat = nf90_open(remapFile, NF90_NOWRITE, nc_file_id)
-    if(ncstat /= 0) then
-      write (msg, '(a,i4)') "- nf90_open error:", ncstat
-      call ESMF_LogSetError(ESMF_RC_SYS, msg=msg, &
-        line=__LINE__, file=__FILE__, rcToReturn=rc)
-      return
-    endif
-
-    !-----------------------------------------------------------------------
-    ! read source grid meta data for consistency check
-    !-----------------------------------------------------------------------
-    !-----------------------------------------------------------------
-    ! number of address pairs in the remappings
-    !-----------------------------------------------------------------
-
-    ncstat = nf90_inq_dimid(nc_file_id, 'n_s', nc_numlinks_id)
-    if(ncstat /= 0) then
-      write (msg, '(a,i4)') "- nf90_inq_dimid error:", ncstat
-      call ESMF_LogSetError(ESMF_RC_SYS, msg=msg, &
-        line=__LINE__, file=__FILE__, rcToReturn=rc)
-      return
-    endif
-    ncstat = nf90_inquire_dimension(nc_file_id, nc_numlinks_id, len=num_links)
-    if(ncstat /= 0) then
-      write (msg, '(a,i4)') "- nf90_inquire_dimension error:", ncstat
-      call ESMF_LogSetError(ESMF_RC_SYS, msg=msg, &
-        line=__LINE__, file=__FILE__, rcToReturn=rc)
-      return
-    endif
-
-    !-----------------------------------------------------------------
-    ! number of weights per point/order of interpolation method
-    !-----------------------------------------------------------------
-    ncstat = nf90_inq_dimid(nc_file_id, 'num_wgts', nc_numwgts_id)
-    if(ncstat /= 0) then
-      write (msg, '(a,i4)') "- nf90_inq_dimid error:", ncstat
-      call ESMF_LogSetError(ESMF_RC_SYS, msg=msg, &
-        line=__LINE__, file=__FILE__, rcToReturn=rc)
-      return
-    endif
-    ncstat = nf90_inquire_dimension(nc_file_id, nc_numwgts_id, len=num_wts)
-    if(ncstat /= 0) then
-      write (msg, '(a,i4)') "- nf90_inquire_dimension error:", ncstat
-      call ESMF_LogSetError(ESMF_RC_SYS, msg=msg, &
-        line=__LINE__, file=__FILE__, rcToReturn=rc)
-      return
-    endif
-
-    ! split the input data between PETs
-    ! allocate factorList and factorIndexList
-#if 0
-    allocate( localSize(npet), localOffset(npet) )
-    nlinksPPet = num_links/npet
-    localSize(:) = nlinksPPet
-    
-    do i = 1, npet
-        localOffset(i) = 1 + (i-1)*nlinksPPet
-    enddo
-    localSize(npet) = nlinksPPet+MOD(num_links, npet)
-    
-    allocate( factorIndexList(2,localSize(FlocalPet)) )
-    allocate( factorList(localSize(FlocalPet)) )
-#endif
-    allocate( factorIndexList(2,num_links) )
-    allocate( factorList(num_links) )
-    !-----------------------------------------------------------------
-    ! source addresses for weights
-    !-----------------------------------------------------------------
-
-    allocate( address(num_links) )
-    ncstat = nf90_inq_varid(nc_file_id, 'col', nc_srcgrdadd_id)
-    if(ncstat /= 0) then
-      write (msg, '(a,i4)') "- nf90_inq_varid error:", ncstat
-      call ESMF_LogSetError(ESMF_RC_SYS, msg=msg, &
-        line=__LINE__, file=__FILE__, rcToReturn=rc)
-      return
-    endif
-    ncstat = nf90_get_var(ncid=nc_file_id, varid=nc_srcgrdadd_id, &
-      values=address)
-    if(ncstat /= 0) then
-      write (msg, '(a,i4)') "- nf90_get_var error:", ncstat
-      call ESMF_LogSetError(ESMF_RC_SYS, msg=msg, &
-        line=__LINE__, file=__FILE__, rcToReturn=rc)
-      return
-    endif
-    factorIndexList(1,:) = address
-
-    !-----------------------------------------------------------------
-    ! destination addresss for weights
-    !-----------------------------------------------------------------
-
-    ncstat = nf90_inq_varid(nc_file_id, 'row', nc_dstgrdadd_id)
-    if(ncstat /= 0) then
-      write (msg, '(a,i4)') "- nf90_inq_varid error:", ncstat
-      call ESMF_LogSetError(ESMF_RC_SYS, msg=msg, &
-        line=__LINE__, file=__FILE__, rcToReturn=rc)
-      return
-    endif
-    ncstat = nf90_get_var(nc_file_id, nc_dstgrdadd_id, address)
-    if(ncstat /= 0) then
-      write (msg, '(a,i4)') "- nf90_get_var error:", ncstat
-      call ESMF_LogSetError(ESMF_RC_SYS, msg=msg, &
-        line=__LINE__, file=__FILE__, rcToReturn=rc)
-      return
-    endif
-    factorIndexList(2,:) = address
-    deallocate( address )
-
-    !-----------------------------------------------------------------
-    !     read all variables
-    !-----------------------------------------------------------------
-
-    ncstat = nf90_inq_varid(nc_file_id, 'S', nc_rmpmatrix_id)
-    if(ncstat /= 0) then
-      write (msg, '(a,i4)') "- nf90_inq_varid error:", ncstat
-      call ESMF_LogSetError(ESMF_RC_SYS, msg=msg, &
-        line=__LINE__, file=__FILE__, rcToReturn=rc)
-      return
-    endif
-      write (msg, '(a,i4)') "- nf90_get_var error:", ncstat
-    ncstat = nf90_get_var(nc_file_id, nc_rmpmatrix_id, factorList)
-!      localOffset(FlocalPet), localSize(FlocalPet))
-    if(ncstat /= 0) then
-      call ESMF_LogSetError(ESMF_RC_SYS, msg=msg, &
-        line=__LINE__, file=__FILE__, rcToReturn=rc)
-      return
-    endif
-    !------------------------------------------------------------------------
-    !     close input file
-    !------------------------------------------------------------------------
-
-    ncstat = nf90_close(nc_file_id)
-    if(ncstat /= 0) then
-      write (msg, '(a,i4)') "- nf90_close error:", ncstat
-      call ESMF_LogSetError(ESMF_RC_SYS, msg=msg, &
-        line=__LINE__, file=__FILE__, rcToReturn=rc)
-      return
-    endif
-    if(present(rc)) rc = ESMF_SUCCESS
-
-#else
-    call ESMF_LogSetError(rcToCheck=ESMF_RC_LIB_NOT_PRESENT, & 
-      msg="- ESMF_NETCDF not defined when lib was compiled", & 
-      ESMF_CONTEXT, rcToReturn=rc) 
-    return
-#endif
-
-  end subroutine ESMF_FieldRegridReadSCRIPFileP
-
-!------------------------------------------------------------------------------
 
 end module ESMF_RegridWeightGenCheckMod

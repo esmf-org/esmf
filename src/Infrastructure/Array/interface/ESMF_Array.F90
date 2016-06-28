@@ -42,9 +42,9 @@ module ESMF_ArrayMod
   use ESMF_ArraySpecMod
   use ESMF_VMMod
   use ESMF_DELayoutMod
-  use ESMF_DistGridMod
   use ESMF_RHandleMod
   use ESMF_F90InterfaceMod  ! ESMF Fortran-C++ interface helper
+  use ESMF_FactorReadMod    ! ESMF helpers for reading from netCDF file
   
   ! class sub modules
   use ESMF_ArrayCreateMod   ! contains the ESMF_Array derived type definition
@@ -155,6 +155,7 @@ module ESMF_ArrayMod
     module procedure ESMF_ArraySMMStoreR4
     module procedure ESMF_ArraySMMStoreR8
     module procedure ESMF_ArraySMMStoreNF
+    module procedure ESMF_ArraySMMStoreFromFile
 !EOPI
 
   end interface
@@ -1681,7 +1682,171 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(rc)) rc = ESMF_SUCCESS
 
   end subroutine ESMF_ArraySMMStoreNF
+
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ArraySMMStoreFromFile"
+
+!BOP
+! !IROUTINE: ESMF_ArraySMMStore - Precompute sparse matrix multiplication using factors read from file.
+!
+! !INTERFACE:
+! ! Private name; call using ESMF_ArraySMMStore()
+  subroutine ESMF_ArraySMMStoreFromFile(srcArray, dstArray, filename, &
+    routehandle, keywordEnforcer, ignoreUnmatchedIndices, &
+    srcTermProcessing, pipelineDepth, transposeRoutehandle, rc)
+
+! ! ARGUMENTS:
+    type(ESMF_Array),       intent(in)              :: srcArray
+    type(ESMF_Array),       intent(inout)           :: dstArray
+    character(len=*),       intent(in)              :: filename
+    type(ESMF_RouteHandle), intent(inout)           :: routehandle
+    type(ESMF_KeywordEnforcer),            optional :: keywordEnforcer
+    logical,                intent(in),    optional :: ignoreUnmatchedIndices
+    integer,                intent(inout), optional :: srcTermProcessing
+    integer,                intent(inout), optional :: pipeLineDepth
+    type(ESMF_RouteHandle), intent(inout), optional :: transposeRoutehandle
+    integer,                intent(out),   optional :: rc
+
+!-------------------------------------------------------------------------------
+! !DESCRIPTION:
+!
+! The arguments are:
+!
+! \begin{description}
+!
+! \item [srcArray]
+!       {\tt ESMF\_Array} with source data.
+!
+! \item [dstArray]
+!       {\tt ESMF\_Array} with destination data. The data in this Array may be
+!       destroyed by this call.
+!
+! \item [filename]
+!       Path to the file containing weights for creating an {\tt ESMF\_RouteHandle}.
+!       See ~(\ref{sec:weightfileformat}) for a description of the SCRIP weight
+!       file format. Only "row", "col", and "S" variables are required. They
+!       must be one-dimensionsal with dimension "n_s".
+!
+! \item [routehandle]
+!       Handle to the precomputed {\tt ESMF\_RouteHandle}.
+!
+!   \item [{[ignoreUnmatchedIndices]}]
+!     A logical flag that affects the behavior for when sequence indices
+!     in the sparse matrix are encountered that do not have a match on the
+!     {\tt srcField} or {\tt dstField} side. The default setting is
+!     {\tt .false.}, indicating that it is an error when such a situation is
+!     encountered. Setting {\tt ignoreUnmatchedIndices} to {\tt .true.} ignores
+!     entries with unmatched indices.
+!
+!   \item [{[srcTermProcessing]}]
+!     The {\tt srcTermProcessing} parameter controls how many source terms,
+!     located on the same PET and summing into the same destination element,
+!     are summed into partial sums on the source PET before being transferred
+!     to the destination PET. A value of 0 indicates that the entire arithmetic
+!     is done on the destination PET; source elements are neither multiplied
+!     by their factors nor added into partial sums before being sent off by the
+!     source PET. A value of 1 indicates that source elements are multiplied
+!     by their factors on the source side before being sent to the destination
+!     PET. Larger values of {\tt srcTermProcessing} indicate the maximum number
+!     of terms in the partial sums on the source side.
+!
+!     Note that partial sums may lead to bit-for-bit differences in the results.
+!     See section \ref{RH:bfb} for an in-depth discussion of {\em all}
+!     bit-for-bit reproducibility aspects related to route-based communication
+!     methods.
+!
+!     \begin{sloppypar}
+!     The {\tt ESMF\_FieldSMMStore()} method implements an auto-tuning scheme
+!     for the {\tt srcTermProcessing} parameter. The intent on the
+!     {\tt srcTermProcessing} argument is "{\tt inout}" in order to
+!     support both overriding and accessing the auto-tuning parameter.
+!     If an argument $>= 0$ is specified, it is used for the
+!     {\tt srcTermProcessing} parameter, and the auto-tuning phase is skipped.
+!     In this case the {\tt srcTermProcessing} argument is not modified on
+!     return. If the provided argument is $< 0$, the {\tt srcTermProcessing}
+!     parameter is determined internally using the auto-tuning scheme. In this
+!     case the {\tt srcTermProcessing} argument is re-set to the internally
+!     determined value on return. Auto-tuning is also used if the optional
+!     {\tt srcTermProcessing} argument is omitted.
+!     \end{sloppypar}
+!
+!   \item [{[pipelineDepth]}]
+!     The {\tt pipelineDepth} parameter controls how many messages a PET
+!     may have outstanding during a sparse matrix exchange. Larger values
+!     of {\tt pipelineDepth} typically lead to better performance. However,
+!     on some systems too large a value may lead to performance degradation,
+!     or runtime errors.
+!
+!     Note that the pipeline depth has no affect on the bit-for-bit
+!     reproducibility of the results. However, it may affect the performance
+!     reproducibility of the exchange.
+!     The {\tt ESMF\_FieldSMMStore()} method implements an auto-tuning scheme
+!     for the {\tt pipelineDepth} parameter. The intent on the
+!     {\tt pipelineDepth} argument is "{\tt inout}" in order to
+!     support both overriding and accessing the auto-tuning parameter.
+!     If an argument $>= 0$ is specified, it is used for the
+!     {\tt pipelineDepth} parameter, and the auto-tuning phase is skipped.
+!     In this case the {\tt pipelineDepth} argument is not modified on
+!     return. If the provided argument is $< 0$, the {\tt pipelineDepth}
+!     parameter is determined internally using the auto-tuning scheme. In this
+!     case the {\tt pipelineDepth} argument is re-set to the internally
+!     determined value on return. Auto-tuning is also used if the optional
+!     {\tt pipelineDepth} argument is omitted.
+!
+!   \item [{[transposeRoutehandle]}]
+!     If provided, a handle to the transposed matrix operation is returned. The
+!     transposed operation goes from {\tt dstArray} to {\tt srcArray}.
+!
+!   \item [{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!
+! \end{description}
+!
+!EOP
+!-------------------------------------------------------------------------------
+
+    ! LOCAL VARIABLES:
+    real(ESMF_KIND_R8), dimension(:), allocatable :: factorList
+    integer, dimension(:, :), allocatable :: factorIndexList
+    type(ESMF_VM) :: vm
+    integer :: localPet, petCount, localrc, lbPet, ubPet, n_s
+    integer, dimension(:, :), allocatable :: lb, ub
+
+    ! Initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! Fill the factorList and factorIndexList.
+    call ESMF_FactorRead(filename, &
+                         factorList, &
+                         factorIndexList, &
+                         rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! Generate routeHandle from factorList and factorIndexList
+    call ESMF_ArraySMMStore(srcArray=srcArray, &
+                            dstArray=dstArray, &
+                            routehandle=routeHandle, &
+                            factorList=factorList, &
+                            factorIndexList=factorIndexList,   &
+                            ignoreUnmatchedIndices=ignoreUnmatchedIndices, &
+                            srcTermProcessing=srcTermProcessing, &
+                            transposeRoutehandle=transposeRoutehandle, &
+                            pipeLineDepth=pipeLineDepth, &
+                            rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! ##########################################################################
+
+    deallocate(factorList)
+    deallocate(factorIndexList)
+
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end subroutine ESMF_ArraySMMStoreFromFile
 
 
 ! -------------------------- ESMF-public method -------------------------------
