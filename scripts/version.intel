@@ -1,0 +1,8 @@
+#!/bin/sh
+# This script expects as input argument the desired version position (e.g., 1 for major,
+# 2 for minor, etc) and a command (with options) that returns the version of the
+# Intel compiler. The output then of this script is the desired numeric version number.
+VIND=$1
+shift 1
+VNUM=`$* 2>&1 | grep Version | cut -d, -f2 | cut -d' ' -f3 | sed 's/\./ /g' | sed 's/-/ /g' `
+echo ${VNUM} | cut -d' ' -f${VIND}

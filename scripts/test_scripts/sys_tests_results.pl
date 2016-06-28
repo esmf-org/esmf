@@ -113,6 +113,12 @@ use File::Find
         }
         # Get all system tests files
         @st_files=grep (/STest.F90/, @all_files);
+	# Check for special case of MPMD test
+	$count=grep (/STestA.F90/, @all_files);
+	if ($count != 0) {
+		@mpmd_file=grep (/STestA.F90/, @all_files);
+        	push (@st_files, @mpmd_file);
+	}
         # Find the system test files with the "ESMF_SYSTEM_TEST" string
         # grep for system tests to report on
         $count=0;

@@ -105,6 +105,8 @@ endif
 #
 ESMF_F90COMPILER_VERSION    = ${ESMF_F90COMPILER} -V -v
 ESMF_CXXCOMPILER_VERSION    = ${ESMF_CXXCOMPILER} -V -v
+ESMF_F90MAJORVERSION      = $(shell $(ESMF_DIR)/scripts/version.intel 1 ${ESMF_F90COMPILER} -V)
+ESMF_CXXMAJORVERSION      = $(shell $(ESMF_DIR)/scripts/version.intel 1 ${ESMF_CXXCOMPILER} -V)
 
 ############################################################
 # Intel runtime library on Darwin does not currently seem thread-safe
@@ -153,10 +155,20 @@ endif
 ############################################################
 # OpenMP compiler and linker flags
 #
+ifeq ($(shell [ $(ESMF_F90MAJORVERSION) -ge 16 ] && echo true), true)
+ESMF_OPENMP_F90COMPILEOPTS += -qopenmp
+ESMF_OPENMP_F90LINKOPTS    += -qopenmp
+else
 ESMF_OPENMP_F90COMPILEOPTS += -openmp
-ESMF_OPENMP_CXXCOMPILEOPTS += -openmp
 ESMF_OPENMP_F90LINKOPTS    += -openmp
+endif
+ifeq ($(shell [ $(ESMF_CXXMAJORVERSION) -ge 16 ] && echo true), true)
+ESMF_OPENMP_CXXCOMPILEOPTS += -qopenmp
+ESMF_OPENMP_CXXLINKOPTS    += -qopenmp
+else
+ESMF_OPENMP_CXXCOMPILEOPTS += -openmp
 ESMF_OPENMP_CXXLINKOPTS    += -openmp
+endif
 
 ############################################################
 # MKL specific options for external LAPACK

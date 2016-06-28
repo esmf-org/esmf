@@ -75,6 +75,7 @@ class Comp{
     int getFTable(FTable **ftable) const;
     int getTunnel(CompTunnel **tunnel) const;
     static int getComplianceCheckerDepth(int *depth);
+    static int getComplianceCheckerJSON(int *jsonIsOn);
 };
 
 class GridComp:public Comp{

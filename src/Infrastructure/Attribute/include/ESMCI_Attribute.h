@@ -194,8 +194,15 @@ class Attribute
     // query whether an Attribute is "present" or "set"
     bool isSet() const;
 
-    int streamJSON(std::string &output) const;
-    int streamJSONiter(std::ostringstream &os, unsigned int level) const;
+    int streamJSON(ESMC_Logical flattenPackList, ESMC_Logical includeUnset, std::string &output) const;
+    int streamAttributeToJSON(ESMC_Logical flattenPackList, ESMC_Logical includeUnset, std::string &output,  int *totalStreamed) const;
+    int streamAttributeRootToJSON(ESMC_Logical flattenPackList, ESMC_Logical includeUnset, std::string &output, int *totalStreamed) const;
+    int streamAttributeListToJSON(std::vector<Attribute *> attrVector, ESMC_Logical flattenPackList, ESMC_Logical includeUnset, std::string &output, int *totalStreamed) const;
+  	int streamAttributePackToJSON(std::vector<Attribute *> attrVector, ESMC_Logical flattenPackList, ESMC_Logical includeUnset, std::string &output, int *totalStreamed) const;
+  	int streamAttributeLinksToJSON(std::vector<Attribute *> attrVector, ESMC_Logical flattenPackList, ESMC_Logical includeUnset, std::string &output, int *totalStreamed) const;
+
+  	template<typename T>
+    std::string attrValuesToString(const std::vector<T> *vec) const;
 
     // return an Attribute by name or number
     Attribute *AttributeGet(const std::string &name) const;
@@ -448,9 +455,13 @@ extern "C" {
 //        with the following prototype:
 // error: more than one instance of overloaded function "c_esmc_attpackremove_" has "C" linkage
   void FTN_X(c_esmc_attpackstreamjson)(ESMCI::Attribute **attpack,
-                                  char *output, int *rc,
+                                  int *flattenPackList,
+								  int *includeUnset,
+								  char *output, int *rc,
                                   ESMCI_FortranStrLenArg olen);
   void FTN_X(c_esmc_attpackstreamjsonstrlen)(ESMCI::Attribute **attpack,
+		  	  	  	  	  	  	  int *flattenPackList,
+								  int *includeUnset,
                                   int *jsonstrlen, int *rc);
   void FTN_X(c_esmc_attpackget)(ESMC_Base **base, ESMCI::Attribute **attpack,
                                   int *count, char *specList, int *lens,

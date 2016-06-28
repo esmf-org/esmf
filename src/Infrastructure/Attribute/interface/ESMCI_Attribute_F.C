@@ -3879,7 +3879,9 @@ void FTN_X(c_esmc_attpackstreamjson)(
 //
 // !ARGUMENTS:
         ESMCI::Attribute **attpack,    // in - attpack
-        char *output,                  // out - output string
+        int *flattenPackList,   // in - should nested attribute packs be flattened
+		int *includeUnset,      // in - should unset attributes be included
+		char *output,                  // out - output string
         int *rc,                       // out - return code
         ESMCI_FortranStrLenArg olen) { // hidden/in - strlen count for target object
 //
@@ -3901,9 +3903,17 @@ void FTN_X(c_esmc_attpackstreamjson)(
   }
 
   string coutput;
+  ESMC_Logical localFlattenPackList = ESMF_FALSE;
+  ESMC_Logical localIncludeUnset = ESMF_FALSE;
+  if (*flattenPackList) {
+	  localFlattenPackList = ESMF_TRUE;
+  }
+  if (*includeUnset) {
+	  localIncludeUnset = ESMF_TRUE;
+  }
 
   // Write the attributes from the object.
-  status = (*attpack)->streamJSON(coutput);
+  status = (*attpack)->streamJSON(localFlattenPackList, localIncludeUnset, coutput);
   ESMC_LogDefault.MsgFoundError(status, ESMCI_ERR_PASSTHRU,
                                 ESMC_CONTEXT, ESMC_NOT_PRESENT_FILTER(rc));
 
@@ -3931,6 +3941,8 @@ void FTN_X(c_esmc_attpackstreamjsonstrlen)(
 //
 // !ARGUMENTS:
         ESMCI::Attribute **attpack,    // in - attpack
+		int *flattenPackList,   // in - should nested attribute packs be flattened
+		int *includeUnset,      // in - should unset attributes be included
         int *jsonstrlen,               // out - output stringlength
         int *rc) {                     // out - return code
 //
@@ -3953,9 +3965,17 @@ void FTN_X(c_esmc_attpackstreamjsonstrlen)(
   }
 
   string coutput;
+  ESMC_Logical localFlattenPackList = ESMF_FALSE;
+  ESMC_Logical localIncludeUnset = ESMF_FALSE;
+  if (*flattenPackList) {
+    localFlattenPackList = ESMF_TRUE;
+  }
+  if (*includeUnset) {
+    localIncludeUnset = ESMF_TRUE;
+  }
 
   // Write the attributes from the object.
-  status = (*attpack)->streamJSON(coutput);
+  status = (*attpack)->streamJSON(localFlattenPackList, localIncludeUnset, coutput);
   ESMC_LogDefault.MsgFoundError(status, ESMCI_ERR_PASSTHRU,
                                 ESMC_CONTEXT, ESMC_NOT_PRESENT_FILTER(rc));
 

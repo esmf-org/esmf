@@ -3135,7 +3135,7 @@ build_mapl_tests: reqfile_libesmf reqdir_lib chkdir_tests verify_mapl_exhaustive
 #
 run_mapl_tests:  reqdir_tests verify_mapl_exhaustive_flag
 	@if [ $(ESMF_COMM) = "mpiuni" ] ; then \
-	  echo "Cannot run multiprocessor unit tests when ESMF_COMM is mpiuni;" ; \
+	  echo "Cannot run multiprocessor mapl tests when ESMF_COMM is mpiuni;" ; \
 	  echo "run run_unit_tests_uni instead." ; \
 	  echo "" ; \
 	  $(MAKE) err ; \
@@ -3197,9 +3197,9 @@ endif
 #
 verify_mapl_exhaustive_flag:
 ifeq ($(ESMF_TESTEXHAUSTIVE),ON)
-        @$(MAKE) MAPL_TEST_STRING="Exhaustive" mapl_exhaustive_flag_check
+	@$(MAKE) MAPL_TEST_STRING="Exhaustive" mapl_exhaustive_flag_check
 else
-        @$(MAKE) MAPL_TEST_STRING="Non-exhaustive" mapl_exhaustive_flag_check
+	@$(MAKE) MAPL_TEST_STRING="Non-exhaustive" mapl_exhaustive_flag_check
 endif
 
 #
@@ -3212,12 +3212,12 @@ mapl_exhaustive_flag_check:
           echo "whether a basic set or an exhaustive set of tests are built." ;\
           echo "" ;\
           echo "The current setting of ESMF_TESTEXHAUSTIVE is \"$(ESMF_TESTEXHAUSTIVE)\", which" ;\
-          echo "is not the same as when the unit tests were last built." ;\
+          echo "is not the same as when the mapl tests were last built." ;\
           echo "(This is based on the contents of the file:" ;\
           echo "$(MAPL_TESTS_CONFIG) ";\
           echo "which contains: `$(ESMF_SED) -e '1d' $(MAPL_TESTS_CONFIG)` )." ;\
           echo "" ;\
-          echo "To rebuild and run the unit tests with the current ESMF_TESTEXHAUSTIVE value, run:" ;\
+          echo "To rebuild and run the mapl tests with the current ESMF_TESTEXHAUSTIVE value, run:" ;\
           echo "   $(MAKE) clean_unit_tests unit_tests"  ;\
           echo "or change ESMF_TESTEXHAUSTIVE to ON or OFF to match the build-time value." ;\
           echo "" ;\
@@ -3231,9 +3231,9 @@ mapl_exhaustive_flag_check:
 
 clean_if_mapl_exhaustive_flag_mismatch:
 ifeq ($(ESMF_TESTEXHAUSTIVE),ON)
-        @$(MAKE) MAPL_TEST_STRING="Exhaustive" mapl_exhaustive_flag_clobber
+	@$(MAKE) MAPL_TEST_STRING="Exhaustive" mapl_exhaustive_flag_clobber
 else
-        @$(MAKE) MAPL_TEST_STRING="Non-exhaustive" mapl_exhaustive_flag_clobber
+	@$(MAKE) MAPL_TEST_STRING="Non-exhaustive" mapl_exhaustive_flag_clobber
 endif
 
 #

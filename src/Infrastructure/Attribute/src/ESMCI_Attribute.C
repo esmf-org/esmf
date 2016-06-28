@@ -3153,8 +3153,10 @@ if (attrRoot == ESMF_TRUE) {
   if (items > 0 && tk != ESMF_NOKIND)
     return true;  // set
 
-  ESMC_LogDefault.Write("isSet - items <= 0 or tk == ESMF_NOKIND",
-     ESMC_LOGMSG_WARN, ESMC_CONTEXT);
+  //char msg[ESMF_MAXSTR];
+  //sprintf(msg, "isSet - items <= 0 or tk == ESMF_NOKIND: %s", attrName.c_str());
+  //ESMC_LogDefault.Write(msg,
+  //   ESMC_LOGMSG_WARN, ESMC_CONTEXT);
 
   return false;     // not set
 
