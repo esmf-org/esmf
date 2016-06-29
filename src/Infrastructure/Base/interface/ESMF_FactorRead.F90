@@ -86,7 +86,7 @@ subroutine ESMF_FactorRead(filename, factorList, factorIndexList, rc)
 !       Path to the file containing weights for creating an {\tt ESMF\_RouteHandle}.
 !       See ~(\ref{sec:weightfileformat}) for a description of the SCRIP weight
 !       file format. Only "row", "col", and "S" variables are required. They
-!       must be one-dimensionsal with dimension "n_s".
+!       must be one-dimensional with dimension "n\_s".
 !
 ! \item [factorList]
 !       The weight factors / interpolation weights to be read from file.

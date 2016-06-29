@@ -42,6 +42,7 @@ module ESMF_ArrayMod
   use ESMF_ArraySpecMod
   use ESMF_VMMod
   use ESMF_DELayoutMod
+  use ESMF_DistGridMod
   use ESMF_RHandleMod
   use ESMF_F90InterfaceMod  ! ESMF Fortran-C++ interface helper
   use ESMF_FactorReadMod    ! ESMF helpers for reading from netCDF file
