@@ -1727,7 +1727,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !       Path to the file containing weights for creating an {\tt ESMF\_RouteHandle}.
 !       See ~(\ref{sec:weightfileformat}) for a description of the SCRIP weight
 !       file format. Only "row", "col", and "S" variables are required. They
-!       must be one-dimensionsal with dimension "n_s".
+!       must be one-dimensionsal with dimension "n\_s".
 !
 ! \item [routehandle]
 !       Handle to the precomputed {\tt ESMF\_RouteHandle}.
