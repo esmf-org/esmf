@@ -2255,6 +2255,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !  Returns the number of lines in the table in {\tt lineCount} and 
 !  the maximum number of words in a table line in {\tt columnCount}.
 !
+!  After the call, the line pointer is positioned to the end of the table.
+!  To reset it to the beginning of the table, use {\tt ESMF\_ConfigFindLabel}. 
+!
 !   The arguments are:
 !   \begin{description}
 !   \item [config]
