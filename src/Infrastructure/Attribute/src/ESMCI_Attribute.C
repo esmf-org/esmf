@@ -4289,27 +4289,28 @@ if (attrRoot == ESMF_TRUE) {
 //
 //EOPI
 
-  unsigned int i;
-
   attrBase = ESMC_NULL_POINTER;
   parent = ESMC_NULL_POINTER;
 
-        if (tk == ESMC_TYPEKIND_I4) vip.clear();
-        else if (tk == ESMC_TYPEKIND_I8) vlp.clear();
-        else if (tk == ESMC_TYPEKIND_R4) vfp.clear();
-        else if (tk == ESMC_TYPEKIND_R8) vdp.clear();  
-        else if (tk == ESMC_TYPEKIND_LOGICAL) vbp.clear();
-        else if (tk == ESMC_TYPEKIND_CHARACTER) vcpp.clear();
+  if (tk == ESMC_TYPEKIND_I4) vip.clear();
+  else if (tk == ESMC_TYPEKIND_I8) vlp.clear();
+  else if (tk == ESMC_TYPEKIND_R4) vfp.clear();
+  else if (tk == ESMC_TYPEKIND_R8) vdp.clear();
+  else if (tk == ESMC_TYPEKIND_LOGICAL) vbp.clear();
+  else if (tk == ESMC_TYPEKIND_CHARACTER) vcpp.clear();
 
-  for (i=0; i<attrList.size(); i++)
-    delete attrList.at(i);
-  
-  for (i=0; i<packList.size(); i++)
-    delete packList.at(i);
-  
-  for (i=0; i<linkList.size(); i++)
-    linkList.at(i) = ESMC_NULL_POINTER;
-    
+  while (!attrList.empty())
+    attrList.pop_back();
+  vector<Attribute*>().swap(attrList);
+
+  while (!packList.empty())
+    packList.pop_back();
+  vector<Attribute*>().swap(packList);
+
+  for(std::vector<Attribute*>::iterator it = linkList.begin();
+      it != linkList.end(); ++it) *it = NULL;
+  vector<Attribute*>().swap(linkList);
+
  } // end ~Attribute
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD

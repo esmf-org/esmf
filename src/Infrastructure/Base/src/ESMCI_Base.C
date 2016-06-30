@@ -1101,7 +1101,7 @@ static const char *const version = "$Id$";
   status      = ESMF_STATUS_INVALID;
   
   // setup the root Attribute, passing the address of this
-  //delete root;
+  root.~Attribute();
   
   // if we have to support reference counts someday,
   // test if (refCount > 0) and do something if true;
