@@ -18,7 +18,7 @@ ESMF.Manager(debug=True)
 grid1 = "examples/data/ll1deg_grid.nc"
 grid = ESMF.Grid(filename=grid1, filetype=ESMF.FileFormat.SCRIP)
 
-from ESMF.test.test_api.locstream_utilities import create_locstream_spherical_16, create_locstream_spherical_16_parallel
+from ESMF.util.locstream_utilities import create_locstream_spherical_16, create_locstream_spherical_16_parallel
 coord_sys=ESMF.CoordSys.SPH_DEG
 domask=True
 if ESMF.pet_count() == 1:

@@ -9,7 +9,7 @@ import inspect
 import ESMF
 from ESMF import *
 from ESMF.test.base import TestBase, attr
-from ESMF.test.test_api.mesh_utilities import *
+from ESMF.util.mesh_utilities import *
 
 class TestMesh(TestBase):
     Manager(debug=True)

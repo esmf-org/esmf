@@ -14,10 +14,12 @@ try:
 except:
     raise ImportError('The ESMF library cannot be found!')
 
-def grid_create(xdom, ydom, nx, ny, corners=False, domask=False, doarea=False, ctk=ESMF.TypeKind.R8):
+def grid_create_from_bounds(xdom, ydom, nx, ny, corners=False, domask=False, doarea=False, ctk=ESMF.TypeKind.R8):
     """
+    Create a 2 dimensional Grid using the bounds of the domain defined in the `xdom` and `ydom` lists. The parameters
+    `nx` and `ny` are used to define the number coordinate points between the bounds of the domain.
     :param xdom: 2,1 list containing the x domain
-    :param ydom: 2,1 list conatining the y domain
+    :param ydom: 2,1 list containing the y domain
     :param nx: number of longitude values at cell centers
     :param ny: number of latitude values at cell centers
     :param corners: boolean to determine whether or not to add corner coordinates to this grid
@@ -39,18 +41,36 @@ def grid_create(xdom, ydom, nx, ny, corners=False, domask=False, doarea=False, c
     ycorner = np.array([ys[0:-1], ys[1::]]).T
     ycenter = (ycorner[:, 1] + ycorner[:, 0]) / 2
 
+    grid = grid_create_from_coordinates(xcenter, ycenter, xcorner, ycorner, corners=corners, domask=domask, doarea=doarea, ctk=ctk)
+
+    return grid
+
+def grid_create_from_coordinates(xcoords, ycoords, xcorners=False, ycorners=False, corners=False, domask=False, doarea=False, ctk=ESMF.TypeKind.R8):
+    """
+    Create a 2 dimensional Grid using the bounds of the x and y coordiantes.
+    :param xcoords: The 1st dimension or 'x' coordinates at cell centers, as a Python list or numpy Array
+    :param ycoords: The 2nd dimension or 'y' coordinates at cell centers, as a Python list or numpy Array
+    :param xcorners: The 1st dimension or 'x' coordinates at cell corners, as a Python list or numpy Array
+    :param ycorners: The 2nd dimension or 'y' coordinates at cell corners, as a Python list or numpy Array
+    :param domask: boolean to determine whether to set an arbitrary mask or not
+    :param doarea: boolean to determine whether to set an arbitrary area values or not
+    :param ctk: the coordinate typekind
+    :return: grid
+    """
+    [x, y] = [0, 1]
+
     # create a grid given the number of grid cells in each dimension, the center stagger location is allocated, the
     # Cartesian coordinate system and type of the coordinates are specified
-    max_index = np.array([nx, ny])
+    max_index = np.array([len(xcoords), len(ycoords)])
     grid = ESMF.Grid(max_index, staggerloc=[ESMF.StaggerLoc.CENTER], coord_sys=ESMF.CoordSys.CART, coord_typekind=ctk)
 
     # set the grid coordinates using numpy arrays, parallel case is handled using grid bounds
     gridXCenter = grid.get_coords(x)
-    x_par = xcenter[grid.lower_bounds[ESMF.StaggerLoc.CENTER][x]:grid.upper_bounds[ESMF.StaggerLoc.CENTER][x]]
+    x_par = xcoords[grid.lower_bounds[ESMF.StaggerLoc.CENTER][x]:grid.upper_bounds[ESMF.StaggerLoc.CENTER][x]]
     gridXCenter[...] = x_par.reshape((x_par.size, 1))
 
     gridYCenter = grid.get_coords(y)
-    y_par = ycenter[grid.lower_bounds[ESMF.StaggerLoc.CENTER][y]:grid.upper_bounds[ESMF.StaggerLoc.CENTER][y]]
+    y_par = ycoords[grid.lower_bounds[ESMF.StaggerLoc.CENTER][y]:grid.upper_bounds[ESMF.StaggerLoc.CENTER][y]]
     gridYCenter[...] = y_par.reshape((1, y_par.size))
 
     # create grid corners in a slightly different manner to account for the bounds format common in CF-like files
@@ -63,13 +83,13 @@ def grid_create(xdom, ydom, nx, ny, corners=False, domask=False, doarea=False, c
 
         gridXCorner = grid.get_coords(x, staggerloc=ESMF.StaggerLoc.CORNER)
         for i0 in range(ubx - lbx - 1):
-            gridXCorner[i0, :] = xcorner[i0+lbx, 0]
-        gridXCorner[i0 + 1, :] = xcorner[i0+lbx, 1]
+            gridXCorner[i0, :] = xcorners[i0+lbx, 0]
+        gridXCorner[i0 + 1, :] = xcorners[i0+lbx, 1]
 
         gridYCorner = grid.get_coords(y, staggerloc=ESMF.StaggerLoc.CORNER)
         for i1 in range(uby - lby - 1):
-            gridYCorner[:, i1] = ycorner[i1+lby, 0]
-        gridYCorner[:, i1 + 1] = ycorner[i1+lby, 1]
+            gridYCorner[:, i1] = ycorners[i1+lby, 0]
+        gridYCorner[:, i1 + 1] = ycorners[i1+lby, 1]
 
     # add an arbitrary mask
     if domask:
@@ -85,8 +105,10 @@ def grid_create(xdom, ydom, nx, ny, corners=False, domask=False, doarea=False, c
 
     return grid
 
-def grid_create_periodic(nlon, nlat, corners=False, domask=False):
+def grid_create_from_bounds_periodic(nlon, nlat, corners=False, domask=False):
     """
+    Create a 2 dimensional periodic Grid with `nlon` number of grid cells in the longitude domain [0, 360] and `nlat`
+    number of grid cells in the latitude domain [-90, 90].
     :param nlons: number of longitude values at cell centers
     :param nlats: number of latitude values at cell centers
     :param corners: boolean to determine whether or not to add corner coordinates to this grid
@@ -106,17 +128,34 @@ def grid_create_periodic(nlon, nlat, corners=False, domask=False):
     latcorner = np.array([lats[0:-1], lats[1::]]).T
     latcenter = (latcorner[:, 1] + latcorner[:, 0]) / 2
 
+    grid = grid_create_from_coordinates_periodic(loncenter, latcenter, loncorner, latcorner, corners=corners, domask=domask)
+
+    return grid
+
+def grid_create_from_coordinates_periodic(longitudes, latitudes, lon_corners=False, lat_corners=False, corners=False, domask=False):
+    """
+    Create a 2 dimensional periodic Grid using the 'longitudes' and 'latitudes'.
+    :param longitudes: longitude coordinate values at cell centers
+    :param latitudes: latitude coordinate values at cell centers
+    :param lon_corners: longitude coordinate values at cell corners
+    :param lat_corners: latitude coordinate values at cell corners
+    :param corners: boolean to determine whether or not to add corner coordinates to this grid
+    :param domask: boolean to determine whether to set an arbitrary mask or not
+    :return: grid
+    """
+    [lon, lat] = [0, 1]
+
     # create a grid given the number of grid cells in each dimension the center stagger location is allocated
-    max_index = np.array([nlon, nlat])
+    max_index = np.array([len(longitudes), len(latitudes)])
     grid = ESMF.Grid(max_index, num_peri_dims=1, staggerloc=[ESMF.StaggerLoc.CENTER])
 
     # set the grid coordinates using numpy arrays, parallel case is handled using grid bounds
     gridXCenter = grid.get_coords(lon)
-    lon_par = loncenter[grid.lower_bounds[ESMF.StaggerLoc.CENTER][lon]:grid.upper_bounds[ESMF.StaggerLoc.CENTER][lon]]
+    lon_par = longitudes[grid.lower_bounds[ESMF.StaggerLoc.CENTER][lon]:grid.upper_bounds[ESMF.StaggerLoc.CENTER][lon]]
     gridXCenter[...] = lon_par.reshape((lon_par.size, 1))
 
     gridYCenter = grid.get_coords(lat)
-    lat_par = latcenter[grid.lower_bounds[ESMF.StaggerLoc.CENTER][lat]:grid.upper_bounds[ESMF.StaggerLoc.CENTER][lat]]
+    lat_par = latitudes[grid.lower_bounds[ESMF.StaggerLoc.CENTER][lat]:grid.upper_bounds[ESMF.StaggerLoc.CENTER][lat]]
     gridYCenter[...] = lat_par.reshape((1, lat_par.size))
 
     # create grid corners in a slightly different manner to account for the bounds format common in CF-like files
@@ -129,13 +168,13 @@ def grid_create_periodic(nlon, nlat, corners=False, domask=False):
 
         gridXCorner = grid.get_coords(lon, staggerloc=ESMF.StaggerLoc.CORNER)
         for i0 in range(ubx - lbx - 1):
-            gridXCorner[i0, :] = loncorner[i0+lbx, 0]
-        gridXCorner[i0 + 1, :] = loncorner[i0+lbx, 1]
+            gridXCorner[i0, :] = lon_corners[i0+lbx, 0]
+        gridXCorner[i0 + 1, :] = lon_corners[i0+lbx, 1]
 
         gridYCorner = grid.get_coords(lat, staggerloc=ESMF.StaggerLoc.CORNER)
         for i1 in range(uby - lby - 1):
-            gridYCorner[:, i1] = latcorner[i1+lby, 0]
-        gridYCorner[:, i1 + 1] = latcorner[i1+lby, 1]
+            gridYCorner[:, i1] = lat_corners[i1+lby, 0]
+        gridYCorner[:, i1 + 1] = lat_corners[i1+lby, 1]
 
     # add an arbitrary mask
     if domask:
@@ -146,8 +185,10 @@ def grid_create_periodic(nlon, nlat, corners=False, domask=False):
 
     return grid
 
-def grid_create_3d(xdom, ydom, zdom, nx, ny, nz, corners=False, domask=False, doarea=False):
+def grid_create_from_bounds_3d(xdom, ydom, zdom, nx, ny, nz, corners=False, domask=False, doarea=False):
     """
+    Create a 3 dimensional Grid using the bounds of the domain defined in the `xdom` and `ydom` lists. The parameters
+    `nx`, `ny` and `nz` are used to define the number coordinate points between the bounds of the domain.
     :param xdom: 2,1 list containing the x domain
     :param ydom: 2,1 list conatining the y domain
     :param zdom: 2,1 list conatining the z domain
@@ -177,22 +218,43 @@ def grid_create_3d(xdom, ydom, zdom, nx, ny, nz, corners=False, domask=False, do
     zcorner = np.array([zs[0:-1], zs[1::]]).T
     zcenter = (zcorner[:, 1] + zcorner[:, 0]) / 2
 
+    grid = grid_create_from_coordinates_3d(xcenter, ycenter, zcenter,
+                                           xcorners=xcorner, ycorners=ycorner, zcorners=zcorner,
+                                           corners=corners, domask=domask, doarea=doarea)
+    return grid
+
+def grid_create_from_coordinates_3d(xcoords, ycoords, zcoords, xcorners=False, ycorners=False, zcorners=False, corners=False, domask=False, doarea=False):
+    """
+    Create a 3 dimensional Grid using the xcoordinates, ycoordinates and zcoordinates.
+    :param xcoords: The 1st dimension or 'x' coordinates at cell centers, as a Python list or numpy Array
+    :param ycoords: The 2nd dimension or 'y' coordinates at cell centers, as a Python list or numpy Array
+    :param zcoords: The 3rd dimension or 'z' coordinates at cell centers, as a Python list or numpy Array
+    :param xcorners: The 1st dimension or 'x' coordinates at cell corners, as a Python list or numpy Array
+    :param ycorners: The 2nd dimension or 'y' coordinates at cell corners, as a Python list or numpy Array
+    :param zcorners: The 3rd dimension or 'z' coordinates at cell corners, as a Python list or numpy Array
+    :param corners: boolean to determine whether or not to add corner coordinates to this grid
+    :param domask: boolean to determine whether to set an arbitrary mask or not
+    :param doarea: boolean to determine whether to set an arbitrary area values or not
+    :return: grid
+    """
+    [x, y, z] = [0, 1, 2]
+
     # create a grid given the number of grid cells in each dimension, the center stagger location is allocated and the
     # Cartesian coordinate system is specified
-    max_index = np.array([nx, ny, nz])
+    max_index = np.array([len(xcoords), len(ycoords), len(zcoords)])
     grid = ESMF.Grid(max_index, staggerloc=[ESMF.StaggerLoc.CENTER_VCENTER], coord_sys=ESMF.CoordSys.CART)
 
     # set the grid coordinates using numpy arrays, parallel case is handled using grid bounds
     gridXCenter = grid.get_coords(x)
-    x_par = xcenter[grid.lower_bounds[ESMF.StaggerLoc.CENTER_VCENTER][x]:grid.upper_bounds[ESMF.StaggerLoc.CENTER_VCENTER][x]]
+    x_par = xcoords[grid.lower_bounds[ESMF.StaggerLoc.CENTER_VCENTER][x]:grid.upper_bounds[ESMF.StaggerLoc.CENTER_VCENTER][x]]
     gridXCenter[...] = x_par.reshape(x_par.size, 1, 1)
 
     gridYCenter = grid.get_coords(y)
-    y_par = ycenter[grid.lower_bounds[ESMF.StaggerLoc.CENTER_VCENTER][y]:grid.upper_bounds[ESMF.StaggerLoc.CENTER_VCENTER][y]]
+    y_par = ycoords[grid.lower_bounds[ESMF.StaggerLoc.CENTER_VCENTER][y]:grid.upper_bounds[ESMF.StaggerLoc.CENTER_VCENTER][y]]
     gridYCenter[...] = y_par.reshape(1, y_par.size, 1)
 
     gridZCenter = grid.get_coords(z)
-    z_par = zcenter[grid.lower_bounds[ESMF.StaggerLoc.CENTER_VCENTER][z]:grid.upper_bounds[ESMF.StaggerLoc.CENTER_VCENTER][z]]
+    z_par = zcoords[grid.lower_bounds[ESMF.StaggerLoc.CENTER_VCENTER][z]:grid.upper_bounds[ESMF.StaggerLoc.CENTER_VCENTER][z]]
     gridZCenter[...] = z_par.reshape(1, 1, z_par.size)
 
     # create grid corners in a slightly different manner to account for the bounds format common in CF-like files
@@ -207,18 +269,18 @@ def grid_create_3d(xdom, ydom, zdom, nx, ny, nz, corners=False, domask=False, do
 
         gridXCorner = grid.get_coords(x, staggerloc=ESMF.StaggerLoc.CORNER_VFACE)
         for i0 in range(ubx - lbx - 1):
-            gridXCorner[i0, :, :] = xcorner[i0+lbx, 0]
-        gridXCorner[i0 + 1, :, :] = xcorner[i0+lbx, 1]
+            gridXCorner[i0, :, :] = xcorners[i0+lbx, 0]
+        gridXCorner[i0 + 1, :, :] = xcorners[i0+lbx, 1]
 
         gridYCorner = grid.get_coords(y, staggerloc=ESMF.StaggerLoc.CORNER_VFACE)
         for i1 in range(uby - lby - 1):
-            gridYCorner[:, i1, :] = ycorner[i1+lby, 0]
-        gridYCorner[:, i1 + 1, :] = ycorner[i1+lby, 1]
+            gridYCorner[:, i1, :] = ycorners[i1+lby, 0]
+        gridYCorner[:, i1 + 1, :] = ycorners[i1+lby, 1]
 
         gridZCorner = grid.get_coords(z, staggerloc=ESMF.StaggerLoc.CORNER_VFACE)
         for i2 in range(ubz - lbz - 1):
-            gridZCorner[:, :, i2] = zcorner[i2+lbz, 0]
-        gridZCorner[:, :, i2 + 1] = zcorner[i2+lbz, 1]
+            gridZCorner[:, :, i2] = zcorners[i2+lbz, 0]
+        gridZCorner[:, :, i2 + 1] = zcorners[i2+lbz, 1]
 
     # add an arbitrary mask
     if domask:
@@ -235,8 +297,10 @@ def grid_create_3d(xdom, ydom, zdom, nx, ny, nz, corners=False, domask=False, do
 
     return grid
 
-def grid_create_periodic_3d(nlon, nlat, nz, corners=False, domask=False):
+def grid_create_from_bounds_periodic_3d(nlon, nlat, nz, corners=False, domask=False):
     """
+    Create a 3 dimensional periodic Grid with `nlon` number of grid cells in the longitude domain [0, 360] and `nlat`
+    number of grid cells in the latitude domain [-90, 90] and `nz` number of grid cells in the z domain (thick sphere).
     :param nlons: number of longitude values at cell centers
     :param nlats: number of latitude values at cell centers
     :param nz: number of height values at cell centers
@@ -262,21 +326,43 @@ def grid_create_periodic_3d(nlon, nlat, nz, corners=False, domask=False):
     zcorner = np.array([zs[0:-1], zs[1::]]).T
     zcenter = (zcorner[:, 1] + zcorner[:, 0]) / 2
 
+    grid = grid_create_from_coordinates_periodic_3d(loncenter, latcenter, zcenter,
+                                                    lon_corners=loncorner, lat_corners=latcorner, z_corners=zcorner,
+                                                    corners=corners, domask=domask)
+    return grid
+
+def grid_create_from_coordinates_periodic_3d(longitudes, latitudes, heights,
+                                             lon_corners=False, lat_corners=False, z_corners=False,
+                                             corners=False, domask=False):
+    """
+    Create a 3 dimensional periodic Grid using longitudes, latitudes and heights (thick sphere).
+    :param longitudes: longitude coordinate values at cell centers
+    :param latitudes: latitude coordinate values at cell centers
+    :param heights: height coordinate values at cell centers
+    :param lon_corners: longitude coordinate values at cell corners
+    :param lat_corners: latitude coordinate values at cell corners
+    :param z_corners: height coordinate values at cell corners
+    :param corners: boolean to determine whether or not to add corner coordinates to this grid
+    :param domask: boolean to determine whether to set an arbitrary mask or not
+    :return: grid
+    """
+    [lon, lat, z] = [0, 1, 2]
+
     # create a grid given the number of grid cells in each dimension the center stagger location is allocated
-    max_index = np.array([nlon, nlat, nz])
+    max_index = np.array([len(longitudes), len(latitudes), len(heights)])
     grid = ESMF.Grid(max_index, num_peri_dims=1, staggerloc=[ESMF.StaggerLoc.CENTER])
 
     # set the grid coordinates using numpy arrays, parallel case is handled using grid bounds
     gridXCenter = grid.get_coords(lon)
-    lon_par = loncenter[grid.lower_bounds[ESMF.StaggerLoc.CENTER][lon]:grid.upper_bounds[ESMF.StaggerLoc.CENTER][lon]]
+    lon_par = longitudes[grid.lower_bounds[ESMF.StaggerLoc.CENTER][lon]:grid.upper_bounds[ESMF.StaggerLoc.CENTER][lon]]
     gridXCenter[...] = lon_par.reshape((lon_par.size, 1, 1))
 
     gridYCenter = grid.get_coords(lat)
-    lat_par = latcenter[grid.lower_bounds[ESMF.StaggerLoc.CENTER][lat]:grid.upper_bounds[ESMF.StaggerLoc.CENTER][lat]]
+    lat_par = latitudes[grid.lower_bounds[ESMF.StaggerLoc.CENTER][lat]:grid.upper_bounds[ESMF.StaggerLoc.CENTER][lat]]
     gridYCenter[...] = lat_par.reshape((1, lat_par.size, 1))
 
     gridZCenter = grid.get_coords(z)
-    z_par = zcenter[grid.lower_bounds[ESMF.StaggerLoc.CENTER][z]:grid.upper_bounds[ESMF.StaggerLoc.CENTER][z]]
+    z_par = heights[grid.lower_bounds[ESMF.StaggerLoc.CENTER][z]:grid.upper_bounds[ESMF.StaggerLoc.CENTER][z]]
     gridZCenter[...] = z_par.reshape((1, 1, z_par.size))
 
     # create grid corners in a slightly different manner to account for the bounds format common in CF-like files
@@ -291,18 +377,18 @@ def grid_create_periodic_3d(nlon, nlat, nz, corners=False, domask=False):
 
         gridXCorner = grid.get_coords(lon, staggerloc=ESMF.StaggerLoc.CORNER)
         for i0 in range(ubx - lbx - 1):
-            gridXCorner[i0, :, :] = loncorner[i0+lbx, 0]
-        gridXCorner[i0 + 1, :, :] = loncorner[i0+lbx, 1]
+            gridXCorner[i0, :, :] = lon_corners[i0+lbx, 0]
+        gridXCorner[i0 + 1, :, :] = lon_corners[i0+lbx, 1]
 
         gridYCorner = grid.get_coords(lat, staggerloc=ESMF.StaggerLoc.CORNER)
         for i1 in range(uby - lby - 1):
-            gridYCorner[:, i1, :] = latcorner[i1+lby, 0]
-        gridYCorner[:, i1 + 1, :] = latcorner[i1+lby, 1]
+            gridYCorner[:, i1, :] = lat_corners[i1+lby, 0]
+        gridYCorner[:, i1 + 1, :] = lat_corners[i1+lby, 1]
 
         gridZCorner = grid.get_coords(z, staggerloc=ESMF.StaggerLoc.CORNER)
         for i2 in range(ubz - lbz - 1):
-            gridZCorner[:, :, i2] = zcorner[i2+lbz, 0]
-        gridZCorner[:, :, i2 + 1] = zcorner[i2+lbz, 1]
+            gridZCorner[:, :, i2] = z_corners[i2+lbz, 0]
+        gridZCorner[:, :, i2 + 1] = z_corners[i2+lbz, 1]
 
     # add an arbitrary mask
     if domask:

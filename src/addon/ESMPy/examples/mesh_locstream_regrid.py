@@ -6,8 +6,8 @@ import numpy
 # This call enables debug logging
 # ESMF.Manager(debug=True)
 
-from ESMF.test.test_api.mesh_utilities import mesh_create_5, mesh_create_5_parallel
-from ESMF.test.test_api.locstream_utilities import create_locstream_16, create_locstream_16_parallel
+from ESMF.util.mesh_utilities import mesh_create_5, mesh_create_5_parallel
+from ESMF.util.locstream_utilities import create_locstream_16, create_locstream_16_parallel
 if ESMF.pet_count() == 1:
     mesh, _, _, _, _, _ = mesh_create_5()
     locstream = create_locstream_16()

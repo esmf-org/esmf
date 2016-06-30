@@ -4,9 +4,9 @@ regrid unit test file
 
 from ESMF import *
 from ESMF.test.base import TestBase, attr
-from ESMF.test.test_api.mesh_utilities import *
-from ESMF.test.test_api.grid_utilities import *
-from ESMF.test.test_api.field_utilities import compare_fields
+from ESMF.util.mesh_utilities import *
+from ESMF.util.grid_utilities import *
+from ESMF.util.field_utilities import compare_fields
 
 class TestRegrid(TestBase):
 
@@ -145,7 +145,7 @@ class TestRegrid(TestBase):
             srcfield.data[i] = 20.0
 
         # create grid
-        grid = grid_create([0, 4], [0, 4], 8, 8, corners=True, domask=True)
+        grid = grid_create_from_bounds([0, 4], [0, 4], 8, 8, corners=True, domask=True)
 
         [x, y] = [0, 1]
 
@@ -183,7 +183,7 @@ class TestRegrid(TestBase):
                 mesh_create_50()
 
         # create grid
-        grid = grid_create([0, 4], [0, 4], 8, 8, corners=True, doarea=True)
+        grid = grid_create_from_bounds([0, 4], [0, 4], 8, 8, corners=True, doarea=True)
 
         [x, y] = [0, 1]
 
@@ -214,8 +214,8 @@ class TestRegrid(TestBase):
             parallel = True
 
         # create a grid
-        srcgrid = grid_create_periodic(60, 30, corners=True, domask=True)
-        dstgrid = grid_create_periodic(55, 28, corners=True)
+        srcgrid = grid_create_from_bounds_periodic(60, 30, corners=True, domask=True)
+        dstgrid = grid_create_from_bounds_periodic(55, 28, corners=True)
 
         # create the Fields
         srcfield = ESMF.Field(srcgrid, name='srcfield')
@@ -259,8 +259,8 @@ class TestRegrid(TestBase):
                 raise NameError('MPI rank must be 4 in parallel mode!')
 
         # create a grid
-        srcgrid = grid_create_3d([0, 21], [0, 21], [0, 21], 21, 21, 21, corners=False)
-        dstgrid = grid_create_3d([0.5, 19.5], [0.5, 19.5], [0.5, 19.5], 19, 19, 19, corners=False)
+        srcgrid = grid_create_from_bounds_3d([0, 21], [0, 21], [0, 21], 21, 21, 21, corners=False)
+        dstgrid = grid_create_from_bounds_3d([0.5, 19.5], [0.5, 19.5], [0.5, 19.5], 19, 19, 19, corners=False)
 
         # create Field objects on the Meshes
         srcfield = ESMF.Field(srcgrid, name='srcfield')
@@ -290,8 +290,8 @@ class TestRegrid(TestBase):
                 raise NameError('MPI rank must be 4 in parallel mode!')
 
         # create a grid
-        srcgrid = grid_create_periodic_3d(60, 60, 14, corners=False)
-        dstgrid = grid_create_periodic_3d(50, 50, 11, corners=False)
+        srcgrid = grid_create_from_bounds_periodic_3d(60, 60, 14, corners=False)
+        dstgrid = grid_create_from_bounds_periodic_3d(50, 50, 11, corners=False)
 
         # create Field objects on the Meshes
         srcfield = ESMF.Field(srcgrid, name='srcfield')
@@ -322,8 +322,8 @@ class TestRegrid(TestBase):
                 raise NameError('MPI rank must be 4 in parallel mode!')
 
         # create a grid
-        srcgrid = grid_create_3d([0, 21], [0, 21], [0, 21], 21, 21, 21, corners=True)
-        dstgrid = grid_create_3d([0.5, 19.5], [0.5, 19.5], [0.5, 19.5], 19, 19, 19, corners=True)
+        srcgrid = grid_create_from_bounds_3d([0, 21], [0, 21], [0, 21], 21, 21, 21, corners=True)
+        dstgrid = grid_create_from_bounds_3d([0.5, 19.5], [0.5, 19.5], [0.5, 19.5], 19, 19, 19, corners=True)
 
         # create Field objects on the Meshes
         srcfield = ESMF.Field(srcgrid, name='srcfield')
@@ -364,8 +364,8 @@ class TestRegrid(TestBase):
                 raise NameError('MPI rank must be 4 in parallel mode!')
 
         # create two unique Grid objects
-        srcgrid = grid_create([0, 21], [0, 21], 21, 21, corners=True, domask=True)
-        dstgrid = grid_create([0.5, 19.5], [0.5, 19.5], 19, 19, corners=True)
+        srcgrid = grid_create_from_bounds([0, 21], [0, 21], 21, 21, corners=True, domask=True)
+        dstgrid = grid_create_from_bounds([0.5, 19.5], [0.5, 19.5], 19, 19, corners=True)
 
         # create Field objects on the Meshes
         srcfield = ESMF.Field(srcgrid, name='srcfield')
@@ -409,9 +409,9 @@ class TestRegrid(TestBase):
                 raise NameError('MPI rank must be 4 in parallel mode!')
 
         # create two unique Grid objects
-        srcgrid = grid_create([0, 21], [0, 21], 21, 21, corners=True, domask=True,
-                              ctk=ESMF.TypeKind.R4)
-        dstgrid = grid_create([0.5, 19.5], [0.5, 19.5], 19, 19, corners=True)
+        srcgrid = grid_create_from_bounds([0, 21], [0, 21], 21, 21, corners=True, domask=True,
+                                          ctk=ESMF.TypeKind.R4)
+        dstgrid = grid_create_from_bounds([0.5, 19.5], [0.5, 19.5], 19, 19, corners=True)
 
         # create Field objects on the Meshes
         srcfield = ESMF.Field(srcgrid, name='srcfield')
@@ -463,7 +463,7 @@ class TestRegrid(TestBase):
                 mesh_create_50(domask=True, doarea=True)
 
         # create a grid
-        grid = grid_create([0, 4], [0, 4], 8, 8, corners=True, doarea=True)
+        grid = grid_create_from_bounds([0, 4], [0, 4], 8, 8, corners=True, doarea=True)
 
         # create Field objects on the Meshes
         srcfield = ESMF.Field(mesh, name='srcfield', meshloc=ESMF.MeshLoc.ELEMENT)
@@ -518,7 +518,7 @@ class TestRegrid(TestBase):
                 mesh_create_50()
 
         # create a grid
-        grid = grid_create([0, 4], [0, 4], 8, 8, corners=True)
+        grid = grid_create_from_bounds([0, 4], [0, 4], 8, 8, corners=True)
 
         # create Fields
         srcfield = ESMF.Field(mesh, name='srcfield', meshloc=ESMF.MeshLoc.ELEMENT)
@@ -563,7 +563,7 @@ class TestRegrid(TestBase):
             parallel = True
 
         # create a grid
-        grid = grid_create([0, 4], [0, 4], 8, 8, corners=True, domask=True)
+        grid = grid_create_from_bounds([0, 4], [0, 4], 8, 8, corners=True, domask=True)
 
         # create a Mesh
         if parallel:
@@ -605,7 +605,7 @@ class TestRegrid(TestBase):
             parallel = True
 
         # create a grid
-        grid = grid_create([0, 4], [0, 4], 8, 8, corners=True)
+        grid = grid_create_from_bounds([0, 4], [0, 4], 8, 8, corners=True)
 
         # create a Mesh
         if parallel:
@@ -711,7 +711,7 @@ class TestRegrid(TestBase):
                 mesh_create_50_ngons()
 
         # create a grid
-        grid = grid_create([0, 4], [0, 4], 8, 8, corners=True, doarea=True)
+        grid = grid_create_from_bounds([0, 4], [0, 4], 8, 8, corners=True, doarea=True)
 
         # create Field objects on the Meshes
         srcfield = ESMF.Field(mesh, name='srcfield', meshloc=ESMF.MeshLoc.ELEMENT)
@@ -761,7 +761,7 @@ class TestRegrid(TestBase):
             mesh_create_4_ngons()
 
         # create a grid
-        grid = grid_create([0, 4], [0, 4], 8, 8, corners=True, doarea=True)
+        grid = grid_create_from_bounds([0, 4], [0, 4], 8, 8, corners=True, doarea=True)
 
         # create Field objects on the Meshes
         srcfield = ESMF.Field(mesh, name='srcfield', meshloc=ESMF.MeshLoc.ELEMENT)
@@ -817,7 +817,7 @@ class TestRegrid(TestBase):
                 mesh_create_50_ngons()
 
         # create a grid
-        grid = grid_create([0, 4], [0, 4], 8, 8, corners=True, doarea=True)
+        grid = grid_create_from_bounds([0, 4], [0, 4], 8, 8, corners=True, doarea=True)
 
         # create Field objects on the Meshes
         srcfield = ESMF.Field(mesh, name='srcfield', meshloc=ESMF.MeshLoc.NODE)

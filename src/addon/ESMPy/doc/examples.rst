@@ -53,42 +53,42 @@ necessary to regrid data between Fields built on Grids, Meshes and LocStreams.
 LocStream Create
 ~~~~~~~~~~~~~~~~
 
-.. literalinclude:: ../src/ESMF/test/test_api/locstream_utilities.py
+.. literalinclude:: ../src/ESMF/util/locstream_utilities.py
         :pyobject: create_locstream_spherical_16
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 LocStream Create Parallel
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. literalinclude:: ../src/ESMF/test/test_api/locstream_utilities.py
+.. literalinclude:: ../src/ESMF/util/locstream_utilities.py
         :pyobject: create_locstream_spherical_16_parallel
 
 ~~~~~~~~~~~~~~~~
 Create a 2D Grid
 ~~~~~~~~~~~~~~~~
 
-    .. literalinclude:: ../src/ESMF/test/test_api/grid_utilities.py
-        :pyobject: grid_create
+    .. literalinclude:: ../src/ESMF/util/grid_utilities.py
+        :pyobject: grid_create_from_coordinates
 
 ~~~~~~~~~~~~~~~~
 Create a 3D Grid
 ~~~~~~~~~~~~~~~~
 
-    .. literalinclude:: ../src/ESMF/test/test_api/grid_utilities.py
-        :pyobject: grid_create_3d
+    .. literalinclude:: ../src/ESMF/util/grid_utilities.py
+        :pyobject: grid_create_from_coordinates_3d
 
 ~~~~~~~~~~~~~~~~~~~~~~
 Create a periodic Grid
 ~~~~~~~~~~~~~~~~~~~~~~
 
-    .. literalinclude:: ../src/ESMF/test/test_api/grid_utilities.py
-        :pyobject: grid_create_periodic
+    .. literalinclude:: ../src/ESMF/util/grid_utilities.py
+        :pyobject: grid_create_from_coordinates_periodic
 
 ~~~~~~~~~~~~~~~~~~~~~~~
 Create a 5 element Mesh
 ~~~~~~~~~~~~~~~~~~~~~~~
 
-    .. literalinclude:: ../src/ESMF/test/test_api/mesh_utilities.py
+    .. literalinclude:: ../src/ESMF/util/mesh_utilities.py
         :pyobject: mesh_create_5
 
 ~~~~~~~~~~~~~~
@@ -103,7 +103,7 @@ Create a Field
 Initialize an analytic Field
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    .. literalinclude:: ../src/ESMF/test/test_api/grid_utilities.py
+    .. literalinclude:: ../src/ESMF/util/grid_utilities.py
         :pyobject: initialize_field_grid_periodic
 
 
@@ -119,7 +119,7 @@ Run ESMPy regridding
 Compute Field mass
 ~~~~~~~~~~~~~~~~~~
 
-  .. literalinclude:: ../src/ESMF/test/test_api/grid_utilities.py
+  .. literalinclude:: ../src/ESMF/util/grid_utilities.py
     :pyobject: compute_mass_grid
 
 

@@ -15,7 +15,7 @@ import numpy
 # This call enables debug logging
 ESMF.Manager(debug=True)
 
-from ESMF.test.test_api.locstream_utilities import create_locstream_spherical_16, create_locstream_spherical_16_parallel
+from ESMF.util.locstream_utilities import create_locstream_spherical_16, create_locstream_spherical_16_parallel
 coord_sys=ESMF.CoordSys.SPH_DEG
 domask=True
 if ESMF.pet_count() == 1:
