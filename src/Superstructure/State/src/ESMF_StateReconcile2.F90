@@ -1365,7 +1365,6 @@ contains
         rcToReturn=rc)) return
 
     ! Update local Base
-
     do, i=0, npets-1
       if (i /= mypet) then
         base_temp = ESMF_BaseDeserialize (buffer_recv, offset=recv_offsets(i),  &
@@ -1384,6 +1383,11 @@ contains
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
+
+        call ESMF_BaseDestroy(base_temp, noGarbage=.true., rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
       end if
     end do
 
@@ -1392,6 +1396,11 @@ contains
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT,  &
         rcToReturn=rc)) return
+
+    deallocate(buffer)
+    deallocate(recv_sizes)
+    deallocate(recv_offsets)
+    deallocate(buffer_recv)
 
     rc = ESMF_SUCCESS
 
