@@ -1384,6 +1384,11 @@ contains
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
+
+        call ESMF_BaseDestroy(base_temp, noGarbage=.true., rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
       end if
     end do
 
@@ -1392,6 +1397,10 @@ contains
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT,  &
         rcToReturn=rc)) return
+
+    deallocate(buffer)
+    deallocate(recv_sizes)
+    deallocate(buffer_recv)
 
     rc = ESMF_SUCCESS
 
