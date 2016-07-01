@@ -36,10 +36,6 @@
 !------------------------------------------------------------------------------
 ^endif
 
-! The following macro is used to get around the first pass preprocessing,
-! which treats the string concatenation operator // as an inline comment.
-^define CONCAT /
-
 ! variable declarations
 #define AttributeTestVariablesMacro() \
       character(ESMF_MAXSTR)                :: attrname, attrnameOut, attrvalue @\
@@ -174,12 +170,12 @@
       !mtag_ex @\
       ! Add a long value character to mobj Test @\
       call ESMF_AttributeSet(mname, name="LongValue", value= & @\
-        "This is a really long line " CONCAT/ & @\
-        "that's broken into multiple lines " CONCAT/ & @\
-        "to compile, and it is also a runon " CONCAT/ & @\
-        "sentence, which is bad grammar but a good" CONCAT/ & @\
-        " test of how the Attributes behave with long" CONCAT/ & @\
-        " values, yada yada yada!!!", rc=rc) @\
+        "This is a really long line & & @\
+        &that's broken into multiple lines & @\
+        &to compile, and it is also a runon & @\
+        &sentence, which is bad grammar but a good & @\
+        &test of how the Attributes behave with long & @\
+        &values, yada yada yada!!!", rc=rc) @\
       write(failMsg, *) "Did not return ESMF_SUCCESS" @\
       write(name, *) "Adding a long value character Attribute to mobj Test" @\
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE) @\
@@ -191,12 +187,12 @@
       !mtag_ex @\
       ! Add ASCII characters to an Attribute on an Array Test @\
       correct = .true. @\
-      inASCII = "!""#$%&'()*+,-./0123456789" CONCAT/ & @\
-                ":;<=>?" CONCAT/ & @\
-                "ABCDEFGHIJKLMNOPQRSTUVWXYZ" CONCAT/ & @\
-                "[\]^_`" CONCAT/ & @\
-                "abcdefghijklmnopqrstuvwxyz" CONCAT/ & @\
-                "{|}~" @\
+      inASCII = "!""#$%&'()*+,-./0123456789& @\
+                &:;<=>?& @\
+                &ABCDEFGHIJKLMNOPQRSTUVWXYZ& @\
+                &[\]^_`& @\
+                &abcdefghijklmnopqrstuvwxyz& @\
+                &{|}~" @\
       do i=1,len(trim(inASCII)) @\
         call ESMF_AttributeSet(mname, name=inASCII(i:i), value=inASCII, rc=rc) @\
         if (rc /= ESMF_SUCCESS) then @\
