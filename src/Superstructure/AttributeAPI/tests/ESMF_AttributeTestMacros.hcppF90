@@ -170,7 +170,7 @@
       !mtag_ex @\
       ! Add a long value character to mobj Test @\
       call ESMF_AttributeSet(mname, name="LongValue", value= & @\
-        "This is a really long line & & @\
+        "This is a really long line & @\
         &that's broken into multiple lines & @\
         &to compile, and it is also a runon & @\
         &sentence, which is bad grammar but a good & @\
@@ -193,7 +193,7 @@
                 &[\]^_`& @\
                 &abcdefghijklmnopqrstuvwxyz& @\
                 &{|}~" @\
-      do i=1,len(trim(inASCII)) @\
+      do i=1,len_trim(inASCII) @\
         call ESMF_AttributeSet(mname, name=inASCII(i:i), value=inASCII, rc=rc) @\
         if (rc /= ESMF_SUCCESS) then @\
             correct = .false. @\
