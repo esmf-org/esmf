@@ -34,6 +34,7 @@ module NUOPC_Comp
   public NUOPC_CompDerive
   public NUOPC_CompFilterPhaseMap
   public NUOPC_CompSearchPhaseMap
+  public NUOPC_CompSearchRevPhaseMap
   public NUOPC_CompSetClock
   public NUOPC_CompSetEntryPoint
   public NUOPC_CompSetInternalEntryPoint
@@ -103,6 +104,11 @@ module NUOPC_Comp
   interface NUOPC_CompSearchPhaseMap
     module procedure NUOPC_GridCompSearchPhaseMap
     module procedure NUOPC_CplCompSearchPhaseMap
+  end interface
+  !---------------------------------------------
+  interface NUOPC_CompSearchRevPhaseMap
+    module procedure NUOPC_GridCompSearchRevPhaseMap
+    module procedure NUOPC_CplCompSearchRevPhaseMap
   end interface
   !---------------------------------------------
   interface NUOPC_CompSetClock
@@ -1824,8 +1830,7 @@ module NUOPC_Comp
         msg="Deallocation of phases.", &
         line=__LINE__, &
         file=trim(name)//":"//FILENAME, rcToReturn=rc)) return  ! bail out
-
-    endif    
+    endif
   end subroutine
   !-----------------------------------------------------------------------------
 
@@ -1916,6 +1921,202 @@ module NUOPC_Comp
         ind = index(tempString, "=")
         max = len(tempString)
         read (tempString(ind+1:max), "(i4)") phaseIndex ! obtain phase index
+      endif
+      ! clean-up
+      deallocate(phases, stat=stat)
+      if (ESMF_LogFoundDeallocError(statusToCheck=stat, &
+        msg="Deallocation of phases.", &
+        line=__LINE__, &
+        file=trim(name)//":"//FILENAME, rcToReturn=rc)) return  ! bail out
+    endif
+  end subroutine
+  !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+!BOP
+! !IROUTINE: NUOPC_CompSearchRevPhaseMap - Reverse Search the Phase Map of a GridComp
+! !INTERFACE:
+  ! Private name; call using NUOPC_CompSearchRevPhaseMap()
+  subroutine NUOPC_GridCompSearchRevPhaseMap(comp, methodflag, phaseIndex, &
+    phaseLabel, rc)
+! !ARGUMENTS:
+    type(ESMF_GridComp)                           :: comp
+    type(ESMF_Method_Flag), intent(in)            :: methodflag
+    integer,                intent(in),  optional :: phaseIndex
+    character(len=*),       intent(out)           :: phaseLabel
+    integer,                intent(out), optional :: rc 
+!
+! !DESCRIPTION:
+! Search all PhaseMap entries in a GridComp (i.e. Model, Mediator, or Driver)
+! to see if the ESMF {\tt phaseIndex} is found. Return the associated
+! {\tt phaseLabel}, or an empty string if not found. If {\tt phaseIndex} is not
+! specified, set {\tt phaseLabel} to the first entry in the PhaseMap, or 
+! an empty string if there are no entries.
+!EOP
+  !-----------------------------------------------------------------------------
+    ! local variables
+    integer                   :: i
+    integer                   :: itemCount, stat, ind, max
+    character(ESMF_MAXSTR)    :: name, pString
+    character(len=40)         :: attributeName
+    logical                   :: phaseFlag
+    character(len=NUOPC_PhaseMapStringLength), pointer  :: phases(:)
+    character(len=NUOPC_PhaseMapStringLength)           :: tempString
+
+    rc = ESMF_SUCCESS
+
+    ! query the Component for info
+    call ESMF_GridCompGet(comp, name=name, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+
+    ! determine which phaseMap to deal with
+    attributeName = "UnknownPhaseMap" ! initialize to something obvious
+    if (methodflag == ESMF_METHOD_INITIALIZE) then
+      attributeName = "InitializePhaseMap"
+    elseif (methodflag == ESMF_METHOD_RUN) then
+      attributeName = "RunPhaseMap"
+    elseif (methodflag == ESMF_METHOD_FINALIZE) then
+      attributeName = "FinalizePhaseMap"
+    endif
+    
+    phaseLabel = ""             ! initialize to empty string
+    phaseFlag  = .false.        ! initialize
+    
+    ! access phaseMap info
+    call ESMF_AttributeGet(comp, name=trim(attributeName), &
+      itemCount=itemCount, convention="NUOPC", purpose="Instance", &
+      attnestflag=ESMF_ATTNEST_ON, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    
+    ! search the phaseMap
+    if (itemCount > 0) then
+      allocate(phases(itemCount), stat=stat)
+      if (ESMF_LogFoundAllocError(statusToCheck=stat, &
+        msg="Allocation of temporary data structure.", &
+        line=__LINE__, &
+        file=trim(name)//":"//FILENAME, rcToReturn=rc)) return  ! bail out
+      call ESMF_AttributeGet(comp, name=trim(attributeName), valueList=phases, &
+        convention="NUOPC", purpose="Instance", attnestflag=ESMF_ATTNEST_ON, &
+        rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+      if (present(phaseIndex)) then
+        write (pString,*) phaseIndex
+        do i=1, itemCount
+          if (index(phases(i),trim("="//trim(adjustl(pString)))) > 0) exit
+        enddo
+        if (i <= itemCount) then
+          ! phaseIndex was found
+          phaseFlag = .true.
+          tempString = trim(phases(i))
+        endif
+      else
+        phaseFlag = .true.
+        tempString = trim(phases(1))  ! by default select the first map entry
+      endif
+      if (phaseFlag) then
+        ind = index(tempString, "=")
+        read (tempString(1:ind-1), "(A)") phaseLabel ! obtain phase index
+      endif
+      ! clean-up
+      deallocate(phases, stat=stat)
+      if (ESMF_LogFoundDeallocError(statusToCheck=stat, &
+        msg="Deallocation of phases.", &
+        line=__LINE__, &
+        file=trim(name)//":"//FILENAME, rcToReturn=rc)) return  ! bail out
+    endif
+  end subroutine
+  !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+!BOP
+! !IROUTINE: NUOPC_CompSearchRevPhaseMap - Reverse Search the Phase Map of a CplComp
+! !INTERFACE:
+  ! Private name; call using NUOPC_CompSearchRevPhaseMap()
+  subroutine NUOPC_CplCompSearchRevPhaseMap(comp, methodflag, phaseIndex, &
+    phaseLabel, rc)
+! !ARGUMENTS:
+    type(ESMF_CplComp)                            :: comp
+    type(ESMF_Method_Flag), intent(in)            :: methodflag
+    integer,                intent(in),  optional :: phaseIndex
+    character(len=*),       intent(out)           :: phaseLabel
+    integer,                intent(out), optional :: rc 
+!
+! !DESCRIPTION:
+! Search all PhaseMap entries in a CplComp (i.e. Connector)
+! to see if the ESMF {\tt phaseIndex} is found. Return the associated
+! {\tt phaseLabel}, or an empty string if not found. If {\tt phaseIndex} is not
+! specified, set {\tt phaseLabel} to the first entry in the PhaseMap, or 
+! an empty string if there are no entries.
+!EOP
+  !-----------------------------------------------------------------------------
+    ! local variables
+    integer                   :: i
+    integer                   :: itemCount, stat, ind, max
+    character(ESMF_MAXSTR)    :: name, pString
+    character(len=40)         :: attributeName
+    logical                   :: phaseFlag
+    character(len=NUOPC_PhaseMapStringLength), pointer  :: phases(:)
+    character(len=NUOPC_PhaseMapStringLength)           :: tempString
+
+    rc = ESMF_SUCCESS
+
+    ! query the Component for info
+    call ESMF_CplCompGet(comp, name=name, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+
+    ! determine which phaseMap to deal with
+    attributeName = "UnknownPhaseMap" ! initialize to something obvious
+    if (methodflag == ESMF_METHOD_INITIALIZE) then
+      attributeName = "InitializePhaseMap"
+    elseif (methodflag == ESMF_METHOD_RUN) then
+      attributeName = "RunPhaseMap"
+    elseif (methodflag == ESMF_METHOD_FINALIZE) then
+      attributeName = "FinalizePhaseMap"
+    endif
+    
+    phaseLabel = ""             ! initialize to empty string
+    phaseFlag  = .false.        ! initialize
+    
+    ! access phaseMap info
+    call ESMF_AttributeGet(comp, name=trim(attributeName), &
+      itemCount=itemCount, convention="NUOPC", purpose="Instance", &
+      attnestflag=ESMF_ATTNEST_ON, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    
+    ! search the phaseMap
+    if (itemCount > 0) then
+      allocate(phases(itemCount), stat=stat)
+      if (ESMF_LogFoundAllocError(statusToCheck=stat, &
+        msg="Allocation of temporary data structure.", &
+        line=__LINE__, &
+        file=trim(name)//":"//FILENAME, rcToReturn=rc)) return  ! bail out
+      call ESMF_AttributeGet(comp, name=trim(attributeName), valueList=phases, &
+        convention="NUOPC", purpose="Instance", attnestflag=ESMF_ATTNEST_ON, &
+        rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+      if (present(phaseIndex)) then
+        write (pString,*) phaseIndex
+        do i=1, itemCount
+          if (index(phases(i),trim("="//trim(adjustl(pString)))) > 0) exit
+        enddo
+        if (i <= itemCount) then
+          ! phaseIndex was found
+          phaseFlag = .true.
+          tempString = trim(phases(i))
+        endif
+      else
+        phaseFlag = .true.
+        tempString = trim(phases(1))  ! by default select the first map entry
+      endif
+      if (phaseFlag) then
+        ind = index(tempString, "=")
+        read (tempString(1:ind-1), "(A)") phaseLabel ! obtain phase index
       endif
       ! clean-up
       deallocate(phases, stat=stat)

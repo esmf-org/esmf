@@ -11,10 +11,6 @@
 !  Interface Component
 !-------------------------------------------------------------------------
 
-
-!TODO: make this macros available through ESMF as parameter or find other way
-#define ESMF_INIT_CREATED 82949521
-
 module ESMF_ComplianceICMod
 
   ! ESMF module
@@ -959,7 +955,7 @@ module ESMF_ComplianceICMod
 
     stateValid = .true.
     ! Ensure that the State is a valid object
-    if (ESMF_StateGetInit(state) /= ESMF_INIT_CREATED) then
+    if (.not.ESMF_StateIsCreated(state)) then
       call ESMF_LogWrite(trim(prefix)//" ==> The "//trim(referenceName)// &
         " is invalid!", &
         ESMF_LOGMSG_WARNING, rc=rc)
@@ -2152,7 +2148,7 @@ module ESMF_ComplianceICMod
       line=__LINE__, &
       file=FILENAME)) &
       return  ! bail out
-    if ((ESMF_ClockGetInit(clock) /= ESMF_INIT_CREATED) .or. &
+    if (.not.ESMF_ClockIsCreated(clock) .or. &
       (clockThis == ESMF_NULL_POINTER)) then
       call ESMF_LogWrite(trim(prefix)//" ==> The incoming Clock is invalid!", &
         ESMF_LOGMSG_WARNING, rc=rc)
@@ -2206,7 +2202,7 @@ module ESMF_ComplianceICMod
       line=__LINE__, &
       file=FILENAME)) &
       return  ! bail out
-    if ((ESMF_ClockGetInit(clock) /= ESMF_INIT_CREATED) .or. &
+    if (.not.ESMF_ClockIsCreated(clock) .or. &
       (clockThis == ESMF_NULL_POINTER)) clockValid = .false.
     ! Further ensure that the clockCopy is a valid object
     ! Clock has deep C++ implementation, thus must also check this pointer here
@@ -2215,7 +2211,7 @@ module ESMF_ComplianceICMod
       line=__LINE__, &
       file=FILENAME)) &
       return  ! bail out
-    if ((ESMF_ClockGetInit(clockCopy) /= ESMF_INIT_CREATED) .or. &
+    if (.not.ESMF_ClockIsCreated(clockCopy) .or. &
       (clockThis == ESMF_NULL_POINTER)) clockValid = .false.
     
     if (clockValid) then
@@ -2333,7 +2329,7 @@ module ESMF_ComplianceICMod
     
       clockInternalValid = .true.
       ! Ensure that the internalClock is a valid object
-      if (ESMF_ClockGetInit(clockInternal) /= ESMF_INIT_CREATED) &
+      if (.not.ESMF_ClockIsCreated(clockInternal)) &
         clockInternalValid = .false.
 
       if (.not.clockInternalValid) then
@@ -2353,7 +2349,7 @@ module ESMF_ComplianceICMod
     
     clockValid = .true.
     ! Ensure that the Clock is a valid object
-    if (ESMF_ClockGetInit(clock) /= ESMF_INIT_CREATED) &
+    if (.not.ESMF_ClockIsCreated(clock)) &
       clockValid = .false.
     
     if (.not.clockValid) then

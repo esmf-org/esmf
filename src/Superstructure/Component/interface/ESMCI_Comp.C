@@ -63,6 +63,8 @@ extern "C" {
     ESMCI::VMPlan **vmplan, int *rc);
   void FTN_X(f_esmf_compgetftable)(const ESMCI::Comp *compp,
     ESMCI::FTable **ftable, int *rc);
+  void FTN_X(f_esmf_compgetbase)(const ESMCI::Comp *compp,
+    ESMC_Base **base, int *rc);
   void FTN_X(f_esmf_compgettunnel)(const ESMCI::Comp *comp, 
     ESMCI::CompTunnel **tunnel, int *rc);
 
@@ -141,9 +143,9 @@ namespace ESMCI {
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI::Comp:setServices()"
+#define ESMC_METHOD "ESMCI::Comp::setServices()"
 //BOPI
-// !IROUTINE:  ESMCI::Comp:setServices
+// !IROUTINE:  ESMCI::Comp::setServices
 //
 // !INTERFACE:
 int Comp::setServices(
@@ -185,9 +187,9 @@ int Comp::setServices(
   
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI::Comp:setEntryPoint()"
+#define ESMC_METHOD "ESMCI::Comp::setEntryPoint()"
 //BOPI
-// !IROUTINE:  ESMCI::Comp:setEntryPoint
+// !IROUTINE:  ESMCI::Comp::setEntryPoint
 //
 // !INTERFACE:
 int Comp::setEntryPoint(
@@ -245,9 +247,9 @@ int Comp::setEntryPoint(
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI::Comp:getInternalState()"
+#define ESMC_METHOD "ESMCI::Comp::getInternalState()"
 //BOPI
-// !IROUTINE:  ESMCI::Comp:getInternalState
+// !IROUTINE:  ESMCI::Comp::getInternalState
 //
 // !INTERFACE:
 void *Comp::getInternalState(
@@ -299,9 +301,9 @@ void *Comp::getInternalState(
   
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI::Comp:setInternalState()"
+#define ESMC_METHOD "ESMCI::Comp::setInternalState()"
 //BOPI
-// !IROUTINE:  ESMCI::Comp:setInternalState
+// !IROUTINE:  ESMCI::Comp::setInternalState
 //
 // !INTERFACE:
 int Comp::setInternalState(
@@ -352,9 +354,9 @@ int Comp::setInternalState(
   
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI::Comp:execute()"
+#define ESMC_METHOD "ESMCI::Comp::execute()"
 //BOPI
-// !IROUTINE:  ESMCI::Comp:execute
+// !IROUTINE:  ESMCI::Comp::execute
 //
 // !INTERFACE:
 int Comp::execute(
@@ -408,9 +410,9 @@ int Comp::execute(
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI::Comp:getCurrentPhase()"
+#define ESMC_METHOD "ESMCI::Comp::getCurrentPhase()"
 //BOPI
-// !IROUTINE:  ESMCI::Comp:getCurrentPhase
+// !IROUTINE:  ESMCI::Comp::getCurrentPhase
 //
 // !INTERFACE:
 int Comp::getCurrentPhase(
@@ -451,9 +453,9 @@ int Comp::getCurrentPhase(
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI::Comp:getTimeout()"
+#define ESMC_METHOD "ESMCI::Comp::getTimeout()"
 //BOPI
-// !IROUTINE:  ESMCI::Comp:getTimeout
+// !IROUTINE:  ESMCI::Comp::getTimeout
 //
 // !INTERFACE:
 int Comp::getTimeout(
@@ -494,9 +496,9 @@ int Comp::getTimeout(
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI::Comp:getVmInfo()"
+#define ESMC_METHOD "ESMCI::Comp::getVmInfo()"
 //BOPI
-// !IROUTINE:  ESMCI::Comp:getVmInfo
+// !IROUTINE:  ESMCI::Comp::getVmInfo
 //
 // !INTERFACE:
 int Comp::getVmInfo(
@@ -537,9 +539,9 @@ int Comp::getVmInfo(
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI::Comp:getVm()"
+#define ESMC_METHOD "ESMCI::Comp::getVm()"
 //BOPI
-// !IROUTINE:  ESMCI::Comp:getVm
+// !IROUTINE:  ESMCI::Comp::getVm
 //
 // !INTERFACE:
 int Comp::getVm(
@@ -580,9 +582,9 @@ int Comp::getVm(
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI::Comp:getVmParent()"
+#define ESMC_METHOD "ESMCI::Comp::getVmParent()"
 //BOPI
-// !IROUTINE:  ESMCI::Comp:getVmParent
+// !IROUTINE:  ESMCI::Comp::getVmParent
 //
 // !INTERFACE:
 int Comp::getVmParent(
@@ -623,9 +625,9 @@ int Comp::getVmParent(
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI::Comp:getVmPlan()"
+#define ESMC_METHOD "ESMCI::Comp::getVmPlan()"
 //BOPI
-// !IROUTINE:  ESMCI::Comp:getVmPlan
+// !IROUTINE:  ESMCI::Comp::getVmPlan
 //
 // !INTERFACE:
 int Comp::getVmPlan(
@@ -666,9 +668,9 @@ int Comp::getVmPlan(
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI::Comp:getFTable()"
+#define ESMC_METHOD "ESMCI::Comp::getFTable()"
 //BOPI
-// !IROUTINE:  ESMCI::Comp:getFTable
+// !IROUTINE:  ESMCI::Comp::getFTable
 //
 // !INTERFACE:
 int Comp::getFTable(
@@ -709,9 +711,52 @@ int Comp::getFTable(
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI::Comp:getTunnel()"
+#define ESMC_METHOD "ESMCI::Comp::getBase()"
 //BOPI
-// !IROUTINE:  ESMCI::Comp:getTunnel
+// !IROUTINE:  ESMCI::Comp::getBase
+//
+// !INTERFACE:
+int Comp::getBase(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+//
+    ESMC_Base **base
+  )const{
+//
+// !DESCRIPTION:
+//
+//EOPI
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
+  
+  // check input
+  if (this==NULL){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
+      "- Not a valid comp argument", ESMC_CONTEXT, &rc);
+    return rc;
+  }
+  
+  FTN_X(f_esmf_compgetbase)(this, base, &localrc);
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+    &rc)) return rc;
+  
+  // return successfully
+  rc = ESMF_SUCCESS;
+  return rc;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::Comp::getTunnel()"
+//BOPI
+// !IROUTINE:  ESMCI::Comp::getTunnel
 //
 // !INTERFACE:
 int Comp::getTunnel(
@@ -752,9 +797,9 @@ int Comp::getTunnel(
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI::Comp:getComplianceCheckerDepth()"
+#define ESMC_METHOD "ESMCI::Comp::getComplianceCheckerDepth()"
 //BOPI
-// !IROUTINE:  ESMCI::Comp:getComplianceCheckerDepth
+// !IROUTINE:  ESMCI::Comp::getComplianceCheckerDepth
 //
 // !INTERFACE:
 int Comp::getComplianceCheckerDepth(
@@ -802,9 +847,9 @@ int Comp::getComplianceCheckerDepth(
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI::Comp:getComplianceCheckerJSON()"
+#define ESMC_METHOD "ESMCI::Comp::getComplianceCheckerJSON()"
 //BOPI
-// !IROUTINE:  ESMCI::Comp:getComplianceCheckerJSON
+// !IROUTINE:  ESMCI::Comp::getComplianceCheckerJSON
 //
 // !INTERFACE:
 int Comp::getComplianceCheckerJSON(
@@ -849,9 +894,9 @@ int Comp::getComplianceCheckerJSON(
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI::GridComp:create()"
+#define ESMC_METHOD "ESMCI::GridComp::create()"
 //BOPI
-// !IROUTINE:  ESMCI::GridComp:create
+// !IROUTINE:  ESMCI::GridComp::create
 //
 // !INTERFACE:
 GridComp *GridComp::create(
@@ -891,9 +936,9 @@ GridComp *GridComp::create(
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI::GridComp:destroy()"
+#define ESMC_METHOD "ESMCI::GridComp::destroy()"
 //BOPI
-// !IROUTINE:  ESMCI::GridComp:destroy
+// !IROUTINE:  ESMCI::GridComp::destroy
 //
 // !INTERFACE:
 int GridComp::destroy(
@@ -936,9 +981,9 @@ int GridComp::destroy(
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI::GridComp:initialize()"
+#define ESMC_METHOD "ESMCI::GridComp::initialize()"
 //BOPI
-// !IROUTINE:  ESMCI::GridComp:initialize
+// !IROUTINE:  ESMCI::GridComp::initialize
 //
 // !INTERFACE:
 int GridComp::initialize(
@@ -991,9 +1036,9 @@ int GridComp::initialize(
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI::GridComp:run()"
+#define ESMC_METHOD "ESMCI::GridComp::run()"
 //BOPI
-// !IROUTINE:  ESMCI::GridComp:run
+// !IROUTINE:  ESMCI::GridComp::run
 //
 // !INTERFACE:
 int GridComp::run(
@@ -1046,9 +1091,9 @@ int GridComp::run(
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI::GridComp:finalize()"
+#define ESMC_METHOD "ESMCI::GridComp::finalize()"
 //BOPI
-// !IROUTINE:  ESMCI::GridComp:finalize
+// !IROUTINE:  ESMCI::GridComp::finalize
 //
 // !INTERFACE:
 int GridComp::finalize(
@@ -1101,9 +1146,9 @@ int GridComp::finalize(
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI::GridComp:print()"
+#define ESMC_METHOD "ESMCI::GridComp::print()"
 //BOPI
-// !IROUTINE:  ESMCI::GridComp:print
+// !IROUTINE:  ESMCI::GridComp::print
 //
 // !INTERFACE:
 int GridComp::print(
@@ -1143,9 +1188,9 @@ int GridComp::print(
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI::CplComp:create()"
+#define ESMC_METHOD "ESMCI::CplComp::create()"
 //BOPI
-// !IROUTINE:  ESMCI::CplComp:create
+// !IROUTINE:  ESMCI::CplComp::create
 //
 // !INTERFACE:
 CplComp *CplComp::create(
@@ -1185,9 +1230,9 @@ CplComp *CplComp::create(
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI::CplComp:destroy()"
+#define ESMC_METHOD "ESMCI::CplComp::destroy()"
 //BOPI
-// !IROUTINE:  ESMCI::CplComp:destroy
+// !IROUTINE:  ESMCI::CplComp::destroy
 //
 // !INTERFACE:
 int CplComp::destroy(
@@ -1230,9 +1275,9 @@ int CplComp::destroy(
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI::CplComp:initialize()"
+#define ESMC_METHOD "ESMCI::CplComp::initialize()"
 //BOPI
-// !IROUTINE:  ESMCI::CplComp:initialize
+// !IROUTINE:  ESMCI::CplComp::initialize
 //
 // !INTERFACE:
 int CplComp::initialize(
@@ -1285,9 +1330,9 @@ int CplComp::initialize(
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI::CplComp:run()"
+#define ESMC_METHOD "ESMCI::CplComp::run()"
 //BOPI
-// !IROUTINE:  ESMCI::CplComp:run
+// !IROUTINE:  ESMCI::CplComp::run
 //
 // !INTERFACE:
 int CplComp::run(
@@ -1340,9 +1385,9 @@ int CplComp::run(
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI::CplComp:finalize()"
+#define ESMC_METHOD "ESMCI::CplComp::finalize()"
 //BOPI
-// !IROUTINE:  ESMCI::CplComp:finalize
+// !IROUTINE:  ESMCI::CplComp::finalize
 //
 // !INTERFACE:
 int CplComp::finalize(
@@ -1395,9 +1440,9 @@ int CplComp::finalize(
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI::CplComp:print()"
+#define ESMC_METHOD "ESMCI::CplComp::print()"
 //BOPI
-// !IROUTINE:  ESMCI::CplComp:print
+// !IROUTINE:  ESMCI::CplComp::print
 //
 // !INTERFACE:
 int CplComp::print(
@@ -1437,9 +1482,9 @@ int CplComp::print(
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI::SciComp:create()"
+#define ESMC_METHOD "ESMCI::SciComp::create()"
 //BOPI
-// !IROUTINE:  ESMCI::SciComp:create
+// !IROUTINE:  ESMCI::SciComp::create
 //
 // !INTERFACE:
 SciComp *SciComp::create(
@@ -1480,9 +1525,9 @@ SciComp *SciComp::create(
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI::SciComp:destroy()"
+#define ESMC_METHOD "ESMCI::SciComp::destroy()"
 //BOPI
-// !IROUTINE:  ESMCI::SciComp:destroy
+// !IROUTINE:  ESMCI::SciComp::destroy
 //
 // !INTERFACE:
 int SciComp::destroy(
@@ -1526,9 +1571,9 @@ int SciComp::destroy(
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI::SciComp:print()"
+#define ESMC_METHOD "ESMCI::SciComp::print()"
 //BOPI
-// !IROUTINE:  ESMCI::SciComp:print
+// !IROUTINE:  ESMCI::SciComp::print
 //
 // !INTERFACE:
 int SciComp::print(

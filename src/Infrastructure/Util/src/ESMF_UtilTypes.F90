@@ -56,7 +56,7 @@
 
 !------------------------------------------------------------------------------
 !
- !     ! WARNING: 
+!     ! WARNING: 
 !     !  constants MUST match corresponding values in ../include/ESMC_Macros.h
 !
 !EOPI
@@ -114,7 +114,7 @@
 
 !------------------------------------------------------------------------------
 !
- !    ! Keyword enforcement type
+!    ! Keyword enforcement type
 
      type ESMF_KeywordEnforcer
        private
@@ -172,7 +172,7 @@
 !
 !    ! Character array pointer.  For use when arrays of character pointers
 !    ! are needed, but can not be directly coded due to Fortran semantics.
- 
+
      type ESMF_CharPtr
        character(1), pointer :: cptr(:) => null ()
      end type
@@ -230,7 +230,7 @@
                    ESMF_KIND_I2 = selected_int_kind(4)
 #endif
       integer, parameter :: &
-                    ESMF_KIND_I4 = selected_int_kind(9)
+                   ESMF_KIND_I4 = selected_int_kind(9)
 #ifndef ESMF_NEC_KIND_I8
       integer, parameter :: &
                    ESMF_KIND_I8 = selected_int_kind(18)
@@ -355,7 +355,7 @@
         ESMF_ID_GRIDCOMPONENT  = ESMF_ObjectID(30, "ESMF_GridComponent"), &
         ESMF_ID_CPLCOMPONENT   = ESMF_ObjectID(31, "ESMF_CplComponent"), &
         ESMF_ID_COMPONENT      = ESMF_ObjectID(32, "ESMF_Component"), &
-         ESMF_ID_XGRID          = ESMF_ObjectID(33, "ESMF_XGrid"), &
+        ESMF_ID_XGRID          = ESMF_ObjectID(33, "ESMF_XGrid"), &
         ESMF_ID_NONE           = ESMF_ObjectID(99, "ESMF_None")
 
 !------------------------------------------------------------------------------
@@ -485,7 +485,7 @@
 !
 !     ! Direction type
 
-       type ESMF_Direction_Flag
+      type ESMF_Direction_Flag
 #ifndef ESMF_NO_SEQUENCE
       sequence
 #endif
@@ -550,7 +550,7 @@
         ESMF_STARTREGION_EXCLUSIVE = ESMF_StartRegion_Flag(0), &
         ESMF_STARTREGION_COMPUTATIONAL = ESMF_StartRegion_Flag(1)
 
- !------------------------------------------------------------------------------
+!------------------------------------------------------------------------------
 !     ! ESMF_Region_Flag
 !
 !     ! Interface flag for setting index bounds
@@ -615,7 +615,7 @@
       sequence
 #endif
       !private
-         integer :: value
+        integer :: value
       end type
 
       type(ESMF_AttReconcileFlag), parameter ::  &
@@ -680,7 +680,7 @@
 !------------------------------------------------------------------------------
 !     ! ESMF_AttTreeFlag
 !
- !     ! Interface flag for Attribute tree
+!     ! Interface flag for Attribute tree
 
       type ESMF_AttTreeFlag
 #ifndef ESMF_NO_SEQUENCE
@@ -745,7 +745,7 @@
            ESMF_LINETYPE_GREAT_CIRCLE = ESMF_LineType_Flag(1)
 
 !------------------------------------------------------------------------------
- 
+
       type ESMF_PoleMethod_Flag
 #ifndef ESMF_NO_SEQUENCE
       sequence
@@ -810,7 +810,7 @@
 
 !------------------------------------------------------------------------------
 ! ! ESMF_CoordSys_Flag
- !
+!
 !------------------------------------------------------------------------------
   type ESMF_CoordSys_Flag
 #ifndef ESMF_NO_SEQUENCE
@@ -909,7 +909,7 @@
 #endif
       private
           integer :: flag
-       end type
+      end type
 
       type(ESMF_MeshOp_Flag), parameter ::  &
         ESMF_MESHOP_DIFFERENCE    = ESMF_MeshOp_Flag(0)

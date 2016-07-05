@@ -269,6 +269,30 @@ recursive subroutine f_esmf_compgetftable(comp, ftable, rc)
 end subroutine f_esmf_compgetftable
 
 #undef  ESMF_METHOD
+#define ESMF_METHOD "f_esmf_compgetbase"
+recursive subroutine f_esmf_compgetbase(comp, base, rc)
+  use ESMF_UtilTypesMod      ! ESMF utility types
+  use ESMF_BaseMod           ! ESMF base class
+  use ESMF_CompMod
+  use ESMF_InitMacrosMod
+  
+  implicit none
+
+  type(ESMF_CWrap)      :: comp
+  type(ESMF_Base)       :: base
+  integer               :: rc
+  
+  ! Initialize return code; assume routine not implemented
+  rc = ESMF_RC_NOT_IMPL
+
+  base = comp%compp%base
+  
+  ! return successfully
+  rc = ESMF_SUCCESS
+
+end subroutine f_esmf_compgetbase
+
+#undef  ESMF_METHOD
 #define ESMF_METHOD "f_esmf_compinsertvm"
 recursive subroutine f_esmf_compinsertvm(comp, vm, rc)
   use ESMF_UtilTypesMod      ! ESMF utility types

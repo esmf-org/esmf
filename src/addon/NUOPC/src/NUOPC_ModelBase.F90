@@ -76,7 +76,7 @@ module NUOPC_ModelBase
     character(ESMF_MAXSTR):: name
 
     rc = ESMF_SUCCESS
-
+    
     ! query the Component for info
     call ESMF_GridCompGet(gcomp, name=name, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -84,6 +84,12 @@ module NUOPC_ModelBase
     
     ! add standard NUOPC GridComp Attribute Package to the Model
     call NUOPC_CompAttributeInit(gcomp, kind="Model", rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+
+    ! set the ESMF compliance checker register Attribute
+    call ESMF_AttributeSet(gcomp, name="ESMF_RUNTIME_COMPLIANCEICREGISTER", &
+      value="NUOPC_Model_ComplianceICR", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
@@ -177,7 +183,7 @@ module NUOPC_ModelBase
     type(ESMF_Clock)          :: internalClock
     logical                   :: allCurrent
     logical                   :: existflag
-    character(ESMF_MAXSTR)    :: modelName, msgString, valueString, pString
+    character(ESMF_MAXSTR)    :: modelName, msgString, valueString, pLabel
     integer                   :: phase
     integer                   :: verbosity
     character(ESMF_MAXSTR)    :: name
@@ -252,10 +258,13 @@ module NUOPC_ModelBase
 
     ! conditionally output diagnostic to Log file
     if (btest(verbosity,0)) then
-      write (pString,*) phase
+      call NUOPC_CompSearchRevPhaseMap(gcomp, ESMF_METHOD_RUN, &
+        phaseIndex=phase, phaseLabel=pLabel, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
       call ESMF_ClockPrint(internalClock, options="currTime", &
         preString=">>>"//trim(modelName)//&
-        " entered Run (phase="//trim(adjustl(pString))// &
+        " entered Run (phase="//trim(adjustl(pLabel))// &
         ") with current time: ", unit=msgString, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
@@ -402,7 +411,7 @@ module NUOPC_ModelBase
     if (btest(verbosity,0)) then
       call ESMF_ClockPrint(internalClock, options="currTime", &
         preString="<<<"//trim(modelName)//&
-        " leaving Run (phase="//trim(adjustl(pString))// &
+        " leaving Run (phase="//trim(adjustl(pLabel))// &
         ") with current time: ", unit=msgString, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out

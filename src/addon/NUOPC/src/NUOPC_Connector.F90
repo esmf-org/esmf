@@ -83,7 +83,19 @@ module NUOPC_Connector
     call NUOPC_CompAttributeInit(connector, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-        
+
+#ifdef FIXED_ATTRIBUTE_ISSUE
+!TODO: there is currently an Attribute problem that if I turn on the 
+!TODO: AttributeSet below, then the standard NUOPC CplComp AttPack does not
+!TODO: get updated across all the PETs in the Driver. This leads to problems
+!TODO: when trying to look up RunMap or similar across all PETs.
+    ! set the ESMF compliance checker register Attribute
+    call ESMF_AttributeSet(connector, name="ESMF_RUNTIME_COMPLIANCEICREGISTER", &
+      value="NUOPC_Connector_ComplianceICR", rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+#endif
+    
     ! Initialize phases
     
     ! Phase 0 requires use of ESMF method.
@@ -491,6 +503,8 @@ print *, "bondLevelMax:", bondLevelMax, "bondLevel:", bondLevel
     character(ESMF_MAXSTR), pointer       :: importNamespaceList(:)
     character(ESMF_MAXSTR), pointer       :: exportNamespaceList(:)
     character(ESMF_MAXSTR), pointer       :: cplList(:)
+    character(ESMF_MAXSTR)                :: msgString, valueString
+    integer                               :: verbosity
 
     rc = ESMF_SUCCESS
 
@@ -512,6 +526,17 @@ call ESMF_VMLogMemInfo("befP1b Reconcile")
 #ifdef RECONCILE_MEMORY_DEBUG_on
 call ESMF_VMLogMemInfo("aftP1b Reconcile")
 #endif
+
+    ! determine verbosity
+    call NUOPC_CompAttributeGet(cplcomp, name="Verbosity", value=valueString, &
+      rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    verbosity = ESMF_UtilString2Int(valueString, &
+      specialStringList=(/"high", "max "/), specialValueList=(/255, 255/), &
+      rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
     ! set Attributes
     call NUOPC_CompAttributeSet(cplcomp, &
@@ -571,6 +596,38 @@ call printStringList("exportNamespaceList", exportNamespaceList)
 print *, "current bondLevel=", bondLevel
 #endif
 
+            if (btest(verbosity,4)) then
+              write (msgString,'(A, ": ", A30, I3, "): ", A30)') trim(name), &
+                "exportStandardNameList(j=", j, exportStandardNameList(j)
+              call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+                if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+                return  ! bail out
+              write (msgString,'(A, ": ", A30, I3, "): ", A30)') trim(name), &
+                "exportNamespaceList(j=", j, exportNamespaceList(j)
+              call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+                if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+                return  ! bail out
+              write (msgString,'(A, ": ", A30, I3, "): ", A30)') trim(name), &
+                "importStandardNameList(i=", i, importStandardNameList(i)
+              call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+                if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+                return  ! bail out
+              write (msgString,'(A, ": ", A30, I3, "): ", A30)') trim(name), &
+                "importNamespaceList(i=", i, importNamespaceList(i)
+              call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+                if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+                return  ! bail out
+              write (msgString,'(A, ": bondLevel=", I2)') trim(name), bondLevel
+              call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+                if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+                return  ! bail out
+            endif
+
             if (bondLevel == -1) cycle  ! break out and look for next match
                        
             ! Getting to this place in the double loop means that the 
@@ -609,6 +666,15 @@ print *, "current bondLevel=", bondLevel
                   return  ! bail out
                 endif
                 cplList(count) = importStandardNameList(i)
+                if (btest(verbosity,4)) then
+                  write (msgString,'(A, ": added cplList(", I3, ")=", A30)') &
+                    trim(name), count, cplList(count)
+                  call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+                  if (ESMF_LogFoundError(rcToCheck=rc, &
+                    msg=ESMF_LOGERR_PASSTHRU, &
+                    line=__LINE__, file=trim(name)//":"//FILENAME, &
+                    rcToReturn=rc)) return  ! bail out
+                endif
                 ! make the targeted entry to the ConsumerConnection attribute
                 write (connectionString, "('targeted:', i10)") bondLevel
                 call NUOPC_SetAttribute(field, name="ConsumerConnection", &
@@ -1719,7 +1785,7 @@ call ESMF_VMLogMemInfo("aftP5 Reconcile")
     integer                         :: localrc
     logical                         :: existflag
     character(ESMF_MAXSTR)          :: connectionString
-    character(ESMF_MAXSTR)          :: name, valueString
+    character(ESMF_MAXSTR)          :: name, valueString, msgString, iString
     integer                         :: verbosity
 
     rc = ESMF_SUCCESS
@@ -1794,13 +1860,22 @@ call ESMF_VMLogMemInfo("aftP5 Reconcile")
     
     ! main loop over all entries in the cplList
     do i=1, cplListSize
-!print *, "cplList(",i,")=", trim(cplList(i))
       call chopString(cplList(i), chopChar=":", chopStringList=chopStringList, &
         rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
       cplName = chopStringList(1) ! first part is the standard name of cpl field
       deallocate(chopStringList)
+
+      if (btest(verbosity,3)) then
+        write (iString,'(I4)') i
+        write (msgString,*) "loop over all entries in cplList: "// &
+          trim(adjustl(iString))//": "//trim(cplName)
+        call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+          return  ! bail out
+      endif
       
       ! find import and export side match
       foundFlag = .false. ! reset
@@ -1850,7 +1925,7 @@ call ESMF_VMLogMemInfo("aftP5 Reconcile")
       
       if (.not.foundFlag) then
         call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
-          msg="Bad internal error - should never get here!",&
+          msg="Should never get here: "//trim(cplName),&
           line=__LINE__, file=trim(name)//":"//FILENAME, &
           rcToReturn=rc)
         return  ! bail out
@@ -2021,7 +2096,7 @@ call ESMF_VMLogMemInfo("aftP5 Reconcile")
     integer                   :: localrc
     logical                   :: existflag
     integer                   :: rootPet, rootVas, vas, petCount
-    character(ESMF_MAXSTR)    :: compName, msgString, valueString
+    character(ESMF_MAXSTR)    :: compName, msgString, valueString, pLabel
     integer                   :: phase
     integer                   :: verbosity
     integer                   :: profiling
@@ -2067,8 +2142,14 @@ call ESMF_VMLogMemInfo("aftP5 Reconcile")
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
+    ! conditionally output diagnostic to Log file
     if (btest(verbosity,0)) then
-      write (msgString,"(A)") ">>>"//trim(compName)//" entered Run"
+      call NUOPC_CompSearchRevPhaseMap(cplcomp, ESMF_METHOD_RUN, &
+        phaseIndex=phase, phaseLabel=pLabel, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+      write (msgString,"(A)") ">>>"//trim(compName)//&
+      " entered Run (phase="//trim(adjustl(pLabel))//")"
       call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
@@ -2239,7 +2320,8 @@ call ESMF_VMLogMemInfo("aftP5 Reconcile")
 
     ! conditionally output diagnostic to Log file
     if (btest(verbosity,0)) then
-      write (msgString,"(A)") "<<<"//trim(compName)//" leaving Run"
+      write (msgString,"(A)") "<<<"//trim(compName)//&
+      " leaving Run (phase="//trim(adjustl(pLabel))//")"
       call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &

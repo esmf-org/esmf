@@ -65,6 +65,7 @@ module NUOPC
   public NUOPC_CompDerive                 ! method
   public NUOPC_CompFilterPhaseMap         ! method
   public NUOPC_CompSearchPhaseMap         ! method
+  public NUOPC_CompSearchRevPhaseMap      ! method
   public NUOPC_CompSetClock               ! method
   public NUOPC_CompSetEntryPoint          ! method
   public NUOPC_CompSetInternalEntryPoint  ! method
