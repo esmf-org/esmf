@@ -1994,7 +1994,7 @@ if (attrRoot == ESMF_TRUE) {
   tk = source.tk;
   items = source.items;
   attrRoot = source.attrRoot;
-  
+
   attrConvention = source.attrConvention;
   attrPurpose = source.attrPurpose;
   attrObject = source.attrObject;
@@ -2158,6 +2158,10 @@ if (attrRoot == ESMF_TRUE) {
     if (!attr) {
       attr = new Attribute(ESMF_FALSE);
 
+      // set the parent
+      attr->parent = parent;
+      attr->setBase(attrBase);
+
       // recurse to set the attribute values
       localrc = attr->AttributeCopyIgnore(*(source.attrList.at(i)));
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
@@ -2167,6 +2171,10 @@ if (attrRoot == ESMF_TRUE) {
       localrc = AttributeSet(attr);
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
           &localrc)) return localrc;
+    } else {
+      // still have to reset the parent and base
+      attr->parent = parent;
+      attr->setBase(attrBase);
     }
   }
 
@@ -2179,6 +2187,10 @@ if (attrRoot == ESMF_TRUE) {
     if (!attr) {
       attr = new Attribute(ESMF_FALSE);
 
+      // set the parent and base
+      attr->parent = parent;
+      attr->setBase(attrBase);
+
       // recurse through nested attribute packages
       localrc = attr->AttributeCopyIgnore(*(source.packList.at(i)));
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
@@ -2188,6 +2200,10 @@ if (attrRoot == ESMF_TRUE) {
       localrc = AttPackSet(attr);
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
           &localrc)) return localrc;
+    } else {
+      // still have to reset the parent and base
+      attr->parent = parent;
+      attr->setBase(attrBase);
     }
   }
 
