@@ -2036,7 +2036,7 @@ extern "C" {
 //EOP
 
   int status;
-  
+
   // Initialize return code; assume routine not implemented
   if (rc) *rc = ESMC_RC_NOT_IMPL;
 
@@ -2067,7 +2067,11 @@ extern "C" {
     if (rc) *rc = status;    
     return;
   }
-  
+
+  // set the base pointer for the root attribute before copying
+  (**destination).root.setBase(*destination);
+
+  // now copy
   if (*attcopyflag == ESMF_COPY_VALUE && *atttreeflag == ESMC_ATTTREE_OFF) {
       status = (**destination).root.AttributeCopyIgnore((**source).root);
       ESMC_LogDefault.MsgFoundError(status, ESMCI_ERR_PASSTHRU,
