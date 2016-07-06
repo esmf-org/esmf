@@ -1384,7 +1384,7 @@ contains
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
 
-        call ESMF_BaseDestroy(base_temp, rc=localrc)
+        call ESMF_BaseDestroy(base_temp, noGarbage=.True., rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
