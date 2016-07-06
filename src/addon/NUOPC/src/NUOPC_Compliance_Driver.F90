@@ -35,6 +35,7 @@ module NUOPC_Compliance_Driver
   
     integer, save :: ccfDepth = 1   ! component control flow depth
     integer, save :: maxDepth = -2  ! maximum depth of compliance checker
+    logical, save :: doJSON = .false. ! whether to output JSON
 
     ! these map NUOPC events to the phase when it should occur
     ! therefore, we can check after the phase to verify
@@ -85,6 +86,7 @@ contains
         logical                 :: phaseZeroFlag
         logical                 :: regAdvertise, regRealize
         character(NUOPC_PhaseMapStringLength) :: phaseLabel
+        integer                 :: jsonIsOn
     
         ! Initialize user return code
         rc = ESMF_SUCCESS
@@ -112,6 +114,17 @@ contains
                 line=__LINE__, &
                 file=FILENAME)) &
                 return  ! bail out
+        endif
+
+        call c_esmc_getComplianceCheckJSON(jsonIsOn, rc)
+        if (ESMF_LogFoundError(rc, &
+            line=__LINE__, &
+            file=FILENAME)) &
+            return  ! bail out
+        if (jsonIsOn == 1) then
+          doJSON = .true.
+        else
+          doJSON = .false.
         endif
 
         !---------------------------------------------------------------------------
@@ -314,6 +327,9 @@ contains
         type(ESMF_Clock)        :: clockCopy
         integer                 :: phase
         character(NUOPC_PhaseMapStringLength) :: phaseLabel
+        character(ESMF_MAXSTR)  :: compName
+        type(ESMF_Clock)        :: clockInternal
+        logical                 :: clockIsPresent
     
         ! Initialize user return code
         rc = ESMF_SUCCESS
@@ -325,7 +341,8 @@ contains
             file=FILENAME)) &
             return  ! bail out
 
-        call ESMF_GridCompGet(comp, currentPhase=phase, rc=rc)
+        call ESMF_GridCompGet(comp, currentPhase=phase, name=compName, &
+            clockIsPresent=clockIsPresent, rc=rc)
         if (ESMF_LogFoundError(rc, &
             line=__LINE__, &
             file=FILENAME)) &
@@ -353,6 +370,18 @@ contains
         !---------------------------------------------------------------------------
         ! Start Compliance Checking: InitializePrologue
         if (ccfDepth <= maxDepth .or. maxDepth < 0) then
+
+            if (doJSON) then
+                if (clockIsPresent) then
+                    call ESMF_GridCompGet(comp, clock=clockInternal, rc=rc)
+                    if (ESMF_LogFoundError(rc, &
+                      line=__LINE__, &
+                      file=FILENAME)) &
+                      return  ! bail out
+                endif
+                call JSON_LogPhaseEvent("start_phase", compName, "init", phase, &
+                    clockInternal, rc)
+            endif
 
             write(output,*) ">START InitializePrologue for phase:", &
               trim(adjustl(pString)), ": ", trim(phaseLabel)
@@ -407,7 +436,7 @@ contains
                 return  ! bail out
 
             ! check NUOPC-specific metadata attributes
-            call NUOPC_CheckComponentMetadata(prefix, comp=comp, rc=rc)
+            call NUOPC_CheckComponentMetadata(prefix, comp=comp, outputJSON=doJSON, rc=rc)
             if (ESMF_LogFoundError(rc, &
                 line=__LINE__, &
                 file=FILENAME)) &
@@ -449,6 +478,11 @@ contains
         ! Start Compliance Checking: InitializeEpilogue
         if (ccfDepth <= maxDepth .or. maxDepth < 0) then
 
+            if (doJSON) then
+                call JSON_LogPhaseEvent("end_phase", compName, "init", phase, &
+                    clockInternal, rc)
+            endif
+
             call prefixString(comp, prefix=prefix, forward=.false., rc=rc)
             if (ESMF_LogFoundError(rc, &
                 line=__LINE__, &
@@ -481,7 +515,7 @@ contains
                 file=FILENAME)) &
                 return  ! bail out
 
-            call NUOPC_CheckComponentMetadata(prefix, comp=comp, rc=rc)
+            call NUOPC_CheckComponentMetadata(prefix, comp=comp, outputJSON=doJSON, rc=rc)
             if (ESMF_LogFoundError(rc, &
                 line=__LINE__, &
                 file=FILENAME)) &
@@ -492,7 +526,7 @@ contains
             if (ESMF_StateIsCreated(importState)) then
                 ! compliance check importState
                 call NUOPC_CheckState(prefix, referenceName="importState", state=importState, &
-                    rc=rc)
+                    outputJSON=doJSON, rc=rc)
                 if (ESMF_LogFoundError(rc, &
                     line=__LINE__, &
                     file=FILENAME)) &
@@ -502,7 +536,7 @@ contains
             if (ESMF_StateIsCreated(exportState)) then
                 ! compliance check exportState
                 call NUOPC_CheckState(prefix, referenceName="exportState", state=exportState, &
-                    rc=rc)
+                    outputJSON=doJSON, rc=rc)
                 if (ESMF_LogFoundError(rc, &
                     line=__LINE__, &
                     file=FILENAME)) &
@@ -578,6 +612,9 @@ contains
         type(ESMF_Clock)        :: clockCopy
         integer                 :: phase
         character(NUOPC_PhaseMapStringLength) :: phaseLabel
+        character(ESMF_MAXSTR)  :: compName
+        type(ESMF_Clock)        :: clockInternal
+        logical                 :: clockIsPresent
     
         ! Initialize user return code
         rc = ESMF_SUCCESS
@@ -588,7 +625,8 @@ contains
             file=FILENAME)) &
             return  ! bail out
 
-        call ESMF_GridCompGet(comp, currentPhase=phase, rc=rc)
+        call ESMF_GridCompGet(comp, currentPhase=phase, name=compName, &
+            clockIsPresent=clockIsPresent, rc=rc)
         if (ESMF_LogFoundError(rc, &
             line=__LINE__, &
             file=FILENAME)) &
@@ -616,6 +654,18 @@ contains
         !---------------------------------------------------------------------------
         ! Start Compliance Checking: RunPrologue
         if (ccfDepth <= maxDepth .or. maxDepth < 0) then
+
+            if (doJSON) then
+                if (clockIsPresent) then
+                    call ESMF_GridCompGet(comp, clock=clockInternal, rc=rc)
+                    if (ESMF_LogFoundError(rc, &
+                      line=__LINE__, &
+                      file=FILENAME)) &
+                      return  ! bail out
+                endif
+                call JSON_LogPhaseEvent("start_phase", compName, "run", phase, &
+                    clockInternal, rc)
+            endif
 
             write(output,*) ">START RunPrologue for phase:", &
               trim(adjustl(pString)), ": ", trim(phaseLabel)
@@ -690,6 +740,11 @@ contains
         !---------------------------------------------------------------------------
         ! Start Compliance Checking: RunEpilogue
         if (ccfDepth <= maxDepth .or. maxDepth < 0) then
+
+            if (doJSON) then
+                call JSON_LogPhaseEvent("end_phase", compName, "run", phase, &
+                    clockInternal, rc)
+            endif
 
             call prefixString(comp, prefix=prefix, forward=.false., rc=rc)
             if (ESMF_LogFoundError(rc, &
@@ -780,6 +835,9 @@ contains
         type(ESMF_Clock)        :: clockCopy
         integer                 :: phase
         character(NUOPC_PhaseMapStringLength) :: phaseLabel
+        character(ESMF_MAXSTR)  :: compName
+        type(ESMF_Clock)        :: clockInternal
+        logical                 :: clockIsPresent
     
         ! Initialize user return code
         rc = ESMF_SUCCESS
@@ -790,7 +848,8 @@ contains
             file=FILENAME)) &
             return  ! bail out
 
-        call ESMF_GridCompGet(comp, currentPhase=phase, rc=rc)
+        call ESMF_GridCompGet(comp, currentPhase=phase, name=compName, &
+            clockIsPresent=clockIsPresent, rc=rc)
         if (ESMF_LogFoundError(rc, &
             line=__LINE__, &
             file=FILENAME)) &
@@ -818,6 +877,18 @@ contains
         !---------------------------------------------------------------------------
         ! Start Compliance Checking: FinalizePrologue
         if (ccfDepth <= maxDepth .or. maxDepth < 0) then
+
+            if (doJSON) then
+                if (clockIsPresent) then
+                    call ESMF_GridCompGet(comp, clock=clockInternal, rc=rc)
+                    if (ESMF_LogFoundError(rc, &
+                      line=__LINE__, &
+                      file=FILENAME)) &
+                      return  ! bail out
+                endif
+                call JSON_LogPhaseEvent("start_phase", compName, "final", phase, &
+                    clockInternal, rc)
+            endif
 
             write(output,*) ">START FinalizePrologue for phase:", &
               trim(adjustl(pString)), ": ", trim(phaseLabel)
@@ -884,6 +955,11 @@ contains
         !---------------------------------------------------------------------------
         ! Start Compliance Checking: FinalizeEpilogue
         if (ccfDepth <= maxDepth .or. maxDepth < 0) then
+
+            if (doJSON) then
+                call JSON_LogPhaseEvent("end_phase", compName, "final", phase, &
+                    clockInternal, rc)
+            endif
 
             call prefixString(comp, prefix=prefix, forward=.false., rc=rc)
             if (ESMF_LogFoundError(rc, &

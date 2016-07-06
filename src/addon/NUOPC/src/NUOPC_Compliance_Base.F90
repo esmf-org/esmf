@@ -38,6 +38,7 @@ module NUOPC_Compliance_Base
     public NUOPC_CheckInternalClock
     public NUOPC_CheckComponentStatistics
     public NUOPC_CompSearchPhaseMapByIndex
+    public JSON_LogPhaseEvent
 
     interface NUOPC_CheckComponentMetadata
         module procedure NUOPC_CheckGridComponentMetadata
@@ -56,25 +57,28 @@ module NUOPC_Compliance_Base
 
 contains
 
-    recursive subroutine NUOPC_CheckGridComponentMetadata(prefix, comp, rc)
+    recursive subroutine NUOPC_CheckGridComponentMetadata(prefix, comp, outputJSON, rc)
         character(*), intent(in)              :: prefix
         type(ESMF_GridComp)                   :: comp
+        logical, optional                     :: outputJSON
         integer,      intent(out), optional   :: rc
 
-        type(ESMF_CompType_Flag)              :: comptype
         character(ESMF_MAXSTR)                :: attributeName
         character(ESMF_MAXSTR)                :: convention
         character(ESMF_MAXSTR)                :: purpose
+        character(ESMF_MAXSTR)                :: compName
+        type(ESMF_AttPack)                    :: attpack
+        character(1024*20)                    :: jsonstring
+        logical                               :: isPresent
+        logical                               :: doJSON
+
 
         if (present(rc)) rc = ESMF_SUCCESS
 
-        ! get Component type and branch on it
-!        call ESMF_GridCompGet(comp, comptype=comptype, rc=rc)
-!        if (ESMF_LogFoundError(rc, &
-!            line=__LINE__, &
-!            file=FILENAME)) &
-!            return  ! bail out
-
+        doJSON = .false.
+        if (present(outputJSON)) then
+            doJSON = outputJSON
+        endif
 
         ! set NUOPC convention and purpose specifiers
         convention = "NUOPC"
@@ -170,6 +174,51 @@ contains
             file=FILENAME)) &
             return  ! bail out
 
+        if (doJSON) then
+
+            call ESMF_GridCompGet(comp, name=compName, rc=rc)
+            if (ESMF_LogFoundError(rc, &
+              line=__LINE__, &
+              file=FILENAME)) &
+              return  ! bail out
+
+            call ESMF_AttributeAdd(comp, convention=convention, purpose=purpose, &
+                                   attrList=(/"CompName"/), &
+                                   attpack=attpack, rc=rc)
+            if (ESMF_LogFoundError(rc, &
+              line=__LINE__, &
+              file=FILENAME)) &
+              return  ! bail out
+
+            call ESMF_AttributeSet(comp, name="CompName", value=compName, &
+                                   attpack=attpack, rc=rc)
+            if (ESMF_LogFoundError(rc, &
+              line=__LINE__, &
+              file=FILENAME)) &
+              return  ! bail out
+
+            ! output JSON
+            call ESMF_AttributeGetAttPack(comp, attpack=attpack, &
+              convention=convention, purpose=purpose, isPresent=isPresent, rc=rc)
+            if (ESMF_LogFoundError(rc, &
+              line=__LINE__, &
+              file=FILENAME)) &
+              return  ! bail out
+
+            if (isPresent) then
+                call ESMF_AttPackStreamJSON(attpack, .true., .false., jsonstring, rc=rc)
+                if (ESMF_LogFoundError(rc, &
+                  line=__LINE__, &
+                  file=FILENAME)) &
+                  return  ! bail out
+
+                call ESMF_LogWrite(jsonstring, ESMF_LOGMSG_JSON, rc=rc)
+                if (ESMF_LogFoundError(rc, &
+                  line=__LINE__, &
+                  file=FILENAME)) &
+                  return  ! bail out
+            endif
+        endif
 
     end subroutine
 
@@ -477,10 +526,11 @@ contains
 
 
 
-    recursive subroutine NUOPC_CheckState(prefix, referenceName, state, rc)
+    recursive subroutine NUOPC_CheckState(prefix, referenceName, state, outputJSON, rc)
         character(*), intent(in)              :: prefix
         character(*), intent(in)              :: referenceName
         type(ESMF_State)                      :: state
+        logical, optional                     :: outputJSON
         integer,      intent(out), optional   :: rc
 
         logical                               :: stateValid
@@ -499,8 +549,17 @@ contains
         character(ESMF_MAXSTR)                :: attributeName
         character(ESMF_MAXSTR)                :: convention
         character(ESMF_MAXSTR)                :: purpose
+        logical                               :: doJSON
+        type(ESMF_AttPack)                    :: attpack
+        character(1024*50)                    :: jsonstring
+        logical                               :: isPresent
 
         if (present(rc)) rc = ESMF_SUCCESS
+
+        doJSON = .false.
+        if (present(outputJSON)) then
+            doJSON = outputJSON
+        endif
 
         stateValid = .true.
         ! Ensure that the State is a valid object
@@ -548,6 +607,55 @@ contains
             ! set NUOPC convention and purpose specifiers
             convention = "NUOPC"
             purpose = "Instance"
+
+            if (doJSON) then
+              ! add a few attributes so they appear in the JSON
+              ! TODO: this should really only be done once
+              call ESMF_AttributeAdd(state, convention=convention, purpose=purpose, &
+                                   attrList=(/"name  ", &
+                                              "intent"/), &
+                                   attpack=attpack, rc=rc)
+              if (ESMF_LogFoundError(rc, &
+                line=__LINE__, &
+                file=FILENAME)) &
+                return  ! bail out
+
+              call ESMF_AttributeSet(state, name="name", value=name, &
+                                   attpack=attpack, rc=rc)
+              if (ESMF_LogFoundError(rc, &
+                line=__LINE__, &
+                file=FILENAME)) &
+                return  ! bail out
+
+              call ESMF_AttributeSet(state, name="intent", value=tempString, &
+                                   attpack=attpack, rc=rc)
+              if (ESMF_LogFoundError(rc, &
+                line=__LINE__, &
+                file=FILENAME)) &
+                return  ! bail out
+
+              call ESMF_AttributeGetAttPack(state, attpack=attpack, &
+                  convention=convention, purpose=purpose, isPresent=isPresent, rc=rc)
+              if (ESMF_LogFoundError(rc, &
+                  line=__LINE__, &
+                  file=FILENAME)) &
+                  return  ! bail out
+
+              if (isPresent) then
+                  call ESMF_AttPackStreamJSON(attpack, .true., .false., jsonstring, rc=rc)
+                  if (ESMF_LogFoundError(rc, &
+                      line=__LINE__, &
+                      file=FILENAME)) &
+                      return  ! bail out
+
+                  call ESMF_LogWrite(jsonstring, ESMF_LOGMSG_JSON, rc=rc)
+                  if (ESMF_LogFoundError(rc, &
+                     line=__LINE__, &
+                     file=FILENAME)) &
+                     return  ! bail out
+              endif
+            endif ! doJSON
+
 
             call ESMF_LogWrite(trim(prefix)//" State level attribute check: "// &
                 "convention: '"//trim(convention)//"', purpose: '"//trim(purpose)//"'.", &
@@ -1852,7 +1960,50 @@ contains
             deallocate(phases)
         endif
 
-end subroutine
+    end subroutine
+
+    recursive subroutine JSON_LogPhaseEvent(event, compName, method, phase, clock, rc)
+        character(len=*), intent(in) :: event, compName, method
+        integer, intent(in) :: phase
+        type(ESMF_Clock), intent(in), optional :: clock
+        integer, intent(out), optional :: rc
+
+        ! locals
+        character(len=16) :: phaseString
+        character(len=64) :: timeStamp
+        character(len=512) :: jsonString
+
+        rc = ESMF_SUCCESS
+
+        write(phaseString, "(I0)") phase
+
+        timeStamp = '""'
+        if (present(clock)) then
+            if (ESMF_ClockIsCreated(clock)) then
+                call ESMF_ClockPrint(clock, options="currTime", &
+                    unit=timeStamp, rc=rc)
+                if (ESMF_LogFoundError(rc, &
+                    line=__LINE__, &
+                    file=FILENAME)) &
+                    return  ! bail out
+                timeStamp = '"'//trim(timeStamp)//'"'
+            endif
+        endif
+
+        write(jsonString,*) '{"event":{&
+            &"name":"'//trim(event)//'",&
+            &"compName":"'// trim(compName) //'",&
+            &"method":"'//trim(method)//'",&
+            &"phase":"'//trim(phaseString)//'",&
+            &"currTime":'//trim(timeStamp)//'}}'
+
+        call ESMF_LogWrite(trim(jsonString), ESMF_LOGMSG_JSON, rc=rc)
+        if (ESMF_LogFoundError(rc, &
+          line=__LINE__, &
+          file=FILENAME)) &
+          return  ! bail out
+
+    end subroutine
 
 
 end module NUOPC_Compliance_Base
