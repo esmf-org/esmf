@@ -7292,13 +7292,14 @@ void GridIter::getDEBnds(
         if (!grid->isUBnd(localDE,i)) uBnd[i]++; 
       } 
 
-      // Also expand for bipole
-      for (int i=0; i<rank; i++) {
-        //// Expand to include all nodes touched by cells on this proc
-        if (grid->isLBnd(localDE,i) && (connL[i]==ESMC_GRIDCONN_BIPOLE)) lBnd[i]--;
-        if (grid->isUBnd(localDE,i) && (connU[i]==ESMC_GRIDCONN_BIPOLE)) uBnd[i]++; 
-      } 
-
+        // Expand for bipole, if center stagger
+      if (staggerloc == 0) {
+        for (int i=0; i<rank; i++) {
+          //// Expand to include all nodes touched by cells on this proc
+          if (grid->isLBnd(localDE,i) && (connL[i]==ESMC_GRIDCONN_BIPOLE)) lBnd[i]--;
+          if (grid->isUBnd(localDE,i) && (connU[i]==ESMC_GRIDCONN_BIPOLE)) uBnd[i]++; 
+        } 
+      }
 
 #if 0
    }
@@ -8381,14 +8382,26 @@ void GridCellIter::getDEBnds(
     }
 #endif 
 
-    for (int i=0; i<rank; i++) {
-      if (align[i] <0) {
-        if (grid->isUBnd(localDE,i) && (connU[i] != ESMC_GRIDCONN_BIPOLE)) uBnd[i]--;
-      } else {
-        if (grid->isLBnd(localDE,i) && (connL[i] != ESMC_GRIDCONN_BIPOLE)) lBnd[i]++;
-      }    
+    // If center stagger, expand if not bipole
+    if (staggerloc==0) {
+      for (int i=0; i<rank; i++) {
+        if (align[i] <0) {
+          if (grid->isUBnd(localDE,i) && (connU[i] != ESMC_GRIDCONN_BIPOLE)) uBnd[i]--;
+        } else {
+          if (grid->isLBnd(localDE,i) && (connL[i] != ESMC_GRIDCONN_BIPOLE)) lBnd[i]++;
+        }    
+      }
+    } else {
+      for (int i=0; i<rank; i++) {
+        if (align[i] <0) {
+          if (grid->isUBnd(localDE,i)) uBnd[i]--;
+        } else {
+          if (grid->isLBnd(localDE,i)) lBnd[i]++;
+        }    
+      }
     }
- 
+
+
 #if 0
   }
 #endif
@@ -8396,13 +8409,16 @@ void GridCellIter::getDEBnds(
   // printf("GCI lBnd=%d %d UBnd=%d %d \n", lBnd[0],lBnd[1],uBnd[0],uBnd[1]);
 
   // If using center make sure we aren't going to go outside the bounds
+#if 0    
     int centerUBnd[ESMF_MAXDIM]; 
     int centerLBnd[ESMF_MAXDIM];
     
     // Get center bounds
     grid->getExclusiveUBound(0, localDE, centerUBnd);  
     grid->getExclusiveLBound(0, localDE, centerLBnd);  
-    
+
+
+    // Make sure that they are 
     for (int i=0; i<rank; i++) {
       int rc;
       if ((uBnd[i] > centerUBnd[i]) || (lBnd[i] < centerLBnd[i])) {
@@ -8412,7 +8428,10 @@ void GridCellIter::getDEBnds(
         throw rc;
       }
     }
+#endif
+
 }
+
 //-----------------------------------------------------------------------------
 
 
@@ -8964,13 +8983,14 @@ void precomputeCellNodeLIDInfo(Grid *grid, DistGrid *staggerDistgrid, int dimCou
         if (!grid->isUBnd(localDE,i)) uBnd[i]++;
       } 
 
-      // Also expand for bipole
-      for (int i=0; i<dimCount; i++) {
-        //// Expand to include all nodes touched by cells on this proc
-        if (grid->isLBnd(localDE,i) && (connL[i]==ESMC_GRIDCONN_BIPOLE)) lBnd[i]--;
-        if (grid->isUBnd(localDE,i) && (connU[i]==ESMC_GRIDCONN_BIPOLE)) uBnd[i]++; 
+        // Also expand for bipole, if center stagger
+      if (staggerloc == 0) {
+        for (int i=0; i<dimCount; i++) {
+          //// Expand to include all nodes touched by cells on this proc
+          if (grid->isLBnd(localDE,i) && (connL[i]==ESMC_GRIDCONN_BIPOLE)) lBnd[i]--;
+          if (grid->isUBnd(localDE,i) && (connU[i]==ESMC_GRIDCONN_BIPOLE)) uBnd[i]++; 
+        } 
       } 
-
 
 #if 0
 
