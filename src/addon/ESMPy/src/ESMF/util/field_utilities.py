@@ -122,7 +122,7 @@ def compare_fields(field1, field2, itrp_mean_tol, itrp_max_tol, csrv_tol,
             csrv = True
 
         # print out diagnostic information
-        print "  Mean relative error = "+str(total_error_global)
+        print "\n  Mean relative error = "+str(total_error_global)
         print "  Max  relative error = "+str(max_error_global)
         print "  Conservation  error = "+str(csrv_error_global)
         #print "  Min error   = "+str(min_error_global)

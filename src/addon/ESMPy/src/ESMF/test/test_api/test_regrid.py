@@ -279,7 +279,7 @@ class TestRegrid(TestBase):
 
         # compare results and output PASS or FAIL
         meanrel, csrvrel, correct = compare_fields(dstfield, exactfield, 
-                                                   10E-03, 10E-03, 10E-16)
+                                                   10E-02, 10E-02, 10E-16)
 
         self.assertAlmostEqual(meanrel, 0.00215601743167)
         self.assertAlmostEqual(csrvrel, 0.0)
@@ -351,7 +351,7 @@ class TestRegrid(TestBase):
 
         # compare results and output PASS or FAIL
         meanrel, csrvrel, correct = compare_fields(dstfield, exactfield,
-                                                   10E-03, 10E-03, 10E-16,
+                                                   10E-02, 10E-02, 10E-16,
                                                    dstfracfield=dstfracfield,
                                                    mass1=srcmass, mass2=dstmass)
 
@@ -394,7 +394,7 @@ class TestRegrid(TestBase):
 
         # compare results and output PASS or FAIL
         meanrel, csrvrel, correct = compare_fields(dstfield, dstfield2, 
-                                                   10E-3, 10E-3, 10E-16, 
+                                                   10E-2, 10E-2, 10E-16,
                                                    dstfracfield=dstfracfield,
                                                    mass1=srcmass, mass2=dstmass)
 
@@ -440,7 +440,7 @@ class TestRegrid(TestBase):
 
         # compare results and output PASS or FAIL
         meanrel, csrvrel, correct = compare_fields(dstfield, dstfield2, 
-                                                   10E-3, 10E-3, 10E-16, 
+                                                   10E-2, 10E-2, 10E-16,
                                                    dstfracfield=dstfracfield,
                                                    mass1=srcmass, mass2=dstmass)
 
