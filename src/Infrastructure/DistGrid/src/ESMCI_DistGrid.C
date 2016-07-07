@@ -2763,48 +2763,48 @@ int DistGrid::print()const{
   int seqIndex;
   indexTuple[0] = 0; indexTuple[1] = 0;
   seqIndex = getSequenceIndexTile(1, indexTuple, depth, &lrc);
-  printf("indexTuple = (%d, %d), sequenceIndex = %d, lrc = %d\n",
-    indexTuple[0], indexTuple[1], seqIndex, lrc);
+  printf("localPet=%d, indexTuple = (%d, %d), sequenceIndex = %d, lrc = %d\n",
+    VM::getCurrent()->getLocalPet(), indexTuple[0], indexTuple[1], seqIndex, lrc);
   indexTuple[0] = 0; indexTuple[1] = 1;
   seqIndex = getSequenceIndexTile(1, indexTuple, depth, &lrc);
-  printf("indexTuple = (%d, %d), sequenceIndex = %d, lrc = %d\n",
-    indexTuple[0], indexTuple[1], seqIndex, lrc);
+  printf("localPet=%d, indexTuple = (%d, %d), sequenceIndex = %d, lrc = %d\n",
+    VM::getCurrent()->getLocalPet(), indexTuple[0], indexTuple[1], seqIndex, lrc);
   indexTuple[0] = 1; indexTuple[1] = 1;
   seqIndex = getSequenceIndexTile(1, indexTuple, depth, &lrc);
-  printf("indexTuple = (%d, %d), sequenceIndex = %d, lrc = %d\n",
-    indexTuple[0], indexTuple[1], seqIndex, lrc);
+  printf("localPet=%d, indexTuple = (%d, %d), sequenceIndex = %d, lrc = %d\n",
+    VM::getCurrent()->getLocalPet(), indexTuple[0], indexTuple[1], seqIndex, lrc);
   indexTuple[0] = 1; indexTuple[1] = 0;
   seqIndex = getSequenceIndexTile(1, indexTuple, depth, &lrc);
-  printf("indexTuple = (%d, %d), sequenceIndex = %d, lrc = %d\n",
-    indexTuple[0], indexTuple[1], seqIndex, lrc);
+  printf("localPet=%d, indexTuple = (%d, %d), sequenceIndex = %d, lrc = %d\n",
+    VM::getCurrent()->getLocalPet(), indexTuple[0], indexTuple[1], seqIndex, lrc);
   indexTuple[0] = 11; indexTuple[1] = 1;
   seqIndex = getSequenceIndexTile(1, indexTuple, depth, &lrc);
-  printf("indexTuple = (%d, %d), sequenceIndex = %d, lrc = %d\n",
-    indexTuple[0], indexTuple[1], seqIndex, lrc);
+  printf("localPet=%d, indexTuple = (%d, %d), sequenceIndex = %d, lrc = %d\n",
+    VM::getCurrent()->getLocalPet(), indexTuple[0], indexTuple[1], seqIndex, lrc);
   indexTuple[0] = 1; indexTuple[1] = 5;
   seqIndex = getSequenceIndexTile(1, indexTuple, depth, &lrc);
-  printf("indexTuple = (%d, %d), sequenceIndex = %d, lrc = %d\n",
-    indexTuple[0], indexTuple[1], seqIndex, lrc);
+  printf("localPet=%d, indexTuple = (%d, %d), sequenceIndex = %d, lrc = %d\n",
+    VM::getCurrent()->getLocalPet(), indexTuple[0], indexTuple[1], seqIndex, lrc);
   indexTuple[0] = 1; indexTuple[1] = 6;
   seqIndex = getSequenceIndexTile(1, indexTuple, depth, &lrc);
-  printf("indexTuple = (%d, %d), sequenceIndex = %d, lrc = %d\n",
-    indexTuple[0], indexTuple[1], seqIndex, lrc);
+  printf("localPet=%d, indexTuple = (%d, %d), sequenceIndex = %d, lrc = %d\n",
+    VM::getCurrent()->getLocalPet(), indexTuple[0], indexTuple[1], seqIndex, lrc);
   indexTuple[0] = 4; indexTuple[1] = 6;
   seqIndex = getSequenceIndexTile(1, indexTuple, depth, &lrc);
-  printf("indexTuple = (%d, %d), sequenceIndex = %d, lrc = %d\n",
-    indexTuple[0], indexTuple[1], seqIndex, lrc);
+  printf("localPet=%d, indexTuple = (%d, %d), sequenceIndex = %d, lrc = %d\n",
+    VM::getCurrent()->getLocalPet(), indexTuple[0], indexTuple[1], seqIndex, lrc);
   indexTuple[0] = 10; indexTuple[1] = 5;
   seqIndex = getSequenceIndexTile(1, indexTuple, depth, &lrc);
-  printf("indexTuple = (%d, %d), sequenceIndex = %d, lrc = %d\n",
-    indexTuple[0], indexTuple[1], seqIndex, lrc);
+  printf("localPet=%d, indexTuple = (%d, %d), sequenceIndex = %d, lrc = %d\n",
+    VM::getCurrent()->getLocalPet(), indexTuple[0], indexTuple[1], seqIndex, lrc);
   indexTuple[0] = 10; indexTuple[1] = 6;
   seqIndex = getSequenceIndexTile(1, indexTuple, depth, &lrc);
-  printf("indexTuple = (%d, %d), sequenceIndex = %d, lrc = %d\n",
-    indexTuple[0], indexTuple[1], seqIndex, lrc);
+  printf("localPet=%d, indexTuple = (%d, %d), sequenceIndex = %d, lrc = %d\n",
+    VM::getCurrent()->getLocalPet(), indexTuple[0], indexTuple[1], seqIndex, lrc);
   indexTuple[0] = 21; indexTuple[1] = 5;
   seqIndex = getSequenceIndexTile(1, indexTuple, depth, &lrc);
-  printf("indexTuple = (%d, %d), sequenceIndex = %d, lrc = %d\n",
-    indexTuple[0], indexTuple[1], seqIndex, lrc);
+  printf("localPet=%d, indexTuple = (%d, %d), sequenceIndex = %d, lrc = %d\n",
+    VM::getCurrent()->getLocalPet(), indexTuple[0], indexTuple[1], seqIndex, lrc);
   printf("--- ESMCI::DistGrid::print - Topology test end ---\n");
 #endif
   
