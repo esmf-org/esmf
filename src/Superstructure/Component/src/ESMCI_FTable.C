@@ -1781,6 +1781,14 @@ int FTable::callVFuncPtr(
           base->root.AttributeIsPresent("ESMF_RUNTIME_COMPLIANCEICREGISTER", 
             &presentFlag);
           
+#ifdef ESMF_NO_DLFCN
+          if (presentFlag==ESMF_TRUE){
+            presentFlag==ESMF_FALSE;
+            ESMC_LogDefault.Write("Ignoring ESMF_RUNTIME_COMPLIANCEICREGISTER "
+              "Attribute due to no dynamic linking.", ESMC_LOGMSG_WARN);
+          }
+#endif
+
           if (presentFlag==ESMF_TRUE){
             
             // access the attribute object in base
@@ -1816,6 +1824,7 @@ int FTable::callVFuncPtr(
 std::cout << "ESMF_RUNTIME_COMPLIANCEICREGISTER attribute:" << value[0] <<"\n";
 #endif
             
+#ifndef ESMF_NO_DLFCN
             // check and see if an alternate compliance ic object was specified
             envVar = VM::getenv("ESMF_RUNTIME_COMPLIANCEICOBJECT");
             void *lib;
@@ -1837,7 +1846,8 @@ std::cout << "ESMF_RUNTIME_COMPLIANCEICREGISTER attribute:" << value[0] <<"\n";
             // compliance IC for register is an internal routine -> look at rc
             if (ESMC_LogDefault.MsgFoundError(registerIcUserRc,
               ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc; // bail out
-            
+#endif
+                    
           }else{
             //TODO: In the long run the else branch could be refactored with 
             //TODO: the if branch. Both in principle should be using dlopen()
