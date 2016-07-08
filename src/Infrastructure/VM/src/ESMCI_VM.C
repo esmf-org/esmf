@@ -725,14 +725,15 @@ void VM::shutdown(
           // The following loop deletes deep C++ ESMF objects derived from
           // Base class. For deep Fortran classes it deletes the Base member.
           for (int k=matchTable_Objects[i].size()-1; k>=0; k--){
+//fprintf(stderr, "about to delete i=%d k=%d %p\n", i, k, matchTable_Objects[i][k]);
             delete matchTable_Objects[i][k];  // delete ESMF object, incl. Base
             matchTable_Objects[i].pop_back();
           }
           if (matchTable_Objects[i].size() > 0)
             std::cout << "Failure in ESMF Automatic Garbage Collection line: "
               << __LINE__ << std::endl;
-            // swap() trick with a temporary to free vector's memory
-            std::vector<ESMC_Base *>().swap(matchTable_Objects[i]);
+          // swap() trick with a temporary to free vector's memory
+          std::vector<ESMC_Base *>().swap(matchTable_Objects[i]);
         }catch(int localrc){
           // catch standard ESMF return code
           ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
@@ -1715,8 +1716,13 @@ void VM::addObject(
   if (i == matchTableBound)
     return;  // no match found, bail out
   
-  // match found
+  // match found, proceed
+
+  // must lock/unlock for thread-safe access to std::vector
+  VM *vm = getCurrent();
+  vm->lock();
   matchTable_Objects[i].push_back(object);
+  vm->unlock();
 }
 //-----------------------------------------------------------------------------
 
@@ -1762,9 +1768,13 @@ void VM::rmObject(
       throw rc;
     }
   }
+  
   // found a match
-
   // proceed to remove object from this VM's garbage collection table
+
+  // must lock/unlock for thread-safe access to std::vector
+  VM *vm = getCurrent();
+  vm->lock();
   for (vector<ESMC_Base *>::iterator 
     it = matchTable_Objects[i].begin();
     it != matchTable_Objects[i].end(); ++it){
@@ -1773,6 +1783,7 @@ void VM::rmObject(
       break;
     }
   }
+  vm->unlock();
 }
 //-----------------------------------------------------------------------------
 
@@ -1809,6 +1820,10 @@ void VM::addFObject(
     return;  // no match found, bail out
   
   // match found
+
+  // must lock/unlock for thread-safe access to std::vector
+  VM *vm = getCurrent();
+  vm->lock();
   int size = matchTable_FObjects[i].size();
   matchTable_FObjects[i].resize(size+1);  // add element to FObjects list
   void *fobjectElement = (void *)&(matchTable_FObjects[i][size].fobject);
@@ -1816,6 +1831,7 @@ void VM::addFObject(
   FTN_X(f_esmf_fortranudtpointercopy)(fobjectElement, (void *)fobject);
 
   matchTable_FObjects[i][size].objectID = objectID;
+  vm->unlock();
 }
 //-----------------------------------------------------------------------------
 
@@ -1861,9 +1877,13 @@ void VM::rmFObject(
       throw rc;
     }
   }
-  // found a match
 
+  // found a match
   // proceed to remove object from this VM's garbage collection table
+
+  // must lock/unlock for thread-safe access to std::vector
+  VM *vm = getCurrent();
+  vm->lock();
   for (vector<FortranObject>::iterator 
     it = matchTable_FObjects[i].begin();
     it != matchTable_FObjects[i].end(); ++it){
@@ -1878,6 +1898,7 @@ void VM::rmFObject(
       break;
     }
   }
+  vm->lock();
 }
 //-----------------------------------------------------------------------------
 
