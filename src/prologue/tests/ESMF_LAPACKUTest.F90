@@ -24,6 +24,9 @@ program ESMF_LAPACKUTest
   integer :: rc, result
 
 #if defined (ESMF_LAPACK)
+#if defined (ESMF_LAPACK_INTERNAL)
+#include "ESMF_LapackBlas.inc"
+#endif
 
   integer, parameter :: dp_k = kind (1.0d0)
 
@@ -77,7 +80,7 @@ program ESMF_LAPACKUTest
   info = 0
   pivs = 0
   call DGELSY (n, n, nrhs, a, n, b, n, pivs, cond, rank, work1, -1, info)
-  worklen = work1(1)
+  worklen = int (work1(1))
   print *, '  suggested workspace length =', worklen
 
   write (failMsg, *) trim (name) // ': info =', info

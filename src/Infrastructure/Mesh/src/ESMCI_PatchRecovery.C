@@ -37,11 +37,19 @@ static const char *const version = "$Id$";
 //-----------------------------------------------------------------------------
 
 #ifdef ESMF_LAPACK
+#if defined (ESMF_LAPACK_INTERNAL)
+extern "C" void FTN_X(esmf_dgelsy)(int *,int *,int*,double*,int*,double*,int*,int*,
+  double*,int*, double*,int*,int*);
+
+extern "C" void FTN_X(esmf_dgelsd)(int *,int *, int*, double*, int*, double*,
+  int*,double*, double*, int*, double *, int*, int *, int *);
+#else
 extern "C" void FTNX(dgelsy)(int *,int *,int*,double*,int*,double*,int*,int*,
   double*,int*, double*,int*,int*);
 
 extern "C" void FTNX(dgelsd)(int *,int *, int*, double*, int*, double*,
   int*,double*, double*, int*, double *, int*, int *, int *);
+#endif
 #endif
 
 extern "C" void FTN_X(f_esmf_lapack_iworksize)(int *,int *);
@@ -311,8 +319,13 @@ Par::Out() << std::endl;
   int tmplwork=-1;
   double tmpwork=0;
 #ifdef ESMF_LAPACK  
+#if defined (ESMF_LAPACK_INTERNAL)
+  FTN_X(esmf_dgelsd)(&m, &n, &m, &mat[0], &m, &id_rhs[0], &ldb, &s[0], &rcond, &rank,
+    &tmpwork, &tmplwork, &iwork[0], &info);
+#else
   FTNX(dgelsd)(&m, &n, &m, &mat[0], &m, &id_rhs[0], &ldb, &s[0], &rcond, &rank,
     &tmpwork, &tmplwork, &iwork[0], &info);
+#endif
 #else
   Throw() << "Please reconfigure with lapack enabled";
 #endif
@@ -324,9 +337,14 @@ Par::Out() << std::endl;
   
 
   // Call solver
-#ifdef ESMF_LAPACK  
+#ifdef ESMF_LAPACK
+#if defined (ESMF_LAPACK_INTERNAL)
+  FTN_X(esmf_dgelsd)(&m, &n, &m, &mat[0], &m, &id_rhs[0], &ldb, &s[0], &rcond, &rank,
+    &work[0], &worksize, &iwork[0], &info);
+#else
   FTNX(dgelsd)(&m, &n, &m, &mat[0], &m, &id_rhs[0], &ldb, &s[0], &rcond, &rank,
     &work[0], &worksize, &iwork[0], &info);
+#endif
   if (info !=0) Throw() << "Bad dgelsd solve, info=" << info;
 #else
   Throw() << "Please reconfigure with lapack enabled";
@@ -413,8 +431,13 @@ std::vector<double> matsav = mat;
   int tmplwork=-1;
   double tmpwork=0;
 #ifdef ESMF_LAPACK  
+#if defined (ESMF_LAPACK_INTERNAL)
+  FTN_X(esmf_dgelsd)(&m, &n, &nrhs, &mat[0], &m, &rhs[0], &ldb, &s[0], &rcond, &rank,
+    &tmpwork, &tmplwork, &iwork[0], &info);
+#else
   FTNX(dgelsd)(&m, &n, &nrhs, &mat[0], &m, &rhs[0], &ldb, &s[0], &rcond, &rank,
     &tmpwork, &tmplwork, &iwork[0], &info);
+#endif
 #else
   Throw() << "Please reconfigure with lapack enabled";
 #endif
@@ -426,8 +449,13 @@ std::vector<double> matsav = mat;
   
   // Call solver
 #ifdef ESMF_LAPACK  
+#if defined (ESMF_LAPACK_INTERNAL)
+  FTN_X(esmf_dgelsd)(&m, &n, &nrhs, &mat[0], &m, &rhs[0], &ldb, &s[0], &rcond, &rank,
+    &work[0], &worksize, &iwork[0], &info);
+#else
   FTNX(dgelsd)(&m, &n, &nrhs, &mat[0], &m, &rhs[0], &ldb, &s[0], &rcond, &rank,
     &work[0], &worksize, &iwork[0], &info);
+#endif
   if (info !=0) Throw() << "Bad dgelsd solve, info=" << info;
 #else
   Throw() << "Please reconfigure with lapack enabled";
@@ -514,9 +542,13 @@ Par::Out() << std::endl;
 #endif
 
 #ifdef ESMF_LAPACK
+#if defined (ESMF_LAPACK_INTERNAL)
+  FTN_X(esmf_dgelsy)(&m, &n, &m, &mat[0], &m, &id_rhs[0], &ldb, &jpvt[0], &rcond,
+    &rank, &work[0], &lwork, &info);
+#else
   FTNX(dgelsy)(&m, &n, &m, &mat[0], &m, &id_rhs[0], &ldb, &jpvt[0], &rcond,
     &rank, &work[0], &lwork, &info);
-
+#endif
   if (info !=0) Throw() << "Bad dgelsy solve, info=" << info;
 #else
   Throw() << "Please reconfigure with lapack enabled";
@@ -580,8 +612,13 @@ std::vector<double> matsav = mat;
 #endif
 
 #ifdef ESMF_LAPACK
+#if defined (ESMF_LAPACK_INTERNAL)
+  FTN_X(esmf_dgelsy)(&m, &n, &nrhs, &mat[0], &m, &rhs[0], &ldb, &jpvt[0], &rcond,
+    &rank, &work[0], &lwork, &info);
+#else
   FTNX(dgelsy)(&m, &n, &nrhs, &mat[0], &m, &rhs[0], &ldb, &jpvt[0], &rcond,
     &rank, &work[0], &lwork, &info);
+#endif
 #else
   Throw() << "Please recompile with ESMF_LAPACK enabled";
 #endif

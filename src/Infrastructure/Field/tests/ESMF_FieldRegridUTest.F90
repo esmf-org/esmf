@@ -16,6 +16,12 @@
 
 #include "ESMF.h"
 
+#if defined (ESMF_LAPACK)
+#if defined (ESMF_LAPACK_INTERNAL)
+#include "ESMF_LapackBlas.inc"
+#endif
+#endif
+
 !==============================================================================
 !BOPI
 ! !PROGRAM: ESMF_FieldRegridUTest - Unit tests for Field Regrid methods
@@ -2133,14 +2139,14 @@ write(*,*) "LOCALRC=",localrc
         ! set src data
         farrayPtr(i1,i2) = 20.0
 
-	! set mask
-	dx=farrayPtrXC(i1,i2)-((A_maxx+A_minx)/2.0)
-	dy=farrayPtrYC(i1,i2)-((A_maxy+A_miny)/2.0)
-	if (sqrt(dx*dx+dy*dy) < 1.0) then
+        ! set mask
+        dx=farrayPtrXC(i1,i2)-((A_maxx+A_minx)/2.0)
+        dy=farrayPtrYC(i1,i2)-((A_maxy+A_miny)/2.0)
+        if (sqrt(dx*dx+dy*dy) < 1.0) then
            maskA(i1,i2) = 2
-	else
+        else
            maskA(i1,i2) = 0
-	endif
+        endif
 
      enddo
      enddo
@@ -2194,14 +2200,14 @@ write(*,*) "LOCALRC=",localrc
         farrayPtrXC(i1,i2) = ((B_maxx-B_minx)*REAL(i1-1)/REAL(B_nx-1))+B_minx
         farrayPtrYC(i1,i2) = ((B_maxy-B_miny)*REAL(i2-1)/REAL(B_ny-1))+B_miny
 
-	! set mask
-	dx=farrayPtrXC(i1,i2)-((B_maxx+B_minx)/2.0)
-	dy=farrayPtrYC(i1,i2)-((B_maxy+B_miny)/2.0)
-	if (sqrt(dx*dx+dy*dy) < 2.0) then
+        ! set mask
+        dx=farrayPtrXC(i1,i2)-((B_maxx+B_minx)/2.0)
+        dy=farrayPtrYC(i1,i2)-((B_maxy+B_miny)/2.0)
+        if (sqrt(dx*dx+dy*dy) < 2.0) then
            maskB(i1,i2) = 3
-	else
+        else
            maskB(i1,i2) = 0
-	endif
+        endif
 
         ! initialize destination field
         farrayPtr(i1,i2)=0.0
@@ -2215,7 +2221,7 @@ write(*,*) "LOCALRC=",localrc
   !!! Regrid forward from the A grid to the B grid
   ! Regrid store
   call ESMF_FieldRegridStore( &
-	  srcFieldA, srcMaskValues=(/1,2/), &
+          srcFieldA, srcMaskValues=(/1,2/), &
           dstField=fieldB, dstMaskValues=(/1,2,3,4/), &
           routeHandle=routeHandle, &
           regridmethod=ESMF_REGRIDMETHOD_BILINEAR, &
@@ -2262,16 +2268,16 @@ write(*,*) "LOCALRC=",localrc
      do i1=clbnd(1),cubnd(1)
      do i2=clbnd(2),cubnd(2)
 
-	if (maskB(i1,i2) .ne. 0) then	
-	   ! if masked out should be 0.0 (but give ourselves room for imprecision)
-	   if (farrayPtr(i1,i2) > 2.0) then
+        if (maskB(i1,i2) .ne. 0) then
+           ! if masked out should be 0.0 (but give ourselves room for imprecision)
+           if (farrayPtr(i1,i2) > 2.0) then
              correct=.false.
            endif
-	else
-	   ! If not masked out should be 20 (but give ourselves room for imprecision)
-	   if (farrayPtr(i1,i2) < 18.0) then
+        else
+           ! If not masked out should be 20 (but give ourselves room for imprecision)
+           if (farrayPtr(i1,i2) < 18.0) then
              correct=.false.
-	    endif
+            endif
         endif
 
      enddo
@@ -2565,17 +2571,17 @@ write(*,*) "LOCALRC=",localrc
         farrayPtrXC(i1,i2) = ((A_maxx-A_minx)*REAL(i1-1)/REAL(A_nx-1))+A_minx
         farrayPtrYC(i1,i2) = ((A_maxy-A_miny)*REAL(i2-1)/REAL(A_ny-1))+A_miny
 
-	! set mask (circle of radius 2 around center)
+        ! set mask (circle of radius 2 around center)
         ! and source data based on mask
-	dx=farrayPtrXC(i1,i2)-((A_maxx+A_minx)/2.0)
-	dy=farrayPtrYC(i1,i2)-((A_maxy+A_miny)/2.0)
-	if (sqrt(dx*dx+dy*dy) < 2.0) then
+        dx=farrayPtrXC(i1,i2)-((A_maxx+A_minx)/2.0)
+        dy=farrayPtrYC(i1,i2)-((A_maxy+A_miny)/2.0)
+        if (sqrt(dx*dx+dy*dy) < 2.0) then
            maskA(i1,i2) = 2
            farrayPtr(i1,i2) = -1000.0 
-	else
+        else
            maskA(i1,i2) = 0
            farrayPtr(i1,i2) = 20.0 
-	endif
+        endif
 
      enddo
      enddo
@@ -2641,9 +2647,9 @@ write(*,*) "LOCALRC=",localrc
   !!! Regrid forward from the A grid to the B grid
   ! Regrid store
   call ESMF_FieldRegridStore( &
-	  srcFieldA, srcMaskValues=(/1,2/), &
+          srcFieldA, srcMaskValues=(/1,2/), &
           dstField=fieldB, &
-	  unmappedaction=ESMF_UNMAPPEDACTION_IGNORE, &
+          unmappedaction=ESMF_UNMAPPEDACTION_IGNORE, &
           routeHandle=routeHandle, &
           regridmethod=ESMF_REGRIDMETHOD_BILINEAR, &
           rc=localrc)
@@ -2670,9 +2676,9 @@ write(*,*) "LOCALRC=",localrc
 
   ! Regrid store
   call ESMF_FieldRegridStore( &
-	  srcFieldA, srcMaskValues=(/1,2/), &
+          srcFieldA, srcMaskValues=(/1,2/), &
           dstField=fieldBPatch, &
-	  unmappedaction=ESMF_UNMAPPEDACTION_IGNORE, &
+          unmappedaction=ESMF_UNMAPPEDACTION_IGNORE, &
           routeHandle=routeHandlePatch, &
           regridmethod=ESMF_REGRIDMETHOD_PATCH, &
           rc=localrc)
@@ -3017,16 +3023,16 @@ write(*,*) "LOCALRC=",localrc
         farrayPtrXC(i1,i2) = REAL(i1-1)*A_dx
         farrayPtrYC(i1,i2) = -90. + (REAL(i2-1)*A_dy + 0.5*A_dy)
 
-	! set mask region around 180
+        ! set mask region around 180
         ! and source data based on mask
-	dx=farrayPtrXC(i1,i2)-180.0
-	if (abs(dx) < 45.0) then
+        dx=farrayPtrXC(i1,i2)-180.0
+        if (abs(dx) < 45.0) then
            maskA(i1,i2) = 2
            farrayPtr(i1,i2) = -1000.0 
-	else
+        else
            maskA(i1,i2) = 0
            farrayPtr(i1,i2) = 20.0 
-	endif
+        endif
 
      enddo
      enddo
@@ -3092,9 +3098,9 @@ write(*,*) "LOCALRC=",localrc
   !!! Regrid forward from the A grid to the B grid
   ! Regrid store
   call ESMF_FieldRegridStore( &
-	  srcFieldA, srcMaskValues=(/1,2/), &
+          srcFieldA, srcMaskValues=(/1,2/), &
           dstField=fieldB, &
-	  unmappedaction=ESMF_UNMAPPEDACTION_IGNORE, &
+          unmappedaction=ESMF_UNMAPPEDACTION_IGNORE, &
           routeHandle=routeHandle, &
           regridmethod=ESMF_REGRIDMETHOD_BILINEAR, &
           rc=localrc)
@@ -3119,9 +3125,9 @@ write(*,*) "LOCALRC=",localrc
 #ifdef ESMF_LAPACK
   ! Regrid store
   call ESMF_FieldRegridStore( &
-	  srcFieldA, srcMaskValues=(/1,2/), &
+          srcFieldA, srcMaskValues=(/1,2/), &
           dstField=fieldBPatch, &
-	  unmappedaction=ESMF_UNMAPPEDACTION_IGNORE, &
+          unmappedaction=ESMF_UNMAPPEDACTION_IGNORE, &
           routeHandle=routeHandlePatch, &
           regridmethod=ESMF_REGRIDMETHOD_PATCH, &
           rc=localrc)
@@ -3516,16 +3522,16 @@ write(*,*) "LOCALRC=",localrc
      do i1=clbnd(1),cubnd(1)
      do i2=clbnd(2),cubnd(2)
 
-	! set mask region around 180
+        ! set mask region around 180
         ! and source data based on mask
-	dx=farrayPtrXC(i1,i2)-180.0
-	if (abs(dx) < 45.0) then
+        dx=farrayPtrXC(i1,i2)-180.0
+        if (abs(dx) < 45.0) then
            maskB(i1,i2) = 2
            farrayPtr(i1,i2) = -1000.0 
-	else
+        else
            maskB(i1,i2) = 0
            farrayPtr(i1,i2) = 0.0 
-	endif
+        endif
 
         ! Set source coordinates as 0 to 360
         farrayPtrXC(i1,i2) = REAL(i1-1)*B_dx
@@ -3545,7 +3551,7 @@ write(*,*) "LOCALRC=",localrc
   ! Regrid store
   call ESMF_FieldRegridStore(srcFieldA, &
           dstField=fieldB, dstMaskValues=(/2/), &
-	  unmappedaction=ESMF_UNMAPPEDACTION_IGNORE, &
+          unmappedaction=ESMF_UNMAPPEDACTION_IGNORE, &
           routeHandle=routeHandle, &
           regridmethod=ESMF_REGRIDMETHOD_BILINEAR, &
           rc=localrc)
@@ -3571,7 +3577,7 @@ write(*,*) "LOCALRC=",localrc
   ! Regrid store
   call ESMF_FieldRegridStore(srcFieldA, &
           dstField=fieldBPatch, dstMaskValues=(/2/), &
-	  unmappedaction=ESMF_UNMAPPEDACTION_IGNORE, &
+          unmappedaction=ESMF_UNMAPPEDACTION_IGNORE, &
           routeHandle=routeHandlePatch, &
           regridmethod=ESMF_REGRIDMETHOD_PATCH, &
           rc=localrc)
@@ -3893,7 +3899,7 @@ write(*,*) "LOCALRC=",localrc
         farrayPtrXC(i1,i2) = ((A_maxx-A_minx)*REAL(i1-1)/REAL(A_nx-1))+A_minx
         farrayPtrYC(i1,i2) = ((A_maxy-A_miny)*REAL(i2-1)/REAL(A_ny-1))+A_miny
 
-	! func to interpolate
+        ! func to interpolate
         farrayPtr(i1,i2) = 20.0+farrayPtrXC(i1,i2)+farrayPtrYC(i1,i2)
 
      enddo
@@ -3954,7 +3960,7 @@ write(*,*) "LOCALRC=",localrc
   !!! Regrid forward from the A grid to the B grid
   ! Regrid store
   call ESMF_FieldRegridStore( &
-	  srcFieldA, &
+          srcFieldA, &
           dstField=fieldB, &
           routeHandle=routeHandle, &
           regridmethod=ESMF_REGRIDMETHOD_BILINEAR, &
@@ -4009,10 +4015,10 @@ write(*,*) "LOCALRC=",localrc
      do i1=clbnd(1),cubnd(1)
      do i2=clbnd(2),cubnd(2)
 
-	!! if error is too big report an error
-	if (abs(farrayPtr(i1,i2)-(20.0+farrayPtrXC(i1,i2)+farrayPtrYC(i1,i2))) > 0.0001) then
-           correct=.false.	
-	endif	
+        !! if error is too big report an error
+        if (abs(farrayPtr(i1,i2)-(20.0+farrayPtrXC(i1,i2)+farrayPtrYC(i1,i2))) > 0.0001) then
+           correct=.false.
+        endif
      enddo
      enddo
 
@@ -4260,7 +4266,7 @@ write(*,*) "LOCALRC=",localrc
         farrayPtrXC(i1,i2) = ((A_maxx-A_minx)*REAL(i1-1)/REAL(A_nx-1))+A_minx
         farrayPtrYC(i1,i2) = ((A_maxy-A_miny)*REAL(i2-1)/REAL(A_ny-1))+A_miny
 
-	! func to interpolate
+        ! func to interpolate
         farrayPtr(i1,i2) = 20.0+farrayPtrXC(i1,i2)+farrayPtrYC(i1,i2)
 
      enddo
@@ -4321,7 +4327,7 @@ write(*,*) "LOCALRC=",localrc
   !!! Regrid forward from the A grid to the B grid
   ! Regrid store
   call ESMF_FieldRegridStore( &
-	  srcFieldA, &
+          srcFieldA, &
           dstField=fieldB, &
           routeHandle=routeHandle, &
           regridmethod=ESMF_REGRIDMETHOD_BILINEAR, &
@@ -4376,10 +4382,10 @@ write(*,*) "LOCALRC=",localrc
      do i1=clbnd(1),cubnd(1)
      do i2=clbnd(2),cubnd(2)
 
-	!! if error is too big report an error
-	if (abs(farrayPtr(i1,i2)-(20.0+farrayPtrXC(i1,i2)+farrayPtrYC(i1,i2))) > 0.0001) then
-           correct=.false.	
-	endif	
+        !! if error is too big report an error
+        if (abs(farrayPtr(i1,i2)-(20.0+farrayPtrXC(i1,i2)+farrayPtrYC(i1,i2))) > 0.0001) then
+           correct=.false.
+        endif
      enddo
      enddo
 
@@ -4908,7 +4914,7 @@ write(*,*) "LOCALRC=",localrc
   !!! Regrid forward from the A grid to the B grid
   ! Regrid store
   call ESMF_FieldRegridStore( &
-	  srcField, &
+          srcField, &
           dstField=dstField, &
           routeHandle=routeHandle, &
           regridmethod=ESMF_REGRIDMETHOD_BILINEAR, &
@@ -4965,10 +4971,10 @@ write(*,*) "LOCALRC=",localrc
      do i1=clbnd(1),cubnd(1)
      do i2=clbnd(2),cubnd(2)
 
-	!! if error is too big report an error
-	if (abs(farrayPtr(i1,i2)-(20.0+farrayPtrXC(i1,i2)+farrayPtrYC(i1,i2))) > 0.0001) then
-           correct=.false.	
-	endif	
+        !! if error is too big report an error
+        if (abs(farrayPtr(i1,i2)-(20.0+farrayPtrXC(i1,i2)+farrayPtrYC(i1,i2))) > 0.0001) then
+           correct=.false.
+        endif
      enddo
      enddo
 
@@ -5473,7 +5479,7 @@ write(*,*) "LOCALRC=",localrc
   !!! Regrid forward from the A grid to the B grid
   ! Regrid store
   call ESMF_FieldRegridStore( &
-	  srcField, &
+          srcField, &
           dstField=dstField, &
           routeHandle=routeHandle, &
           regridmethod=ESMF_REGRIDMETHOD_BILINEAR, &
@@ -5513,10 +5519,10 @@ write(*,*) "LOCALRC=",localrc
         x=nodeCoords(2*i1-1)
         y=nodeCoords(2*i1)
 
-	!! if error is too big report an error
-	if ( abs( farrayPtr1D(i2)-(x+y+20.0) ) > 0.0001) then
-           correct=.false.	
-	endif	
+        !! if error is too big report an error
+        if ( abs( farrayPtr1D(i2)-(x+y+20.0) ) > 0.0001) then
+           correct=.false.
+        endif
 
         ! Advance to next owner
         i2=i2+1
@@ -6218,7 +6224,7 @@ write(*,*) "LOCALRC=",localrc
   !!! Regrid forward from the A grid to the B grid
   ! Regrid store
   call ESMF_FieldRegridStore( &
-	  srcField, &
+          srcField, &
           dstField=dstField, &
           routeHandle=routeHandle, &
           regridmethod=ESMF_REGRIDMETHOD_BILINEAR, &
@@ -6258,10 +6264,10 @@ write(*,*) "LOCALRC=",localrc
         x=nodeCoords(2*i1-1)
         y=nodeCoords(2*i1)
 
-	!! if error is too big report an error
-	if ( abs( farrayPtr1D(i2)-(x+y+20.0) ) > 0.0001) then
-           correct=.false.	
-	endif	
+        !! if error is too big report an error
+        if ( abs( farrayPtr1D(i2)-(x+y+20.0) ) > 0.0001) then
+           correct=.false.
+        endif
 
         ! Advance to next owner
         i2=i2+1
@@ -6851,7 +6857,7 @@ write(*,*) "LOCALRC=",localrc
   !!! Regrid forward from the A grid to the B grid
   ! Regrid store
   call ESMF_FieldRegridStore( &
-	  srcField, &
+          srcField, &
           dstField=dstField, &
           routeHandle=routeHandle, &
           regridmethod=ESMF_REGRIDMETHOD_BILINEAR, &
@@ -6913,11 +6919,11 @@ write(*,*) "LOCALRC=",localrc
      do i2=clbnd(2),cubnd(2)
      do i3=clbnd(3),cubnd(3)
 
-	!! if error is too big report an error
-	if (abs(farrayPtr(i1,i2,i3)-(20.0+farrayPtrXC(i1,i2,i3)+farrayPtrYC(i1,i2,i3)+ &
+        !! if error is too big report an error
+        if (abs(farrayPtr(i1,i2,i3)-(20.0+farrayPtrXC(i1,i2,i3)+farrayPtrYC(i1,i2,i3)+ &
                                      farrayPtrZC(i1,i2,i3))) > 0.0001) then
-           correct=.false.	
-	endif	
+           correct=.false.
+        endif
      enddo
      enddo
      enddo
@@ -7234,9 +7240,9 @@ write(*,*) "LOCALRC=",localrc
   !!! Regrid forward from the A grid to the B grid
   ! Regrid store
   call ESMF_FieldRegridStore( &
-	  srcFieldA, &
+          srcFieldA, &
           dstField=fieldB, &
-	  unmappedaction=ESMF_UNMAPPEDACTION_IGNORE, &
+          unmappedaction=ESMF_UNMAPPEDACTION_IGNORE, &
           routeHandle=routeHandle, &
           regridmethod=ESMF_REGRIDMETHOD_BILINEAR, &
           polemethod=ESMF_POLEMETHOD_NONE, &
@@ -7283,7 +7289,7 @@ write(*,*) "LOCALRC=",localrc
            if (abs(farrayPtr(i1,i2)-20.0) .gt. 0.000001) then
               correct=.false.
            endif
-	endif
+        endif
      enddo
      enddo
 
@@ -7588,9 +7594,9 @@ write(*,*) "LOCALRC=",localrc
   !!! Regrid forward from the A grid to the B grid
   ! Regrid store
   call ESMF_FieldRegridStore( &
-	  srcFieldA, &
+          srcFieldA, &
           dstField=fieldB, &
-	  unmappedaction=ESMF_UNMAPPEDACTION_IGNORE, &
+          unmappedaction=ESMF_UNMAPPEDACTION_IGNORE, &
           routeHandle=routeHandle, &
           regridmethod=ESMF_REGRIDMETHOD_BILINEAR, &
           polemethod=ESMF_POLEMETHOD_ALLAVG, &
@@ -7631,7 +7637,7 @@ write(*,*) "LOCALRC=",localrc
         ! if working everything should be really close to 20.0
         if (abs(farrayPtr(i1,i2)-20.0) .gt. 0.000001) then
             correct=.false.
-	endif
+        endif
      enddo
      enddo
 
@@ -7948,9 +7954,9 @@ write(*,*) "LOCALRC=",localrc
   !!! Regrid forward from the A grid to the B grid
   ! Regrid store
   call ESMF_FieldRegridStore( &
-	  srcFieldA, &
+          srcFieldA, &
           dstField=fieldB, &
-	  unmappedaction=ESMF_UNMAPPEDACTION_IGNORE, &
+          unmappedaction=ESMF_UNMAPPEDACTION_IGNORE, &
           routeHandle=routeHandle, &
           regridmethod=ESMF_REGRIDMETHOD_BILINEAR, &
           polemethod=ESMF_POLEMETHOD_NPNTAVG, &
@@ -7992,7 +7998,7 @@ write(*,*) "LOCALRC=",localrc
         ! if working everything should be really close to 20.0
         if (abs(farrayPtr(i1,i2)-20.0) .gt. 0.000001) then
             correct=.false.
-	endif
+        endif
      enddo
      enddo
 
@@ -8309,9 +8315,9 @@ write(*,*) "LOCALRC=",localrc
   !!! Regrid forward from the A grid to the B grid
   ! Regrid store
   call ESMF_FieldRegridStore( &
-	  srcFieldA, &
+          srcFieldA, &
           dstField=fieldB, &
-	  unmappedaction=ESMF_UNMAPPEDACTION_IGNORE, &
+          unmappedaction=ESMF_UNMAPPEDACTION_IGNORE, &
           routeHandle=routeHandle, &
           regridmethod=ESMF_REGRIDMETHOD_BILINEAR, &
           polemethod=ESMF_POLEMETHOD_TEETH, &
@@ -8352,7 +8358,7 @@ write(*,*) "LOCALRC=",localrc
         ! if working everything should be really close to 20.0
         if (abs(farrayPtr(i1,i2)-20.0) .gt. 0.000001) then
             correct=.false.
-	endif
+        endif
      enddo
      enddo
 
@@ -8748,9 +8754,9 @@ write(*,*) "LOCALRC=",localrc
   !!! Regrid forward from the A grid to the B grid
   ! Regrid store
   call ESMF_FieldRegridStore( &
-	  srcField, &
+          srcField, &
           dstField=dstField, &
-	  unmappedaction=ESMF_UNMAPPEDACTION_IGNORE, &
+          unmappedaction=ESMF_UNMAPPEDACTION_IGNORE, &
           routeHandle=routeHandle, &
           regridmethod=ESMF_REGRIDMETHOD_BILINEAR, &
           rc=localrc)
@@ -8790,7 +8796,7 @@ write(*,*) "LOCALRC=",localrc
         ! if working everything should be really close to 20.0
         if (abs(farrayPtr(i1,i2)-xfarrayPtr(i1,i2)) .gt. 0.001) then
             correct=.false.
-	endif
+        endif
      enddo
      enddo
 
@@ -9131,9 +9137,9 @@ write(*,*) "LOCALRC=",localrc
   !!! Regrid forward from the A grid to the B grid
   ! Regrid store
   call ESMF_FieldRegridStore( &
-	  srcFieldA, &
+          srcFieldA, &
           dstField=fieldB, &
-	  unmappedaction=ESMF_UNMAPPEDACTION_IGNORE, &
+          unmappedaction=ESMF_UNMAPPEDACTION_IGNORE, &
           factorIndexList=indices, factorList=weights, &
           regridmethod=ESMF_REGRIDMETHOD_BILINEAR, &
           rc=localrc)
@@ -9181,7 +9187,7 @@ write(*,*) "LOCALRC=",localrc
         ! if working everything should be really close to 20.0
         if (abs(farrayPtr(i1,i2)-20.0) .gt. 0.000001) then
             correct=.false.
-	endif
+        endif
      enddo
      enddo
 
@@ -9502,9 +9508,9 @@ write(*,*) "LOCALRC=",localrc
   ! Please use (factorList, factorIndexList) instead of (weights, indices)  
   ! See test_RegridMatrixFactor() for an example of their use. 
   call ESMF_FieldRegridStore( &
-	  srcFieldA, &
+          srcFieldA, &
           dstField=fieldB, &
-	  unmappedaction=ESMF_UNMAPPEDACTION_IGNORE, &
+          unmappedaction=ESMF_UNMAPPEDACTION_IGNORE, &
           weights=weights, indices=indices,          & ! DEPRECATED
           regridmethod=ESMF_REGRIDMETHOD_BILINEAR,   &
           rc=localrc)
@@ -9552,7 +9558,7 @@ write(*,*) "LOCALRC=",localrc
         ! if working everything should be really close to 20.0
         if (abs(farrayPtr(i1,i2)-20.0) .gt. 0.000001) then
             correct=.false.
-	endif
+        endif
      enddo
      enddo
 
@@ -9969,9 +9975,9 @@ write(*,*) "LOCALRC=",localrc
   !!! Regrid forward from the A grid to the B grid
   ! Regrid store
   call ESMF_FieldRegridStore( &
-	  srcField, &
+          srcField, &
           dstField=dstField, &
-	  unmappedaction=ESMF_UNMAPPEDACTION_IGNORE, &
+          unmappedaction=ESMF_UNMAPPEDACTION_IGNORE, &
           routehandle=routehandle, &
           regridmethod=ESMF_REGRIDMETHOD_BILINEAR, &
           rc=localrc)
@@ -10024,7 +10030,7 @@ write(*,*) "LOCALRC=",localrc
         if (rel_error .gt. 0.001) then
            write(*,*) i1,i2," ",farrayPtr(i1,i2),xfarrayPtr(i1,i2)
            correct=.false.
-	endif
+        endif
      enddo
      enddo
 
@@ -10375,7 +10381,7 @@ write(*,*) "LOCALRC=",localrc
   !!! Regrid forward from the A grid to the B grid
   ! Regrid store
   call ESMF_FieldRegridStore( &
-	  srcField, &
+          srcField, &
           dstField=dstField, &
           routeHandle=routeHandle, &
           regridmethod=ESMF_REGRIDMETHOD_BILINEAR, &
@@ -10416,7 +10422,7 @@ write(*,*) "LOCALRC=",localrc
         ! if working everything should be really close to exact answer
         if (abs(farrayPtr(i1,i2)-xfarrayPtr(i1,i2)) .gt. 0.001) then
             correct=.false.
-	endif
+        endif
      enddo
      enddo
 
@@ -10991,10 +10997,10 @@ write(*,*) "LOCALRC=",localrc
   !!! Regrid forward from the A grid to the B grid
   ! Regrid store
   call ESMF_FieldRegridStore( &
-	  srcField, &
+          srcField, &
           dstField=dstField, &
           routeHandle=routeHandle, &
-	  unmappedaction=ESMF_UNMAPPEDACTION_IGNORE, &
+          unmappedaction=ESMF_UNMAPPEDACTION_IGNORE, &
           regridmethod=ESMF_REGRIDMETHOD_BILINEAR, &
           rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
@@ -11073,14 +11079,14 @@ write(*,*) "LOCALRC=",localrc
         !! mark that at least one point has been interpolated
         at_least_one_interp=.true.
 
-	!! if error is too big report an error
-	if (abs(farrayPtr(i1,i2,i3)-(20.0+farrayPtrXC(i1,i2,i3)+farrayPtrYC(i1,i2,i3)+ &
+        !! if error is too big report an error
+        if (abs(farrayPtr(i1,i2,i3)-(20.0+farrayPtrXC(i1,i2,i3)+farrayPtrYC(i1,i2,i3)+ &
                                      farrayPtrZC(i1,i2,i3))) > 0.0001) then
 
 !           write(*,*) localPet," error",abs(farrayPtr(i1,i2,i3)), &
 !                    abs(20.0+farrayPtrXC(i1,i2,i3)+farrayPtrYC(i1,i2,i3)+farrayPtrZC(i1,i2,i3))
-           correct=.false.	
-	endif	
+           correct=.false.
+        endif
      enddo
      enddo
      enddo
@@ -11469,7 +11475,7 @@ write(*,*) "LOCALRC=",localrc
   ! Regrid store
   ! Calculate routeHandle on 2D fields
   call ESMF_FieldRegridStore( &
-	  srcField, &
+          srcField, &
           dstField=dstField, &
           routeHandle=routeHandle, &
           regridmethod=ESMF_REGRIDMETHOD_BILINEAR, &
@@ -11995,7 +12001,7 @@ write(*,*) "LOCALRC=",localrc
            errorfarrayPtr(i1,i2)=(farrayPtr(i1,i2) - farrayPtr2(i1,i2))
         endif
         if (ABS(errorfarrayPtr(i1,i2)) .gt. 0.01) then
-		  write(*,*) i1,i2,"::", &
+                  write(*,*) i1,i2,"::", &
                      errorfarrayPtr(i1,i2), &
                      "::", farrayPtr(i1,i2),"::",farrayPtr2(i1,i2)
           correct=.false. 
@@ -12256,7 +12262,7 @@ write(*,*) "LOCALRC=",localrc
         theta = DEG2RAD*(farrayPtrXC(i1,i2))
         phi = DEG2RAD*(90.-farrayPtrYC(i1,i2))
 
-		x = cos(theta)*sin(phi)
+        x = cos(theta)*sin(phi)
         y = sin(theta)*sin(phi)
         z = cos(phi)
 
@@ -12331,7 +12337,7 @@ write(*,*) "LOCALRC=",localrc
         theta = DEG2RAD*(farrayPtrXC(i1,i2))
         phi = DEG2RAD*(90.-farrayPtrYC(i1,i2))
 
-		x = cos(theta)*sin(phi)
+        x = cos(theta)*sin(phi)
         y = sin(theta)*sin(phi)
         z = cos(phi)
 
@@ -12368,7 +12374,7 @@ write(*,*) "LOCALRC=",localrc
   ! Regrid store
   ! Calculate routeHandle on 2D fields
   call ESMF_FieldRegridStore( &
-	  srcField, &
+          srcField, &
           dstField=dstField, &
           routeHandle=routeHandle, &
           regridmethod=ESMF_REGRIDMETHOD_BILINEAR, &
@@ -12762,7 +12768,7 @@ write(*,*) "LOCALRC=",localrc
   ! Regrid store
   ! Calculate routeHandle on 2D fields
   call ESMF_FieldRegridStore( &
-	  srcField, &
+          srcField, &
           dstField=dstField, &
           routeHandle=routeHandle, &
           regridmethod=ESMF_REGRIDMETHOD_NEAREST_STOD, &
@@ -13156,7 +13162,7 @@ write(*,*) "LOCALRC=",localrc
   ! Regrid store
   ! Calculate routeHandle on 2D fields
   call ESMF_FieldRegridStore( &
-	  srcField, &
+          srcField, &
           dstField=dstField, &
           routeHandle=routeHandle, &
           regridmethod=ESMF_REGRIDMETHOD_NEAREST_DTOS, &
@@ -13486,13 +13492,13 @@ write(*,*) "LOCALRC=",localrc
 
         srcPtr(i1,i2) = 200.0
 
-	! set mask region around 180
-	dx=farrayPtrXC(i1,i2)-180.0
-	if (abs(dx) < 45.0) then
+        ! set mask region around 180
+        dx=farrayPtrXC(i1,i2)-180.0
+        if (abs(dx) < 45.0) then
            srcMask(i1,i2) = 1
-	else
+        else
            srcMask(i1,i2) = 0
-	endif
+        endif
 
      enddo
      enddo
@@ -13581,9 +13587,9 @@ write(*,*) "LOCALRC=",localrc
   ! Regrid store
   ! Calculate routeHandle on 2D fields
   call ESMF_FieldRegridStore( &
-	  srcField, srcMaskValues=(/1/), &
+          srcField, srcMaskValues=(/1/), &
           dstField=dstField, &
-	  unmappedaction=ESMF_UNMAPPEDACTION_IGNORE, &
+          unmappedaction=ESMF_UNMAPPEDACTION_IGNORE, &
           routeHandle=routeHandle, &
           regridmethod=ESMF_REGRIDMETHOD_BILINEAR, &
           unmappedDstList=unmappedDstList, rc=localrc)
@@ -14339,7 +14345,7 @@ write(*,*) "LOCALRC=",localrc
   !!! Regrid forward from the A grid to the B grid
   ! Regrid store
   call ESMF_FieldRegridStore( &
-	  srcField, &
+          srcField, &
           dstField=dstField, &
           routeHandle=routeHandle, &
           regridmethod=ESMF_REGRIDMETHOD_NEAREST_STOD, &
@@ -14379,11 +14385,11 @@ write(*,*) "LOCALRC=",localrc
         x=nodeCoords(2*i1-1)
         y=nodeCoords(2*i1)
 
-	!! if error is too big report an error
-	if ( abs( farrayPtr1D(i2)-(x+y+20.0) ) > 0.0001) then
-           correct=.false.	
+        !! if error is too big report an error
+        if ( abs( farrayPtr1D(i2)-(x+y+20.0) ) > 0.0001) then
+           correct=.false.
            write(*,*) localPet,nodeIds(i1),"::",farrayPtr1D(i2),(x+y+20.0)
-	endif	
+        endif
 
         ! Advance to next owner
         i2=i2+1
@@ -14841,9 +14847,9 @@ write(*,*) "LOCALRC=",localrc
   !!! Regrid forward from the A grid to the B grid
   ! Regrid store
   call ESMF_FieldRegridStore( &
-	  srcField, &
+          srcField, &
           dstField=dstField, &
-	  unmappedaction=ESMF_UNMAPPEDACTION_IGNORE, &
+          unmappedaction=ESMF_UNMAPPEDACTION_IGNORE, &
           routeHandle=routeHandle, &
           regridmethod=ESMF_REGRIDMETHOD_BILINEAR, &
           rc=localrc)
@@ -14888,7 +14894,7 @@ write(*,*) "LOCALRC=",localrc
         if (abs(farrayPtr(i1,i2)-xfarrayPtr(i1,i2)) .gt. 0.001) then
             correct=.false.
             write(*,*) "ERROR:",farrayPtr(i1,i2),".ne.",xfarrayPtr(i1,i2)
-	endif
+        endif
      enddo
      enddo
 
@@ -15666,7 +15672,7 @@ write(*,*) "LOCALRC=",localrc
   !!! Regrid forward from the A grid to the B grid
   ! Regrid store
   call ESMF_FieldRegridStore( &
-	  srcField, &
+          srcField, &
           srcMaskValues=(/1/), &
           dstField=dstField, &
           dstMaskValues=(/2/), &
@@ -15718,7 +15724,7 @@ write(*,*) "LOCALRC=",localrc
            !! (10000.0 will trigger error here)
            if ( abs( farrayPtr1D(i2)-(x+y+20.0) ) > 0.0001) then
               write(*,*) "ERROR:",nodeIds(i1),farrayPtr1D(i2),(x+y+20.0)
-              correct=.false.	
+              correct=.false.
            endif
         endif
 
@@ -16268,9 +16274,9 @@ write(*,*) "LOCALRC=",localrc
   !!! Regrid forward from the A grid to the B grid
   ! Regrid store
   call ESMF_FieldRegridStore( &
-	  srcField, &
+          srcField, &
           dstField=dstField, &
-	  unmappedaction=ESMF_UNMAPPEDACTION_ERROR, &
+          unmappedaction=ESMF_UNMAPPEDACTION_ERROR, &
           routeHandle=routeHandle, &
           regridmethod=ESMF_REGRIDMETHOD_BILINEAR, &
           lineType=ESMF_LINETYPE_GREAT_CIRCLE, &
@@ -16338,7 +16344,7 @@ write(*,*) "LOCALRC=",localrc
         ! Return error if relative error too big
         if (relErr > errTol) then
             correct=.false.
-	endif
+        endif
      enddo
      enddo
 
@@ -17102,7 +17108,7 @@ write(*,*) "LOCALRC=",localrc
   !!! Regrid forward from the A grid to the B grid
   ! Regrid store
   call ESMF_FieldRegridStore( &
-	  srcField, &
+          srcField, &
           dstField=dstField, &
           routeHandle=routeHandle, &
           regridmethod=ESMF_REGRIDMETHOD_BILINEAR, &
@@ -17142,10 +17148,10 @@ write(*,*) "LOCALRC=",localrc
         x=nodeCoords(2*i1-1)
         y=nodeCoords(2*i1)
 
-	!! if error is too big report an error
-	if ( abs( farrayPtr1D(i2)-(x+y+20.0) ) > 0.0001) then
-           correct=.false.	
-	endif	
+        !! if error is too big report an error
+        if ( abs( farrayPtr1D(i2)-(x+y+20.0) ) > 0.0001) then
+           correct=.false.
+        endif
 
         ! Advance to next owner
         i2=i2+1
@@ -18210,7 +18216,7 @@ write(*,*) "LOCALRC=",localrc
   !!! Regrid forward from the A grid to the B grid
   ! Regrid store
   call ESMF_FieldRegridStore( &
-	  srcField, &
+          srcField, &
           srcMaskValues=(/1/), &
           dstField=dstField, &
           dstMaskValues=(/1/), &
@@ -18261,7 +18267,7 @@ write(*,*) "LOCALRC=",localrc
 
      !! if error is too big report an error
      if (relErr > 0.0001) then
-        correct=.false.	
+        correct=.false.
         !write(*,*) localPet,"::",i1,farrayPtr1D(i1),xfarrayPtr1D(i1)
      endif
   enddo
@@ -18895,7 +18901,7 @@ write(*,*) "LOCALRC=",localrc
         lat = farrayPtrYc(i1,i2)
 
         theta = DEG2RAD*(lon)
-	phi = DEG2RAD*(90.-lat)
+        phi = DEG2RAD*(90.-lat)
 
         ! set exact dst data
         xfarrayPtr(i1,i2) = 2. + cos(theta)**2.*cos(2.*phi)
@@ -18911,7 +18917,7 @@ write(*,*) "LOCALRC=",localrc
   !!! Regrid forward from the A grid to the B grid
   ! Regrid store
   call ESMF_FieldRegridStore( &
-	  srcField, &
+          srcField, &
           dstField=dstField, &
           routeHandle=routeHandle, &
           regridmethod=ESMF_REGRIDMETHOD_BILINEAR, &
@@ -19619,7 +19625,7 @@ write(*,*) "LOCALRC=",localrc
   !!! Regrid forward from the A grid to the B grid
   ! Regrid store
   call ESMF_FieldRegridStore( &
-	  srcField, &
+          srcField, &
           dstField=dstField, &
           routeHandle=routeHandle, &
           regridmethod=ESMF_REGRIDMETHOD_BILINEAR, &
@@ -19706,10 +19712,10 @@ write(*,*) "LOCALRC=",localrc
         !! Calculate max
         if (relErr > maxRelErr) maxRelErr=relErr
 
-	!! if error is too big report an error
-	if (relErr > 0.009) then
-           correct=.false.	
-	endif	
+        !! if error is too big report an error
+        if (relErr > 0.009) then
+           correct=.false.
+        endif
 
      enddo
      enddo
@@ -20108,7 +20114,7 @@ write(*,*) "LOCALRC=",localrc
   !!! Regrid forward from the A grid to the B grid
   ! Regrid store
   call ESMF_FieldRegridStore( &
- 	  srcField, &
+          srcField, &
           dstField=dstField, &
           routeHandle=routeHandle, &
           unmappedAction=ESMF_UNMAPPEDACTION_IGNORE, &
@@ -20200,10 +20206,10 @@ write(*,*) "LOCALRC=",localrc
         !! Calculate max
         if (relErr > maxRelErr) maxRelErr=relErr
 
-	!! if error is too big report an error
-	if (relErr > 0.002) then
-           correct=.false.	
-	endif	
+        !! if error is too big report an error
+        if (relErr > 0.002) then
+           correct=.false.
+        endif
      enddo
      enddo
      enddo
@@ -20524,7 +20530,7 @@ write(*,*) "LOCALRC=",localrc
   !!! Regrid forward from one locstream to another
   ! Regrid store
   call ESMF_FieldRegridStore( &
- 	  srcField, &
+          srcField, &
           dstField=dstField, &
           routeHandle=routeHandle, &
           regridmethod=ESMF_REGRIDMETHOD_NEAREST_STOD, &
@@ -21131,7 +21137,7 @@ write(*,*) "LOCALRC=",localrc
   !!! Regrid forward from the src LocStream to the dst Mesh
   ! Regrid store
   call ESMF_FieldRegridStore( &
-	  srcField, &
+          srcField, &
           dstField=dstField, &
           routeHandle=routeHandle, &
           regridmethod=ESMF_REGRIDMETHOD_NEAREST_STOD, &
@@ -21171,11 +21177,11 @@ write(*,*) "LOCALRC=",localrc
         x=nodeCoords(2*i1-1)
         y=nodeCoords(2*i1)
 
-	!! if error is too big report an error
-	if ( abs( farrayPtr1D(i2)-(x+y+20.0) ) > 0.0001) then
-           correct=.false.	
+        !! if error is too big report an error
+        if ( abs( farrayPtr1D(i2)-(x+y+20.0) ) > 0.0001) then
+           correct=.false.
            write(*,*) localPet,nodeIds(i1),"::",farrayPtr1D(i2),(x+y+20.0)
-	endif	
+        endif
 
         ! Advance to next owner
         i2=i2+1
@@ -21540,7 +21546,7 @@ write(*,*) "LOCALRC=",localrc
   ! Regrid store
   ! Calculate routeHandle on 2D fields
   call ESMF_FieldRegridStore( &
-	  srcField, &
+          srcField, &
           dstField=dstField, &
           routeHandle=routeHandle, &
           regridmethod=ESMF_REGRIDMETHOD_NEAREST_DTOS, &
@@ -21675,6 +21681,10 @@ write(*,*) "LOCALRC=",localrc
   integer :: cl,cu,idx
   integer :: localPet, petCount
   real(ESMF_KIND_R8) :: beg_time, end_time  
+#if defined (ESMF_LAPACK)
+  logical, external :: LSAME
+  logical :: tf
+#endif
 
   ! init success flag
   correct=.true.
@@ -21940,7 +21950,7 @@ write(*,*) "LOCALRC=",localrc
   !!! Regrid forward from the grid to the LocStream
   ! Regrid store
   call ESMF_FieldRegridStore( &
-	  srcField, &
+          srcField, &
           dstField=dstField, &
            routeHandle=routeHandle, &
           regridmethod=ESMF_REGRIDMETHOD_BILINEAR, &
@@ -21964,6 +21974,11 @@ write(*,*) "LOCALRC=",localrc
     endif
 
   !!! Regrid forward from the Src grid to the LocStream - this time with PATCH
+
+  ! Make sure LAPACK lib is mapped in before the timing block
+#if defined (ESMF_LAPACK)
+  tf = LSAME ('a', 'A')
+#endif
 
   ! Get start time
   call ESMF_VMWtime(beg_time)
@@ -22023,12 +22038,12 @@ write(*,*) "LOCALRC=",localrc
         ! determine validation data
         expected = x+y+z+15.0
 
-	!! if error is too big report an error
-	if ( abs( farrayPtr1D(i1)-(expected) )/expected > 0.001) then
+        !! if error is too big report an error
+        if ( abs( farrayPtr1D(i1)-(expected) )/expected > 0.001) then
            print*,'ERROR: larger than expected difference, expected ',expected, &
                   '  got ',farrayPtr1D(i1),'  diff= ',abs(farrayPtr1D(i1)-expected)
-           correct=.false.	
-	endif	
+           correct=.false.
+        endif
      enddo
 
      ! now for patch
@@ -22055,12 +22070,12 @@ write(*,*) "LOCALRC=",localrc
         ! determine validation data
         expected = x+y+z+15.0
 
-	!! if error is too big report an error
-	if ( abs( farrayPtr1D(i1)-(expected) )/expected > 0.001) then
+        !! if error is too big report an error
+        if ( abs( farrayPtr1D(i1)-(expected) )/expected > 0.001) then
            print*,'ERROR: larger than expected difference, expected ',expected, &
                   '  got ',farrayPtr1D(i1),'  diff= ',abs(farrayPtr1D(i1)-expected)
-           correct=.false.	
-	endif	
+           correct=.false.
+        endif
      enddo
 
   enddo    ! lDE
@@ -22396,7 +22411,7 @@ write(*,*) "LOCALRC=",localrc
   !!! Regrid forward from the grid to the LocStream
   ! Regrid store
   call ESMF_FieldRegridStore( &
-	  srcField, &
+          srcField, &
           dstField=dstField, &
           routeHandle=routeHandle, &
           regridmethod=ESMF_REGRIDMETHOD_BILINEAR, &
@@ -22441,8 +22456,8 @@ write(*,*) "LOCALRC=",localrc
       print*,'ERROR: larger than expected difference, expected ',expected, &
              '  got ',farrayPtr1D(i1),'  diff= ',abs(farrayPtr1D(i1)-expected), &
              '  rel diff= ',abs(farrayPtr1D(i1)-expected)/expected
-      correct=.false.	
-    endif	
+      correct=.false.
+    endif
   enddo
 
 
@@ -22859,7 +22874,7 @@ write(*,*) "LOCALRC=",localrc
   !!! Regrid forward from the Src grid to the LocStream
   ! Regrid store
   call ESMF_FieldRegridStore( &
-	  srcField, &
+          srcField, &
           dstField=dstField, &
           routeHandle=routeHandle, &
           regridmethod=ESMF_REGRIDMETHOD_BILINEAR, &
@@ -22900,12 +22915,12 @@ write(*,*) "LOCALRC=",localrc
 
         expected = x+y+z+20.0
 
-	!! if error is too big report an error
-	if ( abs( farrayPtr1D(i1)-expected )/expected > 0.001) then
+        !! if error is too big report an error
+        if ( abs( farrayPtr1D(i1)-expected )/expected > 0.001) then
            print*,'ERROR: larger than expected error, expected ',expected, &
                   '  got ',farrayPtr1D(i1)
-           correct=.false.	
-	endif	
+           correct=.false.
+        endif
 
   enddo
 
@@ -23518,7 +23533,7 @@ write(*,*) "LOCALRC=",localrc
   !!! Regrid forward from the mesh to the locstream
   ! Regrid store
   call ESMF_FieldRegridStore( &
-	  srcField, &
+          srcField, &
           dstField=dstField, dstMaskValues=(/1,2/), &
           routeHandle=routeHandle, &
           regridmethod=ESMF_REGRIDMETHOD_BILINEAR, &
@@ -23553,7 +23568,7 @@ write(*,*) "LOCALRC=",localrc
   do i1=cl,cu
 
         if (maskArray(i1) .gt. 0) then
-	  if ( abs( farrayPtr1D(i1) ) > 0.0001) then
+          if ( abs( farrayPtr1D(i1) ) > 0.0001) then
             correct=.false.
           endif
         else
@@ -24376,7 +24391,7 @@ write(*,*) "LOCALRC=",localrc
   ! Regrid store
   ! Calculate routeHandle on 2D fields
   call ESMF_FieldRegridStore( &
-	  srcField, &
+          srcField, &
           dstField=dstField, &
           routeHandle=routeHandle, &
           regridmethod=ESMF_REGRIDMETHOD_BILINEAR, &
@@ -24404,7 +24419,7 @@ write(*,*) "LOCALRC=",localrc
   ! Regrid store
   ! Calculate routeHandle on 2D fields
   call ESMF_FieldRegridStore( &
-	  srcField, &
+          srcField, &
           dstField=lsdstField, &
           routeHandle=routeHandle, &
           regridmethod=ESMF_REGRIDMETHOD_BILINEAR, &
@@ -24432,7 +24447,7 @@ write(*,*) "LOCALRC=",localrc
   ! Regrid store
   ! Calculate routeHandle on 2D fields
   call ESMF_FieldRegridStore( &
-	  srcField, &
+          srcField, &
           dstField=mdstField, &
           routeHandle=routeHandle, &
           regridmethod=ESMF_REGRIDMETHOD_BILINEAR, &
@@ -25224,7 +25239,7 @@ write(*,*) "LOCALRC=",localrc
   !!! Regrid forward from the A grid to the B grid
   ! Regrid store
   call ESMF_FieldRegridStore( &
-	  srcField, &
+          srcField, &
            dstField=dstField, &
           routeHandle=routeHandle, &
           regridmethod=ESMF_REGRIDMETHOD_BILINEAR, &
@@ -25273,10 +25288,10 @@ write(*,*) "LOCALRC=",localrc
         !! Set max
         if (err > maxErr) maxErr=err
 
-	!! if error is too big report an error
-	if (err > 0.1) then
-            correct=.false.	
-	endif	
+        !! if error is too big report an error
+        if (err > 0.1) then
+            correct=.false.
+        endif
  
         ! Advance to next owner
         i2=i2+1
@@ -25655,7 +25670,7 @@ write(*,*) "LOCALRC=",localrc
   !!! Regrid forward from the A grid to the B grid
   ! Regrid store
   call ESMF_FieldRegridStore( &
-	  srcField, &
+          srcField, &
           dstField=dstField, &
           routeHandle=routeHandle, &
           regridmethod=ESMF_REGRIDMETHOD_BILINEAR, &
@@ -25717,7 +25732,7 @@ write(*,*) "LOCALRC=",localrc
         if (relErr .gt. 0.005) then
             correct=.false.
 !            write(*,*) "relErr=",relErr,farrayPtr(i1,i2),xfarrayPtr(i1,i2)
-	endif
+        endif
 
         ! put in error field
         errfarrayPtr(i1,i2)=relErr
@@ -26319,7 +26334,7 @@ write(*,*) "LOCALRC=",localrc
   !!! Regrid forward from the A grid to the B grid
   ! Regrid store
   call ESMF_FieldRegridStore( &
-	  srcField, &
+          srcField, &
           dstField=dstField, &
           routeHandle=routeHandle, &
           regridmethod=ESMF_REGRIDMETHOD_BILINEAR, &
@@ -26380,10 +26395,10 @@ write(*,*) "LOCALRC=",localrc
           ! Skip unmapped points 
          if (farrayPtr(i1,i2) < 1.0) cycle
 
-	!! if error is too big report an error
-	if (abs(farrayPtr(i1,i2)-(20.0+farrayPtrXC(i1,i2)+farrayPtrYC(i1,i2))) > 0.0001) then
-           correct=.false.	
-	endif	
+        !! if error is too big report an error
+        if (abs(farrayPtr(i1,i2)-(20.0+farrayPtrXC(i1,i2)+farrayPtrYC(i1,i2))) > 0.0001) then
+           correct=.false.
+        endif
      enddo
      enddo
 
@@ -26706,7 +26721,7 @@ write(*,*) "LOCALRC=",localrc
   !!! Regrid forward from the A grid to the B grid
   ! Regrid store
   call ESMF_FieldRegridStore( &
-	  srcField, &
+          srcField, &
           dstField=dstField, &
           routeHandle=routeHandle, &
           regridmethod=ESMF_REGRIDMETHOD_BILINEAR, &
@@ -26768,7 +26783,7 @@ write(*,*) "LOCALRC=",localrc
         if (relErr .gt. 0.005) then
             correct=.false.
 !            write(*,*) "relErr=",relErr,farrayPtr(i1,i2),xfarrayPtr(i1,i2)
-	endif
+        endif
 
         ! put in error field
         errfarrayPtr(i1,i2)=relErr
@@ -27172,7 +27187,7 @@ write(*,*) "LOCALRC=",localrc
 
   ! Regrid store
   call ESMF_FieldRegridStore( &
-	  srcField, &
+          srcField, &
           dstField=dstField, &
           routeHandle=routeHandle, &
           regridmethod=ESMF_REGRIDMETHOD_BILINEAR, &
@@ -27240,7 +27255,7 @@ write(*,*) "LOCALRC=",localrc
         if (relErr .gt. 0.005) then
             correct=.false.
 !            write(*,*) "relErr=",relErr,farrayPtr(i1,i2),xfarrayPtr(i1,i2)
-	endif
+        endif
 
         ! put in error field
         errfarrayPtr(i1,i2)=relErr
@@ -27989,7 +28004,7 @@ write(*,*) "LOCALRC=",localrc
 
   ! Regrid store
   call ESMF_FieldRegridStore( &
-	  srcField, &
+          srcField, &
           srcMaskValues=(/1/), &
           dstField=dstField, &
           dstMaskValues=(/2/), &
@@ -28786,7 +28801,7 @@ write(*,*) "LOCALRC=",localrc
 
   ! Regrid store
   call ESMF_FieldRegridStore( &
-	  srcField, &
+          srcField, &
           srcMaskValues=(/1/), &
           dstField=dstField, &
           dstMaskValues=(/2/), &
