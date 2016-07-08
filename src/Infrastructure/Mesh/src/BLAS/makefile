@@ -3,13 +3,13 @@
 ALL: build_here
 
 SOURCEC  =
-SOURCEF  = dcopy.f  ddot.f  dger.f  dnrm2.f  drot.f  dscal.f  dswap.f  dtrmm.f \
-           dtrmv.f  idamax.f dgemv.f dgemm.f dtrsm.f daxpy.f
+SOURCEF  = dcopy.F90  ddot.F90  dger.F90  dnrm2.F90  drot.F90  dscal.F90  dswap.F90  dtrmm.F90 \
+           dtrmv.F90  idamax.F90 dgemv.F90 dgemm.F90 dtrsm.F90 daxpy.F90
 
 SOURCEH  =
 
 # List all .h files which should be copied to common include dir
-STOREH	  = 
+STOREH	  = ESMF_LapackBlas.inc
 
 OBJSC     = $(addsuffix .o, $(basename $(SOURCEC)))
 OBJSF     = $(addsuffix .o, $(basename $(SOURCEF)))
