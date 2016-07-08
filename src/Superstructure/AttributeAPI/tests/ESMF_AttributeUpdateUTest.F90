@@ -359,6 +359,10 @@ module ESMF_AttributeUpdateUTestMod
       purpose=purpGen, rc=status)
     if (rc/=ESMF_SUCCESS) return
 
+    ! add a single Attribute alongside the Attribute packages
+    call ESMF_AttributeSet(field, "Lone Attribute", value="Lone Attribute", &
+                           rc=status)
+
   end subroutine userm1_run
 
 !-------------------------------------------------------------------------
@@ -516,7 +520,7 @@ program ESMF_AttributeUpdateUTest
   use ESMF
   use ESMF_TestMod
   use ESMF_AttributeUpdateUTestMod, only : userm1_setvm, userm1_register, &
-    userm2_setvm, userm2_register, usercpl_setvm, usercpl_register
+  userm2_setvm, userm2_register, usercpl_setvm, usercpl_register
 
 
   implicit none
@@ -530,7 +534,7 @@ program ESMF_AttributeUpdateUTest
 
     ! individual test failure message
     character(ESMF_MAXSTR) :: failMsg
-    character(ESMF_MAXSTR) :: name
+    character(2*ESMF_MAXSTR) :: name
 
     ! cumulative result: count failures; no failures equals "all pass"
     integer :: result = 0
@@ -539,15 +543,15 @@ program ESMF_AttributeUpdateUTest
     integer :: rc = ESMF_SUCCESS
 
     ! local variables
-      integer                 :: petCount, localPet
-      type(ESMF_VM)           :: vm
-      type(ESMF_State)        :: c1exp, c2imp
-      type(ESMF_GridComp)     :: gridcomp1
-      type(ESMF_GridComp)     :: gridcomp2
-      type(ESMF_CplComp)      :: cplcomp
-      character(ESMF_MAXSTR)  :: convESMF,purpGen
+    integer                 :: petCount, localPet
+    type(ESMF_VM)           :: vm
+    type(ESMF_State)        :: c1exp, c2imp
+    type(ESMF_GridComp)     :: gridcomp1
+    type(ESMF_GridComp)     :: gridcomp2
+    type(ESMF_CplComp)      :: cplcomp
+    character(ESMF_MAXSTR)  :: convESMF,purpGen
 
-	type(ESMF_AttPack)        :: attpack
+    type(ESMF_AttPack)        :: attpack
     type(ESMF_Field)            :: field
     type(ESMF_FieldBundle)      :: fieldbundle
     type(ESMF_Grid)             :: grid
@@ -646,19 +650,16 @@ program ESMF_AttributeUpdateUTest
     if (rc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
     !EX_UTest_Multi_Proc_Only
-	call ESMF_AttributeGetAttPack(field, convention=convESMF, purpose=purpGen, &
+    call ESMF_AttributeGetAttPack(field, convention=convESMF, purpose=purpGen, &
         attpack=attpack, rc=rc)
-    print *, "PET #", localPet, " - Poised for segv.."
     call ESMF_AttributeGet(field, name2, value=outVal, attpack=attpack, rc=rc)
-    print *, "outVal = ", outVal 
-    print *, "value2 = ", value2
     write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
     write(name, *) "Getting an updated Attribute value from a Field test"
     call ESMF_Test((rc==ESMF_SUCCESS).and.(value2==outVal), &
                     name, failMsg, result, ESMF_SRCLINE)
 
     !EX_UTest_Multi_Proc_Only
-	call ESMF_AttributeGetAttPack(field, convention=convESMF, purpose=purp2, &
+    call ESMF_AttributeGetAttPack(field, convention=convESMF, purpose=purp2, &
         attpack=attpack, rc=rc)
     call ESMF_AttributeGet(field, attrList(1), value=outVal, &
       convention=convESMF, purpose=purp2, rc=rc)
@@ -671,7 +672,7 @@ program ESMF_AttributeUpdateUTest
     call ESMF_AttributeGet(field, attrList(2), value=outVal, &
       convention=convESMF, purpose=purp2, rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
-    write(name, *) "Getting an updated Attribute package Attribute value from a Field test"
+    write(name, *) "Getting an updated Attribute package Attribute value from Field test"
     call ESMF_Test((rc==ESMF_SUCCESS).and.(valueList(2)==outVal), &
                     name, failMsg, result, ESMF_SRCLINE)
 
@@ -681,6 +682,13 @@ program ESMF_AttributeUpdateUTest
     write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
     write(name, *) "Getting an updated deleted Attribute value from a Field test"
     call ESMF_Test((rc/=ESMF_SUCCESS), &
+                    name, failMsg, result, ESMF_SRCLINE)
+
+    !EX_UTest_Multi_Proc_Only
+    call ESMF_AttributeGet(field, "Lone Attribute", value=outVal, rc=rc)
+    write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
+    write(name, *) "Getting a lone Attribute from a Field test: value = ", outVal
+    call ESMF_Test((rc==ESMF_SUCCESS) .and. outVal=="Lone Attribute", &
                     name, failMsg, result, ESMF_SRCLINE)
 
     ! Now back to finalizing the model run
