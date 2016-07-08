@@ -56,6 +56,7 @@ TESTS_BUILD = \
 		$(ESMF_TESTDIR)/ESMF_AttributeUpdateUTest \
 		$(ESMF_TESTDIR)/ESMF_AttributeUpdateCIMRespPartyUTest \
 		$(ESMF_TESTDIR)/ESMF_AttributeUpdateClosedLoopTreesUTest \
+		$(ESMF_TESTDIR)/ESMF_AttributeUpdateComponentUTest \
 		$(ESMF_TESTDIR)/ESMF_AttributeUpdateContainerStressUTest \
 		$(ESMF_TESTDIR)/ESMF_AttributeUpdateMultiReconcileUTest \
 		$(ESMF_TESTDIR)/ESMF_AttributeUpdateRemoveOnlyUTest \
@@ -91,6 +92,7 @@ TESTS_RUN = \
 		RUN_ESMF_AttributeUpdateUTest \
 		RUN_ESMF_AttributeUpdateCIMRespPartyUTest \
 		RUN_ESMF_AttributeUpdateClosedLoopTreesUTest \
+		RUN_ESMF_AttributeUpdateComponentUTest \
 		RUN_ESMF_AttributeUpdateContainerStressUTest \
 		RUN_ESMF_AttributeUpdateMultiReconcileUTest \
 		RUN_ESMF_AttributeUpdateRemoveOnlyUTest \
@@ -409,6 +411,9 @@ RUN_ESMF_AttributeUpdateCIMRespPartyUTest:
 
 RUN_ESMF_AttributeUpdateClosedLoopTreesUTest:
 	$(MAKE) TNAME=AttributeUpdateClosedLoopTrees NP=4 ftest
+
+RUN_ESMF_AttributeUpdateComponentUTest:
+	$(MAKE) TNAME=AttributeUpdateComponent NP=8 ftest
 
 RUN_ESMF_AttributeUpdateContainerStressUTest:
 	$(MAKE) TNAME=AttributeUpdateContainerStress NP=4 ftest
