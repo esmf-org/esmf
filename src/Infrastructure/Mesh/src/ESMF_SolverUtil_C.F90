@@ -34,6 +34,9 @@
      integer, intent(out)             :: iworksize
 
 #if defined (ESMF_LAPACK)
+#if defined (ESMF_LAPACK_INTERNAL)
+#include "ESMF_LapackBlas.inc"
+#endif
      integer, external :: ILAENV
 
      integer :: smlsiz              

@@ -1079,14 +1079,18 @@ endif
 ifndef ESMF_LAPACK
 ifndef ESMF_LAPACK_OFF
 ESMF_LAPACK = internal
-ESMF_LAPACK_LIBPATH =
-ESMF_LAPACK_LIBS =
 endif
 endif
 
 ifeq ($(ESMF_LAPACK),OFF)
 ESMF_LAPACK =
 export ESMF_LAPACK_OFF = true
+endif
+
+ifeq ($(ESMF_LAPACK),internal)
+ESMF_LAPACK_INTERNAL = 1
+ESMF_LAPACK_LIBPATH =
+ESMF_LAPACK_LIBS =
 endif
 
 ifeq ($(ESMF_LAPACK),system)
@@ -1115,6 +1119,9 @@ endif
 
 ifdef ESMF_LAPACK
 ESMF_CPPFLAGS             += -DESMF_LAPACK=1
+ifdef ESMF_LAPACK_INTERNAL
+ESMF_CPPFLAGS             += -DESMF_LAPACK_INTERNAL=1
+endif
 ifdef ESMF_LAPACK_LIBS
 ESMF_CXXLINKLIBS          += $(ESMF_LAPACK_LIBS)
 ESMF_CXXLINKRPATHSTHIRD   += $(addprefix $(ESMF_CXXRPATHPREFIX),$(subst -L,,$(filter -L%,$(ESMF_LAPACK_LIBS))))

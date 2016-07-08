@@ -22,8 +22,13 @@ static const char *const version = "$Id$";
 //-----------------------------------------------------------------------------
 
 #ifdef ESMF_LAPACK
+#if defined (ESMF_LAPACK_INTERNAL)
+extern "C" void FTN_X(esmf_dgelsy)(int *,int *,int*,double*,int*,double*,int*,int*,
+  double*,int*,double*,int*,int*);
+#else
 extern "C" void FTNX(dgelsy)(int *,int *,int*,double*,int*,double*,int*,int*,
   double*,int*,double*,int*,int*);
+#endif
 #endif
 
 namespace ESMCI {
@@ -139,8 +144,13 @@ void PolyFit1D(UInt nsamples, const double coord[], const double vals[], const s
   std::vector<double> work(lwork, 0);
   double rcond=0.0000000000001;
 
+#if defined (ESMF_LAPACK_INTERNAL)
+  FTN_X(esmf_dgelsy)(
+    &m, &n, &nrhs, &mat[0], &m, &rhs[0], &ldb, &jpvt[0], &rcond, &rank, &work[0], &lwork, &info);
+#else
   FTNX(dgelsy)(
     &m, &n, &nrhs, &mat[0], &m, &rhs[0], &ldb, &jpvt[0], &rcond, &rank, &work[0], &lwork, &info);
+#endif
 
   for (UInt i = 0; i < ncoef; i++) coef[i] = rhs[i];
 #endif

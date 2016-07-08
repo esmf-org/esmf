@@ -1070,9 +1070,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     if (present(noGarbage)) then
       if (noGarbage) then
-        ! remove Base entry from garbage collection
-        call c_esmc_vmrmobject(fieldbundle%this%base)
-        ! destroy Base object
+        ! destroy Base object (which also removes it from garbage collection)
         call ESMF_BaseDestroy(fieldbundle%this%base, noGarbage, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
           ESMF_ERR_PASSTHRU, &
