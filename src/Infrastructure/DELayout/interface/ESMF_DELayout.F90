@@ -422,8 +422,8 @@ contains
 
 ! !INTERFACE:
   ! Private name; call using ESMF_DELayoutCreate()
-  function ESMF_DELayoutCreateDefault(keywordEnforcer, deCount, deGrouping, &
-    pinflag, petList, vm, rc)
+  recursive function ESMF_DELayoutCreateDefault(keywordEnforcer, deCount, &
+    deGrouping, pinflag, petList, vm, rc)
 !         
 ! !RETURN VALUE:
     type(ESMF_DELayout) :: ESMF_DELayoutCreateDefault
@@ -546,8 +546,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 ! !INTERFACE:
   ! Private name; call using ESMF_DELayoutCreate()
-  function ESMF_DELayoutCreateFromPetMap(petMap, keywordEnforcer, pinflag, &
-    vm, rc)
+  recursive function ESMF_DELayoutCreateFromPetMap(petMap, keywordEnforcer, &
+    pinflag, vm, rc)
 !         
 ! !RETURN VALUE:
     type(ESMF_DELayout) :: ESMF_DELayoutCreateFromPetMap
@@ -641,7 +641,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 ! !INTERFACE:
   ! Private name; call using ESMF_DELayoutCreate()
-  function ESMF_DELayoutCreateHintWeights(keywordEnforcer, deCount, &
+  recursive function ESMF_DELayoutCreateHintWeights(keywordEnforcer, deCount, &
     compWeights, commWeights, deGrouping, pinflag, petList, vm, rc)
 !         
 ! !RETURN VALUE:
@@ -784,8 +784,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 ! !INTERFACE:
   ! Private name; call using ESMF_DELayoutCreate()
-  function ESMF_DELayoutCreateDeprecated(vmObject, deCountList, petList, &
-    connectionWeightDimList, cyclicFlagDimList, rc)
+  recursive function ESMF_DELayoutCreateDeprecated(vmObject, deCountList, &
+    petList, connectionWeightDimList, cyclicFlagDimList, rc)
 !         
 ! !RETURN VALUE:
     type(ESMF_DELayout) :: ESMF_DELayoutCreateDeprecated
@@ -939,7 +939,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE: ESMF_DELayoutDestroy - Release resources associated with DELayout object
 
 ! !INTERFACE:
-  subroutine ESMF_DELayoutDestroy(delayout, keywordEnforcer, noGarbage, rc)
+  recursive subroutine ESMF_DELayoutDestroy(delayout, keywordEnforcer, noGarbage, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_DELayout),  intent(inout)          :: delayout
