@@ -120,7 +120,7 @@ extern "C" {
     if (*noGarbage == ESMF_TRUE) noGarbageOpt = true;
 
   if (noGarbageOpt){
-    ESMCI::VM::rmObject(*base);
+    ESMCI::VM::rmObject(*base); // remove base entry from garbage collection
     delete *base;
   }
   
