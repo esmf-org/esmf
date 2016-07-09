@@ -187,12 +187,11 @@
       !mtag_ex @\
       ! Add ASCII characters to an Attribute on an Array Test @\
       correct = .true. @\
-      inASCII = "!""#$%&'()*+,-./0123456789& @\
-                &:;<=>?& @\
-                &ABCDEFGHIJKLMNOPQRSTUVWXYZ& @\
-                &[\]^_`& @\
-                &abcdefghijklmnopqrstuvwxyz& @\
-                &{|}~" @\
+      inASCII = "!""#$%&'()*+,-./0123456789:;<=>?" @\
+      inASCII = ESMF_StringConcat (trim (inASCII), "ABCDEFGHIJKLMNOPQRSTUVWXYZ") @\
+      inASCII = ESMF_StringConcat (trim (inASCII), "[\]^_`") @\
+      inASCII = ESMF_StringConcat (trim (inASCII), "abcdefghijklmnopqrstuvwxyz") @\
+      inASCII = ESMF_StringConcat (trim (inASCII), "{|}~") @\
       do i=1,len_trim(inASCII) @\
         call ESMF_AttributeSet(mname, name=inASCII(i:i), value=inASCII, rc=rc) @\
         if (rc /= ESMF_SUCCESS) then @\

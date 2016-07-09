@@ -12,8 +12,6 @@
 #define FILENAME "src/addon/NUOPC/src/NUOPC_Connector.F90"
 !==============================================================================
 
-#define RECONCILE_MEMORY_DEBUG_off
-
 module NUOPC_Connector
 
   !-----------------------------------------------------------------------------
@@ -353,7 +351,7 @@ module NUOPC_Connector
     ! local variables
     integer                               :: i, j
     integer                               :: bondLevel, bondLevelMax
-    character(ESMF_MAXSTR)                :: name
+    character(ESMF_MAXSTR)                :: name, valueString
     character(ESMF_MAXSTR), pointer       :: importStandardNameList(:)
     character(ESMF_MAXSTR), pointer       :: exportStandardNameList(:)
     type(ESMF_Field),       pointer       :: importFieldList(:)
@@ -362,6 +360,7 @@ module NUOPC_Connector
     character(ESMF_MAXSTR)                :: connectionString
     character(ESMF_MAXSTR), pointer       :: importNamespaceList(:)
     character(ESMF_MAXSTR), pointer       :: exportNamespaceList(:)
+    integer                               :: profiling
 
     rc = ESMF_SUCCESS
 
@@ -369,20 +368,30 @@ module NUOPC_Connector
     call ESMF_CplCompGet(cplcomp, name=name, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    ! determine profiling
+    call NUOPC_CompAttributeGet(cplcomp, name="Profiling", value=valueString, &
+      rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    profiling = ESMF_UtilString2Int(valueString, &
+      specialStringList=(/"high", "max "/), specialValueList=(/65535, 65535/), &
+      rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
     ! reconcile the States including Attributes
-#ifdef RECONCILE_MEMORY_DEBUG_on
-call ESMF_VMLogMemInfo("befP1a Reconcile")
-#endif
+    if (btest(profiling,1)) then    ! PROFILE
+      call ESMF_VMLogMemInfo("befP1a Reconcile")
+    endif
     call NUOPC_Reconcile(importState, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     call NUOPC_Reconcile(exportState, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-#ifdef RECONCILE_MEMORY_DEBUG_on
-call ESMF_VMLogMemInfo("aftP1a Reconcile")
-#endif
+    if (btest(profiling,1)) then    ! PROFILE
+      call ESMF_VMLogMemInfo("aftP1a Reconcile")
+    endif
 
     nullify(importStandardNameList)
     nullify(importFieldList)
@@ -505,6 +514,7 @@ print *, "bondLevelMax:", bondLevelMax, "bondLevel:", bondLevel
     character(ESMF_MAXSTR), pointer       :: cplList(:)
     character(ESMF_MAXSTR)                :: msgString, valueString
     integer                               :: verbosity
+    integer                               :: profiling
 
     rc = ESMF_SUCCESS
 
@@ -512,20 +522,30 @@ print *, "bondLevelMax:", bondLevelMax, "bondLevel:", bondLevel
     call ESMF_CplCompGet(cplcomp, name=name, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    ! determine profiling
+    call NUOPC_CompAttributeGet(cplcomp, name="Profiling", value=valueString, &
+      rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    profiling = ESMF_UtilString2Int(valueString, &
+      specialStringList=(/"high", "max "/), specialValueList=(/65535, 65535/), &
+      rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
     ! reconcile the States including Attributes
-#ifdef RECONCILE_MEMORY_DEBUG_on
-call ESMF_VMLogMemInfo("befP1b Reconcile")
-#endif
+    if (btest(profiling,1)) then    ! PROFILE
+      call ESMF_VMLogMemInfo("befP1b Reconcile")
+    endif
     call NUOPC_Reconcile(importState, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     call NUOPC_Reconcile(exportState, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-#ifdef RECONCILE_MEMORY_DEBUG_on
-call ESMF_VMLogMemInfo("aftP1b Reconcile")
-#endif
+    if (btest(profiling,1)) then    ! PROFILE
+      call ESMF_VMLogMemInfo("aftP1b Reconcile")
+    endif
 
     ! determine verbosity
     call NUOPC_CompAttributeGet(cplcomp, name="Verbosity", value=valueString, &
@@ -533,7 +553,7 @@ call ESMF_VMLogMemInfo("aftP1b Reconcile")
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     verbosity = ESMF_UtilString2Int(valueString, &
-      specialStringList=(/"high", "max "/), specialValueList=(/255, 255/), &
+      specialStringList=(/"high", "max "/), specialValueList=(/65535, 65535/), &
       rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
@@ -778,8 +798,9 @@ print *, "current bondLevel=", bondLevel
     type(type_InternalState)        :: is
     logical                         :: foundFlag
     character(ESMF_MAXSTR)          :: connectionString
-    character(ESMF_MAXSTR)          :: name
+    character(ESMF_MAXSTR)          :: name, valueString
     character(ESMF_MAXSTR)          :: iTransferOffer, eTransferOffer
+    integer                         :: profiling
 
     rc = ESMF_SUCCESS
 
@@ -787,7 +808,17 @@ print *, "current bondLevel=", bondLevel
     call ESMF_CplCompGet(cplcomp, name=name, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    
+    ! determine profiling
+    call NUOPC_CompAttributeGet(cplcomp, name="Profiling", value=valueString, &
+      rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    profiling = ESMF_UtilString2Int(valueString, &
+      specialStringList=(/"high", "max "/), specialValueList=(/65535, 65535/), &
+      rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+
     ! prepare local pointer variables
     nullify(cplList)
     nullify(importStandardNameList)
@@ -812,18 +843,18 @@ print *, "current bondLevel=", bondLevel
 
     ! re-reconcile the States because they may have changed
     ! (previous proxy objects are dropped before fresh reconcile)
-#ifdef RECONCILE_MEMORY_DEBUG_on
-call ESMF_VMLogMemInfo("befP2 Reconcile")
-#endif
+    if (btest(profiling,1)) then    ! PROFILE
+      call ESMF_VMLogMemInfo("befP2 Reconcile")
+    endif
     call NUOPC_Reconcile(importState, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     call NUOPC_Reconcile(exportState, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-#ifdef RECONCILE_MEMORY_DEBUG_on
-call ESMF_VMLogMemInfo("aftP2 Reconcile")
-#endif
+    if (btest(profiling,1)) then    ! PROFILE
+      call ESMF_VMLogMemInfo("aftP2 Reconcile")
+    endif
     
     ! get the cplList Attribute
     call NUOPC_CompAttributeGet(cplcomp, name="CplList", &
@@ -1090,11 +1121,22 @@ call ESMF_VMLogMemInfo("aftP2 Reconcile")
     integer                         :: verbosity
     integer(ESMF_KIND_I4), pointer  :: ungriddedLBound(:), ungriddedUBound(:)
     integer                         :: fieldDimCount, gridDimCount
+    integer                         :: profiling
 
     rc = ESMF_SUCCESS
 
     ! query the Component for info
     call ESMF_CplCompGet(cplcomp, name=name, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    ! determine profiling
+    call NUOPC_CompAttributeGet(cplcomp, name="Profiling", value=valueString, &
+      rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    profiling = ESMF_UtilString2Int(valueString, &
+      specialStringList=(/"high", "max "/), specialValueList=(/65535, 65535/), &
+      rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
@@ -1104,7 +1146,7 @@ call ESMF_VMLogMemInfo("aftP2 Reconcile")
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     verbosity = ESMF_UtilString2Int(valueString, &
-      specialStringList=(/"high", "max "/), specialValueList=(/255, 255/), &
+      specialStringList=(/"high", "max "/), specialValueList=(/65535, 65535/), &
       rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
@@ -1126,18 +1168,18 @@ call ESMF_VMLogMemInfo("aftP2 Reconcile")
 
     ! re-reconcile the States because they may have changed
     ! (previous proxy objects are dropped before fresh reconcile)
-#ifdef RECONCILE_MEMORY_DEBUG_on
-call ESMF_VMLogMemInfo("befP3 Reconcile")
-#endif
+    if (btest(profiling,1)) then    ! PROFILE
+      call ESMF_VMLogMemInfo("befP3 Reconcile")
+    endif
     call NUOPC_Reconcile(importState, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     call NUOPC_Reconcile(exportState, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-#ifdef RECONCILE_MEMORY_DEBUG_on
-call ESMF_VMLogMemInfo("aftP3 Reconcile")
-#endif
+    if (btest(profiling,1)) then    ! PROFILE
+      call ESMF_VMLogMemInfo("aftP3 Reconcile")
+    endif
     
     ! get the cplList Attribute
     call NUOPC_CompAttributeGet(cplcomp, name="CplList", &
@@ -1443,6 +1485,7 @@ call ESMF_VMLogMemInfo("aftP3 Reconcile")
     character(ESMF_MAXSTR)          :: geomobjname
     character(ESMF_MAXSTR)          :: iTransferAction, eTransferAction
     integer                         :: verbosity
+    integer                         :: profiling
 
     rc = ESMF_SUCCESS
 
@@ -1450,14 +1493,24 @@ call ESMF_VMLogMemInfo("aftP3 Reconcile")
     call ESMF_CplCompGet(cplcomp, name=name, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    
+    ! determine profiling
+    call NUOPC_CompAttributeGet(cplcomp, name="Profiling", value=valueString, &
+      rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    profiling = ESMF_UtilString2Int(valueString, &
+      specialStringList=(/"high", "max "/), specialValueList=(/65535, 65535/), &
+      rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+
     ! determine verbosity
     call NUOPC_CompAttributeGet(cplcomp, name="Verbosity", value=valueString, &
       rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     verbosity = ESMF_UtilString2Int(valueString, &
-      specialStringList=(/"high", "max "/), specialValueList=(/255, 255/), &
+      specialStringList=(/"high", "max "/), specialValueList=(/65535, 65535/), &
       rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
@@ -1479,18 +1532,18 @@ call ESMF_VMLogMemInfo("aftP3 Reconcile")
 
     ! re-reconcile the States because they may have changed
     ! (previous proxy objects are dropped before fresh reconcile)
-#ifdef RECONCILE_MEMORY_DEBUG_on
-call ESMF_VMLogMemInfo("befP4 Reconcile")
-#endif
+    if (btest(profiling,1)) then    ! PROFILE
+      call ESMF_VMLogMemInfo("befP4 Reconcile")
+    endif
     call NUOPC_Reconcile(importState, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     call NUOPC_Reconcile(exportState, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-#ifdef RECONCILE_MEMORY_DEBUG_on
-call ESMF_VMLogMemInfo("aftP4 Reconcile")
-#endif
+    if (btest(profiling,1)) then    ! PROFILE
+      call ESMF_VMLogMemInfo("aftP4 Reconcile")
+    endif
     
     ! get the cplList Attribute
     call NUOPC_CompAttributeGet(cplcomp, name="CplList", &
@@ -1732,7 +1785,8 @@ call ESMF_VMLogMemInfo("aftP4 Reconcile")
     integer, intent(out) :: rc
     
     ! local variables
-    character(ESMF_MAXSTR)          :: name
+    character(ESMF_MAXSTR)          :: name, valueString
+    integer                         :: profiling
 
     rc = ESMF_SUCCESS
 
@@ -1740,21 +1794,31 @@ call ESMF_VMLogMemInfo("aftP4 Reconcile")
     call ESMF_CplCompGet(cplcomp, name=name, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    ! determine profiling
+    call NUOPC_CompAttributeGet(cplcomp, name="Profiling", value=valueString, &
+      rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    profiling = ESMF_UtilString2Int(valueString, &
+      specialStringList=(/"high", "max "/), specialValueList=(/65535, 65535/), &
+      rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
     ! re-reconcile the States because they may have changed
     ! (previous proxy objects are dropped before fresh reconcile)
-#ifdef RECONCILE_MEMORY_DEBUG_on
-call ESMF_VMLogMemInfo("befP5 Reconcile")
-#endif
+    if (btest(profiling,1)) then    ! PROFILE
+      call ESMF_VMLogMemInfo("befP5 Reconcile")
+    endif
     call NUOPC_Reconcile(importState, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     call NUOPC_Reconcile(exportState, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-#ifdef RECONCILE_MEMORY_DEBUG_on
-call ESMF_VMLogMemInfo("aftP5 Reconcile")
-#endif
+    if (btest(profiling,1)) then    ! PROFILE
+      call ESMF_VMLogMemInfo("aftP5 Reconcile")
+    endif
 
   end subroutine
 
@@ -1801,7 +1865,7 @@ call ESMF_VMLogMemInfo("aftP5 Reconcile")
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     verbosity = ESMF_UtilString2Int(valueString, &
-      specialStringList=(/"high", "max "/), specialValueList=(/255, 255/), &
+      specialStringList=(/"high", "max "/), specialValueList=(/65535, 65535/), &
       rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
@@ -2121,7 +2185,7 @@ call ESMF_VMLogMemInfo("aftP5 Reconcile")
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     profiling = ESMF_UtilString2Int(valueString, &
-      specialStringList=(/"high", "max "/), specialValueList=(/255, 255/), &
+      specialStringList=(/"high", "max "/), specialValueList=(/65535, 65535/), &
       rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
@@ -2132,7 +2196,7 @@ call ESMF_VMLogMemInfo("aftP5 Reconcile")
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     verbosity = ESMF_UtilString2Int(valueString, &
-      specialStringList=(/"high", "max "/), specialValueList=(/255, 255/), &
+      specialStringList=(/"high", "max "/), specialValueList=(/65535, 65535/), &
       rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
@@ -2359,7 +2423,7 @@ call ESMF_VMLogMemInfo("aftP5 Reconcile")
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     verbosity = ESMF_UtilString2Int(valueString, &
-      specialStringList=(/"high", "max "/), specialValueList=(/255, 255/), &
+      specialStringList=(/"high", "max "/), specialValueList=(/65535, 65535/), &
       rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
