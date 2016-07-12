@@ -157,6 +157,7 @@ module ESMF_VMMod
   public ESMF_VMGetCurrentGarbageInfo
   public ESMF_VMGetMemInfo
   public ESMF_VMIsCreated
+  public ESMF_VMLogCurrentGarbageInfo
   public ESMF_VMLogMemInfo
   public ESMF_VMGetVMId
   public ESMF_VMPrint
@@ -4603,6 +4604,46 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (ESMF_VMGetInit(vm)==ESMF_INIT_CREATED) &
       ESMF_VMIsCreated = .true.
   end function
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-internal method -----------------------------
+!BOPI
+! !IROUTINE: ESMF_VMLogCurrentGarbageInfo - Log garbage collection info
+
+! !INTERFACE:
+  subroutine ESMF_VMLogCurrentGarbageInfo(prefix, rc)
+!
+! !ARGUMENTS:
+    character (len=*),    intent(in),   optional  :: prefix
+    integer, intent(out),               optional  :: rc           
+!
+! !DESCRIPTION:
+!   Log memory info from the system for this PET.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[{[rc]}] 
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOPI
+!------------------------------------------------------------------------------
+    integer                 :: localrc      ! local return code
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! Call into the C++ interface.
+    call c_esmc_vmlogcurrentgarbageinfo(prefix, localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end subroutine ESMF_VMLogCurrentGarbageInfo
 !------------------------------------------------------------------------------
 
 
