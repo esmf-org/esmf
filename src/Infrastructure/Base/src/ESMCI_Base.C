@@ -953,6 +953,13 @@ static const char *const version = "$Id$";
   sprintf(baseName, "%s%3d", "unnamed", ID);
   ESMC_CtoF90string(baseName, baseNameF90, ESMF_MAXSTR);
   
+#if 0
+  char msgbuf[ESMF_MAXSTR];
+  sprintf(msgbuf, "ESMC_Base constructor: %p, %s, %s", this, 
+    this->ESMC_BaseGetClassName(), this->ESMC_BaseGetName());
+  ESMC_LogDefault.Write(msgbuf, ESMC_LOGMSG_INFO);
+#endif
+  
   // add object to list for automatic garbage collection
   ESMCI::VM::addObject(this, vmID);
 
@@ -1003,6 +1010,13 @@ static const char *const version = "$Id$";
   strcpy(className, "global");
   sprintf(baseName, "%s%3d", "unnamed", ID);
   ESMC_CtoF90string(baseName, baseNameF90, ESMF_MAXSTR);
+  
+#if 0
+  char msgbuf[ESMF_MAXSTR];
+  sprintf(msgbuf, "ESMC_Base constructor: %p, %s, %s", this, 
+    this->ESMC_BaseGetClassName(), this->ESMC_BaseGetName());
+  ESMC_LogDefault.Write(msgbuf, ESMC_LOGMSG_INFO);
+#endif
   
   // add object to list for automatic garbage collection
   ESMCI::VM::addObject(this, vmID);
@@ -1057,6 +1071,13 @@ static const char *const version = "$Id$";
       sprintf(baseName, "%s%3d", className, ID);
   ESMC_CtoF90string(baseName, baseNameF90, ESMF_MAXSTR);
 
+#if 0
+  char msgbuf[ESMF_MAXSTR];
+  sprintf(msgbuf, "ESMC_Base constructor: %p, %s, %s", this, 
+    this->ESMC_BaseGetClassName(), this->ESMC_BaseGetName());
+  ESMC_LogDefault.Write(msgbuf, ESMC_LOGMSG_INFO);
+#endif
+  
   // add object to list for automatic garbage collection
   ESMCI::VM::addObject(this, vmID);
 
@@ -1088,8 +1109,15 @@ static const char *const version = "$Id$";
 //
 //EOPI
   int i, rc;
-  
-//fprintf(stderr, "final garbage collection in ~ESMC_Base() for %p\n", this);
+
+#if 0
+  char msgbuf[ESMF_MAXSTR];
+  sprintf(msgbuf, "In ~ESMC_Base() for %p", this);
+  ESMC_LogDefault.Write(msgbuf, ESMC_LOGMSG_INFO);
+  sprintf(msgbuf, " -> Base name: %s, classname: %s", this->ESMC_BaseGetName(),
+    this->ESMC_BaseGetClassName());
+  ESMC_LogDefault.Write(msgbuf, ESMC_LOGMSG_INFO);
+#endif
   
   if (vmIDCreator){
     // Base object is responsible for vmID deallocation
