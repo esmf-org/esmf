@@ -119,7 +119,8 @@ module ESMF_DELayoutWQUTest_mod
     integer             :: de, deCount
     real(ESMF_KIND_R8)  :: dt
     
-    dt = 5.d0 * exp(-((de-deCount/2)**2)/8.)
+    ! very unbalanced work weight
+    dt = 2.d0 * exp(-((de-deCount/2)**2)/8.)
 
 !print *, "de=", de, "dt=", dt
     
@@ -182,7 +183,7 @@ program ESMF_DELayoutWQUTest
   !NEX_UTest
   write(name, *) "GridCompCreate() - round 1"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  gcomp = ESMF_GridCompCreate(name="gridded component", rc=rc)
+  gcomp = ESMF_GridCompCreate(name="myGridComp1", rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
   !NEX_UTest
@@ -212,7 +213,7 @@ program ESMF_DELayoutWQUTest
   !NEX_UTest
   write(name, *) "GridCompCreate() - round 2"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  gcomp = ESMF_GridCompCreate(name="gridded component", rc=rc)
+  gcomp = ESMF_GridCompCreate(name="myGridComp2", rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
   !NEX_UTest
@@ -247,6 +248,11 @@ program ESMF_DELayoutWQUTest
   call ESMF_GridCompDestroy(gcomp, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
  
+#if 0
+  call ESMF_VMLogCurrentGarbageInfo("Before Garbage Collection", rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+#endif
+
   !---------------------------------------------------------------------------
   call ESMF_TestEnd(ESMF_SRCLINE)
   
