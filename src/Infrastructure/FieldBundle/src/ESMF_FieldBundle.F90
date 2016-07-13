@@ -5755,6 +5755,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords for t
     integer                                   :: fcount, i, localrc
     type(ESMF_Field), pointer                 :: flist(:)
     type(ESMF_Array), pointer                 :: alist(:)
+    character(800)                            :: name, msgString
 
     localrc = ESMF_RC_NOT_IMPL
     if(present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -5782,6 +5783,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords for t
         call ESMF_FieldGet(flist(i), array=alist(i), rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
+#if 1
+        call ESMF_ArrayGet(alist(i), name=name, rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+        write(msgString,*) "alist(",i,") name:", trim(name)
+        call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO)
+#endif
     enddo
 
     ESMF_FieldBundleToAB = ESMF_ArrayBundleCreate(arrayList=alist, rc=localrc)
