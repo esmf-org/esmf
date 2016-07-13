@@ -89,9 +89,13 @@ ArrayBundle::ArrayBundle(
   try{  
     
     // fill in the ArrayBundle object
-    for (int i=0; i<arrayCount; i++)
+    for (int i=0; i<arrayCount; i++){
+#if 1
+      ESMC_LogDefault.Write(arrayList[i]->getName(), ESMC_LOGMSG_INFO);
+#endif
       arrayContainer.add(string(arrayList[i]->getName()), arrayList[i],
         multi, relaxed);
+    }
     
     arrayCreator = false; // Array objects were provided externally
   
