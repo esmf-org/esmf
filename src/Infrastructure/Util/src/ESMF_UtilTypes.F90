@@ -174,6 +174,9 @@
 !    ! are needed, but can not be directly coded due to Fortran semantics.
 
      type ESMF_CharPtr
+#ifndef ESMF_NO_SEQUENCE
+    sequence
+#endif
        character(1), pointer :: cptr(:) => null ()
      end type
 
@@ -1083,8 +1086,8 @@
                                    ESMF_UNMAPPEDACTION_IGNORE
 
       public ESMF_FileFormat_Flag, ESMF_FILEFORMAT_VTK, ESMF_FILEFORMAT_SCRIP, &
-		 ESMF_FILEFORMAT_ESMFMESH, ESMF_FILEFORMAT_ESMFGRID, &
-    	 	ESMF_FILEFORMAT_UGRID, ESMF_FILEFORMAT_GRIDSPEC
+             ESMF_FILEFORMAT_ESMFMESH, ESMF_FILEFORMAT_ESMFGRID, &
+             ESMF_FILEFORMAT_UGRID, ESMF_FILEFORMAT_GRIDSPEC
 
       public ESMF_FileStatus_Flag, ESMF_FILESTATUS_UNKNOWN,   &
                                   ESMF_FILESTATUS_OLD,       &
