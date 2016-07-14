@@ -57,7 +57,7 @@
       end do
 
       allocate(comps_pet_info(size(comps)))
-      call partition_pet_global_list(vm, comp_info, comps_pet_info, rc)
+      call partition_pet_global_list(vm, comp_info, comps_pet_info, ESMF_ACC_PET_PARTITION_CONTIG, rc)
       if(rc /= ESMF_SUCCESS) then
         print *, "ERROR: Partitioning global pet list failed"
       end if

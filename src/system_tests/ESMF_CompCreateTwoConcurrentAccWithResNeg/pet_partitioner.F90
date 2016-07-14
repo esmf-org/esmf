@@ -20,6 +20,10 @@
   use ESMF_TestMod
   use user_neg_info
 
+  integer, parameter :: &
+    ESMF_ACC_PET_PARTITION_CONTIG = 1, ESMF_ACC_PET_PARTITION_EVEN_STRIDED = 2
+
+  public ESMF_ACC_PET_PARTITION_CONTIG, ESMF_ACC_PET_PARTITION_EVEN_STRIDED
   public partition_pet_global_list, subtract_pets
 
   contains
@@ -31,7 +35,7 @@
   ! accelerator devices attached to the node
   ! and a non accelerated petlist, nonAPets, that consists of pets without
   ! access to the accelerator device
-  subroutine partition_pets(vm, aPets, nonAPets, rc)
+  subroutine partition_pets(vm, aPets, nonAPets, partStrategy, rc)
 !   ! The ESMF Framework module
     use ESMF
     use mpi
@@ -40,6 +44,7 @@
     type(ESMF_VM), intent(in) :: vm
     integer, intent(out), allocatable :: aPets(:)
     integer, intent(out), allocatable :: nonAPets(:)
+    integer, intent(in) :: partStrategy
     integer, intent(out) :: rc
   
     integer, allocatable :: isAccPetList(:)
@@ -78,9 +83,14 @@
 
     ! FIXME: We don't need ssiIdLocalCommAccDeviceCounts, anymore - delete it
     if(accDeviceCount > 0) then
-      ! The first (lowest ranked) processes with access to device gets to use it
-      if(ssiIdLocalCommRank < accDeviceCount) then
-        isAccPet(1) = 1
+      if(partStrategy == ESMF_ACC_PET_PARTITION_CONTIG) then
+        ! The first (lowest ranked) processes with access to device gets to use it
+        if(ssiIdLocalCommRank < accDeviceCount) then
+          isAccPet(1) = 1
+        end if
+      else
+        print *, "ERROR: Unrecognized partition strategy"
+        return
       end if
     end if
 
@@ -264,11 +274,12 @@
 
   end subroutine subtract_pets
 
-    subroutine partition_pet_global_list(vm, comp_info, comp_pets_info, rc)
+    subroutine partition_pet_global_list(vm, comp_info, comp_pets_info, part_strategy, rc)
 
       type(ESMF_VM), intent(in) :: vm
       integer, intent(in) :: comp_info(:)
       type(ESMF_PetListInfo), allocatable, intent(inout) :: comp_pets_info(:)
+      integer, intent(in) :: part_strategy
       integer, intent(out) :: rc
 
       integer :: total_comps, ncomps_no_acc, ncomps_can_acc, ncomps_must_acc
@@ -290,7 +301,7 @@
         gpet_list(i) = i-1
       end do
 
-      call partition_pets(vm, apets, nonapets, rc)
+      call partition_pets(vm, apets, nonapets, part_strategy, rc)
       if(rc /= ESMF_SUCCESS) then
         print *, "ERROR: Could not partition pets to acc and nonacc"
         return
