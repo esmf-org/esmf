@@ -10,6 +10,7 @@ include $(ESMF_DIR)/makefile
 DIRS      = ESMF_CompCreate \
             ESMF_CompCreateWithResNeg \
             ESMF_CompCreateTwoConcurrentWithResNeg \
+            ESMF_CompCreateTwoConcurrentAccWithResNeg \
             ESMF_CompFortranAndC \
             ESMF_RecursiveComponent \
             ESMF_ArrayScatterGather \
