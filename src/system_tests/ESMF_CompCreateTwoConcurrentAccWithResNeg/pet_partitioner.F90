@@ -285,7 +285,7 @@
       integer :: total_comps, ncomps_no_acc, ncomps_can_acc, ncomps_must_acc
       integer :: naccs, nnon_accs, tmp_rem_accs, comp_pet_sz
       integer :: i, j, k, pet_count, tmp_pet_sidx, tmp_pet_eidx
-      integer, allocatable :: gpet_list(:), apets(:), nonapets(:)
+      integer, allocatable :: apets(:), nonapets(:)
     
 
       ! Get Pet count from VM
@@ -294,12 +294,6 @@
         print *, "Unable to petcount from VM"
         return
       end if
-
-      ! Create a PET list that we can use for negotiation
-      allocate(gpet_list(pet_count))
-      do i=1,pet_count
-        gpet_list(i) = i-1
-      end do
 
       call partition_pets(vm, apets, nonapets, part_strategy, rc)
       if(rc /= ESMF_SUCCESS) then
