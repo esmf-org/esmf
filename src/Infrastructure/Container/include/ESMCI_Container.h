@@ -35,6 +35,7 @@ namespace ESMCI {
    public:
     Container(){
       garbageOff();   // by default no garbage is kept
+      std::cout << "In Container constructor, size:" << this->size() << "\n";
     }
     void add(Key k, T t, bool multi=false, bool relaxed=false);
     void addReplace(Key k, T t);
