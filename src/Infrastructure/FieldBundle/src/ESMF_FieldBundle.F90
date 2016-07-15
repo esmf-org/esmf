@@ -1152,7 +1152,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ! Destroy all the internal Fields if this is a proxy fieldBundle
       if(this%is_proxy) then
         nullify(flist)
-        call ESMF_ContainerGet(this%container, itemCount=fcount, itemList=flist, rc=localrc)
+        call ESMF_ContainerGet(this%container, itemCount=fcount, &
+          itemList=flist, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
           ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
@@ -1470,15 +1471,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ESMF_INIT_CHECK_DEEP_SHORT(ESMF_FieldBundleGetInit, fieldbundle, rc)
     
     if (present(fieldCount)) then
-      call ESMF_ContainerGet(fieldbundle%this%container, itemName=trim(fieldName), &
-        itemCount=fieldCount, rc=localrc)
+      call ESMF_ContainerGet(fieldbundle%this%container, &
+        itemName=trim(fieldName), itemCount=fieldCount, rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
     endif
 
     if (present(isPresent)) then
-      call ESMF_ContainerGet(fieldbundle%this%container, itemName=trim(fieldName), &
-        isPresent=isPresent, rc=localrc)
+      call ESMF_ContainerGet(fieldbundle%this%container, &
+        itemName=trim(fieldName), isPresent=isPresent, rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
     endif
@@ -1487,16 +1488,16 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       if(fieldCount .gt. 1) then
         if(present(field)) then
           call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
-            msg = " - field argument cannot be specified when fieldCount is greater than 1", &
-            ESMF_CONTEXT, rcToReturn=rc)
+            msg = "field argument cannot be specified when fieldCount is "// &
+              "greater than 1", ESMF_CONTEXT, rcToReturn=rc)
           return
         endif
       endif
     endif
 
     if (present(field)) then
-      call ESMF_ContainerGet(fieldbundle%this%container, itemName=trim(fieldName), &
-        item=field, rc=localrc)
+      call ESMF_ContainerGet(fieldbundle%this%container, &
+        itemName=trim(fieldName), item=field, rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
     endif
@@ -1673,7 +1674,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     if(fieldIndex .lt. 1 .or. fieldIndex .gt. l_fieldCount) then
       call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_BAD, &
-        msg = " - fieldIndex must be between 1 and fieldCount in the FieldBundle", &
+        msg = "fieldIndex must be between 1 and fieldCount in the FieldBundle",&
         ESMF_CONTEXT, rcToReturn=rc)
       return
     endif
@@ -5343,7 +5344,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords for t
       bp => fieldbundle%this
 
       call ESMF_ContainerGet(bp%container, itemCount=fieldCount, &
-        itemList=l_fieldList, rc=localrc)
+        itemList=l_fieldList, itemorderflag=ESMF_ITEMORDER_ADDORDER, rc=localrc)
       if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
