@@ -29,6 +29,7 @@
  
       ! parameters, types
       use ESMF_IOUtilMod
+      use ESMF_UtilStringMod
       use ESMF_UtilTypesMod
       use ESMF_InitMacrosMod
       use ESMF_LogErrMod
@@ -88,6 +89,9 @@
       public :: ESMF_UtilString2Int
       public :: ESMF_UtilStringLowerCase
       public :: ESMF_UtilStringUpperCase
+      public :: ESMF_UtilArray2String
+      public :: ESMF_UtilString2Array
+      public :: ESMF_StringConcat
 
 !  Misc type-to-string methods
       public :: ESMF_StatusString
