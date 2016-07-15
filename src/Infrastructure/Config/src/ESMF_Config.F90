@@ -157,15 +157,19 @@
 !------------------------------------------------------------------------------
 ! Revised parameter table to fit Fortran 90 standard.
 
-       integer,   parameter :: LSZ = 256  ! Maximum line size
-       integer,   parameter :: MSZ = 1024 ! Used to size buffer; this is
+!       integer,   parameter :: LSZ = 256  ! Maximum line size
+       integer,   parameter :: LSZ = max (1024,ESMF_MAXPATHLEN)  ! Maximum line size
+                                          ! should be at least long enough
+                                          ! to read in a file name with full
+                                          ! path prepended.
+       integer,   parameter :: MSZ = 256  ! Used to size buffer; this is
                                           ! usually *less* than the number
                                           ! of non-blank/comment lines
                                           ! (because most lines are shorter
                                           ! then LSZ)
  
        integer,   parameter :: NBUF_MAX = MSZ*LSZ ! max size of buffer
-       integer,   parameter :: NATT_MAX = NBUF_MAX/16 ! max # attributes;  
+       integer,   parameter :: NATT_MAX = NBUF_MAX/64 ! max # attributes;  
                                                   ! assumes an average line
                                                   ! size of 16, the code
                                                   ! will do a bound check
@@ -186,7 +190,7 @@
           sequence
 #endif
           private              
-          character(len=LSZ)      :: label = ' '      ! attribute label
+          character, pointer      :: label(:) => null () ! attribute label
           logical                 :: used  = .false.  ! attribute used (retrieved) or not
           ESMF_INIT_DECLARE
        end type ESMF_ConfigAttrUsed
@@ -667,6 +671,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   \end{description}
 !
 !EOP -------------------------------------------------------------------
+      integer :: i
       integer :: memstat
 
       ! Initialize return code; assume routine not implemented
@@ -679,6 +684,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
       ! TODO: Absoft 9/Jazz bug necessitates this separate deallocate statement
       ! before the other (must be in reverse order of allocation)
+      do, i=1, size (config%cptr%attr_used)
+        if (associated (config%cptr%attr_used(i)%label)) then
+          deallocate(config%cptr%attr_used(i)%label, stat=memstat)
+          if (ESMF_LogFoundDeallocError(memstat, msg="Deallocating local buffer 3", &
+                                     ESMF_CONTEXT, rcToReturn=rc)) return
+        end if
+      end do
       deallocate(config%cptr%attr_used, stat=memstat)
       if (ESMF_LogFoundDeallocError(memstat, msg="Deallocating local buffer 2", &
                                      ESMF_CONTEXT, rcToReturn=rc)) return
@@ -1093,7 +1105,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
       localcount = size (valueList)
       if (present (count)) then
-	if (count <= 0) then
+        if (count <= 0) then
            if (ESMF_LogFoundError(ESMF_RC_OBJ_BAD, &
                                   msg="invalid SIZE", &
                                    ESMF_CONTEXT, rcToReturn=rc)) return
@@ -1384,7 +1396,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
       localcount = size (valueList)
       if (present (count)) then
-	if (count <= 0) then
+        if (count <= 0) then
            if (ESMF_LogFoundError(ESMF_RC_OBJ_BAD, &
                                   msg="invalid SIZE", &
                                    ESMF_CONTEXT, rcToReturn=rc)) return
@@ -1485,7 +1497,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
       localcount = size (valueList)
       if (present (count)) then
-	if (count <= 0) then
+        if (count <= 0) then
            if (ESMF_LogFoundError(ESMF_RC_OBJ_BAD, &
                                   msg="invalid SIZE", &
                                    ESMF_CONTEXT, rcToReturn=rc)) return
@@ -1783,7 +1795,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
       localcount = size (valueList)
       if (present (count)) then
-	if (count <= 0) then
+        if (count <= 0) then
            if (ESMF_LogFoundError(ESMF_RC_OBJ_BAD, &
                                   msg="invalid SIZE", &
                                    ESMF_CONTEXT, rcToReturn=rc)) return
@@ -1883,7 +1895,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
       localcount = size (valueList)
       if (present (count)) then
-	if (count <= 0) then
+        if (count <= 0) then
            if (ESMF_LogFoundError(ESMF_RC_OBJ_BAD, &
                                   msg="invalid SIZE", &
                                    ESMF_CONTEXT, rcToReturn=rc)) return
@@ -2096,7 +2108,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
       localcount = size (valueList)
       if (present (count)) then
-	if (count <= 0) then
+        if (count <= 0) then
            if (ESMF_LogFoundError(ESMF_RC_OBJ_BAD, &
                                   msg="invalid SIZE", &
                                    ESMF_CONTEXT, rcToReturn=rc)) return
@@ -2785,7 +2797,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
               if (unique) then
                 !  TODO:  pre-sort and use binary search, or use hash function
                 do b = 1, a-1
-                  if (trim(label) .eq. trim(config%cptr%attr_used(b)%label)) then
+                  if (label == ESMF_UtilArray2String (config%cptr%attr_used(b)%label)) then
                     duplicate = .true.
                     logmsg = "Duplicate label '" // trim(label) // &
                                   "' found in attributes file"
@@ -2800,7 +2812,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             ! ... and place it into attributes table
             if (.not.duplicate) then
                if ( a <= NATT_MAX ) then
-                  config%cptr%attr_used(a)%label = label
+                  allocate (config%cptr%attr_used(a)%label(len_trim (label)))
+                  config%cptr%attr_used(a)%label = ESMF_UtilString2Array (trim (label))
                else
                   if (ESMF_LogFoundError(ESMF_RC_INTNRL_LIST,    &
                        msg="attribute out-of-range; increase NATT_MAX", &
@@ -3073,9 +3086,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ! find attr label and set its used flag to given value
       !  TODO:  pre-sort and use binary search, or use hash function
       do i = 1, NATT_MAX
-        if (trim(config%cptr%current_attr) == trim(config%cptr%attr_used(i)%label)) then
-          config%cptr%attr_used(i)%used = used
-          exit
+        if (associated (config%cptr%attr_used(i)%label)) then
+          if (trim(config%cptr%current_attr) == ESMF_UtilArray2String (config%cptr%attr_used(i)%label)) then
+            config%cptr%attr_used(i)%used = used
+            exit
+          end if
         endif
       enddo
 
@@ -3171,7 +3186,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           do i = 1, config%cptr%nattr
             if (.not.(config%cptr%attr_used(i)%used)) then
               logmsg = "Config attribute label '" // &
-                  trim(config%cptr%attr_used(i)%label) // &
+                  ESMF_UtilArray2String (config%cptr%attr_used(i)%label) // &
                   "' unused (not retrieved via ESMF_ConfigGetAttribute() " // &
                   "or ESMF_ConfigGetChar())."
               call ESMF_LogWrite(logmsg, ESMF_LOGMSG_WARNING, ESMF_CONTEXT)

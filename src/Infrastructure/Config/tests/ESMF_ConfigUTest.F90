@@ -94,7 +94,7 @@ module config_subrs
         write(failMsg, *) "Did not return ESMF_SUCCESS"
         write(name, *) "Create Config Test"
         cf = ESMF_ConfigCreate(rc=rc)
-	call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+        call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       
         if ( rc /= ESMF_SUCCESS ) then 
            print *,'ESMF_ConfigCreate: catastrophic error, rc =', rc
@@ -108,47 +108,47 @@ module config_subrs
         write(name, *) "Config assignment Test"
         cf_alias = cf
         rc = merge (ESMF_SUCCESS, ESMF_FAILURE, associated (cf%cptr, cf_alias%cptr))
-	call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+        call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
        
-	!------------------------------------------------------------------------
-	!EX_UTest
-	! Test ESMF_ConfigOperator(==)(Config,Config) 
-	write(failMsg, *) "Did not return ESMF_SUCCESS"
-	write(name, *) "Config equality with same Config Test"
-	rc = merge (ESMF_SUCCESS, ESMF_FAILURE, cf == cf_alias)
-	call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+        !------------------------------------------------------------------------
+        !EX_UTest
+        ! Test ESMF_ConfigOperator(==)(Config,Config)
+        write(failMsg, *) "Did not return ESMF_SUCCESS"
+        write(name, *) "Config equality with same Config Test"
+        rc = merge (ESMF_SUCCESS, ESMF_FAILURE, cf == cf_alias)
+        call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
-	!------------------------------------------------------------------------
-	!EX_UTest
-	! Test ESMF_ConfigOperator(==)(Config,Config) 
-	write(failMsg, *) "Did not return ESMF_SUCCESS"
-	write(name, *) "Config equality with different Config Test"
-	rc = merge (ESMF_SUCCESS, ESMF_FAILURE, .not. (cf == cf1))
-	call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+        !------------------------------------------------------------------------
+        !EX_UTest
+        ! Test ESMF_ConfigOperator(==)(Config,Config)
+        write(failMsg, *) "Did not return ESMF_SUCCESS"
+        write(name, *) "Config equality with different Config Test"
+        rc = merge (ESMF_SUCCESS, ESMF_FAILURE, .not. (cf == cf1))
+        call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
-	!------------------------------------------------------------------------
-	!EX_UTest
-	! Test ESMF_ConfigOperator(/=)(Config,Config) 
-	write(failMsg, *) "Did not return ESMF_SUCCESS"
-	write(name, *) "Config inequality with same Config Test"
-	rc = merge (ESMF_SUCCESS, ESMF_FAILURE, .not. (cf /= cf_alias))
-	call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+        !------------------------------------------------------------------------
+        !EX_UTest
+        ! Test ESMF_ConfigOperator(/=)(Config,Config)
+        write(failMsg, *) "Did not return ESMF_SUCCESS"
+        write(name, *) "Config inequality with same Config Test"
+        rc = merge (ESMF_SUCCESS, ESMF_FAILURE, .not. (cf /= cf_alias))
+        call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
-	!------------------------------------------------------------------------
-	!EX_UTest
-	! Test ESMF_ConfigOperator(/=)(Config,Config) 
-	write(failMsg, *) "Did not return ESMF_SUCCESS"
-	write(name, *) "Config inequality with different Config Test"
-	rc = merge (ESMF_SUCCESS, ESMF_FAILURE, cf /= cf1)
-	call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+        !------------------------------------------------------------------------
+        !EX_UTest
+        ! Test ESMF_ConfigOperator(/=)(Config,Config)
+        write(failMsg, *) "Did not return ESMF_SUCCESS"
+        write(name, *) "Config inequality with different Config Test"
+        rc = merge (ESMF_SUCCESS, ESMF_FAILURE, cf /= cf1)
+        call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
-	!------------------------------------------------------------------------
+        !------------------------------------------------------------------------
         !EX_UTest
         ! Config Load File Test
         write(failMsg, *) "Did not return ESMF_RC_DUP_NAME"
         write(name, *) "Config Load File Test"
         call ESMF_ConfigLoadFile( cf, fname, unique = .true., rc = rc)
-	call ESMF_Test((rc.eq.ESMF_RC_DUP_NAME), name, failMsg, result, ESMF_SRCLINE)
+        call ESMF_Test((rc.eq.ESMF_RC_DUP_NAME), name, failMsg, result, ESMF_SRCLINE)
 
         if (rc == ESMF_RC_MEM) then 
            print *,' ESMF_ConfigLoadFile: Out of memory: exceeded NBUF_MAX'
