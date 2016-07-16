@@ -3026,8 +3026,9 @@ print *, "found match:"// &
       endif
       
       ! append rhh to rh and clear rhh
-      call ESMF_RouteHandleAppendClear(rh, appendRoutehandle=rhh, &
-        rraShift=rraShift, vectorLengthShift=vectorLengthShift, rc=rc)
+      call ESMF_RouteHandleAppend(rh, appendRoutehandle=rhh, &
+        rraShift=rraShift, vectorLengthShift=vectorLengthShift, &
+        clearflag=.true., rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
       

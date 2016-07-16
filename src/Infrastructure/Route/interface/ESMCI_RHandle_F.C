@@ -93,32 +93,40 @@ extern "C" {
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
 
-  void FTN_X(c_esmc_routehandleappendclear)(ESMCI::RouteHandle **ptr, 
-    ESMCI::RouteHandle **rh, int *rraShift, int *vectorLengthShift, int *rc){
+  void FTN_X(c_esmc_routehandleappend)(ESMCI::RouteHandle **ptr, 
+    ESMCI::RouteHandle **rh, int *rraShift, int *vectorLengthShift, 
+    ESMC_Logical *clearFlag, int *rc){
 #undef  ESMC_METHOD
-#define ESMC_METHOD "c_esmc_routehandleappendclear()"
+#define ESMC_METHOD "c_esmc_routehandleappend()"
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     int localrc = ESMC_RC_NOT_IMPL;
+    // convert to bool
+    bool clearFlagOpt = false;  // default
+    if (ESMC_NOT_PRESENT_FILTER(clearFlag) != ESMC_NULL_POINTER)
+      if (*clearFlag == ESMF_TRUE) clearFlagOpt = true;
     // get a handle on the XXE stored in rh
     ESMCI::XXE *xxeSub = (ESMCI::XXE *)(*rh)->getStorage();
-    // delete the temporary routehandle w/o deleting the xxeSub
-    localrc = (*rh)->setType(ESMCI::ESMC_UNINITIALIZEDHANDLE);
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
-      ESMC_NOT_PRESENT_FILTER(rc))) return;
-    localrc = ESMCI::RouteHandle::destroy(*rh);
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
-      ESMC_NOT_PRESENT_FILTER(rc))) return;
+    // optinally delete the temporary routehandle w/o deleting the xxeSub
+    if (clearFlagOpt){
+      localrc = (*rh)->setType(ESMCI::ESMC_UNINITIALIZEDHANDLE);
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, 
+        ESMC_CONTEXT, ESMC_NOT_PRESENT_FILTER(rc))) return;
+      localrc = ESMCI::RouteHandle::destroy(*rh);
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+        ESMC_CONTEXT, ESMC_NOT_PRESENT_FILTER(rc))) return;
+    }
     // append the xxeSub to the xxe object with RRA offset info
     ESMCI::XXE *xxe = (ESMCI::XXE *)(*ptr)->getStorage();
     localrc = xxe->appendXxeSub(0x0, xxeSub, *rraShift, *vectorLengthShift);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       ESMC_NOT_PRESENT_FILTER(rc))) return;
-    // keep track of xxeSub for xxe garbage collection
-    localrc = xxe->storeXxeSub(xxeSub);
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
-      ESMC_NOT_PRESENT_FILTER(rc))) return;
-    
+    // optionally keep track of xxeSub for xxe garbage collection
+    if (clearFlagOpt){
+      localrc = xxe->storeXxeSub(xxeSub);
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, 
+        ESMC_CONTEXT, ESMC_NOT_PRESENT_FILTER(rc))) return;
+    }
     // return successfully
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }

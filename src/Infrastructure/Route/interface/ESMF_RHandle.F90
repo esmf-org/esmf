@@ -86,7 +86,7 @@ module ESMF_RHandleMod
   public ESMF_RouteHandleRelease
 
   public ESMF_RouteHandlePrepXXE
-  public ESMF_RouteHandleAppendClear
+  public ESMF_RouteHandleAppend
   
   public ESMF_RouteHandleGet
   public ESMF_RouteHandleSet
@@ -438,24 +438,28 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_RouteHandleAppendClear"
+#define ESMF_METHOD "ESMF_RouteHandleAppend"
 !BOPI
-! !IROUTINE: ESMF_RouteHandleAppendClear - Append XXE based RouteHandle and clear
+! !IROUTINE: ESMF_RouteHandleAppend - Append XXE based RouteHandle
 
 ! !INTERFACE:
-  subroutine ESMF_RouteHandleAppendClear(rhandle, appendRoutehandle, &
-    rraShift, vectorLengthShift, rc)
+  subroutine ESMF_RouteHandleAppend(rhandle, appendRoutehandle, rraShift, &
+    vectorLengthShift, clearflag, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_RouteHandle), intent(inout) :: rhandle
     type(ESMF_RouteHandle), intent(inout) :: appendRoutehandle
     integer, intent(in)                   :: rraShift
     integer, intent(in)                   :: vectorLengthShift
+    logical, intent(in),  optional        :: clearflag
     integer, intent(out), optional        :: rc            
 
 !
 ! !DESCRIPTION:
-!   Set an {\tt ESMF\_RouteHandle} attribute with the given value.
+!   Append the exchanged stored in {\tt appendRoutehandle} to the 
+!   {\tt rhandle}. Optionally clear the incoming {\tt appendRoutehandle} 
+!   and ensure that the appended exchange will be cleared when {\tt rhandle}
+!   is released.
 !
 !   The arguments are:
 !   \begin{description}
@@ -463,6 +467,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     {\tt ESMF\_RouteHandle} to be appended to.
 !   \item[appendRoutehandle] 
 !     {\tt ESMF\_RouteHandle} to be appended and cleared.
+!   \item[{[clearFlag]}] 
+!     If set to {\tt .true.}, clear {\tt appendRoutehandle} and ensure 
+!     the appended exchange will be cleared when {\tt rhandle} is released.
+!     Otherwise treat the {\tt appendRoutehandle} as an alias that must not
+!     be cleared. Default is {\tt .false.}.
 !   \item[{[rc]}] 
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -470,6 +479,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !EOPI
 !------------------------------------------------------------------------------
     integer                 :: localrc      ! local return code
+    type(ESMF_Logical)      :: clearflagArg
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
@@ -477,8 +487,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit,rhandle,rc)
     
-    call c_ESMC_RouteHandleAppendClear(rhandle, appendRoutehandle, &
-      rraShift, vectorLengthShift, localrc)
+    if (present(clearflag)) then
+      clearflagArg = clearflag
+    else
+      clearflagArg = ESMF_FALSE ! default
+    endif
+
+    call c_ESMC_RouteHandleAppend(rhandle, appendRoutehandle, &
+      rraShift, vectorLengthShift, clearflagArg, localrc)
     if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
@@ -486,7 +502,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Return successfully
     if (present(rc)) rc = ESMF_SUCCESS
 
-  end subroutine ESMF_RouteHandleAppendClear
+  end subroutine ESMF_RouteHandleAppend
 !------------------------------------------------------------------------------
 
 

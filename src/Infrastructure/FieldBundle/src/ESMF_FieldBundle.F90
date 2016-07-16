@@ -3568,8 +3568,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
           ! append rh to routehandle and clear rh
           if (present(routehandle)) then
-            call ESMF_RouteHandleAppendClear(routehandle, appendRoutehandle=rh, &
-              rraShift=rraShift, vectorLengthShift=vectorLengthShift, rc=localrc)
+            call ESMF_RouteHandleAppend(routehandle, appendRoutehandle=rh, &
+              rraShift=rraShift, vectorLengthShift=vectorLengthShift, &
+              clearflag=.true., rc=localrc)
             if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
            endif
