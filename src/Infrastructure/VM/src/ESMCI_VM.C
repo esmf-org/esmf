@@ -1558,6 +1558,71 @@ void VM::getCurrentGarbageInfo(
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::VM::logCurrentGarbageInfo()"
+//BOPI
+// !IROUTINE:  ESMCI::VM::logCurrentGarbageInfo - Log garbage info of current VM
+//
+// !INTERFACE:
+void VM::logCurrentGarbageInfo(
+//
+// !ARGUMENTS:
+//
+  std::string prefix
+  ){
+//
+// !DESCRIPTION:
+//   Log the garbage collection information of the current context.
+//
+//EOPI
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int rc = ESMC_RC_NOT_IMPL;   // final return code
+
+  esmf_pthread_t mytid;
+#ifndef ESMF_NO_PTHREADS
+  mytid = pthread_self();
+#else
+  mytid = 0;
+#endif
+  int i = matchTableIndex;
+  if (matchTable_tid[i] != mytid){
+    for (i=0; i<matchTableBound; i++)
+      if (matchTable_tid[i] == mytid) break;
+    if (i == matchTableBound){
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+        "- Could not determine current VM", ESMC_CONTEXT, &rc);
+      throw rc;
+    }
+  }
+  // found a match
+  
+  char msg[512];
+  sprintf(msg, "%s - CurrGarbInfo: Fortran objs=%d", prefix.c_str(), 
+    matchTable_FObjects[i].size());
+  ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
+  for (int j=0; j<matchTable_FObjects[i].size(); j++){
+    sprintf(msg, "%s - CurrGarbInfo: fortran objs[%d]: %d", prefix.c_str(), j,
+      matchTable_FObjects[i][j].objectID);
+    ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
+  }
+  sprintf(msg, "%s - CurrGarbInfo: Base objs=%d", prefix.c_str(), 
+    matchTable_Objects[i].size());
+  ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
+  for (int j=0; j<matchTable_Objects[i].size(); j++){
+    sprintf(msg, "%s - CurrGarbInfo: base objs[%d]: %p : %s : %s", 
+      prefix.c_str(), j, matchTable_Objects[i][j], 
+      matchTable_Objects[i][j]->ESMC_BaseGetClassName(),
+      matchTable_Objects[i][j]->ESMC_BaseGetName());
+    ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
+  }
+
+  // return successfully
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::VM::getMemInfo()"
 //BOPI
 // !IROUTINE:  ESMCI::VM::getMemInfo - Get memory info
@@ -1710,11 +1775,17 @@ void VM::addObject(
 //
 //EOPI
 //-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int rc = ESMC_RC_NOT_IMPL;   // final return code
+
   int i;
   for (i=0; i<matchTableBound; i++)
     if (VMIdCompare(vmID, &(matchTable_vmID[i]))) break;
-  if (i == matchTableBound)
-    return;  // no match found, bail out
+  if (i == matchTableBound){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+      "- Could not find table entry for current VM", ESMC_CONTEXT, &rc);
+    throw rc;
+  }
   
   // match found, proceed
 
@@ -1813,11 +1884,17 @@ void VM::addFObject(
 //
 //EOPI
 //-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int rc = ESMC_RC_NOT_IMPL;   // final return code
+
   int i;
   for (i=0; i<matchTableBound; i++)
     if (VMIdCompare(vmID, &(matchTable_vmID[i]))) break;
-  if (i == matchTableBound)
-    return;  // no match found, bail out
+  if (i == matchTableBound){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+      "- Could not find table entry for current VM", ESMC_CONTEXT, &rc);
+    throw rc;
+  }
   
   // match found
 

@@ -107,6 +107,7 @@ class VM : public VMK {   // inherits from ESMCI::VMK class
     static VM *getCurrent(int *rc=NULL);      // current VM
     static VMId *getCurrentID(int *rc=NULL);  // VMId of current VM
     static void getCurrentGarbageInfo(int *, int *); // garbage info current VM
+    static void logCurrentGarbageInfo(std::string prefix); // garbage info
     static void getMemInfo(int *virtMemPet, int *physMemPet);   // memory info
     static void logMemInfo(std::string prefix);   // memory info
     static int getBaseIDAndInc(VMId *vmID);

@@ -100,10 +100,14 @@ namespace ESMCI {
     DistGrid(VM *vm=NULL):ESMC_Base(vm){ // allow specific VM instead default
       decompflag = NULL;
       indexflag = NULL;
+      // initialize the name for this DistGrid object in the Base class
+      ESMC_BaseSetName(NULL, "DistGrid");
     }
     DistGrid(int baseID):ESMC_Base(baseID){ // prevent baseID counter increment
       decompflag = NULL;
       indexflag = NULL;
+      // initialize the name for this DistGrid object in the Base class
+      ESMC_BaseSetName(NULL, "DistGrid");
     }
     ~DistGrid(){destruct(false);}
     
