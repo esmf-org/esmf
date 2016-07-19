@@ -3566,11 +3566,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                   ESMF_CONTEXT, rcToReturn=rc)) return
            endif
 
-          ! append rh to routehandle and clear rh
+          ! append rh to routehandle, transfer ownership, destroy rh noGarbage
           if (present(routehandle)) then
             call ESMF_RouteHandleAppend(routehandle, appendRoutehandle=rh, &
               rraShift=rraShift, vectorLengthShift=vectorLengthShift, &
-              clearflag=.true., rc=localrc)
+              transferflag=.true., rc=localrc)
+            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+            call ESMF_RouteHandleDestroy(routehandle, noGarbage=.true., &
+              rc=localrc)
             if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
            endif
@@ -5785,7 +5789,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords for t
         call ESMF_FieldGet(flist(i), array=alist(i), rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
-#if 1
+#if 0
         call ESMF_ArrayGet(alist(i), name=name, rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return

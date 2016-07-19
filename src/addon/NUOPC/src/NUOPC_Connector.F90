@@ -216,6 +216,10 @@ module NUOPC_Connector
 
     rc = ESMF_SUCCESS
 
+#if 0
+call ESMF_VMLogCurrentGarbageInfo("Connector Initialize05P1 in: ")
+#endif
+
     ! query the Component for info
     call ESMF_CplCompGet(cplcomp, name=name, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -248,6 +252,10 @@ module NUOPC_Connector
             line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
     end if
+
+#if 0
+call ESMF_VMLogCurrentGarbageInfo("Connector Initialize05P1 out: ")
+#endif
 
     contains
 
@@ -364,6 +372,10 @@ module NUOPC_Connector
 
     rc = ESMF_SUCCESS
 
+#if 0
+call ESMF_VMLogCurrentGarbageInfo("Connector InitializeP1a in: ")
+#endif
+
     ! query the Component for info
     call ESMF_CplCompGet(cplcomp, name=name, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -392,6 +404,10 @@ module NUOPC_Connector
     if (btest(profiling,1)) then    ! PROFILE
       call ESMF_VMLogMemInfo("aftP1a Reconcile")
     endif
+
+#if 0
+call ESMF_VMLogCurrentGarbageInfo("Connector InitializeP1a after reconcile: ")
+#endif
 
     nullify(importStandardNameList)
     nullify(importFieldList)
@@ -489,6 +505,10 @@ print *, "bondLevelMax:", bondLevelMax, "bondLevel:", bondLevel
     if (associated(exportFieldList)) deallocate(exportFieldList)
     if (associated(exportNamespaceList)) deallocate(exportNamespaceList)
     
+#if 0
+call ESMF_VMLogCurrentGarbageInfo("Connector InitializeP1a out: ")
+#endif
+
   end subroutine
   
   !-----------------------------------------------------------------------------
@@ -2174,6 +2194,10 @@ print *, "current bondLevel=", bondLevel
     call ESMF_VMWtime(timeBase)
     time0=timeBase
 
+#if 0
+call ESMF_VMLogCurrentGarbageInfo("Connector RUN enter: ")
+#endif
+
     ! query the Component for info
     call ESMF_CplCompGet(cplcomp, name=name, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -2392,6 +2416,10 @@ print *, "current bondLevel=", bondLevel
         return  ! bail out
     endif
     
+#if 0
+call ESMF_VMLogCurrentGarbageInfo("Connector RUN leaving: ")
+#endif
+
   end subroutine
   
   !-----------------------------------------------------------------------------
@@ -2417,6 +2445,10 @@ print *, "current bondLevel=", bondLevel
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
+#if 0
+call ESMF_VMLogCurrentGarbageInfo("Connector finalize enter: ")
+#endif
+
     ! determine verbosity
     call NUOPC_CompAttributeGet(cplcomp, name="Verbosity", value=valueString, &
       rc=rc)
@@ -2487,10 +2519,10 @@ print *, "current bondLevel=", bondLevel
       msg="Deallocation of internal state dstFieldList member failed.", &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
-    call ESMF_FieldBundleDestroy(is%wrap%srcFields, rc=rc)
+    call ESMF_FieldBundleDestroy(is%wrap%srcFields, noGarbage=.true., rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    call ESMF_FieldBundleDestroy(is%wrap%dstFields, rc=rc)
+    call ESMF_FieldBundleDestroy(is%wrap%dstFields, noGarbage=.true., rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     call ESMF_StateDestroy(is%wrap%state, rc=rc)
@@ -2511,6 +2543,10 @@ print *, "current bondLevel=", bondLevel
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
       
+#if 0
+call ESMF_VMLogCurrentGarbageInfo("Connector finalize leaving: ")
+#endif
+
   end subroutine
   
   !-----------------------------------------------------------------------------
@@ -2679,6 +2715,7 @@ print *, "found match:"// &
     type(ESMF_TermOrder_Flag), pointer               :: termOrders(:)
     character(*),              intent(in)            :: name
     integer,                   intent(out), optional :: rc
+    
     ! local variables
     integer                         :: i, j, k, count, stat, localDeCount
     type(ESMF_Field), pointer       :: srcFields(:), dstFields(:)
@@ -2699,7 +2736,23 @@ print *, "found match:"// &
     integer(ESMF_KIND_I4), pointer  :: dstMaskValues(:)
     integer                         :: srcTermProcessing, pipelineDepth
     logical                         :: dumpWeightsFlag
+    type(ESMF_Grid)                 :: srcGrid, dstGrid
     
+    type RHL
+      type(ESMF_Grid)             :: srcGrid, dstGrid
+      logical                     :: redistflag 
+      type(ESMF_RegridMethod_Flag):: regridmethod
+      type(ESMF_RouteHandle)      :: rh
+      type(RHL), pointer          :: prev
+    end type
+    
+    type(RHL), pointer              :: rhList, rhListE
+    logical                         :: rhListMatch
+    
+#if 0
+call ESMF_VMLogCurrentGarbageInfo("Connector FieldBundleCplStore enter: ")
+#endif
+
     ! consistency check counts
     if (associated(cplList)) then
       count = size(cplList)
@@ -2765,6 +2818,9 @@ print *, "found match:"// &
     ! prepare auxiliary variables
     rraShift = 0              ! reset
     vectorLengthShift = 0     ! reset
+    
+    ! prepare rhList linked list
+    nullify(rhList)
     
     ! loop over all fields
     do i=1, count
@@ -3000,35 +3056,94 @@ print *, "found match:"// &
         endif
       enddo
 
-      if (redistflag) then
-        ! redist store call
-        call ESMF_FieldRedistStore(srcField=srcFields(i), &
-          dstField=dstFields(i), &
+      ! TODO: the RH reuse optimization is Grid specific -> need to make it
+      ! TODO: general to handle Mesh and LocStream as well, or at least not
+      ! TODO: fail!
+      
+      ! access the src and dst grid objects
+      call ESMF_FieldGet(srcFields(i), grid=srcGrid, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+      call ESMF_FieldGet(dstFields(i), grid=dstGrid, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+
+      rhListMatch = .false.
+      
+      ! search for a match
+      rhListE=>rhList
+      do while (associated(rhListE))
+        print *, "srcGrid Match for i=", i, " is: ", &
+          ESMF_GridMatch(srcGrid, rhListE%srcGrid, globalflag=.true.)
+        print *, "dstGrid Match for i=", i, " is: ", &
+          ESMF_GridMatch(dstGrid, rhListE%dstGrid, globalflag=.true.)
+        ! test src grid match
+        rhListMatch = &
+          ESMF_GridMatch(srcGrid, rhListE%srcGrid, globalflag=.true.) &
+          >= ESMF_GRIDMATCH_EXACT
+        ! test dst grid match
+        rhListMatch = rhListMatch .and. &
+          ESMF_GridMatch(dstGrid, rhListE%dstGrid, globalflag=.true.) &
+          >= ESMF_GRIDMATCH_EXACT
+        ! test redistflag
+        rhListMatch = rhListMatch .and. (rhListE%redistflag .eqv. redistflag)
+        ! test regridmethod
+        rhListMatch = rhListMatch .and. (rhListE%regridmethod == regridmethod)
+        if (rhListMatch) exit ! break out of search 
+        rhListE=>rhListE%prev   ! previous element
+      enddo
+
+      if (.not.rhListMatch) then
+#if 1
+call ESMF_LogWrite("no rhListMatch -> pre-compute remapping", ESMF_LOGMSG_INFO)
+#endif
+        ! add a new rhList element
+        allocate(rhListE)
+        rhListE%prev=>rhList  ! link new element to previous list head
+        rhList=>rhListE       ! list head now pointing to new element
+        ! precompute remapping
+        if (redistflag) then
+          ! redist store call
+          call ESMF_FieldRedistStore(srcField=srcFields(i), &
+            dstField=dstFields(i), &
 !not yet implemented:          pipelineDepth=pipelineDepth, &
-          routehandle=rhh, &
-          rc=rc)
-        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-          line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-      else      
-        ! regrid store call
-        call ESMF_FieldRegridStore(srcField=srcFields(i), &
-          dstField=dstFields(i), &
-          srcMaskValues=srcMaskValues, dstMaskValues=dstMaskValues, &
-          regridmethod=regridmethod, &
-          polemethod=polemethod, regridPoleNPnts=regridPoleNPnts, &
-          unmappedaction=unmappedaction, &
-          srcTermProcessing=srcTermProcessing, pipelineDepth=pipelineDepth, &
-          routehandle=rhh, &
-          factorIndexList=factorIndexList, factorList=factorList, &
-          rc=rc)
-        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-          line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+            routehandle=rhh, &
+            rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+        else      
+          ! regrid store call
+          call ESMF_FieldRegridStore(srcField=srcFields(i), &
+            dstField=dstFields(i), &
+            srcMaskValues=srcMaskValues, dstMaskValues=dstMaskValues, &
+            regridmethod=regridmethod, &
+            polemethod=polemethod, regridPoleNPnts=regridPoleNPnts, &
+            unmappedaction=unmappedaction, &
+            srcTermProcessing=srcTermProcessing, pipelineDepth=pipelineDepth, &
+            routehandle=rhh, &
+            factorIndexList=factorIndexList, factorList=factorList, &
+            rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+        endif
+        ! store info in the new rhList element
+        rhListE%rh = rhh
+        rhListE%srcGrid=srcGrid
+        rhListE%dstGrid=dstGrid
+        rhListE%redistflag=redistflag
+        rhListE%regridmethod=regridmethod
+      else
+#if 1
+call ESMF_LogWrite("found rhListMatch -> reuse routehandle", ESMF_LOGMSG_INFO)
+#endif
+        ! pull out the routehandle from the matching rhList element
+        rhh = rhListE%rh
       endif
       
       ! append rhh to rh and clear rhh
       call ESMF_RouteHandleAppend(rh, appendRoutehandle=rhh, &
         rraShift=rraShift, vectorLengthShift=vectorLengthShift, &
-        clearflag=.true., rc=rc)
+        transferflag=.not.rhListMatch, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
       
@@ -3089,11 +3204,25 @@ print *, "found match:"// &
       
     enddo
     
+    ! take down rhList and destroy rh objects
+    do while (associated(rhList))
+      rhListE=>rhList
+      rhList=>rhList%prev
+      call ESMF_RouteHandleDestroy(rhListE%rh, noGarbage=.true., rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+      deallocate(rhListE)
+    enddo
+
     ! garbage collection
     deallocate(srcFields, dstFields)
 
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
+
+#if 0
+call ESMF_VMLogCurrentGarbageInfo("Connector FieldBundleCplStore leaving: ")
+#endif
 
   end subroutine
 

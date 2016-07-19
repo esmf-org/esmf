@@ -90,7 +90,7 @@ ArrayBundle::ArrayBundle(
     
     // fill in the ArrayBundle object
     for (int i=0; i<arrayCount; i++){
-#if 1
+#if 0
       ESMC_LogDefault.Write(arrayList[i]->getName(), ESMC_LOGMSG_INFO);
 #endif
       arrayContainer.add(string(arrayList[i]->getName()), arrayList[i],
