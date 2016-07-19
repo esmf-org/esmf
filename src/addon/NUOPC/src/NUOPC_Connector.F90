@@ -1140,6 +1140,7 @@ print *, "current bondLevel=", bondLevel
     character(ESMF_MAXSTR)          :: iTransferAction, eTransferAction
     integer                         :: verbosity
     integer(ESMF_KIND_I4), pointer  :: ungriddedLBound(:), ungriddedUBound(:)
+    integer(ESMF_KIND_I4), pointer  :: gridToFieldMap(:)
     integer                         :: fieldDimCount, gridDimCount
     integer                         :: profiling
 
@@ -1346,8 +1347,7 @@ print *, "current bondLevel=", bondLevel
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
-          ! bring over ungridded dim bounds as attributes
-          ! for use on receiving sides
+          ! bring over more info as attributes
           call ESMF_FieldGet(providerField, grid=grid, &
             dimCount=fieldDimCount, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -1355,9 +1355,30 @@ print *, "current bondLevel=", bondLevel
           call ESMF_GridGet(grid, dimCount=gridDimCount, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          ! bring over gridToFieldMap as attributes
+          allocate(gridToFieldMap(gridDimCount),stat=stat)
+          if (ESMF_LogFoundAllocError(statusToCheck=stat, &
+            msg="Allocation of internal ungriddedLBound failed.", &
+            line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+            return  ! bail out
+          call ESMF_FieldGet(providerField, gridToFieldMap=gridToFieldMap, &
+            rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          call ESMF_AttributeSet(acceptorField, &
+            name="GridToFieldMap", valueList=gridToFieldMap, &
+            convention="NUOPC", purpose="Instance", &
+            attnestflag=ESMF_ATTNEST_ON, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, &
+            file=FILENAME)) &
+            return  ! bail out
+          deallocate(gridToFieldMap)
+
 !          print *, "fieldDimCount = ", fieldDimCount
 !          print *, "gridDimCount = ", gridDimCount
           if (fieldDimCount - gridDimCount > 0) then
+            ! bring over ungridded dim bounds as attributes
             allocate(ungriddedLBound(fieldDimCount-gridDimCount),stat=stat)
             if (ESMF_LogFoundAllocError(statusToCheck=stat, &
               msg="Allocation of internal ungriddedLBound failed.", &
@@ -2737,13 +2758,34 @@ print *, "found match:"// &
     integer                         :: srcTermProcessing, pipelineDepth
     logical                         :: dumpWeightsFlag
     type(ESMF_Grid)                 :: srcGrid, dstGrid
+    type(ESMF_GeomType_Flag)        :: srcGeomtype, dstGeomtype
+    type(ESMF_StaggerLoc)           :: srcStaggerLoc, dstStaggerLoc
+    integer, pointer                :: srcGridToFieldMap(:)
+    integer, pointer                :: dstGridToFieldMap(:)
+    integer, pointer                :: srcUngriddedLBound(:)
+    integer, pointer                :: srcUngriddedUBound(:)
+    integer, pointer                :: dstUngriddedLBound(:)
+    integer, pointer                :: dstUngriddedUBound(:)
+    integer                         :: fieldDimCount, gridDimCount
+    logical                         :: gridPair
     
     type RHL
-      type(ESMF_Grid)             :: srcGrid, dstGrid
-      logical                     :: redistflag 
-      type(ESMF_RegridMethod_Flag):: regridmethod
-      type(ESMF_RouteHandle)      :: rh
-      type(RHL), pointer          :: prev
+      type(ESMF_Grid)                   :: srcGrid, dstGrid
+      ! field specific items, TODO: offer FieldMatch
+      type(ESMF_StaggerLoc)             :: srcStaggerLoc, dstStaggerLoc
+      integer, pointer                  :: srcGridToFieldMap(:)
+      integer, pointer                  :: dstGridToFieldMap(:)
+      integer, pointer                  :: srcUngriddedLBound(:)
+      integer, pointer                  :: srcUngriddedUBound(:)
+      integer, pointer                  :: dstUngriddedLBound(:)
+      integer, pointer                  :: dstUngriddedUBound(:)
+      ! remap specific items
+      logical                           :: redistflag 
+      type(ESMF_RegridMethod_Flag)      :: regridmethod
+      type(ESMF_RouteHandle)            :: rh
+      integer(ESMF_KIND_I4), pointer    :: factorIndexList(:,:)
+      real(ESMF_KIND_R8), pointer       :: factorList(:)
+      type(RHL), pointer                :: prev
     end type
     
     type(RHL), pointer              :: rhList, rhListE
@@ -3056,51 +3098,149 @@ call ESMF_VMLogCurrentGarbageInfo("Connector FieldBundleCplStore enter: ")
         endif
       enddo
 
-      ! TODO: the RH reuse optimization is Grid specific -> need to make it
-      ! TODO: general to handle Mesh and LocStream as well, or at least not
-      ! TODO: fail!
+      ! for now optimized reuse of RouteHandle is only implemented for Grids
       
-      ! access the src and dst grid objects
-      call ESMF_FieldGet(srcFields(i), grid=srcGrid, rc=rc)
+      call ESMF_FieldGet(srcFields(i), geomtype=srcGeomtype, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-      call ESMF_FieldGet(dstFields(i), grid=dstGrid, rc=rc)
+      call ESMF_FieldGet(dstFields(i), geomtype=dstGeomtype, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
+      gridPair = (srcGeomtype==ESMF_GEOMTYPE_GRID)
+      gridPair = gridPair .and. (dstGeomtype==ESMF_GEOMTYPE_GRID)
+
       rhListMatch = .false.
-      
-      ! search for a match
-      rhListE=>rhList
-      do while (associated(rhListE))
-        print *, "srcGrid Match for i=", i, " is: ", &
-          ESMF_GridMatch(srcGrid, rhListE%srcGrid, globalflag=.true.)
-        print *, "dstGrid Match for i=", i, " is: ", &
-          ESMF_GridMatch(dstGrid, rhListE%dstGrid, globalflag=.true.)
-        ! test src grid match
-        rhListMatch = &
-          ESMF_GridMatch(srcGrid, rhListE%srcGrid, globalflag=.true.) &
-          >= ESMF_GRIDMATCH_EXACT
-        ! test dst grid match
-        rhListMatch = rhListMatch .and. &
-          ESMF_GridMatch(dstGrid, rhListE%dstGrid, globalflag=.true.) &
-          >= ESMF_GRIDMATCH_EXACT
-        ! test redistflag
-        rhListMatch = rhListMatch .and. (rhListE%redistflag .eqv. redistflag)
-        ! test regridmethod
-        rhListMatch = rhListMatch .and. (rhListE%regridmethod == regridmethod)
-        if (rhListMatch) exit ! break out of search 
-        rhListE=>rhListE%prev   ! previous element
-      enddo
+
+      if (gridPair) then
+        ! access the src and dst grid objects
+        call ESMF_FieldGet(srcFields(i), grid=srcGrid, &
+          staggerLoc=srcStaggerLoc, dimCount=fieldDimCount, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+        call ESMF_GridGet(srcGrid, dimCount=gridDimCount, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+        allocate(srcGridToFieldMap(gridDimCount))
+        allocate(srcUngriddedLBound(fieldDimCount-gridDimCount), &
+          srcUngriddedUBound(fieldDimCount-gridDimCount))
+        call ESMF_FieldGet(srcFields(i), gridToFieldMap=srcGridToFieldMap, &
+          ungriddedLBound=srcUngriddedLBound, &
+          ungriddedUBound=srcUngriddedUBound,rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+        
+        call ESMF_FieldGet(dstFields(i), grid=dstGrid, &
+          staggerLoc=dstStaggerLoc, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+        call ESMF_GridGet(dstGrid, dimCount=gridDimCount, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+        allocate(dstGridToFieldMap(gridDimCount))
+        allocate(dstUngriddedLBound(fieldDimCount-gridDimCount), &
+          dstUngriddedUBound(fieldDimCount-gridDimCount))
+        call ESMF_FieldGet(dstFields(i), gridToFieldMap=dstGridToFieldMap, &
+          ungriddedLBound=dstUngriddedLBound, &
+          ungriddedUBound=dstUngriddedUBound,rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+
+        ! search for a match
+        rhListE=>rhList
+        do while (associated(rhListE))
+#if 0
+print *, "srcGrid Match for i=", i, " is: ", &
+  ESMF_GridMatch(srcGrid, rhListE%srcGrid, globalflag=.true.)
+print *, "dstGrid Match for i=", i, " is: ", &
+  ESMF_GridMatch(dstGrid, rhListE%dstGrid, globalflag=.true.)
+#endif
+          ! test src grid match
+          rhListMatch = &
+            ESMF_GridMatch(rhListE%srcGrid, srcGrid, globalflag=.true.) &
+            >= ESMF_GRIDMATCH_EXACT
+          if (.not.rhListMatch) goto 123
+          ! test dst grid match
+          rhListMatch = &
+            ESMF_GridMatch(rhListE%dstGrid, dstGrid, globalflag=.true.) &
+            >= ESMF_GRIDMATCH_EXACT
+          if (.not.rhListMatch) goto 123
+          ! test src staggerLoc match
+          rhListMatch = (rhListE%srcStaggerLoc==srcStaggerLoc)
+          if (.not.rhListMatch) goto 123
+          ! test dst staggerLoc match
+          rhListMatch = (rhListE%dstStaggerLoc==dstStaggerLoc)
+          if (.not.rhListMatch) goto 123
+          ! test srcGridToFieldMap
+          rhListMatch = &
+            (size(rhListE%srcGridToFieldMap)==size(srcGridToFieldMap))
+          if (.not.rhListMatch) goto 123
+          do j=1, size(srcGridToFieldMap)
+            rhListMatch = (rhListE%srcGridToFieldMap(j)==srcGridToFieldMap(j))
+            if (.not.rhListMatch) goto 123
+          enddo
+          ! test dstGridToFieldMap
+          rhListMatch = &
+            (size(rhListE%dstGridToFieldMap)==size(dstGridToFieldMap))
+          if (.not.rhListMatch) goto 123
+          do j=1, size(dstGridToFieldMap)
+            rhListMatch = (rhListE%dstGridToFieldMap(j)==dstGridToFieldMap(j))
+            if (.not.rhListMatch) goto 123
+          enddo
+          ! test srcUngriddedLBound
+          rhListMatch = &
+            (size(rhListE%srcUngriddedLBound)==size(srcUngriddedLBound))
+          if (.not.rhListMatch) goto 123
+          do j=1, size(srcUngriddedLBound)
+            rhListMatch = (rhListE%srcUngriddedLBound(j)==srcUngriddedLBound(j))
+            if (.not.rhListMatch) goto 123
+          enddo
+          ! test srcUngriddedUBound
+          rhListMatch = &
+            (size(rhListE%srcUngriddedUBound)==size(srcUngriddedUBound))
+          if (.not.rhListMatch) goto 123
+          do j=1, size(srcUngriddedUBound)
+            rhListMatch = (rhListE%srcUngriddedUBound(j)==srcUngriddedUBound(j))
+            if (.not.rhListMatch) goto 123
+          enddo
+          ! test dstUngriddedLBound
+          rhListMatch = &
+            (size(rhListE%dstUngriddedLBound)==size(dstUngriddedLBound))
+          if (.not.rhListMatch) goto 123
+          do j=1, size(dstUngriddedLBound)
+            rhListMatch = (rhListE%dstUngriddedLBound(j)==dstUngriddedLBound(j))
+            if (.not.rhListMatch) goto 123
+          enddo
+          ! test dstUngriddedUBound
+          rhListMatch = &
+            (size(rhListE%dstUngriddedUBound)==size(dstUngriddedUBound))
+          if (.not.rhListMatch) goto 123
+          do j=1, size(dstUngriddedUBound)
+            rhListMatch = (rhListE%dstUngriddedUBound(j)==dstUngriddedUBound(j))
+            if (.not.rhListMatch) goto 123
+          enddo
+          ! test redistflag
+          rhListMatch = (rhListE%redistflag .eqv. redistflag)
+          if (.not.rhListMatch) goto 123
+          ! test regridmethod
+          rhListMatch = (rhListE%regridmethod==regridmethod)
+          if (rhListMatch) exit ! break out of search 
+123       continue
+          rhListE=>rhListE%prev   ! previous element
+        enddo
+        
+      endif
 
       if (.not.rhListMatch) then
 #if 1
 call ESMF_LogWrite("no rhListMatch -> pre-compute remapping", ESMF_LOGMSG_INFO)
 #endif
-        ! add a new rhList element
-        allocate(rhListE)
-        rhListE%prev=>rhList  ! link new element to previous list head
-        rhList=>rhListE       ! list head now pointing to new element
+        if (gridPair) then
+          ! add a new rhList element
+          allocate(rhListE)
+          rhListE%prev=>rhList  ! link new element to previous list head
+          rhList=>rhListE       ! list head now pointing to new element
+        endif
         ! precompute remapping
         if (redistflag) then
           ! redist store call
@@ -3126,18 +3266,36 @@ call ESMF_LogWrite("no rhListMatch -> pre-compute remapping", ESMF_LOGMSG_INFO)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
         endif
-        ! store info in the new rhList element
-        rhListE%rh = rhh
-        rhListE%srcGrid=srcGrid
-        rhListE%dstGrid=dstGrid
-        rhListE%redistflag=redistflag
-        rhListE%regridmethod=regridmethod
+        if (gridPair) then
+          ! store info in the new rhList element
+          rhListE%srcGrid=srcGrid
+          rhListE%dstGrid=dstGrid
+          rhListE%srcStaggerLoc=srcStaggerLoc
+          rhListE%dstStaggerLoc=dstStaggerLoc
+          rhListE%srcGridToFieldMap=>srcGridToFieldMap
+          rhListE%dstGridToFieldMap=>dstGridToFieldMap
+          rhListE%srcUngriddedLBound=>srcUngriddedLBound
+          rhListE%srcUngriddedUBound=>srcUngriddedUBound
+          rhListE%dstUngriddedLBound=>dstUngriddedLBound
+          rhListE%dstUngriddedUBound=>dstUngriddedUBound
+          rhListE%redistflag=redistflag
+          rhListE%regridmethod=regridmethod
+          rhListE%rh = rhh
+          rhListE%factorIndexList => factorIndexList
+          rhListE%factorList => factorList
+        endif
       else
 #if 1
 call ESMF_LogWrite("found rhListMatch -> reuse routehandle", ESMF_LOGMSG_INFO)
 #endif
         ! pull out the routehandle from the matching rhList element
         rhh = rhListE%rh
+        factorIndexList => rhListE%factorIndexList
+        factorList => rhListE%factorList
+        ! deallocate temporary grid/field info
+        deallocate(srcGridToFieldMap, dstGridToFieldMap)
+        deallocate(srcUngriddedLBound, srcUngriddedUBound)
+        deallocate(dstUngriddedLBound, dstUngriddedUBound)
       endif
       
       ! append rhh to rh and clear rhh
@@ -3196,8 +3354,11 @@ call ESMF_LogWrite("found rhListMatch -> reuse routehandle", ESMF_LOGMSG_INFO)
       enddo
       
       ! local garbage collection
-      if (associated(factorIndexList)) deallocate(factorIndexList)
-      if (associated(factorList)) deallocate(factorList)
+      if (.not.gridPair) then
+        ! grid pairs will have factorIndexList and factorList in rhList struct
+        if (associated(factorIndexList)) deallocate(factorIndexList)
+        if (associated(factorList)) deallocate(factorList)
+      endif
       if (associated(chopStringList)) deallocate(chopStringList)
       if (associated(srcMaskValues)) deallocate(srcMaskValues)
       if (associated(dstMaskValues)) deallocate(dstMaskValues)
@@ -3211,6 +3372,11 @@ call ESMF_LogWrite("found rhListMatch -> reuse routehandle", ESMF_LOGMSG_INFO)
       call ESMF_RouteHandleDestroy(rhListE%rh, noGarbage=.true., rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+      if (associated(rhListE%factorIndexList)) deallocate(rhListE%factorIndexList)
+      if (associated(rhListE%factorList)) deallocate(rhListE%factorList)
+      deallocate(rhListE%srcGridToFieldMap, rhListE%dstGridToFieldMap)
+      deallocate(rhListE%srcUngriddedLBound, rhListE%srcUngriddedUBound)
+      deallocate(rhListE%dstUngriddedLBound, rhListE%dstUngriddedUBound)
       deallocate(rhListE)
     enddo
 

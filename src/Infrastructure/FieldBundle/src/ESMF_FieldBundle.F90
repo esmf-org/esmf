@@ -3573,8 +3573,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
               transferflag=.true., rc=localrc)
             if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
-            call ESMF_RouteHandleDestroy(routehandle, noGarbage=.true., &
-              rc=localrc)
+            ! remove RouteHandle, just transferred from garbage collection
+            call ESMF_RouteHandleDestroy(rh, noGarbage=.true., rc=localrc)
             if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
            endif
