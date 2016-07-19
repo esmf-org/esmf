@@ -636,6 +636,7 @@ static const char *const version = "$Id$";
     status = *sp++;
     pfp = (ESMC_ProxyFlag *)sp;
     proxyflag = *pfp++;
+    proxyflag = ESMF_PROXYYES;  // deserialize means this is a proxy object
     cp = (char *)pfp;
     memcpy(baseName, cp, ESMF_MAXSTR);
     cp += ESMF_MAXSTR;
