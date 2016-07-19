@@ -275,7 +275,7 @@ program ESMF_GridCreateUTest
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
   ! Check that match returns alias
-  if (ESMF_GridMatch(grid,grid,rc=localrc) /=ESMF_GRIDMATCH_ALIAS) correct=.false.
+  if (.not.(ESMF_GridMatch(grid,grid,rc=localrc)>=ESMF_GRIDMATCH_EXACT)) correct=.false.
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
   ! Create Grid 2
