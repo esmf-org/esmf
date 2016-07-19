@@ -56,9 +56,12 @@ namespace ESMCI {
     void *storage[RHSTORAGECOUNT];  // storage used by specific communication
  
    public:
-    RouteHandle():ESMC_Base(-1){}   // use Base constructor w/o BaseID increment
+    RouteHandle():ESMC_Base(-1){    // use Base constructor w/o BaseID increment
+      // initialize the name for this RouteHandle object in the Base class
+      ESMC_BaseSetName(NULL, "RouteHandle");
+    }
     static RouteHandle *create(int *rc);
-    static int destroy(RouteHandle *routehandle);
+    static int destroy(RouteHandle *routehandle, bool noGarbage=false);
     int construct(void);
     int destruct(void);    
     RouteHandleType getType(void) const { return htype; }

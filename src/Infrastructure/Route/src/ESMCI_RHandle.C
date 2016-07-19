@@ -119,7 +119,8 @@ int RouteHandle::destroy(
 //  int error return code
 //
 // !ARGUMENTS:
-    RouteHandle *routehandle) {    // in - RouteHandle object to destroy
+    RouteHandle *routehandle,   // in - RouteHandle object to destroy
+    bool noGarbage){            // in - remove from garbage collection
 //
 // !DESCRIPTION:
 //  ESMF routine which destroys a RouteHandle object.
@@ -145,6 +146,12 @@ int RouteHandle::destroy(
   // mark as invalid object
   routehandle->ESMC_BaseSetStatus(ESMF_STATUS_INVALID);
   
+  // optionally delete the complete object and remove from garbage collection
+  if (noGarbage){
+    VM::rmObject(routehandle); // remove object from garbage collection
+    delete routehandle;        // completely delete the object, free heap
+  }
+
   // return successfully
   rc = ESMF_SUCCESS;
   return rc;

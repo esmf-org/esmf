@@ -251,11 +251,12 @@ contains
 ! !IROUTINE: ESMF_RouteHandleDestroy - Release resources associated with a RouteHandle
 
 ! !INTERFACE:
-  subroutine ESMF_RouteHandleDestroy(rhandle, rc)
+  subroutine ESMF_RouteHandleDestroy(rhandle, noGarbage, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_RouteHandle), intent(inout) :: rhandle   
-    integer, intent(out), optional :: rc        
+    type(ESMF_RouteHandle), intent(inout)          :: rhandle   
+    logical,                intent(in),   optional :: noGarbage
+    integer,                intent(out),  optional :: rc
 !
 ! !DESCRIPTION:
 !   Destroys an {\tt ESMF\_RouteHandle}, releaseing the resources associated
@@ -265,6 +266,24 @@ contains
 !   \begin{description}
 !   \item[rhandle] 
 !     The {\tt ESMF\_RouteHandle} to be destroyed.
+! \item[{[noGarbage]}]
+!      If set to {\tt .TRUE.} the object will be fully destroyed and removed
+!      from the ESMF garbage collection system. Note however that under this 
+!      condition ESMF cannot protect against accessing the destroyed object 
+!      through dangling aliases -- a situation which may lead to hard to debug 
+!      application crashes.
+! 
+!      It is generally recommended to leave the {\tt noGarbage} argument
+!      set to {\tt .FALSE.} (the default), and to take advantage of the ESMF 
+!      garbage collection system which will prevent problems with dangling
+!      aliases or incorrect sequences of destroy calls. However this level of
+!      support requires that a small remnant of the object is kept in memory
+!      past the destroy call. This can lead to an unexpected increase in memory
+!      consumption over the course of execution in applications that use 
+!      temporary ESMF objects. For situations where the repeated creation and 
+!      destruction of temporary objects leads to memory issues, it is 
+!      recommended to call with {\tt noGarbage} set to {\tt .TRUE.}, fully 
+!      removing the entire temporary object from memory.
 !   \item[{[rc]}] 
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -272,6 +291,7 @@ contains
 !EOPI
 !------------------------------------------------------------------------------
     integer                 :: localrc      ! local return code
+    type(ESMF_Logical)      :: opt_noGarbage  ! helper variable
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
@@ -280,6 +300,10 @@ contains
     ! check input variable
     ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit,rhandle,rc)
 
+    ! Set default flags
+    opt_noGarbage = ESMF_FALSE
+    if (present(noGarbage)) opt_noGarbage = noGarbage
+
     ! was handle already destroyed?
     if (rhandle%this .eq. ESMF_NULL_POINTER) then
       if (present(rc)) rc = ESMF_SUCCESS
@@ -287,7 +311,7 @@ contains
     endif 
 
     ! Call C++ destroy code
-    call c_ESMC_RouteHandleDestroy(rhandle, localrc)
+    call c_ESMC_RouteHandleDestroy(rhandle, opt_noGarbage, localrc)
     if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
@@ -444,22 +468,21 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 ! !INTERFACE:
   subroutine ESMF_RouteHandleAppend(rhandle, appendRoutehandle, rraShift, &
-    vectorLengthShift, clearflag, rc)
+    vectorLengthShift, transferflag, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_RouteHandle), intent(inout) :: rhandle
     type(ESMF_RouteHandle), intent(inout) :: appendRoutehandle
     integer, intent(in)                   :: rraShift
     integer, intent(in)                   :: vectorLengthShift
-    logical, intent(in),  optional        :: clearflag
+    logical, intent(in),  optional        :: transferflag
     integer, intent(out), optional        :: rc            
 
 !
 ! !DESCRIPTION:
 !   Append the exchanged stored in {\tt appendRoutehandle} to the 
-!   {\tt rhandle}. Optionally clear the incoming {\tt appendRoutehandle} 
-!   and ensure that the appended exchange will be cleared when {\tt rhandle}
-!   is released.
+!   {\tt rhandle}. Optionally transfer ownership of the exchange pattern
+!   stored in the incoming {\tt appendRoutehandle} to the {\tt rhandle}.
 !
 !   The arguments are:
 !   \begin{description}
@@ -467,11 +490,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     {\tt ESMF\_RouteHandle} to be appended to.
 !   \item[appendRoutehandle] 
 !     {\tt ESMF\_RouteHandle} to be appended and cleared.
-!   \item[{[clearFlag]}] 
-!     If set to {\tt .true.}, clear {\tt appendRoutehandle} and ensure 
-!     the appended exchange will be cleared when {\tt rhandle} is released.
-!     Otherwise treat the {\tt appendRoutehandle} as an alias that must not
-!     be cleared. Default is {\tt .false.}.
+!   \item[{[transferflag]}] 
+!     If set to {\tt .true.}, the ownership of the appended exchange will be
+!     transferred to {\tt rhandle}. This means that the exchange will be 
+!     released when {\tt rhandle} is released. Even when ownership of the
+!     exchanged is transferred, {\tt appendRoutehandle} still can be used
+!     as a container to reference the exchange, e.g. to append the same
+!     exchange multiple times. The default is {\tt .false.}.
 !   \item[{[rc]}] 
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -479,7 +504,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !EOPI
 !------------------------------------------------------------------------------
     integer                 :: localrc      ! local return code
-    type(ESMF_Logical)      :: clearflagArg
+    type(ESMF_Logical)      :: transferflagArg
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
@@ -487,14 +512,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit,rhandle,rc)
     
-    if (present(clearflag)) then
-      clearflagArg = clearflag
+    if (present(transferflag)) then
+      transferflagArg = transferflag
     else
-      clearflagArg = ESMF_FALSE ! default
+      transferflagArg = ESMF_FALSE ! default
     endif
 
     call c_ESMC_RouteHandleAppend(rhandle, appendRoutehandle, &
-      rraShift, vectorLengthShift, clearflagArg, localrc)
+      rraShift, vectorLengthShift, transferflagArg, localrc)
     if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return

@@ -50,14 +50,19 @@ extern "C" {
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
 
-  void FTN_X(c_esmc_routehandledestroy)(ESMCI::RouteHandle **ptr, int *rc){
+  void FTN_X(c_esmc_routehandledestroy)(ESMCI::RouteHandle **ptr, 
+    ESMC_Logical *noGarbage, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_routehandledestroy()"
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     int localrc = ESMC_RC_NOT_IMPL;
+    // convert to bool
+    bool noGarbageOpt = false;  // default
+    if (ESMC_NOT_PRESENT_FILTER(noGarbage) != ESMC_NULL_POINTER)
+      if (*noGarbage == ESMF_TRUE) noGarbageOpt = true;
     // call into C++
-    localrc = ESMCI::RouteHandle::destroy(*ptr);
+    localrc = ESMCI::RouteHandle::destroy(*ptr, noGarbageOpt);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       ESMC_NOT_PRESENT_FILTER(rc))) return;
     // return successfully
@@ -95,35 +100,33 @@ extern "C" {
 
   void FTN_X(c_esmc_routehandleappend)(ESMCI::RouteHandle **ptr, 
     ESMCI::RouteHandle **rh, int *rraShift, int *vectorLengthShift, 
-    ESMC_Logical *clearFlag, int *rc){
+    ESMC_Logical *transferFlag, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_routehandleappend()"
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     int localrc = ESMC_RC_NOT_IMPL;
     // convert to bool
-    bool clearFlagOpt = false;  // default
-    if (ESMC_NOT_PRESENT_FILTER(clearFlag) != ESMC_NULL_POINTER)
-      if (*clearFlag == ESMF_TRUE) clearFlagOpt = true;
+    bool transferFlagOpt = false;  // default
+    if (ESMC_NOT_PRESENT_FILTER(transferFlag) != ESMC_NULL_POINTER)
+      if (*transferFlag == ESMF_TRUE) transferFlagOpt = true;
     // get a handle on the XXE stored in rh
     ESMCI::XXE *xxeSub = (ESMCI::XXE *)(*rh)->getStorage();
-    // optinally delete the temporary routehandle w/o deleting the xxeSub
-    if (clearFlagOpt){
-      localrc = (*rh)->setType(ESMCI::ESMC_UNINITIALIZEDHANDLE);
-      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, 
-        ESMC_CONTEXT, ESMC_NOT_PRESENT_FILTER(rc))) return;
-      localrc = ESMCI::RouteHandle::destroy(*rh);
-      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
-        ESMC_CONTEXT, ESMC_NOT_PRESENT_FILTER(rc))) return;
-    }
     // append the xxeSub to the xxe object with RRA offset info
     ESMCI::XXE *xxe = (ESMCI::XXE *)(*ptr)->getStorage();
     localrc = xxe->appendXxeSub(0x0, xxeSub, *rraShift, *vectorLengthShift);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       ESMC_NOT_PRESENT_FILTER(rc))) return;
-    // optionally keep track of xxeSub for xxe garbage collection
-    if (clearFlagOpt){
+    // optionally transfer ownership of the XXE communication
+    if (transferFlagOpt){
+      // keep track of xxeSub for xxe garbage collection
       localrc = xxe->storeXxeSub(xxeSub);
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, 
+        ESMC_CONTEXT, ESMC_NOT_PRESENT_FILTER(rc))) return;
+      // mark the rh object in a way to prevent it from deleting the XXE 
+      // while at the same time still allowing it to be used as a container
+      // that can append the same XXE communication to another routehandle
+      localrc = (*rh)->setType(ESMCI::ESMC_UNINITIALIZEDHANDLE);
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, 
         ESMC_CONTEXT, ESMC_NOT_PRESENT_FILTER(rc))) return;
     }
