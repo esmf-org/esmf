@@ -19900,11 +19900,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !  Check if {\tt grid1} and {\tt grid2} match. Returns a range of values of type
 !  ESMF\_GridMatch indicating how closely the Grids match. For a description of
 !  the possible return values, please see~\ref{const:gridmatch}. 
-!  Please also note that by default this call is not collective and only returns the match
-!  for the piece of the Grids onthe local PET. In this case, it's possible for this call to 
-!  return a different match on different PETs for the same Grids. To do a global match operation, 
-!  the user should set the {\tt globalflag} argument to .true.. In this case, the call becomes collective
-!  across the current VM ensuring the same result is returned on all PETs.
+!  Please also note that by default this call is not collective and only
+!  returns the match for the piece of the Grids on the local PET. In this case,
+!  it is possible for this call to return a different match on different PETs 
+!  for the same Grids. To do a global match operation set the {\tt globalflag}
+!  argument to .true.. In this case, the call becomes collective across the
+!  current VM, ensuring the same result is returned on all PETs.
 !
 !     The arguments are:
 !     \begin{description}
@@ -19940,13 +19941,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit, grid1, rc)
     ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit, grid2, rc)
     
-    ! Check for alias
-    if (grid1%this==grid2%this) then
-       ESMF_GridMatch = ESMF_GRIDMATCH_ALIAS
-       if (present(rc)) rc = ESMF_SUCCESS
-       return
-    endif
-
     ! Call into the C++ interface, which will sort out optional arguments.
     call c_ESMC_GridMatch(grid1, grid2, matchResult, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
