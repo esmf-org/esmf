@@ -65,7 +65,7 @@ program ESMF_AttPackDistGridUTest
   distgrid = ESMF_DistGridCreate(minIndex=(/1,1/), maxIndex=(/5,5/), &
                                  regDecomp=(/2,3/), rc=rc)
 
-  AttPackTestMacro(distgrid, "a DistGrid", EX_UTest, "unnamed  0")
+  AttPackTestMacro(distgrid, "a DistGrid", EX_UTest, "DistGrid000")
 
   call ESMF_DistGridDestroy(distgrid, rc=rc)
 
