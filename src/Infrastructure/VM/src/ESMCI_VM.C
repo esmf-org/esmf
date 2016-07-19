@@ -1609,10 +1609,15 @@ void VM::logCurrentGarbageInfo(
     matchTable_Objects[i].size());
   ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
   for (int j=0; j<matchTable_Objects[i].size(); j++){
-    sprintf(msg, "%s - CurrGarbInfo: base objs[%d]: %p : %s : %s", 
+    const char *proxyString;
+    proxyString="actual object";
+    if (matchTable_Objects[i][j]->ESMC_BaseGetProxyFlag()==ESMF_PROXYYES)
+      proxyString="proxy object";
+    sprintf(msg, "%s - CurrGarbInfo: base objs[%d]: %p : %s : %s : %d ; %s", 
       prefix.c_str(), j, matchTable_Objects[i][j], 
       matchTable_Objects[i][j]->ESMC_BaseGetClassName(),
-      matchTable_Objects[i][j]->ESMC_BaseGetName());
+      matchTable_Objects[i][j]->ESMC_BaseGetName(),
+      matchTable_Objects[i][j]->ESMC_BaseGetID(), proxyString);
     ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
   }
 
