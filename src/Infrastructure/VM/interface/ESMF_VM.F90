@@ -4541,9 +4541,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   The arguments are:
 !   \begin{description}
 !   \item[virtMemPet] 
-!     Virtual memory currently used by this PET.
+!     Virtual memory in kB currently used by this PET.
 !   \item[physMemPet] 
-!     Physical memory currently used by this PET.
+!     Physical memory in kB currently used by this PET.
 !   \item[{[rc]}] 
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
