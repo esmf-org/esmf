@@ -68,6 +68,12 @@ extern "C" {
   void FTN_X(f_esmf_fortranudtpointercopy)(void *dst, void *src);
   
   void FTN_X(esmf_complianceicregister)(void *comp, int *rc);
+
+#ifdef ESMF_NO_DLFCN
+  //for now, assume these are here in the case that dlopen is not available
+  void FTN_X(nuopc_model_complianceicr)(void *comp, int *rc);
+  void FTN_X(nuopc_driver_complianceicr)(void *comp, int *rc);
+#endif
 }
 //==============================================================================
 
@@ -1781,13 +1787,14 @@ int FTable::callVFuncPtr(
           base->root.AttributeIsPresent("ESMF_RUNTIME_COMPLIANCEICREGISTER", 
             &presentFlag);
           
-#ifdef ESMF_NO_DLFCN
-          if (presentFlag==ESMF_TRUE){
-            presentFlag==ESMF_FALSE;
-            ESMC_LogDefault.Write("Ignoring ESMF_RUNTIME_COMPLIANCEICREGISTER "
-              "Attribute due to no dynamic linking.", ESMC_LOGMSG_WARN);
-          }
-#endif
+//#ifdef ESMF_NO_DLFCN
+          //if (presentFlag==ESMF_TRUE){
+          //  presentFlag==ESMF_FALSE;
+          //  ESMC_LogDefault.Write("Ignoring ESMF_RUNTIME_COMPLIANCEICREGISTER "
+          //   "Attribute due to no dynamic linking.", ESMC_LOGMSG_WARN);
+          //}
+//#endif
+
 
           if (presentFlag==ESMF_TRUE){
             
@@ -1846,6 +1853,28 @@ std::cout << "ESMF_RUNTIME_COMPLIANCEICREGISTER attribute:" << value[0] <<"\n";
             // compliance IC for register is an internal routine -> look at rc
             if (ESMC_LogDefault.MsgFoundError(registerIcUserRc,
               ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc; // bail out
+#else
+            //here the compliance register routine has been specified
+            //on the attribute, but we do not have dlopen available
+            //therefore, go for a blind call assuming the NUOPC register
+            //routines have been linked in, which is typically the case
+
+            //std::cout << "ESMF_RUNTIME_COMPLIANCEICREGISTER attribute:" << value[0] <<"\n";
+            if (value[0].find("nuopc_model") != std::string::npos) {
+            	FTN_X(nuopc_model_complianceicr)((void *)comp, &registerIcUserRc);
+            	if (ESMC_LogDefault.MsgFoundError(registerIcUserRc,
+            	              ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc; // bail out
+            }
+            else if (value[0].find("nuopc_driver") != std::string::npos) {
+            	FTN_X(nuopc_driver_complianceicr)((void *)comp, &registerIcUserRc);
+            	if (ESMC_LogDefault.MsgFoundError(registerIcUserRc,
+            	              ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc; // bail out
+            }
+            else {
+            	ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+            	   "- compliance IC register routine not found", ESMC_CONTEXT, &rc);
+            	return rc;
+            }
 #endif
                     
           }else{
@@ -1860,6 +1889,7 @@ std::cout << "ESMF_RUNTIME_COMPLIANCEICREGISTER attribute:" << value[0] <<"\n";
           
 #ifdef ESMF_NO_DLFCNdummy
             FTN_X(esmf_complianceicregister)((void *)comp, &registerIcUserRc);
+
 #else
 #define QUOTEMACRO_(x) #x
 #define QUOTEMACRO(x) QUOTEMACRO_(x)
