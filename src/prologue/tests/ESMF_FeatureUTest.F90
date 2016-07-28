@@ -95,8 +95,14 @@
     name = "Fortran allocatable arguments size test"
     failMsg = "Incorrect allocated size"
     tf = size (a) == 42 .and. size (indicies) == 42 .and. size (tfs) == 42  &
-        .and. size (strings) == 42 .and. size (dts) == 42
+        .and. size (dts) == 42
+    tf = tf .and. size (strings) == 42
     call ESMF_Test(rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
+
+    ! TODO: Auto-reallocation of allocatables not supported in gfortran until v4.6.
+    ! So do explicit deallocates for now.
+    deallocate (a, indicies, tfs, dts)
+    deallocate (strings)
 
     !------------------------------------------------------------------------
     !------------------------------------------------------------------------

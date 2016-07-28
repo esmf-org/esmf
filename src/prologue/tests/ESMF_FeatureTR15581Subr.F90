@@ -30,14 +30,15 @@ contains
     real,         allocatable, intent(out) :: a(:)
     integer,      allocatable, intent(out) :: indicies(:)
     logical,      allocatable, intent(out) :: tfs(:)
-    character(*), allocatable, intent(out) :: strings(:)
+    ! TODO: Absoft doesn't support character(*) allocatable dummy args in v11.1.
+    character(8), allocatable, intent(out) :: strings(:)
     type(ESMF_AllocDType), allocatable, intent(out) :: dts(:)
     integer,                   intent(out) :: rc
 
     integer :: i
     integer :: memstat
 
-    allocate (a(n), indicies(n), tfs(n), strings(n), stat=memstat)
+    allocate (a(n), indicies(n), tfs(n), dts(n), strings(n), stat=memstat)
     if (memstat /= 0) then
       rc = ESMF_FAILURE
       return
