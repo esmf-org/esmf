@@ -75,8 +75,8 @@ RUN_ESMF_F90ArrayPtrUTestUNI:
 # Special for testing various Fortran features that ESMF depends on.
 #
 
-ESMF_UTEST_Feature_OBJS = ESMCI_FeatureSubr.o
-ESMF_FeatureUTest.o : ESMCI_FeatureSubr.o
+ESMF_UTEST_Feature_OBJS = ESMCI_FeatureSubr.o ESMF_FeatureTR15581Subr.o
+ESMF_FeatureUTest.o : ESMCI_FeatureSubr.o ESMF_FeatureTR15581Subr.o
 
 RUN_ESMF_FeatureUTest:
 	$(MAKE) TNAME=Feature NP=2 ftest

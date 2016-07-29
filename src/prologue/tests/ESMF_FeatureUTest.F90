@@ -16,13 +16,22 @@
 
     use ESMF
     use ESMF_TestMod
+    use ESMF_FeatureTR15581Subr_mod
     implicit none
 
     integer :: rc, result
     character(len=ESMF_MAXSTR) :: failMsg, name
 
+    real,    allocatable :: a(:)
+    integer, allocatable :: indicies(:)
+    logical, allocatable :: tfs(:)
+    character(8), allocatable :: strings(:)
+    type(ESMF_AllocDType), allocatable :: dts(:)
+
     type(ESMF_Logical) :: tf_c
     logical :: tf
+
+    integer :: i
 
     interface
       subroutine ESMC_Present_test (arg, present_val)
@@ -64,6 +73,52 @@
     call ESMC_Present_test (present_val=tf_c)
     tf = tf_c == ESMF_TRUE
     call ESMF_Test(.not. tf, name, failMsg, result, ESMF_SRCLINE)
+
+!------------------------------------------------------------------------
+! Test to ensure that the F95+TR15581 (and F2003) allocatable features are supported.
+! These include:
+!   - Allocatable derived type components
+!   - Allocatable dummy arguments
+!   - Allocatable function return values
+
+    !------------------------------------------------------------------------
+    !------------------------------------------------------------------------
+    ! NEX_UTest
+    name = "Fortran allocatable arguments call test"
+    failMsg = "Did not return ESMF_SUCCESS"
+    call ESMF_FeatureAllocArg (42, a, indicies, tfs, strings, dts, rc=rc)
+    call ESMF_Test(rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
+
+    !------------------------------------------------------------------------
+    !------------------------------------------------------------------------
+    ! NEX_UTest
+    name = "Fortran allocatable arguments size test"
+    failMsg = "Incorrect allocated size"
+    tf = size (a) == 42 .and. size (indicies) == 42 .and. size (tfs) == 42  &
+        .and. size (dts) == 42
+    tf = tf .and. size (strings) == 42
+    call ESMF_Test(rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
+
+    ! TODO: Auto-reallocation of allocatables not supported in gfortran until v4.6.
+    ! So do explicit deallocates for now.
+    deallocate (a, indicies, tfs, dts)
+    deallocate (strings)
+
+    !------------------------------------------------------------------------
+    !------------------------------------------------------------------------
+    ! NEX_UTest
+    name = "Fortran allocatable function result test"
+    failMsg = "Did not return ESMF_SUCCESS"
+    a = ESMF_FeatureAllocFRet (420, rc=rc)
+    call ESMF_Test(rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
+
+    !------------------------------------------------------------------------
+    !------------------------------------------------------------------------
+    ! NEX_UTest
+    name = "Fortran allocatable return value size test"
+    failMsg = "Incorrect allocated size"
+    tf = size (a) == 420
+    call ESMF_Test(rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
 
     !------------------------------------------------------------------------
     !------------------------------------------------------------------------
