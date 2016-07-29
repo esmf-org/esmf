@@ -428,7 +428,7 @@ contains
                 return  ! bail out
 
             ! check Component statistics
-            call NUOPC_CheckComponentStatistics(prefix, comp=comp, rc=rc)
+            call NUOPC_CheckComponentStatistics(prefix, comp=comp, outputJSON=doJSON, rc=rc)
             if (ESMF_LogFoundError(rc, &
                 line=__LINE__, &
                 file=FILENAME)) &
@@ -521,7 +521,7 @@ contains
 
 
             ! check Component statistics
-            call NUOPC_CheckComponentStatistics(prefix, comp=comp, rc=rc)
+            call NUOPC_CheckComponentStatistics(prefix, comp=comp, outputJSON=doJSON, rc=rc)
             if (ESMF_LogFoundError(rc, &
                 line=__LINE__, &
                 file=FILENAME)) &
@@ -720,7 +720,7 @@ contains
 !                return  ! bail out
 
             ! check Component statistics
-            call NUOPC_CheckComponentStatistics(prefix, comp=comp, rc=rc)
+            call NUOPC_CheckComponentStatistics(prefix, comp=comp, outputJSON=doJSON, rc=rc)
             if (ESMF_LogFoundError(rc, &
                 line=__LINE__, &
                 file=FILENAME)) &
@@ -787,7 +787,7 @@ contains
                 return  ! bail out
 
             ! check Component statistics
-            call NUOPC_CheckComponentStatistics(prefix, comp=comp, rc=rc)
+            call NUOPC_CheckComponentStatistics(prefix, comp=comp, outputJSON=doJSON, rc=rc)
             if (ESMF_LogFoundError(rc, &
                 line=__LINE__, &
                 file=FILENAME)) &
@@ -948,7 +948,7 @@ contains
 !                return  ! bail out
 
             ! check Component statistics
-            call NUOPC_CheckComponentStatistics(prefix, comp=comp, rc=rc)
+            call NUOPC_CheckComponentStatistics(prefix, comp=comp, outputJSON=doJSON, rc=rc)
             if (ESMF_LogFoundError(rc, &
                 line=__LINE__, &
                 file=FILENAME)) &
@@ -1015,7 +1015,7 @@ contains
                 return  ! bail out
 
             ! check Component statistics
-            call NUOPC_CheckComponentStatistics(prefix, comp=comp, rc=rc)
+            call NUOPC_CheckComponentStatistics(prefix, comp=comp, outputJSON=doJSON, rc=rc)
             if (ESMF_LogFoundError(rc, &
                 line=__LINE__, &
                 file=FILENAME)) &

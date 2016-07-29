@@ -1704,16 +1704,24 @@ contains
 
     end subroutine
 
-    recursive subroutine NUOPC_CheckComponentStatistics(prefix, comp, rc)
+    recursive subroutine NUOPC_CheckComponentStatistics(prefix, comp, outputJSON, rc)
         character(*), intent(in)              :: prefix
         type(ESMF_GridComp)                   :: comp
+        logical,      intent(in),  optional   :: outputJSON
         integer,      intent(out), optional   :: rc
 
         integer                 :: fobjCount, objCount
         integer                 :: virtMemPet, physMemPet
-        character(ESMF_MAXSTR)  :: output
+        character(ESMF_MAXSTR)  :: output, virtMemPetStr, physMemPetStr, compName
+        logical                 :: doJSON
+        character(len=256)      :: jsonString
 
         if (present(rc)) rc = ESMF_SUCCESS
+        if (present(outputJSON)) then
+            doJSON = outputJSON
+        else
+            doJSON = .false.
+        endif
 
         ! memory statistics for this PET
         call ESMF_VMGetMemInfo(virtMemPet, physMemPet, rc=rc)
@@ -1722,19 +1730,19 @@ contains
             file=FILENAME)) &
             return  ! bail out
 
-        write (output, *) virtMemPet
+        write (virtMemPetStr, *) virtMemPet
         call ESMF_LogWrite(trim(prefix)//"ESMF Stats: "//&
             "the virtual memory used by this PET (in KB): "// &
-            trim(adjustl(output)), ESMF_LOGMSG_INFO, rc=rc)
+            trim(adjustl(virtMemPetStr)), ESMF_LOGMSG_INFO, rc=rc)
         if (ESMF_LogFoundError(rc, &
             line=__LINE__, &
             file=FILENAME)) &
             return  ! bail out
 
-        write (output, *) physMemPet
+        write (physMemPetStr, *) physMemPet
         call ESMF_LogWrite(trim(prefix)//"ESMF Stats: "//&
             "the physical memory used by this PET (in KB): "// &
-            trim(adjustl(output)), ESMF_LOGMSG_INFO, rc=rc)
+            trim(adjustl(physMemPetStr)), ESMF_LOGMSG_INFO, rc=rc)
         if (ESMF_LogFoundError(rc, &
             line=__LINE__, &
             file=FILENAME)) &
@@ -1764,6 +1772,25 @@ contains
             line=__LINE__, &
             file=FILENAME)) &
             return  ! bail out
+
+        if (doJSON) then
+
+            call ESMF_GridCompGet(comp, name=compName, rc=rc)
+            if (ESMF_LogFoundError(rc, &
+              line=__LINE__, &
+              file=FILENAME)) &
+              return  ! bail out
+
+            write(jsonString,*) '{"stats":{&
+              &"virtMemPet":"'//trim(adjustl(virtMemPetStr))//'",&
+              &"physMemPet":"'//trim(adjustl(physMemPetStr))//'"}}'
+
+            call ESMF_LogWrite(trim(jsonString), ESMF_LOGMSG_JSON, rc=rc)
+            if (ESMF_LogFoundError(rc, &
+              line=__LINE__, &
+              file=FILENAME)) &
+              return  ! bail out
+        endif
 
     end subroutine
 
