@@ -38,7 +38,8 @@ module NUOPC_Compliance_Base
     public NUOPC_CheckInternalClock
     public NUOPC_CheckComponentStatistics
     public NUOPC_CompSearchPhaseMapByIndex
-    public JSON_LogPhaseEvent
+    public JSON_LogCtrlFlow
+    public JSON_LogHeader
 
     interface NUOPC_CheckComponentMetadata
         module procedure NUOPC_CheckGridComponentMetadata
@@ -1962,40 +1963,82 @@ contains
 
     end subroutine
 
-    recursive subroutine JSON_LogPhaseEvent(event, compName, method, phase, clock, rc)
-        character(len=*), intent(in) :: event, compName, method
-        integer, intent(in) :: phase
-        type(ESMF_Clock), intent(in), optional :: clock
+    recursive subroutine JSON_LogCtrlFlow(event, comp, rc)
+
+        character(len=*), intent(in) :: event
+        type(ESMF_GridComp), intent(in) :: comp
         integer, intent(out), optional :: rc
 
         ! locals
+        character(len=ESMF_MAXSTR) :: compName
+        integer :: phase
+        type(ESMF_Clock) :: clock
+        logical :: clockIsPresent
+        type(ESMF_Method_Flag) :: method
         character(len=16) :: phaseString
+        character(len=16) :: methodString
         character(len=64) :: timeStamp
         character(len=512) :: jsonString
 
         rc = ESMF_SUCCESS
 
+        call ESMF_GridCompGet(comp, clockIsPresent=clockIsPresent, &
+            currentMethod=method, currentPhase=phase, name=compName, rc=rc)
+        if (ESMF_LogFoundError(rc, &
+             line=__LINE__, file=FILENAME)) return  ! bail out
+
+        if (clockIsPresent) then
+            call ESMF_GridCompGet(comp, clock=clock, rc=rc)
+            if (ESMF_LogFoundError(rc, &
+              line=__LINE__, file=FILENAME)) return  ! bail out
+        endif
+
+        if (method == ESMF_METHOD_INITIALIZEIC) then
+            methodString = "init"
+        elseif (method == ESMF_METHOD_RUNIC) then
+            methodString = "run"
+        elseif (method == ESMF_METHOD_FINALIZEIC) then
+            methodString = "finalize"
+        else
+            methodString = "unknown"
+        endif
+
         write(phaseString, "(I0)") phase
 
         timeStamp = '""'
-        if (present(clock)) then
-            if (ESMF_ClockIsCreated(clock)) then
-                call ESMF_ClockPrint(clock, options="currTime", &
-                    unit=timeStamp, rc=rc)
-                if (ESMF_LogFoundError(rc, &
-                    line=__LINE__, &
-                    file=FILENAME)) &
-                    return  ! bail out
-                timeStamp = '"'//trim(timeStamp)//'"'
-            endif
+        if (clockIsPresent .and. ESMF_ClockIsCreated(clock)) then
+            call ESMF_ClockPrint(clock, options="currTime", &
+                unit=timeStamp, rc=rc)
+            if (ESMF_LogFoundError(rc, &
+                line=__LINE__, file=FILENAME)) return  ! bail out
+            timeStamp = '"'//trim(timeStamp)//'"'
         endif
 
-        write(jsonString,*) '{"event":{&
-            &"name":"'//trim(event)//'",&
+        write(jsonString,*) '{"ctrl":{&
+            &"event":"'//trim(event)//'",&
             &"compName":"'// trim(compName) //'",&
-            &"method":"'//trim(method)//'",&
+            &"method":"'//trim(methodString)//'",&
             &"phase":"'//trim(phaseString)//'",&
             &"currTime":'//trim(timeStamp)//'}}'
+
+        call ESMF_LogWrite(trim(jsonString), ESMF_LOGMSG_JSON, rc=rc)
+        if (ESMF_LogFoundError(rc, &
+          line=__LINE__, &
+          file=FILENAME)) &
+          return  ! bail out
+
+    end subroutine
+
+    recursive subroutine JSON_LogHeader(rc)
+        integer, intent(out), optional :: rc
+
+        ! locals
+        character(len=64) :: jsonString
+
+        rc = ESMF_SUCCESS
+
+        write(jsonString,*) '{"esmf_json":{&
+            &"version":"0.1"}}'
 
         call ESMF_LogWrite(trim(jsonString), ESMF_LOGMSG_JSON, rc=rc)
         if (ESMF_LogFoundError(rc, &

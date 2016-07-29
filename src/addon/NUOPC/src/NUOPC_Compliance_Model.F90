@@ -358,8 +358,8 @@ contains
         integer                 :: phase
         character(NUOPC_PhaseMapStringLength) :: phaseLabel
         character(ESMF_MAXSTR)  :: compName
-        type(ESMF_Clock)        :: clockInternal
-        logical                 :: clockIsPresent
+        !type(ESMF_Clock)        :: clockInternal
+        !logical                 :: clockIsPresent
     
         ! Initialize user return code
         rc = ESMF_SUCCESS
@@ -371,7 +371,7 @@ contains
             return  ! bail out
 
         call ESMF_GridCompGet(comp, currentPhase=phase, name=compName, &
-            clockIsPresent=clockIsPresent, rc=rc)
+            rc=rc)
         if (ESMF_LogFoundError(rc, &
             line=__LINE__, &
             file=FILENAME)) &
@@ -391,15 +391,9 @@ contains
         if (ccfDepth <= maxDepth .or. maxDepth < 0) then
 
             if (doJSON) then
-                if (clockIsPresent) then
-                    call ESMF_GridCompGet(comp, clock=clockInternal, rc=rc)
-                    if (ESMF_LogFoundError(rc, &
-                      line=__LINE__, &
-                      file=FILENAME)) &
-                      return  ! bail out
-                endif
-                call JSON_LogPhaseEvent("start_phase", compName, "init", phase, &
-                    clockInternal, rc)
+                call JSON_LogCtrlFlow("start_prologue", comp, rc)
+                if (ESMF_LogFoundError(rc, &
+                    line=__LINE__, file=FILENAME)) return  ! bail out
             endif
 
             write(output,*) ">START InitializePrologue for phase:", &
@@ -464,6 +458,15 @@ contains
                 line=__LINE__, &
                 file=FILENAME)) &
                 return  ! bail out
+
+            if (doJSON) then
+                call JSON_LogCtrlFlow("stop_prologue", comp, rc)
+                if (ESMF_LogFoundError(rc, &
+                    line=__LINE__, file=FILENAME)) return  ! bail out
+                call JSON_LogCtrlFlow("start_phase", comp, rc)
+                if (ESMF_LogFoundError(rc, &
+                    line=__LINE__, file=FILENAME)) return  ! bail out
+            endif
     
         endif
         ! Stop Compliance Checking: InitializePrologue
@@ -485,8 +488,12 @@ contains
         if (ccfDepth <= maxDepth .or. maxDepth < 0) then
 
             if (doJSON) then
-                call JSON_LogPhaseEvent("end_phase", compName, "init", phase, &
-                    clockInternal, rc)
+                call JSON_LogCtrlFlow("stop_phase", comp, rc)
+                if (ESMF_LogFoundError(rc, &
+                    line=__LINE__, file=FILENAME)) return  ! bail out
+                call JSON_LogCtrlFlow("start_epilogue", comp, rc)
+                if (ESMF_LogFoundError(rc, &
+                    line=__LINE__, file=FILENAME)) return  ! bail out
             endif
 
             call prefixString(comp, prefix=prefix, forward=.false., rc=rc)
@@ -575,6 +582,12 @@ contains
                 file=FILENAME)) &
                 return  ! bail out
 
+            if (doJSON) then
+                call JSON_LogCtrlFlow("stop_epilogue", comp, rc)
+                if (ESMF_LogFoundError(rc, &
+                    line=__LINE__, file=FILENAME)) return  ! bail out
+            endif
+
         endif
         ! Stop Compliance Checking: InitializeEpilogue
         !---------------------------------------------------------------------------
@@ -604,8 +617,8 @@ contains
         integer                 :: phase
         character(NUOPC_PhaseMapStringLength) :: phaseLabel
         character(ESMF_MAXSTR)  :: compName
-        type(ESMF_Clock)        :: clockInternal
-        logical                 :: clockIsPresent
+        !type(ESMF_Clock)        :: clockInternal
+        !logical                 :: clockIsPresent
     
         ! Initialize user return code
         rc = ESMF_SUCCESS
@@ -617,7 +630,7 @@ contains
             return  ! bail out
 
         call ESMF_GridCompGet(comp, currentPhase=phase, name=compName, &
-            clockIsPresent=clockIsPresent, rc=rc)
+            rc=rc)
         if (ESMF_LogFoundError(rc, &
             line=__LINE__, &
             file=FILENAME)) &
@@ -637,15 +650,9 @@ contains
         if (ccfDepth <= maxDepth .or. maxDepth < 0) then
 
             if (doJSON) then
-                if (clockIsPresent) then
-                    call ESMF_GridCompGet(comp, clock=clockInternal, rc=rc)
-                    if (ESMF_LogFoundError(rc, &
-                      line=__LINE__, &
-                      file=FILENAME)) &
-                      return  ! bail out
-                endif
-                call JSON_LogPhaseEvent("start_phase", compName, "run", phase, &
-                    clockInternal, rc)
+                call JSON_LogCtrlFlow("start_prologue", comp, rc)
+                if (ESMF_LogFoundError(rc, &
+                    line=__LINE__, file=FILENAME)) return  ! bail out
             endif
 
             write(output,*) ">START RunPrologue for phase:", &
@@ -704,6 +711,15 @@ contains
                 file=FILENAME)) &
                 return  ! bail out
 
+            if (doJSON) then
+                call JSON_LogCtrlFlow("stop_prologue", comp, rc)
+                if (ESMF_LogFoundError(rc, &
+                    line=__LINE__, file=FILENAME)) return  ! bail out
+                call JSON_LogCtrlFlow("start_phase", comp, rc)
+                if (ESMF_LogFoundError(rc, &
+                    line=__LINE__, file=FILENAME)) return  ! bail out
+            endif
+
         endif
         ! Stop Compliance Checking: RunPrologue
         !---------------------------------------------------------------------------
@@ -723,8 +739,12 @@ contains
         if (ccfDepth <= maxDepth .or. maxDepth < 0) then
 
             if (doJSON) then
-                call JSON_LogPhaseEvent("end_phase", compName, "run", phase, &
-                    clockInternal, rc)
+                call JSON_LogCtrlFlow("stop_phase", comp, rc)
+                if (ESMF_LogFoundError(rc, &
+                    line=__LINE__, file=FILENAME)) return  ! bail out
+                call JSON_LogCtrlFlow("start_epilogue", comp, rc)
+                if (ESMF_LogFoundError(rc, &
+                    line=__LINE__, file=FILENAME)) return  ! bail out
             endif
 
             call prefixString(comp, prefix=prefix, forward=.false., rc=rc)
@@ -789,6 +809,12 @@ contains
                 file=FILENAME)) &
                 return  ! bail out
 
+            if (doJSON) then
+                call JSON_LogCtrlFlow("stop_epilogue", comp, rc)
+                if (ESMF_LogFoundError(rc, &
+                    line=__LINE__, file=FILENAME)) return  ! bail out
+            endif
+
         endif
         ! Stop Compliance Checking: RunEpilogue
         !---------------------------------------------------------------------------
@@ -817,8 +843,8 @@ contains
         integer                 :: phase
         character(NUOPC_PhaseMapStringLength) :: phaseLabel
         character(ESMF_MAXSTR)  :: compName
-        type(ESMF_Clock)        :: clockInternal
-        logical                 :: clockIsPresent
+        !type(ESMF_Clock)        :: clockInternal
+        !logical                 :: clockIsPresent
     
         ! Initialize user return code
         rc = ESMF_SUCCESS
@@ -830,7 +856,7 @@ contains
             return  ! bail out
 
         call ESMF_GridCompGet(comp, currentPhase=phase, name=compName, &
-            clockIsPresent=clockIsPresent, rc=rc)
+            rc=rc)
         if (ESMF_LogFoundError(rc, &
             line=__LINE__, &
             file=FILENAME)) &
@@ -850,15 +876,9 @@ contains
         if (ccfDepth <= maxDepth .or. maxDepth < 0) then
 
             if (doJSON) then
-                if (clockIsPresent) then
-                    call ESMF_GridCompGet(comp, clock=clockInternal, rc=rc)
-                    if (ESMF_LogFoundError(rc, &
-                      line=__LINE__, &
-                      file=FILENAME)) &
-                      return  ! bail out
-                endif
-                call JSON_LogPhaseEvent("start_phase", compName, "final", phase, &
-                    clockInternal, rc)
+                call JSON_LogCtrlFlow("start_prologue", comp, rc)
+                if (ESMF_LogFoundError(rc, &
+                    line=__LINE__, file=FILENAME)) return  ! bail out
             endif
 
             write(output,*) ">START FinalizePrologue for phase:", &
@@ -909,6 +929,15 @@ contains
                 file=FILENAME)) &
                 return  ! bail out
 
+            if (doJSON) then
+                call JSON_LogCtrlFlow("stop_prologue", comp, rc)
+                if (ESMF_LogFoundError(rc, &
+                    line=__LINE__, file=FILENAME)) return  ! bail out
+                call JSON_LogCtrlFlow("start_phase", comp, rc)
+                if (ESMF_LogFoundError(rc, &
+                    line=__LINE__, file=FILENAME)) return  ! bail out
+            endif
+
         endif
         ! Stop Compliance Checking: FinalizePrologue
         !---------------------------------------------------------------------------
@@ -928,8 +957,12 @@ contains
         if (ccfDepth <= maxDepth .or. maxDepth < 0) then
 
             if (doJSON) then
-                call JSON_LogPhaseEvent("end_phase", compName, "final", phase, &
-                    clockInternal, rc)
+                call JSON_LogCtrlFlow("stop_phase", comp, rc)
+                if (ESMF_LogFoundError(rc, &
+                    line=__LINE__, file=FILENAME)) return  ! bail out
+                call JSON_LogCtrlFlow("start_epilogue", comp, rc)
+                if (ESMF_LogFoundError(rc, &
+                    line=__LINE__, file=FILENAME)) return  ! bail out
             endif
 
             call prefixString(comp, prefix=prefix, forward=.false., rc=rc)
@@ -985,6 +1018,12 @@ contains
                 line=__LINE__, &
                 file=FILENAME)) &
                 return  ! bail out
+
+            if (doJSON) then
+                call JSON_LogCtrlFlow("stop_epilogue", comp, rc)
+                if (ESMF_LogFoundError(rc, &
+                    line=__LINE__, file=FILENAME)) return  ! bail out
+            endif
 
         endif
         ! Stop Compliance Checking: FinalizeEpilogue
