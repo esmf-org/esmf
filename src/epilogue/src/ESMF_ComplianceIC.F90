@@ -987,7 +987,7 @@ module ESMF_ComplianceICMod
     character(ESMF_MAXSTR)                :: convention
     character(ESMF_MAXSTR)                :: purpose
     type(ESMF_AttPack)                    :: attpack
-    character(1024*20)                    :: jsonstring
+    character(1024*50)                    :: jsonstring
     logical                               :: isPresent
 
     if (present(rc)) rc = ESMF_SUCCESS
