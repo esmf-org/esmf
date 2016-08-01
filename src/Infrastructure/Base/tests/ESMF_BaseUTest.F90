@@ -62,6 +62,8 @@
       ! instantiate a Base 
       type(ESMF_Base) :: base1, base2
       type(ESMF_AttReconcileFlag) :: attreconflag
+      integer :: id
+      type(ESMF_VMId) :: vmid
       character, allocatable   :: buffer(:)
       integer :: buff_size
       integer :: offset1, offset2, offset3
@@ -220,10 +222,35 @@
                       name, failMsg, result, ESMF_SRCLINE)
 
       !EX_UTest
+      ! test getting of ESMF_Base members values,
+      id = -1
+      call ESMF_BaseGetId (base, id, rc=rc)
+      write(name, *) "ESMF_BaseGetID"
+      write(failMsg, *) "rc =", rc
+      call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      print *, 'id =', id
+
+      !EX_UTest
+      ! test getting of ESMF_Base members values,
+      call ESMF_BaseGetVMId (base, vmid, rc=rc)
+      write(name, *) "ESMF_BaseGetVMId"
+      write(failMsg, *) "rc =", rc
+      call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !EX_UTest
       ! test print method via option string
       print_options = "brief"
       call ESMF_BasePrint(base, print_options, rc=rc)
-      write(name, *) "ESMF_BasePrint"
+      write(name, *) "ESMF_BasePrint brief"
+      write(failMsg, *) "rc =", rc, ", print_options =", trim(print_options)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      !EX_UTest
+      ! test print method via option string
+      print_options = "debug"
+      call ESMF_BasePrint(base, print_options, rc=rc)
+      write(name, *) "ESMF_BasePrint debug"
       write(failMsg, *) "rc =", rc, ", print_options =", trim(print_options)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)

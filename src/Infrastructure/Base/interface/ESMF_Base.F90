@@ -92,7 +92,8 @@ module ESMF_BaseMod
 !      public ESMF_BaseGetInstCount
 
 !      public ESMF_BaseSetID
-!      public ESMF_BaseGetID
+       public ESMF_BaseGetID
+       public ESMF_BaseGetVMId
 
 !      public ESMF_BaseSetRefCount
 !      public ESMF_BaseGetRefCount
@@ -187,7 +188,7 @@ module ESMF_BaseMod
 !
 !EOPI
 
-    integer :: status, allocNAttrs
+    integer :: localrc, allocNAttrs
 
     ! Initialize return code; assume routine not implemented
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -196,12 +197,12 @@ module ESMF_BaseMod
     if (present(nattr)) allocNAttrs = nattr
 
     if (present(name)) then
-        call c_ESMC_BaseCreate(base , superclass, name, allocNattrs, status)
+        call c_ESMC_BaseCreate(base , superclass, name, allocNattrs, localrc)
     else
         !!call c_ESMC_BaseCreate(base , superclass, ESMF_NULL_POINTER, &
-        call c_ESMC_BaseCreate(base , superclass, "", allocNattrs, status)
+        call c_ESMC_BaseCreate(base , superclass, "", allocNattrs, localrc)
     endif
-    if (ESMF_LogFoundError(status, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     
     ! Set init code
@@ -259,7 +260,7 @@ module ESMF_BaseMod
 !EOPI
 
     logical :: rcpresent                          ! Return code present   
-    integer :: status
+    integer :: localrc
     type(ESMF_Logical)      :: opt_noGarbage  ! helper variable
 
     ! Initialize return code
@@ -277,8 +278,8 @@ module ESMF_BaseMod
     if (present(noGarbage)) opt_noGarbage = noGarbage
 
     ! Call into the C++ interface
-    call c_ESMC_BaseDestroy(base, opt_noGarbage, status)
-    if (ESMF_LogFoundError(status, ESMF_ERR_PASSTHRU, &
+    call c_ESMC_BaseDestroy(base, opt_noGarbage, localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Set init code
@@ -335,7 +336,7 @@ module ESMF_BaseMod
 ! 
 !EOPI
       logical :: rcpresent                          ! Return code present   
-      integer :: status
+      integer :: localrc
 
       ! Initialize return code; assume routine not implemented
       rcpresent = .FALSE.
@@ -343,20 +344,20 @@ module ESMF_BaseMod
         rcpresent = .TRUE.
         rc = ESMF_RC_NOT_IMPL
       endif
-      status = ESMF_RC_NOT_IMPL
+      localrc = ESMF_RC_NOT_IMPL
 
       ! TODO: remove this once everyone is initializing their Base objects.
       ! cheat for old code for now.
       if (base%isInit .ne. ESMF_INIT_CREATED) then 
-          call ESMF_BaseCreate(base, namespace, name, 0, status)
-          if (rcpresent) rc = status
+          call ESMF_BaseCreate(base, namespace, name, 0, localrc)
+          if (rcpresent) rc = localrc
           return
       endif
       ! end cheat
 
-      call c_ESMC_SetName(base , namespace, name, status)
+      call c_ESMC_SetName(base , namespace, name, localrc)
 
-      if (rcpresent) rc = status
+      if (rcpresent) rc = localrc
 
   end subroutine ESMF_SetName
 
@@ -389,16 +390,57 @@ module ESMF_BaseMod
 !     \end{description}
 !
 !EOPI
-      integer :: status
+      integer :: localrc
 
       ! Initialize return code; assume routine not implemented
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
-      status = ESMF_RC_NOT_IMPL
+      localrc = ESMF_RC_NOT_IMPL
 
-      call c_ESMC_GetName(base , name, status)
-      if (present(rc)) rc = status
+      call c_ESMC_GetName(base , name, localrc)
+      if (present(rc)) rc = localrc
 
   end subroutine ESMF_GetName
+
+
+!-------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_BaseGetId"
+!BOPI
+! !IROUTINE:  ESMF_BaseGetId - get the ESMF object ID of this object
+!
+! !INTERFACE:
+  subroutine ESMF_BaseGetId(base, id, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Base), intent(in)             :: base
+      integer,         intent(out)            :: id
+      integer,         intent(out), optional  :: rc
+
+!
+! !DESCRIPTION:
+!     Return the ESMF object Id.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[base]
+!       Any ESMF type.
+!     \item[id]
+!       The object ID of the Base object.
+!     \item[{[rc]}]
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOPI
+      integer :: localrc
+
+      ! Initialize return code; assume routine not implemented
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+      localrc = ESMF_RC_NOT_IMPL
+
+      call c_ESMC_GetId (base , id, localrc)
+      if (present(rc)) rc = localrc
+
+  end subroutine ESMF_BaseGetId
 
 
 !-------------------------------------------------------------------------
@@ -430,16 +472,57 @@ module ESMF_BaseMod
 !     \end{description}
 !
 !EOPI
-      integer :: status
+      integer :: localrc
 
       ! Initialize return code; assume routine not implemented
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
-      status = ESMF_RC_NOT_IMPL
+      localrc = ESMF_RC_NOT_IMPL
 
-      call c_ESMC_GetVM(base , vm, status)
-      if (present(rc)) rc = status
+      call c_ESMC_GetVM(base , vm, localrc)
+      if (present(rc)) rc = localrc
 
   end subroutine ESMF_GetVM
+
+
+!-------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_BaseGetVMId"
+!BOPI
+! !IROUTINE:  ESMF_GetVMId - get the VM Id of this object
+!
+! !INTERFACE:
+  subroutine ESMF_BaseGetVMId (base, vmid, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Base), intent(in)             :: base
+      type(ESMF_VMId), intent(out)            :: vmid
+      integer,         intent(out), optional  :: rc
+
+!
+! !DESCRIPTION:
+!     Return the vm of any type in the system.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[base]
+!       Any ESMF type.
+!     \item[vmid]
+!       The vmid of the Base object.
+!     \item[{[rc]}]
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOPI
+      integer :: localrc
+
+      ! Initialize return code; assume routine not implemented
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+      localrc = ESMF_RC_NOT_IMPL
+
+      call c_ESMC_GetVMID(base , vmid, localrc)
+      if (present(rc)) rc = localrc
+
+  end subroutine ESMF_BaseGetVMId
 
 
 !-------------------------------------------------------------------------
