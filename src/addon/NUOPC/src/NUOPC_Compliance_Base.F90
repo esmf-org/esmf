@@ -56,6 +56,11 @@ module NUOPC_Compliance_Base
         module procedure NUOPC_CplCompSearchPhaseMapByIndex
     end interface
 
+    interface JSON_GetID
+        module procedure JSON_GridCompGetID
+        module procedure JSON_StateGetID
+    end interface
+
 contains
 
     recursive subroutine NUOPC_CheckGridComponentMetadata(prefix, comp, outputJSON, rc)
@@ -69,10 +74,10 @@ contains
         character(ESMF_MAXSTR)                :: purpose
         character(ESMF_MAXSTR)                :: compName
         type(ESMF_AttPack)                    :: attpack
-        character(1024*20)                    :: jsonstring
+        character(1024*50)                    :: jsonstring
         logical                               :: isPresent
         logical                               :: doJSON
-
+        character(64)                         :: idStr
 
         if (present(rc)) rc = ESMF_SUCCESS
 
@@ -183,8 +188,15 @@ contains
               file=FILENAME)) &
               return  ! bail out
 
+            call JSON_GetID(comp, idStr, rc=rc)
+            if (ESMF_LogFoundError(rc, &
+              line=__LINE__, &
+              file=FILENAME)) &
+              return  ! bail out
+
             call ESMF_AttributeAdd(comp, convention=convention, purpose=purpose, &
-                                   attrList=(/"CompName"/), &
+                                   attrList=(/"CompName", &
+                                              "ESMFID  "/), &
                                    attpack=attpack, rc=rc)
             if (ESMF_LogFoundError(rc, &
               line=__LINE__, &
@@ -192,6 +204,13 @@ contains
               return  ! bail out
 
             call ESMF_AttributeSet(comp, name="CompName", value=compName, &
+                                   attpack=attpack, rc=rc)
+            if (ESMF_LogFoundError(rc, &
+              line=__LINE__, &
+              file=FILENAME)) &
+              return  ! bail out
+
+            call ESMF_AttributeSet(comp, name="ESMFID", value=trim(adjustl(idStr)), &
                                    attpack=attpack, rc=rc)
             if (ESMF_LogFoundError(rc, &
               line=__LINE__, &
@@ -552,8 +571,15 @@ contains
         character(ESMF_MAXSTR)                :: purpose
         logical                               :: doJSON
         type(ESMF_AttPack)                    :: attpack
-        character(1024*50)                    :: jsonstring
+        character(1024*100)                   :: jsonstring
         logical                               :: isPresent
+
+        integer                               :: rank
+        type(ESMF_TypeKind_Flag)              :: typekind
+        real(ESMF_KIND_R8)                    :: fieldMinVal, fieldMaxVal
+        real(ESMF_KIND_R8), pointer           :: farrayPtr2D(:,:)
+        character(16)                         :: fieldMinValStr, fieldMaxValStr
+        character(64)                         :: idStr
 
         if (present(rc)) rc = ESMF_SUCCESS
 
@@ -610,10 +636,19 @@ contains
             purpose = "Instance"
 
             if (doJSON) then
+
+              call JSON_GetID(state, idStr, rc=rc)
+              if (ESMF_LogFoundError(rc, &
+                 line=__LINE__, &
+                 file=FILENAME)) &
+                 return  ! bail out
+
+
               ! add a few attributes so they appear in the JSON
               ! TODO: this should really only be done once
               call ESMF_AttributeAdd(state, convention=convention, purpose=purpose, &
-                                   attrList=(/"name  ", &
+                                   attrList=(/"ESMFID", &
+                                              "name  ", &
                                               "intent"/), &
                                    attpack=attpack, rc=rc)
               if (ESMF_LogFoundError(rc, &
@@ -629,6 +664,13 @@ contains
                 return  ! bail out
 
               call ESMF_AttributeSet(state, name="intent", value=tempString, &
+                                   attpack=attpack, rc=rc)
+              if (ESMF_LogFoundError(rc, &
+                line=__LINE__, &
+                file=FILENAME)) &
+                return  ! bail out
+
+              call ESMF_AttributeSet(state, name="ESMFID", value=trim(idStr), &
                                    attpack=attpack, rc=rc)
               if (ESMF_LogFoundError(rc, &
                 line=__LINE__, &
@@ -745,6 +787,51 @@ contains
                     if (stateitemtypeList(item) == ESMF_STATEITEM_FIELD) then
                        ! Can't check metadata here because the metadata that should
                        ! be set is dependent on the phase we are in
+
+                        if (doJSON) then
+                            ! putting this here for now
+                            call ESMF_StateGet(state, itemName=itemNameList(item), &
+                                  field=field, rc=rc)
+                            if (ESMF_LogFoundError(rc, &
+                                line=__LINE__, &
+                                file=FILENAME)) &
+                                return  ! bail out
+
+                            call ESMF_FieldGet(field, rank=rank, typekind=typekind, &
+                                rc=rc)
+                            if (ESMF_LogFoundError(rc, &
+                                line=__LINE__, &
+                                file=FILENAME)) &
+                                return  ! bail out
+
+                            ! only support this case while testing
+                            if (typekind==ESMF_TYPEKIND_R8 .and. rank==2) then
+                                call ESMF_FieldGet(field, localDe=0, farrayPtr=farrayPtr2D, rc=rc)
+                                if (ESMF_LogFoundError(rc, &
+                                    line=__LINE__, &
+                                    file=FILENAME)) &
+                                    return  ! bail out
+
+                                fieldMinVal = minval(farrayPtr2D)
+                                fieldMaxVal = maxval(farrayPtr2D)
+
+                                write(fieldMinValStr, "(G12.5)") fieldMinVal
+                                write(fieldMaxValStr, "(G12.5)") fieldMaxVal
+
+                                write(jsonstring,*) '{"field_stats":{&
+                                    &"fieldName":"'//trim(itemNameList(item))//'",&
+                                    &"stateName":"'//trim(name)//'",&
+                                    &"petMinVal":"'//trim(adjustl(fieldMinValStr))//'",&
+                                    &"petMaxVal":"'//trim(adjustl(fieldMaxValStr))//'"}}'
+
+                                call ESMF_LogWrite(jsonstring, ESMF_LOGMSG_JSON, rc=rc)
+                                if (ESMF_LogFoundError(rc, &
+                                    line=__LINE__, &
+                                    file=FILENAME)) &
+                                    return  ! bail out
+                            endif
+
+                       endif
 
                     !            ! compliance check Field metadata
                     !            call ESMF_StateGet(state, itemName=itemNameList(item), &
@@ -2005,7 +2092,10 @@ contains
         character(len=16) :: phaseString
         character(len=16) :: methodString
         character(len=64) :: timeStamp
+        character(len=64) :: idStr
         character(len=512) :: jsonString
+        real(ESMF_KIND_R8) :: sysTime
+        character(64)      :: sysTimeStr
 
         rc = ESMF_SUCCESS
 
@@ -2041,9 +2131,25 @@ contains
             timeStamp = '"'//trim(timeStamp)//'"'
         endif
 
+        call JSON_GetID(comp, idStr, rc=rc)
+        if (ESMF_LogFoundError(rc, &
+          line=__LINE__, &
+          file=FILENAME)) &
+          return  ! bail out
+
+        call ESMF_VMWtime(sysTime, rc=rc)
+        if (ESMF_LogFoundError(rc, &
+          line=__LINE__, &
+          file=FILENAME)) &
+          return  ! bail out
+
+        write(sysTimeStr,"(F32.16)") sysTime
+
         write(jsonString,*) '{"ctrl":{&
+            &"sysTime":"'//trim(adjustl(sysTimeStr))//'",&
             &"event":"'//trim(event)//'",&
-            &"compName":"'// trim(compName) //'",&
+            &"ESMFID":"'//trim(idStr)//'",&
+            &"compName":"'//trim(compName) //'",&
             &"method":"'//trim(methodString)//'",&
             &"phase":"'//trim(phaseString)//'",&
             &"currTime":'//trim(timeStamp)//'}}'
@@ -2072,6 +2178,84 @@ contains
           line=__LINE__, &
           file=FILENAME)) &
           return  ! bail out
+
+    end subroutine
+
+    recursive subroutine JSON_GridCompGetID(comp, id, rc)
+        type(ESMF_GridComp)            :: comp
+        character(len=*), intent(out)  :: id
+        integer, intent(out)           :: rc
+
+        ! locals
+        integer                    :: compid
+        type(ESMF_VMId), pointer   :: vmid(:)
+        integer                    :: vmlocalid
+        character                  :: vmkey
+        character(64)              :: compidStr, vmidStr, idStr
+
+        rc = ESMF_SUCCESS
+
+        call ESMF_BaseGetID(comp%compp%base, compid, rc=rc)
+        if (ESMF_LogFoundError(rc, &
+          line=__LINE__, &
+          file=FILENAME)) &
+          return  ! bail out
+
+        allocate(vmid(1))
+        call ESMF_BaseGetVMId(comp%compp%base, vmid(1), rc=rc)
+        if (ESMF_LogFoundError(rc, &
+          line=__LINE__, &
+          file=FILENAME)) &
+          return  ! bail out
+
+        call c_ESMCI_VMIdGet (vmid(1), vmlocalid, vmkey, rc)
+        if (ESMF_LogFoundError(rc, &
+          line=__LINE__, &
+          file=FILENAME)) &
+          return  ! bail out
+
+        write(vmidStr, "(I16)"), vmlocalid
+        write(compidStr, "(I16)"), compid
+        write(id, "(A)"), trim(adjustl(vmidStr))//"-"//trim(adjustl(compidStr))
+
+    end subroutine
+
+    recursive subroutine JSON_StateGetID(state, id, rc)
+        type(ESMF_State)               :: state
+        character(len=*), intent(out)  :: id
+        integer, intent(out)           :: rc
+
+        ! locals
+        integer                    :: stateid
+        type(ESMF_VMId), pointer   :: vmid(:)
+        integer                    :: vmlocalid
+        character                  :: vmkey
+        character(64)              :: stateidStr, vmidStr, idStr
+
+        rc = ESMF_SUCCESS
+
+        call ESMF_BaseGetID(state%statep%base, stateid, rc=rc)
+        if (ESMF_LogFoundError(rc, &
+          line=__LINE__, &
+          file=FILENAME)) &
+          return  ! bail out
+
+        allocate(vmid(1))
+        call ESMF_BaseGetVMId(state%statep%base, vmid(1), rc=rc)
+        if (ESMF_LogFoundError(rc, &
+          line=__LINE__, &
+          file=FILENAME)) &
+          return  ! bail out
+
+        call c_ESMCI_VMIdGet (vmid(1), vmlocalid, vmkey, rc)
+        if (ESMF_LogFoundError(rc, &
+          line=__LINE__, &
+          file=FILENAME)) &
+          return  ! bail out
+
+        write(vmidStr, "(I16)"), vmlocalid
+        write(stateidStr, "(I16)"), stateid
+        write(id, "(A)"), trim(adjustl(vmidStr))//"-"//trim(adjustl(stateidStr))
 
     end subroutine
 
