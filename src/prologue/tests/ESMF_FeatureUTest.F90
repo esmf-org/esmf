@@ -96,13 +96,16 @@
     failMsg = "Incorrect allocated size"
     tf = size (a) == 42 .and. size (indicies) == 42 .and. size (tfs) == 42  &
         .and. size (dts) == 42
+#if defined (ALLOC_STRING_TEST)
     tf = tf .and. size (strings) == 42
+#endif
+    rc = merge (ESMF_SUCCESS, ESMF_RC_ARG_SIZE, tf)
     call ESMF_Test(rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
 
-    ! TODO: Auto-reallocation of allocatables not supported in gfortran until v4.6.
-    ! So do explicit deallocates for now.
-    deallocate (a, indicies, tfs, dts)
-    deallocate (strings)
+    ! NOTE: Some compilers may require a special command line argument for
+    ! the following tests to work.  This is needed to turn on the F2003
+    ! semantics for reassignment of allocatable arrays to different sizes
+    ! than originally allocated.  For example PGI requires -Mallocatable=03.
 
     !------------------------------------------------------------------------
     !------------------------------------------------------------------------
@@ -115,9 +118,9 @@
     !------------------------------------------------------------------------
     !------------------------------------------------------------------------
     ! NEX_UTest
-    name = "Fortran allocatable return value size test"
+    name = "Fortran allocatable function return size test"
     failMsg = "Incorrect allocated size"
-    tf = size (a) == 420
+    rc = merge (ESMF_SUCCESS, ESMF_RC_ARG_SIZE, size (a) == 420)
     call ESMF_Test(rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
 
     !------------------------------------------------------------------------

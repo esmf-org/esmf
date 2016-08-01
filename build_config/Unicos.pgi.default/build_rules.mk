@@ -60,6 +60,11 @@ ESMF_PGIVERSION_PATCH = $(shell $(ESMF_DIR)/scripts/version.pgi 3 $(ESMF_F90COMP
 ESMF_F90COMPILECPPFLAGS += -DESMF_PGIVERSION_PATCH=$(ESMF_PGIVERSION_PATCH)
 
 ############################################################
+# Enable TR15581/F2003 Allocatable array resizing
+#
+ESMF_F90COMPILEOPTS += -Mallocatable=03
+
+############################################################
 # XT compute nodes do not have support for POSIX IPC (memory mapped files)
 #
 ESMF_CXXCOMPILECPPFLAGS += -DESMF_NO_POSIXIPC
