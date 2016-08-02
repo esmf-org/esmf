@@ -105,7 +105,8 @@
     ! NOTE: Some compilers may require a special command line argument for
     ! the following tests to work.  This is needed to turn on the F2003
     ! semantics for reassignment of allocatable arrays to different sizes
-    ! than originally allocated.  For example PGI requires -Mallocatable=03.
+    ! than originally allocated.  For example PGI requires -Mallocatable=03
+    ! and Intel requires -assume realloc_lhs.
 
     !------------------------------------------------------------------------
     !------------------------------------------------------------------------
