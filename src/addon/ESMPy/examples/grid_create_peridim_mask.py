@@ -84,4 +84,4 @@ except:
 
 if ESMF.local_pet() == 0:
     assert (masked_values > 0)
-    print "Successfully created a grid with masking and switched periodic dimensions for regridding!"
+    print ("Successfully created a grid with masking and switched periodic dimensions for regridding!")

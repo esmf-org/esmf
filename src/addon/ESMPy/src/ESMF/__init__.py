@@ -53,16 +53,16 @@ between interpolation weights and data values.
 
 #### IMPORT LIBRARIES #########################################################
 
-from api.esmpymanager import *
-from api.grid import *
-from api.mesh import *
-from api.locstream import *
-from api.field import *
-from api.regrid import *
-from api.constants import _ESMF_VERSION
+from ESMF.api.esmpymanager import *
+from ESMF.api.grid import *
+from ESMF.api.mesh import *
+from ESMF.api.locstream import *
+from ESMF.api.field import *
+from ESMF.api.regrid import *
+from ESMF.api.constants import _ESMF_VERSION
 
 # for testing
-from util.decorators import expected_failure
+from ESMF.util.decorators import expected_failure
 
 #### SET UP SOME INFO #########################################################
 
@@ -77,7 +77,7 @@ __author__ = "University Corporation for Atmospheric Research, " + \
              "Argonne National Laboratory, " + \
              "NASA Goddard Space Flight Center"
 __license__ = "University of Illinois-NCSA"
-__release__ = api.constants._ESMF_VERSION
-__version__ = api.constants._ESMF_VERSION
+__release__ = _ESMF_VERSION
+__version__ = _ESMF_VERSION
 
 

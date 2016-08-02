@@ -72,7 +72,7 @@ if ESMF.pet_count() > 1:
 # output the results from one processor only
 if ESMF.local_pet() is 0:
     meanrelerr = relerr / num_nodes
-    print "ESMPy Grid Mesh Regridding Example"
-    print "  interpolation mean relative error = {0}".format(meanrelerr)
+    print ("ESMPy Grid Mesh Regridding Example")
+    print ("  interpolation mean relative error = {0}".format(meanrelerr))
 
     assert (meanrelerr < 3e-5)

@@ -226,8 +226,8 @@ def _get_dot_(path,root='src'):
             ret.append(tail)
     ret.reverse()
     return('.'.join(ret))
-package_dir = {'':'src'}
-src_path = os.path.join(package_dir.keys()[0],package_dir.values()[0],'ESMF')
+
+src_path = os.path.join('src','ESMF')
 packages = []
 for dirpath,dirnames,filenames in os.walk(src_path):
     if '__init__.py' in filenames:

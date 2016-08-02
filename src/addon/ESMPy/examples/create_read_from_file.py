@@ -39,4 +39,4 @@ mesh = ESMF.Mesh(filename=os.path.join(DATADIR, "mpas_uniform_10242_dual_counter
 field = ESMF.Field(mesh, meshloc=ESMF.MeshLoc.NODE)
 
 if ESMF.local_pet() == 0:
-    print "Grid, Mesh and Field all created/read from file successfully :)"
+    print ("Grid, Mesh and Field all created/read from file successfully :)")
