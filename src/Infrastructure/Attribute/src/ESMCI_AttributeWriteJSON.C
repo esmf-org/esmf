@@ -64,6 +64,7 @@ namespace ESMCI {
 // !ARGUMENTS:
     		ESMC_Logical flattenPackList,
     		ESMC_Logical includeUnset,
+			ESMC_Logical includeLinks,
     		string &output
 			) const {
 //
@@ -80,12 +81,12 @@ namespace ESMCI {
       // stream the JSON, starting from root
       if (attrRoot == ESMF_FALSE) {
     	  attr = &(attrBase->root);
-    	  localrc = attr->streamAttributeRootToJSON(flattenPackList, includeUnset, output, &totalStreamed);
+    	  localrc = attr->streamAttributeRootToJSON(flattenPackList, includeUnset, includeLinks, output, &totalStreamed);
 		  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
 		           		&localrc)) return localrc;
       }
       else {
-    	  localrc = streamAttributeRootToJSON(flattenPackList, includeUnset, output, &totalStreamed);
+    	  localrc = streamAttributeRootToJSON(flattenPackList, includeUnset, includeLinks, output, &totalStreamed);
     	  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
     	           		&localrc)) return localrc;
       }
@@ -100,7 +101,8 @@ namespace ESMCI {
 	#define ESMC_METHOD "streamAttributeRootToJSON"
 
     int Attribute::streamAttributeRootToJSON(ESMC_Logical flattenPackList,
-    		ESMC_Logical includeUnset, string &output, int *totalStreamed) const {
+    		ESMC_Logical includeUnset, ESMC_Logical includeLinks,
+			string &output, int *totalStreamed) const {
 
     	int localrc;
    		ostringstream ostream;
@@ -133,7 +135,7 @@ namespace ESMCI {
    		if (flattenPackList == ESMF_TRUE) {
    			ostream << "{";
    		}
-   		localrc = streamAttributeToJSON(flattenPackList, includeUnset, stringJSON, totalStreamed);
+   		localrc = streamAttributeToJSON(flattenPackList, includeUnset, includeLinks, stringJSON, totalStreamed);
    		if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
    										&localrc)) return localrc;
 
@@ -154,7 +156,8 @@ namespace ESMCI {
     #define ESMC_METHOD "streamAttributeToJSON"
 
    	int Attribute::streamAttributeToJSON(ESMC_Logical flattenPackList,
-   			ESMC_Logical includeUnset, string &output, int *totalStreamed) const {
+   			ESMC_Logical includeUnset, ESMC_Logical includeLinks,
+			string &output, int *totalStreamed) const {
 
    		int localrc;
 		ostringstream ostream;
@@ -181,7 +184,7 @@ namespace ESMCI {
 		}
 
 		localrc = streamAttributePackToJSON(packList,
-				flattenPackList, includeUnset, stringJSON, &localStreamed);
+				flattenPackList, includeUnset, includeLinks, stringJSON, &localStreamed);
 		if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
 								&localrc)) return localrc;
 		if (localStreamed > 0) {
@@ -194,13 +197,15 @@ namespace ESMCI {
 			*totalStreamed = *totalStreamed + localStreamed;
 		}
 
-		localrc = streamAttributeLinksToJSON(linkList,
-				flattenPackList, includeUnset, stringJSON, &localStreamed);
-		if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
-									&localrc)) return localrc;
-		if (localStreamed > 0) {
-			ostream << separator << "\"linkList\":" << stringJSON;
-			*totalStreamed = *totalStreamed + localStreamed;
+		if (includeLinks == ESMF_TRUE) {
+			localrc = streamAttributeLinksToJSON(linkList,
+					flattenPackList, includeUnset, stringJSON, &localStreamed);
+			if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+										&localrc)) return localrc;
+			if (localStreamed > 0) {
+				ostream << separator << "\"linkList\":" << stringJSON;
+				*totalStreamed = *totalStreamed + localStreamed;
+			}
 		}
 
 		if (flattenPackList == ESMF_FALSE) {
@@ -275,7 +280,7 @@ namespace ESMCI {
 							&localrc)) return localrc;
 					val = attrValuesToString(&vecf);
 				}
-				else if (cur->tk == ESMC_TYPEKIND_R4) {
+				else if (cur->tk == ESMC_TYPEKIND_R8) {
 					localrc = cur->get(&attrCount, &vecd);
 					if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
 							&localrc)) return localrc;
@@ -317,6 +322,7 @@ namespace ESMCI {
 
 	int Attribute::streamAttributePackToJSON(vector<Attribute *> attrVector,
 			ESMC_Logical flattenPackList, ESMC_Logical includeUnset,
+			ESMC_Logical includeLinks,
 			string &output, int *totalStreamed) const {
 
 		int localrc;
@@ -334,7 +340,7 @@ namespace ESMCI {
 		for (int i = 0; i < attrVector.size(); i++) {
 			string stringJSON;
 			localrc = attrVector.at(i)->streamAttributeToJSON(flattenPackList,
-					includeUnset, stringJSON, &localStreamed);
+					includeUnset, includeLinks, stringJSON, &localStreamed);
 			if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
 					  &localrc)) return localrc;
 			if (localStreamed > 0) {
@@ -374,7 +380,7 @@ namespace ESMCI {
 		for (int i = 0; i < attrVector.size(); i++) {
 			string stringJSON;
 			localrc = attrVector.at(i)->streamAttributeRootToJSON(flattenPackList,
-					includeUnset, stringJSON, &localStreamed);
+					includeUnset, ESMF_TRUE, stringJSON, &localStreamed);
 			if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
 					  &localrc)) return localrc;
 			if (localStreamed > 0) {

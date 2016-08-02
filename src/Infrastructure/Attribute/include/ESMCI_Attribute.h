@@ -194,11 +194,11 @@ class Attribute
     // query whether an Attribute is "present" or "set"
     bool isSet() const;
 
-    int streamJSON(ESMC_Logical flattenPackList, ESMC_Logical includeUnset, std::string &output) const;
-    int streamAttributeToJSON(ESMC_Logical flattenPackList, ESMC_Logical includeUnset, std::string &output,  int *totalStreamed) const;
-    int streamAttributeRootToJSON(ESMC_Logical flattenPackList, ESMC_Logical includeUnset, std::string &output, int *totalStreamed) const;
+    int streamJSON(ESMC_Logical flattenPackList, ESMC_Logical includeUnset, ESMC_Logical includeLinks, std::string &output) const;
+    int streamAttributeToJSON(ESMC_Logical flattenPackList, ESMC_Logical includeUnset, ESMC_Logical includeLinks, std::string &output,  int *totalStreamed) const;
+    int streamAttributeRootToJSON(ESMC_Logical flattenPackList, ESMC_Logical includeUnset, ESMC_Logical includeLinks, std::string &output, int *totalStreamed) const;
     int streamAttributeListToJSON(std::vector<Attribute *> attrVector, ESMC_Logical flattenPackList, ESMC_Logical includeUnset, std::string &output, int *totalStreamed) const;
-  	int streamAttributePackToJSON(std::vector<Attribute *> attrVector, ESMC_Logical flattenPackList, ESMC_Logical includeUnset, std::string &output, int *totalStreamed) const;
+  	int streamAttributePackToJSON(std::vector<Attribute *> attrVector, ESMC_Logical flattenPackList, ESMC_Logical includeUnset, ESMC_Logical includeLinks, std::string &output, int *totalStreamed) const;
   	int streamAttributeLinksToJSON(std::vector<Attribute *> attrVector, ESMC_Logical flattenPackList, ESMC_Logical includeUnset, std::string &output, int *totalStreamed) const;
 
   	template<typename T>
@@ -457,11 +457,13 @@ extern "C" {
   void FTN_X(c_esmc_attpackstreamjson)(ESMCI::Attribute **attpack,
                                   int *flattenPackList,
 								  int *includeUnset,
+								  int *includeLinks,
 								  char *output, int *rc,
                                   ESMCI_FortranStrLenArg olen);
   void FTN_X(c_esmc_attpackstreamjsonstrlen)(ESMCI::Attribute **attpack,
 		  	  	  	  	  	  	  int *flattenPackList,
 								  int *includeUnset,
+								  int *includeLinks,
                                   int *jsonstrlen, int *rc);
   void FTN_X(c_esmc_attpackget)(ESMC_Base **base, ESMCI::Attribute **attpack,
                                   int *count, char *specList, int *lens,

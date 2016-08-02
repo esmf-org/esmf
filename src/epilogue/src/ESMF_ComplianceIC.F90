@@ -1095,7 +1095,8 @@ module ESMF_ComplianceICMod
               return  ! bail out
 
           if (isPresent) then
-              call ESMF_AttPackStreamJSON(attpack, .true., .false., jsonstring, rc=rc)
+              call ESMF_AttPackStreamJSON(attpack, flattenPackList=.true., &
+                    includeUnset=.false., includeLinks=.false., output=jsonstring, rc=rc)
               if (ESMF_LogFoundError(rc, &
                   line=__LINE__, &
                   file=FILENAME)) &
@@ -1777,7 +1778,8 @@ module ESMF_ComplianceICMod
           return  ! bail out
 
         if (isPresent) then
-            call ESMF_AttPackStreamJSON(attpack, .true., .false., jsonstring, rc=rc)
+            call ESMF_AttPackStreamJSON(attpack, flattenPackList=.true., &
+                    includeUnset=.false., includeLinks=.true., output=jsonstring, rc=rc)
             if (ESMF_LogFoundError(rc, &
               line=__LINE__, &
               file=FILENAME)) &

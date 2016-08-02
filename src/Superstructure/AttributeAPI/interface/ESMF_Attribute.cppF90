@@ -3605,11 +3605,13 @@ contains
 ! !IROUTINE: ESMF_AttPackStreamJSON - Stream AttPack to JSON formatted string.
 !
 ! !INTERFACE:
-      subroutine ESMF_AttPackStreamJSON(attpack, flattenPackList, includeUnset, output, rc)
+      subroutine ESMF_AttPackStreamJSON(attpack, flattenPackList, includeUnset, &
+      	includeLinks, output, rc)
 
       type(ESMF_AttPack), intent(in)   :: attpack
       logical,            intent(in)   :: flattenPackList
       logical,            intent(in)   :: includeUnset
+      logical,            intent(in)   :: includeLinks
       character(len=*),   intent(out)  :: output
       integer,            intent(out), optional   :: rc
 
@@ -3635,7 +3637,7 @@ contains
 !EOPI
 
       integer :: localrc, errflag, jsonstrlen
-      integer :: localFlattenPackList, localIncludeUnset
+      integer :: localFlattenPackList, localIncludeUnset, localIncludeLinks
       
       if (flattenPackList) then
       	localFlattenPackList = 1
@@ -3647,6 +3649,12 @@ contains
       	localIncludeUnset = 1
       else
         localIncludeUnset = 0
+      endif  
+      
+      if (includeLinks) then
+      	localIncludeLinks = 1
+      else
+        localIncludeLinks = 0
       endif   
 
       ! Initialize
@@ -3655,7 +3663,8 @@ contains
       ! Use an inquiry function to find the length of the string needed
       ! for the JSON string.  This will be used to allocate the Fortran string,
       ! the user will be responsible for deallocating it.
-      call C_ESMC_AttPackStreamJSONstrlen(attpack, localFlattenPackList, localIncludeUnset, jsonstrlen, localrc)
+      call C_ESMC_AttPackStreamJSONstrlen(attpack, localFlattenPackList, localIncludeUnset, &
+      	localIncludeLinks, jsonstrlen, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -3664,7 +3673,8 @@ contains
               ESMF_CONTEXT, rcToReturn=rc)) return
 
       ! call the C++ function to stream JSON to the output string
-      call C_ESMC_AttPackStreamJSON(attpack, localFlattenPackList, localIncludeUnset, output, localrc)
+      call C_ESMC_AttPackStreamJSON(attpack, localFlattenPackList, localIncludeUnset, &
+      	localIncludeLinks, output, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
 

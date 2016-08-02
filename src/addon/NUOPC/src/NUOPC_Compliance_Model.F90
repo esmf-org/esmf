@@ -407,7 +407,7 @@ contains
 
             ! compliance check importState
             call NUOPC_CheckState(prefix, referenceName="importState", state=importState, &
-                rc=rc)
+                outputJSON=doJSON, rc=rc)
             if (ESMF_LogFoundError(rc, &
                 line=__LINE__, &
                 file=FILENAME)) &
@@ -415,7 +415,7 @@ contains
 
             ! compliance check exportState
             call NUOPC_CheckState(prefix, referenceName="exportState", state=exportState, &
-                rc=rc)
+                outputJSON=doJSON, rc=rc)
             if (ESMF_LogFoundError(rc, &
                 line=__LINE__, &
                 file=FILENAME)) &
@@ -527,7 +527,7 @@ contains
 
             ! compliance check importState
             call NUOPC_CheckState(prefix, referenceName="importState", state=importState, &
-                rc=rc)
+                outputJSON=doJSON, rc=rc)
             if (ESMF_LogFoundError(rc, &
                 line=__LINE__, &
                 file=FILENAME)) &
@@ -535,7 +535,7 @@ contains
     
             ! compliance check exportState
             call NUOPC_CheckState(prefix, referenceName="exportState", state=exportState, &
-                rc=rc)
+                outputJSON=doJSON, rc=rc)
             if (ESMF_LogFoundError(rc, &
                 line=__LINE__, &
                 file=FILENAME)) &

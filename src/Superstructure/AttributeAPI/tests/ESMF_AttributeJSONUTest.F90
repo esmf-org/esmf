@@ -204,10 +204,12 @@ program ESMF_AttributeJSONUTest
     call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
     !-------------------------------------------------------------------------
 
+
     !-------------------------------------------------------------------------
     !EX_UTest
     ! Write JSON stream for the State
-    call ESMF_AttPackStreamJSON(attpack, .true., .true., output, rc=rc)
+    call ESMF_AttPackStreamJSON(attpack, flattenPackList=.true., &
+        includeUnset=.true., includeLinks=.true., output=output, rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Write JSON stream for the State"
     call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -250,7 +252,8 @@ program ESMF_AttributeJSONUTest
     !-------------------------------------------------------------------------
     !EX_UTest
     ! Write JSON stream for the State
-    call ESMF_AttPackStreamJSON(attpack, .false., .true., output, rc=rc)
+    call ESMF_AttPackStreamJSON(attpack, flattenPackList=.false., &
+        includeUnset=.true., includeLinks=.true., output=output, rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Write JSON stream for the State"
     call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -305,7 +308,8 @@ program ESMF_AttributeJSONUTest
     !-------------------------------------------------------------------------
     !EX_UTest
     ! Write JSON stream for the GridComp
-    call ESMF_AttPackStreamJSON(attpack, .true., .true., output, rc=rc)
+    call ESMF_AttPackStreamJSON(attpack, flattenPackList=.true., &
+        includeUnset=.true., includeLinks=.true., output=output, rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Write JSON stream for the GridComp"
     call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
