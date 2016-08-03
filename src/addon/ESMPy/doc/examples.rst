@@ -42,6 +42,12 @@ Regridding from LocStream to Grid
 
     .. literalinclude:: ../examples/locstream_grid_regrid.py
 
+-------------------------------------
+Parallel regridding using MPI.Spawn()
+-------------------------------------
+
+    .. literalinclude:: ../examples/mpi_spawn_regrid.py
+
 ---------------------------
 Regridding Helper Functions
 ---------------------------

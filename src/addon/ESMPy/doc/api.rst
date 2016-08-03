@@ -491,3 +491,94 @@ of the ESMF objects.  One example of where this could come up is when passing
 a Field slice into regridding.  The entire original Field will still be run
 through the ESMF regridding engine, and only the appropriate portion of
 the Field slice will be updated with the regridded values.
+
+------------------
+Parallel execution
+------------------
+
+ESMPy is a thin wrapper on top of ESMF, which was designed for high performance
+and scalable computing. The ESMF virtual machine is used to manage the available
+resources of the execution environment in a layer that is transparent to the
+ESMPy user. This allows the full power of the high performance computing
+environment to be utilized by the ESMPy user with little use of specialized
+parallel programming techniques.
+
+ESMPy objects will be distributed across the available computing resources with
+no additional parameters required. The Grid, Mesh, LocStream, and Field classes
+will all be transparently ``parallelized" with no need for user calls to a
+message passing interface. Likewise, the Regrid class will compute and apply
+the interpolation weights using all available computing resources with no need
+for user intervention.
+
+However, it is useful to remember that resulting Field values will only be
+accessible on certain processors. The mpi4py package may be necessary for post
+processing tasks that require access to global Field values.
+
+~~~~~~~~~~~~~~~~~~~~
+mpirun vs. MPI.Spawn
+~~~~~~~~~~~~~~~~~~~~
+
+There are a couple of recommended practices for using ESMPy in a parallel
+environment. Using mpirun to specify the desired number of computing cores
+is probably the easiest way to start a parallel ESMPy job. Another option is to
+call the MPI.Spawn() function from the mpi4py Python package from within a
+serial Python script or interpreter. It has been observed that MPI.Spawn() may
+not work properly when mpi4py is built with an underlying mpich
+library, openmpi has seen better success. A third option is to call mpirun
+using a system call from within a serial Python script or interpreter, however
+this method is not highly recommended.
+
+The following two examples demonstrate how to execute an ESMPy script in
+parallel:
+
+++++++
+mpirun
+++++++
+
+::
+
+    mpirun -n 4 python hello_world.py
+
++++++++++
+MPI.Spawn
++++++++++
+
+::
+
+    import sys
+    from mpi4py import MPI
+
+    # Parent
+    if len(sys.argv) == 1:
+
+        # Spawn workers
+        comm = MPI.COMM_WORLD.Spawn(
+            sys.executable,
+            args=[sys.argv[0], 'worker'],
+            maxprocs=4)
+
+        # Shutdown
+        comm.Disconnect()
+
+    # Worker
+    elif sys.argv[1] == 'worker':
+
+        # Connect to parent
+        try:
+            comm = MPI.Comm.Get_parent()
+            rank = comm.Get_rank()
+        except:
+            raise ValueError('Could not connect to parent - ' + usage)
+
+        # worker code goes here, regridding etc..
+        print "Hello World from processor #"+str(rank)
+
+        # Shutdown
+        comm.Disconnect()
+
+    # Catch
+    else:
+        raise ValueError('Program should be started without arguments')
+
+A more detailed example of using MPI.Spawn() can be found in the Tutorials section
+of the documentation.
