@@ -518,7 +518,7 @@ processing tasks that require access to global Field values.
 mpirun vs. MPI.Spawn
 ~~~~~~~~~~~~~~~~~~~~
 
-There are a couple of recommended practices for using ESMPy in a parallel
+There are a few different options for using ESMPy in a parallel
 environment. Using mpirun to specify the desired number of computing cores
 is probably the easiest way to start a parallel ESMPy job. Another option is to
 call the MPI.Spawn() function from the mpi4py Python package from within a
@@ -529,7 +529,8 @@ using a system call from within a serial Python script or interpreter, however
 this method is not highly recommended.
 
 The following two examples demonstrate how to execute an ESMPy script in
-parallel:
+parallel. Any of the scripts found in the examples directory of the ESMPy source
+code can be run in parallel using mpirun as well as in serial mode.  
 
 ++++++
 mpirun
