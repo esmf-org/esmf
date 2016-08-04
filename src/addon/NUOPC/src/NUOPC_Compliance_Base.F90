@@ -38,6 +38,7 @@ module NUOPC_Compliance_Base
     public NUOPC_CheckInternalClock
     public NUOPC_CheckComponentStatistics
     public NUOPC_CompSearchPhaseMapByIndex
+    public JSON_LogWrite
     public JSON_LogCtrlFlow
     public JSON_LogHeader
 
@@ -234,7 +235,7 @@ contains
                   file=FILENAME)) &
                   return  ! bail out
 
-                call ESMF_LogWrite(jsonstring, ESMF_LOGMSG_JSON, rc=rc)
+                call JSON_LogWrite(jsonstring, rc=rc)
                 if (ESMF_LogFoundError(rc, &
                   line=__LINE__, &
                   file=FILENAME)) &
@@ -687,7 +688,7 @@ contains
                       file=FILENAME)) &
                       return  ! bail out
 
-                  call ESMF_LogWrite(jsonstring, ESMF_LOGMSG_JSON, rc=rc)
+                  call JSON_LogWrite(jsonstring, rc=rc)
                   if (ESMF_LogFoundError(rc, &
                      line=__LINE__, &
                      file=FILENAME)) &
@@ -1417,7 +1418,7 @@ contains
                   file=FILENAME)) &
                   return  ! bail out
 
-                call ESMF_LogWrite(jsonstring, ESMF_LOGMSG_JSON, rc=rc)
+                call JSON_LogWrite(jsonstring, rc=rc)
                 if (ESMF_LogFoundError(rc, &
                  line=__LINE__, &
                  file=FILENAME)) &
@@ -1978,7 +1979,7 @@ contains
               &"virtMemPet":"'//trim(adjustl(virtMemPetStr))//'",&
               &"physMemPet":"'//trim(adjustl(physMemPetStr))//'"}}'
 
-            call ESMF_LogWrite(trim(jsonString), ESMF_LOGMSG_JSON, rc=rc)
+            call JSON_LogWrite(trim(jsonString), rc=rc)
             if (ESMF_LogFoundError(rc, &
               line=__LINE__, &
               file=FILENAME)) &
@@ -2183,6 +2184,33 @@ contains
 
     end subroutine
 
+    recursive subroutine JSON_LogWrite(msg, rc)
+        character(len=*), intent(in) ::   msg
+        integer, optional, intent(out) :: rc
+
+        ! locals
+        real(ESMF_KIND_R8) :: sysTime
+        character(64)      :: sysTimeStr
+
+        rc = ESMF_SUCCESS
+
+        !call ESMF_VMWtime(sysTime, rc=rc)
+        !if (ESMF_LogFoundError(rc, &
+        !  line=__LINE__, &
+        !  file=FILENAME)) &
+        !  return  ! bail out
+
+        !write(sysTimeStr,"(F32.9)") sysTime
+
+        !call ESMF_LogWrite(trim(adjustl(sysTimeStr))//" "//trim(msg), ESMF_LOGMSG_JSON, rc=rc)
+        call ESMF_LogWrite(trim(msg), ESMF_LOGMSG_JSON, rc=rc)
+        if (ESMF_LogFoundError(rc, &
+          line=__LINE__, &
+          file=FILENAME)) &
+          return  ! bail out
+
+    end subroutine
+
     recursive subroutine JSON_LogCtrlFlow(event, comp, rc)
 
         character(len=*), intent(in) :: event
@@ -2260,7 +2288,8 @@ contains
             &"phase":"'//trim(phaseString)//'",&
             &"currTime":'//trim(timeStamp)//'}}'
 
-        call ESMF_LogWrite(trim(jsonString), ESMF_LOGMSG_JSON, rc=rc)
+        !call ESMF_LogWrite(trim(jsonString), ESMF_LOGMSG_JSON, rc=rc)
+        call JSON_LogWrite(trim(jsonString), rc=rc)
         if (ESMF_LogFoundError(rc, &
           line=__LINE__, &
           file=FILENAME)) &
@@ -2279,7 +2308,7 @@ contains
         write(jsonString,*) '{"esmf_json":{&
             &"version":"0.1"}}'
 
-        call ESMF_LogWrite(trim(jsonString), ESMF_LOGMSG_JSON, rc=rc)
+        call JSON_LogWrite(trim(jsonString), rc=rc)
         if (ESMF_LogFoundError(rc, &
           line=__LINE__, &
           file=FILENAME)) &
