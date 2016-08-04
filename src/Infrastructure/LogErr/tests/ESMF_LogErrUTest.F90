@@ -79,6 +79,7 @@
       type(ESMF_Time) :: my_time, log_time
       integer :: log8unit
       logical :: was_found
+      logical :: highRes_flag
       logical :: trace_flag
       type(ESMF_LogMsg_Flag), pointer :: logabort_flags(:)
       character(2) :: tooshortstr
@@ -1116,6 +1117,58 @@ if (time_diff < zero) stop 1
       write(name, *) "Opening unclosed default log Test"
       call ESMF_LogOpen ('new_log', rc=rc)
       call ESMF_Test((rc /= ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! Test setting the MPI_Wtime flag
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Set highResTimestampFlag test"
+      call ESMF_LogSet (highResTimestampFlag=.true., rc=rc)
+      call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! Test the MPI_Wtime flag
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Test highResTimestampFlag set test"
+      call ESMF_LogGet (highResTimestampFlag=highRes_flag, rc=rc)
+      call ESMF_Test((rc == ESMF_SUCCESS .and. highRes_flag), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! Test writing with highResTimestampFlag set
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Writing with high res timestamp set Test"
+      call ESMF_LogWrite (logmsgFlag=ESMF_LOGMSG_INFO,  &
+          msg=" High res timestamps set, and should be in the log",  &
+          rc=rc)
+      call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! Test clearing the MPI_Wtime flag
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Clear highResTimestampFlag test"
+      call ESMF_LogSet (highResTimestampFlag=.false., rc=rc)
+      call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! Test the MPI_Wtime flag
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Test highResTimestampFlag clear test"
+      call ESMF_LogGet (highResTimestampFlag=highRes_flag, rc=rc)
+      call ESMF_Test((rc == ESMF_SUCCESS .and. .not. highRes_flag), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! Test writing with highResTimestampFlag cleared
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Writing with high res timestamp cleared Test"
+      call ESMF_LogWrite (logmsgFlag=ESMF_LOGMSG_INFO,  &
+          msg=" High res timestamps cleared, and should be NOT be in the log",  &
+          rc=rc)
+      call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 #endif
 100   continue
