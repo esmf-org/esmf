@@ -30,11 +30,13 @@
 
   ! This subroutine partitions the petList [0:petCount) into
   ! an accelerated petlist, aPets, that consists of pets with access to
-  ! the accelerator device. This partition algorithm allows only the 
-  ! lowest ranked (MPI rank) PET on a node to have access to the
-  ! accelerator devices attached to the node
+  ! the accelerator device
   ! and a non accelerated petlist, nonAPets, that consists of pets without
   ! access to the accelerator device
+  ! based on the partition strategy, partStrategy
+  ! ESMF_ACC_PET_PARTITION_CONTIG => accelerated devices are
+  !   available from the lowest ranked MPI processes (rank < number of
+  !   devices)
   subroutine partition_pets(vm, aPets, nonAPets, partStrategy, rc)
 !   ! The ESMF Framework module
     use ESMF
