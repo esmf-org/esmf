@@ -943,7 +943,7 @@ type(ESMF_KeywordEnforcer),optional::keywordEnforcer !must use keywords below
               trim(alog%petNumLabel), " "
 
           if (alog%LOG_ENTRY(j)%highResTimestampFlag) then
-            write (alog%unitNumber, '(f18.6)', advance='no') alog%LOG_ENTRY(j)%highResTimestamp
+            write (alog%unitNumber, '(f18.6,1x)', advance='no') alog%LOG_ENTRY(j)%highResTimestamp
           end if
 
           spaceflag = .false.
