@@ -48,6 +48,11 @@ ESMF_F90COMPILER_VERSION    = ${ESMF_F90COMPILER} -V -v
 ESMF_CXXCOMPILER_VERSION    = ${ESMF_CXXCOMPILER} -V -v
 
 ############################################################
+# Enable TR15581/F2003 Allocatable array resizing
+#
+ESMF_F90COMPILEOPTS += -assume realloc_lhs
+
+############################################################
 # XT compute nodes do not have support for POSIX IPC (memory mapped files)
 #
 ESMF_CXXCOMPILECPPFLAGS += -DESMF_NO_POSIXIPC

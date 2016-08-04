@@ -109,6 +109,11 @@ ESMF_F90MAJORVERSION      = $(shell $(ESMF_DIR)/scripts/version.intel 1 ${ESMF_F
 ESMF_CXXMAJORVERSION      = $(shell $(ESMF_DIR)/scripts/version.intel 1 ${ESMF_CXXCOMPILER} -V)
 
 ############################################################
+# Enable TR15581/F2003 Allocatable array resizing
+#
+ESMF_F90COMPILEOPTS += -assume realloc_lhs
+
+############################################################
 # Intel runtime library on Darwin does not currently seem thread-safe
 #
 ESMF_PTHREADS := OFF

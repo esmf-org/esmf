@@ -185,6 +185,11 @@ ESMF_F90LINKOPTS          += -mcmodel=medium
 endif
 
 ############################################################
+# Enable TR15581/F2003 Allocatable array resizing
+#
+ESMF_F90COMPILEOPTS += -Mallocatable=03
+
+############################################################
 # Conditionally add pthread compiler and linker flags
 #
 ifeq ($(ESMF_PTHREADS),ON)

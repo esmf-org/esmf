@@ -132,6 +132,8 @@ type ESMF_LogEntry
 #ifndef ESMF_NO_SEQUENCE
     sequence
 #endif
+    real(ESMF_KIND_R8)  ::  highResTimestamp
+    logical             ::  highResTimestampFlag
     integer             ::  h,m,s,ms
     integer             ::  line
     logical             ::  methodflag,lineflag,fileflag
@@ -179,6 +181,7 @@ type ESMF_LogPrivate
     type(ESMF_LogMsg_Flag), pointer                 ::  logmsgList(:) => null ()
     type(ESMF_LogMsg_Flag), pointer                 ::  logmsgAbort(:)=> null ()
     logical                                         ::  traceFlag = .false.
+    logical                                         ::  highResTimestampFlag = .false.
 #else
     type(ESMF_LogEntry), dimension(:),pointer       ::  LOG_ENTRY
     type(ESMF_Logical)                              ::  FileIsOpen
@@ -187,6 +190,7 @@ type ESMF_LogPrivate
     type(ESMF_LogMsg_Flag), pointer                 ::  logmsgList(:)
     type(ESMF_LogMsg_Flag), pointer                 ::  logmsgAbort(:)
     logical                                         ::  traceFlag
+    logical                                         ::  highResTimestampFlag
 #endif                                          
     character(len=ESMF_MAXPATHLEN)                  ::  nameLogErrFile
     character(len=ESMF_MAXSTR)                      ::  petNumLabel
@@ -938,6 +942,10 @@ type(ESMF_KeywordEnforcer),optional::keywordEnforcer !must use keywords below
               alog%LOG_ENTRY(j)%lt, " ", &
               trim(alog%petNumLabel), " "
 
+          if (alog%LOG_ENTRY(j)%highResTimestampFlag) then
+            write (alog%unitNumber, '(g21.15)', advance='no') alog%LOG_ENTRY(j)%highResTimestamp
+          end if
+
           spaceflag = .false.
           if (alog%LOG_ENTRY(j)%fileflag) then
             write (alog%unitNumber, '(a)',  advance='no')  &
@@ -1357,7 +1365,8 @@ end function ESMF_LogFoundError
       subroutine ESMF_LogGet(log, keywordEnforcer,  &
                              flush,    &
                              logmsgAbort, logkindflag, &
-                             maxElements, trace, fileName, rc)
+                             maxElements, trace, fileName,  &
+                             highResTimestampFlag, rc)
 !
 ! !ARGUMENTS:
 !      
@@ -1369,6 +1378,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,                 intent(out), optional :: maxElements
       logical,                 intent(out), optional :: trace
       character(*),            intent(out), optional :: fileName
+      logical,                 intent(out), optional :: highResTimestampFlag
       integer,                 intent(out), optional :: rc
 
 ! !DESCRIPTION:
@@ -1398,6 +1408,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !            Current file name.  When the log has been opened with
 !            {\tt ESMF\_LOGKIND\_MULTI}, the filename has a PET number
 !            prefix.
+!      \item [{[highResTimestampFlag]}]
+!            Current setting of the MPI\_Wtime time stamp flag.
 !      \item [{[rc]}]
 !            Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !      \end{description}
@@ -1450,6 +1462,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                 msg='fileName argument string too short', &
                 ESMF_CONTEXT, rcToReturn=rc)) return
           end if
+        endif
+        if (present (highResTimestampFlag)) then
+          highResTimestampFlag = alog%highResTimestampFlag
         endif
 
       ! Return an array with the current values.  If the user has not
@@ -1662,7 +1677,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       alog%logkindflag=ESMF_LOGKIND_MULTI
     endif
     alog%traceFlag = .false.
-    
+    alog%highResTimestampFlag = .false.
+
   if(alog%logkindflag /= ESMF_LOGKIND_NONE) then
 
     if (alog%logkindflag == ESMF_LOGKIND_SINGLE) then
@@ -1867,7 +1883,7 @@ end subroutine ESMF_LogRc2Msg
     subroutine ESMF_LogSet(log, keywordEnforcer,  &
         flush,  &
         logmsgAbort, maxElements, logmsgList,  &
-        errorMask, trace, rc)
+        errorMask, trace, highResTimestampFlag, rc)
 !
 ! !ARGUMENTS:
 !
@@ -1879,6 +1895,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       type(ESMF_LogMsg_Flag), intent(in),    optional :: logmsgList(:)
       integer,                intent(in),    optional :: errorMask(:)
       logical,                intent(in),    optional :: trace
+      logical,                intent(in),    optional :: highResTimestampFlag
       integer,                intent(out),   optional :: rc
 
 !
@@ -1926,6 +1943,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !            call to a ESMF method, and disabled afterwards. Default is to
 !            not trace these calls.
 !           \end{sloppypar}
+!      \item [{[highResTimestampFlag]}]
+!            Sets the MPI\_Wtime time stamp flag.  If set to {\tt .true.}, a timestamp
+!            from {\tt MPI_Wtime} will be included in each log message.  Default is
+!            to not add the additional timestamps.
 !      \item [{[rc]}]
 !            Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !      \end{description}
@@ -2036,6 +2057,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           call ESMF_LogWrite ('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!',  &
               ESMF_LOGMSG_TRACE, method=ESMF_METHOD, log=log)
         end if
+      end if
+
+      if (present (highResTimestampFlag)) then
+        alog%highResTimestampFlag = highResTimestampFlag
       end if
 
       if (present(rc)) then
@@ -2246,6 +2271,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     character(len=ESMF_MAXPATHLEN)  :: tfile
     integer                         :: tline
     integer                         :: i
+    integer                         :: localrc
     integer                         :: memstat
     integer                         :: rc2, index
     type(ESMF_LogPrivate), pointer  :: alog
@@ -2325,6 +2351,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       
         alog%dirty = ESMF_TRUE
         call DATE_AND_TIME(date=d, time=t, values=timevals)
+        if (alog%highResTimestampFlag) then
+          call c_ESMC_VMWtime (alog%LOG_ENTRY(index)%highResTimestamp, localrc)
+          if (localrc /= ESMF_SUCCESS) then
+            if (present (rc)) rc = localrc
+            return
+          end if
+        end if
+        alog%LOG_ENTRY(index)%highResTimestampFlag = alog%highResTimestampFlag
         alog%LOG_ENTRY(index)%methodflag = .FALSE.
         alog%LOG_ENTRY(index)%lineflag = .FALSE.
         alog%LOG_ENTRY(index)%fileflag = .FALSE.
@@ -2441,6 +2475,7 @@ end subroutine ESMF_LogWrite
     logEntryOut%method = logEntryIn%method
     logEntryOut%d      = logEntryIn%d
     logEntryOut%lt     = logEntryIn%lt
+    logEntryOut%highResTimestamp = logEntryIn%highResTimestamp
     
     if (present(rc)) then
         rc=ESMF_SUCCESS

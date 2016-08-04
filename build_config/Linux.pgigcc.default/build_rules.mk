@@ -142,6 +142,11 @@ ESMF_F90LINKOPTS          += -mcmodel=medium
 endif
 
 ############################################################
+# Enable TR15581/F2003 Allocatable array resizing
+#
+ESMF_F90COMPILEOPTS += -Mallocatable=03
+
+############################################################
 # OpenMP compiler and linker flags
 #
 ESMF_OPENMP_F90COMPILEOPTS += -mp
