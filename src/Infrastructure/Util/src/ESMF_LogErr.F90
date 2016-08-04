@@ -1409,7 +1409,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !            {\tt ESMF\_LOGKIND\_MULTI}, the filename has a PET number
 !            prefix.
 !      \item [{[highResTimestampFlag]}]
-!            Current setting of the MPI\_Wtime time stamp flag.
+!            Current setting of the extended elapsed timestamp flag.
 !      \item [{[rc]}]
 !            Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !      \end{description}
@@ -1944,8 +1944,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !            not trace these calls.
 !           \end{sloppypar}
 !      \item [{[highResTimestampFlag]}]
-!            Sets the MPI\_Wtime time stamp flag.  If set to {\tt .true.}, a timestamp
-!            from {\tt MPI_Wtime} will be included in each log message.  Default is
+!            Sets the extended elapsed timestamp flag.  If set to {\tt .true.}, a timestamp
+!            from {\tt ESMF\_VMWtime} will be included in each log message.  Default is
 !            to not add the additional timestamps.
 !      \item [{[rc]}]
 !            Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
