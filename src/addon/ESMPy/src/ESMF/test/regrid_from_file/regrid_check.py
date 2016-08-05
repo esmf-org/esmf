@@ -187,7 +187,7 @@ def parse_options(options):
 def regrid_check(src_fname, dst_fname, regrid_method, options, 
                  itrp_mean_err, itrp_max_err, csrv_err):
 
-#    print "\nregrid_weight_gen_check.py: mesh_check()"
+#    print ("\nregrid_weight_gen_check.py: mesh_check()")
 
     parallel = False
     if ESMF.pet_count() > 1:

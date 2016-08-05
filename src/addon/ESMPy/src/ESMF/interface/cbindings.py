@@ -114,6 +114,15 @@ class OptionalBool(object):
                 paramptr = ptr(ct.c_bool(param))
                 return paramptr
 
+class Py3Char(object):
+    @classmethod
+    def from_param(self, param):
+        if param is None:
+            return None
+        elif isinstance(param, bytes):
+            return param
+        else:
+            return param.encode('utf-8')
 
 #### INIT/FINAL ###################################################
 
@@ -123,9 +132,9 @@ _ESMF.ESMC_Initialize.restype = ct.c_int
 def ESMP_Initialize(logkind = constants.LogKind.MULTI):
     """
     Preconditions: An ESMF shared library must have been loaded.
-    Postconditions: ESMP has been initialized, further ESMF calls may 
-                    be issued.  This method can only be called once per 
-                    execution, and must be followed by one and only one 
+    Postconditions: ESMP has been initialized, further ESMF calls may
+                    be issued.  This method can only be called once per
+                    execution, and must be followed by one and only one
                     call to ESMP_Finalize(). \n
     Arguments:\n
         LogKind (optional)    :: logkind\n
@@ -135,7 +144,7 @@ def ESMP_Initialize(logkind = constants.LogKind.MULTI):
         """
     # need to add this to the Initialize statement
 
-    rc = _ESMF.ESMC_Initialize(None, constants._ESMP_InitArgLogKindFlagID, 
+    rc = _ESMF.ESMC_Initialize(None, constants._ESMP_InitArgLogKindFlagID,
                                logkind, constants._ESMP_ArgLast)
     if rc != constants._ESMP_SUCCESS:
         raise ValueError('ESMC_Initialize() failed with rc = '+str(rc)+'.    '+
@@ -147,10 +156,10 @@ _ESMF.ESMC_Finalize.argtypes = []
 def ESMP_Finalize():
     """
     Preconditions: ESMF has been initialized.
-    Postconditions: ESMF has been finalized, all heap memory has been 
-                    released, and all MPI states have been cleaned up.  
-                    This method can only be called once per execution, 
-                    and must be preceded by one and only one call to 
+    Postconditions: ESMF has been finalized, all heap memory has been
+                    released, and all MPI states have been cleaned up.
+                    This method can only be called once per execution,
+                    and must be preceded by one and only one call to
                     ESMP_Initialize(). \n
     """
     rc = _ESMF.ESMC_Finalize()
@@ -162,7 +171,7 @@ def ESMP_Finalize():
 
 class ESMP_InterfaceInt(ct.Structure):
     _fields_ = [("shallowMem", ct.c_char*80)]
-                
+
     def __init__(self, arrayArg):
         # initialize the InterfaceInt on the ESMF side
         ESMP_InterfaceIntSet(self, arrayArg, len(arrayArg))
@@ -174,7 +183,7 @@ _ESMF.ESMC_InterfaceIntSet.argtypes = [ct.POINTER(ESMP_InterfaceInt),
                                        ct.c_int]
 def ESMP_InterfaceIntSet(iiptr, arrayArg, lenArg):
     """
-    Preconditions: ESMP has been initialized and 'arrayArg' is a Numpy 
+    Preconditions: ESMP has been initialized and 'arrayArg' is a Numpy
                    array of type int and 'lenArg' is the length of 'arrayArg'.\n
     Postconditions: An ESMP_InterfaceInt pointer has been created.\n
     Arguments:\n
@@ -199,7 +208,7 @@ _ESMF.ESMC_VMGet.argtypes = [ct.c_void_p, ct.POINTER(ct.c_int),
 def ESMP_VMGet(vm):
     """
     Preconditions: An ESMP_VM object has been retrieved.\n
-    Postconditions: Information has been returned about 'vm' in the 
+    Postconditions: Information has been returned about 'vm' in the
                     form of a tuple containing: [localPet, petCount].\n
     Arguments:\n
         :RETURN: integer :: localPet\n
@@ -246,7 +255,7 @@ _ESMF.ESMC_VMPrint.argtypes = [ct.c_void_p]
 def ESMP_VMPrint(vm):
     """
     Preconditions: An ESMP_VM object has been retrieved.\n
-    Postconditions: The contents of 'vm' have been printed to standard 
+    Postconditions: The contents of 'vm' have been printed to standard
                     output.\n
     Arguments:\n
         ESMP_VM :: vm\n
@@ -287,7 +296,7 @@ _ESMF.ESMC_GridCreate1PeriDim.argtypes = [ct.POINTER(ESMP_InterfaceInt),
                                           OptionalNamedConstant,
                                           ct.POINTER(ct.c_int)]
 @deprecated
-def ESMP_GridCreate1PeriDim(maxIndex, periodicDim=None, poleDim=None, 
+def ESMP_GridCreate1PeriDim(maxIndex, periodicDim=None, poleDim=None,
                             coordSys=None, coordTypeKind=None):
     """
     Preconditions: ESMP has been initialized.\n
@@ -396,7 +405,7 @@ def ESMP_GridCreateNoPeriDim(maxIndex, coordSys=None, coordTypeKind=None):
     return gridstruct
 
 _ESMF.ESMC_GridCreateFromFile.restype = ESMP_GridStruct
-_ESMF.ESMC_GridCreateFromFile.argtypes = [ct.c_char_p, ct.c_int,
+_ESMF.ESMC_GridCreateFromFile.argtypes = [Py3Char, ct.c_int,
                                           ct.POINTER(ct.c_int),
                                           OptionalNumpyArrayInt32,
                                           OptionalNamedConstant,
@@ -404,13 +413,13 @@ _ESMF.ESMC_GridCreateFromFile.argtypes = [ct.c_char_p, ct.c_int,
                                           OptionalNamedConstant,
                                           OptionalNamedConstant,
                                           OptionalNamedConstant,
-                                          ct.c_char_p,
+                                          Py3Char,
                                           OptionalArrayOfStrings,
                                           ct.POINTER(ct.c_int)]
 @deprecated
 @netcdf
 def ESMP_GridCreateFromFile(filename, fileTypeFlag, regDecomp,
-                            decompflag=None, isSphere=None, 
+                            decompflag=None, isSphere=None,
                             addCornerStagger=None, addUserArea=None,
                             addMask=None, varname=None, coordNames=None):
     """
@@ -440,13 +449,14 @@ def ESMP_GridCreateFromFile(filename, fileTypeFlag, regDecomp,
     gridstruct = _ESMF.ESMC_GridCreateFromFile(filename, fileTypeFlag,
                                                None, decompflag,
                                                isSphere, addCornerStagger,
-                                               addUserArea, indexflag, addMask, varname,
+                                               addUserArea, indexflag,
+                                               addMask, varname,
                                                coordNames, ct.byref(lrc))
     rc = lrc.value
     if rc != constants._ESMP_SUCCESS:
         raise NameError('ESMC_GridCreateFromFile() failed with rc = '+str(rc))
     return gridstruct
-    
+
 _ESMF.ESMC_GridDestroy.restype = ct.c_int
 _ESMF.ESMC_GridDestroy.argtypes = [ct.c_void_p]
 @deprecated
@@ -470,7 +480,7 @@ _ESMF.ESMC_GridAddCoord.argtypes = [ct.c_void_p, ct.c_uint]
 def ESMP_GridAddCoord(grid, staggerloc=constants.StaggerLoc.CENTER):
     """
     Preconditions: An ESMP_Grid has been created.\n
-    Postconditions: Space for coordinates have been allocated at the 
+    Postconditions: Space for coordinates have been allocated at the
                     specified stagger location of the grid.\n
     Arguments:\n
         ESMP_Grid             :: grid\n
@@ -520,10 +530,10 @@ def ESMP_GridAddItem(grid, item,
                      staggerloc=constants.StaggerLoc.CENTER):
     """
     Preconditions: An ESMP_Grid has been created.\n
-    Postconditions: Space for a grid item has been allocated at the 
-                    specified stagger location of the grid.  Grid items 
-                    such as a mask or and area field can be added with 
-                    this interface, and then retrieved and modified with 
+    Postconditions: Space for a grid item has been allocated at the
+                    specified stagger location of the grid.  Grid items
+                    such as a mask or and area field can be added with
+                    this interface, and then retrieved and modified with
                     ESMP_GridGetItem().\n
     Arguments:\n
         ESMP_Grid             :: grid\n
@@ -561,9 +571,9 @@ _ESMF.ESMC_GridGetCoord.argtypes = [ct.c_void_p, ct.c_int, ct.c_uint,
 def ESMP_GridGetCoordPtr(grid, coordDim,
                          staggerloc=constants.StaggerLoc.CENTER):
     """
-    Preconditions: An ESMP_Grid has been created and coordinates have 
+    Preconditions: An ESMP_Grid has been created and coordinates have
                    been added via ESMP_GridAddCoord().\n
-    Postconditions: A numpy array containing writeable Grid coordinate 
+    Postconditions: A numpy array containing writeable Grid coordinate
                     data has been returned into 'gridCoordPtr'\n
     Arguments:\n
         :RETURN: Numpy.array  :: gridCoordPtr\n
@@ -616,9 +626,9 @@ _ESMF.ESMC_GridGetCoordBounds.argtypes = [ct.c_void_p, ct.c_uint,
 @deprecated
 def ESMP_GridGetCoordBounds(grid, staggerloc=constants.StaggerLoc.CENTER):
     """
-    Preconditions: An ESMP_Grid has been created and coordinates have 
+    Preconditions: An ESMP_Grid has been created and coordinates have
                    been added via ESMP_GridAddCoord().\n
-    Postconditions: Two numpy arrays containing the grid coordinate 
+    Postconditions: Two numpy arrays containing the grid coordinate
                     bounds have been returned in a tuple.\n
     Arguments:\n
         :RETURN: Numpy.array  :: exclusiveLBound\n
@@ -663,12 +673,12 @@ _ESMF.ESMC_GridGetItem.argtypes = [ct.c_void_p, ct.c_uint, ct.c_uint,
 @deprecated
 def ESMP_GridGetItem(grid, item, staggerloc=constants.StaggerLoc.CENTER):
     """
-    Preconditions: An ESMP_Grid has been created and an appropriate 
-                   item has been added via ESMP_GridAddItem().  The 
-                   Grid must have coordinates added via 
+    Preconditions: An ESMP_Grid has been created and an appropriate
+                   item has been added via ESMP_GridAddItem().  The
+                   Grid must have coordinates added via
                    ESMP_GridAddCoord() for this call to succeed.\n
-    Postconditions: A pointer to the data array containing the item is 
-                    returned.  This can be used to modify a grid item, 
+    Postconditions: A pointer to the data array containing the item is
+                    returned.  This can be used to modify a grid item,
                     such as a mask or area field.\n
     Arguments:\n
         :RETURN: Numpy.array  :: mask or area\n
@@ -705,7 +715,7 @@ def ESMP_GridGetItem(grid, item, staggerloc=constants.StaggerLoc.CENTER):
     return gridItemPtr
 
 _ESMF.ESMC_GridWrite.restype = ct.c_int
-_ESMF.ESMC_GridWrite.argtypes = [ct.c_void_p, ct.c_uint,ct.c_char_p]
+_ESMF.ESMC_GridWrite.argtypes = [ct.c_void_p, ct.c_uint,Py3Char]
 @deprecated
 def ESMP_GridWrite(grid, filename, staggerloc=constants.StaggerLoc.CENTER):
     """
@@ -752,16 +762,16 @@ def ESMP_MeshAddElements(mesh, elementCount,
                          elementMask=None,
                          elementArea=None, elementCoords=None):
     """
-    Preconditions: An ESMP_Mesh has been created.  'elementIds' holds 
-                   the IDs of the elements, 'elementTypes' holds the 
-                   types of the elements, and 'elementConn' holds the 
-                   indices of the locations in the 'nodeIDs' 
-                   array from ESMP_MeshAddNodes() which correspond to 
-                   the nodes which make up this element's connectivity.  
-                   Optional arguments 'elementMask' and 'elementArea' 
-                   hold the mask and areas of the elements, 
+    Preconditions: An ESMP_Mesh has been created.  'elementIds' holds
+                   the IDs of the elements, 'elementTypes' holds the
+                   types of the elements, and 'elementConn' holds the
+                   indices of the locations in the 'nodeIDs'
+                   array from ESMP_MeshAddNodes() which correspond to
+                   the nodes which make up this element's connectivity.
+                   Optional arguments 'elementMask' and 'elementArea'
+                   hold the mask and areas of the elements,
                    respectively.\n
-    Postconditions: Elements have been added to 'mesh', this should 
+    Postconditions: Elements have been added to 'mesh', this should
                     only be called once.\n
     Arguments:\n
         ESMP_Mesh                             :: mesh\n
@@ -793,11 +803,11 @@ _ESMF.ESMC_MeshAddNodes.argtypes = [ct.c_void_p, ct.c_int,
 def ESMP_MeshAddNodes(mesh, nodeCount,
                       nodeIds, nodeCoords, nodeOwners):
     """
-    Preconditions: An ESMP_Mesh has been created.  'nodeIds' holds the 
-                   IDs of the nodes, 'nodeCoords' holds the coordinates 
-                   of the nodes, and 'nodeOwners' holds the number 
+    Preconditions: An ESMP_Mesh has been created.  'nodeIds' holds the
+                   IDs of the nodes, 'nodeCoords' holds the coordinates
+                   of the nodes, and 'nodeOwners' holds the number
                    (0-based) of the processor which owns this node.\n
-    Postconditions: Nodes have been added to 'mesh', this should only 
+    Postconditions: Nodes have been added to 'mesh', this should only
                     be called once.\n
     Arguments:\n
         ESMP_Mesh                  :: mesh\n
@@ -852,12 +862,12 @@ def ESMP_MeshCreate(parametricDim, spatialDim, coordSys=None):
     return mesh
 
 _ESMF.ESMC_MeshCreateFromFile.restype = ESMP_Mesh
-_ESMF.ESMC_MeshCreateFromFile.argtypes = [ct.c_char_p, ct.c_int,
+_ESMF.ESMC_MeshCreateFromFile.argtypes = [Py3Char, ct.c_int,
                                           OptionalNamedConstant,
                                           OptionalNamedConstant,
-                                          ct.c_char_p,
+                                          Py3Char,
                                           OptionalNamedConstant,
-                                          ct.c_char_p]
+                                          Py3Char]
 @deprecated
 @netcdf
 def ESMP_MeshCreateFromFile(filename, fileTypeFlag,
@@ -901,7 +911,7 @@ _ESMF.ESMC_MeshDestroy.argtypes = [ct.c_void_p]
 @deprecated
 def ESMP_MeshDestroy(mesh):
     """
-    :KNOWN BUG: This function does not work if ESMP_MeshFreeMemory has 
+    :KNOWN BUG: This function does not work if ESMP_MeshFreeMemory has
                 previously been called.\n
     Preconditions: An ESMP_Mesh has been created.\n
     Postconditions: The 'mesh' has been destroyed.\n
@@ -920,11 +930,11 @@ _ESMF.ESMC_MeshFreeMemory.argtypes = [ct.c_void_p]
 @deprecated
 def ESMP_MeshFreeMemory(mesh):
     """
-    :KNOWN BUG: This function does not work if called on an ESMP_Mesh 
+    :KNOWN BUG: This function does not work if called on an ESMP_Mesh
                 that has not had nodes or elements added.\n
-    Preconditions: An ESMP_Mesh has been created and nodes or elements 
+    Preconditions: An ESMP_Mesh has been created and nodes or elements
                    have been added to the Mesh.\n
-    Postconditions: The noncritical information used to create 'mesh' 
+    Postconditions: The noncritical information used to create 'mesh'
                     has been released back to the heap.\n
     Arguments:\n
         ESMP_Mesh :: mesh\n
@@ -944,7 +954,7 @@ _ESMF.ESMC_MeshGetCoord.argtypes = [ct.c_void_p,
 @deprecated
 def ESMP_MeshGetCoordPtr(mesh):
     """
-    Preconditions: An ESMP_Mesh has been created with coordinates 
+    Preconditions: An ESMP_Mesh has been created with coordinates
                    specified.\n
     Postconditions: An array containing Mesh coordinate data has been
                     returned into 'nodeCoords', number of nodes in
@@ -961,7 +971,7 @@ def ESMP_MeshGetCoordPtr(mesh):
     num_nodes = ESMP_MeshGetLocalNodeCount(mesh)
     nodeCoords = np.array(np.zeros(num_nodes*3),dtype=np.float64)
     _ESMF.ESMC_MeshGetCoord(mesh.struct.ptr, nodeCoords,
-                            ct.byref(lnum_nodes), 
+                            ct.byref(lnum_nodes),
                             ct.byref(lnum_dims), ct.byref(lrc))
     num_nodes = lnum_nodes.value
     num_dims = lnum_dims.value
@@ -978,7 +988,7 @@ _ESMF.ESMC_MeshGetElemCoord.argtypes = [ct.c_void_p,
                                     ct.POINTER(ct.c_int), ct.POINTER(ct.c_int)]
 def ESMP_MeshGetElemCoordPtr(mesh):
     """
-    Preconditions: An ESMP_Mesh has been created with element coordinates 
+    Preconditions: An ESMP_Mesh has been created with element coordinates
                    specified.\n
     Postconditions: An array containing Mesh element coordinate data has been
                     returned into 'elemCoords', number of elements in
@@ -995,7 +1005,7 @@ def ESMP_MeshGetElemCoordPtr(mesh):
     num_elems = ESMP_MeshGetLocalElementCount(mesh)
     elemCoords = np.array(np.zeros(num_elems*3),dtype=np.float64)
     _ESMF.ESMC_MeshGetElemCoord(mesh.struct.ptr, elemCoords,
-                            ct.byref(lnum_elems), 
+                            ct.byref(lnum_elems),
                             ct.byref(lnum_dims), ct.byref(lrc))
     num_elems = lnum_elems.value
     num_dims = lnum_dims.value
@@ -1035,13 +1045,13 @@ def ESMP_MeshGetConnectivityPtr(mesh):
     return connCoord, nodesPerElem
 
 _ESMF.ESMC_MeshGetLocalElementCount.restype = ct.c_int
-_ESMF.ESMC_MeshGetLocalElementCount.argtypes = [ct.c_void_p, 
+_ESMF.ESMC_MeshGetLocalElementCount.argtypes = [ct.c_void_p,
                                                 ct.POINTER(ct.c_int)]
 @deprecated
 def ESMP_MeshGetLocalElementCount(mesh):
     """
     Preconditions: An ESMP_Mesh has been created.\n
-    Postconditions: The local elementCount for 'mesh' has been 
+    Postconditions: The local elementCount for 'mesh' has been
                     returned.\n
     Arguments:\n
         :RETURN: integer :: elementCount\n
@@ -1075,13 +1085,13 @@ def ESMP_MeshGetLocalNodeCount(mesh):
     return nodeCount
 
 _ESMF.ESMC_MeshGetOwnedElementCount.restype = ct.c_int
-_ESMF.ESMC_MeshGetOwnedElementCount.argtypes = [ct.c_void_p, 
+_ESMF.ESMC_MeshGetOwnedElementCount.argtypes = [ct.c_void_p,
                                                 ct.POINTER(ct.c_int)]
 @deprecated
 def ESMP_MeshGetOwnedElementCount(mesh):
     """
     Preconditions: An ESMP_Mesh has been created.\n
-    Postconditions: The owned elementCount for 'mesh' has been 
+    Postconditions: The owned elementCount for 'mesh' has been
                     returned.\n
     Arguments:\n
         :RETURN: integer :: elementCount\n
@@ -1115,7 +1125,7 @@ def ESMP_MeshGetOwnedNodeCount(mesh):
     return nodeCount
 
 _ESMF.ESMC_MeshWrite.restype = ct.c_int
-_ESMF.ESMC_MeshWrite.argtypes = [ct.c_void_p, ct.c_char_p]
+_ESMF.ESMC_MeshWrite.argtypes = [ct.c_void_p, Py3Char]
 @deprecated
 def ESMP_MeshWrite(mesh, filename):
     """
@@ -1205,7 +1215,7 @@ def ESMP_LocStreamGetBounds(locstream, localDe=0):
     return exLB, exUB
 
 _ESMF.ESMC_LocStreamAddKeyAlloc.restype = ct.c_int
-_ESMF.ESMC_LocStreamAddKeyAlloc.argtypes = [ct.c_void_p, ct.c_char_p,
+_ESMF.ESMC_LocStreamAddKeyAlloc.argtypes = [ct.c_void_p, Py3Char,
                                             OptionalNamedConstant]
 def ESMP_LocStreamAddKeyAlloc(locstream, keyName, keyTypeKind=None):
     """
@@ -1232,7 +1242,7 @@ def ESMP_LocStreamAddKeyAlloc(locstream, keyName, keyTypeKind=None):
 
 _ESMF.ESMC_LocStreamGetKeyPtr.restype = ct.POINTER(ct.c_void_p)
 _ESMF.ESMC_LocStreamGetKeyPtr.argtypes = [ct.c_void_p,
-                                          ct.c_char_p,
+                                          Py3Char,
                                           ct.c_int,
                                           ct.POINTER(ct.c_int)]
 def ESMP_LocStreamGetKeyPtr(locstream, keyName, localDe=0):
@@ -1276,9 +1286,9 @@ def ESMP_LocStreamDestroy(locstream):
 _ESMF.ESMC_FieldCreateGridTypeKind.restype = ESMP_Field
 _ESMF.ESMC_FieldCreateGridTypeKind.argtypes = [ct.c_void_p, ct.c_uint,
                                                ct.c_uint, OptionalStructPointer,
-                                               OptionalStructPointer, 
                                                OptionalStructPointer,
-                                               ct.c_char_p, 
+                                               OptionalStructPointer,
+                                               Py3Char,
                                                ct.POINTER(ct.c_int)]
 @deprecated
 def ESMP_FieldCreateGrid(grid, name=None,
@@ -1288,7 +1298,7 @@ def ESMP_FieldCreateGrid(grid, name=None,
                          ungriddedLBound=None,
                          ungriddedUBound=None):
     """
-    Preconditions: ESMP has been initialized and an ESMP_Grid has 
+    Preconditions: ESMP has been initialized and an ESMP_Grid has
                    been created.\n
     Postconditions: An ESMP_Field has been created.\n
     Arguments:\n
@@ -1345,11 +1355,11 @@ def ESMP_FieldCreateGrid(grid, name=None,
         ungriddedUBound_i = ESMP_InterfaceInt(ungriddedUBound)
 
     # call into the FieldCreate C interface
-    field = _ESMF.ESMC_FieldCreateGridTypeKind(grid.struct.ptr, typekind, 
+    field = _ESMF.ESMC_FieldCreateGridTypeKind(grid.struct.ptr, typekind,
                                                staggerloc,
-                                               gridToFieldMap_i, 
+                                               gridToFieldMap_i,
                                                ungriddedLBound_i,
-                                               ungriddedUBound_i, 
+                                               ungriddedUBound_i,
                                                name, ct.byref(lrc))
     rc = lrc.value
     if rc != constants._ESMP_SUCCESS:
@@ -1364,7 +1374,7 @@ _ESMF.ESMC_FieldCreateLocStreamTypeKind.argtypes = [ct.c_void_p,
                                                     OptionalStructPointer,
                                                     OptionalStructPointer,
                                                     OptionalStructPointer,
-                                                    ct.c_char_p,
+                                                    Py3Char,
                                                     ct.POINTER(ct.c_int)]
 def ESMP_FieldCreateLocStream(locstream, name=None,
                      typekind=constants.TypeKind.R8,
@@ -1431,7 +1441,7 @@ _ESMF.ESMC_FieldCreateMeshTypeKind.argtypes = [ct.c_void_p, ct.c_uint,
                                                OptionalStructPointer,
                                                OptionalStructPointer,
                                                OptionalStructPointer,
-                                               ct.c_char_p,
+                                               Py3Char,
                                                ct.POINTER(ct.c_int)]
 def ESMP_FieldCreateMesh(mesh, name=None,
                      typekind=constants.TypeKind.R8,
@@ -1588,8 +1598,8 @@ def ESMP_FieldPrint(field):
 
 _ESMF.ESMC_FieldRead.restype = ct.c_int
 _ESMF.ESMC_FieldRead.argtypes = [ct.c_void_p,
-                                 ct.c_char_p,
-                                 ct.c_char_p,
+                                 Py3Char,
+                                 Py3Char,
                                  ct.c_uint,
                                  ct.c_uint]
 def ESMP_FieldRead(field, filename, variablename, timeslice, iofmt=1):
@@ -1618,9 +1628,9 @@ def ESMP_FieldRegridGetArea(field):
     """
     Preconditions: An ESMP_Field has been created.\n
     Postconditions: The ESMP_Field has been initialized with the areas
-                    of the cells of the underlying Grid or Mesh on 
-                    which the Field has been built.  Note that in the 
-                    Mesh case, this call only works for Fields built on 
+                    of the cells of the underlying Grid or Mesh on
+                    which the Field has been built.  Note that in the
+                    Mesh case, this call only works for Fields built on
                     the elements of a Mesh.\n
     Arguments:\n
         ESMP_Field :: field\n
@@ -1639,9 +1649,9 @@ _ESMF.ESMC_FieldRegridRelease.argtypes = [ct.POINTER(ct.c_void_p)]
 @deprecated
 def ESMP_FieldRegridRelease(routehandle):
     """
-    Preconditions: A routehandle has been created with 
+    Preconditions: A routehandle has been created with
                    ESMP_RegridStore().\n
-    Postconditions: All heap data associated with the regridding 
+    Postconditions: All heap data associated with the regridding
                     operation has been released.\n
     Arguments:\n
         ESMP_RouteHandle :: routehandle\n
@@ -1675,15 +1685,15 @@ def ESMP_FieldRegridStore(srcField, dstField,
                           srcFracField=None, dstFracField=None):
     """
     Preconditions: Two ESMP_Fields have been created and initialized
-                   sufficiently for a regridding operation to take 
-                   place.  'srcMaskValues' and 'dstMaskValues' are 
-                   Numpy arrays which hold the values of a field which 
+                   sufficiently for a regridding operation to take
+                   place.  'srcMaskValues' and 'dstMaskValues' are
+                   Numpy arrays which hold the values of a field which
                    represent a masked cell.\n
-    Postconditions: A handle to the regridding operation has been 
-                    returned into 'routehandle' and Fields containing 
-                    the fractions of the source and destination cells 
-                    participating in the regridding operation are 
-                    optionally returned into 'srcFracField' and 
+    Postconditions: A handle to the regridding operation has been
+                    returned into 'routehandle' and Fields containing
+                    the fractions of the source and destination cells
+                    participating in the regridding operation are
+                    optionally returned into 'srcFracField' and
                     'dstFracField'.\n
     Arguments:\n
         :RETURN: ESMP_RouteHandle           :: routehandle\n
@@ -1725,7 +1735,7 @@ def ESMP_FieldRegridStore(srcField, dstField,
         regridPoleNPnts_ct = ct.byref(ct.c_void_p(regridPoleNPnts))
     else:
         regridPoleNPnts_ct = None
-        
+
     #InterfaceInt requires int32 type numpy arrays
     srcMaskValues_i = srcMaskValues
     if (srcMaskValues is not None):
@@ -1782,15 +1792,15 @@ def ESMP_FieldRegrid(srcField, dstField, routehandle, zeroregion=None):
 
 
 _ESMF.ESMC_ScripInq.restype = None
-_ESMF.ESMC_ScripInq.argtypes = [ct.c_char_p, 
-                                np.ctypeslib.ndpointer(dtype=np.int32), 
+_ESMF.ESMC_ScripInq.argtypes = [Py3Char,
+                                np.ctypeslib.ndpointer(dtype=np.int32),
                                 ct.POINTER(ct.c_int),
                                 ct.POINTER(ct.c_int)]
 @netcdf
 def ESMP_ScripInq(filename):
     """
     Preconditions: ESMP has been initialized.\n
-    Postconditions:  The rank and grid dimensions of the specified SCRIP 
+    Postconditions:  The rank and grid dimensions of the specified SCRIP
                      NetCDF file or an error code have been returned.\n
     Arguments:\n
         String :: filename\n
@@ -1809,7 +1819,7 @@ def ESMP_ScripInq(filename):
     return rank, grid_dims
 
 _ESMF.ESMC_GridspecInq.restype = None
-_ESMF.ESMC_GridspecInq.argtypes = [ct.c_char_p, ct.POINTER(ct.c_int), np.ctypeslib.ndpointer(dtype=np.int32), 
+_ESMF.ESMC_GridspecInq.argtypes = [Py3Char, ct.POINTER(ct.c_int), np.ctypeslib.ndpointer(dtype=np.int32),
                                    ct.POINTER(ct.c_int)]
 @netcdf
 def ESMP_GridspecInq(filename):

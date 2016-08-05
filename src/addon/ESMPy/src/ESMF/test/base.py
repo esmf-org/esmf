@@ -65,7 +65,7 @@ class TestBase(unittest.TestCase):
         try:
             unittest.TestCase.assertDictEqual(self, d1, d2, msg=msg)
         except AssertionError:
-            for k, v in d1.iteritems():
+            for k, v in d1.items():
                 self.assertEqual(v, d2[k])
             self.assertEqual(set(d1.keys()), set(d2.keys()))
 
@@ -82,7 +82,7 @@ def attr(*args, **kwargs):
     def wrap_ob(ob):
         for name in args:
             setattr(ob, name, True)
-        for name, value in kwargs.iteritems():
+        for name, value in kwargs.items():
             setattr(ob, name, value)
         return ob
 

@@ -52,19 +52,19 @@ class TestRegrid(TestBase):
         gridXCorner = srcgrid.get_coords(x)
         gridYCorner = srcgrid.get_coords(y)
 
-        for i in xrange(gridXCorner.shape[x]):
+        for i in range(gridXCorner.shape[x]):
             gridXCorner[i, :] = float(i) / 6.
 
-        for j in xrange(gridYCorner.shape[y]):
+        for j in range(gridYCorner.shape[y]):
             gridYCorner[:, j] = float(j) / 6.
 
         gridXCorner = dstgrid.get_coords(x)
         gridYCorner = dstgrid.get_coords(y)
 
-        for i in xrange(gridXCorner.shape[x]):
+        for i in range(gridXCorner.shape[x]):
             gridXCorner[i, :] = float(i) / 4.
 
-        for j in xrange(gridYCorner.shape[y]):
+        for j in range(gridYCorner.shape[y]):
             gridYCorner[:, j] = float(j) / 4.
 
         # create a Field on the Grid
@@ -106,10 +106,10 @@ class TestRegrid(TestBase):
         gridXCorner = grid.get_coords(x, staggerloc=StaggerLoc.CORNER)
         gridYCorner = grid.get_coords(y, staggerloc=StaggerLoc.CORNER)
 
-        for i in xrange(gridXCorner.shape[x]):
+        for i in range(gridXCorner.shape[x]):
             gridXCorner[i, :] = float(i)
 
-        for j in xrange(gridYCorner.shape[y]):
+        for j in range(gridYCorner.shape[y]):
             gridYCorner[:, j] = float(j)
 
         # create a Field on the Grid
@@ -199,7 +199,7 @@ class TestRegrid(TestBase):
         for i in range(srcarea.data.shape[x]):
             for j in range(srcarea.data.shape[y]):
                 if (srcarea.data[i, j] != 5):
-                    print "Cell area is {0}, but expected 5".format(srcarea[i, j])
+                    print ("Cell area is {0}, but expected 5".format(srcarea[i, j]))
 
         # subtract two because the last two cells of mesh are triangles with half area
         for i in range(dstarea.data.shape[0]):

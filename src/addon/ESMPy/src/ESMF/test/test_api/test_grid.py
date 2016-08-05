@@ -423,20 +423,20 @@ class TestGrid(TestBase):
         exLB = grid.lower_bounds[StaggerLoc.CENTER]
         exUB = grid.upper_bounds[StaggerLoc.CENTER]
 
-        print "Grid Bounds:"
-        print "    exclusiveLBounds = " + str(exLB)
-        print type(exLB)
-        print "    exclusiveUBounds = " + str(exUB)
-        print exUB.dtype
+        print ("Grid Bounds:")
+        print ("    exclusiveLBounds = " + str(exLB))
+        print (type(exLB))
+        print ("    exclusiveUBounds = " + str(exUB))
+        print (exUB.dtype)
 
         # get and set the coordinates
         [x, y] = [0, 1]
         gridCoord = grid.coords[StaggerLoc.CENTER]
 
-        for i in xrange(gridCoord[x].shape[x]):
+        for i in range(gridCoord[x].shape[x]):
             gridCoord[x][i, :] = float(i)
 
-        for j in xrange(gridCoord[y].shape[y]):
+        for j in range(gridCoord[y].shape[y]):
             gridCoord[y][:, j] = float(j)
 
         # validate the coordinates using an easily understood double loop
@@ -444,12 +444,12 @@ class TestGrid(TestBase):
         gridYCoord_check = grid.get_coords(y)
 
         correct = True
-        for i in xrange(gridXCoord_check.shape[x]):
-            for j in xrange(gridXCoord_check.shape[y]):
+        for i in range(gridXCoord_check.shape[x]):
+            for j in range(gridXCoord_check.shape[y]):
                 assert(gridXCoord_check[i, j] == float(i))
 
-        for i in xrange(gridYCoord_check.shape[x]):
-            for j in xrange(gridYCoord_check.shape[y]):
+        for i in range(gridYCoord_check.shape[x]):
+            for j in range(gridYCoord_check.shape[y]):
                 assert(gridYCoord_check[i, j] == float(j))
 
     def test_grid_coords_3D(self):
@@ -464,23 +464,23 @@ class TestGrid(TestBase):
         exLB = grid.lower_bounds[StaggerLoc.CENTER]
         exUB = grid.upper_bounds[StaggerLoc.CENTER]
 
-        print "Grid Bounds:"
-        print "    exclusiveLBounds = " + str(exLB)
-        print type(exLB)
-        print "    exclusiveUBounds = " + str(exUB)
-        print exUB.dtype
+        print ("Grid Bounds:")
+        print ("    exclusiveLBounds = " + str(exLB))
+        print (type(exLB))
+        print ("    exclusiveUBounds = " + str(exUB))
+        print (exUB.dtype)
 
         # get and set the coordinates
         [x, y, z] = [0, 1, 2]
         gridCoord = grid.coords[StaggerLoc.CENTER]
 
-        for i in xrange(gridCoord[x].shape[x]):
+        for i in range(gridCoord[x].shape[x]):
             gridCoord[x][i, :, :] = float(i)
 
-        for j in xrange(gridCoord[y].shape[y]):
+        for j in range(gridCoord[y].shape[y]):
             gridCoord[y][:, j, :] = float(j)
 
-        for k in xrange(gridCoord[z].shape[z]):
+        for k in range(gridCoord[z].shape[z]):
             gridCoord[z][:, :, k] = float(k)
 
         # get the coordinate pointers and validate the coordinates
@@ -488,19 +488,19 @@ class TestGrid(TestBase):
         gridYCoord_check = grid.get_coords(y)
         gridZCoord_check = grid.get_coords(z)
 
-        for i in xrange(gridXCoord_check.shape[x]):
-            for j in xrange(gridXCoord_check.shape[y]):
-                for k in xrange(gridXCoord_check.shape[z]):
+        for i in range(gridXCoord_check.shape[x]):
+            for j in range(gridXCoord_check.shape[y]):
+                for k in range(gridXCoord_check.shape[z]):
                     assert(gridXCoord_check[i, j, k] == float(i))
 
-        for i in xrange(gridYCoord_check.shape[x]):
-            for j in xrange(gridYCoord_check.shape[y]):
-                for k in xrange(gridYCoord_check.shape[z]):
+        for i in range(gridYCoord_check.shape[x]):
+            for j in range(gridYCoord_check.shape[y]):
+                for k in range(gridYCoord_check.shape[z]):
                     assert(gridYCoord_check[i, j, k] == float(j))
 
-        for i in xrange(gridZCoord_check.shape[x]):
-            for j in xrange(gridZCoord_check.shape[y]):
-                for k in xrange(gridZCoord_check.shape[z]):
+        for i in range(gridZCoord_check.shape[x]):
+            for j in range(gridZCoord_check.shape[y]):
+                for k in range(gridZCoord_check.shape[z]):
                     assert (gridZCoord_check[i, j, k] == float(k))
 
     def test_grid_mask(self):
@@ -516,8 +516,8 @@ class TestGrid(TestBase):
         mask = grid.add_item(GridItem.MASK)
 
         [x, y] = [0, 1]
-        for i in xrange(mask.shape[x]):
-            for j in xrange(mask.shape[y]):
+        for i in range(mask.shape[x]):
+            for j in range(mask.shape[y]):
                 if (i == 2.0):
                     mask[i, j] = 1
                 else:

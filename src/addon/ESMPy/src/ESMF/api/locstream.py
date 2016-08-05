@@ -113,7 +113,7 @@ class LocStream(dict):
         slc_ls = slc
 
         # check that this is actually a slicing operation and not just regular item retrieval
-        if not isinstance(slc, basestring):
+        if not isinstance(slc, str):
             # parallel slicing is not yet enabled (collective operation)
             if pet_count() > 1:
                 raise SerialMethod
@@ -131,7 +131,7 @@ class LocStream(dict):
             ret._size = ret.upper_bounds - ret.lower_bounds
 
             # keys
-            for x in ret.iterkeys():
+            for x in ret.keys():
                 ret[x] = super(LocStream, self).__getitem__(x)[slc_ls]
 
         return ret
@@ -276,7 +276,7 @@ class LocStream(dict):
         ret._lower_bounds = self._lower_bounds
         ret._upper_bounds = self._upper_bounds
 
-        for key, value in self.iteritems():
+        for key, value in self.items():
             super(LocStream, ret).__setitem__(key, value)
 
         # don't call ESMF destructor twice on the same shallow Python object

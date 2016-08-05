@@ -216,7 +216,7 @@ class TestMesh(TestBase):
 
         mesh2 = mesh[0:5]
 
-        print 'mesh.coords[0][0].shape = ',mesh.coords[0][0].shape
+        print ('mesh.coords[0][0].shape = ',mesh.coords[0][0].shape)
         assert mesh.coords[0][0].shape == (866,)
         assert mesh.size == [866,936]
         assert mesh.size_owned == [866,936]
