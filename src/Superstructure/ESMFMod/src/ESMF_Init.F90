@@ -319,6 +319,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       logical :: logappendflag_local
       type(ESMF_LogKind_Flag) :: logkindflagUse
       logical :: openflag
+      integer :: complianceCheckIsOn
 
       ! Initialize return code
       rcpresent = .FALSE.
@@ -407,6 +408,20 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       if (localrc /= ESMF_SUCCESS) then
           write (ESMF_UtilIOStderr,*) ESMF_METHOD, ": Error initializing the default log/error manager"
           return
+      endif
+
+      ! if compliance checker is on, we want logs to have high prescision timestamps
+      call c_esmc_getComplianceCheckJSON(complianceCheckIsOn, localrc)
+      if (localrc /= ESMF_SUCCESS) then
+          write (ESMF_UtilIOStderr,*) ESMF_METHOD, ": Error checking ESMF_RUNTIME_COMPLIANCECHECK env variable"
+          return
+      endif
+      if (complianceCheckIsOn == 1) then
+        call ESMF_LogSet(highResTimestampFlag=.true., rc=localrc)
+        if (localrc /= ESMF_SUCCESS) then
+          write (ESMF_UtilIOStderr,*) ESMF_METHOD, ": Error setting default log option: highResTimestampFlag"
+          return
+        endif
       endif
 
       ! Write our version number out into the log
