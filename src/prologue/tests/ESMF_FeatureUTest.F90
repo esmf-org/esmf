@@ -22,7 +22,7 @@
     integer :: rc, result
     character(len=ESMF_MAXSTR) :: failMsg, name
 
-    real,    allocatable :: a(:)
+    real,    allocatable :: a(:), b(:), c(:)
     integer, allocatable :: indicies(:)
     logical, allocatable :: tfs(:)
     character(8), allocatable :: strings(:)
@@ -96,29 +96,60 @@
     failMsg = "Incorrect allocated size"
     tf = size (a) == 42 .and. size (indicies) == 42 .and. size (tfs) == 42  &
         .and. size (dts) == 42
+#if defined (ALLOC_STRING_TEST)
     tf = tf .and. size (strings) == 42
+#endif
+    rc = merge (ESMF_SUCCESS, ESMF_RC_ARG_SIZE, tf)
     call ESMF_Test(rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
 
-    ! TODO: Auto-reallocation of allocatables not supported in gfortran until v4.6.
-    ! So do explicit deallocates for now.
-    deallocate (a, indicies, tfs, dts)
-    deallocate (strings)
+    ! NOTE: Some compilers may require a special command line argument for
+    ! the following tests to work.  This is needed to turn on the F2003
+    ! semantics for reassignment of allocatable arrays to different sizes
+    ! than originally allocated.  For example PGI requires -Mallocatable=03
+    ! and Intel requires -assume realloc_lhs.
 
+    ! TODO: Tests are currently disabled due to failures on older versions
+    ! (pre-4.6 or so) and with g95.  Re-enable when ESMF support for these
+    ! older compilers is no longer required.
+
+#if 0
     !------------------------------------------------------------------------
     !------------------------------------------------------------------------
-    ! NEX_UTest
+    ! NEX_xxxUTest
     name = "Fortran allocatable function result test"
     failMsg = "Did not return ESMF_SUCCESS"
-    a = ESMF_FeatureAllocFRet (420, rc=rc)
+    b = ESMF_FeatureAllocFRet (420, rc=rc)
     call ESMF_Test(rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
 
     !------------------------------------------------------------------------
     !------------------------------------------------------------------------
-    ! NEX_UTest
-    name = "Fortran allocatable return value size test"
+    ! NEX_xxxUTest
+    name = "Fortran allocatable function return size test"
     failMsg = "Incorrect allocated size"
-    tf = size (a) == 420
+    rc = merge (ESMF_SUCCESS, ESMF_RC_ARG_SIZE, size (b) == 420)
     call ESMF_Test(rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
+    print *, 'result size (b) =', size (b)
+
+    !------------------------------------------------------------------------
+    !------------------------------------------------------------------------
+    ! NEX_xxxUTest
+    name = "Fortran resize existing allocatable array via assignment test"
+    failMsg = "Incorrect allocated size"
+    a = b
+    rc = merge (ESMF_SUCCESS, ESMF_RC_ARG_SIZE, size (a) == 420)
+    call ESMF_Test(rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
+    print *, 'resized size (a) =', size (a)
+
+    !------------------------------------------------------------------------
+    !------------------------------------------------------------------------
+    ! NEX_xxxUTest
+    name = "Fortran resize unallocated allocatable array via assignment test"
+    failMsg = "Incorrect allocated size"
+    c = b
+    rc = merge (ESMF_SUCCESS, ESMF_RC_ARG_SIZE, size (c) == 420)
+    call ESMF_Test(rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
+    print *, 'new size (c) =', size (c)
+#endif
 
     !------------------------------------------------------------------------
     !------------------------------------------------------------------------

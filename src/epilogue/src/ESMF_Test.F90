@@ -106,7 +106,7 @@
         if (present(unit)) write(unit, *) trim(msg)
       else
         write(msg, *) "FAIL ", trim(name), ", ", trim(file), ", line ", &
-                      trim (linestr), trim(failMsg)
+                      trim (linestr), ": ", trim(failMsg)
         print *, trim(msg)
         call ESMF_LogWrite(trim(msg), ESMF_LOGMSG_INFO)
         if (present(unit)) write(unit, *) trim(msg)
@@ -464,7 +464,7 @@ exclusion_loop:  &
       call ESMF_VMGetGlobal(globalVM, rc=localrc)
       if (localrc .ne. ESMF_SUCCESS) then
         failMsg = "Unable to get global VM" 
-        write(msg, *) "FAIL ", trim(file), ", line ", trim (linestr), trim(failMsg)
+        write(msg, *) "FAIL ", trim(file), ", line ", trim (linestr), ": ", trim(failMsg)
         print *, trim(msg)
         call ESMF_LogWrite(trim(msg), ESMF_LOGMSG_INFO)
         if (present(unit)) write(unit, *) trim(msg)
@@ -475,7 +475,7 @@ exclusion_loop:  &
       if (localrc .ne. ESMF_SUCCESS) then
         failMsg = "Unable to get number of PETS from global VM" 
         write(msg, *) "FAIL ", trim(file), ", line ", &
-                      trim (linestr), trim(failMsg)
+                      trim (linestr), ": ", trim(failMsg)
         print *, trim(msg)
         call ESMF_LogWrite(trim(msg), ESMF_LOGMSG_INFO)
         if (present(unit)) write(unit, *) trim(msg)
@@ -489,7 +489,7 @@ exclusion_loop:  &
       if (petCount .gt. numPETs) then
         write(failMsg, *) "These tests must run on at least", petCount, " processors."
         write(msg, *) "SKIP ", trim(file), ", line ", &
-                      trim (linestr), trim(failMsg)
+                      trim (linestr), ": ", trim(failMsg)
         print *, trim(msg)
         call ESMF_LogWrite(trim(msg), ESMF_LOGMSG_INFO)
         if (present(unit)) write(unit, *) trim(msg)
@@ -541,7 +541,7 @@ exclusion_loop:  &
       call ESMF_VMGetGlobal(globalVM, rc=localrc)
       if (localrc .ne. ESMF_SUCCESS) then
         failMsg = "Unable to get global VM" 
-        write(msg, *) "FAIL ", trim(file), ", line ", trim (linestr), trim(failMsg)
+        write(msg, *) "FAIL ", trim(file), ", line ", trim (linestr), ": ", trim(failMsg)
         print *, trim(msg)
         call ESMF_LogWrite(trim(msg), ESMF_LOGMSG_INFO)
         if (present(unit)) write(unit, *) trim(msg)
@@ -552,7 +552,7 @@ exclusion_loop:  &
       if (localrc .ne. ESMF_SUCCESS) then
         failMsg = "Unable to query global VM" 
         write(msg, *) "FAIL ", trim(file), ", line ", &
-                      trim (linestr), trim(failMsg)
+                      trim (linestr), ": ", trim(failMsg)
         print *, trim(msg)
         call ESMF_LogWrite(trim(msg), ESMF_LOGMSG_INFO)
         if (present(unit)) write(unit, *) trim(msg)
@@ -566,7 +566,7 @@ exclusion_loop:  &
       if (petCount .lt. numPETs) then
         write(failMsg, *) "These tests must run not more than", petCount, " processors."
         write(msg, *) "SKIP ", trim(file), ", line ", &
-                      trim (linestr), trim(failMsg)
+                      trim (linestr), ": ", trim(failMsg)
         print *, trim(msg)
         call ESMF_LogWrite(trim(msg), ESMF_LOGMSG_INFO)
         if (present(unit)) write(unit, *) trim(msg)
@@ -618,7 +618,7 @@ exclusion_loop:  &
       call ESMF_VMGetGlobal(globalVM, rc=localrc)
       if (localrc .ne. ESMF_SUCCESS) then
         failMsg = "Unable to get global VM" 
-        write(msg, *) "FAIL ", trim(file), ", line ", trim (linestr), trim(failMsg)
+        write(msg, *) "FAIL ", trim(file), ", line ", trim (linestr), ": ", trim(failMsg)
         print *, trim(msg)
         call ESMF_LogWrite(trim(msg), ESMF_LOGMSG_INFO)
         if (present(unit)) write(unit, *) trim(msg)
@@ -629,7 +629,7 @@ exclusion_loop:  &
       if (localrc .ne. ESMF_SUCCESS) then
         failMsg = "Unable to query global VM" 
         write(msg, *) "FAIL ", trim(file), ", line ", &
-                      trim (linestr), trim(failMsg)
+                      trim (linestr), ": ", trim(failMsg)
         print *, trim(msg)
         call ESMF_LogWrite(trim(msg), ESMF_LOGMSG_INFO)
         if (present(unit)) write(unit, *) trim(msg)
@@ -643,7 +643,7 @@ exclusion_loop:  &
       if (petCount .ne. numPETs) then
         write(failMsg, *) "These tests must run on exactly", petCount, " processors."
         write(msg, *) "SKIP ", trim(file), ", line ", &
-                      trim (linestr), trim(failMsg)
+                      trim (linestr), ": ", trim(failMsg)
         print *, trim(msg)
         call ESMF_LogWrite(trim(msg), ESMF_LOGMSG_INFO)
         if (present(unit)) write(unit, *) trim(msg)
