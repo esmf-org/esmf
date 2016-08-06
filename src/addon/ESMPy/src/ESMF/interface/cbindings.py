@@ -6,6 +6,7 @@ The bindings to the ESMF C API
 
 import ctypes as ct
 import numpy as np
+import sys
 
 import ESMF.api.constants as constants
 from ESMF.util.decorators import deprecated, netcdf
@@ -62,7 +63,11 @@ class OptionalArrayOfStrings(object):
         def from_param(self, param):
             if param:
                 lparam = (ct.c_char_p * len(param))()
-                lparam[:] = param
+                if sys.version_info.major >= 3:
+                    for i in range(len(param)):
+                        lparam[i] = bytes(str(param[i]), 'ascii')
+                else:
+                    lparam[:] = param
             else:
                 lparam = None
             return lparam
