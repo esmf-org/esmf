@@ -286,108 +286,45 @@ coordinates.
 First-order conservative
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
-First-order conservative interpolation (RegridMethod.CONSERVE) :cite:`ConservativeOrder1` is also available
-as a regridding method.
-This method will typically have a larger local interpolation error than the previous two methods, but will do a
-much better job of preserving the value of the integral of data between the source and destination grid.
+First-order conservative interpolation (RegridMethod.CONSERVE)
+:cite:`ConservativeOrder1` is also available as a regridding method.
+This method will typically have a larger local interpolation error than the
+other interpoloation methods, but will do a much better job of preserving the
+value of the integral of data between the source and destination grid.
 In this method the value across each source cell is treated as a constant.
-The weights for a particular destination cell are the area of intersection of each source cell with the destination
-cell divided by the area of the destination cell.
+The weights for a particular destination cell are the area of intersection of
+each source cell with the destination cell divided by the area of the
+destination cell.
 For Cartesian grids, the area of a grid cell is the typical Cartesian area.
-For grids on a sphere, cell areas are calculated by connecting the corner coordinates of each grid cell with
-great circles. If the user doesn't specify cell areas in the involved Grids or Meshes, then the conservation will
-hold for the areas as calculated by ESMF.  This means the following equation will hold::
+For grids on a sphere, cell areas are calculated by connecting the corner
+coordinates of each grid cell with great circles. If the user doesn't specify
+cell areas in the involved Grids or Meshes, then the conservation will
+hold for the areas as calculated by ESMF. This means the following equation
+will hold:
 
-    sum-over-all-source-cells(Vsi*Asi) = sum-over-all-destination-cells(Vdj*A'dj),
+.. math:: \Sigma V^s_iA^s_i = \Sigma V^d_jA'^d_j,
 
-where V is the variable being regridded and A' is the area of a cell as calculated by ESMF.
+where :math:`V` is the variable being regridded and :math:`A'` is the area of a
+cell as calculated by ESMF. The superscripts :math:`s` and :math:`d` refer to
+the source and destination values, and the subscripts :math:`i` and :math:`j`
+refer to the grid cell indices (flattening the arrays to a single dimension).
 
-The subscripts s and d refer to source and destination values, and the i and j are the source and destination
-grid cell indices (flattening the arrays to 1 dimension).
-If the user does specify the areas in the Grid or Mesh, then the conservation will be adjusted to work for the
-areas provided by the user. This means the following equation will hold::
+If the user does specify the areas in the Grid or Mesh, then the conservation
+will be adjusted to work for the areas provided by the user. This means the
+following equation will hold:
 
-    sum-over-all-source-cells(Vsi*Asi) = sum-over-all-destination-cells(Vdj*Adj),
+.. math:: \Sigma V^s_iA^s_i = \Sigma V^d_jA^d_j,
 
-where A is the area of a cell as provided by the user.
+where :math:`A` is the area of a cell as provided by the user.
 
-The user should be aware that because of the conservation relationship between the source and destination fields,
-the more the total source area differs from the total destination area the more the values of the source field
-will differ from the corresponding values of the destination field, likely giving a higher interpolation error.
-It is best to have the total source and destination areas the same (this will automatically be true if no user
-areas are specified). For source and destination grids that only partially overlap, the overlapping regions of
-the source and destination should be the same.
-
-Note that for grids on a sphere the conservative interpolation assumes great circle edges to cells.
-This means that the edges of a cell won't necessarily be the same as a straight line in latitude longitude.
-For small edges, this difference will be small, but for long edges it could be significant.
-This means if the user expects cell edges as straight lines in latitude longitude space, they should avoid using
-one large cell with long edges to compute an average over a region (e.g. over an ocean basin).
-The user should also avoid using cells that contain one edge that runs half way or more around the earth,
-because the regrid weight calculation assumes the edge follows the shorter great circle path.
-Also, there isn't a unique great circle edge defined between points on the exact opposite side of the earth
-from one another (antipodal points). However, the user can work around both of these problemS by breaking the
-long edge into two smaller edges by inserting an extra node, or by breaking the large target grid cells into
-two or more smaller grid cells. This allows the application to resolve the ambiguity in edge direction.
-
-It is important to note that by default (i.e. using destination area normalization) conservative regridding
-doesn't normalize the interpolation weights by the destination fraction. This means that for a destination grid
-which only partially overlaps the source grid the destination field that is output from the regrid operation
-should be divided by the corresponding destination fraction to yield the true interpolated values for cells which
-are only partially covered by the source grid. The fraction also needs to be included when computing the total
-source and destination integrals. (To include the fraction in the conservative weights, the user can specify
-the fraction area normalization type. This can be done by specifying normType=NormType.FRACAREA when creating
-the Regrid object.)
-
-For weights generated using destination area normalization (either by not specifying any normalization type or
-by specifying normType=NormType.DSTAREA), if a destination field extends outside the unmasked source field,
-then the values of the cells which extend partway outside the unmasked source field are decreased by the
-fraction they extend outside. To correct these values, the destination field (dst_field) resulting from the
-Regrid call can be divided by the destination fraction dst_frac. The following pseudocode demonstrates how to do this::
-
-
-    for each destination element i
-       if (dst_frac(i) not equal to 0.0) then
-          dst_field(i)=dst_field(i)/dst_frac(i)
-       end if
-    end for
-
-For weights generated using destination area normalization (either by not specifying any normalization type or
-by specifying normType=NormType.DSTAREA), the following pseudo-code shows how to compute the total destination
-integral (dst_total) given the destination field values (dst_field),
-the destination area (dst_area), and the destination fraction (dst_frac).
-As shown in the previous paragraph, it also shows how to adjust the destination field (dst_field)
-by the fraction (dst_frac)::
-
-
-    dst_total=0.0
-    for each destination element i
-       if (dst_frac(i) not equal to 0.0) then
-          dst_total=dst_total+dst_field(i)*dst_area(i)
-          dst_field(i)=dst_field(i)/dst_frac(i)
-          ! If mass computed here after dst_field adjust, would need to be:
-          ! dst_total=dst_total+dst_field(i)*dst_area(i)*dst_frac(i)
-       end if
-    end for
-
-For weights generated using fraction area normalization (by specifying normType=NormType.FRACAREA),
-no adjustment of the destination field is necessary. The following pseudo-code shows how to compute the total
-destination integral (dst_total) given the destination field values (dst_field), the destination area (dst_area),
-and the destination fraction (dst_frac)::
-
-    dst_total=0.0
-    for each destination element i
-         dst_total=dst_total+dst_field(i)*dst_area(i)*dst_frac(i)
-    end for
-
-For both normalization types, the following pseudo-code shows how to compute the total source integral (src_total)
-given the source field values (src_field), the source area (src_area), and the source fraction (src_frac)::
-
-    src_total=0.0
-    for each source element i
-       src_total=src_total+src_field(i)*src_area(i)*src_frac(i)
-    end for
-
+The user should be aware that because of the conservation relationship between
+the source and destination fields, the more the total source area differs from
+the total destination area the more the values of the source field
+will differ from the corresponding values of the destination field, likely
+giving a higher interpolation error. It is best to have the total source and
+destination areas the same (this will automatically be true if no user areas
+are specified). For source and destination grids that only partially overlap,
+the overlapping regions of the source and destination should be the same.
 
 In 2D, ESMPy supports first-order conservative regridding between any
 combination of the following:
@@ -413,6 +350,94 @@ StaggerLoc.CENTER_VCENTER in 3D) for Grids or the element location
 (MeshLoc.ELEMENT) for Meshes. For Grids, the corner stagger location
 (StaggerLoc.CORNER in 2D or StaggerLoc.CORNER_VFACE in 3D) must
 contain coordinates describing the outer perimeter of the Grid cells.
+
+++++++++++++++++++
+Great Circle Edges
+++++++++++++++++++
+
+Conservative interpolation on spherical grids assumes great
+circle edges to cells. This means that the edges of a cell won't necessarily be
+the same as a straight line in spherical space. For small edges, this difference
+will be small, but for long edges it could be significant. This means if the
+user expects cell edges as straight lines in latitude longitude space, they
+should avoid using one large cell with long edges to compute an average over a
+region (e.g. over an ocean basin). The user should also avoid using cells that
+contain one edge that runs half way or more around the earth, because the regrid
+weight calculation assumes the edge follows the shorter great circle path. Also,
+there isn't a unique great circle edge defined between points on the exact
+opposite side of the earth from one another (antipodal points). However, the
+user can work around both of these problemS by breaking the long edge into two
+smaller edges by inserting an extra node, or by breaking the large target grid
+cells into two or more smaller grid cells. This allows the algorithm to
+resolve the ambiguity in edge direction.
+
++++++++++++++
+Normalization
++++++++++++++
+
+It is important to note that conservative regridding does not normalize the
+interpolation weights with the destination fraction by default (i.e. destination
+area normalization). This means that for a destination grid which only partially
+overlaps the source grid the destination field that is output from the regrid
+operation should be divided by the corresponding destination fraction to yield
+the true interpolated values for cells which are only partially covered by the
+source grid. The fraction also needs to be included when computing the total
+source and destination integrals. To include the fraction in the conservative
+weights, the user can specify the fraction area normalization type by specifying
+normType=NormType.FRACAREA when creating the Regrid object.)
+
+For weights generated using destination area normalization (either by not
+specifying any normalization type or by specifying normType=NormType.DSTAREA),
+if a destination field extends outside the unmasked source field then the values
+of the cells which extend partway outside the unmasked source field are
+decreased by the fraction they extend outside. To correct these values the
+destination field (dst_field_ resulting from the Regrid call can be divided by
+the destination fraction. (dst_frac) The following pseudocode demonstrates how
+to do this::
+
+    for each destination element i
+       if (dst_frac(i) not equal to 0.0) then
+          dst_field(i)=dst_field(i)/dst_frac(i)
+       end if
+    end for
+
+For weights generated using destination area normalization (either by not
+specifying any normalization type or by specifying normType=NormType.DSTAREA),
+the following pseudo-code shows how to compute the total destination integral
+(dst_total) given the destination field values (dst_field), the destination area
+(dst_area), and the destination fraction (dst_frac). As shown in the previous
+paragraph, it also shows how to adjust the destination field (dst_field)
+by the fraction (dst_frac)::
+
+    dst_total=0.0
+    for each destination element i
+       if (dst_frac(i) not equal to 0.0) then
+          dst_total=dst_total+dst_field(i)*dst_area(i)
+          dst_field(i)=dst_field(i)/dst_frac(i)
+          ! If mass computed here after dst_field adjust, would need to be:
+          ! dst_total=dst_total+dst_field(i)*dst_area(i)*dst_frac(i)
+       end if
+    end for
+
+For weights generated using fraction area normalization (by specifying
+normType=NormType.FRACAREA), no adjustment of the destination field is
+necessary. The following pseudo-code shows how to compute the total destination
+integral (dst_total) given the destination field values (dst_field), the
+destination area (dst_area), and the destination fraction (dst_frac)::
+
+    dst_total=0.0
+    for each destination element i
+         dst_total=dst_total+dst_field(i)*dst_area(i)*dst_frac(i)
+    end for
+
+For both normalization types, the following pseudo-code shows how to compute the
+total source integral (src_total) given the source field values (src_field),
+the source area (src_area), and the source fraction (src_frac)::
+
+    src_total=0.0
+    for each source element i
+       src_total=src_total+src_field(i)*src_area(i)*src_frac(i)
+    end for
 
 -------
 Masking
