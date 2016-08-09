@@ -572,11 +572,11 @@ contains
       select case (stateItem%otype%ot)
       case (ESMF_STATEITEM_FIELDBUNDLE%ot)
         fbundlep => stateItem%datap%fbp%this
-        call c_ESMC_GetVMId (fbundlep, vmid, localrc)
+        call ESMF_BaseGetVMId (fbundlep%base, vmid, rc=localrc)
 
       case (ESMF_STATEITEM_FIELD%ot)
         fieldp => stateItem%datap%fp%ftypep
-        call c_ESMC_GetVMId (fieldp, vmid, localrc)
+        call ESMF_BaseGetVMId (fieldp%base, vmid, rc=localrc)
 
       case (ESMF_STATEITEM_ARRAY%ot)
         arrayp => stateItem%datap%ap
@@ -592,7 +592,7 @@ contains
 
       case (ESMF_STATEITEM_STATE%ot)
         statep => stateItem%datap%spp
-        call c_ESMC_GetVMId (statep, vmid, localrc)
+        call ESMF_BaseGetVMId (statep%base, vmid, rc=localrc)
 
       end select
       if (ESMF_LogFoundError(localrc, &

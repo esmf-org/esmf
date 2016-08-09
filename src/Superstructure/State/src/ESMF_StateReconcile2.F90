@@ -926,7 +926,7 @@ contains
         end do
 
         ! Use a hash to select a starting index between the bounds
-        idx = rand_nos(myPet) * (offer_last-offer_first) + offer_first
+        idx = int (rand_nos(myPet) * (offer_last-offer_first) + offer_first)
 ! print *, 'pet', mypet, ': offer_first, offer_last, starting idx =', offer_first, offer_last, idx
         do, i=0, npets-1
           if (needslist_p%offerers(idx)) then
@@ -2095,12 +2095,12 @@ contains
     itemtype(0) = ESMF_STATEITEM_STATE%ot
     statep => state%statep
 
-    call c_ESMC_GetID(statep, id(0), localrc)
+    call ESMF_BaseGetID(statep%base, id(0), rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT,  &
         rcToReturn=rc)) return
 
-    call c_ESMC_GetVMId(statep, vmid(0), localrc)
+    call ESMF_BaseGetVMId(statep%base, vmid(0), rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT,  &
         rcToReturn=rc)) return
@@ -2143,12 +2143,12 @@ contains
       case (ESMF_STATEITEM_FIELD%ot)
         fieldp => siwrap(i)%si%datap%fp%ftypep
 
-        call c_ESMC_GetID(fieldp, id(i), localrc)
+        call ESMF_BaseGetID(fieldp%base, id(i), rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT,  &
             rcToReturn=rc)) return
 
-        call c_ESMC_GetVMId(fieldp, vmid(i), localrc)
+        call ESMF_BaseGetVMID(fieldp%base, vmid(i), rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT,  &
             rcToReturn=rc)) return
@@ -2157,12 +2157,12 @@ contains
       case (ESMF_STATEITEM_FIELDBUNDLE%ot)
         fbundlep => siwrap(i)%si%datap%fbp%this
 
-        call c_ESMC_GetID(fbundlep, id(i), localrc)
+        call ESMF_BaseGetID(fbundlep%base, id(i), rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT,  &
             rcToReturn=rc)) return
 
-        call c_ESMC_GetVMId(fbundlep, vmid(i), localrc)
+        call ESMF_BaseGetVMID(fbundlep%base, vmid(i), rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT,  &
             rcToReturn=rc)) return
@@ -2185,12 +2185,12 @@ contains
       case (ESMF_STATEITEM_STATE%ot)
         statep => siwrap(i)%si%datap%spp
 
-        call c_ESMC_GetID(statep, id(i), localrc)
+        call ESMF_BaseGetID(statep%base, id(i), rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT,  &
             rcToReturn=rc)) return
 
-        call c_ESMC_GetVMId(statep, vmid(i), localrc)
+        call ESMF_BaseGetVMID(statep%base, vmid(i), rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT,  &
             rcToReturn=rc)) return

@@ -69,6 +69,11 @@ ESMF_F90COMPILER_VERSION    = ${ESMF_F90COMPILER} -logo
 ESMF_CXXCOMPILER_VERSION    = ${ESMF_CXXCOMPILER}
 
 ############################################################
+# Enable TR15581/F2003 Allocatable array resizing
+#
+ESMF_F90COMPILEOPTS += -assume realloc_lhs
+
+############################################################
 # Force Fortran symbols lower case
 #
 ESMF_F90COMPILEOPTS += -names:lowercase
