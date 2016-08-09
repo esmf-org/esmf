@@ -44,7 +44,7 @@ class TestMaskedArray(TestBase):
         data = ESMP_GridGetCoordPtr(grid, dim)
         lbounds, ubounds = ESMP_GridGetCoordBounds(grid)
 
-        mask = [False]*reduce(mul, ubounds-lbounds)
+        mask = [False]*np.prod(ubounds[:]-lbounds[:])
 
         return data, mask, typekind, lbounds, ubounds, grid
 
@@ -160,7 +160,7 @@ class TestMaskedArray(TestBase):
             data1 = ESMP_GridGetCoordPtr(grid, 1)
             lb, ub = ESMP_GridGetCoordBounds(grid)
 
-            mask = [False] * reduce(mul, ub - lb)
+            mask = [False] * np.prod(ub[:]-lb[:])
 
             esmpy_row = MaskedArray(data0, mask, TypeKind.R8, ub - lb)
             esmpy_col = MaskedArray(data1, mask, TypeKind.R8, ub - lb)

@@ -70,7 +70,7 @@ dstfield = regrid(srcfield, dstfield, zero_region=ESMF.Region.SELECT)
 
 # compute the mean relative error
 from operator import mul
-num_nodes = reduce(mul, xctfield.data.shape)
+num_nodes = numpy.prod(xctfield.data.shape[:])
 relerr = 0
 meanrelerr = 0
 
@@ -95,7 +95,7 @@ if ESMF.pet_count() > 1:
 # output the results from one processor only
 if ESMF.local_pet() is 0:
     meanrelerr = relerr / num_nodes
-    print "ESMPy LocStream Grid Regridding Example"
-    print "  interpolation mean relative error = {0}".format(meanrelerr)
+    print ("ESMPy LocStream Grid Regridding Example")
+    print ("  interpolation mean relative error = {0}".format(meanrelerr))
 
     assert (meanrelerr < 9e-5)

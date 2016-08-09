@@ -24,8 +24,8 @@ class TestCbindings(TestBase):
         localpet = local_pet()
         petcount = pet_count()
 
-        print '\nlocal_pet = {0}\n'.format(localpet)
-        print '\npet_count = {0}\n'.format(petcount)
+        print ('\nlocal_pet = {0}\n'.format(localpet))
+        print ('\npet_count = {0}\n'.format(petcount))
 
 
     def test_interfaceint(self):
@@ -39,7 +39,6 @@ class TestCbindings(TestBase):
         try:
             a = (ct.c_int*3)()
             a = [1,2,3]
-            print a
             interfaceint2 = ESMP_InterfaceInt(a)
         except:
             raise TypeError('FAIL: tuples cannot be used in place of numpy.array')

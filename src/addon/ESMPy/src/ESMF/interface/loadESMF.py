@@ -9,7 +9,7 @@ import traceback
 import ESMF.api.constants as constants
 
 try:
-    from esmfmkfile import ESMFMKFILE as esmfmk
+    from ESMF.interface.esmfmkfile import ESMFMKFILE as esmfmk
 except:
     raise ImportError('The ESMFMKFILE cannot be found!')
 

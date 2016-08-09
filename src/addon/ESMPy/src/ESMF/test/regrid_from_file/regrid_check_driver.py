@@ -45,7 +45,7 @@ for test_case in test_cases:
     (src_fname, dst_fname, regrid_method, options, 
      itrp_mean_err, itrp_max_err, csrv_err) = test_case
     test_str = 'Regrid %s to %s as %s with %s itrp_mean_err=%f, itrp_max_err=%f, and csrv_err=%f' % (src_fname, dst_fname, regrid_method, options, itrp_mean_err, itrp_max_err, csrv_err)
-    print '\n' + test_str + ' - START\n'
+    print ('\n' + test_str + ' - START\n')
     src_fname_full = os.path.join(DATA_SUBDIR, src_fname)
     dst_fname_full = os.path.join(DATA_SUBDIR, dst_fname)
 
@@ -61,7 +61,7 @@ for test_case in test_cases:
         correct = regrid_check(src_fname_full, dst_fname_full, regrid_method, 
                                options, itrp_mean_err, itrp_max_err, csrv_err)
     except:
-        print "Regridding ERROR:\n"
+        print ("Regridding ERROR:\n")
         traceback.print_exc(file=sys.stdout)
 
     skip = False
@@ -73,20 +73,20 @@ for test_case in test_cases:
               skip = True
 
     # print the file
-    print '\n***NOTE*** The log files must be deleted in this test case, they are printed below for future reference\n'
+    print ('\n***NOTE*** The log files must be deleted in this test case, they are printed below for future reference\n')
     if skip:
         for line in open("PET"+str(i)+".ESMF_LogFile"):
-            print line
+            print (line)
             
     # clean the log files
     for i in range(ESMF.pet_count()):
         os.system("echo ' ' > PET"+str(i)+".ESMF_LogFile")
         
-    print "\nPET: " + str(ESMF.local_pet()) + " - " + test_str + " - FINISH\n"
+    print ("\nPET: " + str(ESMF.local_pet()) + " - " + test_str + " - FINISH\n")
 
     if skip:
-        print 'RESULT: SKIP\n\n'
+        print ('RESULT: SKIP\n\n')
     elif correct:
-        print 'RESULT: PASS\n\n'
+        print ('RESULT: PASS\n\n')
     else:
-        print 'RESULT: FAIL\n\n'
+        print ('RESULT: FAIL\n\n')

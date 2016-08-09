@@ -13,7 +13,7 @@ import os
 
 from ESMF.test.regrid_from_file.regrid_from_file_consts import DATA_SUBDIR, DATA_URL_ROOT
 from ESMF.util.cache_data import cache_data_file
-from read_test_cases_from_control_file import read_control_file
+from ESMF.test.regrid_from_file.read_test_cases_from_control_file import read_control_file
 
 def cache_data_files_for_test_cases(test_cases):
     # Create data subdirectory if it doesn't exist.
@@ -45,9 +45,9 @@ def main():
     # Retrieve the data files needed for the test cases from the remote server.
     status_ok = cache_data_files_for_test_cases(test_cases)
     if status_ok:
-        print 'RESULT: PASS - regrid_from_file_dryrun ok\n\n'
+        print ('RESULT: PASS - regrid_from_file_dryrun ok\n\n')
     else:
-        print 'RESULT: FAIL - regrid_from_file_dryrun error\n\n'
+        print ('RESULT: FAIL - regrid_from_file_dryrun error\n\n')
 
 if __name__ == '__main__':
     sys.exit(main())

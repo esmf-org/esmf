@@ -22,7 +22,7 @@ class TestLocStream(TestBase):
             assert locstream.lower_bounds == [0]
             assert locstream.upper_bounds == [5]
 
-        print locstream
+        print (locstream)
 
         # test the deleting a LocStream has no ill effects
         del locstream

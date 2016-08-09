@@ -321,7 +321,7 @@ class TestField(TestBase):
         field.data[...] = 7
         self.examine_field_attributes(field)
 
-        print field
+        print (field)
 
     def test_field_switchedindices_grid(self):
         # create grid

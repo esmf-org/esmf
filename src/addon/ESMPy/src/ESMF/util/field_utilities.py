@@ -122,12 +122,12 @@ def compare_fields(field1, field2, itrp_mean_tol, itrp_max_tol, csrv_tol,
             csrv = True
 
         # print out diagnostic information
-        print "\n  Mean relative error = "+str(total_error_global)
-        print "  Max  relative error = "+str(max_error_global)
-        print "  Conservation  error = "+str(csrv_error_global)
-        #print "  Min error   = "+str(min_error_global)
-        #print "  srcmass     = "+str(mass1_global)
-        #print "  dstmass     = "+str(mass2_global)
+        print ("\n  Mean relative error = "+str(total_error_global))
+        print ("  Max  relative error = "+str(max_error_global))
+        print ("  Conservation  error = "+str(csrv_error_global))
+        #print ("  Min error   = "+str(min_error_global))
+        #print ("  srcmass     = "+str(mass1_global))
+        #print ("  dstmass     = "+str(mass2_global))
 
     # broadcast in parallel case
     if parallel:
@@ -138,9 +138,9 @@ def compare_fields(field1, field2, itrp_mean_tol, itrp_max_tol, csrv_tol,
 
     # print pass or fail
     if (itrp_mean and itrp_max  and csrv):
-        print "PET{0} - PASS".format(ESMF.local_pet())
+        print ("PET{0} - PASS".format(ESMF.local_pet()))
         correct = True
     else:
-        print "PET{0} - FAIL".format(ESMF.local_pet())
+        print ("PET{0} - FAIL".format(ESMF.local_pet()))
 
     return total_error_global, csrv_error_global, correct

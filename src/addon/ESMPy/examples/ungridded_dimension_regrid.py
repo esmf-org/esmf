@@ -114,7 +114,7 @@ for timestep in range(time):
 
 # compute the mean relative interpolation and conservation error
 from operator import mul
-num_nodes = reduce(mul, xctfield.data.shape)
+num_nodes = numpy.prod(xctfield.data.shape[:])
 meanrelerr = 0
 if num_nodes is not 0:
     meanrelerr = relerr / num_nodes
@@ -139,9 +139,9 @@ if ESMF.local_pet() is 0:
     meanrelerr = relerr / num_nodes
     csrverr = numpy.abs(srcmass - dstmass) / dstmass
 
-    print "ESMPy Ungridded Field Dimensions Example"
-    print "  interpolation mean relative error = {0}".format(meanrelerr)
-    print "  mass conservation relative error  = {0}".format(csrverr)
+    print ("ESMPy Ungridded Field Dimensions Example")
+    print ("  interpolation mean relative error = {0}".format(meanrelerr))
+    print ("  mass conservation relative error  = {0}".format(csrverr))
 
 # try:
 #     import matplotlib.pyplot as plt

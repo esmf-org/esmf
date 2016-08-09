@@ -6,10 +6,10 @@ The Array utility class
 
 #### IMPORT LIBRARIES #########################################################
 import ESMF.api.constants as constants
-from operator import mul
 import numpy as np
 import numpy.ma as ma
 import ctypes as ct
+import sys
 
 def ndarray_from_esmf(data, dtype, shape):
     '''
@@ -22,15 +22,20 @@ def ndarray_from_esmf(data, dtype, shape):
     :return: numpy array representing the data with dtype and shape
     '''
     # find the size of the local coordinates
-    size = reduce(mul, shape)
+    size = np.prod(shape[:]) * \
+           np.dtype(constants._ESMF2PythonType[dtype]).itemsize
 
     # create a numpy array to point to the ESMF data allocation
-    buffer = np.core.multiarray.int_asbuffer(
-        ct.addressof(data.contents),
-        np.dtype(constants._ESMF2PythonType[dtype]).itemsize * size)
-    esmfarray = np.frombuffer(buffer, constants._ESMF2PythonType[dtype])
+    if sys.version_info[0] >= 3:
+        buffer = ct.pythonapi.PyMemoryView_FromMemory
+        buffer.restype = ct.py_object
+        buffer = buffer(data, ct.c_int(size), 0x200)
+    else:
+        buffer = np.core.multiarray.int_asbuffer(
+            ct.addressof(data.contents), size)
 
-    esmfarray = esmfarray.reshape(shape, order='F')
+    esmfarray = np.ndarray(tuple(shape[:]), constants._ESMF2PythonType[dtype],
+                           buffer, order="F")
 
     return esmfarray
 
@@ -52,17 +57,23 @@ class MaskedArray(ma.MaskedArray):
         :attribute contents: esmf array pointer
         '''
         # find the size of the local coordinates
-        size = reduce(mul, shape)
+        size = np.prod(shape[:]) * \
+               np.dtype(constants._ESMF2PythonType[dtype]).itemsize
 
         # create a numpy array to point to the ESMF data allocation
-        buffer = np.core.multiarray.int_asbuffer(
-            ct.addressof(data.contents),
-            np.dtype(constants._ESMF2PythonType[dtype]).itemsize * size)
-        npdata = np.frombuffer(buffer, constants._ESMF2PythonType[dtype])
+        if sys.version_info[0] >= 3:
+            buffer = ct.pythonapi.PyMemoryView_FromMemory
+            buffer.restype = ct.py_object
+            buffer = buffer(data, ct.c_int(size), 0x200)
+        else:
+            buffer = np.core.multiarray.int_asbuffer(
+                ct.addressof(data.contents), size)
 
-        npdata = npdata.reshape(shape, order='F')
+        npdata = np.ndarray(tuple(shape[:]),
+                               constants._ESMF2PythonType[dtype],
+                               buffer, order="F")
 
-        if mask is None: mamask = [False]*size
+        if mask is None: mamask = [False] * np.prod(shape[:])
         else: mamask = mask
 
         # create the new Field instance
@@ -89,20 +100,26 @@ class Array(np.ndarray):
         :attribute contents: esmf array pointer
         '''
         # find the size of the local coordinates
-        size = reduce(mul, shape)
+        size = np.prod(shape[:]) * \
+                  np.dtype(constants._ESMF2PythonType[dtype]).itemsize
 
         # create a numpy array to point to the ESMF data allocation
-        buffer = np.core.multiarray.int_asbuffer(
-            ct.addressof(data.contents),
-            np.dtype(constants._ESMF2PythonType[dtype]).itemsize * size)
-        npdata = np.frombuffer(buffer, constants._ESMF2PythonType[dtype])
+        if sys.version_info[0] >= 3:
+            buffer = ct.pythonapi.PyMemoryView_FromMemory
+            buffer.restype = ct.py_object
+            buffer = buffer(data, ct.c_int(size), 0x200)
+        else:
+            buffer = np.core.multiarray.int_asbuffer(
+                ct.addressof(data.contents), size)
 
-        npdata = npdata.reshape(shape, order='F')
+        npdata = np.ndarray(tuple(shape[:]),
+                               constants._ESMF2PythonType[dtype],
+                               buffer, order="F")
 
         # create the new Field instance
         obj = super(Array, cls).__new__(cls, tuple(shape),
-                                         dtype=constants._ESMF2PythonType[dtype],
-                                         buffer=npdata)
+                                        dtype=constants._ESMF2PythonType[dtype],
+                                        buffer=npdata)
 
         # save objectwide metadata
         obj.contents = data.contents

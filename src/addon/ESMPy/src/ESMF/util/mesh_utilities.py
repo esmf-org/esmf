@@ -1370,7 +1370,7 @@ def initialize_field_mesh(field, nodeCoord, nodeOwner, elemType, elemConn,
             else:
                 raise ValueError("Elem type is not supported.")
 
-            #print '[{0},{1}] = {2}'.format(x,y,field.data[i])
+            #print ('[{0},{1}] = {2}'.format(x,y,field.data[i]))
             field.data[i] = 20.0 + x**2 +x*y + y**2
 
             if domask:
@@ -1386,10 +1386,10 @@ def initialize_field_mesh(field, nodeCoord, nodeOwner, elemType, elemConn,
             y = nodeCoord[i*2+1]
 
             if (nodeOwner[i] == ESMF.local_pet()):
-                if ind > field.grid.size_owned:
+                if ind > field.grid.size_owned[node]:
                     raise ValueError("Overstepped the mesh bounds!")
                 field.data[ind] = 20.0 + x**2 +x*y + y**2
-                #print '[{0},{1}] = {2}'.format(x,y,field.data[ind])
+                #print ('[{0},{1}] = {2}'.format(x,y,field.data[ind]))
                 ind += 1
 
             if domask:
