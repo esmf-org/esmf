@@ -384,14 +384,14 @@ the true interpolated values for cells which are only partially covered by the
 source grid. The fraction also needs to be included when computing the total
 source and destination integrals. To include the fraction in the conservative
 weights, the user can specify the fraction area normalization type by specifying
-normType=NormType.FRACAREA when creating the Regrid object.)
+normType=NormType.FRACAREA when creating the Regrid object.
 
 For weights generated using destination area normalization (either by not
 specifying any normalization type or by specifying normType=NormType.DSTAREA),
 if a destination field extends outside the unmasked source field then the values
 of the cells which extend partway outside the unmasked source field are
 decreased by the fraction they extend outside. To correct these values the
-destination field (dst_field_ resulting from the Regrid call can be divided by
+destination field (dst_field) resulting from the Regrid call can be divided by
 the destination fraction. (dst_frac) The following pseudocode demonstrates how
 to do this::
 
