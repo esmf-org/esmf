@@ -84,7 +84,7 @@ if dstmass is not 0:
 
 # compute the mean relative interpolation and conservation error
 from operator import mul
-num_nodes = reduce(mul, xctfield.data.shape)
+num_nodes = numpy.prod(xctfield.data.shape[:])
 relerr = 0
 meanrelerr = 0
 if num_nodes is not 0:

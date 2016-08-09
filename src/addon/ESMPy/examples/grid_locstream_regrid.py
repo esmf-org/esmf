@@ -68,8 +68,7 @@ regrid = ESMF.Regrid(srcfield, dstfield,
 dstfield = regrid(srcfield, dstfield, zero_region=ESMF.Region.SELECT)
 
 # compute the mean relative error
-from operator import mul
-num_nodes = reduce(mul, xctfield.data.shape)
+num_nodes = numpy.prod(xctfield.data.shape[:])
 relerr = 0
 meanrelerr = 0
 

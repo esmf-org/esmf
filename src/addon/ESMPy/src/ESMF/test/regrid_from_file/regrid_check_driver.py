@@ -76,7 +76,7 @@ for test_case in test_cases:
     print ('\n***NOTE*** The log files must be deleted in this test case, they are printed below for future reference\n')
     if skip:
         for line in open("PET"+str(i)+".ESMF_LogFile"):
-            print line
+            print (line)
             
     # clean the log files
     for i in range(ESMF.pet_count()):

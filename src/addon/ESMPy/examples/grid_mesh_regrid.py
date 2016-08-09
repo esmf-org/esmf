@@ -63,7 +63,7 @@ dstfield = regrid(srcfield, dstfield)
 
 # compute the mean relative error
 from operator import mul
-num_nodes = reduce(mul, xctfield.data.shape)
+num_nodes = numpy.prod(xctfield.data.shape[:])
 relerr = 0
 meanrelerr = 0
 if num_nodes is not 0:

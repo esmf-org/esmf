@@ -52,9 +52,9 @@ rtfail = rtfail/num_proc
 rtskip = rtskip/num_proc
 
 print ("Regrid from file test results: "+rtestoutfile)
-print ("PASS  = "+str(rtpass))
-print ("FAIL  = "+str(rtfail))
-print ("SKIP  = "+str(rtskip))
+print ("PASS  = "+str(int(rtpass)))
+print ("FAIL  = "+str(int(rtfail)))
+print ("SKIP  = "+str(int(rtskip)))
 
 if rtpass == 0 and rtfail == 0 and rtskip == 0: 
     print (rtestoutfile+":")
