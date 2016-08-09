@@ -8,7 +8,7 @@
 #     os.makedirs(DD)
 # from ESMF.util.cache_data import cache_data_file
 # cache_data_file(os.path.join(DD, "ll2.5deg_grid.nc"))
-# cache_data_file(os.path.join(DD, "mpas_uniform_10242_dual.nc"))
+# cache_data_file(os.path.join(DD, "mpas_uniform_10242_dual_counterclockwise.nc"))
 
 import ESMF
 import numpy
@@ -17,7 +17,7 @@ import numpy
 # esmpy = ESMF.Manager(debug=True)
 
 grid1 = "examples/data/ll2.5deg_grid.nc"
-grid2 = "examples/data/mpas_uniform_10242_dual.nc"
+grid2 = "examples/data/mpas_uniform_10242_dual_counterclockwise.nc"
 
 # Create a uniform global latlon grid from a SCRIP formatted file
 grid = ESMF.Grid(filename=grid1, filetype=ESMF.FileFormat.SCRIP,
