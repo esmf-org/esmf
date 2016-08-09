@@ -26,7 +26,7 @@ def ndarray_from_esmf(data, dtype, shape):
            np.dtype(constants._ESMF2PythonType[dtype]).itemsize
 
     # create a numpy array to point to the ESMF data allocation
-    if sys.version_info.major >= 3:
+    if sys.version_info[0] >= 3:
         buffer = ct.pythonapi.PyMemoryView_FromMemory
         buffer.restype = ct.py_object
         buffer = buffer(data, ct.c_int(size), 0x200)
@@ -61,7 +61,7 @@ class MaskedArray(ma.MaskedArray):
                np.dtype(constants._ESMF2PythonType[dtype]).itemsize
 
         # create a numpy array to point to the ESMF data allocation
-        if sys.version_info.major >= 3:
+        if sys.version_info[0] >= 3:
             buffer = ct.pythonapi.PyMemoryView_FromMemory
             buffer.restype = ct.py_object
             buffer = buffer(data, ct.c_int(size), 0x200)
@@ -104,7 +104,7 @@ class Array(np.ndarray):
                   np.dtype(constants._ESMF2PythonType[dtype]).itemsize
 
         # create a numpy array to point to the ESMF data allocation
-        if sys.version_info.major >= 3:
+        if sys.version_info[0] >= 3:
             buffer = ct.pythonapi.PyMemoryView_FromMemory
             buffer.restype = ct.py_object
             buffer = buffer(data, ct.c_int(size), 0x200)

@@ -63,7 +63,7 @@ class OptionalArrayOfStrings(object):
         def from_param(self, param):
             if param:
                 lparam = (ct.c_char_p * len(param))()
-                if sys.version_info.major >= 3:
+                if sys.version_info[0] >= 3:
                     for i in range(len(param)):
                         lparam[i] = bytes(str(param[i]), 'ascii')
                 else:

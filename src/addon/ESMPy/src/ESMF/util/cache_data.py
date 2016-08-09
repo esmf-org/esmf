@@ -4,8 +4,14 @@ DATA_URL_ROOT = 'http://www.earthsystemmodeling.org/download/data'
 
 # If fname doesn't exist, retrieve it from the remote server via http.
 def cache_data_file(fname, DATA_URL_ROOT=DATA_URL_ROOT):
-    from urllib.request import urlopen, URLError
+    import sys
+    if sys.version_info[0] >= 3:
+        from urllib.request import urlopen, URLError
+    else:
+        from urllib2 import urlopen, URLError
+
     from shutil import copyfileobj
+
     status_ok = True
     if not os.path.exists(fname):
         url = os.path.join(DATA_URL_ROOT, os.path.basename(fname))
