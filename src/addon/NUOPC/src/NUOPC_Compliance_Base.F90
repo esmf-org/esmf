@@ -2228,8 +2228,8 @@ contains
         character(len=64) :: timeStamp
         character(len=64) :: idStr
         character(len=512) :: jsonString
-        real(ESMF_KIND_R8) :: sysTime
-        character(64)      :: sysTimeStr
+        !real(ESMF_KIND_R8) :: sysTime
+        !character(64)      :: sysTimeStr
 
         rc = ESMF_SUCCESS
 
@@ -2271,16 +2271,15 @@ contains
           file=FILENAME)) &
           return  ! bail out
 
-        call ESMF_VMWtime(sysTime, rc=rc)
-        if (ESMF_LogFoundError(rc, &
-          line=__LINE__, &
-          file=FILENAME)) &
-          return  ! bail out
+        !call ESMF_VMWtime(sysTime, rc=rc)
+        !if (ESMF_LogFoundError(rc, &
+        !  line=__LINE__, &
+        !  file=FILENAME)) &
+        !  return  ! bail out
 
-        write(sysTimeStr,"(F32.16)") sysTime
+        !write(sysTimeStr,"(F32.16)") sysTime
 
         write(jsonString,*) '{"ctrl":{&
-            &"sysTime":"'//trim(adjustl(sysTimeStr))//'",&
             &"event":"'//trim(event)//'",&
             &"ESMFID":"'//trim(idStr)//'",&
             &"compName":"'//trim(compName) //'",&
