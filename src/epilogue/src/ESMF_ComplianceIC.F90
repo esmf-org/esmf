@@ -2699,9 +2699,9 @@ module ESMF_ComplianceICMod
           file=FILENAME)) &
           return  ! bail out
 
-        write(vmidStr, "(I16)"), vmlocalid
-        write(compidStr, "(I16)"), compid
-        write(id, "(A)"), trim(adjustl(vmidStr))//"-"//trim(adjustl(compidStr))
+        write(vmidStr, "(I16)") vmlocalid
+        write(compidStr, "(I16)") compid
+        write(id, "(A)") trim(adjustl(vmidStr))//"-"//trim(adjustl(compidStr))
 
     end subroutine
 
@@ -2738,9 +2738,9 @@ module ESMF_ComplianceICMod
           file=FILENAME)) &
           return  ! bail out
 
-        write(vmidStr, "(I16)"), vmlocalid
-        write(stateidStr, "(I16)"), stateid
-        write(id, "(A)"), trim(adjustl(vmidStr))//"-"//trim(adjustl(stateidStr))
+        write(vmidStr, "(I16)") vmlocalid
+        write(stateidStr, "(I16)") stateid
+        write(id, "(A)") trim(adjustl(vmidStr))//"-"//trim(adjustl(stateidStr))
 
     end subroutine
 
