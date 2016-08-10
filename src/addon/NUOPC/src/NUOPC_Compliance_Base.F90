@@ -2348,9 +2348,9 @@ contains
           file=FILENAME)) &
           return  ! bail out
 
-        write(vmidStr, "(I16)"), vmlocalid
-        write(compidStr, "(I16)"), compid
-        write(id, "(A)"), trim(adjustl(vmidStr))//"-"//trim(adjustl(compidStr))
+        write(vmidStr, "(I16)") vmlocalid
+        write(compidStr, "(I16)") compid
+        write(id, "(A)") trim(adjustl(vmidStr))//"-"//trim(adjustl(compidStr))
 
     end subroutine
 
@@ -2387,9 +2387,9 @@ contains
           file=FILENAME)) &
           return  ! bail out
 
-        write(vmidStr, "(I16)"), vmlocalid
-        write(stateidStr, "(I16)"), stateid
-        write(id, "(A)"), trim(adjustl(vmidStr))//"-"//trim(adjustl(stateidStr))
+        write(vmidStr, "(I16)") vmlocalid
+        write(stateidStr, "(I16)") stateid
+        write(id, "(A)") trim(adjustl(vmidStr))//"-"//trim(adjustl(stateidStr))
 
     end subroutine
 
@@ -2427,9 +2427,9 @@ contains
           file=FILENAME)) &
           return  ! bail out
 
-        write(vmidStr, "(I16)"), vmlocalid
-        write(fieldidStr, "(I16)"), fieldid
-        write(id, "(A)"), trim(adjustl(vmidStr))//"-"//trim(adjustl(fieldidStr))
+        write(vmidStr, "(I16)") vmlocalid
+        write(fieldidStr, "(I16)") fieldid
+        write(id, "(A)") trim(adjustl(vmidStr))//"-"//trim(adjustl(fieldidStr))
 
     end subroutine
 
