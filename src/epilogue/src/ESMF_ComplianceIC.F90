@@ -29,6 +29,7 @@ module ESMF_ComplianceICMod
   interface JSON_GetID
         module procedure JSON_GridCompGetID
         module procedure JSON_StateGetID
+        module procedure JSON_FieldGetID
   end interface
         
   contains
@@ -1194,7 +1195,7 @@ module ESMF_ComplianceICMod
               line=__LINE__, &
               file=FILENAME)) &
               return  ! bail out
-            call checkFieldMetadata(prefix, field=field, rc=rc)
+            call checkFieldMetadata(prefix, field=field, stateid=idStr, rc=rc)
             if (ESMF_LogFoundError(rc, &
               line=__LINE__, &
               file=FILENAME)) &
@@ -1230,7 +1231,7 @@ module ESMF_ComplianceICMod
                 line=__LINE__, &
                 file=FILENAME)) &
                 return  ! bail out
-              call checkFieldMetadata(prefix, field=field, rc=rc)
+              call checkFieldMetadata(prefix, field=field, stateid=idStr, rc=rc)
               if (ESMF_LogFoundError(rc, &
                 line=__LINE__, &
                 file=FILENAME)) &
@@ -1934,14 +1935,24 @@ module ESMF_ComplianceICMod
 
 !-------------------------------------------------------------------------
 
-  recursive subroutine checkFieldMetadata(prefix, field, rc)
+  recursive subroutine checkFieldMetadata(prefix, field, stateid, rc)
     character(*), intent(in)              :: prefix
     type(ESMF_Field)                      :: field
+    character(*), intent(in), optional    :: stateid
     integer,      intent(out), optional   :: rc
     
     character(ESMF_MAXSTR)                :: attributeName
     character(ESMF_MAXSTR)                :: convention
     character(ESMF_MAXSTR)                :: purpose
+    type(ESMF_AttPack)                    :: attpack
+    type(ESMF_FieldStatus_Flag)           :: fieldStatus
+    integer                               :: rank
+    type(ESMF_TypeKind_Flag)              :: typekind
+    real(ESMF_KIND_R8)                    :: fieldMinVal, fieldMaxVal
+    real(ESMF_KIND_R8), pointer           :: farrayPtr2D(:,:)
+    character(64)                         :: idStr
+    character(1024)                       :: jsonstring
+    logical                               :: isPresent
       
     if (present(rc)) rc = ESMF_SUCCESS
     
@@ -1949,6 +1960,112 @@ module ESMF_ComplianceICMod
     convention = "NUOPC"
     purpose = "Instance"
     
+    if (doJSON) then
+
+        call ESMF_FieldGet(field, status=fieldStatus, rc=rc)
+        if (ESMF_LogFoundError(rc, &
+            line=__LINE__, &
+            file=FILENAME)) &
+            return  ! bail out
+
+        if (fieldStatus==ESMF_FIELDSTATUS_COMPLETE) then
+            call ESMF_FieldGet(field, rank=rank, typekind=typekind, &
+                rc=rc)
+            if (ESMF_LogFoundError(rc, &
+                line=__LINE__, &
+                file=FILENAME)) &
+                return  ! bail out
+
+            ! only support this case while testing
+            if (typekind==ESMF_TYPEKIND_R8 .and. rank==2) then
+                call ESMF_FieldGet(field, localDe=0, farrayPtr=farrayPtr2D, rc=rc)
+                if (ESMF_LogFoundError(rc, &
+                    line=__LINE__, &
+                    file=FILENAME)) &
+                    return  ! bail out
+
+                fieldMinVal = minval(farrayPtr2D)
+                fieldMaxVal = maxval(farrayPtr2D)
+
+                call ESMF_AttributeAdd(field, convention=convention, purpose=purpose, &
+                           attrList=(/"petMinVal",   &
+                                      "petMaxVal"/), &
+                           attpack=attpack, rc=rc)
+                if (ESMF_LogFoundError(rc, &
+                    line=__LINE__, &
+                    file=FILENAME)) &
+                    return  ! bail out
+
+                call ESMF_AttributeSet(field, name="petMinVal", value=fieldMinVal, &
+                           attpack=attpack, rc=rc)
+                if (ESMF_LogFoundError(rc, &
+                    line=__LINE__, &
+                    file=FILENAME)) &
+                    return  ! bail out
+
+                call ESMF_AttributeSet(field, name="petMaxVal", value=fieldMaxVal, &
+                                   attpack=attpack, rc=rc)
+                if (ESMF_LogFoundError(rc, &
+                    line=__LINE__, &
+                    file=FILENAME)) &
+                    return  ! bail out
+
+            endif
+        endif
+
+        call ESMF_AttributeAdd(field, convention=convention, purpose=purpose, &
+                           attrList=(/"ESMFID     ",   &
+                                      "stateESMFID"/), &
+                           attpack=attpack, rc=rc)
+        if (ESMF_LogFoundError(rc, &
+            line=__LINE__, &
+            file=FILENAME)) &
+            return  ! bail out
+
+        call JSON_GetID(field, idStr, rc=rc)
+        if (ESMF_LogFoundError(rc, &
+             line=__LINE__, &
+             file=FILENAME)) &
+             return  ! bail out
+
+        call ESMF_AttributeSet(field, name="ESMFID", value=trim(idStr), &
+                           attpack=attpack, rc=rc)
+        if (ESMF_LogFoundError(rc, &
+            line=__LINE__, &
+            file=FILENAME)) &
+            return  ! bail out
+
+        call ESMF_AttributeSet(field, name="stateESMFID", value=trim(stateid), &
+                           attpack=attpack, rc=rc)
+        if (ESMF_LogFoundError(rc, &
+            line=__LINE__, &
+            file=FILENAME)) &
+            return  ! bail out
+
+        call ESMF_AttributeGetAttPack(field, attpack=attpack, &
+          convention=convention, purpose=purpose, isPresent=isPresent, rc=rc)
+        if (ESMF_LogFoundError(rc, &
+              line=__LINE__, &
+              file=FILENAME)) &
+              return  ! bail out
+
+        if (isPresent) then
+            call ESMF_AttPackStreamJSON(attpack, flattenPackList=.true., &
+                includeUnset=.false., includeLinks=.false., output=jsonstring, rc=rc)
+            if (ESMF_LogFoundError(rc, &
+              line=__LINE__, &
+              file=FILENAME)) &
+              return  ! bail out
+
+            call JSON_LogWrite(jsonstring, rc=rc)
+            if (ESMF_LogFoundError(rc, &
+             line=__LINE__, &
+             file=FILENAME)) &
+             return  ! bail out
+        endif
+
+    endif ! doJSON
+
     call ESMF_LogWrite(trim(prefix)//" Field level attribute check: "// &
       "convention: '"//trim(convention)//"', purpose: '"//trim(purpose)//"'.", &
       ESMF_LOGMSG_INFO, rc=rc)
@@ -2591,6 +2708,19 @@ module ESMF_ComplianceICMod
     
   end function
  
+    recursive subroutine JSON_LogWrite(msg, rc)
+        character(len=*), intent(in) ::   msg
+        integer, optional, intent(out) :: rc
+
+        rc = ESMF_SUCCESS
+
+        call ESMF_LogWrite(trim(msg), ESMF_LOGMSG_JSON, rc=rc)
+        if (ESMF_LogFoundError(rc, &
+          line=__LINE__, &
+          file=FILENAME)) &
+          return  ! bail out
+
+    end subroutine
 
     recursive subroutine JSON_LogCtrlFlow(event, comp, rc)
 
@@ -2741,6 +2871,45 @@ module ESMF_ComplianceICMod
         write(vmidStr, "(I16)") vmlocalid
         write(stateidStr, "(I16)") stateid
         write(id, "(A)") trim(adjustl(vmidStr))//"-"//trim(adjustl(stateidStr))
+
+    end subroutine
+
+    recursive subroutine JSON_FieldGetID(field, id, rc)
+        type(ESMF_Field)               :: field
+        character(len=*), intent(out)  :: id
+        integer, intent(out)           :: rc
+
+        ! locals
+        integer                    :: fieldid
+        type(ESMF_VMId), pointer   :: vmid(:)
+        integer                    :: vmlocalid
+        character                  :: vmkey
+        character(64)              :: fieldidStr, vmidStr, idStr
+
+        rc = ESMF_SUCCESS
+
+        call ESMF_BaseGetID(field%ftypep%base, fieldid, rc=rc)
+        if (ESMF_LogFoundError(rc, &
+          line=__LINE__, &
+          file=FILENAME)) &
+          return  ! bail out
+
+        allocate(vmid(1))
+        call ESMF_BaseGetVMId(field%ftypep%base, vmid(1), rc=rc)
+        if (ESMF_LogFoundError(rc, &
+          line=__LINE__, &
+          file=FILENAME)) &
+          return  ! bail out
+
+        call c_ESMCI_VMIdGet (vmid(1), vmlocalid, vmkey, rc)
+        if (ESMF_LogFoundError(rc, &
+          line=__LINE__, &
+          file=FILENAME)) &
+          return  ! bail out
+
+        write(vmidStr, "(I16)") vmlocalid
+        write(fieldidStr, "(I16)") fieldid
+        write(id, "(A)") trim(adjustl(vmidStr))//"-"//trim(adjustl(fieldidStr))
 
     end subroutine
 
