@@ -5200,7 +5200,7 @@ int Grid::getStaggerDistgrid(
 
 
         // Create stagger distgrid w no poles with this padding
-        staggerDistgridList[staggerloc]=DistGrid::create(distgrid_wo_poles,
+        staggerDistgridList[staggerloc]=DistGrid::create(distgrid,
                                                          staggerEdgeLWidthIntInt, 
                                                          staggerEdgeUWidthIntInt, 
                                                          NULL,
@@ -7609,7 +7609,7 @@ GridIter *GridIter::adv(
   // if done then leave
    if (done) return this;
 
-  //  printf("A cur=[%d,%d] \n",curInd[0],curInd[1]);
+    //printf("A cur=[%d,%d] uBnd=[%d,%d]\n",curInd[0],curInd[1],uBndInd[0],uBndInd[1]);
 
   // advance first index
   curInd[0]++;
@@ -7691,10 +7691,14 @@ int GridIter::getGlobalID(
     deBasedInd[i]=curInd[i]-exLBndInd[i];
   }
   
-  // return sequence index
-  gid=staggerDistgrid->getSequenceIndexLocalDe(curDE,deBasedInd,6,&localrc);
+  //printf("GI curDE=%d curInd=%d %d deBasedInd=%d %d \n",
+  //  curDE,curInd[0],curInd[1],deBasedInd[0],deBasedInd[1]);  
   
-  //    if (gid <0) printf("GI Gid=%d curDE=%d curInd=%d %d dstBInd=%d %d localrc=%d ESMC_SUCCESS=%d \n",gid,curDE,curInd[0],curInd[1],deBasedInd[0],deBasedInd[1],localrc,ESMF_SUCCESS);
+  // return sequence index
+  gid=staggerDistgrid->getSequenceIndexLocalDe(curDE,deBasedInd,2,&localrc);
+  
+  //printf("GI Gid=%d curDE=%d curInd=%d %d deBasedInd=%d %d localrc=%d ESMC_SUCCESS=%d \n",
+  //  gid,curDE,curInd[0],curInd[1],deBasedInd[0],deBasedInd[1],localrc,ESMF_SUCCESS);
 
   return gid;
 
@@ -8818,9 +8822,9 @@ int GridCellIter::getGlobalID(
     }
       
     // return sequence index
-    gid=centerDistgrid->getSequenceIndexLocalDe(curDE,deBasedInd,6,&localrc);
+    gid=centerDistgrid->getSequenceIndexLocalDe(curDE,deBasedInd,2,&localrc);
 
-    // if (gid <0) printf("GCI Gid=%d curDE=%d Ind=%d %d localrc=%d \n",gid,curDE,deBasedInd[0],deBasedInd[1],localrc);
+    //printf("GCI Gid=%d curDE=%d Ind=%d %d localrc=%d \n",gid,curDE,deBasedInd[0],deBasedInd[1],localrc);
 
   // return sequence index
   return gid;
