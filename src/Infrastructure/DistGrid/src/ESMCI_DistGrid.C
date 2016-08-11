@@ -1865,7 +1865,7 @@ DistGrid *DistGrid::create(
 }
 //-----------------------------------------------------------------------------
   
-  //-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI:DistGrid::destroy()"
 //BOPI
@@ -3285,7 +3285,7 @@ int DistGrid::getSequenceIndexTileRelative(
 }
 //-----------------------------------------------------------------------------
   
-  //-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::DistGrid::getSequenceIndexTile()"
 //BOPI
@@ -3367,51 +3367,133 @@ int DistGrid::getSequenceIndexTile(
       int tileB = connectionList[i][1];
       if (tileA == tile){
         // found connection for this tile -> need to transform index
-        int *indexB = new int[dimCount];
+        int indexB[dimCount];
         int positionIndexOffset = 2;
         int orientationIndexOffset = 2+dimCount;
+#if 1
         for (int j=0; j<dimCount; j++){
-          int positionOffset = connectionList[i][positionIndexOffset+j];
-          int orientationIndex = connectionList[i][orientationIndexOffset+j];
-          if (orientationIndex < 0){
-            ++orientationIndex; // shift to basis 0
-            indexB[j] = -(index[-orientationIndex] - positionOffset);
+          int position = connectionList[i][positionIndexOffset+j];
+          int orientation = connectionList[i][orientationIndexOffset+j];
+          if (orientation < 0){
+            ++orientation; // shift to basis 0
+            indexB[j] = -index[-orientation] + position;
           }else{
-            --orientationIndex; // shift to basis 0
-            indexB[j] = index[orientationIndex] - positionOffset;
+            --orientation; // shift to basis 0
+            indexB[j] = index[orientation] + position;
           }
         }
+#else
+        double pivot[dimCount];
+        for (int j=0; j<dimCount; j++)
+          pivot[j]=connectionList[i][positionIndexOffset+j]+0.5;
+        double trans[dimCount];
+        for (int j=0; j<dimCount; j++)
+          trans[j]=(double)index[j]-pivot[j];
+        double rot[dimCount];
+        for (int j=0; j<dimCount; j++){
+          int o = connectionList[i][orientationIndexOffset+j];
+          if (o<0)
+            rot[j]= -trans[-(o+1)];
+          else
+            rot[j]= trans[(o-1)];
+        }
+        for (int j=0; j<dimCount; j++)
+          indexB[j]=rot[j]+pivot[j];
+#endif
+        
+        
+        
         seqindex = getSequenceIndexTile(tileB, indexB, depth, &localrc);
         if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
           ESMC_CONTEXT, rc)) return seqindex;  // bail out
-        delete [] indexB;
-        if (seqindex > -1)
-          break;  // break out of loop over connections
+
+printf("tile=%d, tileA=%d, tileB=%d, index[]=%d %d, indexB[]=%d %d, seqInd=%d\n",
+tile, tileA, tileB, index[0], index[1], indexB[0], indexB[1], seqindex);
+
+        if (seqindex > -1){
+          // return successfully
+          if (rc!=NULL) *rc = ESMF_SUCCESS;
+          return seqindex;
+        }
       }
       if (tileB == tile){
         // found connection for this tile -> need to transform index
-        int *indexA = new int[dimCount];
+        int indexA[dimCount];
         int positionIndexOffset = 2;
         int orientationIndexOffset = 2+dimCount;
+#if 1
+        // for reverse must inspect if this is a 90 or 270 degree rotation,
+        // the only ones not orthogonal!
+        int positionVect[dimCount];
+        int orientationVect[dimCount];
+        // first time through initialize the orientationVector to be the same
+        // as for the foreward transform
         for (int j=0; j<dimCount; j++){
-          int positionOffset = connectionList[i][positionIndexOffset+j];
-          int orientationIndex = connectionList[i][orientationIndexOffset+j];
-          if (orientationIndex < 0){
-            ++orientationIndex; // shift to basis 0
-            indexA[-orientationIndex] = -index[j] + positionOffset;
+          positionVect[j] =
+            connectionList[i][positionIndexOffset+j];     // initialize
+          orientationVect[j] =
+            connectionList[i][orientationIndexOffset+j];  // initialize
+        }
+        bool special90=(orientationVect[0]==-2 && orientationVect[1]==1);
+        bool special270=(orientationVect[0]==2 && orientationVect[1]==-1);
+        if (special90 || special270)
+          for (int j=0; j<dimCount; j++)
+            orientationVect[j] = -orientationVect[j]; // revert
+        if (special90){
+          positionVect[0] = -connectionList[i][positionIndexOffset+1];
+          positionVect[1] =  connectionList[i][positionIndexOffset+0];
+        }
+        if (special270){
+          positionVect[0] =  connectionList[i][positionIndexOffset+1];
+          positionVect[1] = -connectionList[i][positionIndexOffset+0];
+        }
+          
+        for (int j=0; j<dimCount; j++){
+          int position = positionVect[j];
+          int orientation = orientationVect[j];
+          if (orientation < 0){
+            ++orientation; // shift to basis 0
+            indexA[j] = -index[-orientation] - positionVect[-orientation];
           }else{
-            --orientationIndex; // shift to basis 0
-            indexA[orientationIndex] = index[j] + positionOffset;
+            --orientation; // shift to basis 0
+            indexA[j] = index[orientation] - positionVect[orientation];
           }
         }
+#else
+        double pivot[dimCount];
+        for (int j=0; j<dimCount; j++)
+          pivot[j]=connectionList[i][positionIndexOffset+j]+0.5;
+        double trans[dimCount];
+        for (int j=0; j<dimCount; j++)
+          trans[j]=(double)index[j]-pivot[j];
+        double rot[dimCount];
+        for (int j=0; j<dimCount; j++){
+          int o = connectionList[i][orientationIndexOffset+j];
+          o = -o; // TODO: correctly figure this out only works for 90 deg rots.
+          if (o<0)
+            rot[j]= -trans[-(o+1)];
+          else
+            rot[j]= trans[(o-1)];
+        }
+        for (int j=0; j<dimCount; j++)
+          indexA[j]=rot[j]+pivot[j];
+#endif
         seqindex = getSequenceIndexTile(tileA, indexA, depth, &localrc);
         if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
           ESMC_CONTEXT, rc)) return seqindex;  // bail out
-        delete [] indexA;
-        if (seqindex > -1)
-          break;  // break out of loop over connections
+
+printf("tile=%d, tileA=%d, tileB=%d, index[]=%d %d, indexA[]=%d %d, seqInd=%d\n",
+tile, tileA, tileB, index[0], index[1], indexA[0], indexA[1], seqindex);
+        
+        if (seqindex > -1){
+          // return successfully
+          if (rc!=NULL) *rc = ESMF_SUCCESS;
+          return seqindex;
+        }
       }
     }
+  }else{
+    seqindex = -1;  // not on tile, and no depth
   }
     
   // return successfully
