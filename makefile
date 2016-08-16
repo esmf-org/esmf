@@ -227,6 +227,12 @@ script_info:
 	-@echo "ESMF_BENCHMARK_TOLERANCE: $(ESMF_BENCHMARK_TOLERANCE)"
 	-@echo "ESMF_BENCHMARK_THRESHOLD_MSEC: $(ESMF_BENCHMARK_THRESHOLD_MSEC)"
 	-@echo " "
+	-@echo " "
+	-@echo "--------------------------------------------------------------"
+	-@echo " * Other relevant environment variables *"
+	-@echo "PATH:    $(PATH)"
+	-@echo "LD_LIBRARY_PATH: $(LD_LIBRARY_PATH)"
+	-@echo " "
 
 #
 info:   script_info
