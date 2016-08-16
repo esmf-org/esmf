@@ -1309,6 +1309,7 @@ contains
         logical                               :: doJSON
         type(ESMF_AttPack)                    :: attpack
         type(ESMF_FieldStatus_Flag)           :: fieldStatus
+        integer                               :: localDeCount
 
         if (present(rc)) rc = ESMF_SUCCESS
 
@@ -1330,14 +1331,14 @@ contains
 
             if (fieldStatus==ESMF_FIELDSTATUS_COMPLETE) then
                 call ESMF_FieldGet(field, rank=rank, typekind=typekind, &
-                    rc=rc)
+                    localDeCount=localDeCount, rc=rc)
                 if (ESMF_LogFoundError(rc, &
                     line=__LINE__, &
                     file=FILENAME)) &
                     return  ! bail out
 
                 ! only support this case while testing
-                if (typekind==ESMF_TYPEKIND_R8 .and. rank==2) then
+                if (typekind==ESMF_TYPEKIND_R8 .and. rank==2 .and. localDeCount==1) then
                     call ESMF_FieldGet(field, localDe=0, farrayPtr=farrayPtr2D, rc=rc)
                     if (ESMF_LogFoundError(rc, &
                         line=__LINE__, &
