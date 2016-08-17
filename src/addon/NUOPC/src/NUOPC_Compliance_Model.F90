@@ -549,7 +549,7 @@ contains
                 return  ! bail out
 
             ! compliance check internal Clock
-            ! REMOVED - moved to phase specific check (checkPhaseEpilogue_InternalClockSet)
+            ! REMOVED - moved to phase specific check (checkEpi_InternalClockSet)
             !call NUOPC_CheckInternalClock(prefix, comp=comp, clock=clock, &
             !    mustMatchCurr=.false., mustReachStop=.false., rc=rc)
             !if (ESMF_LogFoundError(rc, &
@@ -1100,14 +1100,14 @@ contains
         else ! epilogue
             if (methodflag==ESMF_METHOD_INITIALIZE) then
                 if (index(event_AdvertiseFields, trim(phaseLabel)) > 0) then
-                    call checkPhaseEpilogue_Advertise(prefix, comp, importState, &
+                    call checkEpi_Advertise(prefix, comp, importState, &
                         exportState, clock, rc=rc)
                     if (ESMF_LogFoundError(rc, &
                       line=__LINE__, &
                       file=FILENAME)) &
                       return  ! bail out
                 elseif (index(event_InternalClockSet, trim(phaseLabel)) > 0) then
-                    call checkPhaseEpilogue_InternalClockSet(prefix, comp, importState, &
+                    call checkEpi_InternalClockSet(prefix, comp, importState, &
                         exportState, clock, rc=rc)
                     if (ESMF_LogFoundError(rc, &
                       line=__LINE__, &
@@ -1122,7 +1122,7 @@ contains
     !
     ! Checks related to field advertise initialize
     !
-    recursive subroutine checkPhaseEpilogue_Advertise(prefix, comp, &
+    recursive subroutine checkEpi_Advertise(prefix, comp, &
         importState, exportState, clock, rc)
 
         character(*), intent(in)           :: prefix
@@ -1136,20 +1136,20 @@ contains
 
         rc = ESMF_SUCCESS
 
-        !print *, "Inside checkPhaseEpilogue_Advertise()"
+        !print *, "Inside checkEpi_Advertise()"
 
         importFieldCount = 0
         exportFieldCount = 0
 
-        call checkStateFieldMetadataAfterAdvertise(prefix, &
-            importState, importFieldCount, rc=rc)
+        call checkStateAfterAdvertise(prefix=prefix, &
+            state=importState, totalFields=importFieldCount, rc=rc)
         if (ESMF_LogFoundError(rc, &
             line=__LINE__, &
             file=FILENAME)) &
             return  ! bail out
 
-        call checkStateFieldMetadataAfterAdvertise(prefix, &
-            exportState, exportFieldCount, rc=rc)
+        call checkStateAfterAdvertise(prefix=prefix, &
+            state=exportState, totalFields=exportFieldCount, rc=rc)
         if (ESMF_LogFoundError(rc, &
             line=__LINE__, &
             file=FILENAME)) &
@@ -1171,7 +1171,7 @@ contains
     !
     ! Checks after internal clock should be set
     !
-    recursive subroutine checkPhaseEpilogue_InternalClockSet(prefix, comp, &
+    recursive subroutine checkEpi_InternalClockSet(prefix, comp, &
         importState, exportState, clock, rc)
 
         character(*), intent(in)           :: prefix
@@ -1193,7 +1193,7 @@ contains
 
 
 
-    recursive subroutine checkStateFieldMetadataAfterAdvertise(prefix, &
+    recursive subroutine checkStateAfterAdvertise(prefix, &
         state, totalFields, rc)
 
         character(*), intent(in)              :: prefix
@@ -1238,7 +1238,7 @@ contains
                         line=__LINE__, &
                         file=FILENAME)) &
                         return  ! bail out
-                    call checkFieldMetadataAfterAdvertise(prefix, field=field, rc=rc)
+                    call checkFieldMetaAfterAdvertise(prefix, field=field, rc=rc)
                     if (ESMF_LogFoundError(rc, &
                         line=__LINE__, &
                         file=FILENAME)) &
@@ -1264,7 +1264,7 @@ contains
                     do fitem=1, fieldCount
                         totalFields = totalFields + 1
                         field = fields(fitem)
-                        call checkFieldMetadataAfterAdvertise(prefix, field=field, rc=rc)
+                        call checkFieldMetaAfterAdvertise(prefix, field=field, rc=rc)
                         if (ESMF_LogFoundError(rc, &
                             line=__LINE__, &
                             file=FILENAME)) &
@@ -1417,7 +1417,7 @@ contains
     !
     !  end subroutine
 
-    recursive subroutine checkFieldMetadataAfterAdvertise(prefix, field, rc)
+    recursive subroutine checkFieldMetaAfterAdvertise(prefix, field, rc)
         character(*), intent(in)              :: prefix
         type(ESMF_Field)                      :: field
         integer,      intent(out), optional   :: rc
