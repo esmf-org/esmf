@@ -333,6 +333,7 @@ contains
         integer                 :: phase
         character(NUOPC_PhaseMapStringLength) :: phaseLabel
         character(ESMF_MAXSTR)  :: compName
+        character(1024)         :: jsonString
         !type(ESMF_Clock)        :: clockInternal
         !logical                 :: clockIsPresent
     
@@ -493,6 +494,16 @@ contains
                 call JSON_LogCtrlFlow("start_epilogue", comp, rc)
                 if (ESMF_LogFoundError(rc, &
                     line=__LINE__, file=FILENAME)) return  ! bail out
+
+                ! write out run sequence in JSON
+                !call JSON_DriverRunSequence(comp, jsonString, rc=rc)
+                !if (ESMF_LogFoundError(rc, &
+                !    line=__LINE__, file=FILENAME)) return  ! bail out
+                !if (len(jsonString) > 0) then
+                !    call JSON_LogWrite(jsonString, rc=rc)
+                !    if (ESMF_LogFoundError(rc, &
+                !        line=__LINE__, file=FILENAME)) return  ! bail out
+                !endif
             endif
 
             call prefixString(comp, prefix=prefix, forward=.false., rc=rc)
@@ -1135,7 +1146,7 @@ contains
         else ! epilogue
             if (methodflag==ESMF_METHOD_INITIALIZE) then
               if (index(event_AllFieldsRealized, trim(phaseLabel)) > 0) then
-                call checkPhaseEpilogue_AllFieldsRealized(prefix, comp, importState, &
+                call checkEpi_FieldsRealized(prefix, comp, importState, &
                    exportState, clock, rc=rc)
                 if (ESMF_LogFoundError(rc, &
                   line=__LINE__, &
@@ -1148,7 +1159,7 @@ contains
     end subroutine dispatchPhaseChecks
 
 
-    recursive subroutine checkPhaseEpilogue_AllFieldsRealized(prefix, comp, &
+    recursive subroutine checkEpi_FieldsRealized(prefix, comp, &
         importState, exportState, clock, rc)
 
         character(*), intent(in)           :: prefix
@@ -1162,20 +1173,22 @@ contains
 
         rc = ESMF_SUCCESS
 
-        !print *, "checkPhaseEpilogue_AllFieldsRealized()"
+        !print *, "checkEpi_FieldsRealized()"
 
         importFieldCount = 0
         exportFieldCount = 0
 
-        call checkStateFieldMetadataAfterRealize(prefix, &
-            importState, importFieldCount, rc=rc)
+        call checkStateAfterRealize(prefix=prefix, &
+            state=importState, totalFields=importFieldCount, &
+            rc=rc)
         if (ESMF_LogFoundError(rc, &
             line=__LINE__, &
             file=FILENAME)) &
             return  ! bail out
 
-        call checkStateFieldMetadataAfterRealize(prefix, &
-            exportState, exportFieldCount, rc=rc)
+        call checkStateAfterRealize(prefix=prefix, &
+            state=exportState, totalFields=exportFieldCount, &
+            rc=rc)
         if (ESMF_LogFoundError(rc, &
             line=__LINE__, &
             file=FILENAME)) &
@@ -1183,7 +1196,7 @@ contains
 
     end subroutine
 
-    recursive subroutine checkStateFieldMetadataAfterRealize(prefix, &
+    recursive subroutine checkStateAfterRealize(prefix, &
         state, totalFields, rc)
 
         character(*), intent(in)              :: prefix
@@ -1228,7 +1241,7 @@ contains
                         line=__LINE__, &
                         file=FILENAME)) &
                         return  ! bail out
-                    call checkFieldMetadataAfterRealize(prefix, field=field, rc=rc)
+                    call checkFieldMetaAfterRealize(prefix, field=field, rc=rc)
                     if (ESMF_LogFoundError(rc, &
                         line=__LINE__, &
                         file=FILENAME)) &
@@ -1254,7 +1267,7 @@ contains
                     do fitem=1, fieldCount
                         totalFields = totalFields + 1
                         field = fields(fitem)
-                        call checkFieldMetadataAfterRealize(prefix, field=field, rc=rc)
+                        call checkFieldMetaAfterRealize(prefix, field=field, rc=rc)
                         if (ESMF_LogFoundError(rc, &
                             line=__LINE__, &
                             file=FILENAME)) &
@@ -1272,7 +1285,7 @@ contains
     end subroutine
 
 
-    recursive subroutine checkFieldMetadataAfterRealize(prefix, field, rc)
+    recursive subroutine checkFieldMetaAfterRealize(prefix, field, rc)
         character(*), intent(in)              :: prefix
         type(ESMF_Field)                      :: field
         integer,      intent(out), optional   :: rc
@@ -1424,6 +1437,121 @@ contains
             return  ! bail out
 
     end subroutine
+
+
+!   subroutine JSON_DriverRunSequence(driver, jsonString, rc)
+!    type(ESMF_GridComp)                        :: driver
+!    character(*),        intent(out)           :: jsonString
+!    integer,             intent(out), optional :: rc
+!
+!    ! local
+!    character(ESMF_MAXSTR)          :: name
+!    type(type_InternalState)        :: is
+!
+!    if (present(rc)) rc = ESMF_SUCCESS
+!
+!    ! query the Component for info
+!    call ESMF_GridCompGet(driver, name=name, rc=rc)
+!    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+!      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+!
+!    ! query Component for the internal State
+!    nullify(is%wrap)
+!    call ESMF_UserCompGetInternalState(driver, label_InternalState, is, rc)
+!    if (rc /= ESMF_SUCCESS) then
+!        ! not yet set
+!        jsonString = ""
+!        rc = ESMF_SUCCESS
+!        return
+!    endif
+!
+!    call JSON_DriverRunSequenceArray(is%wrap%runSeq, jsonString, rc=rc)
+!    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+!        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+!        return  ! bail out
+!
+!  end subroutine
+!
+!  subroutine JSON_DriverRunSequenceSingle(runSeq, jsonString, rc)
+!    type(NUOPC_RunSequence), intent(in)  :: runSeq
+!    character(*),            intent(out) :: jsonString
+!    integer, optional,       intent(out) :: rc
+!
+!    ! locals
+!    type(NUOPC_RunElement), pointer :: searchElement
+!    character(len=64)               :: jsonElemStr
+!
+!    if (present(rc)) rc = ESMF_SUCCESS
+!
+!    if (.not.associated(runSeq%first)) then
+!      ! empty run sequence
+!      write(jsonString,"(A)") "[]"
+!    else
+!      jsonString = "["
+!      searchElement => runSeq%first
+!      do while (associated(searchElement%next))
+!        call JSON_DriverRunElement(searchElement, jsonElemStr, rc=rc)
+!        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+!          line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+!        jsonString = trim(jsonString)//trim(jsonElemStr)//","
+!        !print *, "JSON_DriverRunSequenceSingle: jsonElemStr=", trim(jsonElemStr)
+!        !print *, "JSON_DriverRunSequenceSingle: jsonString=", trim(jsonString)
+!        searchElement => searchElement%next
+!      enddo
+!      call JSON_DriverRunElement(searchElement, jsonElemStr, rc=rc)
+!      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+!          line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+!      jsonString = trim(jsonString)//trim(jsonElemStr)//"]"
+!    endif
+!
+!  end subroutine
+!
+!
+!  subroutine JSON_DriverRunSequenceArray(runSeq, jsonString, rc)
+!    type(NUOPC_RunSequence), pointer     :: runSeq(:)
+!    character(*),            intent(out) :: jsonString
+!    integer, optional,       intent(out) :: rc
+!
+!    integer                         :: i
+!    character(len=1024)             :: jsonSeqString
+!
+!    if (present(rc)) rc = ESMF_SUCCESS
+!
+!    jsonString = "["
+!    do i=1, size(runSeq)
+!      call JSON_DriverRunSequenceSingle(runSeq(i), jsonSeqString, rc=rc)
+!      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+!          line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+!      jsonString = trim(jsonString)//trim(jsonSeqString)
+!      if (i<size(runSeq)) then
+!        jsonString = trim(jsonString)//","
+!      endif
+!    enddo
+!    jsonString = trim(jsonString)//"]"
+!
+!  end subroutine
+!
+!  subroutine JSON_DriverRunElement(runElement, jsonString, rc)
+!
+!    type(NUOPC_RunElement),  intent(in)  :: runElement
+!    character(len=*),        intent(out) :: jsonString
+!    integer, optional,       intent(out) :: rc
+!
+!    character(8)   :: iStr, jStr, phaseStr
+!
+!    if (present(rc)) rc = ESMF_SUCCESS
+!
+!    write(iStr,"(I6)") runElement%i
+!    write(jStr,"(I6)") runElement%j
+!    write(phaseStr,"(I6)") runElement%phase
+!
+!    write(jsonString, "(A)") '{&
+!        &"i":"'//trim(adjustl(iStr))//'",&
+!        &"j":"'//trim(adjustl(jStr))//'",&
+!        &"phase":"'//trim(adjustl(phaseStr))//'"}'
+!
+!  end subroutine
+
 
 end module NUOPC_Compliance_Driver
 
