@@ -872,11 +872,11 @@ int Comp::getComplianceCheckerJSON(
 
   // check input
   char const *envVar = VM::getenv("ESMF_RUNTIME_COMPLIANCECHECK");
+  *jsonIsOn = 0;
   if (envVar != NULL && jsonIsOn != NULL){
     std::string value(envVar);
     // see if JSON is specified in ESMF_RUNTIME_COMPLIANCECHECK
     int index;
-    *jsonIsOn=0;
     index = value.find("json=on");
     if (index == std::string::npos)
       index = value.find("JSON=ON");
