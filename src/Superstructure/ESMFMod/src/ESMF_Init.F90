@@ -548,6 +548,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           return
       endif
 
+      ! Write final message to the log
+      call ESMF_LogWrite("Finalizing ESMF", &
+        ESMF_LOGMSG_INFO, rc=localrc)
+      if (localrc /= ESMF_SUCCESS) then
+          write (ESMF_UtilIOStderr,*) ESMF_METHOD, ": Error writing into the default log"
+          return
+      endif
+
       ! Close the Config file  
       ! TODO: write this routine and remove the status= line
       ! call ESMF_ConfigFinalize(localrc)
