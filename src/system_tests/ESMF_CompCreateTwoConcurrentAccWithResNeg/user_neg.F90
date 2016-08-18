@@ -85,14 +85,15 @@
       type(ESMF_VM), intent(in) :: vm
       type(ESMF_GridComp), intent(inout) :: comp
       integer, intent(inout) :: comp_info
-      interface
-        subroutine user_setvm(gridcomp, rc)
-          use ESMF_CompMod
-          implicit none
-          type(ESMF_GridComp)  :: gridcomp
-          integer, intent(out)  :: rc
-        end subroutine user_setvm
-      end interface
+      procedure(set_vm_interface) :: user_setvm
+!      interface
+!        subroutine user_setvm(gridcomp, rc)
+!          use ESMF_CompMod
+!          implicit none
+!          type(ESMF_GridComp)  :: gridcomp
+!          integer, intent(out)  :: rc
+!        end subroutine user_setvm
+!      end interface
 
       integer, intent(out) :: rc
 
@@ -154,14 +155,15 @@
       type(ESMF_VM), intent(in) :: vm
       type(ESMF_GridComp), intent(inout) :: comp
       type(ESMF_PetListInfo), intent(in) :: comp_pet_info
-      interface
-        subroutine user_setvm(gridcomp, rc)
-          use ESMF_CompMod
-          implicit none
-          type(ESMF_GridComp)  :: gridcomp
-          integer, intent(out)  :: rc
-        end subroutine user_setvm
-      end interface
+      procedure(set_vm_interface) :: user_setvm
+!      interface
+!        subroutine user_setvm(gridcomp, rc)
+!          use ESMF_CompMod
+!          implicit none
+!          type(ESMF_GridComp)  :: gridcomp
+!          integer, intent(out)  :: rc
+!        end subroutine user_setvm
+!      end interface
 
       integer, intent(out) :: rc
 

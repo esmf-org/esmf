@@ -43,7 +43,7 @@
     ESMF_COMP_USER_NEG_PETLIST_INFO_TUPLE=1
 !------------------------------------------------------------------------------
 
-  interface
+  abstract interface
     subroutine set_vm_interface(gridcomp, rc)
       use ESMF_CompMod
       implicit none
