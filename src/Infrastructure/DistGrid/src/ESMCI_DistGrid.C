@@ -2754,60 +2754,7 @@ int DistGrid::print()const{
       vm->getPetCount(), VM::getCurrent()->getPetCount());
   }
   printf("--- ESMCI::DistGrid::print end ---\n");
-  
-#if 0
-  printf("--- ESMCI::DistGrid::print - Topology test start ---\n");
-  int lrc;
-  int indexTuple[2];
-  int depth=4;
-  int seqIndex;
-  indexTuple[0] = 0; indexTuple[1] = 0;
-  seqIndex = getSequenceIndexTile(1, indexTuple, depth, &lrc);
-  printf("localPet=%d, indexTuple = (%d, %d), sequenceIndex = %d, lrc = %d\n",
-    VM::getCurrent()->getLocalPet(), indexTuple[0], indexTuple[1], seqIndex, lrc);
-  indexTuple[0] = 0; indexTuple[1] = 1;
-  seqIndex = getSequenceIndexTile(1, indexTuple, depth, &lrc);
-  printf("localPet=%d, indexTuple = (%d, %d), sequenceIndex = %d, lrc = %d\n",
-    VM::getCurrent()->getLocalPet(), indexTuple[0], indexTuple[1], seqIndex, lrc);
-  indexTuple[0] = 1; indexTuple[1] = 1;
-  seqIndex = getSequenceIndexTile(1, indexTuple, depth, &lrc);
-  printf("localPet=%d, indexTuple = (%d, %d), sequenceIndex = %d, lrc = %d\n",
-    VM::getCurrent()->getLocalPet(), indexTuple[0], indexTuple[1], seqIndex, lrc);
-  indexTuple[0] = 1; indexTuple[1] = 0;
-  seqIndex = getSequenceIndexTile(1, indexTuple, depth, &lrc);
-  printf("localPet=%d, indexTuple = (%d, %d), sequenceIndex = %d, lrc = %d\n",
-    VM::getCurrent()->getLocalPet(), indexTuple[0], indexTuple[1], seqIndex, lrc);
-  indexTuple[0] = 11; indexTuple[1] = 1;
-  seqIndex = getSequenceIndexTile(1, indexTuple, depth, &lrc);
-  printf("localPet=%d, indexTuple = (%d, %d), sequenceIndex = %d, lrc = %d\n",
-    VM::getCurrent()->getLocalPet(), indexTuple[0], indexTuple[1], seqIndex, lrc);
-  indexTuple[0] = 1; indexTuple[1] = 5;
-  seqIndex = getSequenceIndexTile(1, indexTuple, depth, &lrc);
-  printf("localPet=%d, indexTuple = (%d, %d), sequenceIndex = %d, lrc = %d\n",
-    VM::getCurrent()->getLocalPet(), indexTuple[0], indexTuple[1], seqIndex, lrc);
-  indexTuple[0] = 1; indexTuple[1] = 6;
-  seqIndex = getSequenceIndexTile(1, indexTuple, depth, &lrc);
-  printf("localPet=%d, indexTuple = (%d, %d), sequenceIndex = %d, lrc = %d\n",
-    VM::getCurrent()->getLocalPet(), indexTuple[0], indexTuple[1], seqIndex, lrc);
-  indexTuple[0] = 4; indexTuple[1] = 6;
-  seqIndex = getSequenceIndexTile(1, indexTuple, depth, &lrc);
-  printf("localPet=%d, indexTuple = (%d, %d), sequenceIndex = %d, lrc = %d\n",
-    VM::getCurrent()->getLocalPet(), indexTuple[0], indexTuple[1], seqIndex, lrc);
-  indexTuple[0] = 10; indexTuple[1] = 5;
-  seqIndex = getSequenceIndexTile(1, indexTuple, depth, &lrc);
-  printf("localPet=%d, indexTuple = (%d, %d), sequenceIndex = %d, lrc = %d\n",
-    VM::getCurrent()->getLocalPet(), indexTuple[0], indexTuple[1], seqIndex, lrc);
-  indexTuple[0] = 10; indexTuple[1] = 6;
-  seqIndex = getSequenceIndexTile(1, indexTuple, depth, &lrc);
-  printf("localPet=%d, indexTuple = (%d, %d), sequenceIndex = %d, lrc = %d\n",
-    VM::getCurrent()->getLocalPet(), indexTuple[0], indexTuple[1], seqIndex, lrc);
-  indexTuple[0] = 21; indexTuple[1] = 5;
-  seqIndex = getSequenceIndexTile(1, indexTuple, depth, &lrc);
-  printf("localPet=%d, indexTuple = (%d, %d), sequenceIndex = %d, lrc = %d\n",
-    VM::getCurrent()->getLocalPet(), indexTuple[0], indexTuple[1], seqIndex, lrc);
-  printf("--- ESMCI::DistGrid::print - Topology test end ---\n");
-#endif
-  
+    
   // return successfully
   rc = ESMF_SUCCESS;
   return rc;
@@ -2920,7 +2867,7 @@ bool DistGrid::isLocalDeOnEdgeL(
       localDeIndexTuple[dim-1] = -1;
       // get sequence index providing localDe relative index tuple
       int seqindex =
-        getSequenceIndexLocalDe(localDe, localDeIndexTuple, 3, &localrc);
+        getSequenceIndexLocalDe(localDe, localDeIndexTuple, &localrc);
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
         ESMC_CONTEXT, rc)) return false;
       // determine if seqindex indicates edge or not
@@ -3003,7 +2950,7 @@ bool DistGrid::isLocalDeOnEdgeU(
       localDeIndexTuple[dim-1] = indexCountPDimPDe[de*dimCount+(dim-1)];
       // get sequence index providing localDe relative index tuple
       int seqindex =
-        getSequenceIndexLocalDe(localDe, localDeIndexTuple, 3, &localrc);
+        getSequenceIndexLocalDe(localDe, localDeIndexTuple, &localrc);
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
         ESMC_CONTEXT, rc)) return false;
       // determine if seqindex indicates edge or not
@@ -3136,7 +3083,6 @@ int DistGrid::getSequenceIndexLocalDe(
   const int *index,                 // in  - DE-local index tuple in or 
                                     //       relative to exclusive region
                                     //       basis 0
-  int depth,                        // in  - topology recursions depth
   int *rc                           // out - return code
   )const{
 //
@@ -3211,7 +3157,7 @@ int DistGrid::getSequenceIndexLocalDe(
             indexListPDimPLocalDe[localDe*dimCount+i][index[i]];
       }
       // get sequence index providing tile relative index tuple
-      seqindex = getSequenceIndexTile(tile, tileIndexTuple, depth, &localrc);
+      seqindex = getSequenceIndexTile(tile, tileIndexTuple, &localrc);
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
         ESMC_CONTEXT, rc)) return -1;  //  bail out with invalid seqindex
       delete [] tileIndexTuple;
@@ -3240,7 +3186,6 @@ int DistGrid::getSequenceIndexTileRelative(
 //
   int tile,                        // in  - tile = {1, ..., tileCount}
   const int *index,                 // in  - tile relative index tuple, base 0
-  int depth,                        // in  - depth of recursive search
   int *rc                           // out - return code
   )const{
 //
@@ -3272,8 +3217,7 @@ int DistGrid::getSequenceIndexTileRelative(
   for (int i=0; i<dimCount; i++)
     indexTileSpecific[i] = index[i] + minIndexPDimPTile[(tile-1)*dimCount+i];
   
-  int seqindex = getSequenceIndexTile(tile, indexTileSpecific, depth,
-    &localrc);
+  int seqindex = getSequenceIndexTile(tile, indexTileSpecific, &localrc);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
     ESMC_CONTEXT, rc)) return seqindex;  // bail out
   
@@ -3293,6 +3237,67 @@ int DistGrid::getSequenceIndexTileRelative(
 //
 // !INTERFACE:
 int DistGrid::getSequenceIndexTile(
+//
+// !RETURN VALUE:
+//    int sequence index
+//
+// !ARGUMENTS:
+//
+  int tile,                        // in  - tile = {1, ..., tileCount}
+  const int *index,                 // in  - tile-specific absolute index tuple
+  int *rc                           // out - return code
+  )const{
+//
+// !DESCRIPTION:
+//    Get sequential index provided the tile relative index tuple.
+//
+//    A value of -1 is returned by this function if the specified index tuple
+//    cannot be mapped to a sequence index in DistGrid. If at the same time
+//    the code returned in rc does not indicate an error a return value of -1
+//    indicates that the index tuple lies outside of the DistGrid index space.
+//
+//    The method requires that the
+//    provided index tuple be expressed in a "tile-specific absolute" sense.
+//    It is "absolute" in that the (0,0,...) tuple is not 'defined' to
+//    equal the origin of the tile. Instead the origin of the tile would
+//    be indicated by an index tuple that is equal to the "tile-specific"
+//    vector slice of minIndexPDimPTile[].
+//
+//EOPI
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;   // final return code
+  
+  int seqindex;
+  const int depthMax=6;
+  
+  for (int depth=0; depth<depthMax; depth++){
+    seqindex = getSequenceIndexTileRecursive(tile, index, depth, &localrc);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+      ESMC_CONTEXT, rc)) return seqindex;  // bail out
+    if (seqindex > -1){
+      // return successfully
+      if (rc!=NULL) *rc = ESMF_SUCCESS;
+      return seqindex;
+    }
+  }
+  
+  // return successfully
+  if (rc!=NULL) *rc = ESMF_SUCCESS;
+  return seqindex;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::DistGrid::getSequenceIndexTileRecursive()"
+//BOPI
+// !IROUTINE:  ESMCI::DistGrid::getSequenceIndexTileRecursive
+//
+// !INTERFACE:
+int DistGrid::getSequenceIndexTileRecursive(
 //
 // !RETURN VALUE:
 //    int sequence index
@@ -3326,7 +3331,7 @@ int DistGrid::getSequenceIndexTile(
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;   // final return code
 
-//printf("gjt - getSequenceIndexTile depth: %d\n", depth);
+  //printf("gjt - getSequenceIndexTile depth: %d\n", depth);
 
   // check input
   if (tile < 1 || tile > tileCount){
@@ -3370,7 +3375,6 @@ int DistGrid::getSequenceIndexTile(
         int indexB[dimCount];
         int positionIndexOffset = 2;
         int orientationIndexOffset = 2+dimCount;
-#if 1
         for (int j=0; j<dimCount; j++){
           int position = connectionList[i][positionIndexOffset+j];
           int orientation = connectionList[i][orientationIndexOffset+j];
@@ -3382,33 +3386,12 @@ int DistGrid::getSequenceIndexTile(
             indexB[j] = index[orientation] + position;
           }
         }
-#else
-        double pivot[dimCount];
-        for (int j=0; j<dimCount; j++)
-          pivot[j]=connectionList[i][positionIndexOffset+j]+0.5;
-        double trans[dimCount];
-        for (int j=0; j<dimCount; j++)
-          trans[j]=(double)index[j]-pivot[j];
-        double rot[dimCount];
-        for (int j=0; j<dimCount; j++){
-          int o = connectionList[i][orientationIndexOffset+j];
-          if (o<0)
-            rot[j]= -trans[-(o+1)];
-          else
-            rot[j]= trans[(o-1)];
-        }
-        for (int j=0; j<dimCount; j++)
-          indexB[j]=rot[j]+pivot[j];
-#endif
-        
-        
-        
-        seqindex = getSequenceIndexTile(tileB, indexB, depth, &localrc);
+        seqindex = getSequenceIndexTileRecursive(tileB, indexB, depth, &localrc);
         if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
           ESMC_CONTEXT, rc)) return seqindex;  // bail out
 
-printf("tile=%d, tileA=%d, tileB=%d, index[]=%d %d, indexB[]=%d %d, seqInd=%d\n",
-tile, tileA, tileB, index[0], index[1], indexB[0], indexB[1], seqindex);
+//printf("tile=%d, tileA=%d, tileB=%d, index[]=%d %d, indexB[]=%d %d, seqInd=%d\n",
+//tile, tileA, tileB, index[0], index[1], indexB[0], indexB[1], seqindex);
 
         if (seqindex > -1){
           // return successfully
@@ -3421,7 +3404,6 @@ tile, tileA, tileB, index[0], index[1], indexB[0], indexB[1], seqindex);
         int indexA[dimCount];
         int positionIndexOffset = 2;
         int orientationIndexOffset = 2+dimCount;
-#if 1
         // for reverse must inspect if this is a 90 or 270 degree rotation,
         // the only ones not orthogonal!
         int positionVect[dimCount];
@@ -3447,7 +3429,6 @@ tile, tileA, tileB, index[0], index[1], indexB[0], indexB[1], seqindex);
           positionVect[0] =  connectionList[i][positionIndexOffset+1];
           positionVect[1] = -connectionList[i][positionIndexOffset+0];
         }
-          
         for (int j=0; j<dimCount; j++){
           int position = positionVect[j];
           int orientation = orientationVect[j];
@@ -3459,31 +3440,12 @@ tile, tileA, tileB, index[0], index[1], indexB[0], indexB[1], seqindex);
             indexA[j] = index[orientation] - positionVect[orientation];
           }
         }
-#else
-        double pivot[dimCount];
-        for (int j=0; j<dimCount; j++)
-          pivot[j]=connectionList[i][positionIndexOffset+j]+0.5;
-        double trans[dimCount];
-        for (int j=0; j<dimCount; j++)
-          trans[j]=(double)index[j]-pivot[j];
-        double rot[dimCount];
-        for (int j=0; j<dimCount; j++){
-          int o = connectionList[i][orientationIndexOffset+j];
-          o = -o; // TODO: correctly figure this out only works for 90 deg rots.
-          if (o<0)
-            rot[j]= -trans[-(o+1)];
-          else
-            rot[j]= trans[(o-1)];
-        }
-        for (int j=0; j<dimCount; j++)
-          indexA[j]=rot[j]+pivot[j];
-#endif
-        seqindex = getSequenceIndexTile(tileA, indexA, depth, &localrc);
+        seqindex = getSequenceIndexTileRecursive(tileA, indexA, depth, &localrc);
         if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
           ESMC_CONTEXT, rc)) return seqindex;  // bail out
 
-printf("tile=%d, tileA=%d, tileB=%d, index[]=%d %d, indexA[]=%d %d, seqInd=%d\n",
-tile, tileA, tileB, index[0], index[1], indexA[0], indexA[1], seqindex);
+//printf("tile=%d, tileA=%d, tileB=%d, index[]=%d %d, indexA[]=%d %d, seqInd=%d\n",
+//tile, tileA, tileB, index[0], index[1], indexA[0], indexA[1], seqindex);
         
         if (seqindex > -1){
           // return successfully

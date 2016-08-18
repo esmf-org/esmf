@@ -170,6 +170,7 @@ namespace ESMCI {
     int const *getMaxIndexPDimPDe() const {return maxIndexPDimPDe;}
     int const *getMaxIndexPDimPDe(int de, int *rc) const;
     int const *getElementCountPDe() const {return elementCountPDe;}
+    // misc. get
     int getElementCountPDe(int de, int *rc) const;
     int const *getTileListPDe() const {return tileListPDe;}
     int const *getContigFlagPDimPDe() const {return contigFlagPDimPDe;}
@@ -183,12 +184,15 @@ namespace ESMCI {
     int const *getCollocationTable() const {return collocationTable;}
     DELayout *getDELayout() const {return delayout;}
     int const *getRegDecomp() const {return regDecomp;}
-    int getSequenceIndexLocalDe(int localDe, int const *index, int depth=0,
+    // topology discovery
+    int getSequenceIndexLocalDe(int localDe, int const *index,
       int *rc=NULL) const;
-    int getSequenceIndexTileRelative(int tile, int const *index, int depth,
+    int getSequenceIndexTileRelative(int tile, int const *index,
       int *rc=NULL)const;
-    int getSequenceIndexTile(int tile, int const *index, int depth,
+    int getSequenceIndexTile(int tile, int const *index, int *rc=NULL)const;
+    int getSequenceIndexTileRecursive(int tile, int const *index, int depth,
       int *rc=NULL)const;
+    // misc. get
     int *const *getElementCountPCollPLocalDe()
       const {return elementCountPCollPLocalDe;}
     int const *getArbSeqIndexList(int localDe, int collocation, int *rc=NULL)

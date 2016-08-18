@@ -5200,7 +5200,7 @@ int Grid::getStaggerDistgrid(
 
 
         // Create stagger distgrid w no poles with this padding
-        staggerDistgridList[staggerloc]=DistGrid::create(distgrid,
+        staggerDistgridList[staggerloc]=DistGrid::create(distgrid_wo_poles,
                                                          staggerEdgeLWidthIntInt, 
                                                          staggerEdgeUWidthIntInt, 
                                                          NULL,
@@ -7695,7 +7695,7 @@ int GridIter::getGlobalID(
   //  curDE,curInd[0],curInd[1],deBasedInd[0],deBasedInd[1]);  
   
   // return sequence index
-  gid=staggerDistgrid->getSequenceIndexLocalDe(curDE,deBasedInd,2,&localrc);
+  gid=staggerDistgrid->getSequenceIndexLocalDe(curDE,deBasedInd,&localrc);
   
   //printf("GI Gid=%d curDE=%d curInd=%d %d deBasedInd=%d %d localrc=%d ESMC_SUCCESS=%d \n",
   //  gid,curDE,curInd[0],curInd[1],deBasedInd[0],deBasedInd[1],localrc,ESMF_SUCCESS);
@@ -8822,7 +8822,7 @@ int GridCellIter::getGlobalID(
     }
       
     // return sequence index
-    gid=centerDistgrid->getSequenceIndexLocalDe(curDE,deBasedInd,2,&localrc);
+    gid=centerDistgrid->getSequenceIndexLocalDe(curDE,deBasedInd,&localrc);
 
     //printf("GCI Gid=%d curDE=%d Ind=%d %d localrc=%d \n",gid,curDE,deBasedInd[0],deBasedInd[1],localrc);
 
