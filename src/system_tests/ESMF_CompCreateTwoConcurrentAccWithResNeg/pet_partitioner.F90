@@ -90,6 +90,12 @@
         if(ssiIdLocalCommRank < accDeviceCount) then
           isAccPet(1) = 1
         end if
+      else if(partStrategy == ESMF_ACC_PET_PARTITION_EVEN_STRIDED) then
+        ! The first (lowest ranked) even processes with access to device gets to use it
+        if((mod(ssiIdLocalCommRank, 2) == 0) .and.&
+            (ssiIdLocalCommRank/2 < accDeviceCount)) then
+          isAccPet(1) = 1
+        end if
       else
         print *, "ERROR: Unrecognized partition strategy"
         return
