@@ -148,7 +148,9 @@ namespace ESMCI {
     static bool CheckPIOError(int pioRetCode,
                               int line, const char * const file,
                               const char * const method,
-                              const char *const fmtStr, int *rc,
+                              const std::string &fmtStr,
+                              int rc_code,
+                              int *rc,
                               bool warn = false);
 
 // Don't know yet if we will need these
