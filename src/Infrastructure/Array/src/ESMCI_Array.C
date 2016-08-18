@@ -213,7 +213,7 @@ Array::Array(
       SeqIndex seqIndex;  // invalidated by default constructor
       if (arrayElement.hasValidSeqIndex()){
         // seqIndex is well defined for this arrayElement
-        seqIndex = arrayElement.getSequenceIndexExclusive(3);
+        seqIndex = arrayElement.getSequenceIndexExclusive();
       }
       rimSeqIndex[i].push_back(seqIndex); // store seqIndex for this rim element
       rimLinIndex[i].push_back(linIndex); // store linIndex for this rim element
@@ -2031,7 +2031,6 @@ SeqIndex Array::getSequenceIndexExclusive(
   int localDe,                      // in  - local DE
   int const *index,                 // in  - DE-local index tuple in exclusive
                                     //       region basis 0
-  int depth,                        // in  - topology recursions depth
   int *rc                           // out - return code
   )const{
 //
@@ -2064,7 +2063,7 @@ SeqIndex Array::getSequenceIndexExclusive(
   // determine the sequentialized index for decomposed dimensions
   int decompSeqIndex;
   decompSeqIndex = distgrid->getSequenceIndexLocalDe(localDe, decompIndex,
-    depth, &localrc);  
+    &localrc);  
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
     rc)) return seqIndex;
   seqIndex.decompSeqIndex = decompSeqIndex;
@@ -2131,7 +2130,7 @@ SeqIndex Array::getSequenceIndexTile(
   // determine the sequentialized index for decomposed dimensions
   int decompSeqIndex;
   decompSeqIndex = distgrid->getSequenceIndexTileRelative(tile, decompIndex,
-    0, &localrc);  
+    &localrc);  
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
     rc)) return seqIndex;
   seqIndex.decompSeqIndex = decompSeqIndex;
@@ -2925,7 +2924,7 @@ int Array::constructFileMap(
       while(arrayElement.isWithin()){
         if (arrayElement.isWithinWatch()){
           // within exclusive Array region -> obtain seqIndex value
-          SeqIndex seqIndex = arrayElement.getSequenceIndexExclusive(0);
+          SeqIndex seqIndex = arrayElement.getSequenceIndexExclusive();
           fileMapList[element] = seqIndex.decompSeqIndex;
         }else{
           // outside exclusive Array region -> mark this as unmapped element
@@ -11696,7 +11695,6 @@ SeqIndex ArrayElement::getSequenceIndexExclusive(
 //
 // !ARGUMENTS:
 //
-  int depth
   )const{    
 //
 // !DESCRIPTION:
@@ -11708,7 +11706,7 @@ SeqIndex ArrayElement::getSequenceIndexExclusive(
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   
   SeqIndex seqIndex = array->getSequenceIndexExclusive(localDe, &indexTuple[0],
-    depth, &localrc);
+    &localrc);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
     NULL)) throw localrc;  // bail out with exception
   return seqIndex;
