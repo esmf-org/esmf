@@ -29,6 +29,7 @@
 #include <string.h>
 #include <ctype.h>
 #include <vector>
+#include <iomanip>
 #include <iostream>
 #include <fstream>
 #include <sstream>
@@ -646,9 +647,9 @@ void PIO_Handler::arrayRead(
     piorc = pio_cpp_inquire(pioFileDesc, &nDims,
                               &nVar, &nAtt, &unlim);
     if (!CHECKPIOERROR(piorc, "File is not in NetCDF format", ESMF_RC_FILE_READ, (*rc))) {
-        free (vardesc);
-        vardesc = NULL;
-        return;
+      free (vardesc);
+      vardesc = NULL;
+      return;
     }
   }
   if (getFormat() != ESMF_IOFMT_BIN) {
@@ -656,9 +657,9 @@ void PIO_Handler::arrayRead(
     // An error here means the variable is not in the file
     const std::string errmsg = std::string("variable ") + varname + " not found in file";
     if (!CHECKPIOERROR(piorc, errmsg, ESMF_RC_FILE_READ, (*rc))) {
-        free (vardesc);
-        vardesc = NULL;
-        return;
+      free (vardesc);
+      vardesc = NULL;
+      return;
     }
   }
   if (getFormat() != ESMF_IOFMT_BIN) {
@@ -668,9 +669,9 @@ void PIO_Handler::arrayRead(
       int time_len;
       piorc = pio_cpp_inq_dimid(pioFileDesc, "time", &dimid_time);
       if (!CHECKPIOERROR(piorc, "No time dimension found in file", ESMF_RC_FILE_READ, (*rc))) {
-          free (vardesc);
-          vardesc = NULL;
-          return;
+        free (vardesc);
+        vardesc = NULL;
+        return;
       }
       // Check to see if time is the unlimited dimension
       if (dimid_time != unlim) {
@@ -688,9 +689,9 @@ void PIO_Handler::arrayRead(
       piorc = pio_cpp_inq_dimlen(pioFileDesc,
           dimid_time, &time_len);
       if (!CHECKPIOERROR(piorc, "Error finding time length", ESMF_RC_FILE_READ, (*rc))) {
-          free (vardesc);
-          vardesc = NULL;
-          return;
+        free (vardesc);
+        vardesc = NULL;
+        return;
       }
       if (*timeslice > time_len) {
         PRINTMSG(" (" << my_rank << "): " <<
@@ -742,19 +743,20 @@ void PIO_Handler::arrayRead(
     if (ESMC_LogDefault.MsgFoundError(ESMF_RC_INTNRL_BAD,
         "Bad PIO IO type", ESMC_CONTEXT, rc)) {
       free (vardesc);
+      vardesc = NULL;
       return;
     }
   }
   if (!CHECKPIOERROR(piorc, "Error reading array data", ESMF_RC_FILE_READ, (*rc))) {
-      free (vardesc);
-      vardesc = NULL;
-      return;
+    free (vardesc);
+    vardesc = NULL;
+    return;
   }
 
   // Cleanup
   if ((pio_var_desc_t)NULL != vardesc) {
-    free(vardesc);
-    vardesc = (pio_var_desc_t)NULL;
+    free (vardesc);
+    vardesc = NULL;
   }
 
   // return
@@ -870,12 +872,12 @@ void PIO_Handler::arrayWrite(
       // Not all NetCDF errors are really errors here so we need to check
       if ((PIO_noerr != piorc) && (NC_EINDEFINE != piorc)) {
         if (!CHECKPIOERROR(piorc,
-                          ((NC_EPERM == piorc) ?
-                           "File is read only" :
-                           "File is not in NetCDF format"),
-                           ESMF_RC_FILE_WRITE, (*rc))) {
-            free (vardesc);
-            return;
+            ((NC_EPERM == piorc) ?
+            "File is read only" :
+            "File is not in NetCDF format"),
+            ESMF_RC_FILE_WRITE, (*rc))) {
+          free (vardesc);
+          return;
         }
       }
 
@@ -884,9 +886,9 @@ void PIO_Handler::arrayWrite(
       piorc = pio_cpp_inquire(pioFileDesc, &nfDims,
                                 &nVar, &nAtt, &unlim);
       if (!CHECKPIOERROR(piorc, "File is not in NetCDF format",
-                               ESMF_RC_FILE_WRITE, (*rc))) {
-          free (vardesc);
-          return;
+          ESMF_RC_FILE_WRITE, (*rc))) {
+        free (vardesc);
+        return;
       }
 
       // We have a NetCDF file, see if the variable is in there
@@ -912,11 +914,10 @@ void PIO_Handler::arrayWrite(
     if (hasTimeDim) {
       // Retrieve the max time field
       piorc = pio_cpp_inq_dimlen(pioFileDesc, dimidTime, &timeLen);
-      if (!CHECKPIOERROR(piorc,
-                               "Error retrieving information about time",
-                               ESMF_RC_FILE_WRITE, (*rc))) {
-          free (vardesc);
-          return;
+      if (!CHECKPIOERROR(piorc, "Error retrieving information about time",
+          ESMF_RC_FILE_WRITE, (*rc))) {
+        free (vardesc);
+        return;
       }
     }
 
@@ -959,11 +960,10 @@ void PIO_Handler::arrayWrite(
 
     // Check compatibility between array to write and existing variable.
     piorc = pio_cpp_inq_varndims_vdesc(pioFileDesc, vardesc, &nDims);
-    if (!CHECKPIOERROR(piorc,
-        "Error retrieving information about variable",
+    if (!CHECKPIOERROR(piorc, "Error retrieving information about variable",
         ESMF_RC_FILE_WRITE, (*rc))) {
-        free (vardesc);
-        return;
+      free (vardesc);
+      return;
     }
 
     if (nDims != nArrdims) {
@@ -981,12 +981,11 @@ void PIO_Handler::arrayWrite(
     int *dimIds = new int[nDims];
     piorc = pio_cpp_inq_vardimid_vdesc(pioFileDesc, vardesc,
                                        dimIds, nDims);
-    if (!CHECKPIOERROR(piorc,
-        "Error retrieving information about variable",
+    if (!CHECKPIOERROR(piorc, "Error retrieving information about variable",
         ESMF_RC_FILE_WRITE, (*rc))) {
-        delete[] dimIds;
-        free (vardesc);
-        return;
+      delete[] dimIds;
+      free (vardesc);
+      return;
     }
 
     int dimLen;
@@ -994,12 +993,11 @@ void PIO_Handler::arrayWrite(
     for (int i = 0; i < nDims; i++) {
       PRINTMSG("pio_cpp_inq_dimlen for dim = " << i);
       piorc = pio_cpp_inq_dimlen(pioFileDesc, dimIds[i], &dimLen);
-      if (!CHECKPIOERROR(piorc,
-                         "Error retrieving dimension information",
-                         ESMF_RC_FILE_WRITE, (*rc))) {
-          delete[] dimIds;
-          free (vardesc);
-          return;
+      if (!CHECKPIOERROR(piorc, "Error retrieving dimension information",
+          ESMF_RC_FILE_WRITE, (*rc))) {
+        delete[] dimIds;
+        free (vardesc);
+        return;
       }
         
       if (dimIds[i] == unlim) {
@@ -1054,12 +1052,12 @@ void PIO_Handler::arrayWrite(
     // Not all NetCDF errors are really errors here so we need to check
     if ((PIO_noerr != piorc) && (NC_EINDEFINE != piorc)) {
       if (!CHECKPIOERROR(piorc,
-                        ((NC_EPERM == piorc) ?
-                         "File is read only" :
-                         "File is not in NetCDF format"),
-                         ESMF_RC_FILE_WRITE, (*rc))) {
-          free (vardesc);
-          return;
+          ((NC_EPERM == piorc) ?
+          "File is read only" :
+          "File is not in NetCDF format"),
+          ESMF_RC_FILE_WRITE, (*rc))) {
+        free (vardesc);
+        return;
       }
     }
   }
@@ -1071,17 +1069,17 @@ void PIO_Handler::arrayWrite(
       if (dimLabels.size() > 0)
         axis = dimLabels[i];
       else {
-        char axis_tmp[128];
-        sprintf(axis_tmp, "%s_dim%03d", varname, (i + 1));
-        axis = axis_tmp;
+        std::stringstream axis_tmp;
+        axis_tmp << varname << "_dim" << std::setfill('0') << std::setw(3) << i+1;
+        axis = axis_tmp.str();
       }
       PRINTMSG("Defining dimension " << i);
       piorc = pio_cpp_def_dim(pioFileDesc, axis.c_str(),
                                 ioDims[i], &ncDims[i]);
-      if (!CHECKPIOERROR(piorc,  std::string("Defining dimension: ") + axis,
-            ESMF_RC_FILE_WRITE, (*rc))) {
-          free (vardesc);
-          return;
+      if (!CHECKPIOERROR(piorc, std::string("Defining dimension: ") + axis,
+          ESMF_RC_FILE_WRITE, (*rc))) {
+        free (vardesc);
+        return;
       }
     }
     PRINTMSG("finished defining space dims, timeFrame = " << timeFrame);
@@ -1089,19 +1087,19 @@ void PIO_Handler::arrayWrite(
     if (timeFrame > -1) {
       if (hasTimeDim) {
         piorc = pio_cpp_inq_dimid (pioFileDesc, "time", &ncDims[nioDims]);
-        if (!CHECKPIOERROR(piorc,  "Attempting to obtain 'time' dimension ID",
+        if (!CHECKPIOERROR(piorc, "Attempting to obtain 'time' dimension ID",
             ESMF_RC_FILE_WRITE, (*rc))) {
-            free (vardesc);
-            return;
+          free (vardesc);
+          return;
         }
       } else {
         PRINTMSG("Defining time dimension");
         piorc = pio_cpp_def_dim(pioFileDesc, "time",
                                 PIO_unlimited, &ncDims[nioDims]);
-        if (!CHECKPIOERROR(piorc,  "Attempting to define 'time' dimension",
+        if (!CHECKPIOERROR(piorc, "Attempting to define 'time' dimension",
             ESMF_RC_FILE_WRITE, (*rc))) {
-            free (vardesc);
-            return;
+          free (vardesc);
+          return;
         }
       }
       nioDims++;
@@ -1111,10 +1109,10 @@ void PIO_Handler::arrayWrite(
   if ((getFormat() != ESMF_IOFMT_BIN) && !varExists) {
     piorc = pio_cpp_def_var_md(pioFileDesc, varname, basepiotype,
                                ncDims, nioDims, vardesc);
-    if (!CHECKPIOERROR(piorc,  std::string("Attempting to obtain info on variable ") + varname,
-            ESMF_RC_FILE_WRITE, (*rc))) {
-        free (vardesc);
-        return;
+    if (!CHECKPIOERROR(piorc, std::string("Attempting to obtain info on variable: ") + varname,
+        ESMF_RC_FILE_WRITE, (*rc))) {
+      free (vardesc);
+      return;
     }
   }
   if ((getFormat() != ESMF_IOFMT_BIN) && (timeFrame >= 0)) {
@@ -1141,10 +1139,10 @@ void PIO_Handler::arrayWrite(
   PRINTMSG("calling enddef, status = " << statusOK);
   if ((getFormat() != ESMF_IOFMT_BIN)) {
     piorc = pio_cpp_enddef(pioFileDesc);
-    if (!CHECKPIOERROR(piorc,  std::string ("Attempting to end definition of variable ") + varname,
-            ESMF_RC_FILE_WRITE, (*rc))) {
-        free (vardesc);
-        return;
+    if (!CHECKPIOERROR(piorc,  std::string ("Attempting to end definition of variable: ") + varname,
+        ESMF_RC_FILE_WRITE, (*rc))) {
+      free (vardesc);
+      return;
     }
   }
 #endif // defined(ESMF_NETCDF) || defined(ESMF_PNETCDF)
@@ -1177,7 +1175,7 @@ void PIO_Handler::arrayWrite(
       return;
     }
   }
-  if (!CHECKPIOERROR(piorc,  "Attempting to write file",
+  if (!CHECKPIOERROR(piorc, "Attempting to write file",
             ESMF_RC_FILE_WRITE, (*rc))) {
       free (vardesc);
       return;
