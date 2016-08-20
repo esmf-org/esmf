@@ -111,6 +111,11 @@ ESMF_F90COMPILER_VERSION    = ${ESMF_F90COMPILER} -v --version
 ESMF_CXXCOMPILER_VERSION    = ${ESMF_CXXCOMPILER} -v --version
 
 ############################################################
+# Special debug flags
+#
+ESMF_F90OPTFLAG_G       += -Wall -Wextra -Wno-unused -Wno-unused-dummy-argument -fbacktrace
+
+############################################################
 # Fortran symbol convention
 #
 ifeq ($(ESMF_FORTRANSYMBOLS),default)
