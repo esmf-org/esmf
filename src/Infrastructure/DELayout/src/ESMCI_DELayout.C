@@ -1516,9 +1516,9 @@ int DELayout::serialize(
       }
     }
   }else{
-    for (i=0, dep=deInfoList; i<deCount; i++, dep++){
-      ip += 3*deCount;
-      if (oldstyle){
+    ip += 3*deCount;
+    if (oldstyle){
+      for (i=0, dep=deInfoList; i<deCount; i++, dep++){
         ip += 1 + 2*dep->nconnect + ndim;
       }
     }
