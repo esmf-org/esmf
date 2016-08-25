@@ -367,18 +367,18 @@
         ! Divide comp pets evenly among apets
         comp_pet_sz = size(apets)/naccs
         print *, "DEBUG: Size of each acc comp petlist = ", comp_pet_sz
-        tmp_pet_sidx = 0
-        tmp_pet_eidx = comp_pet_sz -1
+        tmp_pet_sidx = 1
+        tmp_pet_eidx = comp_pet_sz
         do i=1,size(comp_info)
           ! First allocate for all MUST ACC
           if(comp_info(i) == ESMF_COMP_MUST_ACC) then
             allocate(comp_pets_info(i)%pet_list(comp_pet_sz))
             k = 1
             do j=tmp_pet_sidx,tmp_pet_eidx
-              comp_pets_info(i)%pet_list(k) = j
+              comp_pets_info(i)%pet_list(k) = apets(j)
               k = k + 1
-              tmp_pet_sidx = tmp_pet_sidx + 1
             end do
+            tmp_pet_sidx = tmp_pet_sidx + comp_pet_sz
             tmp_pet_eidx = tmp_pet_eidx + comp_pet_sz
             naccs = naccs - 1
           end if
@@ -392,10 +392,10 @@
             allocate(comp_pets_info(i)%pet_list(comp_pet_sz))
             k = 1
             do j=tmp_pet_sidx,tmp_pet_eidx
-              comp_pets_info(i)%pet_list(k) = j
+              comp_pets_info(i)%pet_list(k) = apets(j)
               k = k + 1
-              tmp_pet_sidx = tmp_pet_sidx + 1
             end do
+            tmp_pet_sidx = tmp_pet_sidx + comp_pet_sz
             tmp_pet_eidx = tmp_pet_eidx + comp_pet_sz
             naccs = naccs - 1
           end if
@@ -404,17 +404,17 @@
       if(nnon_accs > 0) then
         comp_pet_sz = size(nonapets)/nnon_accs
         print *, "DEBUG: Size of each non-acc comp petlist = ", comp_pet_sz
-        tmp_pet_sidx = 0
-        tmp_pet_eidx = comp_pet_sz - 1
+        tmp_pet_sidx = 1
+        tmp_pet_eidx = comp_pet_sz
         do i=1,size(comp_info)
           if(comp_info(i) == ESMF_COMP_NO_ACC) then
             allocate(comp_pets_info(i)%pet_list(comp_pet_sz))
             k = 1
             do j=tmp_pet_sidx,tmp_pet_eidx
-              comp_pets_info(i)%pet_list(k) = j
+              comp_pets_info(i)%pet_list(k) = nonapets(j)
               k = k + 1
-              tmp_pet_sidx = tmp_pet_sidx + 1
             end do
+            tmp_pet_sidx = tmp_pet_sidx + comp_pet_sz
             tmp_pet_eidx = tmp_pet_eidx + comp_pet_sz
             nnon_accs = nnon_accs - 1
           end if
@@ -426,10 +426,10 @@
               allocate(comp_pets_info(i)%pet_list(comp_pet_sz))
               k = 1
               do j=tmp_pet_sidx,tmp_pet_eidx
-                comp_pets_info(i)%pet_list(k) = j
+                comp_pets_info(i)%pet_list(k) = nonapets(j)
                 k = k + 1
-                tmp_pet_sidx = tmp_pet_sidx + 1
               end do
+              tmp_pet_sidx = tmp_pet_sidx + comp_pet_sz
               tmp_pet_eidx = tmp_pet_eidx + comp_pet_sz
               nnon_accs = nnon_accs - 1
             end if
