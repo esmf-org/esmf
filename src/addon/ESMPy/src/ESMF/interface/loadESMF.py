@@ -41,7 +41,7 @@ with open(esmfmk, 'r') as MKFILE:
     esmfabi = None
     esmfcomm = None
     esmfversion = None
-    netcdf = [False, False, False, False]
+    netcdf = [False, False]
     
     for line in MKFILE:
         if 'ESMF_LIBSDIR' in line:
@@ -52,12 +52,8 @@ with open(esmfmk, 'r') as MKFILE:
             esmfabi = line.split(":")[1]
         elif 'ESMF_NETCDF:' in line:
             netcdf[0] = True
-        elif 'ESMF_NETCDF_INCLUDE:' in line:
+        elif 'ESMF_PIO:' in line:
             netcdf[1] = True
-        elif 'ESMF_NETCDF_LIBS:' in line:
-            netcdf[2] = True
-        elif 'ESMF_NETCDF_LIBPATH:' in line:
-            netcdf[3] = True
         elif 'ESMF_COMM:' in line:
             esmfcomm = line.split(":")[1]
         elif 'ESMF_VERSION_STRING=' in line:
@@ -92,7 +88,7 @@ else:
     raise ValueError("Unrecognized ESMF_ABI setting!")
 
 # set _ESMF_NETCDF
-if all(netcdf):
+if np.any(netcdf):
     constants._ESMF_NETCDF = True
 
 # set _ESMF_COMM
