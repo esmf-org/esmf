@@ -21,7 +21,8 @@
   use user_neg_info
 
   integer, parameter :: &
-    ESMF_ACC_PET_PARTITION_CONTIG = 1, ESMF_ACC_PET_PARTITION_EVEN_STRIDED = 2
+    ESMF_ACC_PET_PARTITION_CONTIG = 1, ESMF_ACC_PET_PARTITION_EVEN_STRIDED = 2,&
+    ESMF_ACC_PET_PARTITION_LOWEST_RANK = 3
 
   public ESMF_ACC_PET_PARTITION_CONTIG, ESMF_ACC_PET_PARTITION_EVEN_STRIDED
   public partition_pet_global_list, subtract_pets
@@ -37,6 +38,11 @@
   ! ESMF_ACC_PET_PARTITION_CONTIG => accelerated devices are
   !   available from the lowest ranked MPI processes (rank < number of
   !   devices)
+  ! ESMF_ACC_PET_PARTITION_EVEN_STRIDED => accelerated devices are
+  !   available from the lowest ranked even MPI processes
+  ! ESMF_ACC_PET_PARTITION_LOWEST_RANK => accelerated devices are
+  !   available from the lowest ranked process (single process)
+  !   on each node with access to a device
   subroutine partition_pets(vm, aPets, nonAPets, partStrategy, rc)
 !   ! The ESMF Framework module
     use ESMF
@@ -94,6 +100,11 @@
         ! The first (lowest ranked) even processes with access to device gets to use it
         if((mod(ssiIdLocalCommRank, 2) == 0) .and.&
             (ssiIdLocalCommRank/2 < accDeviceCount)) then
+          isAccPet(1) = 1
+        end if
+      else if(partStrategy == ESMF_ACC_PET_PARTITION_LOWEST_RANK) then
+        ! The first (lowest ranked) process with access to device gets to use it
+        if(ssiIdLocalCommRank == 0) then
           isAccPet(1) = 1
         end if
       else
