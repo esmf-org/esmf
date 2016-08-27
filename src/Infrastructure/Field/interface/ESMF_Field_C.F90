@@ -865,88 +865,6 @@ subroutine f_esmf_fieldcollectgarbage(field, rc)
 
   end subroutine f_esmf_regridgetarea
 
-
-#undef  ESMF_METHOD
-#define ESMF_METHOD "f_esmf_regridstore"
-  subroutine f_esmf_regridstore(srcField, dstField, &
-                                srcMaskValues, len1, &
-                                dstMaskValues, len2, &
-                                routehandle, &
-                                regridmethod, &
-                                polemethod, &
-                                regridPoleNPnts, &
-                                linetype, &
-                                normtype, &
-                                unmappedaction, &
-                                ignoreDegenerate, &
-                                srcFracField, &
-                                dstFracField, &
-                                rc)
-
-    use ESMF_UtilTypesMod
-    use ESMF_BaseMod
-    use ESMF_LogErrMod
-    use ESMF_RHandleMod
-    use ESMF_FieldRegridMod
-    use ESMF_FieldMod
-
-    implicit none
-
-      type(ESMF_Field)                        :: srcField
-      type(ESMF_Field)                        :: dstField
-      integer                                 :: len1, len2
-      integer,optional                        :: srcMaskValues(len1), &
-                                                 dstMaskValues(len2)
-      type(ESMF_RouteHandle),optional         :: routehandle
-      type(ESMF_RegridMethod_Flag),optional   :: regridmethod
-      type(ESMF_PoleMethod_Flag),optional     :: polemethod
-      integer,optional                        :: regridPoleNPnts
-
-      type(ESMF_LineType_Flag),optional       :: linetype
-      type(ESMF_NormType_Flag),optional       :: normtype
-      type(ESMF_UnmappedAction_Flag),optional :: unmappedaction
-      logical,optional                        :: ignoreDegenerate
-      type(ESMF_Field),optional               :: srcFracField
-      type(ESMF_Field),optional               :: dstFracField
-      integer,optional                        :: rc 
-
-    integer :: localrc
-    type(ESMF_RouteHandle) :: l_routehandle
-
-    ! initialize return code; assume routine not implemented
-    rc = ESMF_RC_NOT_IMPL
-    localrc = ESMF_RC_NOT_IMPL
-
-    call ESMF_FieldRegridStore(srcField, dstField, &
-                               srcMaskValues=srcMaskValues, &
-                               dstMaskValues=dstMaskValues, &
-                               routehandle=l_routehandle, &
-                               regridmethod=regridmethod, &
-                               polemethod=polemethod, &
-                               regridPoleNPnts=regridPoleNPnts, &
-                               lineType=linetype, &
-                               normType=normtype, &
-                               unmappedaction=unmappedaction, &
-                               ignoreDegenerate=ignoreDegenerate, &
-                               srcFracField=srcFracField, &
-                               dstFracField=dstFracField, &
-                               rc=localrc)
-
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
- 
-    ! because ESMF_RouteHandle.this is private, it cannot be accessed directly
-    ! we use the public interface to do the ptr copy;
-    ! the array object returned to the C interface must consist only of the
-    ! this pointer. It must not contain the isInit member.
-    call ESMF_RoutehandleCopyThis(l_routehandle, routehandle, localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
-
-    rc = ESMF_SUCCESS
-  
-  end subroutine f_esmf_regridstore
-
 #undef  ESMF_METHOD
 #define ESMF_METHOD "f_esmf_regrid"
   subroutine f_esmf_regrid(srcField, dstField, routehandle, zeroregion, zrpresent, rc)
@@ -1041,5 +959,153 @@ subroutine f_esmf_fieldcollectgarbage(field, rc)
     rc = ESMF_SUCCESS
   
   end subroutine f_esmf_regridrelease
+
+#undef  ESMF_METHOD
+#define ESMF_METHOD "f_esmf_regridstore"
+  subroutine f_esmf_regridstore(srcField, dstField, &
+                                srcMaskValues, len1, &
+                                dstMaskValues, len2, &
+                                routehandle, &
+                                regridmethod, &
+                                polemethod, &
+                                regridPoleNPnts, &
+                                linetype, &
+                                normtype, &
+                                unmappedaction, &
+                                ignoreDegenerate, &
+                                srcFracField, &
+                                dstFracField, &
+                                rc)
+
+    use ESMF_UtilTypesMod
+    use ESMF_BaseMod
+    use ESMF_LogErrMod
+    use ESMF_RHandleMod
+    use ESMF_FieldRegridMod
+    use ESMF_FieldMod
+
+    implicit none
+
+      type(ESMF_Field)                        :: srcField
+      type(ESMF_Field)                        :: dstField
+      integer                                 :: len1, len2
+      integer,optional                        :: srcMaskValues(len1), &
+                                                 dstMaskValues(len2)
+      type(ESMF_RouteHandle),optional         :: routehandle
+      type(ESMF_RegridMethod_Flag),optional   :: regridmethod
+      type(ESMF_PoleMethod_Flag),optional     :: polemethod
+      integer,optional                        :: regridPoleNPnts
+
+      type(ESMF_LineType_Flag),optional       :: linetype
+      type(ESMF_NormType_Flag),optional       :: normtype
+      type(ESMF_UnmappedAction_Flag),optional :: unmappedaction
+      logical,optional                        :: ignoreDegenerate
+      type(ESMF_Field),optional               :: srcFracField
+      type(ESMF_Field),optional               :: dstFracField
+      integer,optional                        :: rc 
+
+    integer :: localrc
+    type(ESMF_RouteHandle) :: l_routehandle
+
+    ! initialize return code; assume routine not implemented
+    rc = ESMF_RC_NOT_IMPL
+    localrc = ESMF_RC_NOT_IMPL
+
+    call ESMF_FieldRegridStore(srcField, dstField, &
+                               srcMaskValues=srcMaskValues, &
+                               dstMaskValues=dstMaskValues, &
+                               routehandle=l_routehandle, &
+                               regridmethod=regridmethod, &
+                               polemethod=polemethod, &
+                               regridPoleNPnts=regridPoleNPnts, &
+                               lineType=linetype, &
+                               normType=normtype, &
+                               unmappedaction=unmappedaction, &
+                               ignoreDegenerate=ignoreDegenerate, &
+                               srcFracField=srcFracField, &
+                               dstFracField=dstFracField, &
+                               rc=localrc)
+
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+ 
+    ! because ESMF_RouteHandle.this is private, it cannot be accessed directly
+    ! we use the public interface to do the ptr copy;
+    ! the array object returned to the C interface must consist only of the
+    ! this pointer. It must not contain the isInit member.
+    call ESMF_RoutehandleCopyThis(l_routehandle, routehandle, localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    rc = ESMF_SUCCESS
+  
+  end subroutine f_esmf_regridstore
+
+#undef  ESMF_METHOD
+#define ESMF_METHOD "f_esmf_smmstore"
+  subroutine f_esmf_smmstore(srcField, dstField, &
+                             filename, routehandle, &
+                             ignoreUnmatchedIndices, &
+                             srcTermProcessing, &
+                             pipeLineDepth, &
+                             transposeRoutehandle, &
+                             rc)
+
+    use ESMF_UtilTypesMod
+    use ESMF_BaseMod
+    use ESMF_LogErrMod
+    use ESMF_RHandleMod
+    use ESMF_FieldSMMMod
+    use ESMF_FieldMod
+
+    implicit none
+
+    type(ESMF_Field),       intent(in)              :: srcField
+    type(ESMF_Field),       intent(inout)           :: dstField
+    character(len=*),       intent(in)              :: filename
+    type(ESMF_RouteHandle), intent(inout)           :: routehandle
+    logical,                intent(in),    optional :: ignoreUnmatchedIndices
+    integer,                intent(inout), optional :: srcTermProcessing
+    integer,                intent(inout), optional :: pipeLineDepth
+    type(ESMF_RouteHandle), intent(inout), optional :: transposeRoutehandle
+    integer,                intent(out),   optional :: rc
+
+    integer :: localrc
+    type(ESMF_RouteHandle) :: l_routehandle
+    type(ESMF_RouteHandle) :: l_transposeRoutehandle
+
+    ! initialize return code; assume routine not implemented
+    rc = ESMF_RC_NOT_IMPL
+    localrc = ESMF_RC_NOT_IMPL
+
+    call ESMF_FieldSMMStore(srcField, dstField, &
+                            filename, l_routehandle, &
+                            ignoreUnmatchedIndices=ignoreUnmatchedIndices, &
+                            srcTermProcessing=srcTermProcessing, &
+                            pipeLineDepth=pipeLineDepth, &
+                            transposeRoutehandle=l_transposeRoutehandle, &
+                            rc=localrc)
+
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! because ESMF_RouteHandle.this is private, it cannot be accessed directly
+    ! we use the public interface to do the ptr copy;
+    ! the array object returned to the C interface must consist only of the
+    ! this pointer. It must not contain the isInit member.
+    call ESMF_RoutehandleCopyThis(l_routehandle, routehandle, localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    if (present (transposeRoutehandle)) then
+      call ESMF_RoutehandleCopyThis(l_transposeRoutehandle, &
+                                    transposeRoutehandle, localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+
+    rc = ESMF_SUCCESS
+
+  end subroutine f_esmf_smmstore
 
 

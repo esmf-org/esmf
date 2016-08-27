@@ -895,8 +895,46 @@ int ESMC_FieldRegridStore(
 
 
 //-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE: ESMC_FieldSMMStore - Precompute a Field regridding operation and return a RouteHandle
+//
+// !INTERFACE:
+int ESMC_FieldSMMStore(
+    ESMC_Field srcField,                           // in
+    ESMC_Field dstField,                           // in
+    const char *filename,                          // in
+    ESMC_RouteHandle *routehandle,                 // out
+    ESMC_Logical *ignoreUnmatchedIndices,          // in
+    int *srcTermProcessing,                        // in
+    int *pipeLineDepth,                            // in
+    ESMC_RouteHandle *transposeRoutehandle);       // out
+
+// !RETURN VALUE:
+//   Return code; equals ESMF_SUCCESS if there are no errors.
+//
+// !DESCRIPTION:
+//
+//   Creates a sparse matrix operation (stored in routehandle) that contains
+//   the calculations and communications necessary to interpolate from srcField
+//   to dstField. The routehandle can then be used in the call ESMC\_FieldRegrid()
+//   to interpolate between the Fields.
+//
+//  The arguments are:
+//  \begin{description}
+//  \item[srcField]
+//    ESMC\_Field with source data.
+//  \item[dstField]
+//    ESMC\_Field with destination data.
+//  \item[routehandle]
+//    The handle that implements the regrid, to be used in {\tt ESMC\_FieldRegrid()}.
+//  \end{description}
+//
+//EOP
+//-----------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
 //BOPI
-// !IROUTINE: ESMC_FieldRead - Read Array data into a Field
+// !IROUTINE: ESMC_FieldWrite - Write Field
 //
 // !INTERFACE:
   int ESMC_FieldWrite(ESMC_Field field,  // inout

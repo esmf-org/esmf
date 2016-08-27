@@ -390,10 +390,10 @@ int ESMC_FieldGetBounds(ESMC_Field field,
                             ESMC_InterfaceInt *dstMaskValues,
                             ESMC_RouteHandle *routehandle, 
                             enum ESMC_RegridMethod_Flag *regridmethod, 
-			                enum ESMC_PoleMethod_Flag *polemethod,
-			                int *regridPoleNPnts,
-			                enum ESMC_LineType_Flag *lineType,
-			                enum ESMC_NormType_Flag *normType,
+                            enum ESMC_PoleMethod_Flag *polemethod,
+                            int *regridPoleNPnts,
+                            enum ESMC_LineType_Flag *lineType,
+                            enum ESMC_NormType_Flag *normType,
                             enum ESMC_UnmappedAction_Flag *unmappedaction,
                             ESMC_Logical *ignoreDegenerate,
                             ESMC_Field *srcFracField,
@@ -491,6 +491,47 @@ int ESMC_FieldGetBounds(ESMC_Field field,
   }
 //--------------------------------------------------------------------------
   
+
+//--------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_FieldSMMStore()"
+  int ESMC_FieldSMMStore(ESMC_Field srcField, ESMC_Field dstField,
+                            const char *filename, ESMC_RouteHandle *routehandle,
+                            ESMC_Logical *ignoreUnmatchedIndices,
+                            int *srcTermProcessing, int *pipeLineDepth,
+                            ESMC_RouteHandle *transposeRoutehandle){
+
+    // Initialize return code. Assume routine not implemented
+    int rc = ESMF_RC_NOT_IMPL;
+    int localrc = ESMC_RC_NOT_IMPL;
+
+    ESMCI::RouteHandle *rhPtr, *trhPtr;
+    rhPtr=NULL; trhPtr=NULL;
+
+    // typecast Fields into ESMCI type
+    ESMCI::Field *fieldpsrc = reinterpret_cast<ESMCI::Field *>(srcField.ptr);
+    ESMCI::Field *fieldpdst = reinterpret_cast<ESMCI::Field *>(dstField.ptr);
+
+    // Invoke the C++ interface
+    localrc = ESMCI::Field::smmstore(fieldpsrc, fieldpdst, filename, &rhPtr,
+        ignoreUnmatchedIndices, srcTermProcessing, pipeLineDepth, &trhPtr);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      &rc)) return rc;  // bail out
+
+    // return rhPtr in routehandle argument
+    routehandle->ptr = NULL;
+    routehandle->ptr = (void *)rhPtr;
+    if (trhPtr) {
+      transposeRoutehandle->ptr = NULL;
+      transposeRoutehandle->ptr = (void *)trhPtr;
+    }
+
+    // return successfully
+    rc = ESMF_SUCCESS;
+    return rc;
+  }
+//--------------------------------------------------------------------------
+
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD

@@ -1795,6 +1795,41 @@ def ESMP_FieldRegrid(srcField, dstField, routehandle, zeroregion=None):
         raise ValueError('ESMC_FieldRegrid() failed with rc = '+str(rc)+
                         '.    '+constants._errmsg)
 
+_ESMF.ESMC_FieldRegridStore.restype = ct.c_int
+_ESMF.ESMC_FieldRegridStore.argtypes = [ct.c_void_p, ct.c_void_p, ct.c_char_p,
+                                        ct.c_bool, ct.c_void_p]
+@deprecated
+def ESMP_FieldSMMStore(srcField, dstField, filename,
+                       ignoreUnmatchedIndices, routehandle_T):
+    """
+    Preconditions: Two ESMP_Fields have been created and initialized
+                   sufficiently for a regridding operation to take
+                   place.
+    Postconditions: A handle to the regridding operation has been
+                    returned into 'routehandle' and Fields containing
+                    the fractions of the source and destination cells
+                    participating in the regridding operation are
+                    optionally returned into 'srcFracField' and
+                    'dstFracField'.\n
+    Arguments:\n
+        :RETURN: ESMP_RouteHandle           :: routehandle\n
+        ESMP_Field                          :: srcField\n
+        ESMP_Field                          :: dstField\n
+    """
+    routehandle = ct.c_void_p(0)
+    routehandle_T = ct.c_void_p(0)
+
+    rc = _ESMF.ESMC_FieldSMMStore(srcField.struct.ptr,
+                                  dstField.struct.ptr,
+                                  filename,
+                                  ct.byref(routehandle),
+                                  ignoreUnmatchedIndices,
+                                  routehandle_T
+                                  )
+    if rc != constants._ESMP_SUCCESS:
+        raise ValueError('ESMC_FieldSMMStore() failed with rc = '+str(rc)+
+                        '.    '+constants._errmsg)
+    return routehandle
 
 _ESMF.ESMC_ScripInq.restype = None
 _ESMF.ESMC_ScripInq.argtypes = [Py3Char,

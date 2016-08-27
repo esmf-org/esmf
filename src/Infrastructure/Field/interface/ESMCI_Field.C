@@ -155,6 +155,13 @@ void FTN_X(f_esmf_regrid)(ESMCI::Field *fieldpsrc, ESMCI::Field *fieldpdst,
 
 void FTN_X(f_esmf_regridrelease)(ESMCI::RouteHandle **routehandlep, int *rc);
 
+void FTN_X(f_esmf_smmstore)(ESMCI::Field *fieldpsrc, ESMCI::Field *fieldpdst,
+  const char *filename, ESMCI::RouteHandle **routehandlep,
+  ESMC_Logical *ignoreUnmatchedIndices,
+  int *srcTermProcessing, int *pipeLineDepth,
+  ESMCI::RouteHandle **transposeRoutehandlep,
+  int *rc);
+
 void FTN_X(f_esmf_fieldwrite)(ESMCI::Field *fieldp, const char *file,
   const char *variablename,
   ESMC_Logical *overwrite, ESMC_FileStatus_Flag *status,
@@ -1446,6 +1453,53 @@ namespace ESMCI {
     return rc;
   }
 //-----------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::Field::smmstore()"
+//BOP
+// !IROUTINE:  ESMCI::Field::smmstore - precompute a regriddding operation
+//
+// !INTERFACE:
+  int Field::smmstore(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+    Field *fieldpsrc,
+    Field *fieldpdst,
+    const char *filename,
+    RouteHandle **routehandlep,
+    ESMC_Logical *ignoreUnmatchedIndices,
+    int *srcTermProcessing,
+    int *pipeLineDepth,
+    RouteHandle **transposeRoutehandlep) {
+//
+// !DESCRIPTION:
+//
+//
+//EOP
+    // Initialize return code. Assume routine not implemented
+    int rc = ESMC_RC_NOT_IMPL;
+    int localrc = ESMC_RC_NOT_IMPL;
+
+    FTN_X(f_esmf_smmstore)(fieldpsrc, fieldpdst,
+                              filename, routehandlep,
+                              ignoreUnmatchedIndices,
+                              srcTermProcessing, pipeLineDepth,
+                              transposeRoutehandlep,
+                              &localrc);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      &rc)) {
+      return rc;
+    }
+
+    rc = ESMF_SUCCESS;
+    return rc;
+  }
+//-----------------------------------------------------------------------------
+
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
