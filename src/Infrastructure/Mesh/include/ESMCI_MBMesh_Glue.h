@@ -64,6 +64,8 @@ void MBMesh_addelements(void **mbmpp,
                         int *rc);
 
 
+void MBMesh_destroy(void **mbmpp, int *rc);
+
 void MBMesh_write(void **mbmpp, char *fname, int *rc,
                   ESMCI_FortranStrLenArg nlen);
 
@@ -73,6 +75,11 @@ void MBMesh_createnodedistgrid(void **meshpp, int *ngrid, int *num_lnodes, int *
 void MBMesh_createelemdistgrid(void **meshpp, int *egrid, int *num_lelems, int *rc);
 
 void MBMesh_getarea(void **mbmpp, int *num_elem, double *elem_areas, int *rc);
+
+
+void MBMesh_getlocalelemcoords(void **meshpp, double *ecoords, 
+                               int *_orig_sdim, int *rc);
+
 
 #if 0
 

@@ -30,9 +30,9 @@
 #include "Mesh/include/ESMCI_Mesh.h"
 #include "Mesh/include/ESMCI_MeshCap.h"
 #include "Mesh/include/ESMCI_MeshRead.h"
-#include "Mesh/include/ESMCI_MeshRegrid.h" // only for the REGRID flags
+//#include "Mesh/include/ESMCI_MeshRegrid.h" // only for the REGRID flags
 #include "Mesh/include/ESMCI_Exception.h"
-#include "Mesh/include/ESMCI_Interp.h"
+//#include "Mesh/include/ESMCI_Interp.h"
 #include "Mesh/include/ESMCI_ParEnv.h"
 
 
@@ -90,7 +90,7 @@ void FTN_X(c_esmc_meshio)(ESMCI::VM **vmpp, ESMCI::Grid **gridpp,
     arrays.push_back(*ar[i]);
 
   // Convert Grid to Mesh
-  int regridConserve = ESMC_REGRID_CONSERVE_OFF;
+  int regridConserve = 0; //ESMC_REGRID_CONSERVE_OFF;
   int localrc;
   MeshCap *meshp=MeshCap::GridToMesh(grid, *staggerLoc, 
                                      arrays,
@@ -161,7 +161,7 @@ void FTN_X(c_esmc_gridio)(ESMCI::Grid **gridpp, int *staggerLoc,
     arrays.push_back(*ar[i]);
 
   // Convert Grid to Mesh
-  int regridConserve = ESMC_REGRID_CONSERVE_OFF;
+  int regridConserve = 0; // ESMC_REGRID_CONSERVE_OFF;
   MeshCap *meshp=MeshCap::GridToMesh(grid, *staggerLoc, 
                                      arrays,
                                      NULL,

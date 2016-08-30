@@ -32,7 +32,7 @@
 #include "ESMCI_ParEnv.h"
 #include "ESMCI_MeshUtils.h"
 #include "ESMCI_GlobalIds.h"
- #include "ESMCI_VM.h"
+#include "ESMCI_VM.h"
 #include "ESMCI_CoordSys.h"
 #include "ESMCI_FindPnts.h"
 #include "Mesh/include/ESMCI_MathUtil.h"
@@ -1386,6 +1386,25 @@ void ESMCI_meshaddelements(Mesh **meshpp,
       if (elemMaskII_wsplit != NULL) delete elemMaskII_wsplit;
     }
   }
+
+#if 0
+  // Time loops
+  {
+   /* XMRKX */
+    double beg_tm=MPI_Wtime();
+
+    Mesh::iterator ei = mesh.elem_begin(), ee = mesh.elem_end();
+    for (; ei != ee; ++ei) {
+      
+    }
+
+    double end_tm=MPI_Wtime();
+
+    printf("time to loop through elems=%f\n",end_tm-beg_tm);
+
+  }
+#endif
+
 
   } catch(std::exception &x) {
     // catch Mesh exception return code 

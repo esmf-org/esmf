@@ -44,12 +44,17 @@ using namespace ESMCI;
 #define ESMF
 #define ESMC_METHOD "MBMesh::func()"
 
-MBMesh::MBMesh() : sdim(0),pdim(0),mesh(NULL) {
+MBMesh::MBMesh() : sdim(0),pdim(0),mesh(NULL),verts(NULL) {
 
 } 
 
 MBMesh::~MBMesh() {
 
+  // Get rid of MOAB mesh
+  if (mesh != NULL) delete mesh;
+
+  // Get rid of list of verts
+  if (verts != NULL) delete [] verts;
 } 
 
 #endif // ESMF_MOAB

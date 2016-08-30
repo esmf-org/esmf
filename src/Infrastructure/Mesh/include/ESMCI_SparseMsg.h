@@ -60,6 +60,9 @@ public:
     // location in buffer.
     void push(const UChar *src, UInt size);
 
+    // Get current buffer to look at without popping
+    UChar *get_current() {return cur;}
+
     // Size of message
     UInt msg_size() { return msize;}
 

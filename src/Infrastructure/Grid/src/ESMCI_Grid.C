@@ -39,7 +39,7 @@
 #include "Mesh/include/ESMCI_MeshCap.h"
 #include "Mesh/include/ESMCI_Mesh.h"
 #include "Mesh/include/ESMCI_MeshRead.h"
-#include "Mesh/include/ESMCI_MeshRegrid.h" // only for the REGRID flags
+
 
 // Some xlf compilers don't define this
 #ifndef M_PI
@@ -505,7 +505,7 @@ int setDefaultsLUA(int dimCount,
 
 
   // Convert Grid to Mesh
-  int regridConserve = ESMC_REGRID_CONSERVE_OFF;
+  int regridConserve = 0; // ESMC_REGRID_CONSERVE_OFF;
   MeshCap *meshp=MeshCap::GridToMesh(gridp, staggerloc, 
                                      arrays,
                                      NULL,

@@ -538,6 +538,7 @@
       call ESMF_Test((csrv.eqv..true. .and. rc.eq.ESMF_SUCCESS), name, &
                       failMsg, result, ESMF_SRCLINE)
 
+
       !============== MOAB Mesh to Mesh =======================================
       ! initialize 
       rc=ESMF_SUCCESS
@@ -578,6 +579,8 @@
       call ESMF_Test((csrv.eqv..true. .and. rc.eq.ESMF_SUCCESS), name, &
                       failMsg, result, ESMF_SRCLINE)
 
+
+      !============== MultiPoly =======================================
       ! initialize 
       rc=ESMF_SUCCESS
 
@@ -11451,21 +11454,13 @@ subroutine test_sph_csrv_w_frac_norm(itrp, csrv, rc)
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
 
-  ! If we don't have 1 PET then exit successfully
-  if (petCount .ne. 1) then
-    itrp = .true.
-    csrv = .true.
-    rc=ESMF_SUCCESS
-    return
-  endif
 
-#if 0
   ! If we don't have 1 or 4 PETS then exit successfully
   if ((petCount .ne. 1) .and. (petCount .ne. 4)) then
     rc=ESMF_SUCCESS
     return
   endif
-#endif
+
 
   call ESMF_MeshSetMOAB(.true., rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) then
@@ -12337,7 +12332,7 @@ subroutine test_sph_csrv_w_frac_norm(itrp, csrv, rc)
   ! Uncomment these calls to see some actual regrid results
   if (localPet == 0) then
 
-    write(*,*) "=== Mesh with concave quads ==="
+    write(*,*) "=== MOAB Mesh ==="
     write(*,*) "Conservation:"
     write(*,*) "Rel Error = ", ABS(dstmassg(1)-srcmassg(1))/srcmassg(1)
     write(*,*) "SRC mass = ", srcmassg(1)

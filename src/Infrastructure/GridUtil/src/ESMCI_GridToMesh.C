@@ -27,7 +27,6 @@
 #include "ESMCI_LogErr.h"
 #include "ESMCI_Ptypes.h"
 #include "Mesh/include/ESMCI_Mesh.h"
-#include "Mesh/include/ESMCI_MeshRegrid.h"
 #include "Mesh/include/ESMCI_IOField.h"
 #include "Mesh/include/ESMCI_ParEnv.h"
 #include "Mesh/include/ESMCI_DDir.h"

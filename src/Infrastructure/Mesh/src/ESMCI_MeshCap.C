@@ -908,10 +908,12 @@ void MeshCap::getlocalelemcoords(double *elemCoord, int *_orig_sdim, int *rc)
   if (is_esmf_mesh) {
     ESMCI_getlocalelemcoords(&mesh, elemCoord, _orig_sdim, rc);
   } else {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_NOT_IMPL,
-       "- this functionality is not currently supported using MOAB",
-                                  ESMC_CONTEXT, rc);
-    return;
+#ifdef ESMF_MOAB 
+    MBMesh_getlocalelemcoords(&mbmesh, elemCoord, _orig_sdim, rc);
+#else
+   if(ESMC_LogDefault.MsgFoundError(ESMC_RC_LIB_NOT_PRESENT,
+      "This functionality requires ESMF to be built with the MOAB library enabled" , ESMC_CONTEXT, rc)) return;
+#endif
   }
 } 
 
@@ -1325,10 +1327,15 @@ void MeshCap::meshsetpoles(int *_pole_val, int *_min_pole_gid, int *_max_pole_gi
   if (is_esmf_mesh) {
     ESMCI_meshsetpoles(&mesh, _pole_val, _min_pole_gid, _max_pole_gid, rc);
   } else {
+    // Not using poles right now, so comment this out, so we can test
+    // with logically rectangular meshes
+#if 0
     ESMC_LogDefault.MsgFoundError(ESMC_RC_NOT_IMPL,
        "- this functionality is not currently supported using MOAB",
                                   ESMC_CONTEXT, rc);
     return;
+#endif
+    *rc=ESMF_SUCCESS;
   }
 }
 MeshCap *MeshCap::meshcreatedual(MeshCap **src_meshpp, int *rc) {
@@ -1386,7 +1393,18 @@ void MeshCap::destroy(MeshCap **mcpp,int *rc) {
                                         ESMC_CONTEXT, rc)) return;
     }
   } else {
-    // NEED TO DO THIS IF WE GO TO MOAB
+#ifdef ESMF_MOAB 
+    // Only do if mesh is present
+    if (mcp->mesh != NULL) {
+      int localrc;
+      MBMesh_destroy(&(mcp->mbmesh), &localrc);
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+                                        ESMC_CONTEXT, rc)) return;
+    }
+#else
+   if(ESMC_LogDefault.MsgFoundError(ESMC_RC_LIB_NOT_PRESENT,
+      "This functionality requires ESMF to be built with the MOAB library enabled" , ESMC_CONTEXT, rc)) return;
+#endif
   }
 
   // delete MeshCap struct

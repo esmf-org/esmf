@@ -84,6 +84,8 @@ SOURCEC	  = \
            ESMCI_Mesh_Regrid_Glue.C \
            ESMCI_MBMesh_Util.C \
            ESMCI_MBMesh_BBox.C \
+           ESMCI_MBMesh_Redist.C \
+           ESMCI_MBMesh_Rendez_Elem.C \
            ESMCI_MBMesh_Conserve.C \
            ESMCI_MBMesh_Glue.C \
            ESMCI_MBMesh_Regrid_Glue.C \

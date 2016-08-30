@@ -12,6 +12,7 @@
 
 #include <Mesh/include/ESMCI_MeshRegrid.h>
 #include <Mesh/include/ESMCI_MeshRead.h>
+#include <Mesh/include/ESMCI_Interp.h>
 
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
