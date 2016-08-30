@@ -11461,17 +11461,15 @@ subroutine test_sph_csrv_w_frac_norm(itrp, csrv, rc)
     return
   endif
 
-
+  ! Turn on MOAB
   call ESMF_MeshSetMOAB(.true., rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) then
      rc=ESMF_FAILURE
      return
   endif
 
- ! XMRKX
-
-!!!! Setup source mesh !!!!
-
+ 
+  !!!! Setup source mesh !!!!
   if (petCount .eq. 1) then
      ! Set number of nodes
      numNodes=9
@@ -12133,7 +12131,7 @@ subroutine test_sph_csrv_w_frac_norm(itrp, csrv, rc)
    deallocate(elemConn)
 
 
-#if 1
+#if 0
    call ESMF_MeshWrite(srcMesh,"srcMesh")
 
    call ESMF_MeshWrite(dstMesh,"dstMesh")
