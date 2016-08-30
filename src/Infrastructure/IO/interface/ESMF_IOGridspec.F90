@@ -213,7 +213,6 @@
 	        attstr(1:len) .eq. 'degreeN' .or. &
 	        attstr(1:len) .eq. 'degreesN'))  then 
              call ESMF_LogSetError(ESMF_FAILURE, & 
-        
          msg="- The units attribute for latitude variable is incorrect", & 
                  ESMF_CONTEXT, rcToReturn=rc) 
 	     return

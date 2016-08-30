@@ -25,6 +25,7 @@ grid = ESMF.Grid(filename=grid1, filetype=ESMF.FileFormat.SCRIP,
 
 # create a field on the center stagger locations of the source grid
 srcfield = ESMF.Field(grid, name='srcfield', staggerloc=ESMF.StaggerLoc.CENTER)
+srcfracfield = ESMF.Field(grid, name='srcfracfield', staggerloc=ESMF.StaggerLoc.CENTER)
 
 # create an ESMF formatted unstructured mesh with clockwise cells removed
 mesh = ESMF.Mesh(filename=grid2, filetype=ESMF.FileFormat.ESMFMESH)
@@ -32,7 +33,7 @@ mesh = ESMF.Mesh(filename=grid2, filetype=ESMF.FileFormat.ESMFMESH)
 # create a field on the nodes of the destination mesh
 dstfield = ESMF.Field(mesh, name='dstfield', meshloc=ESMF.MeshLoc.ELEMENT)
 xctfield = ESMF.Field(mesh, name='xctfield', meshloc=ESMF.MeshLoc.ELEMENT)
-dstfracfield = ESMF.Field(mesh, name='xctfield', meshloc=ESMF.MeshLoc.ELEMENT)
+dstfracfield = ESMF.Field(mesh, name='dstfracfield', meshloc=ESMF.MeshLoc.ELEMENT)
 
 # initialize the fields
 [lon,lat] = [0, 1]
@@ -52,7 +53,9 @@ dstfield.data[...] = 1e20
 # create an object to regrid data from the source to the destination field
 regrid = ESMF.Regrid(srcfield, dstfield,
                      regrid_method=ESMF.RegridMethod.CONSERVE,
-                     unmapped_action=ESMF.UnmappedAction.IGNORE)
+                     unmapped_action=ESMF.UnmappedAction.IGNORE,
+                     src_frac_field=srcfracfield,
+                     dst_frac_field=dstfracfield)
 
 # do the regridding from source to destination field
 dstfield = regrid(srcfield, dstfield)
