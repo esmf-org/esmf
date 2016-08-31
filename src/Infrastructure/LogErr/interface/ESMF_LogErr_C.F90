@@ -63,15 +63,18 @@
 
   subroutine f_esmf_logset(flush, rc)
     use ESMF_LogErrMod
+    use ESMF_UtilTypesMod
     
     implicit none
 
-    logical, intent(in)   :: flush
+    type(ESMF_Logical), intent(in)   :: flush
     integer, intent(out)  :: rc
+
+    logical :: lflush
 
     ! Initialize return code; assume routine not implemented
     rc = ESMF_RC_NOT_IMPL
 
-    call ESMF_LogSet(flush=flush, rc=rc)
+    call ESMF_LogSet(flush=lflush, rc=rc)
 
   end subroutine f_esmf_logset
