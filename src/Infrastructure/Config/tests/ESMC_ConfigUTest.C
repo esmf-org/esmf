@@ -119,7 +119,7 @@ int main(void){
 #ifdef ESMF_TESTEXHAUSTIVE
 
   //----------------------------------------------------------------------------
-  //NEX_UTest
+  //EX_UTest
   //Destroy Config object
   strcpy(name, "ConfigDestroy Unit test");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
@@ -128,7 +128,7 @@ int main(void){
   //----------------------------------------------------------------------------
 
   //----------------------------------------------------------------------------
-  //NEX_UTest
+  //EX_UTest
   // Create a config object -- cf
   strcpy(name, "ConfigCreate Unit test");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
