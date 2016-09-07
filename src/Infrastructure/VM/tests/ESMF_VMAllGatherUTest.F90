@@ -112,7 +112,7 @@
       write(name, *) "Verifying array1 data after allgather Test"
       rc = ESMF_SUCCESS
       do i=1, nlen
-		if (array1(i)/=i) rc = ESMF_FAILURE
+        if (array1(i)/=i) rc = ESMF_FAILURE
       enddo
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
@@ -128,7 +128,7 @@
       write(name, *) "Verifying array2 data after allgather Test"
       rc = ESMF_SUCCESS
       do i=1, nsize
-	if (array2(i)/=(i + 2 * localPet)) rc = ESMF_FAILURE
+        if (array2(i)/=(i + 2 * localPet)) rc = ESMF_FAILURE
       enddo
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
@@ -216,6 +216,13 @@
         print *, localPet,' f4array2: ', f4array2(i)
       enddo
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      deallocate(array1)
+      deallocate(array2)
+      deallocate(farray1)
+      deallocate(farray2)
+      deallocate(f4array1)
+      deallocate(f4array2)
 
       call ESMF_TestEnd(ESMF_SRCLINE)
 

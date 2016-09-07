@@ -138,7 +138,7 @@
       do i=1,count
         soln(i)    = root*100+i
         r8_soln(i) = real( soln(i) , ESMF_KIND_R8 ) 
-        r4_soln(i) = r8_soln(i)
+        r4_soln(i) = real( r8_soln(i) )
         if ( mod(soln(i)+root,2) .eq. 0 ) then
           logical_soln(i)= ESMF_TRUE
         else
@@ -305,11 +305,11 @@
       write(failMsg, *) "Did not RETURN ESMF_SUCCESS"
       rc = ESMF_SUCCESS
       do, i=1, n_elements
-	if (localPet == root) then
+        if (localPet == root) then
           call c_ESMCI_VMIdSet (local_vmids(i), i, achar (i+10), localrc)
-	else
-          call c_ESMCI_VMIdSet (local_vmids(i), -1, achar (255), localrc)
-	end if
+        else
+          call c_ESMCI_VMIdSet (local_vmids(i), -1, achar (127), localrc)
+        end if
         if (localrc /= ESMF_SUCCESS) rc = localrc
       end do
       call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -405,6 +405,18 @@
       call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       deallocate (vmids_soln)
+
+      deallocate(localData)
+      deallocate(localData2d)
+      deallocate(localData3d)
+      deallocate(r8_localData)
+      deallocate(r4_localData)
+      deallocate(local_logical)
+
+      deallocate(soln)
+      deallocate(r8_soln)
+      deallocate(r4_soln)
+      deallocate(logical_soln)
 
       !------------------------------------------------------------------------
       call ESMF_TestEnd(ESMF_SRCLINE)

@@ -79,7 +79,7 @@
       write(failMsg, *) "Did have correct PET infoS"
       write(name, *) "Verify the VM is correct Test"
       call ESMF_Test(((localPet.eq.test_localPet).and.(npets.eq.test_npets)), &
-			name, failMsg, result, ESMF_SRCLINE)
+          name, failMsg, result, ESMF_SRCLINE)
 
       end subroutine test_vm_current
 
@@ -159,7 +159,7 @@
       call ESMF_VMWtimePrec(prec=vm_prec, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       print *, "vm_prec = ", vm_prec
-	
+
       !------------------------------------------------------------------------
       !EX_UTest
       write(failMsg, *) "Value not between 0 and 1."
@@ -178,9 +178,9 @@
       array4 = (/50,50/)
       ! Set expected results
       if (npets == 1) then
-	array5 = (/1,2/)
+        array5 = (/1,2/)
       else
-      	array5 = (/604,608/)
+        array5 = (/604,608/)
       end if
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "VM Reduce ESMF_REDUCE_SUM Test"
@@ -200,11 +200,11 @@
       write(failMsg, *) "Returned wrong results"
       write(name, *) "Verify Reduce ESMF_REDUCE_SUM Results Test"
       if (localPet == rootPet) then
-      	call ESMF_Test((array4(1)==(array5(1)).and.(array4(2)==(array5(2)))), &
-			name, failMsg, result, ESMF_SRCLINE)
+        call ESMF_Test((array4(1)==(array5(1)).and.(array4(2)==(array5(2)))), &
+            name, failMsg, result, ESMF_SRCLINE)
       else
-      	call ESMF_Test(((array4(1)==50).and.(array4(2)==50)), &
-			name, failMsg, result, ESMF_SRCLINE)
+        call ESMF_Test(((array4(1)==50).and.(array4(2)==50)), &
+            name, failMsg, result, ESMF_SRCLINE)
       end if
       !------------------------------------------------------------------------
 
@@ -214,9 +214,9 @@
       farray4 = (/50,50/)
       ! Set expected results
       if (npets == 1) then
-	farray5 = (/1,2/)
+        farray5 = (/1,2/)
       else
-      	farray5 = (/604,608/)
+        farray5 = (/604,608/)
       end if
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "VM Reduce ESMF_REDUCE_SUM Test: ESMF_KIND_R8"
@@ -322,11 +322,11 @@
       write(failMsg, *) "Returned wrong results"
       write(name, *) "Verify Reduce ESMF_REDUCE_MINResults Test"
       if (localPet == rootPet) then
-      	call ESMF_Test((array4(1)==(array5(1)).and.(array4(2)==(array5(2)))), &
-			name, failMsg, result, ESMF_SRCLINE)
+        call ESMF_Test((array4(1)==(array5(1)).and.(array4(2)==(array5(2)))), &
+            name, failMsg, result, ESMF_SRCLINE)
       else
-      	call ESMF_Test(((array4(1)==50).and.(array4(2)==50)), &
-			name, failMsg, result, ESMF_SRCLINE)
+        call ESMF_Test(((array4(1)==50).and.(array4(2)==50)), &
+            name, failMsg, result, ESMF_SRCLINE)
       end if
       !------------------------------------------------------------------------
 
@@ -417,9 +417,9 @@
       array4 = (/50,50/)
       ! Set expected results
       if (npets == 1) then
-	array5 = (/1,2/)
+        array5 = (/1,2/)
       else
-      	array5 = (/301,302/)
+        array5 = (/301,302/)
       end if
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "VM Reduce ESMF_REDUCE_MAXTest"
@@ -439,11 +439,11 @@
       write(failMsg, *) "Returned wrong results"
       write(name, *) "Verify Reduce ESMF_REDUCE_MAXResults Test"
       if (localPet == rootPet) then
-      	call ESMF_Test((array4(1)==(array5(1)).and.(array4(2)==(array5(2)))), &
-			name, failMsg, result, ESMF_SRCLINE)
+        call ESMF_Test((array4(1)==(array5(1)).and.(array4(2)==(array5(2)))), &
+            name, failMsg, result, ESMF_SRCLINE)
       else
-      	call ESMF_Test(((array4(1)==50).and.(array4(2)==50)), &
-			name, failMsg, result, ESMF_SRCLINE)
+        call ESMF_Test(((array4(1)==50).and.(array4(2)==50)), &
+            name, failMsg, result, ESMF_SRCLINE)
       end if
       !------------------------------------------------------------------------
 
@@ -453,9 +453,9 @@
       farray4 = (/50,50/)
       ! Set expected results
       if (npets == 1) then
-	farray5 = (/1,2/)
+        farray5 = (/1,2/)
       else
-      	farray5 = (/301,302/)
+        farray5 = (/301,302/)
       end if
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "VM Reduce ESMF_REDUCE_MAXTest: ESMF_KIND_R8"
@@ -1165,11 +1165,11 @@
       allocate(farray2(nsize,npets))
       allocate(f4array2(nsize,npets))
       do j=1, npets 
-      	do i=1, nsize
-        	array2(i,j) = (j-1) * 100 + i
-               farray2(i,j) = real( array2(i,j) , ESMF_KIND_R8)
-              f4array2(i,j) = farray2(i,j)
-      	enddo
+        do i=1, nsize
+           array2(i,j) = (j-1) * 100 + i
+          farray2(i,j) = real( array2(i,j) , ESMF_KIND_R8)
+          f4array2(i,j) = farray2(i,j)
+        enddo
       enddo
 
       !------------------------------------------------------------------------
@@ -1302,7 +1302,9 @@
       write(name, *) "VMId destroy #2 Test"
       call ESMF_VMIdDestroy (vmid2, rc)
       call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-            
+
+      deallocate (vmid1, vmid2)
+
 #endif
       call ESMF_TestEnd(ESMF_SRCLINE)
 
