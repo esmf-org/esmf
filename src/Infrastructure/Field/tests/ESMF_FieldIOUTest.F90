@@ -952,6 +952,9 @@ program ESMF_FieldIOUTest
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   write(name, *) "Destroying all Fields"
   call ESMF_Test(countfail == 0, name, failMsg, result, ESMF_SRCLINE)
+
+  deallocate (exclusiveLBound, exclusiveUBound)
+
 !-------------------------------------------------------------------------------
 !-------------------------------------------------------------------------------
 
