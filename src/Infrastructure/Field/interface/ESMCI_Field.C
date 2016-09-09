@@ -225,30 +225,39 @@ namespace ESMCI {
          return ESMC_NULL_POINTER;
       }
       gtfm_present = 1;
-    } else
+    } else {
       gtfm = new ESMCI::InterfaceInt();
+      gtfm_created = true;
+    }
 
     uglb = (ESMCI::InterfaceInt *)ungriddedLBound;
     if (present(uglb)) {
       if(uglb->dimCount != 1){
          ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
            "- ungriddedLBound array must be of rank 1", ESMC_CONTEXT, rc);
+         if (gtfm_created) delete gtfm;
          return ESMC_NULL_POINTER;
       }
       uglb_present = 1;
-    } else
+    } else {
       uglb = new ESMCI::InterfaceInt();
+      uglb_created = true;
+    }
 
     ugub = (ESMCI::InterfaceInt *)ungriddedUBound;
     if (present(ugub)) {
       if(ugub->dimCount != 1){
          ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
            "- ungriddedUBound array must be of rank 1", ESMC_CONTEXT, rc);
+         if (gtfm_created) delete gtfm;
+         if (uglb_created) delete uglb;
          return ESMC_NULL_POINTER;
       }
       ugub_present = 1;
-    } else
+    } else {
       ugub = new ESMCI::InterfaceInt();
+      ugub_created = true;
+    }
 
     char * fName = NULL;
     int slen = 0;
@@ -360,30 +369,39 @@ namespace ESMCI {
          return ESMC_NULL_POINTER;
       }
       gtfm_present = 1;
-    } else
+    } else {
       gtfm = new ESMCI::InterfaceInt();
+      gtfm_created = true;
+    }
 
     uglb = (ESMCI::InterfaceInt *)ungriddedLBound;
     if (present(uglb)) {
       if(uglb->dimCount != 1){
          ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
            "- ungriddedLBound array must be of rank 1", ESMC_CONTEXT, rc);
+         if (gtfm_created) delete gtfm;
          return ESMC_NULL_POINTER;
       }
       uglb_present = 1;
-    } else
+    } else {
       uglb = new ESMCI::InterfaceInt();
+      uglb_created = true;
+    }
 
     ugub = (ESMCI::InterfaceInt *)ungriddedUBound;
     if (present(ugub)) {
       if(ugub->dimCount != 1){
          ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
            "- ungriddedUBound array must be of rank 1", ESMC_CONTEXT, rc);
+         if (gtfm_created) delete gtfm;
+         if (uglb_created) delete uglb;
          return ESMC_NULL_POINTER;
       }
       ugub_present = 1;
-    } else
+    } else {
       ugub = new ESMCI::InterfaceInt();
+      ugub_created = true;
+    }
 
     char * fName = NULL;
     int slen = 0;
@@ -494,30 +512,39 @@ namespace ESMCI {
          return ESMC_NULL_POINTER;
       }
       gtfm_present = 1;
-    } else
+    } else {
       gtfm = new ESMCI::InterfaceInt();
+      gtfm_created = true;
+    }
 
     uglb = (ESMCI::InterfaceInt *)ungriddedLBound;
     if (present(uglb)) {
       if(uglb->dimCount != 1){
          ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
            "- ungriddedLBound array must be of rank 1", ESMC_CONTEXT, rc);
+         if (gtfm_created) delete gtfm;
          return ESMC_NULL_POINTER;
       }
       uglb_present = 1;
-    } else
+    } else {
       uglb = new ESMCI::InterfaceInt();
+      uglb_created = true;
+    }
 
     ugub = (ESMCI::InterfaceInt *)ungriddedUBound;
     if (present(ugub)) {
       if(ugub->dimCount != 1){
          ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
            "- ungriddedUBound array must be of rank 1", ESMC_CONTEXT, rc);
+         if (gtfm_created) delete gtfm;
+         if (uglb_created) delete uglb;
          return ESMC_NULL_POINTER;
       }
       ugub_present = 1;
-    } else
+    } else {
       ugub = new ESMCI::InterfaceInt();
+      ugub_created = true;
+    }
 
     char * fName = NULL;
     int slen = 0;
@@ -624,30 +651,39 @@ namespace ESMCI {
          return ESMC_NULL_POINTER;
       }
       gtfm_present = 1;
-    } else
+    } else {
       gtfm = new ESMCI::InterfaceInt();
+      gtfm_created = true;
+    }
 
     uglb = (ESMCI::InterfaceInt *)ungriddedLBound;
     if (present(uglb)) {
       if(uglb->dimCount != 1){
          ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
            "- ungriddedLBound array must be of rank 1", ESMC_CONTEXT, rc);
+         if (gtfm_created) delete gtfm;
          return ESMC_NULL_POINTER;
       }
       uglb_present = 1;
-    } else
+    } else {
       uglb = new ESMCI::InterfaceInt();
+      uglb_created = true;
+    }
 
     ugub = (ESMCI::InterfaceInt *)ungriddedUBound;
     if (present(ugub)) {
       if(ugub->dimCount != 1){
          ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
            "- ungriddedUBound array must be of rank 1", ESMC_CONTEXT, rc);
+         if (gtfm_created) delete gtfm;
+         if (uglb_created) delete uglb;
          return ESMC_NULL_POINTER;
       }
       ugub_present = 1;
-    } else
+    } else {
       ugub = new ESMCI::InterfaceInt();
+      ugub_created = true;
+    }
 
     char * fName = NULL;
     int slen = 0;
@@ -753,30 +789,39 @@ namespace ESMCI {
          return ESMC_NULL_POINTER;
       }
       gtfm_present = 1;
-    } else
+    } else {
       gtfm = new ESMCI::InterfaceInt();
+      gtfm_created = true;
+    }
 
     uglb = (ESMCI::InterfaceInt *)ungriddedLBound;
     if (present(uglb)) {
       if(uglb->dimCount != 1){
          ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
            "- ungriddedLBound array must be of rank 1", ESMC_CONTEXT, rc);
+         if (gtfm_created) delete gtfm;
          return ESMC_NULL_POINTER;
       }
       uglb_present = 1;
-    } else
+    } else {
       uglb = new ESMCI::InterfaceInt();
+      uglb_created = true;
+    }
 
     ugub = (ESMCI::InterfaceInt *)ungriddedUBound;
     if (present(ugub)) {
       if(ugub->dimCount != 1){
          ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
            "- ungriddedUBound array must be of rank 1", ESMC_CONTEXT, rc);
+         if (gtfm_created) delete gtfm;
+         if (uglb_created) delete uglb;
          return ESMC_NULL_POINTER;
       }
       ugub_present = 1;
-    } else
+    } else {
       ugub = new ESMCI::InterfaceInt();
+      ugub_created = true;
+    }
 
     char * fName = NULL;
     int slen = 0;
@@ -887,30 +932,39 @@ namespace ESMCI {
          return ESMC_NULL_POINTER;
       }
       gtfm_present = 1;
-    } else
+    } else {
       gtfm = new ESMCI::InterfaceInt();
+      gtfm_created = true;
+    }
 
     uglb = (ESMCI::InterfaceInt *)ungriddedLBound;
     if (present(uglb)) {
       if(uglb->dimCount != 1){
          ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
            "- ungriddedLBound array must be of rank 1", ESMC_CONTEXT, rc);
+         if (gtfm_created) delete gtfm;
          return ESMC_NULL_POINTER;
       }
       uglb_present = 1;
-    } else
+    } else {
       uglb = new ESMCI::InterfaceInt();
+      uglb_created = true;
+    }
 
     ugub = (ESMCI::InterfaceInt *)ungriddedUBound;
     if (present(ugub)) {
       if(ugub->dimCount != 1){
          ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
            "- ungriddedUBound array must be of rank 1", ESMC_CONTEXT, rc);
+         if (gtfm_created) delete gtfm;
+         if (uglb_created) delete uglb;
          return ESMC_NULL_POINTER;
       }
       ugub_present = 1;
-    } else
+    } else {
       ugub = new ESMCI::InterfaceInt();
+      ugub_created = true;
+    }
 
     char * fName = NULL;
     int slen = 0;
