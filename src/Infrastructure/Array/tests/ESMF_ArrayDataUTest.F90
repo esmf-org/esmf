@@ -533,6 +533,9 @@ program ESMF_ArrayDataUTest
   inquireflag  = ESMF_NOINQUIRE
   call c_esmc_arraydeserialize (array_new, buffer, offset3, attreconflag, rc)
   call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+  deallocate (buffer)
+
   !-----------------------------------------------------------------------------
  
   !-----------------------------------------------------------------------------

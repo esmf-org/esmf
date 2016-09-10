@@ -1253,10 +1253,10 @@
   ! set the grid such that one PET has no localindices
   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   if (myPet .eq. petCount-1) then
-	localCount = 0
-	deallocate(localIndices)
-	allocate(localIndices(localCount,2))
-  endif		
+    localCount = 0
+    deallocate(localIndices)
+    allocate(localIndices(localCount,2))
+  endif
 
   !NEX_UTest
   write(name, *) "Create a Field using a 2D arb. grid with one PET without any grid points"
@@ -1297,6 +1297,8 @@
   if (dimCount .ne. 2) correct = .false.  
 
   call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
+
+  deallocate (localIndices)
 
   call ESMF_FieldDestroy(field, rc=localrc)
   call ESMF_LogSetError(localrc, ESMF_ERR_PASSTHRU, &

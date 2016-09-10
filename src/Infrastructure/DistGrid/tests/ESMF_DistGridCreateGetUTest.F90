@@ -1008,6 +1008,9 @@ program ESMF_DistGridCreateGetUTest
   call c_esmc_distgridserialize (distgrid, buffer, buff_len, offset,  &
       inquireflag, rc)
   call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+  deallocate (buffer)
+
   !-----------------------------------------------------------------------------
   
   !------------------------------------------------------------------------

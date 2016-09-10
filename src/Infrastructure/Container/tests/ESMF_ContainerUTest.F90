@@ -483,7 +483,9 @@ program ESMF_ContainerUTest
     enddo
   endif
   call ESMF_Test(loopResult, name, failMsg, result, ESMF_SRCLINE)
-  
+
+  deallocate (fieldListOutIndexMap)
+
   !------------------------------------------------------------------------
   ! final garbage collection
   do i=1, size(fieldListOut)
