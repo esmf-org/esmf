@@ -898,6 +898,11 @@ int main(void){
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
 
+  free(exLBound_tripole);
+  free(exUBound_tripole);
+  free(exLBound);
+  free(exUBound);
+
 #endif
 
   //----------------------------------------------------------------------------
