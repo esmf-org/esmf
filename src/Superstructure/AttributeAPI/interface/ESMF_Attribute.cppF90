@@ -12213,12 +12213,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! @\
 ! !INTERFACE: @\
       ! Private name; call using ESMF_AttributeUpdate() @\
-      subroutine mclass##AttUpdate(mthis, vm, rootList, rc) @\
+      subroutine mclass##AttUpdate(mthis, vm, rootList, reconcile, rc) @\
 ! @\
 ! !ARGUMENTS: @\
       type(mclass), intent(inout) :: mthis @\
       type(ESMF_VM), intent(in) :: vm @\
       integer, dimension(:), intent(in) :: rootList @\
+      logical, intent(in), optional :: reconcile @\
       integer, intent(out), optional :: rc    @\
  @\
 ! @\
@@ -12234,6 +12235,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      should be updated. @\
 !     \item [rootList] @\
 !      The list of "root" PETs that are to be used to update. @\
+!     \item [reconcile] @\
+!      A logical flag used to indicate whether to use "reconcile" behavior or @\
+!      normal "update" behavior. If {\tt reconcile} is set to {\tt ESMF\_TRUE} @\
+!      then the values of the root PETs will be sent to the nonroot PETs without @\
+!      exception. Otherwise, an algorithm that is optimized to use minimal @\
+!      memory will be used to update only the modified parts of the Attribute @\
+!      hierarchy. The default value is {\tt ESMF_FALSE}. @\
 !     \item [{[rc]}]  @\
 !      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
 !     \end{description} @\
@@ -12242,6 +12250,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !EOPI @\
  @\
       integer :: localrc, count                           ! Error status @\
+      logical :: local_reconcile @\
  @\
       ! Initialize return code; assume failure until success is certain @\
       if (present(rc)) rc = ESMF_RC_NOT_IMPL @\
@@ -12249,8 +12258,16 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ! check input variables @\
       ESMF_INIT_CHECK_DEEP(mclass##GetInit,mthis,rc) @\
  @\
+      ! reconcile @\
+      if ( present(reconcile)) then @\
+        local_reconcile = reconcile @\
+      else @\
+        local_reconcile = .false. @\
+      endif @\
+ @\
       count = size(rootList) @\
-      call c_ESMC_AttributeUpdate(mthisfield, vm, rootList, count, localrc) @\
+      call c_ESMC_AttributeUpdate(mthisfield, vm, rootList, count, & @\
+                                  local_reconcile, localrc) @\
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
         ESMF_CONTEXT, rcToReturn=rc)) return @\
  @\

@@ -1060,6 +1060,7 @@ module NUOPC_Driver
         integer                 :: i, j
         character(ESMF_MAXSTR)  :: iString, jString, pLabel
         type(ESMF_State)        :: imState, exState
+
         rc = ESMF_SUCCESS
         do i=0, is%wrap%modelCount
           write (iString, *) i

@@ -2096,12 +2096,13 @@ module NUOPC_Base
 !
 !EOPI
   !-----------------------------------------------------------------------------
+
     if (present(rc)) rc = ESMF_SUCCESS
 
     call ESMF_StateReconcile(state, attreconflag=ESMF_ATTRECONCILE_ON, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME)) return  ! bail out
-    
+
   end subroutine
   !-----------------------------------------------------------------------------
 

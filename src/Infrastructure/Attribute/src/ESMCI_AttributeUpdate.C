@@ -10,7 +10,8 @@
 
 #define ESMC_FILENAME "ESMCI_AttributeUpdate.C"
 
-//#define DEBUG
+//#define DEBUG_PRINT_RUN
+//#define DEBUG_PRINT_INIT_FINAL
 
 // Attribute method implementation (body) file
 
@@ -47,6 +48,13 @@ namespace ESMCI {
 // class wide keySize
 static const int keySize = 4*sizeof(int) + 1;
 
+#ifdef DEBUG_PRINT_RUN
+  static const int strsize = ESMF_MAXSTR*10;
+  char msg[strsize];
+  char filename[ESMF_MAXSTR];
+  ofstream fp;
+#endif
+
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 //
@@ -66,8 +74,9 @@ static const int keySize = 4*sizeof(int) + 1;
 //    {\tt ESMF\_SUCCESS} or error code on failure.
 //
 // !ARGUMENTS:
-      VM *vm,                    // the VM
-      const vector<ESMC_I4> &roots) {      // the rootList
+      VM *vm,                        // the VM
+      const vector<ESMC_I4> &roots,  // the rootList
+      bool reconcile) {              // reconcile flag
 //
 // !DESCRIPTION:
 //    Update an {\tt Attribute} hierarchy with a later version of itself.  
@@ -84,7 +93,7 @@ static const int keySize = 4*sizeof(int) + 1;
     
   // Initialize local return code; assume routine not implemented
   localrc = ESMC_RC_NOT_IMPL;
-  
+
   // return with errors for NULL pointer
   if (this == NULL){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
@@ -95,7 +104,14 @@ static const int keySize = 4*sizeof(int) + 1;
   // query the VM for localPet and petCount
   int localPet = vm->getLocalPet();
   int petCount = vm->getPetCount();
-  
+
+#ifdef DEBUG_PRINT_INIT_FINAL
+  char dbgname[ESMF_MAXSTR];
+  char *pifname = this->getBase()->ESMC_Base::ESMC_BaseGetName();
+  sprintf(dbgname, "A%d-%s-0.dbg", localPet, pifname);
+  ESMC_Print(true, dbgname, true);
+#endif
+
   // make the roots and nonroots vectors
   vector<ESMC_I4> nonroots;
   vector<ESMC_I4>::const_iterator it;
@@ -104,11 +120,26 @@ static const int keySize = 4*sizeof(int) + 1;
     if(it == roots.end()) nonroots.push_back(i);
   }
 
+#ifdef DEBUG_PRINT_RUN
+  char *dbrname = this->getBase()->ESMC_Base::ESMC_BaseGetName();
+  sprintf(filename, "A%d-%s-Update.dbg", localPet, dbrname);
+  fp.open(filename, ofstream::out | ofstream::trunc);
+
+  sprintf(msg, "P%d - rootList = [", localPet);
+  for (unsigned int i=0; i<roots.size(); ++i) sprintf(msg + strlen(msg), "%d, ", roots.at(i));
+  sprintf(msg + strlen(msg), "]\n");
+  attprint(msg, strsize, true, fp);
+
+  sprintf(msg, "P%d - nonrootList = [", localPet);
+  for (unsigned int i=0; i<nonroots.size(); ++i) sprintf(msg + strlen(msg), "%d, ", nonroots.at(i));
+  sprintf(msg + strlen(msg), "]\n");
+  attprint(msg, strsize, true, fp);
+#endif
+
   // find out if update is necessary
-  localrc = AttributeUpdateNeeded(vm, length, roots, nonroots);
-    if (localrc != ESMF_SUCCESS || petCount == 1) return ESMF_SUCCESS;
-// there got to be a better way to do this...  
- 
+  localrc = AttributeUpdateNeeded(vm, length, roots, nonroots, reconcile);
+  if (localrc != ESMF_SUCCESS || petCount == 1) return ESMF_SUCCESS;
+
   // find out if I am a root
   it = find(nonroots.begin(), nonroots.end(), localPet);
   
@@ -116,26 +147,19 @@ static const int keySize = 4*sizeof(int) + 1;
   recvBuf = NULL; sendBuf = NULL;
   recvBuf = new char[length];
   sendBuf = new char[length];
-  if (!recvBuf) {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                  "Failed allocating buffer", ESMC_CONTEXT, &localrc);
-    return localrc;
-  }
-  if (!sendBuf) {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                  "Failed allocating buffer", ESMC_CONTEXT, &localrc);
-    return localrc;
-  }
- 
+
   // I am a root, create buffer
   if (it == nonroots.end()) {
-    localrc = AttributeUpdateBufSend(sendBuf, localPet, &offset, &length);
-    if (localrc != ESMF_SUCCESS) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
-                  "AttributeUpdateBufSend failed", ESMC_CONTEXT, &localrc);
-      delete [] recvBuf;
-      delete [] sendBuf;
-      return ESMF_FAILURE;
+    if (reconcile) this->ESMC_Serialize(sendBuf, &length, &offset, ESMF_NOINQUIRE);
+    else {
+      localrc = AttributeUpdateBufSend(sendBuf, localPet, &offset, &length);
+      if (localrc != ESMF_SUCCESS) {
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+                    "AttributeUpdateBufSend failed", ESMC_CONTEXT, &localrc);
+        delete [] recvBuf;
+        delete [] sendBuf;
+        return ESMF_FAILURE;
+      }
     }
   }
 
@@ -148,9 +172,16 @@ static const int keySize = 4*sizeof(int) + 1;
     delete [] sendBuf;
     return ESMF_FAILURE;
   }
-  
+
   // I am a nonroot, unpack buffer
   if (it != nonroots.end()) {
+    if (reconcile) {
+      // clean tree first
+      this->clean();
+      // now rebuild
+      this->ESMC_Deserialize(recvBuf, &offset);
+    }
+    else {
       localrc = AttributeUpdateBufRecv(recvBuf, localPet, &offset, recvlength);
       if (localrc != ESMF_SUCCESS) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
@@ -158,6 +189,7 @@ static const int keySize = 4*sizeof(int) + 1;
       delete [] recvBuf;
       delete [] sendBuf;
       return ESMF_FAILURE;
+      }
     }
   }
 
@@ -173,7 +205,16 @@ static const int keySize = 4*sizeof(int) + 1;
     delete [] sendBuf;
     return ESMF_FAILURE;
   }*/
-  
+
+#ifdef DEBUG_PRINT_RUN
+  fp.close();
+#endif
+
+#ifdef DEBUG_PRINT_INIT_FINAL
+  sprintf(dbgname, "A%d-%s-1.dbg", localPet, pifname);
+  ESMC_Print(true, dbgname, true);
+#endif
+
   delete [] recvBuf;
   delete [] sendBuf;
 
@@ -215,20 +256,8 @@ static const int keySize = 4*sizeof(int) + 1;
 
   thiskey = NULL; distkey = NULL;
   thiskey = new char[keySize];
-  if (!thiskey) {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                  "Failed allocating key", ESMC_CONTEXT, &localrc);
-    return localrc;
-  }
-
   distkey = new char[keySize];
-  if (!distkey) {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                  "Failed allocating key", ESMC_CONTEXT, &localrc);
-    delete [] thiskey;
-    return localrc;
-  }
-    
+
   // make key
   localrc = AttributeUpdateKeyCreate(thiskey);
   if (localrc != ESMF_SUCCESS) {
@@ -243,29 +272,37 @@ static const int keySize = 4*sizeof(int) + 1;
   memcpy(distkey, recvBuf+(*offset), keySize);
   *offset += keySize;
 
-#ifdef DEBUG
-  // compare keys
+#ifdef DEBUG_PRINT_RUN
+  sprintf(msg,
+      "\nName = %s, Convention = %s, Purpose = %s\n",
+      attrName.c_str(), attrConvention.c_str(), attrPurpose.c_str());
+  attprint(msg, strsize, true, fp);
   // key = ID, xor [name, conv, purp], value changes, struct changes, pack changes
-    printf("\nPET %d  -  %d  %s %d %d %d  -  %d  %s %d %d %d\n", 
-          localPet, 
-          (*(reinterpret_cast<int*> (thiskey+0))),
+  char msg[ESMF_MAXSTR*10];
+  sprintf(msg, "(This)   key: %s, BaseID: %d, attrRoot: %d\n"
+               "    Changes: (value) %d (struct) %d (pack) %d\n"
+               "    Sizes  : (attr) %d (pack) %d (link) %d\n"
+               "(Source) key: %s, BaseID: %d\n"
+               "    Changes: (value) %d (struct) %d (pack) %d\n",
           thiskey+4,
+          (*(reinterpret_cast<int*> (thiskey+0))),
+          attrRoot,
           (*(reinterpret_cast<int*> (thiskey+5))),
           (*(reinterpret_cast<int*> (thiskey+9))),
           (*(reinterpret_cast<int*> (thiskey+13))),
-          (*(reinterpret_cast<int*> (distkey+0))),
+          attrList.size(), packList.size(), linkList.size(),
           distkey+4,
+          (*(reinterpret_cast<int*> (distkey+0))),
           (*(reinterpret_cast<int*> (distkey+5))),
           (*(reinterpret_cast<int*> (distkey+9))),
           (*(reinterpret_cast<int*> (distkey+13))));
+  attprint(msg, strsize, true, fp);
 #endif
 
-  if (AttributeUpdateKeyCompare(thiskey, distkey) == false) {
-#ifdef DEBUG
-    printf("PET %d  -  DeleteMe!!!\n", localPet);
-    printf("PET %d  -  Name = %s, Convention = %s, Purpose = %s, AttrRoot = %d\n\n", 
-            localPet, attrName.c_str(), attrConvention.c_str(), attrPurpose.c_str(),
-            attrRoot);
+  if (!AttributeUpdateKeyCompare(thiskey, distkey)) {
+#ifdef DEBUG_PRINT_RUN
+  sprintf(msg, "!!!NO MATCH!!!\n");
+  attprint(msg, strsize, true, fp);
 #endif
 
     // first two blocks for handling of non-ordered containers
@@ -300,11 +337,10 @@ static const int keySize = 4*sizeof(int) + 1;
       return ESMC_ATTUPDATERM_ATTRIBUTE;
     }
   }
-#ifdef DEBUG
+#ifdef DEBUG_PRINT_RUN
   else { 
-    printf("PET %d  -  !!MATCH!!!\n", localPet);
-    printf("PET %d  -  Name = %s, Convention = %s, Purpose = %s, AttrRoot = %d\n\n", 
-            localPet, attrName.c_str(), attrConvention.c_str(), attrPurpose.c_str());
+  sprintf(msg, "!!!MATCH!!!\n");
+  attprint(msg, strsize, true, fp);
   }
 #endif
 
@@ -330,14 +366,6 @@ static const int keySize = 4*sizeof(int) + 1;
   for (i=0; i<attrChange; ++i) {
     attr = NULL;
     attr = new Attribute(ESMF_FALSE);
-    if (!attr) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                    "Failed allocating Attribute", ESMC_CONTEXT, &localrc);
-      delete attr;
-      delete [] thiskey;
-      delete [] distkey;
-      return localrc;
-    }
     attr->setBase(attrBase);
     attr->parent = this;
     attr->ESMC_Deserialize(recvBuf,offset);
@@ -351,6 +379,10 @@ static const int keySize = 4*sizeof(int) + 1;
       delete [] distkey;
       return ESMF_FAILURE;
     }
+#ifdef DEBUG_PRINT_RUN
+    sprintf(msg, "  - added Attribute: %s\n", attr->attrName.c_str());
+    attprint(msg, strsize, true, fp);
+#endif
     // RLO: All reset calls removed April 2014 because they are now seen as an
     // optimization that is causing failures in the MultiReconcile and ClosedLoop
     // tests of AttributeUpdate
@@ -372,13 +404,6 @@ static const int keySize = 4*sizeof(int) + 1;
     // create attr from serialized list
     attr = NULL;
     attr = new Attribute(ESMF_FALSE);
-    if (!attr) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                    "Failed allocating Attribute", ESMC_CONTEXT, &localrc);
-      delete [] thiskey;
-      delete [] distkey;
-      return localrc;
-    }
     attr->setBase(attrBase);
     attr->parent = this;
     attr->ESMC_Deserialize(recvBuf,offset);
@@ -402,7 +427,7 @@ static const int keySize = 4*sizeof(int) + 1;
         delete [] dstkey;
         return ESMF_FAILURE;
       }
-      if (AttributeUpdateKeyCompare(srckey, dstkey) == true) break;
+      if (AttributeUpdateKeyCompare(srckey, dstkey)) break;
     }
 
     // copy serialized attribute from buffer to attr
@@ -436,6 +461,11 @@ static const int keySize = 4*sizeof(int) + 1;
       return ESMF_FAILURE;
     }*/
 
+#ifdef DEBUG_PRINT_RUN
+    sprintf(msg, "  - replaced Attribute: %s\n", attr->attrName.c_str());
+    attprint(msg, strsize, true, fp);
+#endif
+
     // can delete this one and not call reset because this is a value copy
     delete attr;
     delete [] srckey;
@@ -446,14 +476,6 @@ static const int keySize = 4*sizeof(int) + 1;
   for (i=0; i<packChange; ++i) {
     attr = NULL;
     attr = new Attribute("42","42","42","42");
-    if (!attr) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                    "Failed allocating Attribute", ESMC_CONTEXT, &localrc);
-      delete attr;
-      delete [] thiskey;
-      delete [] distkey;
-      return localrc;
-    }
     attr->setBase(attrBase);
     attr->parent = this;
     attr->ESMC_Deserialize(recvBuf,offset);
@@ -480,12 +502,27 @@ static const int keySize = 4*sizeof(int) + 1;
       delete [] distkey;
       return ESMF_FAILURE;
     }*/
+#ifdef DEBUG_PRINT_RUN
+    sprintf(msg, "  - added AttPack: %s\n", attr->attrName.c_str());
+    attprint(msg, strsize, true, fp);
+#endif
+
   }
 
   // recurse through the Attribute hierarchy
   for (i=0; i<attrList.size(); ++i) {
+#ifdef DEBUG_PRINT_RUN
+    sprintf(msg, "  - recursing attrList to Attribute: %s\n",
+            attrList.at(i)->attrName.c_str());
+    attprint(msg, strsize, true, fp);
+#endif
     localrc = attrList.at(i)->AttributeUpdateBufRecv(recvBuf,localPet,offset,length);
     if (localrc == ESMC_ATTUPDATERM_ATTRIBUTE) {
+#ifdef DEBUG_PRINT_RUN
+      sprintf(msg, "  - removing Attribute: %s\n",
+              attrList.at(i)->attrName.c_str());
+      attprint(msg, strsize, true, fp);
+#endif
       localrc = AttributeRemove(attrList.at(i)->attrName);
       if (localrc != ESMF_SUCCESS) {
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
@@ -498,9 +535,7 @@ static const int keySize = 4*sizeof(int) + 1;
       --i;
     }
     else if (localrc == ESMC_ATTUPDATERM_ATTPACKATT) {
-      localrc = AttributeRemove(attrList.at(i)->attrName); 
-      /*localrc = AttPackRemoveAttribute(attrList.at(i)->attrName, attrList.at(i)->attrConvention, 
-        attrList.at(i)->attrPurpose, attrList.at(i)->attrObject, NULL);*/
+      localrc = AttributeRemove(attrList.at(i)->attrName);
       if (localrc != ESMF_SUCCESS) {
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
                   "AttributeUpdateBufRecv failed AttPackRemoveAttribute",
@@ -524,9 +559,19 @@ static const int keySize = 4*sizeof(int) + 1;
   // recurse through the Attribute Package hierarchy
   for (i=0; i<packList.size(); ++i) {
     string attPackInstanceName;
+#ifdef DEBUG_PRINT_RUN
+    sprintf(msg, "  - recursing packList to AttPack: %s\n",
+            packList.at(i)->attrName.c_str());
+    attprint(msg, strsize, true, fp);
+#endif
     localrc = packList.at(i)->AttributeUpdateBufRecv(recvBuf,localPet,offset,length);
     if (localrc == ESMC_ATTUPDATERM_ATTPACK) {
-      localrc = AttPackRemove(packList.at(i));
+ #ifdef DEBUG_PRINT_RUN
+      sprintf(msg, "  - removing AttPack: %s\n",
+              packList.at(i)->attrName.c_str());
+      attprint(msg, strsize, true, fp);
+ #endif
+     localrc = AttPackRemove(packList.at(i));
       if (localrc != ESMF_SUCCESS) {
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
                   "AttributeUpdateBufRecv failed AttPackRemove",
@@ -551,27 +596,42 @@ static const int keySize = 4*sizeof(int) + 1;
   int hook_index = 0;
   bool hook = true;
   // handling for unordered containers
-  while (hook == true) {
-	  hook = false; // reset hook to start off with a clean slate
+  while (hook) {
+    hook = false; // reset hook to start off with a clean slate
     for (i=hook_index; i<linkList.size(); ++i) {
+#ifdef DEBUG_PRINT_RUN
+    sprintf(msg, "  - recursing linkList to root of class: %d\n",
+            linkList.at(i)->attrBase->classID);
+    attprint(msg, strsize, true, fp);
+#endif
       localrc = linkList.at(i)->AttributeUpdateBufRecv(recvBuf,localPet,offset,length);
-#ifdef DEBUG
+#ifdef DEBUG_PRINT_RUN
       if (localrc == ESMC_ATTUPDATERM_HOOKANDCONTINUE) 
-        printf("PET%d - returned ESMC_ATTUPDATERM_HOOKANDCONTINUE from linkList traversal\n", localPet);
+        sprintf(msg,
+          "  - returned ESMC_ATTUPDATERM_HOOKANDCONTINUE\n",
+          localPet);
       else if (localrc == ESMC_ATTUPDATERM_ATTPACK) 
-        printf("PET%d - returned ESMC_ATTUPDATERM_ATTPACK from linkList traversal\n", localPet);
+        sprintf(msg,
+          "  - returned ESMC_ATTUPDATERM_ATTPACK\n",
+          localPet);
       else if (localrc == ESMC_ATTUPDATERM_ATTRIBUTE) 
-        printf("PET%d - returned ESMC_ATTUPDATERM_ATTRIBUTE from linkList traversal\n", localPet);
+        sprintf(msg,
+          "  - returned ESMC_ATTUPDATERM_ATTRIBUTE\n",
+          localPet);
       else if (localrc == ESMC_ATTUPDATERM_ATTPACKATT) 
-        printf("PET%d - returned ESMC_ATTUPDATERM_ATTPACKATT from linkList traversal\n", localPet);
+        sprintf(msg,
+            "  - returned ESMC_ATTUPDATERM_ATTPACKATT\n",
+            localPet);
       else
-        printf("PET%d - returned %d from linkList traversal\n", localPet, localrc);
+        sprintf(msg,
+            "returned %d from linkList traversal\n", localrc);
+      attprint(msg, strsize, true, fp);
 #endif
       // handling for unordered containers
       if (localrc == ESMC_ATTUPDATERM_HOOKANDCONTINUE) {
-        if (hook ==  false) {
-		      hook = true;
-		      hook_index = i;
+        if (!hook) {
+          hook = true;
+          hook_index = i;
         }
       }
       else if (localrc != ESMF_SUCCESS) {
@@ -632,7 +692,7 @@ static const int keySize = 4*sizeof(int) + 1;
   int localrc, nbytes;
   unsigned int i, j;
   Attribute *attr;
-    
+
   // Initialize local return code; assume routine not implemented
   localrc = ESMC_RC_NOT_IMPL;
   
@@ -643,12 +703,6 @@ static const int keySize = 4*sizeof(int) + 1;
   key = NULL;
   key = new char[keySize];
 
-  if (!key) {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                  "Failed allocating key", ESMC_CONTEXT, &localrc);
-    return localrc;
-  }
-
   localrc = AttributeUpdateKeyCreate(key);
   if (localrc != ESMF_SUCCESS) {
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
@@ -656,7 +710,7 @@ static const int keySize = 4*sizeof(int) + 1;
     delete [] key;
     return ESMF_FAILURE;
   }
-    
+
   // add this key to the buffer
   memcpy(sendBuf+(*offset),key,keySize);
   *offset += keySize;
@@ -673,20 +727,24 @@ static const int keySize = 4*sizeof(int) + 1;
     return ESMF_FAILURE;
   }
 
-#ifdef DEBUG
+#ifdef DEBUG_PRINT_RUN
  // compare keys
+  sprintf(msg,
+    "\nName = %s, Convention = %s, Purpose = %s\n",
+    attrName.c_str(), attrConvention.c_str(), attrPurpose.c_str());
+  attprint(msg, strsize, true, fp);
   // key = ID, xor [name, conv, purp], value changes, struct changes, pack changes
-  printf("\nPET %d - %d %s %d %d %d\n", 
-                      localPet,
-                      (*(reinterpret_cast<int*> (key+0))),
+  sprintf(msg, "key: %s, BaseID: %d, attrRoot: %d\n"
+               "    Changes: (value) %d (struct) %d (pack) %d\n"
+               "    Sizes  : (attr) %d (pack) %d (link) %d\n",
                       key+4,
+                      (*(reinterpret_cast<int*> (key+0))),
+                      attrRoot,
                       (*(reinterpret_cast<int*> (key+5))),
                       (*(reinterpret_cast<int*> (key+9))),
-                      (*(reinterpret_cast<int*> (key+13))));
-
-  printf("PET %d - !!!BUFSEND!!!\n", localPet);
-  printf("PET %d  -  Name = %s, Convention = %s, Purpose = %s, AttrRoot = %d\n\n", 
-          localPet, attrName.c_str(), attrConvention.c_str(), attrPurpose.c_str(), attrRoot);
+                      (*(reinterpret_cast<int*> (key+13))),
+                      attrList.size(), packList.size(), linkList.size());
+  attprint(msg, strsize, true, fp);
 #endif
 
   // get key info
@@ -794,23 +852,35 @@ static const int keySize = 4*sizeof(int) + 1;
   }
   }
 
-#ifdef DEBUG
-printf("PET %d - BUFSEND recurse attrListsize = %d, packListsize = %d, linkListsize = %d\n",
-       localPet, attrList.size(), packList.size(), linkList.size());
+  // recurse through the Attribute hierarchy
+  for (i=0; i<attrList.size(); i++) {
+#ifdef DEBUG_PRINT_RUN
+    sprintf(msg, "attrList recursion %d of %d\n",
+        localPet, i, attrList.size());
+    attprint(msg, strsize, true, fp);
 #endif
-
-  // recurse through the Attribute hierarchy
-  for (i=0; i<attrList.size(); i++)
     localrc = attrList.at(i)->AttributeUpdateBufSend(sendBuf,localPet,offset,length);
-  
-  // recurse through the Attribute hierarchy
-  for (i=0; i<packList.size(); i++)
-    localrc = packList.at(i)->AttributeUpdateBufSend(sendBuf,localPet,offset,length);
+  }
 
   // recurse through the Attribute hierarchy
-  for (i=0; i<linkList.size(); i++)
+  for (i=0; i<packList.size(); i++) {
+#ifdef DEBUG_PRINT_RUN
+    sprintf(msg, "packList recursion %d of %d\n",
+        localPet, i, packList.size());
+    attprint(msg, strsize, true, fp);
+#endif
+    localrc = packList.at(i)->AttributeUpdateBufSend(sendBuf,localPet,offset,length);
+  }
+
+  // recurse through the Attribute hierarchy
+  for (i=0; i<linkList.size(); i++) {
+#ifdef DEBUG_PRINT_RUN
+    sprintf(msg, "linkList recursion %d of %d\n",
+        localPet, i, linkList.size());
+    attprint(msg, strsize, true, fp);
+#endif
     localrc = linkList.at(i)->AttributeUpdateBufSend(sendBuf,localPet,offset,length);
-  
+  }
   // make sure offset is aligned correctly
   nbytes=(*offset)%8;
   if (nbytes!=0) *offset += 8-nbytes;
@@ -824,7 +894,7 @@ printf("PET %d - BUFSEND recurse attrListsize = %d, packListsize = %d, linkLists
   }
   
   delete [] key;
-  
+
   return ESMF_SUCCESS;
   
   } // end AttributeUpdateBufSend
@@ -954,7 +1024,7 @@ printf("PET %d - BUFSEND recurse attrListsize = %d, packListsize = %d, linkLists
   int localrc;
   unsigned int i;
   int handshake = 42;
-    
+
   // Initialize local return code; assume routine not implemented
   localrc = ESMC_RC_NOT_IMPL;
   
@@ -968,11 +1038,6 @@ printf("PET %d - BUFSEND recurse attrListsize = %d, packListsize = %d, linkLists
   // am I a root?
   vector<ESMC_I4>::const_iterator itSend, itNR, itR;
   itSend = find(roots.begin(), roots.end(), localPet);
-
-#ifdef DEBUG      
-printf("PET%d - nonroots.size() = %d, roots.size()= %d\n",localPet,
-          nonroots.size(), roots.size());
-#endif  
 
   int ceilID=ceil(static_cast<double> (nonroots.size())/static_cast<double> (roots.size()));
     
@@ -1004,9 +1069,10 @@ printf("PET%d - nonroots.size() = %d, roots.size()= %d\n",localPet,
     // now we all wait for all comm calls to complete
     vm->commqueuewait();
 
-#ifdef DEBUG      
-printf("\n\nI am PET #%d, I received message \"%s\" from PET #%d\n\n",
+#ifdef DEBUG_PRINT_RUN      
+sprintf(msg, "\nP%d RECEIVE \"%s\" from P%d\n",
             localPet, recvBuf, roots[indRecv]);
+attprint(msg, strsize, true, fp);
 #endif
   }
     
@@ -1028,9 +1094,10 @@ printf("\n\nI am PET #%d, I received message \"%s\" from PET #%d\n\n",
       
       if (indSend < nonroots.size()) {
         // send with message=0 and status=NULL for now
-#ifdef DEBUG      
-        printf("\n\nI am PET #%d, I am sending message \"%s\" to PET #%d\n\n",
-                localPet, sendBuf, nonroots[indSend]);
+#ifdef DEBUG_PRINT_RUN      
+sprintf(msg, "\nP%d, SEND \"%s\" to P%d\n",
+        localPet, sendBuf, nonroots[indSend]);
+attprint(msg, strsize, true, fp);
 #endif
         vm->recv(&handshake, sizeof(int), nonroots[indSend]);
         vm->send(&sendBufSize, sizeof(sendBufSize), nonroots[indSend]);
@@ -1049,6 +1116,7 @@ printf("\n\nI am PET #%d, I received message \"%s\" from PET #%d\n\n",
   }
     
   delete commh;
+
   return ESMF_SUCCESS;
   
   } // end AttributeUpdateComm
@@ -1199,10 +1267,11 @@ printf("\n\nI am PET #%d, I received message \"%s\" from PET #%d\n\n",
 //    {\tt ESMF\_SUCCESS} or error code on failure.
 //
 // !ARGUMENTS:
-      VM *vm,                                     // the VM
-      int &bufSize,                               // size of buffer to return
-      const vector<ESMC_I4> &roots,               // roots vector
-      const vector<ESMC_I4> &nonroots) const {    // nonroots vector
+      VM *vm,                           // the VM
+      int &bufSize,                     // size of buffer to return
+      const vector<ESMC_I4> &roots,     // roots vector
+      const vector<ESMC_I4> &nonroots,  // nonroots vector
+      bool reconcile) const {           // reconcile flag
 //
 // !DESCRIPTION:
 //    Determine if AttributeUpdate() is needed. 
@@ -1232,16 +1301,6 @@ printf("\n\nI am PET #%d, I received message \"%s\" from PET #%d\n\n",
   recvBuf = NULL; sendBuf = NULL;
   recvBuf = new char[length];
   sendBuf = new char[length];
-  if (!recvBuf) {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                  "Failed allocating Recv buffer", ESMC_CONTEXT, &localrc);
-    return localrc;
-  }
-  if (!sendBuf) {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                  "Failed allocating Send buffer", ESMC_CONTEXT, &localrc);
-    return localrc;
-  }
 
   // query the VM for localPet and petCount
   int localPet = vm->getLocalPet();
@@ -1251,43 +1310,52 @@ printf("\n\nI am PET #%d, I received message \"%s\" from PET #%d\n\n",
   
   // I am a root
   if (it == nonroots.end()) {
-    int linkChanges = 0;
-    int structChanges = 0;
-    int valueChanges = 0;
-    int deleteChanges = 0;
-    int numKeys = 0;
+    if (reconcile) {
+      // set the first position of sendBuf to the size of offset from serialize
+      this->ESMC_Serialize(sendBuf, &length, &offset, ESMF_INQUIREONLY);
+      (*(reinterpret_cast<int*> (sendBuf)))=offset;
+      realChangesOut = 1;
+      numKeysOut = 1;
+      bufSize = offset;
+    } else {
+      int linkChanges = 0;
+      int structChanges = 0;
+      int valueChanges = 0;
+      int deleteChanges = 0;
+      int numKeys = 0;
 
-    // look for changes
-    localrc = AttributeUpdateTreeChanges(&linkChanges, &structChanges, 
-      &valueChanges, &deleteChanges, &numKeys);
-    if (localrc != ESMF_SUCCESS) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
-       "AttributeUpdateNeeded failed AttributeUpdateTreeChanges", ESMC_CONTEXT, &localrc);
-      delete [] recvBuf;
-      delete [] sendBuf;
-      return ESMF_FAILURE;
-    }
+      // look for changes
+      localrc = AttributeUpdateTreeChanges(&linkChanges, &structChanges,
+        &valueChanges, &deleteChanges, &numKeys);
+      if (localrc != ESMF_SUCCESS) {
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+         "AttributeUpdateNeeded failed AttributeUpdateTreeChanges", ESMC_CONTEXT, &localrc);
+        delete [] recvBuf;
+        delete [] sendBuf;
+        return ESMF_FAILURE;
+      }
 
-    // create buffer
-    int realChanges = structChanges + valueChanges + deleteChanges;
-    (*(reinterpret_cast<int*> (sendBuf+offset)))=linkChanges;
-    offset += sizeof(int);
-    (*(reinterpret_cast<int*> (sendBuf+offset)))=realChanges;
-    offset += sizeof(int);
-    (*(reinterpret_cast<int*> (sendBuf+offset)))=numKeys;
-    offset += sizeof(int);
-    if (offset != length) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
-                  "AttributeUpdateNeeded -  writing buffer failed", ESMC_CONTEXT, &localrc);
-      delete [] recvBuf;
-      delete [] sendBuf;
-      return ESMF_FAILURE;
+      // create buffer
+      int realChanges = structChanges + valueChanges + deleteChanges;
+      (*(reinterpret_cast<int*> (sendBuf+offset)))=linkChanges;
+      offset += sizeof(int);
+      (*(reinterpret_cast<int*> (sendBuf+offset)))=realChanges;
+      offset += sizeof(int);
+      (*(reinterpret_cast<int*> (sendBuf+offset)))=numKeys;
+      offset += sizeof(int);
+      if (offset != length) {
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+                    "AttributeUpdateNeeded -  writing buffer failed", ESMC_CONTEXT, &localrc);
+        delete [] recvBuf;
+        delete [] sendBuf;
+        return ESMF_FAILURE;
+      }
+
+      // set Out values
+      linkChangesOut = linkChanges;
+      realChangesOut = realChanges;
+      numKeysOut = numKeys;
     }
-    
-    // set Out values
-    linkChangesOut = linkChanges;
-    realChangesOut = realChanges;
-    numKeysOut = numKeys;
   }
   
   // call AttributeUpdateComm with changes as sendBuf and recvBuf
@@ -1303,7 +1371,6 @@ printf("\n\nI am PET #%d, I received message \"%s\" from PET #%d\n\n",
   
   // I am a nonroot
   if (it != nonroots.end()) {
-  
     // unpack the buffer
     if (recvlength != length) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
@@ -1312,19 +1379,26 @@ printf("\n\nI am PET #%d, I received message \"%s\" from PET #%d\n\n",
       delete [] sendBuf;
       return ESMF_FAILURE;
     }
-    linkChangesOut = (*(reinterpret_cast<int*> (recvBuf+offset)));
-    offset += sizeof(int);
-    realChangesOut = (*(reinterpret_cast<int*> (recvBuf+offset)));
-    offset += sizeof(int);
-    numKeysOut = (*(reinterpret_cast<int*> (recvBuf+offset)));
-    offset += sizeof(int);
-    if (offset != length) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
-                  "AttributeUpdateNeeded -  reading buffer failed", ESMC_CONTEXT, &localrc);
-      delete [] recvBuf;
-      delete [] sendBuf;
-      return ESMF_FAILURE;
-    }  
+    if (reconcile) {
+      // set realChanges to 1 so routine doesn't bail and pull out buffer size
+      realChangesOut = 1;
+      numKeysOut = 1;
+      bufSize = (*(reinterpret_cast<int*> (recvBuf)));
+    } else {
+      linkChangesOut = (*(reinterpret_cast<int*> (recvBuf+offset)));
+      offset += sizeof(int);
+      realChangesOut = (*(reinterpret_cast<int*> (recvBuf+offset)));
+      offset += sizeof(int);
+      numKeysOut = (*(reinterpret_cast<int*> (recvBuf+offset)));
+      offset += sizeof(int);
+      if (offset != length) {
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+                    "AttributeUpdateNeeded -  reading buffer failed", ESMC_CONTEXT, &localrc);
+        delete [] recvBuf;
+        delete [] sendBuf;
+        return ESMF_FAILURE;
+      }
+    }
   }
 
   // if link changes, we bail and recommend StateReconcile
@@ -1358,8 +1432,9 @@ printf("\n\nI am PET #%d, I received message \"%s\" from PET #%d\n\n",
   // gjt: make sure to take 8-byte alignment into account
   int keySize8 = keySize/8 * 8;
   if (keySize%8) keySize8 += 8; 
-  
-  bufSize = (realChangesOut)*sizeof(Attribute) + numKeysOut*keySize8;
+
+  if (!reconcile)
+    bufSize = (realChangesOut)*sizeof(Attribute) + numKeysOut*keySize8;
 
   delete [] recvBuf;
   delete [] sendBuf;

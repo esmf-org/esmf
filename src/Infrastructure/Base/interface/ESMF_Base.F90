@@ -714,11 +714,12 @@ module ESMF_BaseMod
 ! !IROUTINE:  ESMF_BasePrint - Call into C++ code to print base object
 !
 ! !INTERFACE:
-  subroutine ESMF_BasePrint(base, options, rc)
+  subroutine ESMF_BasePrint(base, options, filename, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_Base),  intent(in)              :: base
     character(len=*), intent(in),   optional  :: options
+    character(len=*), intent(in),   optional  :: filename
     integer,          intent(out),  optional  :: rc
 !
 ! !DESCRIPTION:
@@ -730,6 +731,8 @@ module ESMF_BaseMod
 !       Any ESMF type.
 !     \item[options]
 !       Print options.
+!     \item[{[filename]}]
+!       Used to determine whether to write to file or stdout.
 !     \item[{[rc]}]
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -738,6 +741,7 @@ module ESMF_BaseMod
 !EOPI
     integer                     :: localrc, ignorerc
     character(len=ESMF_MAXSTR)  :: opts
+    logical                     :: tofile
 
     ! Initialize return code; assume routine not implemented
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -752,11 +756,17 @@ module ESMF_BaseMod
         opts = ''
     endif
 
+    if (present(filename)) then
+        tofile = .true.
+    else
+        tofile = .false.
+    endif
+
     call ESMF_UtilIOUnitFlush (unit=ESMF_UtilIOstdout, rc=ignorerc)
     ! Ignore localrc, because sometimes stdout is not open at this point
     ! and some compilers FLUSH statements will complain.
 
-    call c_ESMC_BasePrint(base , 0, opts, localrc)
+    call c_ESMC_BasePrint(base, 0, opts, tofile, filename, .true., localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 

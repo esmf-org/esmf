@@ -675,8 +675,11 @@ static const char *const version = "$Id$";
 //    {\tt ESMF\_SUCCESS} or error code on failure.
 //
 // !ARGUMENTS:
-      int level,                   // in - print level for recursive prints
-      const char *options) const { //  in - print options
+      int level,                    //  in - print level for recursive prints
+      const char *options,          //  in - print options
+      bool tofile,                  //  in - from file flag
+      const char *filename,         //  in - filename
+      bool append) const {          //  in - append
 //
 // !DESCRIPTION:
 //    Print the contents of an {\tt ESMC\_Base} object.  Expected to be
@@ -686,6 +689,7 @@ static const char *const version = "$Id$";
 
   char msgbuf[ESMF_MAXSTR];
   int localrc;
+  int lpet = 0;
 
     // Initialize local return code; assume routine not implemented
     localrc = ESMC_RC_NOT_IMPL;
@@ -706,18 +710,22 @@ static const char *const version = "$Id$";
     for (int i=0; i<level; i++)
       printf ("->");
   }
-  printf ("     ");
   if (options) {
     if (strcmp (options, "debug") == 0) {
       printf ("ID = %i, ", ID);
     }
   }
-  sprintf(msgbuf, "Root Attributes:\n");
-  printf("%s", msgbuf);
-  // ESMC_LogDefault.Write(msgbuf, ESMC_LOGMSG_INFO);
-  
-  // traverse the Attribute hierarchy, printing as we go
-  root.ESMC_Print();
+  if ((root.getCountAttr() > 0 || root.getCountPack() > 0) && tofile) {
+    sprintf(msgbuf, "Root Attributes:\n");
+    printf("%s", msgbuf);
+    // ESMC_LogDefault.Write(msgbuf, ESMC_LOGMSG_INFO);
+
+    // traverse the Attribute hierarchy, printing as we go
+    if (append)
+      root.ESMC_Print(tofile, filename, true);
+    else
+      root.ESMC_Print(tofile, filename, false);
+  }
 
   return ESMF_SUCCESS;
 
@@ -743,7 +751,7 @@ static const char *const version = "$Id$";
 //
 //EOPI
 
-  return ESMC_Print(0, options);
+  return ESMC_Print(0, options, false, "", false);
 
  } // end ESMC_Print
 

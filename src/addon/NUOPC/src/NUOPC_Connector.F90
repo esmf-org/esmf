@@ -12,6 +12,8 @@
 #define FILENAME "src/addon/NUOPC/src/NUOPC_Connector.F90"
 !==============================================================================
 
+!#define FIXED_ATTRIBUTE_ISSUE
+
 module NUOPC_Connector
 
   !-----------------------------------------------------------------------------
