@@ -3458,22 +3458,26 @@ contains
 ! !IROUTINE: ESMF_AttributeUpdate  - Update an Attribute hierarchy
 !
 ! !INTERFACE:
-!     subroutine ESMF_AttributeUpdate(<object>, vm, rootList, rc)
+!     subroutine ESMF_AttributeUpdate(<object>, vm, rootList, reconcile, rc)
 !
 ! !ARGUMENTS:
 !     <object>, see below for supported values
 !     type(ESMF_VM), intent(in)            :: vm
 !     integer,       intent(in)            :: rootList(:)
+!     logical,       intent(in), optional  :: reconcile
 !     integer,       intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!     Update an Attribute hierarchy during runtime.  This call will not work
-!     if changes have been made to the underlying object hierarchy and
-!     ESMF\_StateReconcile() has not already been called.  There is a check
-!     that will fail if this case is encountered.  The information from
-!     the PETs in the 'rootList' is transferred to the PETs that are not
-!     in the 'rootList'.  Care should be taken to ensure that the information
-!     contained in the Attributes on the PETs in the 'rootList' is consistent.
+!     Update an Attribute hierarchy during runtime. The information from
+!     the PETs in the {\tt rootList} is transferred to the PETs that are not
+!     in the {\tt rootList}.  Care should be taken to ensure that the
+!     information contained in the Attributes on the PETs in the {\tt rootList}
+!     is consistent.
+!     If changes have been made to the underlying object hierarchy then either
+!     {\tt ESMF\_StateReconcile()} or the {\tt reconcile} flag must be used to
+!     resolve them. The same applies if changes are made to both PETs and in
+!     the {\tt rootList} and PETs outside of the {\tt rootList}, or if the same
+!     changes are made in a different order.
 !
 !     Supported values for <object> are:
 !     \begin{description}
@@ -3492,10 +3496,18 @@ contains
 !     \item [<object>]
 !           An {\tt ESMF} object.
 !     \item [vm]
-!           The virtural machine over which this Attribute hierarchy
+!           The virtual machine over which this Attribute hierarchy
 !           should be updated.
 !     \item [rootList]
-!           The list of \textit{root} PETs that are to be used to update.
+!           The list of PETs that are to be used as the source of the update.
+!     \item [{[reconcile]}] @\
+!           A logical flag used to indicate whether to use reconcile behavior @\
+!           or normal update behavior. If {\tt reconcile} is set to  @\
+!           {\tt .true.} then the values of the root PETs will be sent to @\
+!           the nonroot PETs without exception. Otherwise, an algorithm that @\
+!           is optimized to use minimal memory will be used to update only  @\
+!           the modified parts of the Attribute hierarchy on the nonroot @\
+!           PETs. The default value is {\tt .false.}. @\
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -12231,17 +12243,17 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     \item [mthis] @\
 !      An {\tt mclass} object. @\
 !     \item [vm] @\
-!      The virtural machine over which this Attribute hierarchy  @\
+!      The virtual machine over which this Attribute hierarchy  @\
 !      should be updated. @\
 !     \item [rootList] @\
-!      The list of "root" PETs that are to be used to update. @\
-!     \item [reconcile] @\
-!      A logical flag used to indicate whether to use "reconcile" behavior or @\
-!      normal "update" behavior. If {\tt reconcile} is set to {\tt ESMF\_TRUE} @\
+!      The list of PETs that are to be used to as the source of the update. @\
+!     \item [{[reconcile]}] @\
+!      A logical flag used to indicate whether to use reconcile behavior or @\
+!      normal update behavior. If {\tt reconcile} is set to {\tt ESMF\_TRUE} @\
 !      then the values of the root PETs will be sent to the nonroot PETs without @\
 !      exception. Otherwise, an algorithm that is optimized to use minimal @\
 !      memory will be used to update only the modified parts of the Attribute @\
-!      hierarchy. The default value is {\tt ESMF_FALSE}. @\
+!      hierarchy on the nonroot PETs. The default value is {\tt ESMF\_FALSE}. @\
 !     \item [{[rc]}]  @\
 !      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
 !     \end{description} @\
