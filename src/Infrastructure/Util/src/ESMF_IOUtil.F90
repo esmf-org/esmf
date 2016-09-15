@@ -42,10 +42,6 @@ module ESMF_IOUtilMod
 ! can not use ESMF_LogErrMod because it would cause a module circularity
   use ESMF_UtilTypesMod
 #include "ESMF.h"
-#ifdef ESMF_NAG_UNIX_MODULE
-  use f90_unix_io
-#endif
-
   implicit none
 !
 ! !PRIVATE TYPES:
