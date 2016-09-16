@@ -12262,7 +12262,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !EOPI @\
  @\
       integer :: localrc, count                           ! Error status @\
-      logical :: local_reconcile @\
+      type(ESMF_Logical) :: local_reconcile @\
  @\
       ! Initialize return code; assume failure until success is certain @\
       if (present(rc)) rc = ESMF_RC_NOT_IMPL @\
@@ -12272,9 +12272,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
  @\
       ! reconcile @\
       if ( present(reconcile)) then @\
-        local_reconcile = reconcile @\
+        if (reconcile) local_reconcile = ESMF_TRUE @\
       else @\
-        local_reconcile = .false. @\
+        local_reconcile = ESMF_FALSE @\
       endif @\
  @\
       count = size(rootList) @\
