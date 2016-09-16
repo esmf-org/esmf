@@ -2256,9 +2256,8 @@ program ESMF_GridCoordUTest
                               countsPerDeDim2=(/3,4/),  &
                               countsPerDeDim3=(/5/),  &
                               indexflag=ESMF_INDEX_GLOBAL, &
-	                      coordDep1=(/2,1,3/), &
-	                      coordDep2=(/3,2,1/), &
-         	              ! use default for coordDep3
+                              coordDep1=(/2,1,3/), &
+                              coordDep2=(/3,2,1/), &  ! use default for coordDep3
                               gridEdgeLWidth=(/1,2,3/), &
                               gridEdgeUWidth=(/7,8,9/), &  
                               petMap=petMap2D, rc=localrc)
@@ -2268,9 +2267,8 @@ program ESMF_GridCoordUTest
                               countsPerDeDim2=(/3,4/),  &
                               countsPerDeDim3=(/5/),  & 
                               indexflag=ESMF_INDEX_GLOBAL, &
-	                      coordDep1=(/2,1,3/), &
-	                      coordDep2=(/3,2,1/), &
-         	              ! use default for coordDep3 
+                              coordDep1=(/2,1,3/), &
+                              coordDep2=(/3,2,1/), &  ! use default for coordDep3 
                               gridEdgeLWidth=(/1,2,3/), &
                               gridEdgeUWidth=(/7,8,9/), & 
                               rc=localrc)
@@ -2479,9 +2477,8 @@ program ESMF_GridCoordUTest
                               countsPerDeDim2=(/3,4/),  &
                               countsPerDeDim3=(/5/),  &
                               indexflag=ESMF_INDEX_DELOCAL, &
-	                      coordDep1=(/2,1,3/), &
-	                      coordDep2=(/3,2,1/), &
-         	              ! use default for coordDep3
+                              coordDep1=(/2,1,3/), &
+                              coordDep2=(/3,2,1/), &  ! use default for coordDep3
                               gridEdgeLWidth=(/1,2,3/), &
                               gridEdgeUWidth=(/4,5,6/), &  
                                petMap=petMap2D, rc=localrc)
@@ -2491,9 +2488,8 @@ program ESMF_GridCoordUTest
                               countsPerDeDim2=(/3,4/),  &
                               countsPerDeDim3=(/5/),  & 
                               indexflag=ESMF_INDEX_DELOCAL, &
-	                      coordDep1=(/2,1,3/), &
-	                      coordDep2=(/3,2,1/), &
-         	              ! use default for coordDep3  
+                              coordDep1=(/2,1,3/), &
+                              coordDep2=(/3,2,1/), &  ! use default for coordDep3  
                               gridEdgeLWidth=(/1,2,3/), &
                               gridEdgeUWidth=(/4,5,6/), &  
                               rc=localrc)
@@ -2586,9 +2582,8 @@ program ESMF_GridCoordUTest
                               countsPerDeDim2=(/3,4/),  &
                               countsPerDeDim3=(/5/),  &
                               indexflag=ESMF_INDEX_USER, &
-	                      coordDep1=(/2,1,3/), &
-	                      coordDep2=(/3,2,1/), &
-         	              ! use default for coordDep3
+                              coordDep1=(/2,1,3/), &
+                              coordDep2=(/3,2,1/), &  ! use default for coordDep3
                               gridEdgeLWidth=(/1,2,3/), &
                               gridEdgeUWidth=(/4,5,6/), &  
                               gridMemLBound=(/10,20,30/), &
@@ -2599,9 +2594,8 @@ program ESMF_GridCoordUTest
                               countsPerDeDim2=(/3,4/),  &
                               countsPerDeDim3=(/5/),  & 
                               indexflag=ESMF_INDEX_USER, &
-	                      coordDep1=(/2,1,3/), &
-	                      coordDep2=(/3,2,1/), &
-         	              ! use default for coordDep3  
+                              coordDep1=(/2,1,3/), &
+                              coordDep2=(/3,2,1/), &  ! use default for coordDep3  
                               gridEdgeLWidth=(/1,2,3/), &
                               gridEdgeUWidth=(/4,5,6/), &  
                               gridMemLBound=(/10,20,30/), &
