@@ -12272,7 +12272,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
  @\
       ! reconcile @\
       if ( present(reconcile)) then @\
-        if (reconcile) local_reconcile = ESMF_TRUE @\
+        local_reconcile = reconcile @\
       else @\
         local_reconcile = ESMF_FALSE @\
       endif @\
