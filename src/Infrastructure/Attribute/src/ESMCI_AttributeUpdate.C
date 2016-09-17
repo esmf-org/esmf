@@ -176,8 +176,12 @@ static const int keySize = 4*sizeof(int) + 1;
   // I am a nonroot, unpack buffer
   if (it != nonroots.end()) {
     if (reconcile) {
-      // clean tree first
+      // save the Base
+      ESMC_Base *temp_base = attrBase;
+      // clean tree
       this->clean();
+      // reset the base
+      setBase(temp_base);
       // now rebuild
       this->ESMC_Deserialize(recvBuf, &offset);
     }
@@ -197,6 +201,9 @@ static const int keySize = 4*sizeof(int) + 1;
   // RLO: All reset calls removed April 2014 because they are now seen as an
   // optimization that is causing failures in the MultiReconcile and ClosedLoop
   // tests of AttributeUpdate
+  // TODO: September 2016, this should be reenabled at least for the case where
+  //   reconcile == true on objects that can't be affected by the multireconcile
+  //   or closedloop failures (maybe components), but I'm not yet sure how..
   /*localrc = AttributeUpdateReset();
   if (localrc != ESMF_SUCCESS) {
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,

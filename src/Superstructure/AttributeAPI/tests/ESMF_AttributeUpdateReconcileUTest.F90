@@ -476,6 +476,22 @@ program AttributeUpdateReconcile
     call ESMF_Test((rc==ESMF_SUCCESS).and.(outVal=="doodle"), &
                     name, failMsg, result, ESMF_SRCLINE)
 
+    if (localPet == 0) then
+      call ESMF_AttributeSet(cplcomp, "ReconcileFalse", value="doodle", rc=rc)
+      if (rc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+    endif
+
+    call ESMF_AttributeUpdate(cplcomp, vm, rootList=petList1, &
+                              reconcile=.false., rc=rc)
+    if (rc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+    !EX_UTest_Multi_Proc_Only
+    call ESMF_AttributeGet(cplcomp, "ReconcileFalse", value=outVal, rc=rc)
+    write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
+    write(name, *) "PET ", localPet, ": Getting an updated Attribute value from a Component test: value = ", trim(outVal)
+    call ESMF_Test((rc==ESMF_SUCCESS).and.(outVal=="doodle"), &
+                    name, failMsg, result, ESMF_SRCLINE)
+
     ! Now back to finalizing the model run
     call ESMF_GridCompFinalize(gridcomp1, exportState=c1exp, rc=rc)
     if (rc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
