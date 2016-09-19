@@ -12,8 +12,6 @@
 #define FILENAME "src/addon/NUOPC/src/NUOPC_Connector.F90"
 !==============================================================================
 
-!#define FIXED_ATTRIBUTE_ISSUE
-
 module NUOPC_Connector
 
   !-----------------------------------------------------------------------------
@@ -84,17 +82,11 @@ module NUOPC_Connector
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
-#ifdef FIXED_ATTRIBUTE_ISSUE
-!TODO: there is currently an Attribute problem that if I turn on the 
-!TODO: AttributeSet below, then the standard NUOPC CplComp AttPack does not
-!TODO: get updated across all the PETs in the Driver. This leads to problems
-!TODO: when trying to look up RunMap or similar across all PETs.
     ! set the ESMF compliance checker register Attribute
     call ESMF_AttributeSet(connector, name="ESMF_RUNTIME_COMPLIANCEICREGISTER", &
       value="NUOPC_Connector_ComplianceICR", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-#endif
     
     ! Initialize phases
     

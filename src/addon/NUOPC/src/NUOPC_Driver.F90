@@ -1038,13 +1038,14 @@ module NUOPC_Driver
             ! need to update the Component attributes across all PETs
             if (associated(is%wrap%modelPetLists(i)%petList)) then
               call ESMF_AttributeUpdate(is%wrap%modelComp(i), vm, &
-                rootList=is%wrap%modelPetLists(i)%petList, rc=rc)
+                rootList=is%wrap%modelPetLists(i)%petList, reconcile=.true., &
+                rc=rc)
               if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
                 line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
                 return  ! bail out
             else
               call ESMF_AttributeUpdate(is%wrap%modelComp(i), vm, &
-                rootList=(/0/), rc=rc)
+                rootList=(/0/), reconcile=.true., rc=rc)
               if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
                 line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
                 return  ! bail out
@@ -1110,13 +1111,14 @@ module NUOPC_Driver
               ! need to update the Component attributes across all PETs
               if (associated(is%wrap%connectorPetLists(i,j)%petList)) then
                 call ESMF_AttributeUpdate(is%wrap%connectorComp(i,j), vm, &
-                  rootList=is%wrap%connectorPetLists(i,j)%petList, rc=rc)
+                  rootList=is%wrap%connectorPetLists(i,j)%petList, &
+                  reconcile=.true., rc=rc)
                 if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
                   line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc))&
                   return  ! bail out
               else
                 call ESMF_AttributeUpdate(is%wrap%connectorComp(i,j), vm, &
-                  rootList=(/0/), rc=rc)
+                  rootList=(/0/), reconcile=.true., rc=rc)
                 if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
                   line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc))&
                   return  ! bail out
