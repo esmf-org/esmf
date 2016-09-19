@@ -60,6 +60,7 @@ TESTS_BUILD = \
 		$(ESMF_TESTDIR)/ESMF_AttributeUpdateContainerStressUTest \
 		$(ESMF_TESTDIR)/ESMF_AttributeUpdateMultiReconcileUTest \
 		$(ESMF_TESTDIR)/ESMF_AttributeUpdateRemoveOnlyUTest \
+		$(ESMF_TESTDIR)/ESMF_AttributeUpdateReconcileUTest \
 		$(ESMF_TESTDIR)/ESMF_AttributeWriteInternalUTest \
 		$(ESMF_TESTDIR)/ESMF_AttributeXMLUTest \
 		$(ESMF_TESTDIR)/ESMF_AttReadCplCompUTest \
@@ -95,6 +96,7 @@ TESTS_RUN = \
 		RUN_ESMF_AttributeUpdateComponentUTest \
 		RUN_ESMF_AttributeUpdateContainerStressUTest \
 		RUN_ESMF_AttributeUpdateMultiReconcileUTest \
+		RUN_ESMF_AttributeUpdateReconcileUTest \
 		RUN_ESMF_AttributeUpdateRemoveOnlyUTest \
 		RUN_ESMF_AttributeWriteInternalUTest \
 		RUN_ESMF_AttributeXMLUTest \
@@ -420,6 +422,9 @@ RUN_ESMF_AttributeUpdateContainerStressUTest:
 
 RUN_ESMF_AttributeUpdateMultiReconcileUTest:
 	$(MAKE) TNAME=AttributeUpdateMultiReconcile NP=6 ftest
+
+RUN_ESMF_AttributeUpdateReconcileUTest:
+	$(MAKE) TNAME=AttributeUpdateReconcile NP=2 ftest
 
 RUN_ESMF_AttributeUpdateRemoveOnlyUTest:
 	$(MAKE) TNAME=AttributeUpdateRemoveOnly NP=4 ftest

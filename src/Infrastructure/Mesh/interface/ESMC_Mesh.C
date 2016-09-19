@@ -92,8 +92,8 @@ ESMC_Mesh ESMC_MeshCreateFromFile(const char *filename, int fileTypeFlag,
 
   // Call into ESMCI method
   mesh.ptr = (void *)MeshCXX::createFromFile(filename, fileTypeFlag, 
-					     convertToDual, addUserArea, 
-					     meshname, maskFlag, varname, 
+					     convertToDual, addUserArea,
+					     meshname, maskFlag, varname,
 					     &localrc);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
     rc)) return mesh; // bail out
