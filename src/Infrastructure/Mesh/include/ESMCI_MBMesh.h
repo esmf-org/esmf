@@ -18,7 +18,6 @@
 #include "Mesh/src/Moab/moab/Core.hpp"
 using namespace moab;
 
-
 #include <map>
 
 namespace ESMCI {
