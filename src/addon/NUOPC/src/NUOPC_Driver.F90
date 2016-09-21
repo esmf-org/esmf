@@ -55,21 +55,19 @@ module NUOPC_Driver
 
   type type_InternalStateStruct
     integer                           :: modelCount
-    type(type_PetList),  pointer      :: modelPetLists(:)
-    type(type_PetList),  pointer      :: connectorPetLists(:,:)
-    !--- private members ----------------------------------------
-    ! - new style members
-    type(ESMF_Container)              :: componentMap
-    type(ESMF_Container)              :: connectorMap
-    integer                           :: componentMapCount
-    logical                           :: newStyleFlag
-    ! - old style members
+    ! - static references to child components
     type(ESMF_GridComp), pointer      :: modelComp(:)
     type(ESMF_State),    pointer      :: modelIS(:), modelES(:)
+    type(type_PetList),  pointer      :: modelPetLists(:)
     type(ESMF_CplComp),  pointer      :: connectorComp(:,:)
-    ! - common members
+    type(type_PetList),  pointer      :: connectorPetLists(:,:)
+    ! - dynamic references to child components
+    type(ESMF_Container)              :: componentMap
+    type(ESMF_Container)              :: connectorMap
+    ! - run sequence
     type(NUOPC_RunSequence), pointer  :: runSeq(:)  ! size may increase dynamic.
     integer                           :: runPhaseToRunSeqMap(10)
+    ! - clock
     type(ESMF_Clock)                  :: driverClock  ! clock of the parent
   end type
 
@@ -300,7 +298,6 @@ module NUOPC_Driver
     endif
 
     ! prepare the new style members in the internal state
-    is%wrap%newStyleFlag = .false.  ! old style by default
     is%wrap%componentMap = ESMF_ContainerCreate(rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
@@ -309,7 +306,7 @@ module NUOPC_Driver
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
-    is%wrap%componentMapCount = 0 ! reset
+    is%wrap%modelCount = 0 ! reset
     is%wrap%connectorMap = ESMF_ContainerCreate(rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
@@ -332,8 +329,6 @@ module NUOPC_Driver
     ! --> for now, but after the SetModelServices has been called, and
     ! --> the modelCount is now known.
     
-    ! set the legacy modelCount
-    is%wrap%modelCount = is%wrap%componentMapCount
     ! allocate lists inside the internal state according to modelCount
     allocate(is%wrap%modelPetLists(0:is%wrap%modelCount), &
       is%wrap%connectorPetLists(0:is%wrap%modelCount,0:is%wrap%modelCount), &
@@ -527,7 +522,7 @@ module NUOPC_Driver
     
     ! now the component labels are available -> create States with Namespace
     do i=0, is%wrap%modelCount
-      if (i > 0 .and. is%wrap%newStyleFlag) then
+      if (i > 0) then
         ! have component label available for namespace
         call ESMF_ContainerGetUDTByIndex(is%wrap%componentMap, i, &
           cmEntry, ESMF_ITEMORDER_ADDORDER, rc)
@@ -2151,16 +2146,13 @@ module NUOPC_Driver
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
     
-    ! Entering this call means that the new style members are being used
-    is%wrap%newStyleFlag = .true.
-    
     ! Add another component to the componentMap with associated compLabel
     allocate(cmEntry%wrap, stat=stat)
     if (ESMF_LogFoundAllocError(stat, msg="allocating cmEntry", &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
-    is%wrap%componentMapCount = is%wrap%componentMapCount + 1
-    i = is%wrap%componentMapCount
+    is%wrap%modelCount = is%wrap%modelCount + 1
+    i = is%wrap%modelCount
     cmEntry%wrap%label = trim(compLabel)
     cmEntry%wrap%component = ESMF_GridCompCreate(name=trim(compLabel), &
       petList=petList, rc=rc)
@@ -2308,16 +2300,13 @@ module NUOPC_Driver
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
     
-    ! Entering this call means that the new style members are being used
-    is%wrap%newStyleFlag = .true.
-    
     ! Add another component to the componentMap with associated compLabel
     allocate(cmEntry%wrap, stat=stat)
     if (ESMF_LogFoundAllocError(stat, msg="allocating cmEntry", &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
-    is%wrap%componentMapCount = is%wrap%componentMapCount + 1
-    i = is%wrap%componentMapCount
+    is%wrap%modelCount = is%wrap%modelCount + 1
+    i = is%wrap%modelCount
     cmEntry%wrap%label = trim(compLabel)
     cmEntry%wrap%component = ESMF_GridCompCreate(name=trim(compLabel), &
       petList=petList, rc=rc)
@@ -2478,9 +2467,6 @@ module NUOPC_Driver
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
-    
-    ! Entering this call means that the new style members are being used
-    is%wrap%newStyleFlag = .true.
     
     ! set up connectorPetList
     nullify(connectorPetList)     ! invalidate
