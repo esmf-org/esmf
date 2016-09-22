@@ -452,9 +452,9 @@ print *, "current bondLevel=", bondLevel
             ! Getting to this place in the double loop means that the 
             ! standard name match has a connection that supports the match.
             
-            ! -> get the current ConsumerConnection bondLevel highmark
+            ! -> get the current ProducerConnection bondLevel highmark
             field = exportFieldList(j)
-            call NUOPC_GetAttribute(field, name="ConsumerConnection", &
+            call NUOPC_GetAttribute(field, name="ProducerConnection", &
               value=connectionString, rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) &
@@ -462,7 +462,7 @@ print *, "current bondLevel=", bondLevel
             if (trim(connectionString)=="open") then
               ! first valid connection that was found
               write (connectionString, "(i10)") bondLevel
-              call NUOPC_SetAttribute(field, name="ConsumerConnection", &
+              call NUOPC_SetAttribute(field, name="ProducerConnection", &
                 value=connectionString, rc=rc)
               if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
                 line=__LINE__, file=trim(name)//":"//FILENAME)) &
@@ -478,7 +478,7 @@ print *, "bondLevelMax:", bondLevelMax, "bondLevel:", bondLevel
 #endif
               if (bondLevel > bondLevelMax) then
                 write (connectionString, "(i10)") bondLevel
-                call NUOPC_SetAttribute(field, name="ConsumerConnection", &
+                call NUOPC_SetAttribute(field, name="ProducerConnection", &
                   value=connectionString, rc=rc)
                 if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
                   line=__LINE__, file=trim(name)//":"//FILENAME)) &
@@ -667,9 +667,9 @@ print *, "current bondLevel=", bondLevel
             ! Getting to this place in the double loop means that the 
             ! standard name match has a connection that supports the match.
             
-            ! -> look at the current ConsumerConnection entry to see what to do
+            ! -> look at the current ProducerConnection entry to see what to do
             field = exportFieldList(j)
-            call NUOPC_GetAttribute(field, name="ConsumerConnection", &
+            call NUOPC_GetAttribute(field, name="ProducerConnection", &
               value=connectionString, rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
@@ -709,9 +709,9 @@ print *, "current bondLevel=", bondLevel
                     line=__LINE__, file=trim(name)//":"//FILENAME, &
                     rcToReturn=rc)) return  ! bail out
                 endif
-                ! make the targeted entry to the ConsumerConnection attribute
+                ! make the targeted entry to the ProducerConnection attribute
                 write (connectionString, "('targeted:', i10)") bondLevel
-                call NUOPC_SetAttribute(field, name="ConsumerConnection", &
+                call NUOPC_SetAttribute(field, name="ProducerConnection", &
                   value=connectionString, rc=rc)
                 if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
                   line=__LINE__, file=trim(name)//":"//FILENAME)) &
@@ -927,9 +927,9 @@ print *, "current bondLevel=", bondLevel
             ! Getting to this place in the double loop means that the 
             ! standard name match has a connection that supports the match.
             
-            ! -> look at the current ConsumerConnection entry to see what to do
+            ! -> look at the current ProducerConnection entry to see what to do
             eField = exportFieldList(eMatch)
-            call NUOPC_GetAttribute(eField, name="ConsumerConnection", &
+            call NUOPC_GetAttribute(eField, name="ProducerConnection", &
               value=connectionString, rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
@@ -1253,9 +1253,9 @@ print *, "current bondLevel=", bondLevel
             ! Getting to this place in the double loop means that the 
             ! standard name match has a connection that supports the match.
             
-            ! -> look at the current ConsumerConnection entry to see what to do
+            ! -> look at the current ProducerConnection entry to see what to do
             eField = exportFieldList(eMatch)
-            call NUOPC_GetAttribute(eField, name="ConsumerConnection", &
+            call NUOPC_GetAttribute(eField, name="ProducerConnection", &
               value=connectionString, rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
@@ -1637,9 +1637,9 @@ print *, "current bondLevel=", bondLevel
             ! Getting to this place in the double loop means that the 
             ! standard name match has a connection that supports the match.
             
-            ! -> look at the current ConsumerConnection entry to see what to do
+            ! -> look at the current ProducerConnection entry to see what to do
             eField = exportFieldList(eMatch)
-            call NUOPC_GetAttribute(eField, name="ConsumerConnection", &
+            call NUOPC_GetAttribute(eField, name="ProducerConnection", &
               value=connectionString, rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
@@ -1994,9 +1994,9 @@ print *, "current bondLevel=", bondLevel
             ! Getting to this place in the double loop means that the 
             ! standard name match has a connection that supports the match.
             
-            ! -> look at the current ConsumerConnection entry to see what to do
+            ! -> look at the current ProducerConnection entry to see what to do
             eField = exportFieldList(eMatch)
-            call NUOPC_GetAttribute(eField, name="ConsumerConnection", &
+            call NUOPC_GetAttribute(eField, name="ProducerConnection", &
               value=connectionString, rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
@@ -2009,7 +2009,7 @@ print *, "current bondLevel=", bondLevel
                 foundFlag = .true.
                 write (connectionString, "('connected:', i10)") bondLevel
                 call NUOPC_SetAttribute(eField, &
-                  name="ConsumerConnection", value=connectionString, rc=rc)
+                  name="ProducerConnection", value=connectionString, rc=rc)
                 if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
                   line=__LINE__, file=trim(name)//":"//FILENAME)) &
                   return  ! bail out
