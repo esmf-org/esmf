@@ -178,6 +178,14 @@ module NUOPC_Driver
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
     
+    ! Claim initialize phase 1 to be able to call into Driver simply via
+    ! a single ESMF_GridCompInitialize() from application level.
+    call ESMF_GridCompSetEntryPoint(gcomp, ESMF_METHOD_INITIALIZE, &
+      userRoutine=InitializeP1, phase=1, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+      return  ! bail out
+
     call NUOPC_CompSetEntryPoint(gcomp, ESMF_METHOD_INITIALIZE, &
       phaseLabelList=(/"IPDv01p1"/), &
       userRoutine=InitializeIPDv01p1, rc=rc)
@@ -223,12 +231,37 @@ module NUOPC_Driver
     type(ESMF_Clock)      :: clock
     integer, intent(out)  :: rc
     
+    rc = ESMF_SUCCESS
+
+    ! NOOP, because only SetEntryPoint for IPDv00 routines anyway
+
+  end subroutine
+  
+  !-----------------------------------------------------------------------------
+
+  subroutine InitializeP1(gcomp, importState, exportState, clock, rc)
+    type(ESMF_GridComp)   :: gcomp
+    type(ESMF_State)      :: importState, exportState
+    type(ESMF_Clock)      :: clock
+    integer, intent(out)  :: rc
+    
     ! local variables
     character(ESMF_MAXSTR):: name
 
     rc = ESMF_SUCCESS
 
-    ! NOOP, because only SetEntryPoint for IPDv00 routines anyway
+    ! query the Component for info
+    call ESMF_GridCompGet(gcomp, name=name, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+
+    ! call the actual initialize routines
+    call InitializeIPDv01p1(gcomp, importState, exportState, clock, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    call InitializeIPDv01p3(gcomp, importState, exportState, clock, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
   end subroutine
   
@@ -256,8 +289,6 @@ module NUOPC_Driver
     type(ESMF_VM)             :: vm
     character(ESMF_MAXSTR)    :: name
     character(len=160)        :: namespace  ! long engough for component label
-    logical                   :: execFlag, execFlagCollect
-    integer                   :: execFlagIntReduced, execFlagInt
     type(ComponentMapEntry)   :: cmEntry
     type(ESMF_GridComp), pointer :: compList(:)
     type(ESMF_CplComp)        :: connector
@@ -729,10 +760,6 @@ module NUOPC_Driver
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out
-    call loopConnectorCompsS(gcomp, phaseString="IPDv00p2b", rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME)) &
-      return  ! bail out
     call loopConnectorCompsS(gcomp, phaseString="IPDv01p2", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
@@ -753,242 +780,6 @@ module NUOPC_Driver
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out
-
-    ! modelComps
-    call loopModelCompsS(gcomp, phaseString="IPDv00p2", rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME)) &
-      return  ! bail out
-    call loopModelCompsS(gcomp, phaseString="IPDv01p3", rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME)) &
-      return  ! bail out
-    call loopModelCompsS(gcomp, phaseString="IPDv02p3", rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME)) &
-      return  ! bail out
-    call loopModelCompsS(gcomp, phaseString="IPDv03p3", rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME)) &
-      return  ! bail out
-    call loopModelCompsS(gcomp, phaseString="IPDv04p3", rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME)) &
-      return  ! bail out
-    call loopModelCompsS(gcomp, phaseString="IPDv05p4", rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME)) &
-      return  ! bail out
-    ! connectorComps
-    call loopConnectorCompsS(gcomp, phaseString="IPDv03p3", rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME)) &
-      return  ! bail out
-    call loopConnectorCompsS(gcomp, phaseString="IPDv04p3", rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME)) &
-      return  ! bail out
-    call loopConnectorCompsS(gcomp, phaseString="IPDv05p4", rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME)) &
-      return  ! bail out
-
-    ! modelComps
-    call loopModelCompsS(gcomp, phaseString="IPDv03p4", rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME)) &
-      return  ! bail out
-    call loopModelCompsS(gcomp, phaseString="IPDv04p4", rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME)) &
-      return  ! bail out
-    call loopModelCompsS(gcomp, phaseString="IPDv05p5", rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME)) &
-      return  ! bail out
-    ! connectorComps
-    call loopConnectorCompsS(gcomp, phaseString="IPDv03p4", rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME)) &
-      return  ! bail out
-    call loopConnectorCompsS(gcomp, phaseString="IPDv04p4", rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME)) &
-      return  ! bail out
-    call loopConnectorCompsS(gcomp, phaseString="IPDv05p5", rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME)) &
-      return  ! bail out
-
-    ! modelComps
-    call loopModelCompsS(gcomp, phaseString="IPDv03p5", rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME)) &
-      return  ! bail out
-    call loopModelCompsS(gcomp, phaseString="IPDv04p5", rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME)) &
-      return  ! bail out
-    call loopModelCompsS(gcomp, phaseString="IPDv05p6", rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME)) &
-      return  ! bail out
-    ! connectorComps
-    call loopConnectorCompsS(gcomp, phaseString="IPDv01p3a", rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME)) &
-      return  ! bail out
-    call loopConnectorCompsS(gcomp, phaseString="IPDv01p3b", rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME)) &
-      return  ! bail out
-    call loopConnectorCompsS(gcomp, phaseString="IPDv02p3a", rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME)) &
-      return  ! bail out
-    call loopConnectorCompsS(gcomp, phaseString="IPDv02p3b", rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME)) &
-      return  ! bail out
-    call loopConnectorCompsS(gcomp, phaseString="IPDv03p5a", rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME)) &
-      return  ! bail out
-    call loopConnectorCompsS(gcomp, phaseString="IPDv03p5b", rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME)) &
-      return  ! bail out
-    call loopConnectorCompsS(gcomp, phaseString="IPDv04p5a", rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME)) &
-      return  ! bail out
-    call loopConnectorCompsS(gcomp, phaseString="IPDv04p5b", rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME)) &
-      return  ! bail out
-    call loopConnectorCompsS(gcomp, phaseString="IPDv05p6a", rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME)) &
-      return  ! bail out
-    call loopConnectorCompsS(gcomp, phaseString="IPDv05p6b", rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME)) &
-      return  ! bail out
-
-    ! modelComps
-    call loopModelCompsS(gcomp, phaseString="IPDv00p3", rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME)) &
-      return  ! bail out
-    call loopModelCompsS(gcomp, phaseString="IPDv01p4", rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME)) &
-      return  ! bail out
-    call loopModelCompsS(gcomp, phaseString="IPDv02p4", rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME)) &
-      return  ! bail out
-    call loopModelCompsS(gcomp, phaseString="IPDv03p6", rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME)) &
-      return  ! bail out
-    call loopModelCompsS(gcomp, phaseString="IPDv04p6", rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME)) &
-      return  ! bail out
-    call loopModelCompsS(gcomp, phaseString="IPDv05p7", rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME)) &
-      return  ! bail out
-    ! connectorComps
-    ! nothing to do
-
-    ! modelComps
-    call loopModelCompsS(gcomp, phaseString="IPDv00p4", rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME)) &
-      return  ! bail out
-    call loopModelCompsS(gcomp, phaseString="IPDv01p5", rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME)) &
-      return  ! bail out
-    execFlagCollect = .false.
-    call loopModelCompsS(gcomp, phaseString="IPDv02p5", execFlag=execFlag, &
-      rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME)) &
-      return  ! bail out
-    execFlagCollect = execFlagCollect.or.execFlag
-    call loopModelCompsS(gcomp, phaseString="IPDv03p7", execFlag=execFlag, &
-      rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME)) &
-      return  ! bail out
-    execFlagCollect = execFlagCollect.or.execFlag
-    call loopModelCompsS(gcomp, phaseString="IPDv04p7", execFlag=execFlag, &
-      rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME)) &
-      return  ! bail out
-    execFlagCollect = execFlagCollect.or.execFlag
-    call loopModelCompsS(gcomp, phaseString="IPDv05p8", execFlag=execFlag, &
-      rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME)) &
-      return  ! bail out
-    execFlagCollect = execFlagCollect.or.execFlag
-
-    ! deal with the fact that the IPDv02p5 component may not be across all PETs
-    execFlagInt = 0
-    if (execFlagCollect) execFlagInt = 1
-
-    call ESMF_VMAllFullReduce(vm, sendData=(/execFlagInt/), &
-      recvData=execFlagIntReduced, count=1, reduceflag=ESMF_REDUCE_SUM, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME)) &
-      return  ! bail out
-
-    if (execFlagIntReduced>0) execFlag = .true.
-      
-    ! now all PETs have the same execFlag setting for a consistent decision
-    if (execFlag) then
-      ! there were model components with IPDv02p5 or IPDv03p7
-      !  -> resolve data dependencies by entering loop
-      call loopDataDependentInitialize(gcomp, rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=trim(name)//":"//FILENAME)) &
-        return  ! bail out
-    endif
-    
-#define DEBUGPRINT____disable
-#ifdef DEBUGPRINT
-    ! print the entire runSeq structure
-    call NUOPC_RunSequencePrint(is%wrap%runSeq, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-#endif
-
-#if 0
-!-- only last subroutine to contain this
-    ! local garbage collection -> PhaseMap pointer members
-    do i=0, is%wrap%modelCount
-      do j=0, is%wrap%modelCount
-        if (j==i) cycle ! skip
-        if (associated(is%wrap%connectorPhaseMap(i,j)%phaseValue)) &
-          deallocate(is%wrap%connectorPhaseMap(i,j)%phaseValue)
-        if (associated(is%wrap%connectorPhaseMap(i,j)%phases)) &
-          deallocate(is%wrap%connectorPhaseMap(i,j)%phases)
-        if (associated(is%wrap%connectorPhaseMap(i,j)%phaseKey)) &
-          deallocate(is%wrap%connectorPhaseMap(i,j)%phaseKey)
-      enddo
-      if (associated(is%wrap%modelPhaseMap(i)%phaseValue)) &
-        deallocate(is%wrap%modelPhaseMap(i)%phaseValue)
-      if (associated(is%wrap%modelPhaseMap(i)%phases)) &
-        deallocate(is%wrap%modelPhaseMap(i)%phases)
-      if (associated(is%wrap%modelPhaseMap(i)%phaseKey)) &
-        deallocate(is%wrap%modelPhaseMap(i)%phaseKey)
-    enddo
-#endif
 
     contains !----------------------------------------------------------------
     
@@ -1229,31 +1020,265 @@ module NUOPC_Driver
     integer, intent(out) :: rc
     
     ! local variables
-    integer                   :: localrc, stat
     type(type_InternalState)  :: is
-    logical                   :: clockIsPresent
-    type(ESMF_Clock)          :: internalClock
-    integer                   :: i, j, k, l, cIndex
-    character(ESMF_MAXSTR)    :: iString, jString, lString, compName, msgString
-    character(ESMF_MAXSTR)    :: petListBuffer(100)
-    integer                   :: lineCount
-    integer, pointer          :: i_petList(:), j_petList(:), c_petList(:)
-    logical                   :: existflag
-    integer                   :: rootPet, rootVas
+    integer                   :: i, j
     type(ESMF_VM)             :: vm
     character(ESMF_MAXSTR)    :: name
-    character(len=160)        :: namespace  ! long engough for component label
     logical                   :: execFlag, execFlagCollect
     integer                   :: execFlagIntReduced, execFlagInt
-    type(ComponentMapEntry)   :: cmEntry
-    type(ESMF_GridComp), pointer :: compList(:)
-    type(ESMF_CplComp)        :: connector
-    character(len=80)         :: srcCompLabel
-    character(len=80)         :: dstCompLabel
-    type(type_PetList), pointer :: petLists(:)
-    integer, pointer          :: petList(:)
 
     rc = ESMF_SUCCESS
+
+    ! query the Component for info
+    call ESMF_GridCompGet(gcomp, name=name, vm=vm, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    ! query Component for the internal State
+    nullify(is%wrap)
+    call ESMF_UserCompGetInternalState(gcomp, label_InternalState, is, rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+      return  ! bail out
+
+    ! connectorComps
+    call loopConnectorCompsS(gcomp, phaseString="IPDv00p2b", rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) &
+      return  ! bail out
+
+    ! modelComps
+    call loopModelCompsS(gcomp, phaseString="IPDv00p2", rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) &
+      return  ! bail out
+    call loopModelCompsS(gcomp, phaseString="IPDv01p3", rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) &
+      return  ! bail out
+    call loopModelCompsS(gcomp, phaseString="IPDv02p3", rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) &
+      return  ! bail out
+    call loopModelCompsS(gcomp, phaseString="IPDv03p3", rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) &
+      return  ! bail out
+    call loopModelCompsS(gcomp, phaseString="IPDv04p3", rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) &
+      return  ! bail out
+    call loopModelCompsS(gcomp, phaseString="IPDv05p4", rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) &
+      return  ! bail out
+    ! connectorComps
+    call loopConnectorCompsS(gcomp, phaseString="IPDv03p3", rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) &
+      return  ! bail out
+    call loopConnectorCompsS(gcomp, phaseString="IPDv04p3", rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) &
+      return  ! bail out
+    call loopConnectorCompsS(gcomp, phaseString="IPDv05p4", rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) &
+      return  ! bail out
+
+    ! modelComps
+    call loopModelCompsS(gcomp, phaseString="IPDv03p4", rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) &
+      return  ! bail out
+    call loopModelCompsS(gcomp, phaseString="IPDv04p4", rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) &
+      return  ! bail out
+    call loopModelCompsS(gcomp, phaseString="IPDv05p5", rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) &
+      return  ! bail out
+    ! connectorComps
+    call loopConnectorCompsS(gcomp, phaseString="IPDv03p4", rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) &
+      return  ! bail out
+    call loopConnectorCompsS(gcomp, phaseString="IPDv04p4", rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) &
+      return  ! bail out
+    call loopConnectorCompsS(gcomp, phaseString="IPDv05p5", rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) &
+      return  ! bail out
+
+    ! modelComps
+    call loopModelCompsS(gcomp, phaseString="IPDv03p5", rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) &
+      return  ! bail out
+    call loopModelCompsS(gcomp, phaseString="IPDv04p5", rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) &
+      return  ! bail out
+    call loopModelCompsS(gcomp, phaseString="IPDv05p6", rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) &
+      return  ! bail out
+    ! connectorComps
+    call loopConnectorCompsS(gcomp, phaseString="IPDv01p3a", rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) &
+      return  ! bail out
+    call loopConnectorCompsS(gcomp, phaseString="IPDv01p3b", rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) &
+      return  ! bail out
+    call loopConnectorCompsS(gcomp, phaseString="IPDv02p3a", rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) &
+      return  ! bail out
+    call loopConnectorCompsS(gcomp, phaseString="IPDv02p3b", rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) &
+      return  ! bail out
+    call loopConnectorCompsS(gcomp, phaseString="IPDv03p5a", rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) &
+      return  ! bail out
+    call loopConnectorCompsS(gcomp, phaseString="IPDv03p5b", rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) &
+      return  ! bail out
+    call loopConnectorCompsS(gcomp, phaseString="IPDv04p5a", rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) &
+      return  ! bail out
+    call loopConnectorCompsS(gcomp, phaseString="IPDv04p5b", rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) &
+      return  ! bail out
+    call loopConnectorCompsS(gcomp, phaseString="IPDv05p6a", rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) &
+      return  ! bail out
+    call loopConnectorCompsS(gcomp, phaseString="IPDv05p6b", rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) &
+      return  ! bail out
+
+    ! modelComps
+    call loopModelCompsS(gcomp, phaseString="IPDv00p3", rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) &
+      return  ! bail out
+    call loopModelCompsS(gcomp, phaseString="IPDv01p4", rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) &
+      return  ! bail out
+    call loopModelCompsS(gcomp, phaseString="IPDv02p4", rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) &
+      return  ! bail out
+    call loopModelCompsS(gcomp, phaseString="IPDv03p6", rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) &
+      return  ! bail out
+    call loopModelCompsS(gcomp, phaseString="IPDv04p6", rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) &
+      return  ! bail out
+    call loopModelCompsS(gcomp, phaseString="IPDv05p7", rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) &
+      return  ! bail out
+    ! connectorComps
+    ! nothing to do
+
+    ! modelComps
+    call loopModelCompsS(gcomp, phaseString="IPDv00p4", rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) &
+      return  ! bail out
+    call loopModelCompsS(gcomp, phaseString="IPDv01p5", rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) &
+      return  ! bail out
+    execFlagCollect = .false.
+    call loopModelCompsS(gcomp, phaseString="IPDv02p5", execFlag=execFlag, &
+      rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) &
+      return  ! bail out
+    execFlagCollect = execFlagCollect.or.execFlag
+    call loopModelCompsS(gcomp, phaseString="IPDv03p7", execFlag=execFlag, &
+      rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) &
+      return  ! bail out
+    execFlagCollect = execFlagCollect.or.execFlag
+    call loopModelCompsS(gcomp, phaseString="IPDv04p7", execFlag=execFlag, &
+      rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) &
+      return  ! bail out
+    execFlagCollect = execFlagCollect.or.execFlag
+    call loopModelCompsS(gcomp, phaseString="IPDv05p8", execFlag=execFlag, &
+      rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) &
+      return  ! bail out
+    execFlagCollect = execFlagCollect.or.execFlag
+
+    ! deal with the fact that the IPDv02p5 component may not be across all PETs
+    execFlagInt = 0
+    if (execFlagCollect) execFlagInt = 1
+
+    call ESMF_VMAllFullReduce(vm, sendData=(/execFlagInt/), &
+      recvData=execFlagIntReduced, count=1, reduceflag=ESMF_REDUCE_SUM, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) &
+      return  ! bail out
+
+    if (execFlagIntReduced>0) execFlag = .true.
+      
+    ! now all PETs have the same execFlag setting for a consistent decision
+    if (execFlag) then
+      ! there were model components with IPDv02p5 or IPDv03p7
+      !  -> resolve data dependencies by entering loop
+      call loopDataDependentInitialize(gcomp, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) &
+        return  ! bail out
+    endif
+    
+#define DEBUGPRINT____disable
+#ifdef DEBUGPRINT
+    ! print the entire runSeq structure
+    call NUOPC_RunSequencePrint(is%wrap%runSeq, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+#endif
+
+!-- only last subroutine to contain this
+    ! local garbage collection -> PhaseMap pointer members
+    do i=0, is%wrap%modelCount
+      do j=0, is%wrap%modelCount
+        if (j==i) cycle ! skip
+        if (associated(is%wrap%connectorPhaseMap(i,j)%phaseValue)) &
+          deallocate(is%wrap%connectorPhaseMap(i,j)%phaseValue)
+        if (associated(is%wrap%connectorPhaseMap(i,j)%phases)) &
+          deallocate(is%wrap%connectorPhaseMap(i,j)%phases)
+        if (associated(is%wrap%connectorPhaseMap(i,j)%phaseKey)) &
+          deallocate(is%wrap%connectorPhaseMap(i,j)%phaseKey)
+      enddo
+      if (associated(is%wrap%modelPhaseMap(i)%phaseValue)) &
+        deallocate(is%wrap%modelPhaseMap(i)%phaseValue)
+      if (associated(is%wrap%modelPhaseMap(i)%phases)) &
+        deallocate(is%wrap%modelPhaseMap(i)%phases)
+      if (associated(is%wrap%modelPhaseMap(i)%phaseKey)) &
+        deallocate(is%wrap%modelPhaseMap(i)%phaseKey)
+    enddo
 
   end subroutine
   
