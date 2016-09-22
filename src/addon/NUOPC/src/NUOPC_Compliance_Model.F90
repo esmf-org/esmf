@@ -33,8 +33,6 @@ module NUOPC_Compliance_Model
   
     private
   
-    integer, save :: ccfDepth = 1   ! component control flow depth
-    integer, save :: maxDepth = -2  ! maximum depth of compliance checker
     logical, save :: doJSON = .false.
 
     ! these map NUOPC events to the phase when it should occur
