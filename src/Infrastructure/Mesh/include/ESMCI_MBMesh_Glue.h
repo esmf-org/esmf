@@ -57,7 +57,7 @@ void MBMesh_addnodes(void **mbmpp, int *num_nodes, int *nodeId,
 
 void MBMesh_addelements(void **mbmpp, 
                         int *_num_elems, int *elemId, int *elemType, InterfaceInt *_elemMaskII ,
-                        int *_areaPresent, double *elemArea, 
+                         int *_areaPresent, double *elemArea, 
                         int *_coordsPresent, double *elemCoords, 
                         int *_num_elemConn, int *elemConn, int *regridConserve, 
                         ESMC_CoordSys_Flag *_coordSys, int *_orig_sdim,
@@ -79,6 +79,11 @@ void MBMesh_getarea(void **mbmpp, int *num_elem, double *elem_areas, int *rc);
 
 void MBMesh_getlocalelemcoords(void **meshpp, double *ecoords, 
                                int *_orig_sdim, int *rc);
+
+
+void MBMesh_meshturnoncellmask(void **mbmpp, ESMCI::InterfaceInt *maskValuesArg,  int *rc);
+void MBMesh_meshturnoffcellmask(void **mbmpp, int *rc);
+
 
 
 #if 0

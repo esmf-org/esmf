@@ -1019,12 +1019,11 @@ void MeshCap::meshturnoncellmask(ESMCI::InterfaceInt *maskValuesArg,  int *rc) {
   if (is_esmf_mesh) {
     ESMCI_meshturnoncellmask(&mesh, maskValuesArg, rc);
   } else {
-    // Commented to let regridding proceed
-#if 0
-        ESMC_LogDefault.MsgFoundError(ESMC_RC_NOT_IMPL,
-      "- this functionality is not currently supported using MOAB",
-                                  ESMC_CONTEXT, rc);
-    return;
+#ifdef ESMF_MOAB 
+    MBMesh_meshturnoncellmask(&mbmesh, maskValuesArg, rc);
+#else
+   if(ESMC_LogDefault.MsgFoundError(ESMC_RC_LIB_NOT_PRESENT,
+      "This functionality requires ESMF to be built with the MOAB library enabled" , ESMC_CONTEXT, rc)) return;
 #endif
   }
 
@@ -1039,13 +1038,11 @@ void MeshCap::meshturnoffcellmask(int *rc) {
   if (is_esmf_mesh) {
     ESMCI_meshturnoffcellmask(&mesh, rc);
   } else {
-
-    // Commented to let regridding proceed
-#if 0
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_NOT_IMPL,
-       "- this functionality is not currently supported using MOAB",
-                                  ESMC_CONTEXT, rc);
-    return;
+#ifdef ESMF_MOAB 
+    MBMesh_meshturnoffcellmask(&mbmesh, rc);
+#else
+   if(ESMC_LogDefault.MsgFoundError(ESMC_RC_LIB_NOT_PRESENT,
+      "This functionality requires ESMF to be built with the MOAB library enabled" , ESMC_CONTEXT, rc)) return;
 #endif
   }
 

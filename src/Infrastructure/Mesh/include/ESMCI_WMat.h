@@ -126,7 +126,6 @@ public:
    */
   void GatherToCol(WMat &rhs);
 
-
  
   void GatherToRowSrc(WMat &rhs);
 

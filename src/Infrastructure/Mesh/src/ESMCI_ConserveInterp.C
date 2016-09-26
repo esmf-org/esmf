@@ -1384,7 +1384,7 @@ void norm_poly3D(int num_p, double *p) {
 
     // Get src coords
     get_elem_coords_3D_ccw(src_elem, src_cfield, MAX_NUM_POLY_NODES, tmp_coords, &num_src_nodes, src_coords);
-    //  get_elem_coords(src_elem, src_cfield, 3, MAX_NUM_POLY_NODES, &num_src_nodes, src_coords);
+     //  get_elem_coords(src_elem, src_cfield, 3, MAX_NUM_POLY_NODES, &num_src_nodes, src_coords);
 
 
     // if no nodes then exit
@@ -1411,7 +1411,7 @@ void norm_poly3D(int num_p, double *p) {
     // If a smashed quad invalidate everything and leave because it won't results in weights
     // Decision about returning error for degeneracy is made above this subroutine
     if (is_smashed_quad3D(num_src_nodes, src_coords)) {
-      *src_elem_area=0.0;    
+       *src_elem_area=0.0;    
       for (int i=0; i<dst_elems.size(); i++) {
         (*valid)[i]=0;
         (*wgts)[i]=0.0;
@@ -1434,7 +1434,7 @@ void norm_poly3D(int num_p, double *p) {
         (*valid)[i]=0;
         (*wgts)[i]=0.0;
         (*sintd_areas_out)[i]=0.0;
-        (*dst_areas_out)[i]=0.0;
+         (*dst_areas_out)[i]=0.0;
       }
       return;
     }
@@ -1460,7 +1460,7 @@ void norm_poly3D(int num_p, double *p) {
 
     // Loop intersecting and computing areas of intersection
     for (int i=0; i<dst_elems.size(); i++) {
-      const MeshObj *dst_elem = dst_elems[i];
+       const MeshObj *dst_elem = dst_elems[i];
       
       // Get dst coords
       get_elem_coords_3D_ccw(dst_elem, dst_cfield, MAX_NUM_POLY_NODES, tmp_coords, &num_dst_nodes, dst_coords);
@@ -1484,7 +1484,7 @@ void norm_poly3D(int num_p, double *p) {
         sintd_areas[i]=0.0;
         continue;
       }
-
+ 
       // if a smashed quad skip
       if (is_smashed_quad3D(num_dst_nodes, dst_coords)) {
         (*valid)[i]=0;
@@ -1492,7 +1492,7 @@ void norm_poly3D(int num_p, double *p) {
         sintd_areas[i]=0.0;
         continue;
       }
-      
+       
       // calculate dst area
      dst_areas[i]=great_circle_area(num_dst_nodes, dst_coords); 
 
@@ -1560,7 +1560,7 @@ void norm_poly3D(int num_p, double *p) {
 
       // Invalidate masked destination elements
       if (dst_mask_field) {
-        double *msk=dst_mask_field->data(*dst_elem);
+         double *msk=dst_mask_field->data(*dst_elem);
         if (*msk>0.5) {
           (*valid)[i]=0;
           continue;
@@ -1628,7 +1628,7 @@ void norm_poly3D(int num_p, double *p) {
 #undef  MAX_NUM_POLY_COORDS_3D    
   }
 
-
+ 
 
   // Here valid and wghts need to be resized to the same size as dst_elems before being passed into 
   // this call. 
@@ -1660,7 +1660,7 @@ void norm_poly3D(int num_p, double *p) {
     // if destination area is 0.0, invalidate and go to next
     if (*dst_area==0.0) {
       *valid=0;
-      *sintd_area=0.0;
+       *sintd_area=0.0;
       *dst_area=0.0;
       return;
     }
@@ -1728,7 +1728,7 @@ void norm_poly3D(int num_p, double *p) {
         res_map->insert(std::make_pair(src_elem, new interp_res(dst_elem, num_sintd_nodes, num_src_nodes, num_dst_nodes, sdim, src_coords, dst_coords, 
           src_area, dst_areas[i], ((src_area == 0.)? 1.:sintd_areas[i]/src_area) ) ) ); 
       }
-
+ 
     if(res_map) return;     // not intended for weight calculation
 #endif
 
@@ -1796,7 +1796,7 @@ void norm_poly3D(int num_p, double *p) {
 
       // Init everything to 0s
       (*valid_list)[i]=0;
-      (*sintd_area_list)[i]=0.0;
+       (*sintd_area_list)[i]=0.0;
       (*dst_area_list)[i]=0.0;
 
       
@@ -1864,7 +1864,7 @@ void norm_poly3D(int num_p, double *p) {
           (*valid_list)[i]=1;
           (*sintd_area_list)[i]=sintd_area;
           (*dst_area_list)[i]=dst_area;
-        }
+         }
         // else {
         //  Init to 0's above
         //}
@@ -1932,7 +1932,7 @@ void norm_poly3D(int num_p, double *p) {
         tri[0]=dst_coords[3*tri_ind[3]];
         tri[1]=dst_coords[3*tri_ind[3]+1];
         tri[2]=dst_coords[3*tri_ind[3]+2];
-
+ 
         tri[3]=dst_coords[3*tri_ind[4]];
         tri[4]=dst_coords[3*tri_ind[4]+1];
         tri[5]=dst_coords[3*tri_ind[4]+2];
