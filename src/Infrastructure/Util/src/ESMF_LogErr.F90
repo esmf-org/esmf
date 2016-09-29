@@ -1102,7 +1102,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             rcToReturn=ESMF_RC_MEM_ALLOCATE
         endif
         if (present(msg)) then
-          allocmsg = allocmsg(:msglen) // " - " // msg
+          allocmsg = allocmsg(:msglen) // " - " // msg // ' (status = '
+          write (allocmsg,'(a,i5,a)') trim (allocmsg), statusToCheck, ')'
           msglen = len_trim (allocmsg)
         end if
         call ESMF_LogWrite(allocmsg(:msglen), ESMF_LOGMSG_ERROR,  &
@@ -1655,7 +1656,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     call f_ESMF_VMGlobalGet(alog%petNumber, petCount)
     ! Convert PET to contiguous character label
     if (petCount>1) then
-      digits = log10(real(petCount-1))+1
+      digits = int (log10(real(petCount-1))+1)
     else
       digits = 1
     endif
