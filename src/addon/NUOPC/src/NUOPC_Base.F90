@@ -1455,6 +1455,8 @@ module NUOPC_Base
     if (present(rc)) rc = ESMF_SUCCESS
     if (present(count)) count = 0
     
+    NUOPC_IsAtTimeState = .false.  ! initialize
+
     if (present(fieldName)) then
     
       call ESMF_StateGet(state, itemName=fieldName, field=field, rc=rc)
@@ -1606,6 +1608,8 @@ module NUOPC_Base
     if (present(rc)) rc = ESMF_SUCCESS
     if (present(count)) count = 0
 
+    NUOPC_IsConnectedState = .false.  ! initialize
+
     if (present(fieldName)) then
     
       call ESMF_StateGet(state, itemName=fieldName, field=field, rc=rc)
@@ -1681,6 +1685,8 @@ module NUOPC_Base
     ! local variables
     character(ESMF_MAXSTR)                :: value
 
+    NUOPC_IsUpdatedField = .false.  ! initialize
+
     call ESMF_AttributeGet(field, name="Updated", value=value, &
       convention="NUOPC", purpose="Instance", &
       attnestflag=ESMF_ATTNEST_ON, rc=rc)
@@ -1742,6 +1748,8 @@ module NUOPC_Base
     if (present(rc)) rc = ESMF_SUCCESS
     if (present(count)) count = 0
 
+    NUOPC_IsUpdatedState = .false.  ! initialize
+    
     if (present(fieldName)) then
     
       call ESMF_StateGet(state, itemName=fieldName, field=field, rc=rc)
@@ -1827,11 +1835,12 @@ module NUOPC_Base
 ! !IROUTINE: NUOPC_Realize - Realize previously advertised Fields inside a State on a single Grid with internal allocation
 ! !INTERFACE:
   ! call using generic interface: NUOPC_Realize
-  subroutine NUOPC_RealizeComplete(state, grid, typekind, selection, &
+  subroutine NUOPC_RealizeComplete(state, grid, fieldName, typekind, selection,&
     dataFillScheme, rc)
 ! !ARGUMENTS:
     type(ESMF_State)                                :: state
-    type(ESMF_Grid), intent(in)                     :: grid
+    type(ESMF_Grid),          intent(in)            :: grid
+    character(*),             intent(in),  optional :: fieldName
     type(ESMF_TypeKind_Flag), intent(in),  optional :: typekind
     character(len=*),         intent(in),  optional :: selection
     character(len=*),         intent(in),  optional :: dataFillScheme    
@@ -1856,6 +1865,12 @@ module NUOPC_Base
 !     The {\tt ESMF\_State} object in which the fields are realized.
 !   \item[grid]
 !     The {\tt ESMF\_Grid} object on which to realize the fields.
+!   \item[{[fieldName]}]
+!     The name of the field in {\tt state} to be realized, or removed, according
+!     to {\tt selection}. If provided, and the state does not contain a field
+!     with name {\tt fieldName}, return an error in {\tt rc}. If not provided,
+!     realize {\em all} the fields contained in {\tt state} according to 
+!     {\tt selection}.
 !   \item[{[typekind]}]
 !     The {\tt ESMF\_Grid} object on which to realize the fields.
 !     The typekind of the internally created field(s). The valid options are
@@ -1886,17 +1901,25 @@ module NUOPC_Base
 
     if (present(rc)) rc = ESMF_SUCCESS
     
-    call ESMF_StateGet(state, itemCount=itemCount, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, &
-      file=__FILE__)) &
-      return  ! bail out
-    allocate(fieldNameList(itemCount))
-    call ESMF_StateGet(state, itemNameList=fieldNameList, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, &
-      file=__FILE__)) &
-      return  ! bail out
+    if (present(fieldName)) then
+      ! fieldName provided -> construct a fieldNameList with a single element
+      itemCount=1
+      allocate(fieldNameList(itemCount))
+      fieldNameList(1)=trim(fieldName)
+    else
+      ! query the entire fieldNameList from state
+      call ESMF_StateGet(state, itemCount=itemCount, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, &
+        file=__FILE__)) &
+        return  ! bail out
+      allocate(fieldNameList(itemCount))
+      call ESMF_StateGet(state, itemNameList=fieldNameList, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, &
+        file=__FILE__)) &
+        return  ! bail out
+    endif
     
     ! optional selection argument
     if (present(selection)) then
@@ -1930,7 +1953,8 @@ module NUOPC_Base
           return  ! bail out
         if (present(dataFillScheme)) then
           ! a data fill scheme was provided -> use it to initialize
-          call ESMF_FieldFill(field, dataFillScheme=dataFillScheme, member=k, step=0, rc=rc)
+          call ESMF_FieldFill(field, dataFillScheme=dataFillScheme, member=k, &
+            step=0, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, &
             file=__FILE__)) &
