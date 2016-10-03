@@ -71,7 +71,9 @@ module NUOPC_Driver
     type(ESMF_Clock)                  :: driverClock  ! clock of the parent
     ! - temporary variables
     type(type_PhaseMapParser), pointer:: modelPhaseMap(:)
-    type(type_PhaseMapParser), pointer:: connectorPhaseMap(:,:)    
+    type(type_PhaseMapParser), pointer:: connectorPhaseMap(:,:)
+    ! - flags
+    logical                           :: dataDepAllComplete
   end type
 
   type type_InternalState
@@ -163,12 +165,13 @@ module NUOPC_Driver
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
+#ifndef NO_COMP_SPECIFIC_COMPLIANCE_CHECK
     ! set the ESMF compliance checker register Attribute
     call ESMF_AttributeSet(gcomp, name="ESMF_RUNTIME_COMPLIANCEICREGISTER", &
       value="NUOPC_Driver_ComplianceICR", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-
+#endif
     ! Initialize phases
 
     ! Phase 0 requires use of ESMF method.
@@ -187,15 +190,22 @@ module NUOPC_Driver
       return  ! bail out
 
     call NUOPC_CompSetEntryPoint(gcomp, ESMF_METHOD_INITIALIZE, &
-      phaseLabelList=(/"IPDv01p1"/), &
-      userRoutine=InitializeIPDv01p1, rc=rc)
+      phaseLabelList=(/"IPDv02p1"/), &
+      userRoutine=InitializeIPDv02p1, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
     
     call NUOPC_CompSetEntryPoint(gcomp, ESMF_METHOD_INITIALIZE, &
-      phaseLabelList=(/"IPDv01p3"/), &
-      userRoutine=InitializeIPDv01p3, rc=rc)
+      phaseLabelList=(/"IPDv02p3"/), &
+      userRoutine=InitializeIPDv02p3, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+      return  ! bail out
+    
+    call NUOPC_CompSetEntryPoint(gcomp, ESMF_METHOD_INITIALIZE, &
+      phaseLabelList=(/"IPDv02p5"/), &
+      userRoutine=InitializeIPDv02p5, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
@@ -220,6 +230,17 @@ module NUOPC_Driver
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
+      
+    ! --- inward facing entry points ---
+
+    call NUOPC_CompSetInternalEntryPoint(gcomp, ESMF_METHOD_INITIALIZE, &
+      phaseLabelList=(/"IPDv02p5"/), userRoutine=InternalInitializeComplete, &
+      rc=rc)  ! Using IPDv02 here forces inward dependency resolution loop
+              ! even if none of the child components use IPDv02 or higher.
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
           
   end subroutine
   
@@ -233,7 +254,7 @@ module NUOPC_Driver
     
     rc = ESMF_SUCCESS
 
-    ! NOOP, because only SetEntryPoint for IPDv00 routines anyway
+    ! NOOP, because only single IPD version entry points set.
 
   end subroutine
   
@@ -246,7 +267,8 @@ module NUOPC_Driver
     integer, intent(out)  :: rc
     
     ! local variables
-    character(ESMF_MAXSTR):: name
+    character(ESMF_MAXSTR)    :: name
+    type(type_InternalState)  :: is
 
     rc = ESMF_SUCCESS
 
@@ -256,18 +278,38 @@ module NUOPC_Driver
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
     ! call the actual initialize routines
-    call InitializeIPDv01p1(gcomp, importState, exportState, clock, rc=rc)
+    call InitializeIPDv02p1(gcomp, importState, exportState, clock, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    call InitializeIPDv01p3(gcomp, importState, exportState, clock, rc=rc)
+    call InitializeIPDv02p3(gcomp, importState, exportState, clock, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    call InitializeIPDv02p5(gcomp, importState, exportState, clock, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+      
+    ! query Component for the internal State
+    nullify(is%wrap)
+    call ESMF_UserCompGetInternalState(gcomp, label_InternalState, is, rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+      return  ! bail out
+
+    ! check for dead-lock condition in hierarchical data dependency resolution
+    if (.not.is%wrap%dataDepAllComplete) then
+      ! this indicates a dead-lock condition
+      call ESMF_LogSetError(ESMF_RC_INTNRL_BAD, &
+        msg="Initialize data-dependency resolution loop "// &
+        "has entered a dead-lock situation.", &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)
+      return  ! bail out
+    endif
 
   end subroutine
   
   !-----------------------------------------------------------------------------
 
-  recursive subroutine InitializeIPDv01p1(gcomp, importState, exportState, &
+  recursive subroutine InitializeIPDv02p1(gcomp, importState, exportState, &
     clock, rc)
     type(ESMF_GridComp)  :: gcomp
     type(ESMF_State)     :: importState, exportState
@@ -327,8 +369,9 @@ module NUOPC_Driver
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     endif
-
-    ! prepare the new style members in the internal state
+    
+    ! prepare members in the internal state
+    is%wrap%dataDepAllComplete = .true.
     is%wrap%componentMap = ESMF_ContainerCreate(rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
@@ -1012,7 +1055,9 @@ module NUOPC_Driver
       
   end subroutine
   
-  recursive subroutine InitializeIPDv01p3(gcomp, importState, exportState, &
+  !-----------------------------------------------------------------------------
+
+  recursive subroutine InitializeIPDv02p3(gcomp, importState, exportState, &
     clock, rc)
     type(ESMF_GridComp)  :: gcomp
     type(ESMF_State)     :: importState, exportState
@@ -1024,8 +1069,6 @@ module NUOPC_Driver
     integer                   :: i, j
     type(ESMF_VM)             :: vm
     character(ESMF_MAXSTR)    :: name
-    logical                   :: execFlag, execFlagCollect
-    integer                   :: execFlagIntReduced, execFlagInt
 
     rc = ESMF_SUCCESS
 
@@ -1195,6 +1238,45 @@ module NUOPC_Driver
     ! connectorComps
     ! nothing to do
 
+  end subroutine
+  
+  !-----------------------------------------------------------------------------
+
+  recursive subroutine InitializeIPDv02p5Data(gcomp, importState, exportState, &
+    clock, rc)
+    type(ESMF_GridComp)  :: gcomp
+    type(ESMF_State)     :: importState, exportState
+    type(ESMF_Clock)     :: clock
+    integer, intent(out) :: rc
+    
+    ! local variables
+    type(type_InternalState)  :: is
+    integer                   :: i, j
+    type(ESMF_VM)             :: vm
+    character(ESMF_MAXSTR)    :: name, value
+    logical                   :: execFlag, execFlagCollect
+    integer                   :: execFlagIntReduced, execFlagInt
+
+    character(ESMF_MAXSTR)    :: msgString
+
+    rc = ESMF_SUCCESS
+
+    ! query the Component for info
+    call ESMF_GridCompGet(gcomp, name=name, vm=vm, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    ! query Component for the internal State
+    nullify(is%wrap)
+    call ESMF_UserCompGetInternalState(gcomp, label_InternalState, is, rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+      return  ! bail out
+
+#ifdef DEBUG
+call ESMF_LogWrite("gjt: Entering InitializeIPDv02p5Data for: "//trim(name), &
+  ESMF_LOGMSG_INFO)
+#endif
+
     ! modelComps
     call loopModelCompsS(gcomp, phaseString="IPDv00p4", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -1244,14 +1326,32 @@ module NUOPC_Driver
       
     ! now all PETs have the same execFlag setting for a consistent decision
     if (execFlag) then
-      ! there were model components with IPDv02p5 or IPDv03p7
-      !  -> resolve data dependencies by entering loop
-      call loopDataDependentInitialize(gcomp, rc=rc)
+      ! there were model components with IPDv02p5, IPDv03p7, IPDv04p7, 
+      ! or IPDv05p8 -->> resolve data dependencies by entering loop
+      call loopDataDependentInitialize(gcomp, is%wrap%dataDepAllComplete, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) &
         return  ! bail out
+
+#ifdef DEBUG
+write(msgString,*) trim(name)//": gjt: finished loopDataDependentInitialize(): ", &
+  is%wrap%dataDepAllComplete
+call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO)
+#endif
+
     endif
     
+    ! set the InitializeDataComplete attribute
+    value="false"
+    if (is%wrap%dataDepAllComplete) value="true"
+    
+    call NUOPC_CompAttributeSet(gcomp, &
+      name="InitializeDataComplete", value=value, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+
 #define DEBUGPRINT____disable
 #ifdef DEBUGPRINT
     ! print the entire runSeq structure
@@ -1260,28 +1360,15 @@ module NUOPC_Driver
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 #endif
 
-!-- only last subroutine to contain this
-    ! local garbage collection -> PhaseMap pointer members
-    do i=0, is%wrap%modelCount
-      do j=0, is%wrap%modelCount
-        if (j==i) cycle ! skip
-        if (associated(is%wrap%connectorPhaseMap(i,j)%phaseValue)) &
-          deallocate(is%wrap%connectorPhaseMap(i,j)%phaseValue)
-        if (associated(is%wrap%connectorPhaseMap(i,j)%phases)) &
-          deallocate(is%wrap%connectorPhaseMap(i,j)%phases)
-        if (associated(is%wrap%connectorPhaseMap(i,j)%phaseKey)) &
-          deallocate(is%wrap%connectorPhaseMap(i,j)%phaseKey)
-      enddo
-      if (associated(is%wrap%modelPhaseMap(i)%phaseValue)) &
-        deallocate(is%wrap%modelPhaseMap(i)%phaseValue)
-      if (associated(is%wrap%modelPhaseMap(i)%phases)) &
-        deallocate(is%wrap%modelPhaseMap(i)%phases)
-      if (associated(is%wrap%modelPhaseMap(i)%phaseKey)) &
-        deallocate(is%wrap%modelPhaseMap(i)%phaseKey)
-    enddo
+#ifdef DEBUG
+call ESMF_LogWrite("gjt: Exiting InitializeIPDv02p5Data for: "//trim(name), &
+  ESMF_LOGMSG_INFO)
+#endif
 
   end subroutine
-  
+
+  !-----------------------------------------------------------------------------
+
   recursive subroutine loopModelCompsS(gcomp, phaseString, execFlag, rc)
     ! only to be used for phase>0
     type(ESMF_GridComp)     :: gcomp
@@ -1349,6 +1436,8 @@ module NUOPC_Driver
       endif
     enddo
   end subroutine
+
+  !-----------------------------------------------------------------------------
 
   recursive subroutine loopConnectorCompsS(gcomp, phaseString, execFlag, rc)
     ! only to be used for phase>0
@@ -1441,9 +1530,12 @@ module NUOPC_Driver
     enddo
   end subroutine
 
-  recursive subroutine loopDataDependentInitialize(gcomp, rc)
+  !-----------------------------------------------------------------------------
+
+  recursive subroutine loopDataDependentInitialize(gcomp, dataDepAllCompete, rc)
     ! resolve data dependencies
     type(ESMF_GridComp)             :: gcomp
+    logical, optional, intent(out)  :: dataDepAllCompete
     integer, intent(out)            :: rc
     ! local variables
     integer                         :: phase, i, j, k, cphase, localrc
@@ -1458,6 +1550,8 @@ module NUOPC_Driver
     character(ESMF_MAXSTR)          :: name, compName
     type(ESMF_Clock)                :: internalClock
     type(ESMF_VM)                   :: vm
+
+    character(800)          :: msgString
 
     ! initialize out arguments
     rc = ESMF_SUCCESS
@@ -1518,6 +1612,12 @@ module NUOPC_Driver
             line=__LINE__, file=trim(name)//":"//FILENAME)) &
             return  ! bail out
           
+#ifdef DEBUG
+write(msgString,*) trim(name)//": gjt: inside loopDataDependentInitialize(): ", &
+  "component: ", i,", dataComplete: ", trim(valueString)
+call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO)
+#endif
+
           ! preconditioned input variables considering petList of component
           helperIn = 1  ! initialize
           if (ESMF_GridCompIsPetLocal(is%wrap%modelComp(i))) then
@@ -1618,11 +1718,14 @@ module NUOPC_Driver
         endif
       enddo
       
+      if (present(dataDepAllCompete)) dataDepAllCompete=allComplete
+
       ! check if all Components with IPDv02p5 are InitializeDataComplete
       if (allComplete) exit ! break out of data-dependency resolution loop
       
       if (.not.someProgress) then
-        ! dead-lock situation identified
+        if (present(dataDepAllCompete)) exit ! break out of loop
+        ! else, dead-lock situation identified
         call ESMF_LogSetError(ESMF_RC_INTNRL_BAD, &
           msg="Initialize data-dependency resolution loop "// &
           "has entered a dead-lock situation.", &
@@ -2175,7 +2278,7 @@ module NUOPC_Driver
     enddo
     deallocate(connectorList)
     
-    ! destroy the new style members
+    ! destroy members in the internal state
     call ESMF_ContainerDestroy(is%wrap%componentMap, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
@@ -2194,6 +2297,25 @@ module NUOPC_Driver
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
       
+    ! deallocate temporary phase maps in the internal state
+    do i=0, is%wrap%modelCount
+      do j=0, is%wrap%modelCount
+        if (j==i) cycle ! skip
+        if (associated(is%wrap%connectorPhaseMap(i,j)%phaseValue)) &
+          deallocate(is%wrap%connectorPhaseMap(i,j)%phaseValue)
+        if (associated(is%wrap%connectorPhaseMap(i,j)%phases)) &
+          deallocate(is%wrap%connectorPhaseMap(i,j)%phases)
+        if (associated(is%wrap%connectorPhaseMap(i,j)%phaseKey)) &
+          deallocate(is%wrap%connectorPhaseMap(i,j)%phaseKey)
+      enddo
+      if (associated(is%wrap%modelPhaseMap(i)%phaseValue)) &
+        deallocate(is%wrap%modelPhaseMap(i)%phaseValue)
+      if (associated(is%wrap%modelPhaseMap(i)%phases)) &
+        deallocate(is%wrap%modelPhaseMap(i)%phases)
+      if (associated(is%wrap%modelPhaseMap(i)%phaseKey)) &
+        deallocate(is%wrap%modelPhaseMap(i)%phaseKey)
+    enddo
+
     ! deallocate run sequence data structures
     call NUOPC_RunSequenceDeallocate(is%wrap%runSeq, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -3879,6 +4001,200 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       return  ! bail out
     
   end subroutine
+  
+  !-----------------------------------------------------------------------------
+
+  subroutine InternalInitializeComplete(driver, importState, exportState, &
+    clock, rc)
+    type(ESMF_GridComp)  :: driver
+    type(ESMF_State)     :: importState, exportState
+    type(ESMF_Clock)     :: clock
+    integer, intent(out) :: rc
+    
+    ! local variables
+    character(ESMF_MAXSTR)    :: name
+    type(ESMF_Clock)          :: internalClock
+    type(ESMF_Time)           :: time
+
+    rc = ESMF_SUCCESS
+
+    ! query the Component for info
+    call ESMF_GridCompGet(driver, name=name, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+
+#ifdef DEBUG
+call ESMF_LogWrite("gjt: Entering InternalInitializeComplete for: "//trim(name), &
+  ESMF_LOGMSG_INFO)
+#endif
+
+    ! conditionally handle how InitializeDataComplete is set
+    if (ESMF_StateIsCreated(exportState, rc=rc)) then
+      call ESMF_GridCompGet(driver, clock=internalClock, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, &
+        file=__FILE__)) &
+        return  ! bail out
+      call ESMF_ClockGet(internalClock, currTime=time, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, &
+        file=__FILE__)) &
+        return  ! bail out
+      if (NUOPC_IsAtTime(exportState, time, rc=rc)) then
+        ! indicate that data initialization is complete 
+        ! (breaking out of init-loop)
+        call NUOPC_CompAttributeSet(driver, &
+          name="InitializeDataComplete", value="true", rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, &
+          file=__FILE__)) &
+          return  ! bail out
+      endif
+    else
+      ! indicate that data initialization is complete 
+      ! (breaking out of init-loop)
+      call NUOPC_CompAttributeSet(driver, &
+        name="InitializeDataComplete", value="true", rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, &
+        file=__FILE__)) &
+        return  ! bail out
+    endif
+    
+#ifdef DEBUG
+call ESMF_LogWrite("gjt: Exiting InternalInitializeComplete for: "//trim(name), &
+  ESMF_LOGMSG_INFO)
+#endif
+
+  end subroutine
+
+  !-----------------------------------------------------------------------------
+
+  subroutine InitializeIPDv02p5(gcomp, importState, exportState, clock, rc)
+    ! direct copy of the InitializeP5 routine in NUOPC_Model!!!!
+    type(ESMF_GridComp)   :: gcomp
+    type(ESMF_State)      :: importState, exportState
+    type(ESMF_Clock)      :: clock
+    integer, intent(out)  :: rc
+    
+    ! local variables
+    integer               :: localrc
+    type(ESMF_Clock)      :: internalClock
+    logical               :: existflag
+    character(ESMF_MAXSTR):: name, oldDataComplete, newDataComplete
+    integer               :: oldUpdatedCount, newUpdatedCount
+    logical               :: allUpdated
+
+    rc = ESMF_SUCCESS
+
+! For a Driver may be called without valid states
+if (ESMF_StateIsCreated(importState).and.ESMF_StateIsCreated(exportState)) then
+    ! query the Component for info
+    call ESMF_GridCompGet(gcomp, name=name, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    
+    ! check how many Fields in the exportState have the "Updated" Attribute set
+    ! to "true" BEFORE calling the DataInitialize
+    allUpdated = NUOPC_IsUpdated(exportState, count=oldUpdatedCount, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    
+    ! get the value of the "InitializeDataComplete" Attribute
+    call NUOPC_CompAttributeGet(gcomp, name="InitializeDataComplete", &
+      value=oldDataComplete, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) &
+      return  ! bail out
+endif
+
+#if 0
+    ! Initialize component data structures, including its export Fields,
+    ! only connected Fields reside in exportState at this time.
+    ! Expect the component to set "InitializeDataComplete" Attribute when done.
+    ! SPECIALIZE by calling into attached method to fill initial data
+    call ESMF_MethodExecute(gcomp, label=label_DataInitialize, &
+      existflag=existflag, userRc=localrc, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) &
+      return  ! bail out
+    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME, &
+      rcToReturn=rc)) &
+      return  ! bail out
+#else
+! It could be implemented via DataInitialize (as for NUOPC_Model), but for now
+! I just use a direct call into subroutine...
+    call InitializeIPDv02p5Data(gcomp, importState, exportState, clock, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) &
+      return  ! bail out
+#endif
+
+! For a Driver may be called without valid states
+if (ESMF_StateIsCreated(importState).and.ESMF_StateIsCreated(exportState)) then
+    ! re-set the "InitializeDataProgress" Attribute to "false"
+    call NUOPC_CompAttributeSet(gcomp, &
+      name="InitializeDataProgress", value="false", rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME)) return  ! bail out
+
+    ! check how many Fields in the exportState have the "Updated" Attribute set
+    ! to "true" AFTER calling the DataInitialize
+    allUpdated = NUOPC_IsUpdated(exportState, count=newUpdatedCount, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+      
+    ! see if number of updated export fields went up
+    if (newUpdatedCount > oldUpdatedCount) then
+      ! there are more Fields now that have their "Updated" Attribute set "true"
+      ! -> set "InitializeDataProgress" Attribute "true"
+      call NUOPC_CompAttributeSet(gcomp, &
+        name="InitializeDataProgress", value="true", rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=FILENAME)) return  ! bail out
+    endif
+    
+    ! get the value of the "InitializeDataComplete" Attribute
+    call NUOPC_CompAttributeGet(gcomp, name="InitializeDataComplete", &
+      value=newDataComplete, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) &
+      return  ! bail out
+    
+    ! see if the "InitializeDataComplete" Attribute has changed
+    if (trim(newDataComplete) /= trim(oldDataComplete)) then
+      ! there was a change in the "InitializeDataComplete" Attribute setting
+      ! -> set "InitializeDataProgress" Attribute "true"
+      call NUOPC_CompAttributeSet(gcomp, &
+        name="InitializeDataProgress", value="true", rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=FILENAME)) return  ! bail out
+    endif
+    
+    ! correct setting of timestamps
+    call ESMF_GridCompGet(gcomp, clock=internalClock, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) &
+      return  ! bail out
+    if (allUpdated) then
+      ! update timestamp on all the export Fields
+      call NUOPC_UpdateTimestamp(exportState, internalClock, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) &
+        return  ! bail out
+    else
+      ! update timestamp on only those export Fields that have the 
+      ! "Updated" Attribute set to "true"
+      call NUOPC_UpdateTimestamp(exportState, internalClock, &
+        selective=.true., rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) &
+        return  ! bail out
+    endif
+endif
+  end subroutine
+
   !-----------------------------------------------------------------------------
 
 end module
