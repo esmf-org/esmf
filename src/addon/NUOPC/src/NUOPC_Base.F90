@@ -1336,7 +1336,10 @@ module NUOPC_Base
     type(ESMF_Time)         :: fieldTime
     integer                 :: i, valueList(9)
     type(ESMF_CalKind_Flag) :: calkindflag
-    
+#ifdef DEBUG
+    character(ESMF_MAXSTR)  :: msgString
+#endif
+
     if (present(rc)) rc = ESMF_SUCCESS
     
     NUOPC_IsAtTimeField = .true. ! initialize
@@ -1358,6 +1361,12 @@ module NUOPC_Base
     if (ValueList(2)==0) then
       ! month value of 0 is indicative of an uninitialized timestamp
       NUOPC_IsAtTimeField = .false.
+#ifdef DEBUG
+      write (msgString,*) "NUOPC_IsAtTimeField() uninitialized time detected: "
+      call ESMF_LogWrite(msgString, ESMF_LOGMSG_WARNING)
+      write (msgString,*) "field time:  ", valueList
+      call ESMF_LogWrite(msgString, ESMF_LOGMSG_WARNING)
+#endif
       return
     else
       call ESMF_TimeSet(fieldTime, &
@@ -1371,6 +1380,23 @@ module NUOPC_Base
         return  ! bail out
       if (fieldTime /= time) then
         NUOPC_IsAtTimeField = .false.
+#ifdef DEBUG
+        write (msgString,*) "NUOPC_IsAtTimeField() time mismatch detected: "
+        call ESMF_LogWrite(msgString, ESMF_LOGMSG_WARNING)
+        write (msgString,*) "field time:  ", valueList
+        call ESMF_LogWrite(msgString, ESMF_LOGMSG_WARNING)
+        call ESMF_TimeGet(time, &
+          yy=valueList(1), mm=ValueList(2), dd=ValueList(3), &
+           h=valueList(4),  m=ValueList(5),  s=ValueList(6), &
+          ms=valueList(7), us=ValueList(8), ns=ValueList(9), &
+          rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, &
+          file=FILENAME)) &
+          return  ! bail out
+        write (msgString,*) "target time: ", valueList
+        call ESMF_LogWrite(msgString, ESMF_LOGMSG_WARNING)
+#endif
         return
       endif
     endif
@@ -1471,7 +1497,7 @@ module NUOPC_Base
             NUOPC_IsAtTimeState = .false.
             write (msgString, *) "Field not at expected time for item "// &
               trim(adjustl(iString))//": "//trim(itemNameList(i))
-            call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO)
+            call ESMF_LogWrite(msgString, ESMF_LOGMSG_WARNING)
             if (.not.present(count)) exit ! no need to keep going
           elseif (present(count)) then
             count = count + 1
