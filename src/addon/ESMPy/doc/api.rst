@@ -530,7 +530,7 @@ parallel programming techniques.
 
 ESMPy objects will be distributed across the available computing resources with
 no additional parameters required. The Grid, Mesh, LocStream, and Field classes
-will all be transparently ``parallelized" with no need for user calls to a
+will all be transparently "parallelized" with no need for user calls to a
 message passing interface. Likewise, the Regrid class will compute and apply
 the interpolation weights using all available computing resources with no need
 for user intervention.
