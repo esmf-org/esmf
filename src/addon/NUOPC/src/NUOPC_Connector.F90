@@ -82,12 +82,13 @@ module NUOPC_Connector
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
+#ifndef NO_COMP_SPECIFIC_COMPLIANCE_CHECK
     ! set the ESMF compliance checker register Attribute
     call ESMF_AttributeSet(connector, name="ESMF_RUNTIME_COMPLIANCEICREGISTER", &
       value="NUOPC_Connector_ComplianceICR", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    
+#endif    
     ! Initialize phases
     
     ! Phase 0 requires use of ESMF method.
