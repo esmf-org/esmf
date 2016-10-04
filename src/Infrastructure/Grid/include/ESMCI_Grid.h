@@ -46,7 +46,7 @@
 enum ESMC_GridDecompType {ESMC_GRID_INVALID=1, 
 			ESMC_GRID_NONARBITRARY,
 			ESMC_GRID_ARBITRARY
-};
+ };
 
 enum  ESMC_GridConn {ESMC_GRIDCONN_NONE=0,
                      ESMC_GRIDCONN_PERIODIC,
@@ -94,7 +94,7 @@ class Grid : public ESMC_Base {    // inherits from ESMC_Base class
   // global grid dimension
   int *minIndex;  // array is size of dimCount
   int *maxIndex;  // array is size of dimCount
-
+ 
   // Topology information
   ESMC_GridConn *connL;  // size of Grid rank
   ESMC_GridConn *connU;  // size of Grid rank
@@ -140,6 +140,18 @@ class Grid : public ESMC_Base {    // inherits from ESMC_Base class
  // if bit d in isDEUBnd[localde] is 1, then localde is on the
   // upper boundary of dimension d
   char *isDEUBnd;
+
+
+  //// Bounds on every staggerloc ////
+  
+  // if bit d in isDELBnd[localde] is 1, then localde is on the
+  // lower boundary of dimension d
+  char **isStaggerDELBnd; // Of size staggerloc, either NULL or of size localDECount
+
+ // if bit d in isDEUBnd[localde] is 1, then localde is on the
+  // upper boundary of dimension d
+  char **isStaggerDEUBnd; // Of size staggerloc, either NULL or of size localDECount
+
 
   // if true, then destroy the distgrid with the grid
   bool destroyDistgrid;
@@ -336,10 +348,12 @@ template <class TYPE>
 
   // End of Temporary
   
-
   bool isLBnd(int localDE, int dim) {return ((connL[dim]!=ESMC_GRIDCONN_PERIODIC)&&(isDELBnd[localDE] & (0x1 << dim)))?true:false;}
   bool isUBnd(int localDE, int dim) {return ((connU[dim]!=ESMC_GRIDCONN_PERIODIC)&&(isDEUBnd[localDE] & (0x1 << dim)))?true:false;}
 
+  // Stagger specific boundary checking
+  bool isStaggerLBnd(int staggerloc, int localDE, int dim) {return ((isStaggerDELBnd[staggerloc][localDE] & (0x1 << dim)))?true:false;}
+  bool isStaggerUBnd(int staggerloc, int localDE, int dim) {return ((isStaggerDEUBnd[staggerloc][localDE] & (0x1 << dim)))?true:false;}
 
 
   // Get stagger distgrid
@@ -724,6 +738,15 @@ int getComputationalUBound(
     int staggerloc; // staggerloc in grid being iterated through
     DistGrid *staggerDistgrid;
 
+    // if bit d in isDELBnd[localde] is 1, then localde is on the
+    // lower boundary of dimension d
+    char *isDELBnd;
+ 
+    // if bit d in isDEUBnd[localde] is 1, then localde is on the
+    // upper boundary of dimension d
+    char *isDEUBnd;
+    
+
     const ESMC_GridConn *connL;
     const ESMC_GridConn *connU;
     
@@ -761,7 +784,10 @@ int getComputationalUBound(
 
   public:
 
-  bool isDone(void) const {return done;}
+    // bool isLBnd(int localDE, int dim) {return ((isDELBnd[localDE] & (0x1 << dim)))?true:false;}
+    // bool isUBnd(int localDE, int dim) {return ((isDEUBnd[localDE] & (0x1 << dim)))?true:false;}
+
+    bool isDone(void) const {return done;}
   GridIter(Grid *gridArg, int  staggerlocArg, bool cellNodesArg);
   ~GridIter();
   GridIter *toBeg();
