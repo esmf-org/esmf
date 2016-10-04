@@ -341,7 +341,7 @@ module NUOPC_Comp
         if (ESMF_LogFoundDeallocError(statusToCheck=stat, &
           msg="Deallocation of valueSL.", &
           line=__LINE__, &
-          file=trim(name)//":"//FILENAME)) return  ! bail out
+          file=trim(name)//":"//FILENAME, rcToReturn=rc)) return  ! bail out
         stringList(i)=trim(adjustl(tempString))
       elseif (tk==ESMF_TYPEKIND_I4) then
         allocate(valueIL(itemCount))
@@ -359,7 +359,7 @@ module NUOPC_Comp
         if (ESMF_LogFoundDeallocError(statusToCheck=stat, &
           msg="Deallocation of valueIL.", &
           line=__LINE__, &
-          file=trim(name)//":"//FILENAME)) return  ! bail out
+          file=trim(name)//":"//FILENAME, rcToReturn=rc)) return  ! bail out
         stringList(i)=trim(adjustl(tempString))
       endif
     enddo
@@ -440,7 +440,7 @@ module NUOPC_Comp
         if (ESMF_LogFoundDeallocError(statusToCheck=stat, &
           msg="Deallocation of valueSL.", &
           line=__LINE__, &
-          file=trim(name)//":"//FILENAME)) return  ! bail out
+          file=trim(name)//":"//FILENAME, rcToReturn=rc)) return  ! bail out
         stringList(i)=trim(adjustl(tempString))
       elseif (tk==ESMF_TYPEKIND_I4) then
         allocate(valueIL(itemCount))
@@ -458,7 +458,7 @@ module NUOPC_Comp
         if (ESMF_LogFoundDeallocError(statusToCheck=stat, &
           msg="Deallocation of valueIL.", &
           line=__LINE__, &
-          file=trim(name)//":"//FILENAME)) return  ! bail out
+          file=trim(name)//":"//FILENAME, rcToReturn=rc)) return  ! bail out
         stringList(i)=trim(adjustl(tempString))
       endif
     enddo
@@ -891,7 +891,7 @@ module NUOPC_Comp
       if (ESMF_LogFoundDeallocError(statusToCheck=stat, &
         msg="Deallocation of tokenList.", &
         line=__LINE__, &
-        file=trim(name)//":"//FILENAME)) return  ! bail out
+        file=trim(name)//":"//FILENAME, rcToReturn=rc)) return  ! bail out
 
     enddo
     
@@ -2432,7 +2432,7 @@ module NUOPC_Comp
     if (ESMF_LogFoundDeallocError(statusToCheck=stat, &
       msg="Deallocation of phases.", &
       line=__LINE__, &
-      file=trim(name)//":"//FILENAME)) return  ! bail out
+      file=trim(name)//":"//FILENAME, rcToReturn=rc)) return  ! bail out
     
   end subroutine
   !-----------------------------------------------------------------------------
@@ -2524,7 +2524,8 @@ module NUOPC_Comp
     allocate(phases(itemCount+phaseLabelCount), stat=stat) ! space to add more
     if (ESMF_LogFoundAllocError(statusToCheck=stat, &
       msg="Allocation of temporary data structure.", &
-      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+      line=__LINE__, file=trim(name)//":"//FILENAME, &
+      rcToReturn=rc)) return  ! bail out
     if (itemCount > 0) then
       call ESMF_AttributeGet(comp, name=trim(attributeName), &
         valueList=phases, convention="NUOPC", purpose="Instance", &

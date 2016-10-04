@@ -75,6 +75,7 @@
     ! Initialize return code; assume routine not implemented
     rc = ESMF_RC_NOT_IMPL
 
+    lflush = flush
     call ESMF_LogSet(flush=lflush, rc=rc)
 
   end subroutine f_esmf_logset

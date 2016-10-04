@@ -58,7 +58,7 @@ program ESMF_ArrayBundleCreateUTest
   character(len=ESMF_MAXSTR):: arrayNameList(9)
   integer:: arrayCount, i
   type(ESMF_ArrayBundle):: arraybundle, arraybundleAlias
-  character (len=80)      :: arrayName
+  character (len=ESMF_MAXSTR)      :: arrayName
   logical:: arraybundleBool, isPresent, loopResult
   logical:: isCreated
   
@@ -688,6 +688,7 @@ program ESMF_ArrayBundleCreateUTest
   call c_esmc_arraybundleserialize (arraybundle, buffer, buff_len, offset,  &
       attreconflag, inquireflag, rc)
   call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  deallocate (buffer)
   !-----------------------------------------------------------------------------
 
   ! END tests of INTERNAL serialization methods.  They are subject

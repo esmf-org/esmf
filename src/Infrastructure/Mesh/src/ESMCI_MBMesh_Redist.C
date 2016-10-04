@@ -66,7 +66,7 @@ void create_mbmesh_redist_elem(MBMesh *src_mesh,
 #define ESMC_METHOD "create_mbmesh_redist_elem()"
 
   // Get Parallel Information
-  int localrc;
+      int localrc;
   int num_proc = VM::getCurrent(&localrc)->getPetCount();
   if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
     throw localrc;  // bail out with exception
@@ -134,11 +134,11 @@ void create_mbmesh_copy_metadata(MBMesh *src_mesh,
   
   // Add tags
   // TODO: eventually do this in one func shared with other creates, so only
-  //       needs to be updated in one place
+    //       needs to be updated in one place
   // Default value
   int def_val = 0;
   
-  // Setup global id tag
+   // Setup global id tag
   def_val=0;
   merr=moab_mesh->tag_get_handle(GLOBAL_ID_TAG_NAME, 1, MB_TYPE_INTEGER, out_mesh->gid_tag, MB_TAG_DENSE, &def_val);
   if (merr != MB_SUCCESS) {
@@ -165,6 +165,26 @@ void create_mbmesh_copy_metadata(MBMesh *src_mesh,
                                      moab::ErrorCodeStr[merr], ESMC_CONTEXT, &localrc)) throw localrc;
   }     
 
+ // Setup masking tags
+  if (src_mesh->has_elem_mask) {
+    def_val=0;
+    merr=moab_mesh->tag_get_handle("elem_mask", 1, MB_TYPE_INTEGER, out_mesh->elem_mask_tag, MB_TAG_EXCL|MB_TAG_DENSE, &def_val);
+    if (merr != MB_SUCCESS) {
+      int localrc;
+      if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
+                                       moab::ErrorCodeStr[merr], ESMC_CONTEXT, &localrc)) throw localrc;
+    }     
+
+    /// DON'T ADD THIS RIGHT NOW SINCE IT ISN'T NECESARY IN A RENDEZ. MESH ///
+    /// def_val=0;
+    /// merr=moab_mesh->tag_get_handle("elem_mask_val", 1, MB_TYPE_INTEGER, out_mesh->elem_mask_val_tag, MB_TAG_EXCL|MB_TAG_DENSE, &def_val);
+    /// if (merr != MB_SUCCESS) {
+    ///  int localrc;
+    ///  if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
+    ///                                   moab::ErrorCodeStr[merr], ESMC_CONTEXT, &localrc)) throw localrc;
+    ///}     
+  }
+  out_mesh->has_elem_mask=src_mesh->has_elem_mask;
 
   // Do output
   *_out_mesh=out_mesh;
@@ -182,7 +202,7 @@ void create_mbmesh_copy_metadata(MBMesh *src_mesh,
     //// These will make no sense on a new proc, so don't send them
     //  // orig_pos
     //  size += sizeof(int);
-    //
+     //
     //  // owner
     //  size += sizeof(int);
 
@@ -218,7 +238,7 @@ void create_mbmesh_copy_metadata(MBMesh *src_mesh,
     int merr=src_mesh->mesh->get_coords(&vert,1,c);
     if (merr != MB_SUCCESS) {
       Throw() <<"MOAB ERROR: "<<moab::ErrorCodeStr[merr];
-    }
+     }
 
     // Load coords
     int sdim=src_mesh->sdim;
@@ -250,7 +270,7 @@ void create_mbmesh_copy_metadata(MBMesh *src_mesh,
     ///// a new processor
 
     // Unpack coords
-    double coords[3]={0.0,0.0,0.0};
+     double coords[3]={0.0,0.0,0.0};
     int sdim=out_mesh->sdim;
     for (int i=0; i<sdim; i++) {
       coords[i]=*((double *)(buff+off));
@@ -286,7 +306,7 @@ void create_mbmesh_copy_metadata(MBMesh *src_mesh,
                                             std::vector<EH_Comm_Pair> *elem_to_proc_list, 
                                             std::map<int,EntityHandle> *out_gid_to_vert, 
                                             MBMesh *out_mesh) {
-#undef  ESMC_METHOD
+ #undef  ESMC_METHOD
 #define ESMC_METHOD "create_mbmesh_redist_elem_move_verts()"
     int merr;
     
@@ -318,7 +338,7 @@ void create_mbmesh_copy_metadata(MBMesh *src_mesh,
       // Get verts
       int num_verts;
       const EntityHandle *verts;
-       merr=src_mesh->mesh->get_connectivity(eh,verts,num_verts); // NEED TO PASS IN corners_only = true???
+        merr=src_mesh->mesh->get_connectivity(eh,verts,num_verts); // NEED TO PASS IN corners_only = true???
       if (merr != MB_SUCCESS) {
         Throw() <<"MOAB ERROR: "<<moab::ErrorCodeStr[merr];
       }
@@ -354,7 +374,7 @@ void create_mbmesh_copy_metadata(MBMesh *src_mesh,
     }
 
     // Fill communication pattern arrays
-    int size_per_vert=calc_size_vert_comm(src_mesh); // constant per vert
+     int size_per_vert=calc_size_vert_comm(src_mesh); // constant per vert
     int j=0;
     for (int p=0; p<num_proc; p++) {
       if (!set_of_gids_per_proc[p].empty()) {
@@ -386,7 +406,7 @@ void create_mbmesh_copy_metadata(MBMesh *src_mesh,
       if (!set_of_gids_per_proc[p].empty()) {
 
         // Get buffer
-         SparseMsg:: buffer *b=comm.getSendBuffer(p);
+          SparseMsg:: buffer *b=comm.getSendBuffer(p);
 
         // Get iterators to set
         std::set<int>::iterator si=set_of_gids_per_proc[p].begin();
@@ -422,7 +442,7 @@ void create_mbmesh_copy_metadata(MBMesh *src_mesh,
     // Communicate verts
     comm.communicate();
 
-    // Go through received buffers and create verts
+     // Go through received buffers and create verts
     for (std::vector<UInt>::iterator p = comm.inProc_begin(); p != comm.inProc_end(); ++p) {
       UInt proc = *p;
       SparseMsg::buffer *b = comm.getRecvBuffer(proc);
@@ -454,7 +474,7 @@ void create_mbmesh_copy_metadata(MBMesh *src_mesh,
     
     // Allocate temp storage for verts
     int num_verts=out_gid_to_vert->size();
-    EntityHandle *verts=new EntityHandle[num_verts];
+     EntityHandle *verts=new EntityHandle[num_verts];
 
     // Loop and put verts into struct
     int v=0;
@@ -486,13 +506,11 @@ void create_mbmesh_copy_metadata(MBMesh *src_mesh,
     // // owner
     // size += sizeof(int);
 
-    // ADD OTHER THINGS HERE AS ADDED TO ELEM
-
     // number of verts
     size += sizeof(int);
 
     // num verts
-    int num_verts;
+     int num_verts;
     const EntityHandle *verts;
     merr=src_mesh->mesh->get_connectivity(eh,verts,num_verts); // NEED TO PASS IN corners_only = true???
     if (merr != MB_SUCCESS) {
@@ -501,6 +519,14 @@ void create_mbmesh_copy_metadata(MBMesh *src_mesh,
 
     // number of nodes
     size += num_verts*sizeof(int);
+
+    // ADD OTHER THINGS HERE AS ADDED TO ELEM
+
+    // Add masking
+    if (src_mesh->has_elem_mask) {
+      // Only pack mask field (not mask_val), since that's the only one needed for rend. 
+      size += sizeof(int);
+    }
 
     // output size
     return size;
@@ -512,7 +538,7 @@ void create_mbmesh_copy_metadata(MBMesh *src_mesh,
 
     // Offset
     int off=0;
-
+ 
     // Pack gid
     int gid;
     MBMesh_get_gid(src_mesh, elem, &gid);
@@ -523,7 +549,7 @@ void create_mbmesh_copy_metadata(MBMesh *src_mesh,
     ///// Don't send orig_pos and owner, since they will make no sense on
     ///// a new processor
 
-    // Get number of verts and vert list 
+     // Get number of verts and vert list 
     int num_verts;
     const EntityHandle *verts;
     merr=src_mesh->mesh->get_connectivity(elem,verts,num_verts); // NEED TO PASS IN corners_only = true???
@@ -537,7 +563,7 @@ void create_mbmesh_copy_metadata(MBMesh *src_mesh,
 
     // Pack vert gids
     for (int v=0; v<num_verts; v++) {
-      int vert_gid;
+       int vert_gid;
         
       // Get gid of vert
       MBMesh_get_gid(src_mesh, verts[v], &vert_gid);
@@ -546,10 +572,25 @@ void create_mbmesh_copy_metadata(MBMesh *src_mesh,
       *((int *)(buff+off))=vert_gid;
       off +=sizeof(int);        
     }
+
+    // Pack mask data
+    // (Only pack mask field (not mask_val), since that's the only one needed for rend)
+    if (src_mesh->has_elem_mask) {
+      // Get dst elem mask 
+      int masked;
+      int merr=src_mesh->mesh->tag_get_data(src_mesh->elem_mask_tag, &elem, 1, &masked);
+      if (merr != MB_SUCCESS) {
+        Throw() <<"MOAB ERROR: "<<moab::ErrorCodeStr[merr];
+      }
+      
+      // Pack number of mask
+      *((int *)(buff+off))=masked;
+      off +=sizeof(int);
+    }
   }
 
 
-  int calc_size_from_buff_elem_comm(char *buff) {
+  int calc_size_from_buff_elem_comm(MBMesh *out_mesh, char *buff) {
 
     // Init size
     int size=0;
@@ -570,7 +611,12 @@ void create_mbmesh_copy_metadata(MBMesh *src_mesh,
     // Size to hold an integer gid for each vert
     size += num_verts*sizeof(int);
     
-    // return size
+    // Mask Size
+    if (out_mesh->has_elem_mask) {
+      size += sizeof(int);
+    }
+
+     // return size
     return size;
   }
 
@@ -602,7 +648,7 @@ void create_mbmesh_copy_metadata(MBMesh *src_mesh,
                                          ESMC_CONTEXT, &localrc)) throw localrc;
       }
     }
-  }
+   }
 
   void unpack_elem_comm(MBMesh *out_mesh, char *buff, std::map<int,EntityHandle> *out_gid_to_vert, EntityHandle *_new_elem) {
     int merr,localrc;
@@ -667,6 +713,20 @@ void create_mbmesh_copy_metadata(MBMesh *src_mesh,
       if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
         moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
     }     
+
+    // Unpack mask data
+    // (Only unpack mask field (not mask_val), since that's the only one needed for rend)
+     if (out_mesh->has_elem_mask) {
+      // Unpack mask
+      int masked=*((int *)(buff+off));
+      off +=sizeof(int);
+
+      // Set elem mask 
+      merr=out_mesh->mesh->tag_set_data(out_mesh->elem_mask_tag, &new_elem, 1, &masked);
+      if (merr != MB_SUCCESS) {
+        Throw() <<"MOAB ERROR: "<<moab::ErrorCodeStr[merr];
+      }
+    }
 
     // Output elem
     *_new_elem=new_elem;
@@ -795,7 +855,7 @@ void create_mbmesh_copy_metadata(MBMesh *src_mesh,
         char buff[MAX_ELEM_COMM_SIZE];
  
         // Look at buffer to figure out what size we need to pop
-        int elem_size=calc_size_from_buff_elem_comm((char *)(b->get_current()));
+        int elem_size=calc_size_from_buff_elem_comm(out_mesh, (char *)(b->get_current()));
 
         // Get one elem's info out of buffer
         b->pop((UChar *)buff, (UInt)elem_size);

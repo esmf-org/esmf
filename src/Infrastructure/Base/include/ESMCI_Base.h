@@ -122,7 +122,8 @@ class ESMC_Base
     //  (would be pure virtual =0; but some will be implemented in F90)
     virtual int ESMC_Validate(const char *options=0) const;
     virtual int ESMC_Print(const char *options=0) const;
-    virtual int ESMC_Print(int level, const char *options=0) const;
+    virtual int ESMC_Print(int level, const char *options=0, bool tofile=false,
+      const char *filename=0, bool append=false) const;
 
     // constructors/destructor
     ESMC_Base(ESMCI::VM *vm=NULL);  // default constructor

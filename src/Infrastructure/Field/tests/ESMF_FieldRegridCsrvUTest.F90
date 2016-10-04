@@ -11467,7 +11467,7 @@ subroutine test_sph_csrv_w_frac_norm(itrp, csrv, rc)
   integer, pointer :: elemIds(:),elemTypes(:),elemConn(:),elemMask(:)
   integer :: numNodes
   integer :: iconn,inode
-  integer :: numQuadElems,numTriElems
+    integer :: numQuadElems,numTriElems
   integer :: numPentElems,numHexElems,numTotElems
   integer :: numElemConn
 
@@ -11535,7 +11535,7 @@ subroutine test_sph_csrv_w_frac_norm(itrp, csrv, rc)
      ! Since this Mesh is all on PET 0, it's just set to all 0.
      allocate(nodeOwners(numNodes))
      nodeOwners=0 ! everything on PET 0
-
+  
      ! Set the number of each type of element, plus the total number.
      numQuadElems=3
      numTriElems=2
@@ -11603,7 +11603,7 @@ subroutine test_sph_csrv_w_frac_norm(itrp, csrv, rc)
 
        ! Allocate and fill the element id array.
         allocate(elemIds(numTotElems))
-       elemIds=(/1/) 
+        elemIds=(/1/) 
 
        ! Allocate and fill the element topology type array.
        allocate(elemTypes(numTotElems))
@@ -11671,7 +11671,7 @@ subroutine test_sph_csrv_w_frac_norm(itrp, csrv, rc)
         allocate(nodeCoords(2*numNodes))
         nodeCoords=(/0.0,1.0, & ! node id 4
                       1.0,1.0, & ! node id 5
-                      0.0,2.0, & ! node id 7
+                       0.0,2.0, & ! node id 7
                       1.0,2.0 /) ! node id 8
 
         ! Allocate and fill the node owner array.
@@ -11739,7 +11739,7 @@ subroutine test_sph_csrv_w_frac_norm(itrp, csrv, rc)
         ! Allocate and fill the element connection type array.
         allocate(elemConn(4*numQuadElems+3*numTriElems))
         elemConn=(/1,2,4,3/) ! elem id 5
-       endif
+        endif
     endif
 
    ! Create Mesh structure in 1 step
@@ -11807,7 +11807,7 @@ subroutine test_sph_csrv_w_frac_norm(itrp, csrv, rc)
         iconn=iconn+1
      enddo
      x=x*(1.0/REAL(elemTypes(i1),ESMF_KIND_R8))
-     y=y*(1.0/REAL(elemTypes(i1),ESMF_KIND_R8))
+      y=y*(1.0/REAL(elemTypes(i1),ESMF_KIND_R8))
 
      ! Set source function
      srcFarrayPtr(i1) = 20.0+x+y
@@ -11875,7 +11875,7 @@ subroutine test_sph_csrv_w_frac_norm(itrp, csrv, rc)
   ! number of PETs
   if (petCount .eq. 1) then
 
-     ! Fill in node data
+      ! Fill in node data
      numNodes=9
 
      !! node ids
@@ -11943,7 +11943,7 @@ subroutine test_sph_csrv_w_frac_norm(itrp, csrv, rc)
 
        !! elem ids
        allocate(elemIds(numTotElems))
-       elemIds=(/1/) 
+        elemIds=(/1/) 
 
        !! elem type
        allocate(elemTypes(numTotElems))
@@ -12011,7 +12011,7 @@ subroutine test_sph_csrv_w_frac_norm(itrp, csrv, rc)
        allocate(elemIds(numTotElems))
        elemIds=(/3/) 
 
-       !! elem type
+        !! elem type
        allocate(elemTypes(numTotElems))
        elemTypes=ESMF_MESHELEMTYPE_QUAD
 
@@ -12079,7 +12079,7 @@ subroutine test_sph_csrv_w_frac_norm(itrp, csrv, rc)
    
    ! Create dest. field
    dstField = ESMF_FieldCreate(dstMesh, arrayspec, meshloc=ESMF_MESHLOC_ELEMENT, &
-        name="dest", rc=localrc)
+         name="dest", rc=localrc)
    if (localrc /=ESMF_SUCCESS) then
       rc=ESMF_FAILURE
       return
@@ -12180,7 +12180,6 @@ subroutine test_sph_csrv_w_frac_norm(itrp, csrv, rc)
   ! Regrid store
   call ESMF_FieldRegridStore( &
 	  srcField, &
-          srcMaskValues=(/1/), &
           dstField=dstField, &
           routeHandle=routeHandle, &
           regridmethod=ESMF_REGRIDMETHOD_CONSERVE, &

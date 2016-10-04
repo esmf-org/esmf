@@ -146,8 +146,12 @@ extern "C" {
       ESMC_Base **base,         // in/out - base object
       int *level,               // in - print level for recursive prints
       const char *opts,         // in - F90, non-null terminated string
+      ESMC_Logical *tofile,     // in - tofile flag
+      const char *fname,        // in - F90, non-null terminated string
+      ESMC_Logical *append,     // in - append flage
       int *rc,                  // out - return code
-      ESMCI_FortranStrLenArg nlen) { // hidden/in - strlen count for options
+      ESMCI_FortranStrLenArg nlen,   // hidden/in - strlen count for options
+      ESMCI_FortranStrLenArg flen) { // hidden/in - strlen count for filename
 // 
 // !DESCRIPTION:
 //     Print the contents of a base object.
@@ -166,8 +170,20 @@ extern "C" {
     // for Print, it's not a failure for an uninit object to be printed
   }
 
+  // convert to bool
+  bool tofileOpt = false;  // default
+  if (tofile != NULL)
+    if (*tofile == ESMF_TRUE) tofileOpt = true;
+
+  // convert to bool
+  bool appendOpt = false;  // default
+  if (append != NULL)
+    if (*append == ESMF_TRUE) appendOpt = true;
+
   string copts = string (opts, ESMC_F90lentrim (opts, nlen));
-  *rc = (*base)->ESMC_Print(*level, copts.c_str());
+  string cfname = string (fname, ESMC_F90lentrim (fname, flen));
+  *rc = (*base)->ESMC_Print(*level, copts.c_str(), &tofileOpt, cfname.c_str(),
+                            &appendOpt);
   fflush (stdout);
 
   return;

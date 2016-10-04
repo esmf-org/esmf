@@ -33,9 +33,6 @@ module NUOPC_Compliance_Connector
   
     private
   
-    integer, save :: ccfDepth = 1   ! component control flow depth
-    integer, save :: maxDepth = -2  ! maximum depth of compliance checker
-
     ! these map NUOPC events to the phase when it should occur
     ! therefore, we can check after the phase to verify
     character(*), parameter :: &

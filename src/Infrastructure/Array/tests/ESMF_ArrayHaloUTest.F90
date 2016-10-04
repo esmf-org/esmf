@@ -741,6 +741,8 @@ program ESMF_ArrayHaloUTest
     totalLBound=tLBde, totalUBound=tUBde, localDeToDeMap=localDeToDeMap, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
+  deallocate (eLBde, eUBde, tLBde, tUBde)
+
 !------------------------------------------------------------------------
 ! The Array object is defined on a 10 x 20 index space which is regularily
 ! decomposed into 2 x 2 = 4 DEs. This means that each DE holds a 5 x 10 
@@ -1003,6 +1005,8 @@ program ESMF_ArrayHaloUTest
   enddo ! - local DE loop
     
   call ESMF_Test(verifyFlag, name, failMsg, result, ESMF_SRCLINE)
+
+  deallocate (localDeToDeMap)
   
 !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only

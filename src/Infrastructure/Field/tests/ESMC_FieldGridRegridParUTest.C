@@ -683,6 +683,10 @@ int main(void){
   free(elemId);
   free(elemType);
   free(elemConn);
+  free(exLB_corner);
+  free(exUB_corner);
+  free(exLB_center);
+  free(exUB_center);
 
   //----------------------------------------------------------------------------
   //EX_UTest_Multi_Proc_Only

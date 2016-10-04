@@ -1446,8 +1446,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !        Number of {\tt sendData} elements to send from local PET to all other
 !        PETs.
 !   \item[recvData] 
-!        Single data variable to be received. All PETs must specify a
-!        valid result variable.
+!        Contiguous data array for data to be received. All PETs must specify a
+!        valid {\tt recvData} argument.
 !   \item[recvCounts] 
 !        Number of {\tt recvData} elements to be received from corresponding
 !        source PET.
@@ -1825,8 +1825,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !        Contiguous data array holding data to be send. All PETs must specify a
 !        valid source array.
 !   \item[recvData] 
-!        Single data variable to be received. All PETs must specify a
-!        valid result variable.
+!        Contiguous data array for data to be received. All PETs must specify a
+!        valid {\tt recvData} argument.
 !   \item[count] 
 !        Number of elements in sendData and recvData. Must be the same on all
 !        PETs.
@@ -2144,8 +2144,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !        Number of {\tt sendData} elements to send from local PET to
 !        each destination PET.
 !   \item[recvData] 
-!        Single data variable to be received. All PETs must specify a
-!        valid result variable.
+!        Contiguous data array for data to be received. All PETs must specify a
+!        valid {\tt recvData} argument.
 !   \item[recvCount] 
 !        Number of {\tt recvData} elements to be received by local PET from
 !        each source PET.
@@ -2403,8 +2403,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !        Offsets in units of elements in {\tt sendData} marking to start of
 !        element sequence to be send from local PET to destination PET.
 !   \item[recvData] 
-!        Single data variable to be received. All PETs must specify a
-!        valid result variable.
+!        Contiguous data array for data to be received. All PETs must specify a
+!        valid {\tt recvData} argument.
 !   \item[recvCounts] 
 !        Number of {\tt recvData} elements to be received by local PET from
 !        source PET.
@@ -3954,8 +3954,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !        Number of {\tt sendData} elements to send from local PET to all other
 !        PETs.
 !   \item[recvData] 
-!        Single data variable to be received. All PETs must specify a
-!        valid result variable.
+!        Contiguous data array for data to be received. Only the {\tt recvData}
+!        array specified by the {\tt rootPet} will be used by this method.
 !   \item[recvCounts] 
 !        Number of {\tt recvData} elements to be received from corresponding
 !        source PET.
@@ -5337,8 +5337,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !        Contiguous data array holding data to be send. All PETs must specify a
 !        valid source array.
 !   \item[recvData] 
-!        Single data variable to be received. All PETs must specify a
-!        valid result variable.
+!        Contiguous data array for data to be received. Only the {\tt recvData}
+!        array specified by the {\tt rootPet} will be used by this method.
 !   \item[count] 
 !        Number of elements in sendData and recvData. Must be the same on all
 !        PETs.
@@ -5952,8 +5952,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !        Offsets in units of elements in {\tt sendData} marking the start of
 !        element sequence to be send to receive PET.
 !   \item[recvData] 
-!        Single data variable to be received. All PETs must specify a
-!        valid result variable.
+!        Contiguous data array for data to be received. All PETs must specify a
+!        valid {\tt recvData} argument.
 !   \item[recvCount] 
 !        Number of {\tt recvData} elements to receive by local PET from
 !        {\tt rootPet}.
