@@ -5123,14 +5123,18 @@ int Grid::getStaggerDistgrid(
 
 
         // Get connection List with pole added back in
-         InterfaceInt *connListWPoles=NULL;
-        _add_poles_to_conn(distgrid_wo_poles,
+        InterfaceInt *connListWPoles=NULL;
+        if (staggerloc==0){ // center stagger
+//TODO: gjt thinks that poles should only be added back in for center stagger.
+//TODO: For all other staggers the DistGrid should not contain pole connections.
+//TODO: This way the DistGrid::create() will add the edge padding correctly.
+          _add_poles_to_conn(distgrid_wo_poles,
                            staggerEdgeLWidthIntIntArray,
                            staggerEdgeUWidthIntIntArray,
                            connL,connU, &connListWPoles, &localrc);
-        if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+          if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
                                           &rc)) return rc;
-
+        }
 
         // Create stagger distgrid w no poles with this padding
         staggerDistgridList[staggerloc]=DistGrid::create(distgrid_wo_poles,
