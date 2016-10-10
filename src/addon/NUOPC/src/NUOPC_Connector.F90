@@ -3240,7 +3240,9 @@ print *, "dstGrid Match for i=", i, " is: ", &
 
       if (.not.rhListMatch) then
 #if 1
-call ESMF_LogWrite("no rhListMatch -> pre-compute remapping", ESMF_LOGMSG_INFO)
+call ESMF_LogWrite(trim(name)//&
+  ": no rhListMatch -> pre-compute new remapping: "// &
+  trim(cplList(i)), ESMF_LOGMSG_INFO)
 #endif
         if (gridPair) then
           ! add a new rhList element
@@ -3293,7 +3295,9 @@ call ESMF_LogWrite("no rhListMatch -> pre-compute remapping", ESMF_LOGMSG_INFO)
         endif
       else
 #if 1
-call ESMF_LogWrite("found rhListMatch -> reuse routehandle", ESMF_LOGMSG_INFO)
+call ESMF_LogWrite(trim(name)//&
+  ": found rhListMatch -> reuse routehandle: "// &
+  trim(cplList(i)), ESMF_LOGMSG_INFO)
 #endif
         ! pull out the routehandle from the matching rhList element
         rhh = rhListE%rh
