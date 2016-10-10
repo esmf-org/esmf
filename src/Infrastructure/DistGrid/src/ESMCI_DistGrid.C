@@ -220,11 +220,8 @@ DistGrid *DistGrid::create(
         }
       }
     }
-
      
-#if 0
-    // TURN OFF ERROR WITH CONNECTIONS ON Extra edge, BECAUSE GRID NEEDS TO DO IT
-    // edges modified by firstExtra or lastExtra cannot also be connected
+    // Look through connections and remove extra padding across connections
     if (present(connectionList)){
       // there are connections
       int elementSize = connectionList->extent[0];
@@ -237,18 +234,15 @@ DistGrid *DistGrid::create(
         if (present(firstExtra)){
           // there are possible modifications on the lower edge
           for (int j=0; j<dg->dimCount; j++){
-            if (positionVector[j]==0) continue; // BOB 
             if (positionVector[j] < 0){
               if (firstExtra->array[dg->dimCount*(tileA-1)+j] != 0){
-                ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
-                  "- connected edges cannot be modified", ESMC_CONTEXT, rc);
-                return ESMC_NULL_POINTER;
+                firstExtra->array[dg->dimCount*(tileA-1)+j] = 0;  // remove pad.
+                //printf("remove firstExtra padding\n");
               }
             }else if (positionVector[j] > 0){
               if (firstExtra->array[dg->dimCount*(tileB-1)+j] != 0){
-                ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
-                  "- connected edges cannot be modified", ESMC_CONTEXT, rc);
-                return ESMC_NULL_POINTER;
+                firstExtra->array[dg->dimCount*(tileB-1)+j] = 0;  // remove pad.
+                //printf("remove firstExtra padding\n");
               }
             }
           }
@@ -256,26 +250,22 @@ DistGrid *DistGrid::create(
         if (present(lastExtra)){
           // there are possible modifications on the upper edge
           for (int j=0; j<dg->dimCount; j++){
-            if (positionVector[j]==0) continue; // BOB 
             if (positionVector[j] < 0){
               if (lastExtra->array[dg->dimCount*(tileB-1)+j] != 0){
-                ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
-                  "- connected edges cannot be modified", ESMC_CONTEXT, rc);
-                return ESMC_NULL_POINTER;
+                lastExtra->array[dg->dimCount*(tileB-1)+j] = 0;  // remove pad.
+                //printf("remove lastExtra padding\n");
               }
             }else if (positionVector[j] > 0){
               if (lastExtra->array[dg->dimCount*(tileA-1)+j] != 0){
-                printf(" posVec[%d]=%d\n",j,positionVector[j]);
-                ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
-                  "- connected edges cannot be modified", ESMC_CONTEXT, rc);
-                return ESMC_NULL_POINTER;
+                lastExtra->array[dg->dimCount*(tileA-1)+j] = 0;  // remove pad.
+                //printf("remove lastExtra padding\n");
               }
             }
           }
         }
       }
     }
-#endif
+
     // prepare minIndex and maxIndex
     int *minIndexAlloc = new int[totalCountInterfaceInt];
     if (present(firstExtra))
@@ -489,14 +479,15 @@ DistGrid *DistGrid::create(
       }
     }
     if (dg->regDecomp){
-      distgrid->regDecomp = new int[dimCount];
-      memcpy(distgrid->regDecomp, dg->regDecomp, sizeof(int)*dimCount);
+      distgrid->regDecomp = new int[dimCount*tileCount];
+      memcpy(distgrid->regDecomp, dg->regDecomp, 
+        sizeof(int)*dimCount*tileCount);
     }else
       distgrid->regDecomp = NULL;
     if (dg->decompflag){
-      distgrid->decompflag = new Decomp_Flag[dimCount];
+      distgrid->decompflag = new Decomp_Flag[dimCount*tileCount];
       memcpy(distgrid->decompflag, dg->decompflag,
-        sizeof(Decomp_Flag)*dimCount);
+        sizeof(Decomp_Flag)*dimCount*tileCount);
     }else
       distgrid->regDecomp = NULL;
     if (dg->indexflag){

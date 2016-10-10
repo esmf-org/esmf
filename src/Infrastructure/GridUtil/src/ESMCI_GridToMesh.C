@@ -54,7 +54,7 @@
 namespace ESMCI {
 
   //// MOVED TO ESMCI_Mesh_GToM_Glue.C ////
-#if 0
+ #if 0
 
   extern bool grid_debug;
 
@@ -96,6 +96,8 @@ void GridToMesh(const Grid &grid_, int staggerLoc, ESMCI::Mesh &mesh,
  int localrc;
  int rc;
 
+printf("HERE IN GTOM\n");
+
   // Initialize the parallel environment for mesh (if not already done)
   ESMCI::Par::Init("MESHLOG", false /* use log */,VM::getCurrent(&localrc)->getMpi_c());
  if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
@@ -110,8 +112,10 @@ void GridToMesh(const Grid &grid_, int staggerLoc, ESMCI::Mesh &mesh,
  if (!grid.hasCoordStaggerLoc(staggerLoc)) {
    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
 	    "- Grid being used in Regrid call does not contain coordinates at appropriate staggerloc ", ESMC_CONTEXT, &localrc);
-   throw localrc;
+    throw localrc;
  }
+
+
      
  // *** Set some meta-data ***
  // We set the topological dimension of the mesh (quad = 2, hex = 3, etc...)
@@ -166,7 +170,7 @@ void GridToMesh(const Grid &grid_, int staggerLoc, ESMCI::Mesh &mesh,
      // Get mask values
      numMaskValues=maskValuesArg->extent[0];
      ptrMaskValues=&(maskValuesArg->array[0]);
-   }
+    }
  }
 
  
@@ -222,7 +226,7 @@ void GridToMesh(const Grid &grid_, int staggerLoc, ESMCI::Mesh &mesh,
 
 
 
-#ifdef G2M_DBG
+ #ifdef G2M_DBG
 Par::Out() << "GID=" << gid << ", LID=" << lid << std::endl;
 #endif
 

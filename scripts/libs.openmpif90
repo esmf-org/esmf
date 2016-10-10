@@ -1,0 +1,10 @@
+#!/bin/sh
+# this scripts determines whether libmpi_cxx needs to be included or not.
+# Prior to OpenMPI 2.0, libmpi_cxx must be added.  Post-2.0, it is optional.
+OPENMPI_MPIF90=`which $1`
+OPENMPI_LIBDIR=`dirname ${OPENMPI_MPIF90}`/../lib*
+ls ${OPENMPI_LIBDIR} | grep libmpi_cxx 2>&1 > /dev/null
+if [ $? = 0 ]; then
+  echo -lmpi_cxx;
+fi
+

@@ -74,7 +74,7 @@ ESMF_F90DEFAULT         = mpif90
 ESMF_CXXLINKLIBS       += -lmpi_f77
 endif
 ESMF_CXXCOMPILECPPFLAGS+= -DESMF_NO_SIGUSR2
-ESMF_F90LINKLIBS       += -lmpi_cxx
+ESMF_F90LINKLIBS       += $(shell $(ESMF_DIR)/scripts/libs.openmpif90 $(ESMF_F90DEFAULT))
 ESMF_CXXDEFAULT         = mpicxx
 ESMF_MPIRUNDEFAULT      = mpirun $(ESMF_MPILAUNCHOPTIONS)
 ESMF_MPIMPMDRUNDEFAULT  = mpiexec $(ESMF_MPILAUNCHOPTIONS)
@@ -97,6 +97,11 @@ endif
 #
 ESMF_F90COMPILER_VERSION    = ${ESMF_F90COMPILER} -v -V -dryrun
 ESMF_CXXCOMPILER_VERSION    = ${ESMF_CXXCOMPILER} -v --version
+
+############################################################
+# See if g++ is really clang
+#
+ESMF_CLANGSTR := $(findstring clang, $(shell $(ESMF_CXXCOMPILER) --version))
 
 ############################################################
 # Set NAG unix modules when certain non-Standard system calls
@@ -150,6 +155,9 @@ ESMF_CXXLINKRPATHS      =
 # Link against libesmf.a using the F90 linker front-end
 #
 ESMF_F90LINKLIBS += -lstdc++
+ifeq ($(ESMF_CLANGSTR), clang)
+ESMF_F90LINKLIBS += -lc++
+endif
 
 ############################################################
 # Link against libesmf.a using the C++ linker front-end
