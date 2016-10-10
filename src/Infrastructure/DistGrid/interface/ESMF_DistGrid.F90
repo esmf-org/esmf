@@ -1164,7 +1164,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !          defined by deBlockList.
 !     \item[{[deLabelList]}]
 !          List assigning DE labels to the default sequence of DEs. The default
-!          sequence is given by the column major order of the {\tt regDecomp}
+!          sequence is given by the order of DEs in the {\tt deBlockList} 
 !          argument.
 !     \item[{[indexflag]}]
 !          Indicates whether the indices provided by the {\tt minIndex} and
@@ -1504,7 +1504,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !          defined by deBlockList.
 !     \item[{[deLabelList]}]
 !          List assigning DE labels to the default sequence of DEs. The default
-!          sequence is given by the column major order of the {\tt regDecomp}
+!          sequence is given by the order of DEs in the {\tt deBlockList} 
 !          argument.
 !     \item[{[indexflag]}]
 !          Indicates whether the indices provided by the {\tt minIndex} and
@@ -1859,8 +1859,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !          defined by deBlockList.
 !     \item[{[deLabelList]}]
 !          List assigning DE labels to the default sequence of DEs. The default
-!          sequence is given by the column major order of the {\tt regDecomp}
-!          elements in the sequence as they appear following the tile index.
+!          sequence is given by the order of DEs in the {\tt deBlockList} 
+!          argument.
 !     \item[{[indexflag]}]
 !          Indicates whether the indices provided by the {\tt minIndex} and
 !          {\tt maxIndex} arguments are to be interpreted to form a global
@@ -2148,8 +2148,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !          defined by deBlockList.
 !     \item[{[deLabelList]}]
 !          List assigning DE labels to the default sequence of DEs. The default
-!          sequence is given by the column major order of the {\tt regDecomp}
-!          elements in the sequence as they appear following the tile index.
+!          sequence is given by the order of DEs in the {\tt deBlockList} 
+!          argument.
 !     \item[{[indexflag]}]
 !          Indicates whether the indices provided by the {\tt minIndex} and
 !          {\tt maxIndex} arguments are to be interpreted to form a global
