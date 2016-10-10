@@ -136,7 +136,7 @@ module ESMF_GridUtilMod
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_SUCCESS
-    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_SUCCESS
 
     lspherical = 0
     if (present(spherical)) lspherical = spherical
@@ -174,8 +174,8 @@ module ESMF_GridUtilMod
       case default
         localrc = ESMF_RC_NOT_IMPL
     end select
-
-    if (present(rc)) rc = ESMF_SUCCESS
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
 
   end subroutine ESMF_MeshIO
 !------------------------------------------------------------------------------
@@ -233,7 +233,7 @@ module ESMF_GridUtilMod
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_SUCCESS
-    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_SUCCESS
 
     ! These aren't used anymore, but just set them so they have a defined value
     ! TODO: REMOVE THESE
@@ -290,8 +290,8 @@ module ESMF_GridUtilMod
       case default
         localrc = ESMF_RC_NOT_IMPL
     end select
-
-    if (present(rc)) rc = ESMF_SUCCESS
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
 
   end subroutine ESMF_GridWriteVTK
 !------------------------------------------------------------------------------
