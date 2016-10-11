@@ -708,6 +708,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !STATUS:
 ! \begin{itemize}
 ! \item\apiStatusCompatibleVersion{5.2.0r}
+! \item\apiStatusModifiedSinceVersion{5.2.0r}
+! \begin{description}
+! \item[7.1.0] Added argument {\tt zeroregion} to allow user to control
+!              how the destination array is zero'ed out. This is especially
+!              useful in cases where the source and destination arrays do not
+!              cover the identical index space.
+! \end{description}
 ! \end{itemize}
 !
 ! !DESCRIPTION:
