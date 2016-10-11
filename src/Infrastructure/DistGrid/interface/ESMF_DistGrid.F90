@@ -169,13 +169,13 @@ module ESMF_DistGridMod
     module procedure ESMF_DistGridCreateDG
     module procedure ESMF_DistGridCreateDGT
     module procedure ESMF_DistGridCreateRD
-    module procedure ESMF_DistGridCreateDB
-    module procedure ESMF_DistGridCreateRDFA
-    module procedure ESMF_DistGridCreateDBFA      
     module procedure ESMF_DistGridCreateRDT
-    module procedure ESMF_DistGridCreateDBP
-    module procedure ESMF_DistGridCreateRDTFA
-    module procedure ESMF_DistGridCreateDBPFA
+    module procedure ESMF_DistGridCreateRDF
+    module procedure ESMF_DistGridCreateRDTF
+    module procedure ESMF_DistGridCreateDB
+    module procedure ESMF_DistGridCreateDBT
+    module procedure ESMF_DistGridCreateDBF
+    module procedure ESMF_DistGridCreateDBTF
     module procedure ESMF_DistGridCreateDBAI1D
     module procedure ESMF_DistGridCreateDBAI
       
@@ -1103,494 +1103,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_DistGridCreateDB()"
-!BOP
-! !IROUTINE: ESMF_DistGridCreate - Create DistGrid object with DE blocks
-
-! !INTERFACE:
-  ! Private name; call using ESMF_DistGridCreate()
-  function ESMF_DistGridCreateDB(minIndex, maxIndex, deBlockList, &
-    keywordEnforcer, deLabelList, indexflag, connectionList, delayout, vm, rc)
-!         
-! !RETURN VALUE:
-    type(ESMF_DistGrid) :: ESMF_DistGridCreateDB
-!
-! !ARGUMENTS:
-    integer,                       intent(in)            :: minIndex(:)
-    integer,                       intent(in)            :: maxIndex(:)
-    integer,                       intent(in)            :: deBlockList(:,:,:)
-type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    integer,                       intent(in),  optional :: deLabelList(:)
-    type(ESMF_Index_Flag),         intent(in),  optional :: indexflag
-    type(ESMF_DistGridConnection), intent(in),  optional :: connectionList(:)
-    type(ESMF_DELayout),           intent(in),  optional :: delayout
-    type(ESMF_VM),                 intent(in),  optional :: vm
-    integer,                       intent(out), optional :: rc
-!
-! !STATUS:
-! \begin{itemize}
-! \item\apiStatusCompatibleVersion{5.2.0r}
-! \end{itemize}
-!
-! !DESCRIPTION:
-!     \begin{sloppypar}
-!     Create an {\tt ESMF\_DistGrid} from a single logically rectangular (LR) 
-!     tile with decomposition specified by {\tt deBlockList}.
-!     \end{sloppypar}
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[minIndex]
-!          Global coordinate tuple of the lower corner of the tile.
-!     \item[maxIndex]
-!          Global coordinate tuple of the upper corner of the tile.
-!     \item[deBlockList]
-!          List of DE-local LR blocks. The third index of {\tt deBlockList}
-!          steps through the deBlock elements, which are defined by the first
-!          two indices. The first index must be of size {\tt dimCount} and the 
-!          second index must be of size 2. Each 2D element of {\tt deBlockList}
-!          defined by the first two indices hold the following information.
-!          \begin{verbatim}
-!                   +---------------------------------------> 2nd index
-!                   |    1               2           
-!                   | 1  minIndex(1)    maxIndex(1)
-!                   | 2  minIndex(2)    maxIndex(2)
-!                   | .  minIndex(.)    maxIndex(.)
-!                   | .
-!                   v
-!                  1st index
-!          \end{verbatim}
-!          It is required that there be no overlap between the LR segments
-!          defined by deBlockList.
-!     \item[{[deLabelList]}]
-!          List assigning DE labels to the default sequence of DEs. The default
-!          sequence is given by the order of DEs in the {\tt deBlockList} 
-!          argument.
-!     \item[{[indexflag]}]
-!          Indicates whether the indices provided by the {\tt minIndex} and
-!          {\tt maxIndex} arguments are to be interpreted to form a global
-!          index space or not. The default is {\tt ESMF\_INDEX\_DELOCAL}.
-!          See section \ref{const:indexflag} for a complete list of options.
-!     \item[{[connectionList]}]
-!          List of {\tt ESMF\_DistGridConnection} objects, defining connections
-!          between DistGrid tiles in index space.
-!          See section \ref{api:DistGridConnectionSet} for the associated Set()
-!          method.
-!     \item[{[delayout]}]
-!          Optional {\tt ESMF\_DELayout} object to be used. By default a new
-!          DELayout object will be created with the correct number of DEs. If
-!          a DELayout object is specified its number of DEs must match the 
-!          number indicated by {\tt regDecomp}.
-!     \item[{[vm]}]
-!          Optional {\tt ESMF\_VM} object of the current context. Providing the
-!          VM of the current context will lower the method's overhead.
-!     \item[{[rc]}]
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!EOP
-!------------------------------------------------------------------------------
-    integer                 :: localrc      ! local return code
-    type(ESMF_DistGrid)     :: distgrid     ! opaque pointer to new C++ DistGrid
-    type(ESMF_InterfaceInt) :: minIndexAux  ! helper variable
-    type(ESMF_InterfaceInt) :: maxIndexAux  ! helper variable
-    type(ESMF_InterfaceInt) :: deBlockListAux ! helper variable
-    type(ESMF_InterfaceInt) :: deLabelListAux ! helper variable
-    type(ESMF_InterfaceInt) :: connectionListAux ! helper variable
-
-    ! initialize return code; assume routine not implemented
-    localrc = ESMF_RC_NOT_IMPL
-    if (present(rc)) rc = ESMF_RC_NOT_IMPL
-    
-    ! Check init status of arguments
-    ESMF_INIT_CHECK_DEEP(ESMF_DELayoutGetInit, delayout, rc)
-    ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
-    
-    ! Deal with (optional) array arguments
-    minIndexAux = ESMF_InterfaceIntCreate(minIndex, rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
-    maxIndexAux = ESMF_InterfaceIntCreate(maxIndex, rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
-    deBlockListAux = ESMF_InterfaceIntCreate(farray3D=deBlockList, rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
-    deLabelListAux = ESMF_InterfaceIntCreate(deLabelList, rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
-    connectionListAux = ESMF_InterfaceIntCreateDGConn(connectionList, &
-      rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
-
-    ! Mark this DistGrid as invalid
-    distgrid%this = ESMF_NULL_POINTER
-
-    ! call into the C++ interface, which will sort out optional arguments
-    call c_ESMC_DistGridCreateDB(distgrid, minIndexAux, maxIndexAux, &
-      deBlockListAux, deLabelListAux, indexflag, &
-      connectionListAux, delayout, vm, localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
-      
-    ! garbage collection
-    call ESMF_InterfaceIntDestroy(minIndexAux, rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(maxIndexAux, rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(deBlockListAux, rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(deLabelListAux, rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(connectionListAux, rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
-    
-    ! Set return value
-    ESMF_DistGridCreateDB = distgrid 
- 
-    ! Set init code
-    ESMF_INIT_SET_CREATED(ESMF_DistGridCreateDB)
- 
-    ! return successfully
-    if (present(rc)) rc = ESMF_SUCCESS
- 
-  end function ESMF_DistGridCreateDB
-!------------------------------------------------------------------------------
-
-
-! -------------------------- ESMF-public method -------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_DistGridCreateRDFA()"
-!BOPI
-! !IROUTINE: ESMF_DistGridCreate - Create DistGrid object with regular decomposition and fast axis
-
-! !INTERFACE:
-  ! Private name; call using ESMF_DistGridCreate()
-  function ESMF_DistGridCreateRDFA(minIndex, maxIndex, regDecomp, &
-    decompflag, regDecompFirstExtra, regDecompLastExtra, deLabelList, &
-    indexflag, connectionList, fastAxis, vm, rc)
-!         
-! !RETURN VALUE:
-    type(ESMF_DistGrid) :: ESMF_DistGridCreateRDFA
-!
-! !ARGUMENTS:
-    integer,                        intent(in)            :: minIndex(:)
-    integer,                        intent(in)            :: maxIndex(:)
-    integer,                        intent(in),  optional :: regDecomp(:)
-    type(ESMF_Decomp_Flag), target, intent(in),  optional :: decompflag(:)
-    integer,                target, intent(in),  optional :: regDecompFirstExtra(:)
-    integer,                target, intent(in),  optional :: regDecompLastExtra(:)
-    integer,                        intent(in),  optional :: deLabelList(:)
-    type(ESMF_Index_Flag),          intent(in),  optional :: indexflag
-    type(ESMF_DistGridConnection),  intent(in),  optional :: connectionList(:)
-    integer,                        intent(in)            :: fastAxis
-    type(ESMF_VM),                  intent(in),  optional :: vm
-    integer,                        intent(out), optional :: rc
-!
-! !DESCRIPTION:
-!     Create an {\tt ESMF\_DistGrid} from a single logically rectangular (LR) 
-!     tile with regular decomposition. A regular
-!     decomposition is of the same rank as the tile and decomposes
-!     each dimension into a fixed number of DEs. A regular decomposition of a
-!     single tile is expressed by a single {\tt regDecomp} list of DE counts
-!     in each dimension.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[minIndex]
-!          Global coordinate tuple of the lower corner of the tile.
-!     \item[maxIndex]
-!          Global coordinate tuple of the upper corner of the tile.
-!     \item[{[regDecomp]}]
-!          List of DE counts for each dimension. The default decomposition will
-!          be {\tt deCount}$ \times 1 \times ... \times 1$. The value of
-!          {\tt deCount} for a default DELayout equals {\tt petCount}, i.e. the
-!          default decomposition will be into as many DEs as there are 
-!          PETs and the distribution will be 1 DE per PET.
-!     \item[{[decompflag]}]
-!          List of decomposition flags indicating how each dimension of the
-!          tile is to be divided between the DEs. The default setting
-!          is {\tt ESMF\_DECOMP\_BALANCED} in all dimensions. See section
-!          \ref{const:decompflag} for a list of valid decomposition options.
-!     \item[{[regDecompFirstExtra]}]
-!          Extra elements on the first DEs along each dimension in a regular
-!          decomposition. The default is a zero vector.
-!     \item[{[regDecompLastExtra]}]
-!          Extra elements on the last DEs along each dimension in a regular
-!          decomposition. The default is a zero vector.
-!     \item[{[deLabelList]}]
-!          List assigning DE labels to the default sequence of DEs. The default
-!          sequence is given by the column major order of the {\tt regDecomp}
-!          argument.
-!     \item[{[indexflag]}]
-!          Indicates whether the indices provided by the {\tt minIndex} and
-!          {\tt maxIndex} arguments are to be interpreted to form a global
-!          index space or not. The default is {\tt ESMF\_INDEX\_DELOCAL}.
-!          See section \ref{const:indexflag} for a complete list of options.
-!     \item[{[connectionList]}]
-!          List of {\tt ESMF\_DistGridConnection} objects, defining connections
-!          between DistGrid tiles in index space.
-!          See section \ref{api:DistGridConnectionSet} for the associated Set()
-!          method.
-!     \item[fastAxis]
-!          Integer value indicating along which axis fast communication is
-!          requested. This hint will be used during DELayout creation.
-!     \item[{[vm]}]
-!          Optional {\tt ESMF\_VM} object of the current context. Providing the
-!          VM of the current context will lower the method's overhead.
-!     \item[{[rc]}]
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!EOPI
-!------------------------------------------------------------------------------
-    integer                 :: localrc      ! local return code
-    type(ESMF_DistGrid)     :: distgrid     ! opaque pointer to new C++ DistGrid
-    type(ESMF_InterfaceInt) :: minIndexAux  ! helper variable
-    type(ESMF_InterfaceInt) :: maxIndexAux  ! helper variable
-    type(ESMF_InterfaceInt) :: regDecompAux ! helper variable
-    type(ESMF_Decomp_Flag), target   :: dummyDf(0)  ! satisfy C interface
-    type(ESMF_Decomp_Flag), pointer  ::  opt_decompflag(:) ! optional arg helper
-    integer                 :: len_decompflag ! helper variable
-    type(ESMF_InterfaceInt) :: regDecompFirstExtraAux ! helper variable
-    type(ESMF_InterfaceInt) :: regDecompLastExtraAux ! helper variable
-    type(ESMF_InterfaceInt) :: deLabelListAux ! helper variable
-    type(ESMF_InterfaceInt) :: connectionListAux ! helper variable
-
-    ! initialize return code; assume routine not implemented
-    localrc = ESMF_RC_NOT_IMPL
-    if (present(rc)) rc = ESMF_RC_NOT_IMPL
-    
-    ! Check init status of arguments
-    ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
-    
-    ! Deal with (optional) array arguments
-    minIndexAux = ESMF_InterfaceIntCreate(minIndex, rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
-    maxIndexAux = ESMF_InterfaceIntCreate(maxIndex, rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
-    regDecompAux = ESMF_InterfaceIntCreate(regDecomp, rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
-    if (present(decompflag)) then
-      len_decompflag = size(decompflag)
-      opt_decompflag => decompflag
-    else
-      len_decompflag = 0
-      opt_decompflag => dummyDf
-    endif
-    regDecompFirstExtraAux = ESMF_InterfaceIntCreate(regDecompFirstExtra, &
-      rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
-    regDecompLastExtraAux = ESMF_InterfaceIntCreate(regDecompLastExtra, &
-      rc=localrc)
-    deLabelListAux = ESMF_InterfaceIntCreate(deLabelList, rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
-    connectionListAux = ESMF_InterfaceIntCreateDGConn(connectionList, &
-      rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
-
-    ! Mark this DistGrid as invalid
-    distgrid%this = ESMF_NULL_POINTER
-
-    ! call into the C++ interface, which will sort out optional arguments
-    call c_ESMC_DistGridCreateRDFA(distgrid, minIndexAux, maxIndexAux, &
-      regDecompAux, opt_decompflag, len_decompflag, regDecompFirstExtraAux, &
-      regDecompLastExtraAux, deLabelListAux, indexflag, &
-      connectionListAux, fastAxis, vm, localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
-      
-    ! garbage collection
-    call ESMF_InterfaceIntDestroy(minIndexAux, rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(maxIndexAux, rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(regDecompAux, rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(regDecompFirstExtraAux, rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(regDecompLastExtraAux, rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(deLabelListAux, rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(connectionListAux, rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
-    
-    ! Set return value
-    ESMF_DistGridCreateRDFA = distgrid 
- 
-    ! Set init code
-    ESMF_INIT_SET_CREATED(ESMF_DistGridCreateRDFA)
- 
-    ! return successfully
-    if (present(rc)) rc = ESMF_SUCCESS
- 
-  end function ESMF_DistGridCreateRDFA
-!------------------------------------------------------------------------------
-
-
-! -------------------------- ESMF-public method -------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_DistGridCreateDBFA()"
-!BOPI
-! !IROUTINE: ESMF_DistGridCreate - Create DistGrid object with DE blocks and fast axis
-
-! !INTERFACE:
-  ! Private name; call using ESMF_DistGridCreate()
-  function ESMF_DistGridCreateDBFA(minIndex, maxIndex, &
-    deBlockList, deLabelList, indexflag, connectionList, &
-    fastAxis, vm, rc)
-!         
-! !RETURN VALUE:
-    type(ESMF_DistGrid) :: ESMF_DistGridCreateDBFA
-!
-! !ARGUMENTS:
-    integer,                       intent(in)            :: minIndex(:)
-    integer,                       intent(in)            :: maxIndex(:)
-    integer,                       intent(in)            :: deBlockList(:,:,:)
-    integer,                       intent(in),  optional :: deLabelList(:)
-    type(ESMF_Index_Flag),         intent(in),  optional :: indexflag
-    type(ESMF_DistGridConnection), intent(in),  optional :: connectionList(:)
-    integer,                       intent(in)            :: fastAxis
-    type(ESMF_VM),                 intent(in),  optional :: vm
-    integer,                       intent(out), optional :: rc
-!
-! !DESCRIPTION:
-!     Create an {\tt ESMF\_DistGrid} from a single logically rectangular (LR) 
-!     tile with decomposition specified by {\tt deBlockList}.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[minIndex]
-!          Global coordinate tuple of the lower corner of the tile.
-!     \item[maxIndex]
-!          Global coordinate tuple of the upper corner of the tile.
-!     \item[deBlockList]
-!          List of DE-local LR blocks. The third index of {\tt deBlockList}
-!          steps through the deBlock elements, which are defined by the first
-!          two indices. The first index must be of size {\tt dimCount} and the 
-!          second index must be of size 3. Each 2D element of {\tt deBlockList}
-!          defined by the first two indices hold the following information.
-!          \begin{verbatim}
-!                   +---------------------------------------> 2nd index
-!                   |    1               2              3
-!                   | 1  minIndex(1)    maxIndex(1)   tileID
-!                   | 2  minIndex(2)    maxIndex(2)   (not used)
-!                   | .  minIndex(.)    maxIndex(.)   (not used)
-!                   | .
-!                   v
-!                  1st index
-!          \end{verbatim}
-!          It is required that there be no overlap between the LR segments
-!          defined by deBlockList.
-!     \item[{[deLabelList]}]
-!          List assigning DE labels to the default sequence of DEs. The default
-!          sequence is given by the order of DEs in the {\tt deBlockList} 
-!          argument.
-!     \item[{[indexflag]}]
-!          Indicates whether the indices provided by the {\tt minIndex} and
-!          {\tt maxIndex} arguments are to be interpreted to form a global
-!          index space or not. The default is {\tt ESMF\_INDEX\_DELOCAL}.
-!          See section \ref{const:indexflag} for a complete list of options.
-!     \item[{[connectionList]}]
-!          List of {\tt ESMF\_DistGridConnection} objects, defining connections
-!          between DistGrid tiles in index space.
-!          See section \ref{api:DistGridConnectionSet} for the associated Set()
-!          method.
-!     \item[fastAxis]
-!          Integer value indicating along which axis fast communication is
-!          requested. This hint will be used during DELayout creation.
-!     \item[{[vm]}]
-!          Optional {\tt ESMF\_VM} object of the current context. Providing the
-!          VM of the current context will lower the method's overhead.
-!     \item[{[rc]}]
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!EOPI
-!------------------------------------------------------------------------------
-    integer                 :: localrc      ! local return code
-    type(ESMF_DistGrid)     :: distgrid     ! opaque pointer to new C++ DistGrid
-    
-    ! initialize return code; assume routine not implemented
-    localrc = ESMF_RC_NOT_IMPL
-    if (present(rc)) rc = ESMF_RC_NOT_IMPL
-    
-    ! Check init status of arguments
-    ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
-    
-    ! Initialize the pointer to NULL
-    distgrid%this = ESMF_NULL_POINTER
-
-    !DUMMY TEST TO QUIET DOWN COMPILER WARNINGS
-    !TODO: Remove the following dummy test when dummy argument actually used
-    if (size(minIndex) == size(minIndex)) continue
-
-    !DUMMY TEST TO QUIET DOWN COMPILER WARNINGS
-    !TODO: Remove the following dummy test when dummy argument actually used
-    if (size(maxIndex) == size(maxIndex)) continue
-
-    !DUMMY TEST TO QUIET DOWN COMPILER WARNINGS
-    !TODO: Remove the following dummy test when dummy argument actually used
-    if (size(deBlockList) == size(deBlockList)) continue
-
-    !DUMMY TEST TO QUIET DOWN COMPILER WARNINGS
-    !TODO: Remove the following dummy test when dummy argument actually used
-    if (present(deLabelList)) continue
-
-    !DUMMY TEST TO QUIET DOWN COMPILER WARNINGS
-    !TODO: Remove the following dummy test when dummy argument actually used
-    if (present(indexflag)) continue
-
-    !DUMMY TEST TO QUIET DOWN COMPILER WARNINGS
-    !TODO: Remove the following dummy test when dummy argument actually used
-    if (present(connectionList)) continue
-
-    !DUMMY TEST TO QUIET DOWN COMPILER WARNINGS
-    !TODO: Remove the following dummy test when dummy argument actually used
-    if (fastaxis == fastaxis) continue
-    
-    ! Call into the C++ interface, which will sort out optional arguments.
-!    call c_ESMC_DistGridCreateRDFA(distgrid, minIndexAux, maxIndexAux, &
-!      regDecompAux, opt_decompflag, len_decompflag, deLabelListAux, indexflag, &
-!      connectionListAux, fastAxis, vm, localrc)
-!    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-!      ESMF_CONTEXT, rcToReturn=rc)) return
-
-    ! Set return value
-    ESMF_DistGridCreateDBFA = distgrid 
- 
-    ! Set init code
-    ESMF_INIT_SET_CREATED(ESMF_DistGridCreateDBFA)
- 
-    ! return successfully
-    !if (present(rc)) rc = ESMF_SUCCESS   TODO: enable once implemented
- 
-  end function ESMF_DistGridCreateDBFA
-!------------------------------------------------------------------------------
-
-
-! -------------------------- ESMF-public method -------------------------------
-#undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_DistGridCreateRDT()"
 !BOP
 ! !IROUTINE: ESMF_DistGridCreate - Create DistGrid object with regular decomposition (multi-tile version)
@@ -1798,68 +1310,67 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_DistGridCreateDBP()"
+#define ESMF_METHOD "ESMF_DistGridCreateRDF()"
 !BOPI
-! !IROUTINE: ESMF_DistGridCreate - Create DistGrid object on multiple tiles with regular decomposition
+! !IROUTINE: ESMF_DistGridCreate - Create DistGrid object with regular decomposition and fast axis
 
 ! !INTERFACE:
   ! Private name; call using ESMF_DistGridCreate()
-  function ESMF_DistGridCreateDBP(minIndex, maxIndex, deBlockList, deLabelList,&
-    indexflag, connectionList, delayout, vm, rc)
+  function ESMF_DistGridCreateRDF(minIndex, maxIndex, regDecomp, &
+    decompflag, regDecompFirstExtra, regDecompLastExtra, deLabelList, &
+    indexflag, connectionList, fastAxis, vm, rc)
 !         
 ! !RETURN VALUE:
-    type(ESMF_DistGrid) :: ESMF_DistGridCreateDBP
+    type(ESMF_DistGrid) :: ESMF_DistGridCreateRDF
 !
 ! !ARGUMENTS:
-    integer,                       intent(in)            :: minIndex(:,:)
-    integer,                       intent(in)            :: maxIndex(:,:)
-    integer,                       intent(in)            :: deBlockList(:,:,:)
-    integer,                       intent(in),  optional :: deLabelList(:)
-    type(ESMF_Index_Flag),         intent(in),  optional :: indexflag
-    type(ESMF_DistGridConnection), intent(in),  optional :: connectionList(:)
-    type(ESMF_DELayout),           intent(in),  optional :: delayout
-    type(ESMF_VM),                 intent(in),  optional :: vm
-    integer,                       intent(out), optional :: rc
+    integer,                        intent(in)            :: minIndex(:)
+    integer,                        intent(in)            :: maxIndex(:)
+    integer,                        intent(in),  optional :: regDecomp(:)
+    type(ESMF_Decomp_Flag), target, intent(in),  optional :: decompflag(:)
+    integer,                target, intent(in),  optional :: regDecompFirstExtra(:)
+    integer,                target, intent(in),  optional :: regDecompLastExtra(:)
+    integer,                        intent(in),  optional :: deLabelList(:)
+    type(ESMF_Index_Flag),          intent(in),  optional :: indexflag
+    type(ESMF_DistGridConnection),  intent(in),  optional :: connectionList(:)
+    integer,                        intent(in)            :: fastAxis
+    type(ESMF_VM),                  intent(in),  optional :: vm
+    integer,                        intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!     Create an {\tt ESMF\_DistGrid} on multiple logically 
-!     rectangular (LR) tiles with regular decomposition. A regular
+!     Create an {\tt ESMF\_DistGrid} from a single logically rectangular (LR) 
+!     tile with regular decomposition. A regular
 !     decomposition is of the same rank as the tile and decomposes
 !     each dimension into a fixed number of DEs. A regular decomposition of a
-!     multi-tile DistGrid is expressed by a list of DE count vectors, one
-!     vector for each tile. Each vector contained in the 
-!     {\tt regDecomp} argument ascribes DE counts for each dimension. It is 
-!     erroneous to provide more tiles than there are DEs.
+!     single tile is expressed by a single {\tt regDecomp} list of DE counts
+!     in each dimension.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item[minIndex]
-!          The first index provides the global coordinate tuple of the lower 
-!          corner of a tile. The second index indicates the tile number.
+!          Global coordinate tuple of the lower corner of the tile.
 !     \item[maxIndex]
-!          The first index provides the global coordinate tuple of the upper
-!          corner of a tile. The second index indicates the tile number.
-!     \item[deBlockList]
-!          List of DE-local LR blocks. The third index of {\tt deBlockList}
-!          steps through the deBlock elements, which are defined by the first
-!          two indices. The first index must be of size {\tt dimCount} and the 
-!          second index must be of size 3. Each 2D element of {\tt deBlockList}
-!          defined by the first two indices hold the following information.
-!          \begin{verbatim}
-!                   +---------------------------------------> 2nd index
-!                   |    1               2              3
-!                   | 1  minIndex(1)    maxIndex(1)   tileID
-!                   | 2  minIndex(2)    maxIndex(2)   (not used)
-!                   | .  minIndex(.)    maxIndex(.)   (not used)
-!                   | .
-!                   v
-!                  1st index
-!          \end{verbatim}
-!          It is required that there be no overlap between the LR segments
-!          defined by deBlockList.
+!          Global coordinate tuple of the upper corner of the tile.
+!     \item[{[regDecomp]}]
+!          List of DE counts for each dimension. The default decomposition will
+!          be {\tt deCount}$ \times 1 \times ... \times 1$. The value of
+!          {\tt deCount} for a default DELayout equals {\tt petCount}, i.e. the
+!          default decomposition will be into as many DEs as there are 
+!          PETs and the distribution will be 1 DE per PET.
+!     \item[{[decompflag]}]
+!          List of decomposition flags indicating how each dimension of the
+!          tile is to be divided between the DEs. The default setting
+!          is {\tt ESMF\_DECOMP\_BALANCED} in all dimensions. See section
+!          \ref{const:decompflag} for a list of valid decomposition options.
+!     \item[{[regDecompFirstExtra]}]
+!          Extra elements on the first DEs along each dimension in a regular
+!          decomposition. The default is a zero vector.
+!     \item[{[regDecompLastExtra]}]
+!          Extra elements on the last DEs along each dimension in a regular
+!          decomposition. The default is a zero vector.
 !     \item[{[deLabelList]}]
 !          List assigning DE labels to the default sequence of DEs. The default
-!          sequence is given by the order of DEs in the {\tt deBlockList} 
+!          sequence is given by the column major order of the {\tt regDecomp}
 !          argument.
 !     \item[{[indexflag]}]
 !          Indicates whether the indices provided by the {\tt minIndex} and
@@ -1871,11 +1382,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !          between DistGrid tiles in index space.
 !          See section \ref{api:DistGridConnectionSet} for the associated Set()
 !          method.
-!     \item[{[delayout]}]
-!          Optional {\tt ESMF\_DELayout} object to be used. By default a new
-!          DELayout object will be created with the correct number of DEs. If
-!          a DELayout object is specified its number of DEs must match the 
-!          number indicated by {\tt regDecomp}.
+!     \item[fastAxis]
+!          Integer value indicating along which axis fast communication is
+!          requested. This hint will be used during DELayout creation.
 !     \item[{[vm]}]
 !          Optional {\tt ESMF\_VM} object of the current context. Providing the
 !          VM of the current context will lower the method's overhead.
@@ -1887,75 +1396,115 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !------------------------------------------------------------------------------
     integer                 :: localrc      ! local return code
     type(ESMF_DistGrid)     :: distgrid     ! opaque pointer to new C++ DistGrid
+    type(ESMF_InterfaceInt) :: minIndexAux  ! helper variable
+    type(ESMF_InterfaceInt) :: maxIndexAux  ! helper variable
+    type(ESMF_InterfaceInt) :: regDecompAux ! helper variable
+    type(ESMF_Decomp_Flag), target   :: dummyDf(0)  ! satisfy C interface
+    type(ESMF_Decomp_Flag), pointer  ::  opt_decompflag(:) ! optional arg helper
+    integer                 :: len_decompflag ! helper variable
+    type(ESMF_InterfaceInt) :: regDecompFirstExtraAux ! helper variable
+    type(ESMF_InterfaceInt) :: regDecompLastExtraAux ! helper variable
+    type(ESMF_InterfaceInt) :: deLabelListAux ! helper variable
+    type(ESMF_InterfaceInt) :: connectionListAux ! helper variable
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
     
     ! Check init status of arguments
-    ESMF_INIT_CHECK_DEEP(ESMF_DELayoutGetInit, delayout, rc)
     ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
     
-    ! Initialize the pointer to NULL
+    ! Deal with (optional) array arguments
+    minIndexAux = ESMF_InterfaceIntCreate(minIndex, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    maxIndexAux = ESMF_InterfaceIntCreate(maxIndex, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    regDecompAux = ESMF_InterfaceIntCreate(regDecomp, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    if (present(decompflag)) then
+      len_decompflag = size(decompflag)
+      opt_decompflag => decompflag
+    else
+      len_decompflag = 0
+      opt_decompflag => dummyDf
+    endif
+    regDecompFirstExtraAux = ESMF_InterfaceIntCreate(regDecompFirstExtra, &
+      rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    regDecompLastExtraAux = ESMF_InterfaceIntCreate(regDecompLastExtra, &
+      rc=localrc)
+    deLabelListAux = ESMF_InterfaceIntCreate(deLabelList, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    connectionListAux = ESMF_InterfaceIntCreateDGConn(connectionList, &
+      rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! Mark this DistGrid as invalid
     distgrid%this = ESMF_NULL_POINTER
 
-    !DUMMY TEST TO QUIET DOWN COMPILER WARNINGS
-    !TODO: Remove the following dummy test when dummy argument actually used
-    if (size(minIndex) == size(minIndex)) continue
-
-    !DUMMY TEST TO QUIET DOWN COMPILER WARNINGS
-    !TODO: Remove the following dummy test when dummy argument actually used
-    if (size(maxIndex) == size(maxIndex)) continue
-
-    !DUMMY TEST TO QUIET DOWN COMPILER WARNINGS
-    !TODO: Remove the following dummy test when dummy argument actually used
-    if (size(deBlockList) == size(deBlockList)) continue
-
-    !DUMMY TEST TO QUIET DOWN COMPILER WARNINGS
-    !TODO: Remove the following dummy test when dummy argument actually used
-    if (present(deLabelList)) continue
-
-    !DUMMY TEST TO QUIET DOWN COMPILER WARNINGS
-    !TODO: Remove the following dummy test when dummy argument actually used
-    if (present(indexflag)) continue
-
-    !DUMMY TEST TO QUIET DOWN COMPILER WARNINGS
-    !TODO: Remove the following dummy test when dummy argument actually used
-    if (present(connectionList)) continue
-
-    ! Call into the C++ interface, which will sort out optional arguments.
-!    call c_ESMC_DistGridCreateRDFA(distgrid, minIndexAux, maxIndexAux, &
-!      regDecompAux, opt_decompflag, len_decompflag, deLabelListAux, indexflag, &
-!      connectionListAux, fastAxis, vm, localrc)
-!    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-!      ESMF_CONTEXT, rcToReturn=rc)) return
-
+    ! call into the C++ interface, which will sort out optional arguments
+    call c_ESMC_DistGridCreateRDFA(distgrid, minIndexAux, maxIndexAux, &
+      regDecompAux, opt_decompflag, len_decompflag, regDecompFirstExtraAux, &
+      regDecompLastExtraAux, deLabelListAux, indexflag, &
+      connectionListAux, fastAxis, vm, localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+      
+    ! garbage collection
+    call ESMF_InterfaceIntDestroy(minIndexAux, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_InterfaceIntDestroy(maxIndexAux, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_InterfaceIntDestroy(regDecompAux, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_InterfaceIntDestroy(regDecompFirstExtraAux, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_InterfaceIntDestroy(regDecompLastExtraAux, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_InterfaceIntDestroy(deLabelListAux, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_InterfaceIntDestroy(connectionListAux, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    
     ! Set return value
-    ESMF_DistGridCreateDBP = distgrid 
+    ESMF_DistGridCreateRDF = distgrid 
  
     ! Set init code
-    ESMF_INIT_SET_CREATED(ESMF_DistGridCreateDBP)
+    ESMF_INIT_SET_CREATED(ESMF_DistGridCreateRDF)
  
     ! return successfully
-    !if (present(rc)) rc = ESMF_SUCCESS   TODO: enable once implemented
+    if (present(rc)) rc = ESMF_SUCCESS
  
-  end function ESMF_DistGridCreateDBP
+  end function ESMF_DistGridCreateRDF
 !------------------------------------------------------------------------------
 
 
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_DistGridCreateRDTFA()"
+#define ESMF_METHOD "ESMF_DistGridCreateRDTF()"
 !BOPI
 ! !IROUTINE: ESMF_DistGridCreate - Create DistGrid object on multiple tiles with regular decomposition and fast axis
 
 ! !INTERFACE:
   ! Private name; call using ESMF_DistGridCreate()
-  function ESMF_DistGridCreateRDTFA(minIndex, maxIndex, regDecomp, decompflag, &
+  function ESMF_DistGridCreateRDTF(minIndex, maxIndex, regDecomp, decompflag, &
     deLabelList, indexflag, connectionList, fastAxis, vm, rc)
 !         
 ! !RETURN VALUE:
-    type(ESMF_DistGrid) :: ESMF_DistGridCreateRDTFA
+    type(ESMF_DistGrid) :: ESMF_DistGridCreateRDTF
 !
 ! !ARGUMENTS:
     integer,                       intent(in)            :: minIndex(:,:)
@@ -2079,31 +1628,482 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      ESMF_CONTEXT, rcToReturn=rc)) return
     
     ! Set return value
-    ESMF_DistGridCreateRDTFA = distgrid
+    ESMF_DistGridCreateRDTF = distgrid
  
     ! Set init code
-    ESMF_INIT_SET_CREATED(ESMF_DistGridCreateRDTFA)
+    ESMF_INIT_SET_CREATED(ESMF_DistGridCreateRDTF)
  
     ! return successfully
     !if (present(rc)) rc = ESMF_SUCCESS   TODO: enable once implemented
  
-  end function ESMF_DistGridCreateRDTFA
+  end function ESMF_DistGridCreateRDTF
 !------------------------------------------------------------------------------
 
 
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_DistGridCreateDBPFA()"
+#define ESMF_METHOD "ESMF_DistGridCreateDB()"
+!BOP
+! !IROUTINE: ESMF_DistGridCreate - Create DistGrid object with DE blocks
+
+! !INTERFACE:
+  ! Private name; call using ESMF_DistGridCreate()
+  function ESMF_DistGridCreateDB(minIndex, maxIndex, deBlockList, &
+    keywordEnforcer, deLabelList, indexflag, connectionList, delayout, vm, rc)
+!         
+! !RETURN VALUE:
+    type(ESMF_DistGrid) :: ESMF_DistGridCreateDB
+!
+! !ARGUMENTS:
+    integer,                       intent(in)            :: minIndex(:)
+    integer,                       intent(in)            :: maxIndex(:)
+    integer,                       intent(in)            :: deBlockList(:,:,:)
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    integer,                       intent(in),  optional :: deLabelList(:)
+    type(ESMF_Index_Flag),         intent(in),  optional :: indexflag
+    type(ESMF_DistGridConnection), intent(in),  optional :: connectionList(:)
+    type(ESMF_DELayout),           intent(in),  optional :: delayout
+    type(ESMF_VM),                 intent(in),  optional :: vm
+    integer,                       intent(out), optional :: rc
+!
+! !STATUS:
+! \begin{itemize}
+! \item\apiStatusCompatibleVersion{5.2.0r}
+! \end{itemize}
+!
+! !DESCRIPTION:
+!     \begin{sloppypar}
+!     Create an {\tt ESMF\_DistGrid} from a single logically rectangular (LR) 
+!     tile with decomposition specified by {\tt deBlockList}.
+!     \end{sloppypar}
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[minIndex]
+!          Global coordinate tuple of the lower corner of the tile.
+!     \item[maxIndex]
+!          Global coordinate tuple of the upper corner of the tile.
+!     \item[deBlockList]
+!          List of DE-local LR blocks. The third index of {\tt deBlockList}
+!          steps through the deBlock elements, which are defined by the first
+!          two indices. The first index must be of size {\tt dimCount} and the 
+!          second index must be of size 2. Each 2D element of {\tt deBlockList}
+!          defined by the first two indices hold the following information.
+!          \begin{verbatim}
+!                   +---------------------------------------> 2nd index
+!                   |    1               2           
+!                   | 1  minIndex(1)    maxIndex(1)
+!                   | 2  minIndex(2)    maxIndex(2)
+!                   | .  minIndex(.)    maxIndex(.)
+!                   | .
+!                   v
+!                  1st index
+!          \end{verbatim}
+!          It is required that there be no overlap between the LR segments
+!          defined by deBlockList.
+!     \item[{[deLabelList]}]
+!          List assigning DE labels to the default sequence of DEs. The default
+!          sequence is given by the order of DEs in the {\tt deBlockList} 
+!          argument.
+!     \item[{[indexflag]}]
+!          Indicates whether the indices provided by the {\tt minIndex} and
+!          {\tt maxIndex} arguments are to be interpreted to form a global
+!          index space or not. The default is {\tt ESMF\_INDEX\_DELOCAL}.
+!          See section \ref{const:indexflag} for a complete list of options.
+!     \item[{[connectionList]}]
+!          List of {\tt ESMF\_DistGridConnection} objects, defining connections
+!          between DistGrid tiles in index space.
+!          See section \ref{api:DistGridConnectionSet} for the associated Set()
+!          method.
+!     \item[{[delayout]}]
+!          Optional {\tt ESMF\_DELayout} object to be used. By default a new
+!          DELayout object will be created with the correct number of DEs. If
+!          a DELayout object is specified its number of DEs must match the 
+!          number indicated by {\tt regDecomp}.
+!     \item[{[vm]}]
+!          Optional {\tt ESMF\_VM} object of the current context. Providing the
+!          VM of the current context will lower the method's overhead.
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+!------------------------------------------------------------------------------
+    integer                 :: localrc      ! local return code
+    type(ESMF_DistGrid)     :: distgrid     ! opaque pointer to new C++ DistGrid
+    type(ESMF_InterfaceInt) :: minIndexAux  ! helper variable
+    type(ESMF_InterfaceInt) :: maxIndexAux  ! helper variable
+    type(ESMF_InterfaceInt) :: deBlockListAux ! helper variable
+    type(ESMF_InterfaceInt) :: deLabelListAux ! helper variable
+    type(ESMF_InterfaceInt) :: connectionListAux ! helper variable
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+    
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_DELayoutGetInit, delayout, rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
+    
+    ! Deal with (optional) array arguments
+    minIndexAux = ESMF_InterfaceIntCreate(minIndex, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    maxIndexAux = ESMF_InterfaceIntCreate(maxIndex, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    deBlockListAux = ESMF_InterfaceIntCreate(farray3D=deBlockList, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    deLabelListAux = ESMF_InterfaceIntCreate(deLabelList, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    connectionListAux = ESMF_InterfaceIntCreateDGConn(connectionList, &
+      rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! Mark this DistGrid as invalid
+    distgrid%this = ESMF_NULL_POINTER
+
+    ! call into the C++ interface, which will sort out optional arguments
+    call c_ESMC_DistGridCreateDB(distgrid, minIndexAux, maxIndexAux, &
+      deBlockListAux, deLabelListAux, indexflag, &
+      connectionListAux, delayout, vm, localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+      
+    ! garbage collection
+    call ESMF_InterfaceIntDestroy(minIndexAux, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_InterfaceIntDestroy(maxIndexAux, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_InterfaceIntDestroy(deBlockListAux, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_InterfaceIntDestroy(deLabelListAux, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_InterfaceIntDestroy(connectionListAux, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    
+    ! Set return value
+    ESMF_DistGridCreateDB = distgrid 
+ 
+    ! Set init code
+    ESMF_INIT_SET_CREATED(ESMF_DistGridCreateDB)
+ 
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+ 
+  end function ESMF_DistGridCreateDB
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_DistGridCreateDBT()"
+!BOPI
+! !IROUTINE: ESMF_DistGridCreate - Create DistGrid object on multiple tiles with regular decomposition
+
+! !INTERFACE:
+  ! Private name; call using ESMF_DistGridCreate()
+  function ESMF_DistGridCreateDBT(minIndex, maxIndex, deBlockList, deLabelList,&
+    indexflag, connectionList, delayout, vm, rc)
+!         
+! !RETURN VALUE:
+    type(ESMF_DistGrid) :: ESMF_DistGridCreateDBT
+!
+! !ARGUMENTS:
+    integer,                       intent(in)            :: minIndex(:,:)
+    integer,                       intent(in)            :: maxIndex(:,:)
+    integer,                       intent(in)            :: deBlockList(:,:,:)
+    integer,                       intent(in),  optional :: deLabelList(:)
+    type(ESMF_Index_Flag),         intent(in),  optional :: indexflag
+    type(ESMF_DistGridConnection), intent(in),  optional :: connectionList(:)
+    type(ESMF_DELayout),           intent(in),  optional :: delayout
+    type(ESMF_VM),                 intent(in),  optional :: vm
+    integer,                       intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!     Create an {\tt ESMF\_DistGrid} on multiple logically 
+!     rectangular (LR) tiles with regular decomposition. A regular
+!     decomposition is of the same rank as the tile and decomposes
+!     each dimension into a fixed number of DEs. A regular decomposition of a
+!     multi-tile DistGrid is expressed by a list of DE count vectors, one
+!     vector for each tile. Each vector contained in the 
+!     {\tt regDecomp} argument ascribes DE counts for each dimension. It is 
+!     erroneous to provide more tiles than there are DEs.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[minIndex]
+!          The first index provides the global coordinate tuple of the lower 
+!          corner of a tile. The second index indicates the tile number.
+!     \item[maxIndex]
+!          The first index provides the global coordinate tuple of the upper
+!          corner of a tile. The second index indicates the tile number.
+!     \item[deBlockList]
+!          List of DE-local LR blocks. The third index of {\tt deBlockList}
+!          steps through the deBlock elements, which are defined by the first
+!          two indices. The first index must be of size {\tt dimCount} and the 
+!          second index must be of size 3. Each 2D element of {\tt deBlockList}
+!          defined by the first two indices hold the following information.
+!          \begin{verbatim}
+!                   +---------------------------------------> 2nd index
+!                   |    1               2              3
+!                   | 1  minIndex(1)    maxIndex(1)   tileID
+!                   | 2  minIndex(2)    maxIndex(2)   (not used)
+!                   | .  minIndex(.)    maxIndex(.)   (not used)
+!                   | .
+!                   v
+!                  1st index
+!          \end{verbatim}
+!          It is required that there be no overlap between the LR segments
+!          defined by deBlockList.
+!     \item[{[deLabelList]}]
+!          List assigning DE labels to the default sequence of DEs. The default
+!          sequence is given by the order of DEs in the {\tt deBlockList} 
+!          argument.
+!     \item[{[indexflag]}]
+!          Indicates whether the indices provided by the {\tt minIndex} and
+!          {\tt maxIndex} arguments are to be interpreted to form a global
+!          index space or not. The default is {\tt ESMF\_INDEX\_DELOCAL}.
+!          See section \ref{const:indexflag} for a complete list of options.
+!     \item[{[connectionList]}]
+!          List of {\tt ESMF\_DistGridConnection} objects, defining connections
+!          between DistGrid tiles in index space.
+!          See section \ref{api:DistGridConnectionSet} for the associated Set()
+!          method.
+!     \item[{[delayout]}]
+!          Optional {\tt ESMF\_DELayout} object to be used. By default a new
+!          DELayout object will be created with the correct number of DEs. If
+!          a DELayout object is specified its number of DEs must match the 
+!          number indicated by {\tt regDecomp}.
+!     \item[{[vm]}]
+!          Optional {\tt ESMF\_VM} object of the current context. Providing the
+!          VM of the current context will lower the method's overhead.
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOPI
+!------------------------------------------------------------------------------
+    integer                 :: localrc      ! local return code
+    type(ESMF_DistGrid)     :: distgrid     ! opaque pointer to new C++ DistGrid
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+    
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_DELayoutGetInit, delayout, rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
+    
+    ! Initialize the pointer to NULL
+    distgrid%this = ESMF_NULL_POINTER
+
+    !DUMMY TEST TO QUIET DOWN COMPILER WARNINGS
+    !TODO: Remove the following dummy test when dummy argument actually used
+    if (size(minIndex) == size(minIndex)) continue
+
+    !DUMMY TEST TO QUIET DOWN COMPILER WARNINGS
+    !TODO: Remove the following dummy test when dummy argument actually used
+    if (size(maxIndex) == size(maxIndex)) continue
+
+    !DUMMY TEST TO QUIET DOWN COMPILER WARNINGS
+    !TODO: Remove the following dummy test when dummy argument actually used
+    if (size(deBlockList) == size(deBlockList)) continue
+
+    !DUMMY TEST TO QUIET DOWN COMPILER WARNINGS
+    !TODO: Remove the following dummy test when dummy argument actually used
+    if (present(deLabelList)) continue
+
+    !DUMMY TEST TO QUIET DOWN COMPILER WARNINGS
+    !TODO: Remove the following dummy test when dummy argument actually used
+    if (present(indexflag)) continue
+
+    !DUMMY TEST TO QUIET DOWN COMPILER WARNINGS
+    !TODO: Remove the following dummy test when dummy argument actually used
+    if (present(connectionList)) continue
+
+    ! Call into the C++ interface, which will sort out optional arguments.
+!    call c_ESMC_DistGridCreateRDFA(distgrid, minIndexAux, maxIndexAux, &
+!      regDecompAux, opt_decompflag, len_decompflag, deLabelListAux, indexflag, &
+!      connectionListAux, fastAxis, vm, localrc)
+!    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+!      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! Set return value
+    ESMF_DistGridCreateDBT = distgrid 
+ 
+    ! Set init code
+    ESMF_INIT_SET_CREATED(ESMF_DistGridCreateDBT)
+ 
+    ! return successfully
+    !if (present(rc)) rc = ESMF_SUCCESS   TODO: enable once implemented
+ 
+  end function ESMF_DistGridCreateDBT
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_DistGridCreateDBF()"
+!BOPI
+! !IROUTINE: ESMF_DistGridCreate - Create DistGrid object with DE blocks and fast axis
+
+! !INTERFACE:
+  ! Private name; call using ESMF_DistGridCreate()
+  function ESMF_DistGridCreateDBF(minIndex, maxIndex, &
+    deBlockList, deLabelList, indexflag, connectionList, &
+    fastAxis, vm, rc)
+!         
+! !RETURN VALUE:
+    type(ESMF_DistGrid) :: ESMF_DistGridCreateDBF
+!
+! !ARGUMENTS:
+    integer,                       intent(in)            :: minIndex(:)
+    integer,                       intent(in)            :: maxIndex(:)
+    integer,                       intent(in)            :: deBlockList(:,:,:)
+    integer,                       intent(in),  optional :: deLabelList(:)
+    type(ESMF_Index_Flag),         intent(in),  optional :: indexflag
+    type(ESMF_DistGridConnection), intent(in),  optional :: connectionList(:)
+    integer,                       intent(in)            :: fastAxis
+    type(ESMF_VM),                 intent(in),  optional :: vm
+    integer,                       intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!     Create an {\tt ESMF\_DistGrid} from a single logically rectangular (LR) 
+!     tile with decomposition specified by {\tt deBlockList}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[minIndex]
+!          Global coordinate tuple of the lower corner of the tile.
+!     \item[maxIndex]
+!          Global coordinate tuple of the upper corner of the tile.
+!     \item[deBlockList]
+!          List of DE-local LR blocks. The third index of {\tt deBlockList}
+!          steps through the deBlock elements, which are defined by the first
+!          two indices. The first index must be of size {\tt dimCount} and the 
+!          second index must be of size 3. Each 2D element of {\tt deBlockList}
+!          defined by the first two indices hold the following information.
+!          \begin{verbatim}
+!                   +---------------------------------------> 2nd index
+!                   |    1               2              3
+!                   | 1  minIndex(1)    maxIndex(1)   tileID
+!                   | 2  minIndex(2)    maxIndex(2)   (not used)
+!                   | .  minIndex(.)    maxIndex(.)   (not used)
+!                   | .
+!                   v
+!                  1st index
+!          \end{verbatim}
+!          It is required that there be no overlap between the LR segments
+!          defined by deBlockList.
+!     \item[{[deLabelList]}]
+!          List assigning DE labels to the default sequence of DEs. The default
+!          sequence is given by the order of DEs in the {\tt deBlockList} 
+!          argument.
+!     \item[{[indexflag]}]
+!          Indicates whether the indices provided by the {\tt minIndex} and
+!          {\tt maxIndex} arguments are to be interpreted to form a global
+!          index space or not. The default is {\tt ESMF\_INDEX\_DELOCAL}.
+!          See section \ref{const:indexflag} for a complete list of options.
+!     \item[{[connectionList]}]
+!          List of {\tt ESMF\_DistGridConnection} objects, defining connections
+!          between DistGrid tiles in index space.
+!          See section \ref{api:DistGridConnectionSet} for the associated Set()
+!          method.
+!     \item[fastAxis]
+!          Integer value indicating along which axis fast communication is
+!          requested. This hint will be used during DELayout creation.
+!     \item[{[vm]}]
+!          Optional {\tt ESMF\_VM} object of the current context. Providing the
+!          VM of the current context will lower the method's overhead.
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOPI
+!------------------------------------------------------------------------------
+    integer                 :: localrc      ! local return code
+    type(ESMF_DistGrid)     :: distgrid     ! opaque pointer to new C++ DistGrid
+    
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+    
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
+    
+    ! Initialize the pointer to NULL
+    distgrid%this = ESMF_NULL_POINTER
+
+    !DUMMY TEST TO QUIET DOWN COMPILER WARNINGS
+    !TODO: Remove the following dummy test when dummy argument actually used
+    if (size(minIndex) == size(minIndex)) continue
+
+    !DUMMY TEST TO QUIET DOWN COMPILER WARNINGS
+    !TODO: Remove the following dummy test when dummy argument actually used
+    if (size(maxIndex) == size(maxIndex)) continue
+
+    !DUMMY TEST TO QUIET DOWN COMPILER WARNINGS
+    !TODO: Remove the following dummy test when dummy argument actually used
+    if (size(deBlockList) == size(deBlockList)) continue
+
+    !DUMMY TEST TO QUIET DOWN COMPILER WARNINGS
+    !TODO: Remove the following dummy test when dummy argument actually used
+    if (present(deLabelList)) continue
+
+    !DUMMY TEST TO QUIET DOWN COMPILER WARNINGS
+    !TODO: Remove the following dummy test when dummy argument actually used
+    if (present(indexflag)) continue
+
+    !DUMMY TEST TO QUIET DOWN COMPILER WARNINGS
+    !TODO: Remove the following dummy test when dummy argument actually used
+    if (present(connectionList)) continue
+
+    !DUMMY TEST TO QUIET DOWN COMPILER WARNINGS
+    !TODO: Remove the following dummy test when dummy argument actually used
+    if (fastaxis == fastaxis) continue
+    
+    ! Call into the C++ interface, which will sort out optional arguments.
+!    call c_ESMC_DistGridCreateRDFA(distgrid, minIndexAux, maxIndexAux, &
+!      regDecompAux, opt_decompflag, len_decompflag, deLabelListAux, indexflag, &
+!      connectionListAux, fastAxis, vm, localrc)
+!    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+!      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! Set return value
+    ESMF_DistGridCreateDBF = distgrid 
+ 
+    ! Set init code
+    ESMF_INIT_SET_CREATED(ESMF_DistGridCreateDBF)
+ 
+    ! return successfully
+    !if (present(rc)) rc = ESMF_SUCCESS   TODO: enable once implemented
+ 
+  end function ESMF_DistGridCreateDBF
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_DistGridCreateDBTF()"
 !BOPI
 ! !IROUTINE: ESMF_DistGridCreate - Create DistGrid object on multiple tiles with DE blocks and fast axis
 
 ! !INTERFACE:
   ! Private name; call using ESMF_DistGridCreate()
-  function ESMF_DistGridCreateDBPFA(minIndex, maxIndex, deBlockList, &
+  function ESMF_DistGridCreateDBTF(minIndex, maxIndex, deBlockList, &
     deLabelList, indexflag, connectionList, fastAxis, vm, rc)
 !         
 ! !RETURN VALUE:
-    type(ESMF_DistGrid) :: ESMF_DistGridCreateDBPFA
+    type(ESMF_DistGrid) :: ESMF_DistGridCreateDBTF
 !
 ! !ARGUMENTS:
     integer,                       intent(in)            :: minIndex(:,:)
@@ -2221,15 +2221,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      ESMF_CONTEXT, rcToReturn=rc)) return
     
     ! Set return value
-    ESMF_DistGridCreateDBPFA = distgrid
+    ESMF_DistGridCreateDBTF = distgrid
  
     ! Set init code
-    ESMF_INIT_SET_CREATED(ESMF_DistGridCreateDBPFA)
+    ESMF_INIT_SET_CREATED(ESMF_DistGridCreateDBTF)
  
     ! return successfully
     !if (present(rc)) rc = ESMF_SUCCESS   TODO: enable once implemented
  
-  end function ESMF_DistGridCreateDBPFA
+  end function ESMF_DistGridCreateDBTF
 !------------------------------------------------------------------------------
 
 
