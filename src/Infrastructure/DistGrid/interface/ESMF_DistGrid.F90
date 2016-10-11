@@ -942,11 +942,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \end{itemize}
 !
 ! !DESCRIPTION:
-!     Create an {\tt ESMF\_DistGrid} from a single logically rectangular (LR) 
-!     tile with regular decomposition. A regular decomposition is of the same 
-!     rank as the tile and decomposes each dimension into a fixed number of 
-!     DEs. A regular decomposition of a single tile is expressed by a 
-!     single {\tt regDecomp} list of DE counts in each dimension.
+!     Create an {\tt ESMF\_DistGrid} from a single logically rectangular tile.
+!     The tile has a regular decomposition, where the tile is decomposed
+!     into a fixed number of DEs along each dimension. A regular decomposition
+!     of a single tile is expressed by a single {\tt regDecomp} list of DE 
+!     counts in each dimension.
 !
 !     The arguments are:
 !     \begin{description}
@@ -1141,14 +1141,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \end{itemize}
 !
 ! !DESCRIPTION:
-!     Create an {\tt ESMF\_DistGrid} on multiple logically 
-!     rectangular (LR) tiles with regular decomposition. A regular
-!     decomposition is of the same rank as the tile and decomposes
-!     each dimension into a fixed number of DEs. A regular decomposition of a
-!     multi-tile DistGrid is expressed by a list of DE count vectors, one
-!     vector for each tile. Each vector contained in the 
-!     {\tt regDecompPTile} argument ascribes DE counts for each dimension. It is 
-!     erroneous to provide more tiles than there are DEs.
+!     Create an {\tt ESMF\_DistGrid} from multiple logically rectangular tiles. 
+!     Each tile has a regular decomposition, where the tile is decomposed
+!     into a fixed number of DEs along each dimension. A regular decomposition
+!     of a multi-tile DistGrid is expressed by a list of DE count vectors, one
+!     vector for each tile. If a DELayout is specified, it must contain at least
+!     as many DEs as there are tiles.
 !
 !     The arguments are:
 !     \begin{description}
@@ -1159,12 +1157,18 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !          The first index provides the global coordinate tuple of the upper
 !          corner of a tile. The second index indicates the tile number.
 !     \item[{[regDecompPTile]}]
-!          List of DE counts for each dimension. The second 
-!          index indicates the tile number. The default decomposition will
-!          be {\tt deCount}$ \times 1 \times ... \times 1$. The value of
-!          {\tt deCount} for a default DELayout equals {\tt petCount}, i.e. the
-!          default decomposition will be into as many DEs as there are 
-!          PETs and the distribution will be 1 DE per PET.
+!          List of DE counts for each dimension. The second index steps through
+!          the tiles. The total {\tt deCount} is determined as ths sum over
+!          the products of {\tt regDecomp} elements for each tile.
+!          By default each tile is decomposed only along the first dimension.
+!          The default number of DEs per tile is at least 1, but may be greater
+!          for the leading tiles if the {\tt deCount} is greater than the 
+!          {\tt tileCount}. If no DELayout is specified, the {\tt deCount} is 
+!          by default set equal to the number of PETs ({\tt petCount}), or the 
+!          number of tiles ({\tt tileCount}), which ever is greater. This means
+!          that as long as {\tt petCount} > {\tt tileCount}, the resulting
+!          default distribution will be 1 DE per PET. Notice that some tiles
+!          may be decomposed into more DEs than other tiles.
 !     \item[{[decompflagPTile]}]
 !          List of decomposition flags indicating how each dimension of each
 !          tile is to be divided between the DEs. The default setting
@@ -1195,9 +1199,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !          method.
 !     \item[{[delayout]}]
 !          Optional {\tt ESMF\_DELayout} object to be used. By default a new
-!          DELayout object will be created with the correct number of DEs. If
-!          a DELayout object is specified its number of DEs must match the 
-!          number indicated by {\tt regDecompPTile}.
+!          DELayout object will be created with as many DEs as there are PETs,
+!          or tiles, which ever is greater. If a DELayout object is specified,
+!          the number of DEs must match {\tt regDecompPTile}, if present. In the
+!          case that {\tt regDecompPTile} was not specified, the {\tt deCount}
+!          must be at least that of the default DELayout. The 
+!          {\tt regDecompPTile} will be constructed accordingly.
 !     \item[{[vm]}]
 !          Optional {\tt ESMF\_VM} object of the current context. Providing the
 !          VM of the current context will lower the method's overhead.
