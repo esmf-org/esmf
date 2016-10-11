@@ -9919,7 +9919,7 @@ msg=" coords in periodic dim (i.e. 1) are not periodic "// &
               call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_VALUE, & 
 msg=" coords in periodic dim (i.e. 1) are not periodic "// &
     "(i.e. max coord(1)-min coord(1) /= 360)", & 
-              line=__LINE__, file=__FILE__ , rcToReturn=rc) 
+              ESMF_CONTEXT, rcToReturn=rc) 
               return 
            endif
         else if (coordSys .eq. ESMF_COORDSYS_SPH_RAD) then
@@ -9928,8 +9928,8 @@ msg=" coords in periodic dim (i.e. 1) are not periodic "// &
               call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_VALUE, & 
 msg=" coords in periodic dim (i.e. 1) are not periodic "// &
     "(i.e. max coord(1)-min coord(1) /= 2Pi)", & 
-              line=__LINE__, file=__FILE__ , rcToReturn=rc) 
-               return 
+              ESMF_CONTEXT, rcToReturn=rc) 
+              return 
            endif
         endif
      endif
@@ -9944,14 +9944,14 @@ msg=" coords in periodic dim (i.e. 1) are not periodic "// &
     if (size(minCornerCoord) .ne. dimCount) then
        call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_SIZE, & 
             msg="- minCornerCoord array must be the same dimension as the grid (i.e. maxIndex)", & 
-             line=__LINE__, file=__FILE__ , rcToReturn=rc) 
+            ESMF_CONTEXT, rcToReturn=rc) 
        return 
     endif
 
     if (size(maxCornerCoord) .ne. dimCount) then
        call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_SIZE, & 
              msg="- maxCornerCoord array must be the same dimension as the grid (i.e. maxIndex)", & 
-             line=__LINE__, file=__FILE__ , rcToReturn=rc) 
+             ESMF_CONTEXT, rcToReturn=rc) 
         return 
     endif
 
