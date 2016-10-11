@@ -2984,7 +2984,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
          call ESMF_ArrayRedistStore(srcA2D(k), dstA2D(k), routehandle=routehandle, rc=localrc)
          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
             ESMF_CONTEXT, rcToReturn=rc)) return
-         call ESMF_ArrayRedist(srcA2D(k), dstA2D(k), routehandle=routehandle, rc=localrc)
+         call ESMF_ArrayRedist(srcA2D(k), dstA2D(k), routehandle=routehandle, &
+            zeroregion=ESMF_REGION_TOTAL, rc=localrc)
          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
              ESMF_CONTEXT, rcToReturn=rc)) return
          call ESMF_ArrayRedistRelease(routehandle=routehandle, rc=localrc)
@@ -3121,7 +3122,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
              call ESMF_ArrayRedistStore(srcA(j), dstA(j), routehandle=routehandle, rc=localrc)
              if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                   ESMF_CONTEXT, rcToReturn=rc)) return
-             call ESMF_ArrayRedist(srcA(j), dstA(j), routehandle=routehandle, rc=localrc)
+             call ESMF_ArrayRedist(srcA(j), dstA(j), routehandle=routehandle, &
+               zeroregion=ESMF_REGION_TOTAL, rc=localrc)
              if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                   ESMF_CONTEXT, rcToReturn=rc)) return
              call ESMF_ArrayRedistRelease(routehandle=routehandle, rc=localrc)
