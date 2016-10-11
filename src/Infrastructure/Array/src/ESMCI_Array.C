@@ -2566,6 +2566,11 @@ bool Array::match(
     if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
     return matchResult;
   }
+  if (array1->tensorElementCount != array2->tensorElementCount){
+    matchResult = false;
+    if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
+    return matchResult;
+  }
   int localDeCount = array1->getDistGrid()->getDELayout()->getLocalDeCount();
   int *int1 = array1->totalElementCountPLocalDe;
   int *int2 = array2->totalElementCountPLocalDe;
@@ -4985,6 +4990,12 @@ int Array::redist(
   ESMC_CommFlag commflag,               // in    - communication options
   bool *finishedflag,                   // out   - TEST ops finished or not
   bool *cancelledflag,                  // out   - any cancelled operations
+  ESMC_Region_Flag zeroflag,            // in    - ESMC_REGION_TOTAL:
+                                        //          -> zero out total region
+                                        //         ESMC_REGION_SELECT:
+                                        //          -> zero out target points
+                                        //         ESMC_REGION_EMPTY:
+                                        //          -> don't zero out any points
   bool checkflag                        // in    - false: (def.) basic checks
                                         //         true:  full input check
   ){
@@ -5000,7 +5011,7 @@ int Array::redist(
 
   // implemented via sparseMatMul
   localrc = sparseMatMul(srcArray, dstArray, routehandle,
-    commflag, finishedflag, cancelledflag, ESMC_REGION_SELECT, 
+    commflag, finishedflag, cancelledflag, zeroflag, 
     ESMC_TERMORDER_FREE, checkflag);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
     &rc)) return rc;
