@@ -380,7 +380,8 @@ int IO::read(
           return rc;
 
         // std::cout << ESMC_METHOD << ": DE count > 1 - redistribute data" << std::endl;
-        localrc = ESMCI::Array::redist(temp_array_p, (*it)->getArray(), &rh);
+        localrc = ESMCI::Array::redist(temp_array_p, (*it)->getArray(), &rh,
+          ESMF_COMM_BLOCKING, NULL, NULL, ESMC_REGION_TOTAL);
         if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc))
           return rc;
 
@@ -570,7 +571,8 @@ int IO::write(
         }
 
         // std::cout << ESMC_METHOD << ": DE count > 1 - redistribute data" << std::endl;
-        localrc = ESMCI::Array::redist((*it)->getArray(), temp_array_p, &rh);
+        localrc = ESMCI::Array::redist((*it)->getArray(), temp_array_p, &rh,
+          ESMF_COMM_BLOCKING, NULL, NULL, ESMC_REGION_TOTAL);
         if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) {
         // Close the file but return original error even if close fails.
           localrc = close();
