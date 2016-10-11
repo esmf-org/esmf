@@ -955,11 +955,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     \item[maxIndex]
 !          Global coordinate tuple of the upper corner of the tile.
 !     \item[{[regDecomp]}]
-!          List of DE counts for each dimension. The default decomposition will
-!          be {\tt deCount}$ \times 1 \times ... \times 1$. The value of
-!          {\tt deCount} for a default DELayout equals {\tt petCount}, i.e. the
-!          default decomposition will be into as many DEs as there are 
-!          PETs and the distribution will be 1 DE per PET.
+!          List of DE counts for each dimension. The total {\tt deCount} is
+!          determined as the product of {\tt regDecomp} elements.
+!          By default {\tt regDecomp} = (/{\tt deCount},1,...,1/), 
+!          where {\tt deCount}
+!          is the number of DEs in the {\tt delayout}. If the default
+!          {\tt delayout} is used, the {\tt deCount} is equal to {\tt petCount}.
+!          This leads to a simple 1 DE per PET distribution, where the
+!          decompsition is only along the first dimension.
 !     \item[{[decompflag]}]
 !          List of decomposition flags indicating how each dimension of the
 !          tile is to be divided between the DEs. The default setting
@@ -1265,7 +1268,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     distgrid%this = ESMF_NULL_POINTER
 
     ! call into the C++ interface, which will sort out optional arguments
-    call c_ESMC_DistGridCreateRDP(distgrid, minIndexAux, maxIndexAux, &
+    call c_ESMC_DistGridCreateRDT(distgrid, minIndexAux, maxIndexAux, &
       regDecompAux, opt_decompflag, len1_decompflag, len2_decompflag, &
       regDecompFirstExtraAux, regDecompLastExtraAux, deLabelListAux, &
       indexflag, connectionListAux, delayout, vm, localrc)
@@ -1449,7 +1452,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     distgrid%this = ESMF_NULL_POINTER
 
     ! call into the C++ interface, which will sort out optional arguments
-    call c_ESMC_DistGridCreateRDFA(distgrid, minIndexAux, maxIndexAux, &
+    call c_ESMC_DistGridCreateRDF(distgrid, minIndexAux, maxIndexAux, &
       regDecompAux, opt_decompflag, len_decompflag, regDecompFirstExtraAux, &
       regDecompLastExtraAux, deLabelListAux, indexflag, &
       connectionListAux, fastAxis, vm, localrc)
@@ -1621,7 +1624,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (fastaxis == fastaxis) continue
     
     ! Call into the C++ interface, which will sort out optional arguments.
-!    call c_ESMC_DistGridCreateRDFA(distgrid, minIndexAux, maxIndexAux, &
+!    call c_ESMC_DistGridCreateRDF(distgrid, minIndexAux, maxIndexAux, &
 !      regDecompAux, opt_decompflag, len_decompflag, deLabelListAux, indexflag, &
 !      connectionListAux, fastAxis, vm, localrc)
 !    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -1931,7 +1934,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(connectionList)) continue
 
     ! Call into the C++ interface, which will sort out optional arguments.
-!    call c_ESMC_DistGridCreateRDFA(distgrid, minIndexAux, maxIndexAux, &
+!    call c_ESMC_DistGridCreateRDF(distgrid, minIndexAux, maxIndexAux, &
 !      regDecompAux, opt_decompflag, len_decompflag, deLabelListAux, indexflag, &
 !      connectionListAux, fastAxis, vm, localrc)
 !    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -2072,7 +2075,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (fastaxis == fastaxis) continue
     
     ! Call into the C++ interface, which will sort out optional arguments.
-!    call c_ESMC_DistGridCreateRDFA(distgrid, minIndexAux, maxIndexAux, &
+!    call c_ESMC_DistGridCreateRDF(distgrid, minIndexAux, maxIndexAux, &
 !      regDecompAux, opt_decompflag, len_decompflag, deLabelListAux, indexflag, &
 !      connectionListAux, fastAxis, vm, localrc)
 !    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -2214,7 +2217,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (fastaxis == fastaxis) continue
     
     ! Call into the C++ interface, which will sort out optional arguments.
-!    call c_ESMC_DistGridCreateRDFA(distgrid, minIndexAux, maxIndexAux, &
+!    call c_ESMC_DistGridCreateRDF(distgrid, minIndexAux, maxIndexAux, &
 !      regDecompAux, opt_decompflag, len_decompflag, deLabelListAux, indexflag, &
 !      connectionListAux, fastAxis, vm, localrc)
 !    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
