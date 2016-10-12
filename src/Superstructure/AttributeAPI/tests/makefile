@@ -12,6 +12,7 @@ AUTOGEN =  	ESMF_AttPackABundleUTest.F90 \
 			ESMF_AttPackFieldUTest.F90 \
 			ESMF_AttPackGridCompUTest.F90 \
 			ESMF_AttPackGridUTest.F90 \
+			ESMF_AttPackLocStreamUTest.F90 \
 			ESMF_AttPackSciCompUTest.F90 \
 			ESMF_AttPackStateUTest.F90 \
 			ESMF_AttributeABundleUTest.F90 \
@@ -22,6 +23,7 @@ AUTOGEN =  	ESMF_AttPackABundleUTest.F90 \
 			ESMF_AttributeFieldUTest.F90 \
 			ESMF_AttributeGridCompUTest.F90 \
 			ESMF_AttributeGridUTest.F90 \
+			ESMF_AttributeLocStreamUTest.F90 \
 			ESMF_AttributeSciCompUTest.F90 \
 			ESMF_AttributeStateUTest.F90
 
@@ -41,6 +43,7 @@ TESTS_BUILD = \
 		$(ESMF_TESTDIR)/ESMF_AttPackFieldUTest \
 		$(ESMF_TESTDIR)/ESMF_AttPackGridCompUTest \
 		$(ESMF_TESTDIR)/ESMF_AttPackGridUTest \
+		$(ESMF_TESTDIR)/ESMF_AttPackLocStreamUTest \
 		$(ESMF_TESTDIR)/ESMF_AttPackSciCompUTest \
 		$(ESMF_TESTDIR)/ESMF_AttPackStateUTest \
 		$(ESMF_TESTDIR)/ESMF_AttributeArrayUTest \
@@ -51,6 +54,7 @@ TESTS_BUILD = \
 		$(ESMF_TESTDIR)/ESMF_AttributeFieldUTest \
 		$(ESMF_TESTDIR)/ESMF_AttributeGridCompUTest \
 		$(ESMF_TESTDIR)/ESMF_AttributeGridUTest \
+		$(ESMF_TESTDIR)/ESMF_AttributeLocStreamUTest \
 		$(ESMF_TESTDIR)/ESMF_AttributeSciCompUTest \
 		$(ESMF_TESTDIR)/ESMF_AttributeStateUTest \
 		$(ESMF_TESTDIR)/ESMF_AttributeUpdateUTest \
@@ -78,6 +82,7 @@ TESTS_RUN = \
 		RUN_ESMF_AttPackFieldUTest \
 		RUN_ESMF_AttPackGridCompUTest \
 		RUN_ESMF_AttPackGridUTest \
+		RUN_ESMF_AttPackLocStreamUTest \
 		RUN_ESMF_AttPackSciCompUTest \
 		RUN_ESMF_AttPackStateUTest \
 		RUN_ESMF_AttributeArrayUTest \
@@ -88,6 +93,7 @@ TESTS_RUN = \
 		RUN_ESMF_AttributeFBundleUTest \
 		RUN_ESMF_AttributeGridCompUTest \
 		RUN_ESMF_AttributeGridUTest \
+		RUN_ESMF_AttributeLocStreamUTest \
 		RUN_ESMF_AttributeSciCompUTest \
 		RUN_ESMF_AttributeStateUTest \
 		RUN_ESMF_AttributeUpdateUTest \
@@ -115,6 +121,7 @@ TESTS_RUN_UNI = \
 		RUN_ESMF_AttPackFieldUTestUNI \
 		RUN_ESMF_AttPackGridCompUTestUNI \
 		RUN_ESMF_AttPackGridUTestUNI \
+		RUN_ESMF_AttPackLocStreamUTestUNI \
 		RUN_ESMF_AttPackSciCompUTestUNI \
 		RUN_ESMF_AttPackStateUTestUNI \
 		RUN_ESMF_AttributeArrayUTestUNI \
@@ -126,6 +133,7 @@ TESTS_RUN_UNI = \
 		RUN_ESMF_AttributeGridCompUTestUNI \
 		RUN_ESMF_AttInternalGridUTestUNI \
 		RUN_ESMF_AttributeGridUTestUNI \
+		RUN_ESMF_AttributeLocStreamUTestUNI \
 		RUN_ESMF_AttributeSciCompUTestUNI \
 		RUN_ESMF_AttributeStateUTestUNI \
 		RUN_ESMF_AttributeWriteInternalUTestUNI \
@@ -244,6 +252,18 @@ RUN_ESMF_AttPackGridUTestUNI:
 	cp -f $(ESMF_DIR)/src/Superstructure/AttributeAPI/tests/data/baseline_unnamed\ \ 0grid.xml $(ESMF_TESTDIR)/baseline_unnamed\ \ 0.xml
 	cp -f $(ESMF_DIR)/src/Superstructure/AttributeAPI/tests/data/baseline_unnamed\ \ 0grid.stdout $(ESMF_TESTDIR)/baseline_unnamed\ \ 0.stdout
 	$(MAKE) TNAME=AttPackGrid NP=1 ftest
+
+# --- AttPackLocStream
+
+RUN_ESMF_AttPackLocStreamUTest:
+	cp -f $(ESMF_DIR)/src/Superstructure/AttributeAPI/tests/data/baseline_LocStream\ \ 2.xml $(ESMF_TESTDIR)
+	cp -f $(ESMF_DIR)/src/Superstructure/AttributeAPI/tests/data/baseline_LocStream\ \ 2.stdout $(ESMF_TESTDIR)
+	$(MAKE) TNAME=AttPackLocStream NP=4 ftest
+
+RUN_ESMF_AttPackLocStreamUTestUNI:
+	cp -f $(ESMF_DIR)/src/Superstructure/AttributeAPI/tests/data/baseline_LocStream\ \ 2.xml $(ESMF_TESTDIR)
+	cp -f $(ESMF_DIR)/src/Superstructure/AttributeAPI/tests/data/baseline_LocStream\ \ 2.stdout $(ESMF_TESTDIR)
+	$(MAKE) TNAME=AttPackLocStream NP=1 ftest
 
 # --- AttPackSciComp
 
@@ -368,6 +388,14 @@ RUN_ESMF_AttributeGridUTest:
 
 RUN_ESMF_AttributeGridUTestUNI:
 	$(MAKE) TNAME=AttributeGrid NP=1 ftest
+
+# --- LocStream
+
+RUN_ESMF_AttributeLocStreamUTest:
+	$(MAKE) TNAME=AttributeLocStream NP=4 ftest
+
+RUN_ESMF_AttributeLocStreamUTestUNI:
+	$(MAKE) TNAME=AttributeLocStream NP=1 ftest
 
 # --- SciComp
 

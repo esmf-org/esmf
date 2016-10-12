@@ -180,6 +180,8 @@ static const char *const version = "$Id$";
 //  
 //EOPI
 
+  ESMC_Print();
+
   return ID;
 
 } // end ESMC_BaseGetID

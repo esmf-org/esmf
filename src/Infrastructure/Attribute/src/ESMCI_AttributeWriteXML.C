@@ -287,6 +287,7 @@ int Attribute::AttributeWriteXMLheader(
                object.compare("arraybundle")==0 ||
                object.compare("array")==0 ||
                object.compare("grid")==0 ||
+               object.compare("locstream")==0 ||
                object.compare("distgrid")==0) {
         modelcompname="N/A";
         fullname="N/A";

@@ -50,6 +50,7 @@ program ESMF_AttributeFieldUTest
       ! local variables
       type(ESMF_Grid)  :: grid
       type(ESMF_Field) :: field
+      type(ESMF_LocStream) :: locstream
 
       ! macro variables
       AttributeTestVariablesMacro()
@@ -72,8 +73,8 @@ program ESMF_AttributeFieldUTest
       ! preparations
       ! fields
       field = ESMF_FieldEmptyCreate(name="field", rc=rc)
-
       grid = ESMF_GridEmptyCreate(rc=rc)
+      locstream = ESMF_LocStreamCreate(20, rc=rc)
 
 !-------------------------------------------------------------------------
 !  FIELD
@@ -86,24 +87,22 @@ AttributeTestMacro(field, a Field, EX_UTest, NEX_UTest)
     !-------------------------------------------------------------------------
 
       !NEX_UTest
-      ! Link a Field Attribute hierarchy to a Grid Attribute hierarchy Field Test, again
+      ! Link a Field Attribute hierarchy to a Grid Attribute hierarchy Field Test
       call ESMF_AttributeLink(field, grid, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Linking a Field hierarchy to a Grid hierarchy Test, again"
+      write(name, *) "Linking a Field hierarchy to a Grid hierarchy Test"
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
-^ifdef ESMF_TESTEXHAUSTIVE
-
-      !EX_UTest
-      ! Link a Field Attribute hierarchy to a Grid Attribute hierarchy Field Test, again
+      !NEX_UTest
+      ! Link a Field Attribute hierarchy to a Grid Attribute hierarchy 2 Field Test
       call ESMF_AttributeLink(field, grid, rc=rc)
-      write(failMsg, *) "Did not return ESMC_RC_ATTR_LINK"
-      write(name, *) "Linking a Field hierarchy to a Grid hierarchy Test, again"
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Linking a Field hierarchy to a Grid hierarchy 2 Test"
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
-      !EX_UTest
+      !NEX_UTest
       ! Unlink a Field Attribute hierarchy from a Grid Attribute hierarchy Field Test
       call ESMF_AttributeLinkRemove(field, grid, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
@@ -111,19 +110,65 @@ AttributeTestMacro(field, a Field, EX_UTest, NEX_UTest)
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
-      !EX_UTest
-      ! Unlink a Field Attribute hierarchy from a Grid Attribute hierarchy Field Test 2
+      !NEX_UTest
+      ! Unlink a Field Attribute hierarchy from a Grid Attribute hierarchy 2 Field Test
       call ESMF_AttributeLinkRemove(field, grid, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Unlinking a Field hierarchy from a Grid hierarchy Test 2"
+      write(name, *) "Unlinking a Field hierarchy from a Grid hierarchy 2 Test"
+      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      !NEX_UTest
+      ! Unlink a Field Attribute hierarchy from a Grid Attribute hierarchy 3 Field Test
+      call ESMF_AttributeLinkRemove(field, grid, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Unlinking a Field hierarchy from a Grid hierarchy 3 Test"
+      call ESMF_Test((rc/=ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+^ifdef ESMF_TESTEXHAUSTIVE
+
+    !-------------------------------------------------------------------------
+    !  Attribute hierarchy linking
+    !-------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Link a Field Attribute hierarchy to a LocStream Attribute hierarchy Field Test
+      call ESMF_AttributeLink(field, locStream, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Linking a Field hierarchy to a LocStream hierarchy Test"
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
       !EX_UTest
-      ! Unlink a Field Attribute hierarchy from a Grid Attribute hierarchy Field Tes3
-      call ESMF_AttributeLinkRemove(field, grid, rc=rc)
+      ! Link a Field Attribute hierarchy to a LocStream Attribute hierarchy 2 Field Test
+      call ESMF_AttributeLink(field, locStream, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Unlinking a Field hierarchy from a Grid hierarchy Test 3"
+      write(name, *) "Linking a Field hierarchy to a LocStream hierarchy 2 Test"
+      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Unlink a Field Attribute hierarchy from a LocStream Attribute hierarchy Field Test
+      call ESMF_AttributeLinkRemove(field, locStream, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Unlinking a Field hierarchy from a LocStream hierarchy Test"
+      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Unlink a Field Attribute hierarchy from a LocStream Attribute hierarchy 2 Field Test
+      call ESMF_AttributeLinkRemove(field, locStream, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Unlinking a Field hierarchy from a LocStream hierarchy 2 Test"
+      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Unlink a Field Attribute hierarchy from a LocStream Attribute hierarchy 3 Field Test
+      call ESMF_AttributeLinkRemove(field, locStream, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Unlinking a Field hierarchy from a LocStream hierarchy 3 Test"
       call ESMF_Test((rc/=ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
@@ -133,6 +178,7 @@ AttributeTestMacro(field, a Field, EX_UTest, NEX_UTest)
       ! clean up
       call ESMF_FieldDestroy(field, rc=rc)
       call ESMF_GridDestroy(grid, rc=rc)
+      call ESMF_LocStreamDestroy(locstream, rc=rc)
 
       if (rc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
