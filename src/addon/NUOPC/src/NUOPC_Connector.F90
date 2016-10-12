@@ -3156,21 +3156,25 @@ call ESMF_VMLogCurrentGarbageInfo("Connector FieldBundleCplStore enter: ")
         ! search for a match
         rhListE=>rhList
         do while (associated(rhListE))
-#if 0
-print *, "srcGrid Match for i=", i, " is: ", &
-  ESMF_GridMatch(srcGrid, rhListE%srcGrid, globalflag=.true.)
-print *, "dstGrid Match for i=", i, " is: ", &
-  ESMF_GridMatch(dstGrid, rhListE%dstGrid, globalflag=.true.)
-#endif
           ! test src grid match
           rhListMatch = &
             ESMF_GridMatch(rhListE%srcGrid, srcGrid, globalflag=.true.) &
             >= ESMF_GRIDMATCH_EXACT
+#if 0
+write (msgString,*) trim(name)//": srcGrid Match for i=", i, " is: ", &
+  rhListMatch
+call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_INFO)
+#endif
           if (.not.rhListMatch) goto 123
           ! test dst grid match
           rhListMatch = &
             ESMF_GridMatch(rhListE%dstGrid, dstGrid, globalflag=.true.) &
             >= ESMF_GRIDMATCH_EXACT
+#if 0
+write (msgString,*) trim(name)//": dstGrid Match for i=", i, " is: ", &
+  rhListMatch
+call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_INFO)
+#endif
           if (.not.rhListMatch) goto 123
           ! test src staggerLoc match
           rhListMatch = (rhListE%srcStaggerLoc==srcStaggerLoc)
@@ -3240,7 +3244,9 @@ print *, "dstGrid Match for i=", i, " is: ", &
 
       if (.not.rhListMatch) then
 #if 1
-call ESMF_LogWrite("no rhListMatch -> pre-compute remapping", ESMF_LOGMSG_INFO)
+call ESMF_LogWrite(trim(name)//&
+  ": no rhListMatch -> pre-compute new remapping: "// &
+  trim(cplList(i)), ESMF_LOGMSG_INFO)
 #endif
         if (gridPair) then
           ! add a new rhList element
@@ -3293,7 +3299,9 @@ call ESMF_LogWrite("no rhListMatch -> pre-compute remapping", ESMF_LOGMSG_INFO)
         endif
       else
 #if 1
-call ESMF_LogWrite("found rhListMatch -> reuse routehandle", ESMF_LOGMSG_INFO)
+call ESMF_LogWrite(trim(name)//&
+  ": found rhListMatch -> reuse routehandle: "// &
+  trim(cplList(i)), ESMF_LOGMSG_INFO)
 #endif
         ! pull out the routehandle from the matching rhList element
         rhh = rhListE%rh

@@ -834,7 +834,7 @@ extern "C" {
   void FTN_X(c_esmc_arrayredist)(ESMCI::Array **srcArray, ESMCI::Array **dstArray,
     ESMCI::RouteHandle **routehandle, ESMC_CommFlag *commflag,
     ESMC_Logical *finishedflag, ESMC_Logical *cancelledflag,
-    ESMC_Logical *checkflag, int *rc){
+    ESMC_Region_Flag *zeroflag, ESMC_Logical *checkflag, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_arrayredist()"
     // Initialize return code; assume routine not implemented
@@ -848,7 +848,7 @@ extern "C" {
     bool cancelled;
     ESMC_LogDefault.MsgFoundError(ESMCI::Array::redist(
       *srcArray, *dstArray, routehandle, *commflag, &finished, &cancelled,
-      checkflagOpt),
+      *zeroflag, checkflagOpt),
       ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       ESMC_NOT_PRESENT_FILTER(rc));
     // translate back finishedflag

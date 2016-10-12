@@ -352,7 +352,8 @@ namespace ESMCI {
       bool ignoreUnmatched=false, int *pipelineDepthArg = NULL);
     static int redist(Array *srcArray, Array *dstArray,
       RouteHandle **routehandle, ESMC_CommFlag commflag=ESMF_COMM_BLOCKING,
-      bool *finishedflag=NULL, bool *cancelledflag=NULL, bool checkflag=false);
+      bool *finishedflag=NULL, bool *cancelledflag=NULL, 
+      ESMC_Region_Flag zeroflag=ESMC_REGION_SELECT, bool checkflag=false);
     static int redistRelease(RouteHandle *routehandle);
     static int sparseMatMulStore(Array *srcArray, Array *dstArray,
       RouteHandle **routehandle, std::vector<SparseMatrix> const &sparseMatrix,

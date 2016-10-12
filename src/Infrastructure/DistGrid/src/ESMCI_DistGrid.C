@@ -28,6 +28,7 @@
 // include higher level, 3rd party or system headers
 #include <cstdio>
 #include <cstring>
+#include <algorithm>
 
 // include ESMF headers
 #include "ESMCI_Macros.h"
@@ -652,9 +653,20 @@ DistGrid *DistGrid::create(
       return ESMC_NULL_POINTER;
     }
   }else{
-    // delayout was provided -> get deCount
-    deCount = delayout->getDeCount();
+    // delayout was provided
     delayoutCreator = false;  // indicate that delayout was not created here
+    if (present(regDecomp)){
+      // ensure that deCount matches between provided DELayout and regDecomp
+      if (deCount != delayout->getDeCount()){
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+          "deCount must match between provided DELayout and provided regDecomp",
+          ESMC_CONTEXT, rc);
+        distgrid->ESMC_BaseSetStatus(ESMF_STATUS_INVALID);  // mark invalid
+        return ESMC_NULL_POINTER;
+      }
+    }
+    // set deCount
+    deCount = delayout->getDeCount();
   }
   int *dummy;
   bool regDecompDeleteFlag = false;  // reset
@@ -1446,11 +1458,9 @@ DistGrid *DistGrid::create(
       deCount += localProduct;
     }
   }else{
-    // regDecomp was not provided -> set deCount = tileCount for default
-    deCountPTile = new int[tileCount];
-    for (int i=0; i<tileCount; i++)
-      deCountPTile[i] = 1;
-    deCount = tileCount;
+    // regDecomp was not provided 
+    // -> set deCount = max(tileCount,petCount) for default
+    deCount = max(tileCount, petCount);
   }
   bool delayoutCreator = true; // default assume delayout will be created here
   if (delayout == ESMC_NULL_POINTER){
@@ -1462,19 +1472,50 @@ DistGrid *DistGrid::create(
       return ESMC_NULL_POINTER;
     }
   }else{
-    // delayout was provided -> get deCount
-    deCount = delayout->getDeCount();
+    // delayout was provided
     delayoutCreator = false;  // indicate that delayout was not created here
+    if (present(regDecomp)){
+      // ensure that deCount matches between provided DELayout and regDecomp
+      if (deCount != delayout->getDeCount()){
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+          "deCount must match between provided DELayout and provided regDecomp",
+          ESMC_CONTEXT, rc);
+        distgrid->ESMC_BaseSetStatus(ESMF_STATUS_INVALID);  // mark invalid
+        return ESMC_NULL_POINTER;
+      }
+    }
+    // set deCount
+    deCount = delayout->getDeCount();
+  }
+  // make sure that there are at least as many DEs available as there are tiles
+  if (deCount < tileCount){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+      "there needs to be at least one DE per tile!",
+      ESMC_CONTEXT, rc);
+    distgrid->ESMC_BaseSetStatus(ESMF_STATUS_INVALID);  // mark invalid
+    return ESMC_NULL_POINTER;
   }
   int *dummy, dummyLen[2];
   bool regDecompDeleteFlag = false;  // reset
   if (!present(regDecomp)){
-    // regDecomp was not provided -> create a temporary default regDecomp
+    // regDecomp was not provided -> create default
+    // determine default decomposition, use all PETs, but...
+    int deCountPerTile = max(1, petCount/tileCount);  //..at least 1 DE per tile
+    int extraDEs = max(0, petCount-deCountPerTile*tileCount); // remaining DEs
+    // create a temporary default regDecomp and deCountPTile
     regDecompDeleteFlag = true;  // set
     dummy = new int[dimCount*tileCount];
-    // set default decomposition
-    for (int i=0; i<dimCount*tileCount; i++)
-      dummy[i] = 1;
+    deCountPTile = new int[tileCount];    
+    for (int i=0; i<tileCount; i++){
+      if (i<extraDEs)
+        dummy[dimCount*i] = deCountPerTile + 1; // spread the extra DEs
+      else
+        dummy[dimCount*i] = deCountPerTile;     // just regular DEs
+      for (int j=1; j<dimCount; j++)
+        dummy[dimCount*i+j] = 1;                // no decomp in higher dims
+      deCountPTile[i] = dummy[dimCount*i];      // keep for easier access
+    }
+    // finish up creating the default regDecomp InterfaceInt
     dummyLen[0] = dimCount;
     dummyLen[1] = tileCount;
     regDecomp = new InterfaceInt(dummy, 2, dummyLen);

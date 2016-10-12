@@ -474,6 +474,7 @@ interface ESMF_GridCreate1PeriDimUfrm
 ! !PRIVATE MEMBER FUNCTIONS:
 ! 
       module procedure ESMF_GridCreate1PeriDimUfrmR
+      module procedure ESMF_GridCreate1PeriDimUfrmB
       
 ! !DESCRIPTION: 
 ! This interface provides a single entry point for the various 
@@ -2983,7 +2984,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
          call ESMF_ArrayRedistStore(srcA2D(k), dstA2D(k), routehandle=routehandle, rc=localrc)
          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
             ESMF_CONTEXT, rcToReturn=rc)) return
-         call ESMF_ArrayRedist(srcA2D(k), dstA2D(k), routehandle=routehandle, rc=localrc)
+         call ESMF_ArrayRedist(srcA2D(k), dstA2D(k), routehandle=routehandle, &
+            zeroregion=ESMF_REGION_TOTAL, rc=localrc)
          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
              ESMF_CONTEXT, rcToReturn=rc)) return
          call ESMF_ArrayRedistRelease(routehandle=routehandle, rc=localrc)
@@ -3120,7 +3122,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
              call ESMF_ArrayRedistStore(srcA(j), dstA(j), routehandle=routehandle, rc=localrc)
              if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                   ESMF_CONTEXT, rcToReturn=rc)) return
-             call ESMF_ArrayRedist(srcA(j), dstA(j), routehandle=routehandle, rc=localrc)
+             call ESMF_ArrayRedist(srcA(j), dstA(j), routehandle=routehandle, &
+               zeroregion=ESMF_REGION_TOTAL, rc=localrc)
              if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                   ESMF_CONTEXT, rcToReturn=rc)) return
              call ESMF_ArrayRedistRelease(routehandle=routehandle, rc=localrc)
@@ -9716,6 +9719,263 @@ msg=" coords in periodic dim (i.e. 1) are not periodic "// &
     if (present(rc)) rc = ESMF_SUCCESS
 
    end function ESMF_GridCreate1PeriDimUfrmR
+
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD 
+#define ESMF_METHOD "ESMF_GridCreate1PeriDimUfrmB"
+ !BOP
+! !IROUTINE: ESMF_GridCreate1PeriDimUfrm - Create a uniform Grid with one periodic dim and a block distribution
+
+! !INTERFACE:
+  ! Private name; call using ESMF_GridCreate1PeriDimUfrm()
+  function ESMF_GridCreate1PeriDimUfrmB(minIndex, maxIndex, &
+            minCornerCoord, maxCornerCoord, &
+            deBlockList, deLabelList, &
+            polekindflag, coordSys, staggerLocList, &
+            ignoreNonPeriCoord, petMap, name, rc)
+
+    
+!
+! !RETURN VALUE:
+    type(ESMF_Grid) :: ESMF_GridCreate1PeriDimUfrmB
+!
+! !ARGUMENTS:
+    integer,                   intent(in),  optional :: minIndex(:)
+    integer,                   intent(in)            :: maxIndex(:)
+    real(ESMF_KIND_R8),        intent(in)            :: minCornerCoord(:)
+    real(ESMF_KIND_R8),        intent(in)            :: maxCornerCoord(:)
+    integer,                   intent(in)            :: deBlockList(:,:,:)
+    integer,                   intent(in),  optional :: deLabelList(:)
+    type(ESMF_PoleKind_Flag),  intent(in),  optional :: polekindflag(2)
+    type(ESMF_CoordSys_Flag),  intent(in),  optional :: coordSys
+    type(ESMF_StaggerLoc),     intent(in),  optional :: staggerLocList(:)
+    logical,                   intent(in),  optional :: ignoreNonPeriCoord
+    integer,                   intent(in),  optional :: petMap(:,:,:)
+    character (len=*),         intent(in),  optional :: name 
+    integer,                   intent(out), optional :: rc
+    
+!
+! !DESCRIPTION:
+!
+! This method creates a single tile, regularly distributed grid 
+! (see Figure \ref{fig:GridDecomps}) with one periodic dimension.
+! 
+! The resulting grid has it's coordinates uniformly spread between the 
+! ranges specified by the user. The coordinates are ESMF\_TYPEKIND\_R8. 
+! Currently, this method only fills the center stagger with coordinates, and
+! the {\tt minCornerCoord} and {\tt maxCornerCoord} arguments give the boundaries of 
+! the center stagger.
+!
+! To specify the distribution, the user passes in an array 
+! ({\tt deBlockList}) specifying index space blocks for each DE.
+!
+!  The following arguments have been set to non-typical values and so 
+!  there is a reasonable possibility that they may change in the future
+!  to be inconsistent with other Grid create interfaces:
+!
+!  The arguements coordDep1, coordDep2, and coordDep3 have internally 
+!  been set to 1, 2, and 3 respectively. 
+!  This was done because this call creates a uniform grid and so only 1D arrays
+!  are needed to hold the coordinates. This means the coordinate arrays
+!  will be 1D. 
+!
+!  The argument indexFlag has internally been set to ESMF\_INDEX\_GLOBAL. This
+!  means that the grid created from this function will have a global index space.
+!
+! The arguments are:
+! \begin{description}
+! \item[{[minIndex]}] 
+!      The bottom extent of the grid array. If not given then the value defaults
+!      to /1,1,1,.../.
+! \item[maxIndex] 
+!      The upper extent of the grid array.
+! \item[minCornerCoord] 
+!      The coordinates of the corner of the grid that corresponds to {\tt minIndex}. 
+!      size(minCornerCoord) must be equal to size(maxIndex).
+! \item[maxCornerCoord] 
+!      The coordinates of the corner of the grid that corresponds to {\tt maxIndex}. 
+!      size(maxCornerCoord) must be equal to size(maxIndex).
+! \item[deBlockList]
+!      List of DE-local LR blocks. The third index of {\tt deBlockList}
+!      steps through the deBlock elements, which are defined by the first
+!      two indices. The first index must be of size {\tt dimCount} and the 
+!      second index must be of size 2. Each 2D element of {\tt deBlockList}
+!      defined by the first two indices hold the following information.
+!      \begin{verbatim}
+!               +---------------------------------------> 2nd index
+!               |    1               2           
+!               | 1  minIndex(1)    maxIndex(1)
+!               | 2  minIndex(2)    maxIndex(2)
+!               | .  minIndex(.)    maxIndex(.)
+!               | .
+!               v
+!              1st index
+!      \end{verbatim}
+!      It is required that there be no overlap between the LR segments
+!      defined by deBlockList.
+! \item[{[deLabelList]}]
+!      List assigning DE labels to the default sequence of DEs. The default
+!      sequence is given by the order of DEs in the {\tt deBlockList} 
+!      argument.
+! \item[{[polekindflag]}] 
+!      the connection that occurs at the minimum end of the index dimension. polekindflag(2) 
+!      the connection that occurs at the maximum end of the index dimension. Please see 
+!      Section~\ref{const:polekind} for a full list of options. If not specified, the default
+!      is {\tt ESMF\_POLETYPE\_MONOPOLE} for both.
+! \item[{[coordSys]}] 
+!     The coordinate system of the grid coordinate data. 
+!     For a full list of options, please see Section~\ref{const:coordsys}. 
+!     If not specified then defaults to ESMF\_COORDSYS\_SPH\_DEG.  
+! \item[{[staggerLocList]}]
+!     The list of stagger locations to fill with coordinates. Please see Section~\ref{const:staggerloc} 
+!     for a description of the available stagger locations. If not present, then 
+!     no staggers are added or filled. 
+! \item[{[ignoreNonPeriCoord]}]
+!     If .true., do not check if the coordinates for the periodic dimension (i.e. dim=1) specify a full periodic range (e.g. 0 to 360 degrees).
+!     If not specified, defaults to .false. .  
+! \item[{[petMap]}]
+!       Sets the mapping of pets to the created DEs. This 3D
+!       should be of size regDecomp(1) x regDecomp(2) x regDecomp(3)
+!       If the Grid is 2D, then the last dimension is of size 1.   
+! \item[{[name]}]
+!      {\tt ESMF\_Grid} name.
+! \item[{[rc]}]
+!      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+! \end{description}
+!
+!EOP
+    ! local variables
+    type(ESMF_Grid)                             :: grid
+    type(ESMF_DistGrid)                         :: distgrid
+    type(ESMF_DistGridConnection), allocatable  :: connectionList(:)
+    integer, allocatable                        :: minIndexOpt(:)
+    integer, allocatable                        :: coordDimMap(:,:)
+    integer                                     :: localrc
+    integer                                     :: dimCount
+    integer                                     :: s
+    logical                                     :: localIgnoreNonPeriCoord
+    type(ESMF_CoordSys_Flag)                    :: localCoordSys 
+    real(ESMF_KIND_R8), parameter               :: PiX2= &
+      6.2831853071795862319959269370883703232_ESMF_KIND_R8 
+
+    ! Initialize return code; assume failure until success is certain
+    localrc = ESMF_RC_NOT_IMPL
+     if (present(rc)) rc = ESMF_RC_NOT_IMPL
+     
+    ! Create grid structure from DistGrid with one periodic connection
+    dimCount = size(maxIndex)
+    allocate(minIndexOpt(dimCount))
+    if (.not.present(minIndex)) then
+      minIndexOpt(:) = 1  ! initialize all 1's
+    else
+      minIndexOpt = minIndex
+    endif
+
+    ! periodic along i
+    allocate(connectionList(1))
+    call ESMF_DistGridConnectionSet(connection=connectionList(1), &
+      tileIndexA=1, tileIndexB=1, &
+      positionVector=(/maxIndex(1)-minIndexOpt(1)+1, 0/), rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    distgrid = ESMF_DistGridCreate(minIndexOpt, maxIndex, &
+      deBlockList=deBlockList, deLabelList=deLabelList, &
+      connectionList=connectionList, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    
+    allocate(coordDimMap(dimCount,dimCount))
+    coordDimMap = reshape((/1,2,0,0/), shape(coordDimMap))
+    grid = ESMF_GridCreate(distgrid, &
+            coordSys=coordSys, &
+            coordDimCount=(/1,1/), coordDimMap=coordDimMap, &
+            coordTypeKind=ESMF_TYPEKIND_R8,   &
+            indexFlag=ESMF_INDEX_GLOBAL, &
+            name=name, &
+            rc=localrc) 
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+      
+
+    ! Get CoordSys of Grid
+    call ESMF_GridGet(grid, coordSys=localCoordSys, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! Handle optional ignoreNonPeriCoord argument
+    if (present(ignoreNonPeriCoord)) then
+      localIgnoreNonPeriCoord=ignoreNonPeriCoord
+    else 
+      localIgnoreNonPeriCoord=.false.
+    endif
+
+    ! Make sure periodic dimension has periodic coords
+     if (.not. localIgnoreNonPeriCoord) then
+        if (localCoordSys .eq. ESMF_COORDSYS_SPH_DEG) then
+           if (abs(abs(maxCornerCoord(1) - minCornerCoord(1))- &
+                360.0_ESMF_KIND_R8) > Tiny(maxCornerCoord(1))) then
+              call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_VALUE, & 
+msg=" coords in periodic dim (i.e. 1) are not periodic "// &
+    "(i.e. max coord(1)-min coord(1) /= 360)", & 
+              ESMF_CONTEXT, rcToReturn=rc) 
+              return 
+           endif
+        else if (coordSys .eq. ESMF_COORDSYS_SPH_RAD) then
+           if (abs(abs(maxCornerCoord(1) - minCornerCoord(1))- &
+                PiX2) > Tiny(maxCornerCoord(1))) then
+              call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_VALUE, & 
+msg=" coords in periodic dim (i.e. 1) are not periodic "// &
+    "(i.e. max coord(1)-min coord(1) /= 2Pi)", & 
+              ESMF_CONTEXT, rcToReturn=rc) 
+              return 
+           endif
+        endif
+     endif
+
+
+     ! Get  dimCount
+    call ESMF_GridGet(grid, dimCount=dimCount, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! Check size of coordinate arrays
+    if (size(minCornerCoord) .ne. dimCount) then
+       call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_SIZE, & 
+            msg="- minCornerCoord array must be the same dimension as the grid (i.e. maxIndex)", & 
+            ESMF_CONTEXT, rcToReturn=rc) 
+       return 
+    endif
+
+    if (size(maxCornerCoord) .ne. dimCount) then
+       call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_SIZE, & 
+             msg="- maxCornerCoord array must be the same dimension as the grid (i.e. maxIndex)", & 
+             ESMF_CONTEXT, rcToReturn=rc) 
+        return 
+    endif
+
+
+    ! Fill staggers
+    if (present(staggerLocList)) then
+       do s=1, size(staggerLocList) 
+          call ESMF_GridFillStaggerCoordsUfrm(grid, &
+               minCornerCoord, maxCornerCoord, &
+               staggerloc=staggerLocList(s), &
+               rc=localrc)
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+       enddo
+    endif
+
+
+    ! Set Grid
+     ESMF_GridCreate1PeriDimUfrmB=grid   
+ 
+    ! Return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end function ESMF_GridCreate1PeriDimUfrmB
 
 
  !------------------------------------------------------------------------------
