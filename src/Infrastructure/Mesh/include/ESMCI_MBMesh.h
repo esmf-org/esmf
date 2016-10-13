@@ -15,7 +15,7 @@
 // Take out if MOAB isn't being used
 #ifdef ESMF_MOAB
 
-#include "Mesh/src/Moab/moab/Core.hpp"
+#include "moab/Core.hpp"
 using namespace moab;
 
 #include <map>

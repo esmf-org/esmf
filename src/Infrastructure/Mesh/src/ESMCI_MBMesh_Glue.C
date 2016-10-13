@@ -37,8 +37,8 @@
 #include "Mesh/include/ESMCI_MBMesh.h"
 #include "Mesh/include/ESMCI_MBMesh_Util.h"
 
-#include "Mesh/src/Moab/MBTagConventions.hpp"
-#include "Mesh/src/Moab/parallel/moab/ParallelComm.hpp"
+#include "MBTagConventions.hpp"
+#include "moab/ParallelComm.hpp"
 
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
