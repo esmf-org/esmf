@@ -72,6 +72,7 @@ src/Superstructure/AttributeAPI/tests/ESMF_AttributeGridUTest.F90
 src/Superstructure/AttributeAPI/tests/ESMF_AttributeLocStreamUTest.F90
 src/Superstructure/AttributeAPI/tests/ESMF_AttributeSciCompUTest.F90
 src/Superstructure/AttributeAPI/tests/ESMF_AttributeStateUTest.F90
+src/Superstructure/AttributeAPI/tests/ESMF_AttributeAutoLinkUTest.F90
 src/Superstructure/State/src/ESMF_StateAPI.F90
 src/Superstructure/State/src/ESMF_StateInternals.F90
 src/Superstructure/State/src/ESMF_StateRemRep.F90

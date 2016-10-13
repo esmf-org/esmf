@@ -34,6 +34,7 @@ LOCDIR	  = src/Superstructure/AttributeAPI/tests
 .NOTPARALLEL:
 
 TESTS_BUILD = \
+		$(ESMF_TESTDIR)/ESMF_AttributeAutoLinkUTest \
 		$(ESMF_TESTDIR)/ESMF_AttInternalGridUTest \
 		$(ESMF_TESTDIR)/ESMF_AttPackABundleUTest \
 		$(ESMF_TESTDIR)/ESMF_AttPackArrayUTest \
@@ -73,6 +74,7 @@ TESTS_BUILD = \
 		$(ESMF_TESTDIR)/ESMF_AttributeJSONUTest
 
 TESTS_RUN = \
+		RUN_ESMF_AttributeAutoLinkUTest \
 		RUN_ESMF_AttInternalGridUTest \
 		RUN_ESMF_AttPackABundleUTest \
 		RUN_ESMF_AttPackArrayUTest \
@@ -156,6 +158,15 @@ CLOBBERDIRS =
 #
 #  Attribute class
 #
+
+# --- AutoLink
+
+RUN_ESMF_AttributeAutoLinkUTest:
+	$(MAKE) TNAME=AttributeAutoLink NP=4 ftest
+
+RUN_ESMF_AttributeAutoLinkUTestUNI:
+	$(MAKE) TNAME=AttributeAutoLink NP=1 ftest
+
 
 # --- AttPackArray
 
