@@ -364,6 +364,7 @@ call ESMF_VMLogCurrentGarbageInfo("Connector Initialize05P1 out: ")
     character(ESMF_MAXSTR), pointer       :: importNamespaceList(:)
     character(ESMF_MAXSTR), pointer       :: exportNamespaceList(:)
     integer                               :: profiling
+    logical                               :: match
 
     rc = ESMF_SUCCESS
 
@@ -438,8 +439,11 @@ call printStringList("exportNamespaceList", exportNamespaceList)
       ! simple linear search of items that match between both lists
       do j=1, size(exportStandardNameList)  ! consumer side
         do i=1, size(importStandardNameList)  ! producer side
-          if (NUOPC_FieldDictionaryMatchSyno( &
-            importStandardNameList(i), exportStandardNameList(j))) then
+          match = NUOPC_FieldDictionaryMatchSyno( &
+            importStandardNameList(i), exportStandardNameList(j), rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          if (match) then
             ! found matching standard name pair
             ! -> determine bondLevel according to namespace matching
             bondLevel = &
@@ -530,6 +534,7 @@ call ESMF_VMLogCurrentGarbageInfo("Connector InitializeP1a out: ")
     character(ESMF_MAXSTR)                :: msgString, valueString
     integer                               :: verbosity
     integer                               :: profiling
+    logical                               :: match
 
     rc = ESMF_SUCCESS
 
@@ -620,8 +625,11 @@ call printStringList("exportNamespaceList", exportNamespaceList)
       ! simple linear search of items that match between both lists
       do j=1, size(exportStandardNameList)  ! consumer side
         do i=1, size(importStandardNameList)  ! producer side
-          if (NUOPC_FieldDictionaryMatchSyno( &
-            importStandardNameList(i), exportStandardNameList(j))) then
+          match = NUOPC_FieldDictionaryMatchSyno( &
+            importStandardNameList(i), exportStandardNameList(j), rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          if (match) then
             ! found matching standard name pair
             ! -> determine bondLevel according to namespace matching
             bondLevel = &
@@ -816,6 +824,7 @@ print *, "current bondLevel=", bondLevel
     character(ESMF_MAXSTR)          :: name, valueString
     character(ESMF_MAXSTR)          :: iTransferOffer, eTransferOffer
     integer                         :: profiling
+    logical                         :: matchE, matchI
 
     rc = ESMF_SUCCESS
 
@@ -914,9 +923,15 @@ print *, "current bondLevel=", bondLevel
       foundFlag = .false. ! reset
       do eMatch=1, size(exportStandardNameList)  ! consumer side
         do iMatch=1, size(importStandardNameList)  ! producer side
-          if (NUOPC_FieldDictionaryMatchSyno(importStandardNameList(iMatch), &
-            cplName) .and. NUOPC_FieldDictionaryMatchSyno( &
-            exportStandardNameList(eMatch), cplName)) then
+          matchE = NUOPC_FieldDictionaryMatchSyno( &
+            exportStandardNameList(eMatch), cplName, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          matchI = NUOPC_FieldDictionaryMatchSyno( &
+            importStandardNameList(iMatch), cplName, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          if (matchE .and. matchI) then
             ! found a matching standard name pair
             ! -> determine bondLevel according to namespace matching
             bondLevel = &
@@ -1142,6 +1157,7 @@ print *, "current bondLevel=", bondLevel
     integer(ESMF_KIND_I4), pointer  :: gridToFieldMap(:)
     integer                         :: fieldDimCount, gridDimCount
     integer                         :: profiling
+    logical                         :: matchE, matchI
 
     rc = ESMF_SUCCESS
 
@@ -1244,9 +1260,15 @@ print *, "current bondLevel=", bondLevel
       foundFlag = .false. ! reset
       do eMatch=1, size(exportStandardNameList)  ! consumer side
         do iMatch=1, size(importStandardNameList)  ! producer side
-          if (NUOPC_FieldDictionaryMatchSyno(importStandardNameList(iMatch), &
-            cplName) .and. NUOPC_FieldDictionaryMatchSyno( &
-            exportStandardNameList(eMatch), cplName)) then
+          matchE = NUOPC_FieldDictionaryMatchSyno( &
+            exportStandardNameList(eMatch), cplName, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          matchI = NUOPC_FieldDictionaryMatchSyno( &
+            importStandardNameList(iMatch), cplName, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          if (matchE .and. matchI) then
             ! found a matching standard name pair
             ! -> determine bondLevel according to namespace matching
             bondLevel = &
@@ -1526,6 +1548,7 @@ print *, "current bondLevel=", bondLevel
     character(ESMF_MAXSTR)          :: iTransferAction, eTransferAction
     integer                         :: verbosity
     integer                         :: profiling
+    logical                         :: matchE, matchI
 
     rc = ESMF_SUCCESS
 
@@ -1628,9 +1651,15 @@ print *, "current bondLevel=", bondLevel
       foundFlag = .false. ! reset
       do eMatch=1, size(exportStandardNameList)  ! consumer side
         do iMatch=1, size(importStandardNameList)  ! producer side
-          if (NUOPC_FieldDictionaryMatchSyno(importStandardNameList(iMatch), &
-            cplName) .and. NUOPC_FieldDictionaryMatchSyno( &
-            exportStandardNameList(eMatch), cplName)) then
+          matchE = NUOPC_FieldDictionaryMatchSyno( &
+            exportStandardNameList(eMatch), cplName, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          matchI = NUOPC_FieldDictionaryMatchSyno( &
+            importStandardNameList(iMatch), cplName, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          if (matchE .and. matchI) then
             ! found a matching standard name pair
             ! -> determine bondLevel according to namespace matching
             bondLevel = &
@@ -1891,6 +1920,7 @@ print *, "current bondLevel=", bondLevel
     character(ESMF_MAXSTR)          :: connectionString
     character(ESMF_MAXSTR)          :: name, valueString, msgString, iString
     integer                         :: verbosity
+    logical                         :: matchE, matchI
 
     rc = ESMF_SUCCESS
 
@@ -1985,9 +2015,15 @@ print *, "current bondLevel=", bondLevel
       foundFlag = .false. ! reset
       do eMatch=1, size(exportStandardNameList)  ! consumer side
         do iMatch=1, size(importStandardNameList)  ! producer side
-          if (NUOPC_FieldDictionaryMatchSyno(importStandardNameList(iMatch), &
-            cplName) .and. NUOPC_FieldDictionaryMatchSyno( &
-            exportStandardNameList(eMatch), cplName)) then
+          matchE = NUOPC_FieldDictionaryMatchSyno( &
+            exportStandardNameList(eMatch), cplName, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          matchI = NUOPC_FieldDictionaryMatchSyno( &
+            importStandardNameList(iMatch), cplName, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          if (matchE .and. matchI) then
             ! found a matching standard name pair
             ! -> determine bondLevel according to namespace matching
             bondLevel = &
