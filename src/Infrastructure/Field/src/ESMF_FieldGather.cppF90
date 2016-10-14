@@ -110,7 +110,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! local variables
     type(ESMF_Grid)                 :: grid
     type(ESMF_TypeKind_Flag)        :: typekind
-    integer                         :: rank, ldeCount, lde
+    integer                         :: rank, dimCount, ldeCount, lde
     integer, allocatable            :: coordDimCount(:)
     real(ESMF_KIND_R8), pointer     :: dataPtrR8D1(:)
     real(ESMF_KIND_R8), pointer     :: dataPtrR8D2(:,:)
@@ -154,22 +154,53 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     if (trim(l_dataFillScheme)=="sincos") then
       if (typekind==ESMF_TYPEKIND_R8 .and. rank==1) then
-        ! 1D sin pattern
-        do lde=0, ldeCount-1
-          call ESMF_GridGetCoord(grid, coordDim=1, localDe=lde, &
-            farrayPtr=coord1PtrR8D1, rc=rc)
-          if (ESMF_LogFoundError(rcToCheck=rc, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT)) &
-            return  ! bail out
-          call ESMF_FieldGet(field, localDe=lde, farrayPtr=dataPtrR8D1, rc=rc)
-          if (ESMF_LogFoundError(rcToCheck=rc, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT)) &
-            return  ! bail out
-          do i=lbound(dataPtrR8D2,1),ubound(dataPtrR8D2,1)
-            dataPtrR8D1(i) = &
-              sin(real(l_member)*3.1416*(coord1PtrR8D1(i)+real(l_step))/180.)
+      
+      call ESMF_GridGet(grid, dimCount=dimCount, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT)) &
+        return  ! bail out
+
+        if (dimCount==1) then
+          ! 1D sin pattern
+          do lde=0, ldeCount-1
+            call ESMF_GridGetCoord(grid, coordDim=1, localDe=lde, &
+              farrayPtr=coord1PtrR8D1, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT)) &
+              return  ! bail out
+            call ESMF_FieldGet(field, localDe=lde, farrayPtr=dataPtrR8D1, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT)) &
+              return  ! bail out
+            do i=lbound(dataPtrR8D1,1),ubound(dataPtrR8D1,1)
+              dataPtrR8D1(i) = &
+                sin(real(l_member)*3.1416*(coord1PtrR8D1(i)+real(l_step))/180.)
+            enddo
           enddo
-        enddo
+        else
+          ! must be dimCount==2 -> 2D pattern
+          do lde=0, ldeCount-1
+            call ESMF_GridGetCoord(grid, coordDim=1, localDe=lde, &
+              farrayPtr=coord1PtrR8D1, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT)) &
+              return  ! bail out
+            call ESMF_GridGetCoord(grid, coordDim=2, localDe=lde, &
+              farrayPtr=coord2PtrR8D1, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT)) &
+              return  ! bail out
+            call ESMF_FieldGet(field, localDe=lde, farrayPtr=dataPtrR8D1, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT)) &
+              return  ! bail out
+            do i=lbound(dataPtrR8D1,1),ubound(dataPtrR8D1,1)
+              dataPtrR8D1(i) = &
+                sin(real(l_member)*3.1416*(coord1PtrR8D1(i)+real(l_step))/180.) * &
+                cos(real(l_member)*3.1416*(coord2PtrR8D1(i)+real(l_step))/180.)
+            enddo
+          enddo
+        endif
       elseif (typekind==ESMF_TYPEKIND_R8 .and. rank==2) then
         ! 2D sin*cos pattern
         do lde=0, ldeCount-1
