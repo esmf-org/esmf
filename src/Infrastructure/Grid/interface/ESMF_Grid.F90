@@ -25282,7 +25282,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer              :: localrc
     integer              :: undistDimCount
     integer              :: i,j,ud
-    integer, pointer     :: distSize(:)
     integer, pointer     :: local1DIndices(:)
     integer              :: ind
     logical              :: found
@@ -25290,16 +25289,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Initialize return code; assume failure until success is certain
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
-
-    ! dimCount of distributed part
-    allocate(distSize(distDimCount),stat=localrc)
-    if (ESMF_LogFoundAllocError(localrc, msg="Allocating distSize", &
-                                   ESMF_CONTEXT, rcToReturn=rc)) return
-
-    do i=1,distDimCount   
-       ind = distDim(i)
-       distSize(i)=maxIndex(ind)-minIndex(ind)+1
-    enddo
 
     ! dimCounts of the undistributed part of the grid
     undistDimCount=dimCount-distDimCount
@@ -25327,14 +25316,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       
     if (arbIndexCount > 0) then
        ! use 0-based index to calculate the 1D index and add 1 back at the end
-       do i = 1, arbIndexCount
-          local1DIndices(i) = arbIndexList(i,1)-1
-	  if (distDimCount >= 2) then 
-	     do j = 2,distDimCount
-	        local1DIndices(i) = local1DIndices(i)*distSize(j) + arbIndexList(i,j)-1
-	     enddo
-	  endif
-          local1DIndices(i) = local1DIndices(i)+1
+       do i = 1, arbIndexCount        
+          local1DIndices(i) = 0 ! initialize
+          do j = distDimCount, 1, -1
+            ind = distDim(j)
+            ! first time multiply with zero intentionally:
+            local1DIndices(i) = local1DIndices(i) * (maxIndex(ind)-minIndex(ind)+1)
+	    local1DIndices(i) = local1DIndices(i) + arbIndexList(i,j)-minIndex(ind)
+	  enddo
+          local1DIndices(i) = local1DIndices(i)+1 ! shift to base 1 sequence index
        enddo
     endif   
 
@@ -25378,7 +25368,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       deallocate(undistLBound)
       deallocate(undistUBound)
     endif
-    deallocate(distSize)
 
     ! Return successfully
     if (present(rc)) rc = ESMF_SUCCESS
