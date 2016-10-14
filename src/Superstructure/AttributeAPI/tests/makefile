@@ -114,6 +114,7 @@ TESTS_RUN = \
 		RUN_ESMF_AttributeJSONUTest
 
 TESTS_RUN_UNI = \
+		RUN_ESMF_AttributeAutoLinkUTestUNI \
 		RUN_ESMF_AttInternalGridUTestUNI \
 		RUN_ESMF_AttPackArrayUTestUNI \
 		RUN_ESMF_AttPackABundleUTestUNI \
