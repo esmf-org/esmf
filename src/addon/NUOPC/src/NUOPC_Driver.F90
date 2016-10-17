@@ -4087,13 +4087,13 @@ call ESMF_LogWrite("gjt: Exiting InternalInitializeComplete for: "//trim(name), 
 
     rc = ESMF_SUCCESS
 
-! For a Driver may be called without valid states
-if (ESMF_StateIsCreated(importState).and.ESMF_StateIsCreated(exportState)) then
     ! query the Component for info
     call ESMF_GridCompGet(gcomp, name=name, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    
+
+! For a Driver may be called without valid states
+if (ESMF_StateIsCreated(importState).and.ESMF_StateIsCreated(exportState)) then
     ! check how many Fields in the exportState have the "Updated" Attribute set
     ! to "true" BEFORE calling the DataInitialize
     allUpdated = NUOPC_IsUpdated(exportState, count=oldUpdatedCount, rc=rc)
