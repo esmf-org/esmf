@@ -25277,14 +25277,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !EOP
     type(ESMF_DistGrid)  :: distgrid
-    integer, pointer     :: undistLBound(:)
-    integer, pointer     :: undistUBound(:)
+    integer, allocatable :: undistLBound(:), undistUBound(:)
+    integer, allocatable :: minDistIndex(:), maxDistIndex(:)
     integer              :: localrc
     integer              :: undistDimCount
     integer              :: i,j,ud
-    integer, pointer     :: local1DIndices(:)
+    integer, allocatable :: local1DIndices(:)
     integer              :: ind
-    logical              :: found
+    
 
     ! Initialize return code; assume failure until success is certain
     localrc = ESMF_RC_NOT_IMPL
@@ -25301,33 +25301,38 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        return 
     endif
 
-    ! convert localArbIndex into 1D index array for DistGrid
-    ! Check localArbIndex dimension matched with localArbIndexCount and diskDimCount
+    ! Check local arbIndexList dimension matched with local arbIndexCount and diskDimCount
     if (size(arbIndexList, 1) /= arbIndexCount) then
        	  call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, & 
                  msg="- localArbIndex 1st dimension has to match with localArbIndexCount", & 
                  ESMF_CONTEXT, rcToReturn=rc) 
           return
     endif
+    
+    ! prepare for conversion
+    allocate(minDistIndex(distDimCount), maxDistIndex(distDimCount), stat=localrc)
+    if (ESMF_LogFoundAllocError(localrc, msg="Allocating local1DIndices", &
+                                     ESMF_CONTEXT, rcToReturn=rc)) return
+    do j = 1, distDimCount
+      ind = distDim(j)
+      minDistIndex(j) = minIndex(ind)
+      maxDistIndex(j) = maxIndex(ind)
+    enddo
 
     allocate(local1DIndices(arbIndexCount), stat=localrc)
     if (ESMF_LogFoundAllocError(localrc, msg="Allocating local1DIndices", &
                                      ESMF_CONTEXT, rcToReturn=rc)) return
       
+    ! convert local arbIndexList into local 1D sequence index list for DistGrid
     if (arbIndexCount > 0) then
-       ! use 0-based index to calculate the 1D index and add 1 back at the end
-       do i = 1, arbIndexCount        
-          local1DIndices(i) = 0 ! initialize
-          do j = distDimCount, 1, -1
-            ind = distDim(j)
-            ! first time multiply with zero intentionally:
-            local1DIndices(i) = local1DIndices(i) * (maxIndex(ind)-minIndex(ind)+1)
-	    local1DIndices(i) = local1DIndices(i) + arbIndexList(i,j)-minIndex(ind)
-	  enddo
-          local1DIndices(i) = local1DIndices(i)+1 ! shift to base 1 sequence index
+      ! loop over all entries in the local index list
+      do i = 1, arbIndexCount        
+        local1DIndices(i) = ESMF_DistGridSeqIndex(minDistIndex, maxDistIndex, &
+          arbIndexList(i,:), rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
        enddo
     endif   
-
 
    ! Calc undistLBound, undistUBound for Grid -----------------------------------------------
    if (undistDimCount > 0) then
@@ -25363,6 +25368,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 
     ! Clean up memory
+    deallocate(minDistIndex, maxDistIndex)
     deallocate(local1DIndices)
     if (undistDimCount > 0) then
       deallocate(undistLBound)

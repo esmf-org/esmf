@@ -141,7 +141,7 @@ module ESMF_DistGridMod
 ! - ESMF-internal methods:
   public ESMF_DistGridGetInit
   public ESMF_DistGridSetInitCreated
-  
+  public ESMF_DistGridSeqIndex
   
 !EOPI
 !------------------------------------------------------------------------------
@@ -3490,6 +3490,98 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   end subroutine ESMF_DistGridSetInitCreated
 !------------------------------------------------------------------------------
 
+
+! -------------------------- ESMF-internal method -----------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_DistGridSeqIndex"
+!BOPI
+! !IROUTINE: ESMF_DistGridSeqIndex - Compute the canonical sequence index
+!
+! !INTERFACE:
+  function ESMF_DistGridSeqIndex(minIndex, maxIndex, index, rc) 
+!
+! !RETURN VALUE:
+    integer :: ESMF_DistGridSeqIndex   
+!
+! !ARGUMENTS:
+    integer,                        intent(in)            :: minIndex(:)
+    integer,                        intent(in)            :: maxIndex(:)
+    integer,                        intent(in)            :: index(:)
+    integer,                        intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!   Compute the canonical sequence index (single integer number) associated
+!   with the index tuple passed in as {\tt index}. Canonical indices start
+!   at 1 for the starting corner, specified via the {\tt minIndex} argument,
+!   and increase from there in column major fashion up to the end corner. The
+!   end corner is defined by the {\tt maxIndex} argument.
+!
+!   If the {\tt index} tuple is not within the index space defined by
+!   {\tt minIndex} and {\tt maxIndex}, an invalid sequence index value 
+!   of -1 is returned by this function.
+!
+!   The size of {\tt minIndex}, {\tt maxIndex}, and {\tt index} must all be
+!   the same, or an error is returned in the return code.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[minIndex]
+!        Coordinate tuple of the lower corner of the tile.
+!   \item[maxIndex]
+!        Coordinate tuple of the upper corner of the tile.
+!   \item[index]
+!        Coordinate tuple of the index point to be converted into the 
+!        sequence index.
+!   \item[{[rc]}]
+!        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOPI
+!------------------------------------------------------------------------------
+    integer                 :: localrc            ! local return code
+    integer                 :: seqIndex
+    integer                 :: i, count
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+    
+    ESMF_DistGridSeqIndex = -1 ! initialize to an invalid value
+    
+    ! error checking of the input
+    count = size(minIndex)
+    if (count /= size(maxIndex)) then
+      call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_SIZE, &
+        msg="size(maxIndex) must match size(minIndex)", &
+        ESMF_CONTEXT, rcToReturn=rc)
+      return
+    endif
+    if (count /= size(index)) then
+      call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_SIZE, &
+        msg="size(index) must match size(minIndex)", &
+        ESMF_CONTEXT, rcToReturn=rc)
+      return
+    endif
+    
+    seqIndex = 0 ! initialize to base 0
+    do i = count, 1, -1
+      ! error check:
+      if (index(i)<minIndex(i) .or. index(i)>maxIndex(i)) then
+        seqIndex = -2 ! will come out as -1 after the shift below
+        exit
+      endif
+      ! first time multiply with zero intentionally:
+      seqIndex = seqIndex * (maxIndex(i)-minIndex(i)+1)
+      seqIndex = seqIndex + index(i)-minIndex(i)
+    enddo
+    seqIndex = seqIndex+1 ! shift sequence index to base 1 
+ 
+    ! return successfully
+    ESMF_DistGridSeqIndex = seqIndex
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end function ESMF_DistGridSeqIndex
+!------------------------------------------------------------------------------
 
 
 !------------------------------------------------------------------------------
