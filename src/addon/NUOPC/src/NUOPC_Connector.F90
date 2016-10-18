@@ -1140,7 +1140,7 @@ print *, "current bondLevel=", bondLevel
     integer                         :: verbosity
     integer(ESMF_KIND_I4), pointer  :: ungriddedLBound(:), ungriddedUBound(:)
     integer(ESMF_KIND_I4), pointer  :: gridToFieldMap(:)
-    integer                         :: fieldDimCount, gridDimCount
+    integer                         :: fieldDimCount, gridDimCount, arbDimCount
     integer                         :: profiling
 
     rc = ESMF_SUCCESS
@@ -1351,9 +1351,19 @@ print *, "current bondLevel=", bondLevel
             dimCount=fieldDimCount, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-          call ESMF_GridGet(grid, dimCount=gridDimCount, rc=rc)
+          call ESMF_GridGet(grid, dimCount=gridDimCount, &
+            arbDimCount=arbDimCount, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          ! bring over arbDimCount as attribute
+          call ESMF_AttributeSet(acceptorField, &
+            name="ArbDimCount", value=arbDimCount, &
+            convention="NUOPC", purpose="Instance", &
+            attnestflag=ESMF_ATTNEST_ON, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, &
+            file=FILENAME)) &
+            return  ! bail out
           ! bring over gridToFieldMap as attributes
           allocate(gridToFieldMap(gridDimCount),stat=stat)
           if (ESMF_LogFoundAllocError(statusToCheck=stat, &
