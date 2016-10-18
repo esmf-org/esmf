@@ -2761,7 +2761,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        type(ESMF_GRIDITEM_FLAG) :: gridItemList(ESMF_GRIDITEM_COUNT)=(/ESMF_GRIDITEM_MASK,ESMF_GRIDITEM_AREA/) 
        type(ESMF_GRIDITEM_FLAG) :: gridItem
        type(ESMF_CoordSys_Flag) :: coordSys
-       integer                  :: localDECount, localDE    
+       integer                  :: localDECount, localDE
+       integer                  :: arbDimCount, arrayDimCount
+       character(len=160)       :: msgString
 
        
        ! Initialize return code; assume failure until success is certain
@@ -2778,14 +2780,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
        ! Get info from old grid to create new Grid.
        call ESMF_GridGet(grid, &
-            dimCount=dimCount, & 
+            dimCount=dimCount, arbDimCount=arbDimCount, & 
             rc=localrc)
        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
             ESMF_CONTEXT, rcToReturn=rc)) return
 
        ! Get info from old grid to create new Grid.
        call ESMF_GridGet(grid, &
-            dimCount=dimCount, & 
             coordTypeKind=coordTypeKind, &
             coordSys=coordSys, &
             staggerlocCount=maxNumStaggers, &
@@ -2800,8 +2801,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
             ESMF_CONTEXT, rcToReturn=rc)) return
 
-       ! Create New Grid
-       newGrid=ESMF_GridCreate(name=name, &
+       if (arbDimCount==0) then
+          ! Create New Grid
+          newGrid=ESMF_GridCreate(name=name, &
             coordTypeKind=coordTypeKind, &
             distgrid=distgrid, &
             coordSys=coordSys, &
@@ -2814,12 +2816,20 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             ! gridMemLBound=gridMemLBound, &   ! TODO: NEED TO ADD THIS TO GET
             indexFlag=indexFlag, &
             rc=localrc)
-       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
             ESMF_CONTEXT, rcToReturn=rc)) return
+       else
+          ! Create New Grid
+          newGrid=ESMF_GridCreate(name=name, &
+            coordTypeKind=coordTypeKind, &
+            distgrid=distgrid, &
+            coordSys=coordSys, &
+            indexFlag=indexFlag, &
+            rc=localrc)
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+            ESMF_CONTEXT, rcToReturn=rc)) return
+       endif
 
-
-
-#if 1
        ! Allocate to maximum number of possible staggers
        allocate(srcStaggers(maxNumStaggers))
 
@@ -2829,18 +2839,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
             ESMF_CONTEXT, rcToReturn=rc)) return
 
-#else
-        ! For Bob:
-        ! please fill out nStaggers and srcStaggers list, rest of the code is
-        ! is generic. nStaggers and srcStaggers are currently hardcoded for demo.
-        nStaggers = 3
-        allocate(srcStaggers(nStaggers))
-        srcStaggers(1) = ESMF_STAGGERLOC_CENTER
-        srcStaggers(2) = ESMF_STAGGERLOC_EDGE1
-        srcStaggers(3) = ESMF_STAGGERLOC_EDGE2
+#if 0
+       write (msgString,*) "ESMF_GridCreateCopyFromNewDG(): nStaggers=",nStaggers, &
+        " dimCount(Grid)=", dimCount
+       call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=localrc)
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+         ESMF_CONTEXT, rcToReturn=rc)) return
 #endif
-
-
 
        ! Add Coords to new grid       
        do i = 1, nStaggers
@@ -2879,11 +2884,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        
        ! construct temporary 2D Arrays and fill with data if necessary
        do k=1, dimCount*nStaggers
-          call ESMF_ArrayGet(srcA(k), rank=rank, dimCount=dimCount, &
+          call ESMF_ArrayGet(srcA(k), rank=rank, dimCount=arrayDimCount, &
             localDECount=localDECount, rc=localrc)          
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                 ESMF_CONTEXT, rcToReturn=rc)) return
-          if (rank==dimCount) then
+          if (rank==arrayDimCount) then
             ! branch that assumes no replicated dims in Array
             ! TODO: actually there may still be replication, only 
             ! TODO: arrayToDistGridMap conclusively provides that indication
@@ -2944,10 +2949,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        
        ! construct temporary 2D Arrays
        do k=1, dimCount*nStaggers
-          call ESMF_ArrayGet(dstA(k), rank=rank, dimCount=dimCount, rc=localrc)          
+          call ESMF_ArrayGet(dstA(k), rank=rank, dimCount=arrayDimCount, rc=localrc)          
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                 ESMF_CONTEXT, rcToReturn=rc)) return
-          if (rank==dimCount) then
+          if (rank==arrayDimCount) then
             ! branch that assumes no replicated dims in Array
             ! TODO: actually there may still be replication, only 
             ! TODO: arrayToDistGridMap conclusively provides that indication
