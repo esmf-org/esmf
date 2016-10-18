@@ -402,5 +402,9 @@ program ESMF_VMAllToAllVUTest
   deallocate(f8array1)
   deallocate(f8array2)
   deallocate(f8array3)
+  
+  deallocate(larray1)
+  deallocate(larray2)
+  deallocate(larray3)
 
 end program ESMF_VMAllToAllVUTest

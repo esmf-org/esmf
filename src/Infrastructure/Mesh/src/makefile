@@ -84,6 +84,8 @@ SOURCEC	  = \
            ESMCI_Mesh_Regrid_Glue.C \
            ESMCI_MBMesh_Util.C \
            ESMCI_MBMesh_BBox.C \
+           ESMCI_MBMesh_Redist.C \
+           ESMCI_MBMesh_Rendez_Elem.C \
            ESMCI_MBMesh_Conserve.C \
            ESMCI_MBMesh_Glue.C \
            ESMCI_MBMesh_Regrid_Glue.C \
@@ -115,6 +117,8 @@ include ${ESMF_DIR}/makefile
 ifeq ($(ESMF_MOAB),internal)
 ESMF_CXXCOMPILECPPFLAGS += -I$(ESMF_DIR)/src/Infrastructure/Mesh/src/Moab
 ESMF_CXXCOMPILECPPFLAGS += -I$(ESMF_DIR)/src/Infrastructure/Mesh/src/Moab/moab
+ESMF_CXXCOMPILECPPFLAGS += -I$(ESMF_DIR)/src/Infrastructure/Mesh/src/Moab/parallel
+ESMF_CXXCOMPILECPPFLAGS += -I$(ESMF_DIR)/src/Infrastructure/Mesh/src/Moab/parallel/moab
 endif
 
 

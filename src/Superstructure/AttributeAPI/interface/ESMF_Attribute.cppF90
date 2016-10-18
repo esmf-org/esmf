@@ -68,6 +68,7 @@ module ESMF_AttributeMod
   use ESMF_FieldMod
   use ESMF_FieldBundleMod
   use ESMF_GridMod
+  use ESMF_LocStreamMod
   use ESMF_StateTypesMod
   use ESMF_StateVaMod
   use ESMF_StateMod
@@ -201,6 +202,12 @@ module ESMF_AttributeMod
         module procedure ESMF_GridAttAddPackCstN1
         module procedure ESMF_GridAttAddPackStdSL
         module procedure ESMF_GridAttAddPackCstSL
+        module procedure ESMF_LocStreamAttAddPackStd
+        module procedure ESMF_LocStreamAttAddPackCst
+        module procedure ESMF_LocStreamAttAddPackCstN
+        module procedure ESMF_LocStreamAttAddPackCstN1
+        module procedure ESMF_LocStreamAttAddPackStdSL
+        module procedure ESMF_LocStreamAttAddPackCstSL
         module procedure ESMF_StateAttAddPackStd
         module procedure ESMF_StateAttAddPackCst
         module procedure ESMF_StateAttAddPackCstN
@@ -263,6 +270,8 @@ module ESMF_AttributeMod
         module procedure ESMF_FieldBundleAttRemoveAP
         module procedure ESMF_GridAttRemove
         module procedure ESMF_GridAttRemoveAP
+        module procedure ESMF_LocStreamAttRemove
+        module procedure ESMF_LocStreamAttRemoveAP
         module procedure ESMF_StateAttRemove
         module procedure ESMF_StateAttRemoveAP
 
@@ -460,6 +469,25 @@ module ESMF_AttributeMod
         module procedure ESMF_GridAttGetCount
         module procedure ESMF_GridAttGetCountAttPack
 
+        TypeKindInterfaceMacro(ESMF_LocStreamAttGet)
+        TypeKindInterfaceMacro(ESMF_LocStreamAttGet1D)
+        module procedure ESMF_LocStreamAttGetLgcl
+        module procedure ESMF_LocStreamAttGetLgclList
+        module procedure ESMF_LocStreamAttGetChar
+        module procedure ESMF_LocStreamAttGetCharList
+        TypeKindInterfaceMacro(ESMF_LocStreamAttGetAP)
+        TypeKindInterfaceMacro(ESMF_LocStreamAttGet1DAP)
+        module procedure ESMF_LocStreamAttGetLgclAP
+        module procedure ESMF_LocStreamAttGetLgclListAP
+        module procedure ESMF_LocStreamAttGetCharAP
+        module procedure ESMF_LocStreamAttGetCharListAP
+        module procedure ESMF_LocStreamAttGetInfoByNam
+        module procedure ESMF_LocStreamAttGetInfoByNamAP
+        module procedure ESMF_LocStreamAttGetInfoByNum
+        module procedure ESMF_LocStreamAttGetInfoByNumAP
+        module procedure ESMF_LocStreamAttGetCount
+        module procedure ESMF_LocStreamAttGetCountAttPack
+
         TypeKindInterfaceMacro(ESMF_StateAttGet)
         TypeKindInterfaceMacro(ESMF_StateAttGet1D)
         module procedure ESMF_StateAttGetLgcl
@@ -506,6 +534,7 @@ module ESMF_AttributeMod
         module procedure ESMF_FieldAttGetAttPack
         module procedure ESMF_FieldBundleAttGetAttPack
         module procedure ESMF_GridAttGetAttPack
+        module procedure ESMF_LocStreamAttGetAttPack
         module procedure ESMF_StateAttGetAttPack
         module procedure ESMF_ArrayAttGetAttPackSL
         module procedure ESMF_ArrayBundleAttGetAttPackSL
@@ -516,6 +545,7 @@ module ESMF_AttributeMod
         module procedure ESMF_FieldAttGetAttPackSL
         module procedure ESMF_FieldBundleAttGetAttPackSL
         module procedure ESMF_GridAttGetAttPackSL
+        module procedure ESMF_LocStreamAttGetAttPackSL
         module procedure ESMF_StateAttGetAttPackSL
 
 ! !DESCRIPTION:
@@ -541,19 +571,24 @@ module ESMF_AttributeMod
         module procedure ESMF_CplCompAttLinkSciComp
         module procedure ESMF_CplCompAttLinkState
         module procedure ESMF_CplCompAttLinkGrid
+        module procedure ESMF_CplCompAttLinkLocStream
         module procedure ESMF_FieldBundleAttLinkField
         module procedure ESMF_FieldBundleAttLinkGrid
+        module procedure ESMF_FieldBundleAttLinkLocStream
         module procedure ESMF_FieldAttLinkGrid
+        module procedure ESMF_FieldAttLinkLocStream
         module procedure ESMF_GridCompAttLinkCplComp
         module procedure ESMF_GridCompAttLinkGridComp
         module procedure ESMF_GridCompAttLinkSciComp
         module procedure ESMF_GridCompAttLinkState
         module procedure ESMF_GridCompAttLinkGrid
+        module procedure ESMF_GridCompAttLinkLocStream
         module procedure ESMF_SciCompAttLinkCplComp
         module procedure ESMF_SciCompAttLinkGridComp
         module procedure ESMF_SciCompAttLinkSciComp
         module procedure ESMF_SciCompAttLinkState
         module procedure ESMF_SciCompAttLinkGrid
+        module procedure ESMF_SciCompAttLinkLocStream
         module procedure ESMF_StateAttLinkArrayBundle
         module procedure ESMF_StateAttLinkArray
         module procedure ESMF_StateAttLinkFieldBundle
@@ -582,19 +617,24 @@ module ESMF_AttributeMod
         module procedure ESMF_CplCompAttLinkRmSciComp
         module procedure ESMF_CplCompAttLinkRmState
         module procedure ESMF_CplCompAttLinkRmGrid
+        module procedure ESMF_CplCompAttLinkRmLocStream
         module procedure ESMF_FieldBundleAttLinkRmField
         module procedure ESMF_FieldBundleAttLinkRmGrid
+        module procedure ESMF_FieldBundleAttLinkRmLocStream
         module procedure ESMF_FieldAttLinkRmGrid
+        module procedure ESMF_FieldAttLinkRmLocStream
         module procedure ESMF_GridCompAttLinkRmCplComp
         module procedure ESMF_GridCompAttLinkRmGridComp
         module procedure ESMF_GridCompAttLinkRmSciComp
         module procedure ESMF_GridCompAttLinkRmState
         module procedure ESMF_GridCompAttLinkRmGrid
+        module procedure ESMF_GridCompAttLinkRmLocStream
         module procedure ESMF_SciCompAttLinkRmCplComp
         module procedure ESMF_SciCompAttLinkRmGridComp
         module procedure ESMF_SciCompAttLinkRmSciComp
         module procedure ESMF_SciCompAttLinkRmState
         module procedure ESMF_SciCompAttLinkRmGrid
+        module procedure ESMF_SciCompAttLinkRmLocStream
         module procedure ESMF_StateAttLinkRmArrayBundle
         module procedure ESMF_StateAttLinkRmArray
         module procedure ESMF_StateAttLinkRmFieldBundle
@@ -626,6 +666,7 @@ module ESMF_AttributeMod
         module procedure ESMF_FieldAttRead
         module procedure ESMF_FieldBundleAttRead
         module procedure ESMF_GridAttRead
+        module procedure ESMF_LocStreamAttRead
         module procedure ESMF_StateAttRead
 
 ! !DESCRIPTION:
@@ -760,6 +801,19 @@ module ESMF_AttributeMod
         module procedure ESMF_GridAttSetCharAP
         module procedure ESMF_GridAttSetCharListAP
 
+        TypeKindInterfaceMacro(ESMF_LocStreamAttSet)
+        TypeKindInterfaceMacro(ESMF_LocStreamAttSet1D)
+        module procedure ESMF_LocStreamAttSetLgcl
+        module procedure ESMF_LocStreamAttSetLgclList
+        module procedure ESMF_LocStreamAttSetChar
+        module procedure ESMF_LocStreamAttSetCharList
+        TypeKindInterfaceMacro(ESMF_LocStreamAttSetAP)
+        TypeKindInterfaceMacro(ESMF_LocStreamAttSet1DAP)
+        module procedure ESMF_LocStreamAttSetLgclAP
+        module procedure ESMF_LocStreamAttSetLgclListAP
+        module procedure ESMF_LocStreamAttSetCharAP
+        module procedure ESMF_LocStreamAttSetCharListAP
+
         TypeKindInterfaceMacro(ESMF_StateAttSet)
         TypeKindInterfaceMacro(ESMF_StateAttSet1D)
         module procedure ESMF_StateAttSetLgcl
@@ -797,6 +851,7 @@ module ESMF_AttributeMod
         module procedure ESMF_FieldAttWrite
         module procedure ESMF_FieldBundleAttWrite
         module procedure ESMF_GridAttWrite
+        module procedure ESMF_LocStreamAttWrite
         module procedure ESMF_StateAttWrite
 
 ! !DESCRIPTION:
@@ -3458,22 +3513,26 @@ contains
 ! !IROUTINE: ESMF_AttributeUpdate  - Update an Attribute hierarchy
 !
 ! !INTERFACE:
-!     subroutine ESMF_AttributeUpdate(<object>, vm, rootList, rc)
+!     subroutine ESMF_AttributeUpdate(<object>, vm, rootList, reconcile, rc)
 !
 ! !ARGUMENTS:
 !     <object>, see below for supported values
 !     type(ESMF_VM), intent(in)            :: vm
 !     integer,       intent(in)            :: rootList(:)
+!     logical,       intent(in), optional  :: reconcile
 !     integer,       intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!     Update an Attribute hierarchy during runtime.  This call will not work
-!     if changes have been made to the underlying object hierarchy and
-!     ESMF\_StateReconcile() has not already been called.  There is a check
-!     that will fail if this case is encountered.  The information from
-!     the PETs in the 'rootList' is transferred to the PETs that are not
-!     in the 'rootList'.  Care should be taken to ensure that the information
-!     contained in the Attributes on the PETs in the 'rootList' is consistent.
+!     Update an Attribute hierarchy during runtime. The information from
+!     the PETs in the {\tt rootList} is transferred to the PETs that are not
+!     in the {\tt rootList}.  Care should be taken to ensure that the
+!     information contained in the Attributes on the PETs in the {\tt rootList}
+!     is consistent.
+!     If changes have been made to the underlying object hierarchy then either
+!     {\tt ESMF\_StateReconcile()} or the {\tt reconcile} flag must be used to
+!     resolve them. The same applies if changes are made to both PETs and in
+!     the {\tt rootList} and PETs outside of the {\tt rootList}, or if the same
+!     changes are made in a different order.
 !
 !     Supported values for <object> are:
 !     \begin{description}
@@ -3492,10 +3551,18 @@ contains
 !     \item [<object>]
 !           An {\tt ESMF} object.
 !     \item [vm]
-!           The virtural machine over which this Attribute hierarchy
+!           The virtual machine over which this Attribute hierarchy
 !           should be updated.
 !     \item [rootList]
-!           The list of \textit{root} PETs that are to be used to update.
+!           The list of PETs that are to be used as the source of the update.
+!     \item [{[reconcile]}] @\
+!           A logical flag used to indicate whether to use reconcile behavior @\
+!           or normal update behavior. If {\tt reconcile} is set to  @\
+!           {\tt .true.} then the values of the root PETs will be sent to @\
+!           the nonroot PETs without exception. Otherwise, an algorithm that @\
+!           is optimized to use minimal memory will be used to update only  @\
+!           the modified parts of the Attribute hierarchy on the nonroot @\
+!           PETs. The default value is {\tt .false.}. @\
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -12213,12 +12280,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! @\
 ! !INTERFACE: @\
       ! Private name; call using ESMF_AttributeUpdate() @\
-      subroutine mclass##AttUpdate(mthis, vm, rootList, rc) @\
+      subroutine mclass##AttUpdate(mthis, vm, rootList, reconcile, rc) @\
 ! @\
 ! !ARGUMENTS: @\
       type(mclass), intent(inout) :: mthis @\
       type(ESMF_VM), intent(in) :: vm @\
       integer, dimension(:), intent(in) :: rootList @\
+      logical, intent(in), optional :: reconcile @\
       integer, intent(out), optional :: rc    @\
  @\
 ! @\
@@ -12230,10 +12298,17 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     \item [mthis] @\
 !      An {\tt mclass} object. @\
 !     \item [vm] @\
-!      The virtural machine over which this Attribute hierarchy  @\
+!      The virtual machine over which this Attribute hierarchy  @\
 !      should be updated. @\
 !     \item [rootList] @\
-!      The list of "root" PETs that are to be used to update. @\
+!      The list of PETs that are to be used to as the source of the update. @\
+!     \item [{[reconcile]}] @\
+!      A logical flag used to indicate whether to use reconcile behavior or @\
+!      normal update behavior. If {\tt reconcile} is set to {\tt ESMF\_TRUE} @\
+!      then the values of the root PETs will be sent to the nonroot PETs without @\
+!      exception. Otherwise, an algorithm that is optimized to use minimal @\
+!      memory will be used to update only the modified parts of the Attribute @\
+!      hierarchy on the nonroot PETs. The default value is {\tt ESMF\_FALSE}. @\
 !     \item [{[rc]}]  @\
 !      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
 !     \end{description} @\
@@ -12242,6 +12317,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !EOPI @\
  @\
       integer :: localrc, count                           ! Error status @\
+      type(ESMF_Logical) :: local_reconcile @\
  @\
       ! Initialize return code; assume failure until success is certain @\
       if (present(rc)) rc = ESMF_RC_NOT_IMPL @\
@@ -12249,8 +12325,16 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ! check input variables @\
       ESMF_INIT_CHECK_DEEP(mclass##GetInit,mthis,rc) @\
  @\
+      ! reconcile @\
+      if ( present(reconcile)) then @\
+        local_reconcile = reconcile @\
+      else @\
+        local_reconcile = ESMF_FALSE @\
+      endif @\
+ @\
       count = size(rootList) @\
-      call c_ESMC_AttributeUpdate(mthisfield, vm, rootList, count, localrc) @\
+      call c_ESMC_AttributeUpdate(mthisfield, vm, rootList, count, & @\
+                                  local_reconcile, localrc) @\
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
         ESMF_CONTEXT, rcToReturn=rc)) return @\
  @\
@@ -12396,6 +12480,8 @@ AttLinkCompMacro(ESMF_CplComp, ESMF_State, State, comp, state,  & @\
                 comp%compp%base, state%statep%base)
 AttLinkCompMacro(ESMF_CplComp, ESMF_Grid, Grid, comp, grid,  & @\
                 comp%compp%base, grid)
+AttLinkCompMacro(ESMF_CplComp, ESMF_LocStream, LocStream, comp, locStream,  & @\
+                comp%compp%base, locStream)
 AttLinkRemoveCompMacro(ESMF_CplComp, ESMF_CplComp, CplComp, comp1, comp2, & @\
                 comp1%compp%base, comp2%compp%base)
 AttLinkRemoveCompMacro(ESMF_CplComp, ESMF_GridComp, GridComp, comp1, comp2,  & @\
@@ -12406,6 +12492,8 @@ AttLinkRemoveCompMacro(ESMF_CplComp, ESMF_State, State, comp, state,  & @\
                 comp%compp%base, state%statep%base)
 AttLinkRemoveCompMacro(ESMF_CplComp, ESMF_Grid, Grid, comp, grid,  & @\
                 comp%compp%base, grid)
+AttLinkRemoveCompMacro(ESMF_CplComp, ESMF_LocStream, LocStream, comp, locStream,  & @\
+                comp%compp%base, locStream)
 
 AttReadMacro(ESMF_CplComp, comp, comp%compp%base)
 
@@ -12458,6 +12546,8 @@ AttLinkCompMacro(ESMF_GridComp, ESMF_State, State, comp, state, & @\
                 comp%compp%base, state%statep%base)
 AttLinkCompMacro(ESMF_GridComp, ESMF_Grid, Grid, comp, grid,  & @\
                 comp%compp%base, grid)
+AttLinkCompMacro(ESMF_GridComp, ESMF_LocStream, LocStream, comp, locStream,  & @\
+                comp%compp%base, locStream)
 AttLinkRemoveCompMacro(ESMF_GridComp, ESMF_CplComp, CplComp, comp1, comp2, & @\
                 comp1%compp%base, comp2%compp%base)
 AttLinkRemoveCompMacro(ESMF_GridComp, ESMF_GridComp, GridComp, comp1, comp2, & @\
@@ -12468,6 +12558,8 @@ AttLinkRemoveCompMacro(ESMF_GridComp, ESMF_State, State, comp, state, & @\
                 comp%compp%base, state%statep%base)
 AttLinkRemoveCompMacro(ESMF_GridComp, ESMF_Grid, Grid, comp, grid,  & @\
                 comp%compp%base, grid)
+AttLinkRemoveCompMacro(ESMF_GridComp, ESMF_LocStream, LocStream, comp, locStream,  & @\
+                comp%compp%base, locStream)
 
 AttReadMacro(ESMF_GridComp, comp, comp%compp%base)
 
@@ -12518,6 +12610,8 @@ AttLinkCompMacro(ESMF_SciComp, ESMF_State, State, comp, state, & @\
                 comp%compp%base, state%statep%base)
 AttLinkCompMacro(ESMF_SciComp, ESMF_Grid, Grid, comp, grid,  & @\
                 comp%compp%base, grid)
+AttLinkCompMacro(ESMF_SciComp, ESMF_LocStream, LocStream, comp, locStream,  & @\
+                comp%compp%base, locStream)
 AttLinkRemoveCompMacro(ESMF_SciComp, ESMF_CplComp, CplComp, comp1, comp2, & @\
                 comp1%compp%base, comp2%compp%base)
 AttLinkRemoveCompMacro(ESMF_SciComp, ESMF_GridComp, GridComp, comp1, comp2, & @\
@@ -12528,6 +12622,8 @@ AttLinkRemoveCompMacro(ESMF_SciComp, ESMF_State, State, comp, state, & @\
                 comp%compp%base, state%statep%base)
 AttLinkRemoveCompMacro(ESMF_SciComp, ESMF_Grid, Grid, comp, grid,  & @\
                 comp%compp%base, grid)
+AttLinkRemoveCompMacro(ESMF_SciComp, ESMF_LocStream, LocStream, comp, locStream,  & @\
+                comp%compp%base, locStream)
 
 AttReadMacro(ESMF_SciComp, comp, comp%compp%base)
 
@@ -12618,10 +12714,14 @@ AttLinkMacro(ESMF_FieldBundle, ESMF_Field, Field, fieldbundle, field, & @\
                 fieldbundle%this%base, field%ftypep%base)
 AttLinkMacro(ESMF_FieldBundle, ESMF_Grid, Grid, fieldbundle, grid, & @\
                 fieldbundle%this%base, grid)
+AttLinkMacro(ESMF_FieldBundle, ESMF_LocStream, LocStream, fieldbundle, locStream, & @\
+                fieldbundle%this%base, locStream%lstypep%base)
 AttLinkRemoveMacro(ESMF_FieldBundle, ESMF_Field, Field, fieldbundle, field, & @\
                 fieldbundle%this%base, field%ftypep%base)
 AttLinkRemoveMacro(ESMF_FieldBundle, ESMF_Grid, Grid, fieldbundle, grid, & @\
                 fieldbundle%this%base, grid)
+AttLinkRemoveMacro(ESMF_FieldBundle, ESMF_LocStream, LocStream, fieldbundle, locStream, & @\
+                fieldbundle%this%base, locStream%lstypep%base)
 
 AttReadMacro(ESMF_FieldBundle, fieldbundle, fieldbundle%this%base)
 
@@ -12658,8 +12758,12 @@ GetNameNumberMacro(ESMF_Field, field, field%ftypep%base)
 
 AttLinkMacro(ESMF_Field, ESMF_Grid, Grid, field, grid, & @\
                 field%ftypep%base, grid)
+AttLinkMacro(ESMF_Field, ESMF_LocStream, LocStream, field, locStream, & @\
+                field%ftypep%base, locStream%lstypep%base)
 AttLinkRemoveMacro(ESMF_Field, ESMF_Grid, Grid, field, grid, & @\
                 field%ftypep%base, grid)
+AttLinkRemoveMacro(ESMF_Field, ESMF_LocStream, LocStream, field, locStream, & @\
+                field%ftypep%base, locStream%lstypep%base)
 
 AttReadMacro(ESMF_Field, field, field%ftypep%base)
 
@@ -12780,6 +12884,39 @@ AttSetLogicalMacro(ESMF_Grid, grid, grid)
 AttSetCharacterBMacro(ESMF_Grid, grid, grid)
 
 AttWriteMacro(ESMF_Grid, grid, grid, grid, grid)
+
+!-------------------------------------------------------------------------
+!  LocStream
+!-------------------------------------------------------------------------
+
+AttGetAttPackMacro(ESMF_LocStream, locstream, locstream%lstypep%base)
+AttGetAttPackMacroSL(ESMF_LocStream, locstream, locstream%lstypep%base)
+
+AttAddPackStandardMacro(ESMF_LocStream, locstream, locstream%lstypep%base)
+AttAddPackCustomMacro(ESMF_LocStream, locstream, locstream%lstypep%base)
+AttAddPackCustomNMacro(ESMF_LocStream, locstream, locstream%lstypep%base)
+AttAddPackCustomN1Macro(ESMF_LocStream, locstream, locstream%lstypep%base)
+AttAddPackStandardMacroSL(ESMF_LocStream, locstream, locstream%lstypep%base)
+AttAddPackCustomMacroSL(ESMF_LocStream, locstream, locstream%lstypep%base)
+
+TypeKind3DeclarationMacro(AttGet, ESMF_LocStream, locstream, locstream%lstypep%base)
+TypeKind3NoDocDeclarationMacro(AttGet1D, ESMF_LocStream, locstream, locstream%lstypep%base)
+AttGetLogicalMacro(ESMF_LocStream, locstream, locstream%lstypep%base)
+AttGetCharacterMacro(ESMF_LocStream, locstream, locstream%lstypep%base)
+
+GetCountMacro(ESMF_LocStream, locstream, locstream%lstypep%base)
+GetNameNumberMacro(ESMF_LocStream, locstream, locstream%lstypep%base)
+
+AttReadMacro(ESMF_LocStream, locstream, locstream%lstypep%base)
+
+AttRemoveMacro(ESMF_LocStream, locstream, locstream%lstypep%base)
+
+TypeKind3DeclarationMacro(AttSet, ESMF_LocStream, locstream, locstream%lstypep%base)
+AttSetLogicalMacro(ESMF_LocStream, locstream, locstream%lstypep%base)
+AttSetCharacterMacro(ESMF_LocStream, locstream, locstream%lstypep%base)
+
+AttUpdateMacro(ESMF_LocStream, locstream, locstream%lstypep%base)
+AttWriteMacro(ESMF_LocStream, locstream, locstream%lstypep%base, locstream, locstream)
 
 !-------------------------------------------------------------------------
 !  DISTGRID

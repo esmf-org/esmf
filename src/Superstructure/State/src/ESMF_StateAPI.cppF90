@@ -1295,6 +1295,8 @@ ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit,routehandleList(i),rc)
           integer :: sipcount
           integer :: memstat1
 
+          icount = 0
+
 	  call ESMF_ContainerGet (sp%stateContainer, itemCount=sipcount, rc=localrc)
 	  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
 	      ESMF_CONTEXT, rcToReturn=rc)) return
@@ -1750,6 +1752,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer :: localrc
     integer :: commsend, commrecv
 
+    ESMF_StateIsReconcileNeeded = .false.
+
     ! check input variables
     ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc)
     ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit,vm,rc)
@@ -1839,13 +1843,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE: ESMF_StatePrint - Print State information
 !
 ! !INTERFACE:
-      subroutine ESMF_StatePrint(state, options, nestedFlag, rc)
+      subroutine ESMF_StatePrint(state, options, nestedFlag, filename, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_State), intent(in) :: state
       character(len=*), intent(in),  optional :: options
       logical,          intent(in),  optional :: nestedFlag
-      integer,          intent(out), optional :: rc 
+      character(len=*), intent(in),  optional :: filename
+      integer,          intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !     Prints information about the {\tt state} to {\tt stdout}.
@@ -1863,6 +1868,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !       State level only (default),
 !       When set to {\tt .true.}, additionally prints information from
 !       nested States
+!     \item[{[filename]}]
+!       The filename to which to write the Attribute info.
 !     \item[{[rc]}]
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !      \end{description}
@@ -1913,7 +1920,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 	 write (ESMF_UtilIOStderr,*) "ESMF_StatePrint: Illegal options arg: ", &
 	     trim (localopts)
 	 if (present (rc)) rc = ESMF_RC_ARG_BAD
-	 return 
+	 return
        end select
 
        if (.not.associated(state%statep)) then 
@@ -1942,13 +1949,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        write (ESMF_UtilIOStdout,*)  &
            "StatePrint (pet ", trim (mypet_string), "):"
 
-       call statePrintWorker (state%statep, level=0, rc1=rc)
+       call statePrintWorker (state%statep, level=0, filename=filename, rc1=rc)
 
    contains
 
-     recursive subroutine statePrintWorker (sp1, level, rc1)
+     recursive subroutine statePrintWorker (sp1, level, filename, rc1)
        type(ESMF_StateClass), pointer :: sp1
        integer, intent(in) :: level
+       character(*), intent(in), optional :: filename
        integer, intent(out), optional :: rc1
 
        type(ESMF_StateItemWrap), pointer :: siwrap(:)
@@ -2017,17 +2025,23 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        if (ESMF_LogFoundError(localrc1, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc1)) return
-       call c_ESMC_BasePrint(sp1%base, level, "brief", localrc1)
+       call c_ESMC_BasePrint(sp1%base, level, "brief", .false., "", &
+                             .false., localrc1)
        if (ESMF_LogFoundError(localrc1, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc1)) return
 
        if (debugflag) then
-	 write (ESMF_UtilIOStdout,*) 'ContainerPrint:'
-	 call ESMF_ContainerPrint (sp1%stateContainer, rc=localrc1)
-	 if (ESMF_LogFoundError(localrc1, &
-              ESMF_ERR_PASSTHRU, &
-              ESMF_CONTEXT, rcToReturn=rc1)) return
+         write (ESMF_UtilIOStdout,*) 'ContainerPrint:'
+         call ESMF_ContainerPrint (sp1%stateContainer, rc=localrc1)
+         if (ESMF_LogFoundError(localrc1, &
+           ESMF_ERR_PASSTHRU, &
+           ESMF_CONTEXT, rcToReturn=rc1)) return
+         call c_ESMC_BasePrint(sp1%base, level, "debug", .true., filename, &
+                               .false., localrc1)
+         if (ESMF_LogFoundError(localrc1, &
+           ESMF_ERR_PASSTHRU, &
+           ESMF_CONTEXT, rcToReturn=rc1)) return
        end if
 
        do, i1 = 1, ptrcnt
@@ -2036,7 +2050,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
          call ESMF_StateItemPrint (sip,  &
              header=trim (outbuf),  &
              prefixstr=nestr,  &
-             longflag=longflag, debugflag=debugflag)
+             longflag=longflag, debugflag=debugflag, filename=filename)
 
          if (localnestedflag .and. sip%otype%ot == ESMF_STATEITEM_STATE%ot) then
            call statePrintWorker (sip%datap%spp, level=level+1, rc1=localrc1)

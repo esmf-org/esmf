@@ -111,6 +111,7 @@ void ESMCI_GridToMesh(const Grid &grid_, int staggerLoc,
    throw localrc;
  }
 
+
  // Create Mesh
  Mesh *meshp = new Mesh();
  
@@ -202,24 +203,21 @@ void ESMCI_GridToMesh(const Grid &grid_, int staggerLoc,
    // *** Create the Nodes ***
      // Loop nodes of the grid.  Here we loop all nodes, both owned and not.
    ESMCI::GridIter *gni=new ESMCI::GridIter(&grid,staggerLoc,true);
-
+ 
    // Put Local in first, so we don't have to search for duplicates for every interation, 
    // after locals are in put in non-local
-
    // loop through all LOCAL nodes in the Grid owned by cells
    for(gni->toBeg(); !gni->isDone(); gni->adv()) {   
-
+   
      // Only operate on Local Nodes
      if (gni->isLocal()) {
        MeshObj *node;
        
        // get the global id of this Grid node
        int gid=gni->getGlobalID(); 
-       
+
        // get the local id of this Grid node
        int lid=gni->getLocalID(); 
-
-
 
 #ifdef G2M_DBG
 Par::Out() << "GID=" << gid << ", LID=" << lid << std::endl;
@@ -238,9 +236,9 @@ Par::Out() << "GID=" << gid << ", LID=" << lid << std::endl;
        node->set_owner(me);  // Set owner to this proc
        
        //       UInt nodeset = is_sphere ? gni->getPoleID() : 0;   // Do we need to partition the nodes in any sets?
+
        UInt nodeset = gni->getPoleID();   // Do we need to partition the nodes in any sets?
        mesh.add_node(node, nodeset);
-
        
        // If Shared add to list to use DistDir on
        if (gni->isShared()) {
@@ -256,9 +254,7 @@ Par::Out() << "GID=" << gid << ", LID=" << lid << std::endl;
        // Put node into map
        nodemap[lid]=node;    
      }
-     
    } // gni
-
 
    // loop through all NON-LOCAL nodes in the Grid owned by cells
    for(gni->toBeg(); !gni->isDone(); gni->adv()) {   
@@ -306,7 +302,6 @@ Par::Out() << "GID=" << gid << ", LID=" << lid << std::endl;
        nodemap[lid]=node;    
      }
    } // gni
-  
 
 
    // Use DistDir to fill node owners for non-local nodes 

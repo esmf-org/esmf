@@ -15,9 +15,8 @@
 // Take out if MOAB isn't being used
 #ifdef ESMF_MOAB
 
-#include "Mesh/src/Moab/moab/Core.hpp"
+#include "moab/Core.hpp"
 using namespace moab;
-
 
 #include <map>
 
@@ -31,13 +30,37 @@ namespace ESMCI {
     Interface *mesh; // Moab mesh  MAYBE I SHOULD NAME ThIS SOMETHING ELSE????
 
     int num_verts;
-
     EntityHandle *verts; // Temporary storage for element create
+
+    int num_elems; // number of elems on this processor
 
     // Tags
     Tag gid_tag;
     Tag orig_pos_tag;
     Tag owner_tag;
+
+    bool has_node_orig_coords;
+    Tag node_orig_coords_tag;
+
+    bool has_node_mask;
+    Tag node_mask_tag;
+    Tag node_mask_val_tag;
+
+    bool has_elem_frac;
+    Tag  elem_frac_tag;
+
+    bool has_elem_mask;
+    Tag elem_mask_tag;
+    Tag elem_mask_val_tag;
+
+    bool has_elem_area;
+    Tag  elem_area_tag;
+
+    bool has_elem_coords;
+    Tag  elem_coords_tag;
+
+    bool has_elem_orig_coords;
+    Tag  elem_orig_coords_tag;
 
     // Split stuff
     bool is_split;

@@ -51,10 +51,10 @@
     integer :: result = 0
  
        ! individual test result code
-    integer :: rc = 1
+     integer :: rc = 1
 
     ! individual test failure message
-    character(ESMF_MAXSTR) :: failMsg
+     character(ESMF_MAXSTR) :: failMsg
     character(512) :: name
 
     call ESMF_TestStart(ESMF_SRCLINE, rc=rc)
@@ -104,7 +104,7 @@
       ! Test regridding on Grids with indices switched
       write(failMsg, *) "Test unsuccessful"
       write(name, *) "Regrid between two Fields on Grids with indices switched"
-
+ 
       ! initialize 
       rc=ESMF_SUCCESS
 
@@ -157,7 +157,7 @@
       ! initialize 
       rc=ESMF_SUCCESS
       
-      ! do test
+       ! do test
       call test_regridSrcMask(rc)
 
       ! return result
@@ -210,7 +210,7 @@
       !EX_UTest
       ! Test regrid with masks
       write(failMsg, *) "Test unsuccessful"
-      write(name, *) "Regrid with R4 coordinates"
+       write(name, *) "Regrid with R4 coordinates"
 
       ! initialize 
       rc=ESMF_SUCCESS
@@ -263,7 +263,7 @@
       rc=ESMF_SUCCESS
       
       ! do test
-      call test_regridMeshToGrid(rc)
+       call test_regridMeshToGrid(rc)
 
       ! return result
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -316,7 +316,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-
+ 
       !EX_UTest
        ! Test regrid with masks
       write(failMsg, *) "Test unsuccessful"
@@ -369,7 +369,7 @@
 
 
       !------------------------------------------------------------------------
-
+ 
       !EX_UTest
       ! Test regrid with masks
        write(failMsg, *) "Test unsuccessful"
@@ -377,12 +377,13 @@
 
       ! initialize 
       rc=ESMF_SUCCESS
-      
+ 
       ! do test
       call test_regridGridToGridSph3D(rc)
  
       ! return result
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
 
       !------------------------------------------------------------------------
 
@@ -422,7 +423,7 @@
       !EX_UTest
       ! Test regrid with masks
       write(failMsg, *) "Test unsuccessful"
-      write(name, *) "Test regridding Sphere with ESMF_POLEMETHOD_NPNTAVG"
+       write(name, *) "Test regridding Sphere with ESMF_POLEMETHOD_NPNTAVG"
 
        ! initialize 
       rc=ESMF_SUCCESS
@@ -475,7 +476,7 @@
 
         ! initialize 
       rc=ESMF_SUCCESS
-      
+       
       ! do test
       call test_regridMatrixFactor(rc)
 
@@ -528,7 +529,7 @@
       write(name, *) "Test regridding on a grid with an irregular distribution"
 
       ! initialize 
-       rc=ESMF_SUCCESS
+        rc=ESMF_SUCCESS
       
       ! do test
       call test_regridIrreg(rc)
@@ -581,7 +582,7 @@
       write(failMsg, *) "Test unsuccessful"
       write(name, *) "Test regridding on a spherical grids with NEAREST_DTOS regridding"
 
-      ! initialize 
+       ! initialize 
       rc=ESMF_SUCCESS
        
       ! do test
@@ -609,6 +610,8 @@
       ! return result
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
+
+
       !EX_UTest
       ! Test regrid with 2 tile distgrid"
       write(failMsg, *) "Test unsuccessful"
@@ -622,6 +625,7 @@
 
       ! return result
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
 
       !------------------------------------------------------------------------
       !EX_UTest
@@ -653,9 +657,8 @@
 
       ! return result
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-
-       !------------------------------------------------------------------------
-
+      
+      !------------------------------------------------------------------------
 
       !------------------------------------------------------------------------
       !EX_UTest
@@ -672,7 +675,6 @@
       ! return result
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
-
 
       !------------------------------------------------------------------------
       !EX_UTest
@@ -14480,7 +14482,7 @@ write(*,*) "LOCALRC=",localrc
   integer :: i1,i2,i3, index(2)
   integer :: lDE, srclocalDECount, dstlocalDECount
   real(ESMF_KIND_R8) :: coord(2)
-  character(len=ESMF_MAXSTR) :: string
+   character(len=ESMF_MAXSTR) :: string
 
   integer :: src_nx(2), src_ny(2)
   integer :: src_minx(2), src_miny(2)
@@ -14509,7 +14511,8 @@ write(*,*) "LOCALRC=",localrc
 
   integer :: localPet, petCount
 
-  type(ESMF_DistGridConnection) :: connectionList(2)
+  type(ESMF_DistGridConnection) :: connectionList(1)
+!  type(ESMF_DistGridConnection) :: connectionList(2)
   integer :: minIndex(2,2), maxIndex(2,2)
   integer :: regDecomp(2,2)
   type(ESMF_Decomp_Flag) :: decomp(2,2)
@@ -14530,7 +14533,7 @@ write(*,*) "LOCALRC=",localrc
   call ESMF_VMGetGlobal(vm, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rcToReturn=rc)) return
+             ESMF_CONTEXT, rcToReturn=rc)) return
 
   call ESMF_VMGet(vm, petCount=petCount, localPet=localpet, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
@@ -14582,14 +14585,15 @@ write(*,*) "LOCALRC=",localrc
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
-  call ESMF_DistgridConnectionSet(connection=connectionList(2), &
+#if 0
+   call ESMF_DistgridConnectionSet(connection=connectionList(2), &
         tileIndexA=2,tileIndexB=1, &
         positionVector=(/-src_nx(1),0/), &
         rc=localrc)
   if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-
+#endif
 
   ! Setup index space
   minIndex(:,1)=(/1,1/)
@@ -14635,7 +14639,7 @@ write(*,*) "LOCALRC=",localrc
   if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-
+ 
 
    srcField = ESMF_FieldCreate(srcGrid, arrayspec, &
                          staggerloc=ESMF_STAGGERLOC_CENTER, name="source", rc=localrc)
@@ -14688,7 +14692,7 @@ write(*,*) "LOCALRC=",localrc
   if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-
+ 
   call ESMF_DistgridGet(srcDistgrid, delayout=delayout, rc=localrc)
   if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
@@ -14741,7 +14745,7 @@ write(*,*) "LOCALRC=",localrc
 
 
      !! Set values based on tile
-     tile_nx=src_nx(tile)
+      tile_nx=src_nx(tile)
      tile_ny=src_ny(tile)
 
      tile_minx=src_minx(tile)
@@ -14749,7 +14753,6 @@ write(*,*) "LOCALRC=",localrc
 
      tile_miny=src_miny(tile)
      tile_maxy=src_maxy(tile)
-
 
      !! set coords, interpolated function
      do i1=clbnd(1),cubnd(1)
@@ -14766,6 +14769,20 @@ write(*,*) "LOCALRC=",localrc
      enddo
 
   enddo    ! lDE
+
+
+#if 0
+
+  call ESMF_GridWriteVTK(srcGrid,staggerloc=ESMF_STAGGERLOC_CENTER, &
+        filename="srcGrid", &
+       rc=localrc)
+  if (ESMF_LogFoundError(localrc, &
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+
+   return 
+#endif
 
 
   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -14804,7 +14821,7 @@ write(*,*) "LOCALRC=",localrc
 
      call ESMF_FieldGet(xdstField, lDE, xfarrayPtr,  rc=localrc)
      if (ESMF_LogFoundError(localrc, &
-         ESMF_ERR_PASSTHRU, &
+          ESMF_ERR_PASSTHRU, &
          ESMF_CONTEXT, rcToReturn=rc)) return
 
 
@@ -14857,7 +14874,7 @@ write(*,*) "LOCALRC=",localrc
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
-  ! Do regrid
+   ! Do regrid
   call ESMF_FieldRegrid(srcField, dstField, routeHandle, rc=localrc)
   if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &

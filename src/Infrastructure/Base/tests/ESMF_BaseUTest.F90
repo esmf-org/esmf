@@ -335,6 +335,8 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
 
+      deallocate (buffer)
+
 #endif
 
       ! This calls finalize before returning, so it must be the last

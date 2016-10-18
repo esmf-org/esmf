@@ -551,7 +551,7 @@ class Mesh(object):
         """
         Return a numpy array of coordinates at a specified Mesh 
         location (coordinates can only be returned for the Mesh
-        :attr:`~ESMF.api.constants.MeshLoc.NODE`s
+        :attr:`~ESMF.api.constants.MeshLoc.NODE`\s
         at this time). The returned array is NOT a copy, it is
         directly aliased to the underlying memory allocated by ESMF.
 

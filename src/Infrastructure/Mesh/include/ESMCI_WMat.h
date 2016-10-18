@@ -14,6 +14,7 @@
 
 #include <Mesh/include/ESMCI_Migrator.h>
 #include "PointList/include/ESMCI_PointList.h"
+#include <Mesh/include/ESMCI_MBMesh.h>
 
 #include <ostream>
 
@@ -108,7 +109,12 @@ public:
   void Migrate(Mesh &mesh);
   void Migrate(PointList &plist);
   void MigrateToElem(Mesh &mesh);
-  
+
+// Take out if MOAB isn't being used
+#ifdef ESMF_MOAB
+  void MigrateToElem(MBMesh &mesh);  
+#endif // ESMF_MOAB
+
   // Return the number of rows that use this id
   UInt NumRows(long id) const;
   
@@ -119,7 +125,6 @@ public:
    * weightset.
    */
   void GatherToCol(WMat &rhs);
-
 
  
   void GatherToRowSrc(WMat &rhs);

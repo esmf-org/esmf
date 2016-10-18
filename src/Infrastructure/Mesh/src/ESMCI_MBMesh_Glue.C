@@ -32,12 +32,13 @@
 #include "ESMCI_CoordSys.h"
 
 #include "Mesh/include/ESMCI_MathUtil.h" 
+#include "Mesh/include/ESMCI_MeshRegrid.h" 
 
 #include "Mesh/include/ESMCI_MBMesh.h"
 #include "Mesh/include/ESMCI_MBMesh_Util.h"
 
-#include "Mesh/src/Moab/MBTagConventions.hpp"
-
+#include "MBTagConventions.hpp"
+#include "moab/ParallelComm.hpp"
 
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
@@ -110,44 +111,50 @@ void MBMesh_create(void **mbmpp,
     Interface *moab_mesh=new Core();
 
     // Default value
-    int def_val = 0;
+    int int_def_val = 0;
+    double dbl_def_val = 0.0;
 
      // Setup global id tag
-    Tag gid_tag;
-    def_val=0;
-    merr=moab_mesh->tag_get_handle(GLOBAL_ID_TAG_NAME, 1, MB_TYPE_INTEGER, gid_tag, MB_TAG_DENSE, &def_val);
+    int_def_val=0;
+    merr=moab_mesh->tag_get_handle(GLOBAL_ID_TAG_NAME, 1, MB_TYPE_INTEGER, mbmp->gid_tag, MB_TAG_DENSE, &int_def_val);
     if (merr != MB_SUCCESS) {
       if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
                                        moab::ErrorCodeStr[merr], ESMC_CONTEXT, rc)) return;
     }     
 
-
     // Setup orig_pos tag
-    Tag orig_pos_tag;
-    def_val=-1;
-    merr=moab_mesh->tag_get_handle("orig_pos", 1, MB_TYPE_INTEGER, orig_pos_tag, MB_TAG_EXCL|MB_TAG_DENSE, &def_val);
+    int_def_val=-1;
+    merr=moab_mesh->tag_get_handle("orig_pos", 1, MB_TYPE_INTEGER, mbmp->orig_pos_tag, MB_TAG_EXCL|MB_TAG_DENSE, &int_def_val);
     if (merr != MB_SUCCESS) {
       if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
                                        moab::ErrorCodeStr[merr], ESMC_CONTEXT, rc)) return;
     }     
 
     // Setup owner tag
-    Tag owner_tag;
-    def_val=-1;
-    merr=moab_mesh->tag_get_handle("owner", 1, MB_TYPE_INTEGER, owner_tag, MB_TAG_EXCL|MB_TAG_DENSE, &def_val);
+    int_def_val=-1;
+    merr=moab_mesh->tag_get_handle("owner", 1, MB_TYPE_INTEGER, mbmp->owner_tag, MB_TAG_EXCL|MB_TAG_DENSE, &int_def_val);
     if (merr != MB_SUCCESS) {
       if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
                                        moab::ErrorCodeStr[merr], ESMC_CONTEXT, rc)) return;
     }     
 
+    // Setup node_orig_coord tag
+    mbmp->has_node_orig_coords=false;
+    if (*coordSys != ESMC_COORDSYS_CART) {
+      dbl_def_val=-1.0;
+      merr=moab_mesh->tag_get_handle("node_orig_coords", *sdim, MB_TYPE_DOUBLE, mbmp->node_orig_coords_tag, MB_TAG_EXCL|MB_TAG_DENSE, &dbl_def_val);
+      if (merr != MB_SUCCESS) {
+        if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
+                                         moab::ErrorCodeStr[merr], ESMC_CONTEXT, rc)) return;
+      }     
+      mbmp->has_node_orig_coords=true;
+    }
+
+ /* XMRKX */
+
     // Set Moab Mesh
     mbmp->mesh=moab_mesh;
  
-    // Set Tags
-    mbmp->gid_tag=gid_tag;
-    mbmp->orig_pos_tag=orig_pos_tag;
-    mbmp->owner_tag=owner_tag;
-
     // Set dimensions
     mbmp->pdim=*pdim;
     mbmp->sdim=cart_sdim;
@@ -165,7 +172,7 @@ void MBMesh_create(void **mbmpp,
 void MBMesh_addnodes(void **mbmpp, int *num_nodes, int *nodeId, 
                      double *nodeCoord, int *nodeOwner, InterfaceInt *nodeMaskII,
                      ESMC_CoordSys_Flag *_coordSys, int *_orig_sdim,
-                      int *rc) 
+                       int *rc) 
 {
 
   // Should we do exception handling in here, since MOAB doesn't??? 
@@ -221,7 +228,7 @@ void MBMesh_addnodes(void **mbmpp, int *num_nodes, int *nodeId,
      // Create new nodes
     for (int n = 0; n < num_verts; ++n) {
       double cart_coords[3];
-
+ 
       // Init to 0.0 incase less than 3D
       cart_coords[0]=0.0; cart_coords[1]=0.0; cart_coords[2]=0.0; 
       
@@ -261,129 +268,61 @@ void MBMesh_addnodes(void **mbmpp, int *num_nodes, int *nodeId,
       }     
     }
 
- /* XMRKX */
-  
-
-    // DO THE REST OF THIS LATER
-#if 0
-    // If not cartesian then keep original coordinate field
-    IOField<NodalField> *node_orig_coord;
-    if (coordSys != ESMC_COORDSYS_CART) {
-      node_orig_coord = mesh.RegisterNodalField(mesh, "orig_coordinates", orig_sdim);
+    // Set original coords
+    if (mbmp->has_node_orig_coords) {
+      // Set orinal coords
+      merr=moab_mesh->tag_set_data(mbmp->node_orig_coords_tag, verts, num_verts, nodeCoord);
+      if (merr != MB_SUCCESS) {
+        if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
+                       moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
+      }     
     }
 
-    // Handle node masking
-     IOField<NodalField> *node_mask_val;
-    IOField<NodalField> *node_mask;
-  
-    bool has_node_mask=false;
+    // Set mask information
+    mbmp->has_node_mask=false;
     if (present(nodeMaskII)) { // if masks exist
-    // Error checking
-    if ((nodeMaskII)->dimCount !=1) {
-      int localrc;
-       if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
-        "- nodeMask array must be 1D ", ESMC_CONTEXT,  &localrc)) throw localrc;
-    }
-
-    if ((nodeMaskII)->extent[0] != *num_nodes) {
-      int localrc;
-      if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
-                                       "- nodeMask array must be the same size as the nodeIds array ", ESMC_CONTEXT, &localrc)) throw localrc;
-    }
-    
-    // Register mask fields on mesh
-    node_mask_val = mesh.RegisterNodalField(mesh, "node_mask_val", 1);
-    node_mask = mesh.RegisterNodalField(mesh, "mask", 1);
-
-
-    // Record the fact that it has masks
-    has_node_mask=true;   
-   } 
- 
-    // Loop and add coords and mask
-    if (has_node_mask) {
-      int *maskArray=(nodeMaskII)->array;
-      int nm=0;
-      for (UInt nc = 0; ni != ne; ++ni) {
-        
-        MeshObj &node = *ni;
+      // Error checking
+      if ((nodeMaskII)->dimCount !=1) {
+        int localrc;
+         if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
+                                         "- nodeMask array must be 1D ", ESMC_CONTEXT,  &localrc)) throw localrc;
+      }
       
-        // Coords
-        double *coord = node_coord->data(node);
-        for (UInt c = 0; c < sdim; ++c)
-          coord[c] = nodeCoord[nc+c];
-         nc += sdim;   
-
-        // Mask
-        double *mask = node_mask_val->data(node);
-         *mask=maskArray[nm];
-        nm++;
-  
+      if ((nodeMaskII)->extent[0] != *num_nodes) {
+        int localrc;
+        if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
+                                         "- nodeMask array must be the same size as the nodeIds array ", ESMC_CONTEXT, &localrc)) throw localrc;
       }
-    } else {
-      for (UInt nc = 0; ni != ne; ++ni) {
-        
-        MeshObj &node = *ni;
-        
-        double *coord = node_coord->data(node);
-        for (UInt c = 0; c < sdim; ++c)
-          coord[c] = nodeCoord[nc+c];        
-        nc += sdim;   
-      }      
+      
+      // Setup node mask tag
+      int int_def_val=0; // So things are by default not masked
+      merr=moab_mesh->tag_get_handle("node_mask", 1, MB_TYPE_INTEGER, mbmp->node_mask_tag, MB_TAG_EXCL|MB_TAG_DENSE, &int_def_val);
+      if (merr != MB_SUCCESS) {
+        if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
+                                         moab::ErrorCodeStr[merr], ESMC_CONTEXT, rc)) return;
+      }     
+
+      // Setup node mask value tag
+      int_def_val=0; // So things are by default not masked
+      merr=moab_mesh->tag_get_handle("node_mask_val", 1, MB_TYPE_INTEGER, mbmp->node_mask_val_tag, MB_TAG_EXCL|MB_TAG_DENSE, &int_def_val);
+      if (merr != MB_SUCCESS) {
+        if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
+                                         moab::ErrorCodeStr[merr], ESMC_CONTEXT, rc)) return;
+      }     
+
+      // Set values in node mask value
+      merr=moab_mesh->tag_set_data(mbmp->node_mask_val_tag, verts, num_verts, nodeMaskII->array);
+      if (merr != MB_SUCCESS) {
+        if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
+                                         moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
+      }     
+
+      // Record the fact that it has masks
+      mbmp->has_node_mask=true;
     }
 
-
-     // Loop and add coords
-    if (coordSys == ESMC_COORDSYS_CART) {
-      Mesh::iterator ni = mesh.node_begin(), ne = mesh.node_end();
- 
-       int nc=0;
-      for (; ni != ne; ++ni) {        
-        MeshObj &node = *ni;
-        
-        double *coord = node_coord->data(node);
-        for (UInt c = 0; c < sdim; ++c)
-          coord[c] = nodeCoord[nc+c];        
-        nc += sdim;   
-      }      
-    } else {
-      Mesh::iterator ni = mesh.node_begin(), ne = mesh.node_end();
-
-      int nc=0;
-      for (; ni != ne; ++ni) {        
-        MeshObj &node = *ni;
-
-        // Save original coordinates        
-        double *orig_coord = node_orig_coord->data(node);
-        for (UInt c = 0; c<orig_sdim; ++c)
-            orig_coord[c] = nodeCoord[nc+c];        
-        nc += orig_sdim;
-
-        // Convert and save Cartesian coordinates
-         double *coord = node_coord->data(node);
-        ESMCI_CoordSys_ConvertToCart(coordSys, orig_sdim, 
-                                      orig_coord, coord);
-      }
-    }
-
-
-    // Loop and add mask
-    if (has_node_mask) {
-      int *maskArray=(nodeMaskII)->array;    
-      Mesh::iterator ni = mesh.node_begin(), ne = mesh.node_end();
-
-      int nm=0;
-      for (; ni != ne; ++ni) {
-         MeshObj &node = *ni;
-         
-        // Mask
-        double *mask = node_mask_val->data(node);
-        *mask=maskArray[nm];
-        nm++; 
-      }
-    }
-#endif
-    
+ /* XMRKX */
+      
   } catch(std::exception &x) {
     // catch Mesh exception return code 
     if (x.what()) {
@@ -401,7 +340,7 @@ void MBMesh_addnodes(void **mbmpp, int *num_nodes, int *nodeId,
     return;
   } catch(...){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-      "- Caught unknown exception", ESMC_CONTEXT, rc);
+       "- Caught unknown exception", ESMC_CONTEXT, rc);
     return;
   }
  
@@ -457,7 +396,7 @@ static int ElemType2NumNodes(int pdim, int sdim, int etype) {
 // triangulate > 4 sided
 // sdim = spatial dim
 // num_p = number of points in poly
- // p     = poly coords size=num_p*sdim
+  // p     = poly coords size=num_p*sdim
 // td    = temporary buffer size=num_p*sdim
 // ti    = temporary integer buffer size = num_p
 // tri_ind = output array  size = 3*(nump-2)
@@ -513,7 +452,7 @@ static void triangulate(int sdim, int num_p, double *p, double *td, int *ti, int
             }
 
              // compute area of triangle
-            double tri_area;
+             double tri_area;
             if (sdim == 2) {
               tri_area = area_of_flat_2D_polygon(3, td);
             } else if (sdim == 3) {
@@ -569,8 +508,8 @@ void MBMesh_addelements(void **mbmpp,
     int localrc;
 
     // Do this for now instead of initing mesh parallel stuff
-    // TODO: MAYBE EVENTUALLY PUT THIS INTO MBMesh???
-    MPI_Comm mpi_comm;
+     // TODO: MAYBE EVENTUALLY PUT THIS INTO MBMesh???
+     MPI_Comm mpi_comm;
      {
       int localrc;
       int rc;
@@ -622,7 +561,7 @@ void MBMesh_addelements(void **mbmpp,
           if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
             "- for a mesh with parametric dimension 2 element types must be either triangles or quadrilaterals ",
                                            ESMC_CONTEXT, &localrc)) throw localrc;
-        }
+          }
       }
 #endif
     } else if (parametric_dim==3) {
@@ -656,6 +595,105 @@ void MBMesh_addelements(void **mbmpp,
         "- element connectivity list doesn't contain the right number of entries ",
                                        ESMC_CONTEXT, &localrc)) throw localrc;
     }
+
+ /* XMRKX */
+    // Register element tags
+    int     int_def_val=-1.0;
+    double  dbl_def_val= 0.0;
+
+    //// Register the frac field
+    mbmp->has_elem_frac=false;
+    if (*regridConserve == ESMC_REGRID_CONSERVE_ON) {
+
+      merr=moab_mesh->tag_get_handle("elem_frac", 1, MB_TYPE_DOUBLE, mbmp->elem_frac_tag, MB_TAG_EXCL|MB_TAG_DENSE, &dbl_def_val);
+      if (merr != MB_SUCCESS) {
+        if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
+                                         moab::ErrorCodeStr[merr], ESMC_CONTEXT, rc)) return;
+      }     
+
+      mbmp->has_elem_frac=true;
+    }
+
+
+    // Handle element masking
+    mbmp->has_elem_mask=false;
+     if (present(elemMaskII)) { // if masks exist
+      // Error checking
+      if (elemMaskII->dimCount !=1) {
+        int localrc;
+        if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
+          "- elementMask array must be 1D ", ESMC_CONTEXT,  &localrc)) throw localrc;
+      }
+      
+      if (elemMaskII->extent[0] != num_elems) {
+        int localrc;
+        if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
+        "- elementMask array must be the same size as elementIds array ", ESMC_CONTEXT, &localrc)) throw localrc;
+      }
+
+      // Setup elem mask tag
+      int_def_val=0; // So things are by default not masked
+      merr=moab_mesh->tag_get_handle("elem_mask", 1, MB_TYPE_INTEGER, mbmp->elem_mask_tag, MB_TAG_EXCL|MB_TAG_DENSE, &int_def_val);
+      if (merr != MB_SUCCESS) {
+        if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
+                                         moab::ErrorCodeStr[merr], ESMC_CONTEXT, rc)) return;
+      }     
+
+      // Setup elem mask value tag
+      int_def_val=0; // So things are by default not masked
+      merr=moab_mesh->tag_get_handle("elem_mask_val", 1, MB_TYPE_INTEGER, mbmp->elem_mask_val_tag, MB_TAG_EXCL|MB_TAG_DENSE, &int_def_val);
+      if (merr != MB_SUCCESS) {
+        if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
+                                         moab::ErrorCodeStr[merr], ESMC_CONTEXT, rc)) return;
+      }     
+
+      // Record the fact that it has masks
+      mbmp->has_elem_mask=true;   
+    } 
+
+    // Handle element area
+    mbmp->has_elem_area=false;
+    if (areaPresent == 1) { // if areas exist
+  
+      merr=moab_mesh->tag_get_handle("elem_area", 1, MB_TYPE_DOUBLE, mbmp->elem_area_tag, MB_TAG_EXCL|MB_TAG_DENSE, &dbl_def_val);
+      if (merr != MB_SUCCESS) {
+        if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
+                                         moab::ErrorCodeStr[merr], ESMC_CONTEXT, rc)) return;
+      }     
+      
+      // Record the fact that it has masks
+      mbmp->has_elem_area=true;   
+    } 
+
+
+    // Handle element coords
+    mbmp->has_elem_coords=false;
+    mbmp->has_elem_orig_coords=false;
+    if (coordsPresent == 1) { // if coords exist
+            
+      // Add element coords field
+      merr=moab_mesh->tag_get_handle("elem_coords", mbmp->sdim, MB_TYPE_DOUBLE, mbmp->elem_coords_tag, MB_TAG_EXCL|MB_TAG_DENSE, &dbl_def_val);
+       if (merr != MB_SUCCESS) {
+        if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
+                                         moab::ErrorCodeStr[merr], ESMC_CONTEXT, rc)) return;
+      }     
+
+      // If not cartesian then add original coordinates field
+      if (coordSys != ESMC_COORDSYS_CART) {
+        merr=moab_mesh->tag_get_handle("elem_orig_coords", orig_sdim, MB_TYPE_DOUBLE, mbmp->elem_orig_coords_tag, MB_TAG_EXCL|MB_TAG_DENSE, &dbl_def_val);
+        if (merr != MB_SUCCESS) {
+          if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
+                                           moab::ErrorCodeStr[merr], ESMC_CONTEXT, rc)) return;
+        }     
+
+        // Record the fact that it has original elem coords
+        mbmp->has_elem_orig_coords=true;   
+      }
+
+
+      // Record the fact that it has elem coords
+      mbmp->has_elem_coords=true;   
+    } 
 
 
     // Count the number of extra elements we need for splitting
@@ -691,7 +729,7 @@ void MBMesh_addelements(void **mbmpp,
       for (int e = 0; e < num_elems; ++e) {
         if (elemId[e] > max_id) {
           max_id=elemId[e];
-        }
+         }
       }
 
       // Calc global max id
@@ -747,7 +785,7 @@ void MBMesh_addelements(void **mbmpp,
          // Check elemConn
         if (node_index < 0) {
 	  int localrc;
-	  if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+ 	  if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
 	   "- elemConn entries should not be less than 1 ",
            ESMC_CONTEXT, &localrc)) throw localrc;
 	}
@@ -783,22 +821,6 @@ void MBMesh_addelements(void **mbmpp,
           ESMC_CONTEXT, &localrc)) throw localrc;
     }
  
-    // If they exist, error check mask 
-    if (present(elemMaskII)) { // if masks exist
-      // Error checking
-      if (elemMaskII->dimCount !=1) {
-        int localrc;
-        if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
-          "- elementMask array must be 1D ", ESMC_CONTEXT,  &localrc)) throw localrc;
-      }
-      
-      if (elemMaskII->extent[0] != num_elems) {
-        int localrc;
-        if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
-        "- elementMask array must be the same size as elementIds array ", ESMC_CONTEXT, &localrc)) throw localrc;
-      }
-    }
-
 
     // Generate connectivity list with split elements
     // TODO: MAYBE EVENTUALLY PUT EXTRA SPLIT ONES AT END
@@ -819,7 +841,7 @@ void MBMesh_addelements(void **mbmpp,
       elemConn_wsplit=new int[num_elemConn+3*num_extra_elem];
       elemType_wsplit=new int[num_elems_wsplit];
       elemId_wsplit=new int[num_elems_wsplit];
-       if (areaPresent==1) elemArea_wsplit=new double[num_elems_wsplit];
+        if (areaPresent==1) elemArea_wsplit=new double[num_elems_wsplit];
 
 
       //// Setup for split mask
@@ -875,7 +897,7 @@ void MBMesh_addelements(void **mbmpp,
               polyCoords[crd_pos]=coords[j];
               crd_pos++;
             }
-
+ 
             // printf("id=%d coord=%f %f \n",elemId[e],polyCoords[crd_pos-2],polyCoords[crd_pos-1]);
           }
 
@@ -895,7 +917,7 @@ void MBMesh_addelements(void **mbmpp,
               elemId_wsplit[split_elem_pos]=curr_extra_id;
               mbmp->split_to_orig_id[curr_extra_id]=elemId[e]; // Store map of split to original id
               mbmp->split_id_to_frac[curr_extra_id]=triFrac[i];
-               curr_extra_id++;
+              curr_extra_id++;
              }
 
             // Type is triangle
@@ -930,7 +952,7 @@ void MBMesh_addelements(void **mbmpp,
           if (areaPresent==1) elemArea_wsplit[split_elem_pos]=elemArea[e];
           if (elemMaskIIArray !=NULL) elemMaskIIArray_wsplit[split_elem_pos]=elemMaskIIArray[e];
           split_elem_pos++;
-          for (int i=0; i<elemType[e]; i++) {
+           for (int i=0; i<elemType[e]; i++) {
             elemConn_wsplit[split_conn_pos]=elemConn[conn_pos];
              split_conn_pos++;
             conn_pos++;
@@ -986,7 +1008,7 @@ void MBMesh_addelements(void **mbmpp,
        
         // Get 0-based vert index
         int vert_index=elemConn[cur_conn]-1;
-
+ 
         // Setup connectivity list
         elem_verts[n] = mbmp->verts[vert_index];
 
@@ -1005,7 +1027,7 @@ void MBMesh_addelements(void **mbmpp,
           moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
       }     
 
-      // Set global id
+       // Set global id
       merr=moab_mesh->tag_set_data(mbmp->gid_tag, &new_elem, 1, elemId+e);
       if (merr != MB_SUCCESS) {
         if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
@@ -1026,76 +1048,112 @@ void MBMesh_addelements(void **mbmpp,
                     moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
       }     
 
-    } // for e
+
+      // Set elem mask value
+      if (mbmp->has_elem_mask) {
+        merr=moab_mesh->tag_set_data(mbmp->elem_mask_val_tag, &new_elem, 1, 
+                                     elemMaskII->array+e); 
+        if (merr != MB_SUCCESS) {
+          if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
+                          moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
+        }     
+      }
+
+      // Set elem area
+      if (mbmp->has_elem_area) {
+        merr=moab_mesh->tag_set_data(mbmp->elem_area_tag, &new_elem, 1, 
+                                     elemArea+e); 
+        if (merr != MB_SUCCESS) {
+           if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
+                          moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
+        }     
+      }      
+
+      // Set elem coord
+      if (mbmp->has_elem_coords) {
+        // Depending on coordSys save coordinates
+        if (coordSys == ESMC_COORDSYS_CART) {
+          merr=moab_mesh->tag_set_data(mbmp->elem_coords_tag, &new_elem, 1, 
+                                       elemCoords+mbmp->sdim*e); 
+          if (merr != MB_SUCCESS) {
+            if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
+                       moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
+          }      
+        } else {
+          // Save original coords
+          merr=moab_mesh->tag_set_data(mbmp->elem_orig_coords_tag, &new_elem, 1, 
+                                       elemCoords+orig_sdim*e); 
+          if (merr != MB_SUCCESS) {
+            if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
+                       moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
+          }      
+
+          // Convert to Cartesian coords
+          double cart_coords[7]; // 7 is the maximum dimension of ESMF grids
+          ESMCI_CoordSys_ConvertToCart(coordSys, orig_sdim, 
+                                       elemCoords, cart_coords);
+
+          // Save Cartesian coords
+          merr=moab_mesh->tag_set_data(mbmp->elem_coords_tag, &new_elem, 1, 
+                                       cart_coords); 
+          if (merr != MB_SUCCESS) {
+            if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
+                       moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
+          }      
+
+        }
+      }
+
 
 #if 0
+      // Set elem coords in the current elem
+      merr=moab_mesh->tag_set_data(mbmp->elem_coords_tag, &new_elem, 1, elem_coords);
+      if (merr != MB_SUCCESS) {
+        if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
+                    moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
+      }     
+#endif
 
-  // Register the frac field
-  if (*regridConserve == ESMC_REGRID_CONSERVE_ON) {
-    Context ctxt; ctxt.flip();
-     MEField<> *elem_frac = mesh.RegisterField("elem_frac",
-                        MEFamilyDG0::instance(), MeshObj::ELEMENT, ctxt, 1, true);
-  }
+    } // for e
 
-
-  // Handle element masking
-  bool has_elem_mask=false;
-  if (present(elemMaskII)) { // if masks exist
-    // ERROR CHECKED ABOVE
-
-    // Context for new fields
-    Context ctxt; ctxt.flip();
- 
-    // Add element mask values field
-    MEField<> *elem_mask_val = mesh.RegisterField("elem_mask_val",
-                         MEFamilyDG0::instance(), MeshObj::ELEMENT, ctxt, 1, true);
- 
-    // Add element mask field
-    MEField<> *elem_mask = mesh.RegisterField("elem_mask",
-                         MEFamilyDG0::instance(), MeshObj::ELEMENT, ctxt, 1, true);
-
-    // Record the fact that it has masks
-    has_elem_mask=true;   
-  } 
+    // Set number of local elems
+    mbmp->num_elems=num_elems;
 
 
-  // Handle element area
-  bool has_elem_area=false;
-  if (areaPresent == 1) { // if areas exist
 
-    // Context for new fields
-    Context ctxt; ctxt.flip();
+    //// Setup parallel sharing ///
 
-    // Add element mask field
-    MEField<> *elem_area = mesh.RegisterField("elem_area",
-                         MEFamilyDG0::instance(), MeshObj::ELEMENT, ctxt, 1, true);
+    // setup parallel comm //
+    ParallelComm *pcomm= new ParallelComm(moab_mesh, mpi_comm);
 
-    // Record the fact that it has masks
-    has_elem_area=true;   
-  } 
+    // Resolve object sharing like in Mesh->Commit()
+    pcomm->resolve_shared_ents(0, mbmp->pdim, mbmp->pdim-1);    
 
 
-  // Handle element coords
-  bool has_elem_coords=false;
-  if (coordsPresent == 1) { // if coords exist
+ #if 0
+  // Time loops
+  {
+   /* XMRKX */
+    double beg_tm=MPI_Wtime();
 
-    // Context for new fields
-    Context ctxt; ctxt.flip();
+    // Get a range containing all elements                                        
+    Range all_elem;
+    merr=moab_mesh->get_entities_by_dimension(0,mbmp->pdim,all_elem);
 
-    // Add element coords field
-    MEField<> *elem_coords = mesh.RegisterField("elem_coordinates",
-                         MEFamilyDG0::instance(), MeshObj::ELEMENT, ctxt, mesh.spatial_dim(), true);
+    // Put into vector                                                            
+    for(Range::iterator it=all_elem.begin(); it !=all_elem.end(); it++) {
+      const EntityHandle eh=*it;
 
-    // If not cartesian then add original coordinates field
-    if (coordSys != ESMC_COORDSYS_CART) {
-      MEField<> *elem_orig_coords = mesh.RegisterField("elem_orig_coordinates",
-                          MEFamilyDG0::instance(), MeshObj::ELEMENT, ctxt, orig_sdim, true);
     }
 
+    double end_tm=MPI_Wtime();
 
-     // Record the fact that it has masks
-    has_elem_coords=true;   
-  } 
+    printf("MOAB time to loop through elems=%f\n",end_tm-beg_tm);
+
+  }
+#endif
+
+#if 0
 
 
   // Perhaps commit will be a separate call, but for now commit the mesh here.
@@ -1118,7 +1176,7 @@ void MBMesh_addelements(void **mbmpp,
     Mesh::iterator ei = mesh.elem_begin(), ee = mesh.elem_end();
     for (; ei != ee; ++ei) {
       MeshObj &elem = *ei;
-      if (!GetAttr(elem).is_locally_owned()) continue;
+       if (!GetAttr(elem).is_locally_owned()) continue;
 
       // Set mask value to input array
       double *mv=elem_mask_val->data(elem);
@@ -1128,7 +1186,7 @@ void MBMesh_addelements(void **mbmpp,
         // Init mask to 0.0
       double *m=elem_mask->data(elem);
       *m=0.0;      
-    }
+     }
   }
 
 
@@ -1163,7 +1221,7 @@ void MBMesh_addelements(void **mbmpp,
       
       // Get some useful information
       int sdim = mesh.spatial_dim(); 
-      
+       
       // Loop through elements setting values
       // Here we depend on the fact that data index for elements
       // is set as the position in the local array above
@@ -1184,7 +1242,7 @@ void MBMesh_addelements(void **mbmpp,
       // Get Fields
       MEField<> *elem_coords=mesh.GetField("elem_coordinates"); 
       MEField<> *elem_orig_coords=mesh.GetField("elem_orig_coordinates"); 
-      
+       
       // Get some useful information
       int sdim = mesh.spatial_dim(); 
       
@@ -1209,7 +1267,7 @@ void MBMesh_addelements(void **mbmpp,
                                      orig_coords, coords);
 
         // printf("eid=%d coords=%f %f %f %f ind=%d\n",elem.get_id(),coords[0],coords[1],elemCoords[data_index+0],elemCoords[data_index+1],data_index);
-      }
+       }
 
 
     }
@@ -1240,7 +1298,7 @@ void MBMesh_addelements(void **mbmpp,
   } catch(std::exception &x) {
     // catch Mesh exception return code 
     if (x.what()) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+       ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
    					  x.what(), ESMC_CONTEXT, rc);
     } else {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
@@ -1255,12 +1313,236 @@ void MBMesh_addelements(void **mbmpp,
   } catch(...){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
       "- Caught unknown exception", ESMC_CONTEXT, rc);
-    return;
+     return;
   }
 
   // Set return code 
   if (rc!=NULL) *rc = ESMF_SUCCESS;
 } 
+
+void MBMesh_meshturnoncellmask(void **mbmpp, ESMCI::InterfaceInt *maskValuesArg,  int *rc) {
+
+  int merr, localrc;
+
+  try {
+
+    // Initialize the parallel environment for mesh (if not already done)
+    {
+      int localrc;
+      ESMCI::Par::Init("MESHLOG", false /* use log */,VM::getCurrent(&localrc)->getMpi_c());
+      if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
+	throw localrc;  // bail out with exception
+    }
+    
+    // Get Moab Mesh wrapper
+    MBMesh *mbmp=*((MBMesh **)mbmpp);
+    
+    //Get MOAB Mesh
+    Interface *moab_mesh=mbmp->mesh;
+    
+
+    // If no mask values then leave
+    if (!present(maskValuesArg)) {
+      // Set return code 
+      if (rc!=NULL) *rc = ESMF_SUCCESS;
+       
+      // Leave
+      return;
+    }
+
+
+    // Get mask values
+    int numMaskValues=(maskValuesArg)->extent[0];
+    int *ptrMaskValues=&((maskValuesArg)->array[0]);
+
+    // If has masks
+    if (mbmp->has_elem_mask) {
+         
+      // Get a range containing all elements
+      Range range_elem;
+      merr=moab_mesh->get_entities_by_dimension(0,mbmp->pdim,range_elem);
+      if (merr != MB_SUCCESS) {
+        if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
+                                         moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
+      }     
+
+      // Loop through elements setting values
+      for(Range::iterator it=range_elem.begin(); it !=range_elem.end(); it++) {
+        const EntityHandle elem=*it;
+
+        // Get mask value
+        int mv;
+        merr=moab_mesh->tag_get_data(mbmp->elem_mask_val_tag, &elem, 1, &mv);
+        if (merr != MB_SUCCESS) {
+          if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
+                                           moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
+        }     
+
+        // See if mv matches any mask values
+        int masked=0;
+        for (int i=0; i<numMaskValues; i++) {
+          int mvi=ptrMaskValues[i];
+          if (mv==mvi) {
+            masked=1;
+            break;
+          }
+        }
+        
+        // Set global id
+        merr=moab_mesh->tag_set_data(mbmp->elem_mask_tag, &elem, 1, &masked);
+         if (merr != MB_SUCCESS) {
+          if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
+                    moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
+        }                       
+      }
+    }
+
+  } catch(std::exception &x) {
+    // catch Mesh exception return code 
+    if (x.what()) {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+                                            x.what(), ESMC_CONTEXT, rc);
+    } else {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+                                            "UNKNOWN", ESMC_CONTEXT, rc);
+    }
+
+    return;
+  }catch(int localrc){
+    // catch standard ESMF return code
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc);
+    return;
+  } catch(...){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+                             "- Caught unknown exception", ESMC_CONTEXT, rc);
+    return;
+  }
+
+  // Set return code 
+  if (rc!=NULL) *rc = ESMF_SUCCESS;
+
+}
+
+// Turn OFF masking
+ void MBMesh_meshturnoffcellmask(void **mbmpp, int *rc) {
+
+  int merr, localrc;
+
+  try {
+
+    // Initialize the parallel environment for mesh (if not already done)
+    {
+      int localrc;
+      ESMCI::Par::Init("MESHLOG", false /* use log */,VM::getCurrent(&localrc)->getMpi_c());
+      if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
+ 	throw localrc;  // bail out with exception
+    }
+    
+    // Get Moab Mesh wrapper
+    MBMesh *mbmp=*((MBMesh **)mbmpp);
+    
+    //Get MOAB Mesh
+    Interface *moab_mesh=mbmp->mesh;
+    
+    // If has masks
+    if (mbmp->has_elem_mask) {
+      // Get a range containing all elements
+      Range range_elem;
+      merr=moab_mesh->get_entities_by_dimension(0,mbmp->pdim,range_elem);
+      if (merr != MB_SUCCESS) {
+        if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
+                                         moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
+      }     
+
+      // Loop through elements setting values
+      for(Range::iterator it=range_elem.begin(); it !=range_elem.end(); it++) {
+        const EntityHandle elem=*it;
+
+        // unset masked value
+        int masked=0;
+        merr=moab_mesh->tag_set_data(mbmp->elem_mask_tag, &elem, 1, &masked);
+        if (merr != MB_SUCCESS) {
+          if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
+                    moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
+        }            
+                
+      }
+    }
+
+  } catch(std::exception &x) {
+    // catch Mesh exception return code 
+    if (x.what()) {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+                                            x.what(), ESMC_CONTEXT, rc);
+    } else {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+                                            "UNKNOWN", ESMC_CONTEXT, rc);
+    }
+
+    return;
+  }catch(int localrc){
+      // catch standard ESMF return code
+     ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc);
+    return;
+  } catch(...){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+                        "- Caught unknown exception", ESMC_CONTEXT, rc);
+    return;
+  }
+
+  // Set return code 
+  if (rc!=NULL) *rc = ESMF_SUCCESS;
+}
+
+
+
+void MBMesh_destroy(void **mbmpp, int *rc) {
+
+  try {
+
+  // Initialize the parallel environment for mesh (if not already done)
+    {
+ int localrc;
+ int rc;
+  ESMCI::Par::Init("MESHLOG", false /* use log */,VM::getCurrent(&localrc)->getMpi_c());
+ if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
+   throw localrc;  // bail out with exception
+    }
+
+    // Get Moab Mesh wrapper
+    MBMesh *mbmp=*((MBMesh **)mbmpp);
+
+    // Get rid of MBMesh
+    delete mbmp;
+
+    // Set to null
+    *mbmpp=NULL;
+    
+  } catch(std::exception &x) {
+    // catch Mesh exception return code 
+     if (x.what()) {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+    					  x.what(), ESMC_CONTEXT, rc);
+    } else {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+   					  "UNKNOWN", ESMC_CONTEXT, rc);
+    }
+  
+    return;
+  }catch(int localrc){
+    // catch standard ESMF return code
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc);
+    return;
+  } catch(...){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+      "- Caught unknown exception", ESMC_CONTEXT, rc);
+    return;
+  }
+
+  // Set return code 
+  if (rc!=NULL) *rc = ESMF_SUCCESS;
+}
+
 
  
 void MBMesh_write(void **mbmpp, char *fname, int *rc,
@@ -1291,8 +1573,8 @@ void MBMesh_write(void **mbmpp, char *fname, int *rc,
 #define FILENAME_W_VTK_MAX 1024
     char filename_w_vtk[FILENAME_W_VTK_MAX];
     if (strlen(filename)+4 > FILENAME_W_VTK_MAX) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
-                                    " filename too long ", ESMC_CONTEXT, rc);
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
+                                     " filename too long ", ESMC_CONTEXT, rc);
       return;
     }
 #undef FILENAME_W_VTK_MAX
@@ -1429,17 +1711,14 @@ void MBMesh_createnodedistgrid(void **mbmpp, int *ngrid, int *num_lnodes, int *r
  */
 
 // DO THIS BETTER, HAVE A FIELD THAT CONTAINS THE POSITION IN THE FINAL ARRAY AND -1 FOR ANYTHING NOT LOCAL OR SPLIT 
-void getElemGIDS(void **mbmpp, std::vector<int> &egids) {
+void getElemGIDS(MBMesh *mbmp, std::vector<int> &egids) {
 
   // Get localPet
   int localrc;
   int localPet = VM::getCurrent(&localrc)->getLocalPet();
   if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
     throw localrc;  // bail out with exception
-  
-  // Get Moab Mesh wrapper
-  MBMesh *mbmp=*((MBMesh **)mbmpp);
-  
+    
   //Get MOAB Mesh
   Interface *moab_mesh=mbmp->mesh;
   
@@ -1524,7 +1803,11 @@ void MBMesh_createelemdistgrid(void **mbmpp, int *egrid, int *num_lelems, int *r
     }
 #endif
 
-    getElemGIDS(mbmpp, egids);
+    // Get Moab Mesh wrapper
+    MBMesh *mbmp=*((MBMesh **)mbmpp);
+
+    // Get list of elem gids in order
+    getElemGIDS(mbmp, egids);
     
   } catch(std::exception &x) {
     // catch Mesh exception return code 
@@ -1642,6 +1925,82 @@ void getElems(void **mbmpp, std::vector<EntityHandle> &ehs) {
   }    
 }
 
+
+void MBMesh_getlocalelemcoords(void **mbmpp, double *ecoords, 
+                               int *_orig_sdim, int *rc) 
+{
+  int localrc,merr;
+    try {
+
+      // Get Moab Mesh wrapper
+      MBMesh *mbmp=*((MBMesh **)mbmpp);
+
+      // Make sure that there are element coords
+      if (!mbmp->has_elem_coords) {
+        if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_WRONG,
+                                         "- this mesh doesn't contain element coordinates.",
+                                         ESMC_CONTEXT, &localrc)) throw localrc;
+      }
+
+      //Get MOAB Mesh
+      Interface *moab_mesh=mbmp->mesh;
+
+      // Get original spatial dim
+      int orig_sdim=*_orig_sdim;
+
+      // Declare id vector
+      std::vector<EntityHandle> ehs; 
+
+      // Get local elems in correct order
+      getElems(mbmpp, ehs);
+
+      // Loop through elements and put coordss into array
+      if (mbmp->has_elem_orig_coords) {
+        for (int i=0; i<ehs.size(); i++) {   
+          // Get element gid
+          EntityHandle elem=ehs[i];
+
+          // Get orig_pos
+          merr=moab_mesh->tag_get_data(mbmp->elem_orig_coords_tag, 
+                                       &elem, 1, ecoords+orig_sdim*i);
+          if (merr != MB_SUCCESS) {
+            if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
+                                             moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
+          }     
+        }
+      } else {
+        for (int i=0; i<ehs.size(); i++) {   
+          // Get element gid
+          EntityHandle elem=ehs[i];
+
+          // Get orig_pos
+          merr=moab_mesh->tag_get_data(mbmp->elem_coords_tag, 
+                                       &elem, 1, ecoords+orig_sdim*i);
+          if (merr != MB_SUCCESS) {
+            if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
+                                             moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
+          }     
+        }
+      }
+
+    } catch(int localrc) {
+        // catch standard ESMF return code
+        ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc);
+        if (rc!=NULL) *rc = localrc;
+        return;
+    } catch(...) {
+        localrc = ESMC_RC_INTNRL_BAD;
+        ESMC_LogDefault.MsgFoundError(localrc,
+            "- Caught unknown exception", ESMC_CONTEXT, rc);
+        if (rc!=NULL) *rc = localrc;
+        return;
+    }
+
+    // Set return code
+    if (rc!=NULL) *rc = ESMF_SUCCESS;
+} 
+
+
 void MBMesh_getarea(void **mbmpp, int *num_elem, double *elem_areas, int *rc) {
 
   // Declare polygon information
@@ -1695,119 +2054,56 @@ void MBMesh_getarea(void **mbmpp, int *num_elem, double *elem_areas, int *rc) {
     // MOAB error
     int merr;
     
-    // Don't support user areas right now
-#if 0    
-    // If an area field exists use that instead
-    MEField<> *area_field = mesh.GetField("elem_area");
-    if (area_field) {
-      
-      // Loop through elements and put areas into array
-      for (int i=0; i<egids.size(); i++) {
-        // Get element gid
-        int elem_gid=egids[i];
-        
-        //  Find the corresponding Mesh element
-        Mesh::MeshObjIDMap::iterator mi =  mesh.map_find(MeshObj::ELEMENT, elem_gid);
-        if (mi == mesh.map_end(MeshObj::ELEMENT)) {
-          Throw() << "Element not in mesh";
-        }
-        
-        // Get the element
-        const MeshObj &elem = *mi; 
-        
-        // Only put it in if it's locally owned
-        if (!GetAttr(elem).is_locally_owned()) continue;
-        
-        // Get area from field
-        double *area=area_field->data(elem);
-        
-        // Put area into area array
-        elem_areas[i]=*area;
-      }
-
-      // Add in the split elements
-      if (mesh.is_split) {
-        std::map<int,int> id_to_index;
-        for (int i=0; i<egids.size(); i++) {
-          id_to_index[egids[i]]=i;
-        }
-
-        // Iterate through split elements adding in area
-        Mesh::iterator ei = mesh.elem_begin(), ee = mesh.elem_end();
-        for (; ei != ee; ++ei) {
-          MeshObj &elem = *ei;
-        
-          // Don't do non-local elements
-          if (!GetAttr(elem).is_locally_owned()) continue;
-
-          // Get the element id
-          int eid=elem.get_id();
-
-          // Skip non-split elements
-          if (!(eid > mesh.max_non_split_id)) continue; 
-
-          // Get area from field
-          double *area=area_field->data(elem);
-      
-          // Get original id
-          int orig_id=mesh.split_to_orig_id[eid];
-
-          // Get index
-          int index=id_to_index[orig_id];
-
-          // Add area to what's already there
-          elem_areas[index] += *area;
-        }
-      }
-
-      // Return success
-      if (rc!=NULL) *rc = ESMF_SUCCESS;      
-      return;
-      }
-
-#endif
-
- /* XMRKX */    
 
     // Get dimensions
     int sdim=mbmp->sdim;
     int pdim=mbmp->pdim;
 
-    // Loop through elements and put areas into array
-    for (int i=0; i<ehs.size(); i++) {
 
-      // Get element gid
-      EntityHandle elem=ehs[i];
+    // Put areas into array 
+    if (mbmp->has_elem_area) {
       
-      // Compute area depending on dimensions
-      double area;
-      if (pdim==2) {
-	if (sdim==2) {
-          MBMesh_get_elem_coords(mbmp, elem, MAX_NUM_POLY_NODES_2D, &num_poly_nodes, poly_coords);
-	  remove_0len_edges2D(&num_poly_nodes, poly_coords);
-          area=area_of_flat_2D_polygon(num_poly_nodes, poly_coords);
-	} else if (sdim==3) {
-          Throw() << "Meshes with parametric dimension == 2 and spatial dimension = 3 not supported in MOAB";
-	  //get_elem_coords(&elem, cfield, 3, MAX_NUM_POLY_NODES_3D, &num_poly_nodes, poly_coords);
-          //get_elem_coords_3D_ccw(&elem, cfield, MAX_NUM_POLY_NODES_3D, tmp_coords, &num_poly_nodes, poly_coords);
-	  //remove_0len_edges3D(&num_poly_nodes, poly_coords);
-	  //area=great_circle_area(num_poly_nodes, poly_coords);
-	}
-      } else if (pdim==3) {
-	if (sdim==3) {
-          Throw() << "Meshes with parametric dimension == 3 and spatial dimension = 3 not supported in MOAB";
-          // Phedra tmp_phedra=create_phedra_from_elem(&elem, cfield);
-          //area=tmp_phedra.calc_volume(); 
+      merr=moab_mesh->tag_get_data(mbmp->elem_area_tag, &ehs[0], ehs.size(), elem_areas);
+      if (merr != MB_SUCCESS) {
+        int localrc;
+        if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
+                                         moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
+      }     
+
+    } else {
+      for (int i=0; i<ehs.size(); i++) {
+
+        // Get element
+        EntityHandle elem=ehs[i];
+        
+        // Compute area depending on dimensions
+        double area;
+        if (pdim==2) {
+          if (sdim==2) {
+            MBMesh_get_elem_coords(mbmp, elem, MAX_NUM_POLY_NODES_2D, &num_poly_nodes, poly_coords);
+            remove_0len_edges2D(&num_poly_nodes, poly_coords);
+            area=area_of_flat_2D_polygon(num_poly_nodes, poly_coords);
+          } else if (sdim==3) {
+            MBMesh_get_elem_coords(mbmp, elem, MAX_NUM_POLY_NODES_3D, &num_poly_nodes, poly_coords);
+            //get_elem_coords_3D_ccw(&elem, cfield, MAX_NUM_POLY_NODES_3D, tmp_coords, &num_poly_nodes, poly_coords);
+            remove_0len_edges3D(&num_poly_nodes, poly_coords);
+            area=great_circle_area(num_poly_nodes, poly_coords);
+          }
+        } else if (pdim==3) {
+          if (sdim==3) {
+            Throw() << "Meshes with parametric dimension == 3 and spatial dimension = 3 not supported in MOAB";
+            // Phedra tmp_phedra=create_phedra_from_elem(&elem, cfield);
+            //area=tmp_phedra.calc_volume(); 
+          } else {
+            Throw() << "Meshes with parametric dimension == 3, but spatial dim != 3 not supported for computing areas";
+          }
         } else {
-          Throw() << "Meshes with parametric dimension == 3, but spatial dim != 3 not supported for computing areas";
+          Throw() << "Meshes with parametric dimension != 2 or 3 not supported for computing areas";
         }
-      } else {
-	Throw() << "Meshes with parametric dimension != 2 or 3 not supported for computing areas";
+        
+        // Put area into area array
+        elem_areas[i]=area;
       }
-
-      // Put area into area array
-      elem_areas[i]=area;
-
     }
 
 
@@ -2077,8 +2373,8 @@ void ESMCI_meshdestroy(Mesh **meshpp, int *rc) {
 
   // Set return code 
   if (rc!=NULL) *rc = ESMF_SUCCESS;
-
 }
+
 
 void ESMCI_meshfreememory(Mesh **meshpp, int *rc) {
 
@@ -3592,7 +3888,7 @@ void ESMCI_triangulate(int *pdim, int *sdim, int *numPnts,
   if(rc != NULL) *rc = ESMF_SUCCESS;
 }
 
-
+#if 0
 void ESMCI_meshturnoncellmask(Mesh **meshpp, ESMCI::InterfaceInt *maskValuesArg,  int *rc) {
 
   try {
@@ -3607,7 +3903,7 @@ void ESMCI_meshturnoncellmask(Mesh **meshpp, ESMCI::InterfaceInt *maskValuesArg,
     
     
     // Get Mesh pointer
-    Mesh *meshp = *meshpp;
+     Mesh *meshp = *meshpp;
     
     // Get Mesh reference
     Mesh &mesh = *meshp;
@@ -3637,7 +3933,7 @@ void ESMCI_meshturnoncellmask(Mesh **meshpp, ESMCI::InterfaceInt *maskValuesArg,
 
 
     // Set Mask values
-    // Get Fields
+     // Get Fields
     MEField<> *elem_mask_val=mesh.GetField("elem_mask_val"); 
     MEField<> *elem_mask=mesh.GetField("elem_mask"); 
       
@@ -3667,7 +3963,7 @@ void ESMCI_meshturnoncellmask(Mesh **meshpp, ESMCI::InterfaceInt *maskValuesArg,
         bool mask=false;
         for (int i=0; i<numMaskValues; i++) {
           int mvi=ptrMaskValues[i];
-          if (mi==mvi) {
+           if (mi==mvi) {
             mask=true;
             break;
           }
@@ -3697,7 +3993,7 @@ void ESMCI_meshturnoncellmask(Mesh **meshpp, ESMCI::InterfaceInt *maskValuesArg,
     }
 
     return;
-  }catch(int localrc){
+   }catch(int localrc){
     // catch standard ESMF return code
     ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc);
     return;
@@ -3727,7 +4023,7 @@ void ESMCI_meshturnoffcellmask(Mesh **meshpp, int *rc) {
     
     
     // Get Mesh pointer
-    Mesh *meshp = *meshpp;
+     Mesh *meshp = *meshpp;
     
     // Get Mesh reference
     Mesh &mesh = *meshp;
@@ -3757,7 +4053,7 @@ void ESMCI_meshturnoffcellmask(Mesh **meshpp, int *rc) {
         // Get mask
         double *m=elem_mask->data(elem);
         
-        // Init mask to 0
+         // Init mask to 0
         *m=0.0;
       }
     }
@@ -3787,7 +4083,7 @@ void ESMCI_meshturnoffcellmask(Mesh **meshpp, int *rc) {
   if (rc!=NULL) *rc = ESMF_SUCCESS;
 
 }
-
+ 
 ////////////
 void ESMCI_meshturnonnodemask(Mesh **meshpp, ESMCI::InterfaceInt *maskValuesArg,  int *rc) {
 
@@ -3817,7 +4113,7 @@ void ESMCI_meshturnonnodemask(Mesh **meshpp, ESMCI::InterfaceInt *maskValuesArg,
       // Leave
       return;
     }
-
+ 
     // If no mask values then leave
     if (!present(maskValuesArg)) {
       // Set return code 
@@ -3847,7 +4143,7 @@ void ESMCI_meshturnonnodemask(Mesh **meshpp, ESMCI::InterfaceInt *maskValuesArg,
         MeshObj &node = *ni;
 
         // Don't just do local, because masking needs to be symmetrical 
-        // between local and not otherwise results change as the number
+         // between local and not otherwise results change as the number
         // of PETs changes
         //if (!GetAttr(node).is_locally_owned()) continue;
 
@@ -3877,7 +4173,7 @@ void ESMCI_meshturnonnodemask(Mesh **meshpp, ESMCI::InterfaceInt *maskValuesArg,
           *m=0.0;
         }
         
-      }
+       }
     }
 
   } catch(std::exception &x) {
@@ -3907,7 +4203,7 @@ void ESMCI_meshturnonnodemask(Mesh **meshpp, ESMCI::InterfaceInt *maskValuesArg,
 }
 
 // Turn OFF masking
-void ESMCI_meshturnoffnodemask(Mesh **meshpp, int *rc) {
+ void ESMCI_meshturnoffnodemask(Mesh **meshpp, int *rc) {
 
   try {
 
@@ -3937,7 +4233,7 @@ void ESMCI_meshturnoffnodemask(Mesh **meshpp, int *rc) {
       
       // Loop through elements setting values
       // Here we depend on the fact that data index for elements
-      // is set as the position in the local array above
+       // is set as the position in the local array above
       Mesh::iterator ni = mesh.node_begin(), ne = mesh.node_end();
       for (; ni != ne; ++ni) {
         MeshObj &node = *ni;
@@ -3967,7 +4263,7 @@ void ESMCI_meshturnoffnodemask(Mesh **meshpp, int *rc) {
 
     return;
   }catch(int localrc){
-    // catch standard ESMF return code
+     // catch standard ESMF return code
     ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc);
     return;
   } catch(...){
@@ -3981,8 +4277,9 @@ void ESMCI_meshturnoffnodemask(Mesh **meshpp, int *rc) {
 
 }
 
-//////////// 
+#endif
 
+//////////// 
 void ESMCI_get_polygon_area(int *spatialdim, int *nedges, 
 						 double *points, double *area, int *rc) {
   if (*spatialdim == 2) {

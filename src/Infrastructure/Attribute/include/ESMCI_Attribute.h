@@ -24,6 +24,7 @@
 #include <algorithm>
 #include <cmath>
 #include <cstdio>
+#include <fstream>
 
 #include "ESMCI_Util.h"
 
@@ -59,8 +60,8 @@ class Attribute
 {
  private:
     std::string attrName; // inline to reduce memory thrashing
-    ESMC_TypeKind_Flag tk;           // typekind indicator
-    int items;                  // number of items (NOT byte count) for lists
+    ESMC_TypeKind_Flag tk;       // typekind indicator
+    unsigned int items;          // number of items (NOT byte count) for lists
 
     ESMC_Logical attrRoot;
     ESMC_Logical attrUpdateDone; // hack for non-ordered containers
@@ -138,6 +139,10 @@ class Attribute
     static const char GRIDS_PURP[];
 
     // Print
+    void attprint(char *msgbuf, int strsize, bool tofile, std::ofstream &fp) const \
+      {if (tofile) { std::string str(msgbuf); fp << str;} else printf("%s", msgbuf);}
+    int ESMC_Print(bool tofile, const char *filename, bool append) const;
+    int print_to_file(bool tofile, std::ofstream &fp, unsigned int level) const;
     int ESMC_Print(void) const;
 
     // Modifiers, Constructors, Destructors, Serializers, Operators
@@ -157,6 +162,7 @@ class Attribute
       ESMC_InquireFlag inquireflag) const;
     int ESMC_SerializeCC(char *buffer, int *length, int &offset,
       bool cc, ESMC_InquireFlag inquireflag) const;
+    void clean();
 
     // accessors for private member variables
     inline const std::string getName() const {return this->attrName;}
@@ -165,7 +171,8 @@ class Attribute
     inline const std::string getConvention() const {return this->attrConvention;}
     inline const std::string getPurpose() const {return this->attrPurpose;}
     inline const std::string getObject() const {return this->attrObject;}
-    inline const Attribute* getParent() const {return this->parent;}
+    inline const Attribute *getParent() const {return this->parent;}
+    inline const ESMC_Base *getBase() const {return this->attrBase;}
 
     // accessors for counts
     inline int getCountAttr() const {return attrList.size();};
@@ -323,7 +330,8 @@ class Attribute
     // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! //
     
     // attribute update
-    int AttributeUpdate(VM *vm, const std::vector<ESMC_I4> &rootList);
+    int AttributeUpdate(VM *vm, const std::vector<ESMC_I4> &rootList,
+                        bool reconcile);
     int AttributeUpdateBufRecv(char *recvBuf, int localPet, int *offset,
       const int &length);
     int AttributeUpdateBufSend(char *sendBuf, int localPet, int *offset,
@@ -337,7 +345,8 @@ class Attribute
     bool AttributeUpdateKeyCompare(char *key1, char *key2) const;
     int AttributeUpdateKeyCreate(char *key) const;
     int AttributeUpdateNeeded(VM *vm, int &bufSize,
-      const std::vector<ESMC_I4> &roots, const std::vector<ESMC_I4> &nonroots) const;
+      const std::vector<ESMC_I4> &roots, const std::vector<ESMC_I4> &nonroots,
+      bool reconcile) const;
     int AttributeUpdateRemove(int attrNum);
     int AttributeUpdateReset();
 
@@ -601,7 +610,8 @@ extern "C" {
                                   ESMCI_FortranStrLenArg nlen,
                                   ESMCI_FortranStrLenArg vlen);
   void FTN_X(c_esmc_attributeupdate)(ESMC_Base **base, ESMCI::VM **vm,
-                                  int *rootList, int *count, int *rc);
+                                  int *rootList, int *count,
+                                  ESMC_Logical *reconcile, int *rc);
   void FTN_X(c_esmc_attributeupdatereset)(ESMC_Base **base, int *rc);
 }
 

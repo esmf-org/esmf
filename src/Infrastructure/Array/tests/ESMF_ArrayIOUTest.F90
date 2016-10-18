@@ -1205,6 +1205,15 @@ program ESMF_ArrayIOUTest
 
 10 continue
 
+  if (allocated (minIndexPTile)) deallocate (minIndexPTile)
+  if (allocated (maxIndexPTile)) deallocate (maxIndexPTile)
+  if (allocated (arrayToDistGridMap)) deallocate (arrayToDistGridMap)
+  if (allocated (undistLBound)) deallocate (undistLBound)
+  if (allocated (undistUBound)) deallocate (undistUBound)
+  if (allocated (minIndexNew)) deallocate (minIndexNew)
+  if (allocated (maxIndexNew)) deallocate (maxIndexNew)
+  if (allocated (regDecomp)) deallocate (regDecomp)
+
   !-----------------------------------------------------------------------------
   call ESMF_TestEnd(ESMF_SRCLINE) ! calls ESMF_Finalize() internally
   !-----------------------------------------------------------------------------

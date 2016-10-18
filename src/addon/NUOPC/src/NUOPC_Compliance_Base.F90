@@ -26,6 +26,10 @@ module NUOPC_Compliance_Base
 
     private
 
+    public ccfDepth   ! component control flow depth
+    public maxDepth   ! maximum depth of compliance checker
+    integer, save :: ccfDepth = 1
+    integer, save :: maxDepth = -2
 
     public NUOPC_CheckComponentMetadata
     public NUOPC_CheckComponentMetadataCIM

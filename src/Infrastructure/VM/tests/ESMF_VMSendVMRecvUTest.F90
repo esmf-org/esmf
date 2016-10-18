@@ -357,6 +357,18 @@ call ESMF_VMBarrier (vm)
       end do
       call ESMF_Test( (ISum .eq. 0), name, failMsg, result, ESMF_SRCLINE)
 
+      deallocate(localData)
+      deallocate(r8_localData)
+      deallocate(r4_localData)
+      deallocate(local_logical)
+      deallocate(local_chars)
+
+      deallocate(soln)
+      deallocate(r8_soln)
+      deallocate(r4_soln)
+      deallocate(logical_soln)
+      deallocate(char_soln)
+
       call ESMF_TestEnd(ESMF_SRCLINE)
 
       end program ESMF_VMSendVMRecvUTest

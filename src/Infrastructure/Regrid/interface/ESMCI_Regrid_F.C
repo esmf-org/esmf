@@ -27,10 +27,8 @@
 #include "ESMCI_PointList.h"
 #include "Mesh/include/ESMCI_Mesh.h"
 #include "Mesh/include/ESMCI_MeshRead.h"
-#include "Mesh/include/ESMCI_MeshRegrid.h"
 #include "Mesh/include/ESMCI_Exception.h"
 #include "Mesh/include/ESMCI_Integrate.h"
-#include "Mesh/include/ESMCI_Interp.h"
 #include "Mesh/include/ESMCI_Extrapolation.h"
 #include "Mesh/include/ESMCI_MeshCap.h"
 

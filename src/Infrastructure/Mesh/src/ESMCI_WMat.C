@@ -13,6 +13,8 @@
 #include <Mesh/include/ESMCI_Attr.h>
 #include <Mesh/include/ESMCI_MeshUtils.h>
 #include "PointList/include/ESMCI_PointList.h"
+#include <Mesh/include/ESMCI_MBMesh.h>
+#include <Mesh/include/ESMCI_MBMesh_Util.h>
 
 #include <algorithm>
 #include <cstdio>
@@ -434,7 +436,28 @@ for (; wi != we; ++wi) {
   
 }
 
+  // take out if MOAB isn't defined
+#ifdef ESMF_MOAB
 
+// Migrate WMat based on mesh's element ids
+//void WMat::Migrate(CommRel &crel) {
+void WMat::MigrateToElem(MBMesh &mesh) { 
+  Trace __trace("WMat::Migrate(Mesh &mesh)");
+  
+    std::vector<UInt> mesh_dist, iw_dist;
+    
+    MBMesh_get_local_elem_gids(&mesh, mesh_dist);  
+    GetRowGIDS(iw_dist);
+    
+    // Create description of migration pattern
+    Migrator mig(mesh_dist.size(), mesh_dist.size() > 0 ? &mesh_dist[0] : NULL, 0,
+        iw_dist.size(), iw_dist.size() > 0 ? &iw_dist[0] : NULL);
+    
+    // Migrate weigths
+    mig.Migrate(*this);          
+}
+
+#endif // ESMF_MOAB
   
 void WMat::clear() {
   

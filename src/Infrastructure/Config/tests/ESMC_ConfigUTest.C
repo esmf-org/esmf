@@ -71,6 +71,24 @@ int main(void){
 
   //----------------------------------------------------------------------------
   //NEX_UTest
+  //Destroy Config object
+  strcpy(name, "ConfigDestroy Unit test");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
+  rc = ESMC_ConfigDestroy(&cf);
+  ESMC_Test((rc == ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__,0);
+  //----------------------------------------------------------------------------
+
+  //----------------------------------------------------------------------------
+  //NEX_UTest
+  // Create a config object -- cf
+  strcpy(name, "ConfigCreate Unit test");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
+  cf = ESMC_ConfigCreate(&rc);
+  ESMC_Test((rc == ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__,0);
+  //----------------------------------------------------------------------------
+
+  //----------------------------------------------------------------------------
+  //NEX_UTest
   //Load resource file into memory - set optional argument unique to .true.
   unique = 1;
   strcpy(name, "ConfigLoadFile Unit test - optional arg");
@@ -99,7 +117,26 @@ int main(void){
   //----------------------------------------------------------------------------
  
 #ifdef ESMF_TESTEXHAUSTIVE
- //----------------------------------------------------------------------------
+
+  //----------------------------------------------------------------------------
+  //EX_UTest
+  //Destroy Config object
+  strcpy(name, "ConfigDestroy Unit test");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
+  rc = ESMC_ConfigDestroy(&cf);
+  ESMC_Test((rc == ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__,0);
+  //----------------------------------------------------------------------------
+
+  //----------------------------------------------------------------------------
+  //EX_UTest
+  // Create a config object -- cf
+  strcpy(name, "ConfigCreate Unit test");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
+  cf = ESMC_ConfigCreate(&rc);
+  ESMC_Test((rc == ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__,0);
+  //----------------------------------------------------------------------------
+
+  //----------------------------------------------------------------------------
   //EX_UTest
   //Load resource file into memory
   //This UTest tests whether the code will recognize that the input file 

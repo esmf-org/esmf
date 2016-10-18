@@ -102,6 +102,8 @@
     rc = merge (ESMF_SUCCESS, ESMF_RC_ARG_SIZE, tf)
     call ESMF_Test(rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
 
+    deallocate (a, indicies, tfs, dts)
+
     ! NOTE: Some compilers may require a special command line argument for
     ! the following tests to work.  This is needed to turn on the F2003
     ! semantics for reassignment of allocatable arrays to different sizes

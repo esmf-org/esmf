@@ -28,6 +28,7 @@
 // include higher level, 3rd party or system headers
 #include <cstdio>
 #include <cstring>
+#include <algorithm>
 
 // include ESMF headers
 #include "ESMCI_Macros.h"
@@ -220,11 +221,8 @@ DistGrid *DistGrid::create(
         }
       }
     }
-
      
-#if 0
-    // TURN OFF ERROR WITH CONNECTIONS ON Extra edge, BECAUSE GRID NEEDS TO DO IT
-    // edges modified by firstExtra or lastExtra cannot also be connected
+    // Look through connections and remove extra padding across connections
     if (present(connectionList)){
       // there are connections
       int elementSize = connectionList->extent[0];
@@ -237,18 +235,15 @@ DistGrid *DistGrid::create(
         if (present(firstExtra)){
           // there are possible modifications on the lower edge
           for (int j=0; j<dg->dimCount; j++){
-            if (positionVector[j]==0) continue; // BOB 
             if (positionVector[j] < 0){
               if (firstExtra->array[dg->dimCount*(tileA-1)+j] != 0){
-                ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
-                  "- connected edges cannot be modified", ESMC_CONTEXT, rc);
-                return ESMC_NULL_POINTER;
+                firstExtra->array[dg->dimCount*(tileA-1)+j] = 0;  // remove pad.
+                //printf("remove firstExtra padding\n");
               }
             }else if (positionVector[j] > 0){
               if (firstExtra->array[dg->dimCount*(tileB-1)+j] != 0){
-                ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
-                  "- connected edges cannot be modified", ESMC_CONTEXT, rc);
-                return ESMC_NULL_POINTER;
+                firstExtra->array[dg->dimCount*(tileB-1)+j] = 0;  // remove pad.
+                //printf("remove firstExtra padding\n");
               }
             }
           }
@@ -256,26 +251,22 @@ DistGrid *DistGrid::create(
         if (present(lastExtra)){
           // there are possible modifications on the upper edge
           for (int j=0; j<dg->dimCount; j++){
-            if (positionVector[j]==0) continue; // BOB 
             if (positionVector[j] < 0){
               if (lastExtra->array[dg->dimCount*(tileB-1)+j] != 0){
-                ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
-                  "- connected edges cannot be modified", ESMC_CONTEXT, rc);
-                return ESMC_NULL_POINTER;
+                lastExtra->array[dg->dimCount*(tileB-1)+j] = 0;  // remove pad.
+                //printf("remove lastExtra padding\n");
               }
             }else if (positionVector[j] > 0){
               if (lastExtra->array[dg->dimCount*(tileA-1)+j] != 0){
-                printf(" posVec[%d]=%d\n",j,positionVector[j]);
-                ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
-                  "- connected edges cannot be modified", ESMC_CONTEXT, rc);
-                return ESMC_NULL_POINTER;
+                lastExtra->array[dg->dimCount*(tileA-1)+j] = 0;  // remove pad.
+                //printf("remove lastExtra padding\n");
               }
             }
           }
         }
       }
     }
-#endif
+
     // prepare minIndex and maxIndex
     int *minIndexAlloc = new int[totalCountInterfaceInt];
     if (present(firstExtra))
@@ -489,14 +480,15 @@ DistGrid *DistGrid::create(
       }
     }
     if (dg->regDecomp){
-      distgrid->regDecomp = new int[dimCount];
-      memcpy(distgrid->regDecomp, dg->regDecomp, sizeof(int)*dimCount);
+      distgrid->regDecomp = new int[dimCount*tileCount];
+      memcpy(distgrid->regDecomp, dg->regDecomp, 
+        sizeof(int)*dimCount*tileCount);
     }else
       distgrid->regDecomp = NULL;
     if (dg->decompflag){
-      distgrid->decompflag = new Decomp_Flag[dimCount];
+      distgrid->decompflag = new Decomp_Flag[dimCount*tileCount];
       memcpy(distgrid->decompflag, dg->decompflag,
-        sizeof(Decomp_Flag)*dimCount);
+        sizeof(Decomp_Flag)*dimCount*tileCount);
     }else
       distgrid->regDecomp = NULL;
     if (dg->indexflag){
@@ -661,9 +653,20 @@ DistGrid *DistGrid::create(
       return ESMC_NULL_POINTER;
     }
   }else{
-    // delayout was provided -> get deCount
-    deCount = delayout->getDeCount();
+    // delayout was provided
     delayoutCreator = false;  // indicate that delayout was not created here
+    if (present(regDecomp)){
+      // ensure that deCount matches between provided DELayout and regDecomp
+      if (deCount != delayout->getDeCount()){
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+          "deCount must match between provided DELayout and provided regDecomp",
+          ESMC_CONTEXT, rc);
+        distgrid->ESMC_BaseSetStatus(ESMF_STATUS_INVALID);  // mark invalid
+        return ESMC_NULL_POINTER;
+      }
+    }
+    // set deCount
+    deCount = delayout->getDeCount();
   }
   int *dummy;
   bool regDecompDeleteFlag = false;  // reset
@@ -1455,11 +1458,9 @@ DistGrid *DistGrid::create(
       deCount += localProduct;
     }
   }else{
-    // regDecomp was not provided -> set deCount = tileCount for default
-    deCountPTile = new int[tileCount];
-    for (int i=0; i<tileCount; i++)
-      deCountPTile[i] = 1;
-    deCount = tileCount;
+    // regDecomp was not provided 
+    // -> set deCount = max(tileCount,petCount) for default
+    deCount = max(tileCount, petCount);
   }
   bool delayoutCreator = true; // default assume delayout will be created here
   if (delayout == ESMC_NULL_POINTER){
@@ -1471,19 +1472,50 @@ DistGrid *DistGrid::create(
       return ESMC_NULL_POINTER;
     }
   }else{
-    // delayout was provided -> get deCount
-    deCount = delayout->getDeCount();
+    // delayout was provided
     delayoutCreator = false;  // indicate that delayout was not created here
+    if (present(regDecomp)){
+      // ensure that deCount matches between provided DELayout and regDecomp
+      if (deCount != delayout->getDeCount()){
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+          "deCount must match between provided DELayout and provided regDecomp",
+          ESMC_CONTEXT, rc);
+        distgrid->ESMC_BaseSetStatus(ESMF_STATUS_INVALID);  // mark invalid
+        return ESMC_NULL_POINTER;
+      }
+    }
+    // set deCount
+    deCount = delayout->getDeCount();
+  }
+  // make sure that there are at least as many DEs available as there are tiles
+  if (deCount < tileCount){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+      "there needs to be at least one DE per tile!",
+      ESMC_CONTEXT, rc);
+    distgrid->ESMC_BaseSetStatus(ESMF_STATUS_INVALID);  // mark invalid
+    return ESMC_NULL_POINTER;
   }
   int *dummy, dummyLen[2];
   bool regDecompDeleteFlag = false;  // reset
   if (!present(regDecomp)){
-    // regDecomp was not provided -> create a temporary default regDecomp
+    // regDecomp was not provided -> create default
+    // determine default decomposition, use all PETs, but...
+    int deCountPerTile = max(1, petCount/tileCount);  //..at least 1 DE per tile
+    int extraDEs = max(0, petCount-deCountPerTile*tileCount); // remaining DEs
+    // create a temporary default regDecomp and deCountPTile
     regDecompDeleteFlag = true;  // set
     dummy = new int[dimCount*tileCount];
-    // set default decomposition
-    for (int i=0; i<dimCount*tileCount; i++)
-      dummy[i] = 1;
+    deCountPTile = new int[tileCount];    
+    for (int i=0; i<tileCount; i++){
+      if (i<extraDEs)
+        dummy[dimCount*i] = deCountPerTile + 1; // spread the extra DEs
+      else
+        dummy[dimCount*i] = deCountPerTile;     // just regular DEs
+      for (int j=1; j<dimCount; j++)
+        dummy[dimCount*i+j] = 1;                // no decomp in higher dims
+      deCountPTile[i] = dummy[dimCount*i];      // keep for easier access
+    }
+    // finish up creating the default regDecomp InterfaceInt
     dummyLen[0] = dimCount;
     dummyLen[1] = tileCount;
     regDecomp = new InterfaceInt(dummy, 2, dummyLen);

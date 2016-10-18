@@ -10,7 +10,8 @@
 # The ESMF_DIR environment variable MUST be set by the user!
 #-------------------------------------------------------------------------------
 ifndef ESMF_DIR
-$(error ESMF_DIR needs to be set to the top ESMF directory)
+$(error Environment variable ESMF_DIR needs to be set to the top ESMF directory.  \
+Please see the README file for examples of setting ESMF_DIR)
 endif
 #-------------------------------------------------------------------------------
 

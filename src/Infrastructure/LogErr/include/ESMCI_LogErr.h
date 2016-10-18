@@ -31,6 +31,7 @@
 #include "ESMF_LogMacros.inc"
 
 #include "ESMC_LogErr.h"
+#include "ESMC_Util.h"
 #include "ESMCI_Util.h"
 
 #include <cstdio>
@@ -130,7 +131,7 @@ private:
 // the default global log object
 extern ESMCI::LogErr ESMC_LogDefault;
 extern "C" {
- void FTN_X(f_esmf_logset)(bool *flush, int *rc);
+ void FTN_X(f_esmf_logset)(ESMC_Logical *flush, int *rc);
  void FTN_X(f_esmf_logwrite0)(const char *msg, int *msgtype, int *rc, ESMCI_FortranStrLenArg mlen);
  void FTN_X(f_esmf_logwrite1)(const char *msg, int *msgtype,
                             int *line, const char *file, const char *method, int *rc,

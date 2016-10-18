@@ -57,12 +57,14 @@ void MBMesh_addnodes(void **mbmpp, int *num_nodes, int *nodeId,
 
 void MBMesh_addelements(void **mbmpp, 
                         int *_num_elems, int *elemId, int *elemType, InterfaceInt *_elemMaskII ,
-                        int *_areaPresent, double *elemArea, 
+                         int *_areaPresent, double *elemArea, 
                         int *_coordsPresent, double *elemCoords, 
                         int *_num_elemConn, int *elemConn, int *regridConserve, 
                         ESMC_CoordSys_Flag *_coordSys, int *_orig_sdim,
                         int *rc);
 
+
+void MBMesh_destroy(void **mbmpp, int *rc);
 
 void MBMesh_write(void **mbmpp, char *fname, int *rc,
                   ESMCI_FortranStrLenArg nlen);
@@ -73,6 +75,16 @@ void MBMesh_createnodedistgrid(void **meshpp, int *ngrid, int *num_lnodes, int *
 void MBMesh_createelemdistgrid(void **meshpp, int *egrid, int *num_lelems, int *rc);
 
 void MBMesh_getarea(void **mbmpp, int *num_elem, double *elem_areas, int *rc);
+
+
+void MBMesh_getlocalelemcoords(void **meshpp, double *ecoords, 
+                               int *_orig_sdim, int *rc);
+
+
+void MBMesh_meshturnoncellmask(void **mbmpp, ESMCI::InterfaceInt *maskValuesArg,  int *rc);
+void MBMesh_meshturnoffcellmask(void **mbmpp, int *rc);
+
+
 
 #if 0
 

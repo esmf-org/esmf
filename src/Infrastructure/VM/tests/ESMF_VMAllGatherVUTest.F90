@@ -120,27 +120,27 @@
 
       ! prepare data array3
       do i=1, petCount
-	array3(i) = i
+        array3(i) = i
       enddo
 
       ! prepare data array4
       if (petCount ==1) then
-	array4 = (/0/)
+        array4 = (/0/)
       else
-      	array4 = (/0,1,3,6/)
+        array4 = (/0,1,3,6/)
       end if
 
       ! prepare data array5 
       if (petCount ==1) then
-	array5 = (/1/)
-	i4array5 = (/1/)
-	farray5 = (/1/)
-	f4array5 = (/1/)
+        array5 = (/1/)
+        i4array5 = (/1/)
+        farray5 = (/1/)
+        f4array5 = (/1/)
       else
-      	array5 = (/1,1,2,1,2,3,1,2,3,4/)
-      	i4array5 = (/1,1,2,1,2,3,1,2,3,4/)
-      	farray5 = (/1,3,4,5,6,7,7,8,9,10/)
-      	f4array5 = (/1,3,4,5,6,7,7,8,9,10/)
+        array5 = (/1,1,2,1,2,3,1,2,3,4/)
+        i4array5 = (/1,1,2,1,2,3,1,2,3,4/)
+        farray5 = (/1,3,4,5,6,7,7,8,9,10/)
+        f4array5 = (/1,3,4,5,6,7,7,8,9,10/)
       end if
 
       !Testing with Integer arguments
@@ -150,7 +150,7 @@
       write(name, *) "AllGatherV Integer Test"
       write(failMsg, *) "Did not return ESMF_SUCCESS."
       call ESMF_VMAllGatherV(vm, sendData=array2, sendCount=(localPet + 1),  &
-		recvData=array1, recvCounts=array3, recvOffsets=array4, rc=rc)
+          recvData=array1, recvCounts=array3, recvOffsets=array4, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
@@ -160,7 +160,7 @@
       write(name, *) "Verifying array1 integer data after allgatherv Test"
       rc = ESMF_SUCCESS
       do i=1, nlen
-		if (array1(i)/=array5(i)) rc = ESMF_FAILURE
+        if (array1(i)/=array5(i)) rc = ESMF_FAILURE
       enddo
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
@@ -208,7 +208,7 @@
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "AllGatherV R8 Test"
       call ESMF_VMAllGatherV(vm, sendData=farray2, sendCount=(localPet + 1),  &
-				recvData=farray1, recvCounts=array3, recvOffsets=array4, rc=rc)
+          recvData=farray1, recvCounts=array3, recvOffsets=array4, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
@@ -360,6 +360,25 @@
       write(name, *) "Releasing VMId source array Test"
       call ESMF_VMIdDestroy (vmidarray2, rc=rc)
       call ESMF_Test(all_verify, name, failMsg, result, ESMF_SRCLINE)
+
+      deallocate(array1)
+      deallocate(i4array1)
+      deallocate(farray1)
+      deallocate(f4array1)
+      deallocate(vmidarray1)
+
+      deallocate(array2)
+      deallocate(i4array2)
+      deallocate(farray2)
+      deallocate(f4array2)
+      deallocate(vmidarray2)
+
+      deallocate(array3)
+      deallocate(array4)
+      deallocate(array5)
+      deallocate(i4array5)
+      deallocate(farray5)
+      deallocate(f4array5)
 
       call ESMF_TestEnd(ESMF_SRCLINE)
 

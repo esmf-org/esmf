@@ -39,7 +39,7 @@
 #include "Mesh/include/ESMCI_MeshCap.h"
 #include "Mesh/include/ESMCI_Mesh.h"
 #include "Mesh/include/ESMCI_MeshRead.h"
-#include "Mesh/include/ESMCI_MeshRegrid.h" // only for the REGRID flags
+
 
 // Some xlf compilers don't define this
 #ifndef M_PI
@@ -505,7 +505,7 @@ int setDefaultsLUA(int dimCount,
 
 
   // Convert Grid to Mesh
-  int regridConserve = ESMC_REGRID_CONSERVE_OFF;
+  int regridConserve = 0; // ESMC_REGRID_CONSERVE_OFF;
   MeshCap *meshp=MeshCap::GridToMesh(gridp, staggerloc, 
                                      arrays,
                                      NULL,
@@ -3773,11 +3773,11 @@ int Grid::constructInternal(
 //
 //EOPI
 //-----------------------------------------------------------------------------
-  int rc,localrc;
+   int rc,localrc;
 
 
   // Init lat lon flag
-  // Eventually this'll come through the interface
+   // Eventually this'll come through the interface
   coordSys=coordSysArg;
 
   // Connections aren't being forced at the start
@@ -3820,11 +3820,11 @@ int Grid::constructInternal(
   // only for regular grid
   if (decompType == ESMC_GRID_NONARBITRARY && undistDimCount) {
     undistLBound = new int[undistDimCount];
-    memcpy(undistLBound, undistLBoundArg, undistDimCount * sizeof(int));
+     memcpy(undistLBound, undistLBoundArg, undistDimCount * sizeof(int));
     
     undistUBound = new int[undistDimCount];
     memcpy(undistUBound, undistUBoundArg, undistDimCount * sizeof(int));
-  }
+   }
 
   // if there are any dimensions 
   if (dimCount) {
@@ -3868,11 +3868,11 @@ int Grid::constructInternal(
       for(int j=0; j<dimCount; j++)
         coordDimMap[i][j]=coordDimMapArg[i][j];
     
-    //// allocate coordinate Lower Width storage
+     //// allocate coordinate Lower Width storage
     staggerEdgeLWidthList=_allocate2D<int>(staggerLocCount,dimCount);
 
     //// allocate coordinate Upper Width storage
-    staggerEdgeUWidthList=_allocate2D<int>(staggerLocCount,dimCount);
+     staggerEdgeUWidthList=_allocate2D<int>(staggerLocCount,dimCount);
 
     //// allocate coordinate Alignment storage
     staggerAlignList=_allocate2D<int>(staggerLocCount,dimCount);
@@ -3896,7 +3896,16 @@ int Grid::constructInternal(
       }
     }
 
+    // allocate bound arrays
+    isStaggerDELBnd = new char *[staggerLocCount];
+    isStaggerDEUBnd = new char *[staggerLocCount];
 
+    //// Default to NULL
+    for(int i=0; i<staggerLocCount; i++) {
+      isStaggerDELBnd[i] = ESMC_NULL_POINTER;
+      isStaggerDEUBnd[i] = ESMC_NULL_POINTER;
+    }    
+ 
     //// allocate coordinate array storage
     coordArrayList=_allocate2D<Array *>(staggerLocCount,dimCount);
     for(int i=0; i<staggerLocCount; i++)
@@ -3911,7 +3920,7 @@ int Grid::constructInternal(
       for(int j=0; j<dimCount; j++) {
           coordDidIAllocList[i][j]=false;
       }
-    }
+     }
 
 
     //// allocate coordinate array storage
@@ -3959,7 +3968,7 @@ int Grid::constructInternal(
     int j=0;
     for(int i=0; i<dimCount; i++) {
       if (!gridIsDist[i]) {
-        gridMapDim[i]=j;
+         gridMapDim[i]=j;
         j++;
       }
     }
@@ -4007,7 +4016,7 @@ int Grid::constructInternal(
 	   if (gi == ESMC_GRID_ARBDIM) {
 	     coordMapDim[c][i] = arbDimArg-1;
 	     coordIsDist[c][i] = true;
-	   } else {
+ 	   } else {
 	     coordMapDim[c][i] = undistDimMap[gi];  
 	     coordIsDist[c][i] = false;
 	   }
@@ -4309,6 +4318,8 @@ Grid::Grid(
   itemArrayList = ESMC_NULL_POINTER;
   itemDidIAllocList = ESMC_NULL_POINTER;
 
+  isStaggerDELBnd = ESMC_NULL_POINTER;
+  isStaggerDEUBnd = ESMC_NULL_POINTER;
 
   gridIsDist = ESMC_NULL_POINTER;
   gridMapDim = ESMC_NULL_POINTER;
@@ -4549,6 +4560,22 @@ void Grid::destruct(bool followCreator, bool noGarbage){
      _free2D<bool>(&coordIsDist); 
      _free2D<int>(&coordMapDim); 
   }
+
+   // Get rid of stagger bounds stuff
+   if (isStaggerDELBnd != ESMC_NULL_POINTER) {
+     for (int i=0; i<staggerLocCount; i++) {
+       if (isStaggerDELBnd[i] != ESMC_NULL_POINTER) delete [] isStaggerDELBnd[i];
+     }    
+     delete [] isStaggerDELBnd;
+   }
+
+   if (isStaggerDEUBnd != ESMC_NULL_POINTER) {
+     for (int i=0; i<staggerLocCount; i++) {
+       if (isStaggerDEUBnd[i] != ESMC_NULL_POINTER) delete [] isStaggerDEUBnd[i];
+     }    
+     delete [] isStaggerDEUBnd;
+   }
+
 
    // delete local de bounds indicators
   if (isDELBnd != ESMC_NULL_POINTER) delete [] isDELBnd;
@@ -5096,14 +5123,18 @@ int Grid::getStaggerDistgrid(
 
 
         // Get connection List with pole added back in
-         InterfaceInt *connListWPoles=NULL;
-        _add_poles_to_conn(distgrid_wo_poles,
+        InterfaceInt *connListWPoles=NULL;
+        if (staggerloc==0){ // center stagger
+//TODO: gjt thinks that poles should only be added back in for center stagger.
+//TODO: For all other staggers the DistGrid should not contain pole connections.
+//TODO: This way the DistGrid::create() will add the edge padding correctly.
+          _add_poles_to_conn(distgrid_wo_poles,
                            staggerEdgeLWidthIntIntArray,
                            staggerEdgeUWidthIntIntArray,
                            connL,connU, &connListWPoles, &localrc);
-        if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+          if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
                                           &rc)) return rc;
-
+        }
 
         // Create stagger distgrid w no poles with this padding
         staggerDistgridList[staggerloc]=DistGrid::create(distgrid_wo_poles,
@@ -5127,6 +5158,16 @@ int Grid::getStaggerDistgrid(
           if (connListWPoles->array !=NULL) delete[] connListWPoles->array;
           delete connListWPoles;
         }
+
+        // Fill in DEBounds for 1Tile, if new distgrid 
+        // (Unlike in the multi-tile case, here we don't change the connections per stagger, so
+        //  it's ok to just use the main nopole distgrid, instead of making a stagger specfic one.
+        //  The bounds need to be without poles, because we don't want cells across the pole in regridding.) 
+        localrc=_createIsDEBnd(&(isStaggerDELBnd[staggerloc]),&(isStaggerDEUBnd[staggerloc]), 
+                               distgrid_wo_poles, distgridToGridMap);
+        if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc))
+          return rc;
+
        } else { // Multi-tile grids
         int extent[2];
 
@@ -5144,7 +5185,7 @@ int Grid::getStaggerDistgrid(
         // each tile (based on the connections). The distgrid create with extra padding should handle
         // this, but it doesn't appear to. This is the start of a hack to fix this. 
         // (but it would be really better to handle it in Distgrid... 
-
+ 
         /// Oh...DARN... I don't think that this will work, because all the DEs may not
         /// be on this processor...hmmmm
 
@@ -5196,18 +5237,46 @@ int Grid::getStaggerDistgrid(
         //       the pole taking out methods to work with more tiles (see _create_nopole_distgrid() and _translate_distgrid_conn()). This 
         //       probably isn't an issue because having a pole with multi-tiles seems uncommon. If you have a multi-tile
         //       grid with a pole and you are getting bowtie shaped elements, this is probably why. Ask Bob how to fix. 
-        //       (If you take out the poles, then you need to add them back in here. See _add_poles_to_conn(), etc. in the if part above)
+         //       (If you take out the poles, then you need to add them back in here. See _add_poles_to_conn(), etc. in the if part above)
 
+        // For non-center staggers, take out conenctions, so conservative works
+        // For center stagger, leave connections, so bilinear, etc works
+        if (staggerloc > 0) {
 
-        // Create stagger distgrid w no poles with this padding
-        staggerDistgridList[staggerloc]=DistGrid::create(distgrid_wo_poles,
-                                                         staggerEdgeLWidthIntInt, 
-                                                         staggerEdgeUWidthIntInt, 
-                                                         NULL,
-                                                         NULL, NULL, 
-                                                         &localrc);
-        if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
-                                          &rc)) return rc;
+          // Create 0 sized connection list to indicate that there should be no connections
+           // Allocate list without poles
+          int dimCount=distgrid->getDimCount();
+          int connSize=2+2*dimCount;
+          int tmpConnList[5]; // Small tmp array, just to provide usable address, 
+                              // not actually used, because 0 connections
+          int extent[2];
+          extent[0]=connSize;
+          extent[1]=0; // No connections, to indicate there should be no connections
+          InterfaceInt *emptyConnListII=new InterfaceInt(tmpConnList,2,extent);
+
+          // Create stagger distgrid with no connections, so corners work 
+          staggerDistgridList[staggerloc]=DistGrid::create(distgrid,
+                                                           staggerEdgeLWidthIntInt, 
+                                                           staggerEdgeUWidthIntInt, 
+                                                           NULL,
+                                                           emptyConnListII, NULL, 
+                                                           &localrc);
+          if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+                                            &rc)) return rc;
+          // Get rid of connections
+          delete emptyConnListII;
+
+        } else {
+          // Leave connections, so bilinear, etc. works
+          staggerDistgridList[staggerloc]=DistGrid::create(distgrid,
+                                                           staggerEdgeLWidthIntInt, 
+                                                           staggerEdgeUWidthIntInt, 
+                                                           NULL,
+                                                           NULL, NULL, 
+                                                           &localrc);
+          if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+                                            &rc)) return rc;
+        }
  
         // Get rid of Interface ints
         delete staggerEdgeLWidthIntInt;
@@ -5215,10 +5284,17 @@ int Grid::getStaggerDistgrid(
         
         delete staggerEdgeUWidthIntInt;
         delete [] staggerEdgeUWidthIntIntArray;
+
+        // Fill in DEBounds for NTile, if new distgrid 
+        // (Because right now we strip connections off of non-center staggers for multi-tile grids, for that 
+        //  type of grid we want the bounds to be for the specific stagger).  
+       localrc=_createIsDEBnd(&(isStaggerDELBnd[staggerloc]),&(isStaggerDEUBnd[staggerloc]), 
+                               staggerDistgridList[staggerloc], distgridToGridMap);
+        if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc))
+          return rc;
       }
-   }
-    
-  
+    }
+
     // Return distgrid
     *distgridArg=staggerDistgridList[staggerloc];
     
@@ -5588,7 +5664,7 @@ int Grid::deserialize(
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
      &rc)) return rc;
   
-  // Since we're not allowing the serialization of 
+   // Since we're not allowing the serialization of 
   // non-ready Grids don't worry about serializing
   // the protogrid
   // ... but make sure its NULL
@@ -5629,7 +5705,7 @@ int Grid::deserialize(
   DESERIALIZE_VAR1D( buffer,loffset,connU,dimCount,ESMC_GridConn);
   
   DESERIALIZE_VAR1D( buffer,loffset,gridEdgeLWidth,dimCount,int);
-  DESERIALIZE_VAR1D( buffer,loffset,gridEdgeUWidth,dimCount,int);
+   DESERIALIZE_VAR1D( buffer,loffset,gridEdgeUWidth,dimCount,int);
   DESERIALIZE_VAR1D( buffer,loffset,gridAlign,dimCount,int);
   
   DESERIALIZE_VAR1D( buffer,loffset,coordDimCount,dimCount,int);
@@ -5656,7 +5732,20 @@ int Grid::deserialize(
   isDELBnd=ESMC_NULL_POINTER;
   isDEUBnd=ESMC_NULL_POINTER;
     
-  // make sure loffset is aligned correctly
+  // Allocate stagger  bound arrays, 
+  // but since there are no localDEs these should always be NULL
+  isStaggerDELBnd = ESMC_NULL_POINTER;
+  isStaggerDEUBnd = ESMC_NULL_POINTER;
+  isStaggerDELBnd = new char *[staggerLocCount];
+  isStaggerDEUBnd = new char *[staggerLocCount];
+
+  // Set to NULL
+  for(int i=0; i<staggerLocCount; i++) {
+    isStaggerDELBnd[i] = ESMC_NULL_POINTER;
+    isStaggerDEUBnd[i] = ESMC_NULL_POINTER;
+  }    
+
+ // make sure loffset is aligned correctly
   r=loffset%8;
   if (r!=0) loffset += 8-r;
 
@@ -5671,7 +5760,7 @@ int Grid::deserialize(
 	coordArrayList[s][c]=new Array(-1); // prevent baseID counter increment
 	coordArrayList[s][c]->deserialize(buffer, &loffset, attreconflag);
       } else {
-	coordArrayList[s][c]=ESMC_NULL_POINTER;
+ 	coordArrayList[s][c]=ESMC_NULL_POINTER;
       }
     }
   }
@@ -6066,6 +6155,7 @@ static  void _free3D(Type ****array)
             isDELBnd[lDE] &= ~(0x1<<distgridToGridMap[d]);
           } 
           
+
           // if we're not an upper bound turn off the bit
           bool isUBnd=distgrid->isLocalDeOnEdgeU(lDE,d+1,&localrc);
           if (ESMC_LogDefault.MsgFoundError(localrc,
@@ -7270,27 +7360,21 @@ void GridIter::getDEBnds(
 //-----------------------------------------------------------------------------
 
   // Set Bounds of iteration on this proc
-  grid->getExclusiveUBound(staggerloc, localDE, uBnd);  
-  grid->getExclusiveLBound(staggerloc, localDE, lBnd);  
+  grid->getDistExclusiveUBound(staggerDistgrid, localDE, uBnd);  
+  grid->getDistExclusiveLBound(staggerDistgrid, localDE, lBnd);  
 
-  // if cell iterator then expand bounds
+   // if cell iterator then expand bounds
   if (cellNodes) {
-#if 0
-    if (grid->isForceConn()) {
-       for (int i=0; i<rank; i++) {
+      int localrc,rc;
+      for (int i=0; i<rank; i++) {
+        bool isLBnd=grid->isStaggerLBnd(staggerloc, localDE, i);
+        bool isUBnd=grid->isStaggerUBnd(staggerloc, localDE, i);
+
         //// Expand to include all nodes touched by cells on this proc
-        if (!grid->isLBnd(localDE,i)) lBnd[i]--;
-        if (!grid->isUBnd(localDE,i)) uBnd[i]++;
+        if (!isLBnd) lBnd[i]--;
+        if (!isUBnd) uBnd[i]++; 
       } 
 
-    } else {
-#endif
-      int localrc;
-      for (int i=0; i<rank; i++) {
-        //// Expand to include all nodes touched by cells on this proc
-        if (!grid->isLBnd(localDE,i)) lBnd[i]--;
-        if (!grid->isUBnd(localDE,i)) uBnd[i]++; 
-      } 
 
         // Expand for bipole, if center stagger
       if (staggerloc == 0) {
@@ -7300,15 +7384,8 @@ void GridIter::getDEBnds(
           if (grid->isUBnd(localDE,i) && (connU[i]==ESMC_GRIDCONN_BIPOLE)) uBnd[i]++; 
         } 
       }
-
-#if 0
-   }
-#endif
   }
-
-
-  //   printf("GI lBnd=%d %d UBnd=%d %d \n", lBnd[0],lBnd[1],uBnd[0],uBnd[1]);
-
+ 
 }
 //-----------------------------------------------------------------------------
 
@@ -7342,7 +7419,7 @@ void GridIter::setDEBnds(
   // Set Bounds of iteration on this proc
   this->getDEBnds(localDE,uBndInd,lBndInd);
 
-   // Setup info for calculating the DE index tuple location quickly
+    // Setup info for calculating the DE index tuple location quickly
   // Needs to be done after bounds are set
   int currOff=1;
   lOff=0;
@@ -7354,17 +7431,11 @@ void GridIter::setDEBnds(
   }  
  
   // Exclusive Bounds
-  grid->getExclusiveLBound(staggerloc, localDE, exLBndInd);
+  grid->getDistExclusiveLBound(staggerDistgrid, localDE, exLBndInd);  
 
-  // Get Original bounds for detecting localness
-  grid->getExclusiveUBound(staggerloc, localDE, uBndOrig);  
-  grid->getExclusiveLBound(staggerloc, localDE, lBndOrig);  
-
-  int lBndNew[7];
-  int uBndNew[7];
-  grid->getDistExclusiveUBound(staggerDistgrid, localDE, uBndNew);  
-  grid->getDistExclusiveLBound(staggerDistgrid, localDE, lBndNew);  
-
+   // Get Original bounds for detecting localness
+  grid->getDistExclusiveUBound(staggerDistgrid, localDE, uBndOrig);  
+  grid->getDistExclusiveLBound(staggerDistgrid, localDE, lBndOrig);  
 
   // Set to first index on DE
   for (int i=0; i<rank; i++) {
@@ -7404,7 +7475,7 @@ void GridIter::setDEBnds(
 #define ESMC_METHOD "ESMCI::GridIter::advToNonZeroDE()"
 //BOPI
 // !IROUTINE:  advToNonZeroDE()
-//
+ //
 // !INTERFACE:
 bool GridIter::advToNonEmptyDE(
 //
@@ -7426,7 +7497,7 @@ bool GridIter::advToNonEmptyDE(
   int tmp_lBnd[ESMF_MAXDIM];
 
  /* XMRKX */
-
+ 
   // temp localDE to advance
   int localDE=*_localDE;
 
@@ -7452,7 +7523,7 @@ bool GridIter::advToNonEmptyDE(
     }
 
     // Advance to next DE 
-    localDE++;
+     localDE++;
   }
 
   // return that there were no more empty DEs
@@ -7481,7 +7552,7 @@ GridIter::GridIter(
  Grid *gridArg,
  int  staggerlocArg,
  bool cellNodesArg
- ){
+  ){
 //
 // !DESCRIPTION:
 
@@ -7499,8 +7570,11 @@ GridIter::GridIter(
 
   // Get distgrid for this staggerloc 
   grid->getStaggerDistgrid(staggerloc, &staggerDistgrid);
+
+  // Set isLBnd
+   /* XMRKX */
  
-  // initialize 
+   // initialize 
   for (int i=0; i<ESMF_MAXDIM; i++) {
      curInd[i]=0;
     lBndInd[i]=0;
@@ -7518,6 +7592,7 @@ GridIter::GridIter(
 
   // set to beginning (just in case)
   this->toBeg();
+
 }
 //-----------------------------------------------------------------------------
 
@@ -7536,7 +7611,7 @@ GridIter *GridIter::toBeg(
 //    GridIter object
 //
 // !ARGUMENTS:
- //  
+  //  
  ){
 //
 // !DESCRIPTION:
@@ -7548,20 +7623,20 @@ GridIter *GridIter::toBeg(
   // If no DEs then just set iterator to done 
   if (numDE==0) {
     done=true;
-    return this;
+     return this;
   } 
 
   // Set to first DE 
   curDE=0; 
 
-  // Advance to first non-empty position
-  // If there are none, then set as done and leave
+   // Advance to first non-empty position
+   // If there are none, then set as done and leave
   if (!this->advToNonEmptyDE(&curDE)) {
     done=true;
     return this;
   }
 
-  // Set to beginning (localDE=0)
+  // Set to beginning 
   this->setDEBnds(curDE);
   
   // Set to first index
@@ -7591,12 +7666,12 @@ GridIter *GridIter::toBeg(
 //
 // !INTERFACE:
 GridIter *GridIter::adv(
-//
+ //
  // !RETURN VALUE:
 //    none
 //
 // !ARGUMENTS:
- //  
+  //  
 
  ){
 //
@@ -7606,7 +7681,7 @@ GridIter *GridIter::adv(
 //EOPI
 //-----------------------------------------------------------------------------
 
-  // if done then leave
+    // if done then leave
    if (done) return this;
 
     //printf("A cur=[%d,%d] uBnd=[%d,%d]\n",curInd[0],curInd[1],uBndInd[0],uBndInd[1]);
@@ -7644,9 +7719,9 @@ GridIter *GridIter::adv(
       if (!this->advToNonEmptyDE(&curDE)) {
         done=true;
         return this;
-      }
+       }
 
-      ////// Set the boundaries based on this DE
+       ////// Set the boundaries based on this DE
       this->setDEBnds(curDE);
     }
   }
@@ -7658,7 +7733,7 @@ GridIter *GridIter::adv(
 
 
 
-//-----------------------------------------------------------------------------
+  //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::GridIter::getGlobalID()"
 //BOPI
@@ -7682,7 +7757,7 @@ int GridIter::getGlobalID(
   int localrc;
   int gid;
   int deBasedInd[ESMF_MAXDIM];
-
+ 
   // if done then leave
   if (done) return -1;
 
@@ -7692,7 +7767,7 @@ int GridIter::getGlobalID(
   }
   
   //printf("GI curDE=%d curInd=%d %d deBasedInd=%d %d \n",
-  //  curDE,curInd[0],curInd[1],deBasedInd[0],deBasedInd[1]);  
+   //  curDE,curInd[0],curInd[1],deBasedInd[0],deBasedInd[1]);  
   
   // return sequence index
   gid=staggerDistgrid->getSequenceIndexLocalDe(curDE,deBasedInd,&localrc);
@@ -7701,7 +7776,7 @@ int GridIter::getGlobalID(
   //  gid,curDE,curInd[0],curInd[1],deBasedInd[0],deBasedInd[1],localrc,ESMF_SUCCESS);
 
   return gid;
-
+ 
 }
 //-----------------------------------------------------------------------------
 
@@ -7710,7 +7785,7 @@ int GridIter::getGlobalID(
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::GridIter::getPoleID()"
 //BOPI
-// !IROUTINE:  GridIter 
+ // !IROUTINE:  GridIter 
 //
 // !INTERFACE:
 int GridIter::getPoleID(
@@ -7729,29 +7804,23 @@ int GridIter::getPoleID(
 //
 //EOPI
 //-----------------------------------------------------------------------------
+  int localrc, rc;
 
   // if done then leave
   if (done) return 0;
 
-#if 0
-  if (grid->isForceConn()) {
-#endif
-
-    // check to see if we're on this proc
-    for (int i=0; i<rank; i++) {
-      if ((curInd[i]==lBndInd[i]) && grid->isLBnd(curDE,i) && (connL[i]==ESMC_GRIDCONN_POLE)) return 2*(i+1);
-      if ((curInd[i]==uBndInd[i]) && grid->isUBnd(curDE,i) && (connU[i]==ESMC_GRIDCONN_POLE)) return 2*(i+1)+1;
-    }
-
-#if 0
-   } else {
-    // check to see if we're on this proc
-    for (int i=0; i<rank; i++) {
-      if ((curInd[i]==lBndInd[i]) && grid->isLBnd(curDE,i)) return 2*(i+1);
-      if ((curInd[i]==uBndInd[i]) && grid->isUBnd(curDE,i)) return 2*(i+1)+1;
-    }
+  // Regridding currently doesn't generate poles for 3 or greater dimension grids, 
+  // so leave if that's the case
+  if (rank > 2) return 0;
+ 
+  // check to see if we're on this proc
+  for (int i=0; i<rank; i++) {
+    bool isLBnd=grid->isStaggerLBnd(staggerloc, curDE, i);
+    bool isUBnd=grid->isStaggerUBnd(staggerloc, curDE, i);
+    
+    if ((curInd[i]==lBndInd[i]) && isLBnd && (connL[i]==ESMC_GRIDCONN_POLE)) return 2*(i+1);
+    if ((curInd[i]==uBndInd[i]) && isUBnd && (connU[i]==ESMC_GRIDCONN_POLE)) return 2*(i+1)+1;
   }
-#endif
 
   // if we pass the above test then we're not next to a pole node
   return 0;
@@ -7772,7 +7841,7 @@ int GridIter::getCount(
 // !RETURN VALUE:
 //    the number of nodes in this iterator
 //
-// !ARGUMENTS:
+ // !ARGUMENTS:
 //   none  
  ){
 //
@@ -7788,14 +7857,14 @@ int GridIter::getCount(
 
   // Loop through DEs count nodes
   cnt=0;
-  for (int d=0; d<numDE; d++) {
+   for (int d=0; d<numDE; d++) {
     // Set Bounds of iteration on this proc
     this->getDEBnds(d,uBnd,lBnd);
 
     // For this DE get the number of nodes
     cntDE=1;
     for (int i=0; i<rank; i++) {
-      cntDE *= (uBnd[i]-lBnd[i]+1);
+       cntDE *= (uBnd[i]-lBnd[i]+1);
     }
 
     // Add the size of this DE to the rest
@@ -7836,7 +7905,7 @@ int GridIter::getDE(
   if (done) return -1;
   
   // Get some useful information
-  const int *localDeToDeMap = staggerDistgrid->getDELayout()->getLocalDeToDeMap();
+   const int *localDeToDeMap = staggerDistgrid->getDELayout()->getLocalDeToDeMap();
   
   // Output DE
   return localDeToDeMap[curDE];
@@ -7847,7 +7916,7 @@ int GridIter::getDE(
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::GridIter::isLocal()"
-//BOPI
+ //BOPI
 // !IROUTINE:  isLocal 
 //
 // !INTERFACE:
@@ -7863,7 +7932,7 @@ bool GridIter::isLocal(
 // !DESCRIPTION:
 // return true if this item is on this processor
 //
-//EOPI
+ //EOPI
 //-----------------------------------------------------------------------------
 
   // if done then leave
@@ -7871,7 +7940,7 @@ bool GridIter::isLocal(
 
   // if not cell then they're all on this proc
    if (!cellNodes) return true;
-
+ 
   // TODO: FIX THIS FOR DISTGRID CONNECTIONS!!!!!!!!!!!!!!
 
   // check to see if we're on this proc
@@ -7884,7 +7953,7 @@ bool GridIter::isLocal(
 }
 //-----------------------------------------------------------------------------
 
-
+ 
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
@@ -7918,12 +7987,12 @@ bool GridIter::isShared(
   // if not cell then they're no shared nodes
   if (!cellNodes) return false;
 
-  // If we're more than 1 inside the exclusive region then we shouldn't be shared
+   // If we're more than 1 inside the exclusive region then we shouldn't be shared
   bool interior=true;
   for (int i=0; i<rank; i++) {
     if ((curInd[i]<lBndOrig[i]+1) || (curInd[i]>uBndOrig[i]-1)) {
       interior=false;
-      break;
+       break;
     }
   }
   if (interior) return false;
@@ -7932,7 +8001,7 @@ bool GridIter::isShared(
 
 
   // If none of the above are true then return true, because we might be shared
-  return true;
+   return true;
  }
 //-----------------------------------------------------------------------------
 
@@ -7973,14 +8042,14 @@ int GridIter::getLocalID(
   }
 
   // Add in DE number and output
-  return dePos*numDE+curDE;
+   return dePos*numDE+curDE;
 
-}
+ }
 //-----------------------------------------------------------------------------
 
 
 
-//-----------------------------------------------------------------------------
+ //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::GridIter::getCoord()"
 //BOPI
@@ -8027,8 +8096,8 @@ template void GridIter::getCoord(ESMC_I4 *data);
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI::GridIter::getCartCoord()"
-//BOPI
+ #define ESMC_METHOD "ESMCI::GridIter::getCartCoord()"
+  //BOPI
 // !IROUTINE:  getCartCoord
 //
 // !INTERFACE:
@@ -8076,14 +8145,14 @@ void GridIter::getCartCoord(
 template void GridIter::getCartCoord(ESMC_R8 *data);
 //template void GridIter::getCoord(ESMC_R4 *data);
 //template void GridIter::getCoord(ESMC_I4 *data);
-//-----------------------------------------------------------------------------
+ //-----------------------------------------------------------------------------
 
 
-//-----------------------------------------------------------------------------
+ //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::GridIter::getItem()"
 //BOPI
-// !IROUTINE:  getItem
+ // !IROUTINE:  getItem
 //
 // !INTERFACE:
 template <class TYPE>
@@ -8124,21 +8193,21 @@ template void GridIter::getItem(int item, ESMC_I4 *data);
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI::GridIter::getArrayData()"
+ #define ESMC_METHOD "ESMCI::GridIter::getArrayData()"
 //BOPI
 // !IROUTINE:  getArrayData
 //
 // !INTERFACE:
 template <class TYPE>
 void GridIter::getArrayData(
-//
+ //
 // !RETURN VALUE:
 //  void
 //
 // !ARGUMENTS:
 //   Data output
 // 
-                            Array *array,
+                             Array *array,
                             TYPE *data // (out) input array needs to be at
                                        // least of size grid dimCount    
  ){
@@ -8172,7 +8241,7 @@ void GridIter::getArrayData(
  
 
  
-}
+ }
 
 // Add more types here if necessary
 template void GridIter::getArrayData(Array *array, ESMC_R8 *data);
@@ -8183,7 +8252,7 @@ template void GridIter::getArrayData(Array *array, ESMC_I4 *data);
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI::GridIter::getArrayData()"
+ #define ESMC_METHOD "ESMCI::GridIter::getArrayData()"
 //BOPI
 // !IROUTINE:  getArrayData
 //
@@ -8193,7 +8262,7 @@ void GridIter::setArrayData(
 //
 // !RETURN VALUE:
 //  void
-//
+ //
 // !ARGUMENTS:
 //   Data output
 // 
@@ -8220,7 +8289,7 @@ void GridIter::setArrayData(
                "- requested type does not match type of data in Array ", ESMC_CONTEXT, &rc);
     throw rc;
   }
-
+ 
   //// Get LocalArray cooresponding to staggerloc, coord and localDE
   localArray=array->getLocalarrayList()[curDE];
   
@@ -8235,7 +8304,7 @@ template void GridIter::setArrayData(Array *array, ESMC_R4 data);
 template void GridIter::setArrayData(Array *array, ESMC_I4 data);
 //-----------------------------------------------------------------------------
 
-
+ 
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
@@ -8248,7 +8317,7 @@ GridIter *GridIter::moveToLocalID(
 //
 // !RETURN VALUE:
 //    returns the grid iterator
-//
+ //
 // !ARGUMENTS:
 //   
  int localID){
@@ -8268,7 +8337,7 @@ GridIter *GridIter::moveToLocalID(
   // check for bad DE
   if (de > uBndDE) return this;
 
-  // set DE
+   // set DE
   curDE=de;
 
   // load DE bounds and other info
@@ -8287,7 +8356,7 @@ GridIter *GridIter::moveToLocalID(
   // since we're now not done set done to false
   done=false;
 
-  // Add in DE number and output
+   // Add in DE number and output
   return this;
 
 }
@@ -8303,7 +8372,7 @@ GridIter *GridIter::moveToLocalID(
 // !IROUTINE:  GridIter Destruct
 //
 // !INTERFACE:
-GridIter::~GridIter(
+ GridIter::~GridIter(
 //
 // !RETURN VALUE:
 //    void
@@ -8316,7 +8385,7 @@ GridIter::~GridIter(
 // !DESCRIPTION:
 
 //
-//EOPI
+ //EOPI
 //-----------------------------------------------------------------------------
 
 }
@@ -8339,7 +8408,7 @@ GridIter::~GridIter(
 //
 // !INTERFACE:
 void GridCellIter::getDEBnds(
-//
+ //
 // !RETURN VALUE:
 //    none
 //
@@ -8355,85 +8424,37 @@ void GridCellIter::getDEBnds(
 //
 //EOPI
 //-----------------------------------------------------------------------------
+  int localrc, rc;
 
   // Set Bounds of iteration on this proc
-  grid->getExclusiveUBound(staggerloc, localDE, uBnd);  
-  grid->getExclusiveLBound(staggerloc, localDE, lBnd);  
+  grid->getDistExclusiveUBound(staggerDistgrid, localDE, uBnd);  
+  grid->getDistExclusiveLBound(staggerDistgrid, localDE, lBnd);  
 
   // if cell iterator then expand bounds
-#if 0
-  if (grid->isForceConn()) {
+  // If center stagger, expand if not bipole
+  if (staggerloc==0) {
     for (int i=0; i<rank; i++) {
-      //// Adjust based on alignment of each dimension
-      //// to just cover cell indices
+      bool isLBnd=grid->isStaggerLBnd(staggerloc, curDE, i);
+      bool isUBnd=grid->isStaggerUBnd(staggerloc, curDE, i);
+      
       if (align[i] <0) {
-        if (grid->isUBnd(localDE,i)) uBnd[i]--;
+        if (isUBnd && (connU[i] != ESMC_GRIDCONN_BIPOLE)) uBnd[i]--;
       } else {
-        if (grid->isLBnd(localDE,i)) lBnd[i]++;
-      }   
-    }
-  } else {
-#endif
-    int localrc;
-
-#if 0
-    for (int i=0; i<rank; i++) {
-      if (align[i] <0) {
-        if (grid->isUBnd(localDE,i)) uBnd[i]--;
-      } else {
-        if (grid->isLBnd(localDE,i)) lBnd[i]++;
+        if (isLBnd && (connL[i] != ESMC_GRIDCONN_BIPOLE)) lBnd[i]++;
       }    
     }
-#endif 
-
-    // If center stagger, expand if not bipole
-    if (staggerloc==0) {
-      for (int i=0; i<rank; i++) {
-        if (align[i] <0) {
-          if (grid->isUBnd(localDE,i) && (connU[i] != ESMC_GRIDCONN_BIPOLE)) uBnd[i]--;
-        } else {
-          if (grid->isLBnd(localDE,i) && (connL[i] != ESMC_GRIDCONN_BIPOLE)) lBnd[i]++;
-        }    
-      }
-    } else {
-      for (int i=0; i<rank; i++) {
-        if (align[i] <0) {
-          if (grid->isUBnd(localDE,i)) uBnd[i]--;
-        } else {
-          if (grid->isLBnd(localDE,i)) lBnd[i]++;
-        }    
-      }
-    }
-
-
-#if 0
-  }
-#endif
-
-  // printf("GCI lBnd=%d %d UBnd=%d %d \n", lBnd[0],lBnd[1],uBnd[0],uBnd[1]);
-
-  // If using center make sure we aren't going to go outside the bounds
-#if 0    
-    int centerUBnd[ESMF_MAXDIM]; 
-    int centerLBnd[ESMF_MAXDIM];
-    
-    // Get center bounds
-    grid->getExclusiveUBound(0, localDE, centerUBnd);  
-    grid->getExclusiveLBound(0, localDE, centerLBnd);  
-
-
-    // Make sure that they are 
+  } else {
     for (int i=0; i<rank; i++) {
-      int rc;
-      if ((uBnd[i] > centerUBnd[i]) || (lBnd[i] < centerLBnd[i])) {
-	ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-	"- center stagger not contained properly within staggerloc being regridded",
-        ESMC_CONTEXT, &rc);
-        throw rc;
-      }
+      bool isLBnd=grid->isStaggerLBnd(staggerloc, curDE, i);
+      bool isUBnd=grid->isStaggerUBnd(staggerloc, curDE, i);
+      
+      if (align[i] <0) {
+        if (isUBnd) uBnd[i]--;
+      } else {
+        if (isLBnd) lBnd[i]++;
+      }    
     }
-#endif
-
+  }
 }
 
 //-----------------------------------------------------------------------------
@@ -8460,12 +8481,12 @@ void GridCellIter::setDEBnds(
 // Set the bounds in this iterator to the values corresponding to
 // this DE. 
 //
-//EOPI
+ //EOPI
 //-----------------------------------------------------------------------------
 
   // Set Bounds of iteration on this proc
   this->getDEBnds(localDE, uBndInd, lBndInd);
-
+ 
   // Get exclusive bounds for center stagger
   grid->getExclusiveLBound(0, localDE, exLBndInd);
 
@@ -8508,7 +8529,7 @@ void GridCellIter::setDEBnds(
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::GridIter::advToNonZeroDE()"
 //BOPI
-// !IROUTINE:  advToNonZeroDE()
+ // !IROUTINE:  advToNonZeroDE()
 //
 // !INTERFACE:
 bool GridCellIter::advToNonEmptyDE(
@@ -8517,11 +8538,11 @@ bool GridCellIter::advToNonEmptyDE(
 //    true - advanced to next DEs
 //    false - there were no more non-empty DEs
 // !ARGUMENTS:
-//  
+ //  
    int *_localDE
  ){
 //
-// !DESCRIPTION:
+ // !DESCRIPTION:
 // Starting with the current value of localDE advance to the next non-empty one. 
 //
 //EOPI
@@ -8556,7 +8577,7 @@ bool GridCellIter::advToNonEmptyDE(
       return true;
     }
 
-    // Advance to next DE 
+     // Advance to next DE 
     localDE++;
   }
 
@@ -8569,14 +8590,14 @@ bool GridCellIter::advToNonEmptyDE(
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI::GridCellIter()"
+ #define ESMC_METHOD "ESMCI::GridCellIter()"
 //BOPI
 // !IROUTINE:  GridCellIter Construct
 //
 // !INTERFACE:
 GridCellIter::GridCellIter(
 //
-// !RETURN VALUE:
+ // !RETURN VALUE:
 //    Pointer to a new Grid Iterator
 //
 // !ARGUMENTS:
@@ -8604,7 +8625,7 @@ GridCellIter::GridCellIter(
   const int *staggerAlign= grid->getStaggerAlign(staggerloc);
 
   // Convert to -1,+1 alignment used in GridCellIter
-  // (make 0 the same as -1)
+   // (make 0 the same as -1)
   for (int i=0; i<rank; i++) {
     if (staggerAlign[i] < 1) align[i]=-1;
     else align[i]=1;
@@ -8617,12 +8638,11 @@ GridCellIter::GridCellIter(
   // (e.g. if we're doing conservative regridding)
   grid->getStaggerDistgrid(0,&centerDistgrid);
   
-
   // initialize 
   for (int i=0; i<ESMF_MAXDIM; i++) {
     curInd[i]=0;
     lBndInd[i]=0;
-    uBndInd[i]=0;
+     uBndInd[i]=0;
   }
   curDE=0;
   uBndDE=0;
@@ -8631,7 +8651,7 @@ GridCellIter::GridCellIter(
   // set number of local DEs
   numDE=staggerDistgrid->getDELayout()->getLocalDeCount();
 
-  // set end of local DEs
+   // set end of local DEs
   uBndDE=numDE-1;
 
   // set to beginning (just in case)
@@ -8652,7 +8672,7 @@ GridCellIter::GridCellIter(
 // !INTERFACE:
 GridCellIter *GridCellIter::toBeg(
 //
-// !RETURN VALUE:
+ // !RETURN VALUE:
 //    GridCellIter object
 //
 // !ARGUMENTS:
@@ -8674,7 +8694,7 @@ GridCellIter *GridCellIter::toBeg(
   // Set to first DE 
   curDE=0; 
 
- // Advance to first non-empty position
+  // Advance to first non-empty position
   // If there are none, then set as done and leave
   if (!this->advToNonEmptyDE(&curDE)) {
     done=true;
@@ -8684,23 +8704,17 @@ GridCellIter *GridCellIter::toBeg(
   // Set to beginning (localDE=0)
   this->setDEBnds(curDE);
 
-  //  printf("B cur=[%d,%d] \n",curInd[0],curInd[1]);
-
-
-  // IF DE IS EMPTY NEED TO ADVANCE TO NEXT FULL DE HERE
-
   // Set to first index
   for (int i=0; i<rank; i++) {
     curInd[i]=lBndInd[i];
   }
-
 
   // set done status
   if (curDE > uBndDE) { 
     done=true;
   } else {
     done=false;
-  }
+   }
 
   // return pointer to GridCellIter
   return this;
@@ -8732,26 +8746,23 @@ GridCellIter *GridCellIter::adv(
 //EOPI
 //-----------------------------------------------------------------------------
 
-  // if done then leave
+   // if done then leave
   if (done) return this;
-
-  //  printf("A cur=[%d,%d] \n",curInd[0],curInd[1]);
 
   // advance first index
   curInd[0]++;
 
   // if greater than upper bound advance rest of indices
-  if (curInd[0] > uBndInd[0]) {
+   if (curInd[0] > uBndInd[0]) {
 
     //// advance the rest of the indices
     int i=1;
     while (i<rank) {
       curInd[i-1]=lBndInd[i-1]; 
-
       curInd[i]++;
 
       if (curInd[i] <= uBndInd[i]) break;               
-  
+ 
       i++;
     }
 
@@ -8759,9 +8770,7 @@ GridCellIter *GridCellIter::adv(
     if (i==rank) {
       curDE++;
 
-      //      printf("curDE=%d uBndDE=%d \n",curDE,uBndDE);
-
-      ////// If we're past the top of the DEs then we're done
+       ////// If we're past the top of the DEs then we're done
       if (curDE > uBndDE) { 
         done=true;
         return this;
@@ -8776,7 +8785,6 @@ GridCellIter *GridCellIter::adv(
 
       ////// Set the boundaries based on this DE
       this->setDEBnds(curDE);
-      // IF DE IS EMPTY NEED TO ADVANCE TO NEXT FULL DE HERE
     }
   }
 
@@ -8796,7 +8804,7 @@ GridCellIter *GridCellIter::adv(
 // !INTERFACE:
 int GridCellIter::getGlobalID(
 //
-// !RETURN VALUE:
+  // !RETURN VALUE:
 //    global id
 //
 // !ARGUMENTS:
@@ -8824,8 +8832,6 @@ int GridCellIter::getGlobalID(
     // return sequence index
     gid=centerDistgrid->getSequenceIndexLocalDe(curDE,deBasedInd,&localrc);
 
-    //printf("GCI Gid=%d curDE=%d Ind=%d %d localrc=%d \n",gid,curDE,deBasedInd[0],deBasedInd[1],localrc);
-
   // return sequence index
   return gid;
 
@@ -8844,14 +8850,14 @@ int GridCellIter::getGlobalID(
 int GridCellIter::getDE(
 //
 // !RETURN VALUE:
-//    the DE of the current position
+ //    the DE of the current position
 //
 // !ARGUMENTS:
 //   none  
  ){
 //
 // !DESCRIPTION:
-// Return the DE of the current position
+ // Return the DE of the current position
 //
 //EOPI
 //-----------------------------------------------------------------------------
@@ -8892,11 +8898,12 @@ int GridCellIter::getCount(
   int localrc;
   int cnt, cntDE;
   int lBnd[ESMF_MAXDIM];
-  int uBnd[ESMF_MAXDIM];
+   int uBnd[ESMF_MAXDIM];
 
   // Loop through DEs count nodes
   cnt=0;
   for (int d=0; d<numDE; d++) {
+
     // Set Bounds of iteration on this proc
     this->getDEBnds(d,uBnd,lBnd);
 
@@ -8906,7 +8913,7 @@ int GridCellIter::getCount(
       cntDE *= (uBnd[i]-lBnd[i]+1);
     }
 
-    // Add the size of this DE to the rest
+     // Add the size of this DE to the rest
     cnt +=cntDE;
   }
 
@@ -8940,7 +8947,7 @@ int GridCellIter::getLocalID(
 //-----------------------------------------------------------------------------
   int localrc;
   int dePos;  
-
+ 
   // if done then leave
   if (done) return -1;
 
@@ -8952,7 +8959,6 @@ int GridCellIter::getLocalID(
 
   // Add in DE number and output
   return dePos*numDE+curDE;
-
 }
 //-----------------------------------------------------------------------------
 
@@ -8965,45 +8971,33 @@ void precomputeCellNodeLIDInfo(Grid *grid, DistGrid *staggerDistgrid, int dimCou
   int tmplOff;
 
   // Set Bounds of iteration on this proc
-  grid->getExclusiveUBound(staggerloc, localDE, uBnd);  
-  grid->getExclusiveLBound(staggerloc, localDE, lBnd);  
- /* XMRKX */
-
+  grid->getDistExclusiveUBound(staggerDistgrid, localDE, uBnd);  
+  grid->getDistExclusiveLBound(staggerDistgrid, localDE, lBnd);  
+  // OLD grid->getExclusiveUBound(staggerloc, localDE, uBnd);  
+  // OLD grid->getExclusiveLBound(staggerloc, localDE, lBnd);  
 
   // if cell iterator then expand bounds
-#if 0
-    if (grid->isForceConn()) {
-      for (int i=0; i<dimCount; i++) {
-        //// Expand to include all nodes touched by cells on this proc
-        if (!grid->isLBnd(localDE,i)) lBnd[i]--;
-        if (!grid->isUBnd(localDE,i)) uBnd[i]++;
-      } 
-    } else {
-#endif
-      int localrc;
-      for (int i=0; i<dimCount; i++) {
-        //// Expand to include all nodes touched by cells on this proc
-        if (!grid->isLBnd(localDE,i)) lBnd[i]--;
-        if (!grid->isUBnd(localDE,i)) uBnd[i]++;
-      } 
+  int localrc, rc;
+  for (int i=0; i<dimCount; i++) {
+    bool isLBnd=grid->isStaggerLBnd(staggerloc, localDE, i);
+    bool isUBnd=grid->isStaggerUBnd(staggerloc, localDE, i);
 
-        // Also expand for bipole, if center stagger
-      if (staggerloc == 0) {
-        for (int i=0; i<dimCount; i++) {
-          //// Expand to include all nodes touched by cells on this proc
-          if (grid->isLBnd(localDE,i) && (connL[i]==ESMC_GRIDCONN_BIPOLE)) lBnd[i]--;
-          if (grid->isUBnd(localDE,i) && (connU[i]==ESMC_GRIDCONN_BIPOLE)) uBnd[i]++; 
-        } 
-      } 
+    //// Expand to include all nodes touched by cells on this proc
+    if (!isLBnd) lBnd[i]--;
+    if (!isUBnd) uBnd[i]++;
+  } 
 
-#if 0
+  // Also expand for bipole, if center stagger
+  if (staggerloc == 0) {
+    for (int i=0; i<dimCount; i++) {
+      bool isLBnd=grid->isStaggerLBnd(staggerloc, localDE, i);
+      bool isUBnd=grid->isStaggerUBnd(staggerloc, localDE, i);
 
- /* XMRKX */
-
-    }
-#endif
-
-
+      //// Expand to include all nodes touched by cells on this proc
+      if (isLBnd && (connL[i]==ESMC_GRIDCONN_BIPOLE)) lBnd[i]--;
+      if (isUBnd && (connU[i]==ESMC_GRIDCONN_BIPOLE)) uBnd[i]++; 
+    } 
+  } 
 
 
   // Setup info for calculating the DE index tuple location quickly
@@ -9021,7 +9015,6 @@ void precomputeCellNodeLIDInfo(Grid *grid, DistGrid *staggerDistgrid, int dimCou
 
 int getCellNodeLID(int *ind, int dimCount, int curDE, int numDE, int *dimOffCN, int lOffCN) {
 
-
  // compute position in DE
   int dePos=-lOffCN;
   for (int i=0; i<dimCount; i++) {
@@ -9035,7 +9028,7 @@ int getCellNodeLID(int *ind, int dimCount, int curDE, int numDE, int *dimOffCN, 
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI::GridCellIter::getCornersCellNodeLocalID()"
+ #define ESMC_METHOD "ESMCI::GridCellIter::getCornersCellNodeLocalID()"
 //BOPI
 // !IROUTINE: getCornersCellNodeLocalID()"
 //
@@ -9046,7 +9039,7 @@ void GridCellIter::getCornersCellNodeLocalID(
 //  none
 //
 // !ARGUMENTS:
-                                             int *cnrCount,
+                                              int *cnrCount,
                                              int *cnrList
  ){
 //
@@ -9083,7 +9076,7 @@ void GridCellIter::getCornersCellNodeLocalID(
   precomputeCellNodeLIDInfo(grid, staggerDistgrid, rank, staggerloc, curDE, connL, connU, dimOffCN, &lOffCN);
 
   // Loop through setting corners
-  for (int i=0; i<cnrNum; i++) {
+   for (int i=0; i<cnrNum; i++) {
     int ind[ESMF_MAXDIM];
 
     // generate index value for corner
@@ -9098,7 +9091,7 @@ void GridCellIter::getCornersCellNodeLocalID(
 	  ind[j]--;
 	}        
       }
-    }
+     }
 
     // compute Local IDs
     cnrList[cnrMap[rank][i]]=getCellNodeLID(ind, rank, curDE, numDE, dimOffCN, lOffCN);
@@ -9131,7 +9124,7 @@ void GridCellIter::setArrayData(
 // !DESCRIPTION:
 // Set data to a passed in Array
 // TODO: Need to come up with a way to handle Arrays with more dimensions than the Grid
-//
+ //
 //EOPI
 //-----------------------------------------------------------------------------
   int localrc;
@@ -9150,7 +9143,7 @@ void GridCellIter::setArrayData(
   
   //// Get LocalArray cooresponding to staggerloc, coord and localDE
   localArray=array->getLocalarrayList()[curDE];
-  
+   
   //// Get pointer to LocalArray data
   localArray->setData(curInd, data);
   
@@ -9179,7 +9172,7 @@ void GridCellIter::getArrayData(
 //
 // !ARGUMENTS:
 //   Data output
-// 
+ // 
                             Array *array,
                             TYPE *data // (out) input array needs to be at
                                        // least of size grid dimCount    
@@ -9202,7 +9195,7 @@ void GridCellIter::getArrayData(
   if (array->getTypekind() != get_TypeKind_from_Type<TYPE>()) {
     int rc;
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_WRONG,
-               "- requested type does not match type of data in Array ", ESMC_CONTEXT, &rc);
+                "- requested type does not match type of data in Array ", ESMC_CONTEXT, &rc);
     throw rc;
   }
 
@@ -9227,7 +9220,7 @@ template void GridCellIter::getArrayData(Array *array, ESMC_I4 *data);
 #define ESMC_METHOD "ESMCI::GridCellIter::getItem()"
 //BOPI
 // !IROUTINE:  getItem
-//
+ //
 // !INTERFACE:
 template <class TYPE>
 void GridCellIter::getItem(
@@ -9254,7 +9247,7 @@ void GridCellIter::getItem(
   if (done) return;
 
   // get item data from center stagger (where the data for a cell lives)
-  localrc=grid->getItemInternalConvert(0, item, curDE, curInd, value);
+   localrc=grid->getItemInternalConvert(0, item, curDE, curInd, value);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
                                     &rc)) throw rc;
 
@@ -9275,7 +9268,7 @@ template void GridCellIter::getItem(int item, ESMC_I4 *data);
 // !IROUTINE:  moveToLocalID
 //
 // !INTERFACE:
-GridCellIter *GridCellIter::moveToLocalID(
+ GridCellIter *GridCellIter::moveToLocalID(
 //
 // !RETURN VALUE:
 //    returns the grid iterator
@@ -9306,7 +9299,7 @@ GridCellIter *GridCellIter::moveToLocalID(
   this->setDEBnds(curDE);  
 
   // reset current index location using dePos 
-  for (int i=0; i<rank-1; i++) {
+   for (int i=0; i<rank-1; i++) {
     cnt=uBndInd[i]-lBndInd[i]+1;
     curInd[i] = dePos%cnt+lBndInd[i];
     dePos /=cnt;
@@ -9323,7 +9316,7 @@ GridCellIter *GridCellIter::moveToLocalID(
 //-----------------------------------------------------------------------------
 
 
-
+ 
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
@@ -9358,7 +9351,7 @@ GridCellIter::~GridCellIter(
 #define ESMC_METHOD "ESMCI::Grid::matchCoordInternal()"
 //BOPI
 // !IROUTINE:  Grid::matchCoordInternal()"
-//
+ //
 // !INTERFACE:
 template <class TYPE>
 bool Grid:: matchCoordInternal(
@@ -9371,8 +9364,8 @@ bool Grid:: matchCoordInternal(
 				 Grid *grid1,
 				 Grid *grid2
                                  ){
-//
-// !DESCRIPTION:
+ //
+ // !DESCRIPTION:
 //  This internal function returns true if all of the coords in grid1 and grid2 match. 
 // NOTE: This function assumes that other items in the grids (e.g. dimCount) match. 
 //
@@ -9410,7 +9403,7 @@ bool Grid:: matchCoordInternal(
       // Set Bounds of iteration on this proc
       grid1->getExclusiveUBound(s, lDE, uBnd);  
       grid1->getExclusiveLBound(s, lDE, lBnd);        
-
+ 
       // Loop through all dimensions although
       // only valid ones will not be initialized 
       // to 0,0 (and those won't be used in getCoordInternal call)
@@ -9419,7 +9412,7 @@ bool Grid:: matchCoordInternal(
       for (i[4]=lBnd[4]; i[4]<=uBnd[4]; i[4]++) {
       for (i[3]=lBnd[3]; i[3]<=uBnd[3]; i[3]++) {
       for (i[2]=lBnd[2]; i[2]<=uBnd[2]; i[2]++) {
-      for (i[1]=lBnd[1]; i[1]<=uBnd[1]; i[1]++) {
+        for (i[1]=lBnd[1]; i[1]<=uBnd[1]; i[1]++) {
       for (i[0]=lBnd[0]; i[0]<=uBnd[0]; i[0]++) {
 
 	// Get Coordinates for Grid 1
@@ -9467,7 +9460,7 @@ bool Grid:: matchItemInternal(
                               int staggerloc,
 			      int item,
  			      Grid *grid1,
-			      Grid *grid2
+ 			      Grid *grid2
 			      ){
   //
 // !DESCRIPTION:
@@ -9515,7 +9508,7 @@ bool Grid:: matchItemInternal(
 	// Check if item values match
 	if (iv1 != iv2) {
 	  return false;
-	}
+ 	}
 
       } // 0
       } // 1
@@ -9563,7 +9556,7 @@ bool Grid::match(
   if (grid1 == NULL){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
       "- Not a valid pointer to Grid", ESMC_CONTEXT, rc);
-    return false;
+     return false;
   }
   if (grid2 == NULL){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
@@ -9611,7 +9604,7 @@ bool Grid::match(
   // Is the following still necessary???
 
   // Check distDimCount
-  if (grid1->distDimCount != grid2->distDimCount) {
+   if (grid1->distDimCount != grid2->distDimCount) {
     if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
     return false;;
   }
@@ -9659,7 +9652,7 @@ bool Grid::match(
   //  int *gridEdgeLWidth; // size of grid dimCount
   //  int *gridEdgeUWidth; // size of grid dimCount
   //  int *gridAlign; // size of grid dimCount
-
+ 
   
   // Check Grid coordDimCount
   for (int i=0; i<grid1->dimCount; i++) {
@@ -9707,7 +9700,7 @@ bool Grid::match(
     }
   }
 
-  
+   
   // Check staggerLocCount
   if (grid1->staggerLocCount != grid2->staggerLocCount) {
     if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
@@ -9755,7 +9748,7 @@ bool Grid::match(
       if (grid1->staggerMemLBoundList[i][j] != grid2->staggerMemLBoundList[i][j]) {
 	if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
 	return false;
-      }
+       }
     }
   }
 
@@ -9803,7 +9796,7 @@ bool Grid::match(
 	  if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
 	  return false;
 	}
-      }
+       }
     }
   }
 
@@ -10092,36 +10085,14 @@ void _create_nopole_distgrid(DistGrid *distgrid, DistGrid **distgrid_nopole, int
   //       (If you take out the poles, then you need to add them back in later. See _add_poles_to_conn(), etc. 
   //       in getStaggerDistgrid())
   if (distgrid->getTileCount() > 1) {
-    // Copy connection list to enable copy of distgrid
-    int dimCount=distgrid->getDimCount();
-    int connSize=2+2*dimCount; 
-    int connCount=distgrid->getConnectionCount();
-    int * const* connList=distgrid->getConnectionList();
-    int *newConnList=NULL;
-    if (connCount*connSize > 0) newConnList=new int[connCount*connSize];
-    int k=0;
-    for (int i=0; i<connCount; i++) {
-      for (int j=0; j<connSize; j++) {
-        newConnList[k]=connList[i][j];
-        k++;
-      }
-    }  
-    int extent[2];
-    extent[0]=connSize;
-    extent[1]=connCount;
-    InterfaceInt *newConnListII=new InterfaceInt(newConnList,2,extent);
 
     // Copy distgrid
     *distgrid_nopole=DistGrid::create(distgrid,
                                    (InterfaceInt *)NULL, (InterfaceInt *)NULL,
-                                   (ESMC_IndexFlag *)NULL, newConnListII, 
+                                      (ESMC_IndexFlag *)NULL, (InterfaceInt *)NULL, 
                                    NULL, &localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
                                       rc)) return; 
-
-    // Free memory connection list memory
-    delete newConnListII;
-    if (newConnList != NULL) delete [] newConnList;
 
     return;
   }

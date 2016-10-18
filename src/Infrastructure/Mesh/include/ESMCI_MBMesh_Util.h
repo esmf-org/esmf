@@ -25,7 +25,9 @@
 #ifdef ESMF_MOAB
 
 #include "Mesh/include/ESMCI_MBMesh.h"
+#include "Mesh/include/ESMCI_MeshTypes.h"
 
+#include <vector>
 
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
@@ -36,8 +38,16 @@
 
 using namespace ESMCI;
 
+void MBMesh_get_gid(MBMesh *mbmp, EntityHandle eh, int *gid);
 
+void MBMesh_get_elem_coords_3D_ccw(MBMesh *mbmp, EntityHandle elem, 
+                                   int max_num_nodes, double *tmp_coords, 
+                                   int *num_nodes, double *coords);
 void MBMesh_get_elem_coords(MBMesh *mbmp, EntityHandle elem, int max_num_nodes, int *num_nodes, double *coords);
+
+void MBMesh_get_elem_centroid(MBMesh *mbmp, EntityHandle elem, double *centroid);
+
+void MBMesh_get_local_elem_gids(MBMesh *mbmp, std::vector<UInt> &egids);
 
 #endif // ESMF_MOAB
 

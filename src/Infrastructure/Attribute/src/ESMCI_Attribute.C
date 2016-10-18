@@ -36,6 +36,7 @@
 
 #include <sstream>
 #include <cstring>
+#include <fstream>
 #include <cstdlib>
 #include <vector>
 #include <algorithm>
@@ -43,6 +44,7 @@
 using std::string;
 using std::vector;
 using std::ostringstream;
+using std::ofstream;
 using std::transform;
 
 //-----------------------------------------------------------------------------
@@ -1726,7 +1728,7 @@ const char Attribute::GRIDS_PURP[]   = "grids";
       "Cannot find the Attribute package", ESMC_CONTEXT, &localrc);
     return localrc;
   }
-  
+
   // save the parent, remove attpack from it's parent, then delete attpack
   attrparent = attpack->parent;
   for (i=0; i<attrparent->packList.size(); i++) {
@@ -3254,9 +3256,9 @@ if (attrRoot == ESMF_TRUE) {
 
   // Initialize local return code; assume routine not implemented
   localrc = ESMC_RC_NOT_IMPL;
-    
+
   for (i=0; i<linkList.size(); i++) {
-    if (destination->attrBase->ESMC_BaseGetID() == 
+    if (destination->attrBase->ESMC_BaseGetID() ==
         linkList.at(i)->attrBase->ESMC_BaseGetID() &&
         ESMCI::VMIdCompare(destination->attrBase->ESMC_BaseGetVMId(),
         linkList.at(i)->attrBase->ESMC_BaseGetVMId())) {
@@ -3732,122 +3734,209 @@ if (attrRoot == ESMF_TRUE) {
 //    {\tt ESMF\_SUCCESS} or error code on failure.
 // 
 // !ARGUMENTS:
-      void) const {                    // could add options at some point
+      bool tofile,            // stream to stdout or file
+      const char *filename,   // filename
+      bool append) const {    // append or start new
 // 
 // !DESCRIPTION:
 //     Print the contents of an {\tt Attribute} object
 //
 //EOPI
-  int localrc;
-  unsigned int i;
-  char msgbuf[4*ESMF_MAXSTR];
+  int strsize=4*ESMF_MAXSTR;
+  char msgbuf[strsize];
+  ofstream fp;
 
-  // Initialize local return code; assume routine not implemented
-  localrc = ESMC_RC_NOT_IMPL;
-
-  for (i=0; i<attrList.size(); i++) {
-    sprintf(msgbuf, "   Attr %d:\n", i);
-    printf("%s",msgbuf);
-    ESMC_LogDefault.Write(msgbuf, ESMC_LOGMSG_INFO, ESMC_CONTEXT);
-  // print name
-  sprintf(msgbuf, "        name: %s\n",  attrList.at(i)->attrName.c_str());
-  printf("%s",msgbuf);
-  ESMC_LogDefault.Write(msgbuf, ESMC_LOGMSG_INFO, ESMC_CONTEXT);
-  
-  // print items if there are any
-  if (attrList.at(i)->items <= 0) {
-      sprintf(msgbuf, "        value: \n");
-      printf("%s",msgbuf);
-      ESMC_LogDefault.Write(msgbuf, ESMC_LOGMSG_INFO, ESMC_CONTEXT);
+  if (tofile) {
+    sprintf(msgbuf, filename);
+    // open file for writing and append to previous contents
+    if (append)
+      fp.open(msgbuf, ofstream::out | ofstream::app);
+    // open file for writing and throw away previous contents
+    else
+      fp.open(msgbuf, ofstream::out | ofstream::trunc);
   }
 
-  if (attrList.at(i)->items == 1) {
-      sprintf(msgbuf, "        value: ");
-      printf("%s",msgbuf);
-      ESMC_LogDefault.Write(msgbuf, ESMC_LOGMSG_INFO, ESMC_CONTEXT);
-             if (attrList.at(i)->tk == ESMC_TYPEKIND_I4)
-                 sprintf(msgbuf, "%d\n", attrList.at(i)->vip.at(0)); 
-             else if (attrList.at(i)->tk == ESMC_TYPEKIND_I8)
-                 sprintf(msgbuf, "%lld\n", attrList.at(i)->vlp.at(0)); 
-             else if (attrList.at(i)->tk == ESMC_TYPEKIND_R4)
-                 sprintf(msgbuf, "%f\n", attrList.at(i)->vfp.at(0)); 
-             else if (attrList.at(i)->tk == ESMC_TYPEKIND_R8)
-                 sprintf(msgbuf, "%g\n", attrList.at(i)->vdp.at(0)); 
-             else if (attrList.at(i)->tk == ESMC_TYPEKIND_LOGICAL)
-                 sprintf(msgbuf, "%s\n", ESMC_LogicalString(attrList.at(i)->vbp.at(0))); 
-             else if (attrList.at(i)->tk == ESMC_TYPEKIND_CHARACTER)
-                 sprintf(msgbuf, "%s\n", attrList.at(i)->vcpp.at(0).c_str());
-             else{ 
-                 sprintf(msgbuf, "unknown value");
-                 ESMC_LogDefault.MsgFoundError(ESMC_RC_ATTR_WRONGTYPE, msgbuf,
-                     ESMC_CONTEXT, &localrc);
-                 return localrc;
-             }
-      printf("%s",msgbuf);
-      ESMC_LogDefault.Write(msgbuf, ESMC_LOGMSG_INFO, ESMC_CONTEXT);
-  }
+  print_to_file(tofile, fp, 0);
 
-  if (attrList.at(i)->items > 1) { 
-      sprintf(msgbuf, "        %d items, values:\n", attrList.at(i)->items);
-      printf("%s",msgbuf);
-      ESMC_LogDefault.Write(msgbuf, ESMC_LOGMSG_INFO, ESMC_CONTEXT);
-      for (unsigned int j=0; j<attrList.at(i)->items; j++) {
-                if (attrList.at(i)->tk == ESMC_TYPEKIND_I4) {
-                    sprintf(msgbuf, "          \t item %d: %d\n", j, attrList.at(i)->vip[j]); 
-                } else if (attrList.at(i)->tk == ESMC_TYPEKIND_I8) {
-                    sprintf(msgbuf, "          \t item %d: %lld\n", j, attrList.at(i)->vlp[j]); 
-                } else if (attrList.at(i)->tk == ESMC_TYPEKIND_R4) {
-                    sprintf(msgbuf, "          \t item %d: %f\n", j, attrList.at(i)->vfp[j]); 
-                } else if (attrList.at(i)->tk == ESMC_TYPEKIND_R8) {
-                    sprintf(msgbuf, "          \t item %d: %g\n", j, attrList.at(i)->vdp[j]); 
-                } else if (attrList.at(i)->tk == ESMC_TYPEKIND_LOGICAL) {
-                    sprintf(msgbuf, "          \t item %d: %s\n", j,
-                      ESMC_LogicalString(attrList.at(i)->vbp[j]));
-                } else if (attrList.at(i)->tk == ESMC_TYPEKIND_CHARACTER) {
-                    sprintf(msgbuf, "          \t item %d: %s\n", j, attrList.at(i)->vcpp[j].c_str());
-                } else{
-                    sprintf(msgbuf, "          \t unknown value");
-                    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, ESMC_CONTEXT,
-                      &localrc);
-                    return localrc;
-                }
-      printf("%s",msgbuf);
-      ESMC_LogDefault.Write(msgbuf, ESMC_LOGMSG_INFO, ESMC_CONTEXT);
-      }
-  }
-
-  // print convention
-  sprintf(msgbuf, "        convention: %s\n",  attrList.at(i)->attrConvention.c_str());
-  printf("%s",msgbuf);
-  ESMC_LogDefault.Write(msgbuf, ESMC_LOGMSG_INFO, ESMC_CONTEXT);
-  
-  // print purpose
-  sprintf(msgbuf, "        purpose: %s\n",  attrList.at(i)->attrPurpose.c_str());
-  printf("%s",msgbuf);
-  ESMC_LogDefault.Write(msgbuf, ESMC_LOGMSG_INFO, ESMC_CONTEXT);
-  
-  // print object
-  sprintf(msgbuf, "        object: %s\n",  attrList.at(i)->attrObject.c_str());
-  printf("%s",msgbuf);
-  ESMC_LogDefault.Write(msgbuf, ESMC_LOGMSG_INFO, ESMC_CONTEXT);
-
-  sprintf(msgbuf, "        attrCount: %d\n", attrList.at(i)->getCountTotal());
-  printf("%s",msgbuf);
-  ESMC_LogDefault.Write(msgbuf, ESMC_LOGMSG_INFO, ESMC_CONTEXT);
-  }
-  
-  for (i=0; i<packList.size(); i++) {
-    packList.at(i)->ESMC_Print();
-  }
-//  for (i=0; i<linkList.size(); i++) {
-//    linkList.at(i)->ESMC_Print();
-//  }
-
-  fflush (stdout);
+  if (tofile)
+    fp.close();
+  else
+    fflush (stdout);
 
   return ESMF_SUCCESS;
 
 }  // end ESMC_Print
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "print_to_file"
+//BOPI
+// !IROUTINE:  Attribute::print_to_file - Print the {\tt Attribute} contents
+//
+// !INTERFACE:
+      int Attribute::print_to_file(
+//
+// !RETURN VALUE:
+//    {\tt ESMF\_SUCCESS} or error code on failure.
+//
+// !ARGUMENTS:
+      bool tofile,                  // stream to stdout or file
+      ofstream &fp,                 // file handle
+      unsigned int level) const {   // indentation according to attpack
+//
+// !DESCRIPTION:
+//     Print the contents of an {\tt Attribute} object
+//
+//EOPI
+  unsigned int i;
+  int strsize=4*ESMF_MAXSTR;
+  char msgbuf[strsize];
+  string indent = "";
+  int localrc;
+
+  // Initialize local return code; assume routine not implemented
+  localrc = ESMC_RC_NOT_IMPL;
+
+  for (i=0; i<level; ++i) indent += "  ";
+
+  for (i=0; i<attrList.size(); i++) {
+    sprintf(msgbuf, "%sAttr %d:\n", indent.c_str(), i);
+    attprint(msgbuf, strsize, tofile, fp);
+
+    sprintf(msgbuf, "%s    name: %s\n", indent.c_str(),
+        attrList.at(i)->attrName.c_str());
+    attprint(msgbuf, strsize, tofile, fp);
+
+    if (attrList.at(i)->items <= 0) {
+      sprintf(msgbuf, "%s    value: \n", indent.c_str());
+      attprint(msgbuf, strsize, tofile, fp);
+    }
+
+    if (attrList.at(i)->items == 1) {
+      sprintf(msgbuf, "%s    value: ", indent.c_str());
+      attprint(msgbuf, strsize, tofile, fp);
+
+      if (attrList.at(i)->tk == ESMC_TYPEKIND_I4)
+        sprintf(msgbuf, "%d\n", attrList.at(i)->vip.at(0));
+      else if (attrList.at(i)->tk == ESMC_TYPEKIND_I8)
+        sprintf(msgbuf, "%lld\n", attrList.at(i)->vlp.at(0));
+      else if (attrList.at(i)->tk == ESMC_TYPEKIND_R4)
+        sprintf(msgbuf, "%f\n", attrList.at(i)->vfp.at(0));
+      else if (attrList.at(i)->tk == ESMC_TYPEKIND_R8)
+        sprintf(msgbuf, "%g\n", attrList.at(i)->vdp.at(0));
+      else if (attrList.at(i)->tk == ESMC_TYPEKIND_LOGICAL)
+        sprintf(msgbuf, "%s\n", ESMC_LogicalString(attrList.at(i)->vbp.at(0)));
+      else if (attrList.at(i)->tk == ESMC_TYPEKIND_CHARACTER)
+        sprintf(msgbuf, "%s\n", attrList.at(i)->vcpp.at(0).c_str());
+      else{
+        sprintf(msgbuf, "unknown value");
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ATTR_WRONGTYPE, msgbuf,
+          ESMC_CONTEXT, &localrc);
+        return localrc;
+      }
+      attprint(msgbuf, strsize, tofile, fp);
+    }
+
+    if (attrList.at(i)->items > 1) {
+      sprintf(msgbuf, "%s    %d items, values:\n", indent.c_str(),
+          attrList.at(i)->items);
+      attprint(msgbuf, strsize, tofile, fp);
+      for (unsigned int j=0; j<attrList.at(i)->items; j++) {
+        if (attrList.at(i)->tk == ESMC_TYPEKIND_I4) {
+          sprintf(msgbuf, "%s        item %d: %d\n", indent.c_str(), j,
+              attrList.at(i)->vip[j]);
+        } else if (attrList.at(i)->tk == ESMC_TYPEKIND_I8) {
+          sprintf(msgbuf, "%s        item %d: %lld\n", indent.c_str(), j,
+              attrList.at(i)->vlp[j]);
+        } else if (attrList.at(i)->tk == ESMC_TYPEKIND_R4) {
+          sprintf(msgbuf, "%s        item %d: %f\n", indent.c_str(), j,
+              attrList.at(i)->vfp[j]);
+        } else if (attrList.at(i)->tk == ESMC_TYPEKIND_R8) {
+          sprintf(msgbuf, "%s        item %d: %g\n", indent.c_str(), j,
+              attrList.at(i)->vdp[j]);
+        } else if (attrList.at(i)->tk == ESMC_TYPEKIND_LOGICAL) {
+          sprintf(msgbuf, "%s        item %d: %s\n", indent.c_str(), j,
+              ESMC_LogicalString(attrList.at(i)->vbp[j]));
+        } else if (attrList.at(i)->tk == ESMC_TYPEKIND_CHARACTER) {
+          sprintf(msgbuf, "%s        item %d: %s\n", indent.c_str(), j,
+              attrList.at(i)->vcpp[j].c_str());
+        } else{
+          sprintf(msgbuf, "%s        unknown value", indent.c_str());
+          ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, ESMC_CONTEXT,
+            &localrc);
+          return localrc;
+        }
+      attprint(msgbuf, strsize, tofile, fp);
+      }
+    }
+    // print convention
+    sprintf(msgbuf, "%s    convention: %s\n", indent.c_str(),
+        attrList.at(i)->attrConvention.c_str());
+    attprint(msgbuf, strsize, tofile, fp);
+
+    // print purpose
+    sprintf(msgbuf, "%s    purpose: %s\n", indent.c_str(),
+        attrList.at(i)->attrPurpose.c_str());
+    attprint(msgbuf, strsize, tofile, fp);
+
+    // print object
+    sprintf(msgbuf, "%s    object: %s\n", indent.c_str(),
+        attrList.at(i)->attrObject.c_str());
+    attprint(msgbuf, strsize, tofile, fp);
+
+    sprintf(msgbuf, "%s    attrCount: %d\n", indent.c_str(),
+        attrList.at(i)->getCountTotal());
+    attprint(msgbuf, strsize, tofile, fp);
+  }
+
+  for (i=0; i<packList.size(); i++) {
+    sprintf(msgbuf, "\n%sPack %d: %s\n", indent.c_str(),
+        i, packList.at(i)->attrName.c_str());
+    attprint(msgbuf, strsize, tofile, fp);
+    packList.at(i)->print_to_file(tofile, fp, ++level);
+  }
+
+/*  RLO: only to be enabled for special cases
+  for (i=0; i<linkList.size(); i++) {
+    sprintf(msgbuf, "\n%sLink to Object %d: %s\n", indent.c_str(),
+        i, linkList.at(i)->attrBase->ESMC_Base::ESMC_BaseGetName());
+    attprint(msgbuf, strsize, tofile, fp);
+    linkList.at(i)->print_to_file(tofile, fp, ++level);
+  }
+*/
+
+  return ESMF_SUCCESS;
+
+}  // end print_to_file
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_Print"
+//BOPI
+// !IROUTINE:  Attribute::ESMC_Print - Print the {\tt Attribute} contents
+//
+// !INTERFACE:
+      int Attribute::ESMC_Print(
+//
+// !RETURN VALUE:
+//    {\tt ESMF\_SUCCESS} or error code on failure.
+//
+// !ARGUMENTS:
+      ) const {                    // could add options at some point
+//
+// !DESCRIPTION:
+//     Print the contents of an {\tt Attribute} object
+//
+//EOPI
+  int localrc;
+
+  // Initialize local return code; assume routine not implemented
+  localrc = ESMC_RC_NOT_IMPL;
+
+  localrc = ESMC_Print(false, NULL, false);
+
+   return ESMF_SUCCESS;
+}  // end ESMC_Print
+//-----------------------------------------------------------------------------
+
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 //
@@ -3875,7 +3964,7 @@ if (attrRoot == ESMF_TRUE) {
 //   Initialize an {\tt Attribute} and set the name, convention, and purpose.
 //
 //EOPI
-  
+
   char name[ESMF_MAXSTR];
   
   tk = ESMF_NOKIND;
@@ -4287,6 +4376,53 @@ if (attrRoot == ESMF_TRUE) {
 }  // end AttributeOperator=
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
+#define ESMC_METHOD "clean()"
+//BOPI
+// !IROUTINE:  clean - remove all Attributes, packages and links
+//
+// !INTERFACE:
+      void Attribute::clean() {
+//
+// !RETURN VALUE:
+//    none
+//
+// !ARGUMENTS:
+//    none
+//
+// !DESCRIPTION:
+//    Delete an {\tt Attribute} hierarchy.
+//
+//EOPI
+
+  attrBase = ESMC_NULL_POINTER;
+  parent = ESMC_NULL_POINTER;
+
+  if (tk == ESMC_TYPEKIND_I4) {vip.clear(); vector<ESMC_I4>().swap(vip); }
+  else if (tk == ESMC_TYPEKIND_I8) {vlp.clear(); vector<ESMC_I8>().swap(vlp); }
+  else if (tk == ESMC_TYPEKIND_R4) {vfp.clear(); vector<ESMC_R4>().swap(vfp); }
+  else if (tk == ESMC_TYPEKIND_R8) {vdp.clear(); vector<ESMC_R8>().swap(vdp); }
+  else if (tk == ESMC_TYPEKIND_LOGICAL) {vbp.clear(); vector<ESMC_Logical>().swap(vbp); }
+  else if (tk == ESMC_TYPEKIND_CHARACTER) {vcpp.clear(); vector<string>().swap(vcpp); }
+
+  while (!attrList.empty()) {
+    delete attrList.back();
+    attrList.pop_back();
+  }
+  vector<Attribute*>().swap(attrList);
+
+  while (!packList.empty()) {
+    delete packList.back();
+    packList.pop_back();
+  }
+  vector<Attribute*>().swap(packList);
+
+  for(std::vector<Attribute*>::iterator it = linkList.begin();
+      it != linkList.end(); ++it) *it = NULL;
+  vector<Attribute*>().swap(linkList);
+
+ } // end clean
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
 #define ESMC_METHOD "~Attribute()"
 //BOPI
 // !IROUTINE:  ~Attribute - native C++ destructor for Attribute class
@@ -4319,6 +4455,10 @@ if (attrRoot == ESMF_TRUE) {
     delete attrList.back();
     attrList.pop_back();
   }
+  /*printf("Attrlist size = %d, name = %s\n", attrList.size(),
+             attrList.at(0)->attrName.c_str());
+  for (unsigned int i=0; i<attrList.size(); ++i) delete attrList.at(i);
+  attrList.clear();*/
   vector<Attribute*>().swap(attrList);
 
   while (!packList.empty()) {
@@ -4552,17 +4692,17 @@ if (attrRoot == ESMF_TRUE) {
 // !IROUTINE:  ESMC_SerializeCC - Turn the object information into a byte stream
 //
 // !INTERFACE:
-      int Attribute::ESMC_SerializeCC(
+    int Attribute::ESMC_SerializeCC(
 //
 // !RETURN VALUE:
 //    {\tt ESMF\_SUCCESS} or error code on failure.
 //
 // !ARGUMENTS:
-      char *buffer,          // inout - byte stream to fill
-      int *length,           // inout - buf length; realloc'd here if needed
-      int &offset,           // inout - original offset, updated throughout
-      bool cc,               // in - to tell whether in count or copy mode 
-      ESMC_InquireFlag inquireflag) const { // in - inquire flag
+    char *buffer,          // inout - byte stream to fill
+    int *length,           // inout - buf length; realloc'd here if needed
+    int &offset,           // inout - original offset, updated throughout
+    bool cc,               // in - to tell whether in count or copy mode
+    ESMC_InquireFlag inquireflag) const { // in - inquire flag
 //
 // !DESCRIPTION:
 //    Turn an {\tt Attribute} into a stream of bytes.
@@ -4571,6 +4711,7 @@ if (attrRoot == ESMF_TRUE) {
     int nbytes;
     int localrc;
     unsigned int i;
+    int offset_in;
 
     // Define serialization macros
 #define SERIALIZE_VAR(cc,bufptr,loff,var,t) \
@@ -4581,95 +4722,98 @@ if (attrRoot == ESMF_TRUE) {
   if (cc) strncpy((bufptr)+(loff),(var).c_str(),s);      \
   loff += s;
 
+    // initialize offset
+    offset_in = offset;
+
     // Initialize local return code; assume routine not implemented
     localrc = ESMC_RC_NOT_IMPL;
 
-      SERIALIZE_VAR(cc,buffer,offset,(attrName.size()),string::size_type);
-      SERIALIZE_VARC(cc,buffer,offset,attrName,(attrName.size()));
+    SERIALIZE_VAR(cc,buffer,offset,(attrName.size()),string::size_type);
+    SERIALIZE_VARC(cc,buffer,offset,attrName,(attrName.size()));
 
-      SERIALIZE_VAR(cc,buffer,offset,tk,ESMC_TypeKind_Flag);
-      
-      SERIALIZE_VAR(cc,buffer,offset,items,int);
-      SERIALIZE_VAR(cc,buffer,offset,attrRoot,ESMC_Logical);
-      
-      SERIALIZE_VAR(cc,buffer,offset,(attrConvention.size()),string::size_type);
-      SERIALIZE_VARC(cc,buffer,offset,attrConvention,(attrConvention.size()));
-      SERIALIZE_VAR(cc,buffer,offset,(attrPurpose.size()),string::size_type);
-      SERIALIZE_VARC(cc,buffer,offset,attrPurpose,(attrPurpose.size()));
-      SERIALIZE_VAR(cc,buffer,offset,(attrObject.size()),string::size_type);
-      SERIALIZE_VARC(cc,buffer,offset,attrObject,(attrObject.size()));
-      
-      SERIALIZE_VAR(cc,buffer,offset,attrPack,ESMC_Logical);
-      SERIALIZE_VAR(cc,buffer,offset,attrPackHead,ESMC_Logical);
-      SERIALIZE_VAR(cc,buffer,offset,attrNested,ESMC_Logical);
-          
-      SERIALIZE_VAR(cc,buffer,offset,attrList.size(),int);
-      SERIALIZE_VAR(cc,buffer,offset,packList.size(),int);
-//      SERIALIZE_VAR(cc,buffer,offset,linkList.size(),int);
+    SERIALIZE_VAR(cc,buffer,offset,tk,ESMC_TypeKind_Flag);
 
-        if (tk == ESMC_TYPEKIND_I4) {
-          for (i=0; i<items; i++) {
-            SERIALIZE_VAR(cc,buffer,offset,vip[i],ESMC_I4);
-          }}
-        else if (tk == ESMC_TYPEKIND_I8) {
-          for (i=0; i<items; i++) {
-            SERIALIZE_VAR(cc,buffer,offset,vlp[i],ESMC_I8);
-          }}
-        else if (tk == ESMC_TYPEKIND_R4) {
-          for (i=0; i<items; i++) {
-            SERIALIZE_VAR(cc,buffer,offset,vfp[i],ESMC_R4);
-          }}
-        else if (tk == ESMC_TYPEKIND_R8) {
-          for (i=0; i<items; i++) {
-            SERIALIZE_VAR(cc,buffer,offset,vdp[i],ESMC_R8);
-          }}
-        else if (tk == ESMC_TYPEKIND_LOGICAL) {
-          for (i=0; i<items; i++) {
-            SERIALIZE_VAR(cc,buffer,offset,vbp[i],ESMC_Logical);
-          }}
-        else if (tk == ESMC_TYPEKIND_CHARACTER) {
-          for (i=0; i<items; i++) {
-            SERIALIZE_VAR(cc,buffer,offset,(vcpp[i].size()),string::size_type);
-            SERIALIZE_VARC(cc,buffer,offset,vcpp[i],(vcpp[i].size())); 
-          }
-        }
+    SERIALIZE_VAR(cc,buffer,offset,items,int);
+    SERIALIZE_VAR(cc,buffer,offset,attrRoot,ESMC_Logical);
 
-      // make sure offset is aligned correctly
-      nbytes=offset%8;
-      if (nbytes!=0) offset += 8-nbytes;
+    SERIALIZE_VAR(cc,buffer,offset,(attrConvention.size()),string::size_type);
+    SERIALIZE_VARC(cc,buffer,offset,attrConvention,(attrConvention.size()));
+    SERIALIZE_VAR(cc,buffer,offset,(attrPurpose.size()),string::size_type);
+    SERIALIZE_VARC(cc,buffer,offset,attrPurpose,(attrPurpose.size()));
+    SERIALIZE_VAR(cc,buffer,offset,(attrObject.size()),string::size_type);
+    SERIALIZE_VARC(cc,buffer,offset,attrObject,(attrObject.size()));
+
+    SERIALIZE_VAR(cc,buffer,offset,attrPack,ESMC_Logical);
+    SERIALIZE_VAR(cc,buffer,offset,attrPackHead,ESMC_Logical);
+    SERIALIZE_VAR(cc,buffer,offset,attrNested,ESMC_Logical);
+
+    SERIALIZE_VAR(cc,buffer,offset,attrList.size(),int);
+    SERIALIZE_VAR(cc,buffer,offset,packList.size(),int);
+//    SERIALIZE_VAR(cc,buffer,offset,linkList.size(),int);
+
+    if (tk == ESMC_TYPEKIND_I4) {
+      for (i=0; i<items; i++) {
+        SERIALIZE_VAR(cc,buffer,offset,vip[i],ESMC_I4);
+      }}
+    else if (tk == ESMC_TYPEKIND_I8) {
+      for (i=0; i<items; i++) {
+        SERIALIZE_VAR(cc,buffer,offset,vlp[i],ESMC_I8);
+      }}
+    else if (tk == ESMC_TYPEKIND_R4) {
+      for (i=0; i<items; i++) {
+        SERIALIZE_VAR(cc,buffer,offset,vfp[i],ESMC_R4);
+      }}
+    else if (tk == ESMC_TYPEKIND_R8) {
+      for (i=0; i<items; i++) {
+        SERIALIZE_VAR(cc,buffer,offset,vdp[i],ESMC_R8);
+      }}
+    else if (tk == ESMC_TYPEKIND_LOGICAL) {
+      for (i=0; i<items; i++) {
+        SERIALIZE_VAR(cc,buffer,offset,vbp[i],ESMC_Logical);
+      }}
+    else if (tk == ESMC_TYPEKIND_CHARACTER) {
+      for (i=0; i<items; i++) {
+        SERIALIZE_VAR(cc,buffer,offset,(vcpp[i].size()),string::size_type);
+        SERIALIZE_VARC(cc,buffer,offset,vcpp[i],(vcpp[i].size()));
+      }
+    }
+
+    // make sure offset is aligned correctly
+    nbytes=offset%8;
+    if (nbytes!=0) offset += 8-nbytes;
     
-      // Serialize the Attribute hierarchy
-      for (i=0; i<attrList.size(); i++)
-          attrList.at(i)->ESMC_SerializeCC(buffer,length,offset,cc,inquireflag);
+    // Serialize the Attribute hierarchy
+    for (i=0; i<attrList.size(); i++)
+        attrList.at(i)->ESMC_SerializeCC(buffer,length,offset,cc,inquireflag);
   
-      for (i=0; i<packList.size(); i++)
-          packList.at(i)->ESMC_SerializeCC(buffer,length,offset,cc,inquireflag);
+    for (i=0; i<packList.size(); i++)
+        packList.at(i)->ESMC_SerializeCC(buffer,length,offset,cc,inquireflag);
   
 /*      for (i=0; i<linkList.size(); i++)
           linkList.at(i)->ESMC_SerializeCC(buffer,length,offset,cc,inquireflag); */
   
-      // make sure offset is aligned correctly
-      nbytes=offset%8;
-      if (nbytes!=0) offset += 8-nbytes;
-      
-      // check if buffer has enough free memory, expand?
-      if (inquireflag != ESMF_INQUIREONLY) {
-        if (*length < offset){
-          ESMC_LogDefault.MsgFoundError(ESMC_RC_MEM_ALLOCATE, 
-            "Buffer too short to add an Attribute hierarchy", ESMC_CONTEXT,
-            &localrc);
-          return localrc;
-        }
+    // make sure offset is aligned correctly
+    nbytes=offset%8;
+    if (nbytes!=0) offset += 8-nbytes;
+
+    // check if buffer has enough free memory, expand?
+    if (inquireflag != ESMF_INQUIREONLY) {
+      if (*length < offset){
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_MEM_ALLOCATE,
+          "Buffer too short to add an Attribute hierarchy", ESMC_CONTEXT,
+          &localrc);
+        return localrc;
       }
+    }
       
-    // Undefine serialization macros, so they don't cause troubles elsewhere
+// Undefine serialization macros, so they don't cause troubles elsewhere
 #undef SERIALIZE_VAR
 #undef SERIALIZE_VARC
 
-  // return successfully
-  return ESMF_SUCCESS;
+    // return successfully
+    return ESMF_SUCCESS;
 
- } // end ESMC_SerializeCC
+    } // end ESMC_SerializeCC
 //-----------------------------------------------------------------------------
 
 } // namespace ESMCI

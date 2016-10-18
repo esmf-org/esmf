@@ -10,7 +10,7 @@ Table of Contents
 Welcome to ESMPy - The ESMF Python Interface!
 
 .. toctree::
-    :maxdepth: 3
+    :maxdepth: 4
 
     intro
     install

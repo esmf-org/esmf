@@ -273,10 +273,12 @@ program ESMF_VMAllToAllUTest
 
   deallocate(r4array1)
   deallocate(r4array2)
+  deallocate(r4array2_expected)
   deallocate(r4array3)
 
   deallocate(r8array1)
   deallocate(r8array2)
+  deallocate(r8array2_expected)
   deallocate(r8array3)
 
 end program ESMF_VMAllToAllUTest

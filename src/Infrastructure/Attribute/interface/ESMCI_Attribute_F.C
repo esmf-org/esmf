@@ -3629,6 +3629,7 @@ extern "C" {
       ESMCI::VM **vm,           // in - VM that this Attribute lives on
       int *rootList,            // in - root PET list
       int *count,               // in - count of rootList
+      ESMC_Logical *reconcile,  // in - reconcile flag
       int *rc) {                // in - return code
 // 
 // !DESCRIPTION:
@@ -3638,7 +3639,8 @@ extern "C" {
 
   int status;
   vector<ESMC_I4> rootListl;
-  
+  bool local_reconcile;
+
   // Initialize return code; assume routine not implemented
   if (rc) *rc = ESMC_RC_NOT_IMPL;
 
@@ -3661,8 +3663,12 @@ extern "C" {
   for (unsigned int i=0; i<*count; ++i)
     rootListl.push_back(rootList[i]);
 
+  // reconcile
+  if (*reconcile == ESMF_TRUE) local_reconcile = true;
+  else local_reconcile = false;
+
   // Update the Attribute
-  status = (**base).root.AttributeUpdate(*vm, rootListl);
+  status = (**base).root.AttributeUpdate(*vm, rootListl, local_reconcile);
   ESMC_LogDefault.MsgFoundError(status, ESMCI_ERR_PASSTHRU,
     ESMC_CONTEXT, ESMC_NOT_PRESENT_FILTER(rc));
 

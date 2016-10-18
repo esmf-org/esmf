@@ -513,9 +513,7 @@ int LogErr::Set(
     rc = ESMC_RC_NOT_IMPL;
     
     // cast flush to bool
-    bool lflush = false;
-    
-    lflush = static_cast<bool> (flush);
+    ESMC_Logical lflush = (flush != 0)?ESMF_TRUE:ESMF_FALSE;
 
     if (ESMC_LogDefault.logtype == ESMC_LOGKIND_NONE) return ESMF_SUCCESS;
     FTN_X(f_esmf_logset)(&lflush, &rc);

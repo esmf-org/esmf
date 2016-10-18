@@ -50,6 +50,7 @@ program ESMF_AttributeFBundleUTest
       ! local variables
       type(ESMF_FieldBundle) :: fieldbundle
       type(ESMF_Field)       :: ffb
+      type(ESMF_LocStream)   :: locstream
 
       ! macro variables
       AttributeTestVariablesMacro()
@@ -75,7 +76,10 @@ program ESMF_AttributeFBundleUTest
       
       ! field bundles
       fieldbundle = ESMF_FieldBundleCreate(name="fieldbundle", rc=rc)
-      
+
+      ! locstreams
+      locstream = ESMF_LocStreamCreate(20, rc=rc)
+
       if (rc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 !-------------------------------------------------------------------------

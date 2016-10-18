@@ -28,7 +28,7 @@ namespace ESMCI {
   bool is_outside_hex_sph3D_xyz(const double *hex_xyz, const double *pnt_xyz);
 
   bool calc_p_hex_sph3D_xyz(const double *hex_xyz, const double *pnt_xyz, double *p);
-
+ 
   bool invert_matrix_3x3(double m[], double m_inv[]);
 
   bool intersect_quad_with_line(const double *q, const double *l1, const double *l2, double *p,
@@ -54,7 +54,7 @@ namespace ESMCI {
   void get_elem_coords_and_ids(const MeshObj *elem, MEField<>  *cfield, int sdim, int max_num_nodes, int *num_nodes, double *coords, int *ids);
 
 
-  void remove_0len_edges3D(int *num_p, double *p, int *_first_remove_ind=NULL);
+   void remove_0len_edges3D(int *num_p, double *p, int *_first_remove_ind=NULL);
 
   void remove_0len_edges2D(int *num_p, double *p);
 
@@ -83,7 +83,7 @@ int calc_gc_parameters_quad(const double *pnt, double *pnt1, double *pnt2, doubl
                             double *p1, double *p2);
 
 int calc_gc_parameters_tri(const double *pnt, double *t1, double *t2, double *t3,
-                           double *p1, double *p2);
+                            double *p1, double *p2);
 
 //// Handy macros ////
 
