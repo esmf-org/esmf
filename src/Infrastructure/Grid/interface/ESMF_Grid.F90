@@ -2802,6 +2802,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             ESMF_CONTEXT, rcToReturn=rc)) return
 
        if (arbDimCount==0) then
+          ! no arbitrary distribution
           ! Create New Grid
           newGrid=ESMF_GridCreate(name=name, &
             coordTypeKind=coordTypeKind, &
@@ -2819,6 +2820,18 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
             ESMF_CONTEXT, rcToReturn=rc)) return
        else
+          ! arbitrary distribution
+          !TODO: there need to be two branches here, depending on the dimCount of the
+          !TODO: passed in DistGrid. If the dimCount equals the dimCount of the old grid,
+          !TODO: then a non-arbDist grid is going to be created here. This is basically what
+          !TODO: is being assumed with the one call below right now. However, the other case
+          !TODO: to cover is where the dimCount of the incoming DistGrid is smaller than
+          !TODO: the original grid dimCount. In that case the created Grid will also be arbDist
+          !TODO: which means we need to create it via the correctly overloaded GridCreate()
+          !TODO: that takes the indexArray, which really is minIndex, maxIndex. We don't currently
+          !TODO: have access to this info anylonger at this point. We need to start carrrying it 
+          !TODO: (probably in the Grid), in the future so that it is possible to create a Grid
+          !TODO: from a arbDist Grid.
           ! Create New Grid
           newGrid=ESMF_GridCreate(name=name, &
             coordTypeKind=coordTypeKind, &
@@ -2854,7 +2867,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                 ESMF_CONTEXT, rcToReturn=rc)) return
        enddo
 
-       ! Create Arraybundle
+       ! Create src Arraybundle
        ! Pull coord Arrays out of old grid and put them into Arraybundle
        ! for each staggerloc added above
        allocate(srcA(dimCount*nStaggers), dstA(dimCount*nStaggers))
@@ -2870,9 +2883,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         enddo
        enddo
        
-       
-       
-       
 !TODO: gjt: The following is completely hacked for now, just to get the 
 !TODO: gjt: demo working. Basically the problem is that we don't currently
 !TODO: gjt: support communication calls for Arrays with replicated dims.
@@ -2882,7 +2892,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !TODO: gjt: From there it is finally copied into the 1D replicated dst side 
 !TODO: gjt: coordinate Arrays. - nasty ha!
        
-       ! construct temporary 2D Arrays and fill with data if necessary
+       ! construct temporary 2D src Arrays and fill with data if necessary
        do k=1, dimCount*nStaggers
           call ESMF_ArrayGet(srcA(k), rank=rank, dimCount=arrayDimCount, &
             localDECount=localDECount, rc=localrc)          
@@ -2935,7 +2945,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             ESMF_CONTEXT, rcToReturn=rc)) return
             
 
-       ! Create 2nd Arraybundle
+       ! Create dst Arraybundle
        ! Pull coord Arrays out of new grid and put them into Arraybundle
        ! for each staggerloc added above
        do i=1,dimCount
