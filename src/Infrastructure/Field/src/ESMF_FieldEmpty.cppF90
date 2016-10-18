@@ -2412,7 +2412,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 @\
     !  link the Attribute hierarchies @\
     linkChange = ESMF_TRUE @\
-    call c_ESMC_AttributeLink(field%ftypep%base, geombase, linkChange, localrc) @\
+    call c_ESMC_AttributeLink(field%ftypep%base, locstream%lstypep%base, linkChange, localrc) @\
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
                     ESMF_CONTEXT, rcToReturn=rc))  return @\
 @\
@@ -2551,7 +2551,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 @\
     !  link the Attribute hierarchies @\
     linkChange = ESMF_TRUE @\
-    call c_ESMC_AttributeLink(field%ftypep%base, geombase, linkChange, localrc) @\
+    call c_ESMC_AttributeLink(field%ftypep%base, locstream%lstypep%base, linkChange, localrc) @\
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
                     ESMF_CONTEXT, rcToReturn=rc))  return @\
 @\
@@ -4500,7 +4500,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
   ! link the Attribute hierarchies
   linkChange = ESMF_TRUE
-  call c_ESMC_AttributeLink(field%ftypep%base, locstream, linkChange, localrc)
+  call c_ESMC_AttributeLink(field%ftypep%base, locstream%lstypep%base, linkChange, localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rcToReturn=rc))  return
 
