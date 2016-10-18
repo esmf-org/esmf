@@ -4063,7 +4063,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
       !  link the Attribute hierarchies
       linkChange = ESMF_TRUE
-      call c_ESMC_AttributeLink(btype%base, locstream, linkChange, status)
+      call c_ESMC_AttributeLink(btype%base, locstream%lstypep%base, linkChange, status)
       if (ESMF_LogFoundError(status, ESMF_ERR_PASSTHRU, &
                     ESMF_CONTEXT, rcToReturn=rc))  return
 
