@@ -3457,9 +3457,9 @@ function ESMF_MeshCreateCubedSphere(tileSize, nx, ny, filename, rc)
   start_lat=-91.0
   end_lat = 91.0
   
-!  call c_ESMC_ClumpPntsLL(totalNodes, reshape(lonEdge, (/totalnodes/)), reshape(latEdge, (/totalnodes/)), &
-!                         TOL, map, uniquenodes, &
-!                         maxDuplicate, start_lat, end_lat, rc)
+  call c_ESMC_ClumpPntsLL(totalNodes, reshape(lonEdge, (/totalnodes/)), reshape(latEdge, (/totalnodes/)), &
+                         TOL, map, uniquenodes, &
+                         maxDuplicate, start_lat, end_lat, rc)
 
   allocate(firstowners(uniquenodes), recvbuf(uniquenodes))
 

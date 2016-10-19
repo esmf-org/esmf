@@ -29,6 +29,7 @@
 #include "ESMCI_VM.h"
 #include "ESMCI_CoordSys.h"
 #include "Mesh/include/ESMCI_MeshCap.h"
+#include "Mesh/include/ESMCI_ClumpPnts.h"
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
@@ -83,6 +84,26 @@ extern "C" void FTN_X(c_esmc_meshinit)(char *logfile, int *use_log,
 
 }
 #endif
+
+extern "C" void FTN_X(c_esmc_clumppntsll)(int *num_pnt, double *pnt_lon, double *pnt_lat, 
+                                        double *tol, int *pnt_cl_ind,int *num_cl, 
+                                        int *max_size_cl, 
+                                        double *start_lat, double *end_lat, int *rc) 
+{
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_clumppntsll()"
+
+  double *cl_lon, *cl_lat;
+
+  ESMCI::ClumpPntsLL(*num_pnt, pnt_lon, pnt_lat, 
+                     *tol, pnt_cl_ind, num_cl, 
+                     &cl_lon, &cl_lat, max_size_cl, 
+                     *start_lat, *end_lat, rc) ;
+
+  delete [] cl_lon;
+  delete [] cl_lat;
+
+}
 
 extern "C" void FTN_X(c_esmc_meshcreate)(MeshCap **meshpp,
                                          int *pdim, int *sdim, 
