@@ -10,7 +10,7 @@
 !
 !==============================================================================
 !
-program ESMF_AttributeFieldUTest
+program ESMF_AttributeAutoLinkUTest
 
 !------------------------------------------------------------------------------
 ! INCLUDES
@@ -19,11 +19,11 @@ program ESMF_AttributeFieldUTest
 !
 !==============================================================================
 !BOP
-! !PROGRAM: ESMF_AttributeFieldUTest - Attribute Field Unit Tests
+! !PROGRAM: ESMF_AttributeAutoLinkUTest - Attribute Tests
 !
 ! !DESCRIPTION:
 !
-! The code in this file drives F90 Attribute Field unit tests.
+! The code in this file drives F90 Attribute tests.
 ! The companion file ESMF\_Attribute.F90 contains the definitions for the
 ! Attribute methods.
 !
@@ -48,9 +48,11 @@ program ESMF_AttributeFieldUTest
       integer :: result = 0
 
       ! local variables
-      type(ESMF_Grid)  :: grid
-      type(ESMF_Field) :: field
-      type(ESMF_LocStream) :: locstream
+      type(ESMF_Field)       :: field
+      type(ESMF_FieldBundle) :: fieldbundle
+      type(ESMF_State)       :: state, state2
+      type(ESMF_LocStream)   :: locstream
+      integer                :: linkcount
 
       ! macro variables
       AttributeTestVariablesMacro()
@@ -71,119 +73,140 @@ program ESMF_AttributeFieldUTest
 
       !------------------------------------------------------------------------
       ! preparations
-      ! fields
-      field = ESMF_FieldEmptyCreate(name="field", rc=rc)
-      grid = ESMF_GridEmptyCreate(rc=rc)
       locstream = ESMF_LocStreamCreate(20, rc=rc)
+      field = ESMF_FieldCreate(locstream, ESMF_TYPEKIND_R8, name="field", rc=rc)
+      fieldbundle = ESMF_FieldBundleCreate(fieldList=(/field/), &
+                                           name="fieldbundle", rc=rc)
+      state = ESMF_StateCreate(name="state", rc=rc)
+      state2 = ESMF_StateCreate(name="state2", rc=rc)
 
-!-------------------------------------------------------------------------
-!  FIELD
-!-------------------------------------------------------------------------
-    
-AttributeTestMacro(field, a Field, EX_UTest, NEX_UTest)
-
-    !-------------------------------------------------------------------------
-    !  Attribute hierarchy linking
-    !-------------------------------------------------------------------------
-
-      !NEX_UTest
-      ! Link a Field Attribute hierarchy to a Grid Attribute hierarchy Field Test
-      call ESMF_AttributeLink(field, grid, rc=rc)
-      write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Linking a Field hierarchy to a Grid hierarchy Test"
-      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-      !------------------------------------------------------------------------
-
-      !NEX_UTest
-      ! Link a Field Attribute hierarchy to a Grid Attribute hierarchy 2 Field Test
-      call ESMF_AttributeLink(field, grid, rc=rc)
-      write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Linking a Field hierarchy to a Grid hierarchy 2 Test"
-      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-      !------------------------------------------------------------------------
-
-      !NEX_UTest
-      ! Unlink a Field Attribute hierarchy from a Grid Attribute hierarchy Field Test
-      call ESMF_AttributeLinkRemove(field, grid, rc=rc)
-      write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Unlinking a Field hierarchy from a Grid hierarchy Test"
-      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-      !------------------------------------------------------------------------
-
-      !NEX_UTest
-      ! Unlink a Field Attribute hierarchy from a Grid Attribute hierarchy 2 Field Test
-      call ESMF_AttributeLinkRemove(field, grid, rc=rc)
-      write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Unlinking a Field hierarchy from a Grid hierarchy 2 Test"
-      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-      !------------------------------------------------------------------------
-
-      !NEX_UTest
-      ! Unlink a Field Attribute hierarchy from a Grid Attribute hierarchy 3 Field Test
-      call ESMF_AttributeLinkRemove(field, grid, rc=rc)
-      write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Unlinking a Field hierarchy from a Grid hierarchy 3 Test"
-      call ESMF_Test((rc/=ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-      !------------------------------------------------------------------------
-
-^ifdef ESMF_TESTEXHAUSTIVE
+      if (rc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
     !-------------------------------------------------------------------------
     !  Attribute hierarchy linking
     !-------------------------------------------------------------------------
 
-      !EX_UTest
-      ! Link a Field Attribute hierarchy to a LocStream Attribute hierarchy Field Test
-      call ESMF_AttributeLink(field, locStream, rc=rc)
+      !NEX_UTest
+      ! Link a State Attribute hierarchy to a Field Attribute hierarchy State Test
+      call ESMF_StateAdd(state, (/field/), rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Linking a Field hierarchy to a LocStream hierarchy Test"
+      write(name, *) "Linking a State hierarchy to a Field hierarchy Test"
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
-      !EX_UTest
-      ! Link a Field Attribute hierarchy to a LocStream Attribute hierarchy 2 Field Test
-      call ESMF_AttributeLink(field, locStream, rc=rc)
+      !NEX_UTest
+      ! Check Attribute link count
+      call ESMF_AttributeGet(state, count=linkcount, &
+                             attcountflag=ESMF_ATTGETCOUNT_ATTLINK, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Linking a Field hierarchy to a LocStream hierarchy 2 Test"
+      write(name, *) "Check the Attribute link count"
+      call ESMF_Test(((rc==ESMF_SUCCESS) &
+                     .and. (linkcount == 1)), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      !NEX_UTest
+      ! Link a State Attribute hierarchy to a FieldBundle Attribute hierarchy State Test
+      call ESMF_StateAdd(state, (/fieldbundle/), rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Linking a State hierarchy to a FieldBundle hierarchy Test"
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
-      !EX_UTest
-      ! Unlink a Field Attribute hierarchy from a LocStream Attribute hierarchy Field Test
-      call ESMF_AttributeLinkRemove(field, locStream, rc=rc)
+      !NEX_UTest
+      ! Check Attribute link count
+      call ESMF_AttributeGet(state, count=linkcount, &
+                             attcountflag=ESMF_ATTGETCOUNT_ATTLINK, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Unlinking a Field hierarchy from a LocStream hierarchy Test"
+      write(name, *) "Check the Attribute link count"
+      call ESMF_Test(((rc==ESMF_SUCCESS) &
+                     .and. (linkcount == 2)), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      !NEX_UTest
+      ! Link a State Attribute hierarchy to a State Attribute hierarchy State Test
+      call ESMF_StateAdd(state, (/state2/), rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Linking a State hierarchy to a State hierarchy Test"
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
-      !EX_UTest
-      ! Unlink a Field Attribute hierarchy from a LocStream Attribute hierarchy 2 Field Test
-      call ESMF_AttributeLinkRemove(field, locStream, rc=rc)
+      !NEX_UTest
+      ! Check Attribute link count
+      call ESMF_AttributeGet(state, count=linkcount, &
+                             attcountflag=ESMF_ATTGETCOUNT_ATTLINK, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Unlinking a Field hierarchy from a LocStream hierarchy 2 Test"
+      write(name, *) "Check the Attribute link count"
+      call ESMF_Test(((rc==ESMF_SUCCESS) &
+                     .and. (linkcount == 3)), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      !NEX_UTest
+      ! Unlink a State Attribute hierarchy from a State Attribute hierarchy State Test
+      call ESMF_StateRemove(state, (/"state2"/), rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Unlinking a State hierarchy to a State hierarchy Test"
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
-      !EX_UTest
-      ! Unlink a Field Attribute hierarchy from a LocStream Attribute hierarchy 3 Field Test
-      call ESMF_AttributeLinkRemove(field, locStream, rc=rc)
+      !NEX_UTest
+      ! Check Attribute link count
+      call ESMF_AttributeGet(state, count=linkcount, &
+                             attcountflag=ESMF_ATTGETCOUNT_ATTLINK, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Unlinking a Field hierarchy from a LocStream hierarchy 3 Test"
-      call ESMF_Test((rc/=ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      write(name, *) "Check the Attribute link count"
+      call ESMF_Test(((rc==ESMF_SUCCESS) &
+                     .and. (linkcount == 2)), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
-^endif
+      !NEX_UTest
+      ! Unlink a State Attribute hierarchy from a FieldBundle Attribute hierarchy State Test
+      call ESMF_StateRemove(state, (/"fieldbundle"/), rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Unlinking a State hierarchy to a State hierarchy Test"
+      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      !NEX_UTest
+      ! Check Attribute link count
+      call ESMF_AttributeGet(state, count=linkcount, &
+                             attcountflag=ESMF_ATTGETCOUNT_ATTLINK, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Check the Attribute link count"
+      call ESMF_Test(((rc==ESMF_SUCCESS) &
+                     .and. (linkcount == 1)), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      !NEX_UTest
+      ! Unlink a State Attribute hierarchy from a Field Attribute hierarchy State Test
+      call ESMF_StateRemove(state, (/"field"/), rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Unlinking a State hierarchy to a State hierarchy Test"
+      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      !NEX_UTest
+      ! Check Attribute link count
+      call ESMF_AttributeGet(state, count=linkcount, &
+                             attcountflag=ESMF_ATTGETCOUNT_ATTLINK, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Check the Attribute link count"
+      call ESMF_Test(((rc==ESMF_SUCCESS) &
+                     .and. (linkcount == 0)), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
 
       !------------------------------------------------------------------------
       ! clean up
-      call ESMF_FieldDestroy(field, rc=rc)
-      call ESMF_GridDestroy(grid, rc=rc)
       call ESMF_LocStreamDestroy(locstream, rc=rc)
-
+      call ESMF_FieldDestroy(field, rc=rc)
+      call ESMF_FieldBundleDestroy(fieldbundle, rc=rc)
+      call ESMF_StateDestroy(state, rc=rc)
+      call ESMF_StateDestroy(state2, rc=rc)
+     
       if (rc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   !-----------------------------------------------------------------------------
   call ESMF_TestEnd(ESMF_SRCLINE)
   !-----------------------------------------------------------------------------
   
-end program ESMF_AttributeFieldUTest
+end program ESMF_AttributeAutoLinkUTest

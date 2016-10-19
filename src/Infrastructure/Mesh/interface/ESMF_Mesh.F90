@@ -52,7 +52,7 @@ module ESMF_MeshMod
   use ESMF_IOScripMod
   use ESMF_IOUGridMod
   use ESMF_ArrayMod
-
+  use ESMF_UtilCubedSphereMod
   implicit none
 
 !------------------------------------------------------------------------------
@@ -189,7 +189,7 @@ module ESMF_MeshMod
   public ESMF_MeshSetMOAB
   public ESMF_MeshGetIntPtr
   public ESMF_MeshCreateFromIntPtr
-
+  public ESMF_MeshCreateCubedSphere
 !EOPI
 !------------------------------------------------------------------------------
 
@@ -3327,6 +3327,238 @@ end function ESMF_MeshCreateRedist
 end function ESMF_MeshCreateDual
 !------------------------------------------------------------------------------
 
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_MeshCreateCubedSphere"
+  
+function ESMF_MeshCreateCubedSphere(tileSize, nx, ny, filename, rc)
+
+! !RETURN VALUE:
+    type(ESMF_Mesh)         :: ESMF_MeshCreateCubedSphere
+
+! !ARGUMENTS:
+    integer,                  intent(in)            :: tileSize
+    integer,                  intent(in)            :: nx 
+    integer,                  intent(in)            :: ny
+    character(len=*),         optional              :: filename
+    integer,                  intent(out),optional  :: rc
+
+  type(ESMF_Mesh)       :: mesh
+  type(ESMF_VM)         :: vm
+  integer               :: PetNo, PetCnt
+  integer, parameter    :: f_p = selected_real_kind(15)   ! double precision
+  real,  parameter      :: pi = 3.1415926
+  real , parameter      :: todeg = 180.0/pi          ! convert to degrees
+  real(ESMF_KIND_R8), allocatable :: lonEdge(:,:), latEdge(:,:)
+  real(ESMF_KIND_R8), allocatable :: NodeCoords(:), CenterCoords(:)
+  real(ESMF_KIND_R8), allocatable :: lonCenter(:,:), latCenter(:,:)
+  integer, allocatable  :: ElemIds(:), NodeIds(:)
+  integer, allocatable  :: ElemType(:)
+  integer, allocatable  :: ElemConn(:)
+  integer, allocatable  :: NodeOwners(:)
+  integer               :: sizei, sizej, starti, startj, tile
+  integer               :: rem, rem1, rem2, ind
+  integer               :: i, j, k, kk
+  integer               :: localNodes, localElems
+  integer               :: totalNodes
+  integer, allocatable  :: firstOwners(:), recvbuf(:), map(:)
+  integer               :: maxDuplicate, uniquenodes
+  integer               :: localrc
+  real(ESMF_KIND_R8)    :: start_lat, end_lat, TOL
+  real(ESMF_KIND_R8)    :: starttime, endtime
+  character(len=80)     :: filename1
+  integer               :: start(2), count(2)
+
+  ! get global vm information
+  !
+  call ESMF_VMGetCurrent(vm, rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+
+  ! set up local pet info
+  call ESMF_VMGet(vm, localPet=PetNo, petCount=PetCnt, rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (nx * ny * 6 /= PetCnt) then
+       call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
+                             msg="nx * ny does not equal to the total number of PETs", & 
+                             ESMF_CONTEXT, rcToReturn=rc) 
+  endif    
+
+  ! Distribute center coordinates according to the nx/ny decomposition
+#if 0
+  xsize = tileSize/nx
+  ysize = tileSize/ny
+  starty = ysize*(PetNo/nx)+1
+  startx = xsize*mod(PetNo,nx)+1
+  tile = (starty-1)/tilesize
+#endif
+    ! use actual cubed sphere coordiantes
+    tile = PetNo/(nx*ny)+1
+    rem = mod(PetNo,nx*ny)
+    sizei = tileSize/nx
+    sizej = tileSize/ny
+    rem1 = mod(tileSize, nx)
+    rem2 = mod(tileSize, ny)
+    ind = mod(rem,nx)
+    if (rem1 > 0) then
+       if (ind < rem1) then
+         sizei=sizei+1
+         starti=sizei*ind+1
+       else
+         starti=sizei*ind+rem1+1
+       endif
+    else
+       starti = sizei*ind+1
+    endif
+    ind = rem/nx
+    if (rem2 > 0) then
+       if (ind < rem2) then
+         sizej=sizej+1
+         startj=sizej*ind+1
+       else
+         startj=sizej*ind+rem2+1
+       endif
+    else
+       startj = sizej*ind+1
+    endif
+    !print *, PetNo, 'block:', starti, startj, sizei, sizej, tile
+
+  allocate(lonEdge(tileSize+1, (tileSize+1)*6),latEdge(tileSize+1, (tileSize+1)*6))
+  allocate(lonCenter(sizei,sizej),latCenter(sizei, sizej))
+
+  start(1)=starti
+  start(2)=startj
+  count(1)=sizei
+  count(2)=sizej
+
+  call ESMF_VMWtime(starttime, rc=rc)
+  ! Generate glocal edge coordinates and local center coordinates
+  call ESMF_UtilCreateCSCoords(tileSize, lonEdge, latEdge, start=start, count=count, &
+       lonCenter=lonCenter, latCenter=latCenter)
+  call ESMF_VMWtime(endtime, rc=rc)
+  
+  print *, 'Create CS size ', tileSize, 'in', (endtime-starttime)*1000.0, ' msecs'
+
+  totalnodes = (tileSize+1)*(tileSize+1)*6
+
+  ! convert radius to degrees
+  lonEdge = lonEdge * todeg
+  latEdge = latEdge * todeg
+  lonCenter = lonCenter * todeg
+  latCenter = latCenter * todeg
+
+  ! Create a mesh 
+  mesh = ESMF_MeshCreate(2, 2, coordSys=ESMF_COORDSYS_SPH_DEG, rc=localrc)
+  
+  !Find unique set of node coordinates
+  allocate(map(totalnodes))
+  TOL=0.0000000001
+  start_lat=-91.0
+  end_lat = 91.0
+  
+!  call c_ESMC_ClumpPntsLL(totalNodes, reshape(lonEdge, (/totalnodes/)), reshape(latEdge, (/totalnodes/)), &
+!                         TOL, map, uniquenodes, &
+!                         maxDuplicate, start_lat, end_lat, rc)
+
+  allocate(firstowners(uniquenodes), recvbuf(uniquenodes))
+
+  ! Global ID for the elements and the nodes using its 2D index: (y-1)*tileSize+x
+  ! for nodes shared by multiple PETs, the PET with smaller rank will own the
+  ! nodes.
+  ! there won't be duplicate nodes in the local block, so localNodes will be the same as before
+  localNodes = (sizei+1)*(sizej+1)
+  localElems = sizei*sizej
+  allocate(NodeIds(localNodes), nodeCoords(localNodes*2), nodeOwners(localNodes))
+  
+  k=1 
+  firstOwners = PetCnt+1
+  nodeOwners = PetNo
+  do j=startj+tile,sizej+startj+tile
+     do i=starti,sizei+starti
+        !use the new index to the unique set of nodes
+        kk = (j-1)*(tileSize+1)+i
+        NodeIds(k) = map(kk)+1
+        firstOwners(map(kk)+1)=PetNo       
+        nodeCoords(k*2-1) = lonEdge(i,j)
+        nodeCoords(k*2) = latEdge(i,j)
+        k=k+1
+     enddo
+  enddo
+
+  ! global minimum of firstOwners to find the owner of the nodes (use the smallest PetNo)
+  call ESMF_VMAllReduce(vm, firstOwners, recvbuf, uniquenodes, &
+       ESMF_REDUCE_MIN, rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+  k=1
+  do j=startj+tile,sizej+startj+tile
+     do i=starti,sizei+starti
+        !use the new index to the unique set of nodes
+         kk = (j-1)*(tileSize+1)+i
+         nodeOwners(k)=recvbuf(map(kk)+1)
+         k=k+1
+     enddo
+  enddo
+
+  deallocate(firstOwners, recvbuf, map)
+
+  call ESMF_MeshAddNodes(mesh, NodeIds=NodeIds, &
+       NodeCoords = NodeCoords, NodeOwners = NodeOwners, &
+       rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+
+  deallocate(NodeIds, NodeCoords, NodeOwners)
+
+  ! Add elements -- allocate arrays
+  allocate(ElemIds(localElems), ElemConn(localElems*4), ElemType(localElems))
+  allocate(centerCoords(localElems*2))
+  ! Set values:  ElemIds are global, ElemConn uses localNode IDs
+  ElemType = ESMF_MESHELEMTYPE_QUAD
+
+  k=1
+  kk=1
+
+  do j=1,sizej
+     do i=1,sizei
+        ElemIds(k) = (j-1)*(tileSize)+i
+        centerCoords(k*2-1) = lonCenter(i,j)
+        centerCoords(k*2) = latCenter(i,j)
+        ! Set the connection using local node ID, counter clockwize
+        ElemConn(k*4-3)=kk
+        ElemConn(k*4-2)=kk+1
+        ElemConn(k*4-1)=kk+1+(sizei+1)
+        ElemConn(k*4)=kk+(sizei+1)
+        k=k+1
+        kk=kk+1
+     enddo
+     kk=kk+1
+  enddo
+  
+  call ESMF_MeshAddElements(mesh, ElemIds, ElemType, ElemConn, &
+                 elementCoords=centerCoords, rc=localrc)
+
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+
+  deallocate(ElemIds, ElemConn, ElemType, centerCoords)
+
+#if 0
+  if (present(filename)) then
+    if (PetNo==0) then
+       call WriteCSMesh(filename, tileSize, lonEdge, latEdge, lonCenter, latCenter)
+    endif
+  endif
+#endif
+
+  deallocate(lonEdge, latEdge, lonCenter, latCenter)
+
+  ESMF_MeshCreateCubedSphere = mesh
+  rc=ESMF_SUCCESS
+
+end function ESMF_MeshCreateCubedSphere
+! -----------------------------------------------------------------------------
 
 
 

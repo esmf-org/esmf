@@ -4033,6 +4033,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
       integer :: status                           ! Error status
       type(ESMF_FieldBundleType), pointer :: btype     ! internal data
+      type(ESMF_Logical) :: linkChange
 
       ! Initialize return code; assume routine not implemented
       status = ESMF_RC_NOT_IMPL
@@ -4053,12 +4054,18 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       endif
 
        ! Create the geombase around the locstream
-       btype%geombase=ESMF_GeomBaseCreate(locstream,rc=status)
+       btype%geombase=ESMF_GeomBaseCreate(locstream, rc=status)
        if (ESMF_LogFoundError(status, ESMF_ERR_PASSTHRU, &
                     ESMF_CONTEXT, rcToReturn=rc))  return
 
       ! Set Status to containing a Geombase
       btype%status = ESMF_FBSTATUS_GRIDSET
+
+      !  link the Attribute hierarchies
+      linkChange = ESMF_TRUE
+      call c_ESMC_AttributeLink(btype%base, locstream%lstypep%base, linkChange, status)
+      if (ESMF_LogFoundError(status, ESMF_ERR_PASSTHRU, &
+                    ESMF_CONTEXT, rcToReturn=rc))  return
 
       if (present(rc)) rc = ESMF_SUCCESS
 
@@ -5440,8 +5447,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords for t
       type(ESMF_AttReconcileFlag) :: lattreconflag
       type(ESMF_Grid) :: grid
       type(ESMF_GeomType_Flag) :: geomtype
-      type(ESMF_Logical) :: linkChange
       type(ESMF_Field), pointer :: flist(:)
+      type(ESMF_Logical) :: linkChange
 
       ! Initialize return code; assume routine not implemented
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -5500,7 +5507,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords for t
         if (ESMF_LogFoundError(localrc, &
           ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
-        if(geomtype == ESMF_GEOMTYPE_GRID) then
+        if((geomtype == ESMF_GEOMTYPE_GRID) .or. &
+           (geomtype == ESMF_GEOMTYPE_LOCSTREAM)) then
           call ESMF_GeomBaseGet(bp%geombase, grid=grid, rc=localrc)
           if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &

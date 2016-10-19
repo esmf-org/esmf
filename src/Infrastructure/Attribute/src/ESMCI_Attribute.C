@@ -3256,9 +3256,9 @@ if (attrRoot == ESMF_TRUE) {
 
   // Initialize local return code; assume routine not implemented
   localrc = ESMC_RC_NOT_IMPL;
-    
+
   for (i=0; i<linkList.size(); i++) {
-    if (destination->attrBase->ESMC_BaseGetID() == 
+    if (destination->attrBase->ESMC_BaseGetID() ==
         linkList.at(i)->attrBase->ESMC_BaseGetID() &&
         ESMCI::VMIdCompare(destination->attrBase->ESMC_BaseGetVMId(),
         linkList.at(i)->attrBase->ESMC_BaseGetVMId())) {
