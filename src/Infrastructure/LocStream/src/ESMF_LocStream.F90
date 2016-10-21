@@ -1462,10 +1462,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       endif
 
       if (actualFlag) then
-        ! only actual member PETs actually create a LocStream object
+        ! only actual member PETs worry about the DistGrid
       
         ! Make sure DistGrid is 1D
-         call ESMF_DistGridGet(distgrid, dimCount=dimCount, rc=localrc)
+        call ESMF_DistGridGet(distgrid, dimCount=dimCount, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rcToReturn=rc)) return
@@ -1475,61 +1475,64 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             ESMF_CONTEXT, rcToReturn=rc)) return
         endif
 
-        ! Set defaults
-        if (present(indexflag)) then
-          indexflagLocal=indexflag
-        else
-          indexflagLocal=ESMF_INDEX_DELOCAL
-        endif
-
-        if (present(coordSys)) then
-          coordSysLocal=coordSys
-        else
-          coordSysLocal=ESMF_COORDSYS_SPH_DEG
-        endif
-
-        ! Initialize pointers
-        nullify(lstypep)
-        nullify(ESMF_LocStreamCreateFromDG%lstypep)
-
-        ! allocate LocStream type
-        allocate(lstypep, stat=localrc)
-        if (ESMF_LogFoundAllocError(localrc, msg="Allocating LocStream type object", &
-                                     ESMF_CONTEXT, rcToReturn=rc)) return
-
-
-        ! Allocate space for keys
-        nullify(lstypep%keyNames)
-        nullify(lstypep%keyUnits)
-        nullify(lstypep%keyLongNames)
-        nullify(lstypep%keys)
-        nullify(lstypep%destroyKeys)
-
-        ! Set some remaining info into the struct      
-        lstypep%indexflag=indexflagLocal
-        lstypep%coordSys=coordSysLocal
-        lstypep%destroyDistgrid=.false.
-        lstypep%distgrid=distgrid
-        lstypep%keyCount=0
-
-        ! set Name
-        call ESMF_BaseCreate(lstypep%base,"LocStream",name,0,rc=localrc)       
-        if (ESMF_LogFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rcToReturn=rc)) return
-
-        ! Set pointer to internal locstream type
-        locstream%lstypep=>lstypep
-
-        ! Set return value.
-        ESMF_LocStreamCreateFromDG=locstream
-      
-        ! Add reference to this object into ESMF garbage collection table
-        ! Only call this in those Create() methods that do not call other LSCreate()
-        call c_ESMC_VMAddFObject(locstream, &
-          ESMF_ID_LOCSTREAM%objectID)
-        
       endif
+
+      ! Initialize pointers
+      nullify(lstypep)
+      nullify(ESMF_LocStreamCreateFromDG%lstypep)
+
+      ! allocate LocStream type
+      allocate(lstypep, stat=localrc)
+      if (ESMF_LogFoundAllocError(localrc, msg="Allocating LocStream type object", &
+                                   ESMF_CONTEXT, rcToReturn=rc)) return
+
+      ! Initialize key member variables
+      nullify(lstypep%keyNames)
+      nullify(lstypep%keyUnits)
+      nullify(lstypep%keyLongNames)
+      nullify(lstypep%keys)
+      nullify(lstypep%destroyKeys)
+
+      ! Set defaults
+      if (present(indexflag)) then
+        indexflagLocal=indexflag
+      else
+        indexflagLocal=ESMF_INDEX_DELOCAL
+      endif
+
+      if (present(coordSys)) then
+        coordSysLocal=coordSys
+      else
+        coordSysLocal=ESMF_COORDSYS_SPH_DEG
+      endif
+      
+      ! Set some remaining info into the struct      
+      lstypep%indexflag=indexflagLocal
+      lstypep%coordSys=coordSysLocal
+      lstypep%destroyDistgrid=.false.
+      lstypep%keyCount=0
+
+      if (actualFlag) then
+        ! only actual member PETs set distgrid
+        lstypep%distgrid=distgrid
+      endif
+
+      ! set Name
+      call ESMF_BaseCreate(lstypep%base,"LocStream",name,0,rc=localrc)       
+      if (ESMF_LogFoundError(localrc, &
+                              ESMF_ERR_PASSTHRU, &
+                              ESMF_CONTEXT, rcToReturn=rc)) return
+
+      ! Set pointer to internal locstream type
+      locstream%lstypep=>lstypep
+
+      ! Set return value.
+      ESMF_LocStreamCreateFromDG=locstream
+      
+      ! Add reference to this object into ESMF garbage collection table
+      ! Only call this in those Create() methods that do not call other LSCreate()
+      call c_ESMC_VMAddFObject(locstream, &
+        ESMF_ID_LOCSTREAM%objectID)
 
       ! set init status to created
       ESMF_INIT_SET_CREATED(ESMF_LocStreamCreateFromDG)
