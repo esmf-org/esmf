@@ -4720,6 +4720,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer, allocatable :: collocation(:)
     logical  :: arbSeqIndexFlag
     type(ESMF_DELayout) :: delayout
+    integer   :: seqIndex, stride
 
     ! Initialize return code; assume failure until success is certain
     localrc = ESMF_RC_NOT_IMPL
@@ -4829,15 +4830,16 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     !! the input localArbIndex
     do i=1,localCounts
       !! make it 0-based first before calculations
-      local1DIndices(i)=local1DIndices(i)-1
-      if (distDimCount >= 2) then
-        do j=distDimCount,2	
-          !! add 1 to make the result 1-based
-	  localArbIndex(i,j) = mod(local1DIndices(i),distSize(j))+1
-          local1DIndices(i)=local1DIndices(i)/distSize(j)
+      seqIndex=local1DIndices(i)-1
+      do j=distDimCount, 1, -1
+        stride=1
+        do k=1, j-1
+          stride = stride * distSize(k)
         enddo
-      endif    
-      localArbIndex(i,1) = local1DIndices(i)+1
+        localArbIndex(i,j) = seqIndex / stride
+        seqIndex = seqIndex - stride * localArbIndex(i,j)
+        localArbIndex(i,j) = localArbIndex(i,j) + minIndexLocal(distDimLocal(j))
+      enddo
     enddo
 
     localArbIndexArg = ESMF_InterfaceIntCreate(farray2D=localArbIndex, rc=localrc)

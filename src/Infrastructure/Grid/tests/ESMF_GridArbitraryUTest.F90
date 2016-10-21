@@ -115,36 +115,36 @@ program ESMF_GridArbitraryUTest
   if (myPet < halfPets) then
      ind1d = myPet*2
      do i=1,localCount,2
-       y = mod(ind1d,ydim)+1
        x = ind1d/ydim+1
-       localIndices(i,1)=y
-       localIndices(i,2)=x
+       y = mod(ind1d,ydim)+1
+       localIndices(i,1)=x
+       localIndices(i,2)=y
        if (y<ydim) then
-         localIndices(i+1,1)=y+1
-         localIndices(i+1,2)=x
+         localIndices(i+1,1)=x
+         localIndices(i+1,2)=y+1
        else
-         localIndices(i+1,1)=1
-         localIndices(i+1,2)=x+1
+         localIndices(i+1,1)=x+1
+         localIndices(i+1,2)=y
        endif
        ind1d = ind1d+petCount+halfPets
      enddo 
   else
      ind1d=myPet+halfPets
      do i=1,localCount
-       y = mod(ind1d,ydim)+1
        x = ind1d/ydim+1
-       localIndices(i,1)=y
-       localIndices(i,2)=x
+       y = mod(ind1d,ydim)+1
+       localIndices(i,1)=x
+       localIndices(i,2)=y
        ind1d = ind1d+petCount+halfPets
      enddo
   endif
   if (myPet == petCount-1) then
-    ind1d = total-remain+1
+    ind1d = total-remain
     do i=localCount-remain+1,localCount
-       y = mod(ind1d,ydim)+1
        x = ind1d/ydim+1
-       localIndices(i,1)=y
-       localIndices(i,2)=x
+       y = mod(ind1d,ydim)+1
+       localIndices(i,1)=x
+       localIndices(i,2)=y
        ind1d = ind1d+1
     enddo
   endif
