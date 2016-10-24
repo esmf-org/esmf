@@ -33,6 +33,7 @@
 #include "ESMCI_Base.h"
 
 // include higher level, 3rd party or system headers
+#include <iostream>
 #include <string.h>
 #include <stdlib.h>
 #include <vector>
@@ -623,6 +624,7 @@ static const char *const version = "$Id$";
     int *ip, i, nbytes;
     ESMC_Status *sp;
     ESMC_ProxyFlag *pfp;
+    ESMCI::VMId *vmIDp;
     char *cp;
     int localrc;
 
@@ -632,14 +634,20 @@ static const char *const version = "$Id$";
     ip = (int *)(buffer + *offset);
     ID = *ip++;
     refCount = *ip++;  
-    classID = *ip++;  
+    classID = *ip++;
+
     sp = (ESMC_Status *)ip;
     baseStatus = *sp++;
     status = *sp++;
+
     pfp = (ESMC_ProxyFlag *)sp;
     proxyflag = *pfp++;
     proxyflag = ESMF_PROXYYES;  // deserialize means this is a proxy object
-    cp = (char *)pfp;
+
+    vmIDp = (ESMCI::VMId *)pfp;
+    vmIDp++;
+
+    cp = (char *)vmIDp;
     memcpy(baseName, cp, ESMF_MAXSTR);
     cp += ESMF_MAXSTR;
     memcpy(baseNameF90, cp, ESMF_MAXSTR);
@@ -660,6 +668,58 @@ static const char *const version = "$Id$";
       localrc = root.ESMC_Deserialize(buffer,offset);
     }
         
+  return ESMF_SUCCESS;
+
+ } // end ESMC_Deserialize
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_Deserialize"
+//BOPI
+// !IROUTINE:  ESMC_Deserialize - Return ID and vmID of a serialized object
+//
+// !INTERFACE:
+      // static
+      int ESMC_Base::ESMC_Deserialize(
+//
+// !RETURN VALUE:
+//    {\tt ESMF\_SUCCESS} or error code on failure.
+//
+// !ARGUMENTS:
+      char *buffer,         // in - byte stream to read
+      int *offset,          // inout - original offset
+      int *ID,              // out - Object ID
+      ESMCI::VMId *vmID) {  // out - VMId
+//
+// !DESCRIPTION:
+//    Turn a stream of bytes into an object.
+//
+//EOPI
+
+    int *ip, i, nbytes;
+    ESMC_Status *sp;
+    ESMC_ProxyFlag *pfp;
+    ESMCI::VMId *vmIDp;
+    char *cp;
+    int localrc;
+
+    // Initialize local return code; assume routine not implemented
+    localrc = ESMC_RC_NOT_IMPL;
+
+    ip = (int *)(buffer + *offset);
+    *ID = *ip++;
+    ip++;  // refcount
+    ip++;  // classID
+
+    sp = (ESMC_Status *)ip;
+    sp++;  // baseStatus
+    sp++;  // status
+
+    pfp = (ESMC_ProxyFlag *)sp;
+    pfp++; // proxyFlag
+
+    vmIDp = (ESMCI::VMId *)pfp;
+
   return ESMF_SUCCESS;
 
  } // end ESMC_Deserialize
@@ -808,6 +868,7 @@ static const char *const version = "$Id$";
     int *ip, i, rc;
     ESMC_Status *sp;
     ESMC_ProxyFlag *pfp;
+    ESMCI::VMId *vmIDp;
     char *cp;
 
     // Initialize local return code; assume routine not implemented
@@ -838,7 +899,10 @@ static const char *const version = "$Id$";
       pfp = (ESMC_ProxyFlag *)sp;
       *pfp++ = proxyflag;
 
-      cp = (char *)pfp;
+      vmIDp = (ESMCI::VMId *)pfp;
+      *vmIDp++ = *vmID;
+
+      cp = (char *)vmIDp;
       memcpy(cp, baseName, ESMF_MAXSTR);
       cp += ESMF_MAXSTR;
       memcpy(cp, baseNameF90, ESMF_MAXSTR);

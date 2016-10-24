@@ -63,7 +63,7 @@
       type(ESMF_Base) :: base1, base2
       type(ESMF_AttReconcileFlag) :: attreconflag
       integer :: id
-      type(ESMF_VMId) :: vmid
+      type(ESMF_VMId) :: vmid, vmid_new
       character, allocatable   :: buffer(:)
       integer :: buff_size
       integer :: offset1, offset2, offset3
@@ -233,9 +233,35 @@
       !EX_UTest
       ! test getting of ESMF_Base members values,
       call ESMF_BaseGetVMId (base, vmid, rc=rc)
-      write(name, *) "ESMF_BaseGetVMId"
+      write(name, *) "ESMF_BaseGetVMId of original Base"
       write(failMsg, *) "rc =", rc
       call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !EX_UTest
+      ! test setting of ESMF_Base members values,
+      call ESMF_VMIdCreate (vmid_new, rc=rc)
+      call c_ESMCI_VMIdSet (vmid_new, 1234, achar (123), rc)
+      call ESMF_BaseSetVMId (base, vmid_new, rc=rc)
+      write(name, *) "ESMF_BaseSetVMId a new VMId into the Base"
+      write(failMsg, *) "rc =", rc
+      call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_BasePrint (base)
+
+      !EX_UTest
+      ! test getting of ESMF_Base members values,
+      call ESMF_BaseGetVMId (base, vmid_new, rc=rc)
+      write(name, *) "ESMF_BaseGetVMId new VMid"
+      write(failMsg, *) "rc =", rc
+      call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_VMIdDestroy (vmid_new, rc=rc)
+
+      !EX_UTest
+      ! test resetting of ESMF_Base members values,
+      call ESMF_BaseSetVMId (base, vmid, rc=rc)
+      write(name, *) "ESMF_BaseSetVMId reset the original VMId into the Base"
+      write(failMsg, *) "rc =", rc
+      call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_BasePrint (base)
 
       !EX_UTest
       ! test print method via option string

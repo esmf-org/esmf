@@ -182,8 +182,8 @@ extern "C" {
 
   string copts = string (opts, ESMC_F90lentrim (opts, nlen));
   string cfname = string (fname, ESMC_F90lentrim (fname, flen));
-  *rc = (*base)->ESMC_Print(*level, copts.c_str(), &tofileOpt, cfname.c_str(),
-                            &appendOpt);
+  *rc = (*base)->ESMC_Print(*level, copts.c_str(), tofileOpt, cfname.c_str(),
+                            appendOpt);
   fflush (stdout);
 
   return;
@@ -281,6 +281,40 @@ extern "C" {
   }
 
   *rc = (*base)->ESMC_Deserialize(buf, offset, *attreconflag);
+
+  return;
+
+}  // end c_ESMC_BaseDeserialize
+
+//-----------------------------------------------------------------------------
+//BOPI
+// !IROUTINE:  c_ESMC_BaseDeserialize_idvmid - Deserialize Base ID and vmId inquiry
+//
+// !INTERFACE:
+      void FTN_X(c_esmc_basedeserialize_idvmid)(
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_basedeserialize_idvmid()"
+//
+// !RETURN VALUE:
+//    none.  return code is passed thru the parameter list
+//
+// !ARGUMENTS:
+      char *buf,                // in/out - really a byte stream
+      int *offset,              // in/out - current offset in the stream
+      int *ID,                  // out - Object ID
+      ESMCI::VMId **vmId,       // out - vmId
+      int *rc,                  // out - return code
+      ESMCI_FortranStrLenArg buf_l) { // hidden/in - buffer length
+//
+// !DESCRIPTION:
+//     Deserialize the ID and vmId of a serialized Base.
+//
+//EOPI
+
+  // Initialize return code; assume routine not implemented
+  if (rc) *rc = ESMC_RC_NOT_IMPL;
+
+  *rc = ESMC_Base::ESMC_Deserialize(buf, offset, ID, *vmId);
 
   return;
 
