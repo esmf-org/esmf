@@ -301,6 +301,8 @@ contains
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT,  &
         rcToReturn=rc)) return
+    if (meminfo) call ESMF_VMLogMemInfo ('after Step 0 - initialization')
+
 
     ! 1.) Each PET constructs its send arrays containing local Id
     ! and VMId info for each object contained in the State.
@@ -322,7 +324,7 @@ contains
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT,  &
         rcToReturn=rc)) return
-    if (meminfo) call ESMF_VMLogMemInfo ('after Step 1')
+    if (meminfo) call ESMF_VMLogMemInfo ('after Step 1 - constructed send Id/VMId info')
 
 
     ! 2.) All PETs send their items Ids and VMIds to all the other PETs,
@@ -347,7 +349,7 @@ contains
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT,  &
         rcToReturn=rc)) return
-    if (meminfo) call ESMF_VMLogMemInfo ('after Step 2')
+    if (meminfo) call ESMF_VMLogMemInfo ('after Step 2 - exchanged Ids/VMIds')
 
 
 ! At this point, each PET knows what items can be found on all of
@@ -373,7 +375,7 @@ contains
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT,  &
         rcToReturn=rc)) return
-    if (meminfo) call ESMF_VMLogMemInfo ('after Step 3')
+    if (meminfo) call ESMF_VMLogMemInfo ('after Step 3 - compared needs arrays')
 
 
     ! 4.) Communicate needs back to the offering PETs.
@@ -397,7 +399,7 @@ contains
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT,  &
         rcToReturn=rc)) return
-    if (meminfo) call ESMF_VMLogMemInfo ('after Step 4')
+    if (meminfo) call ESMF_VMLogMemInfo ('after Step 4 - exchanged needs')
 
 
     ! 5.) Serialized needed objects
@@ -421,7 +423,7 @@ contains
     if (ESMF_LogFoundDeallocError(memstat, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT,  &
         rcToReturn=rc)) return
-    if (meminfo) call ESMF_VMLogMemInfo ('after Step 5')
+    if (meminfo) call ESMF_VMLogMemInfo ('after Step 5 - serialized needs')
 
 
     ! 6.) Send/receive serialized objects to whoever needed them
@@ -446,7 +448,7 @@ contains
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT,  &
         rcToReturn=rc)) return
-    if (meminfo) call ESMF_VMLogMemInfo ('after Step 6')
+    if (meminfo) call ESMF_VMLogMemInfo ('after Step 6 - exchanged items')
 
 
     ! 7.) Deserialize received objects and create proxies (recurse on
@@ -485,7 +487,7 @@ contains
       call ESMF_ReconcileDebugPrint (ESMF_METHOD //  &
           ': *** Step 7 - Complete')
     end if
-    if (meminfo) call ESMF_VMLogMemInfo ('after Step 7')
+    if (meminfo) call ESMF_VMLogMemInfo ('after Step 7 - deserialized items')
 
 ! Clean up
 
@@ -567,6 +569,7 @@ contains
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT,  &
           rcToReturn=rc)) return
+      if (meminfo) call ESMF_VMLogMemInfo ('after Step 8 - State base attributes')
     end if
 
     state%statep%reconcileneededflag = .false.
@@ -1031,7 +1034,7 @@ contains
     if (debug) then
       print *, ESMF_METHOD, ': PET', mypet, ', needs_count =', needs_count
     end if
-    buffer_offset = ESMF_SIZEOF_DEFINT
+    buffer_offset = ESMF_SIZEOF_DEFINT * (needs_count+1) ! Skip past count and table
 #if defined (ALIGN_FIX)
     buffer_offset = ((buffer_offset+7)/8)*8
 #endif
@@ -1211,15 +1214,17 @@ contains
               rcToReturn=rc)) return
       end select
 
-#if defined (ALIGN_FIX)
-      buffer_offset = ((buffer_offset+7)/8)*8
-#endif
+    ! Use offset from table in case of an early exit from a deserialize method
+
+    buffer_offset = transfer (  &
+        source=obj_buffer((i+1)*ESMF_SIZEOF_DEFINT:(i+2)*ESMF_SIZEOF_DEFINT-1),  &
+        mold  =i)
 
       if (debug) then
         print *, '   buffer offset after item loop =', buffer_offset
       end if
 
-    end do
+    end do ! needs_count
 
     if (trace) then
       print *, '    pet', mypet,  &
@@ -1263,7 +1268,7 @@ contains
 
     type(ESMF_Base), pointer :: base
     type(ESMF_Base) :: base_temp
-    character, allocatable :: buffer(:), buffer_recv(:)
+    character, allocatable :: buffer_local(:), buffer_recv(:)
     integer,   allocatable :: recv_sizes(:), recv_offsets(:)
     integer :: buffer_size(1)
 
@@ -1288,7 +1293,7 @@ contains
       select case (pass)
       case (1)
       ! Pass 1 finds the required buffer length to serialize any attributes.
-        allocate (buffer(4), stat=memstat)  ! Dummy to avoid null pointer derefs
+        allocate (buffer_local(4), stat=memstat)  ! Dummy to avoid null pointer derefs
         if (ESMF_LogFoundAllocError(memstat, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT,  &
             rcToReturn=rc)) return
@@ -1296,27 +1301,28 @@ contains
 
       case (2)
         ! Pass 2 allocates the buffer and performs the actual serialization.
-        deallocate (buffer, stat=memstat)
+        deallocate (buffer_local, stat=memstat)
         if (ESMF_LogFoundDeallocError(memstat, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT,  &
             rcToReturn=rc)) return
 
-        allocate (buffer(0:offset-1), stat=memstat)
+        allocate (buffer_local(0:offset-1), stat=memstat)
         if (ESMF_LogFoundAllocError(memstat, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT,  &
             rcToReturn=rc)) return
+        buffer_local = achar (0)
         inqflag = ESMF_NOINQUIRE
       end select
 
       offset = 0
-      call ESMF_BaseSerialize (base, buffer, offset,  &
+      call ESMF_BaseSerialize (base, buffer_local, offset,  &
           ESMF_ATTRECONCILE_ON, inqflag,  &
           rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT,  &
           rcToReturn=rc)) return
 
-    end do
+    end do ! pass
 
     ! Exchange serialized buffer sizes
     allocate (recv_sizes(0:npets-1), stat=memstat)
@@ -1357,7 +1363,7 @@ contains
     end if
 
     call ESMF_VMAllGatherV (vm,  &
-        sendData=buffer(:buffer_size(1)-1), sendCount=buffer_size(1),  &
+        sendData=buffer_local(:buffer_size(1)-1), sendCount=buffer_size(1),  &
         recvData=buffer_recv, recvCounts=recv_sizes, recvOffsets=recv_offsets,  &
         rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -1397,7 +1403,7 @@ contains
         ESMF_CONTEXT,  &
         rcToReturn=rc)) return
 
-    deallocate(buffer)
+    deallocate(buffer_local)
     deallocate(recv_sizes)
     deallocate(recv_offsets)
     deallocate(buffer_recv)
@@ -2586,7 +2592,12 @@ contains
 
     end do item_loop
 
-! For each PET, create a buffer containing its serialized needs.
+    if (debug)  &
+        print *, ESMF_METHOD, ': buffer_sizes =', pet_needs(:)%buffer_size
+
+! For each PET, create a buffer containing its serialized needs.  The buffer
+! consists of a count of items, a table of the offsets (in bytes) of each
+! serialized item, and the serialized items themselves.
 
     if (trace) then
       call ESMF_ReconcileDebugPrint (ESMF_METHOD //  &
@@ -2603,7 +2614,7 @@ contains
         cycle
       end if
 
-      buffer_offset = ESMF_SIZEOF_DEFINT ! space for needs_count
+      buffer_offset = ESMF_SIZEOF_DEFINT * (needs_count + 1) ! space for needs_count and size table
 #if defined (ALIGN_FIX)
       buffer_offset = ((buffer_offset+7)/8)*8
 #endif
@@ -2628,10 +2639,11 @@ contains
           source=needs_count,  &
           mold  =obj_buffer(0:ESMF_SIZEOF_DEFINT-1))
 
-      buffer_offset = ESMF_SIZEOF_DEFINT ! space for needs_count
+      buffer_offset = ESMF_SIZEOF_DEFINT * (needs_count + 1) ! space for needs_count + offsets table
 #if defined (ALIGN_FIX)
       buffer_offset = ((buffer_offset+7)/8)*8
 #endif
+      i = ESMF_SIZEOF_DEFINT
       do, item=1, nitems
         if (.not. needs_list(item, pet)) cycle
         lbufsize = pet_needs(item)%buffer_size
@@ -2644,7 +2656,12 @@ contains
         end if
         obj_buffer(buffer_offset:buffer_offset+lbufsize-1) =  &
             pet_needs(item)%obj_buffer(:lbufsize-1)
+        obj_buffer(i:i+ESMF_SIZEOF_DEFINT-1) =  &
+            transfer (  &
+            source=buffer_offset,  &
+            mold  =obj_buffer(0:ESMF_SIZEOF_DEFINT-1))
         buffer_offset = buffer_offset + lbufsize
+        i = i + ESMF_SIZEOF_DEFINT
       end do ! items
 
     end do ! pets
