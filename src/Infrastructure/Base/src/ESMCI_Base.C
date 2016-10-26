@@ -1143,7 +1143,7 @@ static const char *const version = "$Id$";
       // some sort of registry utility.
       strcpy(baseName, name);
   else
-      sprintf(baseName, "%s%3d", className, ID);
+      sprintf(baseName, "%s%03d", className, ID);
   ESMC_CtoF90string(baseName, baseNameF90, ESMF_MAXSTR);
 
 #if 0
