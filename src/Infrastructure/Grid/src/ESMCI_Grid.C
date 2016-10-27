@@ -3164,7 +3164,20 @@ int Grid::set(
     proto->nameLen=nameLenArg;
     proto->name= new char[nameLenArg];
     memcpy(proto->name, nameArg, nameLenArg * sizeof(char));
-  } 
+
+    //// Convert F90 name string to C++ string 
+    char *name = ESMC_F90toCstring(nameArg, nameLenArg);
+    if (!name && nameLenArg){
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
+                                    "- Not a valid string", ESMC_CONTEXT, &rc);
+      return rc;
+    }
+
+    // Set in base (so it can be pulled out when grid is still empty)
+    localrc = ESMC_BaseSetName(name, "Grid");
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc))
+      return rc;
+  }
 
   //  if passed in, set typekind
   if (typekindArg != ESMC_NULL_POINTER) {
@@ -6199,7 +6212,7 @@ int construct(
   InterfaceInt *distgridToGridMapArg,                  // (in) optional
   InterfaceInt *undistLBoundArg,                 // (in) optional
   InterfaceInt *undistUBoundArg,                 // (in) optional
-  ESMC_CoordSys_Flag *coordSysArg, 
+   ESMC_CoordSys_Flag *coordSysArg, 
   InterfaceInt *coordDimCountArg,               // (in) optional
   InterfaceInt *coordDimMapArg,             // (in) optional
   InterfaceInt *gridMemLBoundArg,             // (in) optional
@@ -6247,7 +6260,7 @@ int construct(
   // initialize return code; assume routine not implemented
   rc = ESMC_RC_NOT_IMPL;
 
-  // To prevent erasing an existing grid, make sure grid is inactive
+   // To prevent erasing an existing grid, make sure grid is inactive
   if (gridArg->getStatus() != ESMC_GRIDSTATUS_NOT_READY) {
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_WRONG,
       "- grid must be status 'not ready' to be activated ", ESMC_CONTEXT, &rc);
@@ -6295,7 +6308,7 @@ int construct(
     indexflag=ESMC_INDEX_DELOCAL;  // default
   } else {
     indexflag=*indexflagArg;
-  }
+   }
 
 
   // Get DimCount of Distributed Dimensions
@@ -6343,7 +6356,7 @@ int construct(
     }
     if (undistLBoundArg->extent[0] != undistDimCount){
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
-        "- undistLBound, undistUBound size mismatch", ESMC_CONTEXT, &rc);
+         "- undistLBound, undistUBound size mismatch", ESMC_CONTEXT, &rc);
       return rc;
     }
     // set undistLBound from argument
@@ -6391,7 +6404,7 @@ int construct(
   } 
 
   // Error check gridEdgeUWidthArg
-  if (present(gridEdgeUWidthArg)) {
+   if (present(gridEdgeUWidthArg)) {
     if (gridEdgeUWidthArg->dimCount != 1){
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
         "- gridEdgeUWidth array must be of dimCount 1", ESMC_CONTEXT, &rc);
@@ -6439,7 +6452,7 @@ int construct(
   gridEdgeUWidth = new int[dimCount];
   gridAlign = new int[dimCount];
 
-  localrc=setGridDefaultsLUA(dimCount,
+   localrc=setGridDefaultsLUA(dimCount,
           gridEdgeLWidthArg, gridEdgeUWidthArg, gridAlignArg,
           gridEdgeLWidth, gridEdgeUWidth, gridAlign);
   if (ESMC_LogDefault.MsgFoundError(localrc,
@@ -6487,7 +6500,7 @@ int construct(
   distgridToGridMap = new int[distDimCount];
   if (!present(distgridToGridMapArg)) {
     for (int i=0; i<distDimCount; i++)
-      distgridToGridMap[i] = i; // set distgridToGridMap to default (0,1,2..)
+       distgridToGridMap[i] = i; // set distgridToGridMap to default (0,1,2..)
   } else {
     if (distgridToGridMapArg->dimCount != 1){
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
@@ -6535,7 +6548,7 @@ int construct(
       }
       // // TODO: take this out when Array Factorization works
       // if (coordDimCountArg->array[i] != dimCount){
-      //  ESMC_LogDefault.MsgFoundError(ESMC_RC_NOT_IMPL,
+       //  ESMC_LogDefault.MsgFoundError(ESMC_RC_NOT_IMPL,
       //    "- Array and thus Grid don't currently support factorization",
       //    ESMC_CONTEXT, &rc);
       //  return rc;
@@ -6583,7 +6596,7 @@ int construct(
       for (int j=0; j<coordDimCount[i]; j++) {
         // Note: order of i,j is because of F vs. C array ordering
         ind=j*dimCount+i;
-
+ 
         // Check to make sure data is correct
        if (coordDimMapArg->array[ind] < 1 || coordDimMapArg->array[ind] > dimCount){
           ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
@@ -6631,7 +6644,7 @@ int construct(
     for (int i=0, j=0; i < dimCount; i++) {
       if (maxIndex[i] == 0) {
 	minIndex[i] = undistLBound[j];
-        maxIndex[i] = undistUBound[j];
+         maxIndex[i] = undistUBound[j];
 	j++;
       }
     }

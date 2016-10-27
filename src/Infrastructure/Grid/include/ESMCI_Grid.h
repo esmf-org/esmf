@@ -291,6 +291,7 @@ template <class TYPE>
   ESMC_IndexFlag getIndexFlag(void) const {return indexflag;}
   ESMC_TypeKind_Flag getTypeKind(void) const {return typekind;}
   const DistGrid *getDistGrid(void) const {return distgrid;}
+  const ProtoGrid *getProtoGrid(void) const {return proto;}
   const int *getDistgridToGridMap(void) const {return distgridToGridMap;}
   const int *getUndistLBound(void) const {return undistLBound;}
   const int *getUndistUBound(void) const {return undistUBound;}
