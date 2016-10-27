@@ -5375,43 +5375,44 @@ int Grid::serialize(
   if (cp) memcpy(bufptr+loff,((t **)varptr)+s1,(s1*s2*sizeof(t))); \
   loff += (s1*s2*sizeof(t));  
 
+  // Allocate depending on status
+  if (status == ESMC_GRIDSTATUS_SHAPE_READY) {
+    
+    // Create list of which Arrays exist
+    coordExists=_allocate2D<bool>(staggerLocCount,dimCount);
+    for (int s=0; s<staggerLocCount; s++) {
+      for (int c=0; c<dimCount; c++) {
+        if (coordArrayList[s][c] == ESMC_NULL_POINTER) {
+          coordExists[s][c]=false;
+        } else {
+            coordExists[s][c]=true;
+        }
+      }
+    }
+    
 
-
-  // Create list of which Arrays exist
-  coordExists=_allocate2D<bool>(staggerLocCount,dimCount);
-  for (int s=0; s<staggerLocCount; s++) {
-    for (int c=0; c<dimCount; c++) {
-      if (coordArrayList[s][c] == ESMC_NULL_POINTER) {
-	coordExists[s][c]=false;
+    // Create list of which item Arrays exist
+    itemExists=_allocate2D<bool>(staggerLocCount,ESMC_GRIDITEM_COUNT);
+    for (int s=0; s<staggerLocCount; s++) {
+      for (int i=0; i<ESMC_GRIDITEM_COUNT; i++) {
+        if (itemArrayList[s][i] == ESMC_NULL_POINTER) {
+          itemExists[s][i]=false;
+        } else {
+          itemExists[s][i]=true;
+        }
+      }
+    }
+    
+    // Create list of which staggerdistgrids exist
+    staggerDistgridExists= new bool[staggerLocCount];
+    for (int s=0; s<staggerLocCount; s++) {
+      if (staggerDistgridList[s] == ESMC_NULL_POINTER) {
+        staggerDistgridExists[s]=false;
       } else {
-	coordExists[s][c]=true;
+        staggerDistgridExists[s]=true;
       }
     }
   }
-
-
-  // Create list of which item Arrays exist
-  itemExists=_allocate2D<bool>(staggerLocCount,ESMC_GRIDITEM_COUNT);
-  for (int s=0; s<staggerLocCount; s++) {
-    for (int i=0; i<ESMC_GRIDITEM_COUNT; i++) {
-      if (itemArrayList[s][i] == ESMC_NULL_POINTER) {
-	itemExists[s][i]=false;
-      } else {
-	itemExists[s][i]=true;
-      }
-    }
-  }
-
-  // Create list of which staggerdistgrids exist
-  staggerDistgridExists= new bool[staggerLocCount];
-  for (int s=0; s<staggerLocCount; s++) {
-    if (staggerDistgridList[s] == ESMC_NULL_POINTER) {
-      staggerDistgridExists[s]=false;
-    } else {
-      staggerDistgridExists[s]=true;
-    }
-  }
-
 
 
   // Run twice:
@@ -5612,14 +5613,18 @@ int Grid::serialize(
     }
   }
 
-  // free coordExists
-  _free2D<bool>(&coordExists);
-
-  // free itemExists
-  _free2D<bool>(&itemExists);
-
-  // free staggerDistgridExists
-  delete [] staggerDistgridExists;
+  // Deallocate depending on status
+  if (status == ESMC_GRIDSTATUS_SHAPE_READY) {
+    
+    // free coordExists
+    _free2D<bool>(&coordExists);
+    
+    // free itemExists
+    _free2D<bool>(&itemExists);
+    
+    // free staggerDistgridExists
+    delete [] staggerDistgridExists;
+  }
 
   // output localoffset
   *offset=loffset;
@@ -5860,6 +5865,15 @@ int Grid::deserialize(
     // Deserialize the DistGrid
     distgrid_wo_poles = DistGrid::deserialize(buffer, &loffset);  
 
+    // free coordExists
+    _free2D<bool>(&coordExists);
+    
+    // free itemExists
+    _free2D<bool>(&itemExists);
+    
+    // free staggerDistgridExists
+    delete [] staggerDistgridExists;
+
   } else if (status == ESMC_GRIDSTATUS_NOT_READY) {
     // Add protogrid
     localrc=this->addProtoGrid();
@@ -5879,23 +5893,13 @@ int Grid::deserialize(
     }
   }
   
-
+  
   // make sure loffset is aligned correctly
   r=loffset%8;
   if (r!=0) loffset += 8-r;
-
-  // free coordExists
-  _free2D<bool>(&coordExists);
-
-  // free itemExists
-  _free2D<bool>(&itemExists);
-
-  // free staggerDistgridExists
-  delete [] staggerDistgridExists;
-
+  
   // output localoffset
   *offset=loffset;
-
 
   // Undefine serialization macros, so they don't cause troubles elsewhere
 #undef DESERIALIZE_VAR
