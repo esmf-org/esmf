@@ -2762,7 +2762,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        type(ESMF_GRIDITEM_FLAG) :: gridItem
        type(ESMF_CoordSys_Flag) :: coordSys
        integer                  :: localDECount, localDE
-       integer                  :: arbDimCount, arrayDimCount
+       integer                  :: arbDimCount, arrayDimCount, dgDimCount
+       integer, allocatable     :: minIndex(:), maxIndex(:), indexArray(:,:)
        character(len=160)       :: msgString
 
        
@@ -2777,11 +2778,21 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        ! TODO: NEED TO MAKE SURE INCOMING DistGrid HAS SAME MinIndex, MaxIndex AS EXISTING
        !       Grid's DistGrid
 
+#if 1
+       if (present(name)) &
+       call ESMF_LogWrite("ESMF_GridCreateCopyFromNewDG for: "//trim(name), &
+         ESMF_LOGMSG_INFO)
+#endif
 
        ! Get info from old grid to create new Grid.
        call ESMF_GridGet(grid, &
             dimCount=dimCount, arbDimCount=arbDimCount, & 
             rc=localrc)
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+            ESMF_CONTEXT, rcToReturn=rc)) return
+
+       ! Get info from target distgrid
+       call ESMF_DistGridGet(distgrid, dimCount=dgDimCount, rc=localrc)
        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
             ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -2803,6 +2814,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
        if (arbDimCount==0) then
           ! no arbitrary distribution
+#if 1
+          call ESMF_LogWrite("ESMF_GridCreateCopyFromNewDG no-arb grid", &
+            ESMF_LOGMSG_INFO)
+#endif
           ! Create New Grid
           newGrid=ESMF_GridCreate(name=name, &
             coordTypeKind=coordTypeKind, &
@@ -2821,6 +2836,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             ESMF_CONTEXT, rcToReturn=rc)) return
        else
           ! arbitrary distribution
+#if 1
+          call ESMF_LogWrite("ESMF_GridCreateCopyFromNewDG arb grid", &
+            ESMF_LOGMSG_INFO)
+#endif
           !TODO: there need to be two branches here, depending on the dimCount of the
           !TODO: passed in DistGrid. If the dimCount equals the dimCount of the old grid,
           !TODO: then a non-arbDist grid is going to be created here. This is basically what
@@ -2832,15 +2851,58 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           !TODO: have access to this info anylonger at this point. We need to start carrrying it 
           !TODO: (probably in the Grid), in the future so that it is possible to create a Grid
           !TODO: from a arbDist Grid.
-          ! Create New Grid
-          newGrid=ESMF_GridCreate(name=name, &
-            coordTypeKind=coordTypeKind, &
-            distgrid=distgrid, &
-            coordSys=coordSys, &
-            indexFlag=indexFlag, &
-            rc=localrc)
-          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
-            ESMF_CONTEXT, rcToReturn=rc)) return
+          
+          
+          if (dgDimCount==dimCount) then
+            ! Create New Grid as regDecomp
+#if 1
+            call ESMF_LogWrite("ESMF_GridCreateCopyFromNewDG arb grid as regDecom", &
+              ESMF_LOGMSG_INFO)
+#endif
+            newGrid=ESMF_GridCreate(name=name, &
+              coordTypeKind=coordTypeKind, &
+              distgrid=distgrid, &
+              coordSys=coordSys, &
+              indexFlag=indexFlag, &
+              rc=localrc)
+            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+              ESMF_CONTEXT, rcToReturn=rc)) return
+          elseif (dgDimCount < dimCount) then
+            ! Create New Grid as arbDistr
+#if 1
+            call ESMF_LogWrite("ESMF_GridCreateCopyFromNewDG arb grid as arbDistr", &
+              ESMF_LOGMSG_INFO)
+#endif
+            ! first must set up the indexArray (which holds index space bounds)
+            allocate(minIndex(dimCount), maxIndex(dimCount), stat=localrc)
+            if (ESMF_LogFoundAllocError(localrc, msg="Allocating minIndex, maxIndex", &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+            call ESMF_GridGet(grid, tile=1, staggerloc=ESMF_STAGGERLOC_CENTER, &
+              minIndex=minIndex, maxIndex=maxIndex, rc=localrc)
+            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+              ESMF_CONTEXT, rcToReturn=rc)) return
+            allocate(indexArray(2,dimCount), stat=localrc)
+            if (ESMF_LogFoundAllocError(localrc, msg="Allocating indexArray", &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+            indexArray(1,:)=minIndex(:)
+            indexArray(2,:)=maxIndex(:)            
+            ! now create the new arbDistr grid
+            newGrid=ESMF_GridCreate(name=name, &
+              indexArray=indexArray, &
+              coordTypeKind=coordTypeKind, &
+              distgrid=distgrid, &
+              coordSys=coordSys, &
+              rc=localrc)
+            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+              ESMF_CONTEXT, rcToReturn=rc)) return
+            deallocate(minIndex, maxIndex, indexArray)
+          else
+            ! problem condition -> flag error
+            call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_SIZE, & 
+                    msg="Grid and DistGrid dimCounts are not compatible.", & 
+                    ESMF_CONTEXT, rcToReturn=rc) 
+            return 
+          endif
        endif
 
        ! Allocate to maximum number of possible staggers
@@ -2852,7 +2914,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
             ESMF_CONTEXT, rcToReturn=rc)) return
 
-#if 0
+#if 1
        write (msgString,*) "ESMF_GridCreateCopyFromNewDG(): nStaggers=",nStaggers, &
         " dimCount(Grid)=", dimCount
        call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=localrc)
@@ -4715,7 +4777,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer :: tileCount, localCounts
     integer, pointer :: minIndexLocal(:), maxIndexLocal(:)
     logical, pointer :: isDistDim(:)
-    integer :: i, j, k, arbDim, deCount
+    integer :: i, j, k, arbDim, ldeCount
     integer, allocatable :: distDimLocal(:)
     integer, allocatable :: collocation(:)
     logical  :: arbSeqIndexFlag
@@ -4739,9 +4801,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     !! find out grid dimension
     dimCount = size(indexArray,2)
     
-    !! find out undistDimCount and distDimCount
+    !! find out distgrid info
     call ESMF_DistGridGet(distgrid, dimCount=dimCount1, tileCount=tileCount, &
-    	rc=localrc)
+      delayout=delayout, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+       ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_DElayoutGet(delayout, localDeCount=ldeCount, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+       ESMF_CONTEXT, rcToReturn=rc)) return
+
     !! dimCount1 should be equal or less than dimCount
     if (dimCount1 > dimCount) then
         call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, & 
@@ -4807,16 +4875,21 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     distDimArg = ESMF_InterfaceIntCreate(distDimLocal, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
+    
+    if (ldeCount > 0) then
+      call ESMF_DistGridGet(distgrid,localDE=0, elementCount=localCounts, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
 
-    call ESMF_DistGridGet(distgrid,localDE=0, elementCount=localCounts, rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
-
-    !! reconstruct the localArbIndex from local1DIndices
-    allocate(local1DIndices(localCounts))
-    call ESMF_DistGridGet(distgrid,localDE=0, seqIndexList=local1DIndices, rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
+      !! reconstruct the localArbIndex from local1DIndices
+      allocate(local1DIndices(localCounts))
+      call ESMF_DistGridGet(distgrid,localDE=0, seqIndexList=local1DIndices, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    else
+      localCounts = 0
+      allocate(local1DIndices(localCounts))
+    endif
  
     !! find out the dimension 
     allocate(localArbIndex(localCounts,distDimCount))
@@ -4850,13 +4923,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     !! consistent with the minIndex and maxIndex 
     !! First, find out which dimension in DistGrid is arbitrary
     arbDim = -1
-    call ESMF_DistGridGet(distgrid, delayout=delayout, rc=localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-          ESMF_CONTEXT, rcToReturn=rc)) return
-      call ESMF_DELayoutGet(delayout, localDECount=deCount, rc=localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-          ESMF_CONTEXT, rcToReturn=rc)) return
-    if (deCount > 0) then
+    if (ldeCount > 0) then
       allocate(collocation(dimCount1))  ! dimCount
       call ESMF_DistGridGet(distgrid,   &
            collocation=collocation, rc=localrc)
@@ -4871,13 +4938,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           if (arbSeqIndexFlag) arbDim = i
       enddo
       deallocate(collocation)
-    endif
-
-    if (arbDim == -1) then
+      if (arbDim == -1) then
         call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, & 
                    msg="- distgrid should contain arbitrary sequence indices", & 
                           ESMF_CONTEXT, rcToReturn=rc) 
 	return
+      endif
     endif
 
     if (undistDimCount /= 0) then

@@ -3025,7 +3025,7 @@ extern "C" {
                                                      edgeLWidthIntInt, 
                                                      edgeUWidthIntInt, 
                                                      &indexflag,
-                                                     NULL,    
+                                                     NULL, true,
                                                      &localrc);
    if(ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
                  ESMC_CONTEXT, ESMC_NOT_PRESENT_FILTER(rc))) return;
@@ -3056,7 +3056,7 @@ extern "C" {
                                                     NULL,
                                                     NULL,
                                                      &indexflag,
-                                                     NULL,    
+                                                     NULL, true,
                                                      &localrc);
    if(ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
                       ESMC_CONTEXT, ESMC_NOT_PRESENT_FILTER(rc))) return;
