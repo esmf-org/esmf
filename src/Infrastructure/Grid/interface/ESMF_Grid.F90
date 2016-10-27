@@ -13776,14 +13776,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE: ESMF_GridEmptyCreate - Create a Grid that has no contents
 
 ! !INTERFACE:
-     function ESMF_GridEmptyCreate(keywordEnforcer, rc)
+     function ESMF_GridEmptyCreate(keywordEnforcer, vm, rc)
 !
 ! !RETURN VALUE:
      type(ESMF_Grid) :: ESMF_GridEmptyCreate
 !
 ! !ARGUMENTS:
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-       integer,  intent(out),  optional  :: rc
+       type(ESMF_VM),           intent(in),  optional :: vm
+       integer,                 intent(out), optional :: rc
 !
 ! !STATUS:
 ! \begin{itemize}
@@ -13799,6 +13800,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! The arguments are:
 ! \begin{description}
+! \item[{[vm]}]
+!     If present, the Grid object is created on the specified 
+!     {\tt ESMF\_VM} object. The default is to create on the VM of the 
+!     current context.
 ! \item[{[rc]}]
 !      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
@@ -13812,10 +13817,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     grid%this = ESMF_NULL_POINTER
 
     ! Call C++ Subroutine to do the create
-    call c_ESMC_gridcreateempty(grid%this, localrc)
+    call c_ESMC_gridcreateempty(grid%this, vm, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-
 
     ! Set return value
     ESMF_GridEmptyCreate = grid
@@ -13826,8 +13830,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Return successfully
     if (present(rc)) rc = ESMF_SUCCESS
 
-
-      end function ESMF_GridEmptyCreate
+  end function ESMF_GridEmptyCreate
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -20348,7 +20351,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                  minIndex, maxIndex, &
                  localArbIndexCount, localArbIndex,                        &
                  gridEdgeLWidth, gridEdgeUWidth, gridAlign, gridMemLBound,   &
-                 indexflag, destroyDistgrid, destroyDELayout, name, rc)
+                 indexflag, destroyDistgrid, destroyDELayout, name, vm, rc)
 !
 ! !RETURN VALUE:
 
@@ -20371,10 +20374,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        integer,               intent(in),   optional  :: gridEdgeUWidth(:)
        integer,               intent(in),   optional  :: gridAlign(:)
        integer,               intent(in),   optional  :: gridMemLBound(:)
-       type(ESMF_Index_Flag),  intent(in),   optional  :: indexflag
+       type(ESMF_Index_Flag), intent(in),   optional  :: indexflag
        logical,               intent(in),   optional  :: destroyDistgrid
        logical,               intent(in),   optional  :: destroyDELayout
        character (len=*),     intent(in),   optional  :: name
+       type(ESMF_VM),         intent(in),   optional  :: vm
        integer,               intent(out),  optional  :: rc
 !
 ! !DESCRIPTION:
@@ -20466,6 +20470,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_InterfaceInt) :: maxIndexArg ! Language Interface Helper Var
     type(ESMF_InterfaceInt) :: localArbIndexArg ! Language Interface Helper Var
     integer :: intDestroyDistgrid,intDestroyDELayout
+    type(ESMF_Pointer)      :: vmThis
+    logical                 :: actualFlag
 
 
     ! Initialize return code; assume failure until success is certain
@@ -20476,6 +20482,17 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ESMF_INIT_CHECK_DEEP_SHORT(ESMF_DistGridGetInit, distgrid, rc)
     ESMF_INIT_CHECK_DEEP_SHORT(ESMF_GridGetInit, grid, rc)
 
+    ! Must make sure the local PET is associated with an actual member
+    actualFlag = .true.
+    if (present(vm)) then
+      call ESMF_VMGetThis(vm, vmThis)
+      if (vmThis == ESMF_NULL_POINTER) then
+        actualFlag = .false.  ! local PET is not for an actual member of Array
+      endif
+    endif
+    
+    if (actualFlag) then
+    
     ! Translate F90 arguments to C++ friendly form
     !! name
     nameLen=0
@@ -20580,10 +20597,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
+    endif
+
     ! Return successfully
     if (present(rc)) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_GridSetFromDistGrid
+    end subroutine ESMF_GridSetFromDistGrid
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD

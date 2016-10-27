@@ -61,8 +61,7 @@ extern "C" {
 
   ///////////////////////////////////////////////////////////////////////////////////
 
-  void FTN_X(c_esmc_gridcreateempty)(ESMCI::Grid **ptr, 
-					  int *rc){
+  void FTN_X(c_esmc_gridcreateempty)(ESMCI::Grid **ptr, ESMCI::VM **vm, int *rc){
     int localrc;
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_gridcreateempty()"
@@ -70,10 +69,32 @@ extern "C" {
     //Initialize return code
     localrc = ESMC_RC_NOT_IMPL;
 
-    // call into C++
-    *ptr = ESMCI::Grid::create(&localrc);
-      ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, 
-      ESMC_NOT_PRESENT_FILTER(rc));
+    // deal with optional arguments
+    ESMCI::VM *opt_vm;
+    bool actualFlag = true;
+    if (ESMC_NOT_PRESENT_FILTER(vm) == ESMC_NULL_POINTER)
+      opt_vm = NULL;
+    else{
+      opt_vm = *vm;
+      if (opt_vm == NULL)
+        actualFlag = false; // not an actual member because VM present but NULL
+    }
+
+#if 1
+    printf("c_esmc_gridcreateempty(): opt_vm=%p, actualFlag=%d\n", 
+      opt_vm, actualFlag);
+#endif
+
+    if (actualFlag){
+      // on PETs with actual members call into C++
+      *ptr = ESMCI::Grid::create(&localrc);
+      ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+        ESMC_NOT_PRESENT_FILTER(rc));
+    }
+
+    // return success
+    if (rc!=NULL) *rc = ESMF_SUCCESS;
+
 }
 
   ///////////////////////////////////////////////////////////////////////////////////
@@ -131,7 +152,7 @@ extern "C" {
       if (opt_vm == NULL)
         actualFlag = false; // not an actual member because VM present but NULL
     }
-#if 0
+#if 1
     printf("c_esmc_gridcreatefromdistgrid(): opt_vm=%p, actualFlag=%d\n", 
       opt_vm, actualFlag);
 #endif
@@ -147,6 +168,10 @@ extern "C" {
       ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
         ESMC_NOT_PRESENT_FILTER(rc));
     }
+    
+    // return success
+    if (rc!=NULL) *rc = ESMF_SUCCESS;
+
 }
 
   ///////////////////////////////////////////////////////////////////////////////////
