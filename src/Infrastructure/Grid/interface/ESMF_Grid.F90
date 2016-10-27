@@ -14545,6 +14545,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
+    ! If not asking for anything, then just leave
+    if (.not. present(distgrid)) then
+       ! Return successfully
+       if (present(rc)) rc = ESMF_SUCCESS
+       return
+    endif
+
+
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP_SHORT(ESMF_GridGetInit, grid, rc)
     tmp_staggerloc=staggerloc%staggerloc
