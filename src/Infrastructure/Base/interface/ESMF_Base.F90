@@ -783,7 +783,7 @@ module ESMF_BaseMod
 !EOPI
     integer                     :: localrc, ignorerc
     character(len=ESMF_MAXSTR)  :: opts
-    logical                     :: tofile
+    type(ESMF_Logical)          :: tofile
 
     ! Initialize return code; assume routine not implemented
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -798,17 +798,13 @@ module ESMF_BaseMod
         opts = ''
     endif
 
-    if (present(filename)) then
-        tofile = .true.
-    else
-        tofile = .false.
-    endif
+    tofile = present (filename)
 
     call ESMF_UtilIOUnitFlush (unit=ESMF_UtilIOstdout, rc=ignorerc)
     ! Ignore localrc, because sometimes stdout is not open at this point
     ! and some compilers FLUSH statements will complain.
 
-    call c_ESMC_BasePrint(base, 0, opts, tofile, filename, .true., localrc)
+    call c_ESMC_BasePrint(base, 0, opts, tofile, filename, ESMF_TRUE, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
