@@ -192,7 +192,8 @@ namespace ESMCI {
     int getSequenceIndexTile(int tile, int const *index, int *rc=NULL)const;
     int getSequenceIndexTileRecursive(int tile, int const *index, int depth,
       int *rc=NULL)const;
-    // misc. get
+    
+    // get/set arb sequence indices
     int *const *getElementCountPCollPLocalDe()
       const {return elementCountPCollPLocalDe;}
     int const *getArbSeqIndexList(int localDe, int collocation, int *rc=NULL)
