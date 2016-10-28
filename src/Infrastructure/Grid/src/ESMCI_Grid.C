@@ -809,10 +809,16 @@ int Grid::addCoordArrayArb(
     //// fill in distgridToArrayMap for use in Array::create
     //// distgridToArrayMap - computed by inverting how coords dims map to distgrid
     for (int i=0; i<coordDimCount[coord]; i++) {
-      if (coordDimMap[coord][i] == ESMC_GRID_ARBDIM) 
-        distgridToArrayMapIntIntArray[coordMapDim[coord][i]]=arbDim; // convert to 1-based
-      else {
-        distgridToArrayMapIntIntArray[coordMapDim[coord][i]]=i+1; // convert to 1-based
+      if (distgrid->getDELayout()->getLocalDeCount()){
+        // only do this for real when there are localDEs
+        if (coordDimMap[coord][i] == ESMC_GRID_ARBDIM) 
+          distgridToArrayMapIntIntArray[coordMapDim[coord][i]]=arbDim; // convert to 1-based
+        else {
+          distgridToArrayMapIntIntArray[coordMapDim[coord][i]]=i+1; // convert to 1-based
+        }
+      }else{
+        // otherwise provide default sequence 1,2,3,...coordDimCount[coord] to satisfy Array
+        distgridToArrayMapIntIntArray[i]=i+1; // convert to 1-based
       }
     }
 
@@ -4478,7 +4484,10 @@ void Grid::destruct(bool followCreator, bool noGarbage){
 //EOPI
 //-----------------------------------------------------------------------------
  if (ESMC_BaseGetStatus()==ESMF_STATUS_READY){
-
+  if (getStatus() < ESMC_GRIDSTATUS_SHAPE_READY){
+   // If present delete ProtoGrid
+   if (proto != ESMC_NULL_POINTER) delete proto;    
+  }else{
    if (followCreator){
 
    // Delete external class contents of Grid before deleting Grid
@@ -4604,7 +4613,7 @@ void Grid::destruct(bool followCreator, bool noGarbage){
   if (localArbIndexCount) {
     _free2D<int>(&localArbIndex);
   }
-
+ }
  }
 }
 
@@ -5716,7 +5725,8 @@ int Grid::deserialize(
     DESERIALIZE_VAR( buffer,loffset,indexflag,ESMC_IndexFlag);
     
     // Don't deserialize, but set 
-    destroyDistgrid=true;  // distgrid is Grid's after deserialize
+    destroyDistgrid=false; // proxy distgrid (like all proxies) do not belong to any 
+                           // other object -> garbage collection will take care of them.
     destroyDELayout=false; // delayot belongs to DistGrid
     
     DESERIALIZE_VAR( buffer,loffset,distDimCount,int);    
