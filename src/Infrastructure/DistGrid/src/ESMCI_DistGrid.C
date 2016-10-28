@@ -3759,6 +3759,69 @@ int DistGrid::getSequenceIndexTileRecursive(
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::DistGrid::getIndexTupleFromSeqIndex()"
+//BOPI
+// !IROUTINE:  ESMCI::DistGrid::getIndexTupleFromSeqIndex
+//
+// !INTERFACE:
+int DistGrid::getIndexTupleFromSeqIndex(
+//
+// !RETURN VALUE:
+//    int return code
+//
+// !ARGUMENTS:
+//
+  int seqIndex,                 // in  - sequence index to be transformed
+  vector<int> &indexTuple,      // out - index tuple within tile
+  int &tile                     // out - tile index (1-based)
+  )const{
+//
+// !DESCRIPTION:
+//    Transform the seqIndex argument into tile and indexTuple. If the size 
+//    of indexTuple does not match dimCount, it will automatically be resized 
+//    by this method.
+//
+//EOPI
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
+  
+  if (indexTuple.size() != dimCount)
+    indexTuple.resize(dimCount);
+  
+  seqIndex -= 1;  // make seqIndex 0-based
+ 
+  // determine the tile index
+  for (int tile=0; tile<tileCount; tile++){
+    seqIndex -= elementCountPTile[tile];
+    if (seqIndex <=0){
+      // found the tile index (remember, 1-based)
+      seqIndex += elementCountPTile[tile]; // correct back into the tile
+      break;
+    }
+  }
+  
+  // determine the index tuple within the tile
+  for (int i=dimCount-1; i>=0; i--){
+    int stride = 1;
+    for (int j=0; j<i-1; j++)
+      stride *= maxIndexPDimPTile[dimCount*(tile-1)+j]
+        - minIndexPDimPTile[dimCount*(tile-1)+j] + 1;
+    indexTuple[i] = seqIndex / stride;
+    seqIndex -= stride * indexTuple[i];
+    indexTuple[i] += minIndexPDimPTile[dimCount*(tile-1)+i];
+  }
+    
+  // return successfully
+  rc = ESMF_SUCCESS;
+  return rc;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::DistGrid::getMinIndexPDimPTile()"
 //BOPI
 // !IROUTINE:  ESMCI::DistGrid::getMinIndexPDimPTile
