@@ -1358,12 +1358,31 @@ print *, "current bondLevel=", bondLevel
           call ESMF_FieldGet(acceptorField, vm=vm, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+#if 0
+          call ESMF_LogWrite("Connector InitializeP3 transfer DG for Grid: "//&
+            trim(geomobjname), ESMF_LOGMSG_INFO, rc=rc)
+#endif
           acceptorDG = ESMF_DistGridCreate(providerDG, vm=vm, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+#if 0
+          ! It really isn't the right thing to create a full Grid here just
+          ! to pass the DistGrid to the acceptor side. Plus this interface
+          ! does NOT work for DistGrids with arb seq indices.
           grid = ESMF_GridCreate(acceptorDG, name=geomobjname, vm=vm, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+#else
+          ! The right way to transfer the DistGrid to the acceptor side is to
+          ! create an empty Grid, and then only set the name and distgrid.
+          grid = ESMF_GridEmptyCreate(vm=vm, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          call ESMF_GridSet(grid, name=geomobjname, distgrid=acceptorDG, &
+            vm=vm, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+#endif
           call ESMF_FieldEmptySet(acceptorField, grid=grid, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
@@ -1887,7 +1906,7 @@ print *, "current bondLevel=", bondLevel
     ! re-reconcile the States because they may have changed
     ! (previous proxy objects are dropped before fresh reconcile)
     if (btest(profiling,1)) then    ! PROFILE
-      call ESMF_VMLogMemInfo("befP5 Reconcile")
+      call ESMF_VMLogMemInfo("befP5a Reconcile")
     endif
     call NUOPC_Reconcile(importState, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -1896,7 +1915,7 @@ print *, "current bondLevel=", bondLevel
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     if (btest(profiling,1)) then    ! PROFILE
-      call ESMF_VMLogMemInfo("aftP5 Reconcile")
+      call ESMF_VMLogMemInfo("aftP5a Reconcile")
     endif
 
   end subroutine
