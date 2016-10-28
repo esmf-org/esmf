@@ -2778,7 +2778,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        ! TODO: NEED TO MAKE SURE INCOMING DistGrid HAS SAME MinIndex, MaxIndex AS EXISTING
        !       Grid's DistGrid
 
-#if 1
+#if 0
        if (present(name)) &
        call ESMF_LogWrite("ESMF_GridCreateCopyFromNewDG for: "//trim(name), &
          ESMF_LOGMSG_INFO)
@@ -2814,7 +2814,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
        if (arbDimCount==0) then
           ! no arbitrary distribution
-#if 1
+#if 0
           call ESMF_LogWrite("ESMF_GridCreateCopyFromNewDG no-arb grid", &
             ESMF_LOGMSG_INFO)
 #endif
@@ -2836,26 +2836,21 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             ESMF_CONTEXT, rcToReturn=rc)) return
        else
           ! arbitrary distribution
-#if 1
+#if 0
           call ESMF_LogWrite("ESMF_GridCreateCopyFromNewDG arb grid", &
             ESMF_LOGMSG_INFO)
 #endif
-          !TODO: there need to be two branches here, depending on the dimCount of the
-          !TODO: passed in DistGrid. If the dimCount equals the dimCount of the old grid,
-          !TODO: then a non-arbDist grid is going to be created here. This is basically what
-          !TODO: is being assumed with the one call below right now. However, the other case
-          !TODO: to cover is where the dimCount of the incoming DistGrid is smaller than
-          !TODO: the original grid dimCount. In that case the created Grid will also be arbDist
-          !TODO: which means we need to create it via the correctly overloaded GridCreate()
-          !TODO: that takes the indexArray, which really is minIndex, maxIndex. We don't currently
-          !TODO: have access to this info anylonger at this point. We need to start carrrying it 
-          !TODO: (probably in the Grid), in the future so that it is possible to create a Grid
-          !TODO: from a arbDist Grid.
-          
+          ! Two branches here:
+          ! 
+          ! If the dimCount of the DistGrid equals the dimCount of the old grid, then a 
+          ! non-arbDist grid is being created here (from an arbitrary incoming Grid).
+          !
+          ! If the dimCount of the incoming DistGrid is smaller than the original grid dimCount,
+          ! the created Grid will also be arbDist.          
           
           if (dgDimCount==dimCount) then
-            ! Create New Grid as regDecomp
-#if 1
+            ! Create the new Grid as regDecomp
+#if 0
             call ESMF_LogWrite("ESMF_GridCreateCopyFromNewDG arb grid as regDecom", &
               ESMF_LOGMSG_INFO)
 #endif
@@ -2868,8 +2863,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
               ESMF_CONTEXT, rcToReturn=rc)) return
           elseif (dgDimCount < dimCount) then
-            ! Create New Grid as arbDistr
-#if 1
+            ! Create the new Grid as arbDistr
+#if 0
             call ESMF_LogWrite("ESMF_GridCreateCopyFromNewDG arb grid as arbDistr", &
               ESMF_LOGMSG_INFO)
 #endif
@@ -2914,7 +2909,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
             ESMF_CONTEXT, rcToReturn=rc)) return
 
-#if 1
+#if 0
        write (msgString,*) "ESMF_GridCreateCopyFromNewDG(): nStaggers=",nStaggers, &
         " dimCount(Grid)=", dimCount
        call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=localrc)
