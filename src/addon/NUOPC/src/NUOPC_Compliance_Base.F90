@@ -63,8 +63,14 @@ module NUOPC_Compliance_Base
 
     interface JSON_GetID
         module procedure JSON_GridCompGetID
+        module procedure JSON_CplCompGetID
         module procedure JSON_StateGetID
         module procedure JSON_FieldGetID
+    end interface
+
+    interface JSON_LogCtrlFlow
+        module procedure JSON_GridCompLogCtrlFlow
+        module procedure JSON_CplCompLogCtrlFlow
     end interface
 
 contains
@@ -250,17 +256,29 @@ contains
     end subroutine
 
 
-    recursive subroutine NUOPC_CheckCplComponentMetadata(prefix, comp, rc)
+    recursive subroutine NUOPC_CheckCplComponentMetadata(prefix, comp, outputJSON, rc)
         character(*), intent(in)              :: prefix
         type(ESMF_CplComp)                    :: comp
+        logical, optional                     :: outputJSON
         integer,      intent(out), optional   :: rc
 
         type(ESMF_CompType_Flag)              :: comptype
         character(ESMF_MAXSTR)                :: attributeName
         character(ESMF_MAXSTR)                :: convention
         character(ESMF_MAXSTR)                :: purpose
+        character(ESMF_MAXSTR)                :: compName
+        type(ESMF_AttPack)                    :: attpack
+        character(1024*50)                    :: jsonstring
+        logical                               :: isPresent
+        logical                               :: doJSON
+        character(64)                         :: idStr
 
         if (present(rc)) rc = ESMF_SUCCESS
+
+        doJSON = .false.
+        if (present(outputJSON)) then
+            doJSON = outputJSON
+        endif
 
         ! get Component type and branch on it
 !        call ESMF_GridCompGet(comp, comptype=comptype, rc=rc)
@@ -337,8 +355,68 @@ contains
 !            file=FILENAME)) &
 !            return  ! bail out
 
-    end subroutine
+        if (doJSON) then
 
+            call ESMF_CplCompGet(comp, name=compName, rc=rc)
+            if (ESMF_LogFoundError(rc, &
+              line=__LINE__, &
+              file=FILENAME)) &
+              return  ! bail out
+
+            call JSON_GetID(comp, idStr, rc=rc)
+            if (ESMF_LogFoundError(rc, &
+              line=__LINE__, &
+              file=FILENAME)) &
+              return  ! bail out
+
+            call ESMF_AttributeAdd(comp, convention=convention, purpose=purpose, &
+                                   attrList=(/"CompName", &
+                                              "ESMFID  "/), &
+                                   attpack=attpack, rc=rc)
+            if (ESMF_LogFoundError(rc, &
+              line=__LINE__, &
+              file=FILENAME)) &
+              return  ! bail out
+
+            call ESMF_AttributeSet(comp, name="CompName", value=compName, &
+                                   attpack=attpack, rc=rc)
+            if (ESMF_LogFoundError(rc, &
+              line=__LINE__, &
+              file=FILENAME)) &
+              return  ! bail out
+
+            call ESMF_AttributeSet(comp, name="ESMFID", value=trim(adjustl(idStr)), &
+                                   attpack=attpack, rc=rc)
+            if (ESMF_LogFoundError(rc, &
+              line=__LINE__, &
+              file=FILENAME)) &
+              return  ! bail out
+
+            ! output JSON
+            call ESMF_AttributeGetAttPack(comp, attpack=attpack, &
+              convention=convention, purpose=purpose, isPresent=isPresent, rc=rc)
+            if (ESMF_LogFoundError(rc, &
+              line=__LINE__, &
+              file=FILENAME)) &
+              return  ! bail out
+
+            if (isPresent) then
+                call ESMF_AttPackStreamJSON(attpack, flattenPackList=.true., &
+                    includeUnset=.false., includeLinks=.false., output=jsonstring, rc=rc)
+                if (ESMF_LogFoundError(rc, &
+                  line=__LINE__, &
+                  file=FILENAME)) &
+                  return  ! bail out
+
+                call JSON_LogWrite(jsonstring, rc=rc)
+                if (ESMF_LogFoundError(rc, &
+                  line=__LINE__, &
+                  file=FILENAME)) &
+                  return  ! bail out
+            endif
+        endif
+
+    end subroutine
 
 
     recursive subroutine NUOPC_CheckComponentMetadataCIM(prefix, comp, rc)
@@ -2216,7 +2294,7 @@ contains
 
     end subroutine
 
-    recursive subroutine JSON_LogCtrlFlow(event, comp, rc)
+    recursive subroutine JSON_GridCompLogCtrlFlow(event, comp, rc)
 
         character(len=*), intent(in) :: event
         type(ESMF_GridComp), intent(in) :: comp
@@ -2233,8 +2311,6 @@ contains
         character(len=64) :: timeStamp
         character(len=64) :: idStr
         character(len=512) :: jsonString
-        !real(ESMF_KIND_R8) :: sysTime
-        !character(64)      :: sysTimeStr
 
         rc = ESMF_SUCCESS
 
@@ -2276,13 +2352,80 @@ contains
           file=FILENAME)) &
           return  ! bail out
 
-        !call ESMF_VMWtime(sysTime, rc=rc)
-        !if (ESMF_LogFoundError(rc, &
-        !  line=__LINE__, &
-        !  file=FILENAME)) &
-        !  return  ! bail out
+        write(jsonString,*) '{"ctrl":{&
+            &"event":"'//trim(event)//'",&
+            &"ESMFID":"'//trim(idStr)//'",&
+            &"compName":"'//trim(compName) //'",&
+            &"method":"'//trim(methodString)//'",&
+            &"phase":"'//trim(phaseString)//'",&
+            &"currTime":'//trim(timeStamp)//'}}'
 
-        !write(sysTimeStr,"(F32.16)") sysTime
+        call JSON_LogWrite(trim(jsonString), rc=rc)
+        if (ESMF_LogFoundError(rc, &
+          line=__LINE__, &
+          file=FILENAME)) &
+          return  ! bail out
+
+    end subroutine
+
+    !TODO: abstract and combine with subroutine above
+    recursive subroutine JSON_CplCompLogCtrlFlow(event, comp, rc)
+
+        character(len=*), intent(in) :: event
+        type(ESMF_CplComp), intent(in) :: comp
+        integer, intent(out), optional :: rc
+
+        ! locals
+        character(len=ESMF_MAXSTR) :: compName
+        integer :: phase
+        type(ESMF_Clock) :: clock
+        logical :: clockIsPresent
+        type(ESMF_Method_Flag) :: method
+        character(len=16) :: phaseString
+        character(len=16) :: methodString
+        character(len=64) :: timeStamp
+        character(len=64) :: idStr
+        character(len=512) :: jsonString
+
+        rc = ESMF_SUCCESS
+
+        call ESMF_CplCompGet(comp, clockIsPresent=clockIsPresent, &
+            currentMethod=method, currentPhase=phase, name=compName, rc=rc)
+        if (ESMF_LogFoundError(rc, &
+             line=__LINE__, file=FILENAME)) return  ! bail out
+
+        if (clockIsPresent) then
+            call ESMF_CplCompGet(comp, clock=clock, rc=rc)
+            if (ESMF_LogFoundError(rc, &
+              line=__LINE__, file=FILENAME)) return  ! bail out
+        endif
+
+        if (method == ESMF_METHOD_INITIALIZEIC) then
+            methodString = "init"
+        elseif (method == ESMF_METHOD_RUNIC) then
+            methodString = "run"
+        elseif (method == ESMF_METHOD_FINALIZEIC) then
+            methodString = "finalize"
+        else
+            methodString = "unknown"
+        endif
+
+        write(phaseString, "(I0)") phase
+
+        timeStamp = '""'
+        if (clockIsPresent .and. ESMF_ClockIsCreated(clock)) then
+            call ESMF_ClockPrint(clock, options="currTime", &
+                unit=timeStamp, rc=rc)
+            if (ESMF_LogFoundError(rc, &
+                line=__LINE__, file=FILENAME)) return  ! bail out
+            timeStamp = '"'//trim(timeStamp)//'"'
+        endif
+
+        call JSON_GetID(comp, idStr, rc=rc)
+        if (ESMF_LogFoundError(rc, &
+          line=__LINE__, &
+          file=FILENAME)) &
+          return  ! bail out
 
         write(jsonString,*) '{"ctrl":{&
             &"event":"'//trim(event)//'",&
@@ -2292,7 +2435,6 @@ contains
             &"phase":"'//trim(phaseString)//'",&
             &"currTime":'//trim(timeStamp)//'}}'
 
-        !call ESMF_LogWrite(trim(jsonString), ESMF_LOGMSG_JSON, rc=rc)
         call JSON_LogWrite(trim(jsonString), rc=rc)
         if (ESMF_LogFoundError(rc, &
           line=__LINE__, &
@@ -2322,6 +2464,45 @@ contains
 
     recursive subroutine JSON_GridCompGetID(comp, id, rc)
         type(ESMF_GridComp)            :: comp
+        character(len=*), intent(out)  :: id
+        integer, intent(out)           :: rc
+
+        ! locals
+        integer                    :: compid
+        type(ESMF_VMId), pointer   :: vmid(:)
+        integer                    :: vmlocalid
+        character                  :: vmkey
+        character(64)              :: compidStr, vmidStr, idStr
+
+        rc = ESMF_SUCCESS
+
+        call ESMF_BaseGetID(comp%compp%base, compid, rc=rc)
+        if (ESMF_LogFoundError(rc, &
+          line=__LINE__, &
+          file=FILENAME)) &
+          return  ! bail out
+
+        allocate(vmid(1))
+        call ESMF_BaseGetVMId(comp%compp%base, vmid(1), rc=rc)
+        if (ESMF_LogFoundError(rc, &
+          line=__LINE__, &
+          file=FILENAME)) &
+          return  ! bail out
+
+        call c_ESMCI_VMIdGet (vmid(1), vmlocalid, vmkey, rc)
+        if (ESMF_LogFoundError(rc, &
+          line=__LINE__, &
+          file=FILENAME)) &
+          return  ! bail out
+
+        write(vmidStr, "(I16)") vmlocalid
+        write(compidStr, "(I16)") compid
+        write(id, "(A)") trim(adjustl(vmidStr))//"-"//trim(adjustl(compidStr))
+
+    end subroutine
+
+    recursive subroutine JSON_CplCompGetID(comp, id, rc)
+        type(ESMF_CplComp)             :: comp
         character(len=*), intent(out)  :: id
         integer, intent(out)           :: rc
 

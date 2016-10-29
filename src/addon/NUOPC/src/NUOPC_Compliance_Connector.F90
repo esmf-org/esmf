@@ -32,6 +32,8 @@ module NUOPC_Compliance_Connector
     implicit none
   
     private
+
+    logical, save :: doJSON = .false.
   
     ! these map NUOPC events to the phase when it should occur
     ! therefore, we can check after the phase to verify
@@ -80,6 +82,7 @@ contains
         integer                 :: phaseCount, phase
         logical                 :: phaseZeroFlag
         character(NUOPC_PhaseMapStringLength) :: phaseLabel
+        integer                 :: jsonIsOn
     
         ! Initialize user return code
         rc = ESMF_SUCCESS
@@ -103,6 +106,17 @@ contains
                 line=__LINE__, &
                 file=FILENAME)) &
                 return  ! bail out
+        endif
+
+        call c_esmc_getComplianceCheckJSON(jsonIsOn, rc)
+        if (ESMF_LogFoundError(rc, &
+            line=__LINE__, &
+            file=FILENAME)) &
+            return  ! bail out
+        if (jsonIsOn == 1) then
+          doJSON = .true.
+        else
+          doJSON = .false.
         endif
 
         !---------------------------------------------------------------------------
@@ -351,6 +365,12 @@ contains
         ! Start Compliance Checking: InitializePrologue
         if (ccfDepth <= maxDepth .or. maxDepth < 0) then
         
+            if (doJSON) then
+                call JSON_LogCtrlFlow("start_prologue", comp, rc)
+                if (ESMF_LogFoundError(rc, &
+                    line=__LINE__, file=FILENAME)) return  ! bail out
+            endif
+
             write(output,*) ">START InitializePrologue for phase:", &
               trim(adjustl(pString)), ": ", trim(phaseLabel)
             call ESMF_LogWrite(trim(prefix)//trim(output), &
@@ -362,7 +382,7 @@ contains
 
             ! compliance check importState
             call NUOPC_CheckState(prefix, referenceName="importState", state=importState, &
-                rc=rc)
+                outputJSON=doJSON, rc=rc)
             if (ESMF_LogFoundError(rc, &
                 line=__LINE__, &
                 file=FILENAME)) &
@@ -370,7 +390,7 @@ contains
 
             ! compliance check exportState
             call NUOPC_CheckState(prefix, referenceName="exportState", state=exportState, &
-                rc=rc)
+                outputJSON=doJSON, rc=rc)
             if (ESMF_LogFoundError(rc, &
                 line=__LINE__, &
                 file=FILENAME)) &
@@ -391,7 +411,7 @@ contains
 !                return  ! bail out
 
              ! compliance check Component metadata
-            call NUOPC_CheckComponentMetadata(prefix, comp=comp, rc=rc)
+            call NUOPC_CheckComponentMetadata(prefix, comp=comp, outputJSON=doJSON, rc=rc)
             if (ESMF_LogFoundError(rc, &
                 line=__LINE__, &
                 file=FILENAME)) &
@@ -413,6 +433,15 @@ contains
                 line=__LINE__, &
                 file=FILENAME)) &
                 return  ! bail out
+
+            if (doJSON) then
+                call JSON_LogCtrlFlow("stop_prologue", comp, rc)
+                if (ESMF_LogFoundError(rc, &
+                    line=__LINE__, file=FILENAME)) return  ! bail out
+                call JSON_LogCtrlFlow("start_phase", comp, rc)
+                if (ESMF_LogFoundError(rc, &
+                    line=__LINE__, file=FILENAME)) return  ! bail out
+            endif
     
         endif
         ! Stop Compliance Checking: InitializePrologue
@@ -432,6 +461,15 @@ contains
         !---------------------------------------------------------------------------
         ! Start Compliance Checking: InitializeEpilogue
         if (ccfDepth <= maxDepth .or. maxDepth < 0) then
+
+            if (doJSON) then
+                call JSON_LogCtrlFlow("stop_phase", comp, rc)
+                if (ESMF_LogFoundError(rc, &
+                    line=__LINE__, file=FILENAME)) return  ! bail out
+                call JSON_LogCtrlFlow("start_epilogue", comp, rc)
+                if (ESMF_LogFoundError(rc, &
+                    line=__LINE__, file=FILENAME)) return  ! bail out
+            endif
 
             call prefixString(comp, prefix=prefix, forward=.false., rc=rc)
             if (ESMF_LogFoundError(rc, &
@@ -456,7 +494,7 @@ contains
 !                return  ! bail out
 
             ! compliance check Component metadata
-            call NUOPC_CheckComponentMetadata(prefix, comp=comp, rc=rc)
+            call NUOPC_CheckComponentMetadata(prefix, comp=comp, outputJSON=doJSON, rc=rc)
             if (ESMF_LogFoundError(rc, &
                 line=__LINE__, &
                 file=FILENAME)) &
@@ -464,7 +502,7 @@ contains
 
             ! compliance check importState
             call NUOPC_CheckState(prefix, referenceName="importState", state=importState, &
-                rc=rc)
+                outputJSON=doJSON, rc=rc)
             if (ESMF_LogFoundError(rc, &
                 line=__LINE__, &
                 file=FILENAME)) &
@@ -472,7 +510,7 @@ contains
     
             ! compliance check exportState
             call NUOPC_CheckState(prefix, referenceName="exportState", state=exportState, &
-                rc=rc)
+                outputJSON=doJSON, rc=rc)
             if (ESMF_LogFoundError(rc, &
                 line=__LINE__, &
                 file=FILENAME)) &
@@ -500,6 +538,12 @@ contains
                 line=__LINE__, &
                 file=FILENAME)) &
                 return  ! bail out
+
+            if (doJSON) then
+                call JSON_LogCtrlFlow("stop_epilogue", comp, rc)
+                if (ESMF_LogFoundError(rc, &
+                    line=__LINE__, file=FILENAME)) return  ! bail out
+            endif
 
         endif
         ! Stop Compliance Checking: InitializeEpilogue
@@ -558,6 +602,12 @@ contains
         ! Start Compliance Checking: RunPrologue
         if (ccfDepth <= maxDepth .or. maxDepth < 0) then
 
+            if (doJSON) then
+                call JSON_LogCtrlFlow("start_prologue", comp, rc)
+                if (ESMF_LogFoundError(rc, &
+                    line=__LINE__, file=FILENAME)) return  ! bail out
+            endif
+
             write(output,*) ">START RunPrologue for phase:", &
               trim(adjustl(pString)), ": ", trim(phaseLabel)
             call ESMF_LogWrite(trim(prefix)//trim(output), &
@@ -569,7 +619,7 @@ contains
 
             ! compliance check importState
             call NUOPC_CheckState(prefix, referenceName="importState", state=importState, &
-                rc=rc)
+                outputJSON=doJSON, rc=rc)
             if (ESMF_LogFoundError(rc, &
                 line=__LINE__, &
                 file=FILENAME)) &
@@ -577,7 +627,7 @@ contains
 
             ! compliance check exportState
             call NUOPC_CheckState(prefix, referenceName="exportState", state=exportState, &
-                rc=rc)
+                outputJSON=doJSON, rc=rc)
             if (ESMF_LogFoundError(rc, &
                 line=__LINE__, &
                 file=FILENAME)) &
@@ -614,6 +664,15 @@ contains
                 file=FILENAME)) &
                 return  ! bail out
 
+            if (doJSON) then
+                call JSON_LogCtrlFlow("stop_prologue", comp, rc)
+                if (ESMF_LogFoundError(rc, &
+                    line=__LINE__, file=FILENAME)) return  ! bail out
+                call JSON_LogCtrlFlow("start_phase", comp, rc)
+                if (ESMF_LogFoundError(rc, &
+                    line=__LINE__, file=FILENAME)) return  ! bail out
+            endif
+
         endif
         ! Stop Compliance Checking: RunPrologue
         !---------------------------------------------------------------------------
@@ -631,6 +690,15 @@ contains
         !---------------------------------------------------------------------------
         ! Start Compliance Checking: RunEpilogue
         if (ccfDepth <= maxDepth .or. maxDepth < 0) then
+
+            if (doJSON) then
+                call JSON_LogCtrlFlow("stop_phase", comp, rc)
+                if (ESMF_LogFoundError(rc, &
+                    line=__LINE__, file=FILENAME)) return  ! bail out
+                call JSON_LogCtrlFlow("start_epilogue", comp, rc)
+                if (ESMF_LogFoundError(rc, &
+                    line=__LINE__, file=FILENAME)) return  ! bail out
+            endif
 
             call prefixString(comp, prefix=prefix, forward=.false., rc=rc)
             if (ESMF_LogFoundError(rc, &
@@ -656,7 +724,7 @@ contains
 
             ! compliance check importState
             call NUOPC_CheckState(prefix, referenceName="importState", state=importState, &
-                rc=rc)
+                outputJSON=doJSON, rc=rc)
             if (ESMF_LogFoundError(rc, &
                 line=__LINE__, &
                 file=FILENAME)) &
@@ -664,7 +732,7 @@ contains
 
             ! compliance check exportState
             call NUOPC_CheckState(prefix, referenceName="exportState", state=exportState, &
-                rc=rc)
+                outputJSON=doJSON, rc=rc)
             if (ESMF_LogFoundError(rc, &
                 line=__LINE__, &
                 file=FILENAME)) &
@@ -693,6 +761,12 @@ contains
                 line=__LINE__, &
                 file=FILENAME)) &
                 return  ! bail out
+
+            if (doJSON) then
+                call JSON_LogCtrlFlow("stop_epilogue", comp, rc)
+                if (ESMF_LogFoundError(rc, &
+                    line=__LINE__, file=FILENAME)) return  ! bail out
+            endif
 
         endif
         ! Stop Compliance Checking: RunEpilogue
@@ -750,6 +824,12 @@ contains
         ! Start Compliance Checking: FinalizePrologue
         if (ccfDepth <= maxDepth .or. maxDepth < 0) then
 
+            if (doJSON) then
+                call JSON_LogCtrlFlow("start_prologue", comp, rc)
+                if (ESMF_LogFoundError(rc, &
+                    line=__LINE__, file=FILENAME)) return  ! bail out
+            endif
+
             write(output,*) ">START FinalizePrologue for phase:", &
               trim(adjustl(pString)), ": ", trim(phaseLabel)
             call ESMF_LogWrite(trim(prefix)//trim(output), &
@@ -761,7 +841,7 @@ contains
 
             ! compliance check importState
             call NUOPC_CheckState(prefix, referenceName="importState", state=importState, &
-                rc=rc)
+                outputJSON=doJSON, rc=rc)
             if (ESMF_LogFoundError(rc, &
                 line=__LINE__, &
                 file=FILENAME)) &
@@ -769,7 +849,7 @@ contains
 
             ! compliance check exportState
             call NUOPC_CheckState(prefix, referenceName="exportState", state=exportState, &
-                rc=rc)
+                outputJSON=doJSON, rc=rc)
             if (ESMF_LogFoundError(rc, &
                 line=__LINE__, &
                 file=FILENAME)) &
@@ -798,6 +878,15 @@ contains
                 file=FILENAME)) &
                 return  ! bail out
 
+            if (doJSON) then
+                call JSON_LogCtrlFlow("stop_prologue", comp, rc)
+                if (ESMF_LogFoundError(rc, &
+                    line=__LINE__, file=FILENAME)) return  ! bail out
+                call JSON_LogCtrlFlow("start_phase", comp, rc)
+                if (ESMF_LogFoundError(rc, &
+                    line=__LINE__, file=FILENAME)) return  ! bail out
+            endif
+
         endif
         ! Stop Compliance Checking: FinalizePrologue
         !---------------------------------------------------------------------------
@@ -815,6 +904,15 @@ contains
         !---------------------------------------------------------------------------
         ! Start Compliance Checking: FinalizeEpilogue
         if (ccfDepth <= maxDepth .or. maxDepth < 0) then
+
+            if (doJSON) then
+                call JSON_LogCtrlFlow("stop_phase", comp, rc)
+                if (ESMF_LogFoundError(rc, &
+                    line=__LINE__, file=FILENAME)) return  ! bail out
+                call JSON_LogCtrlFlow("start_epilogue", comp, rc)
+                if (ESMF_LogFoundError(rc, &
+                    line=__LINE__, file=FILENAME)) return  ! bail out
+            endif
 
             call prefixString(comp, prefix=prefix, forward=.false., rc=rc)
             if (ESMF_LogFoundError(rc, &
@@ -840,7 +938,7 @@ contains
 
             ! compliance check importState
             call NUOPC_CheckState(prefix, referenceName="importState", state=importState, &
-                rc=rc)
+                outputJSON=doJSON, rc=rc)
             if (ESMF_LogFoundError(rc, &
                 line=__LINE__, &
                 file=FILENAME)) &
@@ -848,7 +946,7 @@ contains
 
             ! compliance check exportState
             call NUOPC_CheckState(prefix, referenceName="exportState", state=exportState, &
-                rc=rc)
+                outputJSON=doJSON, rc=rc)
             if (ESMF_LogFoundError(rc, &
                 line=__LINE__, &
                 file=FILENAME)) &
@@ -869,6 +967,12 @@ contains
                 line=__LINE__, &
                 file=FILENAME)) &
                 return  ! bail out
+
+             if (doJSON) then
+                call JSON_LogCtrlFlow("stop_epilogue", comp, rc)
+                if (ESMF_LogFoundError(rc, &
+                    line=__LINE__, file=FILENAME)) return  ! bail out
+            endif
 
         endif
         ! Stop Compliance Checking: FinalizeEpilogue
