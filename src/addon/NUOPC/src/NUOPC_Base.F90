@@ -1066,7 +1066,7 @@ module NUOPC_Base
 !EOPI
   !-----------------------------------------------------------------------------
     ! local variables
-    character(ESMF_MAXSTR)            :: attrList(11)
+    character(ESMF_MAXSTR)            :: attrList(13)
     character(ESMF_MAXSTR)            :: tempString
     logical                           :: accepted
     integer                           :: i
@@ -1087,6 +1087,8 @@ module NUOPC_Base
     attrList(9) = "UngriddedUBound"
     attrList(10) = "GridToFieldMap"
     attrList(11) = "ArbDimCount"
+    attrList(12) = "MinIndex"
+    attrList(13) = "MaxIndex"
     
     ! add Attribute packages
     call ESMF_AttributeAdd(field, convention="ESG", purpose="General", rc=rc)

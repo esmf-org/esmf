@@ -1158,6 +1158,8 @@ print *, "current bondLevel=", bondLevel
     integer                         :: fieldDimCount, gridDimCount, arbDimCount
     integer                         :: profiling
     logical                         :: matchE, matchI
+    integer                         :: dimCount
+    integer, allocatable            :: minIndex(:), maxIndex(:)
 
     rc = ESMF_SUCCESS
 
@@ -1352,7 +1354,8 @@ print *, "current bondLevel=", bondLevel
           call ESMF_FieldGet(providerField, grid=grid, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-          call ESMF_GridGet(grid, distgrid=providerDG, name=geomobjname, rc=rc)
+          call ESMF_GridGet(grid, distgrid=providerDG, name=geomobjname, &
+            dimCount=dimCount, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
           call ESMF_FieldGet(acceptorField, vm=vm, rc=rc)
@@ -1365,16 +1368,10 @@ print *, "current bondLevel=", bondLevel
           acceptorDG = ESMF_DistGridCreate(providerDG, vm=vm, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-#if 0
-          ! It really isn't the right thing to create a full Grid here just
-          ! to pass the DistGrid to the acceptor side. Plus this interface
-          ! does NOT work for DistGrids with arb seq indices.
-          grid = ESMF_GridCreate(acceptorDG, name=geomobjname, vm=vm, rc=rc)
-          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-#else
           ! The right way to transfer the DistGrid to the acceptor side is to
           ! create an empty Grid, and then only set the name and distgrid.
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
           grid = ESMF_GridEmptyCreate(vm=vm, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
@@ -1382,7 +1379,6 @@ print *, "current bondLevel=", bondLevel
             vm=vm, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-#endif
           call ESMF_FieldEmptySet(acceptorField, grid=grid, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
@@ -1395,6 +1391,24 @@ print *, "current bondLevel=", bondLevel
           call ESMF_GridGet(grid, dimCount=gridDimCount, &
             arbDimCount=arbDimCount, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          allocate(minIndex(dimCount), maxIndex(dimCount), stat=rc)
+          if (ESMF_LogFoundAllocError(rc, msg="Allocating minIndex, maxIndex", &
+            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          call ESMF_GridGetIndex(grid, tileNo=1, &
+            minIndex=minIndex, maxIndex=maxIndex, rc=rc)
+          ! bring over mindIndex and maxIndex as attributes
+          call ESMF_AttributeSet(acceptorField, &
+            name="MinIndex", valueList=minIndex, &
+            convention="NUOPC", purpose="Instance", &
+            attnestflag=ESMF_ATTNEST_ON, rc=rc)
+          call ESMF_AttributeSet(acceptorField, &
+            name="MaxIndex", valueList=maxIndex, &
+            convention="NUOPC", purpose="Instance", &
+            attnestflag=ESMF_ATTNEST_ON, rc=rc)
+          deallocate(minIndex, maxIndex, stat=rc)
+          if (ESMF_LogFoundDeallocError(rc, &
+            msg="Deallocating minIndex, maxIndex", &
             line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
           ! bring over arbDimCount as attribute
           call ESMF_AttributeSet(acceptorField, &
