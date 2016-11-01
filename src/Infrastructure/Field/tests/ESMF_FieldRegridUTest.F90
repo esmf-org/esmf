@@ -952,8 +952,9 @@
       ! return result
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
+#if 0
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_OFF_UTest
 
       write(failMsg, *) "Test unsuccessful"
       write(name, *) "Test regrid smm on an arbitrary grid"
@@ -968,6 +969,8 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
+#endif
+
 #endif
 #endif
     call ESMF_TestEnd(ESMF_SRCLINE)
