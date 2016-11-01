@@ -283,6 +283,7 @@ public  ESMF_GridDecompType, ESMF_GRID_INVALID, ESMF_GRID_NONARBITRARY, ESMF_GRI
   public ESMF_GridGetItem
   public ESMF_GridSetItem
   public ESMF_GridGetItemBounds
+  public ESMF_GridGetIndex
 
 !  public ESMF_GridSetCommitShapeTile
   public ESMF_GridSerialize
