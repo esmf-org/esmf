@@ -268,13 +268,13 @@ RUN_ESMF_AttPackGridUTestUNI:
 # --- AttPackLocStream
 
 RUN_ESMF_AttPackLocStreamUTest:
-	cp -f $(ESMF_DIR)/src/Superstructure/AttributeAPI/tests/data/baseline_LocStream\ \ 2.xml $(ESMF_TESTDIR)
-	cp -f $(ESMF_DIR)/src/Superstructure/AttributeAPI/tests/data/baseline_LocStream\ \ 2.stdout $(ESMF_TESTDIR)
+	cp -f $(ESMF_DIR)/src/Superstructure/AttributeAPI/tests/data/baseline_LocStream002.xml $(ESMF_TESTDIR)
+	cp -f $(ESMF_DIR)/src/Superstructure/AttributeAPI/tests/data/baseline_LocStream0022.stdout $(ESMF_TESTDIR)
 	$(MAKE) TNAME=AttPackLocStream NP=4 ftest
 
 RUN_ESMF_AttPackLocStreamUTestUNI:
-	cp -f $(ESMF_DIR)/src/Superstructure/AttributeAPI/tests/data/baseline_LocStream\ \ 2.xml $(ESMF_TESTDIR)
-	cp -f $(ESMF_DIR)/src/Superstructure/AttributeAPI/tests/data/baseline_LocStream\ \ 2.stdout $(ESMF_TESTDIR)
+	cp -f $(ESMF_DIR)/src/Superstructure/AttributeAPI/tests/data/baseline_LocStream002.xml $(ESMF_TESTDIR)
+	cp -f $(ESMF_DIR)/src/Superstructure/AttributeAPI/tests/data/baseline_LocStream002.stdout $(ESMF_TESTDIR)
 	$(MAKE) TNAME=AttPackLocStream NP=1 ftest
 
 # --- AttPackSciComp
