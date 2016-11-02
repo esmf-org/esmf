@@ -952,9 +952,8 @@
       ! return result
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
-#if 0
       !------------------------------------------------------------------------
-      !EX_OFF_UTest
+      !EX_UTest
 
       write(failMsg, *) "Test unsuccessful"
       write(name, *) "Test regrid smm on an arbitrary grid"
@@ -969,8 +968,6 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-#endif
-
 #endif
 #endif
     call ESMF_TestEnd(ESMF_SRCLINE)
@@ -28962,7 +28959,7 @@ write(*,*) "LOCALRC=",localrc
   type(ESMF_Grid) :: dstArbGrid
   type(ESMF_Field) :: srcFieldA
   type(ESMF_Field) :: dstField
-  type(ESMF_Field) :: xdstField
+   type(ESMF_Field) :: xdstField
   type(ESMF_Field) :: dstArbField
   type(ESMF_Field) :: xdstArbField
   type(ESMF_Array) :: arrayB
@@ -28978,10 +28975,10 @@ write(*,*) "LOCALRC=",localrc
   real(ESMF_KIND_R8), pointer :: farrayPtr1D(:)
   real(ESMF_KIND_R8), pointer :: xfarrayPtr(:,:), xfarrayPtr1D(:)
   integer :: clbnd(2),cubnd(2)
-   integer :: cnt(1)
+  integer :: clbnd1D(1),cubnd1D(1)
   integer :: fclbnd(2),fcubnd(2)
-   integer :: i1,i2,i3, index(2), pos
-   integer :: lDE, localDECount
+  integer :: i1,i2,i3, index(2), pos, local_i1
+  integer :: lDE, localDECount
   real(ESMF_KIND_R8) :: coord(2)
   character(len=ESMF_MAXSTR) :: string
   integer Src_nx, Src_ny, Dst_nx, Dst_ny
@@ -29000,7 +28997,7 @@ write(*,*) "LOCALRC=",localrc
   integer :: localPet, petCount
 
   integer(ESMF_KIND_I4), pointer:: factorIndexList(:,:)
-  real(ESMF_KIND_R8), pointer :: factorList(:)
+   real(ESMF_KIND_R8), pointer :: factorList(:)
 
   ! result code
   integer :: finalrc
@@ -29019,7 +29016,8 @@ write(*,*) "LOCALRC=",localrc
   call ESMF_VMGet(vm, petCount=petCount, localPet=localpet, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rcToReturn=rc)) return
+             ESMF_CONTEXT, rcToReturn=rc)) return
+
 
   ! Establish the resolution of the grids
   Dst_nx = 20
@@ -29238,7 +29236,6 @@ write(*,*) "LOCALRC=",localrc
       rc=ESMF_FAILURE
       return
    endif
- 
 
 ! Code to check regridding of regularly decomposed grids. Saved for debugging.
 ! (for it to work, need to get routeHandle out of ESMF_FieldRegridStore() call above)
@@ -29339,7 +29336,7 @@ write(*,*) "LOCALRC=",localrc
         endif
      enddo
      enddo
-
+ 
      ! Allocate list
      allocate(localIndices(localCount,2))    
 
@@ -29357,7 +29354,7 @@ write(*,*) "LOCALRC=",localrc
   endif 
 
   ! Setup dest. arbitrary grid
-  dstArbGrid=ESMF_GridCreateNoPeriDim(minIndex=(/1,1/),maxIndex=(/Dst_nx,Dst_ny/), &
+  dstArbGrid=ESMF_GridCreateNoPeriDim(minIndex=(/1,1/),maxIndex=(/Dst_nx,Dst_ny /), &
                                 arbIndexList=localIndices,arbIndexCount=localCount, &
                                coordSys=ESMF_COORDSYS_CART, &
                                 rc=localrc)
@@ -29369,12 +29366,12 @@ write(*,*) "LOCALRC=",localrc
 
   ! Setup fields
   dstArbField = ESMF_FieldCreate(dstArbGrid, typekind=ESMF_TYPEKIND_R8, &
-                         staggerloc=ESMF_STAGGERLOC_CENTER, name="dest", rc=localrc)
+                          staggerloc=ESMF_STAGGERLOC_CENTER, name="dest", rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
     rc=ESMF_FAILURE
      return
    endif
-  
+   
 
    xdstArbField = ESMF_FieldCreate(dstArbGrid, typekind=ESMF_TYPEKIND_R8, &
                          staggerloc=ESMF_STAGGERLOC_CENTER, name="dest", rc=localrc)
@@ -29384,31 +29381,35 @@ write(*,*) "LOCALRC=",localrc
   endif
 
   ! Set xdstField
-  call ESMF_FieldGet(xdstArbField, farrayPtr=xfarrayPtr1D, computationalCount=cnt, &
+  call ESMF_FieldGet(xdstArbField, farrayPtr=xfarrayPtr1D, &
+       computationalLBound=clbnd1D, computationalUBound=cubnd1D, &
        rc=localrc)
-  if (localrc /=ESMF_SUCCESS) then
+   if (localrc /=ESMF_SUCCESS) then
      rc=ESMF_FAILURE
      return
   endif
 
-  ! Set exact field
-  do i1=1,cnt(1)
+   ! Set exact field
+  do i1=clbnd1D(1),cubnd1D(1)
+
+     ! Get localIndex
+     local_i1=i1-clbnd1D(1)+1
+
      ! Calc coordinates
-     x = ((Dst_maxx-Dst_minx)*REAL(localIndices(i1,1)-1)/REAL(Dst_nx-1))+Dst_minx
-     y = ((Dst_maxy-Dst_miny)*REAL(localIndices(i1,2)-1)/REAL(Dst_ny-1))+Dst_miny
+     x = ((Dst_maxx-Dst_minx)*REAL(localIndices(local_i1,1)-1)/REAL(Dst_nx-1))+Dst_minx
+     y = ((Dst_maxy-Dst_miny)*REAL(localIndices(local_i1,2)-1)/REAL(Dst_ny-1))+Dst_miny
      
      ! Set exact destination field
      xfarrayPtr1D(i1) = 2.0+x+10*y
      
   enddo
 
-
   ! Do SMM
   call ESMF_FieldSMMStore(srcFieldA, dstArbField, routeHandle=routeHandle, &
          factorList=factorList, factorIndexList=factorIndexList, rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
       rc=ESMF_FAILURE
-      return
+       return
    endif
 
   ! Do regrid
@@ -29426,7 +29427,8 @@ write(*,*) "LOCALRC=",localrc
 
 
   !!!! Check error !!!!
-  call ESMF_FieldGet(xdstArbField, farrayPtr=xfarrayPtr1D, computationalCount=cnt, &
+  call ESMF_FieldGet(xdstArbField, farrayPtr=xfarrayPtr1D, &
+       computationalLBound=clbnd1D, computationalUBound=cubnd1D, &
        rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
      rc=ESMF_FAILURE
@@ -29435,17 +29437,17 @@ write(*,*) "LOCALRC=",localrc
 
   call ESMF_FieldGet(dstArbField, farrayPtr=farrayPtr1D, &
        rc=localrc)
-  if (localrc /=ESMF_SUCCESS) then
+   if (localrc /=ESMF_SUCCESS) then
      rc=ESMF_FAILURE
      return
   endif
 
   ! Set exact field
   maxRelErr=0.0  
-  do i1=1,cnt(1)
+  do i1=clbnd1D(1),cubnd1D(1)
 
      ! Compute relative error
-     if (xfarrayPtr1D(i1) .ne. 0.0) then
+      if (xfarrayPtr1D(i1) .ne. 0.0) then
         relErr=abs((farrayPtr1D(i1)-xfarrayPtr1D(i1))/xfarrayPtr1D(i1))
      else
         relErr=abs(farrayPtr1D(i1)-xfarrayPtr1D(i1))
@@ -29454,7 +29456,7 @@ write(*,*) "LOCALRC=",localrc
      ! if working everything should be close to exact answer
      if (relErr .gt. 1.0E-14) then
         correct=.false.
-     endif
+      endif
      
      ! Calc Max error
      if (relErr .gt. maxRelErr) then
@@ -29464,14 +29466,14 @@ write(*,*) "LOCALRC=",localrc
 
 !  write(*,*) "MaxRelErr=",maxRelErr
 
-  ! Destroy the Fields
+   ! Destroy the Fields
    call ESMF_FieldDestroy(srcFieldA, rc=localrc)
    if (localrc /=ESMF_SUCCESS) then
      rc=ESMF_FAILURE
      return
    endif
 
-   call ESMF_FieldDestroy(dstField, rc=localrc)
+    call ESMF_FieldDestroy(dstField, rc=localrc)
    if (localrc /=ESMF_SUCCESS) then
      rc=ESMF_FAILURE
      return
@@ -29483,7 +29485,7 @@ write(*,*) "LOCALRC=",localrc
      return
    endif
 
-
+ 
   ! Free the grids
   call ESMF_GridDestroy(srcGrid, rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
@@ -29502,7 +29504,7 @@ write(*,*) "LOCALRC=",localrc
 
   ! Deallocate regridding matrix
   deallocate(factorIndexList)
-  deallocate(factorList)
+   deallocate(factorList)
 
   ! return answer based on correct flag
   if (correct) then
