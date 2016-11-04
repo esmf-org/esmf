@@ -25,6 +25,8 @@
 
 namespace ESMCI {
 
+  /////// TODO: THIS ISN'T USED RIGHT NOW, SO GET RID OF EVENTUALLY //////////
+
 
 struct MBMesh_Search_result {
 
