@@ -45,7 +45,7 @@ program ESMF_RegridWeightGenApp
   integer            :: ind, pos
   logical            :: largeFileFlag
   logical            :: netcdf4FileFlag
-  logical 		 :: ignoreUnmapped, userAreaFlag, ignoreDegenerate
+  logical              :: ignoreUnmapped, userAreaFlag, ignoreDegenerate
   type(ESMF_UnmappedAction_Flag) :: unmappedaction
   logical            :: srcMissingValue, dstMissingValue
   logical            :: srcIsRegional, dstIsRegional, typeSetFlag
@@ -55,7 +55,7 @@ program ESMF_RegridWeightGenApp
   character(len=256) :: argStr
   logical            :: terminateProg
   !real(ESMF_KIND_R8) :: starttime, endtime
-  logical            :: checkFlag
+  logical            :: checkFlag, moabFlag
    type(ESMF_LogKind_Flag) :: msgbuf(1)
   type(ESMF_LogKind_Flag) :: logflag
   character(len=ESMF_MAXPATHLEN)  :: argvalue
@@ -100,8 +100,8 @@ program ESMF_RegridWeightGenApp
   ! Initialize ESMF
   !
   call ESMF_Initialize (defaultCalKind=ESMF_CALKIND_GREGORIAN, &
-	defaultlogfilename="RegridWeightGen.Log", &
-                	logkindflag=logflag, rc=rc)
+      defaultlogfilename="RegridWeightGen.Log", &
+                      logkindflag=logflag, rc=rc)
   if (rc /= ESMF_SUCCESS) call ErrorMsgAndAbort(-1)
   
   !------------------------------------------------------------------------
@@ -121,7 +121,7 @@ program ESMF_RegridWeightGenApp
   if (PetNo == 0) then
     call ESMF_UtilGetArgIndex('--help', argindex=ind)
     if (ind /= -1) then
-	    call PrintUsage()
+          call PrintUsage()
       terminateProg=.true.
     endif
     call ESMF_UtilGetArgIndex('--version', argindex=ind)
@@ -164,7 +164,7 @@ program ESMF_RegridWeightGenApp
       print *, "ERROR: The required argument [-w|--weight] is missing."
       print *, "Use the --help argument to see an explanation of usage."
       call ESMF_Finalize(endflag=ESMF_END_ABORT)
-    else	
+    else      
       call ESMF_UtilGetArg(ind+1, argvalue=wgtfile)
     endif
 
@@ -175,9 +175,9 @@ program ESMF_RegridWeightGenApp
       method = 'bilinear'
     else
       call ESMF_UtilGetArg(ind+1, argvalue=method)
-	    if ((trim(method) .ne. 'bilinear') .and. &
+          if ((trim(method) .ne. 'bilinear') .and. &
           (trim(method) .ne. 'conserve') .and. &
-	        (trim(method) .ne. 'patch')    .and. &
+              (trim(method) .ne. 'patch')    .and. &
           (trim(method) .ne. 'nearestdtos')   .and. &
           (trim(method) .ne. 'neareststod')) then
         write(*,*)
@@ -344,7 +344,7 @@ program ESMF_RegridWeightGenApp
         print *, "Use the --help argument to see an explanation of usage."
         call ESMF_Finalize(endflag=ESMF_END_ABORT)
       else
-        call ESMF_UtilGetArg(ind+1, argvalue=srcMeshName)	   
+        call ESMF_UtilGetArg(ind+1, argvalue=srcMeshName)         
       endif
     endif
 
@@ -357,7 +357,7 @@ program ESMF_RegridWeightGenApp
         print *, "Use the --help argument to see an explanation of usage."
         call ESMF_Finalize(endflag=ESMF_END_ABORT)
       else
-        call ESMF_UtilGetArg(ind+1, argvalue=dstMeshName)	   
+        call ESMF_UtilGetArg(ind+1, argvalue=dstMeshName)         
       endif
     endif
 
@@ -367,7 +367,7 @@ program ESMF_RegridWeightGenApp
       srcMissingValue = .false.
     else
       srcMissingValue = .true.
-      call ESMF_UtilGetArg(ind+1, argvalue=srcVarName)	   
+      call ESMF_UtilGetArg(ind+1, argvalue=srcVarName)         
     endif
 
     ! missing area only supported for GRIDSPEC and UGRID file.  When the grid
@@ -389,7 +389,7 @@ program ESMF_RegridWeightGenApp
       dstMissingValue = .false.
     else
       dstMissingValue = .true.
-      call ESMF_UtilGetArg(ind+1, argvalue=dstVarName)	   
+      call ESMF_UtilGetArg(ind+1, argvalue=dstVarName)         
     endif
 
     ! missing area only supported for GRIDSPEC and UGRID file.  When the grid
@@ -515,7 +515,7 @@ program ESMF_RegridWeightGenApp
     if (srcFileType == ESMF_FILEFORMAT_GRIDSPEC) then
       call ESMF_UtilGetArgIndex('--src_coordinates', argindex=ind, rc=rc)
       if (ind /= -1) then
-        call ESMF_UtilGetArg(ind+1, argvalue=argStr)	   
+        call ESMF_UtilGetArg(ind+1, argvalue=argStr)         
         pos = INDEX(argStr, ',')
         if (pos == 0) then
           write(*,*)
@@ -541,7 +541,7 @@ program ESMF_RegridWeightGenApp
     if (dstFileType == ESMF_FILEFORMAT_GRIDSPEC) then
       call ESMF_UtilGetArgIndex('--dst_coordinates', argindex=ind, rc=rc)
       if (ind /= -1) then
-        call ESMF_UtilGetArg(ind+1, argvalue=argStr)	   
+        call ESMF_UtilGetArg(ind+1, argvalue=argStr)         
         pos = INDEX(argStr, ",")
         if (pos == 0) then
           write(*,*)
@@ -571,9 +571,9 @@ program ESMF_RegridWeightGenApp
     ! the regrid method is not conservative  (no default value to force user to specify
     ! the location)
     if (ind /= -1) then
-      call ESMF_UtilGetArg(ind+1, argvalue=argStr)	   
+      call ESMF_UtilGetArg(ind+1, argvalue=argStr)         
       if (trim(argStr) .eq. 'corner') then
-	   useSrcCorner = .true.
+         useSrcCorner = .true.
       elseif (trim(argStr) .eq. 'center') then
            useSrcCorner = .false.
       else
@@ -587,7 +587,7 @@ program ESMF_RegridWeightGenApp
           .and. method /= 'conserve') then
           write(*,*)
           print *, 'ERROR: --src_loc is required for this source file type and regridding'
-	  print *, '       method.'
+        print *, '       method.'
           print *, '       Please specifiy either "center" or "corner"'
           print *, "Use the --help argument to see an explanation of usage."
           call ESMF_Finalize(endflag=ESMF_END_ABORT)
@@ -599,7 +599,7 @@ program ESMF_RegridWeightGenApp
         .and. useSrcCorner ) then
           write(*,*)
           print *, 'ERROR: cannot use corner coordinates to do regridding for SCRIP or'
-	  print *, '       GRIDSPEC files.'
+        print *, '       GRIDSPEC files.'
           print *, "Use the --help argument to see an explanation of usage."
           call ESMF_Finalize(endflag=ESMF_END_ABORT)
     endif
@@ -609,9 +609,9 @@ program ESMF_RegridWeightGenApp
     ! the regrid method is not conservative  (no default value to force user to specify
     ! the location)
     if (ind /= -1) then
-      call ESMF_UtilGetArg(ind+1, argvalue=argStr)	   
+      call ESMF_UtilGetArg(ind+1, argvalue=argStr)         
       if (trim(argStr) .eq. 'corner') then
-	   useDstCorner = .true.
+         useDstCorner = .true.
       elseif (trim(argStr) .eq. 'center') then
            useDstCorner = .false.
       else
@@ -625,7 +625,7 @@ program ESMF_RegridWeightGenApp
           .and. method /= 'conserve') then
           write(*,*)
           print *, 'ERROR: --dst_loc is required for this source file type and regridding'
-	  print *, '       method.'
+        print *, '       method.'
           print *, '       Please specifiy either "center" or "corner"'
           print *, "Use the --help argument to see an explanation of usage."
           call ESMF_Finalize(endflag=ESMF_END_ABORT)
@@ -637,7 +637,7 @@ program ESMF_RegridWeightGenApp
         .and. useDstCorner) then
           write(*,*)
           print *, 'ERROR: cannot use corner coordinates to do regridding for SCRIP or'
-	  print *, '       GRIDSPEC files.'
+        print *, '       GRIDSPEC files.'
           print *, "Use the --help argument to see an explanation of usage."
           call ESMF_Finalize(endflag=ESMF_END_ABORT)
     endif
@@ -651,9 +651,16 @@ program ESMF_RegridWeightGenApp
 
     checkFlag = .false.
     call ESMF_UtilGetArgIndex('--check', argindex=ind, rc=rc)
-    if (ind /= -1) checkFlag = .true.   
+    if (ind /= -1) checkFlag = .true.
 
-1110 continue 
+    moabFlag = .false.
+    call ESMF_UtilGetArgIndex('--moab', argindex=ind, rc=rc)
+    if (ind /= -1) moabFlag = .true.
+
+    if (moabFlag) call ESMF_MeshSetMOAB(.true., rc=rc)
+    if (rc /= ESMF_SUCCESS) call ErrorMsgAndAbort(PetNo)
+
+1110 continue
     commandbuf2(:)=0
     if (terminateProg) then
       commandbuf2(1)=-9999            
@@ -715,7 +722,7 @@ program ESMF_RegridWeightGenApp
     if (rc /= ESMF_SUCCESS) call ErrorMsgAndAbort(PetNo)
 
     if (commandbuf2(1) == -9999) then
-      goto 1111	  
+      goto 1111        
     endif
 
     srcFileType%fileformat = commandbuf2(1)
@@ -844,7 +851,7 @@ program ESMF_RegridWeightGenApp
     methodflag = ESMF_REGRIDMETHOD_NEAREST_STOD
   else if (trim(method) .eq. 'nearestdtos') then
     methodflag = ESMF_REGRIDMETHOD_NEAREST_DTOS
-  endif	 
+  endif       
 
   if (ignoreunmapped) then
     unmappedaction = ESMF_UNMAPPEDACTION_IGNORE
@@ -862,7 +869,7 @@ program ESMF_RegridWeightGenApp
   call ESMF_RegridWeightGen(srcfile, dstfile, wgtfile, regridmethod=methodflag, &
                             polemethod = pole, regridPoleNPnts = poleptrs, unmappedaction = unmappedaction, &
                             srcFileType = srcFileType, dstFileType = dstFileType, &
-			    ignoreDegenerate = ignoreDegenerate, &
+                      ignoreDegenerate = ignoreDegenerate, &
                             lineType=lineType, &
                             normType=normType, &
                             srcRegionalFlag = srcIsRegional, dstRegionalFlag = dstIsRegional, &
@@ -873,8 +880,8 @@ program ESMF_RegridWeightGenApp
                             srcCoordinateVars = srcCoordNames, dstCoordinateVars = dstCoordNames, &
                             useUserAreaFlag = userAreaFlag, largefileFlag = largeFileFlag, &
                             netcdf4FileFlag = netcdf4FileFlag,  &
-			    useSrcCornerFlag = useSrcCorner, &
-			    useDstCornerFlag = useDstCorner, &
+                      useSrcCornerFlag = useSrcCorner, &
+                      useDstCornerFlag = useDstCorner, &
                             verboseFlag = .true., rc = rc)
 
   if (rc /= ESMF_SUCCESS) call ErrorMsgAndAbort(PetNo)
@@ -915,7 +922,7 @@ contains
 
   subroutine PrintUsage()
     print *, "Usage: ESMF_RegridWeightGen --source|-s src_grid_filename" 
-    print *, "                	     --destination|-d dst_grid_filename"
+    print *, "                           --destination|-d dst_grid_filename"
     print *, "                      --weight|-w out_weight_file "
     print *, "                      [--method|-m bilinear|patch|neareststod|nearestdtos|conserve]"
     print *, "                      [--pole|-p all|none|teeth|<N>]"
@@ -957,7 +964,7 @@ contains
     print *, "--pole or -p - an optional argument indicating what to do with the pole."
     print *, "                 The default value is all."
     print *, "--line_type or -l - an optional argument indicating the type of path"
-    print *, " 			  lines (e.g. cell edges) follow on a spherical"
+    print *, "                     lines (e.g. cell edges) follow on a spherical"
     print *, "                    surface. The default value depends on the regrid"
     print *, "                    method. For non-conservative methods the default is"
     print *, "                    cartesian. For conservative methods the default is greatcircle." 

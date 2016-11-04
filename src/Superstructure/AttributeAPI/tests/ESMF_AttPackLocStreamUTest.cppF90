@@ -64,7 +64,7 @@ program ESMF_AttPackLocStreamUTest
 
   locstream = ESMF_LocStreamCreate(20, rc=rc)
 
-  AttPackTestMacro(locStream, "a LocStream", EX_UTest, "LocStream  2")
+  AttPackTestMacro(locStream, "a LocStream", EX_UTest, "LocStream002")
 
   call ESMF_LocStreamDestroy(locStream, rc=rc)
   if (rc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
