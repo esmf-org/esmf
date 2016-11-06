@@ -135,6 +135,16 @@ extern "C" {
     // return successfully
     if (rc) *rc = ESMF_SUCCESS;
   }
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_getcompliancechecktext"
+  void FTN_X(c_esmc_getcompliancechecktext)(int *textIsOn, int *rc){
+    if (rc) *rc = ESMC_RC_NOT_IMPL;
+    int localrc = ESMCI::Comp::getComplianceCheckerText(textIsOn);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      rc)) return;
+    // return successfully
+    if (rc) *rc = ESMF_SUCCESS;
+  }
 } // extern "C"
 //==============================================================================
 
@@ -882,6 +892,52 @@ int Comp::getComplianceCheckerJSON(
       index = value.find("JSON=ON");
     if (index != std::string::npos){
       *jsonIsOn=1;
+    }
+  }
+
+  // return successfully
+  rc = ESMF_SUCCESS;
+  return rc;
+}
+//-----------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::Comp::getComplianceCheckerText()"
+//BOPI
+// !IROUTINE:  ESMCI::Comp::getComplianceCheckerText
+//
+// !INTERFACE:
+int Comp::getComplianceCheckerText(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+//
+    int *textIsOn
+  ){
+//
+// !DESCRIPTION:
+//
+//EOPI
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
+
+  // check input
+  char const *envVar = VM::getenv("ESMF_RUNTIME_COMPLIANCECHECK");
+  *textIsOn = 1;
+  if (envVar != NULL && textIsOn != NULL){
+    std::string value(envVar);
+    // see if TEXT is specified in ESMF_RUNTIME_COMPLIANCECHECK
+    int index;
+    index = value.find("text=off");
+    if (index == std::string::npos)
+      index = value.find("TEXT=OFF");
+    if (index != std::string::npos){
+      *textIsOn=0;
     }
   }
 

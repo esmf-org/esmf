@@ -33,8 +33,6 @@ module NUOPC_Compliance_Driver
   
     private
   
-    logical, save :: doJSON = .false. ! whether to output JSON
-
     ! these map NUOPC events to the phase when it should occur
     ! therefore, we can check after the phase to verify
     character(*), parameter :: &
@@ -84,8 +82,7 @@ contains
         logical                 :: phaseZeroFlag
         logical                 :: regAdvertise, regRealize
         character(NUOPC_PhaseMapStringLength) :: phaseLabel
-        integer                 :: jsonIsOn
-    
+
         ! Initialize user return code
         rc = ESMF_SUCCESS
     
@@ -105,29 +102,12 @@ contains
             file=FILENAME)) &
             return  ! bail out
 
-        ! Need to set the maxDepth variable unless it has already been set before
-        if (maxDepth < -1) then
-            call c_esmc_getComplianceCheckDepth(maxDepth, rc)
+        if (.not. complianceInit) then
+            call NUOPC_ComplianceInit(rc=rc)
             if (ESMF_LogFoundError(rc, &
                 line=__LINE__, &
                 file=FILENAME)) &
                 return  ! bail out
-        endif
-
-        call c_esmc_getComplianceCheckJSON(jsonIsOn, rc)
-        if (ESMF_LogFoundError(rc, &
-            line=__LINE__, &
-            file=FILENAME)) &
-            return  ! bail out
-        if (jsonIsOn == 1) then
-          doJSON = .true.
-          call JSON_LogHeader(rc=rc)
-          if (ESMF_LogFoundError(rc, &
-            line=__LINE__, &
-            file=FILENAME)) &
-            return  ! bail out
-        else
-          doJSON = .false.
         endif
 
         !---------------------------------------------------------------------------
@@ -135,7 +115,7 @@ contains
 
         if (ccfDepth <= maxDepth .or. maxDepth < 0) then
 
-            call ESMF_LogWrite(trim(prefix)//">START register compliance check.", &
+            call NUOPC_ComplianceLogWrite(trim(prefix)//">START register compliance check.", &
                 ESMF_LOGMSG_INFO, rc=rc)
             if (ESMF_LogFoundError(rc, &
                 line=__LINE__, &
@@ -150,7 +130,7 @@ contains
                 file=FILENAME)) &
                 return  ! bail out
             if (phaseZeroFlag) then
-                call ESMF_LogWrite(trim(prefix)//" phase ZERO for Initialize registered.",&
+                call NUOPC_ComplianceLogWrite(trim(prefix)//" phase ZERO for Initialize registered.",&
                     ESMF_LOGMSG_INFO, rc=rc)
                 if (ESMF_LogFoundError(rc, &
                     line=__LINE__, &
@@ -163,7 +143,7 @@ contains
                     file=FILENAME)) &
                     return  ! bail out
             else
-                call ESMF_LogWrite(trim(prefix)//" ==> NUOPC requires Initialize phase ZERO!", &
+                call NUOPC_ComplianceLogWrite(trim(prefix)//" ==> NUOPC requires Initialize phase ZERO!", &
                     ESMF_LOGMSG_WARNING, rc=rc)
                 if (ESMF_LogFoundError(rc, &
                     line=__LINE__, &
@@ -171,7 +151,7 @@ contains
                     return  ! bail out
             endif
             if (phaseCount == 0) then
-                call ESMF_LogWrite(trim(prefix)//" ==> No Initialize method registered!", &
+                call NUOPC_ComplianceLogWrite(trim(prefix)//" ==> No Initialize method registered!", &
                     ESMF_LOGMSG_WARNING, rc=rc)
                 if (ESMF_LogFoundError(rc, &
                     line=__LINE__, &
@@ -184,7 +164,7 @@ contains
                 else
                     write(output,*) " ",phaseCount," phase(s) of Initialize registered."
                 endif
-                call ESMF_LogWrite(trim(prefix)//trim(output), ESMF_LOGMSG_INFO, rc=rc)
+                call NUOPC_ComplianceLogWrite(trim(prefix)//trim(output), ESMF_LOGMSG_INFO, rc=rc)
                 if (ESMF_LogFoundError(rc, &
                     line=__LINE__, &
                     file=FILENAME)) &
@@ -207,7 +187,7 @@ contains
                 file=FILENAME)) &
                 return  ! bail out
             if (phaseZeroFlag) then
-                call ESMF_LogWrite(trim(prefix)//" phase ZERO for Run registered.",&
+                call NUOPC_ComplianceLogWrite(trim(prefix)//" phase ZERO for Run registered.",&
                     ESMF_LOGMSG_INFO, rc=rc)
                 if (ESMF_LogFoundError(rc, &
                     line=__LINE__, &
@@ -221,7 +201,7 @@ contains
                     return  ! bail out
             endif
             if (phaseCount == 0) then
-                call ESMF_LogWrite(trim(prefix)//" ==> No Run method registered!", &
+                call NUOPC_ComplianceLogWrite(trim(prefix)//" ==> No Run method registered!", &
                     ESMF_LOGMSG_WARNING, rc=rc)
                 if (ESMF_LogFoundError(rc, &
                     line=__LINE__, &
@@ -234,7 +214,7 @@ contains
                 else
                     write(output,*) " ",phaseCount," phase(s) of Run registered."
                 endif
-                call ESMF_LogWrite(trim(prefix)//trim(output), ESMF_LOGMSG_INFO, rc=rc)
+                call NUOPC_ComplianceLogWrite(trim(prefix)//trim(output), ESMF_LOGMSG_INFO, rc=rc)
                 if (ESMF_LogFoundError(rc, &
                     line=__LINE__, &
                     file=FILENAME)) &
@@ -257,7 +237,7 @@ contains
                 file=FILENAME)) &
                 return  ! bail out
             if (phaseZeroFlag) then
-                call ESMF_LogWrite(trim(prefix)//" phase ZERO for Finalize registered.",&
+                call NUOPC_ComplianceLogWrite(trim(prefix)//" phase ZERO for Finalize registered.",&
                     ESMF_LOGMSG_INFO, rc=rc)
                 if (ESMF_LogFoundError(rc, &
                     line=__LINE__, &
@@ -271,7 +251,7 @@ contains
                     return  ! bail out
             endif
             if (phaseCount == 0) then
-                call ESMF_LogWrite(trim(prefix)//" ==> No Finalize method registered!", &
+                call NUOPC_ComplianceLogWrite(trim(prefix)//" ==> No Finalize method registered!", &
                     ESMF_LOGMSG_WARNING, rc=rc)
                 if (ESMF_LogFoundError(rc, &
                     line=__LINE__, &
@@ -284,7 +264,7 @@ contains
                 else
                     write(output,*) " ",phaseCount," phase(s) of Finalize registered."
                 endif
-                call ESMF_LogWrite(trim(prefix)//trim(output), ESMF_LOGMSG_INFO, rc=rc)
+                call NUOPC_ComplianceLogWrite(trim(prefix)//trim(output), ESMF_LOGMSG_INFO, rc=rc)
                 if (ESMF_LogFoundError(rc, &
                     line=__LINE__, &
                     file=FILENAME)) &
@@ -299,7 +279,7 @@ contains
                 enddo
             endif
 
-            call ESMF_LogWrite(trim(prefix)//">STOP register compliance check.", &
+            call NUOPC_ComplianceLogWrite(trim(prefix)//">STOP register compliance check.", &
                 ESMF_LOGMSG_INFO, rc=rc)
             if (ESMF_LogFoundError(rc, &
                 line=__LINE__, &
@@ -375,7 +355,7 @@ contains
         ! Start Compliance Checking: InitializePrologue
         if (ccfDepth <= maxDepth .or. maxDepth < 0) then
 
-            if (doJSON) then
+            if (outputJSON) then
                 call JSON_LogCtrlFlow("start_prologue", comp, rc)
                 if (ESMF_LogFoundError(rc, &
                     line=__LINE__, file=FILENAME)) return  ! bail out
@@ -383,7 +363,7 @@ contains
 
             write(output,*) ">START InitializePrologue for phase:", &
               trim(adjustl(pString)), ": ", trim(phaseLabel)
-            call ESMF_LogWrite(trim(prefix)//trim(output), &
+            call NUOPC_ComplianceLogWrite(trim(prefix)//trim(output), &
                 ESMF_LOGMSG_INFO, rc=rc)
             if (ESMF_LogFoundError(rc, &
                 line=__LINE__, &
@@ -427,14 +407,14 @@ contains
                 return  ! bail out
 
             ! check Component statistics
-            call NUOPC_CheckComponentStatistics(prefix, comp=comp, outputJSON=doJSON, rc=rc)
+            call NUOPC_CheckComponentStatistics(prefix, comp=comp, rc=rc)
             if (ESMF_LogFoundError(rc, &
                 line=__LINE__, &
                 file=FILENAME)) &
                 return  ! bail out
 
             ! check NUOPC-specific metadata attributes
-            call NUOPC_CheckComponentMetadata(prefix, comp=comp, outputJSON=doJSON, rc=rc)
+            call NUOPC_CheckComponentMetadata(prefix, comp=comp, rc=rc)
             if (ESMF_LogFoundError(rc, &
                 line=__LINE__, &
                 file=FILENAME)) &
@@ -450,14 +430,14 @@ contains
 
             write(output,*) ">STOP InitializePrologue for phase:", &
               trim(adjustl(pString)), ": ", trim(phaseLabel)
-            call ESMF_LogWrite(trim(prefix)//trim(output), &
+            call NUOPC_ComplianceLogWrite(trim(prefix)//trim(output), &
                 ESMF_LOGMSG_INFO, rc=rc)
             if (ESMF_LogFoundError(rc, &
                 line=__LINE__, &
                 file=FILENAME)) &
                 return  ! bail out
 
-            if (doJSON) then
+            if (outputJSON) then
                 call JSON_LogCtrlFlow("stop_prologue", comp, rc)
                 if (ESMF_LogFoundError(rc, &
                     line=__LINE__, file=FILENAME)) return  ! bail out
@@ -485,7 +465,7 @@ contains
         ! Start Compliance Checking: InitializeEpilogue
         if (ccfDepth <= maxDepth .or. maxDepth < 0) then
 
-            if (doJSON) then
+            if (outputJSON) then
                 call JSON_LogCtrlFlow("stop_phase", comp, rc)
                 if (ESMF_LogFoundError(rc, &
                     line=__LINE__, file=FILENAME)) return  ! bail out
@@ -512,7 +492,7 @@ contains
 
             write(output,*) ">START InitializeEpilogue for phase:", &
               trim(adjustl(pString)), ": ", trim(phaseLabel)
-            call ESMF_LogWrite(trim(prefix)//trim(output), &
+            call NUOPC_ComplianceLogWrite(trim(prefix)//trim(output), &
                 ESMF_LOGMSG_INFO, rc=rc)
             if (ESMF_LogFoundError(rc, &
                 line=__LINE__, &
@@ -530,13 +510,13 @@ contains
 
 
             ! check Component statistics
-            call NUOPC_CheckComponentStatistics(prefix, comp=comp, outputJSON=doJSON, rc=rc)
+            call NUOPC_CheckComponentStatistics(prefix, comp=comp, rc=rc)
             if (ESMF_LogFoundError(rc, &
                 line=__LINE__, &
                 file=FILENAME)) &
                 return  ! bail out
 
-            call NUOPC_CheckComponentMetadata(prefix, comp=comp, outputJSON=doJSON, rc=rc)
+            call NUOPC_CheckComponentMetadata(prefix, comp=comp, rc=rc)
             if (ESMF_LogFoundError(rc, &
                 line=__LINE__, &
                 file=FILENAME)) &
@@ -547,7 +527,7 @@ contains
             if (ESMF_StateIsCreated(importState)) then
                 ! compliance check importState
                 call NUOPC_CheckState(prefix, referenceName="importState", state=importState, &
-                    outputJSON=doJSON, rc=rc)
+                    rc=rc)
                 if (ESMF_LogFoundError(rc, &
                     line=__LINE__, &
                     file=FILENAME)) &
@@ -557,7 +537,7 @@ contains
             if (ESMF_StateIsCreated(exportState)) then
                 ! compliance check exportState
                 call NUOPC_CheckState(prefix, referenceName="exportState", state=exportState, &
-                    outputJSON=doJSON, rc=rc)
+                    rc=rc)
                 if (ESMF_LogFoundError(rc, &
                     line=__LINE__, &
                     file=FILENAME)) &
@@ -598,14 +578,14 @@ contains
 
             write(output,*) ">STOP InitializeEpilogue for phase:", &
               trim(adjustl(pString)), ": ", trim(phaseLabel)
-            call ESMF_LogWrite(trim(prefix)//trim(output), &
+            call NUOPC_ComplianceLogWrite(trim(prefix)//trim(output), &
                 ESMF_LOGMSG_INFO, rc=rc)
             if (ESMF_LogFoundError(rc, &
                 line=__LINE__, &
                 file=FILENAME)) &
                 return  ! bail out
 
-            if (doJSON) then
+            if (outputJSON) then
                 call JSON_LogCtrlFlow("stop_epilogue", comp, rc)
                 if (ESMF_LogFoundError(rc, &
                     line=__LINE__, file=FILENAME)) return  ! bail out
@@ -682,7 +662,7 @@ contains
         ! Start Compliance Checking: RunPrologue
         if (ccfDepth <= maxDepth .or. maxDepth < 0) then
 
-            if (doJSON) then
+            if (outputJSON) then
                 call JSON_LogCtrlFlow("start_prologue", comp, rc)
                 if (ESMF_LogFoundError(rc, &
                     line=__LINE__, file=FILENAME)) return  ! bail out
@@ -690,7 +670,7 @@ contains
 
             write(output,*) ">START RunPrologue for phase:", &
               trim(adjustl(pString)), ": ", trim(phaseLabel)
-            call ESMF_LogWrite(trim(prefix)//trim(output), &
+            call NUOPC_ComplianceLogWrite(trim(prefix)//trim(output), &
                 ESMF_LOGMSG_INFO, rc=rc)
             if (ESMF_LogFoundError(rc, &
                 line=__LINE__, &
@@ -729,7 +709,7 @@ contains
 !                return  ! bail out
 
             ! check Component statistics
-            call NUOPC_CheckComponentStatistics(prefix, comp=comp, outputJSON=doJSON, rc=rc)
+            call NUOPC_CheckComponentStatistics(prefix, comp=comp, rc=rc)
             if (ESMF_LogFoundError(rc, &
                 line=__LINE__, &
                 file=FILENAME)) &
@@ -737,14 +717,14 @@ contains
 
             write(output,*) ">STOP RunPrologue for phase:", &
               trim(adjustl(pString)), ": ", trim(phaseLabel)
-            call ESMF_LogWrite(trim(prefix)//trim(output), &
+            call NUOPC_ComplianceLogWrite(trim(prefix)//trim(output), &
                 ESMF_LOGMSG_INFO, rc=rc)
             if (ESMF_LogFoundError(rc, &
                 line=__LINE__, &
                 file=FILENAME)) &
                 return  ! bail out
 
-            if (doJSON) then
+            if (outputJSON) then
                 call JSON_LogCtrlFlow("stop_prologue", comp, rc)
                 if (ESMF_LogFoundError(rc, &
                     line=__LINE__, file=FILENAME)) return  ! bail out
@@ -771,7 +751,7 @@ contains
         ! Start Compliance Checking: RunEpilogue
         if (ccfDepth <= maxDepth .or. maxDepth < 0) then
 
-            if (doJSON) then
+            if (outputJSON) then
                 call JSON_LogCtrlFlow("stop_phase", comp, rc)
                 if (ESMF_LogFoundError(rc, &
                     line=__LINE__, file=FILENAME)) return  ! bail out
@@ -788,7 +768,7 @@ contains
 
             write(output,*) ">START RunEpilogue for phase:", &
               trim(adjustl(pString)), ": ", trim(phaseLabel)
-            call ESMF_LogWrite(trim(prefix)//trim(output), &
+            call NUOPC_ComplianceLogWrite(trim(prefix)//trim(output), &
                 ESMF_LOGMSG_INFO, rc=rc)
             if (ESMF_LogFoundError(rc, &
                 line=__LINE__, &
@@ -796,7 +776,7 @@ contains
                 return  ! bail out
 
             ! check Component statistics
-            call NUOPC_CheckComponentStatistics(prefix, comp=comp, outputJSON=doJSON, rc=rc)
+            call NUOPC_CheckComponentStatistics(prefix, comp=comp, rc=rc)
             if (ESMF_LogFoundError(rc, &
                 line=__LINE__, &
                 file=FILENAME)) &
@@ -835,14 +815,14 @@ contains
 
             write(output,*) ">STOP RunEpilogue for phase:", &
               trim(adjustl(pString)), ": ", trim(phaseLabel)
-            call ESMF_LogWrite(trim(prefix)//trim(output), &
+            call NUOPC_ComplianceLogWrite(trim(prefix)//trim(output), &
                 ESMF_LOGMSG_INFO, rc=rc)
             if (ESMF_LogFoundError(rc, &
                 line=__LINE__, &
                 file=FILENAME)) &
                 return  ! bail out
 
-            if (doJSON) then
+            if (outputJSON) then
                 call JSON_LogCtrlFlow("stop_epilogue", comp, rc)
                 if (ESMF_LogFoundError(rc, &
                     line=__LINE__, file=FILENAME)) return  ! bail out
@@ -918,7 +898,7 @@ contains
         ! Start Compliance Checking: FinalizePrologue
         if (ccfDepth <= maxDepth .or. maxDepth < 0) then
 
-            if (doJSON) then
+            if (outputJSON) then
                 call JSON_LogCtrlFlow("start_prologue", comp, rc)
                 if (ESMF_LogFoundError(rc, &
                     line=__LINE__, file=FILENAME)) return  ! bail out
@@ -926,7 +906,7 @@ contains
 
             write(output,*) ">START FinalizePrologue for phase:", &
               trim(adjustl(pString)), ": ", trim(phaseLabel)
-            call ESMF_LogWrite(trim(prefix)//trim(output), &
+            call NUOPC_ComplianceLogWrite(trim(prefix)//trim(output), &
                 ESMF_LOGMSG_INFO, rc=rc)
             if (ESMF_LogFoundError(rc, &
                 line=__LINE__, &
@@ -957,7 +937,7 @@ contains
 !                return  ! bail out
 
             ! check Component statistics
-            call NUOPC_CheckComponentStatistics(prefix, comp=comp, outputJSON=doJSON, rc=rc)
+            call NUOPC_CheckComponentStatistics(prefix, comp=comp, rc=rc)
             if (ESMF_LogFoundError(rc, &
                 line=__LINE__, &
                 file=FILENAME)) &
@@ -965,14 +945,14 @@ contains
 
             write(output,*) ">STOP FinalizePrologue for phase:", &
               trim(adjustl(pString)), ": ", trim(phaseLabel)
-            call ESMF_LogWrite(trim(prefix)//trim(output), &
+            call NUOPC_ComplianceLogWrite(trim(prefix)//trim(output), &
                 ESMF_LOGMSG_INFO, rc=rc)
             if (ESMF_LogFoundError(rc, &
                 line=__LINE__, &
                 file=FILENAME)) &
                 return  ! bail out
 
-            if (doJSON) then
+            if (outputJSON) then
                 call JSON_LogCtrlFlow("stop_prologue", comp, rc)
                 if (ESMF_LogFoundError(rc, &
                     line=__LINE__, file=FILENAME)) return  ! bail out
@@ -999,7 +979,7 @@ contains
         ! Start Compliance Checking: FinalizeEpilogue
         if (ccfDepth <= maxDepth .or. maxDepth < 0) then
 
-            if (doJSON) then
+            if (outputJSON) then
                 call JSON_LogCtrlFlow("stop_phase", comp, rc)
                 if (ESMF_LogFoundError(rc, &
                     line=__LINE__, file=FILENAME)) return  ! bail out
@@ -1016,7 +996,7 @@ contains
 
             write(output,*) ">START FinalizeEpilogue for phase:", &
               trim(adjustl(pString)), ": ", trim(phaseLabel)
-            call ESMF_LogWrite(trim(prefix)//trim(output), &
+            call NUOPC_ComplianceLogWrite(trim(prefix)//trim(output), &
                 ESMF_LOGMSG_INFO, rc=rc)
             if (ESMF_LogFoundError(rc, &
                 line=__LINE__, &
@@ -1024,7 +1004,7 @@ contains
                 return  ! bail out
 
             ! check Component statistics
-            call NUOPC_CheckComponentStatistics(prefix, comp=comp, outputJSON=doJSON, rc=rc)
+            call NUOPC_CheckComponentStatistics(prefix, comp=comp, rc=rc)
             if (ESMF_LogFoundError(rc, &
                 line=__LINE__, &
                 file=FILENAME)) &
@@ -1055,14 +1035,14 @@ contains
 
             write(output,*) ">STOP FinalizeEpilogue for phase:", &
               trim(adjustl(pString)), ": ", trim(phaseLabel)
-            call ESMF_LogWrite(trim(prefix)//trim(output), &
+            call NUOPC_ComplianceLogWrite(trim(prefix)//trim(output), &
                 ESMF_LOGMSG_INFO, rc=rc)
             if (ESMF_LogFoundError(rc, &
                 line=__LINE__, &
                 file=FILENAME)) &
                 return  ! bail out
 
-            if (doJSON) then
+            if (outputJSON) then
                 call JSON_LogCtrlFlow("stop_epilogue", comp, rc)
                 if (ESMF_LogFoundError(rc, &
                     line=__LINE__, file=FILENAME)) return  ! bail out
@@ -1298,7 +1278,7 @@ contains
         convention = "NUOPC"
         purpose = "Instance"
 
-        call ESMF_LogWrite(trim(prefix)//" Field level attribute check: "// &
+        call NUOPC_ComplianceLogWrite(trim(prefix)//" Field level attribute check: "// &
           "convention: '"//trim(convention)//"', purpose: '"//trim(purpose)//"'.", &
            ESMF_LOGMSG_INFO, rc=rc)
         if (ESMF_LogFoundError(rc, &
