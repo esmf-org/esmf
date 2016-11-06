@@ -2346,7 +2346,7 @@ contains
 
         write(jsonString,*) '{"ctrl":{&
             &"event":"region_enter",&
-            &"name":"'//trim(name)//'}}'
+            &"name":"'//trim(name)//'"}}'
         call JSON_LogWrite(jsonString, rc=rc)
         if (ESMF_LogFoundError(rc, &
           line=__LINE__, &
@@ -2366,7 +2366,7 @@ contains
 
         write(jsonString,*) '{"ctrl":{&
             &"event":"region_exit",&
-            &"name":"'//trim(name)//'}}'
+            &"name":"'//trim(name)//'"}}'
         call JSON_LogWrite(jsonString, rc=rc)
         if (ESMF_LogFoundError(rc, &
           line=__LINE__, &
