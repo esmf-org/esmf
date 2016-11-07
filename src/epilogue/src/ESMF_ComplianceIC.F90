@@ -1114,7 +1114,7 @@ module ESMF_ComplianceICMod
       convention = "NUOPC"
       purpose = "Instance"
 
-      if (outputJSON) then
+      if (outputJSON .and. includeState) then
 
           call JSON_GetID(state, idStr, rc=rc)
           if (ESMF_LogFoundError(rc, &
@@ -2028,7 +2028,7 @@ module ESMF_ComplianceICMod
     convention = "NUOPC"
     purpose = "Instance"
     
-    if (outputJSON) then
+    if (outputJSON .and. includeState) then
 
         call ESMF_FieldGet(field, status=fieldStatus, rc=rc)
         if (ESMF_LogFoundError(rc, &
