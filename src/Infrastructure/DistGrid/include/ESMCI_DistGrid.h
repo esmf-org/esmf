@@ -125,7 +125,7 @@ namespace ESMCI {
     static DistGrid *create(DistGrid *dg,
       InterfaceInt *firstExtra, InterfaceInt *lastExtra, 
       ESMC_IndexFlag *indexflag, InterfaceInt *connectionList, 
-      VM *vm=NULL, int *rc=NULL);
+      VM *vm=NULL, bool actualFlag=true, int *rc=NULL);
     static DistGrid *create(InterfaceInt *minIndex,
       InterfaceInt *maxIndex, InterfaceInt *regDecomp, 
       Decomp_Flag *decompflag, int decompflagCount,
@@ -192,7 +192,9 @@ namespace ESMCI {
     int getSequenceIndexTile(int tile, int const *index, int *rc=NULL)const;
     int getSequenceIndexTileRecursive(int tile, int const *index, int depth,
       int *rc=NULL)const;
-    // misc. get
+    int getIndexTupleFromSeqIndex(int seqIndex, std::vector<int> &indexTuple,
+      int &tile) const;
+    // get/set arb sequence indices
     int *const *getElementCountPCollPLocalDe()
       const {return elementCountPCollPLocalDe;}
     int const *getArbSeqIndexList(int localDe, int collocation, int *rc=NULL)

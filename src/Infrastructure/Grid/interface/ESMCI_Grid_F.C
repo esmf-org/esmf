@@ -61,8 +61,7 @@ extern "C" {
 
   ///////////////////////////////////////////////////////////////////////////////////
 
-  void FTN_X(c_esmc_gridcreateempty)(ESMCI::Grid **ptr, 
-					  int *rc){
+  void FTN_X(c_esmc_gridcreateempty)(ESMCI::Grid **ptr, ESMCI::VM **vm, int *rc){
     int localrc;
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_gridcreateempty()"
@@ -70,10 +69,32 @@ extern "C" {
     //Initialize return code
     localrc = ESMC_RC_NOT_IMPL;
 
-    // call into C++
-    *ptr = ESMCI::Grid::create(&localrc);
-      ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, 
-      ESMC_NOT_PRESENT_FILTER(rc));
+    // deal with optional arguments
+    ESMCI::VM *opt_vm;
+    bool actualFlag = true;
+    if (ESMC_NOT_PRESENT_FILTER(vm) == ESMC_NULL_POINTER)
+      opt_vm = NULL;
+    else{
+      opt_vm = *vm;
+      if (opt_vm == NULL)
+        actualFlag = false; // not an actual member because VM present but NULL
+    }
+
+#if 0
+    printf("c_esmc_gridcreateempty(): opt_vm=%p, actualFlag=%d\n", 
+      opt_vm, actualFlag);
+#endif
+
+    if (actualFlag){
+      // on PETs with actual members call into C++
+      *ptr = ESMCI::Grid::create(&localrc);
+      ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+        ESMC_NOT_PRESENT_FILTER(rc));
+    }
+
+    // return success
+    if (rc!=NULL) *rc = ESMF_SUCCESS;
+
 }
 
   ///////////////////////////////////////////////////////////////////////////////////
@@ -147,6 +168,10 @@ extern "C" {
       ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
         ESMC_NOT_PRESENT_FILTER(rc));
     }
+    
+    // return success
+    if (rc!=NULL) *rc = ESMF_SUCCESS;
+
 }
 
   ///////////////////////////////////////////////////////////////////////////////////
@@ -204,6 +229,219 @@ extern "C" {
 
   ///////////////////////////////////////////////////////////////////////////////////
 
+void c_esmc_grid_get_from_proto(ESMCI::Grid **_grid, 
+                            ESMC_TypeKind_Flag *_coordTypeKind,
+                            int *_dimCount, 
+                            int *_tileCount,
+                            ESMCI::DistGrid **_distgrid,
+                            int *_staggerLocCount, 
+                            ESMCI::InterfaceInt *_distgridToGridMap, 
+                            int *_coordSys, 
+                            ESMCI::InterfaceInt *_coordDimCount,
+                            int *_arbDim,
+                            int *_rank,
+                            int *_arbDimCount,
+                            ESMCI::InterfaceInt *_coordDimMap,		  
+                            ESMCI::InterfaceInt *_gridEdgeLWidth, 	  
+                            ESMCI::InterfaceInt *_gridEdgeUWidth,   
+                            ESMCI::InterfaceInt *_gridAlign,		  
+                            ESMC_IndexFlag *_indexflag,
+                            int *_localDECount,
+                            int *_rc){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_grid_get_from_proto()"
+
+     int localrc;
+    int localArbIndexCount;
+    int dimCount, distDimCount, dimCount1;
+    ESMCI::Grid *grid;
+    const int *distgridToGridMap;
+    ESMC_GridDecompType decompType;
+
+    // Get Grid pointer
+    grid=*_grid;
+
+    //Initialize return code
+    localrc = ESMC_RC_NOT_IMPL;
+    if (_rc!=NULL) *_rc = ESMC_RC_NOT_IMPL;
+
+    // make sure status is correct
+    if (grid->getStatus() != ESMC_GRIDSTATUS_NOT_READY) {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_OBJ_WRONG,
+          "- grid is not empty, so shouldn't be getting info from protogrid", ESMC_CONTEXT, 
+          ESMC_NOT_PRESENT_FILTER(_rc));
+      return;
+    }
+
+
+    // Get protogrid
+    const ESMCI::ProtoGrid *proto=grid->getProtoGrid();
+
+    // TODO: WHEN GETTING INFO FROM AN EMPTY GRID IS PUBLIC, MAKE MORE OF THE BELOW WORK
+
+    // coordTypeKind
+    if (ESMC_NOT_PRESENT_FILTER(_coordTypeKind) != ESMC_NULL_POINTER) {
+      if (proto->typekind != ESMC_NULL_POINTER) *_coordTypeKind=*(proto->typekind);
+      else {
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_OBJ_WRONG,
+                                      " coordTypeKind hasn't been set", ESMC_CONTEXT, 
+                                      ESMC_NOT_PRESENT_FILTER(_rc));
+        return;
+      }
+    }
+
+    // dimCount
+    if (ESMC_NOT_PRESENT_FILTER(_dimCount) != ESMC_NULL_POINTER) {
+      if (proto->distgrid != ESMC_NULL_POINTER) {
+        *_dimCount=proto->distgrid->getDimCount();
+      } else {
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_OBJ_WRONG,
+                                      " distgrid hasn't been set, so dimCount not available", ESMC_CONTEXT, 
+                                      ESMC_NOT_PRESENT_FILTER(_rc));
+        return;
+      }
+    }
+
+
+    // localDeCount
+    if (ESMC_NOT_PRESENT_FILTER(_localDECount) != ESMC_NULL_POINTER) {
+      if (proto->distgrid != ESMC_NULL_POINTER) {
+        *_localDECount = proto->distgrid->getDELayout()->getLocalDeCount();
+      } else {
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_OBJ_WRONG,
+                                      " distgrid hasn't been set, so localDECount not available", ESMC_CONTEXT, 
+                                      ESMC_NOT_PRESENT_FILTER(_rc));
+        return;
+      }  
+    }
+
+    // tileCount
+    if (ESMC_NOT_PRESENT_FILTER(_tileCount) != ESMC_NULL_POINTER) {
+      if (proto->distgrid != ESMC_NULL_POINTER) {
+        *_tileCount = proto->distgrid->getTileCount();
+      } else {
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_OBJ_WRONG,
+                                      " distgrid hasn't been set, so tileCount not available", ESMC_CONTEXT, 
+                                      ESMC_NOT_PRESENT_FILTER(_rc));
+        return;
+      }  
+    }
+
+
+    // distgrid
+    if (ESMC_NOT_PRESENT_FILTER(_distgrid) != ESMC_NULL_POINTER) {
+      if (proto->distgrid != ESMC_NULL_POINTER) *_distgrid = (ESMCI::DistGrid *)proto->distgrid;
+      else {
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_OBJ_WRONG,
+                                      " distgrid hasn't been set", ESMC_CONTEXT, 
+                                      ESMC_NOT_PRESENT_FILTER(_rc));
+        return;
+      }
+    }
+
+
+    // staggerLocCount
+    if (ESMC_NOT_PRESENT_FILTER(_staggerLocCount) != ESMC_NULL_POINTER) {
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_OBJ_WRONG,
+                                      " getting staggerlocCount from an empty grid not currently supported.", ESMC_CONTEXT, 
+                                      ESMC_NOT_PRESENT_FILTER(_rc));
+        return;
+    }
+
+    // coordSys
+    if (ESMC_NOT_PRESENT_FILTER(_coordSys) != ESMC_NULL_POINTER)  {
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_OBJ_WRONG,
+                                      " getting coordSys from an empty grid not currently supported.", ESMC_CONTEXT, 
+                                      ESMC_NOT_PRESENT_FILTER(_rc));
+        return;
+    }
+
+    // get distgridToGridMap 
+    if (present(_distgridToGridMap))  {
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_OBJ_WRONG,
+                                      " getting distgridToGridMap from an empty grid not currently supported.", ESMC_CONTEXT, 
+                                      ESMC_NOT_PRESENT_FILTER(_rc));
+        return;
+    }
+
+
+
+    // get coordDimCount
+    if (present(_coordDimCount))  {
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_OBJ_WRONG,
+                                      " getting coordDimCount from an empty grid not currently supported.", ESMC_CONTEXT, 
+                                      ESMC_NOT_PRESENT_FILTER(_rc));
+        return;
+    }
+
+    // get coordDimMap
+    if (present(_coordDimMap))  {
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_OBJ_WRONG,
+                                      " getting coordDimMap from an empty grid not currently supported.", ESMC_CONTEXT, 
+                                      ESMC_NOT_PRESENT_FILTER(_rc));
+        return;
+    }
+
+
+    // get rank -- same as distGrid dimCount
+    if (ESMC_NOT_PRESENT_FILTER(_rank) != ESMC_NULL_POINTER) {
+      if (proto->distgrid != ESMC_NULL_POINTER) {
+        *_rank=proto->distgrid->getDimCount();
+      } else {
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_OBJ_WRONG,
+                                      " distgrid hasn't been set, so rank not available", ESMC_CONTEXT, 
+                                      ESMC_NOT_PRESENT_FILTER(_rc));
+        return;
+      }
+    }
+
+    // get arbDimCount 
+    if (ESMC_NOT_PRESENT_FILTER(_arbDimCount) != ESMC_NULL_POINTER) {
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_OBJ_WRONG,
+                                      " getting arbDimCount from an empty grid not currently supported.", ESMC_CONTEXT, 
+                                      ESMC_NOT_PRESENT_FILTER(_rc));
+        return;
+    }
+
+    // get gridEdgeLWidth
+    if (present(_gridEdgeLWidth)) {
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_OBJ_WRONG,
+                                      " getting gridEdgeLWidth from an empty grid not currently supported.", ESMC_CONTEXT, 
+                                      ESMC_NOT_PRESENT_FILTER(_rc));
+        return;
+    }
+
+
+    // get gridEdgeUWidth
+    if (present(_gridEdgeUWidth)) {
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_OBJ_WRONG,
+                                      " getting gridEdgeUWidth from an empty grid not currently supported.", ESMC_CONTEXT, 
+                                      ESMC_NOT_PRESENT_FILTER(_rc));
+        return;
+    }
+
+    // get gridAlign
+    if (present(_gridAlign)) {
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_OBJ_WRONG,
+                                      " getting gridAlign from an empty grid not currently supported.", ESMC_CONTEXT, 
+                                      ESMC_NOT_PRESENT_FILTER(_rc));
+        return;
+    }
+
+
+
+    // indexflag
+    if (ESMC_NOT_PRESENT_FILTER(_indexflag) != ESMC_NULL_POINTER)  {
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_OBJ_WRONG,
+                                      " getting indexflag from an empty grid not currently supported.", ESMC_CONTEXT, 
+                                      ESMC_NOT_PRESENT_FILTER(_rc));
+        return;
+    }
+
+    // return success
+    if (_rc!=NULL) *_rc = ESMF_SUCCESS;
+}
+
   void FTN_X(c_esmc_gridget)(ESMCI::Grid **_grid, 
                              ESMC_TypeKind_Flag *_coordTypeKind,
                              int *_dimCount, 
@@ -244,9 +482,32 @@ extern "C" {
 
     // make sure status is correct
     if (grid->getStatus() < ESMC_GRIDSTATUS_SHAPE_READY) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_OBJ_WRONG,
-          "- grid not ready for this operation ", ESMC_CONTEXT, 
-          ESMC_NOT_PRESENT_FILTER(_rc));
+
+      // Get information from the protogrid
+      c_esmc_grid_get_from_proto(_grid, 
+                                 _coordTypeKind,
+                                 _dimCount, 
+                                 _tileCount,
+                                 _distgrid,
+                                 _staggerLocCount, 
+                                 _distgridToGridMap, 
+                                 _coordSys, 
+                                 _coordDimCount,
+                                 _arbDim,
+                                 _rank,
+                                 _arbDimCount,
+                                 _coordDimMap,		  
+                                 _gridEdgeLWidth, 	  
+                                 _gridEdgeUWidth,   
+                                 _gridAlign,		  
+                                 _indexflag,
+                                 _localDECount,
+                                 &localrc);
+      if(ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+                             ESMC_CONTEXT, ESMC_NOT_PRESENT_FILTER(_rc))) return;
+
+      // return success
+      if (_rc!=NULL) *_rc = ESMF_SUCCESS;
       return;
     }
 
@@ -3025,7 +3286,7 @@ extern "C" {
                                                      edgeLWidthIntInt, 
                                                      edgeUWidthIntInt, 
                                                      &indexflag,
-                                                     NULL,    
+                                                     NULL, true,
                                                      &localrc);
    if(ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
                  ESMC_CONTEXT, ESMC_NOT_PRESENT_FILTER(rc))) return;
@@ -3056,7 +3317,7 @@ extern "C" {
                                                     NULL,
                                                     NULL,
                                                      &indexflag,
-                                                     NULL,    
+                                                     NULL, true,
                                                      &localrc);
    if(ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
                       ESMC_CONTEXT, ESMC_NOT_PRESENT_FILTER(rc))) return;
