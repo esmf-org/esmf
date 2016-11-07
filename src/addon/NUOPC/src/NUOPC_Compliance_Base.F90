@@ -2344,14 +2344,16 @@ contains
 
         rc = ESMF_SUCCESS
 
-        write(jsonString,*) '{"ctrl":{&
-            &"event":"region_enter",&
-            &"name":"'//trim(name)//'"}}'
-        call JSON_LogWrite(jsonString, rc=rc)
-        if (ESMF_LogFoundError(rc, &
-          line=__LINE__, &
-          file=FILENAME)) &
-          return  ! bail out
+        if (outputJSON) then
+            write(jsonString,*) '{"ctrl":{&
+                &"event":"region_enter",&
+                &"name":"'//trim(name)//'"}}'
+            call JSON_LogWrite(jsonString, rc=rc)
+            if (ESMF_LogFoundError(rc, &
+              line=__LINE__, &
+              file=FILENAME)) &
+              return  ! bail out
+        endif
 
     end subroutine
 
@@ -2364,14 +2366,16 @@ contains
 
         rc = ESMF_SUCCESS
 
-        write(jsonString,*) '{"ctrl":{&
-            &"event":"region_exit",&
-            &"name":"'//trim(name)//'"}}'
-        call JSON_LogWrite(jsonString, rc=rc)
-        if (ESMF_LogFoundError(rc, &
-          line=__LINE__, &
-          file=FILENAME)) &
-          return  ! bail out
+        if (outputJSON) then
+            write(jsonString,*) '{"ctrl":{&
+                &"event":"region_exit",&
+                &"name":"'//trim(name)//'"}}'
+            call JSON_LogWrite(jsonString, rc=rc)
+            if (ESMF_LogFoundError(rc, &
+              line=__LINE__, &
+              file=FILENAME)) &
+              return  ! bail out
+        endif
 
     end subroutine
 

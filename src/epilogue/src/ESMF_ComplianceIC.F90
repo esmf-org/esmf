@@ -22,8 +22,12 @@ module ESMF_ComplianceICMod
   
   integer, save :: ccfDepth = 1   ! component control flow depth
   integer, save :: maxDepth = -2  ! maximum depth of compliance checker
-  logical, save :: doJSON = .false. ! whether to output JSON
-  
+  logical, save :: outputJSON = .false.
+  logical, save :: outputText = .true.
+  logical, save :: complianceInit = .false.
+  logical, save :: includeState = .true.  ! trace import/export states
+  logical, save :: includeVmStats = .true. ! include vm stats
+
   public setvmIC, registerIC
 
   interface JSON_GetID
@@ -32,7 +36,83 @@ module ESMF_ComplianceICMod
         module procedure JSON_FieldGetID
   end interface
         
-  contains
+ contains
+
+
+   recursive subroutine ComplianceInitialize(rc)
+        integer, intent(out), optional :: rc
+
+        ! locals
+        integer :: jsonIsOn
+        integer :: textIsOn
+        type(ESMF_Config) :: config
+        character(10) :: cfgIncludeState
+        character(10) :: cfgIncludeVmStats
+
+        call c_esmc_getComplianceCheckDepth(maxDepth, rc)
+        if (ESMF_LogFoundError(rc, &
+            line=__LINE__, &
+            file=FILENAME)) &
+            return  ! bail out
+
+        call c_esmc_getComplianceCheckText(textIsOn, rc)
+        if (ESMF_LogFoundError(rc, &
+            line=__LINE__, &
+            file=FILENAME)) &
+            return  ! bail out
+        if (textIsOn == 1) then
+          outputText = .true.
+        else
+          outputText = .false.
+        endif
+
+        call c_esmc_getComplianceCheckJSON(jsonIsOn, rc)
+        if (ESMF_LogFoundError(rc, &
+            line=__LINE__, &
+            file=FILENAME)) &
+            return  ! bail out
+        if (jsonIsOn == 1) then
+          outputJSON = .true.
+        else
+          outputJSON = .false.
+        endif
+
+        if (outputJSON) then
+            config = ESMF_ConfigCreate(rc=rc)
+            if (ESMF_LogFoundError(rc, &
+                line=__LINE__, &
+                file=FILENAME)) &
+                return  ! bail out
+            call ESMF_ConfigLoadFile(config, "nuopc.trace", rc=rc)
+            if (rc == ESMF_SUCCESS) then
+                call ESMF_ConfigGetAttribute(config, cfgIncludeState, &
+                    label="include.state:", default="true", rc=rc)
+                if (ESMF_LogFoundError(rc, &
+                    line=__LINE__, &
+                    file=FILENAME)) &
+                    return  ! bail out
+                includeState = (trim(cfgIncludeState)=="true")
+
+                call ESMF_ConfigGetAttribute(config, cfgIncludeVmStats, &
+                    label="include.vmstats:", default="true", rc=rc)
+                if (ESMF_LogFoundError(rc, &
+                    line=__LINE__, &
+                    file=FILENAME)) &
+                    return  ! bail out
+                includeVmStats = (trim(cfgIncludeVmStats)=="true")
+            end if
+
+            ! write header line once
+            !call JSON_LogHeader(rc=rc)
+            !if (ESMF_LogFoundError(rc, &
+            !        line=__LINE__, &
+            !        file=FILENAME)) &
+            !        return  ! bail out
+        endif
+
+        complianceInit = .true.
+
+    end subroutine
 
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
@@ -87,33 +167,20 @@ module ESMF_ComplianceICMod
       file=FILENAME)) &
       return  ! bail out
     
-    ! Need to set the maxDepth variable unless it has already been set before
-    if (maxDepth < -1) then
-      call c_esmc_getComplianceCheckDepth(maxDepth, rc)
-      if (ESMF_LogFoundError(rc, &
-        line=__LINE__, &
-        file=FILENAME)) &
-        return  ! bail out
+    if (.not. complianceInit) then
+        call ComplianceInitialize(rc=rc)
+        if (ESMF_LogFoundError(rc, &
+            line=__LINE__, &
+            file=FILENAME)) &
+            return  ! bail out
     endif
-
-    call c_esmc_getComplianceCheckJSON(jsonIsOn, rc)
-    if (ESMF_LogFoundError(rc, &
-        line=__LINE__, &
-        file=FILENAME)) &
-        return  ! bail out
-    if (jsonIsOn == 1) then
-      doJSON = .true.
-    else
-      doJSON = .false.
-    endif
-
 
     !---------------------------------------------------------------------------
     ! Start Compliance Checking and IC method Registration
     
     if (ccfDepth <= maxDepth .or. maxDepth < 0) then
 
-    call ESMF_LogWrite(trim(prefix)//">START register compliance check.", &
+    call Compliance_LogWrite(trim(prefix)//">START register compliance check.", &
       ESMF_LOGMSG_INFO, rc=rc)
     if (ESMF_LogFoundError(rc, &
       line=__LINE__, &
@@ -128,7 +195,7 @@ module ESMF_ComplianceICMod
       file=FILENAME)) &
       return  ! bail out
     if (phaseZeroFlag) then
-      call ESMF_LogWrite(trim(prefix)//" phase ZERO for Initialize registered.",&
+      call Compliance_LogWrite(trim(prefix)//" phase ZERO for Initialize registered.",&
         ESMF_LOGMSG_INFO, rc=rc)
       if (ESMF_LogFoundError(rc, &
         line=__LINE__, &
@@ -141,7 +208,7 @@ module ESMF_ComplianceICMod
         file=FILENAME)) &
         return  ! bail out
     else
-      call ESMF_LogWrite(trim(prefix)//" ==> NUOPC requires Initialize phase ZERO!", &
+      call Compliance_LogWrite(trim(prefix)//" ==> NUOPC requires Initialize phase ZERO!", &
         ESMF_LOGMSG_WARNING, rc=rc)
       if (ESMF_LogFoundError(rc, &
         line=__LINE__, &
@@ -149,7 +216,7 @@ module ESMF_ComplianceICMod
         return  ! bail out
     endif
     if (phaseCount == 0) then
-      call ESMF_LogWrite(trim(prefix)//" ==> No Initialize method registered!", &
+      call Compliance_LogWrite(trim(prefix)//" ==> No Initialize method registered!", &
         ESMF_LOGMSG_WARNING, rc=rc)
       if (ESMF_LogFoundError(rc, &
         line=__LINE__, &
@@ -162,7 +229,7 @@ module ESMF_ComplianceICMod
       else
         write(output,*) " ",phaseCount," phase(s) of Initialize registered."
       endif
-      call ESMF_LogWrite(trim(prefix)//trim(output), ESMF_LOGMSG_INFO, rc=rc)
+      call Compliance_LogWrite(trim(prefix)//trim(output), ESMF_LOGMSG_INFO, rc=rc)
       if (ESMF_LogFoundError(rc, &
         line=__LINE__, &
         file=FILENAME)) &
@@ -185,7 +252,7 @@ module ESMF_ComplianceICMod
       file=FILENAME)) &
       return  ! bail out
     if (phaseZeroFlag) then
-      call ESMF_LogWrite(trim(prefix)//" phase ZERO for Run registered.",&
+      call Compliance_LogWrite(trim(prefix)//" phase ZERO for Run registered.",&
         ESMF_LOGMSG_INFO, rc=rc)
       if (ESMF_LogFoundError(rc, &
         line=__LINE__, &
@@ -199,7 +266,7 @@ module ESMF_ComplianceICMod
         return  ! bail out
     endif
     if (phaseCount == 0) then
-      call ESMF_LogWrite(trim(prefix)//" ==> No Run method registered!", &
+      call Compliance_LogWrite(trim(prefix)//" ==> No Run method registered!", &
         ESMF_LOGMSG_WARNING, rc=rc)
       if (ESMF_LogFoundError(rc, &
         line=__LINE__, &
@@ -212,7 +279,7 @@ module ESMF_ComplianceICMod
       else
         write(output,*) " ",phaseCount," phase(s) of Run registered."
       endif
-      call ESMF_LogWrite(trim(prefix)//trim(output), ESMF_LOGMSG_INFO, rc=rc)
+      call Compliance_LogWrite(trim(prefix)//trim(output), ESMF_LOGMSG_INFO, rc=rc)
       if (ESMF_LogFoundError(rc, &
         line=__LINE__, &
         file=FILENAME)) &
@@ -235,7 +302,7 @@ module ESMF_ComplianceICMod
       file=FILENAME)) &
       return  ! bail out
     if (phaseZeroFlag) then
-      call ESMF_LogWrite(trim(prefix)//" phase ZERO for Finalize registered.",&
+      call Compliance_LogWrite(trim(prefix)//" phase ZERO for Finalize registered.",&
         ESMF_LOGMSG_INFO, rc=rc)
       if (ESMF_LogFoundError(rc, &
         line=__LINE__, &
@@ -249,7 +316,7 @@ module ESMF_ComplianceICMod
         return  ! bail out
     endif
     if (phaseCount == 0) then
-      call ESMF_LogWrite(trim(prefix)//" ==> No Finalize method registered!", &
+      call Compliance_LogWrite(trim(prefix)//" ==> No Finalize method registered!", &
         ESMF_LOGMSG_WARNING, rc=rc)
       if (ESMF_LogFoundError(rc, &
         line=__LINE__, &
@@ -262,7 +329,7 @@ module ESMF_ComplianceICMod
       else
         write(output,*) " ",phaseCount," phase(s) of Finalize registered."
       endif
-      call ESMF_LogWrite(trim(prefix)//trim(output), ESMF_LOGMSG_INFO, rc=rc)
+      call Compliance_LogWrite(trim(prefix)//trim(output), ESMF_LOGMSG_INFO, rc=rc)
       if (ESMF_LogFoundError(rc, &
         line=__LINE__, &
         file=FILENAME)) &
@@ -277,7 +344,7 @@ module ESMF_ComplianceICMod
       enddo
     endif
 
-    call ESMF_LogWrite(trim(prefix)//">STOP register compliance check.", &
+    call Compliance_LogWrite(trim(prefix)//">STOP register compliance check.", &
       ESMF_LOGMSG_INFO, rc=rc)
     if (ESMF_LogFoundError(rc, &
       line=__LINE__, &
@@ -334,14 +401,14 @@ module ESMF_ComplianceICMod
     ! Start Compliance Checking: InitializePrologue
     if (ccfDepth <= maxDepth .or. maxDepth < 0) then
     
-    if (doJSON) then
+    if (outputJSON) then
         call JSON_LogCtrlFlow("start_prologue", comp, rc)
         if (ESMF_LogFoundError(rc, &
              line=__LINE__, file=FILENAME)) return  ! bail out
     endif
 
     write(output,*) ">START InitializePrologue for phase=", phase
-    call ESMF_LogWrite(trim(prefix)//trim(output), &
+    call Compliance_LogWrite(trim(prefix)//trim(output), &
       ESMF_LOGMSG_INFO, rc=rc)
     if (ESMF_LogFoundError(rc, &
       line=__LINE__, &
@@ -386,14 +453,14 @@ module ESMF_ComplianceICMod
       return  ! bail out
     
     write(output,*) ">STOP InitializePrologue for phase=", phase
-    call ESMF_LogWrite(trim(prefix)//trim(output), &
+    call Compliance_LogWrite(trim(prefix)//trim(output), &
       ESMF_LOGMSG_INFO, rc=rc)
     if (ESMF_LogFoundError(rc, &
       line=__LINE__, &
       file=FILENAME)) &
       return  ! bail out
 
-    if (doJSON) then
+    if (outputJSON) then
         call JSON_LogCtrlFlow("stop_prologue", comp, rc)
         if (ESMF_LogFoundError(rc, &
             line=__LINE__, file=FILENAME)) return  ! bail out
@@ -420,7 +487,7 @@ module ESMF_ComplianceICMod
     ! Start Compliance Checking: InitializeEpilogue
     if (ccfDepth <= maxDepth .or. maxDepth < 0) then
 
-    if (doJSON) then
+    if (outputJSON) then
         call JSON_LogCtrlFlow("stop_phase", comp, rc)
         if (ESMF_LogFoundError(rc, &
             line=__LINE__, file=FILENAME)) return  ! bail out
@@ -436,7 +503,7 @@ module ESMF_ComplianceICMod
       return  ! bail out
     
     write(output,*) ">START InitializeEpilogue for phase=", phase
-    call ESMF_LogWrite(trim(prefix)//trim(output), &
+    call Compliance_LogWrite(trim(prefix)//trim(output), &
       ESMF_LOGMSG_INFO, rc=rc)
     if (ESMF_LogFoundError(rc, &
       line=__LINE__, &
@@ -499,14 +566,14 @@ module ESMF_ComplianceICMod
     
     
     write(output,*) ">STOP InitializeEpilogue for phase=", phase
-    call ESMF_LogWrite(trim(prefix)//trim(output), &
+    call Compliance_LogWrite(trim(prefix)//trim(output), &
       ESMF_LOGMSG_INFO, rc=rc)
     if (ESMF_LogFoundError(rc, &
       line=__LINE__, &
       file=FILENAME)) &
       return  ! bail out
 
-    if (doJSON) then
+    if (outputJSON) then
         call JSON_LogCtrlFlow("stop_epilogue", comp, rc)
         if (ESMF_LogFoundError(rc, &
             line=__LINE__, file=FILENAME)) return  ! bail out
@@ -564,14 +631,14 @@ module ESMF_ComplianceICMod
     ! Start Compliance Checking: RunPrologue
     if (ccfDepth <= maxDepth .or. maxDepth < 0) then
     
-    if (doJSON) then
+    if (outputJSON) then
         call JSON_LogCtrlFlow("start_prologue", comp, rc)
         if (ESMF_LogFoundError(rc, &
             line=__LINE__, file=FILENAME)) return  ! bail out
     endif
 
     write(output,*) ">START RunPrologue for phase=", phase
-    call ESMF_LogWrite(trim(prefix)//trim(output), &
+    call Compliance_LogWrite(trim(prefix)//trim(output), &
       ESMF_LOGMSG_INFO, rc=rc)
     if (ESMF_LogFoundError(rc, &
       line=__LINE__, &
@@ -617,14 +684,14 @@ module ESMF_ComplianceICMod
       return  ! bail out
 
     write(output,*) ">STOP RunPrologue for phase=", phase
-    call ESMF_LogWrite(trim(prefix)//trim(output), &
+    call Compliance_LogWrite(trim(prefix)//trim(output), &
       ESMF_LOGMSG_INFO, rc=rc)
     if (ESMF_LogFoundError(rc, &
       line=__LINE__, &
       file=FILENAME)) &
       return  ! bail out
 
-    if (doJSON) then
+    if (outputJSON) then
         call JSON_LogCtrlFlow("stop_prologue", comp, rc)
         if (ESMF_LogFoundError(rc, &
             line=__LINE__, file=FILENAME)) return  ! bail out
@@ -651,7 +718,7 @@ module ESMF_ComplianceICMod
     ! Start Compliance Checking: RunEpilogue
     if (ccfDepth <= maxDepth .or. maxDepth < 0) then
     
-    if (doJSON) then
+    if (outputJSON) then
         call JSON_LogCtrlFlow("stop_phase", comp, rc)
         if (ESMF_LogFoundError(rc, &
             line=__LINE__, file=FILENAME)) return  ! bail out
@@ -667,7 +734,7 @@ module ESMF_ComplianceICMod
       return  ! bail out
     
     write(output,*) ">START RunEpilogue for phase=", phase
-    call ESMF_LogWrite(trim(prefix)//trim(output), &
+    call Compliance_LogWrite(trim(prefix)//trim(output), &
       ESMF_LOGMSG_INFO, rc=rc)
     if (ESMF_LogFoundError(rc, &
       line=__LINE__, &
@@ -713,14 +780,14 @@ module ESMF_ComplianceICMod
       return  ! bail out
     
     write(output,*) ">STOP RunEpilogue for phase=", phase
-    call ESMF_LogWrite(trim(prefix)//trim(output), &
+    call Compliance_LogWrite(trim(prefix)//trim(output), &
       ESMF_LOGMSG_INFO, rc=rc)
     if (ESMF_LogFoundError(rc, &
       line=__LINE__, &
       file=FILENAME)) &
       return  ! bail out
 
-    if (doJSON) then
+    if (outputJSON) then
         call JSON_LogCtrlFlow("stop_epilogue", comp, rc)
         if (ESMF_LogFoundError(rc, &
             line=__LINE__, file=FILENAME)) return  ! bail out
@@ -778,14 +845,14 @@ module ESMF_ComplianceICMod
     ! Start Compliance Checking: FinalizePrologue
     if (ccfDepth <= maxDepth .or. maxDepth < 0) then
     
-    if (doJSON) then
+    if (outputJSON) then
         call JSON_LogCtrlFlow("start_prologue", comp, rc)
         if (ESMF_LogFoundError(rc, &
             line=__LINE__, file=FILENAME)) return  ! bail out
     endif
 
     write(output,*) ">START FinalizePrologue for phase=", phase
-    call ESMF_LogWrite(trim(prefix)//trim(output), &
+    call Compliance_LogWrite(trim(prefix)//trim(output), &
       ESMF_LOGMSG_INFO, rc=rc)
     if (ESMF_LogFoundError(rc, &
       line=__LINE__, &
@@ -823,14 +890,14 @@ module ESMF_ComplianceICMod
       return  ! bail out
 
     write(output,*) ">STOP FinalizePrologue for phase=", phase
-    call ESMF_LogWrite(trim(prefix)//trim(output), &
+    call Compliance_LogWrite(trim(prefix)//trim(output), &
       ESMF_LOGMSG_INFO, rc=rc)
     if (ESMF_LogFoundError(rc, &
       line=__LINE__, &
       file=FILENAME)) &
       return  ! bail out
 
-    if (doJSON) then
+    if (outputJSON) then
         call JSON_LogCtrlFlow("stop_prologue", comp, rc)
         if (ESMF_LogFoundError(rc, &
             line=__LINE__, file=FILENAME)) return  ! bail out
@@ -857,7 +924,7 @@ module ESMF_ComplianceICMod
     ! Start Compliance Checking: FinalizeEpilogue
     if (ccfDepth <= maxDepth .or. maxDepth < 0) then
     
-    if (doJSON) then
+    if (outputJSON) then
         call JSON_LogCtrlFlow("stop_phase", comp, rc)
         if (ESMF_LogFoundError(rc, &
             line=__LINE__, file=FILENAME)) return  ! bail out
@@ -873,7 +940,7 @@ module ESMF_ComplianceICMod
       return  ! bail out
     
     write(output,*) ">START FinalizeEpilogue for phase=", phase
-    call ESMF_LogWrite(trim(prefix)//trim(output), &
+    call Compliance_LogWrite(trim(prefix)//trim(output), &
       ESMF_LOGMSG_INFO, rc=rc)
     if (ESMF_LogFoundError(rc, &
       line=__LINE__, &
@@ -911,14 +978,14 @@ module ESMF_ComplianceICMod
       return  ! bail out
 
     write(output,*) ">STOP FinalizeEpilogue for phase=", phase
-    call ESMF_LogWrite(trim(prefix)//trim(output), &
+    call Compliance_LogWrite(trim(prefix)//trim(output), &
       ESMF_LOGMSG_INFO, rc=rc)
     if (ESMF_LogFoundError(rc, &
       line=__LINE__, &
       file=FILENAME)) &
       return  ! bail out
 
-    if (doJSON) then
+    if (outputJSON) then
         call JSON_LogCtrlFlow("stop_epilogue", comp, rc)
         if (ESMF_LogFoundError(rc, &
             line=__LINE__, file=FILENAME)) return  ! bail out
@@ -1002,7 +1069,7 @@ module ESMF_ComplianceICMod
     stateValid = .true.
     ! Ensure that the State is a valid object
     if (.not.ESMF_StateIsCreated(state)) then
-      call ESMF_LogWrite(trim(prefix)//" ==> The "//trim(referenceName)// &
+      call Compliance_LogWrite(trim(prefix)//" ==> The "//trim(referenceName)// &
         " is invalid!", &
         ESMF_LOGMSG_WARNING, rc=rc)
       if (ESMF_LogFoundError(rc, &
@@ -1021,7 +1088,7 @@ module ESMF_ComplianceICMod
         line=__LINE__, &
         file=FILENAME)) &
         return  ! bail out
-      call ESMF_LogWrite(trim(prefix)//" "//trim(referenceName)//" name: "// &
+      call Compliance_LogWrite(trim(prefix)//" "//trim(referenceName)//" name: "// &
         trim(name), ESMF_LOGMSG_INFO, rc=rc)
       if (ESMF_LogFoundError(rc, &
         line=__LINE__, &
@@ -1036,7 +1103,7 @@ module ESMF_ComplianceICMod
       else
         tempString = "ESMF_STATEINTENT_INVALID"
       endif
-      call ESMF_LogWrite(trim(prefix)//" "//trim(referenceName)//" stateintent: "// &
+      call Compliance_LogWrite(trim(prefix)//" "//trim(referenceName)//" stateintent: "// &
         trim(tempString), ESMF_LOGMSG_INFO, rc=rc)
       if (ESMF_LogFoundError(rc, &
         line=__LINE__, &
@@ -1047,7 +1114,7 @@ module ESMF_ComplianceICMod
       convention = "NUOPC"
       purpose = "Instance"
 
-      if (doJSON) then
+      if (outputJSON) then
 
           call JSON_GetID(state, idStr, rc=rc)
           if (ESMF_LogFoundError(rc, &
@@ -1103,16 +1170,16 @@ module ESMF_ComplianceICMod
                   file=FILENAME)) &
                   return  ! bail out
 
-              call ESMF_LogWrite(jsonstring, ESMF_LOGMSG_JSON, rc=rc)
+              call JSON_LogWrite(jsonstring, rc=rc)
               if (ESMF_LogFoundError(rc, &
                  line=__LINE__, &
                  file=FILENAME)) &
                  return  ! bail out
           endif
-        endif ! doJSON
+        endif ! outputJSON
 
       
-      call ESMF_LogWrite(trim(prefix)//" State level attribute check: "// &
+      call Compliance_LogWrite(trim(prefix)//" State level attribute check: "// &
         "convention: '"//trim(convention)//"', purpose: '"//trim(purpose)//"'.", &
         ESMF_LOGMSG_INFO, rc=rc)
       if (ESMF_LogFoundError(rc, &
@@ -1130,7 +1197,7 @@ module ESMF_ComplianceICMod
         return  ! bail out
 
       write (tempString, *) itemCount
-      call ESMF_LogWrite(trim(prefix)//" "//trim(referenceName)//" itemCount: "// &
+      call Compliance_LogWrite(trim(prefix)//" "//trim(referenceName)//" itemCount: "// &
         trim(tempString), ESMF_LOGMSG_INFO, rc=rc)
       if (ESMF_LogFoundError(rc, &
         line=__LINE__, &
@@ -1153,7 +1220,7 @@ module ESMF_ComplianceICMod
           else if (stateitemtypeList(item) == ESMF_STATEITEM_FIELDBUNDLE) then
             write (tempString, *) item, " [FIELDBUNDLE] name: "
           else if (stateitemtypeList(item) == ESMF_STATEITEM_ARRAY) then
-            call ESMF_LogWrite(trim(prefix)//" ==> The "//trim(referenceName)// &
+            call Compliance_LogWrite(trim(prefix)//" ==> The "//trim(referenceName)// &
               " contains an ESMF_Array object!", ESMF_LOGMSG_WARNING, rc=rc)
             if (ESMF_LogFoundError(rc, &
               line=__LINE__, &
@@ -1161,7 +1228,7 @@ module ESMF_ComplianceICMod
               return  ! bail out
             write (tempString, *) item, " [ARRAY] name: "
           else if (stateitemtypeList(item) == ESMF_STATEITEM_ARRAYBUNDLE) then
-            call ESMF_LogWrite(trim(prefix)//" ==> The "//trim(referenceName)// &
+            call Compliance_LogWrite(trim(prefix)//" ==> The "//trim(referenceName)// &
               " contains an ESMF_ArrayBundle object!", ESMF_LOGMSG_WARNING, rc=rc)
             if (ESMF_LogFoundError(rc, &
               line=__LINE__, &
@@ -1178,7 +1245,7 @@ module ESMF_ComplianceICMod
             write (tempString, *) item, " [NOTFOUND] name: "
           endif
           
-          call ESMF_LogWrite(trim(prefix)//" "//trim(referenceName)//" item #"// &
+          call Compliance_LogWrite(trim(prefix)//" "//trim(referenceName)//" item #"// &
             trim(tempString)//trim(itemNameList(item)), &
             ESMF_LOGMSG_INFO, rc=rc)
           if (ESMF_LogFoundError(rc, &
@@ -1225,7 +1292,7 @@ module ESMF_ComplianceICMod
                 line=__LINE__, &
                 file=FILENAME)) &
                 return  ! bail out
-              call ESMF_LogWrite(trim(prefix)//" in FieldBundle, Field name: "//&
+              call Compliance_LogWrite(trim(prefix)//" in FieldBundle, Field name: "//&
                 trim(name), ESMF_LOGMSG_INFO, rc=rc)
               if (ESMF_LogFoundError(rc, &
                 line=__LINE__, &
@@ -1287,7 +1354,7 @@ module ESMF_ComplianceICMod
       return  ! bail out
     if (.not.isPresent) then      
       ! attpack not present
-      call ESMF_LogWrite(trim(prefix)//" ==> State level attpack: <"// &
+      call Compliance_LogWrite(trim(prefix)//" ==> State level attpack: <"// &
         "convention: '"//trim(convention)//"', "// &
         "purpose: '"//trim(purpose)//"'> is NOT present!", &
         ESMF_LOGMSG_WARNING, rc=rc)
@@ -1304,7 +1371,7 @@ module ESMF_ComplianceICMod
         return  ! bail out
       if (.not.isPresent) then
         ! attribute not present
-        call ESMF_LogWrite(trim(prefix)//" ==> State level attribute: <"// &
+        call Compliance_LogWrite(trim(prefix)//" ==> State level attribute: <"// &
           trim(attributeName)//"> is NOT present!", &
           ESMF_LOGMSG_WARNING, rc=rc)
         if (ESMF_LogFoundError(rc, &
@@ -1313,7 +1380,7 @@ module ESMF_ComplianceICMod
           return  ! bail out
       else if (itemCount == 0) then
         ! attribute present but not set
-        call ESMF_LogWrite(trim(prefix)//" ==> State level attribute: <"// &
+        call Compliance_LogWrite(trim(prefix)//" ==> State level attribute: <"// &
           trim(attributeName)//"> present but NOT set!", &
           ESMF_LOGMSG_WARNING, rc=rc)
         if (ESMF_LogFoundError(rc, &
@@ -1329,7 +1396,7 @@ module ESMF_ComplianceICMod
             convention=convention, purpose=purpose, rc=rc)
           if (itemCount == 1) then
             ! single valued
-            call ESMF_LogWrite(trim(prefix)//" State level attribute: <"// &
+            call Compliance_LogWrite(trim(prefix)//" State level attribute: <"// &
               trim(attributeName)//"> "// &
               "present and set: "// trim(valueStringList(1)), &
               ESMF_LOGMSG_INFO, rc=rc)
@@ -1341,7 +1408,7 @@ module ESMF_ComplianceICMod
             ! multi valued -> requires loop
             do i=1, itemCount
               write(iStr,*) i
-              call ESMF_LogWrite(trim(prefix)//" State level attribute: <"// &
+              call Compliance_LogWrite(trim(prefix)//" State level attribute: <"// &
                 trim(attributeName)//">["//trim(adjustl(iStr))//"] "// &
                 "present and set: "// trim(valueStringList(i)), &
                 ESMF_LOGMSG_INFO, rc=rc)
@@ -1360,7 +1427,7 @@ module ESMF_ComplianceICMod
           if (itemCount == 1) then
             ! single valued
             write(vStr,*) valueI4List(1)
-            call ESMF_LogWrite(trim(prefix)//" State level attribute: <"// &
+            call Compliance_LogWrite(trim(prefix)//" State level attribute: <"// &
               trim(attributeName)//"> "// &
               "present and set: "// vStr, &
               ESMF_LOGMSG_INFO, rc=rc)
@@ -1373,7 +1440,7 @@ module ESMF_ComplianceICMod
             do i=1, itemCount
               write(iStr,*) i
               write(vStr,*) valueI4List(i)
-              call ESMF_LogWrite(trim(prefix)//" State level attribute: <"// &
+              call Compliance_LogWrite(trim(prefix)//" State level attribute: <"// &
                 trim(attributeName)//">["//trim(adjustl(iStr))//"] "// &
                 "present and set: "// vStr, &
                 ESMF_LOGMSG_INFO, rc=rc)
@@ -1385,7 +1452,7 @@ module ESMF_ComplianceICMod
           endif
           deallocate(valueI4List)
         else
-          call ESMF_LogWrite(trim(prefix)//" State level attribute: <"// &
+          call Compliance_LogWrite(trim(prefix)//" State level attribute: <"// &
             trim(attributeName)//"> "// &
             "present and set: <unsupported data type>", &
             ESMF_LOGMSG_INFO, rc=rc)
@@ -1431,7 +1498,7 @@ module ESMF_ComplianceICMod
       convention = "NUOPC"
       purpose = "Instance"
     
-      call ESMF_LogWrite(trim(prefix)//" GridComp level attribute check: "// &
+      call Compliance_LogWrite(trim(prefix)//" GridComp level attribute check: "// &
         "convention: '"//trim(convention)//"', purpose: '"//trim(purpose)//"'.", &
         ESMF_LOGMSG_INFO, rc=rc)
       if (ESMF_LogFoundError(rc, &
@@ -1673,7 +1740,7 @@ module ESMF_ComplianceICMod
       convention = "NUOPC"
       purpose = "Instance"
     
-      call ESMF_LogWrite(trim(prefix)//" CplComp level attribute check: "// &
+      call Compliance_LogWrite(trim(prefix)//" CplComp level attribute check: "// &
         "convention: '"//trim(convention)//"', purpose: '"//trim(purpose)//"'.", &
         ESMF_LOGMSG_INFO, rc=rc)
       if (ESMF_LogFoundError(rc, &
@@ -1739,7 +1806,7 @@ module ESMF_ComplianceICMod
       ! currently there is no other type by GridComp or CplComp
     endif
 
-    if (doJSON) then
+    if (outputJSON) then
 
         call JSON_GetID(comp, idStr, rc=rc)
         if (ESMF_LogFoundError(rc, &
@@ -1786,7 +1853,7 @@ module ESMF_ComplianceICMod
               file=FILENAME)) &
               return  ! bail out
 
-            call ESMF_LogWrite(jsonstring, ESMF_LOGMSG_JSON, rc=rc)
+            call JSON_LogWrite(jsonstring, rc=rc)
             if (ESMF_LogFoundError(rc, &
               line=__LINE__, &
               file=FILENAME)) &
@@ -1821,7 +1888,7 @@ module ESMF_ComplianceICMod
       return  ! bail out
     if (.not.isPresent) then      
       ! attpack not present
-      call ESMF_LogWrite(trim(prefix)//" ==> Component level attpack: <"// &
+      call Compliance_LogWrite(trim(prefix)//" ==> Component level attpack: <"// &
         "convention: '"//trim(convention)//"', "// &
         "purpose: '"//trim(purpose)//"'> is NOT present!", &
         ESMF_LOGMSG_WARNING, rc=rc)
@@ -1838,7 +1905,7 @@ module ESMF_ComplianceICMod
         return  ! bail out
       if (.not.isPresent) then
         ! attribute not present
-        call ESMF_LogWrite(trim(prefix)//" ==> Component level attribute: <"// &
+        call Compliance_LogWrite(trim(prefix)//" ==> Component level attribute: <"// &
           trim(attributeName)//"> is NOT present!", &
           ESMF_LOGMSG_WARNING, rc=rc)
         if (ESMF_LogFoundError(rc, &
@@ -1847,7 +1914,7 @@ module ESMF_ComplianceICMod
           return  ! bail out
       else if (itemCount == 0) then
         ! attribute present but not set
-        call ESMF_LogWrite(trim(prefix)//" ==> Component level attribute: <"// &
+        call Compliance_LogWrite(trim(prefix)//" ==> Component level attribute: <"// &
           trim(attributeName)//"> present but NOT set!", &
           ESMF_LOGMSG_WARNING, rc=rc)
         if (ESMF_LogFoundError(rc, &
@@ -1863,7 +1930,7 @@ module ESMF_ComplianceICMod
             convention=convention, purpose=purpose, rc=rc)
           if (itemCount == 1) then
             ! single valued
-            call ESMF_LogWrite(trim(prefix)//" Component level attribute: <"// &
+            call Compliance_LogWrite(trim(prefix)//" Component level attribute: <"// &
               trim(attributeName)//"> "// &
               "present and set: "// trim(valueStringList(1)), &
               ESMF_LOGMSG_INFO, rc=rc)
@@ -1875,7 +1942,7 @@ module ESMF_ComplianceICMod
             ! multi valued -> requires loop
             do i=1, itemCount
               write(iStr,*) i
-              call ESMF_LogWrite(trim(prefix)//" Component level attribute: <"// &
+              call Compliance_LogWrite(trim(prefix)//" Component level attribute: <"// &
                 trim(attributeName)//">["//trim(adjustl(iStr))//"] "// &
                 "present and set: "// trim(valueStringList(i)), &
                 ESMF_LOGMSG_INFO, rc=rc)
@@ -1894,7 +1961,7 @@ module ESMF_ComplianceICMod
           if (itemCount == 1) then
             ! single valued
             write(vStr,*) valueI4List(1)
-            call ESMF_LogWrite(trim(prefix)//" Component level attribute: <"// &
+            call Compliance_LogWrite(trim(prefix)//" Component level attribute: <"// &
               trim(attributeName)//"> "// &
               "present and set: "// vStr, &
               ESMF_LOGMSG_INFO, rc=rc)
@@ -1907,7 +1974,7 @@ module ESMF_ComplianceICMod
             do i=1, itemCount
               write(iStr,*) i
               write(vStr,*) valueI4List(i)
-              call ESMF_LogWrite(trim(prefix)//" Component level attribute: <"// &
+              call Compliance_LogWrite(trim(prefix)//" Component level attribute: <"// &
                 trim(attributeName)//">["//trim(adjustl(iStr))//"] "// &
                 "present and set: "// vStr, &
                 ESMF_LOGMSG_INFO, rc=rc)
@@ -1919,7 +1986,7 @@ module ESMF_ComplianceICMod
           endif
           deallocate(valueI4List)
         else
-          call ESMF_LogWrite(trim(prefix)//" Component level attribute: <"// &
+          call Compliance_LogWrite(trim(prefix)//" Component level attribute: <"// &
             trim(attributeName)//"> "// &
             "present and set: <unsupported data type>", &
             ESMF_LOGMSG_INFO, rc=rc)
@@ -1961,7 +2028,7 @@ module ESMF_ComplianceICMod
     convention = "NUOPC"
     purpose = "Instance"
     
-    if (doJSON) then
+    if (outputJSON) then
 
         call ESMF_FieldGet(field, status=fieldStatus, rc=rc)
         if (ESMF_LogFoundError(rc, &
@@ -2067,9 +2134,9 @@ module ESMF_ComplianceICMod
              return  ! bail out
         endif
 
-    endif ! doJSON
+    endif ! outputJSON
 
-    call ESMF_LogWrite(trim(prefix)//" Field level attribute check: "// &
+    call Compliance_LogWrite(trim(prefix)//" Field level attribute check: "// &
       "convention: '"//trim(convention)//"', purpose: '"//trim(purpose)//"'.", &
       ESMF_LOGMSG_INFO, rc=rc)
     if (ESMF_LogFoundError(rc, &
@@ -2212,7 +2279,7 @@ module ESMF_ComplianceICMod
       return  ! bail out
     if (.not.isPresent) then      
       ! attpack not present
-      call ESMF_LogWrite(trim(prefix)//" ==> Field level attpack: <"// &
+      call Compliance_LogWrite(trim(prefix)//" ==> Field level attpack: <"// &
         "convention: '"//trim(convention)//"', "// &
         "purpose: '"//trim(purpose)//"'> is NOT present!", &
         ESMF_LOGMSG_WARNING, rc=rc)
@@ -2229,7 +2296,7 @@ module ESMF_ComplianceICMod
         return  ! bail out
       if (.not.isPresent) then
         ! attribute not present
-        call ESMF_LogWrite(trim(prefix)//" ==> Field level attribute: <"// &
+        call Compliance_LogWrite(trim(prefix)//" ==> Field level attribute: <"// &
           trim(attributeName)//"> is NOT present!", &
           ESMF_LOGMSG_WARNING, rc=rc)
         if (ESMF_LogFoundError(rc, &
@@ -2238,7 +2305,7 @@ module ESMF_ComplianceICMod
           return  ! bail out
       else if (itemCount == 0) then
         ! attribute present but not set
-        call ESMF_LogWrite(trim(prefix)//" ==> Field level attribute: <"// &
+        call Compliance_LogWrite(trim(prefix)//" ==> Field level attribute: <"// &
           trim(attributeName)//"> present but NOT set!", &
           ESMF_LOGMSG_WARNING, rc=rc)
         if (ESMF_LogFoundError(rc, &
@@ -2254,7 +2321,7 @@ module ESMF_ComplianceICMod
             convention=convention, purpose=purpose, rc=rc)
           if (itemCount == 1) then
             ! single valued
-            call ESMF_LogWrite(trim(prefix)//" Field level attribute: <"// &
+            call Compliance_LogWrite(trim(prefix)//" Field level attribute: <"// &
               trim(attributeName)//"> "// &
               "present and set: "// trim(valueStringList(1)), &
               ESMF_LOGMSG_INFO, rc=rc)
@@ -2266,7 +2333,7 @@ module ESMF_ComplianceICMod
             ! multi valued -> requires loop
             do i=1, itemCount
               write(iStr,*) i
-              call ESMF_LogWrite(trim(prefix)//" Field level attribute: <"// &
+              call Compliance_LogWrite(trim(prefix)//" Field level attribute: <"// &
                 trim(attributeName)//">["//trim(adjustl(iStr))//"] "// &
                 "present and set: "// trim(valueStringList(i)), &
                 ESMF_LOGMSG_INFO, rc=rc)
@@ -2285,7 +2352,7 @@ module ESMF_ComplianceICMod
           if (itemCount == 1) then
             ! single valued
             write(vStr,*) valueI4List(1)
-            call ESMF_LogWrite(trim(prefix)//" Field level attribute: <"// &
+            call Compliance_LogWrite(trim(prefix)//" Field level attribute: <"// &
               trim(attributeName)//"> "// &
               "present and set: "// vStr, &
               ESMF_LOGMSG_INFO, rc=rc)
@@ -2298,7 +2365,7 @@ module ESMF_ComplianceICMod
             do i=1, itemCount
               write(iStr,*) i
               write(vStr,*) valueI4List(i)
-              call ESMF_LogWrite(trim(prefix)//" Field level attribute: <"// &
+              call Compliance_LogWrite(trim(prefix)//" Field level attribute: <"// &
                 trim(attributeName)//">["//trim(adjustl(iStr))//"] "// &
                 "present and set: "// vStr, &
                 ESMF_LOGMSG_INFO, rc=rc)
@@ -2310,7 +2377,7 @@ module ESMF_ComplianceICMod
           endif
           deallocate(valueI4List)
         else
-          call ESMF_LogWrite(trim(prefix)//" Field level attribute: <"// &
+          call Compliance_LogWrite(trim(prefix)//" Field level attribute: <"// &
             trim(attributeName)//"> "// &
             "present and set: <unsupported data type>", &
             ESMF_LOGMSG_INFO, rc=rc)
@@ -2347,7 +2414,7 @@ module ESMF_ComplianceICMod
       return  ! bail out
     if (.not.ESMF_ClockIsCreated(clock) .or. &
       (clockThis == ESMF_NULL_POINTER)) then
-      call ESMF_LogWrite(trim(prefix)//" ==> The incoming Clock is invalid!", &
+      call Compliance_LogWrite(trim(prefix)//" ==> The incoming Clock is invalid!", &
         ESMF_LOGMSG_WARNING, rc=rc)
       if (ESMF_LogFoundError(rc, &
         line=__LINE__, &
@@ -2444,14 +2511,14 @@ module ESMF_ComplianceICMod
       if (direction /= directionCopy) clockModified = .true.
     
       if (clockModified) then
-        call ESMF_LogWrite(trim(prefix)//" ==> The incoming Clock was modified!", &
+        call Compliance_LogWrite(trim(prefix)//" ==> The incoming Clock was modified!", &
           ESMF_LOGMSG_WARNING, rc=rc)
         if (ESMF_LogFoundError(rc, &
           line=__LINE__, &
           file=FILENAME)) &
           return  ! bail out
       else
-        call ESMF_LogWrite(trim(prefix)//" The incoming Clock was not modified.", &
+        call Compliance_LogWrite(trim(prefix)//" The incoming Clock was not modified.", &
           ESMF_LOGMSG_INFO, rc=rc)
         if (ESMF_LogFoundError(rc, &
           line=__LINE__, &
@@ -2507,7 +2574,7 @@ module ESMF_ComplianceICMod
     
     if (.not.clockIsPresent) then
 
-      call ESMF_LogWrite(trim(prefix)// &
+      call Compliance_LogWrite(trim(prefix)// &
         " ==> The internal Clock is not present!", &
         ESMF_LOGMSG_WARNING, rc=rc)
       if (ESMF_LogFoundError(rc, &
@@ -2530,7 +2597,7 @@ module ESMF_ComplianceICMod
         clockInternalValid = .false.
 
       if (.not.clockInternalValid) then
-        call ESMF_LogWrite(trim(prefix)//" ==> The internal Clock is invalid!", &
+        call Compliance_LogWrite(trim(prefix)//" ==> The internal Clock is invalid!", &
           ESMF_LOGMSG_WARNING, rc=rc)
         if (ESMF_LogFoundError(rc, &
           line=__LINE__, &
@@ -2550,7 +2617,7 @@ module ESMF_ComplianceICMod
       clockValid = .false.
     
     if (.not.clockValid) then
-      call ESMF_LogWrite(trim(prefix)//" ==> No Clock to compare internal Clock!", &
+      call Compliance_LogWrite(trim(prefix)//" ==> No Clock to compare internal Clock!", &
         ESMF_LOGMSG_WARNING, rc=rc)
       if (ESMF_LogFoundError(rc, &
         line=__LINE__, &
@@ -2580,7 +2647,7 @@ module ESMF_ComplianceICMod
     clockMatch = .true. ! initialize
       
     if (startTimeInt /= startTime) then
-      call ESMF_LogWrite(trim(prefix)//" ==> startTime of internal Clock does not match Clock!", &
+      call Compliance_LogWrite(trim(prefix)//" ==> startTime of internal Clock does not match Clock!", &
         ESMF_LOGMSG_WARNING, rc=rc)
       if (ESMF_LogFoundError(rc, &
         line=__LINE__, &
@@ -2591,7 +2658,7 @@ module ESMF_ComplianceICMod
     
     if (mustMatchCurr) then
       if (currTimeInt /= currTime) then
-        call ESMF_LogWrite(trim(prefix)//" ==> currTime of internal Clock does not match Clock!", &
+        call Compliance_LogWrite(trim(prefix)//" ==> currTime of internal Clock does not match Clock!", &
           ESMF_LOGMSG_WARNING, rc=rc)
         if (ESMF_LogFoundError(rc, &
           line=__LINE__, &
@@ -2602,7 +2669,7 @@ module ESMF_ComplianceICMod
     endif
         
     if (clockMatch) then
-      call ESMF_LogWrite(trim(prefix)//" The internal Clock matches incoming Clock.", &
+      call Compliance_LogWrite(trim(prefix)//" The internal Clock matches incoming Clock.", &
         ESMF_LOGMSG_INFO, rc=rc)
       if (ESMF_LogFoundError(rc, &
         line=__LINE__, &
@@ -2612,14 +2679,14 @@ module ESMF_ComplianceICMod
 
     if (mustReachStop) then
       if (currTimeInt /= stopTimeInt) then
-        call ESMF_LogWrite(trim(prefix)//" ==> The internal Clock has not run to its stopTime!", &
+        call Compliance_LogWrite(trim(prefix)//" ==> The internal Clock has not run to its stopTime!", &
           ESMF_LOGMSG_WARNING, rc=rc)
         if (ESMF_LogFoundError(rc, &
           line=__LINE__, &
           file=FILENAME)) &
           return  ! bail out
       else
-        call ESMF_LogWrite(trim(prefix)//" The internal Clock has run to its stopTime.", &
+        call Compliance_LogWrite(trim(prefix)//" The internal Clock has run to its stopTime.", &
           ESMF_LOGMSG_INFO, rc=rc)
         if (ESMF_LogFoundError(rc, &
           line=__LINE__, &
@@ -2651,7 +2718,7 @@ module ESMF_ComplianceICMod
       return  ! bail out
     
     write (output, *) virtMemPet
-    call ESMF_LogWrite(trim(prefix)//"ESMF Stats: "//&
+    call Compliance_LogWrite(trim(prefix)//"ESMF Stats: "//&
       "the virtual memory used by this PET (in KB): "// &
       trim(adjustl(output)), ESMF_LOGMSG_INFO, rc=rc)
     if (ESMF_LogFoundError(rc, &
@@ -2660,7 +2727,7 @@ module ESMF_ComplianceICMod
       return  ! bail out
         
     write (output, *) physMemPet
-    call ESMF_LogWrite(trim(prefix)//"ESMF Stats: "//&
+    call Compliance_LogWrite(trim(prefix)//"ESMF Stats: "//&
     "the physical memory used by this PET (in KB): "// &
       trim(adjustl(output)), ESMF_LOGMSG_INFO, rc=rc)
     if (ESMF_LogFoundError(rc, &
@@ -2676,7 +2743,7 @@ module ESMF_ComplianceICMod
       return  ! bail out
     
     write (output, *) fobjCount
-    call ESMF_LogWrite(trim(prefix)//"ESMF Stats: "//&
+    call Compliance_LogWrite(trim(prefix)//"ESMF Stats: "//&
     "ESMF Fortran objects referenced by the ESMF garbage collection: "// &
       trim(adjustl(output)), ESMF_LOGMSG_INFO, rc=rc)
     if (ESMF_LogFoundError(rc, &
@@ -2685,7 +2752,7 @@ module ESMF_ComplianceICMod
       return  ! bail out
         
     write (output, *) objCount
-    call ESMF_LogWrite(trim(prefix)//"ESMF Stats: "//&
+    call Compliance_LogWrite(trim(prefix)//"ESMF Stats: "//&
     "ESMF Base objects (all C++, most Fortran) referenced by the ESMF garbage collection: "// &
       trim(adjustl(output)), ESMF_LOGMSG_INFO, rc=rc)
     if (ESMF_LogFoundError(rc, &
@@ -2711,6 +2778,29 @@ module ESMF_ComplianceICMod
     
   end function
  
+    recursive subroutine Compliance_LogWrite(msg, msgType, rc)
+        character(len=*),                 intent(in)  :: msg
+        type(ESMF_LogMsg_Flag), optional, intent(in)  :: msgType
+        integer, optional,                intent(out) :: rc
+
+        ! locals
+        type(ESMF_LogMsg_Flag) :: localMsgType
+
+        rc = ESMF_SUCCESS
+        if (outputText) then
+            if (present(msgType)) then
+                localMsgType = msgType
+            else
+                localMsgType = ESMF_LOGMSG_INFO
+            endif
+            call ESMF_LogWrite(trim(msg), localMsgType, rc=rc)
+            if (ESMF_LogFoundError(rc, &
+              line=__LINE__, &
+              file=FILENAME)) &
+              return  ! bail out
+         endif
+    end subroutine
+
     recursive subroutine JSON_LogWrite(msg, rc)
         character(len=*), intent(in) ::   msg
         integer, optional, intent(out) :: rc
@@ -2791,7 +2881,7 @@ module ESMF_ComplianceICMod
             &"phase":"'//trim(phaseString)//'",&
             &"currTime":'//trim(timeStamp)//'}}'
 
-        call ESMF_LogWrite(trim(jsonString), ESMF_LOGMSG_JSON, rc=rc)
+        call JSON_LogWrite(trim(jsonString), rc=rc)
         if (ESMF_LogFoundError(rc, &
           line=__LINE__, &
           file=FILENAME)) &
