@@ -56,7 +56,7 @@ void ESMCI_meshcreate(Mesh **meshpp,
                       ESMC_CoordSys_Flag *coordSys, int *rc)
 {
 #undef  ESMC_METHOD
-#define ESMC_METHOD "c_esmc_meshcreate()"
+#define ESMC_METHOD "ESMCI_meshcreate()"
 
 
    try {
@@ -135,6 +135,8 @@ void ESMCI_meshaddnodes(Mesh **meshpp, int *num_nodes, int *nodeId,
                                            double *nodeCoord, int *nodeOwner, InterfaceInt *nodeMaskII,
                                            ESMC_CoordSys_Flag *_coordSys, int *_orig_sdim,
                                            int *rc) 
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI_meshaddnodes()"
 {
    try {
     Mesh *meshp = *meshpp;
@@ -335,6 +337,9 @@ void ESMCI_meshaddnodes(Mesh **meshpp, int *num_nodes, int *nodeId,
 void ESMCI_meshwrite(Mesh **meshpp, char *fname, int *rc,
     ESMCI_FortranStrLenArg nlen) {
 
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI_meshwrite()"
+
   try {
 
   // Initialize the parallel environment for mesh (if not already done)
@@ -381,6 +386,8 @@ void ESMCI_meshwrite(Mesh **meshpp, char *fname, int *rc,
 
 // Get the element topology
 const MeshObjTopo *ElemType2Topo(int pdim, int sdim, int etype) {
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ElemType2Topo()"
 
   if (pdim==2) {
     if (sdim==2) {
@@ -414,6 +421,9 @@ const MeshObjTopo *ElemType2Topo(int pdim, int sdim, int etype) {
 // Get the number of nodes from the element type
 // Get the element topology
 static int ElemType2NumNodes(int pdim, int sdim, int etype) {
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ElemType2NumNodes()"
+
   if (pdim==2) {
     return etype;
   } else if (pdim==3) {
@@ -438,6 +448,9 @@ static int ElemType2NumNodes(int pdim, int sdim, int etype) {
 // tri_frac = fraction each triangle is of whole poly size=(num_p-2)
 static void triangulate(int sdim, int num_p, double *p, double *td, int *ti, int *tri_ind, 
                  double *tri_frac) {
+#undef  ESMC_METHOD
+#define ESMC_METHOD "triangulate()"
+
           int localrc;
           
 
@@ -527,6 +540,9 @@ static void triangulate(int sdim, int num_p, double *p, double *td, int *ti, int
 static void triangulate_warea(int sdim, int num_p, double *p, int oeid,
                               double *td, int *ti, int *tri_ind, 
                               double *tri_area) {
+#undef  ESMC_METHOD
+#define ESMC_METHOD "triangulate_warea()"
+
           int localrc;
           
           // Call into triagulation routines
@@ -601,6 +617,9 @@ void ESMCI_meshaddelements(Mesh **meshpp,
                                               int *_num_elemConn, int *elemConn, int *regridConserve, 
                                               ESMC_CoordSys_Flag *_coordSys, int *_orig_sdim,
                                               int *rc) 
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI_meshaddelements()"
+
 {
    try {
 
@@ -1439,6 +1458,10 @@ void ESMCI_meshaddelements(Mesh **meshpp,
 void ESMCI_meshvtkheader(char *filename, int *num_elem, int *num_node, int *conn_size, int *rc,
     ESMCI_FortranStrLenArg nlen) {
 
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI_meshvtkheader()"
+
+
   try {
  
 {
@@ -1502,6 +1525,9 @@ void ESMCI_meshvtkbody(char *filename, int *nodeId, double *nodeCoord,
                     int *nodeOwner, int *elemId, int *elemType, int *elemConn, int *rc,
     ESMCI_FortranStrLenArg nlen) {
 
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI_meshvtkbody()"
+
   try {
 
 {
@@ -1563,6 +1589,8 @@ void ESMCI_meshvtkbody(char *filename, int *nodeId, double *nodeCoord,
 }
 
 void ESMCI_meshdestroy(Mesh **meshpp, int *rc) {
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI_meshdestroy()"
 
   try {
 
@@ -1606,6 +1634,9 @@ void ESMCI_meshdestroy(Mesh **meshpp, int *rc) {
 }
 
 void ESMCI_meshfreememory(Mesh **meshpp, int *rc) {
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI_meshfreememory()"
+
 
   try {
 
@@ -1659,6 +1690,9 @@ extern "C" void FTN_X(f_esmf_getmeshdistgrid)(int*, int*, int*, int*);
  * (which is stored by get_data_index)
  */
 void getNodeGIDS(Mesh &mesh, std::vector<int> &ngid) {
+#undef  ESMC_METHOD
+#define ESMC_METHOD "getNodeGIDS()"
+
 
   UInt nnodes = mesh.num_nodes();
 
@@ -1692,6 +1726,9 @@ void getNodeGIDS(Mesh &mesh, std::vector<int> &ngid) {
  * Don't include split elements
  */
 void getElemGIDS(Mesh &mesh, std::vector<int> &egid) {
+#undef  ESMC_METHOD
+#define ESMC_METHOD "getElemGIDS()"
+
 
   UInt nelems = mesh.num_elems();
 
@@ -1723,6 +1760,9 @@ void getElemGIDS(Mesh &mesh, std::vector<int> &egid) {
 
 
 void ESMCI_meshget(Mesh **meshpp, int *num_nodes, int *num_elements, int *rc){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI_meshget()"
+
 
   // Initialize the parallel environment for mesh (if not already done)
     {
@@ -1743,7 +1783,10 @@ void ESMCI_meshget(Mesh **meshpp, int *num_nodes, int *num_elements, int *rc){
 
 
 void ESMCI_meshcreatenodedistgrid(Mesh **meshpp, int *ngrid, int *num_lnodes, int *rc) {
- 
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI_meshcreatenodedistgrid()" 
+
+
   // Declare id vectors
   std::vector<int> ngids; 
   
@@ -1809,6 +1852,8 @@ void ESMCI_meshcreatenodedistgrid(Mesh **meshpp, int *ngrid, int *num_lnodes, in
 
 
 void ESMCI_meshcreateelemdistgrid(Mesh **meshpp, int *egrid, int *num_lelems, int *rc) {
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI_meshcreateelemdistgrid()"
 
   // Declare id vectors
   std::vector<int> egids; 
@@ -1878,6 +1923,9 @@ void ESMCI_meshinfoserialize(int *intMeshFreed,
                 ESMC_InquireFlag *inquireflag, int *localrc,
                 ESMCI_FortranStrLenArg buffer_l){
 
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI_meshinfoserialize()"
+
     int *ip;
 
     // Initialize return code; assume routine not implemented
@@ -1913,6 +1961,9 @@ void ESMCI_meshinfodeserialize(int *intMeshFreed,
                                  char *buffer, int *offset, int *localrc,
                                  ESMCI_FortranStrLenArg buffer_l){
 
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI_meshinfodeserialize()"
+
     int *ip;
 
     // Initialize return code; assume routine not implemented
@@ -1940,7 +1991,7 @@ void ESMCI_meshserialize(Mesh **meshpp,
                 ESMCI_FortranStrLenArg buffer_l){
 
 #undef  ESMC_METHOD
-#define ESMC_METHOD "c_esmc_meshserialize()"
+#define ESMC_METHOD "ESMCI_meshserialize()"
 
    try {
 
@@ -2112,7 +2163,7 @@ void ESMCI_meshdeserialize(Mesh **meshpp,
                                  ESMCI_FortranStrLenArg buffer_l){
 
 #undef  ESMC_METHOD
-#define ESMC_METHOD "c_esmc_meshdeserialize()"
+#define ESMC_METHOD "ESMCI_meshdeserialize()"
 
    try {
 
@@ -2270,6 +2321,9 @@ void ESMCI_meshdeserialize(Mesh **meshpp,
 void ESMCI_meshfindpnt(Mesh **meshpp, int *unmappedaction, int *dimPnts, int *numPnts, 
 					double *pnts, int *pets, int *rc){
 
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI_meshfindpnt()"
+
    try {
  
   // Initialize the parallel environment for mesh (if not already done)
@@ -2330,6 +2384,9 @@ void ESMCI_meshfindpnt(Mesh **meshpp, int *unmappedaction, int *dimPnts, int *nu
 }
 
 void ESMCI_getlocalelemcoords(Mesh **meshpp, double *ecoords, int *_orig_sdim, int *rc) 
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI_getlocalelemcoords()"
+
 {
     int localrc;
     try {
@@ -2428,6 +2485,9 @@ void ESMCI_getlocalelemcoords(Mesh **meshpp, double *ecoords, int *_orig_sdim, i
 
 void ESMCI_getlocalcoords(Mesh **meshpp, double *nodeCoord, int *_orig_sdim, int *rc) 
 {
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI_getlocalcoords()"
+
     int localrc;
     try {
         Mesh *meshp = *meshpp;
@@ -2515,6 +2575,8 @@ void ESMCI_getlocalcoords(Mesh **meshpp, double *nodeCoord, int *_orig_sdim, int
 
 void ESMCI_getconnectivity(Mesh **meshpp, double *connCoord, int *nodesPerElem,
 		                   int *_orig_sdim, int *rc)
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI_getlconnectivity()"
 {
     int localrc;
     try {
@@ -2619,7 +2681,8 @@ void ESMCI_getconnectivity(Mesh **meshpp, double *connCoord, int *nodesPerElem,
 
 
 void ESMCI_meshgetarea(Mesh **meshpp, int *num_elem, double *elem_areas, int *rc) {
-
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI_meshgetarea()"
   
   // Declare polygon information
 #define  MAX_NUM_POLY_COORDS  60
@@ -2885,7 +2948,8 @@ void ESMCI_meshgetarea(Mesh **meshpp, int *num_elem, double *elem_areas, int *rc
 }
 
 void ESMCI_meshgetdimensions(Mesh **meshpp, int *sdim, int *pdim, int *rc) {
-
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI_meshgetdimensions()"
   try{
     {
       int localrc;
@@ -2929,7 +2993,8 @@ void ESMCI_meshgetdimensions(Mesh **meshpp, int *sdim, int *pdim, int *rc) {
 }
 
 void ESMCI_meshgetcentroid(Mesh **meshpp, int *num_elem, double *elem_centroid, int *rc) {
-
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI_meshgetcentroid()"
   
   // Declare polygon information
 #define  MAX_NUM_POLY_COORDS  60
@@ -3093,7 +3158,8 @@ void ESMCI_meshgetcentroid(Mesh **meshpp, int *num_elem, double *elem_centroid, 
 }
 
 void ESMCI_meshgetfrac(Mesh **meshpp, int *_num_elem, double *elem_fracs, int *rc) {
-  
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI_meshgetfrac()"  
   try {
 
     // Initialize the parallel environment for mesh (if not already done)
@@ -3243,7 +3309,8 @@ void ESMCI_meshgetfrac(Mesh **meshpp, int *_num_elem, double *elem_fracs, int *r
 }
 
 void ESMCI_meshgetfrac2(Mesh **meshpp, int *num_elem, double *elem_fracs, int *rc) {
-  
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI_meshgetfrac2()"  
   try {
 
     // Initialize the parallel environment for mesh (if not already done)
@@ -3340,6 +3407,8 @@ void ESMCI_meshgetfrac2(Mesh **meshpp, int *num_elem, double *elem_fracs, int *r
 // 
 void ESMCI_triangulate(int *pdim, int *sdim, int *numPnts, 
 					double *pnts, double *td, int *ti, int *triInd, int *rc){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI_triangulate()"
    try {
 
   // Initialize the parallel environment for mesh (if not already done)
@@ -3418,6 +3487,8 @@ void ESMCI_triangulate(int *pdim, int *sdim, int *numPnts,
 
 
 void ESMCI_meshturnoncellmask(Mesh **meshpp, ESMCI::InterfaceInt *maskValuesArg,  int *rc) {
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI_meshturnoncellmask()"
 
   try {
 
@@ -3538,6 +3609,8 @@ void ESMCI_meshturnoncellmask(Mesh **meshpp, ESMCI::InterfaceInt *maskValuesArg,
 
 // Turn OFF masking
 void ESMCI_meshturnoffcellmask(Mesh **meshpp, int *rc) {
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI_meshturnoffcellmask()"
 
   try {
 
@@ -3614,7 +3687,8 @@ void ESMCI_meshturnoffcellmask(Mesh **meshpp, int *rc) {
 
 ////////////
 void ESMCI_meshturnonnodemask(Mesh **meshpp, ESMCI::InterfaceInt *maskValuesArg,  int *rc) {
-
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI_meshturnonnodemask()"
   try {
 
     // Initialize the parallel environment for mesh (if not already done)
@@ -3732,7 +3806,8 @@ void ESMCI_meshturnonnodemask(Mesh **meshpp, ESMCI::InterfaceInt *maskValuesArg,
 
 // Turn OFF masking
 void ESMCI_meshturnoffnodemask(Mesh **meshpp, int *rc) {
-
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI_meshturnoffcellmask()"
   try {
 
     // Initialize the parallel environment for mesh (if not already done)
@@ -3809,6 +3884,9 @@ void ESMCI_meshturnoffnodemask(Mesh **meshpp, int *rc) {
 
 void ESMCI_get_polygon_area(int *spatialdim, int *nedges, 
 						 double *points, double *area, int *rc) {
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI_get_polygon_area()"
+
   if (*spatialdim == 2) {
     *area = area_of_flat_2D_polygon(*nedges, points);
   } else if (*spatialdim == 3) {
@@ -3826,6 +3904,10 @@ void ESMCI_get_polygon_area(int *spatialdim, int *nedges,
 
 void ESMCI_meshcreatefrommeshes(Mesh **meshapp, Mesh **meshbpp, Mesh **meshpp, 
 ESMC_MeshOp_Flag * meshop, double * threshold, int *rc) {
+
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI_meshcreatefrommeshes()"
+
   try {
 
     // Initialize the parallel environment for mesh (if not already done)
@@ -3870,6 +3952,8 @@ ESMC_MeshOp_Flag * meshop, double * threshold, int *rc) {
 
 void expand_split_elem_ids(Mesh *mesh, int num_elem_gids, int *elem_gids, int *_num_elem_gids_ws, int **_elem_gids_ws, std::map<UInt,UInt> &split_to_orig_id) {
 
+#undef  ESMC_METHOD
+#define ESMC_METHOD "expand_split_elem_ids()"
   
   // Copy input array to UInt
   UInt *elem_gids_u=NULL;
@@ -3967,6 +4051,9 @@ void expand_split_elem_ids(Mesh *mesh, int num_elem_gids, int *elem_gids, int *_
 }
 
 void calc_split_id_to_frac(Mesh *mesh) {
+#undef  ESMC_METHOD
+#define ESMC_METHOD "calc_split_id_to_frac()"
+
   // Declare polygon information
 #define  MAX_NUM_POLY_COORDS  60
 #define  MAX_NUM_POLY_NODES_2D  30  // MAX_NUM_POLY_COORDS/2
@@ -4097,7 +4184,7 @@ void calc_split_id_to_frac(Mesh *mesh) {
 void ESMCI_meshcreateredistelems(Mesh **src_meshpp, int *num_elem_gids, int *elem_gids, 
                                                     Mesh **output_meshpp, int *rc) {
 #undef  ESMC_METHOD
-#define ESMC_METHOD "c_esmc_meshcreateredistelems()"
+#define ESMC_METHOD "ESMCI_meshcreateredistelems()"
 
   try {
 
@@ -4209,7 +4296,7 @@ void ESMCI_meshcreateredistelems(Mesh **src_meshpp, int *num_elem_gids, int *ele
 void ESMCI_meshcreateredistnodes(Mesh **src_meshpp, int *num_node_gids, int *node_gids, 
                                                     Mesh **output_meshpp, int *rc) {
 #undef  ESMC_METHOD
-#define ESMC_METHOD "c_esmc_meshcreateredistelems()"
+#define ESMC_METHOD "ESMCI_meshcreateredistelems()"
 
   try {
 
@@ -4315,7 +4402,7 @@ void ESMCI_meshcreateredistnodes(Mesh **src_meshpp, int *num_node_gids, int *nod
 void ESMCI_meshcreateredist(Mesh **src_meshpp, int *num_node_gids, int *node_gids, 
                                                int *num_elem_gids, int *elem_gids,  Mesh **output_meshpp, int *rc) {
 #undef  ESMC_METHOD
-#define ESMC_METHOD "c_esmc_meshcreateredist()"
+#define ESMC_METHOD "ESMCI_meshcreateredist()"
 
   try {
 
@@ -4393,7 +4480,7 @@ void ESMCI_meshcreateredist(Mesh **src_meshpp, int *num_node_gids, int *node_gid
 void ESMCI_meshchecknodelist(Mesh **meshpp, int *_num_node_gids, int *node_gids, 
                                              int *rc) {
 #undef  ESMC_METHOD
-#define ESMC_METHOD "c_esmc_meshchecknodelist()"
+#define ESMC_METHOD "ESMCI_meshchecknodelist()"
 
   try {
 
@@ -4484,7 +4571,7 @@ void ESMCI_meshchecknodelist(Mesh **meshpp, int *_num_node_gids, int *node_gids,
 void ESMCI_meshcheckelemlist(Mesh **meshpp, int *_num_elem_gids, int *elem_gids, 
                                              int *rc) {
 #undef  ESMC_METHOD
-#define ESMC_METHOD "c_esmc_meshcheckelemlist()"
+#define ESMC_METHOD "ESMCI_meshcheckelemlist()"
 
   try {
 
@@ -4575,6 +4662,9 @@ void ESMCI_meshcheckelemlist(Mesh **meshpp, int *_num_elem_gids, int *elem_gids,
 // 
 void ESMCI_sphdeg_to_cart(double *lon, double *lat,
                                              double *x, double *y, double *z, int *rc){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI_sphdeg_to_cart()"
+
    try {
 
   // Initialize the parallel environment for mesh (if not already done)
@@ -4635,7 +4725,7 @@ void ESMCI_sphdeg_to_cart(double *lon, double *lat,
 void ESMCI_meshsetpoles(Mesh **meshpp, int *_pole_val, int *_min_pole_gid, int *_max_pole_gid,
                                              int *rc) {
 #undef  ESMC_METHOD
-#define ESMC_METHOD "c_esmc_meshchecknodelist()"
+#define ESMC_METHOD "ESMCI_meshsetpoles()"
 
   try {
 
@@ -4705,7 +4795,7 @@ void ESMCI_meshsetpoles(Mesh **meshpp, int *_pole_val, int *_min_pole_gid, int *
 
 void ESMCI_meshcreatedual(Mesh **src_meshpp, Mesh **output_meshpp, int *rc) {
 #undef  ESMC_METHOD
-#define ESMC_METHOD "c_esmc_meshcreatedual()"
+#define ESMC_METHOD "ESMCI_meshcreatedual()"
 
   try {
 
