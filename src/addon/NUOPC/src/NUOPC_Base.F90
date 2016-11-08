@@ -98,7 +98,9 @@ module NUOPC_Base
   end interface
 
   interface NUOPC_Realize
-    module procedure NUOPC_RealizeComplete
+    module procedure NUOPC_RealizeCompleteG
+    module procedure NUOPC_RealizeCompleteLS
+    module procedure NUOPC_RealizeCompleteM
     module procedure NUOPC_RealizeField
   end interface
   
@@ -1838,7 +1840,7 @@ module NUOPC_Base
 ! !IROUTINE: NUOPC_Realize - Realize previously advertised Fields inside a State on a single Grid with internal allocation
 ! !INTERFACE:
   ! call using generic interface: NUOPC_Realize
-  subroutine NUOPC_RealizeComplete(state, grid, fieldName, typekind, selection,&
+  subroutine NUOPC_RealizeCompleteG(state, grid, fieldName, typekind, selection,&
     dataFillScheme, rc)
 ! !ARGUMENTS:
     type(ESMF_State)                                :: state
@@ -1875,7 +1877,6 @@ module NUOPC_Base
 !     realize {\em all} the fields contained in {\tt state} according to 
 !     {\tt selection}.
 !   \item[{[typekind]}]
-!     The {\tt ESMF\_Grid} object on which to realize the fields.
 !     The typekind of the internally created field(s). The valid options are
 !     {\tt ESMF\_TYPEKIND\_I4}, {\tt ESMF\_TYPEKIND\_I8},
 !     {\tt ESMF\_TYPEKIND\_R4}, and {\tt ESMF\_TYPEKIND\_R8} (default).
@@ -1968,6 +1969,354 @@ module NUOPC_Base
         if (NUOPC_IsConnected(state, fieldName=fieldNameList(i))) then
           ! create a Field
           field = ESMF_FieldCreate(grid, typekindOpt, &
+            name=fieldNameList(i), rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, &
+            file=__FILE__)) &
+            return  ! bail out
+          ! realize the connected Field using the just created Field
+          call NUOPC_Realize(state, field=field, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, &
+            file=__FILE__)) &
+            return  ! bail out
+          if (present(dataFillScheme)) then
+            ! a data fill scheme was provided -> use it to initialize
+            call ESMF_FieldFill(field, dataFillScheme=dataFillScheme, member=k, step=0, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, &
+              file=__FILE__)) &
+              return  ! bail out
+            k=k+1 ! increment the member counter
+          endif
+        else
+          ! remove a not connected Field from State
+          call ESMF_StateRemove(state, (/fieldNameList(i)/), rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, &
+            file=__FILE__)) &
+            return  ! bail out
+        endif
+      else
+        call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
+          msg="Unknown selection requested.", &
+          line=__LINE__, &
+          file=__FILE__, &
+          rcToReturn=rc)
+        return ! bail out
+      endif
+    enddo
+    
+  end subroutine
+  !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+!BOP
+! !IROUTINE: NUOPC_Realize - Realize previously advertised Fields inside a State on a single LocStream with internal allocation
+! !INTERFACE:
+  ! call using generic interface: NUOPC_Realize
+  subroutine NUOPC_RealizeCompleteLS(state, locstream, fieldName, typekind, selection,&
+    dataFillScheme, rc)
+! !ARGUMENTS:
+    type(ESMF_State)                                :: state
+    type(ESMF_LocStream),     intent(in)            :: locstream
+    character(*),             intent(in),  optional :: fieldName
+    type(ESMF_TypeKind_Flag), intent(in),  optional :: typekind
+    character(len=*),         intent(in),  optional :: selection
+    character(len=*),         intent(in),  optional :: dataFillScheme    
+    integer,                  intent(out), optional :: rc
+! !DESCRIPTION:
+!   \label{NUOPC_RealizeComplete}
+!
+!   Realize or remove fields inside of {\tt state} according to {\tt selection}.
+!   All of the fields that are realized are created internally on the same 
+!   {\tt locstream} object, allocating memory accordingly.
+!
+!   The type and kind of the created fields is according to argument 
+!   {\tt typekind}.
+!
+!   Realized fields are filled with data according to the {\tt dataFillScheme}
+!   argument.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[state]
+!     The {\tt ESMF\_State} object in which the fields are realized.
+!   \item[locstream]
+!     The {\tt ESMF\_LocStream} object on which to realize the fields.
+!   \item[{[fieldName]}]
+!     The name of the field in {\tt state} to be realized, or removed, according
+!     to {\tt selection}. If provided, and the state does not contain a field
+!     with name {\tt fieldName}, return an error in {\tt rc}. If not provided,
+!     realize {\em all} the fields contained in {\tt state} according to 
+!     {\tt selection}.
+!   \item[{[typekind]}]
+!     The typekind of the internally created field(s). The valid options are
+!     {\tt ESMF\_TYPEKIND\_I4}, {\tt ESMF\_TYPEKIND\_I8},
+!     {\tt ESMF\_TYPEKIND\_R4}, and {\tt ESMF\_TYPEKIND\_R8} (default).
+!   \item[{[selection]}]
+!     Selection of mode of operation:
+!     \begin{itemize}
+!     \item {\tt "realize\_all"} (default)
+!     \item {\tt "realize\_connected\_remove\_others"}
+!     \end{itemize}
+!   \item[{[dataFillScheme]}]
+!     Realized fields will be filled according to the selected fill
+!     scheme. See \ref{NUOPC_FillField} for fill schemes. Default is to leave
+!     the data in realized fields uninitialized.
+!   \item[{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+  !-----------------------------------------------------------------------------
+    ! local variables
+    character(len=80), allocatable  :: fieldNameList(:)
+    integer                         :: i, itemCount, k
+    type(ESMF_Field)                :: field
+    character(len=80)               :: selectionOpt
+    type(ESMF_TypeKind_Flag)        :: typekindOpt
+
+    if (present(rc)) rc = ESMF_SUCCESS
+    
+    if (present(fieldName)) then
+      ! fieldName provided -> construct a fieldNameList with a single element
+      itemCount=1
+      allocate(fieldNameList(itemCount))
+      fieldNameList(1)=trim(fieldName)
+    else
+      ! query the entire fieldNameList from state
+      call ESMF_StateGet(state, itemCount=itemCount, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, &
+        file=__FILE__)) &
+        return  ! bail out
+      allocate(fieldNameList(itemCount))
+      call ESMF_StateGet(state, itemNameList=fieldNameList, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, &
+        file=__FILE__)) &
+        return  ! bail out
+    endif
+    
+    ! optional selection argument
+    if (present(selection)) then
+      selectionOpt=trim(selection)
+    else
+      selectionOpt="realize_all"
+    endif
+    
+    ! optional typekind argument
+    if (present(typekind)) then
+      typekindOpt=typekind
+    else
+      typekindOpt=ESMF_TYPEKIND_R8
+    endif
+
+    k=1 ! initialize
+    do i=1, itemCount
+      if (trim(selectionOpt)=="realize_all") then
+        ! create a Field
+        field = ESMF_FieldCreate(locstream, typekindOpt, &
+          name=fieldNameList(i), rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, &
+          file=__FILE__)) &
+          return  ! bail out
+        ! realize the connected Field using the just created Field
+        call NUOPC_Realize(state, field=field, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, &
+          file=__FILE__)) &
+          return  ! bail out
+        if (present(dataFillScheme)) then
+          ! a data fill scheme was provided -> use it to initialize
+          call ESMF_FieldFill(field, dataFillScheme=dataFillScheme, member=k, &
+            step=0, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, &
+            file=__FILE__)) &
+            return  ! bail out
+          k=k+1 ! increment the member counter
+        endif
+      else if (trim(selectionOpt)=="realize_connected_remove_others") then
+        if (NUOPC_IsConnected(state, fieldName=fieldNameList(i))) then
+          ! create a Field
+          field = ESMF_FieldCreate(locstream, typekindOpt, &
+            name=fieldNameList(i), rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, &
+            file=__FILE__)) &
+            return  ! bail out
+          ! realize the connected Field using the just created Field
+          call NUOPC_Realize(state, field=field, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, &
+            file=__FILE__)) &
+            return  ! bail out
+          if (present(dataFillScheme)) then
+            ! a data fill scheme was provided -> use it to initialize
+            call ESMF_FieldFill(field, dataFillScheme=dataFillScheme, member=k, step=0, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, &
+              file=__FILE__)) &
+              return  ! bail out
+            k=k+1 ! increment the member counter
+          endif
+        else
+          ! remove a not connected Field from State
+          call ESMF_StateRemove(state, (/fieldNameList(i)/), rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, &
+            file=__FILE__)) &
+            return  ! bail out
+        endif
+      else
+        call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
+          msg="Unknown selection requested.", &
+          line=__LINE__, &
+          file=__FILE__, &
+          rcToReturn=rc)
+        return ! bail out
+      endif
+    enddo
+    
+  end subroutine
+  !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+!BOP
+! !IROUTINE: NUOPC_Realize - Realize previously advertised Fields inside a State on a single Mesh with internal allocation
+! !INTERFACE:
+  ! call using generic interface: NUOPC_Realize
+  subroutine NUOPC_RealizeCompleteM(state, mesh, fieldName, typekind, selection,&
+    dataFillScheme, rc)
+! !ARGUMENTS:
+    type(ESMF_State)                                :: state
+    type(ESMF_Mesh),          intent(in)            :: mesh
+    character(*),             intent(in),  optional :: fieldName
+    type(ESMF_TypeKind_Flag), intent(in),  optional :: typekind
+    character(len=*),         intent(in),  optional :: selection
+    character(len=*),         intent(in),  optional :: dataFillScheme    
+    integer,                  intent(out), optional :: rc
+! !DESCRIPTION:
+!   \label{NUOPC_RealizeComplete}
+!
+!   Realize or remove fields inside of {\tt state} according to {\tt selection}.
+!   All of the fields that are realized are created internally on the same 
+!   {\tt mesh} object, allocating memory accordingly.
+!
+!   The type and kind of the created fields is according to argument 
+!   {\tt typekind}.
+!
+!   Realized fields are filled with data according to the {\tt dataFillScheme}
+!   argument.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[state]
+!     The {\tt ESMF\_State} object in which the fields are realized.
+!   \item[mesh]
+!     The {\tt ESMF\_Mesh} object on which to realize the fields.
+!   \item[{[fieldName]}]
+!     The name of the field in {\tt state} to be realized, or removed, according
+!     to {\tt selection}. If provided, and the state does not contain a field
+!     with name {\tt fieldName}, return an error in {\tt rc}. If not provided,
+!     realize {\em all} the fields contained in {\tt state} according to 
+!     {\tt selection}.
+!   \item[{[typekind]}]
+!     The typekind of the internally created field(s). The valid options are
+!     {\tt ESMF\_TYPEKIND\_I4}, {\tt ESMF\_TYPEKIND\_I8},
+!     {\tt ESMF\_TYPEKIND\_R4}, and {\tt ESMF\_TYPEKIND\_R8} (default).
+!   \item[{[selection]}]
+!     Selection of mode of operation:
+!     \begin{itemize}
+!     \item {\tt "realize\_all"} (default)
+!     \item {\tt "realize\_connected\_remove\_others"}
+!     \end{itemize}
+!   \item[{[dataFillScheme]}]
+!     Realized fields will be filled according to the selected fill
+!     scheme. See \ref{NUOPC_FillField} for fill schemes. Default is to leave
+!     the data in realized fields uninitialized.
+!   \item[{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+  !-----------------------------------------------------------------------------
+    ! local variables
+    character(len=80), allocatable  :: fieldNameList(:)
+    integer                         :: i, itemCount, k
+    type(ESMF_Field)                :: field
+    character(len=80)               :: selectionOpt
+    type(ESMF_TypeKind_Flag)        :: typekindOpt
+
+    if (present(rc)) rc = ESMF_SUCCESS
+    
+    if (present(fieldName)) then
+      ! fieldName provided -> construct a fieldNameList with a single element
+      itemCount=1
+      allocate(fieldNameList(itemCount))
+      fieldNameList(1)=trim(fieldName)
+    else
+      ! query the entire fieldNameList from state
+      call ESMF_StateGet(state, itemCount=itemCount, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, &
+        file=__FILE__)) &
+        return  ! bail out
+      allocate(fieldNameList(itemCount))
+      call ESMF_StateGet(state, itemNameList=fieldNameList, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, &
+        file=__FILE__)) &
+        return  ! bail out
+    endif
+    
+    ! optional selection argument
+    if (present(selection)) then
+      selectionOpt=trim(selection)
+    else
+      selectionOpt="realize_all"
+    endif
+    
+    ! optional typekind argument
+    if (present(typekind)) then
+      typekindOpt=typekind
+    else
+      typekindOpt=ESMF_TYPEKIND_R8
+    endif
+
+    k=1 ! initialize
+    do i=1, itemCount
+      if (trim(selectionOpt)=="realize_all") then
+        ! create a Field
+        field = ESMF_FieldCreate(mesh, typekindOpt, &
+          name=fieldNameList(i), rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, &
+          file=__FILE__)) &
+          return  ! bail out
+        ! realize the connected Field using the just created Field
+        call NUOPC_Realize(state, field=field, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, &
+          file=__FILE__)) &
+          return  ! bail out
+        if (present(dataFillScheme)) then
+          ! a data fill scheme was provided -> use it to initialize
+          call ESMF_FieldFill(field, dataFillScheme=dataFillScheme, member=k, &
+            step=0, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, &
+            file=__FILE__)) &
+            return  ! bail out
+          k=k+1 ! increment the member counter
+        endif
+      else if (trim(selectionOpt)=="realize_connected_remove_others") then
+        if (NUOPC_IsConnected(state, fieldName=fieldNameList(i))) then
+          ! create a Field
+          field = ESMF_FieldCreate(mesh, typekindOpt, &
             name=fieldNameList(i), rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, &
