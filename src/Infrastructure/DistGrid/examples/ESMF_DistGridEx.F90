@@ -66,8 +66,8 @@ program ESMF_DistGridEx
 ! \subsubsection{Single tile DistGrid with regular decomposition}
 ! 
 ! The minimum information required to create an {\tt ESMF\_DistGrid} object
-! for a single tile with default decomposition are the corners of the tile
-! in index space. The following call will create a 1D DistGrid for a 
+! for a single tile with default decomposition are the min and max of the tile
+! in index space. The following call creates a DistGrid for a 
 ! 1D index space tile with elements from 1 through 1000.
 !EOE
 
@@ -81,11 +81,12 @@ program ESMF_DistGridEx
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 !BOE
-! A default DELayout with 1 DE per PET will be created during 
-! {\tt ESMF\_DistGridCreate()}. The 1000 elements of the specified 1D tile will
-! then be block decomposed across the available DEs, i.e. across all PETs. 
-! Hence, for 4 PETs the (min) $\sim$ (max) corners of the DE-local LR regions
-! will be:
+! A default DELayout with 1 DE per PET will be created during the
+! {\tt ESMF\_DistGridCreate()} call. The 1000 elements of the specified 1D tile
+! are then block decomposed into the available DEs, and distributed across the
+! PETs (same number as DEs by default).
+! Assuming execution on 4 PETs, the (min) $\sim$ (max) indices of the DE-local
+! blocks will be:
 ! \begin{verbatim}
 !   DE 0 - (1) ~ (250)
 !   DE 1 - (251) ~ (500)
@@ -94,7 +95,7 @@ program ESMF_DistGridEx
 ! \end{verbatim}
 !
 ! DistGrids with rank > 1 can also be created with default decompositions,
-! specifying only the corners of the tile. The following will create a
+! specifying only the min and max indices of the tile. The following creates a
 ! 2D DistGrid for a 5x5 tile with default decomposition.
 !EOE
 
@@ -150,7 +151,7 @@ program ESMF_DistGridEx
 !
 ! By default grid points along all dimensions are homogeneously divided between
 ! the DEs. The maximum element count difference between DEs along any dimension
-! is 1. The (min) $\sim$ (max) corners of the DE-local LR domains of the above
+! is 1. The (min) $\sim$ (max) indices of the DE-local blocks of the above
 ! example are as follows:
 ! \begin{verbatim}
 !   DE 0 - (1,1) ~ (3,2)
@@ -236,7 +237,7 @@ program ESMF_DistGridEx
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 !BOE
-! The advantage of the {\tt localIndexList} format over the min-/max-corner 
+! The advantage of the {\tt localIndexList} format over the minIndex/maxIndex 
 ! format is that it can be used directly for DE-local to tile index 
 ! dereferencing. Furthermore the {\tt localIndexList} allows to express very
 ! general decompositions such as the cyclic decompositions in the first
@@ -560,16 +561,19 @@ program ESMF_DistGridEx
 !BOE
 ! \subsubsection{Single tile DistGrid with decomposition by DE blocks}
 ! 
-! The examples of the previous sections showed how DistGrid objects with
-! regular decompositions are created. However, in some cases a regular 
-! decomposition may not be specific enough. The following example shows how 
-! the {\tt deBlockList} argument is used to create a DistGrid object with 
-! completely user-defined decomposition.
+! In the previous examples the DistGrid objects were created with regular
+! decompositions. In some cases a regular decomposition may not be the most
+! natural choice to decompose and distribute the index space. The 
+! DE block version of {\tt ESMF\_DistGridCreate()} offers more control
+! over the precise decomposition. The following example shows how the 
+! {\tt deBlockList} argument is used to determine exactly what index space
+! block ends up on each DE.
 !
-! A single 5x5 LR domain is to be decomposed into 6 DEs. To this end a list is
-! constructed that holds the min and max corners of all six DE
-! LR blocks. The DE-local LR blocks are arranged as to cover the whole tile 
-! domain without overlap.
+! A single 5x5 tile is decomposed into 6 DEs. To this end a list is
+! constructed that holds the min and max indices of all six DE
+! blocks. The DE blocks must be constructed to cover the index space without
+! overlapping each other. It is okay to leave holes in the index space, i.e.
+! the DE blocks do not completely cover the index space tile.
 !EOE
 ! 
 !BOC
@@ -600,78 +604,17 @@ program ESMF_DistGridEx
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 !BOE
-! \subsubsection{Single tile DistGrid with periodic boundaries}
-! 
-! By default the edges of all tiles have solid wall boundary conditions. 
-! Periodic boundary conditions can be imposed by specifying connections between
-! tiles. For the single LR domain of the last section periodic boundaries 
-! along the first dimension are imposed by adding a {\tt connectionList} 
-! argument with only one element to the create call.
-!EOE
-!BOC
-  allocate(connectionList(1))
-!EOC
-!BOE
-!
-! The connection element holds information about {\tt tileIndex\_A}, 
-! {\tt tileIndex\_B}, {\tt positionVector}, and {\tt orientationVector/)}.
-!EOE
-!BOC
-  call ESMF_DistGridConnectionSet(connection=connectionList(1), &
-     tileIndexA=1, tileIndexB=1, &
-     positionVector=(/5, 0/), &
-     orientationVector=(/1, 2/), &
-     rc=rc)
-!EOC
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-!BOE
-! \begin{sloppypar}
-! The {\tt tileIndexA} and {\tt tileIndexB} arguments specify that this is a
-! connection within tile 1. The {\tt positionVector} indicates that there is no
-! offset between tileB and tileA along the second dimension, but there is
-! an offset of 5 along the first dimension (which in this case is the length of
-! dimension 1). This aligns tileB (which is tile 1) right next to tileA
-! (which is also tile 1).
-! \end{sloppypar}
-!
-! The {\tt orientationVector} fixes the orientation of the tileB index space to
-! be the same as the orientation of tileA (it maps index 1 of tileA to index 1
-! of tileB and the same for index 2). The {\tt orientationVector} could have
-! been omitted in this case which corresponds to the default orientation.
-!
-! The {\tt connectionList} can now be used to create a {\tt DistGrid} object 
-! with the desired boundary conditions.
-!BOC
-  distgrid = ESMF_DistGridCreate(minIndex=(/1,1/), maxIndex=(/5,5/), &
-    deBlockList=deBlockList, connectionList=connectionList, rc=rc)
-!EOC
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-  
-  call ESMF_DistGridPrint(distgrid, rc=rc)
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-  
-  call ESMF_DistGridDestroy(distgrid, rc=rc)
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-!BOC
-  deallocate(connectionList)
-!EOC
-  deallocate(deBlockList)
-!BOE
-! This closes the tile along the first dimension on itself, thus imposing
-! periodic boundaries along this direction.
-!EOE
-
-!BOE
 ! \subsubsection{2D multi-tile DistGrid with regular decomposition}
 ! 
-! Creating a DistGrid from a list of LR domains is a straight forward
-! extension of the case with a single LR domain. The first four 
-! arguments of {\tt ESMF\_DistGridCreate()} are promoted to rank 2, the 
-! second dimension being the tile count index.
+! Creating a DistGrid from a list of LR tiles is a straight forward
+! extension of the single tile case. The first four 
+! arguments of {\tt ESMF\_DistGridCreate()} are promoted to rank 2 where the 
+! second dimension is the tile index.
 ! 
 ! The following 2D multi-tile domain consisting of 3 LR tiles will 
 ! be used in the examples of this section:
 ! \begin{verbatim}
+!
 !   ----------------------------------------> 2nd dim
 !   |
 !   |                   (1,11)-----(1,20)
@@ -797,9 +740,13 @@ program ESMF_DistGridEx
 ! \subsubsection{Arbitrary DistGrids with user-supplied sequence indices}
 ! \label{DistGrid:ArbitrarySeqInd}
 !
-! The DistGrid class supports the communication methods of higher classes, 
-! like Array and Field, by associating a unique {\em sequence index} with each
-! DistGrid index tuple. This sequence index can be used to address every Array
+! The third, and most flexible way of creating an ESMF DistGrid object is
+! by specifying the arbitrary sequence indices of all the index space elements
+! associated with a particular DE. The concept of sequence index
+! comes into the DistGrid class through the support it implements for the 
+! communication methods of higher classes: Arrays and Fields. This support
+! is based by associating a unique {\em sequence index} with each
+! DistGrid index tuple. The sequence index can be used to address every Array
 ! or Field element. By default, the DistGrid does not actually generate and
 ! store the sequence index of each element. Instead a default sequence through
 ! the elements is implemented in the DistGrid code. This default sequence 
@@ -904,6 +851,68 @@ program ESMF_DistGridEx
 !EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
+
+!BOE
+! \subsubsection{Single tile DistGrid with periodic boundaries}
+! 
+! By default the edges of all tiles have solid wall boundary conditions. 
+! Periodic boundary conditions can be imposed by specifying connections between
+! tiles. For the single LR domain of the last section periodic boundaries 
+! along the first dimension are imposed by adding a {\tt connectionList} 
+! argument with only one element to the create call.
+!EOE
+!BOC
+  allocate(connectionList(1))
+!EOC
+!BOE
+!
+! The connection element holds information about {\tt tileIndex\_A}, 
+! {\tt tileIndex\_B}, {\tt positionVector}, and {\tt orientationVector/)}.
+!EOE
+!BOC
+  call ESMF_DistGridConnectionSet(connection=connectionList(1), &
+     tileIndexA=1, tileIndexB=1, &
+     positionVector=(/5, 0/), &
+     orientationVector=(/1, 2/), &
+     rc=rc)
+!EOC
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOE
+! \begin{sloppypar}
+! The {\tt tileIndexA} and {\tt tileIndexB} arguments specify that this is a
+! connection within tile 1. The {\tt positionVector} indicates that there is no
+! offset between tileB and tileA along the second dimension, but there is
+! an offset of 5 along the first dimension (which in this case is the length of
+! dimension 1). This aligns tileB (which is tile 1) right next to tileA
+! (which is also tile 1).
+! \end{sloppypar}
+!
+! The {\tt orientationVector} fixes the orientation of the tileB index space to
+! be the same as the orientation of tileA (it maps index 1 of tileA to index 1
+! of tileB and the same for index 2). The {\tt orientationVector} could have
+! been omitted in this case which corresponds to the default orientation.
+!
+! The {\tt connectionList} can now be used to create a {\tt DistGrid} object 
+! with the desired boundary conditions.
+!BOC
+  distgrid = ESMF_DistGridCreate(minIndex=(/1,1/), maxIndex=(/5,5/), &
+    deBlockList=deBlockList, connectionList=connectionList, rc=rc)
+!EOC
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  
+  call ESMF_DistGridPrint(distgrid, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  
+  call ESMF_DistGridDestroy(distgrid, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOC
+  deallocate(connectionList)
+!EOC
+  deallocate(deBlockList)
+!BOE
+! This closes the tile along the first dimension on itself, thus imposing
+! periodic boundaries along this direction.
+!EOE
 
 10 continue
 
