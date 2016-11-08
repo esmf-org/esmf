@@ -959,6 +959,44 @@ program ESMF_GridCreateUTest
   call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
   !-----------------------------------------------------------------------------
 
+  !-----------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Test getting information from an empty Grid"
+  write(failMsg, *) "Incorrect result"
+
+  ! create grid with nondefault parameter
+  rc=ESMF_SUCCESS
+  correct=.true.
+
+  ! Create empty grid
+  grid=ESMF_GridEmptyCreate(rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  ! Set some stuff
+  call ESMF_GridSet(grid, &
+       distgrid=distgrid, &
+       name="tst grid",  &
+       rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  ! make sure empty grid returns the right things
+  call ESMF_GridGet(grid, &
+       distgrid=distgrid2, &
+       localDECount=localDECount, &
+       name=grid_name, &
+       rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  ! Check output
+  if (localDECount .ne. 1) correct=.false.
+  if (grid_name .ne. "tst grid") correct=.false.
+
+  ! destroy grid
+  call ESMF_GridDestroy(grid,rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
+  !-----------------------------------------------------------------------------
 
 
   !-----------------------------------------------------------------------------

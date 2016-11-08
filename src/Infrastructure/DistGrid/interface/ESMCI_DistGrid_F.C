@@ -66,13 +66,13 @@ extern "C" {
     printf("c_esmc_distgridcreatedg(): opt_vm=%p, actualFlag=%d\n", 
       opt_vm, actualFlag);
 #endif
-    if (actualFlag){
-      // on PETs with actual members call into C++
-      *ptr = ESMCI::DistGrid::create(*dg, firstExtra, lastExtra,
-        ESMC_NOT_PRESENT_FILTER(indexflag), connectionList, opt_vm, &localrc);
-      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
-        ESMC_CONTEXT, ESMC_NOT_PRESENT_FILTER(rc))) return; // bail out
-    }
+    // all PETs call into the C++ create(), but the actualFlag identifies PETs
+    // that are expected to create actual DistGrid objects
+    *ptr = ESMCI::DistGrid::create(*dg, firstExtra, lastExtra,
+      ESMC_NOT_PRESENT_FILTER(indexflag), connectionList, opt_vm, actualFlag,
+      &localrc);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+      ESMC_CONTEXT, ESMC_NOT_PRESENT_FILTER(rc))) return; // bail out
     // return successfully
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
