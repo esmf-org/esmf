@@ -92,11 +92,14 @@ contains
         integer, intent(out), optional :: rc
 
         ! locals
+        integer :: configrc
         integer :: jsonIsOn
         integer :: textIsOn
         type(ESMF_Config) :: config
         character(10) :: cfgIncludeState
         character(10) :: cfgIncludeVmStats
+
+        rc = ESMF_SUCCESS
 
         call c_esmc_getComplianceCheckDepth(maxDepth, rc)
         if (ESMF_LogFoundError(rc, &
@@ -132,8 +135,8 @@ contains
                 line=__LINE__, &
                 file=FILENAME)) &
                 return  ! bail out
-            call ESMF_ConfigLoadFile(config, "nuopc.trace", rc=rc)
-            if (rc == ESMF_SUCCESS) then
+            call ESMF_ConfigLoadFile(config, "nuopc.trace", rc=configrc)
+            if (configrc == ESMF_SUCCESS) then
                 call ESMF_ConfigGetAttribute(config, cfgIncludeState, &
                     label="include.state:", default="true", rc=rc)
                 if (ESMF_LogFoundError(rc, &
