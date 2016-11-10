@@ -30,12 +30,14 @@ module NUOPC_Compliance_Base
     public maxDepth   ! maximum depth of compliance checker
     public outputJSON ! whether to output JSON trace info to the log
     public outputText ! whether to output human readable text to the log
+    public outputTrace ! whether to output binary trace stream
     public complianceInit  ! whether compliance parameters have been initialized
 
     integer, save :: ccfDepth = 1
     integer, save :: maxDepth = -2
     logical, save :: outputJSON = .false.
     logical, save :: outputText = .true.
+    logical, save :: outputTrace = .false.
     logical, save :: complianceInit = .false.
     logical, save :: includeState = .true.  ! trace import/export states
     logical, save :: includeVmStats = .true. ! include vm stats
@@ -95,6 +97,7 @@ contains
         integer :: configrc
         integer :: jsonIsOn
         integer :: textIsOn
+        integer :: traceIsOn
         type(ESMF_Config) :: config
         character(10) :: cfgIncludeState
         character(10) :: cfgIncludeVmStats
@@ -116,6 +119,17 @@ contains
           outputText = .true.
         else
           outputText = .false.
+        endif
+
+        call c_esmc_getComplianceCheckTrace(traceIsOn, rc)
+        if (ESMF_LogFoundError(rc, &
+            line=__LINE__, &
+            file=FILENAME)) &
+            return  ! bail out
+        if (traceIsOn == 1) then
+          outputTrace = .true.
+        else
+          outputTrace = .false.
         endif
 
         call c_esmc_getComplianceCheckJSON(jsonIsOn, rc)
@@ -162,6 +176,12 @@ contains
                     return  ! bail out
         endif
 
+        !call c_esmftrc_filesys_init(4096, "./traceout", 0, rc)
+        !if (ESMF_LogFoundError(rc, &
+        !     line=__LINE__, &
+        !     file=FILENAME)) &
+        !     return  ! bail out     
+        
         complianceInit = .true.
 
     end subroutine

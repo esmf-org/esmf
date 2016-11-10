@@ -1,10 +1,5 @@
 #include <string.h>
 #include <stdlib.h>
-#include <time.h>
-
-#if !defined (ESMF_OS_MinGW)
-#include <sys/time.h>
-#endif
 
 #include "ESMCI_Macros.h"
 #include "ESMCI_Trace.h"
@@ -17,8 +12,6 @@
 //-----------------------------------------------------------------------------
 
 extern "C" {
-
-  //int esmftrc_filesys_init(unsigned int buf_size, const char *trace_dir, int localPet) {
 
   void FTN_X(c_esmftrc_filesys_init)
      (				   
@@ -38,6 +31,12 @@ extern "C" {
     }
     
   } 
+
+  void FTN_X(c_esmftrc_filesys_fini)() 
+  {
+    esmftrc_filesys_fini();
+  }
   
+
   
 } // extern "C"

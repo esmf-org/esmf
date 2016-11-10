@@ -2,9 +2,9 @@
 
 ALL: build_here 
 
-SOURCEC	  = esmftrc.c esmftrc_filesys.c
+SOURCEC	  = esmftrc.c esmftrc_filesys.c esmftrc_f.c
 SOURCEF	  = 
-SOURCEH	  = esmftrc.h esmftrc_filesys.h
+SOURCEH	  = esmftrc.h esmftrc_filesys.h esmftrc_f.h
 STOREH    = 
 
 OBJSC     = $(addsuffix .o, $(basename $(SOURCEC)))

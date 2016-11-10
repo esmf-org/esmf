@@ -23,6 +23,7 @@ extern "C" {
 				     int *localPet,
 				     int *rc,                        
 				     ESMCI_FortranStrLenArg nlen);
+  void FTN_X(c_esmftrc_filesys_fini)();
 }
 
 #endif

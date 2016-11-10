@@ -458,6 +458,10 @@ contains
 
         ! Call the actual Initialize routine
 
+        if (outputTrace) then
+           call esmftrc_default_trace_phase_enter(0, phase)
+        endif
+        
         call ESMF_GridCompInitializeAct(comp, importState, exportState, clock, &
             phase=phase, userRc=userrc, rc=rc)
         if (ESMF_LogFoundError(rc, &
@@ -708,6 +712,10 @@ contains
         !---------------------------------------------------------------------------
         ccfDepth = ccfDepth + 1
 
+        if (outputTrace) then
+           call esmftrc_default_trace_phase_enter(1, phase)
+        endif
+        
         ! Call the actual Run routine
         call ESMF_GridCompRunAct(comp, importState, exportState, clock, &
             phase=phase, userRc=userrc, rc=rc)

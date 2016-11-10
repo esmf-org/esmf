@@ -77,7 +77,7 @@ static void open_packet(void *data)
 	struct esmftrc_platform_linux_fs_ctx *ctx =
 		FROM_VOID_PTR(struct esmftrc_platform_linux_fs_ctx, data);
 
-	esmftrc_default_open_packet(&ctx->ctx, 0);
+	esmftrc_default_open_packet(&ctx->ctx, ctx->localPet);
 }
 
 static void close_packet(void *data)
@@ -161,8 +161,18 @@ void esmftrc_platform_linux_fs_fini(struct esmftrc_platform_linux_fs_ctx *ctx)
 	free(ctx);
 }
 
+void esmftrc_filesys_fini()
+{
+  esmftrc_platform_linux_fs_fini(global_esmftrc_filesys_ctx);
+}
+
 struct esmftrc_default_ctx *esmftrc_platform_linux_fs_get_esmftrc_ctx(
 	struct esmftrc_platform_linux_fs_ctx *ctx)
 {
 	return &ctx->ctx;
+}
+
+struct esmftrc_default_ctx *esmftrc_platform_get_default_ctx()
+{
+	return &global_esmftrc_filesys_ctx->ctx;
 }

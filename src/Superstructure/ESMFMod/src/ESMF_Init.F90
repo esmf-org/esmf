@@ -320,6 +320,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       type(ESMF_LogKind_Flag) :: logkindflagUse
       logical :: openflag
       integer :: complianceCheckIsOn
+      integer :: traceIsOn
+      type(ESMF_VM) :: vm
+      integer :: localPet
 
       ! Initialize return code
       rcpresent = .FALSE.
@@ -420,6 +423,31 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         call ESMF_LogSet(highResTimestampFlag=.true., rc=localrc)
         if (localrc /= ESMF_SUCCESS) then
           write (ESMF_UtilIOStderr,*) ESMF_METHOD, ": Error setting default log option: highResTimestampFlag"
+          return
+        endif
+      endif
+
+      ! check if tracing is on
+      call c_esmc_getComplianceCheckTrace(traceIsOn, localrc)
+      if (localrc /= ESMF_SUCCESS) then
+          write (ESMF_UtilIOStderr,*) ESMF_METHOD, ": Error checking ESMF_RUNTIME_COMPLIANCECHECK env variable"
+          return
+      endif
+      if (traceIsOn == 1) then
+        call ESMF_VMGetGlobal(vm=vm, rc=localrc)
+        if (localrc /= ESMF_SUCCESS) then
+          write (ESMF_UtilIOStderr,*) ESMF_METHOD, ": Error getting global VM for trace"
+          return
+        endif
+        call ESMF_VMGet(vm=vm, localPet=localPet, rc=localrc)
+        if (localrc /= ESMF_SUCCESS) then
+          write (ESMF_UtilIOStderr,*) ESMF_METHOD, ": Error getting localPet from VM"
+          return
+        endif
+        call c_esmftrc_filesys_init(4096, "./traceout", localPet, rc)
+        print *, "Initialize trace for pet = ", localPet
+        if (localrc /= ESMF_SUCCESS) then
+          write (ESMF_UtilIOStderr,*) ESMF_METHOD, ": Error initializing trace stream"
           return
         endif
       endif
@@ -535,6 +563,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       logical, save :: already_final = .false.    ! Static, maintains state.
 
       logical, parameter :: trace = .false.
+      integer :: traceIsOn
 
       ! Initialize return code
       rcpresent = .FALSE.
@@ -554,6 +583,21 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       if (localrc /= ESMF_SUCCESS) then
           write (ESMF_UtilIOStderr,*) ESMF_METHOD, ": Error writing into the default log"
       endif
+
+      call c_esmc_getComplianceCheckTrace(traceIsOn, localrc)
+      if (localrc /= ESMF_SUCCESS) then
+          write (ESMF_UtilIOStderr,*) ESMF_METHOD, ": Error checking ESMF_RUNTIME_COMPLIANCECHECK env variable"
+          return
+      endif
+      if (traceIsOn == 1) then
+        call c_esmftrc_filesys_fini()
+        if (localrc /= ESMF_SUCCESS) then
+          write (ESMF_UtilIOStderr,*) ESMF_METHOD, ": Error closing trace stream"
+          return
+        endif
+      endif
+
+
 
       ! Close the Config file  
       ! TODO: write this routine and remove the status= line

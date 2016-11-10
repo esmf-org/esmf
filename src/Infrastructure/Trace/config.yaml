@@ -56,6 +56,16 @@ metadata:
       description: System clock
   trace:
     byte-order: le
+#    uuid: auto
+#    packet-header-type:
+#      class: struct
+#      fields:
+#        magic: uint32
+#        uuid:
+#          class: array
+#          length: 16
+#          element-type: uint8
+#        stream_id: uint16
   streams:
     default:
       packet-context-type:

@@ -56,6 +56,8 @@ int esmftrc_filesys_init(unsigned int buf_size, const char *trace_dir, int local
  */
 void esmftrc_platform_linux_fs_fini(struct esmftrc_platform_linux_fs_ctx *ctx);
 
+void esmftrc_filesys_fini();
+
 /**
  * Returns the esmftrc stream-specific context of a given platform context.
  *
@@ -66,6 +68,10 @@ void esmftrc_platform_linux_fs_fini(struct esmftrc_platform_linux_fs_ctx *ctx);
  */
 struct esmftrc_default_ctx *esmftrc_platform_linux_fs_get_esmftrc_ctx(
 	struct esmftrc_platform_linux_fs_ctx *ctx);
+
+
+struct esmftrc_default_ctx *esmftrc_platform_get_default_ctx();
+
 
 #ifdef __cplusplus
 }
