@@ -779,6 +779,7 @@ void MeshCap::meshcreateelemdistgrid(int *egrid, int *num_lelems, int *rc) {
 }
 
 void MeshCap::meshinfoserialize(int *intMeshFreed,
+                                int *spatialDim, int *parametricDim, 
 	        char *buffer, int *length, int *offset,
                 ESMC_InquireFlag *inquireflag, int *rc,
                 ESMCI_FortranStrLenArg buffer_l){
@@ -789,12 +790,14 @@ void MeshCap::meshinfoserialize(int *intMeshFreed,
   // Check if need, and if so
   // eventually put into something separate from both Mesh and MOAB
   ESMCI_meshinfoserialize(intMeshFreed,
+                          spatialDim, parametricDim, 
                           buffer, length, offset,
                           inquireflag, rc, buffer_l);
 } 
 
 
 void MeshCap::meshinfodeserialize(int *intMeshFreed, 
+                                 int *spatialDim, int *parametricDim, 
                                   char *buffer, int *offset, int *rc,
                                   ESMCI_FortranStrLenArg buffer_l){
 #undef ESMC_METHOD
@@ -804,6 +807,7 @@ void MeshCap::meshinfodeserialize(int *intMeshFreed,
   // Check if need, and if so
   // eventually put into something separate from both Mesh and MOAB
   ESMCI_meshinfodeserialize(intMeshFreed, 
+                            spatialDim, parametricDim, 
                             buffer, offset, rc,
                             buffer_l);
 } 

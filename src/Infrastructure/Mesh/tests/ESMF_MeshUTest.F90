@@ -899,12 +899,15 @@ program ESMF_MeshUTest
   ! Test Mesh Get
   call ESMF_MeshGet(mesh2, nodalDistgrid=nodeDistgrid, elementDistgrid=elemDistgrid, &
                    numOwnedNodes=numOwnedNodesTst, numOwnedElements=numOwnedElemsTst, &
+                   spatialDim=spatialDim, parametricDim=parametricDim, &
                    isMemFreed=isMemFreed, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
   ! check results
   if (numOwnedNodesTst .ne. 0) correct=.false.
   if (numOwnedElemsTst .ne. 0) correct=.false.
+  if (spatialDim .ne. 2) correct=.false.
+  if (parametricDim .ne. 2) correct=.false.
   if (isMemFreed) correct=.false. 
 
   ! Make sure node distgrid is ok
@@ -2312,7 +2315,7 @@ subroutine createTestMesh1(mesh, rc)
      return
   endif
 
-
+ 
   ! Setup mesh info depending on the 
   ! number of PETs
   if (petCount .eq. 1) then
@@ -2337,7 +2340,7 @@ subroutine createTestMesh1(mesh, rc)
                  2.0,2.0 /)
 
       !! node owners
-      allocate(nodeOwners(numNodes))
+       allocate(nodeOwners(numNodes))
       nodeOwners=0 ! everything on proc 0
 
 
@@ -2391,7 +2394,7 @@ subroutine createTestMesh1(mesh, rc)
        !! elem type
        allocate(elemTypes(numElems))
        elemTypes=ESMF_MESHELEMTYPE_QUAD
-
+ 
        !! elem conn
        allocate(elemConn(numElems*4))
        elemConn=(/1,2,4,3/)
@@ -2445,7 +2448,7 @@ subroutine createTestMesh1(mesh, rc)
                     0.0,2.0, &
                     1.0,2.0/)
 
-       !! node owners
+        !! node owners
        allocate(nodeOwners(numNodes))
        nodeOwners=(/0,0,2,2/) 
 
@@ -2499,7 +2502,7 @@ subroutine createTestMesh1(mesh, rc)
        elemConn=(/1,2,4,3/)  
      endif
    endif
-
+ 
    
    ! Create Mesh structure in 1 step
    mesh=ESMF_MeshCreate(parametricDim=2,spatialDim=2, &

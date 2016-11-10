@@ -4021,7 +4021,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer, intent(inout) :: length
       integer, intent(inout) :: offset
       type(ESMF_InquireFlag), intent(in), optional :: inquireflag
-      integer, intent(out), optional :: rc 
+       integer, intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
 !      Takes an {\tt ESMF\_Mesh} object and adds all the information needed
@@ -4050,7 +4050,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !EOPI
       integer :: i,localrc
       type(ESMF_AttReconcileFlag) :: attreconflag
-      type(ESMF_InquireFlag) :: linquireflag
+       type(ESMF_InquireFlag) :: linquireflag
       integer :: intMeshFreed,intFullyCreated
 
       ! Initialize
@@ -4079,7 +4079,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
      ! Serialize Node Distgrid
      call c_ESMC_DistgridSerialize(mesh%nodal_distgrid, buffer, length, offset, &
                                  linquireflag, localrc)
-      if (ESMF_LogFoundError(localrc, &
+       if (ESMF_LogFoundError(localrc, &
                                  ESMF_ERR_PASSTHRU, &
                                  ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -4099,6 +4099,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
       ! Serialize other Mesh items
       call c_ESMC_MeshInfoSerialize(intMeshFreed, &
+              mesh%spatialDim, mesh%parametricDim, &
               buffer, length, offset,linquireflag, localrc)
       if (ESMF_LogFoundError(localrc, &
                                  ESMF_ERR_PASSTHRU, &
@@ -4132,7 +4133,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !ARGUMENTS:
       character, pointer, dimension(:) :: buffer
-      integer, intent(inout) :: offset
+       integer, intent(inout) :: offset
       integer, intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
@@ -4158,9 +4159,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer :: localrc
       integer :: i
       type(ESMF_AttReconcileFlag) :: attreconflag
-      integer :: intMeshFreed
-
-      ! Initialize
+      integer :: intMeshFreed, spatialDim, parametricDim
+  
+       ! Initialize
       localrc = ESMF_RC_NOT_IMPL
       if  (present(rc)) rc = ESMF_RC_NOT_IMPL
 
@@ -4188,7 +4189,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                                  ESMF_CONTEXT, rcToReturn=rc)) return
 
       ! Deserialize other ESMF_MeshDeserialize items
-      call c_ESMC_MeshInfoDeserialize(intMeshFreed, buffer, offset, localrc)
+      call c_ESMC_MeshInfoDeserialize(intMeshFreed, &
+           spatialDim, parametricDim, &
+           buffer, offset, localrc)
       if (ESMF_LogFoundError(localrc, &
                                  ESMF_ERR_PASSTHRU, &
                                  ESMF_CONTEXT, rcToReturn=rc)) return
@@ -4207,6 +4210,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ESMF_MeshDeserialize%createStage=3
       ESMF_MeshDeserialize%numOwnedNodes=0
       ESMF_MeshDeserialize%numOwnedElements=0
+      ESMF_MeshDeserialize%spatialDim=spatialDim
+      ESMF_MeshDeserialize%parametricDim=parametricDim
 
       ! If exists serialize mesh
       if (.not. ESMF_MeshDeserialize%isCMeshFreed) then
