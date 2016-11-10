@@ -2032,6 +2032,7 @@ end function ESMF_MeshCreateFromFile
                                  centerCoords=faceCoords, &
 				 convertToDeg=convertToDeg, rc=localrc)
        endif
+
        ElemCnt = ubound (elmtNum, 1)
        totalConnects = ubound(elementConn, 1)
        if (associated(faceCoords)) then
@@ -3432,14 +3433,14 @@ function ESMF_MeshCreateCubedSphere(tileSize, nx, ny, filename, rc)
   count(1)=sizei
   count(2)=sizej
 
-  call ESMF_VMWtime(starttime, rc=rc)
+  !call ESMF_VMWtime(starttime, rc=rc)
   ! Generate glocal edge coordinates and local center coordinates
   call ESMF_UtilCreateCSCoords(tileSize, lonEdge, latEdge, start=start, count=count, &
-       lonCenter=lonCenter, latCenter=latCenter)
-  call ESMF_VMWtime(endtime, rc=rc)
+       tile=tile, lonCenter=lonCenter, latCenter=latCenter)
+  !call ESMF_VMWtime(endtime, rc=rc)
   
-  print *, 'Create CS size ', tileSize, 'in', (endtime-starttime)*1000.0, ' msecs'
-
+  !print *, 'Create CS size ', tileSize, 'in', (endtime-starttime)*1000.0, ' msecs'
+ 
   totalnodes = (tileSize+1)*(tileSize+1)*6
 
   ! convert radius to degrees
@@ -5841,7 +5842,6 @@ end subroutine ESMF_MeshMergeSplitDstInd
     ! These two arrays are temp arrays
     ! NodeUsed() used for multiple purposes, first, find the owners of the node
     ! later, used to store the local Node ID to be used in the ElmtConn table
-    print *, PetNo, 'Before allocate NodeUsed'
     allocate (NodeUsed(NodeCnt))
 
     ! Set to a number > PetCnt because it will store the PetNo if this node is used by
@@ -5928,7 +5928,7 @@ end subroutine ESMF_MeshMergeSplitDstInd
       totalpairs = totalpairs+allpairs(i)
     enddo
    
-    print *, PetNo, " Total node pairs and total nodes: ",  mypair(1), totalpairs, totalnodecnt
+    !print *, PetNo, " Total node pairs and total nodes: ",  mypair(1), totalpairs, totalnodecnt
 
     allocate(segmentTbl(totalpairs))
     call ESMF_VMAllGatherV(vm, nodepairs, mypair(1)*2, segmentTbl, allpairs, &
@@ -5964,7 +5964,7 @@ end subroutine ESMF_MeshMergeSplitDstInd
     enddo
 
     deallocate(pairoffsets, segmentTbl, allpairs, mypair, nodepairs)
-    print *, PetNo, "total local nodes and halo nodes counts:", totalnodecnt, halonodecnt
+    !print *, PetNo, "total local nodes and halo nodes counts:", totalnodecnt, halonodecnt
 
     ! Create a distgrid based on the local ownership of the node ids
      allocate(seqIndexList(totalnodecnt-halonodecnt))
@@ -6001,8 +6001,6 @@ end subroutine ESMF_MeshMergeSplitDstInd
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
          ESMF_CONTEXT, rcToReturn=rc)) return
 
-    print *, PetNo, 'NodeCoords ', nodeCoords(1,1000), nodeCoords(2,1000)
-   
     ! Create a distgrid with regular distribution for the NodeCoords
     regDistGrid = ESMF_DistGridCreate((/1/), (/NodeCnt/), &
     		  	   regDecomp=(/PetCnt/), &
@@ -6025,15 +6023,11 @@ end subroutine ESMF_MeshMergeSplitDstInd
 
     ! NodeCoords(coordDim, localnodecnt), fptr(coordDim, startNode:startNode+localnodecnt)
     ! can we do the following array assignment?
-    print *, 'size of NodeCoords: ', ubound(NodeCoords)
     ! print *, 'bounds of fptr: ', lbound(fptr), ubound(fptr)
     fptr(:,:) = NodeCoords(:,:)
 
-    ! print *, 'fptr ', fptr(1,1000), fptr(2,1000)
-
     deallocate(NodeCoords)
 
-    print *, PetNo, 'Before ArrayRedistStore'
     ! call array redist to redist to the new distribution
     call ESMF_ArrayRedistStore(regCoordArray, nodeCoordArray, routehandle=redistHdl, &
     	 				      rc=localrc)
@@ -6044,7 +6038,6 @@ end subroutine ESMF_MeshMergeSplitDstInd
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
          ESMF_CONTEXT, rcToReturn=rc)) return
 
-    print *, PetNo, 'Before ArrayHaloStore'
     ! Need to get the data for the Halo region
     call ESMF_ArrayHaloStore(nodeCoordArray, haloHandle, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &

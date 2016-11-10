@@ -28,9 +28,20 @@ module NUOPC_Compliance_Base
 
     public ccfDepth   ! component control flow depth
     public maxDepth   ! maximum depth of compliance checker
+    public outputJSON ! whether to output JSON trace info to the log
+    public outputText ! whether to output human readable text to the log
+    public complianceInit  ! whether compliance parameters have been initialized
+
     integer, save :: ccfDepth = 1
     integer, save :: maxDepth = -2
+    logical, save :: outputJSON = .false.
+    logical, save :: outputText = .true.
+    logical, save :: complianceInit = .false.
+    logical, save :: includeState = .true.  ! trace import/export states
+    logical, save :: includeVmStats = .true. ! include vm stats
 
+    public NUOPC_ComplianceInit
+    public NUOPC_ComplianceLogWrite
     public NUOPC_CheckComponentMetadata
     public NUOPC_CheckComponentMetadataCIM
     public NUOPC_CheckComponentAttribute
@@ -42,6 +53,8 @@ module NUOPC_Compliance_Base
     public NUOPC_CheckInternalClock
     public NUOPC_CheckComponentStatistics
     public NUOPC_CompSearchPhaseMapByIndex
+    public NUOPC_RegionEnter
+    public NUOPC_RegionExit
     public JSON_LogWrite
     public JSON_LogCtrlFlow
     public JSON_LogHeader
@@ -75,10 +88,110 @@ module NUOPC_Compliance_Base
 
 contains
 
-    recursive subroutine NUOPC_CheckGridComponentMetadata(prefix, comp, outputJSON, rc)
+    recursive subroutine NUOPC_ComplianceInit(rc)
+        integer, intent(out), optional :: rc
+
+        ! locals
+        integer :: configrc
+        integer :: jsonIsOn
+        integer :: textIsOn
+        type(ESMF_Config) :: config
+        character(10) :: cfgIncludeState
+        character(10) :: cfgIncludeVmStats
+
+        rc = ESMF_SUCCESS
+
+        call c_esmc_getComplianceCheckDepth(maxDepth, rc)
+        if (ESMF_LogFoundError(rc, &
+            line=__LINE__, &
+            file=FILENAME)) &
+            return  ! bail out
+
+        call c_esmc_getComplianceCheckText(textIsOn, rc)
+        if (ESMF_LogFoundError(rc, &
+            line=__LINE__, &
+            file=FILENAME)) &
+            return  ! bail out
+        if (textIsOn == 1) then
+          outputText = .true.
+        else
+          outputText = .false.
+        endif
+
+        call c_esmc_getComplianceCheckJSON(jsonIsOn, rc)
+        if (ESMF_LogFoundError(rc, &
+            line=__LINE__, &
+            file=FILENAME)) &
+            return  ! bail out
+        if (jsonIsOn == 1) then
+          outputJSON = .true.
+        else
+          outputJSON = .false.
+        endif
+
+        if (outputJSON) then
+            config = ESMF_ConfigCreate(rc=rc)
+            if (ESMF_LogFoundError(rc, &
+                line=__LINE__, &
+                file=FILENAME)) &
+                return  ! bail out
+            call ESMF_ConfigLoadFile(config, "nuopc.trace", rc=configrc)
+            if (configrc == ESMF_SUCCESS) then
+                call ESMF_ConfigGetAttribute(config, cfgIncludeState, &
+                    label="include.state:", default="true", rc=rc)
+                if (ESMF_LogFoundError(rc, &
+                    line=__LINE__, &
+                    file=FILENAME)) &
+                    return  ! bail out
+                includeState = (trim(cfgIncludeState)=="true")
+
+                call ESMF_ConfigGetAttribute(config, cfgIncludeVmStats, &
+                    label="include.vmstats:", default="true", rc=rc)
+                if (ESMF_LogFoundError(rc, &
+                    line=__LINE__, &
+                    file=FILENAME)) &
+                    return  ! bail out
+                includeVmStats = (trim(cfgIncludeVmStats)=="true")
+            end if
+
+            ! write header line once
+            call JSON_LogHeader(rc=rc)
+            if (ESMF_LogFoundError(rc, &
+                    line=__LINE__, &
+                    file=FILENAME)) &
+                    return  ! bail out
+        endif
+
+        complianceInit = .true.
+
+    end subroutine
+
+    recursive subroutine NUOPC_ComplianceLogWrite(msg, msgType, rc)
+        character(len=*),                 intent(in)  :: msg
+        type(ESMF_LogMsg_Flag), optional, intent(in)  :: msgType
+        integer, optional,                intent(out) :: rc
+
+        ! locals
+        type(ESMF_LogMsg_Flag) :: localMsgType
+
+        rc = ESMF_SUCCESS
+        if (outputText) then
+            if (present(msgType)) then
+                localMsgType = msgType
+            else
+                localMsgType = ESMF_LOGMSG_INFO
+            endif
+            call ESMF_LogWrite(trim(msg), localMsgType, rc=rc)
+            if (ESMF_LogFoundError(rc, &
+              line=__LINE__, &
+              file=FILENAME)) &
+              return  ! bail out
+         endif
+    end subroutine
+
+    recursive subroutine NUOPC_CheckGridComponentMetadata(prefix, comp, rc)
         character(*), intent(in)              :: prefix
         type(ESMF_GridComp)                   :: comp
-        logical, optional                     :: outputJSON
         integer,      intent(out), optional   :: rc
 
         character(ESMF_MAXSTR)                :: attributeName
@@ -88,21 +201,15 @@ contains
         type(ESMF_AttPack)                    :: attpack
         character(1024*50)                    :: jsonstring
         logical                               :: isPresent
-        logical                               :: doJSON
         character(64)                         :: idStr
 
         if (present(rc)) rc = ESMF_SUCCESS
-
-        doJSON = .false.
-        if (present(outputJSON)) then
-            doJSON = outputJSON
-        endif
 
         ! set NUOPC convention and purpose specifiers
         convention = "NUOPC"
         purpose = "Instance"
 
-        call ESMF_LogWrite(trim(prefix)//" GridComp level attribute check: "// &
+        call NUOPC_ComplianceLogWrite(trim(prefix)//" GridComp level attribute check: "// &
             "convention: '"//trim(convention)//"', purpose: '"//trim(purpose)//"'.", &
             ESMF_LOGMSG_INFO, rc=rc)
         if (ESMF_LogFoundError(rc, &
@@ -192,7 +299,7 @@ contains
             file=FILENAME)) &
             return  ! bail out
 
-        if (doJSON) then
+        if (outputJSON) then
 
             call ESMF_GridCompGet(comp, name=compName, rc=rc)
             if (ESMF_LogFoundError(rc, &
@@ -256,10 +363,9 @@ contains
     end subroutine
 
 
-    recursive subroutine NUOPC_CheckCplComponentMetadata(prefix, comp, outputJSON, rc)
+    recursive subroutine NUOPC_CheckCplComponentMetadata(prefix, comp, rc)
         character(*), intent(in)              :: prefix
         type(ESMF_CplComp)                    :: comp
-        logical, optional                     :: outputJSON
         integer,      intent(out), optional   :: rc
 
         type(ESMF_CompType_Flag)              :: comptype
@@ -270,29 +376,15 @@ contains
         type(ESMF_AttPack)                    :: attpack
         character(1024*50)                    :: jsonstring
         logical                               :: isPresent
-        logical                               :: doJSON
         character(64)                         :: idStr
 
         if (present(rc)) rc = ESMF_SUCCESS
-
-        doJSON = .false.
-        if (present(outputJSON)) then
-            doJSON = outputJSON
-        endif
-
-        ! get Component type and branch on it
-!        call ESMF_GridCompGet(comp, comptype=comptype, rc=rc)
-!        if (ESMF_LogFoundError(rc, &
-!            line=__LINE__, &
-!            file=FILENAME)) &
-!            return  ! bail out
-!
 
         ! set NUOPC convention and purpose specifiers
         convention = "NUOPC"
         purpose = "Instance"
 
-        call ESMF_LogWrite(trim(prefix)//" CplComp level attribute check: "// &
+        call NUOPC_ComplianceLogWrite(trim(prefix)//" CplComp level attribute check: "// &
             "convention: '"//trim(convention)//"', purpose: '"//trim(purpose)//"'.", &
             ESMF_LOGMSG_INFO, rc=rc)
         if (ESMF_LogFoundError(rc, &
@@ -355,7 +447,7 @@ contains
 !            file=FILENAME)) &
 !            return  ! bail out
 
-        if (doJSON) then
+        if (outputJSON) then
 
             call ESMF_CplCompGet(comp, name=compName, rc=rc)
             if (ESMF_LogFoundError(rc, &
@@ -444,9 +536,9 @@ contains
             convention = "NUOPC"
             purpose = "Instance"
 
-            call ESMF_LogWrite(trim(prefix)//" GridComp level attribute check: "// &
+            call NUOPC_ComplianceLogWrite(trim(prefix)//" GridComp level attribute check: "// &
                 "convention: '"//trim(convention)//"', purpose: '"//trim(purpose)//"'.", &
-                ESMF_LOGMSG_INFO, rc=rc)
+                rc=rc)
             if (ESMF_LogFoundError(rc, &
                 line=__LINE__, &
                 file=FILENAME)) &
@@ -605,9 +697,9 @@ contains
             convention = "NUOPC"
             purpose = "Instance"
 
-            call ESMF_LogWrite(trim(prefix)//" CplComp level attribute check: "// &
+            call NUOPC_ComplianceLogWrite(trim(prefix)//" CplComp level attribute check: "// &
                 "convention: '"//trim(convention)//"', purpose: '"//trim(purpose)//"'.", &
-                ESMF_LOGMSG_INFO, rc=rc)
+                rc=rc)
             if (ESMF_LogFoundError(rc, &
                 line=__LINE__, &
                 file=FILENAME)) &
@@ -631,11 +723,10 @@ contains
 
 
 
-    recursive subroutine NUOPC_CheckState(prefix, referenceName, state, outputJSON, rc)
+    recursive subroutine NUOPC_CheckState(prefix, referenceName, state, rc)
         character(*), intent(in)              :: prefix
         character(*), intent(in)              :: referenceName
         type(ESMF_State)                      :: state
-        logical, optional                     :: outputJSON
         integer,      intent(out), optional   :: rc
 
         logical                               :: stateValid
@@ -654,7 +745,6 @@ contains
         character(ESMF_MAXSTR)                :: attributeName
         character(ESMF_MAXSTR)                :: convention
         character(ESMF_MAXSTR)                :: purpose
-        logical                               :: doJSON
         type(ESMF_AttPack)                    :: attpack
         character(1024*100)                   :: jsonstring
         logical                               :: isPresent
@@ -662,15 +752,10 @@ contains
 
         if (present(rc)) rc = ESMF_SUCCESS
 
-        doJSON = .false.
-        if (present(outputJSON)) then
-            doJSON = outputJSON
-        endif
-
         stateValid = .true.
         ! Ensure that the State is a valid object
         if (.not. ESMF_StateIsCreated(state)) then
-            call ESMF_LogWrite(trim(prefix)//" ==> The "//trim(referenceName)// &
+            call NUOPC_ComplianceLogWrite(trim(prefix)//" ==> The "//trim(referenceName)// &
                 " is invalid!", &
                 ESMF_LOGMSG_WARNING, rc=rc)
             if (ESMF_LogFoundError(rc, &
@@ -688,8 +773,8 @@ contains
                 line=__LINE__, &
                 file=FILENAME)) &
                 return  ! bail out
-            call ESMF_LogWrite(trim(prefix)//" "//trim(referenceName)//" name: "// &
-                trim(name), ESMF_LOGMSG_INFO, rc=rc)
+            call NUOPC_ComplianceLogWrite(trim(prefix)//" "//trim(referenceName)//" name: "// &
+                trim(name), rc=rc)
             if (ESMF_LogFoundError(rc, &
                 line=__LINE__, &
                 file=FILENAME)) &
@@ -703,8 +788,8 @@ contains
             else
                 tempString = "ESMF_STATEINTENT_INVALID"
             endif
-            call ESMF_LogWrite(trim(prefix)//" "//trim(referenceName)//" stateintent: "// &
-                trim(tempString), ESMF_LOGMSG_INFO, rc=rc)
+            call NUOPC_ComplianceLogWrite(trim(prefix)//" "//trim(referenceName)//" stateintent: "// &
+                trim(tempString), rc=rc)
             if (ESMF_LogFoundError(rc, &
                 line=__LINE__, &
                 file=FILENAME)) &
@@ -714,7 +799,7 @@ contains
             convention = "NUOPC"
             purpose = "Instance"
 
-            if (doJSON) then
+            if (outputJSON .and. includeState) then
 
               call JSON_GetID(state, idStr, rc=rc)
               if (ESMF_LogFoundError(rc, &
@@ -779,9 +864,9 @@ contains
             endif ! doJSON
 
 
-            call ESMF_LogWrite(trim(prefix)//" State level attribute check: "// &
+            call NUOPC_ComplianceLogWrite(trim(prefix)//" State level attribute check: "// &
                 "convention: '"//trim(convention)//"', purpose: '"//trim(purpose)//"'.", &
-                ESMF_LOGMSG_INFO, rc=rc)
+                rc=rc)
             if (ESMF_LogFoundError(rc, &
                 line=__LINE__, &
                 file=FILENAME)) &
@@ -806,8 +891,8 @@ contains
                 return  ! bail out
 
             write (tempString, *) itemCount
-            call ESMF_LogWrite(trim(prefix)//" "//trim(referenceName)//" itemCount: "// &
-                trim(tempString), ESMF_LOGMSG_INFO, rc=rc)
+            call NUOPC_ComplianceLogWrite(trim(prefix)//" "//trim(referenceName)//" itemCount: "// &
+                trim(tempString), rc=rc)
             if (ESMF_LogFoundError(rc, &
                 line=__LINE__, &
                 file=FILENAME)) &
@@ -829,7 +914,7 @@ contains
                     else if (stateitemtypeList(item) == ESMF_STATEITEM_FIELDBUNDLE) then
                         write (tempString, *) item, " [FIELDBUNDLE] name: "
                     else if (stateitemtypeList(item) == ESMF_STATEITEM_ARRAY) then
-                        call ESMF_LogWrite(trim(prefix)//" ==> The "//trim(referenceName)// &
+                        call NUOPC_ComplianceLogWrite(trim(prefix)//" ==> The "//trim(referenceName)// &
                             " contains an ESMF_Array object!", ESMF_LOGMSG_WARNING, rc=rc)
                         if (ESMF_LogFoundError(rc, &
                             line=__LINE__, &
@@ -837,7 +922,7 @@ contains
                             return  ! bail out
                         write (tempString, *) item, " [ARRAY] name: "
                     else if (stateitemtypeList(item) == ESMF_STATEITEM_ARRAYBUNDLE) then
-                        call ESMF_LogWrite(trim(prefix)//" ==> The "//trim(referenceName)// &
+                        call NUOPC_ComplianceLogWrite(trim(prefix)//" ==> The "//trim(referenceName)// &
                             " contains an ESMF_ArrayBundle object!", ESMF_LOGMSG_WARNING, rc=rc)
                         if (ESMF_LogFoundError(rc, &
                             line=__LINE__, &
@@ -854,9 +939,9 @@ contains
                         write (tempString, *) item, " [NOTFOUND] name: "
                     endif
 
-                    call ESMF_LogWrite(trim(prefix)//" "//trim(referenceName)//" item #"// &
+                    call NUOPC_ComplianceLogWrite(trim(prefix)//" "//trim(referenceName)//" item #"// &
                         trim(tempString)//trim(itemNameList(item)), &
-                        ESMF_LOGMSG_INFO, rc=rc)
+                        rc=rc)
                     if (ESMF_LogFoundError(rc, &
                         line=__LINE__, &
                         file=FILENAME)) &
@@ -872,7 +957,7 @@ contains
                           line=__LINE__, &
                           file=FILENAME)) &
                           return  ! bail out
-                        call NUOPC_CheckField(prefix, "", field=field, stateid=idStr, outputJSON=doJSON, rc=rc)
+                        call NUOPC_CheckField(prefix, "", field=field, stateid=idStr, rc=rc)
                         if (ESMF_LogFoundError(rc, &
                           line=__LINE__, &
                           file=FILENAME)) &
@@ -902,14 +987,14 @@ contains
                             line=__LINE__, &
                             file=FILENAME)) &
                             return  ! bail out
-                          call ESMF_LogWrite(trim(prefix)//" in FieldBundle, Field name: "//&
-                            trim(name), ESMF_LOGMSG_INFO, rc=rc)
+                          call NUOPC_ComplianceLogWrite(trim(prefix)//" in FieldBundle, Field name: "//&
+                            trim(name), rc=rc)
                           if (ESMF_LogFoundError(rc, &
                             line=__LINE__, &
                             file=FILENAME)) &
                             return  ! bail out
                           call NUOPC_CheckField(prefix, "", field=field, stateid=idStr, &
-                            outputJSON=doJSON, rc=rc)
+                            rc=rc)
                           if (ESMF_LogFoundError(rc, &
                             line=__LINE__, &
                             file=FILENAME)) &
@@ -973,7 +1058,7 @@ contains
             return  ! bail out
         if (.not.isPresent) then
             ! attpack not present
-            call ESMF_LogWrite(trim(prefix)//" ==> Component level attpack: <"// &
+            call NUOPC_ComplianceLogWrite(trim(prefix)//" ==> Component level attpack: <"// &
                 "convention: '"//trim(convention)//"', "// &
                 "purpose: '"//trim(purpose)//"'> is NOT present!", &
                 ESMF_LOGMSG_WARNING, rc=rc)
@@ -993,7 +1078,7 @@ contains
             return
         else if (.not.isPresent) then
             ! attribute not present
-            call ESMF_LogWrite(trim(prefix)//" ==> Component level attribute: <"// &
+            call NUOPC_ComplianceLogWrite(trim(prefix)//" ==> Component level attribute: <"// &
                 trim(attributeName)//"> is NOT present!", &
                 ESMF_LOGMSG_WARNING, rc=rc)
             if (ESMF_LogFoundError(rc, &
@@ -1002,7 +1087,7 @@ contains
                 return  ! bail out
         else if (itemCount == 0) then
             ! attribute present but not set
-            call ESMF_LogWrite(trim(prefix)//" ==> Component level attribute: <"// &
+            call NUOPC_ComplianceLogWrite(trim(prefix)//" ==> Component level attribute: <"// &
                 trim(attributeName)//"> present but NOT set!", &
                 ESMF_LOGMSG_WARNING, rc=rc)
             if (ESMF_LogFoundError(rc, &
@@ -1019,10 +1104,10 @@ contains
                     attnestflag=ESMF_ATTNEST_ON, rc=rc)
                 if (itemCount == 1) then
                     ! single valued
-                    call ESMF_LogWrite(trim(prefix)//" Component level attribute: <"// &
+                    call NUOPC_ComplianceLogWrite(trim(prefix)//" Component level attribute: <"// &
                         trim(attributeName)//"> "// &
                         "present and set: "// trim(valueStringList(1)), &
-                        ESMF_LOGMSG_INFO, rc=rc)
+                        rc=rc)
                     if (ESMF_LogFoundError(rc, &
                         line=__LINE__, &
                         file=FILENAME)) &
@@ -1031,10 +1116,10 @@ contains
                     ! multi valued -> requires loop
                     do i=1, itemCount
                         write(iStr,*) i
-                        call ESMF_LogWrite(trim(prefix)//" Component level attribute: <"// &
+                        call NUOPC_ComplianceLogWrite(trim(prefix)//" Component level attribute: <"// &
                             trim(attributeName)//">["//trim(adjustl(iStr))//"] "// &
                             "present and set: "// trim(valueStringList(i)), &
-                            ESMF_LOGMSG_INFO, rc=rc)
+                            rc=rc)
                         if (ESMF_LogFoundError(rc, &
                             line=__LINE__, &
                             file=FILENAME)) &
@@ -1051,10 +1136,10 @@ contains
                 if (itemCount == 1) then
                     ! single valued
                     write(vStr,*) valueI4List(1)
-                    call ESMF_LogWrite(trim(prefix)//" Component level attribute: <"// &
+                    call NUOPC_ComplianceLogWrite(trim(prefix)//" Component level attribute: <"// &
                         trim(attributeName)//"> "// &
                         "present and set: "// vStr, &
-                        ESMF_LOGMSG_INFO, rc=rc)
+                        rc=rc)
                     if (ESMF_LogFoundError(rc, &
                         line=__LINE__, &
                         file=FILENAME)) &
@@ -1064,10 +1149,10 @@ contains
                     do i=1, itemCount
                         write(iStr,*) i
                         write(vStr,*) valueI4List(i)
-                        call ESMF_LogWrite(trim(prefix)//" Component level attribute: <"// &
+                        call NUOPC_ComplianceLogWrite(trim(prefix)//" Component level attribute: <"// &
                             trim(attributeName)//">["//trim(adjustl(iStr))//"] "// &
                             "present and set: "// vStr, &
-                            ESMF_LOGMSG_INFO, rc=rc)
+                            rc=rc)
                         if (ESMF_LogFoundError(rc, &
                             line=__LINE__, &
                             file=FILENAME)) &
@@ -1076,10 +1161,10 @@ contains
                 endif
                 deallocate(valueI4List)
             else
-                call ESMF_LogWrite(trim(prefix)//" Component level attribute: <"// &
+                call NUOPC_ComplianceLogWrite(trim(prefix)//" Component level attribute: <"// &
                     trim(attributeName)//"> "// &
                     "present and set: <unsupported data type>", &
-                    ESMF_LOGMSG_INFO, rc=rc)
+                    rc=rc)
                 if (ESMF_LogFoundError(rc, &
                     line=__LINE__, &
                     file=FILENAME)) &
@@ -1115,7 +1200,7 @@ contains
             return  ! bail out
         if (.not.isPresent) then
             ! attpack not present
-            call ESMF_LogWrite(trim(prefix)//" ==> Component level attpack: <"// &
+            call NUOPC_ComplianceLogWrite(trim(prefix)//" ==> Component level attpack: <"// &
                 "convention: '"//trim(convention)//"', "// &
                 "purpose: '"//trim(purpose)//"'> is NOT present!", &
                 ESMF_LOGMSG_WARNING, rc=rc)
@@ -1133,7 +1218,7 @@ contains
             return  ! bail out
         if (.not.isPresent) then
             ! attribute not present
-            call ESMF_LogWrite(trim(prefix)//" ==> Component level attribute: <"// &
+            call NUOPC_ComplianceLogWrite(trim(prefix)//" ==> Component level attribute: <"// &
                 trim(attributeName)//"> is NOT present!", &
                 ESMF_LOGMSG_WARNING, rc=rc)
             if (ESMF_LogFoundError(rc, &
@@ -1142,7 +1227,7 @@ contains
                 return  ! bail out
         else if (itemCount == 0) then
             ! attribute present but not set
-            call ESMF_LogWrite(trim(prefix)//" ==> Component level attribute: <"// &
+            call NUOPC_ComplianceLogWrite(trim(prefix)//" ==> Component level attribute: <"// &
                 trim(attributeName)//"> present but NOT set!", &
                 ESMF_LOGMSG_WARNING, rc=rc)
             if (ESMF_LogFoundError(rc, &
@@ -1159,10 +1244,10 @@ contains
                     attnestflag=ESMF_ATTNEST_ON, rc=rc)
                 if (itemCount == 1) then
                     ! single valued
-                    call ESMF_LogWrite(trim(prefix)//" Component level attribute: <"// &
+                    call NUOPC_ComplianceLogWrite(trim(prefix)//" Component level attribute: <"// &
                         trim(attributeName)//"> "// &
                         "present and set: "// trim(valueStringList(1)), &
-                        ESMF_LOGMSG_INFO, rc=rc)
+                        rc=rc)
                     if (ESMF_LogFoundError(rc, &
                         line=__LINE__, &
                         file=FILENAME)) &
@@ -1171,10 +1256,10 @@ contains
                     ! multi valued -> requires loop
                     do i=1, itemCount
                         write(iStr,*) i
-                        call ESMF_LogWrite(trim(prefix)//" Component level attribute: <"// &
+                        call NUOPC_ComplianceLogWrite(trim(prefix)//" Component level attribute: <"// &
                             trim(attributeName)//">["//trim(adjustl(iStr))//"] "// &
                             "present and set: "// trim(valueStringList(i)), &
-                            ESMF_LOGMSG_INFO, rc=rc)
+                            rc=rc)
                         if (ESMF_LogFoundError(rc, &
                             line=__LINE__, &
                             file=FILENAME)) &
@@ -1191,10 +1276,10 @@ contains
                 if (itemCount == 1) then
                     ! single valued
                     write(vStr,*) valueI4List(1)
-                    call ESMF_LogWrite(trim(prefix)//" Component level attribute: <"// &
+                    call NUOPC_ComplianceLogWrite(trim(prefix)//" Component level attribute: <"// &
                         trim(attributeName)//"> "// &
                         "present and set: "// vStr, &
-                        ESMF_LOGMSG_INFO, rc=rc)
+                        rc=rc)
                     if (ESMF_LogFoundError(rc, &
                         line=__LINE__, &
                         file=FILENAME)) &
@@ -1204,10 +1289,10 @@ contains
                     do i=1, itemCount
                         write(iStr,*) i
                         write(vStr,*) valueI4List(i)
-                        call ESMF_LogWrite(trim(prefix)//" Component level attribute: <"// &
+                        call NUOPC_ComplianceLogWrite(trim(prefix)//" Component level attribute: <"// &
                             trim(attributeName)//">["//trim(adjustl(iStr))//"] "// &
                             "present and set: "// vStr, &
-                            ESMF_LOGMSG_INFO, rc=rc)
+                            rc=rc)
                         if (ESMF_LogFoundError(rc, &
                             line=__LINE__, &
                             file=FILENAME)) &
@@ -1216,10 +1301,10 @@ contains
                 endif
                 deallocate(valueI4List)
             else
-                call ESMF_LogWrite(trim(prefix)//" Component level attribute: <"// &
+                call NUOPC_ComplianceLogWrite(trim(prefix)//" Component level attribute: <"// &
                     trim(attributeName)//"> "// &
                     "present and set: <unsupported data type>", &
-                    ESMF_LOGMSG_INFO, rc=rc)
+                    rc=rc)
                 if (ESMF_LogFoundError(rc, &
                     line=__LINE__, &
                     file=FILENAME)) &
@@ -1254,7 +1339,7 @@ contains
             return  ! bail out
         if (.not.isPresent) then
             ! attpack not present
-            call ESMF_LogWrite(trim(prefix)//" ==> State level attpack: <"// &
+            call NUOPC_ComplianceLogWrite(trim(prefix)//" ==> State level attpack: <"// &
                 "convention: '"//trim(convention)//"', "// &
                 "purpose: '"//trim(purpose)//"'> is NOT present!", &
                 ESMF_LOGMSG_WARNING, rc=rc)
@@ -1272,7 +1357,7 @@ contains
             return  ! bail out
         if (.not.isPresent) then
             ! attribute not present
-            call ESMF_LogWrite(trim(prefix)//" ==> State level attribute: <"// &
+            call NUOPC_ComplianceLogWrite(trim(prefix)//" ==> State level attribute: <"// &
                 trim(attributeName)//"> is NOT present!", &
                 ESMF_LOGMSG_WARNING, rc=rc)
             if (ESMF_LogFoundError(rc, &
@@ -1281,7 +1366,7 @@ contains
                 return  ! bail out
         else if (itemCount == 0) then
             ! attribute present but not set
-            call ESMF_LogWrite(trim(prefix)//" ==> State level attribute: <"// &
+            call NUOPC_ComplianceLogWrite(trim(prefix)//" ==> State level attribute: <"// &
                 trim(attributeName)//"> present but NOT set!", &
                 ESMF_LOGMSG_WARNING, rc=rc)
             if (ESMF_LogFoundError(rc, &
@@ -1298,10 +1383,10 @@ contains
                     attnestflag=ESMF_ATTNEST_ON, rc=rc)
                 if (itemCount == 1) then
                     ! single valued
-                    call ESMF_LogWrite(trim(prefix)//" State level attribute: <"// &
+                    call NUOPC_ComplianceLogWrite(trim(prefix)//" State level attribute: <"// &
                         trim(attributeName)//"> "// &
                         "present and set: "// trim(valueStringList(1)), &
-                        ESMF_LOGMSG_INFO, rc=rc)
+                        rc=rc)
                     if (ESMF_LogFoundError(rc, &
                         line=__LINE__, &
                         file=FILENAME)) &
@@ -1310,10 +1395,10 @@ contains
                     ! multi valued -> requires loop
                     do i=1, itemCount
                         write(iStr,*) i
-                        call ESMF_LogWrite(trim(prefix)//" State level attribute: <"// &
+                        call NUOPC_ComplianceLogWrite(trim(prefix)//" State level attribute: <"// &
                             trim(attributeName)//">["//trim(adjustl(iStr))//"] "// &
                             "present and set: "// trim(valueStringList(i)), &
-                            ESMF_LOGMSG_INFO, rc=rc)
+                            rc=rc)
                         if (ESMF_LogFoundError(rc, &
                             line=__LINE__, &
                             file=FILENAME)) &
@@ -1330,10 +1415,10 @@ contains
                 if (itemCount == 1) then
                     ! single valued
                     write(vStr,*) valueI4List(1)
-                    call ESMF_LogWrite(trim(prefix)//" State level attribute: <"// &
+                    call NUOPC_ComplianceLogWrite(trim(prefix)//" State level attribute: <"// &
                         trim(attributeName)//"> "// &
                         "present and set: "// vStr, &
-                        ESMF_LOGMSG_INFO, rc=rc)
+                        rc=rc)
                     if (ESMF_LogFoundError(rc, &
                         line=__LINE__, &
                         file=FILENAME)) &
@@ -1343,10 +1428,10 @@ contains
                     do i=1, itemCount
                         write(iStr,*) i
                         write(vStr,*) valueI4List(i)
-                        call ESMF_LogWrite(trim(prefix)//" State level attribute: <"// &
+                        call NUOPC_ComplianceLogWrite(trim(prefix)//" State level attribute: <"// &
                             trim(attributeName)//">["//trim(adjustl(iStr))//"] "// &
                             "present and set: "// vStr, &
-                            ESMF_LOGMSG_INFO, rc=rc)
+                            rc=rc)
                         if (ESMF_LogFoundError(rc, &
                             line=__LINE__, &
                             file=FILENAME)) &
@@ -1355,10 +1440,10 @@ contains
                 endif
                 deallocate(valueI4List)
             else
-                call ESMF_LogWrite(trim(prefix)//" State level attribute: <"// &
+                call NUOPC_ComplianceLogWrite(trim(prefix)//" State level attribute: <"// &
                     trim(attributeName)//"> "// &
                     "present and set: <unsupported data type>", &
-                    ESMF_LOGMSG_INFO, rc=rc)
+                    rc=rc)
                 if (ESMF_LogFoundError(rc, &
                     line=__LINE__, &
                     file=FILENAME)) &
@@ -1370,12 +1455,11 @@ contains
 
     !-------------------------------------------------------------------------
 
-    recursive subroutine NUOPC_CheckField(prefix, referenceName, field, stateid, outputJSON, rc)
+    recursive subroutine NUOPC_CheckField(prefix, referenceName, field, stateid, rc)
         character(*), intent(in)              :: prefix
         character(*), intent(in)              :: referenceName
         type(ESMF_Field)                      :: field
         character(64)                         :: stateid
-        logical, optional                     :: outputJSON
         integer,      intent(out), optional   :: rc
 
         ! locals
@@ -1388,22 +1472,16 @@ contains
         character(64)                         :: idStr
         character(1024)                       :: jsonstring
         logical                               :: isPresent
-        logical                               :: doJSON
         type(ESMF_AttPack)                    :: attpack
         type(ESMF_FieldStatus_Flag)           :: fieldStatus
         integer                               :: localDeCount
 
         if (present(rc)) rc = ESMF_SUCCESS
 
-        doJSON = .false.
-        if (present(outputJSON)) then
-            doJSON = outputJSON
-        endif
-
         convention = "NUOPC"
         purpose = "Instance"
 
-        if (doJSON) then
+        if (outputJSON .and. includeState) then
 
             call ESMF_FieldGet(field, status=fieldStatus, rc=rc)
             if (ESMF_LogFoundError(rc, &
@@ -1507,7 +1585,7 @@ contains
                  file=FILENAME)) &
                  return  ! bail out
             endif
-        endif ! doJSON
+        endif ! outputJSON
 
 
     !write(fieldMinValStr, "(G12.5)") fieldMinVal
@@ -1561,7 +1639,7 @@ contains
             return  ! bail out
         if (.not.isPresent) then
             ! attpack not present
-            call ESMF_LogWrite(trim(prefix)//" ==> Field level attpack: <"// &
+            call NUOPC_ComplianceLogWrite(trim(prefix)//" ==> Field level attpack: <"// &
                 "convention: '"//trim(convention)//"', "// &
                 "purpose: '"//trim(purpose)//"'> is NOT present!", &
                 ESMF_LOGMSG_WARNING, rc=rc)
@@ -1581,7 +1659,7 @@ contains
             return
         else if (.not.isPresent) then
             ! attribute not present
-            call ESMF_LogWrite(trim(prefix)//" ==> Field level attribute: <"// &
+            call NUOPC_ComplianceLogWrite(trim(prefix)//" ==> Field level attribute: <"// &
                 trim(attributeName)//"> is NOT present!", &
                 ESMF_LOGMSG_WARNING, rc=rc)
             if (ESMF_LogFoundError(rc, &
@@ -1590,7 +1668,7 @@ contains
                 return  ! bail out
         else if (itemCount == 0) then
             ! attribute present but not set
-            call ESMF_LogWrite(trim(prefix)//" ==> Field level attribute: <"// &
+            call NUOPC_ComplianceLogWrite(trim(prefix)//" ==> Field level attribute: <"// &
                 trim(attributeName)//"> present but NOT set!", &
                 ESMF_LOGMSG_WARNING, rc=rc)
             if (ESMF_LogFoundError(rc, &
@@ -1607,10 +1685,10 @@ contains
                     attnestflag=ESMF_ATTNEST_ON, rc=rc)
                 if (itemCount == 1) then
                     ! single valued
-                    call ESMF_LogWrite(trim(prefix)//" Field level attribute: <"// &
+                    call NUOPC_ComplianceLogWrite(trim(prefix)//" Field level attribute: <"// &
                         trim(attributeName)//"> "// &
                         "present and set: "// trim(valueStringList(1)), &
-                        ESMF_LOGMSG_INFO, rc=rc)
+                        rc=rc)
                     if (ESMF_LogFoundError(rc, &
                         line=__LINE__, &
                         file=FILENAME)) &
@@ -1619,10 +1697,10 @@ contains
                     ! multi valued -> requires loop
                     do i=1, itemCount
                         write(iStr,*) i
-                        call ESMF_LogWrite(trim(prefix)//" Field level attribute: <"// &
+                        call NUOPC_ComplianceLogWrite(trim(prefix)//" Field level attribute: <"// &
                             trim(attributeName)//">["//trim(adjustl(iStr))//"] "// &
                             "present and set: "// trim(valueStringList(i)), &
-                            ESMF_LOGMSG_INFO, rc=rc)
+                            rc=rc)
                         if (ESMF_LogFoundError(rc, &
                             line=__LINE__, &
                             file=FILENAME)) &
@@ -1639,10 +1717,10 @@ contains
                 if (itemCount == 1) then
                     ! single valued
                     write(vStr,*) valueI4List(1)
-                    call ESMF_LogWrite(trim(prefix)//" Field level attribute: <"// &
+                    call NUOPC_ComplianceLogWrite(trim(prefix)//" Field level attribute: <"// &
                         trim(attributeName)//"> "// &
                         "present and set: "// vStr, &
-                        ESMF_LOGMSG_INFO, rc=rc)
+                        rc=rc)
                     if (ESMF_LogFoundError(rc, &
                         line=__LINE__, &
                         file=FILENAME)) &
@@ -1652,10 +1730,10 @@ contains
                     do i=1, itemCount
                         write(iStr,*) i
                         write(vStr,*) valueI4List(i)
-                        call ESMF_LogWrite(trim(prefix)//" Field level attribute: <"// &
+                        call NUOPC_ComplianceLogWrite(trim(prefix)//" Field level attribute: <"// &
                             trim(attributeName)//">["//trim(adjustl(iStr))//"] "// &
                             "present and set: "// vStr, &
-                            ESMF_LOGMSG_INFO, rc=rc)
+                            rc=rc)
                         if (ESMF_LogFoundError(rc, &
                             line=__LINE__, &
                             file=FILENAME)) &
@@ -1664,10 +1742,10 @@ contains
                 endif
                 deallocate(valueI4List)
             else
-                call ESMF_LogWrite(trim(prefix)//" Field level attribute: <"// &
+                call NUOPC_ComplianceLogWrite(trim(prefix)//" Field level attribute: <"// &
                     trim(attributeName)//"> "// &
                     "present and set: <unsupported data type>", &
-                    ESMF_LOGMSG_INFO, rc=rc)
+                    rc=rc)
                 if (ESMF_LogFoundError(rc, &
                     line=__LINE__, &
                     file=FILENAME)) &
@@ -1700,7 +1778,7 @@ contains
             return  ! bail out
         if (.not.ESMF_ClockIsCreated(clock) .or. &
             (clockThis == ESMF_NULL_POINTER)) then
-            call ESMF_LogWrite(trim(prefix)//" ==> The incoming Clock is invalid!", &
+            call NUOPC_ComplianceLogWrite(trim(prefix)//" ==> The incoming Clock is invalid!", &
                 ESMF_LOGMSG_WARNING, rc=rc)
             if (ESMF_LogFoundError(rc, &
                 line=__LINE__, &
@@ -1797,14 +1875,14 @@ contains
             if (direction /= directionCopy) clockModified = .true.
 
             if (clockModified) then
-                call ESMF_LogWrite(trim(prefix)//" ==> The incoming Clock was modified!", &
+                call NUOPC_ComplianceLogWrite(trim(prefix)//" ==> The incoming Clock was modified!", &
                     ESMF_LOGMSG_WARNING, rc=rc)
                 if (ESMF_LogFoundError(rc, &
                     line=__LINE__, &
                     file=FILENAME)) &
                     return  ! bail out
             else
-                call ESMF_LogWrite(trim(prefix)//" The incoming Clock was not modified.", &
+                call NUOPC_ComplianceLogWrite(trim(prefix)//" The incoming Clock was not modified.", &
                     ESMF_LOGMSG_INFO, rc=rc)
                 if (ESMF_LogFoundError(rc, &
                     line=__LINE__, &
@@ -1858,7 +1936,7 @@ contains
 
         if (.not.clockIsPresent) then
 
-            call ESMF_LogWrite(trim(prefix)// &
+            call NUOPC_ComplianceLogWrite(trim(prefix)// &
                 " ==> The internal Clock is not present!", &
                 ESMF_LOGMSG_WARNING, rc=rc)
             if (ESMF_LogFoundError(rc, &
@@ -1881,7 +1959,7 @@ contains
                 clockInternalValid = .false.
 
             if (.not.clockInternalValid) then
-                call ESMF_LogWrite(trim(prefix)//" ==> The internal Clock is invalid!", &
+                call NUOPC_ComplianceLogWrite(trim(prefix)//" ==> The internal Clock is invalid!", &
                     ESMF_LOGMSG_WARNING, rc=rc)
                 if (ESMF_LogFoundError(rc, &
                     line=__LINE__, &
@@ -1901,7 +1979,7 @@ contains
             clockValid = .false.
 
         if (.not.clockValid) then
-            call ESMF_LogWrite(trim(prefix)//" ==> No Clock to compare internal Clock!", &
+            call NUOPC_ComplianceLogWrite(trim(prefix)//" ==> No Clock to compare internal Clock!", &
                 ESMF_LOGMSG_WARNING, rc=rc)
             if (ESMF_LogFoundError(rc, &
                 line=__LINE__, &
@@ -1931,7 +2009,7 @@ contains
         clockMatch = .true. ! initialize
 
         if (startTimeInt /= startTime) then
-            call ESMF_LogWrite(trim(prefix)//" ==> startTime of internal Clock does not match Clock!", &
+            call NUOPC_ComplianceLogWrite(trim(prefix)//" ==> startTime of internal Clock does not match Clock!", &
                 ESMF_LOGMSG_WARNING, rc=rc)
             if (ESMF_LogFoundError(rc, &
                 line=__LINE__, &
@@ -1942,7 +2020,7 @@ contains
 
         if (mustMatchCurr) then
             if (currTimeInt /= currTime) then
-                call ESMF_LogWrite(trim(prefix)//" ==> currTime of internal Clock does not match Clock!", &
+                call NUOPC_ComplianceLogWrite(trim(prefix)//" ==> currTime of internal Clock does not match Clock!", &
                     ESMF_LOGMSG_WARNING, rc=rc)
                 if (ESMF_LogFoundError(rc, &
                     line=__LINE__, &
@@ -1953,8 +2031,8 @@ contains
         endif
 
         if (clockMatch) then
-            call ESMF_LogWrite(trim(prefix)//" The internal Clock matches incoming Clock.", &
-                ESMF_LOGMSG_INFO, rc=rc)
+            call NUOPC_ComplianceLogWrite(trim(prefix)//" The internal Clock matches incoming Clock.", &
+                rc=rc)
             if (ESMF_LogFoundError(rc, &
                 line=__LINE__, &
                 file=FILENAME)) &
@@ -1963,15 +2041,15 @@ contains
 
         if (mustReachStop) then
             if (currTimeInt /= stopTimeInt) then
-                call ESMF_LogWrite(trim(prefix)//" ==> The internal Clock has not run to its stopTime!", &
+                call NUOPC_ComplianceLogWrite(trim(prefix)//" ==> The internal Clock has not run to its stopTime!", &
                     ESMF_LOGMSG_WARNING, rc=rc)
                 if (ESMF_LogFoundError(rc, &
                     line=__LINE__, &
                     file=FILENAME)) &
                     return  ! bail out
             else
-                call ESMF_LogWrite(trim(prefix)//" The internal Clock has run to its stopTime.", &
-                    ESMF_LOGMSG_INFO, rc=rc)
+                call NUOPC_ComplianceLogWrite(trim(prefix)//" The internal Clock has run to its stopTime.", &
+                    rc=rc)
                 if (ESMF_LogFoundError(rc, &
                     line=__LINE__, &
                     file=FILENAME)) &
@@ -1981,24 +2059,17 @@ contains
 
     end subroutine
 
-    recursive subroutine NUOPC_CheckComponentStatistics(prefix, comp, outputJSON, rc)
+    recursive subroutine NUOPC_CheckComponentStatistics(prefix, comp, rc)
         character(*), intent(in)              :: prefix
         type(ESMF_GridComp)                   :: comp
-        logical,      intent(in),  optional   :: outputJSON
         integer,      intent(out), optional   :: rc
 
         integer                 :: fobjCount, objCount
         integer                 :: virtMemPet, physMemPet
         character(ESMF_MAXSTR)  :: output, virtMemPetStr, physMemPetStr, compName
-        logical                 :: doJSON
         character(len=256)      :: jsonString
 
         if (present(rc)) rc = ESMF_SUCCESS
-        if (present(outputJSON)) then
-            doJSON = outputJSON
-        else
-            doJSON = .false.
-        endif
 
         ! memory statistics for this PET
         call ESMF_VMGetMemInfo(virtMemPet, physMemPet, rc=rc)
@@ -2008,18 +2079,18 @@ contains
             return  ! bail out
 
         write (virtMemPetStr, *) virtMemPet
-        call ESMF_LogWrite(trim(prefix)//"ESMF Stats: "//&
+        call NUOPC_ComplianceLogWrite(trim(prefix)//"ESMF Stats: "//&
             "the virtual memory used by this PET (in KB): "// &
-            trim(adjustl(virtMemPetStr)), ESMF_LOGMSG_INFO, rc=rc)
+            trim(adjustl(virtMemPetStr)), rc=rc)
         if (ESMF_LogFoundError(rc, &
             line=__LINE__, &
             file=FILENAME)) &
             return  ! bail out
 
         write (physMemPetStr, *) physMemPet
-        call ESMF_LogWrite(trim(prefix)//"ESMF Stats: "//&
+        call NUOPC_ComplianceLogWrite(trim(prefix)//"ESMF Stats: "//&
             "the physical memory used by this PET (in KB): "// &
-            trim(adjustl(physMemPetStr)), ESMF_LOGMSG_INFO, rc=rc)
+            trim(adjustl(physMemPetStr)), rc=rc)
         if (ESMF_LogFoundError(rc, &
             line=__LINE__, &
             file=FILENAME)) &
@@ -2033,24 +2104,24 @@ contains
             return  ! bail out
 
         write (output, *) fobjCount
-        call ESMF_LogWrite(trim(prefix)//"ESMF Stats: "//&
+        call NUOPC_ComplianceLogWrite(trim(prefix)//"ESMF Stats: "//&
             "ESMF Fortran objects referenced by the ESMF garbage collection: "// &
-            trim(adjustl(output)), ESMF_LOGMSG_INFO, rc=rc)
+            trim(adjustl(output)), rc=rc)
         if (ESMF_LogFoundError(rc, &
             line=__LINE__, &
             file=FILENAME)) &
             return  ! bail out
 
         write (output, *) objCount
-        call ESMF_LogWrite(trim(prefix)//"ESMF Stats: "//&
+        call NUOPC_ComplianceLogWrite(trim(prefix)//"ESMF Stats: "//&
             "ESMF objects (F & C++) referenced by the ESMF garbage collection: "// &
-            trim(adjustl(output)), ESMF_LOGMSG_INFO, rc=rc)
+            trim(adjustl(output)), rc=rc)
         if (ESMF_LogFoundError(rc, &
             line=__LINE__, &
             file=FILENAME)) &
             return  ! bail out
 
-        if (doJSON) then
+        if (outputJSON .and. includeVmStats) then
 
             call ESMF_GridCompGet(comp, name=compName, rc=rc)
             if (ESMF_LogFoundError(rc, &
@@ -2267,25 +2338,57 @@ contains
 
     end subroutine
 
+    recursive subroutine NUOPC_RegionEnter(name, rc)
+        character(len=*), intent(in) :: name
+        integer, intent(out), optional :: rc
+
+        ! locals
+        character(len=128) :: jsonString
+
+        rc = ESMF_SUCCESS
+
+        if (outputJSON) then
+            write(jsonString,*) '{"ctrl":{&
+                &"event":"region_enter",&
+                &"name":"'//trim(name)//'"}}'
+            call JSON_LogWrite(jsonString, rc=rc)
+            if (ESMF_LogFoundError(rc, &
+              line=__LINE__, &
+              file=FILENAME)) &
+              return  ! bail out
+        endif
+
+    end subroutine
+
+    recursive subroutine NUOPC_RegionExit(name, rc)
+        character(len=*), intent(in) :: name
+        integer, intent(out), optional :: rc
+
+        ! locals
+        character(len=128) :: jsonString
+
+        rc = ESMF_SUCCESS
+
+        if (outputJSON) then
+            write(jsonString,*) '{"ctrl":{&
+                &"event":"region_exit",&
+                &"name":"'//trim(name)//'"}}'
+            call JSON_LogWrite(jsonString, rc=rc)
+            if (ESMF_LogFoundError(rc, &
+              line=__LINE__, &
+              file=FILENAME)) &
+              return  ! bail out
+        endif
+
+    end subroutine
+
+
     recursive subroutine JSON_LogWrite(msg, rc)
         character(len=*), intent(in) ::   msg
         integer, optional, intent(out) :: rc
 
-        ! locals
-        real(ESMF_KIND_R8) :: sysTime
-        character(64)      :: sysTimeStr
-
         rc = ESMF_SUCCESS
 
-        !call ESMF_VMWtime(sysTime, rc=rc)
-        !if (ESMF_LogFoundError(rc, &
-        !  line=__LINE__, &
-        !  file=FILENAME)) &
-        !  return  ! bail out
-
-        !write(sysTimeStr,"(F32.9)") sysTime
-
-        !call ESMF_LogWrite(trim(adjustl(sysTimeStr))//" "//trim(msg), ESMF_LOGMSG_JSON, rc=rc)
         call ESMF_LogWrite(trim(msg), ESMF_LOGMSG_JSON, rc=rc)
         if (ESMF_LogFoundError(rc, &
           line=__LINE__, &

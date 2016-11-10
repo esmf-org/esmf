@@ -83,20 +83,24 @@ module ESMF_UtilCubedSphereMod
   real :: deglon_start = -30., deglon_stop = 30., &  ! boundaries of latlon patch
           deglat_start = -30., deglat_stop = 30.
 
-  public :: ESMF_UtilCreateCSCoords
+  real, allocatable, save       :: global_tile1(:,:,:)
 
+  public :: ESMF_UtilCreateCSCoords
+  public :: ESMF_UtilCreateCSCoordsPar
 contains
 
 ! routine to create the global edges and centers of the cubed-sphere grid
 ! but not the ESMF grid
-subroutine ESMF_UtilCreateCSCoords(npts, LonEdge,LatEdge, start, count, LonCenter, LatCenter)
+subroutine ESMF_UtilCreateCSCoords(npts, LonEdge,LatEdge, start, count, tile, LonCenter, LatCenter)
 
 ! !ARGUMENTS:
     integer,           intent(IN)     :: npts
+!    integer,           intent(in)     :: petNo
     real(ESMF_KIND_R8), intent(inout) :: LonEdge(:,:)
     real(ESMF_KIND_R8), intent(inout) :: LatEdge(:,:)
     integer, optional, intent(in)     :: start(:)
     integer, optional, intent(in)     :: count(:)
+    integer, optional, intent(in)     :: tile
     real(ESMF_KIND_R8), optional, intent(inout) :: LonCenter(:,:)
     real(ESMF_KIND_R8), optional, intent(inout) :: LatCenter(:,:)
 
@@ -107,8 +111,6 @@ subroutine ESMF_UtilCreateCSCoords(npts, LonEdge,LatEdge, start, count, LonCente
 
 ! Local variables
 !-----------------
-  real,  parameter              :: pi = 3.1415926
-  real,  parameter              :: radius = 6371.0
   integer, parameter            :: grid_type = 0
   integer                       :: ntiles=6
   integer                       :: ndims=2
@@ -116,20 +118,14 @@ subroutine ESMF_UtilCreateCSCoords(npts, LonEdge,LatEdge, start, count, LonCente
   integer                       :: IG, JG
   real                          :: alocs(2)
   real, allocatable             :: grid_global(:,:,:,:)
-!  boolean                       :: globalEdgelocal
+  real, allocatable             :: tile1(:,:,:)
+  integer                       :: rc
+  real, allocatable             :: tile_local(:,:,:)
 
-#if 0
-  globalEdgelocal = .FALSE.
-  if (present(globalEdge)) then
-    globalEdgelocal = globalEdge
-  endif  
-#endif
-
-  allocate( grid_global(npts+1,npts+1,ndims,ntiles) )
-  call gnomonic_grids(grid_type, npts, grid_global(:,:,1,1), grid_global(:,:,2,1))
-
-! mirror_grid assumes that the tile=1 is centered on equator and greenwich meridian Lon[-pi,pi]
-  call mirror_grid(grid_global, 0, npts+1, npts+1, 2, 6)
+    allocate( grid_global(npts+1,npts+1,ndims,ntiles) )
+    call gnomonic_grids(grid_type, npts, grid_global(:,:,1,1), grid_global(:,:,2,1))
+    ! mirror_grid assumes that the tile=1 is centered on equator and greenwich meridian Lon[-pi,pi]
+    call mirror_grid(grid_global, 0, npts+1, npts+1, 2, 6)
 
   do n=1,ntiles
      do j=1,npts+1
@@ -150,6 +146,51 @@ subroutine ESMF_UtilCreateCSCoords(npts, LonEdge,LatEdge, start, count, LonCente
 !---------------------------------
 ! Clean Up Corners
 !---------------------------------
+#if 0
+  ! check if they are identical
+  if (PetNo == 0) then
+  do n=1,npts+1
+    do j=1,2
+    if (grid_global(1,n,j,2) /= grid_global(npts+1,n,j,1)) then
+       print *, "mismatch tile 1&2", n, grid_global(1,n,j,2),grid_global(npts+1,n,j,1)
+    endif
+    if (grid_global(1,n,j,3) /= grid_global(npts+2-n,npts+1,j,1)) then
+       print *, "mismatch tile 1&3", n, grid_global(1,n,j,3),grid_global(npts+2-n,npts+1,j,1)
+    endif
+    if (grid_global(n,npts+1,j,5) /= grid_global(1,npts+2-n,j,1)) then
+       print *, "mismatch tile 1&5", n, grid_global(n,npts+1,j,5),grid_global(1,npts+2-n,j,1)
+    endif
+    if (grid_global(n,npts+1,j,6) /= grid_global(n,1,j,1)) then
+       print *, "mismatch tile 1&6", n, grid_global(n,npts+1,j,6),grid_global(n,1,j,1)
+    endif
+    if (grid_global(n,1,j,3) /= grid_global(n,npts+1,j,2)) then
+       print *, "mismatch tile 2&3", n, grid_global(n,1,j,3),grid_global(n,npts+1,j,2)
+    endif
+    if (grid_global(n,1,j,4) /= grid_global(npts+1,npts+2-n,j,2)) then
+       print *, "mismatch tile 2&4", n, grid_global(n,1,j,4),grid_global(npts+1,npts+2-n,j,2)
+    endif
+    if (grid_global(npts+1,n,j,6) /= grid_global(npts+2-n,1,j,2)) then
+       print *, "mismatch tile 2&6", n, grid_global(npts+1,n,j,6),grid_global(npts+2-n,1,j,2)
+    endif
+    if (grid_global(1,n,j,4) /= grid_global(npts+1,n,j,3)) then
+       print *, "mismatch tile 3&4", n, grid_global(i,n,j,4),grid_global(npts+1,n,j,3)
+    endif
+    if (grid_global(1,n,j,5) /= grid_global(npts+2-n,npts+1,j,3)) then
+       print *, "mismatch tile 5&3", n, grid_global(1,n,j,5),grid_global(npts+2-n,npts+1,j,3)
+    endif
+    if (grid_global(n,1,j,5) /= grid_global(n,npts+1,j,4)) then
+       print *, "mismatch tile 5&4", n, grid_global(n,1,j,5),grid_global(n,npts+1,j,4)
+    endif
+    if (grid_global(n,1,j,6) /= grid_global(npts+1,npts+2-n,j,4)) then
+       print *, "mismatch tile 6&4", n, grid_global(n,1,j,6),grid_global(npts+1,npts+2-n,j,4)
+    endif
+    if (grid_global(1,n,j,6) /= grid_global(npts+1,n,j,5)) then
+       print *, "mismatch tile 1&2", n, grid_global(1,n,j,6),grid_global(npts+1,n,j,5)
+    endif
+  enddo
+  enddo
+  endif
+#endif
   grid_global(  1,1:npts+1,:,2)=grid_global(npts+1,1:npts+1,:,1)
   grid_global(  1,1:npts+1,:,3)=grid_global(npts+1:1:-1,npts+1,:,1)
   grid_global(1:npts+1,npts+1,:,5)=grid_global(1,npts+1:1:-1,:,1)
@@ -159,21 +200,31 @@ subroutine ESMF_UtilCreateCSCoords(npts, LonEdge,LatEdge, start, count, LonCente
   grid_global(npts+1,1:npts+1,:,6)=grid_global(npts+1:1:-1,1,:,2)
   grid_global(  1,1:npts+1,:,4)=grid_global(npts+1,1:npts+1,:,3)
   grid_global(  1,1:npts+1,:,5)=grid_global(npts+1:1:-1,npts+1,:,3)
-  grid_global(npts+1,1:npts+1,:,3)=grid_global(1,1:npts+1,:,4)
+  !!!grid_global(npts+1,1:npts+1,:,3)=grid_global(1,1:npts+1,:,4)
   grid_global(1:npts+1,  1,:,5)=grid_global(1:npts+1,npts+1,:,4)
   grid_global(1:npts+1,  1,:,6)=grid_global(npts+1,npts+1:1:-1,:,4)
   grid_global(  1,1:npts+1,:,6)=grid_global(npts+1,1:npts+1,:,5)
 
+  do n=1,ntiles
+     do j=1,npts+1
+        do i=1,npts+1
+           jg=(n-1)*(npts+1)+j
+           LonEdge(i,jg) = grid_global(i,j,1,n)
+           LatEdge(i,jg) = grid_global(i,j,2,n)
+        enddo
+     enddo
+  enddo
+
   if (present(LonCenter) .and. present(LatCenter)) then
-    if (present(start) .and. present(count)) then
-        n = start(2)/npts+1
-        do j=start(2)-(n-1)*npts, count(2)
-           do i=start(1),count(1)
+    if (present(start) .and. present(count) .and. present(tile)) then
+        n=tile
+        do j=start(2), start(2)+count(2)-1
+           do i=start(1),start(1)+count(1)-1
               call cell_center2(grid_global(i,j,  1:2,n), grid_global(i+1,j,  1:2,n),   &
                                 grid_global(i,j+1,1:2,n), grid_global(i+1,j+1,1:2,n),   &
                                 alocs)
-              LonCenter(i,j) = alocs(1)
-              LatCenter(i,j) = alocs(2)
+              LonCenter(i-start(1)+1,j-start(2)+1) = alocs(1)
+              LatCenter(i-start(1)+1,j-start(2)+1) = alocs(2)
            enddo
         enddo
      else
@@ -191,21 +242,85 @@ subroutine ESMF_UtilCreateCSCoords(npts, LonEdge,LatEdge, start, count, LonCente
         enddo
      end if
   end if
-
-  do n=1,ntiles
-     do j=1,npts+1
-        do i=1,npts+1
-           jg=(n-1)*(npts+1)+j
-           LonEdge(i,jg) = grid_global(i,j,1,n)
-           LatEdge(i,jg) = grid_global(i,j,2,n)
-        enddo
-     enddo
-   enddo
-
   deallocate( grid_global )
+
   return
 
-  end subroutine ESMF_UtilCreateCSCoords
+end subroutine ESMF_UtilCreateCSCoords
+
+
+subroutine ESMF_UtilCreateCSCoordsPar(npts, LonEdge,LatEdge, start, count, tile, LonCenter, LatCenter)
+
+! !ARGUMENTS:
+    integer,           intent(IN)     :: npts
+!    integer,           intent(in)     :: petNo
+    real(ESMF_KIND_R8), intent(inout) :: LonEdge(:,:)
+    real(ESMF_KIND_R8), intent(inout) :: LatEdge(:,:)
+    integer, optional, intent(in)     :: start(:)
+    integer, optional, intent(in)     :: count(:)
+    integer, optional, intent(in)     :: tile
+    real(ESMF_KIND_R8), optional, intent(inout) :: LonCenter(:,:)
+    real(ESMF_KIND_R8), optional, intent(inout) :: LatCenter(:,:)
+
+ integer                      :: STATUS
+
+! Local variables
+!-----------------
+  integer, parameter            :: grid_type = 0
+  integer                       :: ntiles=6
+  integer                       :: ndims=2
+  integer                       :: I, J, N
+  integer                       :: IG, JG
+  real                          :: alocs(2)
+  real, allocatable             :: tile1(:,:,:)
+  integer                       :: rc
+  real, allocatable             :: tile_local(:,:,:)
+
+    if (.not. allocated(global_tile1)) then
+       allocate(global_tile1(npts+1,npts+1,ndims))
+       call gnomonic_grids(grid_type, npts, global_tile1(:,:,1), global_tile1(:,:,2))
+    endif
+    allocate(tile_local(count(1)+1,count(2)+1,ndims) )
+    ! mirror_grid assumes that the tile=1 is centered on equator and greenwich meridian Lon[-pi,pi]
+    call mirror_grid_local(tile_local, global_tile1, start, count, 2, tile)
+
+!---------------------------------
+! Shift the corner away from Japan for global tile #1
+!---------------------------------
+! This will result in the corner close to east coast of China
+
+    ! fix the values in the local tile
+    do j=1,count(2)+1
+       do i=1,count(1)+1
+           tile_local(i,j,1) = tile_local(i,j,1) - pi/18.
+           if ( tile_local(i,j,1) < 0. )              &
+                tile_local(i,j,1) = tile_local(i,j,1) + 2.*pi
+           if (ABS(tile_local(i,j,1)) < 1.e-10) tile_local(i,j,1) = 0.0
+           if (ABS(tile_local(i,j,2)) < 1.e-10) tile_local(i,j,2) = 0.0
+       enddo
+    enddo
+
+    LonEdge=tile_local(:,:,1)
+    LatEdge=tile_local(:,:,2)
+
+    if (present(LonCenter) .and. present(LatCenter)) then
+        do j=1, count(2)
+           do i=1,count(1)
+              call cell_center2(tile_local(i,j,  1:2), tile_local(i+1,j,  1:2),   &
+                                tile_local(i,j+1,1:2), tile_local(i+1,j+1,1:2),   &
+                                alocs)
+              LonCenter(i,j) = alocs(1)
+              LatCenter(i,j) = alocs(2)
+           enddo
+        enddo
+     end if
+
+     deallocate(tile_local)
+
+
+  return
+
+  end subroutine ESMF_UtilCreateCSCoordsPar
 
 
   !#################################################################################
@@ -515,6 +630,149 @@ subroutine ESMF_UtilCreateCSCoords(npts, LonEdge,LatEdge, start, count, LonCente
           enddo
 
   end subroutine mirror_grid
+
+
+  subroutine mirror_grid_local(local_tile,global_tile1,start,count,ndims,tileno)
+         real   , intent(INOUT) :: local_tile(:,:,:)
+         real   , intent(INOUT)    :: global_tile1(:,:,:)      
+         integer, intent(IN)    :: start(2), count(2)
+         integer, intent(IN)    :: ndims, tileno
+
+         integer :: i,j,n,n1,n2,nreg, npx, npy
+         integer :: ii, jj
+         real :: x1,y1,z1, x2,y2,z2, ang
+!
+!    Mirror Across the 0-longitude
+!
+      
+         npx = size(global_tile1,1)
+         npy = size(global_tile1,2)
+         do j=1,ceiling(npy/2.)
+            do i=1,ceiling(npx/2.)
+
+            x1 = 0.25 * (ABS(global_tile1(i        ,j        ,1)) + &
+                         ABS(global_tile1(npx-(i-1),j        ,1)) + &
+                         ABS(global_tile1(i        ,npy-(j-1),1)) + &
+                         ABS(global_tile1(npx-(i-1),npy-(j-1),1)))
+            global_tile1(i        ,j        ,1) = SIGN(x1,global_tile1(i        ,j        ,1))
+            global_tile1(npx-(i-1),j        ,1) = SIGN(x1,global_tile1(npx-(i-1),j        ,1))
+            global_tile1(i        ,npy-(j-1),1) = SIGN(x1,global_tile1(i        ,npy-(j-1),1))
+            global_tile1(npx-(i-1),npy-(j-1),1) = SIGN(x1,global_tile1(npx-(i-1),npy-(j-1),1))
+
+            y1 = 0.25 * (ABS(global_tile1(i        ,j        ,2)) + &   
+                         ABS(global_tile1(npx-(i-1),j        ,2)) + &
+                         ABS(global_tile1(i        ,npy-(j-1),2)) + &
+                         ABS(global_tile1(npx-(i-1),npy-(j-1),2)))
+            global_tile1(i        ,j        ,2) = SIGN(y1,global_tile1(i        ,j        ,2))
+            global_tile1(npx-(i-1),j        ,2) = SIGN(y1,global_tile1(npx-(i-1),j        ,2))
+            global_tile1(i        ,npy-(j-1),2) = SIGN(y1,global_tile1(i        ,npy-(j-1),2))
+            global_tile1(npx-(i-1),npy-(j-1),2) = SIGN(y1,global_tile1(npx-(i-1),npy-(j-1),2))
+             
+           ! force dateline/greenwich-meridion consitency
+            if (mod(npx,2) /= 0) then
+              if ( (i==1+(npx-1)/2.0) ) then
+                 global_tile1(i,j        ,1) = 0.0
+                 global_tile1(i,npy-(j-1),1) = 0.0
+              endif
+            endif
+
+            enddo
+         enddo
+
+         if (tileno == 1) then
+            local_tile=global_tile1(start(1):start(1)+count(1), start(2):start(2)+count(2),:)
+         else
+           do j=start(2),start(2)+count(2)
+             do i=start(1),start(1)+count(1)
+
+               x1 = global_tile1(i,j,1)
+               y1 = global_tile1(i,j,2)
+               z1 = radius
+
+               if (tileno == 2) then
+                  ang = -90.
+                  call rot_3d( 3, x1, y1, z1, ang, x2, y2, z2, 1, 1)  ! rotate about the z-axis
+               elseif (tileno == 3) then
+                  ang = -90.
+                  call rot_3d( 3, x1, y1, z1, ang, x2, y2, z2, 1, 1)  ! rotate about the z-axis
+                  ang = 90.
+                  call rot_3d( 1, x2, y2, z2, ang, x1, y1, z1, 1, 1)  ! rotate about the x-axis
+                  x2=x1
+                  y2=y1
+                  z2=z1
+
+           ! force North Pole and dateline/greenwich-meridion consitency
+                  if (mod(npx,2) /= 0) then
+                     if ( (i==1+(npx-1)/2.0) .and. (i==j) ) then
+                        x2 = 0.0
+                        y2 = pi/2.0
+                     endif
+                     if ( (j==1+(npy-1)/2.0) .and. (i < 1+(npx-1)/2.0) ) then
+                        x2 = 0.0
+                     endif
+                     if ( (j==1+(npy-1)/2.0) .and. (i > 1+(npx-1)/2.0) ) then
+                        x2 = pi
+                     endif
+                  endif
+
+               elseif (tileno == 4) then
+                  ang = -180.
+                  call rot_3d( 3, x1, y1, z1, ang, x2, y2, z2, 1, 1)  ! rotate about the z-axis
+                  ang = 90.
+                  call rot_3d( 1, x2, y2, z2, ang, x1, y1, z1, 1, 1)  ! rotate about the x-axis
+                  x2=x1
+                  y2=y1
+                  z2=z1
+
+               ! force dateline/greenwich-meridion consitency
+                  if (mod(npx,2) /= 0) then
+                    if ( (j==1+(npy-1)/2.0) ) then
+                       x2 = pi
+                    endif
+                  endif
+
+               elseif (tileno == 5) then
+                  ang = 90.
+                  call rot_3d( 3, x1, y1, z1, ang, x2, y2, z2, 1, 1)  ! rotate about the z-axis
+                  ang = 90.
+                  call rot_3d( 2, x2, y2, z2, ang, x1, y1, z1, 1, 1)  ! rotate about the y-axis
+                  x2=x1
+                  y2=y1
+                  z2=z1
+               elseif (tileno == 6) then
+                  ang = 90.
+                  call rot_3d( 2, x1, y1, z1, ang, x2, y2, z2, 1, 1)  ! rotate about the y-axis
+                  ang = 0.
+                  call rot_3d( 3, x2, y2, z2, ang, x1, y1, z1, 1, 1)  ! rotate about the z-axis
+                  x2=x1
+                  y2=y1
+                  z2=z1
+
+           ! force South Pole and dateline/greenwich-meridion consitency
+                  if (mod(npx,2) /= 0) then
+                     if ( (i==1+(npx-1)/2.0) .and. (i==j) ) then
+                        x2 = 0.0
+                        y2 = -pi/2.0
+                     endif
+                     if ( (i==1+(npx-1)/2.0) .and. (j > 1+(npy-1)/2.0) ) then
+                        x2 = 0.0
+                     endif
+                     if ( (i==1+(npx-1)/2.0) .and. (j < 1+(npy-1)/2.0) ) then
+                        x2 = pi
+                     endif
+                  endif
+
+               endif
+
+               ii=i-start(1)+1
+               jj=j-start(2)+1
+               local_tile(ii,jj,1) = x2
+               local_tile(ii,jj,2) = y2
+
+              enddo
+            enddo
+       endif
+  end subroutine mirror_grid_local
 
 
 

@@ -809,10 +809,16 @@ int Grid::addCoordArrayArb(
     //// fill in distgridToArrayMap for use in Array::create
     //// distgridToArrayMap - computed by inverting how coords dims map to distgrid
     for (int i=0; i<coordDimCount[coord]; i++) {
-      if (coordDimMap[coord][i] == ESMC_GRID_ARBDIM) 
-        distgridToArrayMapIntIntArray[coordMapDim[coord][i]]=arbDim; // convert to 1-based
-      else {
-        distgridToArrayMapIntIntArray[coordMapDim[coord][i]]=i+1; // convert to 1-based
+      if (distgrid->getDELayout()->getLocalDeCount()){
+        // only do this for real when there are localDEs
+        if (coordDimMap[coord][i] == ESMC_GRID_ARBDIM) 
+          distgridToArrayMapIntIntArray[coordMapDim[coord][i]]=arbDim; // convert to 1-based
+        else {
+          distgridToArrayMapIntIntArray[coordMapDim[coord][i]]=i+1; // convert to 1-based
+        }
+      }else{
+        // otherwise provide default sequence 1,2,3,...coordDimCount[coord] to satisfy Array
+        distgridToArrayMapIntIntArray[i]=i+1; // convert to 1-based
       }
     }
 
@@ -3164,7 +3170,20 @@ int Grid::set(
     proto->nameLen=nameLenArg;
     proto->name= new char[nameLenArg];
     memcpy(proto->name, nameArg, nameLenArg * sizeof(char));
-  } 
+
+    //// Convert F90 name string to C++ string 
+    char *name = ESMC_F90toCstring(nameArg, nameLenArg);
+    if (!name && nameLenArg){
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
+                                    "- Not a valid string", ESMC_CONTEXT, &rc);
+      return rc;
+    }
+
+    // Set in base (so it can be pulled out when grid is still empty)
+    localrc = ESMC_BaseSetName(name, "Grid");
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc))
+      return rc;
+  }
 
   //  if passed in, set typekind
   if (typekindArg != ESMC_NULL_POINTER) {
@@ -4465,7 +4484,10 @@ void Grid::destruct(bool followCreator, bool noGarbage){
 //EOPI
 //-----------------------------------------------------------------------------
  if (ESMC_BaseGetStatus()==ESMF_STATUS_READY){
-
+  if (getStatus() < ESMC_GRIDSTATUS_SHAPE_READY){
+   // If present delete ProtoGrid
+   if (proto != ESMC_NULL_POINTER) delete proto;    
+  }else{
    if (followCreator){
 
    // Delete external class contents of Grid before deleting Grid
@@ -4591,7 +4613,7 @@ void Grid::destruct(bool followCreator, bool noGarbage){
   if (localArbIndexCount) {
     _free2D<int>(&localArbIndex);
   }
-
+ }
  }
 }
 
@@ -5142,7 +5164,7 @@ int Grid::getStaggerDistgrid(
                                                          staggerEdgeLWidthIntInt, 
                                                          staggerEdgeUWidthIntInt, 
                                                          NULL,
-                                                         connListWPoles, NULL,
+                                                         connListWPoles, NULL, true,
                                                          &localrc);
         if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
                                           &rc)) return rc;
@@ -5259,7 +5281,7 @@ int Grid::getStaggerDistgrid(
                                                            staggerEdgeLWidthIntInt, 
                                                            staggerEdgeUWidthIntInt, 
                                                            NULL,
-                                                           emptyConnListII, NULL, 
+                                                           emptyConnListII, NULL, true,
                                                            &localrc);
           if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
                                             &rc)) return rc;
@@ -5272,7 +5294,7 @@ int Grid::getStaggerDistgrid(
                                                            staggerEdgeLWidthIntInt, 
                                                            staggerEdgeUWidthIntInt, 
                                                            NULL,
-                                                           NULL, NULL, 
+                                                           NULL, NULL, true,
                                                            &localrc);
           if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
                                             &rc)) return rc;
@@ -5362,50 +5384,44 @@ int Grid::serialize(
   if (cp) memcpy(bufptr+loff,((t **)varptr)+s1,(s1*s2*sizeof(t))); \
   loff += (s1*s2*sizeof(t));  
 
+  // Allocate depending on status
+  if (status == ESMC_GRIDSTATUS_SHAPE_READY) {
+    
+    // Create list of which Arrays exist
+    coordExists=_allocate2D<bool>(staggerLocCount,dimCount);
+    for (int s=0; s<staggerLocCount; s++) {
+      for (int c=0; c<dimCount; c++) {
+        if (coordArrayList[s][c] == ESMC_NULL_POINTER) {
+          coordExists[s][c]=false;
+        } else {
+            coordExists[s][c]=true;
+        }
+      }
+    }
+    
 
-  // Check status
-  if (status < ESMC_GRIDSTATUS_SHAPE_READY) {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
-      "- Grid not fully created", ESMC_CONTEXT, &rc);
-    return rc;
-  }
-
-
-  // Create list of which Arrays exist
-  coordExists=_allocate2D<bool>(staggerLocCount,dimCount);
-  for (int s=0; s<staggerLocCount; s++) {
-    for (int c=0; c<dimCount; c++) {
-      if (coordArrayList[s][c] == ESMC_NULL_POINTER) {
-	coordExists[s][c]=false;
+    // Create list of which item Arrays exist
+    itemExists=_allocate2D<bool>(staggerLocCount,ESMC_GRIDITEM_COUNT);
+    for (int s=0; s<staggerLocCount; s++) {
+      for (int i=0; i<ESMC_GRIDITEM_COUNT; i++) {
+        if (itemArrayList[s][i] == ESMC_NULL_POINTER) {
+          itemExists[s][i]=false;
+        } else {
+          itemExists[s][i]=true;
+        }
+      }
+    }
+    
+    // Create list of which staggerdistgrids exist
+    staggerDistgridExists= new bool[staggerLocCount];
+    for (int s=0; s<staggerLocCount; s++) {
+      if (staggerDistgridList[s] == ESMC_NULL_POINTER) {
+        staggerDistgridExists[s]=false;
       } else {
-	coordExists[s][c]=true;
+        staggerDistgridExists[s]=true;
       }
     }
   }
-
-
-  // Create list of which item Arrays exist
-  itemExists=_allocate2D<bool>(staggerLocCount,ESMC_GRIDITEM_COUNT);
-  for (int s=0; s<staggerLocCount; s++) {
-    for (int i=0; i<ESMC_GRIDITEM_COUNT; i++) {
-      if (itemArrayList[s][i] == ESMC_NULL_POINTER) {
-	itemExists[s][i]=false;
-      } else {
-	itemExists[s][i]=true;
-      }
-    }
-  }
-
-  // Create list of which staggerdistgrids exist
-  staggerDistgridExists= new bool[staggerLocCount];
-  for (int s=0; s<staggerLocCount; s++) {
-    if (staggerDistgridList[s] == ESMC_NULL_POINTER) {
-      staggerDistgridExists[s]=false;
-    } else {
-      staggerDistgridExists[s]=true;
-    }
-  }
-
 
 
   // Run twice:
@@ -5423,145 +5439,167 @@ int Grid::serialize(
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       &rc)) return rc;
     
-    // Since we're not allowing the serialization of 
-    // non-ready Grids don't worry about serializing
-    // the protogrid
+    // Serialize status
+    SERIALIZE_VAR(cp, buffer,loffset,status,ESMC_GridStatus_Flag);    
 
-    // Don't do status since we're changing it anyway  
-    SERIALIZE_VAR(cp, buffer,loffset,coordSys,ESMC_CoordSys_Flag);
-
-    SERIALIZE_VAR(cp, buffer,loffset,forceConn,bool);
-
-    SERIALIZE_VAR(cp, buffer,loffset, decompType, ESMC_GridDecompType);
-
-    SERIALIZE_VAR(cp, buffer,loffset,typekind,ESMC_TypeKind_Flag);
-
-    SERIALIZE_VAR(cp, buffer,loffset,indexflag,ESMC_IndexFlag);
-    
-    // Don't serialize these because after deserailizing distgrid and delayout are local
-    //  destroyDistgrid 
-    //  destroyDELayout
-
-    SERIALIZE_VAR(cp, buffer,loffset,distDimCount,int);    
-
-    SERIALIZE_VAR1D(cp, buffer,loffset,distgridToGridMap,distDimCount,int);
-
-    SERIALIZE_VAR(cp, buffer,loffset,undistDimCount,int);
-
-    SERIALIZE_VAR1D(cp, buffer,loffset,undistLBound,undistDimCount,int);
-    SERIALIZE_VAR1D(cp, buffer,loffset,undistUBound,undistDimCount,int);
-    
-    SERIALIZE_VAR(cp, buffer,loffset,dimCount,int);    
-
-    SERIALIZE_VAR1D(cp, buffer,loffset,minIndex, dimCount,int);
-    SERIALIZE_VAR1D(cp, buffer,loffset,maxIndex, dimCount,int);
-
-    SERIALIZE_VAR1D(cp, buffer,loffset,connL, dimCount,ESMC_GridConn);
-    SERIALIZE_VAR1D(cp, buffer,loffset,connU, dimCount,ESMC_GridConn);
-
-    SERIALIZE_VAR1D(cp, buffer,loffset,gridEdgeLWidth,dimCount,int);
-    SERIALIZE_VAR1D(cp, buffer,loffset,gridEdgeUWidth,dimCount,int);
-    SERIALIZE_VAR1D(cp, buffer,loffset,gridAlign,dimCount,int);
-
-    SERIALIZE_VAR1D(cp, buffer,loffset,coordDimCount,dimCount,int);
-
-    SERIALIZE_VAR2D(cp, buffer,loffset,coordDimMap,dimCount,dimCount,int);
-
-    SERIALIZE_VAR(cp, buffer,loffset,localArbIndexCount,int);
-    SERIALIZE_VAR2D(cp, buffer,loffset,localArbIndex,localArbIndexCount,distDimCount,int);
-
-    SERIALIZE_VAR(cp, buffer,loffset,staggerLocCount,int);
-
-    SERIALIZE_VAR2D(cp, buffer,loffset,staggerAlignList,staggerLocCount,dimCount,int);
-    SERIALIZE_VAR2D(cp, buffer,loffset,staggerEdgeLWidthList,staggerLocCount,dimCount,int);
-    SERIALIZE_VAR2D(cp, buffer,loffset,staggerEdgeUWidthList,staggerLocCount,dimCount,int);
-    SERIALIZE_VAR2D(cp, buffer,loffset,staggerMemLBoundList,staggerLocCount,dimCount,int);
-
-    // Don't serialize didIAllocList since this proxy grid won't
-    // have Array's allocated 
-
-    SERIALIZE_VAR1D(cp, buffer,loffset,gridIsDist,dimCount,bool);
-    SERIALIZE_VAR1D(cp, buffer,loffset,gridMapDim,dimCount,int);
-
-    SERIALIZE_VAR2D(cp, buffer,loffset,coordIsDist,dimCount,dimCount,bool);
-    SERIALIZE_VAR2D(cp, buffer,loffset,coordMapDim,dimCount,dimCount,int);
-
-    // Don't do isDEBnds because a proxy object isn't on a valid DE
-
-    // make sure loffset is aligned correctly
-    r=loffset%8;
-    if (r!=0) loffset += 8-r;
-
-    // Serialize the Array exists array
-    SERIALIZE_VAR2D(cp, buffer,loffset,coordExists,staggerLocCount,dimCount,bool);
-
-    // Serialize the Coord Arrays 
-    for (int s=0; s<staggerLocCount; s++) {
-      for (int c=0; c<dimCount; c++) {
-	if (coordExists[s][c]) {
-           //// Serialize the Array
-	  localrc = coordArrayList[s][c]->serialize(buffer, length, &loffset, attreconflag, inquireflag);
-	  if (ESMC_LogDefault.MsgFoundError(localrc, 
-             ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;  
-	}
+    // Serialize depending on status
+    if (status == ESMC_GRIDSTATUS_SHAPE_READY) {
+      
+      SERIALIZE_VAR(cp, buffer,loffset,coordSys,ESMC_CoordSys_Flag);
+      
+      SERIALIZE_VAR(cp, buffer,loffset,forceConn,bool);
+      
+      SERIALIZE_VAR(cp, buffer,loffset, decompType, ESMC_GridDecompType);
+      
+      SERIALIZE_VAR(cp, buffer,loffset,typekind,ESMC_TypeKind_Flag);
+      
+      SERIALIZE_VAR(cp, buffer,loffset,indexflag,ESMC_IndexFlag);
+      
+      // Don't serialize these because after deserailizing distgrid and delayout are local
+      //  destroyDistgrid 
+      //  destroyDELayout
+      
+      SERIALIZE_VAR(cp, buffer,loffset,distDimCount,int);    
+      
+      SERIALIZE_VAR1D(cp, buffer,loffset,distgridToGridMap,distDimCount,int);
+      
+      SERIALIZE_VAR(cp, buffer,loffset,undistDimCount,int);
+      
+      SERIALIZE_VAR1D(cp, buffer,loffset,undistLBound,undistDimCount,int);
+      SERIALIZE_VAR1D(cp, buffer,loffset,undistUBound,undistDimCount,int);
+      
+      SERIALIZE_VAR(cp, buffer,loffset,dimCount,int);    
+      
+      SERIALIZE_VAR1D(cp, buffer,loffset,minIndex, dimCount,int);
+      SERIALIZE_VAR1D(cp, buffer,loffset,maxIndex, dimCount,int);
+      
+      SERIALIZE_VAR1D(cp, buffer,loffset,connL, dimCount,ESMC_GridConn);
+      SERIALIZE_VAR1D(cp, buffer,loffset,connU, dimCount,ESMC_GridConn);
+      
+      SERIALIZE_VAR1D(cp, buffer,loffset,gridEdgeLWidth,dimCount,int);
+      SERIALIZE_VAR1D(cp, buffer,loffset,gridEdgeUWidth,dimCount,int);
+      SERIALIZE_VAR1D(cp, buffer,loffset,gridAlign,dimCount,int);
+      
+      SERIALIZE_VAR1D(cp, buffer,loffset,coordDimCount,dimCount,int);
+      
+      SERIALIZE_VAR2D(cp, buffer,loffset,coordDimMap,dimCount,dimCount,int);
+      
+      SERIALIZE_VAR(cp, buffer,loffset,localArbIndexCount,int);
+      SERIALIZE_VAR2D(cp, buffer,loffset,localArbIndex,localArbIndexCount,distDimCount,int);
+      
+      SERIALIZE_VAR(cp, buffer,loffset,staggerLocCount,int);
+      
+      SERIALIZE_VAR2D(cp, buffer,loffset,staggerAlignList,staggerLocCount,dimCount,int);
+      SERIALIZE_VAR2D(cp, buffer,loffset,staggerEdgeLWidthList,staggerLocCount,dimCount,int);
+      SERIALIZE_VAR2D(cp, buffer,loffset,staggerEdgeUWidthList,staggerLocCount,dimCount,int);
+      SERIALIZE_VAR2D(cp, buffer,loffset,staggerMemLBoundList,staggerLocCount,dimCount,int);
+      
+      // Don't serialize didIAllocList since this proxy grid won't
+      // have Array's allocated 
+      
+      SERIALIZE_VAR1D(cp, buffer,loffset,gridIsDist,dimCount,bool);
+      SERIALIZE_VAR1D(cp, buffer,loffset,gridMapDim,dimCount,int);
+      
+      SERIALIZE_VAR2D(cp, buffer,loffset,coordIsDist,dimCount,dimCount,bool);
+      SERIALIZE_VAR2D(cp, buffer,loffset,coordMapDim,dimCount,dimCount,int);
+      
+      // Don't do isDEBnds because a proxy object isn't on a valid DE
+      
+      // make sure loffset is aligned correctly
+      r=loffset%8;
+      if (r!=0) loffset += 8-r;
+      
+      // Serialize the Array exists array
+      SERIALIZE_VAR2D(cp, buffer,loffset,coordExists,staggerLocCount,dimCount,bool);
+      
+      // Serialize the Coord Arrays 
+      for (int s=0; s<staggerLocCount; s++) {
+        for (int c=0; c<dimCount; c++) {
+          if (coordExists[s][c]) {
+            //// Serialize the Array
+            localrc = coordArrayList[s][c]->serialize(buffer, length, &loffset, attreconflag, inquireflag);
+            if (ESMC_LogDefault.MsgFoundError(localrc, 
+                                              ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;  
+          }
+        }
       }
-    }
-
-    // make sure loffset is aligned correctly
-    r=loffset%8;
-    if (r!=0) loffset += 8-r;
-
-    // Serialize the item Array exists array
-    SERIALIZE_VAR2D(cp, buffer,loffset,itemExists,staggerLocCount,ESMC_GRIDITEM_COUNT,bool);
-
-    // Serialize the Item Arrays 
-    for (int s=0; s<staggerLocCount; s++) {
-      for (int i=0; i<ESMC_GRIDITEM_COUNT; i++) {
-	if (itemExists[s][i]) {
-           //// Serialize the Array
-	  localrc = itemArrayList[s][i]->serialize(buffer, length, &loffset, attreconflag, inquireflag);
-	  if (ESMC_LogDefault.MsgFoundError(localrc, 
-		      ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;  
-	}
+      
+      // make sure loffset is aligned correctly
+      r=loffset%8;
+      if (r!=0) loffset += 8-r;
+      
+      // Serialize the item Array exists array
+      SERIALIZE_VAR2D(cp, buffer,loffset,itemExists,staggerLocCount,ESMC_GRIDITEM_COUNT,bool);
+      
+      // Serialize the Item Arrays 
+      for (int s=0; s<staggerLocCount; s++) {
+        for (int i=0; i<ESMC_GRIDITEM_COUNT; i++) {
+          if (itemExists[s][i]) {
+            //// Serialize the Array
+            localrc = itemArrayList[s][i]->serialize(buffer, length, &loffset, attreconflag, inquireflag);
+            if (ESMC_LogDefault.MsgFoundError(localrc, 
+                                              ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;  
+          }
+        }
       }
-    }
+      
 
-
-    // make sure loffset is aligned correctly
-    r=loffset%8;
-    if (r!=0) loffset += 8-r;
-
-    // Serialize the staggerDistgridExists array
-    SERIALIZE_VAR1D(cp, buffer,loffset,staggerDistgridExists,staggerLocCount,bool);
-
-    // Serialize the Item Arrays 
-    for (int s=0; s<staggerLocCount; s++) {
-      if (staggerDistgridExists[s]) {
-	//// Serialize the Array
-	localrc = staggerDistgridList[s]->serialize(buffer, length, &loffset, inquireflag);
-	if (ESMC_LogDefault.MsgFoundError(localrc, 
-			  ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;  
+      // make sure loffset is aligned correctly
+      r=loffset%8;
+      if (r!=0) loffset += 8-r;
+      
+      // Serialize the staggerDistgridExists array
+      SERIALIZE_VAR1D(cp, buffer,loffset,staggerDistgridExists,staggerLocCount,bool);
+      
+      // Serialize the Item Arrays 
+      for (int s=0; s<staggerLocCount; s++) {
+        if (staggerDistgridExists[s]) {
+          //// Serialize the Array
+          localrc = staggerDistgridList[s]->serialize(buffer, length, &loffset, inquireflag);
+          if (ESMC_LogDefault.MsgFoundError(localrc, 
+                                            ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;  
+        }
       }
-    }
+      
+      
+      
+      // make sure loffset is aligned correctly
+      r=loffset%8;
+      if (r!=0) loffset += 8-r;
 
-
-
-    // make sure loffset is aligned correctly
-    r=loffset%8;
-    if (r!=0) loffset += 8-r;
-    // Serialize the DistGrid
-    localrc = distgrid->serialize(buffer, length, &loffset, inquireflag);
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
-     &rc)) return rc;  
-
-    // make sure loffset is aligned correctly
-    r=loffset%8;
-    if (r!=0) loffset += 8-r;
-    // Serialize the DistGrid_wo_poles
-    localrc = distgrid_wo_poles->serialize(buffer, length, &loffset, inquireflag);
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      // Serialize the DistGrid
+      localrc = distgrid->serialize(buffer, length, &loffset, inquireflag);
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+                                        &rc)) return rc;  
+      
+      // make sure loffset is aligned correctly
+      r=loffset%8;
+      if (r!=0) loffset += 8-r;
+      // Serialize the DistGrid_wo_poles
+      localrc = distgrid_wo_poles->serialize(buffer, length, &loffset, inquireflag);
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
         &rc)) return rc;  
 
+    } else if (status == ESMC_GRIDSTATUS_NOT_READY) {
+
+      // If the distgrid is there, then serialize it
+      int isDistgridPresent=0;
+      if (proto->distgrid != ESMC_NULL_POINTER) {
+        isDistgridPresent=1;
+      }
+      SERIALIZE_VAR(cp, buffer,loffset,isDistgridPresent,int);
+    
+      if (isDistgridPresent) {
+        // make sure loffset is aligned correctly
+        r=loffset%8;
+        if (r!=0) loffset += 8-r;
+        
+        // Serialize the DistGrid
+        localrc = proto->distgrid->serialize(buffer, length, &loffset, inquireflag);
+        if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+                                          &rc)) return rc;  
+      }
+    }
 
     // make sure loffset is aligned correctly
     r=loffset%8;
@@ -5584,14 +5622,18 @@ int Grid::serialize(
     }
   }
 
-  // free coordExists
-  _free2D<bool>(&coordExists);
-
-  // free itemExists
-  _free2D<bool>(&itemExists);
-
-  // free staggerDistgridExists
-  delete [] staggerDistgridExists;
+  // Deallocate depending on status
+  if (status == ESMC_GRIDSTATUS_SHAPE_READY) {
+    
+    // free coordExists
+    _free2D<bool>(&coordExists);
+    
+    // free itemExists
+    _free2D<bool>(&itemExists);
+    
+    // free staggerDistgridExists
+    delete [] staggerDistgridExists;
+  }
 
   // output localoffset
   *offset=loffset;
@@ -5664,191 +5706,210 @@ int Grid::deserialize(
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
      &rc)) return rc;
   
-   // Since we're not allowing the serialization of 
-  // non-ready Grids don't worry about serializing
-  // the protogrid
-  // ... but make sure its NULL
-  proto=ESMC_NULL_POINTER;
+  // Deserialize status
+  DESERIALIZE_VAR( buffer,loffset, status, ESMC_GridStatus_Flag);
 
-  // Set status (instead of reading it)
-  status =  ESMC_GRIDSTATUS_SHAPE_READY;
+  // Deserialize based on status
+  if (status == ESMC_GRIDSTATUS_SHAPE_READY) {
+    // Make sure proto grid is null, since we're not adding one
+    proto=ESMC_NULL_POINTER;
 
-  DESERIALIZE_VAR( buffer,loffset, coordSys, ESMC_CoordSys_Flag);
-
-  DESERIALIZE_VAR( buffer,loffset, forceConn, bool);
-
-  DESERIALIZE_VAR( buffer,loffset, decompType, ESMC_GridDecompType);
-
-  DESERIALIZE_VAR( buffer,loffset,typekind,ESMC_TypeKind_Flag);
-
-  DESERIALIZE_VAR( buffer,loffset,indexflag,ESMC_IndexFlag);
-
-  // Don't deserialize, but set 
-  destroyDistgrid=true;  // distgrid is Grid's after deserialize
-  destroyDELayout=false; // delayot belongs to DistGrid
-
-  DESERIALIZE_VAR( buffer,loffset,distDimCount,int);    
-  
-  DESERIALIZE_VAR1D( buffer,loffset,distgridToGridMap,distDimCount,int);
-  
-  DESERIALIZE_VAR( buffer,loffset,undistDimCount,int);
-  
-  DESERIALIZE_VAR1D( buffer,loffset,undistLBound,undistDimCount,int);
-  DESERIALIZE_VAR1D( buffer,loffset,undistUBound,undistDimCount,int);
-  
-  DESERIALIZE_VAR( buffer,loffset,dimCount,int);    
-
-  DESERIALIZE_VAR1D( buffer,loffset,minIndex,dimCount,int);
-  DESERIALIZE_VAR1D( buffer,loffset,maxIndex,dimCount,int);
-
-  DESERIALIZE_VAR1D( buffer,loffset,connL,dimCount,ESMC_GridConn);
-  DESERIALIZE_VAR1D( buffer,loffset,connU,dimCount,ESMC_GridConn);
-  
-  DESERIALIZE_VAR1D( buffer,loffset,gridEdgeLWidth,dimCount,int);
-   DESERIALIZE_VAR1D( buffer,loffset,gridEdgeUWidth,dimCount,int);
-  DESERIALIZE_VAR1D( buffer,loffset,gridAlign,dimCount,int);
-  
-  DESERIALIZE_VAR1D( buffer,loffset,coordDimCount,dimCount,int);
-  DESERIALIZE_VAR2D( buffer,loffset,coordDimMap,dimCount,dimCount,int);
-
-  DESERIALIZE_VAR( buffer,loffset,localArbIndexCount,int);
-  DESERIALIZE_VAR2D( buffer,loffset,localArbIndex,localArbIndexCount, distDimCount,int);
+    DESERIALIZE_VAR( buffer,loffset, coordSys, ESMC_CoordSys_Flag);
     
-  DESERIALIZE_VAR( buffer,loffset,staggerLocCount,int);
-
-  DESERIALIZE_VAR2D( buffer,loffset,staggerAlignList,staggerLocCount,dimCount,int);
-  DESERIALIZE_VAR2D( buffer,loffset,staggerEdgeLWidthList,staggerLocCount,dimCount,int);
-  DESERIALIZE_VAR2D( buffer,loffset,staggerEdgeUWidthList,staggerLocCount,dimCount,int);
-  DESERIALIZE_VAR2D( buffer,loffset,staggerMemLBoundList,staggerLocCount,dimCount,int);
-
-  DESERIALIZE_VAR1D( buffer,loffset,gridIsDist,dimCount,bool);
-  DESERIALIZE_VAR1D( buffer,loffset,gridMapDim,dimCount,int);
-
-  DESERIALIZE_VAR2D( buffer,loffset,coordIsDist,dimCount,dimCount,bool);
-  DESERIALIZE_VAR2D( buffer,loffset,coordMapDim,dimCount,dimCount,int);
-
-  // Don't do isDEBnds because a proxy object isn't on a valid DE
-  // So make sure that they're NULL
-  isDELBnd=ESMC_NULL_POINTER;
-  isDEUBnd=ESMC_NULL_POINTER;
+    DESERIALIZE_VAR( buffer,loffset, forceConn, bool);
     
-  // Allocate stagger  bound arrays, 
-  // but since there are no localDEs these should always be NULL
-  isStaggerDELBnd = ESMC_NULL_POINTER;
-  isStaggerDEUBnd = ESMC_NULL_POINTER;
-  isStaggerDELBnd = new char *[staggerLocCount];
-  isStaggerDEUBnd = new char *[staggerLocCount];
+    DESERIALIZE_VAR( buffer,loffset, decompType, ESMC_GridDecompType);
+    
+    DESERIALIZE_VAR( buffer,loffset,typekind,ESMC_TypeKind_Flag);
+    
+    DESERIALIZE_VAR( buffer,loffset,indexflag,ESMC_IndexFlag);
+    
+    // Don't deserialize, but set 
+    destroyDistgrid=false; // proxy distgrid (like all proxies) do not belong to any 
+                           // other object -> garbage collection will take care of them.
+    destroyDELayout=false; // delayot belongs to DistGrid
+    
+    DESERIALIZE_VAR( buffer,loffset,distDimCount,int);    
+    
+    DESERIALIZE_VAR1D( buffer,loffset,distgridToGridMap,distDimCount,int);
+    
+    DESERIALIZE_VAR( buffer,loffset,undistDimCount,int);
+    
+    DESERIALIZE_VAR1D( buffer,loffset,undistLBound,undistDimCount,int);
+    DESERIALIZE_VAR1D( buffer,loffset,undistUBound,undistDimCount,int);
+    
+    DESERIALIZE_VAR( buffer,loffset,dimCount,int);    
 
-  // Set to NULL
-  for(int i=0; i<staggerLocCount; i++) {
-    isStaggerDELBnd[i] = ESMC_NULL_POINTER;
-    isStaggerDEUBnd[i] = ESMC_NULL_POINTER;
-  }    
+    DESERIALIZE_VAR1D( buffer,loffset,minIndex,dimCount,int);
+    DESERIALIZE_VAR1D( buffer,loffset,maxIndex,dimCount,int);
+    
+    DESERIALIZE_VAR1D( buffer,loffset,connL,dimCount,ESMC_GridConn);
+    DESERIALIZE_VAR1D( buffer,loffset,connU,dimCount,ESMC_GridConn);
+    
+    DESERIALIZE_VAR1D( buffer,loffset,gridEdgeLWidth,dimCount,int);
+    DESERIALIZE_VAR1D( buffer,loffset,gridEdgeUWidth,dimCount,int);
+    DESERIALIZE_VAR1D( buffer,loffset,gridAlign,dimCount,int);
+    
+    DESERIALIZE_VAR1D( buffer,loffset,coordDimCount,dimCount,int);
+    DESERIALIZE_VAR2D( buffer,loffset,coordDimMap,dimCount,dimCount,int);
+    
+    DESERIALIZE_VAR( buffer,loffset,localArbIndexCount,int);
+    DESERIALIZE_VAR2D( buffer,loffset,localArbIndex,localArbIndexCount, distDimCount,int);
+    
+    DESERIALIZE_VAR( buffer,loffset,staggerLocCount,int);
+    
+    DESERIALIZE_VAR2D( buffer,loffset,staggerAlignList,staggerLocCount,dimCount,int);
+    DESERIALIZE_VAR2D( buffer,loffset,staggerEdgeLWidthList,staggerLocCount,dimCount,int);
+    DESERIALIZE_VAR2D( buffer,loffset,staggerEdgeUWidthList,staggerLocCount,dimCount,int);
+    DESERIALIZE_VAR2D( buffer,loffset,staggerMemLBoundList,staggerLocCount,dimCount,int);
+    
+    DESERIALIZE_VAR1D( buffer,loffset,gridIsDist,dimCount,bool);
+    DESERIALIZE_VAR1D( buffer,loffset,gridMapDim,dimCount,int);
 
- // make sure loffset is aligned correctly
-  r=loffset%8;
-  if (r!=0) loffset += 8-r;
-
-  // Deserialize the Array exists array
-  DESERIALIZE_VAR2D( buffer,loffset,coordExists,staggerLocCount,dimCount,bool);
-  
-  // Deserialize the Coord Arrays 
-  coordArrayList=_allocate2D<Array *>(staggerLocCount,dimCount);
-  for (int s=0; s<staggerLocCount; s++) {
-    for (int c=0; c<dimCount; c++) {
-      if (coordExists[s][c]) {
-	coordArrayList[s][c]=new Array(-1); // prevent baseID counter increment
-	coordArrayList[s][c]->deserialize(buffer, &loffset, attreconflag);
-      } else {
- 	coordArrayList[s][c]=ESMC_NULL_POINTER;
+    DESERIALIZE_VAR2D( buffer,loffset,coordIsDist,dimCount,dimCount,bool);
+    DESERIALIZE_VAR2D( buffer,loffset,coordMapDim,dimCount,dimCount,int);
+    
+    // Don't do isDEBnds because a proxy object isn't on a valid DE
+    // So make sure that they're NULL
+    isDELBnd=ESMC_NULL_POINTER;
+    isDEUBnd=ESMC_NULL_POINTER;
+    
+    // Allocate stagger  bound arrays, 
+    // but since there are no localDEs these should always be NULL
+    isStaggerDELBnd = ESMC_NULL_POINTER;
+    isStaggerDEUBnd = ESMC_NULL_POINTER;
+    isStaggerDELBnd = new char *[staggerLocCount];
+    isStaggerDEUBnd = new char *[staggerLocCount];
+    
+    // Set to NULL
+    for(int i=0; i<staggerLocCount; i++) {
+      isStaggerDELBnd[i] = ESMC_NULL_POINTER;
+      isStaggerDEUBnd[i] = ESMC_NULL_POINTER;
+    }    
+    
+    // make sure loffset is aligned correctly
+    r=loffset%8;
+    if (r!=0) loffset += 8-r;
+    
+    // Deserialize the Array exists array
+    DESERIALIZE_VAR2D( buffer,loffset,coordExists,staggerLocCount,dimCount,bool);
+    
+    // Deserialize the Coord Arrays 
+    coordArrayList=_allocate2D<Array *>(staggerLocCount,dimCount);
+    for (int s=0; s<staggerLocCount; s++) {
+      for (int c=0; c<dimCount; c++) {
+        if (coordExists[s][c]) {
+          coordArrayList[s][c]=new Array(-1); // prevent baseID counter increment
+          coordArrayList[s][c]->deserialize(buffer, &loffset, attreconflag);
+        } else {
+          coordArrayList[s][c]=ESMC_NULL_POINTER;
+        }
       }
     }
-  }
-  
-  // Setup coordDidIAllocList if the coordExists then deallocate it
-  //// allocate storage for array allocation flag
-  coordDidIAllocList=_allocate2D<bool>(staggerLocCount,dimCount);
-  //// set to all false since we're a proxy Grid
-  for(int i=0; i<staggerLocCount; i++) {
-    for(int j=0; j<dimCount; j++) {
-      coordDidIAllocList[i][j]=coordExists[i][j];
-    }
-  }
-  
-
-  // make sure loffset is aligned correctly
-  r=loffset%8;
-  if (r!=0) loffset += 8-r;
-
-  // Deserialize the item Array exists array
-  DESERIALIZE_VAR2D( buffer,loffset,itemExists,staggerLocCount,ESMC_GRIDITEM_COUNT,bool);
-  
-  // Deserialize the Coord Arrays 
-  itemArrayList=_allocate2D<Array *>(staggerLocCount,ESMC_GRIDITEM_COUNT);
-  for (int s=0; s<staggerLocCount; s++) {
-    for (int i=0; i<ESMC_GRIDITEM_COUNT; i++) {
-      if (itemExists[s][i]) {
-	itemArrayList[s][i]=new Array(-1);  // prevent baseID counter increment
-	itemArrayList[s][i]->deserialize(buffer, &loffset, attreconflag);
-      } else {
-	itemArrayList[s][i]=ESMC_NULL_POINTER;
+    
+    // Setup coordDidIAllocList if the coordExists then deallocate it
+    //// allocate storage for array allocation flag
+    coordDidIAllocList=_allocate2D<bool>(staggerLocCount,dimCount);
+    //// set to all false since we're a proxy Grid
+    for(int i=0; i<staggerLocCount; i++) {
+      for(int j=0; j<dimCount; j++) {
+        coordDidIAllocList[i][j]=coordExists[i][j];
       }
     }
-  }
-  
-  // Setup itemDidIAllocList if the itemExists then deallocate it
-  //// allocate storage for array allocation flag
-  itemDidIAllocList=_allocate2D<bool>(staggerLocCount,ESMC_GRIDITEM_COUNT);
-  //// set to all false since we're a proxy Grid
-  for(int i=0; i<staggerLocCount; i++) {
-    for(int j=0; j<ESMC_GRIDITEM_COUNT; j++) {
-      itemDidIAllocList[i][j]=itemExists[i][j];
+    
+    
+    // make sure loffset is aligned correctly
+    r=loffset%8;
+    if (r!=0) loffset += 8-r;
+
+    // Deserialize the item Array exists array
+    DESERIALIZE_VAR2D( buffer,loffset,itemExists,staggerLocCount,ESMC_GRIDITEM_COUNT,bool);
+    
+    // Deserialize the Coord Arrays 
+    itemArrayList=_allocate2D<Array *>(staggerLocCount,ESMC_GRIDITEM_COUNT);
+    for (int s=0; s<staggerLocCount; s++) {
+      for (int i=0; i<ESMC_GRIDITEM_COUNT; i++) {
+        if (itemExists[s][i]) {
+          itemArrayList[s][i]=new Array(-1);  // prevent baseID counter increment
+          itemArrayList[s][i]->deserialize(buffer, &loffset, attreconflag);
+        } else {
+          itemArrayList[s][i]=ESMC_NULL_POINTER;
+        }
+      }
+    }
+    
+    // Setup itemDidIAllocList if the itemExists then deallocate it
+    //// allocate storage for array allocation flag
+    itemDidIAllocList=_allocate2D<bool>(staggerLocCount,ESMC_GRIDITEM_COUNT);
+    //// set to all false since we're a proxy Grid
+    for(int i=0; i<staggerLocCount; i++) {
+      for(int j=0; j<ESMC_GRIDITEM_COUNT; j++) {
+        itemDidIAllocList[i][j]=itemExists[i][j];
+      }
+    }
+    
+    // make sure loffset is aligned correctly
+    r=loffset%8;
+    if (r!=0) loffset += 8-r;
+    
+    // Deserialize the staggerDistgridExists array
+    DESERIALIZE_VAR1D( buffer,loffset,staggerDistgridExists,staggerLocCount,bool);
+    
+    // Deserialize the Coord Arrays 
+    staggerDistgridList=new DistGrid *[staggerLocCount];
+    for (int s=0; s<staggerLocCount; s++) {
+      if (staggerDistgridExists[s]) {
+        staggerDistgridList[s]=DistGrid::deserialize(buffer, &loffset);
+      } else {
+        staggerDistgridList[s]=ESMC_NULL_POINTER;
+      }
+    }
+    
+    // Deserialize the DistGrid
+    distgrid = DistGrid::deserialize(buffer, &loffset);
+    
+    // make sure loffset is aligned correctly
+    r=loffset%8;
+    if (r!=0) loffset += 8-r;
+    
+    // Deserialize the DistGrid
+    distgrid_wo_poles = DistGrid::deserialize(buffer, &loffset);  
+
+    // free coordExists
+    _free2D<bool>(&coordExists);
+    
+    // free itemExists
+    _free2D<bool>(&itemExists);
+    
+    // free staggerDistgridExists
+    delete [] staggerDistgridExists;
+
+  } else if (status == ESMC_GRIDSTATUS_NOT_READY) {
+    // Add protogrid
+    localrc=this->addProtoGrid();
+    if (ESMC_LogDefault.MsgFoundError(localrc,
+            ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;        
+
+    // If the distgrid is there, then deserialize it
+    int isDistgridPresent=0;
+    DESERIALIZE_VAR( buffer,loffset, isDistgridPresent, int);
+    if (isDistgridPresent) {
+        // make sure loffset is aligned correctly
+        r=loffset%8;
+        if (r!=0) loffset += 8-r;
+        
+        // Deserialize the DistGrid
+        proto->distgrid = DistGrid::deserialize(buffer, &loffset);
     }
   }
-
-  // make sure loffset is aligned correctly
-  r=loffset%8;
-  if (r!=0) loffset += 8-r;
-
-  // Deserialize the staggerDistgridExists array
-  DESERIALIZE_VAR1D( buffer,loffset,staggerDistgridExists,staggerLocCount,bool);
   
-  // Deserialize the Coord Arrays 
-  staggerDistgridList=new DistGrid *[staggerLocCount];
-  for (int s=0; s<staggerLocCount; s++) {
-    if (staggerDistgridExists[s]) {
-      staggerDistgridList[s]=DistGrid::deserialize(buffer, &loffset);
-    } else {
-      staggerDistgridList[s]=ESMC_NULL_POINTER;
-    }
-  }
   
-  // Deserialize the DistGrid
-  distgrid = DistGrid::deserialize(buffer, &loffset);
-
   // make sure loffset is aligned correctly
   r=loffset%8;
   if (r!=0) loffset += 8-r;
-
-  // Deserialize the DistGrid
-  distgrid_wo_poles = DistGrid::deserialize(buffer, &loffset);
-
-  // make sure loffset is aligned correctly
-  r=loffset%8;
-  if (r!=0) loffset += 8-r;
-
-  // free coordExists
-  _free2D<bool>(&coordExists);
-
-  // free itemExists
-  _free2D<bool>(&itemExists);
-
-  // free staggerDistgridExists
-  delete [] staggerDistgridExists;
-
+  
   // output localoffset
   *offset=loffset;
-
 
   // Undefine serialization macros, so they don't cause troubles elsewhere
 #undef DESERIALIZE_VAR
@@ -6199,7 +6260,7 @@ int construct(
   InterfaceInt *distgridToGridMapArg,                  // (in) optional
   InterfaceInt *undistLBoundArg,                 // (in) optional
   InterfaceInt *undistUBoundArg,                 // (in) optional
-  ESMC_CoordSys_Flag *coordSysArg, 
+   ESMC_CoordSys_Flag *coordSysArg, 
   InterfaceInt *coordDimCountArg,               // (in) optional
   InterfaceInt *coordDimMapArg,             // (in) optional
   InterfaceInt *gridMemLBoundArg,             // (in) optional
@@ -6247,7 +6308,7 @@ int construct(
   // initialize return code; assume routine not implemented
   rc = ESMC_RC_NOT_IMPL;
 
-  // To prevent erasing an existing grid, make sure grid is inactive
+   // To prevent erasing an existing grid, make sure grid is inactive
   if (gridArg->getStatus() != ESMC_GRIDSTATUS_NOT_READY) {
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_WRONG,
       "- grid must be status 'not ready' to be activated ", ESMC_CONTEXT, &rc);
@@ -6295,7 +6356,7 @@ int construct(
     indexflag=ESMC_INDEX_DELOCAL;  // default
   } else {
     indexflag=*indexflagArg;
-  }
+   }
 
 
   // Get DimCount of Distributed Dimensions
@@ -6343,7 +6404,7 @@ int construct(
     }
     if (undistLBoundArg->extent[0] != undistDimCount){
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
-        "- undistLBound, undistUBound size mismatch", ESMC_CONTEXT, &rc);
+         "- undistLBound, undistUBound size mismatch", ESMC_CONTEXT, &rc);
       return rc;
     }
     // set undistLBound from argument
@@ -6391,7 +6452,7 @@ int construct(
   } 
 
   // Error check gridEdgeUWidthArg
-  if (present(gridEdgeUWidthArg)) {
+   if (present(gridEdgeUWidthArg)) {
     if (gridEdgeUWidthArg->dimCount != 1){
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
         "- gridEdgeUWidth array must be of dimCount 1", ESMC_CONTEXT, &rc);
@@ -6439,7 +6500,7 @@ int construct(
   gridEdgeUWidth = new int[dimCount];
   gridAlign = new int[dimCount];
 
-  localrc=setGridDefaultsLUA(dimCount,
+   localrc=setGridDefaultsLUA(dimCount,
           gridEdgeLWidthArg, gridEdgeUWidthArg, gridAlignArg,
           gridEdgeLWidth, gridEdgeUWidth, gridAlign);
   if (ESMC_LogDefault.MsgFoundError(localrc,
@@ -6487,7 +6548,7 @@ int construct(
   distgridToGridMap = new int[distDimCount];
   if (!present(distgridToGridMapArg)) {
     for (int i=0; i<distDimCount; i++)
-      distgridToGridMap[i] = i; // set distgridToGridMap to default (0,1,2..)
+       distgridToGridMap[i] = i; // set distgridToGridMap to default (0,1,2..)
   } else {
     if (distgridToGridMapArg->dimCount != 1){
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
@@ -6535,7 +6596,7 @@ int construct(
       }
       // // TODO: take this out when Array Factorization works
       // if (coordDimCountArg->array[i] != dimCount){
-      //  ESMC_LogDefault.MsgFoundError(ESMC_RC_NOT_IMPL,
+       //  ESMC_LogDefault.MsgFoundError(ESMC_RC_NOT_IMPL,
       //    "- Array and thus Grid don't currently support factorization",
       //    ESMC_CONTEXT, &rc);
       //  return rc;
@@ -6583,7 +6644,7 @@ int construct(
       for (int j=0; j<coordDimCount[i]; j++) {
         // Note: order of i,j is because of F vs. C array ordering
         ind=j*dimCount+i;
-
+ 
         // Check to make sure data is correct
        if (coordDimMapArg->array[ind] < 1 || coordDimMapArg->array[ind] > dimCount){
           ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
@@ -6631,7 +6692,7 @@ int construct(
     for (int i=0, j=0; i < dimCount; i++) {
       if (maxIndex[i] == 0) {
 	minIndex[i] = undistLBound[j];
-        maxIndex[i] = undistUBound[j];
+         maxIndex[i] = undistUBound[j];
 	j++;
       }
     }
@@ -10071,7 +10132,7 @@ void _create_nopole_distgrid(DistGrid *distgrid, DistGrid **distgrid_nopole, int
     *distgrid_nopole=DistGrid::create(distgrid,
                                       (InterfaceInt *)NULL, (InterfaceInt *)NULL,
                                       (ESMC_IndexFlag *)NULL, (InterfaceInt *)NULL, 
-                                      NULL, &localrc);
+                                      NULL, true, &localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
        rc)) return; 
     return;
@@ -10090,7 +10151,7 @@ void _create_nopole_distgrid(DistGrid *distgrid, DistGrid **distgrid_nopole, int
     *distgrid_nopole=DistGrid::create(distgrid,
                                    (InterfaceInt *)NULL, (InterfaceInt *)NULL,
                                       (ESMC_IndexFlag *)NULL, (InterfaceInt *)NULL, 
-                                   NULL, &localrc);
+                                   NULL, true, &localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
                                       rc)) return; 
 
@@ -10155,7 +10216,7 @@ void _create_nopole_distgrid(DistGrid *distgrid, DistGrid **distgrid_nopole, int
  *distgrid_nopole=DistGrid::create(distgrid,
                                    (InterfaceInt *)NULL, (InterfaceInt *)NULL,
                                    (ESMC_IndexFlag *)NULL, newConnListII, 
-                                   NULL, &localrc);
+                                   NULL, true, &localrc);
  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
      rc)) return; 
 

@@ -73,19 +73,27 @@ DistGrid *DistGrid::create(
   ESMC_IndexFlag *indexflag,              // (in)
   InterfaceInt *connectionList,           // (in)
   VM *vm,                                 // (in)
+  bool actualFlag,                        // (in)
   int *rc                                 // (out) return code
   ){
 //
 // !DESCRIPTION:
-//    Create a new DistGrid from an existing DistGrid, keeping the decomposition
-//    unchanged. The firstExtra and lastExtra arguments allow extra elements to
-//    be added at the first/last edge DE in each dimension. The method also 
-//    allows the indexflag to be set. Further, if the connectionList argument
-//    is passed in it will be used to set connections in the newly created
-//    DistGrid, otherwise the connections of the incoming DistGrid will be used.
-//    If neither firstExtra, lastExtra, indexflag, nor connectionList arguments
-//    are specified, the method reduces to a deep copy of the incoming DistGrid
-//    object.
+//    Create a new DistGrid from an existing DistGrid, potentially on a
+//    different VM, keeping the decomposition unchanged. The firstExtra 
+//    and lastExtra arguments allow extra elements to be added at the 
+//    first/last edge DE in each dimension. The method also allows the 
+//    indexflag to be set different from the passed in DistGrid. Further, 
+//    if the connectionList argument is passed in it will be used to set
+//    connections in the newly created DistGrid, otherwise the connections
+//    of the existing DistGrid will be used.
+//    If neither firstExtra, lastExtra, indexflag, connectionList, nor vm
+//    arguments are specified, the method reduces to a deep copy of the
+//    incoming DistGrid object.
+//    The actualFlag argument identifies PETs that are part of vm. If
+//    on a PET actualFlag is true, and vm is not NULL, this PET is part of a
+//    vm that is of smaller size than the currentVM. Of on a PET actualFlag is
+//    false then there exists such a smaller vm (even if vm is NULL), but the
+//    PET is not part of that VM.
 //
 //EOPI
 //-----------------------------------------------------------------------------
@@ -97,13 +105,15 @@ DistGrid *DistGrid::create(
   try{
     
   DELayout *delayout = NULL;
-  if (!vm || (vm==VM::getCurrent())){
+  
+  if (actualFlag && (!vm || (vm==VM::getCurrent()))){
     // only use DELayout of incoming DistGrid if not creating for another VM
     delayout = dg->delayout;
   }
   
   if (present(firstExtra) || present(lastExtra) || indexflag ||
-    present(connectionList) || vm){
+    present(connectionList) || vm || !actualFlag){
+   if (actualFlag){
     // creating a new DistGrid from the existing one considering additional info
     // prepare for internal InterfaceInt usage
     int dimInterfaceInt;
@@ -299,6 +309,10 @@ DistGrid *DistGrid::create(
     // create DistGrid according to collected information
     if (dg->regDecomp!=NULL){
       // this is a regDecomp
+#if 0
+      ESMC_LogDefault.Write("DGfromDG: incoming DG identified as regDecomp", 
+        ESMC_LOGMSG_INFO);
+#endif
       // prepare regDecomp
       InterfaceInt *regDecomp = new InterfaceInt(dg->regDecomp,
         dimInterfaceInt, dimCountInterfaceInt);
@@ -333,6 +347,10 @@ DistGrid *DistGrid::create(
       delete regDecomp;
     }else{
       // this is a deBlockList
+#if 0
+      ESMC_LogDefault.Write("DGfromDG: incoming DG identified as deBlock", 
+        ESMC_LOGMSG_INFO);
+#endif
       if (dg->tileCount==1){
         // single tile
         // prepare deBlockList
@@ -380,7 +398,11 @@ DistGrid *DistGrid::create(
         delete [] deBlockListAlloc;
       }else{
         // multi tile
-        //TODO: activate this branch once deBlockList multi-tile is implemented
+        //TODO: implement this branch once deBlockList multi-tile is implemented
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
+          "Currently no support for multi-tile deBlock DistGrid branch.",
+          ESMC_CONTEXT, rc);
+        return ESMC_NULL_POINTER;
       }
     }
     // garbage collection
@@ -395,7 +417,242 @@ DistGrid *DistGrid::create(
       if (connectionListAlloc)
         delete [] connectionListAlloc;
     }
+   }  // endif actualFlag
+   // -> all PETs now...
+   // deal with arbitrary sequence index lists
+   // keep in mind that the new "distgrid" object only exists across
+   // PETs with actualFlag true.
+#if 0
+   // block for debugging only
+   char msgString[160];
+   sprintf(msgString, "DGfromDG: incoming DG localDeCount=%d",
+     dg->delayout->getLocalDeCount());
+   ESMC_LogDefault.Write(msgString, ESMC_LOGMSG_INFO);
+   if (actualFlag){
+     sprintf(msgString, "DGfromDG: new DG localDeCount=%d",
+       distgrid->delayout->getLocalDeCount());
+     ESMC_LogDefault.Write(msgString, ESMC_LOGMSG_INFO);
+     for (int i=0; i<distgrid->delayout->getLocalDeCount(); i++){
+       sprintf(msgString, "DGfromDG: new DG localDe=%d=>%d elementCount=%d",
+         i, distgrid->delayout->getLocalDeToDeMap()[i], 
+         distgrid->getElementCountPCollPLocalDe()[0][i]);
+       ESMC_LogDefault.Write(msgString, ESMC_LOGMSG_INFO);
+     }
+   }
+   if (!vm)
+     sprintf(msgString, "DGfromDG: vm.petCount=%d, currentVM.petCount=%d",
+       -1, VM::getCurrent()->getPetCount());
+   else
+     sprintf(msgString, "DGfromDG: vm.petCount=%d, currentVM.petCount=%d",
+       vm->getPetCount(), VM::getCurrent()->getPetCount());
+   ESMC_LogDefault.Write(msgString, ESMC_LOGMSG_INFO);
+
+   sprintf(msgString, "DGfromDG: incoming DG diffCollocationCount=%d",
+     dg->getDiffCollocationCount());
+   ESMC_LogDefault.Write(msgString, ESMC_LOGMSG_INFO);
+   
+   // should error out if collocationCount is not 1 cannot handle that yet
+   
+   if (dg->delayout->getLocalDeCount() > 0){
+     for (int i=0; i<dg->delayout->getLocalDeCount(); i++)
+       sprintf(msgString, "DGfromDG: incoming DG localDe=%d=>%d, elementCount=%d, "
+         "arbSeqIndexList=%p", i, dg->delayout->getLocalDeToDeMap()[i],
+         dg->getElementCountPCollPLocalDe()[0][i],
+         dg->getArbSeqIndexList(i, 1));
+     ESMC_LogDefault.Write(msgString, ESMC_LOGMSG_INFO);
+   }
+#endif
+
+   // Need to figure out whether it is safe to communicate across the entire
+   // currentVM or not. 
+   // It is safe to do so if acceptor VM and provider VM do NOT match!
+   // That is because in this case this must be a call that is coming in
+   // on all PETs.
+   VM *currentVM = VM::getCurrent();
+   bool currentVMcollectiveOK = false;
+   VM *providerVM = dg->delayout->getVM();
+   VM *acceptorVM = NULL; // default on all PETs
+   if (actualFlag) acceptorVM = distgrid->delayout->getVM();
+   if (providerVM != acceptorVM)
+     currentVMcollectiveOK = true;
+   
+   if (currentVMcollectiveOK){
+     // only in this case do we need to check if there are arbitrary sequence
+     // indices on the provider DistGrid (on its PETs), and if so then 
+     // send them over to the acceptor DistGrid DEs. 
+     
+     // first check if the provider DistGrid DEs are holding arbitrary 
+     // sequence index allocations.
+     int localArbSeqFlag = 0; // initialize
+     int allArbSeqFlag;
+     if (dg->delayout->getLocalDeCount() && 
+       (dg->getArbSeqIndexList(0, 1)!=NULL)) localArbSeqFlag = 1;
+     currentVM->allreduce(&localArbSeqFlag, &allArbSeqFlag, 1, vmI4, vmSUM);
+#if 0
+     sprintf(msgString, "DGfromDG: allArbSeqFlag = %d", allArbSeqFlag);
+     ESMC_LogDefault.Write(msgString, ESMC_LOGMSG_INFO);
+#endif
+     // now allArbSeqFlag > 0 means that there are provider DistGrid DEs that
+     // hold arbitrary sequence index allocations that need to be sent to
+     // the correct DE of the newly created acceptor DistGrid.
+     
+     if (allArbSeqFlag > 0){
+       int localPet = currentVM->getLocalPet();
+       int petCount = currentVM->getPetCount();
+       int deCount = dg->delayout->getDeCount();  // same for provider & accept
+       // determine how many local DEs in the newly created DistGrid there are
+       // on each PET of the currentVM
+       int *acceptorLocalDeCountPPet = new int[petCount];
+       int localDeCount = 0; // default, will stay for non particip. PETs
+       if (actualFlag)
+         localDeCount = distgrid->delayout->getLocalDeCount();
+       currentVM->allgather(&localDeCount, acceptorLocalDeCountPPet, 
+         sizeof(int));
+       // send across the DE mapping of the local DEs of acceptor DistGrid
+       int *acceptorLocalOffsets = new int[petCount];
+       acceptorLocalOffsets[0]=0; // start
+       for (int i=1; i<petCount; i++)
+         acceptorLocalOffsets[i]=acceptorLocalOffsets[i-1]
+           +acceptorLocalDeCountPPet[i-1];
+       int *acceptorLocalDeToDeMap = new int[deCount];
+       const int *localDeToDeMap = NULL; // default
+       if (actualFlag)
+         localDeToDeMap = distgrid->delayout->getLocalDeToDeMap();
+       currentVM->allgatherv((void *)localDeToDeMap, localDeCount, 
+         acceptorLocalDeToDeMap, acceptorLocalDeCountPPet,
+         acceptorLocalOffsets, vmI4);
+       delete [] acceptorLocalOffsets;
+#if 0
+       for (int i=0; i<deCount; i++){
+         sprintf(msgString, "DGfromDG: DE mapping for acceptor item %d is %d: ",
+           i, acceptorLocalDeToDeMap[i]);
+         ESMC_LogDefault.Write(msgString, ESMC_LOGMSG_INFO);
+       }
+#endif
+       // determine how many local DEs in the provider DistGrid there are
+       // on each PET of the currentVM
+       int *providerLocalDeCountPPet = new int[petCount];
+       localDeCount = dg->delayout->getLocalDeCount();
+       currentVM->allgather(&localDeCount, providerLocalDeCountPPet, 
+         sizeof(int));
+       // send across the DE mapping of the local DEs of provider DistGrid
+       int *providerLocalOffsets = new int[petCount];
+       providerLocalOffsets[0]=0; // start
+       for (int i=1; i<petCount; i++)
+         providerLocalOffsets[i]=providerLocalOffsets[i-1]
+           +providerLocalDeCountPPet[i-1];
+       int *providerLocalDeToDeMap = new int[deCount];
+       localDeToDeMap = dg->delayout->getLocalDeToDeMap();
+       currentVM->allgatherv((void *)localDeToDeMap, localDeCount, 
+         providerLocalDeToDeMap, providerLocalDeCountPPet,
+         providerLocalOffsets, vmI4);
+       delete [] providerLocalOffsets;
+#if 0
+       for (int i=0; i<deCount; i++){
+         sprintf(msgString, "DGfromDG: DE mapping for provider item %d is %d: ",
+           i, providerLocalDeToDeMap[i]);
+         ESMC_LogDefault.Write(msgString, ESMC_LOGMSG_INFO);
+       }
+#endif
+       // loop through DEs (same on both provider and acceptor DistGrids), and
+       // send arb sequence indices from provider to acceptor.
+       for (int de=0; de<deCount; de++){
+         // find this DE amount the localDEs of the provider PETs
+         int providerPet;
+         int providerLDe;
+         int providerOffset=0;
+         bool foundFlag=false;
+         for (providerPet=0; providerPet<petCount; providerPet++){
+           for (providerLDe=0;
+             providerLDe<providerLocalDeCountPPet[providerPet]; providerLDe++){
+             if (providerLocalDeToDeMap[providerOffset]==de){
+               // found the provider DE
+               foundFlag = true;
+               break;
+             }
+             ++providerOffset;
+           }
+           if (foundFlag) break;
+         }
+         // now provider Pet and offset are known
+#if 0
+         sprintf(msgString, "DGfromDG: DE %d - provider PET=%d, "
+           "localDe=%d, offset=%d", de, providerPet, providerLDe, 
+           providerOffset);
+         ESMC_LogDefault.Write(msgString, ESMC_LOGMSG_INFO);
+#endif
+         // find this DE amount the localDEs of the acceptor PETs
+         int acceptorPet;
+         int acceptorLDe;
+         int acceptorOffset=0;
+         foundFlag=false;
+         for (acceptorPet=0; acceptorPet<petCount; acceptorPet++){
+           for (acceptorLDe=0;
+             acceptorLDe<acceptorLocalDeCountPPet[acceptorPet]; acceptorLDe++){
+             if (acceptorLocalDeToDeMap[acceptorOffset]==de){
+               // found the acceptor DE
+               foundFlag = true;
+               break;
+             }
+             ++acceptorOffset;
+           }
+           if (foundFlag) break;
+         }
+         // now acceptor Pet and offset are known
+#if 0
+         sprintf(msgString, "DGfromDG: DE %d - acceptor PET=%d, "
+           "localDe=%d, offset=%d", de, acceptorPet, acceptorLDe, 
+           acceptorOffset);
+         ESMC_LogDefault.Write(msgString, ESMC_LOGMSG_INFO);
+#endif
+         // finally send the arb sequence indices from provider to acceptor
+         int *arbSeqIndex;
+         int itemCount;
+         if (localPet==providerPet && localPet==acceptorPet){
+           // same PET holds DE for provider and acceptor -> local copy
+           itemCount = dg->getElementCountPCollPLocalDe()[0][providerLDe];
+           arbSeqIndex = new int[itemCount];
+           memcpy(arbSeqIndex, dg->getArbSeqIndexList(providerLDe,1),
+             sizeof(int)*itemCount);
+         }else if (localPet==providerPet){
+           // provider side
+           itemCount = dg->getElementCountPCollPLocalDe()[0][providerLDe];
+           currentVM->send(dg->getArbSeqIndexList(providerLDe,1), 
+             sizeof(int)*itemCount, acceptorPet);
+         }else if (localPet==acceptorPet){
+           // acceptor side
+           itemCount = distgrid->getElementCountPCollPLocalDe()[0][acceptorLDe];
+           arbSeqIndex = new int[itemCount];
+           currentVM->recv(arbSeqIndex, sizeof(int)*itemCount, providerPet);
+         }
+         if (localPet==acceptorPet){
+           // acceptor side to wrap up setting of arb sequence indices
+           InterfaceInt *arbSeqIndexInt =
+             new InterfaceInt(arbSeqIndex, 1, &itemCount);
+           distgrid->setArbSeqIndex(arbSeqIndexInt, acceptorLDe, 1);
+           delete arbSeqIndexInt;
+           delete [] arbSeqIndex;
+         }
+       }
+       // clean-up
+       delete [] acceptorLocalDeCountPPet;
+       delete [] acceptorLocalDeToDeMap;
+       delete [] providerLocalDeCountPPet;
+       delete [] providerLocalDeToDeMap;
+     } // endif allArbSeqFlag
+   } // endif currentVMcollectiveOK
+    
   }else{
+#if 0
+    char msgString[160];
+    sprintf(msgString, "DGfromDG: incoming DG identified for deep copy, "
+      "actualFlag=%d", actualFlag);
+    ESMC_LogDefault.Write(msgString, ESMC_LOGMSG_INFO);
+    sprintf(msgString, "DGfromDG: incoming DG localDeCount=%d",
+      dg->delayout->getLocalDeCount());
+    ESMC_LogDefault.Write(msgString, ESMC_LOGMSG_INFO);
+#endif
+   if (actualFlag){
     // simple deep copy of the incoming DistGrid
     distgrid = new DistGrid(vm);  // specific VM, or default if vm==NULL
     int dimCount = distgrid->dimCount = dg->dimCount;
@@ -439,6 +696,7 @@ DistGrid *DistGrid::create(
           dg->indexListPDimPLocalDe[i*dimCount+j], sizeof(int)*size);
       }
     }
+    // connections
     int connectionCount = distgrid->connectionCount = dg->connectionCount;
     if (connectionCount){
       int elementSize = 2*dimCount+2;
@@ -450,7 +708,7 @@ DistGrid *DistGrid::create(
       }
     }else
       distgrid->connectionList = NULL;
-
+    // arbitrary sequence indices
     distgrid->collocationPDim = new int[dimCount];
     memcpy(distgrid->collocationPDim, dg->collocationPDim,
       sizeof(int)*dimCount);
@@ -500,6 +758,7 @@ DistGrid *DistGrid::create(
     distgrid->delayoutCreator = false;
     distgrid->vm = dg->vm;
     distgrid->localDeCountAux = dg->localDeCountAux;
+   }  // endif actualFlag
   }
   
   if (delayout){
@@ -2383,7 +2642,7 @@ int DistGrid::fillSeqIndexList(
   }
   int collIndex = i;
 
-  int elementCount = elementCountPCollPLocalDe[collIndex][localDe];
+  unsigned int elementCount = elementCountPCollPLocalDe[collIndex][localDe];
   
   if (seqIndexList.size() != elementCount)
     seqIndexList.resize(elementCount);
@@ -3216,7 +3475,7 @@ int DistGrid::getSequenceIndexTileRelative(
 //
 // !ARGUMENTS:
 //
-  int tile,                        // in  - tile = {1, ..., tileCount}
+  int tile,                         // in  - tile = {1, ..., tileCount}
   const int *index,                 // in  - tile relative index tuple, base 0
   int *rc                           // out - return code
   )const{
@@ -3260,7 +3519,8 @@ int DistGrid::getSequenceIndexTileRelative(
   return seqindex;
 }
 //-----------------------------------------------------------------------------
-  
+
+
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::DistGrid::getSequenceIndexTile()"
@@ -3275,7 +3535,7 @@ int DistGrid::getSequenceIndexTile(
 //
 // !ARGUMENTS:
 //
-  int tile,                        // in  - tile = {1, ..., tileCount}
+  int tile,                         // in  - tile = {1, ..., tileCount}
   const int *index,                 // in  - tile-specific absolute index tuple
   int *rc                           // out - return code
   )const{
@@ -3336,7 +3596,7 @@ int DistGrid::getSequenceIndexTileRecursive(
 //
 // !ARGUMENTS:
 //
-  int tile,                        // in  - tile = {1, ..., tileCount}
+  int tile,                         // in  - tile = {1, ..., tileCount}
   const int *index,                 // in  - tile-specific absolute index tuple
   int depth,                        // in  - depth of recursive search
   int *rc                           // out - return code
@@ -3499,6 +3759,69 @@ int DistGrid::getSequenceIndexTileRecursive(
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::DistGrid::getIndexTupleFromSeqIndex()"
+//BOPI
+// !IROUTINE:  ESMCI::DistGrid::getIndexTupleFromSeqIndex
+//
+// !INTERFACE:
+int DistGrid::getIndexTupleFromSeqIndex(
+//
+// !RETURN VALUE:
+//    int return code
+//
+// !ARGUMENTS:
+//
+  int seqIndex,                 // in  - sequence index to be transformed
+  vector<int> &indexTuple,      // out - index tuple within tile
+  int &tile                     // out - tile index (1-based)
+  )const{
+//
+// !DESCRIPTION:
+//    Transform the seqIndex argument into tile and indexTuple. If the size 
+//    of indexTuple does not match dimCount, it will automatically be resized 
+//    by this method.
+//
+//EOPI
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
+  
+  if (indexTuple.size() != dimCount)
+    indexTuple.resize(dimCount);
+  
+  seqIndex -= 1;  // make seqIndex 0-based
+ 
+  // determine the tile index
+  for (int tile=0; tile<tileCount; tile++){
+    seqIndex -= elementCountPTile[tile];
+    if (seqIndex <=0){
+      // found the tile index (remember, 1-based)
+      seqIndex += elementCountPTile[tile]; // correct back into the tile
+      break;
+    }
+  }
+  
+  // determine the index tuple within the tile
+  for (int i=dimCount-1; i>=0; i--){
+    int stride = 1;
+    for (int j=0; j<i-1; j++)
+      stride *= maxIndexPDimPTile[dimCount*(tile-1)+j]
+        - minIndexPDimPTile[dimCount*(tile-1)+j] + 1;
+    indexTuple[i] = seqIndex / stride;
+    seqIndex -= stride * indexTuple[i];
+    indexTuple[i] += minIndexPDimPTile[dimCount*(tile-1)+i];
+  }
+    
+  // return successfully
+  rc = ESMF_SUCCESS;
+  return rc;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::DistGrid::getMinIndexPDimPTile()"
 //BOPI
 // !IROUTINE:  ESMCI::DistGrid::getMinIndexPDimPTile
@@ -3511,7 +3834,7 @@ const int *DistGrid::getMinIndexPDimPTile(
 //
 // !ARGUMENTS:
 //
-  int tile,                            // in  - tile   = {1, ..., tileCount}
+  int tile,                             // in  - tile   = {1, ..., tileCount}
   int *rc                               // out - return code
   )const{
 //
@@ -3551,7 +3874,7 @@ const int *DistGrid::getMaxIndexPDimPTile(
 //
 // !ARGUMENTS:
 //
-  int tile,                            // in  - tile   = {1, ..., tileCount}
+  int tile,                             // in  - tile   = {1, ..., tileCount}
   int *rc                               // out - return code
   )const{
 //

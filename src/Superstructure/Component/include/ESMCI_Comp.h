@@ -78,6 +78,7 @@ class Comp{
     int getTunnel(CompTunnel **tunnel) const;
     static int getComplianceCheckerDepth(int *depth);
     static int getComplianceCheckerJSON(int *jsonIsOn);
+    static int getComplianceCheckerText(int *textIsOn);
 };
 
 class GridComp:public Comp{
