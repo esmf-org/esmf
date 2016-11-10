@@ -3325,6 +3325,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_ArraySpec) :: arrayspec
     integer :: rank, ungridded_dimcount, ungridded_ldimcount, ungridded_udimcount
     integer :: memDimCount
+    type(ESMF_MeshLoc) :: localMeshloc
+    type(ESMF_Distgrid) :: localDistgrid
 
     ! Initialize
     localrc = ESMF_RC_NOT_IMPL
@@ -3352,7 +3354,40 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       endif
     endif
 
-    rank = ungridded_dimcount + 1
+    ! Get DimCount from distgrid
+    localMeshloc=ESMF_MESHLOC_NODE
+    if (present(meshloc)) then
+       localMeshloc=meshloc
+    endif
+
+    ! Get distgrid
+    if (localMeshloc == ESMF_MESHLOC_NODE) then
+       call ESMF_MeshGet(mesh, &
+            nodalDistgrid=localDistgrid, &
+            rc=localrc)
+       if (ESMF_LogFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+    else if (localmeshloc == ESMF_MESHLOC_ELEMENT) then
+       call ESMF_MeshGet(mesh, &
+            elementDistgrid=localDistgrid, &
+            rc=localrc)
+       if (ESMF_LogFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+    else
+       if (ESMF_LogFoundError(ESMF_RC_ARG_VALUE, &
+                  msg=" Bad Mesh Location value", &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+            
+    ! Get rank
+    call ESMF_DistGridGet(localDistgrid, &
+         dimCount=rank, rc=localrc)
+    if (ESMF_LogFoundError(localrc, &
+         ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return 
+    
 
     ! Set ArraySpec from rank and typekind input
     call ESMF_ArraySpecSet(arrayspec, rank=rank, typekind=typekind, rc=localrc)
