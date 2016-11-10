@@ -1,0 +1,87 @@
+version: '2.2'
+prefix: esmftrc_
+metadata:
+  type-aliases:
+    uint8:
+      class: int
+      size: 8
+      align: 8
+    byte: uint8
+    int8:
+      $inherit: uint8
+      signed: true
+    uint16:
+      class: int
+      size: 16
+      align: 16
+    word: uint16
+    int16:
+      $inherit: uint8
+      signed: true
+    uint32:
+      class: int
+      size: 32
+      align: 32
+    dword: uint32
+    int32:
+      $inherit: uint8
+      signed: true
+    uint64:
+      class: int
+      size: 64
+      align: 64
+    int64:
+      $inherit: uint8
+      signed: true
+    clock-int:
+      $inherit: uint64
+      property-mappings:
+      - type: clock
+        name: sys_clock
+        property: value
+    esmf_method_type:
+        class: enum
+        value-type: uint8
+        members:
+            - INIT
+            - RUN
+            - FINAL
+    phase_event_type:
+        class: struct
+        fields:
+            method: esmf_method_type
+            phase: uint16      
+  clocks:
+    sys_clock:
+      description: System clock
+  trace:
+    byte-order: le
+  streams:
+    default:
+      packet-context-type:
+        class: struct
+        fields:
+          timestamp_begin: clock-int
+          timestamp_end: clock-int
+          packet_size: uint32
+          content_size: uint32
+          pet: uint32
+      event-header-type:
+        class: struct
+        fields:
+            id: uint32
+            timestamp: clock-int
+      events:
+        phase_enter:
+            payload-type: phase_event_type                  
+        phase_exit:
+            payload-type: phase_event_type
+        phase_prologue_enter:
+            payload-type: phase_event_type
+        phase_prologue_exit:
+            payload-type: phase_event_type  
+        phase_epilogue_enter:
+            payload-type: phase_event_type
+        phase_epilogue_exit:
+            payload-type: phase_event_type  
+            
