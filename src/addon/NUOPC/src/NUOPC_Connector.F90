@@ -1142,6 +1142,8 @@ print *, "current bondLevel=", bondLevel
     type(ESMF_Grid)                 :: grid
     type(ESMF_Mesh)                 :: mesh
     type(ESMF_LocStream)            :: locstream
+    type(ESMF_StaggerLoc)           :: staggerloc
+    type(ESMF_MeshLoc)              :: meshloc
     type(ESMF_DistGrid)             :: providerDG, acceptorDG
     type(ESMF_DistGrid)             :: providerDG_nodal, acceptorDG_nodal
     type(ESMF_VM)                   :: vm
@@ -1351,7 +1353,8 @@ print *, "current bondLevel=", bondLevel
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
         if (geomtype==ESMF_GEOMTYPE_GRID) then
-          call ESMF_FieldGet(providerField, grid=grid, rc=rc)
+          call ESMF_FieldGet(providerField, grid=grid, staggerloc=staggerloc, &
+            rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
           call ESMF_GridGet(grid, distgrid=providerDG, name=geomobjname, &
@@ -1379,10 +1382,10 @@ print *, "current bondLevel=", bondLevel
             vm=vm, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-          call ESMF_FieldEmptySet(acceptorField, grid=grid, rc=rc)
+          call ESMF_FieldEmptySet(acceptorField, grid=grid, &
+            staggerloc=staggerloc, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-
           ! bring over more info as attributes
           call ESMF_FieldGet(providerField, grid=grid, &
             dimCount=fieldDimCount, rc=rc)
@@ -1478,7 +1481,7 @@ print *, "current bondLevel=", bondLevel
             deallocate(ungriddedUBound)
           endif
         elseif (geomtype==ESMF_GEOMTYPE_MESH) then
-          call ESMF_FieldGet(providerField, mesh=mesh, rc=rc)
+          call ESMF_FieldGet(providerField, mesh=mesh, meshloc=meshloc, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
           call ESMF_MeshGet(mesh, elementDistgrid=providerDG, &
@@ -1499,7 +1502,8 @@ print *, "current bondLevel=", bondLevel
             rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-          call ESMF_FieldEmptySet(acceptorField, mesh=mesh, rc=rc)
+          call ESMF_FieldEmptySet(acceptorField, mesh=mesh, meshloc=meshloc, &
+            rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
         elseif (geomtype==ESMF_GEOMTYPE_LOCSTREAM) then
@@ -1579,6 +1583,8 @@ print *, "current bondLevel=", bondLevel
     type(ESMF_GeomType_Flag)        :: geomtype
     type(ESMF_Grid)                 :: providerGrid, acceptorGrid
     type(ESMF_Mesh)                 :: providerMesh, acceptorMesh
+    type(ESMF_StaggerLoc)           :: staggerloc
+    type(ESMF_MeshLoc)              :: meshloc
     type(ESMF_LocStream)            :: providerLocstream, acceptorLocstream
     logical                         :: meshNoConnections
     type(ESMF_DistGrid)             :: distgrid, eDistgrid, nDistgrid
@@ -1783,7 +1789,8 @@ print *, "current bondLevel=", bondLevel
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
         if (geomtype==ESMF_GEOMTYPE_GRID) then
-          call ESMF_FieldGet(providerField, grid=providerGrid, rc=rc)
+          call ESMF_FieldGet(providerField, grid=providerGrid, &
+            staggerloc=staggerloc, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
           call ESMF_GridGet(providerGrid, name=geomobjname, rc=rc)
@@ -1799,11 +1806,13 @@ print *, "current bondLevel=", bondLevel
             name=geomobjname, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-          call ESMF_FieldEmptySet(acceptorField, grid=acceptorGrid, rc=rc)
+          call ESMF_FieldEmptySet(acceptorField, grid=acceptorGrid, &
+            staggerloc=staggerloc, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
         elseif (geomtype==ESMF_GEOMTYPE_MESH) then
-          call ESMF_FieldGet(providerField, mesh=providerMesh, rc=rc)
+          call ESMF_FieldGet(providerField, mesh=providerMesh, &
+            meshloc=meshloc, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out            
           call ESMF_MeshGet(providerMesh, isMemFreed=meshNoConnections, rc=rc)
@@ -1833,7 +1842,8 @@ print *, "current bondLevel=", bondLevel
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
           endif
-          call ESMF_FieldEmptySet(acceptorField, mesh=acceptorMesh, rc=rc)
+          call ESMF_FieldEmptySet(acceptorField, mesh=acceptorMesh, &
+            meshloc=meshloc, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
         elseif (geomtype==ESMF_GEOMTYPE_LOCSTREAM) then
