@@ -30,7 +30,9 @@ program ESMF_DistGridEx
   type(ESMF_DELayout):: delayout
   type(ESMF_DistGrid):: distgrid
   integer, allocatable:: dimExtent(:,:), localIndexList(:)
-  integer, allocatable:: minIndex(:,:), maxIndex(:,:), regDecomp(:,:)
+  integer, allocatable:: minIndexPTile(:,:), maxIndexPTile(:,:)
+  integer, allocatable:: regDecompPTile(:,:)
+  integer, allocatable:: minIndex(:), maxIndex(:)
   integer, allocatable:: deBlockList(:,:,:)
   type(ESMF_DistGridConnection), allocatable:: connectionList(:)
   integer, allocatable:: localDeToDeMap(:), arbSeqIndexList(:)
@@ -596,6 +598,7 @@ program ESMF_DistGridEx
     deBlockList=deBlockList, rc=rc)
 !EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  deallocate(deBlockList)
 
 !  call ESMF_DistGridPrint(distgrid, rc=rc)
 !  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
@@ -641,14 +644,14 @@ program ESMF_DistGridEx
 ! {\tt minIndex} and {\tt maxIndex} arrays.
 !EOE
 !BOC
-  allocate(minIndex(2,3))    ! (dimCount, number of tiles)
-  allocate(maxIndex(2,3))    ! (dimCount, number of tiles)
-  minIndex(:,1) = (/11,1/)
-  maxIndex(:,1) = (/20,10/)
-  minIndex(:,2) = (/11,11/)
-  maxIndex(:,2) = (/20,20/)
-  minIndex(:,3) = (/1,11/)
-  maxIndex(:,3) = (/10,20/)
+  allocate(minIndexPTile(2,3))    ! (dimCount, tileCount)
+  allocate(maxIndexPTile(2,3))    ! (dimCount, tileCount)
+  minIndexPTile(:,1) = (/11,1/)
+  maxIndexPTile(:,1) = (/20,10/)
+  minIndexPTile(:,2) = (/11,11/)
+  maxIndexPTile(:,2) = (/20,20/)
+  minIndexPTile(:,3) = (/1,11/)
+  maxIndexPTile(:,3) = (/10,20/)
 !EOC  
 !BOE
 ! Next the regular decomposition for each tile is set up in the
@@ -656,17 +659,17 @@ program ESMF_DistGridEx
 ! single DE.
 !EOE
 !BOC
-  allocate(regDecomp(2,3))    ! (dimCount, number of tiles)
-  regDecomp(:,1) = (/1,1/)    ! one DE
-  regDecomp(:,2) = (/1,1/)    ! one DE
-  regDecomp(:,3) = (/1,1/)    ! one DE
+  allocate(regDecompPTile(2,3))    ! (dimCount, tileCount)
+  regDecompPTile(:,1) = (/1,1/)    ! one DE
+  regDecompPTile(:,2) = (/1,1/)    ! one DE
+  regDecompPTile(:,3) = (/1,1/)    ! one DE
 !EOC  
 !BOE
 ! Finally the DistGrid can be created by calling
 !EOE
 !BOC
-  distgrid = ESMF_DistGridCreate(minIndexPTile=minIndex, &
-    maxIndexPTile=maxIndex, regDecompPTile=regDecomp, rc=rc)
+  distgrid = ESMF_DistGridCreate(minIndexPTile=minIndexPTile, &
+    maxIndexPTile=maxIndexPTile, regDecompPTile=regDecompPTile, rc=rc)
 !EOC  
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
@@ -691,12 +694,12 @@ program ESMF_DistGridEx
 ! following case where the multi-tile global domain is decomposed into 9 DEs,
 !EOE
 !BOC
-  regDecomp(:,1) = (/2,2/)    ! 4 DEs
-  regDecomp(:,2) = (/1,3/)    ! 3 DEs
-  regDecomp(:,3) = (/2,1/)    ! 2 DEs
+  regDecompPTile(:,1) = (/2,2/)    ! 4 DEs
+  regDecompPTile(:,2) = (/1,3/)    ! 3 DEs
+  regDecompPTile(:,3) = (/2,1/)    ! 2 DEs
   
-  distgrid = ESMF_DistGridCreate(minIndexPTile=minIndex, &
-    maxIndexPTile=maxIndex, regDecompPTile=regDecomp, rc=rc)
+  distgrid = ESMF_DistGridCreate(minIndexPTile=minIndexPTile, &
+    maxIndexPTile=maxIndexPTile, regDecompPTile=regDecompPTile, rc=rc)
 !EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
@@ -705,6 +708,9 @@ program ESMF_DistGridEx
 
   call ESMF_DistGridDestroy(distgrid, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+  deallocate(minIndexPTile, maxIndexPTile, regDecompPTile)
+
 !BOE
 ! resulting in the following decomposition:
 ! \begin{verbatim}
@@ -853,65 +859,628 @@ program ESMF_DistGridEx
 
 
 !BOE
-! \subsubsection{Single tile DistGrid with periodic boundaries}
+! \subsubsection{DistGrid Connections - Definition}
 ! 
-! By default the edges of all tiles have solid wall boundary conditions. 
-! Periodic boundary conditions can be imposed by specifying connections between
-! tiles. For the single LR domain of the last section periodic boundaries 
-! along the first dimension are imposed by adding a {\tt connectionList} 
-! argument with only one element to the create call.
+! By default all of the edges of the index space tiles making up a DistGrid
+! are open. There is no sense of connectedness between the tiles. This situation
+! is shown for a simple 2 tile DistGrid.
+!EOE
+!BOC
+  allocate(minIndexPTile(2,2))    ! (dimCount, tileCount)
+  allocate(maxIndexPTile(2,2))    ! (dimCount, tileCount)
+  minIndexPTile(:,1) = (/1,1/)
+  maxIndexPTile(:,1) = (/10,10/)
+  minIndexPTile(:,2) = (/11,1/)
+  maxIndexPTile(:,2) = (/20,10/)
+  
+  distgrid = ESMF_DistGridCreate(minIndexPTile=minIndexPTile, &
+    maxIndexPTile=maxIndexPTile, rc=rc)
+!EOC  
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  call ESMF_DistGridDestroy(distgrid, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOE
+! \begin{figure}[h]
+!   \caption{Two 10x10 index space tiles next to each other without
+!     connections. Both tiles operate in the same global index space chosen 
+!     by {\tt ESMF\_INDEX\_GLOBAL} when creating the DistGrid object.
+!     The index tuples held by the DistGrid are represented by the vertices of
+!     the shown grid structure. The index tuple (11,3), which is referenced in
+!     the text, is marked by a black circle.}
+!   \centering
+!   \includegraphics{dgconnect_2tiles_not_connected.eps}
+!   \label{fig:dgconnect_2tiles_not_connected}
+! \end{figure}
+!
+! Connections between index space tiles are specified during DistGrid
+! creation through the {\tt connectionList} argument. This argument takes
+! a list of elements of {\tt type(ESMF\_DistGridConnection)}. Each element
+! refers to one specific connection between any two tiles.
+!
+! Each connection is defined by 4 parameters:
+! \begin{itemize}
+! \item {\tt tileIndexA} - The tile index of the "A" side of the connection.
+! \item {\tt tileIndexB} - The tile index of the "B" side of the connection.
+! \item {\tt positionVector} - A vector containing information about the
+!                              translation of the index space of tile "B" 
+!                              relative to tile "A". This vector has as many
+!                              components as there are index space dimensions.
+! \item {\tt orientationVector} - A vector containing information about
+!                                 the rotation of the index space of tile "B"
+!                                 relative to tile "A". This vector has as many
+!                                 components as there are index space dimensions.
+! \end{itemize}
+!
+! The underlying principle of the DistGrid connections is that all supported
+! connections can be written as a forward transformation of the form
+! \begin{equation}
+! \label{eqn:dg_forward_connect_form}
+! \vec a \rightarrow \vec b = \hat R \vec a + \vec P.
+! \end{equation}
+! This transform takes the index space tuple $\vec a$ of a point in the 
+! reference frame of tile "A" and expresses it as tuple $\vec b$ in terms of
+! the index space defined by tile "B". Here $\hat R$
+! is a general rotation operator, and $\vec P$ is a translation vector in index
+! space. $\hat R$ and $\vec P$ correspond to the {\tt orientationVector} and
+! {\tt positionVector}, respectively.
+!
+! As an example consider the index space point marked by the black circle in
+! figure \ref{fig:dgconnect_2tiles_not_connected}. In the reference frame of
+! tile 1 the point has an index tuple of (11,3). Because of the global index
+! space ({\tt ESMF\_INDEX\_GLOBAL}), the point has the same index
+! tuple of (11,3) in the reference frame of tile 2. Therefore, the connection
+! that connects the right edge of tile 1 with the left edge of tile 2 has
+! $\hat R ={1\!\!1}$ (default orientation) and $\vec P = (0,0)$. Therefore 
+! the connection can be set by the following code. The resulting situation is
+! shown in figure \ref{fig:dgconnect_2tiles_connected}.
 !EOE
 !BOC
   allocate(connectionList(1))
-!EOC
-!BOE
-!
-! The connection element holds information about {\tt tileIndex\_A}, 
-! {\tt tileIndex\_B}, {\tt positionVector}, and {\tt orientationVector/)}.
-!EOE
-!BOC
   call ESMF_DistGridConnectionSet(connection=connectionList(1), &
-     tileIndexA=1, tileIndexB=1, &
-     positionVector=(/5, 0/), &
-     orientationVector=(/1, 2/), &
-     rc=rc)
+    tileIndexA=1, tileIndexB=2, positionVector=(/0,0/), rc=rc)
 !EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-!BOE
-! \begin{sloppypar}
-! The {\tt tileIndexA} and {\tt tileIndexB} arguments specify that this is a
-! connection within tile 1. The {\tt positionVector} indicates that there is no
-! offset between tileB and tileA along the second dimension, but there is
-! an offset of 5 along the first dimension (which in this case is the length of
-! dimension 1). This aligns tileB (which is tile 1) right next to tileA
-! (which is also tile 1).
-! \end{sloppypar}
-!
-! The {\tt orientationVector} fixes the orientation of the tileB index space to
-! be the same as the orientation of tileA (it maps index 1 of tileA to index 1
-! of tileB and the same for index 2). The {\tt orientationVector} could have
-! been omitted in this case which corresponds to the default orientation.
-!
-! The {\tt connectionList} can now be used to create a {\tt DistGrid} object 
-! with the desired boundary conditions.
 !BOC
-  distgrid = ESMF_DistGridCreate(minIndex=(/1,1/), maxIndex=(/5,5/), &
-    deBlockList=deBlockList, connectionList=connectionList, rc=rc)
-!EOC
+  distgrid = ESMF_DistGridCreate(minIndexPTile=minIndexPTile, &
+    maxIndexPTile=maxIndexPTile, connectionList=connectionList, &
+    rc=rc)  ! defaults to ESMF_INDEX_GLOBAL
+!EOC  
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-  
-  call ESMF_DistGridPrint(distgrid, rc=rc)
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-  
   call ESMF_DistGridDestroy(distgrid, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-!BOC
+
+  deallocate(minIndexPTile, maxIndexPTile)
   deallocate(connectionList)
-!EOC
-  deallocate(deBlockList)
 !BOE
-! This closes the tile along the first dimension on itself, thus imposing
-! periodic boundaries along this direction.
+! The same topology can be defined for {\tt ESMF\_INDEX\_DELOCAL} indexing.
+! However, the {\tt positionVector} must be adjusted for the fact that now
+! the same point in index space has different index tuples depending on what
+! tile's reference frame is used.
+!
+! With local indexing both tiles start at (1,1) and end at (10,10).
+!BOC
+  allocate(minIndexPTile(2,2))    ! (dimCount, tileCount)
+  allocate(maxIndexPTile(2,2))    ! (dimCount, tileCount)
+  minIndexPTile(:,1) = (/1,1/)
+  maxIndexPTile(:,1) = (/10,10/)
+  minIndexPTile(:,2) = (/1,1/)
+  maxIndexPTile(:,2) = (/10,10/)
+!EOC
+!BOE
+! To see the impact that the index scheme has on the {\tt positionVector},
+! again consider the same highlighted index space point. The index tuple
+! for this point is still (11,3) in the reference frame of tile 1 (tile "A" of
+! the connection). However, in the reference frame of of tile 2 
+! (tile "B" of the connection)) it has changed to (1,3) due to local indexing.
+! Therefore, using form (\ref{eqn:dg_forward_connect_form}), we find that the
+! position vector must be $\vec P = \vec b - \vec a = (1,3) - (11,3) = (-10,0)$.
+!BOC
+  allocate(connectionList(1))
+  call ESMF_DistGridConnectionSet(connection=connectionList(1), &
+    tileIndexA=1, tileIndexB=2, positionVector=(/-10,0/), rc=rc)
+!EOC
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOC
+  distgrid = ESMF_DistGridCreate(minIndexPTile=minIndexPTile, &
+    maxIndexPTile=maxIndexPTile, connectionList=connectionList, &
+    indexflag=ESMF_INDEX_DELOCAL, rc=rc)
+!EOC  
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  call ESMF_DistGridDestroy(distgrid, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+  deallocate(minIndexPTile, maxIndexPTile)
+  deallocate(connectionList)
+!BOE
+!
+! \begin{figure}[h]
+!   \caption{Two 10x10 index space tiles next to each other with a single
+!     connection between the right edge of tile 1 and the left edge of tile 2.
+!     The index tuple (11,3), which is referenced in
+!     the text, is marked by a black circle.}
+!   \centering
+!   \includegraphics{dgconnect_2tiles_connected.eps}
+!   \label{fig:dgconnect_2tiles_connected}
+! \end{figure}
+!
+! Further note that every forward transformation has an associated inverse, or
+! backward transformation from tile "B" into the reference frame of tile "A". 
+! Inverting the forward transform yields the backward transform as
+! \begin{equation}
+! \vec b \rightarrow \vec a = \hat R^{-1} \vec b - \hat R^{-1} \vec P.
+! \end{equation}
+! The DistGrid implicitly considers the corresponding backward connection for 
+! every forward connection that is specified explicitly. In other words,
+! DistGrid connections are bidirectional.
+! 
+! Before going into the details of how the {\tt orientationVector} and 
+! {\tt positionVector} arguments correspond to $\hat R$ and $\vec P$ for more
+! complex cases, it is useful to explore what class of connections are covered
+! by the above introduced form (\ref{eqn:dg_forward_connect_form}) of
+! $ \vec a \rightarrow \vec b$.
+!
+! First consider the case where tile "A" is rotated by $\hat R$
+! relative to tile "B" around a general pivot point $\vec p$ given in terms 
+! of the index space of tile "A":
+!
+! \begin{eqnarray}
+! \label{eqn:dg_forward_connect_pivot}
+! \vec a \rightarrow \vec b & = & \hat R (\vec a - \vec p) + \vec p \nonumber \\
+!   & = & \hat R \vec a +  ({1\!\!1} - \hat R) \vec p
+! \end{eqnarray}
+! 
+! With substitution 
+! \begin{equation}
+! \vec P = ({1\!\!1} - \hat R) \vec p
+! \end{equation}
+! form (\ref{eqn:dg_forward_connect_form}) is recovered.
+!
+! Next consider transform (\ref{eqn:dg_forward_connect_pivot}) followed by
+! a translation $\vec t$ of tile "B" relative to tile "A":
+!
+! \begin{equation}
+! \label{eqn:dg_forward_connect_pivot_trans}
+! \vec a \rightarrow \vec b =
+!   \hat R \vec a +  ({1\!\!1} - \hat R) \vec p + \vec t.
+! \end{equation}
+! 
+! Again form (\ref{eqn:dg_forward_connect_form}) is recovered with the 
+! appropriate subsitution:
+! \begin{equation}
+! \label{eqn:dg_forward_connect_pivot_trans_pv}
+! \vec P = ({1\!\!1} - \hat R) \vec p + \vec t.
+! \end{equation}
+!
+! Equation (\ref{eqn:dg_forward_connect_pivot_trans_pv}) is the general
+! definition of the {\tt positionVector} argument for DistGrid connections.
+! It allows two tiles to be connected according to the relationship expressed
+! by (\ref{eqn:dg_forward_connect_pivot_trans}). Note that this formualation of
+! tile connections is more general than connecting an edge of a tile to the
+! edge of another tile. Instead a DistGrid connection is specified as a general 
+! relationship between the two index spaces, accounting for possible rotation 
+! and translation. This formuation supports situations where some elements of
+! the connected tiles overlap with each other in index space. The ESMF 
+! DistGrid class leverages this feature when representing topologies that
+! lead to redundancies of elements. Examples for this are the bipolar cut line
+! in a tripole grid, or the edges of a cubed sphere.
+!
+! By definition, DistGrid connections associate an index tuple of one tile
+! with exactly one index tuple expressed in the reference frame of another tile.
+! This restricts the supported rotations $\hat R$ to multiples of $90^{\circ}$.
+! Also allowing invesion of index space dimensions leads to 8 unique 
+! operations in two dimension shown in table \ref{tab:dg_ops}.
+!
+! \begin{table}[here]
+! \centering
+! \caption{The 8 unique rotational operations in 2 dimensional index space. The
+! associated {\tt orientationVector} argument for each operation is also shown.}
+! \label{tab:dg_ops}
+! \begin{tabular}{@{}|c|c|c|@{}}\hline
+! & $\hat R$ & {\tt orientationVector} \\ \hline
+!  $0^{\circ}$ &
+!  $\left( \begin{array}{rr}
+!    1 & 0 \\
+!    0 & 1 \end{array} \right)$ &
+!  $\left( \begin{array}{r}
+!    1 \\
+!    2 \end{array} \right)$          \\ \hline
+!  $90^{\circ}$ &
+!  $\left( \begin{array}{rr}
+!    0 & -1 \\
+!    1 & 0 \end{array} \right)$ &
+!  $\left( \begin{array}{r}
+!    -2 \\
+!    1 \end{array} \right)$          \\ \hline
+!  $180^{\circ}$ &
+!  $\left( \begin{array}{rr}
+!    -1 & 0 \\
+!    0 & -1 \end{array} \right)$ &
+!  $\left( \begin{array}{r}
+!    -1 \\
+!    -2 \end{array} \right)$          \\ \hline
+!  $270^{\circ}$ &
+!  $\left( \begin{array}{rr}
+!    0 & 1 \\
+!    -1 & 0 \end{array} \right)$ &
+!  $\left( \begin{array}{r}
+!    2 \\
+!    -1 \end{array} \right)$          \\ \hline
+!  $0^{\circ}$ + inversion dim 1&
+!  $\left( \begin{array}{rr}
+!    -1 & 0 \\
+!    0 & 1 \end{array} \right)$ &
+!  $\left( \begin{array}{r}
+!    -1 \\
+!    2 \end{array} \right)$          \\ \hline
+!  $0^{\circ}$ + inversion dim 2&
+!  $\left( \begin{array}{rr}
+!    1 & 0 \\
+!    0 & -1 \end{array} \right)$ &
+!  $\left( \begin{array}{r}
+!    1 \\
+!    -2 \end{array} \right)$          \\ \hline
+!  $90^{\circ}$ + inversion dim 1&
+!  $\left( \begin{array}{rr}
+!    0 & 1 \\
+!    1 & 0 \end{array} \right)$ &
+!  $\left( \begin{array}{r}
+!    2 \\
+!    1 \end{array} \right)$          \\ \hline
+!  $90^{\circ}$ + inversion dim 2&
+!  $\left( \begin{array}{rr}
+!    0 & -1 \\
+!    -1 & 0 \end{array} \right)$ &
+!  $\left( \begin{array}{r}
+!    -2 \\
+!    -1 \end{array} \right)$          \\ \hline
+! \end{tabular}
+! \end{table}
+!
+! The {\tt orientationVector} is simply a more compact format holding the same 
+! information provided by the 8 rotational matrices. The first (or top) element
+! of the orientation vector indicates which dimension of the tile "A" index
+! tuple is used for the first dimension of the tile "B" tuple. The second 
+! (or bottom) element of the orientation vector indicates which dimension of the
+! tile "A" index tuple is used for the second dimenson of the tile "B" tuple.
+! If an orientation vector entry is negative, the sign of the associated
+! tuple element is inverted when going from tile "A" to tile "B" reference 
+! frame. Table \ref{tab:dg_ops} provides the corresponding 
+! {\tt orientationVector} argument for each of the 8 2D rotational operations.
+!EOE
+
+!BOE
+! \subsubsection{DistGrid Connections - Single tile periodic and pole connections}
+! 
+! The concept of DistGrid connections is not limited to cases with multiple
+! tiles. Even a single tile DistGrid can have connections. In this instance
+! {\tt tileA} and {\tt tileB} simply reference the same tile. A very common
+! case is that of a single tile with periodic boundary conditions.
+!
+! First consider a single tile DistGrid without connections.
+!BOC
+  distgrid = ESMF_DistGridCreate(minIndex=(/1,1/), maxIndex=(/50,20/), rc=rc)
+!EOC  
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  call ESMF_DistGridDestroy(distgrid, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOE
+! In order to better visualize the topology, the first index space
+! dimension is associated with the longitude ($0^{\circ}..360^{\circ}$), and
+! the second dimension with latitude ($-80^{\circ}..+80^{\circ}$) of the unit
+! sphere (using an ESMF\_Grid object) as shown in figure 
+! \ref{fig:dgconnect_1tile_not_connected}.
+!
+!
+! \begin{figure}[h]
+!   \caption{A single 50x20 index space tile without connections. For better
+!     visualization the index space points are plotted on the unit circle.
+!     The gap between the right and left edge of the tile is visible. Further
+!     the top and the bottom edges of the tile are visibly without
+!     connection.}
+!   \centering
+!   \includegraphics{dgconnect_1tile_not_connected.eps}
+!   \label{fig:dgconnect_1tile_not_connected}
+! \end{figure}
+!
+!
+! A single DistGrid connection is needed to connect the right edge of the 
+! index space tile with its left edge. Connecting a tile with itself in such
+! manner leads to a periodic topology.
+!
+! First the {\tt connectionList} needs to be allocated for a single connection.
+! Then the connection is defined with both {\tt tileIndexA} and 
+! {\tt tileIndexB} set to 1, referring to the first, and only tile in this case.
+!EOE
+!BOC
+  allocate(connectionList(1))
+  call ESMF_DistGridConnectionSet(connection=connectionList(1), &
+    tileIndexA=1, tileIndexB=1, positionVector=(/-50,0/), rc=rc)
+!EOC
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOE
+! The {\tt positionVector} is determined by transformation 
+! (\ref{eqn:dg_forward_connect_form}), the fact that there is no rotation 
+! involved, and that stepping over the right edge needs to connect back to
+! the left edge. Therefore $\vec P = \vec b - \vec a = (1,j) - (51,j) = 
+! (-50,0)$. Here $j$ stands for an arbitrary value along the second index 
+! space dimension.
+! 
+! Creating a DistGrid on the same index space tile, but with this connection,
+! results in a periodic boundary condition along the first dimension.
+! This is shown in figure \ref{fig:dgconnect_1tile_periodic1_connected}. 
+!
+!EOE
+!BOC
+  distgrid = ESMF_DistGridCreate(minIndex=(/1,1/), maxIndex=(/50,20/), &
+    connectionList=connectionList, rc=rc)
+!EOC  
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  call ESMF_DistGridDestroy(distgrid, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+  deallocate(connectionList)
+!BOE
+!BOE
+!
+! \begin{figure}[h]
+!   \caption{A single 50x20 index space tile with periodic connection along
+!     the first dimension.}
+!   \centering
+!   \includegraphics{dgconnect_1tile_periodic1_connected.eps}
+!   \label{fig:dgconnect_1tile_periodic1_connected}
+! \end{figure}
+!
+! 
+! In general it is more useful to express the position vector of a connection
+! in terms of the tile minIndex and maxIndex components. For this we define the
+! same index space tile in a set of variables.
+!EOE
+!BOC
+  allocate(minIndex(2))    ! (dimCount)
+  allocate(maxIndex(2))    ! (dimCount)
+  minIndex(:) = (/1,1/)
+  maxIndex(:) = (/50,20/)
+!EOC
+!BOE
+! Now we can code any connection on this tile in terms of {\tt minIndex} and
+! {\tt maxIndex}. For purpose of demonstration we define periodic boundary
+! conditions along both index space dimensions. The resulting torus topology
+! is depicted in figure \ref{fig:dgconnect_1tile_periodic2_connected}. 
+!EOE
+!BOC
+  allocate(connectionList(2))
+  call ESMF_DistGridConnectionSet(connection=connectionList(1), & ! 1st connection
+    tileIndexA=1, tileIndexB=1, &   ! periodic along i
+    positionVector=(/ -(maxIndex(1)-minIndex(1)+1) , 0/), &  
+    rc=rc) 
+!EOC
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOC
+  call ESMF_DistGridConnectionSet(connection=connectionList(2), & ! 2nd connection
+    tileIndexA=1, tileIndexB=1, &   ! periodic along j
+    positionVector=(/ 0 , -(maxIndex(2)-minIndex(2)+1) /), &  
+    rc=rc)
+!EOC
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOC
+  distgrid = ESMF_DistGridCreate(minIndex=minIndex, maxIndex=maxIndex, &
+    connectionList=connectionList, rc=rc)
+!EOC  
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  call ESMF_DistGridDestroy(distgrid, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+  deallocate(connectionList)
+!BOE
+!
+! \begin{figure}[h]
+!   \caption{A single 50x20 index space tile with periodic connections
+!    along both directions. The topology is that of a torus, however, because
+!    of the chosen spherical coordinates the connection through the middle 
+!    has the shape of a cylinder.}
+!   \centering
+!   \includegraphics{dgconnect_1tile_periodic2_connected.eps}
+!   \label{fig:dgconnect_1tile_periodic2_connected}
+! \end{figure}
+!
+! While the topology shown in figure 
+! \ref{fig:dgconnect_1tile_periodic2_connected} is that of a torus, the 
+! coordinates chosen are actually those of a sphere. Next we replace
+! the periodic connection along $j$ (i.e. the second index space dimension) 
+! with a more fitting pole connection at the top of the sphere 
+! (i.e. at $j_{max}$).
+!
+! For the orientation vector associated with a regular pole connection at 
+! $j_{max}$ we first look at how the two index space directions are affected. 
+! Looking at a point with $i$ along the first dimension, and a second point
+! $i+1$ that is just to the right of the first point, we see that as the 
+! pole is being crossed, the second point maps just right of the first point.
+! Therefore, the orientation of the first index space dimension is unaffected
+! by the pole connection. However, for the second dimension we find that
+! increasing $j$ on one side corresponds to a dereasing $j$ across the pole.
+! We thus have found the general fact that {\tt orientationVector=(1,-2)} for
+! a pole connection across the $j$ direction.
+!
+! In order to find the position vector of the polar connection we consider 
+! starting at a general point ($i$,$j_{max}$) at the top edge of the tile. 
+! Crossing the pole this takes us to a point that is again right on the 
+! top edge with $j=j_{max}$, and is $180^\circ$ rotated along the first 
+! dimension. This means $i=mod(i+i_{size}/2, i_{size})$, with $i_{size}=i_{max}
+! -i_{min}+1$.
+! In practice the modulo operation is automatically taken care of by the
+! periodic connection along $i$. We can therefore write:
+!
+! \begin{equation}
+! \vec a = \left( \begin{array}{l}
+!    i \\
+!    j_{max}+1 \end{array} \right)
+! \rightarrow
+! \vec b = \left( \begin{array}{l}
+!    i + i_{size}/2\\
+!    j_{max} \end{array} \right).
+! \end{equation}
+!
+! Using this observation, together with table \ref{tab:dg_ops} to 
+! translate the polar {\tt orientationVector} into a standard rotation 
+! operation $\hat R$, we get the position vector from equation
+! (\ref{eqn:dg_forward_connect_form}):
+! 
+! \begin{eqnarray}
+! \vec P & = & \vec b - \hat R \vec a \nonumber \\
+!        & = & \left( \begin{array}{l}
+!    i + i_{size}/2\\
+!    j_{max} \end{array} \right)
+! - \left( \begin{array}{rr}
+! 1 & 0 \\
+! 0 & -1 \end{array} \right)
+! \left( \begin{array}{l}
+!    i \\
+!    j_{max}+1 \end{array} \right) \nonumber \\
+!        & = & \left( \begin{array}{l}
+!    i_{size}/2\\
+!    2j_{max} +1 \end{array} \right).
+! \end{eqnarray}
+!EOE
+!BOC
+  allocate(connectionList(2))
+  call ESMF_DistGridConnectionSet(connection=connectionList(1), & ! 1st connection
+    tileIndexA=1, tileIndexB=1, &   ! periodic along i
+    positionVector=(/-(maxIndex(1)-minIndex(1)+1),0/), & 
+    rc=rc) 
+!EOC
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOC
+  call ESMF_DistGridConnectionSet(connection=connectionList(2), & ! 2nd connection
+    tileIndexA=1, tileIndexB=1, &   ! pole at j_max
+    orientationVector=(/1,-2/), &
+    positionVector=(/ (maxIndex(1)-minIndex(1)+1)/2 , 2*maxIndex(2)+1 /), & 
+    rc=rc)
+!EOC
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOC
+  distgrid = ESMF_DistGridCreate(minIndex=minIndex, maxIndex=maxIndex, &
+    connectionList=connectionList, rc=rc)
+!EOC  
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  call ESMF_DistGridDestroy(distgrid, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+  deallocate(connectionList)
+  
+!BOE
+! 
+! The pole connection at $j_{max}$ can clearly be seen in figure 
+! \ref{fig:dgconnect_1tile_peripole_connected}. Note that the chosen perspective 
+! hides the fact that the lower edge of the index space tile remains open.
+! In other words there is still a hole at the bottom of the sphere that cannot
+! be seen. Only three of the four sides have been connected so far: 
+! The first connection
+! connects the left and the right tile edges. The second connection connects
+! the top edge to itself to form the pole. A third connection would be needed,
+! e.g. to form a pole at the bottom edge much like the top edge.
+! This would then complete a perfectly spherical topology with a single tile.
+!
+! \begin{figure}[h]
+!   \caption{A single 50x20 index space tile with periodic connection
+!    along $i$, and pole at $j_{max}$. The hole at $j_{min}$ is hidden from
+!    sight.}
+!   \centering
+!   \includegraphics{dgconnect_1tile_peripole_connected.eps}
+!   \label{fig:dgconnect_1tile_peripole_connected}
+! \end{figure}
+!
+!
+! The final single tile topology discussed in this section is that of a tripole.
+! A tripolar sphere has the typical spherical periodic boundary condition
+! along one direction (e.g. connecting the left and the right tile edge), and a
+! regular monopole at one of the other edges of the tile. However, instead
+! of defining a second monopole at the opposite edge, a {\em bipole} connection
+! is chosen.
+!
+! Topologically a bipole connection can be thought of folding the respective
+! edge at the middle point back onto itself. Assuming the bipole at the top 
+! edge, i.e. at $j_{max}$, we get mappings across the bipole of 
+! $(i_{min}, j_{max}+1) \rightarrow (i_{max}, j_{max})$,
+! $(i_{min}+1, j_{max}+1) \rightarrow (i_{max}-1, j_{max})$, and so forth. 
+! This means that 
+! compared to the regular pole connection, the bipolar orientation vector
+! reverses the $i$ direction in addition to the $j$ direction: 
+! {\tt orientationVector=(-1,-2)}.
+!
+! Using the bipolar mapping just mentioned for a point at $i_{min}$, together
+! with table \ref{tab:dg_ops} to translate the polar {\tt orientationVector}
+! into a standard rotation  operation $\hat R$, we can solve for the position
+! vector according to equation (\ref{eqn:dg_forward_connect_form}):
+! 
+! \begin{eqnarray}
+! \vec P & = & \vec b - \hat R \vec a \nonumber \\
+!        & = & \left( \begin{array}{l}
+!    i_{max}\\
+!    j_{max} \end{array} \right)
+! - \left( \begin{array}{rr}
+! -1 & 0 \\
+! 0 & -1 \end{array} \right)
+! \left( \begin{array}{l}
+!    i_{min} \\
+!    j_{max}+1 \end{array} \right) \nonumber \\
+!        & = & \left( \begin{array}{l}
+!    i_{max}+i_{min}\\
+!    2j_{max} +1 \end{array} \right).
+! \end{eqnarray}
+!
+! Figure \ref{fig:dgconnect_1tile_peribipole_connected} visualizes the
+! bipolar topology at the top edge of the tile. Note, however, that the 
+! coordinates are perfectly spherical. Consequently there is no "drawing
+! shut" of the cut line as would be expected for a true bipolar geometry. 
+! Still, the two poles are becoming visible at the two opposing
+! ends of the top circle, where the distance between the connection lines is
+! starting to go to zero.
+!
+! \begin{figure}[h]
+!   \caption{A single 50x20 index space tile with periodic connection
+!    along $i$, and bi-pole at $j_{max}$. The regular pole connection
+!    at $j_{min}$ is hidden from sight.}
+!   \centering
+!   \includegraphics{dgconnect_1tile_peribipole_connected.eps}
+!   \label{fig:dgconnect_1tile_peribipole_connected}
+! \end{figure}
+!EOE
+!BOC
+  allocate(connectionList(3))
+  call ESMF_DistGridConnectionSet(connection=connectionList(1), & ! 1st connection
+    tileIndexA=1, tileIndexB=1, &   ! periodic along i
+    positionVector=(/-(maxIndex(1)-minIndex(1)+1),0/), & 
+    rc=rc) 
+!EOC
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOC
+  call ESMF_DistGridConnectionSet(connection=connectionList(2), & ! 2nd connection
+    tileIndexA=1, tileIndexB=1, &   ! pole at j_min
+    orientationVector=(/1,-2/), &
+    positionVector=(/ (maxIndex(1)-minIndex(1)+1)/2 , 2*minIndex(2)+1 /), & 
+    rc=rc)
+!EOC
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOC
+  call ESMF_DistGridConnectionSet(connection=connectionList(3), & ! 3rd connection
+    tileIndexA=1, tileIndexB=1, &   ! bi-pole at j_max
+    orientationVector=(/-1,-2/), &
+    positionVector=(/ maxIndex(1)+minIndex(1) , 2*maxIndex(2)+1 /), & 
+    rc=rc)
+!EOC
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOC
+  distgrid = ESMF_DistGridCreate(minIndex=minIndex, maxIndex=maxIndex, &
+    connectionList=connectionList, rc=rc)
+!EOC  
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  call ESMF_DistGridDestroy(distgrid, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+  deallocate(connectionList)
+!BOE
+! 
+!
 !EOE
 
 10 continue
