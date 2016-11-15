@@ -13,7 +13,12 @@ GRAPHFILES= dgconnect_2tiles_not_connected.eps \
             dgconnect_1tile_periodic1_connected.eps \
             dgconnect_1tile_periodic2_connected.eps \
             dgconnect_1tile_peripole_connected.eps \
-            dgconnect_1tile_peribipole_connected.eps
+            dgconnect_1tile_peribipole_connected.eps \
+            dgconnect_cusph_not_connected.eps \
+            dgconnect_cusph_5connected.eps \
+            dgconnect_cusph_6connected.eps \
+            dgconnect_cusph_2rotconnected.eps \
+            dgconnect_cusph_12connected.eps
 
 #
 # Tex Files to make

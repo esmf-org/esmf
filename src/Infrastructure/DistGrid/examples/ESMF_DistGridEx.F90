@@ -36,6 +36,7 @@ program ESMF_DistGridEx
   integer, allocatable:: deBlockList(:,:,:)
   type(ESMF_DistGridConnection), allocatable:: connectionList(:)
   integer, allocatable:: localDeToDeMap(:), arbSeqIndexList(:)
+  integer             :: tile, size, conn
   ! result code
   integer :: finalrc, result
   character(ESMF_MAXSTR) :: testname
@@ -1478,8 +1479,419 @@ program ESMF_DistGridEx
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   deallocate(connectionList)
+  deallocate(minIndex, maxIndex)
 !BOE
 ! 
+! \subsubsection{DistGrid Connections - Multi tile connections}
+! 
+! Starting point of the multi-tile connection examples will be the 
+! six tile case shown in figure \ref{fig:dgconnect_cusph_not_connected}. 
+! All six tiles are identical squares of size 10x10.
+!
+! \begin{figure}[h]
+!   \caption{Six 10x10 square index space tiles without connections. The tile
+!    number is indicated by color as indicated by the legend.}
+!   \centering
+!   \includegraphics{dgconnect_cusph_not_connected.eps}
+!   \label{fig:dgconnect_cusph_not_connected}
+! \end{figure}
+!
+! One geometrical interpretation of the six tiles shown is that of an unfolded 
+! cube. In fact, the way that the tiles are arranged in the 2D plane does 
+! suggest the cubic interpretation. In order to turn the six tiles into a 
+! cubic topology, each tile must be connected to its neighbors on all four 
+! sides. In total there will be 12 connections that need to be made.
+!
+! Choosing global indexing, the depicted six tile case can be created
+! in the following way:
+!EOE
+!BOC
+  allocate(minIndexPTile(2,6))    ! (dimCount, tileCount)
+  allocate(maxIndexPTile(2,6))    ! (dimCount, tileCount)
+  size = 10                       ! number of index space points along tile sides
+  !- tile 1
+  tile=1
+  minIndexPTile(1,tile)=1
+  minIndexPTile(2,tile)=1
+  maxIndexPTile(1,tile)=minIndexPTile(1,tile)+size-1
+  maxIndexPTile(2,tile)=minIndexPTile(2,tile)+size-1
+  !- tile 2
+  tile=2
+  minIndexPTile(1,tile)=maxIndexPTile(1,tile-1)+1
+  minIndexPTile(2,tile)=minIndexPTile(2,tile-1)
+  maxIndexPTile(1,tile)=minIndexPTile(1,tile)+size-1
+  maxIndexPTile(2,tile)=minIndexPTile(2,tile)+size-1
+  !- tile 3
+  tile=3
+  minIndexPTile(1,tile)=minIndexPTile(1,tile-1)
+  minIndexPTile(2,tile)=maxIndexPTile(2,tile-1)+1
+  maxIndexPTile(1,tile)=minIndexPTile(1,tile)+size-1
+  maxIndexPTile(2,tile)=minIndexPTile(2,tile)+size-1
+  !- tile 4
+  tile=4
+  minIndexPTile(1,tile)=maxIndexPTile(1,tile-1)+1
+  minIndexPTile(2,tile)=minIndexPTile(2,tile-1)
+  maxIndexPTile(1,tile)=minIndexPTile(1,tile)+size-1
+  maxIndexPTile(2,tile)=minIndexPTile(2,tile)+size-1
+  !- tile 5
+  tile=5
+  minIndexPTile(1,tile)=minIndexPTile(1,tile-1)
+  minIndexPTile(2,tile)=maxIndexPTile(2,tile-1)+1
+  maxIndexPTile(1,tile)=minIndexPTile(1,tile)+size-1
+  maxIndexPTile(2,tile)=minIndexPTile(2,tile)+size-1
+  !- tile 6
+  tile=6
+  minIndexPTile(1,tile)=maxIndexPTile(1,tile-1)+1
+  minIndexPTile(2,tile)=minIndexPTile(2,tile-1)
+  maxIndexPTile(1,tile)=minIndexPTile(1,tile)+size-1
+  maxIndexPTile(2,tile)=minIndexPTile(2,tile)+size-1
+  
+  distgrid = ESMF_DistGridCreate(minIndexPTile=minIndexPTile, &
+    maxIndexPTile=maxIndexPTile, rc=rc)
+!EOC  
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  call ESMF_DistGridDestroy(distgrid, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOE
+! 
+! The five connections between tiles 1\&2, 2\&3, 3\&4, 4\&5, 5\&6 are trivial.
+! There are no rotations, which means that the {\tt orientationVector} argument
+! can be ommitted in these connections. Further, because of the global index 
+! space, there are no translations either, which means that 
+! {\tt positionVector}=(0,0) for these five connections. The resulting
+! topology is shown in figure \ref{fig:dgconnect_cusph_5connected}.
+!EOE
+!BOC
+  allocate(connectionList(5))
+  !- connection 1
+  conn=1
+  call ESMF_DistGridConnectionSet(connection=connectionList(conn), &
+    tileIndexA=1, tileIndexB=2, positionVector=(/0, 0/), rc=rc)
+  !- connection 2
+  conn=2
+  call ESMF_DistGridConnectionSet(connection=connectionList(conn), &
+    tileIndexA=2, tileIndexB=3, positionVector=(/0, 0/), rc=rc)
+  !- connection 3
+  conn=3
+  call ESMF_DistGridConnectionSet(connection=connectionList(conn), &
+    tileIndexA=3, tileIndexB=4, positionVector=(/0, 0/), rc=rc)
+  !- connection 4
+  conn=4
+  call ESMF_DistGridConnectionSet(connection=connectionList(conn), &
+    tileIndexA=4, tileIndexB=5, positionVector=(/0, 0/), rc=rc)
+  !- connection 5
+  conn=5
+  call ESMF_DistGridConnectionSet(connection=connectionList(conn), &
+    tileIndexA=5, tileIndexB=6, positionVector=(/0, 0/), rc=rc)
+
+  distgrid = ESMF_DistGridCreate(minIndexPTile=minIndexPTile, &
+    maxIndexPTile=maxIndexPTile, connectionList=connectionList, rc=rc)
+!EOC  
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  call ESMF_DistGridDestroy(distgrid, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  deallocate(connectionList)
+!BOE
+! 
+! \begin{figure}[h]
+!   \caption{The six tiles of an unfolded cube with five connections defined.}
+!   \centering
+!   \includegraphics{dgconnect_cusph_5connected.eps}
+!   \label{fig:dgconnect_cusph_5connected}
+! \end{figure}
+!
+! The sixth connection that does not involve a rotation is that between tile
+! 1\&6. While there is no rotation involved, it does include a translation
+! because the bottom edge of tile 1 must reach all the way to the top edge 
+! of tile 6. This involves a translation along both the $i$ and the $j$ 
+! dimension. 
+!
+! Using the same procedure introduced in the previous section, we chose an
+! arbitrary index space point close to the connection and write it in terms
+! of both tiles that we want to connect. E.g. the first point of the top 
+! edge of tile 6 is
+!
+! {\tt ( minIndexPTile(1,6) , maxIndexPTile(2,6) )} 
+!
+! in terms of tile 6. However,
+! in terms of tile 1, going through the connection, it is
+!
+! {\tt ( minIndexPTile(1,1) , minIndexPTile(2,1)-1 )}.
+!
+! According to the general transformation relationship 
+! (\ref{eqn:dg_forward_connect_form}) the position vector $\vec P$ for the 
+! forward transform tile 1 $\rightarrow$ tile 6 is then given as the 
+! difference between these two representations. Figure 
+! \ref{fig:dgconnect_cusph_6connected} visualizes the situation.
+!EOE
+  allocate(connectionList(6))
+  !- connection 1
+  conn=1
+  call ESMF_DistGridConnectionSet(connection=connectionList(conn), &
+    tileIndexA=1, tileIndexB=2, positionVector=(/0, 0/), rc=rc)
+  !- connection 2
+  conn=2
+  call ESMF_DistGridConnectionSet(connection=connectionList(conn), &
+    tileIndexA=2, tileIndexB=3, positionVector=(/0, 0/), rc=rc)
+  !- connection 3
+  conn=3
+  call ESMF_DistGridConnectionSet(connection=connectionList(conn), &
+    tileIndexA=3, tileIndexB=4, positionVector=(/0, 0/), rc=rc)
+  !- connection 4
+  conn=4
+  call ESMF_DistGridConnectionSet(connection=connectionList(conn), &
+    tileIndexA=4, tileIndexB=5, positionVector=(/0, 0/), rc=rc)
+  !- connection 5
+  conn=5
+  call ESMF_DistGridConnectionSet(connection=connectionList(conn), &
+    tileIndexA=5, tileIndexB=6, positionVector=(/0, 0/), rc=rc)
+!BOC
+  !- connection 6
+  conn=6
+  call ESMF_DistGridConnectionSet(connection=connectionList(conn), &
+    tileIndexA=1, tileIndexB=6, &
+    positionVector=(/minIndexPTile(1,6)-minIndexPTile(1,1),     &
+                     maxIndexPTile(2,6)-minIndexPTile(2,1)+1/), &
+    rc=rc)
+  
+  distgrid = ESMF_DistGridCreate(minIndexPTile=minIndexPTile, &
+    maxIndexPTile=maxIndexPTile, connectionList=connectionList, rc=rc)
+!EOC  
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  call ESMF_DistGridDestroy(distgrid, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  deallocate(connectionList)
+!BOE
+! 
+! \begin{figure}[h]
+!   \caption{The six tiles of an unfolded cube with all six connections that
+!    do not involve any rotation of tiles.}
+!   \centering
+!   \includegraphics{dgconnect_cusph_6connected.eps}
+!   \label{fig:dgconnect_cusph_6connected}
+! \end{figure}
+!
+! The six remaining connections all involve rotations. The procedure for finding
+! the correct {\tt orientationVector} and {\tt positionVector} arguments
+! still remains the same: First determine the direction of the connection
+! to be formulated. This is important because for the forward connection the
+! rotation applies to tile "A". Once the correct rotation operation $\hat R$ is
+! pinned down, an arbitrary point close to the connection is chosen. This point
+! can either be on tile "A" or "B". It is written then written in terms of tile
+! "A" index space $\vec a$, and in terms of tile "B" index space $\vec b$. 
+! Obviously one of those formulations (either $\vec a$ or $\vec b$) will take
+! advantage of the connection, i.e. it will actually step outside the reference
+! tile in order to reach the chosen point. Finally the position vector $\vec P$ 
+! of the connection is determined by expression 
+! (\ref{eqn:dg_forward_connect_form}) as the difference:
+!
+! \begin{equation}
+! \label{eqn:dg_forward_pvec}
+! \vec P = \vec b - \hat R \vec a.
+! \end{equation}
+!
+! Following the above outlined procedure for connection tile 1 $\rightarrow$
+! tile 3, we find first that tile 1 needs to be rotated clockwise by $90^\circ$.
+! This rotation lines up the top edge of tile 1 with the left edge of
+! tile 3. A clockwise rotation of $90^\circ$ corresponds to a counter clockwise
+! rotation by $270^\circ$ given in table \ref{tab:dg_ops}. We therefore know
+! that {\tt orientationVector}=(2,-1) for this connection, and the associated
+! operation is $\hat R=\left(\begin{array}{rr}
+!    0 & 1 \\
+!    -1 & 0 \end{array} \right)$.
+!
+! Next we chose the first point on the top edge of tile 1 as a reference point.
+! In terms of tile 1 this point has coordinates
+!
+! $\vec a$ = {\tt ( minIndexPTile(1,1) , maxIndexPTile(2,1) )}.
+!
+! The same point in terms of tile 3 (going through the connection) has 
+! coordinates
+!
+! $\vec b$ = {\tt ( minIndexPTile(1,3)-1 , maxIndexPTile(2,3) )}.
+!
+! Using equation (\ref{eqn:dg_forward_pvec}) we find the position vector and
+! can write down the connection:
+!EOE
+!BOC
+  allocate(connectionList(2))
+  !- connection 1
+  conn=1
+  call ESMF_DistGridConnectionSet(connection=connectionList(conn), &
+    tileIndexA=1, tileIndexB=3, &
+    orientationVector=(/2,-1/), & ! 270 degree rotation of tile A
+    positionVector=(/minIndexPTile(1,3)-1-maxIndexPTile(2,1),   &
+                     maxIndexPTile(2,3)+minIndexPTile(1,1)+1/), &
+    rc=rc)
+!BOE
+! For greater clarity figure \ref{fig:dgconnect_cusph_2rotconnected} only
+! shows two connections. Besides the connection just defined between tile 1 
+! and 3, the other connection shown is between tile 4 and 6. Defining the
+! connection as forward going from tile 4 to tile 6 means that tile 4 needs
+! to be rotated in such a way that its right edge meets up with the bottom
+! edge of tile 6. This requires a counter clockwise rotation of tile 4 by
+! $90^\circ$. From table \ref{tab:dg_ops} we then get 
+! {\tt orientationVector}=(-2,1), and $\hat R=\left(\begin{array}{rr}
+!    0 & -1 \\
+!    1 & 0 \end{array} \right)$.
+!
+! Choosing the left most point on the bottom edge of tile 6 as the reference
+! point, we find the coordinates in terms of tile 4 (through the connection)
+!
+! $\vec a$ = {\tt ( maxIndexPTile(1,4)+1 , maxIndexPTile(2,4) )},
+!
+! and in terms of tile 6
+!
+! $\vec b$ = {\tt ( minIndexPTile(1,6) , minIndexPTile(2,6) )}.
+!
+! Again using equation (\ref{eqn:dg_forward_pvec}) we find the position vector
+! and can implement the second connection:
+!EOE
+!BOC
+  !- connection 2
+  conn=2
+  call ESMF_DistGridConnectionSet(connection=connectionList(conn), &
+    tileIndexA=4, tileIndexB=6, &
+    orientationVector=(/-2,1/), & ! 90 degree rotation of tile A
+    positionVector=(/minIndexPTile(1,6)+maxIndexPTile(2,4),   &
+                     minIndexPTile(2,6)-maxIndexPTile(1,4)-1/), &
+    rc=rc)
+
+  distgrid = ESMF_DistGridCreate(minIndexPTile=minIndexPTile, &
+    maxIndexPTile=maxIndexPTile, connectionList=connectionList, rc=rc)
+!EOC  
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  call ESMF_DistGridDestroy(distgrid, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  deallocate(connectionList)
+!BOE
+! 
+! \begin{figure}[h]
+!   \caption{The six tiles of an unfolded cube with two connections that
+!    involve rotation of tiles.}
+!   \centering
+!   \includegraphics{dgconnect_cusph_2rotconnected.eps}
+!   \label{fig:dgconnect_cusph_2rotconnected}
+! \end{figure}
+!
+! The remaining four connections with rotations can be determined following the
+! exact same recipe. The following code finally defines all 12 connections 
+! needed to connect the six index space tiles into a cubic topology.
+!EOE
+!BOC
+  allocate(connectionList(12))
+
+  !- connection 1: tile 1 -> tile 2
+  conn=1
+  call ESMF_DistGridConnectionSet(connection=connectionList(conn), &
+    tileIndexA=1, tileIndexB=2, positionVector=(/0, 0/), rc=rc)
+
+  !- connection 2: tile 2 -> tile 3
+  conn=2
+  call ESMF_DistGridConnectionSet(connection=connectionList(conn), &
+    tileIndexA=2, tileIndexB=3, positionVector=(/0, 0/), rc=rc)
+
+  !- connection 3: tile 3 -> tile 4
+  conn=3
+  call ESMF_DistGridConnectionSet(connection=connectionList(conn), &
+    tileIndexA=3, tileIndexB=4, positionVector=(/0, 0/), rc=rc)
+
+  !- connection 4: tile 4 -> tile 5
+  conn=4
+  call ESMF_DistGridConnectionSet(connection=connectionList(conn), &
+    tileIndexA=4, tileIndexB=5, positionVector=(/0, 0/), rc=rc)
+
+  !- connection 5: tile 5 -> tile 6
+  conn=5
+  call ESMF_DistGridConnectionSet(connection=connectionList(conn), &
+    tileIndexA=5, tileIndexB=6, positionVector=(/0, 0/), rc=rc)
+
+  !- connection 6: tile 1 -> tile 6
+  conn=6
+  call ESMF_DistGridConnectionSet(connection=connectionList(conn), &
+    tileIndexA=1, tileIndexB=6, &
+    positionVector=(/minIndexPTile(1,6)-minIndexPTile(1,1),     &
+                     maxIndexPTile(2,6)-minIndexPTile(2,1)+1/), &
+    rc=rc)
+
+  !- connection 7: tile 1 -> tile 3
+  conn=7
+  call ESMF_DistGridConnectionSet(connection=connectionList(conn), &
+    tileIndexA=1, tileIndexB=3, &
+    orientationVector=(/2,-1/), & ! 270 degree rotation of tile A
+    positionVector=(/minIndexPTile(1,3)-1-maxIndexPTile(2,1), &
+                     maxIndexPTile(2,3)+minIndexPTile(1,1)/), &
+    rc=rc)
+
+  !- connection 8: tile 3 -> tile 5
+  conn=8
+  call ESMF_DistGridConnectionSet(connection=connectionList(conn), &
+    tileIndexA=3, tileIndexB=5, &
+    orientationVector=(/2,-1/), & ! 270 degree rotation of tile A
+    positionVector=(/minIndexPTile(1,5)-1-maxIndexPTile(2,3), &
+                     maxIndexPTile(2,5)+minIndexPTile(1,3)/), &
+    rc=rc)
+
+  !- connection 9: tile 5 -> tile 1
+  conn=9
+  call ESMF_DistGridConnectionSet(connection=connectionList(conn), &
+    tileIndexA=5, tileIndexB=1, &
+    orientationVector=(/2,-1/), & ! 270 degree rotation of tile A
+    positionVector=(/minIndexPTile(1,1)-1-maxIndexPTile(2,5), &
+                     maxIndexPTile(2,1)+minIndexPTile(1,5)/), &
+    rc=rc)
+
+  !- connection 10: tile 2 -> tile 4
+  conn=10
+  call ESMF_DistGridConnectionSet(connection=connectionList(conn), &
+    tileIndexA=2, tileIndexB=4, &
+    orientationVector=(/-2,1/), & ! 90 degree rotation of tile A
+    positionVector=(/minIndexPTile(1,4)+maxIndexPTile(2,2),     &
+                     minIndexPTile(2,4)-maxIndexPTile(1,2)-1/), &
+    rc=rc)
+
+  !- connection 11: tile 4 -> tile 6
+  conn=11
+  call ESMF_DistGridConnectionSet(connection=connectionList(conn), &
+    tileIndexA=4, tileIndexB=6, &
+    orientationVector=(/-2,1/), & ! 90 degree rotation of tile A
+    positionVector=(/minIndexPTile(1,6)+maxIndexPTile(2,4),     &
+                     minIndexPTile(2,6)-maxIndexPTile(1,4)-1/), &
+    rc=rc)
+
+  !- connection 12: tile 6 -> tile 2
+  conn=12
+  call ESMF_DistGridConnectionSet(connection=connectionList(conn), &
+    tileIndexA=6, tileIndexB=2, &
+    orientationVector=(/-2,1/), & ! 90 degree rotation of tile A
+    positionVector=(/minIndexPTile(1,2)+maxIndexPTile(2,6),     &
+                     minIndexPTile(2,2)-maxIndexPTile(1,6)-1/), &
+    rc=rc)
+  
+  ! - create the DistGrid with 6 tiles and 12 connections
+  distgrid = ESMF_DistGridCreate(minIndexPTile=minIndexPTile, &
+    maxIndexPTile=maxIndexPTile, connectionList=connectionList, rc=rc)
+!EOC  
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  call ESMF_DistGridDestroy(distgrid, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  deallocate(connectionList)
+  deallocate(minIndexPTile, maxIndexPTile)
+!BOE
+! For better visualization the resulting cubic topology is plotted in 3D.
+! Each index space point is associated with a longitude and latitude value
+! of the unit sphere. Combined with the cubic topology formed by the six 
+! index space tiles, this results in a cubed sphere representation shown in
+! figure \ref{fig:dgconnect_cusph_12connected}.
+!
+! \begin{figure}[h]
+!   \caption{Six index space tiles with all 12 connections to form a cubic
+!    topology. The coordinates at every index space point are chosen to 
+!    form a spherical geometry, resulting in a cubed sphere.}
+!   \centering
+!   \includegraphics{dgconnect_cusph_12connected.eps}
+!   \label{fig:dgconnect_cusph_12connected}
+! \end{figure}
 !
 !EOE
 
