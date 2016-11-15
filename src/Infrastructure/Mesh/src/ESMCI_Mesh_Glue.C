@@ -1919,9 +1919,10 @@ void ESMCI_meshcreateelemdistgrid(Mesh **meshpp, int *egrid, int *num_lelems, in
 
 
 void ESMCI_meshinfoserialize(int *intMeshFreed,
-	        char *buffer, int *length, int *offset,
-                ESMC_InquireFlag *inquireflag, int *localrc,
-                ESMCI_FortranStrLenArg buffer_l){
+                             int *spatialDim, int *parametricDim, 
+                             char *buffer, int *length, int *offset,
+                             ESMC_InquireFlag *inquireflag, int *localrc,
+                             ESMCI_FortranStrLenArg buffer_l){
 
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI_meshinfoserialize()"
@@ -1932,7 +1933,7 @@ void ESMCI_meshinfoserialize(int *intMeshFreed,
     if (localrc) *localrc = ESMC_RC_NOT_IMPL;
 
     // TODO: verify length > vars.
-    int size = sizeof(int);
+    int size = 3*sizeof(int);
     if (*inquireflag != ESMF_INQUIREONLY) {
       if ((*length - *offset) < size) {         
          ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
@@ -1941,10 +1942,12 @@ void ESMCI_meshinfoserialize(int *intMeshFreed,
       }
     }
 
-    // Save keyCount
+    // Save meshfreed
     ip= (int *)(buffer + *offset);
     if (*inquireflag != ESMF_INQUIREONLY) {
       *ip++ = *intMeshFreed;
+      *ip++ = *spatialDim;
+      *ip++ = *parametricDim;
     }
 
      // Adjust offset
@@ -1958,8 +1961,9 @@ void ESMCI_meshinfoserialize(int *intMeshFreed,
 
 
 void ESMCI_meshinfodeserialize(int *intMeshFreed, 
-                                 char *buffer, int *offset, int *localrc,
-                                 ESMCI_FortranStrLenArg buffer_l){
+                               int *spatialDim, int *parametricDim, 
+                               char *buffer, int *offset, int *localrc,
+                               ESMCI_FortranStrLenArg buffer_l){
 
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI_meshinfodeserialize()"
@@ -1974,9 +1978,11 @@ void ESMCI_meshinfodeserialize(int *intMeshFreed,
 
     // Get values
     *intMeshFreed=*ip++;
+    *spatialDim=*ip++;
+    *parametricDim=*ip++;
 
     // Adjust offset
-    *offset += sizeof(int);
+    *offset += 3*sizeof(int);
 
     // return success
     if (localrc) *localrc = ESMF_SUCCESS;

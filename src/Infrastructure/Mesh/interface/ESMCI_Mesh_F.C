@@ -213,25 +213,29 @@ extern "C" void FTN_X(c_esmc_meshcreateelemdistgrid)(MeshCap **meshpp, int *egri
 
 
 extern "C" void FTN_X(c_esmc_meshinfoserialize)(int *intMeshFreed,
+                int *spatialDim, int *parametricDim, 
 	        char *buffer, int *length, int *offset,
                 ESMC_InquireFlag *inquireflag, int *localrc,
                 ESMCI_FortranStrLenArg buffer_l){
 
   MeshCap::meshinfoserialize(intMeshFreed,
-                           buffer, length, offset,
-                           inquireflag, localrc,
-                           buffer_l);
+                             spatialDim, parametricDim, 
+                             buffer, length, offset,
+                             inquireflag, localrc,
+                             buffer_l);
 
 } 
 
 
 extern "C" void FTN_X(c_esmc_meshinfodeserialize)(int *intMeshFreed, 
+                                 int *spatialDim, int *parametricDim, 
                                  char *buffer, int *offset, int *localrc,
                                  ESMCI_FortranStrLenArg buffer_l){
 
   MeshCap::meshinfodeserialize(intMeshFreed, 
-                                 buffer, offset, localrc,
-                                 buffer_l);
+                               spatialDim, parametricDim, 
+                               buffer, offset, localrc,
+                               buffer_l);
 } 
 
 

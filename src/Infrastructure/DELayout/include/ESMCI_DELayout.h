@@ -368,7 +368,7 @@ class XXE{
         delete xxeSubList[i];
       delete [] xxeSubList;
       // BufferInfo objects held in bufferInfoList
-      for (int i=0; i<bufferInfoList.size(); i++)
+      for (unsigned int i=0; i<bufferInfoList.size(); i++)
         delete bufferInfoList[i];
       bufferInfoList.clear();
     }

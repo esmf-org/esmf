@@ -101,15 +101,16 @@
     
     
     static void meshinfoserialize(int *intMeshFreed,
-                           char *buffer, int *length, int *offset,
-                           ESMC_InquireFlag *inquireflag, int *localrc,
-                           ESMCI_FortranStrLenArg buffer_l);
+                                  int *spatialDim, int *parametricDim, 
+                                  char *buffer, int *length, int *offset,
+                                  ESMC_InquireFlag *inquireflag, int *localrc,
+                                  ESMCI_FortranStrLenArg buffer_l);
     
     
     static void meshinfodeserialize(int *intMeshFreed, 
-                             char *buffer, int *offset, int *localrc,
-                             ESMCI_FortranStrLenArg buffer_l);
-    
+                                    int *spatialDim, int *parametricDim, 
+                                    char *buffer, int *offset, int *localrc,
+                                    ESMCI_FortranStrLenArg buffer_l);
     
     void meshserialize(char *buffer, int *length, int *offset,
                        ESMC_InquireFlag *inquireflag, int *rc,
