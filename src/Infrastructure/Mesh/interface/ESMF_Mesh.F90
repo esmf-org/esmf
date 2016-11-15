@@ -3329,9 +3329,13 @@ end function ESMF_MeshCreateDual
 !------------------------------------------------------------------------------
 
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_MeshCreateCubedSphere"
-  
-function ESMF_MeshCreateCubedSphere(tileSize, nx, ny, filename, rc)
+#define ESMF_METHOD "ESMF_MeshCreateCubedSphere()"
+!BOP
+
+! !IROUTINE: ESMF_MeshCreateCubedSphere - Create a mesh for a Cubed Sphere grid.
+!
+! !INTERFACE:  
+function ESMF_MeshCreateCubedSphere(tileSize, nx, ny, rc)
 
 ! !RETURN VALUE:
     type(ESMF_Mesh)         :: ESMF_MeshCreateCubedSphere
@@ -3340,8 +3344,27 @@ function ESMF_MeshCreateCubedSphere(tileSize, nx, ny, filename, rc)
     integer,                  intent(in)            :: tileSize
     integer,                  intent(in)            :: nx 
     integer,                  intent(in)            :: ny
-    character(len=*),         optional              :: filename
     integer,                  intent(out),optional  :: rc
+
+!
+! !DESCRIPTION:
+!   Create a {\tt ESMF\_Mesh} object for a Cubed Sphere grid using identical regular decomposition for every tile.
+!   The grid coordinates are generated based on the algorithm used by GEOS-5, The tile resolution is defined by 
+!   {\tt tileSize}.  The total number of PETs has to be nx x ny x 6.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[tilesize]
+!          The number of elements on each side of the tile of the Cubed Sphere grid
+!     \item[nx]
+!          The number of processors on the horizontal size of each tile
+!     \item[ny]
+!          The number of processors on the vertical size of each tile
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
 
   type(ESMF_Mesh)       :: mesh
   type(ESMF_VM)         :: vm
@@ -3544,14 +3567,6 @@ function ESMF_MeshCreateCubedSphere(tileSize, nx, ny, filename, rc)
             ESMF_CONTEXT, rcToReturn=rc)) return
 
   deallocate(ElemIds, ElemConn, ElemType, centerCoords)
-
-#if 0
-  if (present(filename)) then
-    if (PetNo==0) then
-       call WriteCSMesh(filename, tileSize, lonEdge, latEdge, lonCenter, latCenter)
-    endif
-  endif
-#endif
 
   deallocate(lonEdge, latEdge, lonCenter, latCenter)
 
