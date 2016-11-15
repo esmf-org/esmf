@@ -3306,6 +3306,9 @@ alldoc: doc
 # this is also the default if you call make from a doc subdir.
 
 localdoc:
+	@if [ "$(GRAPHFILES)"foo != foo ] ; then \
+          cp $(addprefix $(ESMF_BUILD)/src/doc/,$(GRAPHFILES)) .;\
+	fi;
 	$(MAKE) $(TEXFILES_TO_MAKE)
 	@if [ "$(DVIFILES)"foo != foo ] ; then \
           $(MAKE) $(DVIFILES);\

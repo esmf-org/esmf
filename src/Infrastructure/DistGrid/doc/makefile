@@ -7,6 +7,13 @@ LOCDIR    = src/Infrastructure/DistGrid/doc
 DVIFILES  = DistGrid_refdoc.dvi DistGrid_crefdoc.dvi
 PDFFILES  = DistGrid_refdoc.pdf DistGrid_crefdoc.pdf
 HTMLFILES = DistGrid_refdoc DistGrid_crefdoc
+GRAPHFILES= dgconnect_2tiles_not_connected.eps \
+            dgconnect_2tiles_connected.eps \
+            dgconnect_1tile_not_connected.eps \
+            dgconnect_1tile_periodic1_connected.eps \
+            dgconnect_1tile_periodic2_connected.eps \
+            dgconnect_1tile_peripole_connected.eps \
+            dgconnect_1tile_peribipole_connected.eps
 
 #
 # Tex Files to make
@@ -38,6 +45,6 @@ include $(ESMF_DIR)/makefile
 DIRS        = 
 CLEANDIRS   = DistGrid_refdoc DistGrid_crefdoc $(HTMLFILES)
 CLEANFILES  = $(TEXFILES_TO_MAKE) $(CLEAN_TEXFILES) \
-              DistGrid_refdoc.tex DistGrid_crefdoc.tex $(PDFFILES)
+              DistGrid_refdoc.tex DistGrid_crefdoc.tex $(PDFFILES) $(GRAPHFILES)
 CLOBBERDIRS =
 
