@@ -3701,7 +3701,7 @@ int DistGrid::getSequenceIndexTileRecursive(
         int positionVect[dimCount];
         int orientationVect[dimCount];
         // first time through initialize the orientationVector to be the same
-        // as for the foreward transform
+        // as for the forward transform
         for (int j=0; j<dimCount; j++){
           positionVect[j] =
             connectionList[i][positionIndexOffset+j];     // initialize
