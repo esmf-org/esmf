@@ -356,10 +356,6 @@
 
 read_loop:  &
       do
-#if !defined (ESMF_OS_MinGW)
-        read (unit1, '(a)', iostat=ioerr1) string1
-        read (unit2, '(a)', iostat=ioerr2) string2
-#else
         do
           read (unit1, '(a)', iostat=ioerr1) string1
           if (ioerr1 /= 0) exit
@@ -379,7 +375,7 @@ read_loop:  &
           end do
           if (string2 /= ' ') exit
         end do
-#endif
+
         if (ioerr1 /= ioerr2) then
 !          print *, ESMF_METHOD, ': read iostats differ:', ioerr1, ioerr2
           exit
