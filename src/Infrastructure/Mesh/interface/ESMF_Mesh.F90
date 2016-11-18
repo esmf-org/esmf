@@ -3498,7 +3498,7 @@ function ESMF_MeshCreateCubedSphere(tileSize, nx, ny, rc)
   k=1 
   firstOwners = PetCnt+1
   nodeOwners = PetNo
-  do j=startj+tile,sizej+startj+tile
+  do j=(tile-1)*(tileSize+1)+startj,sizej+startj+(tile-1)*(tileSize+1)
      do i=starti,sizei+starti
         !use the new index to the unique set of nodes
         kk = (j-1)*(tileSize+1)+i
@@ -3515,8 +3515,9 @@ function ESMF_MeshCreateCubedSphere(tileSize, nx, ny, rc)
        ESMF_REDUCE_MIN, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
+
   k=1
-  do j=startj+tile,sizej+startj+tile
+  do j=(tile-1)*(tileSize+1)+startj,sizej+startj+(tile-1)*(tileSize+1)
      do i=starti,sizei+starti
         !use the new index to the unique set of nodes
          kk = (j-1)*(tileSize+1)+i
@@ -3546,7 +3547,7 @@ function ESMF_MeshCreateCubedSphere(tileSize, nx, ny, rc)
 
   do j=1,sizej
      do i=1,sizei
-        ElemIds(k) = (j-1)*(tileSize)+i
+        ElemIds(k) = (tile-1)*tilesize*tilesize+(j+startj-1)*(tileSize)+starti+i-1
         centerCoords(k*2-1) = lonCenter(i,j)
         centerCoords(k*2) = latCenter(i,j)
         ! Set the connection using local node ID, counter clockwize
