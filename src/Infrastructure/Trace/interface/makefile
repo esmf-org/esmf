@@ -3,7 +3,7 @@
 ALL: build_here 
 
 SOURCEC	  = ESMCI_Trace_F.C
-SOURCEF	  = 
+SOURCEF	  = ESMF_Trace.F90
 SOURCEH	  = 
 
 OBJSC     = $(addsuffix .o, $(basename $(SOURCEC)))

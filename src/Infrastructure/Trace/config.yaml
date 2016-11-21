@@ -49,6 +49,8 @@ metadata:
     phase_event_type:
         class: struct
         fields:
+            vmid: uint16
+            baseid: uint16
             method: esmf_method_type
             phase: uint16      
   clocks:
@@ -93,5 +95,15 @@ metadata:
         phase_epilogue_enter:
             payload-type: phase_event_type
         phase_epilogue_exit:
-            payload-type: phase_event_type  
-            
+            payload-type: phase_event_type
+#        state:
+#            payload-type:  
+#                class: struct
+#                fields:
+#                    myLen: uint8
+#                    myFields:
+#                        class: array
+#                        length: 16
+#                        element-type:
+#                            class: int
+#                            size: 8

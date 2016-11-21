@@ -28,6 +28,7 @@ module NUOPC_Compliance_Model
     use ESMF
     use NUOPC_Base, only: NUOPC_PhaseMapStringLength  ! change this?
     use NUOPC_Compliance_Base
+    use ESMF_TraceMod
 
     implicit none
   
@@ -459,7 +460,8 @@ contains
         ! Call the actual Initialize routine
 
         if (outputTrace) then
-           call esmftrc_default_trace_phase_enter(0, phase)
+           !call esmftrc_default_trace_phase_enter(0, phase)
+           call ESMF_TraceEventPhaseEnter(1, 2, 0, phase)
         endif
         
         call ESMF_GridCompInitializeAct(comp, importState, exportState, clock, &
@@ -713,7 +715,8 @@ contains
         ccfDepth = ccfDepth + 1
 
         if (outputTrace) then
-           call esmftrc_default_trace_phase_enter(1, phase)
+           !call esmftrc_default_trace_phase_enter(1, phase)
+           call ESMF_TraceEventPhaseEnter(1, 2, 1, phase)
         endif
         
         ! Call the actual Run routine

@@ -3,7 +3,8 @@
 
 #include "ESMCI_Macros.h"
 #include "ESMCI_Trace.h"
-#include "esmftrc_filesys.h"
+
+// C interface called from Fortran
 
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
@@ -13,30 +14,35 @@
 
 extern "C" {
 
-  void FTN_X(c_esmftrc_filesys_init)
+  void FTN_X(c_esmftrace_open)
      (				   
       int *buf_size,  
       const char *trace_dir,           
-      int *localPet,
+      int *stream_id,
       int *rc,                        
-      ESMCI_FortranStrLenArg nlen) {   //strlen for trace_dir
-    
-    int localrc = 0;
-    localrc = esmftrc_filesys_init(*buf_size, trace_dir, *localPet);
-    if (localrc != 0) {
-      *rc = ESMF_SUCCESS;
-    }
-    else {
-      *rc = ESMF_FAILURE;
-    }
-    
+      ESMCI_FortranStrLenArg nlen)  //strlen for trace_dir 
+  {      
+    int localrc = ESMCI::TraceOpen((unsigned int) *buf_size, trace_dir, *stream_id);
+    if (rc != NULL) *rc = localrc;
   } 
 
-  void FTN_X(c_esmftrc_filesys_fini)() 
+  void FTN_X(c_esmftrace_close)(int *rc) 
   {
-    esmftrc_filesys_fini();
+    ESMCI::TraceClose();
+    if (rc != NULL) *rc = ESMF_SUCCESS;
   }
   
+  void FTN_X(c_esmftrace_phase_enter)(int *vmid, int *baseid, int *method, int *phase, int *rc)
+  {
+    ESMCI::TraceEventPhaseEnter(vmid, baseid, method, phase);
+    if (rc != NULL) *rc = ESMF_SUCCESS;
+  }
 
-  
+  void FTN_X(c_esmftrace_phase_exit)(int *vmid, int *baseid, int *method, int *phase, int *rc)
+  {
+    ESMCI::TraceEventPhaseExit(vmid, baseid, method, phase);
+    if (rc != NULL) *rc = ESMF_SUCCESS;
+  }
+    
+
 } // extern "C"

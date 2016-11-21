@@ -46,6 +46,7 @@
       use ESMF_VMMod
       use ESMF_DELayoutMod
       use ESMF_CalendarMod
+      use ESMF_TraceMod
 
       implicit none
       private
@@ -444,7 +445,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           write (ESMF_UtilIOStderr,*) ESMF_METHOD, ": Error getting localPet from VM"
           return
         endif
-        call c_esmftrc_filesys_init(4096, "./traceout", localPet, rc)
+        call ESMF_TraceOpen(4096, "./traceout", localPet, rc=localrc)
         print *, "Initialize trace for pet = ", localPet
         if (localrc /= ESMF_SUCCESS) then
           write (ESMF_UtilIOStderr,*) ESMF_METHOD, ": Error initializing trace stream"
@@ -590,7 +591,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           return
       endif
       if (traceIsOn == 1) then
-        call c_esmftrc_filesys_fini()
+        call ESMF_TraceClose()
         if (localrc /= ESMF_SUCCESS) then
           write (ESMF_UtilIOStderr,*) ESMF_METHOD, ": Error closing trace stream"
           return
