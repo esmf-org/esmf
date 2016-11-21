@@ -883,30 +883,32 @@ program ESMF_MeshEx
 #endif
 
 !BOE
-!\subsubsection{Create a Mesh for a Cubed Sphere grid}
+!\subsubsection{Create a Mesh representation of a cubed sphere grid}
 !\label{sec:example:MeshCubedSphere}
 !
-!This example demostrates how to create a {\tt ESMF\_Mesh} object for a Cubed Sphere grid using identical regular 
-!decomposition for every tile. The grid coordinates are generated based on the algorithm used by GEOS-5, 
+!This example demostrates how to create a {\tt ESMF\_Mesh} object representing a cubed sphere grid with
+!identical regular decomposition for every tile. 
 !In this example, the tile resolution is 45, so there will be a total 45x45x6=12150 elements in the mesh.
-!{\tt nx} and {\tt ny} are the regular decomposition of each tile.  The total number of PETs has to be nx x ny x 6, i.e.
+!{\tt nx} and {\tt ny} are the regular decomposition of each tile.  
+!The total number of PETs has to be nx x ny x 6, i.e.
 !a multiple of 6, otherwise, the API will fail with an error message.
 !EOE
 
-!BOC
   if (mod(PetCount, 6) == 0) then
-     nx=PetCount/6
+!BOC
+     ! Calculate decomposition 
+     nx=PetCount/6 ! Here PetCount needs to be evenly divisible by 6
      ny=1
-     mesh = ESMF_MeshCreateCubedSphere(45, nx,ny, rc=localrc)
+
+     ! Create Mesh
+     mesh = ESMF_MeshCreateCubedSphere(tileSize=45, nx=nx,ny=ny, rc=localrc)
 !EOC
      if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
      ! Get rid of Mesh
      call ESMF_MeshDestroy(mesh, rc=localrc)
    else
      localrc=ESMF_SUCCESS
-!BOC
    endif
-!EOC
    if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
 !BOE
