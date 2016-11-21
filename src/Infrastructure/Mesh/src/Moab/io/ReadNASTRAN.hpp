@@ -3,7 +3,7 @@
  * storing and accessing finite element mesh data.   
  *                                         
  * Copyright 2004 Sandia Corporation.  Under the terms of Contract        
- * DE-AC04-94AL85000 with Sandia Coroporation, the U.S. Government    
+ * DE-AC04-94AL85000 with Sandia Corporation, the U.S. Government    
  * retains certain rights in this software.      
  *                    
  * This library is free software; you can redistribute it and/or     
@@ -84,23 +84,23 @@ private:
                      LARGE_FIELD,                 
                      FREE_FIELD }; 
 
-  ErrorCode determine_line_format( const std::string line, 
+  ErrorCode determine_line_format( const std::string &line,
                                      line_format &format );
   
-  ErrorCode tokenize_line( const std::string line, 
+  ErrorCode tokenize_line( const std::string &line,
                              const line_format format,
                              std::vector<std::string> &tokens );  
 
-  ErrorCode determine_entity_type( const std::string token, EntityType &type); 
+  ErrorCode determine_entity_type( const std::string &token, EntityType &type);
 
-  ErrorCode get_real( const std::string, double &real );
+  ErrorCode get_real( const std::string&, double &real );
 
-  ErrorCode read_node(const std::vector<std::string> tokens, 
+  ErrorCode read_node(const std::vector<std::string> &tokens,
                         const bool           debug, 
                         double*              coord_arrays[3], 
                         int                  &node_id);
 
-  ErrorCode read_element(const std::vector<std::string> tokens, 
+  ErrorCode read_element(const std::vector<std::string> &tokens,
                            std::vector<Range>           &materials,
                            const EntityType             element_type,
                            const bool                     debug );

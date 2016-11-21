@@ -22,8 +22,7 @@ Tag SpectralMeshTool::spectral_vertices_tag(const bool create_if_missing)
   if (!svTag && create_if_missing) {
     if (!spectralOrder) {
         // should already be a spectral order tag...
-      mError->set_last_error("Spectral order must be set before creating spectral vertices tag.");
-      return 0;
+      MB_SET_ERR_RET_VAL("Spectral order must be set before creating spectral vertices tag", 0);
     }
         
       // create it
@@ -75,8 +74,7 @@ ErrorCode SpectralMeshTool::convert_to_coarse(int order, EntityHandle spectral_s
 {
   if (order) spectralOrder = order;
   if (!spectralOrder) {
-      mError->set_last_error("Spectral order must be set or input before converting to spectral mesh.");
-      return MB_FAILURE;
+    MB_SET_ERR(MB_FAILURE, "Spectral order must be set or input before converting to spectral mesh");
   }
   
   Range tmp_ents, ents;
@@ -88,14 +86,12 @@ ErrorCode SpectralMeshTool::convert_to_coarse(int order, EntityHandle spectral_s
   if (ents.empty()) ents = tmp_ents.subset_by_dimension(2);
   if (ents.empty()) ents = tmp_ents.subset_by_dimension(1);
   if (ents.empty()) {
-    mError->set_last_error("Can't find any entities for conversion!");
-    return MB_FAILURE;
+    MB_SET_ERR(MB_FAILURE, "Can't find any entities for conversion");
   }
     
     // get a ptr to connectivity
   if (ents.psize() != 1) {
-    mError->set_last_error("Entities must be in one chunk for conversion.");
-    return MB_FAILURE;
+    MB_SET_ERR(MB_FAILURE, "Entities must be in one chunk for conversion");
   }
   EntityHandle *conn;
   int count, verts_per_e;
@@ -128,11 +124,8 @@ ErrorCode SpectralMeshTool::create_spectral_elems(const T *conn, int num_fine_el
       verts_per_celem = std::pow((double)2.0, dim);
 
   rval = rmi->get_element_connect(num_coarse_elems, verts_per_celem,
-                                  (2 == dim ? MBQUAD : MBHEX), 0, start_elem, new_conn);
-  if (MB_SUCCESS != rval) {
-    mError->set_last_error("Failed to create elems.");
-    return rval;
-  }
+                                  (2 == dim ? MBQUAD : MBHEX), 0,
+                                  start_elem, new_conn);MB_CHK_SET_ERR(rval, "Failed to create elems");
 
   output_range.insert(start_elem, start_elem + num_coarse_elems - 1);
 
@@ -146,11 +139,8 @@ ErrorCode SpectralMeshTool::create_spectral_elems(const T *conn, int num_fine_el
     // we're assuming here that elems was empty on input
   int count;
   EntityHandle *sv_ptr = NULL;
-  rval = mbImpl->tag_iterate(spectral_vertices_tag(true), output_range.begin(), output_range.end(), count, (void*&)sv_ptr);
-  if (MB_SUCCESS != rval) {
-    mError->set_last_error("Failed to get SPECTRAL_VERTICES ptr.");
-    return rval;
-  }
+  rval = mbImpl->tag_iterate(spectral_vertices_tag(true), output_range.begin(), output_range.end(), count,
+                            (void*&)sv_ptr);MB_CHK_SET_ERR(rval, "Failed to get SPECTRAL_VERTICES ptr");
   assert(count == num_coarse_elems);
   int f = start_idx, fs = 0, fl = 0;
   for (int c = 0; c < num_coarse_elems; c++) {

@@ -16,7 +16,7 @@ private:
 protected:
 
   EntitySequence( EntityHandle h )
-    : startHandle(h), endHandle(h) {}
+    : startHandle(h), endHandle(h), sequenceData(NULL) {}
 
   EntitySequence( EntitySequence& split_from, EntityHandle here )
     : startHandle( here ),

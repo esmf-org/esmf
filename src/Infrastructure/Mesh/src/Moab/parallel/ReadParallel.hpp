@@ -72,7 +72,9 @@ public:
                         PA_RESOLVE_SHARED_ENTS,
                         PA_EXCHANGE_GHOSTS, 
                         PA_RESOLVE_SHARED_SETS,
-                        PA_PRINT_PARALLEL};
+                        PA_AUGMENT_SETS_WITH_GHOSTS,
+                        PA_PRINT_PARALLEL
+                       };
 
   static const char *ParallelActionsNames[];
   

@@ -3,7 +3,7 @@
  * storing and accessing finite element mesh data.
  * 
  * Copyright 2004 Sandia Corporation.  Under the terms of Contract
- * DE-AC04-94AL85000 with Sandia Coroporation, the U.S. Government
+ * DE-AC04-94AL85000 with Sandia Corporation, the U.S. Government
  * retains certain rights in this software.
  * 
  * This library is free software; you can redistribute it and/or
@@ -14,28 +14,24 @@
  */
 
 //-------------------------------------------------------------------------
-// Filename      : Util.cpp
-//
-// Purpose       : This file contains utility functions that can be used
-//                 with MB
+// Purpose       : This file contains utility functions for use in MOAB
 //
 // Special Notes : This is a pure virtual class, to prevent instantiation.
 //                 All functions are static, called like this:
 //                 Util::function_name();
-//
-// Creator       : Ray J. Meyers
-//
-// Date          : 09/01/02
-//
-// Owner         : Ray J. meyers
 //-------------------------------------------------------------------------
-
 #include "moab/Util.hpp"
 #include "moab/Interface.hpp"
 #include <assert.h>
-#include <math.h>
 #include <algorithm>
 #include <limits>
+#if defined(_MSC_VER) || defined(__MINGW32__)
+#  include <float.h>
+#  define finite(A) _finite(A)
+#ifndef MOAB_HAVE_FINITE
+#define MOAB_HAVE_FINITE
+#endif
+#endif
 
 namespace moab {
 
@@ -44,11 +40,12 @@ namespace moab {
 
 void Util::normal(Interface* MB, EntityHandle handle, double& x, double& y, double& z)
 {
-
    // get connectivity
-   const EntityHandle *connectivity;
+   const EntityHandle *connectivity = NULL;
    int number_nodes = 0;
-   MB->get_connectivity(handle, connectivity, number_nodes, true);
+   // TODO make the return value nonvoid
+   ErrorCode rval = MB->get_connectivity(handle, connectivity, number_nodes, true);
+   MB_CHK_SET_ERR_RET(rval, "can't get_connectivity");
    assert(number_nodes >= 3);
 
    // get_coordinates
@@ -70,36 +67,37 @@ void Util::normal(Interface* MB, EntityHandle handle, double& x, double& y, doub
    z = vecs[0][0] * vecs[1][1] - vecs[0][1] * vecs[1][0];
 
    double mag = sqrt(x*x + y*y + z*z);
-   if(mag != std::numeric_limits<double>::epsilon())
+   if(mag > std::numeric_limits<double>::epsilon())
    {
      x /= mag;
      y /= mag;
      z /= mag;
    }
 }
-void Util::centroid(Interface *MB, EntityHandle handle, Coord &coord)
+
+void Util::centroid(Interface *MB, EntityHandle handle, CartVect &coord)
 {
-   const EntityHandle *connectivity;
+   const EntityHandle *connectivity = NULL;
    int number_nodes = 0;
-   MB->get_connectivity(handle, connectivity, number_nodes,true);
-   
-   coord.x=0.0;
-   coord.y=0.0;
-   coord.z=0.0;
+   // TODO make the return value nonvoid
+   ErrorCode rval = MB->get_connectivity(handle, connectivity, number_nodes, true);
+   MB_CHK_SET_ERR_RET(rval, "can't get_connectivity");
+
+   coord[0]=coord[1]=coord[2]=0.0;
 
    for(int i = 0; i< number_nodes; i++)
    {
       double node_coords[3];
       MB->get_coords(&(connectivity[i]), 1, node_coords);
      
-      coord.x+=node_coords[0];
-      coord.y+=node_coords[1];
-      coord.z+=node_coords[2];
+      coord[0]+=node_coords[0];
+      coord[1]+=node_coords[1];
+      coord[2]+=node_coords[2];
    }
    
-   coord.x/=(double)number_nodes;
-   coord.y/=(double)number_nodes;
-   coord.z/=(double)number_nodes;
+   coord[0]/=(double)number_nodes;
+   coord[1]/=(double)number_nodes;
+   coord[2]/=(double)number_nodes;
 }
 
 /*//This function calculates the coordinates for the centers of each edges of the entity specified by handle. The coordinates are returned in the list coords_list
@@ -111,7 +109,6 @@ void Util::edge_centers(Interface *MB, EntityHandle handle, std::vector<Coord> &
   int number_nodes = 0;
   double coords[2][3];
   const EntityHandle *connectivity;
-
 
   MB->get_connectivity(handle, connectivity, number_nodes,true);
   
@@ -130,11 +127,7 @@ void Util::edge_centers(Interface *MB, EntityHandle handle, std::vector<Coord> &
     coords_list[i].x = (coords[0][0] + coords[1][0])/2.0;
     coords_list[i].y = (coords[0][1] + coords[1][1])/2.0;
     coords_list[i].z = (coords[0][2] + coords[1][2])/2.0;
-
   }
-
-
-
 }
 */  
 
@@ -147,7 +140,6 @@ void Util::face_centers(Interface *MB, EntityHandle handle, std::vector<Coord> &
   int number_nodes = 0;
   double node_coords[3];
   const EntityHandle *connectivity;
-
 
   MB->get_connectivity(handle, connectivity, number_nodes,true);
   
@@ -174,36 +166,14 @@ void Util::face_centers(Interface *MB, EntityHandle handle, std::vector<Coord> &
     coords_list[i].y/=(double)number_nodes_per_element;
     coords_list[i].z/=(double)number_nodes_per_element;
   }
-
 }
 */
-ErrorCode Util::gather_set(Interface * MB, EntityHandle & gather_set){
-  Tag gathersettag;
-  ErrorCode rval = MB->tag_get_handle("GATHER_SET", 1, MB_TYPE_INTEGER, gathersettag,
-       MB_TAG_SPARSE);
-  if (rval!=MB_SUCCESS)
-    return rval;
 
-  int gatherval = 1;
-  void *vals[] = {&gatherval};
-  Range gathersets;
-  rval = MB->get_entities_by_type_and_tag( 0, MBENTITYSET, &gathersettag,
-                                             vals, 1, gathersets );
-  if (rval!=MB_SUCCESS)
-    return rval;
-  if (gathersets.empty())
-    return MB_ENTITY_NOT_FOUND;
-  gather_set = gathersets[0];
+// Explicit template specializations
+template bool Util::is_finite<double>(double value);
+template bool Util::is_finite<int>(int value);
+template bool Util::is_finite<unsigned int>(unsigned int value);
+template bool Util::is_finite<long>(long value);
 
-  return MB_SUCCESS;
-}
-
-ErrorCode Util::gather_set_entities(Interface * MB, EntityHandle & gather_set, Range & ents)
-{
-  ErrorCode rval = Util::gather_set(MB, gather_set);
-  if (rval!=MB_SUCCESS)
-    return rval;
-  rval = MB->get_entities_by_handle(gather_set, ents);
-  return rval;
-}
 } // namespace moab
+

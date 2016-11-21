@@ -3,7 +3,7 @@
  * storing and accessing finite element mesh data.
  * 
  * Copyright 2004 Sandia Corporation.  Under the terms of Contract
- * DE-AC04-94AL85000 with Sandia Coroporation, the U.S. Government
+ * DE-AC04-94AL85000 with Sandia Corporation, the U.S. Government
  * retains certain rights in this software.
  * 
  * This library is free software; you can redistribute it and/or
@@ -850,7 +850,7 @@ HigherOrderFactory::remove_mid_volume_nodes( ElementSequence* seq,
  * storing and accessing finite element mesh data.
  * 
  * Copyright 2004 Sandia Corporation.  Under the terms of Contract
- * DE-AC04-94AL85000 with Sandia Coroporation, the U.S. Government
+ * DE-AC04-94AL85000 with Sandia Corporation, the U.S. Government
  * retains certain rights in this software.
  * 
  * This library is free software; you can redistribute it and/or
@@ -933,7 +933,8 @@ HigherOrderFactory::tag_for_deletion( EntityHandle parent_handle,
 
       //just get corner nodes of target_entity
       connectivity.clear();
-      mMB->get_connectivity(&( target_entity), 1, connectivity, true  );
+      ErrorCode rval;
+      rval = mMB->get_connectivity(&( target_entity), 1, connectivity, true );MB_CHK_ERR(rval);
 
       //for each node, get all common adjacencies of nodes in 'parent_handle' 
       std::vector<EntityHandle> adj_list_1, adj_list_2, adj_entities;

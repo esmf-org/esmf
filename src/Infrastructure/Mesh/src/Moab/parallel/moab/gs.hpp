@@ -1,11 +1,11 @@
 #ifndef GS_HPP
 #define GS_HPP
 
-
+#include "moab/MOABConfig.h"
 #include "moab/TupleList.hpp"
 #include "moab/Types.hpp"
 
-#ifdef USE_MPI
+#ifdef MOAB_HAVE_MPI
 #include "moab_mpi.h"
 #endif
 
@@ -14,19 +14,19 @@ namespace moab {
   class gs_data
   {
   public:
-#ifdef USE_MPI
+#ifdef MOAB_HAVE_MPI
     class nonlocal_info
     {
     public:
-      uint np;           /* number of processors to communicate with          */
-      uint *target;      /* int target[np]: array of processor ids to comm w/ */
-      uint *nshared;     /* nshared[i] = number of points shared w/ target[i] */
-      uint *sh_ind;      /* list of shared point indices                      */
-      slong *slabels;    /* list of signed long labels (not including gid)    */
-      ulong *ulabels;    /* list of unsigned long labels                      */
-      MPI_Request *reqs; /* pre-allocated for MPI calls                       */
-      realType *buf;         /* pre-allocated buffer to receive data              */
-      uint maxv;         /* maximum vector size                               */
+      uint _np;           /* number of processors to communicate with          */
+      uint *_target;      /* int target[np]: array of processor ids to comm w/ */
+      uint *_nshared;     /* nshared[i] = number of points shared w/ target[i] */
+      uint *_sh_ind;      /* list of shared point indices                      */
+      slong *_slabels;    /* list of signed long labels (not including gid)    */
+      Ulong *_ulabels;    /* list of unsigned long labels                      */
+      MPI_Request *_reqs; /* pre-allocated for MPI calls                       */
+      realType *_buf;         /* pre-allocated buffer to receive data              */
+      uint _maxv;         /* maximum vector size                               */
     
       /**Constructor for nonlocal_info; takes all arguments and initializes 
        * nonlocal_info
@@ -110,8 +110,8 @@ namespace moab {
       crystal_buf buffers[3];
       //crystal_buf provides buffer space for communications
       crystal_buf *all, *keep, *send;
-      MPI_Comm comm;
-      uint num, id;
+      MPI_Comm _comm;
+      uint _num, _id;
 
       /**Default constructor (Note:  moab_crystal_data must be initialized
        * before use!)
@@ -165,9 +165,9 @@ namespace moab {
 #endif
 
     sint *local_cm; /* local condense map */
-#ifdef USE_MPI
+#ifdef MOAB_HAVE_MPI
     nonlocal_info *nlinfo;
-    MPI_Comm comm;
+    MPI_Comm _comm;
 #endif
 
     /**Constructor for moab_gs_data:  takes all arguments and initializes
@@ -183,7 +183,7 @@ namespace moab {
      * param crystal   moab_crystal_data contains MPI_Comm and is used for 
      *                 message passing
      */
-    gs_data (uint n, const long *label, const ulong *ulabel,
+    gs_data (uint n, const long *label, const Ulong *ulabel,
 	     uint maxv, const unsigned int nlabels,
 	     const unsigned int nulabels,
 	     crystal_data *crystal, ErrorCode &Init_Result) {
@@ -202,7 +202,7 @@ namespace moab {
 
     /**Sets up the moab_gs_data; see constructor for parameter documentation
      */
-    ErrorCode initialize (uint n, const long *label, const ulong *ulabel,
+    ErrorCode initialize (uint n, const long *label, const Ulong *ulabel,
 			    uint maxv, const unsigned int nlabels,
 			    const unsigned int nulabels,
 			    crystal_data *crystal);
