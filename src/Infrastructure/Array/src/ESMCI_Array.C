@@ -4489,7 +4489,7 @@ int Array::redistStore(
       "- Not a valid pointer to dstArray", ESMC_CONTEXT, &rc);
     return rc;
   }
-  // srcArray and dstArray may not point to the identical Array object
+  // srcArray and dstArray must not point to the identical Array object
   if (srcArray == dstArray){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
       "- srcArray and dstArray must not be identical", ESMC_CONTEXT, &rc);
@@ -9059,12 +9059,15 @@ int Array::sparseMatMulStore(
     }
   }
 
-  if (haloFlag){
+  if (haloFlag||ignoreUnmatched){
     // Phase IV below expects each FactorElement inside of srcLinSeqVect and
     // dstLinSeqVect to only reference a single partnerDe (- only partnerDe[0]
     // will be looked at!). Therefore transform FactorElements that have more
     // than one partnerDe entry into multiple FactorElements where each only
-    // has a single partnerDe entry:
+    // has a single partnerDe entry.
+    // This condition can arise either do to halos, or when allowing more
+    // general redist conditions that ignore that src and dst are not perfectly
+    // matched wrt seqIndices.
     // Doing this for the src side supports forward HALO:
     for (int j=0; j<srcLocalDeCount; j++){
       for (int k=0; k<srcLinSeqVect[j].size(); k++){
@@ -11032,7 +11035,7 @@ int Array::sparseMatMul(
   bool dstArrayFlag = false;
   if (dstArray != ESMC_NULL_POINTER) dstArrayFlag = true;
   
-  // srcArray and dstArray may not point to the identical Array object
+  // srcArray and dstArray must not point to the identical Array object
   if (!haloFlag && (srcArrayFlag && dstArrayFlag)){
     if (srcArray == dstArray){
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
