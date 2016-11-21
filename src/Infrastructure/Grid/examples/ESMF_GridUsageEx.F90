@@ -66,6 +66,9 @@ program ESMF_GridCreateEx
       character(ESMF_MAXSTR) :: testname
       character(ESMF_MAXSTR) :: failMsg
 
+      ! for Cubed Sphere test
+      integer, allocatable :: decomptile(:,:)
+
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
@@ -1362,6 +1365,29 @@ endif
 
 #endif
 
+!BOE
+!\subsubsection{Create an six-tile Cubed Sphere Grid}
+!\label{sec:usage:cubedsphere}
+!
+!This example creates a multi-tile Grid for a Cubed Sphere grid. Each tile has 45 elements on
+!each size, the total number of elements is 45x45x6=12150.  Each tile is 
+!decomposed in a regular decomposition.  The first two tiles are decomposed into
+!2x2 blocks each and the remaining 4 tiles are decomposed into 1x2 block. 
+!A total of 16 DEs are used.  The grid coordinates are generated based on the
+!algorithm used by GEOS-5.  
+
+!BOC
+     allocate(decomptile(2,6))
+     decomptile(:,1:2)=2
+     decomptile(1,3:6)=2
+     decomptile(2,3:6)=1
+     grid2D = ESMF_GridCreateCubedSphere(45, regDecompPTile=decomptile, rc=rc)
+!EOC
+     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+     ! Get rid of Grid
+     call ESMF_GridDestroy(grid2D, rc=rc)
+     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+     deallocate(decomptile)
 
 !BOE
 !\subsubsection{Grid stagger locations}

@@ -25521,17 +25521,17 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !          The number of elements on each side of the tile of the Cubed Sphere grid
 !     \item[{[regDecompPTile]}]
 !          List of DE counts for each dimension. The second index steps through
-!          the tiles. The total {\tt deCount} is determined as ths sum over
-!          the products of {\tt regDecomp} elements for each tile.
-!          By default each tile is decomposed only along the first dimension.
-!          The default number of DEs per tile is at least 1, but may be greater
-!          for the leading tiles if the {\tt deCount} is greater than the 
-!          {\tt tileCount}. If no DELayout is specified, the {\tt deCount} is 
-!          by default set equal to the number of PETs ({\tt petCount}), or the 
-!          number of tiles ({\tt tileCount}), which ever is greater. This means
-!          that as long as {\tt petCount} > {\tt tileCount}, the resulting
-!          default distribution will be 1 DE per PET. Notice that some tiles
-!          may be decomposed into more DEs than other tiles.
+!          the tiles. The total {\tt deCount} is determined as th sum over
+!          the products of {\tt regDecompPTile} elements for each tile.
+!          By default every tile is decomposed in the same way.  If the total 
+!          PET count is less than 6, one tile will be assigned to one DE and the DEs
+!          will be assigned to PETs sequentially, therefore, some PETs may have
+!          more than one DEs.  If the total PET count is greater than 6, the total
+!          number of DEs will be multiple of 6 and less than or equal to the total
+!          PET count.  For instance, if the total PET count is 16, the total DE count 
+!          will be 12 with each tile decomposed into 1x2 blocks.  The 12 DEs are mapped
+!          to the first 12 PETs and the remainding 4 PETs have no DEs locally, unless
+!          an optional {\tt delayout} is provided.
 !     \item[{[decompflagPTile]}]
 !          List of decomposition flags indicating how each dimension of each
 !          tile is to be divided between the DEs. The default setting

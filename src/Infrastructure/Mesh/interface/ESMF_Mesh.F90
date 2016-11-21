@@ -3407,6 +3407,7 @@ function ESMF_MeshCreateCubedSphere(tileSize, nx, ny, rc)
        call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
                              msg="nx * ny does not equal to the total number of PETs", & 
                              ESMF_CONTEXT, rcToReturn=rc) 
+       return
   endif    
 
   ! Distribute center coordinates according to the nx/ny decomposition
