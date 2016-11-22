@@ -40,10 +40,16 @@
 #include <string.h>
 #include <assert.h>
 #include <time.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <unistd.h>
 
 #include "ESMCI_Macros.h"
-#include <esmftrc.h>
+#include "ESMCI_LogErr.h"
+#include "ESMCI_VM.h"
 #include "ESMCI_Trace.h"
+
+#include <esmftrc.h>
 
 #ifdef __cplusplus
 # define TO_VOID_PTR(_value)		static_cast<void *>(_value)
@@ -87,7 +93,7 @@ namespace ESMCI {
   };
   
   //global context
-  struct esmftrc_platform_filesys_ctx *g_esmftrc_platform_filesys_ctx;
+  static struct esmftrc_platform_filesys_ctx *g_esmftrc_platform_filesys_ctx;
   
   static uint32_t get_clock(void* data)
   {
@@ -133,40 +139,89 @@ namespace ESMCI {
     /* write packet to file */
     write_packet(ctx);
   }
-
-  int TraceOpen(unsigned int buf_size, const char *trace_dir, int stream_id)
-  {
-    char stream_path[1024];
+  
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::TraceOpen()"  
+  void TraceOpen(unsigned int buf_size, const char *trace_dir, int stream_id, int *rc) {
+    
+    int localrc;
+    char stream_path[ESMC_MAXPATHLEN];
+    char stream_dir[ESMC_MAXPATHLEN];
     uint8_t *buf;
     struct esmftrc_platform_filesys_ctx *ctx;
     struct esmftrc_platform_callbacks cbs;
+
+    if (rc != NULL) *rc = ESMF_SUCCESS;
 
     cbs.sys_clock_clock_get_value = get_clock;
     cbs.is_backend_full = is_backend_full;
     cbs.open_packet = open_packet;
     cbs.close_packet = close_packet;
     ctx = FROM_VOID_PTR(struct esmftrc_platform_filesys_ctx, malloc(sizeof(*ctx)));
-
+    
+    ESMC_LogDefault.Write("Enabling ESMF Tracing", ESMC_LOGMSG_INFO);
     if (!ctx) {
-      return ESMF_FAILURE;
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_MEM_ALLOCATE, "Cannot allocate context", 
+                                    ESMC_CONTEXT, rc);
+      return;
     }
-
+  
     buf = FROM_VOID_PTR(uint8_t, malloc(buf_size));
 
     if (!buf) {
       free(ctx);
-      return ESMF_FAILURE;
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_MEM_ALLOCATE, "Cannot allocate trace event buffer", 
+                                    ESMC_CONTEXT, rc);
+      return;
+    }
+    
+    memset(buf, 0, buf_size);
+    
+    //make relative path absolute if needed
+    if (trace_dir[0] != '/') {
+      char cwd[1024];
+      if (getcwd(cwd, sizeof(cwd)) == NULL) {
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_SYS, "Error getting working directory", 
+                                      ESMC_CONTEXT, rc);
+        return; 
+      }
+      sprintf(stream_dir, "%s/%s", cwd, trace_dir);
+      //printf("absolute dir = |%s|\n", stream_dir);
+    }
+    else {
+      sprintf(stream_dir, "%s", trace_dir);
+    }
+           
+    //root stream responsible for creating trace directory     
+    if (stream_id == 0) {      
+      struct stat st = {0};
+      if (stat(stream_dir, &st) == -1) {
+        if (mkdir(stream_dir, 0700) == -1) {
+          //printf("mkdir == -1\n");
+          //perror("mkdir()");
+          ESMC_LogDefault.MsgFoundError(ESMC_RC_FILE_CREATE, "Error creating trace directory", 
+                                        ESMC_CONTEXT, rc);
+          return;
+        }
+      }
     }
 
-    memset(buf, 0, buf_size);
-
-    sprintf(stream_path, "%s/stream%d", trace_dir, stream_id);
+    //all PETs wait for directory to be created
+    VM *globalvm = VM::getGlobal(&localrc);
+    if (ESMC_LogDefault.MsgFoundError(localrc, 
+        ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc)) 
+      return;
+    globalvm->barrier();
+    
+    sprintf(stream_path, "%s/stream%d", stream_dir, stream_id);
     ctx->fh = fopen(stream_path, "wb");
 
     if (!ctx->fh) {
       free(ctx);
       free(buf);
-      return ESMF_FAILURE;
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_FILE_OPEN, "Error opening trace output file", 
+                                    ESMC_CONTEXT, rc);
+      return;
     }
 
     ctx->stream_id = stream_id;
@@ -176,14 +231,16 @@ namespace ESMCI {
 
     //store as global context
     g_esmftrc_platform_filesys_ctx = ctx;
-    return ESMF_SUCCESS;
+
   }
 
   
-  void TraceClose()
+  void TraceClose(int *rc)
   {
     struct esmftrc_platform_filesys_ctx *ctx = g_esmftrc_platform_filesys_ctx;
     
+    if(rc != NULL) rc = ESMF_SUCCESS;
+ 
     if (esmftrc_packet_is_open(&ctx->ctx) &&
 	!esmftrc_packet_is_empty(&ctx->ctx)) {
       close_packet(ctx);

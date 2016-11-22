@@ -34,14 +34,12 @@ extern "C" {
       int *rc,                        
       ESMCI_FortranStrLenArg nlen)  //strlen for trace_dir 
   {      
-    int localrc = ESMCI::TraceOpen((unsigned int) *buf_size, trace_dir, *stream_id);
-    if (rc != NULL) *rc = localrc;
+    ESMCI::TraceOpen((unsigned int) *buf_size, trace_dir, *stream_id, rc);
   } 
 
   void FTN_X(c_esmftrace_close)(int *rc) 
   {
-    ESMCI::TraceClose();
-    if (rc != NULL) *rc = ESMF_SUCCESS;
+    ESMCI::TraceClose(rc);
   }
   
   void FTN_X(c_esmftrace_phase_enter)(int *vmid, int *baseid, int *method, int *phase, int *rc)

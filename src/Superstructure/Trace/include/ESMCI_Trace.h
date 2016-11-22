@@ -39,9 +39,9 @@ namespace ESMCI {
 */
 
 namespace ESMCI { 
-  int TraceOpen(unsigned int buf_size, const char *trace_dir, 
-		int stream_id);
-  void TraceClose();
+  void TraceOpen(unsigned int buf_size, const char *trace_dir, 
+                 int stream_id, int *rc);
+  void TraceClose(int *rc);
 
   ////////////////////////////////
 

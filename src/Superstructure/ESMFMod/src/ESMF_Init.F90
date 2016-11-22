@@ -446,7 +446,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           return
         endif
         call ESMF_TraceOpen(4096, "./traceout", localPet, rc=localrc)
-        print *, "Initialize trace for pet = ", localPet
         if (localrc /= ESMF_SUCCESS) then
           write (ESMF_UtilIOStderr,*) ESMF_METHOD, ": Error initializing trace stream"
           return
