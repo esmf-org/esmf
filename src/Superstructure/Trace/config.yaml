@@ -63,6 +63,7 @@ metadata:
   clocks:
     sys_clock:
       description: System clock
+      $return-ctype: uint64_t
   trace:
     byte-order: le
 #    uuid: auto

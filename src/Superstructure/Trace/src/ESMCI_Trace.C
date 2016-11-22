@@ -95,7 +95,7 @@ namespace ESMCI {
   //global context
   static struct esmftrc_platform_filesys_ctx *g_esmftrc_platform_filesys_ctx;
   
-  static uint32_t get_clock(void* data)
+  static uint64_t get_clock(void* data)
   {
     struct timespec ts;
     
