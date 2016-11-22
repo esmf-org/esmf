@@ -612,16 +612,19 @@ module ESMF_ComplianceICMod
       return  ! bail out
 
     if (outputJSON) then
-        call JSON_LogCtrlFlow("stop_epilogue", comp, rc)
-        if (ESMF_LogFoundError(rc, &
-            line=__LINE__, file=FILENAME)) return  ! bail out
-     endif
-     if (outputTrace) then
-        call ESMF_TraceEventPhaseEpilogueExit(comp, rc=rc)
-        if (ESMF_LogFoundError(rc, &
+       call JSON_LogCtrlFlow("stop_epilogue", comp, rc)
+       if (ESMF_LogFoundError(rc, &
             line=__LINE__, file=FILENAME)) return  ! bail out
     endif
-
+    if (outputTrace) then
+       call ESMF_TraceEventComponentInfo(comp, rc=rc)
+       if (ESMF_LogFoundError(rc, &
+            line=__LINE__, file=FILENAME)) return  ! bail out
+       call ESMF_TraceEventPhaseEpilogueExit(comp, rc=rc)
+       if (ESMF_LogFoundError(rc, &
+            line=__LINE__, file=FILENAME)) return  ! bail out
+    endif
+    
     endif  
     ! Stop Compliance Checking: InitializeEpilogue
     !---------------------------------------------------------------------------
@@ -677,6 +680,11 @@ module ESMF_ComplianceICMod
     if (outputJSON) then
         call JSON_LogCtrlFlow("start_prologue", comp, rc)
         if (ESMF_LogFoundError(rc, &
+            line=__LINE__, file=FILENAME)) return  ! bail out
+    endif
+    if (outputTrace) then
+       call ESMF_TraceEventPhasePrologueEnter(comp, rc=rc)
+       if (ESMF_LogFoundError(rc, &
             line=__LINE__, file=FILENAME)) return  ! bail out
     endif
 
@@ -742,6 +750,14 @@ module ESMF_ComplianceICMod
         if (ESMF_LogFoundError(rc, &
             line=__LINE__, file=FILENAME)) return  ! bail out
     endif
+    if (outputTrace) then
+       call ESMF_TraceEventPhasePrologueExit(comp, rc=rc)
+       if (ESMF_LogFoundError(rc, &
+            line=__LINE__, file=FILENAME)) return  ! bail out
+       call ESMF_TraceEventPhaseEnter(comp, rc=rc)
+       if (ESMF_LogFoundError(rc, &
+            line=__LINE__, file=FILENAME)) return  ! bail out
+    endif
     
     endif
     ! Stop Compliance Checking: RunPrologue
@@ -767,6 +783,14 @@ module ESMF_ComplianceICMod
             line=__LINE__, file=FILENAME)) return  ! bail out
         call JSON_LogCtrlFlow("start_epilogue", comp, rc)
         if (ESMF_LogFoundError(rc, &
+            line=__LINE__, file=FILENAME)) return  ! bail out
+    endif
+    if (outputTrace) then
+       call ESMF_TraceEventPhaseExit(comp, rc=rc)
+       if (ESMF_LogFoundError(rc, &
+            line=__LINE__, file=FILENAME)) return  ! bail out
+       call ESMF_TraceEventPhaseEpilogueEnter(comp, rc=rc)
+       if (ESMF_LogFoundError(rc, &
             line=__LINE__, file=FILENAME)) return  ! bail out
     endif
 
@@ -835,6 +859,11 @@ module ESMF_ComplianceICMod
         if (ESMF_LogFoundError(rc, &
             line=__LINE__, file=FILENAME)) return  ! bail out
     endif
+    if (outputTrace) then
+       call ESMF_TraceEventPhaseEpilogueExit(comp, rc=rc)
+       if (ESMF_LogFoundError(rc, &
+            line=__LINE__, file=FILENAME)) return  ! bail out
+    endif
 
     endif
     ! Stop Compliance Checking: RunEpilogue
@@ -893,6 +922,12 @@ module ESMF_ComplianceICMod
         if (ESMF_LogFoundError(rc, &
             line=__LINE__, file=FILENAME)) return  ! bail out
     endif
+    if (outputTrace) then
+       call ESMF_TraceEventPhasePrologueEnter(comp, rc=rc)
+       if (ESMF_LogFoundError(rc, &
+            line=__LINE__, file=FILENAME)) return  ! bail out
+    endif
+
 
     write(output,*) ">START FinalizePrologue for phase=", phase
     call Compliance_LogWrite(trim(prefix)//trim(output), &
@@ -948,6 +983,14 @@ module ESMF_ComplianceICMod
         if (ESMF_LogFoundError(rc, &
             line=__LINE__, file=FILENAME)) return  ! bail out
     endif
+    if (outputTrace) then
+       call ESMF_TraceEventPhasePrologueExit(comp, rc=rc)
+       if (ESMF_LogFoundError(rc, &
+            line=__LINE__, file=FILENAME)) return  ! bail out
+       call ESMF_TraceEventPhaseEnter(comp, rc=rc)
+       if (ESMF_LogFoundError(rc, &
+            line=__LINE__, file=FILENAME)) return  ! bail out
+    endif
     
     endif
     ! Stop Compliance Checking: FinalizePrologue
@@ -973,6 +1016,14 @@ module ESMF_ComplianceICMod
             line=__LINE__, file=FILENAME)) return  ! bail out
         call JSON_LogCtrlFlow("start_epilogue", comp, rc)
         if (ESMF_LogFoundError(rc, &
+            line=__LINE__, file=FILENAME)) return  ! bail out
+    endif
+    if (outputTrace) then
+       call ESMF_TraceEventPhaseExit(comp, rc=rc)
+       if (ESMF_LogFoundError(rc, &
+            line=__LINE__, file=FILENAME)) return  ! bail out
+       call ESMF_TraceEventPhaseEpilogueEnter(comp, rc=rc)
+       if (ESMF_LogFoundError(rc, &
             line=__LINE__, file=FILENAME)) return  ! bail out
     endif
 
@@ -1031,6 +1082,11 @@ module ESMF_ComplianceICMod
     if (outputJSON) then
         call JSON_LogCtrlFlow("stop_epilogue", comp, rc)
         if (ESMF_LogFoundError(rc, &
+            line=__LINE__, file=FILENAME)) return  ! bail out
+    endif
+    if (outputTrace) then
+       call ESMF_TraceEventPhaseEpilogueExit(comp, rc=rc)
+       if (ESMF_LogFoundError(rc, &
             line=__LINE__, file=FILENAME)) return  ! bail out
     endif
     

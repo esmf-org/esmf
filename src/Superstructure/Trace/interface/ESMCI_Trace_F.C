@@ -1,8 +1,20 @@
 #include <string.h>
 #include <stdlib.h>
+#include <stdio.h>
+
+//#include <sstream>
+//#include <cstring>
+//#include <fstream>
+//#include <cstdlib>
+//#include <vector>
+//#include <algorithm>
 
 #include "ESMCI_Macros.h"
+#include "ESMCI_Util.h"
 #include "ESMCI_Trace.h"
+
+using std::string;
+
 
 // C interface called from Fortran
 
@@ -71,7 +83,8 @@ extern "C" {
   void FTN_X(c_esmftrace_component_info)(int *vmid, int *baseid, const char *name, int *rc, 
                                          ESMCI_FortranStrLenArg nlen)
   {
-    ESMCI::TraceEventComponentInfo(vmid, baseid, name);
+    string cname = string(name, ESMC_F90lentrim (name, nlen));
+    ESMCI::TraceEventComponentInfo(vmid, baseid, cname.c_str());
     if (rc != NULL) *rc = ESMF_SUCCESS;
   }
     
