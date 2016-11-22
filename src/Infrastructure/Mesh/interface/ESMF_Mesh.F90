@@ -3332,7 +3332,7 @@ end function ESMF_MeshCreateDual
 #define ESMF_METHOD "ESMF_MeshCreateCubedSphere()"
 !BOP
 
-! !IROUTINE: ESMF_MeshCreateCubedSphere - Create a mesh for a Cubed Sphere grid.
+! !IROUTINE: ESMF_MeshCreateCubedSphere - Create a Mesh representation of a cubed sphere grid
 !
 ! !INTERFACE:  
 function ESMF_MeshCreateCubedSphere(tileSize, nx, ny, rc)
@@ -3348,7 +3348,7 @@ function ESMF_MeshCreateCubedSphere(tileSize, nx, ny, rc)
 
 !
 ! !DESCRIPTION:
-!   Create a {\tt ESMF\_Mesh} object for a Cubed Sphere grid using identical regular decomposition for every tile.
+!   Create a {\tt ESMF\_Mesh} object for a cubed sphere grid using identical regular decomposition for every tile.
 !   The grid coordinates are generated based on the algorithm used by GEOS-5, The tile resolution is defined by 
 !   {\tt tileSize}.  The total number of PETs has to be nx x ny x 6.
 !
@@ -3407,6 +3407,7 @@ function ESMF_MeshCreateCubedSphere(tileSize, nx, ny, rc)
        call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
                              msg="nx * ny does not equal to the total number of PETs", & 
                              ESMF_CONTEXT, rcToReturn=rc) 
+       return
   endif    
 
   ! Distribute center coordinates according to the nx/ny decomposition

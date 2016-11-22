@@ -66,6 +66,9 @@ program ESMF_GridCreateEx
       character(ESMF_MAXSTR) :: testname
       character(ESMF_MAXSTR) :: failMsg
 
+      ! for Cubed Sphere test
+      integer, allocatable :: decomptile(:,:)
+
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
@@ -1362,6 +1365,36 @@ endif
 
 #endif
 
+!BOE
+!\subsubsection{Create a six-tile cubed sphere Grid}
+!\label{sec:usage:cubedsphere}
+!
+!This example creates a multi-tile Grid to represent a cubed sphere grid. 
+!Each of the six tiles making up the cubed sphere has 45 elements on
+!each side, so the total number of elements is 45x45x6=12150.  Each tile is 
+!decomposed using a regular decomposition.  The first two tiles are decomposed into
+!2x2 blocks each and the remaining 4 tiles are decomposed into 1x2 block. 
+!A total of 16 DEs are used. 
+!
+
+!BOC
+     ! Set up decomposition for each tile 
+     allocate(decomptile(2,6))
+     decomptile(:,1)=(/2,2/) ! Tile 1
+     decomptile(:,2)=(/2,2/) ! Tile 2
+     decomptile(:,3)=(/1,2/) ! Tile 3
+     decomptile(:,4)=(/1,2/) ! Tile 4
+     decomptile(:,5)=(/1,2/) ! Tile 5
+     decomptile(:,6)=(/1,2/) ! Tile 6
+
+     ! Create cubed sphere grid
+     grid2D = ESMF_GridCreateCubedSphere(tileSize=45, regDecompPTile=decomptile, rc=rc)
+!EOC
+     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+     ! Get rid of Grid
+     call ESMF_GridDestroy(grid2D, rc=rc)
+     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+     deallocate(decomptile)
 
 !BOE
 !\subsubsection{Grid stagger locations}
