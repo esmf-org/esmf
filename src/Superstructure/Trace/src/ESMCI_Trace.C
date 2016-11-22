@@ -78,8 +78,6 @@ namespace "ESMCI" {
 }
 */  
 
-  ///////////////////////////////////////////////////////////////////////////////////
-
 namespace ESMCI {
 
   struct esmftrc_platform_filesys_ctx {
@@ -136,7 +134,6 @@ namespace ESMCI {
     write_packet(ctx);
   }
 
-  //int esmftrc_platform_filesys_init(unsigned int buf_size, const char *trace_dir, int stream_id)
   int TraceOpen(unsigned int buf_size, const char *trace_dir, int stream_id)
   {
     char stream_path[1024];
@@ -183,7 +180,6 @@ namespace ESMCI {
   }
 
   
-  //void esmftrc_platform_filesys_fini()
   void TraceClose()
   {
     struct esmftrc_platform_filesys_ctx *ctx = g_esmftrc_platform_filesys_ctx;
@@ -215,7 +211,11 @@ namespace ESMCI {
   ////////////////////////////////
 
 
-  //void esmftrc_default_trace_phase_enter 
+  /*
+   * These functions call into the generated tracer functions
+   * in esmftrc.c.
+   */
+
   void TraceEventPhaseEnter  
      (
      int *ep_vmid,
@@ -224,13 +224,10 @@ namespace ESMCI {
      int *ep_phase
      )
   {
-    //call into generated trace function
     esmftrc_default_trace_phase_enter(esmftrc_platform_get_default_ctx(),
 				      *ep_vmid, *ep_baseid, *ep_method, *ep_phase);
-    
   }
   
-  //void esmftrc_default_trace_phase_exit
   void TraceEventPhaseExit 
     (
      int *ep_vmid,
@@ -241,7 +238,68 @@ namespace ESMCI {
   {
     esmftrc_default_trace_phase_exit(esmftrc_platform_get_default_ctx(),
 				     *ep_vmid, *ep_baseid, *ep_method, *ep_phase);
-    
   }
+
+  void TraceEventPhasePrologueEnter  
+  (
+     int *ep_vmid,
+     int *ep_baseid,
+     int *ep_method,
+     int *ep_phase
+     )
+  {
+    esmftrc_default_trace_phase_prologue_enter(esmftrc_platform_get_default_ctx(),
+                                               *ep_vmid, *ep_baseid, *ep_method, *ep_phase);
+  }
+
+  void TraceEventPhasePrologueExit  
+     (
+     int *ep_vmid,
+     int *ep_baseid,
+     int *ep_method,
+     int *ep_phase
+     )
+  {
+    esmftrc_default_trace_phase_prologue_exit(esmftrc_platform_get_default_ctx(),
+                                              *ep_vmid, *ep_baseid, *ep_method, *ep_phase);
+  }
+
+  void TraceEventPhaseEpilogueEnter  
+  (
+     int *ep_vmid,
+     int *ep_baseid,
+     int *ep_method,
+     int *ep_phase
+     )
+  {
+    esmftrc_default_trace_phase_epilogue_enter(esmftrc_platform_get_default_ctx(),
+                                               *ep_vmid, *ep_baseid, *ep_method, *ep_phase);
+  }
+
+  void TraceEventPhaseEpilogueExit  
+     (
+     int *ep_vmid,
+     int *ep_baseid,
+     int *ep_method,
+     int *ep_phase
+     )
+  {
+    esmftrc_default_trace_phase_epilogue_exit(esmftrc_platform_get_default_ctx(),
+                                              *ep_vmid, *ep_baseid, *ep_method, *ep_phase);
+  }
+
+  void TraceEventComponentInfo
+  (
+   int *ep_vmid,
+   int *ep_baseid,
+   const char *ep_name
+   )
+  {
+    esmftrc_default_trace_component_info(esmftrc_platform_get_default_ctx(),
+                                         *ep_vmid,
+                                         *ep_baseid,
+                                         ep_name);
+  }
+
   
 }

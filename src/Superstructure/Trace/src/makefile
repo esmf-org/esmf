@@ -2,15 +2,16 @@
 
 ALL: build_here 
 
-SOURCEC	  = ESMCI_Trace_F.C
-SOURCEF	  = ESMF_Trace.F90
-SOURCEH	  = 
+SOURCEC	  = esmftrc.c ESMCI_Trace.C
+SOURCEF	  = 
+SOURCEH	  = esmftrc.h ESMCI_Trace.h
+STOREH    = 
 
 OBJSC     = $(addsuffix .o, $(basename $(SOURCEC)))
 OBJSF     = $(addsuffix .o, $(basename $(SOURCEF)))
 
 LIBBASE	  = libesmf
-LOCDIR	  = src/Infrastructure/Trace/interface
+LOCDIR	  = src/Superstructure/Trace/src
 
 CLEANDIRS   =
 CLEANFILES  =
@@ -19,3 +20,5 @@ CLOBBERDIRS =
 include $(ESMF_DIR)/makefile
 
 DIRS	  = 
+
+

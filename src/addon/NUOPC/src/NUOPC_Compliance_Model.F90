@@ -457,13 +457,15 @@ contains
         !---------------------------------------------------------------------------
         ccfDepth = ccfDepth + 1
 
-        ! Call the actual Initialize routine
-
         if (outputTrace) then
-           !call esmftrc_default_trace_phase_enter(0, phase)
-           call ESMF_TraceEventPhaseEnter(1, 2, 0, phase)
+           call ESMF_TraceEventPhaseEnter(comp, rc=rc)
+           if (ESMF_LogFoundError(rc, &
+                line=__LINE__, &
+                file=FILENAME)) &
+                return  ! bail out
         endif
         
+        ! Call the actual Initialize routine        
         call ESMF_GridCompInitializeAct(comp, importState, exportState, clock, &
             phase=phase, userRc=userrc, rc=rc)
         if (ESMF_LogFoundError(rc, &
@@ -471,6 +473,14 @@ contains
             file=FILENAME)) &
             return  ! bail out
    
+        if (outputTrace) then
+           call ESMF_TraceEventPhaseExit(comp, rc=rc)
+           if (ESMF_LogFoundError(rc, &
+                line=__LINE__, &
+                file=FILENAME)) &
+                return  ! bail out
+        endif
+
         ccfDepth = ccfDepth - 1
         !---------------------------------------------------------------------------
         ! Start Compliance Checking: InitializeEpilogue
@@ -715,8 +725,11 @@ contains
         ccfDepth = ccfDepth + 1
 
         if (outputTrace) then
-           !call esmftrc_default_trace_phase_enter(1, phase)
-           call ESMF_TraceEventPhaseEnter(1, 2, 1, phase)
+           call ESMF_TraceEventPhaseEnter(comp, rc=rc)
+           if (ESMF_LogFoundError(rc, &
+                line=__LINE__, &
+                file=FILENAME)) &
+                return  ! bail out
         endif
         
         ! Call the actual Run routine
@@ -727,6 +740,14 @@ contains
             file=FILENAME)) &
             return  ! bail out
 
+        if (outputTrace) then
+           call ESMF_TraceEventPhaseExit(comp, rc=rc)
+           if (ESMF_LogFoundError(rc, &
+                line=__LINE__, &
+                file=FILENAME)) &
+                return  ! bail out
+        endif
+        
         ccfDepth = ccfDepth - 1
         !---------------------------------------------------------------------------
         ! Start Compliance Checking: RunEpilogue
@@ -937,6 +958,20 @@ contains
         !---------------------------------------------------------------------------
         ccfDepth = ccfDepth + 1
 
+        if (outputTrace) then
+           call ESMF_TraceEventComponentInfo(comp, rc=rc)
+           if (ESMF_LogFoundError(rc, &
+                line=__LINE__, &
+                file=FILENAME)) &
+                return  ! bail out
+
+           call ESMF_TraceEventPhaseEnter(comp, rc=rc)
+           if (ESMF_LogFoundError(rc, &
+                line=__LINE__, &
+                file=FILENAME)) &
+                return  ! bail out
+        endif
+
         ! Call the actual Finalize routine
         call ESMF_GridCompFinalizeAct(comp, importState, exportState, clock, &
             phase=phase, userRc=userrc, rc=rc)
@@ -944,6 +979,15 @@ contains
             line=__LINE__, &
             file=FILENAME)) &
             return  ! bail out
+
+        if (outputTrace) then
+           call ESMF_TraceEventPhaseExit(comp, rc=rc)
+           if (ESMF_LogFoundError(rc, &
+                line=__LINE__, &
+                file=FILENAME)) &
+                return  ! bail out
+        endif
+        
 
         ccfDepth = ccfDepth - 1
         !---------------------------------------------------------------------------

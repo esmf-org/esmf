@@ -52,7 +52,14 @@ metadata:
             vmid: uint16
             baseid: uint16
             method: esmf_method_type
-            phase: uint16      
+            phase: uint16
+    component_info_type:
+        class: struct
+        fields:
+            vmid: uint16
+            baseid: uint16
+            name:
+                class: string
   clocks:
     sys_clock:
       description: System clock
@@ -96,14 +103,5 @@ metadata:
             payload-type: phase_event_type
         phase_epilogue_exit:
             payload-type: phase_event_type
-#        state:
-#            payload-type:  
-#                class: struct
-#                fields:
-#                    myLen: uint8
-#                    myFields:
-#                        class: array
-#                        length: 16
-#                        element-type:
-#                            class: int
-#                            size: 8
+        component_info:
+            payload-type: component_info_type
