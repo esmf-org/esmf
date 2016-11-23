@@ -341,7 +341,7 @@ ReorderTool::get_reordered_handles( Tag tag,
                                     std::vector<EntityHandle>& new_handles )
 {
   new_handles.resize( old_handles.size() );
-  ErrorCode rval = mMB->tag_get_data( tag, old_handles, &new_handles[0] );
+  ErrorCode rval = mMB->tag_get_data( tag, old_handles, (new_handles.empty())?NULL:&new_handles[0] );
   CHKERR;
   
   Range::const_iterator it1 = old_handles.begin();
@@ -382,7 +382,7 @@ ErrorCode ReorderTool::get_new_handles( Tag tag,
 {
     // get new handles for tagged entities
   newhandles.resize(old_handles.size());
-  ErrorCode rval = mMB->tag_get_data( tag, old_handles, &newhandles[0] );
+  ErrorCode rval = mMB->tag_get_data( tag, old_handles, (newhandles.empty())?NULL:&newhandles[0] );
   CHKERR;
 
     // remove entities that were not reordered
@@ -585,12 +585,16 @@ ErrorCode ReorderTool::reorder_tag_data( EntityType etype, Tag new_handles, Tag 
       buffer.swap(buffer2);
   }
   
-    // store re-orederd tag data
+    // store re-ordered tag data
   if (-1 == tagsize) {
     rval = mMB->tag_set_by_ptr( tag, &newhandles[0], newhandles.size(), &pointers[0], &sizes[0] );
+    pointers.clear();
+    sizes.clear();
+    buffer.clear();
   }
   else {
     rval = mMB->tag_set_data( tag, &newhandles[0], newhandles.size(), &buffer[0] );
+    buffer.clear();
   }
   CHKERR;
   

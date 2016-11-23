@@ -3,7 +3,7 @@
  * storing and accessing finite element mesh data.
  * 
  * Copyright 2004 Sandia Corporation.  Under the terms of Contract
- * DE-AC04-94AL85000 with Sandia Coroporation, the U.S. Government
+ * DE-AC04-94AL85000 with Sandia Corporation, the U.S. Government
  * retains certain rights in this software.
  * 
  * This library is free software; you can redistribute it and/or
@@ -69,7 +69,7 @@ ErrorCode MeshTopoUtil::get_average_position(const EntityHandle *entities,
 
   if (connect.empty()) return MB_FAILURE;
   
-  for (Range::iterator rit = connect.begin(); rit != connect.end(); rit++) {
+  for (Range::iterator rit = connect.begin(); rit != connect.end(); ++rit) {
     result = mbImpl->get_coords(&(*rit), 1, dum_pos);
     if (MB_SUCCESS != result) return result;
     avg_position[0] += dum_pos[0]; 
@@ -87,8 +87,8 @@ ErrorCode MeshTopoUtil::get_average_position(const EntityHandle *entities,
 ErrorCode MeshTopoUtil::get_average_position(const EntityHandle entity,
                                                double *avg_position) 
 {
-  const EntityHandle *connect;
-  int num_connect;
+  const EntityHandle *connect = NULL;
+  int num_connect = 0;
   if (MBVERTEX == mbImpl->type_from_handle(entity))
     return mbImpl->get_coords(&entity, 1, avg_position);
     
@@ -215,7 +215,7 @@ ErrorCode MeshTopoUtil::star_next_entity(const EntityHandle star_center,
     // if no last_dp1, contents of to_ents should share dp1-dimensional entity with last_entity
   if (0 != last_entity && 0 == last_dp1) {
     Range tmp_to_ents;
-    for (Range::iterator rit = to_ents.begin(); rit != to_ents.end(); rit++) {
+    for (Range::iterator rit = to_ents.begin(); rit != to_ents.end(); ++rit) {
       if (0 != common_entity(last_entity, *rit, dim+2))
         tmp_to_ents.insert(*rit);
     }
@@ -339,12 +339,12 @@ ErrorCode MeshTopoUtil::star_entities_nonmanifold(const EntityHandle star_entity
     
       //   remove (d+2)-entities from the (d+2)-manifold entities
     for (std::vector<EntityHandle>::iterator vit = this_star_dp2.begin(); 
-         vit != this_star_dp2.end(); vit++)
+         vit != this_star_dp2.end(); ++vit)
       dp2_manifold.erase(*vit);
     
       //   remove (d+1)-entities from the (d+1)-entities
     for (std::vector<EntityHandle>::iterator vit = this_star_dp1.begin(); 
-         vit != this_star_dp1.end(); vit++)
+         vit != this_star_dp1.end(); ++vit)
       dp1_manifold.erase(*vit);
     
       // (end while)
@@ -353,7 +353,7 @@ ErrorCode MeshTopoUtil::star_entities_nonmanifold(const EntityHandle star_entity
     // check for leftover dp2 manifold entities, these should be in one of the 
     // stars
   if (!dp2_manifold.empty()) {
-    for (Range::iterator rit = dp2_manifold.begin(); rit != dp2_manifold.end(); rit++) {
+    for (Range::iterator rit = dp2_manifold.begin(); rit != dp2_manifold.end(); ++rit) {
     }
   }
     
@@ -380,7 +380,7 @@ ErrorCode MeshTopoUtil::get_manifold(const EntityHandle star_entity,
     return MB_SUCCESS;
   }
   
-  for (Range::iterator rit = tmp_range.begin(); rit != tmp_range.end(); rit++) {
+  for (Range::iterator rit = tmp_range.begin(); rit != tmp_range.end(); ++rit) {
     Range dum_range;
       // get (target_dim+1)-dimensional entities
     result = mbImpl->get_adjacencies(&(*rit), 1, target_dim+1, false, dum_range);
@@ -464,28 +464,47 @@ ErrorCode MeshTopoUtil::get_bridge_adjacencies(const EntityHandle from_entity,
   
   Range to_ents;
 
-  if (MB_SUCCESS != result) return result;
-
   if (bridge_dim < from_dim) {
       // looping over each sub-entity of dimension bridge_dim...
-    EntityHandle bridge_verts[MAX_SUB_ENTITIES];
-    int bridge_indices[MAX_SUB_ENTITIES];
-    for (int i = 0; i < CN::NumSubEntities(from_type, bridge_dim); i++) {
+    if (MBPOLYGON == from_type)
+    {
+      for (int i=0; i<num_connect; i++)
+      {
+        // loop over edges, and get the vertices
+        EntityHandle verts_on_edge[2]={connect[i], connect[(i+1)%num_connect]};
+        to_ents.clear();
+        ErrorCode tmp_result = mbImpl->get_adjacencies(verts_on_edge, 2,
+                        to_dim, false, to_ents, Interface::INTERSECT);
+        if (MB_SUCCESS != tmp_result) result = tmp_result;
+        to_adjs.merge(to_ents);
+      }
+    }
+    else
+    {
+      EntityHandle bridge_verts[MAX_SUB_ENTITIES];
+      int bridge_indices[MAX_SUB_ENTITIES];
+      for (int i = 0; i < CN::NumSubEntities(from_type, bridge_dim); i++) {
 
-        // get the vertices making up this sub-entity
-      int num_bridge_verts = CN::VerticesPerEntity( CN::SubEntityType( from_type, bridge_dim, i ) );
-      CN::SubEntityVertexIndices( from_type, bridge_dim, i, bridge_indices );
-      for (int j = 0; j < num_bridge_verts; ++j)
-        bridge_verts[j]= connect[bridge_indices[j]];
-      //CN::SubEntityConn(connect, from_type, bridge_dim, i, &bridge_verts[0], num_bridge_verts);
-    
-        // get the to_dim entities adjacent
-      to_ents.clear();
-      ErrorCode tmp_result = mbImpl->get_adjacencies(bridge_verts, num_bridge_verts,
-                                                       to_dim, false, to_ents, Interface::INTERSECT);
-      if (MB_SUCCESS != tmp_result) result = tmp_result;
-    
-      to_adjs.merge(to_ents);
+          // get the vertices making up this sub-entity
+        int num_bridge_verts = CN::VerticesPerEntity( CN::SubEntityType( from_type, bridge_dim, i ) );
+        assert(num_bridge_verts >= 0 && num_bridge_verts <= MAX_SUB_ENTITIES);
+        CN::SubEntityVertexIndices( from_type, bridge_dim, i, bridge_indices );
+        for (int j = 0; j < num_bridge_verts; ++j) {
+          if (bridge_indices[j] >= 0 && bridge_indices[j] < num_connect)
+            bridge_verts[j] = connect[bridge_indices[j]];
+          else
+            bridge_verts[j] = 0;
+        }
+        //CN::SubEntityConn(connect, from_type, bridge_dim, i, &bridge_verts[0], num_bridge_verts);
+
+          // get the to_dim entities adjacent
+        to_ents.clear();
+        ErrorCode tmp_result = mbImpl->get_adjacencies(bridge_verts, num_bridge_verts,
+                                                         to_dim, false, to_ents, Interface::INTERSECT);
+        if (MB_SUCCESS != tmp_result) result = tmp_result;
+
+        to_adjs.merge(to_ents);
+      }
     }
 
   }
@@ -562,7 +581,7 @@ ErrorCode MeshTopoUtil::split_entities_manifold(Range &entities,
   if (NULL != fill_entities) tmp_ptr_fill_entity = &tmp_range;
   else tmp_ptr_fill_entity = NULL;
   
-  for (Range::iterator rit = entities.begin(); rit != entities.end(); rit++) {
+  for (Range::iterator rit = entities.begin(); rit != entities.end(); ++rit) {
     EntityHandle new_entity;
     if (NULL != tmp_ptr_fill_entity) tmp_ptr_fill_entity->clear();
 
@@ -589,9 +608,9 @@ ErrorCode MeshTopoUtil::split_entities_manifold(EntityHandle *entities,
     // most two higher-dimension entities bounded by a given entity; after split, the
     // new entity bounds one and the original entity bounds the other
 
-#define ITERATE_RANGE(range, it) for (Range::iterator it = range.begin(); it != range.end(); it++)
+#define ITERATE_RANGE(range, it) for (Range::iterator it = range.begin(); it != range.end(); ++it)
 #define GET_CONNECT_DECL(ent, connect, num_connect) \
-  const EntityHandle *connect; int num_connect; \
+  const EntityHandle *connect = NULL; int num_connect = 0; \
   {ErrorCode connect_result = mbImpl->get_connectivity(ent, connect, num_connect); \
    if (MB_SUCCESS != connect_result) return connect_result;}
 #define GET_CONNECT(ent, connect, num_connect) \
@@ -632,7 +651,7 @@ ErrorCode MeshTopoUtil::split_entities_manifold(EntityHandle *entities,
       if (dim < CN::Dimension(TYPE_FROM_HANDLE(entities[i]))) {
           // adjacencies from other entities to this one; if any of those are equivalent entities,
           // need to make explicit adjacency to new entity too
-        for (Range::iterator rit = up_adjs[dim].begin(); rit != up_adjs[dim].end(); rit++) {
+        for (Range::iterator rit = up_adjs[dim].begin(); rit != up_adjs[dim].end(); ++rit) {
           if (equivalent_entities(*rit))
             result = mbImpl->add_adjacencies(*rit, &new_entity, 1, false);
         }
@@ -652,7 +671,7 @@ ErrorCode MeshTopoUtil::split_entities_manifold(EntityHandle *entities,
           up_elem2 = tmp_elem;
         }
         
-        tmp_result = mbImpl->remove_adjacencies(entities[i], &up_elem1, 1);
+        mbImpl->remove_adjacencies(entities[i], &up_elem1, 1);
           // (ok if there's an error, that just means there wasn't an explicit adj)
 
         tmp_result = mbImpl->add_adjacencies(new_entity, &up_elem1, 1, false); TC;
@@ -725,15 +744,15 @@ ErrorCode MeshTopoUtil::split_entity_nonmanifold(EntityHandle split_ent,
     result = mbImpl->create_element(split_type, connect, num_connect, new_entity); RR;
 
       // remove any explicit adjacencies between new_adjs and split entity
-    for (Range::iterator rit = new_adjs.begin(); rit != new_adjs.end(); rit++)
+    for (Range::iterator rit = new_adjs.begin(); rit != new_adjs.end(); ++rit)
       mbImpl->remove_adjacencies(split_ent, &(*rit), 1);
   }
       
   if (MBVERTEX != split_type) {
         //  add adj's between new_adjs & new entity, old_adjs & split_entity
-    for (Range::iterator rit = new_adjs.begin(); rit != new_adjs.end(); rit++)
+    for (Range::iterator rit = new_adjs.begin(); rit != new_adjs.end(); ++rit)
       mbImpl->add_adjacencies(new_entity, &(*rit), 1, true);
-    for (Range::iterator rit = old_adjs.begin(); rit != old_adjs.end(); rit++)
+    for (Range::iterator rit = old_adjs.begin(); rit != old_adjs.end(); ++rit)
       mbImpl->add_adjacencies(split_ent, &(*rit), 1, true);
   }
   else if (split_ent != new_entity) {
@@ -746,17 +765,17 @@ ErrorCode MeshTopoUtil::split_entity_nonmanifold(EntityHandle split_ent,
     }
     other_adjs = subtract( other_adjs, old_adjs);
     other_adjs = subtract( other_adjs, new_adjs);
-    for (Range::iterator rit1 = other_adjs.begin(); rit1 != other_adjs.end(); rit1++) {
+    for (Range::iterator rit1 = other_adjs.begin(); rit1 != other_adjs.end(); ++rit1) {
         // find an adjacent lower-dimensional entity in old_ or new_ adjs
       bool found = false;
-      for (Range::iterator rit2 = old_adjs.begin(); rit2 != old_adjs.end(); rit2++) {
+      for (Range::iterator rit2 = old_adjs.begin(); rit2 != old_adjs.end(); ++rit2) {
         if (mbImpl->dimension_from_handle(*rit1) != mbImpl->dimension_from_handle(*rit2) &&
             common_entity(*rit1, *rit2, mbImpl->dimension_from_handle(*rit1))) {
           found = true; old_adjs.insert(*rit1); break;
         }
       }
       if (found) continue;
-      for (Range::iterator rit2 = new_adjs.begin(); rit2 != new_adjs.end(); rit2++) {
+      for (Range::iterator rit2 = new_adjs.begin(); rit2 != new_adjs.end(); ++rit2) {
         if (mbImpl->dimension_from_handle(*rit1) != mbImpl->dimension_from_handle(*rit2) &&
             common_entity(*rit1, *rit2, mbImpl->dimension_from_handle(*rit1))) {
           found = true; new_adjs.insert(*rit1); break;
@@ -767,7 +786,7 @@ ErrorCode MeshTopoUtil::split_entity_nonmanifold(EntityHandle split_ent,
           
       // instead of adjs replace in connectivity
     std::vector<EntityHandle> connect;
-    for (Range::iterator rit = new_adjs.begin(); rit != new_adjs.end(); rit++) {
+    for (Range::iterator rit = new_adjs.begin(); rit != new_adjs.end(); ++rit) {
       connect.clear();
       result = mbImpl->get_connectivity(&(*rit), 1, connect); RR;
       std::replace(connect.begin(), connect.end(), split_ent, new_entity);
@@ -913,8 +932,8 @@ way to do it, if I ever get the time.  Sigh.
 bool MeshTopoUtil::equivalent_entities(const EntityHandle entity,
                                        Range *equiv_ents) 
 {
-  const EntityHandle *connect;
-  int num_connect;
+  const EntityHandle *connect = NULL;
+  int num_connect = 0;
   ErrorCode result = mbImpl->get_connectivity(entity, connect, num_connect);
   if (MB_SUCCESS != result) return false;
 

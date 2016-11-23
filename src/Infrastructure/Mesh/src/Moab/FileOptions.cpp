@@ -3,7 +3,7 @@
  * storing and accessing finite element mesh data.
  * 
  * Copyright 2004 Sandia Corporation.  Under the terms of Contract
- * DE-AC04-94AL85000 with Sandia Coroporation, the U.S. Government
+ * DE-AC04-94AL85000 with Sandia Corporation, the U.S. Government
  * retains certain rights in this software.
  * 
  * This library is free software; you can redistribute it and/or
@@ -18,7 +18,7 @@
  *\date 2007-08-21
  */
 
-#include "FileOptions.hpp"
+#include "moab/FileOptions.hpp"
 
 #include <ctype.h>
 #include <stdlib.h>
@@ -79,6 +79,10 @@ FileOptions::FileOptions( const FileOptions& copy ) :
 
 FileOptions& FileOptions::operator=( const FileOptions& copy )
 {
+  // Check for self-assignment
+  if (this == &copy)
+    return *this;
+
   free( mData );
   mData = 0;
   mOptions.resize( copy.mOptions.size() );

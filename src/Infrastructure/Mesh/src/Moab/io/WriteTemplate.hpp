@@ -3,7 +3,7 @@
  * storing and accessing finite element mesh data.
  * 
  * Copyright 2004 Sandia Corporation.  Under the terms of Contract
- * DE-AC04-94AL85000 with Sandia Coroporation, the U.S. Government
+ * DE-AC04-94AL85000 with Sandia Corporation, the U.S. Government
  * retains certain rights in this software.
  * 
  * This library is free software; you can redistribute it and/or
@@ -141,9 +141,6 @@ private:
   
     //! file name
   std::string fileName;
-
-    //! Meshset Handle for the mesh that is currently being read
-  EntityHandle mCurrentMeshHandle;
 
   //! Cached tags for reading.  Note that all these tags are defined when the
   //! core is initialized.

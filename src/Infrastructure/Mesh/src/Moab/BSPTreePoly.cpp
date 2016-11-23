@@ -9,7 +9,7 @@
 namespace moab {
 
 struct BSPTreePoly::Vertex : public CartVect {
-  Vertex( const CartVect& v ) : CartVect(v), usePtr(0) 
+  Vertex( const CartVect& v ) : CartVect(v), usePtr(0), markVal(0)
 #ifdef DEBUG_IDS
   , id(nextID++)
 #endif  
@@ -27,7 +27,7 @@ struct BSPTreePoly::VertexUse {
   VertexUse( Edge* edge, Vertex* vtx );
   ~VertexUse();
   
-  void set_vertex( BSPTreePoly::Vertex* vtx_ptr );
+  void set_vertex( BSPTreePoly::Vertex*& vtx_ptr );
   
   BSPTreePoly::VertexUse *nextPtr, *prevPtr;
   BSPTreePoly::Vertex* vtxPtr;
@@ -151,7 +151,7 @@ void BSPTreePoly::reset_debug_ids() {
 //static void merge_edges( BSPTreePoly::Edge* keep_edge,
 //                         BSPTreePoly::Edge* dead_edge );
 
-static BSPTreePoly::Edge* split_edge( BSPTreePoly::Vertex* new_vtx,
+static BSPTreePoly::Edge* split_edge( BSPTreePoly::Vertex*& new_vtx,
                                        BSPTreePoly::Edge* into_edge );
 
 BSPTreePoly::VertexUse::VertexUse( BSPTreePoly::Edge* edge, BSPTreePoly::Vertex* vtx )
@@ -185,13 +185,14 @@ BSPTreePoly::VertexUse::~VertexUse()
   nextPtr = prevPtr = 0;
 }
 
-void BSPTreePoly::VertexUse::set_vertex( BSPTreePoly::Vertex* vtx )
+void BSPTreePoly::VertexUse::set_vertex( BSPTreePoly::Vertex*& vtx )
 {
   if (vtxPtr) {
     if (nextPtr == prevPtr) {
       assert(nextPtr == this);
       vtxPtr->usePtr = 0;
       delete vtx;
+      vtx = 0;
     }
     else {
       nextPtr->prevPtr = prevPtr;
@@ -201,11 +202,13 @@ void BSPTreePoly::VertexUse::set_vertex( BSPTreePoly::Vertex* vtx )
     }
   }
   
-  vtxPtr = vtx;
-  nextPtr = vtxPtr->usePtr->nextPtr;
-  prevPtr = vtxPtr->usePtr;
-  nextPtr->prevPtr = this;
-  vtxPtr->usePtr->nextPtr = this;
+  if (vtx) {
+   vtxPtr = vtx;
+   nextPtr = vtxPtr->usePtr->nextPtr;
+   prevPtr = vtxPtr->usePtr;
+   nextPtr->prevPtr = this;
+   vtxPtr->usePtr->nextPtr = this;
+  }
 }
   
 
@@ -234,7 +237,7 @@ BSPTreePoly::EdgeUse::EdgeUse( BSPTreePoly::Edge* edge,
 
 void BSPTreePoly::EdgeUse::insert_after( BSPTreePoly::EdgeUse* prev )
 {
-    // shouldn't aready be in a face
+    // shouldn't already be in a face
   assert(!facePtr);
     // adjacent edges should share vertices
   assert( start() == prev->end() );
@@ -248,7 +251,7 @@ void BSPTreePoly::EdgeUse::insert_after( BSPTreePoly::EdgeUse* prev )
 
 void BSPTreePoly::EdgeUse::insert_before( BSPTreePoly::EdgeUse* next )
 {
-    // shouldn't aready be in a face
+    // shouldn't already be in a face
   assert(!facePtr);
     // adjacent edges should share vertices
   assert( end() == next->start() );
@@ -329,8 +332,15 @@ int BSPTreePoly::Edge::sense( BSPTreePoly::Face* face ) const
 
 BSPTreePoly::Face::~Face()
 {
-  while (usePtr)
-    delete usePtr;
+  BSPTreePoly::EdgeUse* nextEdgeUsePtr = usePtr;
+  while (nextEdgeUsePtr) {
+    delete nextEdgeUsePtr; // This is tricky: ~EdgeUse() might change the value of usePtr
+    if (usePtr && usePtr != nextEdgeUsePtr)
+      nextEdgeUsePtr = usePtr;
+    else
+      nextEdgeUsePtr = 0;
+  }
+  usePtr = 0;
 }
 
 void BSPTreePoly::clear() {
@@ -482,12 +492,12 @@ static void merge_edges( BSPTreePoly::Edge* keep_edge,
   delete dead_edge;
 }
 */
-static BSPTreePoly::Edge* split_edge( BSPTreePoly::Vertex* new_vtx,
+static BSPTreePoly::Edge* split_edge( BSPTreePoly::Vertex*& new_vtx,
                                        BSPTreePoly::Edge* into_edge )
 {
     // split edge, creating new edge
   BSPTreePoly::Edge* new_edge = new BSPTreePoly::Edge( new_vtx, into_edge->end() );
-  into_edge->endPtr->set_vertex( new_vtx );
+  into_edge->endPtr->set_vertex( new_vtx ); // This call might delete new_vtx
   
     // update coedge loops in faces
   if (into_edge->forwardPtr) {
@@ -592,7 +602,7 @@ bool BSPTreePoly::cut_polyhedron( const CartVect& plane_normal,
         double t = -(plane_normal % *start + plane_coeff) / (dir % plane_normal);
         Vertex* new_vtx = new Vertex( *start + t*dir );
         new_vtx->markVal = ON;
-        split_edge( new_vtx, edge->edgePtr );
+        split_edge( new_vtx, edge->edgePtr ); // This call might delete new_vtx
         end = new_vtx;
       }
 

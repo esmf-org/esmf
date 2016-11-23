@@ -53,7 +53,7 @@ ErrorCode RangeSetIterator::build_pair_vec()
   Range::const_pair_iterator pi;
   int i;
   for (pi = all_ents.const_pair_begin(), i = 0;
-       pi != all_ents.const_pair_end(); pi++, i+=2) {
+       pi != all_ents.const_pair_end(); ++pi, i+=2) {
     pairPtr[i] = (*pi).first;
     pairPtr[i+1] = (*pi).second;
   }
@@ -102,7 +102,7 @@ ErrorCode RangeSetIterator::get_next_arr(std::vector<EntityHandle> &arr,
   if (MB_SUCCESS != rval) return rval;
   
   if (checkValid) {
-    for (std::vector<EntityHandle>::iterator vit = tmp_ptr->begin(); vit != tmp_ptr->end(); vit++) {
+    for (std::vector<EntityHandle>::iterator vit = tmp_ptr->begin(); vit != tmp_ptr->end(); ++vit) {
       if (myCore->is_valid(*vit)) arr.push_back(*vit);
     }
   }
@@ -162,10 +162,7 @@ ErrorCode RangeSetIterator::get_next_by_dimension(const EntityHandle *&ptr, int 
 {
     // iterating by dimension - type should be maxtype
   if (entType != MBMAXTYPE) {
-    Error *error;
-    dynamic_cast<Interface*>(myCore)->query_interface(error);
-    error->set_last_error("Both dimension and type should not be set on an iterator.");
-    return MB_FAILURE;
+    MB_SET_ERR(MB_FAILURE, "Both dimension and type should not be set on an iterator");
   }
     
   unsigned int num_ret = 0;
@@ -252,7 +249,7 @@ ErrorCode VectorSetIterator::get_next_arr(std::vector<EntityHandle> &arr,
   atend = (iterPos == count);
 
   if (checkValid) {
-    for (std::vector<EntityHandle>::iterator vit = tmp_ptr->begin(); vit != tmp_ptr->end(); vit++) {
+    for (std::vector<EntityHandle>::iterator vit = tmp_ptr->begin(); vit != tmp_ptr->end(); ++vit) {
       if (myCore->is_valid(*vit)) arr.push_back(*vit);
     }
   }

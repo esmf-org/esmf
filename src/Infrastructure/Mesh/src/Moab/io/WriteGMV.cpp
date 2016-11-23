@@ -3,7 +3,7 @@
  * storing and accessing finite element mesh data.
  * 
  * Copyright 2004 Sandia Corporation.  Under the terms of Contract
- * DE-AC04-94AL85000 with Sandia Coroporation, the U.S. Government
+ * DE-AC04-94AL85000 with Sandia Corporation, the U.S. Government
  * retains certain rights in this software.
  * 
  * This library is free software; you can redistribute it and/or
@@ -54,7 +54,7 @@ WriterIface* WriteGMV::factory( Interface* iface )
   { return new WriteGMV( iface ); }
 
 WriteGMV::WriteGMV(Interface *impl) 
-    : mbImpl(impl), mCurrentMeshHandle(0)
+    : mbImpl(impl)
 {
   assert(impl != NULL);
 
@@ -258,7 +258,7 @@ ErrorCode WriteGMV::local_write_mesh(const char *file_name,
         // make sure the connectivity array is big enough
       int verts_per = CN::VerticesPerEntity(otype);
       if (connect.size() < verts_per*sub_range.size())
-        connect.reserve(verts_per*sub_range.size());
+        connect.resize(verts_per*sub_range.size());
     
         // get the connectivity
       result = mWriteIface->get_element_connect(sub_range.size(),
@@ -299,7 +299,7 @@ ErrorCode WriteGMV::local_write_mesh(const char *file_name,
 
     ofile << "faces " << polygons.size() << " " << polyhedra.size() << std::endl;
 
-    for (Range::iterator rit = polygons.begin(); rit != polygons.end(); rit++) {
+    for (Range::iterator rit = polygons.begin(); rit != polygons.end(); ++rit) {
         // get the vertices
       connecth.clear();
       result = mbImpl->get_connectivity(&(*rit), 1, connecth, true);
@@ -319,7 +319,7 @@ ErrorCode WriteGMV::local_write_mesh(const char *file_name,
       }
     
         // replace handles with ids
-      connect.reserve(connecth.size());
+      connect.resize(connecth.size()+2);
 
         // pre-set polyhedra ids in case there aren't any
       connect[connecth.size()] = 0;

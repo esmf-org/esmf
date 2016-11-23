@@ -57,6 +57,7 @@ ifeq ($(ESMF_COMM),mvapich2)
 ESMF_F90DEFAULT         = mpif90
 ESMF_F90LINKERDEFAULT   = mpicxx
 ESMF_CXXDEFAULT         = mpicxx
+ESMF_CXXLINKLIBS       += $(shell $(ESMF_DIR)/scripts/libs.mvapich2f90)
 ESMF_MPIRUNDEFAULT      = mpirun $(ESMF_MPILAUNCHOPTIONS)
 ESMF_MPIMPMDRUNDEFAULT  = mpiexec $(ESMF_MPILAUNCHOPTIONS)
 else

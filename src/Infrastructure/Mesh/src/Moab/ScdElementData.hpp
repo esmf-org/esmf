@@ -3,7 +3,7 @@
  * storing and accessing finite element mesh data.
  * 
  * Copyright 2004 Sandia Corporation.  Under the terms of Contract
- * DE-AC04-94AL85000 with Sandia Coroporation, the U.S. Government
+ * DE-AC04-94AL85000 with Sandia Corporation, the U.S. Government
  * retains certain rights in this software.
  * 
  * This library is free software; you can redistribute it and/or
@@ -257,7 +257,7 @@ inline EntityHandle ScdElementData::get_vertex(const HomCoord &coords) const
 {
   assert(boundary_complete());
    for (std::vector<VertexDataRef>::const_iterator it = vertexSeqRefs.begin();
-        it != vertexSeqRefs.end(); it++) {
+        it != vertexSeqRefs.end(); ++it) {
      if ((*it).minmax[0] <= coords && (*it).minmax[1] >= coords) {
          // first get the vertex block-local parameters
        HomCoord local_coords = coords / (*it).xform;
@@ -301,7 +301,7 @@ inline ErrorCode ScdElementData::add_vsequence(ScdVertexData *vseq,
   
     // check against other vseq's to make sure they don't overlap
   for (std::vector<VertexDataRef>::const_iterator vsit = vertexSeqRefs.begin();
-       vsit != vertexSeqRefs.end(); vsit++) 
+       vsit != vertexSeqRefs.end(); ++vsit)
     if ((*vsit).contains(minmax[0]) || (*vsit).contains(minmax[1])) 
       return MB_FAILURE;
     

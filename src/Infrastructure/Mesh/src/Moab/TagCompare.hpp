@@ -122,7 +122,7 @@ class TagOneTypeEqual {
     int size;
   public:
     TagOneTypeEqual( const void* v ) 
-      : value(*reinterpret_cast<const T*>(v))
+      : value(*reinterpret_cast<const T*>(v)), size(0)
         {}
         
     bool operator()( const void* data ) const { 
@@ -141,7 +141,7 @@ class TagOneTypeLess {
     int size;
   public:
     TagOneTypeLess( const void* v ) 
-      : value(*reinterpret_cast<const T*>(v))
+      : value(*reinterpret_cast<const T*>(v)), size(0)
         {}
     
     bool operator()( const void* data ) const {
