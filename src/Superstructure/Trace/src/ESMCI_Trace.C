@@ -57,32 +57,7 @@
 #else
 # define TO_VOID_PTR(_value)		((void *) (_value))
 # define FROM_VOID_PTR(_type, _value)	((_type *) (_value))
-#endif
-
-/*
-namespace "ESMCI" {
-
-  int Trace::Open(int stream_id, 
-		  const char trace_dir[],
-		  int buffer_size)
-  {
-    int rc;
-    rc = ESMF_SUCCESS;
-
-    
-
-    return rc;
-  }
-
-  void Trace::Close()
-  {
-  
-    
-
-  }
-  
-}
-*/  
+#endif  
 
 namespace ESMCI {
 
@@ -99,8 +74,9 @@ namespace ESMCI {
   {
     struct timespec ts;
     
-    clock_gettime(CLOCK_MONOTONIC, &ts);
-    
+    //clock_gettime(CLOCK_MONOTONIC, &ts);
+    clock_gettime(CLOCK_REALTIME, &ts);
+
     return ts.tv_sec * 1000000000ULL + ts.tv_nsec;
   }
   
