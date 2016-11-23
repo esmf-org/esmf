@@ -2474,13 +2474,6 @@ call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO)
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
       
-    ! Set the default name of the component to be the label (may be overwr.)
-    call ESMF_GridCompSet(cmEntry%wrap%component, &
-      name=trim(cmEntry%wrap%label), rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
-      return  ! bail out
-    
     ! Set the CompLabel attribute
     call NUOPC_CompAttributeSet(cmEntry%wrap%component, &
       name="CompLabel", value=trim(cmEntry%wrap%label), rc=rc)
@@ -2628,13 +2621,6 @@ call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO)
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
       
-    ! Set the default name of the component to be the label (may be overwr.)
-    call ESMF_GridCompSet(cmEntry%wrap%component, &
-      name=trim(cmEntry%wrap%label), rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
-      return  ! bail out
-    
     ! Set the CompLabel attribute
     call NUOPC_CompAttributeSet(cmEntry%wrap%component, &
       name="CompLabel", value=trim(cmEntry%wrap%label), rc=rc)
@@ -2792,8 +2778,7 @@ call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO)
         enddo
       endif
       cmEntry%wrap%connector = ESMF_CplCompCreate(&
-        name=trim(srcCompLabel)//"-TO-"//trim(dstCompLabel), &
-        petList=connectorPetList, rc=rc)
+        name=trim(cmEntry%wrap%label), petList=connectorPetList, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     else
@@ -2805,7 +2790,7 @@ call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO)
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
       cmEntry%wrap%connector = ESMF_CplCompCreate(&
-        name=trim(srcCompLabel)//"-TO-"//trim(dstCompLabel), rc=rc)
+        name=trim(cmEntry%wrap%label), rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     endif
@@ -2852,13 +2837,6 @@ call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO)
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
     
-    ! Set the default name of the component to be the label (may be overwr.)
-    call ESMF_CplCompSet(cmEntry%wrap%connector, &
-      name=trim(cmEntry%wrap%label), rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
-      return  ! bail out
-
     ! Optionally return the added connector
     if (present(comp)) comp = cmEntry%wrap%connector
     
