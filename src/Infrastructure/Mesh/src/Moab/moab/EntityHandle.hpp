@@ -2,7 +2,32 @@
 #ifndef MOAB_ENTITY_HANDLE_HPP
 #define MOAB_ENTITY_HANDLE_HPP
 
-#include "moab/MOABConfig.h"
+/* MOAB qualified HAVE_INTTYPES_H */
+#define MOAB_HAVE_INTTYPES_H /**/
+
+/* MOAB qualified HAVE_STDDEF_H */
+#define MOAB_HAVE_STDDEF_H /**/
+
+/* MOAB qualified HAVE_STDINT_H */
+#define MOAB_HAVE_STDINT_H /**/
+
+/* MOAB qualified HAVE_STDLIB_H */
+#define MOAB_HAVE_STDLIB_H /**/
+
+/* MOAB qualified HAVE_SYS_TYPES_H */
+#define MOAB_HAVE_SYS_TYPES_H /**/
+
+/* Use int32_t for handles */
+/* #undef MOAB_FORCE_32_BIT_HANDLES */
+
+/* Use int64_t for handles */
+/* #undef MOAB_FORCE_64_BIT_HANDLES */
+
+/* System provides ptrdiff_t typedef */
+#define MOAB_HAVE_PTRDIFF_T /**/
+
+/* System provides size_t typedef */
+#define MOAB_HAVE_SIZE_T /**/
 
 #ifdef MOAB_HAVE_INTTYPES_H
 # include <inttypes.h>
@@ -23,7 +48,7 @@
 # include <stddef.h>
 #elif defined (MOAB_HAVE_STDLIB_H)
 # include <stdlib.h>
-#elif defined (MOAB_HAVE_SYS_TYPES_H)
+#elif defined (HAVE_SYS_TYPES_H)
 # include <sys/types.h>
 #endif
 

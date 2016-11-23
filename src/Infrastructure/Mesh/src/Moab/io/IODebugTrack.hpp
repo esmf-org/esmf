@@ -42,8 +42,8 @@ class IODebugTrack {
        *\param table_size Max table size.  No limit if unspecified 
        */
     IODebugTrack( bool enable,
-                  const std::string& table_name,
-                  std::ostream& output_stream,
+                  const std::string table_name,
+                  std::ostream output_stream,
                   unsigned long table_size = 0 ) ;
   
       /**\brief Constuctor requires stream to which to log errors 
@@ -51,7 +51,7 @@ class IODebugTrack {
        *\param table_size Max table size.  No limit if unspecified 
        */
     IODebugTrack( bool enable,
-                  const std::string& table_name,
+                  const std::string table_name,
                   unsigned long table_size = 0 ) ;
     
       /**\brief Destructor prints errors about unaccessed ranges */

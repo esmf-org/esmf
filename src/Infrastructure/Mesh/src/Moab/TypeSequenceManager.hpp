@@ -26,9 +26,8 @@ public:
    * Define less-than comparison for EntitySequence pointers as a comparison
    * of the entity handles in the pointed-to EntitySequences.
    */
-  template<class T>
   class SequenceCompare {
-    public: inline bool operator()( const T* a, const T* b ) const
+    public: bool operator()( const EntitySequence* a, const EntitySequence* b ) const
       { return a->end_handle() < b->start_handle(); }
   };
   /**\brief Dummy EntitySequence for use in querying set container */
@@ -49,16 +48,16 @@ public:
   };
 
   /**\brief Type of container for organizing EntitySequence instances */
-  typedef std::set<EntitySequence*,SequenceCompare<EntitySequence> > set_type;
+  typedef std::set<EntitySequence*,SequenceCompare> set_type;
   /**\brief Iterator for set_type */
   typedef set_type::iterator iterator;
   /**\brief Iterator for set_type */
   typedef set_type::const_iterator const_iterator;
   /**\brief Type of container for organizing SequenceData instaces */
-  typedef std::set<SequenceData*,SequenceCompare<SequenceData> > data_set_type;
+  typedef std::set<SequenceData*> data_set_type;
   /**\brief iterator type for data_set_type */
   typedef data_set_type::iterator data_iterator;
-
+  
   struct SequenceDataPtr {
     private:
     friend class TypeSequenceManager;
@@ -76,8 +75,8 @@ private:
   void append_memory_use( EntityHandle first,
                           EntityHandle last,
                           const SequenceData* data,
-                          unsigned long long& entity_storage,
-                          unsigned long long& total_storage ) const;
+                          unsigned long& entity_storage,
+                          unsigned long& total_storage ) const;
 
     // check if sequence at passed iterator should be merged with
     // the subsequent sequence, and if so merge them retaining i.
@@ -333,12 +332,12 @@ public:
      */
   ErrorCode notify_appended( iterator seq );
     
-  void get_memory_use( unsigned long long& total_entity_storage,
-                       unsigned long long& total_storage ) const;
+  void get_memory_use( unsigned long& total_entity_storage,
+                       unsigned long& total_storage ) const;
   
   void get_memory_use( EntityHandle start, EntityHandle end,
-                       unsigned long long& total_entity_storage,
-                       unsigned long long& total_amortized_storage ) const;
+                       unsigned long& total_entity_storage,
+                       unsigned long& total_amortized_storage ) const;
                        
   unsigned long get_sequence_count() const
     { return sequenceSet.size(); }

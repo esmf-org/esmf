@@ -3,7 +3,7 @@
  * storing and accessing finite element mesh data.
  * 
  * Copyright 2004 Sandia Corporation.  Under the terms of Contract
- * DE-AC04-94AL85000 with Sandia Corporation, the U.S. Government
+ * DE-AC04-94AL85000 with Sandia Coroporation, the U.S. Government
  * retains certain rights in this software.
  * 
  * This library is free software; you can redistribute it and/or
@@ -35,10 +35,6 @@ class EntitySequence;
 class FileOptions;
 class SetIterator;
 
-#ifdef MOAB_HAVE_AHF
-class HalfFacetRep;
-#endif
-
 #ifdef XPCOM_MB
 
 #define MBCORE_CID \
@@ -63,13 +59,13 @@ public:
   friend class SetIterator;
 
   //!constructor
-  Core();
+  MB_DLL_EXPORT Core();
 
   //! depricated constructor -- values are ignored
-  Core( int rank, int num_cpu );
+  MB_DLL_EXPORT Core( int rank, int num_cpu );
 
   //!destructor
-  ~Core();
+  MB_DLL_EXPORT ~Core();
   
     //! Get a pointer to an internal MOAB interface
     //!\return NULL if not found, iterface pointer otherwise
@@ -220,21 +216,20 @@ public:
   
       //! Gets the connectivity for an element EntityHandle. 
       /** For non-element handles (ie, MeshSets), 
-       * returns an error. Connectivity data is copied from the database into the vector 
-       *   <em>connectivity</em>. The nodes in <em>connectivity</em> are properly ordered.
-       *  \param entity_handle EntityHandle to get connectivity of.
-       *  \param connectivity Vector in which connectivity of <em>entity_handle</em> is returned.  
-       *   Should contain MeshVertices.
-       *  \param corners_only If true, returns only corner vertices, otherwise returns all of them (including any higher-order vertices)
-       *
-       *   Example: \code 
-       *   std::vector<EntityHandle> conn;
-       *   get_connectivity( entity_handle, conn ); \endcode 
-       */
+          returns an error. Connectivity data is copied from the database into the vector 
+          <em>connectivity</em>. The nodes in <em>connectivity</em> are properly ordered.
+          \param entity_handle EntityHandle to get connectivity of.
+          \param connectivity Vector in which connectivity of <em>entity_handle</em> is returned.  
+          Should contain MeshVertices.
+          \param topological_connectivity If true, higher order nodes are ignored. 
+
+          Example: \code 
+          std::vector<EntityHandle> conn;
+          get_connectivity( entity_handle, conn ); \endcode */
     virtual ErrorCode  get_connectivity(const EntityHandle *entity_handles, 
                                         const int num_handles,
                                         std::vector<EntityHandle> &connectivity, 
-                                        bool corners_only = false,
+                                        bool topological_connectivity = false,
                                         std::vector<int> *offsets = NULL) const;
  
     //! Gets the connectivity for a vector of elements
@@ -243,14 +238,14 @@ public:
   virtual ErrorCode  get_connectivity(const EntityHandle *entity_handles, 
                                         const int num_handles,
                                         Range &connectivity, 
-                                        bool corners_only = false) const;
+                                        bool topological_connectivity = false) const;
 
     //! Gets the connectivity for elements
     /** Same as vector-based version except range is returned (unordered!)
     */
   virtual ErrorCode get_connectivity( const Range& entity_handles, 
                                         Range &connectivity, 
-                                        bool corners_only = false) const;
+                                        bool topological_connectivity = false) const;
  
     //! Gets a pointer to constant connectivity data of <em>entity_handle</em> 
       /** Sets <em>number_nodes</em> equal to the number of nodes of the <em> 
@@ -278,7 +273,7 @@ public:
     virtual ErrorCode  get_connectivity( const EntityHandle entity_handle, 
                                            const EntityHandle *&connectivity, 
                                            int &num_nodes, 
-                                           bool corners_only = false,
+                                           bool topological_connectivity = false,
                                            std::vector<EntityHandle>* storage = 0
                                           ) const;
 
@@ -315,16 +310,14 @@ public:
             get_adjacencies( from_entities, MB_1D_ENTITY, adjacencies ); 
             \endcode */
 
-   virtual ErrorCode get_adjacencies(const EntityHandle *from_entities,
-                                       const int num_entities,
-                                       const int to_dimension,
-                                       const bool create_if_missing,
-                                       std::vector<EntityHandle>& adj_entities,
-                                       const int operation_type = Interface::INTERSECT);
+    virtual ErrorCode get_adjacencies(const EntityHandle *from_entities,
+                                         const int num_entities,
+                                         const int to_dimension,
+                                         const bool create_if_missing,
+                                         std::vector<EntityHandle>& adj_entities,
+                                         const int operation_type = Interface::INTERSECT);
 
-
-
-   virtual ErrorCode get_adjacencies(const EntityHandle *from_entities,
+    virtual ErrorCode get_adjacencies(const EntityHandle *from_entities,
                                         const int num_entities,
                                          const int to_dimension,
                                          const bool create_if_missing,
@@ -585,8 +578,6 @@ public:
 
   virtual ErrorCode list_entity(const EntityHandle entity) const;
 
-  typedef unsigned long long type_memstorage;
-
       //! function object for recieving events from MB of higher order nodes
       //! added to entities
     class HONodeAddedRemoved
@@ -648,13 +639,12 @@ public:
      *\param tag_handle    Output: the resulting tag handle.
      *\param flags         Bitwise OR of values from \c TagType
      *\param default_value Optional default value for tag.
-     *\param created       Optional returned boolean indicating that the tag
+     *\param created       Optional returned boolean indicating that the
      *                     was created.
-     *\return - \c MB_ALREADY_ALLOCATED     if tag exists and \c MB_TAG_EXCL is specified, or default values
-     *                                      do not match (and \c MB_TAG_ANY or \c MB_TAG_DFTOK not specified).
+     *\return - \c MB_TAG_ALREADY_ALLOCATED if tag exists and \c MB_TAG_EXCL is specified
      *        - \c MB_TAG_NOT_FOUND         if tag does not exist and \c MB_TAG_CREAT is not specified
-     *        - \c MB_INVALID_SIZE          if tag value size is not a multiple of the size of the data type
-     *                                      (and \c MB_TAG_ANY not specified).
+     *        - \c MB_INVALID_SIZE          if tag value size is not a multiple of 
+     *                                      the size of the data type (and \c MB_TAG_ANY not specified).
      *        - \c MB_TYPE_OUT_OF_RANGE     invalid or inconsistent parameter
      *        - \c MB_VARIABLE_DATA_LENGTH  if \c MB_TAG_VARLEN and \c default_value is non-null and
      *                                      \c default_value_size is not specified.
@@ -1091,7 +1081,7 @@ public:
   virtual ErrorCode remove_child_meshset(EntityHandle meshset, 
                                             const EntityHandle child_meshset);
 
-  // ************************  tag  information *************** 
+  // ************************  error condition information *************** 
 
     //! return various specific tag handles
   Tag material_tag();
@@ -1107,8 +1097,6 @@ public:
     //! get/set the number of elements
     //int total_num_elements() const;
     //void total_num_elements(const int val);
-
-  // ************************  structured sequence  information *************** 
 
     //! return a reference to the sequence manager
   SequenceManager* sequence_manager() { return sequenceManager; }
@@ -1137,12 +1125,7 @@ public:
     //! return the a_entity_factory pointer
   AEntityFactory *a_entity_factory() { return aEntityFactory; }
   const AEntityFactory *a_entity_factory() const { return aEntityFactory; }
-
-#ifdef MOAB_HAVE_AHF
-  HalfFacetRep *a_half_facet_rep() { return ahfRep; }
-  const HalfFacetRep *a_half_facet_rep() const {return ahfRep; }
-#endif
-
+  
     //! return set of registered IO tools
   ReaderWriterSet* reader_writer_set() { return readerWriterSet; }
 
@@ -1151,8 +1134,6 @@ public:
   void print(const EntityHandle handle, const char *prefix,
              bool first_call = true) const;
 
-  ErrorCode print_entity_tags(std::string indent_prefix, const EntityHandle handle, TagType tp) const;
-  
   virtual ErrorCode get_last_error(std::string& info) const;
 
   virtual std::string get_error_string(const ErrorCode code) const;
@@ -1240,16 +1221,16 @@ public:
    */
   void estimated_memory_use( const EntityHandle* ent_array = 0,
                              unsigned long  num_ents = 0,
-                             unsigned long long* total_storage = 0,
-                             unsigned long long* total_amortized_storage = 0,
-                             unsigned long long* entity_storage = 0,
-                             unsigned long long* amortized_entity_storage = 0,
-                             unsigned long long* adjacency_storage = 0,
-                             unsigned long long* amortized_adjacency_storage = 0,
+                             unsigned long* total_storage = 0,
+                             unsigned long* total_amortized_storage = 0,
+                             unsigned long* entity_storage = 0,
+                             unsigned long* amortized_entity_storage = 0,
+                             unsigned long* adjacency_storage = 0,
+                             unsigned long* amortized_adjacency_storage = 0,
                              const Tag*   tag_array = 0,
                              unsigned       num_tags = 0,
-                             unsigned long long* tag_storage = 0,
-                             unsigned long long* amortized_tag_storage = 0 );
+                             unsigned long* tag_storage = 0,
+                             unsigned long* amortized_tag_storage = 0 );
 
   /**\brief Calculate amount of memory used to store MOAB data
    *
@@ -1278,46 +1259,19 @@ public:
    *                   all tags.
    */
   void estimated_memory_use( const Range& ents,
-                             unsigned long long* total_storage = 0,
-                             unsigned long long* total_amortized_storage = 0,
-                             unsigned long long* entity_storage = 0,
-                             unsigned long long* amortized_entity_storage = 0,
-                             unsigned long long* adjacency_storage = 0,
-                             unsigned long long* amortized_adjacency_storage = 0,
+                             unsigned long* total_storage = 0,
+                             unsigned long* total_amortized_storage = 0,
+                             unsigned long* entity_storage = 0,
+                             unsigned long* amortized_entity_storage = 0,
+                             unsigned long* adjacency_storage = 0,
+                             unsigned long* amortized_adjacency_storage = 0,
                              const Tag*   tag_array = 0,
                              unsigned       num_tags = 0,
-                             unsigned long long* tag_storage = 0,
-                             unsigned long long* amortized_tag_storage = 0 );
+                             unsigned long* tag_storage = 0,
+                             unsigned long* amortized_tag_storage = 0 );
                                      
 
   void print_database() const;
-
-  /** \name Sequence Option controllers */
-
-    /**@{*/
-
-    /** \brief Interface to control memory allocation for sequences
-     * Provide a factor that controls the size of the sequence that gets allocated.
-     * This is typically useful in the parallel setting when a-priori, the number of ghost entities
-     * and the memory required for them within the same sequence as the owned entities are unknown.
-     * The default factor is 1.0 but this can be appropriately updated at runtime so that we do not
-     * have broken sequences.
-     */
-    virtual double get_sequence_multiplier() const;
-
-    /** \brief Interface to control memory allocation for sequences
-     * Provide a factor that controls the size of the sequence that gets allocated.
-     * This is typically useful in the parallel setting when a-priori, the number of ghost entities
-     * and the memory required for them within the same sequence as the owned entities are unknown.
-     * The default factor is 1.0 but this can be appropriately updated at runtime so that we do not
-     * have broken sequences.
-     *
-     * \param meshset User specified multiplier (should be greater than 1.0)
-     */
-    virtual void set_sequence_multiplier(double factor);
-
-
-  /**@}*/
 
 private:
 
@@ -1327,16 +1281,16 @@ private:
   Core& operator=( const Core& copy );
 
   void estimated_memory_use_internal( const Range* ents,
-                            unsigned long long* total_storage,
-                            unsigned long long* total_amortized_storage,
-                            unsigned long long* entity_storage,
-                            unsigned long long* amortized_entity_storage,
-                            unsigned long long* adjacency_storage,
-                            unsigned long long* amortized_adjacency_storage,
+                            unsigned long* total_storage,
+                            unsigned long* total_amortized_storage,
+                            unsigned long* entity_storage,
+                            unsigned long* amortized_entity_storage,
+                            unsigned long* adjacency_storage,
+                            unsigned long* amortized_adjacency_storage,
                             const Tag*   tag_array,
                             unsigned       num_tags,
-                            unsigned long long* tag_storage,
-                            unsigned long long* amortized_tag_storage );
+                            unsigned long* tag_storage,
+                            unsigned long* amortized_tag_storage );
 
     //! database init and de-init routines
   ErrorCode initialize();
@@ -1387,15 +1341,9 @@ private:
   Error* mError;
   bool mpiFinalize;
   int writeMPELog;
-  bool initErrorHandlerInCore;
 
     //! list of iterators 
   std::vector<SetIterator*> setIterators;
-
-#ifdef MOAB_HAVE_AHF
-  HalfFacetRep *ahfRep;
-  bool mesh_modified;
-#endif
   
 };
 

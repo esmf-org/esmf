@@ -1,6 +1,4 @@
 /* src/parallel/moab_mpi_config.h.  Generated from moab_mpi_config.h.in by configure.  */
-#include "moab/MOABConfig.h"
-
 /* MPICH_IGNORE_CXX_SEEK is not sufficient to avoid conflicts */
 /* #undef MB_MPI_CXX_CONFLICT */
 

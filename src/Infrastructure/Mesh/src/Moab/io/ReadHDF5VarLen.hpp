@@ -6,8 +6,7 @@
 #ifndef moab_READ_HDF5_VAR_LEN_HPP
 #define moab_READ_HDF5_VAR_LEN_HPP
 
-#include "moab/MOABConfig.h"
-#ifdef MOAB_HAVE_MPI
+#ifdef USE_MPI
 #  include "moab_mpi.h"
 #endif
 #include "DebugOutput.hpp"

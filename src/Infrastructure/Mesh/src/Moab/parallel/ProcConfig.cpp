@@ -3,7 +3,7 @@
  * storing and accessing finite element mesh data.
  * 
  * Copyright 2004 Sandia Corporation.  Under the terms of Contract
- * DE-AC04-94AL85000 with Sandia Corporation, the U.S. Government
+ * DE-AC04-94AL85000 with Sandia Coroporation, the U.S. Government
  * retains certain rights in this software.
  * 
  * This library is free software; you can redistribute it and/or
@@ -24,7 +24,7 @@ ProcConfig::ProcConfig(MPI_Comm proc_comm1)
     : procComm(proc_comm1),
       crystalData(0)
 {
-#ifdef MOAB_HAVE_MPI
+#ifdef USE_MPI
   int rank, size;
   MPI_Comm_rank(procComm, &rank); 
   procRank = (unsigned int) rank;
@@ -38,7 +38,7 @@ ProcConfig::ProcConfig(MPI_Comm proc_comm1)
 
 gs_data::crystal_data *ProcConfig::crystal_router(bool construct_if_missing)
 {
-#ifdef MOAB_HAVE_MPI
+#ifdef USE_MPI
   if (!crystalData && construct_if_missing) {
     crystalData = new gs_data::crystal_data(procComm);
   }
@@ -50,7 +50,7 @@ gs_data::crystal_data *ProcConfig::crystal_router(bool construct_if_missing)
 ProcConfig::~ProcConfig() 
 {
   if (crystalData) {
-#ifdef MOAB_HAVE_MPI
+#ifdef USE_MPI
     crystalData->reset();
 #endif
     delete crystalData;

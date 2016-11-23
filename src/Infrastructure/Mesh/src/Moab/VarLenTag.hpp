@@ -12,7 +12,7 @@ namespace moab {
 #define VAR_LEN_TAG_ELIDE_DATA
 
 
-/* Define class data layout depending on macros:
+/* Define class data layout depenkding on macros:
  * VAR_LEN_TAG_ELIDE_DATA and TEMPLATE_SPECIALIZATION
  */
 #ifndef VAR_LEN_TAG_ELIDE_DATA
@@ -24,7 +24,7 @@ public:
   struct { struct { unsigned size; unsigned char* array; } mPointer; } mData;
 };
 
-#elif !defined(MOAB_TEMPLATE_SPECIALIZATION)
+#elif !defined(TEMPLATE_SPECIALIZATION)
 
 /* A little more advanced data structure for VarLenTag.
  * If the amount of tag data is less than or equal to the
@@ -59,11 +59,11 @@ public:
  * - The data must be first in the struct to avoid alignment issues
  *   for double and 64-bit handle values on some platforms.
  * - The size must therefore be at the end of the struct (including
- *   after any padding) because a) it cannot be at the beginning and
+ *   after any padding) becase a) it cannot be at the beginning and
  *   b) it must be at the same location in both structs in the union.
  * - For the mPointer variation, the padding must be declared
  *   explicitly in order for the size to be forced to the end.
- * - Template specialization is used to avoid declaring a
+ * - Template specialiation is used to avoid declaring a
  *   zero-length array for pad on 32-bit platforms.  
  *   NOTE: GCC allows zero-length arrays, but Sun's compiler 
  *   (and most others) do not.

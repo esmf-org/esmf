@@ -3,7 +3,7 @@
  * storing and accessing finite element mesh data.
  * 
  * Copyright 2004 Sandia Corporation.  Under the terms of Contract
- * DE-AC04-94AL85000 with Sandia Corporation, the U.S. Government
+ * DE-AC04-94AL85000 with Sandia Coroporation, the U.S. Government
  * retains certain rights in this software.
  * 
  * This library is free software; you can redistribute it and/or
@@ -40,7 +40,6 @@ const EntityType ExoIIUtil::ExoIIElementMBEntity[] =
   MBEDGE, // TRUSS3,
   MBTRI, // TRI,
   MBTRI, // TRI3,
-  MBTRI, // SHELL3,
   MBTRI, // TRI6,
   MBTRI, // TRI7,
   MBQUAD, // QUAD,
@@ -55,7 +54,6 @@ const EntityType ExoIIUtil::ExoIIElementMBEntity[] =
   MBQUAD, // SHELL9,
   MBTET, // TETRA,
   MBTET, // TETRA4,
-  MBTET, // TET4
   MBTET, // TETRA8,
   MBTET, // TETRA10,
   MBTET, // TETRA14,
@@ -72,28 +70,25 @@ const EntityType ExoIIUtil::ExoIIElementMBEntity[] =
   MBHEX, // HEX20,
   MBHEX, // HEX27,
   MBHEX, // HEXSHELL,
-  MBPOLYGON, // POLYGON
-  MBPOLYHEDRON, //POLYHEDRON
   MBMAXTYPE // UNKNOWN
 };
 
 
 const char* ExoIIUtil::ElementTypeNames[] =
 {
-  "SPHERE",  // 0
-  "SPRING",  // 1
-  "BAR",     // 2
-  "BAR2",    // 3
-  "BAR3",    // 4
-  "BEAM",    // 5
-  "BEAM2",   // 6
-  "BEAM3",   // 7
-  "TRUSS",   // 8
-  "TRUSS2",  // 9
-  "TRUSS3",  // 10
-  "TRI",     // 11
-  "TRI3",    // 12
-  "SHELL3",  // 13  really the same as TRI3; for sure in 3d?
+  "SPHERE",
+  "SPRING",
+  "BAR", 
+  "BAR2", 
+  "BAR3", 
+  "BEAM", 
+  "BEAM2", 
+  "BEAM3",
+  "TRUSS", 
+  "TRUSS2", 
+  "TRUSS3",
+  "TRI", 
+  "TRI3", 
   "TRI6", 
   "TRI7",
   "QUAD", 
@@ -107,8 +102,7 @@ const char* ExoIIUtil::ElementTypeNames[] =
   "SHELL8", 
   "SHELL9",
   "TETRA", 
-  "TETRA4",
-  "TET4",
+  "TETRA4", 
   "TETRA8", 
   "TETRA10", 
   "TETRA14",
@@ -125,8 +119,6 @@ const char* ExoIIUtil::ElementTypeNames[] =
   "HEX20", 
   "HEX27",
   "HEXSHELL",
-  "nsided", // polygons, described differently
-  "NFACED", // polyhedra, described in faconn%d attributes
   "UNKNOWN"
 };
 
@@ -143,11 +135,10 @@ const int ExoIIUtil::VerticesPerElement[] =
   2, 
   2,  
   3,      // TRUSS
-  3,      // TRI
-  3,      // TRI3
-  3,      // SHELL3 this is new
+  3, 
+  3,  
   6,  
-  7,      // TRI
+  7,  // TRI
   4, 
   4,  
   5,  
@@ -160,7 +151,6 @@ const int ExoIIUtil::VerticesPerElement[] =
   9,  // SHELL
   4, 
   4,  
-  4,  // TET4
   8, 
   10, 
   14,  // TETRA
@@ -177,8 +167,6 @@ const int ExoIIUtil::VerticesPerElement[] =
   20, 
   27,  // HEX
   12,            // HEXSHELL
-  0,             //POLYGON
-  0,             //POLYHEDRON
   0              // UNKNOWN
 };
 
@@ -197,7 +185,6 @@ const int ExoIIUtil::HasMidNodes[][4] =
   {0, 1, 0, 0}, // TRUSS3 - mid nodes on edges
   {0, 0, 0, 0}, // TRI - no mid nodes
   {0, 0, 0, 0}, // TRI3 - no mid nodes
-  {0, 0, 0, 0}, // SHELL3 - no mid nodes
   {0, 1, 0, 0}, // TRI6 - mid nodes on edges
   {0, 1, 1, 0}, // TRI7 - mid nodes on edges and faces
   {0, 0, 0, 0}, // QUAD - no mid nodes
@@ -212,7 +199,6 @@ const int ExoIIUtil::HasMidNodes[][4] =
   {0, 1, 1, 0}, // SHELL9 - mid nodes on edges and faces
   {0, 0, 0, 0}, // TETRA - no mid nodes
   {0, 0, 0, 0}, // TETRA4 - no mid nodes
-  {0, 0, 0, 0}, // TET4 - no mid nodes
   {0, 0, 1, 0}, // TETRA8 - mid nodes on faces
   {0, 1, 0, 0}, // TETRA10 - mid nodes on edges
   {0, 1, 1, 0}, // TETRA14 - mid nodes on edges and faces
@@ -229,8 +215,6 @@ const int ExoIIUtil::HasMidNodes[][4] =
   {0, 1, 0, 0}, // HEX20 - mid nodes on edges
   {0, 1, 1, 1}, // HEX27 - mid node on edges, faces and element
   {0, 0, 0, 0}, // HEXSHELL - *** TODO - not sure if this is right...
-  {0, 0, 0, 0}, // POLYGON
-  {0, 0, 0, 0}, // POLYHEDRON
   {0, 0, 0, 0} // UNKNOWN - no mid nodes
 };
 
@@ -250,7 +234,6 @@ const int ExoIIUtil::ElementGeometricDimension[] =
   3, 
   3, 
   3, 
-  3,
   3, // TRI
   2, 
   2, 
@@ -267,7 +250,6 @@ const int ExoIIUtil::ElementGeometricDimension[] =
   3, 
   3, 
   3, // TETRA
-  3,
   3, 
   3, 
   3, 
@@ -281,8 +263,6 @@ const int ExoIIUtil::ElementGeometricDimension[] =
   3, 
   3, // HEX
   3,          // HEXSHELL
-  2,  // POLYGON
-  3,  //POLYHEDRON
   0 // UNKNOWN
 };
 
@@ -371,8 +351,6 @@ ExoIIElementType ExoIIUtil::get_element_type_from_num_verts(const int num_verts,
                                                             const EntityType entity_type,
                                                             const int dimension) 
 {
-  if (MBPOLYGON==entity_type && 2==dimension) return EXOII_POLYGON;
-  if (MBPOLYHEDRON==entity_type && 3 == dimension) return EXOII_POLYHEDRON;
   for (int i = 0; i < EXOII_MAX_ELEM_TYPE; i++) {
     if ((entity_type == MBMAXTYPE || entity_type == ExoIIElementMBEntity[i]) &&
         VerticesPerElement[i] == num_verts &&

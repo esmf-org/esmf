@@ -3,7 +3,7 @@
  * storing and accessing finite element mesh data.
  * 
  * Copyright 2004 Sandia Corporation.  Under the terms of Contract
- * DE-AC04-94AL85000 with Sandia Corporation, the U.S. Government
+ * DE-AC04-94AL85000 with Sandia Coroporation, the U.S. Government
  * retains certain rights in this software.
  * 
  * This library is free software; you can redistribute it and/or
@@ -80,7 +80,7 @@ public:
       ArrayInfo();
       
       void print();
-      void init(const std::vector<unsigned int>& uint_buf_in);
+      void init(const std::vector<unsigned int>& uint_buf);
     };
     
     ArrayInfo geomArray, nodeArray, elementArray, groupArray, 
@@ -260,6 +260,7 @@ public:
 
   enum {aBODY, LUMP, SHELL, FACE, LOOP, COEDGE, aEDGE, aVERTEX, ATTRIB, UNKNOWN};
   
+  const unsigned int *ACIS_DIMS;
   
   struct AcisRecord 
   {
@@ -286,7 +287,6 @@ public:
     attribVectorTag, entityNameTag, categoryTag, hasMidNodesTag;
   std::map<int, EntityHandle> uidSetMap;
   std::map<int, EntityHandle> gidSetMap[6];
-  bool swapForEndianness;
 
   std::vector<unsigned int> uint_buf;
   int *int_buf;

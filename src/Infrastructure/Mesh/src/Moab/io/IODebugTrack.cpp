@@ -4,7 +4,7 @@
 #include <vector>
 #include <assert.h>
 
-#ifdef MOAB_HAVE_MPI
+#ifdef USE_MPI
 #  include "moab_mpi.h"
 #endif
 
@@ -13,16 +13,15 @@ const char PFX[] = ">>> ";
 namespace moab {
 
 IODebugTrack::IODebugTrack( bool enabled,
-                            const std::string& name,
-                            std::ostream& output_stream,
+                            const std::string name,
+                            std::ostream output_stream,
                             unsigned long table_size )
           : enableOutput(enabled),
             tableName(name),
             ostr(output_stream),
-            maxSize(table_size),
-            haveMPI(false)
+            maxSize(table_size) 
 {
-#ifdef MOAB_HAVE_MPI
+#ifdef USE_MPI
   MPI_Comm_rank( MPI_COMM_WORLD, &mpiRank );
 #else
   mpiRank = 0;
@@ -31,7 +30,7 @@ IODebugTrack::IODebugTrack( bool enabled,
 
 
 IODebugTrack::IODebugTrack( bool enabled,
-                            const std::string& name,
+                            const std::string name,
                             unsigned long table_size )
           : enableOutput(enabled),
             tableName(name),
@@ -40,7 +39,7 @@ IODebugTrack::IODebugTrack( bool enabled,
 {
   mpiRank = 0;
   haveMPI = false;
-#ifdef MOAB_HAVE_MPI
+#ifdef USE_MPI
   int have_init = 0;
   MPI_Initialized(&have_init);
   if (have_init) {
@@ -150,7 +149,7 @@ void IODebugTrack::record_io( DRange ins )
 
 void IODebugTrack::all_reduce()
 {
-#ifdef MOAB_HAVE_MPI
+#ifdef USE_MPI
   if (!enableOutput || !haveMPI)
     return;
 

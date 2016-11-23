@@ -6,30 +6,19 @@
 #include "moab/Interface.hpp"
 #include "SharedSetData.hpp"
 #include <assert.h>
-#include <stdio.h>
 #include <stdlib.h>
 
 namespace moab {
 
 SharedSetData::SharedSetData(Interface& moab, unsigned rank)
-  : mb(moab), sharedSetTag(0)
+  : mb(moab), myRank(rank), sharedSetTag(0)
 {
-  SharedSetTagData zero;
-
-  // Zero out any padding bytes in SharedSetTagData (used for memory alignment)
-  // Otherwise, memcmp could lead to unexpected false negatives for comparison
-  memset(&zero, 0, sizeof(SharedSetTagData));
-
-  zero.ownerRank = rank;
-  zero.ownerHandle = 0;
-  zero.sharingProcs = NULL;
+  SharedSetTagData zero = { 0, rank, 0 };
   ErrorCode rval = mb.tag_get_handle( "__sharedSetTag", sizeof(SharedSetTagData), MB_TYPE_OPAQUE,
                                       sharedSetTag, MB_TAG_CREAT|MB_TAG_SPARSE, &zero );
   assert(MB_SUCCESS == rval);
-  if (MB_SUCCESS != rval) {
-    fprintf(stderr, "Aborted from the constructor of SharedSetData.\n");
+  if (MB_SUCCESS != rval)
     abort();
-  }
 }
 
 SharedSetData::~SharedSetData()

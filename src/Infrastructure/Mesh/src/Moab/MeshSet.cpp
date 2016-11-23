@@ -403,8 +403,8 @@ static EntityHandle* resize_compact_list( MeshSet::Count& count,
 typedef std::pair<EntityHandle,EntityHandle> MeshSetRange;
 
 class MeshSetRComp {
-  public: bool operator()( const MeshSetRange& r, const MeshSetRange& h )
-    { return r.second < h.first; }
+  public: bool operator()( const MeshSetRange& r, EntityHandle h )
+    { return r.second < h; }
 };
 
 template <typename pair_iter_t> inline ErrorCode
@@ -451,10 +451,7 @@ range_tool<pair_iter_t>::ranged_insert_entities( MeshSet::Count& count,
         // subtract one from i->first because if it is one greater
         // then the the last value of some block, then we want that
         // block to append to.
-      MeshSetRange tmp;
-      tmp.first = i->first-1;
-      tmp.second = i->second;
-      list_write = std::lower_bound( list_read, list_end, tmp, MeshSetRComp() );
+      list_write = std::lower_bound( list_read, list_end, i->first-1, MeshSetRComp() );
       list_read = list_write;
     }
     // otherwise shift down until we find where we find a range block
@@ -1109,7 +1106,7 @@ ErrorCode MeshSet::insert_entity_vector( const EntityHandle* vect, size_t len, E
     std::vector<EntityHandle> rangevect;
     convert_to_ranges( vect, len, rangevect );
     typedef const std::pair<EntityHandle,EntityHandle>* pair_vect_t;
-    pair_vect_t pair_vect = (rangevect.empty())?NULL:reinterpret_cast<pair_vect_t>(&rangevect[0]);
+    pair_vect_t pair_vect = reinterpret_cast<pair_vect_t>(&rangevect[0]);
     rval = range_tool<pair_vect_t>::ranged_insert_entities( count, contentList, pair_vect, 
                                  pair_vect + rangevect.size()/2, my_h, tracking() ? adj : 0 );
   }
@@ -1127,7 +1124,7 @@ ErrorCode MeshSet::remove_entity_vector( const EntityHandle* vect, size_t len, E
     std::vector<EntityHandle> rangevect;
     convert_to_ranges( vect, len, rangevect );
     typedef const std::pair<EntityHandle,EntityHandle>* pair_vect_t;
-    pair_vect_t pair_vect = (rangevect.empty())?NULL:reinterpret_cast<pair_vect_t>(&rangevect[0]);
+    pair_vect_t pair_vect = reinterpret_cast<pair_vect_t>(&rangevect[0]);
     rval = range_tool<pair_vect_t>::ranged_remove_entities( count, contentList, pair_vect, 
                                 pair_vect + rangevect.size()/2, my_h, tracking() ? adj : 0 );
   }

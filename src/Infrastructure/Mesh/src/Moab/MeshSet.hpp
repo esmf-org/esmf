@@ -302,7 +302,7 @@ public:
 };
 
 inline MeshSet::hdl_iter::difference_type
- operator-( const MeshSet::hdl_iter &a, const MeshSet::hdl_iter &b )
+ operator-( const MeshSet::hdl_iter a, const MeshSet::hdl_iter b )
   { return (MeshSet::hdl_iter::difference_type)a.h 
          - (MeshSet::hdl_iter::difference_type)b.h; }
 

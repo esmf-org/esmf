@@ -7,7 +7,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <iostream>
-#include "moab/MOABConfig.h"
+
 #include "ReadHDF5Dataset.hpp"
 
 #include "moab_mpe.h"
@@ -16,7 +16,7 @@
 #include <H5Tpublic.h>
 #include <H5Ppublic.h>
 #include <H5Spublic.h>
-#ifdef MOAB_HAVE_HDF5_PARALLEL
+#ifdef HDF5_PARALLEL
 #  include <H5FDmpi.h>
 #  include <H5FDmpio.h>
 #endif
@@ -34,7 +34,7 @@ void ReadHDF5Dataset::default_hyperslab_selection_limit()
 
 H5S_seloper_t ReadHDF5Dataset::hyperslabSelectOp = H5S_SELECT_OR;
 
-#ifdef MOAB_HAVE_LIBMPE
+#ifdef USE_MPE
 static std::pair<int,int> allocate_mpe_state( const char* name, const char* color )
 {
   std::pair<int,int> result;
@@ -78,7 +78,7 @@ ReadHDF5Dataset::ReadHDF5Dataset( const char* debug_desc,
     mpeReduceEvent = allocate_mpe_state( "ReadHDF5Dataset::all_reduce", "yellow" );
   }
   
-#ifndef MOAB_HAVE_HDF5_PARALLEL
+#ifndef HDF5_PARALLEL
   if (nativeParallel) 
     throw Exception(__LINE__);
 #else
@@ -120,7 +120,7 @@ ReadHDF5Dataset::ReadHDF5Dataset( const char* debug_desc,
 
   init( data_set_handle, close_data_set );
   
-#ifndef MOAB_HAVE_HDF5_PARALLEL
+#ifndef HDF5_PARALLEL
   if (nativeParallel) 
     throw Exception(__LINE__);
 #else
@@ -209,7 +209,7 @@ void ReadHDF5Dataset::set_file_ids( const Range& file_ids,
   // if a) user specified buffer size and b) we're doing a true
   // parallel partial read and c) we're doing collective I/O, then
   // we need to know the maximum number of reads that will be done.
-#ifdef MOAB_HAVE_HDF5_PARALLEL
+#ifdef HDF5_PARALLEL
   if (nativeParallel) {
     Range::const_iterator iter = currOffset;
     while (iter != rangeEnd) {

@@ -1,13 +1,17 @@
 #include "DebugOutput.hpp"
-#include "moab/MOABConfig.h"
 #include "moab/Range.hpp"
 #include "moab/CN.hpp"
 #include "Internals.hpp"
-
 #include <iostream>
 #include <string.h>
 #include <algorithm>
 #include <assert.h>
+
+#ifdef USE_MPI
+#  include "moab_mpi.h"
+#else
+#  include "time.h"
+#endif
 
 namespace moab {
 
@@ -51,43 +55,49 @@ void CxxDebugStream::println( int rank, const char* pfx, const char* str )
 void CxxDebugStream::println( const char* pfx, const char* str )
   { outStr << pfx << str << std::endl; outStr.flush(); }
 
+#ifdef USE_MPI
+  #define CURTIME (MPI_Wtime())
+#else
+  #define CURTIME (clock()/(double)CLOCKS_PER_SEC)
+#endif
+
 
 DebugOutput::DebugOutput( DebugOutputStream* impl, unsigned verbosity )
-  : outputImpl(impl), mpiRank(-1), verbosityLimit(verbosity)
+  : outputImpl(impl), mpiRank(-1), verbosityLimit(verbosity), initTime(CURTIME)
     { impl->referenceCount++; assert(impl->referenceCount > 1); }
 DebugOutput::DebugOutput( DebugOutputStream* impl, int rank, unsigned verbosity )
-  : outputImpl(impl), mpiRank(rank), verbosityLimit(verbosity)
+  : outputImpl(impl), mpiRank(rank), verbosityLimit(verbosity), initTime(CURTIME)
     { impl->referenceCount++; assert(impl->referenceCount > 1); }
 DebugOutput::DebugOutput( FILE* impl, unsigned verbosity )
   : outputImpl(new FILEDebugStream(impl)),
-    mpiRank(-1), verbosityLimit(verbosity) {}
+    mpiRank(-1), verbosityLimit(verbosity), initTime(CURTIME) {}
 DebugOutput::DebugOutput( FILE* impl, int rank, unsigned verbosity )
   : outputImpl(new FILEDebugStream(impl)),
-    mpiRank(rank), verbosityLimit(verbosity) { }
+    mpiRank(rank), verbosityLimit(verbosity), initTime(CURTIME) {}
 DebugOutput::DebugOutput( std::ostream& str, unsigned verbosity )
   : outputImpl(new CxxDebugStream(str)),
-    mpiRank(-1), verbosityLimit(verbosity) { }
+    mpiRank(-1), verbosityLimit(verbosity), initTime(CURTIME) {}
 DebugOutput::DebugOutput( std::ostream& str, int rank, unsigned verbosity )
   : outputImpl(new CxxDebugStream(str)),
-    mpiRank(rank), verbosityLimit(verbosity) { }
+    mpiRank(rank), verbosityLimit(verbosity), initTime(CURTIME) {}
 DebugOutput::DebugOutput( const char* pfx, DebugOutputStream* impl, unsigned verbosity )
-  : linePfx(pfx), outputImpl(impl), mpiRank(-1), verbosityLimit(verbosity)
+  : linePfx(pfx), outputImpl(impl), mpiRank(-1), verbosityLimit(verbosity) , initTime(CURTIME)
   { impl->referenceCount++; assert(impl->referenceCount > 1); }
 DebugOutput::DebugOutput( const char* pfx, DebugOutputStream* impl, int rank, unsigned verbosity )
-  : linePfx(pfx), outputImpl(impl), mpiRank(rank), verbosityLimit(verbosity)
+  : linePfx(pfx), outputImpl(impl), mpiRank(rank), verbosityLimit(verbosity), initTime(CURTIME)
   { impl->referenceCount++; assert(impl->referenceCount > 1); }
 DebugOutput::DebugOutput( const char* pfx, FILE* impl, unsigned verbosity )
   : linePfx(pfx), outputImpl(new FILEDebugStream(impl)),
-    mpiRank(-1), verbosityLimit(verbosity) { }
+    mpiRank(-1), verbosityLimit(verbosity), initTime(CURTIME) {}
 DebugOutput::DebugOutput( const char* pfx, FILE* impl, int rank, unsigned verbosity )
   : linePfx(pfx), outputImpl(new FILEDebugStream(impl)),
-    mpiRank(rank), verbosityLimit(verbosity)  { }
+    mpiRank(rank), verbosityLimit(verbosity), initTime(CURTIME) {}
 DebugOutput::DebugOutput( const char* pfx, std::ostream& str, unsigned verbosity )
   : linePfx(pfx), outputImpl(new CxxDebugStream(str)),
-    mpiRank(-1), verbosityLimit(verbosity) { }
+    mpiRank(-1), verbosityLimit(verbosity), initTime(CURTIME) {}
 DebugOutput::DebugOutput( const char* pfx, std::ostream& str, int rank, unsigned verbosity )
   : linePfx(pfx), outputImpl(new CxxDebugStream(str)),
-    mpiRank(rank), verbosityLimit(verbosity)  { }
+    mpiRank(rank), verbosityLimit(verbosity), initTime(CURTIME) {}
 
 DebugOutput::DebugOutput( const DebugOutput& copy )
   : linePfx(copy.linePfx), 
@@ -127,10 +137,8 @@ DebugOutput::~DebugOutput()
 void DebugOutput::use_world_rank() 
 {
   mpiRank = 0;
-#ifdef MOAB_HAVE_MPI
-  int flag=0;
-  if (MPI_SUCCESS==MPI_Initialized(&flag) && flag)
-      MPI_Comm_rank( MPI_COMM_WORLD, &mpiRank );
+#ifdef USE_MPI
+  MPI_Comm_rank( MPI_COMM_WORLD, &mpiRank );
 #endif
 }   
 
@@ -161,7 +169,7 @@ void DebugOutput::tprint_real( const std::string& str )
 void DebugOutput::print_real( const char* fmt, va_list args1, va_list args2 )
 {
   size_t idx = lineBuffer.size();
-#ifdef MOAB_HAVE_VSNPRINTF
+#ifdef HAVE_VSNPRINTF
     // try once with remaining space in buffer
   lineBuffer.resize( lineBuffer.capacity() );
   unsigned size = vsnprintf( &lineBuffer[idx], lineBuffer.size() - idx, fmt, args1 );
@@ -175,9 +183,8 @@ void DebugOutput::print_real( const char* fmt, va_list args1, va_list args2 )
 #else
     // Guess how much space might be required.
     // If every character is a format code then there are len/3 format codes.
-    // Guess a random large value of num_chars characters per formatted argument.
-  const unsigned num_chars = 180;
-  unsigned exp_size = (num_chars / 3) * strlen(fmt);
+    // Guess a random large value of 81 characters per formatted argument.
+  unsigned exp_size = 27*strlen(fmt);
   lineBuffer.resize( idx + exp_size );
   unsigned size = vsprintf( &lineBuffer[idx], fmt, args1 );
   ++size; // trailing null
@@ -320,7 +327,7 @@ void DebugOutput::tprint()
 {
   size_t s = lineBuffer.size();
   lineBuffer.resize( s + 64 );
-  size_t ss = sprintf(&lineBuffer[s],"(%.2f s) ", cpuTi.time_since_birth()  );
+  size_t ss = sprintf(&lineBuffer[s],"(%.2f s) ", CURTIME-initTime );
   lineBuffer.resize( s + ss );
 }
 

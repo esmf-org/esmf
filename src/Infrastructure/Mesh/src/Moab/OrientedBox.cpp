@@ -3,7 +3,7 @@
  * storing and accessing finite element mesh data.
  * 
  * Copyright 2004 Sandia Corporation.  Under the terms of Contract
- * DE-AC04-94AL85000 with Sandia Corporation, the U.S. Government
+ * DE-AC04-94AL85000 with Sandia Coroporation, the U.S. Government
  * retains certain rights in this software.
  * 
  * This library is free software; you can redistribute it and/or
@@ -15,7 +15,7 @@
 
 /* 
  * The algorithms for the calculation of the oriented box from a
- * set of points or a set of cells was copied from the implementation
+ * set of points or a set of cells was copied from the implemenation
  " in the "Visualization Toolkit".  J.K. - 2006-07-19
  *
  * Program:   Visualization Toolkit
@@ -33,16 +33,20 @@
 
 #include "moab/Interface.hpp"
 #include "moab/CN.hpp"
-#include "moab/OrientedBox.hpp"
+#include "OrientedBox.hpp"
 #include "moab/Range.hpp"
 #include "moab/Matrix3.hpp"
-#include "moab/Util.hpp"
 #include <ostream>
 #include <assert.h>
 #include <limits>
 
 namespace moab {
 
+#if defined(_MSC_VER) || defined(__MINGW32__)
+#  include <float.h>
+#  define finite(A) _finite(A)
+#endif
+ 
 std::ostream& operator<<( std::ostream& s, const OrientedBox& b )
 {
   return s << b.center 
@@ -84,7 +88,7 @@ static double point_perp( const CartVect& p,   // closest to this point
 #else
   double t = (m % (p - b)) / (m % m);
 #endif
-  return Util::is_finite(t) ? t : 0.0;
+  return finite(t) ? t : 0.0;
 }
 
 OrientedBox::OrientedBox( const CartVect axes[3], const CartVect& mid )
@@ -270,7 +274,7 @@ ErrorCode OrientedBox::compute_from_vertices( OrientedBox& result,
 
     // Get axes (Eigenvectors) from covariance matrix
   double lambda[3];
-  moab::Matrix::EigenDecomp( a, lambda, result.axis );
+  EigenDecomp( a, lambda, result.axis );
   
     // Calculate center and extents of box given orientation defined by axes
   return box_from_axes( result, instance, vertices );
@@ -290,8 +294,8 @@ ErrorCode OrientedBox::covariance_data_from_tris( CovarienceData& result,
   result.area = 0.0;
   for (Range::iterator i = begin; i != end; ++i)
   {
-    const EntityHandle* conn = NULL;
-    int conn_len = 0;
+    const EntityHandle* conn;
+    int conn_len;
     rval = instance->get_connectivity( *i, conn, conn_len );
     if (MB_SUCCESS != rval)
       return rval;
@@ -365,7 +369,7 @@ ErrorCode OrientedBox::compute_from_covariance_data(
 
     // get axes (Eigenvectors) from covariance matrix
   double lamda[3];
-  moab::Matrix::EigenDecomp( data.matrix, lamda, result.axis );
+  EigenDecomp( data.matrix, lamda, result.axis );
 
     // We now have only the axes.  Calculate proper center
     // and extents for enclosed points.

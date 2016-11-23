@@ -3,7 +3,7 @@
  * storing and accessing finite element mesh data.
  * 
  * Copyright 2004 Sandia Corporation.  Under the terms of Contract
- * DE-AC04-94AL85000 with Sandia Corporation, the U.S. Government
+ * DE-AC04-94AL85000 with Sandia Coroporation, the U.S. Government
  * retains certain rights in this software.
  * 
  * This library is free software; you can redistribute it and/or
@@ -269,10 +269,6 @@ public:
                         const unsigned long *child_conn, const int child_num_verts,
                         const int child_dim,
                         int &side_number, int &sense, int &offset);
-  static short int SideNumber(const EntityType parent_type, const unsigned long long *parent_conn,
-                              const unsigned long long *child_conn, const int child_num_verts,
-                              const int child_dim,
-                              int &side_number, int &sense, int &offset);
   static short int SideNumber(const EntityType parent_type, void * const *parent_conn, 
                         void * const *child_conn, const int child_num_verts,
                         const int child_dim,
@@ -333,10 +329,6 @@ public:
                                 int& direct, int& offset );
   static bool ConnectivityMatch(const unsigned long* conn1,
                                 const unsigned long* conn2,
-                                const int num_vertices,
-                                int &direct, int& offset );
-  static bool ConnectivityMatch(const unsigned long long* conn1,
-                                const unsigned long long* conn2,
                                 const int num_vertices,
                                 int &direct, int& offset );
   static bool ConnectivityMatch(void* const* conn1,

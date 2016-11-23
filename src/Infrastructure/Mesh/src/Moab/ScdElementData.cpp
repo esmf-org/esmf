@@ -3,7 +3,7 @@
  * storing and accessing finite element mesh data.
  * 
  * Copyright 2004 Sandia Corporation.  Under the terms of Contract
- * DE-AC04-94AL85000 with Sandia Corporation, the U.S. Government
+ * DE-AC04-94AL85000 with Sandia Coroporation, the U.S. Government
  * retains certain rights in this software.
  * 
  * This library is free software; you can redistribute it and/or
@@ -29,8 +29,7 @@ EntityID ScdElementData::calc_num_entities(EntityHandle start_handle,
 {
   size_t result = 1;
   switch (CN::Dimension(TYPE_FROM_HANDLE(start_handle))) {
-    default: result = 0; assert( false );
-      break;
+    default: result = 0; assert( false ); 
     case 3: result *= krange;
     case 2: result *= (is_periodic && is_periodic[1] ? (jrange+1) : jrange);
     case 1: result *= (is_periodic && is_periodic[0] ? (irange+1) : irange);
@@ -82,7 +81,7 @@ bool ScdElementData::boundary_complete() const
     // pseudo code:
     // for each vertex sequence v:
   for (std::vector<VertexDataRef>::const_iterator vseq = vertexSeqRefs.begin();
-       vseq != vertexSeqRefs.end(); ++vseq)
+       vseq != vertexSeqRefs.end(); vseq++)
   {
     //   test min corner mincorner:
     bool mincorner = true;
@@ -91,7 +90,7 @@ bool ScdElementData::boundary_complete() const
 
     //     for each vsequence v' != v:
       for (std::vector<VertexDataRef>::const_iterator othervseq = vertexSeqRefs.begin();
-           othervseq != vertexSeqRefs.end(); ++othervseq)
+           othervseq != vertexSeqRefs.end(); othervseq++) 
       {
         if (othervseq == vseq) continue;        
     //       if v.min-p contained in v'
@@ -110,7 +109,7 @@ bool ScdElementData::boundary_complete() const
 
     //     for each vsequence v' != v:
       for (std::vector<VertexDataRef>::const_iterator othervseq = vertexSeqRefs.begin();
-           othervseq != vertexSeqRefs.end(); ++othervseq)
+           othervseq != vertexSeqRefs.end(); othervseq++) 
       {
         if (othervseq == vseq) continue;        
     //       if v.max+p contained in v'

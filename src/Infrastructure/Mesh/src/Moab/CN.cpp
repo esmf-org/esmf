@@ -3,7 +3,7 @@
  * storing and accessing finite element mesh data.
  * 
  * Copyright 2004 Sandia Corporation.  Under the terms of Contract
- * DE-AC04-94AL85000 with Sandia Corporation, the U.S. Government
+ * DE-AC04-94AL85000 with Sandia Coroporation, the U.S. Government
  * retains certain rights in this software.
  * 
  * This library is free software; you can redistribute it and/or
@@ -18,7 +18,6 @@
 #include "MBCN.h"
 #include <assert.h>
 #include <string.h>
-#include <iterator>
 
 namespace moab {
 
@@ -39,9 +38,6 @@ const char *CN::entityTypeNames[] = {
 };
 
 short int CN::numberBasis = 0;
-
-short int CN::permuteVec[MBMAXTYPE][3][MAX_SUB_ENTITIES + 1];
-short int CN::revPermuteVec[MBMAXTYPE][3][MAX_SUB_ENTITIES + 1];
 
 const DimensionPair CN::TypeDimensionMap[] = 
 {
@@ -157,7 +153,7 @@ short int CN::AdjacentSubEntities(const EntityType this_type,
   std::vector<int> tmp_indices;
   const int* it1 = source_indices;
 
-  assert(source_dim <= 3 &&
+  assert(source_dim >= 0 && source_dim <= 3 &&
          target_dim >= 0 && target_dim <= 3 &&
            // make sure we're not stepping off the end of the array; 
          ((source_dim > 0 && 
@@ -282,17 +278,6 @@ short int CN::SideNumber(const EntityType parent_type, const unsigned long *pare
   return side_number(parent_conn, parent_type, child_conn, child_num_verts,
                      child_dim, side_no, sense, offset);
 }
-
-short int CN::SideNumber(const EntityType parent_type, const unsigned long long *parent_conn,
-                          const unsigned long long *child_conn, const int child_num_verts,
-                          const int child_dim,
-                          int &side_no, int &sense, int &offset)
-
-{
-  return side_number(parent_conn, parent_type, child_conn, child_num_verts,
-                     child_dim, side_no, sense, offset);
-}
-
 short int CN::SideNumber(const EntityType parent_type, void * const *parent_conn, 
                      void * const *child_conn, const int child_num_verts,
                      const int child_dim,
@@ -355,8 +340,8 @@ short int CN::SideNumber( const EntityType parent_type,
     // if we've gotten here, we don't match
   side_no = -1;
 
-    // return value is no success
-  return 1;
+    // return value is still success, we didn't have any fatal errors or anything
+  return 0;
 }
 
   //! return the dimension and index of the opposite side, given parent entity type and child 
@@ -564,14 +549,6 @@ bool CN::ConnectivityMatch( const unsigned long *conn1_i,
                               int &direct, int &offset )
 {
   return connectivity_match<unsigned long>(conn1_i, conn2_i, num_vertices, direct, offset );
-}
-
-bool CN::ConnectivityMatch( const unsigned long long *conn1_i,
-                            const unsigned long long *conn2_i,
-                            const int num_vertices,
-                            int &direct, int &offset )
-{
-  return connectivity_match<unsigned long long>(conn1_i, conn2_i, num_vertices, direct, offset );
 }
 
 bool CN::ConnectivityMatch( void* const *conn1_i,

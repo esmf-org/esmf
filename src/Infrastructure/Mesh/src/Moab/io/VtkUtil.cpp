@@ -3,7 +3,7 @@
  * storing and accessing finite element mesh data.
  * 
  * Copyright 2004 Sandia Corporation.  Under the terms of Contract
- * DE-AC04-94AL85000 with Sandia Corporation, the U.S. Government
+ * DE-AC04-94AL85000 with Sandia Coroporation, the U.S. Government
  * retains certain rights in this software.
  * 
  * This library is free software; you can redistribute it and/or
@@ -13,7 +13,7 @@
  * 
  */
 
-#include "moab/VtkUtil.hpp"
+#include "VtkUtil.hpp"
 
 namespace moab {
 
@@ -60,7 +60,7 @@ const unsigned  qhex[] = {  0,  1,  2,  3, // corners (same)
 // List of VtkElemType structs, indexed by the VTK type number.
 const VtkElemType VtkUtil::vtkElemTypes[] = {
       { 0,                         0, MBMAXTYPE, 0, 0 },
-      { "vertex",                  1, MBVERTEX, 1, 0 },
+      { "vertex",                  1, MBMAXTYPE, 1, 0 },
       { "polyvertex",              2, MBMAXTYPE, 0, 0 },
       { "line",                    3, MBEDGE,    2, 0 },
       { "polyline",                4, MBMAXTYPE, 0, 0 },
@@ -93,15 +93,7 @@ const VtkElemType VtkUtil::vtkElemTypes[] = {
       { "quadratic-linear wedge", 31, MBMAXTYPE,12, wedge }, // not supported
       { "bi-quadratic wedge",     32, MBMAXTYPE,18, wedge }, // not supported
       { "bi-quadratic hex",       33, MBMAXTYPE,24, qhex },  // not supported
-      { "bi-quadratic triangle",  34, MBMAXTYPE, 0, 0 },
-      { "cubic line",             35, MBMAXTYPE, 0, 0 },  // VTK_CUBIC_LINE not supported
-      { 0,                        36, MBMAXTYPE, 0, 0 },
-      { 0,                        37, MBMAXTYPE, 0, 0 },
-      { 0,                        38, MBMAXTYPE, 0, 0 },
-      { 0,                        39, MBMAXTYPE, 0, 0 },
-      { 0,                        40, MBMAXTYPE, 0, 0 },
-      { "convex point set",       41, MBMAXTYPE, 0, 0 }, //  VTK_CONVEX_POINT_SET = 41, not supported
-      { "polyhedron",             42, MBPOLYHEDRON, 0, 0 } //
+      { 0,                        34, MBMAXTYPE, 0, 0 }
     };
 
 const unsigned VtkUtil::numVtkElemType = sizeof(VtkUtil::vtkElemTypes) / sizeof(VtkUtil::vtkElemTypes[0]);
@@ -122,7 +114,7 @@ const int mb_to_vtk_type[][3] = {
   { 13, 26,  0 },  // MBWEDGE
   {  0,  0,  0 },  // MBKNIFE
   { 12, 25, 29 },  // MBHEX
-  { 42,  0,  0 },  // MBPOLYHEDRON
+  {  0,  0,  0 },  // MBPOLYHEDRON
   {  0,  0,  0 },  // MBENTITYSET
   {  0,  0,  0 } };// MBMAXTYPE
 
@@ -135,7 +127,7 @@ const VtkElemType* VtkUtil::get_vtk_type( EntityType type, unsigned num_nodes )
   {
       // If the linear type is requested (all polygons are linear
       // irrespective of the number of nodes), return that.
-    if (type == MBPOLYGON || type == MBPOLYHEDRON || vtkElemTypes[i].num_nodes == num_nodes)
+    if (type == MBPOLYGON || vtkElemTypes[i].num_nodes == num_nodes)
       return vtkElemTypes + i;
       // Otherwise if there is a quadratic type and the number of
       // nodes specified corresponds to the quadratic type, return that.

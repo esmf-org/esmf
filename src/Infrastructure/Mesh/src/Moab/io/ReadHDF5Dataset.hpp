@@ -6,8 +6,7 @@
 #ifndef moab_READ_HDF5DATASET_HPP
 #define moab_READ_HDF5DATASET_HPP
 
-#include "moab/MOABConfig.h"
-#ifdef MOAB_HAVE_MPI
+#ifdef USE_MPI
 # include <moab_mpi.h>
 #endif
 
@@ -38,7 +37,7 @@ class ReadHDF5Dataset
 {
 public:
 
-#ifdef MOAB_HAVE_MPI
+#ifdef USE_MPI
   typedef MPI_Comm Comm;
 #else
   typedef int Comm;

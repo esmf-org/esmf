@@ -3,7 +3,7 @@
  * storing and accessing finite element mesh data.
  * 
  * Copyright 2004 Sandia Corporation.  Under the terms of Contract
- * DE-AC04-94AL85000 with Sandia Corporation, the U.S. Government
+ * DE-AC04-94AL85000 with Sandia Coroporation, the U.S. Government
  * retains certain rights in this software.
  * 
  * This library is free software; you can redistribute it and/or
@@ -60,11 +60,11 @@ ErrorCode Skinner::initialize()
 
   ErrorCode result = thisMB->tag_get_handle("skinner adj", sizeof(void*), MB_TYPE_OPAQUE, mAdjTag, 
                                             MB_TAG_DENSE|MB_TAG_CREAT, &null_ptr);
- MB_CHK_ERR(result);
+  if (MB_SUCCESS != result) return result;
 
   if(mDeletableMBTag == 0) {
     result = thisMB->tag_get_handle("skinner deletable", 1, MB_TYPE_BIT, mDeletableMBTag, MB_TAG_BIT|MB_TAG_CREAT);
-   MB_CHK_ERR(result);
+    if (MB_SUCCESS != result) return result;
   }
   
   Range entities;
@@ -99,25 +99,27 @@ ErrorCode Skinner::deinitialize()
   if (0 != mDeletableMBTag) {
     result = thisMB->tag_delete( mDeletableMBTag);
     mDeletableMBTag = 0;
-    MB_CHK_ERR(result);
+    if (MB_SUCCESS != result) return result;
   }
 
-  // remove the adjacency tag
+  // remove the adjaceny tag
   std::vector< std::vector<EntityHandle>* > adj_arr;
   std::vector< std::vector<EntityHandle>* >::iterator i;
   if (0 != mAdjTag) {
     for (EntityType t = MBVERTEX; t != MBMAXTYPE; ++t) {
       Range entities;
-      result = thisMB->get_entities_by_type_and_tag( 0, t, &mAdjTag, 0, 1, entities ); MB_CHK_ERR(result);
+      result = thisMB->get_entities_by_type_and_tag( 0, t, &mAdjTag, 0, 1, entities );
+      if (MB_SUCCESS != result) return result;
       adj_arr.resize( entities.size() );
-      result = thisMB->tag_get_data( mAdjTag, entities, &adj_arr[0] ); MB_CHK_ERR(result);
+      result = thisMB->tag_get_data( mAdjTag, entities, &adj_arr[0] );
+      if (MB_SUCCESS != result) return result;
       for (i = adj_arr.begin(); i != adj_arr.end(); ++i)
         delete *i;
     }
   
     result = thisMB->tag_delete(mAdjTag);
     mAdjTag = 0;
-    MB_CHK_ERR(result);
+    if (MB_SUCCESS != result) return result;
   }
 
   return MB_SUCCESS;
@@ -129,7 +131,8 @@ ErrorCode Skinner::add_adjacency(EntityHandle entity)
   std::vector<EntityHandle> *adj = NULL;
   const EntityHandle *nodes;
   int num_nodes;
-  ErrorCode result = thisMB->get_connectivity(entity, nodes, num_nodes, true); MB_CHK_ERR(result);
+  ErrorCode result = thisMB->get_connectivity(entity, nodes, num_nodes, true);
+  if (MB_SUCCESS != result) return result;
   const EntityHandle *iter =
     std::min_element(nodes, nodes+num_nodes);
 
@@ -146,7 +149,8 @@ ErrorCode Skinner::add_adjacency(EntityHandle entity)
   {
     adj = new std::vector<EntityHandle>;
     adj->push_back(entity);
-    result = thisMB->tag_set_data(mAdjTag, iter, 1, &adj); MB_CHK_ERR(result);
+    result = thisMB->tag_set_data(mAdjTag, iter, 1, &adj);
+    if (MB_SUCCESS != result) return result;
   }
 
   return MB_SUCCESS;
@@ -181,7 +185,7 @@ void Skinner::add_adjacency(EntityHandle entity,
   }
 }
 
-ErrorCode Skinner::find_geometric_skin(const EntityHandle meshset, Range &forward_target_entities)
+ErrorCode Skinner::find_geometric_skin(Range &forward_target_entities) 
 {
     // attempts to find whole model skin, using geom topo sets first then
     // normal find_skin function
@@ -199,7 +203,7 @@ ErrorCode Skinner::find_geometric_skin(const EntityHandle meshset, Range &forwar
   Range face_sets;
   int two = 2;
   const void *two_ptr = &two;
-  result = thisMB->get_entities_by_type_and_tag(meshset, MBENTITYSET, &geom_tag, &two_ptr, 1,
+  result = thisMB->get_entities_by_type_and_tag(0, MBENTITYSET, &geom_tag, &two_ptr, 1,
                                                  face_sets);
 
   Range::iterator it;
@@ -212,7 +216,7 @@ ErrorCode Skinner::find_geometric_skin(const EntityHandle meshset, Range &forwar
   Range skin_sets;
   if (debug) std::cout << "Found " << face_sets.size() << " face sets total..." << std::endl;
   
-  for (it = face_sets.begin(); it != face_sets.end(); ++it) {
+  for (it = face_sets.begin(); it != face_sets.end(); it++) {
     int num_parents;
     result = thisMB->num_parent_meshsets(*it, &num_parents);
     if (MB_SUCCESS != result)
@@ -227,17 +231,16 @@ ErrorCode Skinner::find_geometric_skin(const EntityHandle meshset, Range &forwar
     return MB_FAILURE;
       
     // ok, we have the shell; gather up the elements, putting them all in forward for now
-  for (it = skin_sets.begin(); it != skin_sets.end(); ++it) {
+  for (it = skin_sets.begin(); it != skin_sets.end(); it++) {
     result = thisMB->get_entities_by_handle(*it, forward_target_entities, true);
-    if (MB_SUCCESS != result)
+    if (MB_SUCCESS != result) 
       return result;
   }
         
   return result;
 }
 
-ErrorCode Skinner::find_skin( const EntityHandle meshset,
-                              const Range& source_entities,
+ErrorCode Skinner::find_skin( const Range& source_entities,
                               bool get_vertices,
                               Range& output_handles,
                               Range* output_reverse_handles,
@@ -248,8 +251,9 @@ ErrorCode Skinner::find_skin( const EntityHandle meshset,
   if (source_entities.empty())
     return MB_SUCCESS;
 
+  ErrorCode rval;
   if (look_for_scd) {
-    ErrorCode rval = find_skin_scd(source_entities, get_vertices, output_handles, create_skin_elements);
+    rval = find_skin_scd(source_entities, get_vertices, output_handles, create_skin_elements);
       // if it returns success, it's all scd, and we don't need to do anything more
     if (MB_SUCCESS == rval) return rval;
   }
@@ -259,13 +263,65 @@ ErrorCode Skinner::find_skin( const EntityHandle meshset,
       !this_core->a_entity_factory()->vert_elem_adjacencies())
     this_core->a_entity_factory()->create_vert_elem_adjacencies();
     
-  return find_skin_vertices( meshset,
-                             source_entities,
-                             get_vertices ? &output_handles : 0,
-                             get_vertices ? 0 : &output_handles,
-                             output_reverse_handles,
-                             create_skin_elements );
+  if (this_core && this_core->a_entity_factory()->vert_elem_adjacencies())
+    return find_skin_vertices( source_entities, 
+                               get_vertices ? &output_handles : 0,
+                               get_vertices ? 0 : &output_handles,
+                               output_reverse_handles,
+                               create_skin_elements );
   
+  Range forward, reverse;
+  Range prev;
+  const int d = CN::Dimension(TYPE_FROM_HANDLE(source_entities.front()));
+  if (!source_entities.all_of_dimension(d))
+    return MB_TYPE_OUT_OF_RANGE;
+  
+  rval = thisMB->get_entities_by_dimension( 0, d-1, prev );
+  if (MB_SUCCESS != rval)
+    return rval;
+  
+  rval = find_skin_noadj( source_entities, forward, reverse );
+  if (MB_SUCCESS != rval)
+    return rval;
+  
+  if (get_vertices && !output_reverse_handles) {
+    forward.merge( reverse );
+    reverse.clear();
+  }
+  
+  if (get_vertices) {
+    rval = thisMB->get_connectivity( forward, output_handles );
+    if (MB_SUCCESS != rval)
+      return rval;
+  }
+  
+  if (!create_skin_elements) {
+    Range new_skin;
+    rval = thisMB->get_entities_by_dimension( 0, d-1, new_skin);
+    if (MB_SUCCESS != rval)
+      return rval;
+    new_skin = subtract( new_skin, prev );
+    forward = subtract( forward, new_skin );
+    reverse = subtract( reverse, new_skin );
+    rval = thisMB->delete_entities( new_skin );
+    if (MB_SUCCESS != rval)
+      return rval;
+  }
+  
+  if (!get_vertices) {
+    if (output_handles.empty())
+      output_handles.swap( forward );
+    else
+      output_handles.merge( forward );
+    if (!output_reverse_handles)
+      output_handles.merge( reverse );
+    else if (output_reverse_handles->empty())
+      output_reverse_handles->swap( reverse );
+    else
+      output_reverse_handles->merge( reverse );
+  }
+  
+  return MB_SUCCESS;  
 }
 
 ErrorCode Skinner::find_skin_scd(const Range& source_entities,
@@ -284,7 +340,7 @@ ErrorCode Skinner::find_skin_scd(const Range& source_entities,
   Range myrange;
   rval = scdi->find_boxes(boxes);
   if (MB_SUCCESS != rval) return rval;
-  for (std::vector<ScdBox*>::iterator bit = boxes.begin(); bit != boxes.end(); ++bit) {
+  for (std::vector<ScdBox*>::iterator bit = boxes.begin(); bit != boxes.end(); bit++) {
     Range belems((*bit)->start_element(), (*bit)->start_element() + (*bit)->num_elements()-1);
     if (source_entities.contains(belems)) {
       myboxes.push_back(*bit);
@@ -294,7 +350,7 @@ ErrorCode Skinner::find_skin_scd(const Range& source_entities,
   if (myboxes.empty() || myrange.size() != source_entities.size()) return MB_FAILURE;
 
     // ok, we're all structured; get the skin for each box
-  for (std::vector<ScdBox*>::iterator bit = boxes.begin(); bit != boxes.end(); ++bit) {
+  for (std::vector<ScdBox*>::iterator bit = boxes.begin(); bit != boxes.end(); bit++) {
     rval = skin_box(*bit, get_vertices, output_handles, create_skin_elements);
     if (MB_SUCCESS != rval) return rval;
   }
@@ -397,6 +453,16 @@ ErrorCode Skinner::find_skin_noadj(const Range &source_entities,
   if(mTargetDim < 0 || source_dim > 3)
     return MB_FAILURE;
 
+  //Core *this_core = dynamic_cast<Core*>(thisMB);
+  //bool use_adjs = false;
+  //if (!this_core->a_entity_factory()->vert_elem_adjacencies() &&
+  //  create_vert_elem_adjs)
+  //  this_core->a_entity_factory()->create_vert_elem_adjacencies();
+  //
+  //if (this_core->a_entity_factory()->vert_elem_adjacencies())
+  //  use_adjs = true;
+  //
+  //else 
   initialize();
 
   Range::const_iterator iter, end_iter;
@@ -411,118 +477,143 @@ ErrorCode Skinner::find_skin_noadj(const Range &source_entities,
   EntityHandle sub_conn[32];
   std::vector<EntityHandle> tmp_conn_vec;
   int num_nodes, num_sub_nodes, num_sides;
-  int sub_indices[32];// Also, assume that no polygon has more than 32 nodes
-  // we could increase that, but we will not display it right in visit moab h5m , anyway
+  int sub_indices[32];
   EntityType sub_type;
 
   // for each source entity
   for(iter = source_entities.begin(); iter != end_iter; ++iter)
   {
     // get the connectivity of this entity
-    int actual_num_nodes_polygon=0;
     result = thisMB->get_connectivity(*iter, conn, num_nodes, false, &tmp_conn_vec);
     if (MB_SUCCESS != result)
       return result;
     
     type = thisMB->type_from_handle(*iter);
     Range::iterator seek_iter;
+    Range dum_elems, dum_sub_elems;
     
-    // treat separately polygons (also, polyhedra will need special handling)
-    if (MBPOLYGON == type)
-    {
-      // treat padded polygons, if existing; count backwards, see how many of the last nodes are repeated
-      // assume connectivity is fine, otherwise we could be in trouble
-      actual_num_nodes_polygon = num_nodes;
-      while (actual_num_nodes_polygon >= 3 &&
-          conn[actual_num_nodes_polygon-1]==conn[actual_num_nodes_polygon-2])
-        actual_num_nodes_polygon--;
-      num_sides = actual_num_nodes_polygon;
-      sub_type = MBEDGE;
-      num_sub_nodes = 2;
-    }
-    else// get connectivity of each n-1 dimension entity
-      num_sides = CN::NumSubEntities( type, mTargetDim );
+    // get connectivity of each n-1 dimension entity
+    num_sides = CN::NumSubEntities( type, mTargetDim );
     for(int i=0; i<num_sides; i++)
     {
-      if(MBPOLYGON==type)
-      {
-        sub_conn[0] = conn[i];
-        sub_conn[1] = conn[i+1];
-        if (i+1 == actual_num_nodes_polygon)
-          sub_conn[1]=conn[0];
-      }
-      else
-      {
-        CN::SubEntityNodeIndices( type, num_nodes, mTargetDim, i, sub_type, num_sub_nodes, sub_indices );
-        assert((size_t)num_sub_nodes <= sizeof(sub_indices)/sizeof(sub_indices[0]));
-        for(int j=0; j<num_sub_nodes; j++)
-          sub_conn[j] = conn[sub_indices[j]];
-      }
+      CN::SubEntityNodeIndices( type, num_nodes, mTargetDim, i, sub_type, num_sub_nodes, sub_indices );
+      assert((size_t)num_sub_nodes <= sizeof(sub_indices)/sizeof(sub_indices[0]));
+      for(int j=0; j<num_sub_nodes; j++)
+        sub_conn[j] = conn[sub_indices[j]];
+      
+//      if (use_adjs) {
+//        dum_elems.clear();
+//        result = thisMB->get_adjacencies(sub_conn, num_sub_nodes, source_dim, false,
+//                                         dum_elems);
+//        if (MB_SUCCESS != result) return result;
+//        dum_elems = intersect( dum_elems, source_entities );
+//        if (dum_elems.empty()) {
+//          assert(false);  // should never happen
+//          return MB_FAILURE;
+//        }
+//        // if (dum_elems.size() > 2) { 
+//          // source entities do not form a valid source-dim patch (t-junction).
+//          // do we care?
+//        // }
+//        
+//        if (1 == dum_elems.size()) {
+//            // this sub_element is on the skin
+//
+//            // check for existing entity
+//          dum_sub_elems.clear();
+//          result = thisMB->get_adjacencies(sub_conn, num_sub_nodes, mTargetDim, false,
+//                                           dum_sub_elems);
+//          if (MB_SUCCESS != result) return result;
+//          if (dum_sub_elems.empty()) {
+//              // need to create one
+//            EntityHandle tmphndl=0;
+//            int indices[MAX_SUB_ENTITY_VERTICES];
+//            EntityType new_type;
+//            int num_new_nodes;
+//            CN::SubEntityNodeIndices( type, num_nodes, mTargetDim, i, new_type, num_new_nodes, indices );
+//            for(int j=0; j<num_new_nodes; j++)
+//              sub_conn[j] = conn[indices[j]];
+//        
+//            result = thisMB->create_element(new_type, sub_conn,  
+//                                            num_new_nodes, tmphndl);
+//            forward_target_entities.insert(tmphndl);
+//          }
+//          else {
+//              // else find the relative sense of this entity to the source_entity in this set
+//            int side_no, sense = 0, offset;
+//            if (source_entities.find(*dum_elems.begin()) == source_entities.end()) {
+//              result = thisMB->side_number(*dum_elems.rbegin(), *dum_sub_elems.begin(),
+//                                           side_no, sense, offset);
+//            }
+//            else {
+//              result = thisMB->side_number(*dum_elems.begin(), *dum_sub_elems.begin(),
+//                                           side_no, sense, offset);
+//            }
+//            if (-1 == sense) reverse_target_entities.insert(*dum_sub_elems.begin());
+//            else if (1 == sense) forward_target_entities.insert(*dum_sub_elems.begin());
+//            else return MB_FAILURE;
+//          }
+//        }
+//      }
+//      else {
         
-        // see if we can match this connectivity with
-        // an existing entity
-      find_match( sub_type, sub_conn, num_sub_nodes, match, direct );
-
-        // if there is no match, create a new entity
-      if(match == 0)
-      {
-        EntityHandle tmphndl=0;
-        int indices[MAX_SUB_ENTITY_VERTICES];
-        EntityType new_type;
-        int num_new_nodes;
-        if(MBPOLYGON==type)
+          // see if we can match this connectivity with
+          // an existing entity
+        find_match( sub_type, sub_conn, num_sub_nodes, match, direct );
+        
+          // if there is no match, create a new entity
+        if(match == 0)
         {
-          new_type = MBEDGE;
-          num_new_nodes = 2;
-        }
-        else
-        {
+          EntityHandle tmphndl=0;
+          int indices[MAX_SUB_ENTITY_VERTICES];
+          EntityType new_type;
+          int num_new_nodes;
           CN::SubEntityNodeIndices( type, num_nodes, mTargetDim, i, new_type, num_new_nodes, indices );
           for(int j=0; j<num_new_nodes; j++)
             sub_conn[j] = conn[indices[j]];
+          result = thisMB->create_element(new_type, sub_conn, num_new_nodes,
+                                          tmphndl);
+          assert(MB_SUCCESS == result);
+          add_adjacency(tmphndl, sub_conn, CN::VerticesPerEntity(new_type));
+          forward_target_entities.insert(tmphndl);
         }
-        result = thisMB->create_element(new_type, sub_conn, num_new_nodes,
-                                        tmphndl);
-        assert(MB_SUCCESS == result);
-        add_adjacency(tmphndl, sub_conn, CN::VerticesPerEntity(new_type));
-        forward_target_entities.insert(tmphndl);
-      }
-        // if there is a match, delete the matching entity
-        // if we can.
-      else
-      {
-        if ( (seek_iter = forward_target_entities.find(match)) != forward_target_entities.end())
-        {
-          forward_target_entities.erase(seek_iter);
-          remove_adjacency(match);
-          if(/*!use_adjs &&*/ entity_deletable(match))
-          {
-            result = thisMB->delete_entities(&match, 1);
-            assert(MB_SUCCESS == result);
-          }
-        }
-        else if ( (seek_iter = reverse_target_entities.find(match)) != reverse_target_entities.end())
-        {
-          reverse_target_entities.erase(seek_iter);
-          remove_adjacency(match);
-          if(/*!use_adjs &&*/ entity_deletable(match))
-          {
-            result = thisMB->delete_entities(&match, 1);
-            assert(MB_SUCCESS == result);
-          }
-        }
+          // if there is a match, delete the matching entity
+          // if we can. 
         else
         {
-          if(direct == FORWARD)
+          if ( (seek_iter = forward_target_entities.find(match)) != forward_target_entities.end())
           {
-            forward_target_entities.insert(match);
+            forward_target_entities.erase(seek_iter);
+            remove_adjacency(match);
+            if(/*!use_adjs &&*/ entity_deletable(match))
+            {
+              result = thisMB->delete_entities(&match, 1);
+              assert(MB_SUCCESS == result);
+            }
+          }
+          else if ( (seek_iter = reverse_target_entities.find(match)) != reverse_target_entities.end())
+          {
+            reverse_target_entities.erase(seek_iter);
+            remove_adjacency(match);
+            if(/*!use_adjs &&*/ entity_deletable(match))
+            {
+              result = thisMB->delete_entities(&match, 1);
+              assert(MB_SUCCESS == result);
+            }
           }
           else
           {
-            reverse_target_entities.insert(match);
+            if(direct == FORWARD)
+            {
+              forward_target_entities.insert(match);
+            }
+            else
+            {
+              reverse_target_entities.insert(match);
+            }
           }
         }
-      }
+      //}
     }
   }
 
@@ -638,7 +729,8 @@ bool Skinner::connectivity_match( const EntityHandle *conn1,
 ErrorCode Skinner::remove_adjacency(EntityHandle entity)
 {
   std::vector<EntityHandle> nodes, *adj = NULL;
-  ErrorCode result = thisMB->get_connectivity(&entity, 1, nodes); MB_CHK_ERR(result);
+  ErrorCode result = thisMB->get_connectivity(&entity, 1, nodes);
+  if (MB_SUCCESS != result) return result;
   std::vector<EntityHandle>::iterator iter = 
     std::min_element(nodes.begin(), nodes.end());
 
@@ -677,20 +769,29 @@ ErrorCode Skinner::classify_2d_boundary( const Range &boundary,
   Range bedges, iedges, nmedges, oedges;
   ErrorCode result = classify_2d_boundary(boundary, bar_elements,
                                              bedges, iedges, nmedges, oedges,
-                                             number_boundary_nodes);MB_CHK_ERR(result);
+                                             number_boundary_nodes);
+  if (MB_SUCCESS != result) return result;
   
     // now set the input meshsets to the output ranges
-  result = thisMB->clear_meshset(&boundary_edges, 1);MB_CHK_ERR(result);
-  result = thisMB->add_entities(boundary_edges, bedges); MB_CHK_ERR(result);
+  result = thisMB->clear_meshset(&boundary_edges, 1);
+  if (MB_SUCCESS != result) return result;
+  result = thisMB->add_entities(boundary_edges, bedges);
+  if (MB_SUCCESS != result) return result;
 
-  result = thisMB->clear_meshset(&inferred_edges, 1);MB_CHK_ERR(result);
-  result = thisMB->add_entities(inferred_edges, iedges);MB_CHK_ERR(result);
+  result = thisMB->clear_meshset(&inferred_edges, 1);
+  if (MB_SUCCESS != result) return result;
+  result = thisMB->add_entities(inferred_edges, iedges);
+  if (MB_SUCCESS != result) return result;
 
-  result = thisMB->clear_meshset(&non_manifold_edges, 1); MB_CHK_ERR(result);
-  result = thisMB->add_entities(non_manifold_edges, nmedges);MB_CHK_ERR(result);
+  result = thisMB->clear_meshset(&non_manifold_edges, 1);
+  if (MB_SUCCESS != result) return result;
+  result = thisMB->add_entities(non_manifold_edges, nmedges);
+  if (MB_SUCCESS != result) return result;
 
-  result = thisMB->clear_meshset(&other_edges, 1);MB_CHK_ERR(result);
-  result = thisMB->add_entities(other_edges, oedges);MB_CHK_ERR(result);
+  result = thisMB->clear_meshset(&other_edges, 1);
+  if (MB_SUCCESS != result) return result;
+  result = thisMB->add_entities(other_edges, oedges);
+  if (MB_SUCCESS != result) return result;
 
   return MB_SUCCESS;
 }
@@ -734,13 +835,14 @@ ErrorCode Skinner::classify_2d_boundary( const Range &boundary,
   initialize();
 
   // additional initialization for this routine
-  // define a tag for MBEDGE which counts the occurrences of the edge below
+  // define a tag for MBEDGE which counts the occurances of the edge below
   // default should be 0 for existing edges, if any
 
   Tag count_tag;
   int default_count = 0;
   ErrorCode result = thisMB->tag_get_handle(0, 1, MB_TYPE_INTEGER,
-                                        count_tag, MB_TAG_DENSE|MB_TAG_CREAT, &default_count); MB_CHK_ERR(result);
+                                        count_tag, MB_TAG_DENSE|MB_TAG_CREAT, &default_count);
+  if (MB_SUCCESS != result) return result;
 
  
   Range::const_iterator iter, end_iter;
@@ -867,7 +969,7 @@ ErrorCode Skinner::classify_2d_boundary( const Range &boundary,
   Range::iterator edge_iter, edge_end_iter;
   edge_end_iter = edge_list.end();
   int count;
-  for(edge_iter = edge_list.begin(); edge_iter != edge_end_iter; ++edge_iter)
+  for(edge_iter = edge_list.begin(); edge_iter != edge_end_iter; edge_iter++)
   {
     // check the count_tag
     result = thisMB->tag_get_data(count_tag, &(*edge_iter), 1, &count);
@@ -1004,16 +1106,14 @@ bool Skinner::has_larger_angle(EntityHandle &entity1,
 }
 
   // get skin entities of prescribed dimension
-ErrorCode Skinner::find_skin(const EntityHandle this_set,
-                             const Range &entities,
+ErrorCode Skinner::find_skin(const Range &entities,
                                  int dim,
                                  Range &skin_entities,
-                                 bool create_vert_elem_adjs,
-                                 bool create_skin_elements)
+                                 bool create_vert_elem_adjs) 
 {
   Range tmp_skin;
-  ErrorCode result = find_skin(this_set, entities, (dim==0), tmp_skin, 0,
-                                 create_vert_elem_adjs, create_skin_elements);
+  ErrorCode result = find_skin(entities, (dim==0), tmp_skin, 0, 
+                                 create_vert_elem_adjs, true);
   if (MB_SUCCESS != result || tmp_skin.empty()) return result;
   
   if (tmp_skin.all_of_dimension(dim)) {
@@ -1023,17 +1123,14 @@ ErrorCode Skinner::find_skin(const EntityHandle this_set,
       skin_entities.merge(tmp_skin);
   }
   else {
-    result = thisMB->get_adjacencies( tmp_skin, dim, create_skin_elements, skin_entities,
-                                      Interface::UNION );MB_CHK_ERR(result);
-    if (this_set)
-      result = thisMB->add_entities(this_set, skin_entities);
+    result = thisMB->get_adjacencies( tmp_skin, dim, true, skin_entities, 
+                                      Interface::UNION );
   }
   
   return result;
 }
 
-ErrorCode Skinner::find_skin_vertices( const EntityHandle this_set,
-                                       const Range& entities,
+ErrorCode Skinner::find_skin_vertices( const Range& entities,
                                            Range* skin_verts,
                                            Range* skin_elems,
                                            Range* skin_rev_elems,
@@ -1051,7 +1148,7 @@ ErrorCode Skinner::find_skin_vertices( const EntityHandle this_set,
     // are we skinning all entities
   size_t count = entities.size();
   int num_total;
-  rval = thisMB->get_number_entities_by_dimension( this_set, dim, num_total );
+  rval = thisMB->get_number_entities_by_dimension( 0, dim, num_total );
   if (MB_SUCCESS != rval)
     return rval;
   bool all = (count == (size_t)num_total);
@@ -1087,12 +1184,12 @@ ErrorCode Skinner::find_skin_vertices( const EntityHandle this_set,
         rval = MB_SUCCESS;
       break;
     case 2:
-      rval = find_skin_vertices_2D(this_set, tag, entities, skin_verts,
+      rval = find_skin_vertices_2D( tag, entities, skin_verts, 
                                     skin_elems, skin_rev_elems, 
                                     create_skin_elems, corners_only );
       break;
     case 3:
-      rval = find_skin_vertices_3D( this_set, tag, entities, skin_verts,
+      rval = find_skin_vertices_3D( tag, entities, skin_verts, 
                                     skin_elems, skin_rev_elems, 
                                     create_skin_elems, corners_only );
       break;
@@ -1150,7 +1247,7 @@ ErrorCode Skinner::find_skin_vertices_1D( Tag tag,
     tag_vals.resize( adj.size() );
     rval = thisMB->tag_get_data( tag, &adj[0], adj.size(), &tag_vals[0] );
     if (MB_SUCCESS != rval) return rval;
-#ifdef MOAB_OLD_STD_COUNT
+#ifdef OLD_STD_COUNT
     n = 0;
     std::count( tag_vals.begin(), tag_vals.end(), '\001', n );
 #else
@@ -1208,17 +1305,20 @@ public:
      */
     Side( const EntityHandle* array, int idx,
           EntityHandle adj, unsigned short  ) 
-      : adj_elem(adj) 
+      : adj_elem(adj) /*, elem_side(side)*/ 
     {
       switch (CORNERS) {
-        case 3: handles[1] = array[(idx+2)%CORNERS];
-        case 2: handles[0] = array[(idx+1)%CORNERS]; break;
         default:
           assert(false);
           break;
-     }
+        case 4: handles[2] = array[(idx+3)%CORNERS];
+        case 3: handles[1] = array[(idx+2)%CORNERS];
+        case 2: handles[0] = array[(idx+1)%CORNERS];
+      }
       if (CORNERS == 3 && handles[1] > handles[0])
         std::swap( handles[0], handles[1] );
+      if (CORNERS == 4 && handles[2] > handles[0])
+        std::swap( handles[0], handles[2] );
     }
     
     /** construct from connectivity of parent element
@@ -1233,17 +1333,20 @@ public:
     Side( const EntityHandle* array,  int idx,
           EntityHandle adj, unsigned short ,
           const short* indices ) 
-      : adj_elem(adj)
+      : adj_elem(adj) /*, elem_side(side)*/ 
     {
       switch (CORNERS) {
-        case 3: handles[1] = array[indices[(idx+2)%CORNERS]];
-        case 2: handles[0] = array[indices[(idx+1)%CORNERS]]; break;
         default:
           assert(false);
           break;
-     }
+        case 4: handles[2] = array[indices[(idx+3)%CORNERS]];
+        case 3: handles[1] = array[indices[(idx+2)%CORNERS]];
+        case 2: handles[0] = array[indices[(idx+1)%CORNERS]];
+      }
       if (CORNERS == 3 && handles[1] > handles[0])
         std::swap( handles[0], handles[1] );
+      if (CORNERS == 4 && handles[2] > handles[0])
+        std::swap( handles[0], handles[2] );
     }
    
     // Compare two side instances.  Relies in the ordering of 
@@ -1251,18 +1354,21 @@ public:
     bool operator==( const Side& other ) const 
     {
       switch (CORNERS) {
+        default:
+          assert(false);
+          return false;
+        case 4:
+          return handles[0] == other.handles[0] 
+              && handles[1] == other.handles[1]
+              && handles[2] == other.handles[2];
         case 3:
           return handles[0] == other.handles[0] 
               && handles[1] == other.handles[1];
         case 2:
           return handles[0] == other.handles[0];
-        default:
-          assert(false);
-          return false;
-     }
+      }
     }
   };
-
 
 private:
 
@@ -1369,60 +1475,7 @@ public:
   }
 };
 
-/** construct from connectivity of side
-  *\param array The connectivity of the element side.
-  *\param idx   The index of the implicit vertex (contained
-  *             in all sides in the list.)
-  *\param adj   The element that this is a side of.
-  */
-template<>
-AdjSides<4>::Side::Side( const EntityHandle* array, int idx,
-      EntityHandle adj, unsigned short  ) 
-  : adj_elem(adj)
-{
-  const unsigned int CORNERS=4;
-  handles[2] = array[(idx+3)%CORNERS];
-  handles[1] = array[(idx+2)%CORNERS];
-  handles[0] = array[(idx+1)%CORNERS];
-  if (handles[2] > handles[0])
-    std::swap( handles[0], handles[2] );
-}
-
-/** construct from connectivity of parent element
-  *\param array The connectivity of the parent element
-  *\param idx   The index of the implicit vertex (contained
-  *             in all sides in the list.)  This is an index
-  *             into 'indices', not 'array'.
-  *\param adj   The element that this is a side of.
-  *\param indices  The indices into 'array' at which the vertices
-  *             representing the side occur.
-  */
-template<>
-AdjSides<4>::Side::Side( const EntityHandle* array,  int idx,
-      EntityHandle adj, unsigned short ,
-      const short* indices ) 
-  : adj_elem(adj)
-{
-  const unsigned int CORNERS=4;
-  handles[2] = array[indices[(idx+3)%CORNERS]];
-  handles[1] = array[indices[(idx+2)%CORNERS]];
-  handles[0] = array[indices[(idx+1)%CORNERS]];
-  if (handles[2] > handles[0])
-    std::swap( handles[0], handles[2] );
-}
-
-// Compare two side instances.  Relies in the ordering of 
-// vertex handles as described above.
-template<>
-bool AdjSides<4>::Side::operator==( const Side& other ) const 
-{
-  return handles[0] == other.handles[0] 
-      && handles[1] == other.handles[1]
-      && handles[2] == other.handles[2];
-}
-
-
-// Utility function used by find_skin_vertices_2D and
+// Utiltiy function used by find_skin_vertices_2D and
 // find_skin_vertices_3D to create elements representing
 // the skin side of a higher-dimension element if one
 // does not already exist.  
@@ -1439,7 +1492,7 @@ bool AdjSides<4>::Side::operator==( const Side& other ) const
 //        a lower-dim element representing the side.
 // side_type - The EntityType of the desired side.
 // side_conn - The connectivity of the new side.
-ErrorCode Skinner::create_side( const EntityHandle this_set, EntityHandle elem,
+ErrorCode Skinner::create_side( EntityHandle elem,
                                     EntityType side_type,
                                     const EntityHandle* side_conn,
                                     EntityHandle& side_elem )
@@ -1457,48 +1510,6 @@ ErrorCode Skinner::create_side( const EntityHandle this_set, EntityHandle elem,
   rval = thisMB->get_connectivity( elem, conn, len, false, &storage );
   if (MB_SUCCESS != rval) return rval;
  
-  // treat separately MBPOLYGON; we want to create the edge in the
-  // forward sense always ; so figure out the sense first, then get out
-  if (MBPOLYGON==type && 1==d && MBEDGE==side_type)
-  {
-    // first find the first vertex in the conn list
-    int i=0;
-    for (i=0; i<len; i++)
-    {
-      if (conn[i]==side_conn[0])
-        break;
-    }
-    if (len == i)
-      return MB_FAILURE; // not found, big error
-    // now, what if the polygon is padded?
-    // the previous index is fine always. but the next one could be trouble :(
-    int prevIndex = (i+len-1)%len;
-    int nextIndex = (i+1)%len;
-    // if the next index actually point to the same node, as current, it means it is padded
-    if (conn[nextIndex]== conn[i])
-    {
-      // it really means we are at the end of proper nodes, the last nodes are repeated, so it should
-      // be the first node
-      nextIndex = 0; // this is the first node!
-    }
-    EntityHandle conn2[2] = {side_conn[0], side_conn[1]};
-    if (conn[prevIndex]==side_conn[1])
-    {
-      // reverse, so the edge will be forward
-      conn2[0]=side_conn[1];
-      conn2[1]=side_conn[0];
-    }
-    else if  ( conn[nextIndex]!=side_conn[1])
-      return MB_FAILURE; // it is not adjacent to the polygon
-
-    rval = thisMB->create_element( MBEDGE, conn2, 2, side_elem );MB_CHK_ERR(rval);
-    if (this_set)
-      {
-        rval = thisMB->add_entities(this_set, &side_elem,1); MB_CHK_ERR(rval);
-      }
-    return MB_SUCCESS;
-
-  }
   // Find which side we are creating and get indices of all nodes
   // (including higher-order, if any.)
   CN::SideNumber( type, conn, side_conn, ncorner, d, side, sense, offset );
@@ -1513,12 +1524,7 @@ ErrorCode Skinner::create_side( const EntityHandle this_set, EntityHandle elem,
   for (int i = 0; i < side_len; ++i)
     side_conn_full[i] = conn[indices[i]];
   
-  rval = thisMB->create_element( side_type, side_conn_full, side_len, side_elem );MB_CHK_ERR(rval);
-  if (this_set)
-    {
-      rval = thisMB->add_entities(this_set, &side_elem,1); MB_CHK_ERR(rval);
-    }
-  return MB_SUCCESS;;
+  return thisMB->create_element( side_type, side_conn_full, side_len, side_elem );
 }
 
 // Test if an edge is reversed with respect CN's ordering
@@ -1563,7 +1569,7 @@ bool Skinner::face_reversed( EntityHandle region,
   return (!r && sense == -1);
 }
 
-ErrorCode Skinner::find_skin_vertices_2D( const EntityHandle this_set, Tag tag,
+ErrorCode Skinner::find_skin_vertices_2D( Tag tag,
                                               const Range& faces,
                                               Range* skin_verts,
                                               Range* skin_edges,
@@ -1675,12 +1681,9 @@ ErrorCode Skinner::find_skin_vertices_2D( const EntityHandle this_set, Tag tag,
         }
       }
 
-      // so it must be a MBPOLYGON
-      const int prev_idx = (idx + len - 1)%len; // this should be fine, always, even for padded case
+      const int prev_idx = (idx + len - 1)%len;
       prev = conn[prev_idx];
       next = conn[(idx+1)%len];
-      if (next == conn[idx]) // it must be the padded case, so roll to the beginning
-        next = conn[0];
       
         // Insert sides (edges) in our list of candidate skin sides
       adj_edges.insert( &prev, 1, *i, prev_idx );
@@ -1756,7 +1759,7 @@ ErrorCode Skinner::find_skin_vertices_2D( const EntityHandle this_set, Tag tag,
       for (AdjSides<2>::const_iterator p = adj_edges.begin(); p != adj_edges.end(); ++p) {
         if (p->skin()) {
           EntityHandle edge, ec[] = { *it, p->handles[0] };
-          rval = create_side(this_set, p->adj_elem, MBEDGE, ec, edge );
+          rval = create_side( p->adj_elem, MBEDGE, ec, edge );
           if (MB_SUCCESS != rval) return rval;
           if (skin_edges)
             skin_edges->insert( edge );
@@ -1770,7 +1773,7 @@ ErrorCode Skinner::find_skin_vertices_2D( const EntityHandle this_set, Tag tag,
 }
   
 
-ErrorCode Skinner::find_skin_vertices_3D(const EntityHandle this_set, Tag tag,
+ErrorCode Skinner::find_skin_vertices_3D( Tag tag,
                                               const Range& entities,
                                               Range* skin_verts,
                                               Range* skin_faces,
@@ -2055,7 +2058,7 @@ ErrorCode Skinner::find_skin_vertices_3D(const EntityHandle this_set, Tag tag,
     if (!create_faces)
       continue;
 
-      // Polyhedra always have explicitly defined faces, so
+      // Polyhedra always have explictly defined faces, so
       // there is no way we could need to create such a face.
     assert(0 == adj_poly.num_skin());
     
@@ -2064,7 +2067,7 @@ ErrorCode Skinner::find_skin_vertices_3D(const EntityHandle this_set, Tag tag,
       for (AdjSides<3>::const_iterator t = adj_tris.begin(); t != adj_tris.end(); ++t) {
         if (t->skin()) {
           EntityHandle tri, c[3] = { *it, t->handles[0], t->handles[1] };
-          rval = create_side( this_set, t->adj_elem, MBTRI, c, tri );
+          rval = create_side( t->adj_elem, MBTRI, c, tri );
           if (MB_SUCCESS != rval) return rval;
           if (skin_faces)
             skin_faces->insert( tri );
@@ -2077,7 +2080,7 @@ ErrorCode Skinner::find_skin_vertices_3D(const EntityHandle this_set, Tag tag,
       for (AdjSides<4>::const_iterator q = adj_quads.begin(); q != adj_quads.end(); ++q) {
         if (q->skin()) {
           EntityHandle quad, c[4] = { *it, q->handles[0], q->handles[1], q->handles[2] };
-          rval = create_side(this_set, q->adj_elem, MBQUAD, c, quad );
+          rval = create_side( q->adj_elem, MBQUAD, c, quad );
           if (MB_SUCCESS != rval) return rval;
           if (skin_faces)
             skin_faces->insert( quad );

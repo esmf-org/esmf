@@ -5,6 +5,8 @@
 #include <algorithm>
 #include <iomanip>
 
+#include <cstdio>
+
 #include "assert.h"
 // included in the header now
 // #include "Range.hpp"
@@ -44,9 +46,7 @@ bool debug_surf_eval1 = false;
 
 SmoothFace::SmoothFace(Interface * mb, EntityHandle surface_set,
     GeomTopoTool * gTool) :
-  _markTag(0), _gradientTag(0), _tangentsTag(0), _edgeCtrlTag(0),
-  _facetCtrlTag(0), _facetEdgeCtrlTag(0), _planeTag(0),
-  _mb(mb), _set(surface_set), _my_geomTopoTool(gTool), _obb_root(0), _evaluationsCounter(0)
+  _mb(mb), _set(surface_set), _my_geomTopoTool(gTool), _evaluationsCounter(0)
 {
   //_smooth_face = NULL;
   //_mbOut->create_meshset(MESHSET_SET, _oSet); //will contain the
@@ -69,7 +69,7 @@ double SmoothFace::area()
   //assert(_smooth_face);
   //double area1 = _smooth_face->area();
   double totArea = 0.;
-  for (Range::iterator it = _triangles.begin(); it != _triangles.end(); ++it)
+  for (Range::iterator it = _triangles.begin(); it != _triangles.end(); it++)
   {
     EntityHandle tria = *it;
     const EntityHandle * conn3;
@@ -164,7 +164,7 @@ ErrorCode SmoothFace::compute_control_points_on_edges(double min_dot,
   _markTag = markTag;
 
   // now, compute control points for all edges that are not marked already (they are no on the boundary!)
-  for (Range::iterator it = _edges.begin(); it != _edges.end(); ++it)
+  for (Range::iterator it = _edges.begin(); it != _edges.end(); it++)
   {
     EntityHandle edg = *it;
     // is the edge marked? already computed
@@ -212,21 +212,19 @@ int SmoothFace::init_gradient()
   // some nodes have multiple normals, if they are at the feature edges
   unsigned long setId = _mb->id_from_handle(_set);
   char name[50] = { 0 };
-  sprintf(name, "GRADIENT%lu", setId);// name should be something like GRADIENT29, where 29 is the set ID of the face
+  sprintf(name, "GRADIENT%ld", setId);// name should be something like GRADIENT29, where 29 is the set ID of the face
   rval = _mb->tag_get_handle(name, 3, MB_TYPE_DOUBLE, _gradientTag,
       MB_TAG_DENSE|MB_TAG_CREAT, &defNormal);
-  assert(rval == MB_SUCCESS);
 
   double defPlane[4] = { 0., 0., 1., 0. };
   // also define a plane tag ; this will be for each triangle
   char namePlaneTag[50] = { 0 };
-  sprintf(namePlaneTag, "PLANE%lu", setId);
+  sprintf(namePlaneTag, "PLANE%ld", setId);
   rval = _mb->tag_get_handle("PLANE", 4, MB_TYPE_DOUBLE, _planeTag,
       MB_TAG_DENSE|MB_TAG_CREAT, &defPlane);
-  assert(rval == MB_SUCCESS);
   // the fourth double is for weight, accumulated at each vertex so far
   // maybe not needed in the end
-  for (Range::iterator it = _triangles.begin(); it != _triangles.end(); ++it)
+  for (Range::iterator it = _triangles.begin(); it != _triangles.end(); it++)
   {
     EntityHandle tria = *it;
     const EntityHandle * conn3;
@@ -298,7 +296,7 @@ int SmoothFace::init_gradient()
   {
     std::cout << " normals at  " << numNodes << " nodes" << std::endl;
     int i = 0;
-    for (Range::iterator it = _nodes.begin(); it != _nodes.end(); ++it, i++)
+    for (Range::iterator it = _nodes.begin(); it != _nodes.end(); it++, i++)
     {
       EntityHandle node = *it;
       std::cout << " Node id " << _mb->id_from_handle(node) << "  "
@@ -328,8 +326,8 @@ ErrorCode SmoothFace::init_bezier_edge(EntityHandle edge, double )
   // we may complicate them afterwards
 
   CartVect ctrl_pts[3];
-  int nnodes = 0;
-  const EntityHandle * conn2 = NULL;
+  int nnodes;
+  const EntityHandle * conn2;
   ErrorCode rval = _mb->get_connectivity(edge, conn2, nnodes);
   assert(rval == MB_SUCCESS);
   if (MB_SUCCESS != rval) return rval;
@@ -389,7 +387,7 @@ ErrorCode SmoothFace::compute_tangents_for_each_edge()
     return MB_FAILURE;
 
   // now, compute Tangents for all edges that are not on boundary, so they are not marked
-  for (Range::iterator it = _edges.begin(); it != _edges.end(); ++it)
+  for (Range::iterator it = _edges.begin(); it != _edges.end(); it++)
   {
     EntityHandle edg = *it;
 
@@ -438,10 +436,10 @@ ErrorCode SmoothFace::init_edge_control_points(CartVect &P0, CartVect &P3,
       / 18.0e0));
   Vi[2] = Vi[3] - (di * (((6.0e0 * T3) + (row * N0) - ((2.0e0 * omega) * N3))
       / 18.0e0));
-  //CartVect Wi[3];
-  //Wi[0] = Vi[1] - Vi[0];
-  //Wi[1] = Vi[2] - Vi[1];
-  //Wi[2] = Vi[3] - Vi[2];
+  CartVect Wi[3];
+  Wi[0] = Vi[1] - Vi[0];
+  Wi[1] = Vi[2] - Vi[1];
+  Wi[2] = Vi[3] - Vi[2];
 
   Pi[0] = 0.25 * Vi[0] + 0.75 * Vi[1];
   Pi[1] = 0.50 * Vi[1] + 0.50 * Vi[2];
@@ -468,8 +466,8 @@ ErrorCode SmoothFace::find_edges_orientations(EntityHandle edges[3],
 
     // find the edge connected to both vertices, and then see its orientation
     assert(adjacencies.size() == 1);
-    const EntityHandle * conn2 = NULL;
-    int nnodes = 0;
+    const EntityHandle * conn2;
+    int nnodes;
     rval = _mb->get_connectivity(adjacencies[0], conn2, nnodes);
     assert(rval == MB_SUCCESS);
     assert(2 == nnodes);
@@ -493,7 +491,7 @@ ErrorCode SmoothFace::compute_internal_control_points_on_facets(double ,
   _facetCtrlTag = facetCtrlTag;
   _facetEdgeCtrlTag = facetEdgeCtrlTag;
 
-  for (Range::iterator it = _triangles.begin(); it != _triangles.end(); ++it)
+  for (Range::iterator it = _triangles.begin(); it != _triangles.end(); it++)
   {
     EntityHandle tri = *it;
     // first get connectivity, and the edges
@@ -596,7 +594,7 @@ void SmoothFace::adjust_bounding_box(CartVect & vect)
 ////Function Name: init_facet_control_points
 ////
 ////Member Type:  PRIVATE
-////Description:  compute the control points for a facet
+////Descriptoin:  compute the control points for a facet
 ////===============================================================
 ErrorCode SmoothFace::init_facet_control_points(CartVect N[6], // vertex normals (per edge)
     CartVect P[3][5], // edge control points
@@ -648,20 +646,20 @@ void SmoothFace::DumpModelControlPoints()
   // output a Point3D file (special visit format)
   unsigned long setId = _mb->id_from_handle(_set);
   char name[50] = { 0 };
-  sprintf(name, "%lucontrol.Point3D", setId);// name should be something 2control.Point3D
+  sprintf(name, "%ldcontrol.Point3D", setId);// name should be something 2control.Point3D
   std::ofstream point3DFile;
   point3DFile.open(name);//("control.Point3D");
   point3DFile << "# x y z \n";
   std::ofstream point3DEdgeFile;
-  sprintf(name, "%lucontrolEdge.Point3D", setId);//
+  sprintf(name, "%ldcontrolEdge.Point3D", setId);//
   point3DEdgeFile.open(name);//("controlEdge.Point3D");
   point3DEdgeFile << "# x y z \n";
   std::ofstream smoothPoints;
-  sprintf(name, "%lusmooth.Point3D", setId);//
+  sprintf(name, "%ldsmooth.Point3D", setId);//
   smoothPoints.open(name);//("smooth.Point3D");
   smoothPoints << "# x y z \n";
   CartVect controlPoints[3]; // edge control points
-  for (Range::iterator it = _edges.begin(); it != _edges.end(); ++it)
+  for (Range::iterator it = _edges.begin(); it != _edges.end(); it++)
   {
     EntityHandle edge = *it;
 
@@ -675,7 +673,7 @@ void SmoothFace::DumpModelControlPoints()
   }
   CartVect controlTriPoints[6]; // triangle control points
   CartVect P_facet[3];// result in 3 "mid" control points
-  for (Range::iterator it2 = _triangles.begin(); it2 != _triangles.end(); ++it2)
+  for (Range::iterator it2 = _triangles.begin(); it2 != _triangles.end(); it2++)
   {
     EntityHandle tri = *it2;
 
@@ -745,8 +743,8 @@ ErrorCode SmoothFace::evaluate_smooth_edge(EntityHandle eh, double &tt,
   if (tt >= 1.0)
     tt = 1.0;
 
-  int nnodes = 0;
-  const EntityHandle * conn2 = NULL;
+  int nnodes;
+  const EntityHandle * conn2;
   ErrorCode rval = _mb->get_connectivity(eh, conn2, nnodes);
   assert(rval == MB_SUCCESS);
   if (MB_SUCCESS != rval) return rval;
@@ -787,8 +785,8 @@ ErrorCode SmoothFace::eval_bezier_patch(EntityHandle tri, CartVect &areacoord,
   ErrorCode rval = _mb->tag_get_data(_facetCtrlTag, &tri, 1, &gctrl_pts[0]);// get all 6 control points
   assert(MB_SUCCESS == rval);
   if (MB_SUCCESS != rval) return rval;
-  const EntityHandle * conn3 = NULL;
-  int nnodes = 0;
+  const EntityHandle * conn3;
+  int nnodes;
   rval = _mb->get_connectivity(tri, conn3, nnodes);
   assert(MB_SUCCESS == rval);
 
@@ -959,8 +957,8 @@ void SmoothFace::facet_area_coordinate(EntityHandle facet,
     CartVect & pt_on_plane, CartVect & areacoord)
 {
 
-  const EntityHandle * conn3 = NULL;
-  int nnodes = 0;
+  const EntityHandle * conn3;
+  int nnodes;
   ErrorCode rval = _mb->get_connectivity(facet, conn3, nnodes);
   assert(MB_SUCCESS == rval);
   if (rval) {} // empty statement to prevent compiler warning
@@ -1119,7 +1117,6 @@ ErrorCode SmoothFace::project_to_facets_main(CartVect &this_point, bool trim,
   // we will start with a list of facets anyway, the best among them wins
   ErrorCode rval = _my_geomTopoTool->obb_tree()->closest_to_location(
       (double*) &this_point, _obb_root, tolerance, facets_out);
-  if (MB_SUCCESS != rval) return rval;
 
   int interpOrder = 4;
   double compareTol = 1.e-5;
@@ -1135,8 +1132,7 @@ ErrorCode SmoothFace::project_to_facets(std::vector<EntityHandle> & facet_list,
     CartVect *closest_point_ptr, CartVect * normal_ptr)
 {
 
-  bool outside_facet = false;
-  bool best_outside_facet = true;
+  bool outside_facet, best_outside_facet = true;
   double mindist = 1.e20;
   CartVect close_point, best_point(mindist, mindist, mindist), best_areacoord;
   EntityHandle best_facet = 0L;// no best facet found yet
@@ -1222,7 +1218,7 @@ ErrorCode SmoothFace::project_to_facets(std::vector<EntityHandle> & facet_list,
 //Function Name: project_to_patch
 //
 //Member Type:  PUBLIC
-//Description:  Project a point to a bezier patch. Pass in the areacoord
+//Descriptoin:  Project a point to a bezier patch. Pass in the areacoord
 //              of the point projected to the linear facet.  Function
 //              assumes that the point is contained within the patch -
 //              if not, it will project to one of its edges.
@@ -1580,8 +1576,10 @@ ErrorCode SmoothFace::project_to_facet(EntityHandle facet, CartVect &pt,
     CartVect &areacoord, CartVect &close_point, bool &outside_facet,
     double compare_tol)
 {
-  const EntityHandle * conn3 = NULL;
-  int nnodes = 0;
+
+  ErrorCode stat = MB_SUCCESS;
+  const EntityHandle * conn3;
+  int nnodes;
   _mb->get_connectivity(facet, conn3, nnodes);
   //
   //double coords[9]; // store the coordinates for the nodes
@@ -1590,7 +1588,7 @@ ErrorCode SmoothFace::project_to_facet(EntityHandle facet, CartVect &pt,
   _mb->get_coords(conn3, 3, (double*) &p[0]);
 
   int edge_id = -1;
-  ErrorCode stat = project_to_patch(facet, areacoord, pt, close_point, NULL,
+  stat = project_to_patch(facet, areacoord, pt, close_point, NULL,
       outside_facet, compare_tol, edge_id);
   /* }
    break;
@@ -1616,8 +1614,8 @@ bool SmoothFace::is_at_vertex(EntityHandle facet, // (IN) facet we are evaluatin
   CartVect vert_loc;
   const double actol = 0.1;
   // get coordinates get_coords
-  const EntityHandle * conn3 = NULL;
-  int nnodes = 0;
+  const EntityHandle * conn3;
+  int nnodes;
   _mb->get_connectivity(facet, conn3, nnodes);
   //
   //double coords[9]; // store the coordinates for the nodes
@@ -1751,8 +1749,8 @@ ErrorCode SmoothFace::eval_bezier_patch_normal(EntityHandle facet,
   if (MB_SUCCESS != rval) return rval;
   // _gradientTag
   // get normals at points
-  const EntityHandle * conn3 = NULL;
-  int nnodes = 0;
+  const EntityHandle * conn3;
+  int nnodes;
   rval = _mb->get_connectivity(facet, conn3, nnodes);
   if (MB_SUCCESS != rval) return rval;
 
@@ -1873,54 +1871,54 @@ ErrorCode SmoothFace::eval_bezier_patch_normal(EntityHandle facet,
   normal = CartVect(0.0e0, 0.0e0, 0.0e0);
 
   //i=3; j=0; k=0;
-  //double Bsum = 0.0;
+  double Bsum = 0.0;
   double B = cube(areacoord[0]);
-  //Bsum += B;
+  Bsum += B;
   normal += B * Nijk[0];
 
   //i=2; j=1; k=0;
   B = 3.0 * sqr(areacoord[0]) * areacoord[1];
-  //Bsum += B;
+  Bsum += B;
   normal += B * Nijk[1];
 
   //i=1; j=2; k=0;
   B = 3.0 * areacoord[0] * sqr(areacoord[1]);
-  //Bsum += B;
+  Bsum += B;
   normal += B * Nijk[2];
 
   //i=0; j=3; k=0;
   B = cube(areacoord[1]);
-  //Bsum += B;
+  Bsum += B;
   normal += B * Nijk[3];
 
   //i=2; j=0; k=1;
   B = 3.0 * sqr(areacoord[0]) * areacoord[2];
-  //Bsum += B;
+  Bsum += B;
   normal += B * Nijk[4];
 
   //i=1; j=1; k=1;
   B = 6.0 * areacoord[0] * areacoord[1] * areacoord[2];
-  //Bsum += B;
+  Bsum += B;
   normal += B * Nijk[5];
 
   //i=0; j=2; k=1;
   B = 3.0 * sqr(areacoord[1]) * areacoord[2];
-  //Bsum += B;
+  Bsum += B;
   normal += B * Nijk[6];
 
   //i=1; j=0; k=2;
   B = 3.0 * areacoord[0] * sqr(areacoord[2]);
-  //Bsum += B;
+  Bsum += B;
   normal += B * Nijk[7];
 
   //i=0; j=1; k=2;
   B = 3.0 * areacoord[1] * sqr(areacoord[2]);
-  //Bsum += B;
+  Bsum += B;
   normal += B * Nijk[8];
 
   //i=0; j=0; k=3;
   B = cube(areacoord[2]);
-  //Bsum += B;
+  Bsum += B;
   normal += B * Nijk[9];
 
   //assert(fabs(Bsum - 1.0) < 1e-9);

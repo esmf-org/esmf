@@ -3,7 +3,7 @@
  * storing and accessing finite element mesh data.
  * 
  * Copyright 2004 Sandia Corporation.  Under the terms of Contract
- * DE-AC04-94AL85000 with Sandia Corporation, the U.S. Government
+ * DE-AC04-94AL85000 with Sandia Coroporation, the U.S. Government
  * retains certain rights in this software.
  * 
  * This library is free software; you can redistribute it and/or
@@ -638,10 +638,10 @@ Range intersect(const Range &range1, const Range &range2)
     
     if (r_it[0]->second < r_it[1]->first)
         // 1st subrange completely below 2nd subrange
-      ++r_it[0];
+      r_it[0]++;
     else if (r_it[1]->second < r_it[0]->first) 
         // 2nd subrange completely below 1st subrange
-      ++r_it[1];
+      r_it[1]++;
     
     else {
         // else ranges overlap; first find greater start and lesser end
@@ -652,8 +652,8 @@ Range intersect(const Range &range1, const Range &range2)
       hint = lhs.insert(hint, low_it, high_it);
       
         // now find bounds of this insertion and increment corresponding iterator
-      if (high_it == r_it[0]->second) ++r_it[0];
-      if (high_it == r_it[1]->second) ++r_it[1];
+      if (high_it == r_it[0]->second) r_it[0]++;
+      if (high_it == r_it[1]->second) r_it[1]++;
     }
   }
   
@@ -667,7 +667,7 @@ Range subtract(const Range &range1, const Range &range2)
   if (braindead) {
       // brain-dead implementation right now
     Range res( range1 );
-    for (Range::const_iterator rit = range2.begin(); rit != range2.end(); ++rit)
+    for (Range::const_iterator rit = range2.begin(); rit != range2.end(); rit++)
       res.erase(*rit);
 
     return res;
@@ -684,20 +684,20 @@ Range subtract(const Range &range1, const Range &range2)
         // case a: pair wholly within subtracted pair
       if (r_it0->first >= r_it1->first && r_it0->second <= r_it1->second) {
         Range::PairNode *rtmp = r_it0.node();
-        ++r_it0;
+        r_it0++;
         lhs.delete_pair_node(rtmp);
       }
         // case b: pair overlaps upper part of subtracted pair
       else if (r_it0->first <= r_it1->second &&
                r_it0->first >= r_it1->first) {
         r_it0->first = r_it1->second + 1;
-        ++r_it1;
+        r_it1++;
       }
         // case c: pair overlaps lower part of subtracted pair
       else if (r_it0->second >= r_it1->first &&
                r_it0->second <= r_it1->second) {
         r_it0->second = r_it1->first - 1;
-        ++r_it0;
+        r_it0++;
       }
         // case d: pair completely surrounds subtracted pair
       else if (r_it0->first < r_it1->first && 
@@ -706,12 +706,12 @@ Range subtract(const Range &range1, const Range &range2)
                                         r_it0->first, r_it1->first - 1);
         new_node->mPrev->mNext = new_node->mNext->mPrev = new_node;
         r_it0.node()->first = r_it1->second+1;
-        ++r_it1;
+        r_it1++;
       }
       else {
-        while (r_it0->second < r_it1->first && r_it0 != lhs.end()) ++r_it0;
+        while (r_it0->second < r_it1->first && r_it0 != lhs.end()) r_it0++;
         if (r_it0 == lhs.end()) break;
-        while (r_it1->second < r_it0->first && r_it1 != range2.end()) ++r_it1;
+        while (r_it1->second < r_it0->first && r_it1 != range2.end()) r_it1++;
       }
     }
     
@@ -726,7 +726,7 @@ Range &Range::operator-=(const Range &range2)
   if (braindead) {
       // brain-dead implementation right now
     Range res( *this );
-    for (Range::const_iterator rit = range2.begin(); rit != range2.end(); ++rit)
+    for (Range::const_iterator rit = range2.begin(); rit != range2.end(); rit++)
       res.erase(*rit);
 
     return *this;
@@ -741,20 +741,20 @@ Range &Range::operator-=(const Range &range2)
         // case a: pair wholly within subtracted pair
       if (r_it0->first >= r_it1->first && r_it0->second <= r_it1->second) {
         Range::PairNode *rtmp = r_it0.node();
-        ++r_it0;
+        r_it0++;
         this->delete_pair_node(rtmp);
       }
         // case b: pair overlaps upper part of subtracted pair
       else if (r_it0->first <= r_it1->second &&
                r_it0->first >= r_it1->first) {
         r_it0->first = r_it1->second + 1;
-        ++r_it1;
+        r_it1++;
       }
         // case c: pair overlaps lower part of subtracted pair
       else if (r_it0->second >= r_it1->first &&
                r_it0->second <= r_it1->second) {
         r_it0->second = r_it1->first - 1;
-        ++r_it0;
+        r_it0++;
       }
         // case d: pair completely surrounds subtracted pair
       else if (r_it0->first < r_it1->first && 
@@ -763,12 +763,12 @@ Range &Range::operator-=(const Range &range2)
                                         r_it0->first, r_it1->first - 1);
         new_node->mPrev->mNext = new_node->mNext->mPrev = new_node;
         r_it0.node()->first = r_it1->second+1;
-        ++r_it1;
+        r_it1++;
       }
       else {
-        while (r_it0->second < r_it1->first && r_it0 != this->end()) ++r_it0;
+        while (r_it0->second < r_it1->first && r_it0 != this->end()) r_it0++;
         if (r_it0 == this->end()) break;
-        while (r_it1->second < r_it0->first && r_it1 != range2.end()) ++r_it1;
+        while (r_it1->second < r_it0->first && r_it1 != range2.end()) r_it1++;
       }
     }
     return *this;
@@ -900,8 +900,8 @@ unsigned Range::num_of_type( EntityType type ) const
     if (start_type > type)
       break;
    
-    EntityID sid = start_type < type ? 1 : ID_FROM_HANDLE((*iter).first);
-    EntityID eid = end_type > type ? MB_END_ID : ID_FROM_HANDLE((*iter).second);
+    int sid = start_type < type ? 1 : ID_FROM_HANDLE((*iter).first);
+    int eid = end_type > type ? MB_END_ID : ID_FROM_HANDLE((*iter).second);
     count += eid - sid + 1;
   }
 

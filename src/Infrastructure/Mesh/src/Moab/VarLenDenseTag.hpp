@@ -316,7 +316,7 @@ public:
    *\param output_entities Results *appended* to this range
    *\param type     Optional entity type.  If specified, search is
    *                limited to entities of specified type.
-   *\param intersect Optional intersect list.  If specified,
+   *\param intersect Opotional intersect list.  If specified,
    *                search is restricted to entities in this list.
    */
   virtual
@@ -335,7 +335,7 @@ public:
    *\param output_count This is *incremented* for each detected entity.
    *\param type     Optional entity type.  If specified, search is
    *                limited to entities of specified type.
-   *\param intersect Optional intersect list.  If specified,
+   *\param intersect Opotional intersect list.  If specified,
    *                search is restricted to entities in this list.
    */
   virtual
@@ -354,7 +354,7 @@ public:
    *\param value_bytes Size of tag value in bytes.
    *\param type     Optional entity type.  If specified, search is
    *                limited to entities of specified type.
-   *\param intersect_entities Optional intersect list.  If specified,
+   *\param intersect_entities Opotional intersect list.  If specified,
    *                search is restricted to entities in this list.
    */
   virtual

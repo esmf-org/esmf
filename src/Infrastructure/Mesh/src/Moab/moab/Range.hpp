@@ -3,7 +3,7 @@
  * storing and accessing finite element mesh data.
  * 
  * Copyright 2004 Sandia Corporation.  Under the terms of Contract
- * DE-AC04-94AL85000 with Sandia Corporation, the U.S. Government
+ * DE-AC04-94AL85000 with Sandia Coroporation, the U.S. Government
  * retains certain rights in this software.
  * 
  * This library is free software; you can redistribute it and/or
@@ -28,7 +28,7 @@
 
    ******* A few points about Range: *******
  1.  Range is not the be all of generic containers.
- 2.  Range has its strengths and weaknesses as any other
+ 2.  Range has its strengths and weakneses as any other
      STL container has.
  3.  Strengths:
      a. For contiguous values, storage is extremely minimal.
@@ -848,7 +848,7 @@ inline int Range::index(EntityHandle handle) const
   Range::const_pair_iterator pit = const_pair_begin(); 
   while (handle > (*pit).second && pit != const_pair_end()) {
     i += (*pit).second - (*pit).first + 1;
-    ++pit;
+    pit++;
   }
   if (handle < (*pit).first || pit == const_pair_end()) return -1;
   
@@ -886,7 +886,7 @@ inline size_t Range::psize() const
   size_t i = 0;
   Range::const_pair_iterator pit;
   for (pit = const_pair_begin(), i = 0; 
-       pit != const_pair_end(); ++pit, i++);
+       pit != const_pair_end(); pit++, i++);
 
   return i;
 }

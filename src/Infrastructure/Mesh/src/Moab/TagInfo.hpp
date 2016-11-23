@@ -16,10 +16,8 @@ class TagInfo
 public:
 
   //! constructor
-  TagInfo() : mDefaultValue(NULL),
-              mMeshValue(NULL),
+  TagInfo() : mDefaultValue(0),
               mDefaultValueSize(0),
-              mMeshValueSize(0),
               mDataSize(0), 
               dataType(MB_TYPE_OPAQUE)
               {}
@@ -77,7 +75,7 @@ public:
   static int size_from_data_type( DataType t );
   
     // Check that all lengths are valid multiples of the type size.
-    // Returns true if all lengths are valid, false otherwise.
+    // Returns true if all lengths are valid, false othersize.
   bool check_valid_sizes( const int* sizes, int num_sizes ) const;
 
     /**\return MB_VARIABLE_LENGTH_DATA If variable_length() && lengths is NULL
@@ -350,7 +348,7 @@ public:
    *\param output_entities Results *appended* to this range
    *\param type     Optional entity type.  If specified, search is
    *                limited to entities of specified type.
-   *\param intersect Optional intersect list.  If specified,
+   *\param intersect Opotional intersect list.  If specified,
    *                search is restricted to entities in this list.
    */
   virtual
@@ -369,7 +367,7 @@ public:
    *\param output_count This is *incremented* for each detected entity.
    *\param type     Optional entity type.  If specified, search is
    *                limited to entities of specified type.
-   *\param intersect Optional intersect list.  If specified,
+   *\param intersect Opotional intersect list.  If specified,
    *                search is restricted to entities in this list.
    */
   virtual
@@ -388,7 +386,7 @@ public:
    *\param value_bytes Size of tag value in bytes.
    *\param type     Optional entity type.  If specified, search is
    *                limited to entities of specified type.
-   *\param intersect_entities Optional intersect list.  If specified,
+   *\param intersect_entities Opotional intersect list.  If specified,
    *                search is restricted to entities in this list.
    */
   virtual

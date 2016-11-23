@@ -85,7 +85,7 @@ class FileTokenizer
        * \return True if a newline was found before any non-space
        *         character.  False otherwise.
        */
-    bool get_newline( bool report_error = true );
+    bool get_newline( );
     
     
       /** \brief Parse a sequence of double values.
@@ -219,7 +219,10 @@ class FileTokenizer
   
       /** Pointer to standard C FILE struct */
     std::FILE* filePtr;
-       
+    
+      /** Pointer to MOAB ReadUtil Interface */
+    ReadUtilIface* readUtilPtr;
+    
       /** Input buffer */
     char buffer[512];
     

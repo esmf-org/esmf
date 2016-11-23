@@ -22,16 +22,9 @@
  * together to describe geometric topology, boundary condition, and inter-processor interface 
  * groupings in a mesh.
  *
- * MOAB's API is documented in the moab::Interface class.  Questions and comments should be sent to moab-dev
+ * MOAB's API is documented in the moab::Interface class.  The User's Guide is located in
+ * doc/MOABv4-UG.doc in MOAB's source tree.  Questions and comments should be sent to moab-dev 
  * _at_ mcs.anl.gov.
- *
- * \ref userguide "User's Guide"
- *
- * \ref developerguide "Developer's Guide"
- *
- * \ref metadata "I/O and Meta-Data Storage Conventions in MOAB"
- *
- * <a href="pages.html">Full List of Documents</a>
  */
 
 #ifndef MOAB_INTERFACE_HPP
@@ -40,11 +33,9 @@
 #define MOAB_API_VERSION 1.01
 #define MOAB_API_VERSION_STRING "1.01"
 
-#include "moab/MOABConfig.h"
 #include "moab/Forward.hpp"
 #include "moab/Range.hpp"
 #include "moab/Compiler.hpp"
-#include "moab/ErrorHandler.hpp"
 
 // include files
 #include <string>
@@ -64,9 +55,9 @@
 
 #define MBINTERFACE_IID_STR "f728830e-1dd1-11b2-9598-fb9f414f2465"
 
-#define MBINTERFACE_IID \
-  {0xf728830e, 0x1dd1, 0x11b2, \
-    { 0x95, 0x98, 0xfb, 0x9f, 0x41, 0x4f, 0x24, 0x65 }}
+{0xf728830e, 0x1dd1, 0x11b2, \
+  { 0x95, 0x98, 0xfb, 0x9f, 0x4
+#define MBINTERFACE_IID \1, 0x4f, 0x24, 0x65 }}
 
 #endif
 
@@ -88,7 +79,7 @@ static const MBuuid IDD_MBCore = MBuuid( 0x8956e0a, 0xc300, 0x4005,
 #if defined(XPCOM_MB)
 class NS_NO_VTABLE Interface : public nsISupports {
 #else
-class Interface : public UnknownInterface {
+class MB_DLL_EXPORT Interface : public UnknownInterface {
 #endif
 
 public:
@@ -511,14 +502,14 @@ public:
   virtual ErrorCode  get_connectivity(const EntityHandle *entity_handles, 
                                         const int num_handles,
                                         Range &connectivity, 
-                                        bool corners_only = false) const =0;
+                                        bool topological_connectivity = false) const =0;
 
     //! Gets the connectivity for elements
     /** Same as vector-based version except range is returned (unordered!)
     */
   virtual ErrorCode get_connectivity( const Range& entity_handles, 
                                         Range &connectivity, 
-                                        bool corners_only = false) const =0;
+                                        bool topological_connectivity = false) const =0;
  
     //! Gets the connectivity for a vector of elements
     /** Corner vertices or all vertices (including higher-order nodes, if any) are returned.
@@ -529,14 +520,14 @@ public:
         \param entity_handles Vector of element handles to get connectivity of.
         \param num_handles Number of entity handles in <em>entity_handles</em>
         \param connectivity Vector in which connectivity of <em>entity_handles</em> is returned.  
-        \param corners_only If true, returns only corner vertices, otherwise returns all of them (including any higher-order vertices)
+        \param topological_connectivity If true, higher order nodes are ignored. 
         \param offsets If non-NULL, offsets->[i] stores the index of the start of entity i's connectivity,
                 with the last value in offsets one beyond the last entry
     */
   virtual ErrorCode  get_connectivity(const EntityHandle *entity_handles, 
                                       const int num_handles,
                                       std::vector<EntityHandle> &connectivity, 
-                                      bool corners_only = false,
+                                      bool topological_connectivity = false,
                                       std::vector<int> *offsets = NULL) const =0;
  
     //! Gets a pointer to constant connectivity data of <em>entity_handle</em> 
@@ -563,7 +554,8 @@ public:
         \param entity_handle EntityHandle to get connectivity of.
         \param connectivity Array in which connectivity of <em>entity_handle</em> is returned.
         \param num_nodes Number of MeshVertices in array <em>connectivity</em>. 
-        \param corners_only If true, returns only corner vertices, otherwise returns all of them (including any higher-order vertices)
+        \param topological_connectivity If true, num_nodes will be set to number of corner vertices
+        for that element type.
         \param storage Some elements (e.g. structured mesh) may not have an
                        explicit connectivity list.  This function will normally
                        return MB_NOT_IMPLEMENTED for such elements.  However,
@@ -575,7 +567,7 @@ public:
   virtual ErrorCode  get_connectivity(const EntityHandle entity_handle, 
                                         const EntityHandle *&connectivity, 
                                         int &num_nodes, 
-                                        bool corners_only = false,
+                                        bool topological_connectivity = false,
                                         std::vector<EntityHandle>* storage = 0
                                         ) const =0;
 
@@ -621,7 +613,6 @@ public:
             get_adjacencies( from_entities, 2, 1, false, adjacencies, Interface::INTERSECT); 
             \endcode 
     */
-
   virtual ErrorCode get_adjacencies(const EntityHandle *from_entities,
                                       const int num_entities,
                                       const int to_dimension,
@@ -1046,16 +1037,16 @@ public:
    */
   virtual void estimated_memory_use( const EntityHandle* ent_array = 0,
                              unsigned long  num_ents = 0,
-                             unsigned long long* total_storage = 0,
-                             unsigned long long* total_amortized_storage = 0,
-                             unsigned long long* entity_storage = 0,
-                             unsigned long long* amortized_entity_storage = 0,
-                             unsigned long long* adjacency_storage = 0,
-                             unsigned long long* amortized_adjacency_storage = 0,
+                             unsigned long* total_storage = 0,
+                             unsigned long* total_amortized_storage = 0,
+                             unsigned long* entity_storage = 0,
+                             unsigned long* amortized_entity_storage = 0,
+                             unsigned long* adjacency_storage = 0,
+                             unsigned long* amortized_adjacency_storage = 0,
                              const Tag*   tag_array = 0,
                              unsigned       num_tags = 0,
-                             unsigned long long* tag_storage = 0,
-                             unsigned long long* amortized_tag_storage = 0 ) = 0;
+                             unsigned long* tag_storage = 0,
+                             unsigned long* amortized_tag_storage = 0 ) = 0;
 
   /**\brief Calculate amount of memory used to store MOAB data
    *
@@ -1085,16 +1076,16 @@ public:
    *                   for all tags.
    */
   virtual void estimated_memory_use( const Range& ents,
-                             unsigned long long* total_storage = 0,
-                             unsigned long long* total_amortized_storage = 0,
-                             unsigned long long* entity_storage = 0,
-                             unsigned long long* amortized_entity_storage = 0,
-                             unsigned long long* adjacency_storage = 0,
-                             unsigned long long* amortized_adjacency_storage = 0,
+                             unsigned long* total_storage = 0,
+                             unsigned long* total_amortized_storage = 0,
+                             unsigned long* entity_storage = 0,
+                             unsigned long* amortized_entity_storage = 0,
+                             unsigned long* adjacency_storage = 0,
+                             unsigned long* amortized_adjacency_storage = 0,
                              const Tag*   tag_array = 0,
                              unsigned       num_tags = 0,
-                             unsigned long long* tag_storage = 0,
-                             unsigned long long* amortized_tag_storage = 0 ) = 0;
+                             unsigned long* tag_storage = 0,
+                             unsigned long* amortized_tag_storage = 0 ) = 0;
     /**@}*/
 
     /** \name Higher-order elements */
@@ -1219,13 +1210,12 @@ public:
      *\param tag_handle    Output: the resulting tag handle.
      *\param flags         Bitwise OR of values from TagType
      *\param default_value Optional default value for tag.
-     *\param created       Optional returned boolean indicating that the tag
+     *\param created       Optional returned boolean indicating that the
      *                     was created.
-     *\return - \c MB_ALREADY_ALLOCATED     if tag exists and \c MB_TAG_EXCL is specified, or default values
-     *                                      do not match (and \c MB_TAG_ANY or \c MB_TAG_DFTOK not specified).
+     *\return - \c MB_TAG_ALREADY_ALLOCATED if tag exists and \c MB_TAG_EXCL is specified
      *        - \c MB_TAG_NOT_FOUND         if tag does not exist and \c MB_TAG_CREAT is not specified
-     *        - \c MB_INVALID_SIZE          if tag value size is not a multiple of the size of the data type
-     *                                      (and \c MB_TAG_ANY not specified).
+     *        - \c MB_INVALID_SIZE          if tag value size is not a multiple of 
+     *                                      the size of the data type (and \c mb_TAG_COUNT not specified).
      *        - \c MB_TYPE_OUT_OF_RANGE     invalid or inconsistent parameter
      *        - \c MB_VARIABLE_DATA_LENGTH  if \c MB_TAG_VARLEN and \c default_value is non-null and
      *                                      \c default_value_size is not specified.
@@ -1237,7 +1227,7 @@ public:
      *
      * Examples:
      *
-     * Retrieve a handle for an existing tag, returning a non-success error
+     * Retreive a handle for an existing tag, returning a non-success error
      * code if the tag does not exist or does not store 1 integer value per
      * entity:
      *\code
@@ -1985,43 +1975,12 @@ public:
                                         SetIterator *&set_iter) = 0;
     /**@}*/
 
-
-  // ************************  Interface options controllable by user  *************** 
-
-  /** \name Sequence Option controllers */
-
-    /**@{*/
-
-    /** \brief Interface to control memory allocation for sequences
-     * Provide a factor that controls the size of the sequence that gets allocated.
-     * This is typically useful in the parallel setting when a-priori, the number of ghost entities
-     * and the memory required for them within the same sequence as the owned entities are unknown.
-     * The default factor is 1.0 but this can be appropriately updated at runtime so that we do not
-     * have broken sequences.
-     */
-    virtual double get_sequence_multiplier() const = 0;
-
-    /** \brief Interface to control memory allocation for sequences
-     * Provide a factor that controls the size of the sequence that gets allocated.
-     * This is typically useful in the parallel setting when a-priori, the number of ghost entities
-     * and the memory required for them within the same sequence as the owned entities are unknown.
-     * The default factor is 1.0 but this can be appropriately updated at runtime so that we do not
-     * have broken sequences.
-     *
-     * \param meshset User specified multiplier (should be greater than 1.0)
-     */
-    virtual void set_sequence_multiplier(double factor) = 0;
-
-
-  /**@}*/
-
-
 };
 
 //! predicate for STL algorithms.  Returns true if the entity handle is
 //! of the specified type.  For example, to remove all the tris out of a list
 //! of 2D entities retrieved using get_adjacencies you could do
-//! std::remove_if(list.begin(), list.end(), type_equals(gMB, MeshTri));
+//! \example std::remove_if(list.begin(), list.end(), type_equals(gMB, MeshTri));
 class type_equals : public std::unary_function<EntityHandle, bool>
 {
 public:
@@ -2044,7 +2003,7 @@ public:
 //! predicate for STL algorithms.  Returns true if the entity handle is not
 //! of the specified type.  For example, to remove all but the tris out of a list
 //! of 2D entities retrieved using get_adjacencies you could do
-//! std::remove_if(list.begin(), list.end(), type_not_equals(gMB, MeshTri));
+//! \example std::remove_if(list.begin(), list.end(), type_not_equals(gMB, MeshTri));
 class type_not_equals : public std::unary_function<EntityHandle, bool>
 {
 public:

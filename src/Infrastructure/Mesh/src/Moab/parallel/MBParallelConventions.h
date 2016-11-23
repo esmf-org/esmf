@@ -17,7 +17,7 @@
 /** \brief Tag on a meshset representing a parallel partition.
  *
  * When the mesh is partitioned for use in a parallel environment,
- * the each CPUs partition of the mesh is stored in a meshset with
+ * the each CPUs partiiton of the mesh is stored in a meshset with
  * this tag.  The value of the tag is an integer "part identifier".
  */
 #define PARALLEL_PARTITION_TAG_NAME "PARALLEL_PARTITION"
@@ -29,13 +29,13 @@
  * This tag labels an entity set for which the child sets are part(ition)s
  * that together are a single partitioning of the mesh.  I.e. There should
  * be no mesh entity that is contained in more than one child part(ition)
- * set, and typically every mesh entity of the dimension used to partition
+ * set, and typically every mesh entity of the dimenion used to partition
  * the mesh is contained in exactly one of the child sets.
  *
  * The data for this tag is a single integer value.  The value of
  * the tag is undefined.
  */
-#define PARALLEL_PARTITIONING_TAG_NAME "PARALLEL_MESH_PARTITIONING"
+#define PARALLEL_PARITIONING_TAG_NAME "PARALLEL_MESH_PARITIONING"
 
 /** \brief Tag storing which other processor a given entity is shared with
  *

@@ -3,7 +3,7 @@
  * storing and accessing finite element mesh data.
  * 
  * Copyright 2004 Sandia Corporation.  Under the terms of Contract
- * DE-AC04-94AL85000 with Sandia Corporation, the U.S. Government
+ * DE-AC04-94AL85000 with Sandia Coroporation, the U.S. Government
  * retains certain rights in this software.
  * 
  * This library is free software; you can redistribute it and/or
@@ -26,6 +26,7 @@ namespace moab {
 class ReaderIface;
 class WriterIface;
 class Core;
+class Error;
 
 /**
  *\brief Maintain list of readers and writers.
@@ -41,7 +42,7 @@ class ReaderWriterSet
     typedef ReaderIface* (*reader_factory_t)( Interface* );
     typedef WriterIface* (*writer_factory_t)( Interface* );
   
-    ReaderWriterSet( Core* mdb );
+    ReaderWriterSet( Core* mdb, Error* handler );
   
     ~ReaderWriterSet();
     
@@ -158,6 +159,7 @@ class ReaderWriterSet
   private:
   
     Core* mbCore;
+    Error* mbError;
   
     std::list<Handler> handlerList;
 };

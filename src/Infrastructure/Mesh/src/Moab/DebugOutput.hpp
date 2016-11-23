@@ -8,7 +8,6 @@
 #include <string>
 
 #include "moab/Compiler.hpp"
-#include "moab/CpuTimer.hpp"
 
 namespace moab {
 
@@ -201,7 +200,7 @@ private:
   DebugOutputStream *outputImpl;
   int mpiRank;
   unsigned verbosityLimit;
-  CpuTimer cpuTi;
+  double initTime;
 
   void tprint();
 

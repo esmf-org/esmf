@@ -90,8 +90,6 @@ private:
   WriteUtilIface* writeTool;
  
   bool mStrict; // If true, do not write data that cannot fit in strict VTK file format.
-  int freeNodes;
-  bool createOneNodeCells;
   
 };
 

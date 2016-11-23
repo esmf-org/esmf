@@ -20,9 +20,6 @@ class BitTag : public TagInfo
           int size,
           const void* default_value )
     : TagInfo( name, size, MB_TYPE_BIT, default_value, default_value ? 1 : 0 )
-    , requestedBitsPerEntity(0)
-    , storedBitsPerEntity(0)
-    , pageShift(0)
     {}
   
   public: 
@@ -308,7 +305,7 @@ class BitTag : public TagInfo
    *\param output_entities Results *appended* to this range
    *\param type     Optional entity type.  If specified, search is
    *                limited to entities of specified type.
-   *\param intersect Optional intersect list.  If specified,
+   *\param intersect Opotional intersect list.  If specified,
    *                search is restricted to entities in this list.
    */
   virtual
@@ -327,7 +324,7 @@ class BitTag : public TagInfo
    *\param output_count This is *incremented* for each detected entity.
    *\param type     Optional entity type.  If specified, search is
    *                limited to entities of specified type.
-   *\param intersect Optional intersect list.  If specified,
+   *\param intersect Opotional intersect list.  If specified,
    *                search is restricted to entities in this list.
    */
   virtual
@@ -346,7 +343,7 @@ class BitTag : public TagInfo
    *\param value_bytes Size of tag value in bytes.
    *\param type     Optional entity type.  If specified, search is
    *                limited to entities of specified type.
-   *\param intersect_entities Optional intersect list.  If specified,
+   *\param intersect_entities Opotional intersect list.  If specified,
    *                search is restricted to entities in this list.
    */
   virtual

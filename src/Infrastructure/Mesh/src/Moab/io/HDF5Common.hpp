@@ -1,5 +1,4 @@
-#include "moab/MOABConfig.h"
-#ifdef MOAB_HAVE_MPI
+#ifdef USE_MPI
 #  include "moab_mpi.h"
 #endif
 #include <H5Epublic.h>
