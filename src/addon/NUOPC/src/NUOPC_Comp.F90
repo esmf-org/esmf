@@ -1098,6 +1098,11 @@ module NUOPC_Comp
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME)) return  ! bail out
     call NUOPC_CompAttributeSet(comp, &
+      name="CompLabel", value="_uninitialized", &
+      rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME)) return  ! bail out
+    call NUOPC_CompAttributeSet(comp, &
       name="NestingGeneration", value=0, &        ! default to parent level
       rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &

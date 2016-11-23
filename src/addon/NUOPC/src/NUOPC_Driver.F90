@@ -12,6 +12,8 @@
 #define FILENAME "src/addon/NUOPC/src/NUOPC_Driver.F90"
 !==============================================================================
 
+#define DEBUG_off
+
 module NUOPC_Driver
 
   !-----------------------------------------------------------------------------
@@ -21,6 +23,7 @@ module NUOPC_Driver
   use ESMF
   use NUOPC
   use NUOPC_RunSequenceDef
+  use NUOPC_Connector, only: cplSS => SetServices
   
   implicit none
   
@@ -329,7 +332,7 @@ module NUOPC_Driver
     logical                   :: existflag
     integer                   :: rootPet, rootVas
     type(ESMF_VM)             :: vm
-    character(ESMF_MAXSTR)    :: name
+    character(ESMF_MAXSTR)    :: name, verbosityString
     character(len=160)        :: namespace  ! long engough for component label
     type(ComponentMapEntry)   :: cmEntry
     type(ESMF_GridComp), pointer :: compList(:)
@@ -346,6 +349,12 @@ module NUOPC_Driver
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
+    ! determine verbosity
+    call NUOPC_CompAttributeGet(gcomp, name="Verbosity", value=verbosityString,&
+      rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+
     ! allocate memory for the internal state and set it in the Component
     allocate(is%wrap, stat=stat)
     if (ESMF_LogFoundAllocError(statusToCheck=stat, &
@@ -516,19 +525,22 @@ module NUOPC_Driver
         ! for now put a component alias into the legacy data structure until all
         ! dependencies have been removed
         if (i==0) then
-          ! driver itself: for now use the name as the compLabel
-          call ESMF_GridCompGet(gcomp, name=srcCompLabel, rc=rc)
+          ! driver self
+          call NUOPC_CompAttributeGet(gcomp, name="CompLabel", &
+            value=srcCompLabel, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
         else
+          ! actual child component
           call NUOPC_CompAttributeGet(compList(i), name="CompLabel", &
             value=srcCompLabel, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
         endif
         if (j==0) then
-          ! driver itself: for now use the name as the compLabel
-          call ESMF_GridCompGet(gcomp, name=dstCompLabel, rc=rc)
+          ! driver self
+          call NUOPC_CompAttributeGet(gcomp, name="CompLabel", &
+            value=dstCompLabel, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
         else
@@ -544,6 +556,35 @@ module NUOPC_Driver
           comp=connector, petList=petList, relaxedflag=.true., rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+        
+        ! potentially the connector must be created here
+        if (.not.NUOPC_CompAreServicesSet(connector).and.(i==0.or.j==0)) then
+          ! the connector was not added by the user level code SetModelServices
+          ! and this involves the driver itself -> maybe automatic connector add
+          if (.not.(i==0.and.j==0)) then
+            ! not a driver-to-driver self connection
+            if (.not.(trim(srcCompLabel)=="_uninitialized").and. &
+              .not.(trim(dstCompLabel)=="_uninitialized")) then
+              ! the driver is a child of a parent driver
+              ! -> automatic connector add
+              call NUOPC_DriverAddComp(gcomp, &
+                srcCompLabel=srcCompLabel, dstCompLabel=dstCompLabel, &
+                compSetServicesRoutine=cplSS, rc=rc)
+              if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail
+              ! retrieve the component with petList
+              call NUOPC_DriverGetComp(gcomp, srcCompLabel, dstCompLabel, &
+                comp=connector, petList=petList, relaxedflag=.true., rc=rc)
+              if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail
+              ! automatically created components inherit verbosity setting
+              call NUOPC_CompAttributeSet(connector, name="Verbosity", &
+                value=verbosityString, rc=rc)
+              if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail
+            endif
+          endif
+        endif
         
         is%wrap%connectorComp(i,j) = connector ! set the alias
         is%wrap%connectorPetLists(i,j)%petList => petList
@@ -586,7 +627,7 @@ module NUOPC_Driver
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     enddo
-    ! ... 2nd block: connectors all of model components -> driver
+    ! ... 3rd block: connectors all of model components -> driver
     do i=1, is%wrap%modelCount
       j=0
       call NUOPC_RunElementAdd(is%wrap%runSeq(1), i=i, j=j, phase=1, rc=rc)
@@ -3277,8 +3318,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! alternative exit condition if driver itself matches compLabel
     if (.not.foundFlag) then
-      !TODO: Fix this, I don't think that works yet because Driver never stores
-      ! CompLabel Attribute.
       call NUOPC_CompAttributeGet(driver, name="CompLabel", &
         value=driverCompLabel, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
