@@ -13013,9 +13013,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! centers, and add corners with padding and no connections. This way we
     ! can regrid center data bilinear and conservatively. We cannot handle
     ! regridding for data on corner stagger, plus we have degeneracies in that
-    ! case of exlusive elelements. However, we believe that the current 
+    ! case of exlusive elements. However, we believe that the current 
     ! application of this is for only data on center stagger.
-#define CENTER_CONNECTIONS
 
     conn=0
     if (conn==connectionCount) goto 20
@@ -13036,41 +13035,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     conn=conn+1
     call ESMF_DistGridConnectionSet(connection=connectionList(conn), &
-      tileIndexA=1, tileIndexB=3, orientationVector=(/2, -1/), &  ! 270 deg rot
-      positionVector=(/ &     ! pivot point (maxIndexPTile(1,1)+0.5, 
-                              !              maxIndexPTile(2,1)+0.5)
-#ifdef CENTER_CONNECTIONS
-      maxIndexPTile(1,1)-maxIndexPTile(2,1),      &
-      maxIndexPTile(1,1)+maxIndexPTile(2,1)+1/),  &
-#else
-      maxIndexPTile(1,1)-maxIndexPTile(2,1),      &
-      maxIndexPTile(1,1)+maxIndexPTile(2,1)+2/),  &
-#endif
-      rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
-    if (conn==connectionCount) goto 20
-
-    conn=conn+1
-    call ESMF_DistGridConnectionSet(connection=connectionList(conn), &
       tileIndexA=3, tileIndexB=4, positionVector=(/0, 0/), rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
-    if (conn==connectionCount) goto 20
-
-    conn=conn+1
-    call ESMF_DistGridConnectionSet(connection=connectionList(conn), &
-      tileIndexA=2, tileIndexB=4, orientationVector=(/-2, 1/), &  ! 90 deg rot
-      positionVector=(/ &     ! pivot point (maxIndexPTile(1,2)+0.5, 
-                              !              maxIndexPTile(2,2)+0.5)
-#ifdef CENTER_CONNECTIONS
-      maxIndexPTile(1,2)+maxIndexPTile(2,2)+1,  &
-      -maxIndexPTile(1,2)+maxIndexPTile(2,2)/), &
-#else
-      maxIndexPTile(1,2)+maxIndexPTile(2,2)+2,  &
-      -maxIndexPTile(1,2)+maxIndexPTile(2,2)/), &
-#endif
-      rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     if (conn==connectionCount) goto 20
@@ -13084,41 +13049,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     conn=conn+1
     call ESMF_DistGridConnectionSet(connection=connectionList(conn), &
-      tileIndexA=3, tileIndexB=5, orientationVector=(/2, -1/), &  ! 270 deg rot
-      positionVector=(/ &     ! pivot point (maxIndexPTile(1,3)+0.5, 
-                              !              maxIndexPTile(2,3)+0.5)
-#ifdef CENTER_CONNECTIONS
-      maxIndexPTile(1,3)-maxIndexPTile(2,3),      &
-      maxIndexPTile(1,3)+maxIndexPTile(2,3)+1/),  &
-#else
-      maxIndexPTile(1,3)-maxIndexPTile(2,3),      &
-      maxIndexPTile(1,3)+maxIndexPTile(2,3)+2/),  &
-#endif      
-      rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
-    if (conn==connectionCount) goto 20
-
-    conn=conn+1
-    call ESMF_DistGridConnectionSet(connection=connectionList(conn), &
       tileIndexA=5, tileIndexB=6, positionVector=(/0, 0/), rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
-    if (conn==connectionCount) goto 20
-
-    conn=conn+1
-    call ESMF_DistGridConnectionSet(connection=connectionList(conn), &
-      tileIndexA=4, tileIndexB=6, orientationVector=(/-2, 1/), &  ! 90 deg rot
-      positionVector=(/ &     ! pivot point (maxIndexPTile(1,4)+0.5, 
-                              !              maxIndexPTile(2,4)+0.5)
-#ifdef CENTER_CONNECTIONS
-      maxIndexPTile(1,4)+maxIndexPTile(2,4)+1,  &
-      -maxIndexPTile(1,4)+maxIndexPTile(2,4)/), &
-#else
-      maxIndexPTile(1,4)+maxIndexPTile(2,4)+2,  &
-      -maxIndexPTile(1,4)+maxIndexPTile(2,4)/), &
-#endif
-      rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     if (conn==connectionCount) goto 20
@@ -13136,15 +13067,49 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     conn=conn+1
     call ESMF_DistGridConnectionSet(connection=connectionList(conn), &
+      tileIndexA=1, tileIndexB=3, orientationVector=(/2, -1/), &  ! 270 deg rot
+      positionVector=(/minIndexPTile(1,3)-1-maxIndexPTile(2,1), &
+                       maxIndexPTile(2,3)+minIndexPTile(1,1)/), &
+      rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    if (conn==connectionCount) goto 20
+
+    conn=conn+1
+    call ESMF_DistGridConnectionSet(connection=connectionList(conn), &
+      tileIndexA=2, tileIndexB=4, orientationVector=(/-2, 1/), &  ! 90 deg rot
+      positionVector=(/minIndexPTile(1,4)+maxIndexPTile(2,2),     &
+                       minIndexPTile(2,4)-maxIndexPTile(1,2)-1/), &
+      rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    if (conn==connectionCount) goto 20
+
+    conn=conn+1
+    call ESMF_DistGridConnectionSet(connection=connectionList(conn), &
+      tileIndexA=3, tileIndexB=5, orientationVector=(/2, -1/), &  ! 270 deg rot
+      positionVector=(/minIndexPTile(1,5)-1-maxIndexPTile(2,3), &
+                       maxIndexPTile(2,5)+minIndexPTile(1,3)/), &
+      rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    if (conn==connectionCount) goto 20
+
+    conn=conn+1
+    call ESMF_DistGridConnectionSet(connection=connectionList(conn), &
+      tileIndexA=4, tileIndexB=6, orientationVector=(/-2, 1/), &  ! 90 deg rot
+      positionVector=(/minIndexPTile(1,6)+maxIndexPTile(2,4),     &
+                       minIndexPTile(2,6)-maxIndexPTile(1,4)-1/), &
+      rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    if (conn==connectionCount) goto 20
+
+    conn=conn+1
+    call ESMF_DistGridConnectionSet(connection=connectionList(conn), &
       tileIndexA=5, tileIndexB=1, orientationVector=(/2, -1/), &  ! 270 deg rot
-      positionVector=(/ &     ! pivot plus shift
-#ifdef CENTER_CONNECTIONS
-      minIndexPTile(1,1)-maxIndexPTile(2,5)-1,  &
-      maxIndexPTile(2,1)+minIndexPTile(1,5)/),  &
-#else
-      minIndexPTile(1,1)-maxIndexPTile(2,5)-1,   &
-      maxIndexPTile(2,1)+minIndexPTile(1,5)+1/), &
-#endif
+      positionVector=(/minIndexPTile(1,1)-1-maxIndexPTile(2,5), &
+                       maxIndexPTile(2,1)+minIndexPTile(1,5)/), &
       rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
@@ -13153,14 +13118,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     conn=conn+1
     call ESMF_DistGridConnectionSet(connection=connectionList(conn), &
       tileIndexA=6, tileIndexB=2, orientationVector=(/-2, 1/), &  ! 90 deg rot
-      positionVector=(/ &     ! pivot plus shift
-#ifdef CENTER_CONNECTIONS
-      maxIndexPTile(1,2)+minIndexPTile(2,6),     &
-      minIndexPTile(2,2)-maxIndexPTile(1,6)-1/), &
-#else      
-      maxIndexPTile(1,2)+minIndexPTile(2,6)+1,   &
-      minIndexPTile(2,2)-maxIndexPTile(1,6)-1/), &
-#endif
+      positionVector=(/minIndexPTile(1,2)+maxIndexPTile(2,6),     &
+                       minIndexPTile(2,2)-maxIndexPTile(1,6)-1/), &
       rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
