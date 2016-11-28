@@ -1721,7 +1721,7 @@ program ESMF_DistGridEx
     tileIndexA=1, tileIndexB=3, &
     orientationVector=(/2,-1/), & ! 270 degree rotation of tile A
     positionVector=(/minIndexPTile(1,3)-1-maxIndexPTile(2,1),   &
-                     maxIndexPTile(2,3)+minIndexPTile(1,1)+1/), &
+                     maxIndexPTile(2,3)+minIndexPTile(1,1)/), &
     rc=rc)
 !BOE
 ! For greater clarity figure \ref{fig:dgconnect_cusph_2rotconnected} only
