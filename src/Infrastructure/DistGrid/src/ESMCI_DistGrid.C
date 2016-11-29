@@ -3044,6 +3044,23 @@ int DistGrid::print()const{
     printf("DistGrid-VM: petCount = %d, CurrentVM: petCount = %d\n", 
       vm->getPetCount(), VM::getCurrent()->getPetCount());
   }
+#if 0
+  printf("--- ESMCI::DistGrid::print connection test ---\n");
+  int index[2];
+  index[0]=1; index[1]=10;
+  printf("index=%d,%d, seqIndex=%d\n", index[0], index[1], 
+    getSequenceIndexTile(1, index, &localrc));
+  index[0]=1; index[1]=11;
+  printf("index=%d,%d, seqIndex=%d\n", index[0], index[1], 
+    getSequenceIndexTile(1, index, &localrc));
+  index[0]=0; index[1]=11;
+  printf("index=%d,%d, seqIndex=%d\n", index[0], index[1], 
+    getSequenceIndexTile(1, index, &localrc));
+  index[0]=0; index[1]=10;
+  printf("index=%d,%d, seqIndex=%d\n", index[0], index[1], 
+    getSequenceIndexTile(1, index, &localrc));
+  
+#endif
   printf("--- ESMCI::DistGrid::print end ---\n");
     
   // return successfully
@@ -3562,7 +3579,7 @@ int DistGrid::getSequenceIndexTile(
   if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;   // final return code
   
   int seqindex;
-  const int depthMax=6;
+  const int depthMax=3;
   
   for (int depth=0; depth<depthMax; depth++){
     seqindex = getSequenceIndexTileRecursive(tile, index, depth, &localrc);
@@ -3682,7 +3699,7 @@ int DistGrid::getSequenceIndexTileRecursive(
         if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
           ESMC_CONTEXT, rc)) return seqindex;  // bail out
 
-//printf("tile=%d, tileA=%d, tileB=%d, index[]=%d %d, indexB[]=%d %d, seqInd=%d\n",
+//printf("foreward: tile=%d, tileA=%d, tileB=%d, index[]=%d %d, indexB[]=%d %d, seqInd=%d\n",
 //tile, tileA, tileB, index[0], index[1], indexB[0], indexB[1], seqindex);
 
         if (seqindex > -1){
@@ -3710,33 +3727,47 @@ int DistGrid::getSequenceIndexTileRecursive(
         }
         bool special90=(orientationVect[0]==-2 && orientationVect[1]==1);
         bool special270=(orientationVect[0]==2 && orientationVect[1]==-1);
-        if (special90 || special270)
+        if (special90 || special270){
+          // special two non-orthogonal cases
           for (int j=0; j<dimCount; j++)
             orientationVect[j] = -orientationVect[j]; // revert
-        if (special90){
-          positionVect[0] = -connectionList[i][positionIndexOffset+1];
-          positionVect[1] =  connectionList[i][positionIndexOffset+0];
-        }
-        if (special270){
-          positionVect[0] =  connectionList[i][positionIndexOffset+1];
-          positionVect[1] = -connectionList[i][positionIndexOffset+0];
-        }
-        for (int j=0; j<dimCount; j++){
-          int position = positionVect[j];
-          int orientation = orientationVect[j];
-          if (orientation < 0){
-            ++orientation; // shift to basis 0
-            indexA[j] = -index[-orientation] - positionVect[-orientation];
-          }else{
-            --orientation; // shift to basis 0
-            indexA[j] = index[orientation] - positionVect[orientation];
+          if (special90){
+            positionVect[0] = -connectionList[i][positionIndexOffset+1];
+            positionVect[1] =  connectionList[i][positionIndexOffset+0];
+          }
+          if (special270){
+            positionVect[0] =  connectionList[i][positionIndexOffset+1];
+            positionVect[1] = -connectionList[i][positionIndexOffset+0];
+          }
+          for (int j=0; j<dimCount; j++){
+            int position = positionVect[j];
+            int orientation = orientationVect[j];
+            if (orientation < 0){
+              ++orientation; // shift to basis 0
+              indexA[j] = -index[-orientation] + position;
+            }else{
+              --orientation; // shift to basis 0
+              indexA[j] = index[orientation] + position;
+            }
+          }
+        }else{
+          // regular orthogonal cases
+          for (int j=0; j<dimCount; j++){
+            int orientation = orientationVect[j];
+            if (orientation < 0){
+              ++orientation; // shift to basis 0
+              indexA[j] = -index[-orientation] - positionVect[-orientation];
+            }else{
+              --orientation; // shift to basis 0
+              indexA[j] = index[orientation] - positionVect[orientation];
+            }
           }
         }
         seqindex = getSequenceIndexTileRecursive(tileA, indexA, depth, &localrc);
         if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
           ESMC_CONTEXT, rc)) return seqindex;  // bail out
 
-//printf("tile=%d, tileA=%d, tileB=%d, index[]=%d %d, indexA[]=%d %d, seqInd=%d\n",
+//printf("backward: tile=%d, tileA=%d, tileB=%d, index[]=%d %d, indexA[]=%d %d, seqInd=%d\n",
 //tile, tileA, tileB, index[0], index[1], indexA[0], indexA[1], seqindex);
         
         if (seqindex > -1){
