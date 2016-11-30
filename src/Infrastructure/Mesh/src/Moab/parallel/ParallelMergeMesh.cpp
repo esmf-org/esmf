@@ -5,7 +5,7 @@
 #include "moab/Skinner.hpp"
 #include "moab/MergeMesh.hpp"
 #include "moab/CN.hpp"
-#include "float.h"
+#include <float.h>
 #include <algorithm>
 
 #ifdef USE_MPI
