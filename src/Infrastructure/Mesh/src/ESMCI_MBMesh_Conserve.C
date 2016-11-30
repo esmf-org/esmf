@@ -59,7 +59,7 @@ static const char *const version = "$Id$";
            
 using namespace ESMCI;
 
- bool debug=false;
+static bool debug=false;
 
   
   // Intersects between the line a and the seqment s
