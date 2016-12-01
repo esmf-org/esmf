@@ -3824,14 +3824,15 @@ int DistGrid::getIndexTupleFromSeqIndex(
   seqIndex -= 1;  // make seqIndex 0-based
  
   // determine the tile index
-  for (int tile=0; tile<tileCount; tile++){
+  for (tile=0; tile<tileCount; tile++){
     seqIndex -= elementCountPTile[tile];
     if (seqIndex <=0){
-      // found the tile index (remember, 1-based)
+      // found the tile
       seqIndex += elementCountPTile[tile]; // correct back into the tile
       break;
     }
   }
+  ++tile; // shift tile to be 1-based
   
   // determine the index tuple within the tile
   for (int i=dimCount-1; i>=0; i--){
