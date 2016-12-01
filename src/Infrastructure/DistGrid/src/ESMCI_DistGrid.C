@@ -3821,23 +3821,23 @@ int DistGrid::getIndexTupleFromSeqIndex(
   if (indexTuple.size() != dimCount)
     indexTuple.resize(dimCount);
   
-  seqIndex -= 1;  // make seqIndex 0-based
+  --seqIndex;  // make seqIndex 0-based
  
   // determine the tile index
   for (tile=0; tile<tileCount; tile++){
     seqIndex -= elementCountPTile[tile];
-    if (seqIndex <=0){
+    if (seqIndex <0){
       // found the tile
       seqIndex += elementCountPTile[tile]; // correct back into the tile
       break;
     }
   }
-  ++tile; // shift tile to be 1-based
+  ++tile; // make tile 1-based
   
   // determine the index tuple within the tile
   for (int i=dimCount-1; i>=0; i--){
     int stride = 1;
-    for (int j=0; j<i-1; j++)
+    for (int j=0; j<i; j++)
       stride *= maxIndexPDimPTile[dimCount*(tile-1)+j]
         - minIndexPDimPTile[dimCount*(tile-1)+j] + 1;
     indexTuple[i] = seqIndex / stride;
