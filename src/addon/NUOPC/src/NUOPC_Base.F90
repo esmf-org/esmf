@@ -1108,7 +1108,7 @@ module NUOPC_Base
       line=__LINE__, file=FILENAME)) return  ! bail out
 
     ! check that StandardName has an entry in the NUOPC_FieldDictionary
-    call ESMF_ContainerGet(NUOPC_FieldDictionary, itemName=StandardName, &
+    call ESMF_ContainerGet(NUOPC_FieldDictionary, itemName=trim(StandardName), &
       isPresent=accepted, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME)) return  ! bail out
@@ -1120,7 +1120,7 @@ module NUOPC_Base
           line=__LINE__, file=FILENAME)) return  ! bail out
       else
         call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
-          msg=StandardName//" is not a StandardName in the NUOPC_FieldDictionary!",&
+          msg=trim(StandardName)//" is not a StandardName in the NUOPC_FieldDictionary!",&
           line=__LINE__, file=FILENAME, rcToReturn=rc)
         return  ! bail out
       endif
