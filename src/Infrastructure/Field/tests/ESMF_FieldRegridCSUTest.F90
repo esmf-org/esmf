@@ -169,7 +169,7 @@ contains
   integer :: localPet, petCount
   real(ESMF_KIND_R8), parameter ::  DEG2RAD = &
                 3.141592653589793_ESMF_KIND_R8/180.0_ESMF_KIND_R8 
-
+  integer :: decomptile(2,6)
   
   ! init success flag
   correct=.true.
@@ -187,14 +187,22 @@ contains
             ESMF_CONTEXT, rcToReturn=rc)) return
 
   ! Establish the resolution of the grids
-  src_tile_size=50
+  src_tile_size=20
 
   dst_nx = 47
   dst_ny = 47
 
+  ! Set up decomposition for src Grid
+  decomptile(:,1)=(/2,2/)
+  decomptile(:,2)=(/2,2/)
+  decomptile(:,3)=(/2,2/)
+  decomptile(:,4)=(/2,2/)
+  decomptile(:,5)=(/2,2/)
+  decomptile(:,6)=(/2,2/)
 
   ! Create Src Grid
   srcGrid=ESMF_GridCreateCubedSphere(tileSize=src_tile_size, &
+       regDecompPTile=decomptile, &
        rc=localrc)
   if (ESMF_LogFoundError(localrc, &
        ESMF_ERR_PASSTHRU, &
@@ -390,7 +398,7 @@ contains
           srcField, &
           dstField=dstField, &
           routeHandle=routeHandle, &
-          unmappedAction=ESMF_UNMAPPEDACTION_IGNORE, &
+          unmappedAction=ESMF_UNMAPPEDACTION_ERROR, &
           regridmethod=ESMF_REGRIDMETHOD_BILINEAR, &
           rc=localrc)
   if (ESMF_LogFoundError(localrc, &
@@ -441,7 +449,7 @@ contains
         endif
 
         ! if working everything should be close to exact answer
-        if (relErr .gt. 0.005) then
+        if (relErr .gt. 0.001) then
             correct=.false.
 !            write(*,*) "relErr=",relErr,farrayPtr(i1,i2),xfarrayPtr(i1,i2)
         endif
@@ -486,6 +494,16 @@ contains
         ESMF_CONTEXT, rcToReturn=rc)) return
 
    call ESMF_FieldDestroy(dstField, rc=localrc)
+   if (ESMF_LogFoundError(localrc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+
+   call ESMF_FieldDestroy(xdstField, rc=localrc)
+   if (ESMF_LogFoundError(localrc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+
+   call ESMF_FieldDestroy(errField, rc=localrc)
    if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
@@ -557,6 +575,7 @@ contains
   real(ESMF_KIND_R8) :: localMaxRelErr(1), globalMaxRelErr(1)
   real(ESMF_KIND_R8), parameter ::  DEG2RAD = &
                 3.141592653589793_ESMF_KIND_R8/180.0_ESMF_KIND_R8 
+  integer :: decomptile(2,6)
 
   
   ! init success flag
@@ -575,13 +594,22 @@ contains
             ESMF_CONTEXT, rcToReturn=rc)) return
 
   ! Establish the resolution of the grids
-  src_tile_size=50
+  src_tile_size=20
 
   dst_nx = 47
   dst_ny = 47
 
+  ! Set up decomposition for src Grid
+  decomptile(:,1)=(/2,2/)
+  decomptile(:,2)=(/2,2/)
+  decomptile(:,3)=(/2,2/)
+  decomptile(:,4)=(/2,2/)
+  decomptile(:,5)=(/2,2/)
+  decomptile(:,6)=(/2,2/)
+
   ! Create Src Grid
   srcGrid=ESMF_GridCreateCubedSphere(tileSize=src_tile_size, &
+       regDecompPTile=decomptile, &
        rc=localrc)
   if (ESMF_LogFoundError(localrc, &
        ESMF_ERR_PASSTHRU, &
@@ -801,7 +829,7 @@ contains
           srcField, &
           dstField=dstField, &
           routeHandle=routeHandle, &
-          unmappedAction=ESMF_UNMAPPEDACTION_IGNORE, &
+          unmappedAction=ESMF_UNMAPPEDACTION_ERROR, &
           regridmethod=ESMF_REGRIDMETHOD_CONSERVE, &
           dstFracField=dstFracField, &
           srcFracField=srcFracField, &
@@ -892,7 +920,7 @@ contains
         ! if working everything should be close to exact answer
         if (relErr .gt. 0.005) then
             correct=.false.
-!            write(*,*) "relErr=",relErr,farrayPtr(i1,i2),xfarrayPtr(i1,i2)
+            !write(*,*) "relErr=",relErr,farrayPtr(i1,i2),xfarrayPtr(i1,i2)
         endif
 
         ! Calc max
@@ -1287,7 +1315,7 @@ contains
           srcField, &
           dstField=dstField, &
           routeHandle=routeHandle, &
-          unmappedAction=ESMF_UNMAPPEDACTION_IGNORE, &
+          unmappedAction=ESMF_UNMAPPEDACTION_ERROR, &
           regridmethod=ESMF_REGRIDMETHOD_BILINEAR, &
           rc=localrc)
   if (ESMF_LogFoundError(localrc, &
@@ -1700,7 +1728,7 @@ contains
           srcField, &
           dstField=dstField, &
           routeHandle=routeHandle, &
-          unmappedAction=ESMF_UNMAPPEDACTION_IGNORE, &
+          unmappedAction=ESMF_UNMAPPEDACTION_ERROR, &
           regridmethod=ESMF_REGRIDMETHOD_CONSERVE, &
           dstFracField=dstFracField, &
           srcFracField=srcFracField, &
