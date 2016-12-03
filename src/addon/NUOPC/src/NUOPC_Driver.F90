@@ -237,8 +237,8 @@ module NUOPC_Driver
     ! --- inward facing entry points ---
 
     call NUOPC_CompSetInternalEntryPoint(gcomp, ESMF_METHOD_INITIALIZE, &
-      phaseLabelList=(/"IPDv02p5"/), userRoutine=InternalInitializeComplete, &
-      rc=rc)  ! Using IPDv02 here forces inward dependency resolution loop
+      phaseLabelList=(/"IPDv05p8"/), userRoutine=InternalInitializeComplete, &
+      rc=rc)  ! Using IPDv > 02 here forces inward dependency resolution loop
               ! even if none of the child components use IPDv02 or higher.
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
