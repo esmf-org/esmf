@@ -206,19 +206,46 @@ module NUOPC_Connector
     type(ESMF_Clock)     :: clock
     integer, intent(out) :: rc
 
-    character(ESMF_MAXSTR) :: name
-    character(ESMF_MAXSTR) :: importXferPolicy, exportXferPolicy
+    character(ESMF_MAXSTR)                :: name, valueString
+    character(ESMF_MAXSTR)                :: importXferPolicy, exportXferPolicy
+    integer                               :: profiling
 
     rc = ESMF_SUCCESS
 
-#if 0
-call ESMF_VMLogCurrentGarbageInfo("Connector Initialize05P1 in: ")
-#endif
 
     ! query the Component for info
     call ESMF_CplCompGet(cplcomp, name=name, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+
+#if 1
+call ESMF_VMLogCurrentGarbageInfo(trim(name)//": Initialize05P1 in: ")
+#endif
+
+    ! determine profiling
+    call NUOPC_CompAttributeGet(cplcomp, name="Profiling", value=valueString, &
+      rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    profiling = ESMF_UtilString2Int(valueString, &
+      specialStringList=(/"high", "max "/), specialValueList=(/65535, 65535/), &
+      rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+
+    ! reconcile the States including Attributes
+    if (btest(profiling,1)) then    ! PROFILE
+      call ESMF_VMLogMemInfo("befP1 Reconcile")
+    endif
+    call NUOPC_Reconcile(importState, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    call NUOPC_Reconcile(exportState, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    if (btest(profiling,1)) then    ! PROFILE
+      call ESMF_VMLogMemInfo("aftP1 Reconcile")
+    endif
 
     ! get transfer policy for both states
     call NUOPC_GetAttribute(importState, name="FieldTransferPolicy", &
@@ -231,113 +258,110 @@ call ESMF_VMLogCurrentGarbageInfo("Connector Initialize05P1 in: ")
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
-!    print *, "importState xferPolicy = ", importXferPolicy
-!    print *, "exportState xferPolicy = ", exportXferPolicy
-
-    ! States on both sides must accept transfer
-    if (trim(exportXferPolicy)=="transferAll" .and. &
-        trim(importXferPolicy)=="transferAll") then
-
-        call doTransfer(exportState, importState, rc)
-        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-
-        call doTransfer(importState, exportState, rc)
-        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-
-    end if
-
 #if 0
-call ESMF_VMLogCurrentGarbageInfo("Connector Initialize05P1 out: ")
+call ESMF_LogWrite("importState xferPolicy = "//trim(importXferPolicy), &
+  ESMF_LOGMSG_INFO, rc=rc)
+call ESMF_LogWrite("exportState xferPolicy = "//trim(exportXferPolicy), &
+  ESMF_LOGMSG_INFO, rc=rc)
+#endif
+
+    if (trim(exportXferPolicy)=="transferAll") then
+      call doTransfer(importState, exportState, rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    endif
+    if (trim(importXferPolicy)=="transferAll") then
+      call doTransfer(exportState, importState, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    endif
+
+#if 1
+call ESMF_VMLogCurrentGarbageInfo(trim(name)//": Initialize05P1 out: ")
 #endif
 
     contains
 
-    subroutine doTransfer(fromState, toState, rc)
+    subroutine doTransfer(srcState, dstState, rc)
 
-      type(ESMF_State), intent(inout) :: fromState
-      type(ESMF_State), intent(inout) :: toState
+      type(ESMF_State)     :: srcState
+      type(ESMF_State)     :: dstState
       integer, intent(out) :: rc
 
-      character(ESMF_MAXSTR) :: name
-      character(ESMF_MAXSTR) :: oldTransferGeom, newTransferGeom
-      integer                :: itemCount, i, stat
-      character (ESMF_MAXSTR), allocatable :: itemNameList(:)
-      type(ESMF_StateItem_Flag), allocatable :: itemTypeList(:)
-      type(ESMF_Field)       :: field
-
+      character(ESMF_MAXSTR) :: srcTransferGeom, dstTransferGeom
+      integer                :: i, j
+      character(ESMF_MAXSTR), pointer       :: srcStandardNameList(:)
+      character(ESMF_MAXSTR), pointer       :: dstStandardNameList(:)
+      character(ESMF_MAXSTR), pointer       :: srcNamespaceList(:)
+      character(ESMF_MAXSTR), pointer       :: dstNamespaceList(:)
+      type(ESMF_Field),       pointer       :: srcFieldList(:)
+      type(ESMF_Field),       pointer       :: dstFieldList(:)
+      
       rc = ESMF_SUCCESS
 
-      call ESMF_StateGet(fromState, itemCount=itemCount, rc=rc)
+      nullify(srcStandardNameList)
+      nullify(srcNamespaceList)
+      nullify(srcFieldList)
+      nullify(dstStandardNameList)
+      nullify(dstNamespaceList)
+      nullify(dstFieldList)
+    
+      call NUOPC_GetStateMemberLists(srcState, srcStandardNameList, &
+        fieldList=srcFieldList, namespaceList=srcNamespaceList, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-
-      allocate(itemNameList(itemCount),stat=stat)
-      if (ESMF_LogFoundAllocError(statusToCheck=stat, &
-        msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
-        return  ! bail out
-
-      allocate(itemTypeList(itemCount),stat=stat)
-      if (ESMF_LogFoundAllocError(statusToCheck=stat, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
-        return  ! bail out
-
-      call ESMF_StateGet(fromState, itemNameList=itemNameList, &
-        itemTypeList=itemTypeList, rc=rc)
+        
+      call NUOPC_GetStateMemberLists(dstState, dstStandardNameList, &
+        fieldList=dstFieldList, namespaceList=dstNamespaceList, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-
       ! WARNING: does not currently deal with nested states or field bundles
-      do i=lbound(itemNameList,1), ubound(itemNameList,1)
-        !print *, "conn export state item ", i, " = ", itemNameList(i), " type = ", itemTypeList(i)
-        if (itemTypeList(i)==ESMF_STATEITEM_FIELD) then
+      
+      if (associated(srcStandardNameList)) then
+        do i=1, size(srcStandardNameList)
 
           ! do not transfer if it already exists in the destination state
-          call ESMF_StateGet(toState, &
-            itemSearch=itemNameList(i), itemCount=itemCount, rc=rc)
-          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-          if (itemCount > 0) then
-            cycle
+          if (associated(dstStandardNameList)) then
+            do j=1, size(dstStandardNameList)
+              if (trim(srcStandardNameList(i))==trim(dstStandardNameList(j))) &
+                exit
+            enddo
+            if (j<size(dstStandardNameList)+1) cycle
           endif
 
           ! reverse TransferOfferGeomObject attribute, e.g., if a component
           ! providing a field wants to provide a grid, then the accepting
           ! component should not try to provide its own grid
-          call ESMF_StateGet(fromState, &
-            itemNameList(i), field, rc=rc)
-          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-
-          call NUOPC_GetAttribute(field, name="TransferOfferGeomObject", &
-             value=oldTransferGeom, rc=rc)
+          call NUOPC_GetAttribute(srcFieldList(i), &
+            name="TransferOfferGeomObject", value=srcTransferGeom, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
           ! default
-          newTransferGeom = "cannot provide"
-          if (trim(oldTransferGeom)=="will provide") then
-            newTransferGeom = "cannot provide"
-          else if (trim(oldTransferGeom)=="can provide") then
-            newTransferGeom = "cannot provide"
-          else if (trim(oldTransferGeom)=="cannot provide") then
-            newTransferGeom = "will provide"
+          dstTransferGeom = "cannot provide"
+          if (trim(srcTransferGeom)=="will provide") then
+            dstTransferGeom = "cannot provide"
+          else if (trim(srcTransferGeom)=="can provide") then
+            dstTransferGeom = "cannot provide"
+          else if (trim(srcTransferGeom)=="cannot provide") then
+            dstTransferGeom = "will provide"
           end if
 
           ! transfer to toState
-          call NUOPC_Advertise(toState, StandardName=itemNameList(i), &
-            TransferOfferGeomObject=newTransferGeom, rc=rc)
+          call NUOPC_Advertise(dstState, &
+            StandardName=trim(srcStandardNameList(i)), &
+!            TransferOfferGeomObject=dstTransferGeom, rc=rc)
+            TransferOfferGeomObject="will provide", rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
-        end if
-     end do
+        end do
+      endif
 
-     deallocate(itemNameList)
-     deallocate(itemTypeList)
-
+      if (associated(srcStandardNameList)) deallocate(srcStandardNameList)
+      if (associated(srcFieldList)) deallocate(srcFieldList)
+      if (associated(dstStandardNameList)) deallocate(dstStandardNameList)
+      if (associated(dstFieldList)) deallocate(dstFieldList)
     end subroutine
 
   end subroutine
@@ -369,7 +393,7 @@ call ESMF_VMLogCurrentGarbageInfo("Connector Initialize05P1 out: ")
     rc = ESMF_SUCCESS
 
 #if 0
-call ESMF_VMLogCurrentGarbageInfo("Connector InitializeP1a in: ")
+call ESMF_VMLogCurrentGarbageInfo(trim(name)//": InitializeP1a in: ")
 #endif
 
     ! query the Component for info
@@ -402,7 +426,7 @@ call ESMF_VMLogCurrentGarbageInfo("Connector InitializeP1a in: ")
     endif
 
 #if 0
-call ESMF_VMLogCurrentGarbageInfo("Connector InitializeP1a after reconcile: ")
+call ESMF_VMLogCurrentGarbageInfo(trim(name)//": InitializeP1a after reconcile: ")
 #endif
 
     nullify(importStandardNameList)
@@ -505,7 +529,7 @@ print *, "bondLevelMax:", bondLevelMax, "bondLevel:", bondLevel
     if (associated(exportNamespaceList)) deallocate(exportNamespaceList)
     
 #if 0
-call ESMF_VMLogCurrentGarbageInfo("Connector InitializeP1a out: ")
+call ESMF_VMLogCurrentGarbageInfo(trim(name)//": InitializeP1a out: ")
 #endif
 
   end subroutine
@@ -643,30 +667,30 @@ print *, "current bondLevel=", bondLevel
               write (msgString,'(A, ": ", A30, I3, "): ", A30)') trim(name), &
                 "exportStandardNameList(j=", j, exportStandardNameList(j)
               call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
-                if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
                 line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
                 return  ! bail out
               write (msgString,'(A, ": ", A30, I3, "): ", A30)') trim(name), &
                 "exportNamespaceList(j=", j, exportNamespaceList(j)
               call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
-                if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
                 line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
                 return  ! bail out
               write (msgString,'(A, ": ", A30, I3, "): ", A30)') trim(name), &
                 "importStandardNameList(i=", i, importStandardNameList(i)
               call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
-                if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
                 line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
                 return  ! bail out
               write (msgString,'(A, ": ", A30, I3, "): ", A30)') trim(name), &
                 "importNamespaceList(i=", i, importNamespaceList(i)
               call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
-                if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
                 line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
                 return  ! bail out
               write (msgString,'(A, ": bondLevel=", I2)') trim(name), bondLevel
               call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
-                if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
                 line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
                 return  ! bail out
             endif
@@ -1365,7 +1389,7 @@ print *, "current bondLevel=", bondLevel
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 #if 0
-          call ESMF_LogWrite("Connector InitializeP3 transfer DG for Grid: "//&
+          call ESMF_LogWrite(trim(name)//": InitializeP3 transfer DG for Grid: "//&
             trim(geomobjname), ESMF_LOGMSG_INFO, rc=rc)
 #endif
           acceptorDG = ESMF_DistGridCreate(providerDG, vm=vm, rc=rc)
@@ -2312,7 +2336,7 @@ print *, "current bondLevel=", bondLevel
     time0=timeBase
 
 #if 0
-call ESMF_VMLogCurrentGarbageInfo("Connector RUN enter: ")
+call ESMF_VMLogCurrentGarbageInfo(trim(name)//": RUN enter: ")
 #endif
 
     ! query the Component for info
@@ -2363,7 +2387,7 @@ call ESMF_VMLogCurrentGarbageInfo("Connector RUN enter: ")
     
     if (btest(profiling,0)) then    ! PROFILE
       call ESMF_VMWtime(time)
-      write (msgString, *) "ConnectorProfile 01 time=   ", &
+      write (msgString, *) trim(name)//": Profile 01 time=   ", &
         time-time0, time-timeBase
         time0=time
       call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO)
@@ -2378,7 +2402,7 @@ call ESMF_VMLogCurrentGarbageInfo("Connector RUN enter: ")
     if (btest(profiling,0)) then    ! PROFILE
       ! PROFILE
       call ESMF_VMWtime(time)
-      write (msgString, *) "ConnectorProfile 02 time=   ", &
+      write (msgString, *) trim(name)//": Profile 02 time=   ", &
         time-time0, time-timeBase
         time0=time
       call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO)
@@ -2390,7 +2414,7 @@ call ESMF_VMLogCurrentGarbageInfo("Connector RUN enter: ")
     if (btest(profiling,0)) then    ! PROFILE
       ! PROFILE
       call ESMF_VMWtime(time)
-      write (msgString, *) "ConnectorProfile 03 time=   ", &
+      write (msgString, *) trim(name)//": Profile 03 time=   ", &
         time-time0, time-timeBase
         time0=time
       call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO)
@@ -2408,7 +2432,7 @@ call ESMF_VMLogCurrentGarbageInfo("Connector RUN enter: ")
     if (btest(profiling,0)) then    ! PROFILE
       ! PROFILE
       call ESMF_VMWtime(time)
-      write (msgString, *) "ConnectorProfile 04 time=   ", &
+      write (msgString, *) trim(name)//": Profile 04 time=   ", &
         time-time0, time-timeBase
         time0=time
       call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO)
@@ -2441,7 +2465,7 @@ call ESMF_VMLogCurrentGarbageInfo("Connector RUN enter: ")
     if (btest(profiling,0)) then    ! PROFILE
       ! PROFILE
       call ESMF_VMWtime(time)
-      write (msgString, *) "ConnectorProfile 05 time=   ", &
+      write (msgString, *) trim(name)//": Profile 05 time=   ", &
         time-time0, time-timeBase
         time0=time
       call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO)
@@ -2457,7 +2481,7 @@ call ESMF_VMLogCurrentGarbageInfo("Connector RUN enter: ")
     if (btest(profiling,0)) then    ! PROFILE
       ! PROFILE
       call ESMF_VMWtime(time)
-      write (msgString, *) "ConnectorProfile 06 time=   ", &
+      write (msgString, *) trim(name)//": Profile 06 time=   ", &
         time-time0, time-timeBase
         time0=time
       call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO)
@@ -2470,7 +2494,7 @@ call ESMF_VMLogCurrentGarbageInfo("Connector RUN enter: ")
     if (btest(profiling,0)) then    ! PROFILE
       ! PROFILE
       call ESMF_VMWtime(time)
-      write (msgString, *) "ConnectorProfile 07 time=   ", &
+      write (msgString, *) trim(name)//": Profile 07 time=   ", &
         time-time0, time-timeBase
         time0=time
       call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO)
@@ -2486,7 +2510,7 @@ call ESMF_VMLogCurrentGarbageInfo("Connector RUN enter: ")
     if (btest(profiling,0)) then    ! PROFILE
       ! PROFILE
       call ESMF_VMWtime(time)
-      write (msgString, *) "ConnectorProfile 08 time=   ", &
+      write (msgString, *) trim(name)//": Profile 08 time=   ", &
         time-time0, time-timeBase
         time0=time
       call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO)
@@ -2502,7 +2526,7 @@ call ESMF_VMLogCurrentGarbageInfo("Connector RUN enter: ")
     if (btest(profiling,0)) then    ! PROFILE
       ! PROFILE
       call ESMF_VMWtime(time)
-      write (msgString, *) "ConnectorProfile 09 time=   ", &
+      write (msgString, *) trim(name)//": Profile 09 time=   ", &
         time-time0, time-timeBase
         time0=time
       call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO)
@@ -2517,7 +2541,7 @@ call ESMF_VMLogCurrentGarbageInfo("Connector RUN enter: ")
     if (btest(profiling,0)) then    ! PROFILE
       ! PROFILE
       call ESMF_VMWtime(time)
-      write (msgString, *) "ConnectorProfile 10 time=   ", &
+      write (msgString, *) trim(name)//": Profile 10 time=   ", &
         time-time0, time-timeBase
         time0=time
       call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO)
@@ -2534,7 +2558,7 @@ call ESMF_VMLogCurrentGarbageInfo("Connector RUN enter: ")
     endif
     
 #if 0
-call ESMF_VMLogCurrentGarbageInfo("Connector RUN leaving: ")
+call ESMF_VMLogCurrentGarbageInfo(trim(name)//": RUN leaving: ")
 #endif
 
   end subroutine
@@ -2563,7 +2587,7 @@ call ESMF_VMLogCurrentGarbageInfo("Connector RUN leaving: ")
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
 #if 0
-call ESMF_VMLogCurrentGarbageInfo("Connector finalize enter: ")
+call ESMF_VMLogCurrentGarbageInfo(trim(name)//": finalize enter: ")
 #endif
 
     ! determine verbosity
@@ -2661,7 +2685,7 @@ call ESMF_VMLogCurrentGarbageInfo("Connector finalize enter: ")
       return  ! bail out
       
 #if 0
-call ESMF_VMLogCurrentGarbageInfo("Connector finalize leaving: ")
+call ESMF_VMLogCurrentGarbageInfo(trim(name)//": finalize leaving: ")
 #endif
 
   end subroutine
@@ -2888,7 +2912,7 @@ print *, "found match:"// &
     logical                         :: rhListMatch
     
 #if 0
-call ESMF_VMLogCurrentGarbageInfo("Connector FieldBundleCplStore enter: ")
+call ESMF_VMLogCurrentGarbageInfo(trim(name)//": FieldBundleCplStore enter: ")
 #endif
 
     ! consistency check counts
@@ -3491,7 +3515,7 @@ call ESMF_LogWrite(trim(name)//&
     if (present(rc)) rc = ESMF_SUCCESS
 
 #if 0
-call ESMF_VMLogCurrentGarbageInfo("Connector FieldBundleCplStore leaving: ")
+call ESMF_VMLogCurrentGarbageInfo(trim(name)//": FieldBundleCplStore leaving: ")
 #endif
 
   end subroutine
