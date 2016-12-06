@@ -104,6 +104,61 @@ bool POLY_Mapping<SFUNC_TYPE,MPTRAITS,3,2>::is_in_cell(const double *mdata,
   // The maximum number of points we expect to see in a polygon in here, plus a bit extra
 #define PM_MAX_PNTS_IN_POLY 6
 
+  // If point actually lands on a another point then the match should be exact
+  // TODO: Do this for other types of mapping also (e.g. 3D)
+  if (SFUNC_TYPE::ndofs==3) {
+    // Corner 0
+    if ((mdata[0] == point[0]) && (mdata[1] == point[1]) && (mdata[2] == point[2])) {
+      pcoord[0]=0.0; pcoord[1]=0.0;
+      if (dist) *dist = 0.0;
+      return true;
+    }
+
+    // Corner 1
+    if ((mdata[3] == point[0]) && (mdata[4] == point[1]) && (mdata[5] == point[2])) {
+      pcoord[0]=1.0; pcoord[1]=0.0;
+      if (dist) *dist = 0.0;
+      return true;
+    }
+
+    // Corner 2
+    if ((mdata[6] == point[0]) && (mdata[7] == point[1]) && (mdata[8] == point[2])) {
+      pcoord[0]=0.0; pcoord[1]=1.0;
+      if (dist) *dist = 0.0;
+      return true;
+    }
+  } else if (SFUNC_TYPE::ndofs==4) {
+    // Corner 0
+    if ((mdata[0] == point[0]) && (mdata[1] == point[1]) && (mdata[2] == point[2])) {
+      pcoord[0]=-1.0; pcoord[1]=-1.0;
+      if (dist) *dist = 0.0;
+      return true;
+    }
+
+    // Corner 1
+    if ((mdata[3] == point[0]) && (mdata[4] == point[1]) && (mdata[5] == point[2])) {
+      pcoord[0]=1.0; pcoord[1]=-1.0;
+      if (dist) *dist = 0.0;
+      return true;
+    }
+
+    // Corner 2
+    if ((mdata[6] == point[0]) && (mdata[7] == point[1]) && (mdata[8] == point[2])) {
+      pcoord[0]=1.0; pcoord[1]=1.0;
+      if (dist) *dist = 0.0;
+      return true;
+    }
+
+    // Corner 3
+    if ((mdata[9] == point[0]) && (mdata[10] == point[1]) && (mdata[11] == point[2])) {
+      pcoord[0]=-1.0; pcoord[1]=1.0;
+      if (dist) *dist = 0.0;
+      return true;
+    }
+  } else {
+    Throw() << " only polygons with 3 or 4 sides are currently supported with 2 parametric dimensions";
+  }
+
 
   // Eventually need to reorganize mapping/shape_func system
   // so that the switch to different mapping types happens
@@ -128,6 +183,7 @@ bool POLY_Mapping<SFUNC_TYPE,MPTRAITS,3,2>::is_in_cell(const double *mdata,
   } else {
     Throw() << " only polygons with 3 or 4 sides are currently supported with 2 parametric dimensions";
   }
+
 
   // Get rid of degenerate edges
   int first_removed_ind=-1;
