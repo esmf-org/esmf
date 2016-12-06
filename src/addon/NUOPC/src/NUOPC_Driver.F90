@@ -899,8 +899,8 @@ module NUOPC_Driver
               trim(adjustl(iString))//": "//trim(compName), &
               line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
               return  ! bail out
-            if (ESMF_LogFoundError(rcToCheck=localrc, msg="Phase "// &
-              trim(adjustl(pLabel))//" Initialize for modelComp "// &
+            if (ESMF_LogFoundError(rcToCheck=localrc, msg="Phase '"// &
+              trim(adjustl(pLabel))//"' Initialize for modelComp "// &
               trim(adjustl(iString))//": "//trim(compName)// &
               " did not return ESMF_SUCCESS", &
               line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
@@ -972,8 +972,8 @@ module NUOPC_Driver
                 trim(compName), &
                 line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
                 return  ! bail out
-              if (ESMF_LogFoundError(rcToCheck=localrc, msg="Phase "// &
-                trim(adjustl(pLabel))//" Initialize for connectorComp "// &
+              if (ESMF_LogFoundError(rcToCheck=localrc, msg="Phase '"// &
+                trim(adjustl(pLabel))//"' Initialize for connectorComp "// &
                 trim(adjustl(iString))//" -> "//trim(adjustl(jString))//": "// &
                 trim(compName)//" did not return ESMF_SUCCESS", &
                 line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
@@ -1559,14 +1559,14 @@ call ESMF_LogWrite("gjt: Exiting InitializeIPDv02p5Data for: "//trim(name), &
           call ESMF_CplCompInitialize(is%wrap%connectorComp(i,j), &
             importState=imState, exportState=exState, &
             clock=internalClock, phase=phase, userRc=localrc, rc=rc)
-          if (ESMF_LogFoundError(rcToCheck=rc, msg="Failed calling phase "// &
-            trim(adjustl(pLabel))//" Initialize for connectorComp "// &
+          if (ESMF_LogFoundError(rcToCheck=rc, msg="Failed calling phase '"// &
+            trim(adjustl(pLabel))//"' Initialize for connectorComp "// &
             trim(adjustl(iString))//" -> "//trim(adjustl(jString))//": "// &
             trim(compName), &
             line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
             return  ! bail out
-          if (ESMF_LogFoundError(rcToCheck=localrc, msg="Phase "// &
-            trim(adjustl(pLabel))//" Initialize for connectorComp "// &
+          if (ESMF_LogFoundError(rcToCheck=localrc, msg="Phase '"// &
+            trim(adjustl(pLabel))//"' Initialize for connectorComp "// &
             trim(adjustl(iString))//" -> "//trim(adjustl(jString))//": "// &
             trim(compName)//" did not return ESMF_SUCCESS", &
             line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
@@ -1715,8 +1715,8 @@ call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO)
                 " -> "//trim(adjustl(iString)), &
                 line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
                 return  ! bail out
-              if (ESMF_LogFoundError(rcToCheck=localrc,  msg="Phase "// &
-                trim(adjustl(cpString))//" Run for connectorComp "// &
+              if (ESMF_LogFoundError(rcToCheck=localrc,  msg="Phase '"// &
+                trim(adjustl(cpString))//"' Run for connectorComp "// &
                 trim(adjustl(jString))//" -> "//trim(adjustl(iString))// &
                 " did not return ESMF_SUCCESS", &
                 line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
@@ -1737,8 +1737,8 @@ call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO)
             trim(adjustl(iString))//": "//trim(compName), &
             line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
             return  ! bail out
-          if (ESMF_LogFoundError(rcToCheck=localrc, msg="Phase "// &
-            trim(adjustl(pString))//" Initialize for modelComp "// &
+          if (ESMF_LogFoundError(rcToCheck=localrc, msg="Phase '"// &
+            trim(adjustl(pString))//"' Initialize for modelComp "// &
             trim(adjustl(iString))//": "//trim(compName)// &
             " did not return ESMF_SUCCESS", &
             line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
@@ -2007,8 +2007,8 @@ call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO)
             " -> "//trim(adjustl(jString)), &
             line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
             return  ! bail out
-          if (ESMF_LogFoundError(rcToCheck=localrc,  msg="Phase "// &
-            trim(adjustl(pLabel))//" Run for connectorComp "// &
+          if (ESMF_LogFoundError(rcToCheck=localrc,  msg="Phase '"// &
+            trim(adjustl(pLabel))//"' Run for connectorComp "// &
             trim(adjustl(iString))//" -> "//trim(adjustl(jString))// &
             " did not return ESMF_SUCCESS", &
             line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
@@ -2075,8 +2075,8 @@ call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO)
             " Run for modelComp "//trim(adjustl(iString)), &
             line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
             return  ! bail out
-          if (ESMF_LogFoundError(rcToCheck=localrc, msg="Phase "// &
-            trim(adjustl(pLabel))//" Run for modelComp "// &
+          if (ESMF_LogFoundError(rcToCheck=localrc, msg="Phase '"// &
+            trim(adjustl(pLabel))//"' Run for modelComp "// &
             trim(adjustl(iString))//" did not return ESMF_SUCCESS", &
             line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
             return  ! bail out
