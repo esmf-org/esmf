@@ -1422,6 +1422,7 @@ call ESMF_LogWrite("gjt: Exiting InitializeIPDv02p5Data for: "//trim(name), &
     type(type_InternalState):: is
     character(ESMF_MAXSTR)  :: name, compName
     type(ESMF_Clock)        :: internalClock
+    logical                 :: internalflag
     ! initialize out arguments
     rc = ESMF_SUCCESS
     if (present(execFlag)) execFlag = .false.
@@ -1449,9 +1450,14 @@ call ESMF_LogWrite("gjt: Exiting InitializeIPDv02p5Data for: "//trim(name), &
             phase = is%wrap%modelPhaseMap(i)%phaseValue(k)
         enddo
         if (phase == 0) cycle ! skip to next i
+        if (i==0) then
+          internalflag=.true.
+        else
+          internalflag=.false.
+        endif
         call NUOPC_CompSearchRevPhaseMap(is%wrap%modelComp(i), &
-          ESMF_METHOD_INITIALIZE, phaseIndex=phase, phaseLabel=pLabel, &
-          rc=rc)
+          ESMF_METHOD_INITIALIZE, internalflag=internalflag, &
+          phaseIndex=phase, phaseLabel=pLabel, rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
         ! attempt to make the actual call to initialize
@@ -1462,13 +1468,13 @@ call ESMF_LogWrite("gjt: Exiting InitializeIPDv02p5Data for: "//trim(name), &
         call ESMF_GridCompInitialize(is%wrap%modelComp(i), &
           importState=is%wrap%modelIS(i), exportState=is%wrap%modelES(i), &
           clock=internalClock, phase=phase, userRc=localrc, rc=rc)
-        if (ESMF_LogFoundError(rcToCheck=rc, msg="Failed calling phase "// &
-          trim(adjustl(pLabel))//" Initialize for modelComp "// &
+        if (ESMF_LogFoundError(rcToCheck=rc, msg="Failed calling phase '"// &
+          trim(adjustl(pLabel))//"' Initialize for modelComp "// &
           trim(adjustl(iString))//": "//trim(compName), &
           line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
           return  ! bail out
-        if (ESMF_LogFoundError(rcToCheck=localrc, msg="Phase "// &
-          trim(adjustl(pLabel))//" Initialize for modelComp "// &
+        if (ESMF_LogFoundError(rcToCheck=localrc, msg="Phase '"// &
+          trim(adjustl(pLabel))//"' Initialize for modelComp "// &
           trim(adjustl(iString))//": "//trim(compName)// &
           " did not return ESMF_SUCCESS", &
           line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
