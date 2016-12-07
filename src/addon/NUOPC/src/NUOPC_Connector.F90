@@ -350,8 +350,7 @@ call ESMF_VMLogCurrentGarbageInfo(trim(name)//": Initialize05P1 out: ")
           ! transfer to toState
           call NUOPC_Advertise(dstState, &
             StandardName=trim(srcStandardNameList(i)), &
-!            TransferOfferGeomObject=dstTransferGeom, rc=rc)
-            TransferOfferGeomObject="will provide", rc=rc)
+            TransferOfferGeomObject=dstTransferGeom, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
@@ -1581,7 +1580,7 @@ print *, "current bondLevel=", bondLevel
             line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
         else
           call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
-            msg="Provided GeomType must be Grid or Mesh.", &
+            msg="Provided GeomType must be Grid, Mesh, or LocStream.", &
             line=__LINE__, file=trim(name)//":"//FILENAME)
           return  ! bail out
         endif
@@ -1830,13 +1829,14 @@ print *, "current bondLevel=", bondLevel
         endif
 
         if (btest(verbosity,1)) then
-          call ESMF_LogWrite(trim(name)//": transferring the full Grid/Mesh", &
+          call ESMF_LogWrite(trim(name)//&
+            ": transferring the full Grid/Mesh/LocStream", &
             ESMF_LOGMSG_INFO, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
         endif
 
-        ! transfer the underlying Grid/Mesh from provider to acceptor
+        ! transfer the underlying Grid/Mesh/LocStream from provider to acceptor
         call ESMF_FieldGet(providerField, geomtype=geomtype, rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
@@ -1921,18 +1921,30 @@ print *, "current bondLevel=", bondLevel
             line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
         else
           call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
-            msg="Provided GeomType must be Grid or Mesh.", &
+            msg="Provided GeomType must be Grid, Mesh, or LocStream.", &
             line=__LINE__, file=trim(name)//":"//FILENAME)
           return  ! bail out
         endif
           
         if (btest(verbosity,1)) then
           call ESMF_LogWrite(trim(name)//&
-            ": done transferring the full Grid/Mesh", &
+            ": done transferring the full Grid/Mesh/LocStream", &
             ESMF_LOGMSG_INFO, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
         endif
+        
+        ! Need to reset the TransferOfferGeomObject and TransferActionGeomObject
+        ! attributes on the acceptorField, just in case this Field interacts on
+        ! multiple levels of a component hierarchy.
+        call NUOPC_SetAttribute(acceptorField, &
+          name="TransferOfferGeomObject", value="will provide", rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+        call NUOPC_SetAttribute(acceptorField, &
+          name="TransferActionGeomObject", value="provide", rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
       else
         !TODO: Fields mentioned via stdname in Cpl metadata not found -> error?
