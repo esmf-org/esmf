@@ -1493,7 +1493,7 @@ call ESMF_LogWrite("gjt: Exiting InitializeIPDv02p5Data for: "//trim(name), &
     logical, intent(out), optional :: execFlag ! .true. if at least one executed
     integer, intent(out)    :: rc
     ! local variables
-    integer                 :: phase, i, j, k, localrc
+    integer                 :: phase, i, ii, j, k, localrc
     character(ESMF_MAXSTR)  :: iString, jString, pLabel
     type(ESMF_State)        :: imState, exState
     type(type_InternalState):: is
@@ -1515,7 +1515,8 @@ call ESMF_LogWrite("gjt: Exiting InitializeIPDv02p5Data for: "//trim(name), &
     ! query Component for clock
     call ESMF_GridCompGet(gcomp, clock=internalClock, rc=rc)
     ! loop through all the model components
-    do i=0, is%wrap%modelCount
+    do ii=1, is%wrap%modelCount+1
+      i=mod(ii,is%wrap%modelCount+1)
       write (iString, *) i
       do j=0, is%wrap%modelCount
         write (jString, *) j

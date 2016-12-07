@@ -559,7 +559,9 @@ call ESMF_VMLogCurrentGarbageInfo(trim(name)//": InitializeP1a out: ")
     integer                               :: verbosity
     integer                               :: profiling
     logical                               :: match
-
+    type(ESMF_StateIntent_Flag)           :: importStateIntent
+    character(ESMF_MAXSTR)                :: fieldName
+    
     rc = ESMF_SUCCESS
 
     ! query the Component for info
@@ -609,6 +611,12 @@ call ESMF_VMLogCurrentGarbageInfo(trim(name)//": InitializeP1a out: ")
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
+    ! determine importStateIntent
+    call ESMF_StateGet(importState, stateintent=importStateIntent, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+
+    ! prepare to get lists out of States    
     nullify(importStandardNameList)
     nullify(importFieldList)
     nullify(importNamespaceList)
@@ -711,13 +719,33 @@ print *, "current bondLevel=", bondLevel
               read (connectionString(10:len(connectionString)), "(i10)") &
                 bondLevelMax  ! the bondLevel that was targeted
               if (bondLevel == bondLevelMax) then
-                ! ambiguity detected -> bail out
-                call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
-                  msg="Ambiguous connection status, multiple connections "// &
-                  " with the same bondLevel were found for: "// &
-                  trim(importStandardNameList(i)), &
-                  line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)
-                return  ! bail out
+                ! ambiguity detected -> check if this may be resolved
+                if (importStateIntent==ESMF_STATEINTENT_IMPORT) then
+                  ! importState is a component's importState, i.e. not a 
+                  ! real producer, but a driver intermediary
+                  ! -> resolve this issue by removing the field in question
+                  ! -> from the importState of the driver intermediary because
+                  ! -> obviously there are local producers that are available.
+                  call ESMF_FieldGet(importFieldList(i), name=fieldName, rc=rc)
+                  if (ESMF_LogFoundError(rcToCheck=rc, &
+                    msg=ESMF_LOGERR_PASSTHRU, &
+                    line=__LINE__, file=trim(name)//":"//FILENAME)) &
+                    return  ! bail out
+                  call ESMF_StateRemove(importState, (/fieldName/), rc=rc)
+                  if (ESMF_LogFoundError(rcToCheck=rc, &
+                    msg=ESMF_LOGERR_PASSTHRU, &
+                    line=__LINE__, file=trim(name)//":"//FILENAME)) &
+                    return  ! bail out
+                else
+                  ! importState is a model's exportState, i.e. real producer
+                  ! cannot resolve that situation -> bail out
+                  call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
+                    msg="Ambiguous connection status, multiple connections "// &
+                    "with identical bondLevel found for: "// &
+                    trim(importStandardNameList(i)), &
+                    line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)
+                  return  ! bail out
+                endif
               endif
             else
               ! obtain the bondLevel that needs to be targeted
