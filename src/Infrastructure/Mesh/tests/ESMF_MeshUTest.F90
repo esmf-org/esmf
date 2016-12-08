@@ -1529,8 +1529,9 @@ endif
 
   ! Check Output mesh
   call ESMF_MeshGet(mesh2, numOwnedElements=localNumOwnedElems(1), &
-                   rc=localrc)
+                   spatialDim=spatialDim, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
 
   ! Sum across procs
   call ESMF_VMAllReduce(vm,localNumOwnedElems, globalNumOwnedElems, 1, &
@@ -1542,6 +1543,13 @@ endif
  
    !write(*,*) localPet, " number of local elems=",localnumOwnedElems(1)
   !write(*,*) localPet, " number of global elems=",globalnumOwnedElems(1)
+
+  ! Try accessing coordinates
+  allocate(elemCoords(spatialDim*localNumOwnedElems(1)))
+  call ESMF_MeshGet(mesh2, ownedElemCoords=elemCoords, &
+                   spatialDim=spatialDim, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+  deallocate(elemCoords)
 
   ! Get rid of Meshs
   call ESMF_MeshDestroy(mesh, rc=localrc)
