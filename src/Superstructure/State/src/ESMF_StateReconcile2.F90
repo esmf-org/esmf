@@ -165,7 +165,8 @@ contains
 !       {\tt ESMF\_VM} for this {\tt ESMF\_Component}.  By default, it is set to the current vm.
 !     \item[{[attreconflag]}]
 !       Flag to tell if Attribute reconciliation is to be done as well as data reconciliation.
-!       This flag is documented in section \ref{const:attreconcile}.
+!       This flag is documented in section \ref{const:attreconcile}.  Default is
+!       {\tt ESMF\_ATTRECONCILE\_OFF}.
 !     \item[{[rc]}]
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
