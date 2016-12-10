@@ -14,7 +14,7 @@
 \newcommand{\sreq}[1]{\subsection{\hspace{.2in}#1}}
 \newcommand{\ssreq}[1]{\subsubsection{\hspace{.2in}#1}}
 \newcommand{\mytitle}{\longname \docmttype ~~}
-\newcommand{\myversion}{Version 7.0.0}
+\newcommand{\myversion}{Version 7.0.1}
 
 \newenvironment
 {reqlist}
