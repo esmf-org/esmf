@@ -100,6 +100,11 @@ ESMF_CXXCOMPILER_VERSION    = ${ESMF_CXXCOMPILER} -v --version
 ESMF_F90MAJORVERSION      = $(shell $(ESMF_DIR)/scripts/version.intel 1 ${ESMF_F90COMPILER} -V)
 
 ############################################################
+# Special debug flags
+#
+ESMF_F90OPTFLAG_G       += -traceback
+
+############################################################
 # Enable TR15581/F2003 Allocatable array resizing
 #
 ESMF_F90COMPILEOPTS += -assume realloc_lhs

@@ -1764,7 +1764,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       if (collectiveflag) then
 
         if (.not. present (vm)) then
-          localrc = ESMF_FAILURE
+          localrc = ESMF_RC_ARG_INCOMP
           if (ESMF_LogFoundError(localrc, &
               msg="VM is required for collective inquiry", &
               ESMF_CONTEXT, rcToReturn=rc)) return

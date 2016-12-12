@@ -776,7 +776,7 @@ StateClsAddListMacro(ESMF_State, State, states, spp, STATE)
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
       ESMF_StateClassFindData = .FALSE.
   
-      ! This function is only called internally, so technicaly we do not need
+      ! This function is only called internally, so technically we do not need
       ! to check the validity of the state - it has been checked before we
       ! get here.  TODO: eliminate the check if it proves costly.
 

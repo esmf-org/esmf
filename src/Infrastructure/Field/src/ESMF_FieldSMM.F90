@@ -1028,8 +1028,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,                intent(inout), optional :: pipeLineDepth
       type(ESMF_RouteHandle), intent(inout), optional :: transposeRoutehandle
       integer,                intent(out),   optional :: rc
-
-!-------------------------------------------------------------------------------
+!
 ! !DESCRIPTION:
 !
 ! The arguments are:
