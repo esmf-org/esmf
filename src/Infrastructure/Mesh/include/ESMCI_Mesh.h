@@ -127,6 +127,9 @@ void resolve_cspec_delete_owners(UInt obj_type);
  std::map<UInt,UInt> split_to_orig_id;
  std::map<UInt,double> split_id_to_frac;
 
+ // Save original dimension
+ int orig_spatial_dim;
+
   private:
 void assign_new_ids();
 CommReg *sghost;
