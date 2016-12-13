@@ -3423,7 +3423,8 @@ call ESMF_LogWrite(trim(name)//&
       ! weight dumping
       if (dumpWeightsFlag .and. .not.redistflag) then
         call NUOPC_Write(factorList=factorList, &
-          fileName="weights_"//trim(name)//"_"//trim(chopStringList(1))//".nc",&
+          factorIndexList=factorIndexList, &
+          fileName="weightmatrix_"//trim(name)//"_"//trim(chopStringList(1))//".nc",&
           rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out

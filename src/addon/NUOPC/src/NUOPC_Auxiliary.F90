@@ -57,6 +57,7 @@ module NUOPC_Auxiliary
     logical,            intent(in),  optional :: relaxedflag
     integer,            intent(out), optional :: rc
 ! !DESCRIPTION:
+!   \label{api_NUOPC_SCRIPWrite}
 !   Write the destributed interpolaton matrix provided by {\tt factorList} 
 !   and {\tt factorIndexList} to a SCRIP formatted NetCDF file. Each PET calls
 !   with its local list of factors and indices. The call then writes the 
@@ -116,6 +117,9 @@ module NUOPC_Auxiliary
     character(*),       intent(in)            :: fileName
     integer,            intent(out), optional :: rc
 ! !DESCRIPTION:
+!
+!   THIS METHOD IS DEPRECATED. Use \ref{api_NUOPC_SCRIPWrite} instead.
+! 
 !   Write the destributed {\tt factorList} to file. Each PET calls with its 
 !   local list of factors. The call then writes the distributed factors into
 !   a single file. The order of the factors in the file is first by PET, and 
