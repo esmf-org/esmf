@@ -973,7 +973,8 @@ program ESMF_NUOPC_UTest
     factorList(i)        = real(i*i, ESMF_KIND_R8)/100.d0  ! factor
   enddo
   call NUOPC_Write(factorList=factorList, &
-    factorIndexList=factorIndexList, fileName="test_scrip.nc", rc=rc)
+    factorIndexList=factorIndexList, fileName="test_scrip.nc", &
+    relaxedflag=.true., rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   !------------------------------------------------------------------------
 

@@ -48,11 +48,13 @@ module NUOPC_Auxiliary
 ! !IROUTINE: NUOPC_Write - Write a distributed interpolation matrix to file in SCRIP format
 ! !INTERFACE:
   ! call using generic interface: NUOPC_Write
-  subroutine NUOPC_SCRIPWrite(factorList, factorIndexList, fileName, rc)
+  subroutine NUOPC_SCRIPWrite(factorList, factorIndexList, fileName, &
+    relaxedflag, rc)
 ! !ARGUMENTS:
     real(ESMF_KIND_R8), intent(in), target    :: factorList(:)
     integer,            intent(in), target    :: factorIndexList(:,:) 
     character(*),       intent(in)            :: fileName
+    logical,            intent(in),  optional :: relaxedflag
     integer,            intent(out), optional :: rc
 ! !DESCRIPTION:
 !   Write the destributed interpolaton matrix provided by {\tt factorList} 
@@ -69,19 +71,35 @@ module NUOPC_Auxiliary
 !     The distributed list of source and destination indices.
 !   \item[fileName]
 !     The name of the file to be written to.
+!   \item[{[relaxedflag]}]
+!     If {\tt .true.}, then no error is returned even if the call cannot write
+!     the file due to library limitations. Default is {\tt .false.}.
 !   \item[{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
 !EOP
   !-----------------------------------------------------------------------------
-    
+    ! local variables
+    logical                 :: ioCapable
+    logical                 :: doItFlag
+
     if (present(rc)) rc = ESMF_SUCCESS
     
-    call ESMF_OutputSimpleWeightFile(fileName, factorList, &
-      factorIndexList, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=FILENAME)) return  ! bail out
+    ioCapable = (ESMF_IO_PIO_PRESENT .and. &
+      (ESMF_IO_NETCDF_PRESENT .or. ESMF_IO_PNETCDF_PRESENT))
+    
+    doItFlag = .true. ! default
+    if (present(relaxedFlag)) then
+      doItFlag = .not.relaxedflag .or. (relaxedflag.and.ioCapable)
+    endif
+    
+    if (doItFlag) then
+      call ESMF_OutputSimpleWeightFile(fileName, factorList, &
+        factorIndexList, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=FILENAME)) return  ! bail out
+    endif
     
   end subroutine
   !-----------------------------------------------------------------------------
