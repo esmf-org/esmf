@@ -8754,7 +8754,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        integer,                   intent(in),  optional :: gridAlign(:)
        integer,                   intent(in),  optional :: gridMemLBound(:)
        type(ESMF_Index_Flag),     intent(in),  optional :: indexflag
-       integer,                   intent(in),  optional :: petMap(:,:,:)
+       integer,                   intent(in),  optional :: petMap(:,:,:) 
        character (len=*),         intent(in),  optional :: name 
        integer,                   intent(out), optional :: rc
 !
@@ -12808,7 +12808,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 ! !INTERFACE:
   function ESMF_GridCreateCubedSphere(tileSize,keywordEnforcer, regDecompPTile, decompflagPTile, &
-        deLabelList, delayout, rc)
+        deLabelList, delayout, name, rc)
 !         
 ! !RETURN VALUE:
     type(ESMF_Grid) :: ESMF_GridCreateCubedSphere
@@ -12820,6 +12820,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_Decomp_Flag), target, intent(in),  optional :: decompflagPTile(:,:)
     integer,                        intent(in),  optional :: deLabelList(:)
     type(ESMF_DELayout),            intent(in),  optional :: delayout
+    character (len=*),              intent(in),  optional :: name 
     integer,                        intent(out), optional :: rc
 
 !
@@ -12863,6 +12864,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !          case that {\tt regDecompPTile} was not specified, the {\tt deCount}
 !          must be at least that of the default DELayout. The 
 !          {\tt regDecompPTile} will be constructed accordingly.
+!     \item[{[name]}]
+!          {\tt ESMF\_Grid} name.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -12901,7 +12904,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   !------------------------------------------------------------------------
   ! get global vm information
   !
-  call ESMF_VMGetGlobal(vm, rc=localrc)
+  call ESMF_VMGetCurrent(vm, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -13146,7 +13149,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! must create with ESMF_INDEX_DELOCAL because of how tiles get their 
     ! coordinates from the cubedSphereTileCreate() routine
     grid = ESMF_GridCreate(distgrid, coordSys=ESMF_COORDSYS_SPH_DEG, &
-      indexflag=ESMF_INDEX_DELOCAL, rc=localrc)
+      indexflag=ESMF_INDEX_DELOCAL, name=name, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -13244,7 +13247,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
       !Redist the grid with the new distgrid
-      newgrid = ESMF_GridCreate(grid, newdistgrid, rc=localrc)
+      newgrid = ESMF_GridCreate(grid, newdistgrid, name=name, rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
          ESMF_CONTEXT, rcToReturn=rc)) return
       ! Destroy old grid

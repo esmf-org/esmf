@@ -55,6 +55,7 @@
   public ESMF_ScripInqUnits
   public ESMF_ScripGetVar
   public ESMF_OutputScripWeightFile
+  public ESMF_OutputSimpleWeightFile
   public ESMF_EsmfGetNode
   public ESMF_EsmfGetElement
   public ESMF_OutputScripVarFile
@@ -808,6 +809,7 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
          else
 	   methodlocal = ESMF_REGRIDMETHOD_BILINEAR
            map_method = "Bilinear remapping"
+	   esmf_regrid_method = "Bilinear"
          endif
          conventions = "NCAR-CSM"
 
@@ -2513,6 +2515,319 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
 
     return
 end subroutine ESMF_OutputScripWeightFile
+
+#undef ESMF_METHOD
+#define ESMF_METHOD "ESMF_OutputSimpleWeightFile"
+!BOPI
+! !ROUTINE: ESMF_OUtputSimpleWeightFile
+! output the weight and indices tables into a NetCDF format file
+!
+
+! !INTERFACE:
+subroutine ESMF_OutputSimpleWeightFile (wgtFile, factorList, factorIndexList, &
+				      title, method, &
+				      largeFileFlag, netcdf4FileFlag, &
+				      rc)
+!
+! !ARGUMENTS:
+      character(len=*), intent(in) :: wgtFile
+      real(ESMF_KIND_R8) , intent(in) :: factorList(:)   
+      integer(ESMF_KIND_I4) , intent(in), target :: factorIndexList(:,:) 
+      character(len=*), optional, intent(in) :: title
+      type(ESMF_RegridMethod_Flag), optional, intent(in) :: method
+      logical, optional, intent(in) :: largeFileFlag, netcdf4FileFlag
+      integer, optional :: rc
+
+      type(ESMF_VM):: vm
+      integer :: PetNo, PetCnt
+      type(ESMF_Logical) :: largeFileFlaglocal
+      type(ESMF_Logical) :: netcdf4FileFlaglocal
+      type(ESMF_RegridMethod_Flag) :: methodlocal
+      character(len=256) :: titlelocal, map_method
+      character(len=256) :: esmf_regrid_method,conventions
+      integer :: total, localCount(1)
+      integer(ESMF_KIND_I4), pointer:: allCounts(:) 
+      integer(ESMF_KIND_I4), pointer:: indexbuf(:), next(:)
+      integer :: ncid, ncid1
+      integer :: ncStatus
+      integer :: status
+      integer :: maxcount
+      integer :: i,j, k, start
+      integer :: nsDimId, VarId
+      real(ESMF_KIND_R8), pointer   :: weightbuf(:)
+      character(len=256) :: errmsg
+
+#ifdef ESMF_NETCDF
+
+      call ESMF_VMGetCurrent(vm, rc=rc)
+      if (rc /= ESMF_SUCCESS) return
+
+      ! set up local pet info
+      call ESMF_VMGet(vm, localPet=PetNo, petCount=PetCnt, rc=rc)
+      if (rc /= ESMF_SUCCESS) return
+
+      if (present(largeFileFlag)) then
+	largeFileFlaglocal = largeFileFlag
+      else
+        largeFileFlaglocal = .false.
+      endif
+
+      if (present(netcdf4FileFlag)) then
+	netcdf4FileFlaglocal = netcdf4FileFlag
+      else
+        netcdf4FileFlaglocal = .false.
+      endif
+
+      localCount(1)=size(factorList,1)
+      allocate(allCounts(PetCnt))
+      call ESMF_VMAllGather(vm,localCount,allCounts,1,rc=status)
+      if (ESMF_LogFoundError(status, ESMF_ERR_PASSTHRU, &
+           ESMF_CONTEXT, rcToReturn=rc)) return
+
+      ! calculate the size of the global weight table
+      total = 0
+      do i=1,PetCnt
+	 total=allCounts(i)+total
+      end do
+      !print *, PetNo, 'local count ', localCount(1), AllCounts(PetNo+1), total
+
+      if (PetNo == 0) then
+         ! Create output file and create dimensions and variables
+	 call c_nc_create(wgtFile, NF90_CLOBBER, &
+		largeFileFlaglocal, netcdf4FileFlaglocal, ncid, status)
+	 if (ESMF_LogFoundError(status, ESMF_ERR_PASSTHRU, &
+		ESMF_CONTEXT, rcToReturn=rc)) return
+         
+         ! global variables
+          if (present(title)) then
+             titlelocal = trim(title)
+          else
+             titlelocal = "Undefined"
+          endif
+        
+         ! Regrid method
+         if (present(method)) then
+	   methodlocal = method
+	   if (methodlocal%regridmethod == ESMF_REGRIDMETHOD_BILINEAR%regridmethod) then
+              map_method = "Bilinear remapping"
+	      esmf_regrid_method = "Bilinear"
+	   elseif (methodlocal%regridmethod == ESMF_REGRIDMETHOD_PATCH%regridmethod) then
+	      !scrip_test does not recognize patch remapping
+              map_method = "Bilinear remapping"
+	      esmf_regrid_method = "Higher-order Patch"
+	   elseif (methodlocal%regridmethod == ESMF_REGRIDMETHOD_CONSERVE%regridmethod) then
+              map_method = "Conservative remapping"
+	      esmf_regrid_method = "First-order Conservative"
+	   elseif (methodlocal%regridmethod == ESMF_REGRIDMETHOD_NEAREST_STOD%regridmethod) then
+              map_method = "Bilinear remapping"
+	      esmf_regrid_method = "Nearest source to destination"
+	   elseif (methodlocal%regridmethod == ESMF_REGRIDMETHOD_NEAREST_DTOS%regridmethod) then
+              map_method = "Bilinear remapping"
+	      esmf_regrid_method = "Nearest destination to source"
+	   else
+	      !report error
+              call ESMF_LogSetError(rcToCheck=ESMF_FAILURE, & 
+                  msg="- regridmethod not recongized", & 
+                  ESMF_CONTEXT, rcToReturn=rc) 
+	      return
+	   endif
+         else
+           map_method = "Undefined"
+           esmf_regrid_method = "Undefined"
+         endif
+
+         ncStatus = nf90_put_att(ncid, NF90_GLOBAL, "title", trim(titlelocal))
+         errmsg = "Attribute title in "//trim(wgtfile)
+         if (CDFCheckError (ncStatus, &
+           ESMF_METHOD, &
+           ESMF_SRCLINE,&
+	   errmsg,&
+           rc)) return
+
+         ncStatus = nf90_put_att(ncid, NF90_GLOBAL, "map_method", trim(map_method))
+         errmsg = "Attribute map_method in "//trim(wgtfile)
+         if (CDFCheckError (ncStatus, &
+           ESMF_METHOD, &
+           ESMF_SRCLINE,&
+	   errmsg,&
+           rc)) return
+
+         ncStatus = nf90_put_att(ncid, NF90_GLOBAL, "ESMF_regrid_method", &
+			trim(esmf_regrid_method))
+         errmsg = "Attribute esmf_regrid_method in "//trim(wgtfile)
+         if (CDFCheckError (ncStatus, &
+           ESMF_METHOD, &
+           ESMF_SRCLINE,&
+	   errmsg,&
+           rc)) return
+
+         ncStatus = nf90_def_dim(ncid,"n_s",total, nsDimId)
+         errmsg = "Dimension n_s in "//trim(wgtfile)
+         if (CDFCheckError (ncStatus, &
+           ESMF_METHOD, &
+           ESMF_SRCLINE,&
+	   errmsg,&
+           rc)) return
+
+        ! col: sparse matrix weight table
+         ncStatus = nf90_def_var(ncid,"col",NF90_INT, (/nsDimId/),  VarId)
+         errmsg = "Variable col in "//trim(wgtfile)
+         if (CDFCheckError (ncStatus, &
+           ESMF_METHOD, &
+           ESMF_SRCLINE,&
+	   errmsg,&
+           rc)) return
+
+        ! row: sparse matrix weight table
+         ncStatus = nf90_def_var(ncid,"row",NF90_INT, (/nsDimId/),  VarId)
+         errmsg = "Variable row in "//trim(wgtfile)
+         if (CDFCheckError (ncStatus, &
+           ESMF_METHOD, &
+           ESMF_SRCLINE,&
+	   errmsg,&
+           rc)) return
+
+        ! S: sparse matrix weight table
+         ncStatus = nf90_def_var(ncid,"S",NF90_DOUBLE, (/nsDimId/),  VarId)
+         errmsg = "Variable S in "//trim(wgtfile)
+         if (CDFCheckError (ncStatus, &
+           ESMF_METHOD, &
+           ESMF_SRCLINE,&
+	   errmsg,&
+           rc)) return
+
+         ncStatus=nf90_enddef(ncid) 
+         if (CDFCheckError (ncStatus, &
+           ESMF_METHOD, &
+           ESMF_SRCLINE,&
+	   trim(wgtFile),&
+           rc)) return
+      endif
+   
+      ! find the max of allCounts(i) and allocate colrow
+      maxcount=0
+      do i=1,PetCnt
+	if (allCounts(i) > maxcount) maxcount = allCounts(i)
+      enddo
+
+      call ESMF_VMBarrier(vm)
+
+     if (PetNo == 0) then 
+	! First write out its own weight and indices, then receive the data from 
+	! other PETs and write them out
+	start = 1
+        ! allocate indexbuf and weightbuf to receive data from other PETs
+        allocate(indexbuf(maxcount*2), weightbuf(maxcount))
+        do i=1, PetCnt
+          ! write the local factorList and factorIndexList first
+          localCount(1)=allCounts(i)
+ 	  if (i==1) then 
+  	    !do j=1,localCount(1)
+            !    indexbuf(j) = factorIndexList(1,j)
+            !enddo
+            next => factorIndexList(1,:)
+            ncStatus=nf90_inq_varid(ncid,"col",VarId)
+   	    ncStatus=nf90_put_var(ncid,VarId, next,(/start/),localCount)          
+            errmsg = "Variable col in "//trim(wgtfile)
+            if (CDFCheckError (ncStatus, &
+              ESMF_METHOD, &
+              ESMF_SRCLINE,errmsg,&
+              rc)) return
+            !do j=1,localCount(1)
+            !  indexbuf(j) = factorIndexList(2,j)
+            !enddo
+            next => factorIndexList(2,:)
+            ncStatus=nf90_inq_varid(ncid,"row",VarId)
+   	    ncStatus=nf90_put_var(ncid,VarId, next,(/start/),localCount)          
+            errmsg = "Variable row in "//trim(wgtfile)
+            if (CDFCheckError (ncStatus, &
+              ESMF_METHOD, &
+              ESMF_SRCLINE,errmsg,&
+              rc)) return
+
+            ncStatus=nf90_inq_varid(ncid,"S",VarId)
+            ncStatus=nf90_put_var(ncid,VarId, factorList, (/start/),localCount)
+            errmsg = "Variable S in "//trim(wgtfile)
+            if (CDFCheckError (ncStatus, &
+              ESMF_METHOD, &
+              ESMF_SRCLINE,errmsg,&
+              rc)) return
+	  else 
+            if (localCount(1) > 0) then
+              ! receive the factorList and factorIndexList 
+              call ESMF_VMRecv(vm, indexbuf, localCount(1)*2, i-1, rc=status)
+	      if (ESMF_LogFoundError(status, ESMF_ERR_PASSTHRU, &
+        	  ESMF_CONTEXT, rcToReturn=rc)) return
+              call ESMF_VMRecv(vm, weightbuf, localCount(1), i-1, rc=status)
+	      if (ESMF_LogFoundError(status, ESMF_ERR_PASSTHRU, &
+        	  ESMF_CONTEXT, rcToReturn=rc)) return
+
+              ncStatus=nf90_inq_varid(ncid,"col",VarId)
+       	      ncStatus=nf90_put_var(ncid,VarId, indexbuf,(/start/),localCount)          
+              errmsg = "Variable col in "//trim(wgtfile)
+              if (CDFCheckError (ncStatus, &
+                ESMF_METHOD, &
+                ESMF_SRCLINE,errmsg,&
+                rc)) return
+              next => indexbuf(localCount(1)+1:localCount(1)*2)
+              ncStatus=nf90_inq_varid(ncid,"row",VarId)
+     	      ncStatus=nf90_put_var(ncid,VarId, next ,(/start/),localCount)          
+              errmsg = "Variable row in "//trim(wgtfile)
+              if (CDFCheckError (ncStatus, &
+                ESMF_METHOD, &
+                ESMF_SRCLINE,errmsg,&
+                rc)) return
+
+              ncStatus=nf90_inq_varid(ncid,"S",VarId)
+              ncStatus=nf90_put_var(ncid,VarId, weightbuf, (/start/),localCount)
+              errmsg = "Variable S in "//trim(wgtfile)
+              if (CDFCheckError (ncStatus, &
+                ESMF_METHOD, &
+                ESMF_SRCLINE,errmsg,&
+                rc)) return
+            end if
+          end if
+          start = start + localCount(1)
+       end do
+     else
+       allocate(indexbuf(localcount(1)*2))
+       if (localcount(1) > 0) then
+         do j=1,localCount(1)
+             indexbuf(j) = factorIndexList(1,j)
+             indexbuf(j+localCount(1)) = factorIndexList(2,j)
+         enddo
+         ! a non-root PET, send the results to PET 0
+         call ESMF_VMSend(vm, indexbuf, localCount(1)*2, 0, rc=status)
+         if (ESMF_LogFoundError(status, ESMF_ERR_PASSTHRU, &
+        	ESMF_CONTEXT, rcToReturn=rc)) return
+         call ESMF_VMSend(vm, factorList, localCount(1), 0, rc=status)
+	 if (ESMF_LogFoundError(status, ESMF_ERR_PASSTHRU, &
+        	ESMF_CONTEXT, rcToReturn=rc)) return
+       end if
+     end if
+       
+     call ESMF_VMBarrier(vm)
+     deallocate(allCounts)
+     if (PetNo == 0) then
+       ncStatus = nf90_close(ncid)                        
+       if (CDFCheckError (ncStatus, &
+         ESMF_METHOD, &
+         ESMF_SRCLINE, trim(wgtfile),&
+         rc)) return
+       deallocate(weightbuf)
+     end if
+     deallocate(indexbuf)
+     if (present(rc)) rc = ESMF_SUCCESS
+     return
+#else
+     call ESMF_LogSetError(rcToCheck=ESMF_RC_LIB_NOT_PRESENT, & 
+                 msg="- ESMF_NETCDF not defined when lib was compiled", & 
+                 ESMF_CONTEXT, rcToReturn=rc) 
+#endif
+
+    return
+end subroutine ESMF_OutputSimpleWeightFile
+
 
 #undef ESMF_METHOD
 #define ESMF_METHOD "ESMF_OutputScripVarFile"

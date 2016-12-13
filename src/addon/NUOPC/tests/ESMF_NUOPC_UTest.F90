@@ -197,6 +197,8 @@ program ESMF_NUOPC_UTest
   character(len=120)      :: tempString
   type(NUOPC_FreeFormat)  :: runSeqFF, attrFF, fdFF
   character(len=NUOPC_FreeFormatLen)  :: runSequence(5)
+  real(ESMF_KIND_R8), allocatable :: factorList(:)
+  integer, allocatable            :: factorIndexList(:,:)
 
 
 !-------------------------------------------------------------------------------
@@ -957,6 +959,21 @@ program ESMF_NUOPC_UTest
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call NUOPC_Write(stateA, fieldNameList=(/"sea_surface_temperature"/), &
     status=ESMF_FILESTATUS_REPLACE, relaxedflag=.true., rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "NUOPC_Write() SCRIP weight file Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  allocate(factorIndexList(2, 2*localPet), factorList(2*localPet))
+  do i=1, 2*localPet
+    factorIndexList(1,i) = localPet*10  + i  ! src index
+    factorIndexList(2,i) = localPet*100 + i  ! dst index
+    factorList(i)        = real(i*i, ESMF_KIND_R8)/100.d0  ! factor
+  enddo
+  call NUOPC_Write(factorList=factorList, &
+    factorIndexList=factorIndexList, fileName="test_scrip.nc", rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   !------------------------------------------------------------------------
 

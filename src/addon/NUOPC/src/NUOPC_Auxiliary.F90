@@ -15,6 +15,8 @@
 module NUOPC_Auxiliary
 
   use ESMF
+  use ESMF_IOScripMod !!!! Needed for the internal NUOPC_SCRIPWrite() method
+                      !!!! TODO: Replace this once public Write() available.
 
   implicit none
   
@@ -29,6 +31,7 @@ module NUOPC_Auxiliary
 !==============================================================================
 
   interface NUOPC_Write
+    module procedure NUOPC_SCRIPWrite
     module procedure NUOPC_FactorsWrite
     module procedure NUOPC_FieldWrite
     module procedure NUOPC_StateWrite
@@ -40,6 +43,50 @@ module NUOPC_Auxiliary
   contains
   !-----------------------------------------------------------------------------
   
+  !-----------------------------------------------------------------------------
+!BOP
+! !IROUTINE: NUOPC_Write - Write a distributed interpolation matrix to file in SCRIP format
+! !INTERFACE:
+  ! call using generic interface: NUOPC_Write
+  subroutine NUOPC_SCRIPWrite(factorList, factorIndexList, fileName, rc)
+! !ARGUMENTS:
+    real(ESMF_KIND_R8), intent(in), target    :: factorList(:)
+    integer,            intent(in), target    :: factorIndexList(:,:) 
+    character(*),       intent(in)            :: fileName
+    integer,            intent(out), optional :: rc
+! !DESCRIPTION:
+!   Write the destributed interpolaton matrix provided by {\tt factorList} 
+!   and {\tt factorIndexList} to a SCRIP formatted NetCDF file. Each PET calls
+!   with its local list of factors and indices. The call then writes the 
+!   distributed factors into a single file. If the file already exists, the
+!   contents is replaced by this call.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[factorList]
+!     The distributed factor list.
+!   \item[factorIndexList]
+!     The distributed list of source and destination indices.
+!   \item[fileName]
+!     The name of the file to be written to.
+!   \item[{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+  !-----------------------------------------------------------------------------
+    
+    if (present(rc)) rc = ESMF_SUCCESS
+    
+    call ESMF_OutputSimpleWeightFile(fileName, factorList, &
+      factorIndexList, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME)) return  ! bail out
+    
+  end subroutine
+  !-----------------------------------------------------------------------------
+
+
   !-----------------------------------------------------------------------------
 !BOP
 ! !IROUTINE: NUOPC_Write - Write a distributed factorList to file
