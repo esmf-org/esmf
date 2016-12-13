@@ -2602,7 +2602,7 @@ subroutine ESMF_OutputSimpleWeightFile (wgtFile, factorList, factorIndexList, &
           if (present(title)) then
              titlelocal = trim(title)
           else
-             titlelocal = "ESMF Offline Regridding Weight Generator"
+             titlelocal = "Undefined"
           endif
         
          ! Regrid method
@@ -2632,8 +2632,8 @@ subroutine ESMF_OutputSimpleWeightFile (wgtFile, factorList, factorIndexList, &
 	      return
 	   endif
          else
-	   methodlocal = ESMF_REGRIDMETHOD_BILINEAR
-           map_method = "Bilinear remapping"
+           map_method = "Undefined"
+           esmf_regrid_method = "Undefined"
          endif
 
          ncStatus = nf90_put_att(ncid, NF90_GLOBAL, "title", trim(titlelocal))
