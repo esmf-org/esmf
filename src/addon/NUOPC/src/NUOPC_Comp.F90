@@ -1098,6 +1098,11 @@ module NUOPC_Comp
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME)) return  ! bail out
     call NUOPC_CompAttributeSet(comp, &
+      name="CompLabel", value="_uninitialized", &
+      rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME)) return  ! bail out
+    call NUOPC_CompAttributeSet(comp, &
       name="NestingGeneration", value=0, &        ! default to parent level
       rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -1937,11 +1942,12 @@ module NUOPC_Comp
 ! !IROUTINE: NUOPC_CompSearchRevPhaseMap - Reverse Search the Phase Map of a GridComp
 ! !INTERFACE:
   ! Private name; call using NUOPC_CompSearchRevPhaseMap()
-  subroutine NUOPC_GridCompSearchRevPhaseMap(comp, methodflag, phaseIndex, &
-    phaseLabel, rc)
+  subroutine NUOPC_GridCompSearchRevPhaseMap(comp, methodflag, internalflag, &
+    phaseIndex, phaseLabel, rc)
 ! !ARGUMENTS:
     type(ESMF_GridComp)                           :: comp
     type(ESMF_Method_Flag), intent(in)            :: methodflag
+    logical,                intent(in),  optional :: internalflag
     integer,                intent(in),  optional :: phaseIndex
     character(len=*),       intent(out)           :: phaseLabel
     integer,                intent(out), optional :: rc 
@@ -1951,7 +1957,9 @@ module NUOPC_Comp
 ! to see if the ESMF {\tt phaseIndex} is found. Return the associated
 ! {\tt phaseLabel}, or an empty string if not found. If {\tt phaseIndex} is not
 ! specified, set {\tt phaseLabel} to the first entry in the PhaseMap, or 
-! an empty string if there are no entries.
+! an empty string if there are no entries. The {\tt internalflag} argument 
+! allows to search the internal phase maps of driver components. The default
+! is {\tt internalflag=.false.}.
 !EOP
   !-----------------------------------------------------------------------------
     ! local variables
@@ -1960,6 +1968,7 @@ module NUOPC_Comp
     character(ESMF_MAXSTR)    :: name, pString
     character(len=40)         :: attributeName
     logical                   :: phaseFlag
+    logical                   :: internalflagOpt
     character(len=NUOPC_PhaseMapStringLength), pointer  :: phases(:)
     character(len=NUOPC_PhaseMapStringLength)           :: tempString
 
@@ -1969,15 +1978,22 @@ module NUOPC_Comp
     call ESMF_GridCompGet(comp, name=name, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+      
+    ! deal with optional input argument
+    internalflagOpt=.false. ! default
+    if (present(internalflag)) internalflagOpt=internalflag
 
     ! determine which phaseMap to deal with
     attributeName = "UnknownPhaseMap" ! initialize to something obvious
     if (methodflag == ESMF_METHOD_INITIALIZE) then
       attributeName = "InitializePhaseMap"
+      if (internalflagOpt) attributeName = "InternalInitializePhaseMap"
     elseif (methodflag == ESMF_METHOD_RUN) then
       attributeName = "RunPhaseMap"
+      if (internalflagOpt) attributeName = "InternalRunPhaseMap"
     elseif (methodflag == ESMF_METHOD_FINALIZE) then
       attributeName = "FinalizePhaseMap"
+      if (internalflagOpt) attributeName = "InternalFinalizePhaseMap"
     endif
     
     phaseLabel = ""             ! initialize to empty string

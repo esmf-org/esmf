@@ -1108,7 +1108,7 @@ module NUOPC_Base
       line=__LINE__, file=FILENAME)) return  ! bail out
 
     ! check that StandardName has an entry in the NUOPC_FieldDictionary
-    call ESMF_ContainerGet(NUOPC_FieldDictionary, itemName=StandardName, &
+    call ESMF_ContainerGet(NUOPC_FieldDictionary, itemName=trim(StandardName), &
       isPresent=accepted, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME)) return  ! bail out
@@ -1120,7 +1120,7 @@ module NUOPC_Base
           line=__LINE__, file=FILENAME)) return  ! bail out
       else
         call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
-          msg=StandardName//" is not a StandardName in the NUOPC_FieldDictionary!",&
+          msg=trim(StandardName)//" is not a StandardName in the NUOPC_FieldDictionary!",&
           line=__LINE__, file=FILENAME, rcToReturn=rc)
         return  ! bail out
       endif
@@ -1414,15 +1414,16 @@ module NUOPC_Base
 ! !IROUTINE: NUOPC_IsAtTime - Check if Field(s) in a State are at the given Time
 ! !INTERFACE:
   ! call using generic interface: NUOPC_IsAtTime
-  function NUOPC_IsAtTimeState(state, time, fieldName, count, rc)
+  function NUOPC_IsAtTimeState(state, time, fieldName, count, fieldList, rc)
 ! !RETURN VALUE:
     logical :: NUOPC_IsAtTimeState
 ! !ARGUMENTS:
-    type(ESMF_State), intent(in)            :: state
-    type(ESMF_Time),  intent(in)            :: time
-    character(*),     intent(in),  optional :: fieldName
-    integer,          intent(out), optional :: count
-    integer,          intent(out), optional :: rc
+    type(ESMF_State),              intent(in)            :: state
+    type(ESMF_Time),               intent(in)            :: time
+    character(*),                  intent(in),  optional :: fieldName
+    integer,                       intent(out), optional :: count
+    type(ESMF_Field), allocatable, intent(out), optional :: fieldList(:)
+    integer,                       intent(out), optional :: rc
 ! !DESCRIPTION:
 !   Return {\tt .true.} if the field(s) in {\tt state} have a timestamp 
 !   attribute that matches {\tt time}. Otherwise return {\tt .false.}.
@@ -1440,8 +1441,12 @@ module NUOPC_Base
 !     in {\tt state} and return {\tt .true.} if all the fields are at the 
 !     correct time.
 !   \item[{[count]}]
-!     If provided, the number of fields that are at time are returned. If 
+!     If provided, the number of fields that are at {\tt time} are returned. If 
 !     {\tt fieldName} is present then {\tt count} cannot be greater than 1.
+!   \item[{[fieldList]}]
+!     If provided, the fields that are {\em not} at {\tt time} are returned. If 
+!     {\tt fieldName} is present then {\tt fieldList} can contain a maximum of
+!     1 field.
 !   \item[{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -1451,11 +1456,12 @@ module NUOPC_Base
     ! local variables
     character(ESMF_MAXSTR), pointer       :: StandardNameList(:)
     character(ESMF_MAXSTR), pointer       :: itemNameList(:)
-    type(ESMF_Field),       pointer       :: fieldList(:)
+    type(ESMF_Field),       pointer       :: allFieldList(:)
     type(ESMF_Field)                      :: field
     logical                               :: isAtTime
-    integer                               :: i
+    integer                               :: i, j
     character(ESMF_MAXSTR)                :: iString, msgString
+    integer, allocatable                  :: fieldIndexList(:)
     
     if (present(rc)) rc = ESMF_SUCCESS
     if (present(count)) count = 0
@@ -1480,21 +1486,23 @@ module NUOPC_Base
       
       nullify(StandardNameList)
       nullify(itemNameList)
-      nullify(fieldList)
+      nullify(allFieldList)
 
       call NUOPC_GetStateMemberLists(state, StandardNameList=StandardNameList, &
-        itemNameList=itemNameList, fieldList=fieldList, rc=rc)
+        itemNameList=itemNameList, fieldList=allFieldList, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, &
         file=FILENAME)) &
         return  ! bail out
         
       if (associated(itemNameList)) then
+        if (present(fieldList)) allocate(fieldIndexList(size(itemNameList)))
+        j=1
         do i=1, size(itemNameList)
           write (iString, *) i
           write (msgString, *) "Failure in NUOPC_IsAtTimeState() for item "// &
             trim(adjustl(iString))//": "//trim(itemNameList(i))
-          field = fieldList(i)
+          field = allFieldList(i)
           isAtTime = NUOPC_IsAtTime(field, time, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=msgString, &
             line=__LINE__, &
@@ -1502,20 +1510,28 @@ module NUOPC_Base
             return  ! bail out
           if (.not.isAtTime) then
             NUOPC_IsAtTimeState = .false.
-            write (msgString, *) "Field not at expected time for item "// &
-              trim(adjustl(iString))//": "//trim(itemNameList(i))
-            call ESMF_LogWrite(msgString, ESMF_LOGMSG_WARNING)
-            if (.not.present(count)) exit ! no need to keep going
+            ! no need to keep going if first true/false is all that matters
+            if (.not.present(count) .and. .not.present(fieldList)) exit
+            if (present(fieldList)) then
+              fieldIndexList(j)=i ! record the field index
+              j=j+1
+            endif
           elseif (present(count)) then
             count = count + 1
           endif
         enddo
+        if (present(fieldList)) then
+          allocate(fieldList(j-1))
+          do i=1, j-1
+            fieldList(i)=allFieldList(fieldIndexList(i))
+          enddo
+          deallocate(fieldIndexList)
+        endif
       endif
       
       if (associated(StandardNameList)) deallocate(StandardNameList)
       if (associated(itemNameList)) deallocate(itemNameList)
-      if (associated(fieldList)) deallocate(fieldList)
-      
+      if (associated(allFieldList)) deallocate(allFieldList)
     endif
     
   end function
