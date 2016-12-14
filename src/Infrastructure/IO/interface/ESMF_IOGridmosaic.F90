@@ -37,7 +37,9 @@
       use ESMF_UtilMod
       use ESMF_InitMacrosMod    ! ESMF initializer macros
       use ESMF_LogErrMod        ! ESMF error handling
+      use ESMF_UtilStringMod
       use ESMF_VMMod
+
 #ifdef ESMF_NETCDF
       use netcdf
 #endif
@@ -53,14 +55,14 @@
 ! !PUBLIC TYPES:
 
   type ESMF_Mosaic
-    character(len=128)  :: name
-    integer            :: ntiles      ! number of tiles
-    integer            :: tilesize    ! the size of the tile
-    integer            :: ncontacts   ! number of contacts
-    character(len=256) :: tileDirectory  ! the path of the tile files
-    character(len=:),  allocatable :: filenames(:)  ! the tile filename array
-    integer, pointer   :: contact(:,:)   ! pair of tiles in each contact
-    integer, pointer   :: connindex(:,:,:)  ! the end points of the contact edges
+    character(len=ESMF_MAXSTR)  :: name
+    integer                                  :: ntiles      ! number of tiles
+    integer                                  :: tilesize    ! the size of the tile
+    integer                                  :: ncontacts   ! number of contacts
+    character(len=ESMF_MAXPATHLEN)           :: tileDirectory  ! the path of the tile files
+    character(len=ESMF_MAXPATHLEN),  pointer :: filenames(:)  ! the tile filename array
+    integer, pointer                         :: contact(:,:)   ! pair of tiles in each contact
+    integer, pointer                         :: connindex(:,:,:)  ! the end points of the contact edges
   end type
     
 !------------------------------------------------------------------------------
@@ -134,20 +136,20 @@ subroutine ESMF_GridspecReadMosaic(filename, mosaic, rc)
     integer   :: ncid, varid
     integer   :: i, j, nvars, attlen
     integer   :: ntiles, ncontacts
-    character(len=128) :: attstr
-    character(len=128) :: mosaicname
-    character(len=:), allocatable :: pathname
-    character(len=:), allocatable :: tempname
-    !character(len=256) :: tempname
+    character(len=ESMF_MAXSTR) :: attstr
+    character(len=ESMF_MAXSTR) :: mosaicname
+    character(len=ESMF_MAXPATHLEN) :: tempname
     integer            :: strlen
-    character(len=:), allocatable :: tilenames(:)
-    !character(len=:),  allocatable :: tilefilenames(:)
+    character(len=1), allocatable :: temptilenames(:,:)
+    character(len=ESMF_MAXSTR), allocatable :: tilenames(:)
+    character(len=1),  allocatable :: tilefilenames(:,:)
     integer, pointer :: contact(:,:)
     integer, pointer :: connindex(:,:,:)
     integer   :: tilesize
     integer   :: dimids(2), ndims, dims(2)
     integer   :: ncStatus, localrc
     integer   :: totallen
+    integer   :: k
 
     !initialize mosaic values
     mosaic%ntiles = 0
@@ -223,8 +225,8 @@ subroutine ESMF_GridspecReadMosaic(filename, mosaic, rc)
                rc)) return
              mosaic%ntiles = ntiles
              ! get the tile names
-             allocate(character(len=strlen)::tilenames(ntiles))
-             ncStatus = nf90_get_var(ncid, varid, tilenames, start=(/1,1/), count=(/strlen, ntiles/))
+             allocate(tilenames(ntiles), temptilenames(strlen, ntiles))
+             ncStatus = nf90_get_var(ncid, varid, temptilenames, start=(/1,1/), count=(/strlen, ntiles/))
              if (CDFCheckError (ncStatus, &
                ESMF_METHOD,  &
                ESMF_SRCLINE, &
@@ -232,9 +234,10 @@ subroutine ESMF_GridspecReadMosaic(filename, mosaic, rc)
                rc)) return
               ! replace null character by blank
              do j=1,ntiles
+              tilenames(j) = ESMF_UtilArray2String(temptilenames(:,j))
               call trim_null(tilenames(j))
              enddo
-
+             
             ! Find contact regions
             ncStatus = nf90_get_att(ncid, i, 'contact_regions', values=attstr)
             if (CDFCheckError (ncStatus, &
@@ -297,15 +300,18 @@ subroutine ESMF_GridspecReadMosaic(filename, mosaic, rc)
                ESMF_SRCLINE, &
                "contact dimension inquire", &
                rc)) return
-            allocate(character(len=dims(1))::pathname)
-            ncStatus = nf90_get_var(ncid, i, pathname, start=(/1/), count=(/dims(1)/))
+            !allocate(pathname(dims(1)))
+            ! initialize the string to null characters
+            do k=1,ESMF_MAXPATHLEN
+                mosaic%tileDirectory(k:k)=char(0)
+            enddo
+            ncStatus = nf90_get_var(ncid, i, mosaic%tileDirectory, start=(/1/), count=(/dims(1)/))
             if (CDFCheckError (ncStatus, &
                ESMF_METHOD,  &
                ESMF_SRCLINE, &
                "fail to get grid_file_location", &
                rc)) return
-            call trim_null(pathname)
-            mosaic%tileDirectory=trim(pathname)
+            call trim_null(mosaic%tileDirectory)
           elseif (attstr(1:attlen) .eq. 'grid_file_names') then
             ! Find the dimension of this variable
             ncStatus = nf90_inquire_variable(ncid, i, ndims=ndims, dimids=dimids)
@@ -327,10 +333,15 @@ subroutine ESMF_GridspecReadMosaic(filename, mosaic, rc)
                ESMF_SRCLINE, &
                "contact dimension inquire", &
                rc)) return
-            allocate(character(len=dims(1))::mosaic%filenames(ntiles))
-            !allocate(character(len=dims(1))::tilefilenames(ntiles))
-            !allocate(mosaic%filenames(ntiles))
-            ncStatus = nf90_get_var(ncid, i, mosaic%filenames, start=(/1,1/), count=(/dims(1), ntiles/))
+            allocate(tilefilenames(dims(1), ntiles))
+            allocate(mosaic%filenames(ntiles))
+            ! initialize the string to null characters
+	    do j=1,ntiles
+              do k=1,ESMF_MAXPATHLEN
+                mosaic%filenames(ntiles)(k:k)=char(0)
+              enddo
+            enddo
+            ncStatus = nf90_get_var(ncid, i, tilefilenames, start=(/1,1/), count=(/dims(1), ntiles/))
             if (CDFCheckError (ncStatus, &
                ESMF_METHOD,  &
                ESMF_SRCLINE, &
@@ -338,8 +349,8 @@ subroutine ESMF_GridspecReadMosaic(filename, mosaic, rc)
                rc)) return
             ! replace null character by blank
             do j=1,ntiles
+              mosaic%filenames(j)=ESMF_UtilArray2String(tilefilenames(:,j))
               call trim_null(mosaic%filenames(j))
-              !mosaic%filenames(j)=tilefilenames(j)
             enddo
           endif
        endif
@@ -360,9 +371,7 @@ subroutine ESMF_GridspecReadMosaic(filename, mosaic, rc)
         return    
       else
         ! find the tileSize by reading one of the tilefiles
-        totallen=len_trim(mosaic%filenames(1))+len_trim(pathname)
-        allocate(character(len=totallen)::tempname)
-        tempname = trim(pathname)//trim(mosaic%filenames(1))
+        tempname = trim(mosaic%TileDirectory)//trim(mosaic%filenames(1))
         call ESMF_GridSpecQueryTileSize(tempname, tilesize, rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
            ESMF_CONTEXT, rcToReturn=rc)) return
@@ -386,7 +395,7 @@ end subroutine ESMF_GridspecReadMosaic
 #define ESMF_METHOD "ESMF_GridspecQueryTileSize"
 subroutine ESMF_GridspecQueryTileSize(filename, tileSize, rc)
 
-    character(len=:), intent(in), allocatable     :: filename
+    character(len=*), intent(in)     :: filename
     integer, intent(out)             :: tileSize
     integer, intent(out), optional   :: rc
 
@@ -487,8 +496,8 @@ subroutine ESMF_GridspecReadTile(filename, tileSize, cornerLon, cornerLat, cente
 
 ! !ARGUMENTS:
  
-    character(len=:), intent(in), allocatable     :: filename
-    integer, intent(in)             :: tileSize
+    character(len=*), intent(in)     :: filename
+    integer, intent(in)              :: tileSize
     real(ESMF_KIND_R8), pointer      :: cornerLon(:,:)
     real(ESMF_KIND_R8), pointer      :: cornerLat(:,:)
     real(ESMF_KIND_R8), pointer      :: centerLon(:,:)
@@ -660,7 +669,7 @@ subroutine readContacts(ncid, varid, dims, mosaicname, tilenames, &
   integer, intent(in)                       :: ncid, varid
   integer, intent(in)                       :: dims(2)
   character(len=*), intent(in)              :: mosaicname
-  character(len=:), intent(in), allocatable :: tilenames(:)
+  character(len=*), intent(in), target      :: tilenames(:)
   integer, pointer                          :: contact(:,:)
   integer, pointer                          :: connindex(:,:,:)
   integer, intent(out)                      :: rc
@@ -711,9 +720,8 @@ subroutine readContacts(ncid, varid, dims, mosaicname, tilenames, &
   integer   :: tiletuple(2,4)
   integer   :: varid1
   integer   :: ncStatus
-  character(len=:), allocatable :: contactstring(:)
-  character(len=:), allocatable :: indexstring(:)
-  
+  character(len=1), allocatable :: contactstring(:,:)
+  character(len=1), allocatable :: indexstring(:,:)
   ! Check the attributes first
   ncStatus = nf90_inquire_attribute(ncid, varid, 'standard_name', len=attlen)
   if (CDFCheckError (ncStatus, &
@@ -752,7 +760,7 @@ subroutine readContacts(ncid, varid, dims, mosaicname, tilenames, &
           ESMF_CONTEXT, rcToReturn=rc) 
      return
   endif
-  allocate(character(len=dims(1))::contactstring(dims(2)))
+  allocate(contactstring(dims(1),dims(2)))
   ncStatus = nf90_get_var(ncid, varid, contactstring, start=(/1,1/), count=(/dims(1), dims(2)/))
   if (CDFCheckError (ncStatus, &
          ESMF_METHOD,  &
@@ -760,7 +768,7 @@ subroutine readContacts(ncid, varid, dims, mosaicname, tilenames, &
          "Error reading contacts variable", &
          rc)) return
   do j=1, dims(2)
-    call parse_contact(contactstring(j), tilenames, tile1, tile2)
+    call parse_contact(ESMF_UtilArray2String(contactstring(:,j)), tilenames, tile1, tile2)
     contact(1,j)=tile1
     contact(2,j)=tile2
   enddo
@@ -785,7 +793,7 @@ subroutine readContacts(ncid, varid, dims, mosaicname, tilenames, &
          ESMF_SRCLINE, &
          attstr(1:attlen), &
          rc)) return
-  allocate(character(len=dims(1))::indexstring(dims(2)))
+  allocate(indexstring(dims(1),dims(2)))
   ncStatus = nf90_get_var(ncid, varid1, indexstring, start=(/1,1/), count=(/dims(1), dims(2)/))
   if (CDFCheckError (ncStatus, &
          ESMF_METHOD,  &
@@ -793,7 +801,7 @@ subroutine readContacts(ncid, varid, dims, mosaicname, tilenames, &
          "contact_type attribute does not exit", &
          rc)) return
   do j=1, dims(2)
-    call parse_contactindex(indexstring(j), tiletuple)
+    call parse_contactindex(ESMF_UtilArray2String(indexstring(:,j)), tiletuple)
     connindex(:,:,j)=tiletuple
   enddo
 
@@ -823,17 +831,17 @@ end subroutine trim_null
 ! Parse a contact string "mosaic:tile1::mosaic::tile2" and a tilename array.  Return the index of tile1 and tile2
 subroutine parse_contact(string, tiles, tile1, tile2)
 
-  character(len=*), intent(inout) :: string
-  character(len=:), intent(in), allocatable :: tiles(:)
+  character(len=*)                      :: string
+  character(len=*), intent(in), target :: tiles(:)
   integer, intent(out) :: tile1, tile2
 
   integer :: pos, pos1, pos2
   integer :: length
-  character(len=40) :: tempstr, tilestr
+  character(len=ESMF_MAXSTR) :: tempstr, tilestr
   integer :: i
 
   call trim_null(string)
-  length = len(trim(string))
+  length = len_trim(string)
   pos=index(string, "::")
   pos1 = index(string(1:pos-1), ":")
   tilestr = string(pos1+1:pos-1)
@@ -859,7 +867,7 @@ end subroutine parse_contact
 ! Parse a contact string "mosaic:tile1::mosaic::tile2" and a tilename array.  Return the index of tile1 and tile2
 subroutine parse_contactindex(string, tiletuple)
 
-  character(len=*), intent(inout) :: string
+  character(len=*)     :: string
   integer, intent(out) :: tiletuple(2,4)
 
   ! The contact_index contains a pair of four points that defines the two edges that contact to 
@@ -875,7 +883,7 @@ subroutine parse_contactindex(string, tiletuple)
   integer :: i,j
 
   call trim_null(string)
-  length = len(trim(string))
+  length = len_trim(string)
   pos=index(string, "::")
   pos1 = index(string(1:pos-1), ",")
   pos2 = index(string(1:pos1-1), ":")
