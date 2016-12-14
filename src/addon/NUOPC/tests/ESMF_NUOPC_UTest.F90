@@ -641,10 +641,10 @@ program ESMF_NUOPC_UTest
   !------------------------------------------------------------------------
   !NEX_UTest
   write(name, *) "NUOPC_FieldDictionaryMatchSyno() (non existing entry1) Test"
-  write(failMsg, *) "Did return ESMF_SUCCESS"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
   flag = NUOPC_FieldDictionaryMatchSyno("abcd_adoption_level", &
     "esmf_adoption_level", rc=rc)
-  call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   !------------------------------------------------------------------------
 
   !------------------------------------------------------------------------
