@@ -76,6 +76,7 @@ module NUOPC_Driver
     type(type_PhaseMapParser), pointer:: modelPhaseMap(:)
     type(type_PhaseMapParser), pointer:: connectorPhaseMap(:,:)
     ! - flags
+    logical                           :: firstTimeDataInit
     logical                           :: dataDepAllComplete
   end type
 
@@ -380,6 +381,7 @@ module NUOPC_Driver
     endif
     
     ! prepare members in the internal state
+    is%wrap%firstTimeDataInit  = .true.
     is%wrap%dataDepAllComplete = .true.
     is%wrap%componentMap = ESMF_ContainerCreate(rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -1314,19 +1316,23 @@ module NUOPC_Driver
       return  ! bail out
 
 #ifdef DEBUG
-call ESMF_LogWrite("gjt: Entering InitializeIPDv02p5Data for: "//trim(name), &
+call ESMF_LogWrite(trim(name)//": Entering InitializeIPDv02p5Data", &
   ESMF_LOGMSG_INFO)
 #endif
 
     ! modelComps
-    call loopModelCompsS(gcomp, phaseString="IPDv00p4", rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME)) &
-      return  ! bail out
-    call loopModelCompsS(gcomp, phaseString="IPDv01p5", rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME)) &
-      return  ! bail out
+    if (is%wrap%firstTimeDataInit) then
+      ! IPDv < 02 data initialize phase only called once
+      call loopModelCompsS(gcomp, phaseString="IPDv00p4", rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) &
+        return  ! bail out
+      call loopModelCompsS(gcomp, phaseString="IPDv01p5", rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) &
+        return  ! bail out
+      is%wrap%firstTimeDataInit=.false. ! set guard flag for next time
+    endif
     execFlagCollect = .false.
     call loopModelCompsS(gcomp, phaseString="IPDv02p5", execFlag=execFlag, &
       rc=rc)
@@ -1375,7 +1381,7 @@ call ESMF_LogWrite("gjt: Entering InitializeIPDv02p5Data for: "//trim(name), &
         return  ! bail out
 
 #ifdef DEBUG
-write(msgString,*) trim(name)//": gjt: finished loopDataDependentInitialize(): ", &
+write(msgString,*) trim(name)//": finished loopDataDependentInitialize(): ", &
   is%wrap%dataDepAllComplete
 call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO)
 #endif
@@ -1402,7 +1408,7 @@ call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO)
 #endif
 
 #ifdef DEBUG
-call ESMF_LogWrite("gjt: Exiting InitializeIPDv02p5Data for: "//trim(name), &
+call ESMF_LogWrite(trim(name)//": Exiting InitializeIPDv02p5Data", &
   ESMF_LOGMSG_INFO)
 #endif
 
@@ -1661,7 +1667,7 @@ call ESMF_LogWrite("gjt: Exiting InitializeIPDv02p5Data for: "//trim(name), &
             return  ! bail out
           
 #ifdef DEBUG
-write(msgString,*) trim(name)//": gjt: inside loopDataDependentInitialize(): ", &
+write(msgString,*) trim(name)//": inside loopDataDependentInitialize(): ", &
   "component: ", i,", dataComplete: ", trim(valueString)
 call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO)
 #endif
@@ -4036,9 +4042,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer, intent(out) :: rc
     
     ! local variables
-    character(ESMF_MAXSTR)    :: name
-    type(ESMF_Clock)          :: internalClock
-    type(ESMF_Time)           :: time
+    character(ESMF_MAXSTR)        :: name
+    type(ESMF_Clock)              :: internalClock
+    type(ESMF_Time)               :: time
+    type(ESMF_Field), allocatable :: fieldList(:)
+    character(ESMF_MAXSTR)        :: fieldName
+    integer                       :: i
 
     rc = ESMF_SUCCESS
 
@@ -4048,7 +4057,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
 #ifdef DEBUG
-call ESMF_LogWrite("gjt: Entering InternalInitializeComplete for: "//trim(name), &
+call ESMF_LogWrite(trim(name)//": Entering InternalInitializeComplete", &
   ESMF_LOGMSG_INFO)
 #endif
 
@@ -4056,23 +4065,32 @@ call ESMF_LogWrite("gjt: Entering InternalInitializeComplete for: "//trim(name),
     if (ESMF_StateIsCreated(exportState, rc=rc)) then
       call ESMF_GridCompGet(driver, clock=internalClock, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, &
-        file=__FILE__)) &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) &
         return  ! bail out
       call ESMF_ClockGet(internalClock, currTime=time, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, &
-        file=__FILE__)) &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) &
         return  ! bail out
-      if (NUOPC_IsAtTime(exportState, time, rc=rc)) then
+      if (NUOPC_IsAtTime(exportState, time, fieldList=fieldList, rc=rc)) then
         ! indicate that data initialization is complete 
         ! (breaking out of init-loop)
         call NUOPC_CompAttributeSet(driver, &
           name="InitializeDataComplete", value="true", rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-          line=__LINE__, &
-          file=__FILE__)) &
+          line=__LINE__, file=trim(name)//":"//FILENAME)) &
           return  ! bail out
+#ifdef DEBUG
+      else
+        do i=1, size(fieldList)
+          call ESMF_FieldGet(fieldList(i), name=fieldName, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME)) &
+            return  ! bail out
+          call ESMF_LogWrite(trim(name)//": Field not at expected time: "&
+            //trim(fieldName), ESMF_LOGMSG_WARNING)
+        enddo
+        deallocate(fieldList)
+#endif
       endif
     else
       ! indicate that data initialization is complete 
@@ -4080,13 +4098,12 @@ call ESMF_LogWrite("gjt: Entering InternalInitializeComplete for: "//trim(name),
       call NUOPC_CompAttributeSet(driver, &
         name="InitializeDataComplete", value="true", rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, &
-        file=__FILE__)) &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) &
         return  ! bail out
     endif
     
 #ifdef DEBUG
-call ESMF_LogWrite("gjt: Exiting InternalInitializeComplete for: "//trim(name), &
+call ESMF_LogWrite(trim(name)//": Exiting InternalInitializeComplete", &
   ESMF_LOGMSG_INFO)
 #endif
 
