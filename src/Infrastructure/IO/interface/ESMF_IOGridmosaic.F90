@@ -84,15 +84,16 @@
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridspecReadMosaic"
 
-!BOP
+!BOPI
 ! !INTERFACE:
-subroutine ESMF_GridspecReadMosaic(filename, mosaic, rc)
+subroutine ESMF_GridspecReadMosaic(filename, mosaic, tileFilePath, rc)
 
 ! !ARGUMENTS:
  
-    character(len=*), intent(in)     :: filename
-    type(ESMF_Mosaic), intent(inout) :: mosaic
-    integer, optional, intent(out)   :: rc
+    character(len=*), intent(in)           :: filename
+    type(ESMF_Mosaic), intent(inout)       :: mosaic
+    character(len=*), intent(in), optional :: tileFilePath
+    integer, optional, intent(out)         :: rc
 
 ! !DESCRIPTIONS:
 !   find a variable with the standard_name attribute set to "grid_mosaic_spec"
@@ -100,13 +101,10 @@ subroutine ESMF_GridspecReadMosaic(filename, mosaic, rc)
 !   use the "contact_regions" attribute to find the variable that defines the contacts
 !   The value of the variable is the mosaic name used in the contact list
 !   
-!   find a variable with standard_name set to "grid_file_location".  It is the 
-!   path where the tile files are stored.  If not exist, assuming the tile files are
-!   in the working directory
-!  
-!   there should be a variable that defines the filenames of the tile files.  Let's give
-!   it a standard_name called "grid_file_names", together with grid_file_location, we can
-!   locate the tile files.  It is a 1D array with the same size as the "children" variable.
+!   Variable "gridfiles" defines the path where the tile files are stored. If the 
+!   optional argument tileFilePath is given, use it instead of the path defined in the
+!   mosaic file.  Variable "gridfiles" defines the name of the tile files.  It is a 1D 
+!   array with the same size as the "children" variable.
 !
 !   the "children" varible is a 1D array containing a list of tile names.  The dimension
 !   of the variable defines the number of tiles
@@ -286,99 +284,118 @@ subroutine ESMF_GridspecReadMosaic(filename, mosaic, rc)
             if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                ESMF_CONTEXT, rcToReturn=rc)) return
 	    mosaic%ncontacts=dims(2)
-          elseif (attstr(1:attlen) .eq. 'grid_file_location') then
-            ! Get the directory name where the tile files are stored
-            ncStatus = nf90_inquire_variable(ncid, i, ndims=ndims, dimids=dimids)
-            if (CDFCheckError (ncStatus, &
-               ESMF_METHOD,  &
-               ESMF_SRCLINE, &
-               "inquire variable grid_file_location", &
-               rc)) return
-            ncStatus = nf90_inquire_dimension(ncid, dimids(1), len=dims(1))
-            if (CDFCheckError (ncStatus, &
-               ESMF_METHOD,  &
-               ESMF_SRCLINE, &
-               "contact dimension inquire", &
-               rc)) return
-            !allocate(pathname(dims(1)))
-            ! initialize the string to null characters
-            do k=1,ESMF_MAXPATHLEN
-                mosaic%tileDirectory(k:k)=char(0)
-            enddo
-            ncStatus = nf90_get_var(ncid, i, mosaic%tileDirectory, start=(/1/), count=(/dims(1)/))
-            if (CDFCheckError (ncStatus, &
-               ESMF_METHOD,  &
-               ESMF_SRCLINE, &
-               "fail to get grid_file_location", &
-               rc)) return
-            call trim_null(mosaic%tileDirectory)
-          elseif (attstr(1:attlen) .eq. 'grid_file_names') then
-            ! Find the dimension of this variable
-            ncStatus = nf90_inquire_variable(ncid, i, ndims=ndims, dimids=dimids)
-            if (CDFCheckError (ncStatus, &
-               ESMF_METHOD,  &
-               ESMF_SRCLINE, &
-               "children attribute does not exit", &
-               rc)) return
-            if (ndims /= 2) then
-                call ESMF_LogSetError(rcToCheck=ESMF_FAILURE, &
-                 msg="- contact region variable dimension greater than 1", & 
-                 ESMF_CONTEXT, rcToReturn=rc) 
-               return
-            endif    
-            ! query it's dimension to find out the string length
-            ncStatus = nf90_inquire_dimension(ncid, dimids(1), len=dims(1))
-            if (CDFCheckError (ncStatus, &
-               ESMF_METHOD,  &
-               ESMF_SRCLINE, &
-               "contact dimension inquire", &
-               rc)) return
-            allocate(tilefilenames(dims(1), ntiles))
-            allocate(mosaic%filenames(ntiles))
-            ! initialize the string to null characters
-	    do j=1,ntiles
-              do k=1,ESMF_MAXPATHLEN
-                mosaic%filenames(ntiles)(k:k)=char(0)
-              enddo
-            enddo
-            ncStatus = nf90_get_var(ncid, i, tilefilenames, start=(/1,1/), count=(/dims(1), ntiles/))
-            if (CDFCheckError (ncStatus, &
-               ESMF_METHOD,  &
-               ESMF_SRCLINE, &
-               "fail to get grid_file_names", &
-               rc)) return
-            ! replace null character by blank
-            do j=1,ntiles
-              mosaic%filenames(j)=ESMF_UtilArray2String(tilefilenames(:,j))
-              call trim_null(mosaic%filenames(j))
-            enddo
           endif
        endif
      enddo
 
-     ncStatus = nf90_close(ncid)
+     ! find the tile file path
+     if (present(tileFilePath)) then
+       mosaic%tileDirectory = tileFilePath
+     else
+       ncStatus = nf90_inq_varid(ncid, 'gridlocation', varid)
+       if (CDFCheckError (ncStatus, &
+               ESMF_METHOD,  &
+               ESMF_SRCLINE, &
+               "inquire variable gridlocation", &
+               rc)) return
+       ! Get the directory name where the tile files are stored
+       ncStatus = nf90_inquire_variable(ncid, varid, ndims=ndims, dimids=dimids)
+       if (CDFCheckError (ncStatus, &
+               ESMF_METHOD,  &
+               ESMF_SRCLINE, &
+               "inquire variable gridlocation", &
+               rc)) return
+       ncStatus = nf90_inquire_dimension(ncid, dimids(1), len=dims(1))
+            if (CDFCheckError (ncStatus, &
+               ESMF_METHOD,  &
+               ESMF_SRCLINE, &
+               "contact dimension inquire", &
+               rc)) return
+       ! initialize the string to null characters
+       do k=1,ESMF_MAXPATHLEN
+           mosaic%tileDirectory(k:k)=char(0)
+       enddo
+       ncStatus = nf90_get_var(ncid, varid, mosaic%tileDirectory, start=(/1/), count=(/dims(1)/))
+       if (CDFCheckError (ncStatus, &
+               ESMF_METHOD,  &
+               ESMF_SRCLINE, &
+               "fail to get gridlocation", &
+               rc)) return
+       call trim_null(mosaic%tileDirectory)
+     endif
+
+     ! get the tile file names
+     ncStatus = nf90_inq_varid(ncid, 'gridfiles', varid)
      if (CDFCheckError (ncStatus, &
+               ESMF_METHOD,  &
+               ESMF_SRCLINE, &
+               "inquire variable gridfiles", &
+               rc)) return
+       
+     ! Find the dimension of this variable
+     ncStatus = nf90_inquire_variable(ncid, varid, ndims=ndims, dimids=dimids)
+     if (CDFCheckError (ncStatus, &
+               ESMF_METHOD,  &
+               ESMF_SRCLINE, &
+               "inquire variable gridfiles error", &
+               rc)) return
+     if (ndims /= 2) then
+        call ESMF_LogSetError(rcToCheck=ESMF_FAILURE, &
+                 msg="- gridfiles variable dimension /= 2", & 
+                 ESMF_CONTEXT, rcToReturn=rc) 
+        return
+     endif    
+     ! query it's dimension to find out the string length
+     ncStatus = nf90_inquire_dimension(ncid, dimids(1), len=dims(1))
+     if (CDFCheckError (ncStatus, &
+               ESMF_METHOD,  &
+               ESMF_SRCLINE, &
+               "gridfiles dimension inquire", &
+               rc)) return
+     allocate(tilefilenames(dims(1), ntiles))
+     allocate(mosaic%filenames(ntiles))
+     ! initialize the string to null characters
+     do j=1,ntiles
+        do k=1,ESMF_MAXPATHLEN
+            mosaic%filenames(ntiles)(k:k)=char(0)
+        enddo
+      enddo
+      ncStatus = nf90_get_var(ncid, varid, tilefilenames, start=(/1,1/), count=(/dims(1), ntiles/))
+      if (CDFCheckError (ncStatus, &
+               ESMF_METHOD,  &
+               ESMF_SRCLINE, &
+               "fail to get gridfiles", &
+               rc)) return
+      ! replace null character by blank
+      do j=1,ntiles
+          mosaic%filenames(j)=ESMF_UtilArray2String(tilefilenames(:,j))
+          call trim_null(mosaic%filenames(j))
+      enddo
+
+
+      ncStatus = nf90_close(ncid)
+      if (CDFCheckError (ncStatus, &
            ESMF_METHOD,  &
            ESMF_SRCLINE, &
            "close mosaic file", &
            rc)) return
 
-     ! check if we found the mosaic variables
-     if (mosaic%ntiles == 0) then
-        call ESMF_LogSetError(ESMF_FAILURE, & 
+      ! check if we found the mosaic variables
+      if (mosaic%ntiles == 0) then
+         call ESMF_LogSetError(ESMF_FAILURE, & 
                  msg="- Failed to parse GridSpec Mosaic file", & 
                  ESMF_CONTEXT, rcToReturn=rc) 
-        return    
-      else
-        ! find the tileSize by reading one of the tilefiles
-        tempname = trim(mosaic%TileDirectory)//trim(mosaic%filenames(1))
-        call ESMF_GridSpecQueryTileSize(tempname, tilesize, rc=localrc)
-        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-           ESMF_CONTEXT, rcToReturn=rc)) return
-        mosaic%tilesize = tilesize
-        if (present(rc)) rc=ESMF_SUCCESS
-        return
-      endif
+         return    
+       else
+         ! find the tileSize by reading one of the tilefiles
+         tempname = trim(mosaic%TileDirectory)//trim(mosaic%filenames(1))
+         call ESMF_GridSpecQueryTileSize(tempname, tilesize, rc=localrc)
+         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+         mosaic%tilesize = tilesize
+         if (present(rc)) rc=ESMF_SUCCESS
+         return
+       endif
 
 #else       
 

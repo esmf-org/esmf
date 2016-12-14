@@ -13280,7 +13280,7 @@ end function ESMF_GridCreateCubedSphere
 
 ! !INTERFACE:
   function ESMF_GridCreateMosaic(filename,keywordEnforcer, regDecompPTile, decompflagPTile, &
-        deLabelList, delayout, name, rc)
+        deLabelList, delayout, name, tileFilePath, rc)
 !         
 ! !RETURN VALUE:
     type(ESMF_Grid) :: ESMF_GridCreateMosaic
@@ -13293,6 +13293,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                        intent(in),  optional :: deLabelList(:)
     type(ESMF_DELayout),            intent(in),  optional :: delayout
     character(len=*),               intent(in),  optional :: name
+    character(len=*),               intent(in),  optional :: tileFilePath
     integer,                        intent(out), optional :: rc
 
 !
@@ -13341,6 +13342,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !          {\tt regDecompPTile} will be constructed accordingly.
 !     \item[{[name]}]
 !          {\tt ESMF\_Grid} name.
+!     \item[{[tileFilePath]}]
+!          Optional argument to define the path where the tile files reside. If it 
+!          is given, it overwrites the path defined in {\tt gridlocation} variable 
+!          in the mosaic file.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -13391,7 +13396,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
-  call ESMF_GridSpecReadMosaic(filename, mosaic, rc=localrc)
+  call ESMF_GridSpecReadMosaic(filename, mosaic, tileFilePath=tileFilePath, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
