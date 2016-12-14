@@ -83,8 +83,6 @@ module ESMF_UtilCubedSphereMod
   real :: deglon_start = -30., deglon_stop = 30., &  ! boundaries of latlon patch
           deglat_start = -30., deglat_stop = 30.
 
-  real, allocatable, save       :: global_tile1(:,:,:)
-
   public :: ESMF_UtilCreateCSCoords
   public :: ESMF_UtilCreateCSCoordsPar
 contains
@@ -275,11 +273,11 @@ subroutine ESMF_UtilCreateCSCoordsPar(npts, LonEdge,LatEdge, start, count, tile,
   real, allocatable             :: tile1(:,:,:)
   integer                       :: rc
   real, allocatable             :: tile_local(:,:,:)
+  real, allocatable, save       :: global_tile1(:,:,:)
 
-    if (.not. allocated(global_tile1)) then
-       allocate(global_tile1(npts+1,npts+1,ndims))
-       call gnomonic_grids(grid_type, npts, global_tile1(:,:,1), global_tile1(:,:,2))
-    endif
+    allocate(global_tile1(npts+1,npts+1,ndims))
+    call gnomonic_grids(grid_type, npts, global_tile1(:,:,1), global_tile1(:,:,2))
+
     allocate(tile_local(count(1)+1,count(2)+1,ndims) )
     ! mirror_grid assumes that the tile=1 is centered on equator and greenwich meridian Lon[-pi,pi]
     call mirror_grid_local(tile_local, global_tile1, start, count, 2, tile)
@@ -316,7 +314,7 @@ subroutine ESMF_UtilCreateCSCoordsPar(npts, LonEdge,LatEdge, start, count, tile,
      end if
 
      deallocate(tile_local)
-
+     deallocate(global_tile1)
 
   return
 
