@@ -1402,7 +1402,7 @@ endif
 !
 !This example creates a six-tile Grid to represent a cubed sphere grid defined
 !in a GRIDSPEC Mosaic file {\tt C48\_mosaic.nc}. The GRIDSPEC mosaic file format is defined in
-!the document \htmladdnormallink{GRIDSPEC: A standard for the description of grids used in Earth System models}{http://extranet.gfdl.noaa.gov/~vb/gridstd/gridstdse3.html#x5-220003.2} by V. Balaji, Alistair Adcroft and Zhi Liang.
+!the document \htmladdnormallink{GRIDSPEC: A standard for the description of grids used in Earth System models}{http://extranet.gfdl.noaa.gov/~vb/gridstd/gridstdse3.html\#x5-220003.2} by V. Balaji, Alistair Adcroft and Zhi Liang.
 !
 !The mosaic file contains the following information:
 !
@@ -1492,8 +1492,8 @@ endif
 !to each other.  For a Cubed Sphere grid, there are six tiles and 12 connections.  The {\tt contacts} variable
 !has three required attributes: {\tt standard\_name}, {\tt contact\_type}, and {\tt contact\_index}.  {\tt startand\_name}
 !has to be set to {\tt grid\_contact\_spec}.  {\tt contact\_type} has to be {\tt boundary}.  ESMF does not support
-!overlapping contact regions. {\tt contact_index} defines the variable name that contains the information how the
-!two adjacent tiles are connected to each other.  The {\tt contact_index} variable contains 12 entries.  Each entry
+!overlapping contact regions. {\tt contact\_index} defines the variable name that contains the information how the
+!two adjacent tiles are connected to each other.  The {\tt contact\_index} variable contains 12 entries.  Each entry
 !contains the index of four points that defines the two edges that contact to 
 ! each other from the two neighboring tiles.  Assuming the four points are A, B, C, and D.  
 ! A and B defines the edge of tile 1 and C and D defines the edge of tile2.  A is the same point
@@ -1510,8 +1510,8 @@ endif
 !A total of 16 DEs are used. 
 !
 !{\tt ESMF\_GridCreateMosaic()} first reads in the mosaic file and defines the tile connections in the 
-!{\tt ESMF_DistGrid}  using the information
-!defined in variables {\tt contacts} and {\tt contact_index}. Then it reads in the coordinates defined in
+!{\tt ESMF\_DistGrid}  using the information
+!defined in variables {\tt contacts} and {\tt contact\_index}. Then it reads in the coordinates defined in
 !the tile files.  The coordinates defined in the tile file is called {\tt supergrid}.  A supergrid put all the
 !stagger locations in one big grid.  It contains corner, edge and center coordinates all in one 2D array.
 !In this example, there are 48 elements in each side of a tile, therefore, the size of the supergrid is 
@@ -1568,7 +1568,7 @@ endif
 !\end{verbatim}
 !
 !The tile file not only defines the coordinates at all staggers, it also has a complete specification of
-!distances, angles, and areas.  In ESMF, we only use the {\tt geographic_longitude} and {\tt geographic_latitude}
+!distances, angles, and areas.  In ESMF, we only use the {\tt geographic\_longitude} and {\tt geographic\_latitude}
 !variables and its subsets on the center and corner staggers.
 !BOC
      ! Set up decomposition for each tile 
