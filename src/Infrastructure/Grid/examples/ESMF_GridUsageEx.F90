@@ -1512,8 +1512,8 @@ endif
 !{\tt ESMF\_GridCreateMosaic()} first reads in the mosaic file and defines the tile connections in the 
 !{\tt ESMF\_DistGrid}  using the information
 !defined in variables {\tt contacts} and {\tt contact\_index}. Then it reads in the coordinates defined in
-!the tile files.  The coordinates defined in the tile file is called {\tt supergrid}.  A supergrid put all the
-!stagger locations in one big grid.  It contains corner, edge and center coordinates all in one 2D array.
+!the tile files.  The coordinates defined in the tile file are a {\tt supergrid}.  A supergrid contains all the
+!stagger locations in one grid.  It contains the corner, edge and center coordinates all in one 2D array.
 !In this example, there are 48 elements in each side of a tile, therefore, the size of the supergrid is 
 !48*2+1=97, i.e. 97x97.
 !
@@ -1568,8 +1568,11 @@ endif
 !\end{verbatim}
 !
 !The tile file not only defines the coordinates at all staggers, it also has a complete specification of
-!distances, angles, and areas.  In ESMF, we only use the {\tt geographic\_longitude} and {\tt geographic\_latitude}
+!distances, angles, and areas.  In ESMF, we currently only use the {\tt geographic\_longitude} and {\tt geographic\_latitude}
 !variables and its subsets on the center and corner staggers.
+!EOE
+
+#ifdef ESMF_NETCDF
 !BOC
      ! Set up decomposition for each tile 
      allocate(decomptile(2,6))
@@ -1581,15 +1584,15 @@ endif
      decomptile(:,6)=(/1,2/) ! Tile 6
 
      ! Create cubed sphere grid
-      grid2D = ESMF_GridCreateMosaic(filename='data/C48_mosaic.nc', &
-              tileFilePath='./data/', regDecompPTile=decomptile, rc=rc)
+     grid2D = ESMF_GridCreateMosaic(filename='data/C48_mosaic.nc', &
+                tileFilePath='./data/', regDecompPTile=decomptile, rc=rc)
 !EOC
      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
      ! Get rid of Grid
      call ESMF_GridDestroy(grid2D, rc=rc)
      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
      deallocate(decomptile)
-
+#endif
 !BOE
 !\subsubsection{Grid stagger locations}
 !\label{sec:usage:staggerloc}

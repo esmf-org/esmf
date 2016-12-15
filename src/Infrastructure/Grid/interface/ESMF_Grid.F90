@@ -13899,7 +13899,7 @@ integer, intent(OUT) :: positionVector(2)
   endif
   
   ! done constructing orientationVector
-  print *, ">>>>> orientationVector=", orientationVector, " <<<<<"
+  ! print *, ">>>>> orientationVector=", orientationVector, " <<<<<"
   
   ! now construct positionVector....
   ! The contact connects pA "+1" (on tile A) to pC (on tile B). The "+1" here
@@ -13920,7 +13920,7 @@ integer, intent(OUT) :: positionVector(2)
   !print *, "pAplusrot=", pAplusrot
   ! find positionVector per definition as the difference
   positionVector = pC - pAplusrot
-  print *, ">>>>> positionVector=   ", positionVector, " <<<<<"
+  !print *, ">>>>> positionVector=   ", positionVector, " <<<<<"
 
 end subroutine calculateConnect
 

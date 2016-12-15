@@ -199,8 +199,13 @@
       ! do test
       call test_bilinear_regrid_csmosaic(rc)
 
-      ! return result
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      ! return results depending on the presence of the NetCDF library
+#ifdef ESMF_NETCDF
+      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+#else
+      write(failMsg, *) "Did not return ESMF_RC_LIB_NOT_PRESENT"
+      call ESMF_Test((rc==ESMF_RC_LIB_NOT_PRESENT), name, failMsg, result, ESMF_SRCLINE)
+#endif
       !------------------------------------------------------------------------
       !------------------------------------------------------------------------
       !EX_UTest
@@ -214,8 +219,13 @@
       ! do test
       call test_conserve_regrid_csmosaic(rc)
 
-      ! return result
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      ! return results depending on the presence of the NetCDF library
+#ifdef ESMF_NETCDF
+      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+#else
+      write(failMsg, *) "Did not return ESMF_RC_LIB_NOT_PRESENT"
+      call ESMF_Test((rc==ESMF_RC_LIB_NOT_PRESENT), name, failMsg, result, ESMF_SRCLINE)
+#endif
       !------------------------------------------------------------------------
 
 #endif
