@@ -80,7 +80,7 @@
         print *, "Getting pet list info type failed, exiting..."
         return
       end if
-      if(pet_list_info_type == ESMF_COMP_USER_NEG_PETLIST_INFO_ENUMERATE) then
+      if(pet_list_info_type == ESMF_COMP_USER_NEG_LIST_INFO_ENUMERATE) then
         call ESMF_AttributeGet(comp, name="ESMF_COMP_USER_NEG_PETLIST_INFO_SIZE",&
           value=pet_count, rc=rc)
         if(rc /= ESMF_SUCCESS) then
@@ -102,7 +102,7 @@
         print *, "Got Petlist : ", pet_list
         print *, "Accepting the petlist passed by driver/main"
       else
-        print *, "ERROR: Only PETLIST_INFO of type ENUMERATE is supported for now"
+        print *, "ERROR: Only LIST_INFO of type ENUMERATE is supported for now"
         return
       end if
 

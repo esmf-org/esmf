@@ -226,7 +226,7 @@
       pet_count = size(comp_pet_info%pet_list)
 
       call ESMF_AttributeSet(comp, name="ESMF_COMP_USER_NEG_PETLIST_INFO_TYPE",&
-        value=ESMF_COMP_USER_NEG_PETLIST_INFO_ENUMERATE, rc=rc)
+        value=ESMF_COMP_USER_NEG_LIST_INFO_ENUMERATE, rc=rc)
       if(rc /= ESMF_SUCCESS) then
         print *, "Setting pet list info type failed, exiting..."
         return
