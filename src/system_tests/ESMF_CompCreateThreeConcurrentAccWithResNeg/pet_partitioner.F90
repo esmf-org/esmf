@@ -35,6 +35,7 @@
   ! and a non accelerated petlist, nonAPets, that consists of pets without
   ! access to the accelerator device
   ! based on the partition strategy, partStrategy
+  ! nDevApet returns the number of devices pet APet
   ! ESMF_ACC_PET_PARTITION_CONTIG => accelerated devices are
   !   available from the lowest ranked MPI processes (rank < number of
   !   devices)
@@ -43,7 +44,7 @@
   ! ESMF_ACC_PET_PARTITION_LOWEST_RANK => accelerated devices are
   !   available from the lowest ranked process (single process)
   !   on each node with access to a device
-  subroutine partition_pets(vm, aPets, nonAPets, partStrategy, rc)
+  subroutine partition_pets(vm, aPets, nonAPets, nDevAPet, partStrategy, rc)
 !   ! The ESMF Framework module
     use ESMF
     use mpi
@@ -52,6 +53,7 @@
     type(ESMF_VM), intent(in) :: vm
     integer, intent(out), allocatable :: aPets(:)
     integer, intent(out), allocatable :: nonAPets(:)
+    integer, intent(out) :: nDevAPet
     integer, intent(in) :: partStrategy
     integer, intent(out) :: rc
   
@@ -65,6 +67,7 @@
     integer :: vmCommRank, ssiIdLocalCommSize, ssiIdLocalCommRank
     integer :: i, j, k
 
+    nDevAPet = 0
     call ESMF_VMGet(vm, localPet=localPet, petCount=petCount, mpiCommunicator=esmfVMComm, rc=rc)
     if(rc .ne. ESMF_SUCCESS) then
       print *, "Getting local pet id  and comm failed"
@@ -132,6 +135,14 @@
     numNonAPets = petCount - numAPets
     
     if(numAPets /= 0) then
+      ! FIXME: We assume that all APets have access to the same
+      ! number of devices and that the devices are uniformly distributed
+      ! (no heterogeneous nodes)
+      nDevAPet = accDeviceCount / numAPets
+      if(nDevAPet == 0) then
+        print *, "WARNING: Assumption that each apet has atleast 1 dev failed"
+        nDevAPet = 1
+      end if
       ! Partition petlist [0:petCount) to aPets = accelerated pets
       ! and nonAPets = non-accelerated pets
       allocate(aPets(numAPets))
@@ -149,6 +160,7 @@
         endif
       end do
     else
+      nDevAPet = 0
       ! nonAPets = petList [0:petCount)
       ! allocate(aPets(petCount))
       allocate(aPets(0))
@@ -302,8 +314,9 @@
       integer, intent(out) :: rc
 
       integer :: total_comps, ncomps_no_acc, ncomps_can_acc, ncomps_must_acc
+      integer :: ndev_apet, ndev_idx
       integer :: naccs, nnon_accs, tmp_rem_accs, comp_pet_sz
-      integer :: i, j, k, pet_count, tmp_pet_sidx, tmp_pet_eidx
+      integer :: i, j, k, l, pet_count, tmp_pet_sidx, tmp_pet_eidx
       integer, allocatable :: apets(:), nonapets(:)
     
 
@@ -314,12 +327,12 @@
         return
       end if
 
-      call partition_pets(vm, apets, nonapets, part_strategy, rc)
+      call partition_pets(vm, apets, nonapets, ndev_apet, part_strategy, rc)
       if(rc /= ESMF_SUCCESS) then
         print *, "ERROR: Could not partition pets to acc and nonacc"
         return
       end if
-      print *, "After partition : ", size(apets), " acc pets and ", size(nonapets), " non-acc pets"
+      print *, "After partition : ", size(apets), " acc pets and ", size(nonapets), " non-acc pets ", ndev_apet, " devices/acc pet"
 
       ncomps_can_acc = 0
       ncomps_must_acc = 0
@@ -378,15 +391,21 @@
         ! Divide comp pets evenly among apets
         comp_pet_sz = size(apets)/naccs
         print *, "DEBUG: Size of each acc comp petlist = ", comp_pet_sz
+        ndev_idx = 0
         tmp_pet_sidx = 1
         tmp_pet_eidx = comp_pet_sz
         do i=1,size(comp_info)
           ! First allocate for all MUST ACC
           if(comp_info(i) == ESMF_COMP_MUST_ACC) then
             allocate(comp_pets_info(i)%pet_list(comp_pet_sz))
+            allocate(comp_pets_info(i)%device_list(comp_pet_sz * ndev_apet))
             k = 1
             do j=tmp_pet_sidx,tmp_pet_eidx
               comp_pets_info(i)%pet_list(k) = apets(j)
+              do l=1,ndev_apet
+                comp_pets_info(i)%device_list(k+l-1) = ndev_idx
+                ndev_idx = ndev_idx + 1
+              end do
               k = k + 1
             end do
             tmp_pet_sidx = tmp_pet_sidx + comp_pet_sz
@@ -401,9 +420,14 @@
           end if
           if(comp_info(i) == ESMF_COMP_CAN_ACC) then
             allocate(comp_pets_info(i)%pet_list(comp_pet_sz))
+            allocate(comp_pets_info(i)%device_list(comp_pet_sz * ndev_apet))
             k = 1
             do j=tmp_pet_sidx,tmp_pet_eidx
               comp_pets_info(i)%pet_list(k) = apets(j)
+              do l=1,ndev_apet
+                comp_pets_info(i)%device_list(k+l-1) = ndev_idx
+                ndev_idx = ndev_idx + 1
+              end do
               k = k + 1
             end do
             tmp_pet_sidx = tmp_pet_sidx + comp_pet_sz
