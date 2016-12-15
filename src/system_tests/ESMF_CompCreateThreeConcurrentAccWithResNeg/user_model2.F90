@@ -33,6 +33,8 @@
       type(mydata), pointer :: wrap
     end type
 
+    integer, dimension(:), allocatable :: device_list
+
     contains
 
 !-------------------------------------------------------------------------
@@ -44,7 +46,7 @@
     type(ESMF_GridComp) :: comp
     integer, intent(out) :: rc
 
-    integer :: i, pet_count, pet_list_info_type
+    integer :: i, pet_count, pet_list_info_type, device_count, dev_list_info_type
     integer, allocatable :: pet_list(:)
 #ifdef ESMF_TESTWITHTHREADS
     type(ESMF_VM) :: vm
@@ -101,6 +103,38 @@
         end if
         print *, "Got Petlist : ", pet_list
         print *, "Accepting the petlist passed by driver/main"
+      else
+        print *, "ERROR: Only LIST_INFO of type ENUMERATE is supported for now"
+        return
+      end if
+
+      call ESMF_AttributeGet(comp, name="ESMF_COMP_USER_NEG_DEVLIST_INFO_TYPE",&
+        value=dev_list_info_type, rc=rc)
+      if(rc /= ESMF_SUCCESS) then
+        print *, "Getting pet list info type failed, exiting..."
+        return
+      end if
+      if(dev_list_info_type == ESMF_COMP_USER_NEG_LIST_INFO_ENUMERATE) then
+        call ESMF_AttributeGet(comp, name="ESMF_COMP_USER_NEG_DEVLIST_INFO_SIZE",&
+          value=device_count, rc=rc)
+        if(rc /= ESMF_SUCCESS) then
+          print *, "Getting pet list info type failed, exiting..."
+          return
+        end if
+        if(device_count <= 0) then
+          print *, "dev list info size <= 0, exiting"
+          rc = ESMF_FAILURE
+          return
+        end if
+        allocate(device_list(device_count))
+        call ESMF_AttributeGet(comp, name="ESMF_COMP_USER_NEG_DEVLIST_INFO",&
+          valueList=device_list, rc=rc)
+        if(rc /= ESMF_SUCCESS) then
+          print *, "Setting device list info failed, exiting..."
+          return
+        end if
+        print *, "Got device list : ", device_list
+        print *, "Accepting the device list passed by driver/main"
       else
         print *, "ERROR: Only LIST_INFO of type ENUMERATE is supported for now"
         return

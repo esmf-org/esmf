@@ -33,6 +33,8 @@
       type(mydata), pointer :: wrap
     end type
 
+    integer, dimension(:), allocatable :: device_list
+
     contains
 
 !-------------------------------------------------------------------------
@@ -44,7 +46,7 @@
     type(ESMF_GridComp) :: comp
     integer, intent(out) :: rc
 
-    integer :: i, pet_count, pet_list_info_type
+    integer :: i, pet_count, pet_list_info_type, device_count, dev_list_info_type
     integer, allocatable :: pet_list(:)
 #ifdef ESMF_TESTWITHTHREADS
     type(ESMF_VM) :: vm

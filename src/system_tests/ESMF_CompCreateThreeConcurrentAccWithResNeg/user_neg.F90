@@ -167,7 +167,7 @@
 
       integer, intent(out) :: rc
 
-      integer :: user_neg_acc_info, pet_count
+      integer :: user_neg_acc_info, pet_count, device_count
       !integer, allocatable :: pet_list(:)
 
       integer, parameter :: MAX_USER_NEG_STEPS = 2
@@ -239,6 +239,27 @@
       end if
       call ESMF_AttributeSet(comp, name="ESMF_COMP_USER_NEG_PETLIST_INFO",&
         valueList=comp_pet_info%pet_list, rc=rc)
+      if(rc /= ESMF_SUCCESS) then
+        print *, "Setting pet list info failed, exiting..."
+        return
+      end if
+
+      device_count = size(comp_pet_info%device_list)
+
+      call ESMF_AttributeSet(comp, name="ESMF_COMP_USER_NEG_DEVLIST_INFO_TYPE",&
+        value=ESMF_COMP_USER_NEG_LIST_INFO_ENUMERATE, rc=rc)
+      if(rc /= ESMF_SUCCESS) then
+        print *, "Setting device list info type failed, exiting..."
+        return
+      end if
+      call ESMF_AttributeSet(comp, name="ESMF_COMP_USER_NEG_DEVLIST_INFO_SIZE",&
+        value=device_count, rc=rc)
+      if(rc /= ESMF_SUCCESS) then
+        print *, "Setting device list info type failed, exiting..."
+        return
+      end if
+      call ESMF_AttributeSet(comp, name="ESMF_COMP_USER_NEG_DEVLIST_INFO",&
+        valueList=comp_pet_info%device_list, rc=rc)
       if(rc /= ESMF_SUCCESS) then
         print *, "Setting pet list info failed, exiting..."
         return
