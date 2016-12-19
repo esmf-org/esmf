@@ -37,6 +37,7 @@ run_ESMF_GridUsageEx:
 run_ESMF_GridUsageEx_uni:
 	mkdir -p $(ESMF_EXDIR)/data
 	cp -f data/*.nc $(ESMF_EXDIR)/data
+	cp -f ../../Field/tests/data/*.nc $(ESMF_EXDIR)/data
 	chmod u+rw $(ESMF_EXDIR)/data/*
 	$(MAKE) EXNAME=GridUsage NP=1 exfrun
 
