@@ -136,7 +136,6 @@ Specifies the path where the NetCDF header files are located.
 Specifies the path where the NetCDF library file is located.
 
 \item[ESMF\_NETCDF\_LIBS] Typical value: {\tt "-lnetcdf"} 
-(no default).
 
 Specifies the linker directives needed to link the NetCDF library to
 the application.
@@ -146,6 +145,9 @@ typical case where {\tt ESMF\_NETCDF} is set to {\tt "standard"},
 {\tt ESMF\_NETCDF\_LIBS} is set to {\tt "-lnetcdf"}.  
 When {\tt ESMF\_NETCDF} is set to {\tt "split"}, {\tt ESMF\_NETCDF\_LIBS} 
 is set to {\tt "-lnetcdff -lnetcdf"}.
+
+If the hdf5 library is required, append {\tt "-lhdf5\_hl -lhdf5"} to the
+desired setting.  E.g. {\tt "-lnetcdff -lnetcdf -lhdf5\_hl -lhdf5"}
 \end{description}
 
 \subsubsection{Parallel-NetCDF}
