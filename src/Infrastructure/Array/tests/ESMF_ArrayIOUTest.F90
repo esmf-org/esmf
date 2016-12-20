@@ -1020,7 +1020,7 @@ program ESMF_ArrayIOUTest
   call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 !------------------------------------------------------------------------
-! Array with undistributed dimension(s)
+! Array with undistributed dimension(s) - undistributed in the middle position
 !------------------------------------------------------------------------
 
 !------------------------------------------------------------------------
@@ -1052,7 +1052,7 @@ program ESMF_ArrayIOUTest
   ! initialize data
   arrayPtrR8D4 = 12345._ESMF_KIND_R8*localPet
 
-#define TEST_WORKAROUND
+#define TEST_WORKAROUND_off
 #if defined(TEST_WORKAROUND)
 !!!! Calling ArrayWrite on array directly does not work because it has 
 !!!! undistributed dimensions!!  
@@ -1118,7 +1118,7 @@ program ESMF_ArrayIOUTest
 !!!! dimensions, and therefore will work in the ArrayWrite() call below...
 
 !------------------------------------------------------------------------
-  !NEX_UTest_Multi_Proc_Only
+  !NEX_DISABLED_UTest_Multi_Proc_Only
 ! ! Given an ESMF array, write the netCDF file.
   write(name, *) "Write ESMF_Array with undistributed dimensions (prototype) to NetCDF Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
@@ -1135,9 +1135,9 @@ program ESMF_ArrayIOUTest
 !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
 ! ! Given an ESMF array, write the netCDF file.
-  write(name, *) "Array with undistributed dimensions write to NetCDF Test"
+  write(name, *) "Array with undistributed dimension (middle) write to NetCDF Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  call ESMF_ArrayWrite(array_undist, fileName="Array_undist.nc",         &
+  call ESMF_ArrayWrite(array_undist, fileName="Array_undist_middle.nc", &
       status=ESMF_FILESTATUS_REPLACE, iofmt=ESMF_IOFMT_NETCDF, rc=rc)
 #if (defined ESMF_PIO && (defined ESMF_NETCDF || defined ESMF_PNETCDF))
   call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -1159,9 +1159,9 @@ program ESMF_ArrayIOUTest
 !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
 ! ! Given an ESMF array, read the netCDF file.
-  write(name, *) "Array with undistributed dimensions read from NetCDF Test"
+  write(name, *) "Array with undistributed dimension (middle) read from NetCDF Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  call ESMF_ArrayRead (array_undist_r, fileName='Array_undist.nc',         &
+  call ESMF_ArrayRead(array_undist_r, fileName="Array_undist_middle.nc", &
       iofmt=ESMF_IOFMT_NETCDF, rc=rc)
 #if (defined ESMF_PIO && (defined ESMF_NETCDF || defined ESMF_PNETCDF))
   call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -1192,8 +1192,238 @@ program ESMF_ArrayIOUTest
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_ArrayDestroy(array_undist, rc=rc)
   call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+!------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Destroy Array"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_ArrayDestroy(array_undist_r, rc=rc)
+  call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+!------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Destroy DistGrid"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_DistGridDestroy(distgrid, rc=rc)
+  call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+!------------------------------------------------------------------------
+! Array with undistributed dimension(s) - undistributed in the last position
 !------------------------------------------------------------------------
 
+!------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Distgrid Create 1 DE/Pet Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  distgrid = ESMF_DistGridCreate(minIndex=(/1,1/), &
+              maxIndex=(/5,10/), regDecomp=(/petCount,1/),  rc=rc)
+  call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+!------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Array with undistributed dimensions Create Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  array_undist = ESMF_ArrayCreate(distgrid=distgrid, typekind=ESMF_TYPEKIND_R8, &
+          indexflag=ESMF_INDEX_GLOBAL, distgridToArrayMap=(/1,2/), &
+          undistLBound=(/2,3/), undistUBound=(/8,5/), &
+          name="myData", rc=rc)
+  call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+!------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Array with undistributed dimensions get and fill Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"  
+  ! access the pointer to the allocated memory on each DE
+  call ESMF_ArrayGet(array_undist, farrayPtr=arrayPtrR8D4, rc=rc)
+  call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  
+  ! initialize data
+  arrayPtrR8D4 = 12345._ESMF_KIND_R8*localPet
+
+!------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+! ! Given an ESMF array, write the netCDF file.
+  write(name, *) "Array with undistributed dimension (last) write to NetCDF Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_ArrayWrite(array_undist, fileName="Array_undist_last.nc", &
+      status=ESMF_FILESTATUS_REPLACE, iofmt=ESMF_IOFMT_NETCDF, rc=rc)
+#if (defined ESMF_PIO && (defined ESMF_NETCDF || defined ESMF_PNETCDF))
+  call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+#else
+  write(failMsg, *) "Did not return ESMF_RC_LIB_NOT_PRESENT"
+  call ESMF_Test((rc==ESMF_RC_LIB_NOT_PRESENT), name, failMsg, result, ESMF_SRCLINE)
+#endif
+
+!------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Array with undistributed dimensions Create for read Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  array_undist_r = ESMF_ArrayCreate(distgrid=distgrid, typekind=ESMF_TYPEKIND_R8, &
+          indexflag=ESMF_INDEX_GLOBAL, distgridToArrayMap=(/1,2/), &
+          undistLBound=(/2,3/), undistUBound=(/8,5/), &
+          name="myData", rc=rc)
+  call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+!------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+! ! Given an ESMF array, read the netCDF file.
+  write(name, *) "Array with undistributed dimension (last) read from NetCDF Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_ArrayRead(array_undist_r, fileName="Array_undist_last.nc", &
+      iofmt=ESMF_IOFMT_NETCDF, rc=rc)
+#if (defined ESMF_PIO && (defined ESMF_NETCDF || defined ESMF_PNETCDF))
+  call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+#else
+  write(failMsg, *) "Did not return ESMF_RC_LIB_NOT_PRESENT"
+  call ESMF_Test((rc==ESMF_RC_LIB_NOT_PRESENT), name, failMsg, result, ESMF_SRCLINE)
+#endif
+
+!------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+! ! Access read-in Array
+  write(name, *) "Array with undistributed dimensions access read-in data Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_ArrayGet (array_undist, farrayPtr=arrayPtrR8D4_r, rc=rc)
+  call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+!------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+! ! Compare read-in Array to expected
+  write(name, *) "Array with undistributed dimensions comparison Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  passfail = all (arrayPtrR8D4_r == 12345.0_ESMF_KIND_R8*localPet)
+  call ESMF_Test(passfail, name, failMsg, result, ESMF_SRCLINE)
+
+!------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Destroy Array"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_ArrayDestroy(array_undist, rc=rc)
+  call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+!------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Destroy Array"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_ArrayDestroy(array_undist_r, rc=rc)
+  call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+!------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Destroy DistGrid"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_DistGridDestroy(distgrid, rc=rc)
+  call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+!------------------------------------------------------------------------
+! Array with undistributed dimension(s) - undistributed in the first position
+!------------------------------------------------------------------------
+
+!------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Distgrid Create 1 DE/Pet Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  distgrid = ESMF_DistGridCreate(minIndex=(/1,1/), &
+              maxIndex=(/5,10/), regDecomp=(/petCount,1/),  rc=rc)
+  call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+!------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Array with undistributed dimensions Create Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  array_undist = ESMF_ArrayCreate(distgrid=distgrid, typekind=ESMF_TYPEKIND_R8, &
+          indexflag=ESMF_INDEX_GLOBAL, distgridToArrayMap=(/2,3/), &
+          undistLBound=(/2,3/), undistUBound=(/8,5/), &
+          name="myData", rc=rc)
+  call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+!------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Array with undistributed dimensions get and fill Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"  
+  ! access the pointer to the allocated memory on each DE
+  call ESMF_ArrayGet(array_undist, farrayPtr=arrayPtrR8D4, rc=rc)
+  call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  
+  ! initialize data
+  arrayPtrR8D4 = 12345._ESMF_KIND_R8*localPet
+
+#define DO_NOT_TEST_UNDISTR_FIRST
+#ifndef DO_NOT_TEST_UNDISTR_FIRST
+!TODO: re-enable this test once fixed inside of ESMF
+!------------------------------------------------------------------------
+  !NEX_DISABLED_UTest_Multi_Proc_Only
+! ! Given an ESMF array, write the netCDF file.
+  write(name, *) "Array with undistributed dimension (first) write to NetCDF Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_ArrayWrite(array_undist, fileName="Array_undist_first.nc", &
+      status=ESMF_FILESTATUS_REPLACE, iofmt=ESMF_IOFMT_NETCDF, rc=rc)
+#if (defined ESMF_PIO && (defined ESMF_NETCDF || defined ESMF_PNETCDF))
+  call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+#else
+  write(failMsg, *) "Did not return ESMF_RC_LIB_NOT_PRESENT"
+  call ESMF_Test((rc==ESMF_RC_LIB_NOT_PRESENT), name, failMsg, result, ESMF_SRCLINE)
+#endif
+#endif
+
+!------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Array with undistributed dimensions Create for read Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  array_undist_r = ESMF_ArrayCreate(distgrid=distgrid, typekind=ESMF_TYPEKIND_R8, &
+          indexflag=ESMF_INDEX_GLOBAL, distgridToArrayMap=(/2,3/), &
+          undistLBound=(/2,3/), undistUBound=(/8,5/), &
+          name="myData", rc=rc)
+  call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+#ifndef DO_NOT_TEST_UNDISTR_FIRST
+!TODO: re-enable this test once fixed inside of ESMF
+!------------------------------------------------------------------------
+  !NEX_DISABLED_UTest_Multi_Proc_Only
+! ! Given an ESMF array, read the netCDF file.
+  write(name, *) "Array with undistributed dimension (first) read from NetCDF Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_ArrayRead(array_undist_r, fileName="Array_undist_first.nc", &
+      iofmt=ESMF_IOFMT_NETCDF, rc=rc)
+#if (defined ESMF_PIO && (defined ESMF_NETCDF || defined ESMF_PNETCDF))
+  call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+#else
+  write(failMsg, *) "Did not return ESMF_RC_LIB_NOT_PRESENT"
+  call ESMF_Test((rc==ESMF_RC_LIB_NOT_PRESENT), name, failMsg, result, ESMF_SRCLINE)
+#endif
+
+!------------------------------------------------------------------------
+  !NEX_DISABLED_UTest_Multi_Proc_Only
+! ! Access read-in Array
+  write(name, *) "Array with undistributed dimensions access read-in data Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_ArrayGet (array_undist, farrayPtr=arrayPtrR8D4_r, rc=rc)
+  call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+!------------------------------------------------------------------------
+  !NEX_DISABLED_UTest_Multi_Proc_Only
+! ! Compare read-in Array to expected
+  write(name, *) "Array with undistributed dimensions comparison Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  passfail = all (arrayPtrR8D4_r == 12345.0_ESMF_KIND_R8*localPet)
+  call ESMF_Test(passfail, name, failMsg, result, ESMF_SRCLINE)
+#endif
+
+!------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Destroy Array"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_ArrayDestroy(array_undist, rc=rc)
+  call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+!------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Destroy Array"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_ArrayDestroy(array_undist_r, rc=rc)
+  call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+!------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
   write(name, *) "Destroy DistGrid"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
