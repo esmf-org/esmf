@@ -38,6 +38,7 @@ module NUOPC_Driver
     
   public &
     label_ModifyInitializePhaseMap, &
+    label_ModifyCplLists, &
     label_SetModelServices, &
     label_SetRunSequence, &
     label_Finalize, &
@@ -51,6 +52,8 @@ module NUOPC_Driver
     label_SetRunSequence = "Driver_SetRunSequence"
   character(*), parameter :: &
     label_ModifyInitializePhaseMap = "Driver_ModifyInitializePhaseMap"
+  character(*), parameter :: &
+    label_ModifyCplLists = "Driver_ModifyCplLists"
   character(*), parameter :: &
     label_Finalize = "Driver_Finalize"
   character(*), parameter :: &
@@ -193,23 +196,19 @@ module NUOPC_Driver
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
 
+    ! - upward implement IPDv02:
     call NUOPC_CompSetEntryPoint(driver, ESMF_METHOD_INITIALIZE, &
-      phaseLabelList=(/"IPDv02p1"/), &
-      userRoutine=InitializeIPDv02p1, rc=rc)
+      phaseLabelList=(/"IPDv02p1"/), userRoutine=InitializeIPDv02p1, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
-    
     call NUOPC_CompSetEntryPoint(driver, ESMF_METHOD_INITIALIZE, &
-      phaseLabelList=(/"IPDv02p3"/), &
-      userRoutine=InitializeIPDv02p3, rc=rc)
+      phaseLabelList=(/"IPDv02p3"/), userRoutine=InitializeIPDv02p3, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
-    
     call NUOPC_CompSetEntryPoint(driver, ESMF_METHOD_INITIALIZE, &
-      phaseLabelList=(/"IPDv02p5"/), &
-      userRoutine=InitializeIPDv02p5, rc=rc)
+      phaseLabelList=(/"IPDv02p5"/), userRoutine=InitializeIPDv02p5, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
@@ -235,7 +234,7 @@ module NUOPC_Driver
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
       
-    ! --- inward facing entry points ---
+    ! - downward implement IPDv05:
     call NUOPC_CompSetInternalEntryPoint(driver, ESMF_METHOD_INITIALIZE, &
       phaseLabelList=(/"IPDv05p1"/), userRoutine=IInitAdvertize, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -243,6 +242,11 @@ module NUOPC_Driver
       return  ! bail out
     call NUOPC_CompSetInternalEntryPoint(driver, ESMF_METHOD_INITIALIZE, &
       phaseLabelList=(/"IPDv05p2"/), userRoutine=IInitAdvertizeFinish, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+      return  ! bail out
+    call NUOPC_CompSetInternalEntryPoint(driver, ESMF_METHOD_INITIALIZE, &
+      phaseLabelList=(/"IPDv05p3"/), userRoutine=IInitModifyCplLists, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
@@ -4119,6 +4123,39 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     endif
+
+  end subroutine
+
+  !-----------------------------------------------------------------------------
+
+  subroutine IInitModifyCplLists(driver, importState, exportState, clock, rc)
+    type(ESMF_GridComp)  :: driver
+    type(ESMF_State)     :: importState, exportState
+    type(ESMF_Clock)     :: clock
+    integer, intent(out) :: rc
+    
+    ! local variables
+    character(ESMF_MAXSTR)        :: name
+    integer                       :: localrc
+    logical                       :: existflag
+
+    rc = ESMF_SUCCESS
+
+    ! query the Component for info
+    call ESMF_GridCompGet(driver, name=name, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+
+    ! SPECIALIZE by calling into optional attached method allowing modification
+    ! of the "CplList" metadata on child Connectors.
+    call ESMF_MethodExecute(driver, label=label_ModifyCplLists, &
+      existflag=existflag, userRc=localrc, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+      return  ! bail out
+    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+      return  ! bail out
 
   end subroutine
 
