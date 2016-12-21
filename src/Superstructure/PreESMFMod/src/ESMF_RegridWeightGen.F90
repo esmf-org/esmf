@@ -102,7 +102,8 @@ contains
     useDstCoordFlag, dstCoordinateVars, &
     useSrcCornerFlag, useDstCornerFlag, & 
     useUserAreaFlag, largefileFlag, &
-    netcdf4fileFlag, verboseFlag, rc)
+    netcdf4fileFlag, weightOnlyFlag, &
+    verboseFlag, rc)
 
 ! !ARGUMENTS:
 
@@ -136,6 +137,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   logical,                      intent(in),  optional :: useUserAreaFlag
   logical,                      intent(in),  optional :: largefileFlag
   logical,                      intent(in),  optional :: netcdf4fileFlag
+  logical,                      intent(in),  optional :: weightOnlyFlag
   logical,                      intent(in),  optional :: verboseFlag
   integer,                      intent(out), optional :: rc
 
@@ -280,6 +282,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   \item [{[netcdf4fileFlag]}]
 !     If .TRUE., the output weight file is in NetCDF4 file format. 
 !     The default is .FALSE.
+!   \item [{[weightOnlyFlag]}]
+!     If .TRUE., the output weight file only contains factorList and factorIndexList. 
+!     The default is .FALSE.
 !   \item [{[verboseFlag]}]
 !     If .TRUE., it will print summary information about the regrid parameters,
 !     default to .FALSE.
@@ -296,6 +301,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     logical            :: localUserAreaFlag
     logical            :: localLargefileFlag
     logical            :: localNetcdf4fileFlag
+    logical            :: localWeightOnlyFlag
     logical            :: localVerboseFlag
     integer            :: localrc
     type(ESMF_VM)      :: vm
@@ -373,6 +379,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     dstMissingValue = .false.
     localLargeFileFlag = .false.
     localNetcdf4FileFlag = .false.
+    localWeightOnlyFlag = .false.
     localUserAreaflag = .false.
     useSrcCoordVar = .false.
     useDstCoordVar = .false.
@@ -560,6 +567,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     if (present(netcdf4fileFlag)) then
 	    localNetcdf4FileFlag = netcdf4fileFlag
+    endif
+
+    if (present(weightOnlyFlag)) then
+            localWeightOnlyFlag = weightOnlyFlag
     endif
 
     if (present(useUserAreaFlag)) then
@@ -1473,7 +1484,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     endif
 
     !! Write the weight table into a SCRIP format NetCDF file
-    if (PetNo == 0) then
+    if (PetNo == 0 .and. .not. localWeightOnlyFlag) then
       if (isConserve) then
 	  if (useSrcCoordVar .and. useDstCoordVar) then
             call ESMF_OutputScripWeightFile(weightFile, factorList, factorIndexList,  &
@@ -1579,8 +1590,21 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
               ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
       endif
-    else 
+    elseif (.not. localWeightOnlyFlag) then
+      ! Not root PET
       call ESMF_OutputScripWeightFile(weightFile, factorList, factorIndexList, rc=localrc)
+      if (ESMF_LogFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+    else
+      ! localWeightOnlyFlag == .TRUE. for all PETs
+      ! write simple weight file
+      call ESMF_OutputSimpleWeightFile(weightFile, factorList, factorIndexList, &
+                  title = "ESMF Regrid Weight Generator", &
+                  method = localRegridMethod, &
+		  largeFileFlag=localLargeFileFlag, &
+		  netcdf4FileFlag = localNetcdf4FileFlag, &
+                  rc=localrc)
       if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return

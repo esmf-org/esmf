@@ -41,10 +41,11 @@ program ESMF_RegridWeightGenApp
   type(ESMF_RegridMethod_Flag) :: methodflag
   character(len=ESMF_MAXPATHLEN) :: commandbuf1(3)
   character(len=MAXNAMELEN)  :: commandbuf3(8)
-  integer            :: commandbuf2(20)
+  integer            :: commandbuf2(21)
   integer            :: ind, pos
   logical            :: largeFileFlag
   logical            :: netcdf4FileFlag
+  logical            :: weightOnlyFlag
   logical              :: ignoreUnmapped, userAreaFlag, ignoreDegenerate
   type(ESMF_UnmappedAction_Flag) :: unmappedaction
   logical            :: srcMissingValue, dstMissingValue
@@ -463,7 +464,16 @@ program ESMF_RegridWeightGenApp
       print *, "Use the --help argument to see an explanation of usage."
       call ESMF_Finalize(endflag=ESMF_END_ABORT)
     endif
+ 
+    ! --weight_only for weight file format
+    call ESMF_UtilGetArgIndex('--weight_only', argindex=ind, rc=rc)
+    if (ind /= -1) then
+      weightOnlyFlag = .true.
+    else
+      weightOnlyFlag = .false.
+    endif
    
+  
     ! --user_area - to use user-defined area for the cells
     call ESMF_UtilGetArgIndex('--user_areas', argindex=ind, rc=rc)
     if (ind /= -1) then
@@ -689,6 +699,7 @@ program ESMF_RegridWeightGenApp
       if (useDstCorner) commandbuf2(19) = 1
       if (trim(lineTypeStr) .eq. 'cartesian') commandbuf2(20) = 1
       if (trim(lineTypeStr) .eq. 'greatcircle') commandbuf2(20) = 2
+      if (weightOnlyFlag) commandbuf2(21) = 1
     endif 
 
 
@@ -822,6 +833,11 @@ program ESMF_RegridWeightGenApp
     else
       useDstCorner=.false.
     endif
+    if (commandbuf2(21)==1) then
+      weightOnlyFlag=.true.
+    else
+      weightOnlyFlag=.false.
+    endif
 
 
     call ESMF_VMBroadcast(vm, commandbuf1, len (commandbuf1)*size (commandbuf1), 0, rc=rc)
@@ -869,7 +885,7 @@ program ESMF_RegridWeightGenApp
   call ESMF_RegridWeightGen(srcfile, dstfile, wgtfile, regridmethod=methodflag, &
                             polemethod = pole, regridPoleNPnts = poleptrs, unmappedaction = unmappedaction, &
                             srcFileType = srcFileType, dstFileType = dstFileType, &
-                      ignoreDegenerate = ignoreDegenerate, &
+                            ignoreDegenerate = ignoreDegenerate, &
                             lineType=lineType, &
                             normType=normType, &
                             srcRegionalFlag = srcIsRegional, dstRegionalFlag = dstIsRegional, &
@@ -880,8 +896,9 @@ program ESMF_RegridWeightGenApp
                             srcCoordinateVars = srcCoordNames, dstCoordinateVars = dstCoordNames, &
                             useUserAreaFlag = userAreaFlag, largefileFlag = largeFileFlag, &
                             netcdf4FileFlag = netcdf4FileFlag,  &
-                      useSrcCornerFlag = useSrcCorner, &
-                      useDstCornerFlag = useDstCorner, &
+                            weightOnlyFlag  = weightOnlyFlag, &
+                            useSrcCornerFlag = useSrcCorner, &
+                            useDstCornerFlag = useDstCorner, &
                             verboseFlag = .true., rc = rc)
 
   if (rc /= ESMF_SUCCESS) call ErrorMsgAndAbort(PetNo)
@@ -938,6 +955,7 @@ contains
     print *, "                      [--dst_regional]"
     print *, "                      [--64bit_offset]"
     print *, "                      [--netcdf4]"
+    print *, "                      [--weight_only]"
     print *, "                      [--src_meshname src_mesh_variable]"
     print *, "                      [--dst_meshname dst_mesh_variable]"
     print *, "                      [--src_missingvalue src_var_name]"
@@ -1000,6 +1018,8 @@ contains
     print *, "--netcdf4  - an optional argument specifying the output weight file is in"
     print *, "             the NetCDF4 format. This option only works with NetCDF library"
     print *, "             version 4.1 and above"
+    print *, "--weight_only  - an Optional argument specifying the output weight file only contains"
+    print *, "             the weights and the source and destination grid's indices."
     print *, "--src_meshname  - required if the source grid type is UGRID. It defines the dummy"
     print *, "             variable name that has all the topology information stored in its"
     print *, "             attributes."
