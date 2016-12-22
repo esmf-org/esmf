@@ -549,7 +549,7 @@ module NUOPC_Driver
         ! for now put a component alias into the legacy data structure until all
         ! dependencies have been removed
         if (i==0) then
-          ! driver self
+          ! driver-self
           call NUOPC_CompAttributeGet(gcomp, name="CompLabel", &
             value=srcCompLabel, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -562,7 +562,7 @@ module NUOPC_Driver
             line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
         endif
         if (j==0) then
-          ! driver self
+          ! driver-self
           call NUOPC_CompAttributeGet(gcomp, name="CompLabel", &
             value=dstCompLabel, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -586,7 +586,7 @@ module NUOPC_Driver
           ! the connector was not added by the user level code SetModelServices
           ! and this involves the driver itself -> maybe automatic connector add
           if (.not.(i==0.and.j==0)) then
-            ! not a driver-to-driver self connection
+            ! not a driver-to-driver-self connection
             if (.not.(trim(srcCompLabel)=="_uninitialized").and. &
               .not.(trim(dstCompLabel)=="_uninitialized")) then
               ! the driver is a child of a parent driver
@@ -4135,9 +4135,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer, intent(out) :: rc
     
     ! local variables
-    character(ESMF_MAXSTR)        :: name
-    integer                       :: localrc
-    logical                       :: existflag
+    character(ESMF_MAXSTR)          :: name
+    integer                         :: localrc
+    logical                         :: existflag
+    type(ESMF_CplComp)              :: connector
+    integer                         :: i
+    type(type_InternalState)        :: is
 
     rc = ESMF_SUCCESS
 
@@ -4145,7 +4148,35 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     call ESMF_GridCompGet(driver, name=name, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    
+    ! query Component for the internal State
+    nullify(is%wrap)
+    call ESMF_UserCompGetInternalState(driver, label_InternalState, is, rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+      return  ! bail out
 
+    ! add REMAPMETHOD=redist option to all of the CplList entries for all
+    ! Connectors to/from driver-self
+    do i=1, is%wrap%modelCount
+      connector = is%wrap%connectorComp(i,0)
+      if (NUOPC_CompAreServicesSet(connector)) then
+        call addCplListOption(connector, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+          return  ! bail out
+      endif
+    enddo
+    do i=1, is%wrap%modelCount
+      connector = is%wrap%connectorComp(0,i)
+      if (NUOPC_CompAreServicesSet(connector)) then
+        call addCplListOption(connector, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+          return  ! bail out
+      endif
+    enddo
+    
     ! SPECIALIZE by calling into optional attached method allowing modification
     ! of the "CplList" metadata on child Connectors.
     call ESMF_MethodExecute(driver, label=label_ModifyCplLists, &
@@ -4156,6 +4187,41 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
+      
+  contains
+  
+    subroutine addCplListOption(connector, rc)
+      type(ESMF_CplComp)              :: connector
+      integer, intent(out)            :: rc
+      ! local variables
+      integer                         :: j, cplListSize
+      character(len=160), allocatable :: cplList(:)
+      call NUOPC_CompAttributeGet(connector, name="CplList", &
+        itemCount=cplListSize, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+      if (cplListSize>0) then
+        allocate(cplList(cplListSize))
+        call NUOPC_CompAttributeGet(connector, name="CplList", &
+          valueList=cplList, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+          return  ! bail out
+        ! go through all of the entries in the cplList and add options
+        do j=1, cplListSize
+          ! switch remapping to redist
+          cplList(j) = trim(cplList(j))//":REMAPMETHOD=redist"
+        enddo
+        ! store the modified cplList in CplList attribute of connector
+        call NUOPC_CompAttributeSet(connector, &
+          name="CplList", valueList=cplList, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+          return  ! bail out
+        deallocate(cplList)
+      endif
+    end subroutine
 
   end subroutine
 
@@ -4283,7 +4349,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     character(ESMF_MAXSTR)        :: name
 
     rc = ESMF_SUCCESS
-    
 
     ! query the Component for info
     call ESMF_GridCompGet(driver, name=name, rc=rc)
