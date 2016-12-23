@@ -1738,27 +1738,11 @@ call ESMF_LogWrite("eShareStatus: "//trim(eShareStatus), ESMF_LOGMSG_INFO, rc=rc
               rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-#if 0
-            allocate(totalLWidth(fieldDimCount),stat=stat)
-            if (ESMF_LogFoundAllocError(statusToCheck=stat, &
-              msg="Allocation of internal totalLWidth failed.", &
-              line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
-              return  ! bail out
-            allocate(totalUWidth(fieldDimCount),stat=stat)
-            if (ESMF_LogFoundAllocError(statusToCheck=stat, &
-              msg="Allocation of internal totalUWidth failed.", &
-              line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
-              return  ! bail out
-            call ESMF_FieldGet(providerField, totalLWidth=totalLWidth, &
-              totalUWidth=totalUWidth, name=fieldName, rc=rc)
-            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-#endif
-            
+            !TODO: make sure that this FieldCreate() sets ungridded bounds and
+            !TODO: total widths correctly
             acceptorField=ESMF_FieldCreate(grid=grid, array=array, &
               datacopyflag=ESMF_DATACOPY_REFERENCE, staggerloc=staggerloc, &
               gridToFieldMap=gridToFieldMap, name=fieldName, rc=rc)  
-              !not all info yet!!!!!!!!!!!
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
             call NUOPC_Realize(acceptorState, acceptorField, rc=rc)
