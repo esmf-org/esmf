@@ -1456,9 +1456,9 @@ namespace ESMCI {
     }
 
     // Do elem original coordinates if necessary
-    MEField<> *doec = src_mesh->GetField("orig_elem_coordinates");
+    MEField<> *doec = src_mesh->GetField("elem_orig_coordinates");
     if (doec != NULL) {
-      MEField<> *doec_r = dst_mesh->GetField("orig_elem_coordinates");
+      MEField<> *doec_r = dst_mesh->GetField("elem_orig_coordinates");
 
       // load coord fields
       snd[num_snd]=doec;

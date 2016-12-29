@@ -2050,7 +2050,7 @@ void ESMCI_meshserialize(Mesh **meshpp,
     if (mesh.GetField("elem_frac") != NULL) fields_present[7]=1;       
     if (mesh.GetField("orig_coordinates") != NULL) fields_present[8]=1;       
     if (mesh.GetField("elem_coordinates") != NULL) fields_present[9]=1; 
-    if (mesh.GetField("orig_elem_coordinates") != NULL) fields_present[10]=1; 
+    if (mesh.GetField("elem_orig_coordinates") != NULL) fields_present[10]=1; 
 
 
     // DEBUG OUTPUT
@@ -2292,7 +2292,7 @@ void ESMCI_meshdeserialize(Mesh **meshpp,
     if (fields_present[7]) meshp->RegisterField("elem_frac", MEFamilyDG0::instance(), MeshObj::ELEMENT, ctxt, 1, true);
     if (fields_present[8]) meshp->RegisterNodalField(*meshp, "orig_coordinates", orig_spatial_dim);
     if (fields_present[9]) meshp->RegisterField("elem_coordinates", MEFamilyDG0::instance(), MeshObj::ELEMENT, ctxt, spatial_dim, true);
-    if (fields_present[10]) meshp->RegisterField("orig_elem_coordinates", MEFamilyDG0::instance(), MeshObj::ELEMENT, ctxt, orig_spatial_dim, true);
+    if (fields_present[10]) meshp->RegisterField("elem_orig_coordinates", MEFamilyDG0::instance(), MeshObj::ELEMENT, ctxt, orig_spatial_dim, true);
 
     // DEBUG OUTPUT
     // for (int i=0; i<ESMF_RECONCILE_MESH_NUM_FIELDS; i++) {
