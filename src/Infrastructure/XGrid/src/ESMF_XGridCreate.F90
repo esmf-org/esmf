@@ -2538,10 +2538,11 @@ end subroutine checkGrid
 !          Return code.
 !     \end{description}
 !EOPI
-       integer :: localrc
+       integer                     :: localrc
        real(ESMF_KIND_R8), pointer :: frac(:)
-       type(ESMF_VM)        :: vm
-       logical :: isMemFreed
+       type(ESMF_VM)               :: vm
+       logical                     :: isMemFreed
+       integer                     :: localDeCount, i
 
        ! Logic to determine if valid optional args are passed.  
 
@@ -2561,14 +2562,20 @@ end subroutine checkGrid
           return 
        endif
 
-       call ESMF_ArrayGet(Array, localDe=0, farrayPtr=frac, rc=localrc)
+       call ESMF_ArrayGet(Array, localDECount=localDeCount, rc=localrc)
        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
          ESMF_CONTEXT, rcToReturn=rc)) return
 
-       ! Call through to the C++ object that does the work
-       call ESMF_MeshGetElemFrac(Mesh, frac, rc=localrc)
-       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-         ESMF_CONTEXT, rcToReturn=rc)) return
+       do i = 0, localDeCount-1
+				 call ESMF_ArrayGet(Array, localDe=i, farrayPtr=frac, rc=localrc)
+				 if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+					 ESMF_CONTEXT, rcToReturn=rc)) return
+
+				 ! Call through to the C++ object that does the work
+				 call ESMF_MeshGetElemFrac(Mesh, frac, rc=localrc)
+				 if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+					 ESMF_CONTEXT, rcToReturn=rc)) return 
+       enddo
 
       rc = ESMF_SUCCESS
 
@@ -2600,10 +2607,11 @@ end subroutine checkGrid
 !          Return code.
 !     \end{description}
 !EOPI
-       integer :: localrc
-       type(ESMF_VM)        :: vm
-       logical :: isMemFreed
+       integer                     :: localrc
        real(ESMF_KIND_R8), pointer :: frac(:)
+       type(ESMF_VM)               :: vm
+       logical                     :: isMemFreed
+       integer                     :: localDeCount, i
 
        ! Logic to determine if valid optional args are passed.  
 
@@ -2623,14 +2631,20 @@ end subroutine checkGrid
           return 
        endif
 
-       call ESMF_ArrayGet(Array, localDe=0, farrayPtr=frac, rc=localrc)
+       call ESMF_ArrayGet(Array, localDECount=localDeCount, rc=localrc)
        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
          ESMF_CONTEXT, rcToReturn=rc)) return
 
-       ! Call through to the C++ object that does the work
-       call ESMF_MeshGetElemFrac2(Mesh, frac, rc=localrc)
-       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-         ESMF_CONTEXT, rcToReturn=rc)) return
+       do i = 0, localDeCount-1
+				 call ESMF_ArrayGet(Array, localDe=i, farrayPtr=frac, rc=localrc)
+				 if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+					 ESMF_CONTEXT, rcToReturn=rc)) return
+
+				 ! Call through to the C++ object that does the work
+				 call ESMF_MeshGetElemFrac2(Mesh, frac, rc=localrc)
+				 if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+					 ESMF_CONTEXT, rcToReturn=rc)) return
+       enddo
 
       rc = ESMF_SUCCESS
 
