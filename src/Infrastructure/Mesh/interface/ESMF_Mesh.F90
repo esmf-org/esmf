@@ -3947,10 +3947,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer                       :: i, localrc      ! local return code
     type(ESMF_DistGridMatch_Flag) :: matchResultNode, matchResultElem
 
-    real(ESMF_KIND_R8), pointer   :: area1(:), area2(:)
-    real(ESMF_KIND_R8), pointer   :: coord1(:), coord2(:)
-    integer                       :: nOwnedNodes1, nOwnedElems1
-    integer                       :: nOwnedNodes2, nOwnedElems2
+    real(ESMF_KIND_R8), pointer       :: area1(:), area2(:)
+    real(ESMF_KIND_R8), allocatable   :: coord1(:), coord2(:)
+    integer                           :: nOwnedNodes1, nOwnedElems1
+    integer                           :: nOwnedNodes2, nOwnedElems2
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
@@ -3988,7 +3988,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
-
     ! return successfully
     if ((matchResultNode >= ESMF_DISTGRIDMATCH_EXACT) .and. &
       (matchResultElem >= ESMF_DISTGRIDMATCH_EXACT)) then
@@ -4019,6 +4018,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     enddo
     deallocate(area1, area2)
 
+#if 0
     ! check nodal coordinates
     if(mesh1%SpatialDim /= mesh2%SpatialDim) then
       ESMF_MeshMatch = .false.
@@ -4059,10 +4059,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         return
       endif
     enddo
-    deallocate(coord1, coord2)
 
     ! check element coordinates
-#if 0
     ! Currently mesh element coordinates are not required
     if(mesh1%numOwnedElements /= mesh2%numOwnedElements) then
       ESMF_MeshMatch = .false.
