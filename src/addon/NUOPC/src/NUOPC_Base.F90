@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2016, University Corporation for Atmospheric Research, 
+! Copyright 2002-2017, University Corporation for Atmospheric Research, 
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 ! Laboratory, University of Michigan, National Centers for Environmental 
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -199,7 +199,8 @@ module NUOPC_Base
 ! !INTERFACE:
   ! call using generic interface: NUOPC_Advertise
   subroutine NUOPC_AdvertiseField(state, StandardName, Units, &
-    LongName, ShortName, name, TransferOfferGeomObject, rc)
+    LongName, ShortName, name, TransferOfferField, SharePolicyField, &
+    TransferOfferGeomObject, SharePolicyGeomObject, rc)
 ! !ARGUMENTS:
     type(ESMF_State), intent(inout)         :: state
     character(*),     intent(in)            :: StandardName
@@ -207,7 +208,10 @@ module NUOPC_Base
     character(*),     intent(in),  optional :: LongName
     character(*),     intent(in),  optional :: ShortName
     character(*),     intent(in),  optional :: name
+    character(*),     intent(in),  optional :: TransferOfferField
+    character(*),     intent(in),  optional :: SharePolicyField
     character(*),     intent(in),  optional :: TransferOfferGeomObject
+    character(*),     intent(in),  optional :: SharePolicyGeomObject
     integer,          intent(out), optional :: rc
 ! !DESCRIPTION:
 !   \label{NUOPC_AdvertiseField}
@@ -246,11 +250,26 @@ module NUOPC_Base
 !     The actual name of the advertised field by which it is accessed in the
 !     state object. NUOPC does not restrict the value of this variable.
 !     If omitted, the default is to use the value of the ShortName.
+!   \item[{[TransferOfferField]}]
+!     The "TransferOfferField" attribute of the advertised field. NUOPC 
+!     controls the vocabulary of this attribute. Valid options are 
+!     "will provide", "can provide", "cannot provide".
+!     If omitted, the default is "will provide".
+!   \item[{[SharePolicyField]}]
+!     The "SharePolicyField" attribute of the advertised field. NUOPC 
+!     controls the vocabulary of this attribute. Valid options are 
+!     "share", and "not share".
+!     If omitted, the default is "not share".
 !   \item[{[TransferOfferGeomObject]}]
 !     The "TransferOfferGeomObject" attribute of the advertised field. NUOPC 
 !     controls the vocabulary of this attribute. Valid options are 
 !     "will provide", "can provide", "cannot provide".
-!     If omitted, the default is "will provide".
+!     If omitted, the default is equal to {\tt TransferOfferField}.
+!   \item[{[SharePolicyGeomObject]}]
+!     The "SharePolicyGeomObject" attribute of the advertised field. NUOPC 
+!     controls the vocabulary of this attribute. Valid options are 
+!     "share", and "not share".
+!     If omitted, the default is equal to {\tt SharePolicyField}.
 !   \item[{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -284,6 +303,61 @@ module NUOPC_Base
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=FILENAME)) return  ! bail out
     endif
+    if (present(TransferOfferField)) then
+      if (trim(TransferOfferField)=="will provide") then
+        call NUOPC_SetAttribute(field, name="TransferOfferField", &
+          value="will provide", rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, &
+          file=FILENAME)) &
+          return  ! bail out
+      elseif (trim(TransferOfferField)=="can provide") then
+        call NUOPC_SetAttribute(field, name="TransferOfferField", &
+          value="can provide", rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, &
+          file=FILENAME)) &
+          return  ! bail out
+      elseif (trim(TransferOfferField)=="cannot provide") then
+        call NUOPC_SetAttribute(field, name="TransferOfferField", &
+          value="cannot provide", rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, &
+          file=FILENAME)) &
+          return  ! bail out
+      else
+        call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
+          msg="must provide a valid string for TransferOfferField", &
+          line=__LINE__, &
+          file=FILENAME, &
+          rcToReturn=rc)
+        return  ! bail out
+      endif
+    endif
+    if (present(SharePolicyField)) then
+      if (trim(SharePolicyField)=="share") then
+        call NUOPC_SetAttribute(field, name="SharePolicyField", &
+          value="share", rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, &
+          file=FILENAME)) &
+          return  ! bail out
+      elseif (trim(SharePolicyField)=="not share") then
+        call NUOPC_SetAttribute(field, name="SharePolicyField", &
+          value="not share", rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, &
+          file=FILENAME)) &
+          return  ! bail out
+      else
+        call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
+          msg="must provide a valid string for SharePolicyField", &
+          line=__LINE__, &
+          file=FILENAME, &
+          rcToReturn=rc)
+        return  ! bail out
+      endif
+    endif
     if (present(TransferOfferGeomObject)) then
       if (trim(TransferOfferGeomObject)=="will provide") then
         call NUOPC_SetAttribute(field, name="TransferOfferGeomObject", &
@@ -314,6 +388,50 @@ module NUOPC_Base
           rcToReturn=rc)
         return  ! bail out
       endif
+    else
+      ! set default for TransferOfferGeomObject
+      call NUOPC_GetAttribute(field, name="TransferOfferField", &
+        value=tempString, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=FILENAME)) return  ! bail out
+      call NUOPC_SetAttribute(field, name="TransferOfferGeomObject", &
+        value=tempString, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=FILENAME)) return  ! bail out
+    endif
+    if (present(SharePolicyGeomObject)) then
+      if (trim(SharePolicyGeomObject)=="share") then
+        call NUOPC_SetAttribute(field, name="SharePolicyGeomObject", &
+          value="share", rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, &
+          file=FILENAME)) &
+          return  ! bail out
+      elseif (trim(SharePolicyGeomObject)=="not share") then
+        call NUOPC_SetAttribute(field, name="SharePolicyGeomObject", &
+          value="not share", rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, &
+          file=FILENAME)) &
+          return  ! bail out
+      else
+        call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
+          msg="must provide a valid string for SharePolicyGeomObject", &
+          line=__LINE__, &
+          file=FILENAME, &
+          rcToReturn=rc)
+        return  ! bail out
+      endif
+    else
+      ! set default for SharePolicyGeomObject
+      call NUOPC_GetAttribute(field, name="SharePolicyField", &
+        value=tempString, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=FILENAME)) return  ! bail out
+      call NUOPC_SetAttribute(field, name="SharePolicyGeomObject", &
+        value=tempString, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=FILENAME)) return  ! bail out
     endif
     call ESMF_StateAdd(state, fieldList=(/field/), rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -330,11 +448,15 @@ module NUOPC_Base
 ! !INTERFACE:
   ! call using generic interface: NUOPC_Advertise
   subroutine NUOPC_AdvertiseFields(state, StandardNames, &
-    TransferOfferGeomObject, rc)
+    TransferOfferField, SharePolicyField, &
+    TransferOfferGeomObject, SharePolicyGeomObject, rc)
 ! !ARGUMENTS:
     type(ESMF_State), intent(inout)         :: state
     character(*),     intent(in)            :: StandardNames(:)
+    character(*),     intent(in),  optional :: TransferOfferField
+    character(*),     intent(in),  optional :: SharePolicyField
     character(*),     intent(in),  optional :: TransferOfferGeomObject
+    character(*),     intent(in),  optional :: SharePolicyGeomObject
     integer,          intent(out), optional :: rc
 ! !DESCRIPTION:
 !   \label{NUOPC_AdvertiseFields}
@@ -355,12 +477,30 @@ module NUOPC_Base
 !   \item[StandardNames]
 !     A list of "StandardName" attributes of the advertised fields. Must be 
 !     StandardNames found in the  NUOPC Field Dictionary.
-!   \item[{[TransferOfferGeomObject]}]
-!     The "TransferOfferGeomObject" attribute associated with the advertised
-!     fields. This setting applies to all the fields advertised in this call. 
-!     NUOPC controls the vocabulary of this attribute. Valid options are 
+!   \item[{[TransferOfferField]}]
+!     The "TransferOfferField" attribute of the advertised fields. This 
+!     setting applies to all the fields advertised in this call. NUOPC 
+!     controls the vocabulary of this attribute. Valid options are 
 !     "will provide", "can provide", "cannot provide".
 !     If omitted, the default is "will provide".
+!   \item[{[SharePolicyField]}]
+!     The "SharePolicyField" attribute of the advertised fields. This 
+!     setting applies to all the fields advertised in this call. NUOPC 
+!     controls the vocabulary of this attribute. Valid options are 
+!     "share", and "not share".
+!     If omitted, the default is "not share".
+!   \item[{[TransferOfferGeomObject]}]
+!     The "TransferOfferGeomObject" attribute of the advertised fields. This 
+!     setting applies to all the fields advertised in this call. NUOPC 
+!     controls the vocabulary of this attribute. Valid options are 
+!     "will provide", "can provide", "cannot provide".
+!     If omitted, the default is equal to {\tt TransferOfferField}.
+!   \item[{[SharePolicyGeomObject]}]
+!     The "SharePolicyGeomObject" attribute of the advertised fields. This 
+!     setting applies to all the fields advertised in this call. NUOPC 
+!     controls the vocabulary of this attribute. Valid options are 
+!     "share", and "not share".
+!     If omitted, the default is equal to {\tt SharePolicyField}.
 !   \item[{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -374,7 +514,11 @@ module NUOPC_Base
 
     do i=1, size(StandardNames)
       call NUOPC_AdvertiseField(state, StandardName=StandardNames(i), &
-        TransferOfferGeomObject=TransferOfferGeomObject, rc=rc)
+        TransferOfferField=TransferOfferField, &
+        SharePolicyField=SharePolicyField, &
+        TransferOfferGeomObject=TransferOfferGeomObject, &
+        SharePolicyGeomObject=SharePolicyGeomObject, &
+        rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, &
         file=FILENAME)) &
@@ -1068,7 +1212,7 @@ module NUOPC_Base
 !EOPI
   !-----------------------------------------------------------------------------
     ! local variables
-    character(ESMF_MAXSTR)            :: attrList(13)
+    character(ESMF_MAXSTR)            :: attrList(19)
     character(ESMF_MAXSTR)            :: tempString
     logical                           :: accepted
     integer                           :: i
@@ -1084,13 +1228,20 @@ module NUOPC_Base
     attrList(5) = "Updated" ! values: "true" or "false"
     attrList(6) = "TransferOfferGeomObject" ! values: "cannot provide",
                                             !   "can provide", "will provide"
-    attrList(7) = "TransferActionGeomObject" ! values: "provide", "accept"
-    attrList(8) = "UngriddedLBound"
-    attrList(9) = "UngriddedUBound"
-    attrList(10) = "GridToFieldMap"
-    attrList(11) = "ArbDimCount"
-    attrList(12) = "MinIndex"
-    attrList(13) = "MaxIndex"
+    attrList(7) = "TransferActionGeomObject"! values: "provide", "accept"
+    attrList(8) = "SharePolicyGeomObject"   ! values: "share", "not share"
+    attrList(9) = "ShareStatusGeomObject"   ! values: "shared", "not shared"
+    attrList(10)= "TransferOfferField"      ! values: "cannot provide",
+                                            !   "can provide", "will provide"
+    attrList(11)= "TransferActionField"     ! values: "provide", "accept"
+    attrList(12)= "SharePolicyField"        ! values: "share", "not share"
+    attrList(13)= "ShareStatusField"        ! values: "shared", "not shared"
+    attrList(14)= "UngriddedLBound"
+    attrList(15)= "UngriddedUBound"
+    attrList(16)= "GridToFieldMap"
+    attrList(17)= "ArbDimCount"
+    attrList(18)= "MinIndex"
+    attrList(19)= "MaxIndex"
     
     ! add Attribute packages
     call ESMF_AttributeAdd(field, convention="ESG", purpose="General", rc=rc)
@@ -1249,9 +1400,41 @@ module NUOPC_Base
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME)) return  ! bail out
 
+    ! set TransferOfferField
+    call ESMF_AttributeSet(field, &
+      name="TransferOfferField", value="will provide", &
+      convention="NUOPC", purpose="Instance", attnestflag=ESMF_ATTNEST_ON, &
+      rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME)) return  ! bail out
+
+    ! set TransferActionField
+    call ESMF_AttributeSet(field, &
+      name="TransferActionField", value="provide", &
+      convention="NUOPC", purpose="Instance", attnestflag=ESMF_ATTNEST_ON, &
+      rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME)) return  ! bail out
+
+    ! set SharePolicyField
+    call ESMF_AttributeSet(field, &
+      name="SharePolicyField", value="not share", &
+      convention="NUOPC", purpose="Instance", attnestflag=ESMF_ATTNEST_ON, &
+      rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME)) return  ! bail out
+
+    ! set ShareStatusField
+    call ESMF_AttributeSet(field, &
+      name="ShareStatusField", value="not shared", &
+      convention="NUOPC", purpose="Instance", attnestflag=ESMF_ATTNEST_ON, &
+      rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME)) return  ! bail out
+
     ! set TransferOfferGeomObject
     call ESMF_AttributeSet(field, &
-      name="TransferOfferGeomObject", value="will provide", &
+      name="TransferOfferGeomObject", value="_undefined", &
       convention="NUOPC", purpose="Instance", attnestflag=ESMF_ATTNEST_ON, &
       rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -1259,7 +1442,23 @@ module NUOPC_Base
 
     ! set TransferActionGeomObject
     call ESMF_AttributeSet(field, &
-      name="TransferActionGeomObject", value="provide", &
+      name="TransferActionGeomObject", value="_undefined", &
+      convention="NUOPC", purpose="Instance", attnestflag=ESMF_ATTNEST_ON, &
+      rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME)) return  ! bail out
+
+    ! set SharePolicyGeomObject
+    call ESMF_AttributeSet(field, &
+      name="SharePolicyGeomObject", value="not shared", &
+      convention="NUOPC", purpose="Instance", attnestflag=ESMF_ATTNEST_ON, &
+      rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME)) return  ! bail out
+
+    ! set ShareStatusGeomObject
+    call ESMF_AttributeSet(field, &
+      name="ShareStatusGeomObject", value="not shared", &
       convention="NUOPC", purpose="Instance", attnestflag=ESMF_ATTNEST_ON, &
       rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -1901,6 +2100,7 @@ module NUOPC_Base
 !     \begin{itemize}
 !     \item {\tt "realize\_all"} (default)
 !     \item {\tt "realize\_connected\_remove\_others"}
+!     \item {\tt "realize\_connected+provide\_remove\_others"}
 !     \end{itemize}
 !   \item[{[dataFillScheme]}]
 !     Realized fields will be filled according to the selected fill
@@ -1918,6 +2118,7 @@ module NUOPC_Base
     type(ESMF_Field)                :: field
     character(len=80)               :: selectionOpt
     type(ESMF_TypeKind_Flag)        :: typekindOpt
+    character(len=80)               :: value
 
     if (present(rc)) rc = ESMF_SUCCESS
     
@@ -1930,14 +2131,12 @@ module NUOPC_Base
       ! query the entire fieldNameList from state
       call ESMF_StateGet(state, itemCount=itemCount, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, &
-        file=__FILE__)) &
+        line=__LINE__, file=FILENAME)) &
         return  ! bail out
       allocate(fieldNameList(itemCount))
       call ESMF_StateGet(state, itemNameList=fieldNameList, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, &
-        file=__FILE__)) &
+        line=__LINE__, file=FILENAME)) &
         return  ! bail out
     endif
     
@@ -1962,22 +2161,19 @@ module NUOPC_Base
         field = ESMF_FieldCreate(grid, typekindOpt, &
           name=fieldNameList(i), rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-          line=__LINE__, &
-          file=__FILE__)) &
+          line=__LINE__, file=FILENAME)) &
           return  ! bail out
         ! realize the connected Field using the just created Field
         call NUOPC_Realize(state, field=field, rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-          line=__LINE__, &
-          file=__FILE__)) &
+          line=__LINE__, file=FILENAME)) &
           return  ! bail out
         if (present(dataFillScheme)) then
           ! a data fill scheme was provided -> use it to initialize
           call ESMF_FieldFill(field, dataFillScheme=dataFillScheme, member=k, &
             step=0, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-            line=__LINE__, &
-            file=__FILE__)) &
+            line=__LINE__, file=FILENAME)) &
             return  ! bail out
           k=k+1 ! increment the member counter
         endif
@@ -1987,21 +2183,18 @@ module NUOPC_Base
           field = ESMF_FieldCreate(grid, typekindOpt, &
             name=fieldNameList(i), rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-            line=__LINE__, &
-            file=__FILE__)) &
+            line=__LINE__, file=FILENAME)) &
             return  ! bail out
           ! realize the connected Field using the just created Field
           call NUOPC_Realize(state, field=field, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-            line=__LINE__, &
-            file=__FILE__)) &
+            line=__LINE__, file=FILENAME)) &
             return  ! bail out
           if (present(dataFillScheme)) then
             ! a data fill scheme was provided -> use it to initialize
             call ESMF_FieldFill(field, dataFillScheme=dataFillScheme, member=k, step=0, rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-              line=__LINE__, &
-              file=__FILE__)) &
+              line=__LINE__, file=FILENAME)) &
               return  ! bail out
             k=k+1 ! increment the member counter
           endif
@@ -2009,15 +2202,71 @@ module NUOPC_Base
           ! remove a not connected Field from State
           call ESMF_StateRemove(state, (/fieldNameList(i)/), rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-            line=__LINE__, &
-            file=__FILE__)) &
+            line=__LINE__, file=FILENAME)) &
+            return  ! bail out
+        endif
+      else if (trim(selectionOpt)=="realize_connected+provide_remove_others") then
+        if (NUOPC_IsConnected(state, fieldName=fieldNameList(i))) then
+          call ESMF_StateGet(state, itemName=fieldNameList(i), field=field, &
+            rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=FILENAME)) &
+            return  ! bail out
+#if 0
+          call NUOPC_GetAttribute(field, name="TransferActionField", &
+            value=value, rc=rc)
+          call ESMF_LogWrite(trim(fieldNameList(i))//":*** "//trim(value)// &
+            " ***: TransferActionField", ESMF_LOGMSG_INFO, rc=rc)
+          call NUOPC_GetAttribute(field, name="ShareStatusField", &
+            value=value, rc=rc)
+          call ESMF_LogWrite(trim(fieldNameList(i))//":*** "//trim(value)// &
+            " ***: ShareStatusField", ESMF_LOGMSG_INFO, rc=rc)
+          call NUOPC_GetAttribute(field, name="TransferActionGeomObject", &
+            value=value, rc=rc)
+          call ESMF_LogWrite(trim(fieldNameList(i))//":*** "//trim(value)// &
+            " ***: TransferActionGeomObject", ESMF_LOGMSG_INFO, rc=rc)
+          call NUOPC_GetAttribute(field, name="ShareStatusGeomObject", &
+            value=value, rc=rc)
+          call ESMF_LogWrite(trim(fieldNameList(i))//":*** "//trim(value)// &
+            " ***: ShareStatusGeomObject:", ESMF_LOGMSG_INFO, rc=rc)
+#endif
+          call NUOPC_GetAttribute(field, name="TransferActionField", &
+            value=value, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=FILENAME)) &
+            return  ! bail out
+          if (trim(value)=="provide") then
+            ! create a Field
+            field = ESMF_FieldCreate(grid, typekindOpt, &
+              name=fieldNameList(i), rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=FILENAME)) &
+              return  ! bail out
+            ! realize the connected Field using the just created Field
+            call NUOPC_Realize(state, field=field, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=FILENAME)) &
+              return  ! bail out
+            if (present(dataFillScheme)) then
+              ! a data fill scheme was provided -> use it to initialize
+              call ESMF_FieldFill(field, dataFillScheme=dataFillScheme, member=k, step=0, rc=rc)
+              if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                line=__LINE__, file=FILENAME)) &
+                return  ! bail out
+              k=k+1 ! increment the member counter
+            endif
+          endif
+        else
+          ! remove a not connected Field from State
+          call ESMF_StateRemove(state, (/fieldNameList(i)/), rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=FILENAME)) &
             return  ! bail out
         endif
       else
         call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
           msg="Unknown selection requested.", &
-          line=__LINE__, &
-          file=__FILE__, &
+          line=__LINE__, file=FILENAME, &
           rcToReturn=rc)
         return ! bail out
       endif
@@ -2104,14 +2353,12 @@ module NUOPC_Base
       ! query the entire fieldNameList from state
       call ESMF_StateGet(state, itemCount=itemCount, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, &
-        file=__FILE__)) &
+        line=__LINE__, file=FILENAME)) &
         return  ! bail out
       allocate(fieldNameList(itemCount))
       call ESMF_StateGet(state, itemNameList=fieldNameList, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, &
-        file=__FILE__)) &
+        line=__LINE__, file=FILENAME)) &
         return  ! bail out
     endif
     
@@ -2136,22 +2383,19 @@ module NUOPC_Base
         field = ESMF_FieldCreate(locstream, typekindOpt, &
           name=fieldNameList(i), rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-          line=__LINE__, &
-          file=__FILE__)) &
+          line=__LINE__, file=FILENAME)) &
           return  ! bail out
         ! realize the connected Field using the just created Field
         call NUOPC_Realize(state, field=field, rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-          line=__LINE__, &
-          file=__FILE__)) &
+          line=__LINE__, file=FILENAME)) &
           return  ! bail out
         if (present(dataFillScheme)) then
           ! a data fill scheme was provided -> use it to initialize
           call ESMF_FieldFill(field, dataFillScheme=dataFillScheme, member=k, &
             step=0, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-            line=__LINE__, &
-            file=__FILE__)) &
+            line=__LINE__, file=FILENAME)) &
             return  ! bail out
           k=k+1 ! increment the member counter
         endif
@@ -2161,21 +2405,18 @@ module NUOPC_Base
           field = ESMF_FieldCreate(locstream, typekindOpt, &
             name=fieldNameList(i), rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-            line=__LINE__, &
-            file=__FILE__)) &
+            line=__LINE__, file=FILENAME)) &
             return  ! bail out
           ! realize the connected Field using the just created Field
           call NUOPC_Realize(state, field=field, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-            line=__LINE__, &
-            file=__FILE__)) &
+            line=__LINE__, file=FILENAME)) &
             return  ! bail out
           if (present(dataFillScheme)) then
             ! a data fill scheme was provided -> use it to initialize
             call ESMF_FieldFill(field, dataFillScheme=dataFillScheme, member=k, step=0, rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-              line=__LINE__, &
-              file=__FILE__)) &
+              line=__LINE__, file=FILENAME)) &
               return  ! bail out
             k=k+1 ! increment the member counter
           endif
@@ -2183,15 +2424,13 @@ module NUOPC_Base
           ! remove a not connected Field from State
           call ESMF_StateRemove(state, (/fieldNameList(i)/), rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-            line=__LINE__, &
-            file=__FILE__)) &
+            line=__LINE__, file=FILENAME)) &
             return  ! bail out
         endif
       else
         call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
           msg="Unknown selection requested.", &
-          line=__LINE__, &
-          file=__FILE__, &
+          line=__LINE__, file=FILENAME, &
           rcToReturn=rc)
         return ! bail out
       endif
@@ -2278,14 +2517,12 @@ module NUOPC_Base
       ! query the entire fieldNameList from state
       call ESMF_StateGet(state, itemCount=itemCount, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, &
-        file=__FILE__)) &
+        line=__LINE__, file=FILENAME)) &
         return  ! bail out
       allocate(fieldNameList(itemCount))
       call ESMF_StateGet(state, itemNameList=fieldNameList, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, &
-        file=__FILE__)) &
+        line=__LINE__, file=FILENAME)) &
         return  ! bail out
     endif
     
@@ -2310,22 +2547,19 @@ module NUOPC_Base
         field = ESMF_FieldCreate(mesh, typekindOpt, &
           name=fieldNameList(i), rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-          line=__LINE__, &
-          file=__FILE__)) &
+          line=__LINE__, file=FILENAME)) &
           return  ! bail out
         ! realize the connected Field using the just created Field
         call NUOPC_Realize(state, field=field, rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-          line=__LINE__, &
-          file=__FILE__)) &
+          line=__LINE__, file=FILENAME)) &
           return  ! bail out
         if (present(dataFillScheme)) then
           ! a data fill scheme was provided -> use it to initialize
           call ESMF_FieldFill(field, dataFillScheme=dataFillScheme, member=k, &
             step=0, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-            line=__LINE__, &
-            file=__FILE__)) &
+            line=__LINE__, file=FILENAME)) &
             return  ! bail out
           k=k+1 ! increment the member counter
         endif
@@ -2335,21 +2569,18 @@ module NUOPC_Base
           field = ESMF_FieldCreate(mesh, typekindOpt, &
             name=fieldNameList(i), rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-            line=__LINE__, &
-            file=__FILE__)) &
+            line=__LINE__, file=FILENAME)) &
             return  ! bail out
           ! realize the connected Field using the just created Field
           call NUOPC_Realize(state, field=field, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-            line=__LINE__, &
-            file=__FILE__)) &
+            line=__LINE__, file=FILENAME)) &
             return  ! bail out
           if (present(dataFillScheme)) then
             ! a data fill scheme was provided -> use it to initialize
             call ESMF_FieldFill(field, dataFillScheme=dataFillScheme, member=k, step=0, rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-              line=__LINE__, &
-              file=__FILE__)) &
+              line=__LINE__, file=FILENAME)) &
               return  ! bail out
             k=k+1 ! increment the member counter
           endif
@@ -2357,15 +2588,13 @@ module NUOPC_Base
           ! remove a not connected Field from State
           call ESMF_StateRemove(state, (/fieldNameList(i)/), rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-            line=__LINE__, &
-            file=__FILE__)) &
+            line=__LINE__, file=FILENAME)) &
             return  ! bail out
         endif
       else
         call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
           msg="Unknown selection requested.", &
-          line=__LINE__, &
-          file=__FILE__, &
+          line=__LINE__, file=FILENAME, &
           rcToReturn=rc)
         return ! bail out
       endif
@@ -2410,7 +2639,7 @@ module NUOPC_Base
     character(ESMF_MAXSTR)  :: LongName
     character(ESMF_MAXSTR)  :: ShortName
     integer                 :: i
-    integer, parameter      :: attrCount=6
+    integer, parameter      :: attrCount=12
     character(ESMF_MAXSTR)  :: attrList(attrCount)
     character(ESMF_MAXSTR)  :: tempString
     
@@ -2421,8 +2650,14 @@ module NUOPC_Base
     attrList(2) = "ProducerConnection"
     attrList(3) = "ConsumerConnection"
     attrList(4) = "Updated"
-    attrList(5) = "TransferOfferGeomObject"
-    attrList(6) = "TransferActionGeomObject"
+    attrList(5) = "TransferOfferField"
+    attrList(6) = "TransferActionField"
+    attrList(7) = "SharePolicyField"
+    attrList(8) = "ShareStatusField"
+    attrList(9) = "TransferOfferGeomObject"
+    attrList(10) = "TransferActionGeomObject"
+    attrList(11) = "SharePolicyGeomObject"
+    attrList(12) = "ShareStatusGeomObject"
     
     ! Obtain the advertised Field
     

@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2016, University Corporation for Atmospheric Research, 
+! Copyright 2002-2017, University Corporation for Atmospheric Research, 
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 ! Laboratory, University of Michigan, National Centers for Environmental 
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -874,8 +874,9 @@ print *, "current bondLevel=", bondLevel
     character(ESMF_MAXSTR)          :: connectionString
     character(ESMF_MAXSTR)          :: name, valueString
     character(ESMF_MAXSTR)          :: iTransferOffer, eTransferOffer
+    character(ESMF_MAXSTR)          :: iSharePolicy, eSharePolicy
     integer                         :: profiling
-    logical                         :: matchE, matchI
+    logical                         :: matchE, matchI, acceptFlag
 
     rc = ESMF_SUCCESS
 
@@ -1044,7 +1045,145 @@ print *, "current bondLevel=", bondLevel
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
         
-        ! coordinate the transfer of geomobjects between components
+        ! coordinate the transfer and sharing of fields between components
+        call NUOPC_GetAttribute(iField, name="TransferOfferField", &
+          value=iTransferOffer, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+        call NUOPC_GetAttribute(eField, name="TransferOfferField", &
+          value=eTransferOffer, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+        acceptFlag=.false. ! reset
+        if (trim(iTransferOffer)=="will provide") then
+          if (trim(eTransferOffer)=="will provide") then
+            ! -> both sides must provide
+            call NUOPC_SetAttribute(iField, &
+              name="TransferActionField", value="provide", rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+            call NUOPC_SetAttribute(eField, &
+              name="TransferActionField", value="provide", rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          elseif (trim(eTransferOffer)=="can provide") then
+            ! -> import side must provide, export side must accept
+            acceptFlag=.true.
+            call NUOPC_SetAttribute(iField, &
+              name="TransferActionField", value="provide", rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+            call NUOPC_SetAttribute(eField, &
+              name="TransferActionField", value="accept", rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          else  ! eTransferOffer=="cannot provide"
+            ! -> import side must provide, export side must accept
+            acceptFlag=.true.
+            call NUOPC_SetAttribute(iField, &
+              name="TransferActionField", value="provide", rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+            call NUOPC_SetAttribute(eField, &
+              name="TransferActionField", value="accept", rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          endif
+        elseif (trim(iTransferOffer)=="can provide") then
+          if (trim(eTransferOffer)=="will provide") then
+            ! -> import side must accept, export side must provide
+            acceptFlag=.true.
+            call NUOPC_SetAttribute(iField, &
+              name="TransferActionField", value="accept", rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+            call NUOPC_SetAttribute(eField, &
+              name="TransferActionField", value="provide", rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          elseif (trim(eTransferOffer)=="can provide") then
+            ! -> import side must provide, export side must accept
+            acceptFlag=.true.
+            call NUOPC_SetAttribute(iField, &
+              name="TransferActionField", value="provide", rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+            call NUOPC_SetAttribute(eField, &
+              name="TransferActionField", value="accept", rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          else  ! eTransferOffer=="cannot provide"
+            ! -> import side must provide, export side must accept
+            acceptFlag=.true.
+            call NUOPC_SetAttribute(iField, &
+              name="TransferActionField", value="provide", rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+            call NUOPC_SetAttribute(eField, &
+              name="TransferActionField", value="accept", rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          endif
+        else  ! iTransferOffer=="cannot provide"
+          if (trim(eTransferOffer)=="will provide") then
+            ! -> import side must accept, export side must provide
+            acceptFlag=.true.
+            call NUOPC_SetAttribute(iField, &
+              name="TransferActionField", value="accept", rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+            call NUOPC_SetAttribute(eField, &
+              name="TransferActionField", value="provide", rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          elseif (trim(eTransferOffer)=="can provide") then
+            ! -> import side must accept, export side must provide
+            acceptFlag=.true.
+            call NUOPC_SetAttribute(iField, &
+              name="TransferActionField", value="accept", rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+            call NUOPC_SetAttribute(eField, &
+              name="TransferActionField", value="provide", rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          else  ! eTransferOffer=="cannot provide"
+            ! -> neither side is able to provide -> error
+            call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
+              msg="Neither side (import/export) able to provide geom object.", &
+              line=__LINE__, file=trim(name)//":"//FILENAME)
+            return  ! bail out
+          endif
+        endif
+        if (acceptFlag) then
+          ! One side accepts the other -> need to look at sharing
+          call NUOPC_GetAttribute(iField, name="SharePolicyField", &
+            value=iSharePolicy, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          call NUOPC_GetAttribute(eField, name="SharePolicyField", &
+            value=eSharePolicy, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          if (trim(iSharePolicy)=="share" .and. trim(eSharePolicy)=="share") then
+            ! both sides want to share -> shared
+            call NUOPC_SetAttribute(iField, &
+              name="ShareStatusField", value="shared", rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+            call NUOPC_SetAttribute(eField, &
+              name="ShareStatusField", value="shared", rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          else
+            ! at least one side does not want to share -> not shared
+            ! but don't modify attribute here because if alread shared through
+            ! another connection, it must stay shared. Rely on "not shared" 
+            ! default.
+          endif
+        endif
+
+        ! coordinate the transfer and sharing of geomobjects between components
         call NUOPC_GetAttribute(iField, name="TransferOfferGeomObject", &
           value=iTransferOffer, rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -1053,6 +1192,7 @@ print *, "current bondLevel=", bondLevel
           value=eTransferOffer, rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+        acceptFlag=.false. ! reset
         if (trim(iTransferOffer)=="will provide") then
           if (trim(eTransferOffer)=="will provide") then
             ! -> both sides must provide
@@ -1066,6 +1206,7 @@ print *, "current bondLevel=", bondLevel
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
           elseif (trim(eTransferOffer)=="can provide") then
             ! -> import side must provide, export side must accept
+            acceptFlag=.true.
             call NUOPC_SetAttribute(iField, &
               name="TransferActionGeomObject", value="provide", rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -1076,6 +1217,7 @@ print *, "current bondLevel=", bondLevel
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
           else  ! eTransferOffer=="cannot provide"
             ! -> import side must provide, export side must accept
+            acceptFlag=.true.
             call NUOPC_SetAttribute(iField, &
               name="TransferActionGeomObject", value="provide", rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -1088,6 +1230,7 @@ print *, "current bondLevel=", bondLevel
         elseif (trim(iTransferOffer)=="can provide") then
           if (trim(eTransferOffer)=="will provide") then
             ! -> import side must accept, export side must provide
+            acceptFlag=.true.
             call NUOPC_SetAttribute(iField, &
               name="TransferActionGeomObject", value="accept", rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -1098,6 +1241,7 @@ print *, "current bondLevel=", bondLevel
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
           elseif (trim(eTransferOffer)=="can provide") then
             ! -> import side must provide, export side must accept
+            acceptFlag=.true.
             call NUOPC_SetAttribute(iField, &
               name="TransferActionGeomObject", value="provide", rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -1108,6 +1252,7 @@ print *, "current bondLevel=", bondLevel
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
           else  ! eTransferOffer=="cannot provide"
             ! -> import side must provide, export side must accept
+            acceptFlag=.true.
             call NUOPC_SetAttribute(iField, &
               name="TransferActionGeomObject", value="provide", rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -1120,6 +1265,7 @@ print *, "current bondLevel=", bondLevel
         else  ! iTransferOffer=="cannot provide"
           if (trim(eTransferOffer)=="will provide") then
             ! -> import side must accept, export side must provide
+            acceptFlag=.true.
             call NUOPC_SetAttribute(iField, &
               name="TransferActionGeomObject", value="accept", rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -1130,6 +1276,7 @@ print *, "current bondLevel=", bondLevel
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
           elseif (trim(eTransferOffer)=="can provide") then
             ! -> import side must accept, export side must provide
+            acceptFlag=.true.
             call NUOPC_SetAttribute(iField, &
               name="TransferActionGeomObject", value="accept", rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -1146,10 +1293,37 @@ print *, "current bondLevel=", bondLevel
             return  ! bail out
           endif
         endif
+        if (acceptFlag) then
+          ! One side accepts the other -> need to look at sharing
+          call NUOPC_GetAttribute(iField, name="SharePolicyGeomObject", &
+            value=iSharePolicy, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          call NUOPC_GetAttribute(eField, name="SharePolicyGeomObject", &
+            value=eSharePolicy, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          if (trim(iSharePolicy)=="share" .and. trim(eSharePolicy)=="share") then
+            ! both sides want to share -> shared
+            call NUOPC_SetAttribute(iField, &
+              name="ShareStatusGeomObject", value="shared", rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+            call NUOPC_SetAttribute(eField, &
+              name="ShareStatusGeomObject", value="shared", rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          else
+            ! at least one side does not want to share -> not shared
+            ! at least one side does not want to share -> not shared
+            ! but don't modify attribute here because if alread shared through
+            ! another connection, it must stay shared. Rely on "not shared" 
+            ! default.
+          endif
+        endif
       else
         !TODO: Fields mentioned via stdname in Cpl metadata not found -> error?
       endif
-
     enddo
 
     ! create the State member    
@@ -1189,6 +1363,7 @@ print *, "current bondLevel=", bondLevel
     integer                         :: iMatch, eMatch
     type(ESMF_Field)                :: iField, eField
     type(ESMF_Field)                :: providerField, acceptorField
+    type(ESMF_State)                :: providerState, acceptorState
     type(ESMF_GeomType_Flag)        :: geomtype
     type(ESMF_Grid)                 :: grid
     type(ESMF_Mesh)                 :: mesh
@@ -1203,8 +1378,9 @@ print *, "current bondLevel=", bondLevel
     logical                         :: foundFlag
     character(ESMF_MAXSTR)          :: connectionString
     character(ESMF_MAXSTR)          :: name, valueString
-    character(ESMF_MAXSTR)          :: geomobjname
+    character(ESMF_MAXSTR)          :: geomobjname, fieldName
     character(ESMF_MAXSTR)          :: iTransferAction, eTransferAction
+    character(ESMF_MAXSTR)          :: iShareStatus, eShareStatus
     integer                         :: verbosity
     integer(ESMF_KIND_I4), pointer  :: ungriddedLBound(:), ungriddedUBound(:)
     integer(ESMF_KIND_I4), pointer  :: gridToFieldMap(:)
@@ -1213,7 +1389,9 @@ print *, "current bondLevel=", bondLevel
     logical                         :: matchE, matchI
     integer                         :: dimCount
     integer, allocatable            :: minIndex(:), maxIndex(:)
-
+    logical                         :: sharedFlag
+    type(ESMF_Array)                :: array
+    
     rc = ESMF_SUCCESS
 
     ! query the Component for info
@@ -1384,22 +1562,36 @@ print *, "current bondLevel=", bondLevel
           .and.(trim(eTransferAction)=="accept")) then
           providerField = iField
           acceptorField = eField
+          providerState = importState
+          acceptorState = exportState
         elseif ((trim(eTransferAction)=="provide") &
           .and.(trim(iTransferAction)=="accept")) then
           providerField = eField
           acceptorField = iField
+          providerState = exportState
+          acceptorState = importState
         else  ! not a situation that needs handling here
           cycle ! continue with the next i
         endif
         
-        if (btest(verbosity,1)) then
-          call ESMF_LogWrite(trim(name)//": transferring underlying DistGrid", &
-            ESMF_LOGMSG_INFO, rc=rc)
-          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-        endif
-
+        call NUOPC_GetAttribute(iField, name="ShareStatusField", &
+          value=iShareStatus, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+        call NUOPC_GetAttribute(eField, name="ShareStatusField", &
+          value=eShareStatus, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+#if 0
+call ESMF_LogWrite("iShareStatus: "//trim(iShareStatus), ESMF_LOGMSG_INFO, rc=rc)
+call ESMF_LogWrite("eShareStatus: "//trim(eShareStatus), ESMF_LOGMSG_INFO, rc=rc)
+#endif
+        sharedFlag = .false. ! reset
+        if (trim(iShareStatus)=="shared" .and. trim(eShareStatus)=="shared") &
+          sharedFlag = .true.
+          
         ! transfer the underlying DistGrid from provider to acceptor
+        ! or share the providerField or providerGeomObject with the acceptor
         call ESMF_FieldGet(providerField, geomtype=geomtype, rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
@@ -1408,36 +1600,48 @@ print *, "current bondLevel=", bondLevel
             rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-          call ESMF_GridGet(grid, distgrid=providerDG, name=geomobjname, &
-            dimCount=dimCount, rc=rc)
-          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-          call ESMF_FieldGet(acceptorField, vm=vm, rc=rc)
-          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-#if 0
-          call ESMF_LogWrite(trim(name)//": InitializeP3 transfer DG for Grid: "//&
-            trim(geomobjname), ESMF_LOGMSG_INFO, rc=rc)
-#endif
-          acceptorDG = ESMF_DistGridCreate(providerDG, vm=vm, rc=rc)
-          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-          ! The right way to transfer the DistGrid to the acceptor side is to
-          ! create an empty Grid, and then only set the name and distgrid.
-          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-          grid = ESMF_GridEmptyCreate(vm=vm, rc=rc)
-          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-          call ESMF_GridSet(grid, name=geomobjname, distgrid=acceptorDG, &
-            vm=vm, rc=rc)
-          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-          call ESMF_FieldEmptySet(acceptorField, grid=grid, &
-            staggerloc=staggerloc, rc=rc)
-          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-          ! bring over more info as attributes
+          if (.not.sharedFlag) then
+            ! not shared -> must transfer
+            call ESMF_GridGet(grid, distgrid=providerDG, name=geomobjname, &
+              dimCount=dimCount, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+            call ESMF_FieldGet(acceptorField, vm=vm, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+#if 0   
+            call ESMF_LogWrite(trim(name)//": InitializeP3 transfer DG for Grid: "//&
+              trim(geomobjname), ESMF_LOGMSG_INFO, rc=rc)
+#endif  
+            if (btest(verbosity,1)) then
+              call ESMF_LogWrite(trim(name)//": transferring underlying DistGrid", &
+                ESMF_LOGMSG_INFO, rc=rc)
+              if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+            endif
+            acceptorDG = ESMF_DistGridCreate(providerDG, vm=vm, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+            grid = ESMF_GridEmptyCreate(vm=vm, rc=rc)
+              if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+            if (btest(verbosity,1)) then
+              call ESMF_LogWrite(trim(name)//&
+                ": done transferring underlying DistGrid", &
+                ESMF_LOGMSG_INFO, rc=rc)
+              if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+            endif
+            call ESMF_GridSet(grid, name=geomobjname, distgrid=acceptorDG, &
+              vm=vm, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+            call ESMF_FieldEmptySet(acceptorField, grid=grid, &
+              staggerloc=staggerloc, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          endif
+          ! query additional provider information
           call ESMF_FieldGet(providerField, grid=grid, &
             dimCount=fieldDimCount, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -1451,29 +1655,8 @@ print *, "current bondLevel=", bondLevel
             line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
           call ESMF_GridGetIndex(grid, tileNo=1, &
             minIndex=minIndex, maxIndex=maxIndex, rc=rc)
-          ! bring over mindIndex and maxIndex as attributes
-          call ESMF_AttributeSet(acceptorField, &
-            name="MinIndex", valueList=minIndex, &
-            convention="NUOPC", purpose="Instance", &
-            attnestflag=ESMF_ATTNEST_ON, rc=rc)
-          call ESMF_AttributeSet(acceptorField, &
-            name="MaxIndex", valueList=maxIndex, &
-            convention="NUOPC", purpose="Instance", &
-            attnestflag=ESMF_ATTNEST_ON, rc=rc)
-          deallocate(minIndex, maxIndex, stat=rc)
-          if (ESMF_LogFoundDeallocError(rc, &
-            msg="Deallocating minIndex, maxIndex", &
+          if (ESMF_LogFoundAllocError(rc, msg="Allocating minIndex, maxIndex", &
             line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-          ! bring over arbDimCount as attribute
-          call ESMF_AttributeSet(acceptorField, &
-            name="ArbDimCount", value=arbDimCount, &
-            convention="NUOPC", purpose="Instance", &
-            attnestflag=ESMF_ATTNEST_ON, rc=rc)
-          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-            line=__LINE__, &
-            file=FILENAME)) &
-            return  ! bail out
-          ! bring over gridToFieldMap as attributes
           allocate(gridToFieldMap(gridDimCount),stat=stat)
           if (ESMF_LogFoundAllocError(statusToCheck=stat, &
             msg="Allocation of internal ungriddedLBound failed.", &
@@ -1483,20 +1666,8 @@ print *, "current bondLevel=", bondLevel
             rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-          call ESMF_AttributeSet(acceptorField, &
-            name="GridToFieldMap", valueList=gridToFieldMap, &
-            convention="NUOPC", purpose="Instance", &
-            attnestflag=ESMF_ATTNEST_ON, rc=rc)
-          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-            line=__LINE__, &
-            file=FILENAME)) &
-            return  ! bail out
-          deallocate(gridToFieldMap)
-
-!          print *, "fieldDimCount = ", fieldDimCount
-!          print *, "gridDimCount = ", gridDimCount
           if (fieldDimCount - gridDimCount > 0) then
-            ! bring over ungridded dim bounds as attributes
+            ! query ungridded dim bounds
             allocate(ungriddedLBound(fieldDimCount-gridDimCount),stat=stat)
             if (ESMF_LogFoundAllocError(statusToCheck=stat, &
               msg="Allocation of internal ungriddedLBound failed.", &
@@ -1511,26 +1682,97 @@ print *, "current bondLevel=", bondLevel
               ungriddedUBound=ungriddedUBound, rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-
+          endif
+          if (.not.sharedFlag) then
+            ! transfer additional provider info in form of attributes
             call ESMF_AttributeSet(acceptorField, &
-              name="UngriddedLBound", valueList=ungriddedLBound, &
+              name="MinIndex", valueList=minIndex, &
+              convention="NUOPC", purpose="Instance", &
+              attnestflag=ESMF_ATTNEST_ON, rc=rc)
+            call ESMF_AttributeSet(acceptorField, &
+              name="MaxIndex", valueList=maxIndex, &
+              convention="NUOPC", purpose="Instance", &
+              attnestflag=ESMF_ATTNEST_ON, rc=rc)
+            ! bring over arbDimCount as attribute
+            call ESMF_AttributeSet(acceptorField, &
+              name="ArbDimCount", value=arbDimCount, &
               convention="NUOPC", purpose="Instance", &
               attnestflag=ESMF_ATTNEST_ON, rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, &
               file=FILENAME)) &
               return  ! bail out
+            ! bring over gridToFieldMap as attributes
             call ESMF_AttributeSet(acceptorField, &
-              name="UngriddedUBound", valueList=ungriddedUBound, &
+              name="GridToFieldMap", valueList=gridToFieldMap, &
               convention="NUOPC", purpose="Instance", &
               attnestflag=ESMF_ATTNEST_ON, rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, &
               file=FILENAME)) &
               return  ! bail out
+            if (fieldDimCount - gridDimCount > 0) then
+              ! bring over ungridded dim bounds as attributes
+!            print *, "fieldDimCount = ", fieldDimCount
+!            print *, "gridDimCount = ", gridDimCount
+              call ESMF_AttributeSet(acceptorField, &
+                name="UngriddedLBound", valueList=ungriddedLBound, &
+                convention="NUOPC", purpose="Instance", &
+                attnestflag=ESMF_ATTNEST_ON, rc=rc)
+              if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                line=__LINE__, &
+                file=FILENAME)) &
+                return  ! bail out
+              call ESMF_AttributeSet(acceptorField, &
+                name="UngriddedUBound", valueList=ungriddedUBound, &
+                convention="NUOPC", purpose="Instance", &
+                attnestflag=ESMF_ATTNEST_ON, rc=rc)
+              if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                line=__LINE__, &
+                file=FILENAME)) &
+                return  ! bail out
+            endif
+          else
+            ! shared: query additional info from provider to share with acceptor
+            call ESMF_FieldGet(providerField, name=fieldName, array=array, &
+              rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+            !TODO: make sure that this FieldCreate() sets ungridded bounds and
+            !TODO: total widths correctly
+            acceptorField=ESMF_FieldCreate(grid=grid, array=array, &
+              datacopyflag=ESMF_DATACOPY_REFERENCE, staggerloc=staggerloc, &
+              gridToFieldMap=gridToFieldMap, name=fieldName, rc=rc)  
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+            call NUOPC_Realize(acceptorState, acceptorField, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+            ! reset the TransferAction for this completed field
+            call NUOPC_SetAttribute(acceptorField, &
+              name="TransferActionField", value="complete", rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+            call NUOPC_SetAttribute(acceptorField, &
+              name="TransferActionGeomObject", value="complete", rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          endif
+          
+          ! clean-up
+          deallocate(minIndex, maxIndex, stat=rc)
+          if (ESMF_LogFoundDeallocError(rc, &
+            msg="Deallocating minIndex, maxIndex", &
+            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          deallocate(gridToFieldMap, stat=rc)
+          if (ESMF_LogFoundDeallocError(rc, &
+            msg="Deallocating gridToFieldMap", &
+            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          if (fieldDimCount - gridDimCount > 0) then
             deallocate(ungriddedLBound)
             deallocate(ungriddedUBound)
           endif
+          
         elseif (geomtype==ESMF_GEOMTYPE_MESH) then
           call ESMF_FieldGet(providerField, mesh=mesh, meshloc=meshloc, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -1542,6 +1784,12 @@ print *, "current bondLevel=", bondLevel
           call ESMF_FieldGet(acceptorField, vm=vm, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          if (btest(verbosity,1)) then
+            call ESMF_LogWrite(trim(name)//": transferring underlying DistGrid", &
+              ESMF_LOGMSG_INFO, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          endif
           acceptorDG = ESMF_DistGridCreate(providerDG, vm=vm, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
@@ -1557,6 +1805,13 @@ print *, "current bondLevel=", bondLevel
             rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          if (btest(verbosity,1)) then
+            call ESMF_LogWrite(trim(name)//&
+              ": done transferring underlying DistGrid", &
+              ESMF_LOGMSG_INFO, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          endif
         elseif (geomtype==ESMF_GEOMTYPE_LOCSTREAM) then
           call ESMF_FieldGet(providerField, locstream=locstream, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -1568,6 +1823,12 @@ print *, "current bondLevel=", bondLevel
           call ESMF_FieldGet(acceptorField, vm=vm, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          if (btest(verbosity,1)) then
+            call ESMF_LogWrite(trim(name)//": transferring underlying DistGrid", &
+              ESMF_LOGMSG_INFO, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          endif
           acceptorDG = ESMF_DistGridCreate(providerDG, vm=vm, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
@@ -1578,21 +1839,19 @@ print *, "current bondLevel=", bondLevel
           call ESMF_FieldEmptySet(acceptorField, locstream=locstream, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          if (btest(verbosity,1)) then
+            call ESMF_LogWrite(trim(name)//&
+              ": done transferring underlying DistGrid", &
+              ESMF_LOGMSG_INFO, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          endif
         else
           call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
             msg="Provided GeomType must be Grid, Mesh, or LocStream.", &
             line=__LINE__, file=trim(name)//":"//FILENAME)
           return  ! bail out
         endif
-
-        if (btest(verbosity,1)) then
-          call ESMF_LogWrite(trim(name)//&
-            ": done transferring underlying DistGrid", &
-            ESMF_LOGMSG_INFO, rc=rc)
-          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-        endif
-
       else
         !TODO: Fields mentioned via stdname in Cpl metadata not found -> error?
       endif
@@ -2018,8 +2277,9 @@ print *, "current bondLevel=", bondLevel
     
     ! local variables
     character(ESMF_MAXSTR), pointer :: cplList(:), chopStringList(:)
+    character(ESMF_MAXSTR), pointer :: cplListTemp(:)
     character(ESMF_MAXSTR)          :: cplName
-    integer                         :: cplListSize, i
+    integer                         :: cplListSize, i, j
     integer                         :: bondLevel, bondLevelMax
     character(ESMF_MAXSTR), pointer :: importNamespaceList(:)
     character(ESMF_MAXSTR), pointer :: exportNamespaceList(:)
@@ -2029,6 +2289,7 @@ print *, "current bondLevel=", bondLevel
     type(ESMF_Field),       pointer :: exportFieldList(:)
     integer                         :: iMatch, eMatch
     type(ESMF_Field)                :: iField, eField
+    type(ESMF_Array)                :: iArray, eArray
     integer                         :: stat
     type(type_InternalState)        :: is
     logical                         :: foundFlag
@@ -2106,6 +2367,14 @@ print *, "current bondLevel=", bondLevel
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
       
+    ! prepare cplListTemp
+    allocate(cplListTemp(cplListSize))
+    j=1 ! initialize
+
+    ! prepare lists of fields
+    allocate(is%wrap%srcFieldList(cplListSize))
+    allocate(is%wrap%dstFieldList(cplListSize))
+
     ! prepare chopStringList
     nullify(chopStringList)
     
@@ -2192,16 +2461,30 @@ print *, "current bondLevel=", bondLevel
         ! there are matching Fields in the import and export States
         iField=importFieldList(iMatch)
         eField=exportFieldList(eMatch)
-        
-        ! add the import and export Fields to FieldBundles
-        call ESMF_FieldBundleAdd(is%wrap%srcFields, (/iField/), &
-          multiflag=.true., rc=rc)
+        ! add the fields to the field lists
+        is%wrap%srcFieldList(i)=iField
+        is%wrap%dstFieldList(i)=eField
+        ! check if the field pair may share the array, i.e. data allocation
+        call ESMF_FieldGet(iField, array=iArray, rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-        call ESMF_FieldBundleAdd(is%wrap%dstFields, (/eField/), &
-          multiflag=.true., rc=rc)
+        call ESMF_FieldGet(eField, array=eArray, rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+        if (iArray/=eArray) then
+          ! not sharing -> add the import and export Fields to FieldBundles
+          call ESMF_FieldBundleAdd(is%wrap%srcFields, (/iField/), &
+            multiflag=.true., rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          call ESMF_FieldBundleAdd(is%wrap%dstFields, (/eField/), &
+            multiflag=.true., rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          ! also add to cplListTemp
+          cplListTemp(j)=cplList(i)
+          j=j+1
+        endif
           
         ! set the connected Attribute on import Field
         call NUOPC_SetAttribute(iField, name="Connected", value="true", &
@@ -2240,8 +2523,8 @@ print *, "current bondLevel=", bondLevel
       ! if not specialized -> use default method to:
       ! precompute the regrid for all src to dst Fields
       call FieldBundleCplStore(is%wrap%srcFields, is%wrap%dstFields, &
-        cplList=cplList, rh=is%wrap%rh, termOrders=is%wrap%termOrders, &
-        name=name, rc=rc)
+        cplList=cplListTemp(1:j-1), rh=is%wrap%rh, &
+        termOrders=is%wrap%termOrders, name=name, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
       if (btest(verbosity,2)) then
@@ -2261,28 +2544,9 @@ print *, "current bondLevel=", bondLevel
       endif    
     endif
     
-    ! populate remaining internal state members
-    call ESMF_FieldBundleGet(is%wrap%srcFields, &
-      fieldCount=is%wrap%srcFieldCount, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    allocate(is%wrap%srcFieldList(is%wrap%srcFieldCount))
-    call ESMF_FieldBundleGet(is%wrap%srcFields, &
-      fieldList=is%wrap%srcFieldList, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    call ESMF_FieldBundleGet(is%wrap%dstFields, &
-      fieldCount=is%wrap%dstFieldCount, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    allocate(is%wrap%dstFieldList(is%wrap%dstFieldCount))
-    call ESMF_FieldBundleGet(is%wrap%dstFields, &
-      fieldList=is%wrap%dstFieldList, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    
     ! clean-up
     if (associated(cplList)) deallocate(cplList)
+    if (associated(cplListTemp)) deallocate(cplListTemp)
     if (associated(importStandardNameList)) deallocate(importStandardNameList)
     if (associated(importFieldList)) deallocate(importFieldList)
     if (associated(importNamespaceList)) deallocate(importNamespaceList)
@@ -2891,7 +3155,7 @@ print *, "found match:"// &
     rc)
     type(ESMF_FieldBundle),    intent(in)            :: srcFB
     type(ESMF_FieldBundle),    intent(inout)         :: dstFB
-    character(*),              pointer               :: cplList(:)
+    character(*)                                     :: cplList(:)
     type(ESMF_RouteHandle),    intent(inout)         :: rh
     type(ESMF_TermOrder_Flag), pointer               :: termOrders(:)
     character(*),              intent(in)            :: name
@@ -2956,11 +3220,7 @@ call ESMF_VMLogCurrentGarbageInfo(trim(name)//": FieldBundleCplStore enter: ")
 #endif
 
     ! consistency check counts
-    if (associated(cplList)) then
-      count = size(cplList)
-    else
-      count = 0
-    endif
+    count = size(cplList)
     call ESMF_FieldBundleGet(srcFB, fieldCount=i, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
