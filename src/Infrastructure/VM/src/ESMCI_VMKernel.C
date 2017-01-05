@@ -3680,6 +3680,9 @@ int VMK::reduce(void *in, void *out, int len, vmType type, vmOp op, int root){
     case vmR8:
       mpitype = MPI_DOUBLE;
       break;
+    case vmBYTE:
+      localrc = -1;   // error
+      return localrc; // bail out
     }
     localrc = MPI_Reduce(in, out, len, mpitype, mpiop, root, mpi_c);
   }else{
@@ -3695,6 +3698,9 @@ int VMK::reduce(void *in, void *out, int len, vmType type, vmOp op, int root){
     case vmR8:
       templen *= 8;   // 8 bytes
       break;
+    case vmBYTE:
+      localrc = -1;   // error
+      return localrc; // bail out
     }
     char *temparray;
     if (mypet==root)
@@ -3748,6 +3754,9 @@ int VMK::reduce(void *in, void *out, int len, vmType type, vmOp op, int root){
             }
           }
           break;
+        case vmBYTE:
+          localrc = -1;   // error
+          return localrc; // bail out
         }
         break;
       case vmMIN:
@@ -3797,6 +3806,9 @@ int VMK::reduce(void *in, void *out, int len, vmType type, vmOp op, int root){
             }
           }
           break;
+        case vmBYTE:
+          localrc = -1;   // error
+          return localrc; // bail out
         }
         break;
       case vmMAX:
@@ -3846,6 +3858,9 @@ int VMK::reduce(void *in, void *out, int len, vmType type, vmOp op, int root){
             }
           }
           break;
+        case vmBYTE:
+          localrc = -1;   // error
+          return localrc; // bail out
         }
         break;
       }
@@ -3884,6 +3899,9 @@ int VMK::allreduce(void *in, void *out, int len, vmType type, vmOp op){
     case vmR8:
       mpitype = MPI_DOUBLE;
       break;
+    case vmBYTE:
+      localrc = -1;   // error
+      return localrc; // bail out
     }
     localrc = MPI_Allreduce(in, out, len, mpitype, mpiop, mpi_c);
   }else{
@@ -3899,6 +3917,9 @@ int VMK::allreduce(void *in, void *out, int len, vmType type, vmOp op){
     case vmR8:
       templen *= 8;   // 8 bytes
       break;
+    case vmBYTE:
+      localrc = -1;   // error
+      return localrc; // bail out
     }
     char *temparray = new char[templen*npets]; // allocate temp data array
     // gather all data onto each PET
@@ -3952,6 +3973,9 @@ int VMK::allreduce(void *in, void *out, int len, vmType type, vmOp op){
           }
         }
         break;
+      case vmBYTE:
+        localrc = -1;   // error
+        return localrc; // bail out
       }
       break;
     case vmMIN:
@@ -4001,6 +4025,9 @@ int VMK::allreduce(void *in, void *out, int len, vmType type, vmOp op){
           }
         }
         break;
+      case vmBYTE:
+        localrc = -1;   // error
+        return localrc; // bail out
       }
       break;
     case vmMAX:
@@ -4050,6 +4077,9 @@ int VMK::allreduce(void *in, void *out, int len, vmType type, vmOp op){
           }
         }
         break;
+      case vmBYTE:
+        localrc = -1;   // error
+        return localrc; // bail out
       }
       break;
     }
@@ -4096,6 +4126,9 @@ int VMK::allfullreduce(void *in, void *out, int len, vmType type, vmOp op){
           local_r8 += tempdata[j];
       }
       break;
+    case vmBYTE:
+      localrc = -1;   // error
+      return localrc; // bail out
     }
     break;
   case vmMIN:
@@ -4127,6 +4160,9 @@ int VMK::allfullreduce(void *in, void *out, int len, vmType type, vmOp op){
           if (tempdata[j] < local_r8) local_r8 = tempdata[j];
       }
       break;
+    case vmBYTE:
+      localrc = -1;   // error
+      return localrc; // bail out
     }
     break;
   case vmMAX:
@@ -4158,6 +4194,9 @@ int VMK::allfullreduce(void *in, void *out, int len, vmType type, vmOp op){
           if (tempdata[j] > local_r8) local_r8 = tempdata[j];
       }
       break;
+    case vmBYTE:
+      localrc = -1;   // error
+      return localrc; // bail out
     }
     break;
   }
@@ -4227,6 +4266,9 @@ int VMK::reduce_scatter(void *in, void *out, int *outCounts,
     case vmR8:
       mpitype = MPI_DOUBLE;
       break;
+    case vmBYTE:
+      localrc = -1;   // error
+      return localrc; // bail out
     }
     localrc = MPI_Reduce_scatter(in, out, outCounts, mpitype, mpiop, mpi_c);
   }else{
@@ -4323,6 +4365,9 @@ int VMK::scatterv(void *in, int *inCounts, int *inOffsets, void *out,
     case vmR8:
       size=8;
       break;
+    case vmBYTE:
+      localrc = -1;   // error
+      return localrc; // bail out
     }
     int root = 0; // arbitrary root, 0 always exists!
     if (mypet==root){
@@ -4473,6 +4518,9 @@ int VMK::gatherv(void *in, int inCount, void *out, int *outCounts,
     case vmR8:
       size=8;
       break;
+    case vmBYTE:
+      localrc = -1;   // error
+      return localrc; // bail out
     }
     int root = 0; // arbitrary root, 0 always exists!
     if (mypet==root){
@@ -4603,6 +4651,9 @@ int VMK::allgatherv(void *in, int inCount, void *out, int *outCounts,
     case vmR8:
       size=8;
       break;
+    case vmBYTE:
+      localrc = -1;   // error
+      return localrc; // bail out
     }
     int root = 0; // arbitrary root, 0 always exists!
     if (mypet==root){
@@ -4676,6 +4727,9 @@ int VMK::alltoall(void *in, int inCount, void *out, int outCount,
     case vmR8:
       size=8;
       break;
+    case vmBYTE:
+      localrc = -1;   // error
+      return localrc; // bail out
     }
     char *inC = (char *)in;
     char *outC = (char *)out;
@@ -5615,7 +5669,7 @@ namespace ESMCI {
         perror("socketSend: send()");
         return SOCKERR_UNSPEC;  // bail out
       }
-      if (len!=size){
+      if ((unsigned)len!=size){
         fprintf(stderr, "socketSend: incorrect number of bytes sent!\n");
         return SOCKERR_UNSPEC;  // bail out
       }

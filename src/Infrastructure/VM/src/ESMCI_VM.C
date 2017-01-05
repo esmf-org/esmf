@@ -1597,18 +1597,18 @@ void VM::logCurrentGarbageInfo(
   // found a match
   
   char msg[512];
-  sprintf(msg, "%s - CurrGarbInfo: Fortran objs=%d", prefix.c_str(), 
+  sprintf(msg, "%s - CurrGarbInfo: Fortran objs=%lu", prefix.c_str(), 
     matchTable_FObjects[i].size());
   ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
-  for (int j=0; j<matchTable_FObjects[i].size(); j++){
+  for (unsigned j=0; j<matchTable_FObjects[i].size(); j++){
     sprintf(msg, "%s - CurrGarbInfo: fortran objs[%d]: %d", prefix.c_str(), j,
       matchTable_FObjects[i][j].objectID);
     ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
   }
-  sprintf(msg, "%s - CurrGarbInfo: Base objs=%d", prefix.c_str(), 
+  sprintf(msg, "%s - CurrGarbInfo: Base objs=%lu", prefix.c_str(), 
     matchTable_Objects[i].size());
   ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
-  for (int j=0; j<matchTable_Objects[i].size(); j++){
+  for (unsigned j=0; j<matchTable_Objects[i].size(); j++){
     const char *proxyString;
     proxyString="actual object";
     if (matchTable_Objects[i][j]->ESMC_BaseGetProxyFlag()==ESMF_PROXYYES)

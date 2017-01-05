@@ -1524,6 +1524,8 @@ int LocalArray::print(
           break;    
       }
       break;
+      default:
+        return rc;  // bail out
     }
   }
 
@@ -1576,7 +1578,7 @@ int LocalArray::write(
       }
   }
 
-  fprintf(ffile, "ArrayWrite: Array at address 0x%08lx:  ", 
+  fprintf(ffile, "ArrayWrite: Array at address 0x%08Lx:  ", 
                          (ESMC_POINTER)this);
   fprintf(ffile, "rank = %d, typekind = %d\n", 
                            this->rank, this->typekind);
@@ -1760,6 +1762,8 @@ int LocalArray::write(
           break;    
       }
       break;
+      default:
+        return rc;  // bail out
   }
 
   fclose(ffile);
@@ -1852,7 +1856,10 @@ int LocalArray::tkrPtrCopy(
       FTN_X(f_esmf_fortrantkrptrcopy7di1)(dst, src);
       break;
 #endif
+      default:
+        return rc;  // bail out
     }
+    break;
 #endif
 #ifndef ESMF_NO_INTEGER_2_BYTE
     case ESMC_TYPEKIND_I2:
@@ -1880,7 +1887,10 @@ int LocalArray::tkrPtrCopy(
       FTN_X(f_esmf_fortrantkrptrcopy7di2)(dst, src);
       break;
 #endif
+      default:
+        return rc;  // bail out
     }
+    break;
 #endif
     case ESMC_TYPEKIND_I4:
     switch (rank){
@@ -1907,7 +1917,10 @@ int LocalArray::tkrPtrCopy(
       FTN_X(f_esmf_fortrantkrptrcopy7di4)(dst, src);
       break;
 #endif
+      default:
+        return rc;  // bail out
     }
+    break;
     case ESMC_TYPEKIND_I8:
     switch (rank){
       case 1:
@@ -1933,7 +1946,10 @@ int LocalArray::tkrPtrCopy(
       FTN_X(f_esmf_fortrantkrptrcopy7di8)(dst, src);
       break;
 #endif
+      default:
+        return rc;  // bail out
     }
+    break;
     case ESMC_TYPEKIND_R4:
     switch (rank){
       case 1:
@@ -1959,7 +1975,10 @@ int LocalArray::tkrPtrCopy(
       FTN_X(f_esmf_fortrantkrptrcopy7dr4)(dst, src);
       break;
 #endif
+      default:
+        return rc;  // bail out
     }
+    break;
     case ESMC_TYPEKIND_R8:
     switch (rank){
       case 1:
@@ -1985,8 +2004,12 @@ int LocalArray::tkrPtrCopy(
       FTN_X(f_esmf_fortrantkrptrcopy7dr8)(dst, src);
       break;
 #endif
+      default:
+        return rc;  // bail out
     }
     break;
+    default:
+      return rc;  // bail out
   }
 
   // return successfully

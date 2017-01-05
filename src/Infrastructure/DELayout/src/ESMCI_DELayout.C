@@ -1458,7 +1458,7 @@ int DELayout::serialize(
 
   // Check if buffer has enough free memory to hold object
   if (inquireflag != ESMF_INQUIREONLY){
-    if ((*length - *offset) < sizeof(DELayout)){
+    if ((*length - *offset) < (int)sizeof(DELayout)){
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD, 
       "- Buffer too short to add a DELayout object", ESMC_CONTEXT, &rc);
       return rc;
@@ -1552,8 +1552,8 @@ int DELayout::serialize(
   *offset = (cp - buffer);
  
   if (inquireflag == ESMF_INQUIREONLY){
-    if (*offset < sizeof (DELayout))
-      *offset = sizeof (DELayout);
+    if (*offset < (int)sizeof(DELayout))
+      *offset = sizeof(DELayout);
   }
  
   // return successfully
@@ -2564,7 +2564,7 @@ int XXE::exec(
   if (dTime != NULL)
     VMK::wtime(&t0);
   
-  for (int i=0; i<bufferInfoList.size(); i++){
+  for (unsigned i=0; i<bufferInfoList.size(); i++){
     int currentSize = bufferInfoList[i]->vectorLengthMultiplier * *vectorLength;
     if (bufferInfoList[i]->size < currentSize){
       // allocate a new, larger buffer to accommodate currentSize
@@ -3380,6 +3380,9 @@ printf("gjt - DID NOT CANCEL commhandle\n");
             *(rraBase+rraOffset) = 0.;
           }
           break;
+        case BYTE:
+          rc = ESMF_FAILURE;
+          return rc;  // bail out
         }
       }
       break;
@@ -3440,6 +3443,9 @@ printf("gjt - DID NOT CANCEL commhandle\n");
                   *(rraBase+(rraOffsetList[i]* *vectorLength)+k) = 0.;
           }
           break;
+        case BYTE:
+          rc = ESMF_FAILURE;
+          return rc;  // bail out
         }
       }
       break;
@@ -7741,7 +7747,7 @@ int XXE::appendSumSuperScalarListDstRRA(
   char *rraIndexListChar = new char[rraIndexList.size()*sizeof(int)];
   xxeSumSuperScalarListDstRRAInfo->rraIndexList =
     (int *)rraIndexListChar;
-  for (int i=0; i<rraIndexList.size(); i++){
+  for (unsigned i=0; i<rraIndexList.size(); i++){
     xxeSumSuperScalarListDstRRAInfo->rraIndexList[i] =
       rraIndexList[i];
   }
@@ -7749,7 +7755,7 @@ int XXE::appendSumSuperScalarListDstRRA(
   char *valueBaseListChar = new char[valueBaseList.size()*sizeof(void *)];
   xxeSumSuperScalarListDstRRAInfo->valueBaseList =
     (void **)valueBaseListChar;
-  for (int i=0; i<valueBaseList.size(); i++){
+  for (unsigned i=0; i<valueBaseList.size(); i++){
     xxeSumSuperScalarListDstRRAInfo->valueBaseList[i] =
       valueBaseList[i];
   }
@@ -7922,7 +7928,7 @@ int XXE::appendProductSumSuperScalarListDstRRA(
   char *rraIndexListChar = new char[rraIndexList.size()*sizeof(int)];
   xxeProductSumSuperScalarListDstRRAInfo->rraIndexList =
     (int *)rraIndexListChar;
-  for (int i=0; i<rraIndexList.size(); i++){
+  for (unsigned i=0; i<rraIndexList.size(); i++){
     xxeProductSumSuperScalarListDstRRAInfo->rraIndexList[i] =
       rraIndexList[i];
   }
@@ -7930,7 +7936,7 @@ int XXE::appendProductSumSuperScalarListDstRRA(
   char *valueBaseListChar = new char[valueBaseList.size()*sizeof(void *)];
   xxeProductSumSuperScalarListDstRRAInfo->valueBaseList =
     (void **)valueBaseListChar;
-  for (int i=0; i<valueBaseList.size(); i++){
+  for (unsigned i=0; i<valueBaseList.size(); i++){
     xxeProductSumSuperScalarListDstRRAInfo->valueBaseList[i] =
       valueBaseList[i];
   }
