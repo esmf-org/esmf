@@ -226,7 +226,7 @@ program ESMF_FieldIOUTest
 
 #ifdef WRITE_FIELDS_WITH_SAME_DIMS_ERROR
 !------------------------------------------------------------------------
-  !NEX_UTest_Multi_Proc_Only
+  !NEX_disabled_UTest_Multi_Proc_Only
   ! Create Field without halo region
   field_multi=ESMF_FieldCreate(grid, arrayspec=arrayspec, &
            name="temperature2",  rc=rc)
@@ -236,7 +236,7 @@ program ESMF_FieldIOUTest
 !------------------------------------------------------------------------
 
 !------------------------------------------------------------------------
-  !NEX_UTest_Multi_Proc_Only
+  !NEX_disabled_UTest_Multi_Proc_Only
   ! Write multiple Fields with same dimensions to a file
   call ESMF_FieldWrite(field_w, fileName="field2.nc", &
        dimLabels=(/ "temperature_x", "temperature_y" /), rc=rc)
