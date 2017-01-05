@@ -4509,6 +4509,9 @@ int VMK::gatherv(void *in, int inCount, void *out, int *outCounts,
     // This is a very simplistic, probably very bad peformance implementation.
     int size=0;
     switch (type){
+    case vmBYTE:
+      size=1;
+      break;
     case vmI4:
       size=4;
       break;
@@ -4518,9 +4521,6 @@ int VMK::gatherv(void *in, int inCount, void *out, int *outCounts,
     case vmR8:
       size=8;
       break;
-    case vmBYTE:
-      localrc = -1;   // error
-      return localrc; // bail out
     }
     int root = 0; // arbitrary root, 0 always exists!
     if (mypet==root){
@@ -4642,6 +4642,9 @@ int VMK::allgatherv(void *in, int inCount, void *out, int *outCounts,
     // This is a very simplistic, probably very bad peformance implementation.
     int size=0;
     switch (type){
+    case vmBYTE:
+      size=1;
+      break;
     case vmI4:
       size=4;
       break;
@@ -4651,9 +4654,6 @@ int VMK::allgatherv(void *in, int inCount, void *out, int *outCounts,
     case vmR8:
       size=8;
       break;
-    case vmBYTE:
-      localrc = -1;   // error
-      return localrc; // bail out
     }
     int root = 0; // arbitrary root, 0 always exists!
     if (mypet==root){
@@ -4718,6 +4718,9 @@ int VMK::alltoall(void *in, int inCount, void *out, int outCount,
     // This is a very simplistic, probably very bad peformance implementation.
     int size=0;
     switch (type){
+    case vmBYTE:
+      size=1;
+      break;
     case vmI4:
       size=4;
       break;
@@ -4727,9 +4730,6 @@ int VMK::alltoall(void *in, int inCount, void *out, int outCount,
     case vmR8:
       size=8;
       break;
-    case vmBYTE:
-      localrc = -1;   // error
-      return localrc; // bail out
     }
     char *inC = (char *)in;
     char *outC = (char *)out;
