@@ -1,7 +1,7 @@
 // $Id: ESMCI_MeshRedist.C,v 1.23 2012/01/06 20:17:51 svasquez Exp $
 //
 // Earth System Modeling Framework
-// Copyright 2002-2016, University Corporation for Atmospheric Research, 
+// Copyright 2002-2017, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -1456,9 +1456,9 @@ namespace ESMCI {
     }
 
     // Do elem original coordinates if necessary
-    MEField<> *doec = src_mesh->GetField("orig_elem_coordinates");
+    MEField<> *doec = src_mesh->GetField("elem_orig_coordinates");
     if (doec != NULL) {
-      MEField<> *doec_r = dst_mesh->GetField("orig_elem_coordinates");
+      MEField<> *doec_r = dst_mesh->GetField("elem_orig_coordinates");
 
       // load coord fields
       snd[num_snd]=doec;

@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2016, University Corporation for Atmospheric Research,
+! Copyright 2002-2017, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -40,7 +40,7 @@ program ESMF_FieldIOUTest
   type(ESMF_VM):: vm
   type(ESMF_ArraySpec):: arrayspec
   type(ESMF_Field) :: field_w, field_r, field_t, field_s, field_tr, field_sr, field
-  type(ESMF_Field) :: field_w_nohalo
+  type(ESMF_Field) :: field_w_nohalo, field_multi
   type(ESMF_Field) :: field_gw, field_gr, field_gr2, field_gr3
   type(ESMF_Field) :: field_r2de, field_w2de
   real(ESMF_KIND_R8), pointer :: Farray_w(:,:) => null (), Farray_r(:,:) => null ()
@@ -224,6 +224,33 @@ program ESMF_FieldIOUTest
   call ESMF_Test((rc==ESMF_RC_LIB_NOT_PRESENT), name, failMsg, result, ESMF_SRCLINE)
 #endif
 
+#ifdef WRITE_FIELDS_WITH_SAME_DIMS_ERROR
+!------------------------------------------------------------------------
+  !NEX_disabled_UTest_Multi_Proc_Only
+  ! Create Field without halo region
+  field_multi=ESMF_FieldCreate(grid, arrayspec=arrayspec, &
+           name="temperature2",  rc=rc)
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  write(name, *) "Create a field from grid and fortran dummy array without halo"
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+!------------------------------------------------------------------------
+
+!------------------------------------------------------------------------
+  !NEX_disabled_UTest_Multi_Proc_Only
+  ! Write multiple Fields with same dimensions to a file
+  call ESMF_FieldWrite(field_w, fileName="field2.nc", &
+       dimLabels=(/ "temperature_x", "temperature_y" /), rc=rc)
+  call ESMF_FieldWrite(field_multi, fileName="field2.nc", &
+       dimLabels=(/ "temperature_x", "temperature_y" /), rc=rc)
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  write(name, *) "Write multiple Fields with same dimensions to a file"
+#if (defined ESMF_PIO && ( defined ESMF_NETCDF || defined ESMF_PNETCDF))
+  call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+#else
+  write(failMsg, *) "Did not return ESMF_RC_LIB_NOT_PRESENT"
+  call ESMF_Test((rc==ESMF_RC_LIB_NOT_PRESENT), name, failMsg, result, ESMF_SRCLINE)
+#endif
+#endif
 !------------------------------------------------------------------------
 
 !
