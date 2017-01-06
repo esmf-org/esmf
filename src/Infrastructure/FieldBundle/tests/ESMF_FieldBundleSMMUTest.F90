@@ -9,6 +9,9 @@
 ! Licensed under the University of Illinois-NCSA License.
 !
 !==============================================================================
+
+#define FILENAME "src/Infrastructure/FieldBundle/tests/ESMF_FieldBundleSMMUTest.F90"
+
 !
 program ESMF_FieldBundleSMMUTest
 
@@ -45,22 +48,25 @@ program ESMF_FieldBundleSMMUTest
     ! individual test result code
     integer :: rc = ESMF_SUCCESS
 
-#ifdef ESMF_TESTEXHAUSTIVE
-    ! individual test name
-    character(ESMF_MAXSTR) :: name
-
-    ! individual test failure messages
-    character(ESMF_MAXSTR*2) :: failMsg
-#endif
+    ! test error messages
+    character(ESMF_MAXSTR) :: failMsg, name
 
     call ESMF_TestStart(ESMF_SRCLINE, rc=rc)
     if(rc /= ESMF_SUCCESS) &
         call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
-    if (.not. ESMF_TestMinPETs(4, ESMF_SRCLINE)) &
-        call ESMF_Finalize(endflag=ESMF_END_ABORT)
-
 #ifdef ESMF_TESTEXHAUSTIVE
+
+        ! --------------------------------------------------------------------------
+        !EX_UTest
+        write(name, *) "ESMF_FieldBundleSMMStoreFromFile Test"
+        write(failMsg, *) "Did not return ESMF_SUCCESS"
+        call test_field_bundle_smm_store_from_file(rc)
+        call ESMF_Test((rc .eq. ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+        ! --------------------------------------------------------------------------
+
+        if (.not. ESMF_TestMinPETs(4, ESMF_SRCLINE)) &
+            call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
         !------------------------------------------------------------------------
         !EX_UTest_Multi_Proc_Only
@@ -465,3 +471,205 @@ contains
 #endif
 
 end program ESMF_FieldBundleSMMUTest
+
+! ----------------------------------------------------------------------------------
+
+subroutine test_field_bundle_smm_store_from_file(rc)
+  use ESMF
+  use ESMF_IOScripMod
+
+  integer, intent(inout) :: rc
+
+  character(*), parameter :: weightFile = 'test_fb_weights.nc'
+  real, parameter :: tol = 10E-15
+  integer(ESMF_KIND_I4), pointer :: factorIndexList(:,:)
+  real(ESMF_KIND_R8), pointer :: factorList(:), coordX(:), coordY(:), &
+    farrayPtrMem(:, :), farrayPtrFile(:, :)
+  type(ESMF_Field) :: srcField, dstField, srcFields(1), dstFields(1)
+  type(ESMF_FieldBundle) :: srcFieldBundle, dstFieldBundle
+  type(ESMF_Grid) :: grid
+  type(ESMF_RouteHandle) :: routehandleMem, routehandleFile
+  type(ESMF_Array) :: arrayMem, arrayMemCopy, arrayFile
+  type(ESMF_ArraySpec) :: arrayMemCopySpec
+  type(ESMF_DistGrid) :: arrayMemDistGrid
+  integer :: shp(2), ii, jj, lbnd(3), ubnd(3), countFail
+
+  rc = ESMF_FAILURE
+
+  ! --------------------------------------------------------------------------------
+  ! Generate fields for regrid store and write the factor arrays to netCDF. This
+  ! output netCDF containing the factors is read in to test the field bundle SMM
+  ! store from file.
+
+  grid = ESMF_GridCreateNoPeriDim(maxIndex=(/10,20/), coordDep1=(/1/), &
+    coordDep2=(/2/), rc=rc)
+  if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+    line=__LINE__, file=FILENAME)) return
+
+  call ESMF_GridAddCoord(grid, rc=rc)
+  if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+    line=__LINE__, file=FILENAME)) return
+
+  call ESMF_GridGetCoord(grid, coordDim=1, computationalLBound=lbnd, &
+    computationalUBound=ubnd, farrayPtr=coordX, rc=rc)
+  if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+    line=__LINE__, file=FILENAME)) return
+
+  do i=lbnd(1),ubnd(1)
+    coordX(i) = i*10.0
+  enddo
+
+  call ESMF_GridGetCoord(grid, coordDim=2, computationalLBound=lbnd, &
+    computationalUBound=ubnd, farrayPtr=coordY, rc=rc)
+  if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+    line=__LINE__, file=FILENAME)) return
+
+  do i=lbnd(1),ubnd(1)
+    coordY(i) = i*20.0
+  enddo
+
+  srcField = ESMF_FieldCreate(grid, typekind=ESMF_TYPEKIND_R8, name="srcField", &
+    rc=rc)
+  if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+    line=__LINE__, file=FILENAME)) return
+
+  dstField = ESMF_FieldCreate(grid, typekind=ESMF_TYPEKIND_R8, name="dstField", &
+    rc=rc)
+  if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+    line=__LINE__, file=FILENAME)) return
+
+  call ESMF_FieldFill(srcField, rc=rc)
+  if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+    line=__LINE__, file=FILENAME)) return
+
+  call ESMF_FieldRegridStore(srcField=srcField, dstField=dstField, &
+    factorIndexList=factorIndexList, factorList=factorList, &
+    routehandle=routehandleMem, rc=rc)
+  if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+    line=__LINE__, file=FILENAME)) return
+
+  call ESMF_OutputSimpleWeightFile(weightFile, factorList, factorIndexList, rc=rc)
+  if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+    line=__LINE__, file=FILENAME)) return
+
+  ! --------------------------------------------------------------------------------
+  ! Create field bundles and the route handle from file.
+
+  srcFields(1) = srcField
+  srcFieldBundle = ESMF_FieldBundleCreate(fieldList=srcFields, rc=rc)
+  if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+    line=__LINE__, file=FILENAME)) return
+
+  dstFields(1) = dstField
+  dstFieldBundle = ESMF_FieldBundleCreate(fieldList=dstFields, rc=rc)
+  if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+    line=__LINE__, file=FILENAME)) return
+
+  call ESMF_FieldBundleSMMStore(srcFieldBundle, dstFieldBundle, weightFile, &
+    routehandleFile, rc=rc)
+  if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+    line=__LINE__, file=FILENAME)) return
+
+  ! --------------------------------------------------------------------------------
+  ! Test regrid operation with original fields against factors read from file.
+
+  ! The in-memory route handle.
+  call ESMF_FieldBundleRegrid(srcFieldBundle, dstFieldBundle, routehandleMem, rc=rc)
+  if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+    line=__LINE__, file=FILENAME)) return
+
+  ! The desired result of the from file store regrid operation.
+  call ESMF_FieldGet(dstField, array=arrayMem, arrayspec=arrayMemCopySpec, rc=rc)
+  if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+    line=__LINE__, file=FILENAME)) return
+
+  ! In-memory regrid operation result.
+  call ESMF_ArrayGet(arrayMem, distgrid=arrayMemDistGrid, rc=rc)
+  if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+    line=__LINE__, file=FILENAME)) return
+
+  ! Copy the output array from the in-memory regrid operation. The array values
+  ! would change after the from-file regrid operation.
+  arrayMemCopy = ESMF_ArrayCreate(arrayMemDistGrid, arrayMemCopySpec, rc=rc)
+  if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+    line=__LINE__, file=FILENAME)) return
+
+  call ESMF_ArrayCopy(arrayMemCopy, arrayMem, rc=rc)
+  if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+    line=__LINE__, file=FILENAME)) return
+
+  call ESMF_ArrayGet(arrayMemCopy, farrayPtr=farrayPtrMem, rc=rc)
+  if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+    line=__LINE__, file=FILENAME)) return
+
+  ! The from-file route handle.
+  call ESMF_FieldBundleRegrid(srcFieldBundle, dstFieldBundle, routehandleFile, &
+    rc=rc)
+  if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+    line=__LINE__, file=FILENAME)) return
+
+  ! The result of the from file store regrid operation.
+  call ESMF_FieldGet(dstField, array=arrayFile, rc=rc)
+  if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+    line=__LINE__, file=FILENAME)) return
+
+  call ESMF_ArrayGet(arrayFile, farrayPtr=farrayPtrFile, rc=rc)
+  if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+    line=__LINE__, file=FILENAME)) return
+
+  ! If the absolute value of the differences exceeds the tolerances, then the test
+  ! will fail. The count is evaluated at the end of the subroutine.
+  countFail = 0
+  shp = shape(farrayPtrMem)
+  do jj=1,shp(1)
+    do ii=1,shp(2)
+      if (abs(farrayPtrMem(jj,ii) - farrayPtrFile(jj,ii)) .ge. tol) then
+        countFail = countFail + 1
+      endif
+    enddo
+  enddo
+
+  ! --------------------------------------------------------------------------------
+
+  deallocate(factorList)
+  deallocate(factorIndexList)
+
+  call ESMF_ArrayDestroy(arrayMemCopy, rc=rc)
+  if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+    line=__LINE__, file=FILENAME)) return
+
+  call ESMF_FieldBundleSMMRelease(routehandleMem, rc=rc)
+  if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+    line=__LINE__, file=FILENAME)) return
+
+  call ESMF_FieldBundleDestroy(srcFieldBundle, rc=rc)
+  if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+    line=__LINE__, file=FILENAME)) return
+
+  call ESMF_FieldBundleDestroy(dstFieldBundle, rc=rc)
+  if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+    line=__LINE__, file=FILENAME)) return
+
+  call ESMF_FieldDestroy(srcField, rc=rc)
+  if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+    line=__LINE__, file=FILENAME)) return
+
+  call ESMF_FieldDestroy(dstField, rc=rc)
+  if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+    line=__LINE__, file=FILENAME)) return
+
+  call ESMF_GridDestroy(grid, rc=rc)
+  if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+    line=__LINE__, file=FILENAME)) return
+
+  ! --------------------------------------------------------------------------------
+
+  if (countFail .eq. 0) then
+    rc = ESMF_SUCCESS
+  else
+    rc = ESMF_FAILURE
+  endif
+
+end subroutine test_field_bundle_smm_store_from_file
+
+! ----------------------------------------------------------------------------------

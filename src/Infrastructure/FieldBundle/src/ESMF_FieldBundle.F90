@@ -58,6 +58,7 @@ module ESMF_FieldBundleMod
   use ESMF_StaggerLocMod    
   use ESMF_VMMod
   use ESMF_IOMod
+  use ESMF_FactorReadMod    ! Read weight factors from netCDF file.
   
   implicit none
 
@@ -251,6 +252,7 @@ module ESMF_FieldBundleMod
     module procedure ESMF_FieldBundleSMMStoreR4
     module procedure ESMF_FieldBundleSMMStoreR8
     module procedure ESMF_FieldBundleSMMStoreNF
+    module procedure ESMF_FieldBundleSMMStoreFromFile
 !
 !EOPI
 
@@ -4993,6 +4995,86 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         
     end subroutine ESMF_FieldBundleSMMStoreNF
 ! ---------------------------------------------------------------------------- 
+
+! ----------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_FieldBundleSMMStoreFromFile"
+
+!BOP
+! !IROUTINE: ESMF_FieldBundleSMMStoreFromFile - Precompute field bundle sparse matrix multiplication using factors read from file.
+!
+! !INTERFACE:
+! ! Private name; call using ESMF_FieldBundleSMMStore()
+    subroutine ESMF_FieldBundleSMMStoreFromFile(srcFieldBundle, dstFieldBundle, &
+      filename, routehandle, keywordEnforcer, rc)
+
+! ! ARGUMENTS:
+      type(ESMF_FieldBundle), intent(in)              :: srcFieldBundle
+      type(ESMF_FieldBundle), intent(inout)           :: dstFieldBundle
+      character(len=*),       intent(in)              :: filename
+      type(ESMF_RouteHandle), intent(inout)           :: routehandle
+      type(ESMF_KeywordEnforcer),            optional :: keywordEnforcer
+      integer,                intent(out),   optional :: rc
+!
+! !DESCRIPTION:
+!
+! The arguments are:
+!
+! \begin{description}
+!
+! \item [srcFieldBundle]
+!       {\tt ESMF\_FieldBundle} with source data.
+!
+! \item [dstFieldBundle]
+!       {\tt ESMF\_FieldBundle} with destination data. The data in this field
+!       bundle may be destroyed by this call.
+!
+! \item [filename]
+!       Path to the file containing weights for creating an {\tt ESMF\_RouteHandle}.
+!       See ~(\ref{sec:weightfileformat}) for a description of the SCRIP weight
+!       file format. Only "row", "col", and "S" variables are required. They
+!       must be one-dimensionsal with dimension "n\_s".
+!
+! \item [routehandle]
+!       Handle to the precomputed {\tt ESMF\_RouteHandle}.
+!
+!   \item [{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!
+! \end{description}
+!
+!EOP
+! ----------------------------------------------------------------------------------
+
+      ! LOCAL VARIABLES:
+      real(ESMF_KIND_R8), dimension(:), allocatable :: factorList
+      integer, dimension(:, :), allocatable :: factorIndexList
+      integer :: localrc
+
+      ! Initialize return code; assume routine not implemented
+      localrc = ESMF_RC_NOT_IMPL
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+      ! Fill the factorList and factorIndexList.
+      call ESMF_FactorRead(filename, &
+                           factorList, &
+                           factorIndexList, &
+                           rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+
+      ! Generate routeHandle from factorList and factorIndexList
+      call ESMF_FieldBundleSMMStore(srcFieldBundle, dstFieldBundle, routehandle, &
+        factorList, factorIndexList, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+
+      deallocate(factorList)
+      deallocate(factorIndexList)
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+    end subroutine ESMF_FieldBundleSMMStoreFromFile
 
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD

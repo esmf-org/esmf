@@ -1129,9 +1129,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ! LOCAL VARIABLES:
       real(ESMF_KIND_R8), dimension(:), allocatable :: factorList
       integer, dimension(:, :), allocatable :: factorIndexList
-      type(ESMF_VM) :: vm
-      integer :: localPet, petCount, localrc, lbPet, ubPet, n_s
-      integer, dimension(:, :), allocatable :: lb, ub
+      integer :: localrc
 
       ! Initialize return code; assume routine not implemented
       localrc = ESMF_RC_NOT_IMPL
