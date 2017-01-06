@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2016, University Corporation for Atmospheric Research, 
+! Copyright 2002-2017, University Corporation for Atmospheric Research, 
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 ! Laboratory, University of Michigan, National Centers for Environmental 
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -3947,7 +3947,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer                       :: i, localrc      ! local return code
     type(ESMF_DistGridMatch_Flag) :: matchResultNode, matchResultElem
 
-    real(ESMF_KIND_R8), pointer   :: area1(:), area2(:)
+    real(ESMF_KIND_R8), pointer       :: area1(:), area2(:)
+    real(ESMF_KIND_R8), allocatable   :: coord1(:), coord2(:)
+    integer                           :: nOwnedNodes1, nOwnedElems1
+    integer                           :: nOwnedNodes2, nOwnedElems2
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
@@ -3985,7 +3988,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
-
     ! return successfully
     if ((matchResultNode >= ESMF_DISTGRIDMATCH_EXACT) .and. &
       (matchResultElem >= ESMF_DISTGRIDMATCH_EXACT)) then
@@ -4014,6 +4016,79 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         return
       endif
     enddo
+    deallocate(area1, area2)
+
+#if 0
+    ! check nodal coordinates
+    if(mesh1%SpatialDim /= mesh2%SpatialDim) then
+      ESMF_MeshMatch = .false.
+      return
+    endif
+    if(mesh1%numOwnedNodes /= mesh2%numOwnedNodes) then
+      ESMF_MeshMatch = .false.
+      return
+    endif
+    call ESMF_MeshGet(mesh1, numOwnedNodes=nOwnedNodes1, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_MeshGet(mesh2, numOwnedNodes=nOwnedNodes2, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    if(nOwnedNodes1 /= nOwnedNodes2) then
+      ESMF_MeshMatch = .false.
+      return
+    endif
+    allocate(coord1(nOwnedNodes1*mesh1%SpatialDim), &
+             coord2(nOwnedNodes2*mesh2%SpatialDim), stat=localrc)
+    if (ESMF_LogFoundAllocError(localrc, &
+        msg="- MeshMatch: Allocating coord1 and coord2 failed ", &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+
+    call ESMF_MeshGet(mesh1, ownedNodeCoords=coord1, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    call ESMF_MeshGet(mesh2, ownedNodeCoords=coord2, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    do i = 1, nOwnedNodes1
+      if(coord1(i) /= coord2(i)) then
+        ESMF_MeshMatch = .false.
+        deallocate(coord1, coord2)
+        return
+      endif
+    enddo
+
+    ! check element coordinates
+    ! Currently mesh element coordinates are not required
+    if(mesh1%numOwnedElements /= mesh2%numOwnedElements) then
+      ESMF_MeshMatch = .false.
+      return
+    endif
+    nCoord = mesh1%numOwnedElements * mesh1%SpatialDim
+    allocate(coord1(nCoord), coord2(mesh2%numOwnedElements), stat=localrc)
+    if (ESMF_LogFoundAllocError(localrc, &
+        msg="- MeshMatch: Allocating coord1 and coord2 failed ", &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+
+    call ESMF_MeshGet(mesh1, ownedElemCoords=coord1, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    call ESMF_MeshGet(mesh2, ownedElemCoords=coord2, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    do i = 1, mesh1%numOwnedElements 
+      if(coord1(i) /= coord2(i)) then
+        ESMF_MeshMatch = .false.
+        deallocate(coord1, coord2)
+        return
+      endif
+    enddo
+    deallocate(coord1, coord2)
+#endif
 
     if (present(rc)) rc = ESMF_SUCCESS
     

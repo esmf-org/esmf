@@ -4,28 +4,29 @@ ALL:  build_unit_tests
 run:  run_unit_tests
 run_uni:  run_unit_tests_uni
 
-AUTOGEN =  	ESMF_AttPackABundleUTest.F90 \
-			ESMF_AttPackArrayUTest.F90 \
-			ESMF_AttPackCplCompUTest.F90 \
-			ESMF_AttPackDistGridUTest.F90 \
-			ESMF_AttPackFBundleUTest.F90 \
-			ESMF_AttPackFieldUTest.F90 \
-			ESMF_AttPackGridCompUTest.F90 \
-			ESMF_AttPackGridUTest.F90 \
-			ESMF_AttPackLocStreamUTest.F90 \
-			ESMF_AttPackSciCompUTest.F90 \
-			ESMF_AttPackStateUTest.F90 \
-			ESMF_AttributeABundleUTest.F90 \
-			ESMF_AttributeArrayUTest.F90 \
-			ESMF_AttributeCplCompUTest.F90 \
-			ESMF_AttributeDistGridUTest.F90 \
-			ESMF_AttributeFBundleUTest.F90 \
-			ESMF_AttributeFieldUTest.F90 \
-			ESMF_AttributeGridCompUTest.F90 \
-			ESMF_AttributeGridUTest.F90 \
-			ESMF_AttributeLocStreamUTest.F90 \
-			ESMF_AttributeSciCompUTest.F90 \
-			ESMF_AttributeStateUTest.F90
+AUTOGEN = ESMF_AttPackABundleUTest.F90 \
+          ESMF_AttPackArrayUTest.F90 \
+          ESMF_AttPackCplCompUTest.F90 \
+          ESMF_AttPackDistGridUTest.F90 \
+          ESMF_AttPackFBundleUTest.F90 \
+          ESMF_AttPackFieldUTest.F90 \
+          ESMF_AttPackGridCompUTest.F90 \
+          ESMF_AttPackGridUTest.F90 \
+          ESMF_AttPackLocStreamUTest.F90 \
+          ESMF_AttPackSciCompUTest.F90 \
+          ESMF_AttPackStateUTest.F90 \
+          ESMF_AttributeABundleUTest.F90 \
+          ESMF_AttributeArrayUTest.F90 \
+          ESMF_AttributeAutoLinkUTest.F90 \
+          ESMF_AttributeCplCompUTest.F90 \
+          ESMF_AttributeDistGridUTest.F90 \
+          ESMF_AttributeFBundleUTest.F90 \
+          ESMF_AttributeFieldUTest.F90 \
+          ESMF_AttributeGridCompUTest.F90 \
+          ESMF_AttributeGridUTest.F90 \
+          ESMF_AttributeLocStreamUTest.F90 \
+          ESMF_AttributeSciCompUTest.F90 \
+          ESMF_AttributeStateUTest.F90
 
 .PRECIOUS: %.F90
 

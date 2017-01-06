@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2016, University Corporation for Atmospheric Research, 
+// Copyright 2002-2017, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -1209,6 +1209,8 @@ void ESMCI_meshaddelements(Mesh **meshpp,
     Context ctxt; ctxt.flip();
      MEField<> *elem_frac = mesh.RegisterField("elem_frac",
                         MEFamilyDG0::instance(), MeshObj::ELEMENT, ctxt, 1, true);
+     MEField<> *elem_frac2 = mesh.RegisterField("elem_frac2",
+                        MEFamilyDG0::instance(), MeshObj::ELEMENT, ctxt, 1, true);
   }
 
 
@@ -1275,6 +1277,22 @@ void ESMCI_meshaddelements(Mesh **meshpp,
   // Perhaps commit will be a separate call, but for now commit the mesh here.
   mesh.build_sym_comm_rel(MeshObj::NODE);
   mesh.Commit();
+
+  // Set Frac values
+  if (*regridConserve == ESMC_REGRID_CONSERVE_ON) {
+    // Get Fields
+    MEField<> *elem_frac2=mesh.GetField("elem_frac2");
+
+    Mesh::const_iterator ei = mesh.elem_begin(), ee = mesh.elem_end();
+    int count = 0;
+    for (; ei != ee; ++ei) {
+      const MeshObj &elem = *ei;
+      double *f=elem_frac2->data(elem);
+      *f=1.0;
+      count ++;
+    }
+    printf("number of elements: %d\n ", count);
+  }
 
 
   // Set Mask values
