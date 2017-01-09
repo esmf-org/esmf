@@ -1464,7 +1464,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !------------------------------------------------------------------------------
 
 
-!------------------------------------------------------------------------------
+! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ArraySMMStoreNF()"
 !BOP
@@ -1684,10 +1684,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
   end subroutine ESMF_ArraySMMStoreNF
 
-!------------------------------------------------------------------------------
+! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ArraySMMStoreFromFile"
-
 !BOP
 ! !IROUTINE: ESMF_ArraySMMStore - Precompute sparse matrix multiplication using factors read from file.
 !
@@ -1708,9 +1707,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                intent(inout), optional :: pipeLineDepth
     type(ESMF_RouteHandle), intent(inout), optional :: transposeRoutehandle
     integer,                intent(out),   optional :: rc
-
-!-------------------------------------------------------------------------------
-! !DESCRIPTION:
 !
 ! The arguments are:
 !
@@ -1806,8 +1802,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !EOP
 !-------------------------------------------------------------------------------
-
-    ! LOCAL VARIABLES:
     real(ESMF_KIND_R8), dimension(:), allocatable :: factorList
     integer, dimension(:, :), allocatable :: factorIndexList
     integer :: localrc
@@ -1837,8 +1831,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                             rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-
-    ! ##########################################################################
 
     deallocate(factorList)
     deallocate(factorIndexList)

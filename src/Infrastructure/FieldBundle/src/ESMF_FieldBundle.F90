@@ -5001,7 +5001,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 #define ESMF_METHOD "ESMF_FieldBundleSMMStoreFromFile"
 
 !BOP
-! !IROUTINE: ESMF_FieldBundleSMMStoreFromFile - Precompute field bundle sparse matrix multiplication using factors read from file.
+! !IROUTINE: ESMF_FieldBundleSMMStore - Precompute field bundle sparse matrix multiplication using factors read from file.
 !
 ! !INTERFACE:
 ! ! Private name; call using ESMF_FieldBundleSMMStore()
