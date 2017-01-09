@@ -36,7 +36,7 @@ namespace ESMCI {
 #define ESMC_METHOD "F90ClassHolder()"
     int udtSize;
     FTN_X(f_esmf_fortranudtpointersize)(&udtSize);
-    if (sizeof(ESMCI::F90ClassHolder) < udtSize){
+    if ((int)sizeof(ESMCI::F90ClassHolder) < udtSize){
       int localrc = ESMC_RC_NOT_IMPL;
       ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD, 
         "- hardcoded ESMCI::F90ClassHolder size smaller than UDT size"
