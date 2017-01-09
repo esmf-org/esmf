@@ -867,9 +867,9 @@ contains
   !!! Regrid forward from the A grid to the B grid
   ! Regrid store
   call ESMF_FieldBundleRegridStore( &
-	  fieldBundleA, srcMaskValues=(/1,2/), &
+          fieldBundleA, srcMaskValues=(/1,2/), &
           dstFieldBundle=fieldBundleB, &
-	  unmappedaction=ESMF_UNMAPPEDACTION_IGNORE, &
+          unmappedaction=ESMF_UNMAPPEDACTION_IGNORE, &
           routeHandle=routeHandle, &
           regridmethod=ESMF_REGRIDMETHOD_BILINEAR, &
           rc=localrc)
