@@ -1683,6 +1683,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(rc)) rc = ESMF_SUCCESS
 
   end subroutine ESMF_ArraySMMStoreNF
+!------------------------------------------------------------------------------
+
 
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
@@ -1838,6 +1840,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(rc)) rc = ESMF_SUCCESS
 
   end subroutine ESMF_ArraySMMStoreFromFile
+!------------------------------------------------------------------------------
 
 
 ! -------------------------- ESMF-public method -------------------------------
