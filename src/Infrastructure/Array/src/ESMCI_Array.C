@@ -1699,12 +1699,10 @@ Array *Array::create(
       // catch standard ESMF return code
       ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
         rc);
-      arrayOut->ESMC_BaseSetStatus(ESMF_STATUS_INVALID);  // mark invalid
       return NULL;
     }catch(...){
       // allocation error
       ESMC_LogDefault.MsgAllocError("for new ESMCI::Array.", ESMC_CONTEXT, rc);  
-      arrayOut->ESMC_BaseSetStatus(ESMF_STATUS_INVALID);  // mark invalid
       return NULL;
     }
     // copy all scalar members and reference members
@@ -2438,7 +2436,7 @@ int Array::setRimSeqIndex(
       return rc;  // bail out
     }
     if (rimSeqIndexArg->extent[0]*tensorElementCount 
-      != rimSeqIndex[localDe].size()){
+      != (int)rimSeqIndex[localDe].size()){
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
         "- rimSeqIndexArg argument must be of size rimSeqIndex[localDe].size()",
         ESMC_CONTEXT, &rc);
@@ -3004,7 +3002,8 @@ int Array::serialize(
   int r;
 
   // Check if buffer has enough free memory to hold object
-  if ((inquireflag != ESMF_INQUIREONLY) && (*length - *offset) < sizeof(Array)){
+  if ((inquireflag != ESMF_INQUIREONLY) && (*length - *offset) < 
+    (int)sizeof(Array)){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
       "Buffer too short to add an Array object", ESMC_CONTEXT, &rc);
     return rc;
@@ -3064,7 +3063,7 @@ int Array::serialize(
   *offset = (cp - buffer);
   
   if (inquireflag == ESMF_INQUIREONLY)
-    if (*offset < sizeof (Array))
+    if (*offset < (int)sizeof (Array))
       *offset = sizeof (Array);
   
   // return successfully
@@ -4304,7 +4303,7 @@ int Array::haloStore(
     
     // remove seqIndex masking in Array rim region before evaluating return code
     for (int i=0; i<localDeCount; i++){
-      for (int k=0; k<rimMaskElement[i].size(); k++){
+      for (unsigned k=0; k<rimMaskElement[i].size(); k++){
         int element = rimMaskElement[i][k];
         array->rimSeqIndex[i][element] = rimMaskSeqIndex[i][k]; // restore
       }
@@ -5705,7 +5704,7 @@ namespace ArrayHelper{
       int termCount = 0;
       vector<void *>bufferInfoList;
       vector<int> rraIndexList;
-      for (int i=0; i<recvnbVector.size(); i++){
+      for (unsigned i=0; i<recvnbVector.size(); i++){
         termCount += recvnbVector[i].dstInfoTable.size();
         bufferInfoList.push_back(recvnbVector[i].bufferInfo);
         rraIndexList.push_back(srcLocalDeCount + recvnbVector[i].dstLocalDe);
@@ -5730,7 +5729,7 @@ namespace ArrayHelper{
       // set up a temporary vector for sorting for TERMORDER_SRCSEQ
       vector<DstInfoSrcSeqSort> dstInfoSort;
       vector<ArrayHelper::DstInfo>::iterator pp;
-      for (int i=0; i<recvnbVector.size(); i++){
+      for (unsigned i=0; i<recvnbVector.size(); i++){
         // append terms from buffer "i"
         for (pp=recvnbVector[i].dstInfoTable.begin();
           pp!=recvnbVector[i].dstInfoTable.end(); ++pp){
@@ -5740,7 +5739,7 @@ namespace ArrayHelper{
       // do the actual sort
       sort(dstInfoSort.begin(), dstInfoSort.end());
       // fill in rraOffsetList, factorList, valueOffsetList, baseListIndexList
-      for (int i=0; i<dstInfoSort.size(); i++){
+      for (unsigned i=0; i<dstInfoSort.size(); i++){
         rraOffsetList[i] = dstInfoSort[i].pp->linIndex/vectorLength;
         factorList[i] = (void *)(dstInfoSort[i].pp->factor);
         valueOffsetList[i] = dstInfoSort[i].pp->bufferIndex;
@@ -5754,11 +5753,11 @@ namespace ArrayHelper{
 
       //TODO: need to fix this implementation to work with srcTermProcessing > 1
       
-      int bufferItemCount = 0;
+      unsigned bufferItemCount = 0;
       vector<void *>bufferInfoList;
       vector<int> rraIndexList;
       vector<ArrayHelper::DstInfo>::iterator pp;
-      for (int i=0; i<recvnbVector.size(); i++){
+      for (unsigned i=0; i<recvnbVector.size(); i++){
         pp = recvnbVector[i].dstInfoTable.begin();
         while (pp != recvnbVector[i].dstInfoTable.end()){
           SeqIndex seqIndex = pp->seqIndex;
@@ -5790,7 +5789,7 @@ namespace ArrayHelper{
         xxeSumSuperScalarListDstRRAInfo->baseListIndexList;
       // set up a temporary vector for sorting for TERMORDER_SRCSEQ
       vector<DstInfoSrcSeqSort> dstInfoSort;
-      for (int i=0; i<recvnbVector.size(); i++){
+      for (unsigned i=0; i<recvnbVector.size(); i++){
         // append terms from buffer "i"
         int bufferItem = 0; // reset
         pp = recvnbVector[i].dstInfoTable.begin();
@@ -5815,7 +5814,7 @@ namespace ArrayHelper{
       // do the actual sort
       sort(dstInfoSort.begin(), dstInfoSort.end());
       // fill in rraOffsetList, valueOffsetList, baseListIndexList
-      for (int i=0; i<dstInfoSort.size(); i++){
+      for (unsigned i=0; i<dstInfoSort.size(); i++){
         rraOffsetList[i] = dstInfoSort[i].pp->linIndex/vectorLength;
         valueOffsetList[i] = dstInfoSort[i].pp->bufferIndex;
         baseListIndexList[i] = dstInfoSort[i].recvnbVectorIndex;
@@ -9027,7 +9026,7 @@ int Array::sparseMatMulStore(
     //
     // Doing this for the src side
     for (int j=0; j<srcLocalDeCount; j++){
-      for (int k=0; k<srcLinSeqVect[j].size(); k++){
+      for (unsigned k=0; k<srcLinSeqVect[j].size(); k++){
         for (vector<DD::FactorElement>::iterator
           fe=srcLinSeqVect[j][k].factorList.begin();
           fe!=srcLinSeqVect[j][k].factorList.end();){
@@ -9043,7 +9042,7 @@ int Array::sparseMatMulStore(
     }
     // Doing this for the dst side
     for (int j=0; j<dstLocalDeCount; j++){
-      for (int k=0; k<dstLinSeqVect[j].size(); k++){
+      for (unsigned k=0; k<dstLinSeqVect[j].size(); k++){
         for (vector<DD::FactorElement>::iterator
           fe=dstLinSeqVect[j][k].factorList.begin();
           fe!=dstLinSeqVect[j][k].factorList.end();){
@@ -9070,10 +9069,10 @@ int Array::sparseMatMulStore(
     // matched wrt seqIndices.
     // Doing this for the src side supports forward HALO:
     for (int j=0; j<srcLocalDeCount; j++){
-      for (int k=0; k<srcLinSeqVect[j].size(); k++){
+      for (unsigned k=0; k<srcLinSeqVect[j].size(); k++){
         for (int kk=0; kk<srcLinSeqVect[j][k].factorCount; kk++){
           if (srcLinSeqVect[j][k].factorList[kk].partnerDe.size() > 1){
-            for (int jj=1;
+            for (unsigned jj=1;
               jj<srcLinSeqVect[j][k].factorList[kk].partnerDe.size(); jj++){
               // construct factorElement with one partnerDe entry
               DD::FactorElement factorElement =
@@ -9093,10 +9092,10 @@ int Array::sparseMatMulStore(
     }
     // Doing this for the dst side supports backward HALO:
     for (int j=0; j<dstLocalDeCount; j++){
-      for (int k=0; k<dstLinSeqVect[j].size(); k++){
+      for (unsigned k=0; k<dstLinSeqVect[j].size(); k++){
         for (int kk=0; kk<dstLinSeqVect[j][k].factorCount; kk++){
           if (dstLinSeqVect[j][k].factorList[kk].partnerDe.size() > 1){
-            for (int jj=1;
+            for (unsigned jj=1;
               jj<dstLinSeqVect[j][k].factorList[kk].partnerDe.size(); jj++){
               // construct factorElement with one partnerDe entry
               DD::FactorElement factorElement =
@@ -9530,7 +9529,7 @@ int sparseMatMulStoreEncodeXXE(
     int *index2Ref = new int[dstLocalDeElementCount[j]];  // large enough
     int localDeFactorCount = 0; // reset
     int iCount = 0; // reset
-    for (int k=0; k<dstLinSeqVect[j].size(); k++){
+    for (unsigned k=0; k<dstLinSeqVect[j].size(); k++){
       int factorCount = dstLinSeqVect[j][k].factorCount;
       if (factorCount){
         index2Ref[iCount] = k;   // store element index
@@ -9737,7 +9736,7 @@ fflush(asmmstoreprintfp);
 #ifdef MSG_DEFLATE
       // construct bufferIndex member in dstInfoTable according to deflation
       vector<ArrayHelper::Deflator> deflator(dstInfoTable[i].size());
-      for (int k=0; k<dstInfoTable[i].size(); k++){
+      for (unsigned k=0; k<dstInfoTable[i].size(); k++){
         // fill
         deflator[k].seqIndex = dstInfoTable[i][k].partnerSeqIndex;
         deflator[k].index = k;
@@ -9747,7 +9746,7 @@ fflush(asmmstoreprintfp);
       // record the buffer index in dstInfoTable
       int kk = 0;
       dstInfoTable[i][deflator[0].index].bufferIndex = kk;  // spin up
-      for (int k=1; k<deflator.size(); k++){
+      for (unsigned k=1; k<deflator.size(); k++){
         if (deflator[k].seqIndex != deflator[k-1].seqIndex)
           ++kk;
         dstInfoTable[i][deflator[k].index].bufferIndex = kk;
@@ -9835,7 +9834,7 @@ ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
     int *index2Ref = new int[srcLocalDeElementCount[j]];  // large enough
     int localDeFactorCount = 0; // reset
     int iCount = 0; // reset
-    for (int k=0; k<srcLinSeqVect[j].size(); k++){
+    for (unsigned k=0; k<srcLinSeqVect[j].size(); k++){
       int factorCount = srcLinSeqVect[j][k].factorCount;
       if (factorCount){
         index2Ref[iCount] = k;   // store element index
@@ -9990,7 +9989,7 @@ ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
       int vectorLength = srcInfoTable[i].begin()->vectorLength;
       // use a temporary vector to aide in deflating of the message to be sent
       vector<ArrayHelper::Deflator> deflator(srcInfoTable[i].size());
-      for (int k=0; k<srcInfoTable[i].size(); k++){
+      for (unsigned k=0; k<srcInfoTable[i].size(); k++){
         // fill
         deflator[k].seqIndex  = srcInfoTable[i][k].seqIndex;
         deflator[k].index     = srcInfoTable[i][k].linIndex;
@@ -10019,7 +10018,7 @@ ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
       block.linIndex = deflator[0].index;
       block.linIndexCount = 1;
       linIndexContigBlockList.push_back(block);
-      for (int k=1; k<deflator.size(); k++){
+      for (unsigned k=1; k<deflator.size(); k++){
         if (deflator[k-1].index + vectorLength == deflator[k].index){
           // contiguous step in linIndex
           ++(linIndexContigBlockList.back().linIndexCount);

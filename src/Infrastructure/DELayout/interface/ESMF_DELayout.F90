@@ -1841,6 +1841,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
+    
+    ! initialize return value in case of early bail out
+    ESMF_DELayoutServiceOffer = ESMF_SERVICEREPLY_DENY
 
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_DELayoutGetInit, delayout, rc)

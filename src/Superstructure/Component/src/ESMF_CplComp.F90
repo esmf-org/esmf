@@ -1936,7 +1936,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         integer, intent(out)        :: rc           ! must not be optional
       end subroutine
     end interface
-	type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                intent(in),  optional :: phase
     integer,                intent(out), optional :: rc 
 !
