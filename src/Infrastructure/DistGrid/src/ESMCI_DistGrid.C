@@ -3818,7 +3818,7 @@ int DistGrid::getIndexTupleFromSeqIndex(
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
   
-  if (indexTuple.size() != dimCount)
+  if ((int)indexTuple.size() != dimCount)
     indexTuple.resize(dimCount);
   
   --seqIndex;  // make seqIndex 0-based
@@ -4154,7 +4154,7 @@ int DistGrid::serialize(
 
   // Check if buffer has enough free memory to hold object
   if ((inquireflag != ESMF_INQUIREONLY) && (*length - *offset)
-    < sizeof(DistGrid)){
+    < (int)sizeof(DistGrid)){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD, 
       "Buffer too short to add a DistGrid object", ESMC_CONTEXT, &rc);
     return rc;
@@ -4728,7 +4728,7 @@ int DistGrid::setArbSeqIndex(
   }
   void MultiDimIndexLoop::first(){
     // set indexTuple to the first valid index, considering blocked out region
-    int i;
+    unsigned i;
     for (i=0; i<indexTuple.size(); i++)
       indexTuple[i] = indexTupleStart[i];  // reset, to cover not fully blocked
     for (i=0; i<indexTuple.size(); i++){
@@ -4755,7 +4755,7 @@ int DistGrid::setArbSeqIndex(
   }
   void MultiDimIndexLoop::last(){
     // set indexTuple to the last index, not considering whether it is blocked
-    for (int i=0; i<indexTuple.size(); i++)
+    for (unsigned i=0; i<indexTuple.size(); i++)
       indexTuple[i] = indexTupleEnd[i]-1;  // reset
   }
   void MultiDimIndexLoop::adjust(){
@@ -4763,7 +4763,7 @@ int DistGrid::setArbSeqIndex(
     // -> consider the blocked out region
     // to improve performance for the fully blocked case check for it first
     bool skipBlockedRegionFlag = true;
-    for (int i=0; i<indexTuple.size(); i++){
+    for (unsigned i=0; i<indexTuple.size(); i++){
       if ((indexTupleBlockStart[i] > indexTupleStart[i]) ||
         (indexTupleBlockEnd[i] < indexTupleEnd[i])){
         // found a dimension that does not have a fully blocked range
@@ -4773,7 +4773,7 @@ int DistGrid::setArbSeqIndex(
     }
     if (skipBlockedRegionFlag){
       // fully blocked range in all dimensions -> shift indexTuple to end
-      for (int i=0; i<indexTuple.size(); i++)
+      for (unsigned i=0; i<indexTuple.size(); i++)
         indexTuple[i] = indexTupleEnd[i];
     }else{
       // there are dimensions that do NOT have fully blocked ranges
@@ -4781,8 +4781,8 @@ int DistGrid::setArbSeqIndex(
       do{
         // adjust all tuples, if necessary skip blocked region
         skipBlockedRegionFlag = true;  // init
-        int i;
-        for (i=0; i<indexTuple.size()-1; i++){
+        unsigned i;
+        for (i=0; i+1<indexTuple.size(); i++){
           if (indexTuple[i] == indexTupleEnd[i]){
             indexTuple[i] = indexTupleStart[i];  // reset
             if (skipDim[i+1])
@@ -4814,17 +4814,17 @@ int DistGrid::setArbSeqIndex(
     adjust();
   }
   bool MultiDimIndexLoop::isFirst()const{
-    for (int i=0; i<indexTuple.size(); i++)
+    for (unsigned i=0; i<indexTuple.size(); i++)
       if (indexTuple[i] != indexTupleStart[i]) return false;
     return true;
   }
   bool MultiDimIndexLoop::isLast()const{
-    for (int i=0; i<indexTuple.size(); i++)
+    for (unsigned i=0; i<indexTuple.size(); i++)
       if (indexTuple[i] != indexTupleEnd[i]-1) return false;
     return true;
   }
   bool MultiDimIndexLoop::isWithin()const{
-    for (int i=0; i<indexTuple.size(); i++)
+    for (unsigned i=0; i<indexTuple.size(); i++)
       if (indexTupleStart[i] >= indexTupleEnd[i])
         return false; // this means there are no elements to iterate over
     if (indexTuple[indexTuple.size()-1] < indexTupleEnd[indexTuple.size()-1])
@@ -4840,8 +4840,8 @@ int DistGrid::setArbSeqIndex(
   }
   bool MultiDimIndexLoop::isWithinWatch()const{
     bool withinWatchFlag = true;  // init
-    int i;
-    for (i=0; i<indexTuple.size()-1; i++){
+    unsigned i;
+    for (i=0; i+1<indexTuple.size(); i++){
       if ((indexTuple[i] < indexTupleWatchStart[i]) ||
         (indexTuple[i] >= indexTupleWatchEnd[i])){
         withinWatchFlag = false;  // not within watched region
@@ -4864,7 +4864,7 @@ int DistGrid::setArbSeqIndex(
     return &indexTupleStart[0];
   }
   void MultiDimIndexLoop::print()const{
-    int i;
+    unsigned i;
     printf("MultiDimIndexLoop: indexTupleStart = (");
     for (i=0; i<indexTupleStart.size()-1; i++)
       printf(" %d,", indexTupleStart[i]);

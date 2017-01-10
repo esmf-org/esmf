@@ -1464,7 +1464,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !------------------------------------------------------------------------------
 
 
-!------------------------------------------------------------------------------
+! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ArraySMMStoreNF()"
 !BOP
@@ -1683,11 +1683,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(rc)) rc = ESMF_SUCCESS
 
   end subroutine ESMF_ArraySMMStoreNF
-
 !------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ArraySMMStoreFromFile"
-
 !BOP
 ! !IROUTINE: ESMF_ArraySMMStore - Precompute sparse matrix multiplication using factors read from file.
 !
@@ -1708,9 +1709,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                intent(inout), optional :: pipeLineDepth
     type(ESMF_RouteHandle), intent(inout), optional :: transposeRoutehandle
     integer,                intent(out),   optional :: rc
-
-!-------------------------------------------------------------------------------
+!
 ! !DESCRIPTION:
+!
+! Compute an {\tt ESMF\_RouteHandle} using factors read from file.
 !
 ! The arguments are:
 !
@@ -1730,7 +1732,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !       must be one-dimensionsal with dimension "n\_s".
 !
 ! \item [routehandle]
-!       Handle to the precomputed {\tt ESMF\_RouteHandle}.
+!       Handle to the {\tt ESMF\_RouteHandle}.
 !
 !   \item [{[ignoreUnmatchedIndices]}]
 !     A logical flag that affects the behavior for when sequence indices
@@ -1806,13 +1808,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !EOP
 !-------------------------------------------------------------------------------
-
-    ! LOCAL VARIABLES:
     real(ESMF_KIND_R8), dimension(:), allocatable :: factorList
     integer, dimension(:, :), allocatable :: factorIndexList
-    type(ESMF_VM) :: vm
-    integer :: localPet, petCount, localrc, lbPet, ubPet, n_s
-    integer, dimension(:, :), allocatable :: lb, ub
+    integer :: localrc
 
     ! Initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
@@ -1840,14 +1838,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
-    ! ##########################################################################
-
     deallocate(factorList)
     deallocate(factorIndexList)
 
     if (present(rc)) rc = ESMF_SUCCESS
 
   end subroutine ESMF_ArraySMMStoreFromFile
+!------------------------------------------------------------------------------
 
 
 ! -------------------------- ESMF-public method -------------------------------

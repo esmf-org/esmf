@@ -1031,6 +1031,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !DESCRIPTION:
 !
+! Compute an {\tt ESMF\_RouteHandle} using factors read from file.
+!
 ! The arguments are:
 !
 ! \begin{description}
@@ -1049,7 +1051,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !       must be one-dimensionsal with dimension "n\_s".
 !
 ! \item [routehandle]
-!       Handle to the precomputed {\tt ESMF\_RouteHandle}.
+!       Handle to the {\tt ESMF\_RouteHandle}.
 !
 !   \item [{[ignoreUnmatchedIndices]}]
 !     A logical flag that affects the behavior for when sequence indices
@@ -1129,9 +1131,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ! LOCAL VARIABLES:
       real(ESMF_KIND_R8), dimension(:), allocatable :: factorList
       integer, dimension(:, :), allocatable :: factorIndexList
-      type(ESMF_VM) :: vm
-      integer :: localPet, petCount, localrc, lbPet, ubPet, n_s
-      integer, dimension(:, :), allocatable :: lb, ub
+      integer :: localrc
 
       ! Initialize return code; assume routine not implemented
       localrc = ESMF_RC_NOT_IMPL

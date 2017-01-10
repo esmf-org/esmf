@@ -1979,11 +1979,13 @@ all_tests: info
 	  $(MAKE) $(ALLTEST_TARGETS) results_summary ;\
         fi
 
+all_tests_uni: info
+	$(MAKE) $(ALLTEST_TARGETS_UNI) results_summary
+
 dust_all_tests: dust_unit_tests dust_system_tests dust_examples
 
 build_all_tests: clean_if_exhaustive_flag_mismatch
 	$(MAKE) build_unit_tests build_system_tests build_examples
-
 
 run_all_tests:
 	@if [ $(ESMF_COMM) = "mpiuni" ] ; then \
@@ -1993,6 +1995,10 @@ run_all_tests:
 	  $(MAKE) run_unit_tests run_system_tests \
                   run_examples results_summary ;\
         fi
+
+run_all_tests_uni:
+	$(MAKE) run_unit_tests_uni run_system_tests_uni \
+          run_examples_uni results_summary
 
 clean_all_tests:
 	$(MAKE) clean_unit_tests clean_system_tests clean_examples

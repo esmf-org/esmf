@@ -179,7 +179,7 @@ module ESMF_AttachMethodsMod
 ! !INTERFACE:
   ! Private name; call using ESMF_MethodAdd()
   subroutine ESMF_MethodStateAddShObj(state, label, index, userRoutine, &
-		sharedObj, rc)
+    sharedObj, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_State)                        :: state
@@ -263,7 +263,7 @@ module ESMF_AttachMethodsMod
 ! !INTERFACE:
   ! Private name; call using ESMF_MethodExecute()
   subroutine ESMF_MethodStateExecute(state, label, index, existflag, &
-					userRc, rc)
+    userRc, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_State)                        :: state
@@ -480,7 +480,7 @@ module ESMF_AttachMethodsMod
 ! !INTERFACE:
   ! Private name; call using ESMF_MethodAdd()
   subroutine ESMF_MethodGridCompAddShObj(gcomp, label, index, userRoutine, &
-	sharedObj, rc)
+    sharedObj, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_GridComp)                     :: gcomp
@@ -640,7 +640,7 @@ module ESMF_AttachMethodsMod
 ! !INTERFACE:
   ! Private name; call using ESMF_MethodAdd()
   subroutine ESMF_MethodCplCompAddShObj(cplcomp, label, index, userRoutine, &
-		sharedObj, rc)
+    sharedObj, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_CplComp)                      :: cplcomp

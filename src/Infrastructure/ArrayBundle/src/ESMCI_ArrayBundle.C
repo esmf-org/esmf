@@ -1693,7 +1693,7 @@ int ArrayBundle::serialize(
 
   // Check if buffer has enough free memory to hold object
   if ((inquireflag != ESMF_INQUIREONLY) && (*length - *offset) <
-    sizeof(ArrayBundle)){
+    (int)sizeof(ArrayBundle)){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
       "Buffer too short to add an ArrayBundle object", ESMC_CONTEXT, &rc);
     return rc;
