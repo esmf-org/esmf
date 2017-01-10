@@ -58,7 +58,7 @@ program ESMF_FieldBundleSMMUTest
 #ifdef ESMF_TESTEXHAUSTIVE
 
         ! --------------------------------------------------------------------------
-        !EX_UTest
+        !EX_UTest_Multi_Proc_Only
         write(name, *) "ESMF_FieldBundleSMMStoreFromFile Test"
         write(failMsg, *) "Did not return ESMF_SUCCESS"
         call test_field_bundle_smm_store_from_file(rc)
