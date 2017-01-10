@@ -939,9 +939,9 @@ contains
     type(ESMF_XGridSpec)            :: sparseMat(1)
 
     type(ESMF_Field)                :: fa_atm, fa_ocn, fa_xgrid
-    type(ESMF_Field)                :: aa_atm, aa_ocn, aa_xgrid
+    type(ESMF_Field)                :: aa_atm, aa_ocn, aa_xgrid, fieldM
     type(ESMF_Field)                :: srcFrac, dstFrac, srcArea, dstArea
-    type(ESMF_Mesh)                 :: mesh_atm, mesh_ocn, mesh_xgrid
+    type(ESMF_Mesh)                 :: mesh_atm, mesh_ocn, mesh_xgrid, meshM
     real(ESMF_KIND_R8)              :: srcsum(3), allsrcsum(3), scale
     real(ESMF_KIND_R8)              :: dstFlux_reg, dstFlux, totalXArea, totalSrcArea, error
     integer                         :: l_scheme
@@ -1232,6 +1232,19 @@ contains
         ESMF_CONTEXT, rcToReturn=rc)) return
 
     call checkProxy(xgrid, rc=localrc)
+    if (ESMF_LogFoundError(localrc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! Query the XGrid for the overlay mesh
+    call ESMF_XGridGet(xgrid, mesh=meshM, rc=localrc)
+    if (ESMF_LogFoundError(localrc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! Create a field on the overlay mesh
+    fieldM = ESMF_FieldCreate(mesh=meshM, typekind=ESMF_TYPEKIND_R8, &
+        rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
