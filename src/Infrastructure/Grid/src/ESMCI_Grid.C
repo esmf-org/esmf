@@ -4898,7 +4898,7 @@ int Grid::setItemArrayInternal(
     for (int i=0; i<dimCount; i++){
       if ((staggerEdgeLWidthArg->array[i] < 0) || (staggerEdgeLWidthArg->array[i] > gridEdgeLWidth[i])) {
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
-           "- staggerAlign must be either -1, 0, or 1", ESMC_CONTEXT, &rc);
+           "- staggerEdgeLWidth doesn't fit within gridEdgeLWidth", ESMC_CONTEXT, &rc);
         return rc;
       }
     }
@@ -4922,7 +4922,7 @@ int Grid::setItemArrayInternal(
     for (int i=0; i<dimCount; i++){
       if ((staggerEdgeUWidthArg->array[i] < 0) || (staggerEdgeUWidthArg->array[i] > gridEdgeUWidth[i])) {
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
-          "- staggerAlign must be either -1, 0, or 1", ESMC_CONTEXT, &rc);
+          "- staggerEdgeUWidth doesn't fit within gridEdgeUWidth", ESMC_CONTEXT, &rc);
         return rc;
       }
     }

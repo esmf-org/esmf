@@ -2749,6 +2749,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        integer :: gridEdgeLWidth(ESMF_MAXDIM)
        integer :: gridEdgeUWidth(ESMF_MAXDIM)
        integer :: gridAlign(ESMF_MAXDIM)
+       integer :: staggerEdgeLWidth(ESMF_MAXDIM)
+       integer :: staggerEdgeUWidth(ESMF_MAXDIM)
+       integer :: staggerAlign(ESMF_MAXDIM)
+       integer :: staggerLBound(ESMF_MAXDIM)
        type(ESMF_Index_Flag) :: indexflag
        integer :: i, j, nStaggers
        type(ESMF_ArrayBundle) :: srcAB, dstAB
@@ -2922,8 +2926,21 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 #endif
 
        ! Add Coords to new grid       
+       ! TODO: handle staggerLBound 
        do i = 1, nStaggers
-           call ESMF_GridAddCoord(newGrid, staggerloc=srcStaggers(i), rc=localrc)
+           call ESMF_GridGet(grid, staggerloc=srcStaggers(i), &
+                staggerEdgeLWidth=staggerEdgeLWidth(1:dimCount), &
+                staggerEdgeUWidth=staggerEdgeUWidth(1:dimCount), &
+                staggerAlign=staggerAlign(1:dimCount), &
+                rc=localrc)
+           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+                ESMF_CONTEXT, rcToReturn=rc)) return
+
+           call ESMF_GridAddCoord(newGrid, staggerloc=srcStaggers(i), &
+                staggerEdgeLWidth=staggerEdgeLWidth(1:dimCount), &
+                staggerEdgeUWidth=staggerEdgeUWidth(1:dimCount), &
+                staggerAlign=staggerAlign(1:dimCount), &
+                rc=localrc)
            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                 ESMF_CONTEXT, rcToReturn=rc)) return
        enddo
@@ -15625,7 +15642,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE:
   ! Private name; call using ESMF_GridGet()
       subroutine ESMF_GridGetPSloc(grid, staggerloc, &
-        keywordEnforcer, distgrid, rc)
+        keywordEnforcer, distgrid, &
+        staggerEdgeLWidth, staggerEdgeUWidth, &
+        staggerAlign, staggerLBound, rc)
 
 !
 ! !ARGUMENTS:
@@ -15633,6 +15652,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       type (ESMF_StaggerLoc), intent(in)            :: staggerloc
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       type(ESMF_DistGrid),    intent(out), optional :: distgrid
+      integer,                intent(out), optional :: staggerEdgeLWidth(:)
+      integer,                intent(out), optional :: staggerEdgeUWidth(:)
+      integer,                intent(out), optional :: staggerAlign(:)
+      integer,                intent(out), optional :: staggerLBound(:)      
       integer,                intent(out), optional :: rc
 !
 ! !STATUS:
@@ -15655,15 +15678,33 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     of predefined stagger locations. 
 !\item[{[distgrid]}]
 !   The structure describing the distribution of this staggerloc in this grid. 
+! \item[{[staggerEdgeLWidth]}] 
+!      This array should be the same dimCount as the grid. It specifies the lower corner of the stagger
+!      region with respect to the lower corner of the exclusive region.
+! \item[{[staggerEdgeUWidth]}] 
+!      This array should be the same dimCount as the grid. It specifies the upper corner of the stagger
+!      region with respect to the upper corner of the exclusive region.
+! \item[{[staggerAlign]}] 
+!      This array is of size  grid dimCount.
+!      For this stagger location, it specifies which element
+!      has the same index value as the center. For example, 
+!      for a 2D cell with corner stagger it specifies which 
+!      of the 4 corners has the same index as the center. 
+! \item[{[staggerLBound]}] 
+!      Specifies the lower index range of the memory of every DE in this staggerloc in this Grid. 
+!      Only used when Grid indexflag is {\tt ESMF\_INDEX\_USER}. 
 !\item[{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !\end{description}
 !
 !EOP
 
+ ! XMRKX
     integer :: localrc ! local error status
-    type(ESMF_InterfaceInt) :: minIndexArg ! helper variable
-    type(ESMF_InterfaceInt) :: maxIndexArg ! helper variable
+    type(ESMF_InterfaceInt) :: staggerEdgeLWidthArg ! helper variable
+    type(ESMF_InterfaceInt) :: staggerEdgeUWidthArg ! helper variable
+    type(ESMF_InterfaceInt) :: staggerAlignArg ! helper variable
+    type(ESMF_InterfaceInt) :: staggerLBoundArg ! helper variable
     integer :: tmp_staggerloc
 
     ! Initialize return code
@@ -15671,7 +15712,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
     ! If not asking for anything, then just leave
-    if (.not. present(distgrid)) then
+    if (.not. present(distgrid) .and. &
+        .not. present(staggerEdgeLWidth) .and. &
+        .not. present(staggerEdgeUWidth) .and. &
+        .not. present(staggerAlign) .and. &
+        .not. present(staggerLBound)) then
        ! Return successfully
        if (present(rc)) rc = ESMF_SUCCESS
        return
@@ -15682,11 +15727,49 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ESMF_INIT_CHECK_DEEP_SHORT(ESMF_GridGetInit, grid, rc)
     tmp_staggerloc=staggerloc%staggerloc
 
+
+    ! process optional arguments into interface ints
+    staggerEdgeLWidthArg=ESMF_InterfaceIntCreate(staggerEdgeLWidth, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    staggerEdgeUWidthArg=ESMF_InterfaceIntCreate(staggerEdgeUWidth, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    staggerAlignArg=ESMF_InterfaceIntCreate(staggerAlign, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    staggerLBoundArg=ESMF_InterfaceIntCreate(staggerLBound, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
     ! Call into the C++ interface, which will sort out optional arguments
     call c_ESMC_GridGetPSloc(grid, tmp_staggerLoc, &
-         distgrid, localrc)
+         distgrid, staggerEdgeLWidthArg, staggerEdgeUWidthArg, &
+         staggerAlignArg, staggerLBoundArg, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
        ESMF_CONTEXT, rcToReturn=rc)) return
+
+
+    ! Deallocate interface ints
+    call ESMF_InterfaceIntDestroy(staggerEdgeLWidthArg, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    call ESMF_InterfaceIntDestroy(staggerEdgeUWidthArg, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    call ESMF_InterfaceIntDestroy(staggerAlignArg, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    call ESMF_InterfaceIntDestroy(staggerLBoundArg, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
 
     ! Set Deep Classes as created
     if (present(distgrid)) then

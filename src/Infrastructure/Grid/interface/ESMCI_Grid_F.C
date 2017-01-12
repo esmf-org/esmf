@@ -2583,13 +2583,17 @@ void c_esmc_grid_get_from_proto(ESMCI::Grid **_grid,
   ///////////////////////////////////////////////////////////////////////////////////
   
   void FTN_X(c_esmc_gridgetpsloc)(ESMCI::Grid **_grid, 
-				int *_staggerloc,  
-   			        ESMCI::DistGrid **_staggerdistgrid,
-                                int *_rc){
+                                  int *_staggerloc,  
+                                  ESMCI::DistGrid **_staggerdistgrid,
+                                  ESMCI::InterfaceInt *_staggerEdgeLWidth,
+                                  ESMCI::InterfaceInt *_staggerEdgeUWidth,
+                                  ESMCI::InterfaceInt *_staggerAlign,
+                                  ESMCI::InterfaceInt *_staggerLBound,
+                                  int *_rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_gridgetpsloc()"
     int localrc;
-    int distDimCount,dimCount;
+    int dimCount;
     int staggerloc;
     ESMCI::Grid *grid;
     const ESMCI::DistGrid *distgrid;
@@ -2619,7 +2623,9 @@ void c_esmc_grid_get_from_proto(ESMCI::Grid **_grid,
 
     // get some useful info
     decompType = grid->getDecompType();
+    dimCount = grid->getDimCount();
 
+    // Do some preliminary error checking
     if (decompType == ESMC_GRID_NONARBITRARY) {
       if ((staggerloc < 0) || (staggerloc >=  grid->getStaggerLocCount())) {
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_WRONG,
@@ -2650,6 +2656,100 @@ void c_esmc_grid_get_from_proto(ESMCI::Grid **_grid,
      if(ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
       ESMC_CONTEXT, ESMC_NOT_PRESENT_FILTER(_rc))) return;
    }
+
+
+    // fill staggerEdgeLWidth
+    if (present(_staggerEdgeLWidth)){
+      // exclusiveLBound was provided -> do some error checking
+      if ((_staggerEdgeLWidth)->dimCount != 1){
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
+          "- staggerEdgeLWidth array must be of rank 1", 
+          ESMC_CONTEXT, ESMC_NOT_PRESENT_FILTER(_rc));
+        return;
+      }
+      if ((_staggerEdgeLWidth)->extent[0] < dimCount){
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
+          "- staggerEdgeLWidth must at least be the same rank as the the grid'", 
+          ESMC_CONTEXT, ESMC_NOT_PRESENT_FILTER(_rc));
+        return;
+      }
+
+      // Fill in the output array
+      for (int i=0; i<dimCount; i++) {
+	(_staggerEdgeLWidth)->array[i]=grid->getStaggerEdgeLWidth(staggerloc)[i];
+      }
+    }
+
+    // fill staggerEdgeUWidth
+    if (present(_staggerEdgeUWidth)){
+      // exclusiveLBound was provided -> do some error checking
+      if ((_staggerEdgeUWidth)->dimCount != 1){
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
+          "- staggerEdgeUWidth array must be of rank 1", 
+          ESMC_CONTEXT, ESMC_NOT_PRESENT_FILTER(_rc));
+        return;
+      }
+      if ((_staggerEdgeUWidth)->extent[0] < dimCount){
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
+          "- staggerEdgeUWidth must at least be the same rank as the the grid'", 
+          ESMC_CONTEXT, ESMC_NOT_PRESENT_FILTER(_rc));
+        return;
+      }
+
+      // Fill in the output array
+      for (int i=0; i<dimCount; i++) {
+	(_staggerEdgeUWidth)->array[i]=grid->getStaggerEdgeUWidth(staggerloc)[i];
+      }
+    }
+
+
+    // fill staggerAlign
+    if (present(_staggerAlign)){
+      // exclusiveLBound was provided -> do some error checking
+      if ((_staggerAlign)->dimCount != 1){
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
+          "- staggerAlign array must be of rank 1", 
+          ESMC_CONTEXT, ESMC_NOT_PRESENT_FILTER(_rc));
+        return;
+      }
+      if ((_staggerAlign)->extent[0] < dimCount){
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
+          "- staggerAlign must at least be the same rank as the the grid'", 
+          ESMC_CONTEXT, ESMC_NOT_PRESENT_FILTER(_rc));
+        return;
+      }
+
+      // Fill in the output array
+      for (int i=0; i<dimCount; i++) {
+	(_staggerAlign)->array[i]=grid->getStaggerAlign(staggerloc)[i];
+      }
+    }
+
+
+    // fill staggerLBound
+    if (present(_staggerLBound)){
+      // exclusiveLBound was provided -> do some error checking
+      if ((_staggerLBound)->dimCount != 1){
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
+          "- staggerLBound array must be of rank 1", 
+          ESMC_CONTEXT, ESMC_NOT_PRESENT_FILTER(_rc));
+        return;
+      }
+      if ((_staggerLBound)->extent[0] < dimCount){
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
+          "- staggerLBound must at least be the same rank as the the grid'", 
+          ESMC_CONTEXT, ESMC_NOT_PRESENT_FILTER(_rc));
+        return;
+      }
+
+      // Fill in the output array
+      for (int i=0; i<dimCount; i++) {
+	(_staggerLBound)->array[i]=grid->getStaggerMemLBound(staggerloc)[i];
+      }
+    }
+
+
+
   
     // return successfully
     if (_rc!=NULL) *_rc = ESMF_SUCCESS;
