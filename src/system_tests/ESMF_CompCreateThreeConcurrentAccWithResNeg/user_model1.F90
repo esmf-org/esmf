@@ -270,6 +270,8 @@
 !   !
  
     subroutine user_run(comp, importState, exportState, clock, rc)
+        use mpi
+        implicit none
         type(ESMF_GridComp) :: comp
         type(ESMF_State) :: importState, exportState
         type(ESMF_Clock) :: clock
@@ -280,6 +282,12 @@
 
         type(mydata), pointer :: mydatablock
         type(wrapper) :: mywrapper
+
+        integer :: i, ndevices, deviceid, rank
+        integer, parameter :: INIT_VAL = 2
+        integer, parameter :: N = 100
+        integer, parameter :: SCALE_FACTOR = 10
+        integer, dimension(:) :: vec(N), svec(N)
 
         rc = ESMF_SUCCESS
 
@@ -307,6 +315,29 @@
         print *, "run, local data =", mydatablock%index, &
                         mydatablock%scale_factor, mydatablock%flag
 
+        call MPI_Comm_rank(MPI_COMM_WORLD, rank, rc)
+        ndevices = 0
+        if(allocated(device_list)) then
+          ndevices = SIZE(device_list)
+        end if
+        print *, "Num of devices available = ", ndevices
+        deviceid = 0
+        if(ndevices > 0) then
+          deviceid = device_list(mod(rank, ndevices) + 1)
+        end if
+        vec = INIT_VAL
+        print *, "Vector before scaling = ", vec
+
+        !$omp target if(ndevices > 0) device(deviceid) map(to:vec) map(from:svec)
+        !$omp parallel do
+        do i=1,N
+          svec(i) = SCALE_FACTOR * vec(i)
+        end do
+        !$omp end parallel do
+        !$omp end target
+
+        print *, "Scaled vector = ", svec
+   
         call ESMF_StatePrint(importState, rc=rc)
         if (rc/=ESMF_SUCCESS) return ! bail on error    
         call ESMF_StateGet(importState, "humidity", humidity, rc=rc)
