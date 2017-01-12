@@ -122,19 +122,18 @@
           return
         end if
         if(device_count <= 0) then
-          print *, "dev list info size <= 0, exiting"
-          rc = ESMF_FAILURE
-          return
+          print *, "dev list info size <= 0"
+        else
+          allocate(device_list(device_count))
+          call ESMF_AttributeGet(comp, name="ESMF_COMP_USER_NEG_DEVLIST_INFO",&
+            valueList=device_list, rc=rc)
+          if(rc /= ESMF_SUCCESS) then
+            print *, "Setting device list info failed, exiting..."
+            return
+          end if
+          print *, "Got device list : ", device_list
+          print *, "Accepting the device list passed by driver/main"
         end if
-        allocate(device_list(device_count))
-        call ESMF_AttributeGet(comp, name="ESMF_COMP_USER_NEG_DEVLIST_INFO",&
-          valueList=device_list, rc=rc)
-        if(rc /= ESMF_SUCCESS) then
-          print *, "Setting device list info failed, exiting..."
-          return
-        end if
-        print *, "Got device list : ", device_list
-        print *, "Accepting the device list passed by driver/main"
       else
         print *, "ERROR: Only LIST_INFO of type ENUMERATE is supported for now"
         return
@@ -307,7 +306,7 @@
 
         print *, "run, local data =", mydatablock%index, &
                         mydatablock%scale_factor, mydatablock%flag
-   
+
         call ESMF_StatePrint(importState, rc=rc)
         if (rc/=ESMF_SUCCESS) return ! bail on error    
         call ESMF_StateGet(importState, "humidity", humidity, rc=rc)

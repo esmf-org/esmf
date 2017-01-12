@@ -244,7 +244,10 @@
         return
       end if
 
-      device_count = size(comp_pet_info%device_list)
+      device_count = 0
+      if(allocated(comp_pet_info%device_list)) then
+        device_count = size(comp_pet_info%device_list)
+      end if
 
       call ESMF_AttributeSet(comp, name="ESMF_COMP_USER_NEG_DEVLIST_INFO_TYPE",&
         value=ESMF_COMP_USER_NEG_LIST_INFO_ENUMERATE, rc=rc)
@@ -258,11 +261,13 @@
         print *, "Setting device list info type failed, exiting..."
         return
       end if
-      call ESMF_AttributeSet(comp, name="ESMF_COMP_USER_NEG_DEVLIST_INFO",&
-        valueList=comp_pet_info%device_list, rc=rc)
-      if(rc /= ESMF_SUCCESS) then
-        print *, "Setting pet list info failed, exiting..."
-        return
+      if(device_count > 0) then
+        call ESMF_AttributeSet(comp, name="ESMF_COMP_USER_NEG_DEVLIST_INFO",&
+          valueList=comp_pet_info%device_list, rc=rc)
+        if(rc /= ESMF_SUCCESS) then
+          print *, "Setting pet list info failed, exiting..."
+          return
+        end if
       end if
 
       do i=1,MAX_USER_NEG_STEPS-1
