@@ -12,6 +12,7 @@ DIRS      = ESMF_CompCreate \
             ESMF_CompCreateTwoConcurrentWithResNeg \
             ESMF_CompCreateTwoConcurrentAccWithResNeg \
             ESMF_CompCreateThreeConcurrentAccWithResNeg \
+            ESMF_CompCreateThreeConcurrentAccWithResNegOpenACC \
             ESMF_CompFortranAndC \
             ESMF_RecursiveComponent \
             ESMF_ArrayScatterGather \
