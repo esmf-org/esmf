@@ -581,6 +581,30 @@ Hovering over the test name i.e., Blues gfortran, will reveal notes particular t
 
 The platforms that run the regression tests, email the test results to a server that updates the test results web page. A script checks for test reports every 15 minutes, and updates the web page. The time of the last update appears on the web page.
 
+
+\subsubsection{Building the Documentation}
+
+As software development progresses, the documentation is updated, built and posted 
+\htmladdnormallink{{\it here.}}{https://www.earthsystemcog.org/projects/esmf/dev_docs/}
+
+The documents are built daily in the early morning, the results of the builds are posted\htmladdnormallink{{\it here.}}{https://http://www.earthsystemmodeling.org/developers/test/daily/2week_results/trunk_results_noheader/doc_build.shtml/}
+
+These documents can be updated by the developers, by checking out the documents from therepository and submitting the edited files. To have the new version of the documents posted on the web, the developer must sent a request to the following email address, esmf\_test@noaa.gov. The subject of the email indicates which document to build and post.
+The following is the list of subjects that can be used:
+
+\begin{itemize} 
+\item Build\_Dev\_Guide\_Doc
+\item Build\_NUOPC\_Doc
+\item Build\_Ref\_Doc
+\item Build\_ESMPy\_Doc
+\item Build\_CICE\_NUOPC\_CAP\_Doc
+\item Build\_HYCOM\_NUOPC\_CAP\_Doc
+\item Build\_MOM\_NUOPC\_CAP\_Doc/
+\end{itemize}
+
+A script checks for document build requests every quarter hour on the quarter hour. A document build is started and on successful completion the document is updated on the web and document build results is updated. 
+
+
 \subsubsection{Testing for Releases}
 
 We provide two types of tar files, the ESMF source and the shared
