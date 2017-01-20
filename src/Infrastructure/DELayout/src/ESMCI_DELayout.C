@@ -2488,10 +2488,13 @@ int XXE::exec(
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
-  
-#if 0
-  printf("gjt in ESMCI::XXE::exec(), stream=%p, %d, %d\n", stream, count, 
-    sizeof(StreamElement));
+
+#define EXECWITHPRINT____disable
+#ifdef EXECWITHPRINT
+  char msg[1024];
+  sprintf(msg, "ESMCI::XXE::exec(): START: stream=%p, %d, %lu, cancelled=%p", 
+    stream, count, sizeof(StreamElement), cancelled);
+  ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
 #endif
   
   // set index range
@@ -2595,15 +2598,17 @@ int XXE::exec(
 #endif
   }
   
-#define EXECWITHPRINT____disable
-
   for (int i=indexRangeStart; i<=indexRangeStop; i++){
     xxeElement = &(stream[i]);
     
     if (xxeElement->predicateBitField & filterBitField)
       continue; // filter out this operation
     
-//    printf("gjt: %d, opId=%d\n", i, stream[i].opId);
+#ifdef EXECWITHPRINT
+    sprintf(msg, "ESMCI::XXE::exec(): %d, opId=%d", i, stream[i].opId);
+    ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
+#endif    
+    
     switch(stream[i].opId){
     case send:
       {
@@ -2615,12 +2620,13 @@ int XXE::exec(
         if (xxeSendInfo->vectorFlag)
           size *= *vectorLength;
 #ifdef EXECWITHPRINT
-        fprintf(stderr, "XXE::send: <localPet=%d> buffer=%p, size=%d, dst=%d, "
-          "tag=%d, vectorFlag=%d, indirectionFlag=%d\n",
+        sprintf(msg, "XXE::send: <localPet=%d> buffer=%p, size=%d, dst=%d, "
+          "tag=%d, vectorFlag=%d, indirectionFlag=%d",
           vm->getLocalPet(),
           xxeSendInfo->buffer, xxeSendInfo->size, xxeSendInfo->dstPet,
           xxeSendInfo->tag, xxeSendInfo->vectorFlag,
           xxeSendInfo->indirectionFlag);
+        ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
 #endif
         vm->send(buffer, size, xxeSendInfo->dstPet, xxeSendInfo->tag);
         xxeSendInfo->activeFlag = true;     // set
@@ -2637,12 +2643,13 @@ int XXE::exec(
         if (xxeRecvInfo->vectorFlag)
           size *= *vectorLength;
 #ifdef EXECWITHPRINT
-        fprintf(stderr, "XXE::recv: <localPet=%d> buffer=%p, size=%d, src=%d, "
-          "tag=%d, vectorFlag=%d, indirectionFlag=%d\n",
+        sprintf(msg, "XXE::recv: <localPet=%d> buffer=%p, size=%d, src=%d, "
+          "tag=%d, vectorFlag=%d, indirectionFlag=%d",
           vm->getLocalPet(),
           xxeRecvInfo->buffer, xxeRecvInfo->size, xxeRecvInfo->srcPet,
           xxeRecvInfo->tag, xxeRecvInfo->vectorFlag,
           xxeRecvInfo->indirectionFlag);
+        ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
 #endif
         vm->recv(buffer, size, xxeRecvInfo->srcPet, xxeRecvInfo->tag);
         xxeRecvInfo->activeFlag = true;     // set
@@ -2659,7 +2666,8 @@ int XXE::exec(
           rraOffset *= *vectorLength;
         }
 #ifdef EXECWITHPRINT
-        fprintf(stderr, "XXE::sendRRA: <localPet=%d> \n", vm->getLocalPet());
+        sprintf(msg, "XXE::sendRRA: <localPet=%d>", vm->getLocalPet());
+        ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
 #endif
         vm->send(rraList[xxeSendRRAInfo->rraIndex]
           + rraOffset, size, xxeSendRRAInfo->dstPet, xxeSendRRAInfo->tag);
@@ -2677,7 +2685,8 @@ int XXE::exec(
           rraOffset *= *vectorLength;
         }
 #ifdef EXECWITHPRINT
-        fprintf(stderr, "XXE::recvRRA: <localPet=%d> \n", vm->getLocalPet());
+        sprintf(msg, "XXE::recvRRA: <localPet=%d>", vm->getLocalPet());
+        ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
 #endif
         vm->recv(rraList[xxeRecvRRAInfo->rraIndex]
           + rraOffset, size, xxeRecvRRAInfo->srcPet, xxeRecvRRAInfo->tag);
@@ -2701,9 +2710,10 @@ int XXE::exec(
           dstSize *= *vectorLength;
         }
 #ifdef EXECWITHPRINT
-        fprintf(stderr, "XXE::sendrecv: <localPet=%d> dst=%d, sendSize=%d, "
-          " src=%d, recvSize=%d\n", vm->getLocalPet(), xxeSendRecvInfo->dstPet,
+        sprintf(msg, "XXE::sendrecv: <localPet=%d> dst=%d, sendSize=%d, "
+          " src=%d, recvSize=%d", vm->getLocalPet(), xxeSendRecvInfo->dstPet,
           srcSize, xxeSendRecvInfo->srcPet, dstSize);
+        ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
 #endif
         vm->sendrecv(srcBuffer, srcSize, xxeSendRecvInfo->dstPet,
           dstBuffer, dstSize, xxeSendRecvInfo->srcPet, xxeSendRecvInfo->dstTag,
@@ -2727,7 +2737,8 @@ int XXE::exec(
           rraOffset *= *vectorLength;
         }
 #ifdef EXECWITHPRINT
-        fprintf(stderr, "XXE::sendRRArecv: <localPet=%d> \n", vm->getLocalPet());
+        sprintf(msg, "XXE::sendRRArecv: <localPet=%d>", vm->getLocalPet());
+        ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
 #endif
         vm->sendrecv(rraList[xxeSendRRARecvInfo->rraIndex] + rraOffset,
           srcSize, xxeSendRRARecvInfo->dstPet, dstBuffer, dstSize,
@@ -3492,6 +3503,11 @@ printf("gjt - DID NOT CANCEL commhandle\n");
     case memGatherSrcRRA:
       {
         xxeMemGatherSrcRRAInfo = (MemGatherSrcRRAInfo *)xxeElement;
+#ifdef EXECWITHPRINT
+        sprintf(msg, "XXE::memGatherSrcRRA: dstBaseTK=%d", 
+          xxeMemGatherSrcRRAInfo->dstBaseTK);
+        ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
+#endif
         char *dstBase = (char *)xxeMemGatherSrcRRAInfo->dstBase;
         if (xxeMemGatherSrcRRAInfo->indirectionFlag)
           dstBase = *(char **)xxeMemGatherSrcRRAInfo->dstBase;
@@ -3637,6 +3653,11 @@ printf("gjt - DID NOT CANCEL commhandle\n");
     *dTime = t1 - t0;
   }
   
+#ifdef EXECWITHPRINT
+  sprintf(msg, "ESMCI::XXE::exec(): STOP");
+  ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
+#endif
+
   // return successfully
   rc = ESMF_SUCCESS;
   return rc;
@@ -4810,17 +4831,16 @@ int XXE::print(
     if (xxeElement->predicateBitField & filterBitField)
       continue; // filter out this operation
     
-    fprintf(fp, "XXE::print(): <localPet=%d> i=%d, xxeElement=%p, opId=%d, "
-      "predicateBitField=0x%08x\n", 
+    fprintf(fp, "XXE::print(): <xxe=%p> <localPet=%d> i=%d, xxeElement=%p, "
+      "opId=%d, predicateBitField=0x%08x\n", this, 
       vm->getLocalPet(), i, xxeElement, stream[i].opId,
       stream[i].predicateBitField);
     switch(stream[i].opId){
     case send:
       {
         xxeSendInfo = (SendInfo *)xxeElement;
-        fprintf(fp, "  XXE::send: <localPet=%d> buffer=%p, size=%d, dst=%d, "
+        fprintf(fp, "  XXE::send: buffer=%p, size=%d, dst=%d, "
           "tag=%d, vectorFlag=%d, indirectionFlag=%d\n",
-          vm->getLocalPet(),
           xxeSendInfo->buffer, xxeSendInfo->size, xxeSendInfo->dstPet,
           xxeSendInfo->tag, xxeSendInfo->vectorFlag,
           xxeSendInfo->indirectionFlag);
@@ -4829,9 +4849,8 @@ int XXE::print(
     case recv:
       {
         xxeRecvInfo = (RecvInfo *)xxeElement;
-        fprintf(fp, "  XXE::recv: <localPet=%d> buffer=%p, size=%d, src=%d, "
+        fprintf(fp, "  XXE::recv: buffer=%p, size=%d, src=%d, "
           "tag=%d, vectorFlag=%d, indirectionFlag=%d\n",
-          vm->getLocalPet(),
           xxeRecvInfo->buffer, xxeRecvInfo->size, xxeRecvInfo->srcPet,
           xxeRecvInfo->tag, xxeRecvInfo->vectorFlag,
           xxeRecvInfo->indirectionFlag);
@@ -4840,9 +4859,8 @@ int XXE::print(
     case sendRRA:
       {
         xxeSendRRAInfo = (SendRRAInfo *)xxeElement;
-        fprintf(fp, "  XXE::sendRRA: <localPet=%d> rraOffset=%d, size=%d, "
+        fprintf(fp, "  XXE::sendRRA: rraOffset=%d, size=%d, "
           "dst=%d, rraIndex=%d, tag=%d, vectorFlag=%d\n",
-          vm->getLocalPet(),
           xxeSendRRAInfo->rraOffset, xxeSendRRAInfo->size,
           xxeSendRRAInfo->dstPet, xxeSendRRAInfo->rraIndex,
           xxeSendRRAInfo->tag, xxeSendRRAInfo->vectorFlag);
@@ -4851,9 +4869,8 @@ int XXE::print(
     case recvRRA:
       {
         xxeRecvRRAInfo = (RecvRRAInfo *)xxeElement;
-        fprintf(fp, "  XXE::recvRRA: <localPet=%d> rraOffset=%d, size=%d, "
+        fprintf(fp, "  XXE::recvRRA: rraOffset=%d, size=%d, "
           "src=%d, rraIndex=%d, tag=%d, vectorFlag=%d\n",
-          vm->getLocalPet(),
           xxeRecvRRAInfo->rraOffset, xxeRecvRRAInfo->size,
           xxeRecvRRAInfo->srcPet, xxeRecvRRAInfo->rraIndex,
           xxeRecvRRAInfo->tag, xxeRecvRRAInfo->vectorFlag);
@@ -4862,9 +4879,8 @@ int XXE::print(
     case sendnb:
       {
         xxeSendnbInfo = (SendnbInfo *)xxeElement;
-        fprintf(fp, "  XXE::sendnb: <localPet=%d> buffer=%p, size=%d, dst=%d, "
+        fprintf(fp, "  XXE::sendnb: buffer=%p, size=%d, dst=%d, "
           "tag=%d, vectorFlag=%d, indirectionFlag=%d, commhandle=%p\n",
-          vm->getLocalPet(),
           xxeSendnbInfo->buffer, xxeSendnbInfo->size, xxeSendnbInfo->dstPet,
           xxeSendnbInfo->tag, xxeSendnbInfo->vectorFlag,
           xxeSendnbInfo->indirectionFlag, xxeSendnbInfo->commhandle);
@@ -4873,9 +4889,8 @@ int XXE::print(
     case recvnb:
       {
         xxeRecvnbInfo = (RecvnbInfo *)xxeElement;
-        fprintf(fp, "  XXE::recvnb: <localPet=%d> buffer=%p, size=%d, src=%d, "
+        fprintf(fp, "  XXE::recvnb: buffer=%p, size=%d, src=%d, "
           "tag=%d, vectorFlag=%d, indirectionFlag=%d, commhandle=%p\n",
-          vm->getLocalPet(),
           xxeRecvnbInfo->buffer, xxeRecvnbInfo->size, xxeRecvnbInfo->srcPet,
           xxeRecvnbInfo->tag, xxeRecvnbInfo->vectorFlag,
           xxeRecvnbInfo->indirectionFlag, xxeRecvnbInfo->commhandle);
@@ -4884,9 +4899,8 @@ int XXE::print(
     case sendnbRRA:
       {
         xxeSendnbRRAInfo = (SendnbRRAInfo *)xxeElement;
-        fprintf(fp, "  XXE::sendnbRRA: <localPet=%d> rraOffset=%d, size=%d, "
+        fprintf(fp, "  XXE::sendnbRRA: rraOffset=%d, size=%d, "
           "dst=%d, rraIndex=%d, tag=%d, vectorFlag=%d, commhandle=%p\n",
-          vm->getLocalPet(),
           xxeSendnbRRAInfo->rraOffset, xxeSendnbRRAInfo->size,
           xxeSendnbRRAInfo->dstPet, xxeSendnbRRAInfo->rraIndex,
           xxeSendnbRRAInfo->tag, xxeSendnbRRAInfo->vectorFlag,
@@ -4896,9 +4910,8 @@ int XXE::print(
     case recvnbRRA:
       {
         xxeRecvnbRRAInfo = (RecvnbRRAInfo *)xxeElement;
-        fprintf(fp, "  XXE::recvnbRRA: <localPet=%d> rraOffset=%d, size=%d, "
+        fprintf(fp, "  XXE::recvnbRRA: rraOffset=%d, size=%d, "
           "src=%d, rraIndex=%d, tag=%d, vectorFlag=%d, commhandle=%p\n",
-          vm->getLocalPet(),
           xxeRecvnbRRAInfo->rraOffset, xxeRecvnbRRAInfo->size,
           xxeRecvnbRRAInfo->srcPet, xxeRecvnbRRAInfo->rraIndex,
           xxeRecvnbRRAInfo->tag, xxeRecvnbRRAInfo->vectorFlag,
@@ -4910,8 +4923,8 @@ int XXE::print(
         xxeWaitOnIndexInfo = (WaitOnIndexInfo *)xxeElement;
         xxeIndexElement = &(stream[xxeWaitOnIndexInfo->index]);
         xxeCommhandleInfo = (CommhandleInfo *)xxeIndexElement;
-        fprintf(fp, "  XXE::waitOnIndex: <localPet=%d> index=%d, "
-          " commhandle=%p\n", vm->getLocalPet(), xxeWaitOnIndexInfo->index,
+        fprintf(fp, "  XXE::waitOnIndex: index=%d, "
+          " commhandle=%p\n", xxeWaitOnIndexInfo->index,
           xxeCommhandleInfo->commhandle);
       }
       break;
@@ -4920,8 +4933,8 @@ int XXE::print(
         xxeTestOnIndexInfo = (TestOnIndexInfo *)xxeElement;
         xxeIndexElement = &(stream[xxeTestOnIndexInfo->index]);
         xxeCommhandleInfo = (CommhandleInfo *)xxeIndexElement;
-        fprintf(fp, "  XXE::TestOnIndex: <localPet=%d> index=%d, "
-          " commhandle=%p\n", vm->getLocalPet(), xxeTestOnIndexInfo->index,
+        fprintf(fp, "  XXE::testOnIndex: index=%d, "
+          " commhandle=%p\n", xxeTestOnIndexInfo->index,
           xxeCommhandleInfo->commhandle);
       }
       break;
@@ -4948,15 +4961,27 @@ int XXE::print(
     case waitOnIndexSub:
       {
         waitOnIndexSubInfo = (WaitOnIndexSubInfo *)xxeElement;
-        fprintf(fp, "  XXE::waitOnIndexSubInfo <localPet=%d>\n",
-          vm->getLocalPet());
+        xxeIndexElement = &(stream[waitOnIndexSubInfo->index]);
+        xxeCommhandleInfo = (CommhandleInfo *)xxeIndexElement;
+        fprintf(fp, "  XXE::waitOnIndexSub index=%d, "
+          " commhandle=%p\n", waitOnIndexSubInfo->index,
+          xxeCommhandleInfo->commhandle);
+        if (waitOnIndexSubInfo->xxe)
+          waitOnIndexSubInfo->xxe->print(fp, rraCount, 
+            rraList+waitOnIndexSubInfo->rraShift);        // recursive call
       }
       break;
     case testOnIndexSub:
       {
         testOnIndexSubInfo = (TestOnIndexSubInfo *)xxeElement;
-        fprintf(fp, "  XXE::testOnIndexSubInfo <localPet=%d>\n",
-          vm->getLocalPet());
+        xxeIndexElement = &(stream[testOnIndexSubInfo->index]);
+        xxeCommhandleInfo = (CommhandleInfo *)xxeIndexElement;
+        fprintf(fp, "  XXE::testOnIndexSub index=%d, "
+          " commhandle=%p\n", testOnIndexSubInfo->index,
+          xxeCommhandleInfo->commhandle);
+        if (testOnIndexSubInfo->xxe)
+          testOnIndexSubInfo->xxe->print(fp, rraCount, 
+            rraList+testOnIndexSubInfo->rraShift);        // recursive call
       }
       break;
     case cancelIndex:
@@ -4964,8 +4989,8 @@ int XXE::print(
         xxeCancelIndexInfo = (CancelIndexInfo *)xxeElement;
         xxeIndexElement = &(stream[xxeCancelIndexInfo->index]);
         xxeCommhandleInfo = (CommhandleInfo *)xxeIndexElement;
-        fprintf(fp, "  XXE::CancelIndex: <localPet=%d> index=%d, "
-          " commhandle=%p\n", vm->getLocalPet(), xxeCancelIndexInfo->index,
+        fprintf(fp, "  XXE::CancelIndex: index=%d, "
+          " commhandle=%p\n", xxeCancelIndexInfo->index,
           xxeCommhandleInfo->commhandle);
       }
       break;
@@ -4994,9 +5019,9 @@ int XXE::print(
       {
         xxeSumSuperScalarDstRRAInfo =
           (SumSuperScalarDstRRAInfo *)xxeElement;
-        fprintf(fp, "  XXE::sumSuperScalarDstRRA <localPet=%d> rraIndex=%d, "
+        fprintf(fp, "  XXE::sumSuperScalarDstRRA rraIndex=%d, "
           "termCount=%d, vectorFlag=%d, indirectionFlag=%d\n",
-          vm->getLocalPet(), xxeSumSuperScalarDstRRAInfo->rraIndex,
+          xxeSumSuperScalarDstRRAInfo->rraIndex,
           xxeSumSuperScalarDstRRAInfo->termCount,
           xxeSumSuperScalarDstRRAInfo->vectorFlag,
           xxeSumSuperScalarDstRRAInfo->indirectionFlag);
@@ -5006,9 +5031,9 @@ int XXE::print(
       {
         xxeProductSumSuperScalarDstRRAInfo =
           (ProductSumSuperScalarDstRRAInfo *)xxeElement;
-        fprintf(fp, "  XXE::productSumSuperScalarDstRRA <localPet=%d> "
+        fprintf(fp, "  XXE::productSumSuperScalarDstRRA "
           "rraIndex=%d, termCount=%d, vectorFlag=%d, indirectionFlag=%d\n",
-          vm->getLocalPet(), xxeProductSumSuperScalarDstRRAInfo->rraIndex,
+          xxeProductSumSuperScalarDstRRAInfo->rraIndex,
           xxeProductSumSuperScalarDstRRAInfo->termCount,
           xxeProductSumSuperScalarDstRRAInfo->vectorFlag,
           xxeProductSumSuperScalarDstRRAInfo->indirectionFlag);
@@ -5018,9 +5043,9 @@ int XXE::print(
       {
         xxeProductSumSuperScalarSrcRRAInfo =
           (ProductSumSuperScalarSrcRRAInfo *)xxeElement;
-        fprintf(fp, "  XXE::productSumSuperScalarSrcRRA <localPet=%d> "
+        fprintf(fp, "  XXE::productSumSuperScalarSrcRRA "
           "rraIndex=%d, termCount=%d, vectorFlag=%d, indirectionFlag=%d\n",
-          vm->getLocalPet(), xxeProductSumSuperScalarSrcRRAInfo->rraIndex,
+          xxeProductSumSuperScalarSrcRRAInfo->rraIndex,
           xxeProductSumSuperScalarSrcRRAInfo->termCount,
           xxeProductSumSuperScalarSrcRRAInfo->vectorFlag,
           xxeProductSumSuperScalarSrcRRAInfo->indirectionFlag);
@@ -5037,16 +5062,16 @@ int XXE::print(
     case zeroScalarRRA:
       {
         xxeZeroScalarRRAInfo = (ZeroScalarRRAInfo *)xxeElement;
-        fprintf(fp, "  XXE::zeroScalarRRA <localPet=%d> rraOffset=%d, "
-          "rraIndex=%d\n", vm->getLocalPet(), xxeZeroScalarRRAInfo->rraOffset,
+        fprintf(fp, "  XXE::zeroScalarRRA rraOffset=%d, "
+          "rraIndex=%d\n", xxeZeroScalarRRAInfo->rraOffset,
           xxeZeroScalarRRAInfo->rraIndex);
       }
       break;
     case zeroSuperScalarRRA:
       {
         xxeZeroSuperScalarRRAInfo = (ZeroSuperScalarRRAInfo *)xxeElement;
-        fprintf(fp, "  XXE::zeroSuperScalarRRA <localPet=%d> rraOffsetList=%p, "
-          "rraIndex=%d, termCount=%d, vectorFlag=%d\n", vm->getLocalPet(),
+        fprintf(fp, "  XXE::zeroSuperScalarRRA rraOffsetList=%p, "
+          "rraIndex=%d, termCount=%d, vectorFlag=%d\n",
           xxeZeroSuperScalarRRAInfo->rraOffsetList,
           xxeZeroSuperScalarRRAInfo->rraIndex,
           xxeZeroSuperScalarRRAInfo->termCount,
@@ -5056,9 +5081,9 @@ int XXE::print(
     case zeroMemset:
       {
         xxeZeroMemsetInfo = (ZeroMemsetInfo *)xxeElement;
-        fprintf(fp, "  XXE::zeroMemset <localPet=%d> buffer=%p, byteCount=%d, "
+        fprintf(fp, "  XXE::zeroMemset buffer=%p, byteCount=%d, "
           "vectorFlag=%d, indirectionFlag=%d\n", 
-            vm->getLocalPet(), xxeZeroMemsetInfo->buffer,
+            xxeZeroMemsetInfo->buffer,
             xxeZeroMemsetInfo->byteCount, xxeZeroMemsetInfo->vectorFlag,
             xxeZeroMemsetInfo->indirectionFlag);
       }
@@ -5066,9 +5091,9 @@ int XXE::print(
     case zeroMemsetRRA:
       {
         xxeZeroMemsetRRAInfo = (ZeroMemsetRRAInfo *)xxeElement;
-        fprintf(fp, "  XXE::zeroMemsetRRA <localPet=%d> byteCount=%d, "   
+        fprintf(fp, "  XXE::zeroMemsetRRA byteCount=%d, "   
           "rraIndex=%d, vectorFlag=%d\n", 
-          vm->getLocalPet(), xxeZeroMemsetRRAInfo->byteCount,
+          xxeZeroMemsetRRAInfo->byteCount,
           xxeZeroMemsetRRAInfo->rraIndex, xxeZeroMemsetRRAInfo->vectorFlag);
       }
       break;
@@ -5087,8 +5112,13 @@ int XXE::print(
     case memGatherSrcRRA:
       {
         xxeMemGatherSrcRRAInfo = (MemGatherSrcRRAInfo *)xxeElement;
-        fprintf(fp, "  XXE::memGatherSrcRRA <localPet=%d>\n",
-          vm->getLocalPet());
+        fprintf(fp, "  XXE::memGatherSrcRRA: dstBase=%p, dstBaseTK=%d, "
+          "chunkCount=%d, vectorFlag=%d, indirectionFlag=%d\n",
+          xxeMemGatherSrcRRAInfo->dstBase, 
+          xxeMemGatherSrcRRAInfo->dstBaseTK,
+          xxeMemGatherSrcRRAInfo->chunkCount, 
+          xxeMemGatherSrcRRAInfo->vectorFlag,
+          xxeMemGatherSrcRRAInfo->indirectionFlag);
       }
       break;
     case xxeSub:
@@ -5102,7 +5132,7 @@ int XXE::print(
     case xxeSubMulti:
       {
         xxeSubMultiInfo = (XxeSubMultiInfo *)xxeElement;
-        fprintf(fp, "  XXE::xxeSubMulti <localPet=%d>\n", vm->getLocalPet());
+        fprintf(fp, "  XXE::xxeSubMulti count=%d\n", xxeSubMultiInfo->count);
         for (int k=0; k<xxeSubMultiInfo->count; k++)
           xxeSubMultiInfo->xxe[k]->print(fp, rraCount, rraList); // recurs. call
       }
@@ -5110,8 +5140,8 @@ int XXE::print(
     case wtimer:
       {
         xxeWtimerInfo = (WtimerInfo *)xxeElement;
-        fprintf(fp, "  XXE::wtimer <localPet=%d>\n", vm->getLocalPet());
         int index = xxeWtimerInfo->actualWtimerIndex;
+        fprintf(fp, "  XXE::wtimer index=%d\n", index);
         double *wtime = &(xxeWtimerInfo->wtime);
         *wtime = 0.;                      // initialize
         xxeWtimerInfo->wtimeSum = 0.;     // initialize
@@ -5126,18 +5156,19 @@ int XXE::print(
     case message:
       {
         xxeMessageInfo = (MessageInfo *)xxeElement;
-        fprintf(fp, "  XXE::message <localPet=%d>\n", vm->getLocalPet());
+        fprintf(fp, "  XXE::message string=%s\n", xxeMessageInfo->messageString);
       }
       break;
     case profileMessage:
       {
         xxeProfileMessageInfo = (ProfileMessageInfo *)xxeElement;
-        fprintf(fp, "  XXE::profileMessage <localPet=%d>\n", vm->getLocalPet());
+        fprintf(fp, "  XXE::profileMessage string=%s\n", 
+          xxeProfileMessageInfo->messageString);
       }
       break;
     case nop:
       {
-        fprintf(fp, "  XXE::nop <localPet=%d>\n", vm->getLocalPet());
+        fprintf(fp, "  XXE::nop\n");
       }
       break;
     default:
