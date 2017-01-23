@@ -5950,7 +5950,8 @@ namespace ArrayHelper{
           dt_byte, count);
 #endif
         // decide for the fastest option
-        if (dt_byte < dt_tk){
+//gjt-hack: force typekind option for now        if (dt_byte < dt_tk){
+        if (false){
           // use byte option for memGatherSrcRRA
           // -> nothing to do because this was the last mode tested
         }else{
@@ -6169,7 +6170,8 @@ namespace ArrayHelper{
           dt_byte, count);
 #endif
         // decide for the fastest option
-        if (dt_byte < dt_tk){
+//gjt-hack: force typekind option for now        if (dt_byte < dt_tk){
+        if (false){
           // use byte option for memGatherSrcRRA
           // -> nothing to do because this was the last mode tested
         }else{
@@ -6408,7 +6410,8 @@ namespace ArrayHelper{
           dt_byte, count);
 #endif
         // decide for the fastest option
-        if (dt_byte < dt_tk){
+//gjt-hack: force typekind option for now        if (dt_byte < dt_tk){
+        if (false){
           // use byte option for memGatherSrcRRA
           // -> nothing to do because this was the last mode tested
         }else{
@@ -11226,7 +11229,7 @@ int Array::sparseMatMul(
   // but possible and supported!), the vectorLenght will be left at 0. In the
   // other cases (i.e. srcArray and/or dstArray are present) it is assumed that
   // the vectorLength can be determined from which ever Array is present (first
-  // see about srcArray, and if not available then look at dstArray). This is
+  // see about srcArray, and then dstArray. Last one present will set). This is
   // consistent because vectorization in the XXE stream is only meaningful under
   // the condition that the vectorLength determined from the srcArray equals
   // that determined from the dstArray. There is no check performed here on
@@ -11243,20 +11246,22 @@ int Array::sparseMatMul(
     int rank = srcArray->rank;
     for (int jj=0; jj<rank; jj++){
       if (srcArray->arrayToDistGridMap[jj])
-        // decomposed dimension
+        // first decomposed dimension found
         break;
       else
         // tensor dimension
         vectorLength *= srcArray->undistUBound[jj]
           - srcArray->undistLBound[jj] + 1;
     }
-  }else if (dstArrayFlag){
+  }
+  
+  if (dstArrayFlag){
     // use dstArray to determine vectorLength
     vectorLength = 1;  // prime
     int rank = dstArray->rank;
     for (int jj=0; jj<rank; jj++){
       if (dstArray->arrayToDistGridMap[jj])
-        // decomposed dimension
+        // first decomposed dimension found
         break;
       else
         // tensor dimension
@@ -11274,6 +11279,43 @@ int Array::sparseMatMul(
     finishedflag, cancelledflag);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
     &rc)) return rc;
+  
+#define ASMMXXEPRINT
+#ifdef ASMMXXEPRINT
+  // print XXE stream
+  VM *vm = VM::getCurrent(&localrc);
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+    &rc)) return rc;
+  int localPet = vm->getLocalPet();
+  int petCount = vm->getPetCount();
+  char file[160];
+  sprintf(file, "asmmXXEprint.%05d", localPet);
+  FILE *fp = fopen(file, "a");
+  fprintf(fp, "\n=================================================="
+    "==============================\n");
+  for (int pet=0; pet<petCount; pet++){
+    if (pet==localPet){
+      localrc = xxe->print(fp, rraCount, rraList);
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+        ESMC_CONTEXT, &rc)) return rc;
+    }
+    vm->barrier();
+  }
+  fprintf(fp, "\n=================================================="
+    "==============================\n");
+  fprintf(fp, "filterBitField = 0x%08x\n", filterBitField);
+  fprintf(fp, "\n=================================================="
+    "==============================\n");
+  for (int pet=0; pet<petCount; pet++){
+    if (pet==localPet){
+      localrc = xxe->print(fp, rraCount, rraList, filterBitField);
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+        ESMC_CONTEXT, &rc)) return rc;
+    }
+    vm->barrier();
+  }
+  fclose(fp);
+#endif
 
   while (commflag==ESMF_COMM_BLOCKING && !(*finishedflag)){
     // must be a blocking call with TERMORDER_FREE -> free-order while
