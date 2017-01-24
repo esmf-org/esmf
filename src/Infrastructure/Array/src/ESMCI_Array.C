@@ -224,7 +224,6 @@ Array::Array(
   }
   
   // special variables for super-vectorization in XXE
-char msg[80];
   sizeSuperUndist = new int[redDimCount+1];
   sizeDist = new int[redDimCount*localDeCount];
   int k=0;
@@ -243,16 +242,12 @@ char msg[80];
         ++jj;
       }
     }
-sprintf(msg, "sizeSuperUndist[%d]=%d\n", j, sizeSuperUndist[j]);
-ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO); 
     // construct sizeDist
     if (j<redDimCount){
       for (int i=0; i<localDeCount; i++){
         sizeDist[i*redDimCount+j] =
           totalUBound[i*redDimCount+j] - totalLBound[i*redDimCount+j] + 1;
       }
-sprintf(msg, "sizeDist[%d]=%d\n", j, sizeDist[j]);
-ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO); 
     }
   }
   
