@@ -223,7 +223,41 @@ Array::Array(
     rimElementCount[i] = element; // store element count
   }
   
-  localDeCountAux = localDeCount; // TODO: auxilary for garb until ref. counting
+  // special variables for super-vectorization in XXE
+char msg[80];
+  sizeSuperUndist = new int[redDimCount+1];
+  sizeDist = new int[redDimCount*localDeCount];
+  int k=0;
+  int jj=0;
+  for (int j=0; j<redDimCount+1; j++){
+    // construct SizeSuperUndist
+    sizeSuperUndist[j] = 1; // prime
+    for (; k<rank; k++){
+      if (arrayToDistGridMap[k]){
+        // decomposed dimension found
+        ++k;
+        break;
+      }else{
+        // tensor dimension
+        sizeSuperUndist[j] *= undistUBound[jj] - undistLBound[jj] + 1;
+        ++jj;
+      }
+    }
+sprintf(msg, "sizeSuperUndist[%d]=%d\n", j, sizeSuperUndist[j]);
+ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO); 
+    // construct sizeDist
+    if (j<redDimCount){
+      for (int i=0; i<localDeCount; i++){
+        sizeDist[i*redDimCount+j] =
+          totalUBound[i*redDimCount+j] - totalLBound[i*redDimCount+j] + 1;
+      }
+sprintf(msg, "sizeDist[%d]=%d\n", j, sizeDist[j]);
+ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO); 
+    }
+  }
+  
+  // Auxiliary 
+  localDeCountAux = localDeCount; // TODO: auxiliary for garb until ref. counting
   
   // invalidate the name for this Array object in the Base class
   ESMC_BaseSetName(NULL, "Array");
@@ -307,6 +341,10 @@ void Array::destruct(bool followCreator, bool noGarbage){
       delete [] exclusiveElementCountPDe;
     if (totalElementCountPLocalDe != NULL)
       delete [] totalElementCountPLocalDe;
+    if (sizeSuperUndist != NULL)
+      delete [] sizeSuperUndist;
+    if (sizeDist != NULL)
+      delete [] sizeDist;
     if (distgridCreator && followCreator){
       int localrc = DistGrid::destroy(&distgrid, noGarbage);
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
@@ -11240,34 +11278,38 @@ int Array::sparseMatMul(
   // is bogus. However, the vectorLength is irrelevant under this condition, and
   // will be ignored by the XXE execution.
 
-  if (srcArrayFlag){
-    // use srcArray to determine vectorLength
-    vectorLength = 1;  // prime
-    int rank = srcArray->rank;
-    for (int jj=0; jj<rank; jj++){
-      if (srcArray->arrayToDistGridMap[jj])
-        // first decomposed dimension found
-        break;
-      else
-        // tensor dimension
-        vectorLength *= srcArray->undistUBound[jj]
-          - srcArray->undistLBound[jj] + 1;
-    }
+  // undistributed: r, s, t
+  int superVecSizeUnd[3];
+  // distributed: i, j
+  int superVecSizeDis[2][srcArray->delayout->getLocalDeCount()];   
+
+  superVecSizeUnd[0]=-1;  // initialize with disabled super vector support
+  superVecSizeUnd[1]=1;
+  superVecSizeUnd[2]=1;
+
+  for (int j=0; j<srcArray->delayout->getLocalDeCount(); j++){
+    superVecSizeDis[0][j]=1;
+    superVecSizeDis[1][j]=1;
   }
   
-  if (dstArrayFlag){
-    // use dstArray to determine vectorLength
-    vectorLength = 1;  // prime
-    int rank = dstArray->rank;
-    for (int jj=0; jj<rank; jj++){
-      if (dstArray->arrayToDistGridMap[jj])
-        // first decomposed dimension found
-        break;
-      else
-        // tensor dimension
-        vectorLength *= dstArray->undistUBound[jj]
-          - dstArray->undistLBound[jj] + 1;
+  if (srcArrayFlag && srcArray->sizeSuperUndist){
+    // use srcArray to determine vectorLength
+    int i;
+    for (i=0; i<srcArray->rank-srcArray->tensorCount; i++){
+      vectorLength = srcArray->sizeSuperUndist[0];  // ok to set multiple times
+      superVecSizeUnd[i] = srcArray->sizeSuperUndist[i];
+      for (int j=0; j<srcArray->delayout->getLocalDeCount(); j++)
+        superVecSizeDis[i][j] = 
+          srcArray->sizeDist[j*(srcArray->rank-srcArray->tensorCount)+i];
     }
+    superVecSizeUnd[i] = srcArray->sizeSuperUndist[i];
+  }
+  if (superVecSizeUnd[1]==1 && superVecSizeUnd[2]==1)
+    superVecSizeUnd[0]=-1;  // turn off super vectorization, simple vector okay
+  
+  if (dstArrayFlag && dstArray->sizeSuperUndist){
+    // use dstArray to determine vectorLength
+    vectorLength = dstArray->sizeSuperUndist[0];
   }
   
 #ifdef ASMMTIMING
@@ -11276,7 +11318,12 @@ int Array::sparseMatMul(
   
   // execute XXE stream
   localrc = xxe->exec(rraCount, rraList, &vectorLength, filterBitField,
-    finishedflag, cancelledflag);
+    finishedflag, cancelledflag,
+    NULL,     // dTime                  -> disabled
+    -1, -1,   // indexStart, indexStop  -> full stream
+    // super vector support:
+    superVecSizeUnd[0], superVecSizeUnd[1], superVecSizeUnd[2],
+    superVecSizeDis[0], superVecSizeDis[1]);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
     &rc)) return rc;
   
