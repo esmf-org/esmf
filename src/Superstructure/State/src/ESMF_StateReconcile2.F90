@@ -999,6 +999,7 @@ contains
 !EOPI
 
     integer :: localrc
+    integer :: memstat
 
     type(ESMF_FieldBundle) :: fieldbundle
     type(ESMF_Field) :: field
@@ -1008,8 +1009,9 @@ contains
 
     integer :: buffer_offset
     integer :: needs_count
+    integer, allocatable :: offset_table(:), type_table(:)
 
-    integer :: i
+    integer :: i, idx
     integer :: stateitem_type
     character(ESMF_MAXSTR) :: errstring
 
@@ -1035,10 +1037,6 @@ contains
     if (debug) then
       print *, ESMF_METHOD, ': PET', mypet, ', needs_count =', needs_count
     end if
-    buffer_offset = ESMF_SIZEOF_DEFINT * (needs_count+1) ! Skip past count and table
-#if defined (ALIGN_FIX)
-    buffer_offset = ((buffer_offset+7)/8)*8
-#endif
 
     if (needs_count /= ubound (vm_ids, 1)) then
       print *, ESMF_METHOD, ': pet', mypet,  &
@@ -1048,35 +1046,57 @@ contains
           rcToReturn=rc)) return
     end if
 
-    ! Deserialize
+    ! Deserialize offset and type tables
+    if (debug) then
+      print *, ESMF_METHOD, ': buffer offset/type table:'
+    end if
+    allocate (offset_table(needs_count), type_table(needs_count), stat=memstat)
+    if (ESMF_LogFoundAllocError (memstat, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT,  &
+        rcToReturn=rc)) return
+    idx = 2 * ESMF_SIZEOF_DEFINT  ! Start after needs_count and pad
+    do, i=1, needs_count
+#if !defined (__G95__)
+      offset_table(i) = transfer (  &
+          obj_buffer(idx:idx+ESMF_SIZEOF_DEFINT-1),  &
+          mold=needs_count)
+      idx = idx + ESMF_SIZEOF_DEFINT
+      type_table(i) = transfer (  &
+          obj_buffer(idx:idx+ESMF_SIZEOF_DEFINT-1),  &
+          mold=needs_count)
+      idx = idx + ESMF_SIZEOF_DEFINT
+#else
+      ! g95 snapshots prior to April 4, 2010 have a bug in TRANSFER.
+      ! The following works around it.
+      offset_table(i) = ESMF_Reconcile_g95_getint (  &
+          obj_buffer(idx:idx*ESMF_SIZEOF_DEFINT-1))
+      idx = idx + ESMF_SIZEOF_DEFINT
+      type_table(i) = ESMF_Reconcile_g95_getint (  &
+          obj_buffer(idx:idx*ESMF_SIZEOF_DEFINT-1))
+      idx = idx + ESMF_SIZEOF_DEFINT
+#endif
+      if (debug) then
+        print *, '   ', i, ':', offset_table(i), type_table(i)
+      end if
+    end do
+
+    ! Deserialize items
     if (trace) then
       print *, '    pet', mypet,  &
           ': *** Step 1 - main deserialization loop'
     end if
+    buffer_offset = ESMF_SIZEOF_DEFINT * (2 + 2*needs_count) ! Skip past count, pad, and offset/type tables
     do, i=1, needs_count
 
       ! Item type
-#if !defined (__G95__)
-      stateitem_type = transfer (  &
-          source=obj_buffer(buffer_offset:buffer_offset+ESMF_SIZEOF_DEFINT-1), &
-          mold  = stateitem_type)
-#else
-      ! g95 snapshots prior to April 4, 2010 have a bug in TRANSFER.
-      ! The following works around it.
-      stateitem_type = ESMF_Reconcile_g95_getint (  &
-          obj_buffer(buffer_offset:buffer_offset+ESMF_SIZEOF_DEFINT-1))
-#endif
-      buffer_offset = buffer_offset+ESMF_SIZEOF_DEFINT
-#if defined (ALIGN_FIX)
-      buffer_offset = ((buffer_offset+7)/8)*8
-#endif
-
+      stateitem_type = type_table(i)
       if (debug) then
         print *, ESMF_METHOD,  &
             ': stateitem_type =', stateitem_type, ', offset =', buffer_offset
       end if
 
       ! Item itself
+      buffer_offset = offset_table(i)
       select case (stateitem_type)
         case (ESMF_STATEITEM_FIELDBUNDLE%ot)
           if (debug) then
@@ -1110,6 +1130,9 @@ contains
               ESMF_CONTEXT,  &
               rcToReturn=rc)) return
 
+          if (debug) then
+            print *, "created field, ready to set id and add to local state"
+          end if
 !!DEBUG "created field, ready to set id and add to local state"
           call c_ESMC_SetVMId(field%ftypep, vm_ids(i), localrc)
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -1215,15 +1238,24 @@ contains
               rcToReturn=rc)) return
       end select
 
+#if 0
     ! Use offset from table in case of an early exit from a deserialize method
 
+#if !defined (__G95__)
     buffer_offset = transfer (  &
         source=obj_buffer((i+1)*ESMF_SIZEOF_DEFINT:(i+2)*ESMF_SIZEOF_DEFINT-1),  &
         mold  =i)
+#else
+      ! g95 snapshots prior to April 4, 2010 have a bug in TRANSFER.
+      ! The following works around it.
+    buffer_offset = ESMF_Reconcile_g95_getint (  &
+        source=obj_buffer((i+1)*ESMF_SIZEOF_DEFINT:(i+2)*ESMF_SIZEOF_DEFINT-1))
+#endif
 
       if (debug) then
         print *, '   buffer offset after item loop =', buffer_offset
       end if
+#endif
 
     end do ! needs_count
 
@@ -2349,6 +2381,7 @@ contains
 
     type PetNeeds_t
       logical :: needed = .false.
+      integer :: obj_type
       character(1), pointer :: obj_buffer(:) => null ()
       integer :: buffer_size = 0 ! Actual space used in obj_buffer.  May be
                                  ! smaller than size(obj_buffer)
@@ -2357,6 +2390,7 @@ contains
     type(PetNeeds_t), allocatable :: pet_needs(:)
 
     character(1), pointer :: obj_buffer(:)
+    integer, allocatable :: type_table(:)
     type(ESMF_StateItem), pointer :: stateitem
     type(ESMF_InquireFlag) :: inqflag
     type(ESMF_State) :: wrapper
@@ -2417,6 +2451,11 @@ contains
       call ESMF_ReconcileDebugPrint (ESMF_METHOD //  &
           ': *** Step 2 - Serialize all needed objects')
     end if
+    allocate (type_table(nitems),  &
+        stat=memstat)
+    if (ESMF_LogFoundAllocError(memstat, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT,  &
+        rcToReturn=rc)) return
   item_loop:  &
     do, item = 1, nitems
 
@@ -2438,6 +2477,7 @@ contains
           if (ESMF_LogFoundAllocError(memstat, ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT,  &
               rcToReturn=rc)) return
+          buffer_offset = 0
 
         ! Pass 2 performs the actual serialization.
         case (2)
@@ -2447,7 +2487,7 @@ contains
               ESMF_CONTEXT,  &
               rcToReturn=rc)) return
 
-          if (debug) then
+          if (.true.) then
             print *, ESMF_METHOD, ': allocating obj_buffer bounds = (0:', buffer_offset-1, ')'
           end if
 
@@ -2455,25 +2495,16 @@ contains
           if (ESMF_LogFoundAllocError(memstat, ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT,  &
               rcToReturn=rc)) return
+          buffer_offset = 0
 
         end select
 
         lbufsize = size (obj_buffer)
 
         stateitem => siwrap(item)%si
+        type_table(item) = stateitem%otype%ot
 
-        ! serialize item type
-        if (inqflag == ESMF_NOINQUIRE) then
-          obj_buffer(0:ESMF_SIZEOF_DEFINT-1) = transfer ( &
-              source=stateitem%otype%ot,  &
-              mold  =obj_buffer)
-        end if
-        buffer_offset = ESMF_SIZEOF_DEFINT
-#if defined (ALIGN_FIX)
-        buffer_offset = ((buffer_offset+7)/8)*8
-#endif
-
-        ! serialize item itself
+        ! serialize item
         select case (stateitem%otype%ot)
 
           case (ESMF_STATEITEM_FIELDBUNDLE%ot)
@@ -2582,7 +2613,8 @@ contains
 
         if (debug) then
           print *, '    PET', mypet,  &
-              ': item serialized, pass =', pass, ', new offset =', buffer_offset
+              ': item serialized, pass =', pass, ', new offset =', buffer_offset,  &
+              merge (" (calc'ed)", " (actual) ", pass == 1)
         end if
 
       end do pass_loop
@@ -2615,10 +2647,9 @@ contains
         cycle
       end if
 
-      buffer_offset = ESMF_SIZEOF_DEFINT * (needs_count + 1) ! space for needs_count and size table
-#if defined (ALIGN_FIX)
-      buffer_offset = ((buffer_offset+7)/8)*8
-#endif
+      ! Calculate size needed for serialized item buffer, including
+      ! space for needs_count, and size/type table
+      buffer_offset = ESMF_SIZEOF_DEFINT * (2 + needs_count*2)
       do, item=1, nitems
         if (needs_list(item, pet))  &
           buffer_offset = buffer_offset + pet_needs(item)%buffer_size
@@ -2628,6 +2659,8 @@ contains
         print *, '    PET', mypet,  &
             ': computed buffer_offset =', buffer_offset, ', for PET', pet
       end if
+
+      ! Fill serialized item buffer
 
       allocate (id_info(pet)%item_buffer(0:buffer_offset-1),  &
           stat=memstat)
@@ -2640,11 +2673,10 @@ contains
           source=needs_count,  &
           mold  =obj_buffer(0:ESMF_SIZEOF_DEFINT-1))
 
-      buffer_offset = ESMF_SIZEOF_DEFINT * (needs_count + 1) ! space for needs_count + offsets table
-#if defined (ALIGN_FIX)
-      buffer_offset = ((buffer_offset+7)/8)*8
-#endif
-      i = ESMF_SIZEOF_DEFINT
+      ! space for needs_count, padding, and size/type table
+      buffer_offset = ESMF_SIZEOF_DEFINT * (2 + needs_count*2)
+
+      i = 2 * ESMF_SIZEOF_DEFINT  ! space for needs_count and a pad
       do, item=1, nitems
         if (.not. needs_list(item, pet)) cycle
         lbufsize = pet_needs(item)%buffer_size
@@ -2655,14 +2687,21 @@ contains
               ': packing at buffer_offset =', buffer_offset, ', for PET', pet,  &
               ', item =', item
         end if
-        obj_buffer(buffer_offset:buffer_offset+lbufsize-1) =  &
-            pet_needs(item)%obj_buffer(:lbufsize-1)
-        obj_buffer(i:i+ESMF_SIZEOF_DEFINT-1) =  &
+        obj_buffer(i:i+ESMF_SIZEOF_DEFINT-1) =  &  ! Buffer offset
             transfer (  &
             source=buffer_offset,  &
             mold  =obj_buffer(0:ESMF_SIZEOF_DEFINT-1))
-        buffer_offset = buffer_offset + lbufsize
         i = i + ESMF_SIZEOF_DEFINT
+
+        obj_buffer(i:i+ESMF_SIZEOF_DEFINT-1) =  &  ! Item type
+            transfer (  &
+            source=type_table(item),  &
+            mold  =obj_buffer(0:ESMF_SIZEOF_DEFINT-1))
+        i = i + ESMF_SIZEOF_DEFINT
+
+        obj_buffer(buffer_offset:buffer_offset+lbufsize-1) =  &  ! Serialized item
+            pet_needs(item)%obj_buffer(:lbufsize-1)
+        buffer_offset = buffer_offset + lbufsize
       end do ! items
 
     end do ! pets
@@ -2863,13 +2902,13 @@ contains
 #if defined (__G95__)
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_Reconcileg95_getint"
-    function ESMF_Reconcile_g95_getint (bytes) result (int)
-      character, intent(in) :: bytes(:)
-      integer :: int
+    function ESMF_Reconcile_g95_getint (source) result (i)
+      character, intent(in) :: source(:)
+      integer :: i
 
       ! Workaround routine for g95 TRANSFER bug.
 
-      int = transfer (bytes, int)
+      i = transfer (source=source, mold=i)
 
     end function ESMF_Reconcile_g95_getint
 #endif

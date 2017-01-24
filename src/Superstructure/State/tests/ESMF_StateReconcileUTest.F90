@@ -160,6 +160,7 @@ program ESMF_StateReconcileUTest
     integer :: rc
     type(ESMF_State) :: state1, state2, state3, state_nested
     type(ESMF_State) :: state_attr
+    type(ESMF_State) :: state_sgrid
     type(ESMF_GridComp) :: comp1, comp2
     type(ESMF_ArraySpec) :: arrayspec
     type(ESMF_Array)     :: array1, array1_alternate, array2
@@ -167,7 +168,9 @@ program ESMF_StateReconcileUTest
     type(ESMF_Field)     :: field_nested, field_dummy
     type(ESMF_Field)     :: field_attr(5)
     type(ESMF_Field)     :: field_attr_new(size (field_attr))
+    type(ESMF_Field)     :: field_sg1, field_sg2
     type(ESMF_FieldBundle) :: fb_attr, fb_attr_new
+    type(ESMF_Grid)      :: grid_shared, grid_sg1, grid_sg2
     type(ESMF_VM) :: vm
     character(len=ESMF_MAXSTR) :: comp1name, comp2name, statename, fieldname
     character(len=ESMF_MAXSTR) :: array1name
@@ -189,6 +192,7 @@ program ESMF_StateReconcileUTest
 
     if (.not. ESMF_TestMinPETs(4, ESMF_SRCLINE)) goto 10
 
+call ESMF_LogSet (flush=.true.)
 
     ! Get the global VM for this job.
     call ESMF_VMGetGlobal(vm=vm, rc=rc)
@@ -840,7 +844,7 @@ program ESMF_StateReconcileUTest
     !-------------------------------------------------------------------------
     !NEX_UTest_Multi_Proc_Only
     if (localPet == 0) then
-      call ESMF_StateRemove (state2, itemName=array1name, rc=rc)
+      call ESMF_StateRemove (state2, itemNameList=(/array1name/), rc=rc)
     end if
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Removing non-proxy item test"
@@ -1098,6 +1102,115 @@ program ESMF_StateReconcileUTest
         fieldBundle=fb_attr_new,  &
         rc=rc)
     call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+!-------------------------------------------------------------------------
+!   Fields with shared Grids
+!-------------------------------------------------------------------------
+
+    !-------------------------------------------------------------------------
+    !NEX_UTest_Multi_Proc_Only
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Create Grid for sharing test"
+    if (localPet == 0) then
+      grid_shared = ESMF_GridCreateNoPeriDim(minIndex=(/1,1/), maxIndex=(/10,20/), &
+            regDecomp=(/2,2/), name="shared Grid", rc=rc)
+    else
+      rc = ESMF_SUCCESS
+    end if
+    call ESMF_Test(rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
+
+    !-------------------------------------------------------------------------
+    !NEX_UTest_Multi_Proc_Only
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Create Field1 for shared Grid test"
+    if (localPet == 0) then
+      field_sg1 = ESMF_FieldCreate(grid_shared, typekind=ESMF_TYPEKIND_R4, &
+          indexflag=ESMF_INDEX_DELOCAL, &
+          staggerloc=ESMF_STAGGERLOC_CENTER, name="Field_sg1", rc=rc)
+    else
+      rc = ESMF_SUCCESS
+    end if
+    call ESMF_Test(rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
+
+    !-------------------------------------------------------------------------
+    !NEX_UTest_Multi_Proc_Only
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Create Field2 for shared Grid test"
+    if (localPet == 0) then
+      field_sg2 = ESMF_FieldCreate(grid_shared, typekind=ESMF_TYPEKIND_R4, &
+          indexflag=ESMF_INDEX_DELOCAL, &
+          staggerloc=ESMF_STAGGERLOC_CENTER, name="Field_sg2", rc=rc)
+    else
+      rc = ESMF_SUCCESS
+    end if
+    call ESMF_Test(rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
+
+    !-------------------------------------------------------------------------
+    !NEX_UTest_Multi_Proc_Only
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Create State for shared Grid test"
+    if (localPet == 0) then
+      state_sgrid = ESMF_StateCreate(name="State_shared_Grid",  &
+          fieldList=(/field_sg1, field_sg2/),  &
+          rc=rc)
+    else
+      state_sgrid = ESMF_StateCreate(name="State_shared_Grid",  &
+          rc=rc)
+    end if
+    call ESMF_Test(rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
+
+    !-------------------------------------------------------------------------
+    !NEX_UTest_Multi_Proc_Only
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Reconcile State for shared Grid test"
+    call ESMF_StateReconcile (state_sgrid, rc=rc)
+    call ESMF_Test(rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
+
+!    call ESMF_StatePrint (state_sgrid, options='long')
+
+    !-------------------------------------------------------------------------
+    !NEX_UTest_Multi_Proc_Only
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Access Proxy Field 1 test"
+    if (localPet /= 0) then
+      call ESMF_StateGet (state_sgrid, 'Field_sg1', field=field_sg1, rc=rc)
+    else
+      rc = ESMF_SUCCESS
+    end if
+    call ESMF_Test(rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
+
+    call ESMF_FieldPrint (field_sg1)
+    !-------------------------------------------------------------------------
+    !NEX_UTest_Multi_Proc_Only
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Access Proxy Field 2 test"
+    if (localPet /= 0) then
+      call ESMF_StateGet (state_sgrid, 'Field_sg2', field=field_sg2, rc=rc)
+    else
+      rc = ESMF_SUCCESS
+    end if
+    call ESMF_Test(rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
+
+    !-------------------------------------------------------------------------
+    !NEX_UTest_Multi_Proc_Only
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Access shared Grid 1 test"
+    call ESMF_FieldGet (field_sg1, grid=grid_sg1, rc=rc)
+    call ESMF_Test(rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
+
+    !-------------------------------------------------------------------------
+    !NEX_UTest_Multi_Proc_Only
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Access shared Grid 2 test"
+    call ESMF_FieldGet (field_sg2, grid=grid_sg2, rc=rc)
+    call ESMF_Test(rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
+
+    !-------------------------------------------------------------------------
+    !NEX_norunUTest_Multi_Proc_Only
+!    write(failMsg, *) "Did not return ESMF_SUCCESS"
+!    write(name, *) "Compare shared grids test"
+!    rc = merge (ESMF_SUCCESS, ESMF_FAILURE, grid_sg1 == grid_sg2)
+!    call ESMF_Test(rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
 
 !-------------------------------------------------------------------------
 10  continue
