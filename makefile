@@ -57,6 +57,10 @@ all:  lib build_unit_tests build_examples build_system_tests
 script_info:
 	-@echo " "
 	-@echo "--------------------------------------------------------------"
+	-@echo "ESMF_VERSION_STRING:    $(ESMF_VERSION_STRING)"
+	-@echo "--------------------------------------------------------------"
+	-@echo " "
+	-@echo "--------------------------------------------------------------"
 	-@echo "Make version:"; $(MAKE) -v; echo ""
 	-@echo "--------------------------------------------------------------"
 	-@echo "Fortran Compiler version:"; $(ESMF_F90COMPILER_VERSION); echo ""
@@ -65,10 +69,11 @@ script_info:
 	-@echo "--------------------------------------------------------------"
 	-@echo "Preprocessor version:"
 	@$(ESMF_CPP) --version $(ESMF_DIR)/scripts/empty.C
-	-@echo "" 
-	-@echo "--------------------------------------------------------------"
-	-@echo "ESMF_VERSION_STRING:    $(ESMF_VERSION_STRING)"
-	-@echo "--------------------------------------------------------------"
+	-@if [ -n "$(ESMF_NETCDF)" ] ; then \
+	  echo "--------------------------------------------------------------" ; \
+	  echo "NetCDF library version: `nc-config --version`" ; \
+	  echo "NetCDF Fortran version: `nf-config --version`" ; \
+	fi
 	-@echo " "
 	-@echo "--------------------------------------------------------------"
 	-@echo " * User set ESMF environment variables *"
