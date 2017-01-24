@@ -2476,7 +2476,12 @@ int XXE::exec(
   bool *cancelled,    // out - indicates whether there are any cancelled ops
   double *dTime,      // out - execution time, NULL to disable
   int indexStart,     // in  - start index, < 0 for default (full stream)
-  int indexStop       // in  - stop index, < 0 for default (full stream)
+  int indexStop,      // in  - stop index, < 0 for default (full stream)
+  int superVecSize_r, // in  - super vector support
+  int superVecSize_s, // in  - super vector support
+  int superVecSize_t, // in  - super vector support
+  int *superVecSize_i,// in  - super vector support
+  int *superVecSize_j // in  - super vector support
   ){
 //
 // !DESCRIPTION:
@@ -3517,65 +3522,68 @@ printf("gjt - DID NOT CANCEL commhandle\n");
         int vectorL = 1; // initialize
         if (xxeMemGatherSrcRRAInfo->vectorFlag)
           vectorL = *vectorLength;
-        switch (xxeMemGatherSrcRRAInfo->dstBaseTK){
-        case BYTE:
-          {
-            char *dstPointer = dstBase;
-            for (int k=0; k<xxeMemGatherSrcRRAInfo->chunkCount; k++){
-              memcpy(dstPointer, rraBase + rraOffsetList[k] * vectorL,
-                countList[k] * vectorL);
-              dstPointer += countList[k] * vectorL;
+        if(superVecSize_r==-1){
+#ifdef EXECWITHPRINT
+          sprintf(msg, "XXE::memGatherSrcRRA: taking vector branch...");
+          ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
+#endif
+          switch (xxeMemGatherSrcRRAInfo->dstBaseTK){
+          case BYTE:
+            {
+              char *dstPointer = dstBase;
+              for (int k=0; k<xxeMemGatherSrcRRAInfo->chunkCount; k++){
+                memcpy(dstPointer, rraBase + rraOffsetList[k] * vectorL,
+                  countList[k] * vectorL);
+                dstPointer += countList[k] * vectorL;
+              }
             }
+            break;
+          case I4:
+            exec_memGatherSrcRRA<ESMC_I4>(xxeMemGatherSrcRRAInfo, vectorL,
+              rraList);
+            break;
+          case I8:
+            exec_memGatherSrcRRA<ESMC_I8>(xxeMemGatherSrcRRAInfo, vectorL,
+              rraList);
+            break;
+          case R4:
+            exec_memGatherSrcRRA<ESMC_R4>(xxeMemGatherSrcRRAInfo, vectorL,
+              rraList);
+            break;
+          case R8:
+            exec_memGatherSrcRRA<ESMC_R8>(xxeMemGatherSrcRRAInfo, vectorL,
+              rraList);
+            break;
           }
-          break;
-        case I4:
-          {
-            ESMC_I4 *dstPointer = (ESMC_I4*)dstBase;
-            ESMC_I4 *srcPointer;
-            for (int k=0; k<xxeMemGatherSrcRRAInfo->chunkCount; k++){
-              srcPointer = ((ESMC_I4*)rraBase) + rraOffsetList[k] * vectorL;
-              for (int kk=0; kk<countList[k]*vectorL; kk++)
-                dstPointer[kk] = srcPointer[kk]; 
-              dstPointer += countList[k] * vectorL;
-            }
+        }else{
+#ifdef EXECWITHPRINT
+          sprintf(msg, "XXE::memGatherSrcRRA: taking super-vector branch...");
+          ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
+#endif
+          switch (xxeMemGatherSrcRRAInfo->dstBaseTK){
+          case I4:
+            exec_memGatherSrcRRASuper<ESMC_I4>(xxeMemGatherSrcRRAInfo, vectorL,
+              rraList, superVecSize_r, superVecSize_s, superVecSize_t,
+              superVecSize_i, superVecSize_j);
+            break;
+          case I8:
+            exec_memGatherSrcRRASuper<ESMC_I8>(xxeMemGatherSrcRRAInfo, vectorL,
+              rraList, superVecSize_r, superVecSize_s, superVecSize_t,
+              superVecSize_i, superVecSize_j);
+            break;
+          case R4:
+            exec_memGatherSrcRRASuper<ESMC_R4>(xxeMemGatherSrcRRAInfo, vectorL,
+              rraList, superVecSize_r, superVecSize_s, superVecSize_t,
+              superVecSize_i, superVecSize_j);
+            break;
+          case R8:
+            exec_memGatherSrcRRASuper<ESMC_R8>(xxeMemGatherSrcRRAInfo, vectorL,
+              rraList, superVecSize_r, superVecSize_s, superVecSize_t,
+              superVecSize_i, superVecSize_j);
+            break;
+          default:
+            break;
           }
-          break;
-        case I8:
-          {
-            ESMC_I8 *dstPointer = (ESMC_I8*)dstBase;
-            ESMC_I8 *srcPointer;
-            for (int k=0; k<xxeMemGatherSrcRRAInfo->chunkCount; k++){
-              srcPointer = ((ESMC_I8*)rraBase) + rraOffsetList[k] * vectorL;
-              for (int kk=0; kk<countList[k]*vectorL; kk++)
-                dstPointer[kk] = srcPointer[kk]; 
-              dstPointer += countList[k] * vectorL;
-            }
-          }
-          break;
-        case R4:
-          {
-            ESMC_R4 *dstPointer = (ESMC_R4*)dstBase;
-            ESMC_R4 *srcPointer;
-            for (int k=0; k<xxeMemGatherSrcRRAInfo->chunkCount; k++){
-              srcPointer = ((ESMC_R4*)rraBase) + rraOffsetList[k] * vectorL;
-              for (int kk=0; kk<countList[k]*vectorL; kk++)
-                dstPointer[kk] = srcPointer[kk]; 
-              dstPointer += countList[k] * vectorL;
-            }
-          }
-          break;
-        case R8:
-          {
-            ESMC_R8 *dstPointer = (ESMC_R8*)dstBase;
-            ESMC_R8 *srcPointer;
-            for (int k=0; k<xxeMemGatherSrcRRAInfo->chunkCount; k++){
-              srcPointer = ((ESMC_R8*)rraBase) + rraOffsetList[k] * vectorL;
-              for (int kk=0; kk<countList[k]*vectorL; kk++)
-                dstPointer[kk] = srcPointer[kk]; 
-              dstPointer += countList[k] * vectorL;
-            }
-          }
-          break;
         }
       }
       break;
@@ -3668,6 +3676,77 @@ printf("gjt - DID NOT CANCEL commhandle\n");
 //-----------------------------------------------------------------------------
 // templated XXE operations used in XXE::exec()
 //-----------------------------------------------------------------------------
+
+template<typename T>
+inline void XXE::exec_memGatherSrcRRA(
+  MemGatherSrcRRAInfo *xxeMemGatherSrcRRAInfo, int vectorL, char **rraList){
+  char *dstBase = (char *)xxeMemGatherSrcRRAInfo->dstBase;
+  if (xxeMemGatherSrcRRAInfo->indirectionFlag)
+    dstBase = *(char **)xxeMemGatherSrcRRAInfo->dstBase;
+  char *rraBase = rraList[xxeMemGatherSrcRRAInfo->rraIndex];
+  int *rraOffsetList = xxeMemGatherSrcRRAInfo->rraOffsetList;
+  int *countList = xxeMemGatherSrcRRAInfo->countList;
+  T *dstPointer = (T*)dstBase;
+  T *srcPointer;
+  for (int k=0; k<xxeMemGatherSrcRRAInfo->chunkCount; k++){
+    srcPointer = ((T*)rraBase) + rraOffsetList[k] * vectorL;
+    for (int kk=0; kk<countList[k]*vectorL; kk++)
+      dstPointer[kk] = srcPointer[kk]; 
+    dstPointer += countList[k] * vectorL;
+  }
+}
+
+//-----------------------------------------------------------------------------
+
+template<typename T>
+inline void XXE::exec_memGatherSrcRRASuper(
+  MemGatherSrcRRAInfo *xxeMemGatherSrcRRAInfo, int vectorL, char **rraList,
+  int size_r, int size_s, int size_t, int *size_i, int *size_j){
+  char *dstBase = (char *)xxeMemGatherSrcRRAInfo->dstBase;
+  if (xxeMemGatherSrcRRAInfo->indirectionFlag)
+    dstBase = *(char **)xxeMemGatherSrcRRAInfo->dstBase;
+  char *rraBase = rraList[xxeMemGatherSrcRRAInfo->rraIndex];
+  int *rraOffsetList = xxeMemGatherSrcRRAInfo->rraOffsetList;
+  int *countList = xxeMemGatherSrcRRAInfo->countList;
+  T *dstPointer = (T*)dstBase;
+  T *srcPointer;
+  int sz_i = size_i[xxeMemGatherSrcRRAInfo->rraIndex];
+  int sz_j = size_j[xxeMemGatherSrcRRAInfo->rraIndex];
+  for (int k=0; k<xxeMemGatherSrcRRAInfo->chunkCount; k++){
+    for (int kk=0; kk<countList[k]; kk++){
+      int j = (rraOffsetList[k] + kk) / sz_i;
+      int i = (rraOffsetList[k] + kk) % sz_i;
+      srcPointer = ((T*)rraBase)
+        + (j*size_s*sz_i + i) * size_r;
+      int t=0;
+      int s=0;
+      for (int kkk=0; kkk<vectorL/size_r; kkk++){
+        for (int kkkk=0; kkkk<size_r; kkkk++){
+          dstPointer[kkkk] = srcPointer[kkkk];
+#ifdef EXECWITHPRINT
+  char msg[1024];
+  sprintf(msg, "srcPointer=%p, *=%d  (%d,%d,%d,%d)", 
+    srcPointer, *srcPointer, k,kk,kkk,kkkk);
+  ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
+#endif
+        }
+        dstPointer += size_r; // dst step in contiguous buffer
+        // determine next src step 
+        ++s;
+        if (s<size_s){
+          srcPointer += sz_i*size_r;
+        }else{
+          s=0;
+          ++t;
+          srcPointer += (size_s*(sz_j-1)+1)*sz_i*size_r;
+        }
+      }
+    }
+  }
+}
+
+//-----------------------------------------------------------------------------
+
 #define XXE_RECURSIVE_DEBUG___disable
 
 template<typename T, typename U, typename V>
@@ -4017,7 +4096,7 @@ void XXE::ssslDstRra(T **rraBaseList, int *rraIndexList, TKId elementTK,
   int *valueOffsetList, int *baseListIndexList,
   TKId valueTK, int termCount, int vectorLength, int resolved){
   // Recursively resolve the TKs and typecast the arguments appropriately
-  // before executing psssDstRra operation on the data.
+  // before executing ssslDstRra operation on the data.
   T *element;
   V *value;
   if (resolved==0){
@@ -4101,7 +4180,7 @@ void XXE::ssslDstRra(T **rraBaseList, int *rraIndexList, TKId elementTK,
     return;
   }
 #ifdef XXE_RECURSIVE_DEBUG
-  printf("Arrived in psssDstRra kernel with %s, %s, %s\n", typeid(T).name(), 
+  printf("Arrived in ssslDstRra kernel with %s, %s, %s\n", typeid(T).name(), 
     typeid(U).name(), typeid(V).name());
 #endif
   if (vectorLength==1){

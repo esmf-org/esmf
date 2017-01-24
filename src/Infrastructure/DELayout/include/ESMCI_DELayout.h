@@ -406,7 +406,9 @@ class XXE{
     }
     int exec(int rraCount=0, char **rraList=NULL, int *vectorLength=NULL,
       int filterBitField=0x0, bool *finished=NULL, bool *cancelled=NULL, 
-      double *dTime=NULL, int indexStart=-1, int indexStop=-1);
+      double *dTime=NULL, int indexStart=-1, int indexStop=-1,
+      int superVecSize_r=-1, int superVecSize_s=1, int superVecSize_t=1,
+      int *superVecSize_i=NULL, int *superVecSize_j=NULL);
     int print(FILE *fp, int rraCount=0, char **rraList=NULL,
       int filterBitField=0x0, int indexStart=-1, int indexStop=-1);
     int printProfile(FILE *fp);
@@ -505,40 +507,6 @@ class XXE{
     int appendProfileMessage(int predicateBitField, char *messageString);
     int appendMessage(int predicateBitField, char *messageString);
     
-  private:
-    template<typename T, typename U, typename V>
-    static void psv(T *element, TKId elementTK, U *factorList, TKId factorTK,
-      V *valueList, TKId valueTK, int factorCount, int resolved);
-    template<typename T, typename U, typename V>
-    static void pss(T *element, TKId elementTK, U *factor, TKId factorTK,
-      V *value, TKId valueTK, int resolved);
-    template<typename T, typename V>
-    static void sssDstRra(T *rraBase, TKId elementTK, int *rraOffsetList,
-      V *valueBase, int *valueOffsetList, TKId valueTK, int termCount,
-      int vectorLength, int resolved);
-    template<typename T, typename V>
-    static void ssslDstRra(T **rraBaseList, int *rraIndexList, TKId elementTK,
-      int *rraOffsetList, V **valueBaseList,
-      int *valueOffsetList, int *baseListIndexList,
-      TKId valueTK, int termCount, int vectorLength, int resolved);
-    template<typename T, typename U, typename V>
-    static void psssDstRra(T *rraBase, TKId elementTK, int *rraOffsetList,
-      U **factorList, TKId factorTK, V *valueBase, int *valueOffsetList,
-      TKId valueTK, int termCount, int vectorLength, int resolved);
-    template<typename T, typename U, typename V>
-    static void pssslDstRra(T **rraBaseList, int *rraIndexList, TKId elementTK,
-      int *rraOffsetList, U **factorList, TKId factorTK, V **valueBaseList,
-      int *valueOffsetList, int *baseListIndexList,
-      TKId valueTK, int termCount, int vectorLength, int resolved);
-    template<typename T, typename U, typename V>
-    static void psssSrcRra(T *rraBase, TKId valueTK, int *rraOffsetList,
-      U **factorList, TKId factorTK, V *elementBase, int *elementOffsetList,
-      TKId elementTK, int termCount, int vectorLength, int resolved);
-    template<typename T, typename U, typename V>
-    static void pssscRra(T *rraBase, TKId elementTK, int *rraOffsetList,
-      U **factorList, TKId factorTK, V *valueList, TKId valueTK,
-      int termCount, int vectorLength, int resolved);
-
   public:
       
     // specific stream element types, used to interpret the elements in stream
@@ -1002,6 +970,47 @@ class XXE{
       bool activeFlag;
       bool cancelledFlag;
     }CommhandleInfo;
+
+  private:
+    template<typename T>
+    inline static void exec_memGatherSrcRRA(
+      MemGatherSrcRRAInfo *xxeMemGatherSrcRRAInfo, int vectorL, char **rraList);
+    template<typename T>
+    inline static void exec_memGatherSrcRRASuper(
+      MemGatherSrcRRAInfo *xxeMemGatherSrcRRAInfo, int vectorL, char **rraList,
+      int size_r, int size_s, int size_t, int *size_i, int *size_j);
+    template<typename T, typename U, typename V>
+    static void psv(T *element, TKId elementTK, U *factorList, TKId factorTK,
+      V *valueList, TKId valueTK, int factorCount, int resolved);
+    template<typename T, typename U, typename V>
+    static void pss(T *element, TKId elementTK, U *factor, TKId factorTK,
+      V *value, TKId valueTK, int resolved);
+    template<typename T, typename V>
+    static void sssDstRra(T *rraBase, TKId elementTK, int *rraOffsetList,
+      V *valueBase, int *valueOffsetList, TKId valueTK, int termCount,
+      int vectorLength, int resolved);
+    template<typename T, typename V>
+    static void ssslDstRra(T **rraBaseList, int *rraIndexList, TKId elementTK,
+      int *rraOffsetList, V **valueBaseList,
+      int *valueOffsetList, int *baseListIndexList,
+      TKId valueTK, int termCount, int vectorLength, int resolved);
+    template<typename T, typename U, typename V>
+    static void psssDstRra(T *rraBase, TKId elementTK, int *rraOffsetList,
+      U **factorList, TKId factorTK, V *valueBase, int *valueOffsetList,
+      TKId valueTK, int termCount, int vectorLength, int resolved);
+    template<typename T, typename U, typename V>
+    static void pssslDstRra(T **rraBaseList, int *rraIndexList, TKId elementTK,
+      int *rraOffsetList, U **factorList, TKId factorTK, V **valueBaseList,
+      int *valueOffsetList, int *baseListIndexList,
+      TKId valueTK, int termCount, int vectorLength, int resolved);
+    template<typename T, typename U, typename V>
+    static void psssSrcRra(T *rraBase, TKId valueTK, int *rraOffsetList,
+      U **factorList, TKId factorTK, V *elementBase, int *elementOffsetList,
+      TKId elementTK, int termCount, int vectorLength, int resolved);
+    template<typename T, typename U, typename V>
+    static void pssscRra(T *rraBase, TKId elementTK, int *rraOffsetList,
+      U **factorList, TKId factorTK, V *valueList, TKId valueTK,
+      int termCount, int vectorLength, int resolved);
 
 };  // class XXE
 
