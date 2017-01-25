@@ -2487,7 +2487,7 @@ contains
               ESMF_CONTEXT,  &
               rcToReturn=rc)) return
 
-          if (.true.) then
+          if (debug) then
             print *, ESMF_METHOD, ': allocating obj_buffer bounds = (0:', buffer_offset-1, ')'
           end if
 
