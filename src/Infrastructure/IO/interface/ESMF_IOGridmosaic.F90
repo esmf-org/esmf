@@ -515,10 +515,10 @@ subroutine ESMF_GridspecReadTile(filename, tileSize, cornerLon, cornerLat, cente
  
     character(len=*), intent(in)     :: filename
     integer, intent(in)              :: tileSize
-    real(ESMF_KIND_R8), pointer      :: cornerLon(:,:)
-    real(ESMF_KIND_R8), pointer      :: cornerLat(:,:)
     real(ESMF_KIND_R8), pointer      :: centerLon(:,:)
     real(ESMF_KIND_R8), pointer      :: centerLat(:,:)
+    real(ESMF_KIND_R8), optional, pointer :: cornerLon(:,:)
+    real(ESMF_KIND_R8), optional, pointer :: cornerLat(:,:)
     integer, optional, intent(in)  :: start(2)
     integer, optional, intent(in)  :: count(2)
     integer, optional, intent(out)          :: rc
@@ -631,10 +631,14 @@ subroutine ESMF_GridspecReadTile(filename, tileSize, cornerLon, cornerLat, cente
                   rc)) return
                ! copy to the corner and center lat/lon arrays
                if (attstr(1:attlen) .eq. 'geographic_latitude') then
-                 cornerLat=supercoord(1:count1(1):2, 1:count1(2):2)
+                 if (present(cornerLat)) then
+                    cornerLat=supercoord(1:count1(1):2, 1:count1(2):2)
+                 endif
                  centerLat=supercoord(2:count1(1):2, 2:count1(2):2)
                else
-                 cornerLon=supercoord(1:count1(1):2, 1:count1(2):2)
+                 if (present(cornerLon)) then
+                    cornerLon=supercoord(1:count1(1):2, 1:count1(2):2)
+                 endif
                  centerLon=supercoord(2:count1(1):2, 2:count1(2):2)
                endif
             else
@@ -649,10 +653,14 @@ subroutine ESMF_GridspecReadTile(filename, tileSize, cornerLon, cornerLat, cente
                   rc)) return
                ! copy to the corner and center lat/lon arrays
                if (attstr(1:attlen) .eq. 'geographic_latitude') then
-                  cornerLat=supercoord(1:nx:2, 1:ny:2)
+                  if (present(cornerLat)) then
+                     cornerLat=supercoord(1:nx:2, 1:ny:2)
+                  endif
                   centerLat=supercoord(2:nx:2, 2:ny:2)
                else
-                  cornerLon=supercoord(1:nx:2, 1:ny:2)
+                  if (present(cornerLon)) then
+                     cornerLon=supercoord(1:nx:2, 1:ny:2)
+                  endif
                   centerLon=supercoord(2:nx:2, 2:ny:2)
                endif
              endif
