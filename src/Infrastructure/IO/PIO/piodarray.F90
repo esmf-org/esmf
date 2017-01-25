@@ -321,7 +321,7 @@ contains
        if(debugasync) print *,__PIO_FILE__,__LINE__
     endif
 
-    if(debugasync .and. ios%ioproc) print *,__FILE__,__LINE__,iodesc%async_id
+    if(debugasync .and. ios%ioproc) print *,__PIO_FILE__,__LINE__,iodesc%async_id
 
     select case(File%iotype)
     case(pio_iotype_pbinary, pio_iotype_direct_pbinary)
@@ -415,7 +415,7 @@ contains
        if(debugasync) print *,__PIO_FILE__,__LINE__
     endif
 
-    if(debugasync .and. ios%ioproc) print *,__FILE__,__LINE__,iodesc%async_id
+    if(debugasync .and. ios%ioproc) print *,__PIO_FILE__,__LINE__,iodesc%async_id
 
     select case(File%iotype)
     case(pio_iotype_pbinary, pio_iotype_direct_pbinary)
@@ -509,7 +509,7 @@ contains
        if(debugasync) print *,__PIO_FILE__,__LINE__
     endif
 
-    if(debugasync .and. ios%ioproc) print *,__FILE__,__LINE__,iodesc%async_id
+    if(debugasync .and. ios%ioproc) print *,__PIO_FILE__,__LINE__,iodesc%async_id
 
     select case(File%iotype)
     case(pio_iotype_pbinary, pio_iotype_direct_pbinary)
@@ -4712,7 +4712,7 @@ contains
        call darray_write_complete(File)
     endif
 
-    if(debug) print *,__FILE__,__LINE__,'buffsize = ',file%buffsize,file%request_cnt
+    if(debug) print *,__PIO_FILE__,__LINE__,'buffsize = ',file%buffsize,file%request_cnt
 
   end subroutine add_data_to_buffer_real
 
@@ -4752,7 +4752,7 @@ contains
        call darray_write_complete(File)
     endif
 
-    if(debug) print *,__FILE__,__LINE__,'buffsize = ',file%buffsize,file%request_cnt
+    if(debug) print *,__PIO_FILE__,__LINE__,'buffsize = ',file%buffsize,file%request_cnt
 
   end subroutine add_data_to_buffer_int
 
@@ -4792,7 +4792,7 @@ contains
        call darray_write_complete(File)
     endif
 
-    if(debug) print *,__FILE__,__LINE__,'buffsize = ',file%buffsize,file%request_cnt
+    if(debug) print *,__PIO_FILE__,__LINE__,'buffsize = ',file%buffsize,file%request_cnt
 
   end subroutine add_data_to_buffer_double
 
@@ -4811,7 +4811,7 @@ contains
     integer, pointer :: array_of_requests(:), status(:)
 
     if(associated(file%data_list_top)) then
-       if(debug) print *,__FILE__,__LINE__, file%request_cnt
+       if(debug) print *,__PIO_FILE__,__LINE__, file%request_cnt
 #ifdef MEMCHK	
     call GPTLget_memusage(msize, rss, mshare, mtext, mstack)
     if(rss>lastrss) then
@@ -4827,11 +4827,11 @@ contains
           cnt=cnt+1
           ptr=>ptr%next
        end do
-       if(DEBUG) print *,__FILE__,__LINE__, array_of_requests, cnt, file%request_cnt
+       if(DEBUG) print *,__PIO_FILE__,__LINE__, array_of_requests, cnt, file%request_cnt
 #ifdef _PNETCDF
        ierr  = nfmpi_wait_all(file%fh, file%request_cnt, array_of_requests, status)
 #endif
-       if(DEBUG) print *,__FILE__,__LINE__,status, ierr, total_buffsize
+       if(DEBUG) print *,__PIO_FILE__,__LINE__,status, ierr, total_buffsize
 
        ptr=>file%data_list_top
        do while(associated(ptr))
