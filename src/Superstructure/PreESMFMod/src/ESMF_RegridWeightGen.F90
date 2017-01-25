@@ -684,11 +684,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Only set useSrcMask to false if srcMissingvalue is not given and the file type is
     ! either GRIDSPEC or UGRID, same for useDstMask
     if ((.not. srcMissingvalue) .and. (localSrcFileType == ESMF_FILEFORMAT_GRIDSPEC .or. &
-         localSrcFileType /= ESMF_FILEFORMAT_MOSAIC)) &
+         localSrcFileType == ESMF_FILEFORMAT_MOSAIC)) &
       useSrcMask = .false.
 
     if ((.not. dstMissingvalue) .and. (localDstFileType == ESMF_FILEFORMAT_GRIDSPEC .or. &
-         localDstFileType /= ESMF_FILEFORMAT_MOSAIC)) &
+         localDstFileType == ESMF_FILEFORMAT_MOSAIC)) &
       useDstMask = .false.
  
     ! Should I have only PetNO=0 to open the file and find out the size?

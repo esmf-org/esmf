@@ -268,7 +268,7 @@ program ESMF_RegridWeightGenApp
         dstFileType = ESMF_FILEFORMAT_UGRID
         !write(*,*)
         !print *, 'Set src and dst grid file types to UGRID.'
-      else if (trim(flag) .eq. 'CFGRID') then
+      else if (trim(flag) .eq. 'GRIDSPEC') then
         srcFileType = ESMF_FILEFORMAT_GRIDSPEC
         dstFileType = ESMF_FILEFORMAT_GRIDSPEC
       else if (trim(flag) .eq. 'MOSAIC') then
@@ -290,7 +290,7 @@ program ESMF_RegridWeightGenApp
         ! check if the type is consistent with -t
         if ((trim(flag) .eq. 'ESMF' .and. srcFileType /= ESMF_FILEFORMAT_ESMFMESH) .or.   &
             (trim(flag) .eq. 'UGRID' .and. srcFileType /= ESMF_FILEFORMAT_UGRID) .or.   &
-            (trim(flag) .eq. 'CFGRID' .and. srcFileType /= ESMF_FILEFORMAT_GRIDSPEC) .or. &
+            (trim(flag) .eq. 'GRIDSPEC' .and. srcFileType /= ESMF_FILEFORMAT_GRIDSPEC) .or. &
             (trim(flag) .eq. 'SCRIP' .and. srcFileType /= ESMF_FILEFORMAT_SCRIP) .or. &
             (trim(flag) .eq. 'MOSAIC' .and. srcFileType /= ESMF_FILEFORMAT_MOSAIC)) then
           write(*,*)
