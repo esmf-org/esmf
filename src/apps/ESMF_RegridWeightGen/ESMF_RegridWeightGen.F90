@@ -303,13 +303,13 @@ program ESMF_RegridWeightGenApp
         srcFileType = ESMF_FILEFORMAT_ESMFMESH
       else if (trim(flag) .eq. 'UGRID') then
         srcFileType = ESMF_FILEFORMAT_UGRID
-      else if (trim(flag) .eq. 'CFGRID') then
+      else if (trim(flag) .eq. 'GRIDSPEC') then
         srcFileType = ESMF_FILEFORMAT_GRIDSPEC
       else if (trim(flag) .eq. 'MOSAIC') then
         srcFileType = ESMF_FILEFORMAT_MOSAIC
       else if (trim(flag) .ne. 'SCRIP') then
         write(*,*)
-        print *, 'ERROR: Unknown --src_type: must be one of ESMF,SCRIP,UGRID, or GRIDSPEC.'
+        print *, 'ERROR: Unknown --src_type: must be one of ESMF,SCRIP,UGRID,GRIDSPEC or MOSAIC.'
         print *, "Use the --help argument to see an explanation of usage."
         call ESMF_Finalize(endflag=ESMF_END_ABORT)
       endif
@@ -322,7 +322,7 @@ program ESMF_RegridWeightGenApp
         ! check if the type is consistent with -t
         if ((trim(flag) .eq. 'ESMF' .and. dstFileType /= ESMF_FILEFORMAT_ESMFMESH) .or.   &
             (trim(flag) .eq. 'UGRID' .and. dstFileType /= ESMF_FILEFORMAT_UGRID) .or.   &
-            (trim(flag) .eq. 'CFGRID' .and. dstFileType /= ESMF_FILEFORMAT_GRIDSPEC) .or. &
+            (trim(flag) .eq. 'GRIDSPEC' .and. dstFileType /= ESMF_FILEFORMAT_GRIDSPEC) .or. &
             (trim(flag) .eq. 'SCRIP' .and. dstFileType /= ESMF_FILEFORMAT_SCRIP) .or. &
             (trim(flag) .eq. 'MOSAIC' .and. dstFileType /= ESMF_FILEFORMAT_MOSAIC)) then
           write(*,*)
@@ -335,13 +335,13 @@ program ESMF_RegridWeightGenApp
          dstFileType = ESMF_FILEFORMAT_ESMFMESH
       else if (trim(flag) .eq. 'UGRID') then
          dstFileType = ESMF_FILEFORMAT_UGRID
-      else if (trim(flag) .eq. 'CFGRID') then
+      else if (trim(flag) .eq. 'GRIDSPEC') then
          dstFileType = ESMF_FILEFORMAT_GRIDSPEC
       else if (trim(flag) .eq. 'MOSAIC') then
         dstFileType = ESMF_FILEFORMAT_MOSAIC
       else if (trim(flag) .ne. 'SCRIP') then
         write(*,*)
-        print *, 'ERROR: Unknown --dst_type: must be one of ESMF,SCRIP,UGRID or GRIDSPEC.'
+        print *, 'ERROR: Unknown --dst_type: must be one of ESMF,SCRIP,UGRID,GRIDSPEC or MOSAIC.'
         print *, "Use the --help argument to see an explanation of usage."
         call ESMF_Finalize(endflag=ESMF_END_ABORT)
       endif
