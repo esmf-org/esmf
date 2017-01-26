@@ -479,19 +479,19 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! If the src grid type is UGRID or GRIDSPEC, check if the srcMissingvalueFlag is given 
     if (localSrcFileType == ESMF_FILEFORMAT_UGRID .or. &
-    	  localSrcFileType == ESMF_FILEFORMAT_GRIDSPEC) then
+    	localSrcFileType == ESMF_FILEFORMAT_GRIDSPEC) then
       if (present(srcMissingvalueFlag)) then
 	      srcMissingValue = srcMissingvalueFlag
 	    else
 	      srcMissingValue = .false.
       endif
-	    if (srcMissingValue) then
-	      if (.not. present(srcMissingvalueVar)) then
-          call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
-   	        msg ="srcMissingvalueVar argument is not given", &
-            ESMF_CONTEXT, rcToReturn=rc)
-          return
- 	      endif  
+      if (srcMissingValue) then
+          if (.not. present(srcMissingvalueVar)) then
+            call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
+                  msg ="srcMissingvalueVar argument is not given", &
+                  ESMF_CONTEXT, rcToReturn=rc)
+            return
+ 	  endif  
       endif
     endif
 
@@ -499,17 +499,17 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (localDstFileType == ESMF_FILEFORMAT_UGRID .or. &
       	localDstFileType == ESMF_FILEFORMAT_GRIDSPEC) then
       if (present(dstMissingvalueFlag)) then
-	      dstMissingValue = dstMissingvalueFlag
-	    else
-	      dstMissingValue = .false.
+	  dstMissingValue = dstMissingvalueFlag
+      else
+	  dstMissingValue = .false.
       endif
-	    if (dstMissingValue) then
-	      if (.not. present(dstMissingvalueVar)) then
-          call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
+      if (dstMissingValue) then
+	  if (.not. present(dstMissingvalueVar)) then
+            call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
    	        msg ="dstMissingvalueVar argument is not given", &
-            ESMF_CONTEXT, rcToReturn=rc)
-          return
-        endif
+                ESMF_CONTEXT, rcToReturn=rc)
+            return
+          endif
       endif
     endif
 
@@ -570,19 +570,19 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     endif
 
     if (present(largefileFlag)) then
-	    localLargeFileFlag = largefileFlag
+      localLargeFileFlag = largefileFlag
     endif
 
     if (present(netcdf4fileFlag)) then
-	    localNetcdf4FileFlag = netcdf4fileFlag
+      localNetcdf4FileFlag = netcdf4fileFlag
     endif
 
     if (present(weightOnlyFlag)) then
-            localWeightOnlyFlag = weightOnlyFlag
+      localWeightOnlyFlag = weightOnlyFlag
     endif
 
     if (present(useUserAreaFlag)) then
-	    localUserAreaFlag = useUserAreaFlag
+       localUserAreaFlag = useUserAreaFlag
     endif
 
     if (present(useSrcCornerFlag)) then
@@ -597,11 +597,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       localVerboseFlag = verboseFlag
     endif
 
-    if ((useSrcCornerFlag .and. localSrcFileType == ESMF_FILEFORMAT_MOSAIC) .or. &
-       (useDstCornerFlag .and. localDstFileType == ESMF_FILEFORMAT_MOSAIC)) then
+    if ((useSrcCorner .and. localSrcFileType == ESMF_FILEFORMAT_MOSAIC) .or. &
+       (useDstCorner .and. localDstFileType == ESMF_FILEFORMAT_MOSAIC)) then
       call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
 	      msg = " Only Center Stagger is supported for the multi-tile GRIDSPEC MOSAIC grid", &
-        ESMF_CONTEXT, rcToReturn=rc)
+              ESMF_CONTEXT, rcToReturn=rc)
       return
     endif
 
@@ -629,8 +629,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 	      (localDstFileType /= ESMF_FILEFORMAT_SCRIP .and. &
  	      localDstFileType /= ESMF_FILEFORMAT_ESMFMESH)) then
       call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
-	      msg = "user defined areas is supported only when the source or dest grid is in SCRIP of ESMF format", &
-        ESMF_CONTEXT, rcToReturn=rc)
+	 msg = "user defined areas is supported only when the source or dest grid is in SCRIP of ESMF format", &
+         ESMF_CONTEXT, rcToReturn=rc)
       return
     endif
 
@@ -638,14 +638,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! coordinate variables
     if (localsrcFileType == ESMF_FILEFORMAT_GRIDSPEC) then
       if (present(useSrcCoordFlag)) then
-	      useSrcCoordVar = useSrcCoordFlag
+	useSrcCoordVar = useSrcCoordFlag
       else
         useSrcCoordVar = .false.
       endif
       if (useSrcCoordVar) then
         if (.not. present(srcCoordinateVars)) then
           call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
-     	      msg = "srcCoordinateVars argument is not given.", &
+     	    msg = "srcCoordinateVars argument is not given.", &
             ESMF_CONTEXT, rcToReturn=rc)
           return
 	endif  
@@ -654,17 +654,17 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     if (localdstFileType == ESMF_FILEFORMAT_GRIDSPEC) then
       if (present(useDstCoordFlag)) then
-	      useDstCoordVar = useDstCoordFlag
+	useDstCoordVar = useDstCoordFlag
       else
         useDstCoordVar = .false.
       endif
       if (useDstCoordVar) then
-	      if (.not. present(dstCoordinateVars)) then
+	if (.not. present(dstCoordinateVars)) then
           call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
-     	      msg = "dstCoordinateVars argument is not given.", &
+     	    msg = "dstCoordinateVars argument is not given.", &
             ESMF_CONTEXT, rcToReturn=rc)
           return
-	      endif  
+	endif  
       endif
     endif
 
@@ -680,7 +680,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
          localDstFileType /= ESMF_FILEFORMAT_MOSAIC) .and. &
         (localRegridMethod /= ESMF_REGRIDMETHOD_CONSERVE)) then
 	dstUseLocStream = .TRUE.
-    endif 
+    endif
+ 
     ! Only set useSrcMask to false if srcMissingvalue is not given and the file type is
     ! either GRIDSPEC or UGRID, same for useDstMask
     if ((.not. srcMissingvalue) .and. (localSrcFileType == ESMF_FILEFORMAT_GRIDSPEC .or. &
