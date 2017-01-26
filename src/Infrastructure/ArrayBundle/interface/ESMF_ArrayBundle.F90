@@ -2815,7 +2815,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE:
   ! Private name; call using ESMF_ArrayBundleSMMStore()
   subroutine ESMF_ArrayBundleSMMStoreI4(srcArrayBundle, dstArrayBundle, &
-    routehandle, factorList, factorIndexList, keywordEnforcer, rc)
+    routehandle, factorList, factorIndexList, keywordEnforcer, srcTermProcessing, &
+    rc)
 !
 ! !ARGUMENTS:
     type(ESMF_ArrayBundle),        intent(in)            :: srcArrayBundle
@@ -2824,7 +2825,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer(ESMF_KIND_I4), target, intent(in)            :: factorList(:)
     integer,                       intent(in)            :: factorIndexList(:,:)
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    integer,                       intent(out), optional :: rc
+    integer,                    intent(inout),  optional :: srcTermProcessing(:)
+    integer,                    intent(out),    optional :: rc
 !
 !EOPI
 !------------------------------------------------------------------------------
@@ -2882,7 +2884,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE:
   ! Private name; call using ESMF_ArrayBundleSMMStore()
   subroutine ESMF_ArrayBundleSMMStoreI8(srcArrayBundle, dstArrayBundle, &
-    routehandle, factorList, factorIndexList, keywordEnforcer, rc)
+    routehandle, factorList, factorIndexList, keywordEnforcer, srcTermProcessing, &
+    rc)
 !
 ! !ARGUMENTS:
     type(ESMF_ArrayBundle),        intent(in)            :: srcArrayBundle
@@ -2891,7 +2894,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer(ESMF_KIND_I8), target, intent(in)            :: factorList(:)
     integer,                       intent(in)            :: factorIndexList(:,:)
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    integer,                       intent(out), optional :: rc
+    integer,                     intent(inout), optional :: srcTermProcessing(:)
+    integer,                     intent(out),   optional :: rc
 !
 !EOPI
 !------------------------------------------------------------------------------
@@ -2949,7 +2953,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE:
   ! Private name; call using ESMF_ArrayBundleSMMStore()
   subroutine ESMF_ArrayBundleSMMStoreR4(srcArrayBundle, dstArrayBundle, &
-    routehandle, factorList, factorIndexList, keywordEnforcer, rc)
+    routehandle, factorList, factorIndexList, keywordEnforcer, srcTermProcessing, &
+    rc)
 !
 ! !ARGUMENTS:
     type(ESMF_ArrayBundle),     intent(in)            :: srcArrayBundle
@@ -2958,7 +2963,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     real(ESMF_KIND_R4), target, intent(in)            :: factorList(:)
     integer,                    intent(in)            :: factorIndexList(:,:)
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    integer,                    intent(out), optional :: rc
+    integer,                 intent(inout), optional  :: srcTermProcessing(:)
+    integer,                 intent(out),   optional  :: rc
 !
 !EOPI
 !------------------------------------------------------------------------------
@@ -3016,7 +3022,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE:
   ! Private name; call using ESMF_ArrayBundleSMMStore()
   subroutine ESMF_ArrayBundleSMMStoreR8(srcArrayBundle, dstArrayBundle, &
-    routehandle, factorList, factorIndexList, keywordEnforcer, rc)
+    routehandle, factorList, factorIndexList, keywordEnforcer, srcTermProcessing, &
+    rc)
 !
 ! !ARGUMENTS:
     type(ESMF_ArrayBundle),     intent(in)            :: srcArrayBundle
@@ -3025,7 +3032,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     real(ESMF_KIND_R8), target, intent(in)            :: factorList(:)
     integer,                    intent(in)            :: factorIndexList(:,:)
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    integer,                    intent(out), optional :: rc
+    integer,                 intent(inout), optional  :: srcTermProcessing(:)
+    integer,                 intent(out),   optional  :: rc
 !
 !EOPI
 !------------------------------------------------------------------------------
@@ -3083,14 +3091,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE:
   ! Private name; call using ESMF_ArrayBundleSMMStore()
   subroutine ESMF_ArrayBundleSMMStoreNF(srcArrayBundle, dstArrayBundle, &
-    routehandle, keywordEnforcer, rc)
+    routehandle, keywordEnforcer, srcTermProcessing, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_ArrayBundle),     intent(in)             :: srcArrayBundle
     type(ESMF_ArrayBundle),     intent(inout)          :: dstArrayBundle
     type(ESMF_RouteHandle),     intent(inout)          :: routehandle
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    integer,                    intent(out),  optional :: rc
+    integer,                 intent(inout), optional   :: srcTermProcessing(:)
+    integer,                 intent(out),   optional   :: rc
 !
 ! !STATUS:
 ! \begin{itemize}
