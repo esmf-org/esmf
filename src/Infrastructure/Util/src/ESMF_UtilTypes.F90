@@ -850,13 +850,16 @@
   end type
 
   type(ESMF_FileFormat_Flag), parameter :: &
+        ESMF_FILEFORMAT_UNKNOWN = ESMF_FileFormat_Flag(0), &
         ESMF_FILEFORMAT_VTK = ESMF_FileFormat_Flag(1), &
         ESMF_FILEFORMAT_SCRIP = ESMF_FileFormat_Flag(2), &
         ESMF_FILEFORMAT_ESMFMESH = ESMF_FileFormat_Flag(3), &
         ESMF_FILEFORMAT_ESMFGRID = ESMF_FileFormat_Flag(4), &
         ESMF_FILEFORMAT_UGRID = ESMF_FileFormat_Flag(5), &
+        ESMF_FILEFORMAT_CFGRID = ESMF_FileFormat_Flag(6), &
         ESMF_FILEFORMAT_GRIDSPEC = ESMF_FileFormat_Flag(6), &
-        ESMF_FILEFORMAT_MOSAIC = ESMF_FileFormat_Flag(7)
+        ESMF_FILEFORMAT_MOSAIC = ESMF_FileFormat_Flag(7), &
+        ESMF_FILEFORMAT_TILE = ESMF_FileFormat_Flag(7)
 
 
 !------------------------------------------------------------------------------
@@ -1089,7 +1092,9 @@
 
       public ESMF_FileFormat_Flag, ESMF_FILEFORMAT_VTK, ESMF_FILEFORMAT_SCRIP, &
              ESMF_FILEFORMAT_ESMFMESH, ESMF_FILEFORMAT_ESMFGRID, &
-             ESMF_FILEFORMAT_UGRID, ESMF_FILEFORMAT_GRIDSPEC, ESMF_FILEFORMAT_MOSAIC
+             ESMF_FILEFORMAT_UGRID, ESMF_FILEFORMAT_GRIDSPEC, &
+             ESMF_FILEFORMAT_CFGRID, ESMF_FILEFORMAT_MOSAIC, &
+             ESMF_FILEFORMAT_UNKNOWN, ESMF_FILEFORMAT_TILE
 
       public ESMF_FileStatus_Flag, ESMF_FILESTATUS_UNKNOWN,   &
                                   ESMF_FILESTATUS_OLD,       &

@@ -16,7 +16,8 @@ program ESMF_RegridWeightGenApp
   use ESMF
   use ESMF_IOScripMod
   use ESMF_IOGridspecMod
-   use ESMF_RegridWeightGenMod
+  use ESMF_IOFileTypeCheckMod
+  use ESMF_RegridWeightGenMod
   use ESMF_RegridWeightGenCheckMod
 
   implicit none
@@ -61,7 +62,7 @@ program ESMF_RegridWeightGenApp
    type(ESMF_LogKind_Flag) :: msgbuf(1)
   type(ESMF_LogKind_Flag) :: logflag
   character(len=ESMF_MAXPATHLEN)  :: argvalue
-  integer            :: count, i
+  integer            :: count, i, length
   type(ESMF_NormType_Flag) :: normType
   logical            :: useSrcCorner, useDstCorner
   logical            :: useTilePathFlag
@@ -251,126 +252,42 @@ program ESMF_RegridWeightGenApp
     endif
 
     typeSetFlag = .false.  
-    srcFileType = ESMF_FILEFORMAT_SCRIP
-    dstFileType = ESMF_FILEFORMAT_SCRIP
+    srcFileType = ESMF_FILEFORMAT_UNKNOWN
+    dstFileType = ESMF_FILEFORMAT_UNKNOWN
     srcIsRegional = .false.
     dstIsRegional = .false.
+    ! deprecated
     call ESMF_UtilGetArgIndex('-t', argindex=ind, rc=rc)
     if (ind /= -1) then
-      call ESMF_UtilGetArg(ind+1, argvalue=flag)
-      if (trim(flag) .eq. 'ESMF') then
-        srcFileType = ESMF_FILEFORMAT_ESMFMESH
-        dstFileType = ESMF_FILEFORMAT_ESMFMESH
-        !write(*,*)
-        !print *, 'Set src and dst grid file types to ESMF.'
-      else if (trim(flag) .eq. 'UGRID') then
-        srcFileType = ESMF_FILEFORMAT_UGRID
-        dstFileType = ESMF_FILEFORMAT_UGRID
-        !write(*,*)
-        !print *, 'Set src and dst grid file types to UGRID.'
-      else if (trim(flag) .eq. 'GRIDSPEC') then
-        srcFileType = ESMF_FILEFORMAT_GRIDSPEC
-        dstFileType = ESMF_FILEFORMAT_GRIDSPEC
-      else if (trim(flag) .eq. 'MOSAIC') then
-        srcFileType = ESMF_FILEFORMAT_MOSAIC
-        dstFileType = ESMF_FILEFORMAT_MOSAIC
-      else if (trim(flag) .ne. 'SCRIP') then
-        write(*,*)
-        print *, 'ERROR: Unknown -t: must be one of ESMF,SCRIP,UGRID or GRIDSPEC.'
-        print *, "Use the --help argument to see an explanation of usage."
-        call ESMF_Finalize(endflag=ESMF_END_ABORT)
-      endif 
-      typeSetFlag = .true.
+     write(*,*)
+     print *, "WARNING: deprecated switch -t will be ingored.  The file type will be detacted automatically"
     endif
 
     call ESMF_UtilGetArgIndex('--src_type', argindex=ind, rc=rc)
     if (ind /= -1) then
-      call ESMF_UtilGetArg(ind+1, argvalue=flag)
-      if (typeSetFlag) then
-        ! check if the type is consistent with -t
-        if ((trim(flag) .eq. 'ESMF' .and. srcFileType /= ESMF_FILEFORMAT_ESMFMESH) .or.   &
-            (trim(flag) .eq. 'UGRID' .and. srcFileType /= ESMF_FILEFORMAT_UGRID) .or.   &
-            (trim(flag) .eq. 'GRIDSPEC' .and. srcFileType /= ESMF_FILEFORMAT_GRIDSPEC) .or. &
-            (trim(flag) .eq. 'SCRIP' .and. srcFileType /= ESMF_FILEFORMAT_SCRIP) .or. &
-            (trim(flag) .eq. 'MOSAIC' .and. srcFileType /= ESMF_FILEFORMAT_MOSAIC)) then
-          write(*,*)
-          print *, 'ERROR: Source file type conflict: --src_type and -t.' 
-          print *, "Use the --help argument to see an explanation of usage."
-          call ESMF_Finalize(endflag=ESMF_END_ABORT)
-        endif
-      endif
-      if (trim(flag) .eq. 'ESMF') then
-        srcFileType = ESMF_FILEFORMAT_ESMFMESH
-      else if (trim(flag) .eq. 'UGRID') then
-        srcFileType = ESMF_FILEFORMAT_UGRID
-      else if (trim(flag) .eq. 'GRIDSPEC') then
-        srcFileType = ESMF_FILEFORMAT_GRIDSPEC
-      else if (trim(flag) .eq. 'MOSAIC') then
-        srcFileType = ESMF_FILEFORMAT_MOSAIC
-      else if (trim(flag) .ne. 'SCRIP') then
-        write(*,*)
-        print *, 'ERROR: Unknown --src_type: must be one of ESMF,SCRIP,UGRID,GRIDSPEC or MOSAIC.'
-        print *, "Use the --help argument to see an explanation of usage."
-        call ESMF_Finalize(endflag=ESMF_END_ABORT)
-      endif
+     write(*,*)
+     print *, "WARNING: deprecated switch -src_type will be ingored.  The file type will be detacted automationally"
     endif
 
     call ESMF_UtilGetArgIndex('--dst_type', argindex=ind, rc=rc)
     if (ind /= -1) then
-      call ESMF_UtilGetArg(ind+1, argvalue=flag)
-      if (typeSetFlag) then
-        ! check if the type is consistent with -t
-        if ((trim(flag) .eq. 'ESMF' .and. dstFileType /= ESMF_FILEFORMAT_ESMFMESH) .or.   &
-            (trim(flag) .eq. 'UGRID' .and. dstFileType /= ESMF_FILEFORMAT_UGRID) .or.   &
-            (trim(flag) .eq. 'GRIDSPEC' .and. dstFileType /= ESMF_FILEFORMAT_GRIDSPEC) .or. &
-            (trim(flag) .eq. 'SCRIP' .and. dstFileType /= ESMF_FILEFORMAT_SCRIP) .or. &
-            (trim(flag) .eq. 'MOSAIC' .and. dstFileType /= ESMF_FILEFORMAT_MOSAIC)) then
-          write(*,*)
-          print *, 'ERROR: Destination file type conflict: --dst_type and -t.' 
-          print *, "Use the --help argument to see an explanation of usage."
-          call ESMF_Finalize(endflag=ESMF_END_ABORT)
-        endif
-      endif
-      if (trim(flag) .eq. 'ESMF') then
-         dstFileType = ESMF_FILEFORMAT_ESMFMESH
-      else if (trim(flag) .eq. 'UGRID') then
-         dstFileType = ESMF_FILEFORMAT_UGRID
-      else if (trim(flag) .eq. 'GRIDSPEC') then
-         dstFileType = ESMF_FILEFORMAT_GRIDSPEC
-      else if (trim(flag) .eq. 'MOSAIC') then
-        dstFileType = ESMF_FILEFORMAT_MOSAIC
-      else if (trim(flag) .ne. 'SCRIP') then
-        write(*,*)
-        print *, 'ERROR: Unknown --dst_type: must be one of ESMF,SCRIP,UGRID,GRIDSPEC or MOSAIC.'
-        print *, "Use the --help argument to see an explanation of usage."
-        call ESMF_Finalize(endflag=ESMF_END_ABORT)
-      endif
+     write(*,*)
+     print *, "WARNING: deprecated switch -dst_type will be ingored.  The file type will be detacted automatically"
     endif
 
-    ! If the src grid type is UGRID, get the dummy variable name in the file
-    if (srcFileType == ESMF_FILEFORMAT_UGRID) then
-      call ESMF_UtilGetArgIndex('--src_meshname', argindex=ind, rc=rc)
-      if (ind == -1) then
+    ! Check the srcfile type and dstfile type
+    call ESMF_FileTypeCheck(srcfile, srcFileType, varname=srcMeshName, rc=rc)
+    if (rc/=ESMF_SUCCESS .or. srcFileType==ESMF_FILEFORMAT_UNKNOWN) then
         write(*,*)
-        print *, 'ERROR: The argument --src_meshname is missing.'
-        print *, "Use the --help argument to see an explanation of usage."
+        print *, 'ERROR: Unable to detect the source grid file type.'
         call ESMF_Finalize(endflag=ESMF_END_ABORT)
-      else
-        call ESMF_UtilGetArg(ind+1, argvalue=srcMeshName)         
-      endif
     endif
-
-    ! If the dst grid type is UGRID, get the dummy variable name in the file
-    if (dstFileType == ESMF_FILEFORMAT_UGRID) then
-      call ESMF_UtilGetArgIndex('--dst_meshname', argindex=ind, rc=rc)
-      if (ind == -1) then
+    ! Check the dstfile type and dstfile type
+    call ESMF_FileTypeCheck(dstfile, dstFileType, varname=dstMeshName, rc=rc)
+    if (rc/=ESMF_SUCCESS .or. dstFileType==ESMF_FILEFORMAT_UNKNOWN) then
         write(*,*)
-        print *, 'ERROR: The argument --dst_meshname is missing.'
-        print *, "Use the --help argument to see an explanation of usage."
+        print *, 'ERROR: Unable to detect the destination grid file type.'
         call ESMF_Finalize(endflag=ESMF_END_ABORT)
-      else
-        call ESMF_UtilGetArg(ind+1, argvalue=dstMeshName)         
-      endif
     endif
 
     ! If the src grid type is GRIDSPEC or UGRID, check if --src_missingvalue argument is given
@@ -673,6 +590,8 @@ program ESMF_RegridWeightGenApp
     call ESMF_UtilGetArgIndex('--tilefile_path', argindex=ind, rc=rc)
     if (ind /= -1) then
       call ESMF_UtilGetArg(ind+1, argvalue=tilePath)         
+      length=len_trim(tilePath)
+      if (tilePath(length:length) /= '/') tilePath(length+1:length+1)='/'
       useTilePathFlag = .true.
     else
       tilePath=' '
@@ -997,17 +916,12 @@ contains
     print *, "                      [--norm_type dstarea|fracarea]"
     print *, "                      [--ignore_unmapped|-i]"
     print *, "                      [--ignore_degenerate]"
-    print *, "                      [--src_type SCRIP|ESMF|UGRID|GRIDSPEC|MOSAIC]" 
-    print *, "                      [--dst_type SCRIP|ESMF|UGRID|GRIDSPEC|MOSAIC]"
-    print *, "                      [-t SCRIP|ESMF|UGRID|GRIDSPEC|MOSAIC]"
     print *, "                      [-r]"
     print *, "                      [--src_regional]"
     print *, "                      [--dst_regional]"
     print *, "                      [--64bit_offset]"
     print *, "                      [--netcdf4]"
     print *, "                      [--weight_only]"
-    print *, "                      [--src_meshname src_mesh_variable]"
-    print *, "                      [--dst_meshname dst_mesh_variable]"
     print *, "                      [--src_missingvalue src_var_name]"
     print *, "                      [--dst_missingvalue dst_var_name]"
     print *, "                      [--src_coordinates lon_var_name,lat_var_name]"

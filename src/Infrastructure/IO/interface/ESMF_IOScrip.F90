@@ -677,6 +677,7 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
       type(ESMF_Mosaic)  :: srcmosaic, dstmosaic
       character(len=ESMF_MAXPATHLEN) :: tempname
       integer            :: totalsize, totallen
+      integer            :: meshId
 
 #ifdef ESMF_NETCDF
       ! write out the indices and weights table sequentially to the output file
@@ -1783,21 +1784,23 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
              rc)) return
 	else if (srcFileTypeLocal == ESMF_FILEFORMAT_UGRID) then 
            ! ESMF unstructured grid
+	   call ESMF_UGridInq(srcfile, srcmeshname, meshId=meshId, faceCoordFlag=faceCoordFlag)
+           if (ESMF_LogFoundError(status, ESMF_ERR_PASSTHRU, &
+               ESMF_CONTEXT, rcToReturn=rc)) return
   	   if (.not. useSrcCornerlocal .or. methodlocal%regridmethod ==ESMF_REGRIDMETHOD_CONSERVE%regridmethod) then 
 	     ! check if faceCoords exit
-	      call ESMF_UGridInq(srcfile, srcmeshname, faceCoordFlag=faceCoordFlag)
 	      allocate(latBuffer2(src_grid_corner,srcDim),&
 	   	       lonBuffer2(src_grid_corner,srcDim)) 
               if (faceCoordFlag) then
  	        allocate(latBuffer(srcDim), lonBuffer(srcDim))
-  	        call ESMF_UGridGetVar(srcfile, srcmeshname, &
+  	        call ESMF_UGridGetVar(srcfile, meshId, &
 		   faceXcoords=lonBuffer, faceYcoords=latBuffer, &
 		   faceNodeConnX=lonBuffer2, faceNodeConnY=latBuffer2, rc=status)
               else
   	        write(*,*) "Warning: face coordinates not present in src grid file,"// &
                   " so not outputting xc_a and yc_a to weight file."
                 write(*,*)
-  	        call ESMF_UGridGetVar(srcfile, srcmeshname, &
+  	        call ESMF_UGridGetVar(srcfile, meshId, &
 		   faceNodeConnX=lonBuffer2, faceNodeConnY=latBuffer2, rc=status)
               endif
 	      if (ESMF_LogFoundError(status, ESMF_ERR_PASSTHRU, &
@@ -1836,7 +1839,7 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
               deallocate(latBuffer2, lonBuffer2)
 	   else
 	      allocate(latBuffer(srcDim), lonBuffer(srcDim))
-  	      call ESMF_UGridGetVar(srcfile, srcmeshname, &
+  	      call ESMF_UGridGetVar(srcfile, meshId, &
 		   nodeXcoords=lonBuffer, nodeYcoords=latBuffer, rc=status)
 	      if (ESMF_LogFoundError(status, ESMF_ERR_PASSTHRU, &
         	  ESMF_CONTEXT, rcToReturn=rc)) return
@@ -1906,8 +1909,6 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
              if (ESMF_LogFoundError(status, ESMF_ERR_PASSTHRU, &
          	ESMF_CONTEXT, rcToReturn=rc)) return
              varBuffer1D=reshape(lonBuffer2,(/totalsize/))
-             print *, trim(tempname), lonBuffer2(1,1), varBuffer1D(1), lonBuffer2(1,2), &
-                 varBuffer1D(srcmosaic%tilesize+1)
              start=(k-1)*totalsize+1      
              ncStatus = nf90_put_var(ncid, VarId1,varBuffer1D, (/start/), (/totalsize/))
              if (CDFCheckError (ncStatus, &
@@ -2277,22 +2278,24 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
              ESMF_SRCLINE,trim(dstFile),&
              rc)) return
 	else if (dstFileTypeLocal == ESMF_FILEFORMAT_UGRID) then 
+           call ESMF_UGridInq(dstfile, dstmeshname, meshId=meshId, faceCoordFlag=faceCoordFlag)
+           if (ESMF_LogFoundError(status, ESMF_ERR_PASSTHRU, &
+               ESMF_CONTEXT, rcToReturn=rc)) return
   	   if (.not. useDstCornerlocal .or. &
-	     methodlocal%regridmethod ==ESMF_REGRIDMETHOD_CONSERVE%regridmethod) then 
+ 	     methodlocal%regridmethod ==ESMF_REGRIDMETHOD_CONSERVE%regridmethod) then 
 	     ! check if faceCoords exit
-	      call ESMF_UGridInq(dstfile, dstmeshname, faceCoordFlag=faceCoordFlag)
 	        allocate(latBuffer2(dst_grid_corner,dstDim),&
 			lonBuffer2(dst_grid_corner,dstDim)) 
               if (faceCoordFlag) then
   	        allocate(latBuffer(dstDim), lonBuffer(dstDim))
-  	        call ESMF_UGridGetVar(dstfile, dstmeshname, &
+  	        call ESMF_UGridGetVar(dstfile, meshId, &
 		   faceXcoords=lonBuffer, faceYcoords=latBuffer, &
 		   faceNodeConnX=lonBuffer2, faceNodeConnY=latBuffer2, rc=status)
               else
   	        write(*,*) "Warning: face coordinates not present in dst grid file,"// &
                   " so not outputting xc_a and yc_a to weight file."
                 write(*,*)
-  	        call ESMF_UGridGetVar(dstfile, dstmeshname, &
+  	        call ESMF_UGridGetVar(dstfile, meshId, &
 		   faceNodeConnX=lonBuffer2, faceNodeConnY=latBuffer2, rc=status)
               endif
 	      if (ESMF_LogFoundError(status, ESMF_ERR_PASSTHRU, &
@@ -2330,9 +2333,9 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
                 ESMF_SRCLINE,errmsg,&
                 rc)) return
               deallocate(latBuffer2, lonBuffer2)
-	  else
+	   else
 	      allocate(latBuffer(dstDim), lonBuffer(dstDim))
-  	      call ESMF_UGridGetVar(dstfile, dstmeshname, &
+  	      call ESMF_UGridGetVar(dstfile, meshId, &
 		   nodeXcoords=lonBuffer, nodeYcoords=latBuffer, rc=rc)
    	      ncStatus=nf90_inq_varid(ncid,"xc_b",VarId)
               ncStatus=nf90_put_var(ncid,VarId, lonBuffer)          

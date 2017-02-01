@@ -46,6 +46,7 @@ module ESMF_RegridWeightGenMod
   use ESMF_IOScripMod
   use ESMF_IOGridspecMod
   use ESMF_IOUGridMod
+  use ESMF_IOFileTypeCheckMod
   use ESMF_RHandleMod
   use ESMF_LocStreamMod
   
@@ -374,8 +375,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     useSrcMask = .TRUE.
     useDstMask = .TRUE.
     localRegridMethod = ESMF_REGRIDMETHOD_BILINEAR
-    localSrcFileType = ESMF_FILEFORMAT_SCRIP
-    localDstFileType = ESMF_FILEFORMAT_SCRIP
+    localSrcFileType = ESMF_FILEFORMAT_UNKNOWN
+    localDstFileType = ESMF_FILEFORMAT_UNKNOWN
     localVerboseFlag = .false.
     srcIsRegional = .false.
     dstIsRegional = .false.
@@ -431,12 +432,23 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     if (present(srcFileType)) then
        localSrcFileType = srcFileType
-     endif
+    else 
+       call ESMF_FileTypeCheck(srcfile, localSrcFileType, rc=localrc)
+       if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
 
     if (present(dstFileType)) then
        localDstFileType = dstFileType
+    else
+       call ESMF_FileTypeCheck(dstfile, localDstFileType, rc=localrc)
+       if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
     endif
 
+    
     ! Handle optional normType argument
     if (present(normType)) then
        localNormType=normType
@@ -456,7 +468,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        endif
     endif
 
-
+#if 0
     ! If the src grid type is UGRID, get the dummy variable name in the file
     if (localSrcFileType == ESMF_FILEFORMAT_UGRID) then
       if (.not. present(srcMeshname)) then
@@ -476,6 +488,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         return
       endif
     endif
+#endif
 
     ! If the src grid type is UGRID or GRIDSPEC, check if the srcMissingvalueFlag is given 
     if (localSrcFileType == ESMF_FILEFORMAT_UGRID .or. &
@@ -811,8 +824,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       elseif (localSrcFileType == ESMF_FILEFORMAT_ESMFMESH) then 
         print *, "  Source File is in ESMF format"
       elseif (localSrcFileType == ESMF_FILEFORMAT_UGRID) then
-        print *, "  Source File is in UGRID format, dummy variable: ", &
-		    trim(srcMeshName)
+        print *, "  Source File is in UGRID format"
 	if (srcMissingValue) then
 	   print *, "    Use attribute 'missing_value' of variable '", trim(srcMissingvalueVar),"' as the mask"
 	endif
@@ -850,8 +862,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       elseif (localDstFileType == ESMF_FILEFORMAT_ESMFMESH) then 
         print *, "  Destination File is in ESMF format"
       elseif (localDstFileType == ESMF_FILEFORMAT_UGRID) then
-        print *, "  Destination File is in UGRID format, dummy variable: ", & 
-	    	trim(dstMeshName)
+        print *, "  Destination File is in UGRID format"
 	if (dstMissingValue) then
 	   print *, "    Use the missing value of '", trim(dstMissingvalueVar),"' as the mask"
         endif	
@@ -1014,7 +1025,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
          srcLocStream = ESMF_LocStreamCreate(srcfile, & 
        		      fileformat=localSrcFileType, &
 		      indexflag=ESMF_INDEX_GLOBAL, & 
-		      meshname = trim(srcMeshName), &
 		      varname=trim(srcMissingvalueVar), &
 		      centerflag=.not. useSrcCorner, rc=localrc)
        else		      
@@ -1101,7 +1111,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 	! if srcfile is not SCRIP, it is always unstructured
 	if (srcMissingValue) then
 	   srcMesh = ESMF_MeshCreate(srcfile, localSrcFileType, &
-               meshname = trim(srcMeshName), maskFlag =meshloc, &
+               maskFlag =meshloc, &
                addUserArea=localUserAreaFlag, &
                convertToDual=convertSrcToDual, &
 	       varname=trim(srcMissingvalueVar), rc=localrc)
@@ -1109,7 +1119,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 	   srcMesh = ESMF_MeshCreate(srcfile, localSrcFileType, &
                 addUserArea=localUserAreaFlag, &
                convertToDual=convertSrcToDual, &
-                meshname = trim(srcMeshName), rc=localrc)
+               rc=localrc)
 	endif
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
@@ -1153,7 +1163,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
          dstLocStream = ESMF_LocStreamCreate(dstfile, &
        		      fileformat=localDstFileType, &
 		      indexflag=ESMF_INDEX_GLOBAL, & 
-		      meshname = trim(dstMeshName), &
 		      varname= trim(dstMissingvalueVar), &
 		      centerflag=.not. useDstCorner, rc=localrc)
        else
@@ -1239,7 +1248,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 	! if dstfile is not SCRIP, it is always unstructured
 	if (dstMissingValue) then
  	   dstMesh = ESMF_MeshCreate(dstfile, localDstFileType, &
-                      meshname = trim(dstMeshName), maskFlag=meshloc, &
+                      maskFlag=meshloc, &
                       addUserArea=localUserAreaFlag, &
                       convertToDual=convertDstToDual, &
 		      varname=trim(dstMissingvalueVar), rc=localrc)
@@ -1247,7 +1256,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 	   dstMesh = ESMF_MeshCreate(dstfile, localDstFileType, &
 	                addUserArea=localUserAreaFlag, &
                         convertToDual=convertDstToDual, &
-          		meshname = trim(dstMeshName), rc=localrc)
+          		rc=localrc)
         endif
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
@@ -2584,7 +2593,6 @@ subroutine computeRedistAreaMesh(mesh, vm, petNo, petCnt, area, rc)
        ESMF_CONTEXT, rcToReturn=rc)) return
 
   totalCount=globalCount(1)
-  print *, 'local element ', localElemCount, totalCount
 
   ! Create distgrid with everything on PET 0
   justPet0Distgrid = ESMF_DistGridCreate((/1/),(/totalCount/), regDecomp=(/1/),&
