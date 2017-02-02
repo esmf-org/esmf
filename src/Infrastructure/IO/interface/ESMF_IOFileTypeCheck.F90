@@ -85,7 +85,6 @@
     logical :: foundlon, foundlat
     logical :: foundscriplon, foundscriplat
     logical :: foundesmfcoord, foundesmfconn
-    logical :: foundesmfnode
     logical :: useStandname, foundtype
     integer :: ncStatus
     integer ::  gridid, varid, dimid, len
@@ -103,7 +102,6 @@
     foundscriplat = .false.
     foundesmfcoord = .false.
     foundesmfconn = .false.
-    foundesmfnode = .false.
     foundtype = .false.
 
 #ifdef ESMF_NETCDF
@@ -207,7 +205,7 @@
         elseif (trim(attvalue) .eq. 'grid_corner_lat') then
            foundscriplat = .true.
         elseif (trim(attvalue) .eq. 'nodeCoords') then
-           foundesmfnode = .true.
+           foundesmfcoord = .true.
         elseif (trim(attvalue) .eq. 'elementConn') then
            foundesmfconn = .true.
         endif
