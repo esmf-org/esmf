@@ -3,7 +3,7 @@
 # use when mpicxx is used for linking.  For version 3.1, use -lmpichf90.
 # From version 3.2 onwards, use -lmpifort.
 MPICHVERSION=`mpichversion | grep Version | tr -d "\t " | cut -f2 -d":"`
-if [ $MPICHVERSION = 3.1 ]; then
+if [ $MPICHVERSION = 3.0 ] || [ $MPICHVERSION = 3.1 ]; then
   echo -lmpichf90;
 else
   echo -lmpifort;
