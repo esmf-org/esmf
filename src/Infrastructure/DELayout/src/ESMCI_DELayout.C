@@ -2497,8 +2497,12 @@ int XXE::exec(
 #define EXECWITHPRINT____disable
 #ifdef EXECWITHPRINT
   char msg[1024];
-  sprintf(msg, "ESMCI::XXE::exec(): START: stream=%p, %d, %lu, cancelled=%p", 
-    stream, count, sizeof(StreamElement), cancelled);
+  sprintf(msg, "ESMCI::XXE::exec(): START: stream=%p, count=%d, "
+    "sizeof(StreamElement)=%lu, rraCount=%d", 
+    stream, count, sizeof(StreamElement), rraCount);
+  ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
+  sprintf(msg, "ESMCI::XXE::exec(): START'ed: filterBitField=0x%08x, "
+    "finished=%p, cancelled=%p", filterBitField, finished, cancelled);
   ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
 #endif
   
@@ -2625,9 +2629,8 @@ int XXE::exec(
         if (xxeSendInfo->vectorFlag)
           size *= *vectorLength;
 #ifdef EXECWITHPRINT
-        sprintf(msg, "XXE::send: <localPet=%d> buffer=%p, size=%d, dst=%d, "
+        sprintf(msg, "XXE::send: buffer=%p, size=%d, dst=%d, "
           "tag=%d, vectorFlag=%d, indirectionFlag=%d",
-          vm->getLocalPet(),
           xxeSendInfo->buffer, xxeSendInfo->size, xxeSendInfo->dstPet,
           xxeSendInfo->tag, xxeSendInfo->vectorFlag,
           xxeSendInfo->indirectionFlag);
@@ -2648,9 +2651,8 @@ int XXE::exec(
         if (xxeRecvInfo->vectorFlag)
           size *= *vectorLength;
 #ifdef EXECWITHPRINT
-        sprintf(msg, "XXE::recv: <localPet=%d> buffer=%p, size=%d, src=%d, "
+        sprintf(msg, "XXE::recv: buffer=%p, size=%d, src=%d, "
           "tag=%d, vectorFlag=%d, indirectionFlag=%d",
-          vm->getLocalPet(),
           xxeRecvInfo->buffer, xxeRecvInfo->size, xxeRecvInfo->srcPet,
           xxeRecvInfo->tag, xxeRecvInfo->vectorFlag,
           xxeRecvInfo->indirectionFlag);
@@ -2671,7 +2673,7 @@ int XXE::exec(
           rraOffset *= *vectorLength;
         }
 #ifdef EXECWITHPRINT
-        sprintf(msg, "XXE::sendRRA: <localPet=%d>", vm->getLocalPet());
+        sprintf(msg, "XXE::sendRRA: size=%d", xxeSendRRAInfo->size);
         ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
 #endif
         vm->send(rraList[xxeSendRRAInfo->rraIndex]
@@ -2690,7 +2692,7 @@ int XXE::exec(
           rraOffset *= *vectorLength;
         }
 #ifdef EXECWITHPRINT
-        sprintf(msg, "XXE::recvRRA: <localPet=%d>", vm->getLocalPet());
+        sprintf(msg, "XXE::recvRRA: size=%d", xxeRecvRRAInfo->size);
         ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
 #endif
         vm->recv(rraList[xxeRecvRRAInfo->rraIndex]
@@ -2715,9 +2717,8 @@ int XXE::exec(
           dstSize *= *vectorLength;
         }
 #ifdef EXECWITHPRINT
-        sprintf(msg, "XXE::sendrecv: <localPet=%d> dst=%d, sendSize=%d, "
-          " src=%d, recvSize=%d", vm->getLocalPet(), xxeSendRecvInfo->dstPet,
-          srcSize, xxeSendRecvInfo->srcPet, dstSize);
+        sprintf(msg, "XXE::sendrecv: dst=%d, sendSize=%d, src=%d, recvSize=%d", 
+          xxeSendRecvInfo->dstPet, srcSize, xxeSendRecvInfo->srcPet, dstSize);
         ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
 #endif
         vm->sendrecv(srcBuffer, srcSize, xxeSendRecvInfo->dstPet,
@@ -2742,7 +2743,8 @@ int XXE::exec(
           rraOffset *= *vectorLength;
         }
 #ifdef EXECWITHPRINT
-        sprintf(msg, "XXE::sendRRArecv: <localPet=%d>", vm->getLocalPet());
+        sprintf(msg, "XXE::sendRRArecv: dst=%d, src=%d", 
+          xxeSendRRARecvInfo->dstPet, xxeSendRRARecvInfo->srcPet);
         ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
 #endif
         vm->sendrecv(rraList[xxeSendRRARecvInfo->rraIndex] + rraOffset,
@@ -2948,6 +2950,17 @@ int XXE::exec(
         testOnIndexSubInfo = (TestOnIndexSubInfo *)xxeElement;
         xxeIndexElement = &(stream[testOnIndexSubInfo->index]);
         xxeCommhandleInfo = (CommhandleInfo *)xxeIndexElement;
+#ifdef EXECWITHPRINT
+        sprintf(msg, "XXE::testOnIndexSubInfo: activeFlag=%d", 
+          xxeCommhandleInfo->activeFlag);
+        ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
+        if (finished){
+          // there is a finished flag 
+          sprintf(msg, "XXE::testOnIndexSubInfo: entering w/ finished=%d", 
+            *finished);
+          ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
+        }
+#endif
         if (xxeCommhandleInfo->activeFlag){
           // there is an outstanding active communication
           int completeFlag;
@@ -2974,6 +2987,14 @@ int XXE::exec(
             if (finished) *finished = false;  // comm not finished
         }
         if (cancelled && xxeCommhandleInfo->cancelledFlag) *cancelled = true;
+#ifdef EXECWITHPRINT
+        if (finished){
+          // there is a finished flag 
+          sprintf(msg, "XXE::testOnIndexSubInfo: exiting w/ finished=%d", 
+            *finished);
+          ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
+        }
+#endif
       }
       break;
     case cancelIndex:
