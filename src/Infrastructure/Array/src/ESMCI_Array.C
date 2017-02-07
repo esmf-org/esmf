@@ -11341,7 +11341,6 @@ int Array::sparseMatMul(
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
         ESMC_CONTEXT, &rc)) return rc;
     }
-    vm->barrier();
   }
   fprintf(fp, "\n=================================================="
     "==============================\n");
@@ -11354,7 +11353,6 @@ int Array::sparseMatMul(
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
         ESMC_CONTEXT, &rc)) return rc;
     }
-    vm->barrier();
   }
   fclose(fp);
 #endif
@@ -11374,7 +11372,12 @@ int Array::sparseMatMul(
     filterBitField |= XXE::filterBitCancel;           // set Cancel filter
     filterBitField |= XXE::filterBitNbWaitFinishSingleSum; // SingleSum filter
     localrc = xxe->exec(rraCount, rraList, &vectorLength, filterBitField,
-      finishedflag, cancelledflag);
+      finishedflag, cancelledflag,
+      NULL,     // dTime                  -> disabled
+      -1, -1,   // indexStart, indexStop  -> full stream
+      // super vector support:
+      superVecSizeUnd[0], superVecSizeUnd[1], superVecSizeUnd[2],
+      superVecSizeDis[0], superVecSizeDis[1]);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       &rc)) return rc;
   }
