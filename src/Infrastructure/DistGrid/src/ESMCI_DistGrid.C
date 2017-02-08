@@ -2386,7 +2386,7 @@ int DistGrid::construct(
     elementCountPCollPLocalDe[i] = new int[localDeCount];
     for (int j=0; j<localDeCount; j++){
       arbSeqIndexListPCollPLocalDe[i][j] = NULL;
-      elementCountPCollPLocalDe[i][j] = elementCountPDe[localDeToDeMap[i]];
+      elementCountPCollPLocalDe[i][j] = elementCountPDe[localDeToDeMap[j]];
     }
   }
   if (regDecompArg){
@@ -4597,11 +4597,19 @@ int DistGrid::setArbSeqIndex(
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
   
+#define DEBUGPRINTS____disable
+#ifdef DEBUGPRINTS
+  char msg[160];
+  sprintf(msg, "setArbSeqIndex: localDe=%d, collocation=%d", localDe, 
+    collocation);
+  ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
+#endif
+  
   // check input
   int localDeCount = delayout->getLocalDeCount();
   if (localDe < 0 || localDe > localDeCount-1){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-      "- Specified local DE out of bounds", ESMC_CONTEXT, &rc);
+      "Specified local DE out of bounds", ESMC_CONTEXT, &rc);
     return rc;
   }
   int collocationIndex;
@@ -4610,31 +4618,41 @@ int DistGrid::setArbSeqIndex(
     if (collocationTable[collocationIndex] == collocation) break;
   if (collocationIndex==diffCollocationCount){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-      "- Specified collocation not found", ESMC_CONTEXT, &rc);
+      "Specified collocation not found", ESMC_CONTEXT, &rc);
     return rc;
   }
   if (!present(arbSeqIndex)){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
-      "- Not a valid pointer to arbSeqIndex array", ESMC_CONTEXT, &rc);
+      "Not a valid pointer to arbSeqIndex array", ESMC_CONTEXT, &rc);
     return rc;
   }
   if (arbSeqIndex->dimCount != 1){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
-      "- arbSeqIndex array must be of rank 1", ESMC_CONTEXT, &rc);
+      "arbSeqIndex array must be of rank 1", ESMC_CONTEXT, &rc);
     return rc;
   }
+  
+#ifdef DEBUGPRINTS
+  sprintf(msg, "setArbSeqIndex: arbSeqIndex->extent[0]=%d, "
+    "elementCountPCollPLocalDe[collocationIndex][localDe]=%d", 
+    arbSeqIndex->extent[0], 
+    elementCountPCollPLocalDe[collocationIndex][localDe]);
+  ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
+#endif
+    
   if (arbSeqIndex->extent[0] !=
     elementCountPCollPLocalDe[collocationIndex][localDe]){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
-      "- arbSeqIndex array must supply one value for each element in local DE",
+      "arbSeqIndex array must supply one value for each element in local DE",
       ESMC_CONTEXT, &rc);
     return rc;
   }
 
   // set arbSeqIndexListPLocalDe[][]
-  if (arbSeqIndexListPCollPLocalDe[collocationIndex][localDe])
+  if (arbSeqIndexListPCollPLocalDe[collocationIndex][localDe]){
     // delete previous index list
     delete [] arbSeqIndexListPCollPLocalDe[collocationIndex][localDe];
+  }
   arbSeqIndexListPCollPLocalDe[collocationIndex][localDe] =
     new int[arbSeqIndex->extent[0]];
   memcpy(arbSeqIndexListPCollPLocalDe[collocationIndex][localDe],
