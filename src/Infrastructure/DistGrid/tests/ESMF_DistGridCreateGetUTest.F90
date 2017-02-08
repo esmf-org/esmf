@@ -925,7 +925,9 @@ program ESMF_DistGridCreateGetUTest
   !NEX_UTest
   write(name, *) "DistGridCreate() - 1D arbitrary seq indices general DE/PET case"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  allocate(arbSeqIndexL(localPet))  ! number of localDEs equal to PET id
+  localDeCount = localPet ! use localPet for number of local DEs
+  if (petCount==1) localDeCount = 2 ! if only single PET, then use 2 local DEs
+  allocate(arbSeqIndexL(localDeCount))  ! number of localDEs
   localStart = localPet*10
   do j=1, size(arbSeqIndexL)
     allocate(arbSeqIndexL(j)%ptr((j+1)*2))
