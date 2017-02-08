@@ -180,6 +180,13 @@
        character(1), pointer :: cptr(:) => null ()
      end type
 
+!------------------------------------------------------------------------------
+!
+!    ! Types useful to pass arrays of arrays into Fortran API
+
+     type ESMF_PtrInt1D
+       integer, pointer :: ptr(:) => null ()
+     end type
 
 !------------------------------------------------------------------------------
 !
@@ -1080,8 +1087,8 @@
 
       public ESMF_KeywordEnforcer
 
-      public ESMF_Status, ESMF_Pointer, ESMF_CharPtr, ESMF_TypeKind_Flag
-      public ESMF_DataValue
+      public ESMF_Status, ESMF_Pointer, ESMF_CharPtr, ESMF_PtrInt1D
+      public ESMF_TypeKind_Flag, ESMF_DataValue
 
       public ESMF_MapPtr
 
