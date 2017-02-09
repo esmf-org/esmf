@@ -275,7 +275,7 @@ program ESMF_ArrayArbIdxSMMUTest
   dstArray = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=dstDistgrid, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   
-  ! The dstDistgrid evenly divides 12 elements across the 6 DEs (becaues default
+  ! The dstDistgrid evenly divides 12 elements across the 6 DEs (because default
   ! is 1 DE per PET and there are 6 PETs running this example).
   ! The default sequenceIndex of dstDistGrid is determined by the default rule
   ! of simply enumerating the elements within the tile, starting at 1:
@@ -846,22 +846,22 @@ program ESMF_ArrayArbIdxSMMUTest
   write(failMsg, *) "Wrong results" 
   if (localPet == 0) then
     call ESMF_Test(((farrayPtr2D(1,1).eq.38).and.(farrayPtr2D(2,1).eq.0)), &
-     name, failMsg, result, ESMF_SRCLINE)
+      name, failMsg, result, ESMF_SRCLINE)
   else if (localPet == 1) then
     call ESMF_Test(((farrayPtr2D(1,1).eq.0).and.(farrayPtr2D(2,1).eq.-135)), &
-     name, failMsg, result, ESMF_SRCLINE)
+      name, failMsg, result, ESMF_SRCLINE)
   else if (localPet == 2) then
     call ESMF_Test(((farrayPtr2D(1,1).eq.231).and.(farrayPtr2D(2,1).eq.-84)), &
-     name, failMsg, result, ESMF_SRCLINE)
+      name, failMsg, result, ESMF_SRCLINE)
   else if (localPet == 3) then
     call ESMF_Test(((farrayPtr2D(1,1).eq.-150).and.(farrayPtr2D(2,1).eq.0)), &
-     name, failMsg, result, ESMF_SRCLINE)
+      name, failMsg, result, ESMF_SRCLINE)
   else if (localPet == 4) then
     call ESMF_Test(((farrayPtr2D(1,1).eq.4378).and.(farrayPtr2D(2,1).eq.-396)), &
-     name, failMsg, result, ESMF_SRCLINE)
+      name, failMsg, result, ESMF_SRCLINE)
   else if (localPet == 5) then
     call ESMF_Test(((farrayPtr2D(1,1).eq.250).and.(farrayPtr2D(2,1).eq.0)), &
-     name, failMsg, result, ESMF_SRCLINE)
+      name, failMsg, result, ESMF_SRCLINE)
   endif
 
 !------------------------------------------------------------------------
@@ -870,22 +870,22 @@ program ESMF_ArrayArbIdxSMMUTest
   write(failMsg, *) "Wrong results" 
   if (localPet == 0) then
     call ESMF_Test(((farrayPtr2D(1,2).eq.-62).and.(farrayPtr2D(2,2).eq.0)), &
-     name, failMsg, result, ESMF_SRCLINE)
+      name, failMsg, result, ESMF_SRCLINE)
   else if (localPet == 1) then
     call ESMF_Test(((farrayPtr2D(1,2).eq.0).and.(farrayPtr2D(2,2).eq.-235)), &
-     name, failMsg, result, ESMF_SRCLINE)
+      name, failMsg, result, ESMF_SRCLINE)
   else if (localPet == 2) then
     call ESMF_Test(((farrayPtr2D(1,2).eq.931).and.(farrayPtr2D(2,2).eq.-284)), &
-     name, failMsg, result, ESMF_SRCLINE)
+      name, failMsg, result, ESMF_SRCLINE)
   else if (localPet == 3) then
     call ESMF_Test(((farrayPtr2D(1,2).eq.-250).and.(farrayPtr2D(2,2).eq.0)), &
-     name, failMsg, result, ESMF_SRCLINE)
+      name, failMsg, result, ESMF_SRCLINE)
   else if (localPet == 4) then
     call ESMF_Test(((farrayPtr2D(1,2).eq.15878).and.(farrayPtr2D(2,2).eq.-1496)), &
-     name, failMsg, result, ESMF_SRCLINE)
+      name, failMsg, result, ESMF_SRCLINE)
   else if (localPet == 5) then
     call ESMF_Test(((farrayPtr2D(1,2).eq.750).and.(farrayPtr2D(2,2).eq.-100)), &
-     name, failMsg, result, ESMF_SRCLINE)
+      name, failMsg, result, ESMF_SRCLINE)
   endif
 
 !------------------------------------------------------------------------
