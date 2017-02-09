@@ -323,6 +323,7 @@ class XXE{
       // the need for XXE stream rewrite (which would be far too expensive to
       // do during exec())!
     int lastFilterBitField;         // filterBitField during last exec() call
+    bool superVectorOkay;           // flag to indicate that super-vector okay
   private:
     int max;                        // maximum number of elements in stream
     int storageMaxCount;            // maximum number of elements in storage
@@ -347,6 +348,7 @@ class XXE{
       xxeSubMaxCount = xxeSubMaxCountArg;
       bufferInfoList.reserve(1000);  // initial preparation
       lastFilterBitField = 0x0;
+      superVectorOkay = true;
     }
     ~XXE(){
       // destructor

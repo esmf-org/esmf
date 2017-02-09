@@ -7942,6 +7942,7 @@ int sparseMatMulStoreEncodeXXE(VM *vm, DELayout *srcDelayout,
   vector<DD::AssociationElement> *dstLinSeqVect,
   const int *dstLocalDeTotalElementCount,
   char **rraList, int rraCount, RouteHandle **routehandle,
+  bool undistPastFirstDistDim,
 #ifdef ASMMSTORETIMING
   double *t8, double *t9, double *t10, double *t11, double *t12, double *t13,
   double *t14,
@@ -9257,26 +9258,45 @@ int Array::sparseMatMulStore(
       dstArray->totalElementCountPLocalDe[i] * dstArray->tensorElementCount;
   
   // prepare tensorContigLength arguments
+  bool  contigFlag = true;
   int srcTensorContigLength = 1;  // init
-  for (int jj=0; jj<srcArray->rank; jj++){
-    if (srcArray->arrayToDistGridMap[jj])
+  int srcTensorLength = 1;  // init
+  for (int j=0, jj=0; jj<srcArray->rank; jj++){
+    if (srcArray->arrayToDistGridMap[jj]){
       // decomposed dimension
-      break;
-    else
+      contigFlag = false;
+    }else{
       // tensor dimension
-      srcTensorContigLength *= srcArray->undistUBound[jj]
-        - srcArray->undistLBound[jj] + 1;
+      srcTensorLength *= srcArray->undistUBound[j]
+        - srcArray->undistLBound[j] + 1;
+      if (contigFlag)
+        srcTensorContigLength *= srcArray->undistUBound[j]
+          - srcArray->undistLBound[j] + 1;
+      ++j;
+    }
   }
+  contigFlag = true;
   int dstTensorContigLength = 1;  // init
-  for (int jj=0; jj<dstArray->rank; jj++){
-    if (dstArray->arrayToDistGridMap[jj])
+  int dstTensorLength = 1;  // init
+  for (int j=0, jj=0; jj<dstArray->rank; jj++){
+    if (dstArray->arrayToDistGridMap[jj]){
       // decomposed dimension
-      break;
-    else
+      contigFlag = false;
+    }else{
       // tensor dimension
-      dstTensorContigLength *= dstArray->undistUBound[jj]
-        - dstArray->undistLBound[jj] + 1;
+      dstTensorLength *= dstArray->undistUBound[j]
+        - dstArray->undistLBound[j] + 1;
+      if (contigFlag)
+        dstTensorContigLength *= dstArray->undistUBound[j]
+          - dstArray->undistLBound[j] + 1;
+      ++j;
+    }
   }
+  
+  // determine if there are undistributed dims past the first distributed
+  bool undistPastFirstDistDim = false;
+  if (srcTensorLength > srcTensorContigLength) undistPastFirstDistDim = true;
+  if (dstTensorLength > dstTensorContigLength) undistPastFirstDistDim = true;
   
   // encode sparseMatMul communication pattern into XXE stream
   localrc = sparseMatMulStoreEncodeXXE(vm,
@@ -9287,6 +9307,7 @@ int Array::sparseMatMulStore(
     srcLinSeqVect, dstLinSeqVect,
     dstLocalDeTotalElementCount,
     rraList, rraCount, routehandle,
+    undistPastFirstDistDim,
 #ifdef ASMMSTORETIMING
     &t8, &t9, &t10, &t11, &t12, &t13, &t14,
 #endif
@@ -9404,6 +9425,7 @@ int sparseMatMulStoreEncodeXXE(
   char **rraList,                         // in
   int rraCount,                           // in
   RouteHandle **routehandle,              // inout - handle to precomputed comm
+  bool undistPastFirstDistDim,            // in
 #ifdef ASMMSTORETIMING
   double *t8, double *t9, double *t10, double *t11, double *t12, double *t13,
   double *t14,
@@ -9480,6 +9502,8 @@ int sparseMatMulStoreEncodeXXE(
   xxe->typekind[0] = typekindFactors;
   xxe->typekind[1] = typekindSrc;
   xxe->typekind[2] = typekindDst;
+  // set the superVectorOkay flag
+  xxe->superVectorOkay = !undistPastFirstDistDim;
   // prepare XXE type variables
   XXE::TKId elementTK;
   switch (typekindDst){

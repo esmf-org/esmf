@@ -3530,8 +3530,9 @@ printf("gjt - DID NOT CANCEL commhandle\n");
       {
         xxeMemGatherSrcRRAInfo = (MemGatherSrcRRAInfo *)xxeElement;
 #ifdef EXECWITHPRINT
-        sprintf(msg, "XXE::memGatherSrcRRA: dstBaseTK=%d", 
-          xxeMemGatherSrcRRAInfo->dstBaseTK);
+        sprintf(msg, "XXE::memGatherSrcRRA: dstBaseTK=%d, vectorFlag=%d", 
+          xxeMemGatherSrcRRAInfo->dstBaseTK, 
+          xxeMemGatherSrcRRAInfo->vectorFlag);
         ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
 #endif
         char *dstBase = (char *)xxeMemGatherSrcRRAInfo->dstBase;
@@ -3543,7 +3544,37 @@ printf("gjt - DID NOT CANCEL commhandle\n");
         int vectorL = 1; // initialize
         if (xxeMemGatherSrcRRAInfo->vectorFlag)
           vectorL = *vectorLength;
-        if(superVecSize_r==-1){
+        if(xxeMemGatherSrcRRAInfo->vectorFlag && superVecSize_r>=1
+          && superVectorOkay){
+#ifdef EXECWITHPRINT
+          sprintf(msg, "XXE::memGatherSrcRRA: taking super-vector branch...");
+          ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
+#endif
+          switch (xxeMemGatherSrcRRAInfo->dstBaseTK){
+          case I4:
+            exec_memGatherSrcRRASuper<ESMC_I4>(xxeMemGatherSrcRRAInfo, vectorL,
+              rraList, superVecSize_r, superVecSize_s, superVecSize_t,
+              superVecSize_i, superVecSize_j);
+            break;
+          case I8:
+            exec_memGatherSrcRRASuper<ESMC_I8>(xxeMemGatherSrcRRAInfo, vectorL,
+              rraList, superVecSize_r, superVecSize_s, superVecSize_t,
+              superVecSize_i, superVecSize_j);
+            break;
+          case R4:
+            exec_memGatherSrcRRASuper<ESMC_R4>(xxeMemGatherSrcRRAInfo, vectorL,
+              rraList, superVecSize_r, superVecSize_s, superVecSize_t,
+              superVecSize_i, superVecSize_j);
+            break;
+          case R8:
+            exec_memGatherSrcRRASuper<ESMC_R8>(xxeMemGatherSrcRRAInfo, vectorL,
+              rraList, superVecSize_r, superVecSize_s, superVecSize_t,
+              superVecSize_i, superVecSize_j);
+            break;
+          default:
+            break;
+          }
+        }else{
 #ifdef EXECWITHPRINT
           sprintf(msg, "XXE::memGatherSrcRRA: taking vector branch...");
           ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
@@ -3574,35 +3605,6 @@ printf("gjt - DID NOT CANCEL commhandle\n");
           case R8:
             exec_memGatherSrcRRA<ESMC_R8>(xxeMemGatherSrcRRAInfo, vectorL,
               rraList);
-            break;
-          }
-        }else{
-#ifdef EXECWITHPRINT
-          sprintf(msg, "XXE::memGatherSrcRRA: taking super-vector branch...");
-          ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
-#endif
-          switch (xxeMemGatherSrcRRAInfo->dstBaseTK){
-          case I4:
-            exec_memGatherSrcRRASuper<ESMC_I4>(xxeMemGatherSrcRRAInfo, vectorL,
-              rraList, superVecSize_r, superVecSize_s, superVecSize_t,
-              superVecSize_i, superVecSize_j);
-            break;
-          case I8:
-            exec_memGatherSrcRRASuper<ESMC_I8>(xxeMemGatherSrcRRAInfo, vectorL,
-              rraList, superVecSize_r, superVecSize_s, superVecSize_t,
-              superVecSize_i, superVecSize_j);
-            break;
-          case R4:
-            exec_memGatherSrcRRASuper<ESMC_R4>(xxeMemGatherSrcRRAInfo, vectorL,
-              rraList, superVecSize_r, superVecSize_s, superVecSize_t,
-              superVecSize_i, superVecSize_j);
-            break;
-          case R8:
-            exec_memGatherSrcRRASuper<ESMC_R8>(xxeMemGatherSrcRRAInfo, vectorL,
-              rraList, superVecSize_r, superVecSize_s, superVecSize_t,
-              superVecSize_i, superVecSize_j);
-            break;
-          default:
             break;
           }
         }
