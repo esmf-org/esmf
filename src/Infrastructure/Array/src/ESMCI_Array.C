@@ -11300,13 +11300,16 @@ int Array::sparseMatMul(
   // undistributed: r, s, t
   int superVecSizeUnd[3];
   // distributed: i, j
-  int superVecSizeDis[2][srcArray->delayout->getLocalDeCount()];   
+  int srcLocalDeCount=0;
+  if (srcArrayFlag)
+    srcLocalDeCount = srcArray->delayout->getLocalDeCount();
+  int superVecSizeDis[2][srcLocalDeCount];   
 
   superVecSizeUnd[0]=-1;  // initialize with disabled super vector support
   superVecSizeUnd[1]=1;
   superVecSizeUnd[2]=1;
 
-  for (int j=0; j<srcArray->delayout->getLocalDeCount(); j++){
+  for (int j=0; j<srcLocalDeCount; j++){
     superVecSizeDis[0][j]=1;
     superVecSizeDis[1][j]=1;
   }
@@ -11317,7 +11320,7 @@ int Array::sparseMatMul(
     for (i=0; i<srcArray->rank-srcArray->tensorCount; i++){
       vectorLength = srcArray->sizeSuperUndist[0];  // ok to set multiple times
       superVecSizeUnd[i] = srcArray->sizeSuperUndist[i];
-      for (int j=0; j<srcArray->delayout->getLocalDeCount(); j++)
+      for (int j=0; j<srcLocalDeCount; j++)
         superVecSizeDis[i][j] = 
           srcArray->sizeDist[j*(srcArray->rank-srcArray->tensorCount)+i];
     }
