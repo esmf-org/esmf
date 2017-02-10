@@ -318,7 +318,7 @@ extern "C" {
 
   return;
 
-}  // end c_ESMC_BaseDeserialize
+}  // end c_ESMC_BaseDeserialize_idvmid
 
 //-----------------------------------------------------------------------------
 //BOP

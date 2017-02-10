@@ -180,6 +180,13 @@
        character(1), pointer :: cptr(:) => null ()
      end type
 
+!------------------------------------------------------------------------------
+!
+!    ! Types useful to pass arrays of arrays into Fortran API
+
+     type ESMF_PtrInt1D
+       integer, pointer :: ptr(:) => null ()
+     end type
 
 !------------------------------------------------------------------------------
 !
@@ -850,12 +857,17 @@
   end type
 
   type(ESMF_FileFormat_Flag), parameter :: &
+        ESMF_FILEFORMAT_UNKNOWN = ESMF_FileFormat_Flag(0), &
         ESMF_FILEFORMAT_VTK = ESMF_FileFormat_Flag(1), &
         ESMF_FILEFORMAT_SCRIP = ESMF_FileFormat_Flag(2), &
         ESMF_FILEFORMAT_ESMFMESH = ESMF_FileFormat_Flag(3), &
         ESMF_FILEFORMAT_ESMFGRID = ESMF_FileFormat_Flag(4), &
         ESMF_FILEFORMAT_UGRID = ESMF_FileFormat_Flag(5), &
-        ESMF_FILEFORMAT_GRIDSPEC = ESMF_FileFormat_Flag(6)
+        ESMF_FILEFORMAT_CFGRID = ESMF_FileFormat_Flag(6), &
+        ESMF_FILEFORMAT_GRIDSPEC = ESMF_FileFormat_Flag(6), &
+        ESMF_FILEFORMAT_MOSAIC = ESMF_FileFormat_Flag(7), &
+        ESMF_FILEFORMAT_TILE = ESMF_FileFormat_Flag(7)
+
 
 !------------------------------------------------------------------------------
 !
@@ -1075,8 +1087,8 @@
 
       public ESMF_KeywordEnforcer
 
-      public ESMF_Status, ESMF_Pointer, ESMF_CharPtr, ESMF_TypeKind_Flag
-      public ESMF_DataValue
+      public ESMF_Status, ESMF_Pointer, ESMF_CharPtr, ESMF_PtrInt1D
+      public ESMF_TypeKind_Flag, ESMF_DataValue
 
       public ESMF_MapPtr
 
@@ -1087,7 +1099,9 @@
 
       public ESMF_FileFormat_Flag, ESMF_FILEFORMAT_VTK, ESMF_FILEFORMAT_SCRIP, &
              ESMF_FILEFORMAT_ESMFMESH, ESMF_FILEFORMAT_ESMFGRID, &
-             ESMF_FILEFORMAT_UGRID, ESMF_FILEFORMAT_GRIDSPEC
+             ESMF_FILEFORMAT_UGRID, ESMF_FILEFORMAT_GRIDSPEC, &
+             ESMF_FILEFORMAT_CFGRID, ESMF_FILEFORMAT_MOSAIC, &
+             ESMF_FILEFORMAT_UNKNOWN, ESMF_FILEFORMAT_TILE
 
       public ESMF_FileStatus_Flag, ESMF_FILESTATUS_UNKNOWN,   &
                                   ESMF_FILESTATUS_OLD,       &

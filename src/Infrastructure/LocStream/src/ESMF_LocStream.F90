@@ -2164,7 +2164,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE:
       ! Private name: call using ESMF_LocStreamCreate()
       function ESMF_LocStreamCreateFromFile(filename, keywordEnforcer, &
-           fileformat, meshname, varname, indexflag, centerflag, name, rc)
+           fileformat, varname, indexflag, centerflag, name, rc)
 !
 ! !RETURN VALUE:
       type(ESMF_LocStream) :: ESMF_LocStreamCreateFromFile
@@ -2174,7 +2174,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       character (len=*),          intent(in)           :: filename
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       type(ESMF_FileFormat_Flag), intent(in), optional :: fileformat
-      character (len=*),          intent(in), optional :: meshname
       character(len=*),           intent(in), optional :: varname
       type(ESMF_Index_Flag),      intent(in), optional :: indexflag
       logical,                    intent(in), optional :: centerflag
@@ -2198,9 +2197,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !          Section~\ref{const:grid:fileformat} and Section~\ref{const:mesh:fileformat} for a 
 !          list of valid options (note that the {\tt ESMF\_FILEFORMAT\_GRIDSPEC} format is not
 !          supported).  If not specified, the default is {\tt ESMF\_FILEFORMAT\_SCRIP}.
-!     \item[{[meshname]}]
-!         The dummy variable for the mesh metadata in the UGRID file if the {\tt fileformat}
-!         is {\tt ESMF\_FILEFORMAT\_UGRID}.  This argument is optional.
 !     \item[{[varname]}]
 !         An optional variable name stored in the UGRID file to be used to
 !         generate the mask using the missing value of the data value of
@@ -2284,6 +2280,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         return
     endif   
 
+#if 0
     if (localfileformat /= ESMF_FILEFORMAT_UGRID .and. &
        (present(meshname) .or. present(varname))) then
         call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
@@ -2291,6 +2288,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           ESMF_CONTEXT, rcToReturn=rc)
         return
     endif
+#endif
    
     ! Initialize return code; assume failure until success is certain
     localrc = ESMF_RC_NOT_IMPL
@@ -2355,7 +2353,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     elseif (localfileformat == ESMF_FILEFORMAT_UGRID) then
        ! totaldims is the mesh_dimension (2 for 2D and 3 for 3D)
        if (localcenterflag) then
-          call ESMF_UGridInq(filename, meshname=meshname, elementCount=totalpoints, &
+          call ESMF_UGridInq(filename, elementCount=totalpoints, &
                              meshid=meshid, nodeCoordDim=totaldims, &
                              faceCoordFlag=haveface, rc=localrc)
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -2367,7 +2365,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
              return
           endif
        else
-          call ESMF_UGridInq(filename, meshname=meshname, nodeCount=totalpoints, &
+          call ESMF_UGridInq(filename, nodeCount=totalpoints, &
                              meshid=meshid, nodeCoordDim=totaldims, rc=localrc)
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                   ESMF_CONTEXT, rcToReturn=rc)) return

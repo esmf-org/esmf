@@ -13417,11 +13417,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
+#if 0
   if (mosaic%ntiles /= 6) then
       call ESMF_LogSetError(localrc, msg="- Cubed Sphere grid has to have 6 tiles", &
            ESMF_CONTEXT, rcToReturn=rc)
       return
   endif
+#endif
   
   tileCount = mosaic%ntiles
   tileSize = mosaic%tilesize
@@ -13651,13 +13653,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   ! If the total PET count is less than 6, some PETs will get more than one DE.
   ! Otherwise, total DEs is always less than or equal to total PETs.
   
-    if (PetCnt < 6) then 
-        totalDE=6
+    if (PetCnt < tileCount) then 
+        totalDE=tileCount
     else 
-        totalDE = (PetCnt/6)*6
+        totalDE = (PetCnt/tileCount)*tileCount
     endif
 
-    nxy = totalDE/6
+    nxy = totalDE/tileCount
     bigFac = 1
     do i=2, int(sqrt(float(nxy)))
       if ((nxy/i)*i == nxy) then
@@ -13681,7 +13683,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           ESMF_CONTEXT, rcToReturn=rc)) return
        !print *, PetNo, ' demap ', decount, demap
      endif     
-     allocate(regDecomp(2,6))
+     allocate(regDecomp(2,tileCount))
        regDecomp(1,:)=nx
        regDecomp(2,:)=ny  
     !-------------------------------------------

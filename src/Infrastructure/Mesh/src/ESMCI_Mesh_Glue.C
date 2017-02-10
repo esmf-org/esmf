@@ -1291,7 +1291,7 @@ void ESMCI_meshaddelements(Mesh **meshpp,
       *f=1.0;
       count ++;
     }
-    printf("number of elements: %d\n ", count);
+    //printf("number of elements: %d\n ", count);
   }
 
 

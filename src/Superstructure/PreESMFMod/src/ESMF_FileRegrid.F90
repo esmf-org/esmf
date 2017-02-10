@@ -776,14 +776,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           srcLocStream = ESMF_LocStreamCreate(srcfile, & 
        		      fileformat=localSrcFileType, &
 		      indexflag=ESMF_INDEX_DELOCAL, & 
-		      meshname=trim(srcVarStr), &
 		      varname=trim(srcVarName), &
 		      centerflag=.not. useSrcCorner, rc=localrc)
         else
           srcLocStream = ESMF_LocStreamCreate(srcfile, & 
        		      fileformat=localSrcFileType, &
 		      indexflag=ESMF_INDEX_DELOCAL, & 
-		      meshname=trim(srcVarStr), &
 		      centerflag=.not. useSrcCorner, rc=localrc)
         endif
         if (ESMF_LogFoundError(localrc, &
@@ -796,13 +794,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       else if (localRegridMethod == ESMF_REGRIDMETHOD_CONSERVE) then
         if (useSrcMask) then 
           srcMesh = ESMF_MeshCreate(srcfile, localsrcfiletype, &
-              meshname = trim(srcVarStr), maskFlag =srcmeshloc, &
+              maskFlag =srcmeshloc, &
 	    ! BOB: NEVER DO DUAL WHEN CONSERVE 
               convertToDual= .false., &
   	      varname=trim(srcVarName), rc=localrc)
         else
           srcMesh = ESMF_MeshCreate(srcfile, localsrcfiletype, &
-              meshname = trim(srcVarStr), &
 	    ! BOB: NEVER DO DUAL WHEN CONSERVE 
               convertToDual= .false., &
   	      rc=localrc)
@@ -817,12 +814,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       else ! Non-conservative, but also not nearest neighbor (this would be things like bilinear, etc.)
         if (useSrcMask) then 
           srcMesh = ESMF_MeshCreate(srcfile, localsrcfiletype, &
-              meshname = trim(srcVarStr), maskFlag =srcmeshloc, &
+              maskFlag =srcmeshloc, &
 	      convertToDual= .not. useSrcCorner, &
   	      varname=trim(srcVarName), rc=localrc)
         else
           srcMesh = ESMF_MeshCreate(srcfile, localsrcfiletype, &
-              meshname = trim(srcVarStr), &
 	      convertToDual=.not. useSrcCorner, &
   	      rc=localrc)
         endif
@@ -892,14 +888,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
            dstLocStream = ESMF_LocStreamCreate(dstfile, & 
        		      fileformat=localDstFileType, &
 		      indexflag=ESMF_INDEX_DELOCAL, & 
-		      meshname=trim(dstVarStr), &
 		      varname=trim(dstVarName), &
 		      centerflag=.not. useDstCorner, rc=localrc)
         else 
            dstLocStream = ESMF_LocStreamCreate(dstfile, & 
        		      fileformat=localDstFileType, &
 		      indexflag=ESMF_INDEX_DELOCAL, & 
-		      meshname=trim(dstVarStr), &
 		      centerflag=.not. useDstCorner, rc=localrc)
         endif
         if (ESMF_LogFoundError(localrc, &
@@ -912,13 +906,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       else
         if (useDstMask) then
           dstMesh = ESMF_MeshCreate(dstfile, localdstfiletype, &
-            meshname = trim(dstVarStr), maskFlag=dstmeshloc, &
+            maskFlag=dstmeshloc, &
 	    ! BOB: NEVER DO DUAL WHEN CONSERVE
 	    convertToDual= .false., &
             varname=trim(dstVarName), rc=localrc)
         else  
           dstMesh = ESMF_MeshCreate(dstfile, localdstfiletype, &
-            meshname = trim(dstVarStr), &
 	    ! BOB: NEVER DO DUAL WHEN CONSERVE
 	    convertToDual= .false., &
             rc=localrc)

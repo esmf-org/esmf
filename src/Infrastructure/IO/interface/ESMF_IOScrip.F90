@@ -36,6 +36,7 @@
       use ESMF_VMMod
       use ESMF_IOUGridMod
       use ESMF_IOGridspecMod
+      use ESMF_IOGridmosaicMod
 #ifdef ESMF_NETCDF
       use netcdf
 #endif
@@ -604,7 +605,7 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
 			              srcMissingValue, dstMissingValue, &
 				      srcvarname, dstvarname, &
 				      useSrcCorner, useDstCorner, &
-				      srccoordnames, dstcoordnames, rc)
+				      srccoordnames, dstcoordnames, tileFilePath, rc)
 !
 ! !ARGUMENTS:
       character(len=*), intent(in) :: wgtFile
@@ -625,6 +626,7 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
       character(len=*), optional, intent(in) :: srcvarname, dstvarname
       character(len=*), optional, intent(in) :: srccoordnames(:), dstcoordnames(:)
       logical, optional, intent(in) :: useSrcCorner, useDstCorner
+      character(len=*), optional, intent(in) :: tileFilePath
       integer, optional :: rc
 
       type(ESMF_VM):: vm
@@ -636,7 +638,7 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
       integer :: status
       integer :: i,j, k, start
       integer :: srcDim, dstDim
-      integer:: naDimId, nbDimId, nsDimId, srankDimId, drankDimId, varId
+      integer:: naDimId, nbDimId, nsDimId, srankDimId, drankDimId, varId, varId1, varId2
       integer :: nvaDimId, nvbDimId
       integer :: src_grid_rank, dst_grid_rank, src_grid_corner, dst_grid_corner
       integer, pointer :: src_grid_dims(:), dst_grid_dims(:)
@@ -672,6 +674,10 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
       logical            :: useSrcCornerlocal, useDstCornerlocal
       type(ESMF_NormType_Flag):: localNormType
       logical            :: src_has_area, dst_has_area
+      type(ESMF_Mosaic)  :: srcmosaic, dstmosaic
+      character(len=ESMF_MAXPATHLEN) :: tempname
+      integer            :: totalsize, totallen
+      integer            :: meshId
 
 #ifdef ESMF_NETCDF
       ! write out the indices and weights table sequentially to the output file
@@ -961,7 +967,19 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
           allocate(src_grid_dims(1))
           src_grid_dims(1)=srcDim
           src_grid_rank = 1    
+        else if (srcFileTypeLocal == ESMF_FILEFORMAT_MOSAIC) then 
+          call ESMF_GridSpecReadMosaic(srcFile, srcmosaic, tileFilePath=tileFilePath, rc=status)
+          if (ESMF_LogFoundError(status, ESMF_ERR_PASSTHRU, &
+             ESMF_CONTEXT, rcToReturn=rc)) return
+          srcCoordDim = 2
+  	  src_grid_rank = 1
+          src_grid_corner = 0
+          allocate(src_grid_dims(1))
+          srcDim = srcmosaic%tilesize * srcmosaic%tilesize * srcmosaic%ntiles
+          src_grid_dims(1)=srcDim
+  	  srcunits = 'degrees'
         endif 
+
         if (dstFileTypelocal == ESMF_FILEFORMAT_SCRIP) then
           allocate(dst_grid_dims(2))
           call ESMF_ScripInq(dstFile, grid_rank=dst_grid_rank, grid_size=dstDim, &
@@ -1028,7 +1046,19 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
           allocate(dst_grid_dims(1))
           dst_grid_dims(1)=dstDim   
           dst_grid_rank = 1
-        endif
+        else if (dstFileTypeLocal == ESMF_FILEFORMAT_MOSAIC) then 
+          call ESMF_GridSpecReadMosaic(dstFile, dstmosaic, tileFilePath=tileFilePath, rc=status)
+          if (ESMF_LogFoundError(status, ESMF_ERR_PASSTHRU, &
+             ESMF_CONTEXT, rcToReturn=rc)) return
+          dstCoordDim = 2
+  	  dst_grid_rank = 1
+          dst_grid_corner = 0
+          allocate(dst_grid_dims(1))
+          dstDim = dstmosaic%tilesize * dstmosaic%tilesize * dstmosaic%ntiles
+          dst_grid_dims(1)=dstDim
+	  dstunits = 'degrees'
+
+        endif 
         ! define dimensions
          ncStatus = nf90_def_dim(ncid,"n_a",srcDim, naDimId)
          errmsg = "Dimension n_a in "//trim(wgtfile)
@@ -1740,7 +1770,7 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
                  rc)) return
              ncStatus=nf90_inq_varid(ncid,"area_a",VarId)
              ncStatus=nf90_put_var(ncid,VarId, area)          
-             errmsg = "Variable mask_a in "//trim(wgtfile)
+             errmsg = "Variable area_a in "//trim(wgtfile)
              if (CDFCheckError (ncStatus, &
                ESMF_METHOD, &
                ESMF_SRCLINE,errmsg,&
@@ -1754,21 +1784,23 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
              rc)) return
 	else if (srcFileTypeLocal == ESMF_FILEFORMAT_UGRID) then 
            ! ESMF unstructured grid
+	   call ESMF_UGridInq(srcfile, srcmeshname, meshId=meshId, faceCoordFlag=faceCoordFlag)
+           if (ESMF_LogFoundError(status, ESMF_ERR_PASSTHRU, &
+               ESMF_CONTEXT, rcToReturn=rc)) return
   	   if (.not. useSrcCornerlocal .or. methodlocal%regridmethod ==ESMF_REGRIDMETHOD_CONSERVE%regridmethod) then 
 	     ! check if faceCoords exit
-	      call ESMF_UGridInq(srcfile, srcmeshname, faceCoordFlag=faceCoordFlag)
 	      allocate(latBuffer2(src_grid_corner,srcDim),&
 	   	       lonBuffer2(src_grid_corner,srcDim)) 
               if (faceCoordFlag) then
  	        allocate(latBuffer(srcDim), lonBuffer(srcDim))
-  	        call ESMF_UGridGetVar(srcfile, srcmeshname, &
+  	        call ESMF_UGridGetVar(srcfile, meshId, &
 		   faceXcoords=lonBuffer, faceYcoords=latBuffer, &
 		   faceNodeConnX=lonBuffer2, faceNodeConnY=latBuffer2, rc=status)
               else
   	        write(*,*) "Warning: face coordinates not present in src grid file,"// &
                   " so not outputting xc_a and yc_a to weight file."
                 write(*,*)
-  	        call ESMF_UGridGetVar(srcfile, srcmeshname, &
+  	        call ESMF_UGridGetVar(srcfile, meshId, &
 		   faceNodeConnX=lonBuffer2, faceNodeConnY=latBuffer2, rc=status)
               endif
 	      if (ESMF_LogFoundError(status, ESMF_ERR_PASSTHRU, &
@@ -1805,9 +1837,9 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
                   ESMF_SRCLINE,errmsg,&
                   rc)) return
               deallocate(latBuffer2, lonBuffer2)
-	  else
+	   else
 	      allocate(latBuffer(srcDim), lonBuffer(srcDim))
-  	      call ESMF_UGridGetVar(srcfile, srcmeshname, &
+  	      call ESMF_UGridGetVar(srcfile, meshId, &
 		   nodeXcoords=lonBuffer, nodeYcoords=latBuffer, rc=status)
 	      if (ESMF_LogFoundError(status, ESMF_ERR_PASSTHRU, &
         	  ESMF_CONTEXT, rcToReturn=rc)) return
@@ -1826,7 +1858,7 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
                 ESMF_SRCLINE,errmsg,&
               rc)) return
               deallocate(latBuffer, lonBuffer)
-	  endif
+	   endif
 
            ! Write out mask
            allocate(mask(srcDim))         
@@ -1855,7 +1887,44 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
   	     errmsg,&
              rc)) return
            deallocate(mask)
-
+	else if (srcFileTypeLocal == ESMF_FILEFORMAT_MOSAIC) then 
+           !read coordinates from the tile files
+           allocate(latBuffer2(srcmosaic%tilesize, srcmosaic%tilesize))
+           allocate(lonBuffer2(srcmosaic%tilesize, srcmosaic%tilesize))
+           totalsize = srcmosaic%tilesize*srcmosaic%tilesize
+           allocate(varBuffer1D(totalsize))
+	   ncStatus=nf90_inq_varid(ncid,"xc_a",VarId1)
+	   ncStatus=nf90_inq_varid(ncid,"yc_a",VarId2)
+           errmsg = "Variable xc_a or yc_a in "//trim(wgtfile)
+           if (CDFCheckError (ncStatus, &
+              ESMF_METHOD, &
+              ESMF_SRCLINE,&
+	      errmsg,&
+           rc)) return
+           do k=1,srcmosaic%ntiles 
+             totallen = len_trim(srcmosaic%filenames(k))+len_trim(srcmosaic%tileDirectory)
+             tempname = trim(srcmosaic%tileDirectory)//trim(srcmosaic%filenames(k))
+             call ESMF_GridspecReadTile(trim(tempname),srcmosaic%tilesize, &
+                  centerlon=lonBuffer2, centerlat=latBuffer2, rc=status)
+             if (ESMF_LogFoundError(status, ESMF_ERR_PASSTHRU, &
+         	ESMF_CONTEXT, rcToReturn=rc)) return
+             varBuffer1D=reshape(lonBuffer2,(/totalsize/))
+             start=(k-1)*totalsize+1      
+             ncStatus = nf90_put_var(ncid, VarId1,varBuffer1D, (/start/), (/totalsize/))
+             if (CDFCheckError (ncStatus, &
+                ESMF_METHOD, &
+                ESMF_SRCLINE,&
+  	        "writing xc_a in weight file", &
+             rc)) return
+             varBuffer1D=reshape(latBuffer2,(/totalsize/))
+             ncStatus = nf90_put_var(ncid, VarId2, varBuffer1D, (/start/), (/totalsize/))
+             if (CDFCheckError (ncStatus, &
+                ESMF_METHOD, &
+                ESMF_SRCLINE,&
+  	        "writing xc_a in weight file", &
+             rc)) return
+          enddo
+          deallocate(lonBuffer2, latBuffer2, varBuffer1D)              
         endif 
 
         ! Read the dstGrid variables and write them out
@@ -2209,22 +2278,24 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
              ESMF_SRCLINE,trim(dstFile),&
              rc)) return
 	else if (dstFileTypeLocal == ESMF_FILEFORMAT_UGRID) then 
+           call ESMF_UGridInq(dstfile, dstmeshname, meshId=meshId, faceCoordFlag=faceCoordFlag)
+           if (ESMF_LogFoundError(status, ESMF_ERR_PASSTHRU, &
+               ESMF_CONTEXT, rcToReturn=rc)) return
   	   if (.not. useDstCornerlocal .or. &
-	     methodlocal%regridmethod ==ESMF_REGRIDMETHOD_CONSERVE%regridmethod) then 
+ 	     methodlocal%regridmethod ==ESMF_REGRIDMETHOD_CONSERVE%regridmethod) then 
 	     ! check if faceCoords exit
-	      call ESMF_UGridInq(dstfile, dstmeshname, faceCoordFlag=faceCoordFlag)
 	        allocate(latBuffer2(dst_grid_corner,dstDim),&
 			lonBuffer2(dst_grid_corner,dstDim)) 
               if (faceCoordFlag) then
   	        allocate(latBuffer(dstDim), lonBuffer(dstDim))
-  	        call ESMF_UGridGetVar(dstfile, dstmeshname, &
+  	        call ESMF_UGridGetVar(dstfile, meshId, &
 		   faceXcoords=lonBuffer, faceYcoords=latBuffer, &
 		   faceNodeConnX=lonBuffer2, faceNodeConnY=latBuffer2, rc=status)
               else
   	        write(*,*) "Warning: face coordinates not present in dst grid file,"// &
                   " so not outputting xc_a and yc_a to weight file."
                 write(*,*)
-  	        call ESMF_UGridGetVar(dstfile, dstmeshname, &
+  	        call ESMF_UGridGetVar(dstfile, meshId, &
 		   faceNodeConnX=lonBuffer2, faceNodeConnY=latBuffer2, rc=status)
               endif
 	      if (ESMF_LogFoundError(status, ESMF_ERR_PASSTHRU, &
@@ -2262,9 +2333,9 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
                 ESMF_SRCLINE,errmsg,&
                 rc)) return
               deallocate(latBuffer2, lonBuffer2)
-	  else
+	   else
 	      allocate(latBuffer(dstDim), lonBuffer(dstDim))
-  	      call ESMF_UGridGetVar(dstfile, dstmeshname, &
+  	      call ESMF_UGridGetVar(dstfile, meshId, &
 		   nodeXcoords=lonBuffer, nodeYcoords=latBuffer, rc=rc)
    	      ncStatus=nf90_inq_varid(ncid,"xc_b",VarId)
               ncStatus=nf90_put_var(ncid,VarId, lonBuffer)          
@@ -2310,8 +2381,46 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
   	     errmsg,&
              rc)) return
            deallocate(mask)
+	else if (dstFileTypeLocal == ESMF_FILEFORMAT_MOSAIC) then 
+           !read coordinates from the tile files
+           allocate(latBuffer2(dstmosaic%tilesize, dstmosaic%tilesize))
+           allocate(lonBuffer2(dstmosaic%tilesize, dstmosaic%tilesize))
+           totalsize = dstmosaic%tilesize*dstmosaic%tilesize
+           allocate(varBuffer1D(totalsize))
+	   ncStatus=nf90_inq_varid(ncid,"xc_b",VarId1)
+	   ncStatus=nf90_inq_varid(ncid,"yc_b",VarId2)
+           errmsg = "Variable xc_b or yc_b in "//trim(wgtfile)
+           if (CDFCheckError (ncStatus, &
+              ESMF_METHOD, &
+              ESMF_SRCLINE,&
+	      errmsg,&
+           rc)) return
+           do k=1,dstmosaic%ntiles 
+             totallen = len_trim(dstmosaic%filenames(k))+len_trim(dstmosaic%tileDirectory)
+             tempname = trim(dstmosaic%tileDirectory)//trim(dstmosaic%filenames(k))
+             call ESMF_GridspecReadTile(trim(tempname),dstmosaic%tilesize, &
+                  centerlon=lonBuffer2, centerlat=latBuffer2, rc=status)
+             if (ESMF_LogFoundError(status, ESMF_ERR_PASSTHRU, &
+         	ESMF_CONTEXT, rcToReturn=rc)) return
+             varBuffer1D=reshape(lonBuffer2,(/totalsize/))
+             start=(k-1)*totalsize+1      
+             ncStatus = nf90_put_var(ncid, VarId1, varBuffer1D, (/start/), (/totalsize/))
+             if (CDFCheckError (ncStatus, &
+                ESMF_METHOD, &
+                ESMF_SRCLINE,&
+  	        "writing xc_b in weight file", &
+             rc)) return
+             varBuffer1D=reshape(latBuffer2,(/totalsize/))
+             ncStatus = nf90_put_var(ncid, VarId2,varBuffer1D, (/start/), (/totalsize/))
+             if (CDFCheckError (ncStatus, &
+                ESMF_METHOD, &
+                ESMF_SRCLINE,&
+  	        "writing yc_b in weight file", &
+             rc)) return
+          enddo
+          deallocate(lonBuffer2, latBuffer2, varBuffer1D)              
         endif 
-
+     
          ! Write area_a
          ncStatus=nf90_inq_varid(ncid,"area_a",VarId)
          if (present(srcArea)) then
@@ -2389,8 +2498,7 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
            ESMF_SRCLINE,errmsg,&
            rc)) return
          deallocate(src_grid_dims, dst_grid_dims)
-    end if
-
+    endif  ! PetNo==0
     ! Block all other PETs until the NetCDF file has been created
     call ESMF_VMBarrier(vm)
 

@@ -631,6 +631,9 @@ static const char *const version = "$Id$";
     // Initialize local return code; assume routine not implemented
     localrc = ESMC_RC_NOT_IMPL;
 
+    int r=*offset%8;
+    if (r!=0) *offset += 8-r;  // alignment
+
     ip = (int *)(buffer + *offset);
     ID = *ip++;
     refCount = *ip++;  
@@ -665,7 +668,11 @@ static const char *const version = "$Id$";
 
     // Deserialize the Attribute hierarchy
     if (attreconflag == ESMC_ATTRECONCILE_ON) {
+      if (*offset%8 != 0)
+        *offset += 8 - *offset%8;
       localrc = root.ESMC_Deserialize(buffer,offset);
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, 
+            ESMC_CONTEXT, &localrc)) return localrc;
     }
         
   return ESMF_SUCCESS;
@@ -865,14 +872,17 @@ static const char *const version = "$Id$";
 //
 //EOPI
     int fixedpart;
-    int *ip, i, rc;
+    int *ip, i, localrc;
     ESMC_Status *sp;
     ESMC_ProxyFlag *pfp;
     ESMCI::VMId *vmIDp;
     char *cp;
 
     // Initialize local return code; assume routine not implemented
-    rc = ESMC_RC_NOT_IMPL;
+    localrc = ESMC_RC_NOT_IMPL;
+
+    int r=*offset%8;
+    if (r!=0) *offset += 8-r;  // alignment
 
     fixedpart = sizeof(ESMC_Base);
     if (inquireflag == ESMF_INQUIREONLY) {
@@ -881,8 +891,8 @@ static const char *const version = "$Id$";
       if ((*length - *offset) < fixedpart) {
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD, 
                                "Buffer too short to add a Base object", 
-            ESMC_CONTEXT, &rc);
-        return ESMF_FAILURE; 
+            ESMC_CONTEXT, &localrc);
+        return localrc; 
         //buffer = (char *)realloc((void *)buffer, *length + 2*fixedpart);
         //*length += 2 * fixedpart;
       }
@@ -918,8 +928,12 @@ static const char *const version = "$Id$";
     }
 
     // Serialize the Attribute hierarchy
-    if (attreconflag == ESMC_ATTRECONCILE_ON) { 
-      rc = root.ESMC_Serialize(buffer,length,offset, inquireflag);
+    if (attreconflag == ESMC_ATTRECONCILE_ON) {
+      if (*offset%8 != 0)
+        *offset += 8 - *offset%8;
+      localrc = root.ESMC_Serialize(buffer,length,offset, inquireflag);
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, 
+            ESMC_CONTEXT, &localrc)) return localrc;
     }
 
   return ESMF_SUCCESS;

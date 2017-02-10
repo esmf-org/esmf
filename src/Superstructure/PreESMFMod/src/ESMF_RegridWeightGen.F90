@@ -46,6 +46,7 @@ module ESMF_RegridWeightGenMod
   use ESMF_IOScripMod
   use ESMF_IOGridspecMod
   use ESMF_IOUGridMod
+  use ESMF_IOFileTypeCheckMod
   use ESMF_RHandleMod
   use ESMF_LocStreamMod
   
@@ -103,6 +104,7 @@ contains
     useSrcCornerFlag, useDstCornerFlag, & 
     useUserAreaFlag, largefileFlag, &
     netcdf4fileFlag, weightOnlyFlag, &
+    tileFilePath, &
     verboseFlag, rc)
 
 ! !ARGUMENTS:
@@ -139,6 +141,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   logical,                      intent(in),  optional :: netcdf4fileFlag
   logical,                      intent(in),  optional :: weightOnlyFlag
   logical,                      intent(in),  optional :: verboseFlag
+  character(len=*),             intent(in),  optional :: tileFilePath
   integer,                      intent(out), optional :: rc
 
 ! !DESCRIPTION:
@@ -267,11 +270,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   \item [{[useSrcCornerFlag]}]
 !     If {\tt useSrcCornerFlag} is .TRUE., the corner coordinates of the source file
 !     will be used for regridding. Otherwise, the center coordinates will be us ed.
-!     The default is .FALSE.
+!     The default is .FALSE. The corner stagger is not supported for the SCRIP formatted input
+!     grid or multi-tile GRIDSPEC MOSAIC input grid.
 !   \item [{[useDstCornerFlag]}]
 !     If {\tt useDstCornerFlag} is .TRUE., the corner coordinates of the destination file
 !     will be used for regridding. Otherwise, the center coordinates will be used.
-!     The default is .FALSE.
+!     The default is .FALSE. The corner stagger is not supported for the SCRIP formatted input
+!     grid or multi-tile GRIDSPEC MOSAIC input grid.
 !   \item [{[useUserAreaFlag]}]
 !     If .TRUE., the element area values defined in the grid files are used.
 !     Only the SCRIP and ESMF format grid files have user specified areas. This flag
@@ -310,18 +315,18 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_Grid)    :: srcGrid, dstGrid
     type(ESMF_Field)   :: srcField, dstField
     type(ESMF_Field)   :: srcFracField, dstFracField
-    type(ESMF_ArraySpec) :: arrayspec
     integer(ESMF_KIND_I4), pointer:: factorIndexList(:,:)
     real(ESMF_KIND_R8), pointer :: factorList(:)
     integer(ESMF_KIND_I4) :: maskvals(1)
     integer            :: ind
-    integer, pointer   :: srcdims(:), dstdims(:)
+    integer            :: srcdims(2), dstdims(2)
     integer            :: srcrank, dstrank
     logical            :: isConserve, srcIsSphere, dstIsSphere
     logical            :: addCorners
     logical            :: convertSrcToDual,convertDstToDual
     type(ESMF_MeshLoc) :: meshloc
     logical            :: srcIsReg, dstIsReg
+    logical            :: srcIsMosaic, dstIsMosaic
     logical            :: srcIsRegional, dstIsRegional, typeSetFlag
     character(len=256) :: methodStr
     real(ESMF_KIND_R8), pointer :: srcArea(:)
@@ -370,8 +375,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     useSrcMask = .TRUE.
     useDstMask = .TRUE.
     localRegridMethod = ESMF_REGRIDMETHOD_BILINEAR
-    localSrcFileType = ESMF_FILEFORMAT_SCRIP
-    localDstFileType = ESMF_FILEFORMAT_SCRIP
+    localSrcFileType = ESMF_FILEFORMAT_UNKNOWN
+    localDstFileType = ESMF_FILEFORMAT_UNKNOWN
     localVerboseFlag = .false.
     srcIsRegional = .false.
     dstIsRegional = .false.
@@ -389,6 +394,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     localIgnoreDegenerate = .false.
     srcUseLocStream = .false.
     dstUseLocStream = .false.
+    srcIsMosaic = .false.
+    dstIsMosaic = .false.
+    srcIsReg = .false.
+    dstIsReg = .false.
 
     if (present(regridMethod)) then
       localRegridMethod = regridMethod
@@ -423,12 +432,23 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     if (present(srcFileType)) then
        localSrcFileType = srcFileType
-     endif
+    else 
+       call ESMF_FileTypeCheck(srcfile, localSrcFileType, rc=localrc)
+       if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
 
     if (present(dstFileType)) then
        localDstFileType = dstFileType
+    else
+       call ESMF_FileTypeCheck(dstfile, localDstFileType, rc=localrc)
+       if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
     endif
 
+    
     ! Handle optional normType argument
     if (present(normType)) then
        localNormType=normType
@@ -448,7 +468,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        endif
     endif
 
-
+#if 0
     ! If the src grid type is UGRID, get the dummy variable name in the file
     if (localSrcFileType == ESMF_FILEFORMAT_UGRID) then
       if (.not. present(srcMeshname)) then
@@ -468,22 +488,23 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         return
       endif
     endif
+#endif
 
     ! If the src grid type is UGRID or GRIDSPEC, check if the srcMissingvalueFlag is given 
     if (localSrcFileType == ESMF_FILEFORMAT_UGRID .or. &
-    	  localSrcFileType == ESMF_FILEFORMAT_GRIDSPEC) then
+    	localSrcFileType == ESMF_FILEFORMAT_GRIDSPEC) then
       if (present(srcMissingvalueFlag)) then
 	      srcMissingValue = srcMissingvalueFlag
 	    else
 	      srcMissingValue = .false.
       endif
-	    if (srcMissingValue) then
-	      if (.not. present(srcMissingvalueVar)) then
-          call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
-   	        msg ="srcMissingvalueVar argument is not given", &
-            ESMF_CONTEXT, rcToReturn=rc)
-          return
- 	      endif  
+      if (srcMissingValue) then
+          if (.not. present(srcMissingvalueVar)) then
+            call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
+                  msg ="srcMissingvalueVar argument is not given", &
+                  ESMF_CONTEXT, rcToReturn=rc)
+            return
+ 	  endif  
       endif
     endif
 
@@ -491,17 +512,17 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (localDstFileType == ESMF_FILEFORMAT_UGRID .or. &
       	localDstFileType == ESMF_FILEFORMAT_GRIDSPEC) then
       if (present(dstMissingvalueFlag)) then
-	      dstMissingValue = dstMissingvalueFlag
-	    else
-	      dstMissingValue = .false.
+	  dstMissingValue = dstMissingvalueFlag
+      else
+	  dstMissingValue = .false.
       endif
-	    if (dstMissingValue) then
-	      if (.not. present(dstMissingvalueVar)) then
-          call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
+      if (dstMissingValue) then
+	  if (.not. present(dstMissingvalueVar)) then
+            call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
    	        msg ="dstMissingvalueVar argument is not given", &
-            ESMF_CONTEXT, rcToReturn=rc)
-          return
-        endif
+                ESMF_CONTEXT, rcToReturn=rc)
+            return
+          endif
       endif
     endif
 
@@ -562,19 +583,19 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     endif
 
     if (present(largefileFlag)) then
-	    localLargeFileFlag = largefileFlag
+      localLargeFileFlag = largefileFlag
     endif
 
     if (present(netcdf4fileFlag)) then
-	    localNetcdf4FileFlag = netcdf4fileFlag
+      localNetcdf4FileFlag = netcdf4fileFlag
     endif
 
     if (present(weightOnlyFlag)) then
-            localWeightOnlyFlag = weightOnlyFlag
+      localWeightOnlyFlag = weightOnlyFlag
     endif
 
     if (present(useUserAreaFlag)) then
-	    localUserAreaFlag = useUserAreaFlag
+       localUserAreaFlag = useUserAreaFlag
     endif
 
     if (present(useSrcCornerFlag)) then
@@ -589,6 +610,25 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       localVerboseFlag = verboseFlag
     endif
 
+    if ((useSrcCorner .and. localSrcFileType == ESMF_FILEFORMAT_MOSAIC) .or. &
+       (useDstCorner .and. localDstFileType == ESMF_FILEFORMAT_MOSAIC)) then
+      call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
+	      msg = " Only Center Stagger is supported for the multi-tile GRIDSPEC MOSAIC grid", &
+              ESMF_CONTEXT, rcToReturn=rc)
+      return
+    endif
+
+#if 0
+    if ((localSrcFileType == ESMF_FILEFORMAT_MOSAIC .or. &
+        localDstFileType == ESMF_FILEFORMAT_MOSAIC) .and. &
+        .not. localWeightOnlyFlag) then
+      call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
+	      msg = " If one of the grids is in GRIDSPEC MOSAIC format, the WeightOnlyFlag has to be TRUE", &
+        ESMF_CONTEXT, rcToReturn=rc)
+      return
+    endif
+#endif
+
     ! user area only needed for conservative regridding
     if (localUserAreaFlag .and. (localRegridMethod /= ESMF_REGRIDMETHOD_CONSERVE)) then
       call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
@@ -602,8 +642,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 	      (localDstFileType /= ESMF_FILEFORMAT_SCRIP .and. &
  	      localDstFileType /= ESMF_FILEFORMAT_ESMFMESH)) then
       call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
-	      msg = "user defined areas is supported only when the source or dest grid is in SCRIP of ESMF format", &
-        ESMF_CONTEXT, rcToReturn=rc)
+	 msg = "user defined areas is supported only when the source or dest grid is in SCRIP of ESMF format", &
+         ESMF_CONTEXT, rcToReturn=rc)
       return
     endif
 
@@ -611,59 +651,63 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! coordinate variables
     if (localsrcFileType == ESMF_FILEFORMAT_GRIDSPEC) then
       if (present(useSrcCoordFlag)) then
-	      useSrcCoordVar = useSrcCoordFlag
+	useSrcCoordVar = useSrcCoordFlag
       else
         useSrcCoordVar = .false.
       endif
       if (useSrcCoordVar) then
-	      if (.not. present(srcCoordinateVars)) then
+        if (.not. present(srcCoordinateVars)) then
           call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
-     	      msg = "srcCoordinateVars argument is not given.", &
+     	    msg = "srcCoordinateVars argument is not given.", &
             ESMF_CONTEXT, rcToReturn=rc)
           return
-	      endif  
+	endif  
       endif
     endif
 
     if (localdstFileType == ESMF_FILEFORMAT_GRIDSPEC) then
       if (present(useDstCoordFlag)) then
-	      useDstCoordVar = useDstCoordFlag
+	useDstCoordVar = useDstCoordFlag
       else
         useDstCoordVar = .false.
       endif
       if (useDstCoordVar) then
-	      if (.not. present(dstCoordinateVars)) then
+	if (.not. present(dstCoordinateVars)) then
           call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
-     	      msg = "dstCoordinateVars argument is not given.", &
+     	    msg = "dstCoordinateVars argument is not given.", &
             ESMF_CONTEXT, rcToReturn=rc)
           return
-	      endif  
+	endif  
       endif
     endif
 
     ! Use LocStream if the source file format is SCRIP and the regridmethod is nearest-neighbor
-    if ((localSrcFileType /= ESMF_FILEFORMAT_GRIDSPEC) .and. &
+    if ((localSrcFileType /= ESMF_FILEFORMAT_GRIDSPEC .and. &
+         localSrcFileType /= ESMF_FILEFORMAT_MOSAIC ) .and. &
         (localRegridMethod == ESMF_REGRIDMETHOD_NEAREST_STOD .or. &
         localRegridMethod == ESMF_REGRIDMETHOD_NEAREST_DTOS)) then
 	srcUseLocStream = .TRUE.
     endif 
     ! Use LocStream if the dest file format is SCRIP and the regridmethod is non-conservative
-    if ((localDstFileType /= ESMF_FILEFORMAT_GRIDSPEC) .and. &
+    if ((localDstFileType /= ESMF_FILEFORMAT_GRIDSPEC .and. &
+         localDstFileType /= ESMF_FILEFORMAT_MOSAIC) .and. &
         (localRegridMethod /= ESMF_REGRIDMETHOD_CONSERVE)) then
 	dstUseLocStream = .TRUE.
-    endif 
+    endif
+ 
     ! Only set useSrcMask to false if srcMissingvalue is not given and the file type is
     ! either GRIDSPEC or UGRID, same for useDstMask
-    if ((.not. srcMissingvalue) .and. (localSrcFileType == ESMF_FILEFORMAT_GRIDSPEC)) &
+    if ((.not. srcMissingvalue) .and. (localSrcFileType == ESMF_FILEFORMAT_GRIDSPEC .or. &
+         localSrcFileType == ESMF_FILEFORMAT_MOSAIC)) &
       useSrcMask = .false.
 
-    if ((.not. dstMissingvalue) .and. (localDstFileType == ESMF_FILEFORMAT_GRIDSPEC)) &
+    if ((.not. dstMissingvalue) .and. (localDstFileType == ESMF_FILEFORMAT_GRIDSPEC .or. &
+         localDstFileType == ESMF_FILEFORMAT_MOSAIC)) &
       useDstMask = .false.
  
     ! Should I have only PetNO=0 to open the file and find out the size?
     if (PetNo == 0) then
       if (localSrcFileType == ESMF_FILEFORMAT_SCRIP) then
-        allocate(srcdims(2))
         call ESMF_ScripInq(srcfile, grid_rank= srcrank, grid_dims=srcdims, rc=localrc)
         if (localVerboseFlag .and. localrc /= ESMF_SUCCESS) then 
           write(*,*)
@@ -678,7 +722,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           srcIsReg = .false.
         endif
       elseif (localSrcFileType == ESMF_FILEFORMAT_GRIDSPEC) then
-        allocate(srcdims(2))
         if (useSrcCoordVar) then
            call ESMF_GridspecInq(srcfile, srcrank, srcdims, coord_names=srcCoordinateVars, rc=localrc)
         else
@@ -693,11 +736,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
               ESMF_CONTEXT, rcToReturn=rc)) return
 	      srcIsReg = .true.
         srcrank = 2
-      else
-        allocate(srcdims(2))
-	srcIsReg = .false.
+      elseif (localSrcFileType == ESMF_FILEFORMAT_MOSAIC) then
+        srcIsMosaic = .true.
       endif
-      allocate(dstdims(2))
       if (localdstFileType == ESMF_FILEFORMAT_SCRIP) then
 	call ESMF_ScripInq(dstfile, grid_rank=dstrank, grid_dims=dstdims, rc=localrc)
 	if (localVerboseFlag .and. localrc /= ESMF_SUCCESS) then 
@@ -727,12 +768,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
               ESMF_CONTEXT, rcToReturn=rc)) return
 	dstrank = 2
 	dstIsReg = .true.
-      else
-	dstIsReg = .false.
+      elseif (localDstFileType == ESMF_FILEFORMAT_MOSAIC) then
+        dstIsMosaic = .true.
       endif
       commandbuf(:) = 0
       if (srcIsReg) commandbuf(1) = 1
       if (dstIsReg) commandbuf(2) = 1
+      if (srcIsMosaic) commandbuf(1) = 2
+      if (dstIsMosaic) commandbuf(2) = 2
       if (srcIsReg) then
         commandbuf(3) = srcdims(1)
      	commandbuf(4) = srcdims(2)
@@ -747,20 +790,19 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             ESMF_CONTEXT, rcToReturn=rc)) return
     else
       ! Not the Root PET
-      allocate(srcdims(2),dstdims(2))
       call ESMF_VMBroadcast(vm, commandbuf, 6, 0, rc=rc)
       if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
       if (commandbuf(1) == 1) then
         srcIsReg = .true.
-      else
-        srcIsReg = .false.
+      elseif (commandbuf(1) == 2) then
+        srcIsMosaic = .true.
       endif        
       if (commandbuf(2) == 1) then
 	dstIsReg = .true.
-      else
-        dstIsReg = .false.
+      elseif (commandbuf(2) == 2) then
+        dstIsMosaic = .true.
       endif        
       srcdims(1) = commandbuf(3)  
       srcdims(2) = commandbuf(4)  
@@ -774,25 +816,29 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       print *, "  Source File: ", trim(srcfile)
       print *, "  Destination File: ", trim(dstfile)
       print *, "  Weight File: ", trim(weightFile)
+      if (localWeightOnlyFlag) then
+          print *, "    only output weights in the weight file"
+      endif
       if (localSrcFileType == ESMF_FILEFORMAT_SCRIP) then 
         print *, "  Source File is in SCRIP format"
       elseif (localSrcFileType == ESMF_FILEFORMAT_ESMFMESH) then 
         print *, "  Source File is in ESMF format"
       elseif (localSrcFileType == ESMF_FILEFORMAT_UGRID) then
-        print *, "  Source File is in UGRID format, dummy variable: ", &
-		    trim(srcMeshName)
+        print *, "  Source File is in UGRID format"
 	if (srcMissingValue) then
 	   print *, "    Use attribute 'missing_value' of variable '", trim(srcMissingvalueVar),"' as the mask"
 	endif
-      else 
-	print *, "  Source File is in GRIDSPEC format"
+      elseif  (localSrcFileType == ESMF_FILEFORMAT_GRIDSPEC) then
+	print *, "  Source File is in CF Tile format"
 	if (useSrcCoordVar) then
 	   print *, "    Use '", trim(srcCoordinateVars(1)), "' and '", trim(srcCoordinateVars(2)), &
 	               "' as the coordinate variables"
 	endif
 	if (srcMissingValue) then
 	   print *, "    Use the missing values of variable '", trim(srcMissingvalueVar),"' as the mask"
-        endif
+       endif
+      else
+	print *, "  Source File is in a multi-tile GRIDSPEC MOSAIC format"
       endif
       if (srcIsRegional) then
 	 print *, "  Source Grid is a regional grid"
@@ -801,6 +847,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       endif
       if (srcIsReg)   then
 	 print *, "  Source Grid is a logically rectangular grid"
+      elseif (srcIsMosaic) then
+	 print *, "  Source Grid is an multi-tile grid"
       else
 	 print *, "  Source Grid is an unstructured grid"
       endif
@@ -814,8 +862,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       elseif (localDstFileType == ESMF_FILEFORMAT_ESMFMESH) then 
         print *, "  Destination File is in ESMF format"
       elseif (localDstFileType == ESMF_FILEFORMAT_UGRID) then
-        print *, "  Destination File is in UGRID format, dummy variable: ", & 
-	    	trim(dstMeshName)
+        print *, "  Destination File is in UGRID format"
 	if (dstMissingValue) then
 	   print *, "    Use the missing value of '", trim(dstMissingvalueVar),"' as the mask"
         endif	
@@ -836,6 +883,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       endif
       if (dstIsReg)   then
 	 print *, "  Destination Grid is a logically rectangular grid"
+      elseif (dstIsMosaic) then
+	 print *, "  Destination Grid is an multi-tile grid"
       else
 	 print *, "  Destination Grid is an unstructured grid"
       endif
@@ -888,6 +937,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 	  print *, "  Norm Type: dstarea"
       elseif (localNormType .eq. ESMF_NORMTYPE_FRACAREA) then
 	  print *, "  Norm Type: fracarea"
+      endif
+      if (present(tileFilePath)) then
+          print *, "  Alternative tile file path: ", trim(tileFilePath)
       endif
       write(*,*)
     endif 
@@ -964,7 +1016,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         enddo
       endif
     endif
-    deallocate(srcdims)
 
     !Read in the srcfile and create the corresponding ESMF object (either
     ! ESMF_Grid or ESMF_Mesh
@@ -974,7 +1025,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
          srcLocStream = ESMF_LocStreamCreate(srcfile, & 
        		      fileformat=localSrcFileType, &
 		      indexflag=ESMF_INDEX_GLOBAL, & 
-		      meshname = trim(srcMeshName), &
 		      varname=trim(srcMissingvalueVar), &
 		      centerflag=.not. useSrcCorner, rc=localrc)
        else		      
@@ -986,11 +1036,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        if (ESMF_LogFoundError(localrc, &
               ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
-       call ESMF_ArraySpecSet(arrayspec, 1, ESMF_TYPEKIND_R8, rc=localrc)
-       if (ESMF_LogFoundError(localrc, &
-              ESMF_ERR_PASSTHRU, &
-              ESMF_CONTEXT, rcToReturn=rc)) return
-       srcField = ESMF_FieldCreate(srcLocStream, arrayspec, rc=localrc)
+       srcField = ESMF_FieldCreate(srcLocStream, typekind=ESMF_TYPEKIND_R8, rc=localrc)
        if (ESMF_LogFoundError(localrc, &
               ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
@@ -1020,11 +1066,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
          if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
-         call ESMF_ArraySpecSet(arrayspec, 2, ESMF_TYPEKIND_R8, rc=localrc)
-         if (ESMF_LogFoundError(localrc, &
-            ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rcToReturn=rc)) return
-    	 srcField = ESMF_FieldCreate(srcGrid, arrayspec, staggerloc=ESMF_STAGGERLOC_CENTER, rc=localrc)
+    	 srcField = ESMF_FieldCreate(srcGrid, typekind=ESMF_TYPEKIND_R8, &
+                    staggerloc=ESMF_STAGGERLOC_CENTER, rc=localrc)
          if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
@@ -1036,11 +1079,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
            if (ESMF_LogFoundError(localrc, &
               ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
-	      call ESMF_ArraySpecSet(arrayspec, 2, ESMF_TYPEKIND_R8, rc=localrc)
-           if (ESMF_LogFoundError(localrc, &
-              ESMF_ERR_PASSTHRU, &
-              ESMF_CONTEXT, rcToReturn=rc)) return
-     	   srcField = ESMF_FieldCreate(srcGrid, arrayspec, staggerloc=ESMF_STAGGERLOC_CENTER, rc=localrc)
+     	   srcField = ESMF_FieldCreate(srcGrid, typekind=ESMF_TYPEKIND_R8, &
+                       staggerloc=ESMF_STAGGERLOC_CENTER, rc=localrc)
            if (ESMF_LogFoundError(localrc, &
               ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
@@ -1051,17 +1091,27 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
            if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rcToReturn=rc)) return
-           call ESMF_ArraySpecSet(arrayspec, 1, ESMF_TYPEKIND_R8, rc=localrc)
-           srcField=ESMF_FieldCreate(srcMesh,arrayspec,meshloc=meshloc,rc=localrc)
+           srcField=ESMF_FieldCreate(srcMesh,typekind=ESMF_TYPEKIND_R8,meshloc=meshloc,rc=localrc)
            if (ESMF_LogFoundError(localrc, &
               ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
 	endif
+    elseif (localSrcFileType == ESMF_FILEFORMAT_MOSAIC) then
+        ! multi-tile Mosaic Cubed Sphere grid
+        srcGrid = ESMF_GridCreateMosaic(srcfile, tileFilePath=TileFilePath, rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
+           ESMF_ERR_PASSTHRU, &
+           ESMF_CONTEXT, rcToReturn=rc)) return
+     	srcField = ESMF_FieldCreate(srcGrid, typekind=ESMF_TYPEKIND_R8, &
+                   staggerloc=ESMF_STAGGERLOC_CENTER, rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
     else
 	! if srcfile is not SCRIP, it is always unstructured
 	if (srcMissingValue) then
 	   srcMesh = ESMF_MeshCreate(srcfile, localSrcFileType, &
-               meshname = trim(srcMeshName), maskFlag =meshloc, &
+               maskFlag =meshloc, &
                addUserArea=localUserAreaFlag, &
                convertToDual=convertSrcToDual, &
 	       varname=trim(srcMissingvalueVar), rc=localrc)
@@ -1069,13 +1119,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 	   srcMesh = ESMF_MeshCreate(srcfile, localSrcFileType, &
                 addUserArea=localUserAreaFlag, &
                convertToDual=convertSrcToDual, &
-                meshname = trim(srcMeshName), rc=localrc)
+               rc=localrc)
 	endif
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
-        call ESMF_ArraySpecSet(arrayspec, 1, ESMF_TYPEKIND_R8, rc=localrc)
-        srcField=ESMF_FieldCreate(srcMesh,arrayspec,meshloc=meshloc,rc=localrc)
+        srcField=ESMF_FieldCreate(srcMesh,typekind=ESMF_TYPEKIND_R8,meshloc=meshloc,rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
@@ -1108,14 +1157,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         enddo
       endif
     endif
-    deallocate(dstdims)
 
     if (dstUseLocStream) then
        if (dstMissingValue) then
          dstLocStream = ESMF_LocStreamCreate(dstfile, &
        		      fileformat=localDstFileType, &
 		      indexflag=ESMF_INDEX_GLOBAL, & 
-		      meshname = trim(dstMeshName), &
 		      varname= trim(dstMissingvalueVar), &
 		      centerflag=.not. useDstCorner, rc=localrc)
        else
@@ -1127,11 +1174,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        if (ESMF_LogFoundError(localrc, &
               ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
-       call ESMF_ArraySpecSet(arrayspec, 1, ESMF_TYPEKIND_R8, rc=localrc)
-       if (ESMF_LogFoundError(localrc, &
-              ESMF_ERR_PASSTHRU, &
-              ESMF_CONTEXT, rcToReturn=rc)) return
-       dstField = ESMF_FieldCreate(dstLocStream, arrayspec, rc=localrc)
+       dstField = ESMF_FieldCreate(dstLocStream, typekind=ESMF_TYPEKIND_R8, rc=localrc)
        if (ESMF_LogFoundError(localrc, &
               ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
@@ -1161,11 +1204,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
-      call ESMF_ArraySpecSet(arrayspec, 2, ESMF_TYPEKIND_R8, rc=localrc)
-      if (ESMF_LogFoundError(localrc, &
-            ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rcToReturn=rc)) return
-      dstField = ESMF_FieldCreate(dstGrid, arrayspec, staggerloc=ESMF_STAGGERLOC_CENTER, rc=localrc)
+      dstField = ESMF_FieldCreate(dstGrid, typekind=ESMF_TYPEKIND_R8, &
+                          staggerloc=ESMF_STAGGERLOC_CENTER, rc=localrc)
       if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
@@ -1177,11 +1217,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
            if (ESMF_LogFoundError(localrc, &
               ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
-	   call ESMF_ArraySpecSet(arrayspec, 2, ESMF_TYPEKIND_R8, rc=localrc)
-           if (ESMF_LogFoundError(localrc, &
-              ESMF_ERR_PASSTHRU, &
-              ESMF_CONTEXT, rcToReturn=rc)) return
-           dstField = ESMF_FieldCreate(dstGrid, arrayspec, staggerloc=ESMF_STAGGERLOC_CENTER, rc=localrc)
+           dstField = ESMF_FieldCreate(dstGrid, typekind=ESMF_TYPEKIND_R8, &
+                      staggerloc=ESMF_STAGGERLOC_CENTER, rc=localrc)
            if (ESMF_LogFoundError(localrc, &
               ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
@@ -1191,20 +1228,27 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             if (ESMF_LogFoundError(localrc, &
                ESMF_ERR_PASSTHRU, &
                ESMF_CONTEXT, rcToReturn=rc)) return
-            call ESMF_ArraySpecSet(arrayspec, 1, ESMF_TYPEKIND_R8, rc=localrc)
-            if (ESMF_LogFoundError(localrc, &
-               ESMF_ERR_PASSTHRU, &
-               ESMF_CONTEXT, rcToReturn=rc)) return
-            dstField=ESMF_FieldCreate(dstMesh,arrayspec,meshloc=meshloc,rc=localrc)
+            dstField=ESMF_FieldCreate(dstMesh,typekind=ESMF_TYPEKIND_R8,meshloc=meshloc,rc=localrc)
             if (ESMF_LogFoundError(localrc, &
                ESMF_ERR_PASSTHRU, &
                ESMF_CONTEXT, rcToReturn=rc)) return
 	endif
+    elseif (localDstFileType == ESMF_FILEFORMAT_MOSAIC) then
+        ! multi-tile Mosaic Cubed Sphere grid
+        dstGrid = ESMF_GridCreateMosaic(dstfile, tileFilePath=TileFilePath, rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
+           ESMF_ERR_PASSTHRU, &
+           ESMF_CONTEXT, rcToReturn=rc)) return
+     	dstField = ESMF_FieldCreate(dstGrid, typekind=ESMF_TYPEKIND_R8, &
+           staggerloc=ESMF_STAGGERLOC_CENTER, rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
     else
 	! if dstfile is not SCRIP, it is always unstructured
 	if (dstMissingValue) then
  	   dstMesh = ESMF_MeshCreate(dstfile, localDstFileType, &
-                      meshname = trim(dstMeshName), maskFlag=meshloc, &
+                      maskFlag=meshloc, &
                       addUserArea=localUserAreaFlag, &
                       convertToDual=convertDstToDual, &
 		      varname=trim(dstMissingvalueVar), rc=localrc)
@@ -1212,16 +1256,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 	   dstMesh = ESMF_MeshCreate(dstfile, localDstFileType, &
 	                addUserArea=localUserAreaFlag, &
                         convertToDual=convertDstToDual, &
-          		meshname = trim(dstMeshName), rc=localrc)
+          		rc=localrc)
         endif
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
-        call ESMF_ArraySpecSet(arrayspec, 1, ESMF_TYPEKIND_R8, rc=localrc)
-        if (ESMF_LogFoundError(localrc, &
-            ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rcToReturn=rc)) return
-        dstField=ESMF_FieldCreate(dstMesh,arrayspec,meshloc=meshloc,rc=localrc)
+        dstField=ESMF_FieldCreate(dstMesh,typekind=ESMF_TYPEKIND_R8,meshloc=meshloc,rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
@@ -1233,41 +1273,27 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! Create Frac Fields if conservative
     if (isConserve) then
-      if (srcIsReg) then
-        call ESMF_ArraySpecSet(arrayspec, 2, ESMF_TYPEKIND_R8, rc=localrc)
-        if (ESMF_LogFoundError(localrc, &
-              ESMF_ERR_PASSTHRU, &
-              ESMF_CONTEXT, rcToReturn=rc)) return
-        srcFracField = ESMF_FieldCreate(srcGrid, arrayspec, staggerloc=ESMF_STAGGERLOC_CENTER, rc=localrc)
+      if (srcIsReg .or. srcIsMosaic) then
+        srcFracField = ESMF_FieldCreate(srcGrid, typekind=ESMF_TYPEKIND_R8, &
+                     staggerloc=ESMF_STAGGERLOC_CENTER, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
               ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
       else
-        call ESMF_ArraySpecSet(arrayspec, 1, ESMF_TYPEKIND_R8, rc=localrc)
-        if (ESMF_LogFoundError(localrc, &
-              ESMF_ERR_PASSTHRU, &
-              ESMF_CONTEXT, rcToReturn=rc)) return
-        srcFracField=ESMF_FieldCreate(srcMesh,arrayspec,meshloc=meshloc,rc=localrc)
+        srcFracField=ESMF_FieldCreate(srcMesh,typekind=ESMF_TYPEKIND_R8,meshloc=meshloc,rc=localrc)
         if (ESMF_LogFoundError(localrc, &
               ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
       endif
 
-      if (dstIsReg) then
-        call ESMF_ArraySpecSet(arrayspec, 2, ESMF_TYPEKIND_R8, rc=localrc)
-        if (ESMF_LogFoundError(localrc, &
-              ESMF_ERR_PASSTHRU, &
-              ESMF_CONTEXT, rcToReturn=rc)) return
-        dstFracField = ESMF_FieldCreate(dstGrid, arrayspec, staggerloc=ESMF_STAGGERLOC_CENTER, rc=localrc)
+      if (dstIsReg .or. dstIsMosaic) then
+        dstFracField = ESMF_FieldCreate(dstGrid, typekind=ESMF_TYPEKIND_R8, &
+                     staggerloc=ESMF_STAGGERLOC_CENTER, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
               ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
       else
-        call ESMF_ArraySpecSet(arrayspec, 1, ESMF_TYPEKIND_R8, rc=localrc)
-        if (ESMF_LogFoundError(localrc, &
-              ESMF_ERR_PASSTHRU, &
-              ESMF_CONTEXT, rcToReturn=rc)) return
-        dstFracField=ESMF_FieldCreate(dstMesh,arrayspec,meshloc=meshloc,rc=localrc)
+        dstFracField=ESMF_FieldCreate(dstMesh,typekind=ESMF_TYPEKIND_R8,meshloc=meshloc,rc=localrc)
         if (ESMF_LogFoundError(localrc, &
               ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
@@ -1380,8 +1406,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Compute areas if conservative
     ! Area only valid on PET 0 right now, when parallel Array
     ! write works, then make area io parallel
+    if (.not. localWeightOnlyFlag) then
     if (isConserve) then
-      if (srcIsReg) then
+      if (srcIsReg .or. srcIsMosaic) then
         call computeAreaGrid(srcGrid, PetNo, srcArea, regridScheme, localrc)
         if (ESMF_LogFoundError(localrc, &
                               ESMF_ERR_PASSTHRU, &
@@ -1397,7 +1424,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
               ESMF_CONTEXT, rcToReturn=rc)) return
       endif
 
-      if (dstIsReg) then
+      if (dstIsReg .or. dstIsMosaic) then
         call computeAreaGrid(dstGrid, PetNo, dstArea, regridScheme, localrc)
         if (ESMF_LogFoundError(localrc, &
               ESMF_ERR_PASSTHRU, &
@@ -1413,10 +1440,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
               ESMF_CONTEXT, rcToReturn=rc)) return
       endif
     endif
-
+    endif
     ! Compact weight matrix
     ! (only compact if one of the grids is irregular, because that's when the repeated entries occur)
-    if ((.not. srcIsReg) .or. (.not. dstIsReg)) then
+    if (((.not. srcIsReg) .and. (.not. srcIsMosaic)) .or. &
+        ((.not. dstIsReg) .and. (.not. dstIsMosaic))) then
       call compactMatrix(factorList, factorIndexList, &
         wasCompacted, &
         compactedFactorList, compactedFactorIndexList, &
@@ -1438,48 +1466,50 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Computer fraction if bilinear
     ! src fraction is always 0
     ! destination fraction depends on the src mask, dst mask, and the weight
-    if (localRegridMethod /= ESMF_REGRIDMETHOD_CONSERVE) then
-      if (dstUseLocStream) then
-	call computeFracLocStream(dstLocStream, vm, factorIndexList, dstFrac, localrc)
-        if (ESMF_LogFoundError(localrc, &
+    if (.not. localWeightOnlyFlag) then
+      if (localRegridMethod /= ESMF_REGRIDMETHOD_CONSERVE) then
+        if (dstUseLocStream) then
+	  call computeFracLocStream(dstLocStream, vm, factorIndexList, dstFrac, localrc)
+          if (ESMF_LogFoundError(localrc, &
               ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
-      elseif (dstIsReg) then
-	call computeFracGrid(dstGrid, vm, factorIndexList, dstFrac, localrc)
-        if (ESMF_LogFoundError(localrc, &
+        elseif (dstIsReg .or. dstIsMosaic) then
+	  call computeFracGrid(dstGrid, vm, factorIndexList, dstFrac, localrc)
+          if (ESMF_LogFoundError(localrc, &
               ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
+        else
+	  call computeFracMesh(dstMesh, vm, factorIndexList, dstFrac, localrc)
+          if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+        endif
       else
-	call computeFracMesh(dstMesh, vm, factorIndexList, dstFrac, localrc)
-        if (ESMF_LogFoundError(localrc, &
+        if (srcIsReg .or. srcIsMosaic) then
+          call gatherFracFieldGrid(srcGrid, srcFracField, petNo, srcFrac, rc=localrc)
+          if (ESMF_LogFoundError(localrc, &
               ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
-      endif
-    else
-      if (srcIsReg) then
-        call gatherFracFieldGrid(srcGrid, srcFracField, petNo, srcFrac, rc=localrc)
-        if (ESMF_LogFoundError(localrc, &
+        else
+          call gatherFracFieldMesh(srcMesh, vm, srcFracField, petNo, petCnt, &
+            srcFrac, rc=localrc)
+          if (ESMF_LogFoundError(localrc, &
               ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
-      else
-        call gatherFracFieldMesh(srcMesh, vm, srcFracField, petNo, petCnt, &
-          srcFrac, rc=localrc)
-        if (ESMF_LogFoundError(localrc, &
-              ESMF_ERR_PASSTHRU, &
-              ESMF_CONTEXT, rcToReturn=rc)) return
-      endif
+        endif
  
-      if (dstIsReg) then
-        call gatherFracFieldGrid(dstGrid, dstFracField, petNo, dstFrac, rc=localrc)
-        if (ESMF_LogFoundError(localrc, &
+        if (dstIsReg .or. dstIsMosaic) then
+          call gatherFracFieldGrid(dstGrid, dstFracField, petNo, dstFrac, rc=localrc)
+          if (ESMF_LogFoundError(localrc, &
               ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
-      else
-        call gatherFracFieldMesh(dstMesh, vm, dstFracField, petNo, petCnt, &
-          dstFrac, rc=localrc)
-        if (ESMF_LogFoundError(localrc, &
+        else
+          call gatherFracFieldMesh(dstMesh, vm, dstFracField, petNo, petCnt, &
+            dstFrac, rc=localrc)
+          if (ESMF_LogFoundError(localrc, &
               ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
+        endif
       endif
     endif
 
@@ -1497,6 +1527,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 		  srcmeshname = srcMeshName, dstmeshname = dstMeshName, &
 		  srcMissingValue = srcMissingValue, dstMissingValue=dstMissingValue, &
 	          srcvarname = srcMissingvalueVar, dstvarname=dstMissingvalueVar, &
+                  tileFilePath = tileFilePath, &
 	 	  srccoordnames = srcCoordinateVars, dstcoordnames = dstCoordinateVars, rc=localrc)
           else if (useSrcCoordVar) then	
             call ESMF_OutputScripWeightFile(weightFile, factorList, factorIndexList,  &
@@ -1509,6 +1540,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 		  srcmeshname = srcMeshName, dstmeshname = dstMeshName, &
 		  srcMissingValue = srcMissingValue, dstMissingValue=dstMissingValue, &
 	          srcvarname = srcMissingvalueVar, dstvarname=dstMissingvalueVar, &
+                  tileFilePath = tileFilePath, &
 	 	  srccoordnames = srcCoordinateVars, rc=localrc)
 	  elseif (useDstCoordVar) then
             call ESMF_OutputScripWeightFile(weightFile, factorList, factorIndexList,  &
@@ -1521,6 +1553,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 		  srcmeshname = srcMeshName, dstmeshname = dstMeshName, &
 		  srcMissingValue = srcMissingValue, dstMissingValue=dstMissingValue, &
 	          srcvarname = srcMissingvalueVar, dstvarname=dstMissingvalueVar, &
+                  tileFilePath = tileFilePath, &
 	 	  dstcoordnames = dstCoordinateVars, rc=localrc)
 	  else
             call ESMF_OutputScripWeightFile(weightFile, factorList, factorIndexList,  &
@@ -1532,6 +1565,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 		  netcdf4FileFlag = localNetcdf4FileFlag, &
 		  srcmeshname = srcMeshName, dstmeshname = dstMeshName, &
 		  srcMissingValue = srcMissingValue, dstMissingValue=dstMissingValue, &
+                  tileFilePath = tileFilePath, &
 	          srcvarname = srcMissingvalueVar, dstvarname=dstMissingvalueVar, rc=localrc)
 	  endif
           if (ESMF_LogFoundError(localrc, &
@@ -1549,6 +1583,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 		  srcMissingValue = srcMissingValue, dstMissingValue=dstMissingValue, &
 	          srcvarname = srcMissingvalueVar, dstvarname=dstMissingvalueVar, &
 		  useSrcCorner=useSrcCorner, useDstCorner=useDstCorner, &
+                  tileFilePath = tileFilePath, &
  	 	  srccoordnames = srcCoordinateVars, dstcoordnames = dstCoordinateVars, rc=localrc)
 	  elseif (useSrcCoordVar) then
             call ESMF_OutputScripWeightFile(weightFile, factorList, factorIndexList,  &
@@ -1561,6 +1596,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 		  srcMissingValue = srcMissingValue, dstMissingValue=dstMissingValue, &
 	          srcvarname = srcMissingvalueVar, dstvarname=dstMissingvalueVar, &
 		  useSrcCorner=useSrcCorner, useDstCorner=useDstCorner, &
+                  tileFilePath = tileFilePath, &
  	 	  srccoordnames = srcCoordinateVars, rc=localrc)
 	  elseif (useDstCoordVar) then
              call ESMF_OutputScripWeightFile(weightFile, factorList, factorIndexList,  &
@@ -1573,6 +1609,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 		  srcMissingValue = srcMissingValue, dstMissingValue=dstMissingValue, &
 	          srcvarname = srcMissingvalueVar, dstvarname=dstMissingvalueVar, &
 		  useSrcCorner=useSrcCorner, useDstCorner=useDstCorner, &
+                  tileFilePath = tileFilePath, &
  	 	  dstcoordnames = dstCoordinateVars, rc=localrc)
 	  else
             call ESMF_OutputScripWeightFile(weightFile, factorList, factorIndexList,  &
@@ -1584,6 +1621,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 		  srcmeshname = srcMeshName, dstmeshname = dstMeshName, &
 		  srcMissingValue = srcMissingValue, dstMissingValue=dstMissingValue, &
 		  useSrcCorner=useSrcCorner, useDstCorner=useDstCorner, &
+                  tileFilePath = tileFilePath, &
 	          srcvarname = srcMissingvalueVar, dstvarname=dstMissingvalueVar, rc=localrc)
           endif
           if (ESMF_LogFoundError(localrc, &
@@ -1724,8 +1762,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     deallocate(sendbuf, recvbuf)         
     endif
 #endif
-    
+
     ! Get rid of conservative arrays
+    if (.not. localWeightOnlyFlag) then
     if (isConserve) then
       if (PetNo == 0) then
         deallocate(srcArea)
@@ -1735,6 +1774,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (PetNo == 0) then
       deallocate(dstFrac)
       if (isConserve) deallocate(srcFrac)
+    endif
     endif
 
     ! clean up
@@ -1747,14 +1787,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     endif
     if (srcUseLocStream) then
        call ESMF_LocStreamDestroy(srcLocStream)
-    elseif (srcIsReg) then
+    elseif (srcIsReg .or. srcIsMosaic) then
        call ESMF_GridDestroy(srcGrid)
     else
        call ESMF_MeshDestroy(srcMesh)
     endif   
     if (dstUseLocStream) then
        call ESMF_LocStreamDestroy(dstLocStream)
-    elseif (dstIsReg) then
+    elseif (dstIsReg .or. dstIsMosaic) then
        call ESMF_GridDestroy(dstGrid)
     else
        call ESMF_MeshDestroy(dstMesh)
@@ -1784,7 +1824,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     srcNodalDistgrid, dstNodalDistgrid, &
     weightFile, regridmethod, lineType, normType, unmappedaction, &
     ignoreDegenerate, useUserAreaFlag, &
-    largefileFlag, netcdf4fileFlag, verboseFlag, rc)
+    largefileFlag, netcdf4fileFlag, &
+    weightOnlyFlag, verboseFlag, rc)
 
 ! !ARGUMENTS:
 
@@ -1805,6 +1846,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   logical,                      intent(in),  optional :: useUserAreaFlag
   logical,                      intent(in),  optional :: largefileFlag
   logical,                      intent(in),  optional :: netcdf4fileFlag
+  logical,                      intent(in),  optional :: weightOnlyFlag
   logical,                      intent(in),  optional :: verboseFlag
   integer,                      intent(out), optional :: rc
 
@@ -1881,6 +1923,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   \item [{[netcdf4fileFlag]}]
 !     If .TRUE., the output weight file is in NetCDF4 file format. 
 !     The default is .FALSE.
+!   \item [{[weightOnlyFlag]}]
+!     If .TRUE., the output weight file only contains factorList and factorIndexList. 
+!     The default is .FALSE.
 !   \item [{[verboseFlag]}]
 !     If .TRUE., it will print summary information about the regrid parameters,
 !     default to .FALSE.
@@ -1893,6 +1938,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     logical            :: localUserAreaFlag
      logical            :: localLargefileFlag
     logical            :: localNetcdf4fileFlag
+    logical            :: localWeightOnlyFlag
     logical            :: localVerboseFlag
     integer            :: localrc
     type(ESMF_VM)      :: vm
@@ -1944,6 +1990,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     localVerboseFlag = .false.
     localLargeFileFlag = .false.
     localNetcdf4FileFlag = .false.
+    localWeightOnlyFlag = .false.
     localUserAreaflag = .false.
     localIgnoreDegenerate = .false.
 
@@ -1969,6 +2016,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 	    localNetcdf4FileFlag = netcdf4fileFlag
     endif
 
+    if (present(weightOnlyFlag)) then
+            localWeightOnlyFlag = weightOnlyFlag
+    endif
     if (present(useUserAreaFlag)) then
 	    localUserAreaFlag = useUserAreaFlag
     endif
@@ -1995,7 +2045,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        endif
     endif
 
-
     ! user area only needed for conservative regridding
     if (localUserAreaFlag .and. (localRegridMethod /= ESMF_REGRIDMETHOD_CONSERVE)) then
       call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
@@ -2011,6 +2060,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       print *, "  Destination File: ", trim(dstfile)
       if (present(weightFile)) then
         print *, "  Weight File: ", trim(weightFile)
+        if (localWeightOnlyFlag) then
+          print *, "  only output weights in the weight file"
+        endif
       endif
       if (localRegridMethod == ESMF_REGRIDMETHOD_BILINEAR) then
         print *, "  Regrid Method: bilinear"
@@ -2197,12 +2249,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Only compute area, fraction and output weight file is weightFile is present
-    if (present(weightFile)) then
+    if (present(weightFile) .and. .not. localWeightOnlyFlag) then
       ! Compute areas if conservative
       ! Area only valid on PET 0 right now, when parallel Array
       ! write works, then make area io parallel
       if (isConserve) then
-        call computeRedistAreaMesh(srcMesh, vm, petNo, petCnt, srcArea, localrc)
+         call computeRedistAreaMesh(srcMesh, vm, petNo, petCnt, srcArea, localrc)
         if (ESMF_LogFoundError(localrc, &
               ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
@@ -2283,13 +2335,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                 ESMF_CONTEXT, rcToReturn=rc)) return
 	      endif
       else 
-	      call ESMF_OutputScripWeightFile(weightFile, factorList, factorIndexList, &
+	call ESMF_OutputScripWeightFile(weightFile, factorList, factorIndexList, &
                   normType=localNormType, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
               ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
       endif
-
+         
       !call ESMF_VMBarrier(vm)
       !call ESMF_VMWtime(endtime, rc=localrc)
 
@@ -2304,6 +2356,34 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         if (isConserve) deallocate(srcFrac)
 	deallocate(dstFrac)
       endif
+    else if (present(weightFile)) then  !localWeightOnlyFlag = .TRUE.
+      call compactMatrix(factorList, factorIndexList, &
+        wasCompacted, &
+        compactedFactorList, compactedFactorIndexList, &
+        localrc)
+      if (ESMF_LogFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+
+      ! If the list was compacted get rid of the old lists and 
+      ! point to the new lists
+      if (wasCompacted) then
+        deallocate(factorList)
+        factorList=>compactedFactorList
+        deallocate(factorIndexList)
+        factorIndexList=>compactedFactorIndexList
+      endif
+
+      ! write simple weight file
+      call ESMF_OutputSimpleWeightFile(weightFile, factorList, factorIndexList, &
+                  title = "ESMF Regrid Weight Generator", &
+                  method = localRegridMethod, &
+		  largeFileFlag=localLargeFileFlag, &
+		  netcdf4FileFlag = localNetcdf4FileFlag, &
+                  rc=localrc)
+      if (ESMF_LogFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
     endif
 
     ! clean up
@@ -2348,23 +2428,14 @@ subroutine computeAreaGrid(grid, petNo, area, regridScheme, rc)
   integer :: rc
 
   type(ESMF_Field) :: areaField
-  type(ESMF_ArraySpec) ::arrayspec
   integer :: minIndex(2), maxIndex(2), gridDims(2)
   real (ESMF_KIND_R8), pointer :: area2D(:,:)
+  integer :: i, start, ntiles
   integer :: localrc
 
-  ! Setup Arrayspec
-  call ESMF_ArraySpecSet(arrayspec, 2, ESMF_TYPEKIND_R8, rc=localrc)
-  if (ESMF_LogFoundError(localrc, &
-                         ESMF_ERR_PASSTHRU, &
-                         ESMF_CONTEXT, rcToReturn=rc)) return
-  if (localrc /=ESMF_SUCCESS) then
-     rc=localrc
-     return
-  endif
-
   ! Create a field on the grid to hold the areas
-  areaField=ESMF_FieldCreate(grid, arrayspec, staggerloc=ESMF_STAGGERLOC_CENTER, name="area", rc=localrc)
+  areaField=ESMF_FieldCreate(grid, typekind=ESMF_TYPEKIND_R8, &
+                 staggerloc=ESMF_STAGGERLOC_CENTER, name="area", rc=localrc)
   if (ESMF_LogFoundError(localrc, &
                          ESMF_ERR_PASSTHRU, &
                          ESMF_CONTEXT, rcToReturn=rc)) return
@@ -2383,6 +2454,11 @@ subroutine computeAreaGrid(grid, petNo, area, regridScheme, rc)
      return
   endif
 
+  ! Get number of tiles
+  call ESMF_GridGet(grid, tileCount = ntiles, rc=localrc)
+  if (ESMF_LogFoundError(localrc, &
+       ESMF_ERR_PASSTHRU, &
+       ESMF_CONTEXT, rcToReturn=rc)) return
 
   ! Get size of Grid
   call ESMF_GridGet(grid, tile=1, staggerloc=ESMF_STAGGERLOC_CENTER, &
@@ -2399,33 +2475,33 @@ subroutine computeAreaGrid(grid, petNo, area, regridScheme, rc)
   gridDims(1)=maxIndex(1)-minIndex(1)+1
   gridDims(2)=maxIndex(2)-minIndex(2)+1
 
+  ! Allocate memory for area
+  allocate(area2D(gridDims(1),gridDims(2)))
 
+  ! Only do this part on PET 0
+  if (petNo .eq. 0) then
      ! Allocate memory for area
-     allocate(area2D(gridDims(1),gridDims(2)))
+     allocate(area(gridDims(1)*gridDims(2)*ntiles))
+  endif
 
-     ! Get area onto PET 0
-     call ESMF_FieldGather(areaField, farray=area2D, rootPet=0, rc=localrc)
-  if (ESMF_LogFoundError(localrc, &
+  ! Get area onto PET 0
+  start=1
+  do i=1,ntiles
+    call ESMF_FieldGather(areaField, farray=area2D, rootPet=0, tile=i, rc=localrc)
+    if (ESMF_LogFoundError(localrc, &
                          ESMF_ERR_PASSTHRU, &
                          ESMF_CONTEXT, rcToReturn=rc)) return
-     if (localrc /=ESMF_SUCCESS) then
-         rc=localrc
-        return
+
+     ! copy to 1D array
+     if (PetNo == 0) then
+       ! flatten area
+       area(start:start+gridDims(1)*gridDims(2)-1)=RESHAPE(area2D,(/gridDims(1)*gridDims(2)/))
+       start= start+gridDims(1)*gridDims(2)
      endif
- 
-     ! Only do this part on PET 0
-     if (petNo .eq. 0) then
+  enddo
 
-        ! Allocate memory for area
-        allocate(area(gridDims(1)*gridDims(2)))
-
-        ! flatten area
-        area=RESHAPE(area2D,(/gridDims(1)*gridDims(2)/))
-
-     endif
-
-     ! deallocate memory for 2D area
-     deallocate(area2D)
+  ! deallocate memory for 2D area
+  deallocate(area2D)
 
 end subroutine computeAreaGrid
 
@@ -2517,7 +2593,6 @@ subroutine computeRedistAreaMesh(mesh, vm, petNo, petCnt, area, rc)
        ESMF_CONTEXT, rcToReturn=rc)) return
 
   totalCount=globalCount(1)
-  print *, 'local element ', localElemCount, totalCount
 
   ! Create distgrid with everything on PET 0
   justPet0Distgrid = ESMF_DistGridCreate((/1/),(/totalCount/), regDecomp=(/1/),&
@@ -2694,24 +2769,26 @@ subroutine computeFracGrid(grid, vm, indices, frac, rc)
   integer :: rc
 
   type (ESMF_DistGrid) :: distgrid
-  integer (ESMF_KIND_I4) :: localCount(1), elementCount(1)
+  integer (ESMF_KIND_I4) :: localCount(1)
+  integer (ESMF_KIND_I4), pointer :: elementCount(:)
   integer (ESMF_KIND_I4),pointer :: globalCount(:),globalDispl(:)
   integer (ESMF_KIND_I4),pointer :: buffer(:),buffer1(:)
-  integer :: totalCount
-  integer :: i, j, total 
+  integer :: totalCount, totalElements
+  integer :: i, j, total
   integer :: petNo,petCnt
-  integer :: saved, count
+  integer :: saved, count, ntiles
 
   call ESMF_VMGet(vm, localPet=PetNo, petCount=PetCnt, rc=rc)
 
   ! Allocate List of counts
   allocate(globalCount(petCnt))
 
-  call ESMF_GridGet(grid, distgrid=distgrid, rc=rc)
+  call ESMF_GridGet(grid, distgrid=distgrid, tileCount=ntiles, rc=rc)
   if (rc /=ESMF_SUCCESS) then
       return
   endif
 
+  allocate(elementCount(ntiles))
   call ESMF_DistGridGet(distgrid, elementCountPTile=elementCount, rc=rc)
   total = size(indices,2)
   ! find unique indices in the destination column: indices(2,:)
@@ -2776,7 +2853,11 @@ subroutine computeFracGrid(grid, vm, indices, frac, rc)
   endif  
 
   if (PetNo==0) then
-    allocate(frac(elementCount(1)))
+    totalElements = 0
+    do i=1,ntiles
+      totalElements=totalElements+elementCount(i)
+    enddo
+    allocate(frac(totalElements))
     frac = 0
     do i=1,totalCount
        frac(buffer1(i))=1
@@ -2786,6 +2867,7 @@ subroutine computeFracGrid(grid, vm, indices, frac, rc)
   ! Get rid of helper variables
   deallocate(buffer, buffer1) 
   deallocate(globalCount)
+  deallocate(elementCount)
   deallocate(globalDispl)
 
 end subroutine computeFracGrid
@@ -3013,44 +3095,52 @@ subroutine gatherFracFieldGrid(grid, fracField, petNo, frac, rc)
   integer :: rc
   integer :: minIndex(2), maxIndex(2), gridDims(2)
   real (ESMF_KIND_R8), pointer :: frac2D(:,:)
+  integer :: i, start, ntiles
   integer :: localrc
 
 
   ! Get size of Grid
-  call ESMF_GridGet(grid, tile=1, staggerloc=ESMF_STAGGERLOC_CENTER, minIndex=minIndex, maxIndex=maxIndex, rc=localrc)
-  if (localrc /=ESMF_SUCCESS) then
-      rc=localrc
-      return
-  endif
+  call ESMF_GridGet(grid, tile=1, staggerloc=ESMF_STAGGERLOC_CENTER, &
+       minIndex=minIndex, maxIndex=maxIndex, rc=localrc)
+  if (ESMF_LogFoundError(localrc, &
+       ESMF_ERR_PASSTHRU, &
+       ESMF_CONTEXT, rcToReturn=rc)) return
 
+  ! Get number of tiles
+  call ESMF_GridGet(grid, tileCount = ntiles, rc=localrc)
+  if (ESMF_LogFoundError(localrc, &
+       ESMF_ERR_PASSTHRU, &
+       ESMF_CONTEXT, rcToReturn=rc)) return
+  
   ! Grid size
   gridDims(1)=maxIndex(1)-minIndex(1)+1
   gridDims(2)=maxIndex(2)-minIndex(2)+1
 
+  ! Allocate memory for area
+  allocate(frac2D(gridDims(1),gridDims(2)))
 
+  ! Only do this part on PET 0
+  if (petNo .eq. 0) then
      ! Allocate memory for area
-     allocate(frac2D(gridDims(1),gridDims(2)))
+     allocate(frac(gridDims(1)*gridDims(2)*ntiles))
+  endif
 
-     ! Get area onto PET 0
-     call ESMF_FieldGather(fracField, farray=frac2D, rootPet=0, rc=localrc)
-     if (localrc /=ESMF_SUCCESS) then
-         rc=localrc
-        return
+  ! Get area onto PET 0
+  start = 1
+  do i=1,ntiles
+     call ESMF_FieldGather(fracField, farray=frac2D, rootPet=0, tile=i, rc=localrc)
+     if (ESMF_LogFoundError(localrc, &
+       ESMF_ERR_PASSTHRU, &
+       ESMF_CONTEXT, rcToReturn=rc)) return
+     ! copy to 1D array
+     if (PetNo == 0) then
+       ! flatten area
+       frac(start:start+gridDims(1)*gridDims(2)-1)=RESHAPE(frac2D,(/gridDims(1)*gridDims(2)/))
+       start= start+gridDims(1)*gridDims(2)
      endif
- 
-     ! Only do this part on PET 0
-     if (petNo .eq. 0) then
-
-        ! Allocate memory for area
-        allocate(frac(gridDims(1)*gridDims(2)))
-
-        ! flatten area
-        frac=RESHAPE(frac2D,(/gridDims(1)*gridDims(2)/))
-
-     endif
-
-     ! deallocate memory for 2D area
-     deallocate(frac2D)
+  enddo
+  ! deallocate memory for 2D area
+  deallocate(frac2D)
      
 end subroutine gatherFracFieldGrid
 

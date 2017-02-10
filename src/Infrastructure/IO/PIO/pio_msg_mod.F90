@@ -299,14 +299,14 @@ contains
 
 
 
-       if(debugasync) print *,__FILE__,__LINE__,index
+       if(debugasync) print *,__PIO_FILE__,__LINE__,index
     end if
     iodesc%async_id=index
     list_item%index=index
     list_item%iodesc => iodesc
 
 
-    if(debugasync) print *,__FILE__,__LINE__,index,list_item%iodesc%async_id
+    if(debugasync) print *,__PIO_FILE__,__LINE__,index,list_item%iodesc%async_id
 
   end subroutine add_to_iodesc_list
 
@@ -320,7 +320,7 @@ contains
     nullify(previtem)
     do while(associated(list_item%iodesc) )
        if(abs(list_item%iodesc%async_id) == id) then
-    if(debugasync) print *,__FILE__,__LINE__,id,list_item%index
+    if(debugasync) print *,__PIO_FILE__,__LINE__,id,list_item%index
           iodesc=>list_item%iodesc
           iodesc%async_id=-1
           nullify(list_item%iodesc)
@@ -422,10 +422,10 @@ contains
     nullify(iodesc)
     do while(associated(list_item%iodesc) )
 
-       if(debugasync) print *,__FILE__,__LINE__,list_item%index,async_id,list_item%iodesc%async_id
+       if(debugasync) print *,__PIO_FILE__,__LINE__,list_item%index,async_id,list_item%iodesc%async_id
        if(abs(list_item%iodesc%async_id) == async_id) then
           iodesc => list_item%iodesc
-          if(debugasync) print *,__FILE__,__LINE__,async_id,list_item%index,iodesc%write%n_elemtype
+          if(debugasync) print *,__PIO_FILE__,__LINE__,async_id,list_item%index,iodesc%write%n_elemtype
           exit
        end if
        list_item=>list_item%next

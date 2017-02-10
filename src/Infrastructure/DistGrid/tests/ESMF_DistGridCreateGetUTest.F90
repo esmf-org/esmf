@@ -52,7 +52,7 @@ program ESMF_DistGridCreateGetUTest
 
   !LOCAL VARIABLES:
   type(ESMF_VM):: vm
-  integer:: petCount, localPet, i, localDeCount
+  integer:: petCount, localPet, i, j, localDeCount
   type(ESMF_DistGrid):: distgrid, distgrid2, distgrid3, distgridAlias
   type(ESMF_DELayout):: delayout
   integer:: dimCount, tileCount, deCount
@@ -67,6 +67,7 @@ program ESMF_DistGridCreateGetUTest
   integer, allocatable:: deBlockList(:,:,:)
   integer, allocatable:: arbSeqIndexList(:)
   integer, allocatable:: collocation(:)
+  type(ESMF_PtrInt1D), allocatable :: arbSeqIndexL(:)
   logical:: loopResult
   type(ESMF_DistGridMatch_Flag):: matchResult
   logical:: arbSeqIndexFlag
@@ -866,12 +867,80 @@ program ESMF_DistGridCreateGetUTest
   
   !------------------------------------------------------------------------
   !NEX_UTest
-  write(name, *) "DistGridCreate() - 1D arbitrary seq indices"
+  write(name, *) "DistGridCreate() - 1D arbitrary seq indices 1DE/PET case"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   localStart = localPet*10
-  distgrid = ESMF_DistGridCreate(arbSeqIndexList=(/localStart, localStart+1/), &
-    rc=rc)
+  allocate(arbSeqIndexList((localPet+1)*2))
+  do i=1,(localPet+1)*2
+    arbSeqIndexList(i)=localStart+i
+  enddo
+  distgrid = ESMF_DistGridCreate(arbSeqIndexList=arbSeqIndexList, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  deallocate(arbSeqIndexList)
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "DistGridPrint()"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_DistGridPrint(distgrid, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "DistGridDestroy()"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_DistGridDestroy(distgrid, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "DistGridCreate() - 1D arbitrary seq indices 1 DE/PET with general API case"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  allocate(arbSeqIndexL(1))
+  localStart = localPet*10
+  allocate(arbSeqIndexL(1)%ptr((localPet+1)*2))
+  do i=1,(localPet+1)*2
+    arbSeqIndexL(1)%ptr(i)=localStart+i
+  enddo
+  distgrid = ESMF_DistGridCreate(arbSeqIndexList=arbSeqIndexL, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  deallocate(arbSeqIndexL(1)%ptr)
+  deallocate(arbSeqIndexL)
+  
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "DistGridPrint()"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_DistGridPrint(distgrid, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "DistGridDestroy()"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_DistGridDestroy(distgrid, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "DistGridCreate() - 1D arbitrary seq indices general DE/PET case"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  localDeCount = localPet ! use localPet for number of local DEs
+  if (petCount==1) localDeCount = 2 ! if only single PET, then use 2 local DEs
+  allocate(arbSeqIndexL(localDeCount))  ! number of localDEs
+  localStart = localPet*10
+  do j=1, size(arbSeqIndexL)
+    allocate(arbSeqIndexL(j)%ptr((j+1)*2))
+    do i=1,(j+1)*2
+      arbSeqIndexL(j)%ptr(i)=localStart+i
+    enddo
+  enddo
+  distgrid = ESMF_DistGridCreate(arbSeqIndexList=arbSeqIndexL, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  do j=1, size(arbSeqIndexL)
+    deallocate(arbSeqIndexL(j)%ptr)
+  enddo
+  deallocate(arbSeqIndexL)
   
   !------------------------------------------------------------------------
   !NEX_UTest

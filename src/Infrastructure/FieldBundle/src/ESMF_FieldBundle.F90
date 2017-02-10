@@ -4517,7 +4517,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE:
   ! Private name; call using ESMF_FieldBundleSMMStore()
     subroutine ESMF_FieldBundleSMMStoreI4(srcFieldBundle, dstFieldBundle, & 
-        routehandle, factorList, factorIndexList, keywordEnforcer, rc) 
+        routehandle, factorList, factorIndexList, keywordEnforcer, &
+        srcTermProcessing, rc)
 
         ! input arguments 
         type(ESMF_FieldBundle), intent(in)            :: srcFieldBundle  
@@ -4526,7 +4527,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         integer(ESMF_KIND_I4),  intent(in)            :: factorList(:)
         integer,                intent(in)            :: factorIndexList(:,:) 
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-        integer,                intent(out), optional :: rc 
+        integer,             intent(inout), optional  :: srcTermProcessing(:)
+        integer,             intent(out),   optional  :: rc
 
 !EOPI
         ! local variables as temporary input/output arguments 
@@ -4570,7 +4572,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             ESMF_CONTEXT, rcToReturn=rc)) return
 
         call ESMF_ArrayBundleSMMStore(srcab, dstab, routehandle, factorList, &
-            factorIndexList, rc=localrc)
+            factorIndexList, srcTermProcessing=srcTermProcessing, rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
             
@@ -4596,7 +4598,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE:
   ! Private name; call using ESMF_FieldBundleSMMStore()
     subroutine ESMF_FieldBundleSMMStoreI8(srcFieldBundle, dstFieldBundle, & 
-      routehandle, factorList, factorIndexList, keywordEnforcer, rc) 
+      routehandle, factorList, factorIndexList, keywordEnforcer, &
+      srcTermProcessing, rc)
 
         ! input arguments 
         type(ESMF_FieldBundle), intent(in)            :: srcFieldBundle  
@@ -4605,7 +4608,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         integer(ESMF_KIND_I8),  intent(in)            :: factorList(:)
         integer,                intent(in)            :: factorIndexList(:,:) 
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-        integer,                intent(out), optional :: rc 
+        integer,             intent(inout), optional  :: srcTermProcessing(:)
+        integer,             intent(out),   optional  :: rc
 
 !EOPI
         ! local variables as temporary input/output arguments 
@@ -4649,7 +4653,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             ESMF_CONTEXT, rcToReturn=rc)) return
 
         call ESMF_ArrayBundleSMMStore(srcab, dstab, routehandle, factorList, &
-            factorIndexList, rc=localrc)
+            factorIndexList, srcTermProcessing=srcTermProcessing, rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
             
@@ -4675,7 +4679,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE:
   ! Private name; call using ESMF_FieldBundleSMMStore()
     subroutine ESMF_FieldBundleSMMStoreR4(srcFieldBundle, dstFieldBundle, & 
-      routehandle, factorList, factorIndexList, keywordEnforcer, rc) 
+      routehandle, factorList, factorIndexList, keywordEnforcer, &
+      srcTermProcessing, rc)
 
         ! input arguments 
         type(ESMF_FieldBundle), intent(in)            :: srcFieldBundle  
@@ -4684,7 +4689,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         real(ESMF_KIND_R4),     intent(in)            :: factorList(:)
         integer,                intent(in)            :: factorIndexList(:,:) 
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-        integer,                intent(out), optional :: rc 
+        integer,             intent(inout), optional  :: srcTermProcessing(:)
+        integer,             intent(out),   optional  :: rc
 
 !EOPI
         ! local variables as temporary input/output arguments 
@@ -4728,7 +4734,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             ESMF_CONTEXT, rcToReturn=rc)) return
 
         call ESMF_ArrayBundleSMMStore(srcab, dstab, routehandle, factorList, &
-            factorIndexList, rc=localrc)
+            factorIndexList, srcTermProcessing=srcTermProcessing, rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -4754,7 +4760,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE:
   ! Private name; call using ESMF_FieldBundleSMMStore()
     subroutine ESMF_FieldBundleSMMStoreR8(srcFieldBundle, dstFieldBundle, & 
-      routehandle, factorList, factorIndexList, keywordEnforcer, rc) 
+      routehandle, factorList, factorIndexList, keywordEnforcer, &
+      srcTermProcessing, rc)
 
         ! input arguments 
         type(ESMF_FieldBundle), intent(in)            :: srcFieldBundle  
@@ -4763,7 +4770,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         real(ESMF_KIND_R8),     intent(in)            :: factorList(:)
         integer,                intent(in)            :: factorIndexList(:,:) 
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-        integer,                intent(out), optional :: rc 
+        integer,             intent(inout), optional  :: srcTermProcessing(:)
+        integer,             intent(out),   optional  :: rc
 
 !EOPI
         ! local variables as temporary input/output arguments 
@@ -4807,7 +4815,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             ESMF_CONTEXT, rcToReturn=rc)) return
 
         call ESMF_ArrayBundleSMMStore(srcab, dstab, routehandle, factorList, &
-            factorIndexList, rc=localrc)
+            factorIndexList, srcTermProcessing=srcTermProcessing, rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -4919,14 +4927,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE:
   ! Private name; call using ESMF_FieldBundleSMMStore()
     subroutine ESMF_FieldBundleSMMStoreNF(srcFieldBundle, dstFieldBundle, & 
-        routehandle, keywordEnforcer, rc) 
+        routehandle, keywordEnforcer, srcTermProcessing, rc)
 
         ! input arguments 
         type(ESMF_FieldBundle), intent(in)            :: srcFieldBundle  
         type(ESMF_FieldBundle), intent(inout)         :: dstFieldBundle  
         type(ESMF_RouteHandle), intent(inout)         :: routehandle
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-        integer,                intent(out), optional :: rc 
+        integer,             intent(inout), optional  :: srcTermProcessing(:)
+        integer,             intent(out), optional    :: rc
 
 !EOPI
         ! local variables as temporary input/output arguments 
@@ -4978,7 +4987,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
 
-        call ESMF_ArrayBundleSMMStore(srcab, dstab, routehandle, rc=localrc)
+        call ESMF_ArrayBundleSMMStore(srcab, dstab, routehandle, &
+            srcTermProcessing=srcTermProcessing, rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -5006,7 +5016,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE:
 ! ! Private name; call using ESMF_FieldBundleSMMStore()
     subroutine ESMF_FieldBundleSMMStoreFromFile(srcFieldBundle, dstFieldBundle, &
-      filename, routehandle, keywordEnforcer, rc)
+      filename, routehandle, keywordEnforcer, srcTermProcessing, rc)
 
 ! ! ARGUMENTS:
       type(ESMF_FieldBundle), intent(in)              :: srcFieldBundle
@@ -5014,7 +5024,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       character(len=*),       intent(in)              :: filename
       type(ESMF_RouteHandle), intent(inout)           :: routehandle
       type(ESMF_KeywordEnforcer),            optional :: keywordEnforcer
-      integer,                intent(out),   optional :: rc
+      integer,             intent(inout), optional    :: srcTermProcessing(:)
+      integer,             intent(out),   optional    :: rc
+
 !
 ! !DESCRIPTION:
 !
@@ -5067,7 +5079,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
       ! Generate routeHandle from factorList and factorIndexList
       call ESMF_FieldBundleSMMStore(srcFieldBundle, dstFieldBundle, routehandle, &
-        factorList, factorIndexList, rc=localrc)
+        factorList, factorIndexList, srcTermProcessing=srcTermProcessing, &
+        rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 

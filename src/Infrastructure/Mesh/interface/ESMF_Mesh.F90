@@ -1630,7 +1630,7 @@ end function ESMF_MeshCreateFromMeshes
 ! !INTERFACE:
   ! Private name; call using ESMF_MeshCreate()
     function ESMF_MeshCreateFromFile(filename, fileformat, keywordEnforcer, &
-                 convertToDual, addUserArea, meshname, maskFlag, varname, &
+                 convertToDual, addUserArea, maskFlag, varname, &
 		 nodalDistgrid, elementDistgrid, rc)
 !
 !
@@ -1642,7 +1642,6 @@ end function ESMF_MeshCreateFromMeshes
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     logical,                    intent(in),  optional :: convertToDual
     logical,                    intent(in),  optional :: addUserArea
-    character(len=*),           intent(in),  optional :: meshname
     type(ESMF_MeshLoc),         intent(in),  optional :: maskFlag
     character(len=*),           intent(in),  optional :: varname
     type(ESMF_DistGrid),        intent(in),  optional :: nodalDistgrid
@@ -1668,9 +1667,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !         if {\tt .true.}, the cell area will be read in from the GRID file.  This feature is
 !         only supported when the grid file is in the SCRIP or ESMF format. If not specified, 
 !         defaults to {\tt .false.}.
-!   \item[{[meshname]}]
-!         The dummy variable for the mesh metadata in the UGRID file if the {\tt fileformat}
-!         is {\tt ESMF\_FILEFORMAT\_UGRID}.  If not specified, defaults to empty string.
 !   \item[{[maskFlag]}]
 !         If maskFlag is present, generate the mask using the missing\_value attribute defined in 'varname'
 !         This flag is only supported when the grid file is in the UGRID format.
@@ -1749,13 +1745,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 	if (present(maskFlag)) then
            myMesh = ESMF_MeshCreateFromUnstruct(filename, &
-	     fileformat=fileformat, meshname = meshname, &
+	     fileformat=fileformat, &
              convertToDual=localConvertToDual, &
 	     maskFlag=maskFlag, varname=varname, &
 	     rc=localrc)
 	else
            myMesh = ESMF_MeshCreateFromUnstruct(filename, &
-	     fileformat=fileformat, meshname = meshname, &
+	     fileformat=fileformat, &
              convertToDual=localConvertToDual, &
 	     rc=localrc)
 	endif 
@@ -1966,6 +1962,7 @@ end function ESMF_MeshCreateFromFile
 	fileformatlocal = ESMF_FILEFORMAT_ESMFMESH
     endif
 
+#if 0
     if (fileformatlocal == ESMF_FILEFORMAT_UGRID) then
 	if (.not. present(meshname)) then
            call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
@@ -1973,6 +1970,7 @@ end function ESMF_MeshCreateFromFile
                              ESMF_CONTEXT, rcToReturn=rc) 
         endif
     endif
+#endif
 
     ! get global vm information
     !
@@ -2049,7 +2047,7 @@ end function ESMF_MeshCreateFromFile
           haveNodeMask = .true.
        endif
        ! Get information from file
-       call ESMF_GetMeshFromUGridFile(filename, meshname, nodeCoords, elementConn, &
+       call ESMF_GetMeshFromUGridFile(filename, nodeCoords, elementConn, &
                            elmtNum, startElmt, convertToDeg=.true., &
 			   faceCoords=faceCoords, rc=localrc)
        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -5633,7 +5631,7 @@ end subroutine ESMF_MeshMergeSplitDstInd
 !  the mesh
 ! !INTERFACE:
 ! Private name; call using ESMF_MeshCreate()
-    function ESMF_MeshCreateFromUnstruct(filename, fileformat, meshname, &
+    function ESMF_MeshCreateFromUnstruct(filename, fileformat, &
 			addUserArea, maskFlag, varname, rc)
 !
 !
@@ -5642,7 +5640,6 @@ end subroutine ESMF_MeshMergeSplitDstInd
 ! !ARGUMENTS:
     character(len=*), intent(in)              :: filename
     type(ESMF_FileFormat_Flag), optional, intent(in) :: fileformat
-    character(len=*), optional, intent(in)    :: meshname
     logical, intent(in), optional	      :: addUserArea
     type(ESMF_MeshLoc), intent(in), optional  :: maskFlag
     character(len=*), optional, intent(in)    :: varname

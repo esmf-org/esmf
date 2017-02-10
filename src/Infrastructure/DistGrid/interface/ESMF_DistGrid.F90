@@ -176,6 +176,7 @@ module ESMF_DistGridMod
     module procedure ESMF_DistGridCreateDBT
     module procedure ESMF_DistGridCreateDBF
     module procedure ESMF_DistGridCreateDBTF
+    module procedure ESMF_DistGridCreateDBAI1D1DE
     module procedure ESMF_DistGridCreateDBAI1D
     module procedure ESMF_DistGridCreateDBAI
       
@@ -2245,16 +2246,16 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_DistGridCreateDBAI1D()"
+#define ESMF_METHOD "ESMF_DistGridCreateDBAI1D1DE()"
 !BOP
-! !IROUTINE: ESMF_DistGridCreate - Create 1D DistGrid object from user's arbitrary index list
+! !IROUTINE: ESMF_DistGridCreate - Create 1D DistGrid object from user's arbitrary index list 1 DE per PET
 
 ! !INTERFACE:
   ! Private name; call using ESMF_DistGridCreate()
-  function ESMF_DistGridCreateDBAI1D(arbSeqIndexList, keywordEnforcer, rc)
+  function ESMF_DistGridCreateDBAI1D1DE(arbSeqIndexList, keywordEnforcer, rc)
 !         
 ! !RETURN VALUE:
-    type(ESMF_DistGrid) :: ESMF_DistGridCreateDBAI1D
+    type(ESMF_DistGrid) :: ESMF_DistGridCreateDBAI1D1DE
 !
 ! !ARGUMENTS:
     integer, intent(in)            :: arbSeqIndexList(:)
@@ -2337,7 +2338,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     deallocate(globalSizes)
     
     ! set return value
-    ESMF_DistGridCreateDBAI1D = distgrid 
+    ESMF_DistGridCreateDBAI1D1DE = distgrid 
 
     ! prepare to set local arbitrary sequence indices
     indicesAux = ESMF_InterfaceIntCreate(farray1D=arbSeqIndexList, rc=localrc)
@@ -2355,6 +2356,174 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
  
+    ! Set init code
+    ESMF_INIT_SET_CREATED(ESMF_DistGridCreateDBAI1D1DE)
+ 
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+ 
+  end function ESMF_DistGridCreateDBAI1D1DE
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_DistGridCreateDBAI1D()"
+!BOP
+! !IROUTINE: ESMF_DistGridCreate - Create 1D DistGrid object from user's arbitrary index list multiple DE/PET
+
+! !INTERFACE:
+  ! Private name; call using ESMF_DistGridCreate()
+  function ESMF_DistGridCreateDBAI1D(arbSeqIndexList, keywordEnforcer, rc)
+!         
+! !RETURN VALUE:
+    type(ESMF_DistGrid) :: ESMF_DistGridCreateDBAI1D
+!
+! !ARGUMENTS:
+    type(ESMF_PtrInt1D), intent(in) :: arbSeqIndexList(:)
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    integer, intent(out), optional  :: rc
+!
+! !DESCRIPTION:
+!     Create an {\tt ESMF\_DistGrid} of {\tt dimCount} 1 from a PET-local list
+!     of sequence index lists. The PET-local size of the {\tt arbSeqIndexList}
+!     argument determines the number of local DEs in the created DistGrid.
+!     Each of the local DEs is associated with as many index space elements as
+!     there are arbitrary sequence indices in the associated list.
+!     The sequence indices must be unique across all DEs. A default
+!     DELayout with the correct number of DEs per PET is automatically created.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[arbSeqIndexList]
+!          List of arbitrary sequence index lists that reside on the local PET.
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+!------------------------------------------------------------------------------
+    integer                 :: localrc      ! local return code
+    type(ESMF_DistGrid)     :: distgrid     ! opaque pointer to new C++ DistGrid
+    type(ESMF_DELayout)     :: delayout     ! opaque pointer to DELayout object
+    type(ESMF_VM)           :: vm           ! opaque pointer to VM object
+    type(ESMF_InterfaceInt) :: indicesAux   ! index helper
+    integer                 :: localDeCount(1)  ! number of local DEs
+    integer, allocatable    :: localDeCounts(:) ! array of all local DE counts
+    integer, allocatable    :: localSizes(:)    ! number of local indices
+    integer, allocatable    :: globalSizes(:)   ! array of all sizes
+    integer, allocatable    :: globalSizesOff(:)! globalSizes offsets
+    integer                 :: globalSizesCount ! number of entries in globalSizes
+    integer                 :: petCount         ! num pets
+    integer, allocatable    :: deblock(:,:,:)   ! Array of sizes
+    integer, allocatable    :: petMap(:)        ! mapping of DE to PETs
+    integer                 :: i, j, k, csum    ! loop variable
+    integer                 :: minC(1), maxC(1) ! min/max corner
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+    
+    call ESMF_VMGetCurrent(vm, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+      
+    call ESMF_VMGet(vm, petCount=petCount, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! number of localDEs
+    localDeCount(1) = size(arbSeqIndexList)
+
+    ! gather all localDe counts
+    allocate(localDeCounts(petCount))
+    call ESMF_VMAllGather(vm, localDeCount, localDeCounts, 1, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+      
+    ! setup local sizes
+    allocate(localSizes(localDeCount(1)))
+    do i=1, localDeCount(1)
+      localSizes(i)=size(arbSeqIndexList(i)%ptr)
+    enddo
+    
+    ! prepare globalSizes
+    allocate(globalSizesOff(petCount))
+    globalSizesCount=0
+    do i=1, petCount
+      globalSizesOff(i) = globalSizesCount
+      globalSizesCount = globalSizesCount + localDeCounts(i)
+    enddo
+    
+    ! gather all of the local sizes on all PETs
+    allocate(globalSizes(globalSizesCount))
+    call ESMF_VMAllGatherV(vm, localSizes, localDeCount(1), &
+      globalSizes, localDeCounts, globalSizesOff, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! set up the petMap
+    allocate(petMap(globalSizesCount))
+    k=1
+    do i=1, petCount
+      do j=1, localDeCounts(i)
+        petMap(k) = i-1
+        k = k+1
+      enddo
+    enddo    
+    
+    ! set up the deblocks
+    allocate(deblock(1,2,globalSizesCount))
+    csum = 0
+    do i=1,globalSizesCount
+      deblock(1,1,i) = csum + 1 ! min
+      csum = csum + globalSizes(i)
+      deblock(1,2,i) = csum     ! max
+    enddo
+    
+    ! create fitting DELayout
+    delayout = ESMF_DELayoutCreate(petMap, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! create fitting DistGrid
+    minC(1) = deblock(1,1,1)
+    maxC(1) = deblock(1,2,globalSizesCount)
+    distgrid = ESMF_DistGridCreate(minC, maxC, deBlockList=deblock, &
+      delayout=delayout, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! garbage collection
+    deallocate(deblock)
+    deallocate(petMap)
+    deallocate(globalSizes)
+    deallocate(globalSizesOff)
+    deallocate(localSizes)
+    deallocate(localDeCounts)
+    
+    ! set return value
+    ESMF_DistGridCreateDBAI1D = distgrid 
+
+    ! set local arbitrary sequence indices
+    do i=1, localDeCount(1)
+      indicesAux = ESMF_InterfaceIntCreate(farray1D=arbSeqIndexList(i)%ptr, &
+        rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+
+      ! set local arbitrary sequence indices in DistGrid object
+      ! localDe=(i-1), collocation=1
+      call c_ESMC_DistGridSetArbSeqIndex(distgrid, indicesAux, i-1, 1, localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+
+      ! destroy temporary InterfaceInt
+      call ESMF_InterfaceIntDestroy(indicesAux, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    enddo
+    
     ! Set init code
     ESMF_INIT_SET_CREATED(ESMF_DistGridCreateDBAI1D)
  
