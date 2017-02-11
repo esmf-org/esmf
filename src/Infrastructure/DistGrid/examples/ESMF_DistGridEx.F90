@@ -1071,7 +1071,7 @@ program ESMF_DistGridEx
 ! Also allowing invesion of index space dimensions leads to 8 unique 
 ! operations in two dimension shown in table \ref{tab:dg_ops}.
 !
-! \begin{table}[here]
+! \begin{table}[h!]
 ! \centering
 ! \caption{The 8 unique rotational operations in 2 dimensional index space. The
 ! associated {\tt orientationVector} argument for each operation is also shown.}
