@@ -1116,7 +1116,8 @@ int ArrayBundle::sparseMatMulStore(
   ArrayBundle *srcArraybundle,          // in    - source ArrayBundle
   ArrayBundle *dstArraybundle,          // in    - destination ArrayBundle
   RouteHandle **routehandle,            // inout - handle to precomputed comm
-  vector<SparseMatrix> &sparseMatrix    // in    - sparse matrix
+  vector<SparseMatrix> &sparseMatrix,   // in    - sparse matrix
+  InterfaceInt *srcTermProcessing       // inout - srcTermProcessing parameters
   ){    
 //
 // !DESCRIPTION:
@@ -1171,6 +1172,38 @@ int ArrayBundle::sparseMatMulStore(
         "- srcArraybundle and dstArraybundle arguments contain no Arrays",
         ESMC_CONTEXT, &rc);
       return rc;
+    }
+    // check if srcTermProcessing argument is valid
+    vector<int*> srcTermProcParameters(arrayCount);
+    if (!present(srcTermProcessing)){
+      // srcTermProcessing argument is not present
+      for (int i=0; i<arrayCount; i++)
+        srcTermProcParameters[i] = NULL;  // invalidate each parameter
+    }else{
+      // srcTermProcessing argument is present
+      if (srcTermProcessing->extent[0]==arrayCount){
+        // same number of elements as there are arrays in the bundles
+        for (int i=0; i<arrayCount; i++)
+          srcTermProcParameters[i] = &(srcTermProcessing->array[i]);
+      }else if (srcTermProcessing->extent[0]==1){
+        // single element in srcTermProcessing but more arrays in bundles
+        if (srcTermProcessing->array[0] == 0){
+          ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
+            "- Single srcTermProcessing parameter must not be 0 to apply for "
+            "all arrays in bundle.",
+            ESMC_CONTEXT, &rc);
+          return rc;
+        }
+        for (int i=0; i<arrayCount; i++)
+          srcTermProcParameters[i] = &(srcTermProcessing->array[0]);
+      }else{
+        // all other conditions are error conditions
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
+          "- Number of elements in srcTermProcessing must match number of "
+          "arrays in bundles, or be 1.",
+          ESMC_CONTEXT, &rc);
+        return rc;
+      }
     }
     // construct local matchList
     vector<int> matchList(arrayCount);
@@ -1241,13 +1274,16 @@ int ArrayBundle::sparseMatMulStore(
           vectorLengthShift);
         if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
           ESMC_CONTEXT, &rc)) return rc;
+        // also supply the value of matching srcTermProcessing element back
+        if (srcTermProcParameters[i] && srcTermProcParameters[matchList[i]])
+          *srcTermProcParameters[i] = *srcTermProcParameters[matchList[i]];
       }else{
         // src/dst Array pair does _not_ match any previous pair in ArrayBundle
 //        printf("localPet=%d, src/dst pair #%d requires precompute\n",
 //          localPet, i);
         RouteHandle *rh;
         localrc = Array::sparseMatMulStore(srcArray, dstArray, &rh, 
-          sparseMatrix);
+          sparseMatrix, false, false, srcTermProcParameters[i]);
         if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
           ESMC_CONTEXT, &rc)) return rc;
         // get a handle on the XXE stored in rh
