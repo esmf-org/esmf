@@ -1058,7 +1058,39 @@ namespace ESMCI {
   // which might make it odd to be used as a general intesect code.
   bool line_with_gc_seg3D(double *a1, double *a2, double *sin, double *sout,
 		       double *p) {
-    
+
+    //// If we're too close to parallel to be accurate then just treat like parallel ////
+#define PARALLEL_TOL 1.0E-10
+    double plane_norm[3];
+    MU_CROSS_PRODUCT_VEC3D(plane_norm,a1,a2);
+
+    // Get length of plane norm
+    double len_plane_norm=MU_LEN_VEC3D(plane_norm);
+
+    // Get vector from sin to sout
+    double sio_vec[3];
+    MU_SUB_VEC3D(sio_vec,sout,sin);
+
+    // Get length of t12_vec
+    double len_sio_vec=MU_LEN_VEC3D(sio_vec);
+
+    // calculate dot product
+    double cos_plane_sio=MU_DOT_VEC3D(plane_norm,sio_vec); 
+
+    // divide by lengths to get cos
+    if (len_plane_norm != 0.0)  cos_plane_sio=cos_plane_sio/len_plane_norm;
+    if (len_sio_vec != 0.0) cos_plane_sio=cos_plane_sio/len_sio_vec;
+  
+    if(std::abs(cos_plane_sio) < PARALLEL_TOL) {
+      p[0]=sout[0];
+      p[1]=sout[1];
+      p[2]=sout[2];
+      
+      return true;
+    }
+#undef PARALLEL_TOL
+
+
     // Do this intersection by reprsenting the line a1 to a2 as a plane through the
     // two line points and the origin of the sphere (0,0,0). This is the 
     // definition of a great circle arc. 
