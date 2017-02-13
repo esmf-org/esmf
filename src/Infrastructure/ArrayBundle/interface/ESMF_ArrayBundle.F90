@@ -2815,8 +2815,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE:
   ! Private name; call using ESMF_ArrayBundleSMMStore()
   subroutine ESMF_ArrayBundleSMMStoreI4(srcArrayBundle, dstArrayBundle, &
-    routehandle, factorList, factorIndexList, keywordEnforcer, srcTermProcessing, &
-    rc)
+    routehandle, factorList, factorIndexList, keywordEnforcer, &
+    srcTermProcessing, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_ArrayBundle),        intent(in)            :: srcArrayBundle
@@ -2830,10 +2830,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !EOPI
 !------------------------------------------------------------------------------
-    integer                         :: localrc            ! local return code
-    integer(ESMF_KIND_I4), pointer  :: opt_factorList(:)  ! helper variable
-    integer                         :: len_factorList     ! helper variable
-    type(ESMF_InterfaceInt)         :: factorIndexListArg ! helper variable
+    integer                         :: localrc              ! local return code
+    integer(ESMF_KIND_I4), pointer  :: opt_factorList(:)    ! helper variable
+    integer                         :: len_factorList       ! helper variable
+    type(ESMF_InterfaceInt)         :: factorIndexListArg   ! helper variable
+    type(ESMF_InterfaceInt)         :: srcTermProcessingArg ! helper variable
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
@@ -2850,11 +2851,17 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ESMF_InterfaceIntCreate(farray2D=factorIndexList, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
+    
+    ! Wrap srcTermProcessing argument
+    srcTermProcessingArg = &
+      ESMF_InterfaceIntCreate(srcTermProcessing, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Call into the C++ interface, which will sort out optional arguments
     call c_ESMC_ArrayBundleSMMStore(srcArrayBundle, dstArrayBundle, &
       routehandle, ESMF_TYPEKIND_I4, opt_factorList, len_factorList, &
-      factorIndexListArg, localrc)
+      factorIndexListArg, srcTermProcessingArg, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     
@@ -2884,8 +2891,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE:
   ! Private name; call using ESMF_ArrayBundleSMMStore()
   subroutine ESMF_ArrayBundleSMMStoreI8(srcArrayBundle, dstArrayBundle, &
-    routehandle, factorList, factorIndexList, keywordEnforcer, srcTermProcessing, &
-    rc)
+    routehandle, factorList, factorIndexList, keywordEnforcer, &
+    srcTermProcessing, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_ArrayBundle),        intent(in)            :: srcArrayBundle
@@ -2899,10 +2906,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !EOPI
 !------------------------------------------------------------------------------
-    integer                         :: localrc            ! local return code
-    integer(ESMF_KIND_I8), pointer  :: opt_factorList(:)  ! helper variable
-    integer                         :: len_factorList     ! helper variable
-    type(ESMF_InterfaceInt)         :: factorIndexListArg ! helper variable
+    integer                         :: localrc              ! local return code
+    integer(ESMF_KIND_I8), pointer  :: opt_factorList(:)    ! helper variable
+    integer                         :: len_factorList       ! helper variable
+    type(ESMF_InterfaceInt)         :: factorIndexListArg   ! helper variable
+    type(ESMF_InterfaceInt)         :: srcTermProcessingArg ! helper variable
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
@@ -2920,10 +2928,16 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
+    ! Wrap srcTermProcessing argument
+    srcTermProcessingArg = &
+      ESMF_InterfaceIntCreate(srcTermProcessing, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
     ! Call into the C++ interface, which will sort out optional arguments
     call c_ESMC_ArrayBundleSMMStore(srcArrayBundle, dstArrayBundle, &
       routehandle, ESMF_TYPEKIND_I8, opt_factorList, len_factorList, &
-      factorIndexListArg, localrc)
+      factorIndexListArg, srcTermProcessingArg, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     
@@ -2953,8 +2967,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE:
   ! Private name; call using ESMF_ArrayBundleSMMStore()
   subroutine ESMF_ArrayBundleSMMStoreR4(srcArrayBundle, dstArrayBundle, &
-    routehandle, factorList, factorIndexList, keywordEnforcer, srcTermProcessing, &
-    rc)
+    routehandle, factorList, factorIndexList, keywordEnforcer, &
+    srcTermProcessing, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_ArrayBundle),     intent(in)            :: srcArrayBundle
@@ -2968,10 +2982,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !EOPI
 !------------------------------------------------------------------------------
-    integer                         :: localrc            ! local return code
-    real(ESMF_KIND_R4), pointer     :: opt_factorList(:)  ! helper variable
-    integer                         :: len_factorList     ! helper variable
-    type(ESMF_InterfaceInt)         :: factorIndexListArg ! helper variable
+    integer                         :: localrc              ! local return code
+    real(ESMF_KIND_R4), pointer     :: opt_factorList(:)    ! helper variable
+    integer                         :: len_factorList       ! helper variable
+    type(ESMF_InterfaceInt)         :: factorIndexListArg   ! helper variable
+    type(ESMF_InterfaceInt)         :: srcTermProcessingArg ! helper variable
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
@@ -2989,10 +3004,16 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
+    ! Wrap srcTermProcessing argument
+    srcTermProcessingArg = &
+      ESMF_InterfaceIntCreate(srcTermProcessing, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
     ! Call into the C++ interface, which will sort out optional arguments
     call c_ESMC_ArrayBundleSMMStore(srcArrayBundle, dstArrayBundle, &
       routehandle, ESMF_TYPEKIND_R4, opt_factorList, len_factorList, &
-      factorIndexListArg, localrc)
+      factorIndexListArg, srcTermProcessingArg, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     
@@ -3022,8 +3043,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE:
   ! Private name; call using ESMF_ArrayBundleSMMStore()
   subroutine ESMF_ArrayBundleSMMStoreR8(srcArrayBundle, dstArrayBundle, &
-    routehandle, factorList, factorIndexList, keywordEnforcer, srcTermProcessing, &
-    rc)
+    routehandle, factorList, factorIndexList, keywordEnforcer, &
+    srcTermProcessing, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_ArrayBundle),     intent(in)            :: srcArrayBundle
@@ -3037,10 +3058,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !EOPI
 !------------------------------------------------------------------------------
-    integer                         :: localrc            ! local return code
-    real(ESMF_KIND_R8), pointer     :: opt_factorList(:)  ! helper variable
-    integer                         :: len_factorList     ! helper variable
-    type(ESMF_InterfaceInt)         :: factorIndexListArg ! helper variable
+    integer                         :: localrc              ! local return code
+    real(ESMF_KIND_R8), pointer     :: opt_factorList(:)    ! helper variable
+    integer                         :: len_factorList       ! helper variable
+    type(ESMF_InterfaceInt)         :: factorIndexListArg   ! helper variable
+    type(ESMF_InterfaceInt)         :: srcTermProcessingArg ! helper variable
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
@@ -3058,10 +3080,16 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
+    ! Wrap srcTermProcessing argument
+    srcTermProcessingArg = &
+      ESMF_InterfaceIntCreate(srcTermProcessing, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
     ! Call into the C++ interface, which will sort out optional arguments
     call c_ESMC_ArrayBundleSMMStore(srcArrayBundle, dstArrayBundle, &
       routehandle, ESMF_TYPEKIND_R8, opt_factorList, len_factorList, &
-      factorIndexListArg, localrc)
+      factorIndexListArg, srcTermProcessingArg, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     
@@ -3160,7 +3188,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !EOP
 !------------------------------------------------------------------------------
-    integer                 :: localrc      ! local return code
+    integer                 :: localrc              ! local return code
+    type(ESMF_InterfaceInt) :: srcTermProcessingArg ! helper variable
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
@@ -3170,9 +3199,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ESMF_INIT_CHECK_DEEP_SHORT(ESMF_ArrayBundleGetInit, srcArrayBundle, rc)
     ESMF_INIT_CHECK_DEEP_SHORT(ESMF_ArrayBundleGetInit, dstArrayBundle, rc)
     
+    ! Wrap srcTermProcessing argument
+    srcTermProcessingArg = &
+      ESMF_InterfaceIntCreate(srcTermProcessing, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
     ! Call into the C++ interface, which will sort out optional arguments
     call c_ESMC_ArrayBundleSMMStoreNF(srcArrayBundle, dstArrayBundle, &
-      routehandle, localrc)
+      routehandle, srcTermProcessingArg, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     

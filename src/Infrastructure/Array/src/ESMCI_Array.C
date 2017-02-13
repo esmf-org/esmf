@@ -223,7 +223,36 @@ Array::Array(
     rimElementCount[i] = element; // store element count
   }
   
-  localDeCountAux = localDeCount; // TODO: auxilary for garb until ref. counting
+  // special variables for super-vectorization in XXE
+  sizeSuperUndist = new int[redDimCount+1];
+  sizeDist = new int[redDimCount*localDeCount];
+  int k=0;
+  int jj=0;
+  for (int j=0; j<redDimCount+1; j++){
+    // construct SizeSuperUndist
+    sizeSuperUndist[j] = 1; // prime
+    for (; k<rank; k++){
+      if (arrayToDistGridMap[k]){
+        // decomposed dimension found
+        ++k;
+        break;
+      }else{
+        // tensor dimension
+        sizeSuperUndist[j] *= undistUBound[jj] - undistLBound[jj] + 1;
+        ++jj;
+      }
+    }
+    // construct sizeDist
+    if (j<redDimCount){
+      for (int i=0; i<localDeCount; i++){
+        sizeDist[i*redDimCount+j] =
+          totalUBound[i*redDimCount+j] - totalLBound[i*redDimCount+j] + 1;
+      }
+    }
+  }
+  
+  // Auxiliary 
+  localDeCountAux = localDeCount; // TODO: auxiliary for garb until ref. counting
   
   // invalidate the name for this Array object in the Base class
   ESMC_BaseSetName(NULL, "Array");
@@ -307,6 +336,10 @@ void Array::destruct(bool followCreator, bool noGarbage){
       delete [] exclusiveElementCountPDe;
     if (totalElementCountPLocalDe != NULL)
       delete [] totalElementCountPLocalDe;
+    if (sizeSuperUndist != NULL)
+      delete [] sizeSuperUndist;
+    if (sizeDist != NULL)
+      delete [] sizeDist;
     if (distgridCreator && followCreator){
       int localrc = DistGrid::destroy(&distgrid, noGarbage);
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
@@ -5950,7 +5983,8 @@ namespace ArrayHelper{
           dt_byte, count);
 #endif
         // decide for the fastest option
-        if (dt_byte < dt_tk){
+//gjt-hack: force typekind option for now        if (dt_byte < dt_tk){
+        if (false){
           // use byte option for memGatherSrcRRA
           // -> nothing to do because this was the last mode tested
         }else{
@@ -6169,7 +6203,8 @@ namespace ArrayHelper{
           dt_byte, count);
 #endif
         // decide for the fastest option
-        if (dt_byte < dt_tk){
+//gjt-hack: force typekind option for now        if (dt_byte < dt_tk){
+        if (false){
           // use byte option for memGatherSrcRRA
           // -> nothing to do because this was the last mode tested
         }else{
@@ -6408,7 +6443,8 @@ namespace ArrayHelper{
           dt_byte, count);
 #endif
         // decide for the fastest option
-        if (dt_byte < dt_tk){
+//gjt-hack: force typekind option for now        if (dt_byte < dt_tk){
+        if (false){
           // use byte option for memGatherSrcRRA
           // -> nothing to do because this was the last mode tested
         }else{
@@ -7906,6 +7942,7 @@ int sparseMatMulStoreEncodeXXE(VM *vm, DELayout *srcDelayout,
   vector<DD::AssociationElement> *dstLinSeqVect,
   const int *dstLocalDeTotalElementCount,
   char **rraList, int rraCount, RouteHandle **routehandle,
+  bool undistPastFirstDistDim,
 #ifdef ASMMSTORETIMING
   double *t8, double *t9, double *t10, double *t11, double *t12, double *t13,
   double *t14,
@@ -9221,26 +9258,45 @@ int Array::sparseMatMulStore(
       dstArray->totalElementCountPLocalDe[i] * dstArray->tensorElementCount;
   
   // prepare tensorContigLength arguments
+  bool  contigFlag = true;
   int srcTensorContigLength = 1;  // init
-  for (int jj=0; jj<srcArray->rank; jj++){
-    if (srcArray->arrayToDistGridMap[jj])
+  int srcTensorLength = 1;  // init
+  for (int j=0, jj=0; jj<srcArray->rank; jj++){
+    if (srcArray->arrayToDistGridMap[jj]){
       // decomposed dimension
-      break;
-    else
+      contigFlag = false;
+    }else{
       // tensor dimension
-      srcTensorContigLength *= srcArray->undistUBound[jj]
-        - srcArray->undistLBound[jj] + 1;
+      srcTensorLength *= srcArray->undistUBound[j]
+        - srcArray->undistLBound[j] + 1;
+      if (contigFlag)
+        srcTensorContigLength *= srcArray->undistUBound[j]
+          - srcArray->undistLBound[j] + 1;
+      ++j;
+    }
   }
+  contigFlag = true;
   int dstTensorContigLength = 1;  // init
-  for (int jj=0; jj<dstArray->rank; jj++){
-    if (dstArray->arrayToDistGridMap[jj])
+  int dstTensorLength = 1;  // init
+  for (int j=0, jj=0; jj<dstArray->rank; jj++){
+    if (dstArray->arrayToDistGridMap[jj]){
       // decomposed dimension
-      break;
-    else
+      contigFlag = false;
+    }else{
       // tensor dimension
-      dstTensorContigLength *= dstArray->undistUBound[jj]
-        - dstArray->undistLBound[jj] + 1;
+      dstTensorLength *= dstArray->undistUBound[j]
+        - dstArray->undistLBound[j] + 1;
+      if (contigFlag)
+        dstTensorContigLength *= dstArray->undistUBound[j]
+          - dstArray->undistLBound[j] + 1;
+      ++j;
+    }
   }
+  
+  // determine if there are undistributed dims past the first distributed
+  bool undistPastFirstDistDim = false;
+  if (srcTensorLength > srcTensorContigLength) undistPastFirstDistDim = true;
+  if (dstTensorLength > dstTensorContigLength) undistPastFirstDistDim = true;
   
   // encode sparseMatMul communication pattern into XXE stream
   localrc = sparseMatMulStoreEncodeXXE(vm,
@@ -9251,6 +9307,7 @@ int Array::sparseMatMulStore(
     srcLinSeqVect, dstLinSeqVect,
     dstLocalDeTotalElementCount,
     rraList, rraCount, routehandle,
+    undistPastFirstDistDim,
 #ifdef ASMMSTORETIMING
     &t8, &t9, &t10, &t11, &t12, &t13, &t14,
 #endif
@@ -9368,6 +9425,7 @@ int sparseMatMulStoreEncodeXXE(
   char **rraList,                         // in
   int rraCount,                           // in
   RouteHandle **routehandle,              // inout - handle to precomputed comm
+  bool undistPastFirstDistDim,            // in
 #ifdef ASMMSTORETIMING
   double *t8, double *t9, double *t10, double *t11, double *t12, double *t13,
   double *t14,
@@ -9444,6 +9502,8 @@ int sparseMatMulStoreEncodeXXE(
   xxe->typekind[0] = typekindFactors;
   xxe->typekind[1] = typekindSrc;
   xxe->typekind[2] = typekindDst;
+  // set the superVectorOkay flag
+  xxe->superVectorOkay = !undistPastFirstDistDim;
   // prepare XXE type variables
   XXE::TKId elementTK;
   switch (typekindDst){
@@ -11226,7 +11286,7 @@ int Array::sparseMatMul(
   // but possible and supported!), the vectorLenght will be left at 0. In the
   // other cases (i.e. srcArray and/or dstArray are present) it is assumed that
   // the vectorLength can be determined from which ever Array is present (first
-  // see about srcArray, and if not available then look at dstArray). This is
+  // see about srcArray, and then dstArray. Last one present will set). This is
   // consistent because vectorization in the XXE stream is only meaningful under
   // the condition that the vectorLength determined from the srcArray equals
   // that determined from the dstArray. There is no check performed here on
@@ -11237,32 +11297,41 @@ int Array::sparseMatMul(
   // is bogus. However, the vectorLength is irrelevant under this condition, and
   // will be ignored by the XXE execution.
 
-  if (srcArrayFlag){
+  // undistributed: r, s, t
+  int superVecSizeUnd[3];
+  // distributed: i, j
+  int srcLocalDeCount=0;
+  if (srcArrayFlag)
+    srcLocalDeCount = srcArray->delayout->getLocalDeCount();
+  int superVecSizeDis[2][srcLocalDeCount];   
+
+  superVecSizeUnd[0]=-1;  // initialize with disabled super vector support
+  superVecSizeUnd[1]=1;
+  superVecSizeUnd[2]=1;
+
+  for (int j=0; j<srcLocalDeCount; j++){
+    superVecSizeDis[0][j]=1;
+    superVecSizeDis[1][j]=1;
+  }
+  
+  if (srcArrayFlag && srcArray->sizeSuperUndist){
     // use srcArray to determine vectorLength
-    vectorLength = 1;  // prime
-    int rank = srcArray->rank;
-    for (int jj=0; jj<rank; jj++){
-      if (srcArray->arrayToDistGridMap[jj])
-        // decomposed dimension
-        break;
-      else
-        // tensor dimension
-        vectorLength *= srcArray->undistUBound[jj]
-          - srcArray->undistLBound[jj] + 1;
+    int i;
+    for (i=0; i<srcArray->rank-srcArray->tensorCount; i++){
+      vectorLength = srcArray->sizeSuperUndist[0];  // ok to set multiple times
+      superVecSizeUnd[i] = srcArray->sizeSuperUndist[i];
+      for (int j=0; j<srcLocalDeCount; j++)
+        superVecSizeDis[i][j] = 
+          srcArray->sizeDist[j*(srcArray->rank-srcArray->tensorCount)+i];
     }
-  }else if (dstArrayFlag){
+    superVecSizeUnd[i] = srcArray->sizeSuperUndist[i];
+  }
+  if (superVecSizeUnd[1]==1 && superVecSizeUnd[2]==1)
+    superVecSizeUnd[0]=-1;  // turn off super vectorization, simple vector okay
+  
+  if (dstArrayFlag && dstArray->sizeSuperUndist){
     // use dstArray to determine vectorLength
-    vectorLength = 1;  // prime
-    int rank = dstArray->rank;
-    for (int jj=0; jj<rank; jj++){
-      if (dstArray->arrayToDistGridMap[jj])
-        // decomposed dimension
-        break;
-      else
-        // tensor dimension
-        vectorLength *= dstArray->undistUBound[jj]
-          - dstArray->undistLBound[jj] + 1;
-    }
+    vectorLength = dstArray->sizeSuperUndist[0];
   }
   
 #ifdef ASMMTIMING
@@ -11271,9 +11340,49 @@ int Array::sparseMatMul(
   
   // execute XXE stream
   localrc = xxe->exec(rraCount, rraList, &vectorLength, filterBitField,
-    finishedflag, cancelledflag);
+    finishedflag, cancelledflag,
+    NULL,     // dTime                  -> disabled
+    -1, -1,   // indexStart, indexStop  -> full stream
+    // super vector support:
+    superVecSizeUnd[0], superVecSizeUnd[1], superVecSizeUnd[2],
+    superVecSizeDis[0], superVecSizeDis[1]);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
     &rc)) return rc;
+  
+#define ASMMXXEPRINT
+#ifdef ASMMXXEPRINT
+  // print XXE stream
+  VM *vm = VM::getCurrent(&localrc);
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+    &rc)) return rc;
+  int localPet = vm->getLocalPet();
+  int petCount = vm->getPetCount();
+  char file[160];
+  sprintf(file, "asmmXXEprint.%05d", localPet);
+  FILE *fp = fopen(file, "a");
+  fprintf(fp, "\n=================================================="
+    "==============================\n");
+  for (int pet=0; pet<petCount; pet++){
+    if (pet==localPet){
+      localrc = xxe->print(fp, rraCount, rraList);
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+        ESMC_CONTEXT, &rc)) return rc;
+    }
+  }
+  fprintf(fp, "\n=================================================="
+    "==============================\n");
+  fprintf(fp, "filterBitField = 0x%08x\n", filterBitField);
+  fprintf(fp, "\n=================================================="
+    "==============================\n");
+  for (int pet=0; pet<petCount; pet++){
+    if (pet==localPet){
+      localrc = xxe->print(fp, rraCount, rraList, filterBitField);
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+        ESMC_CONTEXT, &rc)) return rc;
+    }
+  }
+  fclose(fp);
+#endif
 
   while (commflag==ESMF_COMM_BLOCKING && !(*finishedflag)){
     // must be a blocking call with TERMORDER_FREE -> free-order while
@@ -11290,7 +11399,12 @@ int Array::sparseMatMul(
     filterBitField |= XXE::filterBitCancel;           // set Cancel filter
     filterBitField |= XXE::filterBitNbWaitFinishSingleSum; // SingleSum filter
     localrc = xxe->exec(rraCount, rraList, &vectorLength, filterBitField,
-      finishedflag, cancelledflag);
+      finishedflag, cancelledflag,
+      NULL,     // dTime                  -> disabled
+      -1, -1,   // indexStart, indexStop  -> full stream
+      // super vector support:
+      superVecSizeUnd[0], superVecSizeUnd[1], superVecSizeUnd[2],
+      superVecSizeDis[0], superVecSizeDis[1]);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       &rc)) return rc;
   }

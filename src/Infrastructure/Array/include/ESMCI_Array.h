@@ -155,6 +155,9 @@ namespace ESMCI {
                                       // between exclusive and total bounds
                                       // [localDeCount][rimElementCount[]]
     std::vector<int> rimElementCount; // numb. of elements in rim [localDeCount]
+    // special variables for super-vectorization in XXE
+    int *sizeSuperUndist;   // [redDimCount+1]
+    int *sizeDist;          // [redDimCount*localDeCount]
     // lower level object references
     DistGrid *distgrid;
     bool distgridCreator;
@@ -189,6 +192,8 @@ namespace ESMCI {
       tensorElementCount = 0;
       exclusiveElementCountPDe = NULL;
       totalElementCountPLocalDe = NULL;
+      sizeSuperUndist = NULL;
+      sizeDist = NULL;
 #if !defined (PARCH_IRIX64)
       rimSeqIndex.resize(0);
 #endif
@@ -218,6 +223,8 @@ namespace ESMCI {
       tensorElementCount = 0;
       exclusiveElementCountPDe = NULL;
       totalElementCountPLocalDe = NULL;
+      sizeSuperUndist = NULL;
+      sizeDist = NULL;
 #if !defined (PARCH_IRIX64)
       rimSeqIndex.resize(0);
 #endif

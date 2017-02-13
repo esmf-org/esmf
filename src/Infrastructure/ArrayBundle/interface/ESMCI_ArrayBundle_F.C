@@ -594,7 +594,8 @@ extern "C" {
   void FTN_X(c_esmc_arraybundlesmmstore)(ESMCI::ArrayBundle **srcArraybundle,
     ESMCI::ArrayBundle **dstArraybundle, ESMCI::RouteHandle **routehandle, 
     ESMC_TypeKind_Flag *typekindFactors, void *factorList, int *factorListCount,
-    ESMCI::InterfaceInt *factorIndexList, int *rc){
+    ESMCI::InterfaceInt *factorIndexList, 
+    ESMCI::InterfaceInt *srcTermProcessing, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_arraybundlesmmstore()"
     // Initialize return code; assume routine not implemented
@@ -637,7 +638,8 @@ extern "C" {
       *factorListCount, srcN, dstN, (factorIndexList)->array));
     // Call into the actual C++ method wrapped inside LogErr handling
     if (ESMC_LogDefault.MsgFoundError(ESMCI::ArrayBundle::sparseMatMulStore(
-      *srcArraybundle, *dstArraybundle, routehandle, sparseMatrix ),
+      *srcArraybundle, *dstArraybundle, routehandle, sparseMatrix,
+      srcTermProcessing),
       ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       ESMC_NOT_PRESENT_FILTER(rc))) return;
     
@@ -661,7 +663,7 @@ extern "C" {
 
   void FTN_X(c_esmc_arraybundlesmmstorenf)(ESMCI::ArrayBundle **srcArraybundle,
     ESMCI::ArrayBundle **dstArraybundle, ESMCI::RouteHandle **routehandle,
-    int *rc){
+    ESMCI::InterfaceInt *srcTermProcessing, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_arraybundlesmmstorenf()"
     // Initialize return code; assume routine not implemented
@@ -670,7 +672,8 @@ extern "C" {
     vector<ESMCI::SparseMatrix> sparseMatrix;
     // Call into the actual C++ method wrapped inside LogErr handling
     ESMC_LogDefault.MsgFoundError(ESMCI::ArrayBundle::sparseMatMulStore(
-      *srcArraybundle, *dstArraybundle, routehandle, sparseMatrix),
+      *srcArraybundle, *dstArraybundle, routehandle, sparseMatrix,
+      srcTermProcessing),
       ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       ESMC_NOT_PRESENT_FILTER(rc));
   }

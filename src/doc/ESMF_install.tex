@@ -9,7 +9,7 @@ website, \htmladdnormallink{http://www.earthsystemmodeling.org}{http://www.earth
 
 The ESMF is distributed as a full source code tree.  You will need
 to compile the code into the {\tt libesmf.a} library.
-On some platforms a shared library, {\tt libesmf.so}, is also created.
+On many platforms a shared library, {\tt libesmf.so}, is also created.
 Follow the instructions in the following sections
 to build the library and link it with your application.
 
@@ -25,6 +25,13 @@ Some portions of the ESMF library can offer enhanced capabilities when
 certain third party libraries are available. This section describes
 these dependencies and the associated environment settings
 that allow the user to control them.
+
+On many platforms, the ESMF library is also created as a shared library.
+When third party libraries are called from ESMF, it is recommended that they are
+also available as shared libraries.  In cases where they are not, they should at
+least be compiled with the position independed code option enabled (e.g., -fPIC on
+Linux with gfortran/gcc) where necessary, so that the ESMF shared library
+build can successfully incorporate them.
 
 \subsubsection{LAPACK}
 \label{sec:lapack}
