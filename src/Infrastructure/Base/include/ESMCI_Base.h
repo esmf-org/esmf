@@ -113,7 +113,7 @@ class ESMC_Base
                       const ESMC_InquireFlag &inquireflag) const;
     int ESMC_Deserialize(char *buffer, int *offset,
                       const ESMC_AttReconcileFlag &attreconflag);
-    static int ESMC_Deserialize(char *buffer, int *offset,
+    static int ESMC_Deserialize(const char *buffer, const int *offset,
                       int *ID, ESMCI::VMId *vmId);
     
     // optional Read/Write methods for any ESMF class

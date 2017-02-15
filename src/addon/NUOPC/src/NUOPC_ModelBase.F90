@@ -73,7 +73,9 @@ module NUOPC_ModelBase
     integer, intent(out) :: rc
     
     ! local variables
-    character(ESMF_MAXSTR):: name
+    character(ESMF_MAXSTR)    :: name
+    integer                   :: stat
+    type(type_InternalState)  :: is
 
     rc = ESMF_SUCCESS
     
@@ -129,7 +131,18 @@ module NUOPC_ModelBase
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out
-      
+     
+    ! Set up the internal state
+    allocate(is%wrap, stat=stat)
+    if (ESMF_LogFoundAllocError(statusToCheck=stat, &
+      msg="Allocation of internal state memory failed.", &
+      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+      return  ! bail out
+    call ESMF_UserCompSetInternalState(gcomp, label_InternalState, is, rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+      return  ! bail out
+        
   end subroutine
 
   !-----------------------------------------------------------------------------
@@ -153,7 +166,8 @@ module NUOPC_ModelBase
     integer, intent(out)  :: rc
     
     ! local variables
-    character(ESMF_MAXSTR)  :: name
+    character(ESMF_MAXSTR)    :: name
+    type(type_InternalState)  :: is
 
     rc = ESMF_SUCCESS
 
@@ -168,6 +182,16 @@ module NUOPC_ModelBase
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
+    ! query Component for the internal State
+    nullify(is%wrap)
+    call ESMF_UserCompGetInternalState(gcomp, label_InternalState, is, rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+      return  ! bail out
+    
+    ! store the incoming clock as driverClock in internal state
+    is%wrap%driverClock = clock
+    
   end subroutine
   
   !-----------------------------------------------------------------------------
@@ -179,7 +203,7 @@ module NUOPC_ModelBase
     integer, intent(out) :: rc
     
     ! local variables
-    integer                   :: localrc, stat
+    integer                   :: localrc
     type(type_InternalState)  :: is
     type(ESMF_Clock)          :: internalClock
     logical                   :: allCurrent
@@ -213,18 +237,14 @@ module NUOPC_ModelBase
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out
     
-    ! allocate memory for the internal state and set it in the Component
-    allocate(is%wrap, stat=stat)
-    if (ESMF_LogFoundAllocError(statusToCheck=stat, &
-      msg="Allocation of internal state memory failed.", &
-      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
-      return  ! bail out
-    call ESMF_UserCompSetInternalState(gcomp, label_InternalState, is, rc)
+    ! query Component for the internal State
+    nullify(is%wrap)
+    call ESMF_UserCompGetInternalState(gcomp, label_InternalState, is, rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
-
-    ! set the driverClock member in the internal state
+    
+    ! store the incoming clock as driverClock in internal state
     is%wrap%driverClock = clock
     
     ! SPECIALIZE required: label_SetRunClock
@@ -422,13 +442,6 @@ module NUOPC_ModelBase
         return  ! bail out
     endif
     
-    ! deallocate internal state memory
-    deallocate(is%wrap, stat=stat)
-    if (ESMF_LogFoundDeallocError(statusToCheck=stat, &
-      msg="Deallocation of internal state memory failed.", &
-      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
-      return  ! bail out
-
   end subroutine
   
   !-----------------------------------------------------------------------------
@@ -531,9 +544,10 @@ module NUOPC_ModelBase
     integer, intent(out) :: rc
 
     ! local variables
-    integer                   :: localrc
+    integer                   :: localrc, stat
     logical                   :: existflag
     character(ESMF_MAXSTR)    :: name
+    type(type_InternalState)  :: is
 
     rc = ESMF_SUCCESS
 
@@ -549,6 +563,20 @@ module NUOPC_ModelBase
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
     if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+      return  ! bail out
+
+    ! query Component for the internal State
+    nullify(is%wrap)
+    call ESMF_UserCompGetInternalState(gcomp, label_InternalState, is, rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+      return  ! bail out
+
+    ! deallocate internal state memory
+    deallocate(is%wrap, stat=stat)
+    if (ESMF_LogFoundDeallocError(statusToCheck=stat, &
+      msg="Deallocation of internal state memory failed.", &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
 
