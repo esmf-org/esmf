@@ -91,7 +91,7 @@
       maxnpet=4, indexflag=ESMF_INDEX_GLOBAL, rc=rc)
     write(failMsg, *) ""
     write(name, *) "Regrid then create xgrid online and regrid through xgrid, overlapping cut"
-    call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
     !------------------------------------------------------------------------
     !EX_UTest
@@ -704,6 +704,7 @@ contains
     !----------------------------------------------------
     ! compute regrid routehandle
     !----------------------------------------------------
+    !call ESMF_LogWrite(tag, ESMF_LOGMSG_INFO)
     call ESMF_FieldRegridStore(xgrid, f_atm, f_xgrid, routehandle=rh_a2x, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
