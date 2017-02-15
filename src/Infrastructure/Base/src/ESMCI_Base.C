@@ -728,9 +728,7 @@ static const char *const version = "$Id$";
     pfp++; // proxyFlag
 
     vmIDp = (ESMCI::VMId *)pfp;
-    // std::cerr << ESMC_METHOD << ": Starting VMIdCopy" << std::endl;
-    // VMIdCopy (vmID, vmIDp);
-    // std::cerr << ESMC_METHOD << ": VMIdCopy complete" << std::endl;
+    VMIdCopy (vmID, vmIDp);
 
   return ESMF_SUCCESS;
 
