@@ -299,8 +299,8 @@ extern "C" {
 //    none.  return code is passed thru the parameter list
 //
 // !ARGUMENTS:
-      char *buf,                // in/out - really a byte stream
-      int *offset,              // in/out - current offset in the stream
+      const char *buf,          // in - really a byte stream
+      const int *offset,        // in - current offset in the stream
       int *ID,                  // out - Object ID
       ESMCI::VMId **vmId,       // out - vmId
       int *rc,                  // out - return code

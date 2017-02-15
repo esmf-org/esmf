@@ -1080,9 +1080,9 @@ module ESMF_BaseMod
 !
 ! !ARGUMENTS:
     character,       intent(in)    :: buffer(:)
-    integer,         intent(inout) :: offset
+    integer,         intent(in)    :: offset
     integer,         intent(out)   :: ID
-    type(ESMF_VMId), intent(out)   :: VMId
+    type(ESMF_VMId), intent(inout) :: VMId
     integer,         intent(out)   :: rc
 !
 ! !DESCRIPTION:
@@ -1095,9 +1095,7 @@ module ESMF_BaseMod
 !     \item [buffer]
 !           Data buffer of serialized information.
 !     \item [offset]
-!           Current read offset in the current buffer.  This will be
-!           updated by this routine and return pointing to the next
-!           available byte in the buffer.
+!           Current read offset in the current buffer.
 !     \item[ID]
 !           Returns the ESMF object ID
 !     \item[VMId]
