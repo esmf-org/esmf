@@ -4502,6 +4502,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !     See section \ref{Array:SparseMatMul} for details on the definition of 
 !     {\em sequence indices} and {\em tensor sequence indices}.
+! \item [{[srcTermProcessing]}]
+!       Source term summing options for route handle creation. See
+!       {\tt ESMF\_FieldRegridStore} documentation for a full parameter description.
+!       Two forms may be provided. If a single element list is provided, this
+!       integer value is applied across all bundle members. Otherwise, the list must
+!       contain as many elements as there are bundle members. For the special case
+!       of accessing the auto-tuned parameter (providing a negative integer value),
+!       the list length must equal the bundle member count.
 ! \item [{[rc]}]  
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
 ! \end{description} 
@@ -5023,7 +5031,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       type(ESMF_FieldBundle), intent(inout)           :: dstFieldBundle
       character(len=*),       intent(in)              :: filename
       type(ESMF_RouteHandle), intent(inout)           :: routehandle
-      type(ESMF_KeywordEnforcer),            optional :: keywordEnforcer
+      type(ESMF_KeywordEnforcer),         optional    :: keywordEnforcer
       integer,             intent(inout), optional    :: srcTermProcessing(:)
       integer,             intent(out),   optional    :: rc
 
@@ -5052,8 +5060,17 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item [routehandle]
 !       Handle to the {\tt ESMF\_RouteHandle}.
 !
-!   \item [{[rc]}]
-!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+! \item [{[srcTermProcessing]}]
+!       Source term summing options for route handle creation. See
+!       {\tt ESMF\_FieldRegridStore} documentation for a full parameter description.
+!       Two forms may be provided. If a single element list is provided, this
+!       integer value is applied across all bundle members. Otherwise, the list must
+!       contain as many elements as there are bundle members. For the special case
+!       of accessing the auto-tuned parameter (providing a negative integer value),
+!       the list length must equal the bundle member count.
+!
+! \item [{[rc]}]
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !
 ! \end{description}
 !
