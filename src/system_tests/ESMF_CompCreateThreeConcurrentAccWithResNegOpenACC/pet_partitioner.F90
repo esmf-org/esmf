@@ -61,7 +61,7 @@
     integer :: isAccPet(1)
     integer :: numAPets, numNonAPets
 
-    integer :: petCount, localPet, ssiId, accDeviceCount
+    integer :: petCount, localPet, ssiId, accDeviceCount, ssiIdLocalAPetCount
     integer, allocatable, dimension(:) :: ssiIdLocalCommAccDeviceCounts
     integer :: esmfVMComm, vmComm, ssiIdLocalComm
     integer :: vmCommRank, ssiIdLocalCommSize, ssiIdLocalCommRank
@@ -116,6 +116,7 @@
       end if
     end if
 
+    call MPI_Allreduce(isAccPet, ssiIdLocalAPetCount, 1, MPI_INTEGER, MPI_SUM, ssiIdLocalComm, rc)
     call MPI_Comm_free(ssiIdLocalComm, rc)
 
     allocate(isAccPetList(petCount))
@@ -135,10 +136,10 @@
     numNonAPets = petCount - numAPets
     
     if(numAPets /= 0) then
-      ! FIXME: We assume that all APets have access to the same
+      ! FIXME: We assume that all APets on a node have access to the same
       ! number of devices and that the devices are uniformly distributed
       ! (no heterogeneous nodes)
-      nDevAPet = accDeviceCount / numAPets
+      nDevAPet = accDeviceCount / ssiIdLocalAPetCount
       if(nDevAPet == 0) then
         print *, "WARNING: Assumption that each apet has atleast 1 dev failed"
         nDevAPet = 1
