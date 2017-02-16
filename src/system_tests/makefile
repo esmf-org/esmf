@@ -11,7 +11,7 @@ DIRS      = ESMF_CompCreate \
             ESMF_CompCreateWithResNeg \
             ESMF_CompCreateTwoConcurrentWithResNeg \
             ESMF_CompCreateTwoConcurrentAccWithResNeg \
-            ESMF_CompCreateThreeConcurrentAccWithResNeg \
+            ESMF_CompCreateThreeConcurrentAccWithResNegOpenMP4 \
             ESMF_CompCreateThreeConcurrentAccWithResNegOpenACC \
             ESMF_CompCreateThreeConcurrentAccWithResNegIntelMIC \
             ESMF_CompFortranAndC \
