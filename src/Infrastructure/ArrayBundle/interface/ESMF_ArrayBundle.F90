@@ -2698,7 +2698,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE:
 ! ! Private name; call using ESMF_ArrayBundleSMMStore()
 ! subroutine ESMF_ArrayBundleSMMStore<type><kind>(srcArrayBundle, &
-!   dstArrayBundle, routehandle, factorList, factorIndexList, keywordEnforcer, rc)
+!   dstArrayBundle, routehandle, factorList, factorIndexList, keywordEnforcer, &
+!   srcTermProcessing, rc)
 !
 ! !ARGUMENTS:
 !   type(ESMF_ArrayBundle),           intent(in)    :: srcArrayBundle
@@ -2707,11 +2708,19 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   <type>(ESMF_KIND_<kind>), target, intent(in)    :: factorList(:)
 !   integer,                          intent(in)    :: factorIndexList(:,:)
 !type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-!   integer,                          intent(out), optional :: rc
+!   integer,                intent(inout), optional :: srcTermProcessing(:)
+!   integer,                intent(out),   optional :: rc
 !
 ! !STATUS:
 ! \begin{itemize}
 ! \item\apiStatusCompatibleVersion{5.2.0r}
+! \item\apiStatusModifiedSinceVersion{5.2.0r}
+! \begin{description}
+! \item[7.1.0] Added argument {\tt srcTermProcessing}.
+!              The new argument gives the user access to the tuning parameter
+!              affecting the sparse matrix execution and bit-wise 
+!              reproducibility.
+! \end{description}
 ! \end{itemize}
 !
 ! !DESCRIPTION:
@@ -2798,7 +2807,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !     See section \ref{Array:SparseMatMul} for details on the definition of 
 !     Array {\em sequence indices} and {\em tensor sequence indices}.
-! \item [{[srcTermProcessing]}]
+!   \item [{[srcTermProcessing]}]
 !       Source term summing options for route handle creation. See
 !       {\tt ESMF\_ArraySMMStore} documentation for a full parameter description.
 !       Two forms may be provided. If a single element list is provided, this
@@ -3130,16 +3139,23 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     routehandle, keywordEnforcer, srcTermProcessing, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_ArrayBundle),     intent(in)             :: srcArrayBundle
-    type(ESMF_ArrayBundle),     intent(inout)          :: dstArrayBundle
-    type(ESMF_RouteHandle),     intent(inout)          :: routehandle
+    type(ESMF_ArrayBundle),  intent(in)              :: srcArrayBundle
+    type(ESMF_ArrayBundle),  intent(inout)           :: dstArrayBundle
+    type(ESMF_RouteHandle),  intent(inout)           :: routehandle
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    integer,                 intent(inout), optional   :: srcTermProcessing(:)
-    integer,                 intent(out),   optional   :: rc
+    integer,                 intent(inout), optional :: srcTermProcessing(:)
+    integer,                 intent(out),   optional :: rc
 !
 ! !STATUS:
 ! \begin{itemize}
 ! \item\apiStatusCompatibleVersion{5.2.0r}
+! \item\apiStatusModifiedSinceVersion{5.2.0r}
+! \begin{description}
+! \item[7.1.0] Added argument {\tt srcTermProcessing}.
+!              The new argument gives the user access to the tuning parameter
+!              affecting the sparse matrix execution and bit-wise 
+!              reproducibility.
+! \end{description}
 ! \end{itemize}
 !
 ! !DESCRIPTION:
@@ -3190,7 +3206,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     may be destroyed by this call.
 !   \item [routehandle]
 !     Handle to the precomputed Route.
-! \item [{[srcTermProcessing]}]
+!   \item [{[srcTermProcessing]}]
 !       Source term summing options for route handle creation. See
 !       {\tt ESMF\_ArraySMMStore} documentation for a full parameter description.
 !       Two forms may be provided. If a single element list is provided, this
