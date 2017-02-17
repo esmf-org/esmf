@@ -43,6 +43,6 @@ include $(ESMF_DIR)/makefile
 
 DIRS	    = 
 CLEANDIRS   = Grid_refdoc $(HTMLFILES)
-CLEANFILES  = $(TEXFILES_TO_MAKE) $(CLEAN_TEXFILES) Grid_refdoc.tex $(PDFFILES)
+CLEANFILES  = $(TEXFILES_TO_MAKE) $(CLEAN_TEXFILES) Grid_refdoc.tex Grid_crefdoc.tex $(PDFFILES)
 CLOBBERDIRS =
 
