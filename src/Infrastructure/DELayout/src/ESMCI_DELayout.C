@@ -118,12 +118,12 @@ DELayout *DELayout::create(
 //
 // !ARGUMENTS:
 //
-  int *deCountArg,               // (in) number of DEs
-  InterfaceInt<int> *deGrouping, // (in) deGrouping vector
-  ESMC_Pin_Flag *pinFlag,        // (in) type of resources DEs are pinned to
-  InterfaceInt<int> *petListArg, // (in) list of PETs to be used in delayout
-  VM *vm,                        // (in) VM context
-  int *rc){                      // (out) return code
+  int *deCountArg,              // (in) number of DEs
+  InterArray<int> *deGrouping,  // (in) deGrouping vector
+  ESMC_Pin_Flag *pinFlag,       // (in) type of resources DEs are pinned to
+  InterArray<int> *petListArg,  // (in) list of PETs to be used in delayout
+  VM *vm,                       // (in) VM context
+  int *rc){                     // (out) return code
 //
 // !DESCRIPTION:
 //

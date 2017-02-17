@@ -238,10 +238,10 @@ class Grid : public ESMC_Base {    // inherits from ESMC_Base class
 
   int setStaggerInfo(
 		     int staggerloc,             // (in) optional
-		     InterfaceInt<int> *staggerEdgeLWidthArg, // (in) optional
-		     InterfaceInt<int> *staggerEdgeUWidthArg, // (in) optional
-		     InterfaceInt<int> *staggerAlignArg,   // (in) optional 
-		     InterfaceInt<int> *staggerMemLBoundArg   // (in) optional 
+		     InterArray<int> *staggerEdgeLWidthArg, // (in) optional
+		     InterArray<int> *staggerEdgeUWidthArg, // (in) optional
+		     InterArray<int> *staggerAlignArg,   // (in) optional 
+		     InterArray<int> *staggerMemLBoundArg   // (in) optional 
 		     );
 
 template <class TYPE>
@@ -255,12 +255,12 @@ template <class TYPE>
  public:
 
   // ESMC interface:
-  static Grid* createnoperidim(ESMC_InterfaceInt *maxIndex, 
+  static Grid* createnoperidim(ESMC_InterArrayInt *maxIndex, 
                                ESMC_CoordSys_Flag *coordSys,
                                ESMC_TypeKind_Flag *coordTypeKind,
                                ESMC_IndexFlag *indexflag,
                                int *rc);
-  static Grid* create1peridim(ESMC_InterfaceInt *maxIndex, 
+  static Grid* create1peridim(ESMC_InterArrayInt *maxIndex, 
                               int *periodicDim, int *poleDim,
                               ESMC_CoordSys_Flag *coordSys,
                               ESMC_TypeKind_Flag *coordTypeKind, 
@@ -373,19 +373,19 @@ template <class TYPE>
 	  char *_name,                                 // (in)
 	  ESMC_TypeKind_Flag *_typekind,                    // (in)
 	  DistGrid *_distgrid,                    // (in)
-	  InterfaceInt<int> *gridEdgeLWidth,          // (in)
-	  InterfaceInt<int> *gridEdgeUWidth,          // (in)
-	  InterfaceInt<int> *gridAlign,          // (in)
-	  InterfaceInt<int> *_distgridToGridMap,                  // (in)
-	  InterfaceInt<int> *_distDim,                  // (in)
-          InterfaceInt<int> *_minIndex,          // (in)
-          InterfaceInt<int> *_maxIndex,          // (in)
-          InterfaceInt<int> *_localArbIndex,          // (in)
+	  InterArray<int> *gridEdgeLWidth,          // (in)
+	  InterArray<int> *gridEdgeUWidth,          // (in)
+	  InterArray<int> *gridAlign,          // (in)
+	  InterArray<int> *_distgridToGridMap,                  // (in)
+	  InterArray<int> *_distDim,                  // (in)
+          InterArray<int> *_minIndex,          // (in)
+          InterArray<int> *_maxIndex,          // (in)
+          InterArray<int> *_localArbIndex,          // (in)
           int *localArbIndexCount,          // (in)
           ESMC_CoordSys_Flag *coordSys,
-	  InterfaceInt<int> *_coordDimCount,              // (in)
-	  InterfaceInt<int> *_coordDimMap,             // (in)
-	  InterfaceInt<int> *gridMemLBound,          // (in)
+	  InterArray<int> *_coordDimCount,              // (in)
+	  InterArray<int> *_coordDimMap,             // (in)
+	  InterArray<int> *gridMemLBound,          // (in)
 	  ESMC_IndexFlag *_indexflag,                  // (in)
 	  bool *destroyDistgrid,
 	  bool *destroyDELayout
@@ -409,14 +409,14 @@ template <class TYPE>
 	       char *name,                                 // (in)
 	       ESMC_TypeKind_Flag *typekind,                    // (in)
 	       DistGrid *distgrid,                  // (in)
-	       InterfaceInt<int> *gridEdgeLWidth,          // (in)
-	       InterfaceInt<int> *gridEdgeUWidth,          // (in)
-	       InterfaceInt<int> *gridAlign,          // (in)
-	       InterfaceInt<int> *distgridToGridMap,                  // (in)
+	       InterArray<int> *gridEdgeLWidth,          // (in)
+	       InterArray<int> *gridEdgeUWidth,          // (in)
+	       InterArray<int> *gridAlign,          // (in)
+	       InterArray<int> *distgridToGridMap,                  // (in)
                      ESMC_CoordSys_Flag *coordSys, 
-	       InterfaceInt<int> *coordDimCount,              // (in)
-	       InterfaceInt<int> *coordDimMap,             // (in)
-	       InterfaceInt<int> *gridMemLBound,          // (in)
+	       InterArray<int> *coordDimCount,              // (in)
+	       InterArray<int> *coordDimMap,             // (in)
+	       InterArray<int> *gridMemLBound,          // (in)
 	       ESMC_IndexFlag *indexflag,                  // (in)
 	       bool *destroyDistgrid,
 	       bool *destroyDELayout,
@@ -429,15 +429,15 @@ template <class TYPE>
 	       char *name,                                 // (in)
 	       ESMC_TypeKind_Flag *typekind,                    // (in)
 	       DistGrid *distgrid,                  // (in)
-	       InterfaceInt<int> *minIndex,              // (in)
-	       InterfaceInt<int> *maxIndex,              // (in)
-	       InterfaceInt<int> *localArbIndex,          // (in)
+	       InterArray<int> *minIndex,              // (in)
+	       InterArray<int> *maxIndex,              // (in)
+	       InterArray<int> *localArbIndex,          // (in)
                int localArbIndexCount,				  // (in)
-	       InterfaceInt<int> *distDimMap,                  // (in)
+	       InterArray<int> *distDimMap,                  // (in)
 	       int arbDim,
                ESMC_CoordSys_Flag *coordSys,
-  	       InterfaceInt<int> *coordDimCount,       // (in) optional
-               InterfaceInt<int> *coordDimMap,         // (in) optional
+  	       InterArray<int> *coordDimCount,       // (in) optional
+               InterArray<int> *coordDimMap,         // (in) optional
     	       bool *destroyDistgrid,
 	       bool *destroyDELayout,
 	       int *rc                               // (out) return code
@@ -552,10 +552,10 @@ int getComputationalUBound(
                      int *_staggerloc,
 		     int *item,
 		     ESMC_TypeKind_Flag *typekind,          
-                     InterfaceInt<int> *_staggerEdgeLWidthArg,
-                     InterfaceInt<int> *_staggerEdgeUWidthArg,
-                     InterfaceInt<int> *_staggerAlign,
-                     InterfaceInt<int> *_staggerMemLBound
+                     InterArray<int> *_staggerEdgeLWidthArg,
+                     InterArray<int> *_staggerEdgeUWidthArg,
+                     InterArray<int> *_staggerAlign,
+                     InterArray<int> *_staggerMemLBound
                      );
 
  // Allocate item Arrays for a staggerloc
@@ -583,19 +583,19 @@ int getComputationalUBound(
                        int arrayCount,             // (in) 
                        Array **arrayList,           // (in)
                        CopyFlag *docopyArg,   // (in) optional
-                       InterfaceInt<int> *_staggerEdgeLWidthArg,
-                       InterfaceInt<int> *_staggerEdgeUWidthArg,
-                       InterfaceInt<int> *_staggerAlign
+                       InterArray<int> *_staggerEdgeLWidthArg,
+                       InterArray<int> *_staggerEdgeUWidthArg,
+                       InterArray<int> *_staggerAlign
                        );
 
 
  // Allocate coordinate Arrays for every coord in a staggerloc
  int addCoordArray(
                      int *_staggerloc,
-                     InterfaceInt<int> *_staggerEdgeLWidthArg,
-                     InterfaceInt<int> *_staggerEdgeUWidthArg,
-                     InterfaceInt<int> *_staggerAlign,
-                     InterfaceInt<int> *_staggerMemLBound
+                     InterArray<int> *_staggerEdgeLWidthArg,
+                     InterArray<int> *_staggerEdgeUWidthArg,
+                     InterArray<int> *_staggerAlign,
+                     InterArray<int> *_staggerMemLBound
                      );
 
  // Allocate coordinate Arrays for every coord in a staggerloc
@@ -679,16 +679,16 @@ int getComputationalUBound(
 		      char *_name, 
 		      ESMC_TypeKind_Flag *_typekind,
 		      DistGrid *_distgrid,     
-                      InterfaceInt<int> *gridEdgeLWidthArg,
-                      InterfaceInt<int> *gridEdgeUWidthArg,
-                      InterfaceInt<int> *gridAlignArg,
-		      InterfaceInt<int> *_distgridToGridMap,   
-		      InterfaceInt<int> *_undistLBound,  
-		      InterfaceInt<int> *_undistUBound,
+                      InterArray<int> *gridEdgeLWidthArg,
+                      InterArray<int> *gridEdgeUWidthArg,
+                      InterArray<int> *gridAlignArg,
+		      InterArray<int> *_distgridToGridMap,   
+		      InterArray<int> *_undistLBound,  
+		      InterArray<int> *_undistUBound,
                       ESMC_CoordSys_Flag *coordSys, 
-		      InterfaceInt<int> *_coordDimCount,
-		      InterfaceInt<int> *_coordDimMap,
-                      InterfaceInt<int> *gridMemLBound,
+		      InterArray<int> *_coordDimCount,
+		      InterArray<int> *_coordDimMap,
+                      InterArray<int> *gridMemLBound,
 		      ESMC_IndexFlag *_indexflag, 
 		      bool *destroyDistgrid,
 		      bool *destroyDELayout
@@ -700,18 +700,18 @@ int getComputationalUBound(
 		      char *_name, 
 		      ESMC_TypeKind_Flag *_typekind,
 		      DistGrid *_distgrid,     
-		      InterfaceInt<int> *minIndex,   
-		      InterfaceInt<int> *maxIndex,   
-		      InterfaceInt<int> *_localArbIndex,
+		      InterArray<int> *minIndex,   
+		      InterArray<int> *maxIndex,   
+		      InterArray<int> *_localArbIndex,
 		      int localArbIndexCount,			
-		      InterfaceInt<int> *_distDim, 
+		      InterArray<int> *_distDim, 
 		      int arbDim,
-		      InterfaceInt<int> *_undistLBound,  
-		      InterfaceInt<int> *_undistUBound,
+		      InterArray<int> *_undistLBound,  
+		      InterArray<int> *_undistUBound,
                       ESMC_CoordSys_Flag *coordSys, 
-		      InterfaceInt<int> *_coordDimCount,
-		      InterfaceInt<int> *_coordDimMap,
-                      InterfaceInt<int> *gridMemLBound,
+		      InterArray<int> *_coordDimCount,
+		      InterArray<int> *_coordDimMap,
+                      InterArray<int> *gridMemLBound,
 		      ESMC_IndexFlag *_indexflag, 
 		      bool *destroyDistgrid,
 		      bool *destroyDELayout
@@ -722,9 +722,9 @@ int getComputationalUBound(
   // set defaults for LWidth, UWidth, and Align based on user input
   int setGridDefaultsLUA(
                        int dimCount,                // Size of the input arrays
-                       InterfaceInt<int> *gridEdgeLWidthIn,  // (in) optional
-                       InterfaceInt<int> *gridEdgeUWidthIn,  // (in) optional
-                       InterfaceInt<int> *gridAlignIn,   // (in) optional
+                       InterArray<int> *gridEdgeLWidthIn,  // (in) optional
+                       InterArray<int> *gridEdgeUWidthIn,  // (in) optional
+                       InterArray<int> *gridAlignIn,   // (in) optional
                        int *gridEdgeLWidthOut,          // (out)
                        int *gridEdgeUWidthOut,          // (out)
                        int *gridAlignOut            // (out)
@@ -875,21 +875,21 @@ class ProtoGrid {
   char *name;  
   ESMC_TypeKind_Flag *typekind;
    DistGrid *distgrid;     
-  InterfaceInt<int> *gridEdgeLWidth;
-  InterfaceInt<int> *gridEdgeUWidth;
-  InterfaceInt<int> *gridAlign;   
-  InterfaceInt<int> *gridMemLBound;   
-  InterfaceInt<int> *distgridToGridMap;   
-  InterfaceInt<int> *distDim;   
-  InterfaceInt<int> *undistLBound;  
-  InterfaceInt<int> *undistUBound;  
+  InterArray<int> *gridEdgeLWidth;
+  InterArray<int> *gridEdgeUWidth;
+  InterArray<int> *gridAlign;   
+  InterArray<int> *gridMemLBound;   
+  InterArray<int> *distgridToGridMap;   
+  InterArray<int> *distDim;   
+  InterArray<int> *undistLBound;  
+  InterArray<int> *undistUBound;  
   ESMC_CoordSys_Flag *coordSys;
-  InterfaceInt<int> *coordDimCount;  
-  InterfaceInt<int> *coordDimMap; 
+  InterArray<int> *coordDimCount;  
+  InterArray<int> *coordDimMap; 
   ESMC_IndexFlag *indexflag; 
-  InterfaceInt<int> *minIndex;
-  InterfaceInt<int> *maxIndex;
-  InterfaceInt<int> *localArbIndex;
+  InterArray<int> *minIndex;
+  InterArray<int> *maxIndex;
+  InterArray<int> *localArbIndex;
   int localArbIndexCount;
   int arbDim;
   bool *destroyDistgrid;

@@ -44,9 +44,9 @@ extern "C" {
   // - ESMF-public methods:
         
   void FTN_X(c_esmc_distgridcreatedg)(ESMCI::DistGrid **ptr, 
-    ESMCI::DistGrid **dg, ESMCI::InterfaceInt<int> *firstExtra,
-    ESMCI::InterfaceInt<int> *lastExtra, ESMC_IndexFlag *indexflag,
-    ESMCI::InterfaceInt<int> *connectionList, ESMCI::VM **vm, int *rc){
+    ESMCI::DistGrid **dg, ESMCI::InterArray<int> *firstExtra,
+    ESMCI::InterArray<int> *lastExtra, ESMC_IndexFlag *indexflag,
+    ESMCI::InterArray<int> *connectionList, ESMCI::VM **vm, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_distgridcreatedg()"
     // Initialize return code; assume routine not implemented
@@ -78,13 +78,13 @@ extern "C" {
   }
   
   void FTN_X(c_esmc_distgridcreaterd)(ESMCI::DistGrid **ptr, 
-    ESMCI::InterfaceInt<int> *minIndex, ESMCI::InterfaceInt<int> *maxIndex,
-    ESMCI::InterfaceInt<int> *regDecomp,
+    ESMCI::InterArray<int> *minIndex, ESMCI::InterArray<int> *maxIndex,
+    ESMCI::InterArray<int> *regDecomp,
     ESMCI::Decomp_Flag *decompflag, int *decompflagCount, 
-    ESMCI::InterfaceInt<int> *regDecompFirstExtra,
-    ESMCI::InterfaceInt<int> *regDecompLastExtra,
-    ESMCI::InterfaceInt<int> *deLabelList, ESMC_IndexFlag *indexflag, 
-    ESMCI::InterfaceInt<int> *connectionList,
+    ESMCI::InterArray<int> *regDecompFirstExtra,
+    ESMCI::InterArray<int> *regDecompLastExtra,
+    ESMCI::InterArray<int> *deLabelList, ESMC_IndexFlag *indexflag, 
+    ESMCI::InterArray<int> *connectionList,
     ESMCI::DELayout **delayout, ESMCI::VM **vm, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_distgridcreaterd()"
@@ -124,14 +124,14 @@ extern "C" {
   }
   
   void FTN_X(c_esmc_distgridcreaterdt)(ESMCI::DistGrid **ptr, 
-    ESMCI::InterfaceInt<int> *minIndex, ESMCI::InterfaceInt<int> *maxIndex,
-    ESMCI::InterfaceInt<int> *regDecomp,
+    ESMCI::InterArray<int> *minIndex, ESMCI::InterArray<int> *maxIndex,
+    ESMCI::InterArray<int> *regDecomp,
     ESMCI::Decomp_Flag *decompflag,
     int *decompflagCount1, int *decompflagCount2,
-    ESMCI::InterfaceInt<int> *regDecompFirstExtra,
-    ESMCI::InterfaceInt<int> *regDecompLastExtra,
-    ESMCI::InterfaceInt<int> *deLabelList, ESMC_IndexFlag *indexflag, 
-    ESMCI::InterfaceInt<int> *connectionList,
+    ESMCI::InterArray<int> *regDecompFirstExtra,
+    ESMCI::InterArray<int> *regDecompLastExtra,
+    ESMCI::InterArray<int> *deLabelList, ESMC_IndexFlag *indexflag, 
+    ESMCI::InterArray<int> *connectionList,
     ESMCI::DELayout **delayout, ESMCI::VM **vm, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_distgridcreaterdt()"
@@ -157,13 +157,13 @@ extern "C" {
   }
   
   void FTN_X(c_esmc_distgridcreaterdf)(ESMCI::DistGrid **ptr, 
-    ESMCI::InterfaceInt<int> *minIndex, ESMCI::InterfaceInt<int> *maxIndex,
-    ESMCI::InterfaceInt<int> *regDecomp,
+    ESMCI::InterArray<int> *minIndex, ESMCI::InterArray<int> *maxIndex,
+    ESMCI::InterArray<int> *regDecomp,
     ESMCI::Decomp_Flag *decompflag, int *decompflagCount,
-    ESMCI::InterfaceInt<int> *regDecompFirstExtra,
-    ESMCI::InterfaceInt<int> *regDecompLastExtra,
-    ESMCI::InterfaceInt<int> *deLabelList, ESMC_IndexFlag *indexflag, 
-    ESMCI::InterfaceInt<int> *connectionList,
+    ESMCI::InterArray<int> *regDecompFirstExtra,
+    ESMCI::InterArray<int> *regDecompLastExtra,
+    ESMCI::InterArray<int> *deLabelList, ESMC_IndexFlag *indexflag, 
+    ESMCI::InterArray<int> *connectionList,
     int *fastAxis, ESMCI::VM **vm, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_distgridcreaterdf()"
@@ -184,10 +184,10 @@ extern "C" {
   }
 
   void FTN_X(c_esmc_distgridcreatedb)(ESMCI::DistGrid **ptr, 
-    ESMCI::InterfaceInt<int> *minIndex, ESMCI::InterfaceInt<int> *maxIndex,
-    ESMCI::InterfaceInt<int> *deBlockList,
-    ESMCI::InterfaceInt<int> *deLabelList, ESMC_IndexFlag *indexflag, 
-    ESMCI::InterfaceInt<int> *connectionList,
+    ESMCI::InterArray<int> *minIndex, ESMCI::InterArray<int> *maxIndex,
+    ESMCI::InterArray<int> *deBlockList,
+    ESMCI::InterArray<int> *deLabelList, ESMC_IndexFlag *indexflag, 
+    ESMCI::InterArray<int> *connectionList,
     ESMCI::DELayout **delayout, ESMCI::VM **vm, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_distgridcreatedb()"
@@ -228,18 +228,18 @@ extern "C" {
 
   void FTN_X(c_esmc_distgridget)(ESMCI::DistGrid **ptr,
     int *dimCount, int *tileCount, int *deCount,
-    ESMCI::InterfaceInt<int> *minIndexPDimPTile,
-    ESMCI::InterfaceInt<int> *maxIndexPDimPTile,
-    ESMCI::InterfaceInt<int> *elementCountPTile,
-    ESMCI::InterfaceInt<int> *minIndexPDimPDe,
-    ESMCI::InterfaceInt<int> *maxIndexPDimPDe,
-    ESMCI::InterfaceInt<int> *elementCountPDe,
-    ESMCI::InterfaceInt<int> *tileListPDe,
-    ESMCI::InterfaceInt<int> *indexCountPDimPDe,
-    ESMCI::InterfaceInt<int> *collocationPDim,
+    ESMCI::InterArray<int> *minIndexPDimPTile,
+    ESMCI::InterArray<int> *maxIndexPDimPTile,
+    ESMCI::InterArray<int> *elementCountPTile,
+    ESMCI::InterArray<int> *minIndexPDimPDe,
+    ESMCI::InterArray<int> *maxIndexPDimPDe,
+    ESMCI::InterArray<int> *elementCountPDe,
+    ESMCI::InterArray<int> *tileListPDe,
+    ESMCI::InterArray<int> *indexCountPDimPDe,
+    ESMCI::InterArray<int> *collocationPDim,
     ESMC_Logical *regDecompFlag, 
     int *connectionCount,
-    ESMCI::InterfaceInt<int> *connectionList,
+    ESMCI::InterArray<int> *connectionList,
     ESMCI::DELayout **delayout, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_distgridget()"
@@ -525,7 +525,7 @@ extern "C" {
 
   void FTN_X(c_esmc_distgridgetplocalde)(ESMCI::DistGrid **ptr,
     int *localDeArg, int *collocationArg, ESMC_Logical *arbSeqIndexFlag,
-    ESMCI::InterfaceInt<int> *seqIndexList, int *elementCount, int *rc){
+    ESMCI::InterArray<int> *seqIndexList, int *elementCount, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_distgridgetplocalde()"
     // Initialize return code; assume routine not implemented
@@ -587,7 +587,7 @@ extern "C" {
   }
 
   void FTN_X(c_esmc_distgridgetplocaldepdim)(ESMCI::DistGrid **ptr,
-    int *localDeArg, int *dimArg, ESMCI::InterfaceInt<int> *indexList, int *rc){
+    int *localDeArg, int *dimArg, ESMCI::InterArray<int> *indexList, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_distgridgetplocaldepdim()"
     // Initialize return code; assume routine not implemented
@@ -663,9 +663,9 @@ extern "C" {
   }
   
   void FTN_X(c_esmc_distgridconnection)(
-    ESMCI::InterfaceInt<int> *connection, int *tileIndexA,
-    int *tileIndexB, ESMCI::InterfaceInt<int> *positionVector,
-    ESMCI::InterfaceInt<int> *orientationVector,
+    ESMCI::InterArray<int> *connection, int *tileIndexA,
+    int *tileIndexB, ESMCI::InterArray<int> *positionVector,
+    ESMCI::InterArray<int> *orientationVector,
     int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_connection()"
@@ -680,7 +680,7 @@ extern "C" {
   }
 
   void FTN_X(c_esmc_distgridset)(
-    ESMCI::DistGrid **ptr, ESMCI::InterfaceInt<int> *collocationPDim, int *rc){
+    ESMCI::DistGrid **ptr, ESMCI::InterArray<int> *collocationPDim, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_distgridset()"
     // Initialize return code; assume routine not implemented
@@ -693,7 +693,7 @@ extern "C" {
   }
   
   void FTN_X(c_esmc_distgridsetarbseqindex)(
-    ESMCI::DistGrid **ptr, ESMCI::InterfaceInt<int> *arbSeqIndex, 
+    ESMCI::DistGrid **ptr, ESMCI::InterArray<int> *arbSeqIndex, 
       int *localDe, int *collocation, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_distgridsetarbseqindex()"

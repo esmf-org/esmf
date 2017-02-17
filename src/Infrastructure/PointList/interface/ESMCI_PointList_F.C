@@ -40,7 +40,7 @@
 // the interface subroutine names MUST be in lower case
 extern "C" {
 
-  void FTN_X(c_esmc_pointlistcreatefrmgrid)(ESMCI::Grid **gptr, ESMC_StaggerLoc *staggerLoc, ESMCI::InterfaceInt<int> *maskValuesArg, ESMCI::PointList **plptr, int *rc){
+  void FTN_X(c_esmc_pointlistcreatefrmgrid)(ESMCI::Grid **gptr, ESMC_StaggerLoc *staggerLoc, ESMCI::InterArray<int> *maskValuesArg, ESMCI::PointList **plptr, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_pointlistcreatefrmgrid()"
 
@@ -79,7 +79,7 @@ extern "C" {
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
 
-  void FTN_X(c_esmc_pointlistcreatefrmmesh)(ESMCI::MeshCap **mptr, ESMC_MeshLoc_Flag *meshLoc, ESMCI::InterfaceInt<int> *maskValuesArg, ESMCI::PointList **plptr, int *rc){
+  void FTN_X(c_esmc_pointlistcreatefrmmesh)(ESMCI::MeshCap **mptr, ESMC_MeshLoc_Flag *meshLoc, ESMCI::InterArray<int> *maskValuesArg, ESMCI::PointList **plptr, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_pointlistcreatefrmmesh()"
 

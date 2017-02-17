@@ -1403,8 +1403,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !------------------------------------------------------------------------------
     integer                         :: localrc          ! local return code
     type(ESMF_StartRegion_Flag)     :: opt_startregion  ! helper variable
-    type(ESMF_InterfaceInt)         :: haloLDepthArg    ! helper variable
-    type(ESMF_InterfaceInt)         :: haloUDepthArg    ! helper variable
+    type(ESMF_InterArray)           :: haloLDepthArg    ! helper variable
+    type(ESMF_InterArray)           :: haloUDepthArg    ! helper variable
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
@@ -1418,10 +1418,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(startregion)) opt_startregion = startregion
 
     ! Deal with (optional) array arguments
-    haloLDepthArg = ESMF_InterfaceIntCreate(haloLDepth, rc=localrc)
+    haloLDepthArg = ESMF_InterArrayCreate(haloLDepth, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    haloUDepthArg = ESMF_InterfaceIntCreate(haloUDepth, rc=localrc)
+    haloUDepthArg = ESMF_InterArrayCreate(haloUDepth, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -1432,10 +1432,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ESMF_CONTEXT, rcToReturn=rc)) return
     
     ! garbage collection
-    call ESMF_InterfaceIntDestroy(haloLDepthArg, rc=localrc)
+    call ESMF_InterArrayDestroy(haloLDepthArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(haloUDepthArg, rc=localrc)
+    call ESMF_InterArrayDestroy(haloUDepthArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -1940,7 +1940,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !EOPI
 !------------------------------------------------------------------------------
     integer                 :: localrc      ! local return code
-    type(ESMF_InterfaceInt) :: srcToDstTransposeMapArg   ! index helper
+    type(ESMF_InterArray)   :: srcToDstTransposeMapArg   ! index helper
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
@@ -1951,7 +1951,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ESMF_INIT_CHECK_DEEP_SHORT(ESMF_ArrayBundleGetInit, dstArrayBundle, rc)
     
     ! Deal with (optional) array arguments
-    srcToDstTransposeMapArg = ESMF_InterfaceIntCreate(srcToDstTransposeMap, &
+    srcToDstTransposeMapArg = ESMF_InterArrayCreate(srcToDstTransposeMap, &
       rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
@@ -1968,7 +1968,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ESMF_CONTEXT, rcToReturn=rc)) return
     
     ! garbage collection
-    call ESMF_InterfaceIntDestroy(srcToDstTransposeMapArg, rc=localrc)
+    call ESMF_InterArrayDestroy(srcToDstTransposeMapArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -2001,8 +2001,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !EOPI
 !------------------------------------------------------------------------------
-    integer                 :: localrc      ! local return code
-    type(ESMF_InterfaceInt) :: srcToDstTransposeMapArg   ! index helper
+    integer               :: localrc      ! local return code
+    type(ESMF_InterArray) :: srcToDstTransposeMapArg   ! index helper
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
@@ -2013,7 +2013,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ESMF_INIT_CHECK_DEEP_SHORT(ESMF_ArrayBundleGetInit, dstArrayBundle, rc)
     
     ! Deal with (optional) array arguments
-    srcToDstTransposeMapArg = ESMF_InterfaceIntCreate(srcToDstTransposeMap, &
+    srcToDstTransposeMapArg = ESMF_InterArrayCreate(srcToDstTransposeMap, &
       rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
@@ -2030,7 +2030,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ESMF_CONTEXT, rcToReturn=rc)) return
     
     ! garbage collection
-    call ESMF_InterfaceIntDestroy(srcToDstTransposeMapArg, rc=localrc)
+    call ESMF_InterArrayDestroy(srcToDstTransposeMapArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -2063,8 +2063,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !EOPI
 !------------------------------------------------------------------------------
-    integer                 :: localrc      ! local return code
-    type(ESMF_InterfaceInt) :: srcToDstTransposeMapArg   ! index helper
+    integer               :: localrc      ! local return code
+    type(ESMF_InterArray) :: srcToDstTransposeMapArg   ! index helper
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
@@ -2075,7 +2075,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ESMF_INIT_CHECK_DEEP_SHORT(ESMF_ArrayBundleGetInit, dstArrayBundle, rc)
     
     ! Deal with (optional) array arguments
-    srcToDstTransposeMapArg = ESMF_InterfaceIntCreate(srcToDstTransposeMap, &
+    srcToDstTransposeMapArg = ESMF_InterArrayCreate(srcToDstTransposeMap, &
       rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
@@ -2092,7 +2092,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ESMF_CONTEXT, rcToReturn=rc)) return
     
     ! garbage collection
-    call ESMF_InterfaceIntDestroy(srcToDstTransposeMapArg, rc=localrc)
+    call ESMF_InterArrayDestroy(srcToDstTransposeMapArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -2125,8 +2125,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !EOPI
 !------------------------------------------------------------------------------
-    integer                 :: localrc      ! local return code
-    type(ESMF_InterfaceInt) :: srcToDstTransposeMapArg   ! index helper
+    integer               :: localrc      ! local return code
+    type(ESMF_InterArray) :: srcToDstTransposeMapArg   ! index helper
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
@@ -2137,7 +2137,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ESMF_INIT_CHECK_DEEP_SHORT(ESMF_ArrayBundleGetInit, dstArrayBundle, rc)
     
     ! Deal with (optional) array arguments
-    srcToDstTransposeMapArg = ESMF_InterfaceIntCreate(srcToDstTransposeMap, &
+    srcToDstTransposeMapArg = ESMF_InterArrayCreate(srcToDstTransposeMap, &
       rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
@@ -2154,7 +2154,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ESMF_CONTEXT, rcToReturn=rc)) return
     
     ! garbage collection
-    call ESMF_InterfaceIntDestroy(srcToDstTransposeMapArg, rc=localrc)
+    call ESMF_InterArrayDestroy(srcToDstTransposeMapArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -2247,8 +2247,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !EOP
 !------------------------------------------------------------------------------
-    integer                 :: localrc      ! local return code
-    type(ESMF_InterfaceInt) :: srcToDstTransposeMapArg   ! index helper
+    integer               :: localrc      ! local return code
+    type(ESMF_InterArray) :: srcToDstTransposeMapArg   ! index helper
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
@@ -2259,7 +2259,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ESMF_INIT_CHECK_DEEP_SHORT(ESMF_ArrayBundleGetInit, dstArrayBundle, rc)
     
     ! Deal with (optional) array arguments
-    srcToDstTransposeMapArg = ESMF_InterfaceIntCreate(srcToDstTransposeMap, &
+    srcToDstTransposeMapArg = ESMF_InterArrayCreate(srcToDstTransposeMap, &
       rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
@@ -2276,7 +2276,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ESMF_CONTEXT, rcToReturn=rc)) return
     
     ! garbage collection
-    call ESMF_InterfaceIntDestroy(srcToDstTransposeMapArg, rc=localrc)
+    call ESMF_InterArrayDestroy(srcToDstTransposeMapArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -2833,8 +2833,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer                         :: localrc              ! local return code
     integer(ESMF_KIND_I4), pointer  :: opt_factorList(:)    ! helper variable
     integer                         :: len_factorList       ! helper variable
-    type(ESMF_InterfaceInt)         :: factorIndexListArg   ! helper variable
-    type(ESMF_InterfaceInt)         :: srcTermProcessingArg ! helper variable
+    type(ESMF_InterArray)           :: factorIndexListArg   ! helper variable
+    type(ESMF_InterArray)           :: srcTermProcessingArg ! helper variable
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
@@ -2848,13 +2848,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     len_factorList = size(factorList)
     opt_factorList => factorList
     factorIndexListArg = &
-      ESMF_InterfaceIntCreate(farray2D=factorIndexList, rc=localrc)
+      ESMF_InterArrayCreate(farray2D=factorIndexList, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     
     ! Wrap srcTermProcessing argument
     srcTermProcessingArg = &
-      ESMF_InterfaceIntCreate(srcTermProcessing, rc=localrc)
+      ESMF_InterArrayCreate(srcTermProcessing, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -2866,7 +2866,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ESMF_CONTEXT, rcToReturn=rc)) return
     
     ! Garbage collection
-    call ESMF_InterfaceIntDestroy(factorIndexListArg, rc=localrc)
+    call ESMF_InterArrayDestroy(factorIndexListArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -2909,8 +2909,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer                         :: localrc              ! local return code
     integer(ESMF_KIND_I8), pointer  :: opt_factorList(:)    ! helper variable
     integer                         :: len_factorList       ! helper variable
-    type(ESMF_InterfaceInt)         :: factorIndexListArg   ! helper variable
-    type(ESMF_InterfaceInt)         :: srcTermProcessingArg ! helper variable
+    type(ESMF_InterArray)           :: factorIndexListArg   ! helper variable
+    type(ESMF_InterArray)           :: srcTermProcessingArg ! helper variable
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
@@ -2924,13 +2924,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     len_factorList = size(factorList)
     opt_factorList => factorList
     factorIndexListArg = &
-      ESMF_InterfaceIntCreate(farray2D=factorIndexList, rc=localrc)
+      ESMF_InterArrayCreate(farray2D=factorIndexList, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Wrap srcTermProcessing argument
     srcTermProcessingArg = &
-      ESMF_InterfaceIntCreate(srcTermProcessing, rc=localrc)
+      ESMF_InterArrayCreate(srcTermProcessing, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -2942,7 +2942,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ESMF_CONTEXT, rcToReturn=rc)) return
     
     ! Garbage collection
-    call ESMF_InterfaceIntDestroy(factorIndexListArg, rc=localrc)
+    call ESMF_InterArrayDestroy(factorIndexListArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -2982,11 +2982,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !EOPI
 !------------------------------------------------------------------------------
-    integer                         :: localrc              ! local return code
-    real(ESMF_KIND_R4), pointer     :: opt_factorList(:)    ! helper variable
-    integer                         :: len_factorList       ! helper variable
-    type(ESMF_InterfaceInt)         :: factorIndexListArg   ! helper variable
-    type(ESMF_InterfaceInt)         :: srcTermProcessingArg ! helper variable
+    integer                       :: localrc              ! local return code
+    real(ESMF_KIND_R4), pointer   :: opt_factorList(:)    ! helper variable
+    integer                       :: len_factorList       ! helper variable
+    type(ESMF_InterArray)         :: factorIndexListArg   ! helper variable
+    type(ESMF_InterArray)         :: srcTermProcessingArg ! helper variable
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
@@ -3000,13 +3000,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     len_factorList = size(factorList)
     opt_factorList => factorList
     factorIndexListArg = &
-      ESMF_InterfaceIntCreate(farray2D=factorIndexList, rc=localrc)
+      ESMF_InterArrayCreate(farray2D=factorIndexList, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Wrap srcTermProcessing argument
     srcTermProcessingArg = &
-      ESMF_InterfaceIntCreate(srcTermProcessing, rc=localrc)
+      ESMF_InterArrayCreate(srcTermProcessing, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -3018,7 +3018,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ESMF_CONTEXT, rcToReturn=rc)) return
     
     ! Garbage collection
-    call ESMF_InterfaceIntDestroy(factorIndexListArg, rc=localrc)
+    call ESMF_InterArrayDestroy(factorIndexListArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -3058,11 +3058,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !EOPI
 !------------------------------------------------------------------------------
-    integer                         :: localrc              ! local return code
-    real(ESMF_KIND_R8), pointer     :: opt_factorList(:)    ! helper variable
-    integer                         :: len_factorList       ! helper variable
-    type(ESMF_InterfaceInt)         :: factorIndexListArg   ! helper variable
-    type(ESMF_InterfaceInt)         :: srcTermProcessingArg ! helper variable
+    integer                       :: localrc              ! local return code
+    real(ESMF_KIND_R8), pointer   :: opt_factorList(:)    ! helper variable
+    integer                       :: len_factorList       ! helper variable
+    type(ESMF_InterArray)         :: factorIndexListArg   ! helper variable
+    type(ESMF_InterArray)         :: srcTermProcessingArg ! helper variable
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
@@ -3076,13 +3076,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     len_factorList = size(factorList)
     opt_factorList => factorList
     factorIndexListArg = &
-      ESMF_InterfaceIntCreate(farray2D=factorIndexList, rc=localrc)
+      ESMF_InterArrayCreate(farray2D=factorIndexList, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Wrap srcTermProcessing argument
     srcTermProcessingArg = &
-      ESMF_InterfaceIntCreate(srcTermProcessing, rc=localrc)
+      ESMF_InterArrayCreate(srcTermProcessing, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -3094,7 +3094,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ESMF_CONTEXT, rcToReturn=rc)) return
     
     ! Garbage collection
-    call ESMF_InterfaceIntDestroy(factorIndexListArg, rc=localrc)
+    call ESMF_InterArrayDestroy(factorIndexListArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -3188,8 +3188,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !EOP
 !------------------------------------------------------------------------------
-    integer                 :: localrc              ! local return code
-    type(ESMF_InterfaceInt) :: srcTermProcessingArg ! helper variable
+    integer               :: localrc              ! local return code
+    type(ESMF_InterArray) :: srcTermProcessingArg ! helper variable
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
@@ -3201,7 +3201,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     
     ! Wrap srcTermProcessing argument
     srcTermProcessingArg = &
-      ESMF_InterfaceIntCreate(srcTermProcessing, rc=localrc)
+      ESMF_InterArrayCreate(srcTermProcessing, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 

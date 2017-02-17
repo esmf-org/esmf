@@ -1308,10 +1308,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer :: tmp_staggerloc
     integer :: localrc ! local error status
     type(ESMF_GridDecompType) :: decompType ! Arbitrary or not
-    type(ESMF_InterfaceInt) :: staggerEdgeLWidthArg  ! Language Interface Helper Var
-    type(ESMF_InterfaceInt) :: staggerEdgeUWidthArg  ! Language Interface Helper Var
-    type(ESMF_InterfaceInt) :: staggerAlignArg  ! Language Interface Helper Var
-    type(ESMF_InterfaceInt) :: staggerLBoundArg  ! Language Interface Helper Var
+    type(ESMF_InterArray) :: staggerEdgeLWidthArg  ! Language Interface Helper Var
+    type(ESMF_InterArray) :: staggerEdgeUWidthArg  ! Language Interface Helper Var
+    type(ESMF_InterArray) :: staggerAlignArg  ! Language Interface Helper Var
+    type(ESMF_InterArray) :: staggerLBoundArg  ! Language Interface Helper Var
 
     ! Initialize return code; assume failure until success is certain
     localrc = ESMF_RC_NOT_IMPL
@@ -1356,22 +1356,22 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 	endif
      else
         !! staggerEdgeLWidth
-    	staggerEdgeLWidthArg = ESMF_InterfaceIntCreate(staggerEdgeLWidth, rc=localrc)
+    	staggerEdgeLWidthArg = ESMF_InterArrayCreate(staggerEdgeLWidth, rc=localrc)
     	if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       	  ESMF_CONTEXT, rcToReturn=rc)) return
 
     	!! staggerEdgeUWidth
-    	staggerEdgeUWidthArg = ESMF_InterfaceIntCreate(staggerEdgeUWidth, rc=localrc)
+    	staggerEdgeUWidthArg = ESMF_InterArrayCreate(staggerEdgeUWidth, rc=localrc)
     	if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       	   ESMF_CONTEXT, rcToReturn=rc)) return
 
     	!! staggerAlign
-    	staggerAlignArg = ESMF_InterfaceIntCreate(staggerAlign, rc=localrc)
+    	staggerAlignArg = ESMF_InterArrayCreate(staggerAlign, rc=localrc)
     	if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     	  ESMF_CONTEXT, rcToReturn=rc)) return
 
         !! staggerMemLBound
-        staggerLBoundArg = ESMF_InterfaceIntCreate(staggerLBound, rc=localrc)
+        staggerLBoundArg = ESMF_InterArrayCreate(staggerLBound, rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -1382,19 +1382,19 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           ESMF_CONTEXT, rcToReturn=rc)) return
 
     	! Deallocate helper variables
-    	call ESMF_InterfaceIntDestroy(staggerEdgeLWidthArg, rc=localrc)
+    	call ESMF_InterArrayDestroy(staggerEdgeLWidthArg, rc=localrc)
     	if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     	  ESMF_CONTEXT, rcToReturn=rc)) return
 
-    	call ESMF_InterfaceIntDestroy(staggerEdgeUWidthArg, rc=localrc)
+    	call ESMF_InterArrayDestroy(staggerEdgeUWidthArg, rc=localrc)
     	if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     	  ESMF_CONTEXT, rcToReturn=rc)) return
 
-    	call ESMF_InterfaceIntDestroy(staggerAlignArg, rc=localrc)
+    	call ESMF_InterArrayDestroy(staggerAlignArg, rc=localrc)
     	  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       	    ESMF_CONTEXT, rcToReturn=rc)) return
             
-        call ESMF_InterfaceIntDestroy(staggerLBoundArg, rc=localrc)
+        call ESMF_InterArrayDestroy(staggerLBoundArg, rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -1470,9 +1470,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !EOPI
     integer :: tmp_staggerloc
     integer :: localrc ! local error status
-    type(ESMF_InterfaceInt) :: staggerEdgeLWidthArg  ! Language Interface Helper Var
-    type(ESMF_InterfaceInt) :: staggerEdgeUWidthArg  ! Language Interface Helper Var
-    type(ESMF_InterfaceInt) :: staggerAlignArg  ! Language Interface Helper Var
+    type(ESMF_InterArray) :: staggerEdgeLWidthArg  ! Language Interface Helper Var
+    type(ESMF_InterArray) :: staggerEdgeUWidthArg  ! Language Interface Helper Var
+    type(ESMF_InterArray) :: staggerAlignArg  ! Language Interface Helper Var
     integer :: i,arrayCount
     type(ESMF_Pointer), allocatable :: arrayPointerList(:) ! helper variable
 
@@ -1497,22 +1497,22 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     endif
 
     !! staggerLWidth
-    staggerEdgeLWidthArg = ESMF_InterfaceIntCreate(staggerEdgeLWidth, rc=localrc)
+    staggerEdgeLWidthArg = ESMF_InterArrayCreate(staggerEdgeLWidth, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     !! staggerEdgeUWidth
-    staggerEdgeUWidthArg = ESMF_InterfaceIntCreate(staggerEdgeUWidth, rc=localrc)
+    staggerEdgeUWidthArg = ESMF_InterArrayCreate(staggerEdgeUWidth, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     !! staggeAlign
-    staggerAlignArg = ESMF_InterfaceIntCreate(staggerAlign, rc=localrc)
+    staggerAlignArg = ESMF_InterArrayCreate(staggerAlign, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     !! staggerAlign
-    staggerAlignArg = ESMF_InterfaceIntCreate(staggerAlign, rc=localrc)
+    staggerAlignArg = ESMF_InterArrayCreate(staggerAlign, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -1536,15 +1536,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! cleanup
     deallocate(arrayPointerList)
-    call ESMF_InterfaceIntDestroy(staggerEdgeLWidthArg, rc=localrc)
+    call ESMF_InterArrayDestroy(staggerEdgeLWidthArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
-    call ESMF_InterfaceIntDestroy(staggerEdgeUWidthArg, rc=localrc)
+    call ESMF_InterArrayDestroy(staggerEdgeUWidthArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
-    call ESMF_InterfaceIntDestroy(staggerAlignArg, rc=localrc)
+    call ESMF_InterArrayDestroy(staggerAlignArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -1633,10 +1633,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     integer :: tmp_staggerloc
     integer :: localrc ! local error status
-    type(ESMF_InterfaceInt) :: staggerEdgeLWidthArg  ! Language Interface Helper Var
-    type(ESMF_InterfaceInt) :: staggerEdgeUWidthArg  ! Language Interface Helper Var
-    type(ESMF_InterfaceInt) :: staggerAlignArg  ! Language Interface Helper Var
-    type(ESMF_InterfaceInt) :: staggerLBoundArg  ! Language Interface Helper Var
+    type(ESMF_InterArray) :: staggerEdgeLWidthArg  ! Language Interface Helper Var
+    type(ESMF_InterArray) :: staggerEdgeUWidthArg  ! Language Interface Helper Var
+    type(ESMF_InterArray) :: staggerAlignArg  ! Language Interface Helper Var
+    type(ESMF_InterArray) :: staggerLBoundArg  ! Language Interface Helper Var
     type(ESMF_GridDecompType) :: decompType     ! decompose type: arbitrary or non-arbitrary
 
     ! Initialize return code; assume failure until success is certain
@@ -1689,22 +1689,22 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     else
 
        !! staggerEdgeLWidth
-       staggerEdgeLWidthArg = ESMF_InterfaceIntCreate(staggerEdgeLWidth, rc=localrc)
+       staggerEdgeLWidthArg = ESMF_InterArrayCreate(staggerEdgeLWidth, rc=localrc)
        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
 
        !! staggerEdgeUWidth
-       staggerEdgeUWidthArg = ESMF_InterfaceIntCreate(staggerEdgeUWidth, rc=localrc)
+       staggerEdgeUWidthArg = ESMF_InterArrayCreate(staggerEdgeUWidth, rc=localrc)
        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
 
        !! staggerAlign
-       staggerAlignArg = ESMF_InterfaceIntCreate(staggerAlign, rc=localrc)
+       staggerAlignArg = ESMF_InterArrayCreate(staggerAlign, rc=localrc)
        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
 
        !! staggerLBound
-       staggerLBoundArg = ESMF_InterfaceIntCreate(staggerLBound, rc=localrc)
+       staggerLBoundArg = ESMF_InterArrayCreate(staggerLBound, rc=localrc)
        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -1716,19 +1716,19 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           ESMF_CONTEXT, rcToReturn=rc)) return
 
        ! Deallocate helper variables
-       call ESMF_InterfaceIntDestroy(staggerEdgeLWidthArg, rc=localrc)
+       call ESMF_InterArrayDestroy(staggerEdgeLWidthArg, rc=localrc)
        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
 
-       call ESMF_InterfaceIntDestroy(staggerEdgeUWidthArg, rc=localrc)
+       call ESMF_InterArrayDestroy(staggerEdgeUWidthArg, rc=localrc)
        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
 
-       call ESMF_InterfaceIntDestroy(staggerAlignArg, rc=localrc)
+       call ESMF_InterArrayDestroy(staggerAlignArg, rc=localrc)
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
 
-       call ESMF_InterfaceIntDestroy(staggerLBoundArg, rc=localrc)
+       call ESMF_InterArrayDestroy(staggerLBoundArg, rc=localrc)
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
  
@@ -1877,7 +1877,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer, pointer ::  distgridToGridMap(:)
     integer          :: i,j,k
     integer ::  index1D    ! the return value
-    type(ESMF_InterfaceInt)   :: gridIndexArg
+    type(ESMF_InterArray)   :: gridIndexArg
     type(ESMF_GridDecompType) :: decompType
     type(ESMF_DistGrid) :: distGrid
     integer, allocatable :: undistdim(:)
@@ -1967,7 +1967,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! Call the C function to get the index of the 1D distgrid
     !! index
-    gridIndexArg = ESMF_InterfaceIntCreate(gridindex, rc=localrc)
+    gridIndexArg = ESMF_InterArrayCreate(gridindex, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -2010,7 +2010,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     endif  
 
     ! clean up memory allocation
-    call ESMF_InterfaceIntDestroy(GridIndexArg, rc=localrc)
+    call ESMF_InterArrayDestroy(GridIndexArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -4516,13 +4516,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer :: localrc ! local error status
     type(ESMF_Grid) :: grid              
     integer :: nameLen 
-    type(ESMF_InterfaceInt) :: gridEdgeLWidthArg  ! Language Interface Helper Var
-    type(ESMF_InterfaceInt) :: gridEdgeUWidthArg  ! Language Interface Helper Var
-    type(ESMF_InterfaceInt) :: gridAlignArg  ! Language Interface Helper Var
-    type(ESMF_InterfaceInt) :: gridMemLBoundArg  ! Language Interface Helper Var
-    type(ESMF_InterfaceInt) :: distgridToGridMapArg  ! Language Interface Helper Var
-    type(ESMF_InterfaceInt) :: coordDimCountArg  ! Language Interface Helper Var
-    type(ESMF_InterfaceInt) :: coordDimMapArg ! Language Interface Helper Var
+    type(ESMF_InterArray) :: gridEdgeLWidthArg  ! Language Interface Helper Var
+    type(ESMF_InterArray) :: gridEdgeUWidthArg  ! Language Interface Helper Var
+    type(ESMF_InterArray) :: gridAlignArg  ! Language Interface Helper Var
+    type(ESMF_InterArray) :: gridMemLBoundArg  ! Language Interface Helper Var
+    type(ESMF_InterArray) :: distgridToGridMapArg  ! Language Interface Helper Var
+    type(ESMF_InterArray) :: coordDimCountArg  ! Language Interface Helper Var
+    type(ESMF_InterArray) :: coordDimMapArg ! Language Interface Helper Var
     integer :: intDestroyDistgrid,intDestroyDELayout
     integer, allocatable :: collocation(:)
     logical  :: arbSeqIndexFlag
@@ -4592,29 +4592,29 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! It doesn't look like it needs to be translated, but test to make sure
 
     !! staggerWidths
-    gridEdgeLWidthArg = ESMF_InterfaceIntCreate(gridEdgeLWidth, rc=localrc)
+    gridEdgeLWidthArg = ESMF_InterArrayCreate(gridEdgeLWidth, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    gridEdgeUWidthArg = ESMF_InterfaceIntCreate(gridEdgeUWidth, rc=localrc)
+    gridEdgeUWidthArg = ESMF_InterArrayCreate(gridEdgeUWidth, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    gridAlignArg = ESMF_InterfaceIntCreate(gridAlign, rc=localrc)
+    gridAlignArg = ESMF_InterArrayCreate(gridAlign, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    gridMemLBoundArg = ESMF_InterfaceIntCreate(gridMemLBound, rc=localrc)
+    gridMemLBoundArg = ESMF_InterArrayCreate(gridMemLBound, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     !! distgridToGridMap
-    distgridToGridMapArg = ESMF_InterfaceIntCreate(distgridToGridMap, rc=localrc)
+    distgridToGridMapArg = ESMF_InterArrayCreate(distgridToGridMap, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     !! Description of array factorization
-    coordDimCountArg = ESMF_InterfaceIntCreate(coordDimCount, rc=localrc)
+    coordDimCountArg = ESMF_InterArrayCreate(coordDimCount, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    coordDimMapArg = ESMF_InterfaceIntCreate(farray2D=coordDimMap, rc=localrc)
+    coordDimMapArg = ESMF_InterArrayCreate(farray2D=coordDimMap, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -4666,25 +4666,25 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 #endif
 
     ! Deallocate helper variables
-    call ESMF_InterfaceIntDestroy(gridEdgeLWidthArg, rc=localrc)
+    call ESMF_InterArrayDestroy(gridEdgeLWidthArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(gridEdgeUWidthArg, rc=localrc)
+    call ESMF_InterArrayDestroy(gridEdgeUWidthArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(gridAlignArg, rc=localrc)
+    call ESMF_InterArrayDestroy(gridAlignArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(gridMemLBoundArg, rc=localrc)
+    call ESMF_InterArrayDestroy(gridMemLBoundArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(distgridToGridMapArg, rc=localrc)
+    call ESMF_InterArrayDestroy(distgridToGridMapArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(coordDimCountArg, rc=localrc)
+    call ESMF_InterArrayDestroy(coordDimCountArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(coordDimMapArg, rc=localrc)
+    call ESMF_InterArrayDestroy(coordDimMapArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -4779,12 +4779,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer :: localrc ! local error status
     type(ESMF_Grid) :: grid              
     integer :: nameLen 
-    type(ESMF_InterfaceInt) :: minIndexArg     ! Language Interface Helper Var
-    type(ESMF_InterfaceInt) :: maxIndexArg     ! Language Interface Helper Var
-    type(ESMF_InterfaceInt) :: localArbIndexArg ! Language Interface Helper Var
-    type(ESMF_InterfaceInt) :: distDimArg      ! Language Interface Helper Var
-    type(ESMF_InterfaceInt) :: coordDimCountArg  ! Language Interface Helper Var
-    type(ESMF_InterfaceInt) :: coordDimMapArg ! Language Interface Helper Var
+    type(ESMF_InterArray) :: minIndexArg     ! Language Interface Helper Var
+    type(ESMF_InterArray) :: maxIndexArg     ! Language Interface Helper Var
+    type(ESMF_InterArray) :: localArbIndexArg ! Language Interface Helper Var
+    type(ESMF_InterArray) :: distDimArg      ! Language Interface Helper Var
+    type(ESMF_InterArray) :: coordDimCountArg  ! Language Interface Helper Var
+    type(ESMF_InterArray) :: coordDimMapArg ! Language Interface Helper Var
     integer :: intDestroyDistgrid,intDestroyDELayout
     integer :: dimCount, distDimCount, undistDimCount, dimCount1
     integer, pointer :: local1DIndices(:), localArbIndex(:,:), distSize(:)
@@ -4880,15 +4880,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     endif
 
     !! Arbitrary grid indices
-    minIndexArg = ESMF_InterfaceIntCreate(minIndexLocal, rc=localrc)
+    minIndexArg = ESMF_InterArrayCreate(minIndexLocal, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    maxIndexArg = ESMF_InterfaceIntCreate(maxIndexLocal, rc=localrc)
+    maxIndexArg = ESMF_InterArrayCreate(maxIndexLocal, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     !! distDim
-    distDimArg = ESMF_InterfaceIntCreate(distDimLocal, rc=localrc)
+    distDimArg = ESMF_InterArrayCreate(distDimLocal, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     
@@ -4931,7 +4931,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       enddo
     enddo
 
-    localArbIndexArg = ESMF_InterfaceIntCreate(farray2D=localArbIndex, rc=localrc)
+    localArbIndexArg = ESMF_InterArrayCreate(farray2D=localArbIndex, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -4997,10 +4997,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     endif
 
     !! Description of array factorization
-    coordDimCountArg = ESMF_InterfaceIntCreate(coordDimCount, rc=localrc)
+    coordDimCountArg = ESMF_InterArrayCreate(coordDimCount, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    coordDimMapArg = ESMF_InterfaceIntCreate(farray2D=coordDimMap, rc=localrc)
+    coordDimMapArg = ESMF_InterArrayCreate(farray2D=coordDimMap, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 	
@@ -5036,22 +5036,22 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       deallocate(undistMaxIndex)
     endif
 
-    call ESMF_InterfaceIntDestroy(distDimArg, rc=localrc)
+    call ESMF_InterArrayDestroy(distDimArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(minIndexArg, rc=localrc)
+    call ESMF_InterArrayDestroy(minIndexArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(maxIndexArg, rc=localrc)
+    call ESMF_InterArrayDestroy(maxIndexArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(localArbIndexArg, rc=localrc)
+    call ESMF_InterArrayDestroy(localArbIndexArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(coordDimCountArg, rc=localrc)
+    call ESMF_InterArrayDestroy(coordDimCountArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(coordDimMapArg, rc=localrc)
+    call ESMF_InterArrayDestroy(coordDimMapArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -15082,12 +15082,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !EOP
     integer :: localrc ! local error status
     type(ESMF_GridDecompType) :: decompType  ! check if arbitrary
-    type(ESMF_InterfaceInt) :: distgridToGridMapArg  ! Language Interface Helper Var
-    type(ESMF_InterfaceInt) :: coordDimCountArg  ! Language Interface Helper Var
-    type(ESMF_InterfaceInt) :: coordDimMapArg ! Language Interface Helper Var
-    type(ESMF_InterfaceInt) :: gridEdgeLWidthArg  ! Language Interface Helper Var
-    type(ESMF_InterfaceInt) :: gridEdgeUWidthArg  ! Language Interface Helper Var
-    type(ESMF_InterfaceInt) :: gridAlignArg  ! Language Interface Helper Var
+    type(ESMF_InterArray) :: distgridToGridMapArg  ! Language Interface Helper Var
+    type(ESMF_InterArray) :: coordDimCountArg  ! Language Interface Helper Var
+    type(ESMF_InterArray) :: coordDimMapArg ! Language Interface Helper Var
+    type(ESMF_InterArray) :: gridEdgeLWidthArg  ! Language Interface Helper Var
+    type(ESMF_InterArray) :: gridEdgeUWidthArg  ! Language Interface Helper Var
+    type(ESMF_InterArray) :: gridAlignArg  ! Language Interface Helper Var
 
 
     ! Initialize return code; assume failure until success is certain
@@ -15140,26 +15140,26 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        ! It doesn't look like it needs to be translated, but test to make sure
 
        !! distgridToGridMap
-       distgridToGridMapArg = ESMF_InterfaceIntCreate(distgridToGridMap, rc=localrc)
+       distgridToGridMapArg = ESMF_InterArrayCreate(distgridToGridMap, rc=localrc)
        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
 
        !! Description of array factorization
-       coordDimCountArg = ESMF_InterfaceIntCreate(coordDimCount, rc=localrc)
+       coordDimCountArg = ESMF_InterArrayCreate(coordDimCount, rc=localrc)
        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
-       coordDimMapArg = ESMF_InterfaceIntCreate(farray2D=coordDimMap, rc=localrc)
+       coordDimMapArg = ESMF_InterArrayCreate(farray2D=coordDimMap, rc=localrc)
        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
 
        !! Grid Boundary Info
-       gridEdgeLWidthArg = ESMF_InterfaceIntCreate(gridEdgeLWidth, rc=localrc)
+       gridEdgeLWidthArg = ESMF_InterArrayCreate(gridEdgeLWidth, rc=localrc)
        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
-       gridEdgeUWidthArg = ESMF_InterfaceIntCreate(gridEdgeUWidth, rc=localrc)
+       gridEdgeUWidthArg = ESMF_InterArrayCreate(gridEdgeUWidth, rc=localrc)
        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
-       gridAlignArg = ESMF_InterfaceIntCreate(gridAlign, rc=localrc)
+       gridAlignArg = ESMF_InterArrayCreate(gridAlign, rc=localrc)
        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -15175,22 +15175,22 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             ESMF_CONTEXT, rcToReturn=rc)) return
 
        ! Deallocate helper variables
-       call ESMF_InterfaceIntDestroy(distgridToGridMapArg, rc=localrc)
+       call ESMF_InterArrayDestroy(distgridToGridMapArg, rc=localrc)
        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
-       call ESMF_InterfaceIntDestroy(coordDimCountArg, rc=localrc)
+       call ESMF_InterArrayDestroy(coordDimCountArg, rc=localrc)
        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
-       call ESMF_InterfaceIntDestroy(coordDimMapArg, rc=localrc)
+       call ESMF_InterArrayDestroy(coordDimMapArg, rc=localrc)
        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
-       call ESMF_InterfaceIntDestroy(gridEdgeLWidthArg, rc=localrc)
+       call ESMF_InterArrayDestroy(gridEdgeLWidthArg, rc=localrc)
        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
-       call ESMF_InterfaceIntDestroy(gridEdgeUWidthArg, rc=localrc)
+       call ESMF_InterArrayDestroy(gridEdgeUWidthArg, rc=localrc)
        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
-       call ESMF_InterfaceIntDestroy(gridAlignArg, rc=localrc)
+       call ESMF_InterArrayDestroy(gridAlignArg, rc=localrc)
        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -15251,8 +15251,8 @@ end subroutine ESMF_GridGetDefault
 !EOPI
 
     integer :: localrc ! local error status
-    type(ESMF_InterfaceInt) :: minIndexArg ! helper variable
-    type(ESMF_InterfaceInt) :: maxIndexArg ! helper variable	
+    type(ESMF_InterArray) :: minIndexArg ! helper variable
+    type(ESMF_InterArray) :: maxIndexArg ! helper variable	
     type(ESMF_GridDecompType) :: decompType
     integer :: localTileNo ! local TileNo	
   
@@ -15286,10 +15286,10 @@ end subroutine ESMF_GridGetDefault
     endif
 
     ! process optional arguments
-    minIndexArg=ESMF_InterfaceIntCreate(minIndex, rc=localrc)
+    minIndexArg=ESMF_InterArrayCreate(minIndex, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    maxIndexArg=ESMF_InterfaceIntCreate(maxIndex, rc=localrc)
+    maxIndexArg=ESMF_InterArrayCreate(maxIndex, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -15298,10 +15298,10 @@ end subroutine ESMF_GridGetDefault
        ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Deallocate interface ints
-    call ESMF_InterfaceIntDestroy(minIndexArg, rc=localrc)
+    call ESMF_InterArrayDestroy(minIndexArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(maxIndexArg, rc=localrc)
+    call ESMF_InterArrayDestroy(maxIndexArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
    
@@ -15369,7 +15369,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer :: isUBoundTmp(ESMF_MAXDIM) 
     integer :: dimCount,i
     type(ESMF_GridDecompType) :: decompType  ! check if arbitrary
-    type(ESMF_InterfaceInt) :: arbIndexListArg ! Language Interface Helper Var
+    type(ESMF_InterArray) :: arbIndexListArg ! Language Interface Helper Var
 
     ! Initialize return code
     localrc = ESMF_RC_NOT_IMPL
@@ -15424,7 +15424,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     endif
 
     !! Arbitrarily distributed grid local indices
-    arbIndexListArg = ESMF_InterfaceIntCreate(farray2D=arbIndexList, rc=localrc)
+    arbIndexListArg = ESMF_InterArrayCreate(farray2D=arbIndexList, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -15451,7 +15451,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        enddo
     endif
 
-    call ESMF_InterfaceIntDestroy(arbIndexListArg, rc=localrc)
+    call ESMF_InterArrayDestroy(arbIndexListArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -15564,12 +15564,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !EOP
 
     integer :: localrc ! local error status
-    type(ESMF_InterfaceInt) :: exclusiveLBoundArg ! helper variable
-    type(ESMF_InterfaceInt) :: exclusiveUBoundArg ! helper variable
-    type(ESMF_InterfaceInt) :: exclusiveCountArg ! helper variable
-    type(ESMF_InterfaceInt) :: computationalLBoundArg ! helper variable
-    type(ESMF_InterfaceInt) :: computationalUBoundArg ! helper variable
-    type(ESMF_InterfaceInt) :: computationalCountArg ! helper variable
+    type(ESMF_InterArray) :: exclusiveLBoundArg ! helper variable
+    type(ESMF_InterArray) :: exclusiveUBoundArg ! helper variable
+    type(ESMF_InterArray) :: exclusiveCountArg ! helper variable
+    type(ESMF_InterArray) :: computationalLBoundArg ! helper variable
+    type(ESMF_InterArray) :: computationalUBoundArg ! helper variable
+    type(ESMF_InterArray) :: computationalCountArg ! helper variable
     integer :: tmp_staggerloc
 
     ! Initialize return code
@@ -15581,22 +15581,22 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     tmp_staggerloc=staggerloc%staggerloc
 
     ! process optional arguments
-    exclusiveLBoundArg=ESMF_InterfaceIntCreate(exclusiveLBound, rc=localrc)
+    exclusiveLBoundArg=ESMF_InterArrayCreate(exclusiveLBound, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    exclusiveUBoundArg=ESMF_InterfaceIntCreate(exclusiveUBound, rc=localrc)
+    exclusiveUBoundArg=ESMF_InterArrayCreate(exclusiveUBound, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    exclusiveCountArg=ESMF_InterfaceIntCreate(exclusiveCount, rc=localrc)
+    exclusiveCountArg=ESMF_InterArrayCreate(exclusiveCount, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    computationalLBoundArg=ESMF_InterfaceIntCreate(computationalLBound, rc=localrc)
+    computationalLBoundArg=ESMF_InterArrayCreate(computationalLBound, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    computationalUBoundArg=ESMF_InterfaceIntCreate(computationalUBound, rc=localrc)
+    computationalUBoundArg=ESMF_InterArrayCreate(computationalUBound, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    computationalCountArg=ESMF_InterfaceIntCreate(computationalCount, rc=localrc)
+    computationalCountArg=ESMF_InterArrayCreate(computationalCount, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -15610,22 +15610,22 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Deallocate interface ints
-    call ESMF_InterfaceIntDestroy(exclusiveLBoundArg, rc=localrc)
+    call ESMF_InterArrayDestroy(exclusiveLBoundArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(exclusiveUBoundArg, rc=localrc)
+    call ESMF_InterArrayDestroy(exclusiveUBoundArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(exclusiveCountArg, rc=localrc)
+    call ESMF_InterArrayDestroy(exclusiveCountArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(computationalLBoundArg, rc=localrc)
+    call ESMF_InterArrayDestroy(computationalLBoundArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(computationalUBoundArg, rc=localrc)
+    call ESMF_InterArrayDestroy(computationalUBoundArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(computationalCountArg, rc=localrc)
+    call ESMF_InterArrayDestroy(computationalCountArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -15703,10 +15703,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
  ! XMRKX
     integer :: localrc ! local error status
-    type(ESMF_InterfaceInt) :: staggerEdgeLWidthArg ! helper variable
-    type(ESMF_InterfaceInt) :: staggerEdgeUWidthArg ! helper variable
-    type(ESMF_InterfaceInt) :: staggerAlignArg ! helper variable
-    type(ESMF_InterfaceInt) :: staggerLBoundArg ! helper variable
+    type(ESMF_InterArray) :: staggerEdgeLWidthArg ! helper variable
+    type(ESMF_InterArray) :: staggerEdgeUWidthArg ! helper variable
+    type(ESMF_InterArray) :: staggerAlignArg ! helper variable
+    type(ESMF_InterArray) :: staggerLBoundArg ! helper variable
     integer :: tmp_staggerloc
 
     ! Initialize return code
@@ -15731,19 +15731,19 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 
     ! process optional arguments into interface ints
-    staggerEdgeLWidthArg=ESMF_InterfaceIntCreate(staggerEdgeLWidth, rc=localrc)
+    staggerEdgeLWidthArg=ESMF_InterArrayCreate(staggerEdgeLWidth, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
-    staggerEdgeUWidthArg=ESMF_InterfaceIntCreate(staggerEdgeUWidth, rc=localrc)
+    staggerEdgeUWidthArg=ESMF_InterArrayCreate(staggerEdgeUWidth, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
-    staggerAlignArg=ESMF_InterfaceIntCreate(staggerAlign, rc=localrc)
+    staggerAlignArg=ESMF_InterArrayCreate(staggerAlign, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
-    staggerLBoundArg=ESMF_InterfaceIntCreate(staggerLBound, rc=localrc)
+    staggerLBoundArg=ESMF_InterArrayCreate(staggerLBound, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -15756,19 +15756,19 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 
     ! Deallocate interface ints
-    call ESMF_InterfaceIntDestroy(staggerEdgeLWidthArg, rc=localrc)
+    call ESMF_InterArrayDestroy(staggerEdgeLWidthArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
-    call ESMF_InterfaceIntDestroy(staggerEdgeUWidthArg, rc=localrc)
+    call ESMF_InterArrayDestroy(staggerEdgeUWidthArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
-    call ESMF_InterfaceIntDestroy(staggerAlignArg, rc=localrc)
+    call ESMF_InterArrayDestroy(staggerAlignArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
-    call ESMF_InterfaceIntDestroy(staggerLBoundArg, rc=localrc)
+    call ESMF_InterArrayDestroy(staggerLBoundArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -15845,8 +15845,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !EOP
 
     integer :: localrc ! local error status
-    type(ESMF_InterfaceInt) :: minIndexArg ! helper variable
-    type(ESMF_InterfaceInt) :: maxIndexArg ! helper variable
+    type(ESMF_InterArray) :: minIndexArg ! helper variable
+    type(ESMF_InterArray) :: maxIndexArg ! helper variable
     integer :: tmp_staggerloc
 
     ! Initialize return code
@@ -15858,10 +15858,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     tmp_staggerloc=staggerloc%staggerloc
 
     ! process optional arguments
-    minIndexArg=ESMF_InterfaceIntCreate(minIndex, rc=localrc)
+    minIndexArg=ESMF_InterArrayCreate(minIndex, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    maxIndexArg=ESMF_InterfaceIntCreate(maxIndex, rc=localrc)
+    maxIndexArg=ESMF_InterArrayCreate(maxIndex, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -15873,10 +15873,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Deallocate interface ints
-    call ESMF_InterfaceIntDestroy(minIndexArg, rc=localrc)
+    call ESMF_InterArrayDestroy(minIndexArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(maxIndexArg, rc=localrc)
+    call ESMF_InterArrayDestroy(maxIndexArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -16169,15 +16169,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_LocalArray) :: localarray
     type(ESMF_DataCopy_Flag) :: datacopyflagInt
     integer :: coordDimCount(ESMF_MAXDIM)
-    type(ESMF_InterfaceInt) :: exclusiveLBoundArg ! helper variable
-    type(ESMF_InterfaceInt) :: exclusiveUBoundArg ! helper variable
-    type(ESMF_InterfaceInt) :: exclusiveCountArg ! helper variable
-    type(ESMF_InterfaceInt) :: computationalLBoundArg ! helper variable
-    type(ESMF_InterfaceInt) :: computationalUBoundArg ! helper variable
-    type(ESMF_InterfaceInt) :: computationalCountArg ! helper variable
-    type(ESMF_InterfaceInt) :: totalLBoundArg ! helper variable
-    type(ESMF_InterfaceInt) :: totalUBoundArg ! helper variable
-    type(ESMF_InterfaceInt) :: totalCountArg ! helper variable
+    type(ESMF_InterArray) :: exclusiveLBoundArg ! helper variable
+    type(ESMF_InterArray) :: exclusiveUBoundArg ! helper variable
+    type(ESMF_InterArray) :: exclusiveCountArg ! helper variable
+    type(ESMF_InterArray) :: computationalLBoundArg ! helper variable
+    type(ESMF_InterArray) :: computationalUBoundArg ! helper variable
+    type(ESMF_InterArray) :: computationalCountArg ! helper variable
+    type(ESMF_InterArray) :: totalLBoundArg ! helper variable
+    type(ESMF_InterArray) :: totalUBoundArg ! helper variable
+    type(ESMF_InterArray) :: totalCountArg ! helper variable
     integer :: tmp_staggerloc
     type(ESMF_GridDecompType) :: decompType
 
@@ -16264,31 +16264,31 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ESMF_CONTEXT, rcToReturn=rc)) return 
 
     ! process optional arguments
-    exclusiveLBoundArg=ESMF_InterfaceIntCreate(exclusiveLBound, rc=localrc)
+    exclusiveLBoundArg=ESMF_InterArrayCreate(exclusiveLBound, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    exclusiveUBoundArg=ESMF_InterfaceIntCreate(exclusiveUBound, rc=localrc)
+    exclusiveUBoundArg=ESMF_InterArrayCreate(exclusiveUBound, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    exclusiveCountArg=ESMF_InterfaceIntCreate(exclusiveCount, rc=localrc)
+    exclusiveCountArg=ESMF_InterArrayCreate(exclusiveCount, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    computationalLBoundArg=ESMF_InterfaceIntCreate(computationalLBound, rc=localrc)
+    computationalLBoundArg=ESMF_InterArrayCreate(computationalLBound, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    computationalUBoundArg=ESMF_InterfaceIntCreate(computationalUBound, rc=localrc)
+    computationalUBoundArg=ESMF_InterArrayCreate(computationalUBound, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    computationalCountArg=ESMF_InterfaceIntCreate(computationalCount, rc=localrc)
+    computationalCountArg=ESMF_InterArrayCreate(computationalCount, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    totalLBoundArg=ESMF_InterfaceIntCreate(totalLBound, rc=localrc)
+    totalLBoundArg=ESMF_InterArrayCreate(totalLBound, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    totalUBoundArg = ESMF_InterfaceIntCreate(totalUBound, rc=localrc)
+    totalUBoundArg = ESMF_InterArrayCreate(totalUBound, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    totalCountArg = ESMF_InterfaceIntCreate(totalCount, rc=localrc)
+    totalCountArg = ESMF_InterArrayCreate(totalCount, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -16302,31 +16302,31 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Deallocate interface ints
-    call ESMF_InterfaceIntDestroy(exclusiveLBoundArg, rc=localrc)
+    call ESMF_InterArrayDestroy(exclusiveLBoundArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(exclusiveUBoundArg, rc=localrc)
+    call ESMF_InterArrayDestroy(exclusiveUBoundArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(exclusiveCountArg, rc=localrc)
+    call ESMF_InterArrayDestroy(exclusiveCountArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(computationalLBoundArg, rc=localrc)
+    call ESMF_InterArrayDestroy(computationalLBoundArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(computationalUBoundArg, rc=localrc)
+    call ESMF_InterArrayDestroy(computationalUBoundArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(computationalCountArg, rc=localrc)
+    call ESMF_InterArrayDestroy(computationalCountArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(totalLBoundArg, rc=localrc)
+    call ESMF_InterArrayDestroy(totalLBoundArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(totalUBoundArg, rc=localrc)
+    call ESMF_InterArrayDestroy(totalUBoundArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(totalCountArg, rc=localrc)
+    call ESMF_InterArrayDestroy(totalCountArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -16461,15 +16461,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_LocalArray) :: localarray
     type(ESMF_DataCopy_Flag) :: datacopyflagInt
     integer :: coordDimCount(ESMF_MAXDIM)
-    type(ESMF_InterfaceInt) :: exclusiveLBoundArg ! helper variable
-    type(ESMF_InterfaceInt) :: exclusiveUBoundArg ! helper variable
-    type(ESMF_InterfaceInt) :: exclusiveCountArg ! helper variable
-    type(ESMF_InterfaceInt) :: computationalLBoundArg ! helper variable
-    type(ESMF_InterfaceInt) :: computationalUBoundArg ! helper variable
-    type(ESMF_InterfaceInt) :: computationalCountArg ! helper variable
-    type(ESMF_InterfaceInt) :: totalLBoundArg ! helper variable
-    type(ESMF_InterfaceInt) :: totalUBoundArg ! helper variable
-    type(ESMF_InterfaceInt) :: totalCountArg ! helper variable
+    type(ESMF_InterArray) :: exclusiveLBoundArg ! helper variable
+    type(ESMF_InterArray) :: exclusiveUBoundArg ! helper variable
+    type(ESMF_InterArray) :: exclusiveCountArg ! helper variable
+    type(ESMF_InterArray) :: computationalLBoundArg ! helper variable
+    type(ESMF_InterArray) :: computationalUBoundArg ! helper variable
+    type(ESMF_InterArray) :: computationalCountArg ! helper variable
+    type(ESMF_InterArray) :: totalLBoundArg ! helper variable
+    type(ESMF_InterArray) :: totalUBoundArg ! helper variable
+    type(ESMF_InterArray) :: totalCountArg ! helper variable
     integer :: tmp_staggerloc
     type(ESMF_GridDecompType) :: decompType
 
@@ -16555,31 +16555,31 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                               ESMF_CONTEXT, rcToReturn=rc)) return 
 
     ! process optional arguments
-    exclusiveLBoundArg=ESMF_InterfaceIntCreate(exclusiveLBound, rc=localrc)
+    exclusiveLBoundArg=ESMF_InterArrayCreate(exclusiveLBound, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    exclusiveUBoundArg=ESMF_InterfaceIntCreate(exclusiveUBound, rc=localrc)
+    exclusiveUBoundArg=ESMF_InterArrayCreate(exclusiveUBound, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    exclusiveCountArg=ESMF_InterfaceIntCreate(exclusiveCount, rc=localrc)
+    exclusiveCountArg=ESMF_InterArrayCreate(exclusiveCount, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    computationalLBoundArg=ESMF_InterfaceIntCreate(computationalLBound, rc=localrc)
+    computationalLBoundArg=ESMF_InterArrayCreate(computationalLBound, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    computationalUBoundArg=ESMF_InterfaceIntCreate(computationalUBound, rc=localrc)
+    computationalUBoundArg=ESMF_InterArrayCreate(computationalUBound, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    computationalCountArg=ESMF_InterfaceIntCreate(computationalCount, rc=localrc)
+    computationalCountArg=ESMF_InterArrayCreate(computationalCount, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    totalLBoundArg=ESMF_InterfaceIntCreate(totalLBound, rc=localrc)
+    totalLBoundArg=ESMF_InterArrayCreate(totalLBound, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    totalUBoundArg = ESMF_InterfaceIntCreate(totalUBound, rc=localrc)
+    totalUBoundArg = ESMF_InterArrayCreate(totalUBound, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    totalCountArg = ESMF_InterfaceIntCreate(totalCount, rc=localrc)
+    totalCountArg = ESMF_InterArrayCreate(totalCount, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -16592,31 +16592,31 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Deallocate interface ints
-    call ESMF_InterfaceIntDestroy(exclusiveLBoundArg, rc=localrc)
+    call ESMF_InterArrayDestroy(exclusiveLBoundArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(exclusiveUBoundArg, rc=localrc)
+    call ESMF_InterArrayDestroy(exclusiveUBoundArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(exclusiveCountArg, rc=localrc)
+    call ESMF_InterArrayDestroy(exclusiveCountArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(computationalLBoundArg, rc=localrc)
+    call ESMF_InterArrayDestroy(computationalLBoundArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(computationalUBoundArg, rc=localrc)
+    call ESMF_InterArrayDestroy(computationalUBoundArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(computationalCountArg, rc=localrc)
+    call ESMF_InterArrayDestroy(computationalCountArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(totalLBoundArg, rc=localrc)
+    call ESMF_InterArrayDestroy(totalLBoundArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(totalUBoundArg, rc=localrc)
+    call ESMF_InterArrayDestroy(totalUBoundArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(totalCountArg, rc=localrc)
+    call ESMF_InterArrayDestroy(totalCountArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -16751,15 +16751,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
  type(ESMF_LocalArray) :: localArray
  type(ESMF_DataCopy_Flag) :: datacopyflagInt
  integer :: coordDimCount(ESMF_MAXDIM)
- type(ESMF_InterfaceInt) :: exclusiveLBoundArg ! helper variable
- type(ESMF_InterfaceInt) :: exclusiveUBoundArg ! helper variable
- type(ESMF_InterfaceInt) :: exclusiveCountArg ! helper variable
- type(ESMF_InterfaceInt) :: computationalLBoundArg ! helper variable
- type(ESMF_InterfaceInt) :: computationalUBoundArg ! helper variable
- type(ESMF_InterfaceInt) :: computationalCountArg ! helper variable
- type(ESMF_InterfaceInt) :: totalLBoundArg ! helper variable
- type(ESMF_InterfaceInt) :: totalUBoundArg ! helper variable
- type(ESMF_InterfaceInt) :: totalCountArg ! helper variable
+ type(ESMF_InterArray) :: exclusiveLBoundArg ! helper variable
+ type(ESMF_InterArray) :: exclusiveUBoundArg ! helper variable
+ type(ESMF_InterArray) :: exclusiveCountArg ! helper variable
+ type(ESMF_InterArray) :: computationalLBoundArg ! helper variable
+ type(ESMF_InterArray) :: computationalUBoundArg ! helper variable
+ type(ESMF_InterArray) :: computationalCountArg ! helper variable
+ type(ESMF_InterArray) :: totalLBoundArg ! helper variable
+ type(ESMF_InterArray) :: totalUBoundArg ! helper variable
+ type(ESMF_InterArray) :: totalCountArg ! helper variable
  integer :: tmp_staggerloc
  type(ESMF_GridDecompType) :: decompType
 
@@ -16851,31 +16851,31 @@ endif
     ! should check these optional arguments are not present for arbitrary grid????
     if (decompType /= ESMF_GRID_ARBITRARY) then
 
-    exclusiveLBoundArg=ESMF_InterfaceIntCreate(exclusiveLBound, rc=localrc)
+    exclusiveLBoundArg=ESMF_InterArrayCreate(exclusiveLBound, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    exclusiveUBoundArg=ESMF_InterfaceIntCreate(exclusiveUBound, rc=localrc)
+    exclusiveUBoundArg=ESMF_InterArrayCreate(exclusiveUBound, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    exclusiveCountArg=ESMF_InterfaceIntCreate(exclusiveCount, rc=localrc)
+    exclusiveCountArg=ESMF_InterArrayCreate(exclusiveCount, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    computationalLBoundArg=ESMF_InterfaceIntCreate(computationalLBound, rc=localrc)
+    computationalLBoundArg=ESMF_InterArrayCreate(computationalLBound, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    computationalUBoundArg=ESMF_InterfaceIntCreate(computationalUBound, rc=localrc)
+    computationalUBoundArg=ESMF_InterArrayCreate(computationalUBound, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    computationalCountArg=ESMF_InterfaceIntCreate(computationalCount, rc=localrc)
+    computationalCountArg=ESMF_InterArrayCreate(computationalCount, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    totalLBoundArg=ESMF_InterfaceIntCreate(totalLBound, rc=localrc)
+    totalLBoundArg=ESMF_InterArrayCreate(totalLBound, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    totalUBoundArg = ESMF_InterfaceIntCreate(totalUBound, rc=localrc)
+    totalUBoundArg = ESMF_InterArrayCreate(totalUBound, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    totalCountArg = ESMF_InterfaceIntCreate(totalCount, rc=localrc)
+    totalCountArg = ESMF_InterArrayCreate(totalCount, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -16888,31 +16888,31 @@ endif
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Deallocate interface ints
-    call ESMF_InterfaceIntDestroy(exclusiveLBoundArg, rc=localrc)
+    call ESMF_InterArrayDestroy(exclusiveLBoundArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(exclusiveUBoundArg, rc=localrc)
+    call ESMF_InterArrayDestroy(exclusiveUBoundArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(exclusiveCountArg, rc=localrc)
+    call ESMF_InterArrayDestroy(exclusiveCountArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(computationalLBoundArg, rc=localrc)
+    call ESMF_InterArrayDestroy(computationalLBoundArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(computationalUBoundArg, rc=localrc)
+    call ESMF_InterArrayDestroy(computationalUBoundArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(computationalCountArg, rc=localrc)
+    call ESMF_InterArrayDestroy(computationalCountArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(totalLBoundArg, rc=localrc)
+    call ESMF_InterArrayDestroy(totalLBoundArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(totalUBoundArg, rc=localrc)
+    call ESMF_InterArrayDestroy(totalUBoundArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(totalCountArg, rc=localrc)
+    call ESMF_InterArrayDestroy(totalCountArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     
@@ -17049,15 +17049,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_LocalArray) :: localArray
     type(ESMF_DataCopy_Flag) :: datacopyflagInt
     integer :: coordDimCount(ESMF_MAXDIM)
-    type(ESMF_InterfaceInt) :: exclusiveLBoundArg ! helper variable
-    type(ESMF_InterfaceInt) :: exclusiveUBoundArg ! helper variable
-    type(ESMF_InterfaceInt) :: exclusiveCountArg ! helper variable
-    type(ESMF_InterfaceInt) :: computationalLBoundArg ! helper variable
-    type(ESMF_InterfaceInt) :: computationalUBoundArg ! helper variable
-    type(ESMF_InterfaceInt) :: computationalCountArg ! helper variable
-    type(ESMF_InterfaceInt) :: totalLBoundArg ! helper variable
-    type(ESMF_InterfaceInt) :: totalUBoundArg ! helper variable
-    type(ESMF_InterfaceInt) :: totalCountArg ! helper variable
+    type(ESMF_InterArray) :: exclusiveLBoundArg ! helper variable
+    type(ESMF_InterArray) :: exclusiveUBoundArg ! helper variable
+    type(ESMF_InterArray) :: exclusiveCountArg ! helper variable
+    type(ESMF_InterArray) :: computationalLBoundArg ! helper variable
+    type(ESMF_InterArray) :: computationalUBoundArg ! helper variable
+    type(ESMF_InterArray) :: computationalCountArg ! helper variable
+    type(ESMF_InterArray) :: totalLBoundArg ! helper variable
+    type(ESMF_InterArray) :: totalUBoundArg ! helper variable
+    type(ESMF_InterArray) :: totalCountArg ! helper variable
     integer :: tmp_staggerloc
     type(ESMF_GridDecompType) :: decompType
 
@@ -17143,31 +17143,31 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                               ESMF_CONTEXT, rcToReturn=rc)) return 
 
     ! process optional arguments
-    exclusiveLBoundArg=ESMF_InterfaceIntCreate(exclusiveLBound, rc=localrc)
+    exclusiveLBoundArg=ESMF_InterArrayCreate(exclusiveLBound, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    exclusiveUBoundArg=ESMF_InterfaceIntCreate(exclusiveUBound, rc=localrc)
+    exclusiveUBoundArg=ESMF_InterArrayCreate(exclusiveUBound, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    exclusiveCountArg=ESMF_InterfaceIntCreate(exclusiveCount, rc=localrc)
+    exclusiveCountArg=ESMF_InterArrayCreate(exclusiveCount, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    computationalLBoundArg=ESMF_InterfaceIntCreate(computationalLBound, rc=localrc)
+    computationalLBoundArg=ESMF_InterArrayCreate(computationalLBound, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    computationalUBoundArg=ESMF_InterfaceIntCreate(computationalUBound, rc=localrc)
+    computationalUBoundArg=ESMF_InterArrayCreate(computationalUBound, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    computationalCountArg=ESMF_InterfaceIntCreate(computationalCount, rc=localrc)
+    computationalCountArg=ESMF_InterArrayCreate(computationalCount, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    totalLBoundArg=ESMF_InterfaceIntCreate(totalLBound, rc=localrc)
+    totalLBoundArg=ESMF_InterArrayCreate(totalLBound, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    totalUBoundArg = ESMF_InterfaceIntCreate(totalUBound, rc=localrc)
+    totalUBoundArg = ESMF_InterArrayCreate(totalUBound, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    totalCountArg = ESMF_InterfaceIntCreate(totalCount, rc=localrc)
+    totalCountArg = ESMF_InterArrayCreate(totalCount, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -17182,31 +17182,31 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 
     ! Deallocate interface ints
-    call ESMF_InterfaceIntDestroy(exclusiveLBoundArg, rc=localrc)
+    call ESMF_InterArrayDestroy(exclusiveLBoundArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(exclusiveUBoundArg, rc=localrc)
+    call ESMF_InterArrayDestroy(exclusiveUBoundArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(exclusiveCountArg, rc=localrc)
+    call ESMF_InterArrayDestroy(exclusiveCountArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(computationalLBoundArg, rc=localrc)
+    call ESMF_InterArrayDestroy(computationalLBoundArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(computationalUBoundArg, rc=localrc)
+    call ESMF_InterArrayDestroy(computationalUBoundArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(computationalCountArg, rc=localrc)
+    call ESMF_InterArrayDestroy(computationalCountArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(totalLBoundArg, rc=localrc)
+    call ESMF_InterArrayDestroy(totalLBoundArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(totalUBoundArg, rc=localrc)
+    call ESMF_InterArrayDestroy(totalUBoundArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(totalCountArg, rc=localrc)
+    call ESMF_InterArrayDestroy(totalCountArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -17341,15 +17341,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
  type(ESMF_LocalArray) :: localarray
  type(ESMF_DataCopy_Flag) :: datacopyflagInt
  integer :: coordDimCount(ESMF_MAXDIM)
- type(ESMF_InterfaceInt) :: exclusiveLBoundArg ! helper variable
- type(ESMF_InterfaceInt) :: exclusiveUBoundArg ! helper variable
- type(ESMF_InterfaceInt) :: exclusiveCountArg ! helper variable
- type(ESMF_InterfaceInt) :: computationalLBoundArg ! helper variable
- type(ESMF_InterfaceInt) :: computationalUBoundArg ! helper variable
- type(ESMF_InterfaceInt) :: computationalCountArg ! helper variable
- type(ESMF_InterfaceInt) :: totalLBoundArg ! helper variable
- type(ESMF_InterfaceInt) :: totalUBoundArg ! helper variable
- type(ESMF_InterfaceInt) :: totalCountArg ! helper variable
+ type(ESMF_InterArray) :: exclusiveLBoundArg ! helper variable
+ type(ESMF_InterArray) :: exclusiveUBoundArg ! helper variable
+ type(ESMF_InterArray) :: exclusiveCountArg ! helper variable
+ type(ESMF_InterArray) :: computationalLBoundArg ! helper variable
+ type(ESMF_InterArray) :: computationalUBoundArg ! helper variable
+ type(ESMF_InterArray) :: computationalCountArg ! helper variable
+ type(ESMF_InterArray) :: totalLBoundArg ! helper variable
+ type(ESMF_InterArray) :: totalUBoundArg ! helper variable
+ type(ESMF_InterArray) :: totalCountArg ! helper variable
  integer :: tmp_staggerloc
  type(ESMF_GridDecompType) :: decompType
 
@@ -17435,31 +17435,31 @@ endif
                               ESMF_CONTEXT, rcToReturn=rc)) return 
 
     ! process optional arguments
-    exclusiveLBoundArg=ESMF_InterfaceIntCreate(exclusiveLBound, rc=localrc)
+    exclusiveLBoundArg=ESMF_InterArrayCreate(exclusiveLBound, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    exclusiveUBoundArg=ESMF_InterfaceIntCreate(exclusiveUBound, rc=localrc)
+    exclusiveUBoundArg=ESMF_InterArrayCreate(exclusiveUBound, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    exclusiveCountArg=ESMF_InterfaceIntCreate(exclusiveCount, rc=localrc)
+    exclusiveCountArg=ESMF_InterArrayCreate(exclusiveCount, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    computationalLBoundArg=ESMF_InterfaceIntCreate(computationalLBound, rc=localrc)
+    computationalLBoundArg=ESMF_InterArrayCreate(computationalLBound, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    computationalUBoundArg=ESMF_InterfaceIntCreate(computationalUBound, rc=localrc)
+    computationalUBoundArg=ESMF_InterArrayCreate(computationalUBound, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    computationalCountArg=ESMF_InterfaceIntCreate(computationalCount, rc=localrc)
+    computationalCountArg=ESMF_InterArrayCreate(computationalCount, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    totalLBoundArg=ESMF_InterfaceIntCreate(totalLBound, rc=localrc)
+    totalLBoundArg=ESMF_InterArrayCreate(totalLBound, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    totalUBoundArg = ESMF_InterfaceIntCreate(totalUBound, rc=localrc)
+    totalUBoundArg = ESMF_InterArrayCreate(totalUBound, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    totalCountArg = ESMF_InterfaceIntCreate(totalCount, rc=localrc)
+    totalCountArg = ESMF_InterArrayCreate(totalCount, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -17472,31 +17472,31 @@ endif
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Deallocate interface ints
-    call ESMF_InterfaceIntDestroy(exclusiveLBoundArg, rc=localrc)
+    call ESMF_InterArrayDestroy(exclusiveLBoundArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(exclusiveUBoundArg, rc=localrc)
+    call ESMF_InterArrayDestroy(exclusiveUBoundArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(exclusiveCountArg, rc=localrc)
+    call ESMF_InterArrayDestroy(exclusiveCountArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(computationalLBoundArg, rc=localrc)
+    call ESMF_InterArrayDestroy(computationalLBoundArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(computationalUBoundArg, rc=localrc)
+    call ESMF_InterArrayDestroy(computationalUBoundArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(computationalCountArg, rc=localrc)
+    call ESMF_InterArrayDestroy(computationalCountArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(totalLBoundArg, rc=localrc)
+    call ESMF_InterArrayDestroy(totalLBoundArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(totalUBoundArg, rc=localrc)
+    call ESMF_InterArrayDestroy(totalUBoundArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(totalCountArg, rc=localrc)
+    call ESMF_InterArrayDestroy(totalCountArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -17631,15 +17631,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
  type(ESMF_LocalArray) :: localarray
  type(ESMF_DataCopy_Flag) :: datacopyflagInt
  integer :: coordDimCount(ESMF_MAXDIM)
- type(ESMF_InterfaceInt) :: exclusiveLBoundArg ! helper variable
- type(ESMF_InterfaceInt) :: exclusiveUBoundArg ! helper variable
- type(ESMF_InterfaceInt) :: exclusiveCountArg ! helper variable
- type(ESMF_InterfaceInt) :: computationalLBoundArg ! helper variable
- type(ESMF_InterfaceInt) :: computationalUBoundArg ! helper variable
- type(ESMF_InterfaceInt) :: computationalCountArg ! helper variable
- type(ESMF_InterfaceInt) :: totalLBoundArg ! helper variable
- type(ESMF_InterfaceInt) :: totalUBoundArg ! helper variable
- type(ESMF_InterfaceInt) :: totalCountArg ! helper variable
+ type(ESMF_InterArray) :: exclusiveLBoundArg ! helper variable
+ type(ESMF_InterArray) :: exclusiveUBoundArg ! helper variable
+ type(ESMF_InterArray) :: exclusiveCountArg ! helper variable
+ type(ESMF_InterArray) :: computationalLBoundArg ! helper variable
+ type(ESMF_InterArray) :: computationalUBoundArg ! helper variable
+ type(ESMF_InterArray) :: computationalCountArg ! helper variable
+ type(ESMF_InterArray) :: totalLBoundArg ! helper variable
+ type(ESMF_InterArray) :: totalUBoundArg ! helper variable
+ type(ESMF_InterArray) :: totalCountArg ! helper variable
  integer :: tmp_staggerloc
  type(ESMF_GridDecompType) :: decompType
 
@@ -17725,31 +17725,31 @@ endif
                               ESMF_CONTEXT, rcToReturn=rc)) return 
 
     ! process optional arguments
-    exclusiveLBoundArg=ESMF_InterfaceIntCreate(exclusiveLBound, rc=localrc)
+    exclusiveLBoundArg=ESMF_InterArrayCreate(exclusiveLBound, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    exclusiveUBoundArg=ESMF_InterfaceIntCreate(exclusiveUBound, rc=localrc)
+    exclusiveUBoundArg=ESMF_InterArrayCreate(exclusiveUBound, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    exclusiveCountArg=ESMF_InterfaceIntCreate(exclusiveCount, rc=localrc)
+    exclusiveCountArg=ESMF_InterArrayCreate(exclusiveCount, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    computationalLBoundArg=ESMF_InterfaceIntCreate(computationalLBound, rc=localrc)
+    computationalLBoundArg=ESMF_InterArrayCreate(computationalLBound, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    computationalUBoundArg=ESMF_InterfaceIntCreate(computationalUBound, rc=localrc)
+    computationalUBoundArg=ESMF_InterArrayCreate(computationalUBound, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    computationalCountArg=ESMF_InterfaceIntCreate(computationalCount, rc=localrc)
+    computationalCountArg=ESMF_InterArrayCreate(computationalCount, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    totalLBoundArg=ESMF_InterfaceIntCreate(totalLBound, rc=localrc)
+    totalLBoundArg=ESMF_InterArrayCreate(totalLBound, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    totalUBoundArg = ESMF_InterfaceIntCreate(totalUBound, rc=localrc)
+    totalUBoundArg = ESMF_InterArrayCreate(totalUBound, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    totalCountArg = ESMF_InterfaceIntCreate(totalCount, rc=localrc)
+    totalCountArg = ESMF_InterArrayCreate(totalCount, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -17762,31 +17762,31 @@ endif
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Deallocate interface ints
-    call ESMF_InterfaceIntDestroy(exclusiveLBoundArg, rc=localrc)
+    call ESMF_InterArrayDestroy(exclusiveLBoundArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(exclusiveUBoundArg, rc=localrc)
+    call ESMF_InterArrayDestroy(exclusiveUBoundArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(exclusiveCountArg, rc=localrc)
+    call ESMF_InterArrayDestroy(exclusiveCountArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(computationalLBoundArg, rc=localrc)
+    call ESMF_InterArrayDestroy(computationalLBoundArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(computationalUBoundArg, rc=localrc)
+    call ESMF_InterArrayDestroy(computationalUBoundArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(computationalCountArg, rc=localrc)
+    call ESMF_InterArrayDestroy(computationalCountArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(totalLBoundArg, rc=localrc)
+    call ESMF_InterArrayDestroy(totalLBoundArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(totalUBoundArg, rc=localrc)
+    call ESMF_InterArrayDestroy(totalUBoundArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(totalCountArg, rc=localrc)
+    call ESMF_InterArrayDestroy(totalCountArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -18274,15 +18274,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !EOP
 
     integer :: localrc ! local error status
-    type(ESMF_InterfaceInt) :: exclusiveLBoundArg ! helper variable
-    type(ESMF_InterfaceInt) :: exclusiveUBoundArg ! helper variable
-    type(ESMF_InterfaceInt) :: exclusiveCountArg ! helper variable
-    type(ESMF_InterfaceInt) :: computationalLBoundArg ! helper variable
-    type(ESMF_InterfaceInt) :: computationalUBoundArg ! helper variable
-    type(ESMF_InterfaceInt) :: computationalCountArg ! helper variable
-    type(ESMF_InterfaceInt) :: totalLBoundArg ! helper variable
-    type(ESMF_InterfaceInt) :: totalUBoundArg ! helper variable
-    type(ESMF_InterfaceInt) :: totalCountArg ! helper variable
+    type(ESMF_InterArray) :: exclusiveLBoundArg ! helper variable
+    type(ESMF_InterArray) :: exclusiveUBoundArg ! helper variable
+    type(ESMF_InterArray) :: exclusiveCountArg ! helper variable
+    type(ESMF_InterArray) :: computationalLBoundArg ! helper variable
+    type(ESMF_InterArray) :: computationalUBoundArg ! helper variable
+    type(ESMF_InterArray) :: computationalCountArg ! helper variable
+    type(ESMF_InterArray) :: totalLBoundArg ! helper variable
+    type(ESMF_InterArray) :: totalUBoundArg ! helper variable
+    type(ESMF_InterArray) :: totalCountArg ! helper variable
     integer :: tmp_staggerloc
 
     ! Initialize return code
@@ -18300,31 +18300,31 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     endif
 
     ! process optional arguments
-    exclusiveLBoundArg=ESMF_InterfaceIntCreate(exclusiveLBound, rc=localrc)
+    exclusiveLBoundArg=ESMF_InterArrayCreate(exclusiveLBound, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    exclusiveUBoundArg=ESMF_InterfaceIntCreate(exclusiveUBound, rc=localrc)
+    exclusiveUBoundArg=ESMF_InterArrayCreate(exclusiveUBound, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    exclusiveCountArg=ESMF_InterfaceIntCreate(exclusiveCount, rc=localrc)
+    exclusiveCountArg=ESMF_InterArrayCreate(exclusiveCount, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    computationalLBoundArg=ESMF_InterfaceIntCreate(computationalLBound, rc=localrc)
+    computationalLBoundArg=ESMF_InterArrayCreate(computationalLBound, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    computationalUBoundArg=ESMF_InterfaceIntCreate(computationalUBound, rc=localrc)
+    computationalUBoundArg=ESMF_InterArrayCreate(computationalUBound, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    computationalCountArg=ESMF_InterfaceIntCreate(computationalCount, rc=localrc)
+    computationalCountArg=ESMF_InterArrayCreate(computationalCount, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    totalLBoundArg=ESMF_InterfaceIntCreate(totalLBound, rc=localrc)
+    totalLBoundArg=ESMF_InterArrayCreate(totalLBound, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    totalUBoundArg = ESMF_InterfaceIntCreate(totalUBound, rc=localrc)
+    totalUBoundArg = ESMF_InterArrayCreate(totalUBound, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    totalCountArg = ESMF_InterfaceIntCreate(totalCount, rc=localrc)
+    totalCountArg = ESMF_InterArrayCreate(totalCount, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -18337,31 +18337,31 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Deallocate interface ints
-    call ESMF_InterfaceIntDestroy(exclusiveLBoundArg, rc=localrc)
+    call ESMF_InterArrayDestroy(exclusiveLBoundArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(exclusiveUBoundArg, rc=localrc)
+    call ESMF_InterArrayDestroy(exclusiveUBoundArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(exclusiveCountArg, rc=localrc)
+    call ESMF_InterArrayDestroy(exclusiveCountArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(computationalLBoundArg, rc=localrc)
+    call ESMF_InterArrayDestroy(computationalLBoundArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(computationalUBoundArg, rc=localrc)
+    call ESMF_InterArrayDestroy(computationalUBoundArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(computationalCountArg, rc=localrc)
+    call ESMF_InterArrayDestroy(computationalCountArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(totalLBoundArg, rc=localrc)
+    call ESMF_InterArrayDestroy(totalLBoundArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(totalUBoundArg, rc=localrc)
+    call ESMF_InterArrayDestroy(totalUBoundArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(totalCountArg, rc=localrc)
+    call ESMF_InterArrayDestroy(totalCountArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -18628,15 +18628,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_LocalArray) :: localArray
     type(ESMF_DataCopy_Flag) :: datacopyflagInt
     integer :: coordDimCount(ESMF_MAXDIM)
-    type(ESMF_InterfaceInt) :: exclusiveLBoundArg ! helper variable
-    type(ESMF_InterfaceInt) :: exclusiveUBoundArg ! helper variable
-    type(ESMF_InterfaceInt) :: exclusiveCountArg ! helper variable
-    type(ESMF_InterfaceInt) :: computationalLBoundArg ! helper variable
-    type(ESMF_InterfaceInt) :: computationalUBoundArg ! helper variable
-    type(ESMF_InterfaceInt) :: computationalCountArg ! helper variable
-    type(ESMF_InterfaceInt) :: totalLBoundArg ! helper variable
-    type(ESMF_InterfaceInt) :: totalUBoundArg ! helper variable
-    type(ESMF_InterfaceInt) :: totalCountArg ! helper variable
+    type(ESMF_InterArray) :: exclusiveLBoundArg ! helper variable
+    type(ESMF_InterArray) :: exclusiveUBoundArg ! helper variable
+    type(ESMF_InterArray) :: exclusiveCountArg ! helper variable
+    type(ESMF_InterArray) :: computationalLBoundArg ! helper variable
+    type(ESMF_InterArray) :: computationalUBoundArg ! helper variable
+    type(ESMF_InterArray) :: computationalCountArg ! helper variable
+    type(ESMF_InterArray) :: totalLBoundArg ! helper variable
+    type(ESMF_InterArray) :: totalUBoundArg ! helper variable
+    type(ESMF_InterArray) :: totalCountArg ! helper variable
     integer :: tmp_staggerloc
 
     ! Initialize return code 
@@ -18693,31 +18693,31 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ESMF_CONTEXT, rcToReturn=rc)) return 
 
     ! process optional arguments
-    exclusiveLBoundArg=ESMF_InterfaceIntCreate(exclusiveLBound, rc=localrc)
+    exclusiveLBoundArg=ESMF_InterArrayCreate(exclusiveLBound, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    exclusiveUBoundArg=ESMF_InterfaceIntCreate(exclusiveUBound, rc=localrc)
+    exclusiveUBoundArg=ESMF_InterArrayCreate(exclusiveUBound, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    exclusiveCountArg=ESMF_InterfaceIntCreate(exclusiveCount, rc=localrc)
+    exclusiveCountArg=ESMF_InterArrayCreate(exclusiveCount, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    computationalLBoundArg=ESMF_InterfaceIntCreate(computationalLBound, rc=localrc)
+    computationalLBoundArg=ESMF_InterArrayCreate(computationalLBound, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    computationalUBoundArg=ESMF_InterfaceIntCreate(computationalUBound, rc=localrc)
+    computationalUBoundArg=ESMF_InterArrayCreate(computationalUBound, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    computationalCountArg=ESMF_InterfaceIntCreate(computationalCount, rc=localrc)
+    computationalCountArg=ESMF_InterArrayCreate(computationalCount, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    totalLBoundArg=ESMF_InterfaceIntCreate(totalLBound, rc=localrc)
+    totalLBoundArg=ESMF_InterArrayCreate(totalLBound, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    totalUBoundArg = ESMF_InterfaceIntCreate(totalUBound, rc=localrc)
+    totalUBoundArg = ESMF_InterArrayCreate(totalUBound, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    totalCountArg = ESMF_InterfaceIntCreate(totalCount, rc=localrc)
+    totalCountArg = ESMF_InterArrayCreate(totalCount, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -18730,31 +18730,31 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Deallocate interface ints
-    call ESMF_InterfaceIntDestroy(exclusiveLBoundArg, rc=localrc)
+    call ESMF_InterArrayDestroy(exclusiveLBoundArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(exclusiveUBoundArg, rc=localrc)
+    call ESMF_InterArrayDestroy(exclusiveUBoundArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(exclusiveCountArg, rc=localrc)
+    call ESMF_InterArrayDestroy(exclusiveCountArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(computationalLBoundArg, rc=localrc)
+    call ESMF_InterArrayDestroy(computationalLBoundArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(computationalUBoundArg, rc=localrc)
+    call ESMF_InterArrayDestroy(computationalUBoundArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(computationalCountArg, rc=localrc)
+    call ESMF_InterArrayDestroy(computationalCountArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(totalLBoundArg, rc=localrc)
+    call ESMF_InterArrayDestroy(totalLBoundArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(totalUBoundArg, rc=localrc)
+    call ESMF_InterArrayDestroy(totalUBoundArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(totalCountArg, rc=localrc)
+    call ESMF_InterArrayDestroy(totalCountArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -18889,15 +18889,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_LocalArray) :: localArray
     type(ESMF_DataCopy_Flag) :: datacopyflagInt
     integer :: coordDimCount(ESMF_MAXDIM)
-    type(ESMF_InterfaceInt) :: exclusiveLBoundArg ! helper variable
-    type(ESMF_InterfaceInt) :: exclusiveUBoundArg ! helper variable
-    type(ESMF_InterfaceInt) :: exclusiveCountArg ! helper variable
-    type(ESMF_InterfaceInt) :: computationalLBoundArg ! helper variable
-    type(ESMF_InterfaceInt) :: computationalUBoundArg ! helper variable
-    type(ESMF_InterfaceInt) :: computationalCountArg ! helper variable
-    type(ESMF_InterfaceInt) :: totalLBoundArg ! helper variable
-    type(ESMF_InterfaceInt) :: totalUBoundArg ! helper variable
-    type(ESMF_InterfaceInt) :: totalCountArg ! helper variable
+    type(ESMF_InterArray) :: exclusiveLBoundArg ! helper variable
+    type(ESMF_InterArray) :: exclusiveUBoundArg ! helper variable
+    type(ESMF_InterArray) :: exclusiveCountArg ! helper variable
+    type(ESMF_InterArray) :: computationalLBoundArg ! helper variable
+    type(ESMF_InterArray) :: computationalUBoundArg ! helper variable
+    type(ESMF_InterArray) :: computationalCountArg ! helper variable
+    type(ESMF_InterArray) :: totalLBoundArg ! helper variable
+    type(ESMF_InterArray) :: totalUBoundArg ! helper variable
+    type(ESMF_InterArray) :: totalCountArg ! helper variable
     integer :: tmp_staggerloc
 
     ! Initialize return code 
@@ -18954,31 +18954,31 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                               ESMF_CONTEXT, rcToReturn=rc)) return 
 
     ! process optional arguments
-    exclusiveLBoundArg=ESMF_InterfaceIntCreate(exclusiveLBound, rc=localrc)
+    exclusiveLBoundArg=ESMF_InterArrayCreate(exclusiveLBound, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    exclusiveUBoundArg=ESMF_InterfaceIntCreate(exclusiveUBound, rc=localrc)
+    exclusiveUBoundArg=ESMF_InterArrayCreate(exclusiveUBound, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    exclusiveCountArg=ESMF_InterfaceIntCreate(exclusiveCount, rc=localrc)
+    exclusiveCountArg=ESMF_InterArrayCreate(exclusiveCount, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    computationalLBoundArg=ESMF_InterfaceIntCreate(computationalLBound, rc=localrc)
+    computationalLBoundArg=ESMF_InterArrayCreate(computationalLBound, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    computationalUBoundArg=ESMF_InterfaceIntCreate(computationalUBound, rc=localrc)
+    computationalUBoundArg=ESMF_InterArrayCreate(computationalUBound, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    computationalCountArg=ESMF_InterfaceIntCreate(computationalCount, rc=localrc)
+    computationalCountArg=ESMF_InterArrayCreate(computationalCount, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    totalLBoundArg=ESMF_InterfaceIntCreate(totalLBound, rc=localrc)
+    totalLBoundArg=ESMF_InterArrayCreate(totalLBound, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    totalUBoundArg = ESMF_InterfaceIntCreate(totalUBound, rc=localrc)
+    totalUBoundArg = ESMF_InterArrayCreate(totalUBound, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    totalCountArg = ESMF_InterfaceIntCreate(totalCount, rc=localrc)
+    totalCountArg = ESMF_InterArrayCreate(totalCount, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -18991,31 +18991,31 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Deallocate interface ints
-    call ESMF_InterfaceIntDestroy(exclusiveLBoundArg, rc=localrc)
+    call ESMF_InterArrayDestroy(exclusiveLBoundArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(exclusiveUBoundArg, rc=localrc)
+    call ESMF_InterArrayDestroy(exclusiveUBoundArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(exclusiveCountArg, rc=localrc)
+    call ESMF_InterArrayDestroy(exclusiveCountArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(computationalLBoundArg, rc=localrc)
+    call ESMF_InterArrayDestroy(computationalLBoundArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(computationalUBoundArg, rc=localrc)
+    call ESMF_InterArrayDestroy(computationalUBoundArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(computationalCountArg, rc=localrc)
+    call ESMF_InterArrayDestroy(computationalCountArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(totalLBoundArg, rc=localrc)
+    call ESMF_InterArrayDestroy(totalLBoundArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(totalUBoundArg, rc=localrc)
+    call ESMF_InterArrayDestroy(totalUBoundArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(totalCountArg, rc=localrc)
+    call ESMF_InterArrayDestroy(totalCountArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -19150,15 +19150,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
  type(ESMF_LocalArray) :: localArray
  type(ESMF_DataCopy_Flag) :: datacopyflagInt
  integer :: coordDimCount(ESMF_MAXDIM)
- type(ESMF_InterfaceInt) :: exclusiveLBoundArg ! helper variable
- type(ESMF_InterfaceInt) :: exclusiveUBoundArg ! helper variable
- type(ESMF_InterfaceInt) :: exclusiveCountArg ! helper variable
- type(ESMF_InterfaceInt) :: computationalLBoundArg ! helper variable
- type(ESMF_InterfaceInt) :: computationalUBoundArg ! helper variable
- type(ESMF_InterfaceInt) :: computationalCountArg ! helper variable
- type(ESMF_InterfaceInt) :: totalLBoundArg ! helper variable
- type(ESMF_InterfaceInt) :: totalUBoundArg ! helper variable
- type(ESMF_InterfaceInt) :: totalCountArg ! helper variable
+ type(ESMF_InterArray) :: exclusiveLBoundArg ! helper variable
+ type(ESMF_InterArray) :: exclusiveUBoundArg ! helper variable
+ type(ESMF_InterArray) :: exclusiveCountArg ! helper variable
+ type(ESMF_InterArray) :: computationalLBoundArg ! helper variable
+ type(ESMF_InterArray) :: computationalUBoundArg ! helper variable
+ type(ESMF_InterArray) :: computationalCountArg ! helper variable
+ type(ESMF_InterArray) :: totalLBoundArg ! helper variable
+ type(ESMF_InterArray) :: totalUBoundArg ! helper variable
+ type(ESMF_InterArray) :: totalCountArg ! helper variable
  integer :: tmp_staggerloc
 
  ! Initialize return code 
@@ -19215,31 +19215,31 @@ endif
                               ESMF_CONTEXT, rcToReturn=rc)) return 
 
     ! process optional arguments
-    exclusiveLBoundArg=ESMF_InterfaceIntCreate(exclusiveLBound, rc=localrc)
+    exclusiveLBoundArg=ESMF_InterArrayCreate(exclusiveLBound, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    exclusiveUBoundArg=ESMF_InterfaceIntCreate(exclusiveUBound, rc=localrc)
+    exclusiveUBoundArg=ESMF_InterArrayCreate(exclusiveUBound, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    exclusiveCountArg=ESMF_InterfaceIntCreate(exclusiveCount, rc=localrc)
+    exclusiveCountArg=ESMF_InterArrayCreate(exclusiveCount, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    computationalLBoundArg=ESMF_InterfaceIntCreate(computationalLBound, rc=localrc)
+    computationalLBoundArg=ESMF_InterArrayCreate(computationalLBound, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    computationalUBoundArg=ESMF_InterfaceIntCreate(computationalUBound, rc=localrc)
+    computationalUBoundArg=ESMF_InterArrayCreate(computationalUBound, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    computationalCountArg=ESMF_InterfaceIntCreate(computationalCount, rc=localrc)
+    computationalCountArg=ESMF_InterArrayCreate(computationalCount, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    totalLBoundArg=ESMF_InterfaceIntCreate(totalLBound, rc=localrc)
+    totalLBoundArg=ESMF_InterArrayCreate(totalLBound, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    totalUBoundArg = ESMF_InterfaceIntCreate(totalUBound, rc=localrc)
+    totalUBoundArg = ESMF_InterArrayCreate(totalUBound, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    totalCountArg = ESMF_InterfaceIntCreate(totalCount, rc=localrc)
+    totalCountArg = ESMF_InterArrayCreate(totalCount, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -19252,31 +19252,31 @@ endif
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Deallocate interface ints
-    call ESMF_InterfaceIntDestroy(exclusiveLBoundArg, rc=localrc)
+    call ESMF_InterArrayDestroy(exclusiveLBoundArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(exclusiveUBoundArg, rc=localrc)
+    call ESMF_InterArrayDestroy(exclusiveUBoundArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(exclusiveCountArg, rc=localrc)
+    call ESMF_InterArrayDestroy(exclusiveCountArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(computationalLBoundArg, rc=localrc)
+    call ESMF_InterArrayDestroy(computationalLBoundArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(computationalUBoundArg, rc=localrc)
+    call ESMF_InterArrayDestroy(computationalUBoundArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(computationalCountArg, rc=localrc)
+    call ESMF_InterArrayDestroy(computationalCountArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(totalLBoundArg, rc=localrc)
+    call ESMF_InterArrayDestroy(totalLBoundArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(totalUBoundArg, rc=localrc)
+    call ESMF_InterArrayDestroy(totalUBoundArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(totalCountArg, rc=localrc)
+    call ESMF_InterArrayDestroy(totalCountArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -19408,15 +19408,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_LocalArray):: localarray
     type(ESMF_DataCopy_Flag) :: datacopyflagInt
     integer :: coordDimCount(ESMF_MAXDIM)
-    type(ESMF_InterfaceInt) :: exclusiveLBoundArg ! helper variable
-    type(ESMF_InterfaceInt) :: exclusiveUBoundArg ! helper variable
-    type(ESMF_InterfaceInt) :: exclusiveCountArg ! helper variable
-    type(ESMF_InterfaceInt) :: computationalLBoundArg ! helper variable
-    type(ESMF_InterfaceInt) :: computationalUBoundArg ! helper variable
-    type(ESMF_InterfaceInt) :: computationalCountArg ! helper variable
-    type(ESMF_InterfaceInt) :: totalLBoundArg ! helper variable
-    type(ESMF_InterfaceInt) :: totalUBoundArg ! helper variable
-    type(ESMF_InterfaceInt) :: totalCountArg ! helper variable
+    type(ESMF_InterArray) :: exclusiveLBoundArg ! helper variable
+    type(ESMF_InterArray) :: exclusiveUBoundArg ! helper variable
+    type(ESMF_InterArray) :: exclusiveCountArg ! helper variable
+    type(ESMF_InterArray) :: computationalLBoundArg ! helper variable
+    type(ESMF_InterArray) :: computationalUBoundArg ! helper variable
+    type(ESMF_InterArray) :: computationalCountArg ! helper variable
+    type(ESMF_InterArray) :: totalLBoundArg ! helper variable
+    type(ESMF_InterArray) :: totalUBoundArg ! helper variable
+    type(ESMF_InterArray) :: totalCountArg ! helper variable
     integer :: tmp_staggerloc
 
     ! Initialize return code 
@@ -19472,31 +19472,31 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ESMF_CONTEXT, rcToReturn=rc)) return 
 
     ! process optional arguments
-    exclusiveLBoundArg=ESMF_InterfaceIntCreate(exclusiveLBound, rc=localrc)
+    exclusiveLBoundArg=ESMF_InterArrayCreate(exclusiveLBound, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    exclusiveUBoundArg=ESMF_InterfaceIntCreate(exclusiveUBound, rc=localrc)
+    exclusiveUBoundArg=ESMF_InterArrayCreate(exclusiveUBound, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    exclusiveCountArg=ESMF_InterfaceIntCreate(exclusiveCount, rc=localrc)
+    exclusiveCountArg=ESMF_InterArrayCreate(exclusiveCount, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    computationalLBoundArg=ESMF_InterfaceIntCreate(computationalLBound, rc=localrc)
+    computationalLBoundArg=ESMF_InterArrayCreate(computationalLBound, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    computationalUBoundArg=ESMF_InterfaceIntCreate(computationalUBound, rc=localrc)
+    computationalUBoundArg=ESMF_InterArrayCreate(computationalUBound, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    computationalCountArg=ESMF_InterfaceIntCreate(computationalCount, rc=localrc)
+    computationalCountArg=ESMF_InterArrayCreate(computationalCount, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    totalLBoundArg=ESMF_InterfaceIntCreate(totalLBound, rc=localrc)
+    totalLBoundArg=ESMF_InterArrayCreate(totalLBound, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    totalUBoundArg = ESMF_InterfaceIntCreate(totalUBound, rc=localrc)
+    totalUBoundArg = ESMF_InterArrayCreate(totalUBound, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    totalCountArg = ESMF_InterfaceIntCreate(totalCount, rc=localrc)
+    totalCountArg = ESMF_InterArrayCreate(totalCount, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -19509,31 +19509,31 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Deallocate interface ints
-    call ESMF_InterfaceIntDestroy(exclusiveLBoundArg, rc=localrc)
+    call ESMF_InterArrayDestroy(exclusiveLBoundArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(exclusiveUBoundArg, rc=localrc)
+    call ESMF_InterArrayDestroy(exclusiveUBoundArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(exclusiveCountArg, rc=localrc)
+    call ESMF_InterArrayDestroy(exclusiveCountArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(computationalLBoundArg, rc=localrc)
+    call ESMF_InterArrayDestroy(computationalLBoundArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(computationalUBoundArg, rc=localrc)
+    call ESMF_InterArrayDestroy(computationalUBoundArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(computationalCountArg, rc=localrc)
+    call ESMF_InterArrayDestroy(computationalCountArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(totalLBoundArg, rc=localrc)
+    call ESMF_InterArrayDestroy(totalLBoundArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(totalUBoundArg, rc=localrc)
+    call ESMF_InterArrayDestroy(totalUBoundArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(totalCountArg, rc=localrc)
+    call ESMF_InterArrayDestroy(totalCountArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -19668,15 +19668,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_LocalArray) :: localarray
     type(ESMF_DataCopy_Flag) :: datacopyflagInt
     integer :: coordDimCount(ESMF_MAXDIM)
-    type(ESMF_InterfaceInt) :: exclusiveLBoundArg ! helper variable
-    type(ESMF_InterfaceInt) :: exclusiveUBoundArg ! helper variable
-    type(ESMF_InterfaceInt) :: exclusiveCountArg ! helper variable
-    type(ESMF_InterfaceInt) :: computationalLBoundArg ! helper variable
-    type(ESMF_InterfaceInt) :: computationalUBoundArg ! helper variable
-    type(ESMF_InterfaceInt) :: computationalCountArg ! helper variable
-    type(ESMF_InterfaceInt) :: totalLBoundArg ! helper variable
-    type(ESMF_InterfaceInt) :: totalUBoundArg ! helper variable
-    type(ESMF_InterfaceInt) :: totalCountArg ! helper variable
+    type(ESMF_InterArray) :: exclusiveLBoundArg ! helper variable
+    type(ESMF_InterArray) :: exclusiveUBoundArg ! helper variable
+    type(ESMF_InterArray) :: exclusiveCountArg ! helper variable
+    type(ESMF_InterArray) :: computationalLBoundArg ! helper variable
+    type(ESMF_InterArray) :: computationalUBoundArg ! helper variable
+    type(ESMF_InterArray) :: computationalCountArg ! helper variable
+    type(ESMF_InterArray) :: totalLBoundArg ! helper variable
+    type(ESMF_InterArray) :: totalUBoundArg ! helper variable
+    type(ESMF_InterArray) :: totalCountArg ! helper variable
     integer :: tmp_staggerloc
 
     ! Initialize return code 
@@ -19733,31 +19733,31 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                               ESMF_CONTEXT, rcToReturn=rc)) return 
 
     ! process optional arguments
-    exclusiveLBoundArg=ESMF_InterfaceIntCreate(exclusiveLBound, rc=localrc)
+    exclusiveLBoundArg=ESMF_InterArrayCreate(exclusiveLBound, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    exclusiveUBoundArg=ESMF_InterfaceIntCreate(exclusiveUBound, rc=localrc)
+    exclusiveUBoundArg=ESMF_InterArrayCreate(exclusiveUBound, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    exclusiveCountArg=ESMF_InterfaceIntCreate(exclusiveCount, rc=localrc)
+    exclusiveCountArg=ESMF_InterArrayCreate(exclusiveCount, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    computationalLBoundArg=ESMF_InterfaceIntCreate(computationalLBound, rc=localrc)
+    computationalLBoundArg=ESMF_InterArrayCreate(computationalLBound, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    computationalUBoundArg=ESMF_InterfaceIntCreate(computationalUBound, rc=localrc)
+    computationalUBoundArg=ESMF_InterArrayCreate(computationalUBound, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    computationalCountArg=ESMF_InterfaceIntCreate(computationalCount, rc=localrc)
+    computationalCountArg=ESMF_InterArrayCreate(computationalCount, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    totalLBoundArg=ESMF_InterfaceIntCreate(totalLBound, rc=localrc)
+    totalLBoundArg=ESMF_InterArrayCreate(totalLBound, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    totalUBoundArg = ESMF_InterfaceIntCreate(totalUBound, rc=localrc)
+    totalUBoundArg = ESMF_InterArrayCreate(totalUBound, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    totalCountArg = ESMF_InterfaceIntCreate(totalCount, rc=localrc)
+    totalCountArg = ESMF_InterArrayCreate(totalCount, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -19770,31 +19770,31 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Deallocate interface ints
-    call ESMF_InterfaceIntDestroy(exclusiveLBoundArg, rc=localrc)
+    call ESMF_InterArrayDestroy(exclusiveLBoundArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(exclusiveUBoundArg, rc=localrc)
+    call ESMF_InterArrayDestroy(exclusiveUBoundArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(exclusiveCountArg, rc=localrc)
+    call ESMF_InterArrayDestroy(exclusiveCountArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(computationalLBoundArg, rc=localrc)
+    call ESMF_InterArrayDestroy(computationalLBoundArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(computationalUBoundArg, rc=localrc)
+    call ESMF_InterArrayDestroy(computationalUBoundArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(computationalCountArg, rc=localrc)
+    call ESMF_InterArrayDestroy(computationalCountArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(totalLBoundArg, rc=localrc)
+    call ESMF_InterArrayDestroy(totalLBoundArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(totalUBoundArg, rc=localrc)
+    call ESMF_InterArrayDestroy(totalUBoundArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(totalCountArg, rc=localrc)
+    call ESMF_InterArrayDestroy(totalCountArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -19929,15 +19929,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
  type(ESMF_LocalArray) :: localArray
  type(ESMF_DataCopy_Flag) :: datacopyflagInt
  integer :: coordDimCount(ESMF_MAXDIM)
- type(ESMF_InterfaceInt) :: exclusiveLBoundArg ! helper variable
- type(ESMF_InterfaceInt) :: exclusiveUBoundArg ! helper variable
- type(ESMF_InterfaceInt) :: exclusiveCountArg ! helper variable
- type(ESMF_InterfaceInt) :: computationalLBoundArg ! helper variable
- type(ESMF_InterfaceInt) :: computationalUBoundArg ! helper variable
- type(ESMF_InterfaceInt) :: computationalCountArg ! helper variable
- type(ESMF_InterfaceInt) :: totalLBoundArg ! helper variable
- type(ESMF_InterfaceInt) :: totalUBoundArg ! helper variable
- type(ESMF_InterfaceInt) :: totalCountArg ! helper variable
+ type(ESMF_InterArray) :: exclusiveLBoundArg ! helper variable
+ type(ESMF_InterArray) :: exclusiveUBoundArg ! helper variable
+ type(ESMF_InterArray) :: exclusiveCountArg ! helper variable
+ type(ESMF_InterArray) :: computationalLBoundArg ! helper variable
+ type(ESMF_InterArray) :: computationalUBoundArg ! helper variable
+ type(ESMF_InterArray) :: computationalCountArg ! helper variable
+ type(ESMF_InterArray) :: totalLBoundArg ! helper variable
+ type(ESMF_InterArray) :: totalUBoundArg ! helper variable
+ type(ESMF_InterArray) :: totalCountArg ! helper variable
  integer :: tmp_staggerloc
 
  ! Initialize return code 
@@ -19994,31 +19994,31 @@ endif
                               ESMF_CONTEXT, rcToReturn=rc)) return 
 
     ! process optional arguments
-    exclusiveLBoundArg=ESMF_InterfaceIntCreate(exclusiveLBound, rc=localrc)
+    exclusiveLBoundArg=ESMF_InterArrayCreate(exclusiveLBound, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    exclusiveUBoundArg=ESMF_InterfaceIntCreate(exclusiveUBound, rc=localrc)
+    exclusiveUBoundArg=ESMF_InterArrayCreate(exclusiveUBound, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    exclusiveCountArg=ESMF_InterfaceIntCreate(exclusiveCount, rc=localrc)
+    exclusiveCountArg=ESMF_InterArrayCreate(exclusiveCount, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    computationalLBoundArg=ESMF_InterfaceIntCreate(computationalLBound, rc=localrc)
+    computationalLBoundArg=ESMF_InterArrayCreate(computationalLBound, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    computationalUBoundArg=ESMF_InterfaceIntCreate(computationalUBound, rc=localrc)
+    computationalUBoundArg=ESMF_InterArrayCreate(computationalUBound, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    computationalCountArg=ESMF_InterfaceIntCreate(computationalCount, rc=localrc)
+    computationalCountArg=ESMF_InterArrayCreate(computationalCount, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    totalLBoundArg=ESMF_InterfaceIntCreate(totalLBound, rc=localrc)
+    totalLBoundArg=ESMF_InterArrayCreate(totalLBound, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    totalUBoundArg = ESMF_InterfaceIntCreate(totalUBound, rc=localrc)
+    totalUBoundArg = ESMF_InterArrayCreate(totalUBound, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    totalCountArg = ESMF_InterfaceIntCreate(totalCount, rc=localrc)
+    totalCountArg = ESMF_InterArrayCreate(totalCount, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -20031,31 +20031,31 @@ endif
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Deallocate interface ints
-    call ESMF_InterfaceIntDestroy(exclusiveLBoundArg, rc=localrc)
+    call ESMF_InterArrayDestroy(exclusiveLBoundArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(exclusiveUBoundArg, rc=localrc)
+    call ESMF_InterArrayDestroy(exclusiveUBoundArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(exclusiveCountArg, rc=localrc)
+    call ESMF_InterArrayDestroy(exclusiveCountArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(computationalLBoundArg, rc=localrc)
+    call ESMF_InterArrayDestroy(computationalLBoundArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(computationalUBoundArg, rc=localrc)
+    call ESMF_InterArrayDestroy(computationalUBoundArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(computationalCountArg, rc=localrc)
+    call ESMF_InterArrayDestroy(computationalCountArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(totalLBoundArg, rc=localrc)
+    call ESMF_InterArrayDestroy(totalLBoundArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(totalUBoundArg, rc=localrc)
+    call ESMF_InterArrayDestroy(totalUBoundArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(totalCountArg, rc=localrc)
+    call ESMF_InterArrayDestroy(totalCountArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -20188,15 +20188,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_LocalArray) :: localArray
     type(ESMF_DataCopy_Flag) :: datacopyflagInt
     integer :: coordDimCount(ESMF_MAXDIM)
-    type(ESMF_InterfaceInt) :: exclusiveLBoundArg ! helper variable
-    type(ESMF_InterfaceInt) :: exclusiveUBoundArg ! helper variable
-    type(ESMF_InterfaceInt) :: exclusiveCountArg ! helper variable
-    type(ESMF_InterfaceInt) :: computationalLBoundArg ! helper variable
-    type(ESMF_InterfaceInt) :: computationalUBoundArg ! helper variable
-    type(ESMF_InterfaceInt) :: computationalCountArg ! helper variable
-    type(ESMF_InterfaceInt) :: totalLBoundArg ! helper variable
-    type(ESMF_InterfaceInt) :: totalUBoundArg ! helper variable
-    type(ESMF_InterfaceInt) :: totalCountArg ! helper variable
+    type(ESMF_InterArray) :: exclusiveLBoundArg ! helper variable
+    type(ESMF_InterArray) :: exclusiveUBoundArg ! helper variable
+    type(ESMF_InterArray) :: exclusiveCountArg ! helper variable
+    type(ESMF_InterArray) :: computationalLBoundArg ! helper variable
+    type(ESMF_InterArray) :: computationalUBoundArg ! helper variable
+    type(ESMF_InterArray) :: computationalCountArg ! helper variable
+    type(ESMF_InterArray) :: totalLBoundArg ! helper variable
+    type(ESMF_InterArray) :: totalUBoundArg ! helper variable
+    type(ESMF_InterArray) :: totalCountArg ! helper variable
     integer :: tmp_staggerloc
 
     ! Initialize return code 
@@ -20252,31 +20252,31 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ESMF_CONTEXT, rcToReturn=rc)) return 
 
     ! process optional arguments
-    exclusiveLBoundArg=ESMF_InterfaceIntCreate(exclusiveLBound, rc=localrc)
+    exclusiveLBoundArg=ESMF_InterArrayCreate(exclusiveLBound, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    exclusiveUBoundArg=ESMF_InterfaceIntCreate(exclusiveUBound, rc=localrc)
+    exclusiveUBoundArg=ESMF_InterArrayCreate(exclusiveUBound, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    exclusiveCountArg=ESMF_InterfaceIntCreate(exclusiveCount, rc=localrc)
+    exclusiveCountArg=ESMF_InterArrayCreate(exclusiveCount, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    computationalLBoundArg=ESMF_InterfaceIntCreate(computationalLBound, rc=localrc)
+    computationalLBoundArg=ESMF_InterArrayCreate(computationalLBound, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    computationalUBoundArg=ESMF_InterfaceIntCreate(computationalUBound, rc=localrc)
+    computationalUBoundArg=ESMF_InterArrayCreate(computationalUBound, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    computationalCountArg=ESMF_InterfaceIntCreate(computationalCount, rc=localrc)
+    computationalCountArg=ESMF_InterArrayCreate(computationalCount, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    totalLBoundArg=ESMF_InterfaceIntCreate(totalLBound, rc=localrc)
+    totalLBoundArg=ESMF_InterArrayCreate(totalLBound, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    totalUBoundArg = ESMF_InterfaceIntCreate(totalUBound, rc=localrc)
+    totalUBoundArg = ESMF_InterArrayCreate(totalUBound, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    totalCountArg = ESMF_InterfaceIntCreate(totalCount, rc=localrc)
+    totalCountArg = ESMF_InterArrayCreate(totalCount, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -20289,31 +20289,31 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Deallocate interface ints
-    call ESMF_InterfaceIntDestroy(exclusiveLBoundArg, rc=localrc)
+    call ESMF_InterArrayDestroy(exclusiveLBoundArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(exclusiveUBoundArg, rc=localrc)
+    call ESMF_InterArrayDestroy(exclusiveUBoundArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(exclusiveCountArg, rc=localrc)
+    call ESMF_InterArrayDestroy(exclusiveCountArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(computationalLBoundArg, rc=localrc)
+    call ESMF_InterArrayDestroy(computationalLBoundArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(computationalUBoundArg, rc=localrc)
+    call ESMF_InterArrayDestroy(computationalUBoundArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(computationalCountArg, rc=localrc)
+    call ESMF_InterArrayDestroy(computationalCountArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(totalLBoundArg, rc=localrc)
+    call ESMF_InterArrayDestroy(totalLBoundArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(totalUBoundArg, rc=localrc)
+    call ESMF_InterArrayDestroy(totalUBoundArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(totalCountArg, rc=localrc)
+    call ESMF_InterArrayDestroy(totalCountArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -20448,15 +20448,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_LocalArray) :: localarray
     type(ESMF_DataCopy_Flag) :: datacopyflagInt
     integer :: coordDimCount(ESMF_MAXDIM)
-    type(ESMF_InterfaceInt) :: exclusiveLBoundArg ! helper variable
-    type(ESMF_InterfaceInt) :: exclusiveUBoundArg ! helper variable
-    type(ESMF_InterfaceInt) :: exclusiveCountArg ! helper variable
-    type(ESMF_InterfaceInt) :: computationalLBoundArg ! helper variable
-    type(ESMF_InterfaceInt) :: computationalUBoundArg ! helper variable
-    type(ESMF_InterfaceInt) :: computationalCountArg ! helper variable
-    type(ESMF_InterfaceInt) :: totalLBoundArg ! helper variable
-    type(ESMF_InterfaceInt) :: totalUBoundArg ! helper variable
-    type(ESMF_InterfaceInt) :: totalCountArg ! helper variable
+    type(ESMF_InterArray) :: exclusiveLBoundArg ! helper variable
+    type(ESMF_InterArray) :: exclusiveUBoundArg ! helper variable
+    type(ESMF_InterArray) :: exclusiveCountArg ! helper variable
+    type(ESMF_InterArray) :: computationalLBoundArg ! helper variable
+    type(ESMF_InterArray) :: computationalUBoundArg ! helper variable
+    type(ESMF_InterArray) :: computationalCountArg ! helper variable
+    type(ESMF_InterArray) :: totalLBoundArg ! helper variable
+    type(ESMF_InterArray) :: totalUBoundArg ! helper variable
+    type(ESMF_InterArray) :: totalCountArg ! helper variable
     integer :: tmp_staggerloc
 
     ! Initialize return code 
@@ -20515,31 +20515,31 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                               ESMF_CONTEXT, rcToReturn=rc)) return 
 
     ! process optional arguments
-    exclusiveLBoundArg=ESMF_InterfaceIntCreate(exclusiveLBound, rc=localrc)
+    exclusiveLBoundArg=ESMF_InterArrayCreate(exclusiveLBound, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    exclusiveUBoundArg=ESMF_InterfaceIntCreate(exclusiveUBound, rc=localrc)
+    exclusiveUBoundArg=ESMF_InterArrayCreate(exclusiveUBound, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    exclusiveCountArg=ESMF_InterfaceIntCreate(exclusiveCount, rc=localrc)
+    exclusiveCountArg=ESMF_InterArrayCreate(exclusiveCount, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    computationalLBoundArg=ESMF_InterfaceIntCreate(computationalLBound, rc=localrc)
+    computationalLBoundArg=ESMF_InterArrayCreate(computationalLBound, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    computationalUBoundArg=ESMF_InterfaceIntCreate(computationalUBound, rc=localrc)
+    computationalUBoundArg=ESMF_InterArrayCreate(computationalUBound, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    computationalCountArg=ESMF_InterfaceIntCreate(computationalCount, rc=localrc)
+    computationalCountArg=ESMF_InterArrayCreate(computationalCount, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    totalLBoundArg=ESMF_InterfaceIntCreate(totalLBound, rc=localrc)
+    totalLBoundArg=ESMF_InterArrayCreate(totalLBound, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    totalUBoundArg = ESMF_InterfaceIntCreate(totalUBound, rc=localrc)
+    totalUBoundArg = ESMF_InterArrayCreate(totalUBound, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    totalCountArg = ESMF_InterfaceIntCreate(totalCount, rc=localrc)
+    totalCountArg = ESMF_InterArrayCreate(totalCount, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -20552,31 +20552,31 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Deallocate interface ints
-    call ESMF_InterfaceIntDestroy(exclusiveLBoundArg, rc=localrc)
+    call ESMF_InterArrayDestroy(exclusiveLBoundArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(exclusiveUBoundArg, rc=localrc)
+    call ESMF_InterArrayDestroy(exclusiveUBoundArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(exclusiveCountArg, rc=localrc)
+    call ESMF_InterArrayDestroy(exclusiveCountArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(computationalLBoundArg, rc=localrc)
+    call ESMF_InterArrayDestroy(computationalLBoundArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(computationalUBoundArg, rc=localrc)
+    call ESMF_InterArrayDestroy(computationalUBoundArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(computationalCountArg, rc=localrc)
+    call ESMF_InterArrayDestroy(computationalCountArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(totalLBoundArg, rc=localrc)
+    call ESMF_InterArrayDestroy(totalLBoundArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(totalUBoundArg, rc=localrc)
+    call ESMF_InterArrayDestroy(totalUBoundArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(totalCountArg, rc=localrc)
+    call ESMF_InterArrayDestroy(totalCountArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -20711,15 +20711,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
  type(ESMF_LocalArray) :: localarray
  type(ESMF_DataCopy_Flag) :: datacopyflagInt
  integer :: coordDimCount(ESMF_MAXDIM)
- type(ESMF_InterfaceInt) :: exclusiveLBoundArg ! helper variable
- type(ESMF_InterfaceInt) :: exclusiveUBoundArg ! helper variable
- type(ESMF_InterfaceInt) :: exclusiveCountArg ! helper variable
- type(ESMF_InterfaceInt) :: computationalLBoundArg ! helper variable
- type(ESMF_InterfaceInt) :: computationalUBoundArg ! helper variable
- type(ESMF_InterfaceInt) :: computationalCountArg ! helper variable
- type(ESMF_InterfaceInt) :: totalLBoundArg ! helper variable
- type(ESMF_InterfaceInt) :: totalUBoundArg ! helper variable
- type(ESMF_InterfaceInt) :: totalCountArg ! helper variable
+ type(ESMF_InterArray) :: exclusiveLBoundArg ! helper variable
+ type(ESMF_InterArray) :: exclusiveUBoundArg ! helper variable
+ type(ESMF_InterArray) :: exclusiveCountArg ! helper variable
+ type(ESMF_InterArray) :: computationalLBoundArg ! helper variable
+ type(ESMF_InterArray) :: computationalUBoundArg ! helper variable
+ type(ESMF_InterArray) :: computationalCountArg ! helper variable
+ type(ESMF_InterArray) :: totalLBoundArg ! helper variable
+ type(ESMF_InterArray) :: totalUBoundArg ! helper variable
+ type(ESMF_InterArray) :: totalCountArg ! helper variable
  integer :: tmp_staggerloc
 
  ! Initialize return code 
@@ -20777,31 +20777,31 @@ endif
 
 
     ! process optional arguments
-    exclusiveLBoundArg=ESMF_InterfaceIntCreate(exclusiveLBound, rc=localrc)
+    exclusiveLBoundArg=ESMF_InterArrayCreate(exclusiveLBound, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    exclusiveUBoundArg=ESMF_InterfaceIntCreate(exclusiveUBound, rc=localrc)
+    exclusiveUBoundArg=ESMF_InterArrayCreate(exclusiveUBound, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    exclusiveCountArg=ESMF_InterfaceIntCreate(exclusiveCount, rc=localrc)
+    exclusiveCountArg=ESMF_InterArrayCreate(exclusiveCount, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    computationalLBoundArg=ESMF_InterfaceIntCreate(computationalLBound, rc=localrc)
+    computationalLBoundArg=ESMF_InterArrayCreate(computationalLBound, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    computationalUBoundArg=ESMF_InterfaceIntCreate(computationalUBound, rc=localrc)
+    computationalUBoundArg=ESMF_InterArrayCreate(computationalUBound, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    computationalCountArg=ESMF_InterfaceIntCreate(computationalCount, rc=localrc)
+    computationalCountArg=ESMF_InterArrayCreate(computationalCount, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    totalLBoundArg=ESMF_InterfaceIntCreate(totalLBound, rc=localrc)
+    totalLBoundArg=ESMF_InterArrayCreate(totalLBound, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    totalUBoundArg = ESMF_InterfaceIntCreate(totalUBound, rc=localrc)
+    totalUBoundArg = ESMF_InterArrayCreate(totalUBound, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    totalCountArg = ESMF_InterfaceIntCreate(totalCount, rc=localrc)
+    totalCountArg = ESMF_InterArrayCreate(totalCount, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -20814,31 +20814,31 @@ endif
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Deallocate interface ints
-    call ESMF_InterfaceIntDestroy(exclusiveLBoundArg, rc=localrc)
+    call ESMF_InterArrayDestroy(exclusiveLBoundArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(exclusiveUBoundArg, rc=localrc)
+    call ESMF_InterArrayDestroy(exclusiveUBoundArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(exclusiveCountArg, rc=localrc)
+    call ESMF_InterArrayDestroy(exclusiveCountArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(computationalLBoundArg, rc=localrc)
+    call ESMF_InterArrayDestroy(computationalLBoundArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(computationalUBoundArg, rc=localrc)
+    call ESMF_InterArrayDestroy(computationalUBoundArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(computationalCountArg, rc=localrc)
+    call ESMF_InterArrayDestroy(computationalCountArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(totalLBoundArg, rc=localrc)
+    call ESMF_InterArrayDestroy(totalLBoundArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(totalUBoundArg, rc=localrc)
+    call ESMF_InterArrayDestroy(totalUBoundArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(totalCountArg, rc=localrc)
+    call ESMF_InterArrayDestroy(totalCountArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -21143,15 +21143,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !EOP
 
     integer :: localrc ! local error status
-    type(ESMF_InterfaceInt) :: exclusiveLBoundArg ! helper variable
-    type(ESMF_InterfaceInt) :: exclusiveUBoundArg ! helper variable
-    type(ESMF_InterfaceInt) :: exclusiveCountArg ! helper variable
-    type(ESMF_InterfaceInt) :: computationalLBoundArg ! helper variable
-    type(ESMF_InterfaceInt) :: computationalUBoundArg ! helper variable
-    type(ESMF_InterfaceInt) :: computationalCountArg ! helper variable
-    type(ESMF_InterfaceInt) :: totalLBoundArg ! helper variable
-    type(ESMF_InterfaceInt) :: totalUBoundArg ! helper variable
-    type(ESMF_InterfaceInt) :: totalCountArg ! helper variable
+    type(ESMF_InterArray) :: exclusiveLBoundArg ! helper variable
+    type(ESMF_InterArray) :: exclusiveUBoundArg ! helper variable
+    type(ESMF_InterArray) :: exclusiveCountArg ! helper variable
+    type(ESMF_InterArray) :: computationalLBoundArg ! helper variable
+    type(ESMF_InterArray) :: computationalUBoundArg ! helper variable
+    type(ESMF_InterArray) :: computationalCountArg ! helper variable
+    type(ESMF_InterArray) :: totalLBoundArg ! helper variable
+    type(ESMF_InterArray) :: totalUBoundArg ! helper variable
+    type(ESMF_InterArray) :: totalCountArg ! helper variable
     integer :: tmp_staggerloc
 
     ! Initialize return code
@@ -21169,31 +21169,31 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     endif
 
     ! process optional arguments
-    exclusiveLBoundArg=ESMF_InterfaceIntCreate(exclusiveLBound, rc=localrc)
+    exclusiveLBoundArg=ESMF_InterArrayCreate(exclusiveLBound, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    exclusiveUBoundArg=ESMF_InterfaceIntCreate(exclusiveUBound, rc=localrc)
+    exclusiveUBoundArg=ESMF_InterArrayCreate(exclusiveUBound, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    exclusiveCountArg=ESMF_InterfaceIntCreate(exclusiveCount, rc=localrc)
+    exclusiveCountArg=ESMF_InterArrayCreate(exclusiveCount, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    computationalLBoundArg=ESMF_InterfaceIntCreate(computationalLBound, rc=localrc)
+    computationalLBoundArg=ESMF_InterArrayCreate(computationalLBound, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    computationalUBoundArg=ESMF_InterfaceIntCreate(computationalUBound, rc=localrc)
+    computationalUBoundArg=ESMF_InterArrayCreate(computationalUBound, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    computationalCountArg=ESMF_InterfaceIntCreate(computationalCount, rc=localrc)
+    computationalCountArg=ESMF_InterArrayCreate(computationalCount, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    totalLBoundArg=ESMF_InterfaceIntCreate(totalLBound, rc=localrc)
+    totalLBoundArg=ESMF_InterArrayCreate(totalLBound, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    totalUBoundArg = ESMF_InterfaceIntCreate(totalUBound, rc=localrc)
+    totalUBoundArg = ESMF_InterArrayCreate(totalUBound, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    totalCountArg = ESMF_InterfaceIntCreate(totalCount, rc=localrc)
+    totalCountArg = ESMF_InterArrayCreate(totalCount, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -21206,31 +21206,31 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Deallocate interface ints
-    call ESMF_InterfaceIntDestroy(exclusiveLBoundArg, rc=localrc)
+    call ESMF_InterArrayDestroy(exclusiveLBoundArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(exclusiveUBoundArg, rc=localrc)
+    call ESMF_InterArrayDestroy(exclusiveUBoundArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(exclusiveCountArg, rc=localrc)
+    call ESMF_InterArrayDestroy(exclusiveCountArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(computationalLBoundArg, rc=localrc)
+    call ESMF_InterArrayDestroy(computationalLBoundArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(computationalUBoundArg, rc=localrc)
+    call ESMF_InterArrayDestroy(computationalUBoundArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(computationalCountArg, rc=localrc)
+    call ESMF_InterArrayDestroy(computationalCountArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(totalLBoundArg, rc=localrc)
+    call ESMF_InterArrayDestroy(totalLBoundArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(totalUBoundArg, rc=localrc)
+    call ESMF_InterArrayDestroy(totalUBoundArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(totalCountArg, rc=localrc)
+    call ESMF_InterArrayDestroy(totalCountArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -21665,17 +21665,17 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !EOPI
     integer :: localrc ! local error status
     integer :: nameLen 
-    type(ESMF_InterfaceInt) :: gridEdgeLWidthArg  ! Language Interface Helper Var
-    type(ESMF_InterfaceInt) :: gridEdgeUWidthArg  ! Language Interface Helper Var
-    type(ESMF_InterfaceInt) :: gridAlignArg  ! Language Interface Helper Var
-    type(ESMF_InterfaceInt) :: gridMemLBoundArg  ! Language Interface Helper Var
-    type(ESMF_InterfaceInt) :: distgridToGridMapArg  ! Language Interface Helper Var
-    type(ESMF_InterfaceInt) :: distDimArg  ! Language Interface Helper Var
-    type(ESMF_InterfaceInt) :: coordDimCountArg  ! Language Interface Helper Var
-    type(ESMF_InterfaceInt) :: coordDimMapArg ! Language Interface Helper Var
-    type(ESMF_InterfaceInt) :: minIndexArg ! Language Interface Helper Var
-    type(ESMF_InterfaceInt) :: maxIndexArg ! Language Interface Helper Var
-    type(ESMF_InterfaceInt) :: localArbIndexArg ! Language Interface Helper Var
+    type(ESMF_InterArray) :: gridEdgeLWidthArg  ! Language Interface Helper Var
+    type(ESMF_InterArray) :: gridEdgeUWidthArg  ! Language Interface Helper Var
+    type(ESMF_InterArray) :: gridAlignArg  ! Language Interface Helper Var
+    type(ESMF_InterArray) :: gridMemLBoundArg  ! Language Interface Helper Var
+    type(ESMF_InterArray) :: distgridToGridMapArg  ! Language Interface Helper Var
+    type(ESMF_InterArray) :: distDimArg  ! Language Interface Helper Var
+    type(ESMF_InterArray) :: coordDimCountArg  ! Language Interface Helper Var
+    type(ESMF_InterArray) :: coordDimMapArg ! Language Interface Helper Var
+    type(ESMF_InterArray) :: minIndexArg ! Language Interface Helper Var
+    type(ESMF_InterArray) :: maxIndexArg ! Language Interface Helper Var
+    type(ESMF_InterArray) :: localArbIndexArg ! Language Interface Helper Var
     integer :: intDestroyDistgrid,intDestroyDELayout
     type(ESMF_Pointer)      :: vmThis
     logical                 :: actualFlag
@@ -21711,45 +21711,45 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! It doesn't look like it needs to be translated, but test to make sure
 
     !! gridEdgeLWidth and gridEdgeUWidth
-    gridEdgeLWidthArg = ESMF_InterfaceIntCreate(gridEdgeLWidth, rc=localrc)
+    gridEdgeLWidthArg = ESMF_InterArrayCreate(gridEdgeLWidth, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    gridEdgeUWidthArg = ESMF_InterfaceIntCreate(gridEdgeUWidth, rc=localrc)
+    gridEdgeUWidthArg = ESMF_InterArrayCreate(gridEdgeUWidth, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    gridAlignArg = ESMF_InterfaceIntCreate(gridAlign, rc=localrc)
+    gridAlignArg = ESMF_InterArrayCreate(gridAlign, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    gridMemLBoundArg = ESMF_InterfaceIntCreate(gridMemLBound, rc=localrc)
+    gridMemLBoundArg = ESMF_InterArrayCreate(gridMemLBound, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     !! distgridToGridMap
-    distgridToGridMapArg = ESMF_InterfaceIntCreate(distgridToGridMap, rc=localrc)
+    distgridToGridMapArg = ESMF_InterArrayCreate(distgridToGridMap, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     !! distDim
-    distDimArg = ESMF_InterfaceIntCreate(distDim, rc=localrc)
+    distDimArg = ESMF_InterArrayCreate(distDim, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     !! Description of array factorization
-    coordDimCountArg = ESMF_InterfaceIntCreate(coordDimCount, rc=localrc)
+    coordDimCountArg = ESMF_InterArrayCreate(coordDimCount, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    coordDimMapArg = ESMF_InterfaceIntCreate(farray2D=coordDimMap, rc=localrc)
+    coordDimMapArg = ESMF_InterArrayCreate(farray2D=coordDimMap, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     !! Index bound and localArbIndex array
-    minIndexArg = ESMF_InterfaceIntCreate(minIndex, rc=localrc)
+    minIndexArg = ESMF_InterArrayCreate(minIndex, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    maxIndexArg = ESMF_InterfaceIntCreate(maxIndex, rc=localrc)
+    maxIndexArg = ESMF_InterArrayCreate(maxIndex, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    localArbIndexArg = ESMF_InterfaceIntCreate(farray2D=localArbIndex, rc=localrc)
+    localArbIndexArg = ESMF_InterArrayCreate(farray2D=localArbIndex, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -21770,37 +21770,37 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Deallocate helper variables
-    call ESMF_InterfaceIntDestroy(gridEdgeUWidthArg, rc=localrc)
+    call ESMF_InterArrayDestroy(gridEdgeUWidthArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(gridEdgeLWidthArg, rc=localrc)
+    call ESMF_InterArrayDestroy(gridEdgeLWidthArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(gridAlignArg, rc=localrc)
+    call ESMF_InterArrayDestroy(gridAlignArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(gridMemLBoundArg, rc=localrc)
+    call ESMF_InterArrayDestroy(gridMemLBoundArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(distgridToGridMapArg, rc=localrc)
+    call ESMF_InterArrayDestroy(distgridToGridMapArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(distDimArg, rc=localrc)
+    call ESMF_InterArrayDestroy(distDimArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(coordDimCountArg, rc=localrc)
+    call ESMF_InterArrayDestroy(coordDimCountArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(coordDimMapArg, rc=localrc)
+    call ESMF_InterArrayDestroy(coordDimMapArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(minIndexArg, rc=localrc)
+    call ESMF_InterArrayDestroy(minIndexArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(maxIndexArg, rc=localrc)
+    call ESMF_InterArrayDestroy(maxIndexArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(localArbIndexArg, rc=localrc)
+    call ESMF_InterArrayDestroy(localArbIndexArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -24834,12 +24834,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !EOPI
     integer :: localrc ! local error status
-    type(ESMF_InterfaceInt) :: lWidthInArg  ! Language Interface Helper Var
-    type(ESMF_InterfaceInt) :: uWidthInArg  ! Language Interface Helper Var
-    type(ESMF_InterfaceInt) :: alignInArg  ! Language Interface Helper Var
-    type(ESMF_InterfaceInt) :: lWidthOutArg  ! Language Interface Helper Var
-    type(ESMF_InterfaceInt) :: uWidthOutArg  ! Language Interface Helper Var
-    type(ESMF_InterfaceInt) :: alignOutArg  ! Language Interface Helper Var
+    type(ESMF_InterArray) :: lWidthInArg  ! Language Interface Helper Var
+    type(ESMF_InterArray) :: uWidthInArg  ! Language Interface Helper Var
+    type(ESMF_InterArray) :: alignInArg  ! Language Interface Helper Var
+    type(ESMF_InterArray) :: lWidthOutArg  ! Language Interface Helper Var
+    type(ESMF_InterArray) :: uWidthOutArg  ! Language Interface Helper Var
+    type(ESMF_InterArray) :: alignOutArg  ! Language Interface Helper Var
 
 
     ! Initialize return code; assume failure until success is certain
@@ -24874,23 +24874,23 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         endif 
     endif
 
-    ! turn to interfaceint
-    lWidthInArg = ESMF_InterfaceIntCreate(lWidthIn, rc=localrc)
+    ! turn to InterArray
+    lWidthInArg = ESMF_InterArrayCreate(lWidthIn, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    uWidthInArg = ESMF_InterfaceIntCreate(uWidthIn, rc=localrc)
+    uWidthInArg = ESMF_InterArrayCreate(uWidthIn, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    alignInArg = ESMF_InterfaceIntCreate(alignIn, rc=localrc)
+    alignInArg = ESMF_InterArrayCreate(alignIn, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    lWidthOutArg = ESMF_InterfaceIntCreate(lWidthOut, rc=localrc)
+    lWidthOutArg = ESMF_InterArrayCreate(lWidthOut, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    uWidthOutArg = ESMF_InterfaceIntCreate(uWidthOut, rc=localrc)
+    uWidthOutArg = ESMF_InterArrayCreate(uWidthOut, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    alignOutArg = ESMF_InterfaceIntCreate(alignOut, rc=localrc)
+    alignOutArg = ESMF_InterArrayCreate(alignOut, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -24903,22 +24903,22 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Deallocate helper variables
-    call ESMF_InterfaceIntDestroy(lWidthInArg, rc=localrc)
+    call ESMF_InterArrayDestroy(lWidthInArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(uWidthInArg, rc=localrc)
+    call ESMF_InterArrayDestroy(uWidthInArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(alignInArg, rc=localrc)
+    call ESMF_InterArrayDestroy(alignInArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(lWidthOutArg, rc=localrc)
+    call ESMF_InterArrayDestroy(lWidthOutArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(uWidthOutArg, rc=localrc)
+    call ESMF_InterArrayDestroy(uWidthOutArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(alignOutArg, rc=localrc)
+    call ESMF_InterArrayDestroy(alignOutArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 

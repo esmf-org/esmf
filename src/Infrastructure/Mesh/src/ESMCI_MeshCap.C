@@ -57,7 +57,7 @@
 
 // This method converts a Mesh to a PointList
 void MeshCap::MeshCap_to_PointList(ESMC_MeshLoc_Flag meshLoc, 
-                                   ESMCI::InterfaceInt<int> *maskValuesArg, PointList **out_pl,
+                                   ESMCI::InterArray<int> *maskValuesArg, PointList **out_pl,
                                    int *rc) {
 #undef ESMC_METHOD
 #define ESMC_METHOD "MeshCap::MeshCap_to_PointList()"
@@ -277,7 +277,7 @@ void MeshCap::xgridregrid_create(ESMCI::VM **vmpp,
 
 MeshCap *MeshCap::GridToMesh(const Grid &grid_, int staggerLoc, 
                              const std::vector<ESMCI::Array*> &arrays,
-                             ESMCI::InterfaceInt<int> *maskValuesArg,
+                             ESMCI::InterArray<int> *maskValuesArg,
                              int *regridConserve, int *rc) {
 #undef ESMC_METHOD
 #define ESMC_METHOD "MeshCap::GridToMesh()"
@@ -589,7 +589,7 @@ MeshCap *MeshCap::meshcreate(int *pdim, int *sdim,
 } 
 
 void MeshCap::meshaddnodes(int *num_nodes, int *nodeId, 
-                               double *nodeCoord, int *nodeOwner, InterfaceInt<int> *nodeMaskII,
+                               double *nodeCoord, int *nodeOwner, InterArray<int> *nodeMaskII,
                                ESMC_CoordSys_Flag *_coordSys, int *_orig_sdim,
                                int *rc) 
 {
@@ -636,7 +636,7 @@ void MeshCap::meshwrite(char *fname, int *rc,
   }
 }
 
-void MeshCap::meshaddelements(int *_num_elems, int *elemId, int *elemType, InterfaceInt<int> *_elemMaskII ,
+void MeshCap::meshaddelements(int *_num_elems, int *elemId, int *elemType, InterArray<int> *_elemMaskII ,
                               int *_areaPresent, double *elemArea, 
                               int *_coordsPresent, double *elemCoords, 
                               int *_num_elemConn, int *elemConn, int *regridConserve, 
@@ -1015,7 +1015,7 @@ void MeshCap::triangulate(int *pdim, int *sdim, int *numPnts,
                      pnts, td, ti, triInd, rc);
 }
 
-void MeshCap::meshturnoncellmask(ESMCI::InterfaceInt<int> *maskValuesArg,  int *rc) {
+void MeshCap::meshturnoncellmask(ESMCI::InterArray<int> *maskValuesArg,  int *rc) {
 #undef ESMC_METHOD
 #define ESMC_METHOD "MeshCap::meshturnoncellmask()"
  
@@ -1053,7 +1053,7 @@ void MeshCap::meshturnoffcellmask(int *rc) {
  }
 
 
-void MeshCap::meshturnonnodemask(ESMCI::InterfaceInt<int> *maskValuesArg,  int *rc) {
+void MeshCap::meshturnonnodemask(ESMCI::InterArray<int> *maskValuesArg,  int *rc) {
 #undef ESMC_METHOD
 #define ESMC_METHOD "MeshCap::meshturnonnodemask()"
 

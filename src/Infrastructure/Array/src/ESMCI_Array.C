@@ -429,21 +429,21 @@ Array *Array::create(
 //
 // !ARGUMENTS:
 //
-  LocalArray **larrayListArg,                     // (in)
-  int larrayCount,                                // (in)
-  DistGrid *distgrid,                             // (in)
-  CopyFlag copyflag,                              // (in)
-  InterfaceInt<int> *distgridToArrayMap,          // (in)
-  InterfaceInt<int> *computationalEdgeLWidthArg,  // (in)
-  InterfaceInt<int> *computationalEdgeUWidthArg,  // (in)
-  InterfaceInt<int> *computationalLWidthArg,      // (in)
-  InterfaceInt<int> *computationalUWidthArg,      // (in)
-  InterfaceInt<int> *totalLWidthArg,              // (in)
-  InterfaceInt<int> *totalUWidthArg,              // (in)
-  ESMC_IndexFlag *indexflagArg,                   // (in)
-  InterfaceInt<int> *undistLBoundArg,             // (in)
-  InterfaceInt<int> *undistUBoundArg,             // (in)
-  int *rc                                         // (out) return code
+  LocalArray **larrayListArg,                   // (in)
+  int larrayCount,                              // (in)
+  DistGrid *distgrid,                           // (in)
+  CopyFlag copyflag,                            // (in)
+  InterArray<int> *distgridToArrayMap,          // (in)
+  InterArray<int> *computationalEdgeLWidthArg,  // (in)
+  InterArray<int> *computationalEdgeUWidthArg,  // (in)
+  InterArray<int> *computationalLWidthArg,      // (in)
+  InterArray<int> *computationalUWidthArg,      // (in)
+  InterArray<int> *totalLWidthArg,              // (in)
+  InterArray<int> *totalUWidthArg,              // (in)
+  ESMC_IndexFlag *indexflagArg,                 // (in)
+  InterArray<int> *undistLBoundArg,             // (in)
+  InterArray<int> *undistUBoundArg,             // (in)
+  int *rc                                       // (out) return code
   ){
 //
 // !DESCRIPTION:
@@ -1143,21 +1143,21 @@ Array *Array::create(
 //
 // !ARGUMENTS:
 //
-  ArraySpec *arrayspec,                           // (in)
-  DistGrid *distgrid,                             // (in)
-  InterfaceInt<int> *distgridToArrayMap,          // (in)
-  InterfaceInt<int> *computationalEdgeLWidthArg,  // (in)
-  InterfaceInt<int> *computationalEdgeUWidthArg,  // (in)
-  InterfaceInt<int> *computationalLWidthArg,      // (in)
-  InterfaceInt<int> *computationalUWidthArg,      // (in)
-  InterfaceInt<int> *totalLWidthArg,              // (in)
-  InterfaceInt<int> *totalUWidthArg,              // (in)
-  ESMC_IndexFlag *indexflagArg,                   // (in)
-  InterfaceInt<int> *distLBoundArg,               // (in)
-  InterfaceInt<int> *undistLBoundArg,             // (in)
-  InterfaceInt<int> *undistUBoundArg,             // (in)
-  int *rc,                                        // (out) return code
-  VM *vm                                          // (in)
+  ArraySpec *arrayspec,                         // (in)
+  DistGrid *distgrid,                           // (in)
+  InterArray<int> *distgridToArrayMap,          // (in)
+  InterArray<int> *computationalEdgeLWidthArg,  // (in)
+  InterArray<int> *computationalEdgeUWidthArg,  // (in)
+  InterArray<int> *computationalLWidthArg,      // (in)
+  InterArray<int> *computationalUWidthArg,      // (in)
+  InterArray<int> *totalLWidthArg,              // (in)
+  InterArray<int> *totalUWidthArg,              // (in)
+  ESMC_IndexFlag *indexflagArg,                 // (in)
+  InterArray<int> *distLBoundArg,               // (in)
+  InterArray<int> *undistLBoundArg,             // (in)
+  InterArray<int> *undistUBoundArg,             // (in)
+  int *rc,                                      // (out) return code
+  VM *vm                                        // (in)
   ){
 //
 // !DESCRIPTION:
@@ -2290,7 +2290,7 @@ int Array::setComputationalLWidth(
 //
 // !ARGUMENTS:
 //
-  InterfaceInt<int> *computationalLWidthArg        // (in)
+  InterArray<int> *computationalLWidthArg        // (in)
   ){
 //
 // !DESCRIPTION:
@@ -2366,7 +2366,7 @@ int Array::setComputationalUWidth(
 //
 // !ARGUMENTS:
 //
-  InterfaceInt<int> *computationalUWidthArg        // (in)
+  InterArray<int> *computationalUWidthArg        // (in)
   ){
 //
 // !DESCRIPTION:
@@ -2442,8 +2442,8 @@ int Array::setRimSeqIndex(
 //
 // !ARGUMENTS:
 //
-  int localDe,                        // (in)
-  InterfaceInt<int> *rimSeqIndexArg   // (in)
+  int localDe,                      // (in)
+  InterArray<int> *rimSeqIndexArg   // (in)
   ){
 //
 // !DESCRIPTION:
@@ -4043,12 +4043,12 @@ int Array::haloStore(
 //
 // !ARGUMENTS:
 //
-  Array *array,                         // in    - Array
-  RouteHandle **routehandle,            // inout - handle to precomputed comm
+  Array *array,                       // in    - Array
+  RouteHandle **routehandle,          // inout - handle to precomputed comm
   ESMC_HaloStartRegionFlag halostartregionflag, // in - start of halo region
-  InterfaceInt<int> *haloLDepth,        // in    - lower corner halo depth
-  InterfaceInt<int> *haloUDepth,        // in    - upper corner halo depth
-  int *pipelineDepthArg                 // in (optional)
+  InterArray<int> *haloLDepth,        // in    - lower corner halo depth
+  InterArray<int> *haloUDepth,        // in    - upper corner halo depth
+  int *pipelineDepthArg               // in (optional)
   ){
 //
 // !DESCRIPTION:
@@ -4491,7 +4491,7 @@ int Array::redistStore(
   Array *srcArray,                        // in    - source Array
   Array *dstArray,                        // in    - destination Array
   RouteHandle **routehandle,              // inout - handle to precomputed comm
-  InterfaceInt<int> *srcToDstTransposeMap,// in    - mapping src -> dst dims
+  InterArray<int> *srcToDstTransposeMap,  // in    - mapping src -> dst dims
   ESMC_TypeKind_Flag typekindFactor,      // in    - typekind of factor
   void *factor,                           // in    - redist factor
   bool ignoreUnmatched,                   // in    - support unmatched indices

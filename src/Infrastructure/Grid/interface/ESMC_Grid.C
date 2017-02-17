@@ -40,15 +40,15 @@ extern "C" {
 // fortran interface functions to attribute objects
   void FTN_X(c_esmc_gridgetcoordbounds)(ESMCI::Grid **_grid, int *_localDE,
                                         int *_coord, int *_staggerloc,
-                                        ESMCI::InterfaceInt<int> **_exclusiveLBound,
-                                        ESMCI::InterfaceInt<int> **_exclusiveUBound,
-                                        ESMCI::InterfaceInt<int> **_exclusiveCount,
-                                        ESMCI::InterfaceInt<int> **_computationalLBound,
-                                        ESMCI::InterfaceInt<int> **_computationalUBound,
-                                        ESMCI::InterfaceInt<int> **_computationalCount,
-                                        ESMCI::InterfaceInt<int> **_totalLBound,
-                                        ESMCI::InterfaceInt<int> **_totalUBound,
-                                        ESMCI::InterfaceInt<int> **_totalCount,
+                                        ESMCI::InterArray<int> **_exclusiveLBound,
+                                        ESMCI::InterArray<int> **_exclusiveUBound,
+                                        ESMCI::InterArray<int> **_exclusiveCount,
+                                        ESMCI::InterArray<int> **_computationalLBound,
+                                        ESMCI::InterArray<int> **_computationalUBound,
+                                        ESMCI::InterArray<int> **_computationalCount,
+                                        ESMCI::InterArray<int> **_totalLBound,
+                                        ESMCI::InterArray<int> **_totalUBound,
+                                        ESMCI::InterArray<int> **_totalCount,
                                         int *_rc);
 
 void FTN_X(c_esmc_gridio)(ESMCI::Grid **gridpp, int *staggerLoc, int *num_arrays,
@@ -62,10 +62,10 @@ void FTN_X(c_esmc_gridio)(ESMCI::Grid **gridpp, int *staggerLoc, int *num_arrays
                           int *spherical, int *islatlondeg,
                           ESMCI_FortranStrLenArg nlen);
 //-----------------------------------------------------------------------------
-//TODO: InterfaceInt should be passed by value when ticket 3613642 is resolved
+//TODO: InterArray should be passed by value when ticket 3613642 is resolved
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_GridCreateNoPeriDim()"
-ESMC_Grid ESMC_GridCreateNoPeriDim(ESMC_InterfaceInt *maxIndex,
+ESMC_Grid ESMC_GridCreateNoPeriDim(ESMC_InterArrayInt *maxIndex,
                                    enum ESMC_CoordSys_Flag *coordSys,
                                    enum ESMC_TypeKind_Flag *coordTypeKind, 
                                    enum ESMC_IndexFlag *indexflag,
@@ -90,10 +90,10 @@ ESMC_Grid ESMC_GridCreateNoPeriDim(ESMC_InterfaceInt *maxIndex,
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
-//TODO: InterfaceInt should be passed by value when ticket 3613642 is resolved
+//TODO: InterArray should be passed by value when ticket 3613642 is resolved
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_GridCreate1PeriDim()"
-ESMC_Grid ESMC_GridCreate1PeriDim(ESMC_InterfaceInt *maxIndex,
+ESMC_Grid ESMC_GridCreate1PeriDim(ESMC_InterArrayInt *maxIndex,
                                   int *periodicDim, int *poleDim,
                                   enum ESMC_CoordSys_Flag *coordSys,
                                   enum ESMC_TypeKind_Flag *coordTypeKind, 
@@ -258,8 +258,8 @@ void * ESMC_GridGetCoord(ESMC_Grid grid, int coordDim,
 #if 0
   // TODO: use this instead of the above, it is more correct because the Fortran
   //       layer does additional bounds checking.
-  ESMCI::InterfaceInt<int> *computationalLBound;
-  ESMCI::InterfaceInt<int> *computationalUBound;
+  ESMCI::InterArray<int> *computationalLBound;
+  ESMCI::InterArray<int> *computationalUBound;
   // this code is technically more correct, but I can't find the symbol for some reason..
   int localDe = 0;
   FTN_X(c_esmc_gridgetcoordbounds)(&gridp, &localDe, &coordDim, &stagger,

@@ -136,7 +136,7 @@ void ESMCI_meshcreate(Mesh **meshpp,
 } // meshcreate
 
 void ESMCI_meshaddnodes(Mesh **meshpp, int *num_nodes, int *nodeId, 
-                                           double *nodeCoord, int *nodeOwner, InterfaceInt<int> *nodeMaskII,
+                                           double *nodeCoord, int *nodeOwner, InterArray<int> *nodeMaskII,
                                            ESMC_CoordSys_Flag *_coordSys, int *_orig_sdim,
                                            int *rc) 
 #undef  ESMC_METHOD
@@ -615,7 +615,7 @@ static void triangulate_warea(int sdim, int num_p, double *p, int oeid,
 
 
 void ESMCI_meshaddelements(Mesh **meshpp, 
-                                              int *_num_elems, int *elemId, int *elemType, InterfaceInt<int> *_elemMaskII ,
+                                              int *_num_elems, int *elemId, int *elemType, InterArray<int> *_elemMaskII ,
                                               int *_areaPresent, double *elemArea, 
                                               int *_elemCoordsPresent, double *elemCoords, 
                                               int *_num_elemConn, int *elemConn, int *regridConserve, 
@@ -649,7 +649,7 @@ void ESMCI_meshaddelements(Mesh **meshpp,
 
     int num_elemConn=*_num_elemConn;
  
-    InterfaceInt<int> *elemMaskII=_elemMaskII;
+    InterArray<int> *elemMaskII=_elemMaskII;
 
     int areaPresent=*_areaPresent;
 
@@ -952,7 +952,7 @@ void ESMCI_meshaddelements(Mesh **meshpp,
     double *elemArea_wsplit=NULL;
     double *elemCoords_wsplit=NULL;
     int *elemMaskIIArray_wsplit=NULL;
-    InterfaceInt<int> *elemMaskII_wsplit=NULL;
+    InterArray<int> *elemMaskII_wsplit=NULL;
 
     // If the piece of mesh on this proc is split, then generate the split elems
     if (is_split_local) {
@@ -978,7 +978,7 @@ void ESMCI_meshaddelements(Mesh **meshpp,
         elemMaskIIArray_wsplit=new int[num_elems_wsplit];
 
         extent[0]=num_elems_wsplit;
-        elemMaskII_wsplit=new InterfaceInt<int>(elemMaskIIArray_wsplit,1,extent);
+        elemMaskII_wsplit=new InterArray<int>(elemMaskIIArray_wsplit,1,extent);
       }
 
       // Allocate some temporary variables for splitting
@@ -3524,7 +3524,7 @@ void ESMCI_triangulate(int *pdim, int *sdim, int *numPnts,
 }
 
 
-void ESMCI_meshturnoncellmask(Mesh **meshpp, ESMCI::InterfaceInt<int> *maskValuesArg,  int *rc) {
+void ESMCI_meshturnoncellmask(Mesh **meshpp, ESMCI::InterArray<int> *maskValuesArg,  int *rc) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI_meshturnoncellmask()"
 
@@ -3724,7 +3724,7 @@ void ESMCI_meshturnoffcellmask(Mesh **meshpp, int *rc) {
 }
 
 ////////////
-void ESMCI_meshturnonnodemask(Mesh **meshpp, ESMCI::InterfaceInt<int> *maskValuesArg,  int *rc) {
+void ESMCI_meshturnonnodemask(Mesh **meshpp, ESMCI::InterArray<int> *maskValuesArg,  int *rc) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI_meshturnonnodemask()"
   try {

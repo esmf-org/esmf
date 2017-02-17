@@ -41,7 +41,7 @@ void myInitInC(ESMC_GridComp gcomp, ESMC_State importState,
   ESMC_Field field;
   ESMC_ArraySpec arrayspec;
   int *gridToFieldMap, *ungriddedLBound, *ungriddedUBound;
-  ESMC_InterfaceInt i_gridToFieldMap, i_ungriddedLBound, i_ungriddedUBound;
+  ESMC_InterArrayInt i_gridToFieldMap, i_ungriddedLBound, i_ungriddedUBound;
     
   // initialize return code
   *rc = ESMF_SUCCESS;
@@ -135,21 +135,21 @@ void myInitInC(ESMC_GridComp gcomp, ESMC_State importState,
   // Setup gridToFieldMap    
   gridToFieldMap = (int *)malloc(sizeof(int));
   gridToFieldMap[0] = 1;
-  *rc = ESMC_InterfaceIntSet(&i_gridToFieldMap, gridToFieldMap, 1);
+  *rc = ESMC_InterArrayIntSet(&i_gridToFieldMap, gridToFieldMap, 1);
   if (*rc!=ESMF_SUCCESS) return;  // bail out
   
   // Setup ungriddedLBound    
   ungriddedLBound = (int *)malloc(2*sizeof(int));
   ungriddedLBound[0] = 1;
   ungriddedLBound[1] = 1;
-  *rc = ESMC_InterfaceIntSet(&i_ungriddedLBound, ungriddedLBound, 2);
+  *rc = ESMC_InterArrayIntSet(&i_ungriddedLBound, ungriddedLBound, 2);
   if (*rc!=ESMF_SUCCESS) return;  // bail out
 
   // Setup ungriddedUBound    
   ungriddedUBound = (int *)malloc(2*sizeof(int));
   ungriddedUBound[0] = 2;
   ungriddedUBound[1] = 3;
-  *rc = ESMC_InterfaceIntSet(&i_ungriddedUBound, ungriddedUBound, 2);
+  *rc = ESMC_InterArrayIntSet(&i_ungriddedUBound, ungriddedUBound, 2);
   if (*rc!=ESMF_SUCCESS) return;  // bail out
 
   // Finally create Field  

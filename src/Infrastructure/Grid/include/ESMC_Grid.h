@@ -52,13 +52,13 @@ typedef struct{
 
 
 //------------------------------------------------------------------------------
-//TODO: InterfaceInt should be passed by value when ticket 3613642 is resolved
+//TODO: InterArray should be passed by value when ticket 3613642 is resolved
 //BOP
 // !IROUTINE: ESMC_GridCreateNoPeriDim - Create a Grid with no periodic dimensions
 //
 // !INTERFACE:
 ESMC_Grid ESMC_GridCreateNoPeriDim(
-  ESMC_InterfaceInt *maxIndex,            // in
+  ESMC_InterArrayInt *maxIndex,           // in
   enum ESMC_CoordSys_Flag *coordSys,      // in
   enum ESMC_TypeKind_Flag *coordTypeKind, // in
   enum ESMC_IndexFlag *indexflag,         // in
@@ -92,13 +92,13 @@ ESMC_Grid ESMC_GridCreateNoPeriDim(
 //-----------------------------------------------------------------------------
 
 //------------------------------------------------------------------------------
-//TODO: InterfaceInt should be passed by value when ticket 3613642 is resolved
+//TODO: InterArray should be passed by value when ticket 3613642 is resolved
 //BOP
 // !IROUTINE: ESMC_GridCreate1PeriDim - Create a Grid with 1 periodic dimension
 //
 // !INTERFACE:
 ESMC_Grid ESMC_GridCreate1PeriDim(
-  ESMC_InterfaceInt *maxIndex,            // in
+  ESMC_InterArrayInt *maxIndex,           // in
   int *periodicDim,                       // in
   int *poleDim,                           // in
   enum ESMC_CoordSys_Flag *coordSys,      // in

@@ -102,14 +102,14 @@ extern "C" {
   void FTN_X(c_esmc_gridcreatefromdistgrid)(ESMCI::Grid **ptr, 
     int *nameLen, char *name, ESMC_TypeKind_Flag *coordTypeKind, 
 					  ESMCI::DistGrid **distgrid,
-					  ESMCI::InterfaceInt<int> *distgridToGridMapArg, 
+					  ESMCI::InterArray<int> *distgridToGridMapArg, 
                                           ESMC_CoordSys_Flag *coordSys, 
-					  ESMCI::InterfaceInt<int> *coordDimCountArg,
-					  ESMCI::InterfaceInt<int> *coordDimMapArg,		  
-					  ESMCI::InterfaceInt<int> *gridEdgeLWidthArg,    	  
-					  ESMCI::InterfaceInt<int> *gridEdgeUWidthArg,    	  
-					  ESMCI::InterfaceInt<int> *gridAlignArg,		  
-					  ESMCI::InterfaceInt<int> *gridMemLBoundArg,		  
+					  ESMCI::InterArray<int> *coordDimCountArg,
+					  ESMCI::InterArray<int> *coordDimMapArg,		  
+					  ESMCI::InterArray<int> *gridEdgeLWidthArg,    	  
+					  ESMCI::InterArray<int> *gridEdgeUWidthArg,    	  
+					  ESMCI::InterArray<int> *gridAlignArg,		  
+					  ESMCI::InterArray<int> *gridMemLBoundArg,		  
 					  ESMC_IndexFlag *indexflag,
                                           int *destroyDistgridArg, 
                                           int *destroyDELayoutArg, 
@@ -179,14 +179,14 @@ extern "C" {
   void FTN_X(c_esmc_gridcreatedistgridarb)(ESMCI::Grid **ptr, 
                                          int *nameLen, char *name, ESMC_TypeKind_Flag *coordTypeKind, 
                                          ESMCI::DistGrid **distgrid,
-                                         ESMCI::InterfaceInt<int> *distDimArg, 
+                                         ESMCI::InterArray<int> *distDimArg, 
                                          int *arbDim,   
                                          ESMC_CoordSys_Flag *coordSys, 
-                                         ESMCI::InterfaceInt<int> *coordDimCountArg,
-                                         ESMCI::InterfaceInt<int> *coordDimMapArg,		  
-                                         ESMCI::InterfaceInt<int> *minIndexArg, 
-                                         ESMCI::InterfaceInt<int> *maxIndexArg,
-                                         ESMCI::InterfaceInt<int> *localArbIndexArg, 
+                                         ESMCI::InterArray<int> *coordDimCountArg,
+                                         ESMCI::InterArray<int> *coordDimMapArg,		  
+                                         ESMCI::InterArray<int> *minIndexArg, 
+                                         ESMCI::InterArray<int> *maxIndexArg,
+                                         ESMCI::InterArray<int> *localArbIndexArg, 
                                          int *localArbIndexCount, 
                                          int *destroyDistgridArg, 
                                          int *destroyDELayoutArg, 
@@ -235,16 +235,16 @@ void c_esmc_grid_get_from_proto(ESMCI::Grid **_grid,
                             int *_tileCount,
                             ESMCI::DistGrid **_distgrid,
                             int *_staggerLocCount, 
-                            ESMCI::InterfaceInt<int> *_distgridToGridMap, 
+                            ESMCI::InterArray<int> *_distgridToGridMap, 
                             int *_coordSys, 
-                            ESMCI::InterfaceInt<int> *_coordDimCount,
+                            ESMCI::InterArray<int> *_coordDimCount,
                             int *_arbDim,
                             int *_rank,
                             int *_arbDimCount,
-                            ESMCI::InterfaceInt<int> *_coordDimMap,		  
-                            ESMCI::InterfaceInt<int> *_gridEdgeLWidth, 	  
-                            ESMCI::InterfaceInt<int> *_gridEdgeUWidth,   
-                            ESMCI::InterfaceInt<int> *_gridAlign,		  
+                            ESMCI::InterArray<int> *_coordDimMap,		  
+                            ESMCI::InterArray<int> *_gridEdgeLWidth, 	  
+                            ESMCI::InterArray<int> *_gridEdgeUWidth,   
+                            ESMCI::InterArray<int> *_gridAlign,		  
                             ESMC_IndexFlag *_indexflag,
                             int *_localDECount,
                             int *_rc){
@@ -448,16 +448,16 @@ void c_esmc_grid_get_from_proto(ESMCI::Grid **_grid,
                              int *_tileCount,
                              ESMCI::DistGrid **_distgrid,
                              int *_staggerLocCount, 
-                             ESMCI::InterfaceInt<int> *_distgridToGridMap, 
+                             ESMCI::InterArray<int> *_distgridToGridMap, 
                              int *_coordSys, 
-                             ESMCI::InterfaceInt<int> *_coordDimCount,
+                             ESMCI::InterArray<int> *_coordDimCount,
                              int *_arbDim,
                              int *_rank,
                              int *_arbDimCount,
-                             ESMCI::InterfaceInt<int> *_coordDimMap,		  
-                             ESMCI::InterfaceInt<int> *_gridEdgeLWidth, 	  
-                             ESMCI::InterfaceInt<int> *_gridEdgeUWidth,   
-                             ESMCI::InterfaceInt<int> *_gridAlign,		  
+                             ESMCI::InterArray<int> *_coordDimMap,		  
+                             ESMCI::InterArray<int> *_gridEdgeLWidth, 	  
+                             ESMCI::InterArray<int> *_gridEdgeUWidth,   
+                             ESMCI::InterArray<int> *_gridAlign,		  
                              ESMC_IndexFlag *_indexflag,
                              int *_localDECount,
                              int *_rc){
@@ -740,8 +740,8 @@ void c_esmc_grid_get_from_proto(ESMCI::Grid **_grid,
 
   void FTN_X(c_esmc_gridgetindex)(ESMCI::Grid **grid, 
                                 int *tile, 
-				ESMCI::InterfaceInt<int> *minIndex,
-				ESMCI::InterfaceInt<int> *maxIndex,
+				ESMCI::InterArray<int> *minIndex,
+				ESMCI::InterArray<int> *maxIndex,
                                 int *rc) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_gridgetindex()"
@@ -797,7 +797,7 @@ void c_esmc_grid_get_from_proto(ESMCI::Grid **_grid,
   ///////////////////////////////////////////////////////////////////////////////////
 
   void FTN_X(c_esmc_gridconvertindex)(ESMCI::Grid **grid, 
-				    ESMCI::InterfaceInt<int> *gridindex,
+				    ESMCI::InterArray<int> *gridindex,
 				    int *index1D,
 				    int *rc) {
 #undef  ESMC_METHOD
@@ -949,10 +949,10 @@ void c_esmc_grid_get_from_proto(ESMCI::Grid **_grid,
 
   void FTN_X(c_esmc_gridaddcoord)(ESMCI::Grid **grid, 
                                          int *staggerloc, 
-                                         ESMCI::InterfaceInt<int> *staggerEdgeLWidthArg, 
-                                         ESMCI::InterfaceInt<int> *staggerEdgeUWidthArg, 
-                                         ESMCI::InterfaceInt<int> *staggerAlignArg, 
-                                         ESMCI::InterfaceInt<int> *staggerMemLBoundArg, 
+                                         ESMCI::InterArray<int> *staggerEdgeLWidthArg, 
+                                         ESMCI::InterArray<int> *staggerEdgeUWidthArg, 
+                                         ESMCI::InterArray<int> *staggerAlignArg, 
+                                         ESMCI::InterArray<int> *staggerMemLBoundArg, 
                                          int *rc) {
     int localrc;
 #undef  ESMC_METHOD
@@ -996,9 +996,9 @@ void c_esmc_grid_get_from_proto(ESMCI::Grid **_grid,
                                          int *arrayCount, 
                                          ESMCI::Array **arrayList,
                                          ESMCI::CopyFlag *docopy, 
-                                         ESMCI::InterfaceInt<int> *staggerEdgeLWidthArg, 
-                                         ESMCI::InterfaceInt<int> *staggerEdgeUWidthArg, 
-                                         ESMCI::InterfaceInt<int> *staggerAlignArg, 
+                                         ESMCI::InterArray<int> *staggerEdgeLWidthArg, 
+                                         ESMCI::InterArray<int> *staggerEdgeUWidthArg, 
+                                         ESMCI::InterArray<int> *staggerAlignArg, 
                                          int *rc) {
     int localrc;
 #undef  ESMC_METHOD
@@ -1027,10 +1027,10 @@ void c_esmc_grid_get_from_proto(ESMCI::Grid **_grid,
                                          int *staggerloc, 
                                          int *item,
 			                 ESMC_TypeKind_Flag *itemTypeKind,   
-                                         ESMCI::InterfaceInt<int> *staggerEdgeLWidthArg, 
-                                         ESMCI::InterfaceInt<int> *staggerEdgeUWidthArg, 
-                                         ESMCI::InterfaceInt<int> *staggerAlignArg, 
-			                 ESMCI::InterfaceInt<int> *staggerMemLBoundArg, 
+                                         ESMCI::InterArray<int> *staggerEdgeLWidthArg, 
+                                         ESMCI::InterArray<int> *staggerEdgeUWidthArg, 
+                                         ESMCI::InterArray<int> *staggerAlignArg, 
+			                 ESMCI::InterArray<int> *staggerMemLBoundArg, 
                                          int *rc) {
     int localrc;
 #undef  ESMC_METHOD
@@ -1098,19 +1098,19 @@ void c_esmc_grid_get_from_proto(ESMCI::Grid **_grid,
   void FTN_X(c_esmc_gridsetfromdistgrid)(ESMCI::Grid **grid, 
     int *nameLen, char *name, ESMC_TypeKind_Flag *coordTypeKind, 
                                        ESMCI::DistGrid **distgrid,
-                                       ESMCI::InterfaceInt<int> *distgridToGridMapArg, 
-                                       ESMCI::InterfaceInt<int> *distDimArg, 
+                                       ESMCI::InterArray<int> *distgridToGridMapArg, 
+                                       ESMCI::InterArray<int> *distDimArg, 
                                        ESMC_CoordSys_Flag *coordSys, 
-                                       ESMCI::InterfaceInt<int> *coordDimCountArg,
-                                       ESMCI::InterfaceInt<int> *coordDimMapArg,		  
-                                       ESMCI::InterfaceInt<int> *minIndexArg,		  
-                                       ESMCI::InterfaceInt<int> *maxIndexArg,		  
-                                       ESMCI::InterfaceInt<int> *localArbIndexArg,		  
+                                       ESMCI::InterArray<int> *coordDimCountArg,
+                                       ESMCI::InterArray<int> *coordDimMapArg,		  
+                                       ESMCI::InterArray<int> *minIndexArg,		  
+                                       ESMCI::InterArray<int> *maxIndexArg,		  
+                                       ESMCI::InterArray<int> *localArbIndexArg,		  
                                        int *localArbIndexCount,		  
-                                       ESMCI::InterfaceInt<int> *gridEdgeLWidthArg,    	  
-                                       ESMCI::InterfaceInt<int> *gridEdgeUWidthArg,    	  
-                                       ESMCI::InterfaceInt<int> *gridAlignArg,		  
-                                       ESMCI::InterfaceInt<int> *gridMemLBoundArg,		  
+                                       ESMCI::InterArray<int> *gridEdgeLWidthArg,    	  
+                                       ESMCI::InterArray<int> *gridEdgeUWidthArg,    	  
+                                       ESMCI::InterArray<int> *gridAlignArg,		  
+                                       ESMCI::InterArray<int> *gridMemLBoundArg,		  
                                        ESMC_IndexFlag *indexflag,
                                        int *destroyDistgridArg, 
                                        int *destroyDELayoutArg, 
@@ -1194,15 +1194,15 @@ void c_esmc_grid_get_from_proto(ESMCI::Grid **_grid,
   
   void FTN_X(c_esmc_gridgetcoordbounds)(ESMCI::Grid **_grid, int *_localDE,
                                         int *_coord, int *_staggerloc,  
-                                        ESMCI::InterfaceInt<int> *_exclusiveLBound,
-                                        ESMCI::InterfaceInt<int> *_exclusiveUBound,
-                                        ESMCI::InterfaceInt<int> *_exclusiveCount,
-                                        ESMCI::InterfaceInt<int> *_computationalLBound,
-                                        ESMCI::InterfaceInt<int> *_computationalUBound,
-                                        ESMCI::InterfaceInt<int> *_computationalCount,
-                                        ESMCI::InterfaceInt<int> *_totalLBound, 
-                                        ESMCI::InterfaceInt<int> *_totalUBound,
-                                        ESMCI::InterfaceInt<int> *_totalCount,
+                                        ESMCI::InterArray<int> *_exclusiveLBound,
+                                        ESMCI::InterArray<int> *_exclusiveUBound,
+                                        ESMCI::InterArray<int> *_exclusiveCount,
+                                        ESMCI::InterArray<int> *_computationalLBound,
+                                        ESMCI::InterArray<int> *_computationalUBound,
+                                        ESMCI::InterArray<int> *_computationalCount,
+                                        ESMCI::InterArray<int> *_totalLBound, 
+                                        ESMCI::InterArray<int> *_totalUBound,
+                                        ESMCI::InterArray<int> *_totalCount,
                                         int *_rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_gridgetcoordbounds()"
@@ -1709,15 +1709,15 @@ void c_esmc_grid_get_from_proto(ESMCI::Grid **_grid,
   
   void FTN_X(c_esmc_gridgetitembounds)(ESMCI::Grid **_grid, int *_localDE,
    				        int *_staggerloc, int *_item, 
-                                        ESMCI::InterfaceInt<int> *_exclusiveLBound,
-                                        ESMCI::InterfaceInt<int> *_exclusiveUBound,
-                                        ESMCI::InterfaceInt<int> *_exclusiveCount,
-                                        ESMCI::InterfaceInt<int> *_computationalLBound,
-                                        ESMCI::InterfaceInt<int> *_computationalUBound,
-                                        ESMCI::InterfaceInt<int> *_computationalCount,
-                                        ESMCI::InterfaceInt<int> *_totalLBound, 
-                                        ESMCI::InterfaceInt<int> *_totalUBound,
-                                        ESMCI::InterfaceInt<int> *_totalCount,
+                                        ESMCI::InterArray<int> *_exclusiveLBound,
+                                        ESMCI::InterArray<int> *_exclusiveUBound,
+                                        ESMCI::InterArray<int> *_exclusiveCount,
+                                        ESMCI::InterArray<int> *_computationalLBound,
+                                        ESMCI::InterArray<int> *_computationalUBound,
+                                        ESMCI::InterArray<int> *_computationalCount,
+                                        ESMCI::InterArray<int> *_totalLBound, 
+                                        ESMCI::InterArray<int> *_totalUBound,
+                                        ESMCI::InterArray<int> *_totalCount,
                                         int *_rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_gridgetitembounds()"
@@ -2201,12 +2201,12 @@ void c_esmc_grid_get_from_proto(ESMCI::Grid **_grid,
   
   void FTN_X(c_esmc_gridgetplocaldepsloc)(ESMCI::Grid **_grid, 
 					int *_localDE, int *_staggerloc,  
-                                        ESMCI::InterfaceInt<int> *_exclusiveLBound,
-                                        ESMCI::InterfaceInt<int> *_exclusiveUBound,
-                                        ESMCI::InterfaceInt<int> *_exclusiveCount,
-                                        ESMCI::InterfaceInt<int> *_computationalLBound,
-                                        ESMCI::InterfaceInt<int> *_computationalUBound,
-                                        ESMCI::InterfaceInt<int> *_computationalCount,
+                                        ESMCI::InterArray<int> *_exclusiveLBound,
+                                        ESMCI::InterArray<int> *_exclusiveUBound,
+                                        ESMCI::InterArray<int> *_exclusiveCount,
+                                        ESMCI::InterArray<int> *_computationalLBound,
+                                        ESMCI::InterArray<int> *_computationalUBound,
+                                        ESMCI::InterArray<int> *_computationalCount,
                                         int *_rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_gridgetplocaldepsloc()"
@@ -2459,7 +2459,7 @@ void c_esmc_grid_get_from_proto(ESMCI::Grid **_grid,
                                    int *_isLBound,
                                    int *_isUBound,
                                    int *_localArbIndexCount,			
-                                   ESMCI::InterfaceInt<int> *_localArbIndex,
+                                   ESMCI::InterArray<int> *_localArbIndex,
                                    int *_rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_gridgetplocaldepsloc()"
@@ -2585,10 +2585,10 @@ void c_esmc_grid_get_from_proto(ESMCI::Grid **_grid,
   void FTN_X(c_esmc_gridgetpsloc)(ESMCI::Grid **_grid, 
                                   int *_staggerloc,  
                                   ESMCI::DistGrid **_staggerdistgrid,
-                                  ESMCI::InterfaceInt<int> *_staggerEdgeLWidth,
-                                  ESMCI::InterfaceInt<int> *_staggerEdgeUWidth,
-                                  ESMCI::InterfaceInt<int> *_staggerAlign,
-                                  ESMCI::InterfaceInt<int> *_staggerLBound,
+                                  ESMCI::InterArray<int> *_staggerEdgeLWidth,
+                                  ESMCI::InterArray<int> *_staggerEdgeUWidth,
+                                  ESMCI::InterArray<int> *_staggerAlign,
+                                  ESMCI::InterArray<int> *_staggerLBound,
                                   int *_rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_gridgetpsloc()"
@@ -2762,8 +2762,8 @@ void c_esmc_grid_get_from_proto(ESMCI::Grid **_grid,
   void FTN_X(c_esmc_gridgetpslocptile)(ESMCI::Grid **_grid, 
                                 int *_tile,
 				int *_staggerloc,  
-                                ESMCI::InterfaceInt<int> *_minIndex,
-                                ESMCI::InterfaceInt<int> *_maxIndex,
+                                ESMCI::InterArray<int> *_minIndex,
+                                ESMCI::InterArray<int> *_maxIndex,
                                 int *_rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_gridgetpslocptile()"
@@ -2949,12 +2949,12 @@ void c_esmc_grid_get_from_proto(ESMCI::Grid **_grid,
 
   // - ESMF-public methods:        
   void FTN_X(c_esmc_gridluadefault)(int *dimCount, 
-                                  ESMCI::InterfaceInt<int> *gridEdgeLWidthIn,    	  
-                                  ESMCI::InterfaceInt<int> *gridEdgeUWidthIn,    	  
-                                  ESMCI::InterfaceInt<int> *gridAlignIn,		  
-                                  ESMCI::InterfaceInt<int> *gridEdgeLWidthOut,    	  
-                                  ESMCI::InterfaceInt<int> *gridEdgeUWidthOut,    	  
-                                  ESMCI::InterfaceInt<int> *gridAlignOut,		  
+                                  ESMCI::InterArray<int> *gridEdgeLWidthIn,    	  
+                                  ESMCI::InterArray<int> *gridEdgeUWidthIn,    	  
+                                  ESMCI::InterArray<int> *gridAlignIn,		  
+                                  ESMCI::InterArray<int> *gridEdgeLWidthOut,    	  
+                                  ESMCI::InterArray<int> *gridEdgeUWidthOut,    	  
+                                  ESMCI::InterArray<int> *gridAlignOut,		  
                                   int *rc){
     int localrc;
 #undef  ESMC_METHOD
@@ -3311,25 +3311,25 @@ void c_esmc_grid_get_from_proto(ESMCI::Grid **_grid,
 
    int dimCount=2;
 
-   // Create ESMCI::InterfaceInt<int>s holding stagger padding
+   // Create ESMCI::InterArray<int>s holding stagger padding
    int extent[1];
    extent[0]=dimCount;
    int *minIndexIntIntArray=new int[dimCount];
    minIndexIntIntArray[0]=1;
    minIndexIntIntArray[1]=1;
-   ESMCI::InterfaceInt<int> *minIndexIntInt=new ESMCI::InterfaceInt<int>(minIndexIntIntArray,1,extent);
+   ESMCI::InterArray<int> *minIndexIntInt=new ESMCI::InterArray<int>(minIndexIntIntArray,1,extent);
    
    extent[0]=dimCount;
    int *maxIndexIntIntArray=new int[dimCount];
    maxIndexIntIntArray[0]=20;
    maxIndexIntIntArray[1]=20;
-   ESMCI::InterfaceInt<int> *maxIndexIntInt=new ESMCI::InterfaceInt<int>(maxIndexIntIntArray,1,extent);
+   ESMCI::InterArray<int> *maxIndexIntInt=new ESMCI::InterArray<int>(maxIndexIntIntArray,1,extent);
 
    extent[0]=dimCount;
    int *regDecompIntIntArray=new int[dimCount];
    regDecompIntIntArray[0]=4;
    regDecompIntIntArray[1]=1;
-   ESMCI::InterfaceInt<int> *regDecompIntInt=new ESMCI::InterfaceInt<int>(regDecompIntIntArray,1,extent);
+   ESMCI::InterArray<int> *regDecompIntInt=new ESMCI::InterArray<int>(regDecompIntIntArray,1,extent);
    
    ESMC_IndexFlag indexflag=ESMC_INDEX_GLOBAL;
 
@@ -3339,11 +3339,11 @@ void c_esmc_grid_get_from_proto(ESMCI::Grid **_grid,
   regDecompIntInt,                // (in)
   (ESMCI::DecompFlag *)NULL,                 // (in)
   0,                    // (in)
-  (ESMCI::InterfaceInt<int> *)NULL,      // (in)
-  (ESMCI::InterfaceInt<int> *)NULL,       // (in)
-  (ESMCI::InterfaceInt<int> *)NULL,              // (in)
+  (ESMCI::InterArray<int> *)NULL,      // (in)
+  (ESMCI::InterArray<int> *)NULL,       // (in)
+  (ESMCI::InterArray<int> *)NULL,              // (in)
   &indexflag,              // (in)
-  (ESMCI::InterfaceInt<int> *)NULL,           // (in)
+  (ESMCI::InterArray<int> *)NULL,           // (in)
   (ESMCI::DELayout *)NULL,                     // (in)
   (ESMCI::VM *)NULL,                                 // (in)
   &localrc);
@@ -3366,18 +3366,18 @@ void c_esmc_grid_get_from_proto(ESMCI::Grid **_grid,
  }
     
 
-// Create ESMCI::InterfaceInt<int>s holding stagger padding
+// Create ESMCI::InterArray<int>s holding stagger padding
  extent[0]=dimCount;
  int *edgeLWidthIntIntArray=new int[dimCount];
  edgeLWidthIntIntArray[0]=1;
  edgeLWidthIntIntArray[1]=1;
- ESMCI::InterfaceInt<int> *edgeLWidthIntInt=new ESMCI::InterfaceInt<int>(edgeLWidthIntIntArray,1,extent);
+ ESMCI::InterArray<int> *edgeLWidthIntInt=new ESMCI::InterArray<int>(edgeLWidthIntIntArray,1,extent);
 
  extent[0]=dimCount;
  int *edgeUWidthIntIntArray=new int[dimCount];
  edgeUWidthIntIntArray[0]=0;
  edgeUWidthIntIntArray[1]=0;
- ESMCI::InterfaceInt<int> *edgeUWidthIntInt=new ESMCI::InterfaceInt<int>(edgeUWidthIntIntArray,1,extent);
+ ESMCI::InterArray<int> *edgeUWidthIntInt=new ESMCI::InterArray<int>(edgeUWidthIntIntArray,1,extent);
 
  
  // Create stagger distgrid w no poles with this padding

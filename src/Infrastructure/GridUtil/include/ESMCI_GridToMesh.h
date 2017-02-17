@@ -35,7 +35,7 @@ class Grid;
 class Array;
 
 // Create a mesh from the given grid.
- void GridToMesh(const ESMCI::Grid &grid, int staggerLoc, ESMCI::Mesh &mesh, const std::vector<ESMCI::Array*> &arrays, ESMCI::InterfaceInt<int> *maskValuesArg, int *regridConserve);
+ void GridToMesh(const ESMCI::Grid &grid, int staggerLoc, ESMCI::Mesh &mesh, const std::vector<ESMCI::Array*> &arrays, ESMCI::InterArray<int> *maskValuesArg, int *regridConserve);
 
  void CpMeshDataToArray(Grid &grid, int staggerLoc, ESMCI::Mesh &mesh, ESMCI::Array &array, MEField<> *dataToArray);
 
@@ -44,7 +44,7 @@ class Array;
  void PutElemAreaIntoArray(Grid &grid, int staggerLoc, ESMCI::Mesh &mesh, ESMCI::Array &array);
 
 #endif
- void GridToPointList(ESMCI::Grid &grid, ESMC_StaggerLoc staggerLoc, ESMCI::InterfaceInt<int> *maskValuesArg, ESMCI::PointList **_pl, int *localrc);
+ void GridToPointList(ESMCI::Grid &grid, ESMC_StaggerLoc staggerLoc, ESMCI::InterArray<int> *maskValuesArg, ESMCI::PointList **_pl, int *localrc);
 
 } // namespace
 

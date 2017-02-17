@@ -1523,20 +1523,20 @@ TypeKindRankDeclarationMacro(ArrayCreateAsmdShapArb)
 !
 !EOP
 !------------------------------------------------------------------------------
-    integer                 :: localrc    ! local return code
-    type(ESMF_Array)        :: array      ! opaque pointer to new C++ Array
-    integer                 :: localarrayCount, i         ! helper variable
-    type(ESMF_InterfaceInt) :: distgridToArrayMapArg  ! helper variable
-    type(ESMF_InterfaceInt) :: computationalEdgeLWidthArg ! helper variable
-    type(ESMF_InterfaceInt) :: computationalEdgeUWidthArg ! helper variable
-    type(ESMF_InterfaceInt) :: computationalLWidthArg ! helper variable
-    type(ESMF_InterfaceInt) :: computationalUWidthArg ! helper variable
-    type(ESMF_InterfaceInt) :: totalLWidthArg         ! helper variable
-    type(ESMF_InterfaceInt) :: totalUWidthArg         ! helper variable
-    type(ESMF_InterfaceInt) :: undistLBoundArg        ! helper variable
-    type(ESMF_InterfaceInt) :: undistUBoundArg        ! helper variable
+    integer               :: localrc    ! local return code
+    type(ESMF_Array)      :: array      ! opaque pointer to new C++ Array
+    integer               :: localarrayCount, i         ! helper variable
+    type(ESMF_InterArray) :: distgridToArrayMapArg  ! helper variable
+    type(ESMF_InterArray) :: computationalEdgeLWidthArg ! helper variable
+    type(ESMF_InterArray) :: computationalEdgeUWidthArg ! helper variable
+    type(ESMF_InterArray) :: computationalLWidthArg ! helper variable
+    type(ESMF_InterArray) :: computationalUWidthArg ! helper variable
+    type(ESMF_InterArray) :: totalLWidthArg         ! helper variable
+    type(ESMF_InterArray) :: totalUWidthArg         ! helper variable
+    type(ESMF_InterArray) :: undistLBoundArg        ! helper variable
+    type(ESMF_InterArray) :: undistUBoundArg        ! helper variable
     type(ESMF_Pointer), allocatable :: localarrayPointerList(:) ! helper variable
-    integer                 :: len_name               ! helper variable
+    integer               :: len_name               ! helper variable
     type(ESMF_DataCopy_Flag)     :: datacopyflag_opt           ! helper variable
 
     ! Initialize return code; assume failure until success is certain
@@ -1578,36 +1578,36 @@ TypeKindRankDeclarationMacro(ArrayCreateAsmdShapArb)
 !    endif
     
     ! Deal with (optional) array arguments
-    distgridToArrayMapArg = ESMF_InterfaceIntCreate(distgridToArrayMap, &
+    distgridToArrayMapArg = ESMF_InterArrayCreate(distgridToArrayMap, &
       rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     computationalEdgeLWidthArg = &
-      ESMF_InterfaceIntCreate(computationalEdgeLWidth, rc=localrc)
+      ESMF_InterArrayCreate(computationalEdgeLWidth, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     computationalEdgeUWidthArg = &
-      ESMF_InterfaceIntCreate(computationalEdgeUWidth, rc=localrc)
+      ESMF_InterArrayCreate(computationalEdgeUWidth, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    computationalLWidthArg = ESMF_InterfaceIntCreate(computationalLWidth, &
+    computationalLWidthArg = ESMF_InterArrayCreate(computationalLWidth, &
       rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    computationalUWidthArg = ESMF_InterfaceIntCreate(computationalUWidth, &
+    computationalUWidthArg = ESMF_InterArrayCreate(computationalUWidth, &
       rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    totalLWidthArg = ESMF_InterfaceIntCreate(totalLWidth, rc=localrc)
+    totalLWidthArg = ESMF_InterArrayCreate(totalLWidth, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    totalUWidthArg = ESMF_InterfaceIntCreate(totalUWidth, rc=localrc)
+    totalUWidthArg = ESMF_InterArrayCreate(totalUWidth, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    undistLBoundArg = ESMF_InterfaceIntCreate(undistLBound, rc=localrc)
+    undistLBoundArg = ESMF_InterArrayCreate(undistLBound, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    undistUBoundArg = ESMF_InterfaceIntCreate(undistUBound, rc=localrc)
+    undistUBoundArg = ESMF_InterArrayCreate(undistUBound, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -1640,31 +1640,31 @@ TypeKindRankDeclarationMacro(ArrayCreateAsmdShapArb)
       
     ! Garbage collection
     deallocate(localarrayPointerList)
-    call ESMF_InterfaceIntDestroy(distgridToArrayMapArg, rc=localrc)
+    call ESMF_InterArrayDestroy(distgridToArrayMapArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(computationalEdgeLWidthArg, rc=localrc)
+    call ESMF_InterArrayDestroy(computationalEdgeLWidthArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(computationalEdgeUWidthArg, rc=localrc)
+    call ESMF_InterArrayDestroy(computationalEdgeUWidthArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(computationalLWidthArg, rc=localrc)
+    call ESMF_InterArrayDestroy(computationalLWidthArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(computationalUWidthArg, rc=localrc)
+    call ESMF_InterArrayDestroy(computationalUWidthArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(totalLWidthArg, rc=localrc)
+    call ESMF_InterArrayDestroy(totalLWidthArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(totalUWidthArg, rc=localrc)
+    call ESMF_InterArrayDestroy(totalUWidthArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(undistLBoundArg, rc=localrc)
+    call ESMF_InterArrayDestroy(undistLBoundArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(undistUBoundArg, rc=localrc)
+    call ESMF_InterArrayDestroy(undistUBoundArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     
@@ -2400,18 +2400,18 @@ TypeKindRankDeclarationMacro(ArrayCreateAsmdShapArb)
 !
 !EOP
 !------------------------------------------------------------------------------
-    integer                 :: localrc    ! local return code
-    type(ESMF_Array)        :: array      ! opaque pointer to new C++ Array
-    type(ESMF_InterfaceInt) :: distgridToArrayMapArg      ! helper variable
-    type(ESMF_InterfaceInt) :: computationalEdgeLWidthArg ! helper variable
-    type(ESMF_InterfaceInt) :: computationalEdgeUWidthArg ! helper variable
-    type(ESMF_InterfaceInt) :: computationalLWidthArg ! helper variable
-    type(ESMF_InterfaceInt) :: computationalUWidthArg ! helper variable
-    type(ESMF_InterfaceInt) :: totalLWidthArg         ! helper variable
-    type(ESMF_InterfaceInt) :: totalUWidthArg         ! helper variable
-    type(ESMF_InterfaceInt) :: undistLBoundArg        ! helper variable
-    type(ESMF_InterfaceInt) :: undistUBoundArg        ! helper variable
-    integer                 :: len_name               ! helper variable
+    integer               :: localrc    ! local return code
+    type(ESMF_Array)      :: array      ! opaque pointer to new C++ Array
+    type(ESMF_InterArray) :: distgridToArrayMapArg      ! helper variable
+    type(ESMF_InterArray) :: computationalEdgeLWidthArg ! helper variable
+    type(ESMF_InterArray) :: computationalEdgeUWidthArg ! helper variable
+    type(ESMF_InterArray) :: computationalLWidthArg ! helper variable
+    type(ESMF_InterArray) :: computationalUWidthArg ! helper variable
+    type(ESMF_InterArray) :: totalLWidthArg         ! helper variable
+    type(ESMF_InterArray) :: totalUWidthArg         ! helper variable
+    type(ESMF_InterArray) :: undistLBoundArg        ! helper variable
+    type(ESMF_InterArray) :: undistUBoundArg        ! helper variable
+    integer               :: len_name               ! helper variable
 
     ! Initialize return code; assume failure until success is certain
     localrc = ESMF_RC_NOT_IMPL
@@ -2432,36 +2432,36 @@ TypeKindRankDeclarationMacro(ArrayCreateAsmdShapArb)
     endif
     
     ! Deal with (optional) array arguments
-    distgridToArrayMapArg = ESMF_InterfaceIntCreate(distgridToArrayMap, &
+    distgridToArrayMapArg = ESMF_InterArrayCreate(distgridToArrayMap, &
       rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     computationalEdgeLWidthArg = &
-      ESMF_InterfaceIntCreate(computationalEdgeLWidth, rc=localrc)
+      ESMF_InterArrayCreate(computationalEdgeLWidth, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     computationalEdgeUWidthArg = &
-      ESMF_InterfaceIntCreate(computationalEdgeUWidth, rc=localrc)
+      ESMF_InterArrayCreate(computationalEdgeUWidth, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    computationalLWidthArg = ESMF_InterfaceIntCreate(computationalLWidth, &
+    computationalLWidthArg = ESMF_InterArrayCreate(computationalLWidth, &
       rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    computationalUWidthArg = ESMF_InterfaceIntCreate(computationalUWidth, &
+    computationalUWidthArg = ESMF_InterArrayCreate(computationalUWidth, &
       rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    totalLWidthArg = ESMF_InterfaceIntCreate(totalLWidth, rc=localrc)
+    totalLWidthArg = ESMF_InterArrayCreate(totalLWidth, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    totalUWidthArg = ESMF_InterfaceIntCreate(totalUWidth, rc=localrc)
+    totalUWidthArg = ESMF_InterArrayCreate(totalUWidth, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    undistLBoundArg = ESMF_InterfaceIntCreate(undistLBound, rc=localrc)
+    undistLBoundArg = ESMF_InterArrayCreate(undistLBound, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    undistUBoundArg = ESMF_InterfaceIntCreate(undistUBound, rc=localrc)
+    undistUBoundArg = ESMF_InterArrayCreate(undistUBound, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
       
@@ -2493,31 +2493,31 @@ TypeKindRankDeclarationMacro(ArrayCreateAsmdShapArb)
     endif
       
     ! Garbage collection
-    call ESMF_InterfaceIntDestroy(distgridToArrayMapArg, rc=localrc)
+    call ESMF_InterArrayDestroy(distgridToArrayMapArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(computationalEdgeLWidthArg, rc=localrc)
+    call ESMF_InterArrayDestroy(computationalEdgeLWidthArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(computationalEdgeUWidthArg, rc=localrc)
+    call ESMF_InterArrayDestroy(computationalEdgeUWidthArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(computationalLWidthArg, rc=localrc)
+    call ESMF_InterArrayDestroy(computationalLWidthArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(computationalUWidthArg, rc=localrc)
+    call ESMF_InterArrayDestroy(computationalUWidthArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(totalLWidthArg, rc=localrc)
+    call ESMF_InterArrayDestroy(totalLWidthArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(totalUWidthArg, rc=localrc)
+    call ESMF_InterArrayDestroy(totalUWidthArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(undistLBoundArg, rc=localrc)
+    call ESMF_InterArrayDestroy(undistLBoundArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(undistUBoundArg, rc=localrc)
+    call ESMF_InterArrayDestroy(undistUBoundArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     
@@ -3085,8 +3085,8 @@ TypeKindRankDeclarationMacro(ArrayCreateAsmdShapArb)
 !
 !EOPI
 !------------------------------------------------------------------------------
-    integer                 :: localrc      ! local return code
-    type(ESMF_InterfaceInt)       :: rimSeqIndexArg ! helper variable
+    integer                 :: localrc        ! local return code
+    type(ESMF_InterArray)   :: rimSeqIndexArg ! helper variable
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
@@ -3096,7 +3096,7 @@ TypeKindRankDeclarationMacro(ArrayCreateAsmdShapArb)
     ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit, array, rc)
     
     ! Deal with (optional) array arguments
-    rimSeqIndexArg = ESMF_InterfaceIntCreate(farray1D=rimSeqIndex, rc=localrc)
+    rimSeqIndexArg = ESMF_InterArrayCreate(farray1D=rimSeqIndex, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -3106,7 +3106,7 @@ TypeKindRankDeclarationMacro(ArrayCreateAsmdShapArb)
       ESMF_CONTEXT, rcToReturn=rc)) return
     
     ! Garbage collection
-    call ESMF_InterfaceIntDestroy(rimSeqIndexArg, rc=localrc)
+    call ESMF_InterArrayDestroy(rimSeqIndexArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 

@@ -43,12 +43,12 @@ void create_grid(ESMC_Grid &grid, double max_x_in, double max_y_in)
   DEG2RAD = 3.141592653589793/180.0;
 
   int *maxIndex;
-  ESMC_InterfaceInt i_maxIndex;
+  ESMC_InterArrayInt i_maxIndex;
   int dimcount = 2;
   maxIndex = (int *)malloc(dimcount*sizeof(int));
   maxIndex[0] = int(max_x);
   maxIndex[1] = int(max_y);
-  ESMC_InterfaceIntSet(&i_maxIndex, maxIndex, dimcount);
+  ESMC_InterArrayIntSet(&i_maxIndex, maxIndex, dimcount);
 
   ESMC_CoordSys_Flag coordsys = ESMC_COORDSYS_CART;
   ESMC_TypeKind_Flag typekind = ESMC_TYPEKIND_R8;
@@ -249,8 +249,8 @@ int main(void){
   //----------------------------------------------------------------------------
   int *maskValues = (int *)malloc(sizeof(int));
   maskValues[0] = 1;
-  ESMC_InterfaceInt i_maskValues;
-  rc = ESMC_InterfaceIntSet(&i_maskValues, maskValues, 1);
+  ESMC_InterArrayInt i_maskValues;
+  rc = ESMC_InterArrayIntSet(&i_maskValues, maskValues, 1);
 
   //----------------------------------------------------------------------------
   ESMC_UnmappedAction_Flag unmappedaction = ESMC_UNMAPPEDACTION_IGNORE;

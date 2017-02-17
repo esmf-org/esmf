@@ -51,8 +51,8 @@ typedef struct{
 //
 // !INTERFACE:
 ESMC_DistGrid ESMC_DistGridCreate(
-  ESMC_InterfaceInt minIndexInterfaceArg,   // in
-  ESMC_InterfaceInt maxIndexInterfaceArg,   // in
+  ESMC_InterArrayInt minIndexInterfaceArg,  // in
+  ESMC_InterArrayInt maxIndexInterfaceArg,  // in
   int *rc                                   // out
 );
 // !RETURN VALUE:

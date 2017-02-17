@@ -79,8 +79,8 @@ extern "C" {
   }
 
   void FTN_X(c_esmc_delayoutcreatedefault)(ESMCI::DELayout **ptr, int *deCount,
-    ESMCI::InterfaceInt<int> *deGrouping, ESMC_Pin_Flag *pinFlag, 
-    ESMCI::InterfaceInt<int> *petList, ESMCI::VM **vm, int *rc){
+    ESMCI::InterArray<int> *deGrouping, ESMC_Pin_Flag *pinFlag, 
+    ESMCI::InterArray<int> *petList, ESMCI::VM **vm, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_delayoutcreatedefault()"
     // Initialize return code; assume routine not implemented
@@ -154,11 +154,11 @@ extern "C" {
   }
 
   void FTN_X(c_esmc_delayoutget)(ESMCI::DELayout **ptr, ESMCI::VM **vm,
-    int *deCount, ESMCI::InterfaceInt<int> *petMap,
-    ESMCI::InterfaceInt<int> *vasMap, ESMC_Logical *oneToOneFlag,
+    int *deCount, ESMCI::InterArray<int> *petMap,
+    ESMCI::InterArray<int> *vasMap, ESMC_Logical *oneToOneFlag,
     ESMC_Pin_Flag *pinFlag, int *localDeCount, 
-    ESMCI::InterfaceInt<int> *localDeToDeMap, int *vasLocalDeCount,
-    ESMCI::InterfaceInt<int> *vasLocalDeToDeMap, int *rc){
+    ESMCI::InterArray<int> *localDeToDeMap, int *vasLocalDeCount,
+    ESMCI::InterArray<int> *vasLocalDeToDeMap, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_delayoutget()"
     // Initialize return code; assume routine not implemented

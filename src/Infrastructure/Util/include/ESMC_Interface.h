@@ -42,10 +42,10 @@ extern "C" {
 // Class declaration type
 typedef struct{
   char shallowMem[80];
-}ESMC_InterfaceInt;
+}ESMC_InterArrayInt;
 
 // Class API
-int ESMC_InterfaceIntSet(ESMC_InterfaceInt *interfaceIntArg,
+int ESMC_InterArrayIntSet(ESMC_InterArrayInt *interArrayIntArg,
   int *arrayArg, int lenArg);
 
 #ifdef __cplusplus

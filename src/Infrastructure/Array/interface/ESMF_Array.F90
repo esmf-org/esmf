@@ -414,9 +414,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !EOP
 !------------------------------------------------------------------------------
-    integer                 :: localrc      ! local return code
-    type(ESMF_InterfaceInt)       :: computationalLWidthArg ! helper variable
-    type(ESMF_InterfaceInt)       :: computationalUWidthArg ! helper variable
+    integer                 :: localrc                ! local return code
+    type(ESMF_InterArray)   :: computationalLWidthArg ! helper variable
+    type(ESMF_InterArray)   :: computationalUWidthArg ! helper variable
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
@@ -434,11 +434,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! Deal with (optional) array arguments
     computationalLWidthArg = &
-      ESMF_InterfaceIntCreate(farray2D=computationalLWidth, rc=localrc)
+      ESMF_InterArrayCreate(farray2D=computationalLWidth, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     computationalUWidthArg = &
-      ESMF_InterfaceIntCreate(farray2D=computationalUWidth, rc=localrc)
+      ESMF_InterArrayCreate(farray2D=computationalUWidth, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -449,10 +449,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ESMF_CONTEXT, rcToReturn=rc)) return
     
     ! Garbage collection
-    call ESMF_InterfaceIntDestroy(computationalLWidthArg, rc=localrc)
+    call ESMF_InterArrayDestroy(computationalLWidthArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(computationalUWidthArg, rc=localrc)
+    call ESMF_InterArrayDestroy(computationalUWidthArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -1018,7 +1018,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer                         :: localrc            ! local return code
     integer(ESMF_KIND_I4), pointer  :: opt_factorList(:)  ! helper variable
     integer                         :: len_factorList     ! helper variable
-    type(ESMF_InterfaceInt)         :: factorIndexListArg ! helper variable
+    type(ESMF_InterArray)           :: factorIndexListArg ! helper variable
     integer                         :: tupleSize, i       ! helper variable
     integer, allocatable            :: transposeFIL(:,:)  ! helper variable
     type(ESMF_Logical)              :: opt_ignoreUnmatched  ! helper variable
@@ -1035,7 +1035,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     len_factorList = size(factorList)
     opt_factorList => factorList
     factorIndexListArg = &
-      ESMF_InterfaceIntCreate(farray2D=factorIndexList, rc=localrc)
+      ESMF_InterArrayCreate(farray2D=factorIndexList, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     
@@ -1051,7 +1051,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ESMF_CONTEXT, rcToReturn=rc)) return
     
     ! Garbage collection
-    call ESMF_InterfaceIntDestroy(factorIndexListArg, rc=localrc)
+    call ESMF_InterArrayDestroy(factorIndexListArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -1080,7 +1080,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       endif
       ! wrap transposeFIL
       factorIndexListArg = &
-        ESMF_InterfaceIntCreate(farray2D=transposeFIL, rc=localrc)
+        ESMF_InterArrayCreate(farray2D=transposeFIL, rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
       ! Call into the C++ interface, which will sort out optional arguments
@@ -1090,7 +1090,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
       ! Garbage collection
-      call ESMF_InterfaceIntDestroy(factorIndexListArg, rc=localrc)
+      call ESMF_InterArrayDestroy(factorIndexListArg, rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
       deallocate(transposeFIL)
@@ -1137,7 +1137,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer                         :: localrc            ! local return code
     integer(ESMF_KIND_I8), pointer  :: opt_factorList(:)  ! helper variable
     integer                         :: len_factorList     ! helper variable
-    type(ESMF_InterfaceInt)         :: factorIndexListArg ! helper variable
+    type(ESMF_InterArray)           :: factorIndexListArg ! helper variable
     integer                         :: tupleSize, i       ! helper variable
     integer, allocatable            :: transposeFIL(:,:)  ! helper variable
     type(ESMF_Logical)              :: opt_ignoreUnmatched  ! helper variable
@@ -1154,7 +1154,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     len_factorList = size(factorList)
     opt_factorList => factorList
     factorIndexListArg = &
-      ESMF_InterfaceIntCreate(farray2D=factorIndexList, rc=localrc)
+      ESMF_InterArrayCreate(farray2D=factorIndexList, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -1170,7 +1170,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ESMF_CONTEXT, rcToReturn=rc)) return
     
     ! Garbage collection
-    call ESMF_InterfaceIntDestroy(factorIndexListArg, rc=localrc)
+    call ESMF_InterArrayDestroy(factorIndexListArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -1199,7 +1199,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       endif
       ! wrap transposeFIL
       factorIndexListArg = &
-        ESMF_InterfaceIntCreate(farray2D=transposeFIL, rc=localrc)
+        ESMF_InterArrayCreate(farray2D=transposeFIL, rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
       ! Call into the C++ interface, which will sort out optional arguments
@@ -1209,7 +1209,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
       ! Garbage collection
-      call ESMF_InterfaceIntDestroy(factorIndexListArg, rc=localrc)
+      call ESMF_InterArrayDestroy(factorIndexListArg, rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
       deallocate(transposeFIL)
@@ -1253,13 +1253,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !EOPI
 !------------------------------------------------------------------------------
-    integer                         :: localrc            ! local return code
-    real(ESMF_KIND_R4), pointer     :: opt_factorList(:)  ! helper variable
-    integer                         :: len_factorList     ! helper variable
-    type(ESMF_InterfaceInt)         :: factorIndexListArg ! helper variable
-    integer                         :: tupleSize, i       ! helper variable
-    integer, allocatable            :: transposeFIL(:,:)  ! helper variable
-    type(ESMF_Logical)              :: opt_ignoreUnmatched  ! helper variable
+    integer                       :: localrc            ! local return code
+    real(ESMF_KIND_R4), pointer   :: opt_factorList(:)  ! helper variable
+    integer                       :: len_factorList     ! helper variable
+    type(ESMF_InterArray)         :: factorIndexListArg ! helper variable
+    integer                       :: tupleSize, i       ! helper variable
+    integer, allocatable          :: transposeFIL(:,:)  ! helper variable
+    type(ESMF_Logical)            :: opt_ignoreUnmatched  ! helper variable
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
@@ -1273,7 +1273,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     len_factorList = size(factorList)
     opt_factorList => factorList
     factorIndexListArg = &
-      ESMF_InterfaceIntCreate(farray2D=factorIndexList, rc=localrc)
+      ESMF_InterArrayCreate(farray2D=factorIndexList, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -1289,7 +1289,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ESMF_CONTEXT, rcToReturn=rc)) return
     
     ! Garbage collection
-    call ESMF_InterfaceIntDestroy(factorIndexListArg, rc=localrc)
+    call ESMF_InterArrayDestroy(factorIndexListArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -1318,7 +1318,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       endif
       ! wrap transposeFIL
       factorIndexListArg = &
-        ESMF_InterfaceIntCreate(farray2D=transposeFIL, rc=localrc)
+        ESMF_InterArrayCreate(farray2D=transposeFIL, rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
       ! Call into the C++ interface, which will sort out optional arguments
@@ -1328,7 +1328,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
       ! Garbage collection
-      call ESMF_InterfaceIntDestroy(factorIndexListArg, rc=localrc)
+      call ESMF_InterArrayDestroy(factorIndexListArg, rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
       deallocate(transposeFIL)
@@ -1372,13 +1372,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !EOPI
 !------------------------------------------------------------------------------
-    integer                         :: localrc            ! local return code
-    real(ESMF_KIND_R8), pointer     :: opt_factorList(:)  ! helper variable
-    integer                         :: len_factorList     ! helper variable
-    type(ESMF_InterfaceInt)         :: factorIndexListArg ! helper variable
-    integer                         :: tupleSize, i       ! helper variable
-    integer, allocatable            :: transposeFIL(:,:)  ! helper variable
-    type(ESMF_Logical)              :: opt_ignoreUnmatched  ! helper variable
+    integer                       :: localrc            ! local return code
+    real(ESMF_KIND_R8), pointer   :: opt_factorList(:)  ! helper variable
+    integer                       :: len_factorList     ! helper variable
+    type(ESMF_InterArray)         :: factorIndexListArg ! helper variable
+    integer                       :: tupleSize, i       ! helper variable
+    integer, allocatable          :: transposeFIL(:,:)  ! helper variable
+    type(ESMF_Logical)            :: opt_ignoreUnmatched  ! helper variable
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
@@ -1392,7 +1392,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     len_factorList = size(factorList)
     opt_factorList => factorList
     factorIndexListArg = &
-      ESMF_InterfaceIntCreate(farray2D=factorIndexList, rc=localrc)
+      ESMF_InterArrayCreate(farray2D=factorIndexList, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -1408,7 +1408,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ESMF_CONTEXT, rcToReturn=rc)) return
     
     ! Garbage collection
-    call ESMF_InterfaceIntDestroy(factorIndexListArg, rc=localrc)
+    call ESMF_InterArrayDestroy(factorIndexListArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -1437,7 +1437,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       endif
       ! wrap transposeFIL
       factorIndexListArg = &
-        ESMF_InterfaceIntCreate(farray2D=transposeFIL, rc=localrc)
+        ESMF_InterArrayCreate(farray2D=transposeFIL, rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
       ! Call into the C++ interface, which will sort out optional arguments
@@ -1447,7 +1447,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
       ! Garbage collection
-      call ESMF_InterfaceIntDestroy(factorIndexListArg, rc=localrc)
+      call ESMF_InterArrayDestroy(factorIndexListArg, rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
       deallocate(transposeFIL)

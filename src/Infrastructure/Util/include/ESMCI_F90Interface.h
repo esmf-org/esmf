@@ -58,19 +58,19 @@ namespace ESMCI {
 
   //--------------------------------------------------------------------------
 
-  template<typename T> class InterfaceInt{
+  template<typename T> class InterArray{
     public: // this thin class is public to make its usage uncomplicated
       T *array;
       int dimCount;
       int extent[7];    // size 7 reflects the Fortran limit
     public:
       // constructors
-      InterfaceInt();
-      InterfaceInt(T *arrayArg, int lenArg);
-      InterfaceInt(std::vector<T> &arrayArg);
-      InterfaceInt(T *arrayArg, int dimArg, const int *lenArg);
+      InterArray();
+      InterArray(T *arrayArg, int lenArg);
+      InterArray(std::vector<T> &arrayArg);
+      InterArray(T *arrayArg, int dimArg, const int *lenArg);
       // destructor
-      ~InterfaceInt(void);
+      ~InterArray(void);
       // set methods
       void set();
       void set(T *arrayArg, int lenArg);
@@ -79,12 +79,12 @@ namespace ESMCI {
   };
   
   // implementation of a present() method to detect present/absent optional
-  template<typename T> bool present(InterfaceInt<T> *ptr);
+  template<typename T> bool present(InterArray<T> *ptr);
 
   //---- must implement templated class in header in order to let compiler of -
   //---- depending code see the template --------------------------------------
 
-  template<typename T> InterfaceInt<T>::InterfaceInt(void){
+  template<typename T> InterArray<T>::InterArray(void){
     // constructor
     array = NULL;
     dimCount = 0;
@@ -92,7 +92,7 @@ namespace ESMCI {
       extent[i]=0;
   }
 
-  template<typename T> InterfaceInt<T>::InterfaceInt(T *arrayArg, int lenArg){
+  template<typename T> InterArray<T>::InterArray(T *arrayArg, int lenArg){
     // constructor, special case 1d
     array = arrayArg;
     dimCount = 1;
@@ -101,7 +101,7 @@ namespace ESMCI {
       extent[i]=0;
   }
 
-  template<typename T> InterfaceInt<T>::InterfaceInt(std::vector<T> &arrayArg){
+  template<typename T> InterArray<T>::InterArray(std::vector<T> &arrayArg){
     // constructor, special case 1d
     array = &(arrayArg[0]);
     dimCount = 1;
@@ -110,7 +110,7 @@ namespace ESMCI {
       extent[i]=0;
   }
 
-  template<typename T> InterfaceInt<T>::InterfaceInt(T *arrayArg, 
+  template<typename T> InterArray<T>::InterArray(T *arrayArg, 
     int dimArg, const int *lenArg){
     // constructor
     array = arrayArg;
@@ -121,7 +121,7 @@ namespace ESMCI {
       extent[i]=0;
   }
 
-  template<typename T> InterfaceInt<T>::~InterfaceInt<T>(void){
+  template<typename T> InterArray<T>::~InterArray<T>(void){
     // destructor
     array = NULL;
     dimCount = 0;
@@ -129,7 +129,7 @@ namespace ESMCI {
       extent[i]=0;
   }
   
-  template<typename T> void InterfaceInt<T>::set(void){
+  template<typename T> void InterArray<T>::set(void){
     // set NULL
     array = NULL;
     dimCount = 0;
@@ -137,7 +137,7 @@ namespace ESMCI {
       extent[i]=0;
   }
 
-  template<typename T> void InterfaceInt<T>::set(T *arrayArg, int lenArg){
+  template<typename T> void InterArray<T>::set(T *arrayArg, int lenArg){
     // set special case 1d
     array = arrayArg;
     dimCount = 1;
@@ -146,7 +146,7 @@ namespace ESMCI {
       extent[i]=0;
   }
 
-  template<typename T> void InterfaceInt<T>::set(std::vector<T> &arrayArg){
+  template<typename T> void InterArray<T>::set(std::vector<T> &arrayArg){
     // set special case 1d
     array = &(arrayArg[0]);
     dimCount = 1;
@@ -155,7 +155,7 @@ namespace ESMCI {
       extent[i]=0;
   }
 
-  template<typename T> void InterfaceInt<T>::set(T *arrayArg, int dimArg, 
+  template<typename T> void InterArray<T>::set(T *arrayArg, int dimArg, 
     const int *lenArg){
     // set
     array = arrayArg;
@@ -166,7 +166,7 @@ namespace ESMCI {
       extent[i]=0;
   }
   
-  template<typename T> bool present(InterfaceInt<T> *ptr){
+  template<typename T> bool present(InterArray<T> *ptr){
     return ( (ptr != NULL) && (ptr->array != NULL) );
   }
   

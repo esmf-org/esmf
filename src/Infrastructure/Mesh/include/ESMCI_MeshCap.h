@@ -52,7 +52,7 @@
     }
 
     void MeshCap_to_PointList(ESMC_MeshLoc_Flag meshLoc, 
-                                   ESMCI::InterfaceInt<int> *maskValuesArg, PointList **out_pl,
+                                   ESMCI::InterArray<int> *maskValuesArg, PointList **out_pl,
                                    int *rc);
 
     static MeshCap *create_from_ptr(void **_mesh, 
@@ -66,14 +66,14 @@
 
 
     void meshaddnodes(int *num_nodes, int *nodeId, 
-                      double *nodeCoord, int *nodeOwner, InterfaceInt<int> *nodeMaskII,
+                      double *nodeCoord, int *nodeOwner, InterArray<int> *nodeMaskII,
                       ESMC_CoordSys_Flag *_coordSys, int *_orig_sdim,
                       int *rc); 
     
     void meshwrite(char *fname, int *rc,
                    ESMCI_FortranStrLenArg nlen);
     
-    void meshaddelements(int *_num_elems, int *elemId, int *elemType, InterfaceInt<int> *_elemMaskII ,
+    void meshaddelements(int *_num_elems, int *elemId, int *elemType, InterArray<int> *_elemMaskII ,
                          int *_areaPresent, double *elemArea, 
                          int *_coordsPresent, double *elemCoords, 
                          int *_num_elemConn, int *elemConn, int *regridConserve, 
@@ -143,12 +143,12 @@
                      double *pnts, double *td, int *ti, int *triInd, int *rc);
 
 
-    void meshturnoncellmask(ESMCI::InterfaceInt<int> *maskValuesArg,  int *rc);
+    void meshturnoncellmask(ESMCI::InterArray<int> *maskValuesArg,  int *rc);
     
     void meshturnoffcellmask(int *rc);
     
 
-    void meshturnonnodemask(ESMCI::InterfaceInt<int> *maskValuesArg,  int *rc);
+    void meshturnonnodemask(ESMCI::InterArray<int> *maskValuesArg,  int *rc);
     
     void meshturnoffnodemask(int *rc);
 
@@ -214,7 +214,7 @@
 
     static MeshCap *GridToMesh(const Grid &grid_, int staggerLoc, 
                         const std::vector<ESMCI::Array*> &arrays,
-                        ESMCI::InterfaceInt<int> *maskValuesArg,
+                        ESMCI::InterArray<int> *maskValuesArg,
                         int *regridConserve, int *rc);
 
      static void xgridregrid_create(ESMCI::VM **vmpp,

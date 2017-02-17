@@ -591,11 +591,11 @@ int ArrayBundle::haloStore(
 //
 // !ARGUMENTS:
 //
-  ArrayBundle *arraybundle,             // inout - ArrayBundle to be haloed
-  RouteHandle **routehandle,            // inout - handle to precomputed comm
+  ArrayBundle *arraybundle,           // inout - ArrayBundle to be haloed
+  RouteHandle **routehandle,          // inout - handle to precomputed comm
   ESMC_HaloStartRegionFlag halostartregionflag, // in - start of halo region
-  InterfaceInt<int> *haloLDepth,        // in    - lower corner halo depth
-  InterfaceInt<int> *haloUDepth         // in    - upper corner halo depth
+  InterArray<int> *haloLDepth,        // in    - lower corner halo depth
+  InterArray<int> *haloUDepth         // in    - upper corner halo depth
   ){    
 //
 // !DESCRIPTION:
@@ -843,7 +843,7 @@ int ArrayBundle::redistStore(
   ArrayBundle *srcArraybundle,            // in    - source ArrayBundle
   ArrayBundle *dstArraybundle,            // in    - destination ArrayBundle
   RouteHandle **routehandle,              // inout - handle to precomputed comm
-  InterfaceInt<int> *srcToDstTransposeMap,// in    - mapping src -> dst dims
+  InterArray<int> *srcToDstTransposeMap,  // in    - mapping src -> dst dims
   ESMC_TypeKind_Flag typekindFactor,      // in    - typekind of factor
   void *factor                            // in    - redist factor
   ){    
@@ -1113,11 +1113,11 @@ int ArrayBundle::sparseMatMulStore(
 //
 // !ARGUMENTS:
 //
-  ArrayBundle *srcArraybundle,          // in    - source ArrayBundle
-  ArrayBundle *dstArraybundle,          // in    - destination ArrayBundle
-  RouteHandle **routehandle,            // inout - handle to precomputed comm
-  vector<SparseMatrix> &sparseMatrix,   // in    - sparse matrix
-  InterfaceInt<int> *srcTermProcessing  // inout - srcTermProcessing parameters
+  ArrayBundle *srcArraybundle,        // in    - source ArrayBundle
+  ArrayBundle *dstArraybundle,        // in    - destination ArrayBundle
+  RouteHandle **routehandle,          // inout - handle to precomputed comm
+  vector<SparseMatrix> &sparseMatrix, // in    - sparse matrix
+  InterArray<int> *srcTermProcessing  // inout - srcTermProcessing parameters
   ){    
 //
 // !DESCRIPTION:

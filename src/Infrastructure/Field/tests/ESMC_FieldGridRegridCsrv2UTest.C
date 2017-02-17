@@ -56,7 +56,7 @@ int main(void){
   ESMC_Grid grid;
   int dimcount = 2;
   int *maxIndex;
-  ESMC_InterfaceInt i_maxIndex;
+  ESMC_InterArrayInt i_maxIndex;
 
   // Mesh variables
   int pdim=2;
@@ -107,7 +107,7 @@ int main(void){
   maxIndex = (int *)malloc(dimcount*sizeof(int));
   maxIndex[0] = int(ub_x);
   maxIndex[1] = int(ub_y);
-  rc = ESMC_InterfaceIntSet(&i_maxIndex, maxIndex, dimcount);
+  rc = ESMC_InterArrayIntSet(&i_maxIndex, maxIndex, dimcount);
 
   strcpy(name, "GridCreate");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
@@ -494,10 +494,10 @@ int main(void){
   //EX_UTest
   int *maskValues = (int *)malloc(sizeof(int));
   maskValues[0] = 1;
-  strcpy(name, "Create an InterfaceInt for maskValues in ESMC_FieldRegridStore()");
+  strcpy(name, "Create an InterArray for maskValues in ESMC_FieldRegridStore()");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
-  ESMC_InterfaceInt i_maskValues;
-  rc = ESMC_InterfaceIntSet(&i_maskValues, maskValues, 1);
+  ESMC_InterArrayInt i_maskValues;
+  rc = ESMC_InterArrayIntSet(&i_maskValues, maskValues, 1);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
 
   //----------------------------------------------------------------------------

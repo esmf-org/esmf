@@ -1811,7 +1811,7 @@ void Mesh::resolve_cspec_delete_owners(UInt obj_type) {
 }
 
 // This method converts a Mesh to a PointList
- ESMCI::PointList *Mesh::MeshToPointList(ESMC_MeshLoc_Flag meshLoc, ESMCI::InterfaceInt<int> *maskValuesArg, int *rc) {
+ ESMCI::PointList *Mesh::MeshToPointList(ESMC_MeshLoc_Flag meshLoc, ESMCI::InterArray<int> *maskValuesArg, int *rc) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::Mesh::MeshToPointList()"
 

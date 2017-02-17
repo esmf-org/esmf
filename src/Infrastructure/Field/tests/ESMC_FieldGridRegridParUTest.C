@@ -51,7 +51,7 @@ int main(void){
   ESMC_Grid srcgrid;
   int dimcount = 2;
   int *maxIndex;
-  ESMC_InterfaceInt i_maxIndex;
+  ESMC_InterArrayInt i_maxIndex;
 
   // Mesh variables
   int pdim=2;
@@ -102,7 +102,7 @@ int main(void){
   maxIndex = (int *)malloc(dimcount*sizeof(int));
   maxIndex[0] = int(ub_x);
   maxIndex[1] = int(ub_y);
-  rc = ESMC_InterfaceIntSet(&i_maxIndex, maxIndex, dimcount);
+  rc = ESMC_InterArrayIntSet(&i_maxIndex, maxIndex, dimcount);
 
   //----------------------------------------------------------------------------
   //EX_UTest_Multi_Proc_Only

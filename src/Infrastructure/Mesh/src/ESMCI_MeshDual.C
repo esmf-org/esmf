@@ -512,7 +512,7 @@ namespace ESMCI {
   UInt *elemOwner_wsplit=NULL;
 
   //  int *elemMaskIIArray_wsplit=NULL;
-  //InterfaceInt *elemMaskII_wsplit=NULL;
+  //InterArray *elemMaskII_wsplit=NULL;
 
   if (dual_mesh->is_split) {
     // New number of elements
@@ -536,7 +536,7 @@ namespace ESMCI {
         elemMaskIIArray_wsplit=new int[num_elems_wsplit];
 
         extent[0]=num_elems_wsplit;
-        elemMaskII_wsplit=new InterfaceInt(elemMaskIIArray_wsplit,1,extent);
+        elemMaskII_wsplit=new InterArray(elemMaskIIArray_wsplit,1,extent);
       }
 #endif
 

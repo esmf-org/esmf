@@ -48,7 +48,7 @@ int main(void){
 
   int dimcount = 2;
   int *maxIndex;
-  ESMC_InterfaceInt i_maxIndex;
+  ESMC_InterArrayInt i_maxIndex;
   int p;
   bool pass;
   int elbnd[dimcount],eubnd[dimcount];

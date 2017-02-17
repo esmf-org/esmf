@@ -40,13 +40,13 @@ static const char *const version = "$Id$";
 
 extern "C" {
 
-int ESMC_InterfaceIntSet(ESMC_InterfaceInt *interfaceIntArg,
+int ESMC_InterArrayIntSet(ESMC_InterArrayInt *interArrayIntArg,
   int *arrayArg, int lenArg){
   // initialize return code; assume routine not implemented
   int rc = ESMC_RC_NOT_IMPL;
 
-  ESMCI::InterfaceInt<int> *ii = 
-    ((ESMCI::InterfaceInt<int> *)(interfaceIntArg->shallowMem));
+  ESMCI::InterArray<int> *ii = 
+    ((ESMCI::InterArray<int> *)(interArrayIntArg->shallowMem));
   
   ii->set(arrayArg, lenArg);
 

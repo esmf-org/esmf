@@ -60,9 +60,9 @@ ESMC_Field ESMC_FieldCreateGridArraySpec(
   ESMC_Grid grid,                           // in
   ESMC_ArraySpec arrayspec,                 // in
   enum ESMC_StaggerLoc staggerloc,          // in
-  ESMC_InterfaceInt *gridToFieldMap,         // in
-  ESMC_InterfaceInt *ungriddedLBound,        // in
-  ESMC_InterfaceInt *ungriddedUBound,        // in
+  ESMC_InterArrayInt *gridToFieldMap,       // in
+  ESMC_InterArrayInt *ungriddedLBound,      // in
+  ESMC_InterArrayInt *ungriddedUBound,      // in
   const char *name,                         // in
   int *rc                                   // out
 );
@@ -131,11 +131,11 @@ ESMC_Field ESMC_FieldCreateGridArraySpec(
 // !INTERFACE:
 ESMC_Field ESMC_FieldCreateGridTypeKind(
   ESMC_Grid grid,                           // in
-  enum ESMC_TypeKind_Flag typekind,              // in
+  enum ESMC_TypeKind_Flag typekind,         // in
   enum ESMC_StaggerLoc staggerloc,          // in
-  ESMC_InterfaceInt *gridToFieldMap,         // in
-  ESMC_InterfaceInt *ungriddedLBound,        // in
-  ESMC_InterfaceInt *ungriddedUBound,        // in
+  ESMC_InterArrayInt *gridToFieldMap,       // in
+  ESMC_InterArrayInt *ungriddedLBound,      // in
+  ESMC_InterArrayInt *ungriddedUBound,      // in
   const char *name,                         // in
   int *rc                                   // out
 );
@@ -207,9 +207,9 @@ ESMC_Field ESMC_FieldCreateGridTypeKind(
 ESMC_Field ESMC_FieldCreateMeshArraySpec(
   ESMC_Mesh mesh,                           // in
   ESMC_ArraySpec arrayspec,                 // in
-  ESMC_InterfaceInt *gridToFieldMap,         // in
-  ESMC_InterfaceInt *ungriddedLBound,        // in
-  ESMC_InterfaceInt *ungriddedUBound,        // in
+  ESMC_InterArrayInt *gridToFieldMap,       // in
+  ESMC_InterArrayInt *ungriddedLBound,      // in
+  ESMC_InterArrayInt *ungriddedUBound,      // in
   const char *name,                         // in
   int *rc                                   // out
 );
@@ -275,11 +275,11 @@ ESMC_Field ESMC_FieldCreateMeshArraySpec(
 // !INTERFACE:
 ESMC_Field ESMC_FieldCreateMeshTypeKind(
   ESMC_Mesh mesh,                           // in
-  enum ESMC_TypeKind_Flag typekind,              // in
+  enum ESMC_TypeKind_Flag typekind,         // in
   enum ESMC_MeshLoc_Flag meshloc,           // in
-  ESMC_InterfaceInt *gridToFieldMap,         // in
-  ESMC_InterfaceInt *ungriddedLBound,        // in
-  ESMC_InterfaceInt *ungriddedUBound,        // in
+  ESMC_InterArrayInt *gridToFieldMap,       // in
+  ESMC_InterArrayInt *ungriddedLBound,      // in
+  ESMC_InterArrayInt *ungriddedUBound,      // in
   const char *name,                         // in
   int *rc                                   // out
 );
@@ -346,11 +346,11 @@ ESMC_Field ESMC_FieldCreateMeshTypeKind(
 //
 // !INTERFACE:
 ESMC_Field ESMC_FieldCreateLocStreamArraySpec(
-  ESMC_LocStream locstream,                           // in
+  ESMC_LocStream locstream,                 // in
   ESMC_ArraySpec arrayspec,                 // in
-  ESMC_InterfaceInt *gridToFieldMap,         // in
-  ESMC_InterfaceInt *ungriddedLBound,        // in
-  ESMC_InterfaceInt *ungriddedUBound,        // in
+  ESMC_InterArrayInt *gridToFieldMap,       // in
+  ESMC_InterArrayInt *ungriddedLBound,      // in
+  ESMC_InterArrayInt *ungriddedUBound,      // in
   const char *name,                         // in
   int *rc                                   // out
 );
@@ -415,11 +415,11 @@ ESMC_Field ESMC_FieldCreateLocStreamArraySpec(
 //
 // !INTERFACE:
 ESMC_Field ESMC_FieldCreateLocStreamTypeKind(
-  ESMC_LocStream locstream,                           // in
-  enum ESMC_TypeKind_Flag typekind,              // in
-  ESMC_InterfaceInt *gridToFieldMap,         // in
-  ESMC_InterfaceInt *ungriddedLBound,        // in
-  ESMC_InterfaceInt *ungriddedUBound,        // in
+  ESMC_LocStream locstream,                 // in
+  enum ESMC_TypeKind_Flag typekind,         // in
+  ESMC_InterArrayInt *gridToFieldMap,       // in
+  ESMC_InterArrayInt *ungriddedLBound,      // in
+  ESMC_InterArrayInt *ungriddedUBound,      // in
   const char *name,                         // in
   int *rc                                   // out
 );
@@ -742,8 +742,8 @@ int ESMC_FieldRegridGetArea(
 int ESMC_FieldRegridStore( 
     ESMC_Field srcField,                           // in
     ESMC_Field dstField,                           // in
-    ESMC_InterfaceInt *srcMaskValues,              // in
-    ESMC_InterfaceInt *dstMaskValues,              // in
+    ESMC_InterArrayInt *srcMaskValues,             // in
+    ESMC_InterArrayInt *dstMaskValues,             // in
     ESMC_RouteHandle *routehandle,                 // inout
     enum ESMC_RegridMethod_Flag *regridmethod,     // in
     enum ESMC_PoleMethod_Flag *polemethod,         // in
@@ -751,7 +751,7 @@ int ESMC_FieldRegridStore(
     enum ESMC_LineType_Flag *lineType,             // in
     enum ESMC_NormType_Flag *normType,             // in
     enum ESMC_UnmappedAction_Flag *unmappedaction, // in
-    ESMC_Logical *ignoreDegenerate,                        // in
+    ESMC_Logical *ignoreDegenerate,                // in
     ESMC_Field *srcFracField,                      // out
     ESMC_Field *dstFracField);                     // out
 
@@ -829,10 +829,10 @@ int ESMC_FieldRegridStore(
 //
 // !INTERFACE:
   int ESMC_FieldRegrid( 
-    ESMC_Field srcField,                // in
-    ESMC_Field dstField,                // inout
-    ESMC_RouteHandle routehandle,       // in
-    enum ESMC_Region_Flag *zeroregion);  // in
+    ESMC_Field srcField,                  // in
+    ESMC_Field dstField,                  // inout
+    ESMC_RouteHandle routehandle,         // in
+    enum ESMC_Region_Flag *zeroregion);   // in
 
 // !RETURN VALUE:
 //  Return code; equals ESMF_SUCCESS if there are no errors.

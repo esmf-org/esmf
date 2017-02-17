@@ -341,7 +341,7 @@ extern "C" {
   void FTN_X(c_esmc_arraybundlehalostore)(ESMCI::ArrayBundle **arraybundle,
     ESMCI::RouteHandle **routehandle,
     ESMC_HaloStartRegionFlag *halostartregionflag,
-    ESMCI::InterfaceInt<int> *haloLDepth, ESMCI::InterfaceInt<int> *haloUDepth,
+    ESMCI::InterArray<int> *haloLDepth, ESMCI::InterArray<int> *haloUDepth,
     int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_arraybundlehalostore()"
@@ -451,7 +451,7 @@ extern "C" {
 
   void FTN_X(c_esmc_arraybundlerediststore)(ESMCI::ArrayBundle **srcArraybundle,
     ESMCI::ArrayBundle **dstArraybundle, ESMCI::RouteHandle **routehandle, 
-    ESMCI::InterfaceInt<int> *srcToDstTransposeMap,
+    ESMCI::InterArray<int> *srcToDstTransposeMap,
     ESMC_TypeKind_Flag *typekind,
     void *factor, int *rc){
 #undef  ESMC_METHOD
@@ -468,7 +468,7 @@ extern "C" {
 
   void FTN_X(c_esmc_arraybundlerediststorenf)(ESMCI::ArrayBundle **srcArraybundle,
     ESMCI::ArrayBundle **dstArraybundle, ESMCI::RouteHandle **routehandle,
-    ESMCI::InterfaceInt<int> *srcToDstTransposeMap, int *rc){
+    ESMCI::InterArray<int> *srcToDstTransposeMap, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_arraybundlerediststorenf()"
     // Initialize return code; assume routine not implemented
@@ -595,8 +595,8 @@ extern "C" {
   void FTN_X(c_esmc_arraybundlesmmstore)(ESMCI::ArrayBundle **srcArraybundle,
     ESMCI::ArrayBundle **dstArraybundle, ESMCI::RouteHandle **routehandle, 
     ESMC_TypeKind_Flag *typekindFactors, void *factorList, int *factorListCount,
-    ESMCI::InterfaceInt<int> *factorIndexList, 
-    ESMCI::InterfaceInt<int> *srcTermProcessing, int *rc){
+    ESMCI::InterArray<int> *factorIndexList, 
+    ESMCI::InterArray<int> *srcTermProcessing, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_arraybundlesmmstore()"
     // Initialize return code; assume routine not implemented
@@ -664,7 +664,7 @@ extern "C" {
 
   void FTN_X(c_esmc_arraybundlesmmstorenf)(ESMCI::ArrayBundle **srcArraybundle,
     ESMCI::ArrayBundle **dstArraybundle, ESMCI::RouteHandle **routehandle,
-    ESMCI::InterfaceInt<int> *srcTermProcessing, int *rc){
+    ESMCI::InterArray<int> *srcTermProcessing, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_arraybundlesmmstorenf()"
     // Initialize return code; assume routine not implemented

@@ -416,10 +416,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !EOP
 !------------------------------------------------------------------------------
-    integer                         :: localrc        ! local return code
-    type(ESMF_StartRegion_Flag)  :: opt_startregion ! helper variable
-    type(ESMF_InterfaceInt)         :: haloLDepthArg  ! helper variable
-    type(ESMF_InterfaceInt)         :: haloUDepthArg  ! helper variable
+    integer                       :: localrc          ! local return code
+    type(ESMF_StartRegion_Flag)   :: opt_startregion  ! helper variable
+    type(ESMF_InterArray)         :: haloLDepthArg    ! helper variable
+    type(ESMF_InterArray)         :: haloUDepthArg    ! helper variable
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
@@ -433,10 +433,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(startregion)) opt_startregion = startregion
 
     ! Deal with (optional) array arguments
-    haloLDepthArg = ESMF_InterfaceIntCreate(haloLDepth, rc=localrc)
+    haloLDepthArg = ESMF_InterArrayCreate(haloLDepth, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    haloUDepthArg = ESMF_InterfaceIntCreate(haloUDepth, rc=localrc)
+    haloUDepthArg = ESMF_InterArrayCreate(haloUDepth, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -447,10 +447,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ESMF_CONTEXT, rcToReturn=rc)) return
     
     ! garbage collection
-    call ESMF_InterfaceIntDestroy(haloLDepthArg, rc=localrc)
+    call ESMF_InterArrayDestroy(haloLDepthArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(haloUDepthArg, rc=localrc)
+    call ESMF_InterArrayDestroy(haloUDepthArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -1105,11 +1105,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !EOPI
 !------------------------------------------------------------------------------
-    integer                 :: localrc      ! local return code
-    type(ESMF_InterfaceInt) :: srcToDstTransposeMapArg  ! index helper
-    type(ESMF_Logical)      :: opt_ignoreUnmatched      ! helper variable
-    integer, allocatable    :: dstToSrcTransposeMap(:)  ! helper variable
-    integer                 :: i
+    integer               :: localrc                  ! local return code
+    type(ESMF_InterArray) :: srcToDstTransposeMapArg  ! index helper
+    type(ESMF_Logical)    :: opt_ignoreUnmatched      ! helper variable
+    integer, allocatable  :: dstToSrcTransposeMap(:)  ! helper variable
+    integer               :: i
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
@@ -1120,7 +1120,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit, dstArray, rc)
     
     ! Deal with (optional) array arguments
-    srcToDstTransposeMapArg = ESMF_InterfaceIntCreate(srcToDstTransposeMap, &
+    srcToDstTransposeMapArg = ESMF_InterArrayCreate(srcToDstTransposeMap, &
       rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
@@ -1150,11 +1150,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           dstToSrcTransposeMap(srcToDstTransposeMap(i))=i
         enddo
         ! garbage collection
-        call ESMF_InterfaceIntDestroy(srcToDstTransposeMapArg, rc=localrc)
+        call ESMF_InterArrayDestroy(srcToDstTransposeMapArg, rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
         ! create new srcToDstTransposeMapArg
-        srcToDstTransposeMapArg = ESMF_InterfaceIntCreate(dstToSrcTransposeMap,&
+        srcToDstTransposeMapArg = ESMF_InterArrayCreate(dstToSrcTransposeMap,&
           rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
@@ -1176,7 +1176,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     endif
     
     ! garbage collection
-    call ESMF_InterfaceIntDestroy(srcToDstTransposeMapArg, rc=localrc)
+    call ESMF_InterArrayDestroy(srcToDstTransposeMapArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -1213,11 +1213,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !EOPI
 !------------------------------------------------------------------------------
-    integer                 :: localrc      ! local return code
-    type(ESMF_InterfaceInt) :: srcToDstTransposeMapArg  ! index helper
-    type(ESMF_Logical)      :: opt_ignoreUnmatched      ! helper variable
-    integer, allocatable    :: dstToSrcTransposeMap(:)  ! helper variable
-    integer                 :: i
+    integer               :: localrc                  ! local return code
+    type(ESMF_InterArray) :: srcToDstTransposeMapArg  ! index helper
+    type(ESMF_Logical)    :: opt_ignoreUnmatched      ! helper variable
+    integer, allocatable  :: dstToSrcTransposeMap(:)  ! helper variable
+    integer               :: i
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
@@ -1228,7 +1228,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit, dstArray, rc)
     
     ! Deal with (optional) array arguments
-    srcToDstTransposeMapArg = ESMF_InterfaceIntCreate(srcToDstTransposeMap, &
+    srcToDstTransposeMapArg = ESMF_InterArrayCreate(srcToDstTransposeMap, &
       rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
@@ -1258,11 +1258,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           dstToSrcTransposeMap(srcToDstTransposeMap(i))=i
         enddo
         ! garbage collection
-        call ESMF_InterfaceIntDestroy(srcToDstTransposeMapArg, rc=localrc)
+        call ESMF_InterArrayDestroy(srcToDstTransposeMapArg, rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
         ! create new srcToDstTransposeMapArg
-        srcToDstTransposeMapArg = ESMF_InterfaceIntCreate(dstToSrcTransposeMap,&
+        srcToDstTransposeMapArg = ESMF_InterArrayCreate(dstToSrcTransposeMap,&
           rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
@@ -1284,7 +1284,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     endif
     
     ! garbage collection
-    call ESMF_InterfaceIntDestroy(srcToDstTransposeMapArg, rc=localrc)
+    call ESMF_InterArrayDestroy(srcToDstTransposeMapArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -1321,11 +1321,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !EOPI
 !------------------------------------------------------------------------------
-    integer                 :: localrc      ! local return code
-    type(ESMF_InterfaceInt) :: srcToDstTransposeMapArg  ! index helper
-    type(ESMF_Logical)      :: opt_ignoreUnmatched      ! helper variable
-    integer, allocatable    :: dstToSrcTransposeMap(:)  ! helper variable
-    integer                 :: i
+    integer               :: localrc                  ! local return code
+    type(ESMF_InterArray) :: srcToDstTransposeMapArg  ! index helper
+    type(ESMF_Logical)    :: opt_ignoreUnmatched      ! helper variable
+    integer, allocatable  :: dstToSrcTransposeMap(:)  ! helper variable
+    integer               :: i
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
@@ -1336,7 +1336,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit, dstArray, rc)
     
     ! Deal with (optional) array arguments
-    srcToDstTransposeMapArg = ESMF_InterfaceIntCreate(srcToDstTransposeMap, &
+    srcToDstTransposeMapArg = ESMF_InterArrayCreate(srcToDstTransposeMap, &
       rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
@@ -1366,11 +1366,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           dstToSrcTransposeMap(srcToDstTransposeMap(i))=i
         enddo
         ! garbage collection
-        call ESMF_InterfaceIntDestroy(srcToDstTransposeMapArg, rc=localrc)
+        call ESMF_InterArrayDestroy(srcToDstTransposeMapArg, rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
         ! create new srcToDstTransposeMapArg
-        srcToDstTransposeMapArg = ESMF_InterfaceIntCreate(dstToSrcTransposeMap,&
+        srcToDstTransposeMapArg = ESMF_InterArrayCreate(dstToSrcTransposeMap,&
           rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
@@ -1392,7 +1392,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     endif
     
     ! garbage collection
-    call ESMF_InterfaceIntDestroy(srcToDstTransposeMapArg, rc=localrc)
+    call ESMF_InterArrayDestroy(srcToDstTransposeMapArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -1429,11 +1429,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !EOPI
 !------------------------------------------------------------------------------
-    integer                 :: localrc      ! local return code
-    type(ESMF_InterfaceInt) :: srcToDstTransposeMapArg  ! index helper
-    type(ESMF_Logical)      :: opt_ignoreUnmatched      ! helper variable
-    integer, allocatable    :: dstToSrcTransposeMap(:)  ! helper variable
-    integer                 :: i
+    integer               :: localrc                  ! local return code
+    type(ESMF_InterArray) :: srcToDstTransposeMapArg  ! index helper
+    type(ESMF_Logical)    :: opt_ignoreUnmatched      ! helper variable
+    integer, allocatable  :: dstToSrcTransposeMap(:)  ! helper variable
+    integer               :: i
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
@@ -1444,7 +1444,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit, dstArray, rc)
     
     ! Deal with (optional) array arguments
-    srcToDstTransposeMapArg = ESMF_InterfaceIntCreate(srcToDstTransposeMap, &
+    srcToDstTransposeMapArg = ESMF_InterArrayCreate(srcToDstTransposeMap, &
       rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
@@ -1474,11 +1474,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           dstToSrcTransposeMap(srcToDstTransposeMap(i))=i
         enddo
         ! garbage collection
-        call ESMF_InterfaceIntDestroy(srcToDstTransposeMapArg, rc=localrc)
+        call ESMF_InterArrayDestroy(srcToDstTransposeMapArg, rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
         ! create new srcToDstTransposeMapArg
-        srcToDstTransposeMapArg = ESMF_InterfaceIntCreate(dstToSrcTransposeMap,&
+        srcToDstTransposeMapArg = ESMF_InterArrayCreate(dstToSrcTransposeMap,&
           rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
@@ -1500,7 +1500,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     endif
     
     ! garbage collection
-    call ESMF_InterfaceIntDestroy(srcToDstTransposeMapArg, rc=localrc)
+    call ESMF_InterArrayDestroy(srcToDstTransposeMapArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -1666,11 +1666,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !EOP
 !------------------------------------------------------------------------------
-    integer                 :: localrc      ! local return code
-    type(ESMF_InterfaceInt) :: srcToDstTransposeMapArg  ! index helper
-    type(ESMF_Logical)      :: opt_ignoreUnmatched      ! helper variable
-    integer, allocatable    :: dstToSrcTransposeMap(:)  ! helper variable
-    integer                 :: i
+    integer               :: localrc                  ! local return code
+    type(ESMF_InterArray) :: srcToDstTransposeMapArg  ! index helper
+    type(ESMF_Logical)    :: opt_ignoreUnmatched      ! helper variable
+    integer, allocatable  :: dstToSrcTransposeMap(:)  ! helper variable
+    integer               :: i
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
@@ -1681,7 +1681,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit, dstArray, rc)
     
     ! Deal with (optional) array arguments
-    srcToDstTransposeMapArg = ESMF_InterfaceIntCreate(srcToDstTransposeMap, &
+    srcToDstTransposeMapArg = ESMF_InterArrayCreate(srcToDstTransposeMap, &
       rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
@@ -1710,11 +1710,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           dstToSrcTransposeMap(srcToDstTransposeMap(i))=i
         enddo
         ! garbage collection
-        call ESMF_InterfaceIntDestroy(srcToDstTransposeMapArg, rc=localrc)
+        call ESMF_InterArrayDestroy(srcToDstTransposeMapArg, rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
         ! create new srcToDstTransposeMapArg
-        srcToDstTransposeMapArg = ESMF_InterfaceIntCreate(dstToSrcTransposeMap,&
+        srcToDstTransposeMapArg = ESMF_InterArrayCreate(dstToSrcTransposeMap,&
           rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
@@ -1735,7 +1735,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     endif
     
     ! garbage collection
-    call ESMF_InterfaceIntDestroy(srcToDstTransposeMapArg, rc=localrc)
+    call ESMF_InterArrayDestroy(srcToDstTransposeMapArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 

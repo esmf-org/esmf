@@ -90,7 +90,7 @@ namespace ESMCI {
 
 void ESMCI_GridToMesh(const Grid &grid_, int staggerLoc, 
                       const std::vector<ESMCI::Array*> &arrays, 
-                      ESMCI::InterfaceInt<int> *maskValuesArg,
+                      ESMCI::InterArray<int> *maskValuesArg,
                       int *regridConserve, Mesh **out_meshpp, int *rc) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "GridToMesh()" 

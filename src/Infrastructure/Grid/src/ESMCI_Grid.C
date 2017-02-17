@@ -110,7 +110,7 @@ namespace ESMCI{
                                 ESMC_GridConn *connL, ESMC_GridConn *connU, int *rc);
   void _add_poles_to_conn(DistGrid *distgrid, int *lwidth, int *uwidth, 
                         ESMC_GridConn *connL, ESMC_GridConn *connU,
-                        InterfaceInt<int> **connListOut, int *rc);
+                        InterArray<int> **connListOut, int *rc);
 
   
 //  File Local Prototypes (actual implementation at end of file)
@@ -128,40 +128,40 @@ static  Type ***_allocate3D(int sizeDim1, int sizeDim2, int sizeDim3);
 template <class Type>
 static  void _free3D(Type ****array);
 
-static InterfaceInt<int> *_copyInterfaceInt(InterfaceInt<int> *in);
+static InterArray<int> *_copyInterArray(InterArray<int> *in);
  
-static void _freeInterfaceInt(InterfaceInt<int> **in);
+static void _freeInterArray(InterArray<int> **in);
 
 static int _createIsDEBnd(char **_isDELBnd, char **_isDEUBnd, 
                           DistGrid *distgrid,int *distgridToGridMap);
 
 int construct(Grid *_grid, int _nameLen, char *_name, ESMC_TypeKind_Flag *_typekind,
-              DistGrid *_distgrid, InterfaceInt<int> *_gridEdgeLWidth, 
-              InterfaceInt<int> *_gridEdgeUWidth, InterfaceInt<int> *_gridAlign,
-              InterfaceInt<int> *_distgridToGridMap,
-              InterfaceInt<int> *_undistLBound, InterfaceInt<int> *_undistUBound, 
+              DistGrid *_distgrid, InterArray<int> *_gridEdgeLWidth, 
+              InterArray<int> *_gridEdgeUWidth, InterArray<int> *_gridAlign,
+              InterArray<int> *_distgridToGridMap,
+              InterArray<int> *_undistLBound, InterArray<int> *_undistUBound, 
               ESMC_CoordSys_Flag *coordSys, 
-              InterfaceInt<int> *_coordDimCount, InterfaceInt<int> *_coordDimMap,
-	      InterfaceInt<int> *_gridMemLBound,
+              InterArray<int> *_coordDimCount, InterArray<int> *_coordDimMap,
+	      InterArray<int> *_gridMemLBound,
               ESMC_IndexFlag *_indexflag,
               bool destroyDistgrid,
               bool destroyDELayout);
 
 int construct(Grid *_grid, int _nameLen, char *_name, ESMC_TypeKind_Flag *_typekind,
               DistGrid *_distgrid, 
-              InterfaceInt<int> *_minIndex, InterfaceInt<int> *_maxIndex,
-	      InterfaceInt<int> *_localArbIndex, int localArbIndexCount,
-              InterfaceInt<int> *_distDim, int arbDim, 
-              InterfaceInt<int> *_undistLBound, InterfaceInt<int> *_undistUBound, 
+              InterArray<int> *_minIndex, InterArray<int> *_maxIndex,
+	      InterArray<int> *_localArbIndex, int localArbIndexCount,
+              InterArray<int> *_distDim, int arbDim, 
+              InterArray<int> *_undistLBound, InterArray<int> *_undistUBound, 
               ESMC_CoordSys_Flag *coordSys, 
-              InterfaceInt<int> *_coordDimCount, InterfaceInt<int> *_coordDimMap,
-	      InterfaceInt<int> *_gridMemLBound,
+              InterArray<int> *_coordDimCount, InterArray<int> *_coordDimMap,
+	      InterArray<int> *_gridMemLBound,
               ESMC_IndexFlag *_indexflag,
               bool destroyDistgrid, bool destroyDELayout);
 
 int setDefaultsLUA(int dimCount,
-                   InterfaceInt<int> *lWidthIn, InterfaceInt<int> *uWidthIn,
-                   InterfaceInt<int> *alignIn,
+                   InterArray<int> *lWidthIn, InterArray<int> *uWidthIn,
+                   InterArray<int> *alignIn,
                    int *lWidthDefault, int *uWidthDefault, int *alignDefault, 
                    int *lWidthOut, int *uWidthOut, int *alignOut);
 
@@ -187,7 +187,7 @@ int setDefaultsLUA(int dimCount,
 //     pointer to newly allocated ESMCI::Grid object
 //
 // !ARGUMENTS:
-    ESMC_InterfaceInt *maxIndex, 
+    ESMC_InterArrayInt *maxIndex, 
     ESMC_CoordSys_Flag *coordSys,
     ESMC_TypeKind_Flag *coordTypeKind,
     ESMC_IndexFlag *indexflag,
@@ -208,7 +208,7 @@ int setDefaultsLUA(int dimCount,
     cs_present = 0;
     ctk_present = 0;
 
-    ESMCI::InterfaceInt<int> *mi = (ESMCI::InterfaceInt<int> *)maxIndex;
+    ESMCI::InterArray<int> *mi = (ESMCI::InterArray<int> *)maxIndex;
   
 
     // this is a test to see if the data is passed in correctly
@@ -264,7 +264,7 @@ int setDefaultsLUA(int dimCount,
 //     pointer to newly allocated ESMCI::Grid object
 //
 // !ARGUMENTS:
-    ESMC_InterfaceInt *maxIndex, 
+    ESMC_InterArrayInt *maxIndex, 
     int *periodicDim,
     int *poleDim,
     ESMC_CoordSys_Flag *coordSys,
@@ -293,7 +293,7 @@ int setDefaultsLUA(int dimCount,
 
     int pksize = 2;
 
-    ESMCI::InterfaceInt<int> *mi = (ESMCI::InterfaceInt<int> *)maxIndex;
+    ESMCI::InterArray<int> *mi = (ESMCI::InterArray<int> *)maxIndex;
   
     if(mi->dimCount != 1){
        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
@@ -543,10 +543,10 @@ int Grid::addCoordArray(
 // !ARGUMENTS:
 //
                           int *staggerlocArg,             // (in) optional
-                          InterfaceInt<int> *staggerEdgeLWidthArg, // (in) optional
-                          InterfaceInt<int> *staggerEdgeUWidthArg, // (in) optional
-                          InterfaceInt<int> *staggerAlignArg,   // (in) optional 
-                          InterfaceInt<int> *staggerMemLBoundArg   // (in) optional 
+                          InterArray<int> *staggerEdgeLWidthArg, // (in) optional
+                          InterArray<int> *staggerEdgeUWidthArg, // (in) optional
+                          InterArray<int> *staggerAlignArg,   // (in) optional 
+                          InterArray<int> *staggerMemLBoundArg   // (in) optional 
   ) {
 //
 // !DESCRIPTION:
@@ -610,11 +610,11 @@ int Grid::addCoordArray(
     
   int *distgridToArrayMapIntIntArray=new int[dimCount];
   extent[0]=dimCount;
-  InterfaceInt<int> *distgridToArrayMapIntInt =
-    new InterfaceInt<int>(distgridToArrayMapIntIntArray,1,extent); 
+  InterArray<int> *distgridToArrayMapIntInt =
+    new InterArray<int>(distgridToArrayMapIntIntArray,1,extent); 
 
-  InterfaceInt<int> *staggerMemLBoundIntInt =
-    (InterfaceInt<int> *)ESMC_NULL_POINTER;
+  InterArray<int> *staggerMemLBoundIntInt =
+    (InterArray<int> *)ESMC_NULL_POINTER;
   int *staggerMemLBoundIntIntArray=(int *)ESMC_NULL_POINTER;
 
   // Only setup membounds if index flag is user
@@ -622,7 +622,7 @@ int Grid::addCoordArray(
     staggerMemLBoundIntIntArray=new int[dimCount];
     extent[0]=dimCount;
     staggerMemLBoundIntInt = 
-      new InterfaceInt<int>(staggerMemLBoundIntIntArray,1,extent); 
+      new InterArray<int>(staggerMemLBoundIntIntArray,1,extent); 
   }
 
 
@@ -691,15 +691,15 @@ int Grid::addCoordArray(
     // Create an Array to hold the coords 
     array=Array::create(arrayspec, staggerDistgrid,
                           distgridToArrayMapIntInt,
-                          (InterfaceInt<int> *)ESMC_NULL_POINTER,
-                          (InterfaceInt<int> *)ESMC_NULL_POINTER,
-                          (InterfaceInt<int> *)ESMC_NULL_POINTER,
-                          (InterfaceInt<int> *)ESMC_NULL_POINTER,
-                          (InterfaceInt<int> *)ESMC_NULL_POINTER,
-                          (InterfaceInt<int> *)ESMC_NULL_POINTER,
+                          (InterArray<int> *)ESMC_NULL_POINTER,
+                          (InterArray<int> *)ESMC_NULL_POINTER,
+                          (InterArray<int> *)ESMC_NULL_POINTER,
+                          (InterArray<int> *)ESMC_NULL_POINTER,
+                          (InterArray<int> *)ESMC_NULL_POINTER,
+                          (InterArray<int> *)ESMC_NULL_POINTER,
                           &indexflag, staggerMemLBoundIntInt, 
-                          (InterfaceInt<int> *)ESMC_NULL_POINTER,
-                          (InterfaceInt<int> *)ESMC_NULL_POINTER, 
+                          (InterArray<int> *)ESMC_NULL_POINTER,
+                          (InterArray<int> *)ESMC_NULL_POINTER, 
                           &localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc,
       ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;        
@@ -795,8 +795,8 @@ int Grid::addCoordArrayArb(
  
   int *distgridToArrayMapIntIntArray=new int[dimCount];
   extent[0]=dimCount;
-  InterfaceInt<int> *distgridToArrayMapIntInt =
-    new InterfaceInt<int>(distgridToArrayMapIntIntArray,1,extent); 
+  InterArray<int> *distgridToArrayMapIntInt =
+    new InterArray<int>(distgridToArrayMapIntIntArray,1,extent); 
    
   ////////////
   ///// Loop Constructing all the coordinate arrays
@@ -832,15 +832,15 @@ int Grid::addCoordArrayArb(
 
     array=Array::create(arrayspec, distgrid,
                        distgridToArrayMapIntInt,
-                       (InterfaceInt<int> *)ESMC_NULL_POINTER,
-                       (InterfaceInt<int> *)ESMC_NULL_POINTER,
-                       (InterfaceInt<int> *)ESMC_NULL_POINTER,
-                       (InterfaceInt<int> *)ESMC_NULL_POINTER,
-                       (InterfaceInt<int> *)ESMC_NULL_POINTER,
-                       (InterfaceInt<int> *)ESMC_NULL_POINTER,
+                       (InterArray<int> *)ESMC_NULL_POINTER,
+                       (InterArray<int> *)ESMC_NULL_POINTER,
+                       (InterArray<int> *)ESMC_NULL_POINTER,
+                       (InterArray<int> *)ESMC_NULL_POINTER,
+                       (InterArray<int> *)ESMC_NULL_POINTER,
+                       (InterArray<int> *)ESMC_NULL_POINTER,
                         ESMC_NULL_POINTER, NULL,
-                       (InterfaceInt<int> *)ESMC_NULL_POINTER,
-                       (InterfaceInt<int> *)ESMC_NULL_POINTER, 
+                       (InterArray<int> *)ESMC_NULL_POINTER,
+                       (InterArray<int> *)ESMC_NULL_POINTER, 
 			&localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc,
       ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;        
@@ -882,9 +882,9 @@ int Grid::addCoordFromArrayList(
                         int arrayCount,             // (in) 
                         Array **arrayList,           // (in)
                         CopyFlag *docopyArg,   // (in) optional
-                        InterfaceInt<int> *staggerEdgeLWidthArg, // (in) optional
-                        InterfaceInt<int> *staggerEdgeUWidthArg, // (in) optional
-                        InterfaceInt<int> *staggerAlignArg   // (in) optional 
+                        InterArray<int> *staggerEdgeLWidthArg, // (in) optional
+                        InterArray<int> *staggerEdgeUWidthArg, // (in) optional
+                        InterArray<int> *staggerAlignArg   // (in) optional 
   ) {
 //
 // !DESCRIPTION:
@@ -950,10 +950,10 @@ int Grid::addItemArray(
                           int *staggerlocArg,             // (in) optional
                           int *itemArg,
 			  ESMC_TypeKind_Flag *typekindArg,          
-                          InterfaceInt<int> *staggerEdgeLWidthArg, // (in) optional
-                          InterfaceInt<int> *staggerEdgeUWidthArg, // (in) optional
-                          InterfaceInt<int> *staggerAlignArg,   // (in) optional 
-                          InterfaceInt<int> *staggerMemLBoundArg   // (in) optional 
+                          InterArray<int> *staggerEdgeLWidthArg, // (in) optional
+                          InterArray<int> *staggerEdgeUWidthArg, // (in) optional
+                          InterArray<int> *staggerAlignArg,   // (in) optional 
+                          InterArray<int> *staggerMemLBoundArg   // (in) optional 
   ) {
 //
 // !DESCRIPTION:
@@ -1048,11 +1048,11 @@ int Grid::addItemArray(
     
   int *distgridToArrayMapIntIntArray=new int[dimCount];
   extent[0]=dimCount;
-  InterfaceInt<int> *distgridToArrayMapIntInt =
-    new InterfaceInt<int>(distgridToArrayMapIntIntArray,1,extent); 
+  InterArray<int> *distgridToArrayMapIntInt =
+    new InterArray<int>(distgridToArrayMapIntIntArray,1,extent); 
 
-  InterfaceInt<int> *staggerMemLBoundIntInt
-    = (InterfaceInt<int> *)ESMC_NULL_POINTER;
+  InterArray<int> *staggerMemLBoundIntInt
+    = (InterArray<int> *)ESMC_NULL_POINTER;
   int *staggerMemLBoundIntIntArray=(int *)ESMC_NULL_POINTER;
 
   // Only setup membounds if index flag is user
@@ -1060,7 +1060,7 @@ int Grid::addItemArray(
     staggerMemLBoundIntIntArray=new int[dimCount];
     extent[0]=dimCount;
     staggerMemLBoundIntInt =
-      new InterfaceInt<int>(staggerMemLBoundIntIntArray,1,extent); 
+      new InterArray<int>(staggerMemLBoundIntIntArray,1,extent); 
   }
 
 
@@ -1118,15 +1118,15 @@ int Grid::addItemArray(
     // Create an Array to hold the coords 
     array=Array::create(arrayspec, staggerDistgrid,
                           distgridToArrayMapIntInt,
-                          (InterfaceInt<int> *)ESMC_NULL_POINTER,
-                          (InterfaceInt<int> *)ESMC_NULL_POINTER,
-                          (InterfaceInt<int> *)ESMC_NULL_POINTER,
-                          (InterfaceInt<int> *)ESMC_NULL_POINTER,
-                          (InterfaceInt<int> *)ESMC_NULL_POINTER,
-                          (InterfaceInt<int> *)ESMC_NULL_POINTER,
+                          (InterArray<int> *)ESMC_NULL_POINTER,
+                          (InterArray<int> *)ESMC_NULL_POINTER,
+                          (InterArray<int> *)ESMC_NULL_POINTER,
+                          (InterArray<int> *)ESMC_NULL_POINTER,
+                          (InterArray<int> *)ESMC_NULL_POINTER,
+                          (InterArray<int> *)ESMC_NULL_POINTER,
                           &indexflag, staggerMemLBoundIntInt, 
-                          (InterfaceInt<int> *)ESMC_NULL_POINTER,
-                          (InterfaceInt<int> *)ESMC_NULL_POINTER, 
+                          (InterArray<int> *)ESMC_NULL_POINTER,
+                          (InterArray<int> *)ESMC_NULL_POINTER, 
                           &localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc,
       ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;        
@@ -1256,8 +1256,8 @@ int Grid::addItemArrayArb(
     
   int *distgridToArrayMapIntIntArray=new int[distgridDimCount];
   extent[0]=distgridDimCount;
-  InterfaceInt<int> *distgridToArrayMapIntInt =
-    new InterfaceInt<int>(distgridToArrayMapIntIntArray,1,extent); 
+  InterArray<int> *distgridToArrayMapIntInt =
+    new InterArray<int>(distgridToArrayMapIntIntArray,1,extent); 
 
   ////////////
   ///// Construct the item array
@@ -1280,15 +1280,15 @@ int Grid::addItemArrayArb(
     // Create an Array to hold the coords 
    array=Array::create(arrayspec, distgrid,
 		      distgridToArrayMapIntInt,
-		       (InterfaceInt<int> *)ESMC_NULL_POINTER,
-		       (InterfaceInt<int> *)ESMC_NULL_POINTER,
-		       (InterfaceInt<int> *)ESMC_NULL_POINTER,
-		       (InterfaceInt<int> *)ESMC_NULL_POINTER,
-		       (InterfaceInt<int> *)ESMC_NULL_POINTER,
-		       (InterfaceInt<int> *)ESMC_NULL_POINTER,
+		       (InterArray<int> *)ESMC_NULL_POINTER,
+		       (InterArray<int> *)ESMC_NULL_POINTER,
+		       (InterArray<int> *)ESMC_NULL_POINTER,
+		       (InterArray<int> *)ESMC_NULL_POINTER,
+		       (InterArray<int> *)ESMC_NULL_POINTER,
+		       (InterArray<int> *)ESMC_NULL_POINTER,
 		       &indexflag, NULL,
-		       (InterfaceInt<int> *)ESMC_NULL_POINTER,
-		       (InterfaceInt<int> *)ESMC_NULL_POINTER, 
+		       (InterArray<int> *)ESMC_NULL_POINTER,
+		       (InterArray<int> *)ESMC_NULL_POINTER, 
 		       &localrc);
 
    if (ESMC_LogDefault.MsgFoundError(localrc,
@@ -1414,14 +1414,14 @@ Grid *Grid::create(
   char *nameArg,                            // (in) optional
   ESMC_TypeKind_Flag *typekindArg,               // (in) optional
   DistGrid *distgridArg,                    // (in) optional
-  InterfaceInt<int> *gridEdgeLWidthArg,           // (in) optional
-  InterfaceInt<int> *gridEdgeUWidthArg,           // (in) optional
-  InterfaceInt<int> *gridAlignArg,                // (in) optional
-  InterfaceInt<int> *distgridToGridMapArg,                  // (in) optional
+  InterArray<int> *gridEdgeLWidthArg,           // (in) optional
+  InterArray<int> *gridEdgeUWidthArg,           // (in) optional
+  InterArray<int> *gridAlignArg,                // (in) optional
+  InterArray<int> *distgridToGridMapArg,                  // (in) optional
   ESMC_CoordSys_Flag *coordSys, 
-  InterfaceInt<int> *coordDimCountArg,               // (in) optional
-  InterfaceInt<int> *coordDimMapArg,             // (in) optional
-  InterfaceInt<int> *gridMemLBoundArg,          // (in) optional
+  InterArray<int> *coordDimCountArg,               // (in) optional
+  InterArray<int> *coordDimMapArg,             // (in) optional
+  InterArray<int> *gridMemLBoundArg,          // (in) optional
   ESMC_IndexFlag *indexflagArg,             // (in) optional
   bool *destroyDistgridArg,
   bool *destroyDELayoutArg,
@@ -1458,8 +1458,8 @@ Grid *Grid::create(
   localrc=construct(grid, nameLenArg, nameArg, typekindArg, distgridArg, 
                     gridEdgeLWidthArg,gridEdgeUWidthArg, gridAlignArg,
                     distgridToGridMapArg, 
-                    (InterfaceInt<int> *)ESMC_NULL_POINTER,
-                    (InterfaceInt<int> *)ESMC_NULL_POINTER,
+                    (InterArray<int> *)ESMC_NULL_POINTER,
+                    (InterArray<int> *)ESMC_NULL_POINTER,
                     coordSys, coordDimCountArg, coordDimMapArg, gridMemLBoundArg,
                     indexflagArg,
                     destroyDistgridArg, destroyDELayoutArg);
@@ -1490,15 +1490,15 @@ Grid *Grid::create(
   char *nameArg,                            // (in) optional
   ESMC_TypeKind_Flag *typekindArg,               // (in) optional
   DistGrid *distgridArg,                    // (in) optional
-  InterfaceInt<int> *minIndexArg,                // (in) optional
-  InterfaceInt<int> *maxIndexArg,                // (in)
-  InterfaceInt<int> *localArbIndexArg,            // (in)
+  InterArray<int> *minIndexArg,                // (in) optional
+  InterArray<int> *maxIndexArg,                // (in)
+  InterArray<int> *localArbIndexArg,            // (in)
   int  localArbIndexCount,                          // (in)
-  InterfaceInt<int> *distDimArg,                 // (in) 
+  InterArray<int> *distDimArg,                 // (in) 
   int  arbDim,                              // (in)
   ESMC_CoordSys_Flag *coordSys, 
-  InterfaceInt<int> *coordDimCountArg,               // (in) optional
-  InterfaceInt<int> *coordDimMapArg,             // (in) optional
+  InterArray<int> *coordDimCountArg,               // (in) optional
+  InterArray<int> *coordDimMapArg,             // (in) optional
   bool *destroyDistgridArg,
   bool *destroyDELayoutArg,
   int *rcArg                                // (out) return code optional
@@ -1534,12 +1534,12 @@ Grid *Grid::create(
   localrc=construct(grid, nameLenArg, nameArg, typekindArg, distgridArg, 
                     minIndexArg, maxIndexArg, localArbIndexArg, localArbIndexCount,
 		    distDimArg, arbDim, 
-                    (InterfaceInt<int> *)ESMC_NULL_POINTER,
-                    (InterfaceInt<int> *)ESMC_NULL_POINTER,
+                    (InterArray<int> *)ESMC_NULL_POINTER,
+                    (InterArray<int> *)ESMC_NULL_POINTER,
 		    coordSys, 
                     coordDimCountArg,
 		    coordDimMapArg,
-                    (InterfaceInt<int> *)ESMC_NULL_POINTER,
+                    (InterArray<int> *)ESMC_NULL_POINTER,
                     (ESMC_IndexFlag *)NULL,  
                     destroyDistgridArg, destroyDELayoutArg);
    if (ESMC_LogDefault.MsgFoundError(localrc,
@@ -3120,19 +3120,19 @@ int Grid::set(
   char *nameArg,                 // (in) optional
   ESMC_TypeKind_Flag *typekindArg,    // (in) optional
   DistGrid *distgridArg,         // (in) optional
-  InterfaceInt<int> *gridEdgeLWidthArg,  // (in) optional
-  InterfaceInt<int> *gridEdgeUWidthArg,  // (in) optional
-  InterfaceInt<int> *gridAlignArg,       // (in) optional
-  InterfaceInt<int> *distgridToGridMapArg,       // (in) optional
-  InterfaceInt<int> *distDimArg,          // (in) optional
-  InterfaceInt<int> *minIndexArg,           // (int) optional
-  InterfaceInt<int> *maxIndexArg,           // (int) optional
-  InterfaceInt<int> *localArbIndexArg,           // (int) optional
+  InterArray<int> *gridEdgeLWidthArg,  // (in) optional
+  InterArray<int> *gridEdgeUWidthArg,  // (in) optional
+  InterArray<int> *gridAlignArg,       // (in) optional
+  InterArray<int> *distgridToGridMapArg,       // (in) optional
+  InterArray<int> *distDimArg,          // (in) optional
+  InterArray<int> *minIndexArg,           // (int) optional
+  InterArray<int> *maxIndexArg,           // (int) optional
+  InterArray<int> *localArbIndexArg,           // (int) optional
   int  *localArbIndexCountArg,                    // (int) optional
   ESMC_CoordSys_Flag *coordSysArg, 
-  InterfaceInt<int> *coordDimCountArg,    // (in) optional
-  InterfaceInt<int> *coordDimMapArg,  // (in) optional
-  InterfaceInt<int> *gridMemLBoundArg,          // (in)
+  InterArray<int> *coordDimCountArg,    // (in) optional
+  InterArray<int> *coordDimMapArg,  // (in) optional
+  InterArray<int> *gridMemLBoundArg,          // (in)
   ESMC_IndexFlag *indexflagArg,   // (in) optional
   bool *destroyDistgridArg,
   bool *destroyDELayoutArg
@@ -3215,73 +3215,73 @@ int Grid::set(
   // if passed in, set gridEdgeLWidth
   if (present(gridEdgeLWidthArg)) { 
     // if present get rid of the old data
-    if (present(proto->gridEdgeLWidth)) _freeInterfaceInt(&proto->gridEdgeLWidth);
+    if (present(proto->gridEdgeLWidth)) _freeInterArray(&proto->gridEdgeLWidth);
 
     // record the new data
-    proto->gridEdgeLWidth=_copyInterfaceInt(gridEdgeLWidthArg);
+    proto->gridEdgeLWidth=_copyInterArray(gridEdgeLWidthArg);
   }
 
   // if passed in, set gridEdgeUWidth
   if (present(gridEdgeUWidthArg)) { 
     // if present get rid of the old data
-    if (present(proto->gridEdgeUWidth)) _freeInterfaceInt(&proto->gridEdgeUWidth);
+    if (present(proto->gridEdgeUWidth)) _freeInterArray(&proto->gridEdgeUWidth);
 
     // record the new data
-    proto->gridEdgeUWidth=_copyInterfaceInt(gridEdgeUWidthArg);
+    proto->gridEdgeUWidth=_copyInterArray(gridEdgeUWidthArg);
   }
 
   // if passed in, set gridAlign
   if (present(gridAlignArg)) { 
     // if present get rid of the old data
-    if (present(proto->gridAlign)) _freeInterfaceInt(&proto->gridAlign);
+    if (present(proto->gridAlign)) _freeInterArray(&proto->gridAlign);
 
     // record the new data
-    proto->gridAlign=_copyInterfaceInt(gridAlignArg);
+    proto->gridAlign=_copyInterArray(gridAlignArg);
   }
 
   // if passed in, set distgridToGridMap
   if (present(distgridToGridMapArg)) { 
     // if present get rid of the old data
-    if (present(proto->distgridToGridMap)) _freeInterfaceInt(&proto->distgridToGridMap);
+    if (present(proto->distgridToGridMap)) _freeInterArray(&proto->distgridToGridMap);
 
     // record the new data
-    proto->distgridToGridMap=_copyInterfaceInt(distgridToGridMapArg);
+    proto->distgridToGridMap=_copyInterArray(distgridToGridMapArg);
   }
 
   // if passed in, set distDim
   if (present(distDimArg)) { 
     // if present get rid of the old data
-    if (present(proto->distDim)) _freeInterfaceInt(&proto->distDim);
+    if (present(proto->distDim)) _freeInterArray(&proto->distDim);
 
     // record the new data
-    proto->distDim=_copyInterfaceInt(distDimArg);
+    proto->distDim=_copyInterArray(distDimArg);
   }
 
   // if passed in, set minIndex
   if (present(minIndexArg)) {
     // if present get rid of the old data
-    if (present(proto->minIndex)) _freeInterfaceInt(&proto->minIndex);
+    if (present(proto->minIndex)) _freeInterArray(&proto->minIndex);
 
     // record the new data
-    proto->minIndex = _copyInterfaceInt(minIndexArg);
+    proto->minIndex = _copyInterArray(minIndexArg);
   }
 
   // if passed in, set maxIndex
   if (present(maxIndexArg)) {
     // if present get rid of the old data
-    if (present(proto->maxIndex)) _freeInterfaceInt(&proto->maxIndex);
+    if (present(proto->maxIndex)) _freeInterArray(&proto->maxIndex);
 
     // record the new data
-    proto->maxIndex = _copyInterfaceInt(maxIndexArg);
+    proto->maxIndex = _copyInterArray(maxIndexArg);
   }
 
   // if passed in, set localArbIndex
   if (present(localArbIndexArg)) {
     // if present get rid of the old data
-    if (present(proto->localArbIndex)) _freeInterfaceInt(&proto->localArbIndex);
+    if (present(proto->localArbIndex)) _freeInterArray(&proto->localArbIndex);
 
     // record the new data
-    proto->localArbIndex = _copyInterfaceInt(localArbIndexArg);
+    proto->localArbIndex = _copyInterArray(localArbIndexArg);
   }
 
   // if passed in, set localArbIndexCount
@@ -3292,28 +3292,28 @@ int Grid::set(
   // if passed in, set coordDimCount
   if (present(coordDimCountArg)) { 
     // if present get rid of the old data
-    if (present(proto->coordDimCount)) _freeInterfaceInt(&proto->coordDimCount);
+    if (present(proto->coordDimCount)) _freeInterArray(&proto->coordDimCount);
 
     // record the new data
-    proto->coordDimCount=_copyInterfaceInt(coordDimCountArg);
+    proto->coordDimCount=_copyInterArray(coordDimCountArg);
   }
 
   // if passed in, set coordDimMap
   if (present(coordDimMapArg)) { 
     // if present get rid of the old data
-    if (present(proto->coordDimMap)) _freeInterfaceInt(&proto->coordDimMap);
+    if (present(proto->coordDimMap)) _freeInterArray(&proto->coordDimMap);
 
     // record the new data
-    proto->coordDimMap=_copyInterfaceInt(coordDimMapArg);
+    proto->coordDimMap=_copyInterArray(coordDimMapArg);
   }
 
   // if passed in, set gridMemLBoundArg
   if (present(gridMemLBoundArg)) { 
     // if present get rid of the old data
-    if (present(proto->gridMemLBound)) _freeInterfaceInt(&proto->gridMemLBound);
+    if (present(proto->gridMemLBound)) _freeInterArray(&proto->gridMemLBound);
 
     // record the new data
-    proto->gridMemLBound=_copyInterfaceInt(gridMemLBoundArg);
+    proto->gridMemLBound=_copyInterArray(gridMemLBoundArg);
   }
 
   // if passed in, set indexflag
@@ -4702,21 +4702,21 @@ ProtoGrid::ProtoGrid(
   if (name != ESMC_NULL_POINTER) delete [] name;  
   if (typekind != ESMC_NULL_POINTER) delete typekind;
   // don't delete distgrid
-  if (gridEdgeLWidth != ESMC_NULL_POINTER) _freeInterfaceInt(&gridEdgeLWidth);
-  if (gridEdgeUWidth != ESMC_NULL_POINTER) _freeInterfaceInt(&gridEdgeUWidth);
-  if (gridAlign != ESMC_NULL_POINTER) _freeInterfaceInt(&gridAlign);
-  if (gridMemLBound != ESMC_NULL_POINTER) _freeInterfaceInt(&gridMemLBound);
-  if (distgridToGridMap != ESMC_NULL_POINTER) _freeInterfaceInt(&distgridToGridMap);
-  if (distDim != ESMC_NULL_POINTER) _freeInterfaceInt(&distDim);
-  if (undistLBound != ESMC_NULL_POINTER) _freeInterfaceInt(&undistLBound);
-  if (undistUBound != ESMC_NULL_POINTER) _freeInterfaceInt(&undistUBound);
+  if (gridEdgeLWidth != ESMC_NULL_POINTER) _freeInterArray(&gridEdgeLWidth);
+  if (gridEdgeUWidth != ESMC_NULL_POINTER) _freeInterArray(&gridEdgeUWidth);
+  if (gridAlign != ESMC_NULL_POINTER) _freeInterArray(&gridAlign);
+  if (gridMemLBound != ESMC_NULL_POINTER) _freeInterArray(&gridMemLBound);
+  if (distgridToGridMap != ESMC_NULL_POINTER) _freeInterArray(&distgridToGridMap);
+  if (distDim != ESMC_NULL_POINTER) _freeInterArray(&distDim);
+  if (undistLBound != ESMC_NULL_POINTER) _freeInterArray(&undistLBound);
+  if (undistUBound != ESMC_NULL_POINTER) _freeInterArray(&undistUBound);
   if (coordSys != ESMC_NULL_POINTER) delete coordSys; 
-  if (coordDimCount != ESMC_NULL_POINTER) _freeInterfaceInt(&coordDimCount);
-  if (coordDimMap != ESMC_NULL_POINTER) _freeInterfaceInt(&coordDimMap);
+  if (coordDimCount != ESMC_NULL_POINTER) _freeInterArray(&coordDimCount);
+  if (coordDimMap != ESMC_NULL_POINTER) _freeInterArray(&coordDimMap);
   if (indexflag != ESMC_NULL_POINTER) delete indexflag; 
-  if (minIndex != ESMC_NULL_POINTER) _freeInterfaceInt(&minIndex); 
-  if (maxIndex != ESMC_NULL_POINTER) _freeInterfaceInt(&maxIndex); 
-  if (localArbIndex != ESMC_NULL_POINTER) _freeInterfaceInt(&localArbIndex);
+  if (minIndex != ESMC_NULL_POINTER) _freeInterArray(&minIndex); 
+  if (maxIndex != ESMC_NULL_POINTER) _freeInterArray(&maxIndex); 
+  if (localArbIndex != ESMC_NULL_POINTER) _freeInterArray(&localArbIndex);
   if (destroyDistgrid != ESMC_NULL_POINTER) delete destroyDistgrid; 
   if (destroyDELayout != ESMC_NULL_POINTER) delete destroyDELayout; 
 }
@@ -4865,10 +4865,10 @@ int Grid::setItemArrayInternal(
 // !ARGUMENTS:
 //
                           int staggerloc,             // (in) optional
-                          InterfaceInt<int> *staggerEdgeLWidthArg, // (in) optional
-                          InterfaceInt<int> *staggerEdgeUWidthArg, // (in) optional
-                          InterfaceInt<int> *staggerAlignArg,   // (in) optional 
-                          InterfaceInt<int> *staggerMemLBoundArg   // (in) optional 
+                          InterArray<int> *staggerEdgeLWidthArg, // (in) optional
+                          InterArray<int> *staggerEdgeUWidthArg, // (in) optional
+                          InterArray<int> *staggerAlignArg,   // (in) optional 
+                          InterArray<int> *staggerMemLBoundArg   // (in) optional 
   ) {
 //
 // !DESCRIPTION:
@@ -5139,15 +5139,15 @@ int Grid::getStaggerDistgrid(
       if (tileCount <= 1) {
         int extent[1];
       
-        // Create InterfaceInts holding stagger padding
+        // Create InterArrays holding stagger padding
         extent[0]=dimCount;
         int *staggerEdgeLWidthIntIntArray=new int[dimCount];
-        InterfaceInt<int> *staggerEdgeLWidthIntInt
-          = new InterfaceInt<int>(staggerEdgeLWidthIntIntArray,1,extent);
+        InterArray<int> *staggerEdgeLWidthIntInt
+          = new InterArray<int>(staggerEdgeLWidthIntIntArray,1,extent);
 
         int *staggerEdgeUWidthIntIntArray=new int[dimCount];
-        InterfaceInt<int> *staggerEdgeUWidthIntInt =
-          new InterfaceInt<int>(staggerEdgeUWidthIntIntArray,1,extent);
+        InterArray<int> *staggerEdgeUWidthIntInt =
+          new InterArray<int>(staggerEdgeUWidthIntIntArray,1,extent);
       
         // Map offsets into distgrid space
         for (int i=0; i<dimCount; i++) {
@@ -5157,7 +5157,7 @@ int Grid::getStaggerDistgrid(
 
 
         // Get connection List with pole added back in
-        InterfaceInt<int> *connListWPoles=NULL;
+        InterArray<int> *connListWPoles=NULL;
         if (staggerloc==0){ // center stagger
 //TODO: gjt thinks that poles should only be added back in for center stagger.
 //TODO: For all other staggers the DistGrid should not contain pole connections.
@@ -5205,16 +5205,16 @@ int Grid::getStaggerDistgrid(
        } else { // Multi-tile grids
         int extent[2];
 
-        // Create InterfaceInts holding stagger padding
+        // Create InterArrays holding stagger padding
         extent[0]=dimCount;
         extent[1]=tileCount;
         int *staggerEdgeLWidthIntIntArray=new int[dimCount*tileCount];
-        InterfaceInt<int> *staggerEdgeLWidthIntInt =
-          new InterfaceInt<int>(staggerEdgeLWidthIntIntArray,2,extent);
+        InterArray<int> *staggerEdgeLWidthIntInt =
+          new InterArray<int>(staggerEdgeLWidthIntIntArray,2,extent);
          
         int *staggerEdgeUWidthIntIntArray=new int[dimCount*tileCount];
-        InterfaceInt<int> *staggerEdgeUWidthIntInt =
-          new InterfaceInt<int>(staggerEdgeUWidthIntIntArray,2,extent);
+        InterArray<int> *staggerEdgeUWidthIntInt =
+          new InterArray<int>(staggerEdgeUWidthIntIntArray,2,extent);
 
 #if 0
         // A problem with non-center stagger multi-tile is that the padding needs to be different for 
@@ -5288,8 +5288,8 @@ int Grid::getStaggerDistgrid(
           int extent[2];
           extent[0]=connSize;
           extent[1]=0; // No connections, to indicate there should be no connections
-          InterfaceInt<int> *emptyConnListII =
-            new InterfaceInt<int>(tmpConnList,2,extent);
+          InterArray<int> *emptyConnListII =
+            new InterArray<int>(tmpConnList,2,extent);
 
           // Create stagger distgrid with no connections, so corners work 
           staggerDistgridList[staggerloc]=DistGrid::create(distgrid,
@@ -6025,7 +6025,7 @@ static  void _free3D(Type ****array)
 
   // Make a copy of an interface int, allocating a new chunk of memory for its
   // internal array
-  static InterfaceInt<int> *_copyInterfaceInt(InterfaceInt<int> *in) {
+  static InterArray<int> *_copyInterArray(InterArray<int> *in) {
 
     // calc size of array
     int size=1;
@@ -6042,11 +6042,11 @@ static  void _free3D(Type ****array)
       array=ESMC_NULL_POINTER;
     }
 
-    return new InterfaceInt<int>(array,in->dimCount,in->extent);
+    return new InterArray<int>(array,in->dimCount,in->extent);
   }
 
-  // Deallocate an interfaceInt which was created with _copyInterfaceInt 
-  static void _freeInterfaceInt(InterfaceInt<int> **in) {
+  // Deallocate an InterArray which was created with _copyInterArray 
+  static void _freeInterArray(InterArray<int> **in) {
 
     // make sure its not a null pointer
     if (in==ESMC_NULL_POINTER) return;
@@ -6269,16 +6269,16 @@ int construct(
   char *nameArg,                            // (in) optional
   ESMC_TypeKind_Flag *typekindArg,               // (in) optional
   DistGrid *distgridArg,                    // (in) 
-  InterfaceInt<int> *gridEdgeLWidthArg,             // (in) optional
-  InterfaceInt<int> *gridEdgeUWidthArg,             // (in) optional
-  InterfaceInt<int> *gridAlignArg,             // (in) optional
-  InterfaceInt<int> *distgridToGridMapArg,                  // (in) optional
-  InterfaceInt<int> *undistLBoundArg,                 // (in) optional
-  InterfaceInt<int> *undistUBoundArg,                 // (in) optional
+  InterArray<int> *gridEdgeLWidthArg,             // (in) optional
+  InterArray<int> *gridEdgeUWidthArg,             // (in) optional
+  InterArray<int> *gridAlignArg,             // (in) optional
+  InterArray<int> *distgridToGridMapArg,                  // (in) optional
+  InterArray<int> *undistLBoundArg,                 // (in) optional
+  InterArray<int> *undistUBoundArg,                 // (in) optional
    ESMC_CoordSys_Flag *coordSysArg, 
-  InterfaceInt<int> *coordDimCountArg,               // (in) optional
-  InterfaceInt<int> *coordDimMapArg,             // (in) optional
-  InterfaceInt<int> *gridMemLBoundArg,             // (in) optional
+  InterArray<int> *coordDimCountArg,               // (in) optional
+  InterArray<int> *coordDimMapArg,             // (in) optional
+  InterArray<int> *gridMemLBoundArg,             // (in) optional
   ESMC_IndexFlag *indexflagArg,              // (in) optional
   bool *destroyDistgridArg,
   bool *destroyDELayoutArg
@@ -6786,18 +6786,18 @@ int construct(
   char *nameArg,                            // (in) optional
   ESMC_TypeKind_Flag *typekindArg,               // (in) optional
   DistGrid *distgridArg,                    // (in) 
-  InterfaceInt<int> *minIndexArg,               // (in) optional
-  InterfaceInt<int> *maxIndexArg,                // (in)  
-  InterfaceInt<int> *localArbIndexArg,            // (in)  
+  InterArray<int> *minIndexArg,               // (in) optional
+  InterArray<int> *maxIndexArg,                // (in)  
+  InterArray<int> *localArbIndexArg,            // (in)  
   int localArbIndexCountArg,                           // (in)  
-  InterfaceInt<int> *distDimArg,                // (in) 
+  InterArray<int> *distDimArg,                // (in) 
   int arbDimArg,                           // (in)
-  InterfaceInt<int> *undistLBoundArg,            // (in) optional
-  InterfaceInt<int> *undistUBoundArg,            // (in) optional
+  InterArray<int> *undistLBoundArg,            // (in) optional
+  InterArray<int> *undistUBoundArg,            // (in) optional
   ESMC_CoordSys_Flag *coordSysArg, 
-  InterfaceInt<int> *coordDimCountArg,               // (in) optional
-  InterfaceInt<int> *coordDimMapArg,             // (in) optional
-  InterfaceInt<int> *gridMemLBoundArg,             // (in) optional
+  InterArray<int> *coordDimCountArg,               // (in) optional
+  InterArray<int> *coordDimMapArg,             // (in) optional
+  InterArray<int> *gridMemLBoundArg,             // (in) optional
   ESMC_IndexFlag *indexflagArg,             // (in) optional
   bool *destroyDistgridArg,
   bool *destroyDELayoutArg
@@ -7206,9 +7206,9 @@ int setGridDefaultsLUA(
 // !ARGUMENTS:
 //
                        int dimCount,                // Size of the input arrays
-                       InterfaceInt<int> *gridEdgeLWidthIn,  // (in) optional
-                       InterfaceInt<int> *gridEdgeUWidthIn,  // (in) optional
-                       InterfaceInt<int> *gridAlignIn,   // (in) optional
+                       InterArray<int> *gridEdgeLWidthIn,  // (in) optional
+                       InterArray<int> *gridEdgeUWidthIn,  // (in) optional
+                       InterArray<int> *gridAlignIn,   // (in) optional
                        int *gridEdgeLWidthOut,          // (out)
                        int *gridEdgeUWidthOut,          // (out)
                        int *gridAlignOut            // (out)
@@ -7222,7 +7222,7 @@ int setGridDefaultsLUA(
 // This logic is encapsulated in one place so it'll be consistent everywhere. 
 //
 // NOTE: all the input arrays must at least be of size dimCount. (not present, optional,
-//       interfaceInts need not obey this)
+//       InterArrays need not obey this)
 //  
 //EOPI
 //-----------------------------------------------------------------------------
@@ -7262,9 +7262,9 @@ int setDefaultsLUA(
 // !ARGUMENTS:
 //
                    int dimCount,                // all of the input arrays must be of at least this size 
-                   InterfaceInt<int> *lWidthIn,  // (in) optional
-                   InterfaceInt<int> *uWidthIn,  // (in) optional
-                   InterfaceInt<int> *alignIn,   // (in) optional
+                   InterArray<int> *lWidthIn,  // (in) optional
+                   InterArray<int> *uWidthIn,  // (in) optional
+                   InterArray<int> *alignIn,   // (in) optional
                    int *lWidthDefault,      // (in)
                    int *uWidthDefault,      // (in)
                    int *alignDefault,       // (in)
@@ -7280,7 +7280,7 @@ int setDefaultsLUA(
 // This logic is encapsulated in one place so it'll be consistent everywhere. 
 //
 // NOTE: all the input arrays must at least be of size dimCount. (not present, optional,
-//       interfaceInts need not obey this)
+//       InterArrays need not obey this)
 //  
 // NOTE: This routine only does minimal error checking of the inputs.
 //
@@ -10145,8 +10145,8 @@ void _create_nopole_distgrid(DistGrid *distgrid, DistGrid **distgrid_nopole, int
   // Obviously no pole, so just copy
   if (distgrid->getConnectionCount() <1) {
     *distgrid_nopole=DistGrid::create(distgrid,
-                                      (InterfaceInt<int> *)NULL, (InterfaceInt<int> *)NULL,
-                                      (ESMC_IndexFlag *)NULL, (InterfaceInt<int> *)NULL, 
+                                      (InterArray<int> *)NULL, (InterArray<int> *)NULL,
+                                      (ESMC_IndexFlag *)NULL, (InterArray<int> *)NULL, 
                                       NULL, true, &localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
        rc)) return; 
@@ -10164,8 +10164,8 @@ void _create_nopole_distgrid(DistGrid *distgrid, DistGrid **distgrid_nopole, int
 
     // Copy distgrid
     *distgrid_nopole=DistGrid::create(distgrid,
-                                   (InterfaceInt<int> *)NULL, (InterfaceInt<int> *)NULL,
-                                      (ESMC_IndexFlag *)NULL, (InterfaceInt<int> *)NULL, 
+                                   (InterArray<int> *)NULL, (InterArray<int> *)NULL,
+                                      (ESMC_IndexFlag *)NULL, (InterArray<int> *)NULL, 
                                    NULL, true, &localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
                                       rc)) return; 
@@ -10226,10 +10226,10 @@ void _create_nopole_distgrid(DistGrid *distgrid, DistGrid **distgrid_nopole, int
  
   extent[0]=connSize;
   extent[1]=newConnCount;
-  InterfaceInt<int> *newConnListII=new InterfaceInt<int>(newConnList,2,extent);
+  InterArray<int> *newConnListII=new InterArray<int>(newConnList,2,extent);
 
  *distgrid_nopole=DistGrid::create(distgrid,
-                                   (InterfaceInt<int> *)NULL, (InterfaceInt<int> *)NULL,
+                                   (InterArray<int> *)NULL, (InterArray<int> *)NULL,
                                    (ESMC_IndexFlag *)NULL, newConnListII, 
                                    NULL, true, &localrc);
  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
@@ -10321,9 +10321,9 @@ void _translate_distgrid_conn(DistGrid *distgrid,
 
 
 
-// Output is in interfaceInt, calling subroutine needs to deallacate list
+// Output is in InterArray, calling subroutine needs to deallacate list
 void _add_poles_to_conn(DistGrid *distgrid, 
-                        int *lwidth, int *uwidth, ESMC_GridConn *connL, ESMC_GridConn *connU, InterfaceInt<int> **connListOut, int *rc) {
+                        int *lwidth, int *uwidth, ESMC_GridConn *connL, ESMC_GridConn *connU, InterArray<int> **connListOut, int *rc) {
   int localrc;
   int widthIndex[ESMF_MAXDIM];
   bool isLower;
@@ -10457,7 +10457,7 @@ void _add_poles_to_conn(DistGrid *distgrid,
    int extent[2];
    extent[0]=connSize;
    extent[1]=newConnCount;
-   *connListOut=new InterfaceInt<int>(newConnList, 2, extent);
+   *connListOut=new InterArray<int>(newConnList, 2, extent);
  } else {
    *connListOut=NULL;
  }

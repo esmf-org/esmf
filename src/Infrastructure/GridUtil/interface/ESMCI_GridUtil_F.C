@@ -182,7 +182,7 @@ void FTN_X(c_esmc_gridio)(ESMCI::Grid **gridpp, int *staggerLoc,
 
   void FTN_X(c_esmc_gridtomesh)(ESMCI::Grid **gridpp, int *staggerLoc,
                                 int *isSphere, int *islatlondeg, MeshCap **meshpp,
-                                ESMCI::InterfaceInt<int> *maskValuesArg, int *regridConserve, int *rc) {
+                                ESMCI::InterArray<int> *maskValuesArg, int *regridConserve, int *rc) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_gridtomesh()" 
     

@@ -785,8 +785,8 @@ void IO_NetCDF::destruct(void) {
     //printf("*** LocalArray RC: %d\n", localrc);
     //locArray->print("full");
 
-    InterfaceInt<int> *minIndex = new InterfaceInt<int>(minIndices_int, ndims);
-    InterfaceInt<int> *maxIndex = new InterfaceInt<int>(maxIndices_int, ndims);
+    InterArray<int> *minIndex = new InterArray<int>(minIndices_int, ndims);
+    InterArray<int> *maxIndex = new InterArray<int>(maxIndices_int, ndims);
 
     delete[] (double*) values;
     delete[] maxIndices;
@@ -807,10 +807,10 @@ void IO_NetCDF::destruct(void) {
       std::cerr << ESMC_METHOD << ": creating distGrid" << std::endl;
     DistGrid*	distGrid = DistGrid::create(
                                minIndex, maxIndex,
-                               (InterfaceInt<int>*)NULL, (Decomp_Flag*)NULL, 0,
-                               (InterfaceInt<int>*)NULL, (InterfaceInt<int>*)NULL,
-                               (InterfaceInt<int>*)NULL, (ESMC_IndexFlag*)NULL,
-                               (InterfaceInt<int>*)NULL, 
+                               (InterArray<int>*)NULL, (Decomp_Flag*)NULL, 0,
+                               (InterArray<int>*)NULL, (InterArray<int>*)NULL,
+                               (InterArray<int>*)NULL, (ESMC_IndexFlag*)NULL,
+                               (InterArray<int>*)NULL, 
                                (DELayout*)NULL, (VM*)NULL, &localrc);
     //printf("*** DistGrid RC: %d\n", localrc);
 
@@ -828,11 +828,11 @@ void IO_NetCDF::destruct(void) {
       std::cerr << ESMC_METHOD << ": creating thisArray" << std::endl;
     thisArray = Array::create(&locArray, 1,
                               distGrid, DATA_COPY,
-                              (InterfaceInt<int>*)NULL, (InterfaceInt<int>*)NULL, 
-                              (InterfaceInt<int>*)NULL, (InterfaceInt<int>*)NULL, 
-                              (InterfaceInt<int>*)NULL, (InterfaceInt<int>*)NULL,
-                              (InterfaceInt<int>*)NULL, (ESMC_IndexFlag*)NULL,
-                              (InterfaceInt<int>*)NULL, (InterfaceInt<int>*)NULL,
+                              (InterArray<int>*)NULL, (InterArray<int>*)NULL, 
+                              (InterArray<int>*)NULL, (InterArray<int>*)NULL, 
+                              (InterArray<int>*)NULL, (InterArray<int>*)NULL,
+                              (InterArray<int>*)NULL, (ESMC_IndexFlag*)NULL,
+                              (InterArray<int>*)NULL, (InterArray<int>*)NULL,
                               &localrc);
 
     //printf("*** Array RC: %d\n", localrc);

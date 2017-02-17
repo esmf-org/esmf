@@ -75,7 +75,7 @@ static void copy_cnsv_rs_from_WMat_to_Array(WMat *wmat, ESMCI::Array *array);
  extern "C" void FTN_X(c_esmc_arraysmmstore)(ESMCI::Array **srcArray,
     ESMCI::Array **dstArray, ESMCI::RouteHandle **routehandle,
     ESMC_TypeKind_Flag *typekind, void *factorList, int *factorListCount,
-    ESMCI::InterfaceInt<int> *factorIndexList, ESMC_Logical *ignoreUnmatched,
+    ESMCI::InterArray<int> *factorIndexList, ESMC_Logical *ignoreUnmatched,
     int *srcTermProcessing, int *pipelineDepth, int *rc);
 
 void CpMeshDataToArray(Grid &grid, int staggerLoc, ESMCI::Mesh &mesh, ESMCI::Array &array, MEField<> *dataToArray);
@@ -299,8 +299,8 @@ void ESMCI_regrid_create(ESMCI::VM **vmpp,
     int *iientries = new int[2*iisize.first]; 
     int larg[2] = {2, iisize.first};
     // Gather the list
-    ESMCI::InterfaceInt<int> ii(iientries, 2, larg);
-    ESMCI::InterfaceInt<int> *iiptr = &ii;
+    ESMCI::InterArray<int> ii(iientries, 2, larg);
+    ESMCI::InterArray<int> *iiptr = &ii;
 
     double *factors = new double[iisize.first];
 

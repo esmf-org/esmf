@@ -44,7 +44,7 @@ int main(void){
 
   ESMC_ArraySpec arrayspec;
   int *minIndexValues, *maxIndexValues;
-  ESMC_InterfaceInt minIndex, maxIndex;
+  ESMC_InterArrayInt minIndex, maxIndex;
   ESMC_DistGrid distgrid;
   ESMC_Array array;
   ESMC_Array retrievedArray;
@@ -81,7 +81,7 @@ int main(void){
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
   minIndexValues = (int *)malloc(2*sizeof(int));
   minIndexValues[0] = minIndexValues[1] = 1;
-  rc = ESMC_InterfaceIntSet(&minIndex, minIndexValues, 2);
+  rc = ESMC_InterArrayIntSet(&minIndex, minIndexValues, 2);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
   
@@ -92,7 +92,7 @@ int main(void){
   maxIndexValues = (int *)malloc(2*sizeof(int));
   maxIndexValues[0] = 5;
   maxIndexValues[1] = 10;
-  rc = ESMC_InterfaceIntSet(&maxIndex, maxIndexValues, 2);
+  rc = ESMC_InterArrayIntSet(&maxIndex, maxIndexValues, 2);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
   

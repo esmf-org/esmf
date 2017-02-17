@@ -192,7 +192,7 @@ int ESMC_ArrayPrint(
 
 
 int ESMC_ArraySetLWidth(ESMC_Array array,
-   ESMC_InterfaceInt computationalLWidthArg);
+  ESMC_InterArrayInt computationalLWidthArg);
 
 #ifdef __cplusplus
 } // extern "C"

@@ -43,7 +43,7 @@ int main(void){
 
   int dimcount = 2;
   int *maxIndex;
-  ESMC_InterfaceInt i_maxIndex;
+  ESMC_InterArrayInt i_maxIndex;
   int p;
   bool pass;
   int elbnd[dimcount],eubnd[dimcount];
@@ -75,7 +75,7 @@ int main(void){
   maxIndex = (int *)malloc(dimcount*sizeof(int));
   maxIndex[0] = 12;
   maxIndex[1] = 20;
-  rc = ESMC_InterfaceIntSet(&i_maxIndex, maxIndex, dimcount);
+  rc = ESMC_InterArrayIntSet(&i_maxIndex, maxIndex, dimcount);
 
   strcpy(name, "GridCreate");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
@@ -560,7 +560,7 @@ int main(void){
   maxIndex = (int *)malloc(dimcount*sizeof(int));
   maxIndex[0] = 20;
   maxIndex[1] = 20;
-  rc = ESMC_InterfaceIntSet(&i_maxIndex, maxIndex, dimcount);
+  rc = ESMC_InterArrayIntSet(&i_maxIndex, maxIndex, dimcount);
 
   strcpy(name, "GridCreate");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
@@ -617,7 +617,7 @@ int main(void){
   maxIndex = (int *)malloc(dimcount*sizeof(int));
   maxIndex[0] = 12;
   maxIndex[1] = 20;
-  rc = ESMC_InterfaceIntSet(&i_maxIndex, maxIndex, dimcount);
+  rc = ESMC_InterArrayIntSet(&i_maxIndex, maxIndex, dimcount);
 
   strcpy(name, "GridCreate");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");

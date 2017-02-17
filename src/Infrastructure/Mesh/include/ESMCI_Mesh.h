@@ -116,7 +116,7 @@ void proxy_build_sym_comm_rel(UInt obj_type);
  */
 void resolve_cspec_delete_owners(UInt obj_type);
 
- ESMCI::PointList *MeshToPointList(ESMC_MeshLoc_Flag meshLoc, ESMCI::InterfaceInt<int> *maskValuesArg, int *rc);
+ ESMCI::PointList *MeshToPointList(ESMC_MeshLoc_Flag meshLoc, ESMCI::InterArray<int> *maskValuesArg, int *rc);
 
   public: 
 // STUFF FOR SPLIT MESH

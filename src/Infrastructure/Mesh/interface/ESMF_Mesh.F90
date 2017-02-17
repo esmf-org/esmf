@@ -573,7 +573,7 @@ contains
     integer                 :: localrc      ! local return code
     integer                 :: num_elems, num_elementConn
     type(ESMF_RegridConserve) :: lregridConserve
-    type(ESMF_InterfaceInt) :: elementMaskII
+    type(ESMF_InterArray) :: elementMaskII
     real(ESMF_KIND_R8) :: tmpArea(2)
     integer :: areaPresent
     real(ESMF_KIND_R8) :: tmpCoords(2)
@@ -636,7 +636,7 @@ contains
     endif    
 
    ! Create interface int to wrap optional element mask
-   elementMaskII = ESMF_InterfaceIntCreate(elementMask, rc=localrc)
+   elementMaskII = ESMF_InterArrayCreate(elementMask, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
          ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -723,7 +723,7 @@ contains
     !ESMF_INIT_CHECK_DEEP(ESMF_DistGridGetInit, mesh%nodal_distgrid, rc)
 
     ! Get rid of interface Int wrapper
-    call ESMF_InterfaceIntDestroy(elementMaskII, rc=localrc)
+    call ESMF_InterArrayDestroy(elementMaskII, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
          ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -815,7 +815,7 @@ contains
 !------------------------------------------------------------------------------
     integer                 :: localrc      ! local return code
     integer                 :: num_nodes
-    type(ESMF_InterfaceInt) :: nodeMaskII
+    type(ESMF_InterArray) :: nodeMaskII
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
@@ -843,7 +843,7 @@ contains
 
 
    ! Create interface int to wrap optional element mask
-   nodeMaskII = ESMF_InterfaceIntCreate(nodeMask, rc=localrc)
+   nodeMaskII = ESMF_InterArrayCreate(nodeMask, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
          ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -856,7 +856,7 @@ contains
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Get rid of interface Int wrapper
-    call ESMF_InterfaceIntDestroy(nodeMaskII, rc=localrc)
+    call ESMF_InterArrayDestroy(nodeMaskII, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
          ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -1139,7 +1139,7 @@ contains
     integer                 :: num_nodes
     integer                 :: num_elems, num_elementConn
     type(ESMF_RegridConserve) :: lregridConserve
-    type(ESMF_InterfaceInt) :: elementMaskII, nodeMaskII
+    type(ESMF_InterArray) :: elementMaskII, nodeMaskII
     real(ESMF_KIND_R8) :: tmpArea(2)
     integer :: areaPresent
     real(ESMF_KIND_R8) :: tmpCoords(2)
@@ -1193,7 +1193,7 @@ contains
 
 
    ! Create interface int to wrap optional element mask
-   nodeMaskII = ESMF_InterfaceIntCreate(nodeMask, rc=localrc)
+   nodeMaskII = ESMF_InterArrayCreate(nodeMask, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
          ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -1207,14 +1207,14 @@ contains
 
 
     ! Get rid of interface Int wrapper
-    call ESMF_InterfaceIntDestroy(nodeMaskII, rc=localrc)
+    call ESMF_InterArrayDestroy(nodeMaskII, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
          ESMF_CONTEXT, rcToReturn=rc)) return
 
 
 
    ! Create interface int to wrap optional element mask
-   elementMaskII = ESMF_InterfaceIntCreate(elementMask, rc=localrc)
+   elementMaskII = ESMF_InterArrayCreate(elementMask, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
          ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -1341,7 +1341,7 @@ num_elems, &
     endif
 
     ! Get rid of interface Int wrapper
-    call ESMF_InterfaceIntDestroy(elementMaskII, rc=localrc)
+    call ESMF_InterArrayDestroy(elementMaskII, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
          ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -5392,7 +5392,7 @@ end subroutine ESMF_MeshMergeSplitDstInd
 !EOPI
 !------------------------------------------------------------------------------
     integer :: localrc 
-    type(ESMF_InterfaceInt) :: maskValuesArg
+    type(ESMF_InterArray) :: maskValuesArg
 
     ! Init localrc
     localrc = ESMF_SUCCESS
@@ -5404,7 +5404,7 @@ end subroutine ESMF_MeshMergeSplitDstInd
     endif
 
     ! convert mask values 
-    maskValuesArg = ESMF_InterfaceIntCreate(maskValues, rc=localrc)
+    maskValuesArg = ESMF_InterArrayCreate(maskValues, rc=localrc)
     	if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       	  ESMF_CONTEXT, rcToReturn=rc)) return
  
@@ -5412,7 +5412,7 @@ end subroutine ESMF_MeshMergeSplitDstInd
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       	    ESMF_CONTEXT, rcToReturn=rc)) return
 
-    call ESMF_InterfaceIntDestroy(maskValuesArg, rc=localrc)
+    call ESMF_InterArrayDestroy(maskValuesArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       	    ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -5491,7 +5491,7 @@ end subroutine ESMF_MeshMergeSplitDstInd
 !EOPI
 !------------------------------------------------------------------------------
     integer :: localrc 
-    type(ESMF_InterfaceInt) :: maskValuesArg
+    type(ESMF_InterArray) :: maskValuesArg
 
     ! Init localrc
     localrc = ESMF_SUCCESS
@@ -5503,7 +5503,7 @@ end subroutine ESMF_MeshMergeSplitDstInd
     endif
 
     ! convert mask values 
-    maskValuesArg = ESMF_InterfaceIntCreate(maskValues, rc=localrc)
+    maskValuesArg = ESMF_InterArrayCreate(maskValues, rc=localrc)
     	if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       	  ESMF_CONTEXT, rcToReturn=rc)) return
  
@@ -5511,7 +5511,7 @@ end subroutine ESMF_MeshMergeSplitDstInd
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       	    ESMF_CONTEXT, rcToReturn=rc)) return
 
-    call ESMF_InterfaceIntDestroy(maskValuesArg, rc=localrc)
+    call ESMF_InterArrayDestroy(maskValuesArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       	    ESMF_CONTEXT, rcToReturn=rc)) return
 
