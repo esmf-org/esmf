@@ -61,7 +61,7 @@ program ESMF_FieldBundleSMMUTest
 #ifdef ESMF_TESTEXHAUSTIVE
 
     ! ------------------------------------------------------------------------------
-    !EX_UTest
+    !EX_UTest_Multi_Proc_Only
     write(name, *) "ESMF_FieldBundleSMMStoreFromFile Test"
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     call test_field_bundle_smm_store_from_file(rc)
@@ -73,7 +73,7 @@ program ESMF_FieldBundleSMMUTest
 #endif
 
     ! ------------------------------------------------------------------------------
-    !EX_UTest
+    !EX_UTest_Multi_Proc_Only
     write(name, *) "ESMF_FieldBundleSMMStoreFromFile Test (srcTermProcessing=(/-1/))"
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     srcTermProcessingSingle = (/-1/)
@@ -92,7 +92,7 @@ program ESMF_FieldBundleSMMUTest
 #endif
 
     ! ------------------------------------------------------------------------------
-    !EX_UTest
+    !EX_UTest_Multi_Proc_Only
     write(name, *) "ESMF_FieldBundleSMMStore Source Term Processing Test - (/-1, -1/)"
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     srcTermProcessingDouble = (/-1, -1/)
@@ -108,7 +108,7 @@ program ESMF_FieldBundleSMMUTest
     call ESMF_Test((rc .eq. ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
     ! ------------------------------------------------------------------------------
-    !EX_UTest
+    !EX_UTest_Multi_Proc_Only
     write(name, *) "ESMF_FieldBundleSMMStore Source Term Processing Test - (/1, 1/)"
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     srcTermProcessingDouble = (/1, 1/)
@@ -116,7 +116,7 @@ program ESMF_FieldBundleSMMUTest
     call ESMF_Test((rc .eq. ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
     ! ------------------------------------------------------------------------------
-    !EX_UTest
+    !EX_UTest_Multi_Proc_Only
     write(name, *) "ESMF_FieldBundleSMMStore Source Term Processing Test - (/1/)"
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     srcTermProcessingSingle = (/1/)
