@@ -4404,11 +4404,19 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   <type>(ESMF_KIND_<kind>), intent(in)            :: factorList(:) 
 !   integer,                  intent(in),           :: factorIndexList(:,:) 
 !type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+!   integer,                intent(inout), optional :: srcTermProcessing(:)
 !   integer,                  intent(out), optional :: rc 
 !
 ! !STATUS:
 ! \begin{itemize}
 ! \item\apiStatusCompatibleVersion{5.2.0r}
+! \item\apiStatusModifiedSinceVersion{5.2.0r}
+! \begin{description}
+! \item[7.1.0] Added argument {\tt srcTermProcessing}.
+!              The new argument gives the user access to the tuning parameter
+!              affecting the sparse matrix execution and bit-wise
+!              reproducibility.
+! \end{description}
 ! \end{itemize}
 !
 ! !DESCRIPTION: 
@@ -4841,24 +4849,35 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     end subroutine ESMF_FieldBundleSMMStoreR8
 
 !---------------------------------------------------------------------------- 
-!BOP 
-! !IROUTINE: ESMF_FieldBundleSMMStore - Precompute a FieldBundle sparse matrix multiplication without local factors
-! 
-! !INTERFACE: 
-! ! Private name; call using ESMF_FieldBundleSMMStore() 
-! subroutine ESMF_FieldBundleSMMStoreNF(srcFieldBundle, dstFieldBundle, & 
-!        routehandle, keywordEnforcer, rc) 
-! 
-! !ARGUMENTS: 
-!   type(ESMF_FieldBundle),   intent(in)            :: srcFieldBundle  
-!   type(ESMF_FieldBundle),   intent(inout)         :: dstFieldBundle  
-!   type(ESMF_RouteHandle),   intent(inout)         :: routehandle
-!type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-!   integer,                  intent(out), optional :: rc 
+
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_FieldBundleSMMStoreNF"
+!BOP
+! !IROUTINE: ESMF_FieldBundleSMMStore - Precompute a FieldBundle sparse matrix multiplication
 !
+! !INTERFACE:
+  ! Private name; call using ESMF_FieldBundleSMMStore()
+    subroutine ESMF_FieldBundleSMMStoreNF(srcFieldBundle, dstFieldBundle, &
+        routehandle, keywordEnforcer, srcTermProcessing, rc)
+
+! !ARGUMENTS:
+        type(ESMF_FieldBundle), intent(in)            :: srcFieldBundle
+        type(ESMF_FieldBundle), intent(inout)         :: dstFieldBundle
+        type(ESMF_RouteHandle), intent(inout)         :: routehandle
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+        integer,             intent(inout), optional  :: srcTermProcessing(:)
+        integer,             intent(out), optional    :: rc
+
 ! !STATUS:
 ! \begin{itemize}
 ! \item\apiStatusCompatibleVersion{5.2.0r}
+! \item\apiStatusModifiedSinceVersion{5.2.0r}
+! \begin{description}
+! \item[7.1.0] Added argument {\tt srcTermProcessing}.
+!              The new argument gives the user access to the tuning parameter
+!              affecting the sparse matrix execution and bit-wise
+!              reproducibility.
+! \end{description}
 ! \end{itemize}
 !
 ! !DESCRIPTION: 
@@ -4920,32 +4939,19 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !       FieldBundle may be destroyed by this call. 
 ! \item [routehandle] 
 !       Handle to the precomputed Route. 
+! \item [{[srcTermProcessing]}]
+!       Source term summing options for route handle creation. See
+!       {\tt ESMF\_FieldRegridStore} documentation for a full parameter description.
+!       Two forms may be provided. If a single element list is provided, this
+!       integer value is applied across all bundle members. Otherwise, the list must
+!       contain as many elements as there are bundle members. For the special case
+!       of accessing the auto-tuned parameter (providing a negative integer value),
+!       the list length must equal the bundle member count.
 ! \item [{[rc]}]  
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
 ! \end{description} 
 ! 
-!EOP 
-!---------------------------------------------------------------------------- 
-
-#undef  ESMF_METHOD 
-#define ESMF_METHOD "ESMF_FieldBundleSMMStoreNF" 
-!BOPI
-! !IROUTINE: ESMF_FieldBundleSMMStore - Precompute a FieldBundle sparse matrix multiplication
-!
-! !INTERFACE:
-  ! Private name; call using ESMF_FieldBundleSMMStore()
-    subroutine ESMF_FieldBundleSMMStoreNF(srcFieldBundle, dstFieldBundle, & 
-        routehandle, keywordEnforcer, srcTermProcessing, rc)
-
-        ! input arguments 
-        type(ESMF_FieldBundle), intent(in)            :: srcFieldBundle  
-        type(ESMF_FieldBundle), intent(inout)         :: dstFieldBundle  
-        type(ESMF_RouteHandle), intent(inout)         :: routehandle
-type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-        integer,             intent(inout), optional  :: srcTermProcessing(:)
-        integer,             intent(out), optional    :: rc
-
-!EOPI
+!EOP
         ! local variables as temporary input/output arguments 
 
         ! internal local variables 

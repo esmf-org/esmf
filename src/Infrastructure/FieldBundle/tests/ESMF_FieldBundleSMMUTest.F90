@@ -969,8 +969,7 @@ subroutine field_bundle_destroy(fieldBundle, rc)
   type(ESMF_Field), allocatable :: fieldList(:)
   integer :: ii, fieldCount
 
-  call ESMF_FieldBundleGet(fieldBundle, fieldCount=fieldCount, &
-    fieldList=fieldList, rc=rc)
+  call ESMF_FieldBundleGet(fieldBundle, fieldCount=fieldCount, rc=rc)
   if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME)) return
 
