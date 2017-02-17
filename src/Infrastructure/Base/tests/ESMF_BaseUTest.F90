@@ -28,6 +28,7 @@
 ! !USES:
       use ESMF_TestMod     ! test methods
       use ESMF         ! the ESMF Framework
+      use ESMF_BaseMod, only: ESMF_BaseDeserializeIDVMId
       implicit none
 
 !------------------------------------------------------------------------------
@@ -62,11 +63,12 @@
       ! instantiate a Base 
       type(ESMF_Base) :: base1, base2
       type(ESMF_AttReconcileFlag) :: attreconflag
-      integer :: id
-      type(ESMF_VMId) :: vmid, vmid_new
+      integer :: id, id_inq
+      type(ESMF_VMId) :: vmid, vmid_new, vmid_inq
       character, allocatable   :: buffer(:)
       integer :: buff_size
       integer :: offset1, offset2, offset3
+      logical :: tf
 #endif
 
 !-------------------------------------------------------------------------------
@@ -253,7 +255,6 @@
       write(name, *) "ESMF_BaseGetVMId new VMid"
       write(failMsg, *) "rc =", rc
       call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-      call ESMF_VMIdDestroy (vmid_new, rc=rc)
 
       !EX_UTest
       ! test resetting of ESMF_Base members values,
@@ -328,14 +329,14 @@
                       name, failMsg, result, ESMF_SRCLINE)
 
       !EX_UTest
-      ! test doing a serialize for real.
+      ! test doing a deserialize for real.
       ! WARNING: This is testing an INTERNAL method.  It is NOT
       ! part of the supported ESMF user API!
       offset3 = 0
       base2 = ESMF_BaseDeserialize (buffer, offset3, &
           attreconflag, rc=rc)
       write(name, *) "ESMF_BaseDeserialize - perform deserialization"
-      write(failMsg, *) "rc =", rc, ", offset =", offset2
+      write(failMsg, *) "rc =", rc, ", offset =", offset3
       call ESMF_Test((rc == ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
 
@@ -347,6 +348,60 @@
       write(failMsg, *) 'offset', offset2, ' /=', offset3
       call ESMF_Test(offset2 == offset3, &
                       name, failMsg, result, ESMF_SRCLINE)
+
+      !EX_UTest
+      ! Create VMId for inquiry
+      ! WARNING: This is testing an INTERNAL method.  It is NOT
+      ! part of the supported ESMF user API!
+      call ESMF_VMIdCreate (vmid_inq, rc=rc)
+      write(name, *) "Creating VMId for inquiry"
+      write(failMsg, *) "rc =", rc
+      call ESMF_Test((rc == ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      !EX_UTest
+      ! Test ID/VMId inquiry in a serialized buffer
+      ! WARNING: This is testing an INTERNAL method.  It is NOT
+      ! part of the supported ESMF user API!
+      offset3 = 0
+      call ESMF_BaseDeserializeIDVMId (buffer, offset3, &
+          id_inq, vmid_inq, rc=rc)
+      write(name, *) "ESMF_BaseDeserializeID/VMId - perform deserialization inquiry"
+      write(failMsg, *) "rc =", rc
+      call ESMF_Test((rc == ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      !EX_UTest
+      ! Compare original vs inquired ids.
+      ! WARNING: This is testing an INTERNAL method.  It is NOT
+      ! part of the supported ESMF user API!
+      write(name, *) "Compare original vs inquired ids"
+      write(failMsg, *) 'id', id, '/=', id_inq
+      call ESMF_Test(id == id_inq, &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      !EX_UTest
+      ! Compare original vs inquired VMId inquiry.
+      ! WARNING: This is testing an INTERNAL method.  It is NOT
+      ! part of the supported ESMF user API!
+      write(name, *) "Compare original vs inquired VMId inquiry"
+      write(failMsg, *) 'VMIds do not compare'
+      tf = ESMF_VMIdCompare (vmid, vmid_inq, rc=rc)
+      call ESMF_Test((rc == ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      !EX_UTest
+      ! Compare original vs inquired VMIds.
+      ! WARNING: This is testing an INTERNAL method.  It is NOT
+      ! part of the supported ESMF user API!
+      write(name, *) "Compare original vs inquired VMIds"
+      write(failMsg, *) 'VMIds do not compare'
+      rc = merge (ESMF_SUCCESS, ESMF_FAILURE, tf)
+      call ESMF_Test((rc == ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      call ESMF_VMIdDestroy (vmid_new, rc=rc)
+      call ESMF_VMIdDestroy (vmid_inq, rc=rc)
 
       ! END of tests of INTERNAL methods.
 

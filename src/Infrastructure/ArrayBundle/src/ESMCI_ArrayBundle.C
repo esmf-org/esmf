@@ -109,7 +109,7 @@ ArrayBundle::ArrayBundle(
     throw rc;  // bail out with exception
   }catch(...){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-      "- Caught exception", ESMC_CONTEXT, &rc);
+      "Caught exception", ESMC_CONTEXT, &rc);
     throw rc;  // bail out with exception
   }
   
@@ -221,7 +221,7 @@ ArrayBundle *ArrayBundle::create(
   
   }catch(...){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-      "- Caught exception", ESMC_CONTEXT, rc);
+      "Caught exception", ESMC_CONTEXT, rc);
     return ESMC_NULL_POINTER; // bail out
   }
   
@@ -260,7 +260,7 @@ int ArrayBundle::destroy(
   // return with errors for NULL pointer
   if (arraybundle == ESMC_NULL_POINTER || *arraybundle == ESMC_NULL_POINTER){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
-      "- Not a valid pointer to ArrayBundle", ESMC_CONTEXT, &rc);
+      "Not a valid pointer to ArrayBundle", ESMC_CONTEXT, &rc);
     return rc;
   }
 
@@ -552,7 +552,7 @@ int ArrayBundle::print()const{
   // return with errors for NULL pointer
   if (this == NULL){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
-      "- Not a valid pointer to ArrayBundle", ESMC_CONTEXT, &rc);
+      "Not a valid pointer to ArrayBundle", ESMC_CONTEXT, &rc);
     return rc;
   }
 
@@ -618,7 +618,7 @@ int ArrayBundle::haloStore(
     // every Pet must provide arraybundle
     if (arraybundle == NULL){
       ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
-        "- Not a valid pointer to arraybundle", ESMC_CONTEXT, &rc);
+        "Not a valid pointer to arraybundle", ESMC_CONTEXT, &rc);
       return rc;
     }
     int arrayCount = arraybundle->getCount();
@@ -628,13 +628,13 @@ int ArrayBundle::haloStore(
     if (arrayCount != 
       *max_element(arrayCountList.begin(), arrayCountList.end())){
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
-        "- arraybundle argument contains different number"
+        "arraybundle argument contains different number"
         " of Arrays on different PETs", ESMC_CONTEXT, &rc);
       return rc;
     }
     if (arrayCount == 0){
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
-        "- arraybundle argument contains no Arrays", ESMC_CONTEXT, &rc);
+        "arraybundle argument contains no Arrays", ESMC_CONTEXT, &rc);
       return rc;
     }
     // construct local matchList
@@ -737,7 +737,7 @@ int ArrayBundle::haloStore(
     return rc;
   }catch(...){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-      "- Caught exception", ESMC_CONTEXT, &rc);
+      "Caught exception", ESMC_CONTEXT, &rc);
     return rc;
   }
 
@@ -870,18 +870,18 @@ int ArrayBundle::redistStore(
     // every Pet must provide srcArraybundle and dstArraybundle
     if (srcArraybundle == NULL){
       ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
-        "- Not a valid pointer to srcArraybundle", ESMC_CONTEXT, &rc);
+        "Not a valid pointer to srcArraybundle", ESMC_CONTEXT, &rc);
       return rc;
     }
     if (dstArraybundle == NULL){
       ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
-        "- Not a valid pointer to dstArraybundle", ESMC_CONTEXT, &rc);
+        "Not a valid pointer to dstArraybundle", ESMC_CONTEXT, &rc);
       return rc;
     }
     int arrayCount = srcArraybundle->getCount();
     if (arrayCount != dstArraybundle->getCount()){
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
-        "- srcArraybundle and dstArraybundle contain different number"
+        "srcArraybundle and dstArraybundle contain different number"
         " of Arrays", ESMC_CONTEXT, &rc);
       return rc;
     }
@@ -891,13 +891,13 @@ int ArrayBundle::redistStore(
     if (arrayCount != 
       *max_element(arrayCountList.begin(), arrayCountList.end())){
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
-        "- srcArraybundle and dstArraybundle arguments contain different number"
+        "srcArraybundle and dstArraybundle arguments contain different number"
         " of Arrays on different PETs", ESMC_CONTEXT, &rc);
       return rc;
     }
     if (arrayCount == 0){
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
-        "- srcArraybundle and dstArraybundle arguments contain no Arrays",
+        "srcArraybundle and dstArraybundle arguments contain no Arrays",
         ESMC_CONTEXT, &rc);
       return rc;
     }
@@ -1009,7 +1009,7 @@ int ArrayBundle::redistStore(
     return rc;
   }catch(...){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-      "- Caught exception", ESMC_CONTEXT, &rc);
+      "Caught exception", ESMC_CONTEXT, &rc);
     return rc;
   }
 
@@ -1142,18 +1142,18 @@ int ArrayBundle::sparseMatMulStore(
     // every Pet must provide srcArraybundle and dstArraybundle
     if (srcArraybundle == NULL){
       ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
-        "- Not a valid pointer to srcArraybundle", ESMC_CONTEXT, &rc);
+        "Not a valid pointer to srcArraybundle", ESMC_CONTEXT, &rc);
       return rc;
     }
     if (dstArraybundle == NULL){
       ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
-        "- Not a valid pointer to dstArraybundle", ESMC_CONTEXT, &rc);
+        "Not a valid pointer to dstArraybundle", ESMC_CONTEXT, &rc);
       return rc;
     }
     int arrayCount = srcArraybundle->getCount();
     if (arrayCount != dstArraybundle->getCount()){
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
-        "- srcArraybundle and dstArraybundle contain different number"
+        "srcArraybundle and dstArraybundle contain different number"
         " of Arrays", ESMC_CONTEXT, &rc);
       return rc;
     }
@@ -1163,13 +1163,13 @@ int ArrayBundle::sparseMatMulStore(
     if (arrayCount != 
       *max_element(arrayCountList.begin(), arrayCountList.end())){
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
-        "- srcArraybundle and dstArraybundle arguments contain different number"
+        "srcArraybundle and dstArraybundle arguments contain different number"
         " of Arrays on different PETs", ESMC_CONTEXT, &rc);
       return rc;
     }
     if (arrayCount == 0){
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
-        "- srcArraybundle and dstArraybundle arguments contain no Arrays",
+        "srcArraybundle and dstArraybundle arguments contain no Arrays",
         ESMC_CONTEXT, &rc);
       return rc;
     }
@@ -1187,10 +1187,10 @@ int ArrayBundle::sparseMatMulStore(
           srcTermProcParameters[i] = &(srcTermProcessing->array[i]);
       }else if (srcTermProcessing->extent[0]==1){
         // single element in srcTermProcessing but more arrays in bundles
-        if (srcTermProcessing->array[0] == 0){
+        if (srcTermProcessing->array[0] < 0){
           ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
-            "- Single srcTermProcessing parameter must not be 0 to apply for "
-            "all arrays in bundle.",
+            "Single srcTermProcessing parameter must not be negative to "
+            "apply for all arrays in bundle.",
             ESMC_CONTEXT, &rc);
           return rc;
         }
@@ -1199,7 +1199,7 @@ int ArrayBundle::sparseMatMulStore(
       }else{
         // all other conditions are error conditions
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
-          "- Number of elements in srcTermProcessing must match number of "
+          "Number of elements in srcTermProcessing must match number of "
           "arrays in bundles, or be 1.",
           ESMC_CONTEXT, &rc);
         return rc;
@@ -1316,7 +1316,7 @@ int ArrayBundle::sparseMatMulStore(
     return rc;
   }catch(...){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-      "- Caught exception", ESMC_CONTEXT, &rc);
+      "Caught exception", ESMC_CONTEXT, &rc);
     return rc;
   }
   
@@ -1405,7 +1405,7 @@ int ArrayBundle::sparseMatMul(
       }else{
         // inconsistency detected
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
-          "- incorrect number of elements provided in the termorderflag.", 
+          "incorrect number of elements provided in the termorderflag.", 
           ESMC_CONTEXT, &rc);
         return rc;  // bail out
       }
@@ -1417,7 +1417,7 @@ int ArrayBundle::sparseMatMul(
       if (srcArraybundle != NULL && dstArraybundle != NULL){
         if (srcArraybundle->getCount() != dstArraybundle->getCount()){
           ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
-            "- srcArraybundle and dstArraybundle contain different number"
+            "srcArraybundle and dstArraybundle contain different number"
             " of Arrays", ESMC_CONTEXT, &rc);
           return rc;
         }
@@ -1461,7 +1461,7 @@ int ArrayBundle::sparseMatMul(
       if (srcArraybundle != NULL && dstArraybundle != NULL){
         if (srcArraybundle->getCount() != dstArraybundle->getCount()){
           ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
-            "- srcArraybundle and dstArraybundle contain different number"
+            "srcArraybundle and dstArraybundle contain different number"
             " of Arrays", ESMC_CONTEXT, &rc);
           return rc;
         }
@@ -1595,13 +1595,13 @@ int ArrayBundle::sparseMatMul(
     }else{
       // unimplemented branch
       ESMC_LogDefault.MsgFoundError(ESMC_RC_NOT_IMPL,
-        "- only ESMC_ARRAYXXE and ESMC_ARRAYBUNDLEXXE are supported",
+        "only ESMC_ARRAYXXE and ESMC_ARRAYBUNDLEXXE are supported",
         ESMC_CONTEXT, &rc);
       return rc;
     }
   }catch(...){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-      "- Caught exception", ESMC_CONTEXT, &rc);
+      "Caught exception", ESMC_CONTEXT, &rc);
     return rc;
   }
   
@@ -1677,7 +1677,7 @@ int ArrayBundle::sparseMatMulRelease(
   
   }catch(...){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-      "- Caught exception", ESMC_CONTEXT, &rc);
+      "Caught exception", ESMC_CONTEXT, &rc);
     return rc;
   }
   

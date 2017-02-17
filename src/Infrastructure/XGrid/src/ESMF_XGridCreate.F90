@@ -283,7 +283,7 @@ function ESMF_XGridCreate(keywordEnforcer, &
 ! 
 !  If {\tt sideA} and {\tt sideB} have a single 
 !  Grid or Mesh object, it's erroneous
-!  if the two Grids or Meshes are spatially disjoint or identical. 
+!  if the two Grids or Meshes are spatially disjoint. 
 !  It is also erroneous to specify Grid or Mesh object in {\tt sideA} or {\tt sideB} 
 !  that is spatially disjoint from the {\tt ESMF\_XGrid}. 
 !
