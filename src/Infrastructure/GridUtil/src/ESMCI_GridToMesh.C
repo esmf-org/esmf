@@ -87,7 +87,7 @@ namespace ESMCI {
 // SCRIP.  
 
 void GridToMesh(const Grid &grid_, int staggerLoc, ESMCI::Mesh &mesh, 
-  const std::vector<ESMCI::Array*> &arrays, ESMCI::InterfaceInt *maskValuesArg,
+  const std::vector<ESMCI::Array*> &arrays, ESMCI::InterfaceInt<int> *maskValuesArg,
   int *regridConserve) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "GridToMesh()" 
@@ -1001,7 +1001,7 @@ void CpMeshDataToArray(Grid &grid, int staggerLoc, ESMCI::Mesh &mesh, ESMCI::Arr
 #endif
 
   // Convert Grid To PointList
-  void GridToPointList(Grid &grid, ESMC_StaggerLoc staggerLoc, ESMCI::InterfaceInt *maskValuesArg, ESMCI::PointList **_pl, int *rc) {
+  void GridToPointList(Grid &grid, ESMC_StaggerLoc staggerLoc, ESMCI::InterfaceInt<int> *maskValuesArg, ESMCI::PointList **_pl, int *rc) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "GridToPointList()" 
     Trace __trace("GridToPointList()");

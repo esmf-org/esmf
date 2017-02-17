@@ -291,8 +291,8 @@ int ESMC_FieldGetBounds(ESMC_Field field,
   ESMCI::Field *fieldp = reinterpret_cast<ESMCI::Field *>(field.ptr);
 
   // create InterfaceInts to pass into C++
-  ESMCI::InterfaceInt *exLB = new ESMCI::InterfaceInt(exclusiveLBound, rank);
-  ESMCI::InterfaceInt *exUB = new ESMCI::InterfaceInt(exclusiveUBound, rank);
+  ESMCI::InterfaceInt<int> *exLB = new ESMCI::InterfaceInt<int>(exclusiveLBound, rank);
+  ESMCI::InterfaceInt<int> *exUB = new ESMCI::InterfaceInt<int>(exclusiveUBound, rank);
 
   // Invoke the C++ interface
   localrc = ESMCI::Field::getbounds(fieldp, localDe, exLB, exUB);

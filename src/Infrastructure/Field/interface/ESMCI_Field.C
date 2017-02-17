@@ -215,9 +215,9 @@ namespace ESMCI {
     gtfm_created = false;
     uglb_created = false;
     ugub_created = false;
-    ESMCI::InterfaceInt *gtfm, *uglb, *ugub;
+    ESMCI::InterfaceInt<int> *gtfm, *uglb, *ugub;
 
-    gtfm = (ESMCI::InterfaceInt *)gridToFieldMap;
+    gtfm = (ESMCI::InterfaceInt<int> *)gridToFieldMap;
     if (present(gtfm)) {
       if(gtfm->dimCount != 1){
          ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
@@ -226,11 +226,11 @@ namespace ESMCI {
       }
       gtfm_present = 1;
     } else {
-      gtfm = new ESMCI::InterfaceInt();
+      gtfm = new ESMCI::InterfaceInt<int>();
       gtfm_created = true;
     }
 
-    uglb = (ESMCI::InterfaceInt *)ungriddedLBound;
+    uglb = (ESMCI::InterfaceInt<int> *)ungriddedLBound;
     if (present(uglb)) {
       if(uglb->dimCount != 1){
          ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
@@ -240,11 +240,11 @@ namespace ESMCI {
       }
       uglb_present = 1;
     } else {
-      uglb = new ESMCI::InterfaceInt();
+      uglb = new ESMCI::InterfaceInt<int>();
       uglb_created = true;
     }
 
-    ugub = (ESMCI::InterfaceInt *)ungriddedUBound;
+    ugub = (ESMCI::InterfaceInt<int> *)ungriddedUBound;
     if (present(ugub)) {
       if(ugub->dimCount != 1){
          ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
@@ -255,7 +255,7 @@ namespace ESMCI {
       }
       ugub_present = 1;
     } else {
-      ugub = new ESMCI::InterfaceInt();
+      ugub = new ESMCI::InterfaceInt<int>();
       ugub_created = true;
     }
 
@@ -359,9 +359,9 @@ namespace ESMCI {
     gtfm_created = false;
     uglb_created = false;
     ugub_created = false;
-    ESMCI::InterfaceInt *gtfm, *uglb, *ugub;
+    ESMCI::InterfaceInt<int> *gtfm, *uglb, *ugub;
 
-    gtfm = (ESMCI::InterfaceInt *)gridToFieldMap;
+    gtfm = (ESMCI::InterfaceInt<int> *)gridToFieldMap;
     if (present(gtfm)) {
       if(gtfm->dimCount != 1){
          ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
@@ -370,11 +370,11 @@ namespace ESMCI {
       }
       gtfm_present = 1;
     } else {
-      gtfm = new ESMCI::InterfaceInt();
+      gtfm = new ESMCI::InterfaceInt<int>();
       gtfm_created = true;
     }
 
-    uglb = (ESMCI::InterfaceInt *)ungriddedLBound;
+    uglb = (ESMCI::InterfaceInt<int> *)ungriddedLBound;
     if (present(uglb)) {
       if(uglb->dimCount != 1){
          ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
@@ -384,11 +384,11 @@ namespace ESMCI {
       }
       uglb_present = 1;
     } else {
-      uglb = new ESMCI::InterfaceInt();
+      uglb = new ESMCI::InterfaceInt<int>();
       uglb_created = true;
     }
 
-    ugub = (ESMCI::InterfaceInt *)ungriddedUBound;
+    ugub = (ESMCI::InterfaceInt<int> *)ungriddedUBound;
     if (present(ugub)) {
       if(ugub->dimCount != 1){
          ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
@@ -399,7 +399,7 @@ namespace ESMCI {
       }
       ugub_present = 1;
     } else {
-      ugub = new ESMCI::InterfaceInt();
+      ugub = new ESMCI::InterfaceInt<int>();
       ugub_created = true;
     }
 
@@ -502,9 +502,9 @@ namespace ESMCI {
     gtfm_created = false;
     uglb_created = false;
     ugub_created = false;
-    ESMCI::InterfaceInt *gtfm, *uglb, *ugub;
+    ESMCI::InterfaceInt<int> *gtfm, *uglb, *ugub;
 
-    gtfm = (ESMCI::InterfaceInt *)gridToFieldMap;
+    gtfm = (ESMCI::InterfaceInt<int> *)gridToFieldMap;
     if (present(gtfm)) {
       if(gtfm->dimCount != 1){
          ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
@@ -513,11 +513,11 @@ namespace ESMCI {
       }
       gtfm_present = 1;
     } else {
-      gtfm = new ESMCI::InterfaceInt();
+      gtfm = new ESMCI::InterfaceInt<int>();
       gtfm_created = true;
     }
 
-    uglb = (ESMCI::InterfaceInt *)ungriddedLBound;
+    uglb = (ESMCI::InterfaceInt<int> *)ungriddedLBound;
     if (present(uglb)) {
       if(uglb->dimCount != 1){
          ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
@@ -527,11 +527,11 @@ namespace ESMCI {
       }
       uglb_present = 1;
     } else {
-      uglb = new ESMCI::InterfaceInt();
+      uglb = new ESMCI::InterfaceInt<int>();
       uglb_created = true;
     }
 
-    ugub = (ESMCI::InterfaceInt *)ungriddedUBound;
+    ugub = (ESMCI::InterfaceInt<int> *)ungriddedUBound;
     if (present(ugub)) {
       if(ugub->dimCount != 1){
          ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
@@ -542,7 +542,7 @@ namespace ESMCI {
       }
       ugub_present = 1;
     } else {
-      ugub = new ESMCI::InterfaceInt();
+      ugub = new ESMCI::InterfaceInt<int>();
       ugub_created = true;
     }
 
@@ -641,9 +641,9 @@ namespace ESMCI {
     gtfm_created = false;
     uglb_created = false;
     ugub_created = false;
-    ESMCI::InterfaceInt *gtfm, *uglb, *ugub;
+    ESMCI::InterfaceInt<int> *gtfm, *uglb, *ugub;
 
-    gtfm = (ESMCI::InterfaceInt *)gridToFieldMap;
+    gtfm = (ESMCI::InterfaceInt<int> *)gridToFieldMap;
     if (present(gtfm)) {
       if(gtfm->dimCount != 1){
          ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
@@ -652,11 +652,11 @@ namespace ESMCI {
       }
       gtfm_present = 1;
     } else {
-      gtfm = new ESMCI::InterfaceInt();
+      gtfm = new ESMCI::InterfaceInt<int>();
       gtfm_created = true;
     }
 
-    uglb = (ESMCI::InterfaceInt *)ungriddedLBound;
+    uglb = (ESMCI::InterfaceInt<int> *)ungriddedLBound;
     if (present(uglb)) {
       if(uglb->dimCount != 1){
          ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
@@ -666,11 +666,11 @@ namespace ESMCI {
       }
       uglb_present = 1;
     } else {
-      uglb = new ESMCI::InterfaceInt();
+      uglb = new ESMCI::InterfaceInt<int>();
       uglb_created = true;
     }
 
-    ugub = (ESMCI::InterfaceInt *)ungriddedUBound;
+    ugub = (ESMCI::InterfaceInt<int> *)ungriddedUBound;
     if (present(ugub)) {
       if(ugub->dimCount != 1){
          ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
@@ -681,7 +681,7 @@ namespace ESMCI {
       }
       ugub_present = 1;
     } else {
-      ugub = new ESMCI::InterfaceInt();
+      ugub = new ESMCI::InterfaceInt<int>();
       ugub_created = true;
     }
 
@@ -779,9 +779,9 @@ namespace ESMCI {
     gtfm_created = false;
     uglb_created = false;
     ugub_created = false;
-    ESMCI::InterfaceInt *gtfm, *uglb, *ugub;
+    ESMCI::InterfaceInt<int> *gtfm, *uglb, *ugub;
 
-    gtfm = (ESMCI::InterfaceInt *)gridToFieldMap;
+    gtfm = (ESMCI::InterfaceInt<int> *)gridToFieldMap;
     if (present(gtfm)) {
       if(gtfm->dimCount != 1){
          ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
@@ -790,11 +790,11 @@ namespace ESMCI {
       }
       gtfm_present = 1;
     } else {
-      gtfm = new ESMCI::InterfaceInt();
+      gtfm = new ESMCI::InterfaceInt<int>();
       gtfm_created = true;
     }
 
-    uglb = (ESMCI::InterfaceInt *)ungriddedLBound;
+    uglb = (ESMCI::InterfaceInt<int> *)ungriddedLBound;
     if (present(uglb)) {
       if(uglb->dimCount != 1){
          ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
@@ -804,11 +804,11 @@ namespace ESMCI {
       }
       uglb_present = 1;
     } else {
-      uglb = new ESMCI::InterfaceInt();
+      uglb = new ESMCI::InterfaceInt<int>();
       uglb_created = true;
     }
 
-    ugub = (ESMCI::InterfaceInt *)ungriddedUBound;
+    ugub = (ESMCI::InterfaceInt<int> *)ungriddedUBound;
     if (present(ugub)) {
       if(ugub->dimCount != 1){
          ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
@@ -819,7 +819,7 @@ namespace ESMCI {
       }
       ugub_present = 1;
     } else {
-      ugub = new ESMCI::InterfaceInt();
+      ugub = new ESMCI::InterfaceInt<int>();
       ugub_created = true;
     }
 
@@ -922,9 +922,9 @@ namespace ESMCI {
     gtfm_created = false;
     uglb_created = false;
     ugub_created = false;
-    ESMCI::InterfaceInt *gtfm, *uglb, *ugub;
+    ESMCI::InterfaceInt<int> *gtfm, *uglb, *ugub;
 
-    gtfm = (ESMCI::InterfaceInt *)gridToFieldMap;
+    gtfm = (ESMCI::InterfaceInt<int> *)gridToFieldMap;
     if (present(gtfm)) {
       if(gtfm->dimCount != 1){
          ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
@@ -933,11 +933,11 @@ namespace ESMCI {
       }
       gtfm_present = 1;
     } else {
-      gtfm = new ESMCI::InterfaceInt();
+      gtfm = new ESMCI::InterfaceInt<int>();
       gtfm_created = true;
     }
 
-    uglb = (ESMCI::InterfaceInt *)ungriddedLBound;
+    uglb = (ESMCI::InterfaceInt<int> *)ungriddedLBound;
     if (present(uglb)) {
       if(uglb->dimCount != 1){
          ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
@@ -947,11 +947,11 @@ namespace ESMCI {
       }
       uglb_present = 1;
     } else {
-      uglb = new ESMCI::InterfaceInt();
+      uglb = new ESMCI::InterfaceInt<int>();
       uglb_created = true;
     }
 
-    ugub = (ESMCI::InterfaceInt *)ungriddedUBound;
+    ugub = (ESMCI::InterfaceInt<int> *)ungriddedUBound;
     if (present(ugub)) {
       if(ugub->dimCount != 1){
          ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
@@ -962,7 +962,7 @@ namespace ESMCI {
       }
       ugub_present = 1;
     } else {
-      ugub = new ESMCI::InterfaceInt();
+      ugub = new ESMCI::InterfaceInt<int>();
       ugub_created = true;
     }
 
@@ -1148,8 +1148,8 @@ namespace ESMCI {
 // !ARGUMENTS:
   Field *field,
   int *localDe,
-  ESMCI::InterfaceInt *exLB,
-  ESMCI::InterfaceInt *exUB){
+  ESMCI::InterfaceInt<int> *exLB,
+  ESMCI::InterfaceInt<int> *exUB){
 
 // !DESCRIPTION:
 //      ESMF routine to return bounds from the Field.
@@ -1353,13 +1353,13 @@ namespace ESMCI {
     bool sff_created, dff_created;
     sff_created = false;
     dff_created = false;
-    ESMCI::InterfaceInt *smv, *dmv;
+    ESMCI::InterfaceInt<int> *smv, *dmv;
     ESMCI::Field *sff, *dff;
     int *srcMaskArray,*dstMaskArray;
     int srcMaskLen,dstMaskLen;
 
 
-    smv = (ESMCI::InterfaceInt *)srcMaskValues;
+    smv = (ESMCI::InterfaceInt<int> *)srcMaskValues;
     if (present(smv)) {
       if(smv->dimCount != 1){
          ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
@@ -1373,7 +1373,7 @@ namespace ESMCI {
       srcMaskLen=0;
     }
  
-    dmv = (ESMCI::InterfaceInt *)dstMaskValues;
+    dmv = (ESMCI::InterfaceInt<int> *)dstMaskValues;
     if (present(dmv)) {
       if(dmv->dimCount != 1){
          ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,

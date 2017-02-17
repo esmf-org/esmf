@@ -36,6 +36,7 @@
 
 #include "Mesh/include/ESMCI_MBMesh.h"
 #include "Mesh/include/ESMCI_MBMesh_Util.h"
+#include "Mesh/include/ESMCI_MBMesh_Glue.h"
 
 #include "MBTagConventions.hpp"
 #include "moab/ParallelComm.hpp"
@@ -170,7 +171,7 @@ void MBMesh_create(void **mbmpp,
 
 
 void MBMesh_addnodes(void **mbmpp, int *num_nodes, int *nodeId, 
-                     double *nodeCoord, int *nodeOwner, InterfaceInt *nodeMaskII,
+                     double *nodeCoord, int *nodeOwner, InterfaceInt<int> *nodeMaskII,
                      ESMC_CoordSys_Flag *_coordSys, int *_orig_sdim,
                        int *rc) 
 {
@@ -480,7 +481,7 @@ static void triangulate(int sdim, int num_p, double *p, double *td, int *ti, int
  
 
 void MBMesh_addelements(void **mbmpp, 
-                                              int *_num_elems, int *elemId, int *elemType, InterfaceInt *_elemMaskII ,
+                                              int *_num_elems, int *elemId, int *elemType, InterfaceInt<int> *_elemMaskII ,
                                               int *_areaPresent, double *elemArea, 
                                               int *_coordsPresent, double *elemCoords, 
                                               int *_num_elemConn, int *elemConn, int *regridConserve, 
@@ -537,7 +538,7 @@ void MBMesh_addelements(void **mbmpp,
 
     int num_elemConn=*_num_elemConn;
 
-    InterfaceInt *elemMaskII=_elemMaskII;
+    InterfaceInt<int> *elemMaskII=_elemMaskII;
 
     int areaPresent=*_areaPresent;
 
@@ -830,7 +831,7 @@ void MBMesh_addelements(void **mbmpp,
     int *elemId_wsplit=NULL;
     double *elemArea_wsplit=NULL;
     int *elemMaskIIArray_wsplit=NULL;
-     InterfaceInt *elemMaskII_wsplit=NULL;
+     InterfaceInt<int> *elemMaskII_wsplit=NULL;
 
 
     if (mbmp->is_split) {
@@ -855,7 +856,7 @@ void MBMesh_addelements(void **mbmpp,
         elemMaskIIArray_wsplit=new int[num_elems_wsplit];
 
         extent[0]=num_elems_wsplit;
-        elemMaskII_wsplit=new InterfaceInt(elemMaskIIArray_wsplit,1,extent);
+        elemMaskII_wsplit=new InterfaceInt<int>(elemMaskIIArray_wsplit,1,extent);
       }
 
 
@@ -1320,7 +1321,7 @@ void MBMesh_addelements(void **mbmpp,
   if (rc!=NULL) *rc = ESMF_SUCCESS;
 } 
 
-void MBMesh_meshturnoncellmask(void **mbmpp, ESMCI::InterfaceInt *maskValuesArg,  int *rc) {
+void MBMesh_meshturnoncellmask(void **mbmpp, ESMCI::InterfaceInt<int> *maskValuesArg,  int *rc) {
 
   int merr, localrc;
 
@@ -3889,7 +3890,7 @@ void ESMCI_triangulate(int *pdim, int *sdim, int *numPnts,
 }
 
 #if 0
-void ESMCI_meshturnoncellmask(Mesh **meshpp, ESMCI::InterfaceInt *maskValuesArg,  int *rc) {
+void ESMCI_meshturnoncellmask(Mesh **meshpp, ESMCI::InterfaceInt<int> *maskValuesArg,  int *rc) {
 
   try {
 
@@ -4085,7 +4086,7 @@ void ESMCI_meshturnoffcellmask(Mesh **meshpp, int *rc) {
 }
  
 ////////////
-void ESMCI_meshturnonnodemask(Mesh **meshpp, ESMCI::InterfaceInt *maskValuesArg,  int *rc) {
+void ESMCI_meshturnonnodemask(Mesh **meshpp, ESMCI::InterfaceInt<int> *maskValuesArg,  int *rc) {
 
   try {
 

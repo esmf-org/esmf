@@ -81,7 +81,7 @@ static void change_wts_to_be_fracarea(Mesh &mesh, int num_entries,
 extern "C" void FTN_X(c_esmc_arraysmmstore)(ESMCI::Array **srcArray,
     ESMCI::Array **dstArray, ESMCI::RouteHandle **routehandle,
     ESMC_TypeKind_Flag *typekind, void *factorList, int *factorListCount,
-    ESMCI::InterfaceInt *factorIndexList, ESMC_Logical *ignoreUnmatched,
+    ESMCI::InterfaceInt<int> *factorIndexList, ESMC_Logical *ignoreUnmatched,
     int *srcTermProcessing, int *pipelineDepth, int *rc);
 
 
@@ -324,8 +324,8 @@ void MBMesh_regrid_create(ESMCI::VM **vmpp,
     int *iientries = new int[2*iisize.first]; 
     int larg[2] = {2, iisize.first};
     // Gather the list
-    ESMCI::InterfaceInt ii(iientries, 2, larg);
-    ESMCI::InterfaceInt *iiptr = &ii;
+    ESMCI::InterfaceInt<int> ii(iientries, 2, larg);
+    ESMCI::InterfaceInt<int> *iiptr = &ii;
 
     double *factors = new double[iisize.first];
 

@@ -251,23 +251,24 @@ namespace ESMCI {
     // create() and destroy()
     static Array *create(LocalArray **larrayList, int larrayCount,
       DistGrid *distgrid, CopyFlag copyflag,
-      InterfaceInt *distgridToArrayMap,
-      InterfaceInt *computationalEdgeLWidthArg,
-      InterfaceInt *computationalEdgeUWidthArg,
-      InterfaceInt *computationalLWidthArg,
-      InterfaceInt *computationalUWidthArg,
-      InterfaceInt *totalLWidthArg, InterfaceInt *totalUWidthArg,
-      ESMC_IndexFlag *indexflag, InterfaceInt *undistLBoundArg,
-      InterfaceInt *undistUBoundArg, int *rc);
+      InterfaceInt<int> *distgridToArrayMap,
+      InterfaceInt<int> *computationalEdgeLWidthArg,
+      InterfaceInt<int> *computationalEdgeUWidthArg,
+      InterfaceInt<int> *computationalLWidthArg,
+      InterfaceInt<int> *computationalUWidthArg,
+      InterfaceInt<int> *totalLWidthArg, InterfaceInt<int> *totalUWidthArg,
+      ESMC_IndexFlag *indexflag, InterfaceInt<int> *undistLBoundArg,
+      InterfaceInt<int> *undistUBoundArg, int *rc);
     static Array *create(ArraySpec *arrayspec, DistGrid *distgrid,
-      InterfaceInt *distgridToArrayMap,
-      InterfaceInt *computationalEdgeLWidthArg,
-      InterfaceInt *computationalEdgeUWidthArg,
-      InterfaceInt *computationalLWidthArg, 
-      InterfaceInt *computationalUWidthArg, InterfaceInt *totalLWidthArg,
-      InterfaceInt *totalUWidthArg, ESMC_IndexFlag *indexflag,
-      InterfaceInt *distLBoundArg, InterfaceInt *undistLBoundArg,
-      InterfaceInt *undistUBoundArg, int *rc, VM *vm=NULL);
+      InterfaceInt<int> *distgridToArrayMap,
+      InterfaceInt<int> *computationalEdgeLWidthArg,
+      InterfaceInt<int> *computationalEdgeUWidthArg,
+      InterfaceInt<int> *computationalLWidthArg, 
+      InterfaceInt<int> *computationalUWidthArg,
+      InterfaceInt<int> *totalLWidthArg,
+      InterfaceInt<int> *totalUWidthArg, ESMC_IndexFlag *indexflag,
+      InterfaceInt<int> *distLBoundArg, InterfaceInt<int> *undistLBoundArg,
+      InterfaceInt<int> *undistUBoundArg, int *rc, VM *vm=NULL);
     static Array *create(Array *array, int *rc=NULL);
     static int destroy(Array **array, bool noGarbage=false);
     // data copy()
@@ -306,9 +307,9 @@ namespace ESMCI {
       const;
     int getTensorSequenceIndex(const int *index, int *rc=NULL)const;
     int getArbSequenceIndexOffset(const int *index, int *rc=NULL)const;
-    int setComputationalLWidth(InterfaceInt *computationalLWidthArg);
-    int setComputationalUWidth(InterfaceInt *computationalUWidthArg);
-    int setRimSeqIndex(int localDe, InterfaceInt *rimSeqIndexArg);
+    int setComputationalLWidth(InterfaceInt<int> *computationalLWidthArg);
+    int setComputationalUWidth(InterfaceInt<int> *computationalUWidthArg);
+    int setRimSeqIndex(int localDe, InterfaceInt<int> *rimSeqIndexArg);
     std::vector<std::vector<SeqIndex> > const &getRimSeqIndex()const
       {return rimSeqIndex;}
     std::vector<std::vector<int> > const &getRimLinIndex()const
@@ -347,14 +348,14 @@ namespace ESMCI {
       int *counts, int *tile, int rootPet, VM *vm);
     static int haloStore(Array *array, RouteHandle **routehandle,
       ESMC_HaloStartRegionFlag halostartregionflag=ESMF_REGION_EXCLUSIVE,
-      InterfaceInt *haloLDepth=NULL, InterfaceInt *haloUDepth=NULL,
+      InterfaceInt<int> *haloLDepth=NULL, InterfaceInt<int> *haloUDepth=NULL,
       int *pipelineDepthArg=NULL);
     static int halo(Array *array,
       RouteHandle **routehandle, ESMC_CommFlag commflag=ESMF_COMM_BLOCKING,
       bool *finishedflag=NULL, bool *cancelledflag=NULL, bool checkflag=false);
     static int haloRelease(RouteHandle *routehandle);
     static int redistStore(Array *srcArray, Array *dstArray,
-      RouteHandle **routehandle, InterfaceInt *srcToDstTransposeMap,
+      RouteHandle **routehandle, InterfaceInt<int> *srcToDstTransposeMap,
       ESMC_TypeKind_Flag typekindFactor = ESMF_NOKIND, void *factor = NULL,
       bool ignoreUnmatched=false, int *pipelineDepthArg = NULL);
     static int redist(Array *srcArray, Array *dstArray,

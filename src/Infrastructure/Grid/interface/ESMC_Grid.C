@@ -40,15 +40,15 @@ extern "C" {
 // fortran interface functions to attribute objects
   void FTN_X(c_esmc_gridgetcoordbounds)(ESMCI::Grid **_grid, int *_localDE,
                                         int *_coord, int *_staggerloc,
-                                        ESMCI::InterfaceInt **_exclusiveLBound,
-                                        ESMCI::InterfaceInt **_exclusiveUBound,
-                                        ESMCI::InterfaceInt **_exclusiveCount,
-                                        ESMCI::InterfaceInt **_computationalLBound,
-                                        ESMCI::InterfaceInt **_computationalUBound,
-                                        ESMCI::InterfaceInt **_computationalCount,
-                                        ESMCI::InterfaceInt **_totalLBound,
-                                        ESMCI::InterfaceInt **_totalUBound,
-                                        ESMCI::InterfaceInt **_totalCount,
+                                        ESMCI::InterfaceInt<int> **_exclusiveLBound,
+                                        ESMCI::InterfaceInt<int> **_exclusiveUBound,
+                                        ESMCI::InterfaceInt<int> **_exclusiveCount,
+                                        ESMCI::InterfaceInt<int> **_computationalLBound,
+                                        ESMCI::InterfaceInt<int> **_computationalUBound,
+                                        ESMCI::InterfaceInt<int> **_computationalCount,
+                                        ESMCI::InterfaceInt<int> **_totalLBound,
+                                        ESMCI::InterfaceInt<int> **_totalUBound,
+                                        ESMCI::InterfaceInt<int> **_totalCount,
                                         int *_rc);
 
 void FTN_X(c_esmc_gridio)(ESMCI::Grid **gridpp, int *staggerLoc, int *num_arrays,
@@ -258,8 +258,8 @@ void * ESMC_GridGetCoord(ESMC_Grid grid, int coordDim,
 #if 0
   // TODO: use this instead of the above, it is more correct because the Fortran
   //       layer does additional bounds checking.
-  ESMCI::InterfaceInt *computationalLBound;
-  ESMCI::InterfaceInt *computationalUBound;
+  ESMCI::InterfaceInt<int> *computationalLBound;
+  ESMCI::InterfaceInt<int> *computationalUBound;
   // this code is technically more correct, but I can't find the symbol for some reason..
   int localDe = 0;
   FTN_X(c_esmc_gridgetcoordbounds)(&gridp, &localDe, &coordDim, &stagger,

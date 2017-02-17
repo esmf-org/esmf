@@ -992,14 +992,14 @@ void IO::redist_arraycreate1de(Array *src_array_p, Array **dest_array_p, int *rc
   if (ESMC_LogDefault.MsgFoundError(localrc, "Tile count != 1 is not supported", ESMC_CONTEXT, rc))
     return;
 
-  ESMCI::InterfaceInt minIndexInterface((int*)minIndexTile, ndims);
+  ESMCI::InterfaceInt<int> minIndexInterface((int*)minIndexTile, ndims);
 #if 0
   std::cout << ESMC_METHOD << "[" << me << "]: setting maxindex to: (";
   for (int i=0; i<ndims; i++)
     std::cout << " " << maxIndexTile[i];
   std::cout << " )" << std::endl;
 #endif
-  ESMCI::InterfaceInt maxIndexInterface((int*)maxIndexTile, ndims);
+  ESMCI::InterfaceInt<int> maxIndexInterface((int*)maxIndexTile, ndims);
   DistGrid *distgrid = DistGrid::create(&minIndexInterface, &maxIndexInterface, NULL,
       NULL, 0, NULL, NULL, NULL, NULL, NULL, (ESMCI::DELayout*)NULL, NULL,
       &localrc);
@@ -1101,9 +1101,9 @@ void IO::undist_arraycreate_alldist(Array *src_array_p, Array **dest_array_p, in
 
   // create the fixed up DistGrid
 //std::cout << ESMC_METHOD << ": creating new DistGrid" << std::endl;
-  ESMCI::InterfaceInt minIndexInterface(&minIndexNew[0], rank);
-  ESMCI::InterfaceInt maxIndexInterface(&maxIndexNew[0], rank);
-  ESMCI::InterfaceInt regDecompInterface(&regDecomp[0] , rank);
+  ESMCI::InterfaceInt<int> minIndexInterface(&minIndexNew[0], rank);
+  ESMCI::InterfaceInt<int> maxIndexInterface(&maxIndexNew[0], rank);
+  ESMCI::InterfaceInt<int> regDecompInterface(&regDecomp[0] , rank);
   DistGrid *dg_temp = DistGrid::create(&minIndexInterface,
                  &maxIndexInterface, &regDecompInterface,
       NULL, 0, NULL, NULL, NULL, NULL, NULL, (ESMCI::DELayout*)NULL, NULL,

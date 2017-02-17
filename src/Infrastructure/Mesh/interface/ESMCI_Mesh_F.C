@@ -123,7 +123,7 @@ extern "C" void FTN_X(c_esmc_meshcreate)(MeshCap **meshpp,
 
 
 extern "C" void FTN_X(c_esmc_meshaddnodes)(MeshCap **meshpp, int *num_nodes, int *nodeId, 
-                                           double *nodeCoord, int *nodeOwner, InterfaceInt *nodeMaskII,
+                                           double *nodeCoord, int *nodeOwner, InterfaceInt<int> *nodeMaskII,
                                            ESMC_CoordSys_Flag *_coordSys, int *_orig_sdim,
                                            int *rc) 
 {
@@ -143,7 +143,7 @@ extern "C" void FTN_X(c_esmc_meshwrite)(MeshCap **meshpp, char *fname, int *rc,
 }
 
 extern "C" void FTN_X(c_esmc_meshaddelements)(MeshCap **meshpp, 
-                                              int *_num_elems, int *elemId, int *elemType, InterfaceInt *_elemMaskII ,
+                                              int *_num_elems, int *elemId, int *elemType, InterfaceInt<int> *_elemMaskII ,
                                               int *_areaPresent, double *elemArea, 
                                               int *_coordsPresent, double *elemCoords, 
                                               int *_num_elemConn, int *elemConn, int *regridConserve, 
@@ -318,7 +318,7 @@ extern "C" void FTN_X(c_esmc_triangulate)(int *pdim, int *sdim, int *numPnts,
 }
 
 
-extern "C" void FTN_X(c_esmc_meshturnoncellmask)(MeshCap **meshpp, ESMCI::InterfaceInt *maskValuesArg,  int *rc) {
+extern "C" void FTN_X(c_esmc_meshturnoncellmask)(MeshCap **meshpp, ESMCI::InterfaceInt<int> *maskValuesArg,  int *rc) {
 
     (*meshpp)->meshturnoncellmask(maskValuesArg, rc);
 }
@@ -330,7 +330,7 @@ extern "C" void FTN_X(c_esmc_meshturnoffcellmask)(MeshCap **meshpp, int *rc) {
 }
 
 ////////////
-extern "C" void FTN_X(c_esmc_meshturnonnodemask)(MeshCap **meshpp, ESMCI::InterfaceInt *maskValuesArg,  int *rc) {
+extern "C" void FTN_X(c_esmc_meshturnonnodemask)(MeshCap **meshpp, ESMCI::InterfaceInt<int> *maskValuesArg,  int *rc) {
 
     (*meshpp)->meshturnonnodemask(maskValuesArg, rc);
 }

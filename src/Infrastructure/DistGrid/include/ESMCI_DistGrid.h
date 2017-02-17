@@ -116,41 +116,44 @@ namespace ESMCI {
     int construct(int dimCount, int tileCount, int *deTileList,
       int *minIndex, int *maxIndex, int *minIndexPDimPDe, int *maxIndexPDimPDe,
       int *contigFlagPDimPDe, int *indexCountPDimPDe, int **indexList,
-      int *regDecompArg, InterfaceInt *connectionList,
+      int *regDecompArg, InterfaceInt<int> *connectionList,
       Decomp_Flag const *decompflagArg, ESMC_IndexFlag *indexflagArg,
       DELayout *delayout, bool delayoutCreator, VM *vm);
     int destruct(bool followCreator=true, bool noGarbage=false);
    public:
     // create() and destroy()
     static DistGrid *create(DistGrid *dg,
-      InterfaceInt *firstExtra, InterfaceInt *lastExtra, 
-      ESMC_IndexFlag *indexflag, InterfaceInt *connectionList, 
+      InterfaceInt<int> *firstExtra, InterfaceInt<int> *lastExtra, 
+      ESMC_IndexFlag *indexflag, InterfaceInt<int> *connectionList, 
       VM *vm=NULL, bool actualFlag=true, int *rc=NULL);
-    static DistGrid *create(InterfaceInt *minIndex,
-      InterfaceInt *maxIndex, InterfaceInt *regDecomp, 
+    static DistGrid *create(InterfaceInt<int> *minIndex,
+      InterfaceInt<int> *maxIndex, InterfaceInt<int> *regDecomp, 
       Decomp_Flag *decompflag, int decompflagCount,
-      InterfaceInt *regDecompFirstExtra, InterfaceInt *regDecompLastExtra, 
-      InterfaceInt *deLabelList, ESMC_IndexFlag *indexflag, 
-      InterfaceInt *connectionList,
+      InterfaceInt<int> *regDecompFirstExtra, 
+      InterfaceInt<int> *regDecompLastExtra, 
+      InterfaceInt<int> *deLabelList, ESMC_IndexFlag *indexflag, 
+      InterfaceInt<int> *connectionList,
       DELayout *delayout=NULL, VM *vm=NULL, int *rc=NULL);
-    static DistGrid *create(InterfaceInt *minIndex,
-      InterfaceInt *maxIndex, InterfaceInt *deBlockList, 
-      InterfaceInt *deLabelList, ESMC_IndexFlag *indexflag, 
-      InterfaceInt *connectionList,
+    static DistGrid *create(InterfaceInt<int> *minIndex,
+      InterfaceInt<int> *maxIndex, InterfaceInt<int> *deBlockList, 
+      InterfaceInt<int> *deLabelList, ESMC_IndexFlag *indexflag, 
+      InterfaceInt<int> *connectionList,
       DELayout *delayout=NULL, VM *vm=NULL, int *rc=NULL);
-    static DistGrid *create(InterfaceInt *minIndex,
-      InterfaceInt *maxIndex, InterfaceInt *regDecomp, 
+    static DistGrid *create(InterfaceInt<int> *minIndex,
+      InterfaceInt<int> *maxIndex, InterfaceInt<int> *regDecomp, 
       Decomp_Flag *decompflag, int decompflagCount,
-      InterfaceInt *regDecompFirstExtra, InterfaceInt *regDecompLastExtra, 
-      InterfaceInt *deLabelList, ESMC_IndexFlag *indexflag, 
-      InterfaceInt *connectionList,
+      InterfaceInt<int> *regDecompFirstExtra,
+      InterfaceInt<int> *regDecompLastExtra, 
+      InterfaceInt<int> *deLabelList, ESMC_IndexFlag *indexflag, 
+      InterfaceInt<int> *connectionList,
       int fastAxis, VM *vm=NULL, int *rc=NULL);
-    static DistGrid *create(InterfaceInt *minIndex,
-      InterfaceInt *maxIndex, InterfaceInt *regDecomp, 
+    static DistGrid *create(InterfaceInt<int> *minIndex,
+      InterfaceInt<int> *maxIndex, InterfaceInt<int> *regDecomp, 
       Decomp_Flag *decompflag, int decompflagCount1, int decompflagCount2,
-      InterfaceInt *regDecompFirstExtra, InterfaceInt *regDecompLastExtra, 
-      InterfaceInt *deLabelList, ESMC_IndexFlag *indexflag, 
-      InterfaceInt *connectionList,
+      InterfaceInt<int> *regDecompFirstExtra,
+      InterfaceInt<int> *regDecompLastExtra, 
+      InterfaceInt<int> *deLabelList, ESMC_IndexFlag *indexflag, 
+      InterfaceInt<int> *connectionList,
       DELayout *delayout=NULL, VM *vm=NULL, int *rc=NULL);
     static int destroy(DistGrid **distgrid, bool noGarbage=false);
     // is()
@@ -199,10 +202,11 @@ namespace ESMCI {
       const {return elementCountPCollPLocalDe;}
     int const *getArbSeqIndexList(int localDe, int collocation, int *rc=NULL)
       const;
-    int setArbSeqIndex(InterfaceInt *arbSeqIndex, int localDe, int collocation);
-    int setCollocationPDim(InterfaceInt *collocationPDim);
+    int setArbSeqIndex(InterfaceInt<int> *arbSeqIndex, int localDe,
+      int collocation);
+    int setCollocationPDim(InterfaceInt<int> *collocationPDim);
     // fill()
-    int fillSeqIndexList(InterfaceInt *seqIndexList, int localDe,
+    int fillSeqIndexList(InterfaceInt<int> *seqIndexList, int localDe,
       int collocation) const;
     int fillSeqIndexList(std::vector<int> &seqIndexList, int localDe,
       int collocation) const;
@@ -218,9 +222,9 @@ namespace ESMCI {
       const;
     static DistGrid *deserialize(char *buffer, int *offset);
     // connections
-    static int connection(InterfaceInt *connection, int tileIndexA, 
-      int tileIndexB, InterfaceInt *positionVector,
-      InterfaceInt *orientationVector);
+    static int connection(InterfaceInt<int> *connection, int tileIndexA, 
+      int tileIndexB, InterfaceInt<int> *positionVector,
+      InterfaceInt<int> *orientationVector);
   };  // class DistGrid
 
   

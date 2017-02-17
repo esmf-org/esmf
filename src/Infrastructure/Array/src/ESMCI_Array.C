@@ -429,21 +429,21 @@ Array *Array::create(
 //
 // !ARGUMENTS:
 //
-  LocalArray **larrayListArg,                 // (in)
-  int larrayCount,                            // (in)
-  DistGrid *distgrid,                         // (in)
-  CopyFlag copyflag,                          // (in)
-  InterfaceInt *distgridToArrayMap,           // (in)
-  InterfaceInt *computationalEdgeLWidthArg,   // (in)
-  InterfaceInt *computationalEdgeUWidthArg,   // (in)
-  InterfaceInt *computationalLWidthArg,       // (in)
-  InterfaceInt *computationalUWidthArg,       // (in)
-  InterfaceInt *totalLWidthArg,               // (in)
-  InterfaceInt *totalUWidthArg,               // (in)
-  ESMC_IndexFlag *indexflagArg,               // (in)
-  InterfaceInt *undistLBoundArg,              // (in)
-  InterfaceInt *undistUBoundArg,              // (in)
-  int *rc                                     // (out) return code
+  LocalArray **larrayListArg,                     // (in)
+  int larrayCount,                                // (in)
+  DistGrid *distgrid,                             // (in)
+  CopyFlag copyflag,                              // (in)
+  InterfaceInt<int> *distgridToArrayMap,          // (in)
+  InterfaceInt<int> *computationalEdgeLWidthArg,  // (in)
+  InterfaceInt<int> *computationalEdgeUWidthArg,  // (in)
+  InterfaceInt<int> *computationalLWidthArg,      // (in)
+  InterfaceInt<int> *computationalUWidthArg,      // (in)
+  InterfaceInt<int> *totalLWidthArg,              // (in)
+  InterfaceInt<int> *totalUWidthArg,              // (in)
+  ESMC_IndexFlag *indexflagArg,                   // (in)
+  InterfaceInt<int> *undistLBoundArg,             // (in)
+  InterfaceInt<int> *undistUBoundArg,             // (in)
+  int *rc                                         // (out) return code
   ){
 //
 // !DESCRIPTION:
@@ -1143,21 +1143,21 @@ Array *Array::create(
 //
 // !ARGUMENTS:
 //
-  ArraySpec *arrayspec,                       // (in)
-  DistGrid *distgrid,                         // (in)
-  InterfaceInt *distgridToArrayMap,           // (in)
-  InterfaceInt *computationalEdgeLWidthArg,   // (in)
-  InterfaceInt *computationalEdgeUWidthArg,   // (in)
-  InterfaceInt *computationalLWidthArg,       // (in)
-  InterfaceInt *computationalUWidthArg,       // (in)
-  InterfaceInt *totalLWidthArg,               // (in)
-  InterfaceInt *totalUWidthArg,               // (in)
-  ESMC_IndexFlag *indexflagArg,               // (in)
-  InterfaceInt *distLBoundArg,                // (in)
-  InterfaceInt *undistLBoundArg,              // (in)
-  InterfaceInt *undistUBoundArg,              // (in)
-  int *rc,                                    // (out) return code
-  VM *vm                                      // (in)
+  ArraySpec *arrayspec,                           // (in)
+  DistGrid *distgrid,                             // (in)
+  InterfaceInt<int> *distgridToArrayMap,          // (in)
+  InterfaceInt<int> *computationalEdgeLWidthArg,  // (in)
+  InterfaceInt<int> *computationalEdgeUWidthArg,  // (in)
+  InterfaceInt<int> *computationalLWidthArg,      // (in)
+  InterfaceInt<int> *computationalUWidthArg,      // (in)
+  InterfaceInt<int> *totalLWidthArg,              // (in)
+  InterfaceInt<int> *totalUWidthArg,              // (in)
+  ESMC_IndexFlag *indexflagArg,                   // (in)
+  InterfaceInt<int> *distLBoundArg,               // (in)
+  InterfaceInt<int> *undistLBoundArg,             // (in)
+  InterfaceInt<int> *undistUBoundArg,             // (in)
+  int *rc,                                        // (out) return code
+  VM *vm                                          // (in)
   ){
 //
 // !DESCRIPTION:
@@ -2290,7 +2290,7 @@ int Array::setComputationalLWidth(
 //
 // !ARGUMENTS:
 //
-  InterfaceInt *computationalLWidthArg        // (in)
+  InterfaceInt<int> *computationalLWidthArg        // (in)
   ){
 //
 // !DESCRIPTION:
@@ -2366,7 +2366,7 @@ int Array::setComputationalUWidth(
 //
 // !ARGUMENTS:
 //
-  InterfaceInt *computationalUWidthArg        // (in)
+  InterfaceInt<int> *computationalUWidthArg        // (in)
   ){
 //
 // !DESCRIPTION:
@@ -2443,7 +2443,7 @@ int Array::setRimSeqIndex(
 // !ARGUMENTS:
 //
   int localDe,                        // (in)
-  InterfaceInt *rimSeqIndexArg        // (in)
+  InterfaceInt<int> *rimSeqIndexArg   // (in)
   ){
 //
 // !DESCRIPTION:
@@ -4046,8 +4046,8 @@ int Array::haloStore(
   Array *array,                         // in    - Array
   RouteHandle **routehandle,            // inout - handle to precomputed comm
   ESMC_HaloStartRegionFlag halostartregionflag, // in - start of halo region
-  InterfaceInt *haloLDepth,             // in    - lower corner halo depth
-  InterfaceInt *haloUDepth,             // in    - upper corner halo depth
+  InterfaceInt<int> *haloLDepth,        // in    - lower corner halo depth
+  InterfaceInt<int> *haloUDepth,        // in    - upper corner halo depth
   int *pipelineDepthArg                 // in (optional)
   ){
 //
@@ -4488,14 +4488,14 @@ int Array::redistStore(
 //
 // !ARGUMENTS:
 //
-  Array *srcArray,                      // in    - source Array
-  Array *dstArray,                      // in    - destination Array
-  RouteHandle **routehandle,            // inout - handle to precomputed comm
-  InterfaceInt *srcToDstTransposeMap,   // in    - mapping src -> dst dims
-  ESMC_TypeKind_Flag typekindFactor,    // in    - typekind of factor
-  void *factor,                         // in    - redist factor
-  bool ignoreUnmatched,                 // in    - support unmatched indices
-  int *pipelineDepthArg                 // in (optional)
+  Array *srcArray,                        // in    - source Array
+  Array *dstArray,                        // in    - destination Array
+  RouteHandle **routehandle,              // inout - handle to precomputed comm
+  InterfaceInt<int> *srcToDstTransposeMap,// in    - mapping src -> dst dims
+  ESMC_TypeKind_Flag typekindFactor,      // in    - typekind of factor
+  void *factor,                           // in    - redist factor
+  bool ignoreUnmatched,                   // in    - support unmatched indices
+  int *pipelineDepthArg                   // in (optional)
   ){
 //
 // !DESCRIPTION:

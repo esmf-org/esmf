@@ -68,10 +68,10 @@ DistGrid *DistGrid::create(
 // !ARGUMENTS:
 //
   DistGrid *dg,                           // (in)
-  InterfaceInt *firstExtra,               // (in)
-  InterfaceInt *lastExtra,                // (in)
+  InterfaceInt<int> *firstExtra,          // (in)
+  InterfaceInt<int> *lastExtra,           // (in)
   ESMC_IndexFlag *indexflag,              // (in)
-  InterfaceInt *connectionList,           // (in)
+  InterfaceInt<int> *connectionList,      // (in)
   VM *vm,                                 // (in)
   bool actualFlag,                        // (in)
   int *rc                                 // (out) return code
@@ -170,7 +170,7 @@ DistGrid *DistGrid::create(
           memcpy(&(connectionListAlloc[elementSize*i]), dg->connectionList[i],
             sizeof(int)*elementSize);
         }
-        connectionList = new InterfaceInt(connectionListAlloc,
+        connectionList = new InterfaceInt<int>(connectionListAlloc,
           dimInterfaceInt, dimCountInterfaceInt);
       }
     }
@@ -286,7 +286,7 @@ DistGrid *DistGrid::create(
     else
       memcpy(minIndexAlloc, dg->minIndexPDimPTile,
         sizeof(int)*totalCountInterfaceInt);
-    InterfaceInt *minIndex = new InterfaceInt(minIndexAlloc,
+    InterfaceInt<int> *minIndex = new InterfaceInt<int>(minIndexAlloc,
       dimInterfaceInt, dimCountInterfaceInt);
     int *maxIndexAlloc = new int[totalCountInterfaceInt];
     if (present(lastExtra))
@@ -296,7 +296,7 @@ DistGrid *DistGrid::create(
     else
       memcpy(maxIndexAlloc, dg->maxIndexPDimPTile,
         sizeof(int)*totalCountInterfaceInt);
-    InterfaceInt *maxIndex = new InterfaceInt(maxIndexAlloc,
+    InterfaceInt<int> *maxIndex = new InterfaceInt<int>(maxIndexAlloc,
       dimInterfaceInt, dimCountInterfaceInt);
     
     // use indexflag inside dg as the default if not supplied by caller
@@ -314,7 +314,7 @@ DistGrid *DistGrid::create(
         ESMC_LOGMSG_INFO);
 #endif
       // prepare regDecomp
-      InterfaceInt *regDecomp = new InterfaceInt(dg->regDecomp,
+      InterfaceInt<int> *regDecomp = new InterfaceInt<int>(dg->regDecomp,
         dimInterfaceInt, dimCountInterfaceInt);
     
       // use decompflag from inside dg to ensure identical decomposition
@@ -361,8 +361,8 @@ DistGrid *DistGrid::create(
         deBlockListDims[0] = dimCount;
         deBlockListDims[1] = 2;
         deBlockListDims[2] = deCount;
-        InterfaceInt *deBlockList = new InterfaceInt(deBlockListAlloc, 3,
-          deBlockListDims);
+        InterfaceInt<int> *deBlockList =
+          new InterfaceInt<int>(deBlockListAlloc, 3, deBlockListDims);
         delete [] deBlockListDims;
         // fill deBlockListAlloc with correct info
         for (int i=0; i<deCount; i++){
@@ -627,8 +627,8 @@ DistGrid *DistGrid::create(
          }
          if (localPet==acceptorPet){
            // acceptor side to wrap up setting of arb sequence indices
-           InterfaceInt *arbSeqIndexInt =
-             new InterfaceInt(arbSeqIndex, 1, &itemCount);
+           InterfaceInt<int> *arbSeqIndexInt =
+             new InterfaceInt<int>(arbSeqIndex, 1, &itemCount);
            distgrid->setArbSeqIndex(arbSeqIndexInt, acceptorLDe, 1);
            delete arbSeqIndexInt;
            delete [] arbSeqIndex;
@@ -805,16 +805,16 @@ DistGrid *DistGrid::create(
 //
 // !ARGUMENTS:
 //
-  InterfaceInt *minIndex,                 // (in)
-  InterfaceInt *maxIndex,                 // (in)
-  InterfaceInt *regDecomp,                // (in)
+  InterfaceInt<int> *minIndex,            // (in)
+  InterfaceInt<int> *maxIndex,            // (in)
+  InterfaceInt<int> *regDecomp,           // (in)
   Decomp_Flag *decompflag,                // (in)
   int decompflagCount,                    // (in)
-  InterfaceInt *regDecompFirstExtra,      // (in)
-  InterfaceInt *regDecompLastExtra,       // (in)
-  InterfaceInt *deLabelList,              // (in)
+  InterfaceInt<int> *regDecompFirstExtra, // (in)
+  InterfaceInt<int> *regDecompLastExtra,  // (in)
+  InterfaceInt<int> *deLabelList,         // (in)
   ESMC_IndexFlag *indexflag,              // (in)
-  InterfaceInt *connectionList,           // (in)
+  InterfaceInt<int> *connectionList,      // (in)
   DELayout *delayout,                     // (in)
   VM *vm,                                 // (in)
   int *rc                                 // (out) return code
@@ -937,7 +937,7 @@ DistGrid *DistGrid::create(
     dummy[0] = deCount;
     for (int i=1; i<dimCount; i++)
       dummy[i] = 1;
-    regDecomp = new InterfaceInt(dummy, 1, &dimCount);
+    regDecomp = new InterfaceInt<int>(dummy, 1, &dimCount);
   }
   if (regDecomp->dimCount != 1){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
@@ -969,7 +969,7 @@ DistGrid *DistGrid::create(
     // set default sequence
     for (int i=0; i<deCount; i++)
       dummy[i] = i;
-    deLabelList = new InterfaceInt(dummy, 1, &deCount);
+    deLabelList = new InterfaceInt<int>(dummy, 1, &deCount);
   }
   if (deLabelList->dimCount != 1){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
@@ -999,7 +999,7 @@ DistGrid *DistGrid::create(
     // set default
     for (int i=0; i<dimCount; i++)
       dummy[i] = 0;
-    regDecompFirstExtra = new InterfaceInt(dummy, 1, &dimCount);
+    regDecompFirstExtra = new InterfaceInt<int>(dummy, 1, &dimCount);
   }
   if (regDecompFirstExtra->dimCount != 1){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
@@ -1021,7 +1021,7 @@ DistGrid *DistGrid::create(
     // set default
     for (int i=0; i<dimCount; i++)
       dummy[i] = 0;
-    regDecompLastExtra = new InterfaceInt(dummy, 1, &dimCount);
+    regDecompLastExtra = new InterfaceInt<int>(dummy, 1, &dimCount);
   }
   if (regDecompLastExtra->dimCount != 1){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
@@ -1280,12 +1280,12 @@ DistGrid *DistGrid::create(
 //
 // !ARGUMENTS:
 //
-  InterfaceInt *minIndex,                 // (in)
-  InterfaceInt *maxIndex,                 // (in)
-  InterfaceInt *deBlockList,              // (in)
-  InterfaceInt *deLabelList,              // (in)
+  InterfaceInt<int> *minIndex,            // (in)
+  InterfaceInt<int> *maxIndex,            // (in)
+  InterfaceInt<int> *deBlockList,         // (in)
+  InterfaceInt<int> *deLabelList,         // (in)
   ESMC_IndexFlag *indexflag,              // (in)
-  InterfaceInt *connectionList,           // (in)
+  InterfaceInt<int> *connectionList,      // (in)
   DELayout *delayout,                     // (in)
   VM *vm,                                 // (in)
   int *rc                                 // (out) return code
@@ -1407,7 +1407,7 @@ DistGrid *DistGrid::create(
     // set default sequence
     for (int i=0; i<deCount; i++)
       dummy[i] = i;
-    deLabelList = new InterfaceInt(dummy, 1, &deCount);
+    deLabelList = new InterfaceInt<int>(dummy, 1, &deCount);
   }
   if (deLabelList->dimCount != 1){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
@@ -1542,16 +1542,16 @@ DistGrid *DistGrid::create(
 //
 // !ARGUMENTS:
 //
-  InterfaceInt *minIndex,                 // (in)
-  InterfaceInt *maxIndex,                 // (in)
-  InterfaceInt *regDecomp,                // (in)
+  InterfaceInt<int> *minIndex,            // (in)
+  InterfaceInt<int> *maxIndex,            // (in)
+  InterfaceInt<int> *regDecomp,           // (in)
   Decomp_Flag *decompflag,                // (in)
   int decompflagCount,                    // (in)
-  InterfaceInt *regDecompFirstExtra,      // (in)
-  InterfaceInt *regDecompLastExtra,       // (in)
-  InterfaceInt *deLabelList,              // (in)
+  InterfaceInt<int> *regDecompFirstExtra, // (in)
+  InterfaceInt<int> *regDecompLastExtra,  // (in)
+  InterfaceInt<int> *deLabelList,         // (in)
   ESMC_IndexFlag *indexflag,              // (in)
-  InterfaceInt *connectionList,           // (in)
+  InterfaceInt<int> *connectionList,      // (in)
   int fastAxis,                           // (in)
   VM *vm,                                 // (in)
   int *rc                                 // (out) return code
@@ -1601,17 +1601,17 @@ DistGrid *DistGrid::create(
 //
 // !ARGUMENTS:
 //
-  InterfaceInt *minIndex,                 // (in)
-  InterfaceInt *maxIndex,                 // (in)
-  InterfaceInt *regDecomp,                // (in)
+  InterfaceInt<int> *minIndex,            // (in)
+  InterfaceInt<int> *maxIndex,            // (in)
+  InterfaceInt<int> *regDecomp,           // (in)
   Decomp_Flag *decompflag,                // (in)
   int decompflagCount1,                   // (in)
   int decompflagCount2,                   // (in)
-  InterfaceInt *regDecompFirstExtra,      // (in)
-  InterfaceInt *regDecompLastExtra,       // (in)
-  InterfaceInt *deLabelList,              // (in)
+  InterfaceInt<int> *regDecompFirstExtra, // (in)
+  InterfaceInt<int> *regDecompLastExtra,  // (in)
+  InterfaceInt<int> *deLabelList,         // (in)
   ESMC_IndexFlag *indexflag,              // (in)
-  InterfaceInt *connectionList,           // (in)
+  InterfaceInt<int> *connectionList,      // (in)
   DELayout *delayout,                     // (in)
   VM *vm,                                 // (in)
   int *rc                                 // (out) return code
@@ -1777,7 +1777,7 @@ DistGrid *DistGrid::create(
     // finish up creating the default regDecomp InterfaceInt
     dummyLen[0] = dimCount;
     dummyLen[1] = tileCount;
-    regDecomp = new InterfaceInt(dummy, 2, dummyLen);
+    regDecomp = new InterfaceInt<int>(dummy, 2, dummyLen);
   }
   if (regDecomp->dimCount != 2){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
@@ -1817,7 +1817,7 @@ DistGrid *DistGrid::create(
     // set default sequence
     for (int i=0; i<deCount; i++)
       dummy[i] = i;
-    deLabelList = new InterfaceInt(dummy, 1, &deCount);
+    deLabelList = new InterfaceInt<int>(dummy, 1, &deCount);
   }
   if (deLabelList->dimCount != 1){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
@@ -1849,7 +1849,7 @@ DistGrid *DistGrid::create(
       dummy[i] = 0;
     dummyLen[0] = dimCount;
     dummyLen[1] = tileCount;
-    regDecompFirstExtra = new InterfaceInt(dummy, 2, dummyLen);
+    regDecompFirstExtra = new InterfaceInt<int>(dummy, 2, dummyLen);
   }
   if (regDecompFirstExtra->dimCount != 2){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
@@ -1881,7 +1881,7 @@ DistGrid *DistGrid::create(
       dummy[i] = 0;
     dummyLen[0] = dimCount;
     dummyLen[1] = tileCount;
-    regDecompLastExtra = new InterfaceInt(dummy, 2, dummyLen);
+    regDecompLastExtra = new InterfaceInt<int>(dummy, 2, dummyLen);
   }
   if (regDecompLastExtra->dimCount != 2){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
@@ -2239,8 +2239,8 @@ int DistGrid::construct(
 // !ARGUMENTS:
 //
   int dimCountArg,                      // (in)
-  int tileCountArg,                    // (in)
-  int *tileListPDeArg,                 // (in)
+  int tileCountArg,                     // (in)
+  int *tileListPDeArg,                  // (in)
   int *minIndexArg,                     // (in)
   int *maxIndexArg,                     // (in)
   int *minIndexPDimPDeArg,              // (in)
@@ -2249,7 +2249,7 @@ int DistGrid::construct(
   int *indexCountPDimPDeArg,            // (in)
   int **indexListPDimPLocalDeArg,       // (in)
   int *regDecompArg,                    // (in)
-  InterfaceInt *connectionListArg,      // (in)
+  InterfaceInt<int> *connectionListArg, // (in)
   Decomp_Flag const *decompflagArg,     // (in)
   ESMC_IndexFlag *indexflagArg,         // (in)
   DELayout *delayoutArg,                // (in) DELayout
@@ -2511,9 +2511,9 @@ int DistGrid::fillSeqIndexList(
 //
 // !ARGUMENTS:
 //
-  InterfaceInt *seqIndexList,   // in
-  int localDe,                  // in  - local DE = {0, ..., localDeCount-1}
-  int collocation               // in  -
+  InterfaceInt<int> *seqIndexList,  // in
+  int localDe,                      // in  - local DE = {0, ..., localDeCount-1}
+  int collocation                   // in  -
   )const{
 //
 // !DESCRIPTION:
@@ -2647,7 +2647,7 @@ int DistGrid::fillSeqIndexList(
   if (seqIndexList.size() != elementCount)
     seqIndexList.resize(elementCount);
   
-  InterfaceInt *seqIndexListAux = new InterfaceInt(seqIndexList);
+  InterfaceInt<int> *seqIndexListAux = new InterfaceInt<int>(seqIndexList);
   localrc = fillSeqIndexList(seqIndexListAux, localDe, collocation);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
     &rc)) return rc;
@@ -4381,11 +4381,11 @@ int DistGrid::connection(
 //
 // !ARGUMENTS:
 //
-  InterfaceInt *connection,         // out -
-  int tileIndexA,                  // in  -
-  int tileIndexB,                  // in  -
-  InterfaceInt *positionVector,     // in -
-  InterfaceInt *orientationVector   // in -
+  InterfaceInt<int> *connection,        // out -
+  int tileIndexA,                       // in  -
+  int tileIndexB,                       // in  -
+  InterfaceInt<int> *positionVector,    // in -
+  InterfaceInt<int> *orientationVector  // in -
   ){    
 //
 // !DESCRIPTION:
@@ -4486,7 +4486,7 @@ int DistGrid::setCollocationPDim(
 //
 // !ARGUMENTS:
 //
-  InterfaceInt *collocationPDimArg // in
+  InterfaceInt<int> *collocationPDimArg // in
   ){
 //
 // !DESCRIPTION:
@@ -4583,9 +4583,9 @@ int DistGrid::setArbSeqIndex(
 //
 // !ARGUMENTS:
 //
-  InterfaceInt *arbSeqIndex,    // in
-  int localDe,                  // in  - local DE = {0, ..., localDeCount-1}
-  int collocation               // in
+  InterfaceInt<int> *arbSeqIndex, // in
+  int localDe,                    // in  - local DE = {0, ..., localDeCount-1}
+  int collocation                 // in
   ){
 //
 // !DESCRIPTION:

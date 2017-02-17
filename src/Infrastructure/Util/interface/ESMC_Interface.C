@@ -45,7 +45,8 @@ int ESMC_InterfaceIntSet(ESMC_InterfaceInt *interfaceIntArg,
   // initialize return code; assume routine not implemented
   int rc = ESMC_RC_NOT_IMPL;
 
-  ESMCI::InterfaceInt *ii = ((ESMCI::InterfaceInt *)(interfaceIntArg->shallowMem));
+  ESMCI::InterfaceInt<int> *ii = 
+    ((ESMCI::InterfaceInt<int> *)(interfaceIntArg->shallowMem));
   
   ii->set(arrayArg, lenArg);
 

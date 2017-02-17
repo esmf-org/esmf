@@ -93,8 +93,8 @@ void ESMCI_xgridregrid_create(ESMCI::VM **vmpp,
     int *iientries = new int[2*iisize.first]; 
     int larg[2] = {2, iisize.first};
     // Gather the list
-    ESMCI::InterfaceInt ii(iientries, 2, larg);
-    ESMCI::InterfaceInt *iiptr = &ii;
+    ESMCI::InterfaceInt<int> ii(iientries, 2, larg);
+    ESMCI::InterfaceInt<int> *iiptr = &ii;
 
     double *factors = new double[iisize.first];
 

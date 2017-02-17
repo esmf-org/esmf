@@ -89,7 +89,7 @@ namespace ESMCI{
     ESMC_Mesh getMesh(int *rc);
     ESMC_Array getArray(int *rc);
     static int getbounds(Field *field, int *localDe,
-      InterfaceInt *exclusiveLBound, InterfaceInt *exclusiveUBound);
+      InterfaceInt<int> *exclusiveLBound, InterfaceInt<int> *exclusiveUBound);
     int print();
     int read(const char *file,
       const char* variableName,
@@ -100,11 +100,11 @@ namespace ESMCI{
                            ESMC_InterfaceInt *srcMaskValues, 
                            ESMC_InterfaceInt *dstMaskValues,
                            RouteHandle **routehandle,
-			               ESMC_RegridMethod_Flag *regridMethod,
-			               ESMC_PoleMethod_Flag *polemethod,
-			               int *regridPoleNPnts,
-			               ESMC_LineType_Flag *lineType,
-			               ESMC_NormType_Flag *normType,
+			   ESMC_RegridMethod_Flag *regridMethod,
+			   ESMC_PoleMethod_Flag *polemethod,
+			   int *regridPoleNPnts,
+			   ESMC_LineType_Flag *lineType,
+			   ESMC_NormType_Flag *normType,
                            ESMC_UnmappedAction_Flag *unmappedAction,
                            ESMC_Logical *ignoreDegenerate,
                            Field *srcFracField, Field *dstFracField);

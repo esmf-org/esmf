@@ -131,13 +131,13 @@ class ArrayBundle : public ESMC_Base {    // inherits from ESMC_Base class
     // comms
     static int haloStore(ArrayBundle *arraybundle, RouteHandle **routehandle,
       ESMC_HaloStartRegionFlag halostartregionflag=ESMF_REGION_EXCLUSIVE,
-      InterfaceInt *haloLDepth=NULL, InterfaceInt *haloUDepth=NULL);
+      InterfaceInt<int> *haloLDepth=NULL, InterfaceInt<int> *haloUDepth=NULL);
     static int halo(ArrayBundle *arraybundle,
       RouteHandle **routehandle, bool checkflag=false);
     static int haloRelease(RouteHandle *routehandle);
     static int redistStore(ArrayBundle *srcArraybundle,
       ArrayBundle *dstArraybundle, RouteHandle **routehandle,
-      InterfaceInt *srcToDstTransposeMap,
+      InterfaceInt<int> *srcToDstTransposeMap,
       ESMC_TypeKind_Flag typekindFactor = ESMF_NOKIND, void *factor = NULL);
     static int redist(ArrayBundle *srcArraybundle,
       ArrayBundle *dstArraybundle, RouteHandle **routehandle,
@@ -146,7 +146,7 @@ class ArrayBundle : public ESMC_Base {    // inherits from ESMC_Base class
     static int sparseMatMulStore(ArrayBundle *srcArraybundle,
       ArrayBundle *dstArraybundle, RouteHandle **routehandle,
       std::vector<SparseMatrix> &sparseMatrix,
-      InterfaceInt *srcTermProcessing=NULL);
+      InterfaceInt<int> *srcTermProcessing=NULL);
     static int sparseMatMul(ArrayBundle *srcArraybundle,
       ArrayBundle *dstArraybundle, RouteHandle **routehandle,
       ESMC_Region_Flag zeroflag=ESMC_REGION_TOTAL,

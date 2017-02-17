@@ -48,14 +48,15 @@ extern "C" {
     ESMCI::LocalArray **larrayList, int *larrayCount,
     ESMCI::DistGrid **distgrid,
     ESMCI::CopyFlag *copyflag,
-    ESMCI::InterfaceInt *distgridToArrayMap,
-    ESMCI::InterfaceInt *computationalEdgeLWidthArg,
-    ESMCI::InterfaceInt *computationalEdgeUWidthArg,
-    ESMCI::InterfaceInt *computationalLWidthArg,
-    ESMCI::InterfaceInt *computationalUWidthArg, 
-    ESMCI::InterfaceInt *totalLWidthArg, ESMCI::InterfaceInt *totalUWidthArg,
-    ESMC_IndexFlag *indexflag, ESMCI::InterfaceInt *undistLBoundArg,
-    ESMCI::InterfaceInt *undistUBoundArg,
+    ESMCI::InterfaceInt<int> *distgridToArrayMap,
+    ESMCI::InterfaceInt<int> *computationalEdgeLWidthArg,
+    ESMCI::InterfaceInt<int> *computationalEdgeUWidthArg,
+    ESMCI::InterfaceInt<int> *computationalLWidthArg,
+    ESMCI::InterfaceInt<int> *computationalUWidthArg, 
+    ESMCI::InterfaceInt<int> *totalLWidthArg,
+    ESMCI::InterfaceInt<int> *totalUWidthArg,
+    ESMC_IndexFlag *indexflag, ESMCI::InterfaceInt<int> *undistLBoundArg,
+    ESMCI::InterfaceInt<int> *undistUBoundArg,
     char *name, int *len_name, int *rc,
     ESMCI_FortranStrLenArg name_l){
 #undef  ESMC_METHOD
@@ -84,14 +85,15 @@ extern "C" {
   
   void FTN_X(c_esmc_arraycreateallocate)(ESMCI::Array **ptr, 
     ESMCI::ArraySpec *arrayspec, ESMCI::DistGrid **distgrid,
-    ESMCI::InterfaceInt *distgridToArrayMap,
-    ESMCI::InterfaceInt *computationalEdgeLWidthArg,
-    ESMCI::InterfaceInt *computationalEdgeUWidthArg,
-    ESMCI::InterfaceInt *computationalLWidthArg,
-    ESMCI::InterfaceInt *computationalUWidthArg, 
-    ESMCI::InterfaceInt *totalLWidthArg, ESMCI::InterfaceInt *totalUWidthArg,
-    ESMC_IndexFlag *indexflag, ESMCI::InterfaceInt *undistLBoundArg,
-    ESMCI::InterfaceInt *undistUBoundArg,
+    ESMCI::InterfaceInt<int> *distgridToArrayMap,
+    ESMCI::InterfaceInt<int> *computationalEdgeLWidthArg,
+    ESMCI::InterfaceInt<int> *computationalEdgeUWidthArg,
+    ESMCI::InterfaceInt<int> *computationalLWidthArg,
+    ESMCI::InterfaceInt<int> *computationalUWidthArg, 
+    ESMCI::InterfaceInt<int> *totalLWidthArg,
+    ESMCI::InterfaceInt<int> *totalUWidthArg,
+    ESMC_IndexFlag *indexflag, ESMCI::InterfaceInt<int> *undistLBoundArg,
+    ESMCI::InterfaceInt<int> *undistUBoundArg,
     char *name, int *len_name, ESMCI::VM **vm, int *rc,
     ESMCI_FortranStrLenArg name_l){
 #undef  ESMC_METHOD
@@ -182,19 +184,21 @@ extern "C" {
     int *len_localArrayList, ESMCI::DistGrid **distgrid,
     ESMCI::DELayout **delayout,
     ESMC_IndexFlag *indexflag, 
-    ESMCI::InterfaceInt *distgridToArrayMap,
-    ESMCI::InterfaceInt *distgridToPackedArrayMap,
-    ESMCI::InterfaceInt *arrayToDistGridMap,
-    ESMCI::InterfaceInt *undistLBound,
-    ESMCI::InterfaceInt *undistUBound,
-    ESMCI::InterfaceInt *exclusiveLBound,
-    ESMCI::InterfaceInt *exclusiveUBound,
-    ESMCI::InterfaceInt *computationalLBound,
-    ESMCI::InterfaceInt *computationalUBound,
-    ESMCI::InterfaceInt *totalLBound, ESMCI::InterfaceInt *totalUBound,
-    ESMCI::InterfaceInt *computationalLWidth,
-    ESMCI::InterfaceInt *computationalUWidth,
-    ESMCI::InterfaceInt *totalLWidth, ESMCI::InterfaceInt *totalUWidth,
+    ESMCI::InterfaceInt<int> *distgridToArrayMap,
+    ESMCI::InterfaceInt<int> *distgridToPackedArrayMap,
+    ESMCI::InterfaceInt<int> *arrayToDistGridMap,
+    ESMCI::InterfaceInt<int> *undistLBound,
+    ESMCI::InterfaceInt<int> *undistUBound,
+    ESMCI::InterfaceInt<int> *exclusiveLBound,
+    ESMCI::InterfaceInt<int> *exclusiveUBound,
+    ESMCI::InterfaceInt<int> *computationalLBound,
+    ESMCI::InterfaceInt<int> *computationalUBound,
+    ESMCI::InterfaceInt<int> *totalLBound,
+    ESMCI::InterfaceInt<int> *totalUBound,
+    ESMCI::InterfaceInt<int> *computationalLWidth,
+    ESMCI::InterfaceInt<int> *computationalUWidth,
+    ESMCI::InterfaceInt<int> *totalLWidth,
+    ESMCI::InterfaceInt<int> *totalUWidth,
     int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_arrayget()"
@@ -742,7 +746,7 @@ extern "C" {
   void FTN_X(c_esmc_arrayhalostore)(ESMCI::Array **array,
     ESMCI::RouteHandle **routehandle,
     ESMC_HaloStartRegionFlag *halostartregionflag,
-    ESMCI::InterfaceInt *haloLDepth, ESMCI::InterfaceInt *haloUDepth,
+    ESMCI::InterfaceInt<int> *haloLDepth, ESMCI::InterfaceInt<int> *haloUDepth,
     int *pipelineDepth, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_arrayhalostore()"
@@ -793,7 +797,8 @@ extern "C" {
   
   void FTN_X(c_esmc_arrayrediststore)(ESMCI::Array **srcArray,
     ESMCI::Array **dstArray, ESMCI::RouteHandle **routehandle, 
-    ESMCI::InterfaceInt *srcToDstTransposeMap, ESMC_TypeKind_Flag *typekind,
+    ESMCI::InterfaceInt<int> *srcToDstTransposeMap,
+    ESMC_TypeKind_Flag *typekind,
     void *factor, ESMC_Logical *ignoreUnmatched, int *pipelineDepth, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_arrayrediststore()"
@@ -813,7 +818,8 @@ extern "C" {
 
   void FTN_X(c_esmc_arrayrediststorenf)(ESMCI::Array **srcArray,
     ESMCI::Array **dstArray, ESMCI::RouteHandle **routehandle, 
-    ESMCI::InterfaceInt *srcToDstTransposeMap, ESMC_Logical *ignoreUnmatched,
+    ESMCI::InterfaceInt<int> *srcToDstTransposeMap,
+    ESMC_Logical *ignoreUnmatched,
     int *pipelineDepth, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_arrayrediststorenf()"
@@ -870,7 +876,7 @@ extern "C" {
   void FTN_X(c_esmc_arraysmmstore)(ESMCI::Array **srcArray,
     ESMCI::Array **dstArray, ESMCI::RouteHandle **routehandle, 
     ESMC_TypeKind_Flag *typekindFactors, void *factorList, int *factorListCount,
-    ESMCI::InterfaceInt *factorIndexList, 
+    ESMCI::InterfaceInt<int> *factorIndexList, 
     ESMC_Logical *ignoreUnmatched,
     int *srcTermProcessing, int *pipelineDepth, int *rc){
 #undef  ESMC_METHOD
@@ -1079,8 +1085,8 @@ extern "C" {
   }
   
   void FTN_X(c_esmc_arrayset)(ESMCI::Array **array,
-    ESMCI::InterfaceInt *computationalLWidthArg,
-    ESMCI::InterfaceInt *computationalUWidthArg, int *rc){
+    ESMCI::InterfaceInt<int> *computationalLWidthArg,
+    ESMCI::InterfaceInt<int> *computationalUWidthArg, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_arrayset()"
     // Initialize return code; assume routine not implemented
@@ -1098,7 +1104,7 @@ extern "C" {
   }
   
   void FTN_X(c_esmc_arraysetplocalde)(ESMCI::Array **array,
-    int *localDe, ESMCI::InterfaceInt *rimSeqIndexArg, int *rc){
+    int *localDe, ESMCI::InterfaceInt<int> *rimSeqIndexArg, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_arraysetplocalde()"
     // Initialize return code; assume routine not implemented

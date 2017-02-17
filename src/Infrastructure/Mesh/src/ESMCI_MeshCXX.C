@@ -707,11 +707,11 @@ int MeshCXX::addElements(int num_elems, int *elemId,
   int regridConserve = 1; // Set this to 1 to force the frac field to be 
                           // added (required for conservative regridding.
 
-  InterfaceInt *elemMaskII = NULL;
+  InterfaceInt<int> *elemMaskII = NULL;
   if (elemMask) {
     int extent[1];
     extent[0] = num_elems;
-    elemMaskII = new InterfaceInt(elemMask, 1, extent);
+    elemMaskII = new InterfaceInt<int>(elemMask, 1, extent);
   }
   ESMCI_meshaddelements(&meshPointer, &num_elems, elemId, elemType, elemMaskII,
                         &areaPresent, elemArea, &coordsPresent, elemCoords, 
@@ -778,7 +778,7 @@ int MeshCXX::addNodes(int numNodes, int *nodeId, double *nodeCoord,
 
      // Call into Mesh glue to add nodes
      ESMCI_meshaddnodes(&meshPointer, &numNodes, nodeId, 
-                        nodeCoord, nodeOwner, (InterfaceInt *)NULL,
+                        nodeCoord, nodeOwner, (InterfaceInt<int> *)NULL,
                         &coordSys, &spatialDim,
                         &localrc); 
        if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,

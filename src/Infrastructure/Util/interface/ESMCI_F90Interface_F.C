@@ -12,6 +12,7 @@
 #define ESMC_FILENAME "ESMCI_F90Interface_F.C"
 //==============================================================================
 
+#include "ESMC_Util.h"
 #include "ESMCI_Macros.h"
 #include "ESMCI_F90Interface.h"
 
@@ -23,7 +24,7 @@ extern "C" {
   // ESMC_InterfaceInt interfaces
   // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   
-  void FTN_X(c_esmc_interfaceintsetinvalid)(ESMCI::InterfaceInt *array,
+  void FTN_X(c_esmc_interfaceintsetinvalid)(ESMCI::InterfaceInt<int> *array,
     int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_interfaceintsetinvalid()"
@@ -31,7 +32,7 @@ extern "C" {
     *rc = ESMF_SUCCESS;
   }
 
-  void FTN_X(c_esmc_interfaceintcreate1d)(ESMCI::InterfaceInt *array, 
+  void FTN_X(c_esmc_interfaceintcreate1d)(ESMCI::InterfaceInt<int> *array, 
     int *farray, int *len, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_interfaceintcreate1d()"
@@ -39,7 +40,7 @@ extern "C" {
     *rc = ESMF_SUCCESS;
   }
 
-  void FTN_X(c_esmc_interfaceintcreate2d)(ESMCI::InterfaceInt *array, 
+  void FTN_X(c_esmc_interfaceintcreate2d)(ESMCI::InterfaceInt<int> *array, 
     int *farray, int *len, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_interfaceintcreate2d()"
@@ -47,10 +48,42 @@ extern "C" {
     *rc = ESMF_SUCCESS;
   }
 
-  void FTN_X(c_esmc_interfaceintcreate3d)(ESMCI::InterfaceInt *array, 
+  void FTN_X(c_esmc_interfaceintcreate3d)(ESMCI::InterfaceInt<int> *array, 
     int *farray, int *len, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_interfaceintcreate3d()"
+    array->set(farray, 3, len);
+    *rc = ESMF_SUCCESS;
+  }
+
+  void FTN_X(c_esmc_interfaceintsetinvalidi8)(
+    ESMCI::InterfaceInt<ESMC_I8> *array, int *rc){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_interfaceintsetinvalid()"
+    array->set();
+    *rc = ESMF_SUCCESS;
+  }
+
+  void FTN_X(c_esmc_interfaceintcreate1di8)(ESMCI::InterfaceInt<ESMC_I8> *array, 
+    ESMC_I8 *farray, int *len, int *rc){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_interfaceintcreate1di8()"
+    array->set(farray, 1, len);
+    *rc = ESMF_SUCCESS;
+  }
+
+  void FTN_X(c_esmc_interfaceintcreate2di8)(ESMCI::InterfaceInt<ESMC_I8> *array, 
+    ESMC_I8 *farray, int *len, int *rc){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_interfaceintcreate2di8()"
+    array->set(farray, 2, len);
+    *rc = ESMF_SUCCESS;
+  }
+
+  void FTN_X(c_esmc_interfaceintcreate3di8)(ESMCI::InterfaceInt<ESMC_I8> *array, 
+    ESMC_I8 *farray, int *len, int *rc){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_interfaceintcreate3di8()"
     array->set(farray, 3, len);
     *rc = ESMF_SUCCESS;
   }

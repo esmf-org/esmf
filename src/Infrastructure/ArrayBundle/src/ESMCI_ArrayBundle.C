@@ -594,8 +594,8 @@ int ArrayBundle::haloStore(
   ArrayBundle *arraybundle,             // inout - ArrayBundle to be haloed
   RouteHandle **routehandle,            // inout - handle to precomputed comm
   ESMC_HaloStartRegionFlag halostartregionflag, // in - start of halo region
-  InterfaceInt *haloLDepth,             // in    - lower corner halo depth
-  InterfaceInt *haloUDepth              // in    - upper corner halo depth
+  InterfaceInt<int> *haloLDepth,        // in    - lower corner halo depth
+  InterfaceInt<int> *haloUDepth         // in    - upper corner halo depth
   ){    
 //
 // !DESCRIPTION:
@@ -840,12 +840,12 @@ int ArrayBundle::redistStore(
 //
 // !ARGUMENTS:
 //
-  ArrayBundle *srcArraybundle,          // in    - source ArrayBundle
-  ArrayBundle *dstArraybundle,          // in    - destination ArrayBundle
-  RouteHandle **routehandle,            // inout - handle to precomputed comm
-  InterfaceInt *srcToDstTransposeMap,   // in    - mapping src -> dst dims
-  ESMC_TypeKind_Flag typekindFactor,         // in    - typekind of factor
-  void *factor                          // in    - redist factor
+  ArrayBundle *srcArraybundle,            // in    - source ArrayBundle
+  ArrayBundle *dstArraybundle,            // in    - destination ArrayBundle
+  RouteHandle **routehandle,              // inout - handle to precomputed comm
+  InterfaceInt<int> *srcToDstTransposeMap,// in    - mapping src -> dst dims
+  ESMC_TypeKind_Flag typekindFactor,      // in    - typekind of factor
+  void *factor                            // in    - redist factor
   ){    
 //
 // !DESCRIPTION:
@@ -1117,7 +1117,7 @@ int ArrayBundle::sparseMatMulStore(
   ArrayBundle *dstArraybundle,          // in    - destination ArrayBundle
   RouteHandle **routehandle,            // inout - handle to precomputed comm
   vector<SparseMatrix> &sparseMatrix,   // in    - sparse matrix
-  InterfaceInt *srcTermProcessing       // inout - srcTermProcessing parameters
+  InterfaceInt<int> *srcTermProcessing  // inout - srcTermProcessing parameters
   ){    
 //
 // !DESCRIPTION:
