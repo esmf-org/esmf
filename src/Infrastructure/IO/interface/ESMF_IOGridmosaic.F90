@@ -193,14 +193,14 @@ subroutine ESMF_GridspecReadMosaic(filename, mosaic, tileFilePath, rc)
             if (CDFCheckError (ncStatus, &
                ESMF_METHOD,  &
                ESMF_SRCLINE, &
-               "children attribute does not exit", &
+               "children variable does not exit", &
                rc)) return
             ! Find the dimension of the tile variable
             ncStatus = nf90_inquire_variable(ncid, varid, ndims=ndims, dimids=dimids)
             if (CDFCheckError (ncStatus, &
                ESMF_METHOD,  &
                ESMF_SRCLINE, &
-               "children attribute does not exit", &
+               "fail to inquire the variable defined by children attribute", &
                rc)) return
             if (ndims /= 2) then
                 call ESMF_LogSetError(rcToCheck=ESMF_FAILURE, &
@@ -248,14 +248,14 @@ subroutine ESMF_GridspecReadMosaic(filename, mosaic, tileFilePath, rc)
             if (CDFCheckError (ncStatus, &
                ESMF_METHOD,  &
                ESMF_SRCLINE, &
-               "children attribute does not exit", &
+               "contact_regions variable does not exit", &
                rc)) return
             ! Find the dimension of this variable
             ncStatus = nf90_inquire_variable(ncid, varid, ndims=ndims, dimids=dimids)
             if (CDFCheckError (ncStatus, &
                ESMF_METHOD,  &
                ESMF_SRCLINE, &
-               "children attribute does not exit", &
+               "fail to inquire the variable defined by contact_regions", &
                rc)) return
             if (ndims /= 2) then
                 call ESMF_LogSetError(rcToCheck=ESMF_FAILURE, &
