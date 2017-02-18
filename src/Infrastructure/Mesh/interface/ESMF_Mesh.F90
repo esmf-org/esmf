@@ -3441,7 +3441,7 @@ function ESMF_MeshCreateCubedSphere(tileSize, nx, ny, rc)
   integer, allocatable  :: NodeOwners(:)
   integer               :: sizei, sizej, starti, startj, tile
   integer               :: rem, rem1, rem2, ind
-  integer               :: i, j, k, kk
+  integer               :: i, j, k, kk, kksave, l
   integer               :: localNodes, localElems
   integer               :: totalNodes
   integer, allocatable  :: firstOwners(:), recvbuf(:), map(:)
@@ -3450,7 +3450,10 @@ function ESMF_MeshCreateCubedSphere(tileSize, nx, ny, rc)
   real(ESMF_KIND_R8)    :: start_lat, end_lat, TOL
   real(ESMF_KIND_R8)    :: starttime, endtime
   character(len=80)     :: filename1
-  integer               :: start(2), count(2)
+  integer, allocatable  :: start(:,:), count(:,:)
+  integer, allocatable  :: DElist(:), tileno(:)
+  integer               :: totalDE, localDE, unqlocalNodes
+  integer, allocatable  :: GlobalIDs(:), localIDs(:)
 
   ! get global vm information
   !
@@ -3463,12 +3466,19 @@ function ESMF_MeshCreateCubedSphere(tileSize, nx, ny, rc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
 
+#if 0  
   if (nx * ny * 6 /= PetCnt) then
        call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
                              msg="nx * ny does not equal to the total number of PETs", & 
                              ESMF_CONTEXT, rcToReturn=rc) 
        return
   endif    
+#endif
+
+  allocate(lonEdge(tileSize+1, (tileSize+1)*6),latEdge(tileSize+1, (tileSize+1)*6))
+
+  ! Create a mesh 
+  mesh = ESMF_MeshCreate(2, 2, coordSys=ESMF_COORDSYS_SPH_DEG, rc=localrc)
 
   ! Distribute center coordinates according to the nx/ny decomposition
 #if 0
@@ -3479,158 +3489,250 @@ function ESMF_MeshCreateCubedSphere(tileSize, nx, ny, rc)
   tile = (starty-1)/tilesize
 #endif
     ! use actual cubed sphere coordiantes
-    tile = PetNo/(nx*ny)+1
-    rem = mod(PetNo,nx*ny)
-    sizei = tileSize/nx
-    sizej = tileSize/ny
-    rem1 = mod(tileSize, nx)
-    rem2 = mod(tileSize, ny)
-    ind = mod(rem,nx)
-    if (rem1 > 0) then
-       if (ind < rem1) then
-         sizei=sizei+1
-         starti=sizei*ind+1
-       else
-         starti=sizei*ind+rem1+1
-       endif
+    totalDE = nx*ny*6
+    localNodes = 0
+    localElems = 0
+    if (PetCnt >= totalDE) then
+      if (PetNo < totalDE) then 
+         localDE=1
+      else
+         localDE=0
+      endif
     else
-       starti = sizei*ind+1
+      ! multiple DEs per PET
+      localDE=totalDE/PetCnt
+      rem = mod(totalDE, PetCnt)
+      if (PetNo < rem) localDE=localDE+1
     endif
-    ind = rem/nx
-    if (rem2 > 0) then
-       if (ind < rem2) then
-         sizej=sizej+1
-         startj=sizej*ind+1
-       else
-         startj=sizej*ind+rem2+1
-       endif
-    else
-       startj = sizej*ind+1
-    endif
-    !print *, PetNo, 'block:', starti, startj, sizei, sizej, tile
+    if (localDE > 0) then
+     allocate(DElist(localDE), tileno(localDE))
+     allocate(start(2,localDE), count(2,localDE))
+     ! deNo is zero-based
+     do i=1,localDE
+        DElist(i)=PetNo+PetCnt*(i-1)
+     enddo 
+     do i=1,localDE
+        tileno(i) = DElist(i)/(nx*ny)+1
+        rem = mod(DElist(i),nx*ny)
+        sizei = tileSize/nx
+        sizej = tileSize/ny
+        rem1 = mod(tileSize, nx)
+        rem2 = mod(tileSize, ny)
+        ind = mod(rem,nx)
+        if (rem1 > 0) then
+          if (ind < rem1) then
+            sizei=sizei+1
+            starti=sizei*ind+1
+          else
+            starti=sizei*ind+rem1+1
+          endif
+        else
+          starti = sizei*ind+1
+        endif
+        ind = rem/nx
+        if (rem2 > 0) then
+          if (ind < rem2) then
+            sizej=sizej+1
+            startj=sizej*ind+1
+          else
+            startj=sizej*ind+rem2+1
+          endif
+        else
+          startj = sizej*ind+1
+        endif
+        !print *, PetNo, DElist(i), 'block:', starti, startj, sizei, sizej, tileno(i)
 
-  allocate(lonEdge(tileSize+1, (tileSize+1)*6),latEdge(tileSize+1, (tileSize+1)*6))
-  allocate(lonCenter(sizei,sizej),latCenter(sizei, sizej))
-
-  start(1)=starti
-  start(2)=startj
-  count(1)=sizei
-  count(2)=sizej
-
-  !call ESMF_VMWtime(starttime, rc=rc)
-  ! Generate glocal edge coordinates and local center coordinates
-  call ESMF_UtilCreateCSCoords(tileSize, lonEdge, latEdge, start=start, count=count, &
-       tile=tile, lonCenter=lonCenter, latCenter=latCenter)
-  !call ESMF_VMWtime(endtime, rc=rc)
-  
-  !print *, 'Create CS size ', tileSize, 'in', (endtime-starttime)*1000.0, ' msecs'
- 
-  totalnodes = (tileSize+1)*(tileSize+1)*6
-
-  ! convert radius to degrees
-  lonEdge = lonEdge * todeg
-  latEdge = latEdge * todeg
-  lonCenter = lonCenter * todeg
-  latCenter = latCenter * todeg
-
-  ! Create a mesh 
-  mesh = ESMF_MeshCreate(2, 2, coordSys=ESMF_COORDSYS_SPH_DEG, rc=localrc)
-  
-  !Find unique set of node coordinates
-  allocate(map(totalnodes))
-  TOL=0.0000000001
-  start_lat=-91.0
-  end_lat = 91.0
-  
-  call c_ESMC_ClumpPntsLL(totalNodes, reshape(lonEdge, (/totalnodes/)), reshape(latEdge, (/totalnodes/)), &
-                         TOL, map, uniquenodes, &
-                         maxDuplicate, start_lat, end_lat, rc)
-
-  allocate(firstowners(uniquenodes), recvbuf(uniquenodes))
-
-  ! Global ID for the elements and the nodes using its 2D index: (y-1)*tileSize+x
-  ! for nodes shared by multiple PETs, the PET with smaller rank will own the
-  ! nodes.
-  ! there won't be duplicate nodes in the local block, so localNodes will be the same as before
-  localNodes = (sizei+1)*(sizej+1)
-  localElems = sizei*sizej
-  allocate(NodeIds(localNodes), nodeCoords(localNodes*2), nodeOwners(localNodes))
-  
-  k=1 
-  firstOwners = PetCnt+1
-  nodeOwners = PetNo
-  do j=(tile-1)*(tileSize+1)+startj,sizej+startj+(tile-1)*(tileSize+1)
-     do i=starti,sizei+starti
-        !use the new index to the unique set of nodes
-        kk = (j-1)*(tileSize+1)+i
-        NodeIds(k) = map(kk)+1
-        firstOwners(map(kk)+1)=PetNo       
-        nodeCoords(k*2-1) = lonEdge(i,j)
-        nodeCoords(k*2) = latEdge(i,j)
-        k=k+1
+        start(1,i)=starti
+        start(2,i)=startj
+        count(1,i)=sizei
+        count(2,i)=sizej
+        localNodes = localNodes + (sizei+1)*(sizej+1)
+        localElems = localElems + sizei*sizej
      enddo
-  enddo
 
-  ! global minimum of firstOwners to find the owner of the nodes (use the smallest PetNo)
-  call ESMF_VMAllReduce(vm, firstOwners, recvbuf, uniquenodes, &
-       ESMF_REDUCE_MIN, rc=localrc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+     ! Add elements -- allocate arrays
+     allocate(ElemIds(localElems), ElemConn(localElems*4), ElemType(localElems))
+     allocate(centerCoords(localElems*2))
+     ElemType = ESMF_MESHELEMTYPE_QUAD
+     k=1      
+     do i=1,localDE
+        !call ESMF_VMWtime(starttime, rc=rc)
+        ! Generate glocal edge coordinates and local center coordinates
+        allocate(lonCenter(count(1,i), count(2,i)), latCenter(count(1,i), count(2,i)))
+        if (i==1) then 
+           call ESMF_UtilCreateCSCoords(tileSize, lonEdge=lonEdge, latEdge=latEdge, &
+                start=start(:,i), count=count(:,i), &
+                tile=tileno(i), lonCenter=lonCenter, latCenter=latCenter)
+        else
+           call ESMF_UtilCreateCSCoords(tileSize, start=start(:,i), count=count(:,i), &
+                 tile=tileno(i), lonCenter=lonCenter, latCenter=latCenter)
+        endif
+        !call ESMF_VMWtime(endtime, rc=rc)
+        lonCenter = lonCenter * todeg
+        latCenter = latCenter * todeg
+        do j=1,count(2,i)
+          do l=1,count(1,i)
+             ElemIds(k) = (tileno(i)-1)*tilesize*tilesize+(j+start(2,i)-2)*(tileSize)+start(1,i)+l-1
+             centerCoords(k*2-1) = lonCenter(l,j)
+             centerCoords(k*2) = latCenter(l,j)
+             k=k+1
+          enddo
+        enddo
+        deallocate(lonCenter, latCenter)
+     enddo
+
+     totalnodes = (tileSize+1)*(tileSize+1)*6
+     ! convert radius to degrees
+     lonEdge = lonEdge * todeg
+     latEdge = latEdge * todeg
+     !Find unique set of node coordinates
+     allocate(map(totalnodes))
+     TOL=0.0000000001
+     start_lat=-91.0
+     end_lat = 91.0
+     call c_ESMC_ClumpPntsLL(totalNodes, reshape(lonEdge, (/totalnodes/)), reshape(latEdge, (/totalnodes/)), &
+                      TOL, map, uniquenodes, &
+                      maxDuplicate, start_lat, end_lat, rc)
+  
+     ! Find total unique local nodes in each PET
+     allocate(firstowners(uniquenodes), recvbuf(uniquenodes))
+
+     ! Global ID for the elements and the nodes using its 2D index: (y-1)*tileSize+x
+     ! for nodes shared by multiple PETs, the PET with smaller rank will own the
+     ! nodes.
+  
+     k=1 
+     firstOwners = PetCnt+1
+     !nodeOwners = PetNo
+     allocate(GlobalIds(localNodes), localIds(localNodes))
+     do i=1,localDE
+        do j=(tileno(i)-1)*(tileSize+1)+start(2,i),count(2,i)+start(2,i)+(tileno(i)-1)*(tileSize+1)
+          do l=start(1,i),count(1,i)+start(1,i)
+            !use the new index to the unique set of nodes
+            kk = (j-1)*(tileSize+1)+l
+            GlobalIds(k) = map(kk)+1
+            k=k+1
+          enddo
+       enddo
+     enddo
+
+     ! Find if there are any duplicate globalIDs in the array
+     ! First sort GlobalIds, return the original index in localIds and number of unique nodes
+     call sort_int(GlobalIds, localIds, unqlocalnodes)
+     allocate(NodeIds(unqlocalNodes), nodeCoords(unqlocalNodes*2), nodeOwners(unqlocalNodes))
+
+     do i=1,localnodes
+        firstOwners(GlobalIds(i))=PetNo
+     enddo
+     ! global minimum of firstOwners to find the owner of the nodes (use the smallest PetNo)
+     call ESMF_VMAllReduce(vm, firstOwners, recvbuf, uniquenodes, &
+        ESMF_REDUCE_MIN, rc=localrc)
+     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
 
-  k=1
-  do j=(tile-1)*(tileSize+1)+startj,sizej+startj+(tile-1)*(tileSize+1)
-     do i=starti,sizei+starti
-        !use the new index to the unique set of nodes
-         kk = (j-1)*(tileSize+1)+i
-         nodeOwners(k)=recvbuf(map(kk)+1)
-         k=k+1
+     do i=1,localNodes
+       k=localIds(i)
+       NodeIds(k)=GlobalIds(i)
+       nodeOwners(k)=recvbuf(GlobalIds(i))
      enddo
-  enddo
 
-  deallocate(firstOwners, recvbuf, map)
+     k=1
+     kksave = 0
+     do i=1,localDE
+       do j=(tileno(i)-1)*(tileSize+1)+start(2,i),count(2,i)+start(2,i)+(tileno(i)-1)*(tileSize+1)
+         do l=start(1,i),count(1,i)+start(1,i)
+           kk=localIds(k)
+           if (kk > kksave) then
+             nodeCoords(kk*2-1)=lonEdge(l, j)
+             nodeCoords(kk*2)=latEdge(l,j)
+           endif
+           k=k+1
+           kksave = kk
+         enddo
+       enddo
+     enddo
 
-  call ESMF_MeshAddNodes(mesh, NodeIds=NodeIds, &
-       NodeCoords = NodeCoords, NodeOwners = NodeOwners, &
-       rc=localrc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+     deallocate(firstOwners, recvbuf, map)
+
+     call ESMF_MeshAddNodes(mesh, NodeIds=NodeIds, &
+         NodeCoords = NodeCoords, NodeOwners = NodeOwners, &
+         rc=localrc)
+     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
 
-  deallocate(NodeIds, NodeCoords, NodeOwners)
+     !deallocate(NodeIds, NodeCoords, NodeOwners)
 
-  ! Add elements -- allocate arrays
-  allocate(ElemIds(localElems), ElemConn(localElems*4), ElemType(localElems))
-  allocate(centerCoords(localElems*2))
-  ! Set values:  ElemIds are global, ElemConn uses localNode IDs
-  ElemType = ESMF_MESHELEMTYPE_QUAD
-
-  k=1
-  kk=1
-
-  do j=1,sizej
-     do i=1,sizei
-        ElemIds(k) = (tile-1)*tilesize*tilesize+(j+startj-1)*(tileSize)+starti+i-1
-        centerCoords(k*2-1) = lonCenter(i,j)
-        centerCoords(k*2) = latCenter(i,j)
-        ! Set the connection using local node ID, counter clockwize
-        ElemConn(k*4-3)=kk
-        ElemConn(k*4-2)=kk+1
-        ElemConn(k*4-1)=kk+1+(sizei+1)
-        ElemConn(k*4)=kk+(sizei+1)
-        k=k+1
-        kk=kk+1
+     k=1  !local element index
+     kk=1 !local node index
+     do i=1,localDE
+       do j=1,count(2,i)
+         do l=1,count(1,i)
+           ElemConn(k*4-3)=localIds(kk)
+           ElemConn(k*4-2)=localIds(kk+1)
+           ElemConn(k*4-1)=localIds(kk+1+(count(1,i)+1))
+           ElemConn(k*4)=localIds(kk+(count(1,i)+1))
+           k=k+1
+           kk=kk+1
+         enddo
+         kk=kk+1
+       enddo
+       kk=kk+count(1,i)+1
      enddo
-     kk=kk+1
-  enddo
-  
-  call ESMF_MeshAddElements(mesh, ElemIds, ElemType, ElemConn, &
+
+     call ESMF_MeshAddElements(mesh, ElemIds, ElemType, ElemConn, &
                  elementCoords=centerCoords, rc=localrc)
 
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
 
-  deallocate(ElemIds, ElemConn, ElemType, centerCoords)
+     deallocate(ElemIds, ElemConn, ElemType, centerCoords)
 
-  deallocate(lonEdge, latEdge, lonCenter, latCenter)
+  else !localDE=0
+    !still have to call ESMF_MeshAddNodes() and ESMF_MeshAddElements() even if there is no DEs
+    !First participate in ESMF_VMALlReduce()
+    call ESMF_UtilCreateCSCoords(tileSize, lonEdge=lonEdge, latEdge=latEdge)
+
+    totalnodes = (tileSize+1)*(tileSize+1)*6
+    ! convert radius to degrees
+    lonEdge = lonEdge * todeg
+    latEdge = latEdge * todeg
+    !Find unique set of node coordinates
+    allocate(map(totalnodes))
+    TOL=0.0000000001
+    start_lat=-91.0
+    end_lat = 91.0
+    call c_ESMC_ClumpPntsLL(totalNodes, reshape(lonEdge, (/totalnodes/)), reshape(latEdge, (/totalnodes/)), &
+                      TOL, map, uniquenodes, &
+                      maxDuplicate, start_lat, end_lat, rc)
+
+    allocate(firstowners(uniquenodes), recvbuf(uniquenodes))
+    firstOwners = PetCnt+1
+    ! global minimum of firstOwners to find the owner of the nodes (use the smallest PetNo)
+    call ESMF_VMAllReduce(vm, firstOwners, recvbuf, uniquenodes, &
+        ESMF_REDUCE_MIN, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+           ESMF_CONTEXT, rcToReturn=rc)) return
+
+    allocate(NodeIds(0), NodeCoords(0), NodeOwners(0))
+    call ESMF_MeshAddNodes(mesh, NodeIds=NodeIds, &
+       NodeCoords = NodeCoords, NodeOwners = NodeOwners, &
+       rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+
+    allocate(ElemIds(0), ElemType(0), ElemConn(0))
+    allocate(centerCoords(0))
+    call ESMF_MeshAddElements(mesh, ElemIds, ElemType, ElemConn, &
+                 elementCoords=centerCoords, rc=localrc)
+
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+
+  deallocate(firstowners, recvbuf)
+
+  endif ! localDE>0
+
+  deallocate(lonEdge, latEdge)
 
   ESMF_MeshCreateCubedSphere = mesh
   rc=ESMF_SUCCESS
@@ -5664,6 +5766,177 @@ end subroutine ESMF_MeshMergeSplitDstInd
     end function ESMF_MeshGetInit
 
 !------------------------------------------------------------------------------
+
+ subroutine sort_int(origlist, newind, unique) 
+! 
+! !ARGUMENTS: 
+ integer(ESMF_KIND_I4), intent(in) :: origlist(:) 
+ integer(ESMF_KIND_I4), intent(inout) :: newind(:) 
+ integer(ESMF_KIND_I4), intent(out) :: unique
+
+ INTEGER, PARAMETER :: SELECT = 20 
+! .. 
+! .. Local Scalars .. 
+ INTEGER :: ENDD, I, J, START, STKPNT 
+ integer :: n , first, k
+ integer(ESMF_KIND_I4) :: arrayel1, arrayel2, arrayel3, arrayel_minmax, arrayel_temp 
+ integer(ESMF_KIND_I4) :: indtemp, minind
+ integer(ESMF_KIND_I4), allocatable :: list(:), origind(:), offset(:)
+
+! .. 
+! .. Local Arrays .. 
+ INTEGER :: STACK( 2, 32 ) 
+! .. 
+! .. Executable Statements .. 
+ 
+! 
+! Test the input paramters. 
+ 
+ n = size (origlist) 
+ allocate(list(n), origind(n), offset(n))
+ list = origlist
+ do i=1,n
+  origind(i)=i
+  newind(i)=i
+ enddo
+ STKPNT = 1 
+ STACK( 1, 1 ) = 1 
+ STACK( 2, 1 ) = N 
+ 
+ 10 CONTINUE 
+ START = STACK( 1, STKPNT ) 
+ ENDD = STACK( 2, STKPNT ) 
+ STKPNT = STKPNT - 1 
+ IF( ENDD-START.LE.SELECT .AND. ENDD-START > 0 ) THEN 
+! 
+! Do Insertion sort on D( START:ENDD ) 
+! 
+! Sort into increasing order 
+! 
+ DO 50 I = START + 1, ENDD 
+ DO, J = I, START + 1, -1 
+ IF( list( J ) < list( J-1 ) ) THEN 
+ arrayel_minmax = list( J ) 
+ list( J ) = list( J-1 ) 
+ list( J-1 ) = arrayel_minmax 
+ indtemp = origind(j)
+ origind(j)=origind(j-1)
+ origind(j-1)=indtemp
+ ELSE 
+ GO TO 50 
+ END IF 
+ end do 
+ 50 end do 
+! 
+ ELSE IF( ENDD-START > SELECT ) THEN 
+! 
+! Partition list( START:ENDD ) and stack parts, largest one first 
+! 
+! Choose partition entry as median of 3 
+! 
+ arrayel1 = list( START ) 
+ arrayel2 = list( ENDD ) 
+ I = ( START+ENDD ) / 2 
+ arrayel3 = list( I ) 
+ IF( arrayel1 < arrayel2 ) THEN 
+ IF( arrayel3 < arrayel1 ) THEN 
+ arrayel_minmax = arrayel1 
+ ELSE IF( arrayel3 < arrayel2 ) THEN 
+ arrayel_minmax = arrayel3 
+ ELSE 
+ arrayel_minmax = arrayel2 
+ END IF 
+ ELSE 
+ IF( arrayel3 < arrayel2 ) THEN 
+ arrayel_minmax = arrayel2 
+ ELSE IF( arrayel3 < arrayel1 ) THEN 
+ arrayel_minmax = arrayel3 
+ ELSE 
+ arrayel_minmax = arrayel1 
+ END IF 
+ END IF 
+! 
+ I = START - 1 
+ J = ENDD + 1 
+ 
+ 90 CONTINUE 
+ do 
+ J = J - 1 
+ IF( list( J ) <= arrayel_minmax )& 
+ & exit 
+ end do 
+ 
+ do 
+ I = I + 1 
+ IF( list( I ) >= arrayel_minmax )& 
+ & exit 
+ end do 
+ 
+ IF( I < J ) THEN 
+ arrayel_temp = list( I ) 
+ list( I ) = list( J ) 
+ list( J ) = arrayel_temp 
+ indtemp = origind(i)
+ origind(i)=origind(j)
+ origind(j)=indtemp
+ GO TO 90 
+ END IF 
+ IF( J-START > ENDD-J-1 ) THEN 
+ STKPNT = STKPNT + 1 
+ STACK( 1, STKPNT ) = START 
+ STACK( 2, STKPNT ) = J 
+ STKPNT = STKPNT + 1 
+ STACK( 1, STKPNT ) = J + 1 
+ STACK( 2, STKPNT ) = ENDD 
+ ELSE 
+ STKPNT = STKPNT + 1 
+ STACK( 1, STKPNT ) = J + 1 
+ STACK( 2, STKPNT ) = ENDD 
+ STKPNT = STKPNT + 1 
+ STACK( 1, STKPNT ) = START 
+ STACK( 2, STKPNT ) = J 
+ END IF 
+ END IF 
+ IF( STKPNT > 0 ) & 
+ & GO TO 10 
+
+ ! find unique elements in list
+offset = 0
+ unique=1
+ first=-1
+ do i=2,n
+  if (list(i) > list(i-1)) then 
+    unique=unique+1
+    if (first>0) then
+      !found duplicate, set the newIds to the smallest of the list
+      minind = origind(first)
+      do j=first+1,i-1
+        if (origind(j)<minind) minind=origind(j)
+      enddo
+      do j=first,i-1
+        if (origind(j) > minind) then
+           do k=origind(j)+1,n
+              offset(k)=offset(k)+1
+           enddo
+        endif
+        newind(origind(j))=minind
+      enddo
+      first=-1
+    endif
+  else
+    if (first<0) first=i-1
+  endif
+ enddo
+ 
+ write(70,*) offset
+
+ do i=1,n
+   newind(i)=newind(i)-offset(newind(i))
+ enddo
+
+ RETURN 
+ 
+ end subroutine sort_int 
 
 #if 0
 !------------------------------------------------------------------------------

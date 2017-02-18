@@ -94,8 +94,8 @@ subroutine ESMF_UtilCreateCSCoords(npts, LonEdge,LatEdge, start, count, tile, Lo
 ! !ARGUMENTS:
     integer,           intent(IN)     :: npts
 !    integer,           intent(in)     :: petNo
-    real(ESMF_KIND_R8), intent(inout) :: LonEdge(:,:)
-    real(ESMF_KIND_R8), intent(inout) :: LatEdge(:,:)
+    real(ESMF_KIND_R8), optional, intent(inout) :: LonEdge(:,:)
+    real(ESMF_KIND_R8), optional, intent(inout) :: LatEdge(:,:)
     integer, optional, intent(in)     :: start(:)
     integer, optional, intent(in)     :: count(:)
     integer, optional, intent(in)     :: tile
@@ -115,35 +115,54 @@ subroutine ESMF_UtilCreateCSCoords(npts, LonEdge,LatEdge, start, count, tile, Lo
   integer                       :: I, J, N
   integer                       :: IG, JG
   real                          :: alocs(2)
-  real, allocatable             :: grid_global(:,:,:,:)
   real, allocatable             :: tile1(:,:,:)
   integer                       :: rc
   real, allocatable             :: tile_local(:,:,:)
+  real, allocatable, save       :: grid_global(:,:,:,:)
 
-    allocate( grid_global(npts+1,npts+1,ndims,ntiles) )
-    call gnomonic_grids(grid_type, npts, grid_global(:,:,1,1), grid_global(:,:,2,1))
-    ! mirror_grid assumes that the tile=1 is centered on equator and greenwich meridian Lon[-pi,pi]
-    call mirror_grid(grid_global, 0, npts+1, npts+1, 2, 6)
-
-  do n=1,ntiles
-     do j=1,npts+1
-        do i=1,npts+1
+  if (allocated(grid_global)) then 
+     if (size(grid_global,1) /= npts+1) then
+        deallocate(grid_global)
+     endif
+  endif   
+  if (.not. allocated(grid_global)) then
+     allocate( grid_global(npts+1,npts+1,ndims,ntiles) )
+     call gnomonic_grids(grid_type, npts, grid_global(:,:,1,1), grid_global(:,:,2,1))
+     ! mirror_grid assumes that the tile=1 is centered on equator and greenwich meridian Lon[-pi,pi]
+     call mirror_grid(grid_global, 0, npts+1, npts+1, 2, 6)
+     do n=1,ntiles
+        do j=1,npts+1
+           do i=1,npts+1
 !---------------------------------
 ! Shift the corner away from Japan
 !---------------------------------
 ! This will result in the corner close to east coast of China
-           grid_global(i,j,1,n) = grid_global(i,j,1,n) - pi/18.
-           if ( grid_global(i,j,1,n) < 0. )              &
+             grid_global(i,j,1,n) = grid_global(i,j,1,n) - pi/18.
+             if ( grid_global(i,j,1,n) < 0. )              &
                 grid_global(i,j,1,n) = grid_global(i,j,1,n) + 2.*pi
-           if (ABS(grid_global(i,j,1,n)) < 1.e-10) grid_global(i,j,1,n) = 0.0
-           if (ABS(grid_global(i,j,2,n)) < 1.e-10) grid_global(i,j,2,n) = 0.0
-        enddo
-     enddo
-  enddo
+             if (ABS(grid_global(i,j,1,n)) < 1.e-10) grid_global(i,j,1,n) = 0.0
+             if (ABS(grid_global(i,j,2,n)) < 1.e-10) grid_global(i,j,2,n) = 0.0
+          enddo
+       enddo
+    enddo
+    !---------------------------------
+    ! Clean Up Corners
+    !---------------------------------
+    grid_global(  1,1:npts+1,:,2)=grid_global(npts+1,1:npts+1,:,1)
+    grid_global(  1,1:npts+1,:,3)=grid_global(npts+1:1:-1,npts+1,:,1)
+    grid_global(1:npts+1,npts+1,:,5)=grid_global(1,npts+1:1:-1,:,1)
+    grid_global(1:npts+1,npts+1,:,6)=grid_global(1:npts+1,1,:,1)
+    grid_global(1:npts+1,  1,:,3)=grid_global(1:npts+1,npts+1,:,2)
+    grid_global(1:npts+1,  1,:,4)=grid_global(npts+1,npts+1:1:-1,:,2)
+    grid_global(npts+1,1:npts+1,:,6)=grid_global(npts+1:1:-1,1,:,2)
+    grid_global(  1,1:npts+1,:,4)=grid_global(npts+1,1:npts+1,:,3)
+    grid_global(  1,1:npts+1,:,5)=grid_global(npts+1:1:-1,npts+1,:,3)
+    !!!grid_global(npts+1,1:npts+1,:,3)=grid_global(1,1:npts+1,:,4)
+    grid_global(1:npts+1,  1,:,5)=grid_global(1:npts+1,npts+1,:,4)
+    grid_global(1:npts+1,  1,:,6)=grid_global(npts+1,npts+1:1:-1,:,4)
+    grid_global(  1,1:npts+1,:,6)=grid_global(npts+1,1:npts+1,:,5)
+  endif
 
-!---------------------------------
-! Clean Up Corners
-!---------------------------------
 #if 0
   ! check if they are identical
   if (PetNo == 0) then
@@ -189,30 +208,19 @@ subroutine ESMF_UtilCreateCSCoords(npts, LonEdge,LatEdge, start, count, tile, Lo
   enddo
   endif
 #endif
-  grid_global(  1,1:npts+1,:,2)=grid_global(npts+1,1:npts+1,:,1)
-  grid_global(  1,1:npts+1,:,3)=grid_global(npts+1:1:-1,npts+1,:,1)
-  grid_global(1:npts+1,npts+1,:,5)=grid_global(1,npts+1:1:-1,:,1)
-  grid_global(1:npts+1,npts+1,:,6)=grid_global(1:npts+1,1,:,1)
-  grid_global(1:npts+1,  1,:,3)=grid_global(1:npts+1,npts+1,:,2)
-  grid_global(1:npts+1,  1,:,4)=grid_global(npts+1,npts+1:1:-1,:,2)
-  grid_global(npts+1,1:npts+1,:,6)=grid_global(npts+1:1:-1,1,:,2)
-  grid_global(  1,1:npts+1,:,4)=grid_global(npts+1,1:npts+1,:,3)
-  grid_global(  1,1:npts+1,:,5)=grid_global(npts+1:1:-1,npts+1,:,3)
-  !!!grid_global(npts+1,1:npts+1,:,3)=grid_global(1,1:npts+1,:,4)
-  grid_global(1:npts+1,  1,:,5)=grid_global(1:npts+1,npts+1,:,4)
-  grid_global(1:npts+1,  1,:,6)=grid_global(npts+1,npts+1:1:-1,:,4)
-  grid_global(  1,1:npts+1,:,6)=grid_global(npts+1,1:npts+1,:,5)
 
-  do n=1,ntiles
-     do j=1,npts+1
-        do i=1,npts+1
-           jg=(n-1)*(npts+1)+j
-           LonEdge(i,jg) = grid_global(i,j,1,n)
-           LatEdge(i,jg) = grid_global(i,j,2,n)
-        enddo
-     enddo
-  enddo
-
+  if (present(LonEdge) .and. present(LatEdge)) then
+    do n=1,ntiles
+       do j=1,npts+1
+          do i=1,npts+1
+            jg=(n-1)*(npts+1)+j
+            LonEdge(i,jg) = grid_global(i,j,1,n)
+            LatEdge(i,jg) = grid_global(i,j,2,n)
+          enddo
+       enddo
+    enddo
+  endif
+ 
   if (present(LonCenter) .and. present(LatCenter)) then
     if (present(start) .and. present(count) .and. present(tile)) then
         n=tile
