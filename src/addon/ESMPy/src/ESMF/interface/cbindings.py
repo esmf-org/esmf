@@ -182,8 +182,8 @@ class ESMP_InterfaceInt(ct.Structure):
         ESMP_InterfaceIntSet(self, arrayArg, len(arrayArg))
         super(ESMP_InterfaceInt, self).__init__()
 
-_ESMF.ESMC_InterfaceIntSet.restype = ct.c_int
-_ESMF.ESMC_InterfaceIntSet.argtypes = [ct.POINTER(ESMP_InterfaceInt),
+_ESMF.ESMC_InterArrayIntSet.restype = ct.c_int
+_ESMF.ESMC_InterArrayIntSet.argtypes = [ct.POINTER(ESMP_InterfaceInt),
                                        np.ctypeslib.ndpointer(dtype=np.int32),
                                        ct.c_int]
 def ESMP_InterfaceIntSet(iiptr, arrayArg, lenArg):
@@ -197,9 +197,9 @@ def ESMP_InterfaceIntSet(iiptr, arrayArg, lenArg):
         Numpy.array(dtype=np.int32)    :: arrayArg\n
         integer                        :: lenArg\n
     """
-    rc = _ESMF.ESMC_InterfaceIntSet(ct.byref(iiptr), arrayArg, lenArg)
+    rc = _ESMF.ESMC_InterArrayIntSet(ct.byref(iiptr), arrayArg, lenArg)
     if rc != constants._ESMP_SUCCESS:
-        raise ValueError('ESMC_InterfaceIntSet() failed with rc = '+str(rc)+
+        raise ValueError('ESMC_InterArrayIntSet() failed with rc = '+str(rc)+
                         '.    '+constants._errmsg)
 
 #### VM #######################################################################
