@@ -5037,7 +5037,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       type(ESMF_FieldBundle), intent(inout)           :: dstFieldBundle
       character(len=*),       intent(in)              :: filename
       type(ESMF_RouteHandle), intent(inout)           :: routehandle
-      type(ESMF_KeywordEnforcer),         optional    :: keywordEnforcer
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,             intent(inout), optional    :: srcTermProcessing(:)
       integer,             intent(out),   optional    :: rc
 
