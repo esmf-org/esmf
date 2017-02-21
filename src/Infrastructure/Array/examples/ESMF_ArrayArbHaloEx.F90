@@ -34,7 +34,7 @@ program ESMF_ArrayArbHaloEx
   
   
   integer:: i, j, result
-  integer:: seqIndexList(5) ! arbitrary seqIndices on each PET
+  integer(ESMF_KIND_I4):: seqIndexList(5) ! arbitrary seqIndices on each PET
 
   real(ESMF_KIND_R8), pointer :: farrayPtr1d(:), farrayPtr2d(:,:)
   

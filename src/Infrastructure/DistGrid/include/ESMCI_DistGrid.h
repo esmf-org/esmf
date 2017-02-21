@@ -57,6 +57,7 @@ namespace ESMCI {
   class DistGrid : public ESMC_Base {    // inherits from ESMC_Base class
 
    private:
+    ESMC_TypeKind_Flag indexTK;   // integer kind for indexing, default I4
     int dimCount;                 // rank of DistGrid
     int tileCount;                // number of tiles in DistGrid
     int *minIndexPDimPTile;       // lower corner indices [dimCount*tileCount]
@@ -73,7 +74,7 @@ namespace ESMCI {
     int connectionCount;          // number of elements in connection list
     int **connectionList;         // connection elements
                                   // [connectionCount][2*dimCount+2]
-    int ***arbSeqIndexListPCollPLocalDe;// local arb sequence indices
+    void ***arbSeqIndexListPCollPLocalDe;// local arb sequence indices
                                   // [diffCollocationCount][localDeCount]
                                   // [elementCountPCollPLocalDe(localDe)]
     int *collocationPDim;         // collocation [dimCount]
@@ -190,6 +191,8 @@ namespace ESMCI {
     // topology discovery
     int getSequenceIndexLocalDe(int localDe, int const *index,
       int *rc=NULL) const;
+    template<typename T> int tGetSequenceIndexLocalDe(T ***t, int de,
+      int localDe, int const *index, int *rc=NULL) const;
     int getSequenceIndexTileRelative(int tile, int const *index,
       int *rc=NULL)const;
     int getSequenceIndexTile(int tile, int const *index, int *rc=NULL)const;
@@ -202,8 +205,8 @@ namespace ESMCI {
       const {return elementCountPCollPLocalDe;}
     int const *getArbSeqIndexList(int localDe, int collocation, int *rc=NULL)
       const;
-    int setArbSeqIndex(InterArray<int> *arbSeqIndex, int localDe,
-      int collocation);
+    template<typename T> int setArbSeqIndex(InterArray<T> *arbSeqIndex, 
+      int localDe, int collocation);
     int setCollocationPDim(InterArray<int> *collocationPDim);
     // fill()
     int fillSeqIndexList(InterArray<int> *seqIndexList, int localDe,
