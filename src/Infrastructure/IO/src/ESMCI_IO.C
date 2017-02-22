@@ -465,9 +465,6 @@ int IO::write(
   }
 
   localrc1 = write(timeslice);
-  if (ESMC_LogDefault.MsgFoundError(localrc1, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
-    &rc)) return rc;  // bail out
-  
   PRINTMSG("write returned " << localrc1);
   // Can't quit even if error; Have to close first
 
