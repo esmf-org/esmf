@@ -975,6 +975,10 @@ subroutine field_bundle_destroy(fieldBundle, rc)
 
   allocate(fieldList(fieldCount))
 
+  call ESMF_FieldBundleGet(fieldBundle, fieldList=fieldList, rc=rc)
+  if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME)) return
+
   do ii=1,fieldCount
     call ESMF_FieldDestroy(fieldList(ii), rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
