@@ -382,16 +382,21 @@ inside Fortran derived types under certain circumstances.
 
 \subsection{Shared Object Libraries}
 
-On some platforms, a shared object library is created in addition to the
+On many platforms, a shared object library is created in addition to the
 standard {\tt .a} archive library.
-Shared object libraries are libraries that are loaded by the first program 
-that uses them. All programs that start afterwards automatically use the 
-existing shared library. The library is kept in memory as long as any 
-active program is still using it. 
+Shared object libraries are libraries that are pre-linked into an executable.
+They can then be linked to an application at run time.  There are many advantages
+to using shared libraries.  These include smaller executable files, and shared
+memory usage when multiple executables are running - as is often the case of
+programs using MPI.  They also allow easier bug fixing and development because
+the library can often be upgraded without necessarily re-linking the executables
+which call into it.
 
 Shared object libraries can be pre-linked to system libraries and using them
 can simplify dealing with ESMF's dependency on Fortran90 and C++ runtime 
-libraries. 
+libraries.
+
+See \ref{sec:ThirdParty} for third party library build requirements.
 
 \subsection{Customized SITE Files}
 
