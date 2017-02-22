@@ -1703,7 +1703,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_Array),       intent(inout)           :: dstArray
     character(len=*),       intent(in)              :: filename
     type(ESMF_RouteHandle), intent(inout)           :: routehandle
-    type(ESMF_KeywordEnforcer),            optional :: keywordEnforcer
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     logical,                intent(in),    optional :: ignoreUnmatchedIndices
     integer,                intent(inout), optional :: srcTermProcessing
     integer,                intent(inout), optional :: pipeLineDepth
