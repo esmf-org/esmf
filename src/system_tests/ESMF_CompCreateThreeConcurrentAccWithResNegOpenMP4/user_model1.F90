@@ -315,6 +315,14 @@
         print *, "run, local data =", mydatablock%index, &
                         mydatablock%scale_factor, mydatablock%flag
 
+        call ESMF_StatePrint(importState, rc=rc)
+        if (rc/=ESMF_SUCCESS) return ! bail on error    
+        call ESMF_StateGet(importState, "humidity", humidity, rc=rc)
+        if (rc/=ESMF_SUCCESS) return ! bail on error    
+        call ESMF_FieldPrint(humidity, rc=rc)
+        if (rc/=ESMF_SUCCESS) return ! bail on error    
+
+        ! This is where the model specific computation goes.
         call MPI_Comm_rank(MPI_COMM_WORLD, rank, rc)
         ndevices = 0
         if(allocated(device_list)) then
@@ -338,14 +346,6 @@
 
         print *, "Scaled vector = ", svec
    
-        call ESMF_StatePrint(importState, rc=rc)
-        if (rc/=ESMF_SUCCESS) return ! bail on error    
-        call ESMF_StateGet(importState, "humidity", humidity, rc=rc)
-        if (rc/=ESMF_SUCCESS) return ! bail on error    
-        call ESMF_FieldPrint(humidity, rc=rc)
-        if (rc/=ESMF_SUCCESS) return ! bail on error    
-
-        ! This is where the model specific computation goes.
 
         ! Here is where the output state is updated.
         !call ESMF_StateAdd(exportState, humidity, rc=status)
