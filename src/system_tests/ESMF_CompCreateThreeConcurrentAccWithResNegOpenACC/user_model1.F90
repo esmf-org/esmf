@@ -33,6 +33,7 @@
       type(mydata), pointer :: wrap
     end type
 
+    ! This is the device list negotiated with the driver
     integer, dimension(:), allocatable :: device_list
 
     contains
@@ -41,7 +42,8 @@
 !   !  The Register routine sets the subroutines to be called
 !   !   as the init, run, and finalize routines.  Note that these are
 !   !   private to the module.
- 
+!   !   The user_setvm() callback routine is called multiple times by
+!   !   the driver to negotiate PET list and device list with the component
   subroutine user_setvm(comp, rc)
     type(ESMF_GridComp) :: comp
     integer, intent(out) :: rc
@@ -76,6 +78,7 @@
       end if
     else if(neg_state == ESMF_COMP_USER_NEG_INPROGRESS) then
       print *, "Negotiation state : INPROGRESS"
+      ! Get PET list
       call ESMF_AttributeGet(comp, name="ESMF_COMP_USER_NEG_PETLIST_INFO_TYPE",&
         value=pet_list_info_type, rc=rc)
       if(rc /= ESMF_SUCCESS) then
@@ -108,6 +111,11 @@
         return
       end if
 
+      ! We don't need to save the PET list because as long as we return a 
+      ! success the driver will recreate this components with the negotiated
+      ! pet list
+
+      ! Get device list
       call ESMF_AttributeGet(comp, name="ESMF_COMP_USER_NEG_DEVLIST_INFO_TYPE",&
         value=dev_list_info_type, rc=rc)
       if(rc /= ESMF_SUCCESS) then
@@ -332,7 +340,9 @@
         print *, "Num of devices available = ", ndevices
         deviceid = 0
         if(ndevices > 0) then
+          ! Use device in the list based on the proc rank
           deviceid = device_list(mod(rank, ndevices) + 1)
+          ! Set the device used by this PET
           call acc_set_device_num(deviceid, acc_device_not_host)
         end if
         vec = INIT_VAL

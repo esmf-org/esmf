@@ -91,6 +91,8 @@
       goto 10
     endif
 
+    ! Assign disjoint PETs to the components initially
+    ! - to verify that we get the right PETs after resource negotiation
     npetlist1 = npets/NUM_COMPONENTS
     npetlist2 = npets/NUM_COMPONENTS
     npetlist3 = npets - (NUM_COMPONENTS - 1) * (npets/NUM_COMPONENTS)
