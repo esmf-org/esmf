@@ -85,8 +85,8 @@
     if (rc .ne. ESMF_SUCCESS) goto 10
 
       ! Check for correct number of PETs
-    if ( npets < 2 ) then
-      print *, "This system test does not run on fewer than 2 PETs"
+    if ( npets < 3 ) then
+      print *, "This system test does not run on fewer than 3 PETs"
       rc = ESMF_RC_ARG_BAD
       goto 10
     endif
