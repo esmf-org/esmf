@@ -306,12 +306,13 @@
 
   end subroutine subtract_pets
 
-    subroutine partition_pet_global_list(vm, comp_info, comp_pets_info, part_strategy, rc)
+    subroutine partition_pet_global_list(vm, comp_info, comp_pets_info, part_strategy, is_concurrent, rc)
 
       type(ESMF_VM), intent(in) :: vm
       integer, intent(in) :: comp_info(:)
       type(ESMF_PetListInfo), allocatable, intent(inout) :: comp_pets_info(:)
       integer, intent(in) :: part_strategy
+      logical, intent(in) :: is_concurrent
       integer, intent(out) :: rc
 
       integer :: total_comps, ncomps_no_acc, ncomps_can_acc, ncomps_must_acc
@@ -409,8 +410,10 @@
               end do
               k = k + 1
             end do
-            tmp_pet_sidx = tmp_pet_sidx + comp_pet_sz
-            tmp_pet_eidx = tmp_pet_eidx + comp_pet_sz
+            if(is_concurrent) then
+              tmp_pet_sidx = tmp_pet_sidx + comp_pet_sz
+              tmp_pet_eidx = tmp_pet_eidx + comp_pet_sz
+            end if
             naccs = naccs - 1
           end if
         end do
@@ -431,8 +434,10 @@
               end do
               k = k + 1
             end do
-            tmp_pet_sidx = tmp_pet_sidx + comp_pet_sz
-            tmp_pet_eidx = tmp_pet_eidx + comp_pet_sz
+            if(is_concurrent) then
+              tmp_pet_sidx = tmp_pet_sidx + comp_pet_sz
+              tmp_pet_eidx = tmp_pet_eidx + comp_pet_sz
+            end if
             naccs = naccs - 1
           end if
         end do
@@ -450,8 +455,10 @@
               comp_pets_info(i)%pet_list(k) = nonapets(j)
               k = k + 1
             end do
-            tmp_pet_sidx = tmp_pet_sidx + comp_pet_sz
-            tmp_pet_eidx = tmp_pet_eidx + comp_pet_sz
+            if(is_concurrent) then
+              tmp_pet_sidx = tmp_pet_sidx + comp_pet_sz
+              tmp_pet_eidx = tmp_pet_eidx + comp_pet_sz
+            end if
             nnon_accs = nnon_accs - 1
           end if
         end do
@@ -465,8 +472,10 @@
                 comp_pets_info(i)%pet_list(k) = nonapets(j)
                 k = k + 1
               end do
-              tmp_pet_sidx = tmp_pet_sidx + comp_pet_sz
-              tmp_pet_eidx = tmp_pet_eidx + comp_pet_sz
+              if(is_concurrent) then
+                tmp_pet_sidx = tmp_pet_sidx + comp_pet_sz
+                tmp_pet_eidx = tmp_pet_eidx + comp_pet_sz
+              end if
               nnon_accs = nnon_accs - 1
             end if
           end do
