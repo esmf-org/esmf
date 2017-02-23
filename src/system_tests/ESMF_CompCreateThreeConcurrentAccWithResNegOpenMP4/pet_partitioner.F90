@@ -306,6 +306,26 @@
 
   end subroutine subtract_pets
 
+    ! This subroutine partitions the global PET list based on the information
+    ! available about the various components
+    ! vm : ESMF VM
+    ! comp_info(NCOMPS) : Each entry in the array, corresponding to a component,
+    !   indicates whether the component can/must/cannot use accelerator devices.
+    ! comp_pets_info(NCOMPS) : Each entry in the array, corresponding to a component,
+    !   contains PET list related info (PET list, device id list) that can be used 
+    !   for the component
+    ! partStrategy : Indicates the strategy on how to partition the global PET list
+    !   Available partition strategies are:
+    !   ESMF_ACC_PET_PARTITION_CONTIG => accelerated devices are
+    !     available from the lowest ranked MPI processes (rank < number of
+    !     devices)
+    !   ESMF_ACC_PET_PARTITION_EVEN_STRIDED => accelerated devices are
+    !    available from the lowest ranked even MPI processes
+    !   ESMF_ACC_PET_PARTITION_LOWEST_RANK => accelerated devices are
+    !     available from the lowest ranked process (single process)
+    !     on each node with access to a device
+    ! is_concurrent : Set to .true. for concurrent components, .false. otherwise
+    ! rc : return code
     subroutine partition_pet_global_list(vm, comp_info, comp_pets_info, part_strategy, is_concurrent, rc)
 
       type(ESMF_VM), intent(in) :: vm
@@ -329,6 +349,9 @@
         return
       end if
 
+      ! Partition the global pet list into apets : pets with access to accelerators
+      ! and nonapets : pets without (may not) access to accelerators
+      ! ndev_apet --> number of accelerator devices accessible from a apet
       call partition_pets(vm, apets, nonapets, ndev_apet, part_strategy, rc)
       if(rc /= ESMF_SUCCESS) then
         print *, "ERROR: Could not partition pets to acc and nonacc"
@@ -336,6 +359,7 @@
       end if
       print *, "After partition : ", size(apets), " acc pets and ", size(nonapets), " non-acc pets ", ndev_apet, " devices/acc pet"
 
+      ! Find number of components that can/must/cannot use accelerators
       ncomps_can_acc = 0
       ncomps_must_acc = 0
       ncomps_no_acc = 0
@@ -354,6 +378,8 @@
 
       print *, "comps(noacc, canacc, mustacc) =", ncomps_no_acc, ncomps_can_acc, ncomps_must_acc
 
+      ! naccs -> total number of components that will be allocated apets
+      ! = all components that must use + some/all components that can use
       naccs = 0
       nnon_accs = ncomps_no_acc
       tmp_rem_accs = size(apets)
@@ -389,6 +415,7 @@
         end if
       end if
 
+      ! Allocate apets/nonapets among the different components
       if(naccs > 0) then
         ! Divide comp pets evenly among apets
         comp_pet_sz = size(apets)/naccs
