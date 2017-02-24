@@ -38,7 +38,8 @@ int main(void){
   int rc;
   bool correct;
 
-  ESMC_Grid grid_np, grid_1p, grid_1p_pdim1, grid_1p_pdim2, grid_tripole, grid_from_file;
+  ESMC_Grid grid_np, grid_1p, grid_1p_pdim1, grid_1p_pdim2, grid_tripole,
+            grid_from_file, grid_create_cubed_sphere;
   ESMC_VM vm;
 
   int dimcount = 2;
@@ -123,6 +124,70 @@ int main(void){
     rc = ESMC_GridDestroy(&grid_1p_pdim2);
   }
   free(maxIndex);
+  //----------------------------------------------------------------------------
+
+  //----------------------------------------------------------------------------
+  //  GridCreateCubedSphere
+  //----------------------------------------------------------------------------
+
+  //----------------------------------------------------------------------------
+  //NEX_UTest
+
+  // Set up decomposition for each tile (column major Fortran style)
+  int nd = 2;
+  int extent[nd]; extent[0] = 2; extent[1] = 6;
+  int *regDecompPTile;
+  regDecompPTile = (int *)malloc(6*nd*sizeof(int));
+  regDecompPTile[0] = 2; regDecompPTile[1] = 2;   // Tile 1
+  regDecompPTile[2] = 2; regDecompPTile[3] = 2;   // Tile 2
+  regDecompPTile[4] = 1; regDecompPTile[5] = 2;   // Tile 3
+  regDecompPTile[6] = 1; regDecompPTile[7] = 2;   // Tile 4
+  regDecompPTile[8] = 1; regDecompPTile[9] = 2;   // Tile 5
+  regDecompPTile[10] = 1; regDecompPTile[11] = 2; // Tile 6
+
+  ESMC_InterArrayInt i_rd;
+  rc = ESMC_InterArrayIntNDSet(&i_rd, regDecompPTile, nd, extent);
+
+  int *decompFlagPTile;
+  decompFlagPTile = (int *)malloc(6*nd*sizeof(int));
+  decompFlagPTile[0] = 2; decompFlagPTile[1] = 2;   // Tile 1
+  decompFlagPTile[2] = 2; decompFlagPTile[3] = 2;   // Tile 2
+  decompFlagPTile[4] = 1; decompFlagPTile[5] = 2;   // Tile 3
+  decompFlagPTile[6] = 1; decompFlagPTile[7] = 2;   // Tile 4
+  decompFlagPTile[8] = 1; decompFlagPTile[9] = 2;   // Tile 5
+  decompFlagPTile[10] = 1; decompFlagPTile[11] = 2; // Tile 6
+
+  ESMC_InterArrayInt i_df;
+  rc = ESMC_InterArrayIntNDSet(&i_df, decompFlagPTile, nd, extent);
+
+  nd = 1;
+  int *deLabelList;
+  deLabelList = (int *)malloc(6*nd*sizeof(int));
+  deLabelList[0] = 11;
+  deLabelList[1] = 12;
+  deLabelList[2] = 13;
+  deLabelList[3] = 14;
+  deLabelList[4] = 15;
+  deLabelList[5] = 16;
+
+  ESMC_InterArrayInt i_ll;
+  rc = ESMC_InterArrayIntNDSet(&i_ll, deLabelList, nd, extent);
+
+  int tilesize = 45;
+  char namecs[18] = "cubed sphere grid";
+
+  strcpy(name, "GridCreateCubedSphere");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
+  grid_create_cubed_sphere = ESMC_GridCreateCubedSphere(&tilesize, &i_rd,
+                                                        &i_df, &i_ll, //NULL,
+                                                        namecs, &rc);
+  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+  free(regDecompPTile);
+  free(decompFlagPTile);
+  free(deLabelList);
+
+  // no way to retrieve coords from tiles other than 0
+
   //----------------------------------------------------------------------------
 
   //----------------------------------------------------------------------------

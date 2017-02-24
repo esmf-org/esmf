@@ -103,6 +103,20 @@ class Grid(object):
         coordinates defined in the file. This argument is only supported with
         filetype :attr:`~ESMF.api.constants.FileFormat.GRIDSPEC`.
         Defaults to ``None``.
+
+    **Cubed sphere:**
+
+    *REQUIRED:*
+
+    :param int tilesize: The number of elements on each side of the tile of the
+        cubed sphere grid.
+
+    *OPTIONAL:*
+
+    :param list regDecompPTile:
+    :param list decompFlagPTile:
+    :param list deLabelList:
+    :param str name:
     """
 
     @initialize
@@ -122,11 +136,17 @@ class Grid(object):
                  add_user_area=None,
                  add_mask=None,
                  varname=None,
-                 coord_names=None):
+                 coord_names=None,
+                 tilesize=None,
+                 regDecompPTile=None,
+                 decompFlagPTile=None,
+                 deLabelList=None,
+                 name=None):
  
         # initialize the from_file flag to False
         from_file = False
-        
+        cubed_sphere = False
+
         # in-memory grid
         if max_index is not None:
             # cast max_index if not already done
@@ -155,12 +175,22 @@ class Grid(object):
                 warnings.warn("varname is only used for grids created from file, this argument will be ignored.")
             if coord_names:
                 warnings.warn("coord_names is only used for grids created from file, this argument will be ignored.")
+            # raise warnings on all cubed sphere args
+            if tilesize:
+                warnings.warn("tilesize is only used for cubed sphere grids, this argument will be ignored.")
+            if regDecompPTile:
+                warnings.warn("regDecompPTile is only used for cubed sphere grids, this argument will be ignored.")
+            if decompFlagPTile:
+                warnings.warn("decompFlagPTile is only used for cubed sphere grids, this argument will be ignored.")
+            if deLabelList:
+                warnings.warn("deLabelList is only used for cubed sphere grids, this argument will be ignored.")
+            if name:
+                warnings.warn("name is only used for cubed sphere grids, this argument will be ignored.")
         # filename and filetype are required for from-file grids
-        elif (filename is None) or (filetype is None):
-            # raise error, need max_index to create in memory or filename to create from file
-            raise GridArgumentError("must supply either max_index for an in-memory grid or filename and filetype for a from-file grid")
-        # from file
-        else:
+        elif (filename is not None) or (filetype is not None):
+            if (filename is None) or (filetype is None):
+                # raise error, need max_index to create in memory or filename to create from file
+                raise GridArgumentError("must supply either max_index for an in-memory grid or filename and filetype for a from-file grid")
             if (filetype != FileFormat.SCRIP) and (filetype != FileFormat.GRIDSPEC):
                 raise GridArgumentError("filetype must be SCRIP or GRIDSPEC for Grid objects")
             # set the from_file flag to True
@@ -180,6 +210,56 @@ class Grid(object):
                 warnings.warn("coord_typekind is only used for grids created in memory, this argument will be ignored.")
             if staggerloc is not None:
                 warnings.warn("staggerloc is only used for grids created in memory, this argument will be ignored.")
+            # raise warnings on all cubed sphere args
+            if tilesize:
+                warnings.warn("tilesize is only used for cubed sphere grids, this argument will be ignored.")
+            if regDecompPTile:
+                warnings.warn("regDecompPTile is only used for cubed sphere grids, this argument will be ignored.")
+            if decompFlagPTile:
+                warnings.warn("decompFlagPTile is only used for cubed sphere grids, this argument will be ignored.")
+            if deLabelList:
+                warnings.warn("deLabelList is only used for cubed sphere grids, this argument will be ignored.")
+            if name:
+                warnings.warn("name is only used for cubed sphere grids, this argument will be ignored.")
+        elif (tilesize is not None):
+            # set the cubed_sphere flag to True
+            cubed_sphere = True
+            #raise errors for all in-memory grid options
+            if max_index is not None:
+                warnings.warn("max_index is only used for grids created in memory, this argument will be ignored.")
+            if num_peri_dims is not 0:
+                warnings.warn("num_peri_dims is only used for grids created in memory, this argument will be ignored.")
+            if periodic_dim is not None:
+                warnings.warn("periodic_dim is only used for grids created in memory, this argument will be ignored.")
+            if pole_dim is not None:
+                warnings.warn("pole_dim is only used for grids created in memory, this argument will be ignored.")
+            if coord_sys is not None:
+                warnings.warn("coord_sys is only used for grids created in memory, this argument will be ignored.")
+            if coord_typekind is not None:
+                warnings.warn("coord_typekind is only used for grids created in memory, this argument will be ignored.")
+            if staggerloc is not None:
+                warnings.warn("staggerloc is only used for grids created in memory, this argument will be ignored.")
+            # raise warnings on all from file args
+            if filename is not None:
+                warnings.warn("filename is only used for grids created from file, this argument will be ignored.")
+            if filetype is not None:
+                warnings.warn("filetype is only used for grids created from file, this argument will be ignored.")
+            if reg_decomp is not None:
+                warnings.warn("reg_decomp is only used for grids created from file, this argument will be ignored.")
+            if decompflag is not None:
+                warnings.warn("decompflag is only used for grids created from file, this argument will be ignored.")
+            if is_sphere is not None:
+                warnings.warn("is_sphere is only used for grids created from file, this argument will be ignored.")
+            if add_corner_stagger is not None:
+                warnings.warn("add_corner_stagger is only used for grids created from file, this argument will be ignored.")
+            if add_user_area is not None:
+                warnings.warn("add_user_area is only used for grids created from file, this argument will be ignored.")
+            if add_mask is not None:
+                warnings.warn("add_mask is only used for grids created from file, this argument will be ignored.")
+            if varname is not None:
+                warnings.warn("varname is only used for grids created from file, this argument will be ignored.")
+            if coord_names:
+                warnings.warn("coord_names is only used for grids created from file, this argument will be ignored.")
 
         # ctypes stuff
         self._struct = None
@@ -263,7 +343,24 @@ class Grid(object):
                 self._periodic_dim = 0
                 # TODO: we assume that all periodic grids create from file will be periodic across the first
                 #       dimension.. is that true?
-            
+        elif cubed_sphere:
+            self._struct = ESMP_GridCreateCubedSphere(tilesize,
+                regDecompPTile=regDecompPTile, decompFlagPTile=decompFlagPTile,
+                deLabelList=deLabelList, name=name)
+
+            # grid rank for cubed sphere is currently 2
+            self._rank = 2
+            self._ndims = 1
+
+            # allocate space for staggger
+            staggerloc = [StaggerLoc.CENTER,StaggerLoc.CORNER]
+
+            # set from_file so coordinates are not reallocated
+            from_file = True
+
+            # set name
+            self._name = name
+
         else:
             # ctypes stuff
             self._struct = ESMP_GridStruct()
@@ -498,6 +595,15 @@ class Grid(object):
         """
 
         return self._meta
+
+    @property
+    def name(self):
+        """
+        :rtype: str
+        :return: The name of the :class:`~ESMF.api.grid.Grid`.
+        """
+
+        return self._name
 
     @property
     def ndims(self):

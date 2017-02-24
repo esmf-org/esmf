@@ -48,6 +48,9 @@ typedef struct{
 int ESMC_InterArrayIntSet(ESMC_InterArrayInt *interArrayIntArg,
   int *arrayArg, int lenArg);
 
+int ESMC_InterArrayIntNDSet(ESMC_InterArrayInt *interArrayIntArg,
+  int *arrayArg, int dimArg, const int *lenArg);
+
 #ifdef __cplusplus
 } // extern "C"
 #endif

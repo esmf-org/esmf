@@ -179,7 +179,11 @@ class ESMP_InterfaceInt(ct.Structure):
 
     def __init__(self, arrayArg):
         # initialize the InterfaceInt on the ESMF side
-        ESMP_InterfaceIntSet(self, arrayArg, len(arrayArg))
+        if arrayArg.ndim > 1:
+            ESMP_InterfaceIntNDSet(self, arrayArg, arrayArg.ndim,
+                                   np.array(arrayArg.shape, dtype=np.int32))
+        else:
+            ESMP_InterfaceIntSet(self, arrayArg, len(arrayArg))
         super(ESMP_InterfaceInt, self).__init__()
 
 _ESMF.ESMC_InterArrayIntSet.restype = ct.c_int
@@ -200,6 +204,28 @@ def ESMP_InterfaceIntSet(iiptr, arrayArg, lenArg):
     rc = _ESMF.ESMC_InterArrayIntSet(ct.byref(iiptr), arrayArg, lenArg)
     if rc != constants._ESMP_SUCCESS:
         raise ValueError('ESMC_InterArrayIntSet() failed with rc = '+str(rc)+
+                        '.    '+constants._errmsg)
+
+_ESMF.ESMC_InterArrayIntNDSet.restype = ct.c_int
+_ESMF.ESMC_InterArrayIntNDSet.argtypes = [ct.POINTER(ESMP_InterfaceInt),
+                                       np.ctypeslib.ndpointer(dtype=np.int32),
+                                       ct.c_int,
+                                       np.ctypeslib.ndpointer(dtype=np.int32)]
+def ESMP_InterfaceIntNDSet(iiptr, arrayArg, dimArg, lenArg):
+    """
+    Preconditions: ESMP has been initialized and 'arrayArg' is a Numpy
+                   array of type int and 'lenArg' is the length of 'arrayArg'.\n
+    Postconditions: An ESMP_InterfaceInt pointer has been created.\n
+    Arguments:\n
+        :RETURN: ESMP_InterfaceInt.ptr :: grid\n
+        ESMP_InterfaceIntStruct.ptr    :: iiptr\n
+        Numpy.array(dtype=np.int32)    :: arrayArg\n
+        integer                        :: dimArg\n
+        Numpy.array(dtype=np.int32)     :: lenArg\n
+    """
+    rc = _ESMF.ESMC_InterArrayIntNDSet(ct.byref(iiptr), arrayArg, dimArg, lenArg)
+    if rc != constants._ESMP_SUCCESS:
+        raise ValueError('ESMC_InterArrayIntNDSet() failed with rc = '+str(rc)+
                         '.    '+constants._errmsg)
 
 #### VM #######################################################################
@@ -404,6 +430,68 @@ def ESMP_GridCreateNoPeriDim(maxIndex, coordSys=None, coordTypeKind=None):
     rc = lrc.value
     if rc != constants._ESMP_SUCCESS:
         raise ValueError('ESMC_GridCreateNoPeriDim() failed with rc = '+str(rc)+
+                        '.    '+constants._errmsg)
+
+    # create the ESMP Grid object from ctypes pointer
+    return gridstruct
+
+#TODO: InterfaceInt should be passed by value when ticket 3613642 is resolved
+_ESMF.ESMC_GridCreateCubedSphere.restype = ESMP_GridStruct
+_ESMF.ESMC_GridCreateCubedSphere.argtypes = [ct.POINTER(ct.c_int),
+                                             ct.POINTER(ESMP_InterfaceInt),
+                                             ct.POINTER(ESMP_InterfaceInt),
+                                             ct.POINTER(ESMP_InterfaceInt),
+                                             ct.c_void_p,
+                                             ct.POINTER(ct.c_int)]
+@deprecated
+def ESMP_GridCreateCubedSphere(tilesize, regDecompPTile=None,
+                               decompFlagPTile=None, deLabelList=None,
+                               name=None):
+    """
+    Preconditions: ESMP has been initialized.\n
+    Postconditions: An ESMP_Grid has been created.\n
+    Arguments:\n
+        :RETURN: ESMP_Grid :: grid\n
+        Integer                             :: tilesize\n
+        Numpy.array(dtype=int32) (optional) :: regDecompPTile\n
+        Numpy.array(dtype=int32) (optional) :: decompFlagPTile\n
+        Numpy.array(dtype=int32) (optional) :: deLabelList\n
+        String (optional)                   :: name\n
+    """
+    lrc = ct.c_int(0)
+    lts = ct.c_int(tilesize)
+
+   # InterfaceInt requires int32 type numpy arrays
+    regDecompPTile_i = regDecompPTile
+    if (regDecompPTile is not None):
+        if (regDecompPTile.dtype != np.int32):
+            raise TypeError('regDecompPTile must have dtype=int32')
+        regDecompPTile_i = ESMP_InterfaceInt(regDecompPTile)
+
+    # InterfaceInt requires int32 type numpy arrays
+    decompFlagPTile_i = decompFlagPTile
+    if (decompFlagPTile is not None):
+        if (decompFlagPTile.dtype != np.int32):
+            raise TypeError('decompFlagPTile must have dtype=int32')
+        decompFlagPTile_i = ESMP_InterfaceInt(decompFlagPTile)
+
+    # InterfaceInt requires int32 type numpy arrays
+    deLabelList_i = deLabelList
+    if (deLabelList is not None):
+        if (deLabelList.dtype != np.int32):
+            raise TypeError('deLabelList must have dtype=int32')
+        deLabelList_i = ESMP_InterfaceInt(deLabelList)
+
+    # create the ESMF Grid and retrieve a ctypes pointer to it
+    gridstruct = _ESMF.ESMC_GridCreateCubedSphere(lts, regDecompPTile_i,
+                                                  decompFlagPTile_i,
+                                                  deLabelList_i, name,
+                                                  ct.byref(lrc))
+
+    # check the return code from ESMF
+    rc = lrc.value
+    if rc != constants._ESMP_SUCCESS:
+        raise ValueError('ESMC_GridCreateCubedSphere() failed with rc = '+str(rc)+
                         '.    '+constants._errmsg)
 
     # create the ESMP Grid object from ctypes pointer

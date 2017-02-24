@@ -125,6 +125,36 @@ ESMC_Grid ESMC_GridCreate1PeriDim(ESMC_InterArrayInt *maxIndex,
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
+//TODO: InterArray should be passed by value when ticket 3613642 is resolved
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_GridCreateCubedSphere()"
+ESMC_Grid ESMC_GridCreateCubedSphere(int *tilesize,
+                                  ESMC_InterArrayInt *regDecompPTile,
+                                  ESMC_InterArrayInt *decompFlagPTile,
+                                  ESMC_InterArrayInt *deLabelList,
+                                  //ESMC_DELayout *delayout,
+                                  const char *name,
+                                  int *rc){
+  int localrc = ESMC_RC_NOT_IMPL;
+  if(rc!=NULL) *rc=ESMC_RC_NOT_IMPL;
+
+  // Init Grid
+  ESMC_Grid grid;
+  grid.ptr = NULL;
+
+  grid.ptr = reinterpret_cast<void *>(ESMCI::Grid::createcubedsphere(
+    tilesize, regDecompPTile, decompFlagPTile, deLabelList, //delayout,
+    name, &localrc));
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+    rc)) return grid; // bail out
+
+  // return successfully
+  if (rc) *rc = ESMF_SUCCESS;
+  return grid;
+}
+//-----------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_GridCreateFromFile()"
 ESMC_Grid ESMC_GridCreateFromFile(const char *filename, int fileTypeFlag, 
