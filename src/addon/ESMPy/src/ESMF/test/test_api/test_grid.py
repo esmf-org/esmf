@@ -280,8 +280,6 @@ class TestGrid(TestBase):
             self.examine_grid_attributes(grid2)
             grid.destroy()
             grid2.destroy()
-            import ipdb; ipdb.set_trace()
-
 
     @attr('serial')
     def test_grid_slice_2d(self):
