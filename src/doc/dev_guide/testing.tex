@@ -582,20 +582,19 @@ Hovering over the test name i.e., Blues gfortran, will reveal notes particular t
 The platforms that run the regression tests, email the test results to a server that updates the test results web page. A script checks for test reports every 15 minutes, and updates the web page. The time of the last update appears on the web page.
 
 \subsubsection{Investigating Test Failures}
-
-The regression test results web page: \htmladdnormallink{{\it here.}}{http://www.earthsystemmodeling.org/developers/test/daily/2week_results/trunk_results_noheader/platform_sort.shtml} provides a color-coded view of the state of the software.
-When a developer finds that a test fails on a particular platform with a particular compiler, sometime the bug is readily identifiedand fixed.
-However other times the developer might want to know if the test fails on other platforms and if the failure is related to a compiler, mpi configuration or optimized/debug execution.
+The regression test results web page: \htmladdnormallink{{\it http://www.earthsystemmodeling.org/developers/test/daily/2week_results/trunk_results_noheader/platform_sort.shtml}}{http://www.earthsystemmodeling.org/developers/test/daily/2week_results/trunk_results_noheader/platform_sort.shtml} provides a color-coded view of the state of the software.
+When a developer finds that a test fails on a particular platform with a particular compiler, sometime the bug is readily identified and fixed.
+However other times the developer may want to know if the test fails on other platforms and if the failure is related to a compiler, mpi configuration or optimized/debug execution.
 The developer would need to click to all the cells of different platforms searching for the test results for that particular test.
 
 A tool was created to allow the developers to query the test results for a specific test for a specific date, as long as it is within two weeks of the current date.
 The developer may send a query test results message to the following email address: esmf\_test@noaa.gov.
 The suject of the email must be exactly "Test\_Results\_Query". The body of the email message must be:
 
-\begin{itemize}
-\item Test:ESMF\_FieldBundleSMMUTest.F90
-\item Date:Feb 08
-\end{itemize}
+\begin{verbatim}
+Test:ESMF\_FieldBundleSMMUTest.F90
+Date:Feb 08
+\end{verbatim}
 
 This mail box is checked every quarter hour on the quarter hour, the results will be emailed to:esmf\_test@list.woc.noaa.gov.
 The subject of the results email will be:
