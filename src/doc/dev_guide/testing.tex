@@ -585,13 +585,13 @@ The platforms that run the regression tests, email the test results to a server 
 The regression test results web
 \htmladdnormallink{{\it page}}{http://www.earthsystemmodeling.org/developers/test/daily/2week\_results/trunk\_results\_noheader/platform\_sort.shtml}
  provides a color-coded view of the state of the software.
-When a developer finds that a test fails on a particular platform with a particular compiler, sometime the bug is readily identified and fixed.
+When a developer finds that a test fails on a particular platform with a particular compiler, sometimes the bug is readily identified and fixed.
 However other times the developer may want to know if the test fails on other platforms and if the failure is related to a compiler, mpi configuration or optimized/debug execution.
 The developer would need to click to all the cells of different platforms searching for the test results for that particular test.
 
 A tool was created to allow the developers to query the test results for a specific test for a specific date, as long as it is within two weeks of the current date.
 The developer may send a query test results message to the following email address: esmf\_test@noaa.gov.
-The subject of the email must be exactly "Test\_Results\_Query". The body of the email message must be "Test:" followed by the test name and "Date" followed by the desired date. The format must be a three leter month and a two digit number. e.g.:
+The subject of the email must be exactly "Test\_Results\_Query". The body of the email message must be "Test:" followed by the test name and "Date" followed by the desired date. The format must be a three letter month and a two digit number. e.g.:
 
 \begin{verbatim}
 Test:ESMF_FieldBundleSMMUTest.F90
