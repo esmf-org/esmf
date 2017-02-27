@@ -591,7 +591,7 @@ The developer would need to click to all the cells of different platforms search
 
 A tool was created to allow the developers to query the test results for a specific test for a specific date, as long as it is within two weeks of the current date.
 The developer may send a query test results message to the following email address: esmf\_test@noaa.gov.
-The suject of the email must be exactly "Test\_Results\_Query". The body of the email message must be:
+The subject of the email must be exactly "Test\_Results\_Query". The body of the email message must be "Test:" followed by the test name and "Date" followed by the desired date. The format must be a three leter month and a two digit number. e.g.:
 
 \begin{verbatim}
 Test:ESMF_FieldBundleSMMUTest.F90
@@ -599,14 +599,14 @@ Date:Feb 08
 \end{verbatim}
 
 This mail box is checked every quarter hour on the quarter hour, the results will be emailed to:esmf\_test@list.woc.noaa.gov.
-The subject of the results email will be:
+The subject of the results email for this example would be:
 \begin{verbatim}
 
         ESMF_FieldBundleSMMUTest.F90 test results for Feb 08
 
 \end{verbatim}
 
-The body of the email will be as follows:
+The body of the email would be as follows:
 
 \begin{verbatim}
 
@@ -629,8 +629,8 @@ The body of the email will be as follows:
 
 \end{verbatim}
 
-Note that if the date of the query is the current is the current day, the developer should query periodically during the day since
-the test results are being updated as platforms email their test results.
+Note that if the date of the query is the current day, the developer should query periodically during the day since
+the test results are being updated as platforms report their test results.
 If a test crashes it can be because another test hung and the test in question did not run.
 
 Another instance where this tool is useful is when a developer adds a new test, after the nightly tests run, the developer can run a query to quickly see the test results.
