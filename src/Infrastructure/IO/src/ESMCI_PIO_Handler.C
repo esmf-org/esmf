@@ -1072,6 +1072,22 @@ void PIO_Handler::arrayWrite(
       int dimid_existing;
       piorc = pio_cpp_inq_dimid(pioFileDesc, axis.c_str(), &dimid_existing);
       if (PIO_noerr == piorc) {
+        int dim_len;
+        piorc = pio_cpp_inq_dimlen(pioFileDesc, dimid_existing, &dim_len);
+        if (!CHECKPIOERROR(piorc, "Error finding existing dimension length", ESMF_RC_FILE_WRITE, (*rc))) {
+          free (vardesc);
+          vardesc = NULL;
+          return;
+        }
+        if (ioDims[i] != dim_len) {
+          std::stringstream msg;
+          msg << "Existing dimension " << axis << " length " << dim_len << " != required " << ioDims[i];
+          if (ESMC_LogDefault.MsgFoundError(ESMF_RC_FILE_WRITE, msg,
+              ESMC_CONTEXT, rc)) {
+            free (vardesc);
+            return;
+          }
+        }
         ncDims[i] = dimid_existing;
       } else {
         PRINTMSG("Defining dimension " << i);
