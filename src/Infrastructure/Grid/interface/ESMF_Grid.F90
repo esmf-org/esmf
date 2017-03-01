@@ -13315,12 +13315,16 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 !
 ! !DESCRIPTION:
-!   Create a six-tile {\tt ESMF\_Grid} for a Cubed Sphere grid using regular decomposition.  Each tile can
-!   have different decomposition.  The tile connections are defined in a GRIDSPEC format
-!   mosaic file.  And each tile's coordination is defined in a separate NetCDF file.  The coordinates defined 
-!   in the tile file is so-called "Super Grid".  In other words, the dimension of the coordinate variables is
-!   2*tilesize+1 on each side.  It combines the corner, the edge and the center coordinates in one big 
-!   array.
+!   Create a multiple-tile {\tt ESMF\_Grid} based on the definition from a GRIDSPEC Mosaic file and its associated
+!   tile files using regular decomposition.  Each tile can have different decomposition.  The tile connections 
+!   are defined in a GRIDSPEC format Mosaic file. 
+!   And each tile's coordination is defined in a separate NetCDF file.  The coordinates defined 
+!   in the tile file is so-called "Super Grid".  In other words, the dimensions of the coordinate variables are
+!   {\tt (2*xdim+1, 2*ydim+1)} if {\tt (xdim, ydim)} is the size of the tile.  The Super Grid combines the corner, 
+!   the edge and the center coordinates in one big array.  A Mosaic file may contain just one tile.  If a Mosaic contains
+!   multiple tiles.  Each tile is a logically rectangular lat/lon grid.  Currently, all the tiles have to be the same size.
+!   We will remove this limitation in the future release.
+!   
 !
 !     The arguments are:
 !     \begin{description}
@@ -13372,12 +13376,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_VM)                               :: vm
     integer                                     :: PetNo, PetCnt
     integer                                     :: totalDE, nxy, nx, ny, bigFac
+    integer                                     :: sizex, sizey
     type(ESMF_DELayout)                         :: defaultDELayout
     type(ESMF_Grid)                             :: grid, newgrid
     type(ESMF_DistGrid)                         :: distgrid, newdistgrid
     integer                                     :: localrc
     type(ESMF_DistGridConnection), allocatable :: connectionList(:)
-    integer                                    :: i, j, conn
+    integer                                    :: i, j, k, conn
     integer                                    :: localDeCount, localDe, DeNo, tile
     real(kind=ESMF_KIND_R8),  pointer          :: lonPtr(:,:), latPtr(:,:)
     real(kind=ESMF_KIND_R8),  pointer          :: lonCornerPtr(:,:), latCornerPtr(:,:)
@@ -13387,9 +13392,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer                                    :: starti, startj, sizei, sizej
     integer                                    :: ind, rem, rem1, rem2
     integer                                    :: start(2), count(2)
-    integer, allocatable                       :: minIndexPTile(:,:)
-    integer, allocatable                       :: maxIndexPTile(:,:)
-    integer, allocatable                       :: regDecomp(:,:)    
+    integer, pointer                           :: minIndexPTile(:,:)
+    integer, pointer                           :: maxIndexPTile(:,:)
+    integer, allocatable                       :: regDecomp2(:,:)    
     integer, allocatable                       :: demap(:)
     integer                                    :: decount
     !real(ESMF_KIND_R8)                        :: starttime, endtime  
@@ -13399,6 +13404,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer				       :: posVec(2), orientVec(2)
     real(kind=ESMF_KIND_R4), parameter         :: pi = 3.1415926
     real(kind=ESMF_KIND_R4), parameter         :: todeg = 180.0/pi
+    integer                                    :: regDecomp(2)
+    type(ESMF_Decomp_Flag)                     :: decompflag(2)
+    logical                                    :: isGlobal
+    integer, pointer                           :: PetMap1D(:), PetMap(:,:,:)
     
     if (present(rc)) rc=ESMF_SUCCESS
   !------------------------------------------------------------------------
@@ -13417,32 +13426,27 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
-#if 0
-  if (mosaic%ntiles /= 6) then
-      call ESMF_LogSetError(localrc, msg="- Cubed Sphere grid has to have 6 tiles", &
-           ESMF_CONTEXT, rcToReturn=rc)
-      return
-  endif
-#endif
-  
   tileCount = mosaic%ntiles
-  tileSize = mosaic%tilesize
+  sizex = mosaic%nx
+  sizey = mosaic%ny
 
-#if 1
+  if (tileCount > 1) then
     ! use local index for everytile
+    ! should support different tile sizes -- TBD
     allocate(minIndexPTile(2,tileCount))
     allocate(maxIndexPTile(2,tileCount))
     minIndexPTile(1,:)=1
     minIndexPTile(2,:)=1
-    maxIndexPTile(1,:)=tileSize
-    maxIndexPTile(2,:)=tileSize
+    maxIndexPTile(1,:)=sizex
+    maxIndexPTile(2,:)=sizey
     
     ! build connectionList for each connecation
     connectionCount = mosaic%ncontacts
 
     allocate(connectionList(connectionCount))
     do i=1,connectionCount
-      call calculateConnect(tileSize, mosaic%contact(:,i), mosaic%connindex(:,:,i), orientVec, posVec)
+      call calculateConnect(minIndexPTile, maxIndexPTile, mosaic%contact(:,i), &
+           mosaic%connindex(:,:,i), orientVec, posVec)
       call ESMF_DistGridConnectionSet(connection=connectionList(i), &
         tileIndexA=mosaic%contact(1,i), tileIndexB=mosaic%contact(2,i), &
         positionVector=(/posVec(1), posVec(2)/), &
@@ -13451,203 +13455,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         ESMF_CONTEXT, rcToReturn=rc)) return
     enddo
       
-#else
-    ! - initialize Min/Max
-    ! The full cubed sphere has 6 tiles. For testing, tiles can be
-    ! turned on incrementally from 1 all the way to 6. Anything greater than
-    ! 6 is incorrect.
-    allocate(minIndexPTile(2,tileCount))
-    allocate(maxIndexPTile(2,tileCount))
-    tile=0
-    if (tile==tileCount) goto 10
-    !- tile 1
-    tile=1
-    minIndexPTile(1,tile)=1
-    minIndexPTile(2,tile)=1
-    maxIndexPTile(1,tile)=minIndexPTile(1,tile)+tileSize-1
-    maxIndexPTile(2,tile)=minIndexPTile(2,tile)+tileSize-1
-    if (tile==tileCount) goto 10
-    !- tile 2
-    tile=2
-    minIndexPTile(1,tile)=maxIndexPTile(1,tile-1)+1
-    minIndexPTile(2,tile)=minIndexPTile(2,tile-1)
-    maxIndexPTile(1,tile)=minIndexPTile(1,tile)+tileSize-1
-    maxIndexPTile(2,tile)=minIndexPTile(2,tile)+tileSize-1
-    if (tile==tileCount) goto 10
-    !- tile 3
-    tile=3
-    minIndexPTile(1,tile)=minIndexPTile(1,tile-1)
-    minIndexPTile(2,tile)=maxIndexPTile(2,tile-1)+1
-    maxIndexPTile(1,tile)=minIndexPTile(1,tile)+tileSize-1
-    maxIndexPTile(2,tile)=minIndexPTile(2,tile)+tileSize-1
-    if (tile==tileCount) goto 10
-    !- tile 4
-    tile=4
-    minIndexPTile(1,tile)=maxIndexPTile(1,tile-1)+1
-    minIndexPTile(2,tile)=minIndexPTile(2,tile-1)
-    maxIndexPTile(1,tile)=minIndexPTile(1,tile)+tileSize-1
-    maxIndexPTile(2,tile)=minIndexPTile(2,tile)+tileSize-1
-    if (tile==tileCount) goto 10
-    !- tile 5
-    tile=5
-    minIndexPTile(1,tile)=minIndexPTile(1,tile-1)
-    minIndexPTile(2,tile)=maxIndexPTile(2,tile-1)+1
-    maxIndexPTile(1,tile)=minIndexPTile(1,tile)+tileSize-1
-    maxIndexPTile(2,tile)=minIndexPTile(2,tile)+tileSize-1
-    if (tile==tileCount) goto 10
-    !- tile 6
-    tile=6
-    minIndexPTile(1,tile)=maxIndexPTile(1,tile-1)+1
-    minIndexPTile(2,tile)=minIndexPTile(2,tile-1)
-    maxIndexPTile(1,tile)=minIndexPTile(1,tile)+tileSize-1
-    maxIndexPTile(2,tile)=minIndexPTile(2,tile)+tileSize-1
-    if (tile==tileCount) goto 10
-    
-10  continue
-    
-    ! - connectionList
-    ! The full cubed sphere has 12 conections. For testing, connections can be
-    ! turned on incrementally from 0 all the way to 12. Anything greater than
-    ! 12 is incorrect.
-    connectionCount = 12  ! between 0 ... and ... 12.
-    allocate(connectionList(connectionCount))
-
-    ! Connections are either defined on the basis of centers or corners, they
-    ! are NOT the same! Our current strategy is to define connections for
-    ! centers, and add corners with padding and no connections. This way we
-    ! can regrid center data bilinear and conservatively. We cannot handle
-    ! regridding for data on corner stagger, plus we have degeneracies in that
-    ! case of exlusive elelements. However, we believe that the current 
-    ! application of this is for only data on center stagger.
-
-    conn=0
-    if (conn==connectionCount) goto 20
-
-    conn=conn+1
-    call ESMF_DistGridConnectionSet(connection=connectionList(conn), &
-      tileIndexA=1, tileIndexB=2, positionVector=(/0, 0/), rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
-    if (conn==connectionCount) goto 20
-
-    conn=conn+1
-    call ESMF_DistGridConnectionSet(connection=connectionList(conn), &
-      tileIndexA=2, tileIndexB=3, positionVector=(/0, 0/), rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
-    if (conn==connectionCount) goto 20
-
-    conn=conn+1
-    call ESMF_DistGridConnectionSet(connection=connectionList(conn), &
-      tileIndexA=3, tileIndexB=4, positionVector=(/0, 0/), rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
-    if (conn==connectionCount) goto 20
-
-    conn=conn+1
-    call ESMF_DistGridConnectionSet(connection=connectionList(conn), &
-      tileIndexA=4, tileIndexB=5, positionVector=(/0, 0/), rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
-    if (conn==connectionCount) goto 20
-
-    conn=conn+1
-    call ESMF_DistGridConnectionSet(connection=connectionList(conn), &
-      tileIndexA=5, tileIndexB=6, positionVector=(/0, 0/), rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
-    if (conn==connectionCount) goto 20
-
-    conn=conn+1
-    call ESMF_DistGridConnectionSet(connection=connectionList(conn), &
-      tileIndexA=1, tileIndexB=6, &
-      positionVector=(/ &     ! only shift
-      minIndexPTile(1,6)-minIndexPTile(1,1),  &
-      maxIndexPTile(2,6)-minIndexPTile(2,1)+1/), &  
-      rc=localrc)
-    print *, "Position vection 1,6", minIndexPTile(1,6)-minIndexPTile(1,1),  &
-          maxIndexPTile(2,6)-minIndexPTile(2,1)+1
-
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
-    if (conn==connectionCount) goto 20
-
-    conn=conn+1
-    call ESMF_DistGridConnectionSet(connection=connectionList(conn), &
-      tileIndexA=1, tileIndexB=3, orientationVector=(/2, -1/), &  ! 270 deg rot
-      positionVector=(/minIndexPTile(1,3)-1-maxIndexPTile(2,1), &
-                       maxIndexPTile(2,3)+minIndexPTile(1,1)/), &
-      rc=localrc)
-    print *, "Position vection 1,3 ", minIndexPTile(1,3)-1-maxIndexPTile(2,1), &
-                       maxIndexPTile(2,3)+minIndexPTile(1,1)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
-    if (conn==connectionCount) goto 20
-
-    conn=conn+1
-    call ESMF_DistGridConnectionSet(connection=connectionList(conn), &
-      tileIndexA=2, tileIndexB=4, orientationVector=(/-2, 1/), &  ! 90 deg rot
-      positionVector=(/minIndexPTile(1,4)+maxIndexPTile(2,2),     &
-                       minIndexPTile(2,4)-maxIndexPTile(1,2)-1/), &
-      rc=localrc)
-    print *, "Position vection 2,4",minIndexPTile(1,4)+maxIndexPTile(2,2),     &
-                       minIndexPTile(2,4)-maxIndexPTile(1,2)-1
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
-    if (conn==connectionCount) goto 20
-
-    conn=conn+1
-    call ESMF_DistGridConnectionSet(connection=connectionList(conn), &
-      tileIndexA=3, tileIndexB=5, orientationVector=(/2, -1/), &  ! 270 deg rot
-      positionVector=(/minIndexPTile(1,5)-1-maxIndexPTile(2,3), &
-                       maxIndexPTile(2,5)+minIndexPTile(1,3)/), &
-      rc=localrc)
-    print *, "Position vector 3,5", minIndexPTile(1,5)-1-maxIndexPTile(2,3), &
-                       maxIndexPTile(2,5)+minIndexPTile(1,3)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
-    if (conn==connectionCount) goto 20
-
-    conn=conn+1
-    call ESMF_DistGridConnectionSet(connection=connectionList(conn), &
-      tileIndexA=4, tileIndexB=6, orientationVector=(/-2, 1/), &  ! 90 deg rot
-      positionVector=(/minIndexPTile(1,6)+maxIndexPTile(2,4),     &
-                       minIndexPTile(2,6)-maxIndexPTile(1,4)-1/), &
-      rc=localrc)
-    print *, "position vection 4,6", minIndexPTile(1,6)+maxIndexPTile(2,4),     &
-                       minIndexPTile(2,6)-maxIndexPTile(1,4)-1
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
-    if (conn==connectionCount) goto 20
-
-    conn=conn+1
-    call ESMF_DistGridConnectionSet(connection=connectionList(conn), &
-      tileIndexA=5, tileIndexB=1, orientationVector=(/2, -1/), &  ! 270 deg rot
-      positionVector=(/minIndexPTile(1,1)-1-maxIndexPTile(2,5), &
-                       maxIndexPTile(2,1)+minIndexPTile(1,5)/), &
-      rc=localrc)
-    print *, "Position vection 5,1", minIndexPTile(1,1)-1-maxIndexPTile(2,5), &
-                       maxIndexPTile(2,1)+minIndexPTile(1,5)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
-    if (conn==connectionCount) goto 20
-
-    conn=conn+1
-    call ESMF_DistGridConnectionSet(connection=connectionList(conn), &
-      tileIndexA=6, tileIndexB=2, orientationVector=(/-2, 1/), &  ! 90 deg rot
-      positionVector=(/minIndexPTile(1,2)+maxIndexPTile(2,6),     &
-                       minIndexPTile(2,2)-maxIndexPTile(1,6)-1/), &
-      rc=localrc)
-    print *, "Position vection 6,2", minIndexPTile(1,2)+maxIndexPTile(2,6),     &
-                       minIndexPTile(2,2)-maxIndexPTile(1,6)-1
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
-    if (conn==connectionCount) goto 20
-
-20  continue
-
-#endif
-
   !------------------------------------------------------------------------
   ! default decomposition. The number of DEs has to be multiple of 6.
   ! If the total PET count is less than 6, some PETs will get more than one DE.
@@ -13683,15 +13490,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           ESMF_CONTEXT, rcToReturn=rc)) return
        !print *, PetNo, ' demap ', decount, demap
      endif     
-     allocate(regDecomp(2,tileCount))
-       regDecomp(1,:)=nx
-       regDecomp(2,:)=ny  
+     allocate(regDecomp2(2,tileCount))
+       regDecomp2(1,:)=nx
+       regDecomp2(2,:)=ny  
     !-------------------------------------------
     ! - create DistGrid with default decomposition
     ! must create with ESMF_INDEX_DELOCAL because of how connections were defined
     distgrid = ESMF_DistGridCreate(&
       minIndexPTile=minIndexPTile, maxIndexPTile=maxIndexPTile, &
-      regDecompPTile=regDecomp, &
+      regDecompPTile=regDecomp2, &
       indexflag=ESMF_INDEX_DELOCAL, connectionList=connectionList, &
       delayout = defaultDelayout, &
       rc=localrc)
@@ -13720,10 +13527,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       DeNo = demap(localDe)
       tile = DeNo/(nx*ny)+1
       rem = mod(DeNo,nx*ny)
-      sizei = tileSize/nx
-      sizej = tileSize/ny
-      rem1 = mod(tileSize, nx)
-      rem2 = mod(tileSize, ny)
+      sizei = sizex/nx
+      sizej = sizey/ny
+      rem1 = mod(sizex, nx)
+      rem2 = mod(sizey, ny)
       ind = mod(rem,nx)
       if (rem1 > 0) then
          if (ind < rem1) then
@@ -13775,13 +13582,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ! Generate glocal edge coordinates and local center coordinates
       totallen = len_trim(mosaic%filenames(tile))+len_trim(mosaic%tileDirectory)
       tempname = trim(mosaic%tileDirectory)//trim(mosaic%filenames(tile))
-      call ESMF_GridSpecReadTile(trim(tempname),tileSize, lonCornerPtr, latCornerPtr, &
-           lonPtr, latPtr, start, count, rc=localrc)
+      call ESMF_GridSpecReadTile(trim(tempname),sizex, sizey, lonPtr, latPtr, &
+         cornerLon=lonCornerPtr, cornerLat=latCornerPtr, &
+         start=start, count=count, rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
          ESMF_CONTEXT, rcToReturn=rc)) return
       !call ESMF_VMWtime(endtime, rc=localrc)
   
-      !print *, 'Create CS size ', tileSize, 'in', (endtime-starttime)*1000.0, ' msecs'
+      !print *, 'Create CS size ', sizex, sizey, 'in', (endtime-starttime)*1000.0, ' msecs'
     end do 
 
     ! Create another distgrid with user specified decomposition
@@ -13817,6 +13625,113 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! - deallocate connectionList
     deallocate(connectionList)
+    deallocate(minIndexPTile, maxIndexPTile)
+  else  ! one tile case
+    ! Figure out if it is a global grid or a regional grid
+    totallen = len_trim(mosaic%filenames(1))+len_trim(mosaic%tileDirectory)
+    tempname = trim(mosaic%tileDirectory)//trim(mosaic%filenames(1))
+    call ESMF_GridspecQueryTileGlobal(trim(tempname), isGlobal, rc=localrc)
+    if (present(regDecompPTile)) then
+      regDecomp = regDecompPTile(:,1)
+    else
+      ! use default decomposition
+      regDecomp(1) = PetCnt
+      regDecomp(2) = 1
+    endif
+    if (present(decompflagPTile)) then
+      decompflag = decompflagPTile(:,1)
+    else
+      decompflag = ESMF_DECOMP_BALANCED
+    endif
+    allocate(PetMap(regDecomp(1), regDecomp(2), 1))
+    if (present(delayout)) then
+       allocate(PetMap1D(regDecomp(1)*regDecomp(2)))
+       call ESMF_DELayoutGet(delayout, petMap = petMap1D, rc=localrc)
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+           ESMF_CONTEXT, rcToReturn=rc)) return
+       k=1
+       do j=1,regDecomp(2)
+         do i=1,regDecomp(1)
+            PetMap(i,j,1)=PetMap1D(k)
+            k=k+1
+         enddo
+       enddo
+       deallocate(PetMap1D)
+    else
+       do i=1,regDecomp(1)
+         PetMap(i,1,1)=i-1
+       enddo
+    endif
+    if (isGlobal) then
+     grid = ESMF_GridCreate1PeriDim(regDecomp, decompFlag, &  
+        minIndex=(/1,1/), maxIndex=(/sizex,sizey/), &
+        indexflag=ESMF_INDEX_GLOBAL, &
+        coordSys=ESMF_COORDSYS_SPH_DEG, name=name, &
+        petMap = petMap, &
+        rc=localrc)
+    else
+     grid = ESMF_GridCreateNoPeriDim(regDecomp, decompFlag, &  
+        minIndex=(/1,1/), maxIndex=(/sizex,sizey/), &
+        indexflag=ESMF_INDEX_GLOBAL, &
+        coordSys=ESMF_COORDSYS_SPH_DEG, name=name, &
+        petMap = petMap, &
+        rc=localrc)
+    endif
+    deallocate(PetMap)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! --- add CENTER coordinates ---
+    call ESMF_GridAddCoord(grid, staggerloc=ESMF_STAGGERLOC_CENTER, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! --- add CORNER coordinates ---
+    call ESMF_GridAddCoord(grid, staggerloc=ESMF_STAGGERLOC_CORNER, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return
+
+    call ESMF_GridGet(grid, localDECount = decount, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return
+     
+    ! calculate the actual cubed sphere coordiantes for each DE
+    do localDe = 0,decount-1
+      call ESMF_GridGetCoord(grid, coordDim=1, localDe=localDe, &
+          farrayPtr=lonPtr, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+      call ESMF_GridGetCoord(grid, coordDim=2, localDe=localDe, &
+          farrayPtr=latPtr, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+
+      call ESMF_GridGetCoord(grid, coordDim=1, localDe=localDe, &
+         staggerloc=ESMF_STAGGERLOC_CORNER, farrayPtr=lonCornerPtr, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return
+      call ESMF_GridGetCoord(grid, coordDim=2, localDe=localDe, &
+         staggerloc=ESMF_STAGGERLOC_CORNER, farrayPtr=latCornerPtr, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return
+
+      start(1)=lbound(lonPtr,1)
+      start(2)=lbound(lonPtr,2)
+      count(1)=ubound(lonPtr,1)-start(1)+1
+      count(2)=ubound(lonPtr,2)-start(2)+1
+      !call ESMF_VMWtime(starttime, rc=localrc)
+      ! Generate glocal edge coordinates and local center coordinates
+      call ESMF_GridSpecReadTile(trim(tempname),sizex, sizey, lonPtr, latPtr, &
+         cornerLon=lonCornerPtr, cornerLat=latCornerPtr, &
+         start=start, count=count, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return
+      !call ESMF_VMWtime(endtime, rc=localrc)
+  
+      !print *, 'Create CS size ', nx, ny, 'in', (endtime-starttime)*1000.0, ' msecs'
+    end do 
+    ESMF_GridCreateMosaic = grid
+  endif     
   return
 
 end function ESMF_GridCreateMosaic
@@ -13824,17 +13739,19 @@ end function ESMF_GridCreateMosaic
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "calculateConnect"
-subroutine calculateConnect(tilesize, tilepair, contactTuple, orientationVector, positionVector)
+subroutine calculateConnect(minIndexPTile, maxIndexPTile, tilepair, &
+           contactTuple, orientationVector, positionVector)
 
-integer, intent(IN) :: tilesize
+integer, intent(IN), pointer :: minIndexPTile(:,:)
+integer, intent(IN), pointer :: maxIndexPTile(:,:)
 integer, intent(IN) :: tilepair(2)
 integer, intent(IN) :: contactTuple(2,4)
 integer, intent(OUT) :: orientationVector(2)
 integer, intent(OUT) :: positionVector(2)
 
 
-  integer     :: minIndexPTile(2,2)
-  integer     :: maxIndexPTile(2,2)
+  integer     :: minIndexPair(2,2)
+  integer     :: maxIndexPair(2,2)
   integer     :: pA(2)   ! tile A start point
   integer     :: pB(2)   ! tile A end point
   integer     :: pC(2)   ! tile B start point (connect with point A)
@@ -13846,8 +13763,10 @@ integer, intent(OUT) :: positionVector(2)
   integer     :: a_zero, a_notzero
   integer     :: b_zero, b_notzero
 
-  minIndexPTile(:,:)=1
-  maxIndexPTile(:,:)=tileSize
+  minIndexPair(:,1)=minIndexPTile(:,tilepair(1))
+  minIndexPair(:,2)=minIndexPTile(:,tilepair(2))
+  maxIndexPair(:,1)=maxIndexPTile(:,tilepair(1))
+  maxIndexPair(:,2)=maxIndexPTile(:,tilepair(2))
 
   ! -- resulting DistGrid orientation vector and position vector aruments
   ! --- convesion from pA, pB, pC, pD  --> orientationVector, positionVector
@@ -13910,10 +13829,10 @@ integer, intent(OUT) :: positionVector(2)
   endif
   
   ! consider sign flip perpendicular to contact
-  if ((pA(a_zero)==minIndexPTile(a_zero,1) .and. &
-       pC(b_zero)==minIndexPTile(b_zero,2)) .or. &
-      (pA(a_zero)==maxIndexPTile(a_zero,1) .and. &
-       pC(b_zero)==maxIndexPTile(b_zero,2))) then
+  if ((pA(a_zero)==minindexPair(a_zero,1) .and. &
+       pC(b_zero)==minindexPair(b_zero,2)) .or. &
+      (pA(a_zero)==maxIndexPair(a_zero,1) .and. &
+       pC(b_zero)==maxIndexPair(b_zero,2))) then
     orientationVector(b_zero) = - orientationVector(b_zero)
   endif
   
@@ -13925,8 +13844,8 @@ integer, intent(OUT) :: positionVector(2)
   ! means that one step beyond tile A is taken. This step is perpendicular to
   ! the contact vector, and outward from the tile.
   pAplus = pA
-  if (pA(a_zero)==minIndexPTile(a_zero,1)) pAplus(a_zero) = pAplus(a_zero) - 1
-  if (pA(a_zero)==maxIndexPTile(a_zero,1)) pAplus(a_zero) = pAplus(a_zero) + 1
+  if (pA(a_zero)==minindexPair(a_zero,1)) pAplus(a_zero) = pAplus(a_zero) - 1
+  if (pA(a_zero)==maxIndexPair(a_zero,1)) pAplus(a_zero) = pAplus(a_zero) + 1
   !print *, "pAplus=", pAplus
   ! now apply the previously determined orientationVector on pAplus
   do i=1, dimCount
