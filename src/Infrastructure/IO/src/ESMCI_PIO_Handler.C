@@ -980,7 +980,7 @@ void PIO_Handler::arrayWrite(
     PRINTMSG("Calling pio_cpp_inq_vardimid_vdesc");
     std::vector<int> dimIds(nDims);
     piorc = pio_cpp_inq_vardimid_vdesc(pioFileDesc, vardesc,
-                                       dimIds.data(), nDims);
+                                       &dimIds.front(), nDims);
     if (!CHECKPIOERROR(piorc, "Error retrieving information about variable",
         ESMF_RC_FILE_WRITE, (*rc))) {
       free (vardesc);
