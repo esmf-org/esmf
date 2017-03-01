@@ -224,7 +224,6 @@ program ESMF_FieldIOUTest
   call ESMF_Test((rc==ESMF_RC_LIB_NOT_PRESENT), name, failMsg, result, ESMF_SRCLINE)
 #endif
 
-#ifdef WRITE_FIELDS_WITH_SAME_DIMS_ERROR
 !------------------------------------------------------------------------
   !NEX_disabled_UTest_Multi_Proc_Only
   ! Create Field without halo region
@@ -249,7 +248,6 @@ program ESMF_FieldIOUTest
 #else
   write(failMsg, *) "Did not return ESMF_RC_LIB_NOT_PRESENT"
   call ESMF_Test((rc==ESMF_RC_LIB_NOT_PRESENT), name, failMsg, result, ESMF_SRCLINE)
-#endif
 #endif
 !------------------------------------------------------------------------
 
