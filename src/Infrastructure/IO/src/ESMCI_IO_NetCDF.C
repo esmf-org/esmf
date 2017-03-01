@@ -750,11 +750,12 @@ void IO_NetCDF::destruct(void) {
     std::vector<size_t> minIndices(ndims, 0);
     std::vector<int>    minIndices_int(ndims, 0);
     std::vector<double> values(numValues);
-    if ((ncerr = nc_get_vara (netCdfFile, varIndex, minIndices.data(), dimSizes.data(), values.data())) != NC_NOERR) {
-        string errstr = string(": nc_get_vera failure: ") + nc_strerror(ncerr);
-        ESMC_LogDefault.Write(errstr, ESMC_LOGMSG_ERROR, ESMC_CONTEXT);
-        *rc = ESMF_FAILURE;
-        return thisArray;
+    if ((ncerr = nc_get_vara (netCdfFile, varIndex,
+        &minIndices.front(), &dimSizes.front(), &values.front())) != NC_NOERR) {
+      string errstr = string(": nc_get_vera failure: ") + nc_strerror(ncerr);
+      ESMC_LogDefault.Write(errstr, ESMC_LOGMSG_ERROR, ESMC_CONTEXT);
+      *rc = ESMF_FAILURE;
+      return thisArray;
     }
 
 //    NcValues*	values = thisVar->values();
@@ -765,10 +766,10 @@ void IO_NetCDF::destruct(void) {
     LocalArray*	locArray = LocalArray::create(
                                    arrayType,
                                    ndims,
-                                   dimSizes_int.data(),
-                                   minIndices_int.data(),
-                                   maxIndices_int.data(),
-                                   values.data(),
+                                   &dimSizes_int.front(),
+                                   &minIndices_int.front(),
+                                   &maxIndices_int.front(),
+                                   &values.front(),
                                    DATA_COPY,
                                    &localrc);
     //printf("*** LocalArray RC: %d\n", localrc);
@@ -779,8 +780,8 @@ void IO_NetCDF::destruct(void) {
       return thisArray;
     }
 
-    InterArray<int>* minIndex = new InterArray<int>(minIndices_int.data(), ndims);
-    InterArray<int>* maxIndex = new InterArray<int>(maxIndices_int.data(), ndims);
+    InterArray<int>* minIndex = new InterArray<int>(&minIndices_int.front(), ndims);
+    InterArray<int>* maxIndex = new InterArray<int>(&maxIndices_int.front(), ndims);
 
     values.clear();
     maxIndices.clear();
