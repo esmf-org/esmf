@@ -440,6 +440,23 @@ program ESMF_ArrayIOUTest
 
 !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
+! ! Given an ESMF array, write the netCDF file using a different
+! ! variable, but sharing dimensions.
+  write(name, *) "Write ESMF_Array with Halo to NetCDF variable copy Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_ArrayWrite(array_withhalo3, fileName='file3D_withhalo.nc',    &
+      variableName='temperature_copy',  &
+      dimLabels=(/"x_axis", "y_axis", "z_axis"/),  &
+      status=ESMF_FILESTATUS_OLD, rc=rc)
+#if (defined ESMF_PIO && ( defined ESMF_NETCDF || defined ESMF_PNETCDF))
+  call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+#else
+  write(failMsg, *) "Did not return ESMF_RC_LIB_NOT_PRESENT"
+  call ESMF_Test((rc==ESMF_RC_LIB_NOT_PRESENT), name, failMsg, result, ESMF_SRCLINE) 
+#endif
+
+!------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
   write(name, *) "Destroy Array with Halo"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_ArrayDestroy(array_withhalo, rc=rc)
