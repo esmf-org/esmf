@@ -427,12 +427,14 @@
           ! First allocate for all MUST ACC
           if(comp_info(i) == ESMF_COMP_MUST_ACC) then
             allocate(comp_pets_info(i)%pet_list(comp_pet_sz))
-            allocate(comp_pets_info(i)%device_list(comp_pet_sz * ndev_apet))
+            allocate(comp_pets_info(i)%ldevice_list(comp_pet_sz * ndev_apet))
+            allocate(comp_pets_info(i)%gdevice_list(comp_pet_sz * ndev_apet))
             k = 1
             do j=tmp_pet_sidx,tmp_pet_eidx
               comp_pets_info(i)%pet_list(k) = apets(j)
               do l=1,ndev_apet
-                comp_pets_info(i)%device_list(k+l-1) = ndev_idx
+                comp_pets_info(i)%ldevice_list(k+l-1) = l-1
+                comp_pets_info(i)%gdevice_list(k+l-1) = ndev_idx
                 ndev_idx = ndev_idx + 1
               end do
               k = k + 1
@@ -451,12 +453,14 @@
           end if
           if(comp_info(i) == ESMF_COMP_CAN_ACC) then
             allocate(comp_pets_info(i)%pet_list(comp_pet_sz))
-            allocate(comp_pets_info(i)%device_list(comp_pet_sz * ndev_apet))
+            allocate(comp_pets_info(i)%ldevice_list(comp_pet_sz * ndev_apet))
+            allocate(comp_pets_info(i)%gdevice_list(comp_pet_sz * ndev_apet))
             k = 1
             do j=tmp_pet_sidx,tmp_pet_eidx
               comp_pets_info(i)%pet_list(k) = apets(j)
               do l=1,ndev_apet
-                comp_pets_info(i)%device_list(k+l-1) = ndev_idx
+                comp_pets_info(i)%ldevice_list(k+l-1) = l-1
+                comp_pets_info(i)%gdevice_list(k+l-1) = ndev_idx
                 ndev_idx = ndev_idx + 1
               end do
               k = k + 1

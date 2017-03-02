@@ -245,8 +245,8 @@
       end if
 
       device_count = 0
-      if(allocated(comp_pet_info%device_list)) then
-        device_count = size(comp_pet_info%device_list)
+      if(allocated(comp_pet_info%ldevice_list)) then
+        device_count = size(comp_pet_info%ldevice_list)
       end if
 
       call ESMF_AttributeSet(comp, name="ESMF_COMP_USER_NEG_DEVLIST_INFO_TYPE",&
@@ -263,9 +263,15 @@
       end if
       if(device_count > 0) then
         call ESMF_AttributeSet(comp, name="ESMF_COMP_USER_NEG_LDEVLIST_INFO",&
-          valueList=comp_pet_info%device_list, rc=rc)
+          valueList=comp_pet_info%ldevice_list, rc=rc)
         if(rc /= ESMF_SUCCESS) then
-          print *, "Setting pet list info failed, exiting..."
+          print *, "Setting local dev list info failed, exiting..."
+          return
+        end if
+        call ESMF_AttributeSet(comp, name="ESMF_COMP_USER_NEG_GDEVLIST_INFO",&
+          valueList=comp_pet_info%gdevice_list, rc=rc)
+        if(rc /= ESMF_SUCCESS) then
+          print *, "Setting global dev list info failed, exiting..."
           return
         end if
       end if

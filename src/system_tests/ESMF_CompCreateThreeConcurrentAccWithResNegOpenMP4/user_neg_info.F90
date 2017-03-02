@@ -68,7 +68,8 @@
 
   type ESMF_PetListInfo !pet_list_info
     integer, allocatable :: pet_list(:)
-    integer, allocatable :: device_list(:)
+    integer, allocatable :: ldevice_list(:)
+    integer, allocatable :: gdevice_list(:)
   end type
 
   end module user_neg_info
