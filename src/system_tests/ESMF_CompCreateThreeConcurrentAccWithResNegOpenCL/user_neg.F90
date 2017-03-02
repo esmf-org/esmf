@@ -262,7 +262,7 @@
         return
       end if
       if(device_count > 0) then
-        call ESMF_AttributeSet(comp, name="ESMF_COMP_USER_NEG_DEVLIST_INFO",&
+        call ESMF_AttributeSet(comp, name="ESMF_COMP_USER_NEG_LDEVLIST_INFO",&
           valueList=comp_pet_info%device_list, rc=rc)
         if(rc /= ESMF_SUCCESS) then
           print *, "Setting pet list info failed, exiting..."

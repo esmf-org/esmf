@@ -127,7 +127,7 @@
           return
         end if
         allocate(device_list(device_count))
-        call ESMF_AttributeGet(comp, name="ESMF_COMP_USER_NEG_DEVLIST_INFO",&
+        call ESMF_AttributeGet(comp, name="ESMF_COMP_USER_NEG_LDEVLIST_INFO",&
           valueList=device_list, rc=rc)
         if(rc /= ESMF_SUCCESS) then
           print *, "Setting device list info failed, exiting..."
