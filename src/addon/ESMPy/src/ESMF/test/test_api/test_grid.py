@@ -248,6 +248,7 @@ class TestGrid(TestBase):
             raise ValueError(
                 "The following combinations of Grid parameters failed to create a proper Grid: " + str(fail))
 
+    @attr('serial')
     def test_grid_create_cubed_sphere(self):
         # keywords = dict(
             # periodic specifies all valid combos of [num_peri_dims, periodic_dim, pole_dim]
