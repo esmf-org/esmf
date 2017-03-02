@@ -285,7 +285,7 @@ subroutine ESMF_GridspecReadMosaic(filename, mosaic, tileFilePath, rc)
                    mosaic%contact, mosaic%connindex, localrc)
               if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                  ESMF_CONTEXT, rcToReturn=rc)) return
-	      mosaic%ncontacts=dims(2)
+              mosaic%ncontacts=dims(2)
             endif
          endif
        endif
@@ -625,7 +625,8 @@ subroutine ESMF_GridspecReadTile(filename, nx, ny, centerLon, centerLat, cornerL
     character(len=128) :: attstr
     integer :: start1(2), count1(2)
     real(ESMF_KIND_R8), allocatable :: supercoord(:,:)
-    integer :: localrc, foundit
+    integer :: localrc
+    logical :: foundit
 
     if (present(rc)) rc=ESMF_SUCCESS
 
@@ -1076,10 +1077,10 @@ function CDFCheckError (ncStatus, module, fileName, lineNo, errmsg, rc)
         call ESMF_LogWrite (msg="netCDF Status Return Error", logmsgFlag=ESMF_LOGMSG_ERROR, &
             line=lineNo, file=fileName, method=module)
         print '("NetCDF Error: ", A, " : ", A)', &
-    		trim(errmsg),trim(nf90_strerror(ncStatus))
+                trim(errmsg),trim(nf90_strerror(ncStatus))
         call ESMF_LogFlush()
         if (present(rc)) rc = ESMF_FAILURE
-    	CDFCheckError = .TRUE.
+        CDFCheckError = .TRUE.
     else
        if (present(rc)) rc = ESMF_SUCCESS
        return
