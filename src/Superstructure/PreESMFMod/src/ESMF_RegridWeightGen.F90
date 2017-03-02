@@ -829,7 +829,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 	   print *, "    Use attribute 'missing_value' of variable '", trim(srcMissingvalueVar),"' as the mask"
 	endif
       elseif  (localSrcFileType == ESMF_FILEFORMAT_GRIDSPEC) then
-	print *, "  Source File is in CF Tile format"
+	print *, "  Source File is in CF Grid format"
 	if (useSrcCoordVar) then
 	   print *, "    Use '", trim(srcCoordinateVars(1)), "' and '", trim(srcCoordinateVars(2)), &
 	               "' as the coordinate variables"
@@ -838,18 +838,18 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 	   print *, "    Use the missing values of variable '", trim(srcMissingvalueVar),"' as the mask"
        endif
       else
-	print *, "  Source File is in a multi-tile GRIDSPEC MOSAIC format"
+	print *, "  Source File is in GRIDSPEC MOSAIC format"
       endif
-      if (srcIsRegional) then
-	 print *, "  Source Grid is a regional grid"
-      else 
-	 print *, "  Source Grid is a global grid"
+      if (localSrcFileType /= ESMF_FILEFORMAT_MOSAIC) then
+        if (srcIsRegional) then
+  	   print *, "  Source Grid is a regional grid"
+        else 
+	   print *, "  Source Grid is a global grid"
+        endif
       endif
       if (srcIsReg)   then
 	 print *, "  Source Grid is a logically rectangular grid"
-      elseif (srcIsMosaic) then
-	 print *, "  Source Grid is an multi-tile grid"
-      else
+      elseif (.not. srcIsMosaic) then
 	 print *, "  Source Grid is an unstructured grid"
       endif
       if (useSrcCorner) then
@@ -866,8 +866,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 	if (dstMissingValue) then
 	   print *, "    Use the missing value of '", trim(dstMissingvalueVar),"' as the mask"
         endif	
-      else
-	print *, "  Destination File is in GRIDSPEC format"	
+      elseif  (localDstFileType == ESMF_FILEFORMAT_GRIDSPEC) then
+	print *, "  Destination File is in CF Grid format"
 	if (useDstCoordVar) then
 	   print *, "    Use '", trim(dstCoordinateVars(1)), "' and '", trim(dstCoordinateVars(2)), &
 	               "' as the coordinate variables"
@@ -875,17 +875,19 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 	if (dstMissingValue) then
 	   print *, "    Use the missing value of '", trim(dstMissingvalueVar),"' as the mask"
         endif	
+      else
+	print *, "  Destination File is in GRIDSPEC MOSAIC format"
       endif
-      if (dstIsRegional) then
-	 print *, "  Destination Grid is a regional grid"
-      else 
-	 print *, "  Destination Grid is a global grid"
+      if (localDstFileType /= ESMF_FILEFORMAT_MOSAIC) then
+        if (dstIsRegional) then
+	   print *, "  Destination Grid is a regional grid"
+        else
+	   print *, "  Destination Grid is a global grid"
+        endif
       endif
       if (dstIsReg)   then
 	 print *, "  Destination Grid is a logically rectangular grid"
-      elseif (dstIsMosaic) then
-	 print *, "  Destination Grid is an multi-tile grid"
-      else
+      elseif (.not. dstIsMosaic) then
 	 print *, "  Destination Grid is an unstructured grid"
       endif
       if (useDstCorner) then

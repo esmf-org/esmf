@@ -3410,16 +3410,24 @@ function ESMF_MeshCreateCubedSphere(tileSize, nx, ny, rc)
 ! !DESCRIPTION:
 !   Create a {\tt ESMF\_Mesh} object for a cubed sphere grid using identical regular decomposition for every tile.
 !   The grid coordinates are generated based on the algorithm used by GEOS-5, The tile resolution is defined by 
-!   {\tt tileSize}.  The total number of PETs has to be nx x ny x 6.
+!   {\tt tileSize}.  Each tile is decomposed into nx x ny blocks and the total number of DEs used
+!   is nx x ny x 6.  If the total PET is not equal to the number of DEs, the DEs are distributed
+!   into PETs in the default cyclic distribution.  Internally, the nodes and the elements from multiple DEs are
+!   collapsed into a 1D array.  Therefore, the nodal distgrid or the element distgrid attached to the Mesh object
+!   is always a one DE arbitrarily distributed distgrid.  The sequential indices of the nodes and the elements 
+!   are derived based on the location of the point in the Cubed Sphere grid.  If an element is located at {\tt (x, y)} of
+!   tile {\tt n}.  Its sequential index would be {\tt (n-1)*tileSize*tileSize+(y-1)*tileSize+x}.  If it is a node, its
+!   sequential index would be {\tt (n-1)*(tileSize+1)*(tileSize+1)+(y-1)*(tileSize+1)+x}.  
+
 !
 !     The arguments are:
 !     \begin{description}
 !     \item[tilesize]
 !          The number of elements on each side of the tile of the Cubed Sphere grid
 !     \item[nx]
-!          The number of processors on the horizontal size of each tile
+!          The number of blocks on the horizontal size of each tile
 !     \item[ny]
-!          The number of processors on the vertical size of each tile
+!          The number of blocks on the vertical size of each tile
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -3445,6 +3453,7 @@ function ESMF_MeshCreateCubedSphere(tileSize, nx, ny, rc)
   integer               :: localNodes, localElems
   integer               :: totalNodes
   integer, allocatable  :: firstOwners(:), recvbuf(:), map(:)
+  integer, allocatable  :: origIds(:)
   integer               :: maxDuplicate, uniquenodes
   integer               :: localrc
   real(ESMF_KIND_R8)    :: start_lat, end_lat, TOL
@@ -3594,8 +3603,17 @@ function ESMF_MeshCreateCubedSphere(tileSize, nx, ny, rc)
                       TOL, map, uniquenodes, &
                       maxDuplicate, start_lat, end_lat, rc)
   
+     ! Create a new array to point the new index back to the original index
+     allocate(origIds(uniquenodes))
+     origIds(:)=0
+
+     do i=1,totalnodes
+       k=map(i)+1
+       if (origIds(k)==0) origIds(k)=i      
+     enddo
+
      ! Find total unique local nodes in each PET
-     allocate(firstowners(uniquenodes), recvbuf(uniquenodes))
+     allocate(firstowners(totalNodes), recvbuf(totalNodes))
 
      ! Global ID for the elements and the nodes using its 2D index: (y-1)*tileSize+x
      ! for nodes shared by multiple PETs, the PET with smaller rank will own the
@@ -3610,7 +3628,7 @@ function ESMF_MeshCreateCubedSphere(tileSize, nx, ny, rc)
           do l=start(1,i),count(1,i)+start(1,i)
             !use the new index to the unique set of nodes
             kk = (j-1)*(tileSize+1)+l
-            GlobalIds(k) = map(kk)+1
+            GlobalIds(k) = origIds(map(kk)+1)
             k=k+1
           enddo
        enddo
@@ -3625,7 +3643,7 @@ function ESMF_MeshCreateCubedSphere(tileSize, nx, ny, rc)
         firstOwners(GlobalIds(i))=PetNo
      enddo
      ! global minimum of firstOwners to find the owner of the nodes (use the smallest PetNo)
-     call ESMF_VMAllReduce(vm, firstOwners, recvbuf, uniquenodes, &
+     call ESMF_VMAllReduce(vm, firstOwners, recvbuf, totalNodes, &
         ESMF_REDUCE_MIN, rc=localrc)
      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
@@ -3652,7 +3670,7 @@ function ESMF_MeshCreateCubedSphere(tileSize, nx, ny, rc)
        enddo
      enddo
 
-     deallocate(firstOwners, recvbuf, map)
+     deallocate(firstOwners, recvbuf, map, origIds)
 
      call ESMF_MeshAddNodes(mesh, NodeIds=NodeIds, &
          NodeCoords = NodeCoords, NodeOwners = NodeOwners, &
@@ -3686,7 +3704,6 @@ function ESMF_MeshCreateCubedSphere(tileSize, nx, ny, rc)
             ESMF_CONTEXT, rcToReturn=rc)) return
 
      deallocate(ElemIds, ElemConn, ElemType, centerCoords)
-
   else !localDE=0
     !still have to call ESMF_MeshAddNodes() and ESMF_MeshAddElements() even if there is no DEs
     !First participate in ESMF_VMALlReduce()
@@ -5928,8 +5945,6 @@ offset = 0
   endif
  enddo
  
- write(70,*) offset
-
  do i=1,n
    newind(i)=newind(i)-offset(newind(i))
  enddo

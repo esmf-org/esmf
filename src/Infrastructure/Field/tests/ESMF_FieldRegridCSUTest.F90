@@ -2011,12 +2011,6 @@ contains
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
 
-  ! Leave if not 6 PETS
-  if (petCount .ne. 6) then
-    rc=ESMF_SUCCESS
-    return
-  endif
-
   ! Establish the resolution of the grids
   src_tile_size=50
 
@@ -2038,7 +2032,7 @@ contains
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
-
+  
   ! srcArray
   call ESMF_FieldGet(srcField, array=srcArray, rc=localrc)
    if (ESMF_LogFoundError(localrc, &
@@ -2382,12 +2376,6 @@ contains
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
-
-  ! Leave if not 6 PETS
-  if (petCount .ne. 6) then
-    rc=ESMF_SUCCESS
-    return
-  endif
 
   ! Establish the resolution of the grids
   src_tile_size=50
@@ -2754,12 +2742,6 @@ contains
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
-
-  ! Leave if not 6 PETS
-  if (petCount .ne. 6) then
-    rc=ESMF_SUCCESS
-    return
-  endif
 
   ! Establish the resolution of the grids
   src_tile_size=50
@@ -3133,13 +3115,6 @@ contains
   if (ESMF_LogFoundError(localrc, &
        ESMF_ERR_PASSTHRU, &
        ESMF_CONTEXT, rcToReturn=rc)) return
-
-  ! Leave if not 6 PETS
-  if (petCount .ne. 6) then
-    rc=ESMF_SUCCESS
-    return
-  endif
-
 
   ! Establish the resolution of the grids
   src_tile_size=50

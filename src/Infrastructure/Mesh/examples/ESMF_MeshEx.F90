@@ -890,25 +890,21 @@ program ESMF_MeshEx
 !identical regular decomposition for every tile. 
 !In this example, the tile resolution is 45, so there will be a total 45x45x6=12150 elements in the mesh.
 !{\tt nx} and {\tt ny} are the regular decomposition of each tile.  
-!The total number of PETs has to be nx x ny x 6, i.e.
-!a multiple of 6, otherwise, the API will fail with an error message.
+!The total number of DEs is nx x ny x 6. If the number of PETs are less than the total
+!number of DEs, the DEs will be distributed to the PETs using the default cyclic distribution.
 !EOE
 
-  if (mod(PetCount, 6) == 0) then
 !BOC
-     ! Calculate decomposition 
-     nx=PetCount/6 ! Here PetCount needs to be evenly divisible by 6
-     ny=1
+   ! Decompose each tile into 2 x 1 blocks
+   nx=2
+   ny=1
 
-     ! Create Mesh
-     mesh = ESMF_MeshCreateCubedSphere(tileSize=45, nx=nx,ny=ny, rc=localrc)
+   ! Create Mesh
+   mesh = ESMF_MeshCreateCubedSphere(tileSize=45, nx=nx,ny=ny, rc=localrc)
 !EOC
-     if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
-     ! Get rid of Mesh
-     call ESMF_MeshDestroy(mesh, rc=localrc)
-   else
-     localrc=ESMF_SUCCESS
-   endif
+   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+   ! Get rid of Mesh
+   call ESMF_MeshDestroy(mesh, rc=localrc)
    if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
 !BOE

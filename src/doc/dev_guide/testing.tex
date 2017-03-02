@@ -573,7 +573,7 @@ releases, and bad bug fixes).
 Regression tests regularly exercise all interfaces of the code on 
 all target platforms.  
 The regression test results for the last two weeks can be found 
-\htmladdnormallink{{\it here.}}{http://www.earthsystemmodeling.org/developers/test/daily/2week_results/trunk_results_noheader/platform_sort.shtml}
+\htmladdnormallink{{\it here.}}{http://www.earthsystemmodeling.org/developers/test/daily/2week\_results/trunk\_results\_noheader/platform\_sort.shtml}
 This web page provides a complete color-coded current view of the state of the trunk ESMF software, sorting options by platform or compiler are provided.
 A similiar test results web page for the branch is also available.
 Clicking on any of the cells will display the specific test report for that day.
@@ -581,6 +581,59 @@ Hovering over the test name i.e., Blues gfortran, will reveal notes particular t
 
 The platforms that run the regression tests, email the test results to a server that updates the test results web page. A script checks for test reports every 15 minutes, and updates the web page. The time of the last update appears on the web page.
 
+\subsubsection{Investigating Test Failures}
+The regression test results web
+\htmladdnormallink{{\it page}}{http://www.earthsystemmodeling.org/developers/test/daily/2week\_results/trunk\_results\_noheader/platform\_sort.shtml}
+ provides a color-coded view of the state of the software.
+When a developer finds that a test fails on a particular platform with a particular compiler, sometimes the bug is readily identified and fixed.
+However other times the developer may want to know if the test fails on other platforms and if the failure is related to a compiler, mpi configuration or optimized/debug execution.
+The developer would need to click to all the cells of different platforms searching for the test results for that particular test.
+
+A tool was created to allow the developers to query the test results for a specific test for a specific date, as long as it is within two weeks of the current date.
+The developer may send a query test results message to the following email address: esmf\_test@noaa.gov.
+The subject of the email must be exactly "Test\_Results\_Query". The body of the email message must be "Test:" followed by the test name and "Date" followed by the desired date. The format must be a three letter month and a two digit number. e.g.:
+
+\begin{verbatim}
+Test:ESMF_FieldBundleSMMUTest.F90
+Date:Feb 08
+\end{verbatim}
+
+This mail box is checked every quarter hour on the quarter hour, the results are emailed to:esmf\_test@list.woc.noaa.gov.
+The subject of the results email for this example would be:
+\begin{verbatim}
+
+        ESMF_FieldBundleSMMUTest.F90 test results for Feb 08
+
+\end{verbatim}
+
+The body of the email would be as follows:
+
+\begin{verbatim}
+
+	ESMF_Blues_PGI:PASS: mvapich2/g: src/Infrastructure/FieldBundle/tests/ESMF_FieldBundleSMMUTest.F90
+	ESMF_Blues_PGI:PASS: mvapich2/O: src/Infrastructure/FieldBundle/tests/ESMF_FieldBundleSMMUTest.F90
+	ESMF_Blues_PGI:CRASHED: mpich3/g: src/Infrastructure/FieldBundle/tests/ESMF_FieldBundleSMMUTest.F90
+	ESMF_Blues_PGI:PASS: mpich3/O: src/Infrastructure/FieldBundle/tests/ESMF_FieldBundleSMMUTest.F90
+	ESMF_Blues_PGI:PASS: openmpi/g: src/Infrastructure/FieldBundle/tests/ESMF_FieldBundleSMMUTest.F90
+	ESMF_Blues_PGI:PASS: openmpi/O: src/Infrastructure/FieldBundle/tests/ESMF_FieldBundleSMMUTest.F90
+	ESMF_Discover_g95:PASS: mvapich2/g: src/Infrastructure/FieldBundle/tests/ESMF_FieldBundleSMMUTest.F90
+	ESMF_Discover_g95:PASS: mvapich2/O: src/Infrastructure/FieldBundle/tests/ESMF_FieldBundleSMMUTest.F90
+	ESMF_Haumea_g95:PASS: mpich2/g: src/Infrastructure/FieldBundle/tests/ESMF_FieldBundleSMMUTest.F90
+	ESMF_Haumea_g95:PASS: mpich2/O: src/Infrastructure/FieldBundle/tests/ESMF_FieldBundleSMMUTest.F90
+	ESMF_Haumea_g95:PASS: mvapich2/g: src/Infrastructure/FieldBundle/tests/ESMF_FieldBundleSMMUTest.F90
+	ESMF_Haumea_g95:PASS: mvapich2/O: src/Infrastructure/FieldBundle/tests/ESMF_FieldBundleSMMUTest.F90
+	ESMF_Pluto_g95:FAIL: mpich2/g: src/Infrastructure/FieldBundle/tests/ESMF_FieldBundleSMMUTest.F90
+	ESMF_Pluto_g95:FAIL: mpich2/O: src/Infrastructure/FieldBundle/tests/ESMF_FieldBundleSMMUTest.F90
+	ESMF_Pluto_g95:FAIL: mvapich2/g: src/Infrastructure/FieldBundle/tests/ESMF_FieldBundleSMMUTest.F90
+	ESMF_Pluto_g95:FAIL: mvapich2/O: src/Infrastructure/FieldBundle/tests/ESMF_FieldBundleSMMUTest.F90
+
+\end{verbatim}
+
+Note that if the date of the query is the current day, the developer should query periodically during the day since
+the test results are being updated as platforms report their test results.
+If a test crashes it can be because another test hung and the test in question did not run.
+
+Another instance where this tool is useful is when a developer adds a new test, after the nightly tests run, the developer can run a query to quickly see the test results.
 
 \subsubsection{Building the Documentation}
 
@@ -590,7 +643,7 @@ As software development progresses, the documentation is updated, built and post
 The documents are built daily in the early morning, the results of the builds are posted at
 \htmladdnormallink{{\it http://www.earthsystemmodeling.org/developers/test/daily/2week\_results/trunk\_results\_noheader/doc\_build.shtml.}}{http://www.earthsystemmodeling.org/developers/test/daily/2week\_results/trunk\_results\_noheader/doc\_build.shtml}
 
-These documents can be updated by the developers, by checking out the documents from the repository and submitting the edited files. To have the new version of the documents posted on the web, the developer must sent a request to the following email address, esmf\_test@noaa.gov. The subject of the email indicates which document to build and post.
+These documents can be updated by the developers, by checking out the documents from the repository and submitting the edited files. To have the new version of the documents posted on the web, the developer must sent a request to the following email address: esmf\_test@noaa.gov. The subject of the email indicates which document to build and post.
 The following is the list of subjects that have been implemented:
 
 \begin{itemize} 
