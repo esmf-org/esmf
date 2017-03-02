@@ -87,7 +87,11 @@ sub run_benchmark {
                 $sum=$sum + $bm_ET;
                 $count=$count + 1;
         }
-        $BM_ave = $sum/$count;
+        if ($count != 0 ){
+        	$BM_ave = $sum/$count;
+        } else {
+                $BM_ave = 0;
+        }
 	if ( $BM_ave >= $threshold ) {
 		$th = 0;
 	} else {
