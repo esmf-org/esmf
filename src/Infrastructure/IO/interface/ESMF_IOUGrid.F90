@@ -911,6 +911,11 @@ subroutine ESMF_GetMesh2DFromUGrid (filename, ncid, meshid, nodeCoords, elmtConn
     call ESMF_VMGet(vm, localPet=PetNo, petCount=PetCnt, rc=rc)
     if (rc /= ESMF_SUCCESS) return
 
+    if (present(convertToDeg)) then
+       convertToDegLocal = convertToDeg
+    else
+       convertToDegLocal = .false.
+    endif
     ! Get node coordinates
     ncStatus = nf90_inquire_attribute(ncid, meshId, "node_coordinates", len=len)
     errmsg = "Attribute node_coordinates in "//trim(filename)
@@ -1612,7 +1617,6 @@ subroutine ESMF_GetElemFromUGridFile (filename, meshname, elmtConn, &
     character(len=24) :: units
     character(len=256) :: errmsg
     character(len=24) :: attbuf
-    logical :: convertToDegLocal
     integer :: totalConnections
     integer, parameter :: nf90_noerror = 0
     
@@ -2231,10 +2235,10 @@ function CDFCheckError (ncStatus, module, fileName, lineNo, errmsg, rc)
 #ifdef ESMF_NETCDF
     if ( ncStatus .ne. nf90_noerror) then
         call ESMF_LogWrite (msg=trim(errmsg)//':'//trim(nf90_strerror(ncStatus)), &
-	    logmsgFlag=ESMF_LOGMSG_ERROR, &
+            logmsgFlag=ESMF_LOGMSG_ERROR, &
             line=lineNo, file=fileName, method=module)
         print '("NetCDF Error: ", A, " : ", A)', &
-	trim(errmsg),trim(nf90_strerror(ncStatus))
+        trim(errmsg),trim(nf90_strerror(ncStatus))
         call ESMF_LogFlush()
         if (present(rc)) rc = ESMF_FAILURE
  	CDFCheckError = .TRUE.
