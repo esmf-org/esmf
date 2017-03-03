@@ -101,6 +101,7 @@ void FTN_X(f_esmf_gridcreatefromfile)(ESMCI::Grid **grid,
     ESMCI_FortranStrLenArg len_filename,
     ESMCI_FortranStrLenArg len_varname,
     ESMCI_FortranStrLenArg len_coordNames);
+
 }
 
 //
@@ -247,7 +248,7 @@ int setDefaultsLUA(int dimCount,
     // allocate the grid object
     Grid *grid;
 
-    FTN_X(f_esmf_gridcreatenoperidim)(&grid, 
+    FTN_X(f_esmf_gridcreatenoperidim)(&grid,
                                       mi->array, &mi->extent[0],
                                       coordSys, &cs_present,
                                       coordTypeKind, &ctk_present,
@@ -331,7 +332,7 @@ int setDefaultsLUA(int dimCount,
     // allocate the grid object
     Grid *grid;
   
-    FTN_X(f_esmf_gridcreate1peridim)(&grid, 
+    FTN_X(f_esmf_gridcreate1peridim)(&grid,
                                      mi->array, &mi->extent[0], 
                                      &periodicDimLoc, &pd_present,
                                      &poleDimLoc, &pld_present,
@@ -395,7 +396,7 @@ int setDefaultsLUA(int dimCount,
       rdlen1=rd->extent[0];
       rdlen2=rd->extent[1];
 
-      // this is a test to see if the data is passed in correctly
+      /*// this is a test to see if the data is passed in correctly
       printf("\nregDecompPTile:\n  array = [");
       for (int i=0; i<rd->extent[0]; ++i)
         for (int j=0; j<rd->extent[1]; ++j)
@@ -403,7 +404,7 @@ int setDefaultsLUA(int dimCount,
       printf("]\n  extent = [");
       for (int i=0; i<7; ++i)
           printf("%d,", rd->extent[i]);
-      printf("]\n  dimCount = %d\n", rd->dimCount);
+      printf("]\n  dimCount = %d\n", rd->dimCount);*/
 
     } else {
       rdarray=NULL;
@@ -423,7 +424,7 @@ int setDefaultsLUA(int dimCount,
       dflen1=df->extent[0];
       dflen2=df->extent[1];
 
-      // this is a test to see if the data is passed in correctly
+      /*// this is a test to see if the data is passed in correctly
       printf("\ndecompFlagPTile:\n  array = [");
       for (int i=0; i<df->extent[0]; ++i)
         for (int j=0; j<df->extent[1]; ++j)
@@ -431,7 +432,7 @@ int setDefaultsLUA(int dimCount,
       printf("]\n  extent = [");
       for (int i=0; i<7; ++i)
           printf("%d,", df->extent[i]);
-      printf("]\n  dimCount = %d\n", df->dimCount);
+      printf("]\n  dimCount = %d\n", df->dimCount);*/
 
     } else {
       dfarray=NULL;
@@ -450,14 +451,14 @@ int setDefaultsLUA(int dimCount,
       llarray=ll->array;
       lllen=ll->extent[0];
 
-      // this is a test to see if the data is passed in correctly
+      /*// this is a test to see if the data is passed in correctly
       printf("\ndeLabelList:\n  array = [");
       for (int i=0; i<ll->extent[0]; ++i)
         printf("%d,", ll->array[i]);
       printf("]\n  extent = [");
       for (int i=0; i<7; ++i)
           printf("%d,", ll->extent[i]);
-      printf("]\n  dimCount = %d\n", ll->dimCount);
+      printf("]\n  dimCount = %d\n", ll->dimCount);*/
 
     } else {
       llarray=NULL;

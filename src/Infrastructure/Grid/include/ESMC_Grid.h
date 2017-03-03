@@ -154,8 +154,8 @@ ESMC_Grid ESMC_GridCreate1PeriDim(
 ESMC_Grid ESMC_GridCreateCubedSphere(
   int *tilesize,                      // in
   ESMC_InterArrayInt *regDecompPTile, // in
-  ESMC_InterArrayInt *decompFlagPTile,  // in
-  ESMC_InterArrayInt *deLabelList,    // in
+  //ESMC_InterArrayInt *decompFlagPTile,  // in
+  //ESMC_InterArrayInt *deLabelList,    // in
   //ESMC_DELayout *delayout,            // in
   const char *name,                   // in
   int *rc);                           // out
@@ -186,6 +186,17 @@ ESMC_Grid ESMC_GridCreateCubedSphere(
 //      will be 12 with each tile decomposed into 1x2 blocks. The 12 DEs are mapped
 //      to the first 12 PETs and the remaining 4 PETs have no DEs locally, unless
 //      an optional {\tt delayout} is provided.
+//  \item[name]
+//      The name of the {\tt ESMC\_Grid}.
+//  \item[rc]
+//      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+//  \end{description}
+//
+//EOP
+//-----------------------------------------------------------------------------
+
+// these ones are not yet operations
+
 //  \item[decompFlagPTile]
 //      List of decomposition flags indicating how each dimension of each
 //      tile is to be divided between the DEs. The default setting
@@ -204,14 +215,6 @@ ESMC_Grid ESMC_GridCreateCubedSphere(
 //      case that {\tt regDecompPTile} was not specified, the {\tt deCount}
 //      must be at least that of the default DELayout. The
 //      {\tt regDecompPTile} will be constructed accordingly.
-//  \item[name]
-//      The name of the {\tt ESMC\_Grid}.
-//  \item[rc]
-//      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-//  \end{description}
-//
-//EOP
-//-----------------------------------------------------------------------------
 
 //------------------------------------------------------------------------------
 //BOP
@@ -330,8 +333,7 @@ int ESMC_GridAddItem(
 //  \item[itemflag]
 //    The grid item to add.
 //  \item[staggerloc]
-//    The stagger location to add.  If not present, defaults to 
-//    ESMC\_STAGGERLOC\_CENTER.
+//    The stagger location to add.
 //  \end{description}
 //
 //EOP
@@ -346,6 +348,7 @@ void * ESMC_GridGetItem(
   ESMC_Grid grid,                         // in
   enum ESMC_GridItem_Flag itemflag,       // in
   enum ESMC_StaggerLoc staggerloc,        // in
+  int *localDE,                           // in
   int *rc                                 // out
 );
 
@@ -362,8 +365,9 @@ void * ESMC_GridGetItem(
 //  \item[itemflag]
 //    The grid item to add.
 //  \item[staggerloc]
-//    The stagger location to add.  If not present, defaults to 
-//    ESMC\_STAGGERLOC\_CENTER.
+//    The stagger location to add.
+//  \item[localDE]
+//    The local decompositional element. If not present, defaults to 0.
 //  \item[rc]
 //  Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
 //  \end{description}
@@ -392,8 +396,7 @@ int ESMC_GridAddCoord(
 //  \item[grid]
 //    Grid object to which the coordinates will be added
 //  \item[staggerloc]
-//    The stagger location to add.  If not present, defaults to 
-//    ESMC\_STAGGERLOC\_CENTER.
+//    The stagger location to add.
 //  \end{description}
 //
 //EOP
@@ -408,6 +411,7 @@ void * ESMC_GridGetCoord(
   ESMC_Grid grid,                         // in
   int coordDim,                           // in
   enum ESMC_StaggerLoc staggerloc,        // in
+  int *localDE,
   int *exclusiveLBound,                   // out
   int *exclusiveUBound,                   // out
   int *rc                                 // out
@@ -426,8 +430,9 @@ void * ESMC_GridGetCoord(
 //  \item[coordDim]
 //    The coordinate dimension from which to get the data.
 //  \item[staggerloc]
-//    The stagger location to add.  If not present, defaults to 
-//    ESMC\_STAGGERLOC\_CENTER.
+//    The stagger location to add.
+//  \item[localDE]
+//    The local decompositional element. If not present, defaults to 0.
 //  \item[exclusiveLBound]
 //    Upon return this holds the lower bounds of the exclusive region. This bound
 //    must be allocated to be of size equal to the coord dimCount.  
@@ -449,6 +454,7 @@ void * ESMC_GridGetCoord(
 int ESMC_GridGetCoordBounds(
   ESMC_Grid grid,                         // in
   enum ESMC_StaggerLoc staggerloc,        // in
+  int *localDE,                           // in
   int *exclusiveLBound,                   // out
   int *exclusiveUBound,                   // out
   int *rc                                 // out
@@ -465,8 +471,9 @@ int ESMC_GridGetCoordBounds(
 //  \item[grid]
 //    Grid object from which to obtain the coordinates.
 //  \item[staggerloc]
-//    The stagger location to add.  If not present, defaults to 
-//    ESMC\_STAGGERLOC\_CENTER.
+//    The stagger location to add.
+//  \item[localDE]
+//    The local decompositional element. If not present, defaults to 0.
 //  \item[exclusiveLBound]
 //    Upon return this holds the lower bounds of the exclusive region. This bound
 //    must be allocated to be of size equal to the coord dimCount.  
@@ -503,8 +510,7 @@ int ESMC_GridWrite(
 //   \item [grid]
 //     The grid.
 //   \item[staggerloc]
-//     The stagger location to add.  If not present, defaults to 
-//     ESMC\_STAGGERLOC\_CENTER.
+//     The stagger location to add.
 //   \item[filename]
 //     The name of the output file.
 //   \end{description}

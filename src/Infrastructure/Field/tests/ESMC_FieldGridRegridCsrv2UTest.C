@@ -149,7 +149,7 @@ int main(void){
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
 #ifdef gridmasking
   int *mask = (int *)ESMC_GridGetItem(grid, ESMC_GRIDITEM_MASK, 
-                                            ESMC_STAGGERLOC_CENTER, &rc);
+                                            ESMC_STAGGERLOC_CENTER, NULL, &rc);
 #endif
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
@@ -165,7 +165,7 @@ int main(void){
   strcpy(name, "GridGetCoord - X");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
   double *gridXCorner = (double *)ESMC_GridGetCoord(grid, 1,
-                                                    ESMC_STAGGERLOC_CORNER,
+                                                    ESMC_STAGGERLOC_CORNER, NULL,
                                                     exLB_corner, exUB_corner, &rc);
 
   p = 0;
@@ -188,7 +188,7 @@ int main(void){
   strcpy(name, "GridGetCoord - Y");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
   double *gridYCorner = (double *)ESMC_GridGetCoord(grid, 2,
-                                                    ESMC_STAGGERLOC_CORNER,
+                                                    ESMC_STAGGERLOC_CORNER, NULL,
                                                     NULL, NULL, &rc);
 
   p = 0;
@@ -213,7 +213,7 @@ int main(void){
   strcpy(name, "GridGetCoord - X");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
   double *gridXCenter = (double *)ESMC_GridGetCoord(grid, 1,
-                                                    ESMC_STAGGERLOC_CENTER,
+                                                    ESMC_STAGGERLOC_CENTER, NULL,
                                                     exLB_center, exUB_center, &rc);
 
   p = 0;
@@ -236,7 +236,7 @@ int main(void){
   strcpy(name, "GridGetCoord - Y");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
   double *gridYCenter = (double *)ESMC_GridGetCoord(grid, 2,
-                                                    ESMC_STAGGERLOC_CENTER,
+                                                    ESMC_STAGGERLOC_CENTER, NULL,
                                                     NULL, NULL, &rc);
 
   p = 0;

@@ -64,19 +64,21 @@ program ESMF_GridCreateUTest
   integer :: clbnd(3),cubnd(3)
   character, pointer :: buf(:)
   real(ESMF_KIND_R8), pointer :: fptr2D(:,:)
-  integer :: bufCount, offset, localDECount, rank, i1,i2,lDE, i
+  integer :: bufCount, offset, localDECount, rank, i1,i2,lDE, i, j
   type(ESMF_StaggerLoc)          :: staggerloc8
   integer :: minIndex(3), maxIndex(3) 
   integer :: celw(3),ceuw(3)
   logical :: isLBound(2),isUBound(2)
   integer :: petMap2D(2,2,1)
-  real(ESMF_KIND_R8), pointer :: fptr(:,:)
+  real(ESMF_KIND_R8), pointer :: fptr(:,:), fptr1(:,:), fptr2(:,:)
   logical:: gridBool
   logical:: isCreated
   type(ESMF_GridStatus_Flag) :: status
   ! test the AttributeGet for Grid info
   type(ESMF_TypeKind_Flag) :: attrValue
   type(ESMF_CoordSys_Flag) :: coordSys
+  integer(ESMF_KIND_I4) :: regDecompPTile(2,6), deLabelList(6)
+  type(ESMF_Decomp_Flag) :: decompFlagPTile(2,6)
 
 
   !-----------------------------------------------------------------------------
@@ -93,7 +95,6 @@ program ESMF_GridCreateUTest
   ! prepare DistGrid
   distgrid=ESMF_DistGridCreate(minIndex=(/1,1/),maxIndex=(/10,10/), rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-
 
   !------------------------------------------------------------------------
   !NEX_UTest
@@ -2497,6 +2498,78 @@ program ESMF_GridCreateUTest
 
   call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
   !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "GridCreateCubedSphere"
+  write(failMsg, *) "Incorrect result"
+
+  ! create grid with nondefault parameter
+  rc=ESMF_SUCCESS
+
+  ! Set up decomposition for src Grid
+  regDecompPTile(:,1)=(/2,2/)
+  regDecompPTile(:,2)=(/2,2/)
+  regDecompPTile(:,3)=(/2,2/)
+  regDecompPTile(:,4)=(/2,2/)
+  regDecompPTile(:,5)=(/2,2/)
+  regDecompPTile(:,6)=(/2,2/)
+
+  !decompFlagPTile(:,1)=(/ESMF_DECOMP_CYCLIC,  1/)
+  !decompFlagPTile(:,2)=(/ESMF_DECOMP_BALANCED, 2/)
+  !decompFlagPTile(:,3)=(/ESMF_DECOMP_RESTFIRST,3/)
+  !decompFlagPTile(:,4)=(/ESMF_DECOMP_RESTLAST, 4/)
+  !decompFlagPTile(:,5)=(/ESMF_DECOMP_CYCLIC,   5/)
+  !decompFlagPTile(:,6)=(/ESMF_DECOMP_BALANCED,  6/)
+
+  deLabelList(1) = 11
+  deLabelList(1) = 12
+  deLabelList(1) = 13
+  deLabelList(1) = 14
+  deLabelList(1) = 15
+  deLabelList(1) = 16
+
+  grid=ESMF_GridCreateCubedSphere(15, regDecompPTile=regDecompPTile, &
+                                  !decompFlagPTile=decompFlagPTile, &
+                                  !deLabelList=deLabelList, &
+                                  rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  call ESMF_GridGet(grid, localDECount=localDECount, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  do lde = 0, localDECount-1
+
+    call ESMF_GridGetCoord(grid, coordDim=1, localDE=lde, farrayPtr=fptr1, &
+                           exclusiveLBound=exlbnd, exclusiveUBound=exubnd, rc=localrc)
+    if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+    call ESMF_GridGetCoord(grid, coordDim=2, localDE=lde, farrayPtr=fptr2, &
+                           exclusiveLBound=exlbnd, exclusiveUBound=exubnd, rc=localrc)
+    if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+#if 0
+    print *, "coords from de", lde
+
+    print *, "lower bounds = [", exlbnd(1), ", ", exlbnd(2), "]"
+    print *, "upper bounds = [", exubnd(1), ", ", exubnd(2), "]"
+
+    print *, "["
+    do j = 1, exubnd(1)
+      do i = 1, exubnd(2)
+        print *, "[", fptr1(i,j), ", ", fptr2(i,j), "]"
+      enddo
+    enddo
+    print *, "]"
+#endif
+  enddo
+
+  ! destroy grid
+  call ESMF_GridDestroy(grid, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !-----------------------------------------------------------------------------
+
 
 
   call ESMF_TestEnd(ESMF_SRCLINE)

@@ -39,7 +39,7 @@ int main(void){
   bool correct;
 
   ESMC_Grid grid_np, grid_1p, grid_1p_pdim1, grid_1p_pdim2, grid_tripole,
-            grid_from_file, grid_create_cubed_sphere;
+            grid_from_file, grid_cs;
   ESMC_VM vm;
 
   int dimcount = 2;
@@ -63,6 +63,112 @@ int main(void){
   if (rc != ESMF_SUCCESS) return 0;
 
   rc=ESMC_LogSet(true);
+
+  //----------------------------------------------------------------------------
+  //  GridCreateCubedSphere
+  //----------------------------------------------------------------------------
+
+  //----------------------------------------------------------------------------
+  // Set up decomposition for each tile (column major Fortran style)
+  int nd = 2;
+  int extent[nd]; extent[0] = 2; extent[1] = 6;
+  int *regDecompPTile;
+  regDecompPTile = (int *)malloc(6*nd*sizeof(int));
+  regDecompPTile[0] = 2; regDecompPTile[1] = 2;   // Tile 1
+  regDecompPTile[2] = 2; regDecompPTile[3] = 2;   // Tile 2
+  regDecompPTile[4] = 1; regDecompPTile[5] = 2;   // Tile 3
+  regDecompPTile[6] = 1; regDecompPTile[7] = 2;   // Tile 4
+  regDecompPTile[8] = 1; regDecompPTile[9] = 2;   // Tile 5
+  regDecompPTile[10] = 1; regDecompPTile[11] = 2; // Tile 6
+
+  ESMC_InterArrayInt i_rd;
+  rc = ESMC_InterArrayIntNDSet(&i_rd, regDecompPTile, nd, extent);
+
+  /*
+  int *decompFlagPTile;
+  decompFlagPTile = (int *)malloc(6*nd*sizeof(int));
+  decompFlagPTile[0] = 0; decompFlagPTile[1] = 0;   // Tile 1
+  decompFlagPTile[2] = 1; decompFlagPTile[3] = 1;   // Tile 2
+  decompFlagPTile[4] = 2; decompFlagPTile[5] = 2;   // Tile 3
+  decompFlagPTile[6] = 3; decompFlagPTile[7] = 3;   // Tile 4
+  decompFlagPTile[8] = 4; decompFlagPTile[9] = 4;   // Tile 5
+  decompFlagPTile[10] = 0; decompFlagPTile[11] = 5; // Tile 6
+
+  // ESMC_Decomp_Flag doesn't seem to be implemented on the C layer yet
+  // decompFlagPTile[0] = ESMC_DECOMP_DEFAULT; decompFlagPTile[1] = 0;   // Tile 1
+  // decompFlagPTile[2] = ESMC_DECOMP_BALANCED; decompFlagPTile[3] = 1;   // Tile 2
+  // decompFlagPTile[4] = ESMC_DECOMP_RESTFIRST; decompFlagPTile[5] = 2;   // Tile 3
+  // decompFlagPTile[6] = ESMC_DECOMP_RESTLAST; decompFlagPTile[7] = 3;   // Tile 4
+  // decompFlagPTile[8] = ESMC_DECOMP_CYCLIC; decompFlagPTile[9] = 4;   // Tile 5
+  // decompFlagPTile[10] = ESMC_DECOMP_DEFAULT; decompFlagPTile[11] = 5; // Tile 6
+
+
+  ESMC_InterArrayInt i_df;
+  rc = ESMC_InterArrayIntNDSet(&i_df, decompFlagPTile, nd, extent);
+
+  int *deLabelList;
+  deLabelList = (int *)malloc(6*sizeof(int));
+  deLabelList[0] = 11;
+  deLabelList[1] = 12;
+  deLabelList[2] = 13;
+  deLabelList[3] = 14;
+  deLabelList[4] = 15;
+  deLabelList[5] = 16;
+
+  ESMC_InterArrayInt i_ll;
+  rc = ESMC_InterArrayIntSet(&i_ll, deLabelList, 6);
+  */
+
+  int tilesize = 45;
+  char namecs[18] = "cubed sphere grid";
+
+  //NEX_UTest
+  strcpy(name, "GridCreateCubedSphere");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
+  grid_cs = ESMC_GridCreateCubedSphere(&tilesize, &i_rd, namecs, &rc);
+  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+  free(regDecompPTile);
+  // free(decompFlagPTile);
+  // free(deLabelList);
+
+  ESMC_StaggerLoc stagger = ESMC_STAGGERLOC_CENTER;
+
+  //NEX_UTest
+  strcpy(name, "GridWrite(cubedsphere)");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
+  rc = ESMC_GridWrite(grid_cs, stagger, namecs);
+  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+
+  int localde = 0; int exLB[2]; int exUB[2];
+
+  //NEX_UTest
+  strcpy(name, "GridCreateGetCoord(cubedsphere)");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
+  void *dummy = ESMC_GridGetCoord(grid_cs, 1, ESMC_STAGGERLOC_CENTER,
+                                   &localde, exLB, exUB, &rc);
+  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+
+  /*
+  for (int i = 0; i < 6; ++i) {
+    double * coordx = static_cast<double *> (ESMC_GridGetCoord(grid_cs, 1,
+        ESMC_STAGGERLOC_CENTER, &i, exLB, exUB, &rc));
+    double * coordy = static_cast<double *> (ESMC_GridGetCoord(grid_cs, 2,
+        ESMC_STAGGERLOC_CENTER, &i, exLB, exUB, &rc));
+
+
+    printf("exLB = [%d, %d]\n", exLB[0], exLB[1]);
+    printf("exUB = [%d, %d]\n", exUB[0], exUB[1]);
+
+    for (int j = 0; j < exUB[0]-exLB[0]; ++j) {
+      for (int k = 0; k < exUB[1]-exLB[1]; ++k) {
+        int indk = exUB[0]-exLB[0]*j+k;
+        printf("[%f,%f]\n", coordx[indk], coordy[indk]);
+      }
+    }
+  }
+  */
+
+//----------------------------------------------------------------------------
 
   //----------------------------------------------------------------------------
   //  GridCreate1PeriDim (no periodicDim or poleDim specified)
@@ -127,70 +233,6 @@ int main(void){
   //----------------------------------------------------------------------------
 
   //----------------------------------------------------------------------------
-  //  GridCreateCubedSphere
-  //----------------------------------------------------------------------------
-
-  //----------------------------------------------------------------------------
-  //NEX_UTest
-
-  // Set up decomposition for each tile (column major Fortran style)
-  int nd = 2;
-  int extent[nd]; extent[0] = 2; extent[1] = 6;
-  int *regDecompPTile;
-  regDecompPTile = (int *)malloc(6*nd*sizeof(int));
-  regDecompPTile[0] = 2; regDecompPTile[1] = 2;   // Tile 1
-  regDecompPTile[2] = 2; regDecompPTile[3] = 2;   // Tile 2
-  regDecompPTile[4] = 1; regDecompPTile[5] = 2;   // Tile 3
-  regDecompPTile[6] = 1; regDecompPTile[7] = 2;   // Tile 4
-  regDecompPTile[8] = 1; regDecompPTile[9] = 2;   // Tile 5
-  regDecompPTile[10] = 1; regDecompPTile[11] = 2; // Tile 6
-
-  ESMC_InterArrayInt i_rd;
-  rc = ESMC_InterArrayIntNDSet(&i_rd, regDecompPTile, nd, extent);
-
-  int *decompFlagPTile;
-  decompFlagPTile = (int *)malloc(6*nd*sizeof(int));
-  decompFlagPTile[0] = 2; decompFlagPTile[1] = 2;   // Tile 1
-  decompFlagPTile[2] = 2; decompFlagPTile[3] = 2;   // Tile 2
-  decompFlagPTile[4] = 1; decompFlagPTile[5] = 2;   // Tile 3
-  decompFlagPTile[6] = 1; decompFlagPTile[7] = 2;   // Tile 4
-  decompFlagPTile[8] = 1; decompFlagPTile[9] = 2;   // Tile 5
-  decompFlagPTile[10] = 1; decompFlagPTile[11] = 2; // Tile 6
-
-  ESMC_InterArrayInt i_df;
-  rc = ESMC_InterArrayIntNDSet(&i_df, decompFlagPTile, nd, extent);
-
-  nd = 1;
-  int *deLabelList;
-  deLabelList = (int *)malloc(6*nd*sizeof(int));
-  deLabelList[0] = 11;
-  deLabelList[1] = 12;
-  deLabelList[2] = 13;
-  deLabelList[3] = 14;
-  deLabelList[4] = 15;
-  deLabelList[5] = 16;
-
-  ESMC_InterArrayInt i_ll;
-  rc = ESMC_InterArrayIntNDSet(&i_ll, deLabelList, nd, extent);
-
-  int tilesize = 45;
-  char namecs[18] = "cubed sphere grid";
-
-  strcpy(name, "GridCreateCubedSphere");
-  strcpy(failMsg, "Did not return ESMF_SUCCESS");
-  grid_create_cubed_sphere = ESMC_GridCreateCubedSphere(&tilesize, &i_rd,
-                                                        &i_df, &i_ll, //NULL,
-                                                        namecs, &rc);
-  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
-  free(regDecompPTile);
-  free(decompFlagPTile);
-  free(deLabelList);
-
-  // no way to retrieve coords from tiles other than 0
-
-  //----------------------------------------------------------------------------
-
-  //----------------------------------------------------------------------------
   //NEX_UTest
   // Create grid object from SCRIP file with both regDecomp and decompflag
   // set to NULL.
@@ -198,9 +240,9 @@ int main(void){
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
 #ifdef ESMF_NETCDF
   grid_from_file = ESMC_GridCreateFromFile("data/T42_grid.nc",
-					   ESMC_FILEFORMAT_SCRIP,
-					   NULL, NULL, NULL, NULL, NULL, NULL,
-					   NULL, NULL, NULL, &rc);
+                       ESMC_FILEFORMAT_SCRIP,
+                       NULL, NULL, NULL, NULL, NULL, NULL,
+                       NULL, NULL, NULL, &rc);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
   if (rc == ESMF_SUCCESS) {
@@ -222,10 +264,10 @@ int main(void){
   int regDecomp[2] = {petCount,1};
   int decompflag[2] = {ESMC_DECOMP_BALANCED, ESMC_DECOMP_BALANCED};
   grid_from_file = ESMC_GridCreateFromFile("data/T42_grid.nc", 
-					   ESMC_FILEFORMAT_SCRIP,
-					   regDecomp, decompflag,
-					   NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-					   &rc);
+                       ESMC_FILEFORMAT_SCRIP,
+                       regDecomp, decompflag,
+                       NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+                       &rc);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
   if (rc == ESMF_SUCCESS) {
@@ -246,10 +288,10 @@ int main(void){
 #ifdef ESMF_NETCDF
   decompflag[1] = ESMC_DECOMP_RESTFIRST;
   grid_from_file = ESMC_GridCreateFromFile("data/T42_grid.nc", 
-					   ESMC_FILEFORMAT_SCRIP,
-					   regDecomp, decompflag, 
-					   NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-					   &rc);
+                       ESMC_FILEFORMAT_SCRIP,
+                       regDecomp, decompflag, 
+                       NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+                       &rc);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
   if (rc == ESMF_SUCCESS) {
@@ -270,10 +312,10 @@ int main(void){
 #ifdef ESMF_NETCDF
   decompflag[1] = ESMC_DECOMP_RESTLAST;
   grid_from_file = ESMC_GridCreateFromFile("data/T42_grid.nc", 
-					   ESMC_FILEFORMAT_SCRIP,
-					   regDecomp, decompflag, 
-					   NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-					   &rc);
+                       ESMC_FILEFORMAT_SCRIP,
+                       regDecomp, decompflag, 
+                       NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+                       &rc);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
   if (rc == ESMF_SUCCESS) {
@@ -296,10 +338,10 @@ int main(void){
 #ifdef ESMF_NETCDF
   decompflag[1] = ESMC_DECOMP_CYCLIC;
   grid_from_file = ESMC_GridCreateFromFile("data/T42_grid.nc", 
-					   ESMC_FILEFORMAT_SCRIP,
-					   regDecomp, decompflag,
-					   NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-					   &rc);
+                       ESMC_FILEFORMAT_SCRIP,
+                       regDecomp, decompflag,
+                       NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+                       &rc);
   ESMC_Test((rc==ESMF_RC_ARG_OUTOFRANGE), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
   if (rc == ESMF_SUCCESS) {
@@ -321,10 +363,10 @@ int main(void){
   decompflag[0] = ESMC_DECOMP_RESTFIRST;
   decompflag[1] = ESMC_DECOMP_BALANCED;
   grid_from_file = ESMC_GridCreateFromFile("data/T42_grid.nc", 
-					   ESMC_FILEFORMAT_SCRIP,
-					   regDecomp, decompflag, 
-					   NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-					   &rc);
+                       ESMC_FILEFORMAT_SCRIP,
+                       regDecomp, decompflag, 
+                       NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+                       &rc);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
   if (rc == ESMF_SUCCESS) {
@@ -345,10 +387,10 @@ int main(void){
 #ifdef ESMF_NETCDF
   decompflag[1] = ESMC_DECOMP_RESTFIRST;
   grid_from_file = ESMC_GridCreateFromFile("data/T42_grid.nc", 
-					   ESMC_FILEFORMAT_SCRIP,
-					   regDecomp, decompflag, 
-					   NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-					   &rc);
+                       ESMC_FILEFORMAT_SCRIP,
+                       regDecomp, decompflag, 
+                       NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+                       &rc);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
   if (rc == ESMF_SUCCESS) {
@@ -369,10 +411,10 @@ int main(void){
 #ifdef ESMF_NETCDF
   decompflag[1] = ESMC_DECOMP_RESTLAST;
   grid_from_file = ESMC_GridCreateFromFile("data/T42_grid.nc", 
-					   ESMC_FILEFORMAT_SCRIP,
-					   regDecomp, decompflag, 
-					   NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-					   &rc);
+                       ESMC_FILEFORMAT_SCRIP,
+                       regDecomp, decompflag, 
+                       NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+                       &rc);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
   if (rc == ESMF_SUCCESS) {
@@ -395,10 +437,10 @@ int main(void){
 #ifdef ESMF_NETCDF
   decompflag[1] = ESMC_DECOMP_CYCLIC;
   grid_from_file = ESMC_GridCreateFromFile("data/T42_grid.nc", 
-					   ESMC_FILEFORMAT_SCRIP,
-					   regDecomp, decompflag,
-					   NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-					   &rc);
+                       ESMC_FILEFORMAT_SCRIP,
+                       regDecomp, decompflag,
+                       NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+                       &rc);
   ESMC_Test((rc==ESMF_RC_ARG_OUTOFRANGE), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
   if (rc == ESMF_SUCCESS) {
@@ -420,10 +462,10 @@ int main(void){
   decompflag[0] = ESMC_DECOMP_RESTLAST;
   decompflag[1] = ESMC_DECOMP_BALANCED;
   grid_from_file = ESMC_GridCreateFromFile("data/T42_grid.nc", 
-					   ESMC_FILEFORMAT_SCRIP,
-					   regDecomp, decompflag, 
-					   NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-					   &rc);
+                       ESMC_FILEFORMAT_SCRIP,
+                       regDecomp, decompflag, 
+                       NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+                       &rc);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
   if (rc == ESMF_SUCCESS) {
@@ -444,10 +486,10 @@ int main(void){
 #ifdef ESMF_NETCDF
   decompflag[1] = ESMC_DECOMP_RESTFIRST;
   grid_from_file = ESMC_GridCreateFromFile("data/T42_grid.nc", 
-					   ESMC_FILEFORMAT_SCRIP,
-					   regDecomp, decompflag, 
-					   NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-					   &rc);
+                       ESMC_FILEFORMAT_SCRIP,
+                       regDecomp, decompflag, 
+                       NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+                       &rc);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
   if (rc == ESMF_SUCCESS) {
@@ -468,10 +510,10 @@ int main(void){
 #ifdef ESMF_NETCDF
   decompflag[1] = ESMC_DECOMP_RESTLAST;
   grid_from_file = ESMC_GridCreateFromFile("data/T42_grid.nc", 
-					   ESMC_FILEFORMAT_SCRIP,
-					   regDecomp, decompflag, 
-					   NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-					   &rc);
+                       ESMC_FILEFORMAT_SCRIP,
+                       regDecomp, decompflag, 
+                       NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+                       &rc);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
   if (rc == ESMF_SUCCESS) {
@@ -494,10 +536,10 @@ int main(void){
 #ifdef ESMF_NETCDF
   decompflag[1] = ESMC_DECOMP_CYCLIC;
   grid_from_file = ESMC_GridCreateFromFile("data/T42_grid.nc", 
-					   ESMC_FILEFORMAT_SCRIP,
-					   regDecomp, decompflag,
-					   NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-					   &rc);
+                       ESMC_FILEFORMAT_SCRIP,
+                       regDecomp, decompflag,
+                       NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+                       &rc);
   ESMC_Test((rc==ESMF_RC_ARG_OUTOFRANGE), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
   if (rc == ESMF_SUCCESS) {
@@ -521,10 +563,10 @@ int main(void){
   decompflag[0] = ESMC_DECOMP_CYCLIC;
   decompflag[1] = ESMC_DECOMP_BALANCED;
   grid_from_file = ESMC_GridCreateFromFile("data/T42_grid.nc", 
-					   ESMC_FILEFORMAT_SCRIP,
-					   regDecomp, decompflag,
-					   NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-					   &rc);
+                       ESMC_FILEFORMAT_SCRIP,
+                       regDecomp, decompflag,
+                       NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+                       &rc);
   ESMC_Test((rc==ESMF_RC_ARG_OUTOFRANGE), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
   if (rc == ESMF_SUCCESS) {
@@ -547,10 +589,10 @@ int main(void){
 #ifdef ESMF_NETCDF
   decompflag[1] = ESMC_DECOMP_RESTFIRST;
   grid_from_file = ESMC_GridCreateFromFile("data/T42_grid.nc", 
-					   ESMC_FILEFORMAT_SCRIP,
-					   regDecomp, decompflag,
-					   NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-					   &rc);
+                       ESMC_FILEFORMAT_SCRIP,
+                       regDecomp, decompflag,
+                       NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+                       &rc);
   ESMC_Test((rc==ESMF_RC_ARG_OUTOFRANGE), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
   if (rc == ESMF_SUCCESS) {
@@ -573,10 +615,10 @@ int main(void){
 #ifdef ESMF_NETCDF
   decompflag[1] = ESMC_DECOMP_RESTLAST;
   grid_from_file = ESMC_GridCreateFromFile("data/T42_grid.nc", 
-					   ESMC_FILEFORMAT_SCRIP,
-					   regDecomp, decompflag,
-					   NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-					   &rc);
+                       ESMC_FILEFORMAT_SCRIP,
+                       regDecomp, decompflag,
+                       NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+                       &rc);
   ESMC_Test((rc==ESMF_RC_ARG_OUTOFRANGE), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
   if (rc == ESMF_SUCCESS) {
@@ -599,10 +641,10 @@ int main(void){
 #ifdef ESMF_NETCDF
   decompflag[1] = ESMC_DECOMP_CYCLIC;
   grid_from_file = ESMC_GridCreateFromFile("data/T42_grid.nc", 
-					   ESMC_FILEFORMAT_SCRIP,
-					   regDecomp, decompflag,
-					   NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-					   &rc);
+                       ESMC_FILEFORMAT_SCRIP,
+                       regDecomp, decompflag,
+                       NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+                       &rc);
   ESMC_Test((rc==ESMF_RC_ARG_OUTOFRANGE), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
   if (rc == ESMF_SUCCESS) {
@@ -654,7 +696,8 @@ int main(void){
   strcpy(name, "GridGetCoordBounds");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
   rc=ESMC_GridGetCoordBounds(grid_np, 
-                             ESMC_STAGGERLOC_CORNER, 
+                             ESMC_STAGGERLOC_CORNER,
+                             NULL,
                              elbnd,
                              eubnd,NULL);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
@@ -719,6 +762,7 @@ int main(void){
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
   double *gridXCoord_tripole = (double *)ESMC_GridGetCoord(grid_tripole, 1,
                                                    ESMC_STAGGERLOC_CENTER,
+                                                   NULL,
                                                    exLBound_tripole, 
                                                    exUBound_tripole, &rc);
 
@@ -741,7 +785,7 @@ int main(void){
   strcpy(name, "GridGetCoord - Y");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
   double *gridYCoord_tripole = (double *)ESMC_GridGetCoord(grid_tripole, 2, 
-                                                   ESMC_STAGGERLOC_CENTER,
+                                                   ESMC_STAGGERLOC_CENTER, NULL,
                                                    NULL, NULL, &rc);
 
   p = 0;
@@ -778,7 +822,7 @@ int main(void){
   strcpy(name, "GridGetCoord - X");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
   double *gridXCoord = (double *)ESMC_GridGetCoord(grid_1p, 1,
-                                                   ESMC_STAGGERLOC_CENTER,
+                                                   ESMC_STAGGERLOC_CENTER, NULL,
                                                    exLBound, exUBound, &rc);
 
   p = 0;
@@ -800,7 +844,7 @@ int main(void){
   strcpy(name, "GridGetCoord - Y");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
   double *gridYCoord = (double *)ESMC_GridGetCoord(grid_1p, 2, 
-                                                   ESMC_STAGGERLOC_CENTER,
+                                                   ESMC_STAGGERLOC_CENTER, NULL,
                                                    NULL, NULL, &rc);
 
   p = 0;
@@ -821,8 +865,8 @@ int main(void){
   strcpy(name, "Validate Grid coordinates - X");
   strcpy(failMsg, "Grid X coordinates not set correctly");
   double *gridXCoord_check = (double *)ESMC_GridGetCoord(grid_1p, 1,
-                                                         ESMC_STAGGERLOC_CENTER, 
-                                                         NULL, NULL, &rc);
+                                                         ESMC_STAGGERLOC_CENTER,
+                                                         NULL, NULL, NULL, &rc);
   pass = true;
   p = 0;
   for (int i1=exLBound[1]; i1<=exUBound[1]; ++i1) {
@@ -844,7 +888,7 @@ int main(void){
   strcpy(failMsg, "Grid Y coordinates not set correctly");
   double *gridYCoord_check = (double *)ESMC_GridGetCoord(grid_1p, 2, 
                                                          ESMC_STAGGERLOC_CENTER, 
-                                                         NULL, NULL, &rc);
+                                                         NULL, NULL, NULL, &rc);
   pass = true;
   p = 0;
   for (int i1=exLBound[1]; i1<=exUBound[1]; ++i1) {
@@ -878,7 +922,7 @@ int main(void){
   strcpy(name, "GridGetItem");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
   int *gridMask = (int *)ESMC_GridGetItem(grid_1p, ESMC_GRIDITEM_MASK,
-                                                   ESMC_STAGGERLOC_CENTER,
+                                                   ESMC_STAGGERLOC_CENTER, NULL,
                                                    &rc);
 
   p = 0;
@@ -912,7 +956,7 @@ int main(void){
   strcpy(name, "GridGetItem");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
   double *gridArea = (double *)ESMC_GridGetItem(grid_1p, ESMC_GRIDITEM_AREA,
-                                                   ESMC_STAGGERLOC_CENTER,
+                                                   ESMC_STAGGERLOC_CENTER, NULL,
                                                    &rc);
 
   p = 0;

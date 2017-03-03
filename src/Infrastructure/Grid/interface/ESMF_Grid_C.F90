@@ -295,22 +295,22 @@
     endif
 
     grid = ESMF_GridCreateCubedSphere(tilesize, &
-                                      !regDecompPTile=regDecompPTile, &
-                                      !decompFlagPTile=decompFlagPTile_local, &
-                                      !deLabelList=deLabelList, &
+                                      regDecompPTile=regDecompPTile, &
+                                      decompFlagPTile=decompFlagPTile_local, &
+                                      deLabelList=deLabelList, &
                                       !delayout=delayout, &
-                                      !name=name, &
+                                      name=name, &
                                       rc=rc)    
 
     if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
- 
+
     gridp = grid%this
 
     rc = ESMF_SUCCESS
   
   end subroutine f_esmf_gridcreatecubedsphere
-    
+
 #undef  ESMF_METHOD
 #define ESMF_METHOD "f_esmf_gridcreatefromfile"
   subroutine f_esmf_gridcreatefromfile(gridp, filename, fileTypeFlag, &

@@ -137,7 +137,7 @@ int main(void){
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
 #ifdef masking
   int *mask = (int *)ESMC_GridGetItem(srcgrid, ESMC_GRIDITEM_MASK, 
-                                      ESMC_STAGGERLOC_CENTER, &rc);
+                                      ESMC_STAGGERLOC_CENTER, NULL, &rc);
 #endif
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
@@ -151,11 +151,11 @@ int main(void){
   strcpy(name, "Grid Get and Set Coords");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
   double *gridXCoord = (double *)ESMC_GridGetCoord(srcgrid, 1,
-                                                   ESMC_STAGGERLOC_CENTER,
+                                                   ESMC_STAGGERLOC_CENTER, NULL,
                                                    exLBound, exUBound, &rc);
 
   double *gridYCoord = (double *)ESMC_GridGetCoord(srcgrid, 2,
-                                                   ESMC_STAGGERLOC_CENTER,
+                                                   ESMC_STAGGERLOC_CENTER, NULL,
                                                    NULL, NULL, &rc);
 
   printf("exLBounds = [%d,%d]\n", exLBound[0], exLBound[1]);
@@ -239,7 +239,7 @@ int main(void){
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
 #ifdef masking
   int *dstmask = (int *)ESMC_GridGetItem(dstgrid, ESMC_GRIDITEM_MASK, 
-                                      ESMC_STAGGERLOC_CENTER, &rc);
+                                      ESMC_STAGGERLOC_CENTER, NULL, &rc);
 #endif
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
@@ -253,11 +253,11 @@ int main(void){
   strcpy(name, "Grid Get and Set Coords - DST");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
   double *gridXCoord_d = (double *)ESMC_GridGetCoord(dstgrid, 1,
-                                                     ESMC_STAGGERLOC_CENTER,
+                                                     ESMC_STAGGERLOC_CENTER, NULL,
                                                      exLBound_d, exUBound_d, &rc);
 
   double *gridYCoord_d = (double *)ESMC_GridGetCoord(dstgrid, 2,
-                                                     ESMC_STAGGERLOC_CENTER,
+                                                     ESMC_STAGGERLOC_CENTER, NULL,
                                                      NULL, NULL, &rc);
 
   printf("exLBounds = [%d,%d]\n", exLBound_d[0], exLBound_d[1]);
