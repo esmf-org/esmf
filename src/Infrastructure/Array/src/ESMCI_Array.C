@@ -11349,7 +11349,7 @@ int Array::sparseMatMul(
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
     &rc)) return rc;
   
-#define ASMMXXEPRINT
+//mxxe#define ASMMXXEPRINT
 #ifdef ASMMXXEPRINT
   // print XXE stream
   VM *vm = VM::getCurrent(&localrc);
