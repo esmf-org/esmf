@@ -12826,7 +12826,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 ! !INTERFACE:
   function ESMF_GridCreateCubedSphere(tileSize,keywordEnforcer, regDecompPTile, decompflagPTile, &
-        deLabelList, delayout, name, rc)
+        deLabelList, delayout, indexflag, name, rc)
 !         
 ! !RETURN VALUE:
     type(ESMF_Grid) :: ESMF_GridCreateCubedSphere
@@ -12838,6 +12838,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_Decomp_Flag), target, intent(in),  optional :: decompflagPTile(:,:)
     integer,                        intent(in),  optional :: deLabelList(:)
     type(ESMF_DELayout),            intent(in),  optional :: delayout
+    type(ESMF_Index_Flag),          intent(in),  optional :: indexflag
     character(len=*),               intent(in),  optional :: name
     integer,                        intent(out), optional :: rc
 
@@ -12882,6 +12883,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !          case that {\tt regDecompPTile} was not specified, the {\tt deCount}
 !          must be at least that of the default DELayout. The 
 !          {\tt regDecompPTile} will be constructed accordingly.
+!     \item[{[indexflag]}]
+!          Indicates the indexing scheme to be used in the new Grid. Please see
+!          Section~\ref{const:indexflag} for the list of options. If not present,
+!          defaults to ESMF\_INDEX\_DELOCAL.
 !     \item[{[name]}]
 !          {\tt ESMF\_Grid} name.
 !     \item[{[rc]}]
@@ -12913,6 +12918,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer, allocatable                       :: regDecomp(:,:)    
     integer, allocatable                       :: demap(:)
     integer                                    :: decount
+    type(ESMF_Index_Flag)                      :: localIndexFlag
     !real(ESMF_KIND_R8)                        :: starttime, endtime  
 
     real(kind=ESMF_KIND_R4), parameter         :: pi = 3.1415926
@@ -12931,6 +12937,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
+  if (present(indexflag)) then
+     localIndexFlag = indexflag
+  else
+     localIndexFlag = ESMF_INDEX_DELOCAL
+  endif
   !------------------------------------------------------------------------
   ! default decomposition. The number of DEs has to be multiple of 6.
   ! If the total PET count is less than 6, some PETs will get more than one DE.
@@ -13167,7 +13178,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! must create with ESMF_INDEX_DELOCAL because of how tiles get their 
     ! coordinates from the cubedSphereTileCreate() routine
     grid = ESMF_GridCreate(distgrid, coordSys=ESMF_COORDSYS_SPH_DEG, &
-      indexflag=ESMF_INDEX_DELOCAL, name=name, rc=localrc)
+      indexflag=localIndexFlag, name=name, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
