@@ -119,14 +119,16 @@ namespace ESMCI {
       int *contigFlagPDimPDe, int *indexCountPDimPDe, int **indexList,
       int *regDecompArg, InterArray<int> *connectionList,
       Decomp_Flag const *decompflagArg, ESMC_IndexFlag *indexflagArg,
-      DELayout *delayout, bool delayoutCreator, VM *vm);
+      DELayout *delayout, bool delayoutCreator, VM *vm, 
+      ESMC_TypeKind_Flag indexTKArg);
     int destruct(bool followCreator=true, bool noGarbage=false);
    public:
     // create() and destroy()
     static DistGrid *create(DistGrid *dg,
       InterArray<int> *firstExtra, InterArray<int> *lastExtra, 
       ESMC_IndexFlag *indexflag, InterArray<int> *connectionList, 
-      VM *vm=NULL, bool actualFlag=true, int *rc=NULL);
+      VM *vm=NULL, bool actualFlag=true, int *rc=NULL,
+      ESMC_TypeKind_Flag indexTK=ESMC_TYPEKIND_I4);
     static DistGrid *create(InterArray<int> *minIndex,
       InterArray<int> *maxIndex, InterArray<int> *regDecomp, 
       Decomp_Flag *decompflag, int decompflagCount,
@@ -134,12 +136,14 @@ namespace ESMCI {
       InterArray<int> *regDecompLastExtra, 
       InterArray<int> *deLabelList, ESMC_IndexFlag *indexflag, 
       InterArray<int> *connectionList,
-      DELayout *delayout=NULL, VM *vm=NULL, int *rc=NULL);
+      DELayout *delayout=NULL, VM *vm=NULL, int *rc=NULL,
+      ESMC_TypeKind_Flag indexTK=ESMC_TYPEKIND_I4);
     static DistGrid *create(InterArray<int> *minIndex,
       InterArray<int> *maxIndex, InterArray<int> *deBlockList, 
       InterArray<int> *deLabelList, ESMC_IndexFlag *indexflag, 
       InterArray<int> *connectionList,
-      DELayout *delayout=NULL, VM *vm=NULL, int *rc=NULL);
+      DELayout *delayout=NULL, VM *vm=NULL, int *rc=NULL,
+      ESMC_TypeKind_Flag indexTK=ESMC_TYPEKIND_I4);
     static DistGrid *create(InterArray<int> *minIndex,
       InterArray<int> *maxIndex, InterArray<int> *regDecomp, 
       Decomp_Flag *decompflag, int decompflagCount,
@@ -147,7 +151,8 @@ namespace ESMCI {
       InterArray<int> *regDecompLastExtra, 
       InterArray<int> *deLabelList, ESMC_IndexFlag *indexflag, 
       InterArray<int> *connectionList,
-      int fastAxis, VM *vm=NULL, int *rc=NULL);
+      int fastAxis, VM *vm=NULL, int *rc=NULL,
+      ESMC_TypeKind_Flag indexTK=ESMC_TYPEKIND_I4);
     static DistGrid *create(InterArray<int> *minIndex,
       InterArray<int> *maxIndex, InterArray<int> *regDecomp, 
       Decomp_Flag *decompflag, int decompflagCount1, int decompflagCount2,
@@ -155,7 +160,8 @@ namespace ESMCI {
       InterArray<int> *regDecompLastExtra, 
       InterArray<int> *deLabelList, ESMC_IndexFlag *indexflag, 
       InterArray<int> *connectionList,
-      DELayout *delayout=NULL, VM *vm=NULL, int *rc=NULL);
+      DELayout *delayout=NULL, VM *vm=NULL, int *rc=NULL,
+      ESMC_TypeKind_Flag indexTK=ESMC_TYPEKIND_I4);
     static int destroy(DistGrid **distgrid, bool noGarbage=false);
     // is()
     bool isLocalDeOnEdgeL(int localDe, int dim, int *rc) const;

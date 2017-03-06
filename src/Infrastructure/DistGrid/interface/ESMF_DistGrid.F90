@@ -1661,7 +1661,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE:
   ! Private name; call using ESMF_DistGridCreate()
   function ESMF_DistGridCreateDB(minIndex, maxIndex, deBlockList, &
-    keywordEnforcer, deLabelList, indexflag, connectionList, delayout, vm, rc)
+    keywordEnforcer, deLabelList, indexflag, connectionList, delayout, vm, &
+    indexTK, rc)
 !         
 ! !RETURN VALUE:
     type(ESMF_DistGrid) :: ESMF_DistGridCreateDB
@@ -1676,6 +1677,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_DistGridConnection), intent(in),  optional :: connectionList(:)
     type(ESMF_DELayout),           intent(in),  optional :: delayout
     type(ESMF_VM),                 intent(in),  optional :: vm
+    type(ESMF_TypeKind_Flag),      intent(in),  optional :: indexTK
     integer,                       intent(out), optional :: rc
 !
 ! !STATUS:
@@ -1735,6 +1737,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     \item[{[vm]}]
 !          Optional {\tt ESMF\_VM} object of the current context. Providing the
 !          VM of the current context will lower the method's overhead.
+!     \item[{[indexTK]}]
+!          Typekind used for indexing. See section \ref{const:typekind} for a
+!          list of typekind options. Only integer types are supported. The 
+!          default is {\tt ESMF\_TYPEKIND\_I4}, i.e. 32-bit indexing.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -1781,7 +1787,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! call into the C++ interface, which will sort out optional arguments
     call c_ESMC_DistGridCreateDB(distgrid, minIndexAux, maxIndexAux, &
       deBlockListAux, deLabelListAux, indexflag, &
-      connectionListAux, delayout, vm, localrc)
+      connectionListAux, delayout, vm, indexTK, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
       
@@ -2450,7 +2456,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! create fitting DistGrid
     minC(1) = deblock(1,1,1)
     maxC(1) = deblock(1,2,petCount)
-    distgrid = ESMF_DistGridCreate(minC, maxC, deBlockList=deblock, rc=localrc)
+    distgrid = ESMF_DistGridCreate(minC, maxC, deBlockList=deblock, &
+      indexTK=ESMF_TYPEKIND_I8, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 

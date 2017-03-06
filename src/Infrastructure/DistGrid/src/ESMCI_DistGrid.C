@@ -74,7 +74,8 @@ DistGrid *DistGrid::create(
   InterArray<int> *connectionList,      // (in)
   VM *vm,                               // (in)
   bool actualFlag,                      // (in)
-  int *rc                               // (out) return code
+  int *rc,                              // (out) return code
+  ESMC_TypeKind_Flag indexTK            // (in) - default ESMC_TYPEKIND_I4
   ){
 //
 // !DESCRIPTION:
@@ -327,7 +328,7 @@ DistGrid *DistGrid::create(
           decompflagCount = dg->dimCount;
         distgrid = DistGrid::create(minIndex, maxIndex, regDecomp, decompflag,
           decompflagCount, firstExtra, lastExtra, NULL,
-          indexflagOpt, connectionList, delayout, vm, &localrc);
+          indexflagOpt, connectionList, delayout, vm, &localrc, indexTK);
         if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
           ESMC_CONTEXT, rc)) return ESMC_NULL_POINTER;
       }else{
@@ -340,7 +341,7 @@ DistGrid *DistGrid::create(
         }
         distgrid = DistGrid::create(minIndex, maxIndex, regDecomp, decompflag,
           decompflagCount1, decompflagCount2, firstExtra, lastExtra, NULL,
-          indexflagOpt, connectionList, delayout, vm, &localrc);
+          indexflagOpt, connectionList, delayout, vm, &localrc, indexTK);
         if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
           ESMC_CONTEXT, rc)) return ESMC_NULL_POINTER;
       }
@@ -839,7 +840,8 @@ DistGrid *DistGrid::create(
   InterArray<int> *connectionList,      // (in)
   DELayout *delayout,                   // (in)
   VM *vm,                               // (in)
-  int *rc                               // (out) return code
+  int *rc,                              // (out) return code
+  ESMC_TypeKind_Flag indexTK            // (in) - default ESMC_TYPEKIND_I4
   ){
 //
 // !DESCRIPTION:
@@ -1245,7 +1247,7 @@ DistGrid *DistGrid::create(
     minIndex->array, maxIndex->array, minIndexPDimPDe, maxIndexPDimPDe,
     contigFlagPDimPDe, indexCountPDimPDe, indexListPDimPLocalDe,
     regDecomp->array, connectionList, decompflag, indexflag,
-    delayout, delayoutCreator, vm);
+    delayout, delayoutCreator, vm, indexTK);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
     rc)){
     distgrid->ESMC_BaseSetStatus(ESMF_STATUS_INVALID);  // mark invalid
@@ -1310,7 +1312,8 @@ DistGrid *DistGrid::create(
   InterArray<int> *connectionList,      // (in)
   DELayout *delayout,                   // (in)
   VM *vm,                               // (in)
-  int *rc                               // (out) return code
+  int *rc,                              // (out) return code
+  ESMC_TypeKind_Flag indexTK            // (in) - default ESMC_TYPEKIND_I4
   ){
 //
 // !DESCRIPTION:
@@ -1522,7 +1525,7 @@ DistGrid *DistGrid::create(
     minIndex->array, maxIndex->array, minIndexPDimPDe, maxIndexPDimPDe,
     contigFlagPDimPDe, indexCountPDimPDe, indexListPDimPLocalDe, NULL,
     connectionList, NULL, indexflag,
-    delayout, delayoutCreator, vm);
+    delayout, delayoutCreator, vm, indexTK);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
     ESMC_CONTEXT, rc)){
     distgrid->ESMC_BaseSetStatus(ESMF_STATUS_INVALID);  // mark invalid
@@ -1576,7 +1579,8 @@ DistGrid *DistGrid::create(
   InterArray<int> *connectionList,      // (in)
   int fastAxis,                         // (in)
   VM *vm,                               // (in)
-  int *rc                               // (out) return code
+  int *rc,                              // (out) return code
+  ESMC_TypeKind_Flag indexTK            // (in) - default ESMC_TYPEKIND_I4
   ){
 //
 // !DESCRIPTION:
@@ -1636,7 +1640,8 @@ DistGrid *DistGrid::create(
   InterArray<int> *connectionList,      // (in)
   DELayout *delayout,                   // (in)
   VM *vm,                               // (in)
-  int *rc                               // (out) return code
+  int *rc,                              // (out) return code
+  ESMC_TypeKind_Flag indexTK            // (in) - default ESMC_TYPEKIND_I4
   ){
 //
 // !DESCRIPTION:
@@ -2135,7 +2140,7 @@ DistGrid *DistGrid::create(
     minIndex->array, maxIndex->array, minIndexPDimPDe, maxIndexPDimPDe,
     contigFlagPDimPDe, indexCountPDimPDe, indexListPDimPLocalDe,
     regDecomp->array, connectionList, decompflag, indexflag,
-    delayout, delayoutCreator, vm);
+    delayout, delayoutCreator, vm, indexTK);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
     rc)){
     distgrid->ESMC_BaseSetStatus(ESMF_STATUS_INVALID);  // mark invalid
@@ -2276,7 +2281,8 @@ int DistGrid::construct(
   ESMC_IndexFlag *indexflagArg,         // (in)
   DELayout *delayoutArg,                // (in) DELayout
   bool delayoutCreatorArg,              // (in)
-  VM *vmArg                             // (in) VM context
+  VM *vmArg,                            // (in) VM context
+  ESMC_TypeKind_Flag indexTKArg         // (in) indexing typekind
   ){
 //
 // !DESCRIPTION:
@@ -2302,7 +2308,7 @@ int DistGrid::construct(
     indexflag = NULL;
 
   // fill in the DistGrid object
-  indexTK = ESMC_TYPEKIND_I4;  // by default use 32-bit indexing
+  indexTK = indexTKArg;
   dimCount = dimCountArg;
   tileCount = tileCountArg;
   if (present(connectionListArg)){
