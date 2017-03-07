@@ -3705,20 +3705,23 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      the index space corresponding to the cells and the boundary of the 
 !      the exclusive region. This extra space is to contain the extra
 !      padding for non-center stagger locations, and should be big enough
-!      to hold any stagger in the grid. It is an error for this to be non-zero 
-!      for a periodic dimension.
+!      to hold any stagger in the grid. If this and gridAlign are not present then 
+!      defaults to 0, 0, ..., 0 (all zeros).
 ! \item[{[gridEdgeUWidth]}] 
 !      The padding around the upper edges of the grid. This padding is between
 !      the index space corresponding to the cells and the boundary of the 
 !      the exclusive region. This extra space is to contain the extra
 !      padding for non-center stagger locations, and should be big enough
-!      to hold any stagger in the grid. It is an error for this to be non-zero 
-!      for a periodic dimension.
+!      to hold any stagger in the grid. If this and gridAlign are not present then 
+!      defaults to 1, 1, ..., 1 (all ones).
 ! \item[{[gridAlign]}] 
 !     Specification of how the stagger locations should align with the cell
 !     index space (can be overridden by the individual staggerAligns). If
-!     the {\tt gridEdgeWidths} are not specified than this parameter
-!     implies the EdgeWidths.
+!     the gridEdgeWidths are not specified than this argument
+!     implies the gridEdgeWidths. If the gridEdgeWidths are specified and this argument isn't
+!     then this argument is implied by the gridEdgeWidths.
+!     If this and the gridEdgeWidths are not specified, then defaults to 
+!    -1, -1, ..., -1 (all negative ones).
 ! \item[{[gridMemLBound]}] 
 !      Specifies the lower index range of the memory of every DE in this Grid. 
 !      Only used when indexflag is {\tt ESMF\_INDEX\_USER}. May be overridden
@@ -3995,20 +3998,23 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      the index space corresponding to the cells and the boundary of the 
 !      the exclusive region. This extra space is to contain the extra
 !      padding for non-center stagger locations, and should be big enough
-!      to hold any stagger in the grid. It is an error for this to be non-zero 
-!      for a periodic dimension.
+!      to hold any stagger in the grid. If this and gridAlign are not present then 
+!      defaults to 0, 0, ..., 0 (all zeros).
 ! \item[{[gridEdgeUWidth]}] 
 !      The padding around the upper edges of the grid. This padding is between
 !      the index space corresponding to the cells and the boundary of the 
 !      the exclusive region. This extra space is to contain the extra
 !      padding for non-center stagger locations, and should be big enough
-!      to hold any stagger in the grid. It is an error for this to be non-zero 
-!      for a periodic dimension.
+!      to hold any stagger in the grid. If this and gridAlign are not present then 
+!      defaults to 1, 1, ..., 1 (all ones).
 ! \item[{[gridAlign]}] 
 !     Specification of how the stagger locations should align with the cell
 !     index space (can be overridden by the individual staggerAligns). If
-!     the {\tt gridEdgeWidths} are not specified than this parameter
-!     implies the EdgeWidths.
+!     the gridEdgeWidths are not specified than this argument
+!     implies the gridEdgeWidths. If the gridEdgeWidths are specified and this argument isn't
+!     then this argument is implied by the gridEdgeWidths.
+!     If this and the gridEdgeWidths are not specified, then defaults to 
+!    -1, -1, ..., -1 (all negative ones).
 ! \item[{[gridMemLBound]}] 
 !      Specifies the lower index range of the memory of every DE in this Grid. 
 !      Only used when indexflag is {\tt ESMF\_INDEX\_USER}. May be overridden
@@ -4482,18 +4488,23 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      the index space corresponding to the cells and the boundary of the 
 !      the exclusive region. This extra space is to contain the extra
 !      padding for non-center stagger locations, and should be big enough
-!      to hold any stagger in the grid. 
+!      to hold any stagger in the grid. If this and gridAlign are not present then 
+!      defaults to 0, 0, ..., 0 (all zeros).
 ! \item[{[gridEdgeUWidth]}] 
 !      The padding around the upper edges of the grid. This padding is between
 !      the index space corresponding to the cells and the boundary of the 
 !      the exclusive region. This extra space is to contain the extra
 !      padding for non-center stagger locations, and should be big enough
-!      to hold any stagger in the grid. 
+!      to hold any stagger in the grid. If this and gridAlign are not present then 
+!      defaults to 1, 1, ..., 1 (all ones).
 ! \item[{[gridAlign]}] 
 !     Specification of how the stagger locations should align with the cell
 !     index space (can be overridden by the individual staggerAligns). If
-!     the {\tt gridEdgeWidths} are not specified than this parameter
-!     implies the EdgeWidths.
+!     the gridEdgeWidths are not specified than this argument
+!     implies the gridEdgeWidths. If the gridEdgeWidths are specified and this argument isn't
+!     then this argument is implied by the gridEdgeWidths.
+!     If this and the gridEdgeWidths are not specified, then defaults to 
+!    -1, -1, ..., -1 (all negative ones).
 ! \item[{[gridMemLBound]}] 
 !      Specifies the lower index range of the memory of every DE in this Grid. 
 !      Only used when indexflag is {\tt ESMF\_INDEX\_USER}. May be overridden
@@ -7320,20 +7331,23 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      the index space corresponding to the cells and the boundary of the 
 !      the exclusive region. This extra space is to contain the extra
 !      padding for non-center stagger locations, and should be big enough
-!      to hold any stagger in the grid. It is an error for this to be non-zero 
-!      for a periodic dimension.
+!      to hold any stagger in the grid. If this and gridAlign are not present then 
+!      defaults to 0, 0, ..., 0 (all zeros).
 ! \item[{[gridEdgeUWidth]}] 
 !      The padding around the upper edges of the grid. This padding is between
 !      the index space corresponding to the cells and the boundary of the 
 !      the exclusive region. This extra space is to contain the extra
 !      padding for non-center stagger locations, and should be big enough
-!      to hold any stagger in the grid. It is an error for this to be non-zero 
-!      for a periodic dimension. 
+!      to hold any stagger in the grid. If this and gridAlign are not present then 
+!      defaults to 1, 1, ..., 1 (all ones).
 ! \item[{[gridAlign]}] 
 !     Specification of how the stagger locations should align with the cell
 !     index space (can be overridden by the individual staggerAligns). If
-!     the {\tt gridEdgeWidths} are not specified than this parameter
-!     implies the EdgeWidths.
+!     the gridEdgeWidths are not specified than this argument
+!     implies the gridEdgeWidths. If the gridEdgeWidths are specified and this argument isn't
+!     then this argument is implied by the gridEdgeWidths.
+!     If this and the gridEdgeWidths are not specified, then defaults to 
+!    -1, -1, ..., -1 (all negative ones).
 ! \item[{[gridMemLBound]}] 
 !      Specifies the lower index range of the memory of every DE in this Grid. 
 !      Only used when indexflag is {\tt ESMF\_INDEX\_USER}. May be overridden
@@ -7589,7 +7603,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     coordinate component on the three index dimensions
 !     described by {\tt coordsPerDEDim1,2,3}. The size of the 
 !     array specifies the number of dimensions of the third
- !     coordinate component array. The values specify which
+!     coordinate component array. The values specify which
 !     of the index dimensions the corresponding coordinate
 !     arrays map to. If not present the default is 1,2,...,grid rank.  
 ! \item[{[gridEdgeLWidth]}] 
@@ -7597,20 +7611,23 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      the index space corresponding to the cells and the boundary of the 
 !      the exclusive region. This extra space is to contain the extra
 !      padding for non-center stagger locations, and should be big enough
-!      to hold any stagger in the grid. It is an error for this to be non-zero 
-!      for a periodic dimension.
+!      to hold any stagger in the grid. If this and gridAlign are not present then 
+!      defaults to 0, 0, ..., 0 (all zeros).
 ! \item[{[gridEdgeUWidth]}] 
 !      The padding around the upper edges of the grid. This padding is between
 !      the index space corresponding to the cells and the boundary of the 
 !      the exclusive region. This extra space is to contain the extra
 !      padding for non-center stagger locations, and should be big enough
-!      to hold any stagger in the grid. It is an error for this to be non-zero 
-!      for a periodic dimension. 
+!      to hold any stagger in the grid. If this and gridAlign are not present then 
+!      defaults to 1, 1, ..., 1 (all ones).
 ! \item[{[gridAlign]}] 
 !     Specification of how the stagger locations should align with the cell
 !     index space (can be overridden by the individual staggerAligns). If
-!     the {\tt gridEdgeWidths} are not specified than this parameter
-!     implies the EdgeWidths.
+!     the gridEdgeWidths are not specified than this argument
+!     implies the gridEdgeWidths. If the gridEdgeWidths are specified and this argument isn't
+!     then this argument is implied by the gridEdgeWidths.
+!     If this and the gridEdgeWidths are not specified, then defaults to 
+!    -1, -1, ..., -1 (all negative ones).
 ! \item[{[gridMemLBound]}] 
 !      Specifies the lower index range of the memory of every DE in this Grid. 
 !      Only used when indexflag is {\tt ESMF\_INDEX\_USER}. May be overridden
@@ -8098,20 +8115,23 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      the index space corresponding to the cells and the boundary of the 
 !      the exclusive region. This extra space is to contain the extra
 !      padding for non-center stagger locations, and should be big enough
-!      to hold any stagger in the grid. It is an error for this to be non-zero 
-!      for a periodic dimension.
+!      to hold any stagger in the grid. If this and gridAlign are not present then 
+!      defaults to 0, 0, ..., 0 (all zeros).
 ! \item[{[gridEdgeUWidth]}] 
 !      The padding around the upper edges of the grid. This padding is between
 !      the index space corresponding to the cells and the boundary of the 
 !      the exclusive region. This extra space is to contain the extra
 !      padding for non-center stagger locations, and should be big enough
-!      to hold any stagger in the grid. It is an error for this to be non-zero 
-!      for a periodic dimension. 
+!      to hold any stagger in the grid. If this and gridAlign are not present then 
+!      defaults to 1, 1, ..., 1 (all ones).
 ! \item[{[gridAlign]}] 
 !     Specification of how the stagger locations should align with the cell
 !     index space (can be overridden by the individual staggerAligns). If
-!     the {\tt gridEdgeWidths} are not specified than this parameter
-!     implies the EdgeWidths.
+!     the gridEdgeWidths are not specified than this argument
+!     implies the gridEdgeWidths. If the gridEdgeWidths are specified and this argument isn't
+!     then this argument is implied by the gridEdgeWidths.
+!     If this and the gridEdgeWidths are not specified, then defaults to 
+!    -1, -1, ..., -1 (all negative ones).
 ! \item[{[gridMemLBound]}] 
 !      Specifies the lower index range of the memory of every DE in this Grid. 
 !      Only used when indexflag is {\tt ESMF\_INDEX\_USER}. May be overridden
@@ -8355,27 +8375,30 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     described by {\tt coordsPerDEDim1,2,3}. The size of the 
 !     array specifies the number of dimensions of the third
 !     coordinate component array. The values specify which
- !     of the index dimensions the corresponding coordinate
+!     of the index dimensions the corresponding coordinate
 !     arrays map to. If not present the default is 1,2,...,grid rank.  
 ! \item[{[gridEdgeLWidth]}] 
 !      The padding around the lower edges of the grid. This padding is between
 !      the index space corresponding to the cells and the boundary of the 
 !      the exclusive region. This extra space is to contain the extra
 !      padding for non-center stagger locations, and should be big enough
-!      to hold any stagger in the grid. It is an error for this to be non-zero 
-!      for a periodic dimension.
+!      to hold any stagger in the grid. If this and gridAlign are not present then 
+!      defaults to 0, 0, ..., 0 (all zeros).
 ! \item[{[gridEdgeUWidth]}] 
 !      The padding around the upper edges of the grid. This padding is between
 !      the index space corresponding to the cells and the boundary of the 
 !      the exclusive region. This extra space is to contain the extra
 !      padding for non-center stagger locations, and should be big enough
-!      to hold any stagger in the grid. It is an error for this to be non-zero 
-!      for a periodic dimension.
+!      to hold any stagger in the grid. If this and gridAlign are not present then 
+!      defaults to 1, 1, ..., 1 (all ones).
 ! \item[{[gridAlign]}] 
 !     Specification of how the stagger locations should align with the cell
 !     index space (can be overridden by the individual staggerAligns). If
-!     the {\tt gridEdgeWidths} are not specified than this parameter
-!     implies the EdgeWidths.
+!     the gridEdgeWidths are not specified than this argument
+!     implies the gridEdgeWidths. If the gridEdgeWidths are specified and this argument isn't
+!     then this argument is implied by the gridEdgeWidths.
+!     If this and the gridEdgeWidths are not specified, then defaults to 
+!    -1, -1, ..., -1 (all negative ones).
 ! \item[{[gridMemLBound]}] 
 !      Specifies the lower index range of the memory of every DE in this Grid. 
 !      Only used when indexflag is {\tt ESMF\_INDEX\_USER}. May be overridden
@@ -8846,18 +8869,23 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      the index space corresponding to the cells and the boundary of the 
 !      the exclusive region. This extra space is to contain the extra
 !      padding for non-center stagger locations, and should be big enough
-!      to hold any stagger in the grid. 
+!      to hold any stagger in the grid. If this and gridAlign are not present then 
+!      defaults to 0, 0, ..., 0 (all zeros).
 ! \item[{[gridEdgeUWidth]}] 
 !      The padding around the upper edges of the grid. This padding is between
 !      the index space corresponding to the cells and the boundary of the 
- !      the exclusive region. This extra space is to contain the extra
+!      the exclusive region. This extra space is to contain the extra
 !      padding for non-center stagger locations, and should be big enough
-!      to hold any stagger in the grid. 
+!      to hold any stagger in the grid. If this and gridAlign are not present then 
+!      defaults to 1, 1, ..., 1 (all ones).
 ! \item[{[gridAlign]}] 
 !     Specification of how the stagger locations should align with the cell
 !     index space (can be overridden by the individual staggerAligns). If
-!     the {\tt gridEdgeWidths} are not specified than this parameter
-!     implies the EdgeWidths.
+!     the gridEdgeWidths are not specified than this argument
+!     implies the gridEdgeWidths. If the gridEdgeWidths are specified and this argument isn't
+!     then this argument is implied by the gridEdgeWidths.
+!     If this and the gridEdgeWidths are not specified, then defaults to 
+!    -1, -1, ..., -1 (all negative ones).
 ! \item[{[gridMemLBound]}] 
 !      Specifies the lower index range of the memory of every DE in this Grid. 
 !      Only used when indexflag is {\tt ESMF\_INDEX\_USER}. May be overridden
@@ -9098,18 +9126,23 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      the index space corresponding to the cells and the boundary of the 
 !      the exclusive region. This extra space is to contain the extra
 !      padding for non-center stagger locations, and should be big enough
-!      to hold any stagger in the grid. 
+!      to hold any stagger in the grid. If this and gridAlign are not present then 
+!      defaults to 0, 0, ..., 0 (all zeros).
 ! \item[{[gridEdgeUWidth]}] 
 !      The padding around the upper edges of the grid. This padding is between
 !      the index space corresponding to the cells and the boundary of the 
 !      the exclusive region. This extra space is to contain the extra
 !      padding for non-center stagger locations, and should be big enough
-!      to hold any stagger in the grid. 
+!      to hold any stagger in the grid. If this and gridAlign are not present then 
+!      defaults to 1, 1, ..., 1 (all ones).
 ! \item[{[gridAlign]}] 
 !     Specification of how the stagger locations should align with the cell
 !     index space (can be overridden by the individual staggerAligns). If
-!     the {\tt gridEdgeWidths} are not specified than this parameter
-!     implies the EdgeWidths.
+!     the gridEdgeWidths are not specified than this argument
+!     implies the gridEdgeWidths. If the gridEdgeWidths are specified and this argument isn't
+!     then this argument is implied by the gridEdgeWidths.
+!     If this and the gridEdgeWidths are not specified, then defaults to 
+!    -1, -1, ..., -1 (all negative ones).
 ! \item[{[gridMemLBound]}] 
 !      Specifies the lower index range of the memory of every DE in this Grid. 
 !      Only used when indexflag is {\tt ESMF\_INDEX\_USER}. May be overridden
@@ -10431,7 +10464,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     coordinate component on the three index dimensions
 !     described by {\tt coordsPerDEDim1,2,3}. The size of the 
 !     array specifies the number of dimensions of the second
- !     coordinate component array. The values specify which
+!     coordinate component array. The values specify which
 !     of the index dimensions the corresponding coordinate
 !     arrays map to. If not present the default is 1,2,...,grid rank. 
 ! \item[{[coordDep3]}] 
@@ -10447,18 +10480,23 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      the index space corresponding to the cells and the boundary of the 
 !      the exclusive region. This extra space is to contain the extra
 !      padding for non-center stagger locations, and should be big enough
-!      to hold any stagger in the grid. 
+!      to hold any stagger in the grid. If this and gridAlign are not present then 
+!      defaults to 0, 0, ..., 0 (all zeros).
 ! \item[{[gridEdgeUWidth]}] 
 !      The padding around the upper edges of the grid. This padding is between
 !      the index space corresponding to the cells and the boundary of the 
 !      the exclusive region. This extra space is to contain the extra
 !      padding for non-center stagger locations, and should be big enough
-!      to hold any stagger in the grid. 
+!      to hold any stagger in the grid. If this and gridAlign are not present then 
+!      defaults to 1, 1, ..., 1 (all ones).
 ! \item[{[gridAlign]}] 
 !     Specification of how the stagger locations should align with the cell
 !     index space (can be overridden by the individual staggerAligns). If
-!     the {\tt gridEdgeWidths} are not specified than this parameter
-!     implies the EdgeWidths.
+!     the gridEdgeWidths are not specified than this argument
+!     implies the gridEdgeWidths. If the gridEdgeWidths are specified and this argument isn't
+!     then this argument is implied by the gridEdgeWidths.
+!     If this and the gridEdgeWidths are not specified, then defaults to 
+!    -1, -1, ..., -1 (all negative ones).
 ! \item[{[gridMemLBound]}] 
 !      Specifies the lower index range of the memory of every DE in this Grid. 
 !      Only used when indexflag is {\tt ESMF\_INDEX\_USER}. May be overridden
@@ -11466,18 +11504,23 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      the index space corresponding to the cells and the boundary of the 
 !      the exclusive region. This extra space is to contain the extra
 !      padding for non-center stagger locations, and should be big enough
-!      to hold any stagger in the grid. 
+!      to hold any stagger in the grid. If this and gridAlign are not present then 
+!      defaults to 0, 0, ..., 0 (all zeros).
 ! \item[{[gridEdgeUWidth]}] 
 !      The padding around the upper edges of the grid. This padding is between
 !      the index space corresponding to the cells and the boundary of the 
 !      the exclusive region. This extra space is to contain the extra
 !      padding for non-center stagger locations, and should be big enough
-!      to hold any stagger in the grid. 
+!      to hold any stagger in the grid. If this and gridAlign are not present then 
+!      defaults to 1, 1, ..., 1 (all ones).
 ! \item[{[gridAlign]}] 
 !     Specification of how the stagger locations should align with the cell
 !     index space (can be overridden by the individual staggerAligns). If
-!     the {\tt gridEdgeWidths} are not specified than this parameter
-!     implies the EdgeWidths.
+!     the gridEdgeWidths are not specified than this argument
+!     implies the gridEdgeWidths. If the gridEdgeWidths are specified and this argument isn't
+!     then this argument is implied by the gridEdgeWidths.
+!     If this and the gridEdgeWidths are not specified, then defaults to 
+!    -1, -1, ..., -1 (all negative ones).
 ! \item[{[gridMemLBound]}] 
 !      Specifies the lower index range of the memory of every DE in this Grid. 
 !      Only used when indexflag is {\tt ESMF\_INDEX\_USER}. May be overridden
@@ -14185,20 +14228,23 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      the index space corresponding to the cells and the boundary of the 
 !      the exclusive region. This extra space is to contain the extra
 !      padding for non-center stagger locations, and should be big enough
-!      to hold any stagger in the grid. It is an error for this to be non-zero 
-!      for a periodic dimension.
+!      to hold any stagger in the grid. If this and gridAlign are not present then 
+!      defaults to 0, 0, ..., 0 (all zeros).
 ! \item[{[gridEdgeUWidth]}] 
 !      The padding around the upper edges of the grid. This padding is between
 !      the index space corresponding to the cells and the boundary of the 
 !      the exclusive region. This extra space is to contain the extra
 !      padding for non-center stagger locations, and should be big enough
-!      to hold any stagger in the grid. It is an error for this to be non-zero 
-!      for a periodic dimension. 
+!      to hold any stagger in the grid. If this and gridAlign are not present then 
+!      defaults to 1, 1, ..., 1 (all ones).
 ! \item[{[gridAlign]}] 
 !     Specification of how the stagger locations should align with the cell
 !     index space (can be overridden by the individual staggerAligns). If
-!     the {\tt gridEdgeWidths} are not specified than this parameter
-!     implies the EdgeWidths.
+!     the gridEdgeWidths are not specified than this argument
+!     implies the gridEdgeWidths. If the gridEdgeWidths are specified and this argument isn't
+!     then this argument is implied by the gridEdgeWidths.
+!     If this and the gridEdgeWidths are not specified, then defaults to 
+!    -1, -1, ..., -1 (all negative ones).
 ! \item[{[gridMemLBound]}] 
 !      Specifies the lower index range of the memory of every DE in this Grid. 
 !      Only used when indexflag is {\tt ESMF\_INDEX\_USER}. May be overridden
@@ -14487,20 +14533,23 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      the index space corresponding to the cells and the boundary of the 
 !      the exclusive region. This extra space is to contain the extra
 !      padding for non-center stagger locations, and should be big enough
-!      to hold any stagger in the grid. It is an error for this to be non-zero 
-!      for a periodic dimension.
+!      to hold any stagger in the grid. If this and gridAlign are not present then 
+!      defaults to 0, 0, ..., 0 (all zeros).
 ! \item[{[gridEdgeUWidth]}] 
 !      The padding around the upper edges of the grid. This padding is between
 !      the index space corresponding to the cells and the boundary of the 
 !      the exclusive region. This extra space is to contain the extra
 !      padding for non-center stagger locations, and should be big enough
-!      to hold any stagger in the grid. It is an error for this to be non-zero 
-!      for a periodic dimension. 
+!      to hold any stagger in the grid. If this and gridAlign are not present then 
+!      defaults to 1, 1, ..., 1 (all ones).
 ! \item[{[gridAlign]}] 
 !     Specification of how the stagger locations should align with the cell
 !     index space (can be overridden by the individual staggerAligns). If
-!     the {\tt gridEdgeWidths} are not specified than this parameter
-!     implies the EdgeWidths.
+!     the gridEdgeWidths are not specified than this argument
+!     implies the gridEdgeWidths. If the gridEdgeWidths are specified and this argument isn't
+!     then this argument is implied by the gridEdgeWidths.
+!     If this and the gridEdgeWidths are not specified, then defaults to 
+!    -1, -1, ..., -1 (all negative ones).
 ! \item[{[gridMemLBound]}] 
 !      Specifies the lower index range of the memory of every DE in this Grid. 
 !      Only used when indexflag is {\tt ESMF\_INDEX\_USER}. May be overridden
@@ -15309,7 +15358,7 @@ end subroutine ESMF_GridGetDefault
     if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_GridGetIndex
-
+ ! XMRKX
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD  
 #define ESMF_METHOD "ESMF_GridGetPLocalDe"
@@ -15320,7 +15369,7 @@ end subroutine ESMF_GridGetDefault
 ! !INTERFACE:
   ! Private name; call using ESMF_GridGet()
       subroutine ESMF_GridGetPLocalDe(grid, localDE, keywordEnforcer, &
-        isLBound,isUBound, arbIndexCount, arbIndexList, rc)
+        isLBound,isUBound, arbIndexCount, arbIndexList, tile, rc)
 
 !
 ! !ARGUMENTS:
@@ -15331,6 +15380,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       logical,                intent(out), optional :: isUBound(:)
       integer,                intent(out), optional :: arbIndexCount
       integer,        target, intent(out), optional :: arbIndexList(:,:)
+      integer,                intent(out), optional :: tile
       integer,                intent(out), optional :: rc
 !
 ! !STATUS:
@@ -15358,6 +15408,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item[{[arbIndexList]}] 
 !   The 2D array storing the local cell indices for an arbitrarily distributed grid. The size of the array 
 !   is arbIndexCount * arbDimCount 
+!\item[{[tile]}]
+!     The number of the tile in which localDE is contained. Tile numbers range from 1 to TileCount. 
 !\item[{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !\end{description}
@@ -15431,7 +15483,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! Call into the C++ interface, which will sort out optional arguments
     call c_ESMC_GridGetPLocalDe(grid, localDE, &
-      dimCount, isLBoundTmp, isUBoundTmp, arbIndexCount, arbIndexListArg, localrc)
+      dimCount, isLBoundTmp, isUBoundTmp, arbIndexCount, arbIndexListArg, &
+      tile, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
        ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -21630,18 +21683,23 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      the index space corresponding to the cells and the boundary of the 
 !      the exclusive region. This extra space is to contain the extra
 !      padding for non-center stagger locations, and should be big enough
-!      to hold any stagger in the grid. 
+!      to hold any stagger in the grid. If this and gridAlign are not present then 
+!      defaults to 0, 0, ..., 0 (all zeros).
 ! \item[{[gridEdgeUWidth]}] 
 !      The padding around the upper edges of the grid. This padding is between
 !      the index space corresponding to the cells and the boundary of the 
 !      the exclusive region. This extra space is to contain the extra
 !      padding for non-center stagger locations, and should be big enough
-!      to hold any stagger in the grid. 
+!      to hold any stagger in the grid. If this and gridAlign are not present then 
+!      defaults to 1, 1, ..., 1 (all ones).
 ! \item[{[gridAlign]}] 
 !     Specification of how the stagger locations should align with the cell
 !     index space (can be overridden by the individual staggerAligns). If
-!     the {\tt gridEdgeWidths} are not specified than this parameter
-!     implies the EdgeWidths.
+!     the gridEdgeWidths are not specified than this argument
+!     implies the gridEdgeWidths. If the gridEdgeWidths are specified and this argument isn't
+!     then this argument is implied by the gridEdgeWidths.
+!     If this and the gridEdgeWidths are not specified, then defaults to 
+!    -1, -1, ..., -1 (all negative ones).
 ! \item[{[gridMemLBound]}] 
 !      Specifies the lower index range of the memory of every DE in this Grid. 
 !      Only used when indexflag is {\tt ESMF\_INDEX\_USER}. May be overridden
@@ -22110,18 +22168,23 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      the index space corresponding to the cells and the boundary of the 
 !      the exclusive region. This extra space is to contain the extra
 !      padding for non-center stagger locations, and should be big enough
-!      to hold any stagger in the grid. 
+!      to hold any stagger in the grid. If this and gridAlign are not present then 
+!      defaults to 0, 0, ..., 0 (all zeros).
 ! \item[{[gridEdgeUWidth]}] 
 !      The padding around the upper edges of the grid. This padding is between
 !      the index space corresponding to the cells and the boundary of the 
 !      the exclusive region. This extra space is to contain the extra
 !      padding for non-center stagger locations, and should be big enough
-!      to hold any stagger in the grid. 
+!      to hold any stagger in the grid. If this and gridAlign are not present then 
+!      defaults to 1, 1, ..., 1 (all ones).
 ! \item[{[gridAlign]}] 
 !     Specification of how the stagger locations should align with the cell
 !     index space (can be overridden by the individual staggerAligns). If
-!     the {\tt gridEdgeWidths} are not specified than this parameter
-!     implies the EdgeWidths.
+!     the gridEdgeWidths are not specified than this argument
+!     implies the gridEdgeWidths. If the gridEdgeWidths are specified and this argument isn't
+!     then this argument is implied by the gridEdgeWidths.
+!     If this and the gridEdgeWidths are not specified, then defaults to 
+!    -1, -1, ..., -1 (all negative ones).
 ! \item[{[gridMemLBound]}] 
 !      Specifies the lower index range of the memory of every DE in this Grid. 
 !      Only used when indexflag is {\tt ESMF\_INDEX\_USER}. May be overridden
@@ -23117,18 +23180,23 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      the index space corresponding to the cells and the boundary of the 
 !      the exclusive region. This extra space is to contain the extra
 !      padding for non-center stagger locations, and should be big enough
-!      to hold any stagger in the grid. 
+!      to hold any stagger in the grid. If this and gridAlign are not present then 
+!      defaults to 0, 0, ..., 0 (all zeros).
 ! \item[{[gridEdgeUWidth]}] 
 !      The padding around the upper edges of the grid. This padding is between
 !      the index space corresponding to the cells and the boundary of the 
 !      the exclusive region. This extra space is to contain the extra
 !      padding for non-center stagger locations, and should be big enough
-!      to hold any stagger in the grid. 
+!      to hold any stagger in the grid. If this and gridAlign are not present then 
+!      defaults to 1, 1, ..., 1 (all ones).
 ! \item[{[gridAlign]}] 
 !     Specification of how the stagger locations should align with the cell
 !     index space (can be overridden by the individual staggerAligns). If
-!     the {\tt gridEdgeWidths} are not specified than this parameter
-!     implies the EdgeWidths.
+!     the gridEdgeWidths are not specified than this argument
+!     implies the gridEdgeWidths. If the gridEdgeWidths are specified and this argument isn't
+!     then this argument is implied by the gridEdgeWidths.
+!     If this and the gridEdgeWidths are not specified, then defaults to 
+!    -1, -1, ..., -1 (all negative ones).
 ! \item[{[gridMemLBound]}] 
 !      Specifies the lower index range of the memory of every DE in this Grid. 
 !      Only used when indexflag is {\tt ESMF\_INDEX\_USER}. May be overridden

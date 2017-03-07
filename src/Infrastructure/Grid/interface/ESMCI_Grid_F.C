@@ -2453,14 +2453,15 @@ void c_esmc_grid_get_from_proto(ESMCI::Grid **_grid,
 
 
   ///////////////////////////////////////////////////////////////////////////////////
-   void FTN_X(c_esmc_gridgetplocalde)(ESMCI::Grid **_grid, 
-				   int *_localDE, 
-				   int *_dimCount,
-                                   int *_isLBound,
-                                   int *_isUBound,
-                                   int *_localArbIndexCount,			
-                                   ESMCI::InterArray<int> *_localArbIndex,
-                                   int *_rc){
+  void FTN_X(c_esmc_gridgetplocalde)(ESMCI::Grid **_grid, 
+                                     int *_localDE, 
+                                     int *_dimCount,
+                                     int *_isLBound,
+                                     int *_isUBound,
+                                     int *_localArbIndexCount,			
+                                     ESMCI::InterArray<int> *_localArbIndex,
+                                     int *_tile, 
+                                     int *_rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_gridgetplocaldepsloc()"
     int localrc;
@@ -2570,6 +2571,18 @@ void c_esmc_grid_get_from_proto(ESMCI::Grid **_grid,
 	}
       } 
     }
+
+    // Get tile number
+    if (_tile != NULL) {
+      // Get de
+      const int *localDEList=grid->getDistGrid()->getDELayout()->getLocalDeToDeMap();
+      int de=localDEList[localDE];  
+
+      // Get tile
+      const int *DETileList = grid->getDistGrid()->getTileListPDe();
+      *_tile=DETileList[de];
+    }
+
 
   // return successfully
   if (_rc!=NULL) *_rc = ESMF_SUCCESS;

@@ -50,9 +50,9 @@ program ESMF_GridCreateUTest
   character(ESMF_MAXSTR) :: failMsg
   character(ESMF_MAXSTR) :: name, grid_name
 
-  type(ESMF_Grid) :: grid, grid2, gridAlias
+  type(ESMF_Grid) :: grid, grid2, gridAlias,grid_multi
   type(ESMF_VM) :: vm
-  type(ESMF_DistGrid) :: distgrid, distgrid2
+  type(ESMF_DistGrid) :: distgrid, distgrid2, distgrid_multi
   type(ESMF_Array) :: array
   integer :: coordDimMap(2,2), dimCount, undistLBound(3), undistUBound(3)
   type(ESMF_Index_Flag) :: indexflag
@@ -77,6 +77,10 @@ program ESMF_GridCreateUTest
   ! test the AttributeGet for Grid info
   type(ESMF_TypeKind_Flag) :: attrValue
   type(ESMF_CoordSys_Flag) :: coordSys
+  integer :: minIndexPTile(2,4), maxIndexPTile(2,4)
+  integer :: regDecompPTile(2,4)
+  type(ESMF_Decomp_Flag) :: decompPTile(2,4)
+  integer :: tile
 
 
   !-----------------------------------------------------------------------------
@@ -2498,6 +2502,76 @@ program ESMF_GridCreateUTest
   call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
   !-----------------------------------------------------------------------------
 
+  !-----------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Test getting tile number from localDE"
+  write(failMsg, *) "Incorrect result"
+ 
+  ! init flags
+  rc=ESMF_SUCCESS
+  correct=.true.
+
+  ! Setup index space
+  minIndexPTile(:,1)=(/1,1/)
+  maxIndexPTile(:,1)=(/20,20/)
+  regDecompPTile(:,1)=(/petCount,1/)
+
+  minIndexPTile(:,2)=(/1,1/)
+  maxIndexPTile(:,2)=(/20,20/)
+  regDecompPTile(:,2)=(/petCount,1/)
+
+  minIndexPTile(:,3)=(/1,1/)
+  maxIndexPTile(:,3)=(/20,20/)
+  regDecompPTile(:,3)=(/petCount,1/)
+
+  minIndexPTile(:,4)=(/1,1/)
+  maxIndexPTile(:,4)=(/20,20/)
+  regDecompPTile(:,4)=(/petCount,1/)
+
+  decompPTile(:,:)=ESMF_DECOMP_BALANCED
+
+  ! Create source distgrid
+  distgrid_multi=ESMF_DistgridCreate(minIndexPTile=minIndexPTile, maxIndexPTile=maxIndexPTile, &
+                              regDecompPTile=regDecompPTile, &
+                              decompflagPTile=decompPTile,indexflag=ESMF_INDEX_GLOBAL, &
+                              rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+
+  ! setup source grid
+  grid_multi=ESMF_GridCreate(distgrid=distgrid_multi, indexflag=ESMF_INDEX_GLOBAL, &
+                          coordSys=ESMF_COORDSYS_CART, &
+                          rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  ! Get number of localDEs
+  call ESMF_GridGet(grid_multi, localDECount=localDECount, rc=localrc) 
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  ! Check number of DE
+  if (localDECount .ne. 4) correct=.false.
+
+  ! loop DEs checking tile numbers
+  do lDE=0, localDECount-1
+
+     ! Get tile number of localDE
+     call ESMF_GridGet(grid_multi, localDE=lDE, tile=tile, rc=localrc)
+     if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+     ! Check tile number
+     if (tile .ne. (lDE+1)) correct=.false.
+  enddo  
+
+  ! destroy grid
+  call ESMF_GridDestroy(grid_multi,rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  ! destroy distgrid
+  call ESMF_DistgridDestroy(distgrid_multi,rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
+  !-----------------------------------------------------------------------------
 
   call ESMF_TestEnd(ESMF_SRCLINE)
   !-----------------------------------------------------------------------------

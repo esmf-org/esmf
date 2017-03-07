@@ -278,7 +278,7 @@ ESMF_RegridWeightGen
         [--dst_meshname dummy_var_name]
         [--src_missingvalue var_name]
         [--dst_missingvalue var_name]
-         [--src_coordinates lon_name,lat_name]
+        [--src_coordinates lon_name,lat_name]
         [--dst_coordinates lon_name,var_name]
         [--src_loc center|corner]
         [--dst_loc center|corner]
@@ -307,8 +307,8 @@ where:
                         patch     - for patch recovery interpolation
                         conserve  - for first-order conservative interpolation
 
-  --pole or -p        - an optional argument indicating what to do with
-                        the pole.
+  --pole or -p        - an optional argument indicating how to extrapolate 
+                        in the pole region. 
                         The value can be one of the following:
 
                         none  - No pole, the source grid ends at the top
@@ -453,15 +453,32 @@ where:
                         application will terminate with an error message when
                         multiple coordinate variables are found in the file.
 
-    --src_center      - an optional argument that specifies whether to use the 
-                        center coordinates or corner coordinates to do the regridding.
-                        Currently, this flag is only required for non-conservative
-                        regridding when the source grid is an unstructured grid in 
-                        ESMF or UGRID format.  For all other cases, only the center
-                        coordinates is supported and that is also the default value if
-                        this argument is not specified.
+    --src_loc         - an optional argument indicating which part of a source
+                        grid cell to use for regridding. Currently, this flag is 
+                        only required for non-conservative regridding when the 
+                        source grid is an unstructured grid in ESMF or UGRID format.
+                        For all other cases, only the center location is supported.
+                        The value can be one of the following:
 
-    --dst_center      - an optional argument that specifies whether to use the 
+                        center - Regrid using the center location of each grid cell. 
+                                 This is the default option. 
+
+                        corner - Regrid using the corner location of each grid cell. 
+
+    --dst_loc         - an optional argument indicating which part of a destination
+                        grid cell to use for regridding. Currently, this flag is 
+                        only required for non-conservative regridding when the 
+                        destination grid is an unstructured grid in ESMF or UGRID format.
+                        For all other cases, only the center location is supported.
+                        The value can be one of the following:
+
+                        center - Regrid using the center location of each grid cell. 
+                                 This is the default option. 
+
+                        corner - Regrid using the corner location of each grid cell. 
+
+
+    --dst_loc      - an optional argument that specifies whether to use the 
                         center coordinates or corner coordinates to do the regridding.
                         Currently, this flag is only required for non-conservative
                         regridding when the destination grid is an unstructured grid in 
