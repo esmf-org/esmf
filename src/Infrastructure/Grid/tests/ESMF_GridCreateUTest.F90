@@ -2572,7 +2572,9 @@ program ESMF_GridCreateUTest
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
   call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
+
   !-----------------------------------------------------------------------------
+  !NEX_UTest
   write(name, *) "GridCreateCubedSphere"
   write(failMsg, *) "Incorrect result"
 
