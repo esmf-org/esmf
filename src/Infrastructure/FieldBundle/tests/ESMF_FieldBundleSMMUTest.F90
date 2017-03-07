@@ -926,7 +926,7 @@ type(ESMF_FieldBundle) function field_bundle_create(grid, fieldCount, shouldFill
 
   use ESMF
 
-  type(ESMF_Grid) :: grid
+  type(ESMF_Grid), intent(in) :: grid
   integer, intent(in) :: fieldCount
   integer, intent(inout) :: rc
   logical, intent(in) :: shouldFill
@@ -975,8 +975,12 @@ subroutine field_bundle_destroy(fieldBundle, rc)
 
   allocate(fieldList(fieldCount))
 
+  call ESMF_FieldBundleGet(fieldBundle, fieldList=fieldList, rc=rc)
+  if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME)) return
+
   do ii=1,fieldCount
-    call ESMF_FieldDestroy(fieldList(ii))
+    call ESMF_FieldDestroy(fieldList(ii), rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME)) return
   enddo

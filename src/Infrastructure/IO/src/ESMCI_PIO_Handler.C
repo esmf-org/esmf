@@ -837,8 +837,8 @@ void PIO_Handler::arrayWrite(
     }
   }
 
-  if (dimLabels.size() > 0 && dimLabels.size() < nioDims)
-    if (ESMC_LogDefault.MsgFoundError(ESMF_RC_ARG_SIZE, "dimension label extend < nioDims",
+  if (dimLabels.size() > 0 && dimLabels.size() < (unsigned int)nioDims)
+    if (ESMC_LogDefault.MsgFoundError(ESMF_RC_ARG_SIZE, "user dimension labels extend < nioDims",
             ESMC_CONTEXT, rc)) return;
 
   vardesc = (pio_var_desc_t)calloc(PIO_SIZE_VAR_DESC, 1);
@@ -978,12 +978,11 @@ void PIO_Handler::arrayWrite(
     }
 
     PRINTMSG("Calling pio_cpp_inq_vardimid_vdesc");
-    int *dimIds = new int[nDims];
+    std::vector<int> dimIds(nDims);
     piorc = pio_cpp_inq_vardimid_vdesc(pioFileDesc, vardesc,
-                                       dimIds, nDims);
+                                       &dimIds.front(), nDims);
     if (!CHECKPIOERROR(piorc, "Error retrieving information about variable",
         ESMF_RC_FILE_WRITE, (*rc))) {
-      delete[] dimIds;
       free (vardesc);
       return;
     }
@@ -995,7 +994,6 @@ void PIO_Handler::arrayWrite(
       piorc = pio_cpp_inq_dimlen(pioFileDesc, dimIds[i], &dimLen);
       if (!CHECKPIOERROR(piorc, "Error retrieving dimension information",
           ESMF_RC_FILE_WRITE, (*rc))) {
-        delete[] dimIds;
         free (vardesc);
         return;
       }
@@ -1005,7 +1003,6 @@ void PIO_Handler::arrayWrite(
           if (ESMC_LogDefault.MsgFoundError(ESMF_RC_FILE_UNEXPECTED,
               "File variable requires time dimension",
               ESMC_CONTEXT, rc)) {
-            delete[] dimIds;
             free (vardesc);
             return;
           }
@@ -1015,7 +1012,6 @@ void PIO_Handler::arrayWrite(
           if (ESMC_LogDefault.MsgFoundError(ESMF_RC_FILE_UNEXPECTED,
               "Can't overwrite timeslice",
               ESMC_CONTEXT, rc)) {
-            delete[] dimIds;
             free (vardesc);
             return;
           }
@@ -1024,7 +1020,6 @@ void PIO_Handler::arrayWrite(
           if (ESMC_LogDefault.MsgFoundError(ESMF_RC_FILE_UNEXPECTED,
               "Variable dimension in file does not match array",
               ESMC_CONTEXT, rc)) {
-            delete[] dimIds;
             free (vardesc);
             return;
           }
@@ -1032,7 +1027,6 @@ void PIO_Handler::arrayWrite(
         ioDimNum++;
       }
     }
-    delete[] dimIds;
   }
 
   if (varExists && !overwriteFields() && (timeFrame <= 0)) {
@@ -1073,13 +1067,37 @@ void PIO_Handler::arrayWrite(
         axis_tmp << varname << "_dim" << std::setfill('0') << std::setw(3) << i+1;
         axis = axis_tmp.str();
       }
-      PRINTMSG("Defining dimension " << i);
-      piorc = pio_cpp_def_dim(pioFileDesc, axis.c_str(),
+
+      // if dimension already exists, use it.
+      int dimid_existing;
+      piorc = pio_cpp_inq_dimid(pioFileDesc, axis.c_str(), &dimid_existing);
+      if (PIO_noerr == piorc) {
+        int dim_len;
+        piorc = pio_cpp_inq_dimlen(pioFileDesc, dimid_existing, &dim_len);
+        if (!CHECKPIOERROR(piorc, "Error finding existing dimension length", ESMF_RC_FILE_WRITE, (*rc))) {
+          free (vardesc);
+          vardesc = NULL;
+          return;
+        }
+        if (ioDims[i] != dim_len) {
+          std::stringstream msg;
+          msg << "Existing dimension " << axis << " length " << dim_len << " != required " << ioDims[i];
+          if (ESMC_LogDefault.MsgFoundError(ESMF_RC_FILE_WRITE, msg,
+              ESMC_CONTEXT, rc)) {
+            free (vardesc);
+            return;
+          }
+        }
+        ncDims[i] = dimid_existing;
+      } else {
+        PRINTMSG("Defining dimension " << i);
+        piorc = pio_cpp_def_dim(pioFileDesc, axis.c_str(),
                                 ioDims[i], &ncDims[i]);
-      if (!CHECKPIOERROR(piorc, std::string("Defining dimension: ") + axis,
-          ESMF_RC_FILE_WRITE, (*rc))) {
-        free (vardesc);
-        return;
+        if (!CHECKPIOERROR(piorc, std::string("Defining dimension: ") + axis,
+            ESMF_RC_FILE_WRITE, (*rc))) {
+          free (vardesc);
+          return;
+        }
       }
     }
     PRINTMSG("finished defining space dims, timeFrame = " << timeFrame);

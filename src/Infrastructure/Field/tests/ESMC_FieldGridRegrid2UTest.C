@@ -150,7 +150,7 @@ int main(void){
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
 #ifdef gridmasking
   int *mask = (int *)ESMC_GridGetItem(grid, ESMC_GRIDITEM_MASK, 
-                                            ESMC_STAGGERLOC_CENTER, &rc);
+                                            ESMC_STAGGERLOC_CENTER, NULL, &rc);
 #endif
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
@@ -165,7 +165,7 @@ int main(void){
   strcpy(name, "GridGetCoord - X");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
   double *gridXCoord = (double *)ESMC_GridGetCoord(grid, 1,
-                                                   ESMC_STAGGERLOC_CENTER,
+                                                   ESMC_STAGGERLOC_CENTER, NULL,
                                                    exLBound, exUBound, &rc);
 
   //printf("exLBounds = [%d,%d]\n", exLBound[0], exLBound[1]);
@@ -188,7 +188,7 @@ int main(void){
   strcpy(name, "GridGetCoord - Y");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
   double *gridYCoord = (double *)ESMC_GridGetCoord(grid, 2,
-                                                   ESMC_STAGGERLOC_CENTER,
+                                                   ESMC_STAGGERLOC_CENTER, NULL,
                                                    NULL, NULL, &rc);
 
   p = 0;

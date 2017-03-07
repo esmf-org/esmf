@@ -4395,7 +4395,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! ! Private name; call using ESMF_FieldBundleSMMStore() 
 ! subroutine ESMF_FieldBundleSMMStore<type><kind>(srcFieldBundle, &
 !   dstFieldBundle,  routehandle, factorList, factorIndexList, &
-!   keywordEnforcer, rc) 
+!   keywordEnforcer, srcTermProcessing, rc)
 ! 
 ! !ARGUMENTS: 
 !   type(ESMF_FieldBundle),   intent(in)            :: srcFieldBundle  
@@ -5025,7 +5025,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 #define ESMF_METHOD "ESMF_FieldBundleSMMStoreFromFile"
 
 !BOP
-! !IROUTINE: ESMF_FieldBundleSMMStore - Precompute field bundle sparse matrix multiplication using factors read from file.
+! !IROUTINE: ESMF_FieldBundleSMMStore - Precompute field bundle sparse matrix multiplication using factors read from file
 !
 ! !INTERFACE:
 ! ! Private name; call using ESMF_FieldBundleSMMStore()
@@ -5037,7 +5037,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       type(ESMF_FieldBundle), intent(inout)           :: dstFieldBundle
       character(len=*),       intent(in)              :: filename
       type(ESMF_RouteHandle), intent(inout)           :: routehandle
-      type(ESMF_KeywordEnforcer),         optional    :: keywordEnforcer
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,             intent(inout), optional    :: srcTermProcessing(:)
       integer,             intent(out),   optional    :: rc
 

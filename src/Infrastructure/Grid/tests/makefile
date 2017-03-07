@@ -13,7 +13,6 @@ TESTS_BUILD   = $(ESMF_TESTDIR)/ESMC_GridUTest \
 		$(ESMF_TESTDIR)/ESMF_GridItemUTest \
 		$(ESMF_TESTDIR)/ESMF_GridArbitraryUTest
 
-
 TESTS_RUN     = RUN_ESMC_GridUTest \
                 RUN_ESMF_GridCreateUTest \
 	        RUN_ESMF_GridCoordUTest \

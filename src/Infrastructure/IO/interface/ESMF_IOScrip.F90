@@ -975,7 +975,7 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
   	  src_grid_rank = 1
           src_grid_corner = 0
           allocate(src_grid_dims(1))
-          srcDim = srcmosaic%tilesize * srcmosaic%tilesize * srcmosaic%ntiles
+          srcDim = srcmosaic%nx * srcmosaic%ny * srcmosaic%ntiles
           src_grid_dims(1)=srcDim
   	  srcunits = 'degrees'
         endif 
@@ -1054,7 +1054,7 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
   	  dst_grid_rank = 1
           dst_grid_corner = 0
           allocate(dst_grid_dims(1))
-          dstDim = dstmosaic%tilesize * dstmosaic%tilesize * dstmosaic%ntiles
+          dstDim = dstmosaic%nx * dstmosaic%ny * dstmosaic%ntiles
           dst_grid_dims(1)=dstDim
 	  dstunits = 'degrees'
 
@@ -1889,9 +1889,9 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
            deallocate(mask)
 	else if (srcFileTypeLocal == ESMF_FILEFORMAT_MOSAIC) then 
            !read coordinates from the tile files
-           allocate(latBuffer2(srcmosaic%tilesize, srcmosaic%tilesize))
-           allocate(lonBuffer2(srcmosaic%tilesize, srcmosaic%tilesize))
-           totalsize = srcmosaic%tilesize*srcmosaic%tilesize
+           allocate(latBuffer2(srcmosaic%nx, srcmosaic%ny))
+           allocate(lonBuffer2(srcmosaic%nx, srcmosaic%ny))
+           totalsize = srcmosaic%nx*srcmosaic%ny
            allocate(varBuffer1D(totalsize))
 	   ncStatus=nf90_inq_varid(ncid,"xc_a",VarId1)
 	   ncStatus=nf90_inq_varid(ncid,"yc_a",VarId2)
@@ -1904,7 +1904,7 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
            do k=1,srcmosaic%ntiles 
              totallen = len_trim(srcmosaic%filenames(k))+len_trim(srcmosaic%tileDirectory)
              tempname = trim(srcmosaic%tileDirectory)//trim(srcmosaic%filenames(k))
-             call ESMF_GridspecReadTile(trim(tempname),srcmosaic%tilesize, &
+             call ESMF_GridspecReadTile(trim(tempname),srcmosaic%nx, srcmosaic%ny, &
                   centerlon=lonBuffer2, centerlat=latBuffer2, rc=status)
              if (ESMF_LogFoundError(status, ESMF_ERR_PASSTHRU, &
          	ESMF_CONTEXT, rcToReturn=rc)) return
@@ -2383,9 +2383,9 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
            deallocate(mask)
 	else if (dstFileTypeLocal == ESMF_FILEFORMAT_MOSAIC) then 
            !read coordinates from the tile files
-           allocate(latBuffer2(dstmosaic%tilesize, dstmosaic%tilesize))
-           allocate(lonBuffer2(dstmosaic%tilesize, dstmosaic%tilesize))
-           totalsize = dstmosaic%tilesize*dstmosaic%tilesize
+           allocate(latBuffer2(dstmosaic%nx, dstmosaic%ny))
+           allocate(lonBuffer2(dstmosaic%nx, dstmosaic%ny))
+           totalsize = dstmosaic%nx*dstmosaic%ny
            allocate(varBuffer1D(totalsize))
 	   ncStatus=nf90_inq_varid(ncid,"xc_b",VarId1)
 	   ncStatus=nf90_inq_varid(ncid,"yc_b",VarId2)
@@ -2398,7 +2398,7 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
            do k=1,dstmosaic%ntiles 
              totallen = len_trim(dstmosaic%filenames(k))+len_trim(dstmosaic%tileDirectory)
              tempname = trim(dstmosaic%tileDirectory)//trim(dstmosaic%filenames(k))
-             call ESMF_GridspecReadTile(trim(tempname),dstmosaic%tilesize, &
+             call ESMF_GridspecReadTile(trim(tempname),dstmosaic%nx, dstmosaic%ny, &
                   centerlon=lonBuffer2, centerlat=latBuffer2, rc=status)
              if (ESMF_LogFoundError(status, ESMF_ERR_PASSTHRU, &
          	ESMF_CONTEXT, rcToReturn=rc)) return

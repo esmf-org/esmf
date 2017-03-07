@@ -55,4 +55,20 @@ int ESMC_InterArrayIntSet(ESMC_InterArrayInt *interArrayIntArg,
   return rc;
 }
 
+int ESMC_InterArrayIntNDSet(ESMC_InterArrayInt *interArrayIntArg,
+  int *arrayArg, int dimArg, const int *lenArg){
+  // initialize return code; assume routine not implemented
+  int rc = ESMC_RC_NOT_IMPL;
+
+  ESMCI::InterArray<int> *ii =
+    ((ESMCI::InterArray<int> *)(interArrayIntArg->shallowMem));
+
+  ii->set(arrayArg, dimArg, lenArg);
+
+  // return successfully
+  rc = ESMF_SUCCESS;
+  return rc;
+
+}
+
 }; // extern "C"

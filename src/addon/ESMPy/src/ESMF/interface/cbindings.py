@@ -179,7 +179,11 @@ class ESMP_InterfaceInt(ct.Structure):
 
     def __init__(self, arrayArg):
         # initialize the InterfaceInt on the ESMF side
-        ESMP_InterfaceIntSet(self, arrayArg, len(arrayArg))
+        if arrayArg.ndim > 1:
+            ESMP_InterfaceIntNDSet(self, arrayArg, arrayArg.ndim,
+                                   np.array(arrayArg.shape, dtype=np.int32))
+        else:
+            ESMP_InterfaceIntSet(self, arrayArg, len(arrayArg))
         super(ESMP_InterfaceInt, self).__init__()
 
 _ESMF.ESMC_InterArrayIntSet.restype = ct.c_int
@@ -200,6 +204,28 @@ def ESMP_InterfaceIntSet(iiptr, arrayArg, lenArg):
     rc = _ESMF.ESMC_InterArrayIntSet(ct.byref(iiptr), arrayArg, lenArg)
     if rc != constants._ESMP_SUCCESS:
         raise ValueError('ESMC_InterArrayIntSet() failed with rc = '+str(rc)+
+                        '.    '+constants._errmsg)
+
+_ESMF.ESMC_InterArrayIntNDSet.restype = ct.c_int
+_ESMF.ESMC_InterArrayIntNDSet.argtypes = [ct.POINTER(ESMP_InterfaceInt),
+                                       np.ctypeslib.ndpointer(dtype=np.int32),
+                                       ct.c_int,
+                                       np.ctypeslib.ndpointer(dtype=np.int32)]
+def ESMP_InterfaceIntNDSet(iiptr, arrayArg, dimArg, lenArg):
+    """
+    Preconditions: ESMP has been initialized and 'arrayArg' is a Numpy
+                   array of type int and 'lenArg' is the length of 'arrayArg'.\n
+    Postconditions: An ESMP_InterfaceInt pointer has been created.\n
+    Arguments:\n
+        :RETURN: ESMP_InterfaceInt.ptr :: grid\n
+        ESMP_InterfaceIntStruct.ptr    :: iiptr\n
+        Numpy.array(dtype=np.int32)    :: arrayArg\n
+        integer                        :: dimArg\n
+        Numpy.array(dtype=np.int32)     :: lenArg\n
+    """
+    rc = _ESMF.ESMC_InterArrayIntNDSet(ct.byref(iiptr), arrayArg, dimArg, lenArg)
+    if rc != constants._ESMP_SUCCESS:
+        raise ValueError('ESMC_InterArrayIntNDSet() failed with rc = '+str(rc)+
                         '.    '+constants._errmsg)
 
 #### VM #######################################################################
@@ -409,6 +435,71 @@ def ESMP_GridCreateNoPeriDim(maxIndex, coordSys=None, coordTypeKind=None):
     # create the ESMP Grid object from ctypes pointer
     return gridstruct
 
+#TODO: InterfaceInt should be passed by value when ticket 3613642 is resolved
+_ESMF.ESMC_GridCreateCubedSphere.restype = ESMP_GridStruct
+_ESMF.ESMC_GridCreateCubedSphere.argtypes = [ct.POINTER(ct.c_int),
+                                             ct.POINTER(ESMP_InterfaceInt),
+                                             #ct.POINTER(ESMP_InterfaceInt),
+                                             #ct.POINTER(ESMP_InterfaceInt),
+                                             ct.c_void_p,
+                                             ct.POINTER(ct.c_int)]
+@deprecated
+def ESMP_GridCreateCubedSphere(tilesize, regDecompPTile=None,
+                               #decompFlagPTile=None, deLabelList=None,
+                               name=None):
+    """
+    Preconditions: ESMP has been initialized.\n
+    Postconditions: An ESMP_Grid has been created.\n
+    Arguments:\n
+        :RETURN: ESMP_Grid :: grid\n
+        Integer                             :: tilesize\n
+        Numpy.array(dtype=int32) (optional) :: regDecompPTile\n
+        String (optional)                   :: name\n
+    """
+        # Numpy.array(dtype=int32) (optional) :: decompFlagPTile\n
+        # Numpy.array(dtype=int32) (optional) :: deLabelList\n
+
+
+    lrc = ct.c_int(0)
+    lts = ct.c_int(tilesize)
+
+   # InterfaceInt requires int32 type numpy arrays
+    regDecompPTile_i = regDecompPTile
+    if (regDecompPTile is not None):
+        if (regDecompPTile.dtype != np.int32):
+            raise TypeError('regDecompPTile must have dtype=int32')
+        regDecompPTile_i = ESMP_InterfaceInt(regDecompPTile)
+
+    # # InterfaceInt requires int32 type numpy arrays
+    # decompFlagPTile_i = decompFlagPTile
+    # if (decompFlagPTile is not None):
+    #     if (decompFlagPTile.dtype != np.int32):
+    #         raise TypeError('decompFlagPTile must have dtype=int32')
+    #     decompFlagPTile_i = ESMP_InterfaceInt(decompFlagPTile)
+    #
+    # # InterfaceInt requires int32 type numpy arrays
+    # deLabelList_i = deLabelList
+    # if (deLabelList is not None):
+    #     if (deLabelList.dtype != np.int32):
+    #         raise TypeError('deLabelList must have dtype=int32')
+    #     deLabelList_i = ESMP_InterfaceInt(deLabelList)
+
+    # create the ESMF Grid and retrieve a ctypes pointer to it
+    gridstruct = _ESMF.ESMC_GridCreateCubedSphere(lts, regDecompPTile_i,
+                                                  #decompFlagPTile_i,
+                                                  #deLabelList_i,
+                                                  name,
+                                                  ct.byref(lrc))
+
+    # check the return code from ESMF
+    rc = lrc.value
+    if rc != constants._ESMP_SUCCESS:
+        raise ValueError('ESMC_GridCreateCubedSphere() failed with rc = '+str(rc)+
+                        '.    '+constants._errmsg)
+
+    # create the ESMP Grid object from ctypes pointer
+    return gridstruct
+
 _ESMF.ESMC_GridCreateFromFile.restype = ESMP_GridStruct
 _ESMF.ESMC_GridCreateFromFile.argtypes = [Py3Char, ct.c_int,
                                           ct.POINTER(ct.c_int),
@@ -516,8 +607,9 @@ def ESMP_GridAddCoord(grid, staggerloc=constants.StaggerLoc.CENTER):
     lrc = ct.c_int(0)
     lbound = np.array(np.zeros(grid.rank),dtype=np.int32)
     ubound = np.array(np.zeros(grid.rank),dtype=np.int32)
+    #TODO: this one will need better lde handling
     gridCoordPtr = _ESMF.ESMC_GridGetCoord(grid.struct.ptr,
-                                           coordDim, staggerloc,
+                                           coordDim, staggerloc, 0,
                                            lbound, ubound,
                                            ct.byref(lrc))
     rc = lrc.value
@@ -568,13 +660,14 @@ def ESMP_GridAddItem(grid, item,
                         constants._errmsg)
 
 _ESMF.ESMC_GridGetCoord.restype = ct.POINTER(ct.c_void_p)
-_ESMF.ESMC_GridGetCoord.argtypes = [ct.c_void_p, ct.c_int, ct.c_uint,
+_ESMF.ESMC_GridGetCoord.argtypes = [ct.c_void_p, ct.c_int, ct.c_uint, ct.c_int,
                                     np.ctypeslib.ndpointer(dtype=np.int32),
                                     np.ctypeslib.ndpointer(dtype=np.int32),
                                     ct.POINTER(ct.c_int)]
 @deprecated
 def ESMP_GridGetCoordPtr(grid, coordDim,
-                         staggerloc=constants.StaggerLoc.CENTER):
+                         staggerloc=constants.StaggerLoc.CENTER,
+                         localde=0):
     """
     Preconditions: An ESMP_Grid has been created and coordinates have
                    been added via ESMP_GridAddCoord().\n
@@ -599,18 +692,22 @@ def ESMP_GridGetCoordPtr(grid, coordDim,
                     StaggerLoc.CENTER_VFACE\n
                     StaggerLoc.EDGE1_VFACE\n
                     StaggerLoc.EDGE2_VFACE\n
+        integer              :: localde\n
     """
     lrc = ct.c_int(0)
 
     # change coordDim to 1 based indexing
     lcd = ct.c_int(coordDim+1)
 
+    # localde
+    lde = ct.c_int(localde)
+
     # these are just placeholders in this routine..
     exLB = np.array(np.zeros(grid.rank),dtype=np.int32)
     exUB = np.array(np.zeros(grid.rank),dtype=np.int32)
 
     gridCoordPtr = _ESMF.ESMC_GridGetCoord(grid.struct.ptr, lcd, staggerloc,
-                                           exLB, exUB, ct.byref(lrc))
+                                           lde, exLB, exUB, ct.byref(lrc))
 
     # adjust bounds to be 0 based, even though it's just a placeholder..
     exLB = exLB - 1
@@ -622,14 +719,14 @@ def ESMP_GridGetCoordPtr(grid, coordDim,
 
     return gridCoordPtr
 
-
 _ESMF.ESMC_GridGetCoordBounds.restype = ct.c_int
-_ESMF.ESMC_GridGetCoordBounds.argtypes = [ct.c_void_p, ct.c_uint,
+_ESMF.ESMC_GridGetCoordBounds.argtypes = [ct.c_void_p, ct.c_uint, ct.c_int,
                                          np.ctypeslib.ndpointer(dtype=np.int32),
                                          np.ctypeslib.ndpointer(dtype=np.int32),
                                          ct.POINTER(ct.c_int)]
 @deprecated
-def ESMP_GridGetCoordBounds(grid, staggerloc=constants.StaggerLoc.CENTER):
+def ESMP_GridGetCoordBounds(grid, staggerloc=constants.StaggerLoc.CENTER,
+                            localde=0):
     """
     Preconditions: An ESMP_Grid has been created and coordinates have
                    been added via ESMP_GridAddCoord().\n
@@ -654,11 +751,17 @@ def ESMP_GridGetCoordBounds(grid, staggerloc=constants.StaggerLoc.CENTER):
                     StaggerLoc.CENTER_VFACE\n
                     StaggerLoc.EDGE1_VFACE\n
                     StaggerLoc.EDGE2_VFACE\n
+        integer              :: localde\n
     """
     lrc = ct.c_int(0)
+
+    # localde
+    lde = ct.c_int(localde)
+
     exclusiveLBound = np.array(np.zeros(grid.rank),dtype=np.int32)
     exclusiveUBound = np.array(np.zeros(grid.rank),dtype=np.int32)
-    rc = _ESMF.ESMC_GridGetCoordBounds(grid.struct.ptr, staggerloc,
+
+    rc = _ESMF.ESMC_GridGetCoordBounds(grid.struct.ptr, staggerloc, lde,
                                        exclusiveLBound, exclusiveUBound,
                                        ct.byref(lrc))
 
@@ -673,10 +776,11 @@ def ESMP_GridGetCoordBounds(grid, staggerloc=constants.StaggerLoc.CENTER):
     return exclusiveLBound, exclusiveUBound
 
 _ESMF.ESMC_GridGetItem.restype = ct.POINTER(ct.c_void_p)
-_ESMF.ESMC_GridGetItem.argtypes = [ct.c_void_p, ct.c_uint, ct.c_uint,
+_ESMF.ESMC_GridGetItem.argtypes = [ct.c_void_p, ct.c_uint, ct.c_uint, ct.c_int,
                                    ct.POINTER(ct.c_int)]
 @deprecated
-def ESMP_GridGetItem(grid, item, staggerloc=constants.StaggerLoc.CENTER):
+def ESMP_GridGetItem(grid, item, staggerloc=constants.StaggerLoc.CENTER,
+                     localde=0):
     """
     Preconditions: An ESMP_Grid has been created and an appropriate
                    item has been added via ESMP_GridAddItem().  The
@@ -707,9 +811,14 @@ def ESMP_GridGetItem(grid, item, staggerloc=constants.StaggerLoc.CENTER):
                     StaggerLoc.CENTER_VFACE\n
                     StaggerLoc.EDGE1_VFACE\n
                     StaggerLoc.EDGE2_VFACE\n
+        integer              :: localde\n
     """
     lrc = ct.c_int(0)
-    gridItemPtr = _ESMF.ESMC_GridGetItem(grid.struct.ptr, item, staggerloc,
+
+    # localde
+    lde = ct.c_int(localde)
+
+    gridItemPtr = _ESMF.ESMC_GridGetItem(grid.struct.ptr, item, staggerloc, lde,
                                          ct.byref(lrc))
 
     rc = lrc.value

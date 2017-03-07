@@ -83,14 +83,12 @@ class Field(object):
         ungridded_lower_bound = None
         ungridded_upper_bound = None
         rank = grid.rank
-        if ndbounds is None:
-            local_ndbounds = ndbounds
-        elif type(ndbounds) is list:
-            local_ndbounds = ndbounds
-        elif type(ndbounds) is tuple:
-            local_ndbounds = list(ndbounds)
-        else:
-            local_ndbounds = [ndbounds]
+        local_ndbounds = ndbounds
+        try:
+            local_ndbounds = ndbounds.tolist()
+        except AttributeError:
+            if ndbounds is not None:
+                local_ndbounds = list(ndbounds)
 
         xd = 0
         if local_ndbounds:

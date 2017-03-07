@@ -190,7 +190,7 @@ RUN_ESMF_FieldRegridUTestUNI:
 RUN_ESMF_FieldRegridCSUTest:
 	cp -r data $(ESMF_TESTDIR)
 	chmod u+rw $(ESMF_TESTDIR)/data/*
-	$(MAKE) TNAME=FieldRegridCS NP=6 ftest
+	$(MAKE) TNAME=FieldRegridCS NP=4 ftest
 
 RUN_ESMF_FieldRegridCSUTestUNI:
 	$(MAKE) TNAME=FieldRegridCS NP=1 ftest
