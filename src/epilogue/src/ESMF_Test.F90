@@ -123,7 +123,8 @@
 ! !IROUTINE:  ESMF_STest - Print PASS/FAIL and number of processor messages for tests
 !
 ! !INTERFACE:
-      subroutine ESMF_STest(condition, name, failMsg, result, file, line, unit)
+      subroutine ESMF_STest(condition, name, failMsg, result, file, line, unit, &
+        petCount)
 
 ! !ARGUMENTS:
       logical, intent(in) :: condition      ! pass/fail condition
@@ -133,6 +134,8 @@
       character(*), intent(in) :: file      ! test file name
       integer, intent(in) :: line           ! test file line number
       integer, intent(in), optional :: unit ! additional output unit number
+      integer, intent(in), optional :: petCount ! number of PETs if need override
+      
 
 ! !DESCRIPTION:
 !     Gets the PET count and prints out a number of processors message.
@@ -145,13 +148,16 @@
 !-------------------------------------------------------------------------------
 
       type(ESMF_VM):: vm
-      integer:: petCount, localrc
+      integer:: petCountOpt, localrc
       character(ESMF_MAXSTR) :: msg
      
-
-      call ESMF_VMGetGlobal(vm, rc=localrc)
-      call ESMF_VMGet(vm, petCount=petCount, rc=localrc)
-      write(msg, *) "NUMBER_OF_PROCESSORS", petCount
+      if (present(petCount)) then
+        petCountOpt = petCount
+      else
+        call ESMF_VMGetGlobal(vm, rc=localrc)
+        call ESMF_VMGet(vm, petCount=petCountOpt, rc=localrc)
+      endif
+      write(msg, *) "NUMBER_OF_PROCESSORS", petCountOpt
       call ESMF_LogWrite(trim(msg), ESMF_LOGMSG_INFO)
 
       call ESMF_Test(condition, name, failMsg, result,  file, line, unit)
@@ -680,7 +686,7 @@ exclusion_loop:  &
 !-------------------------------------------------------------------------------
       character(ESMF_MAXSTR) :: msg
 !      character(ESMF_MAXSTR) :: failMsg
-      integer, allocatable:: array1(:), array2(:)	
+      integer, allocatable:: array1(:), array2(:)
       integer:: finalrc, gatherRoot, i, localrc
       character(16) :: linestr
 
