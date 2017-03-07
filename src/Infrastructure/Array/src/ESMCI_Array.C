@@ -2093,8 +2093,8 @@ SeqIndex Array::getSequenceIndexExclusive(
   }
   // determine the sequentialized index for decomposed dimensions
   int decompSeqIndex;
-  decompSeqIndex = distgrid->getSequenceIndexLocalDe(localDe, decompIndex,
-    &localrc);  
+  localrc = distgrid->getSequenceIndexLocalDe(localDe, decompIndex,
+    &decompSeqIndex);  
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
     rc)) return seqIndex;
   seqIndex.decompSeqIndex = decompSeqIndex;
@@ -2160,8 +2160,8 @@ SeqIndex Array::getSequenceIndexTile(
   }
   // determine the sequentialized index for decomposed dimensions
   int decompSeqIndex;
-  decompSeqIndex = distgrid->getSequenceIndexTileRelative(tile, decompIndex,
-    &localrc);  
+  localrc = distgrid->getSequenceIndexTileRelative(tile, decompIndex,
+    &decompSeqIndex);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
     rc)) return seqIndex;
   seqIndex.decompSeqIndex = decompSeqIndex;
@@ -4691,7 +4691,7 @@ int Array::redistStore(
       //TODO: this is hardcoded for first collocation only
       int arbSeqIndexCount = srcArbSeqIndexCountPCollPLocalDe[0][i];
       const int *srcArbSeqIndexListPLocalDe =
-        srcArray->distgrid->getArbSeqIndexList(i,1);
+        (const int *)srcArray->distgrid->getArbSeqIndexList(i,1);
       if (srcArbSeqIndexListPLocalDe){
         for (int j=0; j<arbSeqIndexCount; j++){
           factorIndexList[2*jj] = factorIndexList[2*jj+1] =
@@ -7784,6 +7784,11 @@ void clientProcess(FillPartnerDeInfo *fillPartnerDeInfo,
       int i=petCount/2;
       bool foundFlag=false;     // reset
       do{
+        
+printf("seqIndex=%d, i=%d, iMin=%d, iMax=%d, seqIndexInterval[].min=%d,"
+  " seqIndexInterval[].max=%d\n", seqIndex, i, iMin, iMax, 
+  seqIndexInterval[i].min, seqIndexInterval[i].max);
+        
         if (seqIndex < seqIndexInterval[i].min){
           iMax = i;
           i = iMin + (iMax - iMin) / 2;

@@ -568,7 +568,7 @@ extern "C" {
       collIndex = 0;
     }
     const int *arbSeqIndexList =
-      (*ptr)->getArbSeqIndexList(localDe, collocation, &localrc);
+      (const int *)(*ptr)->getArbSeqIndexList(localDe, collocation, &localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
       ESMC_CONTEXT, ESMC_NOT_PRESENT_FILTER(rc))) return;
     if (ESMC_NOT_PRESENT_FILTER(arbSeqIndexFlag) != ESMC_NULL_POINTER){  

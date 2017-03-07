@@ -195,28 +195,29 @@ namespace ESMCI {
     DELayout *getDELayout() const {return delayout;}
     int const *getRegDecomp() const {return regDecomp;}
     // topology discovery
-    int getSequenceIndexLocalDe(int localDe, int const *index,
-      int *rc=NULL) const;
+    template<typename T> int getSequenceIndexLocalDe(int localDe, 
+      int const *index, T *seqIndex) const;
     template<typename T> int tGetSequenceIndexLocalDe(T ***t, int de,
-      int localDe, int const *index, int *rc=NULL) const;
-    int getSequenceIndexTileRelative(int tile, int const *index,
-      int *rc=NULL)const;
-    int getSequenceIndexTile(int tile, int const *index, int *rc=NULL)const;
-    int getSequenceIndexTileRecursive(int tile, int const *index, int depth,
-      int *rc=NULL)const;
+      int localDe, int const *index, T *seqIndex) const;
+    template<typename T> int getSequenceIndexTileRelative(int tile,
+      int const *index, T *seqIndex)const;
+    template<typename T> int getSequenceIndexTile(int tile, int const *index,
+      T *seqIndex)const;
+    template<typename T> int getSequenceIndexTileRecursive(int tile,
+      int const *index, int depth, T *seqIndex)const;
     int getIndexTupleFromSeqIndex(int seqIndex, std::vector<int> &indexTuple,
       int &tile) const;
     // get/set arb sequence indices
     int *const *getElementCountPCollPLocalDe()
       const {return elementCountPCollPLocalDe;}
-    int const *getArbSeqIndexList(int localDe, int collocation, int *rc=NULL)
+    void const *getArbSeqIndexList(int localDe, int collocation, int *rc=NULL)
       const;
     template<typename T> int setArbSeqIndex(InterArray<T> *arbSeqIndex, 
       int localDe, int collocation);
     int setCollocationPDim(InterArray<int> *collocationPDim);
     // fill()
-    int fillSeqIndexList(InterArray<int> *seqIndexList, int localDe,
-      int collocation) const;
+    template<typename T> int fillSeqIndexList(InterArray<T> *seqIndexList,
+      int localDe, int collocation) const;
     int fillSeqIndexList(std::vector<int> &seqIndexList, int localDe,
       int collocation) const;
     int fillIndexListPDimPDe(int *indexList, int de, int dim,
