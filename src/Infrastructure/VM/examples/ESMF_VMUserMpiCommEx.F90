@@ -90,6 +90,7 @@ program ESMF_VMUserMpiCommEx
   if (ierr/=0) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 #else
   rank = 0
+  size = 1
 #endif
 !BOC
   if (rank < 2) then
