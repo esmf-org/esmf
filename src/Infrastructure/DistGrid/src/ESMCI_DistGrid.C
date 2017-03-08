@@ -3513,16 +3513,21 @@ template<typename T> int DistGrid::getSequenceIndexLocalDe(
   }
   
   // correctly typecast void* members and call into templated implementation
+#define BAILONMISMATCH
   if (indexTK == ESMC_TYPEKIND_I1){
     ESMC_I1 seqTemp;
     localrc = tGetSequenceIndexLocalDe(
       (ESMC_I1 ***)arbSeqIndexListPCollPLocalDe, de, localDe, index, &seqTemp);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
       ESMC_CONTEXT, &rc)) return rc;  //  bail out with invalid seqindex
-    //TODO: error out here if T is not identical to indexTK
     if (sizeof(T) != sizeof(seqTemp)){
       ESMC_LogDefault.Write("SeqIndex type mismatch detected.", 
         ESMC_LOGMSG_WARN);
+#ifdef BAILONMISMATCH
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+        "SeqIndex type mismatch detected.", ESMC_CONTEXT, &rc);
+      return rc;
+#endif
     }
     *seqIndex = seqTemp; 
   }else if (indexTK == ESMC_TYPEKIND_I2){
@@ -3531,10 +3536,14 @@ template<typename T> int DistGrid::getSequenceIndexLocalDe(
       (ESMC_I2 ***)arbSeqIndexListPCollPLocalDe, de, localDe, index, &seqTemp);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
       ESMC_CONTEXT, &rc)) return rc;  //  bail out with invalid seqindex
-    //TODO: error out here if T is not identical to indexTK
     if (sizeof(T) != sizeof(seqTemp)){
       ESMC_LogDefault.Write("SeqIndex type mismatch detected.", 
         ESMC_LOGMSG_WARN);
+#ifdef BAILONMISMATCH
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+        "SeqIndex type mismatch detected.", ESMC_CONTEXT, &rc);
+      return rc;
+#endif
     }
     *seqIndex = seqTemp; 
   }else if (indexTK == ESMC_TYPEKIND_I4){
@@ -3543,10 +3552,14 @@ template<typename T> int DistGrid::getSequenceIndexLocalDe(
       (ESMC_I4 ***)arbSeqIndexListPCollPLocalDe, de, localDe, index, &seqTemp);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
       ESMC_CONTEXT, &rc)) return rc;  //  bail out with invalid seqindex
-    //TODO: error out here if T is not identical to indexTK
     if (sizeof(T) != sizeof(seqTemp)){
       ESMC_LogDefault.Write("SeqIndex type mismatch detected.", 
         ESMC_LOGMSG_WARN);
+#ifdef BAILONMISMATCH
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+        "SeqIndex type mismatch detected.", ESMC_CONTEXT, &rc);
+      return rc;
+#endif
     }
     *seqIndex = seqTemp; 
   }else if (indexTK == ESMC_TYPEKIND_I8){
@@ -3555,10 +3568,14 @@ template<typename T> int DistGrid::getSequenceIndexLocalDe(
       (ESMC_I8 ***)arbSeqIndexListPCollPLocalDe, de, localDe, index, &seqTemp);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
       ESMC_CONTEXT, &rc)) return rc;  //  bail out with invalid seqindex
-    //TODO: error out here if T is not identical to indexTK
     if (sizeof(T) != sizeof(seqTemp)){
       ESMC_LogDefault.Write("SeqIndex type mismatch detected.", 
         ESMC_LOGMSG_WARN);
+#ifdef BAILONMISMATCH
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+        "SeqIndex type mismatch detected.", ESMC_CONTEXT, &rc);
+      return rc;
+#endif
     }
     *seqIndex = seqTemp; 
   }else{

@@ -301,8 +301,8 @@ namespace ESMCI {
     DELayout *getDELayout()                 const {return delayout;}
     int getLinearIndexExclusive(int localDe, int const *index, int *rc=NULL)
       const;
-    SeqIndex getSequenceIndexExclusive(int localDe, int const *index,
-      int *rc=NULL) const;
+    int getSequenceIndexExclusive(int localDe, int const *index,
+      SeqIndex *seqIndex) const;
     SeqIndex getSequenceIndexTile(int tile, const int *index, int *rc=NULL)
       const;
     int getTensorSequenceIndex(const int *index, int *rc=NULL)const;
@@ -421,7 +421,7 @@ namespace ESMCI {
       // construct iterator through total Array region with block excl. option
     bool hasValidSeqIndex()const;
     int getLinearIndexExclusive()const;
-    SeqIndex getSequenceIndexExclusive()const;
+    int getSequenceIndexExclusive(SeqIndex *seqIndex)const;
     int getTensorSequenceIndex()const;
     int getArbSequenceIndexOffset()const;
     void print()const;

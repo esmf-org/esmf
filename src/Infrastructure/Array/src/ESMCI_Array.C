@@ -213,7 +213,9 @@ Array::Array(
       SeqIndex seqIndex;  // invalidated by default constructor
       if (arrayElement.hasValidSeqIndex()){
         // seqIndex is well defined for this arrayElement
-        seqIndex = arrayElement.getSequenceIndexExclusive();
+        localrc = arrayElement.getSequenceIndexExclusive(&seqIndex);
+        if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+          ESMC_CONTEXT, NULL)) throw localrc;  // bail out with exception
       }
       rimSeqIndex[i].push_back(seqIndex); // store seqIndex for this rim element
       rimLinIndex[i].push_back(linIndex); // store linIndex for this rim element
@@ -2052,7 +2054,7 @@ int Array::getLinearIndexExclusive(
 // !IROUTINE:  ESMCI::Array::getSequenceIndexExclusive
 //
 // !INTERFACE:
-SeqIndex Array::getSequenceIndexExclusive(
+int Array::getSequenceIndexExclusive(
 //
 // !RETURN VALUE:
 //    SeqIndex sequence index
@@ -2062,7 +2064,7 @@ SeqIndex Array::getSequenceIndexExclusive(
   int localDe,                      // in  - local DE
   int const *index,                 // in  - DE-local index tuple in exclusive
                                     //       region basis 0
-  int *rc                           // out - return code
+  SeqIndex *seqIndex                // out - sequence index
   )const{
 //
 // !DESCRIPTION:
@@ -2074,10 +2076,14 @@ SeqIndex Array::getSequenceIndexExclusive(
 //-----------------------------------------------------------------------------
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
-  if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;   // final return code
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
   
-  // initialize seqIndex
-  SeqIndex seqIndex;  // invalidated by constructor
+  // check seqIndex argument
+  if (seqIndex==NULL){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+      "The seqIndex argument must not be a NULL pointer", ESMC_CONTEXT, &rc);
+    return rc;
+  }
 
   // prepare decompIndex for decomposed dimensions in the DistGrid order
   int dimCount = distgrid->getDimCount();
@@ -2096,18 +2102,17 @@ SeqIndex Array::getSequenceIndexExclusive(
   localrc = distgrid->getSequenceIndexLocalDe(localDe, decompIndex,
     &decompSeqIndex);  
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
-    rc)) return seqIndex;
-  seqIndex.decompSeqIndex = decompSeqIndex;
+    &rc)) return rc;
+  seqIndex->decompSeqIndex = decompSeqIndex;
   
   // garbage collection
   delete [] decompIndex;
   
   // determine sequentialized index for tensor dimensions
-  seqIndex.tensorSeqIndex = getTensorSequenceIndex(index);
+  seqIndex->tensorSeqIndex = getTensorSequenceIndex(index);
   
   // return successfully
-  if (rc!=NULL) *rc = ESMF_SUCCESS;
-  return seqIndex;
+  return ESMF_SUCCESS;
 }
 //-----------------------------------------------------------------------------
 
@@ -2960,7 +2965,10 @@ int Array::constructFileMap(
       while(arrayElement.isWithin()){
         if (arrayElement.isWithinWatch()){
           // within exclusive Array region -> obtain seqIndex value
-          SeqIndex seqIndex = arrayElement.getSequenceIndexExclusive();
+          SeqIndex seqIndex;
+          localrc = arrayElement.getSequenceIndexExclusive(&seqIndex);
+          if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+            ESMC_CONTEXT, NULL)) throw localrc;  // bail out with exception
           fileMapList[element] = seqIndex.decompSeqIndex;
         }else{
           // outside exclusive Array region -> mark this as unmapped element
@@ -4707,7 +4715,10 @@ int Array::redistStore(
           if (srcArrayToDistGridMap[j]==0) arrayElement.setSkipDim(j);
         // fill in the factorIndexList
         while(arrayElement.isWithin()){
-          SeqIndex seqIndex = arrayElement.getSequenceIndexExclusive();
+          SeqIndex seqIndex;
+          localrc = arrayElement.getSequenceIndexExclusive(&seqIndex);
+          if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+            ESMC_CONTEXT, NULL)) throw localrc;  // bail out with exception
           factorIndexList[2*jj] = factorIndexList[2*jj+1] =
             seqIndex.decompSeqIndex;
           ++jj; // increment counter
@@ -7012,7 +7023,10 @@ void clientRequest(FillLinSeqVectInfo *fillLinSeqVectInfo, int dstPet,
       // loop over all elements in the exclusive region for localDe j
       ArrayElement arrayElement(fillLinSeqVectInfo->array, j);
       while(arrayElement.isWithin()){
-        SeqIndex seqIndex = arrayElement.getSequenceIndexExclusive();
+        SeqIndex seqIndex;
+        int localrc = arrayElement.getSequenceIndexExclusive(&seqIndex);
+        if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+          ESMC_CONTEXT, NULL)) throw localrc;  // bail out with exception
         int seqInd = seqIndex.decompSeqIndex;
         if (seqInd >= seqIndMin && seqInd <= seqIndMax){
           int lookupIndex = seqInd - seqIndMin;
@@ -7074,7 +7088,10 @@ void localClientServerExchange(FillLinSeqVectInfo *fillLinSeqVectInfo){
       // loop over all elements in the exclusive region for localDe j
       ArrayElement arrayElement(fillLinSeqVectInfo->array, j);
       while(arrayElement.isWithin()){
-        SeqIndex seqIndex = arrayElement.getSequenceIndexExclusive();
+        SeqIndex seqIndex;
+        int localrc = arrayElement.getSequenceIndexExclusive(&seqIndex);
+        if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+          ESMC_CONTEXT, NULL)) throw localrc;  // bail out with exception
         int seqInd = seqIndex.decompSeqIndex;
         if (seqInd >= seqIndMin && seqInd <= seqIndMax){
           int lookupIndex = seqInd - seqIndMin;
@@ -7406,7 +7423,10 @@ void clientProcess(FillPartnerDeInfo *fillPartnerDeInfo,
           // loop over all elements in the exclusive region for localDe j
           ArrayElement arrayElement(array, j);
           while(arrayElement.isWithin()){
-            SeqIndex seqIndex = arrayElement.getSequenceIndexExclusive();
+            SeqIndex seqIndex;
+            int localrc = arrayElement.getSequenceIndexExclusive(&seqIndex);
+            if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+              ESMC_CONTEXT, NULL)) throw localrc;  // bail out with exception
             int seqInd = seqIndex.decompSeqIndex;
             if (seqInd >= seqIndMin && seqInd <= seqIndMax){
               int lookupIndex = seqInd - seqIndMin;
@@ -7465,7 +7485,10 @@ void clientProcess(FillPartnerDeInfo *fillPartnerDeInfo,
           // loop over all elements in the exclusive region for localDe j
           ArrayElement arrayElement(array, j);
           while(arrayElement.isWithin()){
-            SeqIndex seqIndex = arrayElement.getSequenceIndexExclusive();
+            SeqIndex seqIndex;
+            int localrc = arrayElement.getSequenceIndexExclusive(&seqIndex);
+            if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+              ESMC_CONTEXT, NULL)) throw localrc;  // bail out with exception
             int seqInd = seqIndex.decompSeqIndex;
             if (seqInd >= seqIndMin && seqInd <= seqIndMax){
               int lookupIndex = seqInd - seqIndMin;
@@ -8289,7 +8312,10 @@ int Array::sparseMatMulStore(
       // loop over all elements in exclusive region for local DE i
       while(arrayElement.isWithin()){
         // determine the sequentialized index for the current Array element
-        SeqIndex seqIndex = arrayElement.getSequenceIndexExclusive();
+        SeqIndex seqIndex;
+        localrc = arrayElement.getSequenceIndexExclusive(&seqIndex);
+        if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+          ESMC_CONTEXT, NULL)) throw localrc;  // bail out with exception
         // record seqIndex min and max
         if (firstMinMax){
           srcSeqIndexMinMax[0] = srcSeqIndexMinMax[1]
@@ -8369,7 +8395,10 @@ int Array::sparseMatMulStore(
         // loop over all elements in exclusive region for local DE i
         while(arrayElement.isWithin()){
           // determine the sequentialized index for the current Array element
-          SeqIndex seqIndex = arrayElement.getSequenceIndexExclusive();
+          SeqIndex seqIndex;
+          localrc = arrayElement.getSequenceIndexExclusive(&seqIndex);
+          if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+            ESMC_CONTEXT, NULL)) throw localrc;  // bail out with exception
           // record seqIndex min and max
           if (firstMinMax){
             dstSeqIndexMinMax[0] = dstSeqIndexMinMax[1]
@@ -8514,8 +8543,11 @@ int Array::sparseMatMulStore(
       // loop over all elements in the exclusive region for localDe j
       ArrayElement arrayElement(srcArray, j);
       while(arrayElement.isWithin()){
-        seqIndexList[jj] =
-          arrayElement.getSequenceIndexExclusive().decompSeqIndex;
+        SeqIndex seqIndex;
+        localrc = arrayElement.getSequenceIndexExclusive(&seqIndex);
+        if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+          ESMC_CONTEXT, NULL)) throw localrc;  // bail out with exception
+        seqIndexList[jj] = seqIndex.decompSeqIndex;
         ++jj;
         arrayElement.next();
       } // end while over all exclusive elements
@@ -8646,8 +8678,11 @@ int Array::sparseMatMulStore(
         // loop over all elements in the exclusive region for localDe j
         ArrayElement arrayElement(dstArray, j);
         while(arrayElement.isWithin()){
-          seqIndexList[jj] =
-            arrayElement.getSequenceIndexExclusive().decompSeqIndex;
+          SeqIndex seqIndex;
+          localrc = arrayElement.getSequenceIndexExclusive(&seqIndex);
+          if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+            ESMC_CONTEXT, NULL)) throw localrc;  // bail out with exception
+          seqIndexList[jj] = seqIndex.decompSeqIndex;
           ++jj;
           arrayElement.next();
         } // end while over all exclusive elements
@@ -11820,13 +11855,14 @@ int ArrayElement::getLinearIndexExclusive(
 // !IROUTINE:  ESMCI::ArrayElement::getSequenceIndexExclusive
 //
 // !INTERFACE:
-SeqIndex ArrayElement::getSequenceIndexExclusive(
+int ArrayElement::getSequenceIndexExclusive(
 //
 // !RETURN VALUE:
 //    sequence index
 //
 // !ARGUMENTS:
 //
+    SeqIndex *seqIndex    // out - sequence index
   )const{    
 //
 // !DESCRIPTION:
@@ -11836,12 +11872,20 @@ SeqIndex ArrayElement::getSequenceIndexExclusive(
 //-----------------------------------------------------------------------------
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
   
-  SeqIndex seqIndex = array->getSequenceIndexExclusive(localDe, &indexTuple[0],
-    &localrc);
+  // check seqIndex argument
+  if (seqIndex==NULL){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+      "The seqIndex argument must not be a NULL pointer", ESMC_CONTEXT, &rc);
+    return rc;
+  }
+
+  localrc = array->getSequenceIndexExclusive(localDe, &indexTuple[0],
+    seqIndex);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
-    NULL)) throw localrc;  // bail out with exception
-  return seqIndex;
+    &rc)) return rc;  // bail out with exception
+  return ESMF_SUCCESS;  // return successfully
 }
 //-----------------------------------------------------------------------------
 
