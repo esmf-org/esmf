@@ -70,6 +70,7 @@ program ESMF_GridCreateUTest
   integer :: celw(3),ceuw(3)
   logical :: isLBound(2),isUBound(2)
   integer :: petMap2D(2,2,1)
+  integer :: petMap2x3(2,3,1)
   real(ESMF_KIND_R8), pointer :: fptr(:,:), fptr1(:,:), fptr2(:,:)
   logical:: gridBool
   logical:: isCreated
@@ -2643,6 +2644,61 @@ program ESMF_GridCreateUTest
 
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   !-----------------------------------------------------------------------------
+
+
+  !-----------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Testing PetMap with non-sequential order and >1 DE on some PETs"
+  write(failMsg, *) "Incorrect result"
+
+  ! create grid with nondefault parameter
+  rc=ESMF_SUCCESS
+  if (petCount .eq. 4) then
+     petMap2x3(1,1,1)=0
+     petMap2x3(1,2,1)=2
+     petMap2x3(1,3,1)=3
+     petMap2x3(2,1,1)=0
+     petMap2x3(2,2,1)=1
+     petMap2x3(2,3,1)=1
+
+     grid=ESMF_GridCreate1PeriDim(maxIndex=(/10,10/),regDecomp=(/2,3/), &
+            petMap=petMap2x3,rc=localrc)
+     if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+  else
+     grid=ESMF_GridCreate1PeriDim(maxIndex=(/10,10/),regDecomp=(/2,3/), &
+            rc=localrc)
+     if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+  endif
+
+  ! Get local DE Count
+  call ESMF_GridGet(grid, localDECount=localDECount, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  ! init flag
+  correct=.true.
+
+  ! get check info
+  if (petCount .eq. 1) then
+     if (localDECount .ne. 6) correct=.false. 
+   else if (petCount .eq. 4) then
+     if (localPet .eq. 0) then
+     if (localDECount .ne. 2) correct=.false. 
+     else if (localPet .eq. 1) then
+     if (localDECount .ne. 2) correct=.false. 
+     else if (localPet .eq. 2) then
+     if (localDECount .ne. 1) correct=.false. 
+     else if (localPet .eq. 3) then
+     if (localDECount .ne. 1) correct=.false. 
+     endif
+   endif
+
+  ! destroy grid
+  call ESMF_GridDestroy(grid,rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
+  !-----------------------------------------------------------------------------
+
 
   call ESMF_TestEnd(ESMF_SRCLINE)
   !-----------------------------------------------------------------------------
