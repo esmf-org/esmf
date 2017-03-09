@@ -302,6 +302,7 @@ contains
   ! Create Src Grid
   srcGrid=ESMF_GridCreateCubedSphere(tileSize=src_tile_size, &
        regDecompPTile=decomptile, &
+       indexflag = ESMF_INDEX_GLOBAL, &
        rc=localrc)
   if (ESMF_LogFoundError(localrc, &
        ESMF_ERR_PASSTHRU, &
@@ -698,6 +699,7 @@ contains
   ! Create Src Grid
   srcGrid=ESMF_GridCreateCubedSphere(tileSize=src_tile_size, &
        regDecompPTile=decomptile, &
+       indexflag = ESMF_INDEX_DELOCAL, &
        rc=localrc)
   if (ESMF_LogFoundError(localrc, &
        ESMF_ERR_PASSTHRU, &
@@ -3638,6 +3640,7 @@ contains
   ! Create Src Grid
   srcGrid=ESMF_GridCreateMosaic(filename=trim(filename), &
        tileFilePath="./data/", regDecompPTile=decomptile, &
+       indexflag=ESMF_INDEX_GLOBAL, &
        rc=localrc)
   if (ESMF_LogFoundError(localrc, &
        ESMF_ERR_PASSTHRU, &
@@ -4042,6 +4045,7 @@ contains
   ! Create Src Grid
   srcGrid=ESMF_GridCreateMosaic(filename=trim(filename), &
        tileFilePath="./data/", regDecompPTile=decomptile, &
+       indexflag = ESMF_INDEX_DELOCAL, &
        rc=localrc)
   if (ESMF_LogFoundError(localrc, &
        ESMF_ERR_PASSTHRU, &
