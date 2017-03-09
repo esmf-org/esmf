@@ -294,13 +294,24 @@
       enddo
     endif
 
-    grid = ESMF_GridCreateCubedSphere(tilesize, &
-                                      regDecompPTile=regDecompPTile, &
-                                      decompFlagPTile=decompFlagPTile_local, &
-                                      deLabelList=deLabelList, &
-                                      !delayout=delayout, &
-                                      name=name, &
-                                      rc=rc)    
+
+    if (rdpresent == 1) then
+        grid = ESMF_GridCreateCubedSphere(tilesize, &
+                                          regDecompPTile=regDecompPTile, &
+                                          !decompFlagPTile=decompFlagPTile_local, &
+                                          !deLabelList=deLabelList, &
+                                          !delayout=delayout, &
+                                          name=name, &
+                                          rc=rc)
+    else
+        grid = ESMF_GridCreateCubedSphere(tilesize, &
+                                          !regDecompPTile=regDecompPTile, &
+                                          !decompFlagPTile=decompFlagPTile_local, &
+                                          !deLabelList=deLabelList, &
+                                          !delayout=delayout, &
+                                          name=name, &
+                                          rc=rc)
+    endif
 
     if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
