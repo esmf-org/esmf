@@ -3511,7 +3511,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       endif
 
       !! create delayout from the petList
-      delayout=ESMF_DELayoutCreate(petList=petList,rc=localrc)
+      delayout=ESMF_DELayoutCreate(petMap=petList,rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -11206,7 +11206,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       endif
 
       !! create delayout from the petList
-      delayout=ESMF_DELayoutCreate(petList=petList,rc=localrc)
+      delayout=ESMF_DELayoutCreate(petMap=petList,rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -12124,7 +12124,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       endif
 
       !! create delayout from the petList
-      delayout=ESMF_DELayoutCreate(petList=petList,rc=localrc)
+      delayout=ESMF_DELayoutCreate(petMap=petList,rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -22797,7 +22797,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       endif
 
       !! create delayout from the petList
-      delayout=ESMF_DELayoutCreate(petList=petList,rc=localrc)
+      delayout=ESMF_DELayoutCreate(petMap=petList,rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -23715,7 +23715,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       endif
 
       !! create delayout from the petList
-      delayout=ESMF_DELayoutCreate(petList=petList,rc=localrc)
+      delayout=ESMF_DELayoutCreate(petMap=petList,rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -26011,7 +26011,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       endif
 
       !! create delayout from the petList
-      delayout=ESMF_DELayoutCreate(petList=petList,rc=localrc)
+      delayout=ESMF_DELayoutCreate(petMap=petList,rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -26395,7 +26395,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       endif
 
       !! create delayout from the petList
-      delayout=ESMF_DELayoutCreate(petList=petList,rc=localrc)
+      delayout=ESMF_DELayoutCreate(petMap=petList,rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
 
