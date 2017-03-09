@@ -13351,7 +13351,7 @@ end function ESMF_GridCreateCubedSphere
 
 ! !INTERFACE:
   function ESMF_GridCreateMosaic(filename,keywordEnforcer, regDecompPTile, decompflagPTile, &
-        deLabelList, delayout, name, tileFilePath, rc)
+        deLabelList, delayout, indexflag, name, tileFilePath, rc)
 !         
 ! !RETURN VALUE:
     type(ESMF_Grid) :: ESMF_GridCreateMosaic
@@ -13363,6 +13363,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_Decomp_Flag), target, intent(in),  optional :: decompflagPTile(:,:)
     integer,                        intent(in),  optional :: deLabelList(:)
     type(ESMF_DELayout),            intent(in),  optional :: delayout
+    type(ESMF_Index_Flag),          intent(in),  optional :: indexflag
     character(len=*),               intent(in),  optional :: name
     character(len=*),               intent(in),  optional :: tileFilePath
     integer,                        intent(out), optional :: rc
@@ -13415,6 +13416,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !          case that {\tt regDecompPTile} was not specified, the {\tt deCount}
 !          must be at least that of the default DELayout. The 
 !          {\tt regDecompPTile} will be constructed accordingly.
+!     \item[{[indexflag]}]
+!          Indicates the indexing scheme to be used in the new Grid. Please see
+!          Section~\ref{const:indexflag} for the list of options. If not present,
+!          defaults to ESMF\_INDEX\_DELOCAL.
 !     \item[{[name]}]
 !          {\tt ESMF\_Grid} name.
 !     \item[{[tileFilePath]}]
@@ -13448,6 +13453,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer                                    :: start(2), count(2)
     integer, pointer                           :: minIndexPTile(:,:)
     integer, pointer                           :: maxIndexPTile(:,:)
+    integer, pointer                           :: minIndexPDe(:,:)
+    integer, pointer                           :: maxIndexPDe(:,:)
     integer, allocatable                       :: regDecomp2(:,:)    
     integer, allocatable                       :: demap(:)
     integer                                    :: decount
@@ -13460,10 +13467,19 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     real(kind=ESMF_KIND_R4), parameter         :: todeg = 180.0/pi
     integer                                    :: regDecomp(2)
     type(ESMF_Decomp_Flag)                     :: decompflag(2)
+    type(ESMF_Index_Flag)                      :: localIndexFlag
     logical                                    :: isGlobal
     integer, pointer                           :: PetMap1D(:), PetMap(:,:,:)
+    integer                                    :: lbnd(2), ubnd(2)
     
     if (present(rc)) rc=ESMF_SUCCESS
+
+    if (present(indexflag)) then
+       localIndexFlag = indexflag
+    else
+       localIndexFlag = ESMF_INDEX_DELOCAL
+    endif
+  !------------------------------------------------------------------------
   !------------------------------------------------------------------------
   ! get global vm information
   !
@@ -13562,7 +13578,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   ! - create Grid
   ! coordinates from the cubedSphereTileCreate() routine
   grid = ESMF_GridCreate(distgrid, coordSys=ESMF_COORDSYS_SPH_DEG, &
-      indexflag=ESMF_INDEX_GLOBAL, name=name, rc=localrc)
+      indexflag=localIndexFlag, name=name, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -13692,41 +13708,50 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       regDecomp(1) = PetCnt
       regDecomp(2) = 1
     endif
+    totalDE = regDecomp(1)*regDecomp(2)
     if (present(decompflagPTile)) then
       decompflag = decompflagPTile(:,1)
     else
       decompflag = ESMF_DECOMP_BALANCED
     endif
     allocate(PetMap(regDecomp(1), regDecomp(2), 1))
+    allocate(PetMap1D(totalDE))
+    allocate(demap(0:totalDE-1))
     if (present(delayout)) then
-       allocate(PetMap1D(regDecomp(1)*regDecomp(2)))
-       call ESMF_DELayoutGet(delayout, petMap = petMap1D, rc=localrc)
+       call ESMF_DELayoutGet(delayout, petMap = petMap1D, &
+            localDeCount=decount, localDeToDeMap=demap, rc=localrc)
        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
            ESMF_CONTEXT, rcToReturn=rc)) return
-       k=1
-       do j=1,regDecomp(2)
-         do i=1,regDecomp(1)
-            PetMap(i,j,1)=PetMap1D(k)
-            k=k+1
-         enddo
-       enddo
-       deallocate(PetMap1D)
     else
-       do i=1,regDecomp(1)
-         PetMap(i,1,1)=i-1
-       enddo
+       !Create a default delayout
+       defaultdelayout = ESMF_DELayoutCreate(decount=totalDE, rc=localrc)
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+           ESMF_CONTEXT, rcToReturn=rc)) return
+       call ESMF_DELayoutGet(defaultdelayout, petMap = petMap1D, &
+            localDeCount=decount, localDeToDeMap=demap, rc=localrc)
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+           ESMF_CONTEXT, rcToReturn=rc)) return
     endif
+    k=1
+    do j=1,regDecomp(2)
+      do i=1,regDecomp(1)
+         PetMap(i,j,1)=PetMap1D(k)
+         k=k+1
+      enddo
+    enddo
+    deallocate(PetMap1D)
+                       
     if (isGlobal) then
      grid = ESMF_GridCreate1PeriDim(regDecomp, decompFlag, &  
         minIndex=(/1,1/), maxIndex=(/sizex,sizey/), &
-        indexflag=ESMF_INDEX_GLOBAL, &
+        indexflag=localIndexFlag, &
         coordSys=ESMF_COORDSYS_SPH_DEG, name=name, &
         petMap = petMap, &
         rc=localrc)
     else
      grid = ESMF_GridCreateNoPeriDim(regDecomp, decompFlag, &  
         minIndex=(/1,1/), maxIndex=(/sizex,sizey/), &
-        indexflag=ESMF_INDEX_GLOBAL, &
+        indexflag=localIndexFlag, &
         coordSys=ESMF_COORDSYS_SPH_DEG, name=name, &
         petMap = petMap, &
         rc=localrc)
@@ -13745,10 +13770,16 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
          ESMF_CONTEXT, rcToReturn=rc)) return
 
-    call ESMF_GridGet(grid, localDECount = decount, rc=localrc)
+    call ESMF_GridGet(grid, distgrid=distgrid, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
          ESMF_CONTEXT, rcToReturn=rc)) return
-     
+
+    allocate(minIndexPDe(2,totalDE), maxIndexPDe(2,totalDE))
+    call ESMF_DistgridGet(distgrid, minIndexPDe=minIndexPDe, maxIndexPDe = maxIndexPDe, &
+                          rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return
+        
     ! calculate the actual cubed sphere coordiantes for each DE
     do localDe = 0,decount-1
       call ESMF_GridGetCoord(grid, coordDim=1, localDe=localDe, &
@@ -13761,7 +13792,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         ESMF_CONTEXT, rcToReturn=rc)) return
 
       call ESMF_GridGetCoord(grid, coordDim=1, localDe=localDe, &
-         staggerloc=ESMF_STAGGERLOC_CORNER, farrayPtr=lonCornerPtr, rc=localrc)
+         staggerloc=ESMF_STAGGERLOC_CORNER, farrayPtr=lonCornerPtr, &
+         rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
          ESMF_CONTEXT, rcToReturn=rc)) return
       call ESMF_GridGetCoord(grid, coordDim=2, localDe=localDe, &
@@ -13769,10 +13801,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
          ESMF_CONTEXT, rcToReturn=rc)) return
 
-      start(1)=lbound(lonPtr,1)
-      start(2)=lbound(lonPtr,2)
-      count(1)=ubound(lonPtr,1)-start(1)+1
-      count(2)=ubound(lonPtr,2)-start(2)+1
+      start(1)=minIndexPDe(1,demap(localDe)+1)
+      start(2)=minIndexPDe(2,demap(localDe)+1)
+      count(1)=maxIndexPDe(1,demap(localDe)+1)-start(1)+1
+      count(2)=maxIndexPDe(2,demap(localDe)+1)-start(2)+1
+
       !call ESMF_VMWtime(starttime, rc=localrc)
       ! Generate glocal edge coordinates and local center coordinates
       call ESMF_GridSpecReadTile(trim(tempname),sizex, sizey, lonPtr, latPtr, &
@@ -13785,6 +13818,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       !print *, 'Create CS size ', nx, ny, 'in', (endtime-starttime)*1000.0, ' msecs'
     end do 
     ESMF_GridCreateMosaic = grid
+    deallocate(minIndexPDe, maxIndexPDe)
   endif     
   return
 
@@ -26398,7 +26432,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       delayout=ESMF_DELayoutCreate(petMap=petList,rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
-
       !! Get rid of list
       deallocate(petList)
    else      
@@ -26408,6 +26441,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           ESMF_CONTEXT, rcToReturn=rc)) return
    endif
 
+   call ESMF_DELayoutGet(delayout, decount=decount, rc=localrc)
 
    ! Create DistGrid --------------------------------------------------------------
    ESMF_GridCreateDistgridReg=ESMF_DistGridCreate(minIndex=minIndex, maxIndex=maxIndex, &
