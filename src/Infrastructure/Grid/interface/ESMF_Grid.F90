@@ -13830,8 +13830,8 @@ end function ESMF_GridCreateMosaic
 subroutine calculateConnect(minIndexPTile, maxIndexPTile, tilepair, &
            contactTuple, orientationVector, positionVector)
 
-integer, intent(IN), pointer :: minIndexPTile(:,:)
-integer, intent(IN), pointer :: maxIndexPTile(:,:)
+integer, pointer :: minIndexPTile(:,:)
+integer, pointer :: maxIndexPTile(:,:)
 integer, intent(IN) :: tilepair(2)
 integer, intent(IN) :: contactTuple(2,4)
 integer, intent(OUT) :: orientationVector(2)
