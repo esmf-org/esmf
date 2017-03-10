@@ -180,8 +180,13 @@ ESMF_LIBSTDCXX := $(shell $(ESMF_CXXCOMPILER) -print-file-name=libc++.dylib)
 ifeq ($(ESMF_LIBSTDCXX),libc++.dylib)
 ESMF_LIBSTDCXX := $(shell $(ESMF_CXXCOMPILER) -print-file-name=libc++.a)
 endif
-ESMF_F90LINKPATHS += -L$(dir $(ESMF_LIBSTDCXX))
-ESMF_F90LINKLIBS  += -lc++
+# Link in gnu stdc++ for good measure
+ESMF_LIBGSTDCXX := $(shell $(ESMF_CXXCOMPILER) -print-file-name=libstdc++.dylib)
+ifeq ($(ESMF_LIBGSTDCXX),libstdc++.dylib)
+ESMF_LIBGSTDCXX := $(shell $(ESMF_CXXCOMPILER) -print-file-name=libstdc++.a)
+endif
+ESMF_F90LINKPATHS += -L$(dir $(ESMF_LIBGSTDCXX)) -L$(dir $(ESMF_LIBSTDCXX))
+ESMF_F90LINKLIBS  += -lstdc++ -lc++
 
 ############################################################
 # Blank out variables to prevent rpath encoding
