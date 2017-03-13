@@ -32,13 +32,19 @@ program ESMF_ArrayArbHaloEx
   character(ESMF_MAXSTR) :: testname
   character(ESMF_MAXSTR) :: failMsg
   
+#define ESMF_KIND_INDEXKIND ESMF_KIND_I4
+#define TEST_I8RANGE_off
   
   integer:: i, j, result
-  integer(ESMF_KIND_I4):: seqIndexList(5) ! arbitrary seqIndices on each PET
+  integer(ESMF_KIND_INDEXKIND):: seqIndexList(5) ! arbitrary seqIndices on each PET
+  integer(ESMF_KIND_INDEXKIND), allocatable:: haloList(:)
+  
+  integer(ESMF_KIND_I8):: seqIndexOffset = 2_ESMF_KIND_I8**40
 
   real(ESMF_KIND_R8), pointer :: farrayPtr1d(:), farrayPtr2d(:,:)
   
 
+  print *, "seqIndexOffset=", seqIndexOffset
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
@@ -84,7 +90,11 @@ program ESMF_ArrayArbHaloEx
 !EOE
 !BOC
   do i=1, 5
+#ifdef TEST_I8RANGE_on
+    seqIndexList(i) = localPet + (i - 1) * petCount * seqIndexOffset + 1
+#else
     seqIndexList(i) = localPet + (i - 1) * petCount + 1
+#endif
   enddo
 !EOC
 !BOE
@@ -138,23 +148,46 @@ program ESMF_ArrayArbHaloEx
   allocate(farrayPtr1d(5+localPet+1)) !use explicit Fortran allocate statement
   
   if (localPet==0) then
+    allocate(haloList(1))
+#ifdef TEST_I8RANGE_on
+    haloList(:)=(/4398046511106_ESMF_KIND_I8/)
+#else    
+    haloList(:)=(/6/)
+#endif
     array = ESMF_ArrayCreate(distgrid, farrayPtr1d, &
-      haloSeqIndexList=(/6/), rc=rc)
+      haloSeqIndexList=haloList, rc=rc)
     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   endif
   if (localPet==1) then
+    allocate(haloList(2))
+#ifdef TEST_I8RANGE_on
+    haloList(:)=(/1_ESMF_KIND_I8,&
+     17592186044419_ESMF_KIND_I8/)
+#else
+    haloList(:)=(/1,19/)
+#endif
     array = ESMF_ArrayCreate(distgrid, farrayPtr1d, &
-      haloSeqIndexList=(/1,19/), rc=rc)
+      haloSeqIndexList=haloList, rc=rc)
     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   endif
   if (localPet==2) then
+    allocate(haloList(3))
+#ifdef TEST_I8RANGE_on
+    haloList(:)=(/13194139533316_ESMF_KIND_I8,&
+                   4398046511106_ESMF_KIND_I8,&
+                   8796093022209_ESMF_KIND_I8/)
+#else
+    haloList(:)=(/16,6,9/)
+#endif
     array = ESMF_ArrayCreate(distgrid, farrayPtr1d, &
-      haloSeqIndexList=(/16,6,9/), rc=rc)
+      haloSeqIndexList=haloList, rc=rc)
     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   endif
   if (localPet==3) then
+    allocate(haloList(4))
+    haloList(:)=(/1,3,1,4/)
     array = ESMF_ArrayCreate(distgrid, farrayPtr1d, &
-      haloSeqIndexList=(/1,3,1,4/), rc=rc)
+      haloSeqIndexList=haloList, rc=rc)
     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   endif
 !EOC
@@ -207,9 +240,11 @@ program ESMF_ArrayArbHaloEx
 ! indices.
 !EOE
 !BOC
+  farrayPtr1d = 0 ! initialize
   do i=1, 5
-    farrayPtr1d(i) = seqIndexList(i) / 10.
+    farrayPtr1d(i) = real(seqIndexList(i), ESMF_KIND_R8)
   enddo
+  print *, "farrayPtr1d: ", farrayPtr1d
 !BOE
 ! Now the exclusive elements of {\tt array} are initialized on each DE, however,
 ! the halo elements remain unchanged. A RouteHandle can be set up that encodes
@@ -242,6 +277,7 @@ program ESMF_ArrayArbHaloEx
 !BOE
 ! Also the Array object should be destroyed when no longer needed.
 !EOE
+  print *, "farrayPtr1d: ", farrayPtr1d
 !BOC
   call ESMF_ArrayDestroy(array, rc=rc)
 !EOC
@@ -264,22 +300,22 @@ program ESMF_ArrayArbHaloEx
 !BOC  
   if (localPet==0) then
     array = ESMF_ArrayCreate(distgrid=distgrid, typekind=ESMF_TYPEKIND_R8, &
-      haloSeqIndexList=(/6/), rc=rc)
+      haloSeqIndexList=haloList, rc=rc)
     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   endif
   if (localPet==1) then
     array = ESMF_ArrayCreate(distgrid=distgrid, typekind=ESMF_TYPEKIND_R8, &
-      haloSeqIndexList=(/1,19/), rc=rc)
+      haloSeqIndexList=haloList, rc=rc)
     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   endif
   if (localPet==2) then
     array = ESMF_ArrayCreate(distgrid=distgrid, typekind=ESMF_TYPEKIND_R8, &
-      haloSeqIndexList=(/16,6,9/), rc=rc)
+      haloSeqIndexList=haloList, rc=rc)
     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   endif
   if (localPet==3) then
     array = ESMF_ArrayCreate(distgrid=distgrid, typekind=ESMF_TYPEKIND_R8, &
-      haloSeqIndexList=(/1,3,1,4/), rc=rc)
+      haloSeqIndexList=haloList, rc=rc)
     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   endif
 !EOC
@@ -340,25 +376,22 @@ program ESMF_ArrayArbHaloEx
 !BOC
   if (localPet==0) then
     array = ESMF_ArrayCreate(distgrid=distgrid, typekind=ESMF_TYPEKIND_R8, &
-      haloSeqIndexList=(/6/), undistLBound=(/1/), undistUBound=(/3/), rc=rc)
+      haloSeqIndexList=haloList, undistLBound=(/1/), undistUBound=(/3/), rc=rc)
     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   endif
   if (localPet==1) then
     array = ESMF_ArrayCreate(distgrid=distgrid, typekind=ESMF_TYPEKIND_R8, &
-      haloSeqIndexList=(/1,19/), undistLBound=(/1/), undistUBound=(/3/), &
-      rc=rc)
+      haloSeqIndexList=haloList, undistLBound=(/1/), undistUBound=(/3/), rc=rc)
     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   endif
   if (localPet==2) then
     array = ESMF_ArrayCreate(distgrid=distgrid, typekind=ESMF_TYPEKIND_R8, &
-      haloSeqIndexList=(/16,6,9/), undistLBound=(/1/), undistUBound=(/3/), &
-      rc=rc)
+      haloSeqIndexList=haloList, undistLBound=(/1/), undistUBound=(/3/), rc=rc)
     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   endif
   if (localPet==3) then
     array = ESMF_ArrayCreate(distgrid=distgrid, typekind=ESMF_TYPEKIND_R8, &
-      haloSeqIndexList=(/1,3,1,4/), undistLBound=(/1/), undistUBound=(/3/), &
-      rc=rc)
+      haloSeqIndexList=haloList, undistLBound=(/1/), undistUBound=(/3/), rc=rc)
     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   endif
 !EOC
@@ -413,31 +446,36 @@ program ESMF_ArrayArbHaloEx
 ! In some situations it is more convenient to associate some or all of
 ! the undistributed dimensions with the first Array dimensions. This can be
 ! done easily by explicitly mapping the DistGrid dimension to an Array dimension
-! other than the first one. The following code creates essentially the same 
-! Array as before, but with swapped dimension order.
+! other than the first one by using the {\tt distgridToArrayMap} argument. The
+! following code creates essentially the same Array as before, but with swapped
+! dimension order.
 !EOE
 !BOC
   if (localPet==0) then
+    haloList=(/1/)
     array = ESMF_ArrayCreate(distgrid=distgrid, typekind=ESMF_TYPEKIND_R8, &
-      distgridToArrayMap=(/2/), haloSeqIndexList=(/1/), &
+      distgridToArrayMap=(/2/), haloSeqIndexList=haloList, &
       undistLBound=(/1/), undistUBound=(/3/), rc=rc)
     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   endif
   if (localPet==1) then
+    haloList=(/1,2/)
     array = ESMF_ArrayCreate(distgrid=distgrid, typekind=ESMF_TYPEKIND_R8, &
-      distgridToArrayMap=(/2/), haloSeqIndexList=(/1,2/), &
+      distgridToArrayMap=(/2/), haloSeqIndexList=haloList, &
       undistLBound=(/1/), undistUBound=(/3/), rc=rc)
     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   endif
   if (localPet==2) then
+    haloList=(/1,2,3/)
     array = ESMF_ArrayCreate(distgrid=distgrid, typekind=ESMF_TYPEKIND_R8, &
-      distgridToArrayMap=(/2/), haloSeqIndexList=(/1,2,3/), &
+      distgridToArrayMap=(/2/), haloSeqIndexList=haloList, &
       undistLBound=(/1/), undistUBound=(/3/), rc=rc)
     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   endif
   if (localPet==3) then
+    haloList=(/1,2,3,4/)
     array = ESMF_ArrayCreate(distgrid=distgrid, typekind=ESMF_TYPEKIND_R8, &
-      distgridToArrayMap=(/2/), haloSeqIndexList=(/1,2,3,4/), &
+      distgridToArrayMap=(/2/), haloSeqIndexList=haloList, &
       undistLBound=(/1/), undistUBound=(/3/), rc=rc)
     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   endif
@@ -494,25 +532,25 @@ program ESMF_ArrayArbHaloEx
 !BOC
   if (localPet==0) then
     array2 = ESMF_ArrayCreate(distgrid=distgrid, typekind=ESMF_TYPEKIND_R8, &
-      distgridToArrayMap=(/2/), haloSeqIndexList=(/1/), &
+      distgridToArrayMap=(/2/), haloSeqIndexList=haloList, &
       undistLBound=(/1/), undistUBound=(/6/), rc=rc)
     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   endif
   if (localPet==1) then
     array2 = ESMF_ArrayCreate(distgrid=distgrid, typekind=ESMF_TYPEKIND_R8, &
-      distgridToArrayMap=(/2/), haloSeqIndexList=(/1,2/), &
+      distgridToArrayMap=(/2/), haloSeqIndexList=haloList, &
       undistLBound=(/1/), undistUBound=(/6/), rc=rc)
     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   endif
   if (localPet==2) then
     array2 = ESMF_ArrayCreate(distgrid=distgrid, typekind=ESMF_TYPEKIND_R8, &
-      distgridToArrayMap=(/2/), haloSeqIndexList=(/1,2,3/), &
+      distgridToArrayMap=(/2/), haloSeqIndexList=haloList, &
       undistLBound=(/1/), undistUBound=(/6/), rc=rc)
     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   endif
   if (localPet==3) then
     array2 = ESMF_ArrayCreate(distgrid=distgrid, typekind=ESMF_TYPEKIND_R8, &
-      distgridToArrayMap=(/2/), haloSeqIndexList=(/1,2,3,4/), &
+      distgridToArrayMap=(/2/), haloSeqIndexList=haloList, &
       undistLBound=(/1/), undistUBound=(/6/), rc=rc)
     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   endif
@@ -561,6 +599,8 @@ program ESMF_ArrayArbHaloEx
   call ESMF_DistGridDestroy(distgrid, rc=rc)
 !EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  
+  deallocate(haloList)
 
 ! ------------------------------------------------------------------------------
 ! ------------------------------------------------------------------------------
