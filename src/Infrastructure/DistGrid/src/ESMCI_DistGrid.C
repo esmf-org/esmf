@@ -74,7 +74,8 @@ DistGrid *DistGrid::create(
   InterArray<int> *connectionList,      // (in)
   VM *vm,                               // (in)
   bool actualFlag,                      // (in)
-  int *rc                               // (out) return code
+  int *rc,                              // (out) return code
+  ESMC_TypeKind_Flag indexTK            // (in) - default ESMC_TYPEKIND_I4
   ){
 //
 // !DESCRIPTION:
@@ -327,7 +328,7 @@ DistGrid *DistGrid::create(
           decompflagCount = dg->dimCount;
         distgrid = DistGrid::create(minIndex, maxIndex, regDecomp, decompflag,
           decompflagCount, firstExtra, lastExtra, NULL,
-          indexflagOpt, connectionList, delayout, vm, &localrc);
+          indexflagOpt, connectionList, delayout, vm, &localrc, indexTK);
         if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
           ESMC_CONTEXT, rc)) return ESMC_NULL_POINTER;
       }else{
@@ -340,7 +341,7 @@ DistGrid *DistGrid::create(
         }
         distgrid = DistGrid::create(minIndex, maxIndex, regDecomp, decompflag,
           decompflagCount1, decompflagCount2, firstExtra, lastExtra, NULL,
-          indexflagOpt, connectionList, delayout, vm, &localrc);
+          indexflagOpt, connectionList, delayout, vm, &localrc, indexTK);
         if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
           ESMC_CONTEXT, rc)) return ESMC_NULL_POINTER;
       }
@@ -709,6 +710,7 @@ DistGrid *DistGrid::create(
     }else
       distgrid->connectionList = NULL;
     // arbitrary sequence indices
+    distgrid->indexTK = dg->indexTK;
     distgrid->collocationPDim = new int[dimCount];
     memcpy(distgrid->collocationPDim, dg->collocationPDim,
       sizeof(int)*dimCount);
@@ -717,23 +719,44 @@ DistGrid *DistGrid::create(
       sizeof(int)*dimCount);
     int diffCollocationCount =
       distgrid->diffCollocationCount = dg->diffCollocationCount;
-    distgrid->arbSeqIndexListPCollPLocalDe = new int**[diffCollocationCount];
+    distgrid->arbSeqIndexListPCollPLocalDe = new void**[diffCollocationCount];
     distgrid->elementCountPCollPLocalDe = new int*[diffCollocationCount];
     for (int i=0; i<diffCollocationCount; i++){
-      distgrid->arbSeqIndexListPCollPLocalDe[i] = new int*[localDeCount];
+      distgrid->arbSeqIndexListPCollPLocalDe[i] = new void*[localDeCount];
       distgrid->elementCountPCollPLocalDe[i] = new int[localDeCount];
       memcpy(distgrid->elementCountPCollPLocalDe[i],
         dg->elementCountPCollPLocalDe[i], sizeof(int)*localDeCount);
       for (int j=0; j<localDeCount; j++){
-        if ((dg->arbSeqIndexListPCollPLocalDe[i][j]!=NULL)
-          && (dg->elementCountPCollPLocalDe[i][j]>0)){
-          distgrid->arbSeqIndexListPCollPLocalDe[i][j] =
-            new int[dg->elementCountPCollPLocalDe[i][j]];
+        distgrid->arbSeqIndexListPCollPLocalDe[i][j] = NULL;  // invalidate
+        if ((dg->arbSeqIndexListPCollPLocalDe[i][j] != NULL)
+          && (dg->elementCountPCollPLocalDe[i][j] > 0)){
+          unsigned int sizeOfType;
+          if (dg->indexTK == ESMC_TYPEKIND_I1){
+            distgrid->arbSeqIndexListPCollPLocalDe[i][j] =
+              (void *)(new ESMC_I1[dg->elementCountPCollPLocalDe[i][j]]);
+            sizeOfType = sizeof(ESMC_I1);
+          }else if (dg->indexTK == ESMC_TYPEKIND_I2){
+            distgrid->arbSeqIndexListPCollPLocalDe[i][j] =
+              (void *)(new ESMC_I2[dg->elementCountPCollPLocalDe[i][j]]);
+            sizeOfType = sizeof(ESMC_I2);
+          }else if (dg->indexTK == ESMC_TYPEKIND_I4){
+            distgrid->arbSeqIndexListPCollPLocalDe[i][j] =
+              (void *)(new ESMC_I4[dg->elementCountPCollPLocalDe[i][j]]);
+            sizeOfType = sizeof(ESMC_I4);
+          }else if (dg->indexTK == ESMC_TYPEKIND_I8){
+            distgrid->arbSeqIndexListPCollPLocalDe[i][j] =
+              (void *)(new ESMC_I8[dg->elementCountPCollPLocalDe[i][j]]);
+            sizeOfType = sizeof(ESMC_I8);
+          }else{
+            // error condition, indexTK not supported
+            ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+              "Unsupported DistGrid indexTK", ESMC_CONTEXT, rc);
+            return NULL;
+          }
+          // copy the arbSeqIndexListPCollPLocalDe from old to new DG
           memcpy(distgrid->arbSeqIndexListPCollPLocalDe[i][j],
             dg->arbSeqIndexListPCollPLocalDe[i][j],
-            sizeof(int)*dg->elementCountPCollPLocalDe[i][j]);
-        }else{
-          distgrid->arbSeqIndexListPCollPLocalDe[i][j] = NULL;
+            sizeOfType*dg->elementCountPCollPLocalDe[i][j]);
         }
       }
     }
@@ -817,7 +840,8 @@ DistGrid *DistGrid::create(
   InterArray<int> *connectionList,      // (in)
   DELayout *delayout,                   // (in)
   VM *vm,                               // (in)
-  int *rc                               // (out) return code
+  int *rc,                              // (out) return code
+  ESMC_TypeKind_Flag indexTK            // (in) - default ESMC_TYPEKIND_I4
   ){
 //
 // !DESCRIPTION:
@@ -1223,7 +1247,7 @@ DistGrid *DistGrid::create(
     minIndex->array, maxIndex->array, minIndexPDimPDe, maxIndexPDimPDe,
     contigFlagPDimPDe, indexCountPDimPDe, indexListPDimPLocalDe,
     regDecomp->array, connectionList, decompflag, indexflag,
-    delayout, delayoutCreator, vm);
+    delayout, delayoutCreator, vm, indexTK);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
     rc)){
     distgrid->ESMC_BaseSetStatus(ESMF_STATUS_INVALID);  // mark invalid
@@ -1288,7 +1312,8 @@ DistGrid *DistGrid::create(
   InterArray<int> *connectionList,      // (in)
   DELayout *delayout,                   // (in)
   VM *vm,                               // (in)
-  int *rc                               // (out) return code
+  int *rc,                              // (out) return code
+  ESMC_TypeKind_Flag indexTK            // (in) - default ESMC_TYPEKIND_I4
   ){
 //
 // !DESCRIPTION:
@@ -1500,7 +1525,7 @@ DistGrid *DistGrid::create(
     minIndex->array, maxIndex->array, minIndexPDimPDe, maxIndexPDimPDe,
     contigFlagPDimPDe, indexCountPDimPDe, indexListPDimPLocalDe, NULL,
     connectionList, NULL, indexflag,
-    delayout, delayoutCreator, vm);
+    delayout, delayoutCreator, vm, indexTK);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
     ESMC_CONTEXT, rc)){
     distgrid->ESMC_BaseSetStatus(ESMF_STATUS_INVALID);  // mark invalid
@@ -1554,7 +1579,8 @@ DistGrid *DistGrid::create(
   InterArray<int> *connectionList,      // (in)
   int fastAxis,                         // (in)
   VM *vm,                               // (in)
-  int *rc                               // (out) return code
+  int *rc,                              // (out) return code
+  ESMC_TypeKind_Flag indexTK            // (in) - default ESMC_TYPEKIND_I4
   ){
 //
 // !DESCRIPTION:
@@ -1614,7 +1640,8 @@ DistGrid *DistGrid::create(
   InterArray<int> *connectionList,      // (in)
   DELayout *delayout,                   // (in)
   VM *vm,                               // (in)
-  int *rc                               // (out) return code
+  int *rc,                              // (out) return code
+  ESMC_TypeKind_Flag indexTK            // (in) - default ESMC_TYPEKIND_I4
   ){
 //
 // !DESCRIPTION:
@@ -2113,7 +2140,7 @@ DistGrid *DistGrid::create(
     minIndex->array, maxIndex->array, minIndexPDimPDe, maxIndexPDimPDe,
     contigFlagPDimPDe, indexCountPDimPDe, indexListPDimPLocalDe,
     regDecomp->array, connectionList, decompflag, indexflag,
-    delayout, delayoutCreator, vm);
+    delayout, delayoutCreator, vm, indexTK);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
     rc)){
     distgrid->ESMC_BaseSetStatus(ESMF_STATUS_INVALID);  // mark invalid
@@ -2254,7 +2281,8 @@ int DistGrid::construct(
   ESMC_IndexFlag *indexflagArg,         // (in)
   DELayout *delayoutArg,                // (in) DELayout
   bool delayoutCreatorArg,              // (in)
-  VM *vmArg                             // (in) VM context
+  VM *vmArg,                            // (in) VM context
+  ESMC_TypeKind_Flag indexTKArg         // (in) indexing typekind
   ){
 //
 // !DESCRIPTION:
@@ -2280,6 +2308,7 @@ int DistGrid::construct(
     indexflag = NULL;
 
   // fill in the DistGrid object
+  indexTK = indexTKArg;
   dimCount = dimCountArg;
   tileCount = tileCountArg;
   if (present(connectionListArg)){
@@ -2379,10 +2408,10 @@ int DistGrid::construct(
   }
   collocationTable[0]=1;
   // no arbitrary sequence indices by default
-  arbSeqIndexListPCollPLocalDe = new int**[diffCollocationCount];
+  arbSeqIndexListPCollPLocalDe = new void**[diffCollocationCount];
   elementCountPCollPLocalDe = new int*[diffCollocationCount];
   for (int i=0; i<diffCollocationCount; i++){
-    arbSeqIndexListPCollPLocalDe[i] = new int*[localDeCount];
+    arbSeqIndexListPCollPLocalDe[i] = new void*[localDeCount];
     elementCountPCollPLocalDe[i] = new int[localDeCount];
     for (int j=0; j<localDeCount; j++){
       arbSeqIndexListPCollPLocalDe[i][j] = NULL;
@@ -2464,8 +2493,26 @@ int DistGrid::destruct(bool followCreator, bool noGarbage){
       delete [] connectionList;
     for (int i=0; i<diffCollocationCount; i++){
       for (int j=0; j<localDeCount; j++)
-        if (arbSeqIndexListPCollPLocalDe[i][j])
-          delete [] arbSeqIndexListPCollPLocalDe[i][j];
+        if (arbSeqIndexListPCollPLocalDe[i][j]){
+          if (indexTK == ESMC_TYPEKIND_I1){
+            ESMC_I1 *ptr = (ESMC_I1 *)arbSeqIndexListPCollPLocalDe[i][j];
+            delete [] ptr;
+          }else if (indexTK == ESMC_TYPEKIND_I2){
+            ESMC_I2 *ptr = (ESMC_I2 *)arbSeqIndexListPCollPLocalDe[i][j];
+            delete [] ptr;
+          }else if (indexTK == ESMC_TYPEKIND_I4){
+            ESMC_I4 *ptr = (ESMC_I4 *)arbSeqIndexListPCollPLocalDe[i][j];
+            delete [] ptr;
+          }else if (indexTK == ESMC_TYPEKIND_I8){
+            ESMC_I8 *ptr = (ESMC_I8 *)arbSeqIndexListPCollPLocalDe[i][j];
+            delete [] ptr;
+          }else{
+            // error condition, indexTK not supported
+            ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+              "Unsupported DistGrid indexTK", ESMC_CONTEXT, &rc);
+            return rc;
+          }
+        }
       delete [] arbSeqIndexListPCollPLocalDe[i];
       delete [] elementCountPCollPLocalDe[i];
     }
@@ -2505,13 +2552,13 @@ int DistGrid::destruct(bool followCreator, bool noGarbage){
 //
 // !INTERFACE:
 //
-int DistGrid::fillSeqIndexList(
+template<typename T> int DistGrid::fillSeqIndexList(
 // !RETURN VALUE:
 //    int return code
 //
 // !ARGUMENTS:
 //
-  InterArray<int> *seqIndexList,  // in
+  InterArray<T> *seqIndexList,    // in
   int localDe,                    // in  - local DE = {0, ..., localDeCount-1}
   int collocation                 // in  -
   )const{
@@ -2545,7 +2592,7 @@ int DistGrid::fillSeqIndexList(
     }
     int collIndex = i;
     // check for arbitrary sequence indices
-    const int *arbSeqIndexList =
+    const void *arbSeqIndexList =
       getArbSeqIndexList(localDe, collocation, &localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       &rc)) return rc;
@@ -2558,8 +2605,29 @@ int DistGrid::fillSeqIndexList(
           ESMC_CONTEXT, &rc);
         return rc;
       }
+      unsigned int sizeOfType;
+      if (indexTK == ESMC_TYPEKIND_I1){
+        sizeOfType = sizeof(ESMC_I1);
+      }else if (indexTK == ESMC_TYPEKIND_I2){
+        sizeOfType = sizeof(ESMC_I2);
+      }else if (indexTK == ESMC_TYPEKIND_I4){
+        sizeOfType = sizeof(ESMC_I4);
+      }else if (indexTK == ESMC_TYPEKIND_I8){
+        sizeOfType = sizeof(ESMC_I8);
+      }else{
+        // error condition, indexTK not supported
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+          "Unsupported DistGrid indexTK", ESMC_CONTEXT, &rc);
+        return rc;
+      }
+      if (sizeof(T) != sizeOfType){
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
+          "Type mismatch.",
+          ESMC_CONTEXT, &rc);
+        return rc;
+      }
       memcpy((seqIndexList)->array, arbSeqIndexList,
-        sizeof(int) * elementCountPCollPLocalDe[collIndex][localDe]);
+        sizeOfType * elementCountPCollPLocalDe[collIndex][localDe]);
     }else{
       // default seq indices -> generate on the fly and fill in
       if ((seqIndexList)->extent[0] <
@@ -2580,8 +2648,7 @@ int DistGrid::fillSeqIndexList(
         ii[j] = 0;  // reset
       // loop over all elements in exclusive region for localDe
       while(ii[dimCount-1] < iiEnd[dimCount-1]){
-        (seqIndexList)->array[index] =
-          getSequenceIndexLocalDe(localDe, ii);
+        getSequenceIndexLocalDe(localDe, ii, &((seqIndexList)->array[index]));
         ++index;
         // multi-dim index increment
         ++ii[0];
@@ -3022,7 +3089,24 @@ int DistGrid::print()const{
         printf("(");
         for (int k=0; k<elementCountPCollPLocalDe[i][j]; k++){
           if (k!=0) printf(", ");
-          printf("%d", arbSeqIndexListPCollPLocalDe[i][j][k]);
+          if (indexTK == ESMC_TYPEKIND_I1){
+            printf("%d",
+              ((ESMC_I1 *)arbSeqIndexListPCollPLocalDe[i][j])[k]);
+          }else if (indexTK == ESMC_TYPEKIND_I2){
+            printf("%d",
+              ((ESMC_I2 *)arbSeqIndexListPCollPLocalDe[i][j])[k]);
+          }else if (indexTK == ESMC_TYPEKIND_I4){
+            printf("%d",
+              ((ESMC_I4 *)arbSeqIndexListPCollPLocalDe[i][j])[k]);
+          }else if (indexTK == ESMC_TYPEKIND_I8){
+            printf("%Ld",
+              ((ESMC_I8 *)arbSeqIndexListPCollPLocalDe[i][j])[k]);
+          }else{
+            // error condition, indexTK not supported
+            ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+              "Unsupported DistGrid indexTK", ESMC_CONTEXT, &rc);
+            return rc;
+          }
         }
         printf(")\n");
       }else
@@ -3044,23 +3128,6 @@ int DistGrid::print()const{
     printf("DistGrid-VM: petCount = %d, CurrentVM: petCount = %d\n", 
       vm->getPetCount(), VM::getCurrent()->getPetCount());
   }
-#if 0
-  printf("--- ESMCI::DistGrid::print connection test ---\n");
-  int index[2];
-  index[0]=1; index[1]=10;
-  printf("index=%d,%d, seqIndex=%d\n", index[0], index[1], 
-    getSequenceIndexTile(1, index, &localrc));
-  index[0]=1; index[1]=11;
-  printf("index=%d,%d, seqIndex=%d\n", index[0], index[1], 
-    getSequenceIndexTile(1, index, &localrc));
-  index[0]=0; index[1]=11;
-  printf("index=%d,%d, seqIndex=%d\n", index[0], index[1], 
-    getSequenceIndexTile(1, index, &localrc));
-  index[0]=0; index[1]=10;
-  printf("index=%d,%d, seqIndex=%d\n", index[0], index[1], 
-    getSequenceIndexTile(1, index, &localrc));
-  
-#endif
   printf("--- ESMCI::DistGrid::print end ---\n");
     
   // return successfully
@@ -3174,8 +3241,8 @@ bool DistGrid::isLocalDeOnEdgeL(
       // look just across interface along dim
       localDeIndexTuple[dim-1] = -1;
       // get sequence index providing localDe relative index tuple
-      int seqindex =
-        getSequenceIndexLocalDe(localDe, localDeIndexTuple, &localrc);
+      int seqindex; 
+      localrc = getSequenceIndexLocalDe(localDe, localDeIndexTuple, &seqindex);
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
         ESMC_CONTEXT, rc)) return false;
       // determine if seqindex indicates edge or not
@@ -3257,8 +3324,8 @@ bool DistGrid::isLocalDeOnEdgeU(
       // look just across interface along dim
       localDeIndexTuple[dim-1] = indexCountPDimPDe[de*dimCount+(dim-1)];
       // get sequence index providing localDe relative index tuple
-      int seqindex =
-        getSequenceIndexLocalDe(localDe, localDeIndexTuple, &localrc);
+      int seqindex; 
+      localrc = getSequenceIndexLocalDe(localDe, localDeIndexTuple, &seqindex);
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
         ESMC_CONTEXT, rc)) return false;
       // determine if seqindex indicates edge or not
@@ -3380,7 +3447,7 @@ int DistGrid::getElementCountPDe(
 // !IROUTINE:  ESMCI::DistGrid::getSequenceIndexLocalDe
 //
 // !INTERFACE:
-int DistGrid::getSequenceIndexLocalDe(
+template<typename T> int DistGrid::getSequenceIndexLocalDe(
 //
 // !RETURN VALUE:
 //    int sequence index
@@ -3391,7 +3458,7 @@ int DistGrid::getSequenceIndexLocalDe(
   const int *index,                 // in  - DE-local index tuple in or 
                                     //       relative to exclusive region
                                     //       basis 0
-  int *rc                           // out - return code
+  T *seqIndex                       // out - sequence index
   )const{
 //
 // !DESCRIPTION:
@@ -3412,14 +3479,24 @@ int DistGrid::getSequenceIndexLocalDe(
 //-----------------------------------------------------------------------------
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
-  if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;   // final return code
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
 
+  // check seqIndex argument
+  if (seqIndex==NULL){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+      "The seqIndex argument must not be a NULL pointer", ESMC_CONTEXT, &rc);
+    return rc;
+  }
+  
+  // set seqIndex return value to invalid
+  *seqIndex = -1;
+  
   // check input
   int localDeCount = delayout->getLocalDeCount();
   if (localDe < 0 || localDe > localDeCount-1){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-      "Specified local DE out of bounds", ESMC_CONTEXT, rc);
-    return -1;
+      "Specified local DE out of bounds", ESMC_CONTEXT, &rc);
+    return rc;
   }
   int de = delayout->getLocalDeToDeMap()[localDe];
   for (int i=0; i<dimCount; i++){
@@ -3429,16 +3506,110 @@ int DistGrid::getSequenceIndexLocalDe(
       !contigFlagPDimPDe[de*dimCount+i]){
       if (index[i] < 0 || index[i] >= indexCountPDimPDe[de*dimCount+i]){
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-          "Specified index out of bounds", ESMC_CONTEXT, rc);
-        return -1;
+          "Specified index out of bounds", ESMC_CONTEXT, &rc);
+        return rc;
       }
     }
   }
   
-  // determine seqindex
-  int seqindex;
+  // correctly typecast void* members and call into templated implementation
+#define BAILONMISMATCH
+  if (indexTK == ESMC_TYPEKIND_I1){
+    ESMC_I1 seqTemp;
+    localrc = tGetSequenceIndexLocalDe(
+      (ESMC_I1 ***)arbSeqIndexListPCollPLocalDe, de, localDe, index, &seqTemp);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+      ESMC_CONTEXT, &rc)) return rc;  //  bail out with invalid seqindex
+    if (sizeof(T) != sizeof(seqTemp)){
+      ESMC_LogDefault.Write("SeqIndex type mismatch detected.", 
+        ESMC_LOGMSG_WARN);
+#ifdef BAILONMISMATCH
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+        "SeqIndex type mismatch detected.", ESMC_CONTEXT, &rc);
+      return rc;
+#endif
+    }
+    *seqIndex = seqTemp; 
+  }else if (indexTK == ESMC_TYPEKIND_I2){
+    ESMC_I2 seqTemp;
+    localrc = tGetSequenceIndexLocalDe(
+      (ESMC_I2 ***)arbSeqIndexListPCollPLocalDe, de, localDe, index, &seqTemp);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+      ESMC_CONTEXT, &rc)) return rc;  //  bail out with invalid seqindex
+    if (sizeof(T) != sizeof(seqTemp)){
+      ESMC_LogDefault.Write("SeqIndex type mismatch detected.", 
+        ESMC_LOGMSG_WARN);
+#ifdef BAILONMISMATCH
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+        "SeqIndex type mismatch detected.", ESMC_CONTEXT, &rc);
+      return rc;
+#endif
+    }
+    *seqIndex = seqTemp; 
+  }else if (indexTK == ESMC_TYPEKIND_I4){
+    ESMC_I4 seqTemp;
+    localrc = tGetSequenceIndexLocalDe(
+      (ESMC_I4 ***)arbSeqIndexListPCollPLocalDe, de, localDe, index, &seqTemp);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+      ESMC_CONTEXT, &rc)) return rc;  //  bail out with invalid seqindex
+    if (sizeof(T) != sizeof(seqTemp)){
+      ESMC_LogDefault.Write("SeqIndex type mismatch detected.", 
+        ESMC_LOGMSG_WARN);
+#ifdef BAILONMISMATCH
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+        "SeqIndex type mismatch detected.", ESMC_CONTEXT, &rc);
+      return rc;
+#endif
+    }
+    *seqIndex = seqTemp; 
+  }else if (indexTK == ESMC_TYPEKIND_I8){
+    ESMC_I8 seqTemp;
+    localrc = tGetSequenceIndexLocalDe(
+      (ESMC_I8 ***)arbSeqIndexListPCollPLocalDe, de, localDe, index, &seqTemp);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+      ESMC_CONTEXT, &rc)) return rc;  //  bail out with invalid seqindex
+    if (sizeof(T) != sizeof(seqTemp)){
+      ESMC_LogDefault.Write("SeqIndex type mismatch detected.", 
+        ESMC_LOGMSG_WARN);
+#ifdef BAILONMISMATCH
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+        "SeqIndex type mismatch detected.", ESMC_CONTEXT, &rc);
+      return rc;
+#endif
+    }
+    *seqIndex = seqTemp; 
+  }else{
+    // error condition, indexTK not supported
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+      "Unsupported DistGrid indexTK", ESMC_CONTEXT, &rc);
+    return rc;
+  }
+  
+  // return successfully
+  return ESMF_SUCCESS;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::tGetSequenceIndexLocalDe()"
+template<typename T> int DistGrid::tGetSequenceIndexLocalDe(
+  T ***tArbSeqIndexListPCollPLocalDe,
+  int de, int localDe, const int *index, T *seqIndex)const{
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
+  // check seqIndex argument
+  if (seqIndex==NULL){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+      "The seqIndex argument must not be a NULL pointer", ESMC_CONTEXT, &rc);
+    return rc;
+  }
+  // set seqIndex return value to invalid
+  *seqIndex = -1;
   if (arbSeqIndexListPCollPLocalDe[0][localDe]){
-    // determine the sequentialized index by arbSeqIndexListPLocalDe look-up
+    // determine the seqIndex by arbSeqIndexListPCollPLocalDe look-up
     //TODO: this does _not_ support multiple collocations w/ arb seqIndices 
     //TODO: it assumes that arbSeqIndices may only exist on the first colloc.
     int linExclusiveIndex = index[dimCount-1];  // initialize
@@ -3446,14 +3617,13 @@ int DistGrid::getSequenceIndexLocalDe(
       linExclusiveIndex *= indexCountPDimPDe[de*dimCount + i];
       linExclusiveIndex += index[i];
     }
-    seqindex = arbSeqIndexListPCollPLocalDe[0][localDe][linExclusiveIndex];
+    *seqIndex = tArbSeqIndexListPCollPLocalDe[0][localDe][linExclusiveIndex];
   }else{
     // determine the sequentialized index by construction of default tile rule
     const int *localDeToDeMap = delayout->getLocalDeToDeMap();
     int tile = tileListPDe[localDeToDeMap[localDe]];  // tiles are basis 1 !!!!
     if (tile == 0){
       // means that the localDe does not have any elements thus not on tile
-      seqindex = -1;  // indicate no seqIndex
     }else{
       // prepare tile relative index tuple
       int *tileIndexTuple = new int[dimCount];
@@ -3465,15 +3635,14 @@ int DistGrid::getSequenceIndexLocalDe(
             indexListPDimPLocalDe[localDe*dimCount+i][index[i]];
       }
       // get sequence index providing tile relative index tuple
-      seqindex = getSequenceIndexTile(tile, tileIndexTuple, &localrc);
+      localrc = getSequenceIndexTile(tile, tileIndexTuple, seqIndex);
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
-        ESMC_CONTEXT, rc)) return -1;  //  bail out with invalid seqindex
+        ESMC_CONTEXT, &rc)) return rc;  //  bail out with invalid seqindex
       delete [] tileIndexTuple;
     }
   }
   // return successfully
-  if (rc!=NULL) *rc = ESMF_SUCCESS;
-  return seqindex;
+  return ESMF_SUCCESS;
 }
 //-----------------------------------------------------------------------------
 
@@ -3485,7 +3654,7 @@ int DistGrid::getSequenceIndexLocalDe(
 // !IROUTINE:  ESMCI::DistGrid::getSequenceIndexTileRelative
 //
 // !INTERFACE:
-int DistGrid::getSequenceIndexTileRelative(
+template<typename T> int DistGrid::getSequenceIndexTileRelative(
 //
 // !RETURN VALUE:
 //    int sequence index
@@ -3494,7 +3663,7 @@ int DistGrid::getSequenceIndexTileRelative(
 //
   int tile,                         // in  - tile = {1, ..., tileCount}
   const int *index,                 // in  - tile relative index tuple, base 0
-  int *rc                           // out - return code
+  T *seqIndex                       // out - sequence index
   )const{
 //
 // !DESCRIPTION:
@@ -3512,28 +3681,36 @@ int DistGrid::getSequenceIndexTileRelative(
 //-----------------------------------------------------------------------------
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
-  if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;   // final return code
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
+
+  // check seqIndex argument
+  if (seqIndex==NULL){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+      "The seqIndex argument must not be a NULL pointer", ESMC_CONTEXT, &rc);
+    return rc;
+  }
+  // set seqIndex return value to invalid
+  *seqIndex = -1;
 
   // check input
   if (tile < 1 || tile > tileCount){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-      "Specified tile out of bounds", ESMC_CONTEXT, rc);
-    return -1;
+      "Specified tile out of bounds", ESMC_CONTEXT, &rc);
+    return rc;
   }
 
   int *indexTileSpecific = new int[dimCount];
   for (int i=0; i<dimCount; i++)
     indexTileSpecific[i] = index[i] + minIndexPDimPTile[(tile-1)*dimCount+i];
   
-  int seqindex = getSequenceIndexTile(tile, indexTileSpecific, &localrc);
+  localrc = getSequenceIndexTile(tile, indexTileSpecific, seqIndex);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
-    ESMC_CONTEXT, rc)) return seqindex;  // bail out
+    ESMC_CONTEXT, &rc)) return rc;  // bail out
   
   delete [] indexTileSpecific;
   
   // return successfully
-  if (rc!=NULL) *rc = ESMF_SUCCESS;
-  return seqindex;
+  return ESMF_SUCCESS;
 }
 //-----------------------------------------------------------------------------
 
@@ -3545,7 +3722,7 @@ int DistGrid::getSequenceIndexTileRelative(
 // !IROUTINE:  ESMCI::DistGrid::getSequenceIndexTile
 //
 // !INTERFACE:
-int DistGrid::getSequenceIndexTile(
+template<typename T> int DistGrid::getSequenceIndexTile(
 //
 // !RETURN VALUE:
 //    int sequence index
@@ -3554,7 +3731,7 @@ int DistGrid::getSequenceIndexTile(
 //
   int tile,                         // in  - tile = {1, ..., tileCount}
   const int *index,                 // in  - tile-specific absolute index tuple
-  int *rc                           // out - return code
+  T *seqIndex                       // out - sequence index
   )const{
 //
 // !DESCRIPTION:
@@ -3576,25 +3753,31 @@ int DistGrid::getSequenceIndexTile(
 //-----------------------------------------------------------------------------
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
-  if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;   // final return code
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
+
+  // check seqIndex argument
+  if (seqIndex==NULL){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+      "The seqIndex argument must not be a NULL pointer", ESMC_CONTEXT, &rc);
+    return rc;
+  }
+  // set seqIndex return value to invalid
+  *seqIndex = -1;
   
-  int seqindex;
   const int depthMax=3;
   
   for (int depth=0; depth<depthMax; depth++){
-    seqindex = getSequenceIndexTileRecursive(tile, index, depth, &localrc);
+    localrc = getSequenceIndexTileRecursive(tile, index, depth, seqIndex);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
-      ESMC_CONTEXT, rc)) return seqindex;  // bail out
-    if (seqindex > -1){
+      ESMC_CONTEXT, &rc)) return rc;  // bail out
+    if (*seqIndex > -1){
       // return successfully
-      if (rc!=NULL) *rc = ESMF_SUCCESS;
-      return seqindex;
+      return ESMF_SUCCESS;
     }
   }
   
   // return successfully
-  if (rc!=NULL) *rc = ESMF_SUCCESS;
-  return seqindex;
+  return ESMF_SUCCESS;
 }
 //-----------------------------------------------------------------------------
 
@@ -3606,7 +3789,7 @@ int DistGrid::getSequenceIndexTile(
 // !IROUTINE:  ESMCI::DistGrid::getSequenceIndexTileRecursive
 //
 // !INTERFACE:
-int DistGrid::getSequenceIndexTileRecursive(
+template<typename T> int DistGrid::getSequenceIndexTileRecursive(
 //
 // !RETURN VALUE:
 //    int sequence index
@@ -3616,7 +3799,7 @@ int DistGrid::getSequenceIndexTileRecursive(
   int tile,                         // in  - tile = {1, ..., tileCount}
   const int *index,                 // in  - tile-specific absolute index tuple
   int depth,                        // in  - depth of recursive search
-  int *rc                           // out - return code
+  T *seqIndex                       // out - sequence index
   )const{
 //
 // !DESCRIPTION:
@@ -3638,7 +3821,16 @@ int DistGrid::getSequenceIndexTileRecursive(
 //-----------------------------------------------------------------------------
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
-  if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;   // final return code
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
+
+  // check seqIndex argument
+  if (seqIndex==NULL){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+      "The seqIndex argument must not be a NULL pointer", ESMC_CONTEXT, &rc);
+    return rc;
+  }
+  // set seqIndex return value to invalid
+  *seqIndex = -1;
 
   //printf("gjt - getSequenceIndexTile depth: %d\n", depth);
 
@@ -3646,8 +3838,8 @@ int DistGrid::getSequenceIndexTileRecursive(
   if (tile < 1 || tile > tileCount){
     char message[80];
     sprintf(message, "Specified tile %d is out of bounds", tile);
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD, message, ESMC_CONTEXT, rc);
-    return -1;
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD, message, ESMC_CONTEXT, &rc);
+    return rc;
   }
   
   // adjust recursion depth
@@ -3655,26 +3847,26 @@ int DistGrid::getSequenceIndexTileRecursive(
 
   bool onTile = true;  // start assuming that index tuple can be found on tile
   // add up elements from tile
-  int seqindex = 0; // initialize
+  *seqIndex = 0; // initialize
   for (int i=dimCount-1; i>=0; i--){
     // first time multiply with zero intentionally:
-    seqindex *= maxIndexPDimPTile[(tile-1)*dimCount+i] 
+    *seqIndex *= maxIndexPDimPTile[(tile-1)*dimCount+i] 
       - minIndexPDimPTile[(tile-1)*dimCount+i] + 1;
     if ((index[i] < minIndexPDimPTile[(tile-1)*dimCount+i])
       || (index[i] > maxIndexPDimPTile[(tile-1)*dimCount+i])){
       // index is outside of tile bounds -> break out of onTile code
       onTile = false;
-      seqindex = -1;  // indicate not valid sequence index
+      *seqIndex = -1;  // indicate not valid sequence index
       break;
     }
-    seqindex += index[i]
+    *seqIndex += index[i]
       - minIndexPDimPTile[(tile-1)*dimCount+i];
   }
   if (onTile){
     // add all the elements of previous tiles
     for (int i=0; i<tile-1; i++)
-      seqindex += elementCountPTile[i];
-    ++seqindex;  // shift sequentialized index to basis 1 !!!!
+      *seqIndex += elementCountPTile[i];
+    ++(*seqIndex);  // shift sequentialized index to basis 1 !!!!
   }else if (depth >= 0){
     for (int i=0; i<connectionCount; i++){
       int tileA = connectionList[i][0];
@@ -3695,17 +3887,16 @@ int DistGrid::getSequenceIndexTileRecursive(
             indexB[j] = index[orientation] + position;
           }
         }
-        seqindex = getSequenceIndexTileRecursive(tileB, indexB, depth, &localrc);
+        localrc = getSequenceIndexTileRecursive(tileB, indexB, depth, seqIndex);
         if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
-          ESMC_CONTEXT, rc)) return seqindex;  // bail out
+          ESMC_CONTEXT, &rc)) return rc;  // bail out
 
 //printf("foreward: tile=%d, tileA=%d, tileB=%d, index[]=%d %d, indexB[]=%d %d, seqInd=%d\n",
-//tile, tileA, tileB, index[0], index[1], indexB[0], indexB[1], seqindex);
+//tile, tileA, tileB, index[0], index[1], indexB[0], indexB[1], *seqIndex);
 
-        if (seqindex > -1){
+        if (*seqIndex > -1){
           // return successfully
-          if (rc!=NULL) *rc = ESMF_SUCCESS;
-          return seqindex;
+          return ESMF_SUCCESS;
         }
       }
       if (tileB == tile){
@@ -3763,27 +3954,25 @@ int DistGrid::getSequenceIndexTileRecursive(
             }
           }
         }
-        seqindex = getSequenceIndexTileRecursive(tileA, indexA, depth, &localrc);
+        localrc = getSequenceIndexTileRecursive(tileA, indexA, depth, seqIndex);
         if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
-          ESMC_CONTEXT, rc)) return seqindex;  // bail out
+          ESMC_CONTEXT, &rc)) return rc;  // bail out
 
 //printf("backward: tile=%d, tileA=%d, tileB=%d, index[]=%d %d, indexA[]=%d %d, seqInd=%d\n",
-//tile, tileA, tileB, index[0], index[1], indexA[0], indexA[1], seqindex);
+//tile, tileA, tileB, index[0], index[1], indexA[0], indexA[1], *seqIndex);
         
-        if (seqindex > -1){
+        if (*seqIndex > -1){
           // return successfully
-          if (rc!=NULL) *rc = ESMF_SUCCESS;
-          return seqindex;
+          return ESMF_SUCCESS;
         }
       }
     }
   }else{
-    seqindex = -1;  // not on tile, and no depth
+    *seqIndex = -1;  // not on tile, and no depth
   }
     
   // return successfully
-  if (rc!=NULL) *rc = ESMF_SUCCESS;
-  return seqindex;
+  return ESMF_SUCCESS;
 }
 //-----------------------------------------------------------------------------
 
@@ -4066,7 +4255,7 @@ const int *DistGrid::getIndexListPDimPLocalDe(
 // !IROUTINE:  ESMCI::DistGrid::getArbSeqIndexList
 //
 // !INTERFACE:
-const int *DistGrid::getArbSeqIndexList(
+void const *DistGrid::getArbSeqIndexList(
 //
 // !RETURN VALUE:
 //    int *arbSeqIndexList for localDe
@@ -4103,7 +4292,7 @@ const int *DistGrid::getArbSeqIndexList(
     return NULL;
   }
 
-  // return successfully
+  // return
   if (rc!=NULL) *rc = ESMF_SUCCESS;
   return arbSeqIndexListPCollPLocalDe[collocationIndex][localDe];
 }
@@ -4149,7 +4338,7 @@ int DistGrid::serialize(
   int i;
   char *cp;
   int *ip;
-  ESMC_Logical *lp;
+  ESMC_TypeKind_Flag *tkp;
   int r;
 
   // Check if buffer has enough free memory to hold object
@@ -4175,7 +4364,13 @@ int DistGrid::serialize(
   // Serialize DistGrid meta data
   r=*offset%8;
   if (r!=0) *offset += 8-r;  // alignment
-  ip = (int *)(buffer + *offset);
+  tkp = (ESMC_TypeKind_Flag *)(buffer + *offset);
+  if (inquireflag != ESMF_INQUIREONLY)
+    *tkp++ = indexTK;
+  else
+    tkp += 1;
+  //
+  ip = (int *)tkp;
   if (inquireflag != ESMF_INQUIREONLY){
     *ip++ = dimCount;
     *ip++ = tileCount;
@@ -4187,7 +4382,7 @@ int DistGrid::serialize(
       *ip++ = elementCountPTile[i];
   }else
     ip += 2 + 2*dimCount*tileCount + tileCount;
-
+  //
   int deCount = delayout->getDeCount();
   if (inquireflag != ESMF_INQUIREONLY){
     for (int i=0; i<dimCount*deCount; i++){
@@ -4207,7 +4402,7 @@ int DistGrid::serialize(
     }
   }else
     ip += 4*dimCount*deCount + 2*deCount + 1 + 2*dimCount;
-
+  //
   if (inquireflag != ESMF_INQUIREONLY){
     *ip++ = connectionCount;
     for (int i=0; i<connectionCount; i++)
@@ -4269,7 +4464,7 @@ DistGrid *DistGrid::deserialize(
   int i;
   char *cp;
   int *ip;
-  ESMC_Logical *lp;
+  ESMC_TypeKind_Flag *tkp;
   int r;
   
   // Deserialize the Base class
@@ -4287,7 +4482,9 @@ DistGrid *DistGrid::deserialize(
   // Deserialize DistGrid meta data
   r=*offset%8;
   if (r!=0) *offset += 8-r;  // alignment
-  ip = (int *)(buffer + *offset);
+  tkp = (ESMC_TypeKind_Flag *)(buffer + *offset);
+  a->indexTK = *tkp++;
+  ip = (int *)tkp;
   a->dimCount = *ip++;
   a->tileCount = *ip++;
   a->minIndexPDimPTile = new int[a->dimCount*a->tileCount];
@@ -4332,10 +4529,10 @@ DistGrid *DistGrid::deserialize(
   }
   // reset all xxPLocalDe variables on proxy object
   a->indexListPDimPLocalDe = new int*[0];
-  a->arbSeqIndexListPCollPLocalDe = new int**[a->diffCollocationCount];
+  a->arbSeqIndexListPCollPLocalDe = new void**[a->diffCollocationCount];
   a->elementCountPCollPLocalDe = new int*[a->diffCollocationCount];
   for (int i=0; i<a->diffCollocationCount; i++){
-    a->arbSeqIndexListPCollPLocalDe[i] = new int*[1];
+    a->arbSeqIndexListPCollPLocalDe[i] = new void*[1];
     a->elementCountPCollPLocalDe[i] = new int[1];
     a->arbSeqIndexListPCollPLocalDe[i][0] = NULL;
     a->elementCountPCollPLocalDe[i][0] = 0;
@@ -4522,9 +4719,28 @@ int DistGrid::setCollocationPDim(
   // delete arbSeqIndex if previously set
   int localDeCount = delayout->getLocalDeCount();
   for (int i=0; i<diffCollocationCount; i++){
-    for (int j=0; j<localDeCount; j++)
-      if (arbSeqIndexListPCollPLocalDe[i][j])
-        delete [] arbSeqIndexListPCollPLocalDe[i][j];
+    for (int j=0; j<localDeCount; j++){
+      if (arbSeqIndexListPCollPLocalDe[i][j]){
+        if (indexTK == ESMC_TYPEKIND_I1){
+          ESMC_I1 *ptr = (ESMC_I1 *)arbSeqIndexListPCollPLocalDe[i][j];
+          delete [] ptr;
+        }else if (indexTK == ESMC_TYPEKIND_I2){
+          ESMC_I2 *ptr = (ESMC_I2 *)arbSeqIndexListPCollPLocalDe[i][j];
+          delete [] ptr;
+        }else if (indexTK == ESMC_TYPEKIND_I4){
+          ESMC_I4 *ptr = (ESMC_I4 *)arbSeqIndexListPCollPLocalDe[i][j];
+          delete [] ptr;
+        }else if (indexTK == ESMC_TYPEKIND_I8){
+          ESMC_I8 *ptr = (ESMC_I8 *)arbSeqIndexListPCollPLocalDe[i][j];
+          delete [] ptr;
+        }else{
+          // error condition, indexTK not supported
+          ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+            "Unsupported DistGrid indexTK", ESMC_CONTEXT, &rc);
+          return rc;
+        }
+      }
+    }
     delete [] arbSeqIndexListPCollPLocalDe[i];
     delete [] elementCountPCollPLocalDe[i];
   }
@@ -4544,11 +4760,11 @@ int DistGrid::setCollocationPDim(
   }
   
   // no arbitrary sequence indices by default
-  arbSeqIndexListPCollPLocalDe = new int**[diffCollocationCount];
+  arbSeqIndexListPCollPLocalDe = new void**[diffCollocationCount];
   elementCountPCollPLocalDe = new int*[diffCollocationCount];
   const int *localDeToDeMap = delayout->getLocalDeToDeMap();
   for (int i=0; i<diffCollocationCount; i++){
-    arbSeqIndexListPCollPLocalDe[i] = new int*[localDeCount];
+    arbSeqIndexListPCollPLocalDe[i] = new void*[localDeCount];
     elementCountPCollPLocalDe[i] = new int[localDeCount];
     for (int j=0; j<localDeCount; j++){
       arbSeqIndexListPCollPLocalDe[i][j] = NULL;
@@ -4577,13 +4793,13 @@ int DistGrid::setCollocationPDim(
 //
 // !INTERFACE:
 //
-int DistGrid::setArbSeqIndex(
+template<typename T> int DistGrid::setArbSeqIndex(
 // !RETURN VALUE:
 //    int return code
 //
 // !ARGUMENTS:
 //
-  InterArray<int> *arbSeqIndex, // in
+  InterArray<T> *arbSeqIndex,   // in
   int localDe,                  // in  - local DE = {0, ..., localDeCount-1}
   int collocation               // in
   ){
@@ -4648,21 +4864,109 @@ int DistGrid::setArbSeqIndex(
     return rc;
   }
 
-  // set arbSeqIndexListPLocalDe[][]
+  // potentially delete previous index list
   if (arbSeqIndexListPCollPLocalDe[collocationIndex][localDe]){
-    // delete previous index list
-    delete [] arbSeqIndexListPCollPLocalDe[collocationIndex][localDe];
+    if (indexTK == ESMC_TYPEKIND_I1){
+      ESMC_I1 *ptr = 
+        (ESMC_I1 *)arbSeqIndexListPCollPLocalDe[collocationIndex][localDe];
+      delete [] ptr;
+    }else if (indexTK == ESMC_TYPEKIND_I2){
+      ESMC_I2 *ptr =
+        (ESMC_I2 *)arbSeqIndexListPCollPLocalDe[collocationIndex][localDe];
+      delete [] ptr;
+    }else if (indexTK == ESMC_TYPEKIND_I4){
+      ESMC_I4 *ptr =
+        (ESMC_I4 *)arbSeqIndexListPCollPLocalDe[collocationIndex][localDe];
+      delete [] ptr;
+    }else if (indexTK == ESMC_TYPEKIND_I8){
+      ESMC_I8 *ptr =
+        (ESMC_I8 *)arbSeqIndexListPCollPLocalDe[collocationIndex][localDe];
+      delete [] ptr;
+    }else{
+      // error condition, indexTK not supported
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+        "Unsupported DistGrid indexTK", ESMC_CONTEXT, &rc);
+      return rc;
+    }
   }
-  arbSeqIndexListPCollPLocalDe[collocationIndex][localDe] =
-    new int[arbSeqIndex->extent[0]];
+
+  // set arbSeqIndexListPCollPLocalDe[][]
+  unsigned int sizeOfType;
+  if (indexTK == ESMC_TYPEKIND_I1){
+    arbSeqIndexListPCollPLocalDe[collocationIndex][localDe]
+      = (void *)(new ESMC_I1[arbSeqIndex->extent[0]]);
+    sizeOfType = sizeof(ESMC_I1);
+  }else if (indexTK == ESMC_TYPEKIND_I2){
+    arbSeqIndexListPCollPLocalDe[collocationIndex][localDe]
+      = (void *)(new ESMC_I2[arbSeqIndex->extent[0]]);
+    sizeOfType = sizeof(ESMC_I2);
+  }else if (indexTK == ESMC_TYPEKIND_I4){
+    arbSeqIndexListPCollPLocalDe[collocationIndex][localDe]
+      = (void *)(new ESMC_I4[arbSeqIndex->extent[0]]);
+    sizeOfType = sizeof(ESMC_I4);
+  }else if (indexTK == ESMC_TYPEKIND_I8){
+    arbSeqIndexListPCollPLocalDe[collocationIndex][localDe]
+      = (void *)(new ESMC_I8[arbSeqIndex->extent[0]]);
+    sizeOfType = sizeof(ESMC_I8);
+  }else{
+    // error condition, indexTK not supported
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+      "Unsupported DistGrid indexTK", ESMC_CONTEXT, &rc);
+    return rc;
+  }
+  
+  // check for type mismatch
+  if (sizeOfType != sizeof(T)){
+    // error condition, indexTK not supported
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+      "Mismatch of DistGrid indexTK and typekind of provided sequence indices",
+      ESMC_CONTEXT, &rc);
+    return rc;
+  }
+
+  // copy the provided arbSeqIndex array into the DistGrid
   memcpy(arbSeqIndexListPCollPLocalDe[collocationIndex][localDe],
-    arbSeqIndex->array, sizeof(int)*arbSeqIndex->extent[0]);
+    arbSeqIndex->array, sizeOfType*arbSeqIndex->extent[0]);
   
   // return successfully
   rc = ESMF_SUCCESS;
   return rc;
 }
 //-----------------------------------------------------------------------------
+
+void dummySpecialDistGridMethods(){
+  // this dummy function never gets called, but it ensures that supported method
+  // specializations are available when linking
+  DistGrid dg;
+  int localDe=0;
+  int tile=0;
+  int collocation=0;
+  {
+    InterArray<int> *arbSeqIndex=NULL;
+    dg.setArbSeqIndex(arbSeqIndex, localDe, collocation);
+  }
+  {
+    InterArray<ESMC_I8> *arbSeqIndex=NULL;
+    dg.setArbSeqIndex(arbSeqIndex, localDe, collocation);
+  }
+  {
+    int seqIndex;
+    dg.getSequenceIndexLocalDe(localDe, NULL, &seqIndex);
+  }
+  {
+    ESMC_I8 seqIndex;
+    dg.getSequenceIndexLocalDe(localDe, NULL, &seqIndex);
+  }
+  {
+    int seqIndex;
+    dg.getSequenceIndexTileRelative(tile, NULL, &seqIndex);
+  }
+  {
+    ESMC_I8 seqIndex;
+    dg.getSequenceIndexTileRelative(tile, NULL, &seqIndex);
+  }
+  
+}
 
 
   //============================================================================

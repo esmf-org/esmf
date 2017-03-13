@@ -188,7 +188,8 @@ extern "C" {
     ESMCI::InterArray<int> *deBlockList,
     ESMCI::InterArray<int> *deLabelList, ESMC_IndexFlag *indexflag, 
     ESMCI::InterArray<int> *connectionList,
-    ESMCI::DELayout **delayout, ESMCI::VM **vm, int *rc){
+    ESMCI::DELayout **delayout, ESMCI::VM **vm, ESMC_TypeKind_Flag *indexTK, 
+    int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_distgridcreatedb()"
     // Initialize return code; assume routine not implemented
@@ -196,16 +197,20 @@ extern "C" {
     int localrc = ESMC_RC_NOT_IMPL;
     ESMCI::DELayout *opt_delayout;
     ESMCI::VM *opt_vm;
+    ESMC_TypeKind_Flag opt_indexTK;
     // deal with optional arguments
     if (ESMC_NOT_PRESENT_FILTER(delayout) == ESMC_NULL_POINTER) 
       opt_delayout = NULL;
     else opt_delayout = *delayout;
     if (ESMC_NOT_PRESENT_FILTER(vm) == ESMC_NULL_POINTER) opt_vm = NULL;
     else opt_vm = *vm;
+    if (ESMC_NOT_PRESENT_FILTER(indexTK) == ESMC_NULL_POINTER) 
+      opt_indexTK = ESMC_TYPEKIND_I4;
+    else opt_indexTK = *indexTK;
     // call into C++
     *ptr = ESMCI::DistGrid::create(minIndex, maxIndex, deBlockList,
       deLabelList, ESMC_NOT_PRESENT_FILTER(indexflag),
-      connectionList, opt_delayout, opt_vm, &localrc);
+      connectionList, opt_delayout, opt_vm, &localrc, opt_indexTK);
     ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
       ESMC_CONTEXT, ESMC_NOT_PRESENT_FILTER(rc));
   }
@@ -563,7 +568,7 @@ extern "C" {
       collIndex = 0;
     }
     const int *arbSeqIndexList =
-      (*ptr)->getArbSeqIndexList(localDe, collocation, &localrc);
+      (const int *)(*ptr)->getArbSeqIndexList(localDe, collocation, &localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
       ESMC_CONTEXT, ESMC_NOT_PRESENT_FILTER(rc))) return;
     if (ESMC_NOT_PRESENT_FILTER(arbSeqIndexFlag) != ESMC_NULL_POINTER){  
@@ -706,7 +711,20 @@ extern "C" {
       ESMC_NOT_PRESENT_FILTER(rc));
   }
 
-
+  void FTN_X(c_esmc_distgridsetarbseqindexi8)(
+    ESMCI::DistGrid **ptr, ESMCI::InterArray<ESMC_I8> *arbSeqIndex, 
+      int *localDe, int *collocation, int *rc){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_distgridsetarbseqindex()"
+    // Initialize return code; assume routine not implemented
+    if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+    // Call into the actual C++ method wrapped inside LogErr handling
+    ESMC_LogDefault.MsgFoundError(
+      (*ptr)->setArbSeqIndex(arbSeqIndex, *localDe, *collocation),
+      ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      ESMC_NOT_PRESENT_FILTER(rc));
+  }
+  
   void FTN_X(c_esmc_distgridserialize)(ESMCI::DistGrid **distgrid, char *buf, int *length,
     int *offset, ESMC_InquireFlag *inquireflag, int *rc,
     ESMCI_FortranStrLenArg buf_l){

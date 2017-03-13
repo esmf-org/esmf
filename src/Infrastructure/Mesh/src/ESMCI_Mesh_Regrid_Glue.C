@@ -2149,7 +2149,8 @@ void copy_rs_from_WMat_to_Array(WMat *wmat, ESMCI::Array *array) {
 
       // Get sequence index of this point
       int localrc;
-      UInt seq_ind=distgrid->getSequenceIndexLocalDe(lDE,ind_m_elbnd,&localrc);
+      int seq_ind;
+      localrc=distgrid->getSequenceIndexLocalDe(lDE,ind_m_elbnd,&seq_ind);
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
         ESMC_CONTEXT, NULL)) throw localrc;  // bail out with exception
  /* XMRKX */
@@ -2295,7 +2296,8 @@ void copy_cnsv_rs_from_WMat_to_Array(WMat *wmat, ESMCI::Array *array) {
 
       // Get sequence index of this point
       int localrc;
-      UInt seq_ind=distgrid->getSequenceIndexLocalDe(lDE,ind_m_elbnd,&localrc);
+      int seq_ind;
+      localrc=distgrid->getSequenceIndexLocalDe(lDE,ind_m_elbnd,&seq_ind);
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
         ESMC_CONTEXT, NULL)) throw localrc;  // bail out with exception
 

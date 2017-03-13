@@ -906,8 +906,8 @@ Par::Out() << "\tnot in mesh!!" << std::endl;
     int seq_ind[NUM_QUAD_CORNERS];
     for (int i=0; i<NUM_QUAD_CORNERS; i++) {
       int localrc;
-      seq_ind[i]=staggerDistgrid->getSequenceIndexLocalDe(localDE,
-                                                          corners[i],&localrc);
+      localrc=staggerDistgrid->getSequenceIndexLocalDe(localDE,
+        corners[i],&(seq_ind[i]));
       if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
         throw localrc;  // bail out with exception
 
