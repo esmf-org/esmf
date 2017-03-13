@@ -50,14 +50,14 @@ namespace ESMCI {
   // classes and structs
 
   class Array;
-  struct SeqIndex;
+  template<typename T=int> struct SeqIndex; //TODO: eventually remove T=int default
   class SparseMatrix;
 
   // class definitions
   
   //============================================================================
-  struct SeqIndex{
-    int decompSeqIndex;
+  template<typename T> struct SeqIndex{
+    T decompSeqIndex;
     int tensorSeqIndex;
     SeqIndex(){
       decompSeqIndex = -1;  // invalidate
@@ -74,9 +74,9 @@ namespace ESMCI {
       return true;  // otherwise valid
     }
   };  // struct seqIndex
-  bool operator==(SeqIndex a, SeqIndex b);
-  bool operator!=(SeqIndex a, SeqIndex b);
-  bool operator<(SeqIndex a, SeqIndex b);
+  template<typename T> bool operator==(SeqIndex<T> a, SeqIndex<T> b);
+  template<typename T> bool operator!=(SeqIndex<T> a, SeqIndex<T> b);
+  template<typename T> bool operator<(SeqIndex<T> a, SeqIndex<T> b);
   
   class SeqInd{
     int n;  // number of components in sequence index
@@ -148,7 +148,12 @@ namespace ESMCI {
                                       // Multiply with tensorElementCount to get
                                       // total number of elements in total
                                       // Array region.
-    std::vector<std::vector<SeqIndex> > rimSeqIndex;  // elements in the rim,
+    std::vector<std::vector<SeqIndex<ESMC_I4> > > rimSeqIndexI4;
+                                      // elements in the rim,
+                                      // between exclusive and total bounds
+                                      // [localDeCount][rimElementCount[]]
+    std::vector<std::vector<SeqIndex<ESMC_I8> > > rimSeqIndexI8;
+                                      // elements in the rim,
                                       // between exclusive and total bounds
                                       // [localDeCount][rimElementCount[]]
     std::vector<std::vector<int> > rimLinIndex;       // elements in the rim,
@@ -195,7 +200,8 @@ namespace ESMCI {
       sizeSuperUndist = NULL;
       sizeDist = NULL;
 #if !defined (PARCH_IRIX64)
-      rimSeqIndex.resize(0);
+      rimSeqIndexI4.resize(0);
+      rimSeqIndexI8.resize(0);
 #endif
       rimLinIndex.resize(0);
       rimElementCount.resize(0);
@@ -226,7 +232,8 @@ namespace ESMCI {
       sizeSuperUndist = NULL;
       sizeDist = NULL;
 #if !defined (PARCH_IRIX64)
-      rimSeqIndex.resize(0);
+      rimSeqIndexI4.resize(0);
+      rimSeqIndexI8.resize(0);
 #endif
       rimLinIndex.resize(0);
       rimElementCount.resize(0);
@@ -301,17 +308,19 @@ namespace ESMCI {
     DELayout *getDELayout()                 const {return delayout;}
     int getLinearIndexExclusive(int localDe, int const *index, int *rc=NULL)
       const;
-    int getSequenceIndexExclusive(int localDe, int const *index,
-      SeqIndex *seqIndex) const;
-    SeqIndex getSequenceIndexTile(int tile, const int *index, int *rc=NULL)
+    template<typename T> int getSequenceIndexExclusive(int localDe, 
+      int const *index, SeqIndex<T> *seqIndex) const;
+    SeqIndex<> getSequenceIndexTile(int tile, const int *index, int *rc=NULL)
       const;
     int getTensorSequenceIndex(const int *index, int *rc=NULL)const;
     int getArbSequenceIndexOffset(const int *index, int *rc=NULL)const;
     int setComputationalLWidth(InterArray<int> *computationalLWidthArg);
     int setComputationalUWidth(InterArray<int> *computationalUWidthArg);
-    int setRimSeqIndex(int localDe, InterArray<int> *rimSeqIndexArg);
-    std::vector<std::vector<SeqIndex> > const &getRimSeqIndex()const
-      {return rimSeqIndex;}
+    template<typename T> int setRimSeqIndex(int localDe, 
+      InterArray<T> *rimSeqIndexArg);
+    template<typename T>
+      int getRimSeqIndex(const std::vector<std::vector<SeqIndex<T> > >
+      **rimSeqIndex_)const;
     std::vector<std::vector<int> > const &getRimLinIndex()const
       {return rimLinIndex;}
     std::vector<int> const &getRimElementCount()const
@@ -364,6 +373,11 @@ namespace ESMCI {
       ESMC_Region_Flag zeroflag=ESMC_REGION_SELECT, bool checkflag=false);
     static int redistRelease(RouteHandle *routehandle);
     static int sparseMatMulStore(Array *srcArray, Array *dstArray,
+      RouteHandle **routehandle, std::vector<SparseMatrix> const &sparseMatrix,
+      bool haloFlag=false, bool ignoreUnmatched=false, 
+      int *srcTermProcessingArg = NULL, int *pipelineDepthArg = NULL);
+    template<typename SRC_INDEX_T, typename DST_INDEX_T>
+      static int tSparseMatMulStore(Array *srcArray, Array *dstArray,
       RouteHandle **routehandle, std::vector<SparseMatrix> const &sparseMatrix,
       bool haloFlag=false, bool ignoreUnmatched=false, 
       int *srcTermProcessingArg = NULL, int *pipelineDepthArg = NULL);
@@ -421,7 +435,8 @@ namespace ESMCI {
       // construct iterator through total Array region with block excl. option
     bool hasValidSeqIndex()const;
     int getLinearIndexExclusive()const;
-    int getSequenceIndexExclusive(SeqIndex *seqIndex)const;
+    template<typename T> int getSequenceIndexExclusive(SeqIndex<T> *seqIndex)
+      const;
     int getTensorSequenceIndex()const;
     int getArbSequenceIndexOffset()const;
     void print()const;

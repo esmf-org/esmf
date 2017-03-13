@@ -169,6 +169,7 @@ namespace ESMCI {
     // get() and set()
     int getDimCount() const {return dimCount;}
     int getTileCount() const {return tileCount;}
+    ESMC_TypeKind_Flag getIndexTK() const {return indexTK;}
     int getDiffCollocationCount() const {return diffCollocationCount;}
     int const *getMinIndexPDimPTile() const {return minIndexPDimPTile;}
     int const *getMinIndexPDimPTile(int tile, int *rc) const;
