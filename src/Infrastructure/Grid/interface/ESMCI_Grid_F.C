@@ -3368,11 +3368,12 @@ void c_esmc_grid_get_from_proto(ESMCI::Grid **_grid,
  for (int i=1; i<20; i++) {
    index[0]=4;
    index[1]=i;
-   int id=distgrid->getSequenceIndexTile(
-                                        1,                        // in  - tile = {1, ..., tileCount}
-                                        index,                 // in  - tile-specific absolute index tuple
-                                        3,                        // in  - depth of recursive search
-                                        &localrc);                           // out - return code
+   int id;
+   localrc=distgrid->getSequenceIndexTile(
+                                        1,     // in  - tile = {1, ..., tileCount}
+                                        index, // in  - tile-specific absolute index tuple
+                                        3,     // in  - depth of recursive search
+                                        &id);  // out - sequence index
    if(ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
                       ESMC_CONTEXT, ESMC_NOT_PRESENT_FILTER(rc))) return;
    printf(" %d id=%d \n",i,id);
@@ -3410,11 +3411,12 @@ void c_esmc_grid_get_from_proto(ESMCI::Grid **_grid,
  for (int i=1; i<21; i++) {
    index[0]=4;
    index[1]=i;
-   int id=distgrid2->getSequenceIndexTile(
-                                        1,                        // in  - tile = {1, ..., tileCount}
-                                        index,                 // in  - tile-specific absolute index tuple
-                                        3,                        // in  - depth of recursive search
-                                        &localrc);                           // out - return code
+   int id;
+   localrc=distgrid2->getSequenceIndexTile(
+                                        1,     // in  - tile = {1, ..., tileCount}
+                                        index, // in  - tile-specific absolute index tuple
+                                        3,     // in  - depth of recursive search
+                                        &id);  // out - sequence index
    if(ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
                      ESMC_CONTEXT, ESMC_NOT_PRESENT_FILTER(rc))) return;
    printf(" %d id=%d delta=%d \n",i,id,id-old_id);
@@ -3441,11 +3443,12 @@ void c_esmc_grid_get_from_proto(ESMCI::Grid **_grid,
  for (int i=1; i<21; i++) {
    index[0]=4;
    index[1]=i;
-   int id=distgrid3->getSequenceIndexTile(
-                                        1,                        // in  - tile = {1, ..., tileCount}
-                                        index,                 // in  - tile-specific absolute index tuple
-                                        3,                        // in  - depth of recursive search
-                                        &localrc);                           // out - return code
+   int id;
+   localrc=distgrid3->getSequenceIndexTile(
+                                        1,     // in  - tile = {1, ..., tileCount}
+                                        index, // in  - tile-specific absolute index tuple
+                                        3,     // in  - depth of recursive search
+                                        &id);  // out - return code
    if(ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
                       ESMC_CONTEXT, ESMC_NOT_PRESENT_FILTER(rc))) return;
    printf(" %d id=%d \n",i,id);

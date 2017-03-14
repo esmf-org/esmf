@@ -7993,7 +7993,7 @@ int GridIter::getGlobalID(
    //  curDE,curInd[0],curInd[1],deBasedInd[0],deBasedInd[1]);  
   
   // return sequence index
-  gid=staggerDistgrid->getSequenceIndexLocalDe(curDE,deBasedInd,&localrc);
+  localrc=staggerDistgrid->getSequenceIndexLocalDe(curDE,deBasedInd,&gid);
   
   //printf("GI Gid=%d curDE=%d curInd=%d %d deBasedInd=%d %d localrc=%d ESMC_SUCCESS=%d \n",
   //  gid,curDE,curInd[0],curInd[1],deBasedInd[0],deBasedInd[1],localrc,ESMF_SUCCESS);
@@ -9053,7 +9053,7 @@ int GridCellIter::getGlobalID(
     }
       
     // return sequence index
-    gid=centerDistgrid->getSequenceIndexLocalDe(curDE,deBasedInd,&localrc);
+    localrc=centerDistgrid->getSequenceIndexLocalDe(curDE,deBasedInd,&gid);
 
   // return sequence index
   return gid;
