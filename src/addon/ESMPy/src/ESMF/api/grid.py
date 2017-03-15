@@ -365,7 +365,7 @@ class Grid(object):
 
             # grid rank for cubed sphere is currently 2
             self._rank = 2
-            self._ndims = 1
+            self._ndims = 2
 
             # allocate space for staggger
             staggerloc = [StaggerLoc.CENTER,StaggerLoc.CORNER]
