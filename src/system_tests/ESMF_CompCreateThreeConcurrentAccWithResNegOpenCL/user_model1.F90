@@ -271,6 +271,7 @@
  
     subroutine user_run(comp, importState, exportState, clock, rc)
         use mpi
+        use iso_c_binding
         implicit none
         interface
           integer(c_int) function OpenCLScaleVec(vdeviceid) &
@@ -279,6 +280,22 @@
           implicit none
           integer(c_int), value :: vdeviceid
           end function OpenCLScaleVec
+        end interface
+
+        interface
+          integer(c_int) function opencl_mmul2d(vdeviceid,&
+            a, b, c, m, k, n) &
+          bind(C, NAME='opencl_mmul2d')
+          use iso_c_binding
+          implicit none
+          integer(c_int), value :: vdeviceid
+          type(c_ptr), value :: a
+          type(c_ptr), value :: b
+          type(c_ptr), value :: c
+          integer(c_size_t), value :: m
+          integer(c_size_t), value :: k
+          integer(c_size_t), value :: n
+          end function opencl_mmul2d
         end interface
 
         type(ESMF_GridComp) :: comp
@@ -291,6 +308,11 @@
 
         type(mydata), pointer :: mydatablock
         type(wrapper) :: mywrapper
+
+        integer, parameter :: MAX_SZ = 32
+        real(c_float), dimension(MAX_SZ, MAX_SZ), target :: a, b, c
+        type(c_ptr) :: aptr, bptr, cptr
+        integer(c_size_t) :: max_dim_sz = MAX_SZ
 
         integer :: i, ndevices, deviceid, rank
 
@@ -339,14 +361,21 @@
           deviceid = device_list(mod(rank, ndevices) + 1)
         end if
 
-        rc = OpenCLScaleVec(deviceid)
+        !rc = OpenCLScaleVec(deviceid)
+        a = 1.0
+        b = 2.0
+        c = 0.0
+        aptr = C_LOC(a)
+        bptr = C_LOC(b)
+        cptr = C_LOC(c)
+        rc = opencl_mmul2d (deviceid,&
+               aptr, bptr, cptr, max_dim_sz, max_dim_sz, max_dim_sz)
         if(rc /= 0) then
-          print *, "ERROR: OpenCLScaleVec() failed !"
+          print *, "ERROR: opencl_mmul2d failed !"
           rc = ESMF_FAILURE
           return
         end if
    
-
         ! Here is where the output state is updated.
         !call ESMF_StateAdd(exportState, humidity, rc=status)
         call ESMF_StatePrint(exportState, rc=rc)
