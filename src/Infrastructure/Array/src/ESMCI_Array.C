@@ -1036,9 +1036,9 @@ Array *Array::create(
           // distributed dimension
           if (temp_counts[jj] < 
             totalUBound[i*redDimCount+j] - totalLBound[i*redDimCount+j] + 1){
-std::cerr << ESMC_METHOD << ": " << temp_counts[jj] << " < "
-  << totalUBound[i*redDimCount+j] << " - " << totalLBound[i*redDimCount+j]
-  << " + 1" << std::endl;
+      // std::cerr << ESMC_METHOD << ": rank " << jj << ": " << temp_counts[jj] << " < "
+      //   << totalUBound[i*redDimCount+j] << " - " << totalLBound[i*redDimCount+j]
+      //   << " + 1" << std::endl;
             ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
               "LocalArray does not accommodate requested element count",
               ESMC_CONTEXT, rc);
