@@ -49,6 +49,35 @@ namespace ESMCI {
 
 //-----------------------------------------------------------------------------
 //
+// Explicit template instantiation (do not confuse with specialization!!!)
+// The reason for explicit instantiation here is that it will tell the compiler
+// explicitly to instantiate the following special instantiations of the 
+// template. This way the definition of the templated methods do not have to
+// sit with the declaration in the header file, but can be located in the 
+// source file.
+//
+//-----------------------------------------------------------------------------
+
+template int DistGrid::setArbSeqIndex<ESMC_I4>(InterArray<ESMC_I4> *arbSeqIndex, 
+  int localDe, int collocation);
+
+template int DistGrid::setArbSeqIndex<ESMC_I8>(InterArray<ESMC_I8> *arbSeqIndex, 
+  int localDe, int collocation);
+
+template int DistGrid::getSequenceIndexLocalDe<ESMC_I4>(int localDe, 
+    int const *index, ESMC_I4 *seqIndex) const;
+
+template int DistGrid::getSequenceIndexLocalDe<ESMC_I8>(int localDe, 
+    int const *index, ESMC_I8 *seqIndex) const;
+
+template int DistGrid::getSequenceIndexTileRelative<ESMC_I4>(int tile,
+    int const *index, ESMC_I4 *seqIndex)const;
+
+template int DistGrid::getSequenceIndexTileRelative<ESMC_I8>(int tile,
+    int const *index, ESMC_I8 *seqIndex)const;
+
+//-----------------------------------------------------------------------------
+//
 // create() and destroy()
 //
 //-----------------------------------------------------------------------------
@@ -4933,40 +4962,6 @@ template<typename T> int DistGrid::setArbSeqIndex(
   return rc;
 }
 //-----------------------------------------------------------------------------
-
-void dummySpecialDistGridMethods(){
-  // this dummy function never gets called, but it ensures that supported method
-  // specializations are available when linking
-  DistGrid dg;
-  int localDe=0;
-  int tile=0;
-  int collocation=0;
-  {
-    InterArray<int> *arbSeqIndex=NULL;
-    dg.setArbSeqIndex(arbSeqIndex, localDe, collocation);
-  }
-  {
-    InterArray<ESMC_I8> *arbSeqIndex=NULL;
-    dg.setArbSeqIndex(arbSeqIndex, localDe, collocation);
-  }
-  {
-    int seqIndex;
-    dg.getSequenceIndexLocalDe(localDe, NULL, &seqIndex);
-  }
-  {
-    ESMC_I8 seqIndex;
-    dg.getSequenceIndexLocalDe(localDe, NULL, &seqIndex);
-  }
-  {
-    int seqIndex;
-    dg.getSequenceIndexTileRelative(tile, NULL, &seqIndex);
-  }
-  {
-    ESMC_I8 seqIndex;
-    dg.getSequenceIndexTileRelative(tile, NULL, &seqIndex);
-  }
-  
-}
 
 
   //============================================================================
