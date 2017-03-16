@@ -340,13 +340,15 @@
         vec = INIT_VAL
         print *, "Vector before scaling = ", vec
 
-        !$omp target if(ndevices > 0) device(deviceid) map(to:vec) map(from:svec)
-        !$omp parallel do
-        do i=1,N
-          svec(i) = SCALE_FACTOR * vec(i)
-        end do
-        !$omp end parallel do
-        !$omp end target
+        if(ndevices > 0) then
+            !$omp target device(deviceid) map(to:vec) map(from:svec)
+            !$omp parallel do
+            do i=1,N
+              svec(i) = SCALE_FACTOR * vec(i)
+            end do
+            !$omp end parallel do
+            !$omp end target
+        end if
 
         print *, "Scaled vector = ", svec
    
