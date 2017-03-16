@@ -271,6 +271,7 @@
  
     subroutine user_run(comp, importState, exportState, clock, rc)
         use mpi
+        use mat_utils
         implicit none
         type(ESMF_GridComp) :: comp
         type(ESMF_State) :: importState, exportState
@@ -288,6 +289,9 @@
         integer, parameter :: N = 100
         integer, parameter :: SCALE_FACTOR = 10
         integer, dimension(:) :: vec(N), svec(N)
+
+        integer, parameter :: MAX_SZ = 32
+        real, dimension(MAX_SZ,MAX_SZ) :: a, b, sc, c
 
         rc = ESMF_SUCCESS
 
@@ -346,7 +350,27 @@
 
         print *, "Scaled vector = ", svec
    
+        a = 1.0
+        b = 2.0
+        c = 0.0
 
+        print *, "Performing mat mult (serial): "
+        rc = smmul2d(a, b, sc)
+        if(rc /= 0) then
+            print *, "ERROR: Serial mat mult failed"
+        end if
+        print *, sc
+
+        print *, "Performing mat mult (OpenACC): "
+        rc = omp_mmul2d(deviceid, a, b, c)
+        if(rc /= 0) then
+            print *, "ERROR: Parallel mat mult failed"
+        end if
+
+        if(.not. all(sc .eq. c)) then
+            print *, "Validation FAILED, Serial result != Parallel result"
+        end if
+        
         ! Here is where the output state is updated.
         !call ESMF_StateAdd(exportState, humidity, rc=status)
         call ESMF_StatePrint(exportState, rc=rc)
