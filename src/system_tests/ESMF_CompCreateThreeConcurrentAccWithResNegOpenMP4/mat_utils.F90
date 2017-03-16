@@ -96,6 +96,8 @@ contains
             return
         end if
 
+        print *, "Performing mat mult on device = ", deviceid
+
         !$omp target device(deviceid) map(to:a,b) map(from:c)
         !$omp parallel do
         do i=1,m
@@ -109,6 +111,8 @@ contains
         end do
         !$omp end parallel do
         !$omp end target
+        
+        !print *, "Result (omp_mmul2d) = ", c
 
         return
     end function omp_mmul2d
