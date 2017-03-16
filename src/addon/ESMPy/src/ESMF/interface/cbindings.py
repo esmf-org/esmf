@@ -9,7 +9,7 @@ import numpy as np
 import sys
 
 import ESMF.api.constants as constants
-from ESMF.util.decorators import deprecated, netcdf
+from ESMF.util.decorators import deprecated, netcdf, beta
 from ESMF.interface.loadESMF import _ESMF
 
 def copy_struct(src):
@@ -443,7 +443,7 @@ _ESMF.ESMC_GridCreateCubedSphere.argtypes = [ct.POINTER(ct.c_int),
                                              #ct.POINTER(ESMP_InterfaceInt),
                                              ct.c_void_p,
                                              ct.POINTER(ct.c_int)]
-@deprecated
+@beta
 def ESMP_GridCreateCubedSphere(tilesize, regDecompPTile=None,
                                #decompFlagPTile=None, deLabelList=None,
                                name=None):

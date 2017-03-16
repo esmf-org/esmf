@@ -13,7 +13,7 @@ import ESMF
 import numpy
 
 # This call enables debug logging
-# esmpy = ESMF.Manager(debug=True)
+esmpy = ESMF.Manager(debug=True)
 
 if ESMF.pet_count() != 6:
     print ("ESMPy cubed sphere Grid Mesh Regridding Example requires 6 processors")
