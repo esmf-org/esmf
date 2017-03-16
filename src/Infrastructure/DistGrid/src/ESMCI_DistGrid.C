@@ -76,6 +76,12 @@ template int DistGrid::getSequenceIndexTileRelative<ESMC_I4>(int tile,
 template int DistGrid::getSequenceIndexTileRelative<ESMC_I8>(int tile,
     int const *index, ESMC_I8 *seqIndex)const;
 
+template int DistGrid::fillSeqIndexList<ESMC_I4>(
+    InterArray<ESMC_I4> *seqIndexList, int localDe, int collocation) const;
+
+template int DistGrid::fillSeqIndexList<ESMC_I8>(
+    InterArray<ESMC_I8> *seqIndexList, int localDe, int collocation) const;
+
 //-----------------------------------------------------------------------------
 //
 // create() and destroy()
