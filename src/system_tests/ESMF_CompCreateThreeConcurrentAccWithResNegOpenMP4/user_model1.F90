@@ -363,7 +363,7 @@
         end if
         print *, sc
 
-        print *, "Performing mat mult (OpenACC): "
+        print *, "Performing mat mult (OpenMP4): "
         rc = omp_mmul2d(deviceid, a, b, c)
         if(rc /= 0) then
             print *, "ERROR: Parallel mat mult failed"
