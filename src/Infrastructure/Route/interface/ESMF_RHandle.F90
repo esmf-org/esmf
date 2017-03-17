@@ -350,10 +350,10 @@ contains
 
 ! !INTERFACE:
   ! Private name; call using ESMF_RouteHandleGet()
-  subroutine ESMF_RouteHandleGetP(rhandle, name, rc)
+  subroutine ESMF_RouteHandleGetP(routehandle, name, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_RouteHandle), intent(in)            :: rhandle
+    type(ESMF_RouteHandle), intent(in)            :: routehandle
     character(len=*),       intent(out), optional :: name
     integer,                intent(out), optional :: rc             
 
@@ -363,7 +363,7 @@ contains
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[rhandle] 
+!     \item[routehandle] 
 !          {\tt ESMF\_RouteHandle} to be queried.
 !     \item [{[name]}]
 !          Name of the RouteHandle object.
@@ -379,10 +379,10 @@ contains
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
-    ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit,rhandle,rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit,routehandle,rc)
 
     if (present(name)) then
-      call c_ESMC_GetName(rhandle, name, localrc)
+      call c_ESMC_GetName(routehandle, name, localrc)
       if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
@@ -403,10 +403,10 @@ contains
 
 ! !INTERFACE:
   ! Private name; call using ESMF_RouteHandleGet()
-  subroutine ESMF_RouteHandleGetI(rhandle, htype, rc)
+  subroutine ESMF_RouteHandleGetI(routehandle, htype, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_RouteHandle), intent(in)  :: rhandle
+    type(ESMF_RouteHandle), intent(in)  :: routehandle
     integer,                intent(out) :: htype
     integer,                intent(out) :: rc             
 
@@ -416,7 +416,7 @@ contains
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[rhandle] 
+!     \item[routehandle] 
 !          {\tt ESMF\_RouteHandle} to be queried.
 !     \item[htype]
 !          Route type.
@@ -432,9 +432,9 @@ contains
     localrc = ESMF_RC_NOT_IMPL
     rc = ESMF_RC_NOT_IMPL
 
-    ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit,rhandle,rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit,routehandle,rc)
 
-    call c_ESMC_RouteHandleGetType(rhandle, htype, localrc)
+    call c_ESMC_RouteHandleGetType(routehandle, htype, localrc)
     if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
@@ -657,10 +657,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE: ESMF_RouteHandlePrint - Print the contents of a RouteHandle
 
 ! !INTERFACE:
-  subroutine ESMF_RouteHandlePrint(rhandle, rc)
+  subroutine ESMF_RouteHandlePrint(routehandle, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_RouteHandle), intent(in)            :: rhandle      
+    type(ESMF_RouteHandle), intent(in)            :: routehandle      
     integer,                intent(out), optional :: rc           
 !
 ! !DESCRIPTION:
@@ -668,7 +668,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !   The arguments are:
 !   \begin{description}
-!   \item[rhandle] 
+!   \item[routehandle] 
 !     {\tt ESMF\_RouteHandle} to print contents of.
 !   \item[{[rc]}] 
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -682,13 +682,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
-    ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit,rhandle,rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit,routehandle,rc)
 
     call ESMF_UtilIOUnitFlush (ESMF_UtilIOStdout, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
-    call c_ESMC_RouteHandlePrint(rhandle, localrc)
+    call c_ESMC_RouteHandlePrint(routehandle, localrc)
     if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
@@ -708,10 +708,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 ! !INTERFACE:
   ! Private name; call using ESMF_RouteHandleSet()
-  subroutine ESMF_RouteHandleSetP(rhandle, name, rc)
+  subroutine ESMF_RouteHandleSetP(routehandle, name, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_RouteHandle), intent(in)            :: rhandle
+    type(ESMF_RouteHandle), intent(in)            :: routehandle
     character(len = *),     intent(in),  optional :: name    
     integer,                intent(out), optional :: rc            
 
@@ -721,7 +721,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !   The arguments are:
 !   \begin{description}
-!   \item[rhandle] 
+!   \item[routehandle] 
 !     {\tt ESMF\_RouteHandle} to be modified.
 !   \item [{[name]}]
 !     The RouteHandle name.
@@ -737,10 +737,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
-    ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit,rhandle,rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit,routehandle,rc)
     
     if (present(name)) then
-      call c_ESMC_SetName(rhandle, "RouteHandle", name, localrc)
+      call c_ESMC_SetName(routehandle, "RouteHandle", name, localrc)
       if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
@@ -761,10 +761,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 ! !INTERFACE:
   ! Private name; call using ESMF_RouteHandleSet()
-  subroutine ESMF_RouteHandleSetI(rhandle, htype, rc)
+  subroutine ESMF_RouteHandleSetI(routehandle, htype, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_RouteHandle), intent(in)  :: rhandle
+    type(ESMF_RouteHandle), intent(in)  :: routehandle
     integer,                intent(in)  :: htype
     integer,                intent(out) :: rc            
 
@@ -774,7 +774,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !   The arguments are:
 !   \begin{description}
-!   \item[rhandle] 
+!   \item[routehandle] 
 !     {\tt ESMF\_RouteHandle} to be modified.
 !   \item[htype]
 !     Route type.
@@ -790,9 +790,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     localrc = ESMF_RC_NOT_IMPL
     rc = ESMF_RC_NOT_IMPL
 
-    ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit,rhandle,rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit,routehandle,rc)
     
-    call c_ESMC_RouteHandleSetType(rhandle, htype, localrc)
+    call c_ESMC_RouteHandleSetType(routehandle, htype, localrc)
     if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
