@@ -350,10 +350,11 @@ contains
 
 ! !INTERFACE:
   ! Private name; call using ESMF_RouteHandleGet()
-  subroutine ESMF_RouteHandleGetP(routehandle, name, rc)
+  subroutine ESMF_RouteHandleGetP(routehandle, keywordEnforcer, name, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_RouteHandle), intent(in)            :: routehandle
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     character(len=*),       intent(out), optional :: name
     integer,                intent(out), optional :: rc             
 
@@ -708,10 +709,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 ! !INTERFACE:
   ! Private name; call using ESMF_RouteHandleSet()
-  subroutine ESMF_RouteHandleSetP(routehandle, name, rc)
+  subroutine ESMF_RouteHandleSetP(routehandle, keywordEnforcer, name, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_RouteHandle), intent(in)            :: routehandle
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     character(len = *),     intent(in),  optional :: name    
     integer,                intent(out), optional :: rc            
 
