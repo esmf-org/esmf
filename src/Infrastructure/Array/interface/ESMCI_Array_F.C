@@ -918,11 +918,12 @@ extern "C" {
     if (ESMC_NOT_PRESENT_FILTER(ignoreUnmatched) != ESMC_NULL_POINTER)
       if (*ignoreUnmatched == ESMF_TRUE) ignoreUnmatchedOpt = true;
     // prepare SparseMatrix vector
-    vector<ESMCI::SparseMatrix<int,int> > sparseMatrix;
+    vector<ESMCI::SparseMatrix<ESMC_I4,ESMC_I4> > sparseMatrix;
     int srcN = (factorIndexList)->extent[0]/2;
     int dstN = (factorIndexList)->extent[0]/2;
-    sparseMatrix.push_back(ESMCI::SparseMatrix<int,int>(*typekindFactors, 
-      factorList, *factorListCount, srcN, dstN, (factorIndexList)->array));
+    sparseMatrix.push_back(ESMCI::SparseMatrix<ESMC_I4,ESMC_I4>(
+      *typekindFactors, factorList, *factorListCount, srcN, dstN, 
+      (factorIndexList)->array));
     // Call into the actual C++ method wrapped inside LogErr handling
     if (ESMC_LogDefault.MsgFoundError(ESMCI::Array::sparseMatMulStore(
       *srcArray, *dstArray, routehandle, sparseMatrix, false, ignoreUnmatchedOpt,
@@ -963,7 +964,7 @@ extern "C" {
     if (ESMC_NOT_PRESENT_FILTER(ignoreUnmatched) != ESMC_NULL_POINTER)
       if (*ignoreUnmatched == ESMF_TRUE) ignoreUnmatchedOpt = true;
     // prepare empty SparseMatrix vector
-    vector<ESMCI::SparseMatrix<int,int> > sparseMatrix;
+    vector<ESMCI::SparseMatrix<ESMC_I4,ESMC_I4> > sparseMatrix;
     // Call into the actual C++ method wrapped inside LogErr handling
     ESMC_LogDefault.MsgFoundError(ESMCI::Array::sparseMatMulStore(
       *srcArray, *dstArray, routehandle, sparseMatrix, false, ignoreUnmatchedOpt,
