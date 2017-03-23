@@ -51,7 +51,7 @@ namespace ESMCI {
 
   class Array;
   template<typename T=int> struct SeqIndex; //TODO: eventually remove T=int default
-  class SparseMatrix;
+  template<typename SIT, typename DIT> class SparseMatrix;
 
   // class definitions
   
@@ -78,22 +78,22 @@ namespace ESMCI {
   template<typename T> bool operator!=(SeqIndex<T> a, SeqIndex<T> b);
   template<typename T> bool operator<(SeqIndex<T> a, SeqIndex<T> b);
   
-  class SeqInd{
+  template<typename T> class SeqInd{
     int n;  // number of components in sequence index
-    int const *index;
+    T const *index;
    public:
     SeqInd(){n=0; index=NULL;}
-    SeqInd(int n_, int const *index_){
+    SeqInd(int n_, T const *index_){
       n = n_;
       index = index_;
     }
-    int getIndex(int i)const{return index[i];}
+    T getIndex(int i)const{return index[i];}
     void print(){
-      printf("SeqInd: (");
+      std::cout << "SeqInd:" << n <<" (";
       int i;
       for (i=0; i<n-1; i++)
-        printf("%d, ", index[i]);
-      printf("%d)\n", index[i]);
+        std::cout << index[i] << ",";
+      std::cout << index[i] << ")\n";
     }
   };
   
@@ -355,6 +355,11 @@ namespace ESMCI {
       int *counts, int *tile, int rootPet, VM *vm);
     int scatter(void *array, ESMC_TypeKind_Flag typekind, int rank,
       int *counts, int *tile, int rootPet, VM *vm);
+    template<typename IT>
+      static int tHaloStore(Array *array, RouteHandle **routehandle,
+      ESMC_HaloStartRegionFlag halostartregionflag=ESMF_REGION_EXCLUSIVE,
+      InterArray<int> *haloLDepth=NULL, InterArray<int> *haloUDepth=NULL,
+      int *pipelineDepthArg=NULL);
     static int haloStore(Array *array, RouteHandle **routehandle,
       ESMC_HaloStartRegionFlag halostartregionflag=ESMF_REGION_EXCLUSIVE,
       InterArray<int> *haloLDepth=NULL, InterArray<int> *haloUDepth=NULL,
@@ -372,13 +377,16 @@ namespace ESMCI {
       bool *finishedflag=NULL, bool *cancelledflag=NULL, 
       ESMC_Region_Flag zeroflag=ESMC_REGION_SELECT, bool checkflag=false);
     static int redistRelease(RouteHandle *routehandle);
-    static int sparseMatMulStore(Array *srcArray, Array *dstArray,
-      RouteHandle **routehandle, std::vector<SparseMatrix> const &sparseMatrix,
+    template<typename SIT, typename DIT>
+      static int sparseMatMulStore(Array *srcArray, Array *dstArray,
+      RouteHandle **routehandle, 
+      std::vector<SparseMatrix<SIT,DIT> > const &sparseMatrix,
       bool haloFlag=false, bool ignoreUnmatched=false, 
       int *srcTermProcessingArg = NULL, int *pipelineDepthArg = NULL);
-    template<typename SRC_INDEX_T, typename DST_INDEX_T>
+    template<typename SIT, typename DIT>
       static int tSparseMatMulStore(Array *srcArray, Array *dstArray,
-      RouteHandle **routehandle, std::vector<SparseMatrix> const &sparseMatrix,
+      RouteHandle **routehandle, 
+      std::vector<SparseMatrix<SIT,DIT> > const &sparseMatrix,
       bool haloFlag=false, bool ignoreUnmatched=false, 
       int *srcTermProcessingArg = NULL, int *pipelineDepthArg = NULL);
     static int sparseMatMul(Array *srcArray, Array *dstArray,
@@ -394,27 +402,31 @@ namespace ESMCI {
   
   
   //============================================================================
-  class SparseMatrix{
+  template<typename SIT, typename DIT> class SparseMatrix{
     ESMC_TypeKind_Flag typekind;  // typekind of factors
     void const *factorList;       // vector of factors
     int factorListCount;          // number of factors
     int srcN;                     // src sequence index width (1 or 2)
     int dstN;                     // dst sequence index width (1 or 2)
-    int const *factorIndexList;   // vector of sequence index elements, each
+    void const *factorIndexList;  // vector of sequence index elements, each
                                   // element is a srcN+dstN tuple:
                                   // (0,..,srcN-1,srcN,..,srcN+dstN-1)
    public:
     SparseMatrix(ESMC_TypeKind_Flag const typekind_, void const *factorList_,
       int const factorListCount_, int const srcN_, int const dstN_,
-      int const *factorIndexList_);
+      void const *factorIndexList_);
     ESMC_TypeKind_Flag getTypekind()const{return typekind;}
     void const *getFactorList()const{return factorList;}
     int getFactorListCount()const{return factorListCount;}
-    SeqInd getSrcSeqIndex(int i)const{
-      return SeqInd(srcN, factorIndexList+(srcN+dstN)*i);
+    SeqInd<SIT> getSrcSeqIndex(int i)const{
+      char *fil = (char *)factorIndexList;
+      return SeqInd<SIT>(srcN, 
+        (SIT *)(fil+(srcN*sizeof(SIT)+dstN*sizeof(DIT))*i));
     }
-    SeqInd getDstSeqIndex(int i)const{
-      return SeqInd(dstN, factorIndexList+(srcN+dstN)*i+srcN);
+    SeqInd<DIT> getDstSeqIndex(int i)const{
+      char *fil = (char *)factorIndexList;
+      return SeqInd<DIT>(dstN, 
+        (DIT *)(fil+(srcN*sizeof(SIT)+dstN*sizeof(DIT))*i+srcN*sizeof(SIT)));
     }
     int getSrcN()const{return srcN;}
     int getDstN()const{return dstN;}
