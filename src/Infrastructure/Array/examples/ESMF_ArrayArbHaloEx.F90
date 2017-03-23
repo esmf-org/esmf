@@ -32,8 +32,8 @@ program ESMF_ArrayArbHaloEx
   character(ESMF_MAXSTR) :: testname
   character(ESMF_MAXSTR) :: failMsg
   
-#define ESMF_KIND_INDEXKIND ESMF_KIND_I4
-#define TEST_I8RANGE_off
+#define ESMF_KIND_INDEXKIND ESMF_KIND_I8
+#define TEST_I8RANGE_on
   
   integer:: i, j, result
   integer(ESMF_KIND_INDEXKIND):: seqIndexList(5) ! arbitrary seqIndices on each PET
@@ -91,7 +91,7 @@ program ESMF_ArrayArbHaloEx
 !BOC
   do i=1, 5
 #ifdef TEST_I8RANGE_on
-    seqIndexList(i) = localPet + (i - 1) * petCount * seqIndexOffset + 1
+    seqIndexList(i) = localPet + (i - 1) * petCount + 1 + seqIndexOffset
 #else
     seqIndexList(i) = localPet + (i - 1) * petCount + 1
 #endif
@@ -150,7 +150,7 @@ program ESMF_ArrayArbHaloEx
   if (localPet==0) then
     allocate(haloList(1))
 #ifdef TEST_I8RANGE_on
-    haloList(:)=(/4398046511106_ESMF_KIND_I8/)
+    haloList(:)=(/1099511627782_ESMF_KIND_I8/)
 #else    
     haloList(:)=(/6/)
 #endif
@@ -161,8 +161,8 @@ program ESMF_ArrayArbHaloEx
   if (localPet==1) then
     allocate(haloList(2))
 #ifdef TEST_I8RANGE_on
-    haloList(:)=(/1_ESMF_KIND_I8,&
-     17592186044419_ESMF_KIND_I8/)
+    haloList(:)=(/1099511627777_ESMF_KIND_I8,&
+                  1099511627795_ESMF_KIND_I8/)
 #else
     haloList(:)=(/1,19/)
 #endif
@@ -173,9 +173,9 @@ program ESMF_ArrayArbHaloEx
   if (localPet==2) then
     allocate(haloList(3))
 #ifdef TEST_I8RANGE_on
-    haloList(:)=(/13194139533316_ESMF_KIND_I8,&
-                   4398046511106_ESMF_KIND_I8,&
-                   8796093022209_ESMF_KIND_I8/)
+    haloList(:)=(/1099511627792_ESMF_KIND_I8,&
+                  1099511627782_ESMF_KIND_I8,&
+                  1099511627785_ESMF_KIND_I8/)
 #else
     haloList(:)=(/16,6,9/)
 #endif
@@ -185,7 +185,14 @@ program ESMF_ArrayArbHaloEx
   endif
   if (localPet==3) then
     allocate(haloList(4))
+#ifdef TEST_I8RANGE_on
+    haloList(:)=(/1099511627777_ESMF_KIND_I8,&
+                  1099511627779_ESMF_KIND_I8,&
+                  1099511627777_ESMF_KIND_I8,&
+                  1099511627780_ESMF_KIND_I8/)
+#else
     haloList(:)=(/1,3,1,4/)
+#endif
     array = ESMF_ArrayCreate(distgrid, farrayPtr1d, &
       haloSeqIndexList=haloList, rc=rc)
     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
@@ -452,28 +459,50 @@ program ESMF_ArrayArbHaloEx
 !EOE
 !BOC
   if (localPet==0) then
-    haloList=(/1/)
+#ifdef TEST_I8RANGE_on
+    haloList(:)=(/1099511627777_ESMF_KIND_I8/)
+#else
+    haloList(:)=(/1/)
+#endif
     array = ESMF_ArrayCreate(distgrid=distgrid, typekind=ESMF_TYPEKIND_R8, &
       distgridToArrayMap=(/2/), haloSeqIndexList=haloList, &
       undistLBound=(/1/), undistUBound=(/3/), rc=rc)
     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   endif
   if (localPet==1) then
-    haloList=(/1,2/)
+#ifdef TEST_I8RANGE_on
+    haloList(:)=(/1099511627777_ESMF_KIND_I8,&
+                  1099511627778_ESMF_KIND_I8/)
+#else
+    haloList(:)=(/1,2/)
+#endif
     array = ESMF_ArrayCreate(distgrid=distgrid, typekind=ESMF_TYPEKIND_R8, &
       distgridToArrayMap=(/2/), haloSeqIndexList=haloList, &
       undistLBound=(/1/), undistUBound=(/3/), rc=rc)
     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   endif
   if (localPet==2) then
-    haloList=(/1,2,3/)
+#ifdef TEST_I8RANGE_on
+    haloList(:)=(/1099511627777_ESMF_KIND_I8,&
+                  1099511627778_ESMF_KIND_I8,&
+                  1099511627779_ESMF_KIND_I8/)
+#else
+    haloList(:)=(/1,2,3/)
+#endif
     array = ESMF_ArrayCreate(distgrid=distgrid, typekind=ESMF_TYPEKIND_R8, &
       distgridToArrayMap=(/2/), haloSeqIndexList=haloList, &
       undistLBound=(/1/), undistUBound=(/3/), rc=rc)
     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   endif
   if (localPet==3) then
-    haloList=(/1,2,3,4/)
+#ifdef TEST_I8RANGE_on
+    haloList(:)=(/1099511627777_ESMF_KIND_I8,&
+                  1099511627778_ESMF_KIND_I8,&
+                  1099511627779_ESMF_KIND_I8,&
+                  1099511627780_ESMF_KIND_I8/)
+#else
+    haloList(:)=(/1,2,3,4/)
+#endif
     array = ESMF_ArrayCreate(distgrid=distgrid, typekind=ESMF_TYPEKIND_R8, &
       distgridToArrayMap=(/2/), haloSeqIndexList=haloList, &
       undistLBound=(/1/), undistUBound=(/3/), rc=rc)
