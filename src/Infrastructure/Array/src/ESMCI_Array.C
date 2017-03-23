@@ -2083,7 +2083,7 @@ int Array::getLinearIndexExclusive(
 template<typename IT> int Array::getSequenceIndexExclusive(
 //
 // !RETURN VALUE:
-//    SeqIndex sequence index
+//    int return code
 //
 // !ARGUMENTS:
 //
@@ -7494,8 +7494,8 @@ template<typename IT1, typename IT2>
   int *responseStreamInt = (int *)responseStream;
   while ((char *)responseStreamInt != responseStream+responseStreamSize){
     int j = *responseStreamInt++;
-    int decompSeqIndex = *responseStreamInt++;
-    int tensorSeqIndex = *responseStreamInt++;
+    IT1 decompSeqIndex = *responseStreamInt++;
+    IT1 tensorSeqIndex = *responseStreamInt++;
     int linIndex = *responseStreamInt++;
     int factorCount = *responseStreamInt++;
     AssociationElement<IT1,IT2> element;
@@ -8881,7 +8881,7 @@ template<typename SIT, typename DIT>
 #ifdef ASMMSTOREPRINT
   sprintf(asmmstoreprintfile, "asmmstoreprint.%05d", localPet);
   asmmstorestream.open(asmmstoreprintfile);
-  cout << "gjt: tensorMixFlag=" << tensorMixFlag
+  asmmstorestream << "gjt: tensorMixFlag=" << tensorMixFlag
     << " srcTensorElementCountEff=" << srcTensorElementCountEff
     << " dstTensorElementCountEff=" << dstTensorElementCountEff
     << "\n";
@@ -10315,7 +10315,7 @@ fprintf(asmmstoreprintfp, "iCount: %d, localDeFactorCount: %d\n", iCount,
           rangeStart;
         while (rangeStart != dstInfoTable[i].end()){
           int vectorLength = 1; // initialize
-          int decompSeqIndex = rangeStart->seqIndex.decompSeqIndex;
+          DIT decompSeqIndex = rangeStart->seqIndex.decompSeqIndex;
           int linIndex = rangeStart->linIndex;
           rangeStop++;
           while((rangeStop != dstInfoTable[i].end())
@@ -10325,10 +10325,11 @@ fprintf(asmmstoreprintfp, "iCount: %d, localDeFactorCount: %d\n", iCount,
             ++vectorLength;
             rangeStop++;
           }
-#ifdef ASMMSTOREPRINT_disabled
-fprintf(asmmstoreprintfp, "dstTensorContigLength: %d, vectorLength: %d, decompSeqIndex: %d\n",
-  dstTensorContigLength, vectorLength, decompSeqIndex);
-fflush(asmmstoreprintfp);
+#ifdef ASMMSTOREPRINT
+asmmstorestream << "gjt: dstTensorContigLength: " << dstTensorContigLength <<
+  " vectorLength: " << vectorLength << " decompSeqIndex: " << decompSeqIndex <<
+  "\n";
+asmmstorestream.flush();
 #endif
           if ((rangeWrite != dstInfoTable[i].begin())
             && ((rangeWrite-1)->vectorLength != vectorLength)){
@@ -10339,6 +10340,9 @@ fflush(asmmstoreprintfp);
           if (vectorLength != dstTensorContigLength){
             ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_INCONS,
             "vectorization failed", ESMC_CONTEXT, &rc);
+#ifdef ASMMSTOREPRINT
+asmmstorestream.close();
+#endif
             return rc;
           }
           *rangeWrite = *rangeStart;  // copy table element
@@ -10587,7 +10591,7 @@ ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
           rangeStart;
         while (rangeStart != srcInfoTable[i].end()){
           int vectorLength = 1; // initialize
-          int decompSeqIndex = rangeStart->seqIndex.decompSeqIndex;
+          SIT decompSeqIndex = rangeStart->seqIndex.decompSeqIndex;
           int linIndex = rangeStart->linIndex;
           rangeStop++;
           while((rangeStop != srcInfoTable[i].end())
