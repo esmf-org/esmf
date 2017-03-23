@@ -32,11 +32,12 @@
 #include "ESMCI_Array.h"
 
 // include higher level, 3rd party or system headers
-#include <cstdio>
-#include <cstring>
+// #include <cstdio>
+// #include <cstring>
 #include <vector>
 #include <map>
 #include <algorithm>
+#include <sstream>
 
 // include ESMF headers
 #include "ESMCI_Macros.h"
@@ -673,6 +674,7 @@ Array *Array::create(
   ESMC_IndexFlag indexflag = ESMC_INDEX_DELOCAL;  // default
   if (indexflagArg != NULL)
     indexflag = *indexflagArg;
+std::cerr << ESMC_METHOD << ": indexflag = " << indexflag << std::endl;
   // figure exclusive region
   vector<int> exclusiveLBoundV(redDimCount*localDeCount);
   vector<int> exclusiveUBoundV(redDimCount*localDeCount);
@@ -1035,13 +1037,15 @@ Array *Array::create(
         if (arrayToDistGridMapArray[jj]){
           // distributed dimension
           if (temp_counts[jj] < 
-            totalUBound[i*redDimCount+j] - totalLBound[i*redDimCount+j] + 1){
-      // std::cerr << ESMC_METHOD << ": rank " << jj << ": " << temp_counts[jj] << " < "
-      //   << totalUBound[i*redDimCount+j] << " - " << totalLBound[i*redDimCount+j]
-      //   << " + 1" << std::endl;
+              totalUBound[i*redDimCount+j] - totalLBound[i*redDimCount+j] + 1){
+            std::stringstream debugmsg;
+            debugmsg << "rank " << jj << ": " << temp_counts[jj] << " < "
+               << totalUBound[i*redDimCount+j] << " - " << totalLBound[i*redDimCount+j]
+               << " + 1";
+            std::cerr << ESMC_METHOD << ": " << debugmsg.str() << std::endl;
             ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
-              "LocalArray does not accommodate requested element count",
-              ESMC_CONTEXT, rc);
+                "LocalArray does not accommodate requested element count",
+                ESMC_CONTEXT, rc);
             return ESMC_NULL_POINTER;
           }
           // move the total bounds according to input info
