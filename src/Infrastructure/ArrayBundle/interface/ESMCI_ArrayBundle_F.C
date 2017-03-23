@@ -632,10 +632,11 @@ extern "C" {
       }
     }
     // prepare SparseMatrix vector
-    vector<ESMCI::SparseMatrix> sparseMatrix;
+    vector<ESMCI::SparseMatrix<ESMC_I4,ESMC_I4> > sparseMatrix;
     int srcN = (factorIndexList)->extent[0]/2;
     int dstN = (factorIndexList)->extent[0]/2;
-    sparseMatrix.push_back(ESMCI::SparseMatrix(*typekindFactors, factorList,
+    sparseMatrix.push_back(ESMCI::SparseMatrix<ESMC_I4,ESMC_I4>(
+      *typekindFactors, factorList,
       *factorListCount, srcN, dstN, (factorIndexList)->array));
     // Call into the actual C++ method wrapped inside LogErr handling
     if (ESMC_LogDefault.MsgFoundError(ESMCI::ArrayBundle::sparseMatMulStore(
@@ -670,7 +671,7 @@ extern "C" {
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     // prepare empty SparseMatrix vector
-    vector<ESMCI::SparseMatrix> sparseMatrix;
+    vector<ESMCI::SparseMatrix<ESMC_I4,ESMC_I4> > sparseMatrix;
     // Call into the actual C++ method wrapped inside LogErr handling
     ESMC_LogDefault.MsgFoundError(ESMCI::ArrayBundle::sparseMatMulStore(
       *srcArraybundle, *dstArraybundle, routehandle, sparseMatrix,

@@ -145,7 +145,7 @@ class ArrayBundle : public ESMC_Base {    // inherits from ESMC_Base class
     static int redistRelease(RouteHandle *routehandle);
     static int sparseMatMulStore(ArrayBundle *srcArraybundle,
       ArrayBundle *dstArraybundle, RouteHandle **routehandle,
-      std::vector<SparseMatrix> &sparseMatrix,
+      std::vector<SparseMatrix<ESMC_I4,ESMC_I4> > &sparseMatrix,
       InterArray<int> *srcTermProcessing=NULL);
     static int sparseMatMul(ArrayBundle *srcArraybundle,
       ArrayBundle *dstArraybundle, RouteHandle **routehandle,

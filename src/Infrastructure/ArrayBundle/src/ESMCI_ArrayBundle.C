@@ -1116,7 +1116,7 @@ int ArrayBundle::sparseMatMulStore(
   ArrayBundle *srcArraybundle,        // in    - source ArrayBundle
   ArrayBundle *dstArraybundle,        // in    - destination ArrayBundle
   RouteHandle **routehandle,          // inout - handle to precomputed comm
-  vector<SparseMatrix> &sparseMatrix, // in    - sparse matrix
+  vector<SparseMatrix<ESMC_I4,ESMC_I4> > &sparseMatrix, // in - sparse matrix
   InterArray<int> *srcTermProcessing  // inout - srcTermProcessing parameters
   ){    
 //
