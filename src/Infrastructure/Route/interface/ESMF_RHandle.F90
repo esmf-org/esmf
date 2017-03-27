@@ -461,7 +461,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !ARGUMENTS:
     type(ESMF_RouteHandle), intent(in)            :: routehandle
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    integer,             intent(out), optional :: rc
+    integer,                intent(out), optional :: rc
 
 ! !DESCRIPTION:
 !   Return {\tt .true.} if the {\tt routehandle} has been created. Otherwise return 
@@ -658,10 +658,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE: ESMF_RouteHandlePrint - Print the contents of a RouteHandle
 
 ! !INTERFACE:
-  subroutine ESMF_RouteHandlePrint(routehandle, rc)
+  subroutine ESMF_RouteHandlePrint(routehandle, keywordEnforcer, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_RouteHandle), intent(in)            :: routehandle      
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                intent(out), optional :: rc           
 !
 ! !DESCRIPTION:
@@ -712,7 +713,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   subroutine ESMF_RouteHandleSetP(routehandle, keywordEnforcer, name, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_RouteHandle), intent(in)            :: routehandle
+    type(ESMF_RouteHandle), intent(inout)         :: routehandle
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     character(len = *),     intent(in),  optional :: name    
     integer,                intent(out), optional :: rc            

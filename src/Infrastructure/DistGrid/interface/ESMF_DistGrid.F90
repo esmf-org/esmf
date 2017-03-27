@@ -3601,7 +3601,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   subroutine ESMF_DistGridSet(distgrid, collocationPDim, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_DistGrid),  intent(in)              :: distgrid
+    type(ESMF_DistGrid),  intent(inout)           :: distgrid
     integer,              intent(in)              :: collocationPDim(:)
     integer,              intent(out),  optional  :: rc  
 !
