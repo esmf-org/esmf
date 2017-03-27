@@ -123,17 +123,23 @@ static vector<string> esmfRuntimeEnvValue;
 #define ESMC_METHOD "ESMCI::VMIdKeyCompare()"
 static bool VMKeyCompare(char *vmKey1, char *vmKey2){
   int i;
-// std::cout << ESMC_METHOD << ": entered" << std::endl;
+#if 0
+  std::cout << ESMC_METHOD << ": entered" << std::endl;
+#endif
   for (i=0; i<vmKeyWidth; i++)
-    if (vmKey1[i] != vmKey2[i]) {
-      // std::cout << ESMC_METHOD
-      //     << "loop broke with i = " << i << ", vmKeyWidth = " << vmKeyWidth << std::endl;
+    if (vmKey1[i] != vmKey2[i]){
+#if 0
+      std::cout << ESMC_METHOD << "loop broke with i = " << i 
+        << ", vmKeyWidth = " << vmKeyWidth << std::endl;
+#endif
       break;
     }
   if (i==vmKeyWidth) return true;
+#if 0
   else
-    // std::cout << ESMC_METHOD
-    //     << ": vmKey1[" << i << "] = " << vmKey1[i] << " != vmKey2[" << i << "] = " << vmKey2[i] << std::endl;
+    std::cout << ESMC_METHOD  << ": vmKey1[" << i << "] = " 
+      << vmKey1[i] << " != vmKey2[" << i << "] = " << vmKey2[i] << std::endl;
+#endif
   return false;
 }
 
@@ -264,14 +270,18 @@ bool VMIdCompare(
 //
 //EOPI
 //-----------------------------------------------------------------------------
-// std::cout << ESMC_METHOD << ": entered" << std::endl;
+#if 0
+  std::cout << ESMC_METHOD << ": entered" << std::endl;
+#endif
   if (vmID1==NULL || vmID2==NULL){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
       "- Invalid vmIDs", ESMC_CONTEXT, NULL);
     return false;    // bail out
   }
-  if (vmID1->localID != vmID2->localID) {
+  if (vmID1->localID != vmID2->localID){
+#if 0
     std::cout << ESMC_METHOD << ": localID " << vmID1->localID << " != " << vmID2->localID << std::endl;
+#endif
     return false;
   }
   return VMKeyCompare(vmID1->vmKey, vmID2->vmKey);
