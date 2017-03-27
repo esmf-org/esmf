@@ -62,6 +62,27 @@ namespace ESMCI {
 
 //-----------------------------------------------------------------------------
 //
+// Explicit template instantiation (do not confuse with specialization!!!)
+// The reason for explicit instantiation here is that it will tell the compiler
+// explicitly to instantiate the following special instantiations of the 
+// template. This way the definition of the templated methods do not have to
+// sit with the declaration in the header file, but can be located in the 
+// source file.
+//
+//-----------------------------------------------------------------------------
+
+template SparseMatrix<ESMC_I4,ESMC_I4>::SparseMatrix(
+  ESMC_TypeKind_Flag const typekind_, void const *factorList_,
+  int const factorListCount_, int const srcN_, int const dstN_,
+  void const *factorIndexList_);
+
+template SparseMatrix<ESMC_I8,ESMC_I8>::SparseMatrix(
+  ESMC_TypeKind_Flag const typekind_, void const *factorList_,
+  int const factorListCount_, int const srcN_, int const dstN_,
+  void const *factorIndexList_);
+
+//-----------------------------------------------------------------------------
+//
 // constructor and destructor
 //
 //-----------------------------------------------------------------------------
