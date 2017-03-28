@@ -1061,19 +1061,22 @@ void IO::undist_arraycreate_alldist(Array *src_array_p, Array **dest_array_p, in
 
   int rank = src_array_p->getRank ();
   DistGrid *dg = src_array_p->getDistGrid ();
-  int dimcount = dg->getDimCount ();
-  int tilecount = dg->getTileCount ();
 
+  int tilecount = dg->getTileCount ();
+  //TODO: bail out if tilecount > 1, following code assumes tilecount==1
+  
   const int *arrayToDistGridMap = src_array_p->getArrayToDistGridMap();
   const int *undistLBound = src_array_p->getUndistLBound();
   const int *undistUBound = src_array_p->getUndistUBound();
   const int *minIndexPTile = dg->getMinIndexPDimPTile ();
   const int *maxIndexPTile = dg->getMaxIndexPDimPTile ();
+  const int *regDecomp = dg->getRegDecomp ();
 
-  // construct the new minIndex and maxIndex
-//std::cout << ESMC_METHOD << ": construct the new minIndex and maxIndex." << std::endl;
+  // construct the new minIndex and maxIndex and regDecomp taking into account
+  // how Array dimensions are mapped against DistGrid dimensions
   std::vector<int> minIndexNew(rank);
   std::vector<int> maxIndexNew(rank);
+  std::vector<int> regDecompNew(rank);
   int jj = 0;
   for (int i=0; i<rank; i++) {
     int j = arrayToDistGridMap[i];
@@ -1081,37 +1084,30 @@ void IO::undist_arraycreate_alldist(Array *src_array_p, Array **dest_array_p, in
       // valid DistGrid dimension
       minIndexNew[i] = minIndexPTile[j-1];
       maxIndexNew[i] = maxIndexPTile[j-1];
+      regDecompNew[i] = regDecomp[j-1];
     } else {
       // undistributed dimension
       minIndexNew[i] = undistLBound[jj];
       maxIndexNew[i] = undistUBound[jj];
+      regDecompNew[i] = 1;  // no actual decomposition in this dimension
       jj++;
     }
   }
 
-  // general dimensionality of regDecomp
-  std::vector<int> regDecomp(rank);
-  VM *currentVM = VM::getCurrent(&localrc);
-  regDecomp[0] = currentVM->getNpets(); // first element petCount for default distribution
-  for (int i=1; i<rank; i++)  // default all other dims to 1
-    regDecomp[i] = 1;
-
-  // create the fixed up DistGrid
-//std::cout << ESMC_METHOD << ": creating new DistGrid" << std::endl;
+  // create the fixed up DistGrid, making sure to use original DELayout
   ESMCI::InterArray<int> minIndexInterface(&minIndexNew[0], rank);
   ESMCI::InterArray<int> maxIndexInterface(&maxIndexNew[0], rank);
-  ESMCI::InterArray<int> regDecompInterface(&regDecomp[0] , rank);
+  ESMCI::InterArray<int> regDecompInterface(&regDecompNew[0] , rank);
+  DELayout *delayout = dg->getDELayout();
   DistGrid *dg_temp = DistGrid::create(&minIndexInterface,
-                 &maxIndexInterface, &regDecompInterface,
-      NULL, 0, NULL, NULL, NULL, NULL, NULL, (ESMCI::DELayout*)NULL, NULL,
-      &localrc);
+    &maxIndexInterface, &regDecompInterface,
+    NULL, 0, NULL, NULL, NULL, NULL, NULL, delayout, NULL, &localrc);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc)) {
     return;
   }
 
   // finally, create the fixed up Array using pointer to original data.
   // Assuming only 1 DE/PET since redist step would have been performed previously.
-//std::cout << ESMC_METHOD << ": creating alias Array" << std::endl;
   CopyFlag copyflag = DATA_REF;
   *dest_array_p = Array::create (src_array_p->getLocalarrayList(), 1,
       dg_temp, copyflag,
