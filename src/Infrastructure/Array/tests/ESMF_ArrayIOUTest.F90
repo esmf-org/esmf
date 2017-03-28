@@ -1365,11 +1365,8 @@ program ESMF_ArrayIOUTest
   ! initialize data
   arrayPtrR8D4 = 12345._ESMF_KIND_R8*localPet
 
-#define DO_NOT_TEST_UNDISTR_FIRST
-#ifndef DO_NOT_TEST_UNDISTR_FIRST
-!TODO: re-enable this test once fixed inside of ESMF
 !------------------------------------------------------------------------
-  !NEX_DISABLED_UTest_Multi_Proc_Only
+  !NEX_UTest_Multi_Proc_Only
 ! ! Given an ESMF array, write the netCDF file.
   write(name, *) "Array with undistributed dimension (first) write to NetCDF Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
@@ -1380,7 +1377,6 @@ program ESMF_ArrayIOUTest
 #else
   write(failMsg, *) "Did not return ESMF_RC_LIB_NOT_PRESENT"
   call ESMF_Test((rc==ESMF_RC_LIB_NOT_PRESENT), name, failMsg, result, ESMF_SRCLINE)
-#endif
 #endif
 
 !------------------------------------------------------------------------
@@ -1393,10 +1389,8 @@ program ESMF_ArrayIOUTest
           name="myData", rc=rc)
   call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
-#ifndef DO_NOT_TEST_UNDISTR_FIRST
-!TODO: re-enable this test once fixed inside of ESMF
 !------------------------------------------------------------------------
-  !NEX_DISABLED_UTest_Multi_Proc_Only
+  !NEX_UTest_Multi_Proc_Only
 ! ! Given an ESMF array, read the netCDF file.
   write(name, *) "Array with undistributed dimension (first) read from NetCDF Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
@@ -1410,7 +1404,7 @@ program ESMF_ArrayIOUTest
 #endif
 
 !------------------------------------------------------------------------
-  !NEX_DISABLED_UTest_Multi_Proc_Only
+  !NEX_UTest_Multi_Proc_Only
 ! ! Access read-in Array
   write(name, *) "Array with undistributed dimensions access read-in data Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
@@ -1418,13 +1412,12 @@ program ESMF_ArrayIOUTest
   call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 !------------------------------------------------------------------------
-  !NEX_DISABLED_UTest_Multi_Proc_Only
+  !NEX_UTest_Multi_Proc_Only
 ! ! Compare read-in Array to expected
   write(name, *) "Array with undistributed dimensions comparison Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   passfail = all (arrayPtrR8D4_r == 12345.0_ESMF_KIND_R8*localPet)
   call ESMF_Test(passfail, name, failMsg, result, ESMF_SRCLINE)
-#endif
 
 !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
