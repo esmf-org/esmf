@@ -465,7 +465,7 @@ int Array::constructContiguousFlag(int redDimCount){
 //
 //-----------------------------------------------------------------------------
 
-;//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::Array::create()"
 //BOPI
@@ -544,6 +544,13 @@ Array *Array::create(
   }
   const DELayout *delayout = distgrid->getDELayout();
   int dimCount = distgrid->getDimCount();
+#ifdef DEBUGGING
+  {
+    std::stringstream debugmsg;
+    debugmsg << "rank=" << rank << " dimCount=" << dimCount;
+    ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_INFO);
+  }
+#endif
   // check if distgridToArrayMap was provided and matches rest of arguments
   vector<int> distgridToArrayMapArrayV(dimCount);
   int *distgridToArrayMapArray = &distgridToArrayMapArrayV[0];
@@ -597,6 +604,13 @@ Array *Array::create(
   // determine tensorCount
   int tensorCount = rank - redDimCount;
   if (tensorCount < 0) tensorCount = 0;
+#ifdef DEBUGGING
+  {
+    std::stringstream debugmsg;
+    debugmsg << "rank=" << rank << " dimCount=" << dimCount;
+    ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_INFO);
+  }
+#endif
   // generate arrayToDistGridMap
   vector<int> arrayToDistGridMapArrayV(rank);
   int *arrayToDistGridMapArray = &arrayToDistGridMapArrayV[0];
@@ -695,8 +709,12 @@ Array *Array::create(
   ESMC_IndexFlag indexflag = ESMC_INDEX_DELOCAL;  // default
   if (indexflagArg != NULL)
     indexflag = *indexflagArg;
-#if 0
-  std::cerr << ESMC_METHOD << ": indexflag = " << indexflag << std::endl;
+#ifdef DEBUGGING
+  {
+    std::stringstream debugmsg;
+    debugmsg << "indexflag=" << indexflag;
+    ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_INFO);
+  }
 #endif
   // figure exclusive region
   vector<int> exclusiveLBoundV(redDimCount*localDeCount);
@@ -1062,10 +1080,10 @@ Array *Array::create(
           if (temp_counts[jj] < 
             totalUBound[i*redDimCount+j] - totalLBound[i*redDimCount+j] + 1){
             std::stringstream debugmsg;
-            debugmsg << "rank " << jj << ": " << temp_counts[jj] << " < "
+            debugmsg << "jj=" << jj << ": " << temp_counts[jj] << " < "
               << totalUBound[i*redDimCount+j] << " - " 
               << totalLBound[i*redDimCount+j] << " + 1";
-            std::cerr << ESMC_METHOD << ": " << debugmsg.str() << std::endl;
+            ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_INFO);
             ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
               "LocalArray does not accommodate requested element count",
               ESMC_CONTEXT, rc);
