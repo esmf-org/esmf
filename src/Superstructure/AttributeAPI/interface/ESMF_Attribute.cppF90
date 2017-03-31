@@ -2213,7 +2213,7 @@ contains
 !           Attribute hierarchy when looking for this Attribute, the default
 !           is {\tt ESMF\_ATTNEST\_ON}.  This flag is documented in section
 !           \ref{const:attnest}.
-!     \item [{[typekind}]]
+!     \item [{[typekind]}]
 !           The typekind of the Attribute. This flag is documented in section
 !           \ref{const:typekind}.
 !     \item [{[itemCount]}]
@@ -2288,7 +2288,7 @@ contains
 !           Attribute hierarchy when looking for this Attribute, the default
 !           is {\tt ESMF\_ATTNEST\_ON}.  This flag is documented in section
 !           \ref{const:attnest}.
-!     \item [{[typekind}]]
+!     \item [{[typekind]}]
 !           The typekind of the Attribute. This flag is documented in section
 !           \ref{const:typekind}.
 !     \item [{[itemCount]}]
