@@ -18,6 +18,7 @@
 // INCLUDES
 //------------------------------------------------------------------------------
 #include <string>
+#include <utility>
 
 #include "ESMCI_Macros.h"
 #include "ESMCI_VM.h"
@@ -644,13 +645,15 @@ extern "C" {
                                 char *file,
                                 char *variableName, int *len_variableName,
                                 char *dimensionLabels, int *size_dimLabels,
+                                char *variableAtts, int *size_varAtts,
                                 ESMC_Logical *opt_overwriteflag,
                                 ESMC_FileStatus_Flag *status,
                                 int *timeslice, ESMC_IOFmt_Flag *iofmt,
                                 int *rc,
                                 ESMCI_FortranStrLenArg file_l,
                                 ESMCI_FortranStrLenArg varname_l,
-                                ESMCI_FortranStrLenArg dimlabels_l) {
+                                ESMCI_FortranStrLenArg dimlabels_l,
+                                ESMCI_FortranStrLenArg varatts_l) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_arraywrite()"
     bool overwriteflag;
@@ -681,9 +684,25 @@ extern "C" {
       }
     }
 
+    // form variable attributes into name/value pairs
+    vector<pair<string, string> > varAttPairs;
+    int n_varatts = *size_varAtts;
+    if (n_varatts > 0) {
+      varAttPairs.reserve (n_varatts);
+      char *cp0 = variableAtts;
+      char *cp1 = variableAtts + n_varatts*varatts_l;
+      for (int i=0; i<n_varatts; i++) {
+        varAttPairs.push_back(std::make_pair (
+          string (cp0, ESMC_F90lentrim (cp0, varatts_l)),
+          string (cp1, ESMC_F90lentrim (cp1, varatts_l)) ));
+        cp0 += varatts_l;
+        cp1 += varatts_l;
+      }
+    }
+
     overwriteflag = (*opt_overwriteflag == ESMF_TRUE);
     // Call into the actual C++ method wrapped inside LogErr handling
-    localrc = (*array)->write(fileName, varName, dimLabels,
+    localrc = (*array)->write(fileName, varName, dimLabels, varAttPairs,
                               &overwriteflag, status, timeslice, iofmt);
     ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       ESMC_NOT_PRESENT_FILTER(rc));

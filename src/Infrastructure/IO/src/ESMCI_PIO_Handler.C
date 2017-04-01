@@ -782,6 +782,7 @@ void PIO_Handler::arrayWrite(
   Array *arr_p,                           // (in) Destination of write
   const char * const name,                // (in) Optional array name
   const std::vector<std::string> &dimLabels, // (in) Optional dimension labels
+  const std::vector<std::pair<std::string,std::string> > &varAtts,   // (in) Optional variable attributes
   int *timeslice,                         // (in) Optional timeslice
   int *rc                                 // (out) - Error return code
 //
@@ -1154,6 +1155,25 @@ void PIO_Handler::arrayWrite(
     }
   }
 #endif // ESMFIO_DEBUG
+  if (varAtts.size() > 0) {
+#if 0
+    if (varAtts.size () > 0) {
+      std::cout << ESMC_METHOD << ": putting variable attributes:" << std::endl;
+      for (unsigned i=0; i<varAtts.size (); i++)
+        std::cout << "   attribute " << i << ": " << varname << ":"
+            << varAtts[i].first << " = \"" << varAtts[i].second << "\"" << std::endl;
+    }
+#endif
+    for (unsigned i=0; i<varAtts.size(); i++) {
+      int piorc = pio_cpp_put_att_string (pioFileDesc, vardesc,
+          varAtts[i].first.c_str(), varAtts[i].second.c_str());
+      if (!CHECKPIOERROR(piorc,  std::string ("Attempting to add variable attribute for variable: ") + varname,
+          ESMF_RC_FILE_WRITE, (*rc))) {
+        free (vardesc);
+        return;
+      }
+    }
+  }
   PRINTMSG("calling enddef, status = " << statusOK);
   if ((getFormat() != ESMF_IOFMT_BIN)) {
     piorc = pio_cpp_enddef(pioFileDesc);

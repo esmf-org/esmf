@@ -1910,7 +1910,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !INTERFACE:
   subroutine ESMF_ArrayWrite(array, fileName, keywordEnforcer, &
-     variableName, dimLabels, overwrite, status, timeslice, iofmt, rc)
+     variableName, dimLabels, varAtts, overwrite, status, timeslice, iofmt, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_Array),           intent(in)            :: array
@@ -1918,6 +1918,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     character(*),               intent(in),  optional :: variableName
     character(*),               intent(in),  optional :: dimLabels(:)
+    character(*),               intent(in),  optional :: varAtts(:,:)
     logical,                    intent(in),  optional :: overwrite
     type(ESMF_FileStatus_Flag), intent(in),  optional :: status
     integer,                    intent(in),  optional :: timeslice
@@ -1948,13 +1949,16 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !    supports variable name. If the IO format does not support this 
 !    (such as binary format), ESMF will return an error code.
 !   \item[{[dimLabels]}]
-!     An array of dimension labels for the Field data in the output file.  Enough
+!     An array of dimension labels for the NetCDF variable in the output file.  Enough
 !     label names must be provided to label each axis; default is
 !     the variable name with {\tt \_dimnnn}, where nnn is the dimension number,
 !     appended.  When using the {\tt timeslice} option, the {\tt time} dimension
-!     is unaffected.  Use this argument only in the IO format (such as NetCDF) that
-!     supports variable and dimension names. If the IO format does not support it
-!     (such as binary format), ESMF will return an error code.
+!     is unaffected.  Use this argument only with a NetCDF IO format. If binary format
+!     is used, ESMF will return an error code.
+!   \item[{[varAtts]}]
+!     A 2D array of attribute name/value pairs to be associated with the NetCDF variable
+!     in the output file.  Use this argument only with a NetCDF IO format.
+!     If binary format is used, ESMF will return an error code.
 !   \item[{[overwrite]}]
 !    \begin{sloppypar}
 !      A logical flag, the default is .false., i.e., existing Array data may
@@ -2009,16 +2013,43 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !EOP
 !------------------------------------------------------------------------------
+
+    interface
+      subroutine c_esmc_arraywrite (array, fileName,  &
+          variableName, len_varName,  &
+          dimLabels, size_dimlabels,  &
+          varAtts,   size_varatts,    &
+          overwriteflag,          &
+          status, timeslice, iofmt, rc)
+        use ESMF_UtilTypesMod     ! ESMF utility types
+        use ESMF_ArrayCreateMod
+        implicit none
+        type(ESMF_Array) :: array
+        character(*) :: fileName
+        character(*), optional :: variableName
+        integer     , optional :: len_varName
+        character(*), optional :: dimLabels(*)
+        integer     , optional :: size_dimlabels
+        character(*), optional :: varAtts(*)
+        integer     , optional :: size_varatts
+        type(ESMF_Logical), optional :: overwriteflag
+        type(ESMF_FileStatus_Flag), optional :: status
+        integer,      optional :: timeslice
+        type(ESMF_IOFmt_Flag), optional :: iofmt
+        integer, intent (out), optional :: rc
+      end subroutine
+    end interface
+
     ! Local vars
     integer                    :: localrc           ! local return code
     integer                    :: len_varName       ! helper variable
     integer                    :: size_dimLabels    ! helper variable
+    integer                    :: size_varatts      ! helper variable
     type(ESMF_Logical)         :: opt_overwriteflag ! helper variable
     type(ESMF_FileStatus_Flag) :: opt_status        ! helper variable
     type(ESMF_IOFmt_Flag)      :: opt_iofmt         ! helper variable
     integer                    :: file_ext_p
     integer                    :: ndims
-    character                  :: dimLabels_dummy(1)
 
     ! Initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
@@ -2077,19 +2108,20 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       size_dimlabels = 0
     end if
 
-    ! Call into the C++ interface, which will call IO object
-    if (present (dimLabels)) then
-      call c_esmc_arraywrite(array, fileName,                    &
-          variableName, len_varName, dimLabels, size_dimlabels,  &
-          opt_overwriteflag,          &
-          opt_status, timeslice, opt_iofmt, localrc)
+    if (present (varAtts)) then
+      size_varatts = size (varAtts,1)
     else
-      call c_esmc_arraywrite(array, fileName,                    &
-          variableName, len_varName, dimLabels_dummy, 0,         &
-          opt_overwriteflag,          &
-          opt_status, timeslice, opt_iofmt, localrc)
+      size_varatts = 0
     end if
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU,         &
+
+    ! Call into the C++ interface, which will call IO object
+    call c_esmc_arraywrite(array, fileName,  &
+        variableName, len_varName,  &
+        dimLabels, size_dimlabels,  &
+        varAtts,   size_varatts,    &
+        opt_overwriteflag,          &
+        opt_status, timeslice, opt_iofmt, localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU,  &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Return successfully

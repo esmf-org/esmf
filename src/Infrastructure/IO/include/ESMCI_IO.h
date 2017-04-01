@@ -40,6 +40,7 @@
 #include <cstdio>
 #include <vector>
 #include <string>
+#include <utility>
 
 //-------------------------------------------------------------------------
 
@@ -59,8 +60,9 @@ namespace ESMCI {
   struct IO_ObjectContainer {
     enum IOListObjectType type;
     IO_ObjectType object;           // e.g., Array, Attribute
-    char name[ESMF_MAXSTR];
+    std::string name;
     std::vector<std::string> dimLabels;
+    std::vector<std::pair<std::string,std::string> > varAtts;
     ESMC_I8 number;
 
     IO_ObjectContainer () {
@@ -69,26 +71,23 @@ namespace ESMCI {
       name[0] = '\0';
       number = 0;
     }
-    IO_ObjectContainer (Array *arr_p, const char * const arrName, const std::vector<std::string> &dimLabels) {
+    IO_ObjectContainer (Array *arr_p, const std::string &arrName,
+        const std::vector<std::string> &dimLabels,
+        const std::vector<std::pair<std::string,std::string> > &varAtts) {
       type = IO_ARRAY;
       object.arr = arr_p;
-      if ((const char * const)NULL != arrName) {
-        int len = strlen(arrName);
-        if (len >= ESMF_MAXSTR) {
-          strncpy(name, arrName, (ESMF_MAXSTR - 1));
-          name[ESMF_MAXSTR - 1] = '\0';
-        } else {
-          strcpy(name, arrName);
-        }
-      } else {
-        name[0] = '\0';
-      }
+      if (arrName.length() > 0)
+        name = arrName;
+
       if (dimLabels.size() > 0)
         this->dimLabels = dimLabels;
+
+      if (varAtts.size() > 0)
+        this->varAtts = varAtts;
       number = 0;
     }
     ~IO_ObjectContainer() {
-      name[0] = '\0';
+      name = "";
       object.arr = (Array *)NULL;
       number = 0;
       type = IO_NULL;
@@ -100,7 +99,7 @@ namespace ESMCI {
       return object.attr;
     }
     const char *getName(void) {
-      return name;
+      return name.c_str();
     }
 
   };
@@ -189,7 +188,8 @@ namespace ESMCI {
     int addArray(Array *arr_p);
     int addArray(Array *arr_p,
                  const std::string &variableName,
-                 const std::vector<std::string> &dimLabels);
+                 const std::vector<std::string> &dimLabels,
+                 const std::vector<std::pair<std::string,std::string> > &varAtts);
 // TBI
 #if 0
     void addAttributes(ESMC_Base *obj_p,

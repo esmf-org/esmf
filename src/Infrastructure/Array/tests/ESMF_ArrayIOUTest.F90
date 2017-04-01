@@ -70,6 +70,7 @@ program ESMF_ArrayIOUTest
                        computationalLWidth(:),computationalUWidth(:)
   integer, allocatable :: exclusiveLBound(:,:), exclusiveUBound(:,:)
   integer      :: localDeCount, localPet, petCount
+  character(ESMF_MAXSTR), allocatable     :: varatts(:,:)
   integer :: i,j,k
   integer :: Maxvalue(1), diff
   real(ESMF_KIND_R8) :: r8Max(1), r8diff
@@ -207,8 +208,16 @@ program ESMF_ArrayIOUTest
 ! ! Given an ESMF array, write the netCDF file.
   write(name, *) "Write ESMF_Array with Halo to NetCDF Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
+
+  allocate (varatts (5,2))
+  varatts(1,:) = (/ "long_name       ", "Regional temp   " /)
+  varatts(2,:) = (/ "units           ", "degrees_F       " /)
+  varatts(3,:) = (/ "cartesian_x_axis", "X               " /)
+  varatts(4,:) = (/ "cartesian_y_axis", "Y               " /)
+  varatts(5,:) = (/ "cartesian_z_axis", "Z               " /)
   call ESMF_ArrayWrite(array_withhalo, fileName='file3D_withhalo.nc',    &
       dimLabels=(/"x_axis", "y_axis", "z_axis"/),  &
+      varAtts=varatts,  &
       status=ESMF_FILESTATUS_REPLACE, rc=rc)
 #if (defined ESMF_PIO && ( defined ESMF_NETCDF || defined ESMF_PNETCDF))
   call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)

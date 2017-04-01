@@ -42,6 +42,7 @@
 #include <cstdio>
 #include <stdint.h>
 #include <string>
+#include <utility>
 
 //-------------------------------------------------------------------------
 
@@ -334,6 +335,7 @@ namespace ESMCI {
          int *timeslice, ESMC_IOFmt_Flag *iofmt);
     int write(const std::string &file, const std::string &variableName,
          const std::vector<std::string> &dimLabels,
+         const std::vector<std::pair<std::string,std::string> > &varAtts,
          bool *overwrite, ESMC_FileStatus_Flag *status,
          int *timeslice, ESMC_IOFmt_Flag *iofmt);
     int print() const;
