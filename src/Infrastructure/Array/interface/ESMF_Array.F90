@@ -2029,11 +2029,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         character(*), optional :: variableName
         integer     , optional :: len_varName
         character(*), optional :: dimLabels(*)
-        integer     , optional :: size_dimlabels
-        integer     , optional :: len_dimlabels
+        integer                :: size_dimlabels
+        integer                :: len_dimlabels
         character(*), optional :: varAtts(size_varatts,2)
-        integer     , optional :: size_varatts
-        integer     , optional :: len_varatts
+        integer                :: size_varatts
+        integer                :: len_varatts
         type(ESMF_Logical), optional :: overwriteflag
         type(ESMF_FileStatus_Flag), optional :: status
         integer,      optional :: timeslice
