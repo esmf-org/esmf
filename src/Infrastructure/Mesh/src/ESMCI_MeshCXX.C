@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2016, University Corporation for Atmospheric Research,
+// Copyright 2002-2017, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -707,11 +707,11 @@ int MeshCXX::addElements(int num_elems, int *elemId,
   int regridConserve = 1; // Set this to 1 to force the frac field to be 
                           // added (required for conservative regridding.
 
-  InterfaceInt *elemMaskII = NULL;
+  InterArray<int> *elemMaskII = NULL;
   if (elemMask) {
     int extent[1];
     extent[0] = num_elems;
-    elemMaskII = new InterfaceInt(elemMask, 1, extent);
+    elemMaskII = new InterArray<int>(elemMask, 1, extent);
   }
   ESMCI_meshaddelements(&meshPointer, &num_elems, elemId, elemType, elemMaskII,
                         &areaPresent, elemArea, &coordsPresent, elemCoords, 
@@ -778,7 +778,7 @@ int MeshCXX::addNodes(int numNodes, int *nodeId, double *nodeCoord,
 
      // Call into Mesh glue to add nodes
      ESMCI_meshaddnodes(&meshPointer, &numNodes, nodeId, 
-                        nodeCoord, nodeOwner, (InterfaceInt *)NULL,
+                        nodeCoord, nodeOwner, (InterArray<int> *)NULL,
                         &coordSys, &spatialDim,
                         &localrc); 
        if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,

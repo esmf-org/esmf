@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2016, University Corporation for Atmospheric Research, 
+// Copyright 2002-2017, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -1382,6 +1382,15 @@ extern "C" {
     ESMCI::VMId *vmID = ESMCI::VM::getCurrentID(&rc);  // get current vmID
     ESMCI::VM::addFObject(fobject, *objectID, vmID);
   }
+
+  void FTN_X(c_esmc_vmgetobject)(void **fobject, int *objectID, ESMCI::VMId *vmid,
+      int *type, ESMC_Logical *obj_found, int *rc){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_vmgetobject()"
+    bool found;
+    ESMCI::VM::getObject(fobject, *objectID, vmid, *type, &found, rc);
+    *obj_found = (found)?ESMF_TRUE:ESMF_FALSE;
+  }
     
   void FTN_X(c_esmc_vmrmfobject)(void **fobject){
 #undef  ESMC_METHOD
@@ -1389,7 +1398,7 @@ extern "C" {
     int rc;
     ESMCI::VM::rmFObject(fobject);
   }
-    
+ 
   void FTN_X(c_esmc_vmrmobject)(ESMC_Base **base){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_vmrmobject()"

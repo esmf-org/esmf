@@ -87,7 +87,11 @@ sub run_benchmark {
                 $sum=$sum + $bm_ET;
                 $count=$count + 1;
         }
-        $BM_ave = $sum/$count;
+        if ($count != 0 ){
+        	$BM_ave = $sum/$count;
+        } else {
+                $BM_ave = 0;
+        }
 	if ( $BM_ave >= $threshold ) {
 		$th = 0;
 	} else {
@@ -276,7 +280,7 @@ use File::Find
 						$file =~ s/\.\/// ;
                                         	$PC=$ans*100;
                                         	chomp($file);
-                                        	system ("echo 'PASS: $file' >> $TEST_DIR/bm_pass_info ");
+                                        	system ("echo 'Benchmark PASS: $file' >> $TEST_DIR/bm_pass_info ");
                                         	system ("echo '      Test elapsed time: $test_ET msec.' >> $TEST_DIR/bm_pass_info ");
                                         	system ("echo '      Benchmark elapsed time: $bm_ET msec.' >> $TEST_DIR/bm_pass_info ");
                                         	system ("echo '      Difference: $PC%' >> $TEST_DIR/bm_pass_info ");
@@ -288,7 +292,7 @@ use File::Find
 						$file =~ s/\.\/// ;
 						$PC=$ans*100;
 						chomp($file);
-						system ("echo 'FAIL: $file' >> $TEST_DIR/bm_fail_info ");
+						system ("echo 'Benchmark FAIL: $file' >> $TEST_DIR/bm_fail_info ");
 						system ("echo '      Test elapsed time: $test_ET msec.' >> $TEST_DIR/bm_fail_info ");
 						system ("echo '      Benchmark elapsed time: $bm_ET msec.' >> $TEST_DIR/bm_fail_info ");
 						system ("echo '      Increase: $PC%' >> $TEST_DIR/bm_fail_info ");
@@ -317,13 +321,13 @@ use File::Find
 
 	# Delete ./ from all lists
         foreach ( @pass_list) {
-                s/\.\//PASS: /; # Delete all the "./"
+                s/\.\//Benchmark PASS: /; # Delete all the "./"
 	}
         foreach ( @test_list) {
                 s/\.\//TEST FILE NOT FOUND: /; # Delete all the "./"
 	}
         foreach ( @bm_list) {
-                s/\.\//BM FILE NOT FOUND: /; # Delete all the "./"
+                s/\.\//benchmark FILE NOT FOUND: /; # Delete all the "./"
 	}
         foreach ( @fail_list) {
                 s/\.\///; # Delete all the "./"

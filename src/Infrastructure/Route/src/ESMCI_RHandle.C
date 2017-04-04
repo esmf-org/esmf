@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2016, University Corporation for Atmospheric Research, 
+// Copyright 2002-2017, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -337,11 +337,11 @@ int RouteHandle::print(
     std::vector<int> minIndexV;
     minIndexV.push_back(1);
     minIndexV.push_back(1);
-    InterfaceInt *minIndex = new InterfaceInt(minIndexV);
+    InterArray *minIndex = new InterArray(minIndexV);
     std::vector<int> maxIndexV;
     maxIndexV.push_back(petCount);
     maxIndexV.push_back(petCount);
-    InterfaceInt *maxIndex = new InterfaceInt(maxIndexV);
+    InterArray *maxIndex = new InterArray(maxIndexV);
     DELayout *delayout = NULL;
     DistGrid *dg = DistGrid::create(minIndex, maxIndex, NULL, NULL, 0, NULL,
       NULL, NULL, NULL, NULL, delayout, NULL, &localrc);

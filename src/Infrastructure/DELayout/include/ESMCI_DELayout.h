@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2016, University Corporation for Atmospheric Research, 
+// Copyright 2002-2017, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -128,8 +128,8 @@ class DELayout : public ESMC_Base {    // inherits from ESMC_Base class
     static DELayout *create(int *petMap, int petMapCount,
       ESMC_Pin_Flag *pinFlag, VM *vm=NULL, int *rc=NULL);
     static DELayout *create(int *deCount=NULL,
-      InterfaceInt *deGrouping=NULL, ESMC_Pin_Flag *pinFlag=NULL,
-      InterfaceInt *petList=NULL, VM *vm=NULL, int *rc=NULL);
+      InterArray<int> *deGrouping=NULL, ESMC_Pin_Flag *pinFlag=NULL,
+      InterArray<int> *petList=NULL, VM *vm=NULL, int *rc=NULL);
     static int destroy(ESMCI::DELayout **layout, bool noGarbage=false);
     // get() and set()
     VM *getVM()                       const {return vm;}
@@ -323,6 +323,7 @@ class XXE{
       // the need for XXE stream rewrite (which would be far too expensive to
       // do during exec())!
     int lastFilterBitField;         // filterBitField during last exec() call
+    bool superVectorOkay;           // flag to indicate that super-vector okay
   private:
     int max;                        // maximum number of elements in stream
     int storageMaxCount;            // maximum number of elements in storage
@@ -347,6 +348,7 @@ class XXE{
       xxeSubMaxCount = xxeSubMaxCountArg;
       bufferInfoList.reserve(1000);  // initial preparation
       lastFilterBitField = 0x0;
+      superVectorOkay = true;
     }
     ~XXE(){
       // destructor
@@ -368,7 +370,7 @@ class XXE{
         delete xxeSubList[i];
       delete [] xxeSubList;
       // BufferInfo objects held in bufferInfoList
-      for (int i=0; i<bufferInfoList.size(); i++)
+      for (unsigned int i=0; i<bufferInfoList.size(); i++)
         delete bufferInfoList[i];
       bufferInfoList.clear();
     }
@@ -406,7 +408,9 @@ class XXE{
     }
     int exec(int rraCount=0, char **rraList=NULL, int *vectorLength=NULL,
       int filterBitField=0x0, bool *finished=NULL, bool *cancelled=NULL, 
-      double *dTime=NULL, int indexStart=-1, int indexStop=-1);
+      double *dTime=NULL, int indexStart=-1, int indexStop=-1,
+      int superVecSize_r=-1, int superVecSize_s=1, int superVecSize_t=1,
+      int *superVecSize_i=NULL, int *superVecSize_j=NULL);
     int print(FILE *fp, int rraCount=0, char **rraList=NULL,
       int filterBitField=0x0, int indexStart=-1, int indexStop=-1);
     int printProfile(FILE *fp);
@@ -505,40 +509,6 @@ class XXE{
     int appendProfileMessage(int predicateBitField, char *messageString);
     int appendMessage(int predicateBitField, char *messageString);
     
-  private:
-    template<typename T, typename U, typename V>
-    static void psv(T *element, TKId elementTK, U *factorList, TKId factorTK,
-      V *valueList, TKId valueTK, int factorCount, int resolved);
-    template<typename T, typename U, typename V>
-    static void pss(T *element, TKId elementTK, U *factor, TKId factorTK,
-      V *value, TKId valueTK, int resolved);
-    template<typename T, typename V>
-    static void sssDstRra(T *rraBase, TKId elementTK, int *rraOffsetList,
-      V *valueBase, int *valueOffsetList, TKId valueTK, int termCount,
-      int vectorLength, int resolved);
-    template<typename T, typename V>
-    static void ssslDstRra(T **rraBaseList, int *rraIndexList, TKId elementTK,
-      int *rraOffsetList, V **valueBaseList,
-      int *valueOffsetList, int *baseListIndexList,
-      TKId valueTK, int termCount, int vectorLength, int resolved);
-    template<typename T, typename U, typename V>
-    static void psssDstRra(T *rraBase, TKId elementTK, int *rraOffsetList,
-      U **factorList, TKId factorTK, V *valueBase, int *valueOffsetList,
-      TKId valueTK, int termCount, int vectorLength, int resolved);
-    template<typename T, typename U, typename V>
-    static void pssslDstRra(T **rraBaseList, int *rraIndexList, TKId elementTK,
-      int *rraOffsetList, U **factorList, TKId factorTK, V **valueBaseList,
-      int *valueOffsetList, int *baseListIndexList,
-      TKId valueTK, int termCount, int vectorLength, int resolved);
-    template<typename T, typename U, typename V>
-    static void psssSrcRra(T *rraBase, TKId valueTK, int *rraOffsetList,
-      U **factorList, TKId factorTK, V *elementBase, int *elementOffsetList,
-      TKId elementTK, int termCount, int vectorLength, int resolved);
-    template<typename T, typename U, typename V>
-    static void pssscRra(T *rraBase, TKId elementTK, int *rraOffsetList,
-      U **factorList, TKId factorTK, V *valueList, TKId valueTK,
-      int termCount, int vectorLength, int resolved);
-
   public:
       
     // specific stream element types, used to interpret the elements in stream
@@ -1002,6 +972,47 @@ class XXE{
       bool activeFlag;
       bool cancelledFlag;
     }CommhandleInfo;
+
+  private:
+    template<typename T>
+    inline static void exec_memGatherSrcRRA(
+      MemGatherSrcRRAInfo *xxeMemGatherSrcRRAInfo, int vectorL, char **rraList);
+    template<typename T>
+    inline static void exec_memGatherSrcRRASuper(
+      MemGatherSrcRRAInfo *xxeMemGatherSrcRRAInfo, int vectorL, char **rraList,
+      int size_r, int size_s, int size_t, int *size_i, int *size_j);
+    template<typename T, typename U, typename V>
+    static void psv(T *element, TKId elementTK, U *factorList, TKId factorTK,
+      V *valueList, TKId valueTK, int factorCount, int resolved);
+    template<typename T, typename U, typename V>
+    static void pss(T *element, TKId elementTK, U *factor, TKId factorTK,
+      V *value, TKId valueTK, int resolved);
+    template<typename T, typename V>
+    static void sssDstRra(T *rraBase, TKId elementTK, int *rraOffsetList,
+      V *valueBase, int *valueOffsetList, TKId valueTK, int termCount,
+      int vectorLength, int resolved);
+    template<typename T, typename V>
+    static void ssslDstRra(T **rraBaseList, int *rraIndexList, TKId elementTK,
+      int *rraOffsetList, V **valueBaseList,
+      int *valueOffsetList, int *baseListIndexList,
+      TKId valueTK, int termCount, int vectorLength, int resolved);
+    template<typename T, typename U, typename V>
+    static void psssDstRra(T *rraBase, TKId elementTK, int *rraOffsetList,
+      U **factorList, TKId factorTK, V *valueBase, int *valueOffsetList,
+      TKId valueTK, int termCount, int vectorLength, int resolved);
+    template<typename T, typename U, typename V>
+    static void pssslDstRra(T **rraBaseList, int *rraIndexList, TKId elementTK,
+      int *rraOffsetList, U **factorList, TKId factorTK, V **valueBaseList,
+      int *valueOffsetList, int *baseListIndexList,
+      TKId valueTK, int termCount, int vectorLength, int resolved);
+    template<typename T, typename U, typename V>
+    static void psssSrcRra(T *rraBase, TKId valueTK, int *rraOffsetList,
+      U **factorList, TKId factorTK, V *elementBase, int *elementOffsetList,
+      TKId elementTK, int termCount, int vectorLength, int resolved);
+    template<typename T, typename U, typename V>
+    static void pssscRra(T *rraBase, TKId elementTK, int *rraOffsetList,
+      U **factorList, TKId factorTK, V *valueList, TKId valueTK,
+      int termCount, int vectorLength, int resolved);
 
 };  // class XXE
 

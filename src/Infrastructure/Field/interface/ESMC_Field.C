@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2016, University Corporation for Atmospheric Research,
+// Copyright 2002-2017, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -41,8 +41,8 @@ extern "C" {
 #define ESMC_METHOD "ESMC_FieldCreateGridArraySpec()"
   ESMC_Field ESMC_FieldCreateGridArraySpec(ESMC_Grid grid, 
     ESMC_ArraySpec arrayspec, enum ESMC_StaggerLoc staggerloc,
-    ESMC_InterfaceInt *gridToFieldMap, 
-    ESMC_InterfaceInt *ungriddedLBound, ESMC_InterfaceInt *ungriddedUBound, 
+    ESMC_InterArrayInt *gridToFieldMap, 
+    ESMC_InterArrayInt *ungriddedLBound, ESMC_InterArrayInt *ungriddedUBound, 
     const char *name, int *rc){
     // Initialize return code. Assume routine not implemented
     if (rc) *rc = ESMF_RC_NOT_IMPL;
@@ -72,8 +72,8 @@ extern "C" {
 #define ESMC_METHOD "ESMC_FieldCreateGridTypeKind()"
   ESMC_Field ESMC_FieldCreateGridTypeKind(ESMC_Grid grid, 
     enum ESMC_TypeKind_Flag typekind, enum ESMC_StaggerLoc staggerloc,
-    ESMC_InterfaceInt *gridToFieldMap, 
-    ESMC_InterfaceInt *ungriddedLBound, ESMC_InterfaceInt *ungriddedUBound, 
+    ESMC_InterArrayInt *gridToFieldMap, 
+    ESMC_InterArrayInt *ungriddedLBound, ESMC_InterArrayInt *ungriddedUBound, 
     const char *name, int *rc){
     // Initialize return code. Assume routine not implemented
     if (rc) *rc = ESMF_RC_NOT_IMPL;
@@ -102,8 +102,8 @@ extern "C" {
 #define ESMC_METHOD "ESMC_FieldCreateMeshArraySpec()"
   ESMC_Field ESMC_FieldCreateMeshArraySpec(ESMC_Mesh mesh, 
     ESMC_ArraySpec arrayspec,
-    ESMC_InterfaceInt *gridToFieldMap, 
-    ESMC_InterfaceInt *ungriddedLBound, ESMC_InterfaceInt *ungriddedUBound, 
+    ESMC_InterArrayInt *gridToFieldMap, 
+    ESMC_InterArrayInt *ungriddedLBound, ESMC_InterArrayInt *ungriddedUBound, 
     const char *name, int *rc){
     // Initialize return code. Assume routine not implemented
     if (rc) *rc = ESMF_RC_NOT_IMPL;
@@ -131,8 +131,8 @@ extern "C" {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_FieldCreateMeshTypeKind()"
   ESMC_Field ESMC_FieldCreateMeshTypeKind(ESMC_Mesh mesh, enum ESMC_TypeKind_Flag typekind,
-    enum ESMC_MeshLoc_Flag meshloc, ESMC_InterfaceInt *gridToFieldMap, 
-    ESMC_InterfaceInt *ungriddedLBound, ESMC_InterfaceInt *ungriddedUBound, 
+    enum ESMC_MeshLoc_Flag meshloc, ESMC_InterArrayInt *gridToFieldMap, 
+    ESMC_InterArrayInt *ungriddedLBound, ESMC_InterArrayInt *ungriddedUBound, 
     const char *name, int *rc){
     // Initialize return code. Assume routine not implemented
     if (rc) *rc = ESMF_RC_NOT_IMPL;
@@ -290,9 +290,9 @@ int ESMC_FieldGetBounds(ESMC_Field field,
   // typecase into ESMCI type
   ESMCI::Field *fieldp = reinterpret_cast<ESMCI::Field *>(field.ptr);
 
-  // create InterfaceInts to pass into C++
-  ESMCI::InterfaceInt *exLB = new ESMCI::InterfaceInt(exclusiveLBound, rank);
-  ESMCI::InterfaceInt *exUB = new ESMCI::InterfaceInt(exclusiveUBound, rank);
+  // create InterArrays to pass into C++
+  ESMCI::InterArray<int> *exLB = new ESMCI::InterArray<int>(exclusiveLBound, rank);
+  ESMCI::InterArray<int> *exUB = new ESMCI::InterArray<int>(exclusiveUBound, rank);
 
   // Invoke the C++ interface
   localrc = ESMCI::Field::getbounds(fieldp, localDe, exLB, exUB);
@@ -386,8 +386,8 @@ int ESMC_FieldGetBounds(ESMC_Field field,
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_FieldRegridStore()"
   int ESMC_FieldRegridStore(ESMC_Field srcField, ESMC_Field dstField,
-                            ESMC_InterfaceInt *srcMaskValues, 
-                            ESMC_InterfaceInt *dstMaskValues,
+                            ESMC_InterArrayInt *srcMaskValues, 
+                            ESMC_InterArrayInt *dstMaskValues,
                             ESMC_RouteHandle *routehandle, 
                             enum ESMC_RegridMethod_Flag *regridmethod, 
 			                enum ESMC_PoleMethod_Flag *polemethod,
@@ -539,8 +539,8 @@ int ESMC_FieldGetBounds(ESMC_Field field,
 #define ESMC_METHOD "ESMC_FieldCreateLocStreamArraySpec()"
   ESMC_Field ESMC_FieldCreateLocStreamArraySpec(ESMC_LocStream locstream, 
     ESMC_ArraySpec arrayspec,
-    ESMC_InterfaceInt *gridToFieldMap, 
-    ESMC_InterfaceInt *ungriddedLBound, ESMC_InterfaceInt *ungriddedUBound, 
+    ESMC_InterArrayInt *gridToFieldMap, 
+    ESMC_InterArrayInt *ungriddedLBound, ESMC_InterArrayInt *ungriddedUBound, 
     const char *name, int *rc){
     // Initialize return code. Assume routine not implemented
     if (rc) *rc = ESMF_RC_NOT_IMPL;
@@ -568,8 +568,8 @@ int ESMC_FieldGetBounds(ESMC_Field field,
 #define ESMC_METHOD "ESMC_FieldCreateLocStreamTypeKind()"
   ESMC_Field ESMC_FieldCreateLocStreamTypeKind(ESMC_LocStream locstream, 
     enum ESMC_TypeKind_Flag typekind,
-    ESMC_InterfaceInt *gridToFieldMap, 
-    ESMC_InterfaceInt *ungriddedLBound, ESMC_InterfaceInt *ungriddedUBound, 
+    ESMC_InterArrayInt *gridToFieldMap, 
+    ESMC_InterArrayInt *ungriddedLBound, ESMC_InterArrayInt *ungriddedUBound, 
     const char *name, int *rc){
     // Initialize return code. Assume routine not implemented
     if (rc) *rc = ESMF_RC_NOT_IMPL;

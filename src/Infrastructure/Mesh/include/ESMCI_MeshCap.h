@@ -1,6 +1,6 @@
 // $Id$
 // Earth System Modeling Framework
-// Copyright 2002-2016, University Corporation for Atmospheric Research, 
+// Copyright 2002-2017, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -52,7 +52,7 @@
     }
 
     void MeshCap_to_PointList(ESMC_MeshLoc_Flag meshLoc, 
-                                   ESMCI::InterfaceInt *maskValuesArg, PointList **out_pl,
+                                   ESMCI::InterArray<int> *maskValuesArg, PointList **out_pl,
                                    int *rc);
 
     static MeshCap *create_from_ptr(void **_mesh, 
@@ -66,14 +66,14 @@
 
 
     void meshaddnodes(int *num_nodes, int *nodeId, 
-                      double *nodeCoord, int *nodeOwner, InterfaceInt *nodeMaskII,
+                      double *nodeCoord, int *nodeOwner, InterArray<int> *nodeMaskII,
                       ESMC_CoordSys_Flag *_coordSys, int *_orig_sdim,
                       int *rc); 
     
     void meshwrite(char *fname, int *rc,
                    ESMCI_FortranStrLenArg nlen);
     
-    void meshaddelements(int *_num_elems, int *elemId, int *elemType, InterfaceInt *_elemMaskII ,
+    void meshaddelements(int *_num_elems, int *elemId, int *elemType, InterArray<int> *_elemMaskII ,
                          int *_areaPresent, double *elemArea, 
                          int *_coordsPresent, double *elemCoords, 
                          int *_num_elemConn, int *elemConn, int *regridConserve, 
@@ -101,15 +101,16 @@
     
     
     static void meshinfoserialize(int *intMeshFreed,
-                           char *buffer, int *length, int *offset,
-                           ESMC_InquireFlag *inquireflag, int *localrc,
-                           ESMCI_FortranStrLenArg buffer_l);
+                                  int *spatialDim, int *parametricDim, 
+                                  char *buffer, int *length, int *offset,
+                                  ESMC_InquireFlag *inquireflag, int *localrc,
+                                  ESMCI_FortranStrLenArg buffer_l);
     
     
     static void meshinfodeserialize(int *intMeshFreed, 
-                             char *buffer, int *offset, int *localrc,
-                             ESMCI_FortranStrLenArg buffer_l);
-    
+                                    int *spatialDim, int *parametricDim, 
+                                    char *buffer, int *offset, int *localrc,
+                                    ESMCI_FortranStrLenArg buffer_l);
     
     void meshserialize(char *buffer, int *length, int *offset,
                        ESMC_InquireFlag *inquireflag, int *rc,
@@ -142,12 +143,12 @@
                      double *pnts, double *td, int *ti, int *triInd, int *rc);
 
 
-    void meshturnoncellmask(ESMCI::InterfaceInt *maskValuesArg,  int *rc);
+    void meshturnoncellmask(ESMCI::InterArray<int> *maskValuesArg,  int *rc);
     
     void meshturnoffcellmask(int *rc);
     
 
-    void meshturnonnodemask(ESMCI::InterfaceInt *maskValuesArg,  int *rc);
+    void meshturnonnodemask(ESMCI::InterArray<int> *maskValuesArg,  int *rc);
     
     void meshturnoffnodemask(int *rc);
 
@@ -213,7 +214,7 @@
 
     static MeshCap *GridToMesh(const Grid &grid_, int staggerLoc, 
                         const std::vector<ESMCI::Array*> &arrays,
-                        ESMCI::InterfaceInt *maskValuesArg,
+                        ESMCI::InterArray<int> *maskValuesArg,
                         int *regridConserve, int *rc);
 
      static void xgridregrid_create(ESMCI::VM **vmpp,

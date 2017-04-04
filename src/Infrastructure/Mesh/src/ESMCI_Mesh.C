@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2016, University Corporation for Atmospheric Research, 
+// Copyright 2002-2017, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -1811,7 +1811,7 @@ void Mesh::resolve_cspec_delete_owners(UInt obj_type) {
 }
 
 // This method converts a Mesh to a PointList
- ESMCI::PointList *Mesh::MeshToPointList(ESMC_MeshLoc_Flag meshLoc, ESMCI::InterfaceInt *maskValuesArg, int *rc) {
+ ESMCI::PointList *Mesh::MeshToPointList(ESMC_MeshLoc_Flag meshLoc, ESMCI::InterArray<int> *maskValuesArg, int *rc) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::Mesh::MeshToPointList()"
 

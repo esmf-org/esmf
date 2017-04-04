@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2016, University Corporation for Atmospheric Research, 
+// Copyright 2002-2017, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -38,8 +38,8 @@ static const char *const version = "$Id$";
 
 extern "C" {
 
-ESMC_DistGrid ESMC_DistGridCreate(ESMC_InterfaceInt minIndexInterfaceArg,
-  ESMC_InterfaceInt maxIndexInterfaceArg, int *rc){ //TODO: complete this API
+ESMC_DistGrid ESMC_DistGridCreate(ESMC_InterArrayInt minIndexInterfaceArg,
+  ESMC_InterArrayInt maxIndexInterfaceArg, int *rc){ //TODO: complete this API
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_DistGridCreate()"
 
@@ -50,10 +50,10 @@ ESMC_DistGrid ESMC_DistGridCreate(ESMC_InterfaceInt minIndexInterfaceArg,
   ESMC_DistGrid distgrid;
   
   // typecast into ESMCI types
-  ESMCI::InterfaceInt *minIndexInterface =
-    (ESMCI::InterfaceInt *)&minIndexInterfaceArg;
-  ESMCI::InterfaceInt *maxIndexInterface =
-    (ESMCI::InterfaceInt *)&maxIndexInterfaceArg;
+  ESMCI::InterArray<int> *minIndexInterface =
+    (ESMCI::InterArray<int> *)&minIndexInterfaceArg;
+  ESMCI::InterArray<int> *maxIndexInterface =
+    (ESMCI::InterArray<int> *)&maxIndexInterfaceArg;
   
   distgrid.ptr = (void *)
     ESMCI::DistGrid::create(minIndexInterface, maxIndexInterface, NULL,

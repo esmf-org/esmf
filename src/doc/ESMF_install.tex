@@ -7,9 +7,7 @@ Major releases of the ESMF software can be downloaded by following
 the instructions on the the {\bf Download} link on the ESMF 
 website, \htmladdnormallink{http://www.earthsystemmodeling.org}{http://www.earthsystemmodeling.org}.
 
-The ESMF is distributed as a full source code tree.  You will need
-to compile the code into the {\tt libesmf.a} library.
-On some platforms a shared library, {\tt libesmf.so}, is also created.
+The ESMF is distributed as a full source code tree.
 Follow the instructions in the following sections
 to build the library and link it with your application.
 
@@ -25,6 +23,13 @@ Some portions of the ESMF library can offer enhanced capabilities when
 certain third party libraries are available. This section describes
 these dependencies and the associated environment settings
 that allow the user to control them.
+
+On many platforms, the ESMF library is also created as a shared library.
+When third party libraries are called from ESMF, it is recommended that they are
+also available as shared libraries.  In cases where they are not, they should at
+least be compiled with the position independent code option enabled (e.g., -fPIC on
+Linux with gfortran/gcc) where necessary, so that the ESMF shared library
+build can successfully incorporate them.
 
 \subsubsection{LAPACK}
 \label{sec:lapack}
@@ -136,7 +141,6 @@ Specifies the path where the NetCDF header files are located.
 Specifies the path where the NetCDF library file is located.
 
 \item[ESMF\_NETCDF\_LIBS] Typical value: {\tt "-lnetcdf"} 
-(no default).
 
 Specifies the linker directives needed to link the NetCDF library to
 the application.
@@ -146,6 +150,9 @@ typical case where {\tt ESMF\_NETCDF} is set to {\tt "standard"},
 {\tt ESMF\_NETCDF\_LIBS} is set to {\tt "-lnetcdf"}.  
 When {\tt ESMF\_NETCDF} is set to {\tt "split"}, {\tt ESMF\_NETCDF\_LIBS} 
 is set to {\tt "-lnetcdff -lnetcdf"}.
+
+If the hdf5 library is required, append {\tt "-lhdf5\_hl -lhdf5"} to the
+desired setting.  E.g. {\tt "-lnetcdff -lnetcdf -lhdf5\_hl -lhdf5"}
 \end{description}
 
 \subsubsection{Parallel-NetCDF}

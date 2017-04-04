@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2016, University Corporation for Atmospheric Research, 
+// Copyright 2002-2017, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -39,8 +39,8 @@ int main(void){
   ESMC_ArraySpec arrayspec;
   enum ESMC_StaggerLoc staggerloc=ESMC_STAGGERLOC_CENTER;
   int *gridToFieldMap, *ungriddedLBound, *ungriddedUBound, *maxIndex;
-  ESMC_InterfaceInt i_gridToFieldMap, i_ungriddedLBound, i_ungriddedUBound;
-  ESMC_InterfaceInt i_maxIndex;
+  ESMC_InterArrayInt i_gridToFieldMap, i_ungriddedLBound, i_ungriddedUBound;
+  ESMC_InterArrayInt i_maxIndex;
   ESMC_Field field, field2;
 
   int num_elem, num_node, conn_size;
@@ -146,7 +146,7 @@ int main(void){
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
   gridToFieldMap = (int *)malloc(sizeof(int));
   gridToFieldMap[0] = 1;
-  rc = ESMC_InterfaceIntSet(&i_gridToFieldMap, gridToFieldMap, 1);
+  rc = ESMC_InterArrayIntSet(&i_gridToFieldMap, gridToFieldMap, 1);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
   
@@ -157,7 +157,7 @@ int main(void){
   ungriddedLBound = (int *)malloc(2*sizeof(int));
   ungriddedLBound[0] = 1;
   ungriddedLBound[1] = 1;
-  rc = ESMC_InterfaceIntSet(&i_ungriddedLBound, ungriddedLBound, 2);
+  rc = ESMC_InterArrayIntSet(&i_ungriddedLBound, ungriddedLBound, 2);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
 
@@ -168,7 +168,7 @@ int main(void){
   ungriddedUBound = (int *)malloc(2*sizeof(int));
   ungriddedUBound[0] = 2;
   ungriddedUBound[1] = 3;
-  rc = ESMC_InterfaceIntSet(&i_ungriddedUBound, ungriddedUBound, 2);
+  rc = ESMC_InterArrayIntSet(&i_ungriddedUBound, ungriddedUBound, 2);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
  
@@ -286,7 +286,7 @@ int main(void){
   maxIndex = (int *)malloc(2*sizeof(int));
   maxIndex[0] = 4;
   maxIndex[1] = 4;
-  rc = ESMC_InterfaceIntSet(&i_maxIndex, maxIndex, 2);
+  rc = ESMC_InterArrayIntSet(&i_maxIndex, maxIndex, 2);
   rc = ESMC_ArraySpecSet(&arrayspec, 2, ESMC_TYPEKIND_R8);
   grid=ESMC_GridCreateNoPeriDim(&i_maxIndex, 0, 0, NULL, &rc);
   field=ESMC_FieldCreateGridArraySpec(grid, arrayspec, staggerloc, 0, 0, 0, "must have a name", &rc);

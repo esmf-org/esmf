@@ -40,7 +40,7 @@
 \end{verbatim}
 
 \bigskip{\sf DESCRIPTION:\\}
-Component that drives Model, Mediator, and Connector components. For every Driver time step the same run sequence, i.e. sequence of Model, Mediator, and Connector {\tt Run} methods is called. The run sequence is fully customizable. The default run sequence implements explicit time stepping.
+Component that drives and coordinates initialization of its child components: Model, Mediator, and Connector components. For every Driver time step the same run sequence, i.e. sequence of Model, Mediator, and Connector {\tt Run} methods is called. The run sequence is fully customizable. The default run sequence implements explicit time stepping.
 
 \bigskip{\sf SUPER:}
 \begin{verbatim}  ESMF_GridComp
@@ -60,12 +60,29 @@ Component that drives Model, Mediator, and Connector components. For every Drive
 \begin{itemize}
 \item phase 0: ({\sc Required, NUOPC Provided})
   \begin{itemize}
-  \item Initialize the {\tt InitializePhaseMap} Attribute according to the NUOPC Initialize Phase Definition (IPD) version 00 (see section \ref{IPD} for a precise definition). The default implementation sets the following mapping:
+  \item Ensure that the {\tt InitializePhaseMap} and {\tt InternalInitializePhaseMap} attributes are set consistent with the available NUOPC Initialize Phase Definition (IPD) versions (see section \ref{IPD} for a precise definition). The default implementation uses IPDv02 for {\tt InitializePhaseMap}, and sets
     \begin{itemize}
-    \item IPDv00p1 = 1: ({\sc Required, NUOPC Provided})
+    \item IPDv02p1  ({\sc NUOPC Provided})
+    \item IPDv02p3  ({\sc NUOPC Provided})
+    \item IPDv02p5  ({\sc NUOPC Provided}).
     \end{itemize}  
+ The default implementation uses IPDv05 for {\tt InternalInitializePhaseMap}, and sets
+    \begin{itemize}
+    \item IPDv05p1  ({\sc NUOPC Provided})
+    \item IPDv05p2  ({\sc NUOPC Provided})
+    \item IPDv05p3  ({\sc NUOPC Provided})
+    \item IPDv05p4  ({\sc NUOPC Provided})
+    \item IPDv05p6  ({\sc NUOPC Provided})
+    \item IPDv05p8  ({\sc NUOPC Provided}).
+    \end{itemize}    
   \end{itemize}  
-\item IPDv00p1 ({\sc NUOPC Provided})
+\item phase 1: ({\sc Required, NUOPC Provided})
+  \begin{itemize}
+    \item A default Initialize entry point for the higher level (e.g. application level) to initialize the Driver with a single call.
+    \item Internally calls into the  {\tt InitializePhaseMap}: IPDv02p1, IPDv02p3, IPDv02p5 phases in sequence.
+  \end{itemize}  
+
+\item {\tt InitializePhaseMap}: IPDv02p1 ({\sc NUOPC Provided})
   \begin{itemize}
   \item Allocate and initialize internal data structures.
   \item If the internal clock is not yet set, set the default internal clock to be a copy of the incoming clock, but only if the incoming clock is valid.
@@ -74,12 +91,57 @@ Component that drives Model, Mediator, and Connector components. For every Drive
     \item Call {\tt NUOPC\_DriverAddComp()} for all Model, Mediator, and Connector components to be added.
     \item Optionally replace the default clock. 
   \end{itemize}
-  \item {\it Optional specialization} to set run sequence: {\tt label\_SetRunSequence}.
-
+  \item Create States for all of the child GridComps.
+  \item Create Connectors to/from Driver component itself.
+  \item Set default run sequence.
   \item Execute Initialize phase=0 for all Model, Mediator, and Connector components. This is the method where each component is required to initialize its {\tt InitializePhaseMap} Attribute.
   \item {\it Optional specialization} to analyze and modify the {\tt InitializePhaseMap} Attribute of the child components before the Driver uses it: {\tt label\_ModifyInitializePhaseMap}.
-  \item Drive the initialize sequence for the child components, compatible with up to IPDv04, as documented in section \ref{IPD}.
+  \item {\it Optional specialization} to set run sequence: {\tt label\_SetRunSequence}.
+  \item Drive the initialize sequence for the child components, compatible with up to IPDv05, as documented in section \ref{IPD}, through IPDv05p3.
   \end{itemize}  
+
+\item {\tt InitializePhaseMap}: IPDv02p3 ({\sc NUOPC Provided})
+  \begin{itemize}
+  \item Continue to drive the initialize sequence for the child components, compatible with up to IPDv05, as documented in section \ref{IPD}, through IPDv05p7.
+  \end{itemize}  
+
+\item {\tt InitializePhaseMap}: IPDv02p5 ({\sc NUOPC Provided})
+  \begin{itemize}
+  \item Continue to drive the initialize sequence for the child components, compatible with up to IPDv05, as documented in section \ref{IPD}, through IPDv05p8.
+  \end{itemize}  
+
+\item {\tt InternalInitializePhaseMap}: IPDv05p1 ({\sc NUOPC Provided})
+  \begin{itemize}
+  \item Request that fields in export and import State of child components are mirrored onto the driver's own import and export States.
+  \item This includes transferring the associated Grid, Mesh, or LocStream objects.
+  \end{itemize}  
+
+\item {\tt InternalInitializePhaseMap}: IPDv05p2 ({\sc NUOPC Provided})
+  \begin{itemize}
+  \item Reset the request of field mirroring.
+  \end{itemize}  
+
+\item {\tt InternalInitializePhaseMap}: IPDv05p3 ({\sc NUOPC Provided})
+  \begin{itemize}
+  \item Add the {\tt REMAPMETHOD=redist} option to all entries in {\tt CplList} attribute on all Connectors to/from the driver itself.
+  \item {\it Optional specialization} to modify the {\tt CplList} attribute on all of the Connectors: {\tt label\_ModifyCplLists}.
+  \end{itemize}  
+
+\item {\tt InternalInitializePhaseMap}: IPDv05p4 ({\sc NUOPC Provided})
+  \begin{itemize}
+  \item Check that all connected fields in the driver's own import and export State have a producer connection.
+  \end{itemize}  
+
+\item {\tt InternalInitializePhaseMap}: IPDv05p6 ({\sc NUOPC Provided})
+  \begin{itemize}
+  \item Complete the allocation of all the fields in the driver's own import and export State.
+  \end{itemize}  
+
+\item {\tt InternalInitializePhaseMap}: IPDv05p8 ({\sc NUOPC Provided})
+  \begin{itemize}
+  \item Set the {\tt InitializeDataComplete} consistent with the data-dependency protocol.
+  \end{itemize}  
+
 \end{itemize}
 
 \bigskip{\sf RUN:}

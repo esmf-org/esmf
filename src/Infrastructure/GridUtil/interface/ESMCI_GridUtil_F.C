@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2016, University Corporation for Atmospheric Research, 
+// Copyright 2002-2017, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -182,7 +182,7 @@ void FTN_X(c_esmc_gridio)(ESMCI::Grid **gridpp, int *staggerLoc,
 
   void FTN_X(c_esmc_gridtomesh)(ESMCI::Grid **gridpp, int *staggerLoc,
                                 int *isSphere, int *islatlondeg, MeshCap **meshpp,
-                                ESMCI::InterfaceInt *maskValuesArg, int *regridConserve, int *rc) {
+                                ESMCI::InterArray<int> *maskValuesArg, int *regridConserve, int *rc) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_gridtomesh()" 
     

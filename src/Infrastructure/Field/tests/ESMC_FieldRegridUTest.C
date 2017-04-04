@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2016, University Corporation for Atmospheric Research, 
+// Copyright 2002-2017, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -333,10 +333,10 @@ int main(void){
   //NEX_UTest
   int *maskValues = (int *)malloc(sizeof(int));
   maskValues[0] = 1;
-   strcpy(name, "Create an InterfaceInt for maskValues in ESMC_FieldRegridStore()");
+   strcpy(name, "Create an InterArray for maskValues in ESMC_FieldRegridStore()");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
-  ESMC_InterfaceInt i_maskValues;
-  rc = ESMC_InterfaceIntSet(&i_maskValues, maskValues, 1);
+  ESMC_InterArrayInt i_maskValues;
+  rc = ESMC_InterArrayIntSet(&i_maskValues, maskValues, 1);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
 
   //----------------------------------------------------------------------------

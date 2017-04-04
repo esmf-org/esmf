@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2016, University Corporation for Atmospheric Research, 
+// Copyright 2002-2017, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -100,7 +100,7 @@ void FTN_X(c_esmc_io_netcdfgetstate)(IO_NetCDF**  ptr,
 	State*			localState = (*ptr)->IO_NetCDF::getState();
 	vector<string>	arrayNames = localState->getArrayNames();
 
-	for (int i = 0; i < arrayNames.size(); ++i)
+	for (unsigned i = 0; i < arrayNames.size(); ++i)
 	{
 		Array*	thisArray;
 		localState->getArray((char*)(arrayNames[i].c_str()), &thisArray);

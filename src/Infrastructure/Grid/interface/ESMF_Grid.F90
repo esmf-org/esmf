@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2016, University Corporation for Atmospheric Research,
+! Copyright 2002-2017, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -35,7 +35,6 @@
 ! !USES:
       use ESMF_UtilTypesMod   
       use ESMF_BaseMod          ! ESMF base class
-      use ESMF_LogErrMod
       use ESMF_ArrayMod
       use ESMF_ArrayBundleMod
       use ESMF_RHandleMod
@@ -50,6 +49,7 @@
       use ESMF_ArraySpecMod
       use ESMF_IOScripMod
       use ESMF_IOGridspecMod
+      use ESMF_IOGridmosaicMod
       use ESMF_UtilCubedSphereMod
 
 #ifdef ESMF_NETCDF
@@ -266,6 +266,7 @@ public  ESMF_GridDecompType, ESMF_GRID_INVALID, ESMF_GRID_NONARBITRARY, ESMF_GRI
   public ESMF_GridCreate1PeriDimUfrm
 
   public ESMF_GridCreateCubedSphere
+  public ESMF_GridCreateMosaic
 
   public ESMF_GridDestroy
 
@@ -1307,10 +1308,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer :: tmp_staggerloc
     integer :: localrc ! local error status
     type(ESMF_GridDecompType) :: decompType ! Arbitrary or not
-    type(ESMF_InterfaceInt) :: staggerEdgeLWidthArg  ! Language Interface Helper Var
-    type(ESMF_InterfaceInt) :: staggerEdgeUWidthArg  ! Language Interface Helper Var
-    type(ESMF_InterfaceInt) :: staggerAlignArg  ! Language Interface Helper Var
-    type(ESMF_InterfaceInt) :: staggerLBoundArg  ! Language Interface Helper Var
+    type(ESMF_InterArray) :: staggerEdgeLWidthArg  ! Language Interface Helper Var
+    type(ESMF_InterArray) :: staggerEdgeUWidthArg  ! Language Interface Helper Var
+    type(ESMF_InterArray) :: staggerAlignArg  ! Language Interface Helper Var
+    type(ESMF_InterArray) :: staggerLBoundArg  ! Language Interface Helper Var
 
     ! Initialize return code; assume failure until success is certain
     localrc = ESMF_RC_NOT_IMPL
@@ -1355,22 +1356,22 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 	endif
      else
         !! staggerEdgeLWidth
-    	staggerEdgeLWidthArg = ESMF_InterfaceIntCreate(staggerEdgeLWidth, rc=localrc)
+    	staggerEdgeLWidthArg = ESMF_InterArrayCreate(staggerEdgeLWidth, rc=localrc)
     	if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       	  ESMF_CONTEXT, rcToReturn=rc)) return
 
     	!! staggerEdgeUWidth
-    	staggerEdgeUWidthArg = ESMF_InterfaceIntCreate(staggerEdgeUWidth, rc=localrc)
+    	staggerEdgeUWidthArg = ESMF_InterArrayCreate(staggerEdgeUWidth, rc=localrc)
     	if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       	   ESMF_CONTEXT, rcToReturn=rc)) return
 
     	!! staggerAlign
-    	staggerAlignArg = ESMF_InterfaceIntCreate(staggerAlign, rc=localrc)
+    	staggerAlignArg = ESMF_InterArrayCreate(staggerAlign, rc=localrc)
     	if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     	  ESMF_CONTEXT, rcToReturn=rc)) return
 
         !! staggerMemLBound
-        staggerLBoundArg = ESMF_InterfaceIntCreate(staggerLBound, rc=localrc)
+        staggerLBoundArg = ESMF_InterArrayCreate(staggerLBound, rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -1381,19 +1382,19 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           ESMF_CONTEXT, rcToReturn=rc)) return
 
     	! Deallocate helper variables
-    	call ESMF_InterfaceIntDestroy(staggerEdgeLWidthArg, rc=localrc)
+    	call ESMF_InterArrayDestroy(staggerEdgeLWidthArg, rc=localrc)
     	if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     	  ESMF_CONTEXT, rcToReturn=rc)) return
 
-    	call ESMF_InterfaceIntDestroy(staggerEdgeUWidthArg, rc=localrc)
+    	call ESMF_InterArrayDestroy(staggerEdgeUWidthArg, rc=localrc)
     	if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     	  ESMF_CONTEXT, rcToReturn=rc)) return
 
-    	call ESMF_InterfaceIntDestroy(staggerAlignArg, rc=localrc)
+    	call ESMF_InterArrayDestroy(staggerAlignArg, rc=localrc)
     	  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       	    ESMF_CONTEXT, rcToReturn=rc)) return
             
-        call ESMF_InterfaceIntDestroy(staggerLBoundArg, rc=localrc)
+        call ESMF_InterArrayDestroy(staggerLBoundArg, rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -1469,9 +1470,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !EOPI
     integer :: tmp_staggerloc
     integer :: localrc ! local error status
-    type(ESMF_InterfaceInt) :: staggerEdgeLWidthArg  ! Language Interface Helper Var
-    type(ESMF_InterfaceInt) :: staggerEdgeUWidthArg  ! Language Interface Helper Var
-    type(ESMF_InterfaceInt) :: staggerAlignArg  ! Language Interface Helper Var
+    type(ESMF_InterArray) :: staggerEdgeLWidthArg  ! Language Interface Helper Var
+    type(ESMF_InterArray) :: staggerEdgeUWidthArg  ! Language Interface Helper Var
+    type(ESMF_InterArray) :: staggerAlignArg  ! Language Interface Helper Var
     integer :: i,arrayCount
     type(ESMF_Pointer), allocatable :: arrayPointerList(:) ! helper variable
 
@@ -1496,22 +1497,22 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     endif
 
     !! staggerLWidth
-    staggerEdgeLWidthArg = ESMF_InterfaceIntCreate(staggerEdgeLWidth, rc=localrc)
+    staggerEdgeLWidthArg = ESMF_InterArrayCreate(staggerEdgeLWidth, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     !! staggerEdgeUWidth
-    staggerEdgeUWidthArg = ESMF_InterfaceIntCreate(staggerEdgeUWidth, rc=localrc)
+    staggerEdgeUWidthArg = ESMF_InterArrayCreate(staggerEdgeUWidth, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     !! staggeAlign
-    staggerAlignArg = ESMF_InterfaceIntCreate(staggerAlign, rc=localrc)
+    staggerAlignArg = ESMF_InterArrayCreate(staggerAlign, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     !! staggerAlign
-    staggerAlignArg = ESMF_InterfaceIntCreate(staggerAlign, rc=localrc)
+    staggerAlignArg = ESMF_InterArrayCreate(staggerAlign, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -1535,15 +1536,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! cleanup
     deallocate(arrayPointerList)
-    call ESMF_InterfaceIntDestroy(staggerEdgeLWidthArg, rc=localrc)
+    call ESMF_InterArrayDestroy(staggerEdgeLWidthArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
-    call ESMF_InterfaceIntDestroy(staggerEdgeUWidthArg, rc=localrc)
+    call ESMF_InterArrayDestroy(staggerEdgeUWidthArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
-    call ESMF_InterfaceIntDestroy(staggerAlignArg, rc=localrc)
+    call ESMF_InterArrayDestroy(staggerAlignArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -1632,10 +1633,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     integer :: tmp_staggerloc
     integer :: localrc ! local error status
-    type(ESMF_InterfaceInt) :: staggerEdgeLWidthArg  ! Language Interface Helper Var
-    type(ESMF_InterfaceInt) :: staggerEdgeUWidthArg  ! Language Interface Helper Var
-    type(ESMF_InterfaceInt) :: staggerAlignArg  ! Language Interface Helper Var
-    type(ESMF_InterfaceInt) :: staggerLBoundArg  ! Language Interface Helper Var
+    type(ESMF_InterArray) :: staggerEdgeLWidthArg  ! Language Interface Helper Var
+    type(ESMF_InterArray) :: staggerEdgeUWidthArg  ! Language Interface Helper Var
+    type(ESMF_InterArray) :: staggerAlignArg  ! Language Interface Helper Var
+    type(ESMF_InterArray) :: staggerLBoundArg  ! Language Interface Helper Var
     type(ESMF_GridDecompType) :: decompType     ! decompose type: arbitrary or non-arbitrary
 
     ! Initialize return code; assume failure until success is certain
@@ -1688,22 +1689,22 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     else
 
        !! staggerEdgeLWidth
-       staggerEdgeLWidthArg = ESMF_InterfaceIntCreate(staggerEdgeLWidth, rc=localrc)
+       staggerEdgeLWidthArg = ESMF_InterArrayCreate(staggerEdgeLWidth, rc=localrc)
        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
 
        !! staggerEdgeUWidth
-       staggerEdgeUWidthArg = ESMF_InterfaceIntCreate(staggerEdgeUWidth, rc=localrc)
+       staggerEdgeUWidthArg = ESMF_InterArrayCreate(staggerEdgeUWidth, rc=localrc)
        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
 
        !! staggerAlign
-       staggerAlignArg = ESMF_InterfaceIntCreate(staggerAlign, rc=localrc)
+       staggerAlignArg = ESMF_InterArrayCreate(staggerAlign, rc=localrc)
        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
 
        !! staggerLBound
-       staggerLBoundArg = ESMF_InterfaceIntCreate(staggerLBound, rc=localrc)
+       staggerLBoundArg = ESMF_InterArrayCreate(staggerLBound, rc=localrc)
        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -1715,19 +1716,19 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           ESMF_CONTEXT, rcToReturn=rc)) return
 
        ! Deallocate helper variables
-       call ESMF_InterfaceIntDestroy(staggerEdgeLWidthArg, rc=localrc)
+       call ESMF_InterArrayDestroy(staggerEdgeLWidthArg, rc=localrc)
        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
 
-       call ESMF_InterfaceIntDestroy(staggerEdgeUWidthArg, rc=localrc)
+       call ESMF_InterArrayDestroy(staggerEdgeUWidthArg, rc=localrc)
        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
 
-       call ESMF_InterfaceIntDestroy(staggerAlignArg, rc=localrc)
+       call ESMF_InterArrayDestroy(staggerAlignArg, rc=localrc)
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
 
-       call ESMF_InterfaceIntDestroy(staggerLBoundArg, rc=localrc)
+       call ESMF_InterArrayDestroy(staggerLBoundArg, rc=localrc)
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
  
@@ -1876,7 +1877,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer, pointer ::  distgridToGridMap(:)
     integer          :: i,j,k
     integer ::  index1D    ! the return value
-    type(ESMF_InterfaceInt)   :: gridIndexArg
+    type(ESMF_InterArray)   :: gridIndexArg
     type(ESMF_GridDecompType) :: decompType
     type(ESMF_DistGrid) :: distGrid
     integer, allocatable :: undistdim(:)
@@ -1966,7 +1967,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! Call the C function to get the index of the 1D distgrid
     !! index
-    gridIndexArg = ESMF_InterfaceIntCreate(gridindex, rc=localrc)
+    gridIndexArg = ESMF_InterArrayCreate(gridindex, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -2009,7 +2010,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     endif  
 
     ! clean up memory allocation
-    call ESMF_InterfaceIntDestroy(GridIndexArg, rc=localrc)
+    call ESMF_InterArrayDestroy(GridIndexArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -2748,6 +2749,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        integer :: gridEdgeLWidth(ESMF_MAXDIM)
        integer :: gridEdgeUWidth(ESMF_MAXDIM)
        integer :: gridAlign(ESMF_MAXDIM)
+       integer :: staggerEdgeLWidth(ESMF_MAXDIM)
+       integer :: staggerEdgeUWidth(ESMF_MAXDIM)
+       integer :: staggerAlign(ESMF_MAXDIM)
+       integer :: staggerLBound(ESMF_MAXDIM)
        type(ESMF_Index_Flag) :: indexflag
        integer :: i, j, nStaggers
        type(ESMF_ArrayBundle) :: srcAB, dstAB
@@ -2921,8 +2926,21 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 #endif
 
        ! Add Coords to new grid       
+       ! TODO: handle staggerLBound 
        do i = 1, nStaggers
-           call ESMF_GridAddCoord(newGrid, staggerloc=srcStaggers(i), rc=localrc)
+           call ESMF_GridGet(grid, staggerloc=srcStaggers(i), &
+                staggerEdgeLWidth=staggerEdgeLWidth(1:dimCount), &
+                staggerEdgeUWidth=staggerEdgeUWidth(1:dimCount), &
+                staggerAlign=staggerAlign(1:dimCount), &
+                rc=localrc)
+           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+                ESMF_CONTEXT, rcToReturn=rc)) return
+
+           call ESMF_GridAddCoord(newGrid, staggerloc=srcStaggers(i), &
+                staggerEdgeLWidth=staggerEdgeLWidth(1:dimCount), &
+                staggerEdgeUWidth=staggerEdgeUWidth(1:dimCount), &
+                staggerAlign=staggerAlign(1:dimCount), &
+                rc=localrc)
            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                 ESMF_CONTEXT, rcToReturn=rc)) return
        enddo
@@ -3493,7 +3511,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       endif
 
       !! create delayout from the petList
-      delayout=ESMF_DELayoutCreate(petList=petList,rc=localrc)
+      delayout=ESMF_DELayoutCreate(petMap=petList,rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -3687,20 +3705,23 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      the index space corresponding to the cells and the boundary of the 
 !      the exclusive region. This extra space is to contain the extra
 !      padding for non-center stagger locations, and should be big enough
-!      to hold any stagger in the grid. It is an error for this to be non-zero 
-!      for a periodic dimension.
+!      to hold any stagger in the grid. If this and gridAlign are not present then 
+!      defaults to 0, 0, ..., 0 (all zeros).
 ! \item[{[gridEdgeUWidth]}] 
 !      The padding around the upper edges of the grid. This padding is between
 !      the index space corresponding to the cells and the boundary of the 
 !      the exclusive region. This extra space is to contain the extra
 !      padding for non-center stagger locations, and should be big enough
-!      to hold any stagger in the grid. It is an error for this to be non-zero 
-!      for a periodic dimension.
+!      to hold any stagger in the grid. If this and gridAlign are not present then 
+!      defaults to 1, 1, ..., 1 (all ones).
 ! \item[{[gridAlign]}] 
 !     Specification of how the stagger locations should align with the cell
 !     index space (can be overridden by the individual staggerAligns). If
-!     the {\tt gridEdgeWidths} are not specified than this parameter
-!     implies the EdgeWidths.
+!     the gridEdgeWidths are not specified than this argument
+!     implies the gridEdgeWidths. If the gridEdgeWidths are specified and this argument isn't
+!     then this argument is implied by the gridEdgeWidths.
+!     If this and the gridEdgeWidths are not specified, then defaults to 
+!    -1, -1, ..., -1 (all negative ones).
 ! \item[{[gridMemLBound]}] 
 !      Specifies the lower index range of the memory of every DE in this Grid. 
 !      Only used when indexflag is {\tt ESMF\_INDEX\_USER}. May be overridden
@@ -3977,20 +3998,23 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      the index space corresponding to the cells and the boundary of the 
 !      the exclusive region. This extra space is to contain the extra
 !      padding for non-center stagger locations, and should be big enough
-!      to hold any stagger in the grid. It is an error for this to be non-zero 
-!      for a periodic dimension.
+!      to hold any stagger in the grid. If this and gridAlign are not present then 
+!      defaults to 0, 0, ..., 0 (all zeros).
 ! \item[{[gridEdgeUWidth]}] 
 !      The padding around the upper edges of the grid. This padding is between
 !      the index space corresponding to the cells and the boundary of the 
 !      the exclusive region. This extra space is to contain the extra
 !      padding for non-center stagger locations, and should be big enough
-!      to hold any stagger in the grid. It is an error for this to be non-zero 
-!      for a periodic dimension.
+!      to hold any stagger in the grid. If this and gridAlign are not present then 
+!      defaults to 1, 1, ..., 1 (all ones).
 ! \item[{[gridAlign]}] 
 !     Specification of how the stagger locations should align with the cell
 !     index space (can be overridden by the individual staggerAligns). If
-!     the {\tt gridEdgeWidths} are not specified than this parameter
-!     implies the EdgeWidths.
+!     the gridEdgeWidths are not specified than this argument
+!     implies the gridEdgeWidths. If the gridEdgeWidths are specified and this argument isn't
+!     then this argument is implied by the gridEdgeWidths.
+!     If this and the gridEdgeWidths are not specified, then defaults to 
+!    -1, -1, ..., -1 (all negative ones).
 ! \item[{[gridMemLBound]}] 
 !      Specifies the lower index range of the memory of every DE in this Grid. 
 !      Only used when indexflag is {\tt ESMF\_INDEX\_USER}. May be overridden
@@ -4464,18 +4488,23 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      the index space corresponding to the cells and the boundary of the 
 !      the exclusive region. This extra space is to contain the extra
 !      padding for non-center stagger locations, and should be big enough
-!      to hold any stagger in the grid. 
+!      to hold any stagger in the grid. If this and gridAlign are not present then 
+!      defaults to 0, 0, ..., 0 (all zeros).
 ! \item[{[gridEdgeUWidth]}] 
 !      The padding around the upper edges of the grid. This padding is between
 !      the index space corresponding to the cells and the boundary of the 
 !      the exclusive region. This extra space is to contain the extra
 !      padding for non-center stagger locations, and should be big enough
-!      to hold any stagger in the grid. 
+!      to hold any stagger in the grid. If this and gridAlign are not present then 
+!      defaults to 1, 1, ..., 1 (all ones).
 ! \item[{[gridAlign]}] 
 !     Specification of how the stagger locations should align with the cell
 !     index space (can be overridden by the individual staggerAligns). If
-!     the {\tt gridEdgeWidths} are not specified than this parameter
-!     implies the EdgeWidths.
+!     the gridEdgeWidths are not specified than this argument
+!     implies the gridEdgeWidths. If the gridEdgeWidths are specified and this argument isn't
+!     then this argument is implied by the gridEdgeWidths.
+!     If this and the gridEdgeWidths are not specified, then defaults to 
+!    -1, -1, ..., -1 (all negative ones).
 ! \item[{[gridMemLBound]}] 
 !      Specifies the lower index range of the memory of every DE in this Grid. 
 !      Only used when indexflag is {\tt ESMF\_INDEX\_USER}. May be overridden
@@ -4498,13 +4527,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer :: localrc ! local error status
     type(ESMF_Grid) :: grid              
     integer :: nameLen 
-    type(ESMF_InterfaceInt) :: gridEdgeLWidthArg  ! Language Interface Helper Var
-    type(ESMF_InterfaceInt) :: gridEdgeUWidthArg  ! Language Interface Helper Var
-    type(ESMF_InterfaceInt) :: gridAlignArg  ! Language Interface Helper Var
-    type(ESMF_InterfaceInt) :: gridMemLBoundArg  ! Language Interface Helper Var
-    type(ESMF_InterfaceInt) :: distgridToGridMapArg  ! Language Interface Helper Var
-    type(ESMF_InterfaceInt) :: coordDimCountArg  ! Language Interface Helper Var
-    type(ESMF_InterfaceInt) :: coordDimMapArg ! Language Interface Helper Var
+    type(ESMF_InterArray) :: gridEdgeLWidthArg  ! Language Interface Helper Var
+    type(ESMF_InterArray) :: gridEdgeUWidthArg  ! Language Interface Helper Var
+    type(ESMF_InterArray) :: gridAlignArg  ! Language Interface Helper Var
+    type(ESMF_InterArray) :: gridMemLBoundArg  ! Language Interface Helper Var
+    type(ESMF_InterArray) :: distgridToGridMapArg  ! Language Interface Helper Var
+    type(ESMF_InterArray) :: coordDimCountArg  ! Language Interface Helper Var
+    type(ESMF_InterArray) :: coordDimMapArg ! Language Interface Helper Var
     integer :: intDestroyDistgrid,intDestroyDELayout
     integer, allocatable :: collocation(:)
     logical  :: arbSeqIndexFlag
@@ -4574,29 +4603,29 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! It doesn't look like it needs to be translated, but test to make sure
 
     !! staggerWidths
-    gridEdgeLWidthArg = ESMF_InterfaceIntCreate(gridEdgeLWidth, rc=localrc)
+    gridEdgeLWidthArg = ESMF_InterArrayCreate(gridEdgeLWidth, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    gridEdgeUWidthArg = ESMF_InterfaceIntCreate(gridEdgeUWidth, rc=localrc)
+    gridEdgeUWidthArg = ESMF_InterArrayCreate(gridEdgeUWidth, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    gridAlignArg = ESMF_InterfaceIntCreate(gridAlign, rc=localrc)
+    gridAlignArg = ESMF_InterArrayCreate(gridAlign, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    gridMemLBoundArg = ESMF_InterfaceIntCreate(gridMemLBound, rc=localrc)
+    gridMemLBoundArg = ESMF_InterArrayCreate(gridMemLBound, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     !! distgridToGridMap
-    distgridToGridMapArg = ESMF_InterfaceIntCreate(distgridToGridMap, rc=localrc)
+    distgridToGridMapArg = ESMF_InterArrayCreate(distgridToGridMap, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     !! Description of array factorization
-    coordDimCountArg = ESMF_InterfaceIntCreate(coordDimCount, rc=localrc)
+    coordDimCountArg = ESMF_InterArrayCreate(coordDimCount, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    coordDimMapArg = ESMF_InterfaceIntCreate(farray2D=coordDimMap, rc=localrc)
+    coordDimMapArg = ESMF_InterArrayCreate(farray2D=coordDimMap, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -4648,25 +4677,25 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 #endif
 
     ! Deallocate helper variables
-    call ESMF_InterfaceIntDestroy(gridEdgeLWidthArg, rc=localrc)
+    call ESMF_InterArrayDestroy(gridEdgeLWidthArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(gridEdgeUWidthArg, rc=localrc)
+    call ESMF_InterArrayDestroy(gridEdgeUWidthArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(gridAlignArg, rc=localrc)
+    call ESMF_InterArrayDestroy(gridAlignArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(gridMemLBoundArg, rc=localrc)
+    call ESMF_InterArrayDestroy(gridMemLBoundArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(distgridToGridMapArg, rc=localrc)
+    call ESMF_InterArrayDestroy(distgridToGridMapArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(coordDimCountArg, rc=localrc)
+    call ESMF_InterArrayDestroy(coordDimCountArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(coordDimMapArg, rc=localrc)
+    call ESMF_InterArrayDestroy(coordDimMapArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -4761,12 +4790,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer :: localrc ! local error status
     type(ESMF_Grid) :: grid              
     integer :: nameLen 
-    type(ESMF_InterfaceInt) :: minIndexArg     ! Language Interface Helper Var
-    type(ESMF_InterfaceInt) :: maxIndexArg     ! Language Interface Helper Var
-    type(ESMF_InterfaceInt) :: localArbIndexArg ! Language Interface Helper Var
-    type(ESMF_InterfaceInt) :: distDimArg      ! Language Interface Helper Var
-    type(ESMF_InterfaceInt) :: coordDimCountArg  ! Language Interface Helper Var
-    type(ESMF_InterfaceInt) :: coordDimMapArg ! Language Interface Helper Var
+    type(ESMF_InterArray) :: minIndexArg     ! Language Interface Helper Var
+    type(ESMF_InterArray) :: maxIndexArg     ! Language Interface Helper Var
+    type(ESMF_InterArray) :: localArbIndexArg ! Language Interface Helper Var
+    type(ESMF_InterArray) :: distDimArg      ! Language Interface Helper Var
+    type(ESMF_InterArray) :: coordDimCountArg  ! Language Interface Helper Var
+    type(ESMF_InterArray) :: coordDimMapArg ! Language Interface Helper Var
     integer :: intDestroyDistgrid,intDestroyDELayout
     integer :: dimCount, distDimCount, undistDimCount, dimCount1
     integer, pointer :: local1DIndices(:), localArbIndex(:,:), distSize(:)
@@ -4862,15 +4891,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     endif
 
     !! Arbitrary grid indices
-    minIndexArg = ESMF_InterfaceIntCreate(minIndexLocal, rc=localrc)
+    minIndexArg = ESMF_InterArrayCreate(minIndexLocal, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    maxIndexArg = ESMF_InterfaceIntCreate(maxIndexLocal, rc=localrc)
+    maxIndexArg = ESMF_InterArrayCreate(maxIndexLocal, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     !! distDim
-    distDimArg = ESMF_InterfaceIntCreate(distDimLocal, rc=localrc)
+    distDimArg = ESMF_InterArrayCreate(distDimLocal, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     
@@ -4913,7 +4942,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       enddo
     enddo
 
-    localArbIndexArg = ESMF_InterfaceIntCreate(farray2D=localArbIndex, rc=localrc)
+    localArbIndexArg = ESMF_InterArrayCreate(farray2D=localArbIndex, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -4979,10 +5008,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     endif
 
     !! Description of array factorization
-    coordDimCountArg = ESMF_InterfaceIntCreate(coordDimCount, rc=localrc)
+    coordDimCountArg = ESMF_InterArrayCreate(coordDimCount, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    coordDimMapArg = ESMF_InterfaceIntCreate(farray2D=coordDimMap, rc=localrc)
+    coordDimMapArg = ESMF_InterArrayCreate(farray2D=coordDimMap, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 	
@@ -5018,22 +5047,22 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       deallocate(undistMaxIndex)
     endif
 
-    call ESMF_InterfaceIntDestroy(distDimArg, rc=localrc)
+    call ESMF_InterArrayDestroy(distDimArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(minIndexArg, rc=localrc)
+    call ESMF_InterArrayDestroy(minIndexArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(maxIndexArg, rc=localrc)
+    call ESMF_InterArrayDestroy(maxIndexArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(localArbIndexArg, rc=localrc)
+    call ESMF_InterArrayDestroy(localArbIndexArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(coordDimCountArg, rc=localrc)
+    call ESMF_InterArrayDestroy(coordDimCountArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(coordDimMapArg, rc=localrc)
+    call ESMF_InterArrayDestroy(coordDimMapArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -7302,20 +7331,23 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      the index space corresponding to the cells and the boundary of the 
 !      the exclusive region. This extra space is to contain the extra
 !      padding for non-center stagger locations, and should be big enough
-!      to hold any stagger in the grid. It is an error for this to be non-zero 
-!      for a periodic dimension.
+!      to hold any stagger in the grid. If this and gridAlign are not present then 
+!      defaults to 0, 0, ..., 0 (all zeros).
 ! \item[{[gridEdgeUWidth]}] 
 !      The padding around the upper edges of the grid. This padding is between
 !      the index space corresponding to the cells and the boundary of the 
 !      the exclusive region. This extra space is to contain the extra
 !      padding for non-center stagger locations, and should be big enough
-!      to hold any stagger in the grid. It is an error for this to be non-zero 
-!      for a periodic dimension. 
+!      to hold any stagger in the grid. If this and gridAlign are not present then 
+!      defaults to 1, 1, ..., 1 (all ones).
 ! \item[{[gridAlign]}] 
 !     Specification of how the stagger locations should align with the cell
 !     index space (can be overridden by the individual staggerAligns). If
-!     the {\tt gridEdgeWidths} are not specified than this parameter
-!     implies the EdgeWidths.
+!     the gridEdgeWidths are not specified than this argument
+!     implies the gridEdgeWidths. If the gridEdgeWidths are specified and this argument isn't
+!     then this argument is implied by the gridEdgeWidths.
+!     If this and the gridEdgeWidths are not specified, then defaults to 
+!    -1, -1, ..., -1 (all negative ones).
 ! \item[{[gridMemLBound]}] 
 !      Specifies the lower index range of the memory of every DE in this Grid. 
 !      Only used when indexflag is {\tt ESMF\_INDEX\_USER}. May be overridden
@@ -7571,7 +7603,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     coordinate component on the three index dimensions
 !     described by {\tt coordsPerDEDim1,2,3}. The size of the 
 !     array specifies the number of dimensions of the third
- !     coordinate component array. The values specify which
+!     coordinate component array. The values specify which
 !     of the index dimensions the corresponding coordinate
 !     arrays map to. If not present the default is 1,2,...,grid rank.  
 ! \item[{[gridEdgeLWidth]}] 
@@ -7579,20 +7611,23 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      the index space corresponding to the cells and the boundary of the 
 !      the exclusive region. This extra space is to contain the extra
 !      padding for non-center stagger locations, and should be big enough
-!      to hold any stagger in the grid. It is an error for this to be non-zero 
-!      for a periodic dimension.
+!      to hold any stagger in the grid. If this and gridAlign are not present then 
+!      defaults to 0, 0, ..., 0 (all zeros).
 ! \item[{[gridEdgeUWidth]}] 
 !      The padding around the upper edges of the grid. This padding is between
 !      the index space corresponding to the cells and the boundary of the 
 !      the exclusive region. This extra space is to contain the extra
 !      padding for non-center stagger locations, and should be big enough
-!      to hold any stagger in the grid. It is an error for this to be non-zero 
-!      for a periodic dimension. 
+!      to hold any stagger in the grid. If this and gridAlign are not present then 
+!      defaults to 1, 1, ..., 1 (all ones).
 ! \item[{[gridAlign]}] 
 !     Specification of how the stagger locations should align with the cell
 !     index space (can be overridden by the individual staggerAligns). If
-!     the {\tt gridEdgeWidths} are not specified than this parameter
-!     implies the EdgeWidths.
+!     the gridEdgeWidths are not specified than this argument
+!     implies the gridEdgeWidths. If the gridEdgeWidths are specified and this argument isn't
+!     then this argument is implied by the gridEdgeWidths.
+!     If this and the gridEdgeWidths are not specified, then defaults to 
+!    -1, -1, ..., -1 (all negative ones).
 ! \item[{[gridMemLBound]}] 
 !      Specifies the lower index range of the memory of every DE in this Grid. 
 !      Only used when indexflag is {\tt ESMF\_INDEX\_USER}. May be overridden
@@ -8080,20 +8115,23 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      the index space corresponding to the cells and the boundary of the 
 !      the exclusive region. This extra space is to contain the extra
 !      padding for non-center stagger locations, and should be big enough
-!      to hold any stagger in the grid. It is an error for this to be non-zero 
-!      for a periodic dimension.
+!      to hold any stagger in the grid. If this and gridAlign are not present then 
+!      defaults to 0, 0, ..., 0 (all zeros).
 ! \item[{[gridEdgeUWidth]}] 
 !      The padding around the upper edges of the grid. This padding is between
 !      the index space corresponding to the cells and the boundary of the 
 !      the exclusive region. This extra space is to contain the extra
 !      padding for non-center stagger locations, and should be big enough
-!      to hold any stagger in the grid. It is an error for this to be non-zero 
-!      for a periodic dimension. 
+!      to hold any stagger in the grid. If this and gridAlign are not present then 
+!      defaults to 1, 1, ..., 1 (all ones).
 ! \item[{[gridAlign]}] 
 !     Specification of how the stagger locations should align with the cell
 !     index space (can be overridden by the individual staggerAligns). If
-!     the {\tt gridEdgeWidths} are not specified than this parameter
-!     implies the EdgeWidths.
+!     the gridEdgeWidths are not specified than this argument
+!     implies the gridEdgeWidths. If the gridEdgeWidths are specified and this argument isn't
+!     then this argument is implied by the gridEdgeWidths.
+!     If this and the gridEdgeWidths are not specified, then defaults to 
+!    -1, -1, ..., -1 (all negative ones).
 ! \item[{[gridMemLBound]}] 
 !      Specifies the lower index range of the memory of every DE in this Grid. 
 !      Only used when indexflag is {\tt ESMF\_INDEX\_USER}. May be overridden
@@ -8337,27 +8375,30 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     described by {\tt coordsPerDEDim1,2,3}. The size of the 
 !     array specifies the number of dimensions of the third
 !     coordinate component array. The values specify which
- !     of the index dimensions the corresponding coordinate
+!     of the index dimensions the corresponding coordinate
 !     arrays map to. If not present the default is 1,2,...,grid rank.  
 ! \item[{[gridEdgeLWidth]}] 
 !      The padding around the lower edges of the grid. This padding is between
 !      the index space corresponding to the cells and the boundary of the 
 !      the exclusive region. This extra space is to contain the extra
 !      padding for non-center stagger locations, and should be big enough
-!      to hold any stagger in the grid. It is an error for this to be non-zero 
-!      for a periodic dimension.
+!      to hold any stagger in the grid. If this and gridAlign are not present then 
+!      defaults to 0, 0, ..., 0 (all zeros).
 ! \item[{[gridEdgeUWidth]}] 
 !      The padding around the upper edges of the grid. This padding is between
 !      the index space corresponding to the cells and the boundary of the 
 !      the exclusive region. This extra space is to contain the extra
 !      padding for non-center stagger locations, and should be big enough
-!      to hold any stagger in the grid. It is an error for this to be non-zero 
-!      for a periodic dimension.
+!      to hold any stagger in the grid. If this and gridAlign are not present then 
+!      defaults to 1, 1, ..., 1 (all ones).
 ! \item[{[gridAlign]}] 
 !     Specification of how the stagger locations should align with the cell
 !     index space (can be overridden by the individual staggerAligns). If
-!     the {\tt gridEdgeWidths} are not specified than this parameter
-!     implies the EdgeWidths.
+!     the gridEdgeWidths are not specified than this argument
+!     implies the gridEdgeWidths. If the gridEdgeWidths are specified and this argument isn't
+!     then this argument is implied by the gridEdgeWidths.
+!     If this and the gridEdgeWidths are not specified, then defaults to 
+!    -1, -1, ..., -1 (all negative ones).
 ! \item[{[gridMemLBound]}] 
 !      Specifies the lower index range of the memory of every DE in this Grid. 
 !      Only used when indexflag is {\tt ESMF\_INDEX\_USER}. May be overridden
@@ -8828,18 +8869,23 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      the index space corresponding to the cells and the boundary of the 
 !      the exclusive region. This extra space is to contain the extra
 !      padding for non-center stagger locations, and should be big enough
-!      to hold any stagger in the grid. 
+!      to hold any stagger in the grid. If this and gridAlign are not present then 
+!      defaults to 0, 0, ..., 0 (all zeros).
 ! \item[{[gridEdgeUWidth]}] 
 !      The padding around the upper edges of the grid. This padding is between
 !      the index space corresponding to the cells and the boundary of the 
- !      the exclusive region. This extra space is to contain the extra
+!      the exclusive region. This extra space is to contain the extra
 !      padding for non-center stagger locations, and should be big enough
-!      to hold any stagger in the grid. 
+!      to hold any stagger in the grid. If this and gridAlign are not present then 
+!      defaults to 1, 1, ..., 1 (all ones).
 ! \item[{[gridAlign]}] 
 !     Specification of how the stagger locations should align with the cell
 !     index space (can be overridden by the individual staggerAligns). If
-!     the {\tt gridEdgeWidths} are not specified than this parameter
-!     implies the EdgeWidths.
+!     the gridEdgeWidths are not specified than this argument
+!     implies the gridEdgeWidths. If the gridEdgeWidths are specified and this argument isn't
+!     then this argument is implied by the gridEdgeWidths.
+!     If this and the gridEdgeWidths are not specified, then defaults to 
+!    -1, -1, ..., -1 (all negative ones).
 ! \item[{[gridMemLBound]}] 
 !      Specifies the lower index range of the memory of every DE in this Grid. 
 !      Only used when indexflag is {\tt ESMF\_INDEX\_USER}. May be overridden
@@ -9080,18 +9126,23 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      the index space corresponding to the cells and the boundary of the 
 !      the exclusive region. This extra space is to contain the extra
 !      padding for non-center stagger locations, and should be big enough
-!      to hold any stagger in the grid. 
+!      to hold any stagger in the grid. If this and gridAlign are not present then 
+!      defaults to 0, 0, ..., 0 (all zeros).
 ! \item[{[gridEdgeUWidth]}] 
 !      The padding around the upper edges of the grid. This padding is between
 !      the index space corresponding to the cells and the boundary of the 
 !      the exclusive region. This extra space is to contain the extra
 !      padding for non-center stagger locations, and should be big enough
-!      to hold any stagger in the grid. 
+!      to hold any stagger in the grid. If this and gridAlign are not present then 
+!      defaults to 1, 1, ..., 1 (all ones).
 ! \item[{[gridAlign]}] 
 !     Specification of how the stagger locations should align with the cell
 !     index space (can be overridden by the individual staggerAligns). If
-!     the {\tt gridEdgeWidths} are not specified than this parameter
-!     implies the EdgeWidths.
+!     the gridEdgeWidths are not specified than this argument
+!     implies the gridEdgeWidths. If the gridEdgeWidths are specified and this argument isn't
+!     then this argument is implied by the gridEdgeWidths.
+!     If this and the gridEdgeWidths are not specified, then defaults to 
+!    -1, -1, ..., -1 (all negative ones).
 ! \item[{[gridMemLBound]}] 
 !      Specifies the lower index range of the memory of every DE in this Grid. 
 !      Only used when indexflag is {\tt ESMF\_INDEX\_USER}. May be overridden
@@ -10413,7 +10464,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     coordinate component on the three index dimensions
 !     described by {\tt coordsPerDEDim1,2,3}. The size of the 
 !     array specifies the number of dimensions of the second
- !     coordinate component array. The values specify which
+!     coordinate component array. The values specify which
 !     of the index dimensions the corresponding coordinate
 !     arrays map to. If not present the default is 1,2,...,grid rank. 
 ! \item[{[coordDep3]}] 
@@ -10429,18 +10480,23 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      the index space corresponding to the cells and the boundary of the 
 !      the exclusive region. This extra space is to contain the extra
 !      padding for non-center stagger locations, and should be big enough
-!      to hold any stagger in the grid. 
+!      to hold any stagger in the grid. If this and gridAlign are not present then 
+!      defaults to 0, 0, ..., 0 (all zeros).
 ! \item[{[gridEdgeUWidth]}] 
 !      The padding around the upper edges of the grid. This padding is between
 !      the index space corresponding to the cells and the boundary of the 
 !      the exclusive region. This extra space is to contain the extra
 !      padding for non-center stagger locations, and should be big enough
-!      to hold any stagger in the grid. 
+!      to hold any stagger in the grid. If this and gridAlign are not present then 
+!      defaults to 1, 1, ..., 1 (all ones).
 ! \item[{[gridAlign]}] 
 !     Specification of how the stagger locations should align with the cell
 !     index space (can be overridden by the individual staggerAligns). If
-!     the {\tt gridEdgeWidths} are not specified than this parameter
-!     implies the EdgeWidths.
+!     the gridEdgeWidths are not specified than this argument
+!     implies the gridEdgeWidths. If the gridEdgeWidths are specified and this argument isn't
+!     then this argument is implied by the gridEdgeWidths.
+!     If this and the gridEdgeWidths are not specified, then defaults to 
+!    -1, -1, ..., -1 (all negative ones).
 ! \item[{[gridMemLBound]}] 
 !      Specifies the lower index range of the memory of every DE in this Grid. 
 !      Only used when indexflag is {\tt ESMF\_INDEX\_USER}. May be overridden
@@ -11150,7 +11206,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       endif
 
       !! create delayout from the petList
-      delayout=ESMF_DELayoutCreate(petList=petList,rc=localrc)
+      delayout=ESMF_DELayoutCreate(petMap=petList,rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -11448,18 +11504,23 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      the index space corresponding to the cells and the boundary of the 
 !      the exclusive region. This extra space is to contain the extra
 !      padding for non-center stagger locations, and should be big enough
-!      to hold any stagger in the grid. 
+!      to hold any stagger in the grid. If this and gridAlign are not present then 
+!      defaults to 0, 0, ..., 0 (all zeros).
 ! \item[{[gridEdgeUWidth]}] 
 !      The padding around the upper edges of the grid. This padding is between
 !      the index space corresponding to the cells and the boundary of the 
 !      the exclusive region. This extra space is to contain the extra
 !      padding for non-center stagger locations, and should be big enough
-!      to hold any stagger in the grid. 
+!      to hold any stagger in the grid. If this and gridAlign are not present then 
+!      defaults to 1, 1, ..., 1 (all ones).
 ! \item[{[gridAlign]}] 
 !     Specification of how the stagger locations should align with the cell
 !     index space (can be overridden by the individual staggerAligns). If
-!     the {\tt gridEdgeWidths} are not specified than this parameter
-!     implies the EdgeWidths.
+!     the gridEdgeWidths are not specified than this argument
+!     implies the gridEdgeWidths. If the gridEdgeWidths are specified and this argument isn't
+!     then this argument is implied by the gridEdgeWidths.
+!     If this and the gridEdgeWidths are not specified, then defaults to 
+!    -1, -1, ..., -1 (all negative ones).
 ! \item[{[gridMemLBound]}] 
 !      Specifies the lower index range of the memory of every DE in this Grid. 
 !      Only used when indexflag is {\tt ESMF\_INDEX\_USER}. May be overridden
@@ -12063,7 +12124,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       endif
 
       !! create delayout from the petList
-      delayout=ESMF_DELayoutCreate(petList=petList,rc=localrc)
+      delayout=ESMF_DELayoutCreate(petMap=petList,rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -12800,6 +12861,1095 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     end function ESMF_GridCreateShapeTileArb
 
 
+!-------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridCreateCubedSphere()"
+!BOP
+! !IROUTINE: ESMF_GridCreateCubedSphere - Create a multi-tile cubed sphere Grid with regular decomposition
+
+! !INTERFACE:
+  function ESMF_GridCreateCubedSphere(tileSize,keywordEnforcer, regDecompPTile, decompflagPTile, &
+        deLabelList, delayout, indexflag, name, rc)
+!         
+! !RETURN VALUE:
+    type(ESMF_Grid) :: ESMF_GridCreateCubedSphere
+!
+! !ARGUMENTS:
+    integer,                        intent(in)            :: tilesize
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    integer,                        intent(in),  optional :: regDecompPTile(:,:)
+    type(ESMF_Decomp_Flag), target, intent(in),  optional :: decompflagPTile(:,:)
+    integer,                        intent(in),  optional :: deLabelList(:)
+    type(ESMF_DELayout),            intent(in),  optional :: delayout
+    type(ESMF_Index_Flag),          intent(in),  optional :: indexflag
+    character(len=*),               intent(in),  optional :: name
+    integer,                        intent(out), optional :: rc
+
+!
+! !DESCRIPTION:
+!   Create a six-tile {\tt ESMF\_Grid} for a Cubed Sphere grid using regular decomposition.  Each tile can
+!   have different decomposition.  The grid coordinates are generated based on the algorithm used by GEOS-5,
+!   The tile resolution is defined by tileSize.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[tilesize]
+!          The number of elements on each side of the tile of the Cubed Sphere grid.
+!     \item[{[regDecompPTile]}]
+!          List of DE counts for each dimension. The second index steps through
+!          the tiles. The total {\tt deCount} is determined as the sum over
+!          the products of {\tt regDecompPTile} elements for each tile.
+!          By default every tile is decomposed in the same way.  If the total 
+!          PET count is less than 6, one tile will be assigned to one DE and the DEs
+!          will be assigned to PETs sequentially, therefore, some PETs may have
+!          more than one DEs.  If the total PET count is greater than 6, the total
+!          number of DEs will be a multiple of 6 and less than or equal to the total
+!          PET count.  For instance, if the total PET count is 16, the total DE count 
+!          will be 12 with each tile decomposed into 1x2 blocks.  The 12 DEs are mapped
+!          to the first 12 PETs and the remainding 4 PETs have no DEs locally, unless
+!          an optional {\tt delayout} is provided.
+!     \item[{[decompflagPTile]}]
+!          List of decomposition flags indicating how each dimension of each
+!          tile is to be divided between the DEs. The default setting
+!          is {\tt ESMF\_DECOMP\_BALANCED} in all dimensions for all tiles. 
+!          See section \ref{const:decompflag} for a list of valid decomposition
+!          flag options. The second index indicates the tile number.
+!     \item[{[deLabelList]}]
+!          List assigning DE labels to the default sequence of DEs. The default
+!          sequence is given by the column major order of the {\tt regDecompPTile}
+!          elements in the sequence as they appear following the tile index.
+!     \item[{[delayout]}]
+!          Optional {\tt ESMF\_DELayout} object to be used. By default a new
+!          DELayout object will be created with as many DEs as there are PETs,
+!          or tiles, which ever is greater. If a DELayout object is specified,
+!          the number of DEs must match {\tt regDecompPTile}, if present. In the
+!          case that {\tt regDecompPTile} was not specified, the {\tt deCount}
+!          must be at least that of the default DELayout. The 
+!          {\tt regDecompPTile} will be constructed accordingly.
+!     \item[{[indexflag]}]
+!          Indicates the indexing scheme to be used in the new Grid. Please see
+!          Section~\ref{const:indexflag} for the list of options. If not present,
+!          defaults to ESMF\_INDEX\_DELOCAL.
+!     \item[{[name]}]
+!          {\tt ESMF\_Grid} name.
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+
+    type(ESMF_VM)                               :: vm
+    integer                                     :: PetNo, PetCnt
+    integer                                     :: totalDE, nxy, nx, ny, bigFac
+    type(ESMF_DELayout)                         :: defaultDELayout
+    type(ESMF_Grid)                             :: grid, newgrid
+    type(ESMF_DistGrid)                         :: distgrid, newdistgrid
+    integer                                     :: localrc
+    type(ESMF_DistGridConnection), allocatable :: connectionList(:)
+    integer                                    :: i, j, conn
+    integer                                    :: localDeCount, localDe, DeNo, tile
+    real(kind=ESMF_KIND_R8),  pointer          :: lonPtr(:,:), latPtr(:,:)
+    real(kind=ESMF_KIND_R8),  pointer          :: lonCornerPtr(:,:), latCornerPtr(:,:)
+    integer                                    :: tileCount
+    integer                                    :: connectionCount
+    integer                                    :: centerCount
+    integer                                    :: starti, startj, sizei, sizej
+    integer                                    :: ind, rem, rem1, rem2
+    integer                                    :: start(2), count(2)
+    integer, allocatable                       :: minIndexPTile(:,:)
+    integer, allocatable                       :: maxIndexPTile(:,:)
+    integer, allocatable                       :: regDecomp(:,:)    
+    integer, allocatable                       :: demap(:)
+    integer                                    :: decount
+    type(ESMF_Index_Flag)                      :: localIndexFlag
+    !real(ESMF_KIND_R8)                        :: starttime, endtime  
+
+    real(kind=ESMF_KIND_R4), parameter         :: pi = 3.1415926
+    real(kind=ESMF_KIND_R4), parameter         :: todeg = 180.0/pi
+
+    if (present(rc)) rc=ESMF_SUCCESS
+  !------------------------------------------------------------------------
+  ! get global vm information
+  !
+  call ESMF_VMGetCurrent(vm, rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    ESMF_CONTEXT, rcToReturn=rc)) return
+
+  ! set up local pet info
+  call ESMF_VMGet(vm, localPet=PetNo, petCount=PetCnt, rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (present(indexflag)) then
+     localIndexFlag = indexflag
+  else
+     localIndexFlag = ESMF_INDEX_DELOCAL
+  endif
+  !------------------------------------------------------------------------
+  ! default decomposition. The number of DEs has to be multiple of 6.
+  ! If the total PET count is less than 6, some PETs will get more than one DE.
+  ! Otherwise, total DEs is always less than or equal to total PETs.
+  
+  if (PetCnt < 6) then 
+     totalDE=6
+  else 
+     totalDE = (PetCnt/6)*6
+  endif
+
+  nxy = totalDE/6
+  bigFac = 1
+  do i=2, int(sqrt(float(nxy)))
+    if ((nxy/i)*i == nxy) then
+        bigFac = i
+    endif
+  enddo
+  nx = bigFac
+  ny = nxy/nx
+
+  defaultDELayout = ESMF_DELayoutCreate(deCount = totalDE, rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    ESMF_CONTEXT, rcToReturn=rc)) return
+
+  call ESMF_DELayoutGet(defaultDElayout, localDeCount = decount, rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    ESMF_CONTEXT, rcToReturn=rc)) return
+  if (decount > 0) then
+     allocate(demap(0:decount-1))
+     call ESMF_DELayoutGet(defaultDElayout, localDeToDeMap = demap, rc=localrc)
+     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+     !print *, PetNo, ' demap ', decount, demap
+  endif
+    centerCount=tilesize
+    tileCount = 6  
+
+    ! - initialize Min/Max
+    ! The full cubed sphere has 6 tiles. For testing, tiles can be
+    ! turned on incrementally from 1 all the way to 6. Anything greater than
+    ! 6 is incorrect.
+    allocate(minIndexPTile(2,tileCount))
+    allocate(maxIndexPTile(2,tileCount))
+    tile=0
+    if (tile==tileCount) goto 10
+    !- tile 1
+    tile=1
+    minIndexPTile(1,tile)=1
+    minIndexPTile(2,tile)=1
+    maxIndexPTile(1,tile)=minIndexPTile(1,tile)+centerCount-1
+    maxIndexPTile(2,tile)=minIndexPTile(2,tile)+centerCount-1
+    if (tile==tileCount) goto 10
+    !- tile 2
+    tile=2
+    minIndexPTile(1,tile)=maxIndexPTile(1,tile-1)+1
+    minIndexPTile(2,tile)=minIndexPTile(2,tile-1)
+    maxIndexPTile(1,tile)=minIndexPTile(1,tile)+centerCount-1
+    maxIndexPTile(2,tile)=minIndexPTile(2,tile)+centerCount-1
+    if (tile==tileCount) goto 10
+    !- tile 3
+    tile=3
+    minIndexPTile(1,tile)=minIndexPTile(1,tile-1)
+    minIndexPTile(2,tile)=maxIndexPTile(2,tile-1)+1
+    maxIndexPTile(1,tile)=minIndexPTile(1,tile)+centerCount-1
+    maxIndexPTile(2,tile)=minIndexPTile(2,tile)+centerCount-1
+    if (tile==tileCount) goto 10
+    !- tile 4
+    tile=4
+    minIndexPTile(1,tile)=maxIndexPTile(1,tile-1)+1
+    minIndexPTile(2,tile)=minIndexPTile(2,tile-1)
+    maxIndexPTile(1,tile)=minIndexPTile(1,tile)+centerCount-1
+    maxIndexPTile(2,tile)=minIndexPTile(2,tile)+centerCount-1
+    if (tile==tileCount) goto 10
+    !- tile 5
+    tile=5
+    minIndexPTile(1,tile)=minIndexPTile(1,tile-1)
+    minIndexPTile(2,tile)=maxIndexPTile(2,tile-1)+1
+    maxIndexPTile(1,tile)=minIndexPTile(1,tile)+centerCount-1
+    maxIndexPTile(2,tile)=minIndexPTile(2,tile)+centerCount-1
+    if (tile==tileCount) goto 10
+    !- tile 6
+    tile=6
+    minIndexPTile(1,tile)=maxIndexPTile(1,tile-1)+1
+    minIndexPTile(2,tile)=minIndexPTile(2,tile-1)
+    maxIndexPTile(1,tile)=minIndexPTile(1,tile)+centerCount-1
+    maxIndexPTile(2,tile)=minIndexPTile(2,tile)+centerCount-1
+    if (tile==tileCount) goto 10
+    
+10  continue
+    
+    ! - connectionList
+    ! The full cubed sphere has 12 conections. For testing, connections can be
+    ! turned on incrementally from 0 all the way to 12. Anything greater than
+    ! 12 is incorrect.
+    connectionCount = 12  ! between 0 ... and ... 12.
+    allocate(connectionList(connectionCount))
+
+    ! Connections are either defined on the basis of centers or corners, they
+    ! are NOT the same! Our current strategy is to define connections for
+    ! centers, and add corners with padding and no connections. This way we
+    ! can regrid center data bilinear and conservatively. We cannot handle
+    ! regridding for data on corner stagger, plus we have degeneracies in that
+    ! case of exlusive elements. However, we believe that the current 
+    ! application of this is for only data on center stagger.
+
+    conn=0
+    if (conn==connectionCount) goto 20
+
+    conn=conn+1
+    call ESMF_DistGridConnectionSet(connection=connectionList(conn), &
+      tileIndexA=1, tileIndexB=2, positionVector=(/0, 0/), rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    if (conn==connectionCount) goto 20
+
+    conn=conn+1
+    call ESMF_DistGridConnectionSet(connection=connectionList(conn), &
+      tileIndexA=2, tileIndexB=3, positionVector=(/0, 0/), rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    if (conn==connectionCount) goto 20
+
+    conn=conn+1
+    call ESMF_DistGridConnectionSet(connection=connectionList(conn), &
+      tileIndexA=3, tileIndexB=4, positionVector=(/0, 0/), rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    if (conn==connectionCount) goto 20
+
+    conn=conn+1
+    call ESMF_DistGridConnectionSet(connection=connectionList(conn), &
+      tileIndexA=4, tileIndexB=5, positionVector=(/0, 0/), rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    if (conn==connectionCount) goto 20
+
+    conn=conn+1
+    call ESMF_DistGridConnectionSet(connection=connectionList(conn), &
+      tileIndexA=5, tileIndexB=6, positionVector=(/0, 0/), rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    if (conn==connectionCount) goto 20
+
+    conn=conn+1
+    call ESMF_DistGridConnectionSet(connection=connectionList(conn), &
+      tileIndexA=1, tileIndexB=6, &
+      positionVector=(/ &     ! only shift
+      minIndexPTile(1,6)-minIndexPTile(1,1),  &
+      maxIndexPTile(2,6)-minIndexPTile(2,1)+1/), &  
+      rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    if (conn==connectionCount) goto 20
+
+    conn=conn+1
+    call ESMF_DistGridConnectionSet(connection=connectionList(conn), &
+      tileIndexA=1, tileIndexB=3, orientationVector=(/2, -1/), &  ! 270 deg rot
+      positionVector=(/minIndexPTile(1,3)-1-maxIndexPTile(2,1), &
+                       maxIndexPTile(2,3)+minIndexPTile(1,1)/), &
+      rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    if (conn==connectionCount) goto 20
+
+    conn=conn+1
+    call ESMF_DistGridConnectionSet(connection=connectionList(conn), &
+      tileIndexA=2, tileIndexB=4, orientationVector=(/-2, 1/), &  ! 90 deg rot
+      positionVector=(/minIndexPTile(1,4)+maxIndexPTile(2,2),     &
+                       minIndexPTile(2,4)-maxIndexPTile(1,2)-1/), &
+      rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    if (conn==connectionCount) goto 20
+
+    conn=conn+1
+    call ESMF_DistGridConnectionSet(connection=connectionList(conn), &
+      tileIndexA=3, tileIndexB=5, orientationVector=(/2, -1/), &  ! 270 deg rot
+      positionVector=(/minIndexPTile(1,5)-1-maxIndexPTile(2,3), &
+                       maxIndexPTile(2,5)+minIndexPTile(1,3)/), &
+      rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    if (conn==connectionCount) goto 20
+
+    conn=conn+1
+    call ESMF_DistGridConnectionSet(connection=connectionList(conn), &
+      tileIndexA=4, tileIndexB=6, orientationVector=(/-2, 1/), &  ! 90 deg rot
+      positionVector=(/minIndexPTile(1,6)+maxIndexPTile(2,4),     &
+                       minIndexPTile(2,6)-maxIndexPTile(1,4)-1/), &
+      rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    if (conn==connectionCount) goto 20
+
+    conn=conn+1
+    call ESMF_DistGridConnectionSet(connection=connectionList(conn), &
+      tileIndexA=5, tileIndexB=1, orientationVector=(/2, -1/), &  ! 270 deg rot
+      positionVector=(/minIndexPTile(1,1)-1-maxIndexPTile(2,5), &
+                       maxIndexPTile(2,1)+minIndexPTile(1,5)/), &
+      rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    if (conn==connectionCount) goto 20
+
+    conn=conn+1
+    call ESMF_DistGridConnectionSet(connection=connectionList(conn), &
+      tileIndexA=6, tileIndexB=2, orientationVector=(/-2, 1/), &  ! 90 deg rot
+      positionVector=(/minIndexPTile(1,2)+maxIndexPTile(2,6),     &
+                       minIndexPTile(2,2)-maxIndexPTile(1,6)-1/), &
+      rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    if (conn==connectionCount) goto 20
+
+20  continue
+
+    allocate(regDecomp(2,6))
+    regDecomp(1,:)=nx
+    regDecomp(2,:)=ny
+    !-------------------------------------------
+    ! - create DistGrid with default decomposition
+    ! must create with ESMF_INDEX_GLOBAL because of how connections were defined
+    distgrid = ESMF_DistGridCreate(&
+      minIndexPTile=minIndexPTile, maxIndexPTile=maxIndexPTile, &
+      regDecompPTile=regDecomp, &
+      indexflag=ESMF_INDEX_GLOBAL, connectionList=connectionList, &
+      delayout = defaultDelayout, &
+      rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! - create Grid
+    ! must create with ESMF_INDEX_DELOCAL because of how tiles get their 
+    ! coordinates from the cubedSphereTileCreate() routine
+    grid = ESMF_GridCreate(distgrid, coordSys=ESMF_COORDSYS_SPH_DEG, &
+      indexflag=localIndexFlag, name=name, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! --- add CENTER coordinates ---
+    call ESMF_GridAddCoord(grid, staggerloc=ESMF_STAGGERLOC_CENTER, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! --- add CORNER coordinates ---
+    call ESMF_GridAddCoord(grid, staggerloc=ESMF_STAGGERLOC_CORNER, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! calculate the actual cubed sphere coordiantes for each DE
+    do localDe = 0,decount-1
+      DeNo = demap(localDe)
+      tile = DeNo/(nx*ny)+1
+      rem = mod(DeNo,nx*ny)
+      sizei = tileSize/nx
+      sizej = tileSize/ny
+      rem1 = mod(tileSize, nx)
+      rem2 = mod(tileSize, ny)
+      ind = mod(rem,nx)
+      if (rem1 > 0) then
+         if (ind < rem1) then
+           sizei=sizei+1
+           starti=sizei*ind+1
+         else
+           starti=sizei*ind+rem1+1
+         endif
+      else
+         starti = sizei*ind+1
+      endif
+      ind = rem/nx
+      if (rem2 > 0) then
+         if (ind < rem2) then
+           sizej=sizej+1
+           startj=sizej*ind+1
+         else
+           startj=sizej*ind+rem2+1
+         endif
+      else
+         startj = sizej*ind+1
+      endif
+      !print *, DeNo, 'block:', starti, startj, sizei, sizej, tile
+
+      start(1)=starti
+      start(2)=startj
+      count(1)=sizei
+      count(2)=sizej
+
+      call ESMF_GridGetCoord(grid, coordDim=1, localDe=localDe, &
+          farrayPtr=lonPtr, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+      call ESMF_GridGetCoord(grid, coordDim=2, localDe=localDe, &
+          farrayPtr=latPtr, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+
+      call ESMF_GridGetCoord(grid, coordDim=1, localDe=localDe, &
+         staggerloc=ESMF_STAGGERLOC_CORNER, farrayPtr=lonCornerPtr, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return
+      call ESMF_GridGetCoord(grid, coordDim=2, localDe=localDe, &
+         staggerloc=ESMF_STAGGERLOC_CORNER, farrayPtr=latCornerPtr, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return
+
+      !call ESMF_VMWtime(starttime, rc=localrc)
+      ! Generate glocal edge coordinates and local center coordinates
+      call ESMF_UtilCreateCSCoordsPar(tileSize, lonCornerPtr, latCornerPtr, start=start, count=count, &
+           tile=tile, lonCenter=lonPtr, latCenter=latPtr)
+      !call ESMF_VMWtime(endtime, rc=localrc)
+  
+      lonPtr = lonPtr * todeg
+      latPtr = latPtr * todeg
+      lonCornerPtr = lonCornerPtr * todeg
+      latCornerPtr = latCornerPtr * todeg
+
+      !print *, 'Create CS size ', tileSize, 'in', (endtime-starttime)*1000.0, ' msecs'
+    end do 
+
+    ! Create another distgrid with user specified decomposition
+    if (present(decompflagPTile) .or. present(regDecompPTile) .or. &
+        present(delabelList) .or. present(delayout)) then
+      newdistgrid = ESMF_DistGridCreate(&
+        minIndexPTile=minIndexPTile, maxIndexPTile=maxIndexPTile, &
+        regDecompPTile=regDecompPTile, &
+        decompflagPTile=decompflagPTile, &
+        delabelList = delabelList, &
+        indexflag=ESMF_INDEX_GLOBAL, connectionList=connectionList, &
+        delayout = delayout, &
+        rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+      !Redist the grid with the new distgrid
+      newgrid = ESMF_GridCreate(grid, newdistgrid, name=name, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return
+      ! Destroy old grid
+      call ESMF_GridDestroy(grid, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+
+      ! Destroy old distgrid
+      call ESMF_DistGridDestroy(distgrid, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    
+      ESMF_GridCreateCubedSphere = newgrid
+    else
+      ESMF_GridCreateCubedSphere = grid
+    endif
+
+    ! - deallocate connectionList
+    deallocate(connectionList)
+  return
+
+end function ESMF_GridCreateCubedSphere
+
+!-------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridCreateMosaic()"
+!BOP
+! !IROUTINE: ESMF_GridCreateMosaic - Create a multi-tile Grid object with regular decomposition using the grid definition from a GRIDSPEC Mosaic file.
+
+! !INTERFACE:
+  function ESMF_GridCreateMosaic(filename,keywordEnforcer, regDecompPTile, decompflagPTile, &
+        deLabelList, delayout, indexflag, name, tileFilePath, rc)
+!         
+! !RETURN VALUE:
+    type(ESMF_Grid) :: ESMF_GridCreateMosaic
+!
+! !ARGUMENTS:
+    character(len=*),               intent(in)            :: filename
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    integer,                        intent(in),  optional :: regDecompPTile(:,:)
+    type(ESMF_Decomp_Flag), target, intent(in),  optional :: decompflagPTile(:,:)
+    integer,                        intent(in),  optional :: deLabelList(:)
+    type(ESMF_DELayout),            intent(in),  optional :: delayout
+    type(ESMF_Index_Flag),          intent(in),  optional :: indexflag
+    character(len=*),               intent(in),  optional :: name
+    character(len=*),               intent(in),  optional :: tileFilePath
+    integer,                        intent(out), optional :: rc
+
+!
+! !DESCRIPTION:
+!   Create a multiple-tile {\tt ESMF\_Grid} based on the definition from a GRIDSPEC Mosaic file and its associated
+!   tile files using regular decomposition.  Each tile can have different decomposition.  The tile connections 
+!   are defined in a GRIDSPEC format Mosaic file. 
+!   And each tile's coordination is defined in a separate NetCDF file.  The coordinates defined 
+!   in the tile file is so-called "Super Grid".  In other words, the dimensions of the coordinate variables are
+!   {\tt (2*xdim+1, 2*ydim+1)} if {\tt (xdim, ydim)} is the size of the tile.  The Super Grid combines the corner, 
+!   the edge and the center coordinates in one big array.  A Mosaic file may contain just one tile.  If a Mosaic contains
+!   multiple tiles.  Each tile is a logically rectangular lat/lon grid.  Currently, all the tiles have to be the same size.
+!   We will remove this limitation in the future release.
+!   
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[filename]
+!          The name of the GRIDSPEC Mosaic file.
+!     \item[{[regDecompPTile]}]
+!          List of DE counts for each dimension. The second index steps through
+!          the tiles. The total {\tt deCount} is determined as th sum over
+!          the products of {\tt regDecompPTile} elements for each tile.
+!          By default every tile is decomposed in the same way.  If the total 
+!          PET count is less than 6, one tile will be assigned to one DE and the DEs
+!          will be assigned to PETs sequentially, therefore, some PETs may have
+!          more than one DEs.  If the total PET count is greater than 6, the total
+!          number of DEs will be multiple of 6 and less than or equal to the total
+!          PET count.  For instance, if the total PET count is 16, the total DE count 
+!          will be 12 with each tile decomposed into 1x2 blocks.  The 12 DEs are mapped
+!          to the first 12 PETs and the remainding 4 PETs have no DEs locally, unless
+!          an optional {\tt delayout} is provided.
+!     \item[{[decompflagPTile]}]
+!          List of decomposition flags indicating how each dimension of each
+!          tile is to be divided between the DEs. The default setting
+!          is {\tt ESMF\_DECOMP\_BALANCED} in all dimensions for all tiles. 
+!          See section \ref{const:decompflag} for a list of valid decomposition
+!          flag options. The second index indicates the tile number.
+!     \item[{[deLabelList]}]
+!          List assigning DE labels to the default sequence of DEs. The default
+!          sequence is given by the column major order of the {\tt regDecompPTile}
+!          elements in the sequence as they appear following the tile index.
+!     \item[{[delayout]}]
+!          Optional {\tt ESMF\_DELayout} object to be used. By default a new
+!          DELayout object will be created with as many DEs as there are PETs,
+!          or tiles, which ever is greater. If a DELayout object is specified,
+!          the number of DEs must match {\tt regDecompPTile}, if present. In the
+!          case that {\tt regDecompPTile} was not specified, the {\tt deCount}
+!          must be at least that of the default DELayout. The 
+!          {\tt regDecompPTile} will be constructed accordingly.
+!     \item[{[indexflag]}]
+!          Indicates the indexing scheme to be used in the new Grid. Please see
+!          Section~\ref{const:indexflag} for the list of options. If not present,
+!          defaults to ESMF\_INDEX\_DELOCAL.
+!     \item[{[name]}]
+!          {\tt ESMF\_Grid} name.
+!     \item[{[tileFilePath]}]
+!          Optional argument to define the path where the tile files reside. If it 
+!          is given, it overwrites the path defined in {\tt gridlocation} variable 
+!          in the mosaic file.
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+
+    type(ESMF_VM)                               :: vm
+    integer                                     :: PetNo, PetCnt
+    integer                                     :: totalDE, nxy, nx, ny, bigFac
+    integer                                     :: sizex, sizey
+    type(ESMF_DELayout)                         :: defaultDELayout
+    type(ESMF_Grid)                             :: grid, newgrid
+    type(ESMF_DistGrid)                         :: distgrid, newdistgrid
+    integer                                     :: localrc
+    type(ESMF_DistGridConnection), allocatable :: connectionList(:)
+    integer                                    :: i, j, k, conn
+    integer                                    :: localDeCount, localDe, DeNo, tile
+    real(kind=ESMF_KIND_R8),  pointer          :: lonPtr(:,:), latPtr(:,:)
+    real(kind=ESMF_KIND_R8),  pointer          :: lonCornerPtr(:,:), latCornerPtr(:,:)
+    integer                                    :: tileCount
+    integer                                    :: connectionCount
+    integer                                    :: tileSize
+    integer                                    :: starti, startj, sizei, sizej
+    integer                                    :: ind, rem, rem1, rem2
+    integer                                    :: start(2), count(2)
+    integer, pointer                           :: minIndexPTile(:,:)
+    integer, pointer                           :: maxIndexPTile(:,:)
+    integer, pointer                           :: minIndexPDe(:,:)
+    integer, pointer                           :: maxIndexPDe(:,:)
+    integer, allocatable                       :: regDecomp2(:,:)    
+    integer, allocatable                       :: demap(:)
+    integer                                    :: decount
+    !real(ESMF_KIND_R8)                        :: starttime, endtime  
+    character(len=ESMF_MAXPATHLEN)             :: tempname
+    type(ESMF_Mosaic)			       :: mosaic
+    integer	      			       :: totallen
+    integer				       :: posVec(2), orientVec(2)
+    real(kind=ESMF_KIND_R4), parameter         :: pi = 3.1415926
+    real(kind=ESMF_KIND_R4), parameter         :: todeg = 180.0/pi
+    integer                                    :: regDecomp(2)
+    type(ESMF_Decomp_Flag)                     :: decompflag(2)
+    type(ESMF_Index_Flag)                      :: localIndexFlag
+    logical                                    :: isGlobal
+    integer, pointer                           :: PetMap1D(:), PetMap(:,:,:)
+    integer                                    :: lbnd(2), ubnd(2)
+    
+    if (present(rc)) rc=ESMF_SUCCESS
+
+    if (present(indexflag)) then
+       localIndexFlag = indexflag
+    else
+       localIndexFlag = ESMF_INDEX_DELOCAL
+    endif
+  !------------------------------------------------------------------------
+  !------------------------------------------------------------------------
+  ! get global vm information
+  !
+  call ESMF_VMGetCurrent(vm, rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    ESMF_CONTEXT, rcToReturn=rc)) return
+
+  ! set up local pet info
+  call ESMF_VMGet(vm, localPet=PetNo, petCount=PetCnt, rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+  call ESMF_GridSpecReadMosaic(filename, mosaic, tileFilePath=tileFilePath, rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+  tileCount = mosaic%ntiles
+  sizex = mosaic%nx
+  sizey = mosaic%ny
+
+  if (tileCount > 1) then
+    ! use local index for everytile
+    ! should support different tile sizes -- TBD
+    allocate(minIndexPTile(2,tileCount))
+    allocate(maxIndexPTile(2,tileCount))
+    minIndexPTile(1,:)=1
+    minIndexPTile(2,:)=1
+    maxIndexPTile(1,:)=sizex
+    maxIndexPTile(2,:)=sizey
+    
+    ! build connectionList for each connecation
+    connectionCount = mosaic%ncontacts
+
+    allocate(connectionList(connectionCount))
+    do i=1,connectionCount
+      call calculateConnect(minIndexPTile, maxIndexPTile, mosaic%contact(:,i), &
+           mosaic%connindex(:,:,i), orientVec, posVec)
+      call ESMF_DistGridConnectionSet(connection=connectionList(i), &
+        tileIndexA=mosaic%contact(1,i), tileIndexB=mosaic%contact(2,i), &
+        positionVector=(/posVec(1), posVec(2)/), &
+        orientationVector = (/orientVec(1), orientVec(2)/), rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    enddo
+      
+  !------------------------------------------------------------------------
+  ! default decomposition. The number of DEs has to be multiple of 6.
+  ! If the total PET count is less than 6, some PETs will get more than one DE.
+  ! Otherwise, total DEs is always less than or equal to total PETs.
+  
+    if (PetCnt < tileCount) then 
+        totalDE=tileCount
+    else 
+        totalDE = (PetCnt/tileCount)*tileCount
+    endif
+
+    nxy = totalDE/tileCount
+    bigFac = 1
+    do i=2, int(sqrt(float(nxy)))
+      if ((nxy/i)*i == nxy) then
+        bigFac = i
+      endif
+    enddo
+    nx = bigFac
+    ny = nxy/nx
+  
+    defaultDELayout = ESMF_DELayoutCreate(deCount = totalDE, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    call ESMF_DELayoutGet(defaultDElayout, localDeCount = decount, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    if (decount > 0) then
+       allocate(demap(0:decount-1))
+       call ESMF_DELayoutGet(defaultDElayout, localDeToDeMap = demap, rc=localrc)
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+       !print *, PetNo, ' demap ', decount, demap
+     endif     
+     allocate(regDecomp2(2,tileCount))
+       regDecomp2(1,:)=nx
+       regDecomp2(2,:)=ny  
+    !-------------------------------------------
+    ! - create DistGrid with default decomposition
+    ! must create with ESMF_INDEX_DELOCAL because of how connections were defined
+    distgrid = ESMF_DistGridCreate(&
+      minIndexPTile=minIndexPTile, maxIndexPTile=maxIndexPTile, &
+      regDecompPTile=regDecomp2, &
+      indexflag=ESMF_INDEX_DELOCAL, connectionList=connectionList, &
+      delayout = defaultDelayout, &
+      rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+      
+  ! - create Grid
+  ! coordinates from the cubedSphereTileCreate() routine
+  grid = ESMF_GridCreate(distgrid, coordSys=ESMF_COORDSYS_SPH_DEG, &
+      indexflag=localIndexFlag, name=name, rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+  ! --- add CENTER coordinates ---
+  call ESMF_GridAddCoord(grid, staggerloc=ESMF_STAGGERLOC_CENTER, rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+
+  ! --- add CORNER coordinates ---
+  call ESMF_GridAddCoord(grid, staggerloc=ESMF_STAGGERLOC_CORNER, rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return
+
+  ! calculate the actual cubed sphere coordiantes for each DE
+    do localDe = 0,decount-1
+      DeNo = demap(localDe)
+      tile = DeNo/(nx*ny)+1
+      rem = mod(DeNo,nx*ny)
+      sizei = sizex/nx
+      sizej = sizey/ny
+      rem1 = mod(sizex, nx)
+      rem2 = mod(sizey, ny)
+      ind = mod(rem,nx)
+      if (rem1 > 0) then
+         if (ind < rem1) then
+           sizei=sizei+1
+           starti=sizei*ind+1
+         else
+           starti=sizei*ind+rem1+1
+         endif
+      else
+         starti = sizei*ind+1
+      endif
+      ind = rem/nx
+      if (rem2 > 0) then
+         if (ind < rem2) then
+           sizej=sizej+1
+           startj=sizej*ind+1
+         else
+           startj=sizej*ind+rem2+1
+         endif
+      else
+         startj = sizej*ind+1
+      endif
+      !print *, DeNo, 'block:', starti, startj, sizei, sizej, tile
+
+      start(1)=starti
+      start(2)=startj
+      count(1)=sizei
+      count(2)=sizej
+
+      call ESMF_GridGetCoord(grid, coordDim=1, localDe=localDe, &
+          farrayPtr=lonPtr, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+      call ESMF_GridGetCoord(grid, coordDim=2, localDe=localDe, &
+          farrayPtr=latPtr, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+
+      call ESMF_GridGetCoord(grid, coordDim=1, localDe=localDe, &
+         staggerloc=ESMF_STAGGERLOC_CORNER, farrayPtr=lonCornerPtr, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return
+      call ESMF_GridGetCoord(grid, coordDim=2, localDe=localDe, &
+         staggerloc=ESMF_STAGGERLOC_CORNER, farrayPtr=latCornerPtr, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return
+
+      !call ESMF_VMWtime(starttime, rc=localrc)
+      ! Generate glocal edge coordinates and local center coordinates
+      totallen = len_trim(mosaic%filenames(tile))+len_trim(mosaic%tileDirectory)
+      tempname = trim(mosaic%tileDirectory)//trim(mosaic%filenames(tile))
+      call ESMF_GridSpecReadTile(trim(tempname),sizex, sizey, lonPtr, latPtr, &
+         cornerLon=lonCornerPtr, cornerLat=latCornerPtr, &
+         start=start, count=count, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return
+      !call ESMF_VMWtime(endtime, rc=localrc)
+  
+      !print *, 'Create CS size ', sizex, sizey, 'in', (endtime-starttime)*1000.0, ' msecs'
+    end do 
+
+    ! Create another distgrid with user specified decomposition
+    if (present(decompflagPTile) .or. present(regDecompPTile) .or. &
+        present(delabelList) .or. present(delayout)) then
+      newdistgrid = ESMF_DistGridCreate(&
+        minIndexPTile=minIndexPTile, maxIndexPTile=maxIndexPTile, &
+        regDecompPTile=regDecompPTile, &
+        decompflagPTile=decompflagPTile, &
+        delabelList = delabelList, &
+        indexflag=ESMF_INDEX_DELOCAL, connectionList=connectionList, &
+        delayout = delayout, &
+        rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+      newgrid = ESMF_GridCreate(grid, newdistgrid, name=name, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return
+      ! Destroy old grid
+      call ESMF_GridDestroy(grid, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+
+      ! Destroy old distgrid
+      call ESMF_DistGridDestroy(distgrid, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    
+      ESMF_GridCreateMosaic = newgrid
+    else
+      ESMF_GridCreateMosaic = grid
+    endif
+
+    ! - deallocate connectionList
+    deallocate(connectionList)
+    deallocate(minIndexPTile, maxIndexPTile)
+  else  ! one tile case
+    ! Figure out if it is a global grid or a regional grid
+    totallen = len_trim(mosaic%filenames(1))+len_trim(mosaic%tileDirectory)
+    tempname = trim(mosaic%tileDirectory)//trim(mosaic%filenames(1))
+    call ESMF_GridspecQueryTileGlobal(trim(tempname), isGlobal, rc=localrc)
+    if (present(regDecompPTile)) then
+      regDecomp = regDecompPTile(:,1)
+    else
+      ! use default decomposition
+      regDecomp(1) = PetCnt
+      regDecomp(2) = 1
+    endif
+    totalDE = regDecomp(1)*regDecomp(2)
+    if (present(decompflagPTile)) then
+      decompflag = decompflagPTile(:,1)
+    else
+      decompflag = ESMF_DECOMP_BALANCED
+    endif
+    allocate(PetMap(regDecomp(1), regDecomp(2), 1))
+    allocate(PetMap1D(totalDE))
+    allocate(demap(0:totalDE-1))
+    if (present(delayout)) then
+       call ESMF_DELayoutGet(delayout, petMap = petMap1D, &
+            localDeCount=decount, localDeToDeMap=demap, rc=localrc)
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+           ESMF_CONTEXT, rcToReturn=rc)) return
+    else
+       !Create a default delayout
+       defaultdelayout = ESMF_DELayoutCreate(decount=totalDE, rc=localrc)
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+           ESMF_CONTEXT, rcToReturn=rc)) return
+       call ESMF_DELayoutGet(defaultdelayout, petMap = petMap1D, &
+            localDeCount=decount, localDeToDeMap=demap, rc=localrc)
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+           ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+    k=1
+    do j=1,regDecomp(2)
+      do i=1,regDecomp(1)
+         PetMap(i,j,1)=PetMap1D(k)
+         k=k+1
+      enddo
+    enddo
+    deallocate(PetMap1D)
+                       
+    if (isGlobal) then
+     grid = ESMF_GridCreate1PeriDim(regDecomp, decompFlag, &  
+        minIndex=(/1,1/), maxIndex=(/sizex,sizey/), &
+        indexflag=localIndexFlag, &
+        coordSys=ESMF_COORDSYS_SPH_DEG, name=name, &
+        petMap = petMap, &
+        rc=localrc)
+    else
+     grid = ESMF_GridCreateNoPeriDim(regDecomp, decompFlag, &  
+        minIndex=(/1,1/), maxIndex=(/sizex,sizey/), &
+        indexflag=localIndexFlag, &
+        coordSys=ESMF_COORDSYS_SPH_DEG, name=name, &
+        petMap = petMap, &
+        rc=localrc)
+    endif
+    deallocate(PetMap)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! --- add CENTER coordinates ---
+    call ESMF_GridAddCoord(grid, staggerloc=ESMF_STAGGERLOC_CENTER, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! --- add CORNER coordinates ---
+    call ESMF_GridAddCoord(grid, staggerloc=ESMF_STAGGERLOC_CORNER, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return
+
+    call ESMF_GridGet(grid, distgrid=distgrid, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return
+
+    allocate(minIndexPDe(2,totalDE), maxIndexPDe(2,totalDE))
+    call ESMF_DistgridGet(distgrid, minIndexPDe=minIndexPDe, maxIndexPDe = maxIndexPDe, &
+                          rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return
+        
+    ! calculate the actual cubed sphere coordiantes for each DE
+    do localDe = 0,decount-1
+      call ESMF_GridGetCoord(grid, coordDim=1, localDe=localDe, &
+          farrayPtr=lonPtr, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+      call ESMF_GridGetCoord(grid, coordDim=2, localDe=localDe, &
+          farrayPtr=latPtr, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+
+      call ESMF_GridGetCoord(grid, coordDim=1, localDe=localDe, &
+         staggerloc=ESMF_STAGGERLOC_CORNER, farrayPtr=lonCornerPtr, &
+         rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return
+      call ESMF_GridGetCoord(grid, coordDim=2, localDe=localDe, &
+         staggerloc=ESMF_STAGGERLOC_CORNER, farrayPtr=latCornerPtr, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return
+
+      start(1)=minIndexPDe(1,demap(localDe)+1)
+      start(2)=minIndexPDe(2,demap(localDe)+1)
+      count(1)=maxIndexPDe(1,demap(localDe)+1)-start(1)+1
+      count(2)=maxIndexPDe(2,demap(localDe)+1)-start(2)+1
+
+      !call ESMF_VMWtime(starttime, rc=localrc)
+      ! Generate glocal edge coordinates and local center coordinates
+      call ESMF_GridSpecReadTile(trim(tempname),sizex, sizey, lonPtr, latPtr, &
+         cornerLon=lonCornerPtr, cornerLat=latCornerPtr, &
+         start=start, count=count, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return
+      !call ESMF_VMWtime(endtime, rc=localrc)
+  
+      !print *, 'Create CS size ', nx, ny, 'in', (endtime-starttime)*1000.0, ' msecs'
+    end do 
+    ESMF_GridCreateMosaic = grid
+    deallocate(minIndexPDe, maxIndexPDe)
+  endif     
+  return
+
+end function ESMF_GridCreateMosaic
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "calculateConnect"
+subroutine calculateConnect(minIndexPTile, maxIndexPTile, tilepair, &
+           contactTuple, orientationVector, positionVector)
+
+integer, pointer :: minIndexPTile(:,:)
+integer, pointer :: maxIndexPTile(:,:)
+integer, intent(IN) :: tilepair(2)
+integer, intent(IN) :: contactTuple(2,4)
+integer, intent(OUT) :: orientationVector(2)
+integer, intent(OUT) :: positionVector(2)
+
+
+  integer     :: minIndexPair(2,2)
+  integer     :: maxIndexPair(2,2)
+  integer     :: pA(2)   ! tile A start point
+  integer     :: pB(2)   ! tile A end point
+  integer     :: pC(2)   ! tile B start point (connect with point A)
+  integer     :: pD(2)   ! tile B end point (connect with point B)
+  ! -- helper variables for conversion
+  integer     :: i, dimCount=2
+  integer     :: a(2), b(2)
+  integer     :: pAplus(2), pAplusrot(2)
+  integer     :: a_zero, a_notzero
+  integer     :: b_zero, b_notzero
+
+  minIndexPair(:,1)=minIndexPTile(:,tilepair(1))
+  minIndexPair(:,2)=minIndexPTile(:,tilepair(2))
+  maxIndexPair(:,1)=maxIndexPTile(:,tilepair(1))
+  maxIndexPair(:,2)=maxIndexPTile(:,tilepair(2))
+
+  ! -- resulting DistGrid orientation vector and position vector aruments
+  ! --- convesion from pA, pB, pC, pD  --> orientationVector, positionVector
+  pA = contactTuple(:,1)
+  pB = contactTuple(:,2)
+  pC = contactTuple(:,3)
+  pD = contactTuple(:,4)
+
+  a = pB - pA ! contact vector on tile A
+  b = pD - pC ! contact vector on tile B
+  !print *, "a=", a
+  !print *, "b=", b
+  
+  a_zero    = -1 ! invalidate
+  a_notzero = -1 ! invalidate
+  do i=1, dimCount
+    if (a(i)==0) then
+      a_zero=i
+    else
+      a_notzero = i
+    endif
+  enddo
+  if (a_zero==-1 .or. a_notzero==-1) then 
+    call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
+      msg="Contact for tile A must line up with index space.")
+    return
+  endif
+  
+  b_zero    = -1 ! invalidate
+  b_notzero = -1 ! invalidate
+  do i=1, dimCount
+    if (b(i)==0) then
+      b_zero=i
+    else
+      b_notzero = i
+    endif
+  enddo
+  if (b_zero==-1 .or. b_notzero==-1) then 
+    call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
+      msg="Contact for tile B must line up with index space.")
+    return
+  endif
+  
+  !print *, "a_zero=", a_zero, "   a_notzero=", a_notzero
+  !print *, "b_zero=", b_zero, "   b_notzero=", b_notzero
+  
+  if (abs(a(a_notzero)) /= abs(b(b_notzero))) then
+    call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
+      msg="Contact must have same number of elements on both sides.")
+    return
+  endif
+  
+  ! construct preliminary orientationVector
+  orientationVector(b_zero) = a_zero
+  orientationVector(b_notzero) = a_notzero
+  
+  ! consider sign flip along contact
+  if (a(a_notzero) == -b(b_notzero)) then
+    orientationVector(b_notzero) = - orientationVector(b_notzero)
+  endif
+  
+  ! consider sign flip perpendicular to contact
+  if ((pA(a_zero)==minindexPair(a_zero,1) .and. &
+       pC(b_zero)==minindexPair(b_zero,2)) .or. &
+      (pA(a_zero)==maxIndexPair(a_zero,1) .and. &
+       pC(b_zero)==maxIndexPair(b_zero,2))) then
+    orientationVector(b_zero) = - orientationVector(b_zero)
+  endif
+  
+  ! done constructing orientationVector
+  ! print *, ">>>>> orientationVector=", orientationVector, " <<<<<"
+  
+  ! now construct positionVector....
+  ! The contact connects pA "+1" (on tile A) to pC (on tile B). The "+1" here
+  ! means that one step beyond tile A is taken. This step is perpendicular to
+  ! the contact vector, and outward from the tile.
+  pAplus = pA
+  if (pA(a_zero)==minindexPair(a_zero,1)) pAplus(a_zero) = pAplus(a_zero) - 1
+  if (pA(a_zero)==maxIndexPair(a_zero,1)) pAplus(a_zero) = pAplus(a_zero) + 1
+  !print *, "pAplus=", pAplus
+  ! now apply the previously determined orientationVector on pAplus
+  do i=1, dimCount
+    if (orientationVector(i) < 0) then
+      pAplusrot(i) = -pAplus(-orientationVector(i))
+    else
+      pAplusrot(i) = pAplus(orientationVector(i))
+    endif
+  enddo
+  !print *, "pAplusrot=", pAplusrot
+  ! find positionVector per definition as the difference
+  positionVector = pC - pAplusrot
+  !print *, ">>>>> positionVector=   ", positionVector, " <<<<<"
+
+end subroutine calculateConnect
+
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridDestroy"
@@ -13042,20 +14192,23 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      the index space corresponding to the cells and the boundary of the 
 !      the exclusive region. This extra space is to contain the extra
 !      padding for non-center stagger locations, and should be big enough
-!      to hold any stagger in the grid. It is an error for this to be non-zero 
-!      for a periodic dimension.
+!      to hold any stagger in the grid. If this and gridAlign are not present then 
+!      defaults to 0, 0, ..., 0 (all zeros).
 ! \item[{[gridEdgeUWidth]}] 
 !      The padding around the upper edges of the grid. This padding is between
 !      the index space corresponding to the cells and the boundary of the 
 !      the exclusive region. This extra space is to contain the extra
 !      padding for non-center stagger locations, and should be big enough
-!      to hold any stagger in the grid. It is an error for this to be non-zero 
-!      for a periodic dimension. 
+!      to hold any stagger in the grid. If this and gridAlign are not present then 
+!      defaults to 1, 1, ..., 1 (all ones).
 ! \item[{[gridAlign]}] 
 !     Specification of how the stagger locations should align with the cell
 !     index space (can be overridden by the individual staggerAligns). If
-!     the {\tt gridEdgeWidths} are not specified than this parameter
-!     implies the EdgeWidths.
+!     the gridEdgeWidths are not specified than this argument
+!     implies the gridEdgeWidths. If the gridEdgeWidths are specified and this argument isn't
+!     then this argument is implied by the gridEdgeWidths.
+!     If this and the gridEdgeWidths are not specified, then defaults to 
+!    -1, -1, ..., -1 (all negative ones).
 ! \item[{[gridMemLBound]}] 
 !      Specifies the lower index range of the memory of every DE in this Grid. 
 !      Only used when indexflag is {\tt ESMF\_INDEX\_USER}. May be overridden
@@ -13344,20 +14497,23 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      the index space corresponding to the cells and the boundary of the 
 !      the exclusive region. This extra space is to contain the extra
 !      padding for non-center stagger locations, and should be big enough
-!      to hold any stagger in the grid. It is an error for this to be non-zero 
-!      for a periodic dimension.
+!      to hold any stagger in the grid. If this and gridAlign are not present then 
+!      defaults to 0, 0, ..., 0 (all zeros).
 ! \item[{[gridEdgeUWidth]}] 
 !      The padding around the upper edges of the grid. This padding is between
 !      the index space corresponding to the cells and the boundary of the 
 !      the exclusive region. This extra space is to contain the extra
 !      padding for non-center stagger locations, and should be big enough
-!      to hold any stagger in the grid. It is an error for this to be non-zero 
-!      for a periodic dimension. 
+!      to hold any stagger in the grid. If this and gridAlign are not present then 
+!      defaults to 1, 1, ..., 1 (all ones).
 ! \item[{[gridAlign]}] 
 !     Specification of how the stagger locations should align with the cell
 !     index space (can be overridden by the individual staggerAligns). If
-!     the {\tt gridEdgeWidths} are not specified than this parameter
-!     implies the EdgeWidths.
+!     the gridEdgeWidths are not specified than this argument
+!     implies the gridEdgeWidths. If the gridEdgeWidths are specified and this argument isn't
+!     then this argument is implied by the gridEdgeWidths.
+!     If this and the gridEdgeWidths are not specified, then defaults to 
+!    -1, -1, ..., -1 (all negative ones).
 ! \item[{[gridMemLBound]}] 
 !      Specifies the lower index range of the memory of every DE in this Grid. 
 !      Only used when indexflag is {\tt ESMF\_INDEX\_USER}. May be overridden
@@ -13939,12 +15095,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !EOP
     integer :: localrc ! local error status
     type(ESMF_GridDecompType) :: decompType  ! check if arbitrary
-    type(ESMF_InterfaceInt) :: distgridToGridMapArg  ! Language Interface Helper Var
-    type(ESMF_InterfaceInt) :: coordDimCountArg  ! Language Interface Helper Var
-    type(ESMF_InterfaceInt) :: coordDimMapArg ! Language Interface Helper Var
-    type(ESMF_InterfaceInt) :: gridEdgeLWidthArg  ! Language Interface Helper Var
-    type(ESMF_InterfaceInt) :: gridEdgeUWidthArg  ! Language Interface Helper Var
-    type(ESMF_InterfaceInt) :: gridAlignArg  ! Language Interface Helper Var
+    type(ESMF_InterArray) :: distgridToGridMapArg  ! Language Interface Helper Var
+    type(ESMF_InterArray) :: coordDimCountArg  ! Language Interface Helper Var
+    type(ESMF_InterArray) :: coordDimMapArg ! Language Interface Helper Var
+    type(ESMF_InterArray) :: gridEdgeLWidthArg  ! Language Interface Helper Var
+    type(ESMF_InterArray) :: gridEdgeUWidthArg  ! Language Interface Helper Var
+    type(ESMF_InterArray) :: gridAlignArg  ! Language Interface Helper Var
 
 
     ! Initialize return code; assume failure until success is certain
@@ -13997,26 +15153,26 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        ! It doesn't look like it needs to be translated, but test to make sure
 
        !! distgridToGridMap
-       distgridToGridMapArg = ESMF_InterfaceIntCreate(distgridToGridMap, rc=localrc)
+       distgridToGridMapArg = ESMF_InterArrayCreate(distgridToGridMap, rc=localrc)
        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
 
        !! Description of array factorization
-       coordDimCountArg = ESMF_InterfaceIntCreate(coordDimCount, rc=localrc)
+       coordDimCountArg = ESMF_InterArrayCreate(coordDimCount, rc=localrc)
        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
-       coordDimMapArg = ESMF_InterfaceIntCreate(farray2D=coordDimMap, rc=localrc)
+       coordDimMapArg = ESMF_InterArrayCreate(farray2D=coordDimMap, rc=localrc)
        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
 
        !! Grid Boundary Info
-       gridEdgeLWidthArg = ESMF_InterfaceIntCreate(gridEdgeLWidth, rc=localrc)
+       gridEdgeLWidthArg = ESMF_InterArrayCreate(gridEdgeLWidth, rc=localrc)
        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
-       gridEdgeUWidthArg = ESMF_InterfaceIntCreate(gridEdgeUWidth, rc=localrc)
+       gridEdgeUWidthArg = ESMF_InterArrayCreate(gridEdgeUWidth, rc=localrc)
        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
-       gridAlignArg = ESMF_InterfaceIntCreate(gridAlign, rc=localrc)
+       gridAlignArg = ESMF_InterArrayCreate(gridAlign, rc=localrc)
        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -14032,22 +15188,22 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             ESMF_CONTEXT, rcToReturn=rc)) return
 
        ! Deallocate helper variables
-       call ESMF_InterfaceIntDestroy(distgridToGridMapArg, rc=localrc)
+       call ESMF_InterArrayDestroy(distgridToGridMapArg, rc=localrc)
        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
-       call ESMF_InterfaceIntDestroy(coordDimCountArg, rc=localrc)
+       call ESMF_InterArrayDestroy(coordDimCountArg, rc=localrc)
        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
-       call ESMF_InterfaceIntDestroy(coordDimMapArg, rc=localrc)
+       call ESMF_InterArrayDestroy(coordDimMapArg, rc=localrc)
        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
-       call ESMF_InterfaceIntDestroy(gridEdgeLWidthArg, rc=localrc)
+       call ESMF_InterArrayDestroy(gridEdgeLWidthArg, rc=localrc)
        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
-       call ESMF_InterfaceIntDestroy(gridEdgeUWidthArg, rc=localrc)
+       call ESMF_InterArrayDestroy(gridEdgeUWidthArg, rc=localrc)
        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
-       call ESMF_InterfaceIntDestroy(gridAlignArg, rc=localrc)
+       call ESMF_InterArrayDestroy(gridAlignArg, rc=localrc)
        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -14108,8 +15264,8 @@ end subroutine ESMF_GridGetDefault
 !EOPI
 
     integer :: localrc ! local error status
-    type(ESMF_InterfaceInt) :: minIndexArg ! helper variable
-    type(ESMF_InterfaceInt) :: maxIndexArg ! helper variable	
+    type(ESMF_InterArray) :: minIndexArg ! helper variable
+    type(ESMF_InterArray) :: maxIndexArg ! helper variable	
     type(ESMF_GridDecompType) :: decompType
     integer :: localTileNo ! local TileNo	
   
@@ -14143,10 +15299,10 @@ end subroutine ESMF_GridGetDefault
     endif
 
     ! process optional arguments
-    minIndexArg=ESMF_InterfaceIntCreate(minIndex, rc=localrc)
+    minIndexArg=ESMF_InterArrayCreate(minIndex, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    maxIndexArg=ESMF_InterfaceIntCreate(maxIndex, rc=localrc)
+    maxIndexArg=ESMF_InterArrayCreate(maxIndex, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -14155,10 +15311,10 @@ end subroutine ESMF_GridGetDefault
        ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Deallocate interface ints
-    call ESMF_InterfaceIntDestroy(minIndexArg, rc=localrc)
+    call ESMF_InterArrayDestroy(minIndexArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(maxIndexArg, rc=localrc)
+    call ESMF_InterArrayDestroy(maxIndexArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
    
@@ -14166,7 +15322,7 @@ end subroutine ESMF_GridGetDefault
     if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_GridGetIndex
-
+ ! XMRKX
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD  
 #define ESMF_METHOD "ESMF_GridGetPLocalDe"
@@ -14177,7 +15333,7 @@ end subroutine ESMF_GridGetDefault
 ! !INTERFACE:
   ! Private name; call using ESMF_GridGet()
       subroutine ESMF_GridGetPLocalDe(grid, localDE, keywordEnforcer, &
-        isLBound,isUBound, arbIndexCount, arbIndexList, rc)
+        isLBound,isUBound, arbIndexCount, arbIndexList, tile, rc)
 
 !
 ! !ARGUMENTS:
@@ -14188,6 +15344,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       logical,                intent(out), optional :: isUBound(:)
       integer,                intent(out), optional :: arbIndexCount
       integer,        target, intent(out), optional :: arbIndexList(:,:)
+      integer,                intent(out), optional :: tile
       integer,                intent(out), optional :: rc
 !
 ! !STATUS:
@@ -14215,6 +15372,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item[{[arbIndexList]}] 
 !   The 2D array storing the local cell indices for an arbitrarily distributed grid. The size of the array 
 !   is arbIndexCount * arbDimCount 
+!\item[{[tile]}]
+!     The number of the tile in which localDE is contained. Tile numbers range from 1 to TileCount. 
 !\item[{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !\end{description}
@@ -14226,7 +15385,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer :: isUBoundTmp(ESMF_MAXDIM) 
     integer :: dimCount,i
     type(ESMF_GridDecompType) :: decompType  ! check if arbitrary
-    type(ESMF_InterfaceInt) :: arbIndexListArg ! Language Interface Helper Var
+    type(ESMF_InterArray) :: arbIndexListArg ! Language Interface Helper Var
 
     ! Initialize return code
     localrc = ESMF_RC_NOT_IMPL
@@ -14281,14 +15440,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     endif
 
     !! Arbitrarily distributed grid local indices
-    arbIndexListArg = ESMF_InterfaceIntCreate(farray2D=arbIndexList, rc=localrc)
+    arbIndexListArg = ESMF_InterArrayCreate(farray2D=arbIndexList, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
 
     ! Call into the C++ interface, which will sort out optional arguments
     call c_ESMC_GridGetPLocalDe(grid, localDE, &
-      dimCount, isLBoundTmp, isUBoundTmp, arbIndexCount, arbIndexListArg, localrc)
+      dimCount, isLBoundTmp, isUBoundTmp, arbIndexCount, arbIndexListArg, &
+      tile, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
        ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -14308,7 +15468,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        enddo
     endif
 
-    call ESMF_InterfaceIntDestroy(arbIndexListArg, rc=localrc)
+    call ESMF_InterArrayDestroy(arbIndexListArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -14421,12 +15581,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !EOP
 
     integer :: localrc ! local error status
-    type(ESMF_InterfaceInt) :: exclusiveLBoundArg ! helper variable
-    type(ESMF_InterfaceInt) :: exclusiveUBoundArg ! helper variable
-    type(ESMF_InterfaceInt) :: exclusiveCountArg ! helper variable
-    type(ESMF_InterfaceInt) :: computationalLBoundArg ! helper variable
-    type(ESMF_InterfaceInt) :: computationalUBoundArg ! helper variable
-    type(ESMF_InterfaceInt) :: computationalCountArg ! helper variable
+    type(ESMF_InterArray) :: exclusiveLBoundArg ! helper variable
+    type(ESMF_InterArray) :: exclusiveUBoundArg ! helper variable
+    type(ESMF_InterArray) :: exclusiveCountArg ! helper variable
+    type(ESMF_InterArray) :: computationalLBoundArg ! helper variable
+    type(ESMF_InterArray) :: computationalUBoundArg ! helper variable
+    type(ESMF_InterArray) :: computationalCountArg ! helper variable
     integer :: tmp_staggerloc
 
     ! Initialize return code
@@ -14438,22 +15598,22 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     tmp_staggerloc=staggerloc%staggerloc
 
     ! process optional arguments
-    exclusiveLBoundArg=ESMF_InterfaceIntCreate(exclusiveLBound, rc=localrc)
+    exclusiveLBoundArg=ESMF_InterArrayCreate(exclusiveLBound, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    exclusiveUBoundArg=ESMF_InterfaceIntCreate(exclusiveUBound, rc=localrc)
+    exclusiveUBoundArg=ESMF_InterArrayCreate(exclusiveUBound, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    exclusiveCountArg=ESMF_InterfaceIntCreate(exclusiveCount, rc=localrc)
+    exclusiveCountArg=ESMF_InterArrayCreate(exclusiveCount, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    computationalLBoundArg=ESMF_InterfaceIntCreate(computationalLBound, rc=localrc)
+    computationalLBoundArg=ESMF_InterArrayCreate(computationalLBound, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    computationalUBoundArg=ESMF_InterfaceIntCreate(computationalUBound, rc=localrc)
+    computationalUBoundArg=ESMF_InterArrayCreate(computationalUBound, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    computationalCountArg=ESMF_InterfaceIntCreate(computationalCount, rc=localrc)
+    computationalCountArg=ESMF_InterArrayCreate(computationalCount, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -14467,22 +15627,22 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Deallocate interface ints
-    call ESMF_InterfaceIntDestroy(exclusiveLBoundArg, rc=localrc)
+    call ESMF_InterArrayDestroy(exclusiveLBoundArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(exclusiveUBoundArg, rc=localrc)
+    call ESMF_InterArrayDestroy(exclusiveUBoundArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(exclusiveCountArg, rc=localrc)
+    call ESMF_InterArrayDestroy(exclusiveCountArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(computationalLBoundArg, rc=localrc)
+    call ESMF_InterArrayDestroy(computationalLBoundArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(computationalUBoundArg, rc=localrc)
+    call ESMF_InterArrayDestroy(computationalUBoundArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(computationalCountArg, rc=localrc)
+    call ESMF_InterArrayDestroy(computationalCountArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -14501,7 +15661,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE:
   ! Private name; call using ESMF_GridGet()
       subroutine ESMF_GridGetPSloc(grid, staggerloc, &
-        keywordEnforcer, distgrid, rc)
+        keywordEnforcer, distgrid, &
+        staggerEdgeLWidth, staggerEdgeUWidth, &
+        staggerAlign, staggerLBound, rc)
 
 !
 ! !ARGUMENTS:
@@ -14509,6 +15671,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       type (ESMF_StaggerLoc), intent(in)            :: staggerloc
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       type(ESMF_DistGrid),    intent(out), optional :: distgrid
+      integer,                intent(out), optional :: staggerEdgeLWidth(:)
+      integer,                intent(out), optional :: staggerEdgeUWidth(:)
+      integer,                intent(out), optional :: staggerAlign(:)
+      integer,                intent(out), optional :: staggerLBound(:)      
       integer,                intent(out), optional :: rc
 !
 ! !STATUS:
@@ -14531,15 +15697,33 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     of predefined stagger locations. 
 !\item[{[distgrid]}]
 !   The structure describing the distribution of this staggerloc in this grid. 
+! \item[{[staggerEdgeLWidth]}] 
+!      This array should be the same dimCount as the grid. It specifies the lower corner of the stagger
+!      region with respect to the lower corner of the exclusive region.
+! \item[{[staggerEdgeUWidth]}] 
+!      This array should be the same dimCount as the grid. It specifies the upper corner of the stagger
+!      region with respect to the upper corner of the exclusive region.
+! \item[{[staggerAlign]}] 
+!      This array is of size  grid dimCount.
+!      For this stagger location, it specifies which element
+!      has the same index value as the center. For example, 
+!      for a 2D cell with corner stagger it specifies which 
+!      of the 4 corners has the same index as the center. 
+! \item[{[staggerLBound]}] 
+!      Specifies the lower index range of the memory of every DE in this staggerloc in this Grid. 
+!      Only used when Grid indexflag is {\tt ESMF\_INDEX\_USER}. 
 !\item[{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !\end{description}
 !
 !EOP
 
+ ! XMRKX
     integer :: localrc ! local error status
-    type(ESMF_InterfaceInt) :: minIndexArg ! helper variable
-    type(ESMF_InterfaceInt) :: maxIndexArg ! helper variable
+    type(ESMF_InterArray) :: staggerEdgeLWidthArg ! helper variable
+    type(ESMF_InterArray) :: staggerEdgeUWidthArg ! helper variable
+    type(ESMF_InterArray) :: staggerAlignArg ! helper variable
+    type(ESMF_InterArray) :: staggerLBoundArg ! helper variable
     integer :: tmp_staggerloc
 
     ! Initialize return code
@@ -14547,7 +15731,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
     ! If not asking for anything, then just leave
-    if (.not. present(distgrid)) then
+    if (.not. present(distgrid) .and. &
+        .not. present(staggerEdgeLWidth) .and. &
+        .not. present(staggerEdgeUWidth) .and. &
+        .not. present(staggerAlign) .and. &
+        .not. present(staggerLBound)) then
        ! Return successfully
        if (present(rc)) rc = ESMF_SUCCESS
        return
@@ -14558,11 +15746,49 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ESMF_INIT_CHECK_DEEP_SHORT(ESMF_GridGetInit, grid, rc)
     tmp_staggerloc=staggerloc%staggerloc
 
+
+    ! process optional arguments into interface ints
+    staggerEdgeLWidthArg=ESMF_InterArrayCreate(staggerEdgeLWidth, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    staggerEdgeUWidthArg=ESMF_InterArrayCreate(staggerEdgeUWidth, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    staggerAlignArg=ESMF_InterArrayCreate(staggerAlign, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    staggerLBoundArg=ESMF_InterArrayCreate(staggerLBound, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
     ! Call into the C++ interface, which will sort out optional arguments
     call c_ESMC_GridGetPSloc(grid, tmp_staggerLoc, &
-         distgrid, localrc)
+         distgrid, staggerEdgeLWidthArg, staggerEdgeUWidthArg, &
+         staggerAlignArg, staggerLBoundArg, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
        ESMF_CONTEXT, rcToReturn=rc)) return
+
+
+    ! Deallocate interface ints
+    call ESMF_InterArrayDestroy(staggerEdgeLWidthArg, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    call ESMF_InterArrayDestroy(staggerEdgeUWidthArg, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    call ESMF_InterArrayDestroy(staggerAlignArg, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    call ESMF_InterArrayDestroy(staggerLBoundArg, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
 
     ! Set Deep Classes as created
     if (present(distgrid)) then
@@ -14636,8 +15862,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !EOP
 
     integer :: localrc ! local error status
-    type(ESMF_InterfaceInt) :: minIndexArg ! helper variable
-    type(ESMF_InterfaceInt) :: maxIndexArg ! helper variable
+    type(ESMF_InterArray) :: minIndexArg ! helper variable
+    type(ESMF_InterArray) :: maxIndexArg ! helper variable
     integer :: tmp_staggerloc
 
     ! Initialize return code
@@ -14649,10 +15875,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     tmp_staggerloc=staggerloc%staggerloc
 
     ! process optional arguments
-    minIndexArg=ESMF_InterfaceIntCreate(minIndex, rc=localrc)
+    minIndexArg=ESMF_InterArrayCreate(minIndex, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    maxIndexArg=ESMF_InterfaceIntCreate(maxIndex, rc=localrc)
+    maxIndexArg=ESMF_InterArrayCreate(maxIndex, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -14664,10 +15890,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Deallocate interface ints
-    call ESMF_InterfaceIntDestroy(minIndexArg, rc=localrc)
+    call ESMF_InterArrayDestroy(minIndexArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(maxIndexArg, rc=localrc)
+    call ESMF_InterArrayDestroy(maxIndexArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -14960,15 +16186,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_LocalArray) :: localarray
     type(ESMF_DataCopy_Flag) :: datacopyflagInt
     integer :: coordDimCount(ESMF_MAXDIM)
-    type(ESMF_InterfaceInt) :: exclusiveLBoundArg ! helper variable
-    type(ESMF_InterfaceInt) :: exclusiveUBoundArg ! helper variable
-    type(ESMF_InterfaceInt) :: exclusiveCountArg ! helper variable
-    type(ESMF_InterfaceInt) :: computationalLBoundArg ! helper variable
-    type(ESMF_InterfaceInt) :: computationalUBoundArg ! helper variable
-    type(ESMF_InterfaceInt) :: computationalCountArg ! helper variable
-    type(ESMF_InterfaceInt) :: totalLBoundArg ! helper variable
-    type(ESMF_InterfaceInt) :: totalUBoundArg ! helper variable
-    type(ESMF_InterfaceInt) :: totalCountArg ! helper variable
+    type(ESMF_InterArray) :: exclusiveLBoundArg ! helper variable
+    type(ESMF_InterArray) :: exclusiveUBoundArg ! helper variable
+    type(ESMF_InterArray) :: exclusiveCountArg ! helper variable
+    type(ESMF_InterArray) :: computationalLBoundArg ! helper variable
+    type(ESMF_InterArray) :: computationalUBoundArg ! helper variable
+    type(ESMF_InterArray) :: computationalCountArg ! helper variable
+    type(ESMF_InterArray) :: totalLBoundArg ! helper variable
+    type(ESMF_InterArray) :: totalUBoundArg ! helper variable
+    type(ESMF_InterArray) :: totalCountArg ! helper variable
     integer :: tmp_staggerloc
     type(ESMF_GridDecompType) :: decompType
 
@@ -15055,31 +16281,31 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ESMF_CONTEXT, rcToReturn=rc)) return 
 
     ! process optional arguments
-    exclusiveLBoundArg=ESMF_InterfaceIntCreate(exclusiveLBound, rc=localrc)
+    exclusiveLBoundArg=ESMF_InterArrayCreate(exclusiveLBound, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    exclusiveUBoundArg=ESMF_InterfaceIntCreate(exclusiveUBound, rc=localrc)
+    exclusiveUBoundArg=ESMF_InterArrayCreate(exclusiveUBound, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    exclusiveCountArg=ESMF_InterfaceIntCreate(exclusiveCount, rc=localrc)
+    exclusiveCountArg=ESMF_InterArrayCreate(exclusiveCount, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    computationalLBoundArg=ESMF_InterfaceIntCreate(computationalLBound, rc=localrc)
+    computationalLBoundArg=ESMF_InterArrayCreate(computationalLBound, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    computationalUBoundArg=ESMF_InterfaceIntCreate(computationalUBound, rc=localrc)
+    computationalUBoundArg=ESMF_InterArrayCreate(computationalUBound, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    computationalCountArg=ESMF_InterfaceIntCreate(computationalCount, rc=localrc)
+    computationalCountArg=ESMF_InterArrayCreate(computationalCount, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    totalLBoundArg=ESMF_InterfaceIntCreate(totalLBound, rc=localrc)
+    totalLBoundArg=ESMF_InterArrayCreate(totalLBound, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    totalUBoundArg = ESMF_InterfaceIntCreate(totalUBound, rc=localrc)
+    totalUBoundArg = ESMF_InterArrayCreate(totalUBound, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    totalCountArg = ESMF_InterfaceIntCreate(totalCount, rc=localrc)
+    totalCountArg = ESMF_InterArrayCreate(totalCount, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -15093,31 +16319,31 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Deallocate interface ints
-    call ESMF_InterfaceIntDestroy(exclusiveLBoundArg, rc=localrc)
+    call ESMF_InterArrayDestroy(exclusiveLBoundArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(exclusiveUBoundArg, rc=localrc)
+    call ESMF_InterArrayDestroy(exclusiveUBoundArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(exclusiveCountArg, rc=localrc)
+    call ESMF_InterArrayDestroy(exclusiveCountArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(computationalLBoundArg, rc=localrc)
+    call ESMF_InterArrayDestroy(computationalLBoundArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(computationalUBoundArg, rc=localrc)
+    call ESMF_InterArrayDestroy(computationalUBoundArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(computationalCountArg, rc=localrc)
+    call ESMF_InterArrayDestroy(computationalCountArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(totalLBoundArg, rc=localrc)
+    call ESMF_InterArrayDestroy(totalLBoundArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(totalUBoundArg, rc=localrc)
+    call ESMF_InterArrayDestroy(totalUBoundArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(totalCountArg, rc=localrc)
+    call ESMF_InterArrayDestroy(totalCountArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -15252,15 +16478,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_LocalArray) :: localarray
     type(ESMF_DataCopy_Flag) :: datacopyflagInt
     integer :: coordDimCount(ESMF_MAXDIM)
-    type(ESMF_InterfaceInt) :: exclusiveLBoundArg ! helper variable
-    type(ESMF_InterfaceInt) :: exclusiveUBoundArg ! helper variable
-    type(ESMF_InterfaceInt) :: exclusiveCountArg ! helper variable
-    type(ESMF_InterfaceInt) :: computationalLBoundArg ! helper variable
-    type(ESMF_InterfaceInt) :: computationalUBoundArg ! helper variable
-    type(ESMF_InterfaceInt) :: computationalCountArg ! helper variable
-    type(ESMF_InterfaceInt) :: totalLBoundArg ! helper variable
-    type(ESMF_InterfaceInt) :: totalUBoundArg ! helper variable
-    type(ESMF_InterfaceInt) :: totalCountArg ! helper variable
+    type(ESMF_InterArray) :: exclusiveLBoundArg ! helper variable
+    type(ESMF_InterArray) :: exclusiveUBoundArg ! helper variable
+    type(ESMF_InterArray) :: exclusiveCountArg ! helper variable
+    type(ESMF_InterArray) :: computationalLBoundArg ! helper variable
+    type(ESMF_InterArray) :: computationalUBoundArg ! helper variable
+    type(ESMF_InterArray) :: computationalCountArg ! helper variable
+    type(ESMF_InterArray) :: totalLBoundArg ! helper variable
+    type(ESMF_InterArray) :: totalUBoundArg ! helper variable
+    type(ESMF_InterArray) :: totalCountArg ! helper variable
     integer :: tmp_staggerloc
     type(ESMF_GridDecompType) :: decompType
 
@@ -15346,31 +16572,31 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                               ESMF_CONTEXT, rcToReturn=rc)) return 
 
     ! process optional arguments
-    exclusiveLBoundArg=ESMF_InterfaceIntCreate(exclusiveLBound, rc=localrc)
+    exclusiveLBoundArg=ESMF_InterArrayCreate(exclusiveLBound, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    exclusiveUBoundArg=ESMF_InterfaceIntCreate(exclusiveUBound, rc=localrc)
+    exclusiveUBoundArg=ESMF_InterArrayCreate(exclusiveUBound, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    exclusiveCountArg=ESMF_InterfaceIntCreate(exclusiveCount, rc=localrc)
+    exclusiveCountArg=ESMF_InterArrayCreate(exclusiveCount, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    computationalLBoundArg=ESMF_InterfaceIntCreate(computationalLBound, rc=localrc)
+    computationalLBoundArg=ESMF_InterArrayCreate(computationalLBound, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    computationalUBoundArg=ESMF_InterfaceIntCreate(computationalUBound, rc=localrc)
+    computationalUBoundArg=ESMF_InterArrayCreate(computationalUBound, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    computationalCountArg=ESMF_InterfaceIntCreate(computationalCount, rc=localrc)
+    computationalCountArg=ESMF_InterArrayCreate(computationalCount, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    totalLBoundArg=ESMF_InterfaceIntCreate(totalLBound, rc=localrc)
+    totalLBoundArg=ESMF_InterArrayCreate(totalLBound, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    totalUBoundArg = ESMF_InterfaceIntCreate(totalUBound, rc=localrc)
+    totalUBoundArg = ESMF_InterArrayCreate(totalUBound, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    totalCountArg = ESMF_InterfaceIntCreate(totalCount, rc=localrc)
+    totalCountArg = ESMF_InterArrayCreate(totalCount, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -15383,31 +16609,31 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Deallocate interface ints
-    call ESMF_InterfaceIntDestroy(exclusiveLBoundArg, rc=localrc)
+    call ESMF_InterArrayDestroy(exclusiveLBoundArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(exclusiveUBoundArg, rc=localrc)
+    call ESMF_InterArrayDestroy(exclusiveUBoundArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(exclusiveCountArg, rc=localrc)
+    call ESMF_InterArrayDestroy(exclusiveCountArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(computationalLBoundArg, rc=localrc)
+    call ESMF_InterArrayDestroy(computationalLBoundArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(computationalUBoundArg, rc=localrc)
+    call ESMF_InterArrayDestroy(computationalUBoundArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(computationalCountArg, rc=localrc)
+    call ESMF_InterArrayDestroy(computationalCountArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(totalLBoundArg, rc=localrc)
+    call ESMF_InterArrayDestroy(totalLBoundArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(totalUBoundArg, rc=localrc)
+    call ESMF_InterArrayDestroy(totalUBoundArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(totalCountArg, rc=localrc)
+    call ESMF_InterArrayDestroy(totalCountArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -15542,15 +16768,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
  type(ESMF_LocalArray) :: localArray
  type(ESMF_DataCopy_Flag) :: datacopyflagInt
  integer :: coordDimCount(ESMF_MAXDIM)
- type(ESMF_InterfaceInt) :: exclusiveLBoundArg ! helper variable
- type(ESMF_InterfaceInt) :: exclusiveUBoundArg ! helper variable
- type(ESMF_InterfaceInt) :: exclusiveCountArg ! helper variable
- type(ESMF_InterfaceInt) :: computationalLBoundArg ! helper variable
- type(ESMF_InterfaceInt) :: computationalUBoundArg ! helper variable
- type(ESMF_InterfaceInt) :: computationalCountArg ! helper variable
- type(ESMF_InterfaceInt) :: totalLBoundArg ! helper variable
- type(ESMF_InterfaceInt) :: totalUBoundArg ! helper variable
- type(ESMF_InterfaceInt) :: totalCountArg ! helper variable
+ type(ESMF_InterArray) :: exclusiveLBoundArg ! helper variable
+ type(ESMF_InterArray) :: exclusiveUBoundArg ! helper variable
+ type(ESMF_InterArray) :: exclusiveCountArg ! helper variable
+ type(ESMF_InterArray) :: computationalLBoundArg ! helper variable
+ type(ESMF_InterArray) :: computationalUBoundArg ! helper variable
+ type(ESMF_InterArray) :: computationalCountArg ! helper variable
+ type(ESMF_InterArray) :: totalLBoundArg ! helper variable
+ type(ESMF_InterArray) :: totalUBoundArg ! helper variable
+ type(ESMF_InterArray) :: totalCountArg ! helper variable
  integer :: tmp_staggerloc
  type(ESMF_GridDecompType) :: decompType
 
@@ -15642,31 +16868,31 @@ endif
     ! should check these optional arguments are not present for arbitrary grid????
     if (decompType /= ESMF_GRID_ARBITRARY) then
 
-    exclusiveLBoundArg=ESMF_InterfaceIntCreate(exclusiveLBound, rc=localrc)
+    exclusiveLBoundArg=ESMF_InterArrayCreate(exclusiveLBound, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    exclusiveUBoundArg=ESMF_InterfaceIntCreate(exclusiveUBound, rc=localrc)
+    exclusiveUBoundArg=ESMF_InterArrayCreate(exclusiveUBound, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    exclusiveCountArg=ESMF_InterfaceIntCreate(exclusiveCount, rc=localrc)
+    exclusiveCountArg=ESMF_InterArrayCreate(exclusiveCount, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    computationalLBoundArg=ESMF_InterfaceIntCreate(computationalLBound, rc=localrc)
+    computationalLBoundArg=ESMF_InterArrayCreate(computationalLBound, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    computationalUBoundArg=ESMF_InterfaceIntCreate(computationalUBound, rc=localrc)
+    computationalUBoundArg=ESMF_InterArrayCreate(computationalUBound, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    computationalCountArg=ESMF_InterfaceIntCreate(computationalCount, rc=localrc)
+    computationalCountArg=ESMF_InterArrayCreate(computationalCount, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    totalLBoundArg=ESMF_InterfaceIntCreate(totalLBound, rc=localrc)
+    totalLBoundArg=ESMF_InterArrayCreate(totalLBound, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    totalUBoundArg = ESMF_InterfaceIntCreate(totalUBound, rc=localrc)
+    totalUBoundArg = ESMF_InterArrayCreate(totalUBound, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    totalCountArg = ESMF_InterfaceIntCreate(totalCount, rc=localrc)
+    totalCountArg = ESMF_InterArrayCreate(totalCount, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -15679,31 +16905,31 @@ endif
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Deallocate interface ints
-    call ESMF_InterfaceIntDestroy(exclusiveLBoundArg, rc=localrc)
+    call ESMF_InterArrayDestroy(exclusiveLBoundArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(exclusiveUBoundArg, rc=localrc)
+    call ESMF_InterArrayDestroy(exclusiveUBoundArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(exclusiveCountArg, rc=localrc)
+    call ESMF_InterArrayDestroy(exclusiveCountArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(computationalLBoundArg, rc=localrc)
+    call ESMF_InterArrayDestroy(computationalLBoundArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(computationalUBoundArg, rc=localrc)
+    call ESMF_InterArrayDestroy(computationalUBoundArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(computationalCountArg, rc=localrc)
+    call ESMF_InterArrayDestroy(computationalCountArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(totalLBoundArg, rc=localrc)
+    call ESMF_InterArrayDestroy(totalLBoundArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(totalUBoundArg, rc=localrc)
+    call ESMF_InterArrayDestroy(totalUBoundArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(totalCountArg, rc=localrc)
+    call ESMF_InterArrayDestroy(totalCountArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     
@@ -15840,15 +17066,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_LocalArray) :: localArray
     type(ESMF_DataCopy_Flag) :: datacopyflagInt
     integer :: coordDimCount(ESMF_MAXDIM)
-    type(ESMF_InterfaceInt) :: exclusiveLBoundArg ! helper variable
-    type(ESMF_InterfaceInt) :: exclusiveUBoundArg ! helper variable
-    type(ESMF_InterfaceInt) :: exclusiveCountArg ! helper variable
-    type(ESMF_InterfaceInt) :: computationalLBoundArg ! helper variable
-    type(ESMF_InterfaceInt) :: computationalUBoundArg ! helper variable
-    type(ESMF_InterfaceInt) :: computationalCountArg ! helper variable
-    type(ESMF_InterfaceInt) :: totalLBoundArg ! helper variable
-    type(ESMF_InterfaceInt) :: totalUBoundArg ! helper variable
-    type(ESMF_InterfaceInt) :: totalCountArg ! helper variable
+    type(ESMF_InterArray) :: exclusiveLBoundArg ! helper variable
+    type(ESMF_InterArray) :: exclusiveUBoundArg ! helper variable
+    type(ESMF_InterArray) :: exclusiveCountArg ! helper variable
+    type(ESMF_InterArray) :: computationalLBoundArg ! helper variable
+    type(ESMF_InterArray) :: computationalUBoundArg ! helper variable
+    type(ESMF_InterArray) :: computationalCountArg ! helper variable
+    type(ESMF_InterArray) :: totalLBoundArg ! helper variable
+    type(ESMF_InterArray) :: totalUBoundArg ! helper variable
+    type(ESMF_InterArray) :: totalCountArg ! helper variable
     integer :: tmp_staggerloc
     type(ESMF_GridDecompType) :: decompType
 
@@ -15934,31 +17160,31 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                               ESMF_CONTEXT, rcToReturn=rc)) return 
 
     ! process optional arguments
-    exclusiveLBoundArg=ESMF_InterfaceIntCreate(exclusiveLBound, rc=localrc)
+    exclusiveLBoundArg=ESMF_InterArrayCreate(exclusiveLBound, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    exclusiveUBoundArg=ESMF_InterfaceIntCreate(exclusiveUBound, rc=localrc)
+    exclusiveUBoundArg=ESMF_InterArrayCreate(exclusiveUBound, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    exclusiveCountArg=ESMF_InterfaceIntCreate(exclusiveCount, rc=localrc)
+    exclusiveCountArg=ESMF_InterArrayCreate(exclusiveCount, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    computationalLBoundArg=ESMF_InterfaceIntCreate(computationalLBound, rc=localrc)
+    computationalLBoundArg=ESMF_InterArrayCreate(computationalLBound, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    computationalUBoundArg=ESMF_InterfaceIntCreate(computationalUBound, rc=localrc)
+    computationalUBoundArg=ESMF_InterArrayCreate(computationalUBound, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    computationalCountArg=ESMF_InterfaceIntCreate(computationalCount, rc=localrc)
+    computationalCountArg=ESMF_InterArrayCreate(computationalCount, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    totalLBoundArg=ESMF_InterfaceIntCreate(totalLBound, rc=localrc)
+    totalLBoundArg=ESMF_InterArrayCreate(totalLBound, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    totalUBoundArg = ESMF_InterfaceIntCreate(totalUBound, rc=localrc)
+    totalUBoundArg = ESMF_InterArrayCreate(totalUBound, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    totalCountArg = ESMF_InterfaceIntCreate(totalCount, rc=localrc)
+    totalCountArg = ESMF_InterArrayCreate(totalCount, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -15973,31 +17199,31 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 
     ! Deallocate interface ints
-    call ESMF_InterfaceIntDestroy(exclusiveLBoundArg, rc=localrc)
+    call ESMF_InterArrayDestroy(exclusiveLBoundArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(exclusiveUBoundArg, rc=localrc)
+    call ESMF_InterArrayDestroy(exclusiveUBoundArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(exclusiveCountArg, rc=localrc)
+    call ESMF_InterArrayDestroy(exclusiveCountArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(computationalLBoundArg, rc=localrc)
+    call ESMF_InterArrayDestroy(computationalLBoundArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(computationalUBoundArg, rc=localrc)
+    call ESMF_InterArrayDestroy(computationalUBoundArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(computationalCountArg, rc=localrc)
+    call ESMF_InterArrayDestroy(computationalCountArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(totalLBoundArg, rc=localrc)
+    call ESMF_InterArrayDestroy(totalLBoundArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(totalUBoundArg, rc=localrc)
+    call ESMF_InterArrayDestroy(totalUBoundArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(totalCountArg, rc=localrc)
+    call ESMF_InterArrayDestroy(totalCountArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -16132,15 +17358,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
  type(ESMF_LocalArray) :: localarray
  type(ESMF_DataCopy_Flag) :: datacopyflagInt
  integer :: coordDimCount(ESMF_MAXDIM)
- type(ESMF_InterfaceInt) :: exclusiveLBoundArg ! helper variable
- type(ESMF_InterfaceInt) :: exclusiveUBoundArg ! helper variable
- type(ESMF_InterfaceInt) :: exclusiveCountArg ! helper variable
- type(ESMF_InterfaceInt) :: computationalLBoundArg ! helper variable
- type(ESMF_InterfaceInt) :: computationalUBoundArg ! helper variable
- type(ESMF_InterfaceInt) :: computationalCountArg ! helper variable
- type(ESMF_InterfaceInt) :: totalLBoundArg ! helper variable
- type(ESMF_InterfaceInt) :: totalUBoundArg ! helper variable
- type(ESMF_InterfaceInt) :: totalCountArg ! helper variable
+ type(ESMF_InterArray) :: exclusiveLBoundArg ! helper variable
+ type(ESMF_InterArray) :: exclusiveUBoundArg ! helper variable
+ type(ESMF_InterArray) :: exclusiveCountArg ! helper variable
+ type(ESMF_InterArray) :: computationalLBoundArg ! helper variable
+ type(ESMF_InterArray) :: computationalUBoundArg ! helper variable
+ type(ESMF_InterArray) :: computationalCountArg ! helper variable
+ type(ESMF_InterArray) :: totalLBoundArg ! helper variable
+ type(ESMF_InterArray) :: totalUBoundArg ! helper variable
+ type(ESMF_InterArray) :: totalCountArg ! helper variable
  integer :: tmp_staggerloc
  type(ESMF_GridDecompType) :: decompType
 
@@ -16226,31 +17452,31 @@ endif
                               ESMF_CONTEXT, rcToReturn=rc)) return 
 
     ! process optional arguments
-    exclusiveLBoundArg=ESMF_InterfaceIntCreate(exclusiveLBound, rc=localrc)
+    exclusiveLBoundArg=ESMF_InterArrayCreate(exclusiveLBound, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    exclusiveUBoundArg=ESMF_InterfaceIntCreate(exclusiveUBound, rc=localrc)
+    exclusiveUBoundArg=ESMF_InterArrayCreate(exclusiveUBound, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    exclusiveCountArg=ESMF_InterfaceIntCreate(exclusiveCount, rc=localrc)
+    exclusiveCountArg=ESMF_InterArrayCreate(exclusiveCount, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    computationalLBoundArg=ESMF_InterfaceIntCreate(computationalLBound, rc=localrc)
+    computationalLBoundArg=ESMF_InterArrayCreate(computationalLBound, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    computationalUBoundArg=ESMF_InterfaceIntCreate(computationalUBound, rc=localrc)
+    computationalUBoundArg=ESMF_InterArrayCreate(computationalUBound, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    computationalCountArg=ESMF_InterfaceIntCreate(computationalCount, rc=localrc)
+    computationalCountArg=ESMF_InterArrayCreate(computationalCount, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    totalLBoundArg=ESMF_InterfaceIntCreate(totalLBound, rc=localrc)
+    totalLBoundArg=ESMF_InterArrayCreate(totalLBound, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    totalUBoundArg = ESMF_InterfaceIntCreate(totalUBound, rc=localrc)
+    totalUBoundArg = ESMF_InterArrayCreate(totalUBound, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    totalCountArg = ESMF_InterfaceIntCreate(totalCount, rc=localrc)
+    totalCountArg = ESMF_InterArrayCreate(totalCount, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -16263,31 +17489,31 @@ endif
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Deallocate interface ints
-    call ESMF_InterfaceIntDestroy(exclusiveLBoundArg, rc=localrc)
+    call ESMF_InterArrayDestroy(exclusiveLBoundArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(exclusiveUBoundArg, rc=localrc)
+    call ESMF_InterArrayDestroy(exclusiveUBoundArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(exclusiveCountArg, rc=localrc)
+    call ESMF_InterArrayDestroy(exclusiveCountArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(computationalLBoundArg, rc=localrc)
+    call ESMF_InterArrayDestroy(computationalLBoundArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(computationalUBoundArg, rc=localrc)
+    call ESMF_InterArrayDestroy(computationalUBoundArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(computationalCountArg, rc=localrc)
+    call ESMF_InterArrayDestroy(computationalCountArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(totalLBoundArg, rc=localrc)
+    call ESMF_InterArrayDestroy(totalLBoundArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(totalUBoundArg, rc=localrc)
+    call ESMF_InterArrayDestroy(totalUBoundArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(totalCountArg, rc=localrc)
+    call ESMF_InterArrayDestroy(totalCountArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -16422,15 +17648,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
  type(ESMF_LocalArray) :: localarray
  type(ESMF_DataCopy_Flag) :: datacopyflagInt
  integer :: coordDimCount(ESMF_MAXDIM)
- type(ESMF_InterfaceInt) :: exclusiveLBoundArg ! helper variable
- type(ESMF_InterfaceInt) :: exclusiveUBoundArg ! helper variable
- type(ESMF_InterfaceInt) :: exclusiveCountArg ! helper variable
- type(ESMF_InterfaceInt) :: computationalLBoundArg ! helper variable
- type(ESMF_InterfaceInt) :: computationalUBoundArg ! helper variable
- type(ESMF_InterfaceInt) :: computationalCountArg ! helper variable
- type(ESMF_InterfaceInt) :: totalLBoundArg ! helper variable
- type(ESMF_InterfaceInt) :: totalUBoundArg ! helper variable
- type(ESMF_InterfaceInt) :: totalCountArg ! helper variable
+ type(ESMF_InterArray) :: exclusiveLBoundArg ! helper variable
+ type(ESMF_InterArray) :: exclusiveUBoundArg ! helper variable
+ type(ESMF_InterArray) :: exclusiveCountArg ! helper variable
+ type(ESMF_InterArray) :: computationalLBoundArg ! helper variable
+ type(ESMF_InterArray) :: computationalUBoundArg ! helper variable
+ type(ESMF_InterArray) :: computationalCountArg ! helper variable
+ type(ESMF_InterArray) :: totalLBoundArg ! helper variable
+ type(ESMF_InterArray) :: totalUBoundArg ! helper variable
+ type(ESMF_InterArray) :: totalCountArg ! helper variable
  integer :: tmp_staggerloc
  type(ESMF_GridDecompType) :: decompType
 
@@ -16516,31 +17742,31 @@ endif
                               ESMF_CONTEXT, rcToReturn=rc)) return 
 
     ! process optional arguments
-    exclusiveLBoundArg=ESMF_InterfaceIntCreate(exclusiveLBound, rc=localrc)
+    exclusiveLBoundArg=ESMF_InterArrayCreate(exclusiveLBound, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    exclusiveUBoundArg=ESMF_InterfaceIntCreate(exclusiveUBound, rc=localrc)
+    exclusiveUBoundArg=ESMF_InterArrayCreate(exclusiveUBound, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    exclusiveCountArg=ESMF_InterfaceIntCreate(exclusiveCount, rc=localrc)
+    exclusiveCountArg=ESMF_InterArrayCreate(exclusiveCount, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    computationalLBoundArg=ESMF_InterfaceIntCreate(computationalLBound, rc=localrc)
+    computationalLBoundArg=ESMF_InterArrayCreate(computationalLBound, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    computationalUBoundArg=ESMF_InterfaceIntCreate(computationalUBound, rc=localrc)
+    computationalUBoundArg=ESMF_InterArrayCreate(computationalUBound, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    computationalCountArg=ESMF_InterfaceIntCreate(computationalCount, rc=localrc)
+    computationalCountArg=ESMF_InterArrayCreate(computationalCount, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    totalLBoundArg=ESMF_InterfaceIntCreate(totalLBound, rc=localrc)
+    totalLBoundArg=ESMF_InterArrayCreate(totalLBound, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    totalUBoundArg = ESMF_InterfaceIntCreate(totalUBound, rc=localrc)
+    totalUBoundArg = ESMF_InterArrayCreate(totalUBound, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    totalCountArg = ESMF_InterfaceIntCreate(totalCount, rc=localrc)
+    totalCountArg = ESMF_InterArrayCreate(totalCount, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -16553,31 +17779,31 @@ endif
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Deallocate interface ints
-    call ESMF_InterfaceIntDestroy(exclusiveLBoundArg, rc=localrc)
+    call ESMF_InterArrayDestroy(exclusiveLBoundArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(exclusiveUBoundArg, rc=localrc)
+    call ESMF_InterArrayDestroy(exclusiveUBoundArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(exclusiveCountArg, rc=localrc)
+    call ESMF_InterArrayDestroy(exclusiveCountArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(computationalLBoundArg, rc=localrc)
+    call ESMF_InterArrayDestroy(computationalLBoundArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(computationalUBoundArg, rc=localrc)
+    call ESMF_InterArrayDestroy(computationalUBoundArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(computationalCountArg, rc=localrc)
+    call ESMF_InterArrayDestroy(computationalCountArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(totalLBoundArg, rc=localrc)
+    call ESMF_InterArrayDestroy(totalLBoundArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(totalUBoundArg, rc=localrc)
+    call ESMF_InterArrayDestroy(totalUBoundArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(totalCountArg, rc=localrc)
+    call ESMF_InterArrayDestroy(totalCountArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -17065,15 +18291,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !EOP
 
     integer :: localrc ! local error status
-    type(ESMF_InterfaceInt) :: exclusiveLBoundArg ! helper variable
-    type(ESMF_InterfaceInt) :: exclusiveUBoundArg ! helper variable
-    type(ESMF_InterfaceInt) :: exclusiveCountArg ! helper variable
-    type(ESMF_InterfaceInt) :: computationalLBoundArg ! helper variable
-    type(ESMF_InterfaceInt) :: computationalUBoundArg ! helper variable
-    type(ESMF_InterfaceInt) :: computationalCountArg ! helper variable
-    type(ESMF_InterfaceInt) :: totalLBoundArg ! helper variable
-    type(ESMF_InterfaceInt) :: totalUBoundArg ! helper variable
-    type(ESMF_InterfaceInt) :: totalCountArg ! helper variable
+    type(ESMF_InterArray) :: exclusiveLBoundArg ! helper variable
+    type(ESMF_InterArray) :: exclusiveUBoundArg ! helper variable
+    type(ESMF_InterArray) :: exclusiveCountArg ! helper variable
+    type(ESMF_InterArray) :: computationalLBoundArg ! helper variable
+    type(ESMF_InterArray) :: computationalUBoundArg ! helper variable
+    type(ESMF_InterArray) :: computationalCountArg ! helper variable
+    type(ESMF_InterArray) :: totalLBoundArg ! helper variable
+    type(ESMF_InterArray) :: totalUBoundArg ! helper variable
+    type(ESMF_InterArray) :: totalCountArg ! helper variable
     integer :: tmp_staggerloc
 
     ! Initialize return code
@@ -17091,31 +18317,31 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     endif
 
     ! process optional arguments
-    exclusiveLBoundArg=ESMF_InterfaceIntCreate(exclusiveLBound, rc=localrc)
+    exclusiveLBoundArg=ESMF_InterArrayCreate(exclusiveLBound, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    exclusiveUBoundArg=ESMF_InterfaceIntCreate(exclusiveUBound, rc=localrc)
+    exclusiveUBoundArg=ESMF_InterArrayCreate(exclusiveUBound, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    exclusiveCountArg=ESMF_InterfaceIntCreate(exclusiveCount, rc=localrc)
+    exclusiveCountArg=ESMF_InterArrayCreate(exclusiveCount, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    computationalLBoundArg=ESMF_InterfaceIntCreate(computationalLBound, rc=localrc)
+    computationalLBoundArg=ESMF_InterArrayCreate(computationalLBound, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    computationalUBoundArg=ESMF_InterfaceIntCreate(computationalUBound, rc=localrc)
+    computationalUBoundArg=ESMF_InterArrayCreate(computationalUBound, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    computationalCountArg=ESMF_InterfaceIntCreate(computationalCount, rc=localrc)
+    computationalCountArg=ESMF_InterArrayCreate(computationalCount, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    totalLBoundArg=ESMF_InterfaceIntCreate(totalLBound, rc=localrc)
+    totalLBoundArg=ESMF_InterArrayCreate(totalLBound, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    totalUBoundArg = ESMF_InterfaceIntCreate(totalUBound, rc=localrc)
+    totalUBoundArg = ESMF_InterArrayCreate(totalUBound, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    totalCountArg = ESMF_InterfaceIntCreate(totalCount, rc=localrc)
+    totalCountArg = ESMF_InterArrayCreate(totalCount, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -17128,31 +18354,31 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Deallocate interface ints
-    call ESMF_InterfaceIntDestroy(exclusiveLBoundArg, rc=localrc)
+    call ESMF_InterArrayDestroy(exclusiveLBoundArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(exclusiveUBoundArg, rc=localrc)
+    call ESMF_InterArrayDestroy(exclusiveUBoundArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(exclusiveCountArg, rc=localrc)
+    call ESMF_InterArrayDestroy(exclusiveCountArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(computationalLBoundArg, rc=localrc)
+    call ESMF_InterArrayDestroy(computationalLBoundArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(computationalUBoundArg, rc=localrc)
+    call ESMF_InterArrayDestroy(computationalUBoundArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(computationalCountArg, rc=localrc)
+    call ESMF_InterArrayDestroy(computationalCountArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(totalLBoundArg, rc=localrc)
+    call ESMF_InterArrayDestroy(totalLBoundArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(totalUBoundArg, rc=localrc)
+    call ESMF_InterArrayDestroy(totalUBoundArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(totalCountArg, rc=localrc)
+    call ESMF_InterArrayDestroy(totalCountArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -17419,15 +18645,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_LocalArray) :: localArray
     type(ESMF_DataCopy_Flag) :: datacopyflagInt
     integer :: coordDimCount(ESMF_MAXDIM)
-    type(ESMF_InterfaceInt) :: exclusiveLBoundArg ! helper variable
-    type(ESMF_InterfaceInt) :: exclusiveUBoundArg ! helper variable
-    type(ESMF_InterfaceInt) :: exclusiveCountArg ! helper variable
-    type(ESMF_InterfaceInt) :: computationalLBoundArg ! helper variable
-    type(ESMF_InterfaceInt) :: computationalUBoundArg ! helper variable
-    type(ESMF_InterfaceInt) :: computationalCountArg ! helper variable
-    type(ESMF_InterfaceInt) :: totalLBoundArg ! helper variable
-    type(ESMF_InterfaceInt) :: totalUBoundArg ! helper variable
-    type(ESMF_InterfaceInt) :: totalCountArg ! helper variable
+    type(ESMF_InterArray) :: exclusiveLBoundArg ! helper variable
+    type(ESMF_InterArray) :: exclusiveUBoundArg ! helper variable
+    type(ESMF_InterArray) :: exclusiveCountArg ! helper variable
+    type(ESMF_InterArray) :: computationalLBoundArg ! helper variable
+    type(ESMF_InterArray) :: computationalUBoundArg ! helper variable
+    type(ESMF_InterArray) :: computationalCountArg ! helper variable
+    type(ESMF_InterArray) :: totalLBoundArg ! helper variable
+    type(ESMF_InterArray) :: totalUBoundArg ! helper variable
+    type(ESMF_InterArray) :: totalCountArg ! helper variable
     integer :: tmp_staggerloc
 
     ! Initialize return code 
@@ -17484,31 +18710,31 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ESMF_CONTEXT, rcToReturn=rc)) return 
 
     ! process optional arguments
-    exclusiveLBoundArg=ESMF_InterfaceIntCreate(exclusiveLBound, rc=localrc)
+    exclusiveLBoundArg=ESMF_InterArrayCreate(exclusiveLBound, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    exclusiveUBoundArg=ESMF_InterfaceIntCreate(exclusiveUBound, rc=localrc)
+    exclusiveUBoundArg=ESMF_InterArrayCreate(exclusiveUBound, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    exclusiveCountArg=ESMF_InterfaceIntCreate(exclusiveCount, rc=localrc)
+    exclusiveCountArg=ESMF_InterArrayCreate(exclusiveCount, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    computationalLBoundArg=ESMF_InterfaceIntCreate(computationalLBound, rc=localrc)
+    computationalLBoundArg=ESMF_InterArrayCreate(computationalLBound, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    computationalUBoundArg=ESMF_InterfaceIntCreate(computationalUBound, rc=localrc)
+    computationalUBoundArg=ESMF_InterArrayCreate(computationalUBound, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    computationalCountArg=ESMF_InterfaceIntCreate(computationalCount, rc=localrc)
+    computationalCountArg=ESMF_InterArrayCreate(computationalCount, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    totalLBoundArg=ESMF_InterfaceIntCreate(totalLBound, rc=localrc)
+    totalLBoundArg=ESMF_InterArrayCreate(totalLBound, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    totalUBoundArg = ESMF_InterfaceIntCreate(totalUBound, rc=localrc)
+    totalUBoundArg = ESMF_InterArrayCreate(totalUBound, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    totalCountArg = ESMF_InterfaceIntCreate(totalCount, rc=localrc)
+    totalCountArg = ESMF_InterArrayCreate(totalCount, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -17521,31 +18747,31 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Deallocate interface ints
-    call ESMF_InterfaceIntDestroy(exclusiveLBoundArg, rc=localrc)
+    call ESMF_InterArrayDestroy(exclusiveLBoundArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(exclusiveUBoundArg, rc=localrc)
+    call ESMF_InterArrayDestroy(exclusiveUBoundArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(exclusiveCountArg, rc=localrc)
+    call ESMF_InterArrayDestroy(exclusiveCountArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(computationalLBoundArg, rc=localrc)
+    call ESMF_InterArrayDestroy(computationalLBoundArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(computationalUBoundArg, rc=localrc)
+    call ESMF_InterArrayDestroy(computationalUBoundArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(computationalCountArg, rc=localrc)
+    call ESMF_InterArrayDestroy(computationalCountArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(totalLBoundArg, rc=localrc)
+    call ESMF_InterArrayDestroy(totalLBoundArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(totalUBoundArg, rc=localrc)
+    call ESMF_InterArrayDestroy(totalUBoundArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(totalCountArg, rc=localrc)
+    call ESMF_InterArrayDestroy(totalCountArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -17680,15 +18906,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_LocalArray) :: localArray
     type(ESMF_DataCopy_Flag) :: datacopyflagInt
     integer :: coordDimCount(ESMF_MAXDIM)
-    type(ESMF_InterfaceInt) :: exclusiveLBoundArg ! helper variable
-    type(ESMF_InterfaceInt) :: exclusiveUBoundArg ! helper variable
-    type(ESMF_InterfaceInt) :: exclusiveCountArg ! helper variable
-    type(ESMF_InterfaceInt) :: computationalLBoundArg ! helper variable
-    type(ESMF_InterfaceInt) :: computationalUBoundArg ! helper variable
-    type(ESMF_InterfaceInt) :: computationalCountArg ! helper variable
-    type(ESMF_InterfaceInt) :: totalLBoundArg ! helper variable
-    type(ESMF_InterfaceInt) :: totalUBoundArg ! helper variable
-    type(ESMF_InterfaceInt) :: totalCountArg ! helper variable
+    type(ESMF_InterArray) :: exclusiveLBoundArg ! helper variable
+    type(ESMF_InterArray) :: exclusiveUBoundArg ! helper variable
+    type(ESMF_InterArray) :: exclusiveCountArg ! helper variable
+    type(ESMF_InterArray) :: computationalLBoundArg ! helper variable
+    type(ESMF_InterArray) :: computationalUBoundArg ! helper variable
+    type(ESMF_InterArray) :: computationalCountArg ! helper variable
+    type(ESMF_InterArray) :: totalLBoundArg ! helper variable
+    type(ESMF_InterArray) :: totalUBoundArg ! helper variable
+    type(ESMF_InterArray) :: totalCountArg ! helper variable
     integer :: tmp_staggerloc
 
     ! Initialize return code 
@@ -17745,31 +18971,31 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                               ESMF_CONTEXT, rcToReturn=rc)) return 
 
     ! process optional arguments
-    exclusiveLBoundArg=ESMF_InterfaceIntCreate(exclusiveLBound, rc=localrc)
+    exclusiveLBoundArg=ESMF_InterArrayCreate(exclusiveLBound, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    exclusiveUBoundArg=ESMF_InterfaceIntCreate(exclusiveUBound, rc=localrc)
+    exclusiveUBoundArg=ESMF_InterArrayCreate(exclusiveUBound, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    exclusiveCountArg=ESMF_InterfaceIntCreate(exclusiveCount, rc=localrc)
+    exclusiveCountArg=ESMF_InterArrayCreate(exclusiveCount, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    computationalLBoundArg=ESMF_InterfaceIntCreate(computationalLBound, rc=localrc)
+    computationalLBoundArg=ESMF_InterArrayCreate(computationalLBound, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    computationalUBoundArg=ESMF_InterfaceIntCreate(computationalUBound, rc=localrc)
+    computationalUBoundArg=ESMF_InterArrayCreate(computationalUBound, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    computationalCountArg=ESMF_InterfaceIntCreate(computationalCount, rc=localrc)
+    computationalCountArg=ESMF_InterArrayCreate(computationalCount, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    totalLBoundArg=ESMF_InterfaceIntCreate(totalLBound, rc=localrc)
+    totalLBoundArg=ESMF_InterArrayCreate(totalLBound, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    totalUBoundArg = ESMF_InterfaceIntCreate(totalUBound, rc=localrc)
+    totalUBoundArg = ESMF_InterArrayCreate(totalUBound, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    totalCountArg = ESMF_InterfaceIntCreate(totalCount, rc=localrc)
+    totalCountArg = ESMF_InterArrayCreate(totalCount, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -17782,31 +19008,31 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Deallocate interface ints
-    call ESMF_InterfaceIntDestroy(exclusiveLBoundArg, rc=localrc)
+    call ESMF_InterArrayDestroy(exclusiveLBoundArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(exclusiveUBoundArg, rc=localrc)
+    call ESMF_InterArrayDestroy(exclusiveUBoundArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(exclusiveCountArg, rc=localrc)
+    call ESMF_InterArrayDestroy(exclusiveCountArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(computationalLBoundArg, rc=localrc)
+    call ESMF_InterArrayDestroy(computationalLBoundArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(computationalUBoundArg, rc=localrc)
+    call ESMF_InterArrayDestroy(computationalUBoundArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(computationalCountArg, rc=localrc)
+    call ESMF_InterArrayDestroy(computationalCountArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(totalLBoundArg, rc=localrc)
+    call ESMF_InterArrayDestroy(totalLBoundArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(totalUBoundArg, rc=localrc)
+    call ESMF_InterArrayDestroy(totalUBoundArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(totalCountArg, rc=localrc)
+    call ESMF_InterArrayDestroy(totalCountArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -17941,15 +19167,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
  type(ESMF_LocalArray) :: localArray
  type(ESMF_DataCopy_Flag) :: datacopyflagInt
  integer :: coordDimCount(ESMF_MAXDIM)
- type(ESMF_InterfaceInt) :: exclusiveLBoundArg ! helper variable
- type(ESMF_InterfaceInt) :: exclusiveUBoundArg ! helper variable
- type(ESMF_InterfaceInt) :: exclusiveCountArg ! helper variable
- type(ESMF_InterfaceInt) :: computationalLBoundArg ! helper variable
- type(ESMF_InterfaceInt) :: computationalUBoundArg ! helper variable
- type(ESMF_InterfaceInt) :: computationalCountArg ! helper variable
- type(ESMF_InterfaceInt) :: totalLBoundArg ! helper variable
- type(ESMF_InterfaceInt) :: totalUBoundArg ! helper variable
- type(ESMF_InterfaceInt) :: totalCountArg ! helper variable
+ type(ESMF_InterArray) :: exclusiveLBoundArg ! helper variable
+ type(ESMF_InterArray) :: exclusiveUBoundArg ! helper variable
+ type(ESMF_InterArray) :: exclusiveCountArg ! helper variable
+ type(ESMF_InterArray) :: computationalLBoundArg ! helper variable
+ type(ESMF_InterArray) :: computationalUBoundArg ! helper variable
+ type(ESMF_InterArray) :: computationalCountArg ! helper variable
+ type(ESMF_InterArray) :: totalLBoundArg ! helper variable
+ type(ESMF_InterArray) :: totalUBoundArg ! helper variable
+ type(ESMF_InterArray) :: totalCountArg ! helper variable
  integer :: tmp_staggerloc
 
  ! Initialize return code 
@@ -18006,31 +19232,31 @@ endif
                               ESMF_CONTEXT, rcToReturn=rc)) return 
 
     ! process optional arguments
-    exclusiveLBoundArg=ESMF_InterfaceIntCreate(exclusiveLBound, rc=localrc)
+    exclusiveLBoundArg=ESMF_InterArrayCreate(exclusiveLBound, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    exclusiveUBoundArg=ESMF_InterfaceIntCreate(exclusiveUBound, rc=localrc)
+    exclusiveUBoundArg=ESMF_InterArrayCreate(exclusiveUBound, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    exclusiveCountArg=ESMF_InterfaceIntCreate(exclusiveCount, rc=localrc)
+    exclusiveCountArg=ESMF_InterArrayCreate(exclusiveCount, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    computationalLBoundArg=ESMF_InterfaceIntCreate(computationalLBound, rc=localrc)
+    computationalLBoundArg=ESMF_InterArrayCreate(computationalLBound, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    computationalUBoundArg=ESMF_InterfaceIntCreate(computationalUBound, rc=localrc)
+    computationalUBoundArg=ESMF_InterArrayCreate(computationalUBound, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    computationalCountArg=ESMF_InterfaceIntCreate(computationalCount, rc=localrc)
+    computationalCountArg=ESMF_InterArrayCreate(computationalCount, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    totalLBoundArg=ESMF_InterfaceIntCreate(totalLBound, rc=localrc)
+    totalLBoundArg=ESMF_InterArrayCreate(totalLBound, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    totalUBoundArg = ESMF_InterfaceIntCreate(totalUBound, rc=localrc)
+    totalUBoundArg = ESMF_InterArrayCreate(totalUBound, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    totalCountArg = ESMF_InterfaceIntCreate(totalCount, rc=localrc)
+    totalCountArg = ESMF_InterArrayCreate(totalCount, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -18043,31 +19269,31 @@ endif
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Deallocate interface ints
-    call ESMF_InterfaceIntDestroy(exclusiveLBoundArg, rc=localrc)
+    call ESMF_InterArrayDestroy(exclusiveLBoundArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(exclusiveUBoundArg, rc=localrc)
+    call ESMF_InterArrayDestroy(exclusiveUBoundArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(exclusiveCountArg, rc=localrc)
+    call ESMF_InterArrayDestroy(exclusiveCountArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(computationalLBoundArg, rc=localrc)
+    call ESMF_InterArrayDestroy(computationalLBoundArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(computationalUBoundArg, rc=localrc)
+    call ESMF_InterArrayDestroy(computationalUBoundArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(computationalCountArg, rc=localrc)
+    call ESMF_InterArrayDestroy(computationalCountArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(totalLBoundArg, rc=localrc)
+    call ESMF_InterArrayDestroy(totalLBoundArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(totalUBoundArg, rc=localrc)
+    call ESMF_InterArrayDestroy(totalUBoundArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(totalCountArg, rc=localrc)
+    call ESMF_InterArrayDestroy(totalCountArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -18199,15 +19425,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_LocalArray):: localarray
     type(ESMF_DataCopy_Flag) :: datacopyflagInt
     integer :: coordDimCount(ESMF_MAXDIM)
-    type(ESMF_InterfaceInt) :: exclusiveLBoundArg ! helper variable
-    type(ESMF_InterfaceInt) :: exclusiveUBoundArg ! helper variable
-    type(ESMF_InterfaceInt) :: exclusiveCountArg ! helper variable
-    type(ESMF_InterfaceInt) :: computationalLBoundArg ! helper variable
-    type(ESMF_InterfaceInt) :: computationalUBoundArg ! helper variable
-    type(ESMF_InterfaceInt) :: computationalCountArg ! helper variable
-    type(ESMF_InterfaceInt) :: totalLBoundArg ! helper variable
-    type(ESMF_InterfaceInt) :: totalUBoundArg ! helper variable
-    type(ESMF_InterfaceInt) :: totalCountArg ! helper variable
+    type(ESMF_InterArray) :: exclusiveLBoundArg ! helper variable
+    type(ESMF_InterArray) :: exclusiveUBoundArg ! helper variable
+    type(ESMF_InterArray) :: exclusiveCountArg ! helper variable
+    type(ESMF_InterArray) :: computationalLBoundArg ! helper variable
+    type(ESMF_InterArray) :: computationalUBoundArg ! helper variable
+    type(ESMF_InterArray) :: computationalCountArg ! helper variable
+    type(ESMF_InterArray) :: totalLBoundArg ! helper variable
+    type(ESMF_InterArray) :: totalUBoundArg ! helper variable
+    type(ESMF_InterArray) :: totalCountArg ! helper variable
     integer :: tmp_staggerloc
 
     ! Initialize return code 
@@ -18263,31 +19489,31 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ESMF_CONTEXT, rcToReturn=rc)) return 
 
     ! process optional arguments
-    exclusiveLBoundArg=ESMF_InterfaceIntCreate(exclusiveLBound, rc=localrc)
+    exclusiveLBoundArg=ESMF_InterArrayCreate(exclusiveLBound, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    exclusiveUBoundArg=ESMF_InterfaceIntCreate(exclusiveUBound, rc=localrc)
+    exclusiveUBoundArg=ESMF_InterArrayCreate(exclusiveUBound, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    exclusiveCountArg=ESMF_InterfaceIntCreate(exclusiveCount, rc=localrc)
+    exclusiveCountArg=ESMF_InterArrayCreate(exclusiveCount, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    computationalLBoundArg=ESMF_InterfaceIntCreate(computationalLBound, rc=localrc)
+    computationalLBoundArg=ESMF_InterArrayCreate(computationalLBound, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    computationalUBoundArg=ESMF_InterfaceIntCreate(computationalUBound, rc=localrc)
+    computationalUBoundArg=ESMF_InterArrayCreate(computationalUBound, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    computationalCountArg=ESMF_InterfaceIntCreate(computationalCount, rc=localrc)
+    computationalCountArg=ESMF_InterArrayCreate(computationalCount, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    totalLBoundArg=ESMF_InterfaceIntCreate(totalLBound, rc=localrc)
+    totalLBoundArg=ESMF_InterArrayCreate(totalLBound, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    totalUBoundArg = ESMF_InterfaceIntCreate(totalUBound, rc=localrc)
+    totalUBoundArg = ESMF_InterArrayCreate(totalUBound, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    totalCountArg = ESMF_InterfaceIntCreate(totalCount, rc=localrc)
+    totalCountArg = ESMF_InterArrayCreate(totalCount, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -18300,31 +19526,31 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Deallocate interface ints
-    call ESMF_InterfaceIntDestroy(exclusiveLBoundArg, rc=localrc)
+    call ESMF_InterArrayDestroy(exclusiveLBoundArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(exclusiveUBoundArg, rc=localrc)
+    call ESMF_InterArrayDestroy(exclusiveUBoundArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(exclusiveCountArg, rc=localrc)
+    call ESMF_InterArrayDestroy(exclusiveCountArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(computationalLBoundArg, rc=localrc)
+    call ESMF_InterArrayDestroy(computationalLBoundArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(computationalUBoundArg, rc=localrc)
+    call ESMF_InterArrayDestroy(computationalUBoundArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(computationalCountArg, rc=localrc)
+    call ESMF_InterArrayDestroy(computationalCountArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(totalLBoundArg, rc=localrc)
+    call ESMF_InterArrayDestroy(totalLBoundArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(totalUBoundArg, rc=localrc)
+    call ESMF_InterArrayDestroy(totalUBoundArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(totalCountArg, rc=localrc)
+    call ESMF_InterArrayDestroy(totalCountArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -18459,15 +19685,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_LocalArray) :: localarray
     type(ESMF_DataCopy_Flag) :: datacopyflagInt
     integer :: coordDimCount(ESMF_MAXDIM)
-    type(ESMF_InterfaceInt) :: exclusiveLBoundArg ! helper variable
-    type(ESMF_InterfaceInt) :: exclusiveUBoundArg ! helper variable
-    type(ESMF_InterfaceInt) :: exclusiveCountArg ! helper variable
-    type(ESMF_InterfaceInt) :: computationalLBoundArg ! helper variable
-    type(ESMF_InterfaceInt) :: computationalUBoundArg ! helper variable
-    type(ESMF_InterfaceInt) :: computationalCountArg ! helper variable
-    type(ESMF_InterfaceInt) :: totalLBoundArg ! helper variable
-    type(ESMF_InterfaceInt) :: totalUBoundArg ! helper variable
-    type(ESMF_InterfaceInt) :: totalCountArg ! helper variable
+    type(ESMF_InterArray) :: exclusiveLBoundArg ! helper variable
+    type(ESMF_InterArray) :: exclusiveUBoundArg ! helper variable
+    type(ESMF_InterArray) :: exclusiveCountArg ! helper variable
+    type(ESMF_InterArray) :: computationalLBoundArg ! helper variable
+    type(ESMF_InterArray) :: computationalUBoundArg ! helper variable
+    type(ESMF_InterArray) :: computationalCountArg ! helper variable
+    type(ESMF_InterArray) :: totalLBoundArg ! helper variable
+    type(ESMF_InterArray) :: totalUBoundArg ! helper variable
+    type(ESMF_InterArray) :: totalCountArg ! helper variable
     integer :: tmp_staggerloc
 
     ! Initialize return code 
@@ -18524,31 +19750,31 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                               ESMF_CONTEXT, rcToReturn=rc)) return 
 
     ! process optional arguments
-    exclusiveLBoundArg=ESMF_InterfaceIntCreate(exclusiveLBound, rc=localrc)
+    exclusiveLBoundArg=ESMF_InterArrayCreate(exclusiveLBound, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    exclusiveUBoundArg=ESMF_InterfaceIntCreate(exclusiveUBound, rc=localrc)
+    exclusiveUBoundArg=ESMF_InterArrayCreate(exclusiveUBound, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    exclusiveCountArg=ESMF_InterfaceIntCreate(exclusiveCount, rc=localrc)
+    exclusiveCountArg=ESMF_InterArrayCreate(exclusiveCount, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    computationalLBoundArg=ESMF_InterfaceIntCreate(computationalLBound, rc=localrc)
+    computationalLBoundArg=ESMF_InterArrayCreate(computationalLBound, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    computationalUBoundArg=ESMF_InterfaceIntCreate(computationalUBound, rc=localrc)
+    computationalUBoundArg=ESMF_InterArrayCreate(computationalUBound, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    computationalCountArg=ESMF_InterfaceIntCreate(computationalCount, rc=localrc)
+    computationalCountArg=ESMF_InterArrayCreate(computationalCount, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    totalLBoundArg=ESMF_InterfaceIntCreate(totalLBound, rc=localrc)
+    totalLBoundArg=ESMF_InterArrayCreate(totalLBound, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    totalUBoundArg = ESMF_InterfaceIntCreate(totalUBound, rc=localrc)
+    totalUBoundArg = ESMF_InterArrayCreate(totalUBound, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    totalCountArg = ESMF_InterfaceIntCreate(totalCount, rc=localrc)
+    totalCountArg = ESMF_InterArrayCreate(totalCount, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -18561,31 +19787,31 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Deallocate interface ints
-    call ESMF_InterfaceIntDestroy(exclusiveLBoundArg, rc=localrc)
+    call ESMF_InterArrayDestroy(exclusiveLBoundArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(exclusiveUBoundArg, rc=localrc)
+    call ESMF_InterArrayDestroy(exclusiveUBoundArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(exclusiveCountArg, rc=localrc)
+    call ESMF_InterArrayDestroy(exclusiveCountArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(computationalLBoundArg, rc=localrc)
+    call ESMF_InterArrayDestroy(computationalLBoundArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(computationalUBoundArg, rc=localrc)
+    call ESMF_InterArrayDestroy(computationalUBoundArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(computationalCountArg, rc=localrc)
+    call ESMF_InterArrayDestroy(computationalCountArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(totalLBoundArg, rc=localrc)
+    call ESMF_InterArrayDestroy(totalLBoundArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(totalUBoundArg, rc=localrc)
+    call ESMF_InterArrayDestroy(totalUBoundArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(totalCountArg, rc=localrc)
+    call ESMF_InterArrayDestroy(totalCountArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -18720,15 +19946,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
  type(ESMF_LocalArray) :: localArray
  type(ESMF_DataCopy_Flag) :: datacopyflagInt
  integer :: coordDimCount(ESMF_MAXDIM)
- type(ESMF_InterfaceInt) :: exclusiveLBoundArg ! helper variable
- type(ESMF_InterfaceInt) :: exclusiveUBoundArg ! helper variable
- type(ESMF_InterfaceInt) :: exclusiveCountArg ! helper variable
- type(ESMF_InterfaceInt) :: computationalLBoundArg ! helper variable
- type(ESMF_InterfaceInt) :: computationalUBoundArg ! helper variable
- type(ESMF_InterfaceInt) :: computationalCountArg ! helper variable
- type(ESMF_InterfaceInt) :: totalLBoundArg ! helper variable
- type(ESMF_InterfaceInt) :: totalUBoundArg ! helper variable
- type(ESMF_InterfaceInt) :: totalCountArg ! helper variable
+ type(ESMF_InterArray) :: exclusiveLBoundArg ! helper variable
+ type(ESMF_InterArray) :: exclusiveUBoundArg ! helper variable
+ type(ESMF_InterArray) :: exclusiveCountArg ! helper variable
+ type(ESMF_InterArray) :: computationalLBoundArg ! helper variable
+ type(ESMF_InterArray) :: computationalUBoundArg ! helper variable
+ type(ESMF_InterArray) :: computationalCountArg ! helper variable
+ type(ESMF_InterArray) :: totalLBoundArg ! helper variable
+ type(ESMF_InterArray) :: totalUBoundArg ! helper variable
+ type(ESMF_InterArray) :: totalCountArg ! helper variable
  integer :: tmp_staggerloc
 
  ! Initialize return code 
@@ -18785,31 +20011,31 @@ endif
                               ESMF_CONTEXT, rcToReturn=rc)) return 
 
     ! process optional arguments
-    exclusiveLBoundArg=ESMF_InterfaceIntCreate(exclusiveLBound, rc=localrc)
+    exclusiveLBoundArg=ESMF_InterArrayCreate(exclusiveLBound, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    exclusiveUBoundArg=ESMF_InterfaceIntCreate(exclusiveUBound, rc=localrc)
+    exclusiveUBoundArg=ESMF_InterArrayCreate(exclusiveUBound, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    exclusiveCountArg=ESMF_InterfaceIntCreate(exclusiveCount, rc=localrc)
+    exclusiveCountArg=ESMF_InterArrayCreate(exclusiveCount, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    computationalLBoundArg=ESMF_InterfaceIntCreate(computationalLBound, rc=localrc)
+    computationalLBoundArg=ESMF_InterArrayCreate(computationalLBound, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    computationalUBoundArg=ESMF_InterfaceIntCreate(computationalUBound, rc=localrc)
+    computationalUBoundArg=ESMF_InterArrayCreate(computationalUBound, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    computationalCountArg=ESMF_InterfaceIntCreate(computationalCount, rc=localrc)
+    computationalCountArg=ESMF_InterArrayCreate(computationalCount, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    totalLBoundArg=ESMF_InterfaceIntCreate(totalLBound, rc=localrc)
+    totalLBoundArg=ESMF_InterArrayCreate(totalLBound, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    totalUBoundArg = ESMF_InterfaceIntCreate(totalUBound, rc=localrc)
+    totalUBoundArg = ESMF_InterArrayCreate(totalUBound, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    totalCountArg = ESMF_InterfaceIntCreate(totalCount, rc=localrc)
+    totalCountArg = ESMF_InterArrayCreate(totalCount, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -18822,31 +20048,31 @@ endif
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Deallocate interface ints
-    call ESMF_InterfaceIntDestroy(exclusiveLBoundArg, rc=localrc)
+    call ESMF_InterArrayDestroy(exclusiveLBoundArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(exclusiveUBoundArg, rc=localrc)
+    call ESMF_InterArrayDestroy(exclusiveUBoundArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(exclusiveCountArg, rc=localrc)
+    call ESMF_InterArrayDestroy(exclusiveCountArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(computationalLBoundArg, rc=localrc)
+    call ESMF_InterArrayDestroy(computationalLBoundArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(computationalUBoundArg, rc=localrc)
+    call ESMF_InterArrayDestroy(computationalUBoundArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(computationalCountArg, rc=localrc)
+    call ESMF_InterArrayDestroy(computationalCountArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(totalLBoundArg, rc=localrc)
+    call ESMF_InterArrayDestroy(totalLBoundArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(totalUBoundArg, rc=localrc)
+    call ESMF_InterArrayDestroy(totalUBoundArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(totalCountArg, rc=localrc)
+    call ESMF_InterArrayDestroy(totalCountArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -18979,15 +20205,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_LocalArray) :: localArray
     type(ESMF_DataCopy_Flag) :: datacopyflagInt
     integer :: coordDimCount(ESMF_MAXDIM)
-    type(ESMF_InterfaceInt) :: exclusiveLBoundArg ! helper variable
-    type(ESMF_InterfaceInt) :: exclusiveUBoundArg ! helper variable
-    type(ESMF_InterfaceInt) :: exclusiveCountArg ! helper variable
-    type(ESMF_InterfaceInt) :: computationalLBoundArg ! helper variable
-    type(ESMF_InterfaceInt) :: computationalUBoundArg ! helper variable
-    type(ESMF_InterfaceInt) :: computationalCountArg ! helper variable
-    type(ESMF_InterfaceInt) :: totalLBoundArg ! helper variable
-    type(ESMF_InterfaceInt) :: totalUBoundArg ! helper variable
-    type(ESMF_InterfaceInt) :: totalCountArg ! helper variable
+    type(ESMF_InterArray) :: exclusiveLBoundArg ! helper variable
+    type(ESMF_InterArray) :: exclusiveUBoundArg ! helper variable
+    type(ESMF_InterArray) :: exclusiveCountArg ! helper variable
+    type(ESMF_InterArray) :: computationalLBoundArg ! helper variable
+    type(ESMF_InterArray) :: computationalUBoundArg ! helper variable
+    type(ESMF_InterArray) :: computationalCountArg ! helper variable
+    type(ESMF_InterArray) :: totalLBoundArg ! helper variable
+    type(ESMF_InterArray) :: totalUBoundArg ! helper variable
+    type(ESMF_InterArray) :: totalCountArg ! helper variable
     integer :: tmp_staggerloc
 
     ! Initialize return code 
@@ -19043,31 +20269,31 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ESMF_CONTEXT, rcToReturn=rc)) return 
 
     ! process optional arguments
-    exclusiveLBoundArg=ESMF_InterfaceIntCreate(exclusiveLBound, rc=localrc)
+    exclusiveLBoundArg=ESMF_InterArrayCreate(exclusiveLBound, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    exclusiveUBoundArg=ESMF_InterfaceIntCreate(exclusiveUBound, rc=localrc)
+    exclusiveUBoundArg=ESMF_InterArrayCreate(exclusiveUBound, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    exclusiveCountArg=ESMF_InterfaceIntCreate(exclusiveCount, rc=localrc)
+    exclusiveCountArg=ESMF_InterArrayCreate(exclusiveCount, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    computationalLBoundArg=ESMF_InterfaceIntCreate(computationalLBound, rc=localrc)
+    computationalLBoundArg=ESMF_InterArrayCreate(computationalLBound, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    computationalUBoundArg=ESMF_InterfaceIntCreate(computationalUBound, rc=localrc)
+    computationalUBoundArg=ESMF_InterArrayCreate(computationalUBound, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    computationalCountArg=ESMF_InterfaceIntCreate(computationalCount, rc=localrc)
+    computationalCountArg=ESMF_InterArrayCreate(computationalCount, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    totalLBoundArg=ESMF_InterfaceIntCreate(totalLBound, rc=localrc)
+    totalLBoundArg=ESMF_InterArrayCreate(totalLBound, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    totalUBoundArg = ESMF_InterfaceIntCreate(totalUBound, rc=localrc)
+    totalUBoundArg = ESMF_InterArrayCreate(totalUBound, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    totalCountArg = ESMF_InterfaceIntCreate(totalCount, rc=localrc)
+    totalCountArg = ESMF_InterArrayCreate(totalCount, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -19080,31 +20306,31 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Deallocate interface ints
-    call ESMF_InterfaceIntDestroy(exclusiveLBoundArg, rc=localrc)
+    call ESMF_InterArrayDestroy(exclusiveLBoundArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(exclusiveUBoundArg, rc=localrc)
+    call ESMF_InterArrayDestroy(exclusiveUBoundArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(exclusiveCountArg, rc=localrc)
+    call ESMF_InterArrayDestroy(exclusiveCountArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(computationalLBoundArg, rc=localrc)
+    call ESMF_InterArrayDestroy(computationalLBoundArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(computationalUBoundArg, rc=localrc)
+    call ESMF_InterArrayDestroy(computationalUBoundArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(computationalCountArg, rc=localrc)
+    call ESMF_InterArrayDestroy(computationalCountArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(totalLBoundArg, rc=localrc)
+    call ESMF_InterArrayDestroy(totalLBoundArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(totalUBoundArg, rc=localrc)
+    call ESMF_InterArrayDestroy(totalUBoundArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(totalCountArg, rc=localrc)
+    call ESMF_InterArrayDestroy(totalCountArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -19239,15 +20465,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_LocalArray) :: localarray
     type(ESMF_DataCopy_Flag) :: datacopyflagInt
     integer :: coordDimCount(ESMF_MAXDIM)
-    type(ESMF_InterfaceInt) :: exclusiveLBoundArg ! helper variable
-    type(ESMF_InterfaceInt) :: exclusiveUBoundArg ! helper variable
-    type(ESMF_InterfaceInt) :: exclusiveCountArg ! helper variable
-    type(ESMF_InterfaceInt) :: computationalLBoundArg ! helper variable
-    type(ESMF_InterfaceInt) :: computationalUBoundArg ! helper variable
-    type(ESMF_InterfaceInt) :: computationalCountArg ! helper variable
-    type(ESMF_InterfaceInt) :: totalLBoundArg ! helper variable
-    type(ESMF_InterfaceInt) :: totalUBoundArg ! helper variable
-    type(ESMF_InterfaceInt) :: totalCountArg ! helper variable
+    type(ESMF_InterArray) :: exclusiveLBoundArg ! helper variable
+    type(ESMF_InterArray) :: exclusiveUBoundArg ! helper variable
+    type(ESMF_InterArray) :: exclusiveCountArg ! helper variable
+    type(ESMF_InterArray) :: computationalLBoundArg ! helper variable
+    type(ESMF_InterArray) :: computationalUBoundArg ! helper variable
+    type(ESMF_InterArray) :: computationalCountArg ! helper variable
+    type(ESMF_InterArray) :: totalLBoundArg ! helper variable
+    type(ESMF_InterArray) :: totalUBoundArg ! helper variable
+    type(ESMF_InterArray) :: totalCountArg ! helper variable
     integer :: tmp_staggerloc
 
     ! Initialize return code 
@@ -19306,31 +20532,31 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                               ESMF_CONTEXT, rcToReturn=rc)) return 
 
     ! process optional arguments
-    exclusiveLBoundArg=ESMF_InterfaceIntCreate(exclusiveLBound, rc=localrc)
+    exclusiveLBoundArg=ESMF_InterArrayCreate(exclusiveLBound, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    exclusiveUBoundArg=ESMF_InterfaceIntCreate(exclusiveUBound, rc=localrc)
+    exclusiveUBoundArg=ESMF_InterArrayCreate(exclusiveUBound, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    exclusiveCountArg=ESMF_InterfaceIntCreate(exclusiveCount, rc=localrc)
+    exclusiveCountArg=ESMF_InterArrayCreate(exclusiveCount, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    computationalLBoundArg=ESMF_InterfaceIntCreate(computationalLBound, rc=localrc)
+    computationalLBoundArg=ESMF_InterArrayCreate(computationalLBound, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    computationalUBoundArg=ESMF_InterfaceIntCreate(computationalUBound, rc=localrc)
+    computationalUBoundArg=ESMF_InterArrayCreate(computationalUBound, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    computationalCountArg=ESMF_InterfaceIntCreate(computationalCount, rc=localrc)
+    computationalCountArg=ESMF_InterArrayCreate(computationalCount, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    totalLBoundArg=ESMF_InterfaceIntCreate(totalLBound, rc=localrc)
+    totalLBoundArg=ESMF_InterArrayCreate(totalLBound, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    totalUBoundArg = ESMF_InterfaceIntCreate(totalUBound, rc=localrc)
+    totalUBoundArg = ESMF_InterArrayCreate(totalUBound, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    totalCountArg = ESMF_InterfaceIntCreate(totalCount, rc=localrc)
+    totalCountArg = ESMF_InterArrayCreate(totalCount, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -19343,31 +20569,31 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Deallocate interface ints
-    call ESMF_InterfaceIntDestroy(exclusiveLBoundArg, rc=localrc)
+    call ESMF_InterArrayDestroy(exclusiveLBoundArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(exclusiveUBoundArg, rc=localrc)
+    call ESMF_InterArrayDestroy(exclusiveUBoundArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(exclusiveCountArg, rc=localrc)
+    call ESMF_InterArrayDestroy(exclusiveCountArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(computationalLBoundArg, rc=localrc)
+    call ESMF_InterArrayDestroy(computationalLBoundArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(computationalUBoundArg, rc=localrc)
+    call ESMF_InterArrayDestroy(computationalUBoundArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(computationalCountArg, rc=localrc)
+    call ESMF_InterArrayDestroy(computationalCountArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(totalLBoundArg, rc=localrc)
+    call ESMF_InterArrayDestroy(totalLBoundArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(totalUBoundArg, rc=localrc)
+    call ESMF_InterArrayDestroy(totalUBoundArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(totalCountArg, rc=localrc)
+    call ESMF_InterArrayDestroy(totalCountArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -19502,15 +20728,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
  type(ESMF_LocalArray) :: localarray
  type(ESMF_DataCopy_Flag) :: datacopyflagInt
  integer :: coordDimCount(ESMF_MAXDIM)
- type(ESMF_InterfaceInt) :: exclusiveLBoundArg ! helper variable
- type(ESMF_InterfaceInt) :: exclusiveUBoundArg ! helper variable
- type(ESMF_InterfaceInt) :: exclusiveCountArg ! helper variable
- type(ESMF_InterfaceInt) :: computationalLBoundArg ! helper variable
- type(ESMF_InterfaceInt) :: computationalUBoundArg ! helper variable
- type(ESMF_InterfaceInt) :: computationalCountArg ! helper variable
- type(ESMF_InterfaceInt) :: totalLBoundArg ! helper variable
- type(ESMF_InterfaceInt) :: totalUBoundArg ! helper variable
- type(ESMF_InterfaceInt) :: totalCountArg ! helper variable
+ type(ESMF_InterArray) :: exclusiveLBoundArg ! helper variable
+ type(ESMF_InterArray) :: exclusiveUBoundArg ! helper variable
+ type(ESMF_InterArray) :: exclusiveCountArg ! helper variable
+ type(ESMF_InterArray) :: computationalLBoundArg ! helper variable
+ type(ESMF_InterArray) :: computationalUBoundArg ! helper variable
+ type(ESMF_InterArray) :: computationalCountArg ! helper variable
+ type(ESMF_InterArray) :: totalLBoundArg ! helper variable
+ type(ESMF_InterArray) :: totalUBoundArg ! helper variable
+ type(ESMF_InterArray) :: totalCountArg ! helper variable
  integer :: tmp_staggerloc
 
  ! Initialize return code 
@@ -19568,31 +20794,31 @@ endif
 
 
     ! process optional arguments
-    exclusiveLBoundArg=ESMF_InterfaceIntCreate(exclusiveLBound, rc=localrc)
+    exclusiveLBoundArg=ESMF_InterArrayCreate(exclusiveLBound, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    exclusiveUBoundArg=ESMF_InterfaceIntCreate(exclusiveUBound, rc=localrc)
+    exclusiveUBoundArg=ESMF_InterArrayCreate(exclusiveUBound, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    exclusiveCountArg=ESMF_InterfaceIntCreate(exclusiveCount, rc=localrc)
+    exclusiveCountArg=ESMF_InterArrayCreate(exclusiveCount, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    computationalLBoundArg=ESMF_InterfaceIntCreate(computationalLBound, rc=localrc)
+    computationalLBoundArg=ESMF_InterArrayCreate(computationalLBound, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    computationalUBoundArg=ESMF_InterfaceIntCreate(computationalUBound, rc=localrc)
+    computationalUBoundArg=ESMF_InterArrayCreate(computationalUBound, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    computationalCountArg=ESMF_InterfaceIntCreate(computationalCount, rc=localrc)
+    computationalCountArg=ESMF_InterArrayCreate(computationalCount, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    totalLBoundArg=ESMF_InterfaceIntCreate(totalLBound, rc=localrc)
+    totalLBoundArg=ESMF_InterArrayCreate(totalLBound, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    totalUBoundArg = ESMF_InterfaceIntCreate(totalUBound, rc=localrc)
+    totalUBoundArg = ESMF_InterArrayCreate(totalUBound, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    totalCountArg = ESMF_InterfaceIntCreate(totalCount, rc=localrc)
+    totalCountArg = ESMF_InterArrayCreate(totalCount, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -19605,31 +20831,31 @@ endif
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Deallocate interface ints
-    call ESMF_InterfaceIntDestroy(exclusiveLBoundArg, rc=localrc)
+    call ESMF_InterArrayDestroy(exclusiveLBoundArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(exclusiveUBoundArg, rc=localrc)
+    call ESMF_InterArrayDestroy(exclusiveUBoundArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(exclusiveCountArg, rc=localrc)
+    call ESMF_InterArrayDestroy(exclusiveCountArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(computationalLBoundArg, rc=localrc)
+    call ESMF_InterArrayDestroy(computationalLBoundArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(computationalUBoundArg, rc=localrc)
+    call ESMF_InterArrayDestroy(computationalUBoundArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(computationalCountArg, rc=localrc)
+    call ESMF_InterArrayDestroy(computationalCountArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(totalLBoundArg, rc=localrc)
+    call ESMF_InterArrayDestroy(totalLBoundArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(totalUBoundArg, rc=localrc)
+    call ESMF_InterArrayDestroy(totalUBoundArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(totalCountArg, rc=localrc)
+    call ESMF_InterArrayDestroy(totalCountArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -19934,15 +21160,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !EOP
 
     integer :: localrc ! local error status
-    type(ESMF_InterfaceInt) :: exclusiveLBoundArg ! helper variable
-    type(ESMF_InterfaceInt) :: exclusiveUBoundArg ! helper variable
-    type(ESMF_InterfaceInt) :: exclusiveCountArg ! helper variable
-    type(ESMF_InterfaceInt) :: computationalLBoundArg ! helper variable
-    type(ESMF_InterfaceInt) :: computationalUBoundArg ! helper variable
-    type(ESMF_InterfaceInt) :: computationalCountArg ! helper variable
-    type(ESMF_InterfaceInt) :: totalLBoundArg ! helper variable
-    type(ESMF_InterfaceInt) :: totalUBoundArg ! helper variable
-    type(ESMF_InterfaceInt) :: totalCountArg ! helper variable
+    type(ESMF_InterArray) :: exclusiveLBoundArg ! helper variable
+    type(ESMF_InterArray) :: exclusiveUBoundArg ! helper variable
+    type(ESMF_InterArray) :: exclusiveCountArg ! helper variable
+    type(ESMF_InterArray) :: computationalLBoundArg ! helper variable
+    type(ESMF_InterArray) :: computationalUBoundArg ! helper variable
+    type(ESMF_InterArray) :: computationalCountArg ! helper variable
+    type(ESMF_InterArray) :: totalLBoundArg ! helper variable
+    type(ESMF_InterArray) :: totalUBoundArg ! helper variable
+    type(ESMF_InterArray) :: totalCountArg ! helper variable
     integer :: tmp_staggerloc
 
     ! Initialize return code
@@ -19960,31 +21186,31 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     endif
 
     ! process optional arguments
-    exclusiveLBoundArg=ESMF_InterfaceIntCreate(exclusiveLBound, rc=localrc)
+    exclusiveLBoundArg=ESMF_InterArrayCreate(exclusiveLBound, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    exclusiveUBoundArg=ESMF_InterfaceIntCreate(exclusiveUBound, rc=localrc)
+    exclusiveUBoundArg=ESMF_InterArrayCreate(exclusiveUBound, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    exclusiveCountArg=ESMF_InterfaceIntCreate(exclusiveCount, rc=localrc)
+    exclusiveCountArg=ESMF_InterArrayCreate(exclusiveCount, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    computationalLBoundArg=ESMF_InterfaceIntCreate(computationalLBound, rc=localrc)
+    computationalLBoundArg=ESMF_InterArrayCreate(computationalLBound, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    computationalUBoundArg=ESMF_InterfaceIntCreate(computationalUBound, rc=localrc)
+    computationalUBoundArg=ESMF_InterArrayCreate(computationalUBound, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    computationalCountArg=ESMF_InterfaceIntCreate(computationalCount, rc=localrc)
+    computationalCountArg=ESMF_InterArrayCreate(computationalCount, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    totalLBoundArg=ESMF_InterfaceIntCreate(totalLBound, rc=localrc)
+    totalLBoundArg=ESMF_InterArrayCreate(totalLBound, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    totalUBoundArg = ESMF_InterfaceIntCreate(totalUBound, rc=localrc)
+    totalUBoundArg = ESMF_InterArrayCreate(totalUBound, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    totalCountArg = ESMF_InterfaceIntCreate(totalCount, rc=localrc)
+    totalCountArg = ESMF_InterArrayCreate(totalCount, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -19997,31 +21223,31 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Deallocate interface ints
-    call ESMF_InterfaceIntDestroy(exclusiveLBoundArg, rc=localrc)
+    call ESMF_InterArrayDestroy(exclusiveLBoundArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(exclusiveUBoundArg, rc=localrc)
+    call ESMF_InterArrayDestroy(exclusiveUBoundArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(exclusiveCountArg, rc=localrc)
+    call ESMF_InterArrayDestroy(exclusiveCountArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(computationalLBoundArg, rc=localrc)
+    call ESMF_InterArrayDestroy(computationalLBoundArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(computationalUBoundArg, rc=localrc)
+    call ESMF_InterArrayDestroy(computationalUBoundArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(computationalCountArg, rc=localrc)
+    call ESMF_InterArrayDestroy(computationalCountArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(totalLBoundArg, rc=localrc)
+    call ESMF_InterArrayDestroy(totalLBoundArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(totalUBoundArg, rc=localrc)
+    call ESMF_InterArrayDestroy(totalUBoundArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(totalCountArg, rc=localrc)
+    call ESMF_InterArrayDestroy(totalCountArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -20421,18 +21647,23 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      the index space corresponding to the cells and the boundary of the 
 !      the exclusive region. This extra space is to contain the extra
 !      padding for non-center stagger locations, and should be big enough
-!      to hold any stagger in the grid. 
+!      to hold any stagger in the grid. If this and gridAlign are not present then 
+!      defaults to 0, 0, ..., 0 (all zeros).
 ! \item[{[gridEdgeUWidth]}] 
 !      The padding around the upper edges of the grid. This padding is between
 !      the index space corresponding to the cells and the boundary of the 
 !      the exclusive region. This extra space is to contain the extra
 !      padding for non-center stagger locations, and should be big enough
-!      to hold any stagger in the grid. 
+!      to hold any stagger in the grid. If this and gridAlign are not present then 
+!      defaults to 1, 1, ..., 1 (all ones).
 ! \item[{[gridAlign]}] 
 !     Specification of how the stagger locations should align with the cell
 !     index space (can be overridden by the individual staggerAligns). If
-!     the {\tt gridEdgeWidths} are not specified than this parameter
-!     implies the EdgeWidths.
+!     the gridEdgeWidths are not specified than this argument
+!     implies the gridEdgeWidths. If the gridEdgeWidths are specified and this argument isn't
+!     then this argument is implied by the gridEdgeWidths.
+!     If this and the gridEdgeWidths are not specified, then defaults to 
+!    -1, -1, ..., -1 (all negative ones).
 ! \item[{[gridMemLBound]}] 
 !      Specifies the lower index range of the memory of every DE in this Grid. 
 !      Only used when indexflag is {\tt ESMF\_INDEX\_USER}. May be overridden
@@ -20456,17 +21687,17 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !EOPI
     integer :: localrc ! local error status
     integer :: nameLen 
-    type(ESMF_InterfaceInt) :: gridEdgeLWidthArg  ! Language Interface Helper Var
-    type(ESMF_InterfaceInt) :: gridEdgeUWidthArg  ! Language Interface Helper Var
-    type(ESMF_InterfaceInt) :: gridAlignArg  ! Language Interface Helper Var
-    type(ESMF_InterfaceInt) :: gridMemLBoundArg  ! Language Interface Helper Var
-    type(ESMF_InterfaceInt) :: distgridToGridMapArg  ! Language Interface Helper Var
-    type(ESMF_InterfaceInt) :: distDimArg  ! Language Interface Helper Var
-    type(ESMF_InterfaceInt) :: coordDimCountArg  ! Language Interface Helper Var
-    type(ESMF_InterfaceInt) :: coordDimMapArg ! Language Interface Helper Var
-    type(ESMF_InterfaceInt) :: minIndexArg ! Language Interface Helper Var
-    type(ESMF_InterfaceInt) :: maxIndexArg ! Language Interface Helper Var
-    type(ESMF_InterfaceInt) :: localArbIndexArg ! Language Interface Helper Var
+    type(ESMF_InterArray) :: gridEdgeLWidthArg  ! Language Interface Helper Var
+    type(ESMF_InterArray) :: gridEdgeUWidthArg  ! Language Interface Helper Var
+    type(ESMF_InterArray) :: gridAlignArg  ! Language Interface Helper Var
+    type(ESMF_InterArray) :: gridMemLBoundArg  ! Language Interface Helper Var
+    type(ESMF_InterArray) :: distgridToGridMapArg  ! Language Interface Helper Var
+    type(ESMF_InterArray) :: distDimArg  ! Language Interface Helper Var
+    type(ESMF_InterArray) :: coordDimCountArg  ! Language Interface Helper Var
+    type(ESMF_InterArray) :: coordDimMapArg ! Language Interface Helper Var
+    type(ESMF_InterArray) :: minIndexArg ! Language Interface Helper Var
+    type(ESMF_InterArray) :: maxIndexArg ! Language Interface Helper Var
+    type(ESMF_InterArray) :: localArbIndexArg ! Language Interface Helper Var
     integer :: intDestroyDistgrid,intDestroyDELayout
     type(ESMF_Pointer)      :: vmThis
     logical                 :: actualFlag
@@ -20502,45 +21733,45 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! It doesn't look like it needs to be translated, but test to make sure
 
     !! gridEdgeLWidth and gridEdgeUWidth
-    gridEdgeLWidthArg = ESMF_InterfaceIntCreate(gridEdgeLWidth, rc=localrc)
+    gridEdgeLWidthArg = ESMF_InterArrayCreate(gridEdgeLWidth, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    gridEdgeUWidthArg = ESMF_InterfaceIntCreate(gridEdgeUWidth, rc=localrc)
+    gridEdgeUWidthArg = ESMF_InterArrayCreate(gridEdgeUWidth, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    gridAlignArg = ESMF_InterfaceIntCreate(gridAlign, rc=localrc)
+    gridAlignArg = ESMF_InterArrayCreate(gridAlign, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    gridMemLBoundArg = ESMF_InterfaceIntCreate(gridMemLBound, rc=localrc)
+    gridMemLBoundArg = ESMF_InterArrayCreate(gridMemLBound, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     !! distgridToGridMap
-    distgridToGridMapArg = ESMF_InterfaceIntCreate(distgridToGridMap, rc=localrc)
+    distgridToGridMapArg = ESMF_InterArrayCreate(distgridToGridMap, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     !! distDim
-    distDimArg = ESMF_InterfaceIntCreate(distDim, rc=localrc)
+    distDimArg = ESMF_InterArrayCreate(distDim, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     !! Description of array factorization
-    coordDimCountArg = ESMF_InterfaceIntCreate(coordDimCount, rc=localrc)
+    coordDimCountArg = ESMF_InterArrayCreate(coordDimCount, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    coordDimMapArg = ESMF_InterfaceIntCreate(farray2D=coordDimMap, rc=localrc)
+    coordDimMapArg = ESMF_InterArrayCreate(farray2D=coordDimMap, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     !! Index bound and localArbIndex array
-    minIndexArg = ESMF_InterfaceIntCreate(minIndex, rc=localrc)
+    minIndexArg = ESMF_InterArrayCreate(minIndex, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    maxIndexArg = ESMF_InterfaceIntCreate(maxIndex, rc=localrc)
+    maxIndexArg = ESMF_InterArrayCreate(maxIndex, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    localArbIndexArg = ESMF_InterfaceIntCreate(farray2D=localArbIndex, rc=localrc)
+    localArbIndexArg = ESMF_InterArrayCreate(farray2D=localArbIndex, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -20561,37 +21792,37 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Deallocate helper variables
-    call ESMF_InterfaceIntDestroy(gridEdgeUWidthArg, rc=localrc)
+    call ESMF_InterArrayDestroy(gridEdgeUWidthArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(gridEdgeLWidthArg, rc=localrc)
+    call ESMF_InterArrayDestroy(gridEdgeLWidthArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(gridAlignArg, rc=localrc)
+    call ESMF_InterArrayDestroy(gridAlignArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(gridMemLBoundArg, rc=localrc)
+    call ESMF_InterArrayDestroy(gridMemLBoundArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(distgridToGridMapArg, rc=localrc)
+    call ESMF_InterArrayDestroy(distgridToGridMapArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(distDimArg, rc=localrc)
+    call ESMF_InterArrayDestroy(distDimArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(coordDimCountArg, rc=localrc)
+    call ESMF_InterArrayDestroy(coordDimCountArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(coordDimMapArg, rc=localrc)
+    call ESMF_InterArrayDestroy(coordDimMapArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(minIndexArg, rc=localrc)
+    call ESMF_InterArrayDestroy(minIndexArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(maxIndexArg, rc=localrc)
+    call ESMF_InterArrayDestroy(maxIndexArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(localArbIndexArg, rc=localrc)
+    call ESMF_InterArrayDestroy(localArbIndexArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -20901,18 +22132,23 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      the index space corresponding to the cells and the boundary of the 
 !      the exclusive region. This extra space is to contain the extra
 !      padding for non-center stagger locations, and should be big enough
-!      to hold any stagger in the grid. 
+!      to hold any stagger in the grid. If this and gridAlign are not present then 
+!      defaults to 0, 0, ..., 0 (all zeros).
 ! \item[{[gridEdgeUWidth]}] 
 !      The padding around the upper edges of the grid. This padding is between
 !      the index space corresponding to the cells and the boundary of the 
 !      the exclusive region. This extra space is to contain the extra
 !      padding for non-center stagger locations, and should be big enough
-!      to hold any stagger in the grid. 
+!      to hold any stagger in the grid. If this and gridAlign are not present then 
+!      defaults to 1, 1, ..., 1 (all ones).
 ! \item[{[gridAlign]}] 
 !     Specification of how the stagger locations should align with the cell
 !     index space (can be overridden by the individual staggerAligns). If
-!     the {\tt gridEdgeWidths} are not specified than this parameter
-!     implies the EdgeWidths.
+!     the gridEdgeWidths are not specified than this argument
+!     implies the gridEdgeWidths. If the gridEdgeWidths are specified and this argument isn't
+!     then this argument is implied by the gridEdgeWidths.
+!     If this and the gridEdgeWidths are not specified, then defaults to 
+!    -1, -1, ..., -1 (all negative ones).
 ! \item[{[gridMemLBound]}] 
 !      Specifies the lower index range of the memory of every DE in this Grid. 
 !      Only used when indexflag is {\tt ESMF\_INDEX\_USER}. May be overridden
@@ -21595,7 +22831,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       endif
 
       !! create delayout from the petList
-      delayout=ESMF_DELayoutCreate(petList=petList,rc=localrc)
+      delayout=ESMF_DELayoutCreate(petMap=petList,rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -21908,18 +23144,23 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      the index space corresponding to the cells and the boundary of the 
 !      the exclusive region. This extra space is to contain the extra
 !      padding for non-center stagger locations, and should be big enough
-!      to hold any stagger in the grid. 
+!      to hold any stagger in the grid. If this and gridAlign are not present then 
+!      defaults to 0, 0, ..., 0 (all zeros).
 ! \item[{[gridEdgeUWidth]}] 
 !      The padding around the upper edges of the grid. This padding is between
 !      the index space corresponding to the cells and the boundary of the 
 !      the exclusive region. This extra space is to contain the extra
 !      padding for non-center stagger locations, and should be big enough
-!      to hold any stagger in the grid. 
+!      to hold any stagger in the grid. If this and gridAlign are not present then 
+!      defaults to 1, 1, ..., 1 (all ones).
 ! \item[{[gridAlign]}] 
 !     Specification of how the stagger locations should align with the cell
 !     index space (can be overridden by the individual staggerAligns). If
-!     the {\tt gridEdgeWidths} are not specified than this parameter
-!     implies the EdgeWidths.
+!     the gridEdgeWidths are not specified than this argument
+!     implies the gridEdgeWidths. If the gridEdgeWidths are specified and this argument isn't
+!     then this argument is implied by the gridEdgeWidths.
+!     If this and the gridEdgeWidths are not specified, then defaults to 
+!    -1, -1, ..., -1 (all negative ones).
 ! \item[{[gridMemLBound]}] 
 !      Specifies the lower index range of the memory of every DE in this Grid. 
 !      Only used when indexflag is {\tt ESMF\_INDEX\_USER}. May be overridden
@@ -22508,7 +23749,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       endif
 
       !! create delayout from the petList
-      delayout=ESMF_DELayoutCreate(petList=petList,rc=localrc)
+      delayout=ESMF_DELayoutCreate(petMap=petList,rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -23625,12 +24866,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !EOPI
     integer :: localrc ! local error status
-    type(ESMF_InterfaceInt) :: lWidthInArg  ! Language Interface Helper Var
-    type(ESMF_InterfaceInt) :: uWidthInArg  ! Language Interface Helper Var
-    type(ESMF_InterfaceInt) :: alignInArg  ! Language Interface Helper Var
-    type(ESMF_InterfaceInt) :: lWidthOutArg  ! Language Interface Helper Var
-    type(ESMF_InterfaceInt) :: uWidthOutArg  ! Language Interface Helper Var
-    type(ESMF_InterfaceInt) :: alignOutArg  ! Language Interface Helper Var
+    type(ESMF_InterArray) :: lWidthInArg  ! Language Interface Helper Var
+    type(ESMF_InterArray) :: uWidthInArg  ! Language Interface Helper Var
+    type(ESMF_InterArray) :: alignInArg  ! Language Interface Helper Var
+    type(ESMF_InterArray) :: lWidthOutArg  ! Language Interface Helper Var
+    type(ESMF_InterArray) :: uWidthOutArg  ! Language Interface Helper Var
+    type(ESMF_InterArray) :: alignOutArg  ! Language Interface Helper Var
 
 
     ! Initialize return code; assume failure until success is certain
@@ -23665,23 +24906,23 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         endif 
     endif
 
-    ! turn to interfaceint
-    lWidthInArg = ESMF_InterfaceIntCreate(lWidthIn, rc=localrc)
+    ! turn to InterArray
+    lWidthInArg = ESMF_InterArrayCreate(lWidthIn, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    uWidthInArg = ESMF_InterfaceIntCreate(uWidthIn, rc=localrc)
+    uWidthInArg = ESMF_InterArrayCreate(uWidthIn, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    alignInArg = ESMF_InterfaceIntCreate(alignIn, rc=localrc)
+    alignInArg = ESMF_InterArrayCreate(alignIn, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    lWidthOutArg = ESMF_InterfaceIntCreate(lWidthOut, rc=localrc)
+    lWidthOutArg = ESMF_InterArrayCreate(lWidthOut, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    uWidthOutArg = ESMF_InterfaceIntCreate(uWidthOut, rc=localrc)
+    uWidthOutArg = ESMF_InterArrayCreate(uWidthOut, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    alignOutArg = ESMF_InterfaceIntCreate(alignOut, rc=localrc)
+    alignOutArg = ESMF_InterArrayCreate(alignOut, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -23694,22 +24935,22 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Deallocate helper variables
-    call ESMF_InterfaceIntDestroy(lWidthInArg, rc=localrc)
+    call ESMF_InterArrayDestroy(lWidthInArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(uWidthInArg, rc=localrc)
+    call ESMF_InterArrayDestroy(uWidthInArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(alignInArg, rc=localrc)
+    call ESMF_InterArrayDestroy(alignInArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(lWidthOutArg, rc=localrc)
+    call ESMF_InterArrayDestroy(lWidthOutArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(uWidthOutArg, rc=localrc)
+    call ESMF_InterArrayDestroy(uWidthOutArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(alignOutArg, rc=localrc)
+    call ESMF_InterArrayDestroy(alignOutArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -24804,7 +26045,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       endif
 
       !! create delayout from the petList
-      delayout=ESMF_DELayoutCreate(petList=petList,rc=localrc)
+      delayout=ESMF_DELayoutCreate(petMap=petList,rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -25188,10 +26429,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       endif
 
       !! create delayout from the petList
-      delayout=ESMF_DELayoutCreate(petList=petList,rc=localrc)
+      delayout=ESMF_DELayoutCreate(petMap=petList,rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
-
       !! Get rid of list
       deallocate(petList)
    else      
@@ -25201,6 +26441,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           ESMF_CONTEXT, rcToReturn=rc)) return
    endif
 
+   call ESMF_DELayoutGet(delayout, decount=decount, rc=localrc)
 
    ! Create DistGrid --------------------------------------------------------------
    ESMF_GridCreateDistgridReg=ESMF_DistGridCreate(minIndex=minIndex, maxIndex=maxIndex, &
@@ -25486,515 +26727,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Return successfully
     if (present(rc)) rc = ESMF_SUCCESS
     end function ESMF_GridCreateDistgridArb
-
-!-------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_GridCreateCubedSphere()"
-!BOP
-! !IROUTINE: ESMF_GridCreateCubedSphere - Create a multi-tile Grid object with regular decomposition for Cubed Sphere grid.
-
-! !INTERFACE:
-  function ESMF_GridCreateCubedSphere(tileSize,keywordEnforcer, regDecompPTile, decompflagPTile, &
-        deLabelList, delayout, rc)
-!         
-! !RETURN VALUE:
-    type(ESMF_Grid) :: ESMF_GridCreateCubedSphere
-!
-! !ARGUMENTS:
-    integer,                        intent(in)            :: tilesize
-type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    integer,                        intent(in),  optional :: regDecompPTile(:,:)
-    type(ESMF_Decomp_Flag), target, intent(in),  optional :: decompflagPTile(:,:)
-    integer,                        intent(in),  optional :: deLabelList(:)
-    type(ESMF_DELayout),            intent(in),  optional :: delayout
-    integer,                        intent(out), optional :: rc
-
-!
-! !DESCRIPTION:
-!   Create a six-tile {\tt ESMF\_Grid} for a Cubed Sphere grid using regular decomposition.  Each tile can
-!   have different decomposition.  The grid coordinates are generated based on the algorithm used by GEOS-5,
-!   The tile resolution is defined by tileSize.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[tilesize]
-!          The number of elements on each side of the tile of the Cubed Sphere grid
-!     \item[{[regDecompPTile]}]
-!          List of DE counts for each dimension. The second index steps through
-!          the tiles. The total {\tt deCount} is determined as ths sum over
-!          the products of {\tt regDecomp} elements for each tile.
-!          By default each tile is decomposed only along the first dimension.
-!          The default number of DEs per tile is at least 1, but may be greater
-!          for the leading tiles if the {\tt deCount} is greater than the 
-!          {\tt tileCount}. If no DELayout is specified, the {\tt deCount} is 
-!          by default set equal to the number of PETs ({\tt petCount}), or the 
-!          number of tiles ({\tt tileCount}), which ever is greater. This means
-!          that as long as {\tt petCount} > {\tt tileCount}, the resulting
-!          default distribution will be 1 DE per PET. Notice that some tiles
-!          may be decomposed into more DEs than other tiles.
-!     \item[{[decompflagPTile]}]
-!          List of decomposition flags indicating how each dimension of each
-!          tile is to be divided between the DEs. The default setting
-!          is {\tt ESMF\_DECOMP\_BALANCED} in all dimensions for all tiles. 
-!          See section \ref{const:decompflag} for a list of valid decomposition
-!          flag options. The second index indicates the tile number.
-!     \item[{[deLabelList]}]
-!          List assigning DE labels to the default sequence of DEs. The default
-!          sequence is given by the column major order of the {\tt regDecompPTile}
-!          elements in the sequence as they appear following the tile index.
-!     \item[{[delayout]}]
-!          Optional {\tt ESMF\_DELayout} object to be used. By default a new
-!          DELayout object will be created with as many DEs as there are PETs,
-!          or tiles, which ever is greater. If a DELayout object is specified,
-!          the number of DEs must match {\tt regDecompPTile}, if present. In the
-!          case that {\tt regDecompPTile} was not specified, the {\tt deCount}
-!          must be at least that of the default DELayout. The 
-!          {\tt regDecompPTile} will be constructed accordingly.
-!     \item[{[rc]}]
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!EOP
-
-    type(ESMF_VM)                               :: vm
-    integer                                     :: PetNo, PetCnt
-    integer                                     :: totalDE, nxy, nx, ny, bigFac
-    type(ESMF_DELayout)                         :: defaultDELayout
-    type(ESMF_Grid)                             :: grid, newgrid
-    type(ESMF_DistGrid)                         :: distgrid, newdistgrid
-    integer                                     :: localrc
-    type(ESMF_DistGridConnection), allocatable :: connectionList(:)
-    integer                                    :: i, j, conn
-    integer                                    :: localDeCount, localDe, DeNo, tile
-    real(kind=ESMF_KIND_R8),  pointer          :: lonPtr(:,:), latPtr(:,:)
-    real(kind=ESMF_KIND_R8),  pointer          :: lonCornerPtr(:,:), latCornerPtr(:,:)
-    integer                                    :: tileCount
-    integer                                    :: connectionCount
-    integer                                    :: centerCount
-    integer                                    :: starti, startj, sizei, sizej
-    integer                                    :: ind, rem, rem1, rem2
-    integer                                    :: start(2), count(2)
-    integer, allocatable                       :: minIndexPTile(:,:)
-    integer, allocatable                       :: maxIndexPTile(:,:)
-    integer, allocatable                       :: regDecomp(:,:)    
-    integer, allocatable                       :: demap(:)
-    integer                                    :: decount
-    !real(ESMF_KIND_R8)                        :: starttime, endtime  
-
-    real(kind=ESMF_KIND_R4), parameter         :: pi = 3.1415926
-    real(kind=ESMF_KIND_R4), parameter         :: todeg = 180.0/pi
-
-    if (present(rc)) rc=ESMF_SUCCESS
-  !------------------------------------------------------------------------
-  ! get global vm information
-  !
-  call ESMF_VMGetGlobal(vm, rc=localrc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-    ESMF_CONTEXT, rcToReturn=rc)) return
-
-  ! set up local pet info
-  call ESMF_VMGet(vm, localPet=PetNo, petCount=PetCnt, rc=localrc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
-
-  !------------------------------------------------------------------------
-  ! default decomposition. The number of DEs has to be multiple of 6.
-  ! If the total PET count is less than 6, some PETs will get more than one DE.
-  ! Otherwise, total DEs is always less than or equal to total PETs.
-  
-  if (PetCnt < 6) then 
-     totalDE=6
-  else 
-     totalDE = (PetCnt/6)*6
-  endif
-
-  nxy = totalDE/6
-  bigFac = 1
-  do i=2, int(sqrt(float(nxy)))
-    if ((nxy/i)*i == nxy) then
-        bigFac = i
-    endif
-  enddo
-  nx = bigFac
-  ny = nxy/nx
-
-  defaultDELayout = ESMF_DELayoutCreate(deCount = totalDE, rc=localrc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-    ESMF_CONTEXT, rcToReturn=rc)) return
-
-  call ESMF_DELayoutGet(defaultDElayout, localDeCount = decount, rc=localrc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-    ESMF_CONTEXT, rcToReturn=rc)) return
-  if (decount > 0) then
-     allocate(demap(0:decount-1))
-     call ESMF_DELayoutGet(defaultDElayout, localDeToDeMap = demap, rc=localrc)
-     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
-     !print *, PetNo, ' demap ', decount, demap
-  endif
-    centerCount=tilesize
-    tileCount = 6  
-
-    ! - initialize Min/Max
-    ! The full cubed sphere has 6 tiles. For testing, tiles can be
-    ! turned on incrementally from 1 all the way to 6. Anything greater than
-    ! 6 is incorrect.
-    allocate(minIndexPTile(2,tileCount))
-    allocate(maxIndexPTile(2,tileCount))
-    tile=0
-    if (tile==tileCount) goto 10
-    !- tile 1
-    tile=1
-    minIndexPTile(1,tile)=1
-    minIndexPTile(2,tile)=1
-    maxIndexPTile(1,tile)=minIndexPTile(1,tile)+centerCount-1
-    maxIndexPTile(2,tile)=minIndexPTile(2,tile)+centerCount-1
-    if (tile==tileCount) goto 10
-    !- tile 2
-    tile=2
-    minIndexPTile(1,tile)=maxIndexPTile(1,tile-1)+1
-    minIndexPTile(2,tile)=minIndexPTile(2,tile-1)
-    maxIndexPTile(1,tile)=minIndexPTile(1,tile)+centerCount-1
-    maxIndexPTile(2,tile)=minIndexPTile(2,tile)+centerCount-1
-    if (tile==tileCount) goto 10
-    !- tile 3
-    tile=3
-    minIndexPTile(1,tile)=minIndexPTile(1,tile-1)
-    minIndexPTile(2,tile)=maxIndexPTile(2,tile-1)+1
-    maxIndexPTile(1,tile)=minIndexPTile(1,tile)+centerCount-1
-    maxIndexPTile(2,tile)=minIndexPTile(2,tile)+centerCount-1
-    if (tile==tileCount) goto 10
-    !- tile 4
-    tile=4
-    minIndexPTile(1,tile)=maxIndexPTile(1,tile-1)+1
-    minIndexPTile(2,tile)=minIndexPTile(2,tile-1)
-    maxIndexPTile(1,tile)=minIndexPTile(1,tile)+centerCount-1
-    maxIndexPTile(2,tile)=minIndexPTile(2,tile)+centerCount-1
-    if (tile==tileCount) goto 10
-    !- tile 5
-    tile=5
-    minIndexPTile(1,tile)=minIndexPTile(1,tile-1)
-    minIndexPTile(2,tile)=maxIndexPTile(2,tile-1)+1
-    maxIndexPTile(1,tile)=minIndexPTile(1,tile)+centerCount-1
-    maxIndexPTile(2,tile)=minIndexPTile(2,tile)+centerCount-1
-    if (tile==tileCount) goto 10
-    !- tile 6
-    tile=6
-    minIndexPTile(1,tile)=maxIndexPTile(1,tile-1)+1
-    minIndexPTile(2,tile)=minIndexPTile(2,tile-1)
-    maxIndexPTile(1,tile)=minIndexPTile(1,tile)+centerCount-1
-    maxIndexPTile(2,tile)=minIndexPTile(2,tile)+centerCount-1
-    if (tile==tileCount) goto 10
-    
-10  continue
-    
-    ! - connectionList
-    ! The full cubed sphere has 12 conections. For testing, connections can be
-    ! turned on incrementally from 0 all the way to 12. Anything greater than
-    ! 12 is incorrect.
-    connectionCount = 12  ! between 0 ... and ... 12.
-    allocate(connectionList(connectionCount))
-
-    ! Connections are either defined on the basis of centers or corners, they
-    ! are NOT the same! Our current strategy is to define connections for
-    ! centers, and add corners with padding and no connections. This way we
-    ! can regrid center data bilinear and conservatively. We cannot handle
-    ! regridding for data on corner stagger, plus we have degeneracies in that
-    ! case of exlusive elelements. However, we believe that the current 
-    ! application of this is for only data on center stagger.
-#define CENTER_CONNECTIONS
-
-    conn=0
-    if (conn==connectionCount) goto 20
-
-    conn=conn+1
-    call ESMF_DistGridConnectionSet(connection=connectionList(conn), &
-      tileIndexA=1, tileIndexB=2, positionVector=(/0, 0/), rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
-    if (conn==connectionCount) goto 20
-
-    conn=conn+1
-    call ESMF_DistGridConnectionSet(connection=connectionList(conn), &
-      tileIndexA=2, tileIndexB=3, positionVector=(/0, 0/), rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
-    if (conn==connectionCount) goto 20
-
-    conn=conn+1
-    call ESMF_DistGridConnectionSet(connection=connectionList(conn), &
-      tileIndexA=1, tileIndexB=3, orientationVector=(/2, -1/), &  ! 270 deg rot
-      positionVector=(/ &     ! pivot point (maxIndexPTile(1,1)+0.5, 
-                              !              maxIndexPTile(2,1)+0.5)
-#ifdef CENTER_CONNECTIONS
-      maxIndexPTile(1,1)-maxIndexPTile(2,1),      &
-      maxIndexPTile(1,1)+maxIndexPTile(2,1)+1/),  &
-#else
-      maxIndexPTile(1,1)-maxIndexPTile(2,1),      &
-      maxIndexPTile(1,1)+maxIndexPTile(2,1)+2/),  &
-#endif
-      rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
-    if (conn==connectionCount) goto 20
-
-    conn=conn+1
-    call ESMF_DistGridConnectionSet(connection=connectionList(conn), &
-      tileIndexA=3, tileIndexB=4, positionVector=(/0, 0/), rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
-    if (conn==connectionCount) goto 20
-
-    conn=conn+1
-    call ESMF_DistGridConnectionSet(connection=connectionList(conn), &
-      tileIndexA=2, tileIndexB=4, orientationVector=(/-2, 1/), &  ! 90 deg rot
-      positionVector=(/ &     ! pivot point (maxIndexPTile(1,2)+0.5, 
-                              !              maxIndexPTile(2,2)+0.5)
-#ifdef CENTER_CONNECTIONS
-      maxIndexPTile(1,2)+maxIndexPTile(2,2)+1,  &
-      -maxIndexPTile(1,2)+maxIndexPTile(2,2)/), &
-#else
-      maxIndexPTile(1,2)+maxIndexPTile(2,2)+2,  &
-      -maxIndexPTile(1,2)+maxIndexPTile(2,2)/), &
-#endif
-      rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
-    if (conn==connectionCount) goto 20
-
-    conn=conn+1
-    call ESMF_DistGridConnectionSet(connection=connectionList(conn), &
-      tileIndexA=4, tileIndexB=5, positionVector=(/0, 0/), rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
-    if (conn==connectionCount) goto 20
-
-    conn=conn+1
-    call ESMF_DistGridConnectionSet(connection=connectionList(conn), &
-      tileIndexA=3, tileIndexB=5, orientationVector=(/2, -1/), &  ! 270 deg rot
-      positionVector=(/ &     ! pivot point (maxIndexPTile(1,3)+0.5, 
-                              !              maxIndexPTile(2,3)+0.5)
-#ifdef CENTER_CONNECTIONS
-      maxIndexPTile(1,3)-maxIndexPTile(2,3),      &
-      maxIndexPTile(1,3)+maxIndexPTile(2,3)+1/),  &
-#else
-      maxIndexPTile(1,3)-maxIndexPTile(2,3),      &
-      maxIndexPTile(1,3)+maxIndexPTile(2,3)+2/),  &
-#endif      
-      rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
-    if (conn==connectionCount) goto 20
-
-    conn=conn+1
-    call ESMF_DistGridConnectionSet(connection=connectionList(conn), &
-      tileIndexA=5, tileIndexB=6, positionVector=(/0, 0/), rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
-    if (conn==connectionCount) goto 20
-
-    conn=conn+1
-    call ESMF_DistGridConnectionSet(connection=connectionList(conn), &
-      tileIndexA=4, tileIndexB=6, orientationVector=(/-2, 1/), &  ! 90 deg rot
-      positionVector=(/ &     ! pivot point (maxIndexPTile(1,4)+0.5, 
-                              !              maxIndexPTile(2,4)+0.5)
-#ifdef CENTER_CONNECTIONS
-      maxIndexPTile(1,4)+maxIndexPTile(2,4)+1,  &
-      -maxIndexPTile(1,4)+maxIndexPTile(2,4)/), &
-#else
-      maxIndexPTile(1,4)+maxIndexPTile(2,4)+2,  &
-      -maxIndexPTile(1,4)+maxIndexPTile(2,4)/), &
-#endif
-      rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
-    if (conn==connectionCount) goto 20
-
-    conn=conn+1
-    call ESMF_DistGridConnectionSet(connection=connectionList(conn), &
-      tileIndexA=1, tileIndexB=6, &
-      positionVector=(/ &     ! only shift
-      minIndexPTile(1,6)-minIndexPTile(1,1),  &
-      maxIndexPTile(2,6)-minIndexPTile(2,1)+1/), &  
-      rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
-    if (conn==connectionCount) goto 20
-
-    conn=conn+1
-    call ESMF_DistGridConnectionSet(connection=connectionList(conn), &
-      tileIndexA=5, tileIndexB=1, orientationVector=(/2, -1/), &  ! 270 deg rot
-      positionVector=(/ &     ! pivot plus shift
-#ifdef CENTER_CONNECTIONS
-      minIndexPTile(1,1)-maxIndexPTile(2,5)-1,  &
-      maxIndexPTile(2,1)+minIndexPTile(1,5)/),  &
-#else
-      minIndexPTile(1,1)-maxIndexPTile(2,5)-1,   &
-      maxIndexPTile(2,1)+minIndexPTile(1,5)+1/), &
-#endif
-      rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
-    if (conn==connectionCount) goto 20
-
-    conn=conn+1
-    call ESMF_DistGridConnectionSet(connection=connectionList(conn), &
-      tileIndexA=6, tileIndexB=2, orientationVector=(/-2, 1/), &  ! 90 deg rot
-      positionVector=(/ &     ! pivot plus shift
-#ifdef CENTER_CONNECTIONS
-      maxIndexPTile(1,2)+minIndexPTile(2,6),     &
-      minIndexPTile(2,2)-maxIndexPTile(1,6)-1/), &
-#else      
-      maxIndexPTile(1,2)+minIndexPTile(2,6)+1,   &
-      minIndexPTile(2,2)-maxIndexPTile(1,6)-1/), &
-#endif
-      rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
-    if (conn==connectionCount) goto 20
-
-20  continue
-
-    allocate(regDecomp(2,6))
-    regDecomp(1,:)=nx
-    regDecomp(2,:)=ny
-    !-------------------------------------------
-    ! - create DistGrid with default decomposition
-    ! must create with ESMF_INDEX_GLOBAL because of how connections were defined
-    distgrid = ESMF_DistGridCreate(&
-      minIndexPTile=minIndexPTile, maxIndexPTile=maxIndexPTile, &
-      regDecompPTile=regDecomp, &
-      indexflag=ESMF_INDEX_GLOBAL, connectionList=connectionList, &
-      delayout = defaultDelayout, &
-      rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
-
-    ! - create Grid
-    ! must create with ESMF_INDEX_DELOCAL because of how tiles get their 
-    ! coordinates from the cubedSphereTileCreate() routine
-    grid = ESMF_GridCreate(distgrid, coordSys=ESMF_COORDSYS_SPH_DEG, &
-      indexflag=ESMF_INDEX_DELOCAL, rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
-
-    ! --- add CENTER coordinates ---
-    call ESMF_GridAddCoord(grid, staggerloc=ESMF_STAGGERLOC_CENTER, rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
-
-    ! --- add CORNER coordinates ---
-    call ESMF_GridAddCoord(grid, staggerloc=ESMF_STAGGERLOC_CORNER, rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-         ESMF_CONTEXT, rcToReturn=rc)) return
-
-    ! calculate the actual cubed sphere coordiantes for each DE
-    do localDe = 0,decount-1
-      DeNo = demap(localDe)
-      tile = DeNo/(nx*ny)+1
-      rem = mod(DeNo,nx*ny)
-      sizei = tileSize/nx
-      sizej = tileSize/ny
-      rem1 = mod(tileSize, nx)
-      rem2 = mod(tileSize, ny)
-      ind = mod(rem,nx)
-      if (rem1 > 0) then
-         if (ind < rem1) then
-           sizei=sizei+1
-           starti=sizei*ind+1
-         else
-           starti=sizei*ind+rem1+1
-         endif
-      else
-         starti = sizei*ind+1
-      endif
-      ind = rem/nx
-      if (rem2 > 0) then
-         if (ind < rem2) then
-           sizej=sizej+1
-           startj=sizej*ind+1
-         else
-           startj=sizej*ind+rem2+1
-         endif
-      else
-         startj = sizej*ind+1
-      endif
-      !print *, DeNo, 'block:', starti, startj, sizei, sizej, tile
-
-      start(1)=starti
-      start(2)=startj
-      count(1)=sizei
-      count(2)=sizej
-
-      call ESMF_GridGetCoord(grid, coordDim=1, localDe=localDe, &
-          farrayPtr=lonPtr, rc=localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
-      call ESMF_GridGetCoord(grid, coordDim=2, localDe=localDe, &
-          farrayPtr=latPtr, rc=localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
-
-      call ESMF_GridGetCoord(grid, coordDim=1, localDe=localDe, &
-         staggerloc=ESMF_STAGGERLOC_CORNER, farrayPtr=lonCornerPtr, rc=localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-         ESMF_CONTEXT, rcToReturn=rc)) return
-      call ESMF_GridGetCoord(grid, coordDim=2, localDe=localDe, &
-         staggerloc=ESMF_STAGGERLOC_CORNER, farrayPtr=latCornerPtr, rc=localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-         ESMF_CONTEXT, rcToReturn=rc)) return
-
-      !call ESMF_VMWtime(starttime, rc=localrc)
-      ! Generate glocal edge coordinates and local center coordinates
-      call ESMF_UtilCreateCSCoordsPar(tileSize, lonCornerPtr, latCornerPtr, start=start, count=count, &
-           tile=tile, lonCenter=lonPtr, latCenter=latPtr)
-      !call ESMF_VMWtime(endtime, rc=localrc)
-  
-      lonPtr = lonPtr * todeg
-      latPtr = latPtr * todeg
-      lonCornerPtr = lonCornerPtr * todeg
-      latCornerPtr = latCornerPtr * todeg
-
-      !print *, 'Create CS size ', tileSize, 'in', (endtime-starttime)*1000.0, ' msecs'
-    end do 
-
-    ! Create another distgrid with user specified decomposition
-    if (present(decompflagPTile) .or. present(regDecompPTile) .or. &
-        present(delabelList) .or. present(delayout)) then
-      newdistgrid = ESMF_DistGridCreate(&
-        minIndexPTile=minIndexPTile, maxIndexPTile=maxIndexPTile, &
-        regDecompPTile=regDecompPTile, &
-        decompflagPTile=decompflagPTile, &
-        delabelList = delabelList, &
-        indexflag=ESMF_INDEX_GLOBAL, connectionList=connectionList, &
-        delayout = delayout, &
-        rc=localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
-      !Redist the grid with the new distgrid
-      newgrid = ESMF_GridCreate(grid, newdistgrid, rc=localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-         ESMF_CONTEXT, rcToReturn=rc)) return
-      ! Destroy old grid
-      call ESMF_GridDestroy(grid, rc=localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
-
-      ! Destroy old distgrid
-      call ESMF_DistGridDestroy(distgrid, rc=localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
-    
-      ESMF_GridCreateCubedSphere = newgrid
-    else
-      ESMF_GridCreateCubedSphere = grid
-    endif
-
-    ! - deallocate connectionList
-    deallocate(connectionList)
-  return
-
-end function ESMF_GridCreateCubedSphere
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD

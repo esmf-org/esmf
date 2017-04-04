@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2016, University Corporation for Atmospheric Research, 
+// Copyright 2002-2017, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -59,7 +59,7 @@ void ESMCI_meshcreate(Mesh **meshpp,
                       ESMC_CoordSys_Flag *coordSys, int *rc);
 
 void ESMCI_meshaddnodes(Mesh **meshpp, int *num_nodes, int *nodeId, 
-                            double *nodeCoord, int *nodeOwner, InterfaceInt *nodeMaskII,
+                            double *nodeCoord, int *nodeOwner, InterArray<int> *nodeMaskII,
                             ESMC_CoordSys_Flag *_coordSys, int *_orig_sdim,
                             int *rc);
 
@@ -69,7 +69,7 @@ void ESMCI_meshwrite(Mesh **meshpp, char *fname, int *rc,
 
 
 void ESMCI_meshaddelements(Mesh **meshpp, 
-                                              int *_num_elems, int *elemId, int *elemType, InterfaceInt *_elemMaskII ,
+                                              int *_num_elems, int *elemId, int *elemType, InterArray<int> *_elemMaskII ,
                                               int *_areaPresent, double *elemArea, 
                                               int *_coordsPresent, double *elemCoords, 
                                               int *_num_elemConn, int *elemConn, int *regridConserve, 
@@ -99,12 +99,14 @@ void ESMCI_meshcreatenodedistgrid(Mesh **meshpp, int *ngrid, int *num_lnodes, in
 void ESMCI_meshcreateelemdistgrid(Mesh **meshpp, int *egrid, int *num_lelems, int *rc);
 
 void ESMCI_meshinfoserialize(int *intMeshFreed,
-	        char *buffer, int *length, int *offset,
-                ESMC_InquireFlag *inquireflag, int *localrc,
+                             int *spatialDim, int *parametricDim, 
+                             char *buffer, int *length, int *offset,
+                             ESMC_InquireFlag *inquireflag, int *localrc,
                              ESMCI_FortranStrLenArg buffer_l);
 
 void ESMCI_meshinfodeserialize(int *intMeshFreed, 
-                                 char *buffer, int *offset, int *localrc,
+                               int *spatialDim, int *parametricDim, 
+                               char *buffer, int *offset, int *localrc,
                                ESMCI_FortranStrLenArg buffer_l);
 
 void ESMCI_meshserialize(Mesh **meshpp,
@@ -147,13 +149,13 @@ void ESMCI_meshgetfrac2(Mesh **meshpp, int *num_elem, double *elem_fracs, int *r
 void ESMCI_triangulate(int *pdim, int *sdim, int *numPnts, 
                        double *pnts, double *td, int *ti, int *triInd, int *rc);
 
-void ESMCI_meshturnoncellmask(Mesh **meshpp, ESMCI::InterfaceInt *maskValuesArg,  int *rc);
+void ESMCI_meshturnoncellmask(Mesh **meshpp, ESMCI::InterArray<int> *maskValuesArg,  int *rc);
 
 // Turn OFF masking
 void ESMCI_meshturnoffcellmask(Mesh **meshpp, int *rc);
 
 ////////////
-void ESMCI_meshturnonnodemask(Mesh **meshpp, ESMCI::InterfaceInt *maskValuesArg,  int *rc);
+void ESMCI_meshturnonnodemask(Mesh **meshpp, ESMCI::InterArray<int> *maskValuesArg,  int *rc);
 
 // Turn OFF masking
 void ESMCI_meshturnoffnodemask(Mesh **meshpp, int *rc);

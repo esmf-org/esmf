@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2016, University Corporation for Atmospheric Research, 
+// Copyright 2002-2017, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -41,12 +41,12 @@ namespace ESMCI {
 
   void ESMCI_GridToMesh(const Grid &grid_, int staggerLoc, 
                       const std::vector<ESMCI::Array*> &arrays, 
-                      ESMCI::InterfaceInt *maskValuesArg,
+                      ESMCI::InterArray<int> *maskValuesArg,
                       int *regridConserve, Mesh **out_meshpp, int *rc);
 
 #if 0
   void ESMCI_GridToMesh(const Grid &grid_, int staggerLoc, ESMCI::Mesh &mesh, 
-                        const std::vector<ESMCI::Array*> &arrays, ESMCI::InterfaceInt *maskValuesArg,
+                        const std::vector<ESMCI::Array*> &arrays, ESMCI::InterArray<int> *maskValuesArg,
                         int *regridConserve);
 
   // Only works for scalar data right now, but would be pretty easy to add more dimensions 

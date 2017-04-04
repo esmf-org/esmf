@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2016, University Corporation for Atmospheric Research,
+! Copyright 2002-2017, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -40,7 +40,7 @@ program ESMF_FieldIOUTest
   type(ESMF_VM):: vm
   type(ESMF_ArraySpec):: arrayspec
   type(ESMF_Field) :: field_w, field_r, field_t, field_s, field_tr, field_sr, field
-  type(ESMF_Field) :: field_w_nohalo
+  type(ESMF_Field) :: field_w_nohalo, field_multi
   type(ESMF_Field) :: field_gw, field_gr, field_gr2, field_gr3
   type(ESMF_Field) :: field_r2de, field_w2de
   real(ESMF_KIND_R8), pointer :: Farray_w(:,:) => null (), Farray_r(:,:) => null ()
@@ -53,13 +53,19 @@ program ESMF_FieldIOUTest
   ! field_s---Farray_sw; field_sr---Farray_sr
   type(ESMF_Grid) :: grid, grid_g, grid_2DE
 
+  type(ESMF_Field) :: elem_field
+  type(ESMF_DistGrid) :: elem_dg
+  type(ESMF_Mesh) :: elem_mesh
+
   real(ESMF_KIND_R8), pointer :: Farray_DE0_w(:,:) => null (), Farray_DE0_r(:,:) => null ()
   real(ESMF_KIND_R8), pointer :: Farray_DE1_w(:,:) => null (), Farray_DE1_r(:,:) => null ()
 
   integer                                 :: rc
   integer, allocatable :: computationalLBound(:),computationalUBound(:)
   integer, allocatable :: exclusiveLBound(:), exclusiveUBound(:)
+  integer, allocatable :: arbseqlist(:)
   integer      :: localPet, petCount, tlb(2), tub(2)
+  integer :: elem_tlb(1), elem_tub(1), elem_tc(1)
   integer :: i,j, t, endtime, k
   real(ESMF_KIND_R8) :: Maxvalue, diff
 
@@ -218,6 +224,31 @@ program ESMF_FieldIOUTest
   call ESMF_Test((rc==ESMF_RC_LIB_NOT_PRESENT), name, failMsg, result, ESMF_SRCLINE)
 #endif
 
+!------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  ! Create Field without halo region
+  field_multi=ESMF_FieldCreate(grid, arrayspec=arrayspec, &
+           name="temperature2",  rc=rc)
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  write(name, *) "Create a field from grid and fortran dummy array without halo"
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+!------------------------------------------------------------------------
+
+!------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  ! Write multiple Fields with same dimensions to a file
+  call ESMF_FieldWrite(field_w, fileName="field2.nc", &
+       dimLabels=(/ "temperature_x", "temperature_y" /), rc=rc)
+  call ESMF_FieldWrite(field_multi, fileName="field2.nc", &
+       dimLabels=(/ "temperature_x", "temperature_y" /), rc=rc)
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  write(name, *) "Write multiple Fields with same dimensions to a file"
+#if (defined ESMF_PIO && ( defined ESMF_NETCDF || defined ESMF_PNETCDF))
+  call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+#else
+  write(failMsg, *) "Did not return ESMF_RC_LIB_NOT_PRESENT"
+  call ESMF_Test((rc==ESMF_RC_LIB_NOT_PRESENT), name, failMsg, result, ESMF_SRCLINE)
+#endif
 !------------------------------------------------------------------------
 
 !
@@ -916,6 +947,69 @@ program ESMF_FieldIOUTest
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_GridDestroy(grid_2DE, rc=rc)
   call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+!------------------------------------------------------------------------
+! Mesh Write test
+!------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  allocate(arbseqlist(8))
+  do i = 1, 8
+    arbseqlist(i)=localPet+1+4*(i-1)
+  enddo
+      !print *, lpet, arbseqlist
+
+  elem_dg = ESMF_DistGridCreate(arbseqindexlist=arbseqlist, rc=rc)
+  write(failMsg, *) ""
+  write(name, *) "Create a 1D arbitrarily distributed distgrid"
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+  !------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  elem_mesh = ESMF_MeshCreate(elem_dg, rc=rc)
+  write(failMsg, *) ""
+  write(name, *) "Create a mesh on the 1D elemental distgrid"
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+  !------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  call ESMF_MeshGetFieldBounds(elem_mesh, &
+      totalLBound=elem_tlb, totalUBound=elem_tub, &
+      totalCount=elem_tc, rc=rc)
+  write(failMsg, *) ""
+  write(name, *) "Get Field Bounds based on elem_mesh"
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+  !------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  elem_field = ESMF_FieldCreate(elem_mesh, typekind=ESMF_TYPEKIND_R8, &
+      meshloc=ESMF_MESHLOC_ELEMENT, &
+      ungriddedLBound=(/1/), ungriddedUBound=(/10/), &
+      gridToFieldMap=(/2/),  &
+      rc=rc)
+  write(failMsg, *) ""
+  write(name, *) "Create a Field on the 1D mesh"
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+  deallocate(arbseqlist)
+
+#if 0
+  call ESMF_FieldPrint (elem_field)
+  !------------------------------------------------------------------------
+  !NEX_xxxUTest_Multi_Proc_Only
+  call ESMF_FieldWrite (elem_field, fileName='elem_mesh.nc',  &
+      status=ESMF_FILESTATUS_REPLACE, rc=rc)
+  write(failMsg, *) ""
+  write(name, *) "Write a Field containing the 1D mesh"
+#if (defined ESMF_PIO && ( defined ESMF_NETCDF || defined ESMF_PNETCDF))
+  call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+#else
+  write(failMsg, *) "Did not return ESMF_RC_LIB_NOT_PRESENT"
+  call ESMF_Test((rc==ESMF_RC_LIB_NOT_PRESENT), name, failMsg, result, ESMF_SRCLINE)
+#endif
+#endif
+
 
 !------------------------------------------------------------------------
 ! Destroy all Fields and cleanup

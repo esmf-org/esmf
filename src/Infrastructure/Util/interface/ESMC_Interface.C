@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2016, University Corporation for Atmospheric Research, 
+// Copyright 2002-2017, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -40,18 +40,35 @@ static const char *const version = "$Id$";
 
 extern "C" {
 
-int ESMC_InterfaceIntSet(ESMC_InterfaceInt *interfaceIntArg,
+int ESMC_InterArrayIntSet(ESMC_InterArrayInt *interArrayIntArg,
   int *arrayArg, int lenArg){
   // initialize return code; assume routine not implemented
   int rc = ESMC_RC_NOT_IMPL;
 
-  ESMCI::InterfaceInt *ii = ((ESMCI::InterfaceInt *)(interfaceIntArg->shallowMem));
+  ESMCI::InterArray<int> *ii = 
+    ((ESMCI::InterArray<int> *)(interArrayIntArg->shallowMem));
   
   ii->set(arrayArg, lenArg);
 
   // return successfully
   rc = ESMF_SUCCESS;
   return rc;
+}
+
+int ESMC_InterArrayIntNDSet(ESMC_InterArrayInt *interArrayIntArg,
+  int *arrayArg, int dimArg, const int *lenArg){
+  // initialize return code; assume routine not implemented
+  int rc = ESMC_RC_NOT_IMPL;
+
+  ESMCI::InterArray<int> *ii =
+    ((ESMCI::InterArray<int> *)(interArrayIntArg->shallowMem));
+
+  ii->set(arrayArg, dimArg, lenArg);
+
+  // return successfully
+  rc = ESMF_SUCCESS;
+  return rc;
+
 }
 
 }; // extern "C"

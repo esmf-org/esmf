@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2016, University Corporation for Atmospheric Research,
+! Copyright 2002-2017, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -197,6 +197,8 @@ program ESMF_NUOPC_UTest
   character(len=120)      :: tempString
   type(NUOPC_FreeFormat)  :: runSeqFF, attrFF, fdFF
   character(len=NUOPC_FreeFormatLen)  :: runSequence(5)
+  real(ESMF_KIND_R8), allocatable :: factorList(:)
+  integer, allocatable            :: factorIndexList(:,:)
 
 
 !-------------------------------------------------------------------------------
@@ -639,10 +641,10 @@ program ESMF_NUOPC_UTest
   !------------------------------------------------------------------------
   !NEX_UTest
   write(name, *) "NUOPC_FieldDictionaryMatchSyno() (non existing entry1) Test"
-  write(failMsg, *) "Did return ESMF_SUCCESS"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
   flag = NUOPC_FieldDictionaryMatchSyno("abcd_adoption_level", &
     "esmf_adoption_level", rc=rc)
-  call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   !------------------------------------------------------------------------
 
   !------------------------------------------------------------------------
@@ -957,6 +959,22 @@ program ESMF_NUOPC_UTest
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call NUOPC_Write(stateA, fieldNameList=(/"sea_surface_temperature"/), &
     status=ESMF_FILESTATUS_REPLACE, relaxedflag=.true., rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "NUOPC_Write() SCRIP weight file Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  allocate(factorIndexList(2, 2*localPet), factorList(2*localPet))
+  do i=1, 2*localPet
+    factorIndexList(1,i) = localPet*10  + i  ! src index
+    factorIndexList(2,i) = localPet*100 + i  ! dst index
+    factorList(i)        = real(i*i, ESMF_KIND_R8)/100.d0  ! factor
+  enddo
+  call NUOPC_Write(factorList=factorList, &
+    factorIndexList=factorIndexList, fileName="test_scrip.nc", &
+    relaxedflag=.true., rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   !------------------------------------------------------------------------
 

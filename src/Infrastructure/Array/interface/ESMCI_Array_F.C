@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2016, University Corporation for Atmospheric Research, 
+// Copyright 2002-2017, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -18,6 +18,7 @@
 // INCLUDES
 //------------------------------------------------------------------------------
 #include <string>
+#include <utility>
 
 #include "ESMCI_Macros.h"
 #include "ESMCI_VM.h"
@@ -48,14 +49,15 @@ extern "C" {
     ESMCI::LocalArray **larrayList, int *larrayCount,
     ESMCI::DistGrid **distgrid,
     ESMCI::CopyFlag *copyflag,
-    ESMCI::InterfaceInt *distgridToArrayMap,
-    ESMCI::InterfaceInt *computationalEdgeLWidthArg,
-    ESMCI::InterfaceInt *computationalEdgeUWidthArg,
-    ESMCI::InterfaceInt *computationalLWidthArg,
-    ESMCI::InterfaceInt *computationalUWidthArg, 
-    ESMCI::InterfaceInt *totalLWidthArg, ESMCI::InterfaceInt *totalUWidthArg,
-    ESMC_IndexFlag *indexflag, ESMCI::InterfaceInt *undistLBoundArg,
-    ESMCI::InterfaceInt *undistUBoundArg,
+    ESMCI::InterArray<int> *distgridToArrayMap,
+    ESMCI::InterArray<int> *computationalEdgeLWidthArg,
+    ESMCI::InterArray<int> *computationalEdgeUWidthArg,
+    ESMCI::InterArray<int> *computationalLWidthArg,
+    ESMCI::InterArray<int> *computationalUWidthArg, 
+    ESMCI::InterArray<int> *totalLWidthArg,
+    ESMCI::InterArray<int> *totalUWidthArg,
+    ESMC_IndexFlag *indexflag, ESMCI::InterArray<int> *undistLBoundArg,
+    ESMCI::InterArray<int> *undistUBoundArg,
     char *name, int *len_name, int *rc,
     ESMCI_FortranStrLenArg name_l){
 #undef  ESMC_METHOD
@@ -84,14 +86,15 @@ extern "C" {
   
   void FTN_X(c_esmc_arraycreateallocate)(ESMCI::Array **ptr, 
     ESMCI::ArraySpec *arrayspec, ESMCI::DistGrid **distgrid,
-    ESMCI::InterfaceInt *distgridToArrayMap,
-    ESMCI::InterfaceInt *computationalEdgeLWidthArg,
-    ESMCI::InterfaceInt *computationalEdgeUWidthArg,
-    ESMCI::InterfaceInt *computationalLWidthArg,
-    ESMCI::InterfaceInt *computationalUWidthArg, 
-    ESMCI::InterfaceInt *totalLWidthArg, ESMCI::InterfaceInt *totalUWidthArg,
-    ESMC_IndexFlag *indexflag, ESMCI::InterfaceInt *undistLBoundArg,
-    ESMCI::InterfaceInt *undistUBoundArg,
+    ESMCI::InterArray<int> *distgridToArrayMap,
+    ESMCI::InterArray<int> *computationalEdgeLWidthArg,
+    ESMCI::InterArray<int> *computationalEdgeUWidthArg,
+    ESMCI::InterArray<int> *computationalLWidthArg,
+    ESMCI::InterArray<int> *computationalUWidthArg, 
+    ESMCI::InterArray<int> *totalLWidthArg,
+    ESMCI::InterArray<int> *totalUWidthArg,
+    ESMC_IndexFlag *indexflag, ESMCI::InterArray<int> *undistLBoundArg,
+    ESMCI::InterArray<int> *undistUBoundArg,
     char *name, int *len_name, ESMCI::VM **vm, int *rc,
     ESMCI_FortranStrLenArg name_l){
 #undef  ESMC_METHOD
@@ -182,19 +185,21 @@ extern "C" {
     int *len_localArrayList, ESMCI::DistGrid **distgrid,
     ESMCI::DELayout **delayout,
     ESMC_IndexFlag *indexflag, 
-    ESMCI::InterfaceInt *distgridToArrayMap,
-    ESMCI::InterfaceInt *distgridToPackedArrayMap,
-    ESMCI::InterfaceInt *arrayToDistGridMap,
-    ESMCI::InterfaceInt *undistLBound,
-    ESMCI::InterfaceInt *undistUBound,
-    ESMCI::InterfaceInt *exclusiveLBound,
-    ESMCI::InterfaceInt *exclusiveUBound,
-    ESMCI::InterfaceInt *computationalLBound,
-    ESMCI::InterfaceInt *computationalUBound,
-    ESMCI::InterfaceInt *totalLBound, ESMCI::InterfaceInt *totalUBound,
-    ESMCI::InterfaceInt *computationalLWidth,
-    ESMCI::InterfaceInt *computationalUWidth,
-    ESMCI::InterfaceInt *totalLWidth, ESMCI::InterfaceInt *totalUWidth,
+    ESMCI::InterArray<int> *distgridToArrayMap,
+    ESMCI::InterArray<int> *distgridToPackedArrayMap,
+    ESMCI::InterArray<int> *arrayToDistGridMap,
+    ESMCI::InterArray<int> *undistLBound,
+    ESMCI::InterArray<int> *undistUBound,
+    ESMCI::InterArray<int> *exclusiveLBound,
+    ESMCI::InterArray<int> *exclusiveUBound,
+    ESMCI::InterArray<int> *computationalLBound,
+    ESMCI::InterArray<int> *computationalUBound,
+    ESMCI::InterArray<int> *totalLBound,
+    ESMCI::InterArray<int> *totalUBound,
+    ESMCI::InterArray<int> *computationalLWidth,
+    ESMCI::InterArray<int> *computationalUWidth,
+    ESMCI::InterArray<int> *totalLWidth,
+    ESMCI::InterArray<int> *totalUWidth,
     int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_arrayget()"
@@ -220,7 +225,7 @@ extern "C" {
       // opt_localArrayList was provided
       if (*len_localArrayList < localDeCount){
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
-          "- opt_localArrayList must provide localDeCount elements",
+          "opt_localArrayList must provide localDeCount elements",
           ESMC_CONTEXT, rc);
         return;
       }
@@ -233,12 +238,12 @@ extern "C" {
       // distgridToArrayMap was provided -> do some error checking
       if ((distgridToArrayMap)->dimCount != 1){
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
-          "- distgridToArrayMap array must be of rank 1", ESMC_CONTEXT, rc);
+          "distgridToArrayMap array must be of rank 1", ESMC_CONTEXT, rc);
         return;
       }
       if ((distgridToArrayMap)->extent[0] < dimCount){
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
-          "- 1st dimension of distgridToArrayMap array must be of size "
+          "1st dimension of distgridToArrayMap array must be of size "
           "'dimCount'", ESMC_CONTEXT, rc);
         return;
       }
@@ -251,13 +256,13 @@ extern "C" {
       // distgridToPackedArrayMap was provided -> do some error checking
       if ((distgridToPackedArrayMap)->dimCount != 1){
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
-          "- distgridToPackedArrayMap array must be of rank 1", ESMC_CONTEXT,
+          "distgridToPackedArrayMap array must be of rank 1", ESMC_CONTEXT,
           rc);
         return;
       }
       if ((distgridToPackedArrayMap)->extent[0] < dimCount){
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
-          "- 1st dimension of distgridToPackedArrayMap array must be of size "
+          "1st dimension of distgridToPackedArrayMap array must be of size "
           "'dimCount'", ESMC_CONTEXT, rc);
         return;
       }
@@ -270,12 +275,12 @@ extern "C" {
       // arrayToDistGridMap was provided -> do some error checking
       if ((arrayToDistGridMap)->dimCount != 1){
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
-          "- arrayToDistGridMap array must be of rank 1", ESMC_CONTEXT, rc);
+          "arrayToDistGridMap array must be of rank 1", ESMC_CONTEXT, rc);
         return;
       }
       if ((arrayToDistGridMap)->extent[0] < (*ptr)->getRank()){
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
-          "- 1st dimension of arrayToDistGridMap array must be of size 'rank'",
+          "1st dimension of arrayToDistGridMap array must be of size 'rank'",
           ESMC_CONTEXT, rc);
         return;
       }
@@ -289,12 +294,12 @@ extern "C" {
       //  undistLBound was provided -> do some error checking
       if ((undistLBound)->dimCount != 1){
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
-          "- undistLBound array must be of rank 1", ESMC_CONTEXT, rc);
+          "undistLBound array must be of rank 1", ESMC_CONTEXT, rc);
         return;
       }
       if ((undistLBound)->extent[0] < (*ptr)->getTensorCount()){
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
-          "- undistLBound array must at least be of size tensorCount", 
+          "undistLBound array must at least be of size tensorCount", 
           ESMC_CONTEXT, rc);
         return;
       }
@@ -309,12 +314,12 @@ extern "C" {
       //  undistUBound was provided -> do some error checking
       if ((undistUBound)->dimCount != 1){
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
-          "- undistUBound array must be of rank 1", ESMC_CONTEXT, rc);
+          "undistUBound array must be of rank 1", ESMC_CONTEXT, rc);
         return;
       }
       if ((undistUBound)->extent[0] < (*ptr)->getTensorCount()){
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
-          "- undistUBound array must at least be of size tensorCount", 
+          "undistUBound array must at least be of size tensorCount", 
           ESMC_CONTEXT, rc);
         return;
       }
@@ -330,18 +335,18 @@ extern "C" {
       // exclusiveLBound was provided -> do some error checking
       if ((exclusiveLBound)->dimCount != 2){
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
-          "- exclusiveLBound array must be of rank 2", ESMC_CONTEXT, rc);
+          "exclusiveLBound array must be of rank 2", ESMC_CONTEXT, rc);
         return;
       }
       if ((exclusiveLBound)->extent[0] < redDimCount){
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
-          "- 1st dimension of exclusiveLBound must be of size 'dimCount'",
+          "1st dimension of exclusiveLBound must be of size 'dimCount'",
           ESMC_CONTEXT, rc);
         return;
       }
       if ((exclusiveLBound)->extent[1] < localDeCount){
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
-          "- 2nd dimension of exclusiveLBound must be of size 'localDeCount'",
+          "2nd dimension of exclusiveLBound must be of size 'localDeCount'",
           ESMC_CONTEXT, rc);
         return;
       }
@@ -359,18 +364,18 @@ extern "C" {
       // exclusiveUBound was provided -> do some error checking
       if ((exclusiveUBound)->dimCount != 2){
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
-          "- exclusiveUBound array must be of rank 2", ESMC_CONTEXT, rc);
+          "exclusiveUBound array must be of rank 2", ESMC_CONTEXT, rc);
         return;
       }
       if ((exclusiveUBound)->extent[0] < redDimCount){
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
-          "- 1st dimension of exclusiveUBound must be of size 'dimCount'", 
+          "1st dimension of exclusiveUBound must be of size 'dimCount'", 
           ESMC_CONTEXT, rc);
         return;
       }
       if ((exclusiveUBound)->extent[1] < localDeCount){
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
-          "- 2nd dimension of exclusiveUBound must be of size 'localDeCount'",
+          "2nd dimension of exclusiveUBound must be of size 'localDeCount'",
           ESMC_CONTEXT, rc);
         return;
       }
@@ -388,18 +393,18 @@ extern "C" {
       // computationalLBound was provided -> do some error checking
       if ((computationalLBound)->dimCount != 2){
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
-          "- computationalLBound array must be of rank 2", ESMC_CONTEXT, rc);
+          "computationalLBound array must be of rank 2", ESMC_CONTEXT, rc);
         return;
       }
       if ((computationalLBound)->extent[0] < redDimCount){
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
-          "- 1st dim of computationalLBound must be of size 'dimCount'", 
+          "1st dim of computationalLBound must be of size 'dimCount'", 
           ESMC_CONTEXT, rc);
         return;
       }
       if ((computationalLBound)->extent[1] < localDeCount){
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
-          "- 2nd dim of computationalLBound must be of size 'localDeCount'", 
+          "2nd dim of computationalLBound must be of size 'localDeCount'", 
           ESMC_CONTEXT, rc);
         return;
       }
@@ -419,18 +424,18 @@ extern "C" {
       // computationalUBound was provided -> do some error checking
       if ((computationalUBound)->dimCount != 2){
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
-          "- computationalUBound array must be of rank 2", ESMC_CONTEXT, rc);
+          "computationalUBound array must be of rank 2", ESMC_CONTEXT, rc);
         return;
       }
       if ((computationalUBound)->extent[0] < redDimCount){
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
-          "- 1st dim of computationalUBound must be of size 'dimCount'", 
+          "1st dim of computationalUBound must be of size 'dimCount'", 
           ESMC_CONTEXT, rc);
         return;
       }
       if ((computationalUBound)->extent[1] < localDeCount){
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
-          "- 2nd dim of computationalUBound must be of size 'localDeCount'",
+          "2nd dim of computationalUBound must be of size 'localDeCount'",
           ESMC_CONTEXT, rc);
         return;
       }
@@ -450,18 +455,18 @@ extern "C" {
       // totalLBound was provided -> do some error checking
       if ((totalLBound)->dimCount != 2){
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
-          "- totalLBound array must be of rank 2", ESMC_CONTEXT, rc);
+          "totalLBound array must be of rank 2", ESMC_CONTEXT, rc);
         return;
       }
       if ((totalLBound)->extent[0] < redDimCount){
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
-          "- 1st dimension of totalLBound must be of size 'dimCount'", 
+          "1st dimension of totalLBound must be of size 'dimCount'", 
           ESMC_CONTEXT, rc);
         return;
       }
       if ((totalLBound)->extent[1] < localDeCount){
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
-          "- 2nd dimension of totalLBound must be of size 'localDeCount'",
+          "2nd dimension of totalLBound must be of size 'localDeCount'",
           ESMC_CONTEXT, rc);
         return;
       }
@@ -479,18 +484,18 @@ extern "C" {
       // totalUBound was provided -> do some error checking
       if ((totalUBound)->dimCount != 2){
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
-          "- totalUBound array must be of rank 2", ESMC_CONTEXT, rc);
+          "totalUBound array must be of rank 2", ESMC_CONTEXT, rc);
         return;
       }
       if ((totalUBound)->extent[0] < redDimCount){
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
-          "- 1st dimension of totalUBound must be of size 'dimCount'", 
+          "1st dimension of totalUBound must be of size 'dimCount'", 
           ESMC_CONTEXT, rc);
         return;
       }
       if ((totalUBound)->extent[1] < localDeCount){
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
-          "- 2nd dimension of totalUBound must be of size 'localDeCount'",
+          "2nd dimension of totalUBound must be of size 'localDeCount'",
           ESMC_CONTEXT, rc);
         return;
       }
@@ -508,18 +513,18 @@ extern "C" {
       // computationalLWidth was provided -> do some error checking
       if ((computationalLWidth)->dimCount != 2){
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
-          "- computationalLWidth array must be of rank 2", ESMC_CONTEXT, rc);
+          "computationalLWidth array must be of rank 2", ESMC_CONTEXT, rc);
         return;
       }
       if ((computationalLWidth)->extent[0] < redDimCount){
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
-          "- 1st dimension of computationalLWidth must be of size 'dimCount'",
+          "1st dimension of computationalLWidth must be of size 'dimCount'",
           ESMC_CONTEXT, rc);
         return;
       }
       if ((computationalLWidth)->extent[1] < localDeCount){
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
-          "- 2nd dimension of computationalLWidth must be of size"
+          "2nd dimension of computationalLWidth must be of size"
           " 'localDeCount'", ESMC_CONTEXT, rc);
         return;
       }
@@ -535,18 +540,18 @@ extern "C" {
       // computationalUWidth was provided -> do some error checking
       if ((computationalUWidth)->dimCount != 2){
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
-          "- computationalUWidth array must be of rank 2", ESMC_CONTEXT, rc);
+          "computationalUWidth array must be of rank 2", ESMC_CONTEXT, rc);
         return;
       }
       if ((computationalUWidth)->extent[0] < redDimCount){
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
-          "- 1st dimension of computationalUWidth must be of size 'dimCount'",
+          "1st dimension of computationalUWidth must be of size 'dimCount'",
           ESMC_CONTEXT, rc);
         return;
       }
       if ((computationalUWidth)->extent[1] < localDeCount){
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
-          "- 2nd dimension of computationalUWidth must be of size"
+          "2nd dimension of computationalUWidth must be of size"
           " 'localDeCount'", ESMC_CONTEXT, rc);
         return;
       }
@@ -562,18 +567,18 @@ extern "C" {
       // totalLWidth was provided -> do some error checking
       if ((totalLWidth)->dimCount != 2){
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
-          "- totalLWidth array must be of rank 2", ESMC_CONTEXT, rc);
+          "totalLWidth array must be of rank 2", ESMC_CONTEXT, rc);
         return;
       }
       if ((totalLWidth)->extent[0] < redDimCount){
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
-          "- 1st dimension of totalLWidth must be of size 'dimCount'",
+          "1st dimension of totalLWidth must be of size 'dimCount'",
           ESMC_CONTEXT, rc);
         return;
       }
       if ((totalLWidth)->extent[1] < localDeCount){
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
-          "- 2nd dimension of totalLWidth must be of size"
+          "2nd dimension of totalLWidth must be of size"
           " 'localDeCount'", ESMC_CONTEXT, rc);
         return;
       }
@@ -589,18 +594,18 @@ extern "C" {
       // totalUWidth was provided -> do some error checking
       if ((totalUWidth)->dimCount != 2){
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
-          "- totalUWidth array must be of rank 2", ESMC_CONTEXT, rc);
+          "totalUWidth array must be of rank 2", ESMC_CONTEXT, rc);
         return;
       }
       if ((totalUWidth)->extent[0] < redDimCount){
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
-          "- 1st dimension of totalUWidth must be of size 'dimCount'",
+          "1st dimension of totalUWidth must be of size 'dimCount'",
           ESMC_CONTEXT, rc);
         return;
       }
       if ((totalUWidth)->extent[1] < localDeCount){
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
-          "- 2nd dimension of totalUWidth must be of size"
+          "2nd dimension of totalUWidth must be of size"
           " 'localDeCount'", ESMC_CONTEXT, rc);
         return;
       }
@@ -627,7 +632,7 @@ extern "C" {
     // check localDe
     if ((*localDe < 0) || (*localDe >= localDeCount)){
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
-        "- localDe is out of range.", ESMC_CONTEXT, rc);
+        "localDe is out of range.", ESMC_CONTEXT, rc);
       return;
     }
     // get the LocalArray for localDe
@@ -640,13 +645,15 @@ extern "C" {
                                 char *file,
                                 char *variableName, int *len_variableName,
                                 char *dimensionLabels, int *size_dimLabels,
+                                char *variableAtts, int *size_varAtts,
                                 ESMC_Logical *opt_overwriteflag,
                                 ESMC_FileStatus_Flag *status,
                                 int *timeslice, ESMC_IOFmt_Flag *iofmt,
                                 int *rc,
                                 ESMCI_FortranStrLenArg file_l,
                                 ESMCI_FortranStrLenArg varname_l,
-                                ESMCI_FortranStrLenArg dimlabels_l) {
+                                ESMCI_FortranStrLenArg dimlabels_l,
+                                ESMCI_FortranStrLenArg varatts_l) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_arraywrite()"
     bool overwriteflag;
@@ -677,9 +684,25 @@ extern "C" {
       }
     }
 
+    // form variable attributes into name/value pairs
+    vector<pair<string, string> > varAttPairs;
+    int n_varatts = *size_varAtts;
+    if (n_varatts > 0) {
+      varAttPairs.reserve (n_varatts);
+      char *cp0 = variableAtts;
+      char *cp1 = variableAtts + n_varatts*varatts_l;
+      for (int i=0; i<n_varatts; i++) {
+        varAttPairs.push_back(std::make_pair (
+          string (cp0, ESMC_F90lentrim (cp0, varatts_l)),
+          string (cp1, ESMC_F90lentrim (cp1, varatts_l)) ));
+        cp0 += varatts_l;
+        cp1 += varatts_l;
+      }
+    }
+
     overwriteflag = (*opt_overwriteflag == ESMF_TRUE);
     // Call into the actual C++ method wrapped inside LogErr handling
-    localrc = (*array)->write(fileName, varName, dimLabels,
+    localrc = (*array)->write(fileName, varName, dimLabels, varAttPairs,
                               &overwriteflag, status, timeslice, iofmt);
     ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       ESMC_NOT_PRESENT_FILTER(rc));
@@ -742,7 +765,7 @@ extern "C" {
   void FTN_X(c_esmc_arrayhalostore)(ESMCI::Array **array,
     ESMCI::RouteHandle **routehandle,
     ESMC_HaloStartRegionFlag *halostartregionflag,
-    ESMCI::InterfaceInt *haloLDepth, ESMCI::InterfaceInt *haloUDepth,
+    ESMCI::InterArray<int> *haloLDepth, ESMCI::InterArray<int> *haloUDepth,
     int *pipelineDepth, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_arrayhalostore()"
@@ -793,7 +816,8 @@ extern "C" {
   
   void FTN_X(c_esmc_arrayrediststore)(ESMCI::Array **srcArray,
     ESMCI::Array **dstArray, ESMCI::RouteHandle **routehandle, 
-    ESMCI::InterfaceInt *srcToDstTransposeMap, ESMC_TypeKind_Flag *typekind,
+    ESMCI::InterArray<int> *srcToDstTransposeMap,
+    ESMC_TypeKind_Flag *typekind,
     void *factor, ESMC_Logical *ignoreUnmatched, int *pipelineDepth, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_arrayrediststore()"
@@ -813,7 +837,8 @@ extern "C" {
 
   void FTN_X(c_esmc_arrayrediststorenf)(ESMCI::Array **srcArray,
     ESMCI::Array **dstArray, ESMCI::RouteHandle **routehandle, 
-    ESMCI::InterfaceInt *srcToDstTransposeMap, ESMC_Logical *ignoreUnmatched,
+    ESMCI::InterArray<int> *srcToDstTransposeMap,
+    ESMC_Logical *ignoreUnmatched,
     int *pipelineDepth, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_arrayrediststorenf()"
@@ -870,7 +895,7 @@ extern "C" {
   void FTN_X(c_esmc_arraysmmstore)(ESMCI::Array **srcArray,
     ESMCI::Array **dstArray, ESMCI::RouteHandle **routehandle, 
     ESMC_TypeKind_Flag *typekindFactors, void *factorList, int *factorListCount,
-    ESMCI::InterfaceInt *factorIndexList, 
+    ESMCI::InterArray<int> *factorIndexList, 
     ESMC_Logical *ignoreUnmatched,
     int *srcTermProcessing, int *pipelineDepth, int *rc){
 #undef  ESMC_METHOD
@@ -885,24 +910,24 @@ extern "C" {
       // must provide valid factorList and factorIndexList args
       if (!present(factorIndexList)){
         ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
-          "- Not a valid pointer to factorIndexList array", ESMC_CONTEXT, rc);
+          "Not a valid pointer to factorIndexList array", ESMC_CONTEXT, rc);
         return;
       }
       if ((factorIndexList)->dimCount != 2){
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
-          "- factorIndexList array must be of rank 2", ESMC_CONTEXT, rc);
+          "factorIndexList array must be of rank 2", ESMC_CONTEXT, rc);
         return;
       }
       if ((factorIndexList)->extent[0] != 2 && 
         (factorIndexList)->extent[0] != 4){
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
-          "- 1st dimension of factorIndexList array must be of size 2 or 4",
+          "1st dimension of factorIndexList array must be of size 2 or 4",
           ESMC_CONTEXT, rc);
         return;
       }
       if ((factorIndexList)->extent[1] != *factorListCount){
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
-          "- 2nd dimension of factorIndexList does not match factorListCount",
+          "2nd dimension of factorIndexList does not match factorListCount",
           ESMC_CONTEXT, rc);
         return;
       }
@@ -912,11 +937,12 @@ extern "C" {
     if (ESMC_NOT_PRESENT_FILTER(ignoreUnmatched) != ESMC_NULL_POINTER)
       if (*ignoreUnmatched == ESMF_TRUE) ignoreUnmatchedOpt = true;
     // prepare SparseMatrix vector
-    vector<ESMCI::SparseMatrix> sparseMatrix;
+    vector<ESMCI::SparseMatrix<ESMC_I4,ESMC_I4> > sparseMatrix;
     int srcN = (factorIndexList)->extent[0]/2;
     int dstN = (factorIndexList)->extent[0]/2;
-    sparseMatrix.push_back(ESMCI::SparseMatrix(*typekindFactors, factorList,
-      *factorListCount, srcN, dstN, (factorIndexList)->array));
+    sparseMatrix.push_back(ESMCI::SparseMatrix<ESMC_I4,ESMC_I4>(
+      *typekindFactors, factorList, *factorListCount, srcN, dstN, 
+      (factorIndexList)->array));
     // Call into the actual C++ method wrapped inside LogErr handling
     if (ESMC_LogDefault.MsgFoundError(ESMCI::Array::sparseMatMulStore(
       *srcArray, *dstArray, routehandle, sparseMatrix, false, ignoreUnmatchedOpt,
@@ -936,7 +962,7 @@ extern "C" {
       return;
     }catch(...){
       ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-        "- Caught exception", ESMC_CONTEXT, rc);
+        "Caught exception", ESMC_CONTEXT, rc);
       return;
     }
   
@@ -957,7 +983,7 @@ extern "C" {
     if (ESMC_NOT_PRESENT_FILTER(ignoreUnmatched) != ESMC_NULL_POINTER)
       if (*ignoreUnmatched == ESMF_TRUE) ignoreUnmatchedOpt = true;
     // prepare empty SparseMatrix vector
-    vector<ESMCI::SparseMatrix> sparseMatrix;
+    vector<ESMCI::SparseMatrix<ESMC_I4,ESMC_I4> > sparseMatrix;
     // Call into the actual C++ method wrapped inside LogErr handling
     ESMC_LogDefault.MsgFoundError(ESMCI::Array::sparseMatMulStore(
       *srcArray, *dstArray, routehandle, sparseMatrix, false, ignoreUnmatchedOpt,
@@ -1079,8 +1105,8 @@ extern "C" {
   }
   
   void FTN_X(c_esmc_arrayset)(ESMCI::Array **array,
-    ESMCI::InterfaceInt *computationalLWidthArg,
-    ESMCI::InterfaceInt *computationalUWidthArg, int *rc){
+    ESMCI::InterArray<int> *computationalLWidthArg,
+    ESMCI::InterArray<int> *computationalUWidthArg, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_arrayset()"
     // Initialize return code; assume routine not implemented
@@ -1098,7 +1124,20 @@ extern "C" {
   }
   
   void FTN_X(c_esmc_arraysetplocalde)(ESMCI::Array **array,
-    int *localDe, ESMCI::InterfaceInt *rimSeqIndexArg, int *rc){
+    int *localDe, ESMCI::InterArray<ESMC_I4> *rimSeqIndexArg, int *rc){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_arraysetplocalde()"
+    // Initialize return code; assume routine not implemented
+    if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+    // Call into the C++ method wrapped inside LogErr handling
+    ESMC_LogDefault.MsgFoundError((*array)->setRimSeqIndex(*localDe,
+      rimSeqIndexArg),
+      ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      ESMC_NOT_PRESENT_FILTER(rc));
+  }
+  
+  void FTN_X(c_esmc_arraysetplocaldei8)(ESMCI::Array **array,
+    int *localDe, ESMCI::InterArray<ESMC_I8> *rimSeqIndexArg, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_arraysetplocalde()"
     // Initialize return code; assume routine not implemented

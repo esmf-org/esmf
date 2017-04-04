@@ -249,6 +249,41 @@ class TestGrid(TestBase):
                 "The following combinations of Grid parameters failed to create a proper Grid: " + str(fail))
 
     @attr('serial')
+    def test_grid_create_cubed_sphere(self):
+        # keywords = dict(
+            # periodic specifies all valid combos of [num_peri_dims, periodic_dim, pole_dim]
+            # periodic=[[None, None, None], [None, None, 0], [None, None, 1], [None, None, 2],
+            #           [0, None, None], [0, None, 0], [0, None, 1], [0, None, 2],
+            #           [1, None, None], [1, 0, 1], [1, 0, 2], [1, 1, 0], [1, 1, 2], [1, 2, 0], [1, 2, 1]],
+            # staggerloc=[None, StaggerLoc.CENTER_VCENTER, StaggerLoc.EDGE1_VCENTER, StaggerLoc.EDGE2_VCENTER,
+            #             StaggerLoc.CORNER_VCENTER, StaggerLoc.CENTER_VFACE, StaggerLoc.EDGE1_VFACE,
+            #             StaggerLoc.EDGE2_VFACE, StaggerLoc.CORNER_VFACE],
+            # coord_sys=[None, CoordSys.CART, CoordSys.SPH_DEG, CoordSys.SPH_RAD],
+            # typekind=[None, TypeKind.I4, TypeKind.I8, TypeKind.R4, TypeKind.R8])
+
+            regDecompPTile = np.array([[2,2],[2,2],[1,2],[1,2],[1,2],[1,2]], dtype=np.int32)
+            # decompFlagPTile = np.array([[DecompFlag.DEFAULT, 1],
+            #                           [DecompFlag.BALANCED, 2],
+            #                           [DecompFlag.RESTFIRST, 3],
+            #                           [DecompFlag.RESTLAST, 4],
+            #                           [DecompFlag.CYCLIC, 5],
+            #                           [DecompFlag.DEFAULT, 6]], dtype=np.int32)
+            # deLabelList = np.array([11,12,13,14,15,16], dtype=np.int32)
+
+            grid = Grid(tilesize = 45, regDecompPTile = regDecompPTile,
+                                     #decompFlagPTile = decompFlagPTile,
+                                     #deLabelList = deLabelList,
+                                     name = "cubed_sphere")
+            grid.add_item(GridItem.MASK)
+            grid.add_item(GridItem.AREA)
+            # slicing just the first de
+            grid2 = grid[2:10, 4:7]
+            self.examine_grid_attributes(grid)
+            self.examine_grid_attributes(grid2)
+            grid.destroy()
+            grid2.destroy()
+
+    @attr('serial')
     def test_grid_slice_2d(self):
         grid = self.make_grid_2d()
 

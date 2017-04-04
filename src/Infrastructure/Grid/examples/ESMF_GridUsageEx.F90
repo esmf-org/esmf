@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2016, University Corporation for Atmospheric Research,
+! Copyright 2002-2017, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -65,6 +65,9 @@ program ESMF_GridCreateEx
 
       character(ESMF_MAXSTR) :: testname
       character(ESMF_MAXSTR) :: failMsg
+
+      ! for Cubed Sphere test
+      integer, allocatable :: decomptile(:,:)
 
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
@@ -1362,7 +1365,234 @@ endif
 
 #endif
 
+!BOE
+!\subsubsection{Create a six-tile cubed sphere Grid}
+!\label{sec:usage:cubedsphere}
+!
+!This example creates a multi-tile Grid to represent a cubed sphere grid. 
+!Each of the six tiles making up the cubed sphere has 45 elements on
+!each side, so the total number of elements is 45x45x6=12150.  Each tile is 
+!decomposed using a regular decomposition.  The first two tiles are decomposed into
+!2x2 blocks each and the remaining 4 tiles are decomposed into 1x2 block. 
+!A total of 16 DEs are used. 
+!
 
+!BOC
+     ! Set up decomposition for each tile 
+     allocate(decomptile(2,6))
+     decomptile(:,1)=(/2,2/) ! Tile 1
+     decomptile(:,2)=(/2,2/) ! Tile 2
+     decomptile(:,3)=(/1,2/) ! Tile 3
+     decomptile(:,4)=(/1,2/) ! Tile 4
+     decomptile(:,5)=(/1,2/) ! Tile 5
+     decomptile(:,6)=(/1,2/) ! Tile 6
+
+     ! Create cubed sphere grid
+     grid2D = ESMF_GridCreateCubedSphere(tileSize=45, regDecompPTile=decomptile, rc=rc)
+!EOC
+     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+     ! Get rid of Grid
+     call ESMF_GridDestroy(grid2D, rc=rc)
+     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+     deallocate(decomptile)
+
+!BOE
+!\subsubsection{Create a six-tile cubed sphere Grid from a GRIDSPEC Mosaic file}
+!\label{sec:usage:cubedsphere}
+!
+!This example creates a six-tile Grid to represent a cubed sphere grid defined
+!in a GRIDSPEC Mosaic file {\tt C48\_mosaic.nc}. The GRIDSPEC mosaic file format is defined in
+!the document \htmladdnormallink{GRIDSPEC: A standard for the description of grids used in Earth System models}{http://extranet.gfdl.noaa.gov/~vb/gridstd/gridstdse3.html\#x5-220003.2} by V. Balaji, Alistair Adcroft and Zhi Liang.
+!
+!The mosaic file contains the following information:
+!
+!\begin{verbatim}
+!netcdf C48_mosaic {
+!dimensions:
+!	ntiles = 6 ;
+!	ncontact = 12 ;
+!	string = 255 ;
+!variables:
+!	char mosaic(string) ;
+!		mosaic:standard_name = "grid_mosaic_spec" ;
+!		mosaic:children = "gridtiles" ;
+!		mosaic:contact_regions = "contacts" ;
+!		mosaic:grid_descriptor = "" ;
+!	char gridlocation(string) ;
+!		gridlocation:standard_name = "grid_file_location" ;
+!	char gridfiles(ntiles, string) ;
+!	char gridtiles(ntiles, string) ;
+!	char contacts(ncontact, string) ;
+!		contacts:standard_name = "grid_contact_spec" ;
+!		contacts:contact_type = "boundary" ;
+!		contacts:alignment = "true" ;
+!		contacts:contact_index = "contact_index" ;
+!		contacts:orientation = "orient" ;
+!	char contact_index(ncontact, string) ;
+!		contact_index:standard_name = "starting_ending_point_index_of_contact" ;
+
+!// global attributes:
+!		:grid_version = "0.2" ;
+!		:code_version = "$Name: testing $" ;
+!data:
+!
+!mosaic = "C48_mosaic" ;
+!
+!gridlocation = "/archive/z1l/tools/test_20091028/output_all/" ;
+!
+!gridfiles =
+!  "horizontal_grid.tile1.nc",
+!  "horizontal_grid.tile2.nc",
+!  "horizontal_grid.tile3.nc",
+!  "horizontal_grid.tile4.nc",
+!  "horizontal_grid.tile5.nc",
+!  "horizontal_grid.tile6.nc" ;
+!
+!gridtiles =
+!  "tile1",
+!  "tile2",
+!  "tile3",
+!  "tile4",
+!  "tile5",
+!  "tile6" ;
+!
+!contacts =
+!  "C48_mosaic:tile1::C48_mosaic:tile2",
+!  "C48_mosaic:tile1::C48_mosaic:tile3",
+!  "C48_mosaic:tile1::C48_mosaic:tile5",
+!  "C48_mosaic:tile1::C48_mosaic:tile6",
+!  "C48_mosaic:tile2::C48_mosaic:tile3",
+!  "C48_mosaic:tile2::C48_mosaic:tile4",
+!  "C48_mosaic:tile2::C48_mosaic:tile6",
+!  "C48_mosaic:tile3::C48_mosaic:tile4",
+!  "C48_mosaic:tile3::C48_mosaic:tile5",
+!  "C48_mosaic:tile4::C48_mosaic:tile5",
+!  "C48_mosaic:tile4::C48_mosaic:tile6",
+!  "C48_mosaic:tile5::C48_mosaic:tile6" ;
+!
+! contact_index =
+!  "96:96,1:96::1:1,1:96",
+!  "1:96,96:96::1:1,96:1",
+!  "1:1,1:96::96:1,96:96",
+!  "1:96,1:1::1:96,96:96",
+!  "1:96,96:96::1:96,1:1",
+!  "96:96,1:96::96:1,1:1",
+!  "1:96,1:1::96:96,96:1",
+!  "96:96,1:96::1:1,1:96",
+!  "1:96,96:96::1:1,96:1",
+!  "1:96,96:96::1:96,1:1",
+!  "96:96,1:96::96:1,1:1",
+!  "96:96,1:96::1:1,1:96" ;
+!}
+!\end{verbatim}
+! 
+!A dummy variable with its {\tt standard\_name} attribute set to {\tt grid\_mosaic\_spec} is required.
+!The {\tt children} attribute of this dummy variable provides the variable name that contains the tile names and the 
+!{\tt contact\_region} attribute points to the variable name that defines a list of tile pairs that are connected
+!to each other.  For a Cubed Sphere grid, there are six tiles and 12 connections.  The {\tt contacts} variable
+!has three required attributes: {\tt standard\_name}, {\tt contact\_type}, and {\tt contact\_index}.  {\tt startand\_name}
+!has to be set to {\tt grid\_contact\_spec}.  {\tt contact\_type} has to be {\tt boundary}.  ESMF does not support
+!overlapping contact regions. {\tt contact\_index} defines the variable name that contains the information how the
+!two adjacent tiles are connected to each other.  The {\tt contact\_index} variable contains 12 entries.  Each entry
+!contains the index of four points that defines the two edges that contact to 
+! each other from the two neighboring tiles.  Assuming the four points are A, B, C, and D.  
+! A and B defines the edge of tile 1 and C and D defines the edge of tile2.  A is the same point
+! as C and B is the same as D.  (Ai, Aj) is the index for point A. The entry looks like this:
+!\begin{verbatim}
+!  Ai:Bi,Aj:Bj::Ci:Di,Cj:Dj
+!\end{verbatim}
+!
+!The associated tile file names are defined in variable {\tt gridfiles} and the directory path is defined in 
+!variable {\tt gridlocation}.
+!The {\tt gridlocation} can be overwritten with an optional arguemnt {\tt TileFilePath}.  Each tile is 
+!decomposed using a regular decomposition.  The first two tiles are decomposed into
+!2x2 blocks each and the remaining 4 tiles are decomposed into 1x2 block. 
+!A total of 16 DEs are used. 
+!
+!{\tt ESMF\_GridCreateMosaic()} first reads in the mosaic file and defines the tile connections in the 
+!{\tt ESMF\_DistGrid}  using the information
+!defined in variables {\tt contacts} and {\tt contact\_index}. Then it reads in the coordinates defined in
+!the tile files.  The coordinates defined in the tile file are a {\tt supergrid}.  A supergrid contains all the
+!stagger locations in one grid.  It contains the corner, edge and center coordinates all in one 2D array.
+!In this example, there are 48 elements in each side of a tile, therefore, the size of the supergrid is 
+!48*2+1=97, i.e. 97x97.
+!
+!Here is the header of one of the tile files:
+!
+!\begin{verbatim}
+!netcdf horizontal_grid.tile1 {
+!dimensions:
+!	string = 255 ;
+!	nx = 96 ;
+!	ny = 96 ;
+!	nxp = 97 ;
+!	nyp = 97 ;
+!variables:
+!	char tile(string) ;
+!		tile:standard_name = "grid_tile_spec" ;
+!		tile:geometry = "spherical" ;
+!		tile:north_pole = "0.0 90.0" ;
+!		tile:projection = "cube_gnomonic" ;
+!		tile:discretization = "logically_rectangular" ;
+!		tile:conformal = "FALSE" ;
+!	double x(nyp, nxp) ;
+!		x:standard_name = "geographic_longitude" ;
+!		x:units = "degree_east" ;
+!	double y(nyp, nxp) ;
+!		y:standard_name = "geographic_latitude" ;
+!		y:units = "degree_north" ;
+!	double dx(nyp, nx) ;
+!		dx:standard_name = "grid_edge_x_distance" ;
+!		dx:units = "meters" ;
+!	double dy(ny, nxp) ;
+!		dy:standard_name = "grid_edge_y_distance" ;
+!		dy:units = "meters" ;
+!	double area(ny, nx) ;
+!		area:standard_name = "grid_cell_area" ;
+!		area:units = "m2" ;
+!	double angle_dx(nyp, nxp) ;
+!		angle_dx:standard_name = "grid_vertex_x_angle_WRT_geographic_east" ;
+!		angle_dx:units = "degrees_east" ;
+!	double angle_dy(nyp, nxp) ;
+!		angle_dy:standard_name = "grid_vertex_y_angle_WRT_geographic_north" ;
+!		angle_dy:units = "degrees_north" ;
+!	char arcx(string) ;
+!		arcx:standard_name = "grid_edge_x_arc_type" ;
+!		arcx:north_pole = "0.0 90.0" ;
+!
+!// global attributes:
+!		:grid_version = "0.2" ;
+!		:code_version = "$Name: testing $" ;
+!		:history = "/home/z1l/bin/tools_20091028/make_hgrid --grid_type gnomonic_ed --nlon 96" ;
+!}
+!\end{verbatim}
+!
+!The tile file not only defines the coordinates at all staggers, it also has a complete specification of
+!distances, angles, and areas.  In ESMF, we currently only use the {\tt geographic\_longitude} and {\tt geographic\_latitude}
+!variables and its subsets on the center and corner staggers.
+!EOE
+
+#ifdef ESMF_NETCDF
+!BOC
+     ! Set up decomposition for each tile 
+     allocate(decomptile(2,6))
+     decomptile(:,1)=(/2,2/) ! Tile 1
+     decomptile(:,2)=(/2,2/) ! Tile 2
+     decomptile(:,3)=(/1,2/) ! Tile 3
+     decomptile(:,4)=(/1,2/) ! Tile 4
+     decomptile(:,5)=(/1,2/) ! Tile 5
+     decomptile(:,6)=(/1,2/) ! Tile 6
+
+     ! Create cubed sphere grid
+     grid2D = ESMF_GridCreateMosaic(filename='data/C48_mosaic.nc', &
+                tileFilePath='./data/', regDecompPTile=decomptile, rc=rc)
+!EOC
+     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+     ! Get rid of Grid
+     call ESMF_GridDestroy(grid2D, rc=rc)
+     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+     deallocate(decomptile)
+#endif
 !BOE
 !\subsubsection{Grid stagger locations}
 !\label{sec:usage:staggerloc}

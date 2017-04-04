@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2016, University Corporation for Atmospheric Research,
+! Copyright 2002-2017, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -2213,8 +2213,9 @@ contains
 !           Attribute hierarchy when looking for this Attribute, the default
 !           is {\tt ESMF\_ATTNEST\_ON}.  This flag is documented in section
 !           \ref{const:attnest}.
-!     \item [{[typekind}]]
-!           The typekind of the Attribute.
+!     \item [{[typekind]}]
+!           The typekind of the Attribute. This flag is documented in section
+!           \ref{const:typekind}.
 !     \item [{[itemCount]}]
 !           The number of items in this Attribute.
 !     \item [{[isPresent]}]
@@ -2287,8 +2288,9 @@ contains
 !           Attribute hierarchy when looking for this Attribute, the default
 !           is {\tt ESMF\_ATTNEST\_ON}.  This flag is documented in section
 !           \ref{const:attnest}.
-!     \item [{[typekind}]]
-!           The typekind of the Attribute.
+!     \item [{[typekind]}]
+!           The typekind of the Attribute. This flag is documented in section
+!           \ref{const:typekind}.
 !     \item [{[itemCount]}]
 !           The number of items in this Attribute.
 !     \item [{[isPresent]}]
@@ -2350,7 +2352,8 @@ contains
 !           is {\tt ESMF\_ATTNEST\_ON}.  This flag is documented in section
 !           \ref{const:attnest}.
 !     \item [{[typekind]}]
-!           The typekind of the Attribute.
+!           The typekind of the Attribute. This flag is documented in section
+!           \ref{const:typekind}.
 !     \item [{[itemCount]}]
 !           The number of items in this Attribute.
 !     \item [{[rc]}]
@@ -8942,7 +8945,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !           the default is {\tt ESMF\_ATTNEST\_ON}. This flag is documented @\
 !           in section \ref{const:attnest}. @\
 !     \item [{[typekind]}] @\
-!           The typekind of the Attribute. @\
+!           The typekind of the Attribute.  This flag is documented in section @\
+!           \ref{const:typekind}. @\
 !     \item [{[itemCount]}] @\
 !           The number of items in this Attribute.  For character types, @\
 !           the length of the character string. @\
@@ -9062,7 +9066,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !           the default is {\tt ESMF\_ATTNEST\_ON}. This flag is documented @\
 !           in section \ref{const:attnest}. @\
 !     \item [{[typekind]}] @\
-!           The typekind of the Attribute. @\
+!           The typekind of the Attribute. This flag is documented in section @\
+!           \ref{const:typekind}.@\
 !     \item [{[itemCount]}] @\
 !           The number of items in this Attribute.  For character types, @\
 !           the length of the character string. @\
@@ -9202,7 +9207,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !           the default is {\tt ESMF\_ATTNEST\_ON}. This flag is documented @\
 !           in section \ref{const:attnest}. @\
 !     \item [{[typekind]}] @\
-!           Returns the typekind of the Attribute. @\
+!           Returns the typekind of the Attribute. This flag is documented in section @\
+!           \ref{const:typekind}. @\
 !     \item [{[itemCount]}] @\
 !           Returns the number of items in this Attribute.  For character @\
 !           types, this is the length of the character string. @\
@@ -9327,7 +9333,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !           the default is {\tt ESMF\_ATTNEST\_ON}. This flag is documented @\
 !           in section \ref{const:attnest}. @\
 !     \item [{[typekind]}] @\
-!           Returns the typekind of the Attribute. @\
+!           Returns the typekind of the Attribute. This flag is documented in section @\
+!           \ref{const:typekind}. @\
 !     \item [{[itemCount]}] @\
 !           Returns the number of items in this Attribute.  For character @\
 !           types, this is the length of the character string. @\

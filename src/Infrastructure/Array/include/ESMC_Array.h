@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2016, University Corporation for Atmospheric Research, 
+// Copyright 2002-2017, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -192,7 +192,7 @@ int ESMC_ArrayPrint(
 
 
 int ESMC_ArraySetLWidth(ESMC_Array array,
-   ESMC_InterfaceInt computationalLWidthArg);
+  ESMC_InterArrayInt computationalLWidthArg);
 
 #ifdef __cplusplus
 } // extern "C"

@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2016, University Corporation for Atmospheric Research, 
+// Copyright 2002-2017, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -44,9 +44,9 @@ extern "C" {
   // - ESMF-public methods:
         
   void FTN_X(c_esmc_distgridcreatedg)(ESMCI::DistGrid **ptr, 
-    ESMCI::DistGrid **dg, ESMCI::InterfaceInt *firstExtra,
-    ESMCI::InterfaceInt *lastExtra, ESMC_IndexFlag *indexflag,
-    ESMCI::InterfaceInt *connectionList, ESMCI::VM **vm, int *rc){
+    ESMCI::DistGrid **dg, ESMCI::InterArray<int> *firstExtra,
+    ESMCI::InterArray<int> *lastExtra, ESMC_IndexFlag *indexflag,
+    ESMCI::InterArray<int> *connectionList, ESMCI::VM **vm, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_distgridcreatedg()"
     // Initialize return code; assume routine not implemented
@@ -78,13 +78,13 @@ extern "C" {
   }
   
   void FTN_X(c_esmc_distgridcreaterd)(ESMCI::DistGrid **ptr, 
-    ESMCI::InterfaceInt *minIndex, ESMCI::InterfaceInt *maxIndex,
-    ESMCI::InterfaceInt *regDecomp,
+    ESMCI::InterArray<int> *minIndex, ESMCI::InterArray<int> *maxIndex,
+    ESMCI::InterArray<int> *regDecomp,
     ESMCI::Decomp_Flag *decompflag, int *decompflagCount, 
-    ESMCI::InterfaceInt *regDecompFirstExtra,
-    ESMCI::InterfaceInt *regDecompLastExtra,
-    ESMCI::InterfaceInt *deLabelList, ESMC_IndexFlag *indexflag, 
-    ESMCI::InterfaceInt *connectionList,
+    ESMCI::InterArray<int> *regDecompFirstExtra,
+    ESMCI::InterArray<int> *regDecompLastExtra,
+    ESMCI::InterArray<int> *deLabelList, ESMC_IndexFlag *indexflag, 
+    ESMCI::InterArray<int> *connectionList,
     ESMCI::DELayout **delayout, ESMCI::VM **vm, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_distgridcreaterd()"
@@ -124,14 +124,14 @@ extern "C" {
   }
   
   void FTN_X(c_esmc_distgridcreaterdt)(ESMCI::DistGrid **ptr, 
-    ESMCI::InterfaceInt *minIndex, ESMCI::InterfaceInt *maxIndex,
-    ESMCI::InterfaceInt *regDecomp,
+    ESMCI::InterArray<int> *minIndex, ESMCI::InterArray<int> *maxIndex,
+    ESMCI::InterArray<int> *regDecomp,
     ESMCI::Decomp_Flag *decompflag,
     int *decompflagCount1, int *decompflagCount2,
-    ESMCI::InterfaceInt *regDecompFirstExtra,
-    ESMCI::InterfaceInt *regDecompLastExtra,
-    ESMCI::InterfaceInt *deLabelList, ESMC_IndexFlag *indexflag, 
-    ESMCI::InterfaceInt *connectionList,
+    ESMCI::InterArray<int> *regDecompFirstExtra,
+    ESMCI::InterArray<int> *regDecompLastExtra,
+    ESMCI::InterArray<int> *deLabelList, ESMC_IndexFlag *indexflag, 
+    ESMCI::InterArray<int> *connectionList,
     ESMCI::DELayout **delayout, ESMCI::VM **vm, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_distgridcreaterdt()"
@@ -157,13 +157,13 @@ extern "C" {
   }
   
   void FTN_X(c_esmc_distgridcreaterdf)(ESMCI::DistGrid **ptr, 
-    ESMCI::InterfaceInt *minIndex, ESMCI::InterfaceInt *maxIndex,
-    ESMCI::InterfaceInt *regDecomp,
+    ESMCI::InterArray<int> *minIndex, ESMCI::InterArray<int> *maxIndex,
+    ESMCI::InterArray<int> *regDecomp,
     ESMCI::Decomp_Flag *decompflag, int *decompflagCount,
-    ESMCI::InterfaceInt *regDecompFirstExtra,
-    ESMCI::InterfaceInt *regDecompLastExtra,
-    ESMCI::InterfaceInt *deLabelList, ESMC_IndexFlag *indexflag, 
-    ESMCI::InterfaceInt *connectionList,
+    ESMCI::InterArray<int> *regDecompFirstExtra,
+    ESMCI::InterArray<int> *regDecompLastExtra,
+    ESMCI::InterArray<int> *deLabelList, ESMC_IndexFlag *indexflag, 
+    ESMCI::InterArray<int> *connectionList,
     int *fastAxis, ESMCI::VM **vm, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_distgridcreaterdf()"
@@ -184,11 +184,12 @@ extern "C" {
   }
 
   void FTN_X(c_esmc_distgridcreatedb)(ESMCI::DistGrid **ptr, 
-    ESMCI::InterfaceInt *minIndex, ESMCI::InterfaceInt *maxIndex,
-    ESMCI::InterfaceInt *deBlockList,
-    ESMCI::InterfaceInt *deLabelList, ESMC_IndexFlag *indexflag, 
-    ESMCI::InterfaceInt *connectionList,
-    ESMCI::DELayout **delayout, ESMCI::VM **vm, int *rc){
+    ESMCI::InterArray<int> *minIndex, ESMCI::InterArray<int> *maxIndex,
+    ESMCI::InterArray<int> *deBlockList,
+    ESMCI::InterArray<int> *deLabelList, ESMC_IndexFlag *indexflag, 
+    ESMCI::InterArray<int> *connectionList,
+    ESMCI::DELayout **delayout, ESMCI::VM **vm, ESMC_TypeKind_Flag *indexTK, 
+    int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_distgridcreatedb()"
     // Initialize return code; assume routine not implemented
@@ -196,16 +197,20 @@ extern "C" {
     int localrc = ESMC_RC_NOT_IMPL;
     ESMCI::DELayout *opt_delayout;
     ESMCI::VM *opt_vm;
+    ESMC_TypeKind_Flag opt_indexTK;
     // deal with optional arguments
     if (ESMC_NOT_PRESENT_FILTER(delayout) == ESMC_NULL_POINTER) 
       opt_delayout = NULL;
     else opt_delayout = *delayout;
     if (ESMC_NOT_PRESENT_FILTER(vm) == ESMC_NULL_POINTER) opt_vm = NULL;
     else opt_vm = *vm;
+    if (ESMC_NOT_PRESENT_FILTER(indexTK) == ESMC_NULL_POINTER) 
+      opt_indexTK = ESMC_TYPEKIND_I4;
+    else opt_indexTK = *indexTK;
     // call into C++
     *ptr = ESMCI::DistGrid::create(minIndex, maxIndex, deBlockList,
       deLabelList, ESMC_NOT_PRESENT_FILTER(indexflag),
-      connectionList, opt_delayout, opt_vm, &localrc);
+      connectionList, opt_delayout, opt_vm, &localrc, opt_indexTK);
     ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
       ESMC_CONTEXT, ESMC_NOT_PRESENT_FILTER(rc));
   }
@@ -228,18 +233,18 @@ extern "C" {
 
   void FTN_X(c_esmc_distgridget)(ESMCI::DistGrid **ptr,
     int *dimCount, int *tileCount, int *deCount,
-    ESMCI::InterfaceInt *minIndexPDimPTile,
-    ESMCI::InterfaceInt *maxIndexPDimPTile,
-    ESMCI::InterfaceInt *elementCountPTile,
-    ESMCI::InterfaceInt *minIndexPDimPDe,
-    ESMCI::InterfaceInt *maxIndexPDimPDe,
-    ESMCI::InterfaceInt *elementCountPDe,
-    ESMCI::InterfaceInt *tileListPDe,
-    ESMCI::InterfaceInt *indexCountPDimPDe,
-    ESMCI::InterfaceInt *collocationPDim,
+    ESMCI::InterArray<int> *minIndexPDimPTile,
+    ESMCI::InterArray<int> *maxIndexPDimPTile,
+    ESMCI::InterArray<int> *elementCountPTile,
+    ESMCI::InterArray<int> *minIndexPDimPDe,
+    ESMCI::InterArray<int> *maxIndexPDimPDe,
+    ESMCI::InterArray<int> *elementCountPDe,
+    ESMCI::InterArray<int> *tileListPDe,
+    ESMCI::InterArray<int> *indexCountPDimPDe,
+    ESMCI::InterArray<int> *collocationPDim,
     ESMC_Logical *regDecompFlag, 
     int *connectionCount,
-    ESMCI::InterfaceInt *connectionList,
+    ESMCI::InterArray<int> *connectionList,
     ESMCI::DELayout **delayout, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_distgridget()"
@@ -525,7 +530,7 @@ extern "C" {
 
   void FTN_X(c_esmc_distgridgetplocalde)(ESMCI::DistGrid **ptr,
     int *localDeArg, int *collocationArg, ESMC_Logical *arbSeqIndexFlag,
-    ESMCI::InterfaceInt *seqIndexList, int *elementCount, int *rc){
+    ESMCI::InterArray<int> *seqIndexList, int *elementCount, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_distgridgetplocalde()"
     // Initialize return code; assume routine not implemented
@@ -563,7 +568,7 @@ extern "C" {
       collIndex = 0;
     }
     const int *arbSeqIndexList =
-      (*ptr)->getArbSeqIndexList(localDe, collocation, &localrc);
+      (const int *)(*ptr)->getArbSeqIndexList(localDe, collocation, &localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
       ESMC_CONTEXT, ESMC_NOT_PRESENT_FILTER(rc))) return;
     if (ESMC_NOT_PRESENT_FILTER(arbSeqIndexFlag) != ESMC_NULL_POINTER){  
@@ -587,7 +592,7 @@ extern "C" {
   }
 
   void FTN_X(c_esmc_distgridgetplocaldepdim)(ESMCI::DistGrid **ptr,
-    int *localDeArg, int *dimArg, ESMCI::InterfaceInt *indexList, int *rc){
+    int *localDeArg, int *dimArg, ESMCI::InterArray<int> *indexList, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_distgridgetplocaldepdim()"
     // Initialize return code; assume routine not implemented
@@ -663,9 +668,9 @@ extern "C" {
   }
   
   void FTN_X(c_esmc_distgridconnection)(
-    ESMCI::InterfaceInt *connection, int *tileIndexA,
-    int *tileIndexB, ESMCI::InterfaceInt *positionVector,
-    ESMCI::InterfaceInt *orientationVector,
+    ESMCI::InterArray<int> *connection, int *tileIndexA,
+    int *tileIndexB, ESMCI::InterArray<int> *positionVector,
+    ESMCI::InterArray<int> *orientationVector,
     int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_connection()"
@@ -680,7 +685,7 @@ extern "C" {
   }
 
   void FTN_X(c_esmc_distgridset)(
-    ESMCI::DistGrid **ptr, ESMCI::InterfaceInt *collocationPDim, int *rc){
+    ESMCI::DistGrid **ptr, ESMCI::InterArray<int> *collocationPDim, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_distgridset()"
     // Initialize return code; assume routine not implemented
@@ -693,7 +698,7 @@ extern "C" {
   }
   
   void FTN_X(c_esmc_distgridsetarbseqindex)(
-    ESMCI::DistGrid **ptr, ESMCI::InterfaceInt *arbSeqIndex, 
+    ESMCI::DistGrid **ptr, ESMCI::InterArray<int> *arbSeqIndex, 
       int *localDe, int *collocation, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_distgridsetarbseqindex()"
@@ -706,7 +711,20 @@ extern "C" {
       ESMC_NOT_PRESENT_FILTER(rc));
   }
 
-
+  void FTN_X(c_esmc_distgridsetarbseqindexi8)(
+    ESMCI::DistGrid **ptr, ESMCI::InterArray<ESMC_I8> *arbSeqIndex, 
+      int *localDe, int *collocation, int *rc){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_distgridsetarbseqindex()"
+    // Initialize return code; assume routine not implemented
+    if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+    // Call into the actual C++ method wrapped inside LogErr handling
+    ESMC_LogDefault.MsgFoundError(
+      (*ptr)->setArbSeqIndex(arbSeqIndex, *localDe, *collocation),
+      ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      ESMC_NOT_PRESENT_FILTER(rc));
+  }
+  
   void FTN_X(c_esmc_distgridserialize)(ESMCI::DistGrid **distgrid, char *buf, int *length,
     int *offset, ESMC_InquireFlag *inquireflag, int *rc,
     ESMCI_FortranStrLenArg buf_l){

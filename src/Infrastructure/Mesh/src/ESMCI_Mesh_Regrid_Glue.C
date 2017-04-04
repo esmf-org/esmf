@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2016, University Corporation for Atmospheric Research, 
+// Copyright 2002-2017, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -75,7 +75,7 @@ static void copy_cnsv_rs_from_WMat_to_Array(WMat *wmat, ESMCI::Array *array);
  extern "C" void FTN_X(c_esmc_arraysmmstore)(ESMCI::Array **srcArray,
     ESMCI::Array **dstArray, ESMCI::RouteHandle **routehandle,
     ESMC_TypeKind_Flag *typekind, void *factorList, int *factorListCount,
-    ESMCI::InterfaceInt *factorIndexList, ESMC_Logical *ignoreUnmatched,
+    ESMCI::InterArray<int> *factorIndexList, ESMC_Logical *ignoreUnmatched,
     int *srcTermProcessing, int *pipelineDepth, int *rc);
 
 void CpMeshDataToArray(Grid &grid, int staggerLoc, ESMCI::Mesh &mesh, ESMCI::Array &array, MEField<> *dataToArray);
@@ -299,8 +299,8 @@ void ESMCI_regrid_create(ESMCI::VM **vmpp,
     int *iientries = new int[2*iisize.first]; 
     int larg[2] = {2, iisize.first};
     // Gather the list
-    ESMCI::InterfaceInt ii(iientries, 2, larg);
-    ESMCI::InterfaceInt *iiptr = &ii;
+    ESMCI::InterArray<int> ii(iientries, 2, larg);
+    ESMCI::InterArray<int> *iiptr = &ii;
 
     double *factors = new double[iisize.first];
 
@@ -2149,7 +2149,8 @@ void copy_rs_from_WMat_to_Array(WMat *wmat, ESMCI::Array *array) {
 
       // Get sequence index of this point
       int localrc;
-      UInt seq_ind=distgrid->getSequenceIndexLocalDe(lDE,ind_m_elbnd,&localrc);
+      int seq_ind;
+      localrc=distgrid->getSequenceIndexLocalDe(lDE,ind_m_elbnd,&seq_ind);
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
         ESMC_CONTEXT, NULL)) throw localrc;  // bail out with exception
  /* XMRKX */
@@ -2295,7 +2296,8 @@ void copy_cnsv_rs_from_WMat_to_Array(WMat *wmat, ESMCI::Array *array) {
 
       // Get sequence index of this point
       int localrc;
-      UInt seq_ind=distgrid->getSequenceIndexLocalDe(lDE,ind_m_elbnd,&localrc);
+      int seq_ind;
+      localrc=distgrid->getSequenceIndexLocalDe(lDE,ind_m_elbnd,&seq_ind);
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
         ESMC_CONTEXT, NULL)) throw localrc;  // bail out with exception
 

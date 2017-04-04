@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2016, University Corporation for Atmospheric Research,
+// Copyright 2002-2017, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -541,14 +541,13 @@ static const char *const version = "$Id$";
 //
 //EOPI
   int rc;
-  char msgbuf[ESMF_MAXSTR];
+  std::string msgbuf;
 
     // Initialize local return code; assume routine not implemented
     rc = ESMC_RC_NOT_IMPL;
 
   if (nlen > ESMF_MAXSTR) {
-       sprintf(msgbuf, "string name %d bytes longer than limit of %d bytes\n",
-                       nlen, ESMF_MAXSTR);
+       msgbuf = "Base name " + std::string(name, nlen) + " is longer than ESMF_MAXSTR";
        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, ESMC_CONTEXT, 
            &rc);
        return rc;
@@ -556,9 +555,8 @@ static const char *const version = "$Id$";
   // look for slash in name.  Conflicts with syntax used in StateGet for items in
   // nested States.
   if (memchr (name, '/', nlen) != NULL) {
-    std::string name_s(name,nlen);
-    std::string msgbuf_s = name_s + " must not have a slash (/) in its name";
-    ESMC_LogDefault.MsgFoundError (ESMC_RC_ARG_VALUE, msgbuf_s, ESMC_CONTEXT,
+    msgbuf = "Base name " + std::string (name, nlen) + " must not have a slash (/) in its name";
+    ESMC_LogDefault.MsgFoundError (ESMC_RC_ARG_VALUE, msgbuf, ESMC_CONTEXT,
         &rc);
     return rc;
   }
@@ -631,6 +629,9 @@ static const char *const version = "$Id$";
     // Initialize local return code; assume routine not implemented
     localrc = ESMC_RC_NOT_IMPL;
 
+    int r=*offset%8;
+    if (r!=0) *offset += 8-r;  // alignment
+
     ip = (int *)(buffer + *offset);
     ID = *ip++;
     refCount = *ip++;  
@@ -665,7 +666,11 @@ static const char *const version = "$Id$";
 
     // Deserialize the Attribute hierarchy
     if (attreconflag == ESMC_ATTRECONCILE_ON) {
+      if (*offset%8 != 0)
+        *offset += 8 - *offset%8;
       localrc = root.ESMC_Deserialize(buffer,offset);
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, 
+            ESMC_CONTEXT, &localrc)) return localrc;
     }
         
   return ESMF_SUCCESS;
@@ -676,7 +681,7 @@ static const char *const version = "$Id$";
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_Deserialize"
 //BOPI
-// !IROUTINE:  ESMC_Deserialize - Return ID and vmID of a serialized object
+// !IROUTINE:  ESMC_Deserialize - ID and vmID inquiry of a serialized object
 //
 // !INTERFACE:
       // static
@@ -686,8 +691,8 @@ static const char *const version = "$Id$";
 //    {\tt ESMF\_SUCCESS} or error code on failure.
 //
 // !ARGUMENTS:
-      char *buffer,         // in - byte stream to read
-      int *offset,          // inout - original offset
+      const char *buffer,   // in - byte stream to read
+      const int *offset,    // in - original offset
       int *ID,              // out - Object ID
       ESMCI::VMId *vmID) {  // out - VMId
 //
@@ -697,6 +702,7 @@ static const char *const version = "$Id$";
 //EOPI
 
     int *ip, i, nbytes;
+    int offset_local = *offset;
     ESMC_Status *sp;
     ESMC_ProxyFlag *pfp;
     ESMCI::VMId *vmIDp;
@@ -706,7 +712,10 @@ static const char *const version = "$Id$";
     // Initialize local return code; assume routine not implemented
     localrc = ESMC_RC_NOT_IMPL;
 
-    ip = (int *)(buffer + *offset);
+    int r=offset_local%8;
+    if (r!=0) offset_local += 8-r;  // alignment
+
+    ip = (int *)(buffer + offset_local);
     *ID = *ip++;
     ip++;  // refcount
     ip++;  // classID
@@ -719,6 +728,7 @@ static const char *const version = "$Id$";
     pfp++; // proxyFlag
 
     vmIDp = (ESMCI::VMId *)pfp;
+    VMIdCopy (vmID, vmIDp);
 
   return ESMF_SUCCESS;
 
@@ -865,14 +875,17 @@ static const char *const version = "$Id$";
 //
 //EOPI
     int fixedpart;
-    int *ip, i, rc;
+    int *ip, i, localrc;
     ESMC_Status *sp;
     ESMC_ProxyFlag *pfp;
     ESMCI::VMId *vmIDp;
     char *cp;
 
     // Initialize local return code; assume routine not implemented
-    rc = ESMC_RC_NOT_IMPL;
+    localrc = ESMC_RC_NOT_IMPL;
+
+    int r=*offset%8;
+    if (r!=0) *offset += 8-r;  // alignment
 
     fixedpart = sizeof(ESMC_Base);
     if (inquireflag == ESMF_INQUIREONLY) {
@@ -881,8 +894,8 @@ static const char *const version = "$Id$";
       if ((*length - *offset) < fixedpart) {
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD, 
                                "Buffer too short to add a Base object", 
-            ESMC_CONTEXT, &rc);
-        return ESMF_FAILURE; 
+            ESMC_CONTEXT, &localrc);
+        return localrc; 
         //buffer = (char *)realloc((void *)buffer, *length + 2*fixedpart);
         //*length += 2 * fixedpart;
       }
@@ -918,8 +931,12 @@ static const char *const version = "$Id$";
     }
 
     // Serialize the Attribute hierarchy
-    if (attreconflag == ESMC_ATTRECONCILE_ON) { 
-      rc = root.ESMC_Serialize(buffer,length,offset, inquireflag);
+    if (attreconflag == ESMC_ATTRECONCILE_ON) {
+      if (*offset%8 != 0)
+        *offset += 8 - *offset%8;
+      localrc = root.ESMC_Serialize(buffer,length,offset, inquireflag);
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, 
+            ESMC_CONTEXT, &localrc)) return localrc;
     }
 
   return ESMF_SUCCESS;

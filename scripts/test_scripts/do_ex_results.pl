@@ -10,16 +10,18 @@
 #  -h	ESMF_TESTSCRIPTS
 #  -d	EX_DIR
 #  -b	ESMF_BOPT
+#  -e	ESMF_COMM
 
 
 use Getopt::Std;
 
-getopts("h:d:b:", \%options);
+getopts("h:d:b:e:", \%options);
 
 
 	$ESMF_TESTSCRIPTS = "$options{h}"; 
 	$EX_DIR = "$options{d}"; 
 	$ESMF_BOPT = "$options{b}";
+	$ESMF_COMM = "$options{e}";
 
 #
 # Define location of test scripts.
@@ -31,6 +33,6 @@ unshift (@INC, "$ESMF_TESTSCRIPTS");
 require "examples_results.pl";
 
 # Call examples_result with SUMMARY request turned off.
-&examples_results("$EX_DIR","$ESMF_BOPT","0");
+&examples_results("$EX_DIR","$ESMF_BOPT","$ESMF_COMM","0");
 
 exit;

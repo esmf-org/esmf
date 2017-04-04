@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2016, University Corporation for Atmospheric Research,
+// Copyright 2002-2017, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -299,8 +299,8 @@ extern "C" {
 //    none.  return code is passed thru the parameter list
 //
 // !ARGUMENTS:
-      char *buf,                // in/out - really a byte stream
-      int *offset,              // in/out - current offset in the stream
+      const char *buf,          // in - really a byte stream
+      const int *offset,        // in - current offset in the stream
       int *ID,                  // out - Object ID
       ESMCI::VMId **vmId,       // out - vmId
       int *rc,                  // out - return code
@@ -318,7 +318,7 @@ extern "C" {
 
   return;
 
-}  // end c_ESMC_BaseDeserialize
+}  // end c_ESMC_BaseDeserialize_idvmid
 
 //-----------------------------------------------------------------------------
 //BOP

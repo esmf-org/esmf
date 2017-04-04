@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2016, University Corporation for Atmospheric Research, 
+// Copyright 2002-2017, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -50,13 +50,13 @@ void MBMesh_create(void **mbmpp,
 
 
 void MBMesh_addnodes(void **mbmpp, int *num_nodes, int *nodeId, 
-                     double *nodeCoord, int *nodeOwner, InterfaceInt *nodeMaskII,
+                     double *nodeCoord, int *nodeOwner, InterArray<int> *nodeMaskII,
                      ESMC_CoordSys_Flag *_coordSys, int *_orig_sdim,
                      int *rc);
 
 
 void MBMesh_addelements(void **mbmpp, 
-                        int *_num_elems, int *elemId, int *elemType, InterfaceInt *_elemMaskII ,
+                        int *_num_elems, int *elemId, int *elemType, InterArray<int> *_elemMaskII ,
                          int *_areaPresent, double *elemArea, 
                         int *_coordsPresent, double *elemCoords, 
                         int *_num_elemConn, int *elemConn, int *regridConserve, 
@@ -81,7 +81,7 @@ void MBMesh_getlocalelemcoords(void **meshpp, double *ecoords,
                                int *_orig_sdim, int *rc);
 
 
-void MBMesh_meshturnoncellmask(void **mbmpp, ESMCI::InterfaceInt *maskValuesArg,  int *rc);
+void MBMesh_meshturnoncellmask(void **mbmpp, ESMCI::InterArray<int> *maskValuesArg,  int *rc);
 void MBMesh_meshturnoffcellmask(void **mbmpp, int *rc);
 
 
@@ -156,13 +156,13 @@ void ESMCI_meshgetfrac2(Mesh **meshpp, int *num_elem, double *elem_fracs, int *r
 void ESMCI_triangulate(int *pdim, int *sdim, int *numPnts, 
                        double *pnts, double *td, int *ti, int *triInd, int *rc);
 
-void ESMCI_meshturnoncellmask(Mesh **meshpp, ESMCI::InterfaceInt *maskValuesArg,  int *rc);
+void ESMCI_meshturnoncellmask(Mesh **meshpp, ESMCI::InterArray<int> *maskValuesArg,  int *rc);
 
 // Turn OFF masking
 void ESMCI_meshturnoffcellmask(Mesh **meshpp, int *rc);
 
 ////////////
-void ESMCI_meshturnonnodemask(Mesh **meshpp, ESMCI::InterfaceInt *maskValuesArg,  int *rc);
+void ESMCI_meshturnonnodemask(Mesh **meshpp, ESMCI::InterArray<int> *maskValuesArg,  int *rc);
 
 // Turn OFF masking
 void ESMCI_meshturnoffnodemask(Mesh **meshpp, int *rc);

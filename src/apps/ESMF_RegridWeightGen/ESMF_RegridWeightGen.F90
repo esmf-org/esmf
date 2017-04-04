@@ -2,7 +2,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2016, University Corporation for Atmospheric Research,
+! Copyright 2002-2017, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -16,7 +16,8 @@ program ESMF_RegridWeightGenApp
   use ESMF
   use ESMF_IOScripMod
   use ESMF_IOGridspecMod
-   use ESMF_RegridWeightGenMod
+  use ESMF_IOFileTypeCheckMod
+  use ESMF_RegridWeightGenMod
   use ESMF_RegridWeightGenCheckMod
 
   implicit none
@@ -33,18 +34,20 @@ program ESMF_RegridWeightGenApp
   character(ESMF_MAXPATHLEN) :: srcfile, dstfile, wgtfile
   character(ESMF_MAXPATHLEN) :: srcmeshname, dstmeshname
   character(ESMF_MAXPATHLEN) :: cwd
+  character(ESMF_MAXPATHLEN) :: tilePath
   character(len=40)  :: method, flag, lineTypeStr
   type(ESMF_LineType_Flag) :: lineType
   type(ESMF_PoleMethod_Flag) :: pole
    integer            :: poleptrs
   type(ESMF_FileFormat_Flag) :: srcFileType, dstFileType
   type(ESMF_RegridMethod_Flag) :: methodflag
-  character(len=ESMF_MAXPATHLEN) :: commandbuf1(3)
+  character(len=ESMF_MAXPATHLEN) :: commandbuf1(4)
   character(len=MAXNAMELEN)  :: commandbuf3(8)
-  integer            :: commandbuf2(20)
+  integer            :: commandbuf2(21)
   integer            :: ind, pos
   logical            :: largeFileFlag
   logical            :: netcdf4FileFlag
+  logical            :: weightOnlyFlag
   logical              :: ignoreUnmapped, userAreaFlag, ignoreDegenerate
   type(ESMF_UnmappedAction_Flag) :: unmappedaction
   logical            :: srcMissingValue, dstMissingValue
@@ -59,9 +62,10 @@ program ESMF_RegridWeightGenApp
    type(ESMF_LogKind_Flag) :: msgbuf(1)
   type(ESMF_LogKind_Flag) :: logflag
   character(len=ESMF_MAXPATHLEN)  :: argvalue
-  integer            :: count, i
+  integer            :: count, i, length
   type(ESMF_NormType_Flag) :: normType
   logical            :: useSrcCorner, useDstCorner
+  logical            :: useTilePathFlag
   
   terminateProg = .false.
   
@@ -248,117 +252,42 @@ program ESMF_RegridWeightGenApp
     endif
 
     typeSetFlag = .false.  
-    srcFileType = ESMF_FILEFORMAT_SCRIP
-    dstFileType = ESMF_FILEFORMAT_SCRIP
+    srcFileType = ESMF_FILEFORMAT_UNKNOWN
+    dstFileType = ESMF_FILEFORMAT_UNKNOWN
     srcIsRegional = .false.
     dstIsRegional = .false.
+    ! deprecated
     call ESMF_UtilGetArgIndex('-t', argindex=ind, rc=rc)
     if (ind /= -1) then
-      call ESMF_UtilGetArg(ind+1, argvalue=flag)
-      if (trim(flag) .eq. 'ESMF') then
-        srcFileType = ESMF_FILEFORMAT_ESMFMESH
-        dstFileType = ESMF_FILEFORMAT_ESMFMESH
-        !write(*,*)
-        !print *, 'Set src and dst grid file types to ESMF.'
-      else if (trim(flag) .eq. 'UGRID') then
-        srcFileType = ESMF_FILEFORMAT_UGRID
-        dstFileType = ESMF_FILEFORMAT_UGRID
-        !write(*,*)
-        !print *, 'Set src and dst grid file types to UGRID.'
-      else if (trim(flag) .eq. 'GRIDSPEC') then
-        srcFileType = ESMF_FILEFORMAT_GRIDSPEC
-        dstFileType = ESMF_FILEFORMAT_GRIDSPEC
-      else if (trim(flag) .ne. 'SCRIP') then
-        write(*,*)
-        print *, 'ERROR: Unknown -t: must be one of ESMF,SCRIP,UGRID or GRIDSPEC.'
-        print *, "Use the --help argument to see an explanation of usage."
-        call ESMF_Finalize(endflag=ESMF_END_ABORT)
-      endif 
-      typeSetFlag = .true.
+     write(*,*)
+     print *, "WARNING: deprecated switch -t will be ingored.  The file type will be detacted automatically"
     endif
 
     call ESMF_UtilGetArgIndex('--src_type', argindex=ind, rc=rc)
     if (ind /= -1) then
-      call ESMF_UtilGetArg(ind+1, argvalue=flag)
-      if (typeSetFlag) then
-        ! check if the type is consistent with -t
-        if ((trim(flag) .eq. 'ESMF' .and. srcFileType /= ESMF_FILEFORMAT_ESMFMESH) .or.   &
-            (trim(flag) .eq. 'UGRID' .and. srcFileType /= ESMF_FILEFORMAT_UGRID) .or.   &
-            (trim(flag) .eq. 'GRIDSPEC' .and. srcFileType /= ESMF_FILEFORMAT_GRIDSPEC) .or. &
-            (trim(flag) .eq. 'SCRIP' .and. srcFileType /= ESMF_FILEFORMAT_SCRIP)) then
-          write(*,*)
-          print *, 'ERROR: Source file type conflict: --src_type and -t.' 
-          print *, "Use the --help argument to see an explanation of usage."
-          call ESMF_Finalize(endflag=ESMF_END_ABORT)
-        endif
-      endif
-      if (trim(flag) .eq. 'ESMF') then
-        srcFileType = ESMF_FILEFORMAT_ESMFMESH
-      else if (trim(flag) .eq. 'UGRID') then
-        srcFileType = ESMF_FILEFORMAT_UGRID
-      else if (trim(flag) .eq. 'GRIDSPEC') then
-        srcFileType = ESMF_FILEFORMAT_GRIDSPEC
-      else if (trim(flag) .ne. 'SCRIP') then
-        write(*,*)
-        print *, 'ERROR: Unknown --src_type: must be one of ESMF,SCRIP,UGRID, or GRIDSPEC.'
-        print *, "Use the --help argument to see an explanation of usage."
-        call ESMF_Finalize(endflag=ESMF_END_ABORT)
-      endif
+     write(*,*)
+     print *, "WARNING: deprecated switch -src_type will be ingored.  The file type will be detacted automationally"
     endif
 
     call ESMF_UtilGetArgIndex('--dst_type', argindex=ind, rc=rc)
     if (ind /= -1) then
-      call ESMF_UtilGetArg(ind+1, argvalue=flag)
-      if (typeSetFlag) then
-        ! check if the type is consistent with -t
-        if ((trim(flag) .eq. 'ESMF' .and. dstFileType /= ESMF_FILEFORMAT_ESMFMESH) .or.   &
-            (trim(flag) .eq. 'UGRID' .and. dstFileType /= ESMF_FILEFORMAT_UGRID) .or.   &
-            (trim(flag) .eq. 'GRIDSPEC' .and. dstFileType /= ESMF_FILEFORMAT_GRIDSPEC) .or. &
-            (trim(flag) .eq. 'SCRIP' .and. dstFileType /= ESMF_FILEFORMAT_SCRIP)) then
-          write(*,*)
-          print *, 'ERROR: Destination file type conflict: --dst_type and -t.' 
-          print *, "Use the --help argument to see an explanation of usage."
-          call ESMF_Finalize(endflag=ESMF_END_ABORT)
-        endif
-      endif
-      if (trim(flag) .eq. 'ESMF') then
-         dstFileType = ESMF_FILEFORMAT_ESMFMESH
-      else if (trim(flag) .eq. 'UGRID') then
-         dstFileType = ESMF_FILEFORMAT_UGRID
-      else if (trim(flag) .eq. 'GRIDSPEC') then
-         dstFileType = ESMF_FILEFORMAT_GRIDSPEC
-      else if (trim(flag) .ne. 'SCRIP') then
-        write(*,*)
-        print *, 'ERROR: Unknown --dst_type: must be one of ESMF,SCRIP,UGRID or GRIDSPEC.'
-        print *, "Use the --help argument to see an explanation of usage."
-        call ESMF_Finalize(endflag=ESMF_END_ABORT)
-      endif
+     write(*,*)
+     print *, "WARNING: deprecated switch -dst_type will be ingored.  The file type will be detacted automatically"
     endif
 
-    ! If the src grid type is UGRID, get the dummy variable name in the file
-    if (srcFileType == ESMF_FILEFORMAT_UGRID) then
-      call ESMF_UtilGetArgIndex('--src_meshname', argindex=ind, rc=rc)
-      if (ind == -1) then
+    ! Check the srcfile type and dstfile type
+    call ESMF_FileTypeCheck(srcfile, srcFileType, varname=srcMeshName, rc=rc)
+    if (rc/=ESMF_SUCCESS .or. srcFileType==ESMF_FILEFORMAT_UNKNOWN) then
         write(*,*)
-        print *, 'ERROR: The argument --src_meshname is missing.'
-        print *, "Use the --help argument to see an explanation of usage."
+        print *, 'ERROR: Unable to detect the source grid file type.'
         call ESMF_Finalize(endflag=ESMF_END_ABORT)
-      else
-        call ESMF_UtilGetArg(ind+1, argvalue=srcMeshName)         
-      endif
     endif
-
-    ! If the dst grid type is UGRID, get the dummy variable name in the file
-    if (dstFileType == ESMF_FILEFORMAT_UGRID) then
-      call ESMF_UtilGetArgIndex('--dst_meshname', argindex=ind, rc=rc)
-      if (ind == -1) then
+    ! Check the dstfile type and dstfile type
+    call ESMF_FileTypeCheck(dstfile, dstFileType, varname=dstMeshName, rc=rc)
+    if (rc/=ESMF_SUCCESS .or. dstFileType==ESMF_FILEFORMAT_UNKNOWN) then
         write(*,*)
-        print *, 'ERROR: The argument --dst_meshname is missing.'
-        print *, "Use the --help argument to see an explanation of usage."
+        print *, 'ERROR: Unable to detect the destination grid file type.'
         call ESMF_Finalize(endflag=ESMF_END_ABORT)
-      else
-        call ESMF_UtilGetArg(ind+1, argvalue=dstMeshName)         
-      endif
     endif
 
     ! If the src grid type is GRIDSPEC or UGRID, check if --src_missingvalue argument is given
@@ -462,6 +391,14 @@ program ESMF_RegridWeightGenApp
       print *, '       Only one flag can be given.'
       print *, "Use the --help argument to see an explanation of usage."
       call ESMF_Finalize(endflag=ESMF_END_ABORT)
+    endif
+ 
+    ! --weight_only for weight file format
+    call ESMF_UtilGetArgIndex('--weight_only', argindex=ind, rc=rc)
+    if (ind /= -1) then
+      weightOnlyFlag = .true.
+    else
+      weightOnlyFlag = .false.
     endif
    
     ! --user_area - to use user-defined area for the cells
@@ -649,6 +586,18 @@ program ESMF_RegridWeightGenApp
           call ESMF_Finalize(endflag=ESMF_END_ABORT)
     endif
 
+    ! --tilefile_path to specify alternative tile file path
+    call ESMF_UtilGetArgIndex('--tilefile_path', argindex=ind, rc=rc)
+    if (ind /= -1) then
+      call ESMF_UtilGetArg(ind+1, argvalue=tilePath)         
+      length=len_trim(tilePath)
+      if (tilePath(length:length) /= '/') tilePath(length+1:length+1)='/'
+      useTilePathFlag = .true.
+    else
+      tilePath=' '
+      useTilePathFlag = .false.
+    endif
+
     checkFlag = .false.
     call ESMF_UtilGetArgIndex('--check', argindex=ind, rc=rc)
     if (ind /= -1) checkFlag = .true.
@@ -689,6 +638,7 @@ program ESMF_RegridWeightGenApp
       if (useDstCorner) commandbuf2(19) = 1
       if (trim(lineTypeStr) .eq. 'cartesian') commandbuf2(20) = 1
       if (trim(lineTypeStr) .eq. 'greatcircle') commandbuf2(20) = 2
+      if (weightOnlyFlag) commandbuf2(21) = 1
     endif 
 
 
@@ -703,6 +653,7 @@ program ESMF_RegridWeightGenApp
     commandbuf1(1)=srcfile
     commandbuf1(2)=dstfile
     commandbuf1(3)=wgtfile
+    commandbuf1(4)=tilePath
     commandbuf3(1)=srcMeshName
     commandbuf3(2)=dstMeshName
     commandbuf3(3)=srcVarName
@@ -713,8 +664,8 @@ program ESMF_RegridWeightGenApp
     commandbuf3(8)=dstCoordNames(2)
 
     ! Broadcast the command line arguments to all the PETs
-    call ESMF_VMBroadcast(vm, commandbuf1, len (commandbuf1)*size (commandbuf1), 0, rc=rc)
-    call ESMF_VMBroadcast(vm, commandbuf3, len (commandbuf3)*size (commandbuf3), 0, rc=rc)
+    call ESMF_VMBroadcast(vm, commandbuf1, len(commandbuf1)*size(commandbuf1), 0, rc=rc)
+    call ESMF_VMBroadcast(vm, commandbuf3, len(commandbuf3)*size(commandbuf3), 0, rc=rc)
     if (rc /= ESMF_SUCCESS) call ErrorMsgAndAbort(PetNo)
 
   else
@@ -822,15 +773,26 @@ program ESMF_RegridWeightGenApp
     else
       useDstCorner=.false.
     endif
+    if (commandbuf2(21)==1) then
+      weightOnlyFlag=.true.
+    else
+      weightOnlyFlag=.false.
+    endif
 
 
-    call ESMF_VMBroadcast(vm, commandbuf1, len (commandbuf1)*size (commandbuf1), 0, rc=rc)
+    call ESMF_VMBroadcast(vm, commandbuf1, len(commandbuf1)*size(commandbuf1), 0, rc=rc)
     if (rc /= ESMF_SUCCESS) call ErrorMsgAndAbort(PetNo)
-    call ESMF_VMBroadcast(vm, commandbuf3, len (commandbuf3)*size (commandbuf3), 0, rc=rc)
+    call ESMF_VMBroadcast(vm, commandbuf3, len(commandbuf3)*size(commandbuf3), 0, rc=rc)
     if (rc /= ESMF_SUCCESS) call ErrorMsgAndAbort(PetNo)
     srcfile = commandbuf1(1)
     dstfile = commandbuf1(2)
     wgtfile = commandbuf1(3)
+    tilePath = commandbuf1(4)
+    if (tilePath .eq. ' ') then 
+       useTilePathFlag = .false.
+    else 
+       useTilePathFlag = .true.
+    endif
     srcMeshName = commandbuf3(1)
     dstMeshName = commandbuf3(2)
     srcVarName = commandbuf3(3)
@@ -839,6 +801,7 @@ program ESMF_RegridWeightGenApp
     srcCoordNames(2) = commandbuf3(6)
     dstCoordNames(1) = commandbuf3(7)
     dstCoordNames(2) = commandbuf3(8)
+    
   endif
 
   if (trim(method) .eq. 'bilinear') then
@@ -866,10 +829,11 @@ program ESMF_RegridWeightGenApp
      lineType=ESMF_LINETYPE_GREAT_CIRCLE
   endif
 
-  call ESMF_RegridWeightGen(srcfile, dstfile, wgtfile, regridmethod=methodflag, &
+  if (useTilePathFlag) then
+      call ESMF_RegridWeightGen(srcfile, dstfile, wgtfile, regridmethod=methodflag, &
                             polemethod = pole, regridPoleNPnts = poleptrs, unmappedaction = unmappedaction, &
                             srcFileType = srcFileType, dstFileType = dstFileType, &
-                      ignoreDegenerate = ignoreDegenerate, &
+                            ignoreDegenerate = ignoreDegenerate, &
                             lineType=lineType, &
                             normType=normType, &
                             srcRegionalFlag = srcIsRegional, dstRegionalFlag = dstIsRegional, &
@@ -880,9 +844,31 @@ program ESMF_RegridWeightGenApp
                             srcCoordinateVars = srcCoordNames, dstCoordinateVars = dstCoordNames, &
                             useUserAreaFlag = userAreaFlag, largefileFlag = largeFileFlag, &
                             netcdf4FileFlag = netcdf4FileFlag,  &
-                      useSrcCornerFlag = useSrcCorner, &
-                      useDstCornerFlag = useDstCorner, &
+                            weightOnlyFlag  = weightOnlyFlag, &
+                            useSrcCornerFlag = useSrcCorner, &
+                            useDstCornerFlag = useDstCorner, &
+                            tileFilePath = trim(tilePath), &
                             verboseFlag = .true., rc = rc)
+  else
+      call ESMF_RegridWeightGen(srcfile, dstfile, wgtfile, regridmethod=methodflag, &
+                            polemethod = pole, regridPoleNPnts = poleptrs, unmappedaction = unmappedaction, &
+                            srcFileType = srcFileType, dstFileType = dstFileType, &
+                            ignoreDegenerate = ignoreDegenerate, &
+                            lineType=lineType, &
+                            normType=normType, &
+                            srcRegionalFlag = srcIsRegional, dstRegionalFlag = dstIsRegional, &
+                            srcMeshname = srcMeshname, dstMeshname = dstMeshname, &
+                            srcMissingvalueFlag = srcMissingValue, srcMissingvalueVar = srcVarName, &
+                            dstMissingvalueFlag = dstMissingValue, dstMissingvalueVar = dstVarName, &
+                            useSrcCoordFlag = useSrcCoordVar, useDstCoordFlag = useDstCoordVar, &
+                            srcCoordinateVars = srcCoordNames, dstCoordinateVars = dstCoordNames, &
+                            useUserAreaFlag = userAreaFlag, largefileFlag = largeFileFlag, &
+                            netcdf4FileFlag = netcdf4FileFlag,  &
+                            weightOnlyFlag  = weightOnlyFlag, &
+                            useSrcCornerFlag = useSrcCorner, &
+                            useDstCornerFlag = useDstCorner, &
+                            verboseFlag = .true., rc = rc)
+  endif
 
   if (rc /= ESMF_SUCCESS) call ErrorMsgAndAbort(PetNo)
 
@@ -930,16 +916,12 @@ contains
     print *, "                      [--norm_type dstarea|fracarea]"
     print *, "                      [--ignore_unmapped|-i]"
     print *, "                      [--ignore_degenerate]"
-    print *, "                      [--src_type SCRIP|ESMF|UGRID|GRIDSPEC]" 
-    print *, "                      [--dst_type SCRIP|ESMF|UGRID|GRIDSPEC]"
-    print *, "                      [-t SCRIP|ESMF|UGRID|GRIDSPEC]"
     print *, "                      [-r]"
     print *, "                      [--src_regional]"
     print *, "                      [--dst_regional]"
     print *, "                      [--64bit_offset]"
     print *, "                      [--netcdf4]"
-    print *, "                      [--src_meshname src_mesh_variable]"
-    print *, "                      [--dst_meshname dst_mesh_variable]"
+    print *, "                      [--weight_only]"
     print *, "                      [--src_missingvalue src_var_name]"
     print *, "                      [--dst_missingvalue dst_var_name]"
     print *, "                      [--src_coordinates lon_var_name,lat_var_name]"
@@ -947,6 +929,7 @@ contains
     print *, "                      [--user_areas]"
     print *, "                      [--src_loc center|corner]"
     print *, "                      [--dst_loc center|corner]"
+    print *, "                      [--tilefile_path tile_file_path]"
     print *, "                      [--no_log]"
     print *, "                      [--check]"
     print *, "                      [--help]"
@@ -974,19 +957,6 @@ contains
     print *, "                          the default is to stop with an error."
     print *, "--ignore_degenerate - ignore degenerate cells in the input grids. If not specified,"
     print *, "                          the default is to stop with an error."
-    print *, "--src_type - an optional argument specifying the source grid file type."
-    print *, "             The value could be one of SCRIP, GRIDSPEC, ESMF, or UGRID."
-    print *, "             The ESMF and UGRID types are only available for the unstructured grid."
-    print *, "             The default option is SCRIP."
-    print *, "--dst_type - an optional argument specifying the destination grid file type."
-    print *, "             The value could be one of SCRIP, GRIDSPEC, ESMF, or UGRID."
-    print *, "             The ESMF and UGRID types are only available for the unstructured grid."
-    print *, "             The default option is SCRIP."
-    print *, "-t         - an optional argument specifying the file types for both the source"
-    print *, "             and the destination grid files.  The default option is SCRIP."
-    print *, "             If both -t and --src_type or --dst_type are given at the same time"
-    print *, "             and they disagree with each other, an error message will be"
-    print *, "             generated"
     print *, "-r         - an optional argument specifying the source and destination grids"
     print *, "             are regional grids.  Without this argument, the grids are assumed"
     print *, "             to be global"
@@ -1000,12 +970,8 @@ contains
     print *, "--netcdf4  - an optional argument specifying the output weight file is in"
     print *, "             the NetCDF4 format. This option only works with NetCDF library"
     print *, "             version 4.1 and above"
-    print *, "--src_meshname  - required if the source grid type is UGRID. It defines the dummy"
-    print *, "             variable name that has all the topology information stored in its"
-    print *, "             attributes."
-    print *, "--dst_meshname  - required if the destination grid type is UGRID. It defines the"
-    print *, "             dummy variable name that has all the topology information stored in its"
-    print *, "             attributes."
+    print *, "--weight_only  - an Optional argument specifying the output weight file only contains"
+    print *, "             the weights and the source and destination grid's indices."
     print *, "--src_missingvalue  - an optional argument used when the src file type is GRIDSPEC"
     print *, "             or UGRID. It defines the variable name whose 'missing_value' or"
     print *, "             '_FillValue' attribute will be used to construct the mask for the source"
@@ -1036,6 +1002,8 @@ contains
     print *, "            is only required when the destination grid file is an unstructured grid defined"
     print *, "            in UGRID or ESMF format and the regridding method is non-conservative. For  "
     print *, "            all other cases, the default location is 'center'."
+    print *, "--tilefile_path - the alternative file path for the tile files when the grid file type is"
+    print *, "            MOSAIC."
     print *, "--no_log    - Turn off the ESMF logs."
     print *, "--check    - Check that the generated weights produce reasonable regridded fields.  This"
     print *, "             is done by calling ESMF_Regrid() on an analytic source field using the weights"

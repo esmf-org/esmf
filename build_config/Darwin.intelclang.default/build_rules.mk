@@ -102,6 +102,11 @@ ESMF_F90COMPILER_VERSION    = ${ESMF_F90COMPILER} -V -v
 ESMF_CXXCOMPILER_VERSION    = ${ESMF_CXXCOMPILER} -v --version
 
 ############################################################
+# Special debug flags
+#
+ESMF_F90OPTFLAG_G       += -traceback
+
+############################################################
 # Enable TR15581/F2003 Allocatable array resizing
 #
 ESMF_F90COMPILEOPTS += -assume realloc_lhs
@@ -169,14 +174,19 @@ ESMF_CXXLINKRPATHS += \
   $(ESMF_CXXRPATHPREFIX)$(dir $(shell $(ESMF_DIR)/scripts/libpath.ifort $(ESMF_F90COMPILER)))
 
 ############################################################
-# Link against the stdc++ library
+# Link against the c++ library
 #
-ESMF_LIBSTDCXX := $(shell $(ESMF_CXXCOMPILER) -print-file-name=libstdc++.dylib)
-ifeq ($(ESMF_LIBSTDCXX),libstdc++.dylib)
-ESMF_LIBSTDCXX := $(shell $(ESMF_CXXCOMPILER) -print-file-name=libstdc++.a)
+ESMF_LIBSTDCXX := $(shell $(ESMF_CXXCOMPILER) -print-file-name=libc++.dylib)
+ifeq ($(ESMF_LIBSTDCXX),libc++.dylib)
+ESMF_LIBSTDCXX := $(shell $(ESMF_CXXCOMPILER) -print-file-name=libc++.a)
 endif
-ESMF_F90LINKPATHS += -L$(dir $(ESMF_LIBSTDCXX))
-ESMF_F90LINKLIBS  += -lstdc++
+# Link in gnu stdc++ for good measure
+ESMF_LIBGSTDCXX := $(shell $(ESMF_CXXCOMPILER) -print-file-name=libstdc++.dylib)
+ifeq ($(ESMF_LIBGSTDCXX),libstdc++.dylib)
+ESMF_LIBGSTDCXX := $(shell $(ESMF_CXXCOMPILER) -print-file-name=libstdc++.a)
+endif
+ESMF_F90LINKPATHS += -L$(dir $(ESMF_LIBGSTDCXX)) -L$(dir $(ESMF_LIBSTDCXX))
+ESMF_F90LINKLIBS  += -lstdc++ -lc++
 
 ############################################################
 # Blank out variables to prevent rpath encoding
@@ -193,7 +203,7 @@ ESMF_F90LINKLIBS += -lm
 # Link against libesmf.a using the C++ linker front-end
 #
 ESMF_CXXLINKLIBS += $(shell $(ESMF_DIR)/scripts/libs.ifort "$(ESMF_F90COMPILER) $(ESMF_F90COMPILEOPTS)" | sed 's/\-lcrt1\.o //g')
-ESMF_CXXLINKLIBS += -lsvml -lifcore -limf -ldl -lirc -stdlib=libstdc++
+ESMF_CXXLINKLIBS += -lsvml -lifcore -limf -ldl -lirc -lstdc++ -lc++
 
 ############################################################
 # Shared library options

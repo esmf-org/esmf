@@ -23,6 +23,7 @@ TESTS_BUILD   = \
 		$(ESMF_TESTDIR)/ESMF_FieldCreateGetUTest \
 		$(ESMF_TESTDIR)/ESMF_FieldRegridCsrvUTest \
 		$(ESMF_TESTDIR)/ESMF_FieldRegridUTest \
+		$(ESMF_TESTDIR)/ESMF_FieldRegridCSUTest \
 		$(ESMF_TESTDIR)/ESMF_FieldArbGridUTest \
 		$(ESMF_TESTDIR)/ESMF_FieldIOUTest \
 		$(ESMF_TESTDIR)/ESMF_FieldRegridXGSMMUTest \
@@ -51,6 +52,7 @@ TESTS_RUN     = \
 		RUN_ESMF_FieldUTest \
 		RUN_ESMF_FieldCreateGetUTest \
 		RUN_ESMF_FieldRegridUTest \
+		RUN_ESMF_FieldRegridCSUTest \
 		RUN_ESMF_FieldRegridCsrvUTest \
 		RUN_ESMF_FieldArbGridUTest \
 		RUN_ESMF_FieldIOUTest \
@@ -80,6 +82,7 @@ TESTS_RUN_UNI = \
 		RUN_ESMC_FieldGridGridRegridCsrvUTestUNI \
 		RUN_ESMF_FieldStressUTestUNI \
 		RUN_ESMF_FieldRegridUTestUNI \
+		RUN_ESMF_FieldRegridCSUTestUNI \
 		RUN_ESMF_FieldRegridXGUTestUNI \
 		RUN_ESMF_FieldArbGridUTestUNI \
 		RUN_ESMF_FieldRedistArbUTestUNI \
@@ -183,6 +186,14 @@ RUN_ESMF_FieldRegridUTest:
 
 RUN_ESMF_FieldRegridUTestUNI:
 	$(MAKE) TNAME=FieldRegrid NP=1 ftest
+
+RUN_ESMF_FieldRegridCSUTest:
+	cp -r data $(ESMF_TESTDIR)
+	chmod u+rw $(ESMF_TESTDIR)/data/*
+	$(MAKE) TNAME=FieldRegridCS NP=4 ftest
+
+RUN_ESMF_FieldRegridCSUTestUNI:
+	$(MAKE) TNAME=FieldRegridCS NP=1 ftest
 
 RUN_ESMF_FieldRegridCsrvUTest:
 	$(MAKE) TNAME=FieldRegridCsrv NP=4 ftest

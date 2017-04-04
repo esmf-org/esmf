@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2016, University Corporation for Atmospheric Research, 
+! Copyright 2002-2017, University Corporation for Atmospheric Research, 
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 ! Laboratory, University of Michigan, National Centers for Environmental 
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -192,11 +192,8 @@ module NUOPC_FieldDictionaryApi
 ! !DESCRIPTION:
 !   Return {\tt .true.} if the NUOPC Field dictionary considers
 !   {\tt standardName1} and {\tt standardName2} synonyms, {\tt .false.} 
-!   otherwise. An entry with standard name of {\tt standardName1} must
-!   exist in the field dictionary, or else an error will be returned. 
-!   However, {\tt standardName2} need not correspond to an existing entry.
-!   If {\tt standardName2} does not correspond to an existing entry in the 
-!   field dictionary, the value of {.false.} will be returned.
+!   otherwise. Also, if {\tt standardName1} and/or {\tt standardName2} do not 
+!   correspond to an existing dictionary entry, {.false.} will be returned.
 !EOP
   !-----------------------------------------------------------------------------
     if (present(rc)) rc = ESMF_SUCCESS

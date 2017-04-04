@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2016, University Corporation for Atmospheric Research, 
+// Copyright 2002-2017, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -109,7 +109,7 @@ ArrayBundle::ArrayBundle(
     throw rc;  // bail out with exception
   }catch(...){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-      "- Caught exception", ESMC_CONTEXT, &rc);
+      "Caught exception", ESMC_CONTEXT, &rc);
     throw rc;  // bail out with exception
   }
   
@@ -221,7 +221,7 @@ ArrayBundle *ArrayBundle::create(
   
   }catch(...){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-      "- Caught exception", ESMC_CONTEXT, rc);
+      "Caught exception", ESMC_CONTEXT, rc);
     return ESMC_NULL_POINTER; // bail out
   }
   
@@ -260,7 +260,7 @@ int ArrayBundle::destroy(
   // return with errors for NULL pointer
   if (arraybundle == ESMC_NULL_POINTER || *arraybundle == ESMC_NULL_POINTER){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
-      "- Not a valid pointer to ArrayBundle", ESMC_CONTEXT, &rc);
+      "Not a valid pointer to ArrayBundle", ESMC_CONTEXT, &rc);
     return rc;
   }
 
@@ -552,7 +552,7 @@ int ArrayBundle::print()const{
   // return with errors for NULL pointer
   if (this == NULL){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
-      "- Not a valid pointer to ArrayBundle", ESMC_CONTEXT, &rc);
+      "Not a valid pointer to ArrayBundle", ESMC_CONTEXT, &rc);
     return rc;
   }
 
@@ -591,11 +591,11 @@ int ArrayBundle::haloStore(
 //
 // !ARGUMENTS:
 //
-  ArrayBundle *arraybundle,             // inout - ArrayBundle to be haloed
-  RouteHandle **routehandle,            // inout - handle to precomputed comm
+  ArrayBundle *arraybundle,           // inout - ArrayBundle to be haloed
+  RouteHandle **routehandle,          // inout - handle to precomputed comm
   ESMC_HaloStartRegionFlag halostartregionflag, // in - start of halo region
-  InterfaceInt *haloLDepth,             // in    - lower corner halo depth
-  InterfaceInt *haloUDepth              // in    - upper corner halo depth
+  InterArray<int> *haloLDepth,        // in    - lower corner halo depth
+  InterArray<int> *haloUDepth         // in    - upper corner halo depth
   ){    
 //
 // !DESCRIPTION:
@@ -618,7 +618,7 @@ int ArrayBundle::haloStore(
     // every Pet must provide arraybundle
     if (arraybundle == NULL){
       ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
-        "- Not a valid pointer to arraybundle", ESMC_CONTEXT, &rc);
+        "Not a valid pointer to arraybundle", ESMC_CONTEXT, &rc);
       return rc;
     }
     int arrayCount = arraybundle->getCount();
@@ -628,13 +628,13 @@ int ArrayBundle::haloStore(
     if (arrayCount != 
       *max_element(arrayCountList.begin(), arrayCountList.end())){
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
-        "- arraybundle argument contains different number"
+        "arraybundle argument contains different number"
         " of Arrays on different PETs", ESMC_CONTEXT, &rc);
       return rc;
     }
     if (arrayCount == 0){
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
-        "- arraybundle argument contains no Arrays", ESMC_CONTEXT, &rc);
+        "arraybundle argument contains no Arrays", ESMC_CONTEXT, &rc);
       return rc;
     }
     // construct local matchList
@@ -737,7 +737,7 @@ int ArrayBundle::haloStore(
     return rc;
   }catch(...){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-      "- Caught exception", ESMC_CONTEXT, &rc);
+      "Caught exception", ESMC_CONTEXT, &rc);
     return rc;
   }
 
@@ -840,12 +840,12 @@ int ArrayBundle::redistStore(
 //
 // !ARGUMENTS:
 //
-  ArrayBundle *srcArraybundle,          // in    - source ArrayBundle
-  ArrayBundle *dstArraybundle,          // in    - destination ArrayBundle
-  RouteHandle **routehandle,            // inout - handle to precomputed comm
-  InterfaceInt *srcToDstTransposeMap,   // in    - mapping src -> dst dims
-  ESMC_TypeKind_Flag typekindFactor,         // in    - typekind of factor
-  void *factor                          // in    - redist factor
+  ArrayBundle *srcArraybundle,            // in    - source ArrayBundle
+  ArrayBundle *dstArraybundle,            // in    - destination ArrayBundle
+  RouteHandle **routehandle,              // inout - handle to precomputed comm
+  InterArray<int> *srcToDstTransposeMap,  // in    - mapping src -> dst dims
+  ESMC_TypeKind_Flag typekindFactor,      // in    - typekind of factor
+  void *factor                            // in    - redist factor
   ){    
 //
 // !DESCRIPTION:
@@ -870,18 +870,18 @@ int ArrayBundle::redistStore(
     // every Pet must provide srcArraybundle and dstArraybundle
     if (srcArraybundle == NULL){
       ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
-        "- Not a valid pointer to srcArraybundle", ESMC_CONTEXT, &rc);
+        "Not a valid pointer to srcArraybundle", ESMC_CONTEXT, &rc);
       return rc;
     }
     if (dstArraybundle == NULL){
       ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
-        "- Not a valid pointer to dstArraybundle", ESMC_CONTEXT, &rc);
+        "Not a valid pointer to dstArraybundle", ESMC_CONTEXT, &rc);
       return rc;
     }
     int arrayCount = srcArraybundle->getCount();
     if (arrayCount != dstArraybundle->getCount()){
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
-        "- srcArraybundle and dstArraybundle contain different number"
+        "srcArraybundle and dstArraybundle contain different number"
         " of Arrays", ESMC_CONTEXT, &rc);
       return rc;
     }
@@ -891,13 +891,13 @@ int ArrayBundle::redistStore(
     if (arrayCount != 
       *max_element(arrayCountList.begin(), arrayCountList.end())){
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
-        "- srcArraybundle and dstArraybundle arguments contain different number"
+        "srcArraybundle and dstArraybundle arguments contain different number"
         " of Arrays on different PETs", ESMC_CONTEXT, &rc);
       return rc;
     }
     if (arrayCount == 0){
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
-        "- srcArraybundle and dstArraybundle arguments contain no Arrays",
+        "srcArraybundle and dstArraybundle arguments contain no Arrays",
         ESMC_CONTEXT, &rc);
       return rc;
     }
@@ -1009,7 +1009,7 @@ int ArrayBundle::redistStore(
     return rc;
   }catch(...){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-      "- Caught exception", ESMC_CONTEXT, &rc);
+      "Caught exception", ESMC_CONTEXT, &rc);
     return rc;
   }
 
@@ -1113,10 +1113,11 @@ int ArrayBundle::sparseMatMulStore(
 //
 // !ARGUMENTS:
 //
-  ArrayBundle *srcArraybundle,          // in    - source ArrayBundle
-  ArrayBundle *dstArraybundle,          // in    - destination ArrayBundle
-  RouteHandle **routehandle,            // inout - handle to precomputed comm
-  vector<SparseMatrix> &sparseMatrix    // in    - sparse matrix
+  ArrayBundle *srcArraybundle,        // in    - source ArrayBundle
+  ArrayBundle *dstArraybundle,        // in    - destination ArrayBundle
+  RouteHandle **routehandle,          // inout - handle to precomputed comm
+  vector<SparseMatrix<ESMC_I4,ESMC_I4> > &sparseMatrix, // in - sparse matrix
+  InterArray<int> *srcTermProcessing  // inout - srcTermProcessing parameters
   ){    
 //
 // !DESCRIPTION:
@@ -1141,18 +1142,18 @@ int ArrayBundle::sparseMatMulStore(
     // every Pet must provide srcArraybundle and dstArraybundle
     if (srcArraybundle == NULL){
       ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
-        "- Not a valid pointer to srcArraybundle", ESMC_CONTEXT, &rc);
+        "Not a valid pointer to srcArraybundle", ESMC_CONTEXT, &rc);
       return rc;
     }
     if (dstArraybundle == NULL){
       ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
-        "- Not a valid pointer to dstArraybundle", ESMC_CONTEXT, &rc);
+        "Not a valid pointer to dstArraybundle", ESMC_CONTEXT, &rc);
       return rc;
     }
     int arrayCount = srcArraybundle->getCount();
     if (arrayCount != dstArraybundle->getCount()){
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
-        "- srcArraybundle and dstArraybundle contain different number"
+        "srcArraybundle and dstArraybundle contain different number"
         " of Arrays", ESMC_CONTEXT, &rc);
       return rc;
     }
@@ -1162,15 +1163,47 @@ int ArrayBundle::sparseMatMulStore(
     if (arrayCount != 
       *max_element(arrayCountList.begin(), arrayCountList.end())){
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
-        "- srcArraybundle and dstArraybundle arguments contain different number"
+        "srcArraybundle and dstArraybundle arguments contain different number"
         " of Arrays on different PETs", ESMC_CONTEXT, &rc);
       return rc;
     }
     if (arrayCount == 0){
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
-        "- srcArraybundle and dstArraybundle arguments contain no Arrays",
+        "srcArraybundle and dstArraybundle arguments contain no Arrays",
         ESMC_CONTEXT, &rc);
       return rc;
+    }
+    // check if srcTermProcessing argument is valid
+    vector<int*> srcTermProcParameters(arrayCount);
+    if (!present(srcTermProcessing)){
+      // srcTermProcessing argument is not present
+      for (int i=0; i<arrayCount; i++)
+        srcTermProcParameters[i] = NULL;  // invalidate each parameter
+    }else{
+      // srcTermProcessing argument is present
+      if (srcTermProcessing->extent[0]==arrayCount){
+        // same number of elements as there are arrays in the bundles
+        for (int i=0; i<arrayCount; i++)
+          srcTermProcParameters[i] = &(srcTermProcessing->array[i]);
+      }else if (srcTermProcessing->extent[0]==1){
+        // single element in srcTermProcessing but more arrays in bundles
+        if (srcTermProcessing->array[0] < 0){
+          ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
+            "Single srcTermProcessing parameter must not be negative to "
+            "apply for all arrays in bundle.",
+            ESMC_CONTEXT, &rc);
+          return rc;
+        }
+        for (int i=0; i<arrayCount; i++)
+          srcTermProcParameters[i] = &(srcTermProcessing->array[0]);
+      }else{
+        // all other conditions are error conditions
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
+          "Number of elements in srcTermProcessing must match number of "
+          "arrays in bundles, or be 1.",
+          ESMC_CONTEXT, &rc);
+        return rc;
+      }
     }
     // construct local matchList
     vector<int> matchList(arrayCount);
@@ -1241,13 +1274,16 @@ int ArrayBundle::sparseMatMulStore(
           vectorLengthShift);
         if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
           ESMC_CONTEXT, &rc)) return rc;
+        // also supply the value of matching srcTermProcessing element back
+        if (srcTermProcParameters[i] && srcTermProcParameters[matchList[i]])
+          *srcTermProcParameters[i] = *srcTermProcParameters[matchList[i]];
       }else{
         // src/dst Array pair does _not_ match any previous pair in ArrayBundle
 //        printf("localPet=%d, src/dst pair #%d requires precompute\n",
 //          localPet, i);
         RouteHandle *rh;
         localrc = Array::sparseMatMulStore(srcArray, dstArray, &rh, 
-          sparseMatrix);
+          sparseMatrix, false, false, srcTermProcParameters[i]);
         if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
           ESMC_CONTEXT, &rc)) return rc;
         // get a handle on the XXE stored in rh
@@ -1280,7 +1316,7 @@ int ArrayBundle::sparseMatMulStore(
     return rc;
   }catch(...){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-      "- Caught exception", ESMC_CONTEXT, &rc);
+      "Caught exception", ESMC_CONTEXT, &rc);
     return rc;
   }
   
@@ -1369,7 +1405,7 @@ int ArrayBundle::sparseMatMul(
       }else{
         // inconsistency detected
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
-          "- incorrect number of elements provided in the termorderflag.", 
+          "incorrect number of elements provided in the termorderflag.", 
           ESMC_CONTEXT, &rc);
         return rc;  // bail out
       }
@@ -1381,7 +1417,7 @@ int ArrayBundle::sparseMatMul(
       if (srcArraybundle != NULL && dstArraybundle != NULL){
         if (srcArraybundle->getCount() != dstArraybundle->getCount()){
           ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
-            "- srcArraybundle and dstArraybundle contain different number"
+            "srcArraybundle and dstArraybundle contain different number"
             " of Arrays", ESMC_CONTEXT, &rc);
           return rc;
         }
@@ -1425,7 +1461,7 @@ int ArrayBundle::sparseMatMul(
       if (srcArraybundle != NULL && dstArraybundle != NULL){
         if (srcArraybundle->getCount() != dstArraybundle->getCount()){
           ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
-            "- srcArraybundle and dstArraybundle contain different number"
+            "srcArraybundle and dstArraybundle contain different number"
             " of Arrays", ESMC_CONTEXT, &rc);
           return rc;
         }
@@ -1559,13 +1595,13 @@ int ArrayBundle::sparseMatMul(
     }else{
       // unimplemented branch
       ESMC_LogDefault.MsgFoundError(ESMC_RC_NOT_IMPL,
-        "- only ESMC_ARRAYXXE and ESMC_ARRAYBUNDLEXXE are supported",
+        "only ESMC_ARRAYXXE and ESMC_ARRAYBUNDLEXXE are supported",
         ESMC_CONTEXT, &rc);
       return rc;
     }
   }catch(...){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-      "- Caught exception", ESMC_CONTEXT, &rc);
+      "Caught exception", ESMC_CONTEXT, &rc);
     return rc;
   }
   
@@ -1641,7 +1677,7 @@ int ArrayBundle::sparseMatMulRelease(
   
   }catch(...){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-      "- Caught exception", ESMC_CONTEXT, &rc);
+      "Caught exception", ESMC_CONTEXT, &rc);
     return rc;
   }
   
@@ -1693,7 +1729,7 @@ int ArrayBundle::serialize(
 
   // Check if buffer has enough free memory to hold object
   if ((inquireflag != ESMF_INQUIREONLY) && (*length - *offset) <
-    sizeof(ArrayBundle)){
+    (int)sizeof(ArrayBundle)){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
       "Buffer too short to add an ArrayBundle object", ESMC_CONTEXT, &rc);
     return rc;

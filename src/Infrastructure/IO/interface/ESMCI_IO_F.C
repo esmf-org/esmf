@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2016, University Corporation for Atmospheric Research, 
+// Copyright 2002-2017, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -117,8 +117,10 @@ extern "C" {
       }
     }
 
+    vector<pair<string,string> > varAtts;  // not supported yet
+
     // call into C++
-    localrc = (*ptr)->addArray(*array, varName, dimLabels);
+    localrc = (*ptr)->addArray(*array, varName, dimLabels, varAtts);
     ESMC_LogDefault.MsgFoundError(localrc,
                                   ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
                                   ESMC_NOT_PRESENT_FILTER(rc));

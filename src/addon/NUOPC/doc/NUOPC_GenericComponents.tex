@@ -1,6 +1,6 @@
 % $Id$
 
-The NUOPC generic components are implemented as a {\em collection} of Fortran modules. Each module implements a single, well specified set of standard {\tt ESMF\_GridComp} or {\tt ESMF\_CplComp} methods. The nomenclature of the generic component modules starts with the {\tt NUOPC\_} prefix and continues with the flavor: {\tt Driver}, {\tt Model}, {\tt Mediator}, or {\tt Connector}. This is optionally followed by a string of additional descriptive terms. The four flavors of generic components implemented by the NUOPC Layer are:
+The NUOPC generic components are implemented as a {\em collection} of Fortran modules. Each module implements a single, well specified set of standard {\tt ESMF\_GridComp} or {\tt ESMF\_CplComp} methods. The nomenclature of the generic component modules starts with the {\tt NUOPC\_} prefix and continues with the kind: {\tt Driver}, {\tt Model}, {\tt Mediator}, or {\tt Connector}. This is optionally followed by a string of additional descriptive terms. The four kinds of generic components implemented by the NUOPC Layer are:
 
 \begin{itemize}
 
@@ -59,7 +59,7 @@ Components that inherit from a generic component may choose to only specialize c
 \vspace{.5in}
 \scalebox{0.6}{\includegraphics{NUOPC_GC}}
 \end{center}
-\caption{The NUOPC Generic Component inheritance structure. The tree on the left is rooted in {\tt ESMF\_GridComp}, while the tree on the right is rooted in {\tt ESMF\_CplComp}. The ESMF data types are shown in green. The four main NUOPC Generic Component flavors are shown in dark blue boxes. The yellow box shows a partial specialization in the inheritance tree.}
+\caption{The NUOPC Generic Component inheritance structure. The tree on the left is rooted in {\tt ESMF\_GridComp}, while the tree on the right is rooted in {\tt ESMF\_CplComp}. The ESMF data types are shown in green. The four main NUOPC Generic Component kinds are shown in dark blue boxes. The yellow box shows a partial specialization in the inheritance tree.}
 \label{fig:NUOPCGenericComp}
 \end{figure}
 

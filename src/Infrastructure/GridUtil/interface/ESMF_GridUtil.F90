@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2016, University Corporation for Atmospheric Research, 
+! Copyright 2002-2017, University Corporation for Atmospheric Research, 
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 ! Laboratory, University of Michigan, National Centers for Environmental 
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -343,7 +343,7 @@ module ESMF_GridUtilMod
 !------------------------------------------------------------------------------
     integer :: localrc 
     type(ESMF_Pointer) :: theMesh
-    type(ESMF_InterfaceInt) :: maskValuesArg
+    type(ESMF_InterArray) :: maskValuesArg
     type(ESMF_Index_Flag) :: indexflag
     type(ESMF_RegridConserve) :: lregridConserve
     integer :: localIsLatLonDeg     
@@ -381,7 +381,7 @@ module ESMF_GridUtilMod
 
 
     ! convert mask values 
-    maskValuesArg = ESMF_InterfaceIntCreate(maskValues, rc=localrc)
+    maskValuesArg = ESMF_InterArrayCreate(maskValues, rc=localrc)
     	if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       	  ESMF_CONTEXT, rcToReturn=rc)) return
  
@@ -391,7 +391,7 @@ module ESMF_GridUtilMod
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       	    ESMF_CONTEXT, rcToReturn=rc)) return
 
-    call ESMF_InterfaceIntDestroy(maskValuesArg, rc=localrc)
+    call ESMF_InterArrayDestroy(maskValuesArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       	    ESMF_CONTEXT, rcToReturn=rc)) return
 

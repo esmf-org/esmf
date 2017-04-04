@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2016, University Corporation for Atmospheric Research, 
+// Copyright 2002-2017, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -341,7 +341,7 @@ extern "C" {
   void FTN_X(c_esmc_arraybundlehalostore)(ESMCI::ArrayBundle **arraybundle,
     ESMCI::RouteHandle **routehandle,
     ESMC_HaloStartRegionFlag *halostartregionflag,
-    ESMCI::InterfaceInt *haloLDepth, ESMCI::InterfaceInt *haloUDepth,
+    ESMCI::InterArray<int> *haloLDepth, ESMCI::InterArray<int> *haloUDepth,
     int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_arraybundlehalostore()"
@@ -451,7 +451,8 @@ extern "C" {
 
   void FTN_X(c_esmc_arraybundlerediststore)(ESMCI::ArrayBundle **srcArraybundle,
     ESMCI::ArrayBundle **dstArraybundle, ESMCI::RouteHandle **routehandle, 
-    ESMCI::InterfaceInt *srcToDstTransposeMap, ESMC_TypeKind_Flag *typekind,
+    ESMCI::InterArray<int> *srcToDstTransposeMap,
+    ESMC_TypeKind_Flag *typekind,
     void *factor, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_arraybundlerediststore()"
@@ -467,7 +468,7 @@ extern "C" {
 
   void FTN_X(c_esmc_arraybundlerediststorenf)(ESMCI::ArrayBundle **srcArraybundle,
     ESMCI::ArrayBundle **dstArraybundle, ESMCI::RouteHandle **routehandle,
-    ESMCI::InterfaceInt *srcToDstTransposeMap, int *rc){
+    ESMCI::InterArray<int> *srcToDstTransposeMap, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_arraybundlerediststorenf()"
     // Initialize return code; assume routine not implemented
@@ -594,7 +595,8 @@ extern "C" {
   void FTN_X(c_esmc_arraybundlesmmstore)(ESMCI::ArrayBundle **srcArraybundle,
     ESMCI::ArrayBundle **dstArraybundle, ESMCI::RouteHandle **routehandle, 
     ESMC_TypeKind_Flag *typekindFactors, void *factorList, int *factorListCount,
-    ESMCI::InterfaceInt *factorIndexList, int *rc){
+    ESMCI::InterArray<int> *factorIndexList, 
+    ESMCI::InterArray<int> *srcTermProcessing, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_arraybundlesmmstore()"
     // Initialize return code; assume routine not implemented
@@ -630,14 +632,16 @@ extern "C" {
       }
     }
     // prepare SparseMatrix vector
-    vector<ESMCI::SparseMatrix> sparseMatrix;
+    vector<ESMCI::SparseMatrix<ESMC_I4,ESMC_I4> > sparseMatrix;
     int srcN = (factorIndexList)->extent[0]/2;
     int dstN = (factorIndexList)->extent[0]/2;
-    sparseMatrix.push_back(ESMCI::SparseMatrix(*typekindFactors, factorList,
+    sparseMatrix.push_back(ESMCI::SparseMatrix<ESMC_I4,ESMC_I4>(
+      *typekindFactors, factorList,
       *factorListCount, srcN, dstN, (factorIndexList)->array));
     // Call into the actual C++ method wrapped inside LogErr handling
     if (ESMC_LogDefault.MsgFoundError(ESMCI::ArrayBundle::sparseMatMulStore(
-      *srcArraybundle, *dstArraybundle, routehandle, sparseMatrix ),
+      *srcArraybundle, *dstArraybundle, routehandle, sparseMatrix,
+      srcTermProcessing),
       ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       ESMC_NOT_PRESENT_FILTER(rc))) return;
     
@@ -661,16 +665,17 @@ extern "C" {
 
   void FTN_X(c_esmc_arraybundlesmmstorenf)(ESMCI::ArrayBundle **srcArraybundle,
     ESMCI::ArrayBundle **dstArraybundle, ESMCI::RouteHandle **routehandle,
-    int *rc){
+    ESMCI::InterArray<int> *srcTermProcessing, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_arraybundlesmmstorenf()"
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     // prepare empty SparseMatrix vector
-    vector<ESMCI::SparseMatrix> sparseMatrix;
+    vector<ESMCI::SparseMatrix<ESMC_I4,ESMC_I4> > sparseMatrix;
     // Call into the actual C++ method wrapped inside LogErr handling
     ESMC_LogDefault.MsgFoundError(ESMCI::ArrayBundle::sparseMatMulStore(
-      *srcArraybundle, *dstArraybundle, routehandle, sparseMatrix),
+      *srcArraybundle, *dstArraybundle, routehandle, sparseMatrix,
+      srcTermProcessing),
       ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       ESMC_NOT_PRESENT_FILTER(rc));
   }

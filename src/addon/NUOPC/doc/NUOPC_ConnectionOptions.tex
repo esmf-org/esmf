@@ -33,7 +33,7 @@ OptionName and the value strings are case insensitive. There are single and mult
      {\tt srcTermProcessing} & Number of terms in each partial sum of the interpolation to process on the source side. This setting impacts the bit-for-bit reproducibility of the parallel interpolation results between runs. The strictest bit-for-bit setting is achieved by setting the value to 1. & single & integer\\ \hline
      {\tt termOrder} & Order of the terms in each partial sum of the interpolation. This setting impacts the bit-for-bit reproducibility of the parallel interpolation results between runs. The strictest bit-for-bit setting is achieved by setting the value to {\tt srcseq}. & single & {\tt free}(default), {\tt srcseq}, {\tt srcpet}\\ \hline
      {\tt pipelineDepth} & Maximum number of outstanding non-blocking communication calls during the parallel interpolation. Only relevant for cases where the automatic tuning procedure fails to find a setting that works well on a given hardware. & single & integer\\ \hline
-     {\tt dumpWeightsFlag} & Enable or disable dumping of the interpolation weights into a file. & single & {\tt true}, {\tt false}(default)\\ \hline
+     {\tt dumpWeights} & Enable or disable dumping of the interpolation weights into a file. & single & {\tt true}, {\tt false}(default)\\ \hline
      \hline
 \end{tabular}
 

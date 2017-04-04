@@ -1,7 +1,7 @@
 // $Id: ESMCI_MeshRedist.C,v 1.23 2012/01/06 20:17:51 svasquez Exp $
 //
 // Earth System Modeling Framework
-// Copyright 2002-2016, University Corporation for Atmospheric Research, 
+// Copyright 2002-2017, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -512,7 +512,7 @@ namespace ESMCI {
   UInt *elemOwner_wsplit=NULL;
 
   //  int *elemMaskIIArray_wsplit=NULL;
-  //InterfaceInt *elemMaskII_wsplit=NULL;
+  //InterArray *elemMaskII_wsplit=NULL;
 
   if (dual_mesh->is_split) {
     // New number of elements
@@ -536,7 +536,7 @@ namespace ESMCI {
         elemMaskIIArray_wsplit=new int[num_elems_wsplit];
 
         extent[0]=num_elems_wsplit;
-        elemMaskII_wsplit=new InterfaceInt(elemMaskIIArray_wsplit,1,extent);
+        elemMaskII_wsplit=new InterArray(elemMaskIIArray_wsplit,1,extent);
       }
 #endif
 

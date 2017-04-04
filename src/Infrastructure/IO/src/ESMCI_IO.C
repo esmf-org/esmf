@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2016, University Corporation for Atmospheric Research,
+// Copyright 2002-2017, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -465,9 +465,6 @@ int IO::write(
   }
 
   localrc1 = write(timeslice);
-  if (ESMC_LogDefault.MsgFoundError(localrc1, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
-    &rc)) return rc;  // bail out
-  
   PRINTMSG("write returned " << localrc1);
   // Can't quit even if error; Have to close first
 
@@ -596,8 +593,8 @@ int IO::write(
       }
 
       // Write the Array
-      ioHandler->arrayWrite(temp_array_p,
-                            (*it)->getName(), (*it)->dimLabels, timeslice, &localrc);
+      ioHandler->arrayWrite(temp_array_p, (*it)->getName(),
+          (*it)->dimLabels, (*it)->varAtts, timeslice, &localrc);
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc))
         return rc;
 
@@ -849,7 +846,8 @@ int IO::addArray(
 
   std::string varname;                 // no name
   std::vector<std::string> dimLabels;  // no labels
-  return IO::addArray(arr_p, varname, dimLabels);
+  std::vector<std::pair<std::string,std::string> > varAtts; // no attributes
+  return IO::addArray(arr_p, varname, dimLabels, varAtts);
 }
 
 //-------------------------------------------------------------------------
@@ -866,7 +864,8 @@ int IO::addArray(
 // !ARGUMENTS:
   Array *arr_p,                             // (in) - The array to add
   const std::string &variableName,          // (in) - Name to use for array
-  const std::vector<std::string> &dimLabels // (in) - Optional dimension labels
+  const std::vector<std::string> &dimLabels,// (in) - Optional dimension labels
+  const std::vector<std::pair<std::string,std::string> > &varAtts // (in) - Optional variable attributes
   ) {
 // !DESCRIPTION:
 //      Add an array to the list of objects to read or write. The 
@@ -900,8 +899,7 @@ int IO::addArray(
 
 // Push Array onto the list
   try {
-    const char *varname = (variableName.length() != 0)?variableName.c_str():NULL;
-    IO_ObjectContainer *newObj = new IO_ObjectContainer((Array *)arr_p, varname, dimLabels);
+    IO_ObjectContainer *newObj = new IO_ObjectContainer((Array *)arr_p, variableName, dimLabels, varAtts);
 
     if ((IO_ObjectContainer *)NULL == newObj) {
       localrc = ESMC_RC_MEM_ALLOCATE;
@@ -992,14 +990,14 @@ void IO::redist_arraycreate1de(Array *src_array_p, Array **dest_array_p, int *rc
   if (ESMC_LogDefault.MsgFoundError(localrc, "Tile count != 1 is not supported", ESMC_CONTEXT, rc))
     return;
 
-  ESMCI::InterfaceInt minIndexInterface((int*)minIndexTile, ndims);
+  ESMCI::InterArray<int> minIndexInterface((int*)minIndexTile, ndims);
 #if 0
   std::cout << ESMC_METHOD << "[" << me << "]: setting maxindex to: (";
   for (int i=0; i<ndims; i++)
     std::cout << " " << maxIndexTile[i];
   std::cout << " )" << std::endl;
 #endif
-  ESMCI::InterfaceInt maxIndexInterface((int*)maxIndexTile, ndims);
+  ESMCI::InterArray<int> maxIndexInterface((int*)maxIndexTile, ndims);
   DistGrid *distgrid = DistGrid::create(&minIndexInterface, &maxIndexInterface, NULL,
       NULL, 0, NULL, NULL, NULL, NULL, NULL, (ESMCI::DELayout*)NULL, NULL,
       &localrc);
@@ -1064,19 +1062,22 @@ void IO::undist_arraycreate_alldist(Array *src_array_p, Array **dest_array_p, in
 
   int rank = src_array_p->getRank ();
   DistGrid *dg = src_array_p->getDistGrid ();
-  int dimcount = dg->getDimCount ();
-  int tilecount = dg->getTileCount ();
 
+  int tilecount = dg->getTileCount ();
+  //TODO: bail out if tilecount > 1, following code assumes tilecount==1
+  
   const int *arrayToDistGridMap = src_array_p->getArrayToDistGridMap();
   const int *undistLBound = src_array_p->getUndistLBound();
   const int *undistUBound = src_array_p->getUndistUBound();
   const int *minIndexPTile = dg->getMinIndexPDimPTile ();
   const int *maxIndexPTile = dg->getMaxIndexPDimPTile ();
+  const int *regDecomp = dg->getRegDecomp ();
 
-  // construct the new minIndex and maxIndex
-//std::cout << ESMC_METHOD << ": construct the new minIndex and maxIndex." << std::endl;
+  // construct the new minIndex and maxIndex and regDecomp taking into account
+  // how Array dimensions are mapped against DistGrid dimensions
   std::vector<int> minIndexNew(rank);
   std::vector<int> maxIndexNew(rank);
+  std::vector<int> regDecompNew(rank);
   int jj = 0;
   for (int i=0; i<rank; i++) {
     int j = arrayToDistGridMap[i];
@@ -1084,37 +1085,30 @@ void IO::undist_arraycreate_alldist(Array *src_array_p, Array **dest_array_p, in
       // valid DistGrid dimension
       minIndexNew[i] = minIndexPTile[j-1];
       maxIndexNew[i] = maxIndexPTile[j-1];
+      regDecompNew[i] = regDecomp[j-1];
     } else {
       // undistributed dimension
       minIndexNew[i] = undistLBound[jj];
       maxIndexNew[i] = undistUBound[jj];
+      regDecompNew[i] = 1;  // no actual decomposition in this dimension
       jj++;
     }
   }
 
-  // general dimensionality of regDecomp
-  std::vector<int> regDecomp(rank);
-  VM *currentVM = VM::getCurrent(&localrc);
-  regDecomp[0] = currentVM->getNpets(); // first element petCount for default distribution
-  for (int i=1; i<rank; i++)  // default all other dims to 1
-    regDecomp[i] = 1;
-
-  // create the fixed up DistGrid
-//std::cout << ESMC_METHOD << ": creating new DistGrid" << std::endl;
-  ESMCI::InterfaceInt minIndexInterface(&minIndexNew[0], rank);
-  ESMCI::InterfaceInt maxIndexInterface(&maxIndexNew[0], rank);
-  ESMCI::InterfaceInt regDecompInterface(&regDecomp[0] , rank);
+  // create the fixed up DistGrid, making sure to use original DELayout
+  ESMCI::InterArray<int> minIndexInterface(&minIndexNew[0], rank);
+  ESMCI::InterArray<int> maxIndexInterface(&maxIndexNew[0], rank);
+  ESMCI::InterArray<int> regDecompInterface(&regDecompNew[0] , rank);
+  DELayout *delayout = dg->getDELayout();
   DistGrid *dg_temp = DistGrid::create(&minIndexInterface,
-                 &maxIndexInterface, &regDecompInterface,
-      NULL, 0, NULL, NULL, NULL, NULL, NULL, (ESMCI::DELayout*)NULL, NULL,
-      &localrc);
+    &maxIndexInterface, &regDecompInterface,
+    NULL, 0, NULL, NULL, NULL, NULL, NULL, delayout, NULL, &localrc);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc)) {
     return;
   }
 
   // finally, create the fixed up Array using pointer to original data.
   // Assuming only 1 DE/PET since redist step would have been performed previously.
-//std::cout << ESMC_METHOD << ": creating alias Array" << std::endl;
   CopyFlag copyflag = DATA_REF;
   *dest_array_p = Array::create (src_array_p->getLocalarrayList(), 1,
       dg_temp, copyflag,

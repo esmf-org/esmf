@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2016, University Corporation for Atmospheric Research, 
+// Copyright 2002-2017, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -43,6 +43,7 @@
 #include <cstdio>
 #include <string>
 #include <vector>
+#include <utility>
 
 //-------------------------------------------------------------------------
 
@@ -95,6 +96,7 @@ namespace ESMCI {
     // Non-atomic writes which are only successful on an open IO stream
     virtual void arrayWrite(Array *arr_p, const char *name,
                             const std::vector<std::string> &dimLabels,
+                            const std::vector<std::pair<std::string,std::string> > &varAtts,
                             int *timeslice = NULL, int *rc = NULL) = 0;
 
     // get() and set()

@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2016, University Corporation for Atmospheric Research,
+! Copyright 2002-2017, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -50,9 +50,9 @@ program ESMF_GridCreateUTest
   character(ESMF_MAXSTR) :: failMsg
   character(ESMF_MAXSTR) :: name, grid_name
 
-  type(ESMF_Grid) :: grid, grid2, gridAlias
+  type(ESMF_Grid) :: grid, grid2, gridAlias,grid_multi
   type(ESMF_VM) :: vm
-  type(ESMF_DistGrid) :: distgrid, distgrid2
+  type(ESMF_DistGrid) :: distgrid, distgrid2, distgrid_multi
   type(ESMF_Array) :: array
   integer :: coordDimMap(2,2), dimCount, undistLBound(3), undistUBound(3)
   type(ESMF_Index_Flag) :: indexflag
@@ -64,19 +64,26 @@ program ESMF_GridCreateUTest
   integer :: clbnd(3),cubnd(3)
   character, pointer :: buf(:)
   real(ESMF_KIND_R8), pointer :: fptr2D(:,:)
-  integer :: bufCount, offset, localDECount, rank, i1,i2,lDE, i
+  integer :: bufCount, offset, localDECount, rank, i1,i2,lDE, i, j
   type(ESMF_StaggerLoc)          :: staggerloc8
   integer :: minIndex(3), maxIndex(3) 
   integer :: celw(3),ceuw(3)
   logical :: isLBound(2),isUBound(2)
   integer :: petMap2D(2,2,1)
-  real(ESMF_KIND_R8), pointer :: fptr(:,:)
+  integer :: petMap2x3(2,3,1)
+  real(ESMF_KIND_R8), pointer :: fptr(:,:), fptr1(:,:), fptr2(:,:)
   logical:: gridBool
   logical:: isCreated
   type(ESMF_GridStatus_Flag) :: status
   ! test the AttributeGet for Grid info
   type(ESMF_TypeKind_Flag) :: attrValue
   type(ESMF_CoordSys_Flag) :: coordSys
+  integer :: minIndexPTile(2,4), maxIndexPTile(2,4)
+  integer :: regDecompPTile4(2,4)
+  type(ESMF_Decomp_Flag) :: decompPTile(2,4)
+  integer :: tile
+  integer(ESMF_KIND_I4) :: regDecompPTile(2,6), deLabelList(6)
+  type(ESMF_Decomp_Flag) :: decompFlagPTile(2,6)
 
 
   !-----------------------------------------------------------------------------
@@ -93,7 +100,6 @@ program ESMF_GridCreateUTest
   ! prepare DistGrid
   distgrid=ESMF_DistGridCreate(minIndex=(/1,1/),maxIndex=(/10,10/), rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-
 
   !------------------------------------------------------------------------
   !NEX_UTest
@@ -2490,6 +2496,201 @@ program ESMF_GridCreateUTest
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 #endif
 
+
+  ! destroy grid
+  call ESMF_GridDestroy(grid,rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
+  !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Test getting tile number from localDE"
+  write(failMsg, *) "Incorrect result"
+ 
+  ! init flags
+  rc=ESMF_SUCCESS
+  correct=.true.
+
+  ! Setup index space
+  minIndexPTile(:,1)=(/1,1/)
+  maxIndexPTile(:,1)=(/20,20/)
+  regDecompPTile4(:,1)=(/petCount,1/)
+
+  minIndexPTile(:,2)=(/1,1/)
+  maxIndexPTile(:,2)=(/20,20/)
+  regDecompPTile4(:,2)=(/petCount,1/)
+
+  minIndexPTile(:,3)=(/1,1/)
+  maxIndexPTile(:,3)=(/20,20/)
+  regDecompPTile4(:,3)=(/petCount,1/)
+
+  minIndexPTile(:,4)=(/1,1/)
+  maxIndexPTile(:,4)=(/20,20/)
+  regDecompPTile4(:,4)=(/petCount,1/)
+
+  decompPTile(:,:)=ESMF_DECOMP_BALANCED
+
+  ! Create source distgrid
+  distgrid_multi=ESMF_DistgridCreate(minIndexPTile=minIndexPTile, maxIndexPTile=maxIndexPTile, &
+                              regDecompPTile=regDecompPTile4, &
+                              decompflagPTile=decompPTile,indexflag=ESMF_INDEX_GLOBAL, &
+                              rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+
+  ! setup source grid
+  grid_multi=ESMF_GridCreate(distgrid=distgrid_multi, indexflag=ESMF_INDEX_GLOBAL, &
+                          coordSys=ESMF_COORDSYS_CART, &
+                          rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  ! Get number of localDEs
+  call ESMF_GridGet(grid_multi, localDECount=localDECount, rc=localrc) 
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  ! Check number of DE
+  if (localDECount .ne. 4) correct=.false.
+
+  ! loop DEs checking tile numbers
+  do lDE=0, localDECount-1
+
+     ! Get tile number of localDE
+     call ESMF_GridGet(grid_multi, localDE=lDE, tile=tile, rc=localrc)
+     if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+     ! Check tile number
+     if (tile .ne. (lDE+1)) correct=.false.
+  enddo  
+
+  ! destroy grid
+  call ESMF_GridDestroy(grid_multi,rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  ! destroy distgrid
+  call ESMF_DistgridDestroy(distgrid_multi,rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
+
+  !-----------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "GridCreateCubedSphere"
+  write(failMsg, *) "Incorrect result"
+
+  ! create grid with nondefault parameter
+  rc=ESMF_SUCCESS
+
+  ! Set up decomposition for src Grid
+  regDecompPTile(:,1)=(/2,2/)
+  regDecompPTile(:,2)=(/2,2/)
+  regDecompPTile(:,3)=(/2,2/)
+  regDecompPTile(:,4)=(/2,2/)
+  regDecompPTile(:,5)=(/2,2/)
+  regDecompPTile(:,6)=(/2,2/)
+
+  !decompFlagPTile(:,1)=(/ESMF_DECOMP_CYCLIC,  1/)
+  !decompFlagPTile(:,2)=(/ESMF_DECOMP_BALANCED, 2/)
+  !decompFlagPTile(:,3)=(/ESMF_DECOMP_RESTFIRST,3/)
+  !decompFlagPTile(:,4)=(/ESMF_DECOMP_RESTLAST, 4/)
+  !decompFlagPTile(:,5)=(/ESMF_DECOMP_CYCLIC,   5/)
+  !decompFlagPTile(:,6)=(/ESMF_DECOMP_BALANCED,  6/)
+
+  deLabelList(1) = 11
+  deLabelList(1) = 12
+  deLabelList(1) = 13
+  deLabelList(1) = 14
+  deLabelList(1) = 15
+  deLabelList(1) = 16
+
+  grid=ESMF_GridCreateCubedSphere(15, regDecompPTile=regDecompPTile, &
+                                  !decompFlagPTile=decompFlagPTile, &
+                                  !deLabelList=deLabelList, &
+                                  rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  call ESMF_GridGet(grid, localDECount=localDECount, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  do lde = 0, localDECount-1
+
+    call ESMF_GridGetCoord(grid, coordDim=1, localDE=lde, farrayPtr=fptr1, &
+                           exclusiveLBound=exlbnd, exclusiveUBound=exubnd, rc=localrc)
+    if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+    call ESMF_GridGetCoord(grid, coordDim=2, localDE=lde, farrayPtr=fptr2, &
+                           exclusiveLBound=exlbnd, exclusiveUBound=exubnd, rc=localrc)
+    if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+#if 0
+    print *, "coords from de", lde
+
+    print *, "lower bounds = [", exlbnd(1), ", ", exlbnd(2), "]"
+    print *, "upper bounds = [", exubnd(1), ", ", exubnd(2), "]"
+
+    print *, "["
+    do j = 1, exubnd(1)
+      do i = 1, exubnd(2)
+        print *, "[", fptr1(i,j), ", ", fptr2(i,j), "]"
+      enddo
+    enddo
+    print *, "]"
+#endif
+  enddo
+
+  ! destroy grid
+  call ESMF_GridDestroy(grid, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !-----------------------------------------------------------------------------
+
+
+  !-----------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Testing PetMap with non-sequential order and >1 DE on some PETs"
+  write(failMsg, *) "Incorrect result"
+
+  ! create grid with nondefault parameter
+  rc=ESMF_SUCCESS
+  if (petCount .eq. 4) then
+     petMap2x3(1,1,1)=0
+     petMap2x3(1,2,1)=2
+     petMap2x3(1,3,1)=3
+     petMap2x3(2,1,1)=0
+     petMap2x3(2,2,1)=1
+     petMap2x3(2,3,1)=1
+
+     grid=ESMF_GridCreate1PeriDim(maxIndex=(/10,10/),regDecomp=(/2,3/), &
+            petMap=petMap2x3,rc=localrc)
+     if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+  else
+     grid=ESMF_GridCreate1PeriDim(maxIndex=(/10,10/),regDecomp=(/2,3/), &
+            rc=localrc)
+     if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+  endif
+
+  ! Get local DE Count
+  call ESMF_GridGet(grid, localDECount=localDECount, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  ! init flag
+  correct=.true.
+
+  ! get check info
+  if (petCount .eq. 1) then
+     if (localDECount .ne. 6) correct=.false. 
+   else if (petCount .eq. 4) then
+     if (localPet .eq. 0) then
+     if (localDECount .ne. 2) correct=.false. 
+     else if (localPet .eq. 1) then
+     if (localDECount .ne. 2) correct=.false. 
+     else if (localPet .eq. 2) then
+     if (localDECount .ne. 1) correct=.false. 
+     else if (localPet .eq. 3) then
+     if (localDECount .ne. 1) correct=.false. 
+     endif
+   endif
 
   ! destroy grid
   call ESMF_GridDestroy(grid,rc=localrc)

@@ -246,7 +246,7 @@ contains
 !------------------------------------------------------------------------------
     integer             :: localrc      ! local return code
     type(ESMF_PointList)  :: pointlist
-    type(ESMF_InterfaceInt) :: maskValuesArg
+    type(ESMF_InterArray) :: maskValuesArg
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
@@ -254,7 +254,7 @@ contains
     pointlist%this = ESMF_NULL_POINTER
 
     ! convert mask values
-    maskValuesArg = ESMF_InterfaceIntCreate(maskValues, rc=localrc)
+    maskValuesArg = ESMF_InterArrayCreate(maskValues, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -269,7 +269,7 @@ contains
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
-    call ESMF_InterfaceIntDestroy(maskValuesArg, rc=localrc)
+    call ESMF_InterArrayDestroy(maskValuesArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -322,7 +322,7 @@ contains
 !------------------------------------------------------------------------------
     integer             :: localrc      ! local return code
     type(ESMF_PointList)  :: pointlist
-    type(ESMF_InterfaceInt) :: maskValuesArg
+    type(ESMF_InterArray) :: maskValuesArg
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
@@ -330,7 +330,7 @@ contains
     pointlist%this = ESMF_NULL_POINTER
 
     ! convert mask values
-    maskValuesArg = ESMF_InterfaceIntCreate(maskValues, rc=localrc)
+    maskValuesArg = ESMF_InterArrayCreate(maskValues, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -340,7 +340,7 @@ contains
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
-    call ESMF_InterfaceIntDestroy(maskValuesArg, rc=localrc)
+    call ESMF_InterArrayDestroy(maskValuesArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
 
