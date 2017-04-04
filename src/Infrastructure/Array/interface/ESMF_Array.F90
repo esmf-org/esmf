@@ -2017,8 +2017,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     interface
       subroutine c_esmc_arraywrite (array, fileName,  &
           variableName, len_varName,  &
-          dimLabels, size_dimlabels,  &
-          varAtts,   size_varatts,    &
+          dimLabels, size_dimlabels, len_dimlabels,  &
+          varAtts,   size_varatts, len_varatts,   &
           overwriteflag,          &
           status, timeslice, iofmt, rc)
         use ESMF_UtilTypesMod     ! ESMF utility types
@@ -2030,8 +2030,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         integer     , optional :: len_varName
         character(*), optional :: dimLabels(*)
         integer     , optional :: size_dimlabels
-        character(*), optional :: varAtts(*)
+        integer     , optional :: len_dimlabels
+        character(*), optional :: varAtts(size_varatts,2)
         integer     , optional :: size_varatts
+        integer     , optional :: len_varatts
         type(ESMF_Logical), optional :: overwriteflag
         type(ESMF_FileStatus_Flag), optional :: status
         integer,      optional :: timeslice
@@ -2043,7 +2045,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Local vars
     integer                    :: localrc           ! local return code
     integer                    :: len_varName       ! helper variable
+    integer                    :: len_dimLabels     ! helper variable
     integer                    :: size_dimLabels    ! helper variable
+    integer                    :: len_varatts       ! helper variable
     integer                    :: size_varatts      ! helper variable
     type(ESMF_Logical)         :: opt_overwriteflag ! helper variable
     type(ESMF_FileStatus_Flag) :: opt_status        ! helper variable
@@ -2104,21 +2108,25 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             msg="size (dimLabels) must be >= number of Array dimensions",  &
             ESMF_CONTEXT, rcToReturn=rc)) return
       end if
+      len_dimlabels = len (dimLabels)
     else
       size_dimlabels = 0
+      len_dimlabels = 0
     end if
 
     if (present (varAtts)) then
       size_varatts = size (varAtts,1)
+      len_varatts = len (varAtts)
     else
       size_varatts = 0
+      len_varatts = 0
     end if
 
     ! Call into the C++ interface, which will call IO object
     call c_esmc_arraywrite(array, fileName,  &
         variableName, len_varName,  &
-        dimLabels, size_dimlabels,  &
-        varAtts,   size_varatts,    &
+        dimLabels, size_dimlabels, len_dimlabels,  &
+        varAtts,   size_varatts, len_varatts,   &
         opt_overwriteflag,          &
         opt_status, timeslice, opt_iofmt, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU,  &

@@ -644,8 +644,8 @@ extern "C" {
   void FTN_X(c_esmc_arraywrite)(ESMCI::Array **array,
                                 char *file,
                                 char *variableName, int *len_variableName,
-                                char *dimensionLabels, int *size_dimLabels,
-                                char *variableAtts, int *size_varAtts,
+                                char *dimensionLabels, int *size_dimLabels, int *length_dimLabels,
+                                char *variableAtts, int *size_varAtts, int *length_varAtts,
                                 ESMC_Logical *opt_overwriteflag,
                                 ESMC_FileStatus_Flag *status,
                                 int *timeslice, ESMC_IOFmt_Flag *iofmt,
@@ -656,6 +656,8 @@ extern "C" {
                                 ESMCI_FortranStrLenArg varatts_l) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_arraywrite()"
+// std::cout << ESMF_METHOD << ": file_l=" << file_l << ", varname_l=" << varname_l;
+// std::cout << ", dimlabels_l=" << dimlabels_l << ", varatts_l=" << varatts_l << std::endl;
     bool overwriteflag;
     // Initialize return code; assume routine not implemented
     if (ESMC_NOT_PRESENT_FILTER(rc) != ESMC_NULL_POINTER) {
@@ -675,6 +677,7 @@ extern "C" {
     vector<string> dimLabels;
     int n_labels = *size_dimLabels;
     if (n_labels > 0) {
+      dimlabels_l = *length_dimLabels;  // PGI work-around (see ticket 3614119)
       dimLabels.reserve (n_labels);
       char *cp = dimensionLabels;
       for (int i=0; i<n_labels; i++) {
@@ -688,13 +691,14 @@ extern "C" {
     vector<pair<string, string> > varAttPairs;
     int n_varatts = *size_varAtts;
     if (n_varatts > 0) {
+      varatts_l = *length_varAtts;   // PGI work-around (see ticket 3614119)
       varAttPairs.reserve (n_varatts);
       char *cp0 = variableAtts;
       char *cp1 = variableAtts + n_varatts*varatts_l;
       for (int i=0; i<n_varatts; i++) {
-        varAttPairs.push_back(std::make_pair (
-          string (cp0, ESMC_F90lentrim (cp0, varatts_l)),
-          string (cp1, ESMC_F90lentrim (cp1, varatts_l)) ));
+        std::string s0 = string (cp0, ESMC_F90lentrim (cp0, varatts_l));
+        std::string s1 = string (cp1, ESMC_F90lentrim (cp1, varatts_l));
+        varAttPairs.push_back(std::make_pair (s0, s1));
         cp0 += varatts_l;
         cp1 += varatts_l;
       }
