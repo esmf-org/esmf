@@ -2031,8 +2031,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         character(*), optional :: dimLabels(*)
         integer                :: size_dimlabels
         integer                :: len_dimlabels
-        character(*), optional :: varAtts(size_varatts,2)
         integer                :: size_varatts
+        character(*), optional :: varAtts(size_varatts,2)
         integer                :: len_varatts
         type(ESMF_Logical), optional :: overwriteflag
         type(ESMF_FileStatus_Flag), optional :: status
