@@ -205,7 +205,7 @@ namespace ESMCI {
     template<typename T> int getSequenceIndexTile(int tile, int const *index,
       T *seqIndex)const;
     template<typename T> int getSequenceIndexTileRecursive(int tile,
-      int const *index, int depth, T *seqIndex)const;
+      int const *index, int depth, std::vector<T> &seqIndex)const;
     int getIndexTupleFromSeqIndex(int seqIndex, std::vector<int> &indexTuple,
       int &tile) const;
     // get/set arb sequence indices

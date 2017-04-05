@@ -267,7 +267,11 @@ DistGrid *DistGrid::create(
         }
       }
     }
-     
+
+//gjt: working on corner connection for cubed sphere take out padding removal
+//gjt: btw padding removal below is not robust, it's hard to determine which
+//gjt: edge on a tile is affected by a connection. For now leave them all in.
+#if 0
     // Look through connections and remove extra padding across connections
     if (present(connectionList)){
       // there are connections
@@ -312,7 +316,53 @@ DistGrid *DistGrid::create(
         }
       }
     }
-
+#endif
+    // Look through connections and adjust from center to corner connections
+    // This actually depends on the padding information still being here!!!!
+//gjt: this is very specific code right here 2D, and for cubed sphere is 
+//gjt: extra padding as lastExtra
+//TODO: generalize, or have flag come in that indicates this is to be done
+    if (present(connectionList)){
+      // there are connections
+      int elementSize = connectionList->extent[0];
+      int connectionCount = connectionList->extent[1];
+      for (int i=0; i<connectionCount; i++){
+        int *element = connectionList->array + i*elementSize;
+        int tileA = element[0];
+        int tileB = element[1];
+        int *positionVector = element + 2;
+        int *orientationVector = positionVector + dg->dimCount;
+        if (orientationVector[0]==2 && orientationVector[1]==-1){
+          int diff = lastExtra->array[dg->dimCount*(tileA-1)+0]
+            - firstExtra->array[dg->dimCount*(tileB-1)+1];
+          if (diff == (lastExtra->array[dg->dimCount*(tileB-1)+1]
+            - firstExtra->array[dg->dimCount*(tileA-1)+0])){
+            positionVector[1] += diff;
+          }else{
+            ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
+              "Inconsistent connection and padding detected.",
+            ESMC_CONTEXT, rc);
+            return ESMC_NULL_POINTER;
+          }
+        }else if (orientationVector[0]==-2 && orientationVector[1]==1){
+          int diff = lastExtra->array[dg->dimCount*(tileA-1)+1]
+            - firstExtra->array[dg->dimCount*(tileB-1)+0];
+          if (diff == (lastExtra->array[dg->dimCount*(tileB-1)+0]
+            - firstExtra->array[dg->dimCount*(tileA-1)+1])){
+            positionVector[0] += diff;
+          }else{
+            ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
+              "Inconsistent connection and padding detected.",
+            ESMC_CONTEXT, rc);
+            return ESMC_NULL_POINTER;
+          }
+        }
+      }
+    }
+//gjt: try to cut off the flaps along edges by removing all extra padding
+    firstExtra = NULL;
+    lastExtra = NULL;
+    
     // prepare minIndex and maxIndex
     int *minIndexAlloc = new int[totalCountInterArray];
     if (present(firstExtra))
@@ -3799,17 +3849,42 @@ template<typename T> int DistGrid::getSequenceIndexTile(
   // set seqIndex return value to invalid
   *seqIndex = -1;
   
+  // prepare for recursive call entry
+  std::vector<T> seqIndexV;
   const int depthMax=3;
-  
+#if 1
   for (int depth=0; depth<depthMax; depth++){
-    localrc = getSequenceIndexTileRecursive(tile, index, depth, seqIndex);
+    localrc = getSequenceIndexTileRecursive(tile, index, depth, seqIndexV);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
       ESMC_CONTEXT, &rc)) return rc;  // bail out
-    if (*seqIndex > -1){
-      // return successfully
-      return ESMF_SUCCESS;
-    }
+    // test for early break for efficiency sake
+    if ((int)seqIndexV.size() >= tileCount) break;
   }
+#else
+  int depth = depthMax-1;
+  localrc = getSequenceIndexTileRecursive(tile, index, depth, seqIndexV);
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+    ESMC_CONTEXT, &rc)) return rc;  // bail out
+#endif
+  
+  // sort the seqIndexV
+  if (seqIndexV.size() > 0)
+    sort(seqIndexV.begin(), seqIndexV.end());
+  
+#define DEBUGGINGoff
+#ifdef DEBUGGING
+  {
+    std::stringstream debugmsg;
+    debugmsg << "seqIndexV.size()=" << seqIndexV.size();
+    for (unsigned int i=0; i<seqIndexV.size(); i++)
+      debugmsg << " ["<<i<<"]=" << seqIndexV[i];
+    ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_INFO);
+  }
+#endif
+  
+  // propagate sequence index
+  if (seqIndexV.size() > 0)
+    *seqIndex = seqIndexV[0];
   
   // return successfully
   return ESMF_SUCCESS;
@@ -3834,7 +3909,7 @@ template<typename T> int DistGrid::getSequenceIndexTileRecursive(
   int tile,                         // in  - tile = {1, ..., tileCount}
   const int *index,                 // in  - tile-specific absolute index tuple
   int depth,                        // in  - depth of recursive search
-  T *seqIndex                       // out - sequence index
+  std::vector<T> &seqIndexV         // out - sequence index
   )const{
 //
 // !DESCRIPTION:
@@ -3858,16 +3933,10 @@ template<typename T> int DistGrid::getSequenceIndexTileRecursive(
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
 
-  // check seqIndex argument
-  if (seqIndex==NULL){
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-      "The seqIndex argument must not be a NULL pointer", ESMC_CONTEXT, &rc);
-    return rc;
-  }
-  // set seqIndex return value to invalid
-  *seqIndex = -1;
-
   //printf("gjt - getSequenceIndexTile depth: %d\n", depth);
+
+  // test for early bail out for efficiency sake
+  if ((int)seqIndexV.size() >= tileCount) return ESMF_SUCCESS;
 
   // check input
   if (tile < 1 || tile > tileCount){
@@ -3882,26 +3951,36 @@ template<typename T> int DistGrid::getSequenceIndexTileRecursive(
 
   bool onTile = true;  // start assuming that index tuple can be found on tile
   // add up elements from tile
-  *seqIndex = 0; // initialize
+  int seqIndex = 0; // initialize
   for (int i=dimCount-1; i>=0; i--){
     // first time multiply with zero intentionally:
-    *seqIndex *= maxIndexPDimPTile[(tile-1)*dimCount+i] 
+    seqIndex *= maxIndexPDimPTile[(tile-1)*dimCount+i] 
       - minIndexPDimPTile[(tile-1)*dimCount+i] + 1;
     if ((index[i] < minIndexPDimPTile[(tile-1)*dimCount+i])
       || (index[i] > maxIndexPDimPTile[(tile-1)*dimCount+i])){
       // index is outside of tile bounds -> break out of onTile code
       onTile = false;
-      *seqIndex = -1;  // indicate not valid sequence index
       break;
     }
-    *seqIndex += index[i]
-      - minIndexPDimPTile[(tile-1)*dimCount+i];
+    seqIndex += index[i] - minIndexPDimPTile[(tile-1)*dimCount+i];
   }
   if (onTile){
     // add all the elements of previous tiles
     for (int i=0; i<tile-1; i++)
-      *seqIndex += elementCountPTile[i];
-    ++(*seqIndex);  // shift sequentialized index to basis 1 !!!!
+      seqIndex += elementCountPTile[i];
+    ++(seqIndex);  // shift sequentialized index to basis 1 !!!!
+    // found valid sequence index
+    seqIndexV.push_back(seqIndex);
+#ifdef DEBUGGING
+  {
+    std::stringstream debugmsg;
+    debugmsg << "addition: seqIndex=" << seqIndex << " depth=" << depth
+      << " connectionCount=" << connectionCount << " tile=" << tile;
+    for (int i=0; i<dimCount; i++)
+      debugmsg << " index["<<i<<"]=" << index[i];
+    ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_INFO);
+  }
+#endif
   }else if (depth >= 0){
     for (int i=0; i<connectionCount; i++){
       int tileA = connectionList[i][0];
@@ -3922,17 +4001,16 @@ template<typename T> int DistGrid::getSequenceIndexTileRecursive(
             indexB[j] = index[orientation] + position;
           }
         }
-        localrc = getSequenceIndexTileRecursive(tileB, indexB, depth, seqIndex);
+        localrc = getSequenceIndexTileRecursive(tileB, indexB, depth, seqIndexV);
         if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
           ESMC_CONTEXT, &rc)) return rc;  // bail out
 
 //printf("foreward: tile=%d, tileA=%d, tileB=%d, index[]=%d %d, indexB[]=%d %d, seqInd=%d\n",
 //tile, tileA, tileB, index[0], index[1], indexB[0], indexB[1], *seqIndex);
 
-        if (*seqIndex > -1){
-          // return successfully
-          return ESMF_SUCCESS;
-        }
+        // test for early bail out for efficiency sake
+        if ((int)seqIndexV.size() >= tileCount) return ESMF_SUCCESS;
+
       }
       if (tileB == tile){
         // found connection for this tile -> need to transform index
@@ -3989,21 +4067,18 @@ template<typename T> int DistGrid::getSequenceIndexTileRecursive(
             }
           }
         }
-        localrc = getSequenceIndexTileRecursive(tileA, indexA, depth, seqIndex);
+        localrc = getSequenceIndexTileRecursive(tileA, indexA, depth, seqIndexV);
         if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
           ESMC_CONTEXT, &rc)) return rc;  // bail out
 
 //printf("backward: tile=%d, tileA=%d, tileB=%d, index[]=%d %d, indexA[]=%d %d, seqInd=%d\n",
 //tile, tileA, tileB, index[0], index[1], indexA[0], indexA[1], *seqIndex);
         
-        if (*seqIndex > -1){
-          // return successfully
-          return ESMF_SUCCESS;
-        }
+        // test for early bail out for efficiency sake
+        if ((int)seqIndexV.size() >= tileCount) return ESMF_SUCCESS;
+        
       }
     }
-  }else{
-    *seqIndex = -1;  // not on tile, and no depth
   }
     
   // return successfully
