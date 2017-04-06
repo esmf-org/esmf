@@ -2169,13 +2169,15 @@ template<typename IT> int Array::getSequenceIndexExclusive(
     }
   }
   // determine the sequentialized index for decomposed dimensions
-  IT decompSeqIndex;
+  vector<IT> decompSeqIndex;
   localrc = distgrid->getSequenceIndexLocalDe(localDe, decompIndex,
-    &decompSeqIndex);  
+    decompSeqIndex);  
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
     &rc)) return rc;
-  seqIndex->decompSeqIndex = decompSeqIndex;
-  
+  if (decompSeqIndex.size() > 0)
+    seqIndex->decompSeqIndex = decompSeqIndex[0];
+  else
+    seqIndex->decompSeqIndex = -1;  // invalidate
   // garbage collection
   delete [] decompIndex;
   

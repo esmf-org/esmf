@@ -5411,7 +5411,7 @@ int Grid::getStaggerDistgrid(
             staggerEdgeLWidthIntIntArray[k]=staggerEdgeLWidthList[staggerloc][distgridToGridMap[i]];
             staggerEdgeUWidthIntIntArray[k]=staggerEdgeUWidthList[staggerloc][distgridToGridMap[i]];
 
-            // printf("%d sELW=%d SEUW=%d\n",k,staggerEdgeLWidthIntIntArray[k],staggerEdgeUWidthIntIntArray[k]);
+            //printf("%d sELW=%d SEUW=%d\n",k,staggerEdgeLWidthIntIntArray[k],staggerEdgeUWidthIntIntArray[k]);
             k++;
           }
         }
@@ -5422,7 +5422,13 @@ int Grid::getStaggerDistgrid(
         //       grid with a pole and you are getting bowtie shaped elements, this is probably why. Ask Bob how to fix. 
          //       (If you take out the poles, then you need to add them back in here. See _add_poles_to_conn(), etc. in the if part above)
 
-        // For non-center staggers, take out conenctions, so conservative works
+//gjt: The updated DistGrid::create() now will automatically adjust the center connections
+//gjt: inside of a DistGrid to corner connections when stagger edge paddings are supplied.
+//gjt: So just call into DistGrid::create() here without any higher level logic needed!
+//gjt: Activate this option by renaming REMOVE_CONNECTIONS_on to REMOVE_CONNECTIONS_off
+#define REMOVE_CONNECTIONS_on
+#ifdef REMOVE_CONNECTIONS_on
+        // For non-center staggers, take out connections, so conservative works
         // For center stagger, leave connections, so bilinear, etc works
         if (staggerloc > 0) {
 
@@ -5451,6 +5457,7 @@ int Grid::getStaggerDistgrid(
           delete emptyConnListII;
 
         } else {
+#endif
           // Leave connections, so bilinear, etc. works
           staggerDistgridList[staggerloc]=DistGrid::create(distgrid,
                                                            staggerEdgeLWidthIntInt, 
@@ -5460,7 +5467,9 @@ int Grid::getStaggerDistgrid(
                                                            &localrc);
           if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
                                             &rc)) return rc;
+#ifdef REMOVE_CONNECTIONS_on
         }
+#endif
  
         // Get rid of Interface ints
         delete staggerEdgeLWidthIntInt;
@@ -7992,8 +8001,27 @@ int GridIter::getGlobalID(
   //printf("GI curDE=%d curInd=%d %d deBasedInd=%d %d \n",
    //  curDE,curInd[0],curInd[1],deBasedInd[0],deBasedInd[1]);  
   
-  // return sequence index
-  localrc=staggerDistgrid->getSequenceIndexLocalDe(curDE,deBasedInd,&gid);
+  // determine sequence index
+  std::vector<int> seqIndex;
+  localrc=staggerDistgrid->getSequenceIndexLocalDe(curDE,deBasedInd,seqIndex);
+  
+#define REPORT_DEGENERACY
+#ifdef REPORT_DEGENERACY
+  {
+    std::stringstream debugmsg;
+    if (seqIndex.size()>1){
+      debugmsg << "degeneracy detected in GridIter:";
+      for (unsigned int i=0; i<seqIndex.size(); i++)
+        debugmsg << " ["<<i<<"]=" << seqIndex[i];
+      ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_INFO);
+    }
+  }
+#endif
+  
+  if (seqIndex.size() > 0)
+    gid = seqIndex[0];
+  else
+    gid = -1; // invalidate
   
   //printf("GI Gid=%d curDE=%d curInd=%d %d deBasedInd=%d %d localrc=%d ESMC_SUCCESS=%d \n",
   //  gid,curDE,curInd[0],curInd[1],deBasedInd[0],deBasedInd[1],localrc,ESMF_SUCCESS);
@@ -9047,13 +9075,32 @@ int GridCellIter::getGlobalID(
   if (done) return -1;
 
 
-    // Convert to DE based
-    for (int i=0; i<rank; i++) {
-      deBasedInd[i]=curInd[i]-exLBndInd[i];
-    }
+  // Convert to DE based
+  for (int i=0; i<rank; i++) {
+    deBasedInd[i]=curInd[i]-exLBndInd[i];
+  }
       
-    // return sequence index
-    localrc=centerDistgrid->getSequenceIndexLocalDe(curDE,deBasedInd,&gid);
+  // determine sequence index
+  std::vector<int> seqIndex;
+  localrc=centerDistgrid->getSequenceIndexLocalDe(curDE,deBasedInd,seqIndex);
+
+#define REPORT_DEGENERACY
+#ifdef REPORT_DEGENERACY
+  {
+    std::stringstream debugmsg;
+    if (seqIndex.size()>1){
+      debugmsg << "degeneracy detected in GridCellIter:";
+      for (unsigned int i=0; i<seqIndex.size(); i++)
+        debugmsg << " ["<<i<<"]=" << seqIndex[i];
+      ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_INFO);
+    }
+  }
+#endif
+
+  if (seqIndex.size() > 0)
+    gid = seqIndex[0];
+  else
+    gid = -1; // invalidate
 
   // return sequence index
   return gid;

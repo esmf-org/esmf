@@ -65,10 +65,10 @@ template int DistGrid::setArbSeqIndex<ESMC_I8>(InterArray<ESMC_I8> *arbSeqIndex,
   int localDe, int collocation);
 
 template int DistGrid::getSequenceIndexLocalDe<ESMC_I4>(int localDe, 
-    int const *index, ESMC_I4 *seqIndex) const;
+    int const *index, vector<ESMC_I4> &seqIndex) const;
 
 template int DistGrid::getSequenceIndexLocalDe<ESMC_I8>(int localDe, 
-    int const *index, ESMC_I8 *seqIndex) const;
+    int const *index, vector<ESMC_I8> &seqIndex) const;
 
 template int DistGrid::getSequenceIndexTileRelative<ESMC_I4>(int tile,
     int const *index, ESMC_I4 *seqIndex)const;
@@ -359,9 +359,17 @@ DistGrid *DistGrid::create(
         }
       }
     }
-//gjt: try to cut off the flaps along edges by removing all extra padding
+    
+#if 0
+//gjt: this cuts off the flaps along edges by removing all extra padding
+//gjt: on the actual created DistGrid. Only used for debugging because 
+//gjt: the full implementation strategy is to send degeneracies down to
+//gjt: Mesh-to-Grid where it will then be sorted out correctly to only 
+//gjt: propagate single element for each degeneracy. This is a more general
+//gjt: way of taking care of corner and edge degeneracies in the same way.
     firstExtra = NULL;
     lastExtra = NULL;
+#endif
     
     // prepare minIndex and maxIndex
     int *minIndexAlloc = new int[totalCountInterArray];
@@ -2733,7 +2741,9 @@ template<typename T> int DistGrid::fillSeqIndexList(
         ii[j] = 0;  // reset
       // loop over all elements in exclusive region for localDe
       while(ii[dimCount-1] < iiEnd[dimCount-1]){
-        getSequenceIndexLocalDe(localDe, ii, &((seqIndexList)->array[index]));
+        vector<T> seqIndex;
+        getSequenceIndexLocalDe(localDe, ii, seqIndex);
+        (seqIndexList)->array[index] = seqIndex[0];
         ++index;
         // multi-dim index increment
         ++ii[0];
@@ -3292,6 +3302,14 @@ bool DistGrid::isLocalDeOnEdgeL(
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;   // final return code
 
+#if 0
+  {
+    stringstream debugmsg;
+    debugmsg << "isLocalDeOnEdgeL: localDe=" << localDe << " dim=" << dim;
+    ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_INFO);
+  }
+#endif
+
   // check input
   int localDeCount = delayout->getLocalDeCount();
   if (localDe < 0 || localDe > localDeCount-1){
@@ -3326,12 +3344,12 @@ bool DistGrid::isLocalDeOnEdgeL(
       // look just across interface along dim
       localDeIndexTuple[dim-1] = -1;
       // get sequence index providing localDe relative index tuple
-      int seqindex; 
-      localrc = getSequenceIndexLocalDe(localDe, localDeIndexTuple, &seqindex);
+      vector<int> seqIndex; 
+      localrc = getSequenceIndexLocalDe(localDe, localDeIndexTuple, seqIndex);
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
         ESMC_CONTEXT, rc)) return false;
       // determine if seqindex indicates edge or not
-      if (seqindex != -1){
+      if (seqIndex.size() > 0){
         // valid seqindex indicates that there is a neighbor
         onEdge = false;
         break;
@@ -3375,6 +3393,14 @@ bool DistGrid::isLocalDeOnEdgeU(
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;   // final return code
 
+#if 0
+  {
+    stringstream debugmsg;
+    debugmsg << "isLocalDeOnEdgeU: localDe=" << localDe << " dim=" << dim;
+    ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_INFO);
+  }
+#endif
+
   // check input
   int localDeCount = delayout->getLocalDeCount();
   if (localDe < 0 || localDe > localDeCount-1){
@@ -3409,12 +3435,12 @@ bool DistGrid::isLocalDeOnEdgeU(
       // look just across interface along dim
       localDeIndexTuple[dim-1] = indexCountPDimPDe[de*dimCount+(dim-1)];
       // get sequence index providing localDe relative index tuple
-      int seqindex; 
-      localrc = getSequenceIndexLocalDe(localDe, localDeIndexTuple, &seqindex);
+      vector<int> seqIndex; 
+      localrc = getSequenceIndexLocalDe(localDe, localDeIndexTuple, seqIndex);
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
         ESMC_CONTEXT, rc)) return false;
       // determine if seqindex indicates edge or not
-      if (seqindex != -1){
+      if (seqIndex.size() > 0){
         // valid seqindex indicates that there is a neighbor
         onEdge = false;
         break;
@@ -3543,7 +3569,7 @@ template<typename T> int DistGrid::getSequenceIndexLocalDe(
   const int *index,                 // in  - DE-local index tuple in or 
                                     //       relative to exclusive region
                                     //       basis 0
-  T *seqIndex                       // out - sequence index
+  vector<T> &seqIndex               // out - sequence index
   )const{
 //
 // !DESCRIPTION:
@@ -3566,16 +3592,6 @@ template<typename T> int DistGrid::getSequenceIndexLocalDe(
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
 
-  // check seqIndex argument
-  if (seqIndex==NULL){
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-      "The seqIndex argument must not be a NULL pointer", ESMC_CONTEXT, &rc);
-    return rc;
-  }
-  
-  // set seqIndex return value to invalid
-  *seqIndex = -1;
-  
   // check input
   int localDeCount = delayout->getLocalDeCount();
   if (localDe < 0 || localDe > localDeCount-1){
@@ -3597,72 +3613,31 @@ template<typename T> int DistGrid::getSequenceIndexLocalDe(
     }
   }
   
-  // correctly typecast void* members and call into templated implementation
-#define BAILONMISMATCH
+  // check for type consistency
   if (indexTK == ESMC_TYPEKIND_I1){
-    ESMC_I1 seqTemp;
-    localrc = tGetSequenceIndexLocalDe(
-      (ESMC_I1 ***)arbSeqIndexListPCollPLocalDe, de, localDe, index, &seqTemp);
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
-      ESMC_CONTEXT, &rc)) return rc;  //  bail out with invalid seqindex
-    if (sizeof(T) != sizeof(seqTemp)){
-      ESMC_LogDefault.Write("SeqIndex type mismatch detected.", 
-        ESMC_LOGMSG_WARN);
-#ifdef BAILONMISMATCH
+    if (sizeof(T) != sizeof(ESMC_I1)){
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
         "SeqIndex type mismatch detected.", ESMC_CONTEXT, &rc);
       return rc;
-#endif
     }
-    *seqIndex = seqTemp; 
   }else if (indexTK == ESMC_TYPEKIND_I2){
-    ESMC_I2 seqTemp;
-    localrc = tGetSequenceIndexLocalDe(
-      (ESMC_I2 ***)arbSeqIndexListPCollPLocalDe, de, localDe, index, &seqTemp);
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
-      ESMC_CONTEXT, &rc)) return rc;  //  bail out with invalid seqindex
-    if (sizeof(T) != sizeof(seqTemp)){
-      ESMC_LogDefault.Write("SeqIndex type mismatch detected.", 
-        ESMC_LOGMSG_WARN);
-#ifdef BAILONMISMATCH
+    if (sizeof(T) != sizeof(ESMC_I2)){
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
         "SeqIndex type mismatch detected.", ESMC_CONTEXT, &rc);
       return rc;
-#endif
     }
-    *seqIndex = seqTemp; 
   }else if (indexTK == ESMC_TYPEKIND_I4){
-    ESMC_I4 seqTemp;
-    localrc = tGetSequenceIndexLocalDe(
-      (ESMC_I4 ***)arbSeqIndexListPCollPLocalDe, de, localDe, index, &seqTemp);
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
-      ESMC_CONTEXT, &rc)) return rc;  //  bail out with invalid seqindex
-    if (sizeof(T) != sizeof(seqTemp)){
-      ESMC_LogDefault.Write("SeqIndex type mismatch detected.", 
-        ESMC_LOGMSG_WARN);
-#ifdef BAILONMISMATCH
+    if (sizeof(T) != sizeof(ESMC_I4)){
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
         "SeqIndex type mismatch detected.", ESMC_CONTEXT, &rc);
       return rc;
-#endif
     }
-    *seqIndex = seqTemp; 
   }else if (indexTK == ESMC_TYPEKIND_I8){
-    ESMC_I8 seqTemp;
-    localrc = tGetSequenceIndexLocalDe(
-      (ESMC_I8 ***)arbSeqIndexListPCollPLocalDe, de, localDe, index, &seqTemp);
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
-      ESMC_CONTEXT, &rc)) return rc;  //  bail out with invalid seqindex
-    if (sizeof(T) != sizeof(seqTemp)){
-      ESMC_LogDefault.Write("SeqIndex type mismatch detected.", 
-        ESMC_LOGMSG_WARN);
-#ifdef BAILONMISMATCH
+    if (sizeof(T) != sizeof(ESMC_I8)){
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
         "SeqIndex type mismatch detected.", ESMC_CONTEXT, &rc);
       return rc;
-#endif
     }
-    *seqIndex = seqTemp; 
   }else{
     // error condition, indexTK not supported
     ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
@@ -3670,6 +3645,12 @@ template<typename T> int DistGrid::getSequenceIndexLocalDe(
     return rc;
   }
   
+  // make the actual call with consistently typed arguments
+  localrc = tGetSequenceIndexLocalDe(
+    (T ***)arbSeqIndexListPCollPLocalDe, de, localDe, index, seqIndex);
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+    ESMC_CONTEXT, &rc)) return rc;  //  bail out with invalid seqindex
+
   // return successfully
   return ESMF_SUCCESS;
 }
@@ -3681,18 +3662,11 @@ template<typename T> int DistGrid::getSequenceIndexLocalDe(
 #define ESMC_METHOD "ESMCI::tGetSequenceIndexLocalDe()"
 template<typename T> int DistGrid::tGetSequenceIndexLocalDe(
   T ***tArbSeqIndexListPCollPLocalDe,
-  int de, int localDe, const int *index, T *seqIndex)const{
+  int de, int localDe, const int *index, vector<T> &seqIndex)const{
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
-  // check seqIndex argument
-  if (seqIndex==NULL){
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-      "The seqIndex argument must not be a NULL pointer", ESMC_CONTEXT, &rc);
-    return rc;
-  }
-  // set seqIndex return value to invalid
-  *seqIndex = -1;
+  // arb or not arb
   if (arbSeqIndexListPCollPLocalDe[0][localDe]){
     // determine the seqIndex by arbSeqIndexListPCollPLocalDe look-up
     //TODO: this does _not_ support multiple collocations w/ arb seqIndices 
@@ -3702,7 +3676,8 @@ template<typename T> int DistGrid::tGetSequenceIndexLocalDe(
       linExclusiveIndex *= indexCountPDimPDe[de*dimCount + i];
       linExclusiveIndex += index[i];
     }
-    *seqIndex = tArbSeqIndexListPCollPLocalDe[0][localDe][linExclusiveIndex];
+    seqIndex.push_back(
+      tArbSeqIndexListPCollPLocalDe[0][localDe][linExclusiveIndex]);
   }else{
     // determine the sequentialized index by construction of default tile rule
     const int *localDeToDeMap = delayout->getLocalDeToDeMap();
@@ -3776,6 +3751,7 @@ template<typename T> int DistGrid::getSequenceIndexTileRelative(
   }
   // set seqIndex return value to invalid
   *seqIndex = -1;
+  vector<T> seqIndexV;
 
   // check input
   if (tile < 1 || tile > tileCount){
@@ -3788,12 +3764,16 @@ template<typename T> int DistGrid::getSequenceIndexTileRelative(
   for (int i=0; i<dimCount; i++)
     indexTileSpecific[i] = index[i] + minIndexPDimPTile[(tile-1)*dimCount+i];
   
-  localrc = getSequenceIndexTile(tile, indexTileSpecific, seqIndex);
+  localrc = getSequenceIndexTile(tile, indexTileSpecific, seqIndexV);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
     ESMC_CONTEXT, &rc)) return rc;  // bail out
   
   delete [] indexTileSpecific;
   
+  // propagate sequence index
+  if (seqIndexV.size() > 0)
+    *seqIndex = seqIndexV[0];
+
   // return successfully
   return ESMF_SUCCESS;
 }
@@ -3816,7 +3796,7 @@ template<typename T> int DistGrid::getSequenceIndexTile(
 //
   int tile,                         // in  - tile = {1, ..., tileCount}
   const int *index,                 // in  - tile-specific absolute index tuple
-  T *seqIndex                       // out - sequence index
+  vector<T> &seqIndex               // out - sequence index
   )const{
 //
 // !DESCRIPTION:
@@ -3840,52 +3820,50 @@ template<typename T> int DistGrid::getSequenceIndexTile(
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
 
-  // check seqIndex argument
-  if (seqIndex==NULL){
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-      "The seqIndex argument must not be a NULL pointer", ESMC_CONTEXT, &rc);
-    return rc;
-  }
-  // set seqIndex return value to invalid
-  *seqIndex = -1;
-  
   // prepare for recursive call entry
-  std::vector<T> seqIndexV;
-  const int depthMax=3;
+  vector<T> seqIndexV;
+  const int depthMax=2; // allow up to two-connection hops
 #if 1
-  for (int depth=0; depth<depthMax; depth++){
-    localrc = getSequenceIndexTileRecursive(tile, index, depth, seqIndexV);
+  // ensure a width-first search by slowly incrementing the depth
+  for (int depth=0; depth<=depthMax; depth++){
+    int hops=0;
+    localrc = getSequenceIndexTileRecursive(tile, index, depth, hops, seqIndexV);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
       ESMC_CONTEXT, &rc)) return rc;  // bail out
-    // test for early break for efficiency sake
-    if ((int)seqIndexV.size() >= tileCount) break;
   }
 #else
-  int depth = depthMax-1;
-  localrc = getSequenceIndexTileRecursive(tile, index, depth, seqIndexV);
+  // this deep recursive search is will not deliver good results in general
+  // because it can place very deep search results very early in the
+  // returned vector. Avoid this option!!!! Only here for testing during
+  // development. Probably should be removed once all is working as it should.
+  int hops=0;
+  localrc = getSequenceIndexTileRecursive(tile, index, depthMax, hops, seqIndexV);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
     ESMC_CONTEXT, &rc)) return rc;  // bail out
 #endif
   
-  // sort the seqIndexV
-  if (seqIndexV.size() > 0)
-    sort(seqIndexV.begin(), seqIndexV.end());
-  
+  // construct seqIndex from the unique elements of seqIndexV vector,
+  // preserving order of elements!
+  typename vector<T>::iterator itV;
+  typename vector<T>::iterator it;
+  for (itV=seqIndexV.begin(); itV!=seqIndexV.end(); ++itV){
+    for (it=seqIndex.begin(); it!=seqIndex.end(); ++it)
+      if (*it==*itV) break;
+    if (it==seqIndex.end())
+      seqIndex.push_back(*itV);
+  }
+
 #define DEBUGGINGoff
 #ifdef DEBUGGING
   {
-    std::stringstream debugmsg;
-    debugmsg << "seqIndexV.size()=" << seqIndexV.size();
-    for (unsigned int i=0; i<seqIndexV.size(); i++)
-      debugmsg << " ["<<i<<"]=" << seqIndexV[i];
+    stringstream debugmsg;
+    debugmsg << "seqIndex.size()=" << seqIndex.size();
+    for (unsigned int i=0; i<seqIndex.size(); i++)
+      debugmsg << " ["<<i<<"]=" << seqIndex[i];
     ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_INFO);
   }
 #endif
-  
-  // propagate sequence index
-  if (seqIndexV.size() > 0)
-    *seqIndex = seqIndexV[0];
-  
+    
   // return successfully
   return ESMF_SUCCESS;
 }
@@ -3908,8 +3886,9 @@ template<typename T> int DistGrid::getSequenceIndexTileRecursive(
 //
   int tile,                         // in  - tile = {1, ..., tileCount}
   const int *index,                 // in  - tile-specific absolute index tuple
-  int depth,                        // in  - depth of recursive search
-  std::vector<T> &seqIndexV         // out - sequence index
+  int depth,                        // inout - depth of recursive search
+  int hops,                         // inout - connection hops taken
+  vector<T> &seqIndexV              // out - sequence index
   )const{
 //
 // !DESCRIPTION:
@@ -3935,8 +3914,19 @@ template<typename T> int DistGrid::getSequenceIndexTileRecursive(
 
   //printf("gjt - getSequenceIndexTile depth: %d\n", depth);
 
+#ifdef DEBUGGING
+  {
+    stringstream debugmsg;
+    debugmsg << "getSequenceIndexTileRecursive(): depth=" << depth
+      << " tile=" << tile << " hops=" << hops;
+    for (int i=0; i<dimCount; i++)
+      debugmsg << " index["<<i<<"]=" << index[i];
+    ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_INFO);
+  }
+#endif
+
   // test for early bail out for efficiency sake
-  if ((int)seqIndexV.size() >= tileCount) return ESMF_SUCCESS;
+  if (hops>1 && seqIndexV.size()>0) return ESMF_SUCCESS;
 
   // check input
   if (tile < 1 || tile > tileCount){
@@ -3948,6 +3938,7 @@ template<typename T> int DistGrid::getSequenceIndexTileRecursive(
   
   // adjust recursion depth
   --depth;
+  ++hops;
 
   bool onTile = true;  // start assuming that index tuple can be found on tile
   // add up elements from tile
@@ -3973,26 +3964,38 @@ template<typename T> int DistGrid::getSequenceIndexTileRecursive(
     seqIndexV.push_back(seqIndex);
 #ifdef DEBUGGING
   {
-    std::stringstream debugmsg;
+    stringstream debugmsg;
     debugmsg << "addition: seqIndex=" << seqIndex << " depth=" << depth
-      << " connectionCount=" << connectionCount << " tile=" << tile;
+      << " hops=" << hops << " connectionCount=" << connectionCount 
+      << " tile=" << tile;
     for (int i=0; i<dimCount; i++)
       debugmsg << " index["<<i<<"]=" << index[i];
     ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_INFO);
   }
 #endif
-  }else if (depth >= 0){
+  }
+  if (depth >= 0){
     for (int i=0; i<connectionCount; i++){
       int tileA = connectionList[i][0];
       int tileB = connectionList[i][1];
       if (tileA == tile){
+#ifdef DEBUGGING
+  {
+    stringstream debugmsg;
+    debugmsg << "getSequenceIndexTileRecursive(): connection=" << i
+      << " tileA=" << tileA << " tileB=" << tileB;
+    ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_INFO);
+  }
+#endif
         // found connection for this tile -> need to transform index
         int indexB[dimCount];
         int positionIndexOffset = 2;
         int orientationIndexOffset = 2+dimCount;
+        bool rotation = false;
         for (int j=0; j<dimCount; j++){
           int position = connectionList[i][positionIndexOffset+j];
           int orientation = connectionList[i][orientationIndexOffset+j];
+          if (orientation != j+1) rotation=true;
           if (orientation < 0){
             ++orientation; // shift to basis 0
             indexB[j] = -index[-orientation] + position;
@@ -4001,7 +4004,13 @@ template<typename T> int DistGrid::getSequenceIndexTileRecursive(
             indexB[j] = index[orientation] + position;
           }
         }
-        localrc = getSequenceIndexTileRecursive(tileB, indexB, depth, seqIndexV);
+        int depthDown = depth;
+        if (rotation){
+          // make this last operation by setting depth to 0
+          depthDown = 0;
+        }
+        localrc = getSequenceIndexTileRecursive(tileB, indexB, depth, hops,
+          seqIndexV);
         if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
           ESMC_CONTEXT, &rc)) return rc;  // bail out
 
@@ -4009,10 +4018,18 @@ template<typename T> int DistGrid::getSequenceIndexTileRecursive(
 //tile, tileA, tileB, index[0], index[1], indexB[0], indexB[1], *seqIndex);
 
         // test for early bail out for efficiency sake
-        if ((int)seqIndexV.size() >= tileCount) return ESMF_SUCCESS;
+        if (hops>1 && seqIndexV.size()>0) return ESMF_SUCCESS;
 
       }
       if (tileB == tile){
+#ifdef DEBUGGING
+  {
+    stringstream debugmsg;
+    debugmsg << "getSequenceIndexTileRecursive(): connection=" << i
+      << " tileA=" << tileA << " tileB=" << tileB;
+    ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_INFO);
+  }
+#endif
         // found connection for this tile -> need to transform index
         int indexA[dimCount];
         int positionIndexOffset = 2;
@@ -4023,11 +4040,13 @@ template<typename T> int DistGrid::getSequenceIndexTileRecursive(
         int orientationVect[dimCount];
         // first time through initialize the orientationVector to be the same
         // as for the forward transform
+        bool rotation = false;
         for (int j=0; j<dimCount; j++){
           positionVect[j] =
             connectionList[i][positionIndexOffset+j];     // initialize
           orientationVect[j] =
             connectionList[i][orientationIndexOffset+j];  // initialize
+          if (orientationVect[j] != j+1) rotation=true;
         }
         bool special90=(orientationVect[0]==-2 && orientationVect[1]==1);
         bool special270=(orientationVect[0]==2 && orientationVect[1]==-1);
@@ -4067,7 +4086,13 @@ template<typename T> int DistGrid::getSequenceIndexTileRecursive(
             }
           }
         }
-        localrc = getSequenceIndexTileRecursive(tileA, indexA, depth, seqIndexV);
+        int depthDown = depth;
+        if (rotation){
+          // make this last operation by setting depth to 0
+          depthDown = 0;
+        }
+        localrc = getSequenceIndexTileRecursive(tileA, indexA, depth, hops,
+          seqIndexV);
         if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
           ESMC_CONTEXT, &rc)) return rc;  // bail out
 
@@ -4075,7 +4100,7 @@ template<typename T> int DistGrid::getSequenceIndexTileRecursive(
 //tile, tileA, tileB, index[0], index[1], indexA[0], indexA[1], *seqIndex);
         
         // test for early bail out for efficiency sake
-        if ((int)seqIndexV.size() >= tileCount) return ESMF_SUCCESS;
+        if (hops>1 && seqIndexV.size()>0) return ESMF_SUCCESS;
         
       }
     }
