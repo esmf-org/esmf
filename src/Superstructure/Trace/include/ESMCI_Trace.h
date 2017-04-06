@@ -42,9 +42,12 @@ namespace ESMCI {
   void TraceOpen(unsigned int buf_size, const char *trace_dir, 
                  int stream_id, int *rc);
   void TraceClose(int *rc);
-
+  void TraceSetupTypes(int *rc);  
+  
   ////////////////////////////////
 
+  void TraceEventPhase(int ctrl, int *ep_vmid,
+		       int *ep_baseid, int *ep_method, int *ep_phase);
   void TraceEventPhaseEnter(int *ep_vmid, int *ep_baseid, 
 			    int *ep_method, int *ep_phase);
   void TraceEventPhaseExit(int *ep_vmid, int *ep_baseid, 

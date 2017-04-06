@@ -1193,6 +1193,10 @@ contains
 
         totalFields = 0
 
+        if (.not.ESMF_StateIsCreated(state)) then
+           return
+        endif
+        
         call ESMF_StateGet(state, itemCount=itemCount, rc=rc)
         if (ESMF_LogFoundError(rc, &
             line=__LINE__, &

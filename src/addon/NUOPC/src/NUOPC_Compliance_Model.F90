@@ -463,6 +463,12 @@ contains
                 line=__LINE__, &
                 file=FILENAME)) &
                 return  ! bail out
+           print *, "TraceEventComponentInfo"
+           call ESMF_TraceEventComponentInfo(comp, rc=rc)
+           if (ESMF_LogFoundError(rc, &
+                line=__LINE__, &
+                file=FILENAME)) &
+                return  ! bail out
         endif
         
         ! Call the actual Initialize routine        

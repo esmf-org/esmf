@@ -1399,6 +1399,35 @@ endif
 endif
 
 #-------------------------------------------------------------------------------
+# Babeltrace
+#-------------------------------------------------------------------------------
+ifeq ($(ESMF_BABELTRACE),standard)
+ifneq ($(origin ESMF_XERCES_LIBS), environment)
+ESMF_BABELTRACE_LIBS = -lbabeltrace-ctf
+endif
+endif
+
+ifdef ESMF_BABELTRACE
+ESMF_CPPFLAGS                += -DESMF_BABELTRACE=1
+ifdef ESMF_BABELTRACE_INCLUDE
+ESMF_CXXCOMPILEPATHSTHIRD    += -I$(ESMF_BABELTRACE_INCLUDE)
+ESMF_F90COMPILEPATHSTHIRD    += -I$(ESMF_BABELTRACE_INCLUDE)
+endif
+ifdef ESMF_BABELTRACE_LIBS
+ESMF_CXXLINKLIBS          += $(ESMF_BABELTRACE_LIBS)
+ESMF_CXXLINKRPATHSTHIRD   += $(addprefix $(ESMF_CXXRPATHPREFIX),$(subst -L,,$(filter -L%,$(ESMF_BABELTRACE_LIBS))))
+ESMF_F90LINKLIBS          += $(ESMF_BABELTRACE_LIBS)
+ESMF_F90LINKRPATHSTHIRD   += $(addprefix $(ESMF_F90RPATHPREFIX),$(subst -L,,$(filter -L%,$(ESMF_BABELTRACE_LIBS))))
+endif
+ifdef ESMF_BABELTRACE_LIBPATH
+ESMF_CXXLINKPATHSTHIRD    += -L$(ESMF_BABELTRACE_LIBPATH)
+ESMF_F90LINKPATHSTHIRD    += -L$(ESMF_BABELTRACE_LIBPATH)
+ESMF_CXXLINKRPATHSTHIRD   += $(ESMF_CXXRPATHPREFIX)$(ESMF_BABELTRACE_LIBPATH)
+ESMF_F90LINKRPATHSTHIRD   += $(ESMF_F90RPATHPREFIX)$(ESMF_BABELTRACE_LIBPATH)
+endif
+endif
+
+#-------------------------------------------------------------------------------
 # Set the correct MPIRUN command with appropriate options
 #-------------------------------------------------------------------------------
 ESMF_MPIRUNCOMMAND  = $(shell $(ESMF_DIR)/scripts/mpirun.command $(ESMF_DIR)/scripts $(ESMF_MPIRUN))

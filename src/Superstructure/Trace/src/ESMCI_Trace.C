@@ -11,29 +11,6 @@
  * Licensed under the University of Illinois-NCSA License.
  */
 
-/*
- * Copyright (c) 2015 EfficiOS Inc. and Linux Foundation
- * Copyright (c) 2015 Philippe Proulx <pproulx@efficios.com>
- *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in
- * all copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
- * SOFTWARE.
- */
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
@@ -43,23 +20,473 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>
+#include <babeltrace/ctf-writer/writer.h>
+#include <babeltrace/ctf-writer/clock.h>
+#include <babeltrace/ctf-writer/stream.h>
+#include <babeltrace/ctf-writer/event.h>
+#include <babeltrace/ctf-writer/event-types.h>
+#include <babeltrace/ctf-writer/event-fields.h>
 
 #include "ESMCI_Macros.h"
 #include "ESMCI_LogErr.h"
 #include "ESMCI_VM.h"
 #include "ESMCI_Trace.h"
 
-#include <esmftrc.h>
+#define BT_CHK(_value, _ctx) \
+  if ((_value) != 0) {							\
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_SYS, "Internal tracing error", _ctx, rc); \
+    return;}
 
-#ifdef __cplusplus
-# define TO_VOID_PTR(_value)		static_cast<void *>(_value)
-# define FROM_VOID_PTR(_type, _value)	static_cast<_type *>(_value)
-#else
-# define TO_VOID_PTR(_value)		((void *) (_value))
-# define FROM_VOID_PTR(_type, _value)	((_type *) (_value))
-#endif  
+#define BT_CHK_NULL(_value, _ctx) \
+  if ((_value) == NULL) {						\
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_SYS, "Internal tracing error", _ctx, rc); \
+    return;}
+
 
 namespace ESMCI {
+
+  //global trace writer
+  struct bt_ctf_writer *bt_writer;
+  struct bt_ctf_stream_class *bt_stream_class;
+  struct bt_ctf_stream *bt_stream;
+  struct bt_ctf_clock *bt_clock;
+  
+  //field data types
+  struct bt_ctf_field_type *bt_type_uint4;
+  struct bt_ctf_field_type *bt_type_uint8;
+  struct bt_ctf_field_type *bt_type_uint16;
+  struct bt_ctf_field_type *bt_type_uint32;
+  struct bt_ctf_field_type *bt_type_string;
+  struct bt_ctf_field_type *bt_type_enum_control;
+  struct bt_ctf_field_type *bt_type_enum_method;
+  struct bt_ctf_field_type *bt_type_seq_attr;
+  
+  //event classes
+  struct bt_ctf_event_class *bt_event_class_control;
+  struct bt_ctf_event_class *bt_event_class_comp;
+  
+  static uint64_t get_clock() {
+    struct timespec ts;
+    
+    //clock_gettime(CLOCK_MONOTONIC, &ts);
+    clock_gettime(CLOCK_REALTIME, &ts);
+    
+    return ts.tv_sec * 1000000000ULL + ts.tv_nsec;
+  }
+  
+
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::TraceOpen()"  
+  void TraceOpen(unsigned int buf_size, const char *trace_dir, int stream_id, int *rc) {
+    
+    int localrc;
+    //char stream_path[ESMC_MAXPATHLEN];
+    char stream_dir_root[ESMC_MAXPATHLEN];
+    char stream_dir[ESMC_MAXPATHLEN];
+        
+    if (rc != NULL) *rc = ESMF_SUCCESS;
+
+    ESMC_LogDefault.Write("Enabling ESMF Tracing", ESMC_LOGMSG_INFO);
+        
+    //make relative path absolute if needed
+    if (trace_dir[0] != '/') {
+      char cwd[1024];
+      if (getcwd(cwd, sizeof(cwd)) == NULL) {
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_SYS, "Error getting working directory", 
+                                      ESMC_CONTEXT, rc);
+        return; 
+      }
+      sprintf(stream_dir_root, "%s/%s", cwd, trace_dir);
+      //printf("absolute dir = |%s|\n", stream_dir);
+    }
+    else {
+      sprintf(stream_dir_root, "%s", trace_dir);
+    }
+    
+    struct stat st = {0};
+    if (stream_id == 0) {
+      if (stat(stream_dir_root, &st) == -1) {
+	if (mkdir(stream_dir_root, 0700) == -1) {
+	  //printf("mkdir == -1\n");
+	  //perror("mkdir()");
+	  ESMC_LogDefault.MsgFoundError(ESMC_RC_FILE_CREATE, "Error creating trace root directory", 
+					ESMC_CONTEXT, rc);
+	  return;
+	}
+      }
+    }
+    
+    //all PETs wait for directory to be created
+    VM *globalvm = VM::getGlobal(&localrc);
+    if (ESMC_LogDefault.MsgFoundError(localrc, 
+        ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc)) 
+      return;
+    globalvm->barrier();
+
+    //my specific directory
+    sprintf(stream_dir, "%s/PET%d", stream_dir_root, stream_id);
+    
+    if (stat(stream_dir, &st) == -1) {
+      if (mkdir(stream_dir, 0700) == -1) {
+	//printf("mkdir == -1\n");
+	//perror("mkdir()");
+	ESMC_LogDefault.MsgFoundError(ESMC_RC_FILE_CREATE, "Error creating trace PET directory", 
+				      ESMC_CONTEXT, rc);
+	return;
+      }
+    }
+        
+    bt_writer = bt_ctf_writer_create(stream_dir);
+    BT_CHK_NULL(bt_writer, ESMC_CONTEXT);
+    
+    bt_clock = bt_ctf_clock_create("sys_clock");
+    BT_CHK_NULL(bt_clock, ESMC_CONTEXT);
+    
+    BT_CHK(bt_ctf_writer_add_clock(bt_writer, bt_clock), ESMC_CONTEXT);
+
+    TraceSetupTypes(&localrc);
+    if (ESMC_LogDefault.MsgFoundError(localrc, 
+				      ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc)) 
+      return;
+    
+    bt_stream = bt_ctf_writer_create_stream(bt_writer, bt_stream_class);
+    BT_CHK_NULL(bt_stream, ESMC_CONTEXT);
+
+    struct bt_ctf_field *packet_context = bt_ctf_stream_get_packet_context(bt_stream);
+    BT_CHK_NULL(packet_context, ESMC_CONTEXT);
+
+    struct bt_ctf_field *field_pet = bt_ctf_field_structure_get_field(packet_context, "pet");
+    BT_CHK_NULL(field_pet, ESMC_CONTEXT);
+    
+    BT_CHK(bt_ctf_field_unsigned_integer_set_value(field_pet, stream_id), ESMC_CONTEXT);
+
+    //reference counting
+    bt_ctf_field_put(packet_context);
+    bt_ctf_field_put(field_pet);
+
+    //BT_CHK(bt_ctf_writer_add_environment_field(bt_writer, "host", "testhost"), ESMC_CONTEXT);
+        
+  }
+
+
+  void TraceClose(int *rc) {
+
+    if (rc != NULL) *rc = ESMF_SUCCESS;
+
+    bt_ctf_writer_flush_metadata(bt_writer);
+    bt_ctf_writer_put(bt_writer);
+    bt_ctf_stream_class_put(bt_stream_class);
+    bt_ctf_stream_put(bt_stream);
+
+    bt_ctf_field_type_put(bt_type_uint4);
+    bt_ctf_field_type_put(bt_type_uint8);
+    bt_ctf_field_type_put(bt_type_uint16);
+    bt_ctf_field_type_put(bt_type_uint32);
+    bt_ctf_field_type_put(bt_type_enum_control);
+    bt_ctf_field_type_put(bt_type_enum_method);
+    bt_ctf_field_type_put(bt_type_seq_attr);
+    
+    bt_ctf_event_class_put(bt_event_class_control); 
+     
+  }
+
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::TraceSetupTypes()" 
+  void TraceSetupTypes(int *rc) {
+
+    if (rc != NULL) *rc = ESMF_SUCCESS;
+
+    //general types
+    bt_type_uint32 = bt_ctf_field_type_integer_create(32);
+    BT_CHK_NULL(bt_type_uint32, ESMC_CONTEXT);
+    BT_CHK(bt_ctf_field_type_set_alignment(bt_type_uint32, 8), ESMC_CONTEXT);
+    
+    bt_type_uint16 = bt_ctf_field_type_integer_create(16);
+    BT_CHK_NULL(bt_type_uint16, ESMC_CONTEXT);
+    BT_CHK(bt_ctf_field_type_set_alignment(bt_type_uint16, 8), ESMC_CONTEXT);
+    
+    bt_type_uint8 = bt_ctf_field_type_integer_create(8);
+    BT_CHK_NULL(bt_type_uint8, ESMC_CONTEXT);
+    BT_CHK(bt_ctf_field_type_set_alignment(bt_type_uint8, 8), ESMC_CONTEXT);
+        
+    bt_type_uint4 = bt_ctf_field_type_integer_create(4);
+    BT_CHK_NULL(bt_type_uint4, ESMC_CONTEXT);
+
+    bt_type_string = bt_ctf_field_type_string_create();
+    BT_CHK_NULL(bt_type_string, ESMC_CONTEXT);
+    
+    //define stream class
+    bt_stream_class = bt_ctf_stream_class_create("esmf_stream");
+    BT_CHK_NULL(bt_stream_class, ESMC_CONTEXT);
+    
+    BT_CHK(bt_ctf_stream_class_set_clock(bt_stream_class, bt_clock), ESMC_CONTEXT);
+
+    struct bt_ctf_field_type *packet_context_type =
+      bt_ctf_stream_class_get_packet_context_type(bt_stream_class);
+
+    BT_CHK(bt_ctf_field_type_structure_add_field(packet_context_type, bt_type_uint32, "pet"), ESMC_CONTEXT);
+    
+    //control event
+    bt_event_class_control = bt_ctf_event_class_create("control");
+    BT_CHK_NULL(bt_event_class_control, ESMC_CONTEXT);
+           
+    bt_type_enum_control = bt_ctf_field_type_enumeration_create(bt_type_uint4);
+    BT_CHK_NULL(bt_type_enum_control, ESMC_CONTEXT);
+
+    bt_ctf_field_type_enumeration_add_mapping(bt_type_enum_control, "start_phase", 0, 0);
+    bt_ctf_field_type_enumeration_add_mapping(bt_type_enum_control, "end_phase", 1, 1);
+    bt_ctf_field_type_enumeration_add_mapping(bt_type_enum_control, "start_prologue", 2, 2);
+    bt_ctf_field_type_enumeration_add_mapping(bt_type_enum_control, "end_prologue", 3, 3);
+    bt_ctf_field_type_enumeration_add_mapping(bt_type_enum_control, "start_epilogue", 4, 4);
+    bt_ctf_field_type_enumeration_add_mapping(bt_type_enum_control, "end_epilogue", 5, 5);
+            
+    bt_type_enum_method = bt_ctf_field_type_enumeration_create(bt_type_uint4);
+    BT_CHK_NULL(bt_type_enum_method, ESMC_CONTEXT);
+
+    bt_ctf_field_type_enumeration_add_mapping(bt_type_enum_method, "initialize", 0, 0);
+    bt_ctf_field_type_enumeration_add_mapping(bt_type_enum_method, "run", 1, 1);
+    bt_ctf_field_type_enumeration_add_mapping(bt_type_enum_method, "finalize", 2, 2);
+            
+    BT_CHK(bt_ctf_event_class_add_field(bt_event_class_control, bt_type_uint32, "vmid"), ESMC_CONTEXT);
+    BT_CHK(bt_ctf_event_class_add_field(bt_event_class_control, bt_type_uint32, "baseid"), ESMC_CONTEXT);
+    BT_CHK(bt_ctf_event_class_add_field(bt_event_class_control, bt_type_enum_control, "ctrl"), ESMC_CONTEXT);
+    BT_CHK(bt_ctf_event_class_add_field(bt_event_class_control, bt_type_enum_method, "method"), ESMC_CONTEXT);
+    BT_CHK(bt_ctf_event_class_add_field(bt_event_class_control, bt_type_uint8, "phase"), ESMC_CONTEXT);
+    
+    BT_CHK(bt_ctf_stream_class_add_event_class(bt_stream_class, bt_event_class_control), ESMC_CONTEXT);    
+
+    bt_event_class_comp = bt_ctf_event_class_create("comp");
+    BT_CHK_NULL(bt_event_class_comp, ESMC_CONTEXT);
+
+    //attribute pack
+    struct bt_ctf_field_type *bt_type_struct_attr = bt_ctf_field_type_structure_create();
+    BT_CHK_NULL(bt_type_struct_attr, ESMC_CONTEXT);
+
+    BT_CHK(bt_ctf_field_type_structure_add_field(bt_type_struct_attr, bt_type_string, "key"), ESMC_CONTEXT);
+    BT_CHK(bt_ctf_field_type_structure_add_field(bt_type_struct_attr, bt_type_string, "value"), ESMC_CONTEXT);
+
+    bt_type_seq_attr = bt_ctf_field_type_sequence_create(bt_type_struct_attr, "attr_len");
+    BT_CHK_NULL(bt_type_seq_attr, ESMC_CONTEXT);
+
+    //component
+    BT_CHK(bt_ctf_event_class_add_field(bt_event_class_comp, bt_type_uint32, "vmid"), ESMC_CONTEXT);
+    BT_CHK(bt_ctf_event_class_add_field(bt_event_class_comp, bt_type_uint32, "baseid"), ESMC_CONTEXT);
+    BT_CHK(bt_ctf_event_class_add_field(bt_event_class_comp, bt_type_string, "name"), ESMC_CONTEXT);
+    BT_CHK(bt_ctf_event_class_add_field(bt_event_class_comp, bt_type_uint16, "attr_len"), ESMC_CONTEXT);
+    BT_CHK(bt_ctf_event_class_add_field(bt_event_class_comp, bt_type_seq_attr, "attributes"), ESMC_CONTEXT);   
+    
+    BT_CHK(bt_ctf_stream_class_add_event_class(bt_stream_class, bt_event_class_comp), ESMC_CONTEXT);    
+    
+    //reference management
+    bt_ctf_field_type_put(packet_context_type);
+    bt_ctf_field_type_put(bt_type_struct_attr);
+
+    
+  }
+
+
+        
+  void TraceEventPhase
+     (
+      int ctrl,
+      int *ep_vmid,
+      int *ep_baseid,
+      int *ep_method,
+      int *ep_phase
+      )
+  {
+
+    int localrc;
+    int *rc = &localrc;
+    
+    //printf("TraceEventPhase\n");
+    
+    //esmftrc_default_trace_phase_enter(esmftrc_platform_get_default_ctx(),
+    //				      *ep_vmid, *ep_baseid, *ep_method, *ep_phase);
+
+    struct bt_ctf_event *event = bt_ctf_event_create(bt_event_class_control);
+
+    struct bt_ctf_field *field_ctrl = bt_ctf_field_create(bt_type_enum_control);
+    struct bt_ctf_field *ctrl_container_field = bt_ctf_field_enumeration_get_container(field_ctrl);
+    BT_CHK(bt_ctf_field_unsigned_integer_set_value(ctrl_container_field, ctrl), ESMC_CONTEXT);
+    BT_CHK(bt_ctf_event_set_payload(event, "ctrl", field_ctrl), ESMC_CONTEXT);
+    
+    struct bt_ctf_field *field_vmid = bt_ctf_field_create(bt_type_uint32);
+    BT_CHK(bt_ctf_field_unsigned_integer_set_value(field_vmid, *ep_vmid), ESMC_CONTEXT);
+    BT_CHK(bt_ctf_event_set_payload(event, "vmid", field_vmid), ESMC_CONTEXT);
+
+    struct bt_ctf_field *field_baseid = bt_ctf_field_create(bt_type_uint32);
+    BT_CHK(bt_ctf_field_unsigned_integer_set_value(field_baseid, *ep_baseid), ESMC_CONTEXT);
+    BT_CHK(bt_ctf_event_set_payload(event, "baseid", field_baseid), ESMC_CONTEXT);
+    
+    struct bt_ctf_field *field_method = bt_ctf_field_create(bt_type_enum_method);
+    struct bt_ctf_field *method_container_field = bt_ctf_field_enumeration_get_container(field_method);
+    BT_CHK(bt_ctf_field_unsigned_integer_set_value(method_container_field, *ep_method), ESMC_CONTEXT);
+    BT_CHK(bt_ctf_event_set_payload(event, "method", field_method), ESMC_CONTEXT);
+
+    struct bt_ctf_field *field_phase = bt_ctf_field_create(bt_type_uint8);
+    BT_CHK(bt_ctf_field_unsigned_integer_set_value(field_phase, *ep_phase), ESMC_CONTEXT);
+    BT_CHK(bt_ctf_event_set_payload(event, "phase", field_phase), ESMC_CONTEXT);
+    
+    BT_CHK(bt_ctf_clock_set_time(bt_clock, get_clock()), ESMC_CONTEXT);
+
+    BT_CHK(bt_ctf_stream_append_event(bt_stream, event), ESMC_CONTEXT);
+    BT_CHK(bt_ctf_stream_flush(bt_stream), ESMC_CONTEXT);
+
+    bt_ctf_event_put(event);
+    bt_ctf_field_put(field_ctrl);
+    bt_ctf_field_put(ctrl_container_field);
+    bt_ctf_field_put(field_vmid);
+    bt_ctf_field_put(field_baseid);
+    bt_ctf_field_put(field_method);
+    bt_ctf_field_put(method_container_field);
+    bt_ctf_field_put(field_phase);
+    
+  }
+  
+  void TraceEventPhaseEnter  
+     (
+     int *ep_vmid,
+     int *ep_baseid,
+     int *ep_method,
+     int *ep_phase
+     )
+  {
+    //printf("TraceEventPhaseEnter\n");
+    TraceEventPhase(0, ep_vmid, ep_baseid, ep_method, ep_phase);
+  }
+  
+  void TraceEventPhaseExit 
+    (
+     int *ep_vmid,
+     int *ep_baseid,
+     int *ep_method,
+     int *ep_phase
+     )
+  {
+    //esmftrc_default_trace_phase_exit(esmftrc_platform_get_default_ctx(),
+				     //*ep_vmid, *ep_baseid, *ep_method, *ep_phase);
+    TraceEventPhase(1, ep_vmid, ep_baseid, ep_method, ep_phase);
+  }
+
+  void TraceEventPhasePrologueEnter  
+  (
+     int *ep_vmid,
+     int *ep_baseid,
+     int *ep_method,
+     int *ep_phase
+     )
+  {
+    //esmftrc_default_trace_phase_prologue_enter(esmftrc_platform_get_default_ctx(),
+    //                                          *ep_vmid, *ep_baseid, *ep_method, *ep_phase);
+  }
+
+  void TraceEventPhasePrologueExit  
+     (
+     int *ep_vmid,
+     int *ep_baseid,
+     int *ep_method,
+     int *ep_phase
+     )
+  {
+    //esmftrc_default_trace_phase_prologue_exit(esmftrc_platform_get_default_ctx(),
+    //                                         *ep_vmid, *ep_baseid, *ep_method, *ep_phase);
+  }
+
+  void TraceEventPhaseEpilogueEnter  
+  (
+     int *ep_vmid,
+     int *ep_baseid,
+     int *ep_method,
+     int *ep_phase
+     )
+  {
+    //esmftrc_default_trace_phase_epilogue_enter(esmftrc_platform_get_default_ctx(),
+    //                                           *ep_vmid, *ep_baseid, *ep_method, *ep_phase);
+  }
+
+  void TraceEventPhaseEpilogueExit  
+     (
+     int *ep_vmid,
+     int *ep_baseid,
+     int *ep_method,
+     int *ep_phase
+     )
+  {
+    //esmftrc_default_trace_phase_epilogue_exit(esmftrc_platform_get_default_ctx(),
+    //                                         *ep_vmid, *ep_baseid, *ep_method, *ep_phase);
+  }
+
+  void TraceEventComponentInfo
+  (
+   int *ep_vmid,
+   int *ep_baseid,
+   const char *ep_name
+   )
+  {
+    //esmftrc_default_trace_component_info(esmftrc_platform_get_default_ctx(),
+    //                                    *ep_vmid,
+    //                                    *ep_baseid,
+    //                                   ep_name);
+    
+    int localrc;
+    int *rc = &localrc;
+
+    printf("ESMCI::TraceEventComponentInfo\n");
+    
+    struct bt_ctf_event *event = bt_ctf_event_create(bt_event_class_comp);
+
+    struct bt_ctf_field *field_vmid = bt_ctf_field_create(bt_type_uint32);
+    BT_CHK(bt_ctf_field_unsigned_integer_set_value(field_vmid, *ep_vmid), ESMC_CONTEXT);
+    BT_CHK(bt_ctf_event_set_payload(event, "vmid", field_vmid), ESMC_CONTEXT);
+
+    struct bt_ctf_field *field_baseid = bt_ctf_field_create(bt_type_uint32);
+    BT_CHK(bt_ctf_field_unsigned_integer_set_value(field_baseid, *ep_baseid), ESMC_CONTEXT);
+    BT_CHK(bt_ctf_event_set_payload(event, "baseid", field_baseid), ESMC_CONTEXT);
+
+    struct bt_ctf_field *field_name = bt_ctf_field_create(bt_type_string);
+    BT_CHK(bt_ctf_field_string_set_value(field_name, ep_name), ESMC_CONTEXT);
+    BT_CHK(bt_ctf_event_set_payload(event, "name", field_name), ESMC_CONTEXT);
+    
+    struct bt_ctf_field *field_attr_len = bt_ctf_field_create(bt_type_uint16);
+    BT_CHK(bt_ctf_field_unsigned_integer_set_value(field_attr_len, 0), ESMC_CONTEXT);
+    BT_CHK(bt_ctf_event_set_payload(event, "attr_len", field_attr_len), ESMC_CONTEXT);
+
+    struct bt_ctf_field *field_seq_attr = bt_ctf_field_create(bt_type_seq_attr);
+    BT_CHK(bt_ctf_field_sequence_set_length(field_seq_attr, field_attr_len), ESMC_CONTEXT);
+    BT_CHK(bt_ctf_event_set_payload(event, "attributes", field_seq_attr), ESMC_CONTEXT);
+
+    
+    BT_CHK(bt_ctf_clock_set_time(bt_clock, get_clock()), ESMC_CONTEXT);
+    
+    BT_CHK(bt_ctf_stream_append_event(bt_stream, event), ESMC_CONTEXT);
+    BT_CHK(bt_ctf_stream_flush(bt_stream), ESMC_CONTEXT);
+
+    bt_ctf_event_put(event);
+    bt_ctf_field_put(field_name);
+    bt_ctf_field_put(field_vmid);
+    bt_ctf_field_put(field_baseid);
+    bt_ctf_field_put(field_attr_len);
+    
+
+  }
+
+  
+}
+
+/* archive this here for now */
+
+/*
+
+//#include <esmftrc.h>
+
+//#ifdef __cplusplus
+//# define TO_VOID_PTR(_value)		static_cast<void *>(_value)
+//# define FROM_VOID_PTR(_type, _value)	static_cast<_type *>(_value)
+//#else
+//# define TO_VOID_PTR(_value)		((void *) (_value))
+//# define FROM_VOID_PTR(_type, _value)	((_type *) (_value))
+//#endif
 
   struct esmftrc_platform_filesys_ctx {
     struct esmftrc_default_ctx ctx;
@@ -109,108 +536,108 @@ namespace ESMCI {
     struct esmftrc_platform_filesys_ctx *ctx =
       FROM_VOID_PTR(struct esmftrc_platform_filesys_ctx, data);
 
-    /* close packet now */
+    // close packet now
     esmftrc_default_close_packet(&ctx->ctx);
 
-    /* write packet to file */
+    // write packet to file 
     write_packet(ctx);
   }
   
-#undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI::TraceOpen()"  
-  void TraceOpen(unsigned int buf_size, const char *trace_dir, int stream_id, int *rc) {
+// #undef  ESMC_METHOD
+// #define ESMC_METHOD "ESMCI::TraceOpen()"  
+//   void TraceOpen(unsigned int buf_size, const char *trace_dir, int stream_id, int *rc) {
     
-    int localrc;
-    char stream_path[ESMC_MAXPATHLEN];
-    char stream_dir[ESMC_MAXPATHLEN];
-    uint8_t *buf;
-    struct esmftrc_platform_filesys_ctx *ctx;
-    struct esmftrc_platform_callbacks cbs;
+//     int localrc;
+//     char stream_path[ESMC_MAXPATHLEN];
+//     char stream_dir[ESMC_MAXPATHLEN];
+//     uint8_t *buf;
+//     struct esmftrc_platform_filesys_ctx *ctx;
+//     struct esmftrc_platform_callbacks cbs;
 
-    if (rc != NULL) *rc = ESMF_SUCCESS;
+//     if (rc != NULL) *rc = ESMF_SUCCESS;
 
-    cbs.sys_clock_clock_get_value = get_clock;
-    cbs.is_backend_full = is_backend_full;
-    cbs.open_packet = open_packet;
-    cbs.close_packet = close_packet;
-    ctx = FROM_VOID_PTR(struct esmftrc_platform_filesys_ctx, malloc(sizeof(*ctx)));
+//     cbs.sys_clock_clock_get_value = get_clock;
+//     cbs.is_backend_full = is_backend_full;
+//     cbs.open_packet = open_packet;
+//     cbs.close_packet = close_packet;
+//     ctx = FROM_VOID_PTR(struct esmftrc_platform_filesys_ctx, malloc(sizeof(*ctx)));
     
-    ESMC_LogDefault.Write("Enabling ESMF Tracing", ESMC_LOGMSG_INFO);
-    if (!ctx) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_MEM_ALLOCATE, "Cannot allocate context", 
-                                    ESMC_CONTEXT, rc);
-      return;
-    }
+//     ESMC_LogDefault.Write("Enabling ESMF Tracing", ESMC_LOGMSG_INFO);
+//     if (!ctx) {
+//       ESMC_LogDefault.MsgFoundError(ESMC_RC_MEM_ALLOCATE, "Cannot allocate context", 
+//                                     ESMC_CONTEXT, rc);
+//       return;
+//     }
   
-    buf = FROM_VOID_PTR(uint8_t, malloc(buf_size));
+//     buf = FROM_VOID_PTR(uint8_t, malloc(buf_size));
 
-    if (!buf) {
-      free(ctx);
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_MEM_ALLOCATE, "Cannot allocate trace event buffer", 
-                                    ESMC_CONTEXT, rc);
-      return;
-    }
+//     if (!buf) {
+//       free(ctx);
+//       ESMC_LogDefault.MsgFoundError(ESMC_RC_MEM_ALLOCATE, "Cannot allocate trace event buffer", 
+//                                     ESMC_CONTEXT, rc);
+//       return;
+//     }
     
-    memset(buf, 0, buf_size);
+//     memset(buf, 0, buf_size);
     
-    //make relative path absolute if needed
-    if (trace_dir[0] != '/') {
-      char cwd[1024];
-      if (getcwd(cwd, sizeof(cwd)) == NULL) {
-        ESMC_LogDefault.MsgFoundError(ESMC_RC_SYS, "Error getting working directory", 
-                                      ESMC_CONTEXT, rc);
-        return; 
-      }
-      sprintf(stream_dir, "%s/%s", cwd, trace_dir);
-      //printf("absolute dir = |%s|\n", stream_dir);
-    }
-    else {
-      sprintf(stream_dir, "%s", trace_dir);
-    }
+//     //make relative path absolute if needed
+//     if (trace_dir[0] != '/') {
+//       char cwd[1024];
+//       if (getcwd(cwd, sizeof(cwd)) == NULL) {
+//         ESMC_LogDefault.MsgFoundError(ESMC_RC_SYS, "Error getting working directory", 
+//                                       ESMC_CONTEXT, rc);
+//         return; 
+//       }
+//       sprintf(stream_dir, "%s/%s", cwd, trace_dir);
+//       //printf("absolute dir = |%s|\n", stream_dir);
+//     }
+//     else {
+//       sprintf(stream_dir, "%s", trace_dir);
+//     }
            
-    //root stream responsible for creating trace directory     
-    if (stream_id == 0) {      
-      struct stat st = {0};
-      if (stat(stream_dir, &st) == -1) {
-        if (mkdir(stream_dir, 0700) == -1) {
-          //printf("mkdir == -1\n");
-          //perror("mkdir()");
-          ESMC_LogDefault.MsgFoundError(ESMC_RC_FILE_CREATE, "Error creating trace directory", 
-                                        ESMC_CONTEXT, rc);
-          return;
-        }
-      }
-    }
+//     //root stream responsible for creating trace directory     
+//     if (stream_id == 0) {      
+//       struct stat st = {0};
+//       if (stat(stream_dir, &st) == -1) {
+//         if (mkdir(stream_dir, 0700) == -1) {
+//           //printf("mkdir == -1\n");
+//           //perror("mkdir()");
+//           ESMC_LogDefault.MsgFoundError(ESMC_RC_FILE_CREATE, "Error creating trace directory", 
+//                                         ESMC_CONTEXT, rc);
+//           return;
+//         }
+//       }
+//     }
 
-    //all PETs wait for directory to be created
-    VM *globalvm = VM::getGlobal(&localrc);
-    if (ESMC_LogDefault.MsgFoundError(localrc, 
-        ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc)) 
-      return;
-    globalvm->barrier();
+//     //all PETs wait for directory to be created
+//     VM *globalvm = VM::getGlobal(&localrc);
+//     if (ESMC_LogDefault.MsgFoundError(localrc, 
+//         ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc)) 
+//       return;
+//     globalvm->barrier();
     
-    sprintf(stream_path, "%s/stream%d", stream_dir, stream_id);
-    ctx->fh = fopen(stream_path, "wb");
+//     sprintf(stream_path, "%s/stream%d", stream_dir, stream_id);
+//     ctx->fh = fopen(stream_path, "wb");
 
-    if (!ctx->fh) {
-      free(ctx);
-      free(buf);
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_FILE_OPEN, "Error opening trace output file", 
-                                    ESMC_CONTEXT, rc);
-      return;
-    }
+//     if (!ctx->fh) {
+//       free(ctx);
+//       free(buf);
+//       ESMC_LogDefault.MsgFoundError(ESMC_RC_FILE_OPEN, "Error opening trace output file", 
+//                                     ESMC_CONTEXT, rc);
+//       return;
+//     }
 
-    ctx->stream_id = stream_id;
+//     ctx->stream_id = stream_id;
 
-    esmftrc_init(&ctx->ctx, buf, buf_size, cbs, ctx);
-    open_packet(ctx);
+//     esmftrc_init(&ctx->ctx, buf, buf_size, cbs, ctx);
+//     open_packet(ctx);
 
-    //store as global context
-    g_esmftrc_platform_filesys_ctx = ctx;
+//     //store as global context
+//     g_esmftrc_platform_filesys_ctx = ctx;
 
-  }
+//   }
 
-  
+   
   void TraceClose(int *rc)
   {
     struct esmftrc_platform_filesys_ctx *ctx = g_esmftrc_platform_filesys_ctx;
@@ -226,14 +653,15 @@ namespace ESMCI {
     free(esmftrc_packet_buf(&ctx->ctx));
     free(ctx);
   }
+  
 
-  /*
+  
   struct esmftrc_default_ctx *esmftrc_platform_linux_fs_get_esmftrc_ctx(
 									struct esmftrc_platform_linux_fs_ctx *ctx)
   {
     return &ctx->ctx;
   }
-  */
+  
 
   static struct esmftrc_default_ctx *esmftrc_platform_get_default_ctx()
   {
@@ -241,98 +669,4 @@ namespace ESMCI {
   }
   
 
-  ////////////////////////////////
-
-
-  /*
-   * These functions call into the generated tracer functions
-   * in esmftrc.c.
-   */
-
-  void TraceEventPhaseEnter  
-     (
-     int *ep_vmid,
-     int *ep_baseid,
-     int *ep_method,
-     int *ep_phase
-     )
-  {
-    esmftrc_default_trace_phase_enter(esmftrc_platform_get_default_ctx(),
-				      *ep_vmid, *ep_baseid, *ep_method, *ep_phase);
-  }
-  
-  void TraceEventPhaseExit 
-    (
-     int *ep_vmid,
-     int *ep_baseid,
-     int *ep_method,
-     int *ep_phase
-     )
-  {
-    esmftrc_default_trace_phase_exit(esmftrc_platform_get_default_ctx(),
-				     *ep_vmid, *ep_baseid, *ep_method, *ep_phase);
-  }
-
-  void TraceEventPhasePrologueEnter  
-  (
-     int *ep_vmid,
-     int *ep_baseid,
-     int *ep_method,
-     int *ep_phase
-     )
-  {
-    esmftrc_default_trace_phase_prologue_enter(esmftrc_platform_get_default_ctx(),
-                                               *ep_vmid, *ep_baseid, *ep_method, *ep_phase);
-  }
-
-  void TraceEventPhasePrologueExit  
-     (
-     int *ep_vmid,
-     int *ep_baseid,
-     int *ep_method,
-     int *ep_phase
-     )
-  {
-    esmftrc_default_trace_phase_prologue_exit(esmftrc_platform_get_default_ctx(),
-                                              *ep_vmid, *ep_baseid, *ep_method, *ep_phase);
-  }
-
-  void TraceEventPhaseEpilogueEnter  
-  (
-     int *ep_vmid,
-     int *ep_baseid,
-     int *ep_method,
-     int *ep_phase
-     )
-  {
-    esmftrc_default_trace_phase_epilogue_enter(esmftrc_platform_get_default_ctx(),
-                                               *ep_vmid, *ep_baseid, *ep_method, *ep_phase);
-  }
-
-  void TraceEventPhaseEpilogueExit  
-     (
-     int *ep_vmid,
-     int *ep_baseid,
-     int *ep_method,
-     int *ep_phase
-     )
-  {
-    esmftrc_default_trace_phase_epilogue_exit(esmftrc_platform_get_default_ctx(),
-                                              *ep_vmid, *ep_baseid, *ep_method, *ep_phase);
-  }
-
-  void TraceEventComponentInfo
-  (
-   int *ep_vmid,
-   int *ep_baseid,
-   const char *ep_name
-   )
-  {
-    esmftrc_default_trace_component_info(esmftrc_platform_get_default_ctx(),
-                                         *ep_vmid,
-                                         *ep_baseid,
-                                         ep_name);
-  }
-
-  
-}
+ */

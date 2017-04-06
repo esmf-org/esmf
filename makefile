@@ -216,6 +216,18 @@ script_info:
 	    echo "ESMF_PROJ4_LIBPATH:       $(ESMF_PROJ4_LIBPATH)" ; \
           fi; \
          fi
+	-@if [ -n "$(ESMF_BABELTRACE)" ] ; then \
+	  echo "ESMF_BABELTRACE:               $(ESMF_BABELTRACE)" ; \
+	  if [ -n "$(ESMF_BABELTRACE_INCLUDE)" ] ; then \
+	    echo "ESMF_BABELTRACE_INCLUDE:       $(ESMF_BABELTRACE_INCLUDE)" ; \
+          fi; \
+	  if [ -n "$(ESMF_BABELTRACE_LIBS)" ] ; then \
+	    echo "ESMF_BABELTRACE_LIBS:          $(ESMF_BABELTRACE_LIBS)" ; \
+          fi; \
+	  if [ -n "$(ESMF_BABELTRACE_LIBPATH)" ] ; then \
+	    echo "ESMF_BABELTRACE_LIBPATH:       $(ESMF_BABELTRACE_LIBPATH)" ; \
+          fi; \
+         fi
 	-@echo " "
 	-@echo "--------------------------------------------------------------"
 	-@echo " * ESMF environment variables for final installation *"
