@@ -133,7 +133,7 @@ class Py3Char(object):
 
 _ESMF.ESMC_Initialize.restype = ct.c_int
 #_ESMF.ESMC_Initialize.argtypes = []
-@deprecated
+
 def ESMP_Initialize(logkind = constants.LogKind.MULTI):
     """
     Preconditions: An ESMF shared library must have been loaded.
@@ -157,7 +157,7 @@ def ESMP_Initialize(logkind = constants.LogKind.MULTI):
 
 _ESMF.ESMC_Finalize.restype = ct.c_int
 _ESMF.ESMC_Finalize.argtypes = []
-@deprecated
+
 def ESMP_Finalize():
     """
     Preconditions: ESMF has been initialized.
@@ -235,7 +235,7 @@ _ESMF.ESMC_VMGet.argtypes = [ct.c_void_p, ct.POINTER(ct.c_int),
                              ct.POINTER(ct.c_int), ct.POINTER(ct.c_int),
                              ct.c_void_p, ct.POINTER(ct.c_int),
                              ct.POINTER(ct.c_int)]
-@deprecated
+
 def ESMP_VMGet(vm):
     """
     Preconditions: An ESMP_VM object has been retrieved.\n
@@ -264,7 +264,7 @@ def ESMP_VMGet(vm):
 
 _ESMF.ESMC_VMGetGlobal.restype = ESMP_VM
 _ESMF.ESMC_VMGetGlobal.argtypes = [ct.POINTER(ct.c_int)]
-@deprecated
+
 def ESMP_VMGetGlobal():
     """
     Preconditions: ESMP has been initialized.\n
@@ -282,7 +282,7 @@ def ESMP_VMGetGlobal():
 
 _ESMF.ESMC_VMPrint.restype = ct.c_int
 _ESMF.ESMC_VMPrint.argtypes = [ct.c_void_p]
-@deprecated
+
 def ESMP_VMPrint(vm):
     """
     Preconditions: An ESMP_VM object has been retrieved.\n
@@ -300,7 +300,7 @@ def ESMP_VMPrint(vm):
 
 _ESMF.ESMC_LogSet.restype = ct.c_int
 _ESMF.ESMC_LogSet.argtypes = [ct.c_int]
-@deprecated
+
 def ESMP_LogSet(flush):
     """
     Preconditions: ESMP has been initialized\n
@@ -326,7 +326,7 @@ _ESMF.ESMC_GridCreate1PeriDim.argtypes = [ct.POINTER(ESMP_InterfaceInt),
                                           OptionalNamedConstant,
                                           OptionalNamedConstant,
                                           ct.POINTER(ct.c_int)]
-@deprecated
+
 def ESMP_GridCreate1PeriDim(maxIndex, periodicDim=None, poleDim=None,
                             coordSys=None, coordTypeKind=None):
     """
@@ -389,7 +389,7 @@ _ESMF.ESMC_GridCreateNoPeriDim.argtypes = [ct.POINTER(ESMP_InterfaceInt),
                                            OptionalNamedConstant,
                                            OptionalNamedConstant,
                                            ct.POINTER(ct.c_int)]
-@deprecated
+
 def ESMP_GridCreateNoPeriDim(maxIndex, coordSys=None, coordTypeKind=None):
     """
     Preconditions: ESMP has been initialized.\n
@@ -443,7 +443,7 @@ _ESMF.ESMC_GridCreateCubedSphere.argtypes = [ct.POINTER(ct.c_int),
                                              #ct.POINTER(ESMP_InterfaceInt),
                                              ct.c_void_p,
                                              ct.POINTER(ct.c_int)]
-@deprecated
+
 def ESMP_GridCreateCubedSphere(tilesize, regDecompPTile=None,
                                #decompFlagPTile=None, deLabelList=None,
                                name=None):
@@ -512,7 +512,7 @@ _ESMF.ESMC_GridCreateFromFile.argtypes = [Py3Char, ct.c_int,
                                           Py3Char,
                                           OptionalArrayOfStrings,
                                           ct.POINTER(ct.c_int)]
-@deprecated
+
 @netcdf
 def ESMP_GridCreateFromFile(filename, fileTypeFlag, regDecomp,
                             decompflag=None, isSphere=None,
@@ -555,7 +555,7 @@ def ESMP_GridCreateFromFile(filename, fileTypeFlag, regDecomp,
 
 _ESMF.ESMC_GridDestroy.restype = ct.c_int
 _ESMF.ESMC_GridDestroy.argtypes = [ct.c_void_p]
-@deprecated
+
 def ESMP_GridDestroy(grid):
     """
     Preconditions: An ESMP_Grid has been created.\n
@@ -572,7 +572,7 @@ def ESMP_GridDestroy(grid):
 
 _ESMF.ESMC_GridAddCoord.restype = ct.c_int
 _ESMF.ESMC_GridAddCoord.argtypes = [ct.c_void_p, ct.c_uint]
-@deprecated
+
 def ESMP_GridAddCoord(grid, staggerloc=constants.StaggerLoc.CENTER):
     """
     Preconditions: An ESMP_Grid has been created.\n
@@ -622,7 +622,7 @@ def ESMP_GridAddCoord(grid, staggerloc=constants.StaggerLoc.CENTER):
 
 _ESMF.ESMC_GridAddItem.restype = ct.c_int
 _ESMF.ESMC_GridAddItem.argtypes = [ct.c_void_p, ct.c_uint, ct.c_uint]
-@deprecated
+
 def ESMP_GridAddItem(grid, item,
                      staggerloc=constants.StaggerLoc.CENTER):
     """
@@ -664,7 +664,7 @@ _ESMF.ESMC_GridGetCoord.argtypes = [ct.c_void_p, ct.c_int, ct.c_uint, ct.c_int,
                                     np.ctypeslib.ndpointer(dtype=np.int32),
                                     np.ctypeslib.ndpointer(dtype=np.int32),
                                     ct.POINTER(ct.c_int)]
-@deprecated
+
 def ESMP_GridGetCoordPtr(grid, coordDim,
                          staggerloc=constants.StaggerLoc.CENTER,
                          localde=0):
@@ -724,7 +724,7 @@ _ESMF.ESMC_GridGetCoordBounds.argtypes = [ct.c_void_p, ct.c_uint, ct.c_int,
                                          np.ctypeslib.ndpointer(dtype=np.int32),
                                          np.ctypeslib.ndpointer(dtype=np.int32),
                                          ct.POINTER(ct.c_int)]
-@deprecated
+
 def ESMP_GridGetCoordBounds(grid, staggerloc=constants.StaggerLoc.CENTER,
                             localde=0):
     """
@@ -778,7 +778,7 @@ def ESMP_GridGetCoordBounds(grid, staggerloc=constants.StaggerLoc.CENTER,
 _ESMF.ESMC_GridGetItem.restype = ct.POINTER(ct.c_void_p)
 _ESMF.ESMC_GridGetItem.argtypes = [ct.c_void_p, ct.c_uint, ct.c_uint, ct.c_int,
                                    ct.POINTER(ct.c_int)]
-@deprecated
+
 def ESMP_GridGetItem(grid, item, staggerloc=constants.StaggerLoc.CENTER,
                      localde=0):
     """
@@ -830,7 +830,7 @@ def ESMP_GridGetItem(grid, item, staggerloc=constants.StaggerLoc.CENTER,
 
 _ESMF.ESMC_GridWrite.restype = ct.c_int
 _ESMF.ESMC_GridWrite.argtypes = [ct.c_void_p, ct.c_uint,Py3Char]
-@deprecated
+
 def ESMP_GridWrite(grid, filename, staggerloc=constants.StaggerLoc.CENTER):
     """
     Preconditions: An ESMP_Grid has been created.\n
@@ -869,7 +869,7 @@ _ESMF.ESMC_MeshAddElements.argtypes = [ct.c_void_p, ct.c_int,
                                        OptionalNumpyArrayInt32,
                                        OptionalNumpyArrayFloat64,
                                        OptionalNumpyArrayFloat64]
-@deprecated
+
 def ESMP_MeshAddElements(mesh, elementCount,
                          elementIds, elementTypes,
                          elementConn,
@@ -913,7 +913,7 @@ _ESMF.ESMC_MeshAddNodes.argtypes = [ct.c_void_p, ct.c_int,
                                     np.ctypeslib.ndpointer(dtype=np.int32),
                                     np.ctypeslib.ndpointer(dtype=np.float64),
                                     np.ctypeslib.ndpointer(dtype=np.int32)]
-@deprecated
+
 def ESMP_MeshAddNodes(mesh, nodeCount,
                       nodeIds, nodeCoords, nodeOwners):
     """
@@ -947,7 +947,7 @@ def ESMP_MeshAddNodes(mesh, nodeCount,
 _ESMF.ESMC_MeshCreate.restype = ESMP_Mesh
 _ESMF.ESMC_MeshCreate.argtypes = [ct.c_int, ct.c_int,
                                   OptionalNamedConstant, ct.POINTER(ct.c_int)]
-@deprecated
+
 def ESMP_MeshCreate(parametricDim, spatialDim, coordSys=None):
     """
     Preconditions: ESMP has been initialized.\n
@@ -982,7 +982,7 @@ _ESMF.ESMC_MeshCreateFromFile.argtypes = [Py3Char, ct.c_int,
                                           Py3Char,
                                           OptionalNamedConstant,
                                           Py3Char]
-@deprecated
+
 @netcdf
 def ESMP_MeshCreateFromFile(filename, fileTypeFlag,
                             convertToDual=None, addUserArea=None,
@@ -1022,7 +1022,7 @@ def ESMP_MeshCreateFromFile(filename, fileTypeFlag,
 
 _ESMF.ESMC_MeshDestroy.restype = ct.c_int
 _ESMF.ESMC_MeshDestroy.argtypes = [ct.c_void_p]
-@deprecated
+
 def ESMP_MeshDestroy(mesh):
     """
     :KNOWN BUG: This function does not work if ESMP_MeshFreeMemory has
@@ -1041,7 +1041,7 @@ def ESMP_MeshDestroy(mesh):
 
 _ESMF.ESMC_MeshFreeMemory.restype = ct.c_int
 _ESMF.ESMC_MeshFreeMemory.argtypes = [ct.c_void_p]
-@deprecated
+
 def ESMP_MeshFreeMemory(mesh):
     """
     :KNOWN BUG: This function does not work if called on an ESMP_Mesh
@@ -1065,7 +1065,7 @@ _ESMF.ESMC_MeshGetCoord.argtypes = [ct.c_void_p,
                                     np.ctypeslib.ndpointer(dtype=np.float64),
                                     ct.POINTER(ct.c_int),
                                     ct.POINTER(ct.c_int), ct.POINTER(ct.c_int)]
-@deprecated
+
 def ESMP_MeshGetCoordPtr(mesh):
     """
     Preconditions: An ESMP_Mesh has been created with coordinates
@@ -1161,7 +1161,7 @@ def ESMP_MeshGetConnectivityPtr(mesh):
 _ESMF.ESMC_MeshGetLocalElementCount.restype = ct.c_int
 _ESMF.ESMC_MeshGetLocalElementCount.argtypes = [ct.c_void_p,
                                                 ct.POINTER(ct.c_int)]
-@deprecated
+
 def ESMP_MeshGetLocalElementCount(mesh):
     """
     Preconditions: An ESMP_Mesh has been created.\n
@@ -1181,7 +1181,7 @@ def ESMP_MeshGetLocalElementCount(mesh):
 
 _ESMF.ESMC_MeshGetLocalNodeCount.restype = ct.c_int
 _ESMF.ESMC_MeshGetLocalNodeCount.argtypes = [ct.c_void_p, ct.POINTER(ct.c_int)]
-@deprecated
+
 def ESMP_MeshGetLocalNodeCount(mesh):
     """
     Preconditions: An ESMP_Mesh has been created.\n
@@ -1201,7 +1201,7 @@ def ESMP_MeshGetLocalNodeCount(mesh):
 _ESMF.ESMC_MeshGetOwnedElementCount.restype = ct.c_int
 _ESMF.ESMC_MeshGetOwnedElementCount.argtypes = [ct.c_void_p,
                                                 ct.POINTER(ct.c_int)]
-@deprecated
+
 def ESMP_MeshGetOwnedElementCount(mesh):
     """
     Preconditions: An ESMP_Mesh has been created.\n
@@ -1221,7 +1221,7 @@ def ESMP_MeshGetOwnedElementCount(mesh):
 
 _ESMF.ESMC_MeshGetOwnedNodeCount.restype = ct.c_int
 _ESMF.ESMC_MeshGetOwnedNodeCount.argtypes = [ct.c_void_p, ct.POINTER(ct.c_int)]
-@deprecated
+
 def ESMP_MeshGetOwnedNodeCount(mesh):
     """
     Preconditions: An ESMP_Mesh has been created.\n
@@ -1240,7 +1240,7 @@ def ESMP_MeshGetOwnedNodeCount(mesh):
 
 _ESMF.ESMC_MeshWrite.restype = ct.c_int
 _ESMF.ESMC_MeshWrite.argtypes = [ct.c_void_p, Py3Char]
-@deprecated
+
 def ESMP_MeshWrite(mesh, filename):
     """
     Preconditions: An ESMP_Mesh has been created.\n
@@ -1404,7 +1404,7 @@ _ESMF.ESMC_FieldCreateGridTypeKind.argtypes = [ct.c_void_p, ct.c_uint,
                                                OptionalStructPointer,
                                                Py3Char,
                                                ct.POINTER(ct.c_int)]
-@deprecated
+
 def ESMP_FieldCreateGrid(grid, name=None,
                          typekind=constants.TypeKind.R8,
                          staggerloc=constants.StaggerLoc.CENTER,
@@ -1624,7 +1624,7 @@ def ESMP_FieldCreateMesh(mesh, name=None,
 
 _ESMF.ESMC_FieldDestroy.restype = ct.c_int
 _ESMF.ESMC_FieldDestroy.argtypes = [ct.c_void_p]
-@deprecated
+
 def ESMP_FieldDestroy(field):
     """
     Preconditions: An ESMP_Field has been created.\n
@@ -1641,7 +1641,7 @@ def ESMP_FieldDestroy(field):
 
 _ESMF.ESMC_FieldGetPtr.restype = ct.POINTER(ct.c_void_p)
 _ESMF.ESMC_FieldGetPtr.argtypes = [ct.c_void_p, ct.c_int, ct.POINTER(ct.c_int)]
-@deprecated
+
 def ESMP_FieldGetPtr(field, localDe=0):
     """
     Preconditions: An ESMP_Field has been created.\n
@@ -1666,7 +1666,7 @@ _ESMF.ESMC_FieldGetBounds.argtypes = [ct.c_void_p, ct.POINTER(ct.c_int),
                                       np.ctypeslib.ndpointer(dtype=np.int32),
                                       np.ctypeslib.ndpointer(dtype=np.int32),
                                       ct.c_int]
-@deprecated
+
 def ESMP_FieldGetBounds(field, rank, localDe=0):
     """
     Preconditions: An ESMP_Field has been created.\n
@@ -1696,7 +1696,7 @@ def ESMP_FieldGetBounds(field, rank, localDe=0):
 
 _ESMF.ESMC_FieldPrint.restype = ct.c_int
 _ESMF.ESMC_FieldPrint.argtypes = [ct.c_void_p]
-@deprecated
+
 def ESMP_FieldPrint(field):
     """
     Preconditions: An ESMP_Field has been created.\n
@@ -1737,7 +1737,7 @@ def ESMP_FieldRead(field, filename, variablename, timeslice, iofmt=1):
 
 _ESMF.ESMC_FieldRegridGetArea.restype = ct.c_int
 _ESMF.ESMC_FieldRegridGetArea.argtypes = [ct.c_void_p]
-@deprecated
+
 def ESMP_FieldRegridGetArea(field):
     """
     Preconditions: An ESMP_Field has been created.\n
@@ -1760,7 +1760,7 @@ def ESMP_FieldRegridGetArea(field):
 
 _ESMF.ESMC_FieldRegridRelease.restype = ct.c_int
 _ESMF.ESMC_FieldRegridRelease.argtypes = [ct.POINTER(ct.c_void_p)]
-@deprecated
+
 def ESMP_FieldRegridRelease(routehandle):
     """
     Preconditions: A routehandle has been created with
@@ -1789,7 +1789,7 @@ _ESMF.ESMC_FieldRegridStore.argtypes = [ct.c_void_p, ct.c_void_p,
                                         OptionalBool,
                                         OptionalField,
                                         OptionalField]
-@deprecated
+
 def ESMP_FieldRegridStore(srcField, dstField,
                           srcMaskValues=None, dstMaskValues=None,
                           regridmethod=None,
@@ -1886,7 +1886,7 @@ def ESMP_FieldRegridStore(srcField, dstField,
 _ESMF.ESMC_FieldRegrid.restype = ct.c_int
 _ESMF.ESMC_FieldRegrid.argtypes = [ct.c_void_p, ct.c_void_p, ct.c_void_p,
                                    OptionalNamedConstant]
-@deprecated
+
 def ESMP_FieldRegrid(srcField, dstField, routehandle, zeroregion=None):
     """
     Preconditions: ESMP_RegridStore() has been called.\n

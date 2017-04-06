@@ -593,8 +593,8 @@ int IO::write(
       }
 
       // Write the Array
-      ioHandler->arrayWrite(temp_array_p,
-                            (*it)->getName(), (*it)->dimLabels, timeslice, &localrc);
+      ioHandler->arrayWrite(temp_array_p, (*it)->getName(),
+          (*it)->dimLabels, (*it)->varAtts, timeslice, &localrc);
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc))
         return rc;
 
@@ -846,7 +846,8 @@ int IO::addArray(
 
   std::string varname;                 // no name
   std::vector<std::string> dimLabels;  // no labels
-  return IO::addArray(arr_p, varname, dimLabels);
+  std::vector<std::pair<std::string,std::string> > varAtts; // no attributes
+  return IO::addArray(arr_p, varname, dimLabels, varAtts);
 }
 
 //-------------------------------------------------------------------------
@@ -863,7 +864,8 @@ int IO::addArray(
 // !ARGUMENTS:
   Array *arr_p,                             // (in) - The array to add
   const std::string &variableName,          // (in) - Name to use for array
-  const std::vector<std::string> &dimLabels // (in) - Optional dimension labels
+  const std::vector<std::string> &dimLabels,// (in) - Optional dimension labels
+  const std::vector<std::pair<std::string,std::string> > &varAtts // (in) - Optional variable attributes
   ) {
 // !DESCRIPTION:
 //      Add an array to the list of objects to read or write. The 
@@ -897,8 +899,7 @@ int IO::addArray(
 
 // Push Array onto the list
   try {
-    const char *varname = (variableName.length() != 0)?variableName.c_str():NULL;
-    IO_ObjectContainer *newObj = new IO_ObjectContainer((Array *)arr_p, varname, dimLabels);
+    IO_ObjectContainer *newObj = new IO_ObjectContainer((Array *)arr_p, variableName, dimLabels, varAtts);
 
     if ((IO_ObjectContainer *)NULL == newObj) {
       localrc = ESMC_RC_MEM_ALLOCATE;

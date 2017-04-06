@@ -2917,7 +2917,8 @@ int Array::read(
       &rc)) return rc;
   // For here on, we have to be sure to clean up before returning
   vector<string> labNames;  // dummy vector for reads
-  localrc = newIO->addArray(this, variableName, labNames);
+  vector<pair<string,string> > varAtts;   // dummy vector for reads
+  localrc = newIO->addArray(this, variableName, labNames, varAtts);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       &rc)) {
     IO::destroy(&newIO);
@@ -2957,6 +2958,7 @@ int Array::write(
   const std::string &file,        // in    - name of file being written
   const std::string &variableName,// in    - optional variable name
   const std::vector<std::string> &dimLabels, // in - optional dimension labels
+  const std::vector<std::pair<std::string,std::string> > &varAtts, // in - optional variable attributes
   bool  *overwrite,               // in    - OK to overwrite file data
   ESMC_FileStatus_Flag *status,   // in    - file status flag
   int   *timeslice,               // in    - timeslice option
@@ -2999,7 +3001,27 @@ int Array::write(
   if (ESMF_IOFMT_NETCDF != localiofmt) {
     if (variableName.size() > 0) {
       ESMC_LogDefault.MsgFoundError(ESMF_RC_ARG_BAD, 
-          "Array variable name not allowed in binary mode",
+          "NetCDF variable name not allowed in binary mode",
+          ESMC_CONTEXT, &rc);
+      return rc;
+    }
+  }
+
+  // It is an error to supply dimension names in binary mode
+  if (ESMF_IOFMT_NETCDF != localiofmt) {
+    if (dimLabels.size() > 0) {
+      ESMC_LogDefault.MsgFoundError(ESMF_RC_ARG_BAD, 
+          "NetCDF dimension names not allowed in binary mode",
+          ESMC_CONTEXT, &rc);
+      return rc;
+    }
+  }
+
+  // It is an error to supply variable attributes in binary mode
+  if (ESMF_IOFMT_NETCDF != localiofmt) {
+    if (varAtts.size() > 0) {
+      ESMC_LogDefault.MsgFoundError(ESMF_RC_ARG_BAD, 
+          "NetCDF variable attributes not allowed in binary mode",
           ESMC_CONTEXT, &rc);
       return rc;
     }
@@ -3010,7 +3032,7 @@ int Array::write(
     return rc;
   }
   // From now on, we have to be sure to clean up before returning
-  rc = newIO->addArray(this, variableName, dimLabels);
+  rc = newIO->addArray(this, variableName, dimLabels, varAtts);
   if (ESMC_LogDefault.MsgFoundError(rc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) {
     IO::destroy(&newIO);
     newIO = (IO *)NULL;
