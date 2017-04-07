@@ -2,13 +2,6 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-//#include <sstream>
-//#include <cstring>
-//#include <fstream>
-//#include <cstdlib>
-//#include <vector>
-//#include <algorithm>
-
 #include "ESMCI_Macros.h"
 #include "ESMCI_Util.h"
 #include "ESMCI_Trace.h"
@@ -16,14 +9,9 @@
 
 using std::string;
 
-
 // C interface called from Fortran
 
-//-----------------------------------------------------------------------------
- // leave the following line as-is; it will insert the cvs ident string
- // into the object file for tracking purposes.
- static const char *const version = "$Id$";
-//-----------------------------------------------------------------------------
+static const char *const version = "$Id$";
 
 extern "C" {
 
@@ -44,7 +32,6 @@ extern "C" {
   
   void FTN_X(c_esmftrace_phase_enter)(int *vmid, int *baseid, int *method, int *phase, int *rc)
   {
-    printf("c_esmftrace_phase_enter\n");
     ESMCI::TraceEventPhaseEnter(vmid, baseid, method, phase);
     if (rc != NULL) *rc = ESMF_SUCCESS;
   }
@@ -85,7 +72,6 @@ extern "C" {
 					 ESMCI_FortranStrLenArg aklen,  //attributeKeys
 					 ESMCI_FortranStrLenArg avlen)  //attributeValues
   {
-    //printf("c_esmf_trace_component_info\n");
     string cname = string(name, ESMC_F90lentrim (name, nlen));
     string aKeys = string(attributeKeys, ESMC_F90lentrim (attributeKeys, aklen));
     string aVals = string(attributeVals, ESMC_F90lentrim (attributeVals, avlen));

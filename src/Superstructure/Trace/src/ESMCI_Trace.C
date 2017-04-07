@@ -46,6 +46,43 @@
 using std::string;
 using std::vector;
 
+/* Note: these explicit definitions are included
+ * somewhat temporarily so that we can write an
+ * explict uuid to the trace.  This is necessary
+ * so that all traces in a multi-PET system have
+ * the same uuid and their event streams can
+ * therefore be easily shared.
+ *
+ * A later version of Babeltrace will support
+ * explicitly setting this.
+ */
+/////////////////////////////////
+typedef unsigned char uuid_t[16];
+
+struct bt_ref {
+  long count;
+  void *release;
+};
+
+struct bt_object {
+  struct bt_ref ref_count;
+  void *release;
+  void *parent;
+};
+
+struct bt_ctf_trace {
+  struct bt_object base;
+  int frozen;
+    unsigned char uuid[16];
+};
+
+struct bt_ctf_writer {
+  struct bt_object base;
+  int frozen;
+  struct bt_ctf_trace *trace;
+};
+//////////// end temporary definitions
+
 namespace ESMCI {
   
   //global trace writer
@@ -152,7 +189,6 @@ namespace ESMCI {
     
     if (stat(stream_dir, &st) == -1) {
       if (mkdir(stream_dir, 0700) == -1) {
-	//printf("mkdir == -1\n");
 	//perror("mkdir()");
 	ESMC_LogDefault.MsgFoundError(ESMC_RC_FILE_CREATE, "Error creating trace PET directory", 
 				      ESMC_CONTEXT, rc);
@@ -163,9 +199,14 @@ namespace ESMCI {
     bt_writer = bt_ctf_writer_create(stream_dir);
     BT_CHK_NULL(bt_writer, ESMC_CONTEXT);
 
-    //struct bt_ctf_trace *bt_trace = bt_ctf_writer_get_trace(bt_writer);
-    //BT_CHK_NULL(bt_trace, ESMC_CONTEXT);
-    
+    //temporarily setting custom UUID
+    const unsigned char my_custom_uuid[16] = {
+      0xb3, 0x38, 0x4d, 0x7b, 0x77, 0x8a, 0x4f, 0xf0,
+      0x99, 0xbd, 0x43, 0x54, 0x9e, 0xc0, 0x54, 0x1b,
+    };
+    memcpy(bt_writer->trace->uuid, my_custom_uuid, 16);   
+    // end UUID setting
+        
     bt_clock = bt_ctf_clock_create("sys_clock");
     BT_CHK_NULL(bt_clock, ESMC_CONTEXT);
     
