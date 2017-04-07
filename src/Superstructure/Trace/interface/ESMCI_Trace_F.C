@@ -29,13 +29,12 @@ extern "C" {
 
   void FTN_X(c_esmftrace_open)
      (				   
-      int *buf_size,  
       const char *trace_dir,           
       int *stream_id,
       int *rc,                        
       ESMCI_FortranStrLenArg nlen)  //strlen for trace_dir 
   {      
-    ESMCI::TraceOpen((unsigned int) *buf_size, trace_dir, *stream_id, rc);
+    ESMCI::TraceOpen(trace_dir, *stream_id, rc);
   } 
 
   void FTN_X(c_esmftrace_close)(int *rc) 
@@ -58,25 +57,25 @@ extern "C" {
 
   void FTN_X(c_esmftrace_phase_prologue_enter)(int *vmid, int *baseid, int *method, int *phase, int *rc)
   {
-    //ESMCI::TraceEventPhasePrologueEnter(vmid, baseid, method, phase);
+    ESMCI::TraceEventPhasePrologueEnter(vmid, baseid, method, phase);
     if (rc != NULL) *rc = ESMF_SUCCESS;
   }
 
   void FTN_X(c_esmftrace_phase_prologue_exit)(int *vmid, int *baseid, int *method, int *phase, int *rc)
   {
-    //ESMCI::TraceEventPhasePrologueExit(vmid, baseid, method, phase);
+    ESMCI::TraceEventPhasePrologueExit(vmid, baseid, method, phase);
     if (rc != NULL) *rc = ESMF_SUCCESS;
   }
 
   void FTN_X(c_esmftrace_phase_epilogue_enter)(int *vmid, int *baseid, int *method, int *phase, int *rc)
   {
-    //ESMCI::TraceEventPhaseEpilogueEnter(vmid, baseid, method, phase);
+    ESMCI::TraceEventPhaseEpilogueEnter(vmid, baseid, method, phase);
     if (rc != NULL) *rc = ESMF_SUCCESS;
   }
 
   void FTN_X(c_esmftrace_phase_epilogue_exit)(int *vmid, int *baseid, int *method, int *phase, int *rc)
   {
-    //ESMCI::TraceEventPhaseEpilogueExit(vmid, baseid, method, phase);
+    ESMCI::TraceEventPhaseEpilogueExit(vmid, baseid, method, phase);
     if (rc != NULL) *rc = ESMF_SUCCESS;
   }
 

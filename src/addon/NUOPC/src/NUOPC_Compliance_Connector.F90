@@ -28,7 +28,8 @@ module NUOPC_Compliance_Connector
     use ESMF
     use NUOPC_Base, only: NUOPC_PhaseMapStringLength  ! change this?
     use NUOPC_Compliance_Base
-
+    use ESMF_TraceMod
+    
     implicit none
   
     private
@@ -428,7 +429,20 @@ contains
                 if (ESMF_LogFoundError(rc, &
                     line=__LINE__, file=FILENAME)) return  ! bail out
             endif
-    
+
+            if (outputTrace) then
+               call ESMF_TraceEventPhaseEnter(comp, rc=rc)
+               if (ESMF_LogFoundError(rc, &
+                    line=__LINE__, &
+                    file=FILENAME)) &
+                    return  ! bail out
+               call NUOPC_TraceEventComponentInfo(comp, rc=rc)
+               if (ESMF_LogFoundError(rc, &
+                    line=__LINE__, &
+                    file=FILENAME)) &
+                    return  ! bail out
+            endif
+            
         endif
         ! Stop Compliance Checking: InitializePrologue
         !---------------------------------------------------------------------------
@@ -448,6 +462,14 @@ contains
         ! Start Compliance Checking: InitializeEpilogue
         if (ccfDepth <= maxDepth .or. maxDepth < 0) then
 
+            if (outputTrace) then
+               call ESMF_TraceEventPhaseExit(comp, rc=rc)
+               if (ESMF_LogFoundError(rc, &
+                    line=__LINE__, &
+                    file=FILENAME)) &
+                    return  ! bail out            
+            endif
+           
             if (outputJSON) then
                 call JSON_LogCtrlFlow("stop_phase", comp, rc)
                 if (ESMF_LogFoundError(rc, &
@@ -657,8 +679,16 @@ contains
                 call JSON_LogCtrlFlow("start_phase", comp, rc)
                 if (ESMF_LogFoundError(rc, &
                     line=__LINE__, file=FILENAME)) return  ! bail out
-            endif
+             endif
 
+             if (outputTrace) then
+                call ESMF_TraceEventPhaseEnter(comp, rc=rc)
+                if (ESMF_LogFoundError(rc, &
+                     line=__LINE__, &
+                     file=FILENAME)) &
+                     return  ! bail out               
+             endif
+        
         endif
         ! Stop Compliance Checking: RunPrologue
         !---------------------------------------------------------------------------
@@ -677,6 +707,14 @@ contains
         ! Start Compliance Checking: RunEpilogue
         if (ccfDepth <= maxDepth .or. maxDepth < 0) then
 
+           if (outputTrace) then
+              call ESMF_TraceEventPhaseExit(comp, rc=rc)
+              if (ESMF_LogFoundError(rc, &
+                   line=__LINE__, &
+                   file=FILENAME)) &
+                   return  ! bail out               
+           endif
+           
             if (outputJSON) then
                 call JSON_LogCtrlFlow("stop_phase", comp, rc)
                 if (ESMF_LogFoundError(rc, &
@@ -873,6 +911,14 @@ contains
                     line=__LINE__, file=FILENAME)) return  ! bail out
             endif
 
+            if (outputTrace) then
+               call ESMF_TraceEventPhaseEnter(comp, rc=rc)
+               if (ESMF_LogFoundError(rc, &
+                    line=__LINE__, &
+                    file=FILENAME)) &
+                    return  ! bail out               
+            endif
+
         endif
         ! Stop Compliance Checking: FinalizePrologue
         !---------------------------------------------------------------------------
@@ -891,6 +937,14 @@ contains
         ! Start Compliance Checking: FinalizeEpilogue
         if (ccfDepth <= maxDepth .or. maxDepth < 0) then
 
+            if (outputTrace) then
+               call ESMF_TraceEventPhaseExit(comp, rc=rc)
+               if (ESMF_LogFoundError(rc, &
+                    line=__LINE__, &
+                    file=FILENAME)) &
+                    return  ! bail out               
+            endif
+           
             if (outputJSON) then
                 call JSON_LogCtrlFlow("stop_phase", comp, rc)
                 if (ESMF_LogFoundError(rc, &
@@ -1065,7 +1119,41 @@ contains
             file=FILENAME)) &
             return  ! bail out
 
-    end subroutine
+      end subroutine checkPhaseEpilogue_CplListEstablished
+      
+      recursive subroutine NUOPC_TraceEventComponentInfo(comp, rc)
+        
+        type(ESMF_CplComp), intent(in) :: comp
+        integer, intent(out)  :: rc
+        
+        character(len=5)  :: attrConv(3)
+        character(len=8)  :: attrPurp(3)
+        character(len=20) :: attrName(3)
+        character(len=10) :: attrKey(3)
+        
+        rc = ESMF_SUCCESS      
+        
+        attrConv = "NUOPC"
+        attrPurp = "Instance"
+        
+        attrName(1) = "InitializePhaseMap"
+        attrKey(1) = "IPM"
+        
+        attrName(2) = "RunPhaseMap"
+        attrKey(2) = "RPM"
+        
+        attrName(3) = "FinalizePhaseMap"
+        attrKey(3) = "FPM"
+        
+        call ESMF_TraceEventComponentInfo(comp, attrConv, &
+             attrPurp, attrName, attrKey, rc=rc)
+        if (ESMF_LogFoundError(rc, &
+             line=__LINE__, &
+             file=FILENAME)) &
+             return  
+        
+      end subroutine NUOPC_TraceEventComponentInfo
+
 
 
 end module NUOPC_Compliance_Connector

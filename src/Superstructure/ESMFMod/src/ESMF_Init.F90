@@ -445,7 +445,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           write (ESMF_UtilIOStderr,*) ESMF_METHOD, ": Error getting localPet from VM"
           return
         endif
-        call ESMF_TraceOpen(4096, "./traceout", localPet, rc=localrc)
+        call ESMF_TraceOpen("./traceout", localPet, rc=localrc)
         if (localrc /= ESMF_SUCCESS) then
           write (ESMF_UtilIOStderr,*) ESMF_METHOD, ": Error initializing trace stream"
           return

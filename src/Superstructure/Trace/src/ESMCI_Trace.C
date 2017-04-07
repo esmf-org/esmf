@@ -77,7 +77,6 @@ namespace ESMCI {
     return ts.tv_sec * 1000000000ULL + ts.tv_nsec;
   }
 
-
   static vector<string> split(const string& s, const string& delim, const bool keep_empty = true) {
     vector<string> result;
     if (delim.empty()) {
@@ -102,7 +101,7 @@ namespace ESMCI {
 
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::TraceOpen()"  
-  void TraceOpen(unsigned int buf_size, const char *trace_dir, int stream_id, int *rc) {
+  void TraceOpen(const char *trace_dir, int stream_id, int *rc) {
     
     int localrc;
     //char stream_path[ESMC_MAXPATHLEN];
@@ -163,6 +162,9 @@ namespace ESMCI {
         
     bt_writer = bt_ctf_writer_create(stream_dir);
     BT_CHK_NULL(bt_writer, ESMC_CONTEXT);
+
+    //struct bt_ctf_trace *bt_trace = bt_ctf_writer_get_trace(bt_writer);
+    //BT_CHK_NULL(bt_trace, ESMC_CONTEXT);
     
     bt_clock = bt_ctf_clock_create("sys_clock");
     BT_CHK_NULL(bt_clock, ESMC_CONTEXT);
@@ -185,7 +187,7 @@ namespace ESMCI {
     
     BT_CHK(bt_ctf_field_unsigned_integer_set_value(field_pet, stream_id), ESMC_CONTEXT);
 
-    BT_CHK(bt_ctf_writer_add_environment_field(bt_writer, "esmf_trace_version", "0.1"), ESMC_CONTEXT);
+    BT_CHK(bt_ctf_writer_add_environment_field(bt_writer, "esmf_trace_version", BT_ESMF_TRACE_VERSION), ESMC_CONTEXT);
 
     //reference counting
     bt_ctf_field_put(packet_context);
@@ -258,19 +260,19 @@ namespace ESMCI {
     bt_type_enum_control = bt_ctf_field_type_enumeration_create(bt_type_uint4);
     BT_CHK_NULL(bt_type_enum_control, ESMC_CONTEXT);
 
-    bt_ctf_field_type_enumeration_add_mapping(bt_type_enum_control, "start_phase", 0, 0);
-    bt_ctf_field_type_enumeration_add_mapping(bt_type_enum_control, "end_phase", 1, 1);
-    bt_ctf_field_type_enumeration_add_mapping(bt_type_enum_control, "start_prologue", 2, 2);
-    bt_ctf_field_type_enumeration_add_mapping(bt_type_enum_control, "end_prologue", 3, 3);
-    bt_ctf_field_type_enumeration_add_mapping(bt_type_enum_control, "start_epilogue", 4, 4);
-    bt_ctf_field_type_enumeration_add_mapping(bt_type_enum_control, "end_epilogue", 5, 5);
+    bt_ctf_field_type_enumeration_add_mapping(bt_type_enum_control, "start_phase", BT_CNTL_START, BT_CNTL_START);
+    bt_ctf_field_type_enumeration_add_mapping(bt_type_enum_control, "end_phase", BT_CNTL_END, BT_CNTL_END);
+    bt_ctf_field_type_enumeration_add_mapping(bt_type_enum_control, "start_prologue", BT_CNTL_STARTP, BT_CNTL_STARTP);
+    bt_ctf_field_type_enumeration_add_mapping(bt_type_enum_control, "end_prologue", BT_CNTL_ENDP, BT_CNTL_ENDP);
+    bt_ctf_field_type_enumeration_add_mapping(bt_type_enum_control, "start_epilogue", BT_CNTL_STARTE, BT_CNTL_STARTE);
+    bt_ctf_field_type_enumeration_add_mapping(bt_type_enum_control, "end_epilogue", BT_CNTL_ENDE, BT_CNTL_ENDE);
             
     bt_type_enum_method = bt_ctf_field_type_enumeration_create(bt_type_uint4);
     BT_CHK_NULL(bt_type_enum_method, ESMC_CONTEXT);
 
-    bt_ctf_field_type_enumeration_add_mapping(bt_type_enum_method, "initialize", 0, 0);
-    bt_ctf_field_type_enumeration_add_mapping(bt_type_enum_method, "run", 1, 1);
-    bt_ctf_field_type_enumeration_add_mapping(bt_type_enum_method, "finalize", 2, 2);
+    bt_ctf_field_type_enumeration_add_mapping(bt_type_enum_method, "initialize", BT_METHOD_INIT, BT_METHOD_INIT);
+    bt_ctf_field_type_enumeration_add_mapping(bt_type_enum_method, "run", BT_METHOD_RUN, BT_METHOD_RUN);
+    bt_ctf_field_type_enumeration_add_mapping(bt_type_enum_method, "finalize", BT_METHOD_FINAL, BT_METHOD_FINAL);
             
     BT_CHK(bt_ctf_event_class_add_field(bt_event_class_control, bt_type_uint32, "vmid"), ESMC_CONTEXT);
     BT_CHK(bt_ctf_event_class_add_field(bt_event_class_control, bt_type_uint32, "baseid"), ESMC_CONTEXT);
@@ -324,11 +326,6 @@ namespace ESMCI {
     int localrc;
     int *rc = &localrc;
     
-    //printf("TraceEventPhase\n");
-    
-    //esmftrc_default_trace_phase_enter(esmftrc_platform_get_default_ctx(),
-    //				      *ep_vmid, *ep_baseid, *ep_method, *ep_phase);
-
     struct bt_ctf_event *event = bt_ctf_event_create(bt_event_class_control);
 
     struct bt_ctf_field *field_ctrl = bt_ctf_field_create(bt_type_enum_control);
@@ -369,77 +366,28 @@ namespace ESMCI {
     
   }
   
-  void TraceEventPhaseEnter  
-     (
-     int *ep_vmid,
-     int *ep_baseid,
-     int *ep_method,
-     int *ep_phase
-     )
-  {
-    //printf("TraceEventPhaseEnter\n");
-    TraceEventPhase(0, ep_vmid, ep_baseid, ep_method, ep_phase);
+  void TraceEventPhaseEnter(int *ep_vmid, int *ep_baseid, int *ep_method, int *ep_phase) {
+    TraceEventPhase(BT_CNTL_START, ep_vmid, ep_baseid, ep_method, ep_phase);
   }
   
-  void TraceEventPhaseExit 
-    (
-     int *ep_vmid,
-     int *ep_baseid,
-     int *ep_method,
-     int *ep_phase
-     )
-  {
-    //esmftrc_default_trace_phase_exit(esmftrc_platform_get_default_ctx(),
-				     //*ep_vmid, *ep_baseid, *ep_method, *ep_phase);
-    TraceEventPhase(1, ep_vmid, ep_baseid, ep_method, ep_phase);
+  void TraceEventPhaseExit(int *ep_vmid, int *ep_baseid, int *ep_method, int *ep_phase) {
+    TraceEventPhase(BT_CNTL_END, ep_vmid, ep_baseid, ep_method, ep_phase);
   }
 
-  void TraceEventPhasePrologueEnter  
-  (
-     int *ep_vmid,
-     int *ep_baseid,
-     int *ep_method,
-     int *ep_phase
-     )
-  {
-    //esmftrc_default_trace_phase_prologue_enter(esmftrc_platform_get_default_ctx(),
-    //                                          *ep_vmid, *ep_baseid, *ep_method, *ep_phase);
+  void TraceEventPhasePrologueEnter(int *ep_vmid, int *ep_baseid, int *ep_method, int *ep_phase) {
+    TraceEventPhase(BT_CNTL_STARTP, ep_vmid, ep_baseid, ep_method, ep_phase);
   }
 
-  void TraceEventPhasePrologueExit  
-     (
-     int *ep_vmid,
-     int *ep_baseid,
-     int *ep_method,
-     int *ep_phase
-     )
-  {
-    //esmftrc_default_trace_phase_prologue_exit(esmftrc_platform_get_default_ctx(),
-    //                                         *ep_vmid, *ep_baseid, *ep_method, *ep_phase);
+  void TraceEventPhasePrologueExit(int *ep_vmid, int *ep_baseid, int *ep_method, int *ep_phase) {
+    TraceEventPhase(BT_CNTL_ENDP, ep_vmid, ep_baseid, ep_method, ep_phase);
   }
 
-  void TraceEventPhaseEpilogueEnter  
-  (
-     int *ep_vmid,
-     int *ep_baseid,
-     int *ep_method,
-     int *ep_phase
-     )
-  {
-    //esmftrc_default_trace_phase_epilogue_enter(esmftrc_platform_get_default_ctx(),
-    //                                           *ep_vmid, *ep_baseid, *ep_method, *ep_phase);
+  void TraceEventPhaseEpilogueEnter(int *ep_vmid, int *ep_baseid, int *ep_method, int *ep_phase) {
+    TraceEventPhase(BT_CNTL_STARTE, ep_vmid, ep_baseid, ep_method, ep_phase);
   }
 
-  void TraceEventPhaseEpilogueExit  
-     (
-     int *ep_vmid,
-     int *ep_baseid,
-     int *ep_method,
-     int *ep_phase
-     )
-  {
-    //esmftrc_default_trace_phase_epilogue_exit(esmftrc_platform_get_default_ctx(),
-    //                                         *ep_vmid, *ep_baseid, *ep_method, *ep_phase);
+  void TraceEventPhaseEpilogueExit(int *ep_vmid, int *ep_baseid, int *ep_method, int *ep_phase) {
+    TraceEventPhase(BT_CNTL_ENDE, ep_vmid, ep_baseid, ep_method, ep_phase);
   }
 
   void TraceEventComponentInfo

@@ -21,6 +21,7 @@ module ESMF_TraceMod
   use ESMF_LogErrMod 
   use ESMF_CompMod
   use ESMF_GridCompMod
+  use ESMF_CplCompMod
   use ESMF_BaseMod
   use ESMF_VMMod
   use ESMF_AttributeMod
@@ -38,17 +39,36 @@ module ESMF_TraceMod
   public ESMF_TraceEventPhaseEpilogueExit
   public ESMF_TraceEventComponentInfo
 
+  interface ESMF_TraceEventPhaseEnter
+     module procedure ESMF_TraceEventGridCompPhaseEnter
+     module procedure ESMF_TraceEventCplCompPhaseEnter
+  end interface ESMF_TraceEventPhaseEnter
+
+  interface ESMF_TraceEventPhaseExit
+     module procedure ESMF_TraceEventGridCompPhaseExit
+     module procedure ESMF_TraceEventCplCompPhaseExit
+  end interface ESMF_TraceEventPhaseExit
+
+  interface ESMF_TraceEventComponentInfo
+     module procedure ESMF_TraceEventGridComponentInfo
+     module procedure ESMF_TraceEventCplComponentInfo
+  end interface ESMF_TraceEventComponentInfo
+  
+  interface ESMF_TraceGetCompID
+     module procedure ESMF_TraceGetGridCompID
+     module procedure ESMF_TraceGetCplCompID
+  end interface ESMF_TraceGetCompID
+  
 contains
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_TraceOpen()"
-  subroutine ESMF_TraceOpen(bufSize, traceDir, streamId, rc)
-    integer,          intent(in)             :: bufSize
+  subroutine ESMF_TraceOpen(traceDir, streamId, rc)
     character(len=*), intent(in)             :: traceDir
     integer,          intent(in)             :: streamId
     integer,          intent(out), optional  :: rc
     
-    call c_esmftrace_open(bufSize, traceDir, streamId, rc)
+    call c_esmftrace_open(traceDir, streamId, rc)
     if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
          ESMF_CONTEXT, rcToReturn=rc)) return
   end subroutine ESMF_TraceOpen
@@ -64,8 +84,8 @@ contains
   end subroutine ESMF_TraceClose
 
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_TraceEventPhaseEnter()"
-  subroutine ESMF_TraceEventPhaseEnter(comp, rc)
+#define ESMF_METHOD "ESMF_TraceEventGridCompPhaseEnter()"
+  subroutine ESMF_TraceEventGridCompPhaseEnter(comp, rc)
     type(ESMF_GridComp), intent(in) :: comp
     integer, intent(out), optional  :: rc
 
@@ -93,11 +113,45 @@ contains
     if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
          ESMF_CONTEXT, rcToReturn=rc)) return
 
-  end subroutine ESMF_TraceEventPhaseEnter
+  end subroutine ESMF_TraceEventGridCompPhaseEnter
 
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_TraceEventPhaseExit()"
-  subroutine ESMF_TraceEventPhaseExit(comp, rc)
+#define ESMF_METHOD "ESMF_TraceEventCplCompPhaseEnter()"
+  subroutine ESMF_TraceEventCplCompPhaseEnter(comp, rc)
+    type(ESMF_CplComp), intent(in) :: comp
+    integer, intent(out), optional  :: rc
+
+    ! locals
+    integer :: vmid
+    integer :: baseid
+    type(ESMF_Method_Flag) :: method
+    integer :: method_enum
+    integer :: phase
+
+    rc = ESMF_SUCCESS 
+
+    call ESMF_TraceGetCompID(comp, vmid, baseid, rc=rc)
+    if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return
+
+    call ESMF_CplCompGet(comp, currentMethod=method, &
+         currentPhase=phase, rc=rc)
+    if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return
+
+    method_enum = ESMF_TraceMethodToEnum(method)
+
+    call c_esmftrace_phase_enter(vmid, baseid, method_enum, phase, rc)
+    if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return
+
+  end subroutine ESMF_TraceEventCplCompPhaseEnter
+
+
+  
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_TraceEventGridCompPhaseExit()"
+  subroutine ESMF_TraceEventGridCompPhaseExit(comp, rc)
     type(ESMF_GridComp), intent(in) :: comp
     integer, intent(out), optional  :: rc
 
@@ -124,8 +178,39 @@ contains
     call c_esmftrace_phase_exit(vmid, baseid, method_enum, phase, rc)
     if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
          ESMF_CONTEXT, rcToReturn=rc)) return
-  end subroutine ESMF_TraceEventPhaseExit
+  end subroutine ESMF_TraceEventGridCompPhaseExit
 
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_TraceEventCplCompPhaseExit()"
+  subroutine ESMF_TraceEventCplCompPhaseExit(comp, rc)
+    type(ESMF_CplComp), intent(in) :: comp
+    integer, intent(out), optional  :: rc
+
+    ! locals
+    integer :: vmid
+    integer :: baseid
+    type(ESMF_Method_Flag) :: method
+    integer :: method_enum
+    integer :: phase
+
+    rc = ESMF_SUCCESS
+
+    call ESMF_TraceGetCompID(comp, vmid, baseid, rc=rc)
+    if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return
+
+    call ESMF_CplCompGet(comp, currentMethod=method, &
+         currentPhase=phase, rc=rc)
+    if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return
+
+    method_enum = ESMF_TraceMethodToEnum(method)
+
+    call c_esmftrace_phase_exit(vmid, baseid, method_enum, phase, rc)
+    if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return
+  end subroutine ESMF_TraceEventCplCompPhaseExit
+  
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_TraceEventPhasePrologueEnter()"
   subroutine ESMF_TraceEventPhasePrologueEnter(comp, rc)
@@ -254,13 +339,13 @@ contains
 
 
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_TraceEventComponentInfo()"
-
-  subroutine ESMF_TraceEventComponentInfo(comp, attrConv, attrPurp, attrName, rc)
+#define ESMF_METHOD "ESMF_TraceEventGridComponentInfo()"
+  subroutine ESMF_TraceEventGridComponentInfo(comp, attrConv, attrPurp, attrName, attrKey, rc)
     type(ESMF_GridComp), intent(in) :: comp
     character(len=*),    intent(in) :: attrConv(:)
     character(len=*),    intent(in) :: attrPurp(:)
     character(len=*),    intent(in) :: attrName(:)
+    character(len=*),    intent(in) :: attrKey(:)
     integer, intent(out), optional  :: rc    
 
     ! local
@@ -313,9 +398,11 @@ contains
           if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
                ESMF_CONTEXT, rcToReturn=rc)) return
           
+          !attributeKeys = trim(attributeKeys)//trim(delim)// &
+          !     trim(attrConv(i)) //"$"//trim(attrPurp(i))//"$"//trim(attrName(i))
           attributeKeys = trim(attributeKeys)//trim(delim)// &
-               trim(attrConv(i)) //"$"//trim(attrPurp(i))//"$"//trim(attrName(i))
-                    
+               trim(attrKey(i))
+          
           attributeList = ""
           delim2 = ""
           do j=1, itemCount
@@ -337,14 +424,104 @@ contains
     if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
          ESMF_CONTEXT, rcToReturn=rc)) return
 
-  end subroutine ESMF_TraceEventComponentInfo
+  end subroutine ESMF_TraceEventGridComponentInfo
 
+
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_TraceEventCplComponentInfo()"
+  subroutine ESMF_TraceEventCplComponentInfo(comp, attrConv, attrPurp, attrName, attrKey, rc)
+    type(ESMF_CplComp), intent(in) :: comp
+    character(len=*),    intent(in) :: attrConv(:)
+    character(len=*),    intent(in) :: attrPurp(:)
+    character(len=*),    intent(in) :: attrName(:)
+    character(len=*),    intent(in) :: attrKey(:)
+    integer, intent(out), optional  :: rc    
+
+    ! local
+    integer                    :: baseid
+    integer                    :: vmid
+    character(len=ESMF_MAXSTR) :: name
+    logical                    :: isPresent
+    integer                    :: i, j
+    integer                    :: itemCount
+    character(len=ESMF_MAXSTR), allocatable :: attrValList(:)
+    character(len=ESMF_MAXSTR*10) :: attributeKeys
+    character(len=ESMF_MAXSTR*10) :: attributeVals
+    character(len=ESMF_MAXSTR*10) :: attributeList
+    character(2) :: delim, delim2
+    
+    if (present(rc)) rc = ESMF_SUCCESS
+         
+    call ESMF_TraceGetCompID(comp, vmid, baseid, rc=rc)
+    if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return
+
+    call ESMF_CplCompGet(comp, name=name, rc=rc)
+    if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return
+
+    if (size(attrConv) /= size(attrPurp) .or. &
+         size(attrConv) /= size(attrName)) then
+       call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
+            msg="Attribute vectors must have same length", &
+            ESMF_CONTEXT, rcToReturn=rc)
+       return
+    endif
+
+    attributeKeys = ""
+    attributeVals = ""
+    delim = ""
+    do i=1, size(attrConv)      
+
+       call ESMF_AttributeGet(comp, name=trim(attrName(i)), &
+            convention=trim(attrConv(i)), purpose=trim(attrPurp(i)), &
+            attnestflag=ESMF_ATTNEST_ON, isPresent=isPresent, itemCount=itemCount, rc=rc)
+       if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+
+       if (isPresent) then
+          allocate(attrValList(itemCount))
+          call ESMF_AttributeGet(comp, name=trim(attrName(i)), valueList=attrValList, &
+               convention=trim(attrConv(i)), purpose=trim(attrPurp(i)), &
+               attnestflag=ESMF_ATTNEST_ON, isPresent=isPresent, rc=rc)
+          if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
+               ESMF_CONTEXT, rcToReturn=rc)) then
+             print *, "incorrect tk = ", attrName(i)
+             return
+          endif
+          !attributeKeys = trim(attributeKeys)//trim(delim)// &
+          !     trim(attrConv(i)) //"$"//trim(attrPurp(i))//"$"//trim(attrName(i))
+          attributeKeys = trim(attributeKeys)//trim(delim)// &
+               trim(attrKey(i))
+          
+          attributeList = ""
+          delim2 = ""
+          do j=1, itemCount
+             attributeList = trim(attributeList)//trim(delim2)//trim(attrValList(j))
+             delim2 = "||"
+          enddo
+          attributeVals = trim(attributeVals)//trim(delim)//trim(attributeList)
+          delim = "::"
+
+          deallocate(attrValList)
+       endif
+    enddo
+    
+    !print *, "attributeKeys = ", trim(attributeKeys)
+    !print *, "attributeVals = ", trim(attributeVals)
+        
+    call c_esmftrace_component_info(comp, vmid, baseid, trim(name), &
+         trim(attributeKeys), trim(attributeVals), rc)
+    if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return
+
+  end subroutine ESMF_TraceEventCplComponentInfo
 
 
   
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_TraceEventGetCompID()"
-  subroutine ESMF_TraceGetCompID(comp, vmid, baseid, rc)
+#define ESMF_METHOD "ESMF_TraceEventGetGridCompID()"
+  subroutine ESMF_TraceGetGridCompID(comp, vmid, baseid, rc)
     type(ESMF_GridComp), intent(in)            :: comp
     integer,             intent(out)           :: vmid
     integer,             intent(out)           :: baseid
@@ -371,8 +548,41 @@ contains
     
     deallocate(vmidptr)
     
-  end subroutine ESMF_TraceGetCompID
+  end subroutine ESMF_TraceGetGridCompID
 
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_TraceEventGetCplCompID()"
+  subroutine ESMF_TraceGetCplCompID(comp, vmid, baseid, rc)
+    type(ESMF_CplComp),  intent(in)            :: comp
+    integer,             intent(out)           :: vmid
+    integer,             intent(out)           :: baseid
+    integer,             intent(out), optional :: rc    
+    
+    ! local
+    type(ESMF_VMId), pointer   :: vmidptr(:)
+    character                  :: vmkey
+    
+    rc = ESMF_SUCCESS
+    
+    call ESMF_BaseGetID(comp%compp%base, baseid, rc=rc)
+    if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    
+    allocate(vmidptr(1))
+    call ESMF_BaseGetVMId(comp%compp%base, vmidptr(1), rc=rc)
+    if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return
+    
+    call c_ESMCI_VMIdGet (vmidptr(1), vmid, vmkey, rc)
+    if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return
+    
+    deallocate(vmidptr)
+    
+  end subroutine ESMF_TraceGetCplCompID
+
+
+  
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_TraceMethodToEnum()"
   function ESMF_TraceMethodToEnum(method_flag)
