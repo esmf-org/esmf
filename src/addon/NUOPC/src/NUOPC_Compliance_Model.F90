@@ -463,8 +463,15 @@ contains
                 line=__LINE__, &
                 file=FILENAME)) &
                 return  ! bail out
-           print *, "TraceEventComponentInfo"
-           call ESMF_TraceEventComponentInfo(comp, rc=rc)
+           !print *, "TraceEventComponentInfo"
+           !call ESMF_TraceEventComponentInfo(comp, attrConv, attrPurp, attrName, rc=rc)
+           call ESMF_TraceEventComponentInfo(comp, &
+                (/"NUOPC", "NUOPC", "NUOPC"/), &
+                (/"Instance", "Instance", "Instance"/), &
+                (/"Kind              ", &
+                  "CompLabel         ", &
+                  "InitializePhaseMap"/), &
+                rc=rc)
            if (ESMF_LogFoundError(rc, &
                 line=__LINE__, &
                 file=FILENAME)) &
@@ -965,11 +972,11 @@ contains
         ccfDepth = ccfDepth + 1
 
         if (outputTrace) then
-           call ESMF_TraceEventComponentInfo(comp, rc=rc)
-           if (ESMF_LogFoundError(rc, &
-                line=__LINE__, &
-                file=FILENAME)) &
-                return  ! bail out
+           !call ESMF_TraceEventComponentInfo(comp, rc=rc)
+           !if (ESMF_LogFoundError(rc, &
+           !     line=__LINE__, &
+           !     file=FILENAME)) &
+           !     return  ! bail out
 
            call ESMF_TraceEventPhaseEnter(comp, rc=rc)
            if (ESMF_LogFoundError(rc, &
@@ -1613,6 +1620,26 @@ contains
             return  ! bail out
 
     end subroutine
+    
+!!$    recursive subroutine NUOPC_TraceEventComponentInfo(comp, rc)
+!!$      
+!!$      type(ESMF_GridComp), intent(in) :: comp
+!!$      integer, intent(out)  :: rc
+!!$
+!!$      rc = ESMF_SUCCESS
+!!$            
+!!$      call ESMF_TraceEventComponentInfo(comp, &
+!!$           (/"NUOPC", "NUOPC"/), &
+!!$           (/"Instance", "Instance"/), &
+!!$           (/"Kind", "CompLabel"/), &
+!!$           rc=rc)
+!!$      if (ESMF_LogFoundError(rc, &
+!!$           line=__LINE__, &
+!!$           file=FILENAME)) &
+!!$           return  ! bail out
+!!$      
+!!$    end subroutine NUOPC_TraceEventComponentInfo
+
     
     
 !-------------------------------------------------------------------------

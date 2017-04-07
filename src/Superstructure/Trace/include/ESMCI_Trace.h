@@ -16,6 +16,9 @@
 #ifndef ESMCI_TRACE_H
 #define ESMCI_TRACE_H
 
+#include <string.h>
+#include "ESMCI_Comp.h"
+
 /*
 namespace ESMCI {
 
@@ -61,8 +64,8 @@ namespace ESMCI {
   void TraceEventPhaseEpilogueExit(int *ep_vmid, int *ep_baseid, 
                                    int *ep_method, int *ep_phase);
 
-  void TraceEventComponentInfo(int *ep_vmid, int *ep_baseid,
-                               const char *ep_name);
+  void TraceEventComponentInfo(Comp *comp, int *ep_vmid, int *ep_baseid,
+                               const char *ep_name, std::string attributeKeys, std::string attributeVals);
 
 }
 

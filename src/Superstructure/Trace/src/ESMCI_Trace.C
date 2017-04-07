@@ -31,6 +31,7 @@
 #include "ESMCI_LogErr.h"
 #include "ESMCI_VM.h"
 #include "ESMCI_Trace.h"
+#include "ESMCI_Comp.h"
 
 #define BT_CHK(_value, _ctx) \
   if ((_value) != 0) {							\
@@ -42,9 +43,11 @@
     ESMC_LogDefault.MsgFoundError(ESMC_RC_SYS, "Internal tracing error", _ctx, rc); \
     return;}
 
+using std::string;
+using std::vector;
 
 namespace ESMCI {
-
+  
   //global trace writer
   struct bt_ctf_writer *bt_writer;
   struct bt_ctf_stream_class *bt_stream_class;
@@ -72,6 +75,28 @@ namespace ESMCI {
     clock_gettime(CLOCK_REALTIME, &ts);
     
     return ts.tv_sec * 1000000000ULL + ts.tv_nsec;
+  }
+
+
+  static vector<string> split(const string& s, const string& delim, const bool keep_empty = true) {
+    vector<string> result;
+    if (delim.empty()) {
+      result.push_back(s);
+      return result;
+    }
+    string::const_iterator substart = s.begin(), subend;
+    while (true) {
+      subend = search(substart, s.end(), delim.begin(), delim.end());
+      string temp(substart, subend);
+      if (keep_empty || !temp.empty()) {
+	result.push_back(temp);
+      }
+      if (subend == s.end()) {
+	break;
+      }
+      substart = subend + delim.size();
+    }
+    return result;
   }
   
 
@@ -160,12 +185,12 @@ namespace ESMCI {
     
     BT_CHK(bt_ctf_field_unsigned_integer_set_value(field_pet, stream_id), ESMC_CONTEXT);
 
+    BT_CHK(bt_ctf_writer_add_environment_field(bt_writer, "esmf_trace_version", "0.1"), ESMC_CONTEXT);
+
     //reference counting
     bt_ctf_field_put(packet_context);
-    bt_ctf_field_put(field_pet);
-
-    //BT_CHK(bt_ctf_writer_add_environment_field(bt_writer, "host", "testhost"), ESMC_CONTEXT);
-        
+    bt_ctf_field_put(field_pet);    
+    
   }
 
 
@@ -419,44 +444,58 @@ namespace ESMCI {
 
   void TraceEventComponentInfo
   (
+   Comp *comp,
    int *ep_vmid,
    int *ep_baseid,
-   const char *ep_name
+   const char *ep_name,
+   std::string attributeKeys,
+   std::string attributeVals
    )
   {
-    //esmftrc_default_trace_component_info(esmftrc_platform_get_default_ctx(),
-    //                                    *ep_vmid,
-    //                                    *ep_baseid,
-    //                                   ep_name);
     
     int localrc;
     int *rc = &localrc;
 
-    printf("ESMCI::TraceEventComponentInfo\n");
+    //printf("ESMCI::TraceEventComponentInfo: \n\t%s\n\t%s", attributeKeys.c_str(), attributeVals.c_str());
     
     struct bt_ctf_event *event = bt_ctf_event_create(bt_event_class_comp);
 
-    struct bt_ctf_field *field_vmid = bt_ctf_field_create(bt_type_uint32);
+    struct bt_ctf_field *field_vmid = bt_ctf_event_get_payload(event, "vmid");
     BT_CHK(bt_ctf_field_unsigned_integer_set_value(field_vmid, *ep_vmid), ESMC_CONTEXT);
-    BT_CHK(bt_ctf_event_set_payload(event, "vmid", field_vmid), ESMC_CONTEXT);
 
-    struct bt_ctf_field *field_baseid = bt_ctf_field_create(bt_type_uint32);
+    struct bt_ctf_field *field_baseid = bt_ctf_event_get_payload(event, "baseid");
     BT_CHK(bt_ctf_field_unsigned_integer_set_value(field_baseid, *ep_baseid), ESMC_CONTEXT);
-    BT_CHK(bt_ctf_event_set_payload(event, "baseid", field_baseid), ESMC_CONTEXT);
-
-    struct bt_ctf_field *field_name = bt_ctf_field_create(bt_type_string);
+    
+    struct bt_ctf_field *field_name = bt_ctf_event_get_payload(event, "name");
     BT_CHK(bt_ctf_field_string_set_value(field_name, ep_name), ESMC_CONTEXT);
-    BT_CHK(bt_ctf_event_set_payload(event, "name", field_name), ESMC_CONTEXT);
-    
-    struct bt_ctf_field *field_attr_len = bt_ctf_field_create(bt_type_uint16);
-    BT_CHK(bt_ctf_field_unsigned_integer_set_value(field_attr_len, 0), ESMC_CONTEXT);
-    BT_CHK(bt_ctf_event_set_payload(event, "attr_len", field_attr_len), ESMC_CONTEXT);
+ 
+    const vector<string> attrKeys = split(attributeKeys, "::");
+    const vector<string> attrVals = split(attributeVals, "::");
 
-    struct bt_ctf_field *field_seq_attr = bt_ctf_field_create(bt_type_seq_attr);
+    struct bt_ctf_field *field_attr_len = bt_ctf_event_get_payload(event, "attr_len");
+    BT_CHK(bt_ctf_field_unsigned_integer_set_value(field_attr_len, attrKeys.size()), ESMC_CONTEXT);
+    
+    struct bt_ctf_field *field_seq_attr = bt_ctf_event_get_payload(event, "attributes");
     BT_CHK(bt_ctf_field_sequence_set_length(field_seq_attr, field_attr_len), ESMC_CONTEXT);
-    BT_CHK(bt_ctf_event_set_payload(event, "attributes", field_seq_attr), ESMC_CONTEXT);
 
-    
+    for (int i = 0; i < attrKeys.size(); i++) {
+      struct bt_ctf_field *field_attr = bt_ctf_field_sequence_get_field(field_seq_attr, i);
+      BT_CHK_NULL(field_attr, ESMC_CONTEXT);
+      
+      struct bt_ctf_field *field_attr_key = bt_ctf_field_structure_get_field(field_attr, "key");
+      BT_CHK_NULL(field_attr_key, ESMC_CONTEXT);
+      
+      struct bt_ctf_field *field_attr_value = bt_ctf_field_structure_get_field(field_attr, "value");
+      BT_CHK_NULL(field_attr_value, ESMC_CONTEXT);
+      
+      BT_CHK(bt_ctf_field_string_set_value(field_attr_key, attrKeys.at(i).c_str()), ESMC_CONTEXT);
+      BT_CHK(bt_ctf_field_string_set_value(field_attr_value, attrVals.at(i).c_str()), ESMC_CONTEXT);
+            
+      bt_ctf_field_put(field_attr);
+      bt_ctf_field_put(field_attr_key);
+      bt_ctf_field_put(field_attr_value);
+    }
+        
     BT_CHK(bt_ctf_clock_set_time(bt_clock, get_clock()), ESMC_CONTEXT);
     
     BT_CHK(bt_ctf_stream_append_event(bt_stream, event), ESMC_CONTEXT);
@@ -468,9 +507,9 @@ namespace ESMCI {
     bt_ctf_field_put(field_baseid);
     bt_ctf_field_put(field_attr_len);
     
-
   }
 
+    
   
 }
 

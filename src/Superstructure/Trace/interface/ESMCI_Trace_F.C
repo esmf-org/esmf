@@ -12,6 +12,7 @@
 #include "ESMCI_Macros.h"
 #include "ESMCI_Util.h"
 #include "ESMCI_Trace.h"
+#include "ESMCI_Comp.h"
 
 using std::string;
 
@@ -79,13 +80,20 @@ extern "C" {
     if (rc != NULL) *rc = ESMF_SUCCESS;
   }
 
-  void FTN_X(c_esmftrace_component_info)(int *vmid, int *baseid, const char *name, int *rc, 
-                                         ESMCI_FortranStrLenArg nlen)
+  void FTN_X(c_esmftrace_component_info)(ESMCI::Comp *comp, int *vmid, int *baseid, const char *name,
+					 const char *attributeKeys, const char *attributeVals, int *rc,
+					 ESMCI_FortranStrLenArg nlen,  //name
+					 ESMCI_FortranStrLenArg aklen,  //attributeKeys
+					 ESMCI_FortranStrLenArg avlen)  //attributeValues
   {
-    printf("c_esmf_trace_component_info\n");
+    //printf("c_esmf_trace_component_info\n");
     string cname = string(name, ESMC_F90lentrim (name, nlen));
-    ESMCI::TraceEventComponentInfo(vmid, baseid, cname.c_str());
+    string aKeys = string(attributeKeys, ESMC_F90lentrim (attributeKeys, aklen));
+    string aVals = string(attributeVals, ESMC_F90lentrim (attributeVals, avlen));
+    
+    ESMCI::TraceEventComponentInfo(comp, vmid, baseid, cname.c_str(), aKeys, aVals);
     if (rc != NULL) *rc = ESMF_SUCCESS;
+    
   }
     
 

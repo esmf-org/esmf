@@ -617,7 +617,7 @@ module ESMF_ComplianceICMod
             line=__LINE__, file=FILENAME)) return  ! bail out
     endif
     if (outputTrace) then
-       call ESMF_TraceEventComponentInfo(comp, rc=rc)
+       call ESMF_TraceEventComponentInfo(comp, "", rc=rc)
        if (ESMF_LogFoundError(rc, &
             line=__LINE__, file=FILENAME)) return  ! bail out
        call ESMF_TraceEventPhaseEpilogueExit(comp, rc=rc)
