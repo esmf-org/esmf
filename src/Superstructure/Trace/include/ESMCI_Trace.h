@@ -30,6 +30,8 @@
 #define BT_METHOD_RUN 1
 #define BT_METHOD_FINAL 2
 
+#define BT_REGION_ENTER 0
+#define BT_REGION_EXIT 1
 
 namespace ESMCI { 
   void TraceOpen(const char *trace_dir, int stream_id, int *rc);
@@ -56,6 +58,7 @@ namespace ESMCI {
   void TraceEventComponentInfo(Comp *comp, int *ep_vmid, int *ep_baseid,
                                const char *ep_name, std::string attributeKeys, std::string attributeVals);
 
+  void TraceEventRegion(int ctrl, const char*name);
 }
 
 #endif

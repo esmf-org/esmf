@@ -497,6 +497,10 @@ module ESMF_ComplianceICMod
        call ESMF_TraceEventPhaseEnter(comp, rc=rc)
        if (ESMF_LogFoundError(rc, &
             line=__LINE__, file=FILENAME)) return  ! bail out
+       call ESMF_TraceEventComponentInfo(comp, rc=rc)
+       if (ESMF_LogFoundError(rc, &
+            line=__LINE__, file=FILENAME)) return  ! bail out
+       
     endif
 
     endif
@@ -517,14 +521,6 @@ module ESMF_ComplianceICMod
     ! Start Compliance Checking: InitializeEpilogue
     if (ccfDepth <= maxDepth .or. maxDepth < 0) then
 
-    if (outputJSON) then
-        call JSON_LogCtrlFlow("stop_phase", comp, rc)
-        if (ESMF_LogFoundError(rc, &
-            line=__LINE__, file=FILENAME)) return  ! bail out
-        call JSON_LogCtrlFlow("start_epilogue", comp, rc)
-        if (ESMF_LogFoundError(rc, &
-            line=__LINE__, file=FILENAME)) return  ! bail out
-    endif
     if (outputTrace) then
        call ESMF_TraceEventPhaseExit(comp, rc=rc)
        if (ESMF_LogFoundError(rc, &
@@ -532,6 +528,15 @@ module ESMF_ComplianceICMod
        !call ESMF_TraceEventPhaseEpilogueEnter(comp, rc=rc)
        !if (ESMF_LogFoundError(rc, &
        !     line=__LINE__, file=FILENAME)) return  ! bail out
+    endif
+    
+    if (outputJSON) then
+        call JSON_LogCtrlFlow("stop_phase", comp, rc)
+        if (ESMF_LogFoundError(rc, &
+            line=__LINE__, file=FILENAME)) return  ! bail out
+        call JSON_LogCtrlFlow("start_epilogue", comp, rc)
+        if (ESMF_LogFoundError(rc, &
+            line=__LINE__, file=FILENAME)) return  ! bail out
     endif
 
     call prefixString(comp, prefix=prefix, forward=.false., rc=rc)
@@ -776,7 +781,16 @@ module ESMF_ComplianceICMod
     !---------------------------------------------------------------------------
     ! Start Compliance Checking: RunEpilogue
     if (ccfDepth <= maxDepth .or. maxDepth < 0) then
-    
+
+       if (outputTrace) then
+          call ESMF_TraceEventPhaseExit(comp, rc=rc)
+          if (ESMF_LogFoundError(rc, &
+               line=__LINE__, file=FILENAME)) return  ! bail out
+       !call ESMF_TraceEventPhaseEpilogueEnter(comp, rc=rc)
+          !if (ESMF_LogFoundError(rc, &
+          !     line=__LINE__, file=FILENAME)) return  ! bail out
+       endif
+       
     if (outputJSON) then
         call JSON_LogCtrlFlow("stop_phase", comp, rc)
         if (ESMF_LogFoundError(rc, &
@@ -785,14 +799,7 @@ module ESMF_ComplianceICMod
         if (ESMF_LogFoundError(rc, &
             line=__LINE__, file=FILENAME)) return  ! bail out
     endif
-    if (outputTrace) then
-       call ESMF_TraceEventPhaseExit(comp, rc=rc)
-       if (ESMF_LogFoundError(rc, &
-            line=__LINE__, file=FILENAME)) return  ! bail out
-       !call ESMF_TraceEventPhaseEpilogueEnter(comp, rc=rc)
-       !if (ESMF_LogFoundError(rc, &
-       !     line=__LINE__, file=FILENAME)) return  ! bail out
-    endif
+
 
     call prefixString(comp, prefix=prefix, forward=.false., rc=rc)
     if (ESMF_LogFoundError(rc, &
@@ -1010,14 +1017,6 @@ module ESMF_ComplianceICMod
     ! Start Compliance Checking: FinalizeEpilogue
     if (ccfDepth <= maxDepth .or. maxDepth < 0) then
     
-    if (outputJSON) then
-        call JSON_LogCtrlFlow("stop_phase", comp, rc)
-        if (ESMF_LogFoundError(rc, &
-            line=__LINE__, file=FILENAME)) return  ! bail out
-        call JSON_LogCtrlFlow("start_epilogue", comp, rc)
-        if (ESMF_LogFoundError(rc, &
-            line=__LINE__, file=FILENAME)) return  ! bail out
-    endif
     if (outputTrace) then
        call ESMF_TraceEventPhaseExit(comp, rc=rc)
        if (ESMF_LogFoundError(rc, &
@@ -1025,6 +1024,15 @@ module ESMF_ComplianceICMod
        !call ESMF_TraceEventPhaseEpilogueEnter(comp, rc=rc)
        !if (ESMF_LogFoundError(rc, &
        !     line=__LINE__, file=FILENAME)) return  ! bail out
+    endif
+
+    if (outputJSON) then
+        call JSON_LogCtrlFlow("stop_phase", comp, rc)
+        if (ESMF_LogFoundError(rc, &
+            line=__LINE__, file=FILENAME)) return  ! bail out
+        call JSON_LogCtrlFlow("start_epilogue", comp, rc)
+        if (ESMF_LogFoundError(rc, &
+            line=__LINE__, file=FILENAME)) return  ! bail out
     endif
 
     call prefixString(comp, prefix=prefix, forward=.false., rc=rc)

@@ -80,6 +80,17 @@ extern "C" {
     if (rc != NULL) *rc = ESMF_SUCCESS;
     
   }
-    
+
+  void FTN_X(c_esmftrace_region_enter)(const char *name, int *rc, ESMCI_FortranStrLenArg nlen) {
+    string cname = string(name, ESMC_F90lentrim(name, nlen));
+    ESMCI::TraceEventRegion(BT_REGION_ENTER, cname.c_str());
+    if (rc != NULL) *rc = ESMF_SUCCESS;
+  }
+
+  void FTN_X(c_esmftrace_region_exit)(const char *name, int *rc, ESMCI_FortranStrLenArg nlen) {
+    string cname = string(name, ESMC_F90lentrim(name, nlen));
+    ESMCI::TraceEventRegion(BT_REGION_EXIT, cname.c_str());
+    if (rc != NULL) *rc = ESMF_SUCCESS;
+  }
 
 } // extern "C"

@@ -100,10 +100,12 @@ namespace ESMCI {
   struct bt_ctf_field_type *bt_type_enum_control;
   struct bt_ctf_field_type *bt_type_enum_method;
   struct bt_ctf_field_type *bt_type_seq_attr;
+  struct bt_ctf_field_type *bt_type_enum_region;
   
   //event classes
   struct bt_ctf_event_class *bt_event_class_control;
   struct bt_ctf_event_class *bt_event_class_comp;
+  struct bt_ctf_event_class *bt_event_class_region;
   
   static uint64_t get_clock() {
     struct timespec ts;
@@ -184,8 +186,10 @@ namespace ESMCI {
       return;
     globalvm->barrier();
 
+    //int totalPETs = globalvm->getNpets();
+        
     //my specific directory
-    sprintf(stream_dir, "%s/PET%d", stream_dir_root, stream_id);
+    sprintf(stream_dir, "%s/PET%03d", stream_dir_root, stream_id);
     
     if (stat(stream_dir, &st) == -1) {
       if (mkdir(stream_dir, 0700) == -1) {
@@ -230,6 +234,10 @@ namespace ESMCI {
 
     BT_CHK(bt_ctf_writer_add_environment_field(bt_writer, "esmf_trace_version", BT_ESMF_TRACE_VERSION), ESMC_CONTEXT);
 
+    //write out metadata file
+    bt_ctf_writer_flush_metadata(bt_writer);
+
+    
     //reference counting
     bt_ctf_field_put(packet_context);
     bt_ctf_field_put(field_pet);    
@@ -241,7 +249,6 @@ namespace ESMCI {
 
     if (rc != NULL) *rc = ESMF_SUCCESS;
 
-    bt_ctf_writer_flush_metadata(bt_writer);
     bt_ctf_writer_put(bt_writer);
     bt_ctf_stream_class_put(bt_stream_class);
     bt_ctf_stream_put(bt_stream);
@@ -253,9 +260,12 @@ namespace ESMCI {
     bt_ctf_field_type_put(bt_type_enum_control);
     bt_ctf_field_type_put(bt_type_enum_method);
     bt_ctf_field_type_put(bt_type_seq_attr);
+    bt_ctf_field_type_put(bt_type_enum_region);
+        
+    bt_ctf_event_class_put(bt_event_class_control);
+    bt_ctf_event_class_put(bt_event_class_comp);
+    bt_ctf_event_class_put(bt_event_class_region);
     
-    bt_ctf_event_class_put(bt_event_class_control); 
-     
   }
 
 #undef  ESMC_METHOD
@@ -323,6 +333,23 @@ namespace ESMCI {
     
     BT_CHK(bt_ctf_stream_class_add_event_class(bt_stream_class, bt_event_class_control), ESMC_CONTEXT);    
 
+    //region event class
+    bt_event_class_region = bt_ctf_event_class_create("region");
+    BT_CHK_NULL(bt_event_class_region, ESMC_CONTEXT);
+           
+    bt_type_enum_region = bt_ctf_field_type_enumeration_create(bt_type_uint4);
+    BT_CHK_NULL(bt_type_enum_region, ESMC_CONTEXT);
+
+    bt_ctf_field_type_enumeration_add_mapping(bt_type_enum_region, "enter", BT_REGION_ENTER, BT_REGION_ENTER);
+    bt_ctf_field_type_enumeration_add_mapping(bt_type_enum_region, "exit", BT_REGION_EXIT, BT_REGION_EXIT);
+                    
+    BT_CHK(bt_ctf_event_class_add_field(bt_event_class_region, bt_type_enum_region, "ctrl"), ESMC_CONTEXT);
+    BT_CHK(bt_ctf_event_class_add_field(bt_event_class_region, bt_type_string, "name"), ESMC_CONTEXT);
+        
+    BT_CHK(bt_ctf_stream_class_add_event_class(bt_stream_class, bt_event_class_region), ESMC_CONTEXT);    
+
+    
+    //component event class
     bt_event_class_comp = bt_ctf_event_class_create("comp");
     BT_CHK_NULL(bt_event_class_comp, ESMC_CONTEXT);
 
@@ -406,7 +433,7 @@ namespace ESMCI {
     bt_ctf_field_put(field_phase);
     
   }
-  
+ 
   void TraceEventPhaseEnter(int *ep_vmid, int *ep_baseid, int *ep_method, int *ep_phase) {
     TraceEventPhase(BT_CNTL_START, ep_vmid, ep_baseid, ep_method, ep_phase);
   }
@@ -445,8 +472,6 @@ namespace ESMCI {
     int localrc;
     int *rc = &localrc;
 
-    //printf("ESMCI::TraceEventComponentInfo: \n\t%s\n\t%s", attributeKeys.c_str(), attributeVals.c_str());
-    
     struct bt_ctf_event *event = bt_ctf_event_create(bt_event_class_comp);
 
     struct bt_ctf_field *field_vmid = bt_ctf_event_get_payload(event, "vmid");
@@ -498,7 +523,36 @@ namespace ESMCI {
     
   }
 
+  void TraceEventRegion(int ctrl, const char *name) {
     
+    int localrc;
+    int *rc = &localrc;
+
+    printf("Tracing region: %d, %s\n", ctrl, name);
+    
+    struct bt_ctf_event *event = bt_ctf_event_create(bt_event_class_region);
+    BT_CHK_NULL(event, ESMC_CONTEXT);
+    
+    struct bt_ctf_field *field_ctrl = bt_ctf_event_get_payload(event, "ctrl");
+    BT_CHK_NULL(field_ctrl, ESMC_CONTEXT);
+    struct bt_ctf_field *ctrl_container_field = bt_ctf_field_enumeration_get_container(field_ctrl);
+    BT_CHK_NULL(ctrl_container_field, ESMC_CONTEXT);
+    BT_CHK(bt_ctf_field_unsigned_integer_set_value(ctrl_container_field, ctrl), ESMC_CONTEXT);
+
+    struct bt_ctf_field *field_name = bt_ctf_event_get_payload(event, "name");
+    BT_CHK(bt_ctf_field_string_set_value(field_name, name), ESMC_CONTEXT);
+
+    BT_CHK(bt_ctf_clock_set_time(bt_clock, get_clock()), ESMC_CONTEXT);
+
+    BT_CHK(bt_ctf_stream_append_event(bt_stream, event), ESMC_CONTEXT);
+    BT_CHK(bt_ctf_stream_flush(bt_stream), ESMC_CONTEXT);
+
+    bt_ctf_event_put(event);
+    bt_ctf_field_put(field_ctrl);
+    bt_ctf_field_put(ctrl_container_field);
+    bt_ctf_field_put(field_name);
+    
+  }    
   
 }
 

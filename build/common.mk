@@ -1402,7 +1402,7 @@ endif
 # Babeltrace
 #-------------------------------------------------------------------------------
 ifeq ($(ESMF_BABELTRACE),standard)
-ifneq ($(origin ESMF_XERCES_LIBS), environment)
+ifneq ($(origin ESMF_BABELTRACE_LIBS), environment)
 ESMF_BABELTRACE_LIBS = -lbabeltrace-ctf
 endif
 endif

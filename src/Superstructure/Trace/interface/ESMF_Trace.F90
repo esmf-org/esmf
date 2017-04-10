@@ -38,7 +38,9 @@ module ESMF_TraceMod
   public ESMF_TraceEventPhaseEpilogueEnter
   public ESMF_TraceEventPhaseEpilogueExit
   public ESMF_TraceEventComponentInfo
-
+  public ESMF_TraceEventRegionEnter
+  public ESMF_TraceEventRegionExit
+  
   interface ESMF_TraceEventPhaseEnter
      module procedure ESMF_TraceEventGridCompPhaseEnter
      module procedure ESMF_TraceEventCplCompPhaseEnter
@@ -342,10 +344,10 @@ contains
 #define ESMF_METHOD "ESMF_TraceEventGridComponentInfo()"
   subroutine ESMF_TraceEventGridComponentInfo(comp, attrConv, attrPurp, attrName, attrKey, rc)
     type(ESMF_GridComp), intent(in) :: comp
-    character(len=*),    intent(in) :: attrConv(:)
-    character(len=*),    intent(in) :: attrPurp(:)
-    character(len=*),    intent(in) :: attrName(:)
-    character(len=*),    intent(in) :: attrKey(:)
+    character(len=*),    intent(in), optional :: attrConv(:)
+    character(len=*),    intent(in), optional :: attrPurp(:)
+    character(len=*),    intent(in), optional :: attrName(:)
+    character(len=*),    intent(in), optional :: attrKey(:)
     integer, intent(out), optional  :: rc    
 
     ! local
@@ -371,51 +373,56 @@ contains
     if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
          ESMF_CONTEXT, rcToReturn=rc)) return
 
-    if (size(attrConv) /= size(attrPurp) .or. &
-         size(attrConv) /= size(attrName)) then
-       call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
-            msg="Attribute vectors must have same length", &
-            ESMF_CONTEXT, rcToReturn=rc)
-       return
-    endif
-
     attributeKeys = ""
     attributeVals = ""
-    delim = ""
-    do i=1, size(attrConv)      
 
-       call ESMF_AttributeGet(comp, name=trim(attrName(i)), &
-            convention=trim(attrConv(i)), purpose=trim(attrPurp(i)), &
-            attnestflag=ESMF_ATTNEST_ON, isPresent=isPresent, itemCount=itemCount, rc=rc)
-       if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rcToReturn=rc)) return
-
-       if (isPresent) then
-          allocate(attrValList(itemCount))
-          call ESMF_AttributeGet(comp, name=trim(attrName(i)), valueList=attrValList, &
+    if (present(attrConv) .and. present(attrPurp) &
+         .and. present(attrName) .and. present(attrKey)) then
+    
+       if (size(attrConv) /= size(attrPurp) .or. &
+            size(attrConv) /= size(attrName)) then
+          call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
+               msg="Attribute vectors must have same length", &
+               ESMF_CONTEXT, rcToReturn=rc)
+          return
+       endif
+       
+       delim = ""
+       do i=1, size(attrConv)      
+          
+          call ESMF_AttributeGet(comp, name=trim(attrName(i)), &
                convention=trim(attrConv(i)), purpose=trim(attrPurp(i)), &
-               attnestflag=ESMF_ATTNEST_ON, isPresent=isPresent, rc=rc)
+               attnestflag=ESMF_ATTNEST_ON, isPresent=isPresent, itemCount=itemCount, rc=rc)
           if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
                ESMF_CONTEXT, rcToReturn=rc)) return
           
-          !attributeKeys = trim(attributeKeys)//trim(delim)// &
-          !     trim(attrConv(i)) //"$"//trim(attrPurp(i))//"$"//trim(attrName(i))
-          attributeKeys = trim(attributeKeys)//trim(delim)// &
-               trim(attrKey(i))
-          
-          attributeList = ""
-          delim2 = ""
-          do j=1, itemCount
-             attributeList = trim(attributeList)//trim(delim2)//trim(attrValList(j))
-             delim2 = "||"
-          enddo
-          attributeVals = trim(attributeVals)//trim(delim)//trim(attributeList)
-          delim = "::"
-
-          deallocate(attrValList)
-       endif
-    enddo
-    
+          if (isPresent) then
+             allocate(attrValList(itemCount))
+             call ESMF_AttributeGet(comp, name=trim(attrName(i)), valueList=attrValList, &
+                  convention=trim(attrConv(i)), purpose=trim(attrPurp(i)), &
+                  attnestflag=ESMF_ATTNEST_ON, isPresent=isPresent, rc=rc)
+             if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+             
+             !attributeKeys = trim(attributeKeys)//trim(delim)// &
+             !     trim(attrConv(i)) //"$"//trim(attrPurp(i))//"$"//trim(attrName(i))
+             attributeKeys = trim(attributeKeys)//trim(delim)// &
+                  trim(attrKey(i))
+             
+             attributeList = ""
+             delim2 = ""
+             do j=1, itemCount
+                attributeList = trim(attributeList)//trim(delim2)//trim(attrValList(j))
+                delim2 = "||"
+             enddo
+             attributeVals = trim(attributeVals)//trim(delim)//trim(attributeList)
+             delim = "::"
+             
+             deallocate(attrValList)
+          endif
+       enddo
+    endif
+       
     !print *, "attributeKeys = ", trim(attributeKeys)
     !print *, "attributeVals = ", trim(attributeVals)
         
@@ -581,7 +588,35 @@ contains
     
   end subroutine ESMF_TraceGetCplCompID
 
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_TraceEventRegionEnter()"
+  subroutine ESMF_TraceEventRegionEnter(name, rc)
+    character(len=*), intent(in) :: name
+    integer, intent(out), optional  :: rc
 
+    rc = ESMF_SUCCESS 
+    
+    call c_esmftrace_region_enter(name, rc)
+    if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return
+
+  end subroutine ESMF_TraceEventRegionEnter
+
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_TraceEventRegionExit()"
+  subroutine ESMF_TraceEventRegionExit(name, rc)
+    character(len=*), intent(in) :: name
+    integer, intent(out), optional  :: rc
+
+    rc = ESMF_SUCCESS 
+    
+    call c_esmftrace_region_exit(name, rc)
+    if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return
+
+  end subroutine ESMF_TraceEventRegionExit
+
+  
   
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_TraceMethodToEnum()"
