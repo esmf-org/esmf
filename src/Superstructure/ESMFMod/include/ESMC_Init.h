@@ -76,7 +76,7 @@ extern "C" {
 //  {\tt ESMC\_Initialize()} it inherits all of the MPI implementation 
 //  dependent limitations of what may or may not be done before 
 //  {\tt MPI\_Init()}. For instance, it is unsafe for some MPI implementations,
-//  such as MPICH, to do IO before the MPI environment is initialized. Please
+//  such as MPICH, to do I/O before the MPI environment is initialized. Please
 //  consult the documentation of your MPI implementation for details.
 //
 //  Optional arguments are recognised.  To indicate the end of the optional

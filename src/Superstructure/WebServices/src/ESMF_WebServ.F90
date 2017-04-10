@@ -919,10 +919,10 @@ contains
 !
 ! !DESCRIPTION:
 !   Encapsulates all of the functionality necessary to setup a component as
-!   a component service.  If this is the root PET, it registers the 
+!   a component service.  On the root PET, it registers the
 !   component service and then enters into a loop that waits for requests on 
 !   a socket.  The loop continues until an "exit" request is received, at 
-!   which point it exits the loop and unregisters the service.  If this is
+!   which point it exits the loop and unregisters the service.  On
 !   any PET other than the root PET, it sets up a process block that waits
 !   for instructions from the root PET.  Instructions will come as requests
 !   are received from the socket.
@@ -935,7 +935,7 @@ contains
 ! \item[{[portNum]}]
 !   Number of the port on which the component service is listening.
 ! \item[{[clientId]}]
-!   Identifer of the client responsible for this component service.  If a
+!   Identifier of the client responsible for this component service.  If a
 !   Process Controller application manages this component service, then the
 !   clientId is provided to the component service application in the command
 !   line.  Otherwise, the clientId is not necessary.
@@ -1126,10 +1126,10 @@ contains
 !
 ! !DESCRIPTION:
 !   Encapsulates all of the functionality necessary to setup a component as
-!   a component service.  If this is the root PET, it registers the 
+!   a component service.  On the root PET, it registers the
 !   component service and then enters into a loop that waits for requests on 
 !   a socket.  The loop continues until an "exit" request is received, at 
-!   which point it exits the loop and unregisters the service.  If this is
+!   which point it exits the loop and unregisters the service.  On
 !   any PET other than the root PET, it sets up a process block that waits
 !   for instructions from the root PET.  Instructions will come as requests
 !   are received from the socket.
@@ -1142,7 +1142,7 @@ contains
 ! \item[{[portNum]}]
 !   Number of the port on which the component service is listening.
 ! \item[{[clientId]}]
-!   Identifer of the client responsible for this component service.  If a
+!   Identifier of the client responsible for this component service.  If a
 !   Process Controller application manages this component service, then the
 !   clientId is provided to the component service application in the command
 !   line.  Otherwise, the clientId is not necessary.

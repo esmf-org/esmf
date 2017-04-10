@@ -16,10 +16,10 @@
 
 !-------------------------------------------------------------------------
 !BOE
-!\subsubsection{Making a Component available through WebServices}
+!\subsubsection{Making a Component available through ESMF Web Services}
 !      
-!  In this example a standard ESMF Component is made available through
-!  the WebServices interface.
+!  In this example, a standard ESMF Component is made available through
+!  the Web Services interface.
 !EOE
 !BOE
 !  The first step is to make sure your callback routines for initialize, run
@@ -163,8 +163,8 @@ program WebServicesEx
 ! ------------------------------------------------------------------------------
 
 !BOE
-!  The port number specifies the id of the port on the local machine on which
-!  a listening socket will be created.  This socket is used by the service to
+!  A listening socket will be created on the local machine with the specified
+!  port number.  This socket is used by the service to
 !  wait for and receive requests from the client.  Check with your system
 !  administrator to determine an appropriate port to use for your service.
 !EOE

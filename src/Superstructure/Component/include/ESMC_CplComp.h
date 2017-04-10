@@ -149,7 +149,7 @@ int ESMC_CplCompFinalize(
 //    Component providers must document whether each of their routines are 
 //    {\tt single-phase} or {\tt multi-phase}. Single-phase routines require 
 //    only one invocation to complete their work. Multi-phase routines provide
-//    multiple subroutines to accomplish the work, accomodating components 
+//    multiple subroutines to accomplish the work, accommodating components
 //    which must complete part of their work, return to the caller and allow 
 //    other processing to occur, and then continue the original operation. 
 //    For multiple-phase child components, this is the integer phase number to
@@ -237,7 +237,7 @@ int ESMC_CplCompInitialize(
 //    Component providers must document whether each of their routines are 
 //    {\tt single-phase} or {\tt multi-phase}. Single-phase routines require 
 //    only one invocation to complete their work. Multi-phase routines provide
-//    multiple subroutines to accomplish the work, accomodating components 
+//    multiple subroutines to accomplish the work, accommodating components
 //    which must complete part of their work, return to the caller and allow 
 //    other processing to occur, and then continue the original operation. 
 //    For multiple-phase child components, this is the integer phase number to
@@ -310,7 +310,7 @@ int ESMC_CplCompRun(
 //    Component providers must document whether each of their routines are 
 //    {\tt single-phase} or {\tt multi-phase}. Single-phase routines require 
 //    only one invocation to complete their work. Multi-phase routines provide
-//    multiple subroutines to accomplish the work, accomodating components 
+//    multiple subroutines to accomplish the work, accommodating components
 //    which must complete part of their work, return to the caller and allow 
 //    other processing to occur, and then continue the original operation. 
 //    For multiple-phase child components, this is the integer phase number to

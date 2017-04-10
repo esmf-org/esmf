@@ -948,7 +948,7 @@ namespace ESMCI {
 //
 // !DESCRIPTION:
 //      Read data items for the State from a file.  Currently limited to
-//      multiple Array items from a netCDF file.  Other item types and file
+//      multiple Array items from a NetCDF file.  Other item types and file
 //      types will be supported in future releases.
 //
 //EOP
@@ -1011,7 +1011,7 @@ namespace ESMCI {
 //
 // !DESCRIPTION:
 //      Write data items for the State from a file.  Currently limited to
-//      write multiple Array items to a netCDF file.  Other item types and file
+//      write multiple Array items to a NetCDF file.  Other item types and file
 //      types will be supported in future releases.
 //
 //EOP
