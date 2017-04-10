@@ -1957,8 +1957,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     is used, ESMF will return an error code.
 !   \item[{[varAtts]}]
 !     A 2D array of attribute name/value pairs to be associated with the NetCDF variable
-!     in the output file.  Use this argument only with a NetCDF IO format.
-!     If binary format is used, ESMF will return an error code.
+!     in the output file.  The array must be two columns wide.  The first column contains
+!     names, the second column contains the associated values.   Use this argument only
+!     with a NetCDF IO format.  If binary format is used, ESMF will return an error code.
 !   \item[{[overwrite]}]
 !    \begin{sloppypar}
 !      A logical flag, the default is .false., i.e., existing Array data may
@@ -2055,6 +2056,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer                    :: file_ext_p
     integer                    :: ndims
 
+    character(1) :: dummy_dimLabels(1)
+    character(1) :: dummy_varAtts(1,1)
+
     ! Initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -2115,6 +2119,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     end if
 
     if (present (varAtts)) then
+      if (size (varAtts,2) /= 2) then
+        if (ESMF_LogFoundError(ESMF_RC_ARG_SIZE,  &
+            msg="varAtts name/value array must be two columns wide",  &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+      end if
       size_varatts = size (varAtts,1)
       len_varatts = len (varAtts)
     else
@@ -2123,14 +2132,47 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     end if
 
     ! Call into the C++ interface, which will call IO object
-    call c_esmc_arraywrite(array, fileName,  &
-        variableName, len_varName,  &
-        dimLabels, size_dimlabels, len_dimlabels,  &
-        varAtts,   size_varatts, len_varatts,   &
-        opt_overwriteflag,          &
-        opt_status, timeslice, opt_iofmt, localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU,  &
-      ESMF_CONTEXT, rcToReturn=rc)) return
+    if (present (dimLabels)) then
+      if (present (varAtts)) then
+        call c_esmc_arraywrite(array, fileName,  &
+            variableName, len_varName,  &
+            dimLabels, size_dimlabels, len_dimlabels,  &
+            varAtts,   size_varatts, len_varatts,   &
+            opt_overwriteflag,          &
+            opt_status, timeslice, opt_iofmt, localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU,  &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+      else
+        call c_esmc_arraywrite(array, fileName,  &
+            variableName, len_varName,  &
+            dimLabels, size_dimlabels, len_dimlabels,  &
+            dummy_varAtts,   0, 1,   &
+            opt_overwriteflag,          &
+            opt_status, timeslice, opt_iofmt, localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU,  &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+      end if
+    else
+      if (present (varAtts)) then
+        call c_esmc_arraywrite(array, fileName,  &
+            variableName, len_varName,  &
+            dummy_dimLabels, 0, 1,  &
+            varAtts,   size_varatts, len_varatts,   &
+            opt_overwriteflag,          &
+            opt_status, timeslice, opt_iofmt, localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU,  &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+      else
+        call c_esmc_arraywrite(array, fileName,  &
+            variableName, len_varName,  &
+            dummy_dimLabels, 0, 1,  &
+            dummy_varAtts,   0, 1,   &
+            opt_overwriteflag,          &
+            opt_status, timeslice, opt_iofmt, localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU,  &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+      end if
+    end if
 
     ! Return successfully
     if (present(rc)) rc = ESMF_SUCCESS
