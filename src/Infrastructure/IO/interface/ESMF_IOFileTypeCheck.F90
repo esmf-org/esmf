@@ -20,7 +20,7 @@
 #include "ESMF.h"
 !==============================================================================
 !BOPI
-! !MODULE: ESMF_IOFileTypeCheckMod - Grid IO utility class
+! !MODULE: ESMF_IOFileTypeCheckMod - Grid I/O utility class
 !
 ! !DESCRIPTION:
 !

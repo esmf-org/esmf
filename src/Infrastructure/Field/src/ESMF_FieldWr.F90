@@ -108,16 +108,16 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     The name of the output file to which Field data is written.
 !   \item[{[variableName]}]
 !    Variable name in the output file; default is the "name" of field.
-!    Use this argument only in the IO format (such as NetCDF) that
-!    supports variable name. If the IO format does not support this 
+!    Use this argument only in the I/O format (such as NetCDF) that
+!    supports variable name. If the I/O format does not support this
 !    (such as binary format), ESMF will return an error code.
 !   \item[{[dimLabels]}]
 !     An array of dimension labels for the Field data in the output file.  Enough
 !     label names must be provided to label each axis; default is
 !     the variable name with {\tt \_dimnnn}, where nnn is the dimension number,
 !     appended.  When using the {\tt timeslice} option, the {\tt time} dimension
-!     is unaffected.  Use this argument only in the IO format (such as NetCDF) that
-!     supports variable and dimension names. If the IO format does not support it
+!     is unaffected.  Use this argument only in the I/O format (such as NetCDF) that
+!     supports variable and dimension names. If the I/O format does not support it
 !     (such as binary format), ESMF will return an error code.
 !   \item[{[overwrite]}]
 !    \begin{sloppypar}
@@ -143,7 +143,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !    \end{sloppypar}
 !   \item[{[timeslice]}]
 !    \begin{sloppypar}
-!    Some IO formats (e.g. NetCDF) support the output of data in form of
+!    Some I/O formats (e.g. NetCDF) support the output of data in form of
 !    time slices.  An unlimited dimension called {\tt time} is defined in the
 !    file variable for this capability.
 !    The {\tt timeslice} argument provides access to the {\tt time} dimension,
@@ -161,7 +161,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !    \end{sloppypar}
 !   \item[{[iofmt]}]
 !     \begin{sloppypar}
-!    The IO format.  Please see Section~\ref{opt:iofmtflag} for the list
+!    The I/O format.  Please see Section~\ref{opt:iofmtflag} for the list
 !    of options. If not present, file names with a {\tt .bin} extension will
 !    use {\tt ESMF\_IOFMT\_BIN}, and file names with a {\tt .nc} extension
 !    will use {\tt ESMF\_IOFMT\_NETCDF}.  Other files default to

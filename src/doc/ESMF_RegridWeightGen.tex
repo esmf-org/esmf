@@ -715,7 +715,7 @@ A 2D grid in the Cartesian coordinate can only be regridded into another 2D grid
  then the element is a hexahedron.
 
 If the grid contains some elements with large number of edges, using a 2D array for {\tt elementConn} could take a lot of space.  
-In that case, {\tt elementConn} can be represented as a 1D array that stores the edges of all the elments contineously.  When {\tt elementConn} is a 1D array, the dimension {\tt maxNodePElement} is no longer needed, instead, a new dimension variable {\tt connectionCount} 
+In that case, {\tt elementConn} can be represented as a 1D array that stores the edges of all the elements continuously.  When {\tt elementConn} is a 1D array, the dimension {\tt maxNodePElement} is no longer needed, instead, a new dimension variable {\tt connectionCount}
 is required to define the size of {\tt elementConn}.  The value of {\tt connectionCount} is the sum of all the values in {\tt numElementConn}.
 
 The following is an example grid file using 1D array for {\tt elementConn}:

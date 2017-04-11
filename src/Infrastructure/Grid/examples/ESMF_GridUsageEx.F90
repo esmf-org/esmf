@@ -1091,7 +1091,7 @@ endif
    !-------------------------------------------------------------------
    ! Set up the local index array:  Assuming the grid is 360x180x10.  First
    ! calculate the localArbIndexCount and localArbIndex array for each PET 
-   ! based on the total number of PETS. The cells are evenly distributed in 
+   ! based on the total number of PETs. The cells are evenly distributed in
    ! all the PETs. If the total number of cells are not divisible by the 
    ! total PETs, the remaining cells are assigned to the last PET.  The 
    ! cells are card dealt to each PET in y dimension first, 
@@ -1253,7 +1253,7 @@ endif
 
 
 !BOE
-!  Where T42\_grid.nc is a 2D global grid of size (128x64) and the resulting Grid is distributed
+!  where T42\_grid.nc is a 2D global grid of size (128x64) and the resulting Grid is distributed
 !  by partitioning the rows evenly over all the PETs.
 !EOE
 
@@ -2215,10 +2215,10 @@ call ESMF_GridDestroy(grid3D,rc=rc)
 ! has one extra index location in each dimension than the number of cells
 ! because of the padding for the larger corner stagger location. 
 !
-! The computational region is a user setable region which can be used
+! The computational region is a user-settable region which can be used
 ! to distinguish a particular area for computation. The Grid doesn't
 ! currently contain functionality to let the user set the computational
-! region so it defaults to the exclusive region, however, if the
+! region so it defaults to the exclusive region. However, if the
 ! user sets an Array holding different computational bounds into the 
 ! Grid then that Array's computational bounds will be used.
 !
@@ -2229,8 +2229,8 @@ call ESMF_GridDestroy(grid3D,rc=rc)
 ! what is enlarged to include space for halos, and the total region 
 ! must be large enough to contain the maximum halo operation on the
 ! Grid. The Grid doesn't currently contain functionality to let the 
-! user set the total region so it defaults to the exclusive region,
-! however, if the
+! user set the total region so it defaults to the exclusive region.
+! However, if the
 ! user sets an Array holding different total bounds into the 
 ! Grid then that Array's total bounds will be used.
 !
@@ -2627,7 +2627,7 @@ endif
 ! of coordinate values. In the future there are plans to add more, but 
 ! for now the user may generate coordinates uniformly distributed across
 ! an index space. To do this the user specifies the coordinate values
-! which coorespond to the minimum indices {\tt begCoord} and the 
+! which correspond to the minimum indices {\tt begCoord} and the
 ! maximum indices {\tt endCoord}. The method then calculates the intermediate
 ! coordinates and loads them into the appropriate places in the Grid
 ! coordinate arrays. The following fills a 3D Grid with coordinates from 
@@ -2926,7 +2926,7 @@ endif
 ! which dimensions of the Grid are mapped to the dimensions
 ! described by {\tt maxIndex}. In other words, it describes how the dimensions of 
 ! the underlying default DistGrid are mapped to the Grid. Each entry
-! in {\tt distgridToGridMap} contains the Grid dimension to which the cooresponding
+! in {\tt distgridToGridMap} contains the Grid dimension to which the corresponding
 ! DistGrid dimension should be mapped. 
 ! The following example illustrates the creation of a Grid where the largest
 ! dimension is first. To accomplish this the two dimensions are swapped. 
@@ -3062,7 +3062,7 @@ endif
 ! the user may need one outside this set. This section describes the construction of
 ! custom stagger locations. 
 !
-! To completely specify stagger for an arbitrary number of dimensions, we define the 
+! To completely specify a stagger for an arbitrary number of dimensions, we define the
 ! stagger location in terms of a set of cartesian coordinates. The cell is represented
 ! by a n-dimensional cube with sides of length 2, and the coordinate origin located at
 ! the center of the cell. The geometry of the cell is for reference purposes only, 
@@ -3076,7 +3076,7 @@ endif
 ! The resulting coordinate for the lower left corner is at $(-1,-1)$, and upper right
 ! corner at $(1,1)$.
 ! However, because our staggers are symmetric they don't need to distinguish between
-! the $-1$, and the $1$, so we only need concern ourselves with the first quadrant of
+! the $-1$, and the $1$, so we only need to concern ourselves with the first quadrant of
 ! this cell. We only need to use the $1$, and the $0$, and many of the cell locations
 ! collapse together (e.g. we only need to represent one corner). See figure~\ref{fig:gridcuststaggerloc}
 ! for an illustration of these concepts.

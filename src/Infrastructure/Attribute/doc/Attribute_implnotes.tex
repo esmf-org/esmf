@@ -66,7 +66,7 @@ The second available copy can be applied by setting the {\tt ESMF\_Copy\_Flag} t
 \label{Att:Xerces}
 
 \begin{sloppypar}
-The Xerces C++ library, v3.1.0 or better, is used to read XML files.  
+The Xerces C++ library, v3.1.0 or newer, is used to read XML files.
 More specifically, the SAX2 API is currently used, although future releases may 
 also use the DOM API.  The Xerces C++ website is 
 http://xerces.apache.org/xerces-c/.  For more details, see the 
@@ -82,6 +82,6 @@ The Attribute class has three different types of Attributes, they are: 1. regula
 
 With regular Attributes a duplicate Attribute is replaced by the new value, sometimes resulting in a change in the type of the Attribute.  This behavior also applies to the individual Attributes inside an Attribute package.
 
-The second type, Attribute packages (Attpacks), are groups of Attributes identified and organized by a “convention” and “purpose”.  i.e. the name of an Attpack is just one of the three pieces of identifying information: 1. name, 2. convention, and 3. purpose.  If a duplicate Attpack is created (this is a common use case for some users) a fourth piece of identifying information is created by ESMF to separate the two Attpacks. The user can query for this fourth piece of identifying information, called an attPackInstanceName, either at the time of creation or later in the runtime.
+The second type, Attribute packages (Attpacks), are groups of Attributes identified and organized by a "convention" and "purpose";  i.e. the name of an Attpack is just one of the three pieces of identifying information: 1. name, 2. convention, and 3. purpose.  If a duplicate Attpack is created (this is a common use case for some users) a fourth piece of identifying information is created by ESMF to separate the two Attpacks. The user can query for this fourth piece of identifying information, called an attPackInstanceName, either at the time of creation or later in the runtime.
 
 The third type, Attribute links, are used to link the Attribute trees of two objects.  Duplicates of Attribute links are required for some of the operations within the ESMF containers, and therefore they are enabled.  However, because there is little demand for duplicate links on the user level, they cannot be deleted in any order other than the order in which they were added.

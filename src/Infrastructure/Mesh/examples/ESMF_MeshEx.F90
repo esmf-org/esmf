@@ -92,7 +92,7 @@ program ESMF_MeshEx
 !
 ! This section describes the use of the ESMF Mesh class. It starts with an explanation and examples of 
 ! creating a Mesh and then goes through other Mesh methods. This set of sections covers the use of the 
-! Mesh class interfaces, for further detail which applies to creating a Field on a Mesh, please see 
+! Mesh class interfaces. For further detail which applies to creating a Field on a Mesh, please see
 ! Section~\ref{sec:field:usage:create_mesh_arrayspec}.
 !
 !\subsubsection{Mesh creation}
@@ -103,13 +103,13 @@ program ESMF_MeshEx
 ! Section~\ref{sec:meshrep}).
 !
 ! For the Mesh as a whole we set its parametric dimension ({\tt parametricDim}) and spatial dimension ({\tt spatialDim}). 
-! A Meshes' parametric dimension can  be thought of as the dimension of the elements which make up the Mesh. 
+! A Mesh's parametric dimension can be thought of as the dimension of the elements which make up the Mesh.
 ! A Mesh's spatial dimension, on the other hand, is the is the number of coordinate dimensions needed to describe the location of 
 ! the nodes making up the Mesh. (For a fuller definition of these terms please see Section~\ref{sec:meshrep}.)
 !
 ! The structure of the per node and element information used to create a Mesh is influenced by the Mesh distribution strategy. 
 ! The Mesh class is distributed by elements. This means that a node must be present on any PET that contains an element 
-! associated with that node, but not on any other PET (a node can't be on a PET without an element ""home"). Since a node may be used
+! associated with that node, but not on any other PET (a node can't be on a PET without an element "home"). Since a node may be used
 ! by two or more elements located on different PETs, a node may be duplicated on multiple PETs. When a node is duplicated in this manner, 
 ! one and only one of the PETs that contain the node must "own" the node. The user sets this ownership when they define the nodes during Mesh creation.
 ! When a Field is created on a Mesh (i.e. on  the Mesh nodes), on each PET the Field is only created on the nodes which are owned by that PET.
@@ -141,7 +141,7 @@ program ESMF_MeshEx
 ! node info used in the Mesh Create. In other words, the element connectivity isn't specified in terms of the global list of nodes, but instead
 ! is specified in terms of the locally described node info. One other important point about connectivities is that the order of the nodes in the 
 ! connectivity list of an element is important. Please see Section~\ref{const:meshelemtype} for diagrams illustrating the correct order of
-! nodes in an element. In general, when specifying an element with parametric dimension 2, the nodes should be given in counter-clockwise order 
+! nodes in an element. In general, when specifying an element with parametric dimension 2, the nodes should be given in counterclockwise order
 ! around the element. 
 !
 ! \begin{sloppypar}

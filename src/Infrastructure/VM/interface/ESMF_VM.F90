@@ -838,7 +838,7 @@ contains
 !   \item[vm] 
 !        {\tt ESMF\_VM} object.
 !   \item[sendData]
-!        Contiguous data array holding data to be send. All PETs must specify a
+!        Contiguous data array holding data to be sent. All PETs must specify a
 !        valid source array.
 !   \item[recvData] 
 !        Single data variable to be received. All PETs must specify a
@@ -1089,7 +1089,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   \item[vm] 
 !        {\tt ESMF\_VM} object.
 !   \item[sendData]
-!        Contiguous data array holding data to be send. All PETs must specify a
+!        Contiguous data array holding data to be sent. All PETs must specify a
 !        valid source array.
 !   \item[recvData] 
 !        Contiguous data array for data to be received. All PETs must specify a
@@ -1440,7 +1440,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   \item[vm] 
 !        {\tt ESMF\_VM} object.
 !   \item[sendData]
-!        Contiguous data array holding data to be send. All PETs must specify a
+!        Contiguous data array holding data to be sent. All PETs must specify a
 !        valid source array.
 !   \item[sendCount] 
 !        Number of {\tt sendData} elements to send from local PET to all other
@@ -1822,7 +1822,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   \item[vm] 
 !        {\tt ESMF\_VM} object.
 !   \item[sendData]
-!        Contiguous data array holding data to be send. All PETs must specify a
+!        Contiguous data array holding data to be sent. All PETs must specify a
 !        valid source array.
 !   \item[recvData] 
 !        Contiguous data array for data to be received. All PETs must specify a
@@ -2138,7 +2138,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   \item[vm] 
 !        {\tt ESMF\_VM} object.
 !   \item[sendData]
-!        Contiguous data array holding data to be send. All PETs must specify a
+!        Contiguous data array holding data to be sent. All PETs must specify a
 !        valid source array.
 !   \item[sendCount] 
 !        Number of {\tt sendData} elements to send from local PET to
@@ -2394,14 +2394,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   \item[vm] 
 !        {\tt ESMF\_VM} object.
 !   \item[sendData]
-!        Contiguous data array holding data to be send. All PETs must specify a
+!        Contiguous data array holding data to be sent. All PETs must specify a
 !        valid source array.
 !   \item[sendCounts] 
 !        Number of {\tt sendData} elements to send from local PET to
 !        destination PET.
 !   \item[sendOffsets] 
 !        Offsets in units of elements in {\tt sendData} marking to start of
-!        element sequence to be send from local PET to destination PET.
+!        element sequence to be sent from local PET to destination PET.
 !   \item[recvData] 
 !        Contiguous data array for data to be received. All PETs must specify a
 !        valid {\tt recvData} argument.
@@ -3521,13 +3521,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   \item[vm] 
 !        {\tt ESMF\_VM} object.
 !   \item[sendData]
-!        Contiguous data array holding data to be send. All PETs must specify a
+!        Contiguous data array holding data to be sent. All PETs must specify a
 !        valid source array.
 !   \item[recvData] 
 !        Contiguous data array for data to be received. Only the {\tt recvData}
 !        array specified by the {\tt rootPet} will be used by this method.
 !   \item[count] 
-!        Number of elements to be send from each PET to {\tt rootPet}. Must be
+!        Number of elements to be sent from each PET to {\tt rootPet}. Must be
 !        the same on all PETs.
 !   \item[rootPet] 
 !        PET on which data is gathereds.
@@ -3948,7 +3948,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   \item[vm] 
 !        {\tt ESMF\_VM} object.
 !   \item[sendData]
-!        Contiguous data array holding data to be send. All PETs must specify a
+!        Contiguous data array holding data to be sent. All PETs must specify a
 !        valid source array.
 !   \item[sendCount] 
 !        Number of {\tt sendData} elements to send from local PET to all other
@@ -5334,7 +5334,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   \item[vm] 
 !        {\tt ESMF\_VM} object.
 !   \item[sendData]
-!        Contiguous data array holding data to be send. All PETs must specify a
+!        Contiguous data array holding data to be sent. All PETs must specify a
 !        valid source array.
 !   \item[recvData] 
 !        Contiguous data array for data to be received. Only the {\tt recvData}
@@ -5592,13 +5592,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   \item[vm] 
 !        {\tt ESMF\_VM} object.
 !   \item[sendData]
-!        Contiguous data array holding data to be send. Only the {\tt sendData}
+!        Contiguous data array holding data to be sent. Only the {\tt sendData}
 !        array specified by the {\tt rootPet} will be used by this method.
 !   \item[recvData] 
 !        Contiguous data array for data to be received. All PETs must specify a
 !        valid destination array.
 !   \item[count] 
-!        Number of elements to be send from {\tt rootPet} to each of the PETs.
+!        Number of elements to be sent from {\tt rootPet} to each of the PETs.
 !        Must be the same on all PETs.
 !   \item[rootPet] 
 !        PET that holds data that is being scattered.
@@ -5943,14 +5943,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   \item[vm] 
 !        {\tt ESMF\_VM} object.
 !   \item[sendData]
-!        Contiguous data array holding data to be send. Only the {\tt sendData}
+!        Contiguous data array holding data to be sent. Only the {\tt sendData}
 !        array specified by the {\tt rootPet} will be used by this method.
 !   \item[sendCounts] 
-!        Number of {\tt sendData} elements to be send to corresponding
+!        Number of {\tt sendData} elements to be sent to corresponding
 !        receive PET.
 !   \item[sendOffsets] 
 !        Offsets in units of elements in {\tt sendData} marking the start of
-!        element sequence to be send to receive PET.
+!        element sequence to be sent to receive PET.
 !   \item[recvData] 
 !        Contiguous data array for data to be received. All PETs must specify a
 !        valid {\tt recvData} argument.
@@ -6136,9 +6136,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   \item[vm] 
 !        {\tt ESMF\_VM} object.
 !   \item[sendData] 
-!        Contiguous data array holding data to be send.
+!        Contiguous data array holding data to be sent.
 !   \item[count] 
-!        Number of elements to be send.
+!        Number of elements to be sent.
 !   \item[dstPet] 
 !        Receiving PET.
 !   \item[{[syncflag]}]
@@ -6635,9 +6635,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   \item[vm] 
 !        {\tt ESMF\_VM} object.
 !   \item[sendData] 
-!        Contiguous data array holding data to be send.
+!        Contiguous data array holding data to be sent.
 !   \item[sendCount] 
-!        Number of elements to be send.
+!        Number of elements to be sent.
 !   \item[dstPet] 
 !        PET that holds {\tt recvData}.
 !   \item[recvData] 
@@ -8735,7 +8735,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   \item[vm] 
 !        {\tt ESMF\_VM} object.
 !   \item[vmId] 
-!        {\tt ESMF\_VMId} to be send.
+!        {\tt ESMF\_VMId} to be sent.
 !   \item[dstPet] 
 !        Receiving PET.
 !   \item[{[rc]}] 

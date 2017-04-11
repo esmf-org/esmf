@@ -88,7 +88,7 @@ program ESMF_LocStreamEx
 
    !-------------------------------------------------------------------
    ! Get parallel information. Here petCount is the total number of 
-   ! running PETS, and localPet is the number of this particular PET.
+   ! running PETs, and localPet is the number of this particular PET.
    !-------------------------------------------------------------------
    call ESMF_VMGet(vm, localPet=localPet, petCount=petCount, rc=rc)
 
@@ -201,7 +201,7 @@ program ESMF_LocStreamEx
 
    !-------------------------------------------------------------------
    ! Get parallel information. Here petCount is the total number of 
-   ! running PETS, and localPet is the number of this particular PET.
+   ! running PETs, and localPet is the number of this particular PET.
    !-------------------------------------------------------------------
    call ESMF_VMGet(vm, localPet=localPet, petCount=petCount, rc=rc)
 
@@ -328,7 +328,7 @@ program ESMF_LocStreamEx
 
    !-------------------------------------------------------------------
    ! Get parallel information. Here petCount is the total number of 
-   ! running PETS, and localPet is the number of this particular PET.
+   ! running PETs, and localPet is the number of this particular PET.
    !-------------------------------------------------------------------
    call ESMF_VMGet(vm, localPet=localPet, petCount=petCount, rc=rc)
 

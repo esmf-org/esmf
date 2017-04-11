@@ -78,7 +78,7 @@
 ! \subsubsection{Redistribute data from a source FieldBundle to a destination FieldBundle}
 ! \label{sec:fieldbundle:usage:redist_1dptr}
 !
-! A user can use {\tt ESMF\_FieldBundleRedist} interface to redistribute data from 
+! The {\tt ESMF\_FieldBundleRedist} interface can be used to redistribute data from
 ! source FieldBundle to destination FieldBundle. This interface is overloaded by type and kind;
 ! In the version of {\tt ESMF\_FieldBundleRedist} without factor argument, a default value
 ! of factor 1 is used.

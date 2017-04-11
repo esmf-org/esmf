@@ -405,7 +405,7 @@ contains
 !     The arguments are:
 !     \begin{description}
 !     \item [s]
-!           {\tt ESMF\_Log} from which to retreive status.
+!           {\tt ESMF\_Log} from which to retrieve status.
 !     \end{description}
 !
 !EOPI
@@ -506,7 +506,7 @@ contains
 !     The arguments are:
 !     \begin{description}
 !     \item [s]
-!           {\tt ESMF\_LogPrivate} from which to retreive status.
+!           {\tt ESMF\_LogPrivate} from which to retrieve status.
 !     \end{description}
 !
 !EOPI
@@ -614,7 +614,7 @@ contains
 !     The arguments are:
 !     \begin{description}
 !     \item [s]
-!           {\tt ESMF\_LogEntry} from which to retreive status.
+!           {\tt ESMF\_LogEntry} from which to retrieve status.
 !     \end{description}
 !
 !EOPI

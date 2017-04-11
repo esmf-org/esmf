@@ -1271,7 +1271,7 @@ contains
 !EOP
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_AttributeAdd  - Add a custom Attribute package with a single nested Atrribute package
+! !IROUTINE: ESMF_AttributeAdd  - Add a custom Attribute package with a single nested Attribute package
 !
 ! !INTERFACE:
 !     ! Private name; call using ESMF_AttributeAdd()
@@ -2969,8 +2969,8 @@ contains
 !     validate the contents of fileName.  schemaFileName must be specified for
 !     a fileName containing custom, user-defined Attributes.
 !
-!     Requires the third party Xerces C++ XML Parser library to be installed,
-!     v3.1.0 or better.  For more details, see the "ESMF Users Guide",
+!     Requires the third-party Xerces C++ XML Parser library to be installed,
+!     v3.1.0 or newer.  For more details, see the "ESMF Users Guide",
 !     "Building and Installing the ESMF, Third Party Libraries, Xerces" and
 !     the website
 !     \newline
@@ -3302,7 +3302,8 @@ contains
 !     \end{description}
 !
 !
-!EOP!------------------------------------------------------------------------------
+!EOP
+!------------------------------------------------------------------------------
 !BOP
 ! !IROUTINE: ESMF_AttributeSet - Set an Attribute
 !

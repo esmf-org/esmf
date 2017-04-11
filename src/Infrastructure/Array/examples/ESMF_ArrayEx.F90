@@ -947,7 +947,7 @@ program ESMF_ArrayEx
 !
 ! All previous examples were written for the 2D case. There is, however, no
 ! restriction within the Array or DistGrid class that limits the dimensionality
-! of Array objects beyond the language specific limitations (7D for Fortran). 
+! of Array objects beyond the language-specific limitations (7D for Fortran).
 !
 ! In order to create an {\tt n}-dimensional Array the rank indicated by both
 ! the {\tt arrayspec} and the {\tt distgrid} arguments specified during Array
@@ -1100,7 +1100,7 @@ program ESMF_ArrayEx
 ! call.
 !
 ! The rank specification contained in the {\tt distgrid} argument, which is of 
-! type {\tt ESMF\_DistGrid}, on the other hand has no affect on the 
+! type {\tt ESMF\_DistGrid}, on the other hand has no effect on the
 ! rank of the Array. The {\tt dimCount} specified by the DistGrid object,
 ! which may be equal, greater or less than the Array rank, determines the 
 ! dimensionality of the {\em decomposition}.

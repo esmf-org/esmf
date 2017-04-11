@@ -610,7 +610,7 @@ program ESMF_DistGridEx
 !BOE
 ! \subsubsection{2D multi-tile DistGrid with regular decomposition}
 ! 
-! Creating a DistGrid from a list of LR tiles is a straight forward
+! Creating a DistGrid from a list of LR tiles is a straightforward
 ! extension of the single tile case. The first four 
 ! arguments of {\tt ESMF\_DistGridCreate()} are promoted to rank 2 where the 
 ! second dimension is the tile index.
@@ -1693,7 +1693,7 @@ program ESMF_DistGridEx
 ! Following the above outlined procedure for connection tile 1 $\rightarrow$
 ! tile 3, we find first that tile 1 needs to be rotated clockwise by $90^\circ$.
 ! This rotation lines up the top edge of tile 1 with the left edge of
-! tile 3. A clockwise rotation of $90^\circ$ corresponds to a counter clockwise
+! tile 3. A clockwise rotation of $90^\circ$ corresponds to a counterclockwise
 ! rotation by $270^\circ$ given in table \ref{tab:dg_ops}. We therefore know
 ! that {\tt orientationVector}=(2,-1) for this connection, and the associated
 ! operation is $\hat R=\left(\begin{array}{rr}
@@ -1729,7 +1729,7 @@ program ESMF_DistGridEx
 ! and 3, the other connection shown is between tile 4 and 6. Defining the
 ! connection as forward going from tile 4 to tile 6 means that tile 4 needs
 ! to be rotated in such a way that its right edge meets up with the bottom
-! edge of tile 6. This requires a counter clockwise rotation of tile 4 by
+! edge of tile 6. This requires a counterclockwise rotation of tile 4 by
 ! $90^\circ$. From table \ref{tab:dg_ops} we then get 
 ! {\tt orientationVector}=(-2,1), and $\hat R=\left(\begin{array}{rr}
 !    0 & -1 \\

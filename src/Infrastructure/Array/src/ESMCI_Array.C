@@ -2881,7 +2881,7 @@ int Array::read(
   const std::string &file,        // in    - name of file being read
   const std::string &variableName,// in    - optional variable name
   int   *timeslice,               // in    - timeslice option
-  ESMC_IOFmt_Flag *iofmt          // in    - IO format flag
+  ESMC_IOFmt_Flag *iofmt          // in    - I/O format flag
   ){
 //
 // !DESCRIPTION:
@@ -2962,7 +2962,7 @@ int Array::write(
   bool  *overwrite,               // in    - OK to overwrite file data
   ESMC_FileStatus_Flag *status,   // in    - file status flag
   int   *timeslice,               // in    - timeslice option
-  ESMC_IOFmt_Flag *iofmt          // in    - IO format flag
+  ESMC_IOFmt_Flag *iofmt          // in    - I/O format flag
   ){
 //
 // !DESCRIPTION:

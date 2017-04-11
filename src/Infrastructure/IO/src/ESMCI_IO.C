@@ -242,7 +242,7 @@ int IO::read(
 // !ARGUMENTS:
 
   const std::string &file,        // (in)    - name of file being read
-  ESMC_IOFmt_Flag iofmt,          // (in)    - IO format flag
+  ESMC_IOFmt_Flag iofmt,          // (in)    - I/O format flag
   int   *timeslice                // (in)    - timeslice option
   ) {
 // !DESCRIPTION:
@@ -435,7 +435,7 @@ int IO::write(
 //
 // !ARGUMENTS:
   const std::string &file,        // (in)    - name of file being written
-  ESMC_IOFmt_Flag iofmt,          // (in)    - IO format flag
+  ESMC_IOFmt_Flag iofmt,          // (in)    - I/O format flag
   bool overwrite,                 // (in)    - overwrite fields if true
   ESMC_FileStatus_Flag status,    // (in)    - file status flag
   int   *timeslice                // (in)    - timeslice option
@@ -647,7 +647,7 @@ int IO::open(
 
   const std::string &file,             // (in)  - name of file being read
   ESMC_FileStatus_Flag filestatusflag, // (in)  - file status flag
-  ESMC_IOFmt_Flag iofmt,               // (in)  - IO format flag
+  ESMC_IOFmt_Flag iofmt,               // (in)  - I/O format flag
   bool overwrite,                      // (in)  - overwrite fields?
   bool readonly                        // (in)  - If false then read/write
   ) {

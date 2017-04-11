@@ -80,16 +80,16 @@
 ! \label{sec:fieldbundle:usage:halo}
 !
 !\begin{sloppypar}
-! {\tt ESMF\_FieldBundleHalo} interface can be used to perform halo update
-! of all the Fields contained in the {\tt ESMF\_FieldBundle}.
+! {\tt ESMF\_FieldBundleHalo} interface can be used to perform halo updates
+! for all the Fields contained in the {\tt ESMF\_FieldBundle}.
 !\end{sloppypar}
 ! 
 !
 ! In this example, we will set up a FieldBundle for a 2D inviscid and compressible
 ! flow problem. We will illustrate the FieldBundle halo update operation but we will
-! not solve the non-linear PDEs here. The emphasis here is to demonstrate
+! not solve the non-linear PDEs. The emphasis here is to demonstrate
 ! how to set up halo regions, how a numerical scheme updates
-! the exclusive regions, and how halo update communicates data in the halo regions. Here
+! the exclusive regions, and how a halo update communicates data in the halo regions. Here
 ! are the governing equations:
 !
 !

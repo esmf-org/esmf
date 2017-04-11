@@ -267,7 +267,7 @@ function ESMF_XGridCreate(keywordEnforcer, &
 !  of Grids and Meshes can also be interleaved by rearranging the optional 
 !  GridPriority and MeshPriority arguments accordingly.
 !  
-!  Sparse matrix multiply coefficients are internally computed and
+!  Sparse matrix multiplication coefficients are internally computed and
 !  uniquely determined by the Grids or Meshes provided in {\tt sideA} and {\tt sideB}. User can supply
 !  a single {\tt ESMF\_Grid} or an array of {\tt ESMF\_Grid} on either side of the 
 !  {\tt ESMF\_XGrid}. For an array of {\tt ESMF\_Grid} or {\tt ESMF\_Mesh} in {\tt sideA} or {\tt sideB},
@@ -284,7 +284,7 @@ function ESMF_XGridCreate(keywordEnforcer, &
 !  If {\tt sideA} and {\tt sideB} have a single 
 !  Grid or Mesh object, it's erroneous
 !  if the two Grids or Meshes are spatially disjoint. 
-!  It is also erroneous to specify Grid or Mesh object in {\tt sideA} or {\tt sideB} 
+!  It is also erroneous to specify a Grid or Mesh object in {\tt sideA} or {\tt sideB}
 !  that is spatially disjoint from the {\tt ESMF\_XGrid}. 
 !
 !  This call is {\em collective} across the current VM. For more details please refer to the description 

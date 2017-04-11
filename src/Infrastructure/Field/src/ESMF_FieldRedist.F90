@@ -128,7 +128,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !   This call is {\em collective} across the current VM.
 !
-!   For examples and associated documentations using this method see Section  
+!   For examples and associated documentation regarding this method see Section
 !   \ref{sec:field:usage:redist_1dptr}. 
 !
 !   \begin{description}
@@ -346,7 +346,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !  
 ! This call is {\em collective} across the current VM.  
 ! 
-! For examples and associated documentations using this method see Section  
+! For examples and associated documentation regarding this method see Section
 ! \ref{sec:field:usage:redist_1dptr}. 
 ! 
 ! The arguments are: 
@@ -711,7 +711,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !  
 ! This call is {\em collective} across the current VM.  
 ! 
-! For examples and associated documentations using this method see Section  
+! For examples and associated documentation regarding this method see Section
 ! \ref{sec:field:usage:redist_1dptr}. 
 ! 
 ! The arguments are: 

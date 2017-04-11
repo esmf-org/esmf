@@ -4739,7 +4739,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        integer,                  intent(out),  optional  :: rc
 !
 ! !DESCRIPTION:
-! This is the lower level function to create an arbitrailiy distributed {\tt ESMF\_Grid}
+! This is the lower level function to create an arbitrarily distributed {\tt ESMF\_Grid}
 ! object. It allows the user to fully specify the topology and index space
 ! (of the distributed dimensions) using the DistGrid methods and then build a grid out
 ! of the resulting {\tt distgrid}.  The {\tt indexArray(2,dimCount)}, 

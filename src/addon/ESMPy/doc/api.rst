@@ -236,7 +236,7 @@ In 3D, ESMPy supports nearest destination to source regridding between any combi
 following:
 
 - Structured Grids composed of a single logically rectangular patch
-- Unstructured Meshes composed of hexahedrons (e.g. cubes) and tetrahedrals
+- Unstructured Meshes composed of hexahedrons (e.g. cubes) and tetrahedrons
 - A set of disconnected points (LocStream)
 
 Restrictions:
@@ -270,7 +270,7 @@ In 3D, ESMPy supports nearest source to destination regridding between any combi
 following:
 
 - Structured Grids composed of a single logically rectangular patch
-- Unstructured Meshes composed of hexahedrons (e.g. cubes) and tetrahedrals
+- Unstructured Meshes composed of hexahedrons (e.g. cubes) and tetrahedrons
 - A set of disconnected points (LocStream)
 
 Restrictions:
@@ -336,7 +336,7 @@ In 3D, ESMPy supports first-order conservative regridding between any
 combination of the following:
 
 - Structured Grids composed of a single logically rectangular patch
-- Unstructured Meshes composed of hexahedrons (e.g. cubes) and tetrahedrals.
+- Unstructured Meshes composed of hexahedrons (e.g. cubes) and tetrahedrons.
 
 Restrictions:
 

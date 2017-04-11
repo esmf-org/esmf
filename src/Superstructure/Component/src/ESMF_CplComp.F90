@@ -3183,7 +3183,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! The arguments are:
 ! \begin{description}
 ! \item[d]
-!   {\tt ESMF\_CplComp} from which to retreive status.
+!   {\tt ESMF\_CplComp} from which to retrieve status.
 ! \end{description}
 !
 !EOPI

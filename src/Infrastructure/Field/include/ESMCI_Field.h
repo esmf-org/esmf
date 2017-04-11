@@ -25,7 +25,7 @@
 // !DESCRIPTION:
 //
 // The code in this file defines the ESMC Field class prototypes for the
-// fortran interface routines. The companion file ESMC\_Field_C.F90  contains
+// Fortran interface routines. The companion file ESMC\_Field_C.F90  contains
 // the definitions (full code bodies) for the interface routines.
 //
 //EOP 

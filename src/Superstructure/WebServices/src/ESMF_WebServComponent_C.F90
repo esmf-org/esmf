@@ -22,7 +22,7 @@
 
 !EOP
 !
-! This file provides the fortran subroutine interfaces to be called by the
+! This file provides the Fortran subroutine interfaces to be called by the
 ! c++ software for the purpose of executing the component initialize, run and 
 ! finalize routines.
 !

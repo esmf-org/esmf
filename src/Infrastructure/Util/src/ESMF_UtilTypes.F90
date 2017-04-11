@@ -147,7 +147,7 @@
 !------------------------------------------------------------------------------
 !
 !    ! Generic pointer, large enough to hold a pointer on any architecture,
-!    ! but not useful directly in fortran.  Expected to be used where a
+!    ! but not useful directly in Fortran.  Expected to be used where a
 !    ! pointer generated in C++ needs to be stored on the Fortran side.
 
 !     ! WARNING: 
@@ -1243,7 +1243,7 @@ end interface
 !     The arguments are:
 !     \begin{description}
 !     \item [s]
-!           {\tt ESMF\_ObjectID} from which to retreive status.
+!           {\tt ESMF\_ObjectID} from which to retrieve status.
 !     \end{description}
 !
 !EOPI

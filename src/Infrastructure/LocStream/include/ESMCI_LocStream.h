@@ -25,7 +25,7 @@
 // !DESCRIPTION:
 //
 // The code in this file defines the ESMCI LocStream class prototypes for the
-// fortran interface routines. The companion file ESMCI\_LocStream_C.F90  contains
+// Fortran interface routines. The companion file ESMCI\_LocStream_C.F90  contains
 // the definitions (full code bodies) for the interface routines.
 //
 //EOP 

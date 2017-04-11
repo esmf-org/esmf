@@ -359,7 +359,7 @@
 !     The arguments are:
 !     \begin{description}
 !     \item [s]
-!           {\tt ESMF\_ConfigAttrUsed} from which to retreive status.
+!           {\tt ESMF\_ConfigAttrUsed} from which to retrieve status.
 !     \end{description}
 !
 !EOPI
@@ -457,7 +457,7 @@
 !     The arguments are:
 !     \begin{description}
 !     \item [s]
-!           {\tt ESMF\_ConfigClass} from which to retreive status.
+!           {\tt ESMF\_ConfigClass} from which to retrieve status.
 !     \end{description}
 !
 !EOPI
@@ -558,7 +558,7 @@
 !     The arguments are:
 !     \begin{description}
 !     \item [s]
-!           {\tt ESMF\_Config} from which to retreive status.
+!           {\tt ESMF\_Config} from which to retrieve status.
 !     \end{description}
 !
 !EOPI

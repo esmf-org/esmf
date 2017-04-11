@@ -139,7 +139,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !   This call is {\em collective} across the current VM.
 !
-!   For examples and associated documentations using this method see Section  
+!   For examples and associated documentation regarding this method see Section
 !   \ref{sec:field:usage:smm_1dptr}. 
 !
 !   \begin{description}
@@ -379,7 +379,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !  
 ! This call is collective across the current VM.  
 ! 
-! For examples and associated documentations using this method see Section  
+! For examples and associated documentation regarding this method see Section
 ! \ref{sec:field:usage:smm_1dptr}. 
 ! 
 ! The arguments are:
@@ -478,7 +478,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     on some systems too large a value may lead to performance degradation,
 !     or runtime errors.
 !
-!     Note that the pipeline depth has no affect on the bit-for-bit
+!     Note that the pipeline depth has no effect on the bit-for-bit
 !     reproducibility of the results. However, it may affect the performance
 !     reproducibility of the exchange.
 !
@@ -872,7 +872,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! This call is collective across the current VM.  
 ! 
-! For examples and associated documentations using this method see Section  
+! For examples and associated documentation regarding this method see Section
 ! \ref{sec:field:usage:smm_1dptr}. 
 ! 
 ! The arguments are:
@@ -936,7 +936,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     on some systems too large a value may lead to performance degradation,
 !     or runtime errors.
 !
-!     Note that the pipeline depth has no affect on the bit-for-bit
+!     Note that the pipeline depth has no effect on the bit-for-bit
 !     reproducibility of the results. However, it may affect the performance
 !     reproducibility of the exchange.
 !
@@ -1100,7 +1100,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     on some systems too large a value may lead to performance degradation,
 !     or runtime errors.
 !
-!     Note that the pipeline depth has no affect on the bit-for-bit
+!     Note that the pipeline depth has no effect on the bit-for-bit
 !     reproducibility of the results. However, it may affect the performance
 !     reproducibility of the exchange.
 !     The {\tt ESMF\_FieldSMMStore()} method implements an auto-tuning scheme

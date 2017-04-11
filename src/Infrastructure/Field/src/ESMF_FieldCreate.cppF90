@@ -1216,8 +1216,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   integer, intent(out), optional :: rc                @\
 ! @\
 ! !DESCRIPTION: @\
-! Create an {\tt ESMF\_Field} from a fortran data array and {\tt ESMF\_GeomBase}. @\
-! The fortran data pointer inside {\tt ESMF\_Field} can be queried but deallocating @\
+! Create an {\tt ESMF\_Field} from a Fortran data array and {\tt ESMF\_GeomBase}. @\
+! The Fortran data pointer inside {\tt ESMF\_Field} can be queried but deallocating @\
 ! the retrieved data pointer is not allowed. @\
 ! The arguments are: @\
 ! \begin{description} @\
@@ -1225,7 +1225,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !       {\tt ESMF\_GeomBase} object.  The dimCount of the @\
 !       GeomBase must be smaller than or equal to the rank of the {\tt farray}. @\
 ! \item [farray] @\
-!       Native fortran data array to be copied/referenced in the Field @\
+!       Native Fortran data array to be copied/referenced in the Field @\
 !       The Field dimension (dimCount) will be the same as the dimCount @\
 !       for the {\tt farray}. @\
 ! \item [indexflag] @\
@@ -1388,10 +1388,10 @@ TypeKindRankDeclarationMacro(FieldCreateGBData)
 !   integer, intent(out), optional :: rc                @\
 ! @\
 ! !DESCRIPTION: @\
-! Create an {\tt ESMF\_Field} from a fortran data pointer and {\tt ESMF\_GeomBase}. @\
-! The fortran data pointer inside {\tt ESMF\_Field} can be queried and deallocated when @\
+! Create an {\tt ESMF\_Field} from a Fortran data pointer and {\tt ESMF\_GeomBase}. @\
+! The Fortran data pointer inside {\tt ESMF\_Field} can be queried and deallocated when @\
 ! datacopyflag is {\tt ESMF\_DATACOPY\_REFERENCE}. Note that the {\tt ESMF\_FieldDestroy} call does not @\
-! deallocate the fortran data pointer in this case. This gives user more flexibility over memory management. @\
+! deallocate the Fortran data pointer in this case. This gives user more flexibility over memory management. @\
 ! @\
 ! @\
 ! The arguments are: @\
@@ -1400,7 +1400,7 @@ TypeKindRankDeclarationMacro(FieldCreateGBData)
 !       {\tt ESMF\_GeomBase} object.  The dimCount of the @\
 !       GeomBase must be smaller than or equal to the rank of the {\tt farrayPtr}. @\
 ! \item [farrayPtr] @\
-!       Native fortran data pointer to be copied/referenced in the Field @\
+!       Native Fortran data pointer to be copied/referenced in the Field @\
 !       The Field dimension (dimCount) will be the same as the dimCount @\
 !       for the {\tt farrayPtr}. @\
 ! \item [{[datacopyflag]}] @\
@@ -2133,11 +2133,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \end{itemize} @\
 ! @\
 ! !DESCRIPTION: @\
-! Create an {\tt ESMF\_Field} from a fortran data array and {\tt ESMF\_Grid}. @\
-! The fortran data pointer inside {\tt ESMF\_Field} can be queried but deallocating @\
+! Create an {\tt ESMF\_Field} from a Fortran data array and {\tt ESMF\_Grid}. @\
+! The Fortran data pointer inside {\tt ESMF\_Field} can be queried but deallocating @\
 ! the retrieved data pointer is not allowed. @\
 ! For examples and @\
-! associated documentations using this method see section  @\
+! associated documentation regarding this method see section  @\
 ! \ref{sec:field:usage:create_2darray}, @\
 ! \ref{sec:field:usage:create_2dgrid_3dptr}, @\
 ! \ref{sec:field:usage:create_2dgrid_3dptr_map}, @\
@@ -2149,7 +2149,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item [grid]  @\
 !       {\tt ESMF\_Grid} object. @\
 ! \item [farray] @\
-!       Native fortran data array to be copied/referenced in the Field @\
+!       Native Fortran data array to be copied/referenced in the Field @\
 !       The Field dimension (dimCount) will be the same as the dimCount @\
 !       for the {\tt farray}. @\
 ! \item[indexflag] @\
@@ -2374,13 +2374,13 @@ TypeKindRankDeclarationMacro(FieldCreateGridData)
 ! \end{itemize} @\
 ! @\
 ! !DESCRIPTION: @\
-! Create an {\tt ESMF\_Field} from a fortran data pointer and {\tt ESMF\_Grid}. @\
-! The fortran data pointer inside {\tt ESMF\_Field} can be queried and deallocated when @\
+! Create an {\tt ESMF\_Field} from a Fortran data pointer and {\tt ESMF\_Grid}. @\
+! The Fortran data pointer inside {\tt ESMF\_Field} can be queried and deallocated when @\
 ! datacopyflag is {\tt ESMF\_DATACOPY\_REFERENCE}. Note that the {\tt ESMF\_FieldDestroy} call does not @\
-! deallocate the fortran data pointer in this case. This gives user more flexibility over memory management. @\
+! deallocate the Fortran data pointer in this case. This gives user more flexibility over memory management. @\
 ! @\
 ! For examples and @\
-! associated documentations using this method see section  @\
+! associated documentation regarding this method see section  @\
 ! \ref{sec:field:usage:create_2dptr}, @\
 ! \ref{sec:field:usage:create_2dgrid_3dptr}, @\
 ! \ref{sec:field:usage:create_2dgrid_3dptr_map}, @\
@@ -2392,7 +2392,7 @@ TypeKindRankDeclarationMacro(FieldCreateGridData)
 ! \item [grid]  @\
 !       {\tt ESMF\_Grid} object. @\
 ! \item [farrayPtr] @\
-!       Native fortran data pointer to be copied/referenced in the Field @\
+!       Native Fortran data pointer to be copied/referenced in the Field @\
 !       The Field dimension (dimCount) will be the same as the dimCount @\
 !       for the {\tt farrayPtr}. @\
 ! \item [{[datacopyflag]}] @\
@@ -2960,8 +2960,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! @\
 ! !DESCRIPTION: @\
 ! \begin{sloppypar} @\
-! Create an {\tt ESMF\_Field} from a fortran data array and {\tt ESMF\_LocStream}. @\
-! The fortran data pointer inside {\tt ESMF\_Field} can be queried but deallocating @\
+! Create an {\tt ESMF\_Field} from a Fortran data array and {\tt ESMF\_LocStream}. @\
+! The Fortran data pointer inside {\tt ESMF\_Field} can be queried but deallocating @\
 ! the retrieved data pointer is not allowed. @\
 ! \end{sloppypar} @\
 ! @\
@@ -2970,7 +2970,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item [locstream]  @\
 !       {\tt ESMF\_LocStream} object. @\
 ! \item [farray] @\
-!       Native fortran data array to be copied/referenced in the Field @\
+!       Native Fortran data array to be copied/referenced in the Field @\
 !       The Field dimension (dimCount) will be the same as the dimCount @\
 !       for the {\tt farray}. @\
 ! \item[indexflag] @\
@@ -3120,10 +3120,10 @@ TypeKindRankDeclarationMacro(FieldCreateLSData)
 ! @\
 ! !DESCRIPTION: @\
 ! \begin{sloppypar} @\
-! Create an {\tt ESMF\_Field} from a fortran data pointer and {\tt ESMF\_LocStream}. @\
-! The fortran data pointer inside {\tt ESMF\_Field} can be queried and deallocated when @\
+! Create an {\tt ESMF\_Field} from a Fortran data pointer and {\tt ESMF\_LocStream}. @\
+! The Fortran data pointer inside {\tt ESMF\_Field} can be queried and deallocated when @\
 ! datacopyflag is {\tt ESMF\_DATACOPY\_REFERENCE}. Note that the {\tt ESMF\_FieldDestroy} call does not @\
-! deallocate the fortran data pointer in this case. This gives user more flexibility over memory management. @\
+! deallocate the Fortran data pointer in this case. This gives user more flexibility over memory management. @\
 ! \end{sloppypar} @\
 ! @\
 ! The arguments are: @\
@@ -3131,7 +3131,7 @@ TypeKindRankDeclarationMacro(FieldCreateLSData)
 ! \item [locstream]  @\
 !       {\tt ESMF\_LocStream} object. @\
 ! \item [farrayPtr] @\
-!       Native fortran data pointer to be copied/referenced in the Field @\
+!       Native Fortran data pointer to be copied/referenced in the Field @\
 !       The Field dimension (dimCount) will be the same as the dimCount @\
 !       for the {\tt farrayPtr}. @\
 ! \item [{[datacopyflag]}] @\
@@ -3694,8 +3694,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   integer,                  intent(out), optional    :: rc    @\
 ! @\
 ! !DESCRIPTION: @\
-! Create an {\tt ESMF\_Field} from a fortran data array and {\tt ESMF\_Mesh}. @\
-! The fortran data pointer inside {\tt ESMF\_Field} can be queried but deallocating @\
+! Create an {\tt ESMF\_Field} from a Fortran data array and {\tt ESMF\_Mesh}. @\
+! The Fortran data pointer inside {\tt ESMF\_Field} can be queried but deallocating @\
 ! the retrieved data pointer is not allowed. @\
 ! @\
 ! The arguments are: @\
@@ -3703,7 +3703,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item [mesh]  @\
 !       {\tt ESMF\_Mesh} object. @\
 ! \item [farray] @\
-!       Native fortran data array to be copied/referenced in the Field @\
+!       Native Fortran data array to be copied/referenced in the Field @\
 !       The Field dimension (dimCount) will be the same as the dimCount @\
 !       for the {\tt farray}. @\
 ! \item[indexflag] @\
@@ -3860,17 +3860,17 @@ TypeKindRankDeclarationMacro(FieldCreateMeshData)
 !   integer,                  intent(out), optional :: rc                @\
 ! @\
 ! !DESCRIPTION: @\
-! Create an {\tt ESMF\_Field} from a fortran data pointer and {\tt ESMF\_Mesh}. @\
-! The fortran data pointer inside {\tt ESMF\_Field} can be queried and deallocated when @\
+! Create an {\tt ESMF\_Field} from a Fortran data pointer and {\tt ESMF\_Mesh}. @\
+! The Fortran data pointer inside {\tt ESMF\_Field} can be queried and deallocated when @\
 ! datacopyflag is {\tt ESMF\_DATACOPY\_REFERENCE}. Note that the {\tt ESMF\_FieldDestroy} call does not @\
-! deallocate the fortran data pointer in this case. This gives user more flexibility over memory management. @\
+! deallocate the Fortran data pointer in this case. This gives user more flexibility over memory management. @\
 ! @\
 ! The arguments are: @\
 ! \begin{description} @\
 ! \item [mesh]  @\
 !       {\tt ESMF\_Mesh} object. @\
 ! \item [farrayPtr] @\
-!       Native fortran data pointer to be copied/referenced in the Field @\
+!       Native Fortran data pointer to be copied/referenced in the Field @\
 !       The Field dimension (dimCount) will be the same as the dimCount @\
 !       for the {\tt farrayPtr}. @\
 ! \item [{[datacopyflag]}] @\
@@ -4462,8 +4462,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   integer,                   intent(out), optional    :: rc                 @\
 ! @\
 ! !DESCRIPTION: @\
-! Create an {\tt ESMF\_Field} from a fortran data array and {\tt ESMF\_Xgrid}. @\
-! The fortran data pointer inside {\tt ESMF\_Field} can be queried but deallocating @\
+! Create an {\tt ESMF\_Field} from a Fortran data array and {\tt ESMF\_Xgrid}. @\
+! The Fortran data pointer inside {\tt ESMF\_Field} can be queried but deallocating @\
 ! the retrieved data pointer is not allowed. @\
 ! @\
 ! The arguments are: @\
@@ -4471,7 +4471,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item [xgrid] @\
 !       {\tt ESMF\_XGrid} object. @\
 ! \item [farray] @\
-!       Native fortran data array to be copied/referenced in the Field @\
+!       Native Fortran data array to be copied/referenced in the Field @\
 !       The Field dimension (dimCount) will be the same as the dimCount @\
 !       for the {\tt farray}. @\
 ! \item[indexflag] @\
@@ -4648,17 +4648,17 @@ TypeKindRankDeclarationMacro(FieldCreateXGData)
 !   integer,                   intent(out), optional :: rc                @\
 ! @\
 ! !DESCRIPTION: @\
-! Create an {\tt ESMF\_Field} from a fortran data pointer and {\tt ESMF\_Xgrid}. @\
-! The fortran data pointer inside {\tt ESMF\_Field} can be queried and deallocated when @\
+! Create an {\tt ESMF\_Field} from a Fortran data pointer and {\tt ESMF\_Xgrid}. @\
+! The Fortran data pointer inside {\tt ESMF\_Field} can be queried and deallocated when @\
 ! datacopyflag is {\tt ESMF\_DATACOPY\_REFERENCE}. Note that the {\tt ESMF\_FieldDestroy} call does not @\
-! deallocate the fortran data pointer in this case. This gives user more flexibility over memory management. @\
+! deallocate the Fortran data pointer in this case. This gives user more flexibility over memory management. @\
 ! @\
 ! The arguments are: @\
 ! \begin{description} @\
 ! \item [xgrid] @\
 !       {\tt ESMF\_XGrid} object. @\
 ! \item [farrayPtr] @\
-!       Native fortran data pointer to be copied/referenced in the Field @\
+!       Native Fortran data pointer to be copied/referenced in the Field @\
 !       The Field dimension (dimCount) will be the same as the dimCount @\
 !       for the {\tt farrayPtr}. @\
 ! \item [{[datacopyflag]}] @\

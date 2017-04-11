@@ -28,7 +28,7 @@ module ESMF_FieldBundleMod
 ! !MODULE: ESMF_FieldBundleMod
 !
 
-!   F90 implemenation of fieldbundle
+!   F90 implementation of fieldbundle
 !
 !------------------------------------------------------------------------------
 
@@ -1891,7 +1891,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   Store a FieldBundle halo operation over the data in {\tt fieldbundle}. 
 !   By definition, all elements in the total Field regions that lie
 !   outside the exclusive regions will be considered potential destination
-!   elements for halo. However, only those elements that have a corresponding
+!   elements for the halo operation. However, only those elements that have a corresponding
 !   halo source element, i.e. an exclusive element on one of the DEs, will be
 !   updated under the halo operation. Elements that have no associated source
 !   remain unchanged under halo.
@@ -2142,7 +2142,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords for t
 !    The time-slice number of the variable read from file.
 !   \item[{[iofmt]}]
 !     \begin{sloppypar}
-!    The IO format.  Please see Section~\ref{opt:iofmtflag} for the list
+!    The I/O format.  Please see Section~\ref{opt:iofmtflag} for the list
 !    of options. If not present, file names with a {\tt .bin} extension will
 !    use {\tt ESMF\_IOFMT\_BIN}, and file names with a {\tt .nc} extension
 !    will use {\tt ESMF\_IOFMT\_NETCDF}.  Other files default to
@@ -2334,7 +2334,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !   This call is {\em collective} across the current VM.
 !
-!   For examples and associated documentations using this method see Section  
+!   For examples and associated documentation regarding this method see Section
 !   \ref{sec:fieldbundle:usage:redist_1dptr}. 
 !
 !   \begin{description}
@@ -2550,7 +2550,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !  
 ! This call is collective across the current VM.  
 ! 
-! For examples and associated documentations using this method see Section  
+! For examples and associated documentation regarding this method see Section
 ! \ref{sec:fieldbundle:usage:redist_1dptr}. 
 ! 
 ! The arguments are: 
@@ -2966,7 +2966,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! This call is collective across the current VM.  
 ! 
-! For examples and associated documentations using this method see Section  
+! For examples and associated documentation regarding this method see Section
 ! \ref{sec:fieldbundle:usage:redist_1dptr}. 
 ! 
 ! The arguments are: 
@@ -4204,7 +4204,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !   This call is {\em collective} across the current VM.
 !
-!   For examples and associated documentations using this method see Section  
+!   For examples and associated documentation regarding this method see Section
 !   \ref{sec:fieldbundle:usage:smm_1dptr}. 
 !
 !   \begin{description}
@@ -4466,7 +4466,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !  
 ! This call is collective across the current VM.  
 ! 
-! For examples and associated documentations using this method see Section  
+! For examples and associated documentation regarding this method see Section
 ! \ref{sec:fieldbundle:usage:smm_1dptr}. 
 ! 
 ! The arguments are: 
@@ -4927,7 +4927,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! This call is collective across the current VM.  
 ! 
-! For examples and associated documentations using this method see Section  
+! For examples and associated documentation regarding this method see Section
 ! \ref{sec:fieldbundle:usage:smm_1dptr}. 
 ! 
 ! The arguments are: 
@@ -5236,7 +5236,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords for t
 !    \end{sloppypar}
 !   \item[{[timeslice]}]
 !    \begin{sloppypar}
-!    Some IO formats (e.g. NetCDF) support the output of data in form of
+!    Some I/O formats (e.g. NetCDF) support the output of data in form of
 !    time slices. The {\tt timeslice} argument provides access to this
 !    capability. {\tt timeslice} must be positive. The behavior of this
 !    option may depend on the setting of the {\tt overwrite} flag:
@@ -5252,7 +5252,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords for t
 !    \end{sloppypar}
 !   \item[{[iofmt]}]
 !     \begin{sloppypar}
-!    The IO format.  Please see Section~\ref{opt:iofmtflag} for the list
+!    The I/O format.  Please see Section~\ref{opt:iofmtflag} for the list
 !    of options. If not present, file names with a {\tt .bin} extension will
 !    use {\tt ESMF\_IOFMT\_BIN}, and file names with a {\tt .nc} extension
 !    will use {\tt ESMF\_IOFMT\_NETCDF}.  Other files default to

@@ -964,7 +964,7 @@ int VM::sendVMId(
 //
 // !ARGUMENTS:
 //
-  VMId *vmID,                   // in  - VMId to be send
+  VMId *vmID,                   // in  - VMId to be sent
   int dest                      // in  - destination PET
   ){
 //

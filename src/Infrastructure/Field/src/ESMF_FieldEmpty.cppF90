@@ -1448,7 +1448,7 @@ end subroutine ESMF_FieldEmptyCompTK
 ! has a status of {\tt ESMF\_FIELDSTATUS\_COMPLETE}.  @\
 ! \end{sloppypar} @\
 ! @\
-! The fortran data pointer inside {\tt ESMF\_Field} can be queried but deallocating @\
+! The Fortran data pointer inside {\tt ESMF\_Field} can be queried but deallocating @\
 ! the retrieved data pointer is not allowed. @\
 ! @\
 ! For an example and @\
@@ -1464,7 +1464,7 @@ end subroutine ESMF_FieldEmptyCompTK
 !       The {\tt ESMF\_Field} will have the same dimension @\
 !       (dimCount) as the rank of the {\tt farray}.  @\
 ! \item [farray] @\
-!       Native fortran data array to be copied/referenced in the {\tt field}. @\
+!       Native Fortran data array to be copied/referenced in the {\tt field}. @\
 !       The {\tt field} dimension (dimCount) will be the same as the dimCount @\
 !       for the {\tt farray}. @\
 ! \item [indexflag] @\
@@ -1666,9 +1666,9 @@ TypeKindRankDeclarationMacro(FieldEmptyComp)
 ! {\tt ESMF\_FIELDSTATUS\_GRIDSET}. After this call the completed {\tt ESMF\_Field} @\
 ! has a status of {\tt ESMF\_FIELDSTATUS\_COMPLETE}.  @\
 ! @\
-! The fortran data pointer inside {\tt ESMF\_Field} can be queried and deallocated when @\
+! The Fortran data pointer inside {\tt ESMF\_Field} can be queried and deallocated when @\
 ! datacopyflag is {\tt ESMF\_DATACOPY\_REFERENCE}. Note that the {\tt ESMF\_FieldDestroy} call does not deallocate @\
-! the fortran data pointer in this case. This gives user more flexibility over memory management. @\
+! the Fortran data pointer in this case. This gives user more flexibility over memory management. @\
 ! \end{sloppypar} @\
 ! @\
 ! The arguments are: @\
@@ -1679,7 +1679,7 @@ TypeKindRankDeclarationMacro(FieldEmptyComp)
 !       The {\tt ESMF\_Field} will have the same dimension @\
 !       (dimCount) as the rank of the {\tt farrayPtr}.  @\
 ! \item [farrayPtr] @\
-!       Native fortran data pointer to be copied/referenced in the {\tt field}. @\
+!       Native Fortran data pointer to be copied/referenced in the {\tt field}. @\
 !       The {\tt field} dimension (dimCount) will be the same as the dimCount @\
 !       for the {\tt farrayPtr}. @\
 ! \item [{[datacopyflag]}] @\
@@ -1858,7 +1858,7 @@ TypeKindRankDeclarationMacro(FieldEmptyCompPtr)
 ! This call completes an {\tt ESMF\_Field} allocated with the @\
 ! {\tt ESMF\_FieldEmptyCreate()} call. @\
 ! @\
-! The fortran data pointer inside {\tt ESMF\_Field} can be queried but deallocating @\
+! The Fortran data pointer inside {\tt ESMF\_Field} can be queried but deallocating @\
 ! the retrieved data pointer is not allowed. @\
 ! @\
 ! The arguments are: @\
@@ -1870,7 +1870,7 @@ TypeKindRankDeclarationMacro(FieldEmptyCompPtr)
 ! \item [grid]  @\
 !       The {\tt ESMF\_Grid} object to complete the Field. @\
 ! \item [farray] @\
-!       Native fortran data array to be copied/referenced in the {\tt field}. @\
+!       Native Fortran data array to be copied/referenced in the {\tt field}. @\
 !       The {\tt field} dimension (dimCount) will be the same as the dimCount @\
 !       for the {\tt farray}. @\
 ! \item [indexflag] @\
@@ -2084,11 +2084,11 @@ TypeKindRankDeclarationMacro(FieldEmptyCompGrid)
 ! {\tt ESMF\_FieldEmptyCreate()} call. @\
 ! @\
 ! \begin{sloppypar} @\
-! The fortran data pointer inside {\tt ESMF\_Field} can be queried and deallocated when @\
+! The Fortran data pointer inside {\tt ESMF\_Field} can be queried and deallocated when @\
 ! datacopyflag is {\tt ESMF\_DATACOPY\_REFERENCE}. Note that the {\tt ESMF\_FieldDestroy} call does not deallocate @\
-! the fortran data pointer in this case. This gives user more flexibility over memory management. @\
+! the Fortran data pointer in this case. This gives user more flexibility over memory management. @\
 ! \end{sloppypar} @\
-! The fortran data pointer inside {\tt ESMF\_Field} can be queried and deallocated when @\
+! The Fortran data pointer inside {\tt ESMF\_Field} can be queried and deallocated when @\
 ! @\
 ! The arguments are: @\
 ! \begin{description} @\
@@ -2099,7 +2099,7 @@ TypeKindRankDeclarationMacro(FieldEmptyCompGrid)
 ! \item [grid]  @\
 !       The {\tt ESMF\_Grid} object to complete the Field. @\
 ! \item [farrayPtr] @\
-!       Native fortran data pointer to be copied/referenced in the {\tt field}. @\
+!       Native Fortran data pointer to be copied/referenced in the {\tt field}. @\
 !       The {\tt field} dimension (dimCount) will be the same as the dimCount @\
 !       for the {\tt farrayPtr}. @\
 ! \item [{[datacopyflag]}] @\
@@ -2284,7 +2284,7 @@ TypeKindRankDeclarationMacro(FieldEmptyCompGridPtr)
 ! This call completes an {\tt ESMF\_Field} allocated with the @\
 ! {\tt ESMF\_FieldEmptyCreate()} call. @\
 ! @\
-! The fortran data pointer inside {\tt ESMF\_Field} can be queried but deallocating @\
+! The Fortran data pointer inside {\tt ESMF\_Field} can be queried but deallocating @\
 ! the retrieved data pointer is not allowed. @\
 ! @\
 ! The arguments are: @\
@@ -2296,7 +2296,7 @@ TypeKindRankDeclarationMacro(FieldEmptyCompGridPtr)
 ! \item [locstream]  @\
 !       The {\tt ESMF\_LocStream} object to complete the Field. @\
 ! \item [farray] @\
-!       Native fortran data array to be copied/referenced in the {\tt field}. @\
+!       Native Fortran data array to be copied/referenced in the {\tt field}. @\
 !       The {\tt field} dimension (dimCount) will be the same as the dimCount @\
 !       for the {\tt farray}. @\
 ! \item [indexflag] @\
@@ -2447,9 +2447,9 @@ TypeKindRankDeclarationMacro(FieldEmptyCompLS)
 ! {\tt ESMF\_FieldEmptyCreate()} call. @\
 ! @\
 ! \begin{sloppypar} @\
-! The fortran data pointer inside {\tt ESMF\_Field} can be queried and deallocated when @\
+! The Fortran data pointer inside {\tt ESMF\_Field} can be queried and deallocated when @\
 ! datacopyflag is {\tt ESMF\_DATACOPY\_REFERENCE}. Note that the {\tt ESMF\_FieldDestroy} call does not deallocate @\
-! the fortran data pointer in this case. This gives user more flexibility over memory management. @\
+! the Fortran data pointer in this case. This gives user more flexibility over memory management. @\
 ! \end{sloppypar} @\
 ! @\
 ! The arguments are: @\
@@ -2461,7 +2461,7 @@ TypeKindRankDeclarationMacro(FieldEmptyCompLS)
 ! \item [locstream]  @\
 !       The {\tt ESMF\_LocStream} object to complete the Field. @\
 ! \item [farrayPtr] @\
-!       Native fortran data pointer to be copied/referenced in the {\tt field}. @\
+!       Native Fortran data pointer to be copied/referenced in the {\tt field}. @\
 !       The {\tt field} dimension (dimCount) will be the same as the dimCount @\
 !       for the {\tt farrayPtr}. @\
 ! \item [{[datacopyflag]}] @\
@@ -2590,7 +2590,7 @@ TypeKindRankDeclarationMacro(FieldEmptyCompLSPtr)
 ! This call completes an {\tt ESMF\_Field} allocated with the @\
 ! {\tt ESMF\_FieldEmptyCreate()} call. @\
 ! @\
-! The fortran data pointer inside {\tt ESMF\_Field} can be queried but deallocating @\
+! The Fortran data pointer inside {\tt ESMF\_Field} can be queried but deallocating @\
 ! the retrieved data pointer is not allowed. @\
 ! @\
 ! The arguments are: @\
@@ -2602,7 +2602,7 @@ TypeKindRankDeclarationMacro(FieldEmptyCompLSPtr)
 ! \item [mesh]  @\
 !       The {\tt ESMF\_Mesh} object to complete the Field. @\
 ! \item [farray] @\
-!       Native fortran data array to be copied/referenced in the {\tt field}. @\
+!       Native Fortran data array to be copied/referenced in the {\tt field}. @\
 !       The {\tt field} dimension (dimCount) will be the same as the dimCount @\
 !       for the {\tt farray}. @\
 ! \item [indexflag] @\
@@ -2754,9 +2754,9 @@ TypeKindRankDeclarationMacro(FieldEmptyCompMesh)
 ! {\tt ESMF\_FieldEmptyCreate()} call. @\
 ! @\
 ! \begin{sloppypar} @\
-! The fortran data pointer inside {\tt ESMF\_Field} can be queried and deallocated when @\
+! The Fortran data pointer inside {\tt ESMF\_Field} can be queried and deallocated when @\
 ! datacopyflag is {\tt ESMF\_DATACOPY\_REFERENCE}. Note that the {\tt ESMF\_FieldDestroy} call does not deallocate @\
-! the fortran data pointer in this case. This gives user more flexibility over memory management. @\
+! the Fortran data pointer in this case. This gives user more flexibility over memory management. @\
 ! \end{sloppypar} @\
 ! @\
 ! The arguments are: @\
@@ -2768,7 +2768,7 @@ TypeKindRankDeclarationMacro(FieldEmptyCompMesh)
 ! \item [mesh]  @\
 !       The {\tt ESMF\_Mesh} object to complete the Field. @\
 ! \item [farrayPtr] @\
-!       Native fortran data pointer to be copied/referenced in the {\tt field}. @\
+!       Native Fortran data pointer to be copied/referenced in the {\tt field}. @\
 !       The {\tt field} dimension (dimCount) will be the same as the dimCount @\
 !       for the {\tt farrayPtr}. @\
 ! \item [{[datacopyflag]}] @\
@@ -2898,7 +2898,7 @@ TypeKindRankDeclarationMacro(FieldEmptyCompMeshPtr)
 ! This call completes an {\tt ESMF\_Field} allocated with the @\
 ! {\tt ESMF\_FieldEmptyCreate()} call. @\
 ! @\
-! The fortran data pointer inside {\tt ESMF\_Field} can be queried but deallocating @\
+! The Fortran data pointer inside {\tt ESMF\_Field} can be queried but deallocating @\
 ! the retrieved data pointer is not allowed. @\
 ! @\
 ! The arguments are: @\
@@ -2910,7 +2910,7 @@ TypeKindRankDeclarationMacro(FieldEmptyCompMeshPtr)
 ! \item [xgrid]  @\
 !       The {\tt ESMF\_XGrid} object to complete the Field. @\
 ! \item [farray] @\
-!       Native fortran data array to be copied/referenced in the {\tt field}. @\
+!       Native Fortran data array to be copied/referenced in the {\tt field}. @\
 !       The {\tt field} dimension (dimCount) will be the same as the dimCount @\
 !       for the {\tt farray}. @\
 ! \item [indexflag] @\
@@ -3067,9 +3067,9 @@ TypeKindRankDeclarationMacro(FieldEmptyCompXG)
 ! {\tt ESMF\_FieldEmptyCreate()} call. @\
 ! @\
 ! \begin{sloppypar} @\
-! The fortran data pointer inside {\tt ESMF\_Field} can be queried and deallocated when @\
+! The Fortran data pointer inside {\tt ESMF\_Field} can be queried and deallocated when @\
 ! datacopyflag is {\tt ESMF\_DATACOPY\_REFERENCE}. Note that the {\tt ESMF\_FieldDestroy} call does not deallocate @\
-! the fortran data pointer in this case. This gives user more flexibility over memory management. @\
+! the Fortran data pointer in this case. This gives user more flexibility over memory management. @\
 ! \end{sloppypar} @\
 ! @\
 ! The arguments are: @\
@@ -3081,7 +3081,7 @@ TypeKindRankDeclarationMacro(FieldEmptyCompXG)
 ! \item [xgrid]  @\
 !       The {\tt ESMF\_XGrid} object to complete the Field. @\
 ! \item [farrayPtr] @\
-!       Native fortran data pointer to be copied/referenced in the {\tt field}. @\
+!       Native Fortran data pointer to be copied/referenced in the {\tt field}. @\
 !       The {\tt field} dimension (dimCount) will be the same as the dimCount @\
 !       for the {\tt farrayPtr}. @\
 ! \item [{[datacopyflag]}] @\
@@ -3214,7 +3214,7 @@ TypeKindRankDeclarationMacro(FieldEmptyCompXGPtr)
 ! associated documentation using this method see section  @\
 ! \ref{sec:field:usage:partial_creation}. @\
 ! @\
-! The fortran data pointer inside {\tt ESMF\_Field} can be queried but deallocating @\
+! The Fortran data pointer inside {\tt ESMF\_Field} can be queried but deallocating @\
 ! the retrieved data pointer is not allowed. @\
 ! @\
 ! The arguments are: @\
@@ -3226,7 +3226,7 @@ TypeKindRankDeclarationMacro(FieldEmptyCompXGPtr)
 ! \item [geombase]  @\
 !       The {\tt ESMF\_GeomBase} object to complete the Field. @\
 ! \item [farray] @\
-!       Native fortran data array to be copied/referenced in the {\tt field}. @\
+!       Native Fortran data array to be copied/referenced in the {\tt field}. @\
 !       The {\tt field} dimension (dimCount) will be the same as the dimCount @\
 !       for the {\tt farray}. @\
 ! \item [indexflag] @\
@@ -3757,9 +3757,9 @@ TypeKindRankDeclarationMacro(FieldEmptyCompGB)
 ! associated documentation using this method see section  @\
 ! \ref{sec:field:usage:partial_creation}. @\
 ! @\
-! The fortran data pointer inside {\tt ESMF\_Field} can be queried and deallocated when @\
+! The Fortran data pointer inside {\tt ESMF\_Field} can be queried and deallocated when @\
 ! datacopyflag is {\tt ESMF\_DATACOPY\_REFERENCE}. Note that the {\tt ESMF\_FieldDestroy} call does not deallocate @\
-! the fortran data pointer in this case. This gives user more flexibility over memory management. @\
+! the Fortran data pointer in this case. This gives user more flexibility over memory management. @\
 ! @\
 ! The arguments are: @\
 ! \begin{description} @\
@@ -3771,7 +3771,7 @@ TypeKindRankDeclarationMacro(FieldEmptyCompGB)
 !       The {\tt ESMF\_GeomBase} object to complete the Field.  The dimCount of the @\
 !       GeomBase must be smaller than or equal to the rank of the {\tt farrayPtr}. @\
 ! \item [farrayPtr] @\
-!       Native fortran data pointer to be copied/referenced in the {\tt field}. @\
+!       Native Fortran data pointer to be copied/referenced in the {\tt field}. @\
 !       The {\tt field} dimension (dimCount) will be the same as the dimCount @\
 !       for the {\tt farrayPtr}. @\
 ! \item [{[datacopyflag]}] @\

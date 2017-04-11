@@ -309,7 +309,7 @@ int ArrayBundle::read(
   const char  *file,            // in    - name of file being read
   bool *singleFile,             // in    - All arrays from single file if true
   int   *timeslice,             // in    - timeslice option
-  ESMC_IOFmt_Flag *iofmt        // in    - IO format flag
+  ESMC_IOFmt_Flag *iofmt        // in    - I/O format flag
   ){
 //
 // !DESCRIPTION:
@@ -416,7 +416,7 @@ int ArrayBundle::write(
   bool *overwrite,                // in    - OK to overwrite fields if true
   ESMC_FileStatus_Flag *status,   // in    - file status flag
   int   *timeslice,               // in    - timeslice option
-  ESMC_IOFmt_Flag *iofmt          // in    - IO format flag
+  ESMC_IOFmt_Flag *iofmt          // in    - I/O format flag
   ){
 //
 // !DESCRIPTION:

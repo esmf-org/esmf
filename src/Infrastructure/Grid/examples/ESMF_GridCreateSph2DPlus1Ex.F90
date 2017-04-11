@@ -161,7 +161,7 @@ program ESMF_GridCreateEx
 !EOC  
 
 !BOE
-!  Create a 3D array cooresponding to the center stagger into which to put data.
+!  Create a 3D array corresponding to the center stagger into which to put data.
 !EOE
 !BOC
       call ESMF_ArraySpecSet(arrayspec3D, type=ESMF_DATA_REAL,         &

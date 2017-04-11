@@ -12,13 +12,13 @@
 #define ESMF_FILENAME "ESMF_IO.F90"
 !==============================================================================
 !
-!     ESMF IO Module
+!     ESMF I/O Module
 module ESMF_IOMod
 
 !     
 !==============================================================================
 !     
-! This file contains the IO class definition and all IO class methods.
+! This file contains the I/O class definition and all I/O class methods.
 !     
 !------------------------------------------------------------------------------
 ! INCLUDES
@@ -29,7 +29,7 @@ module ESMF_IOMod
 ! !MODULE: ESMF_IOMod
 !     
 ! !DESCRIPTION:
-! IO Fortran API wrapper of C++ implementation.
+! I/O Fortran API wrapper of C++ implementation.
 !
 ! Defines Fortran wrapper entry points for corresponding
 ! C++ class {\tt ESMCI\_IO} implementation.
@@ -145,7 +145,7 @@ contains
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_IOCreate()"
 !BOPI
-! !IROUTINE: ESMF_IOCreate - Create a new ESMF IO object
+! !IROUTINE: ESMF_IOCreate - Create a new ESMF I/O object
 !
 ! !INTERFACE:
   function ESMF_IOCreate(keywordEnforcer, rc)
@@ -188,7 +188,7 @@ contains
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_IODestroy()"
 !BOPI
-! !IROUTINE: ESMF_IODestroy - Clean up and delete an ESMF IO object
+! !IROUTINE: ESMF_IODestroy - Clean up and delete an ESMF I/O object
 !
 ! !INTERFACE:
   subroutine ESMF_IODestroy(io, rc)
@@ -233,7 +233,7 @@ contains
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_IOClear()"
 !BOPI
-! !IROUTINE: ESMF_IOClear - Clears the I/O queue of an ESMF IO object
+! !IROUTINE: ESMF_IOClear - Clears the I/O queue of an ESMF I/O object
 !
 ! !INTERFACE:
   subroutine ESMF_IOClear(io)
@@ -259,7 +259,7 @@ contains
 
 !------------------------------------------------------------------------------
 !BOPI
-! !IROUTINE: ESMF_IOAddArray - Add an array to an IO object's element list
+! !IROUTINE: ESMF_IOAddArray - Add an array to an I/O object's element list
 
 ! !INTERFACE:
   subroutine ESMF_IOAddArray(io, array, keywordEnforcer, variableName, dimLabels, rc)
@@ -286,8 +286,8 @@ contains
 !   \item[{[dimLabels]}]
 !    An array of dimension names for the Field data in the output file; default is
 !    the variable name with {\tt \_dimnnn}, where nnn is the dimension number,
-!    appended.  Use this argument only in the IO format (such as NetCDF) that
-!    supports variable and dimension names. If the IO format does not support t
+!    appended.  Use this argument only in the I/O format (such as NetCDF) that
+!    supports variable and dimension names. If the I/O format does not support t
 !    (such as binary format), ESMF will return an error code.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -329,7 +329,7 @@ contains
 
 !------------------------------------------------------------------------------
 !BOPI
-! !IROUTINE: ESMF_IORead - Perform a read on an ESMF IO object
+! !IROUTINE: ESMF_IORead - Perform a read on an ESMF I/O object
 !
 ! !INTERFACE:
   subroutine ESMF_IORead(io, fileName, keywordEnforcer, timeslice,           &
@@ -358,7 +358,7 @@ contains
 !      The time-slice number of the variable read from file.
 !     \item[{[iofmt]}]
 !      \begin{sloppypar}
-!      The IO format.  Please see Section~\ref{opt:iofmtflag} for the list 
+!      The I/O format.  Please see Section~\ref{opt:iofmtflag} for the list
 !      of options. If not present, defaults to {\tt ESMF\_IOFMT\_NETCDF}.
 !      \end{sloppypar}
 !     \item[{[schema]}]
@@ -407,7 +407,7 @@ contains
 
 !------------------------------------------------------------------------------
 !BOPI
-! !IROUTINE: ESMF_IOWrite - Perform a write on an ESMF IO object
+! !IROUTINE: ESMF_IOWrite - Perform a write on an ESMF I/O object
 !
 ! !INTERFACE:
   subroutine ESMF_IOWrite(io, fileName, keywordEnforcer, overwrite, status,  &
@@ -458,7 +458,7 @@ contains
 !    \end{sloppypar}
 !   \item[{[timeslice]}]
 !    \begin{sloppypar}
-!    Some IO formats (e.g. NetCDF) support the output of data in form of
+!    Some I/O formats (e.g. NetCDF) support the output of data in form of
 !    time slices. The {\tt timeslice} argument provides access to this
 !    capability. {\tt timeslice} must be positive. The behavior of this
 !    option may depend on the setting of the {\tt overwrite} flag:

@@ -492,7 +492,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   Each PET of the VM must issue this call exactly once for {\em all} of its @\
 !   DEs. The call will block until all PET-local data objects are accessible. @\
 ! @\
-!   For examples and associated documentations using this method see Section  @\
+!   For examples and associated documentation regarding this method see Section  @\
 !   \ref{sec:field:usage:gather_2dptr}. @\
 ! @\
 !   The arguments are: @\

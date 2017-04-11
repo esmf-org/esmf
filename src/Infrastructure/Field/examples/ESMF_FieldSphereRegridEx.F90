@@ -311,10 +311,10 @@ program ESMF_FieldSphereRegridEx
 !\subsubsection{Precompute a regridding operation between two Fields}
 ! To create the sparse matrix regrid operator we call the
 ! {\tt ESMF\_FieldSphereRegridStore()} routine.  In this example we
-! choose the {\tt ESMF_REGRID_METHOD_BILIONEAR} regridding method for
+! choose the {\tt ESMF_REGRID_METHOD_BILINEAR} regridding method for
 ! our first example, and {\tt ESMF_REGRIDMETHOD_PATCH} for our
 ! second example (The underlying C++ code process both matrices
-! simultaneously, but we do not yet have fortran interfaces for this).
+! simultaneously, but we do not yet have Fortran interfaces for this).
 ! This method creates two meshes, and a Rendezvous decomposition of these
 ! meshes is computed.  An octree search is performed, followed by a determination
 ! of which source cell each destination gridpoint is in.  Bilinear weights
