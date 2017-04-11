@@ -16,6 +16,9 @@
 #include <string.h>
 #include "ESMCI_Comp.h"
 
+//how often to flush streams to file
+#define BT_FLUSH_STREAM_INTERVAL 100
+
 //constants used in tracing events
 #define BT_ESMF_TRACE_VERSION "0.1"
 
@@ -34,9 +37,10 @@
 #define BT_REGION_EXIT 1
 
 namespace ESMCI { 
-  void TraceOpen(const char *trace_dir, int stream_id, int *rc);
+  void TraceOpen(const char *trace_dir, int *rc);
   void TraceClose(int *rc);
   void TraceSetupTypes(int *rc);  
+  void TraceCheckPetList(int *traceLocalPet, int *rc);
   
   ////////////////////////////////
 

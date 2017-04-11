@@ -31,6 +31,7 @@ module ESMF_TraceMod
 
   public ESMF_TraceOpen
   public ESMF_TraceClose
+  public ESMF_TraceLocalPet
   public ESMF_TraceEventPhaseEnter
   public ESMF_TraceEventPhaseExit
   public ESMF_TraceEventPhasePrologueEnter
@@ -65,12 +66,11 @@ contains
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_TraceOpen()"
-  subroutine ESMF_TraceOpen(traceDir, streamId, rc)
+  subroutine ESMF_TraceOpen(traceDir, rc)
     character(len=*), intent(in)             :: traceDir
-    integer,          intent(in)             :: streamId
     integer,          intent(out), optional  :: rc
     
-    call c_esmftrace_open(traceDir, streamId, rc)
+    call c_esmftrace_open(traceDir, rc)
     if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
          ESMF_CONTEXT, rcToReturn=rc)) return
   end subroutine ESMF_TraceOpen
@@ -85,6 +85,29 @@ contains
          ESMF_CONTEXT, rcToReturn=rc)) return
   end subroutine ESMF_TraceClose
 
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_TraceLocalPet()"
+  function ESMF_TraceLocalPet(rc)
+    logical :: ESMF_TraceLocalPet
+    integer, intent(out), optional :: rc
+
+    ! locals
+    integer :: check, localrc
+
+    if (present(rc)) rc = ESMF_SUCCESS
+    
+    call c_esmftrace_checkpetlist(check, localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return
+    
+    if (check == 1) then
+       ESMF_TraceLocalPet = .true.
+    else
+       ESMF_TraceLocalPet = .false.
+    endif 
+  end function ESMF_TraceLocalPet
+
+  
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_TraceEventGridCompPhaseEnter()"
   subroutine ESMF_TraceEventGridCompPhaseEnter(comp, rc)

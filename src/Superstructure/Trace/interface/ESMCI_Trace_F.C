@@ -18,16 +18,20 @@ extern "C" {
   void FTN_X(c_esmftrace_open)
      (				   
       const char *trace_dir,           
-      int *stream_id,
       int *rc,                        
       ESMCI_FortranStrLenArg nlen)  //strlen for trace_dir 
   {      
-    ESMCI::TraceOpen(trace_dir, *stream_id, rc);
+    ESMCI::TraceOpen(trace_dir, rc);
   } 
 
   void FTN_X(c_esmftrace_close)(int *rc) 
   {
     ESMCI::TraceClose(rc);
+  }
+
+  void FTN_X(c_esmftrace_checkpetlist)(int *traceLocalPet, int *rc)
+  {
+    ESMCI::TraceCheckPetList(traceLocalPet, rc);
   }
   
   void FTN_X(c_esmftrace_phase_enter)(int *vmid, int *baseid, int *method, int *phase, int *rc)

@@ -413,7 +413,19 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           write (ESMF_UtilIOStderr,*) ESMF_METHOD, ": Error initializing the default log/error manager"
           return
       endif
+      
+      ! Write our version number out into the log
+      call ESMF_LogWrite(&
+           "Running with ESMF Version " // ESMF_VERSION_STRING, &
+           ESMF_LOGMSG_INFO, rc=localrc)
+      if (localrc /= ESMF_SUCCESS) then
+         write (ESMF_UtilIOStderr,*) ESMF_METHOD, ": Error writing into the default log"
+         return
+      endif
 
+      ! Ensure that at least the version number makes it into the log
+      call ESMF_LogFlush(rc=localrc)
+      
       ! if compliance checker is on, we want logs to have high prescision timestamps
       call c_esmc_getComplianceCheckJSON(complianceCheckIsOn, localrc)
       if (localrc /= ESMF_SUCCESS) then
@@ -435,34 +447,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           return
       endif
       if (traceIsOn == 1) then
-        call ESMF_VMGetGlobal(vm=vm, rc=localrc)
-        if (localrc /= ESMF_SUCCESS) then
-          write (ESMF_UtilIOStderr,*) ESMF_METHOD, ": Error getting global VM for trace"
-          return
-        endif
-        call ESMF_VMGet(vm=vm, localPet=localPet, rc=localrc)
-        if (localrc /= ESMF_SUCCESS) then
-          write (ESMF_UtilIOStderr,*) ESMF_METHOD, ": Error getting localPet from VM"
-          return
-        endif
-        call ESMF_TraceOpen("./traceout", localPet, rc=localrc)
-        if (localrc /= ESMF_SUCCESS) then
-          write (ESMF_UtilIOStderr,*) ESMF_METHOD, ": Error initializing trace stream"
-          return
-        endif
+         call ESMF_TraceOpen("./traceout", rc=localrc)
+         if (localrc /= ESMF_SUCCESS) then
+            write (ESMF_UtilIOStderr,*) ESMF_METHOD, ": Error initializing trace stream"
+            return
+         endif
       endif
-
-      ! Write our version number out into the log
-      call ESMF_LogWrite(&
-        "Running with ESMF Version " // ESMF_VERSION_STRING, &
-        ESMF_LOGMSG_INFO, rc=localrc)
-      if (localrc /= ESMF_SUCCESS) then
-          write (ESMF_UtilIOStderr,*) ESMF_METHOD, ": Error writing into the default log"
-          return
-      endif
-
-      ! Ensure that at least the version number makes it into the log
-      call ESMF_LogFlush(rc=localrc)
 
       ! Initialize the default time manager calendar
       call ESMF_CalendarInitialize(calkindflag=defaultCalKind, rc=localrc)
