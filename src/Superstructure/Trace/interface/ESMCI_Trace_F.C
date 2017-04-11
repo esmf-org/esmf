@@ -29,10 +29,10 @@ extern "C" {
     ESMCI::TraceClose(rc);
   }
 
-  void FTN_X(c_esmftrace_checkpetlist)(int *traceLocalPet, int *rc)
-  {
-    ESMCI::TraceCheckPetList(traceLocalPet, rc);
-  }
+  //  void FTN_X(c_esmftrace_checkpetlist)(int *traceLocalPet, int *rc)
+  //{
+  //  ESMCI::TraceCheckPetList(traceLocalPet, rc);
+  //}
   
   void FTN_X(c_esmftrace_phase_enter)(int *vmid, int *baseid, int *method, int *phase, int *rc)
   {

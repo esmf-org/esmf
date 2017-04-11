@@ -31,7 +31,6 @@ module ESMF_TraceMod
 
   public ESMF_TraceOpen
   public ESMF_TraceClose
-  public ESMF_TraceLocalPet
   public ESMF_TraceEventPhaseEnter
   public ESMF_TraceEventPhaseExit
   public ESMF_TraceEventPhasePrologueEnter
@@ -85,27 +84,27 @@ contains
          ESMF_CONTEXT, rcToReturn=rc)) return
   end subroutine ESMF_TraceClose
 
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_TraceLocalPet()"
-  function ESMF_TraceLocalPet(rc)
-    logical :: ESMF_TraceLocalPet
-    integer, intent(out), optional :: rc
-
-    ! locals
-    integer :: check, localrc
-
-    if (present(rc)) rc = ESMF_SUCCESS
-    
-    call c_esmftrace_checkpetlist(check, localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-         ESMF_CONTEXT, rcToReturn=rc)) return
-    
-    if (check == 1) then
-       ESMF_TraceLocalPet = .true.
-    else
-       ESMF_TraceLocalPet = .false.
-    endif 
-  end function ESMF_TraceLocalPet
+!!$#undef  ESMF_METHOD
+!!$#define ESMF_METHOD "ESMF_TraceLocalPet()"
+!!$  function ESMF_TraceLocalPet(rc)
+!!$    logical :: ESMF_TraceLocalPet
+!!$    integer, intent(out), optional :: rc
+!!$
+!!$    ! locals
+!!$    integer :: check, localrc
+!!$
+!!$    if (present(rc)) rc = ESMF_SUCCESS
+!!$    
+!!$    call c_esmftrace_checkpetlist(check, localrc)
+!!$    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+!!$         ESMF_CONTEXT, rcToReturn=rc)) return
+!!$    
+!!$    if (check == 1) then
+!!$       ESMF_TraceLocalPet = .true.
+!!$    else
+!!$       ESMF_TraceLocalPet = .false.
+!!$    endif 
+!!$  end function ESMF_TraceLocalPet
 
   
 #undef  ESMF_METHOD

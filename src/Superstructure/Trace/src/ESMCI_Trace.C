@@ -418,7 +418,7 @@ namespace ESMCI {
 
     if (!traceLocalPet) return;
     
-    FlushStream();
+    BT_CHK(bt_ctf_stream_flush(bt_stream), ESMC_CONTEXT);
     
     bt_ctf_writer_put(bt_writer);
     bt_ctf_stream_class_put(bt_stream_class);

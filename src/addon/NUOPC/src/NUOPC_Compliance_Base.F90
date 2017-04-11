@@ -132,15 +132,6 @@ contains
         else
           outputTrace = .false.
         endif
-
-        if (outputTrace) then
-           print *, "checking local pet"
-           if (.not. ESMF_TraceLocalPet(rc)) then
-              outputTrace = .false.
-              print *, "turning off local trace"
-           endif
-           print *, "done checking local pet"
-        endif
           
         call c_esmc_getComplianceCheckJSON(jsonIsOn, rc)
         if (ESMF_LogFoundError(rc, &
