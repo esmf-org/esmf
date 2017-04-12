@@ -2015,6 +2015,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !EOP
 !------------------------------------------------------------------------------
 
+#if 0
     interface
       subroutine c_esmc_arraywrite (array, fileName,  &
           variableName, len_varName,  &
@@ -2042,6 +2043,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         integer, intent (out), optional :: rc
       end subroutine
     end interface
+#endif
 
     ! Local vars
     integer                    :: localrc           ! local return code
