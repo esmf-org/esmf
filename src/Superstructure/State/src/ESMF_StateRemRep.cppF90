@@ -482,7 +482,7 @@ contains
 !
 ! !DESCRIPTION:
 ! Replace a list of items with a {\tt ESMF\_State}.  If an item in
-! <itemlist> does not match any items already present in {\tt state}, an
+! <itemList> does not match any items already present in {\tt state}, an
 ! error is returned.
 !    
 !    Supported values for <itemList> are:   

@@ -2150,11 +2150,17 @@ void copy_rs_from_WMat_to_Array(WMat *wmat, ESMCI::Array *array) {
       // Get sequence index of this point
       int localrc;
       int seq_ind;
-      localrc=distgrid->getSequenceIndexLocalDe(lDE,ind_m_elbnd,&seq_ind);
+      std::vector<int> seq_indV;
+      localrc=distgrid->getSequenceIndexLocalDe(lDE,ind_m_elbnd,seq_indV);
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
         ESMC_CONTEXT, NULL)) throw localrc;  // bail out with exception
  /* XMRKX */
 
+      if (seq_indV.size() > 0)
+        seq_ind = seq_indV[0];
+      else
+        seq_ind = -1; // invalidate
+      
       // If it's not in the WMat, then it's been masked out, so init. to masked
       ESMC_I4 regrid_status=ESMC_REGRID_STATUS_DST_MASKED; 
 
@@ -2297,9 +2303,15 @@ void copy_cnsv_rs_from_WMat_to_Array(WMat *wmat, ESMCI::Array *array) {
       // Get sequence index of this point
       int localrc;
       int seq_ind;
-      localrc=distgrid->getSequenceIndexLocalDe(lDE,ind_m_elbnd,&seq_ind);
+      std::vector<int> seq_indV;
+      localrc=distgrid->getSequenceIndexLocalDe(lDE,ind_m_elbnd,seq_indV);
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
         ESMC_CONTEXT, NULL)) throw localrc;  // bail out with exception
+
+      if (seq_indV.size() > 0)
+        seq_ind = seq_indV[0];
+      else
+        seq_ind = -1; // invalidate
 
       // If it's not in the WMat, then it's been masked out, so init. to masked
       ESMC_I4 regrid_status=ESMC_REGRID_STATUS_OUTSIDE; 

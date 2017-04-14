@@ -9,7 +9,7 @@ This section describes the file-based regridding application provided by ESMF (f
 
 Regridding can be broken into two stages. The first stage is generation of an interpolation weight matrix that describes how points in
 the source grid contribute to points in the destination grid. The second stage is the multiplication of values on the source grid by the
-interpolation weight matrix to produce values on the destination grid. This occurs through a parallel sparse matrix multiply.
+interpolation weight matrix to produce values on the destination grid. This is implemented as a parallel sparse matrix multiplication.
 
 The {\tt ESMF\_RegridWeightGen} application described in Section~\ref{sec:ESMF_RegridWeightGen} 
 performs the first stage of the regridding process - generate the interpolation weight matrix. 

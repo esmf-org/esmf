@@ -27,8 +27,8 @@ Component set services routine is responsible for setting entry points
 for the standard ESMF Component methods Initialize, Run, and Finalize.
 
 \begin{sloppypar}
-Finally, the Component library call {\tt ESMF\_<Grid/Cpl>CompSetVM()} can
-optionally be issues {\em before} calling
+Finally, the Component can optionally call {\tt ESMF\_<Grid/Cpl>CompSetVM()}
+{\em before} calling
 {\tt ESMF\_<Grid/Cpl>CompSetServices()}. Similar to 
 {\tt ESMF\_<Grid/Cpl>CompSetServices()}, the 
 {\tt ESMF\_<Grid/Cpl>CompSetVM()}

@@ -906,11 +906,17 @@ Par::Out() << "\tnot in mesh!!" << std::endl;
     int seq_ind[NUM_QUAD_CORNERS];
     for (int i=0; i<NUM_QUAD_CORNERS; i++) {
       int localrc;
+      std::vector<int> seqIndex;
       localrc=staggerDistgrid->getSequenceIndexLocalDe(localDE,
-        corners[i],&(seq_ind[i]));
+        corners[i],seqIndex);
       if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
         throw localrc;  // bail out with exception
 
+      if (seqIndex.size() > 0)
+        seq_ind[i] = seqIndex[0];
+      else
+        seq_ind[i] = -1; // invalidate
+          
       //  printf("tile=%d localDE=%d tmp=%d %d seqInd=%d \n",tile, localDE, tmp[0],tmp[1],seq_ind[i]);
 
     }

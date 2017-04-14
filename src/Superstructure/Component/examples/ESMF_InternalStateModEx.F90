@@ -18,8 +18,8 @@
 !BOP
 !
 !   When working with ESMF Internal States it is important to consider the
-!   applying scoping rules. The user must ensure that the private data block,
-!   that is being referenced, persists for the entire access period. This is
+!   applying scoping rules. The user must ensure that the private data block
+!   that is being referenced persists for the entire access period. This is
 !   not an issue in the previous example, where the private data block was
 !   defined on the scope of the main program. However, the Internal State 
 !   construct is often useful inside of Component modules to hold Component

@@ -197,7 +197,7 @@ program ESMF_CompTunnelEx
 !
 ! The same way an actual Component appears as a regular Component in
 ! the context of the actual side application, a {\em dual} Component
-! is creaed as a regular Component on the dual side.
+! is created as a regular Component on the dual side.
 ! A dual Gridded Component with custom {\tt petList} is created using the
 ! regular create call.
 !EOE
@@ -391,7 +391,7 @@ program ESMF_CompTunnelEx
 ! executing the invoked Component method, or until a time out condition has been
 ! reached. In many practical applications a more loose synchronization between
 ! dual and actual Components is useful. Having the PETs of a dual
-! Component return immediatly from a standard Component method allows multiple
+! Component return immediately from a standard Component method allows multiple
 ! dual Component, on the same PETs, to control multiple actual Components. 
 ! If the actual Components are executing in separate executables, or the same 
 ! executable but on exclusive sets of PETs, they can execute concurrently, even
@@ -455,12 +455,12 @@ program ESMF_CompTunnelEx
 !
 ! The default time out for CompWait() is 3600 seconds, i.e. 1 hour, just like
 ! for the other Component methods. However, the semantics of a time out 
-! condition under CompWait() is different from the sother Component methods. Typically the {\tt timeout} is simply the 
+! condition under CompWait() is different from the other Component methods. Typically the {\tt timeout} is simply the
 ! maximum time that any communication between dual and actual Component is allowed 
 ! to take before a time out condition is raised. For CompWait(), the {\tt timeout}
 ! is the maximum time that an actual Component is allowed to execute before
 ! reporting back to the dual Component. Here, even with the default time out, 
-! the dual Component would return from CompWait() immediatly with a time out
+! the dual Component would return from CompWait() immediately with a time out
 ! condition if the actual Component has already been executing for over 1 hour, 
 ! and is not already waiting to report back when the dual Component calls 
 ! CompWait(). On the other hand, if it has only been 30 minutes since 

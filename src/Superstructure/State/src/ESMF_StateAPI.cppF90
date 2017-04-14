@@ -799,7 +799,7 @@ StateAddListMacro(ESMF_State,State,nestedStateList,state,nestedStateList(i)%stat
 !
 ! !DESCRIPTION:
 ! Add or replace a list of items to an {\tt ESMF\_State}.  If an item in
-! <itemlist> does not match any items already present in {\tt state}, it is
+! <itemList> does not match any items already present in {\tt state}, it is
 ! added.  Items with names already present in the {\tt state} replace the
 ! existing item.
 !    
@@ -2089,7 +2089,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,           intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
-!     Currently limited to read in all Arrays from a netCDF file and add them
+!     Currently limited to read in all Arrays from a NetCDF file and add them
 !     to a State object.  Future releases will enable more items of a State
 !     to be read from a file of various formats.
 !

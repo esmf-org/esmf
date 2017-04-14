@@ -651,7 +651,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   {\tt ESMF\_SYNC\_VASBLOCKING} which blocks PETs and their spawned off threads 
 !   across each VAS but does not synchronize PETs that run in different VASs.
 ! \item[{[phase]}]  
-!   Component providers must document whether their each of their
+!   Component providers must document whether each of their
 !   routines are {\em single-phase} or {\em multi-phase}.  
 !   Single-phase routines require only one invocation to complete
 !   their work.  
@@ -1104,7 +1104,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   {\tt ESMF\_SYNC\_VASBLOCKING} which blocks PETs and their spawned off threads 
 !   across each VAS but does not synchronize PETs that run in different VASs.
 ! \item[{[phase]}] 
-!   Component providers must document whether their each of their
+!   Component providers must document whether each of their
 !   routines are {\em single-phase} or {\em multi-phase}.  
 !   Single-phase routines require only one invocation to complete
 !   their work.  
@@ -1447,7 +1447,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   {\tt ESMF\_SYNC\_VASBLOCKING} which blocks PETs and their spawned off threads 
 !   across each VAS but does not synchronize PETs that run in different VASs.
 ! \item[{[phase]}]   
-!   Component providers must document whether their each of their
+!   Component providers must document whether each of their
 !   routines are {\em single-phase} or {\em multi-phase}.    
 !   Single-phase routines require only one invocation to complete
 !   their work.    
@@ -1587,7 +1587,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   {\tt ESMF\_SYNC\_VASBLOCKING} which blocks PETs and their spawned off threads 
 !   across each VAS but does not synchronize PETs that run in different VASs.
 ! \item[{[phase]}]  
-!   Component providers must document whether their each of their
+!   Component providers must document whether each of their
 !   routines are {\em single-phase} or {\em multi-phase}.  
 !   Single-phase routines require only one invocation to complete
 !   their work.  
@@ -2093,7 +2093,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !DESCRIPTION:
 ! \label{CplComp:SetServices}
-! Call into user provided {\tt userRoutine} which is responsible for
+! Call into user provided {\tt userRoutine} which is responsible
 ! for setting Component's Initialize(), Run(), and Finalize() services.
 !    
 ! The arguments are:
@@ -2482,7 +2482,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \end{itemize}
 !
 ! !DESCRIPTION:
-! Optionally call into user provided {\tt userRoutine} which is responsible for
+! Optionally call into user provided {\tt userRoutine} which is responsible
 ! for setting Component's VM properties. 
 !
 ! The arguments are:
@@ -2558,7 +2558,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \end{itemize}
 !
 ! !DESCRIPTION:
-! Optionally call into user provided {\tt userRoutine} which is responsible for
+! Optionally call into user provided {\tt userRoutine} which is responsible
 ! for setting Component's VM properties. The named
 ! {\tt userRoutine} must exist in the executable, or in the shared object
 ! specified by {\tt sharedObj}. In the latter case all of the platform
@@ -2964,7 +2964,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   across each VAS but does not synchronize PETs that run in different VASs.
 ! \item[{[timeout]}]
 !   The maximum period in seconds the actual component is allowed to execute
-!   a previously envoked component method before it must communicate back to
+!   a previously invoked component method before it must communicate back to
 !   the dual component. If the actual component does not communicate back in
 !   the specified time, a timeout condition is raised on the dual side (this
 !   side). The default is 3600, i.e. 1 hour. The {\tt timeout} argument is only
@@ -3086,7 +3086,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   {\tt ESMF\_SYNC\_VASBLOCKING} which blocks PETs and their spawned off threads 
 !   across each VAS but does not synchronize PETs that run in different VASs.
 ! \item[{[phase]}]   
-!   Component providers must document whether their each of their
+!   Component providers must document whether each of their
 !   routines are {\em single-phase} or {\em multi-phase}.    
 !   Single-phase routines require only one invocation to complete
 !   their work.    

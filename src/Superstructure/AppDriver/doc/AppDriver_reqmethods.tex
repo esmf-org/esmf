@@ -54,13 +54,13 @@ It is good practice to package the user-code implementing a component into a For
 
 {\em Pros}: Standard Fortran module use: name mangling and interface checking is handled by the Fortran compiler.
 
-{\em Cons}: Fortran 90/95 has no mechanism to implement a "smart" dependency scheme through USE association. Any change in a lower level component module (even just adding or changing a comment!) will trigger a complete recompilation of all of the higher level components throughout the component hierarchy. This situation is particularily annoying for ESMF componentized code, where the prescribed ESMF component interfaces, in principle, remove all interdependencies between components that would require recompilation.
+{\em Cons}: Fortran 90/95 has no mechanism to implement a "smart" dependency scheme through USE association. Any change in a lower level component module (even just adding or changing a comment!) will trigger a complete recompilation of all of the higher level components throughout the component hierarchy. This situation is particularly annoying for ESMF componentized code, where the prescribed ESMF component interfaces, in principle, remove all interdependencies between components that would require recompilation.
 
 Fortran {\em submodules}, introduced as an extension to Fortran 2003, and now part for the Fortran 2008 standard, are designed to avoid this "false" dependency issue. A code change to an ESMF component that keeps the actual implementation within a submodule, will not trigger a recompilation of the components further up in the component hierarchy. Unfortunately, as of mid-2015, only two compiler vendors support submodules.
 
 \item {\bf External routine}: The AppDriver or parent component provides an explicit interface block for an external routine that implements (or calls) the user-code SetServices routine. This routine can then be passed directly into the {\tt ESMF\_<Grid/Cpl>CompSetServices()} interface documented in \ref{GridComp:SetServices} and \ref{CplComp:SetServices}, respectively. (In practice this can be implemented by the component as an external subroutine that simply calls into the user-code SetServices module routine.)
 
-{\em Pros}: Avoids Fortran USE dependencies: a change to lower level component code will not trigger a complete recompilation of all of the higher level components throughout the component hierarchy. Name mangeling is handled by the Fortran compiler.
+{\em Pros}: Avoids Fortran USE dependencies: a change to lower level component code will not trigger a complete recompilation of all of the higher level components throughout the component hierarchy. Name mangling is handled by the Fortran compiler.
 
 {\em Cons}: The user-code SetServices interface is not checked by the compiler. The user must ensure uniqueness of the external routine name across the entire application.
 
@@ -69,7 +69,7 @@ Fortran {\em submodules}, introduced as an extension to Fortran 2003, and now pa
 
 {\em Pros}: Avoids Fortran USE dependencies: a change to lower level component code will not trigger a complete recompilation of all of the higher level components throughout the component hierarchy. The component code does not have to be accessible until runtime and may be located in a shared object, thus avoiding relinking of the application.
 
-{\em Cons}: The user-code SetServices interface is not checked by the compiler. The user must explicitly deal with all of the Fortran name mangeling issues: 1) Accessing a module routine requires precise knowledge of the name mangeling rules of the specific compiler. Alternatively the user-code SetServices routine may be implemented as an external routine, avoiding the module name mangeling. 2) Even then, Fortran compilers typically append one or two underscores on a symbol name. This must be considered when passing the name into the {\tt ESMF\_<Grid/Cpl>CompSetServices()} method.
+{\em Cons}: The user-code SetServices interface is not checked by the compiler. The user must explicitly deal with all of the Fortran name mangling issues: 1) Accessing a module routine requires precise knowledge of the name mangling rules of the specific compiler. Alternatively, the user-code SetServices routine may be implemented as an external routine, avoiding the module name mangling. 2) Even then, Fortran compilers typically append one or two underscores on a symbol name. This must be considered when passing the name into the {\tt ESMF\_<Grid/Cpl>CompSetServices()} method.
 
 \end{sloppypar}
 \end{itemize}

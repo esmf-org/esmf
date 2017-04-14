@@ -662,7 +662,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   {\tt ESMF\_SYNC\_VASBLOCKING} which blocks PETs and their spawned off threads 
 !   across each VAS but does not synchronize PETs that run in different VASs.
 ! \item[{[phase]}]  
-!   Component providers must document whether their each of their
+!   Component providers must document whether each of their
 !   routines are {\em single-phase} or {\em multi-phase}.
 !   Single-phase routines require only one invocation to complete
 !   their work.
@@ -1497,7 +1497,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   {\tt ESMF\_SYNC\_VASBLOCKING} which blocks PETs and their spawned off threads 
 !   across each VAS but does not synchronize PETs that run in different VASs.
 ! \item[{[phase]}]   
-!   Component providers must document whether their each of their
+!   Component providers must document whether each of their
 !   routines are {\em single-phase} or {\em multi-phase}.    
 !   Single-phase routines require only one invocation to complete
 !   their work.    
@@ -1637,7 +1637,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   {\tt ESMF\_SYNC\_VASBLOCKING} which blocks PETs and their spawned off threads 
 !   across each VAS but does not synchronize PETs that run in different VASs.
 ! \item[{[phase]}]   
-!   Component providers must document whether their each of their
+!   Component providers must document whether each of their
 !   routines are {\em single-phase} or {\em multi-phase}.    
 !   Single-phase routines require only one invocation to complete
 !   their work.    
@@ -1928,7 +1928,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item[{[configFile]}]
 !   Set the configuration filename for this {\tt ESMF\_GridComp}.
 !   An {\tt ESMF\_Config} object will be created for this file
-!   and attached to the {\tt ESMF\_GridComp}.  Superceeded by {\tt config}
+!   and attached to the {\tt ESMF\_GridComp}.  Superseded by {\tt config}
 !   if both are specified.
 ! \item[{[clock]}]
 !   Set the private clock for this {\tt ESMF\_GridComp}.
@@ -2536,7 +2536,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \end{itemize}
 !
 ! !DESCRIPTION:
-! Optionally call into user provided {\tt userRoutine} which is responsible for
+! Optionally call into user provided {\tt userRoutine} which is responsible
 ! for setting Component's VM properties.
 !
 ! The arguments are:
@@ -2613,7 +2613,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \end{itemize}
 !
 ! !DESCRIPTION:
-! Optionally call into user provided {\tt userRoutine} which is responsible for
+! Optionally call into user provided {\tt userRoutine} which is responsible
 ! for setting Component's VM properties. The named
 ! {\tt userRoutine} must exist in the executable, or in the shared object
 ! specified by {\tt sharedObj}. In the latter case all of the platform
@@ -3141,7 +3141,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   {\tt ESMF\_SYNC\_VASBLOCKING} which blocks PETs and their spawned off threads 
 !   across each VAS but does not synchronize PETs that run in different VASs.
 ! \item[{[phase]}]   
-!   Component providers must document whether their each of their
+!   Component providers must document whether each of their
 !   routines are {\em single-phase} or {\em multi-phase}.    
 !   Single-phase routines require only one invocation to complete
 !   their work.    
