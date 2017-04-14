@@ -937,15 +937,14 @@ int Comp::getComplianceCheckerTrace(
   int rc = ESMC_RC_NOT_IMPL;              // final return code
 
   // check input
-  char const *envVar = VM::getenv("ESMF_RUNTIME_COMPLIANCECHECK");
+  char const *envVar = VM::getenv("ESMF_RUNTIME_TRACE");
   *traceIsOn = 0;
   if (envVar != NULL && traceIsOn != NULL){
     std::string value(envVar);
-    // see if Trace is specified in ESMF_RUNTIME_COMPLIANCECHECK
     int index;
-    index = value.find("trace=on");
+    index = value.find("on");
     if (index == std::string::npos)
-      index = value.find("TRACE=ON");
+      index = value.find("ON");
     if (index != std::string::npos){
       *traceIsOn=1;
     }
@@ -983,17 +982,28 @@ int Comp::getComplianceCheckerText(
   int rc = ESMC_RC_NOT_IMPL;              // final return code
 
   // check input
-  char const *envVar = VM::getenv("ESMF_RUNTIME_COMPLIANCECHECK");
-  *textIsOn = 1;
-  if (envVar != NULL && textIsOn != NULL){
-    std::string value(envVar);
-    // see if TEXT is specified in ESMF_RUNTIME_COMPLIANCECHECK
-    int index;
-    index = value.find("text=off");
-    if (index == std::string::npos)
-      index = value.find("TEXT=OFF");
-    if (index != std::string::npos){
-      *textIsOn=0;
+  if (textIsOn != NULL) {
+    char const *envVar = VM::getenv("ESMF_RUNTIME_COMPLIANCECHECK");
+    if (envVar == NULL) {
+      *textIsOn = 0;
+    }
+    else {
+      std::string value(envVar);
+      if (value.length() == 0) {
+	*textIsOn = 0;
+      }
+      else {
+	*textIsOn = 1;  //default to on if env variable present
+      }
+      
+      // see if TEXT is specified in ESMF_RUNTIME_COMPLIANCECHECK
+      int index;
+      index = value.find("text=off");
+      if (index == std::string::npos)
+	index = value.find("TEXT=OFF");
+      if (index != std::string::npos){
+	*textIsOn=0;
+      }
     }
   }
 

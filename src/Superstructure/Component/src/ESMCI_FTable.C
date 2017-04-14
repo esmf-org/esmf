@@ -1775,6 +1775,17 @@ int FTable::callVFuncPtr(
           complianceCheckFlag |= value.find("on")!=string::npos;  // turn on
           complianceCheckFlag |= value.find("ON")!=string::npos;  // turn on
         }
+	//if tracing enabled, turn on compliance checker
+	if (!complianceCheckFlag) {
+	  envVar = VM::getenv("ESMF_RUNTIME_TRACE");	  
+	  if (envVar != NULL){
+	    string value(envVar);
+	    // see if compliance checker should be turned on
+          complianceCheckFlag |= value.find("on")!=string::npos;  // turn on
+          complianceCheckFlag |= value.find("ON")!=string::npos;  // turn on
+	  }
+	}
+	
         if (complianceCheckFlag){
           int registerIcUserRc;
           

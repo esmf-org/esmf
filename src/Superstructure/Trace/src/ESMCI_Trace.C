@@ -11,6 +11,8 @@
  * Licensed under the University of Illinois-NCSA License.
  */
 
+#ifdef ESMF_BABELTRACE
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
@@ -737,6 +739,95 @@ namespace ESMCI {
   }    
   
 }
+
+///////////////// Stubs below for when Babeltrace is not linked in //////////////
+
+#else  /* ESMF_BABELTRACE not set */
+
+#include "ESMCI_Macros.h"
+#include "ESMCI_LogErr.h"
+#include "ESMCI_Trace.h"
+
+#define LOG_NO_BT_LIB ESMC_LogDefault.MsgFoundError(ESMF_RC_LIB_NOT_PRESENT,\
+		        "The Babeltrace library is required for tracing but is not present.",\ 
+                        ESMC_CONTEXT, rc);
+
+namespace ESMCI {
+
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::TraceOpen()"  
+  void TraceOpen(const char *trace_dir, int *rc) { LOG_NO_BT_LIB }
+
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::TraceClose()"  
+  void TraceClose(int *rc) { LOG_NO_BT_LIB }
+
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::TraceSetupTypes()"    
+  void TraceSetupTypes(int *rc) { LOG_NO_BT_LIB }
+
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::TraceCheckPetList()"  
+  void TraceCheckPetList(int *traceLocalPet, int *rc) { LOG_NO_BT_LIB }
+ 
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::TraceEventPhase()"  
+  void TraceEventPhase(int ctrl, int *ep_vmid,
+		       int *ep_baseid, int *ep_method, int *ep_phase)
+  { int *rc=NULL; LOG_NO_BT_LIB }
+
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::TraceEventPhaseEnter()"  
+  void TraceEventPhaseEnter(int *ep_vmid, int *ep_baseid, 
+			    int *ep_method, int *ep_phase)
+  { int *rc=NULL; LOG_NO_BT_LIB }
+
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::TraceEventPhaseExit()"  
+  void TraceEventPhaseExit(int *ep_vmid, int *ep_baseid, 
+			   int *ep_method, int *ep_phase)
+  { int *rc=NULL; LOG_NO_BT_LIB }
+
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::TraceEventPhasePrologueEnter()"  
+  void TraceEventPhasePrologueEnter(int *ep_vmid, int *ep_baseid, 
+			    int *ep_method, int *ep_phase)
+  { int *rc=NULL; LOG_NO_BT_LIB }
+
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::TraceEventPhasePrologueExit()"  
+  void TraceEventPhasePrologueExit(int *ep_vmid, int *ep_baseid, 
+                                   int *ep_method, int *ep_phase)
+  { int *rc=NULL; LOG_NO_BT_LIB }
+
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::TraceEventEpilogueEnter()"  
+  void TraceEventPhaseEpilogueEnter(int *ep_vmid, int *ep_baseid, 
+                                    int *ep_method, int *ep_phase)
+  { int *rc=NULL; LOG_NO_BT_LIB }
+
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::TraceEventPhaseEpilogueExit()"  
+  void TraceEventPhaseEpilogueExit(int *ep_vmid, int *ep_baseid, 
+                                   int *ep_method, int *ep_phase)
+  { int *rc=NULL; LOG_NO_BT_LIB }
+
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::TraceEventComponentInfo()"  
+  void TraceEventComponentInfo(Comp *comp, int *ep_vmid, int *ep_baseid,
+                               const char *ep_name, std::string attributeKeys, std::string attributeVals)
+  { int *rc=NULL; LOG_NO_BT_LIB }
+
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::TraceEventRegion()"  
+  void TraceEventRegion(int ctrl, const char*name)
+  { int *rc=NULL; LOG_NO_BT_LIB }
+
+}
+
+#endif
+
+
 
 /* archive this here for now */
 
