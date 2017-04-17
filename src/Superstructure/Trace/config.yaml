@@ -2,6 +2,10 @@ version: '2.2'
 prefix: esmftrc_
 metadata:
   type-aliases:
+#    uint4:
+#      class: int
+#      size: 4
+#      align: 4
     uint8:
       class: int
       size: 8
@@ -39,43 +43,66 @@ metadata:
       - type: clock
         name: sys_clock
         property: value
-    esmf_method_type:
+    enum_type_control:
         class: enum
         value-type: uint8
         members:
-            - INIT
-            - RUN
-            - FINAL
-    phase_event_type:
-        class: struct
-        fields:
-            vmid: uint16
-            baseid: uint16
-            method: esmf_method_type
-            phase: uint16
-    component_info_type:
+            - start_phase
+            - end_phase
+            - start_prologue
+            - end_prologue
+            - start_epilogue
+            - end_epilogue
+    enum_type_method:
+        class: enum
+        value-type: uint8
+        members:
+            - initialize
+            - run
+            - finalize
+#    phase_event_type:
+#        class: struct
+#        fields:
+#            vmid: uint16
+#            baseid: uint16
+#            method: esmf_method_type
+#            phase: uint16
+    comp_type:
         class: struct
         fields:
             vmid: uint16
             baseid: uint16
             name:
                 class: string
+            IPM:
+                class: string
+            RPM:
+                class: string
+            FPM:
+                class: string
+#            my_array:
+#                class: array
+#                length: vmid
+#                element-type:
+#                    class: string
   clocks:
     sys_clock:
       description: System clock
       $return-ctype: uint64_t
+  env:
+    esmf_trace_version: '0.1'
   trace:
     byte-order: le
-#    uuid: auto
-#    packet-header-type:
-#      class: struct
-#      fields:
-#        magic: uint32
-#        uuid:
-#          class: array
-#          length: 16
-#          element-type: uint8
-#        stream_id: uint16
+    uuid: auto
+    packet-header-type:
+      class: struct
+      fields:
+        magic: uint32
+        uuid:
+          class: array
+          length: 16
+          element-type: uint8
+        stream_id: uint16
   streams:
     default:
       packet-context-type:
@@ -92,17 +119,14 @@ metadata:
             id: uint32
             timestamp: clock-int
       events:
-        phase_enter:
-            payload-type: phase_event_type                  
-        phase_exit:
-            payload-type: phase_event_type
-        phase_prologue_enter:
-            payload-type: phase_event_type
-        phase_prologue_exit:
-            payload-type: phase_event_type  
-        phase_epilogue_enter:
-            payload-type: phase_event_type
-        phase_epilogue_exit:
-            payload-type: phase_event_type
-        component_info:
-            payload-type: component_info_type
+        control:
+            payload-type:
+                class: struct
+                fields:
+                    vmid: uint16
+                    baseid: uint16
+                    ctrl: enum_type_control
+                    method: enum_type_method
+                    phase: uint8
+        comp:
+            payload-type: comp_type

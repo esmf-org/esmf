@@ -2,7 +2,7 @@
 
 ALL: build_here 
 
-SOURCEC	  = esmftrc.c ESMCI_Trace.C
+SOURCEC	  = esmftrc.c ESMCI_Trace.C ESMCI_TraceMetadata.C
 SOURCEF	  = 
 SOURCEH	  = esmftrc.h ESMCI_Trace.h
 STOREH    = 

@@ -27,7 +27,7 @@
 #define BT_CNTL_STARTP 2
 #define BT_CNTL_ENDP 3
 #define BT_CNTL_STARTE 4
-#define BT_CNTL_ENDE 4
+#define BT_CNTL_ENDE 5
 
 #define BT_METHOD_INIT 0
 #define BT_METHOD_RUN 1
@@ -41,6 +41,7 @@ namespace ESMCI {
   void TraceClose(int *rc);
   void TraceSetupTypes(int *rc);  
   void TraceCheckPetList(int *traceLocalPet, int *rc);
+  std::string TraceGetMetadataString();
   
   ////////////////////////////////
 

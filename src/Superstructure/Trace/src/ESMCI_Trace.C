@@ -3,15 +3,13 @@
  * Writes trace events to the file system.
  *
  * Earth System Modeling Framework
- * Copyright 2002-2016, University Corporation for Atmospheric Research, 
+ * Copyright 2002-2017, University Corporation for Atmospheric Research, 
  * Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
  * Laboratory, University of Michigan, National Centers for Environmental 
  * Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
  * NASA Goddard Space Flight Center.
  * Licensed under the University of Illinois-NCSA License.
  */
-
-#ifdef ESMF_BABELTRACE
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -22,12 +20,6 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>
-#include <babeltrace/ctf-writer/writer.h>
-#include <babeltrace/ctf-writer/clock.h>
-#include <babeltrace/ctf-writer/stream.h>
-#include <babeltrace/ctf-writer/event.h>
-#include <babeltrace/ctf-writer/event-types.h>
-#include <babeltrace/ctf-writer/event-fields.h>
 
 #include "ESMCI_Macros.h"
 #include "ESMCI_LogErr.h"
@@ -35,19 +27,23 @@
 #include "ESMCI_Trace.h"
 #include "ESMCI_Comp.h"
 
-#define BT_CHK(_value, _ctx) \
+#define BT_CHK(_value, _ctx)                                            \
   if ((_value) != 0) {							\
     ESMC_LogDefault.MsgFoundError(ESMC_RC_LIB, "Internal tracing error", _ctx, rc); \
     return;}
 
-#define BT_CHK_NULL(_value, _ctx) \
+#define BT_CHK_NULL(_value, _ctx)                                       \
   if ((_value) == NULL) {						\
     ESMC_LogDefault.MsgFoundError(ESMC_RC_LIB, "Internal tracing error", _ctx, rc); \
     return;}
 
-using std::string;
-using std::vector;
-using std::stringstream;
+#ifdef ESMF_BABELTRACE
+#include <babeltrace/ctf-writer/writer.h>
+#include <babeltrace/ctf-writer/clock.h>
+#include <babeltrace/ctf-writer/stream.h>
+#include <babeltrace/ctf-writer/event.h>
+#include <babeltrace/ctf-writer/event-types.h>
+#include <babeltrace/ctf-writer/event-fields.h>
 
 #define ESMF_BT_COMMON_UUID
 #ifdef ESMF_BT_COMMON_UUID
@@ -86,11 +82,10 @@ struct bt_ctf_writer {
   int frozen;
   struct bt_ctf_trace *trace;
 };
-#endif
+#endif /* ESMF_BT_COMMON_UUID */
 
 #define ESMF_BT_SINGLE_TRACE
 #ifdef ESMF_BT_SINGLE_TRACE
-
 struct bt_ctf_stream_class {
   struct bt_object base;
   void * /*GString **/ name;
@@ -107,45 +102,33 @@ struct bt_ctf_stream_class {
   int byte_order;
   int valid;
 };
-#endif
+#endif /* ESMF_BT_SINGLE_TRACE */
+#else /* ESMF_BABELTRACE */
 
-//////////// end temporary definitions
+#define ESMF_TRACE_INTERNAL /* enable internal tracing */
+#ifdef ESMF_TRACE_INTERNAL 
+
+#include <esmftrc.h>
+#define EVENT_BUF_SIZE 4096
+
+#ifdef __cplusplus
+# define TO_VOID_PTR(_value)		static_cast<void *>(_value)
+# define FROM_VOID_PTR(_type, _value)	static_cast<_type *>(_value)
+#else
+# define TO_VOID_PTR(_value)		((void *) (_value))
+# define FROM_VOID_PTR(_type, _value)	((_type *) (_value))
+#endif
+#endif /* ESMF_TRACE_INTERNAL */
+
+#endif /* ESMF_BABELTRACE */
+
+using std::string;
+using std::vector;
+using std::stringstream;
 
 namespace ESMCI {
-  
-  //global trace writer
-  struct bt_ctf_writer *bt_writer;
-  struct bt_ctf_stream_class *bt_stream_class;
-  struct bt_ctf_stream *bt_stream;
-  struct bt_ctf_clock *bt_clock;
-  
-  //field data types
-  struct bt_ctf_field_type *bt_type_uint4;
-  struct bt_ctf_field_type *bt_type_uint8;
-  struct bt_ctf_field_type *bt_type_uint16;
-  struct bt_ctf_field_type *bt_type_uint32;
-  struct bt_ctf_field_type *bt_type_string;
-  struct bt_ctf_field_type *bt_type_enum_control;
-  struct bt_ctf_field_type *bt_type_enum_method;
-  struct bt_ctf_field_type *bt_type_seq_attr;
-  struct bt_ctf_field_type *bt_type_enum_region;
-  
-  //event classes
-  struct bt_ctf_event_class *bt_event_class_control;
-  struct bt_ctf_event_class *bt_event_class_comp;
-  struct bt_ctf_event_class *bt_event_class_region;
-  
-  static int flushStream = 0;
+
   static bool traceLocalPet = true;
-  
-  static uint64_t get_clock() {
-    struct timespec ts;
-    
-    //clock_gettime(CLOCK_MONOTONIC, &ts);
-    clock_gettime(CLOCK_REALTIME, &ts);
-    
-    return ts.tv_sec * 1000000000ULL + ts.tv_nsec;
-  }
 
   static vector<string> split(const string& s, const string& delim, const bool keep_empty = true) {
     vector<string> result;
@@ -257,8 +240,41 @@ namespace ESMCI {
     }
     
   }
-  
 
+  static uint64_t get_clock(void *data) {
+    struct timespec ts;
+    
+    //clock_gettime(CLOCK_MONOTONIC, &ts);
+    clock_gettime(CLOCK_REALTIME, &ts);
+    
+    return ts.tv_sec * 1000000000ULL + ts.tv_nsec;
+  }
+
+#ifdef ESMF_BABELTRACE
+  //global trace writer
+  struct bt_ctf_writer *bt_writer;
+  struct bt_ctf_stream_class *bt_stream_class;
+  struct bt_ctf_stream *bt_stream;
+  struct bt_ctf_clock *bt_clock;
+  
+  //field data types
+  struct bt_ctf_field_type *bt_type_uint4;
+  struct bt_ctf_field_type *bt_type_uint8;
+  struct bt_ctf_field_type *bt_type_uint16;
+  struct bt_ctf_field_type *bt_type_uint32;
+  struct bt_ctf_field_type *bt_type_string;
+  struct bt_ctf_field_type *bt_type_enum_control;
+  struct bt_ctf_field_type *bt_type_enum_method;
+  struct bt_ctf_field_type *bt_type_seq_attr;
+  struct bt_ctf_field_type *bt_type_enum_region;
+  
+  //event classes
+  struct bt_ctf_event_class *bt_event_class_control;
+  struct bt_ctf_event_class *bt_event_class_comp;
+  struct bt_ctf_event_class *bt_event_class_region;
+  
+  static int flushStream = 0;
+  
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::FlushStream()"  
   static void FlushStream() {
@@ -270,7 +286,6 @@ namespace ESMCI {
       flushStream = 0;
     }
   }
-
   
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::TraceOpen()"  
@@ -304,6 +319,7 @@ namespace ESMCI {
 	  ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc)) 
       return;
     int stream_id = globalvm->getMypet();
+
     
     struct stat st = {0};
     if (stream_id == 0) {
@@ -594,7 +610,7 @@ namespace ESMCI {
     BT_CHK(bt_ctf_field_unsigned_integer_set_value(field_phase, *ep_phase), ESMC_CONTEXT);
     BT_CHK(bt_ctf_event_set_payload(event, "phase", field_phase), ESMC_CONTEXT);
     
-    BT_CHK(bt_ctf_clock_set_time(bt_clock, get_clock()), ESMC_CONTEXT);
+    BT_CHK(bt_ctf_clock_set_time(bt_clock, get_clock(NULL)), ESMC_CONTEXT);
 
     BT_CHK(bt_ctf_stream_append_event(bt_stream, event), ESMC_CONTEXT);
     FlushStream();
@@ -690,7 +706,7 @@ namespace ESMCI {
       bt_ctf_field_put(field_attr_value);
     }
         
-    BT_CHK(bt_ctf_clock_set_time(bt_clock, get_clock()), ESMC_CONTEXT);
+    BT_CHK(bt_ctf_clock_set_time(bt_clock, get_clock(NULL)), ESMC_CONTEXT);
     
     BT_CHK(bt_ctf_stream_append_event(bt_stream, event), ESMC_CONTEXT);
   
@@ -725,7 +741,7 @@ namespace ESMCI {
     struct bt_ctf_field *field_name = bt_ctf_event_get_payload(event, "name");
     BT_CHK(bt_ctf_field_string_set_value(field_name, name), ESMC_CONTEXT);
 
-    BT_CHK(bt_ctf_clock_set_time(bt_clock, get_clock()), ESMC_CONTEXT);
+    BT_CHK(bt_ctf_clock_set_time(bt_clock, get_clock(NULL)), ESMC_CONTEXT);
 
     BT_CHK(bt_ctf_stream_append_event(bt_stream, event), ESMC_CONTEXT);
   
@@ -737,22 +753,327 @@ namespace ESMCI {
     bt_ctf_field_put(field_name);
     
   }    
-  
-}
-
-///////////////// Stubs below for when Babeltrace is not linked in //////////////
 
 #else  /* ESMF_BABELTRACE not set */
 
-#include "ESMCI_Macros.h"
-#include "ESMCI_LogErr.h"
-#include "ESMCI_Trace.h"
+#ifdef ESMF_TRACE_INTERNAL
 
-#define LOG_NO_BT_LIB ESMC_LogDefault.MsgFoundError(ESMF_RC_LIB_NOT_PRESENT,\
-		        "The Babeltrace library is required for tracing but is not present.",\ 
-                        ESMC_CONTEXT, rc);
+  struct esmftrc_platform_filesys_ctx {
+    struct esmftrc_default_ctx ctx;
+    FILE *fh;
+    int stream_id;
+  };
+  
+  //global context
+  static struct esmftrc_platform_filesys_ctx *g_esmftrc_platform_filesys_ctx;
+   
+  static void write_packet(struct esmftrc_platform_filesys_ctx *ctx) {
+    size_t nmemb = fwrite(esmftrc_packet_buf(&ctx->ctx),
+			  esmftrc_packet_buf_size(&ctx->ctx), 1, ctx->fh);
+    assert(nmemb == 1);
+  }
 
-namespace ESMCI {
+  static int is_backend_full(void *data) {
+    //assume file system never full
+    return 0;
+  }
+
+  static void open_packet(void *data) {
+    struct esmftrc_platform_filesys_ctx *ctx =
+      FROM_VOID_PTR(struct esmftrc_platform_filesys_ctx, data);
+    
+    esmftrc_default_open_packet(&ctx->ctx, ctx->stream_id);
+  }
+
+  static void close_packet(void *data) {
+    struct esmftrc_platform_filesys_ctx *ctx =
+      FROM_VOID_PTR(struct esmftrc_platform_filesys_ctx, data);
+    
+    // close packet now
+    esmftrc_default_close_packet(&ctx->ctx);
+    
+    // write packet to file 
+    write_packet(ctx);
+  }
+
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::write_metadata()"  
+  static void write_metadata(const char *trace_dir, int *rc) {
+
+    *rc = ESMF_SUCCESS;
+    
+    string metadata_string = TraceGetMetadataString();
+    string filename(trace_dir);
+    filename += "/metadata";
+    
+    std::ofstream ofs (filename.c_str(), std::ofstream::trunc);
+    if (ofs.is_open() && !ofs.fail()) {
+      ofs << metadata_string;
+      ofs.close();
+    }
+    else {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_FILE_CREATE, "Error writing trace metadata file", 
+                                    ESMC_CONTEXT, rc);
+    }
+  }
+
+  
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::TraceOpen()"  
+  void TraceOpen(const char *trace_dir, int *rc) {
+
+    int localrc;
+    char stream_dir_root[ESMC_MAXPATHLEN];
+    char stream_file[ESMC_MAXPATHLEN];
+    struct esmftrc_platform_filesys_ctx *ctx;
+    struct esmftrc_platform_callbacks cbs;
+    uint8_t *buf;
+        
+    if (rc != NULL) *rc = ESMF_SUCCESS;
+
+    ESMC_LogDefault.Write("Enabling ESMF Tracing", ESMC_LOGMSG_INFO);
+
+    // set up callbacks
+    cbs.sys_clock_clock_get_value = get_clock;
+    cbs.is_backend_full = is_backend_full;
+    cbs.open_packet = open_packet;
+    cbs.close_packet = close_packet;
+    ctx = FROM_VOID_PTR(struct esmftrc_platform_filesys_ctx, malloc(sizeof(*ctx))); 
+    if (!ctx) {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_MEM_ALLOCATE, "Cannot allocate context", 
+                                    ESMC_CONTEXT, rc);
+      return;
+    }
+  
+    buf = FROM_VOID_PTR(uint8_t, malloc(EVENT_BUF_SIZE));
+    if (!buf) {
+      free(ctx);
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_MEM_ALLOCATE, "Cannot allocate trace event buffer", 
+                                    ESMC_CONTEXT, rc);
+      return;
+    }
+    
+    memset(buf, 0, EVENT_BUF_SIZE); 
+    
+    //make relative path absolute if needed
+    if (trace_dir[0] != '/') {
+      char cwd[1024];
+      if (getcwd(cwd, sizeof(cwd)) == NULL) {
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_SYS, "Error getting working directory", 
+                                      ESMC_CONTEXT, rc);
+        return; 
+      }
+      sprintf(stream_dir_root, "%s/%s", cwd, trace_dir);
+      //printf("absolute dir = |%s|\n", stream_dir);
+    }
+    else {
+      sprintf(stream_dir_root, "%s", trace_dir);
+    }
+
+    VM *globalvm = VM::getGlobal(&localrc);
+    if (ESMC_LogDefault.MsgFoundError(localrc, 
+	  ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc)) 
+      return;
+    int stream_id = globalvm->getMypet();
+
+    
+    struct stat st = {0};
+    if (stream_id == 0) {
+      if (stat(stream_dir_root, &st) == -1) {
+	if (mkdir(stream_dir_root, 0700) == -1) {
+	  //perror("mkdir()");
+	  ESMC_LogDefault.MsgFoundError(ESMC_RC_FILE_CREATE, "Error creating trace root directory", 
+					ESMC_CONTEXT, rc);
+	  return;
+	}
+      }
+    }
+        
+    //all PETs wait for directory to be created
+    globalvm->barrier();
+
+    //determine if tracing turned on for this PET
+    int localPetOn = 0;
+    TraceCheckPetList(&localPetOn, &localrc);
+    if (ESMC_LogDefault.MsgFoundError(localrc, 
+          ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc)) {
+      traceLocalPet = false;
+      return;
+    }
+       
+    if (localPetOn == 1) {
+      traceLocalPet = true;
+    }
+    else {
+      traceLocalPet = false;
+    }
+    if (!traceLocalPet) {
+      return;
+    }
+  
+    //my specific file
+    sprintf(stream_file, "%s/esmf_stream_%03d", stream_dir_root, stream_id);
+        
+    /*
+    if (stat(stream_dir, &st) == -1) {
+      if (mkdir(stream_dir, 0700) == -1) {
+	//perror("mkdir()");
+	ESMC_LogDefault.MsgFoundError(ESMC_RC_FILE_CREATE, "Error creating trace PET directory", 
+				      ESMC_CONTEXT, rc);
+	return;
+      }
+    }
+    */
+    
+    ctx->fh = fopen(stream_file, "wb");
+    if (!ctx->fh) {
+      free(ctx);
+      free(buf);
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_FILE_OPEN, "Error opening trace output file", 
+                                    ESMC_CONTEXT, rc);
+      return;
+    }
+
+    ctx->stream_id = stream_id;
+
+    //stream zero writes the metadata file
+    if (stream_id == 0) {
+      write_metadata(stream_dir_root, &localrc);
+      if (ESMC_LogDefault.MsgFoundError(localrc, 
+          ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc)) {
+        return;
+      }
+    }
+    
+    esmftrc_init(&ctx->ctx, buf, EVENT_BUF_SIZE, cbs, ctx);
+    open_packet(ctx);
+
+    //store as global context
+    g_esmftrc_platform_filesys_ctx = ctx;
+
+  }
+  
+#undef ESMC_METHOD
+#define ESMC_METHOD "ESMCI::TraceClose()"
+  void TraceClose(int *rc) {
+    struct esmftrc_platform_filesys_ctx *ctx = g_esmftrc_platform_filesys_ctx;
+    
+    if(rc != NULL) rc = ESMF_SUCCESS;
+
+    if (ctx == NULL) {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL, "Error closing trace", 
+                                    ESMC_CONTEXT, rc);
+      return;
+    }
+ 
+    if (esmftrc_packet_is_open(&ctx->ctx) &&
+	!esmftrc_packet_is_empty(&ctx->ctx)) {
+      close_packet(ctx);
+    }
+
+    fclose(ctx->fh);
+    free(esmftrc_packet_buf(&ctx->ctx));
+    free(ctx);
+  }
+
+  static struct esmftrc_default_ctx *esmftrc_platform_get_default_ctx() {
+    return &g_esmftrc_platform_filesys_ctx->ctx;
+  }
+  
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::TraceEventPhase()"  
+  void TraceEventPhase(int ctrl, int *ep_vmid,
+		       int *ep_baseid, int *ep_method, int *ep_phase) {
+
+    if (!traceLocalPet) return;
+    esmftrc_default_trace_control(esmftrc_platform_get_default_ctx(),
+                                  *ep_vmid, *ep_baseid, ctrl,
+                                  *ep_method, *ep_phase);
+    
+  }
+
+  void TraceEventPhaseEnter(int *ep_vmid, int *ep_baseid, int *ep_method, int *ep_phase) {
+    TraceEventPhase(BT_CNTL_START, ep_vmid, ep_baseid, ep_method, ep_phase);
+  }
+  
+  void TraceEventPhaseExit(int *ep_vmid, int *ep_baseid, int *ep_method, int *ep_phase) {
+    TraceEventPhase(BT_CNTL_END, ep_vmid, ep_baseid, ep_method, ep_phase);
+  }
+
+  void TraceEventPhasePrologueEnter(int *ep_vmid, int *ep_baseid, int *ep_method, int *ep_phase) {
+    TraceEventPhase(BT_CNTL_STARTP, ep_vmid, ep_baseid, ep_method, ep_phase);
+  }
+  
+  void TraceEventPhasePrologueExit(int *ep_vmid, int *ep_baseid, int *ep_method, int *ep_phase) {
+    TraceEventPhase(BT_CNTL_ENDP, ep_vmid, ep_baseid, ep_method, ep_phase);
+  }
+  
+  void TraceEventPhaseEpilogueEnter(int *ep_vmid, int *ep_baseid, int *ep_method, int *ep_phase) {
+    TraceEventPhase(BT_CNTL_STARTE, ep_vmid, ep_baseid, ep_method, ep_phase);
+  }
+  
+  void TraceEventPhaseEpilogueExit(int *ep_vmid, int *ep_baseid, int *ep_method, int *ep_phase) {
+    TraceEventPhase(BT_CNTL_ENDE, ep_vmid, ep_baseid, ep_method, ep_phase);
+  }
+
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::TraceEventRegion()"  
+  void TraceEventRegion(int ctrl, const char *name) {
+    if (!traceLocalPet) return;
+    /* ignore for now */
+  }
+  
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::TraceEventComponentInfo()"  
+  void TraceEventComponentInfo(Comp *comp, int *ep_vmid, int *ep_baseid,
+                               const char *ep_name, std::string attributeKeys,
+                               std::string attributeVals) {
+
+    if (!traceLocalPet) return;
+
+    const vector<string> attrKeys = split(attributeKeys, "::");
+    const vector<string> attrVals = split(attributeVals, "::");
+    string ipm("");
+    string rpm("");
+    string fpm("");
+    
+    for (int i=0; i < attrKeys.size(); i++) {
+      if (attrKeys.at(i) == "IPM") {
+        ipm = attrVals.at(i);
+      }
+      else if (attrKeys.at(i) == "RPM") {
+        rpm = attrVals.at(i);
+      }
+      else if (attrKeys.at(i) == "FPM") {
+        fpm = attrVals.at(i);
+      }
+    }
+    
+    esmftrc_default_trace_comp(esmftrc_platform_get_default_ctx(),
+                               *ep_vmid, *ep_baseid, ep_name,
+                               ipm.c_str(), rpm.c_str(), fpm.c_str());
+  }
+
+  
+
+  
+  
+  /*
+  struct esmftrc_default_ctx *esmftrc_platform_linux_fs_get_esmftrc_ctx(
+		  struct esmftrc_platform_linux_fs_ctx *ctx) {
+    return &ctx->ctx;
+  }
+  */
+
+  
+
+////////////////////////////////////////////////////////////////////////////////
+
+#else /* no ESMF_BABELTRACE or ESMF_TRACE_INTERNAL - just use stubs */
+
+#define LOG_NO_BT_LIB ESMC_LogDefault.MsgFoundError(ESMF_RC_LIB_NOT_PRESENT, \
+                "The Babeltrace library is required for tracing but is not present.",\ 
+                ESMC_CONTEXT, rc);
 
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::TraceOpen()"  
@@ -766,9 +1087,9 @@ namespace ESMCI {
 #define ESMC_METHOD "ESMCI::TraceSetupTypes()"    
   void TraceSetupTypes(int *rc) { LOG_NO_BT_LIB }
 
-#undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI::TraceCheckPetList()"  
-  void TraceCheckPetList(int *traceLocalPet, int *rc) { LOG_NO_BT_LIB }
+//#undef  ESMC_METHOD
+//#define ESMC_METHOD "ESMCI::TraceCheckPetList()"  
+//  void TraceCheckPetList(int *traceLocalPet, int *rc) { LOG_NO_BT_LIB }
  
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::TraceEventPhase()"  
@@ -823,205 +1144,8 @@ namespace ESMCI {
   void TraceEventRegion(int ctrl, const char*name)
   { int *rc=NULL; LOG_NO_BT_LIB }
 
+#endif /* ESMF_TRACE_INTERNAL */
+#endif /* ESMF_BABELTRACE */
+
 }
 
-#endif
-
-
-
-/* archive this here for now */
-
-/*
-
-//#include <esmftrc.h>
-
-//#ifdef __cplusplus
-//# define TO_VOID_PTR(_value)		static_cast<void *>(_value)
-//# define FROM_VOID_PTR(_type, _value)	static_cast<_type *>(_value)
-//#else
-//# define TO_VOID_PTR(_value)		((void *) (_value))
-//# define FROM_VOID_PTR(_type, _value)	((_type *) (_value))
-//#endif
-
-  struct esmftrc_platform_filesys_ctx {
-    struct esmftrc_default_ctx ctx;
-    FILE *fh;
-    int stream_id;
-  };
-  
-  //global context
-  static struct esmftrc_platform_filesys_ctx *g_esmftrc_platform_filesys_ctx;
-  
-  static uint64_t get_clock(void* data)
-  {
-    struct timespec ts;
-    
-    //clock_gettime(CLOCK_MONOTONIC, &ts);
-    clock_gettime(CLOCK_REALTIME, &ts);
-
-    return ts.tv_sec * 1000000000ULL + ts.tv_nsec;
-  }
-  
-  static void write_packet(struct esmftrc_platform_filesys_ctx *ctx)
-  {
-    size_t nmemb = fwrite(esmftrc_packet_buf(&ctx->ctx),
-			  esmftrc_packet_buf_size(&ctx->ctx), 1, ctx->fh);
-    assert(nmemb == 1);
-  }
-
-  static int is_backend_full(void *data)
-  {
-    //struct esmftrc_platform_linux_fs_ctx *ctx =
-    // FROM_VOID_PTR(struct esmftrc_platform_linux_fs_ctx, data);
-    
-    // assume file-based backend is never full
-    return 0;
-  }
-
-  static void open_packet(void *data)
-  {
-    struct esmftrc_platform_filesys_ctx *ctx =
-      FROM_VOID_PTR(struct esmftrc_platform_filesys_ctx, data);
-
-    esmftrc_default_open_packet(&ctx->ctx, ctx->stream_id);
-  }
-
-  static void close_packet(void *data)
-  {
-    struct esmftrc_platform_filesys_ctx *ctx =
-      FROM_VOID_PTR(struct esmftrc_platform_filesys_ctx, data);
-
-    // close packet now
-    esmftrc_default_close_packet(&ctx->ctx);
-
-    // write packet to file 
-    write_packet(ctx);
-  }
-  
-// #undef  ESMC_METHOD
-// #define ESMC_METHOD "ESMCI::TraceOpen()"  
-//   void TraceOpen(unsigned int buf_size, const char *trace_dir, int stream_id, int *rc) {
-    
-//     int localrc;
-//     char stream_path[ESMC_MAXPATHLEN];
-//     char stream_dir[ESMC_MAXPATHLEN];
-//     uint8_t *buf;
-//     struct esmftrc_platform_filesys_ctx *ctx;
-//     struct esmftrc_platform_callbacks cbs;
-
-//     if (rc != NULL) *rc = ESMF_SUCCESS;
-
-//     cbs.sys_clock_clock_get_value = get_clock;
-//     cbs.is_backend_full = is_backend_full;
-//     cbs.open_packet = open_packet;
-//     cbs.close_packet = close_packet;
-//     ctx = FROM_VOID_PTR(struct esmftrc_platform_filesys_ctx, malloc(sizeof(*ctx)));
-    
-//     ESMC_LogDefault.Write("Enabling ESMF Tracing", ESMC_LOGMSG_INFO);
-//     if (!ctx) {
-//       ESMC_LogDefault.MsgFoundError(ESMC_RC_MEM_ALLOCATE, "Cannot allocate context", 
-//                                     ESMC_CONTEXT, rc);
-//       return;
-//     }
-  
-//     buf = FROM_VOID_PTR(uint8_t, malloc(buf_size));
-
-//     if (!buf) {
-//       free(ctx);
-//       ESMC_LogDefault.MsgFoundError(ESMC_RC_MEM_ALLOCATE, "Cannot allocate trace event buffer", 
-//                                     ESMC_CONTEXT, rc);
-//       return;
-//     }
-    
-//     memset(buf, 0, buf_size);
-    
-//     //make relative path absolute if needed
-//     if (trace_dir[0] != '/') {
-//       char cwd[1024];
-//       if (getcwd(cwd, sizeof(cwd)) == NULL) {
-//         ESMC_LogDefault.MsgFoundError(ESMC_RC_SYS, "Error getting working directory", 
-//                                       ESMC_CONTEXT, rc);
-//         return; 
-//       }
-//       sprintf(stream_dir, "%s/%s", cwd, trace_dir);
-//       //printf("absolute dir = |%s|\n", stream_dir);
-//     }
-//     else {
-//       sprintf(stream_dir, "%s", trace_dir);
-//     }
-           
-//     //root stream responsible for creating trace directory     
-//     if (stream_id == 0) {      
-//       struct stat st = {0};
-//       if (stat(stream_dir, &st) == -1) {
-//         if (mkdir(stream_dir, 0700) == -1) {
-//           //printf("mkdir == -1\n");
-//           //perror("mkdir()");
-//           ESMC_LogDefault.MsgFoundError(ESMC_RC_FILE_CREATE, "Error creating trace directory", 
-//                                         ESMC_CONTEXT, rc);
-//           return;
-//         }
-//       }
-//     }
-
-//     //all PETs wait for directory to be created
-//     VM *globalvm = VM::getGlobal(&localrc);
-//     if (ESMC_LogDefault.MsgFoundError(localrc, 
-//         ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc)) 
-//       return;
-//     globalvm->barrier();
-    
-//     sprintf(stream_path, "%s/stream%d", stream_dir, stream_id);
-//     ctx->fh = fopen(stream_path, "wb");
-
-//     if (!ctx->fh) {
-//       free(ctx);
-//       free(buf);
-//       ESMC_LogDefault.MsgFoundError(ESMC_RC_FILE_OPEN, "Error opening trace output file", 
-//                                     ESMC_CONTEXT, rc);
-//       return;
-//     }
-
-//     ctx->stream_id = stream_id;
-
-//     esmftrc_init(&ctx->ctx, buf, buf_size, cbs, ctx);
-//     open_packet(ctx);
-
-//     //store as global context
-//     g_esmftrc_platform_filesys_ctx = ctx;
-
-//   }
-
-   
-  void TraceClose(int *rc)
-  {
-    struct esmftrc_platform_filesys_ctx *ctx = g_esmftrc_platform_filesys_ctx;
-    
-    if(rc != NULL) rc = ESMF_SUCCESS;
- 
-    if (esmftrc_packet_is_open(&ctx->ctx) &&
-	!esmftrc_packet_is_empty(&ctx->ctx)) {
-      close_packet(ctx);
-    }
-
-    fclose(ctx->fh);
-    free(esmftrc_packet_buf(&ctx->ctx));
-    free(ctx);
-  }
-  
-
-  
-  struct esmftrc_default_ctx *esmftrc_platform_linux_fs_get_esmftrc_ctx(
-									struct esmftrc_platform_linux_fs_ctx *ctx)
-  {
-    return &ctx->ctx;
-  }
-  
-
-  static struct esmftrc_default_ctx *esmftrc_platform_get_default_ctx()
-  {
-    return &g_esmftrc_platform_filesys_ctx->ctx;
-  }
-  
-
- */
