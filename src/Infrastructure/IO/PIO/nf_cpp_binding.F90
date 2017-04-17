@@ -1718,3 +1718,72 @@ function pio_cpp_put_att_string (file, vardesc, name, value) result(ierr) bind(c
 end function pio_cpp_put_att_string
 
 ! ---------------------------------------------------------------------
+
+! extern "C" int pio_cpp_put_att_floats (pio_file_desc_t file, pio_var_desc_t varDesc,
+!                              const char *name, const float *values, const int nvalues);
+
+function pio_cpp_put_att_floats (file, vardesc, name, values, nvalues) result(ierr) bind(c)
+
+  !  bind to C
+  use, intrinsic :: iso_c_binding, only: c_char, c_int, c_float, c_ptr, c_f_pointer
+  use pio_cpp_utils, only: f_chars, c_len, max_path_len
+
+  !  import pio types
+  use pio_types, only: file_desc_t, Var_desc_t
+
+  !  import nf procedure signatures
+  use pionfatt_mod, only: put_att
+
+  !  function result
+  integer(c_int) :: ierr
+
+  !  dummy arguments
+  type(c_ptr),    value :: file
+  type(c_ptr),    value :: vardesc
+  type(c_ptr),    value :: name
+  real(c_float)         :: values(*)
+  integer(c_int), value :: nvalues
+
+  !  local
+  integer :: ierror
+
+  type(file_desc_t), pointer :: file_desc
+  type(Var_desc_t),  pointer :: var_desc
+  character(kind= c_char, len= max_path_len), pointer :: c_attname
+#ifdef ALLOC_CHARLEN_OK
+  character(len= :), allocatable :: attname
+#else
+  character(len= max_path_len)   :: attname
+#endif
+  real :: attvalues(int (nvalues))
+  integer :: clen
+
+  !  text
+  continue
+
+  !  convert the C pointers to a Fortran pointers
+  call c_f_pointer(file, file_desc)
+  call c_f_pointer(vardesc, var_desc)
+  call c_f_pointer(name, c_attname)
+
+  clen = c_len(c_attname)
+#ifdef ALLOC_CHARLEN_OK
+  allocate(attname, mold= attname(1: clen))
+  call f_chars(attname, c_attname(1: clen))
+#else
+  attname = c_attname(1:clen)
+#endif
+
+  attvalues = values(:int (nvalues))
+
+  !  call the Fortran procedure
+  ierror = put_att (file_desc, var_desc%varID, attname, attvalues)
+
+  !  convert the arguments back to C
+  ierr = int(ierror, c_int)
+
+  !  return to the cpp caller
+  return
+end function pio_cpp_put_att_floats
+
+! ---------------------------------------------------------------------
