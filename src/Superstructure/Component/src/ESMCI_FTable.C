@@ -68,7 +68,7 @@ extern "C" {
   void FTN_X(f_esmf_fortranudtpointercopy)(void *dst, void *src);
   
   void FTN_X(esmf_complianceicregister)(void *comp, int *rc);
-
+  
 #ifdef ESMF_NO_DLFCN
   //for now, assume these are here in the case that dlopen is not available
   void FTN_X(nuopc_model_complianceicr)(void *comp, int *rc);

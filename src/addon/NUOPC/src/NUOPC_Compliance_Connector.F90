@@ -431,6 +431,11 @@ contains
             endif
 
             if (outputTrace) then
+               call ESMF_TraceEventMemInfo(rc=rc)
+               if (ESMF_LogFoundError(rc, &
+                    line=__LINE__, &
+                    file=FILENAME)) &
+                    return  ! bail out               
                call ESMF_TraceEventPhaseEnter(comp, rc=rc)
                if (ESMF_LogFoundError(rc, &
                     line=__LINE__, &
@@ -467,7 +472,12 @@ contains
                if (ESMF_LogFoundError(rc, &
                     line=__LINE__, &
                     file=FILENAME)) &
-                    return  ! bail out            
+                    return  ! bail out
+               call ESMF_TraceEventMemInfo(rc=rc)
+               if (ESMF_LogFoundError(rc, &
+                    line=__LINE__, &
+                    file=FILENAME)) &
+                    return  ! bail out               
             endif
            
             if (outputJSON) then
@@ -682,6 +692,11 @@ contains
              endif
 
              if (outputTrace) then
+                call ESMF_TraceEventMemInfo(rc=rc)
+                if (ESMF_LogFoundError(rc, &
+                     line=__LINE__, &
+                     file=FILENAME)) &
+                     return  ! bail out               
                 call ESMF_TraceEventPhaseEnter(comp, rc=rc)
                 if (ESMF_LogFoundError(rc, &
                      line=__LINE__, &
@@ -709,6 +724,11 @@ contains
 
            if (outputTrace) then
               call ESMF_TraceEventPhaseExit(comp, rc=rc)
+              if (ESMF_LogFoundError(rc, &
+                   line=__LINE__, &
+                   file=FILENAME)) &
+                   return  ! bail out
+              call ESMF_TraceEventMemInfo(rc=rc)
               if (ESMF_LogFoundError(rc, &
                    line=__LINE__, &
                    file=FILENAME)) &
@@ -912,6 +932,11 @@ contains
             endif
 
             if (outputTrace) then
+               call ESMF_TraceEventMemInfo(rc=rc)
+               if (ESMF_LogFoundError(rc, &
+                    line=__LINE__, &
+                    file=FILENAME)) &
+                    return  ! bail out               
                call ESMF_TraceEventPhaseEnter(comp, rc=rc)
                if (ESMF_LogFoundError(rc, &
                     line=__LINE__, &
@@ -939,6 +964,11 @@ contains
 
             if (outputTrace) then
                call ESMF_TraceEventPhaseExit(comp, rc=rc)
+               if (ESMF_LogFoundError(rc, &
+                    line=__LINE__, &
+                    file=FILENAME)) &
+                    return  ! bail out
+               call ESMF_TraceEventMemInfo(rc=rc)
                if (ESMF_LogFoundError(rc, &
                     line=__LINE__, &
                     file=FILENAME)) &

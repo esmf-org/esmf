@@ -40,6 +40,7 @@ module ESMF_TraceMod
   public ESMF_TraceEventComponentInfo
   public ESMF_TraceEventRegionEnter
   public ESMF_TraceEventRegionExit
+  public ESMF_TraceEventMemInfo
   
   interface ESMF_TraceEventPhaseEnter
      module procedure ESMF_TraceEventGridCompPhaseEnter
@@ -637,6 +638,19 @@ contains
          ESMF_CONTEXT, rcToReturn=rc)) return
 
   end subroutine ESMF_TraceEventRegionExit
+
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_TraceEventMemInfo()"
+  subroutine ESMF_TraceEventMemInfo(rc)
+    integer, intent(out), optional  :: rc
+    
+    rc = ESMF_SUCCESS 
+    
+    call c_esmftrace_mem_info(rc)
+    if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return
+    
+  end subroutine ESMF_TraceEventMemInfo
 
   
   

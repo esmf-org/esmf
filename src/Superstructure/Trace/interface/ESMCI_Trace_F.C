@@ -97,4 +97,9 @@ extern "C" {
     if (rc != NULL) *rc = ESMF_SUCCESS;
   }
 
+  void FTN_X(c_esmftrace_mem_info)(int *rc) {
+    ESMCI::TraceEventMemInfo();
+    if (rc != NULL) *rc = ESMF_SUCCESS;
+  }
+
 } // extern "C"

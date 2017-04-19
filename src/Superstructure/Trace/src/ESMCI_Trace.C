@@ -753,7 +753,13 @@ namespace ESMCI {
     bt_ctf_field_put(field_name);
     
   }    
-
+  
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::TraceEventMemInfo()"  
+  void TraceEventMemInfo() {
+    /* ignore for now */
+  }
+  
 #else  /* ESMF_BABELTRACE not set */
 
 #ifdef ESMF_TRACE_INTERNAL
@@ -913,18 +919,7 @@ namespace ESMCI {
   
     //my specific file
     sprintf(stream_file, "%s/esmf_stream_%03d", stream_dir_root, stream_id);
-        
-    /*
-    if (stat(stream_dir, &st) == -1) {
-      if (mkdir(stream_dir, 0700) == -1) {
-	//perror("mkdir()");
-	ESMC_LogDefault.MsgFoundError(ESMC_RC_FILE_CREATE, "Error creating trace PET directory", 
-				      ESMC_CONTEXT, rc);
-	return;
-      }
-    }
-    */
-    
+            
     ctx->fh = fopen(stream_file, "wb");
     if (!ctx->fh) {
       free(ctx);
@@ -1020,7 +1015,8 @@ namespace ESMCI {
 #define ESMC_METHOD "ESMCI::TraceEventRegion()"  
   void TraceEventRegion(int ctrl, const char *name) {
     if (!traceLocalPet) return;
-    /* ignore for now */
+    esmftrc_default_trace_region(esmftrc_platform_get_default_ctx(),
+                                 ctrl, name);
   }
   
 #undef  ESMC_METHOD
@@ -1054,7 +1050,24 @@ namespace ESMCI {
                                ipm.c_str(), rpm.c_str(), fpm.c_str());
   }
 
-  
+#undef ESMC_METHOD
+#define ESMC_METHOD "ESMCI::TraceEventMemInfo()"
+  void TraceEventMemInfo() {
+
+    int localrc;
+    VM *globalvm = VM::getGlobal(&localrc);
+    if (ESMC_LogDefault.MsgFoundError(localrc, 
+          ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc)) 
+      return;
+
+    int virtMem = -1;
+    int physMem = -1;
+    globalvm->getMemInfo(&virtMem, &physMem);    
+    
+    esmftrc_default_trace_mem(esmftrc_platform_get_default_ctx(),
+                              virtMem, physMem);
+    
+  }
 
   
   
@@ -1142,6 +1155,11 @@ namespace ESMCI {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::TraceEventRegion()"  
   void TraceEventRegion(int ctrl, const char*name)
+  { int *rc=NULL; LOG_NO_BT_LIB }
+
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::TraceEventMemInfo()"  
+  void TraceEventMemInfo()
   { int *rc=NULL; LOG_NO_BT_LIB }
 
 #endif /* ESMF_TRACE_INTERNAL */

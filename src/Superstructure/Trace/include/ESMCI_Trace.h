@@ -61,9 +61,12 @@ namespace ESMCI {
                                    int *ep_method, int *ep_phase);
 
   void TraceEventComponentInfo(Comp *comp, int *ep_vmid, int *ep_baseid,
-                               const char *ep_name, std::string attributeKeys, std::string attributeVals);
+                               const char *ep_name,
+                               std::string attributeKeys,
+                               std::string attributeVals);
 
   void TraceEventRegion(int ctrl, const char*name);
+  void TraceEventMemInfo();
 }
 
 #endif

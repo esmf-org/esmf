@@ -53,6 +53,12 @@ metadata:
             - end_prologue
             - start_epilogue
             - end_epilogue
+    enum_type_region:
+        class: enum
+        value-type: uint8
+        members:
+            - enter
+            - exit
     enum_type_method:
         class: enum
         value-type: uint8
@@ -128,5 +134,18 @@ metadata:
                     ctrl: enum_type_control
                     method: enum_type_method
                     phase: uint8
+        region:
+            payload-type:
+                class: struct
+                fields:
+                    ctrl: enum_type_region
+                    name:
+                        class: string
         comp:
             payload-type: comp_type
+        mem:
+            payload-type:
+                class: struct
+                fields:
+                    virtMem: uint32
+                    physMem: uint32
