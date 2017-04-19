@@ -117,10 +117,11 @@ extern "C" {
       }
     }
 
-    vector<pair<string,string> > varAtts;  // not supported yet
+    std::string convention;  // not supported yet
+    std::string purpose;     // not supported yet
 
     // call into C++
-    localrc = (*ptr)->addArray(*array, varName, dimLabels, varAtts);
+    localrc = (*ptr)->addArray(*array, convention, purpose, varName, dimLabels);
     ESMC_LogDefault.MsgFoundError(localrc,
                                   ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
                                   ESMC_NOT_PRESENT_FILTER(rc));

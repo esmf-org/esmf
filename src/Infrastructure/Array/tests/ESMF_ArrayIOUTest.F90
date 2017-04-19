@@ -57,6 +57,7 @@ program ESMF_ArrayIOUTest
   type(ESMF_Array)                        :: array_undist, array_undist_r
   type(ESMF_DistGrid)                     :: distgrid_tmp
   type(ESMF_Array)                        :: array_tmp
+  type(ESMF_Array)                        :: array_gxt
   integer                                 :: rank, tileCount, dimCount, jj
   integer, allocatable                    :: arrayToDistGridMap(:), regDecomp(:)
   integer, allocatable                    :: minIndexPTile(:,:), maxIndexPTile(:,:)
@@ -70,14 +71,21 @@ program ESMF_ArrayIOUTest
                        computationalLWidth(:),computationalUWidth(:)
   integer, allocatable :: exclusiveLBound(:,:), exclusiveUBound(:,:)
   integer      :: localDeCount, localPet, petCount
-  character(ESMF_MAXSTR), allocatable     :: varatts(:,:)
   integer :: i,j,k
   integer :: Maxvalue(1), diff
   real(ESMF_KIND_R8) :: r8Max(1), r8diff
   character(ESMF_MAXSTR) :: string
+  character(ESMF_MAXSTR) :: apConv, apPurp
   integer :: msglen
   logical :: passfail
   logical :: valid_de1
+
+  type nameval_t
+    character(ESMF_MAXSTR) :: name
+    character(ESMF_MAXSTR) :: value
+  end type
+
+  type(nameval_t), allocatable :: attrNameVals(:)
 
   ! cumulative result: count failures; no failures equals "all pass"
   integer :: result = 0
@@ -209,15 +217,8 @@ program ESMF_ArrayIOUTest
   write(name, *) "Write ESMF_Array with Halo to NetCDF Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
 
-  allocate (varatts (5,2))
-  varatts(1,:) = (/ "long_name       ", "Regional temp   " /)
-  varatts(2,:) = (/ "units           ", "degrees_F       " /)
-  varatts(3,:) = (/ "cartesian_x_axis", "X               " /)
-  varatts(4,:) = (/ "cartesian_y_axis", "Y               " /)
-  varatts(5,:) = (/ "cartesian_z_axis", "Z               " /)
   call ESMF_ArrayWrite(array_withhalo, fileName='file3D_withhalo.nc',    &
       dimLabels=(/"x_axis", "y_axis", "z_axis"/),  &
-      varAtts=varatts,  &
       status=ESMF_FILESTATUS_REPLACE, rc=rc)
 #if (defined ESMF_PIO && ( defined ESMF_NETCDF || defined ESMF_PNETCDF))
   call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -1448,6 +1449,87 @@ program ESMF_ArrayIOUTest
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_DistGridDestroy(distgrid, rc=rc)
   call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+!------------------------------------------------------------------------
+! Array with Attribute package
+!------------------------------------------------------------------------
+
+!------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Distgrid Create 1 DE/Pet for Attribute package Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  distgrid = ESMF_DistGridCreate(minIndex=(/1/), &
+              maxIndex=(/96/), regDecomp=(/petCount/),  rc=rc)
+  call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+!------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Array Create for Attribute package Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  array_gxt = ESMF_ArrayCreate(distgrid=distgrid, typekind=ESMF_TYPEKIND_R8, &
+          name="grid_xt", rc=rc)
+  call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+!------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Create custom attribute package Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  apConv = 'GFDL_IO'
+  apPurp = 'attribute'
+  allocate (attrNameVals(3))
+  attrNameVals(1) = nameval_t ('long_name',      'T-cell longitude')
+  attrNameVals(2) = nameval_t ('units',          'degrees_E')
+  attrNameVals(3) = nameval_t ('cartesian_axis', 'X')
+  call ESMF_AttributeAdd (array_gxt,  &
+      convention=apConv, purpose=apPurp,  &
+      attrList=attrNameVals%name, rc=rc)
+  call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+!------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Set attribute values Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  do, i=1, size (attrNameVals)
+    call ESMF_AttributeSet (array_gxt,  &
+        attrNameVals(i)%name, attrNameVals(i)%value,  &
+        convention=apConv, purpose=apPurp, rc=rc)
+    if (rc /= ESMF_SUCCESS) exit
+  end do
+  call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+!------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Set numeric range name Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_AttributeAdd (array_gxt,  &
+      convention=apConv, purpose=apPurp,  &
+      attrList=(/ 'valid_range' /), rc=rc)
+  call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+!------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Set numeric range values Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_AttributeSet (array_gxt,  &
+      'valid_range', valueList=(/ -330.0, 330.0 /),  &
+      convention=apConv, purpose=apPurp, rc=rc)
+  call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+!------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+! ! Given an ESMF array, write the netCDF file.
+  write(name, *) "Array with Attributes write to NetCDF Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_ArrayWrite(array_gxt, fileName="Array_attributes.nc", &
+      dimLabels=(/"x_axis"/),  &
+      convention=apConv, purpose=apPurp,  &
+      status=ESMF_FILESTATUS_REPLACE, iofmt=ESMF_IOFMT_NETCDF, rc=rc)
+#if (defined ESMF_PIO && (defined ESMF_NETCDF || defined ESMF_PNETCDF))
+  call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+#else
+  write(failMsg, *) "Did not return ESMF_RC_LIB_NOT_PRESENT"
+  call ESMF_Test((rc==ESMF_RC_LIB_NOT_PRESENT), name, failMsg, result, ESMF_SRCLINE)
+#endif
 
 !-------------------------------------------------------------------------------
 !-------------------------------------------------------------------------------

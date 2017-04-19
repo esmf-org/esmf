@@ -2916,9 +2916,10 @@ int Array::read(
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       &rc)) return rc;
   // For here on, we have to be sure to clean up before returning
+  std::string convention;   // dummy string for reads
+  std::string purpose;      // dummy string for reads
   vector<string> labNames;  // dummy vector for reads
-  vector<pair<string,string> > varAtts;   // dummy vector for reads
-  localrc = newIO->addArray(this, variableName, labNames, varAtts);
+  localrc = newIO->addArray(this, variableName, convention, purpose, labNames);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       &rc)) {
     IO::destroy(&newIO);
@@ -2957,8 +2958,9 @@ int Array::write(
 //
   const std::string &file,        // in    - name of file being written
   const std::string &variableName,// in    - optional variable name
+  const std::string &convention,  // in    - optional Attribute package
+  const std::string &purpose,     // in    - optional Attribute package
   const std::vector<std::string> &dimLabels, // in - optional dimension labels
-  const std::vector<std::pair<std::string,std::string> > &varAtts, // in - optional variable attributes
   bool  *overwrite,               // in    - OK to overwrite file data
   ESMC_FileStatus_Flag *status,   // in    - file status flag
   int   *timeslice,               // in    - timeslice option
@@ -2974,9 +2976,9 @@ int Array::write(
 //-----------------------------------------------------------------------------
   // initialize return code; assume routine not implemented
   int rc = ESMC_RC_NOT_IMPL;              // final return code
-  ESMC_IOFmt_Flag localiofmt;              // For default handling
+  ESMC_IOFmt_Flag localiofmt;             // For default handling
   bool localoverwrite;                    // For default handling
-  ESMC_FileStatus_Flag localstatus;        // For default handling
+  ESMC_FileStatus_Flag localstatus;       // For default handling
 
   // Handle format default
   if ((ESMC_IOFmt_Flag *)NULL == iofmt) {
@@ -3007,6 +3009,26 @@ int Array::write(
     }
   }
 
+  // It is an error to supply Attribute convention in binary mode
+  if (ESMF_IOFMT_NETCDF != localiofmt) {
+    if (convention.size() > 0) {
+      ESMC_LogDefault.MsgFoundError(ESMF_RC_ARG_BAD, 
+          "NetCDF Attribute convention not allowed in binary mode",
+          ESMC_CONTEXT, &rc);
+      return rc;
+    }
+  }
+
+  // It is an error to supply Attribute purpose in binary mode
+  if (ESMF_IOFMT_NETCDF != localiofmt) {
+    if (purpose.size() > 0) {
+      ESMC_LogDefault.MsgFoundError(ESMF_RC_ARG_BAD, 
+          "NetCDF Attribute convention not allowed in binary mode",
+          ESMC_CONTEXT, &rc);
+      return rc;
+    }
+  }
+
   // It is an error to supply dimension names in binary mode
   if (ESMF_IOFMT_NETCDF != localiofmt) {
     if (dimLabels.size() > 0) {
@@ -3017,22 +3039,13 @@ int Array::write(
     }
   }
 
-  // It is an error to supply variable attributes in binary mode
-  if (ESMF_IOFMT_NETCDF != localiofmt) {
-    if (varAtts.size() > 0) {
-      ESMC_LogDefault.MsgFoundError(ESMF_RC_ARG_BAD, 
-          "NetCDF variable attributes not allowed in binary mode",
-          ESMC_CONTEXT, &rc);
-      return rc;
-    }
-  }
 
   IO *newIO = IO::create(&rc);
   if (ESMC_LogDefault.MsgFoundError(rc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)){
     return rc;
   }
   // From now on, we have to be sure to clean up before returning
-  rc = newIO->addArray(this, variableName, dimLabels, varAtts);
+  rc = newIO->addArray(this, variableName, convention, purpose, dimLabels);
   if (ESMC_LogDefault.MsgFoundError(rc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) {
     IO::destroy(&newIO);
     newIO = (IO *)NULL;

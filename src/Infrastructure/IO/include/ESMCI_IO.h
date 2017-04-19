@@ -61,8 +61,9 @@ namespace ESMCI {
     enum IOListObjectType type;
     IO_ObjectType object;           // e.g., Array, Attribute
     std::string name;
+    std::string convention;
+    std::string purpose;
     std::vector<std::string> dimLabels;
-    std::vector<std::pair<std::string,std::string> > varAtts;
     ESMC_I8 number;
 
     IO_ObjectContainer () {
@@ -72,18 +73,22 @@ namespace ESMCI {
       number = 0;
     }
     IO_ObjectContainer (Array *arr_p, const std::string &arrName,
-        const std::vector<std::string> &dimLabels,
-        const std::vector<std::pair<std::string,std::string> > &varAtts) {
+        const std::string convention,
+        const std::string purpose,
+        const std::vector<std::string> &dimLabels) {
       type = IO_ARRAY;
       object.arr = arr_p;
       if (arrName.length() > 0)
         name = arrName;
 
+      if (convention.length() > 0)
+        this->convention = convention;
+
+      if (purpose.length() > 0)
+        this->purpose = purpose;
+
       if (dimLabels.size() > 0)
         this->dimLabels = dimLabels;
-
-      if (varAtts.size() > 0)
-        this->varAtts = varAtts;
       number = 0;
     }
     ~IO_ObjectContainer() {
@@ -188,8 +193,9 @@ namespace ESMCI {
     int addArray(Array *arr_p);
     int addArray(Array *arr_p,
                  const std::string &variableName,
-                 const std::vector<std::string> &dimLabels,
-                 const std::vector<std::pair<std::string,std::string> > &varAtts);
+                 const std::string &convention,
+                 const std::string &purpose,
+                 const std::vector<std::string> &dimLabels);
 // TBI
 #if 0
     void addAttributes(ESMC_Base *obj_p,

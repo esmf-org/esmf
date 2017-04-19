@@ -334,8 +334,8 @@ namespace ESMCI {
     int read(const std::string &file, const std::string &variableName,
          int *timeslice, ESMC_IOFmt_Flag *iofmt);
     int write(const std::string &file, const std::string &variableName,
+         const std::string &convention, const std::string &purpose,
          const std::vector<std::string> &dimLabels,
-         const std::vector<std::pair<std::string,std::string> > &varAtts,
          bool *overwrite, ESMC_FileStatus_Flag *status,
          int *timeslice, ESMC_IOFmt_Flag *iofmt);
     int print() const;

@@ -532,7 +532,48 @@ int IO::write(
       }
     }
 
-    Array *temp_array_undist_p;  // temp when Array has undistributed dimensions
+    Attribute *attPack = NULL;
+    if ((*it)->convention.length() > 0) {
+      int nattpacks = temp_array_p->root.getCountPack();
+      if (nattpacks == 0) {
+        localrc = ESMF_RC_ATTR_NOTSET;
+        if (ESMC_LogDefault.MsgFoundError(localrc, "No Attribute packages found", ESMC_CONTEXT,
+            &rc)) {
+        // Close the file but return original error even if close fails.
+          localrc = close();
+          return rc;
+        }
+      }
+
+// temp_array_p->root.ESMC_Print ();
+      std::vector<std::string> attPackNameList;
+      int attPackNameCount;
+      localrc = temp_array_p->root.AttPackGet(
+          (*it)->convention, (*it)->purpose, "array",
+          attPackNameList, attPackNameCount, ESMC_ATTNEST_OFF);
+      if (ESMC_LogDefault.MsgFoundError(localrc,
+          "AttPack with convention " + (*it)->convention + " and purpose " + (*it)->purpose + " not found", ESMC_CONTEXT,
+          &rc)) {
+      // Close the file but return original error even if close fails.
+        localrc = close();
+        return rc;
+      }
+
+      attPack = temp_array_p->root.AttPackGet (
+          (*it)->convention, (*it)->purpose, "array",
+          attPackNameList[0], ESMC_ATTNEST_OFF);
+      if (!attPack) {
+        localrc = ESMF_RC_ATTR_NOTSET;
+        if (ESMC_LogDefault.MsgFoundError(localrc, "Can not access AttPack " + attPackNameList[0], ESMC_CONTEXT,
+            &rc)) {
+        // Close the file but return original error even if close fails.
+          localrc = close();
+          return rc;
+        }
+      }
+    }
+
+    Array *temp_array_undist_p;  // temp in case Array has undistributed dimensions
     ESMCI::RouteHandle *rh;
     switch((*it)->type) {
     case IO_NULL:
@@ -594,7 +635,7 @@ int IO::write(
 
       // Write the Array
       ioHandler->arrayWrite(temp_array_p, (*it)->getName(),
-          (*it)->dimLabels, (*it)->varAtts, timeslice, &localrc);
+          (*it)->dimLabels, timeslice, attPack, &localrc);
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc))
         return rc;
 
@@ -845,9 +886,10 @@ int IO::addArray(
 //-----------------------------------------------------------------------------
 
   std::string varname;                 // no name
+  std::string convention;              // no Attribute convention
+  std::string purpose;                 // no Attribute purpose
   std::vector<std::string> dimLabels;  // no labels
-  std::vector<std::pair<std::string,std::string> > varAtts; // no attributes
-  return IO::addArray(arr_p, varname, dimLabels, varAtts);
+  return IO::addArray(arr_p, varname, convention, purpose, dimLabels);
 }
 
 //-------------------------------------------------------------------------
@@ -864,8 +906,9 @@ int IO::addArray(
 // !ARGUMENTS:
   Array *arr_p,                             // (in) - The array to add
   const std::string &variableName,          // (in) - Name to use for array
-  const std::vector<std::string> &dimLabels,// (in) - Optional dimension labels
-  const std::vector<std::pair<std::string,std::string> > &varAtts // (in) - Optional variable attributes
+  const std::string &convention,            // (in) - Attribute convention
+  const std::string &purpose,               // (in) - Attribute purpose
+  const std::vector<std::string> &dimLabels // (in) - Optional dimension labels
   ) {
 // !DESCRIPTION:
 //      Add an array to the list of objects to read or write. The 
@@ -891,15 +934,11 @@ int IO::addArray(
     return localrc;
   }
 
-  if (variableName.size() > ESMF_MAXSTR) {
-    ESMC_LogDefault.Write("Array name length exceeds ESMF_MAXSTR",
-                          ESMC_LOGMSG_WARN, ESMC_CONTEXT);
-    return ESMF_RC_LONG_STR;
-  }
-
 // Push Array onto the list
   try {
-    IO_ObjectContainer *newObj = new IO_ObjectContainer((Array *)arr_p, variableName, dimLabels, varAtts);
+    IO_ObjectContainer *newObj = new IO_ObjectContainer((Array *)arr_p,
+        variableName, convention, purpose,
+        dimLabels);
 
     if ((IO_ObjectContainer *)NULL == newObj) {
       localrc = ESMC_RC_MEM_ALLOCATE;

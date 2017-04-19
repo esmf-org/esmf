@@ -643,21 +643,21 @@ extern "C" {
   
   void FTN_X(c_esmc_arraywrite)(ESMCI::Array **array,
                                 char *file,
-                                char *variableName, int *len_variableName,
+                                char *variableName, char *convention, char *purpose,
                                 char *dimensionLabels, int *size_dimLabels, int *length_dimLabels,
-                                char *variableAtts, int *size_varAtts, int *length_varAtts,
                                 ESMC_Logical *opt_overwriteflag,
                                 ESMC_FileStatus_Flag *status,
                                 int *timeslice, ESMC_IOFmt_Flag *iofmt,
                                 int *rc,
                                 ESMCI_FortranStrLenArg file_l,
                                 ESMCI_FortranStrLenArg varname_l,
-                                ESMCI_FortranStrLenArg dimlabels_l,
-                                ESMCI_FortranStrLenArg varatts_l) {
+                                ESMCI_FortranStrLenArg convention_l,
+                                ESMCI_FortranStrLenArg purpose_l,
+                                ESMCI_FortranStrLenArg dimlabels_l) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_arraywrite()"
 // std::cout << ESMF_METHOD << ": file_l=" << file_l << ", varname_l=" << varname_l;
-// std::cout << ", dimlabels_l=" << dimlabels_l << ", varatts_l=" << varatts_l << std::endl;
+// std::cout << ", dimlabels_l=" << dimlabels_l << std::endl;
     bool overwriteflag;
     // Initialize return code; assume routine not implemented
     if (ESMC_NOT_PRESENT_FILTER(rc) != ESMC_NULL_POINTER) {
@@ -670,9 +670,19 @@ extern "C" {
     string fileName (file, ESMC_F90lentrim (file, file_l));
 
     string varName;
-    if (*len_variableName > 0)
+    if (variableName && (varname_l > 0))
       varName = string (variableName,
-        ESMC_F90lentrim (variableName, *len_variableName));
+        ESMC_F90lentrim (variableName, varname_l));
+
+    string conv;
+    if (convention && (convention_l > 0))
+      conv = string (convention,
+        ESMC_F90lentrim (convention, convention_l));
+
+    string purp;
+    if (purpose && (purpose_l > 0))
+      purp = string (purpose,
+        ESMC_F90lentrim (purpose, purpose_l));
 
     vector<string> dimLabels;
     int n_labels = *size_dimLabels;
@@ -687,26 +697,10 @@ extern "C" {
       }
     }
 
-    // form variable attributes into name/value pairs
-    vector<pair<string, string> > varAttPairs;
-    int n_varatts = *size_varAtts;
-    if (n_varatts > 0) {
-      varatts_l = *length_varAtts;   // PGI work-around (see ticket 3614119)
-      varAttPairs.reserve (n_varatts);
-      char *cp0 = variableAtts;
-      char *cp1 = variableAtts + n_varatts*varatts_l;
-      for (int i=0; i<n_varatts; i++) {
-        std::string s0 = string (cp0, ESMC_F90lentrim (cp0, varatts_l));
-        std::string s1 = string (cp1, ESMC_F90lentrim (cp1, varatts_l));
-        varAttPairs.push_back(std::make_pair (s0, s1));
-        cp0 += varatts_l;
-        cp1 += varatts_l;
-      }
-    }
-
     overwriteflag = (*opt_overwriteflag == ESMF_TRUE);
     // Call into the actual C++ method wrapped inside LogErr handling
-    localrc = (*array)->write(fileName, varName, dimLabels, varAttPairs,
+    localrc = (*array)->write(fileName, varName,
+                              conv, purp, dimLabels,
                               &overwriteflag, status, timeslice, iofmt);
     ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       ESMC_NOT_PRESENT_FILTER(rc));
