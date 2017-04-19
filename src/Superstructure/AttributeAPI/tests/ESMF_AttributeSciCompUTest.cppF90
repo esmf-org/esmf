@@ -49,11 +49,12 @@ program ESMF_AttributeSciCompUTest
 
       ! local variables
       type(ESMF_CplComp) :: cfg
-      type(ESMF_SciComp) :: scicomp, gfg, scicompValue, scicompHybrid
+      type(ESMF_SciComp) :: scicomp, gfg
       type(ESMF_State)   :: sfg
 
       ! macro variables
       AttributeTestVariablesMacro()
+      AttributeTestVariablesCopyMacro(scicomp, ESMF_SciComp)
 
 !-------------------------------------------------------------------------------
 !  The unit tests are divided into Sanity and Exhaustive. The Sanity tests are
@@ -81,8 +82,6 @@ program ESMF_AttributeSciCompUTest
       ! gridded components
       scicomp = ESMF_SciCompCreate(name="scicomp", rc=rc)
       gfg = ESMF_SciCompCreate(name="scicompforscicomp", rc=rc)
-      scicompValue = ESMF_SciCompCreate(name="scicompforvaluecopy", rc=rc)
-      scicompHybrid = ESMF_SciCompCreate(name="scicompforhybridcopy", rc=rc)
       
       if (rc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
@@ -92,31 +91,8 @@ program ESMF_AttributeSciCompUTest
 
 AttributeTestMacro(scicomp, a SciComp, EX_UTest, NEX_UTest)
 
-^ifdef ESMF_TESTEXHAUSTIVE
+AttributeTestCopyMacro(scicomp, ESMF_SciComp, a SciComp, ESMF_SciComp, EX_UTest, NEX_UTest)
 
-    !-------------------------------------------------------------------------
-    !  AttributeCopy
-    !-------------------------------------------------------------------------
-
-      !EX_UTest
-      ! Copy a SciComp Attribute hierarchy VALUE ONE LEVEL Test
-      call ESMF_AttributeCopy(scicomp, scicompValue, &
-        copyflag=ESMF_COPY_VALUE, atttreeflag=ESMF_ATTTREE_OFF, rc=rc)
-      write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Copying a SciComp Attribute hierarchy VALUE ONE LEVEL Test"
-      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-      !------------------------------------------------------------------------
-
-      !EX_UTest
-      ! Copy a SciComp Attribute hierarchy HYBRID Test
-      call ESMF_AttributeCopy(scicomp, scicompHybrid, &
-        copyflag=ESMF_COPY_REFERENCE, atttreeflag=ESMF_ATTTREE_ON, rc=rc)
-      write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Copying a SciComp Attribute hierarchy HYBRID Test"
-      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-      !------------------------------------------------------------------------
-
-^endif
 
     !-------------------------------------------------------------------------
     !  Attribute hierarchy linking
@@ -254,8 +230,6 @@ AttributeTestMacro(scicomp, a SciComp, EX_UTest, NEX_UTest)
       ! clean up      
       call ESMF_SciCompDestroy(scicomp, rc=rc)
       call ESMF_SciCompDestroy(gfg, rc=rc)
-      call ESMF_SciCompDestroy(scicompValue, rc=rc)
-      call ESMF_SciCompDestroy(scicompHybrid, rc=rc)
 
       call ESMF_CplCompDestroy(cfg, rc=rc)
 

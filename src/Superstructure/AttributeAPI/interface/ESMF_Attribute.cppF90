@@ -235,6 +235,9 @@ module ESMF_AttributeMod
         module procedure ESMF_GridCompAttCopy
         module procedure ESMF_SciCompAttCopy
         module procedure ESMF_StateAttCopy
+        module procedure ESMF_FieldAttCopy
+        module procedure ESMF_FieldBundleAttCopy
+        module procedure ESMF_GridAttCopy
 
 ! !DESCRIPTION:
 !     This interface provides a single entry point for methods that copy
@@ -1358,18 +1361,24 @@ contains
 !
 !     Supported values for <object1> are:
 !     \begin{description}
-!     \item type(ESMF\_CplComp),  intent(in) :: comp1
-!     \item type(ESMF\_GridComp), intent(in) :: comp1
-!     \item type(ESMF\_SciComp),  intent(in) :: comp1
-!     \item type(ESMF\_State),    intent(in) :: state
+!     \item type(ESMF\_CplComp),     intent(in)    :: comp1
+!     \item type(ESMF\_GridComp),    intent(in)    :: comp1
+!     \item type(ESMF\_SciComp),     intent(in)    :: comp1
+!     \item type(ESMF\_Field),       intent(inout) :: field1
+!     \item type(ESMF\_FieldBundle), intent(inout) :: fieldbundle1
+!     \item type(ESMF\_Grid),        intent(inout) :: grid1
+!     \item type(ESMF\_State),       intent(in)    :: state
 !     \end{description}
 !
 !     Supported values for <object2> are:
 !     \begin{description}
-!     \item type(ESMF\_CplComp),  intent(inout) :: comp2
-!     \item type(ESMF\_GridComp), intent(inout) :: comp2
-!     \item type(ESMF\_SciComp),  intent(inout) :: comp2
-!     \item type(ESMF\_State),    intent(inout) :: state
+!     \item type(ESMF\_CplComp),     intent(inout) :: comp2
+!     \item type(ESMF\_GridComp),    intent(inout) :: comp2
+!     \item type(ESMF\_SciComp),     intent(inout) :: comp2
+!     \item type(ESMF\_Field),       intent(inout) :: field2
+!     \item type(ESMF\_FieldBundle), intent(inout) :: fieldbundle2
+!     \item type(ESMF\_Grid),        intent(inout) :: grid2
+!     \item type(ESMF\_State),       intent(inout) :: state
 !     \end{description}
 !
 !     NOTE: Copies between different ESMF object types are not possible at this time.
@@ -5047,6 +5056,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
  @\
       integer :: localrc @\
  @\
+       character(ESMF_MAXSTR) :: value @\
+       integer, dimension(1) :: lens @\
+ @\
       ! Initialize @\
       localrc = ESMF_RC_NOT_IMPL @\
       if (present(rc)) rc = ESMF_RC_NOT_IMPL @\
@@ -6618,6 +6630,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         if (lisPresent == ESMF_TRUE) then @\
           call c_ESMC_AttributeGetCharList(mthisfield, name, ESMF_TYPEKIND_CHARACTER, & @\
             count, lens, value, localrc) @\
+          print *, trim(value), "     localrc = ", localrc@\
         endif @\
       endif @\
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
@@ -12710,6 +12723,8 @@ AttAddPackCustomNMacro(ESMF_FieldBundle, fieldbundle, fieldbundle%this%base)
 AttAddPackCustomN1Macro(ESMF_FieldBundle, fieldbundle, fieldbundle%this%base)
 AttAddPackCustomMacroSL(ESMF_FieldBundle, fieldbundle, fieldbundle%this%base)
 
+AttCopyMacro(ESMF_FieldBundle, ESMF_FieldBundle, fieldbundle1, fieldbundle2, fieldbundle1%this%base, fieldbundle2%this%base)
+
 TypeKind3DeclarationMacro(AttGet, ESMF_FieldBundle, fieldbundle, fieldbundle%this%base)
 TypeKind3NoDocDeclarationMacro(AttGet1D, ESMF_FieldBundle, fieldbundle, fieldbundle%this%base)
 AttGetLogicalMacro(ESMF_FieldBundle, fieldbundle, fieldbundle%this%base)
@@ -12755,6 +12770,8 @@ AttAddPackCustomNMacro(ESMF_Field, field, field%ftypep%base)
 AttAddPackCustomN1Macro(ESMF_Field, field, field%ftypep%base)
 AttAddPackStandardMacroSL(ESMF_Field, field, field%ftypep%base)
 AttAddPackCustomMacroSL(ESMF_Field, field, field%ftypep%base)
+
+AttCopyMacro(ESMF_Field, ESMF_Field, field1, field2, field1%ftypep%base, field2%ftypep%base)
 
 TypeKind3DeclarationMacro(AttGet, ESMF_Field, field, field%ftypep%base)
 TypeKind3NoDocDeclarationMacro(AttGet1D, ESMF_Field, field, field%ftypep%base)
@@ -12862,6 +12879,8 @@ AttAddPackCustomNMacro(ESMF_Grid, grid, grid)
 AttAddPackCustomN1Macro(ESMF_Grid, grid, grid)
 AttAddPackStandardMacroSL(ESMF_Grid, grid, grid)
 AttAddPackCustomMacroSL(ESMF_Grid, grid, grid)
+
+AttCopyMacro(ESMF_Grid, ESMF_Grid, grid1, grid2, grid1, grid2)
 
 ^ifndef ESMF_NO_INTEGER_1_BYTE
 funcname##Macro(integer, I1, ESMF_Grid, grid, grid)
