@@ -356,8 +356,11 @@ int pio_cpp_inquire_dimension(pio_file_desc_t ncid, int dimid,
 int pio_cpp_put_att_string (pio_file_desc_t file, pio_var_desc_t varDesc,
                               const char *keyword, const char *value);
 
+int pio_cpp_put_att_ints (pio_file_desc_t file, pio_var_desc_t varDesc,
+                              const char *keyword, const int *values, int nvalues);
+
 int pio_cpp_put_att_floats (pio_file_desc_t file, pio_var_desc_t varDesc,
-                              const char *keyword, const char *values, int nvalues);
+                              const char *keyword, const float *values, int nvalues);
 
 ///////////////////////////////////////////
 //
