@@ -561,7 +561,7 @@ int IO::write(
 
       attPack = temp_array_p->root.AttPackGet (
           (*it)->convention, (*it)->purpose, "array",
-          attPackNameList[0], ESMC_ATTNEST_OFF);
+          attPackNameList[0], ESMC_ATTNEST_ON);
       if (!attPack) {
         localrc = ESMF_RC_ATTR_NOTSET;
         if (ESMC_LogDefault.MsgFoundError(localrc, "Can not access AttPack " + attPackNameList[0], ESMC_CONTEXT,
