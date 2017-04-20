@@ -533,11 +533,11 @@ int IO::write(
     }
 
     Attribute *attPack = NULL;
+    std::vector<std::string> dimLabels;
     if ((*it)->convention.length() > 0) {
-      int nattpacks = temp_array_p->root.getCountPack();
-      if (nattpacks == 0) {
+      if ((temp_array_p->root.getCountPack() == 0) && (dg->root.getCountPack() == 0)) {
         localrc = ESMF_RC_ATTR_NOTSET;
-        if (ESMC_LogDefault.MsgFoundError(localrc, "No Attribute packages found", ESMC_CONTEXT,
+        if (ESMC_LogDefault.MsgFoundError(localrc, "No Array or Grid AttPacks found", ESMC_CONTEXT,
             &rc)) {
         // Close the file but return original error even if close fails.
           localrc = close();
@@ -545,12 +545,49 @@ int IO::write(
         }
       }
 
-// temp_array_p->root.ESMC_Print ();
       std::vector<std::string> attPackNameList;
       int attPackNameCount;
+
+      // Dimension labels from DistGrid Attributes
+// dg->root.ESMC_Print ();
+      localrc = dg->root.AttPackGet(
+          (*it)->convention, (*it)->purpose, "distgrid",
+          attPackNameList, attPackNameCount, ESMC_ATTNEST_ON);
+      if (localrc == ESMF_SUCCESS) {
+        Attribute *dgattPack = dg->root.AttPackGet (
+            (*it)->convention, (*it)->purpose, "distgrid",
+            attPackNameList[0], ESMC_ATTNEST_ON);
+        if (!dgattPack) {
+          localrc = ESMF_RC_ATTR_NOTSET;
+          if (ESMC_LogDefault.MsgFoundError(localrc, "Can not access DistGrid AttPack " + attPackNameList[0], ESMC_CONTEXT,
+              &rc)) {
+          // Close the file but return original error even if close fails.
+            localrc = close();
+            return rc;
+          }
+        }
+        int natts = dgattPack->getCountAttr();
+        for (int i=0; i<natts; i++) {
+          Attribute *att = dgattPack->AttPackGetAttribute (i);
+          if (!att) {
+            if (ESMC_LogDefault.MsgFoundError(ESMF_RC_ATTR_NOTSET,
+                "Can not access DistGrid Attribute in " + dgattPack->getName(),
+                ESMC_CONTEXT, &rc)) {
+            // Close the file but return original error even if close fails.
+              localrc = close();
+              return rc;
+            }
+          }
+          dimLabels.push_back(att->getName());
+        }
+        attPackNameList.clear();
+      }
+
+      // Per-variable attributes from the Array Attributes
+// temp_array_p->root.ESMC_Print ();
       localrc = temp_array_p->root.AttPackGet(
           (*it)->convention, (*it)->purpose, "array",
-          attPackNameList, attPackNameCount, ESMC_ATTNEST_OFF);
+          attPackNameList, attPackNameCount, ESMC_ATTNEST_ON);
       if (ESMC_LogDefault.MsgFoundError(localrc,
           "AttPack with convention " + (*it)->convention + " and purpose " + (*it)->purpose + " not found", ESMC_CONTEXT,
           &rc)) {
@@ -635,7 +672,7 @@ int IO::write(
 
       // Write the Array
       ioHandler->arrayWrite(temp_array_p, (*it)->getName(),
-          (*it)->dimLabels, timeslice, attPack, &localrc);
+          dimLabels, timeslice, attPack, &localrc);
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc))
         return rc;
 
@@ -888,8 +925,7 @@ int IO::addArray(
   std::string varname;                 // no name
   std::string convention;              // no Attribute convention
   std::string purpose;                 // no Attribute purpose
-  std::vector<std::string> dimLabels;  // no labels
-  return IO::addArray(arr_p, varname, convention, purpose, dimLabels);
+  return IO::addArray(arr_p, varname, convention, purpose);
 }
 
 //-------------------------------------------------------------------------
@@ -907,8 +943,7 @@ int IO::addArray(
   Array *arr_p,                             // (in) - The array to add
   const std::string &variableName,          // (in) - Name to use for array
   const std::string &convention,            // (in) - Attribute convention
-  const std::string &purpose,               // (in) - Attribute purpose
-  const std::vector<std::string> &dimLabels // (in) - Optional dimension labels
+  const std::string &purpose                // (in) - Attribute purpose
   ) {
 // !DESCRIPTION:
 //      Add an array to the list of objects to read or write. The 
@@ -917,7 +952,8 @@ int IO::addArray(
 //      {\tt arr_p} is required
 //      {\tt variableName} is not required (may be NULL), however, this
 //         may cause an error when I/O is attempted.
-//      {\tt dimLabels} optional dimension labels
+//      {\tt convention} optional Attributes
+//      [\tt purpose} optional Attributes
 //
 //EOP
 //-----------------------------------------------------------------------------
@@ -937,8 +973,7 @@ int IO::addArray(
 // Push Array onto the list
   try {
     IO_ObjectContainer *newObj = new IO_ObjectContainer((Array *)arr_p,
-        variableName, convention, purpose,
-        dimLabels);
+        variableName, convention, purpose);
 
     if ((IO_ObjectContainer *)NULL == newObj) {
       localrc = ESMC_RC_MEM_ALLOCATE;

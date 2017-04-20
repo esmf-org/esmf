@@ -2918,8 +2918,7 @@ int Array::read(
   // For here on, we have to be sure to clean up before returning
   std::string convention;   // dummy string for reads
   std::string purpose;      // dummy string for reads
-  vector<string> labNames;  // dummy vector for reads
-  localrc = newIO->addArray(this, variableName, convention, purpose, labNames);
+  localrc = newIO->addArray(this, variableName, convention, purpose);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       &rc)) {
     IO::destroy(&newIO);
@@ -2960,7 +2959,6 @@ int Array::write(
   const std::string &variableName,// in    - optional variable name
   const std::string &convention,  // in    - optional Attribute package
   const std::string &purpose,     // in    - optional Attribute package
-  const std::vector<std::string> &dimLabels, // in - optional dimension labels
   bool  *overwrite,               // in    - OK to overwrite file data
   ESMC_FileStatus_Flag *status,   // in    - file status flag
   int   *timeslice,               // in    - timeslice option
@@ -3029,23 +3027,12 @@ int Array::write(
     }
   }
 
-  // It is an error to supply dimension names in binary mode
-  if (ESMF_IOFMT_NETCDF != localiofmt) {
-    if (dimLabels.size() > 0) {
-      ESMC_LogDefault.MsgFoundError(ESMF_RC_ARG_BAD, 
-          "NetCDF dimension names not allowed in binary mode",
-          ESMC_CONTEXT, &rc);
-      return rc;
-    }
-  }
-
-
   IO *newIO = IO::create(&rc);
   if (ESMC_LogDefault.MsgFoundError(rc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)){
     return rc;
   }
   // From now on, we have to be sure to clean up before returning
-  rc = newIO->addArray(this, variableName, convention, purpose, dimLabels);
+  rc = newIO->addArray(this, variableName, convention, purpose);
   if (ESMC_LogDefault.MsgFoundError(rc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) {
     IO::destroy(&newIO);
     newIO = (IO *)NULL;

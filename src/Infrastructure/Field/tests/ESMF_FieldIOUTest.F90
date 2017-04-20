@@ -213,7 +213,6 @@ program ESMF_FieldIOUTest
   !NEX_UTest_Multi_Proc_Only
   ! Write Fortran array in nohalo Field
   call ESMF_FieldWrite(field_w_nohalo, fileName="fieldNoHalo.nc",        &
-       dimLabels=(/ "temperature_x", "temperature_y" /),  &
        status=ESMF_FILESTATUS_REPLACE, rc=rc)
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   write(name, *) "Write Fortran array in nohalo Field"
@@ -237,10 +236,8 @@ program ESMF_FieldIOUTest
 !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
   ! Write multiple Fields with same dimensions to a file
-  call ESMF_FieldWrite(field_w, fileName="field2.nc", &
-       dimLabels=(/ "temperature_x", "temperature_y" /), rc=rc)
-  call ESMF_FieldWrite(field_multi, fileName="field2.nc", &
-       dimLabels=(/ "temperature_x", "temperature_y" /), rc=rc)
+  call ESMF_FieldWrite(field_w, fileName="field2.nc", rc=rc)
+  call ESMF_FieldWrite(field_multi, fileName="field2.nc", rc=rc)
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   write(name, *) "Write multiple Fields with same dimensions to a file"
 #if (defined ESMF_PIO && ( defined ESMF_NETCDF || defined ESMF_PNETCDF))

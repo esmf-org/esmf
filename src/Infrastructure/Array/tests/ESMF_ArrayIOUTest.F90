@@ -218,7 +218,6 @@ program ESMF_ArrayIOUTest
   write(failMsg, *) "Did not return ESMF_SUCCESS"
 
   call ESMF_ArrayWrite(array_withhalo, fileName='file3D_withhalo.nc',    &
-      dimLabels=(/"x_axis", "y_axis", "z_axis"/),  &
       status=ESMF_FILESTATUS_REPLACE, rc=rc)
 #if (defined ESMF_PIO && ( defined ESMF_NETCDF || defined ESMF_PNETCDF))
   call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -456,7 +455,6 @@ program ESMF_ArrayIOUTest
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_ArrayWrite(array_withhalo3, fileName='file3D_withhalo.nc',    &
       variableName='temperature_copy',  &
-      dimLabels=(/"x_axis", "y_axis", "z_axis"/),  &
       status=ESMF_FILESTATUS_OLD, rc=rc)
 #if (defined ESMF_PIO && ( defined ESMF_NETCDF || defined ESMF_PNETCDF))
   call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -1464,6 +1462,17 @@ program ESMF_ArrayIOUTest
 
 !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Create dimensions attribute package on DistGrid Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  apConv = 'GFDL_IO'
+  apPurp = 'attribute'
+  call ESMF_AttributeAdd (distgrid,  &
+      convention=apConv, purpose=apPurp,  &
+      attrList=(/ "x_axis" /), rc=rc)
+  call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+!------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
   write(name, *) "Array Create for Attribute package Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   array_gxt = ESMF_ArrayCreate(distgrid=distgrid, typekind=ESMF_TYPEKIND_R8, &
@@ -1499,7 +1508,25 @@ program ESMF_ArrayIOUTest
 
 !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
-  write(name, *) "Set numeric range name Test"
+  write(name, *) "Set numeric/integer range name Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_AttributeAdd (array_gxt,  &
+      convention=apConv, purpose=apPurp,  &
+      attrList=(/ 'ultimate_answer' /), rc=rc)
+  call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+!------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Set numeric/integer range values Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_AttributeSet (array_gxt,  &
+      'ultimate_answer', valueList=(/ 42 /),  &
+      convention=apConv, purpose=apPurp, rc=rc)
+  call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+!------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Set numeric/float range name Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_AttributeAdd (array_gxt,  &
       convention=apConv, purpose=apPurp,  &
@@ -1508,7 +1535,7 @@ program ESMF_ArrayIOUTest
 
 !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
-  write(name, *) "Set numeric range values Test"
+  write(name, *) "Set numeric/float range values Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_AttributeSet (array_gxt,  &
       'valid_range', valueList=(/ -330.0, 330.0 /),  &
@@ -1521,7 +1548,6 @@ program ESMF_ArrayIOUTest
   write(name, *) "Array with Attributes write to NetCDF Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_ArrayWrite(array_gxt, fileName="Array_attributes.nc", &
-      dimLabels=(/"x_axis"/),  &
       convention=apConv, purpose=apPurp,  &
       status=ESMF_FILESTATUS_REPLACE, iofmt=ESMF_IOFMT_NETCDF, rc=rc)
 #if (defined ESMF_PIO && (defined ESMF_NETCDF || defined ESMF_PNETCDF))

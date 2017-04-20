@@ -1188,7 +1188,7 @@ void PIO_Handler::arrayWrite(
             }
             if (stringvals.size() > 1) {
               if (ESMC_LogDefault.MsgFoundError(localrc,
-                  "Only string Attribute value for " + att->getName() + " are currently supported",
+                  "Only scalar string Attribute value for " + att->getName() + " is currently supported",
                   ESMC_CONTEXT, rc)) {
                 free (vardesc);
                 return;

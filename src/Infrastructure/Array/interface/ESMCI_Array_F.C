@@ -644,7 +644,6 @@ extern "C" {
   void FTN_X(c_esmc_arraywrite)(ESMCI::Array **array,
                                 char *file,
                                 char *variableName, char *convention, char *purpose,
-                                char *dimensionLabels, int *size_dimLabels, int *length_dimLabels,
                                 ESMC_Logical *opt_overwriteflag,
                                 ESMC_FileStatus_Flag *status,
                                 int *timeslice, ESMC_IOFmt_Flag *iofmt,
@@ -652,12 +651,10 @@ extern "C" {
                                 ESMCI_FortranStrLenArg file_l,
                                 ESMCI_FortranStrLenArg varname_l,
                                 ESMCI_FortranStrLenArg convention_l,
-                                ESMCI_FortranStrLenArg purpose_l,
-                                ESMCI_FortranStrLenArg dimlabels_l) {
+                                ESMCI_FortranStrLenArg purpose_l) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_arraywrite()"
-// std::cout << ESMF_METHOD << ": file_l=" << file_l << ", varname_l=" << varname_l;
-// std::cout << ", dimlabels_l=" << dimlabels_l << std::endl;
+// std::cout << ESMF_METHOD << ": file_l=" << file_l << ", varname_l=" << varname_l << std::endl;
     bool overwriteflag;
     // Initialize return code; assume routine not implemented
     if (ESMC_NOT_PRESENT_FILTER(rc) != ESMC_NULL_POINTER) {
@@ -684,23 +681,10 @@ extern "C" {
       purp = string (purpose,
         ESMC_F90lentrim (purpose, purpose_l));
 
-    vector<string> dimLabels;
-    int n_labels = *size_dimLabels;
-    if (n_labels > 0) {
-      dimlabels_l = *length_dimLabels;  // PGI work-around (see ticket 3614119)
-      dimLabels.reserve (n_labels);
-      char *cp = dimensionLabels;
-      for (int i=0; i<n_labels; i++) {
-        dimLabels.push_back(
-          string (cp, ESMC_F90lentrim (cp, dimlabels_l)));
-        cp += dimlabels_l;
-      }
-    }
-
     overwriteflag = (*opt_overwriteflag == ESMF_TRUE);
     // Call into the actual C++ method wrapped inside LogErr handling
     localrc = (*array)->write(fileName, varName,
-                              conv, purp, dimLabels,
+                              conv, purp,
                               &overwriteflag, status, timeslice, iofmt);
     ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       ESMC_NOT_PRESENT_FILTER(rc));
