@@ -47,7 +47,8 @@ DIRS      = ESMF_CompCreate \
 	    ESMF_ArrayRedistOpenACC \
             ESMF_DirectCoupling \
             ESMF_XGridConcurrent \
-            ESMF_XGridSerial
+            ESMF_XGridSerial \
+            ESMF_Trace
 # Disabled STests
 #           ESMF_FieldRegridConserv \ cover by Regrid
 #           ESMF_FieldRegridMulti \   cover by Regrid

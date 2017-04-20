@@ -955,20 +955,22 @@ namespace ESMCI {
     
     if(rc != NULL) rc = ESMF_SUCCESS;
 
-    if (ctx == NULL) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL, "Error closing trace", 
-                                    ESMC_CONTEXT, rc);
-      return;
+    // allow multiple calls to TraceClose for system test
+    // ignore any call after the first one
+    
+    if (ctx != NULL) {
+     
+      if (esmftrc_packet_is_open(&ctx->ctx) &&
+          !esmftrc_packet_is_empty(&ctx->ctx)) {
+        close_packet(ctx);
+      }
+      
+      fclose(ctx->fh);
+      free(esmftrc_packet_buf(&ctx->ctx));
+      free(ctx);
+      g_esmftrc_platform_filesys_ctx = NULL;
     }
- 
-    if (esmftrc_packet_is_open(&ctx->ctx) &&
-	!esmftrc_packet_is_empty(&ctx->ctx)) {
-      close_packet(ctx);
-    }
-
-    fclose(ctx->fh);
-    free(esmftrc_packet_buf(&ctx->ctx));
-    free(ctx);
+    
   }
 
   static struct esmftrc_default_ctx *esmftrc_platform_get_default_ctx() {
