@@ -160,6 +160,8 @@ namespace ESMCI {
     return str.substr(first, (last - first + 1));
   }
 
+  //TODO: consider changing this to also verify
+  //  that tracing is enabled
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::TraceCheckPetList()"  
   void TraceCheckPetList(int *traceLocalPet, int *rc){
@@ -1017,6 +1019,7 @@ namespace ESMCI {
 #define ESMC_METHOD "ESMCI::TraceEventRegion()"  
   void TraceEventRegion(int ctrl, const char *name) {
     if (!traceLocalPet) return;
+
     esmftrc_default_trace_region(esmftrc_platform_get_default_ctx(),
                                  ctrl, name);
   }
@@ -1056,12 +1059,14 @@ namespace ESMCI {
 #define ESMC_METHOD "ESMCI::TraceEventMemInfo()"
   void TraceEventMemInfo() {
 
+    if (!traceLocalPet) return;
+    
     int localrc;
     VM *globalvm = VM::getGlobal(&localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, 
           ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc)) 
       return;
-
+    
     int virtMem = -1;
     int physMem = -1;
     globalvm->getMemInfo(&virtMem, &physMem);    
