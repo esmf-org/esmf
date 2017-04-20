@@ -1170,8 +1170,9 @@ void PIO_Handler::arrayWrite(
             return;
           }
         }
-        // std::cout << ESMC_METHOD << ": Attribute #" << i << " = " << att->getName() << std::endl;
         ESMC_TypeKind_Flag att_type = att->getTypeKind ();
+        // std::cout << ESMC_METHOD << ": Attribute #" << i << " = " << att->getName()
+        //    << ", att_type = " << att_type << std::endl;
         int nvals;
         std::vector<std::string> stringvals;
         std::vector<ESMC_I4> intvals;
@@ -1211,7 +1212,7 @@ void PIO_Handler::arrayWrite(
               return;
             }
             piorc = pio_cpp_put_att_ints (pioFileDesc, vardesc,
-                att->getName().c_str(), intvals.data(), floatvals.size());
+                att->getName().c_str(), &intvals[0], intvals.size());
             if (!CHECKPIOERROR(piorc, "Attempting to set int Attribute: " + att->getName(),
                 ESMF_RC_FILE_WRITE, (*rc))) {
               free (vardesc);
@@ -1228,7 +1229,7 @@ void PIO_Handler::arrayWrite(
               return;
             }
             piorc = pio_cpp_put_att_floats (pioFileDesc, vardesc,
-                att->getName().c_str(), floatvals.data(), floatvals.size());
+                att->getName().c_str(), &floatvals[0], floatvals.size());
             if (!CHECKPIOERROR(piorc, "Attempting to set float Attribute: " + att->getName(),
                 ESMF_RC_FILE_WRITE, (*rc))) {
               free (vardesc);
