@@ -121,7 +121,7 @@ extern "C" {
     std::string purpose;     // not supported yet
 
     // call into C++
-    localrc = (*ptr)->addArray(*array, convention, purpose, varName, dimLabels);
+    localrc = (*ptr)->addArray(*array, varName, convention, purpose, dimLabels);
     ESMC_LogDefault.MsgFoundError(localrc,
                                   ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
                                   ESMC_NOT_PRESENT_FILTER(rc));
