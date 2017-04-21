@@ -96,8 +96,8 @@ class Field(object):
             lb = [1 for a in range(len(local_ndbounds))]
             ungridded_lower_bound = np.array(lb, dtype=np.int32)
             ungridded_upper_bound = np.array(local_ndbounds, dtype=np.int32)
-            # set this to put gridded dimension in the last available dimensions of the field, dependent on grid rank
-            grid_to_field_map = np.array([i+xd+1 for i in range(grid.rank)], dtype=np.int32)
+            # set this to put gridded dimension in the first available dimensions of the field, dependent on grid rank
+            grid_to_field_map = np.array([i+1 for i in range(grid.rank)], dtype=np.int32)
             rank += len(local_ndbounds)
 
         if isinstance(grid, Grid):
