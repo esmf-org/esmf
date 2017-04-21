@@ -37,6 +37,8 @@
     ESMC_LogDefault.MsgFoundError(ESMC_RC_LIB, "Internal tracing error", _ctx, rc); \
     return;}
 
+#define TRACE_DIR_PERMISSIONS (S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH)
+
 #ifdef ESMF_BABELTRACE
 #include <babeltrace/ctf-writer/writer.h>
 #include <babeltrace/ctf-writer/clock.h>
@@ -326,8 +328,7 @@ namespace ESMCI {
     struct stat st = {0};
     if (stream_id == 0) {
       if (stat(stream_dir_root, &st) == -1) {
-	if (mkdir(stream_dir_root, 0700) == -1) {
-	  //printf("mkdir == -1\n");
+	if (mkdir(stream_dir_root, TRACE_DIR_PERMISSIONS) == -1) {	  
 	  //perror("mkdir()");
 	  ESMC_LogDefault.MsgFoundError(ESMC_RC_FILE_CREATE, "Error creating trace root directory", 
 					ESMC_CONTEXT, rc);
@@ -363,7 +364,7 @@ namespace ESMCI {
     sprintf(stream_dir, "%s/PET%03d", stream_dir_root, stream_id);
     
     if (stat(stream_dir, &st) == -1) {
-      if (mkdir(stream_dir, 0700) == -1) {
+      if (mkdir(stream_dir, TRACE_DIR_PERMISSIONS) == -1) {
 	//perror("mkdir()");
 	ESMC_LogDefault.MsgFoundError(ESMC_RC_FILE_CREATE, "Error creating trace PET directory", 
 				      ESMC_CONTEXT, rc);
@@ -888,7 +889,7 @@ namespace ESMCI {
     struct stat st = {0};
     if (stream_id == 0) {
       if (stat(stream_dir_root, &st) == -1) {
-	if (mkdir(stream_dir_root, 0700) == -1) {
+	if (mkdir(stream_dir_root, TRACE_DIR_PERMISSIONS) == -1) {
 	  //perror("mkdir()");
 	  ESMC_LogDefault.MsgFoundError(ESMC_RC_FILE_CREATE, "Error creating trace root directory", 
 					ESMC_CONTEXT, rc);
