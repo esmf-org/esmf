@@ -262,14 +262,13 @@ contains
 ! !IROUTINE: ESMF_IOAddArray - Add an array to an I/O object's element list
 
 ! !INTERFACE:
-  subroutine ESMF_IOAddArray(io, array, keywordEnforcer, variableName, dimLabels, rc)
+  subroutine ESMF_IOAddArray(io, array, keywordEnforcer, variableName, rc)
 
 ! !ARGUMENTS:
     type(ESMF_IO),           intent(in)            :: io
     type(ESMF_Array),        intent(in)            :: array
     type(ESMF_KeywordEnforcer), optional:: keywordEnforcer !keywords req. below
     character(*),            intent(in),  optional :: variableName
-    character(*),            intent(in),  optional, target :: dimLabels(:)
     integer,                 intent(out), optional :: rc
    
 ! !DESCRIPTION:
@@ -283,12 +282,6 @@ contains
 !          The {\tt ESMF\_Array} object to add to io's element list
 !     \item[{[variableName]}]
 !          Optional variableName to attach to this array for I/O purposes
-!   \item[{[dimLabels]}]
-!    An array of dimension names for the Field data in the output file; default is
-!    the variable name with {\tt \_dimnnn}, where nnn is the dimension number,
-!    appended.  Use this argument only in the I/O format (such as NetCDF) that
-!    supports variable and dimension names. If the I/O format does not support t
-!    (such as binary format), ESMF will return an error code.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -297,7 +290,6 @@ contains
 
     integer                     :: localrc     ! local return code
     integer                     :: len_varName ! name length or 0
-    character                   :: dimLabels_dummy(1)
 
     ! Assume failure until success
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -310,15 +302,9 @@ contains
       len_varName = 0
     endif
 
-    if (present (dimLabels)) then
-      call c_ESMC_IOAddArray(io, array,  &
-          variableName, len_varName, dimLabels, size (dimLabels),  &
+    call c_ESMC_IOAddArray(io, array,  &
+        variableName, len_varName,  &
           localrc)
-    else
-      call c_ESMC_IOAddArray(io, array,  &
-          variableName, len_varName, dimLabels_dummy, 0,  &
-          localrc)
-    end if
 
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
          ESMF_CONTEXT, rcToReturn=rc)) return

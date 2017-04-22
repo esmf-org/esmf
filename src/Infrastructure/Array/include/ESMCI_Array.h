@@ -335,7 +335,6 @@ namespace ESMCI {
          int *timeslice, ESMC_IOFmt_Flag *iofmt);
     int write(const std::string &file, const std::string &variableName,
          const std::string &convention, const std::string &purpose,
-         const std::vector<std::string> &dimLabels,
          bool *overwrite, ESMC_FileStatus_Flag *status,
          int *timeslice, ESMC_IOFmt_Flag *iofmt);
     int print() const;

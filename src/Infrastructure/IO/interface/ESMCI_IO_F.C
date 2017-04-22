@@ -90,10 +90,8 @@ extern "C" {
 
   void FTN_X(c_esmc_ioaddarray)(ESMCI::IO **ptr, ESMCI::Array **array,
                                 char *opt_variableName, int *len_variableName,
-                                char *opt_dimLabels, int *size_dimLabels,
                                 int *rc,
-                                ESMCI_FortranStrLenArg varname_l,
-                                ESMCI_FortranStrLenArg dimlabels_l) {
+                                ESMCI_FortranStrLenArg varname_l) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_ioaddarray()"
     // Initialize return code; assume routine not implemented
@@ -106,22 +104,11 @@ extern "C" {
     if (*len_variableName > 0)
        varName = string (opt_variableName, *len_variableName);
 
-    vector<string> dimLabels;
-    int n_labels = *size_dimLabels;
-    if (opt_dimLabels && n_labels > 0) {
-      char *cp = opt_dimLabels;
-      for (int i=0; i<n_labels; i++) {
-        dimLabels.push_back (
-          string (cp, ESMC_F90lentrim (cp, dimlabels_l)));
-        cp += dimlabels_l;
-      }
-    }
-
     std::string convention;  // not supported yet
     std::string purpose;     // not supported yet
 
     // call into C++
-    localrc = (*ptr)->addArray(*array, convention, purpose, varName, dimLabels);
+    localrc = (*ptr)->addArray(*array, varName, convention, purpose);
     ESMC_LogDefault.MsgFoundError(localrc,
                                   ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
                                   ESMC_NOT_PRESENT_FILTER(rc));
