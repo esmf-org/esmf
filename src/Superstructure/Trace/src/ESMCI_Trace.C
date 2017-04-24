@@ -762,6 +762,13 @@ namespace ESMCI {
   void TraceEventMemInfo() {
     /* ignore for now */
   }
+
+#undef ESMC_METHOD
+#define ESMC_METHOD "ESMCI::TraceEventClock()"
+  void TraceEventClock(int *ep_year, int *ep_month, int *ep_day,
+                       int *ep_hour, int *ep_minute, int *ep_second)
+  { /* ignore for now */ }    
+
   
 #else  /* ESMF_BABELTRACE not set */
 
@@ -986,9 +993,16 @@ namespace ESMCI {
 		       int *ep_baseid, int *ep_method, int *ep_phase) {
 
     if (!traceLocalPet) return;
-    esmftrc_default_trace_control(esmftrc_platform_get_default_ctx(),
-                                  *ep_vmid, *ep_baseid, ctrl,
-                                  *ep_method, *ep_phase);
+
+    //esmftrc_default_trace_control(esmftrc_platform_get_default_ctx(),
+    //                              *ep_vmid, *ep_baseid, ctrl,
+    //                              *ep_method, *ep_phase);
+    if (ctrl == BT_CNTL_START) {
+      esmftrc_default_trace_phase_start(esmftrc_platform_get_default_ctx());
+    }
+    else if (ctrl == BT_CNTL_END) {
+      esmftrc_default_trace_phase_end(esmftrc_platform_get_default_ctx());
+    }
     
   }
 
@@ -1001,19 +1015,25 @@ namespace ESMCI {
   }
 
   void TraceEventPhasePrologueEnter(int *ep_vmid, int *ep_baseid, int *ep_method, int *ep_phase) {
-    TraceEventPhase(BT_CNTL_STARTP, ep_vmid, ep_baseid, ep_method, ep_phase);
+    //TraceEventPhase(BT_CNTL_STARTP, ep_vmid, ep_baseid, ep_method, ep_phase);
+    if (!traceLocalPet) return;
+    esmftrc_default_trace_prologue(esmftrc_platform_get_default_ctx(),
+                                   *ep_vmid, *ep_baseid, *ep_method, *ep_phase);
   }
   
   void TraceEventPhasePrologueExit(int *ep_vmid, int *ep_baseid, int *ep_method, int *ep_phase) {
-    TraceEventPhase(BT_CNTL_ENDP, ep_vmid, ep_baseid, ep_method, ep_phase);
+    //TraceEventPhase(BT_CNTL_ENDP, ep_vmid, ep_baseid, ep_method, ep_phase);
   }
   
   void TraceEventPhaseEpilogueEnter(int *ep_vmid, int *ep_baseid, int *ep_method, int *ep_phase) {
-    TraceEventPhase(BT_CNTL_STARTE, ep_vmid, ep_baseid, ep_method, ep_phase);
+    //TraceEventPhase(BT_CNTL_STARTE, ep_vmid, ep_baseid, ep_method, ep_phase);
   }
   
   void TraceEventPhaseEpilogueExit(int *ep_vmid, int *ep_baseid, int *ep_method, int *ep_phase) {
-    TraceEventPhase(BT_CNTL_ENDE, ep_vmid, ep_baseid, ep_method, ep_phase);
+    //TraceEventPhase(BT_CNTL_ENDE, ep_vmid, ep_baseid, ep_method, ep_phase);
+    if (!traceLocalPet) return;
+    esmftrc_default_trace_epilogue(esmftrc_platform_get_default_ctx(),
+                                   *ep_vmid, *ep_baseid, *ep_method, *ep_phase);
   }
 
 #undef  ESMC_METHOD
@@ -1074,6 +1094,19 @@ namespace ESMCI {
     
     esmftrc_default_trace_mem(esmftrc_platform_get_default_ctx(),
                               virtMem, physMem);
+    
+  }
+
+#undef ESMC_METHOD
+#define ESMC_METHOD "ESMCI::TraceEventClock()"
+  void TraceEventClock(int *ep_year, int *ep_month, int *ep_day,
+                       int *ep_hour, int *ep_minute, int *ep_second) {
+    
+    if (!traceLocalPet) return;
+
+    esmftrc_default_trace_clk(esmftrc_platform_get_default_ctx(),
+                              *ep_year, *ep_month, *ep_day,
+                              *ep_hour, *ep_minute, *ep_second);
     
   }
 
@@ -1168,7 +1201,12 @@ namespace ESMCI {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::TraceEventMemInfo()"  
   void TraceEventMemInfo()
-  { int *rc=NULL; LOG_NO_BT_LIB }
+
+#undef ESMC_METHOD
+#define ESMC_METHOD "ESMCI::TraceEventClock()"
+    void TraceEventClock(int *ep_year, int *ep_month, int *ep_day,
+                         int *ep_hour, int *ep_minute, int *ep_second)
+  { int *rc=NULL; LOG_NO_BT_LIB }    
 
 #endif /* ESMF_TRACE_INTERNAL */
 #endif /* ESMF_BABELTRACE */

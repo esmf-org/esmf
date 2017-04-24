@@ -102,4 +102,10 @@ extern "C" {
     if (rc != NULL) *rc = ESMF_SUCCESS;
   }
 
+  void FTN_X(c_esmftrace_clock)(int *ep_year, int *ep_month, int *ep_day,
+                                int *ep_hour, int *ep_minute, int *ep_second, int *rc) {
+    ESMCI::TraceEventClock(ep_year, ep_month, ep_day, ep_hour, ep_minute, ep_second);
+    if (rc != NULL) *rc = ESMF_SUCCESS;
+  }
+
 } // extern "C"

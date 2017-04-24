@@ -67,6 +67,8 @@ namespace ESMCI {
 
   void TraceEventRegion(int ctrl, const char*name);
   void TraceEventMemInfo();
+  void TraceEventClock(int *ep_year, int *ep_month, int *ep_day,
+                       int *ep_hour, int *ep_minute, int *ep_second);
 }
 
 #endif

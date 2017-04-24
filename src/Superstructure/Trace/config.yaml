@@ -96,7 +96,7 @@ metadata:
       description: System clock
       $return-ctype: uint64_t
   env:
-    esmf_trace_version: '0.1'
+    esmf_trace_version: '0.2'
   trace:
     byte-order: le
     uuid: auto
@@ -125,6 +125,28 @@ metadata:
             id: uint32
             timestamp: clock-int
       events:
+        #denotes start of prologue
+        prologue:
+            payload-type:
+                class: struct
+                fields:
+                    vmid: uint16
+                    baseid: uint16                    
+                    method: enum_type_method
+                    phase: uint8
+        #denotes end of epilogue
+        epilogue:
+            payload-type:
+                class: struct
+                fields:
+                    vmid: uint16
+                    baseid: uint16                    
+                    method: enum_type_method
+                    phase: uint8
+        phase_start:
+            payload-type:
+        phase_end:
+            payload-type:
         control:
             payload-type:
                 class: struct
@@ -149,3 +171,13 @@ metadata:
                 fields:
                     virtMem: uint32
                     physMem: uint32
+        clk:
+            payload-type:
+                class: struct
+                fields:
+                    year: uint16
+                    month: uint8
+                    day: uint8
+                    hour: uint8
+                    minute: uint8
+                    second: uint8

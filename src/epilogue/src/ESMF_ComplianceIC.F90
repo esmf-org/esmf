@@ -490,21 +490,26 @@ module ESMF_ComplianceICMod
             line=__LINE__, file=FILENAME)) return  ! bail out
     endif
     if (outputTrace) then
-       !call ESMF_TraceEventPhasePrologueExit(comp, rc=rc)
-       !if (ESMF_LogFoundError(rc, &
-       !     line=__LINE__, file=FILENAME)) return  ! bail out
-       call ESMF_TraceEventPhaseEnter(comp, rc=rc)
+       call ESMF_TraceEventPhasePrologueEnter(comp, rc=rc)
        if (ESMF_LogFoundError(rc, &
-            line=__LINE__, file=FILENAME)) return  ! bail out
-       call ESMF_TraceEventComponentInfo(comp, rc=rc)
-       if (ESMF_LogFoundError(rc, &
-            line=__LINE__, file=FILENAME)) return  ! bail out
+            line=__LINE__, file=FILENAME)) return               
        call ESMF_TraceEventMemInfo(rc=rc)
        if (ESMF_LogFoundError(rc, &
-            line=__LINE__, file=FILENAME)) return  ! bail out
+            line=__LINE__, file=FILENAME)) return                              
+       if (ESMF_ClockIsCreated(clock)) then
+          call ESMF_TraceEventClock(clock, rc=rc)
+          if (ESMF_LogFoundError(rc, &
+               line=__LINE__, file=FILENAME)) return                              
+       endif
+       call ESMF_TraceEventComponentInfo(comp, rc=rc)
+       if (ESMF_LogFoundError(rc, &
+            line=__LINE__, file=FILENAME)) return                              
+       call ESMF_TraceEventPhaseEnter(comp, rc=rc)
+       if (ESMF_LogFoundError(rc, &
+            line=__LINE__, file=FILENAME)) return                              
     endif
-
     endif
+ 
     ! Stop Compliance Checking: InitializePrologue
     !---------------------------------------------------------------------------
     ccfDepth = ccfDepth + 1
@@ -522,14 +527,22 @@ module ESMF_ComplianceICMod
     ! Start Compliance Checking: InitializeEpilogue
     if (ccfDepth <= maxDepth .or. maxDepth < 0) then
 
-    if (outputTrace) then
-       call ESMF_TraceEventPhaseExit(comp, rc=rc)
-       if (ESMF_LogFoundError(rc, &
-            line=__LINE__, file=FILENAME)) return  ! bail out
-       !call ESMF_TraceEventPhaseEpilogueEnter(comp, rc=rc)
-       !if (ESMF_LogFoundError(rc, &
-       !     line=__LINE__, file=FILENAME)) return  ! bail out
-    endif
+       if (outputTrace) then
+          call ESMF_TraceEventPhaseExit(comp, rc=rc)
+          if (ESMF_LogFoundError(rc, &
+               line=__LINE__, file=FILENAME)) return                              
+          if (ESMF_ClockIsCreated(clock)) then
+             call ESMF_TraceEventClock(clock, rc=rc)
+             if (ESMF_LogFoundError(rc, &
+                  line=__LINE__, file=FILENAME)) return                              
+          endif
+          call ESMF_TraceEventMemInfo(rc=rc)
+          if (ESMF_LogFoundError(rc, &
+               line=__LINE__, file=FILENAME)) return
+          call ESMF_TraceEventPhaseEpilogueExit(comp, rc=rc)
+          if (ESMF_LogFoundError(rc, &
+                   line=__LINE__, file=FILENAME)) return                              
+       endif
     
     if (outputJSON) then
         call JSON_LogCtrlFlow("stop_phase", comp, rc)
@@ -757,18 +770,26 @@ module ESMF_ComplianceICMod
             line=__LINE__, file=FILENAME)) return  ! bail out
     endif
     if (outputTrace) then
-       !call ESMF_TraceEventPhasePrologueExit(comp, rc=rc)
-       !if (ESMF_LogFoundError(rc, &
-       !     line=__LINE__, file=FILENAME)) return  ! bail out
-       call ESMF_TraceEventPhaseEnter(comp, rc=rc)
+       call ESMF_TraceEventPhasePrologueEnter(comp, rc=rc)
        if (ESMF_LogFoundError(rc, &
-            line=__LINE__, file=FILENAME)) return  ! bail out
+            line=__LINE__, file=FILENAME)) return               
        call ESMF_TraceEventMemInfo(rc=rc)
        if (ESMF_LogFoundError(rc, &
-            line=__LINE__, file=FILENAME)) return  ! bail out
+            line=__LINE__, file=FILENAME)) return                              
+       if (ESMF_ClockIsCreated(clock)) then
+          call ESMF_TraceEventClock(clock, rc=rc)
+          if (ESMF_LogFoundError(rc, &
+               line=__LINE__, file=FILENAME)) return                              
+       endif
+       call ESMF_TraceEventComponentInfo(comp, rc=rc)
+       if (ESMF_LogFoundError(rc, &
+            line=__LINE__, file=FILENAME)) return                              
+       call ESMF_TraceEventPhaseEnter(comp, rc=rc)
+       if (ESMF_LogFoundError(rc, &
+            line=__LINE__, file=FILENAME)) return                              
+    endif    
     endif
-    
-    endif
+ 
     ! Stop Compliance Checking: RunPrologue
     !---------------------------------------------------------------------------
     ccfDepth = ccfDepth + 1
@@ -786,15 +807,23 @@ module ESMF_ComplianceICMod
     ! Start Compliance Checking: RunEpilogue
     if (ccfDepth <= maxDepth .or. maxDepth < 0) then
 
-       if (outputTrace) then
-          call ESMF_TraceEventPhaseExit(comp, rc=rc)
-          if (ESMF_LogFoundError(rc, &
-               line=__LINE__, file=FILENAME)) return  ! bail out
-       !call ESMF_TraceEventPhaseEpilogueEnter(comp, rc=rc)
-          !if (ESMF_LogFoundError(rc, &
-          !     line=__LINE__, file=FILENAME)) return  ! bail out
-       endif
-       
+        if (outputTrace) then
+           call ESMF_TraceEventPhaseExit(comp, rc=rc)
+           if (ESMF_LogFoundError(rc, &
+                line=__LINE__, file=FILENAME)) return                              
+           if (ESMF_ClockIsCreated(clock)) then
+              call ESMF_TraceEventClock(clock, rc=rc)
+              if (ESMF_LogFoundError(rc, &
+                   line=__LINE__, file=FILENAME)) return                              
+           endif
+           call ESMF_TraceEventMemInfo(rc=rc)
+           if (ESMF_LogFoundError(rc, &
+                line=__LINE__, file=FILENAME)) return
+           call ESMF_TraceEventPhaseEpilogueExit(comp, rc=rc)
+           if (ESMF_LogFoundError(rc, &
+                line=__LINE__, file=FILENAME)) return                              
+        endif
+           
     if (outputJSON) then
         call JSON_LogCtrlFlow("stop_phase", comp, rc)
         if (ESMF_LogFoundError(rc, &
@@ -995,15 +1024,23 @@ module ESMF_ComplianceICMod
             line=__LINE__, file=FILENAME)) return  ! bail out
     endif
     if (outputTrace) then
-       !call ESMF_TraceEventPhasePrologueExit(comp, rc=rc)
-       !if (ESMF_LogFoundError(rc, &
-       !     line=__LINE__, file=FILENAME)) return  ! bail out
-       call ESMF_TraceEventPhaseEnter(comp, rc=rc)
+       call ESMF_TraceEventPhasePrologueEnter(comp, rc=rc)
        if (ESMF_LogFoundError(rc, &
-            line=__LINE__, file=FILENAME)) return  ! bail out
+            line=__LINE__, file=FILENAME)) return               
        call ESMF_TraceEventMemInfo(rc=rc)
        if (ESMF_LogFoundError(rc, &
-            line=__LINE__, file=FILENAME)) return  ! bail out
+            line=__LINE__, file=FILENAME)) return                              
+       if (ESMF_ClockIsCreated(clock)) then
+          call ESMF_TraceEventClock(clock, rc=rc)
+          if (ESMF_LogFoundError(rc, &
+               line=__LINE__, file=FILENAME)) return                              
+       endif
+       call ESMF_TraceEventComponentInfo(comp, rc=rc)
+       if (ESMF_LogFoundError(rc, &
+            line=__LINE__, file=FILENAME)) return                              
+       call ESMF_TraceEventPhaseEnter(comp, rc=rc)
+       if (ESMF_LogFoundError(rc, &
+            line=__LINE__, file=FILENAME)) return                              
     endif
     
     endif
@@ -1024,14 +1061,22 @@ module ESMF_ComplianceICMod
     ! Start Compliance Checking: FinalizeEpilogue
     if (ccfDepth <= maxDepth .or. maxDepth < 0) then
     
-    if (outputTrace) then
-       call ESMF_TraceEventPhaseExit(comp, rc=rc)
-       if (ESMF_LogFoundError(rc, &
-            line=__LINE__, file=FILENAME)) return  ! bail out
-       !call ESMF_TraceEventPhaseEpilogueEnter(comp, rc=rc)
-       !if (ESMF_LogFoundError(rc, &
-       !     line=__LINE__, file=FILENAME)) return  ! bail out
-    endif
+       if (outputTrace) then
+          call ESMF_TraceEventPhaseExit(comp, rc=rc)
+          if (ESMF_LogFoundError(rc, &
+               line=__LINE__, file=FILENAME)) return                              
+          if (ESMF_ClockIsCreated(clock)) then
+             call ESMF_TraceEventClock(clock, rc=rc)
+             if (ESMF_LogFoundError(rc, &
+                  line=__LINE__, file=FILENAME)) return                              
+          endif
+          call ESMF_TraceEventMemInfo(rc=rc)
+          if (ESMF_LogFoundError(rc, &
+               line=__LINE__, file=FILENAME)) return
+          call ESMF_TraceEventPhaseEpilogueExit(comp, rc=rc)
+              if (ESMF_LogFoundError(rc, &
+                   line=__LINE__, file=FILENAME)) return                              
+       endif
 
     if (outputJSON) then
         call JSON_LogCtrlFlow("stop_phase", comp, rc)
