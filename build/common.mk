@@ -687,8 +687,9 @@ ESMF_SEDDEFAULT             = sed
 # The gcc preprocessor is used for partially preprocessing .cppF90 files.
 # The -E option stops the gcc overcompiler after preprocessing, the -P
 # option prevents putting #line directives in the output, and -x c states
-# to use C-style preprocessing regardless of file name suffix.
-ESMF_CPPDEFAULT             = gcc -E -P -x c
+# to use C-style preprocessing regardless of file name suffix. Option -C
+# does not discard C++-style comments, preventing URL mangling.
+ESMF_CPPDEFAULT             = gcc -E -P -x c -C
 
 ESMF_RM                     = rm -rf
 ESMF_MV                     = mv -f

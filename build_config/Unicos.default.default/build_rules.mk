@@ -109,6 +109,6 @@ ESMF_CPPDEFAULT       = cpp
 # amend bad cpp ".TRUE.", ". NOT." , "=>' output
 # fix leading space that seems to show up on some lines
 .cpp.F90:
-	${ESMF_CPP} -E -I${ESMF_INCDIR} $< | tr "@^" "\n#" | $(ESMF_SED) -e 's/^ //' -e '/^#line/d' -e 's/ \. /./g' -e 's/\. not\./.not./g' -e 's/= >/=>/g' > $(dir$<)$(notdir $@)
+	${ESMF_CPP} -E -C -I${ESMF_INCDIR} $< | tr "@^" "\n#" | $(ESMF_SED) -e 's/^ //' -e '/^#line/d' -e 's/ \. /./g' -e 's/\. not\./.not./g' -e 's/= >/=>/g' > $(dir$<)$(notdir $@)
 .cppF90.F90:
-	cp $< $<.cpp; ${ESMF_CPP} -E -I${ESMF_INCDIR} $(FPPDEFS) $<.cpp  | tr "@^|" "\n#'" | $(ESMF_SED) -e 's/^ //' -e '/^#line/d' -e 's/ \. /./g' -e 's/\. not\./.not./g' -e 's/= >/=>/g' > $(dir$<)$(notdir $@); rm -f $<.cpp
+	cp $< $<.cpp; ${ESMF_CPP} -E -C -I${ESMF_INCDIR} $(FPPDEFS) $<.cpp  | tr "@^|" "\n#'" | $(ESMF_SED) -e 's/^ //' -e '/^#line/d' -e 's/ \. /./g' -e 's/\. not\./.not./g' -e 's/= >/=>/g' > $(dir$<)$(notdir $@); rm -f $<.cpp
