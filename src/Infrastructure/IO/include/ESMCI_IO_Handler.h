@@ -97,7 +97,9 @@ namespace ESMCI {
     virtual void arrayWrite(Array *arr_p, const char *name,
                             const std::vector<std::string> &dimLabels,
                             int *timeslice = NULL,
-                            const Attribute *attPack = NULL, int *rc = NULL) = 0;
+                            const Attribute *varAttPack = NULL,
+                            const Attribute *gblAttPack = NULL,
+                            int *rc = NULL) = 0;
 
     // get() and set()
   public:

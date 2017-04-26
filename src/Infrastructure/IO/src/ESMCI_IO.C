@@ -548,9 +548,9 @@ int IO::write(
       std::vector<std::string> attPackNameList;
       int attPackNameCount;
 
-      // Dimension labels from DistGrid Attributes
+      // Dimension labels from Grid xor DistGrid Attributes
 // dg->root.ESMC_Print ();
-      localrc = dg->root.AttPackGet(
+      int localrc = dg->root.AttPackGet(
           (*it)->convention, (*it)->purpose, "distgrid",
           attPackNameList, attPackNameCount, ESMC_ATTNEST_ON);
       if (localrc == ESMF_SUCCESS) {
@@ -672,7 +672,7 @@ int IO::write(
 
       // Write the Array
       ioHandler->arrayWrite(temp_array_p, (*it)->getName(),
-          dimLabels, timeslice, attPack, &localrc);
+          dimLabels, timeslice, attPack, NULL, &localrc);
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc))
         return rc;
 

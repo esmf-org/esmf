@@ -90,8 +90,11 @@ extern "C" {
 
   void FTN_X(c_esmc_ioaddarray)(ESMCI::IO **ptr, ESMCI::Array **array,
                                 char *opt_variableName, int *len_variableName,
+                                const char *conventionName, const char *purposeName,
                                 int *rc,
-                                ESMCI_FortranStrLenArg varname_l) {
+                                ESMCI_FortranStrLenArg varname_l,
+                                ESMCI_FortranStrLenArg conven_l,
+                                ESMCI_FortranStrLenArg purpose_l) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_ioaddarray()"
     // Initialize return code; assume routine not implemented
@@ -104,8 +107,12 @@ extern "C" {
     if (*len_variableName > 0)
        varName = string (opt_variableName, *len_variableName);
 
-    std::string convention;  // not supported yet
-    std::string purpose;     // not supported yet
+    std::string convention;
+    if (conventionName)
+      convention = string (conventionName, ESMC_F90lentrim (conventionName, conven_l));
+    std::string purpose;
+    if (purposeName)
+      purpose = string (purposeName, ESMC_F90lentrim (purposeName, purpose_l));
 
     // call into C++
     localrc = (*ptr)->addArray(*array, varName, convention, purpose);

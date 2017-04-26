@@ -73,7 +73,7 @@ contains
 
 ! !INTERFACE:
   subroutine ESMF_FieldWrite(field, fileName, keywordEnforcer,   &
-      variableName, overwrite, status, timeslice, iofmt, rc)
+      variableName, convention, purpose, overwrite, status, timeslice, iofmt, rc)
 !
 !
 ! !ARGUMENTS:
@@ -81,6 +81,8 @@ contains
     character(*),               intent(in)             :: fileName
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     character(*),               intent(in),  optional  :: variableName
+    character(*),               intent(in),  optional  :: convention
+    character(*),               intent(in),  optional  :: purpose
     logical,                    intent(in),  optional  :: overwrite
     type(ESMF_FileStatus_Flag), intent(in),  optional  :: status
     integer,                    intent(in),  optional  :: timeslice
@@ -110,6 +112,16 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !    Use this argument only in the I/O format (such as NetCDF) that
 !    supports variable name. If the I/O format does not support this
 !    (such as binary format), ESMF will return an error code.
+!   \item[{[convention]}]
+!     Specifies an Attribute package associated with the Array, used to create NetCDF
+!     attributes for the variable in the file.  When this argument is present,
+!     the [{[purpose]}] argument must also be present.  Use this argument only with a NetCDF
+!     I/O format. If binary format is used, ESMF will return an error code.
+!   \item[{[purpose]}]
+!     Specifies an Attribute package associated with the Array, used to create NetCDF
+!     attributes for the variable in the file.  When this argument is present,
+!     the [{[convention]}] argument must also be present.  Use this argument only with a NetCDF
+!     I/O format. If binary format is used, ESMF will return an error code.
 !   \item[{[overwrite]}]
 !    \begin{sloppypar}
 !      A logical flag, the default is .false., i.e., existing field data may
@@ -211,6 +223,17 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       end if
     end if
 
+    ! Attributes
+    if (present(convention) .or. present (purpose)) then
+      if (present (convention) .and. present (purpose)) then
+        continue
+      else
+        if (ESMF_LogFoundError(ESMF_RC_ARG_INCOMP,  &
+            msg="Both convention and purpose are required for Attribute I/O",  &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+      end if
+    end if
+
     if (present(variableName)) then
       name = variableName
     else
@@ -238,7 +261,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! From here on out, we need to clean up so no returning on error
     if (localrc .eq. ESMF_SUCCESS) then
-      call ESMF_IOAddArray(io, array, variableName=name, rc=localrc)
+      call ESMF_IOAddArray(io, array, variableName=name,  &
+          convention=convention, purpose=purpose,  &
+          rc=localrc)
       errorFound = ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU,     &
           ESMF_CONTEXT, rcToReturn=rc)
     endif

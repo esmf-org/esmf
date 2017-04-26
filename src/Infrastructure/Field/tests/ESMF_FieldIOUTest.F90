@@ -56,6 +56,7 @@ program ESMF_FieldIOUTest
   type(ESMF_Field) :: elem_field
   type(ESMF_DistGrid) :: elem_dg
   type(ESMF_Mesh) :: elem_mesh
+  type(ESMF_Field) :: field_att
 
   real(ESMF_KIND_R8), pointer :: Farray_DE0_w(:,:) => null (), Farray_DE0_r(:,:) => null ()
   real(ESMF_KIND_R8), pointer :: Farray_DE1_w(:,:) => null (), Farray_DE1_r(:,:) => null ()
@@ -68,6 +69,16 @@ program ESMF_FieldIOUTest
   integer :: elem_tlb(1), elem_tub(1), elem_tc(1)
   integer :: i,j, t, endtime, k
   real(ESMF_KIND_R8) :: Maxvalue, diff
+
+  character(ESMF_MAXSTR) :: apconv, appurp
+  character(*), parameter :: attrNames(6) = (/  &
+      "long_name    ",  &
+      "units        ",  &
+      "valid_range  ",  &
+      "missing_value",  &
+      "_FillValue   ",  &
+      "cell_methods "   &
+  /)
 
   ! cumulative result: count failures; no failures equals "all pass"
   integer :: result = 0
@@ -1007,6 +1018,117 @@ program ESMF_FieldIOUTest
 #endif
 #endif
 
+
+!------------------------------------------------------------------------
+! Write with Attributes test
+!------------------------------------------------------------------------
+
+!------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  ! Verifying that a Grid can be created
+  grid = ESMF_GridCreateNoPeriDim(minIndex=(/1,1/), maxIndex=(/10,20/), &
+    regDecomp=(/2,2/), gridEdgeLWidth=(/0,0/), gridEdgeUWidth=(/0,0/), &
+    name="landgrid", rc=rc)
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  write(name, *) "Creating a Grid to use in Field Attribute Tests"
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+!------------------------------------------------------------------------
+
+!------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Create dimensions attribute package on DistGrid Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  apConv = 'GFDL_IO'
+  apPurp = 'attribute'
+  call ESMF_AttributeAdd (grid,  &
+      convention=apConv, purpose=apPurp,  &
+      attrList=(/ "x_axis", "y_axis" /), rc=rc)
+  call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+!------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  ! Create Field
+  field_att=ESMF_FieldCreate(grid, arrayspec=arrayspec, &
+           totalLWidth=(/1,1/), totalUWidth=(/1,2/), &
+           name="temperature",  rc=rc)
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  write(name, *) "Create a field for attribute package Test"
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+!------------------------------------------------------------------------
+
+!------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Create attribute package for Field variable Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_AttributeAdd (field_att,  &
+      convention=apConv, purpose=apPurp,  &
+      attrList=attrNames, rc=rc)
+  call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+!------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Set attribute package values for Field variable Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  do, i=1, size (attrNames)
+    select case (attrNames(i))
+    case ("long_name")
+      call ESMF_AttributeSet (field_att,  &
+          attrNames(i), valueList=(/ "temperature" /),  &
+          convention=apConv, purpose=apPurp,  &
+          rc=rc)
+      if (rc /= ESMF_SUCCESS) exit
+    case ("units")
+      call ESMF_AttributeSet (field_att,  &
+          attrNames(i), valueList=(/ "K" /),  &
+          convention=apConv, purpose=apPurp,  &
+          rc=rc)
+      if (rc /= ESMF_SUCCESS) exit
+    case ("valid_range")
+      call ESMF_AttributeSet (field_att,  &
+          attrNames(i), valueList=(/ 100.0, 350.0 /),  &
+          convention=apConv, purpose=apPurp,  &
+          rc=rc)
+      if (rc /= ESMF_SUCCESS) exit
+    case ("missing_value")
+      call ESMF_AttributeSet (field_att,  &
+          attrNames(i), valueList=(/ -1.e+10 /),  &
+          convention=apConv, purpose=apPurp,  &
+          rc=rc)
+      if (rc /= ESMF_SUCCESS) exit
+    case ("_FillValue")
+      call ESMF_AttributeSet (field_att,  &
+          attrNames(i), valueList=(/ -1.e+10 /),  &
+          convention=apConv, purpose=apPurp,  &
+          rc=rc)
+      if (rc /= ESMF_SUCCESS) exit
+    case ("cell_methods")
+      call ESMF_AttributeSet (field_att,  &
+          attrNames(i), valueList=(/ "time: point" /),  &
+          convention=apConv, purpose=apPurp,  &
+          rc=rc)
+      if (rc /= ESMF_SUCCESS) exit
+    case default
+      print *, 'unhandled case!'
+      rc = ESMF_FAILURE
+      exit
+    end select
+  end do
+  call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+!call ESMF_FieldPrint (field_att)
+
+!------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  ! Write Fortran array in Field
+  call ESMF_FieldWrite(field_att, fileName="field_attributes.nc",        &
+       status=ESMF_FILESTATUS_REPLACE, rc=rc)
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  write(name, *) "Write Fortran array in Field"
+#if (defined ESMF_PIO && ( defined ESMF_NETCDF || defined ESMF_PNETCDF))
+  call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+#else
+  write(failMsg, *) "Did not return ESMF_RC_LIB_NOT_PRESENT"
+  call ESMF_Test((rc==ESMF_RC_LIB_NOT_PRESENT), name, failMsg, result, ESMF_SRCLINE)
+#endif
 
 !------------------------------------------------------------------------
 ! Destroy all Fields and cleanup

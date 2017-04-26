@@ -154,7 +154,7 @@ contains
     type(ESMF_IO) :: ESMF_IOCreate
 
 ! !ARGUMENTS:
-    type(ESMF_KeywordEnforcer), optional:: keywordEnforcer !keywords req. below
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                 intent(out), optional :: rc
 
 ! !DESCRIPTION:
@@ -262,13 +262,16 @@ contains
 ! !IROUTINE: ESMF_IOAddArray - Add an array to an I/O object's element list
 
 ! !INTERFACE:
-  subroutine ESMF_IOAddArray(io, array, keywordEnforcer, variableName, rc)
+  subroutine ESMF_IOAddArray(io, array, keywordEnforcer,  &
+                             variableName, convention, purpose, rc)
 
 ! !ARGUMENTS:
     type(ESMF_IO),           intent(in)            :: io
     type(ESMF_Array),        intent(in)            :: array
-    type(ESMF_KeywordEnforcer), optional:: keywordEnforcer !keywords req. below
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     character(*),            intent(in),  optional :: variableName
+    character(*),            intent(in),  optional :: convention
+    character(*),            intent(in),  optional :: purpose
     integer,                 intent(out), optional :: rc
    
 ! !DESCRIPTION:
@@ -282,6 +285,10 @@ contains
 !          The {\tt ESMF\_Array} object to add to io's element list
 !     \item[{[variableName]}]
 !          Optional variableName to attach to this array for I/O purposes
+!     \item[{[convention]}]
+!          Optional convention - AttPack for attribute and dimension names and values
+!     \item[{[purpose]}]
+!          Optional purpose - AttPack for attribute and dimension names and values
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -303,8 +310,9 @@ contains
     endif
 
     call c_ESMC_IOAddArray(io, array,  &
-        variableName, len_varName,  &
-          localrc)
+        variableName, len_varName,     &
+        convention, purpose,           &
+        localrc)
 
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
          ESMF_CONTEXT, rcToReturn=rc)) return
@@ -324,7 +332,7 @@ contains
 ! !ARGUMENTS:
     type(ESMF_IO),            intent(in)            :: io
     character (len=*),        intent(in)            :: fileName
-    type(ESMF_KeywordEnforcer), optional:: keywordEnforcer !keywords req. below
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                  intent(in),  optional :: timeslice
     type(ESMF_IOFmt_Flag),    intent(in),  optional :: iofmt
     character (len=*),        intent(in),  optional :: schema
@@ -396,13 +404,14 @@ contains
 ! !IROUTINE: ESMF_IOWrite - Perform a write on an ESMF I/O object
 !
 ! !INTERFACE:
-  subroutine ESMF_IOWrite(io, fileName, keywordEnforcer, overwrite, status,  &
+  subroutine ESMF_IOWrite(io, fileName, keywordEnforcer,  &
+                          overwrite, status,  &
                           timeslice, iofmt, schema, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_IO),              intent(in)            :: io
     character (len=*),          intent(in)            :: fileName
-    type(ESMF_KeywordEnforcer), optional:: keywordEnforcer !keywords req. belowz
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     logical,                    intent(in),  optional :: overwrite
     type(ESMF_FileStatus_Flag), intent(in),  optional :: status
     integer,                    intent(in),  optional :: timeslice

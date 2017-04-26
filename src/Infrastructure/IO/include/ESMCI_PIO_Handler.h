@@ -113,7 +113,9 @@ namespace ESMCI {
     void arrayWrite(Array *arr_p, const char * const name,
                     const std::vector<std::string> &dimLabels,
                     int *timeslice = NULL,
-                    const Attribute *attPack = NULL, int *rc = NULL);
+                    const Attribute *varAttPack = NULL,
+                    const Attribute *gblAttPack = NULL,
+                    int *rc = NULL);
 
     // get() and set()
   public:
@@ -145,6 +147,7 @@ namespace ESMCI {
                             int *narrDims = (int *)NULL,
                             int *basepiotype = (int *)NULL,
                             int *rc = (int *)NULL);
+    void attPackPut (pio_var_desc_t vardesc, const Attribute *attPack, int *rc);
     // Error recording routine
     static bool CheckPIOError(int pioRetCode,
                               int line, const char * const file,

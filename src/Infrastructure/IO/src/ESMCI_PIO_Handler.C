@@ -783,7 +783,8 @@ void PIO_Handler::arrayWrite(
   const char * const name,                // (in) Optional array name
   const std::vector<std::string> &dimLabels, // (in) Optional dimension labels
   int *timeslice,                         // (in) Optional timeslice
-  const Attribute *attPack,               // (in) Optional Attribute Package
+  const Attribute *varAttPack,            // (in) Optional per-variable Attribute Package
+  const Attribute *gblAttPack,            // (in) Optional global Attribute Package
   int *rc                                 // (out) - Error return code
 //
   ) {
@@ -1128,7 +1129,7 @@ void PIO_Handler::arrayWrite(
   if ((getFormat() != ESMF_IOFMT_BIN) && !varExists) {
     piorc = pio_cpp_def_var_md(pioFileDesc, varname.c_str(), basepiotype,
                                ncDims, nioDims, vardesc);
-    if (!CHECKPIOERROR(piorc, "Attempting to obtain info on variable: " + varname,
+    if (!CHECKPIOERROR(piorc, "Attempting to define PIO vardesc for: " + varname,
         ESMF_RC_FILE_WRITE, (*rc))) {
       free (vardesc);
       return;
@@ -1157,94 +1158,21 @@ void PIO_Handler::arrayWrite(
 #endif // ESMFIO_DEBUG
 
   if (getFormat() != ESMF_IOFMT_BIN) {
-    // ESMF Attribute Package -> NetCDF variable attributes
-    if (attPack) {
-      int natts = attPack->getCountAttr();
-      for (int i=0; i<natts; i++) {
-        Attribute *att = attPack->AttPackGetAttribute (i);
-        if (!att) {
-          if (ESMC_LogDefault.MsgFoundError(ESMF_RC_ATTR_NOTSET,
-              "Can not access Attribute in " + attPack->getName(),
-              ESMC_CONTEXT, rc)) {
-            free (vardesc);
-            return;
-          }
-        }
-        ESMC_TypeKind_Flag att_type = att->getTypeKind ();
-        // std::cout << ESMC_METHOD << ": Attribute #" << i << " = " << att->getName()
-        //    << ", att_type = " << att_type << std::endl;
-        int nvals;
-        std::vector<std::string> stringvals;
-        std::vector<ESMC_I4> intvals;
-        std::vector<ESMC_R4> floatvals;
-        switch (att_type) {
-          case ESMC_TYPEKIND_CHARACTER:
-            localrc = att->get (&stringvals);
-            if (ESMC_LogDefault.MsgFoundError(localrc,
-                "Can not access string Attribute value for " + att->getName(),
-                ESMC_CONTEXT, rc)) {
-              free (vardesc);
-              return;
-            }
-            if (stringvals.size() > 1) {
-              if (ESMC_LogDefault.MsgFoundError(localrc,
-                  "Only scalar string Attribute value for " + att->getName() + " is currently supported",
-                  ESMC_CONTEXT, rc)) {
-                free (vardesc);
-                return;
-              }
-            }
-            piorc = pio_cpp_put_att_string (pioFileDesc, vardesc,
-                att->getName().c_str(), stringvals[0].c_str());
-            if (!CHECKPIOERROR(piorc, "Attempting to set string Attribute: " + att->getName(),
-                ESMF_RC_FILE_WRITE, (*rc))) {
-              free (vardesc);
-              return;
-            }
-            break;
-
-          case ESMC_TYPEKIND_I4:
-            localrc = att->get (&nvals, &intvals);
-            if (ESMC_LogDefault.MsgFoundError(localrc,
-                "Can not access int Attribute value for " + att->getName(),
-                ESMC_CONTEXT, rc)) {
-              free (vardesc);
-              return;
-            }
-            piorc = pio_cpp_put_att_ints (pioFileDesc, vardesc,
-                att->getName().c_str(), &intvals[0], intvals.size());
-            if (!CHECKPIOERROR(piorc, "Attempting to set int Attribute: " + att->getName(),
-                ESMF_RC_FILE_WRITE, (*rc))) {
-              free (vardesc);
-              return;
-            }
-            break;
-
-          case ESMC_TYPEKIND_R4:
-            localrc = att->get (&nvals, &floatvals);
-            if (ESMC_LogDefault.MsgFoundError(localrc,
-                "Can not access float Attribute value for " + att->getName(),
-                ESMC_CONTEXT, rc)) {
-              free (vardesc);
-              return;
-            }
-            piorc = pio_cpp_put_att_floats (pioFileDesc, vardesc,
-                att->getName().c_str(), &floatvals[0], floatvals.size());
-            if (!CHECKPIOERROR(piorc, "Attempting to set float Attribute: " + att->getName(),
-                ESMF_RC_FILE_WRITE, (*rc))) {
-              free (vardesc);
-              return;
-            }
-            break;
-
-          default:
-            if (ESMC_LogDefault.MsgFoundError(ESMF_RC_ATTR_NOTSET,
-                "Unknown Attribute value type for " + att->getName(),
-                ESMC_CONTEXT, rc)) {
-              free (vardesc);
-              return;
-            }
-        }
+    // ESMF Attribute Package -> NetCDF variable and global attributes
+    if (varAttPack) {
+      attPackPut (vardesc, varAttPack, &localrc);
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+          ESMC_CONTEXT, rc)) {
+        free (vardesc);
+        return;
+      }
+    }
+    if (gblAttPack) {
+      attPackPut (NULL, gblAttPack, &localrc);
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+          ESMC_CONTEXT, rc)) {
+        free (vardesc);
+        return;
       }
     }
   }
@@ -1497,6 +1425,116 @@ void PIO_Handler::open(
     *rc = ESMF_SUCCESS;
   }
 } // PIO_Handler::open()
+//-----------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::PIO_Handler::attPackPut()"
+//BOPI
+// !IROUTINE:  ESMCI::PIO_Handler::attPackPut
+//
+// !INTERFACE:
+void PIO_Handler::attPackPut (
+//
+// !RETURN VALUE:
+//
+// !ARGUMENTS:
+//
+  pio_var_desc_t vardesc,                 // (in) - variable to write attributes into, NULL for global
+  const Attribute *attPack,               // (in) - AttPack containing name/value(s) pairs
+  int *rc                                 // (out) - Error return code
+  ) {
+//
+// !DESCRIPTION:
+//    Puts the Attributes and their values into the NetCDF file
+//
+//EOPI
+//-----------------------------------------------------------------------------
+  int localrc;
+  int piorc;
+
+  if (vardesc == NULL) {
+    pio_var_desc_t gblvardesc = (pio_var_desc_t)calloc(PIO_SIZE_VAR_DESC, 1);
+    if (!gblvardesc)
+      if (ESMC_LogDefault.MsgAllocError(" failed to allocate pio global variable desc",
+          ESMC_CONTEXT, rc)) return;
+
+    piorc = pio_cpp_def_var_0d(pioFileDesc, "", PIO_global, gblvardesc);
+    if (!CHECKPIOERROR(piorc, "Attempting to define global PIO vardesc",
+        ESMF_RC_FILE_WRITE, (*rc))) {
+      free (gblvardesc);
+      return;
+    }
+
+    // placeholder for the moment...
+    piorc = pio_cpp_put_att_string (pioFileDesc, gblvardesc, "my_name", "wws");
+    if (!CHECKPIOERROR(piorc, "Attempting to set global attribute",
+        ESMF_RC_FILE_WRITE, (*rc))) {
+      free (gblvardesc);
+      return;
+    }
+    free (gblvardesc);
+    return;
+  }
+
+  int natts = attPack->getCountAttr();
+  for (int i=0; i<natts; i++) {
+    Attribute *att = attPack->AttPackGetAttribute (i);
+    if (!att) {
+      if (ESMC_LogDefault.MsgFoundError(ESMF_RC_ATTR_NOTSET,
+          "Can not access Attribute in " + attPack->getName(),
+          ESMC_CONTEXT, rc)) return;
+    }
+    ESMC_TypeKind_Flag att_type = att->getTypeKind ();
+    // std::cout << ESMC_METHOD << ": Attribute #" << i << " = " << att->getName()
+    //    << ", att_type = " << att_type << std::endl;
+    int nvals;
+    std::vector<std::string> stringvals;
+    std::vector<ESMC_I4> intvals;
+    std::vector<ESMC_R4> floatvals;
+    switch (att_type) {
+      case ESMC_TYPEKIND_CHARACTER:
+        localrc = att->get (&stringvals);
+        if (ESMC_LogDefault.MsgFoundError(localrc,
+            "Can not access string Attribute value for " + att->getName(),
+            ESMC_CONTEXT, rc)) return;
+        if (stringvals.size() > 1) {
+          if (ESMC_LogDefault.MsgFoundError(localrc,
+              "Only scalar string Attribute value for " + att->getName() + " is currently supported",
+              ESMC_CONTEXT, rc)) return;
+        }
+        piorc = pio_cpp_put_att_string (pioFileDesc, vardesc,
+            att->getName().c_str(), stringvals[0].c_str());
+        if (!CHECKPIOERROR(piorc, "Attempting to set string Attribute: " + att->getName(),
+            ESMF_RC_FILE_WRITE, (*rc))) return;
+        break;
+      case ESMC_TYPEKIND_I4:
+        localrc = att->get (&nvals, &intvals);
+        if (ESMC_LogDefault.MsgFoundError(localrc,
+            "Can not access int Attribute value for " + att->getName(),
+            ESMC_CONTEXT, rc)) return;
+        piorc = pio_cpp_put_att_ints (pioFileDesc, vardesc,
+            att->getName().c_str(), &intvals[0], intvals.size());
+        if (!CHECKPIOERROR(piorc, "Attempting to set int Attribute: " + att->getName(),
+            ESMF_RC_FILE_WRITE, (*rc))) return;
+        break;
+      case ESMC_TYPEKIND_R4:
+        localrc = att->get (&nvals, &floatvals);
+        if (ESMC_LogDefault.MsgFoundError(localrc,
+            "Can not access float Attribute value for " + att->getName(),
+            ESMC_CONTEXT, rc)) return;
+        piorc = pio_cpp_put_att_floats (pioFileDesc, vardesc,
+            att->getName().c_str(), &floatvals[0], floatvals.size());
+        if (!CHECKPIOERROR(piorc, "Attempting to set float Attribute: " + att->getName(),
+            ESMF_RC_FILE_WRITE, (*rc))) return;
+        break;
+      default:
+        if (ESMC_LogDefault.MsgFoundError(ESMF_RC_ATTR_NOTSET,
+            "Unknown Attribute value type for " + att->getName(),
+            ESMC_CONTEXT, rc)) return;
+    }
+  }
+} // PIO_Handler::attPackPut()
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
