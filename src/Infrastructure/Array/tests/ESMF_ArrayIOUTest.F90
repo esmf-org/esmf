@@ -76,11 +76,12 @@ program ESMF_ArrayIOUTest
   integer :: Maxvalue(1), diff
   real(ESMF_KIND_R8) :: r8Max(1), r8diff
   character(ESMF_MAXSTR) :: string
-  character(ESMF_MAXSTR) :: apConv, apPurp
   integer :: msglen
   logical :: passfail
   logical :: valid_de1
 
+  character(16), parameter :: apConv = 'Attribute_IO'
+  character(16), parameter :: apPurp = 'attributes'
   type nameval_t
     character(ESMF_MAXSTR) :: name
     character(ESMF_MAXSTR) :: value
@@ -1465,8 +1466,6 @@ program ESMF_ArrayIOUTest
   !NEX_UTest_Multi_Proc_Only
   write(name, *) "Create dimensions attribute package on DistGrid Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  apConv = 'GFDL_IO'
-  apPurp = 'attribute'
   call ESMF_AttributeAdd (distgrid,  &
       convention=apConv, purpose=apPurp,  &
       attrList=(/ "x_axis" /), rc=rc)
@@ -1492,8 +1491,6 @@ program ESMF_ArrayIOUTest
   !NEX_UTest_Multi_Proc_Only
   write(name, *) "Create custom attribute package Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  apConv = 'GFDL_IO'
-  apPurp = 'attribute'
   allocate (attrNameVals(3))
   attrNameVals(1) = nameval_t ('long_name',      'T-cell longitude')
   attrNameVals(2) = nameval_t ('units',          'degrees_E')

@@ -70,7 +70,8 @@ program ESMF_FieldIOUTest
   integer :: i,j, t, endtime, k
   real(ESMF_KIND_R8) :: Maxvalue, diff
 
-  character(ESMF_MAXSTR) :: apconv, appurp
+  character(16), parameter :: apConv = 'Attribute_IO'
+  character(16), parameter :: apPurp = 'attributes'
   character(*), parameter :: attrNames(6) = (/  &
       "long_name    ",  &
       "units        ",  &
@@ -1038,8 +1039,6 @@ program ESMF_FieldIOUTest
   !NEX_UTest_Multi_Proc_Only
   write(name, *) "Create dimensions attribute package on DistGrid Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  apConv = 'GFDL_IO'
-  apPurp = 'attribute'
   call ESMF_AttributeAdd (grid,  &
       convention=apConv, purpose=apPurp,  &
       attrList=(/ "x_axis", "y_axis" /), rc=rc)
