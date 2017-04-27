@@ -116,7 +116,6 @@ extern "C" {
 
     // call into C++
     // Attributes not supported yet
-std::cout << ESMC_METHOD << ": calling addArray method" << std::endl;
     localrc = (*ptr)->addArray(*array, varName, NULL, NULL, NULL);
     ESMC_LogDefault.MsgFoundError(localrc,
                                   ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
