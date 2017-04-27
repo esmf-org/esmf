@@ -1120,9 +1120,10 @@ program ESMF_FieldIOUTest
   !NEX_UTest_Multi_Proc_Only
   ! Write Fortran array in Field
   call ESMF_FieldWrite(field_att, fileName="field_attributes.nc",        &
+       convention=apConv, purpose=apPurp,  &
        status=ESMF_FILESTATUS_REPLACE, rc=rc)
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  write(name, *) "Write Fortran array in Field"
+  write(name, *) "Write Fortran array in Field with attributes"
 #if (defined ESMF_PIO && ( defined ESMF_NETCDF || defined ESMF_PNETCDF))
   call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 #else

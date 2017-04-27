@@ -61,34 +61,40 @@ namespace ESMCI {
     enum IOListObjectType type;
     IO_ObjectType object;           // e.g., Array, Attribute
     std::string name;
-    std::string convention;
-    std::string purpose;
+    Attribute *dimAttPack;
+    Attribute *varAttPack;
+    Attribute *gblAttPack;
     ESMC_I8 number;
 
     IO_ObjectContainer () {
       type = IO_NULL;
       object.arr = (Array *)NULL;
       name[0] = '\0';
+      dimAttPack = NULL;
+      varAttPack = NULL;
+      gblAttPack = NULL;
       number = 0;
     }
     IO_ObjectContainer (Array *arr_p, const std::string &arrName,
-        const std::string convention,
-        const std::string purpose) {
+            Attribute *dimAttPack,
+            Attribute *varAttPack,
+            Attribute *gblAttPack) {
       type = IO_ARRAY;
       object.arr = arr_p;
       if (arrName.length() > 0)
         name = arrName;
 
-      if (convention.length() > 0)
-        this->convention = convention;
-
-      if (purpose.length() > 0)
-        this->purpose = purpose;
+      this->dimAttPack = dimAttPack;
+      this->varAttPack = varAttPack;
+      this->gblAttPack = gblAttPack;
       number = 0;
     }
     ~IO_ObjectContainer() {
       name = "";
       object.arr = (Array *)NULL;
+      dimAttPack = NULL;
+      varAttPack = NULL;
+      gblAttPack = NULL;
       number = 0;
       type = IO_NULL;
     }
@@ -188,8 +194,9 @@ namespace ESMCI {
     int addArray(Array *arr_p);
     int addArray(Array *arr_p,
                  const std::string &variableName,
-                 const std::string &convention,
-                 const std::string &purpose);
+                 Attribute *dimAttPack,
+                 Attribute *varAttPack,
+                 Attribute *gblAttPack);
 // TBI
 #if 0
     void addAttributes(ESMC_Base *obj_p,

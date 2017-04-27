@@ -22,6 +22,11 @@
 #include <cstring>
 using namespace std;
 
+#include "ESMCI_Base.h"
+#include "ESMCI_Array.h"
+#include "ESMCI_Field.h"
+#include "ESMCI_Grid.h"
+#include "ESMCI_IO.h"
 #include "ESMCI_Macros.h"
 #include "ESMCI_LogErr.h"
 
@@ -41,6 +46,92 @@ extern "C" {
 // This section includes all the Field routines
 //
 //
+
+//       call ESMF_FieldIOAddField(io, field, array, variableName=name,  &
+//          convention=convention, purpose=purpose,  &
+//          rc=localrc)
+
+  void FTN_X(c_esmc_fieldioaddarray)(ESMCI::IO **ptr,
+                                ESMC_Base **base,
+                                ESMCI::Array **array,
+                                ESMCI::Grid  **grid,
+                                char *variableName,
+                                char *conventionName, char *purposeName,
+                                int *rc,
+                                ESMCI_FortranStrLenArg varname_l,
+                                ESMCI_FortranStrLenArg convention_l,
+                                ESMCI_FortranStrLenArg purpose_l) {
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_fieldioaddarray()"
+    // Initialize return code; assume routine not implemented
+    if (rc != NULL) {
+      *rc = ESMC_RC_NOT_IMPL;
+    }
+    int localrc = ESMC_RC_NOT_IMPL;
+    // helper variable
+    string varName;
+    if (variableName)
+       varName = string (variableName, ESMC_F90lentrim (variableName, varname_l));
+
+    std::string convention;
+    if (conventionName)
+      convention = string (conventionName, ESMC_F90lentrim (conventionName, convention_l));
+    std::string purpose;
+    if (purposeName)
+      purpose = string (purposeName, ESMC_F90lentrim (purposeName, purpose_l));
+
+    ESMCI::Grid *grid_p = NULL;
+    if ((convention.length() > 0) && (purpose.length() > 0)) {
+      grid_p = *grid;
+      if (grid_p->root.getCountPack() == 0) {
+        localrc = ESMF_RC_ATTR_NOTSET;
+        if (ESMC_LogDefault.MsgFoundError(localrc, "No Field or Grid AttPacks found", ESMC_CONTEXT,
+            rc)) return;
+      }
+    }
+
+    // If present, use Attributes at the Grid level for dimension names
+    ESMCI::Attribute *dimAttPack = NULL;
+    if ((convention.length() > 0) && (purpose.length() > 0)) {
+      std::vector<std::string> attPackNameList;
+      int attPackNameCount;
+      localrc = grid_p->root.AttPackGet(
+          convention, purpose, "grid",
+          attPackNameList, attPackNameCount, ESMC_ATTNEST_ON);
+      if (localrc == ESMF_SUCCESS) {
+        dimAttPack = grid_p->root.AttPackGet (
+            convention, purpose, "grid",
+            attPackNameList[0], ESMC_ATTNEST_ON);
+      }
+    }
+
+    // If present, use Attributes at the Field level for variable attributes
+    ESMC_Base *base_p = *base;
+    ESMCI::Attribute *varAttPack = NULL;
+    if ((convention.length() > 0) && (purpose.length() > 0)) {
+      std::vector<std::string> attPackNameList;
+      int attPackNameCount;
+      localrc = base_p->root.AttPackGet(
+          convention, purpose, "field",
+          attPackNameList, attPackNameCount, ESMC_ATTNEST_ON);
+      if (localrc == ESMF_SUCCESS) {
+        varAttPack = base_p->root.AttPackGet (
+            convention, purpose, "field",
+            attPackNameList[0], ESMC_ATTNEST_ON);
+      }
+    }
+
+    ESMCI::Attribute *gblAttPack = NULL;
+
+    // call into C++
+    localrc = (*ptr)->addArray(*array, varName, dimAttPack, varAttPack, gblAttPack);
+    ESMC_LogDefault.MsgFoundError(localrc,
+                                  ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+                                  ESMC_NOT_PRESENT_FILTER(rc));
+    if (rc != NULL) {
+      *rc = localrc;
+    }
+  }
 
 // non-method functions
 void FTN_X(c_esmc_fieldserialize)(

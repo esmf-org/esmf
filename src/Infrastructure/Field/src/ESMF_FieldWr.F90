@@ -35,6 +35,7 @@ module ESMF_FieldWrMod
   use ESMF_ArrayMod
   use ESMF_FieldMod
   use ESMF_FieldGetMod
+  use ESMF_GridMod
   use ESMF_InitMacrosMod
   use ESMF_IOMod
 
@@ -178,7 +179,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer                         :: localrc
     character(len=ESMF_MAXSTR)      :: name
     type(ESMF_FieldType), pointer   :: fp 
-    type(ESMF_Array)                :: array 
+    type(ESMF_Base)                 :: base
+    type(ESMF_Array)                :: array
+    type(ESMF_Grid)                 :: grid
     type(ESMF_FieldStatus_Flag)     :: fieldstatus       ! Field's status
     logical                         :: opt_overwriteflag ! helper variable
     type(ESMF_FileStatus_Flag)      :: opt_status        ! helper variable
@@ -234,11 +237,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       end if
     end if
 
+    fp => field%ftypep
     if (present(variableName)) then
       name = variableName
     else
-      fp => field%ftypep
-
       call ESMF_GetName(fp%base, name, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU,                &
            ESMF_CONTEXT, rcToReturn=rc)) return
@@ -254,6 +256,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       return
     endif
 
+    if (present (convention)) then
+      call ESMF_FieldGet (field, grid=grid, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU,                &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+    end if
+
     ! Create an I/O object
     io = ESMF_IOCreate(rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU,                &
@@ -261,9 +269,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! From here on out, we need to clean up so no returning on error
     if (localrc .eq. ESMF_SUCCESS) then
-      call ESMF_IOAddArray(io, array, variableName=name,  &
-          convention=convention, purpose=purpose,  &
-          rc=localrc)
+      call c_esmc_fieldioaddarray(io, fp%base, array, grid, name,  &
+          convention, purpose,  &
+          localrc)
       errorFound = ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU,     &
           ESMF_CONTEXT, rcToReturn=rc)
     endif

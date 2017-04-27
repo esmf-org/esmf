@@ -65,6 +65,7 @@ program ESMF_ArrayIOUTest
   integer, allocatable                    :: undistLBound(:), undistUBound(:)
   real(ESMF_KIND_R8),    pointer          :: arrayPtrR8D4(:,:,:,:)
   real(ESMF_KIND_R8),    pointer          :: arrayPtrR8D4_r(:,:,:,:)
+  real(ESMF_KIND_R8),    pointer          :: arrayPtrR8D1(:)
   type(ESMF_RouteHandle)                  :: rh
   integer                                 :: rc, de
   integer, allocatable :: totalLWidth(:), totalUWidth(:), &
@@ -1478,6 +1479,14 @@ program ESMF_ArrayIOUTest
   array_gxt = ESMF_ArrayCreate(distgrid=distgrid, typekind=ESMF_TYPEKIND_R8, &
           name="grid_xt", rc=rc)
   call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+!------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Array Fill for Attribute package Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_ArrayGet (array_gxt, farrayPtr=arrayPtrR8D1, rc=rc)
+  call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  arrayPtrR8D1 = (/ (real (i) + real (i)*.01d0, i=lbound(arrayPtrR8D1,1), ubound (arrayPtrR8D1,1)) /)
 
 !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only

@@ -258,6 +258,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   end subroutine ESMF_IOClear
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_IOAddArray()"
 !BOPI
 ! !IROUTINE: ESMF_IOAddArray - Add an array to an I/O object's element list
 

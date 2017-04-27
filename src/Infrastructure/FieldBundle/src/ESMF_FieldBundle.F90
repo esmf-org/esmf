@@ -5174,13 +5174,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \label{api:FieldBundleWrite}
 
 ! !INTERFACE:
-  subroutine ESMF_FieldBundleWrite(fieldbundle, fileName, &
-    keywordEnforcer, singleFile, overwrite, status, timeslice, iofmt, rc)
+  subroutine ESMF_FieldBundleWrite(fieldbundle, fileName, keywordEnforcer,  &
+      convention, purpose, singleFile, overwrite, status, timeslice, iofmt, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_FieldBundle),     intent(in)             :: fieldbundle
     character(*),               intent(in)             :: fileName
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords for the below
+    character(*),               intent(in),  optional  :: convention
+    character(*),               intent(in),  optional  :: purpose
     logical,                    intent(in),  optional  :: singleFile
     logical  ,                  intent(in),  optional  :: overwrite
     type(ESMF_FileStatus_Flag), intent(in),  optional  :: status

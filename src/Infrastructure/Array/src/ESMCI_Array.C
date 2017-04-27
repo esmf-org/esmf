@@ -2916,9 +2916,7 @@ int Array::read(
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       &rc)) return rc;
   // For here on, we have to be sure to clean up before returning
-  std::string convention;   // dummy string for reads
-  std::string purpose;      // dummy string for reads
-  localrc = newIO->addArray(this, variableName, convention, purpose);
+  localrc = newIO->addArray(this, variableName, NULL, NULL, NULL);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       &rc)) {
     IO::destroy(&newIO);
@@ -2977,6 +2975,7 @@ int Array::write(
   ESMC_IOFmt_Flag localiofmt;             // For default handling
   bool localoverwrite;                    // For default handling
   ESMC_FileStatus_Flag localstatus;       // For default handling
+  int localrc;
 
   // Handle format default
   if ((ESMC_IOFmt_Flag *)NULL == iofmt) {
@@ -3027,12 +3026,56 @@ int Array::write(
     }
   }
 
+  DistGrid *dg = getDistGrid();
+  if ((convention.length() > 0) && (purpose.length() > 0)) {
+std::cout << ESMC_METHOD << ": found convention = " << convention << ", purpose = " << purpose << std::endl;
+    if ((this->root.getCountPack() == 0) && (dg->root.getCountPack() == 0)) {
+      localrc = ESMF_RC_ATTR_NOTSET;
+      if (ESMC_LogDefault.MsgFoundError(localrc, "No Array or DistGrid AttPacks found", ESMC_CONTEXT,
+          &rc)) return rc;
+    }
+  }
+
+  // If present, use Attributes at the DistGrid level for dimension names
+  Attribute *dimAttPack = NULL;
+  if ((convention.length() > 0) && (purpose.length() > 0)) {
+    std::vector<std::string> attPackNameList;
+    int attPackNameCount;
+    localrc = dg->root.AttPackGet(
+        convention, purpose, "distgrid",
+        attPackNameList, attPackNameCount, ESMC_ATTNEST_ON);
+    if (localrc == ESMF_SUCCESS) {
+      dimAttPack = dg->root.AttPackGet (
+          convention, purpose, "distgrid",
+          attPackNameList[0], ESMC_ATTNEST_ON);
+std::cout << ESMC_METHOD << ": DistGrid att pack found!" << std::endl;
+    }
+  }
+
+  // If present, use Attributes at the Array level for variable attributes
+  Attribute *varAttPack = NULL;
+  if ((convention.length() > 0) && (purpose.length() > 0)) {
+    std::vector<std::string> attPackNameList;
+    int attPackNameCount;
+    localrc = this->root.AttPackGet(
+        convention, purpose, "array",
+        attPackNameList, attPackNameCount, ESMC_ATTNEST_ON);
+    if (localrc == ESMF_SUCCESS) {
+      varAttPack = this->root.AttPackGet (
+          convention, purpose, "array",
+          attPackNameList[0], ESMC_ATTNEST_ON);
+std::cout << ESMC_METHOD << ": Array att pack found!" << std::endl;
+    }
+  }
+
+  Attribute *gblAttPack = NULL;
+
   IO *newIO = IO::create(&rc);
   if (ESMC_LogDefault.MsgFoundError(rc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)){
     return rc;
   }
   // From now on, we have to be sure to clean up before returning
-  rc = newIO->addArray(this, variableName, convention, purpose);
+  rc = newIO->addArray(this, variableName, dimAttPack, varAttPack, gblAttPack);
   if (ESMC_LogDefault.MsgFoundError(rc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) {
     IO::destroy(&newIO);
     newIO = (IO *)NULL;
