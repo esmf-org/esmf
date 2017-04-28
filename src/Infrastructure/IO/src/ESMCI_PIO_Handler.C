@@ -1465,16 +1465,7 @@ void PIO_Handler::attPackPut (
       free (gblvardesc);
       return;
     }
-
-    // placeholder for the moment...
-    piorc = pio_cpp_put_att_string (pioFileDesc, gblvardesc, "my_name", "wws");
-    if (!CHECKPIOERROR(piorc, "Attempting to set global attribute",
-        ESMF_RC_FILE_WRITE, (*rc))) {
-      free (gblvardesc);
-      return;
-    }
-    free (gblvardesc);
-    return;
+    vardesc = gblvardesc;
   }
 
   int natts = attPack->getCountAttr();

@@ -179,9 +179,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer                         :: localrc
     character(len=ESMF_MAXSTR)      :: name
     type(ESMF_FieldType), pointer   :: fp 
-    type(ESMF_Base)                 :: base
     type(ESMF_Array)                :: array
     type(ESMF_Grid)                 :: grid
+    type(ESMF_Base), pointer        :: base_dummy => null ()
     type(ESMF_FieldStatus_Flag)     :: fieldstatus       ! Field's status
     logical                         :: opt_overwriteflag ! helper variable
     type(ESMF_FileStatus_Flag)      :: opt_status        ! helper variable
@@ -266,7 +266,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! From here on out, we need to clean up so no returning on error
     if (localrc .eq. ESMF_SUCCESS) then
       call c_esmc_fieldioaddarray(io, fp%base, array, grid, name,  &
-          convention, purpose,  &
+          base_dummy, convention, purpose,  &
           localrc)
       errorFound = ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU,     &
           ESMF_CONTEXT, rcToReturn=rc)

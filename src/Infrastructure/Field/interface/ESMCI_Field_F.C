@@ -47,15 +47,12 @@ extern "C" {
 //
 //
 
-//       call ESMF_FieldIOAddField(io, field, array, variableName=name,  &
-//          convention=convention, purpose=purpose,  &
-//          rc=localrc)
-
   void FTN_X(c_esmc_fieldioaddarray)(ESMCI::IO **ptr,
                                 ESMC_Base **base,
                                 ESMCI::Array **array,
                                 ESMCI::Grid  **grid,
                                 char *variableName,
+                                ESMC_Base **gblbase,    // Optional, may be NULL
                                 char *conventionName, char *purposeName,
                                 int *rc,
                                 ESMCI_FortranStrLenArg varname_l,
@@ -121,7 +118,24 @@ extern "C" {
       }
     }
 
+
+    // If present, use Attributes at the FieldBundle level for global attributes
     ESMCI::Attribute *gblAttPack = NULL;
+    if (gblbase) {
+      ESMC_Base *gblbase_p = *gblbase;
+      if ((convention.length() > 0) && (purpose.length() > 0)) {
+        std::vector<std::string> attPackNameList;
+        int attPackNameCount;
+        localrc = gblbase_p->root.AttPackGet(
+            convention, purpose, "fieldbundle",
+            attPackNameList, attPackNameCount, ESMC_ATTNEST_ON);
+        if (localrc == ESMF_SUCCESS) {
+          gblAttPack = gblbase_p->root.AttPackGet (
+              convention, purpose, "fieldbundle",
+              attPackNameList[0], ESMC_ATTNEST_ON);
+        }
+      }
+    }
 
     // call into C++
     localrc = (*ptr)->addArray(*array, varName, dimAttPack, varAttPack, gblAttPack);

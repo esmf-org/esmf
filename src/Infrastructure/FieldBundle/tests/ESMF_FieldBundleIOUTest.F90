@@ -255,7 +255,7 @@
 
 !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
-  write(name, *) "Set attribute values on Field(1) Test"
+  write(name, *) "Set attribute values on Field(3) Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   do, i=1, size (attrNameVals)
     call ESMF_AttributeSet (fieldTst(3),  &
@@ -297,6 +297,31 @@
 
 !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Create attribute package on FieldBundle single Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  attrNameVals(1) = nameval_t ('file_name', 'single.nc')
+  attrNameVals(2) = nameval_t ('date',      'Apr 27, 2017')
+  call ESMF_AttributeAdd (bundleTst,  &
+      convention=apConv, purpose=apPurp,  &
+      attrList=attrNameVals%name, rc=rc)
+  call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+!------------------------------------------------------------------------
+
+!------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Set attribute values on FieldBundle single Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  do, i=1, size (attrNameVals)
+    call ESMF_AttributeSet (bundleTst,  &
+        attrNameVals(i)%name, attrNameVals(i)%value,  &
+        convention=apConv, purpose=apPurp, rc=rc)
+    if (rc /= ESMF_SUCCESS) exit
+  end do
+  call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+!------------------------------------------------------------------------
+
+!------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
   ! FieldBundle Write to a single file Test
   call ESMF_FieldBundleWrite(bundleTst, fileName="single.nc",      &
       convention=apConv, purpose=apPurp,  &
@@ -324,6 +349,31 @@
   write(failMsg, *) "Did not return ESMF_RC_LIB_NOT_PRESENT"
   call ESMF_Test((rc==ESMF_RC_LIB_NOT_PRESENT), name, failMsg, result, ESMF_SRCLINE)
 #endif
+!------------------------------------------------------------------------
+
+!------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Create attribute package on FieldBundle multi Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  attrNameVals(1) = nameval_t ('file_name', 'multi.nc')
+  attrNameVals(2) = nameval_t ('date',      'Apr 27, 2017')
+  call ESMF_AttributeAdd (bundleTst,  &
+      convention=apConv, purpose=apPurp,  &
+      attrList=attrNameVals%name, rc=rc)
+  call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+!------------------------------------------------------------------------
+
+!------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Set attribute values on FieldBundle multi Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  do, i=1, size (attrNameVals)
+    call ESMF_AttributeSet (bundleTst,  &
+        attrNameVals(i)%name, attrNameVals(i)%value,  &
+        convention=apConv, purpose=apPurp, rc=rc)
+    if (rc /= ESMF_SUCCESS) exit
+  end do
+  call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 !------------------------------------------------------------------------
 
 !------------------------------------------------------------------------

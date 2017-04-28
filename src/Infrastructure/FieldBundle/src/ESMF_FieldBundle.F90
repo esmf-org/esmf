@@ -5357,7 +5357,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords for t
         end if
 
         call c_esmc_fieldioaddarray (io, fp%base, array, grid, name,  &
-            convention, purpose,  &
+            fieldbundle%this%base, convention, purpose,  &
             localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU,                  &
             ESMF_CONTEXT, rcToReturn=rc)) return
@@ -5386,7 +5386,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords for t
         end if
 
         call c_esmc_fieldioaddarray (io, fp%base, array, grid, name,  &
-            convention, purpose,  &
+            fieldbundle%this%base, convention, purpose,  &
             localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU,                  &
             ESMF_CONTEXT, rcToReturn=rc)) return
