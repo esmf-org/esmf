@@ -80,7 +80,7 @@ extern "C" {
     ESMCI::Grid *grid_p = NULL;
     if ((convention.length() > 0) && (purpose.length() > 0)) {
       grid_p = *grid;
-      if (grid_p->root.getCountPack() == 0) {
+      if (grid_p->ESMC_BaseGetRoot()->getCountPack() == 0) {
         localrc = ESMF_RC_ATTR_NOTSET;
         if (ESMC_LogDefault.MsgFoundError(localrc, "No Field or Grid AttPacks found", ESMC_CONTEXT,
             rc)) return;
@@ -92,11 +92,11 @@ extern "C" {
     if ((convention.length() > 0) && (purpose.length() > 0)) {
       std::vector<std::string> attPackNameList;
       int attPackNameCount;
-      localrc = grid_p->root.AttPackGet(
+      localrc = grid_p->ESMC_BaseGetRoot()->AttPackGet(
           convention, purpose, "grid",
           attPackNameList, attPackNameCount, ESMC_ATTNEST_ON);
       if (localrc == ESMF_SUCCESS) {
-        dimAttPack = grid_p->root.AttPackGet (
+        dimAttPack = grid_p->ESMC_BaseGetRoot()->AttPackGet (
             convention, purpose, "grid",
             attPackNameList[0], ESMC_ATTNEST_ON);
       }
@@ -108,11 +108,11 @@ extern "C" {
     if ((convention.length() > 0) && (purpose.length() > 0)) {
       std::vector<std::string> attPackNameList;
       int attPackNameCount;
-      localrc = base_p->root.AttPackGet(
+      localrc = base_p->ESMC_BaseGetRoot()->AttPackGet(
           convention, purpose, "field",
           attPackNameList, attPackNameCount, ESMC_ATTNEST_ON);
       if (localrc == ESMF_SUCCESS) {
-        varAttPack = base_p->root.AttPackGet (
+        varAttPack = base_p->ESMC_BaseGetRoot()->AttPackGet (
             convention, purpose, "field",
             attPackNameList[0], ESMC_ATTNEST_ON);
       }
@@ -126,11 +126,11 @@ extern "C" {
       if ((convention.length() > 0) && (purpose.length() > 0)) {
         std::vector<std::string> attPackNameList;
         int attPackNameCount;
-        localrc = gblbase_p->root.AttPackGet(
+        localrc = gblbase_p->ESMC_BaseGetRoot()->AttPackGet(
             convention, purpose, "fieldbundle",
             attPackNameList, attPackNameCount, ESMC_ATTNEST_ON);
         if (localrc == ESMF_SUCCESS) {
-          gblAttPack = gblbase_p->root.AttPackGet (
+          gblAttPack = gblbase_p->ESMC_BaseGetRoot()->AttPackGet (
               convention, purpose, "fieldbundle",
               attPackNameList[0], ESMC_ATTNEST_ON);
         }

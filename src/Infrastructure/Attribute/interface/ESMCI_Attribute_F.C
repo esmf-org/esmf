@@ -136,7 +136,7 @@ extern "C" {
 
   // loop through valueList allocating space and copying values to cvalue
   j = 0;
-  for (unsigned int i=0; i<(*count); i++) {
+  for (int i=0; i<(*count); i++) {
     if (j > slen) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
                          "bad count value", ESMC_CONTEXT, &status);
@@ -160,7 +160,7 @@ extern "C" {
   }
 
   //TODO: make this more general, for now order is object, convention, purpose, instname
-  *attpack = (**base).root.AttPackGet(cvalue[1], cvalue[2], cvalue[0],
+  *attpack = (*base)->ESMC_BaseGetRoot()->AttPackGet(cvalue[1], cvalue[2], cvalue[0],
                                       cvalue[3], *anflag);
   if (!(*attpack)) *present = ESMF_FALSE;
   else *present = ESMF_TRUE;
@@ -304,7 +304,7 @@ extern "C" {
 
   // loop through valueList allocating space and copying values to cvalue
   int j = 0;
-  for (unsigned int i=0; i<(*count); i++) {
+  for (int i=0; i<(*count); i++) {
     if (j > slen) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
                          "bad specList", ESMC_CONTEXT, &status);
@@ -320,7 +320,7 @@ extern "C" {
   }
 
   // Set the attribute on the object.
-  status = (**base).root.AttPackAddAttribute(cname, cspec[1], cspec[2], cspec[0]);
+  status = (*base)->ESMC_BaseGetRoot()->AttPackAddAttribute(cname, cspec[1], cspec[2], cspec[0]);
   ESMC_LogDefault.MsgFoundError(status, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
         ESMC_NOT_PRESENT_FILTER(rc));
 
@@ -381,7 +381,7 @@ extern "C" {
 
   // loop through valueList allocating space and copying values to cvalue
   int j = 0;
-  for (unsigned int i=0; i<(*count); i++) {
+  for (int i=0; i<(*count); i++) {
     if (j > slen) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
                          "bad specList", ESMC_CONTEXT, &status);
@@ -397,7 +397,7 @@ extern "C" {
   }
 
   // Set the attribute on the object.
-  *attpack = (**base).root.AttPackCreateCustom(cspec[1], cspec[2], cspec[0]);
+  *attpack = (*base)->ESMC_BaseGetRoot()->AttPackCreateCustom(cspec[1], cspec[2], cspec[0]);
   
   if (rc) *rc = ESMF_SUCCESS;
 
@@ -455,7 +455,7 @@ extern "C" {
 
   // loop through valueList allocating space and copying values to cvalue
   int j = 0;
-  for (unsigned int i=0; i<(*count); i++) {
+  for (int i=0; i<(*count); i++) {
     if (j > slen) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
                          "bad specList", ESMC_CONTEXT, &status);
@@ -471,7 +471,7 @@ extern "C" {
   }
 
   // Set the attribute on the object.
-  status = (**base).root.AttPackCreateStandard(cspec[1], cspec[2], cspec[0]);
+  status = (*base)->ESMC_BaseGetRoot()->AttPackCreateStandard(cspec[1], cspec[2], cspec[0]);
   ESMC_LogDefault.MsgFoundError(status, ESMCI_ERR_PASSTHRU,
         ESMC_CONTEXT, ESMC_NOT_PRESENT_FILTER(rc));
 
@@ -578,7 +578,7 @@ extern "C" {
 
   // loop through valueList allocating space and copying values to cvalue
   j = 0;
-  for (unsigned int i=0; i<(*count); i++) {
+  for (int i=0; i<(*count); i++) {
     if (j > slen) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
                          "bad specList", ESMC_CONTEXT, &status);
@@ -602,7 +602,7 @@ extern "C" {
   //   values to cnconv, cnpurp
   j = 0;
   k = 0;
-  for (unsigned int i=0; i<(*nestCount); i++) {
+  for (int i=0; i<(*nestCount); i++) {
     if (!(nestConvention[j])) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute nestConvention", ESMC_CONTEXT, &status);
@@ -628,7 +628,7 @@ extern "C" {
   }
 
   // Set the attribute on the object.
-  status = (**base).root.AttPackNest(cspec[1], cspec[2], cspec[0],
+  status = (*base)->ESMC_BaseGetRoot()->AttPackNest(cspec[1], cspec[2], cspec[0],
                                      *nestCount, cnconv, cnpurp);
   ESMC_LogDefault.MsgFoundError(status, ESMCI_ERR_PASSTHRU,
         ESMC_CONTEXT, ESMC_NOT_PRESENT_FILTER(rc));
@@ -841,7 +841,7 @@ extern "C" {
   j = 0;
   k = 0;
   totalInstances = 0;
-  for (unsigned int i=0; i<(*nestCount); i++) {
+  for (int i=0; i<(*nestCount); i++) {
     cnapicountlist.push_back(nestAttPackInstanceCountList[i]);
     totalInstances += nestAttPackInstanceCountList[i];
 
@@ -875,7 +875,7 @@ extern "C" {
   int cnapinamecount;
 
   // Create the attribute package on the object
-  status = (**base).root.AttPackCreateStandard(cconv, cpurp, cobj,
+  status = (*base)->ESMC_BaseGetRoot()->AttPackCreateStandard(cconv, cpurp, cobj,
                                                cnconv, cnpurp, 
                                                cnapicountlist,
                                                *nestCount,
@@ -887,7 +887,7 @@ extern "C" {
   // convert attpack instance names to F90
   int namecount = std::min(cnapinamecount, *nestAttPackInstanceNameSize);
   j = 0;
-  for (unsigned int i=0; i<namecount; i++) {
+  for (int i=0; i<namecount; i++) {
     // check if F90 name buffer length is big enough
     if (cnapinamelist[i].length() > nestAttPackInstanceNameLens[i]) {
         ESMC_LogDefault.MsgFoundError(ESMC_RC_BUFFER_SHORT,
@@ -957,7 +957,7 @@ extern "C" {
   }
 
   // Remove the attribute package from the object.
-  status = (**base).root.AttPackRemove(*attpack);
+  status = (*base)->ESMC_BaseGetRoot()->AttPackRemove(*attpack);
   ESMC_LogDefault.MsgFoundError(status, ESMCI_ERR_PASSTHRU,
         ESMC_CONTEXT, ESMC_NOT_PRESENT_FILTER(rc));
 
@@ -1029,7 +1029,7 @@ extern "C" {
   }
   
   // Set the attribute on the object.
-  status = (**base).root.AttPackRemoveAttribute(cname, *attpack, *anflag);
+  status = (*base)->ESMC_BaseGetRoot()->AttPackRemoveAttribute(cname, *attpack, *anflag);
   ESMC_LogDefault.MsgFoundError(status, ESMCI_ERR_PASSTHRU,
         ESMC_CONTEXT, ESMC_NOT_PRESENT_FILTER(rc));
 
@@ -1067,7 +1067,7 @@ extern "C" {
 //EOP
 
   int status, j;
-  unsigned int i,k;
+  int i,k;
   ESMC_TypeKind_Flag attrTypeKind;
   int* llens;
   int lcount;
@@ -1316,35 +1316,35 @@ extern "C" {
         vector<ESMC_I4> temp;
         temp.reserve(attrCount);
         status = attr->get(&attrCount, &temp);
-        for (unsigned int i=0; i<attrCount; i++)
+        for (int i=0; i<attrCount; i++)
           (static_cast<ESMC_I4*> (value))[i] = temp[i];
         temp.clear();
       } else if (*tk == ESMC_TYPEKIND_I8) {
         vector<ESMC_I8> temp;
         temp.reserve(attrCount);
         status = attr->get(&attrCount, &temp);
-        for (unsigned int i=0; i<attrCount; i++)
+        for (int i=0; i<attrCount; i++)
           (static_cast<ESMC_I8*> (value))[i] = temp[i];
         temp.clear();
       } else if (*tk == ESMC_TYPEKIND_R4) {
         vector<ESMC_R4> temp;
         temp.reserve(attrCount);
         status = attr->get(&attrCount, &temp);
-        for (unsigned int i=0; i<attrCount; i++)
+        for (int i=0; i<attrCount; i++)
           (static_cast<ESMC_R4*> (value))[i] = temp[i];
         temp.clear();
       } else if (*tk == ESMC_TYPEKIND_R8) {
         vector<ESMC_R8> temp;
         temp.reserve(attrCount);
         status = attr->get(&attrCount, &temp);
-        for (unsigned int i=0; i<attrCount; i++)
+        for (int i=0; i<attrCount; i++)
           (static_cast<ESMC_R8*> (value))[i] = temp[i];
         temp.clear();
       } else if (*tk == ESMC_TYPEKIND_LOGICAL) {
         vector<ESMC_Logical> temp;
         temp.reserve(attrCount);
         status = attr->get(&attrCount, &temp);
-        for (unsigned int i=0; i<attrCount; i++)
+        for (int i=0; i<attrCount; i++)
           (static_cast<ESMC_Logical*> (value))[i] = temp[i];
         temp.clear();
       } else {
@@ -1465,7 +1465,7 @@ extern "C" {
   int capinamecount;
 
   // Create the attribute package on the object
-  status = (**base).root.AttPackGet((*attpack)->getConvention(), 
+  status = (*base)->ESMC_BaseGetRoot()->AttPackGet((*attpack)->getConvention(), 
                                     (*attpack)->getPurpose(), 
                                     (*attpack)->getObject(),
                                     capinamelist, capinamecount,
@@ -1484,7 +1484,7 @@ extern "C" {
 
   // convert attpack instance names to F90
   j = 0;
-  for (unsigned int i=0; i<capinamecount; i++) {
+  for (int i=0; i<capinamecount; i++) {
     // check if F90 name buffer length is big enough
     if (capinamelist[i].length() > attPackInstanceNameLens[i]) {
         ESMC_LogDefault.MsgFoundError(ESMC_RC_BUFFER_SHORT,
@@ -1560,7 +1560,7 @@ extern "C" {
   }
 
   // Set the attribute on the object.
-  status = (**base).root.AttPackIsPresent(*attpack, present);
+  status = (*base)->ESMC_BaseGetRoot()->AttPackIsPresent(*attpack, present);
   ESMC_LogDefault.MsgFoundError(status, ESMCI_ERR_PASSTHRU,
     ESMC_CONTEXT, ESMC_NOT_PRESENT_FILTER(rc));
 
@@ -1631,7 +1631,7 @@ extern "C" {
   }
 
   // Set the attribute on the object.
-  status = (**base).root.AttPackIsPresent(cname, *attpack, ESMC_ATTNEST_ON, present);
+  status = (*base)->ESMC_BaseGetRoot()->AttPackIsPresent(cname, *attpack, ESMC_ATTNEST_ON, present);
   ESMC_LogDefault.MsgFoundError(status, ESMCI_ERR_PASSTHRU,
     ESMC_CONTEXT, ESMC_NOT_PRESENT_FILTER(rc));
   
@@ -1691,7 +1691,7 @@ extern "C" {
   }
 
   // Set the attribute on the object.
-  status = (**base).root.AttPackIsPresent((*num)-1, *attpack, ESMC_ATTNEST_ON, present);
+  status = (*base)->ESMC_BaseGetRoot()->AttPackIsPresent((*num)-1, *attpack, ESMC_ATTNEST_ON, present);
   ESMC_LogDefault.MsgFoundError(status, ESMCI_ERR_PASSTHRU,
     ESMC_CONTEXT, ESMC_NOT_PRESENT_FILTER(rc));
 
@@ -1739,7 +1739,7 @@ extern "C" {
     return;
   }
 
-  status = (**destination).root.AttributeMove(&((**source).root));
+  status = (*destination)->ESMC_BaseGetRoot()->AttributeMove((*source)->ESMC_BaseGetRoot());
   ESMC_LogDefault.MsgFoundError(status, ESMCI_ERR_PASSTHRU,
         ESMC_CONTEXT, ESMC_NOT_PRESENT_FILTER(rc));
 
@@ -1814,7 +1814,7 @@ extern "C" {
 
   // loop through valueList allocating space and copying values to cvalue
   j = 0;
-  for (unsigned int i=0; i<(*count); i++) {
+  for (int i=0; i<(*count); i++) {
     if (!(valueList[j])) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute value", ESMC_CONTEXT, &status);
@@ -1945,43 +1945,43 @@ extern "C" {
       if (*tk == ESMC_TYPEKIND_I4) {
         vector<ESMC_I4> temp;
         temp.reserve(*count);
-        for (unsigned int i=0; i<*count; i++)
+        for (int i=0; i<*count; i++)
           temp.push_back((static_cast<ESMC_I4*> (value))[i]);
           status = attr->AttrModifyValue(*tk, *count, &temp);
-        /*status = (**base).root.AttPackSet(cname, *tk, *count, &temp,
+        /*status = (*base)->ESMC_BaseGetRoot()->AttPackSet(cname, *tk, *count, &temp,
                         cconv, cpurp, cobj, capname);*/
         temp.clear();
       } else if (*tk == ESMC_TYPEKIND_I8) {
         vector<ESMC_I8> temp;
         temp.reserve(*count);
-        for (unsigned int i=0; i<*count; i++)
+        for (int i=0; i<*count; i++)
           temp.push_back((static_cast<ESMC_I8*> (value))[i]);
           status = attr->AttrModifyValue(*tk, *count, &temp);
-        /*status = (**base).root.AttPackSet(cname, *tk, *count, &temp,
+        /*status = (*base)->ESMC_BaseGetRoot()->AttPackSet(cname, *tk, *count, &temp,
                         cconv, cpurp, cobj, capname);*/
         temp.clear();
       } else if (*tk == ESMC_TYPEKIND_R4) {
         vector<ESMC_R4> temp;
         temp.reserve(*count);
-        for (unsigned int i=0; i<*count; i++)
+        for (int i=0; i<*count; i++)
           temp.push_back((static_cast<ESMC_R4*> (value))[i]);
           status = attr->AttrModifyValue(*tk, *count, &temp);
-        /*status = (**base).root.AttPackSet(cname, *tk, *count, &temp,
+        /*status = (*base)->ESMC_BaseGetRoot()->AttPackSet(cname, *tk, *count, &temp,
                         cconv, cpurp, cobj, capname);*/
         temp.clear();
       } else if (*tk == ESMC_TYPEKIND_R8) {
         vector<ESMC_R8> temp;
         temp.reserve(*count);
-        for (unsigned int i=0; i<*count; i++)
+        for (int i=0; i<*count; i++)
           temp.push_back((static_cast<ESMC_R8*> (value))[i]);
           status = attr->AttrModifyValue(*tk, *count, &temp);
-        /*status = (**base).root.AttPackSet(cname, *tk, *count, &temp,
+        /*status = (*base)->ESMC_BaseGetRoot()->AttPackSet(cname, *tk, *count, &temp,
                         cconv, cpurp, cobj, capname);*/
         temp.clear();
       } else if (*tk == ESMC_TYPEKIND_LOGICAL) {
         vector<ESMC_Logical> temp;
         temp.reserve(*count);
-        for (unsigned int i=0; i<*count; i++)
+        for (int i=0; i<*count; i++)
           temp.push_back((static_cast<ESMC_Logical*> (value))[i]);
           status = attr->AttrModifyValue(*tk, *count, &temp);
         temp.clear();
@@ -2069,26 +2069,24 @@ extern "C" {
   }
 
   // set the base pointer for the root attribute before copying
-  (**destination).root.setBase(*destination);
+  (*destination)->ESMC_BaseGetRoot()->setBase(*destination);
 
   // now copy
   if (*attcopyflag == ESMF_COPY_VALUE && *atttreeflag == ESMC_ATTTREE_OFF) {
-      status = (**destination).root.AttributeCopyIgnore((**source).root);
+      status = (*destination)->ESMC_BaseGetRoot()->AttributeCopyIgnore(*((*source)->ESMC_BaseGetRoot()));
       ESMC_LogDefault.MsgFoundError(status, ESMCI_ERR_PASSTHRU,
         ESMC_CONTEXT, ESMC_NOT_PRESENT_FILTER(rc));
   }
   else if (*attcopyflag == ESMF_COPY_REFERENCE) {
-      status = (**destination).root.AttributeCopyHybrid((**source).root);
+      status = (*destination)->ESMC_BaseGetRoot()->AttributeCopyHybrid(*((*source)->ESMC_BaseGetRoot()));
       ESMC_LogDefault.MsgFoundError(status, ESMCI_ERR_PASSTHRU,
         ESMC_CONTEXT, ESMC_NOT_PRESENT_FILTER(rc));
   }
-/* RLO - had to disable this because it no longer makes sense with new copy flag
   else if (*attcopyflag == ESMF_COPY_ALIAS) {
-      status = (**destination).root.AttributeMove(&((**source).root));
-      ESMC_LogDefault.MsgFoundError(status, ESMCI_ERR_PASSTHRU,
-        ESMC_CONTEXT, ESMC_NOT_PRESENT_FILTER(rc));
+      (*destination)->ESMC_BaseSetRoot((*source)->ESMC_BaseGetRoot());
+      status = ESMF_SUCCESS;
+      if (rc) *rc = status;
   }
-*/
   else {
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
                          "invalid attribute copy flag combination", ESMC_CONTEXT, &status);
@@ -2129,7 +2127,7 @@ extern "C" {
 
   int status, j;
   ESMCI::Attribute *attr = NULL;
-  unsigned int i,k;
+  int i,k;
   ESMC_TypeKind_Flag attrTypeKind;
   int *llens;
   int lcount;
@@ -2164,7 +2162,7 @@ extern "C" {
   }
 
   // check the typekind, do not return error (default value possible)
-  attr = (**base).root.AttributeGet(cname);
+  attr = (*base)->ESMC_BaseGetRoot()->AttributeGet(cname);
   if (!attr) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_NOT_FOUND, "attribute not found",
           ESMC_CONTEXT, &status);
@@ -2312,7 +2310,7 @@ extern "C" {
   }
 
   // check the typekind, do not return error (default value possible)
-  attr = (**base).root.AttributeGet(cname);
+  attr = (*base)->ESMC_BaseGetRoot()->AttributeGet(cname);
   if (!attr) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_NOT_FOUND, "attribute not found",
           ESMC_CONTEXT, &status);
@@ -2348,35 +2346,35 @@ extern "C" {
         vector<ESMC_I4> temp;
         temp.reserve(attrItems);
         status = attr->get(&attrItems, &temp);
-        for (unsigned int i=0; i<attrItems; i++)
+        for (int i=0; i<attrItems; i++)
           (static_cast<ESMC_I4*> (value))[i] = temp[i];
         temp.clear();
       } else if (*tk == ESMC_TYPEKIND_I8) {
         vector<ESMC_I8> temp;
         temp.reserve(attrItems);
         status = attr->get(&attrItems, &temp);
-        for (unsigned int i=0; i<attrItems; i++)
+        for (int i=0; i<attrItems; i++)
           (static_cast<ESMC_I8*> (value))[i] = temp[i];
         temp.clear();
       } else if (*tk == ESMC_TYPEKIND_R4) {
         vector<ESMC_R4> temp;
         temp.reserve(attrItems);
         status = attr->get(&attrItems, &temp);
-        for (unsigned int i=0; i<attrItems; i++)
+        for (int i=0; i<attrItems; i++)
           (static_cast<ESMC_R4*> (value))[i] = temp[i];
         temp.clear();
       } else if (*tk == ESMC_TYPEKIND_R8) {
         vector<ESMC_R8> temp;
         temp.reserve(attrItems);
         status = attr->get(&attrItems, &temp);
-        for (unsigned int i=0; i<attrItems; i++)
+        for (int i=0; i<attrItems; i++)
           (static_cast<ESMC_R8*> (value))[i] = temp[i];
         temp.clear();
       } else if (*tk == ESMC_TYPEKIND_LOGICAL) {
         vector<ESMC_Logical> temp;
         temp.reserve(attrItems);
         status = attr->get(&attrItems, &temp);
-        for (unsigned int i=0; i<attrItems; i++)
+        for (int i=0; i<attrItems; i++)
           (static_cast<ESMC_Logical*> (value))[i] = temp[i];
         temp.clear();
       } else {
@@ -2585,7 +2583,7 @@ extern "C" {
       return;
   }
 
-  attr = (**base).root.AttributeGet(cname);
+  attr = (*base)->ESMC_BaseGetRoot()->AttributeGet(cname);
   if (!attr) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_NOT_FOUND, ESMCI_ERR_PASSTHRU,
           ESMC_CONTEXT, &status);
@@ -2791,7 +2789,7 @@ extern "C" {
   // declare string for name
   string cname;
 
-  attr = (**base).root.AttributeGet((*num)-1);
+  attr = (*base)->ESMC_BaseGetRoot()->AttributeGet((*num)-1);
   if (!attr) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_NOT_FOUND, ESMCI_ERR_PASSTHRU,
           ESMC_CONTEXT, &status);
@@ -2874,7 +2872,7 @@ extern "C" {
     return;
   }
 
-  status = (**base).root.getCount(*gcflag, count);
+  status = (*base)->ESMC_BaseGetRoot()->getCount(*gcflag, count);
   ESMC_LogDefault.MsgFoundError(status, ESMCI_ERR_PASSTHRU,
       ESMC_CONTEXT, ESMC_NOT_PRESENT_FILTER(rc));
 
@@ -3014,7 +3012,7 @@ extern "C" {
   }
 
   // Set the attribute on the object.
-  status = (**base).root.AttributeIsPresent(cname, present);
+  status = (*base)->ESMC_BaseGetRoot()->AttributeIsPresent(cname, present);
   ESMC_LogDefault.MsgFoundError(status, ESMCI_ERR_PASSTHRU,
     ESMC_CONTEXT, ESMC_NOT_PRESENT_FILTER(rc));
 
@@ -3071,7 +3069,7 @@ extern "C" {
   }
   
   // Set the attribute on the object.
-  status = (**base).root.AttributeIsPresent((*num)-1, present);
+  status = (*base)->ESMC_BaseGetRoot()->AttributeIsPresent((*num)-1, present);
   ESMC_LogDefault.MsgFoundError(status, ESMCI_ERR_PASSTHRU,
     ESMC_CONTEXT, ESMC_NOT_PRESENT_FILTER(rc));
 
@@ -3128,7 +3126,7 @@ extern "C" {
   }
 
   // Set the attribute link on the object.
-  status = (**source).root.AttributeLink(&(**destination).root, linkChange);
+  status = (*source)->ESMC_BaseGetRoot()->AttributeLink((*destination)->ESMC_BaseGetRoot(), linkChange);
   ESMC_LogDefault.MsgFoundError(status, ESMCI_ERR_PASSTHRU,
     ESMC_CONTEXT, ESMC_NOT_PRESENT_FILTER(rc));
 
@@ -3185,7 +3183,7 @@ extern "C" {
   }
 
   // Set the attribute link on the object.
-  status = (**source).root.AttributeLinkRemove(&(**destination).root, linkChange);
+  status = (*source)->ESMC_BaseGetRoot()->AttributeLinkRemove((*destination)->ESMC_BaseGetRoot(), linkChange);
   ESMC_LogDefault.MsgFoundError(status, ESMCI_ERR_PASSTHRU,
     ESMC_CONTEXT, ESMC_NOT_PRESENT_FILTER(rc));
 
@@ -3246,7 +3244,7 @@ extern "C" {
   }
   
   // Set the attribute on the object.
-  status = (**base).root.AttributeRemove(cname);
+  status = (*base)->ESMC_BaseGetRoot()->AttributeRemove(cname);
   ESMC_LogDefault.MsgFoundError(status, ESMCI_ERR_PASSTHRU,
     ESMC_CONTEXT, ESMC_NOT_PRESENT_FILTER(rc));
 
@@ -3326,7 +3324,7 @@ extern "C" {
 
   // loop through valueList allocating space and copying values to cvalue
   j = 0;
-  for (unsigned int i=0; i<(*count); i++) {
+  for (int i=0; i<(*count); i++) {
     if (j > vlen) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute value", ESMC_CONTEXT, &status);
@@ -3342,7 +3340,7 @@ extern "C" {
   }
 
   // Set the attribute on the object.
-  status = (**base).root.AttributeSet(cname, cvalue.size(), &cvalue);
+  status = (*base)->ESMC_BaseGetRoot()->AttributeSet(cname, cvalue.size(), &cvalue);
   ESMC_LogDefault.MsgFoundError(status, ESMCI_ERR_PASSTHRU,
     ESMC_CONTEXT, ESMC_NOT_PRESENT_FILTER(rc));
 
@@ -3411,37 +3409,37 @@ extern "C" {
       if (*tk == ESMC_TYPEKIND_I4) {
         vector<ESMC_I4> temp;
         temp.reserve(*count);
-        for (unsigned int i=0; i<*count; i++)
+        for (int i=0; i<*count; i++)
           temp.push_back((static_cast<ESMC_I4*> (value))[i]);
-        status = (**base).root.AttributeSet(cname, *count, &temp);
+        status = (*base)->ESMC_BaseGetRoot()->AttributeSet(cname, *count, &temp);
         temp.clear();
       } else if (*tk == ESMC_TYPEKIND_I8) {
         vector<ESMC_I8> temp;
         temp.reserve(*count);
-        for (unsigned int i=0; i<*count; i++)
+        for (int i=0; i<*count; i++)
           temp.push_back((static_cast<ESMC_I8*> (value))[i]);
-        status = (**base).root.AttributeSet(cname, *count, &temp);
+        status = (*base)->ESMC_BaseGetRoot()->AttributeSet(cname, *count, &temp);
         temp.clear();
       } else if (*tk == ESMC_TYPEKIND_R4) {
         vector<ESMC_R4> temp;
         temp.reserve(*count);
-        for (unsigned int i=0; i<*count; i++)
+        for (int i=0; i<*count; i++)
           temp.push_back((static_cast<ESMC_R4*> (value))[i]);
-        status = (**base).root.AttributeSet(cname, *count, &temp);
+        status = (*base)->ESMC_BaseGetRoot()->AttributeSet(cname, *count, &temp);
         temp.clear();
       } else if (*tk == ESMC_TYPEKIND_R8) {
         vector<ESMC_R8> temp;
         temp.reserve(*count);
-        for (unsigned int i=0; i<*count; i++)
+        for (int i=0; i<*count; i++)
           temp.push_back((static_cast<ESMC_R8*> (value))[i]);
-        status = (**base).root.AttributeSet(cname, *count, &temp);
+        status = (*base)->ESMC_BaseGetRoot()->AttributeSet(cname, *count, &temp);
         temp.clear();
       } else if (*tk == ESMC_TYPEKIND_LOGICAL) {
         vector<ESMC_Logical> temp;
         temp.reserve(*count);
-        for (unsigned int i=0; i<*count; i++)
+        for (int i=0; i<*count; i++)
           temp.push_back((static_cast<ESMC_Logical*> (value))[i]);
-        status = (**base).root.AttributeSet(cname, *count, &temp);
+        status = (*base)->ESMC_BaseGetRoot()->AttributeSet(cname, *count, &temp);
         temp.clear();
       } else {
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ATTR_WRONGTYPE,
@@ -3542,7 +3540,7 @@ extern "C" {
   }
 
   // Set the attribute on the object.
-  status = (**base).root.AttributeSetObjsInTree(cname,cobject,*tk,*count,value);
+  status = (*base)->ESMC_BaseGetRoot()->AttributeSetObjsInTree(cname,cobject,*tk,*count,value);
   ESMC_LogDefault.MsgFoundError(status, ESMCI_ERR_PASSTHRU,
     ESMC_CONTEXT, ESMC_NOT_PRESENT_FILTER(rc));
 
@@ -3660,7 +3658,7 @@ extern "C" {
 
   // make list into a vector
   rootListl.reserve(*count);
-  for (unsigned int i=0; i<*count; ++i)
+  for (int i=0; i<*count; ++i)
     rootListl.push_back(rootList[i]);
 
   // reconcile
@@ -3668,7 +3666,7 @@ extern "C" {
   else local_reconcile = false;
 
   // Update the Attribute
-  status = (**base).root.AttributeUpdate(*vm, rootListl, local_reconcile);
+  status = (*base)->ESMC_BaseGetRoot()->AttributeUpdate(*vm, rootListl, local_reconcile);
   ESMC_LogDefault.MsgFoundError(status, ESMCI_ERR_PASSTHRU,
     ESMC_CONTEXT, ESMC_NOT_PRESENT_FILTER(rc));
 
@@ -3709,7 +3707,7 @@ extern "C" {
   }
   
   // Update the Attribute
-  status = (**base).root.AttributeUpdateReset();
+  status = (*base)->ESMC_BaseGetRoot()->AttributeUpdateReset();
   ESMC_LogDefault.MsgFoundError(status, ESMCI_ERR_PASSTHRU,
     ESMC_CONTEXT, ESMC_NOT_PRESENT_FILTER(rc));
 
@@ -3737,7 +3735,7 @@ void FTN_X(c_esmc_attributeread)(ESMC_Base **base,
    ESMF_CHECK_POINTER(*base, status)
 
    // Read the attributes into the object.
-   int rc = (*base)->root.AttributeRead(
+   int rc = (*base)->ESMC_BaseGetRoot()->AttributeRead(
                     *fileNameLen, // always present internal arg.
                     ESMC_NOT_PRESENT_FILTER(fileName),
                     *schemaFileNameLen, // always present internal arg.
@@ -3867,7 +3865,7 @@ void FTN_X(c_esmc_attributewrite)(
   }
 
   // Write the attributes from the object.
-  status = (**base).root.AttributeWrite(cconv, cpurp, cobj, ctarobj,
+  status = (*base)->ESMC_BaseGetRoot()->AttributeWrite(cconv, cpurp, cobj, ctarobj,
     (*base)->ESMC_Base::ESMC_BaseGetName(), *attwriteflag);
   ESMC_LogDefault.MsgFoundError(status, ESMCI_ERR_PASSTHRU,
         ESMC_CONTEXT, ESMC_NOT_PRESENT_FILTER(rc));

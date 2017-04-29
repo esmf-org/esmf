@@ -80,7 +80,7 @@ namespace ESMCI {
 
       // stream the JSON, starting from root
       if (attrRoot == ESMF_FALSE) {
-    	  attr = &(attrBase->root);
+    	  attr = attrBase->ESMC_BaseGetRoot();
     	  localrc = attr->streamAttributeRootToJSON(flattenPackList, includeUnset, includeLinks, output, &totalStreamed);
 		  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
 		           		&localrc)) return localrc;

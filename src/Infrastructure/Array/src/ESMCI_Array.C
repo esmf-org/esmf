@@ -306,7 +306,7 @@ Array::Array(
   
   // invalidate the name for this Array object in the Base class
   ESMC_BaseSetName(NULL, "Array");
-   
+
   }catch(int localrc){
     // catch standard ESMF return code
     ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
@@ -3029,7 +3029,7 @@ int Array::write(
   DistGrid *dg = getDistGrid();
   if ((convention.length() > 0) && (purpose.length() > 0)) {
 std::cout << ESMC_METHOD << ": found convention = " << convention << ", purpose = " << purpose << std::endl;
-    if ((this->root.getCountPack() == 0) && (dg->root.getCountPack() == 0)) {
+    if ((this->ESMC_BaseGetRoot()->getCountPack() == 0) && (dg->ESMC_BaseGetRoot()->getCountPack() == 0)) {
       localrc = ESMF_RC_ATTR_NOTSET;
       if (ESMC_LogDefault.MsgFoundError(localrc, "No Array or DistGrid AttPacks found", ESMC_CONTEXT,
           &rc)) return rc;
@@ -3041,11 +3041,11 @@ std::cout << ESMC_METHOD << ": found convention = " << convention << ", purpose 
   if ((convention.length() > 0) && (purpose.length() > 0)) {
     std::vector<std::string> attPackNameList;
     int attPackNameCount;
-    localrc = dg->root.AttPackGet(
+    localrc = dg->ESMC_BaseGetRoot()->AttPackGet(
         convention, purpose, "distgrid",
         attPackNameList, attPackNameCount, ESMC_ATTNEST_ON);
     if (localrc == ESMF_SUCCESS) {
-      dimAttPack = dg->root.AttPackGet (
+      dimAttPack = dg->ESMC_BaseGetRoot()->AttPackGet (
           convention, purpose, "distgrid",
           attPackNameList[0], ESMC_ATTNEST_ON);
 std::cout << ESMC_METHOD << ": DistGrid att pack found!" << std::endl;
@@ -3057,11 +3057,11 @@ std::cout << ESMC_METHOD << ": DistGrid att pack found!" << std::endl;
   if ((convention.length() > 0) && (purpose.length() > 0)) {
     std::vector<std::string> attPackNameList;
     int attPackNameCount;
-    localrc = this->root.AttPackGet(
+    localrc = this->ESMC_BaseGetRoot()->AttPackGet(
         convention, purpose, "array",
         attPackNameList, attPackNameCount, ESMC_ATTNEST_ON);
     if (localrc == ESMF_SUCCESS) {
-      varAttPack = this->root.AttPackGet (
+      varAttPack = this->ESMC_BaseGetRoot()->AttPackGet (
           convention, purpose, "array",
           attPackNameList[0], ESMC_ATTNEST_ON);
 std::cout << ESMC_METHOD << ": Array att pack found!" << std::endl;
@@ -13850,12 +13850,12 @@ int ESMC_newArray::ESMC_newArrayScalarReduce(
     return localrc;
   }
   // pack arguments to pass into ScatterThread
-  thargRoot.array = this;
-  thargRoot.vm = vm;
-  thargRoot.rootPET = rootPET;
-  thargRoot.result = result;
-  thargRoot.dtk = dtk;
-  thargRoot.op = op;
+  thargESMC_BaseGetRoot()->array = this;
+  thargESMC_BaseGetRoot()->vm = vm;
+  thargESMC_BaseGetRoot()->rootPET = rootPET;
+  thargESMC_BaseGetRoot()->result = result;
+  thargESMC_BaseGetRoot()->dtk = dtk;
+  thargESMC_BaseGetRoot()->op = op;
   
   // create the ScalarReduceThread for rootPET
   pthread_t *pthid = &(commh->pthid[(commh->pthidCount)++]);
