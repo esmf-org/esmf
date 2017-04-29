@@ -35,6 +35,7 @@ module ESMF_FieldWrMod
   use ESMF_ArrayMod
   use ESMF_FieldMod
   use ESMF_FieldGetMod
+  use ESMF_GridMod
   use ESMF_InitMacrosMod
   use ESMF_IOMod
 
@@ -178,7 +179,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer                         :: localrc
     character(len=ESMF_MAXSTR)      :: name
     type(ESMF_FieldType), pointer   :: fp 
-    type(ESMF_Array)                :: array 
+    type(ESMF_Array)                :: array
+    type(ESMF_Grid)                 :: grid
+    type(ESMF_Base), pointer        :: base_dummy => null ()
     type(ESMF_FieldStatus_Flag)     :: fieldstatus       ! Field's status
     logical                         :: opt_overwriteflag ! helper variable
     type(ESMF_FileStatus_Flag)      :: opt_status        ! helper variable
@@ -224,21 +227,16 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     end if
 
     ! Attributes
-    if (present(convention) .or. present (purpose)) then
-      if (present (convention) .and. present (purpose)) then
-        continue
-      else
-        if (ESMF_LogFoundError(ESMF_RC_ARG_INCOMP,  &
-            msg="Both convention and purpose are required for Attribute I/O",  &
-            ESMF_CONTEXT, rcToReturn=rc)) return
-      end if
+    if (present (convention) .neqv. present (purpose)) then
+      if (ESMF_LogFoundError (ESMF_RC_ARG_WRONG,  &
+          msg='Both convention and purpose must be specified',  &
+          ESMF_CONTEXT, rcToReturn=rc)) return
     end if
 
+    fp => field%ftypep
     if (present(variableName)) then
       name = variableName
     else
-      fp => field%ftypep
-
       call ESMF_GetName(fp%base, name, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU,                &
            ESMF_CONTEXT, rcToReturn=rc)) return
@@ -254,6 +252,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       return
     endif
 
+    if (present (convention)) then
+      call ESMF_FieldGet (field, grid=grid, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU,                &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+    end if
+
     ! Create an I/O object
     io = ESMF_IOCreate(rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU,                &
@@ -261,9 +265,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! From here on out, we need to clean up so no returning on error
     if (localrc .eq. ESMF_SUCCESS) then
-      call ESMF_IOAddArray(io, array, variableName=name,  &
-          convention=convention, purpose=purpose,  &
-          rc=localrc)
+      call c_esmc_fieldioaddarray(io, fp%base, array, grid, name,  &
+          base_dummy, convention, purpose,  &
+          localrc)
       errorFound = ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU,     &
           ESMF_CONTEXT, rcToReturn=rc)
     endif

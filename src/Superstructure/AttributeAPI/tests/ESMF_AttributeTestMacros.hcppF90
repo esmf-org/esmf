@@ -1918,8 +1918,7 @@
                       name, failMsg, result, ESMF_SRCLINE) @\
       !---------------------------------------------------------------------- @\
  @\
-^if 0 @\
-      !mtag_disable_nex @\
+      !mtag_nex @\
       ! Copy mdesc Attribute hierarchy ALIAS Test @\
       call ESMF_AttributeCopy(mname##A, mname##Alias, & @\
         copyflag=ESMF_COPY_ALIAS, atttreeflag=ESMF_ATTTREE_ON, rc=rc) @\
@@ -1928,7 +1927,7 @@
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE) @\
       !------------------------------------------------------------------------ @\
  @\
-      !mtag_disable_nex @\
+      !mtag_nex @\
       ! Get a constant character Attribute from mobj Test @\
       call ESMF_AttributeGet(mname##Alias, name="CopyChar", value=outConstantChar, rc=rc) @\
       write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value" @\
@@ -1938,17 +1937,17 @@
       !---------------------------------------------------------------------- @\
       print *, trim(outConstantChar) @\
  @\
-      !mtag_disable_ex @\
+      !mtag_ex @\
       ! Get the Attribute count from a mobj Test @\
       call ESMF_AttributeGet(mname##Alias, count=count, rc=rc) @\
       write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value" @\
-      write(name, *) "Getting the Attribute count from a mobj Test" @\
+      write(name, *) "Getting the .Attribute count from a mobj Test" @\
       call ESMF_Test((rc==ESMF_SUCCESS).and.(count.ge.0), & @\
                       name, failMsg, result, ESMF_SRCLINE) @\
       !---------------------------------------------------------------------- @\
       print *, "count = ", count @\
  @\
-      !mtag_disable_nex @\
+      !mtag_nex @\
       ! Get a constant character Attribute from mobj Test @\
       call ESMF_AttributeSet(mname##A, name="CopyChar", value="imachar", rc=rc) @\
       write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value" @\
@@ -1956,7 +1955,7 @@
       call ESMF_Test((rc==ESMF_SUCCESS), & @\
                       name, failMsg, result, ESMF_SRCLINE) @\
  @\
-      !mtag_disable_nex @\
+      !mtag_nex @\
       ! Get a constant character Attribute from mobj Test @\
       call ESMF_AttributeGet(mname##Alias, name="CopyChar", value=outConstantChar, rc=rc) @\
       write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value" @\
@@ -1966,7 +1965,6 @@
       !---------------------------------------------------------------------- @\
       print *, outConstantChar @\
  @\
-^endif @\
       !mtag_nex @\
       ! Copy mdesc Attribute hierarchy VALUE ONE LEVEL Test @\
       call ESMF_AttributeCopy(mname##A, mname##Value, & @\

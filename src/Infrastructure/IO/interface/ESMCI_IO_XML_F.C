@@ -50,7 +50,7 @@ extern "C" {
           ESMF_CHECK_POINTER(*base, status)
           *ptr = ESMCI_IO_XMLCreate(std::string(name, name_l),
                                     std::string(fileName, filename_l),
-                                         &((*base)->root),  // attributes
+                                         (*base)->ESMC_BaseGetRoot(),  // attributes
                     ESMC_NOT_PRESENT_FILTER(status) );
        }
 

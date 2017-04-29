@@ -115,7 +115,8 @@ extern "C" {
       purpose = string (purposeName, ESMC_F90lentrim (purposeName, purpose_l));
 
     // call into C++
-    localrc = (*ptr)->addArray(*array, varName, convention, purpose);
+    // Attributes not supported yet
+    localrc = (*ptr)->addArray(*array, varName, NULL, NULL, NULL);
     ESMC_LogDefault.MsgFoundError(localrc,
                                   ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
                                   ESMC_NOT_PRESENT_FILTER(rc));

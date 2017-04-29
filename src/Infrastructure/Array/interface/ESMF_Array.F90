@@ -2058,14 +2058,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     end if
 
     ! Attributes
-    if (present(convention) .or. present (purpose)) then
-      if (present (convention) .and. present (purpose)) then
-        continue
-      else
-        if (ESMF_LogFoundError(ESMF_RC_ARG_INCOMP,  &
-            msg="Both convention and purpose are required for Attribute I/O",  &
-            ESMF_CONTEXT, rcToReturn=rc)) return
-      end if
+
+    if (present (convention) .neqv. present (purpose)) then
+      if (ESMF_LogFoundError (ESMF_RC_ARG_WRONG,  &
+          msg='Both convention and purpose must be specified',  &
+          ESMF_CONTEXT, rcToReturn=rc)) return
     end if
 
     ! Call into the C++ interface, which will call IO object

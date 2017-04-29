@@ -65,6 +65,7 @@ program ESMF_ArrayIOUTest
   integer, allocatable                    :: undistLBound(:), undistUBound(:)
   real(ESMF_KIND_R8),    pointer          :: arrayPtrR8D4(:,:,:,:)
   real(ESMF_KIND_R8),    pointer          :: arrayPtrR8D4_r(:,:,:,:)
+  real(ESMF_KIND_R8),    pointer          :: arrayPtrR8D1(:)
   type(ESMF_RouteHandle)                  :: rh
   integer                                 :: rc, de
   integer, allocatable :: totalLWidth(:), totalUWidth(:), &
@@ -75,11 +76,12 @@ program ESMF_ArrayIOUTest
   integer :: Maxvalue(1), diff
   real(ESMF_KIND_R8) :: r8Max(1), r8diff
   character(ESMF_MAXSTR) :: string
-  character(ESMF_MAXSTR) :: apConv, apPurp
   integer :: msglen
   logical :: passfail
   logical :: valid_de1
 
+  character(16), parameter :: apConv = 'Attribute_IO'
+  character(16), parameter :: apPurp = 'attributes'
   type nameval_t
     character(ESMF_MAXSTR) :: name
     character(ESMF_MAXSTR) :: value
@@ -1464,8 +1466,6 @@ program ESMF_ArrayIOUTest
   !NEX_UTest_Multi_Proc_Only
   write(name, *) "Create dimensions attribute package on DistGrid Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  apConv = 'GFDL_IO'
-  apPurp = 'attribute'
   call ESMF_AttributeAdd (distgrid,  &
       convention=apConv, purpose=apPurp,  &
       attrList=(/ "x_axis" /), rc=rc)
@@ -1481,10 +1481,16 @@ program ESMF_ArrayIOUTest
 
 !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Array Fill for Attribute package Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_ArrayGet (array_gxt, farrayPtr=arrayPtrR8D1, rc=rc)
+  call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  arrayPtrR8D1 = (/ (real (i) + real (i)*.01d0, i=lbound(arrayPtrR8D1,1), ubound (arrayPtrR8D1,1)) /)
+
+!------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
   write(name, *) "Create custom attribute package Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  apConv = 'GFDL_IO'
-  apPurp = 'attribute'
   allocate (attrNameVals(3))
   attrNameVals(1) = nameval_t ('long_name',      'T-cell longitude')
   attrNameVals(2) = nameval_t ('units',          'degrees_E')

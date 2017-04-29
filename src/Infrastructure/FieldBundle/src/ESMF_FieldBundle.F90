@@ -5174,13 +5174,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \label{api:FieldBundleWrite}
 
 ! !INTERFACE:
-  subroutine ESMF_FieldBundleWrite(fieldbundle, fileName, &
-    keywordEnforcer, singleFile, overwrite, status, timeslice, iofmt, rc)
+  subroutine ESMF_FieldBundleWrite(fieldbundle, fileName, keywordEnforcer,  &
+      convention, purpose, singleFile, overwrite, status, timeslice, iofmt, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_FieldBundle),     intent(in)             :: fieldbundle
     character(*),               intent(in)             :: fileName
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords for the below
+    character(*),               intent(in),  optional  :: convention
+    character(*),               intent(in),  optional  :: purpose
     logical,                    intent(in),  optional  :: singleFile
     logical  ,                  intent(in),  optional  :: overwrite
     type(ESMF_FileStatus_Flag), intent(in),  optional  :: status
@@ -5272,7 +5274,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords for t
     logical                         :: singlef
     character(len=3)                :: cnum
     character(len=len (fileName) + 3) :: filename_num    ! len (file) + len (cnum)
-    type(ESMF_Array)                :: array 
+    type(ESMF_Array)                :: array
+    type(ESMF_FieldType), pointer   :: fp 
+    type(ESMF_Grid)                 :: grid
     logical                         :: opt_overwriteflag ! helper variable
     type(ESMF_FileStatus_Flag)      :: opt_status        ! helper variable
     type(ESMF_IOFmt_Flag)           :: opt_iofmt
@@ -5317,6 +5321,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords for t
       end if
     end if
 
+    if (present (convention) .neqv. present (purpose)) then
+      if (ESMF_LogFoundError (ESMF_RC_ARG_WRONG,  &
+          msg='Both convention and purpose must be specified',  &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+    end if
+
     call ESMF_FieldBundleGet(fieldbundle, fieldCount=fieldCount, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU,                  &
          ESMF_CONTEXT, rcToReturn=rc)) return
@@ -5339,7 +5349,16 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords for t
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU,                  &
             ESMF_CONTEXT, rcToReturn=rc)) return
 
-        call ESMF_IOAddArray(io, array, variableName=name, rc=localrc)
+        fp => fieldList(i)%ftypep
+        if (present (convention)) then
+          call ESMF_FieldGet (fieldList(i), grid=grid, rc=localrc)
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU,                &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+        end if
+
+        call c_esmc_fieldioaddarray (io, fp%base, array, grid, name,  &
+            fieldbundle%this%base, convention, purpose,  &
+            localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU,                  &
             ESMF_CONTEXT, rcToReturn=rc)) return
       enddo
@@ -5359,7 +5378,16 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords for t
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU,                  &
             ESMF_CONTEXT, rcToReturn=rc)) return
 
-        call ESMF_IOAddArray(io, array, variableName=name, rc=localrc)
+        fp => fieldList(i)%ftypep
+        if (present (convention)) then
+          call ESMF_FieldGet (fieldList(i), grid=grid, rc=localrc)
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU,                &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+        end if
+
+        call c_esmc_fieldioaddarray (io, fp%base, array, grid, name,  &
+            fieldbundle%this%base, convention, purpose,  &
+            localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU,                  &
             ESMF_CONTEXT, rcToReturn=rc)) return
 

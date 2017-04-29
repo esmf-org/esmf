@@ -4393,31 +4393,31 @@ if (attrRoot == ESMF_TRUE) {
 //
 //EOPI
 
-  attrBase = ESMC_NULL_POINTER;
-  parent = ESMC_NULL_POINTER;
+    attrBase = ESMC_NULL_POINTER;
+    parent = ESMC_NULL_POINTER;
 
-  if (tk == ESMC_TYPEKIND_I4) {vip.clear(); vector<ESMC_I4>().swap(vip); }
-  else if (tk == ESMC_TYPEKIND_I8) {vlp.clear(); vector<ESMC_I8>().swap(vlp); }
-  else if (tk == ESMC_TYPEKIND_R4) {vfp.clear(); vector<ESMC_R4>().swap(vfp); }
-  else if (tk == ESMC_TYPEKIND_R8) {vdp.clear(); vector<ESMC_R8>().swap(vdp); }
-  else if (tk == ESMC_TYPEKIND_LOGICAL) {vbp.clear(); vector<ESMC_Logical>().swap(vbp); }
-  else if (tk == ESMC_TYPEKIND_CHARACTER) {vcpp.clear(); vector<string>().swap(vcpp); }
+    if (tk == ESMC_TYPEKIND_I4) {vip.clear(); vector<ESMC_I4>().swap(vip); }
+    else if (tk == ESMC_TYPEKIND_I8) {vlp.clear(); vector<ESMC_I8>().swap(vlp); }
+    else if (tk == ESMC_TYPEKIND_R4) {vfp.clear(); vector<ESMC_R4>().swap(vfp); }
+    else if (tk == ESMC_TYPEKIND_R8) {vdp.clear(); vector<ESMC_R8>().swap(vdp); }
+    else if (tk == ESMC_TYPEKIND_LOGICAL) {vbp.clear(); vector<ESMC_Logical>().swap(vbp); }
+    else if (tk == ESMC_TYPEKIND_CHARACTER) {vcpp.clear(); vector<string>().swap(vcpp); }
 
-  while (!attrList.empty()) {
-    delete attrList.back();
-    attrList.pop_back();
-  }
-  vector<Attribute*>().swap(attrList);
+    while (!attrList.empty()) {
+      delete attrList.back();
+      attrList.pop_back();
+    }
+    vector<Attribute*>().swap(attrList);
 
-  while (!packList.empty()) {
-    delete packList.back();
-    packList.pop_back();
-  }
-  vector<Attribute*>().swap(packList);
+    while (!packList.empty()) {
+      delete packList.back();
+      packList.pop_back();
+    }
+    vector<Attribute*>().swap(packList);
 
-  for(std::vector<Attribute*>::iterator it = linkList.begin();
+    for(std::vector<Attribute*>::iterator it = linkList.begin();
       it != linkList.end(); ++it) *it = NULL;
-  vector<Attribute*>().swap(linkList);
+    vector<Attribute*>().swap(linkList);
 
  } // end clean
 //-----------------------------------------------------------------------------
@@ -4440,35 +4440,31 @@ if (attrRoot == ESMF_TRUE) {
 //
 //EOPI
 
-  attrBase = ESMC_NULL_POINTER;
-  parent = ESMC_NULL_POINTER;
+    attrBase = ESMC_NULL_POINTER;
+    parent = ESMC_NULL_POINTER;
 
-  if (tk == ESMC_TYPEKIND_I4) {vip.clear(); vector<ESMC_I4>().swap(vip); }
-  else if (tk == ESMC_TYPEKIND_I8) {vlp.clear(); vector<ESMC_I8>().swap(vlp); }
-  else if (tk == ESMC_TYPEKIND_R4) {vfp.clear(); vector<ESMC_R4>().swap(vfp); }
-  else if (tk == ESMC_TYPEKIND_R8) {vdp.clear(); vector<ESMC_R8>().swap(vdp); }
-  else if (tk == ESMC_TYPEKIND_LOGICAL) {vbp.clear(); vector<ESMC_Logical>().swap(vbp); }
-  else if (tk == ESMC_TYPEKIND_CHARACTER) {vcpp.clear(); vector<string>().swap(vcpp); }
+    if (tk == ESMC_TYPEKIND_I4) {vip.clear(); vector<ESMC_I4>().swap(vip); }
+    else if (tk == ESMC_TYPEKIND_I8) {vlp.clear(); vector<ESMC_I8>().swap(vlp); }
+    else if (tk == ESMC_TYPEKIND_R4) {vfp.clear(); vector<ESMC_R4>().swap(vfp); }
+    else if (tk == ESMC_TYPEKIND_R8) {vdp.clear(); vector<ESMC_R8>().swap(vdp); }
+    else if (tk == ESMC_TYPEKIND_LOGICAL) {vbp.clear(); vector<ESMC_Logical>().swap(vbp); }
+    else if (tk == ESMC_TYPEKIND_CHARACTER) {vcpp.clear(); vector<string>().swap(vcpp); }
 
-  while (!attrList.empty()) {
-    delete attrList.back();
-    attrList.pop_back();
-  }
-  /*printf("Attrlist size = %d, name = %s\n", attrList.size(),
-             attrList.at(0)->attrName.c_str());
-  for (unsigned int i=0; i<attrList.size(); ++i) delete attrList.at(i);
-  attrList.clear();*/
-  vector<Attribute*>().swap(attrList);
+    while (!attrList.empty()) {
+      delete attrList.back();
+      attrList.pop_back();
+    }
+    vector<Attribute*>().swap(attrList);
 
-  while (!packList.empty()) {
-    delete packList.back();
-    packList.pop_back();
-  }
-  vector<Attribute*>().swap(packList);
+    while (!packList.empty()) {
+      delete packList.back();
+      packList.pop_back();
+    }
+    vector<Attribute*>().swap(packList);
 
-  for(std::vector<Attribute*>::iterator it = linkList.begin();
-      it != linkList.end(); ++it) *it = NULL;
-  vector<Attribute*>().swap(linkList);
+    for(std::vector<Attribute*>::iterator it = linkList.begin();
+        it != linkList.end(); ++it) *it = NULL;
+    vector<Attribute*>().swap(linkList);
 
  } // end ~Attribute
 //-----------------------------------------------------------------------------

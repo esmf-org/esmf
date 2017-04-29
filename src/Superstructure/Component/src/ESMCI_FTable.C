@@ -1784,7 +1784,7 @@ int FTable::callVFuncPtr(
           if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
             ESMC_CONTEXT, &rc)) return rc; // bail out
           ESMC_Logical presentFlag;
-          base->root.AttributeIsPresent("ESMF_RUNTIME_COMPLIANCEICREGISTER", 
+          base->ESMC_BaseGetRoot()->AttributeIsPresent("ESMF_RUNTIME_COMPLIANCEICREGISTER",
             &presentFlag);
           
 //#ifdef ESMF_NO_DLFCN
@@ -1799,7 +1799,7 @@ int FTable::callVFuncPtr(
           if (presentFlag==ESMF_TRUE){
             
             // access the attribute object in base
-            ESMCI::Attribute *attr=base->root.AttributeGet(
+            ESMCI::Attribute *attr=base->ESMC_BaseGetRoot()->AttributeGet(
               "ESMF_RUNTIME_COMPLIANCEICREGISTER");
             
             // retrieve the string value of the attribute

@@ -662,13 +662,14 @@ static const char *const version = "$Id$";
     *offset = (cp - buffer);
 
     // setup the root Attribute, passing the address of this
-    root.setBase(this);
+    root = new ESMCI::Attribute(ESMF_TRUE);
+    root->setBase(this);
 
     // Deserialize the Attribute hierarchy
     if (attreconflag == ESMC_ATTRECONCILE_ON) {
       if (*offset%8 != 0)
         *offset += 8 - *offset%8;
-      localrc = root.ESMC_Deserialize(buffer,offset);
+      localrc = root->ESMC_Deserialize(buffer,offset);
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, 
             ESMC_CONTEXT, &localrc)) return localrc;
     }
@@ -787,16 +788,16 @@ static const char *const version = "$Id$";
       printf ("ID = %i, ", ID);
     }
   }
-  if ((root.getCountAttr() > 0 || root.getCountPack() > 0) && tofile) {
+  if ((root->getCountAttr() > 0 || root->getCountPack() > 0) && tofile) {
     sprintf(msgbuf, "Root Attributes:\n");
     printf("%s", msgbuf);
     // ESMC_LogDefault.Write(msgbuf, ESMC_LOGMSG_INFO);
 
     // traverse the Attribute hierarchy, printing as we go
     if (append)
-      root.ESMC_Print(tofile, filename, true);
+      root->ESMC_Print(tofile, filename, true);
     else
-      root.ESMC_Print(tofile, filename, false);
+      root->ESMC_Print(tofile, filename, false);
   }
 
   return ESMF_SUCCESS;
@@ -934,7 +935,7 @@ static const char *const version = "$Id$";
     if (attreconflag == ESMC_ATTRECONCILE_ON) {
       if (*offset%8 != 0)
         *offset += 8 - *offset%8;
-      localrc = root.ESMC_Serialize(buffer,length,offset, inquireflag);
+      localrc = root->ESMC_Serialize(buffer,length,offset, inquireflag);
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, 
             ESMC_CONTEXT, &localrc)) return localrc;
     }
@@ -1056,8 +1057,10 @@ static const char *const version = "$Id$";
   ESMCI::VM::addObject(this, vmID);
 
   // setup the root Attribute, passing the address of this
-  root.setBase(this);
-  
+  root = new ESMCI::Attribute(ESMF_TRUE);
+  root->setBase(this);
+  rootalias = false;
+
   baseStatus  = ESMF_STATUS_READY;
   status      = ESMF_STATUS_READY;
   proxyflag   = ESMF_PROXYNO;
@@ -1114,8 +1117,10 @@ static const char *const version = "$Id$";
   ESMCI::VM::addObject(this, vmID);
 
   // setup the root Attribute, passing the address of this
-  root.setBase(this);
-  
+  root = new ESMCI::Attribute(ESMF_TRUE);
+  root->setBase(this);
+  rootalias = false;
+
   baseStatus  = ESMF_STATUS_READY;
   status      = ESMF_STATUS_READY;
   proxyflag   = ESMF_PROXYNO;
@@ -1174,8 +1179,10 @@ static const char *const version = "$Id$";
   ESMCI::VM::addObject(this, vmID);
 
   // setup the root Attribute, passing the address of this
-  root.setBase(this);
-  
+  root = new ESMCI::Attribute(ESMF_TRUE);
+  root->setBase(this);
+  rootalias = false;
+
   baseStatus  = ESMF_STATUS_READY;
   status      = ESMF_STATUS_READY;
   proxyflag   = ESMF_PROXYNO;
@@ -1220,9 +1227,10 @@ static const char *const version = "$Id$";
   baseStatus  = ESMF_STATUS_INVALID;
   status      = ESMF_STATUS_INVALID;
   
-  // setup the root Attribute, passing the address of this
-  root.~Attribute();
-  
+  // delete the root Attribute
+  if (!rootalias)
+    delete root;
+
   // if we have to support reference counts someday,
   // test if (refCount > 0) and do something if true;
 

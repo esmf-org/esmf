@@ -65,7 +65,7 @@ class Attribute
 
     ESMC_Logical attrRoot;
     ESMC_Logical attrUpdateDone; // hack for non-ordered containers
-  
+
     std::string attrConvention;             // Convention of Attpack
     std::string attrPurpose;                // Purpose of Attpack
     std::string attrObject;                 // Object of Attpack
@@ -105,7 +105,7 @@ class Attribute
                                   // nested recursions of the tree
                                   // (e.g. for CIM output)
 
-    int        id;         // unique identifier. used to generate unique 
+    int        id;         // unique identifier. used to generate unique
                                   // default names.
                                   //    TODO: inherit from ESMC_Base class?
                                   //      -- but circular dependency exists
@@ -258,30 +258,30 @@ class Attribute
       const ESMC_TypeKind_Flag &tk, const int &count, void *value);
 
     // attpack methods
-    int AttPackAddAttribute(const std::string &name, const std::string &convention, 
+    int AttPackAddAttribute(const std::string &name, const std::string &convention,
       const std::string &purpose, const std::string &object);
     int AttPackAddAttribute(const std::string &name);
 
     Attribute *AttPackCreateCustom(const std::string &convention,
       const std::string &purpose, const std::string &object);
-    int AttPackCreateStandard(const std::string &convention, 
+    int AttPackCreateStandard(const std::string &convention,
       const std::string &purpose, const std::string &object);
     int AttPackCreateStandard(const std::string &convention, const std::string &purpose,
-      const std::string &object, 
+      const std::string &object,
       const std::vector<std::string> &nestConvention, const std::vector<std::string> &nestPurpose,
       const std::vector<int> &nestAttPackInstanceCountList, int nestCount,
       std::vector<std::string> &nestAttPackInstanceNameList,
       int &nestAttPackInstanceNameCount);
 
-    Attribute *AttPackGet(const std::string &convention, 
+    Attribute *AttPackGet(const std::string &convention,
       const std::string &purpose, const std::string &object,
       const std::string &attPackInstanceName, ESMC_AttNest_Flag anflag) const;
     Attribute *AttPackGet(const std::string &convention,
       const std::string &purpose, const std::string &object,
       const std::string &name, const std::string &value) const;
-    int AttPackGet(const std::string &convention, 
+    int AttPackGet(const std::string &convention,
       const std::string &purpose, const std::string &object,
-      std::vector<std::string> &attPackInstanceNameList, 
+      std::vector<std::string> &attPackInstanceNameList,
       int &attPackInstanceNameCount, ESMC_AttNest_Flag anflag) const;
 
     Attribute *AttPackGetAttribute(const std::string &name) const;
@@ -303,7 +303,7 @@ class Attribute
                          const ESMCI::Attribute *attpack,
                          ESMC_AttNest_Flag anflag, ESMC_Logical *present) const;
     bool AttPackIsSet(const std::string &convention, const std::string &purpose,
-                      const std::string &object, 
+                      const std::string &object,
                       const bool &inObjectTree,
                       const bool &inThisCompTreeOnly,
                       const bool &inNestedAttPacks) const;
@@ -323,12 +323,12 @@ class Attribute
                                ESMC_AttNest_Flag anflag);
 
     int AttPackSet(Attribute *attr);
-    
+
 
     // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! //
     //  AttributeUpdate
     // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! //
-    
+
     // attribute update
     int AttributeUpdate(VM *vm, const std::vector<ESMC_I4> &rootList,
                         bool reconcile);
@@ -336,8 +336,8 @@ class Attribute
       const int &length);
     int AttributeUpdateBufSend(char *sendBuf, int localPet, int *offset,
       int *length) const;
-    int AttributeUpdateComm(VM *vm, int sendBufSize, int *recvBufSize, 
-      char *sendBuf, char *recvBuf, const std::vector<ESMC_I4> &roots, 
+    int AttributeUpdateComm(VM *vm, int sendBufSize, int *recvBufSize,
+      char *sendBuf, char *recvBuf, const std::vector<ESMC_I4> &roots,
       const std::vector<ESMC_I4> &nonroots) const;
     int AttributeUpdateTreeChanges(int *linkChanges,
       int *structChanges, int *valueChanges, int *deletChange, int *numKeys) const;
@@ -368,13 +368,13 @@ class Attribute
     int AttributeWriteTabTraverse(FILE *tab, const std::string &convention,
       const std::string &purpose, int &index, const int &columns, int *attrLens,
       const std::vector<std::string> &attrNames) const;
-    int AttributeWriteTabBuffer(FILE *tab, int &index, const int &columns, 
+    int AttributeWriteTabBuffer(FILE *tab, int &index, const int &columns,
       int *attrLens, const std::vector<std::string> &attrNames) const;
 
-    int AttributeWriteXML(const std::string &convention, const std::string &purpose, 
+    int AttributeWriteXML(const std::string &convention, const std::string &purpose,
       const std::string &object, const std::string &varobj, const std::string &basename) const;
     int AttributeWriteXMLheader(IO_XML *io_xml, const std::string &convention,
-      const std::string &purpose, const std::string &object, 
+      const std::string &purpose, const std::string &object,
       const std::string &varobj) const;
     int AttributeWriteXMLtraverse(IO_XML *io_xml, const std::string &convention,
       const std::string &purpose,
@@ -390,18 +390,18 @@ class Attribute
        const int &columns) const;
 
     int AttributeWriteCIM(IO_XML *io_xml, const std::string &convention) const;
-    int AttributeWriteCIMmodelComp(IO_XML *io_xml, const std::string &convention, int indent, 
+    int AttributeWriteCIMmodelComp(IO_XML *io_xml, const std::string &convention, int indent,
                                    const bool gridPresent, const std::string gridGUID) const;
     int AttributeWriteCIMsimRun(IO_XML *io_xml, const std::string &convention) const;
     int AttributeWriteCIMplatform(IO_XML *io_xml, const std::string &convention) const;
-    int AttributeWriteCIMCP(IO_XML *io_xml, const std::string &convention, 
+    int AttributeWriteCIMCP(IO_XML *io_xml, const std::string &convention,
                             const std::string &purpose, int indent) const;
     int AttributeWriteCIMCPfield(IO_XML *io_xml, const std::string &convention, int indent) const;
     int AttributeWriteCIMRP(IO_XML *io_xml, int indent) const;
     int AttributeWriteCIMcitation(IO_XML *io_xml, int indent) const;
     //int AttributeWriteCIMcomposition(IO_XML *io_xml) const;
     int AttributeWriteCIMinput(IO_XML *io_xml, const std::string &convention) const;
-    int AttributeWriteCIMbuffer(IO_XML *io_xml) const; 
+    int AttributeWriteCIMbuffer(IO_XML *io_xml) const;
 
     int AttributeWriteCIMgrids(IO_XML *io_xml, const std::string convention, const std::string gridGUID, const int indent, const bool gridSolo) const;
     int AttributeWriteCIMgridref(IO_XML *io_xml, int indent, const std::string gridGUID) const;
@@ -409,7 +409,7 @@ class Attribute
     int AttributeWriteInternalInfoGrid(IO_XML *io_xml, int nest_level, Attribute *attr) const;
     std::string AttributeGetInternalGridInt(std::string inputString) const;
     std::string AttributeGetInternalGridString(std::string inputString) const;
-    const std::string getTime() const; 
+    const std::string getTime() const;
     std::string month2Num(std::string month) const;
 };
 } // namespace
@@ -420,7 +420,7 @@ extern "C" {
                                   ESMCI::Attribute **attribute, int *rc,
                                   ESMCI_FortranStrLenArg nlen);
   void FTN_X(c_esmc_attpackaddattribute)(ESMC_Base **base, char *name,
-                                  int *count, char *specList, 
+                                  int *count, char *specList,
                                   int *lens, int *rc,
                                   ESMCI_FortranStrLenArg nlen,
                                   ESMCI_FortranStrLenArg slen);
@@ -429,23 +429,23 @@ extern "C" {
                                   ESMCI::Attribute **attpack,
                                   int *rc, ESMCI_FortranStrLenArg slen);
   void FTN_X(c_esmc_attpackcreatestandard)(ESMC_Base **base,
-                                  int *count, char *specList, 
+                                  int *count, char *specList,
                                   int *lens, int *rc,
                                   ESMCI_FortranStrLenArg slen);
   void FTN_X(c_esmc_attpacknest)(ESMC_Base **base,
-                                  int *count, char *specList, 
+                                  int *count, char *specList,
                                   int *lens,
                                   int *nestCount,
-                                  char *nestConvention, char *nestPurpose, 
+                                  char *nestConvention, char *nestPurpose,
                                   int *nestConvLens, int *nestPurpLens,
-                                  int *rc, 
-                                  ESMCI_FortranStrLenArg slen, 
-                                  ESMCI_FortranStrLenArg nclen, 
+                                  int *rc,
+                                  ESMCI_FortranStrLenArg slen,
+                                  ESMCI_FortranStrLenArg nclen,
                                   ESMCI_FortranStrLenArg nplen);
   void FTN_X(c_esmc_attpackcreatestdnest)(ESMC_Base **base,
-                                  char *convention, char *purpose, 
-                                  char *object, 
-                                  char *nestConvention, char *nestPurpose, 
+                                  char *convention, char *purpose,
+                                  char *object,
+                                  char *nestConvention, char *nestPurpose,
                                   int *nestConvLens, int *nestPurpLens,
                                   int *nestAttPackInstanceCountList,
                                   int *nestCount,
@@ -453,11 +453,11 @@ extern "C" {
                                   int *nestAttPackInstanceNameLens,
                                   int *nestattPackInstanceNameSize,
                                   int *nestAttPackInstanceNameCount,
-                                  int *rc, 
-                                  ESMCI_FortranStrLenArg clen, 
-                                  ESMCI_FortranStrLenArg plen, 
-                                  ESMCI_FortranStrLenArg olen, 
-                                  ESMCI_FortranStrLenArg nclen, 
+                                  int *rc,
+                                  ESMCI_FortranStrLenArg clen,
+                                  ESMCI_FortranStrLenArg plen,
+                                  ESMCI_FortranStrLenArg olen,
+                                  ESMCI_FortranStrLenArg nclen,
                                   ESMCI_FortranStrLenArg nplen,
                                   ESMCI_FortranStrLenArg napinlen);
 // TODO:  intel 11.0.083 compiler on Columbia errors out on ESMCI_Attribute_F.C
@@ -492,7 +492,7 @@ extern "C" {
                                   ESMC_TypeKind_Flag *tk, int *count,
                                   ESMC_AttNest_Flag *anflag, int *lens,
                                   char *valueList, int *rc,
-                                  ESMCI_FortranStrLenArg nlen, 
+                                  ESMCI_FortranStrLenArg nlen,
                                   ESMCI_FortranStrLenArg vlen);
   void FTN_X(c_esmc_attpackgetvalue)(ESMC_Base **base, char *name,
                                   ESMCI::Attribute **attpack,
@@ -500,7 +500,7 @@ extern "C" {
                                   ESMC_AttNest_Flag *anflag,
                                   void *value, int *rc,
                                   ESMCI_FortranStrLenArg nlen);
-  void FTN_X(c_esmc_attpackgetapinstnames)(ESMC_Base **base, 
+  void FTN_X(c_esmc_attpackgetapinstnames)(ESMC_Base **base,
                                   ESMCI::Attribute **attpack,
                                   char *attPackInstanceNameList,
                                   int *attPackInstanceNameLens,
@@ -526,7 +526,7 @@ extern "C" {
                                   char *valueList, int *lens,
                                   ESMCI::Attribute **attpack,
                                   ESMC_AttNest_Flag *anflag, int *rc,
-                                  ESMCI_FortranStrLenArg nlen, 
+                                  ESMCI_FortranStrLenArg nlen,
                                   ESMCI_FortranStrLenArg vlen);
   void FTN_X(c_esmc_attpacksetvalue)(ESMC_Base **base, char *name,
                                   ESMC_TypeKind_Flag *tk, int *count,
@@ -543,34 +543,34 @@ extern "C" {
                                   char *object, char *targetobj,
                                   ESMC_AttWriteFlag *attwriteflag, int *rc,
                                   ESMCI_FortranStrLenArg clen,
-                                  ESMCI_FortranStrLenArg plen, 
+                                  ESMCI_FortranStrLenArg plen,
                                   ESMCI_FortranStrLenArg olen,
                                   ESMCI_FortranStrLenArg tlen);
   void FTN_X(c_esmc_attributecopy)(ESMC_Base **source, ESMC_Base **destination,
                                   ESMC_AttCopyFlag *attcopyflag,
                                   ESMC_AttTreeFlag *atttreeflag, int *rc);
-  void FTN_X(c_esmc_attributegetcharlist)(ESMC_Base **base, char *name, 
-                                  ESMC_TypeKind_Flag *tk, int *count, int *lens, 
-                                  char *valueList, int *rc, 
-                                  ESMCI_FortranStrLenArg nlen, 
+  void FTN_X(c_esmc_attributegetcharlist)(ESMC_Base **base, char *name,
+                                  ESMC_TypeKind_Flag *tk, int *count, int *lens,
+                                  char *valueList, int *rc,
+                                  ESMCI_FortranStrLenArg nlen,
                                   ESMCI_FortranStrLenArg vlen);
-  void FTN_X(c_esmc_attributegetvalue)(ESMC_Base **base, char *name, 
+  void FTN_X(c_esmc_attributegetvalue)(ESMC_Base **base, char *name,
                                   ESMC_TypeKind_Flag *tk,
-                                  int *count, void *value, int *rc, 
+                                  int *count, void *value, int *rc,
                                   ESMCI_FortranStrLenArg nlen);
-  void FTN_X(c_esmc_attpackgetinfoname)(ESMC_Base **base, char *name, 
+  void FTN_X(c_esmc_attpackgetinfoname)(ESMC_Base **base, char *name,
                                   ESMCI::Attribute **attpack,
                                   ESMC_AttNest_Flag *anflag,
                                   ESMC_TypeKind_Flag *tk, int *count,
                                   int *rc,
                                   ESMCI_FortranStrLenArg nlen);
-  void FTN_X(c_esmc_attributegetinfoname)(ESMC_Base **base, char *name, 
+  void FTN_X(c_esmc_attributegetinfoname)(ESMC_Base **base, char *name,
                                   ESMC_TypeKind_Flag *tk,
                                   int *count, int *rc,
                                   ESMCI_FortranStrLenArg nlen);
-  void FTN_X(c_esmc_attributegetinfonum)(ESMC_Base **base, int *num, 
+  void FTN_X(c_esmc_attributegetinfonum)(ESMC_Base **base, int *num,
                                   char *name,
-                                  ESMC_TypeKind_Flag *tk, int *count, int *rc, 
+                                  ESMC_TypeKind_Flag *tk, int *count, int *rc,
                                   ESMCI_FortranStrLenArg nlen);
   void FTN_X(c_esmc_attributegetcount)(ESMC_Base **base, int *count,
                                   ESMC_AttGetCountFlag *flag, int *rc);
@@ -578,8 +578,8 @@ extern "C" {
                                   int *count, ESMC_AttGetCountFlag *gcflag,
                                   ESMC_AttNest_Flag *anflag, int *rc);
   void FTN_X(c_esmc_attributeispresent)(ESMC_Base **base, char *name,
-                                  ESMC_Logical *present, 
-                                  int *rc, 
+                                  ESMC_Logical *present,
+                                  int *rc,
                                   ESMCI_FortranStrLenArg nlen);
   void FTN_X(c_esmc_attributelink)(ESMC_Base **source, ESMC_Base **destination,
                                   ESMC_Logical *linkChanges, int *rc);
@@ -591,22 +591,22 @@ extern "C" {
   void FTN_X(c_esmc_attributesetcharlist)(ESMC_Base **base, char *name,
                                   ESMC_TypeKind_Flag *tk,
                                   int *count, char *valueList, int *lens,
-                                  int *rc, 
+                                  int *rc,
                                   ESMCI_FortranStrLenArg nlen,
                                   ESMCI_FortranStrLenArg vllen);
   void FTN_X(c_esmc_attributesetvalue)(ESMC_Base **base, char *name,
                                   ESMC_TypeKind_Flag *tk,
-                                  int *count, void *value, int *rc, 
+                                  int *count, void *value, int *rc,
                                   ESMCI_FortranStrLenArg nlen);
   void FTN_X(c_esmc_attributesetobjsintree)(ESMC_Base **base, char *object,
-                                  char *name, 
-                                  ESMC_TypeKind_Flag *tk, int *count, void *value, 
-                                  int *rc, 
-                                  ESMCI_FortranStrLenArg olen, 
+                                  char *name,
+                                  ESMC_TypeKind_Flag *tk, int *count, void *value,
+                                  int *rc,
+                                  ESMCI_FortranStrLenArg olen,
                                   ESMCI_FortranStrLenArg nlen);
   void FTN_X(c_esmc_attributesetobjchrintree)(ESMC_Base **base, char *object,
-                                  char *name, char *value, int *rc, 
-                                  ESMCI_FortranStrLenArg olen, 
+                                  char *name, char *value, int *rc,
+                                  ESMCI_FortranStrLenArg olen,
                                   ESMCI_FortranStrLenArg nlen,
                                   ESMCI_FortranStrLenArg vlen);
   void FTN_X(c_esmc_attributeupdate)(ESMC_Base **base, ESMCI::VM **vm,

@@ -53,6 +53,15 @@
   type(ESMF_FieldBundle) :: bundleRd, bundleTst
   integer, allocatable :: exclusiveLBound(:), exclusiveUBound(:)
 
+  character(16), parameter :: apConv = 'Attribute_IO'
+  character(16), parameter :: apPurp = 'attributes'
+  type nameval_t
+    character(ESMF_MAXSTR) :: name
+    character(ESMF_MAXSTR) :: value
+  end type
+
+  type(nameval_t), allocatable :: attrNameVals(:)
+
 
   ! cumulative result: count failures; no failures equals "all pass"
   integer :: result = 0
@@ -85,6 +94,15 @@
 
 !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Create dimensions attribute package on shared Grid Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_AttributeAdd (grid,  &
+      convention=apConv, purpose=apPurp,  &
+      attrList=(/ "x_axis", "y_axis" /), rc=rc)
+  call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+!------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
   ! Verifying that a Grid with 2 DEs/PET can be created
   grid_2DE = ESMF_GridCreateNoPeriDim(minIndex=(/1,1/), maxIndex=(/10,20/), &
     regDecomp=(/8,1/), gridEdgeLWidth=(/0,0/), gridEdgeUWidth=(/0,0/), &
@@ -93,6 +111,15 @@
   write(name, *) "Creating a 2 DE/PET Grid to use in Field Tests"
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 !------------------------------------------------------------------------
+
+!------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Create dimensions attribute package on 2 DE/PET Grid Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_AttributeAdd (grid_2DE,  &
+      convention=apConv, purpose=apPurp,  &
+      attrList=(/ "x_axis_2DE", "y_axis_2DE" /), rc=rc)
+  call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 
 !------------------------------------------------------------------------
@@ -135,12 +162,63 @@
 
 !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Create attribute package on Field(1) Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  allocate (attrNameVals(2))
+  attrNameVals(1) = nameval_t ('long_name',      'Temperature CONUS')
+  attrNameVals(2) = nameval_t ('units',          'F')
+  call ESMF_AttributeAdd (fieldTst(1),  &
+      convention=apConv, purpose=apPurp,  &
+      attrList=attrNameVals%name, rc=rc)
+  call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+!------------------------------------------------------------------------
+
+!------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Set attribute values on Field(1) Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  do, i=1, size (attrNameVals)
+    call ESMF_AttributeSet (fieldTst(1),  &
+        attrNameVals(i)%name, attrNameVals(i)%value,  &
+        convention=apConv, purpose=apPurp, rc=rc)
+    if (rc /= ESMF_SUCCESS) exit
+  end do
+  call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+!------------------------------------------------------------------------
+
+!------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
   ! Create Field
   fieldTst(2)=ESMF_FieldCreate(grid, farray=Farray_2w,  &
        indexflag=ESMF_INDEX_DELOCAL, name="velocity",  rc=rc)
   write(failMsg, *) ""
   write(name, *) "Create a field from grid and fortran dummy array"
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+!------------------------------------------------------------------------
+
+!------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Create attribute package on Field(2) Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  attrNameVals(1) = nameval_t ('long_name',      'Velocity CONUS')
+  attrNameVals(2) = nameval_t ('units',          'MPH')
+  call ESMF_AttributeAdd (fieldTst(2),  &
+      convention=apConv, purpose=apPurp,  &
+      attrList=attrNameVals%name, rc=rc)
+  call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+!------------------------------------------------------------------------
+
+!------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Set attribute values on Field(2) Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  do, i=1, size (attrNameVals)
+    call ESMF_AttributeSet (fieldTst(2),  &
+        attrNameVals(i)%name, attrNameVals(i)%value,  &
+        convention=apConv, purpose=apPurp, rc=rc)
+    if (rc /= ESMF_SUCCESS) exit
+  end do
+  call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 !------------------------------------------------------------------------
 
 !------------------------------------------------------------------------
@@ -161,6 +239,31 @@
   write(failMsg, *) ""
   write(name, *) "Create a field from 2 DE/PET grid"
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+!------------------------------------------------------------------------
+
+!------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Create attribute package on Field(3) Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  attrNameVals(1) = nameval_t ('long_name',      'Temperature CONUS 2DE/PET')
+  attrNameVals(2) = nameval_t ('units',          'F')
+  call ESMF_AttributeAdd (fieldTst(3),  &
+      convention=apConv, purpose=apPurp,  &
+      attrList=attrNameVals%name, rc=rc)
+  call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+!------------------------------------------------------------------------
+
+!------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Set attribute values on Field(3) Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  do, i=1, size (attrNameVals)
+    call ESMF_AttributeSet (fieldTst(3),  &
+        attrNameVals(i)%name, attrNameVals(i)%value,  &
+        convention=apConv, purpose=apPurp, rc=rc)
+    if (rc /= ESMF_SUCCESS) exit
+  end do
+  call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 !------------------------------------------------------------------------
 
 !------------------------------------------------------------------------
@@ -194,8 +297,34 @@
 
 !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Create attribute package on FieldBundle single Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  attrNameVals(1) = nameval_t ('file_name', 'single.nc')
+  attrNameVals(2) = nameval_t ('date',      'Apr 27, 2017')
+  call ESMF_AttributeAdd (bundleTst,  &
+      convention=apConv, purpose=apPurp,  &
+      attrList=attrNameVals%name, rc=rc)
+  call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+!------------------------------------------------------------------------
+
+!------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Set attribute values on FieldBundle single Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  do, i=1, size (attrNameVals)
+    call ESMF_AttributeSet (bundleTst,  &
+        attrNameVals(i)%name, attrNameVals(i)%value,  &
+        convention=apConv, purpose=apPurp, rc=rc)
+    if (rc /= ESMF_SUCCESS) exit
+  end do
+  call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+!------------------------------------------------------------------------
+
+!------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
   ! FieldBundle Write to a single file Test
   call ESMF_FieldBundleWrite(bundleTst, fileName="single.nc",      &
+      convention=apConv, purpose=apPurp,  &
       status=ESMF_FILESTATUS_REPLACE, rc=rc)
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   write(name, *) "Writing a FieldBundle to a single file Test"
@@ -224,10 +353,36 @@
 
 !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Create attribute package on FieldBundle multi Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  attrNameVals(1) = nameval_t ('file_name', 'multi.nc')
+  attrNameVals(2) = nameval_t ('date',      'Apr 27, 2017')
+  call ESMF_AttributeAdd (bundleTst,  &
+      convention=apConv, purpose=apPurp,  &
+      attrList=attrNameVals%name, rc=rc)
+  call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+!------------------------------------------------------------------------
+
+!------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Set attribute values on FieldBundle multi Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  do, i=1, size (attrNameVals)
+    call ESMF_AttributeSet (bundleTst,  &
+        attrNameVals(i)%name, attrNameVals(i)%value,  &
+        convention=apConv, purpose=apPurp, rc=rc)
+    if (rc /= ESMF_SUCCESS) exit
+  end do
+  call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+!------------------------------------------------------------------------
+
+!------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
   ! FieldBundle Write to multiple files Test
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   write(name, *) "Writing a FieldBundle to multiple files Test"
   call ESMF_FieldBundleWrite(bundleTst, fileName="multi.nc",  &
+      convention=apConv, purpose=apPurp,  &
       status=ESMF_FILESTATUS_REPLACE, singleFile=.false., rc=rc)
 #if (defined ESMF_PIO && ( defined ESMF_NETCDF || defined ESMF_PNETCDF))
   call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
