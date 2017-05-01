@@ -1937,7 +1937,7 @@
       !---------------------------------------------------------------------- @\
       print *, trim(outConstantChar) @\
  @\
-      !mtag_ex @\
+      !mtag_nex @\
       ! Get the Attribute count from a mobj Test @\
       call ESMF_AttributeGet(mname##Alias, count=count, rc=rc) @\
       write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value" @\
