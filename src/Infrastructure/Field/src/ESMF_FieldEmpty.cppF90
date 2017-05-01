@@ -1342,12 +1342,13 @@ end subroutine ESMF_FieldEmptyCompTK
     if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    if(lDeCount .lt. 1) then
-      call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_VALUE, &
-      msg="- the number of local DEs in array is less than 1 ", &
-      ESMF_CONTEXT, rcToReturn=rc) 
-      return
-    endif
+!gjt: it is okay to have no localDEs, remove the commented code eventually!
+!    if(lDeCount .lt. 1) then
+!      call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_VALUE, &
+!      msg="- the number of local DEs in array is less than 1 ", &
+!      ESMF_CONTEXT, rcToReturn=rc) 
+!      return
+!    endif
     allocate(tlw(dimCount, lDeCount), tuw(dimCount, lDeCount))
     call ESMF_ArrayGet(array, totalLWidth=tlw, totalUWidth=tuw, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
