@@ -1708,7 +1708,7 @@ function pio_cpp_put_att_string (file, vardesc, name, value) result(ierr) bind(c
 #endif
 
   !  call the Fortran procedure
-  ierror = put_att (file_desc, var_desc%varID, attname, attvalue)
+  ierror = put_att (file_desc, var_desc%varID, attname, attvalue(:clen))
 
   !  convert the arguments back to C
   ierr = int(ierror, c_int)
