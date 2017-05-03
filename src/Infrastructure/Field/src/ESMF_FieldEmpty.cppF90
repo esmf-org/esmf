@@ -42,6 +42,7 @@ module ESMF_FieldEmptyMod
   use ESMF_ArrayMod
   use ESMF_FieldMod
   use ESMF_FieldGetMod
+  use ESMF_VMMod
 
   implicit none
 
@@ -4236,7 +4237,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 ! !INTERFACE:
   ! Private name; call using ESMF_FieldEmptySet()
-  subroutine ESMF_FieldEmptySetGrid(field, grid, keywordEnforcer, StaggerLoc, rc)
+  subroutine ESMF_FieldEmptySetGrid(field, grid, keywordEnforcer, StaggerLoc, &
+                                    vm, rc)
 
 !
 ! !ARGUMENTS:
@@ -4244,6 +4246,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   type(ESMF_Grid),       intent(in)            :: grid
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   type(ESMF_STAGGERLOC), intent(in),  optional :: StaggerLoc
+  type(ESMF_VM),         intent(in),  optional :: vm
   integer,               intent(out), optional :: rc
 !
 ! !STATUS:
@@ -4284,7 +4287,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !       To create a custom stagger location see section
 !       \ref{sec:usage:staggerloc:adv}. The default
 !       value is {\tt ESMF\_STAGGERLOC\_CENTER}.
-! \item [{[rc]}] 
+! \item[{[vm]}]
+!       If present, the Field object is created on the specified
+!       {\tt ESMF\_VM} object. The default is to create on the VM of the
+!       current context.
+! \item [{[rc]}]
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
 !
@@ -4296,11 +4303,22 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   type(ESMF_FieldStatus_Flag)           :: status
   integer                               :: localrc
   type(ESMF_Logical)                    :: linkChange
+  type(ESMF_Pointer)                    :: vmThis
+  logical                               :: actualFlag
 
   if(present(rc)) rc = ESMF_RC_NOT_IMPL
   localrc = ESMF_RC_NOT_IMPL
 
   ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,grid,rc)
+
+  ! Must make sure the local PET is associated with an actual member
+  actualFlag = .true.
+  if (present(vm)) then
+    call ESMF_VMGetThis(vm, vmThis)
+    if (vmThis == ESMF_NULL_POINTER) then
+      actualFlag = .false.  ! local PET is not for an actual member of Array
+    endif
+  endif
 
   call ESMF_FieldGet(field, status=status, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -4316,18 +4334,20 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   l_staggerloc = ESMF_STAGGERLOC_CENTER
   if(present(staggerloc)) l_staggerloc = staggerloc
 
-  geombase=ESMF_GeomBaseCreate(grid,l_staggerloc, rc=localrc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-    ESMF_CONTEXT, rcToReturn=rc)) return
+  if (actualFlag) then
+    geombase=ESMF_GeomBaseCreate(grid,l_staggerloc, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
 
-  ! link the Attribute hierarchies
-  linkChange = ESMF_TRUE
-  call c_ESMC_AttributeLink(field%ftypep%base, grid, linkChange, localrc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-                ESMF_CONTEXT, rcToReturn=rc))  return
+    ! link the Attribute hierarchies
+    linkChange = ESMF_TRUE
+    call c_ESMC_AttributeLink(field%ftypep%base, grid, linkChange, localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT, rcToReturn=rc))  return
 
-  field%ftypep%geombase = geombase
-  field%ftypep%status = ESMF_FIELDSTATUS_GRIDSET
+    field%ftypep%geombase = geombase
+    field%ftypep%status = ESMF_FIELDSTATUS_GRIDSET
+  endif
 
   if(present(rc)) rc = ESMF_SUCCESS
 
