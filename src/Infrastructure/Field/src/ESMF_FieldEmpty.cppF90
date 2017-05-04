@@ -4238,7 +4238,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE:
   ! Private name; call using ESMF_FieldEmptySet()
   subroutine ESMF_FieldEmptySetGrid(field, grid, keywordEnforcer, StaggerLoc, &
-                                    vm, rc)
+    vm, rc)
 
 !
 ! !ARGUMENTS:
@@ -4288,9 +4288,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !       \ref{sec:usage:staggerloc:adv}. The default
 !       value is {\tt ESMF\_STAGGERLOC\_CENTER}.
 ! \item[{[vm]}]
-!       If present, the Field object is created on the specified
-!       {\tt ESMF\_VM} object. The default is to create on the VM of the
-!       current context.
+!       If present, the Field object will only be accessed, and the Grid object
+!       set, on those PETs contained in the specified {\tt ESMF\_VM} object. 
+!       The default is to assume the VM of the current context.
 ! \item [{[rc]}]
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
@@ -4316,7 +4316,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   if (present(vm)) then
     call ESMF_VMGetThis(vm, vmThis)
     if (vmThis == ESMF_NULL_POINTER) then
-      actualFlag = .false.  ! local PET is not for an actual member of Array
+      actualFlag = .false.  ! local PET is not for an actual member
     endif
   endif
 
@@ -4343,7 +4343,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     linkChange = ESMF_TRUE
     call c_ESMC_AttributeLink(field%ftypep%base, grid, linkChange, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-                  ESMF_CONTEXT, rcToReturn=rc))  return
+      ESMF_CONTEXT, rcToReturn=rc))  return
 
     field%ftypep%geombase = geombase
     field%ftypep%status = ESMF_FIELDSTATUS_GRIDSET
@@ -4453,14 +4453,16 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 ! !INTERFACE:
   ! Private name; call using ESMF_FieldEmptySet()
-  subroutine ESMF_FieldEmptySetLocStream(field, locstream, keywordEnforcer, rc)
+  subroutine ESMF_FieldEmptySetLocStream(field, locstream, keywordEnforcer, &
+    vm, rc)
 
 !
 ! !ARGUMENTS:
-  type(ESMF_Field),     intent(inout)         :: field
-  type(ESMF_LocStream), intent(in)            :: locstream
+  type(ESMF_Field),      intent(inout)         :: field
+  type(ESMF_LocStream),  intent(in)            :: locstream
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-  integer,              intent(out), optional :: rc
+  type(ESMF_VM),         intent(in),  optional :: vm
+  integer,               intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 ! \begin{sloppypar}
@@ -4487,6 +4489,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \end{sloppypar}
 ! \item [locstream]
 !       {\tt ESMF\_LocStream} to be set in the {\tt ESMF\_Field}.
+! \item[{[vm]}]
+!       If present, the Field object will only be accessed, and the Grid object
+!       set, on those PETs contained in the specified {\tt ESMF\_VM} object. 
+!       The default is to assume the VM of the current context.
 ! \item [{[rc]}] 
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
@@ -4495,14 +4501,25 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !------------------------------------------------------------------------------
 
   type(ESMF_GEOMBASE)                   :: geombase
-  type(ESMF_FieldStatus_Flag)                :: status
-  type(ESMF_Logical)             :: linkChange @\
+  type(ESMF_FieldStatus_Flag)           :: status
+  type(ESMF_Logical)                    :: linkChange
   integer                               :: localrc
+  type(ESMF_Pointer)                    :: vmThis
+  logical                               :: actualFlag
 
   if(present(rc)) rc = ESMF_RC_NOT_IMPL
   localrc = ESMF_RC_NOT_IMPL
 
   ESMF_INIT_CHECK_DEEP_SHORT(ESMF_LocStreamGetInit, locstream, rc)
+
+  ! Must make sure the local PET is associated with an actual member
+  actualFlag = .true.
+  if (present(vm)) then
+    call ESMF_VMGetThis(vm, vmThis)
+    if (vmThis == ESMF_NULL_POINTER) then
+      actualFlag = .false.  ! local PET is not for an actual member
+    endif
+  endif
 
   call ESMF_FieldGet(field, status=status, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -4515,18 +4532,21 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     return
   endif
 
-  geombase=ESMF_GeomBaseCreate(locstream, rc=localrc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-    ESMF_CONTEXT, rcToReturn=rc)) return
+  if (actualFlag) then
+    geombase=ESMF_GeomBaseCreate(locstream, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
 
-  ! link the Attribute hierarchies
-  linkChange = ESMF_TRUE
-  call c_ESMC_AttributeLink(field%ftypep%base, locstream%lstypep%base, linkChange, localrc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-                ESMF_CONTEXT, rcToReturn=rc))  return
+    ! link the Attribute hierarchies
+    linkChange = ESMF_TRUE
+    call c_ESMC_AttributeLink(field%ftypep%base, locstream%lstypep%base, &
+      linkChange, localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc))  return
 
-  field%ftypep%geombase = geombase
-  field%ftypep%status = ESMF_FIELDSTATUS_GRIDSET
+    field%ftypep%geombase = geombase
+    field%ftypep%status = ESMF_FIELDSTATUS_GRIDSET
+  endif
 
   if(present(rc)) rc = ESMF_SUCCESS
 

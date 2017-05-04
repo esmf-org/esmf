@@ -1515,24 +1515,25 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       if (actualFlag) then
         ! only actual member PETs set distgrid
         lstypep%distgrid=distgrid
-      endif
 
-      ! set Name
-      call ESMF_BaseCreate(lstypep%base,"LocStream",name,0,rc=localrc)       
-      if (ESMF_LogFoundError(localrc, &
-                              ESMF_ERR_PASSTHRU, &
-                              ESMF_CONTEXT, rcToReturn=rc)) return
+        ! create base object and set name
+        call ESMF_BaseCreate(lstypep%base,"LocStream",name,0,rc=localrc)       
+        if (ESMF_LogFoundError(localrc, &
+          ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+                              
+        ! Set pointer to internal locstream type
+        locstream%lstypep=>lstypep
 
-      ! Set pointer to internal locstream type
-      locstream%lstypep=>lstypep
-
-      ! Set return value.
-      ESMF_LocStreamCreateFromDG=locstream
+        ! Set return value.
+        ESMF_LocStreamCreateFromDG=locstream
       
-      ! Add reference to this object into ESMF garbage collection table
-      ! Only call this in those Create() methods that do not call other LSCreate()
-      call c_ESMC_VMAddFObject(locstream, &
-        ESMF_ID_LOCSTREAM%objectID)
+        ! Add reference to this object into ESMF garbage collection table
+        ! Only call this in those Create() methods that do not call other LSCreate()
+        call c_ESMC_VMAddFObject(locstream, &
+          ESMF_ID_LOCSTREAM%objectID)
+
+      endif
 
       ! set init status to created
       ESMF_INIT_SET_CREATED(ESMF_LocStreamCreateFromDG)
