@@ -143,6 +143,10 @@
     user_setvms(1)%pfunc => user_setvm1
     user_setvms(2)%pfunc => user_setvm2
     user_setvms(3)%pfunc => user_setvm3
+    user_setvms(4)%pfunc => user_setvm4
+    user_setvms(5)%pfunc => user_setvm5
+    user_setvms(6)%pfunc => user_setvm6
+    user_setvms(7)%pfunc => user_setvm7
     call user_neg_routine(vm, comps, user_setvms, rc)
     if(rc /= ESMF_SUCCESS) then
       print *, "user negotiation failed"
