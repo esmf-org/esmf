@@ -14,14 +14,14 @@ SYSTEM_TESTS_BUILD   = $(ESMC_TESTDIR)/ESMF_CompCreateThreeConcurrentAccWithResN
 # system tests executable will depend on.
 # List objects files in the order that they
 # are to be compiled/created.
-SYSTEM_TESTS_OBJ     = mat_utils.o user_neg_info.o pet_partitioner.o user_model1.o user_model2.o user_model3.o user_neg.o
+SYSTEM_TESTS_OBJ     = mat_utils.o user_neg_info.o pet_partitioner.o user_amodel1.o user_model2.o user_model3.o user_amodel4.o user_model5.o user_model6.o user_amodel7.o user_neg.o
 
 SYSTEM_TESTS_RUN     = RUN_CompCreateThreeConcurrentAccWithResNegIntelMIC
 
 SYSTEM_TESTS_RUN_UNI =
 
 
-ESMF_CompCreateThreeConcurrentAccWithResNegIntelMICSTest.o : mat_utils.o user_neg_info.o pet_partitioner.o user_model1.o user_model2.o user_model3.o user_neg.o
+ESMF_CompCreateThreeConcurrentAccWithResNegIntelMICSTest.o : mat_utils.o user_neg_info.o pet_partitioner.o user_amodel1.o user_model2.o user_model3.o user_amodel4.o user_model5.o user_model6.o user_amodel7.o user_neg.o
 
 
 include $(ESMF_DIR)/makefile

@@ -13,7 +13,7 @@
 !
 !\begin{verbatim}
 
-    module user_model1
+    module user_model5
 
     ! ESMF Framework module
     use ESMF
@@ -57,7 +57,7 @@
 
     ! Initialize return code
     rc = ESMF_SUCCESS
-    print *, "USER: user_setvm called (user_model1)"
+    print *, "USER: user_setvm called (user_model5)"
 
     call ESMF_AttributeGet(comp, name="ESMF_COMP_USER_NEG_STATE",&
           value=neg_state, rc=rc)
@@ -69,7 +69,7 @@
     if(neg_state == ESMF_COMP_USER_NEG_INIT) then
       print *, "Negotiation state : INIT"
       call ESMF_AttributeSet(comp, name="ESMF_COMP_USER_NEG_ACC_INFO",&
-            value=ESMF_COMP_CAN_ACC, rc=rc)
+            value=ESMF_COMP_NO_ACC, rc=rc)
       if(rc /= ESMF_SUCCESS) then
         print *, "Setting Negotiation acc info failed"
         return
@@ -122,18 +122,19 @@
           return
         end if
         if(device_count <= 0) then
-          print *, "dev list info size <= 0"
-        else
-          allocate(device_list(device_count))
-          call ESMF_AttributeGet(comp, name="ESMF_COMP_USER_NEG_LDEVLIST_INFO",&
-            valueList=device_list, rc=rc)
-          if(rc /= ESMF_SUCCESS) then
-            print *, "Setting device list info failed, exiting..."
-            return
-          end if
-          print *, "Got device list : ", device_list
-          print *, "Accepting the device list passed by driver/main"
+          print *, "dev list info size <= 0, exiting"
+          rc = ESMF_FAILURE
+          return
         end if
+        allocate(device_list(device_count))
+        call ESMF_AttributeGet(comp, name="ESMF_COMP_USER_NEG_LDEVLIST_INFO",&
+          valueList=device_list, rc=rc)
+        if(rc /= ESMF_SUCCESS) then
+          print *, "Setting device list info failed, exiting..."
+          return
+        end if
+        print *, "Got device list : ", device_list
+        print *, "Accepting the device list passed by driver/main"
       else
         print *, "ERROR: Only LIST_INFO of type ENUMERATE is supported for now"
         return
@@ -270,9 +271,6 @@
 !   !
  
     subroutine user_run(comp, importState, exportState, clock, rc)
-        use mpi
-        use mat_utils
-        implicit none
         type(ESMF_GridComp) :: comp
         type(ESMF_State) :: importState, exportState
         type(ESMF_Clock) :: clock
@@ -283,15 +281,6 @@
 
         type(mydata), pointer :: mydatablock
         type(wrapper) :: mywrapper
-
-        integer :: i, ndevices, deviceid, rank
-        integer, parameter :: INIT_VAL = 2
-        integer, parameter :: N = 100
-        integer, parameter :: SCALE_FACTOR = 10
-        integer, dimension(:) :: vec(N), svec(N)
-
-        integer, parameter :: MAX_SZ = 32
-        real, dimension(MAX_SZ,MAX_SZ) :: a, b, sc, c
 
         rc = ESMF_SUCCESS
 
@@ -318,7 +307,7 @@
 
         print *, "run, local data =", mydatablock%index, &
                         mydatablock%scale_factor, mydatablock%flag
-
+   
         call ESMF_StatePrint(importState, rc=rc)
         if (rc/=ESMF_SUCCESS) return ! bail on error    
         call ESMF_StateGet(importState, "humidity", humidity, rc=rc)
@@ -327,48 +316,6 @@
         if (rc/=ESMF_SUCCESS) return ! bail on error    
 
         ! This is where the model specific computation goes.
-        call MPI_Comm_rank(MPI_COMM_WORLD, rank, rc)
-        ndevices = 0
-        if(allocated(device_list)) then
-          ndevices = SIZE(device_list)
-        end if
-        print *, "Num of devices available = ", ndevices
-        deviceid = 0
-        if(ndevices > 0) then
-          deviceid = device_list(mod(rank, ndevices) + 1)
-        end if
-        vec = INIT_VAL
-        print *, "Vector before scaling = ", vec
-
-        !!dir$ offload begin target(mic:deviceid)
-        do i=1,N
-          svec(i) = SCALE_FACTOR * vec(i)
-        end do
-        !!dir$ end offload
-
-        print *, "Scaled vector = ", svec
-   
-        a = 1.0
-        b = 2.0
-        c = 0.0
-
-        print *, "Performing mat mult (serial): "
-        rc = smmul2d(a, b, sc)
-        if(rc /= 0) then
-            print *, "ERROR: Serial mat mult failed"
-        end if
-        print *, sc
-
-        print *, "Performing mat mult (MIC): "
-        rc = imic_mmul2d(deviceid, a, b, c)
-        if(rc /= 0) then
-            print *, "ERROR: Parallel mat mult failed"
-        end if
-
-        if(.not. all(sc .eq. c)) then
-            print *, "Validation FAILED, Serial result != Parallel result"
-        end if
-        
 
         ! Here is where the output state is updated.
         !call ESMF_StateAdd(exportState, humidity, rc=status)
@@ -422,7 +369,7 @@
     end subroutine user_final
 
 
-    end module user_model1
+    end module user_model5
     
 !\end{verbatim}
     
