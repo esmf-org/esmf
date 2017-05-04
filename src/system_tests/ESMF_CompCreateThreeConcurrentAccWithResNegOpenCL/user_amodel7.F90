@@ -13,7 +13,7 @@
 !
 !\begin{verbatim}
 
-    module user_model1
+    module user_amodel7
 
     ! ESMF Framework module
     use ESMF
@@ -57,7 +57,7 @@
 
     ! Initialize return code
     rc = ESMF_SUCCESS
-    print *, "USER: user_setvm called (user_model1)"
+    print *, "USER: user_setvm called (user_amodel7)"
 
     call ESMF_AttributeGet(comp, name="ESMF_COMP_USER_NEG_STATE",&
           value=neg_state, rc=rc)
@@ -428,7 +428,7 @@
     end subroutine user_final
 
 
-    end module user_model1
+    end module user_amodel7
     
 !\end{verbatim}
     

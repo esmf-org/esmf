@@ -21,12 +21,20 @@
     use ESMF
     use ESMF_TestMod
 
-    use user_model1, only : user_register1 => user_register,&
+    use user_amodel1, only : user_register1 => user_register,&
                             user_setvm1 => user_setvm
     use user_model2, only : user_register2 => user_register,&
                             user_setvm2 => user_setvm
     use user_model3, only : user_register3 => user_register,&
                             user_setvm3 => user_setvm
+    use user_amodel4, only : user_register4 => user_register,&
+                            user_setvm4 => user_setvm
+    use user_model5, only : user_register5 => user_register,&
+                            user_setvm5 => user_setvm
+    use user_model6, only : user_register6 => user_register,&
+                            user_setvm6 => user_setvm
+    use user_amodel7, only : user_register7 => user_register,&
+                            user_setvm7 => user_setvm
     use user_neg_info
     use user_neg_info
     use user_neg, only : user_neg_routine
@@ -34,11 +42,17 @@
     implicit none
 
 !   Local variables
-    integer, parameter :: NUM_COMPONENTS = 3
+    integer, parameter :: NUM_COMPONENTS = 7
     integer, parameter :: NUM_PHASES = 2
     integer :: my_pet, npets, rc, userrc
-    integer, dimension(:), allocatable :: petlist1, petlist2, petlist3
-    integer :: npetlist1, npetlist2, npetlist3
+    type Alloc_1D_Arr
+      integer, dimension(:), allocatable :: arr
+    end type
+    type(Alloc_1D_Arr) :: petlists(NUM_COMPONENTS) 
+    !integer, dimension(:), allocatable :: petlist1, petlist2, petlist3
+    !integer, dimension(:), allocatable :: petlist4, petlist4, petlist6
+    !integer, dimension(:), allocatable :: petlist7
+    integer :: ncomp_petlist
     type(ESMF_VM):: vm
     !type(ESMF_GridComp) :: comp1, comp2
     type(ESMF_GridComp) :: comps(NUM_COMPONENTS)
@@ -48,7 +62,7 @@
     character(len=ESMF_MAXSTR) :: cnames(NUM_COMPONENTS)
     type(ESMF_SetVMInterfaceType) :: user_setvms(NUM_COMPONENTS)
     
-    integer :: i, j
+    integer :: i, j, k
     character(len=ESMF_MAXSTR) :: tmpstr
 
     ! cumulative result: count failures; no failures equals "all pass"
@@ -85,64 +99,40 @@
     if (rc .ne. ESMF_SUCCESS) goto 10
 
       ! Check for correct number of PETs
-    if ( npets < 3 ) then
+    if ( npets < NUM_COMPONENTS ) then
       print *, "This system test does not run on fewer than 3 PETs"
       rc = ESMF_RC_ARG_BAD
       goto 10
     endif
 
-    npetlist1 = npets/NUM_COMPONENTS
-    npetlist2 = npets/NUM_COMPONENTS
-    npetlist3 = npets - (NUM_COMPONENTS - 1) * (npets/NUM_COMPONENTS)
-
-    allocate(petlist1(npetlist1))
-    allocate(petlist2(npetlist2))
-    allocate(petlist3(npetlist3))
-
-    j = 1
-    do i=0,npets-1,NUM_COMPONENTS
-      petlist1(j) = i 
-      j = j + 1
-    end do
-    j = 1
-    do i=1,npets-1,NUM_COMPONENTS
-      petlist2(j) = i 
-      j = j + 1
-    end do
-    j = 1
-    do i=2,npets-1,NUM_COMPONENTS
-      petlist3(j) = i 
-      j = j + 1
-    end do
-    do while(i < npets-1)
-      petlist3(j) = i
-      i = i + 1
-      j = j + 1
+    ncomp_petlist = npets/NUM_COMPONENTS
+    do i=1,NUM_COMPONENTS-1
+      allocate(petlists(i)%arr(ncomp_petlist))
     end do
 
-    print *, "PET list comp 1 : ", petlist1
-    print *, "PET list comp 2 : ", petlist2
-    print *, "PET list comp 3 : ", petlist3
-    cnames(1) = "System Test CompCreateThreeConcurrentAccWithResNeg Comp 1"
-    comps(1) = ESMF_GridCompCreate(name=cnames(1), petList=petlist1, rc=rc)
-    if (rc .ne. ESMF_SUCCESS) goto 10
-    call ESMF_GridCompPrint(comps(1))
+    ncomp_petlist = npets - (NUM_COMPONENTS - 1) * (npets/NUM_COMPONENTS)
+    allocate(petlists(NUM_COMPONENTS)%arr(ncomp_petlist))
 
-    print *, "Comp Create finished, name = ", trim(cnames(1))
+    do k=0,NUM_COMPONENTS-1
+      j = 1
+      do i=k,npets-1,NUM_COMPONENTS
+        petlists(k+1)%arr(j) = i 
+        j = j + 1
+      end do
+    end do
 
-    cnames(2) = "System Test CompCreateThreeConcurrentAccWithResNeg Comp 2"
-    comps(2) = ESMF_GridCompCreate(name=cnames(2), petList=petlist2, rc=rc)
-    if (rc .ne. ESMF_SUCCESS) goto 10
-    call ESMF_GridCompPrint(comps(2))
+    do k=0,NUM_COMPONENTS-1
+      print *, "PET list comp ", k, " :", petlists(k)%arr
+    end do
 
-    print *, "Comp Create finished, name = ", trim(cnames(2))
+    do k=1,NUM_COMPONENTS
+      write(cnames(k),*) "System Test CompCreateThreeConcurrentAccWithResNeg Comp ", k
+      comps(k) = ESMF_GridCompCreate(name=cnames(k), petList=petlists(k)%arr, rc=rc)
+      if (rc .ne. ESMF_SUCCESS) goto 10
+      call ESMF_GridCompPrint(comps(k))
 
-    cnames(3) = "System Test CompCreateThreeConcurrentAccWithResNeg Comp 3"
-    comps(3) = ESMF_GridCompCreate(name=cnames(3), petList=petlist3, rc=rc)
-    if (rc .ne. ESMF_SUCCESS) goto 10
-    call ESMF_GridCompPrint(comps(3))
-
-    print *, "Comp Create finished, name = ", trim(cnames(3))
+      print *, "Comp Create finished, name = ", trim(cnames(k))
+    end do
 
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
@@ -177,6 +167,22 @@
     userRc=userrc, rc=rc)
     if ((rc .ne. ESMF_SUCCESS) .or. (userrc .ne. ESMF_SUCCESS)) goto 10
     print *, "Comp Register finished (comp 3), rc= ", rc
+    call ESMF_GridCompSetServices(comps(4), userRoutine=user_register4, &
+    userRc=userrc, rc=rc)
+    if ((rc .ne. ESMF_SUCCESS) .or. (userrc .ne. ESMF_SUCCESS)) goto 10
+    print *, "Comp Register finished (comp 4), rc= ", rc
+    call ESMF_GridCompSetServices(comps(5), userRoutine=user_register5, &
+    userRc=userrc, rc=rc)
+    if ((rc .ne. ESMF_SUCCESS) .or. (userrc .ne. ESMF_SUCCESS)) goto 10
+    print *, "Comp Register finished (comp 5), rc= ", rc
+    call ESMF_GridCompSetServices(comps(6), userRoutine=user_register6, &
+    userRc=userrc, rc=rc)
+    if ((rc .ne. ESMF_SUCCESS) .or. (userrc .ne. ESMF_SUCCESS)) goto 10
+    print *, "Comp Register finished (comp 6), rc= ", rc
+    call ESMF_GridCompSetServices(comps(7), userRoutine=user_register7, &
+    userRc=userrc, rc=rc)
+    if ((rc .ne. ESMF_SUCCESS) .or. (userrc .ne. ESMF_SUCCESS)) goto 10
+    print *, "Comp Register finished (comp 7), rc= ", rc
 
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
