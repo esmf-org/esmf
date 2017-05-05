@@ -12,18 +12,20 @@
 #  -d	TEST_DIR
 #  -e	EX_DIR
 #  -b   ESMF_BOPT
+#  -f   ESMF_COMM
 #  
 
 use Getopt::Std;
 use Cwd;
 
-getopts("h:d:e:b:m:", \%options); 
+getopts("h:d:e:b:f:", \%options); 
 
 
 	$ESMF_TESTSCRIPTS = "$options{h}"; 
 	$TEST_DIR = "$options{d}"; 
 	$EX_DIR = "$options{e}"; 
 	$ESMF_BOPT = "$options{b}";
+	$ESMF_COMM = "$options{f}";
 
 
 #
@@ -41,21 +43,21 @@ require "unit_tests_results.pl";
 $dir = cwd();
 
 # Call sys_tests_result with SUMMARY request turned on.
-&sys_tests_results("$TEST_DIR","$ESMF_BOPT","1");
+&sys_tests_results("$TEST_DIR","$ESMF_BOPT","$ESMF_COMM","1");
 
 # Go back tp pwd
 chdir $dir;
 
 # Call examples_results with SUMMARY request turned on.
-&examples_results("$EX_DIR","$ESMF_BOPT","1");
+&examples_results("$EX_DIR","$ESMF_BOPT","$ESMF_COMM","1");
 
 # Go back tp pwd
 chdir $dir;
 
 # Call unit_tests_results with SUMMARY request turned on.
-&unit_tests_results("$TEST_DIR","$ESMF_BOPT","1");
+&unit_tests_results("$TEST_DIR","$ESMF_BOPT","$ESMF_COMM","1");
 
-# Go back tp pwd
+# Go back to pwd
 chdir $dir;
 
 exit;
