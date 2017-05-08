@@ -138,6 +138,10 @@ enum ESMC_MeshOp_Flag { ESMC_MESHOP_DIFFERENCE=0 };
 #define ESMC_GRIDITEM_FRAC     3
 #define ESMC_GRIDITEM_COUNT    4
 
+// Needs to be kept in line with ESMF_ATT_GRIDDED_DIM_LABELS and
+// ESMF_ATT_UNGRIDDED_DIM_LABELS in ../src/ESMCI_UtilTypes.F90
+#define ESMC_ATT_GRIDDED_DIM_LABELS   "ESMF:gridded_dim_labels"
+#define ESMC_ATT_UNGRIDDED_DIM_LABELS "ESMF:ungridded_dim_labels"
 
 // max/min macros if they don't already exist
 #ifndef MAX

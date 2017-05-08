@@ -107,6 +107,11 @@
       logical, parameter :: ESMF_IO_PNETCDF_PRESENT = .false.
 #endif
 
+! Needs to be kept in line with ESMC_ATT_UNGRIDDED_DIM_LABELS and
+! ESMC_ATT_UNGRIDDED_DIM_LABELS in ../include/ESMCI_Util.h
+
+      character(32), parameter :: ESMF_ATT_GRIDDED_DIM_LABELS   = 'ESMF:gridded_dim_labels'
+      character(32), parameter :: ESMF_ATT_UNGRIDDED_DIM_LABELS = 'ESMF:ungridded_dim_labels'
 
 ! Needs to be kept in line with MESH_POLYBREAK_IND
 ! in ESMCI_Mesh.h
@@ -1026,6 +1031,7 @@
       public ESMF_AttNest_Flag, ESMF_ATTNEST_OFF, ESMF_ATTNEST_ON
       public ESMF_AttTreeFlag, ESMF_ATTTREE_OFF, ESMF_ATTTREE_ON
       public ESMF_AttWriteFlag, ESMF_ATTWRITE_TAB, ESMF_ATTWRITE_XML
+      public ESMF_ATT_GRIDDED_DIM_LABELS, ESMF_ATT_UNGRIDDED_DIM_LABELS
 
        public ESMF_RegridMethod_Flag,   ESMF_REGRIDMETHOD_BILINEAR, &
                                    ESMF_REGRIDMETHOD_PATCH, &
