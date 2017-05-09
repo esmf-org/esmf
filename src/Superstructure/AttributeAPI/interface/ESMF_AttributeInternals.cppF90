@@ -953,9 +953,7 @@ contains
 
       ! get the length of name
       if (name(1:5) == "ESMF:") then
-print *, ESMF_METHOD, ': checking attribute name ', trim (name)
         if (all (name /= exception_list)) then
-print *, ESMF_METHOD, ': recognising ', trim (name), ' as an internal attribute'
           modName = name(6:)
           AttributeInternalInfo = .true.
         end if
