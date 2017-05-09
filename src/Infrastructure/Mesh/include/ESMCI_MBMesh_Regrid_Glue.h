@@ -25,7 +25,6 @@
 #ifdef ESMF_MOAB
 
 #include "ESMCI_Macros.h"
-#include "ESMCI_VM.h"
 #include "ESMCI_LogErr.h"
 #include "ESMCI_Grid.h"
 #include "ESMCI_GridToMesh.h"
@@ -52,8 +51,7 @@
 using namespace ESMCI;
 
  
-void MBMesh_regrid_create(ESMCI::VM **vmpp,
-                          void **meshsrcpp, ESMCI::Array **arraysrcpp,
+void MBMesh_regrid_create(void **meshsrcpp, ESMCI::Array **arraysrcpp,
                           void **meshdstpp, ESMCI::Array **arraydstpp,
                           int *regridMethod, 
                           int *map_type,

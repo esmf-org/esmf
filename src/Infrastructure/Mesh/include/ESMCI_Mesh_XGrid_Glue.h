@@ -30,8 +30,7 @@
 
 using namespace ESMCI;
 
-void ESMCI_xgridregrid_create(ESMCI::VM **vmpp,
-                              Mesh **meshsrcpp, Mesh **meshdstpp, 
+void ESMCI_xgridregrid_create(Mesh **meshsrcpp, Mesh **meshdstpp, 
                               Mesh **mesh,
                               int *compute_midmesh,
                               int *regridMethod, 

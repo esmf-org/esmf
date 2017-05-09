@@ -2398,21 +2398,28 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     endif
         
     ! perform FieldBundle redistribution
-    if(src_bundle .and. dst_bundle) &
+    if(src_bundle .and. dst_bundle) then
         call ESMF_ArrayBundleRedist(srcab, dstab, routehandle, &
             checkflag=l_checkflag, rc=localrc)
-    if(src_bundle .and. .not. dst_bundle) &
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+    else if(src_bundle .and. .not. dst_bundle) then
         call ESMF_ArrayBundleRedist(srcArrayBundle=srcab, routehandle=routehandle, &
             checkflag=l_checkflag, rc=localrc)
-    if(.not. src_bundle .and. dst_bundle) &
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+    else if(.not. src_bundle .and. dst_bundle) then
         call ESMF_ArrayBundleRedist(dstArrayBundle=dstab, routehandle=routehandle, &
             checkflag=l_checkflag, rc=localrc)
-    if(.not. src_bundle .and. .not. dst_bundle) &
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+    else if(.not. src_bundle .and. .not. dst_bundle) then
         call ESMF_ArrayBundleRedist(routehandle=routehandle, &
             checkflag=l_checkflag, rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
-
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+    
     ! garbage collection
     if (present(srcFieldBundle)) then
       call ESMF_ArrayBundleDestroy(srcab, noGarbage=.true., rc=localrc)
@@ -3402,7 +3409,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         type(ESMF_StaggerLoc) :: prevSrcStaggerLoc, prevDstStaggerLoc
         type(ESMF_Grid) :: currSrcGrid, currDstGrid
         type(ESMF_StaggerLoc) :: currSrcStaggerLoc, currDstStaggerLoc
-        integer(ESMF_KIND_I4), pointer :: tmp_indices(:,:)
         integer(ESMF_KIND_I4), pointer :: prev_indices(:,:)
         real(ESMF_KIND_R8), pointer :: prev_weights(:)
         type(ESMF_GeomType_Flag) :: srcGeomtype        
@@ -3448,7 +3454,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             ESMF_CONTEXT, rcToReturn=rc)) return
         endif        
 
-        ! 6) loop over all Fields in FieldBundles, call FieldRegridStore and append rh
+        ! loop over all Fields in FieldBundles, call FieldRegridStore and append rh
         rraShift = 0          ! reset
         vectorLengthShift = 0 ! reset
 
@@ -4298,26 +4304,33 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         endif
 
         ! perform FieldBundle SMM
-        if(src_bundle .and. dst_bundle) &
+        if(src_bundle .and. dst_bundle) then
           call ESMF_ArrayBundleSMM(srcab, dstab, routehandle, &
             zeroregion=l_zeroregion, termorderflag=termorderflag, &
             checkflag=l_checkflag, rc=localrc)
-        if(src_bundle .and. .not. dst_bundle) &
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+        else if(src_bundle .and. .not. dst_bundle) then
           call ESMF_ArrayBundleSMM(srcArrayBundle=srcab, &
             routehandle=routehandle, &
             zeroregion=l_zeroregion, termorderflag=termorderflag, &
             checkflag=l_checkflag, rc=localrc)
-        if(.not. src_bundle .and. dst_bundle) &
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+        else if(.not. src_bundle .and. dst_bundle) then
           call ESMF_ArrayBundleSMM(dstArrayBundle=dstab, &
             routehandle=routehandle, &
             zeroregion=l_zeroregion, termorderflag=termorderflag, &
             checkflag=l_checkflag, rc=localrc)
-        if(.not. src_bundle .and. .not. dst_bundle) &
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+        else if(.not. src_bundle .and. .not. dst_bundle) then
           call ESMF_ArrayBundleSMM(routehandle=routehandle, &
             zeroregion=l_zeroregion, termorderflag=termorderflag, &
             checkflag=l_checkflag, rc=localrc)
-        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-          ESMF_CONTEXT, rcToReturn=rc)) return
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+        endif
             
         ! garbage collection
         if (present(srcFieldBundle)) then

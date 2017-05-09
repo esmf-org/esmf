@@ -84,7 +84,7 @@ void PutElemAreaIntoArray(Grid &grid, int staggerLoc, ESMCI::Mesh &mesh, ESMCI::
 
 
 
-void ESMCI_regrid_create(ESMCI::VM **vmpp,
+void ESMCI_regrid_create(
                      Mesh **meshsrcpp, ESMCI::Array **arraysrcpp, ESMCI::PointList **plsrcpp,
                      Mesh **meshdstpp, ESMCI::Array **arraydstpp, ESMCI::PointList **pldstpp,
                      int *regridMethod, 
@@ -101,15 +101,11 @@ void ESMCI_regrid_create(ESMCI::VM **vmpp,
                      int*rc) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_regrid_create()" 
-  Trace __trace(" FTN_X(regrid_test)(ESMCI::VM **vmpp, ESMCI::Grid **gridsrcpp, ESMCI::Grid **griddstcpp, int*rc");
+  Trace __trace(" FTN_X(regrid_test)(ESMCI::Grid **gridsrcpp, ESMCI::Grid **griddstcpp, int*rc");
 
  
-  ESMCI::VM *vm = *vmpp;
   ESMCI::Array &srcarray = **arraysrcpp;
   ESMCI::Array &dstarray = **arraydstpp;
-
-  int localPet = vm->getLocalPet();
-  int petCount = vm->getPetCount();
 
   Mesh *srcmesh = *meshsrcpp;
   Mesh *dstmesh = *meshdstpp;
@@ -494,17 +490,13 @@ void ESMCI_regrid_create(ESMCI::VM **vmpp,
   if (rc!=NULL) *rc = ESMF_SUCCESS;
 }
 
-void ESMCI_regrid_getiwts(ESMCI::VM **vmpp, Grid **gridpp,
+void ESMCI_regrid_getiwts(Grid **gridpp,
                    Mesh **meshpp, ESMCI::Array **arraypp, int *staggerLoc,
                    int *regridScheme, int*rc) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_regrid_getiwts()" 
   Trace __trace(" FTN_X(regrid_getiwts)()");
-  ESMCI::VM *vm = *vmpp;
   ESMCI::Array &array = **arraypp;
-
-  int localPet = vm->getLocalPet();
-  int petCount = vm->getPetCount();
 
   Mesh &mesh = **meshpp;
   Grid &grid = **gridpp;

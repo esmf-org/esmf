@@ -358,7 +358,7 @@ extern "C" {
   void FTN_X(c_esmc_arraybundlehalo)(ESMCI::ArrayBundle **arraybundle,
     ESMCI::RouteHandle **routehandle, ESMC_Logical *checkflag, int *rc){
 #undef  ESMC_METHOD
-#define ESMC_METHOD "c_esmc_arrayhalo()"
+#define ESMC_METHOD "c_esmc_arraybundlehalo()"
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     // convert to bool

@@ -189,8 +189,7 @@ void FTN_X(c_esmc_smmspecdeserialize)(
 } 
 
 // xgrid regrid create method tailored for XGrid
-void FTN_X(c_esmc_xgridregrid_create)(ESMCI::VM **vmpp,
-                   MeshCap **meshsrcpp, MeshCap **meshdstpp, 
+void FTN_X(c_esmc_xgridregrid_create)(MeshCap **meshsrcpp, MeshCap **meshdstpp,
                    MeshCap **mesh,
                    int *compute_midmesh,
                    int *regridMethod, 
@@ -200,8 +199,7 @@ void FTN_X(c_esmc_xgridregrid_create)(ESMCI::VM **vmpp,
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_xgridregrid_create()" 
 
-  MeshCap::xgridregrid_create(vmpp,
-                              meshsrcpp, meshdstpp, 
+  MeshCap::xgridregrid_create(meshsrcpp, meshdstpp, 
                               mesh,
                               compute_midmesh,
                               regridMethod, 

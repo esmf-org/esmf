@@ -47,7 +47,6 @@ module ESMF_XGridCreateMod
   use ESMF_XGridGeomBaseMod
   use ESMF_XGridMod
   use ESMF_InitMacrosMod
-  use ESMF_VMMod
   use ESMF_F90InterfaceMod
 
   implicit none
@@ -358,7 +357,6 @@ function ESMF_XGridCreate(keywordEnforcer, &
     type(ESMF_Mesh)               :: meshA, meshB, mesh, tmpmesh
     type(ESMF_Mesh), allocatable  :: meshAt(:), meshBt(:)
     type(ESMF_Pointer)            :: meshp
-    type(ESMF_VM)                 :: vm
     integer(ESMF_KIND_I4), pointer:: indicies(:,:)
     real(ESMF_KIND_R8), pointer   :: weights(:), sidemesharea(:)
     integer                       :: nentries
@@ -822,18 +820,12 @@ function ESMF_XGridCreate(keywordEnforcer, &
       return
     endif
 
-    ! use current VM for communication
-    call ESMF_VMGetCurrent(vm, rc=localrc)
-    if (ESMF_LogFoundError(localrc, &
-        ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
-
     ! Call into streamlined Regrid
     ! input:  MeshA: merged mesh on side A
     ! input:  MeshB: merged mesh on side B
     ! output: Meshp: merged mesh in the middle (the super mesh)
     compute_midmesh = 1
-    call c_esmc_xgridregrid_create(vm, meshA, meshB, &
+    call c_esmc_xgridregrid_create(meshA, meshB, &
       meshp, compute_midmesh, &
       ESMF_REGRIDMETHOD_CONSERVE, &
       ESMF_UNMAPPEDACTION_IGNORE, &
@@ -962,7 +954,7 @@ function ESMF_XGridCreate(keywordEnforcer, &
     ! When there is only 1 grid per side, optimization can be done but it's not clear for multiple Grids.
     compute_midmesh = 0
     do i = 1, ngrid_a
-      call c_esmc_xgridregrid_create(vm, meshAt(i), mesh, &
+      call c_esmc_xgridregrid_create(meshAt(i), mesh, &
         tmpmesh, compute_midmesh, &
         ESMF_REGRIDMETHOD_CONSERVE, &
         ESMF_UNMAPPEDACTION_IGNORE, &
@@ -991,7 +983,7 @@ function ESMF_XGridCreate(keywordEnforcer, &
       endif
       
       ! Now the reverse direction
-      call c_esmc_xgridregrid_create(vm, mesh, meshAt(i), &
+      call c_esmc_xgridregrid_create(mesh, meshAt(i), &
         tmpmesh, compute_midmesh, &
         ESMF_REGRIDMETHOD_CONSERVE, &
         ESMF_UNMAPPEDACTION_IGNORE, &
@@ -1022,7 +1014,7 @@ function ESMF_XGridCreate(keywordEnforcer, &
 
     ! now do the B side
     do i = 1, ngrid_b
-      call c_esmc_xgridregrid_create(vm, meshBt(i), mesh, &
+      call c_esmc_xgridregrid_create(meshBt(i), mesh, &
         tmpmesh, compute_midmesh, &
         ESMF_REGRIDMETHOD_CONSERVE, &
         ESMF_UNMAPPEDACTION_IGNORE, &
@@ -1051,7 +1043,7 @@ function ESMF_XGridCreate(keywordEnforcer, &
       endif
     
       ! Now the reverse direction
-      call c_esmc_xgridregrid_create(vm, mesh, meshBt(i), &
+      call c_esmc_xgridregrid_create(mesh, meshBt(i), &
         tmpmesh, compute_midmesh, &
         ESMF_REGRIDMETHOD_CONSERVE, &
         ESMF_UNMAPPEDACTION_IGNORE, &
@@ -2420,7 +2412,6 @@ end subroutine checkGrid
 !     \end{description}
 !EOPI
        integer :: localrc
-       type(ESMF_VM)        :: vm
        logical :: isMemFreed
 
        ! Logic to determine if valid optional args are passed.  
@@ -2480,7 +2471,6 @@ end subroutine checkGrid
 !     \end{description}
 !EOPI
        integer :: localrc
-       type(ESMF_VM)        :: vm
        logical :: isMemFreed
 
        ! Logic to determine if valid optional args are passed.  
@@ -2540,7 +2530,6 @@ end subroutine checkGrid
 !EOPI
        integer                     :: localrc
        real(ESMF_KIND_R8), pointer :: frac(:)
-       type(ESMF_VM)               :: vm
        logical                     :: isMemFreed
        integer                     :: localDeCount, i
 
@@ -2609,7 +2598,6 @@ end subroutine checkGrid
 !EOPI
        integer                     :: localrc
        real(ESMF_KIND_R8), pointer :: frac(:)
-       type(ESMF_VM)               :: vm
        logical                     :: isMemFreed
        integer                     :: localDeCount, i
 

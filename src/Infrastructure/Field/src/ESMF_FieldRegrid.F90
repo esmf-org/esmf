@@ -597,7 +597,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         type(ESMF_Array)     :: srcArray
         type(ESMF_Array)     :: dstArray
         type(ESMF_Array)     :: fracArray
-        type(ESMF_VM)        :: vm
         type(ESMF_Mesh)      :: srcMesh, srcMeshDual
         type(ESMF_Mesh)      :: dstMesh, tempMesh
         type(ESMF_MeshLoc)   :: srcMeshloc,dstMeshloc,fracMeshloc
@@ -658,12 +657,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
  
            hasStatusArray=.true.
         endif
-
-
-        ! global vm for now
-        call ESMF_VMGetGlobal(vm, rc=localrc)
-        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-          ESMF_CONTEXT, rcToReturn=rc)) return
 
         ! Now we go through the painful process of extracting the data members
         ! that we need.
