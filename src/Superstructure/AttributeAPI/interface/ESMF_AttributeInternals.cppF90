@@ -952,10 +952,12 @@ contains
       AttributeInternalInfo = .false.
 
       ! get the length of name
-      if (name(1:5) == "ESMF:") then
-        if (all (name /= exception_list)) then
-          modName = name(6:)
-          AttributeInternalInfo = .true.
+      if (len (name) >= 5) then
+        if (name(1:5) == "ESMF:") then
+          if (all (name /= exception_list)) then
+            modName = name(6:)
+            AttributeInternalInfo = .true.
+          end if
         end if
       endif
 
