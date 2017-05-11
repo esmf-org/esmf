@@ -499,7 +499,7 @@ void IO_Handler::open (
 //
 // !ARGUMENTS:
 
-  char const * const file,                 // (in)  - name of file being read
+  const std::string &file,                 // (in)  - name of file being read
   ESMC_FileStatus_Flag filestatusflag_arg, // (in)  - file status
   bool overwrite_arg,                      // (in)  - overwrite fields is true
   bool readonly_arg,                       // (in)  - if false then read/write
@@ -519,7 +519,7 @@ void IO_Handler::open (
   }
 
   // Make sure pointer inputs have something in them
-  if ((char *)NULL == file) {
+  if (file.empty()) {
     localrc = ESMF_RC_PTR_NULL;
     ESMC_LogDefault.MsgFoundError(localrc, "- NULL filename argument pointer",
       ESMC_CONTEXT, rc);

@@ -137,7 +137,7 @@ namespace ESMCI {
   protected:
     virtual void open(bool readonly_arg, int *rc = NULL) = 0;
   public:
-    void open(char const * const file,
+    void open(const std::string &file,
               ESMC_FileStatus_Flag filestatusflag_arg,
               bool overwrite_arg,
               bool readonly_arg,

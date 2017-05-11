@@ -839,13 +839,16 @@ void PIO_Handler::arrayWrite(
     }
   }
 
-  if (dimLabels.size() > 0 && dimLabels.size() < (unsigned int)nioDims)
-    if (ESMC_LogDefault.MsgFoundError(ESMF_RC_ARG_SIZE, "user dimension labels extend < nioDims",
+  if (dimLabels.size() > 0 && dimLabels.size() < (unsigned int)nioDims) {
+    std::stringstream errmsg;
+    errmsg << dimLabels.size() << " user dimension label(s) supplied, " << nioDims << " expected";
+    if (ESMC_LogDefault.MsgFoundError(ESMF_RC_ARG_SIZE, errmsg,
             ESMC_CONTEXT, rc)) return;
+  }
 
   vardesc = (pio_var_desc_t)calloc(PIO_SIZE_VAR_DESC, 1);
   if (!vardesc)
-    if (ESMC_LogDefault.MsgAllocError(" failed to allocate pio variable desc",
+    if (ESMC_LogDefault.MsgAllocError("failed to allocate pio variable desc",
         ESMC_CONTEXT, rc)) return;
 
   // Get a pointer to the array data
@@ -1453,19 +1456,22 @@ void PIO_Handler::attPackPut (
   int localrc;
   int piorc;
 
+  std::vector<char> *gblvardesc;
   if (vardesc == NULL) {
-    pio_var_desc_t gblvardesc = (pio_var_desc_t)calloc(PIO_SIZE_VAR_DESC, 1);
+    gblvardesc = new std::vector<char>[PIO_SIZE_VAR_DESC]();
     if (!gblvardesc)
       if (ESMC_LogDefault.MsgAllocError(" failed to allocate pio global variable desc",
           ESMC_CONTEXT, rc)) return;
 
+#if !defined (ESMF_PNETCDF)
+    // TODO: this fails with PNetCDF...
     piorc = pio_cpp_def_var_0d(pioFileDesc, "", PIO_global, gblvardesc);
-    if (!CHECKPIOERROR(piorc, "Attempting to define global PIO vardesc",
-        ESMF_RC_FILE_WRITE, (*rc))) {
-      free (gblvardesc);
-      return;
-    }
-    vardesc = gblvardesc;
+    if (piorc != PIO_noerr)
+      std::cout << ESMC_METHOD << ": piorc = " << piorc << std::endl;
+      if (!CHECKPIOERROR(piorc, "Attempting to define global PIO vardesc",
+          ESMF_RC_FILE_WRITE, (*rc))) return;
+#endif
+    vardesc = (pio_var_desc_t)&gblvardesc[0];
   }
 
   int natts = attPack->getCountAttr();
@@ -1476,9 +1482,14 @@ void PIO_Handler::attPackPut (
           "Can not access Attribute in " + attPack->getName(),
           ESMC_CONTEXT, rc)) return;
     }
+    if (att->getName().substr(0,5) == "ESMF:") {
+#if 0
+      std::cout << ESMC_METHOD << ": NOTE: attribute " << att->getName() << " ignored." << std::endl;
+#endif
+      continue;
+    }
+
     ESMC_TypeKind_Flag att_type = att->getTypeKind ();
-    // std::cout << ESMC_METHOD << ": Attribute #" << i << " = " << att->getName()
-    //    << ", att_type = " << att_type << std::endl;
     int nvals;
     std::vector<std::string> stringvals;
     std::vector<ESMC_I4> intvals;
@@ -1521,7 +1532,7 @@ void PIO_Handler::attPackPut (
         break;
       default:
         if (ESMC_LogDefault.MsgFoundError(ESMF_RC_ATTR_NOTSET,
-            "Unknown Attribute value type for " + att->getName(),
+            "Unsupported Attribute value type for " + att->getName(),
             ESMC_CONTEXT, rc)) return;
     }
   }
@@ -1783,6 +1794,7 @@ bool PIO_Handler::CheckPIOError(
     std::stringstream errmsg;
 #if defined(ESMF_PNETCDF)
     // Log the error, assuming the error code was passed through PIO from PNetCDF
+std::cout << ESMC_METHOD << ": pioRetCode = " << pioRetCode << std::endl;
     if (!fmtStr.empty()) {
       errmsg << " " << fmtStr << ", (PIO/PNetCDF error = " <<  ncmpi_strerror (pioRetCode) << ")";
     } else {

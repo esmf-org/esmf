@@ -386,12 +386,17 @@ extern "C" {
   }
 
   void FTN_X(c_esmc_arraybundlewrite)(ESMCI::ArrayBundle **bundle,
-                                      char *file, int *len_file,
+                                      const char *file,
+                                      const char *conv,
+                                      const char *purp,
                                       ESMC_Logical *opt_singleFile,
                                       ESMC_Logical *opt_overwriteflag,
                                       ESMC_FileStatus_Flag *status,
                                       int *timeslice,
-                                      ESMC_IOFmt_Flag *iofmt, int *rc) {
+                                      ESMC_IOFmt_Flag *iofmt, int *rc,
+                                      ESMCI_FortranStrLenArg file_l,
+                                      ESMCI_FortranStrLenArg conv_l,
+                                      ESMCI_FortranStrLenArg purp_l) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_arraybundlewrite()"
     bool singleFile;
@@ -404,7 +409,13 @@ extern "C" {
     // The Fortran interface always sets the flags and optional variables
     // except for timeslice. For character variables, create a C++ string.
     // helper variable
-    string fileName = string (file, ESMC_F90lentrim (file, *len_file));
+    string fileName = string (file, ESMC_F90lentrim (file, file_l));
+
+    string convention, purpose;
+    if (conv)
+      convention = string (conv, ESMC_F90lentrim (conv, conv_l));
+    if (purp)
+      purpose    = string (purp, ESMC_F90lentrim (purp, purp_l));
 
     if (ESMC_NOT_PRESENT_FILTER(opt_singleFile) != ESMC_NULL_POINTER) {
       singleFile = (ESMF_FALSE != *opt_singleFile);
@@ -417,15 +428,16 @@ extern "C" {
       overwriteflag = false;
     }
     // Call into the actual C++ method wrapped inside LogErr handling
-    localrc = (*bundle)->write(fileName.c_str(), &singleFile, &overwriteflag,
+    localrc = (*bundle)->write(fileName, convention, purpose, &singleFile, &overwriteflag,
                                status, timeslice, iofmt);
     ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
                                   ESMC_NOT_PRESENT_FILTER(rc));
   }
 
   void FTN_X(c_esmc_arraybundleread)(ESMCI::ArrayBundle **bundle,
-    char *file, int *len_file, ESMC_Logical *opt_singleFile,
-    int *timeslice, ESMC_IOFmt_Flag *iofmt, int *rc){
+    const char *file, ESMC_Logical *opt_singleFile,
+    int *timeslice, ESMC_IOFmt_Flag *iofmt, int *rc,
+    ESMCI_FortranStrLenArg file_l){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_arraybundleread()"
     bool singleFile;
@@ -436,7 +448,7 @@ extern "C" {
     }
     // Create C++ string for string input
     // helper variable
-    string fileName = string (file, ESMC_F90lentrim (file, *len_file));
+    string fileName = string (file, ESMC_F90lentrim (file, file_l));
 
     if (ESMC_NOT_PRESENT_FILTER(opt_singleFile) != ESMC_NULL_POINTER) {
       singleFile = (ESMF_FALSE != *opt_singleFile);
@@ -444,7 +456,7 @@ extern "C" {
       singleFile = true;
     }
     // Call into the actual C++ method wrapped inside LogErr handling
-    localrc = (*bundle)->read(fileName.c_str(), &singleFile, timeslice, iofmt);
+    localrc = (*bundle)->read(fileName, &singleFile, timeslice, iofmt);
     ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
                                   ESMC_NOT_PRESENT_FILTER(rc));
   }
