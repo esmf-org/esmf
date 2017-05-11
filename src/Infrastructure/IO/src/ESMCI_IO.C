@@ -541,9 +541,11 @@ int IO::write(
         localrc = close();
         return rc;
       }
+#if 0
       std::cout << ESMC_METHOD << ": Grid dimension labels:" << std::endl;
       for (unsigned i=0; i<dimLabels.size(); i++)
         std::cout << "    " << i << ": " << dimLabels[i] << std::endl;
+#endif
     }
 
     Array *temp_array_undist_p;  // temp in case Array has undistributed dimensions
@@ -961,7 +963,7 @@ int IO::addArray(
 //
 // !INTERFACE:
 void IO::dimlabel_get (Attribute *dimAttPack, // in - AttPack with potential dimLabel attributes
-    std::string &labeltype,                   // in - attribute to look for (e.g., gridded or ungridded)
+    std::string labeltype,                    // in - attribute to look for (e.g., gridded or ungridded)
     std::vector<std::string> &dimLabels,      // out - labels found
     int *rc) {
 // !DESCRIPTION:
