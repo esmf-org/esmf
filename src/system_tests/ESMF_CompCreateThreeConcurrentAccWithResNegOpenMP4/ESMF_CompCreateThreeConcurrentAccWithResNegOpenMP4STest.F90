@@ -118,7 +118,7 @@
       end do
     end do
 
-    do k=0,NUM_COMPONENTS-1
+    do k=1,NUM_COMPONENTS
       print *, "PET list comp ", k, " :", petlists(k)%arr
     end do
 
