@@ -862,7 +862,7 @@ print *, "ycoords=", ycoords
   !---------- Attribute Add (User additions to ESMF: namespace) -----------
   !------------------------------------------------------------------------
 
-  !EX_UTest
+  !NEX_UTest
   call ESMF_AttributeAdd (grid,  &
       convention=apConv, purpose=apPurp,  &
       attrList=(/ ESMF_ATT_GRIDDED_DIM_LABELS /),  &
@@ -872,7 +872,7 @@ print *, "ycoords=", ycoords
   call ESMF_Test(rc==ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
   !------------------------------------------------------------------------
 
-  !EX_UTest
+  !NEX_UTest
   call ESMF_AttributeSet(grid,  &
       name=ESMF_ATT_GRIDDED_DIM_LABELS,  &
       valueList=(/ "x_axis", "y_axis" /), &
@@ -883,7 +883,7 @@ print *, "ycoords=", ycoords
   call ESMF_Test(rc==ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
   !------------------------------------------------------------------------
 
-  !EX_UTest
+  !NEX_UTest
   ! Note: Normally ESMF_ATT_UNGRIDDED_DIM_LABELS would only be used at the
   ! Field level.  It is included here simply for unit testing.
   call ESMF_AttributeAdd (grid,  &
@@ -895,7 +895,7 @@ print *, "ycoords=", ycoords
   call ESMF_Test(rc==ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
   !------------------------------------------------------------------------
 
-  !EX_UTest
+  !NEX_UTest
   call ESMF_AttributeSet(grid,  &
       name=ESMF_ATT_UNGRIDDED_DIM_LABELS,  &
       valueList=(/ "x_axis_ug", "y_axis_ug" /), &
@@ -906,7 +906,7 @@ print *, "ycoords=", ycoords
   call ESMF_Test(rc==ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
   !------------------------------------------------------------------------
 
-  !EX_UTest
+  !NEX_UTest
   call ESMF_AttributeAdd (grid,  &
       convention=apConv, purpose=apPurp,  &
       attrList=(/ "ESMF:Something_unknown" /),  &
@@ -916,7 +916,7 @@ print *, "ycoords=", ycoords
   call ESMF_Test(rc==ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
   !------------------------------------------------------------------------
 
-  !EX_UTest
+  !NEX_UTest
   call ESMF_AttributeSet(grid,  &
       name="ESMF:Something_unknown",  &
       valueList=(/ "some value" /), &
