@@ -1468,7 +1468,18 @@ program ESMF_ArrayIOUTest
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_AttributeAdd (distgrid,  &
       convention=apConv, purpose=apPurp,  &
-      attrList=(/ "x_axis" /), rc=rc)
+      attrList=(/ ESMF_ATT_GRIDDED_DIM_LABELS /), rc=rc)
+  call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+!------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Set dimensions attribute package on DistGrid Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_AttributeSet (distgrid,  &
+      name=ESMF_ATT_GRIDDED_DIM_LABELS,  &
+      valueList=(/ "grid_x_axis" /), &
+      convention=apConv, purpose=apPurp,  &
+      rc=rc)
   call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 !------------------------------------------------------------------------

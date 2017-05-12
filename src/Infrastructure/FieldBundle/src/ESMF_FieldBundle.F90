@@ -5790,6 +5790,16 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords for t
 !     An {\tt ESMF\_FieldBundle} object.
 !   \item[fileName]
 !     The name of the output file to which field bundle data is written.
+!   \item[{[convention]}]
+!     Specifies an Attribute package associated with the Array, used to create NetCDF
+!     attributes for the variable in the file.  When this argument is present,
+!     the [{[purpose]}] argument must also be present.  Use this argument only with a NetCDF
+!     I/O format. If binary format is used, ESMF will return an error code.
+!   \item[{[purpose]}]
+!     Specifies an Attribute package associated with the Array, used to create NetCDF
+!     attributes for the variable in the file.  When this argument is present,
+!     the [{[convention]}] argument must also be present.  Use this argument only with a NetCDF
+!     I/O format. If binary format is used, ESMF will return an error code.
 !   \item[{[singleFile]}]
 !     A logical flag, the default is .true., i.e., all fields in the bundle 
 !     are written in one single file. If .false., each field will be written

@@ -207,6 +207,14 @@ namespace ESMCI {
     void addGrid(ESMC_Base *grid_p, char *gridName,
                  int *rc=NULL);
 #endif // TBI
+    void dimlabel_get (Attribute *dimAttPack,
+        std::string labeltype,
+        std::vector<std::string> &dimLabels,
+        int *rc);
+    void dimlabel_merge (std::vector<std::string> &dimLabels,
+        std::vector<std::string> &ugdimLabels,
+        Array *array,
+        int *rc);
     bool redist_check(Array *array_p, int *rc);
     void redist_arraycreate1de(Array *src_array_p, Array **dst_array_p, int *rc);
     bool undist_check(Array *array_p, int *rc);

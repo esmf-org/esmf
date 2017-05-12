@@ -24,11 +24,9 @@
 #include "ESMCI_IO.h"
 
 // higher level, 3rd party or system includes here
-#include <stdio.h>
-#include <string.h>
-#include <ctype.h>
-#include <vector>
 #include <iostream>
+#include <sstream>
+#include <vector>
 
 // other ESMF include files here.
 #include "ESMC_Interface.h"
@@ -534,21 +532,20 @@ int IO::write(
     }
 
     std::vector<std::string> dimLabels;
+    // Grid-level dimension labels
     if ((*it)->dimAttPack) {
-      int natts = (*it)->dimAttPack->getCountAttr();
-      for (int i=0; i<natts; i++) {
-        Attribute *att = (*it)->dimAttPack->AttPackGetAttribute (i);
-        if (!att) {
-          if (ESMC_LogDefault.MsgFoundError(ESMF_RC_ATTR_NOTSET,
-              "Can not access DistGrid Attribute in " + (*it)->dimAttPack->getName(),
-              ESMC_CONTEXT, &rc)) {
-          // Close the file but return original error even if close fails.
-            localrc = close();
-            return rc;
-          }
-        }
-        dimLabels.push_back(att->getName());
+      dimlabel_get ((*it)->dimAttPack, ESMC_ATT_GRIDDED_DIM_LABELS, dimLabels, &localrc);
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+          &rc)) {
+        // Close the file but return original error even if close fails.
+        localrc = close();
+        return rc;
       }
+#if 0
+      std::cout << ESMC_METHOD << ": Grid dimension labels:" << std::endl;
+      for (unsigned i=0; i<dimLabels.size(); i++)
+        std::cout << "    " << i << ": " << dimLabels[i] << std::endl;
+#endif
     }
 
     Array *temp_array_undist_p;  // temp in case Array has undistributed dimensions
@@ -609,6 +606,28 @@ int IO::write(
         undist_arraycreate_alldist (temp_array_undist_p, &temp_array_p, &localrc);
         if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc))
           return rc;
+
+        // Find ungridded dimension labels
+        std::vector<std::string> ugdimLabels;
+        if ((*it)->varAttPack) {
+          dimlabel_get ((*it)->varAttPack, ESMC_ATT_UNGRIDDED_DIM_LABELS, ugdimLabels, &localrc);
+          if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+              &rc)) {
+            // Close the file but return original error even if close fails.
+            localrc = close();
+            return rc;
+          }
+        }
+
+        if (ugdimLabels.size() > 0) {
+          dimlabel_merge (dimLabels, ugdimLabels, temp_array_undist_p, &localrc);
+          if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+              &rc)) {
+            // Close the file but return original error even if close fails.
+            localrc = close();
+            return rc;
+          }
+        }
       }
 
       // Write the Array
@@ -934,6 +953,122 @@ int IO::addArray(
   }
   return (rc);
 }  // end IO::addArray
+//-------------------------------------------------------------------------
+
+//-------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::IO::dimlabel_get()"
+//BOP
+// !IROUTINE:  IO::dimlabel_get
+//
+// !INTERFACE:
+void IO::dimlabel_get (Attribute *dimAttPack, // in - AttPack with potential dimLabel attributes
+    std::string labeltype,                    // in - attribute to look for (e.g., gridded or ungridded)
+    std::vector<std::string> &dimLabels,      // out - labels found
+    int *rc) {
+// !DESCRIPTION:
+//      Extract dimension labels from an AttPack.
+//
+//EOP
+//-----------------------------------------------------------------------------
+  int natts = dimAttPack->getCountAttr();
+  for (int i=0; i<natts; i++) {
+    Attribute *att = dimAttPack->AttPackGetAttribute (i);
+    if (!att) {
+      if (ESMC_LogDefault.MsgFoundError(ESMF_RC_ATTR_NOTSET,
+          "Can not access Grid/DistGrid Attribute in " + dimAttPack->getName(),
+          ESMC_CONTEXT, rc)) return;
+    }
+    std::string attname = att->getName();
+    if (attname == labeltype) {
+      ESMC_TypeKind_Flag att_type = att->getTypeKind ();
+      if (att_type != ESMC_TYPEKIND_CHARACTER) {
+        if (ESMC_LogDefault.MsgFoundError(ESMF_RC_ATTR_NOTSET,
+            "Dimension label values must be character strings",
+            ESMC_CONTEXT, rc)) return;
+      }
+      std::vector<std::string> stringvals;
+      int localrc = att->get (&stringvals);
+      if (ESMC_LogDefault.MsgFoundError(localrc,
+          "Can not access dimension label values for " + attname,
+          ESMC_CONTEXT, rc)) return;
+
+      for (unsigned j=0; j<stringvals.size(); j++)
+        dimLabels.push_back(stringvals[j]);
+    }
+  }
+}  // end IO::dimlabel_get
+//-------------------------------------------------------------------------
+
+//-------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::IO::dimlabel_merge()"
+//BOP
+// !IROUTINE:  IO::dimlabel_merge
+//
+// !INTERFACE:
+void IO::dimlabel_merge (
+    std::vector<std::string> &dimLabels,    // inout - labels associated with the Grid on input,
+                                            //         merged labels on output
+    std::vector<std::string> &ugdimLabels,  // in - labels 
+    Array *array,                           //
+    int *rc) {
+// !DESCRIPTION:
+//      Merge dimension labels from Grid with ungridded dimension labels.
+//
+//EOP
+//-----------------------------------------------------------------------------
+  unsigned rank = array->getRank ();
+  const int *arrayToDistGridMap = array->getArrayToDistGridMap();
+
+  // Sanity checks
+  unsigned ngd=0, nugd=0;
+  for (unsigned i=0; i<rank; i++) {
+    int j = arrayToDistGridMap[i];
+    if (j > 0)
+      ngd++;
+    if (j == 0)
+      nugd++;
+  }
+  if (ngd != dimLabels.size()) {
+    std::stringstream errmsg;
+    errmsg << ngd << " Grid dimension labels expected, "
+        << dimLabels.size() << " found";
+    if (ESMC_LogDefault.MsgFoundError(ESMF_RC_ATTR_NOTSET,
+        errmsg.str(),
+        ESMC_CONTEXT, rc)) return;
+  }
+  if (nugd != ugdimLabels.size()) {
+    std::stringstream errmsg;
+    errmsg << nugd << " ungridded dimension labels expected, "
+        << ugdimLabels.size() << " found";
+    if (ESMC_LogDefault.MsgFoundError(ESMF_RC_ATTR_NOTSET,
+        errmsg.str(),
+        ESMC_CONTEXT, rc)) return;
+  }
+
+  // Make a copy of dimLabels, and merge
+  std::vector<std::string> gridded_dimLabels;
+  for (unsigned i=0; i<dimLabels.size(); i++)
+    gridded_dimLabels.push_back(dimLabels[i]);
+
+  dimLabels.clear ();
+  unsigned gp=0, ugp=0;
+  for (unsigned i=0; i<rank; i++) {
+    int j = arrayToDistGridMap[i];
+    if (j > 0)
+      dimLabels.push_back(gridded_dimLabels[gp++]);
+    else
+      dimLabels.push_back(ugdimLabels[ugp++]);
+  }
+
+#if 0
+  std::cout << ESMC_METHOD << ": merged dimLabels:" << std::endl;
+  for (unsigned i=0; i<dimLabels.size(); i++)
+    std::cout << "   " << i << ": " << dimLabels[i] << std::endl;
+#endif
+
+}  // end IO::dimlabel_merge
 //-------------------------------------------------------------------------
 
 
