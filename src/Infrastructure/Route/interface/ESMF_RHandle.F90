@@ -548,7 +548,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 !
 ! !DESCRIPTION:
-!   Set an {\tt ESMF\_RouteHandle} attribute with the given value.
+!   Prepare an {\tt ESMF\_RouteHandle} to be of type ARRAYBUNDLEXXE, and 
+!   ready for {\tt ESMF\_RouteHandleAppend()} calls.
 !
 !   The arguments are:
 !   \begin{description}
