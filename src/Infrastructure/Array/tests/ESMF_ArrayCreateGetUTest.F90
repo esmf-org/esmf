@@ -55,7 +55,7 @@ program ESMF_ArrayCreateGetUTest
   integer:: petCount, localPet
   type(ESMF_ArraySpec):: arrayspec, arrayspec2
   type(ESMF_Array):: array, arrayAlias, arrayCpy, arrayUnInit
-  type(ESMF_DistGrid):: distgrid, distgrid2
+  type(ESMF_DistGrid):: distgrid
   real(ESMF_KIND_R8)      :: farray1D(10)
   real(ESMF_KIND_R8)      :: farray2D(10,10)
   real(ESMF_KIND_R4)      :: farray3D(10,10,10)
@@ -73,8 +73,6 @@ program ESMF_ArrayCreateGetUTest
   logical:: isCreated
 
   integer:: count
-  
-  
 
 !-------------------------------------------------------------------------------
 ! The unit tests are divided into Sanity and Exhaustive. The Sanity tests are
@@ -102,19 +100,11 @@ program ESMF_ArrayCreateGetUTest
   if (petCount /= 4) goto 10
 
   !------------------------------------------------------------------------
-  ! DistGrid preparation
-  distgrid = ESMF_DistGridCreate(minIndex=(/1,1/), maxIndex=(/15,23/), &
-    regDecomp=(/2,2/), rc=rc)
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-
-
-  !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
   write(name, *) "Testing Array IsCreated for uncreated object"
   write(failMsg, *) "Did not return .false."
   isCreated = ESMF_ArrayIsCreated(array)
   call ESMF_Test((isCreated .eqv. .false.), name, failMsg, result, ESMF_SRCLINE)
-  !------------------------------------------------------------------------
 
   !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
@@ -122,7 +112,12 @@ program ESMF_ArrayCreateGetUTest
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   isCreated = ESMF_ArrayIsCreated(array, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
   !------------------------------------------------------------------------
+  ! DistGrid preparation
+  distgrid = ESMF_DistGridCreate(minIndex=(/1,1/), maxIndex=(/15,23/), &
+    regDecomp=(/2,2/), rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
@@ -131,7 +126,6 @@ program ESMF_ArrayCreateGetUTest
   array = ESMF_ArrayCreate(typekind=ESMF_TYPEKIND_R8, distgrid=distgrid, &
     indexflag=ESMF_INDEX_GLOBAL, name="MyArray", rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-  !------------------------------------------------------------------------
 
   !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
@@ -139,7 +133,6 @@ program ESMF_ArrayCreateGetUTest
   write(failMsg, *) "Did not return .true."
   isCreated = ESMF_ArrayIsCreated(array)
   call ESMF_Test((isCreated .eqv. .true.), name, failMsg, result, ESMF_SRCLINE)
-  !------------------------------------------------------------------------
 
   !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
@@ -147,7 +140,6 @@ program ESMF_ArrayCreateGetUTest
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   isCreated = ESMF_ArrayIsCreated(array, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-  !------------------------------------------------------------------------
 
   !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
@@ -155,7 +147,6 @@ program ESMF_ArrayCreateGetUTest
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_ArrayDestroy(array, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-  !------------------------------------------------------------------------
 
   !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
@@ -163,7 +154,6 @@ program ESMF_ArrayCreateGetUTest
   write(failMsg, *) "Did not return .false."
   isCreated = ESMF_ArrayIsCreated(array)
   call ESMF_Test((isCreated .eqv. .false.), name, failMsg, result, ESMF_SRCLINE)
-  !------------------------------------------------------------------------
 
   !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
@@ -171,7 +161,6 @@ program ESMF_ArrayCreateGetUTest
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   isCreated = ESMF_ArrayIsCreated(array, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-  !------------------------------------------------------------------------
 
   !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
@@ -603,42 +592,6 @@ program ESMF_ArrayCreateGetUTest
   call ESMF_DistGridDestroy(distgrid, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   
-  ! test validate code
-  !------------------------------------------------------------------------
-  !NEX_UTest_Multi_Proc_Only
-  write(name, *) "DistGrid Validate of non-created DistGrid Test"
-  write(failMsg, *) "Did not return ESMF_RC_OBJ_NOT_CREATED"
-  call ESMF_DistGridValidate(distgrid2, rc=rc)
-  call ESMF_Test((rc.eq.ESMF_RC_OBJ_NOT_CREATED), name, failMsg, result, ESMF_SRCLINE)
-
-  !------------------------------------------------------------------------
-  !NEX_UTest_Multi_Proc_Only
-  write(name, *) "DistGrid create DistGrid Test"
-  write(failMsg, *) "Did not return ESMF_SUCCESS"
-  distgrid2 = ESMF_DistGridCreate(minIndex=(/1/), maxIndex=(/40/), rc=rc)
-  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-
-  !------------------------------------------------------------------------
-  !NEX_UTest_Multi_Proc_Only
-  write(name, *) "DistGrid Validate of created DistGrid Test"
-  write(failMsg, *) "Did not return ESMF_SUCCESS"
-  call ESMF_DistGridValidate(distgrid2, rc=rc)
-  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-
-  !------------------------------------------------------------------------
-  !NEX_UTest_Multi_Proc_Only
-  write(name, *) "DistGrid destroy DistGrid Test"
-  write(failMsg, *) "Did not return ESMF_SUCCESS"
-  call ESMF_DistGridDestroy(distgrid2, rc=rc)
-  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-
-  !------------------------------------------------------------------------
-  !NEX_UTest_Multi_Proc_Only
-  write(name, *) "DistGrid Validate of destroyed DistGrid Test"
-  write(failMsg, *) "Did not return ESMF_RC_OBJ_DELETED"
-  call ESMF_DistGridValidate(distgrid2, rc=rc)
-  call ESMF_Test((rc.eq.ESMF_RC_OBJ_DELETED), name, failMsg, result, ESMF_SRCLINE)
-
   !------------------------------------------------------------------------
   ! preparations
   distgrid = ESMF_DistGridCreate(minIndex=(/1/), maxIndex=(/40/), rc=rc)
