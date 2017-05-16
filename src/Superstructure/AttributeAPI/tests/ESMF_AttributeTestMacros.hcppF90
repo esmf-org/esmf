@@ -1921,7 +1921,7 @@
       !mtag_nex @\
       ! Copy mdesc Attribute hierarchy ALIAS Test @\
       call ESMF_AttributeCopy(mname##A, mname##Alias, & @\
-        copyflag=ESMF_COPY_ALIAS, atttreeflag=ESMF_ATTTREE_ON, rc=rc) @\
+        attcopy=ESMF_ATTCOPY_REFERENCE, rc=rc) @\
       write(failMsg, *) "Did not return ESMF_SUCCESS" @\
       write(name, *) "Copying mdesc Attribute hierarchy ALIAS Test" @\
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE) @\
@@ -1968,7 +1968,7 @@
       !mtag_nex @\
       ! Copy mdesc Attribute hierarchy VALUE ONE LEVEL Test @\
       call ESMF_AttributeCopy(mname##A, mname##Value, & @\
-        copyflag=ESMF_COPY_VALUE, atttreeflag=ESMF_ATTTREE_OFF, rc=rc) @\
+        attcopy=ESMF_ATTCOPY_VALUE, rc=rc) @\
       write(failMsg, *) "Did not return ESMF_SUCCESS" @\
       write(name, *) "Copying mdesc Attribute hierarchy VALUE ONE LEVEL Test" @\
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE) @\
@@ -1977,7 +1977,7 @@
       !mtag_nex @\
       ! Copy mdesc Attribute hierarchy HYBRID Test @\
       call ESMF_AttributeCopy(mname##A, mname##Hybrid, & @\
-        copyflag=ESMF_COPY_REFERENCE, atttreeflag=ESMF_ATTTREE_ON, rc=rc) @\
+        attcopy=ESMF_ATTCOPY_REFERENCE, rc=rc) @\
       write(failMsg, *) "Did not return ESMF_SUCCESS" @\
       write(name, *) "Copying mdesc Attribute hierarchy HYBRID Test" @\
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE) @\
