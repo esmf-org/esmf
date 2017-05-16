@@ -378,6 +378,9 @@
   ! FieldBundle Write a second timeslice to a single file Test
   call ESMF_FieldBundleWrite(bundleTst, fileName="single_ts.nc", timeslice=2,  &
       status=ESMF_FILESTATUS_OLD, overwrite=.true., rc=rc)
+  !NOTE: For NetCDF overwrite=.true. must be set. For PNetCDF either setting
+  !of overwrite seems to work. Must check if both result in correctly written
+  !data.
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   write(name, *) "Writing a FieldBundle to a single file with timeslice Test"
 #if (defined ESMF_PIO && ( defined ESMF_NETCDF || defined ESMF_PNETCDF))
