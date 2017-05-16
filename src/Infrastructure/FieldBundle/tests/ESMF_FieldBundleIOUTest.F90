@@ -375,6 +375,21 @@
 
 !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
+  ! FieldBundle Write a second timeslice to a single file Test
+  call ESMF_FieldBundleWrite(bundleTst, fileName="single_ts.nc", timeslice=2,  &
+      status=ESMF_FILESTATUS_OLD, overwrite=.true., rc=rc)
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  write(name, *) "Writing a FieldBundle to a single file with timeslice Test"
+#if (defined ESMF_PIO && ( defined ESMF_NETCDF || defined ESMF_PNETCDF))
+  call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+#else
+  write(failMsg, *) "Did not return ESMF_RC_LIB_NOT_PRESENT"
+  call ESMF_Test((rc==ESMF_RC_LIB_NOT_PRESENT), name, failMsg, result, ESMF_SRCLINE)
+#endif
+!------------------------------------------------------------------------
+
+!------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
   write(name, *) "Create attribute package on FieldBundle multi Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   attrNameVals(1) = nameval_t ('file_name', 'multi.nc')
