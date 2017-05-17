@@ -970,7 +970,7 @@ petloop:  &
               ESMF_CONTEXT, rcToReturn=rc)) return
 
             call c_ESMC_AttributeCopy(base, state%statep%base, &
-              ESMF_COPY_VALUE, ESMF_ATTTREE_OFF, localrc)
+              ESMF_ATTCOPY_VALUE, localrc)
             if (ESMF_LogFoundError(localrc, &
               ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return

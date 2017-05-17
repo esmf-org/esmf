@@ -693,21 +693,28 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     \item[distgrid]
 !          Incoming DistGrid object.
 !     \item[{[firstExtra]}]
-!          Extra elements on the edge of the first DEs along each dimension.
+!          Extra elements added to the first DE along each 
+!          dimension. This increases the size of the index space compared to 
+!          that of the incoming {\tt distgrid}. The decomposition of the
+!          enlarged index space is constructed to align with the original index
+!          space provided by {\tt distgrid}.
 !          The default is a zero vector.
 !     \item[{[lastExtra]}]
-!          Extra elements on the edge of the last DEs along each dimension.
+!          Extra elements added to the last DE along each 
+!          dimension. This increases the size of the index space compared to 
+!          that of the incoming {\tt distgrid}. The decomposition of the
+!          enlarged index space is constructed to align with the original index
+!          space provided by {\tt distgrid}.
 !          The default is a zero vector.
 !     \item[{[indexflag]}]
-!          Indicates whether the indices provided by the {\tt minIndex} and
-!          {\tt maxIndex} arguments are to be interpreted to form a global
-!          index space or not. The default is {\tt ESMF\_INDEX\_DELOCAL}.
-!          See section \ref{const:indexflag} for a complete list of options.
+!          If present, override the indexflag setting of the incoming
+!          {\tt distgrid}. See section \ref{const:indexflag} for a 
+!          complete list of options. By default use the indexflag setting of 
+!          {\tt distgrid}. 
 !     \item[{[connectionList]}]
-!          List of {\tt ESMF\_DistGridConnection} objects, defining connections
-!          between DistGrid tiles in index space.
+!          If present, override the connections of the incoming {\tt distgrid}.
 !          See section \ref{api:DistGridConnectionSet} for the associated Set()
-!          method.
+!          method. By default use the connections definded in {\tt distgrid}.
 !     \item[{[vm]}]
 !          If present, the DistGrid object and the DELayout object
 !          are created on the specified {\tt ESMF\_VM} object. The 
@@ -827,19 +834,28 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     \item[distgrid]
 !          Incoming DistGrid object.
 !     \item[firstExtraPTile]
-!          Extra elements on the edge of the first DEs along each dimension.
+!          Extra elements added to the first DE along each dimension for each 
+!          tile. This increases the size of the index space compared to 
+!          that of the incoming {\tt distgrid}. The decomposition of the
+!          enlarged index space is constructed to align with the original index
+!          space provided by {\tt distgrid}.
+!          The default is a zero vector.
 !     \item[lastExtraPTile]
-!          Extra elements on the edge of the last DEs along each dimension.
+!          Extra elements added to the last DE along each dimension for each
+!          tile. This increases the size of the index space compared to 
+!          that of the incoming {\tt distgrid}. The decomposition of the
+!          enlarged index space is constructed to align with the original index
+!          space provided by {\tt distgrid}.
+!          The default is a zero vector.
 !     \item[{[indexflag]}]
-!          Indicates whether the indices provided by the {\tt minIndex} and
-!          {\tt maxIndex} arguments are to be interpreted to form a global
-!          index space or not. The default is {\tt ESMF\_INDEX\_DELOCAL}.
-!          See section \ref{const:indexflag} for a complete list of options.
+!          If present, override the indexflag setting of the incoming
+!          {\tt distgrid}. See section \ref{const:indexflag} for a 
+!          complete list of options. By default use the indexflag setting of 
+!          {\tt distgrid}. 
 !     \item[{[connectionList]}]
-!          List of {\tt ESMF\_DistGridConnection} objects, defining connections
-!          between DistGrid tiles in index space.
+!          If present, override the connections of the incoming {\tt distgrid}.
 !          See section \ref{api:DistGridConnectionSet} for the associated Set()
-!          method.
+!          method. By default use the connections definded in {\tt distgrid}.
 !     \item[{[vm]}]
 !          If present, the DistGrid object and the DELayout object
 !          are created on the specified {\tt ESMF\_VM} object. The 
@@ -971,19 +987,44 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !          is {\tt ESMF\_DECOMP\_BALANCED} in all dimensions. See section
 !          \ref{const:decompflag} for a list of valid decomposition options.
 !     \item[{[regDecompFirstExtra]}]
-!          Extra elements on the first DEs along each dimension in a regular
-!          decomposition. The default is a zero vector.
+!          Specify how many extra elements on the first DEs along each 
+!          dimension to consider when applying the regular decomposition 
+!          algorithm. This does {\em not} add extra elements to the 
+!          index space defined by {\tt minIndex} and {\tt maxIndex}. Instead
+!          {\tt regDecompFirstExtra} is used to correctly interpret the 
+!          specified index space: The {\tt regDecomp} is first applied to the
+!          index space {\em without} the extra elements. The extra elements are
+!          then added back in to arrive at the final decomposition. This is 
+!          useful when aligning the decomposition of index spaces that only
+!          differ in extra elements along the edges, e.g. when dealing with
+!          different stagger locations.
+!          The default is a zero vector, assuming no extra elements.
 !     \item[{[regDecompLastExtra]}]
-!          Extra elements on the last DEs along each dimension in a regular
-!          decomposition. The default is a zero vector.
+!          Specify how many extra elements on the last DEs along each 
+!          dimension to consider when applying the regular decomposition 
+!          algorithm. This does {\em not} add extra elements to the 
+!          index space defined by {\tt minIndex} and {\tt maxIndex}. Instead
+!          {\tt regDecompLastExtra} is used to correctly interpret the 
+!          specified index space: The {\tt regDecomp} is first applied to the
+!          index space {\em without} the extra elements. The extra elements are
+!          then added back in to arrive at the final decomposition. This is 
+!          useful when aligning the decomposition of index spaces that only
+!          differ in extra elements along the edges, e.g. when dealing with
+!          different stagger locations.
+!          The default is a zero vector, assuming no extra elements.
 !     \item[{[deLabelList]}]
 !          List assigning DE labels to the default sequence of DEs. The default
 !          sequence is given by the column major order of the {\tt regDecomp}
 !          argument.
 !     \item[{[indexflag]}]
 !          Indicates whether the indices provided by the {\tt minIndex} and
-!          {\tt maxIndex} arguments are to be interpreted to form a global
-!          index space or not. The default is {\tt ESMF\_INDEX\_DELOCAL}.
+!          {\tt maxIndex} arguments are forming a global
+!          index space or not. This does {\em not} affect the indices held
+!          by the DistGrid object, which are always identical to what was
+!          specified by {\tt minIndex} and {\tt maxIndex}, regardless of the
+!          {\tt indexflag} setting. However, it does affect whether an
+!          {\tt ESMF\_Array} object created on the DistGrid can choose global
+!          indexing or not. The default is {\tt ESMF\_INDEX\_DELOCAL}.
 !          See section \ref{const:indexflag} for a complete list of options.
 !     \item[{[connectionList]}]
 !          List of {\tt ESMF\_DistGridConnection} objects, defining connections
@@ -1178,21 +1219,44 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !          See section \ref{const:decompflag} for a list of valid decomposition
 !          flag options. The second index indicates the tile number.
 !     \item[{[regDecompFirstExtraPTile]}]
-!          Extra elements on the first DEs along each dimension in a regular
-!          decomposition. The default is a zero vector. The second index 
-!          indicates the tile number.
+!          Specify how many extra elements on the first DEs along each 
+!          dimension to consider when applying the regular decomposition 
+!          algorithm. This does {\em not} add extra elements to the 
+!          index space defined by {\tt minIndex} and {\tt maxIndex}. Instead
+!          {\tt regDecompFirstExtraPTile} is used to correctly interpret the 
+!          specified index space: The {\tt regDecomp} is first applied to the
+!          index space {\em without} the extra elements. The extra elements are
+!          then added back in to arrive at the final decomposition. This is 
+!          useful when aligning the decomposition of index spaces that only
+!          differ in extra elements along the edges, e.g. when dealing with
+!          different stagger locations.
+!          The default is a zero vector, assuming no extra elements.
 !     \item[{[regDecompLastExtraPTile]}]
-!          Extra elements on the last DEs along each dimension in a regular
-!          decomposition. The default is a zero vector. The second index 
-!          indicates the tile number.
+!          Specify how many extra elements on the last DEs along each 
+!          dimension to consider when applying the regular decomposition 
+!          algorithm. This does {\em not} add extra elements to the 
+!          index space defined by {\tt minIndex} and {\tt maxIndex}. Instead
+!          {\tt regDecompLastExtraPTile} is used to correctly interpret the 
+!          specified index space: The {\tt regDecomp} is first applied to the
+!          index space {\em without} the extra elements. The extra elements are
+!          then added back in to arrive at the final decomposition. This is 
+!          useful when aligning the decomposition of index spaces that only
+!          differ in extra elements along the edges, e.g. when dealing with
+!          different stagger locations.
+!          The default is a zero vector, assuming no extra elements.
 !     \item[{[deLabelList]}]
 !          List assigning DE labels to the default sequence of DEs. The default
 !          sequence is given by the column major order of the {\tt regDecompPTile}
 !          elements in the sequence as they appear following the tile index.
 !     \item[{[indexflag]}]
 !          Indicates whether the indices provided by the {\tt minIndex} and
-!          {\tt maxIndex} arguments are to be interpreted to form a global
-!          index space or not. The default is {\tt ESMF\_INDEX\_DELOCAL}.
+!          {\tt maxIndex} arguments are forming a global
+!          index space or not. This does {\em not} affect the indices held
+!          by the DistGrid object, which are always identical to what was
+!          specified by {\tt minIndex} and {\tt maxIndex}, regardless of the
+!          {\tt indexflag} setting. However, it does affect whether an
+!          {\tt ESMF\_Array} object created on the DistGrid can choose global
+!          indexing or not. The default is {\tt ESMF\_INDEX\_DELOCAL}.
 !          See section \ref{const:indexflag} for a complete list of options.
 !     \item[{[connectionList]}]
 !          List of {\tt ESMF\_DistGridConnection} objects, defining connections
@@ -1375,19 +1439,44 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !          is {\tt ESMF\_DECOMP\_BALANCED} in all dimensions. See section
 !          \ref{const:decompflag} for a list of valid decomposition options.
 !     \item[{[regDecompFirstExtra]}]
-!          Extra elements on the first DEs along each dimension in a regular
-!          decomposition. The default is a zero vector.
+!          Specify how many extra elements on the first DEs along each 
+!          dimension to consider when applying the regular decomposition 
+!          algorithm. This does {\em not} add extra elements to the 
+!          index space defined by {\tt minIndex} and {\tt maxIndex}. Instead
+!          {\tt regDecompFirstExtra} is used to correctly interpret the 
+!          specified index space: The {\tt regDecomp} is first applied to the
+!          index space {\em without} the extra elements. The extra elements are
+!          then added back in to arrive at the final decomposition. This is 
+!          useful when aligning the decomposition of index spaces that only
+!          differ in extra elements along the edges, e.g. when dealing with
+!          different stagger locations.
+!          The default is a zero vector, assuming no extra elements.
 !     \item[{[regDecompLastExtra]}]
-!          Extra elements on the last DEs along each dimension in a regular
-!          decomposition. The default is a zero vector.
+!          Specify how many extra elements on the last DEs along each 
+!          dimension to consider when applying the regular decomposition 
+!          algorithm. This does {\em not} add extra elements to the 
+!          index space defined by {\tt minIndex} and {\tt maxIndex}. Instead
+!          {\tt regDecompLastExtra} is used to correctly interpret the 
+!          specified index space: The {\tt regDecomp} is first applied to the
+!          index space {\em without} the extra elements. The extra elements are
+!          then added back in to arrive at the final decomposition. This is 
+!          useful when aligning the decomposition of index spaces that only
+!          differ in extra elements along the edges, e.g. when dealing with
+!          different stagger locations.
+!          The default is a zero vector, assuming no extra elements.
 !     \item[{[deLabelList]}]
 !          List assigning DE labels to the default sequence of DEs. The default
 !          sequence is given by the column major order of the {\tt regDecomp}
 !          argument.
 !     \item[{[indexflag]}]
 !          Indicates whether the indices provided by the {\tt minIndex} and
-!          {\tt maxIndex} arguments are to be interpreted to form a global
-!          index space or not. The default is {\tt ESMF\_INDEX\_DELOCAL}.
+!          {\tt maxIndex} arguments are forming a global
+!          index space or not. This does {\em not} affect the indices held
+!          by the DistGrid object, which are always identical to what was
+!          specified by {\tt minIndex} and {\tt maxIndex}, regardless of the
+!          {\tt indexflag} setting. However, it does affect whether an
+!          {\tt ESMF\_Array} object created on the DistGrid can choose global
+!          indexing or not. The default is {\tt ESMF\_INDEX\_DELOCAL}.
 !          See section \ref{const:indexflag} for a complete list of options.
 !     \item[{[connectionList]}]
 !          List of {\tt ESMF\_DistGridConnection} objects, defining connections
@@ -1567,8 +1656,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !          elements in the sequence as they appear following the tile index.
 !     \item[{[indexflag]}]
 !          Indicates whether the indices provided by the {\tt minIndex} and
-!          {\tt maxIndex} arguments are to be interpreted to form a global
-!          index space or not. The default is {\tt ESMF\_INDEX\_DELOCAL}.
+!          {\tt maxIndex} arguments are forming a global
+!          index space or not. This does {\em not} affect the indices held
+!          by the DistGrid object, which are always identical to what was
+!          specified by {\tt minIndex} and {\tt maxIndex}, regardless of the
+!          {\tt indexflag} setting. However, it does affect whether an
+!          {\tt ESMF\_Array} object created on the DistGrid can choose global
+!          indexing or not. The default is {\tt ESMF\_INDEX\_DELOCAL}.
 !          See section \ref{const:indexflag} for a complete list of options.
 !     \item[{[connectionList]}]
 !          List of {\tt ESMF\_DistGridConnection} objects, defining connections
@@ -1721,8 +1815,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !          argument.
 !     \item[{[indexflag]}]
 !          Indicates whether the indices provided by the {\tt minIndex} and
-!          {\tt maxIndex} arguments are to be interpreted to form a global
-!          index space or not. The default is {\tt ESMF\_INDEX\_DELOCAL}.
+!          {\tt maxIndex} arguments are forming a global
+!          index space or not. This does {\em not} affect the indices held
+!          by the DistGrid object, which are always identical to what was
+!          specified by {\tt minIndex} and {\tt maxIndex}, regardless of the
+!          {\tt indexflag} setting. However, it does affect whether an
+!          {\tt ESMF\_Array} object created on the DistGrid can choose global
+!          indexing or not. The default is {\tt ESMF\_INDEX\_DELOCAL}.
 !          See section \ref{const:indexflag} for a complete list of options.
 !     \item[{[connectionList]}]
 !          List of {\tt ESMF\_DistGridConnection} objects, defining connections
@@ -1888,8 +1987,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !          argument.
 !     \item[{[indexflag]}]
 !          Indicates whether the indices provided by the {\tt minIndex} and
-!          {\tt maxIndex} arguments are to be interpreted to form a global
-!          index space or not. The default is {\tt ESMF\_INDEX\_DELOCAL}.
+!          {\tt maxIndex} arguments are forming a global
+!          index space or not. This does {\em not} affect the indices held
+!          by the DistGrid object, which are always identical to what was
+!          specified by {\tt minIndex} and {\tt maxIndex}, regardless of the
+!          {\tt indexflag} setting. However, it does affect whether an
+!          {\tt ESMF\_Array} object created on the DistGrid can choose global
+!          indexing or not. The default is {\tt ESMF\_INDEX\_DELOCAL}.
 !          See section \ref{const:indexflag} for a complete list of options.
 !     \item[{[connectionList]}]
 !          List of {\tt ESMF\_DistGridConnection} objects, defining connections
@@ -2028,8 +2132,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !          argument.
 !     \item[{[indexflag]}]
 !          Indicates whether the indices provided by the {\tt minIndex} and
-!          {\tt maxIndex} arguments are to be interpreted to form a global
-!          index space or not. The default is {\tt ESMF\_INDEX\_DELOCAL}.
+!          {\tt maxIndex} arguments are forming a global
+!          index space or not. This does {\em not} affect the indices held
+!          by the DistGrid object, which are always identical to what was
+!          specified by {\tt minIndex} and {\tt maxIndex}, regardless of the
+!          {\tt indexflag} setting. However, it does affect whether an
+!          {\tt ESMF\_Array} object created on the DistGrid can choose global
+!          indexing or not. The default is {\tt ESMF\_INDEX\_DELOCAL}.
 !          See section \ref{const:indexflag} for a complete list of options.
 !     \item[{[connectionList]}]
 !          List of {\tt ESMF\_DistGridConnection} objects, defining connections
@@ -2170,8 +2279,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !          argument.
 !     \item[{[indexflag]}]
 !          Indicates whether the indices provided by the {\tt minIndex} and
-!          {\tt maxIndex} arguments are to be interpreted to form a global
-!          index space or not. The default is {\tt ESMF\_INDEX\_DELOCAL}.
+!          {\tt maxIndex} arguments are forming a global
+!          index space or not. This does {\em not} affect the indices held
+!          by the DistGrid object, which are always identical to what was
+!          specified by {\tt minIndex} and {\tt maxIndex}, regardless of the
+!          {\tt indexflag} setting. However, it does affect whether an
+!          {\tt ESMF\_Array} object created on the DistGrid can choose global
+!          indexing or not. The default is {\tt ESMF\_INDEX\_DELOCAL}.
 !          See section \ref{const:indexflag} for a complete list of options.
 !     \item[{[connectionList]}]
 !          List of {\tt ESMF\_DistGridConnection} objects, defining connections

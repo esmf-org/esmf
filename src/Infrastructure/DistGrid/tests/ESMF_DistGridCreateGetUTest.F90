@@ -53,7 +53,7 @@ program ESMF_DistGridCreateGetUTest
   !LOCAL VARIABLES:
   type(ESMF_VM):: vm
   integer:: petCount, localPet, i, j, localDeCount
-  type(ESMF_DistGrid):: distgrid, distgrid2, distgrid3, distgridAlias
+  type(ESMF_DistGrid):: distgrid, distgrid2, distgrid3, distgrid4, distgridAlias
   type(ESMF_DELayout):: delayout
   integer:: dimCount, tileCount, deCount
   logical:: regDecompFlag
@@ -1151,6 +1151,41 @@ program ESMF_DistGridCreateGetUTest
   call ESMF_DistGridDestroy(distgrid, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   
+  !------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "DistGrid Validate of non-created DistGrid Test"
+  write(failMsg, *) "Did not return ESMF_RC_OBJ_NOT_CREATED"
+  call ESMF_DistGridValidate(distgrid4, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_RC_OBJ_NOT_CREATED), name, failMsg, result, ESMF_SRCLINE)
+
+  !------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "DistGrid create DistGrid Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  distgrid4 = ESMF_DistGridCreate(minIndex=(/1/), maxIndex=(/40/), rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+  !------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "DistGrid Validate of created DistGrid Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_DistGridValidate(distgrid4, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+  !------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "DistGrid destroy DistGrid Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_DistGridDestroy(distgrid4, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+  !------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "DistGrid Validate of destroyed DistGrid Test"
+  write(failMsg, *) "Did not return ESMF_RC_OBJ_DELETED"
+  call ESMF_DistGridValidate(distgrid4, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_RC_OBJ_DELETED), name, failMsg, result, ESMF_SRCLINE)
+
   !------------------------------------------------------------------------
 10 continue
   call ESMF_TestEnd(ESMF_SRCLINE) ! calls ESMF_Finalize() internally

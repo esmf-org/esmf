@@ -12,10 +12,13 @@ This flag is documented in section \ref{const:alarmlist}.
 {\sf DESCRIPTION:\\}
 An integer named constant which is used to indicate that a particular dimension is arbitrarily distributed.
 
+\subsection{ESMF\_ATTCOPY}
+This flag is documented in section \ref{const:attcopy}.
+
 \subsection{ESMF\_ATTGETCOUNT}
 This flag is documented in section \ref{const:attgetcount}.
 
-\subsection{ESMF\_ATTNEST\_FLAG}
+\subsection{ESMF\_ATTNEST}
 \label{const:attnest}
 {\sf DESCRIPTION:\\}
 Indicate whether or not to descend the Attribute hierarchy.
@@ -49,10 +52,6 @@ The valid values are:
 	\item[ESMF\_ATTRECONCILE\_OFF]
  	Attribute reconciliation will be turned off.
 \end{description}
-
-
-\subsection{ESMF\_ATTTREE}
-This flag is documented in section \ref{const:atttree}.
 
 
 \subsection{ESMF\_ATTWRITE}
@@ -132,25 +131,6 @@ The valid values are:
 
 \item [ESMF\_COORDSYS\_SPH\_RAD] Spherical coordinates in radians. In this system, the spherical coordinates are mapped to the coordinate dimensions in the following order: longitude, latitude, radius. (E.g. using {\tt coordDim=2} in ESMF\_GridGetCoord() references the latitude dimension.)
 
-\end{description}
-
-\subsection{ESMF\_COPY}
-\label{const:copy}
-{\sf DESCRIPTION:\\}
-Indicates which type of copy behavior is used when copying ESMF objects.
-
-The type of this flag is:
-
-{\tt type(ESMF\_Copy\_Flag)}
- 
-The valid values are:
-\begin{description}
-	\item[ESMF\_COPY\_ALIAS]
-	The destination of the copy becomes an alias of the source object.
-	\item[ESMF\_COPY\_REFERENCE]
-	All local data of the object is coped by value, and pointer valued data is referenced.
-	\item[ESMF\_COPY\_VALUE]
-	All data and pointers are copied to the destination object, nothing is referenced.
 \end{description}
 
 \subsection{ESMF\_DATACOPY}

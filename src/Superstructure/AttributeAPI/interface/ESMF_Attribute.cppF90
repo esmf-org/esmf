@@ -1344,14 +1344,12 @@ contains
 !
 ! !INTERFACE:
 !     ! Private name; call using ESMF_AttributeCopy()
-!     subroutine ESMF_AttributeCopy(<object1>, <object2>, copyflag, &
-!       atttreeflag, rc)
+!     subroutine ESMF_AttributeCopy(<object1>, <object2>, attcopy, rc)
 !
 ! !ARGUMENTS:
 !     <object1>, see below for supported values
 !     <object2>, see below for supported values
-!     type(ESMF_Copy_Flag),   intent(in)            :: copyflag
-!     type(ESMF_AttTreeFlag), intent(in)            :: atttreeflag
+!     type(ESMF_AttCopy_Flag),intent(in)   optional :: attcopy
 !     integer,                intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -1386,15 +1384,13 @@ contains
 !     The arguments are:
 !     \begin{description}
 !     \item [<object1>]
-!           An {\tt ESMF} object.
+!           An {\tt Attribute}-bearing ESMF object.
 !     \item [<object2>]
-!           An {\tt ESMF} object.
-!     \item [copyflag]
+!           An {\tt Attribute}-bearing ESMF object.
+!     \item [{[attcopy]}]
 !           A flag to determine if the copy is to be by reference, value,
-!           or both.  This flag is documented in section \ref{const:copy}.
-!     \item [atttreeflag]
-!           A flag to determine if the copy is supposed to descend the
-!           Attribute hierarchy. This flag is documented in section \ref{const:atttree}.
+!           or hybrid.  This flag is documented in section \ref{const:attcopy}.
+!           The default is to copy by value.
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -5023,13 +5019,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! @\
 ! !INTERFACE: @\
       ! Private name; call using ESMF_AttributeCopy() @\
-      subroutine mclass1##AttCopy(mthis1, mthis2, copyflag, atttreeflag, rc) @\
+      subroutine mclass1##AttCopy(mthis1, mthis2, attcopy, rc) @\
 ! @\
 ! !ARGUMENTS: @\
       type(mclass1), intent(in) :: mthis1   @\
       type(mclass2), intent(inout) :: mthis2 @\
-      type(ESMF_Copy_Flag), intent(in) :: copyflag @\
-      type(ESMF_AttTreeFlag), intent(in) :: atttreeflag @\
+      type(ESMF_AttCopy_Flag), intent(in), optional :: attcopy @\
       integer, intent(out), optional :: rc    @\
  @\
 ! @\
@@ -5042,11 +5037,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      An {\tt mclass1} object. @\
 !     \item [mthis2] @\
 !      An {\tt mclass2} object. @\
-!     \item [copyflag] @\
-!      A flag to determine if the copy is to be by reference, value, or both @\
-!     \item [atttreeflag] @\
-!      A flag to determine if the copy is supposed to descend the Attribute @\
-!      hierarchy @\
+!     \item [attcopyflag] @\
+!      A flag to determine if the copy is to be by reference, value, or hybrid @\
 !     \item [{[rc]}] @\
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
 !     \end{description} @\
@@ -5058,6 +5050,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
  @\
        character(ESMF_MAXSTR) :: value @\
        integer, dimension(1) :: lens @\
+       type(ESMF_AttCopy_Flag) :: localattcopy @\
  @\
       ! Initialize @\
       localrc = ESMF_RC_NOT_IMPL @\
@@ -5069,8 +5062,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ! check variables @\
       ESMF_INIT_CHECK_DEEP(mclass2##GetInit,mthis2,rc) @\
  @\
+      ! set copy flag default @\
+      localattcopy = ESMF_ATTCOPY_VALUE @\
+      if (present(attcopy)) then @\
+        localattcopy = attcopy @\
+      endif @\
+ @\
       call c_ESMC_AttributeCopy(mthisfield1, mthisfield2, & @\
-                                copyflag, atttreeflag, localrc) @\
+                                localattcopy, localrc) @\
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
          ESMF_CONTEXT, rcToReturn=rc)) return @\
  @\
