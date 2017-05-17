@@ -42,8 +42,8 @@
       ! cumulative result: count failures; no failures equals "all pass"
       integer :: result = 0
 
-      ! individual test result code
-      integer :: rc
+      ! test return codes
+      integer :: rc, rcToReturn, desiredRc
 
       ! individual test failure message
       character(ESMF_MAXSTR) :: failMsg
@@ -57,6 +57,7 @@
       integer :: my_pet, num_pets
       character(1) :: pet_char
       type(ESMF_VM):: vm
+      logical :: ele, hasNc
 
 #ifdef ESMF_TESTEXHAUSTIVE
       character(ESMF_MAXSTR) :: pet_num
@@ -96,7 +97,7 @@
 
 !------------------------------------------------------------------------------
 ! The unit tests are divided into Sanity and Exhaustive. The Sanity tests are
-! always run. When the environment variable, EXHAUSTIVE, is set to ON then 
+! always run. When the environment variable, EXHAUSTIVE, is set to ON then
 ! the EXHAUSTIVE and sanity tests both run. If the EXHAUSTIVE variable is set
 ! to OFF, then only the sanity unit tests.
 ! Special strings (Non-exhaustive and exhaustive) have been
@@ -186,6 +187,60 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       print *, " rc = ", rc
 
+       ! -----------------------------------------------------------------------
+       ! ESMF_LogFoundNetCDFError Testing
+
+#ifdef ESMF_NETCDF
+        hasNc = .true.
+#else
+        hasNc = .false.
+#endif
+
+        ! ----------------------------------------------------------------------------
+        !NEX_UTest
+        rc = ESMF_RC_NOT_IMPL
+        write(name, *) "ESMF_LogFoundNetCDFError Unit Test - No NetCDF error"
+        write(failMsg, *) "NetCDF error code is a success code. Error checker should pass through."
+
+        ele = ESMF_LogFoundNetCDFError(0)
+        if (ele .and. hasNc) then
+          rc = ESMF_FAILURE
+        else
+          rc = ESMF_SUCCESS
+        endif
+        call ESMF_Test((rc .eq. ESMF_SUCCESS), name, failMsg, result, __FILE__, __LINE__)
+
+        ! ----------------------------------------------------------------------------
+        !NEX_UTest
+        rc = ESMF_RC_NOT_IMPL
+        write(name, *) "ESMF_LogFoundNetCDFError Unit Test - Found NetCDF error"
+        write(failMsg, *) "NetCDF error not caught by error logging"
+
+        rcToReturn = ESMF_SUCCESS
+        ele = ESMF_LogFoundNetCDFError(1, line=2, file='what', &
+                                       msg='message from a user', &
+                                       method='my_method', rcToReturn=rcToReturn)
+        if (ele) then
+          rc = ESMF_SUCCESS
+        else
+          rc = ESMF_FAILURE
+        endif
+
+        if (hasNc) then
+          desiredRc = ESMF_RC_NETCDF_ERROR
+        else
+          desiredRc = ESMF_RC_LIB_NOT_PRESENT
+        endif
+        if (rcToReturn .eq. desiredRc) then
+          rc = ESMF_SUCCESS
+        else
+          rc = ESMF_FAILURE
+        endif
+
+        call ESMF_Test((rc .eq. ESMF_SUCCESS), name, failMsg, result, __FILE__,&
+                       __LINE__)
+
+        ! ----------------------------------------------------------------------------
 
 #ifdef ESMF_TESTEXHAUSTIVE
 
@@ -542,7 +597,7 @@
 
       !------------------------------------------------------------------------
       !EX_UTest
-      ! Test Log reopenOpen 
+      ! Test Log reopenOpen
       write(failMsg, *) "Did not return ESMF_RC_FILE_OPEN"
       call ESMF_LogOpen(log2, "Log_Test_File_3", rc=rc)
       write(name, *) "Open Already Open Log Test"
@@ -617,7 +672,7 @@
       random_string = my_pet_char // random_chars
 
       !EX_UTest
-      ! Test Log Write 
+      ! Test Log Write
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       ! Get date and time to compare later in the test
       call date_and_time(values=my_v)
@@ -674,7 +729,7 @@
                                              msg_type, Pet_num, msg_string
           if (input_status < 0) then
               exit
-          endif 
+          endif
           if (msg_string.eq.random_string) then
               rc = ESMF_SUCCESS
               exit
@@ -725,7 +780,7 @@ if (time_diff < zero) stop 1
       call ESMF_Test((lge(my_pet_char,pet_num).and.lle(my_pet_char,pet_num)), &
         name, failMsg, result, ESMF_SRCLINE)
       print *, " My PET char is ", my_pet_char, ", and I read: ", pet_num
-      
+
       !------------------------------------------------------------------------
       !EX_UTest
       ! Test LogFlush of new unopened log
@@ -807,7 +862,7 @@ if (time_diff < zero) stop 1
       ! Test log for INFO messages
       write(failMsg, *) "INFO log message expected, but not found"
       write(name, *) " Search log for INFO messages"
- 
+
       ! Check for messages we do want
       call search_file (filename=trim (my_pet_char) // '.logAllow',  &
           text='INFO', found=was_found, rc=rc)
@@ -819,7 +874,7 @@ if (time_diff < zero) stop 1
       ! Test log for WARNING messages
       write(failMsg, *) "WARNING log message found, but not expected"
       write(name, *) " Search log for WARNING messages"
- 
+
       ! Check for messages we didn't want
       call search_file (filename=trim (my_pet_char) // '.logAllow',  &
           text='WARNING', found=was_found, rc=rc)
@@ -831,7 +886,7 @@ if (time_diff < zero) stop 1
       ! Test log for ERROR messages
       write(failMsg, *) "ERROR log message found, but not expected"
       write(name, *) " Search log for ERROR messages"
- 
+
       ! Check for messages we didn't want
       call search_file (filename=trim (my_pet_char) // '.logAllow',  &
           text='ERROR', found=was_found, rc=rc)
@@ -993,7 +1048,7 @@ if (time_diff < zero) stop 1
 
       !------------------------------------------------------------------------
       !EX_UTest
-      ! Test ESMF_LogGet logmsgAbort return association 
+      ! Test ESMF_LogGet logmsgAbort return association
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) " LogGet with logmsgAbort set association Test"
       rc = merge (ESMF_SUCCESS, ESMF_FAILURE, associated (logabort_flags) )
@@ -1001,7 +1056,7 @@ if (time_diff < zero) stop 1
 
       !------------------------------------------------------------------------
       !EX_UTest
-      ! Test ESMF_LogGet logmsgAbort return size 
+      ! Test ESMF_LogGet logmsgAbort return size
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) " LogGet with logmsgAbort Test"
       rc = merge (ESMF_SUCCESS, ESMF_FAILURE, size (logabort_flags) == 1)
@@ -1009,7 +1064,7 @@ if (time_diff < zero) stop 1
 
       !------------------------------------------------------------------------
       !EX_UTest
-      ! Test ESMF_LogGet logmsgAbort return values 
+      ! Test ESMF_LogGet logmsgAbort return values
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) " LogGet with logmsgAbort Test"
       rc = merge (ESMF_SUCCESS, ESMF_FAILURE,  &
@@ -1036,7 +1091,7 @@ if (time_diff < zero) stop 1
 
       !------------------------------------------------------------------------
       !EX_UTest
-      ! Test ESMF_LogGet logmsgAbort return association 
+      ! Test ESMF_LogGet logmsgAbort return association
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) " LogGet with logmsgAbort cleared association Test"
       rc = merge (ESMF_SUCCESS, ESMF_FAILURE, associated (logabort_flags) )
@@ -1044,7 +1099,7 @@ if (time_diff < zero) stop 1
 
       !------------------------------------------------------------------------
       !EX_UTest
-      ! Test ESMF_LogGet logmsgAbort return size 
+      ! Test ESMF_LogGet logmsgAbort return size
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) " LogGet with logmsgAbort cleared size Test"
       rc = merge (ESMF_SUCCESS, ESMF_FAILURE, size (logabort_flags) == 0)
@@ -1062,7 +1117,7 @@ if (time_diff < zero) stop 1
 
       !------------------------------------------------------------------------
       !EX_UTest
-      ! Test ESMF_LogAssignment(=)(log,log) 
+      ! Test ESMF_LogAssignment(=)(log,log)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Log assignment (and write via alias) Test"
       log9_alias = log9
@@ -1072,7 +1127,7 @@ if (time_diff < zero) stop 1
 
       !------------------------------------------------------------------------
       !EX_UTest
-      ! Test ESMF_LogOperator(==)(log,log) 
+      ! Test ESMF_LogOperator(==)(log,log)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Log equality with same log Test"
       rc = merge (ESMF_SUCCESS, ESMF_FAILURE, log9 == log9_alias)
@@ -1080,7 +1135,7 @@ if (time_diff < zero) stop 1
 
       !------------------------------------------------------------------------
       !EX_UTest
-      ! Test ESMF_LogOperator(==)(log,log) 
+      ! Test ESMF_LogOperator(==)(log,log)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Log equality with different log Test"
       rc = merge (ESMF_SUCCESS, ESMF_FAILURE, .not. (log8 == log9))
@@ -1088,7 +1143,7 @@ if (time_diff < zero) stop 1
 
       !------------------------------------------------------------------------
       !EX_UTest
-      ! Test ESMF_LogOperator(/=)(log,log) 
+      ! Test ESMF_LogOperator(/=)(log,log)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Log inequality with same log Test"
       rc = merge (ESMF_SUCCESS, ESMF_FAILURE, .not. (log9 /= log9_alias))
@@ -1096,7 +1151,7 @@ if (time_diff < zero) stop 1
 
       !------------------------------------------------------------------------
       !EX_UTest
-      ! Test ESMF_LogOperator(/=)(log,log) 
+      ! Test ESMF_LogOperator(/=)(log,log)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Log inequality with different log Test"
       rc = merge (ESMF_SUCCESS, ESMF_FAILURE, log8 /= log9)

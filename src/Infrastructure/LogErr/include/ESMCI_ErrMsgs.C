@@ -7,7 +7,7 @@
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
 // NASA Goddard Space Flight Center.
 // Licensed under the University of Illinois-NCSA License.
-// 
+//
 //-------------------------------------------------------------------------
 //
 // Array of general error message strings, as generic as possible, to allow
@@ -77,8 +77,8 @@ static const char *errMsg[] = {
   "Library needed by ESMF not present ",              //   49 = ESMF_RC_LIB_NOT_PRESENT
 
   "Attribute unused ",                                //   50 = ESMF_RC_ATTR_UNUSED
-  "Object being used before creation ",               //   51 = ESMF_RC_OBJ_NOT_CREATED 
-  "Object being used after deletion ",                //   52 = ESMF_RC_OBJ_DELETED     
+  "Object being used before creation ",               //   51 = ESMF_RC_OBJ_NOT_CREATED
+  "Object being used after deletion ",                //   52 = ESMF_RC_OBJ_DELETED
   "Return code not set ",                             //   53 = ESMF_RC_NOT_SET
 
   "Wrong data value ",                                //   54 = ESMF_RC_VAL_WRONG
@@ -96,12 +96,14 @@ static const char *errMsg[] = {
 
   "File already exists ",                             //   63 = ESMF_RC_FILE_EXISTS
   "File is not a directory ",                         //   64 = ESMF_RC_FILE_NOTDIR
-  "The MOAB library returned an error ",              //   65 = ESMF_RC_MOAB_ERROR    
+  "The MOAB library returned an error ",              //   65 = ESMF_RC_MOAB_ERROR
+  "",                                                 //   66 = ESMF_RC_NOOP
+  "The NetCDF Library returned an error ",            //   67 = ESMF_RC_NETCDF_ERROR
 
-// 66-499 reserved for future F90 symmetric return code definitions
-                                                                          
-                                               "","","","","","","","","","",
- "","","","","","","","","","","","","","","","","","","","","","","","",
+// 68-499 reserved for future F90 symmetric return code definitions
+
+                                                     "","","","","","","","",
+     "","","","","","","","","","","","","","","","","","","","","","","","",
   "","","","","","","","","","","","","","","","","","","","","","","","","",
   "","","","","","","","","","","","","","","","","","","","","","","","","",
   "","","","","","","","","","","","","","","","","","","","","","","","","",
@@ -118,9 +120,9 @@ static const char *errMsg[] = {
   "","","","","","","","","","","","","","","","","","","","","","","","","",
   "","","","","","","","","","","","","","","","","","","","","","","","","",
   "","","","","","","","","","","","","","","","","","","","","","","","","",
-  
+
 // non-symmetric error code 500 is empty for now!
-  "",  
+  "",
 
 // C++ Error message                                     Return Code (501-1000)
 // -----------------------------------------------       -----------------------
@@ -182,11 +184,11 @@ static const char *errMsg[] = {
   "Library needed by ESMF not present ",              //  549 = ESMC_RC_LIB_NOT_PRESENT
 
   "Attribute unused ",                                //  550 = ESMC_RC_ATTR_UNUSED
-  "Object being used before creation ",               //  551 = ESMC_RC_OBJ_NOT_CREATED 
-  "Object being used after deletion ",                //  552 = ESMC_RC_OBJ_DELETED     
+  "Object being used before creation ",               //  551 = ESMC_RC_OBJ_NOT_CREATED
+  "Object being used after deletion ",                //  552 = ESMC_RC_OBJ_DELETED
   "Return code not set ",                             //  553 = ESMC_RC_NOT_SET
 
-  "Wrong data value ",                                //  554 = ESMC_RC_VAL_WRONG  
+  "Wrong data value ",                                //  554 = ESMC_RC_VAL_WRONG
   "Value inconsistent with error bound ",             //  555 = ESMC_RC_VAL_ERRBOUND
   "Value out of range ",                              //  556 = ESMC_RC_VAL_OUTOFRANGE
 
@@ -201,11 +203,13 @@ static const char *errMsg[] = {
 
   "File already exists ",                             //  563 = ESMC_RC_FILE_EXISTS
   "File is not a directory ",                         //  564 = ESMC_RC_FILE_NOTDIR
-  "The MOAB library returned an error ",              //  565 = ESMF_RC_MOAB_ERROR    
+  "The MOAB library returned an error ",              //  565 = ESMC_RC_MOAB_ERROR
+  "",                                                 //  566 = ESMC_RC_NOOP
+  "The NetCDF library returned an error ",            //  567 = ESMC_RC_NETCDF_ERROR
 
-// 564-999 reserved for future C++ symmetric return code definitions
-                                                                         
-                                               "","","","","","","","","",
+// 568-999 reserved for future C++ symmetric return code definitions
+
+                                                        "","","","","","","",
   "","","","","","","","","","","","","","","","","","","","","","","","","",
   "","","","","","","","","","","","","","","","","","","","","","","","","",
   "","","","","","","","","","","","","","","","","","","","","","","","","",

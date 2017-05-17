@@ -23,7 +23,7 @@ module ESMF_LogErrMod
 !------------------------------------------------------------------------------
 ! INCLUDES
 !! this should be including ESMF.h, but since it also includes the cover
-!! log macros, it can't be included here.  so just include each file 
+!! log macros, it can't be included here.  so just include each file
 !! individually.  If we add files to ESMF.h they also need to be added here.
 #include "ESMF_LogMacros.inc"
 #include "ESMF_Macros.inc"
@@ -34,7 +34,7 @@ module ESMF_LogErrMod
 
 !BOPI
 !============================================================================
-! !MODULE: Fortran Interface to Log class. 
+! !MODULE: Fortran Interface to Log class.
 !
 ! !DESCRIPTION:
 !
@@ -119,14 +119,14 @@ type ESMF_LogKind_Flag
 #endif
     integer      :: ftype
 end type
-    
+
 !     ! Log Types
 type(ESMF_LogKind_Flag), parameter :: &
     ESMF_LOGKIND_SINGLE = ESMF_LogKind_Flag(1), &
     ESMF_LOGKIND_MULTI = ESMF_LogKind_Flag(2),  &
     ESMF_LOGKIND_NONE = ESMF_LogKind_Flag(3)
 
-!     ! Log Entry                            
+!     ! Log Entry
 type ESMF_LogEntry
     private
 #ifndef ESMF_NO_SEQUENCE
@@ -142,7 +142,7 @@ type ESMF_LogEntry
     character(len=32)   ::  method
     character(len=8)    ::  d
     character(len=16)   ::  lt
-    ESMF_INIT_DECLARE    
+    ESMF_INIT_DECLARE
 end type ESMF_LogEntry
 
 type ESMF_Log
@@ -169,10 +169,10 @@ type ESMF_LogPrivate
     integer                                         ::  petNumber
     logical                                         ::  stopprogram
     logical                                         ::  pad ! memory alignment
-    type(ESMF_Logical)                              ::  flushImmediately    
-    type(ESMF_Logical)                              ::  flushed 
+    type(ESMF_Logical)                              ::  flushImmediately
+    type(ESMF_Logical)                              ::  flushed
     type(ESMF_Logical)                              ::  dirty
-    type(ESMF_LogKind_Flag)                         ::  logkindflag      
+    type(ESMF_LogKind_Flag)                         ::  logkindflag
 #ifndef ESMF_NO_INITIALIZERS
     type(ESMF_LogEntry), dimension(:),pointer       ::  LOG_ENTRY   => null ()
     type(ESMF_Logical)                              ::  FileIsOpen  = ESMF_FALSE
@@ -191,10 +191,10 @@ type ESMF_LogPrivate
     type(ESMF_LogMsg_Flag), pointer                 ::  logmsgAbort(:)
     logical                                         ::  traceFlag
     logical                                         ::  highResTimestampFlag
-#endif                                          
+#endif
     character(len=ESMF_MAXPATHLEN)                  ::  nameLogErrFile
     character(len=ESMF_MAXSTR)                      ::  petNumLabel
-    ESMF_INIT_DECLARE    
+    ESMF_INIT_DECLARE
 end type ESMF_LogPrivate
 
 !------------------------------------------------------------------------------
@@ -211,8 +211,8 @@ end type ESMF_LogPrivate
     public ESMF_LOGMSG_NOTRACE
     public ESMF_LOGKIND_SINGLE
     public ESMF_LOGKIND_MULTI
-    public ESMF_LOGKIND_NONE    
-    
+    public ESMF_LOGKIND_NONE
+
 !------------------------------------------------------------------------------
 !
 ! !PUBLIC MEMBER FUNCTIONS:
@@ -226,6 +226,7 @@ end type ESMF_LogPrivate
    public ESMF_LogFoundAllocError
    public ESMF_LogFoundDeallocError
    public ESMF_LogFoundError
+   public ESMF_LogFoundNetCDFError
    public ESMF_LogGet
    public ESMF_LogInitialize
    public ESMF_LogOpen
@@ -237,10 +238,10 @@ end type ESMF_LogPrivate
 
 !  Overloaded = operator functions
    public :: operator(==), operator(/=), operator(>)
-   
-! overload == and > with additional derived types so you can compare 
+
+! overload == and > with additional derived types so you can compare
 !  them as if they were simple integers.
- 
+
 
 interface operator (==)
    module procedure ESMF_LogEQ
@@ -475,7 +476,7 @@ contains
 
     ESMF_INIT_CHECK_SET_SHALLOW(ESMF_LogGetInit,ESMF_LogInit,s)
 
-    !DUMMY TEST TO QUIET DOWN COMPILER WARNINGS 
+    !DUMMY TEST TO QUIET DOWN COMPILER WARNINGS
     !TODO: Remove the following dummy test when implementing this method
     if (s%logTableIndex==s%logTableIndex) continue
 
@@ -731,7 +732,7 @@ end function
 !BOP
 ! !IROUTINE: ESMF_LogClose - Close Log file(s)
 
-! !INTERFACE: 
+! !INTERFACE:
       subroutine ESMF_LogClose(log, keywordEnforcer, rc)
 !
 ! !ARGUMENTS:
@@ -752,13 +753,13 @@ type(ESMF_KeywordEnforcer),optional::keywordEnforcer !must use keywords below
 !
 !      The arguments are:
 !      \begin{description}
-! 
+!
 !      \item [{[log]}]
 !            An {\tt ESMF\_Log} object.  If not specified, the default log is closed.
 !      \item [{[rc]}]
 !            Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !      \end{description}
-! 
+!
 !EOP
 
     integer::rc2,status
@@ -791,7 +792,7 @@ type(ESMF_KeywordEnforcer),optional::keywordEnforcer !must use keywords below
           deallocate (alog%LOG_ENTRY,stat=status)
         endif
       endif
-    
+
       if (alog%errorMaskCount > 0) then
         deallocate(alog%errorMask)
       endif
@@ -801,7 +802,7 @@ type(ESMF_KeywordEnforcer),optional::keywordEnforcer !must use keywords below
       if (associated (alog%logmsgAbort)) then
         deallocate (alog%logmsgAbort)
       end if
-    endif 
+    endif
 
     if (present(rc)) then
       rc=ESMF_SUCCESS
@@ -815,7 +816,7 @@ end subroutine ESMF_LogClose
 !BOPI
 ! !IROUTINE: ESMF_LogFinalize - Finalize Log file(s)
 
-! !INTERFACE: 
+! !INTERFACE:
       subroutine ESMF_LogFinalize(rc)
 !
 ! !ARGUMENTS:
@@ -827,11 +828,11 @@ end subroutine ESMF_LogClose
 !
 !      The arguments are:
 !      \begin{description}
-! 
+!
 !      \item [{[rc]}]
 !            Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !      \end{description}
-! 
+!
 !EOPI
 
         integer :: rc2,k
@@ -858,7 +859,7 @@ end subroutine ESMF_LogFinalize
 !BOP
 ! !IROUTINE: ESMF_LogFlush - Flush the Log file(s)
 
-! !INTERFACE: 
+! !INTERFACE:
       subroutine ESMF_LogFlush(log, keywordEnforcer, rc)
 !
 !
@@ -885,14 +886,14 @@ type(ESMF_KeywordEnforcer),optional::keywordEnforcer !must use keywords below
 !      \item [{[rc]}]
 !            Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !      \end{description}
-! 
+!
 !EOP
     integer                         :: j
     type(ESMF_LogPrivate),pointer   :: alog
     integer                         :: localrc, localrc2
     integer                         :: memstat
     logical                         :: spaceflag
-   
+
     ! Initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) then
@@ -900,9 +901,9 @@ type(ESMF_KeywordEnforcer),optional::keywordEnforcer !must use keywords below
     endif
 
     ESMF_INIT_CHECK_SET_SHALLOW(ESMF_LogGetInit,ESMF_LogInit,log)
-    
+
     nullify(alog) ! ensure that the association status is well defined
-    
+
     if (present(log)) then
       if(log%logTableIndex>0) then
          alog => ESMF_LogTable(log%logTableIndex)
@@ -973,7 +974,7 @@ type(ESMF_KeywordEnforcer),optional::keywordEnforcer !must use keywords below
             write (ESMF_UtilIOStderr,*) ESMF_METHOD,  &
                 ": Deallocation error."
             localrc = ESMF_RC_MEM_DEALLOCATE
-            if (present (rc)) then    
+            if (present (rc)) then
               rc = localrc
             end if
             return
@@ -984,21 +985,21 @@ type(ESMF_KeywordEnforcer),optional::keywordEnforcer !must use keywords below
         end do
       end if
       localrc = ESMF_SUCCESS
-   
-      alog%fIndex = 1 
+
+      alog%fIndex = 1
 
       call ESMF_UtilIOUnitFlush (alog%unitNumber, rc=localrc2)
       if (localrc2 /= ESMF_SUCCESS) then
         write (ESMF_UtilIOStderr,*) 'unit flush failed, rc =', localrc2
         localrc = localrc2
       end if
- 
+
       alog%flushed = ESMF_TRUE
       alog%dirty = ESMF_FALSE
 
     endif
 
-    if (present (rc)) then    
+    if (present (rc)) then
       rc = localrc
     end if
 
@@ -1010,24 +1011,24 @@ end subroutine ESMF_LogFlush
 !BOP
 ! !IROUTINE: ESMF_LogFoundAllocError - Check Fortran allocation status error and write message
 
-! !INTERFACE: 
+! !INTERFACE:
       function ESMF_LogFoundAllocError(statusToCheck, keywordEnforcer,  &
                                        msg,line,file, &
                                        method,rcToReturn,log)
 !
 ! !RETURN VALUE:
-      logical                                    :: ESMF_LogFoundAllocError 
-!  
+      logical                                    :: ESMF_LogFoundAllocError
+!
 ! !ARGUMENTS:
-!      
-      integer,          intent(in)              :: statusToCheck      
+!
+      integer,          intent(in)              :: statusToCheck
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-      character(len=*), intent(in),    optional :: msg      
-      integer,          intent(in),    optional :: line      
-      character(len=*), intent(in),    optional :: file      
-      character(len=*), intent(in),    optional :: method      
-      integer,          intent(inout), optional :: rcToReturn      
-      type(ESMF_Log),   intent(inout), optional :: log      
+      character(len=*), intent(in),    optional :: msg
+      integer,          intent(in),    optional :: line
+      character(len=*), intent(in),    optional :: file
+      character(len=*), intent(in),    optional :: method
+      integer,          intent(inout), optional :: rcToReturn
+      type(ESMF_Log),   intent(inout), optional :: log
 
 !
 ! !STATUS:
@@ -1039,8 +1040,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      This function returns {\tt .true.} when {\tt statusToCheck} indicates
 !      an allocation error, otherwise it returns {\tt .false.}.  The status
 !      value is typically returned from a Fortran ALLOCATE statement.
-!      If an error is indicated, a ESMF memory allocation error message 
-!      will be written to the {\tt ESMF\_Log} along with a user added {\tt msg}, 
+!      If an error is indicated, a ESMF memory allocation error message
+!      will be written to the {\tt ESMF\_Log} along with a user added {\tt msg},
 !      {\tt line}, {\tt file} and {\tt method}.
 !
 !      The arguments are:
@@ -1055,7 +1056,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !            Integer source line number.  Expected to be set by
 !            using the preprocessor {\tt \_\_LINE\_\_} macro.
 !      \item [{[file]}]
-!            User-provided source file name. 
+!            User-provided source file name.
 !      \item [{[method]}]
 !            User-provided method string.
 !      \item [{[rcToReturn]}]
@@ -1065,19 +1066,19 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      \item [{[log]}]
 !            An optional {\tt ESMF\_Log} object that can be used instead
 !            of the default Log.
-!      
+!
 !      \end{description}
-! 
+!
 !EOP
     character(len=ESMF_MAXSTR)::allocmsg
     integer::msglen
     type(ESMF_LogPrivate), pointer  :: alog
-    
+
     ESMF_INIT_CHECK_SET_SHALLOW(ESMF_LogGetInit,ESMF_LogInit,log)
     ESMF_LogFoundAllocError=.FALSE.
-    
+
     nullify(alog) ! ensure that the association status is well defined
-    
+
     if (present(log)) then
       if(log%logTableIndex>0) then
          alog => ESMF_LogTable(log%logTableIndex)
@@ -1110,7 +1111,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             line=line, file=file, method=method, log=log)
         ESMF_LogFoundAllocError=.TRUE.
     endif
-       
+
 end function ESMF_LogFoundAllocError
 
 !--------------------------------------------------------------------------
@@ -1119,7 +1120,7 @@ end function ESMF_LogFoundAllocError
 !BOP
 ! !IROUTINE: ESMF_LogFoundDeallocError - Check Fortran deallocation status error and write message
 
-! !INTERFACE: 
+! !INTERFACE:
       function ESMF_LogFoundDeallocError(statusToCheck, keywordEnforcer,  &
                                          msg,line,file, &
                                          method,rcToReturn,log)
@@ -1128,7 +1129,7 @@ end function ESMF_LogFoundAllocError
       logical ::ESMF_LogFoundDeallocError
 !
 ! !ARGUMENTS:
-!      
+!
       integer,          intent(in)              :: statusToCheck
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       character(len=*), intent(in),    optional :: msg
@@ -1148,8 +1149,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      This function returns {\tt .true.} when {\tt statusToCheck} indicates
 !      a deallocation error, otherwise it returns {\tt .false.}.  The status
 !      value is typically returned from a Fortran DEALLOCATE statement.
-!      If an error is indicated, a ESMF memory allocation error message 
-!      will be written to the {\tt ESMF\_Log} along with a user added {\tt msg}, 
+!      If an error is indicated, a ESMF memory allocation error message
+!      will be written to the {\tt ESMF\_Log} along with a user added {\tt msg},
 !      {\tt line}, {\tt file} and {\tt method}.
 !
 !      The arguments are:
@@ -1164,7 +1165,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !            Integer source line number.  Expected to be set by
 !            using the preprocessor {\tt \_\_LINE\_\_} macro.
 !      \item [{[file]}]
-!            User-provided source file name. 
+!            User-provided source file name.
 !      \item [{[method]}]
 !            User-provided method string.
 !      \item [{[rcToReturn]}]
@@ -1174,19 +1175,19 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      \item [{[log]}]
 !            An optional {\tt ESMF\_Log} object that can be used instead
 !            of the default Log.
-!      
+!
 !      \end{description}
-! 
+!
 !EOP
     character(len=ESMF_MAXSTR)::allocmsg
     integer::msglen
     type(ESMF_LogPrivate), pointer  :: alog
-    
+
     ESMF_INIT_CHECK_SET_SHALLOW(ESMF_LogGetInit,ESMF_LogInit,log)
     ESMF_LogFoundDeallocError=.FALSE.
-    
+
     nullify(alog) ! ensure that the association status is well defined
-    
+
     if (present(log)) then
       if(log%logTableIndex>0) then
          alog => ESMF_LogTable(log%logTableIndex)
@@ -1218,7 +1219,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             line=line, file=file, method=method, log=log)
         ESMF_LogFoundDeallocError=.TRUE.
     endif
-       
+
 end function ESMF_LogFoundDeallocError
 
 !--------------------------------------------------------------------------
@@ -1227,7 +1228,7 @@ end function ESMF_LogFoundDeallocError
 !BOP
 ! !IROUTINE: ESMF_LogFoundError - Check ESMF return code for error and write message
 
-! !INTERFACE: 
+! !INTERFACE:
       function ESMF_LogFoundError(rcToCheck,  keywordEnforcer,  &
                                   msg, line, file, method, &
                                   rcToReturn, log)
@@ -1256,8 +1257,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      This function returns {\tt .true.} when {\tt rcToCheck} indicates
 !      an return code other than {\tt ESMF\_SUCCESS}, otherwise it returns
 !      {\tt .false.}.
-!      If an error is indicated, a ESMF predefined error message 
-!      will be written to the {\tt ESMF\_Log} along with a user added {\tt msg}, 
+!      If an error is indicated, a ESMF predefined error message
+!      will be written to the {\tt ESMF\_Log} along with a user added {\tt msg},
 !      {\tt line}, {\tt file} and {\tt method}.
 !
 !      The arguments are:
@@ -1271,7 +1272,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !            Integer source line number.  Expected to be set by
 !            using the preprocessor {\tt \_\_LINE\_\_} macro.
 !      \item [{[file]}]
-!            User-provided source file name. 
+!            User-provided source file name.
 !      \item [{[method]}]
 !            User-provided method string.
 !      \item [{[rcToReturn]}]
@@ -1284,9 +1285,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      \item [{[log]}]
 !            An optional {\tt ESMF\_Log} object that can be used instead
 !            of the default Log.
-!      
+!
 !      \end{description}
-! 
+!
 !EOP
 
     integer:: rcToCheckInternal
@@ -1295,7 +1296,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_LogPrivate), pointer          :: alog
     character(len=ESMF_MAXSTR) :: errmsg
     integer :: msglen
-    
+
     ! set default return
     ESMF_LogFoundError = .FALSE.
 
@@ -1308,7 +1309,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ESMF_INIT_CHECK_SET_SHALLOW(ESMF_LogGetInit,ESMF_LogInit,log)
 
     nullify(alog) ! ensure that the association status is well defined
-    
+
     if (present(log)) then
       if(log%logTableIndex>0) then
          alog => ESMF_LogTable(log%logTableIndex)
@@ -1318,7 +1319,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         alog => ESMF_LogTable(ESMF_LogDefault%logTableIndex)
       end if
     endif
-    
+
     if (associated(alog)) then
 
       ESMF_INIT_CHECK_SET_SHALLOW(ESMF_LogPrivateGetInit,ESMF_LogPrivateInit,alog)
@@ -1327,7 +1328,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         call ESMF_LogWrite ('called: ' // ESMF_METHOD, ESMF_LOGMSG_TRACE,  &
           line=line, file=file, method=method, log=log)
       end if
-    
+
       ! check the error code
       if (rcToCheckInternal /= ESMF_SUCCESS) then
         masked = .false.
@@ -1353,7 +1354,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         if (present(rcToReturn)) rcToReturn = rcToCheckInternal
       end if
     endif
-       
+
 end function ESMF_LogFoundError
 
 !--------------------------------------------------------------------------
@@ -1362,7 +1363,7 @@ end function ESMF_LogFoundError
 !BOP
 ! !IROUTINE: ESMF_LogGet - Return information about a log object
 
-! !INTERFACE: 
+! !INTERFACE:
       subroutine ESMF_LogGet(log, keywordEnforcer,  &
                              flush,    &
                              logmsgAbort, logkindflag, &
@@ -1370,10 +1371,10 @@ end function ESMF_LogFoundError
                              highResTimestampFlag, rc)
 !
 ! !ARGUMENTS:
-!      
+!
       type(ESMF_Log),          intent(in),  optional :: log
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-      type(ESMF_Logical),      intent(out), optional :: flush       
+      type(ESMF_Logical),      intent(out), optional :: flush
       type(ESMF_LogMsg_Flag),  pointer,     optional :: logmsgAbort(:)
       type(ESMF_LogKind_Flag), intent(out), optional :: logkindflag
       integer,                 intent(out), optional :: maxElements
@@ -1414,7 +1415,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      \item [{[rc]}]
 !            Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !      \end{description}
-! 
+!
 !EOP
 
         type(ESMF_LogPrivate),pointer          :: alog
@@ -1431,7 +1432,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         ESMF_INIT_CHECK_SET_SHALLOW(ESMF_LogGetInit,ESMF_LogInit,log)
 
     nullify(alog) ! ensure that the association status is well defined
-    
+
     if (present(log)) then
       if(log%logTableIndex>0) then
          alog => ESMF_LogTable(log%logTableIndex)
@@ -1439,7 +1440,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     else
       alog => ESMF_LogTable(ESMF_LogDefault%logTableIndex)
     endif
-    
+
     if (associated(alog)) then
 
       ESMF_INIT_CHECK_SET_SHALLOW(ESMF_LogPrivateGetInit,ESMF_LogPrivateInit,alog)
@@ -1509,7 +1510,7 @@ end subroutine ESMF_LogGet
 !BOPI
 ! !IROUTINE: ESMF_LogInitialize - Initialize Log file(s)
 
-! !INTERFACE: 
+! !INTERFACE:
       subroutine ESMF_LogInitialize(filename, logappendflag, logkindflag, rc)
 !
 ! !ARGUMENTS:
@@ -1519,13 +1520,13 @@ end subroutine ESMF_LogGet
       integer,                 intent(out),optional :: rc
 
 ! !DESCRIPTION:
-!      This routine initializes the global default {\tt ESMF\_Log}.  
-!      The default {\tt ESMF\_Log} is assigned the {\tt filename} and 
+!      This routine initializes the global default {\tt ESMF\_Log}.
+!      The default {\tt ESMF\_Log} is assigned the {\tt filename} and
 !      is associated with an open Fortran unit number.
 !
 !      The arguments are:
 !      \begin{description}
-! 
+!
 !      \item [filename]
 !            Name of file.  Maximum length 58 characters to allow for
 !            the PET number to be added and keep the total file name
@@ -1541,7 +1542,7 @@ end subroutine ESMF_LogGet
 !      \item [{[rc]}]
 !            Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !      \end{description}
-! 
+!
 !EOPI
     ! Initialize return code; assume routine not implemented
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -1557,17 +1558,17 @@ end subroutine ESMF_LogInitialize
 !BOP
 ! !IROUTINE: ESMF_LogOpen - Open Log file(s)
 
-! !INTERFACE: 
+! !INTERFACE:
     subroutine ESMF_LogOpen(log, filename, keywordEnforcer,  &
         appendflag, logkindflag, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_Log),          intent(inout)         :: log   
+    type(ESMF_Log),          intent(inout)         :: log
     character(len=*),        intent(in)            :: filename
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     logical,                 intent(in),  optional :: appendflag
-    type(ESMF_LogKind_Flag), intent(in),  optional :: logkindflag    
-    integer,                 intent(out), optional :: rc   
+    type(ESMF_LogKind_Flag), intent(in),  optional :: logkindflag
+    integer,                 intent(out), optional :: rc
 
 !
 ! !DESCRIPTION:
@@ -1586,7 +1587,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      \item [{[appendflag]}]
 !            If the log file exists, setting to {\tt .false.} will set the file position
 !            to the beginning of the file.  Otherwise, new records will be appended to the
-!            end of the file.  If not specified, defaults to {\tt .true.}.  
+!            end of the file.  If not specified, defaults to {\tt .true.}.
 !      \item [{[logkindflag]}]
 !            Set the logkindflag. See section \ref{const:logkindflag} for a list of
 !            valid options.
@@ -1594,9 +1595,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      \item [{[rc]}]
 !            Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !      \end{description}
-! 
+!
 !EOP
-    interface 
+    interface
       subroutine f_ESMF_VMGlobalGet(localPet, petCount)
         integer, intent(out), optional  :: localPet
         integer, intent(out), optional  :: petCount
@@ -1636,7 +1637,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       log%logTableIndex = ESMF_LogTableCount                ! Assign log
       alog => ESMF_LogTable(log%logTableIndex)
     endif
-        
+
     ESMF_INIT_CHECK_SET_SHALLOW(ESMF_LogPrivateGetInit,ESMF_LogPrivateInit,alog)
 
     ! Test if it is open or closed
@@ -1719,7 +1720,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! open the file, with retries
     do i=1, ESMF_LOG_MAXTRYOPEN
 #if !defined (ESMF_OS_MinGW)
-        OPEN(UNIT=alog%unitNumber,File=alog%nameLogErrFile,& 
+        OPEN(UNIT=alog%unitNumber,File=alog%nameLogErrFile,&
              POSITION=position, ACTION="WRITE", STATUS="UNKNOWN", IOSTAT=iostat)
 #else
 #if defined (__INTEL_COMPILER)
@@ -1751,7 +1752,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! BEWARE:  absoft 8.0 compiler bug - if you try to allocate directly
     ! you get an error.  if you allocate a local buffer and then point the
     ! derived type buffer at it, it works.  go figure.
-    
+
     allocate(localbuf(alog%maxElements), stat=memstat)
     if (memstat /= 0) then
       write (ESMF_UtilIOStderr,*) ESMF_METHOD,  &
@@ -1762,16 +1763,16 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       return
     endif
     alog%LOG_ENTRY => localbuf
-    
+
   endif
-  
+
     !TODO: this is really strange because every time ESMF_LogOpen() is called
     !TODO: the _default_ Log on the C side is initialized, odd, isn't it? *gjt*
     call c_ESMC_LogInitialize(filename,alog%petNumber,alog%logkindflag,rc2)
     if (present(rc)) then
-        rc=ESMF_SUCCESS    
+        rc=ESMF_SUCCESS
     endif
-    
+
 end subroutine ESMF_LogOpen
 
 !--------------------------------------------------------------------------
@@ -1789,8 +1790,8 @@ end subroutine ESMF_LogOpen
     character(len=*),        intent(in)            :: filename
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     logical,                 intent(in),  optional :: appendflag
-    type(ESMF_LogKind_Flag), intent(in),  optional :: logkindflag    
-    integer,                 intent(out), optional :: rc   
+    type(ESMF_LogKind_Flag), intent(in),  optional :: logkindflag
+    integer,                 intent(out), optional :: rc
 
 !
 ! !DESCRIPTION:
@@ -1807,7 +1808,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      \item [{[appendflag]}]
 !            If the log file exists, setting to {\tt .false.} will set the file position
 !            to the beginning of the file.  Otherwise, new records will be appended to the
-!            end of the file.  If not specified, defaults to {\tt .true.}.  
+!            end of the file.  If not specified, defaults to {\tt .true.}.
 !      \item [{[logkindflag]}]
 !            Set the logkindflag. See section \ref{const:logkindflag} for a list of
 !            valid options.
@@ -1815,7 +1816,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      \item [{[rc]}]
 !            Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !      \end{description}
-! 
+!
 !EOP
 
   integer                :: localrc
@@ -1880,7 +1881,7 @@ end subroutine ESMF_LogRc2Msg
 !BOP
 ! !IROUTINE: ESMF_LogSet - Set Log parameters
 
-! !INTERFACE: 
+! !INTERFACE:
     subroutine ESMF_LogSet(log, keywordEnforcer,  &
         flush,  &
         logmsgAbort, maxElements, logmsgList,  &
@@ -1930,11 +1931,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !            logged.
 !      \item [{[errorMask]}]
 !            List of error codes that will {\em not} be logged as errors.
-!            Default is to log all error codes. 
+!            Default is to log all error codes.
 !      \item [{[trace]}]
 !            \begin{sloppypar}
 !            If set to {\tt .true.}, calls such as {\tt ESMF\_LogFoundError()},
-!            {\tt ESMF\_LogFoundAllocError()}, and 
+!            {\tt ESMF\_LogFoundAllocError()}, and
 !            {\tt ESMF\_LogFoundDeallocError()}
 !            will be logged in the default log files.  This option is intended
 !            to be used as a tool for debugging and program flow tracing
@@ -1951,7 +1952,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      \item [{[rc]}]
 !            Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !      \end{description}
-! 
+!
 !EOP
     integer :: i, status, status2
     logical :: isDefault
@@ -1959,7 +1960,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_LogEntry), dimension(:), pointer :: localbuf
 
     ESMF_INIT_CHECK_SET_SHALLOW(ESMF_LogGetInit,ESMF_LogInit,log)
-    
+
     nullify(alog) ! ensure that the association status is well defined
 
     isDefault = .false.
@@ -1971,7 +1972,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       alog => ESMF_LogTable(ESMF_LogDefault%logTableIndex)
       isDefault = .true.
     endif
-    
+
     ! Initialize return code; assume routine not implemented
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
@@ -1985,7 +1986,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         if (present (rc)) rc = ESMF_RC_CANNOT_SET
         return
       endif
-    
+
       if (present(flush)) then
         alog%flushImmediately=flush
       endif
@@ -2011,7 +2012,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           alog%LOG_ENTRY => localbuf
           alog%maxElements=maxElements
         endif
-      endif    
+      endif
       if (present(errorMask)) then
         if (alog%errorMaskCount > 0) then
           deallocate(alog%errorMask)
@@ -2020,7 +2021,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         allocate(alog%errorMask(alog%errorMaskCount))
         alog%errorMask = errorMask  ! copy the content of the errorMask argument
       endif
-    
+
       ! currently the connection between F90 and C++ side of LogErr is only well
       ! defined for the default Log, so only then call the C++ side LogSet().
       if (isDefault) then
@@ -2065,7 +2066,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       end if
 
       if (present(rc)) then
-        rc=ESMF_SUCCESS 
+        rc=ESMF_SUCCESS
       endif
     endif
 
@@ -2078,7 +2079,7 @@ end subroutine ESMF_LogSet
 !BOP
 ! !IROUTINE: ESMF_LogSetError - Set ESMF return code for error and write msg
 
-! !INTERFACE: 
+! !INTERFACE:
       subroutine ESMF_LogSetError(rcToCheck, keywordEnforcer,  &
                                   msg, line, file, method, &
                                   rcToReturn, log)
@@ -2103,13 +2104,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !DESCRIPTION:
 !      This subroutine sets the {\tt rcToReturn} value to {\tt rcToCheck} if
 !      {\tt rcToReturn} is present and writes this error code to the {\tt ESMF\_Log}
-!      if an error is generated.  A predefined error message will added to the 
+!      if an error is generated.  A predefined error message will added to the
 !      {\tt ESMF\_Log} along with a user added {\tt msg}, {\tt line}, {\tt file}
-!      and {\tt method}.  
+!      and {\tt method}.
 !
 !      The arguments are:
 !      \begin{description}
-! 
+!
 !      \item [rcToCheck]
 !            rc value for set
 !      \item [{[msg]}]
@@ -2118,7 +2119,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !            Integer source line number.  Expected to be set by
 !            using the preprocessor macro {\tt \_\_LINE\_\_} macro.
 !      \item [{[file]}]
-!            User-provided source file name. 
+!            User-provided source file name.
 !      \item [{[method]}]
 !            User-provided method string.
 !      \item [{[rcToReturn]}]
@@ -2129,9 +2130,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      \item [{[log]}]
 !            An optional {\tt ESMF\_Log} object that can be used instead
 !            of the default Log.
-!      
+!
 !      \end{description}
-! 
+!
 !EOP
 
     integer:: i
@@ -2143,7 +2144,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ESMF_INIT_CHECK_SET_SHALLOW(ESMF_LogGetInit,ESMF_LogInit,log)
 
     nullify(alog) ! ensure that the association status is well defined
-    
+
     if (present(log)) then
       if(log%logTableIndex>0) then
          alog => ESMF_LogTable(log%logTableIndex)
@@ -2151,7 +2152,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     else
       alog => ESMF_LogTable(ESMF_LogDefault%logTableIndex)
     endif
-    
+
     if (associated(alog)) then
 
       ESMF_INIT_CHECK_SET_SHALLOW(ESMF_LogPrivateGetInit,ESMF_LogPrivateInit,alog)
@@ -2177,10 +2178,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           if (present(rcToReturn)) rcToReturn = rcToCheck
         endif
       endif
-    else    
+    else
       if (present(rcToReturn)) rcToReturn = ESMF_SUCCESS
     endif
-       
+
 end subroutine ESMF_LogSetError
 
 
@@ -2190,7 +2191,7 @@ end subroutine ESMF_LogSetError
 !BOP
 ! !IROUTINE: ESMF_LogWrite - Write to Log file(s)
 
-! !INTERFACE: 
+! !INTERFACE:
       recursive subroutine ESMF_LogWrite(msg, logmsgFlag, &
                         logmsgList,      & ! DEPRECATED ARGUMENT
                         keywordEnforcer, line, file, method, log, rc)
@@ -2223,15 +2224,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !DESCRIPTION:
 !      This subroutine writes to the file associated with an {\tt ESMF\_Log}.
-!      A message is passed in along with the {\tt logmsgFlag}, {\tt line}, 
+!      A message is passed in along with the {\tt logmsgFlag}, {\tt line},
 !      {\tt file} and {\tt method}.  If the write to the {\tt ESMF\_Log}
-!      is successful, the function will return a logical {\tt true}.  This 
-!      function is the base function used by all the other {\tt ESMF\_Log} 
+!      is successful, the function will return a logical {\tt true}.  This
+!      function is the base function used by all the other {\tt ESMF\_Log}
 !      writing methods.
 !
 !      The arguments are:
 !      \begin{description}
-! 
+!
 !      \item [msg]
 !            User-provided message string.
 !      \item [logmsgFlag]
@@ -2243,7 +2244,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !            Integer source line number.  Expected to be set by
 !            using the preprocessor macro {\tt \_\_LINE\_\_} macro.
 !      \item [{[file]}]
-!            User-provided source file name. 
+!            User-provided source file name.
 !      \item [{[method]}]
 !            User-provided method string.
 !      \item [{[log]}]
@@ -2252,14 +2253,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      \item [{[rc]}]
 !            Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !      \end{description}
-! 
+!
 !EOP
-    interface 
+    interface
       subroutine f_ESMF_VMAbort(rc)
-        integer, intent(out), optional :: rc    
+        integer, intent(out), optional :: rc
       end subroutine f_ESMF_VMAbort
     end interface
-    
+
     integer                         :: argcase
     type(ESMF_LogMsg_Flag)          :: local_logmsgflag
 
@@ -2276,11 +2277,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer                         :: memstat
     integer                         :: rc2, index
     type(ESMF_LogPrivate), pointer  :: alog
-    
+
     ESMF_INIT_CHECK_SET_SHALLOW(ESMF_LogGetInit,ESMF_LogInit,log)
-    
+
     nullify(alog) ! ensure that the association status is well defined
-    
+
     if (present(log)) then
       if(log%logTableIndex>0) then
          alog => ESMF_LogTable(log%logTableIndex)
@@ -2349,7 +2350,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         end if
 
         index = alog%fIndex
-      
+
         alog%dirty = ESMF_TRUE
         call DATE_AND_TIME(date=d, time=t, values=timevals)
         if (alog%highResTimestampFlag) then
@@ -2369,7 +2370,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             alog%LOG_ENTRY(index)%method = tmethod
         endif
         if (present(line)) then
-            tline=line 
+            tline=line
             alog%LOG_ENTRY(index)%lineflag = .TRUE.
             alog%LOG_ENTRY(index)%line = tline
         endif
@@ -2398,7 +2399,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             if (local_logmsgflag%mtype == alog%logmsgAbort(i)%mtype) then
               alog%stopprogram=.true.
               alog%fIndex = alog%fIndex + 1
-              call ESMF_LogFlush(log,rc=rc2) 
+              call ESMF_LogFlush(log,rc=rc2)
               call ESMF_LogClose(ESMF_LogDefault, rc=rc2)
               exit
             end if
@@ -2409,7 +2410,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             alog%flushImmediately == ESMF_TRUE .or.  &
             local_logmsgflag == ESMF_LOGMSG_ERROR) then
                 alog%fIndex = alog%fIndex + 1
-                call ESMF_LogFlush(log,rc=rc2) 
+                call ESMF_LogFlush(log,rc=rc2)
                 alog%fIndex = 1
         else
             alog%fIndex = alog%fIndex + 1
@@ -2429,7 +2430,7 @@ end subroutine ESMF_LogWrite
 !BOPI
 ! !IROUTINE: ESMF_LogEntryCopy - Copy a Log entry
 
-! !INTERFACE: 
+! !INTERFACE:
       subroutine ESMF_LogEntryCopy(logEntryIn, logEntryOut, rc)
 !
 ! !ARGUMENTS:
@@ -2442,7 +2443,7 @@ end subroutine ESMF_LogWrite
 !
 !      The arguments are:
 !      \begin{description}
-! 
+!
 !      \item [logEntryIn]
 !            Log entry to copy from.
 !      \item [logEntryOut]
@@ -2450,11 +2451,11 @@ end subroutine ESMF_LogWrite
 !      \item [{[rc]}]
 !            Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !      \end{description}
-! 
+!
 !EOPI
 
     integer :: memstat
-    
+
     ! Initialize return code; assume routine not implemented
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
@@ -2477,7 +2478,7 @@ end subroutine ESMF_LogWrite
     logEntryOut%d      = logEntryIn%d
     logEntryOut%lt     = logEntryIn%lt
     logEntryOut%highResTimestamp = logEntryIn%highResTimestamp
-    
+
     if (present(rc)) then
         rc=ESMF_SUCCESS
     endif
@@ -2536,11 +2537,137 @@ end subroutine ESMF_LogEntryCopy
 
   end function ESMF_LogNE
 
-end module ESMF_LogErrMod
-
 
 !-------------------------------------------------------------------------------
 
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_LogFoundNetCDFError()"
+!BOP
+! !IROUTINE: ESMF_LogFoundNetCDFError - Check NetCDF status code for success or log the associated NetCDF error message.
+
+! !INTERFACE:
+function ESMF_LogFoundNetCDFError(ncerrToCheck, keywordEnforcer, msg, line, &
+                                  file, method, rcToReturn, log)
+
+#ifdef ESMF_NETCDF
+  use netcdf
+#endif
+
+!
+! !RETURN VALUE:
+  logical :: ESMF_LogFoundNetCDFError
+!
+! !ARGUMENTS:
+!
+  integer,          intent(in)              :: ncerrToCheck
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+  character(len=*), intent(in),    optional :: msg
+  integer,          intent(in),    optional :: line
+  character(len=*), intent(in),    optional :: file
+  character(len=*), intent(in),    optional :: method
+  integer,          intent(inout), optional :: rcToReturn
+  type(ESMF_Log),   intent(inout), optional :: log
+!
+! !DESCRIPTION:
+!      This function returns {\tt .true.} when {\tt ncerrToCheck} indicates
+!      an return code other than {\tt 0} (the success code from NetCDF Fortran),
+!      otherwise it returns {\tt .false.}.
+!      If an error is indicated, a ESMF predefined error message
+!      will be written to the {\tt ESMF\_Log} along with a user added {\tt msg},
+!      {\tt line}, {\tt file} and {\tt method}. The NetCDF string error
+!      representation will also be logged.
+!
+!      The arguments are:
+!      \begin{description}
+!
+!      \item [{[ncerrToCheck]}]
+!            NetCDF error code to check. An error code of {\tt 0} will
+!            pass-through.
+!      \item [{[msg]}]
+!            User-provided message string.
+!      \item [{[line]}]
+!            Integer source line number.  Expected to be set by using the
+!            preprocessor {\tt \_\_LINE\_\_} macro.
+!      \item [{[file]}]
+!            User-provided source file name.
+!      \item [{[method]}]
+!            User-provided method string.
+!      \item [{[rcToReturn]}]
+!            If specified, when {\tt ncerrToCheck} indicates an error,
+!            set {\tt rcToReturn} to {\tt ESMF\_RC\_NETCDF\_ERROR}. The string
+!            representation for the error code will be retrieved from the NetCDF
+!            Fortran library and logged alongside any user-provided message
+!            string.
+!            Otherwise, {\tt rcToReturn} is not modified.
+!            This is not the return code for this function; it allows the
+!            calling code to do an assignment of the error code at the same time
+!            it is testing the value.
+!      \item [{[log]}]
+!            An optional {\tt ESMF\_Log} object that can be used instead
+!            of the default Log.
+!
+!      \end{description}
+!
+!EOP
+
+  character(len=80) :: ncMsg
+  character(len=ESMF_MAXSTR) :: localMsg
+  logical :: ele
+  integer, parameter :: nf90_noerror = 0
+  character(len=ESMF_MAXSTR) :: ncerrToCheckChar
+  integer :: localRc
+
+  ! ----------------------------------------------------------------------------
+
+#ifdef ESMF_NETCDF
+  ! Check the NetCDF status code for an error designation. Set the return value
+  ! for the found error flag.
+  if (ncerrToCheck .eq. nf90_noerror) then
+    ESMF_LogFoundNetCDFError = .false.
+  else
+    ESMF_LogFoundNetCDFError = .true.
+    ! Retrive the string error from the NetCDF library.
+    ncMsg = nf90_strerror(ncerrToCheck)
+    ! Convert the NetCDF error code from integer to string.
+    write(ncerrToCheckChar, "(I0)") ncerrToCheck
+
+    ! Pick the string to log based on the presence of a user message.
+    if (present(msg)) then
+      ! The string to be logged to file if a user provided a message.
+      localMsg = trim(msg) // ' (strerr=' // trim(ncMsg) // ', ncerrToCheck=' // trim(ncerrToCheckChar) // ')'
+    else
+      ! The default message with no user-provided message.
+      localMsg = trim(ncMsg) // ' (ncerrToCheck=' // trim(ncerrToCheckChar) // ')'
+    endif
+
+    localRc = ESMF_RC_NETCDF_ERROR
+  endif
+#else
+  ! If NetCDF is not compiled with ESMF, set the library not present flag.
+  ESMF_LogFoundNetCDFError = .true.
+  localRc = ESMF_RC_LIB_NOT_PRESENT
+  localMsg = 'ESMF_NETCDF not defined when lib was compiled'
+#endif
+
+  ! ----------------------------------------------------------------------------
+
+  ! Log the error to file if an error was found.
+  if (ESMF_LogFoundNetCDFError) then
+    ele = ESMF_LogFoundError(localRC, msg=trim(localMsg), line=line, &
+      file=file, method=method, log=log, rcToReturn=rcToReturn)
+    ! Update the return code if provided.
+    if (present(rcToReturn)) then
+      rcToReturn = localRc
+    endif
+  endif
+
+end function ESMF_LogFoundNetCDFError
+
+!-------------------------------------------------------------------------------
+
+end module ESMF_LogErrMod
+
+!-------------------------------------------------------------------------------
 
 subroutine ESMF_Breakpoint()
   ! This no-op routine is called when an error condition is detected inside of
@@ -2549,4 +2676,3 @@ subroutine ESMF_Breakpoint()
   ! lead to the error condition.
   continue
 end subroutine
-
