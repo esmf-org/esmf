@@ -190,7 +190,7 @@
        ! -----------------------------------------------------------------------
        ! ESMF_LogFoundNetCDFError Testing
 
-#ifdef ESMF_NETCDF
+#if (defined ESMF_NETCDF || ESMF_PNETCDF)
         hasNc = .true.
 #else
         hasNc = .false.

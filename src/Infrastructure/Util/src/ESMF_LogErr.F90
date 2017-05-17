@@ -1357,7 +1357,147 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 end function ESMF_LogFoundError
 
-!--------------------------------------------------------------------------
+!-------------------------------------------------------------------------------
+
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_LogFoundNetCDFError()"
+!BOP
+! !IROUTINE: ESMF_LogFoundNetCDFError - Check NetCDF status code for success or log the associated NetCDF error message.
+
+! !INTERFACE:
+function ESMF_LogFoundNetCDFError(ncerrToCheck, keywordEnforcer, msg, line, &
+                                  file, method, rcToReturn, log)
+
+#if defined ESMF_NETCDF
+  use netcdf
+#elif defined ESMF_PNETCDF
+  use pnetcdf
+#endif
+
+!
+! !RETURN VALUE:
+  logical :: ESMF_LogFoundNetCDFError
+!
+! !ARGUMENTS:
+!
+  integer,          intent(in)              :: ncerrToCheck
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+  character(len=*), intent(in),    optional :: msg
+  integer,          intent(in),    optional :: line
+  character(len=*), intent(in),    optional :: file
+  character(len=*), intent(in),    optional :: method
+  integer,          intent(inout), optional :: rcToReturn
+  type(ESMF_Log),   intent(inout), optional :: log
+!
+! !DESCRIPTION:
+!      This function returns {\tt .true.} when {\tt ncerrToCheck} indicates
+!      an return code other than {\tt 0} (the success code from NetCDF Fortran)
+!      or {\tt NF\_NOERR} (the success code for PNetCDF). Otherwise it returns
+!      {\tt .false.}.
+!      If an error is indicated, a predefined ESMF error message
+!      will be written to the {\tt ESMF\_Log} along with a user added {\tt msg},
+!      {\tt line}, {\tt file} and {\tt method}. The NetCDF string error
+!      representation will also be logged.
+!
+!      The arguments are:
+!      \begin{description}
+!
+!      \item [{[ncerrToCheck]}]
+!            NetCDF error code to check.
+!      \item [{[msg]}]
+!            User-provided message string.
+!      \item [{[line]}]
+!            Integer source line number.  Expected to be set by using the
+!            preprocessor {\tt \_\_LINE\_\_} macro.
+!      \item [{[file]}]
+!            User-provided source file name.
+!      \item [{[method]}]
+!            User-provided method string.
+!      \item [{[rcToReturn]}]
+!            If specified, when {\tt ncerrToCheck} indicates an error,
+!            set {\tt rcToReturn} to {\tt ESMF\_RC\_NETCDF\_ERROR}. The string
+!            representation for the error code will be retrieved from the NetCDF
+!            Fortran library and logged alongside any user-provided message
+!            string.
+!            Otherwise, {\tt rcToReturn} is not modified.
+!            This is not the return code for this function; it allows the
+!            calling code to do an assignment of the error code at the same time
+!            it is testing the value.
+!      \item [{[log]}]
+!            An optional {\tt ESMF\_Log} object that can be used instead
+!            of the default Log.
+!
+!      \end{description}
+!
+!EOP
+
+  character(len=80) :: ncMsg
+  character(len=ESMF_MAXSTR) :: localMsg
+  logical :: ele
+  character(len=ESMF_MAXSTR) :: ncerrToCheckChar
+  integer :: localRc
+
+#ifdef ESMF_PNETCDF
+  integer, parameter :: ncNoError = NF_NOERR
+#else
+  integer, parameter :: ncNoError = 0
+#endif
+
+  ! ----------------------------------------------------------------------------
+
+#if (defined ESMF_NETCDF || defined ESMF_PNETCDF)
+  ! Check the NetCDF status code for an error designation. Set the return value
+  ! for the found error flag.
+  if (ncerrToCheck .eq. ncNoError) then
+    ESMF_LogFoundNetCDFError = .false.
+  else
+    ESMF_LogFoundNetCDFError = .true.
+
+    ! Retrieve the string error from the NetCDF library. Handle NetCDF and
+    ! PNetCDF error strings.
+#ifdef ESMF_NETCDF
+    ncMsg = nf90_strerror(ncerrToCheck)
+#else
+    ncMsg = nfmpi_strerror(ncerrToCheck)
+#endif
+
+    ! Convert the NetCDF error code from integer to string.
+    write(ncerrToCheckChar, "(I0)") ncerrToCheck
+
+    ! Pick the string to log based on the presence of a user message.
+    if (present(msg)) then
+      ! The string to be logged to file if a user provided a message.
+      localMsg = trim(msg) // ' (strerr=' // trim(ncMsg) // ', ncerrToCheck=' // trim(ncerrToCheckChar) // ')'
+    else
+      ! The default message with no user-provided message.
+      localMsg = trim(ncMsg) // ' (ncerrToCheck=' // trim(ncerrToCheckChar) // ')'
+    endif
+
+    localRc = ESMF_RC_NETCDF_ERROR
+  endif
+#else
+  ! If NetCDF is not compiled with ESMF, set the library not present flag.
+  ESMF_LogFoundNetCDFError = .true.
+  localRc = ESMF_RC_LIB_NOT_PRESENT
+  localMsg = 'ESMF_NETCDF or ESMF_PNETCDF not defined when lib was compiled'
+#endif
+
+  ! ----------------------------------------------------------------------------
+
+  ! Log the error to file if an error was found.
+  if (ESMF_LogFoundNetCDFError) then
+    ele = ESMF_LogFoundError(localRC, msg=trim(localMsg), line=line, &
+      file=file, method=method, log=log, rcToReturn=rcToReturn)
+    ! Update the return code if provided.
+    if (present(rcToReturn)) then
+      rcToReturn = localRc
+    endif
+  endif
+
+end function ESMF_LogFoundNetCDFError
+
+!-------------------------------------------------------------------------------
+
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_LogGet()"
 !BOP
@@ -2536,134 +2676,6 @@ end subroutine ESMF_LogEntryCopy
     ESMF_LogNE = log1%logTableIndex /= log2%logTableIndex
 
   end function ESMF_LogNE
-
-
-!-------------------------------------------------------------------------------
-
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_LogFoundNetCDFError()"
-!BOP
-! !IROUTINE: ESMF_LogFoundNetCDFError - Check NetCDF status code for success or log the associated NetCDF error message.
-
-! !INTERFACE:
-function ESMF_LogFoundNetCDFError(ncerrToCheck, keywordEnforcer, msg, line, &
-                                  file, method, rcToReturn, log)
-
-#ifdef ESMF_NETCDF
-  use netcdf
-#endif
-
-!
-! !RETURN VALUE:
-  logical :: ESMF_LogFoundNetCDFError
-!
-! !ARGUMENTS:
-!
-  integer,          intent(in)              :: ncerrToCheck
-type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-  character(len=*), intent(in),    optional :: msg
-  integer,          intent(in),    optional :: line
-  character(len=*), intent(in),    optional :: file
-  character(len=*), intent(in),    optional :: method
-  integer,          intent(inout), optional :: rcToReturn
-  type(ESMF_Log),   intent(inout), optional :: log
-!
-! !DESCRIPTION:
-!      This function returns {\tt .true.} when {\tt ncerrToCheck} indicates
-!      an return code other than {\tt 0} (the success code from NetCDF Fortran),
-!      otherwise it returns {\tt .false.}.
-!      If an error is indicated, a ESMF predefined error message
-!      will be written to the {\tt ESMF\_Log} along with a user added {\tt msg},
-!      {\tt line}, {\tt file} and {\tt method}. The NetCDF string error
-!      representation will also be logged.
-!
-!      The arguments are:
-!      \begin{description}
-!
-!      \item [{[ncerrToCheck]}]
-!            NetCDF error code to check. An error code of {\tt 0} will
-!            pass-through.
-!      \item [{[msg]}]
-!            User-provided message string.
-!      \item [{[line]}]
-!            Integer source line number.  Expected to be set by using the
-!            preprocessor {\tt \_\_LINE\_\_} macro.
-!      \item [{[file]}]
-!            User-provided source file name.
-!      \item [{[method]}]
-!            User-provided method string.
-!      \item [{[rcToReturn]}]
-!            If specified, when {\tt ncerrToCheck} indicates an error,
-!            set {\tt rcToReturn} to {\tt ESMF\_RC\_NETCDF\_ERROR}. The string
-!            representation for the error code will be retrieved from the NetCDF
-!            Fortran library and logged alongside any user-provided message
-!            string.
-!            Otherwise, {\tt rcToReturn} is not modified.
-!            This is not the return code for this function; it allows the
-!            calling code to do an assignment of the error code at the same time
-!            it is testing the value.
-!      \item [{[log]}]
-!            An optional {\tt ESMF\_Log} object that can be used instead
-!            of the default Log.
-!
-!      \end{description}
-!
-!EOP
-
-  character(len=80) :: ncMsg
-  character(len=ESMF_MAXSTR) :: localMsg
-  logical :: ele
-  integer, parameter :: nf90_noerror = 0
-  character(len=ESMF_MAXSTR) :: ncerrToCheckChar
-  integer :: localRc
-
-  ! ----------------------------------------------------------------------------
-
-#ifdef ESMF_NETCDF
-  ! Check the NetCDF status code for an error designation. Set the return value
-  ! for the found error flag.
-  if (ncerrToCheck .eq. nf90_noerror) then
-    ESMF_LogFoundNetCDFError = .false.
-  else
-    ESMF_LogFoundNetCDFError = .true.
-    ! Retrive the string error from the NetCDF library.
-    ncMsg = nf90_strerror(ncerrToCheck)
-    ! Convert the NetCDF error code from integer to string.
-    write(ncerrToCheckChar, "(I0)") ncerrToCheck
-
-    ! Pick the string to log based on the presence of a user message.
-    if (present(msg)) then
-      ! The string to be logged to file if a user provided a message.
-      localMsg = trim(msg) // ' (strerr=' // trim(ncMsg) // ', ncerrToCheck=' // trim(ncerrToCheckChar) // ')'
-    else
-      ! The default message with no user-provided message.
-      localMsg = trim(ncMsg) // ' (ncerrToCheck=' // trim(ncerrToCheckChar) // ')'
-    endif
-
-    localRc = ESMF_RC_NETCDF_ERROR
-  endif
-#else
-  ! If NetCDF is not compiled with ESMF, set the library not present flag.
-  ESMF_LogFoundNetCDFError = .true.
-  localRc = ESMF_RC_LIB_NOT_PRESENT
-  localMsg = 'ESMF_NETCDF not defined when lib was compiled'
-#endif
-
-  ! ----------------------------------------------------------------------------
-
-  ! Log the error to file if an error was found.
-  if (ESMF_LogFoundNetCDFError) then
-    ele = ESMF_LogFoundError(localRC, msg=trim(localMsg), line=line, &
-      file=file, method=method, log=log, rcToReturn=rcToReturn)
-    ! Update the return code if provided.
-    if (present(rcToReturn)) then
-      rcToReturn = localRc
-    endif
-  endif
-
-end function ESMF_LogFoundNetCDFError
-
-!-------------------------------------------------------------------------------
 
 end module ESMF_LogErrMod
 
