@@ -116,7 +116,10 @@
       end if
     end if
 
-    call MPI_Allreduce(isAccPet, ssiIdLocalAPetCount, 1, MPI_INTEGER, MPI_SUM, ssiIdLocalComm, rc)
+    ! Typical scenarios,
+    ! 1) All MPI ranks on a node have access to the same devices OR
+    ! 2) One MPI rank on each node has access to the devices
+    call MPI_Allreduce(isAccPet, ssiIdLocalAPetCount, 1, MPI_INTEGER, MPI_MAX, ssiIdLocalComm, rc)
     call MPI_Comm_free(ssiIdLocalComm, rc)
 
     allocate(isAccPetList(petCount))
