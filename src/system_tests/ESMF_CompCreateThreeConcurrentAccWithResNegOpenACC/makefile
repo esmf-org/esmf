@@ -26,6 +26,8 @@ ESMF_CompCreateThreeConcurrentAccWithResNegOpenACCSTest.o : mat_utils.o user_neg
 
 include $(ESMF_DIR)/makefile
 
+ESMF_F90COMPILEOPTS += –ta=tesla
+
 DIRS = 
 
 CLEANDIRS   = 
