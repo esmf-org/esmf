@@ -1437,9 +1437,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   character(len=ESMF_MAXSTR) :: ncerrToCheckChar
   integer :: localRc
 
-#ifdef ESMF_PNETCDF
-  integer, parameter :: ncNoError = NF_NOERR
-#else
+#ifdef ESMF_NETCDF
   integer, parameter :: ncNoError = 0
 #endif
 
@@ -1448,7 +1446,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 #if (defined ESMF_NETCDF || defined ESMF_PNETCDF)
   ! Check the NetCDF status code for an error designation. Set the return value
   ! for the found error flag.
+#ifdef ESMF_NETCDF
   if (ncerrToCheck .eq. ncNoError) then
+#else
+  if (ncerrToCheck .eq. NF_NOERR) then
+#endif
     ESMF_LogFoundNetCDFError = .false.
   else
     ESMF_LogFoundNetCDFError = .true.
