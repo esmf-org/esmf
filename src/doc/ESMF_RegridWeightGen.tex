@@ -55,7 +55,7 @@ coordinates of the input grid are put into the center stagger location ({\tt ESM
 In addition, the corner coordinates are also put into the corner stagger location
 ({\tt ESMF\_STAGGERLOC\_CORNER}) for conservative regridding.  If a grid contains multiple logically rectangular tiles 
 connected with each other by edges, such as a Cubed Sphere grid, the grid can be represented as a multi-tile ESMF\_Grid object created 
-using {\tt ESMF\_GridCreateMosaic()}~\ref{sec:example:CubesphereFromFile}. Such a grid is stored in the GRIDSPEC Mosaic and tile file format.~\ref{sec:fileformat:mosaic}  
+using {\tt ESMF\_GridCreateMosaic()}~\ref{sec:usage:cubedspherefromfile}. Such a grid is stored in the GRIDSPEC Mosaic and tile file format.~\ref{sec:fileformat:mosaic}
 The method {\tt ESMF\_MeshCreate()} ~\ref{sec:example:UnstructFromFile}
 is used to create an ESMF\_Mesh object, if the
 source or destination grid is an unstructured grid. When making this call,

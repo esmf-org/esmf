@@ -1398,7 +1398,7 @@ endif
 
 !BOE
 !\subsubsection{Create a six-tile cubed sphere Grid from a GRIDSPEC Mosaic file}
-!\label{sec:usage:cubedsphere}
+!\label{sec:usage:cubedspherefromfile}
 !
 !This example creates a six-tile Grid to represent a cubed sphere grid defined
 !in a GRIDSPEC Mosaic file {\tt C48\_mosaic.nc}. The GRIDSPEC mosaic file format is defined in
