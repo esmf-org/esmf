@@ -5924,14 +5924,24 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords for t
          ESMF_CONTEXT, rcToReturn=rc)) return
 
     allocate (fieldList(fieldCount))
-    call ESMF_FieldBundleGet(fieldbundle, fieldList=fieldList, rc=localrc)
+    call ESMF_FieldBundleGet(fieldbundle, fieldList=fieldList, &
+!TODO: gjt thinks this should be doine in ADDORDER below. However, currently
+!TODO: this causes an ESMF_FieldBundleIOUTest failure. Needs to be fixed.
+!      itemorderflag=ESMF_ITEMORDER_ADDORDER, &
+      rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU,                  &
          ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Create an I/O object
+#if 0
+call ESMF_LogWrite("Bef IOCreate", ESMF_LOGMSG_INFO, rc=rc)
+#endif
     io = ESMF_IOCreate(rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU,                  &
         ESMF_CONTEXT, rcToReturn=rc)) return
+#if 0
+call ESMF_LogWrite("Aft IOCreate", ESMF_LOGMSG_INFO, rc=rc)
+#endif
 
     ! From here on out, we need to clean up so no returning on error
     if (singlef) then
@@ -5955,10 +5965,16 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords for t
             ESMF_CONTEXT, rcToReturn=rc)) return
       enddo
 
+#if 0
+call ESMF_LogWrite("Bef ESMF_IOWrite", ESMF_LOGMSG_INFO, rc=rc)
+#endif
       call ESMF_IOWrite(io, trim(fileName), overwrite=opt_overwriteflag,    &
           status=opt_status, timeslice=timeslice, iofmt=opt_iofmt, rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU,                  &
           ESMF_CONTEXT, rcToReturn=rc)) return
+#if 0
+call ESMF_LogWrite("Aft ESMF_IOWrite", ESMF_LOGMSG_INFO, rc=rc)
+#endif
 
     else
       do i=1,fieldCount

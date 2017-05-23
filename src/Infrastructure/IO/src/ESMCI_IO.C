@@ -549,12 +549,15 @@ int IO::write(
     }
 
     Array *temp_array_undist_p;  // temp in case Array has undistributed dimensions
-    ESMCI::RouteHandle *rh;
+    ESMCI::RouteHandle *rh = temp_array_p->getIoRH(); 
     switch((*it)->type) {
     case IO_NULL:
       localrc = ESMF_STATUS_UNALLOCATED;
       break;
     case IO_ARRAY:
+#if 0
+ESMC_LogDefault.Write("IO::write() case: IO_ARRAY", ESMC_LOGMSG_INFO);
+#endif
       need_redist = redist_check(temp_array_p, &localrc);
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
           &rc)) {
@@ -566,24 +569,42 @@ int IO::write(
       if (need_redist) {
         // Create a compatible temp Array with 1 DE per PET
         // std::cout << ESMC_METHOD << ": DE count > 1 - redist_arraycreate1de" << std::endl;
+#if 0
+ESMC_LogDefault.Write("IO::write() case: IO_ARRAY: bef redist_arraycreate1de()", ESMC_LOGMSG_INFO);
+#endif
         redist_arraycreate1de((*it)->getArray(), &temp_array_p, &localrc);
-        if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
-            &rc)) {
-        // Close the file but return original error even if close fails.
+      	if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+          &rc)) {
+          // Close the file but return original error even if close fails.
           localrc = close();
           return rc;
         }
+#if 0
+ESMC_LogDefault.Write("IO::write() case: IO_ARRAY: aft redist_arraycreate1de()", ESMC_LOGMSG_INFO);
+#endif
 
-        // Redistribute into the temp Array
-        // std::cout << ESMC_METHOD << ": DE count > 1 - redistStore" << std::endl;
-        localrc = ESMCI::Array::redistStore((*it)->getArray(), temp_array_p, &rh, NULL);
-        if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) {
-        // Close the file but return original error even if close fails.
-          localrc = close();
-          return rc;
-        }
+        if (rh==NULL){	// this is the first time in IO for this array
+          // Redistribute into the temp Array
+          // std::cout << ESMC_METHOD << ": DE count > 1 - redistStore" << std::endl;
+#if 0
+ESMC_LogDefault.Write("IO::write() case: IO_ARRAY: bef redistStore()", ESMC_LOGMSG_INFO);
+#endif
+          localrc = ESMCI::Array::redistStore((*it)->getArray(), temp_array_p, &rh, NULL);
+          if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) {
+            // Close the file but return original error even if close fails.
+            localrc = close();
+            return rc;
+          }
+#if 0
+ESMC_LogDefault.Write("IO::write() case: IO_ARRAY: aft redistStore()", ESMC_LOGMSG_INFO);
+#endif
+	  (*it)->getArray()->setIoRH(rh); // store the RouteHandle for next time this array does IO
+	}
 
         // std::cout << ESMC_METHOD << ": DE count > 1 - redistribute data" << std::endl;
+#if 0
+ESMC_LogDefault.Write("IO::write() case: IO_ARRAY: bef redist()", ESMC_LOGMSG_INFO);
+#endif
         localrc = ESMCI::Array::redist((*it)->getArray(), temp_array_p, &rh,
           ESMF_COMM_BLOCKING, NULL, NULL, ESMC_REGION_TOTAL);
         if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) {
@@ -591,6 +612,9 @@ int IO::write(
           localrc = close();
           return rc;
         }
+#if 0
+ESMC_LogDefault.Write("IO::write() case: IO_ARRAY: aft redist()", ESMC_LOGMSG_INFO);
+#endif
         // std::cout << ESMC_METHOD << ": DE count > 1 - redistribute complete!" << std::endl;
       }
 
@@ -603,10 +627,15 @@ int IO::write(
         temp_array_undist_p = temp_array_p;
         // Create an aliased Array which treats all dimensions as distributed.
         // std::cout << ESMC_METHOD << ": calling undist_arraycreate_alldist()" << std::endl;
+#if 0
+ESMC_LogDefault.Write("IO::write() case: IO_ARRAY: bef undist_arraycreate_alldist()", ESMC_LOGMSG_INFO);
+#endif
         undist_arraycreate_alldist (temp_array_undist_p, &temp_array_p, &localrc);
         if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc))
           return rc;
-
+#if 0
+ESMC_LogDefault.Write("IO::write() case: IO_ARRAY: aft undist_arraycreate_alldist()", ESMC_LOGMSG_INFO);
+#endif
         // Find ungridded dimension labels
         std::vector<std::string> ugdimLabels;
         if ((*it)->varAttPack) {
@@ -631,20 +660,25 @@ int IO::write(
       }
 
       // Write the Array
+#if 0
+ESMC_LogDefault.Write("IO::write() case: IO_ARRAY: bef arrayWrite()", ESMC_LOGMSG_INFO);
+#endif
       ioHandler->arrayWrite(temp_array_p, (*it)->getName(),
           dimLabels, timeslice, (*it)->varAttPack, (*it)->gblAttPack, &localrc);
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc))
         return rc;
-
+#if 0
+ESMC_LogDefault.Write("IO::write() case: IO_ARRAY: aft arrayWrite()", ESMC_LOGMSG_INFO);
+#endif
       // Clean ups //
       if (need_redist) {
-        localrc = temp_array_p->redistRelease(rh);
-        if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc))
-          return rc;
         localrc = ESMCI::Array::destroy(&temp_array_p);
         if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc))
           return rc;
       }
+#if 0
+ESMC_LogDefault.Write("IO::write() case: IO_ARRAY: done", ESMC_LOGMSG_INFO);
+#endif
       break;
       // These aren't handled yet
     case IO_ATTRIBUTE:

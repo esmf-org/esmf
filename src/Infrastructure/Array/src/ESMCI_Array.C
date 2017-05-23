@@ -304,6 +304,8 @@ Array::Array(
   // Auxiliary 
   localDeCountAux = localDeCount; // TODO: auxiliary for garb until ref. counting
   
+  ioRH = NULL; // invalidate
+  
   // invalidate the name for this Array object in the Base class
   ESMC_BaseSetName(NULL, "Array");
 
@@ -1897,6 +1899,9 @@ Array *Array::create(
     arrayOut->localDeCountAux = 
       arrayOut->delayout->getLocalDeCount(); // TODO: auxilary for garb
                                              // TODO: until ref. counting
+					     
+    arrayOut->ioRH = NULL; // invalidate
+
   }catch(int localrc){
     // catch standard ESMF return code
     ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
@@ -3504,6 +3509,7 @@ int Array::deserialize(
   localDeCountAux = delayout->getLocalDeCount(); // TODO: auxilary for garb
                                                  // TODO: until ref. counting
 
+  ioRH = NULL;  // invalidate
   // return successfully
   rc = ESMF_SUCCESS;
   return rc;
