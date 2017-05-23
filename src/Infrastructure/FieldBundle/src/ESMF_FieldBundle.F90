@@ -4037,7 +4037,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             if (.not.rhListMatch) goto 123
           enddo
           ! completed search 
-          exit ! break oout
+          exit ! break out
           ! continue search with previous element
 123       continue
           rhListE=>rhListE%prev   ! previous element

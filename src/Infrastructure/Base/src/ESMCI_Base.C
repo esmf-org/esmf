@@ -362,7 +362,7 @@ static const char *const version = "$Id$";
   if (classname) {
      len = strlen(classname);
      if (len >= ESMF_MAXSTR) {
-       sprintf(msgbuf, "Error: object type %d bytes longer than limit of %d\n",
+       sprintf(msgbuf, "Error: object type %d bytes longer than limit of %d",
                           len, ESMF_MAXSTR-1);
        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, ESMC_CONTEXT, 
          &rc);
@@ -403,7 +403,7 @@ static const char *const version = "$Id$";
     rc = ESMC_RC_NOT_IMPL;
 
   if (nlen > ESMF_MAXSTR) {
-       sprintf(msgbuf, "string name %d bytes longer than limit of %d bytes\n",
+       sprintf(msgbuf, "string name %d bytes longer than limit of %d bytes",
                        nlen, ESMF_MAXSTR);
        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, ESMC_CONTEXT, 
             &rc);
@@ -476,7 +476,7 @@ static const char *const version = "$Id$";
   if (name && (name[0]!='\0')) { 
      len = strlen(name);
      if (len >= ESMF_MAXSTR) {
-       sprintf(msgbuf, "object name %d bytes longer than limit of %d bytes\n",
+       sprintf(msgbuf, "object name %d bytes longer than limit of %d bytes",
                        len, ESMF_MAXSTR-1);
        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, ESMC_CONTEXT, 
            &rc);
@@ -485,7 +485,7 @@ static const char *const version = "$Id$";
      // look for slash in name.  Conflicts with syntax used in StateGet for items in
      // nested States.
      if (strchr (name, '/') != NULL) {
-       sprintf(msgbuf, "%s must not have a slash (/) in its name\n", name);
+       sprintf(msgbuf, "%s must not have a slash (/) in its name", name);
        ESMC_LogDefault.MsgFoundError (ESMC_RC_ARG_VALUE, msgbuf, ESMC_CONTEXT,
            &rc);
        return rc;
@@ -496,7 +496,7 @@ static const char *const version = "$Id$";
   if (classname && (classname[0]!='\0')) {
      len = strlen(classname);
      if (len >= ESMF_MAXSTR) {
-       sprintf(msgbuf, "object type %d bytes longer than limit of %d bytes\n",
+       sprintf(msgbuf, "object type %d bytes longer than limit of %d bytes",
                        len, ESMF_MAXSTR-1);
        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, ESMC_CONTEXT, 
            &rc);

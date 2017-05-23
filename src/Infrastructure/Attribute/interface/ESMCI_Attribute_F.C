@@ -2062,7 +2062,6 @@ extern "C" {
       ESMC_Base **source,              // in/out - base object
       ESMC_Base **destination,         // in/out - base object
       ESMC_AttCopyFlag *attcopyflag,   // in - attcopyflag
-      ESMC_AttTreeFlag *atttreeflag,   // in - atttreeflag
       int *rc) {                       // in/out - return code
 // 
 // !DESCRIPTION:
@@ -2096,28 +2095,21 @@ extern "C" {
     return;
   }
   
-  if (!atttreeflag) {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                         "bad ESMC_AttTreeFlag", ESMC_CONTEXT, &status);
-    if (rc) *rc = status;    
-    return;
-  }
-
   // set the base pointer for the root attribute before copying
   (*destination)->ESMC_BaseGetRoot()->setBase(*destination);
 
   // now copy
-  if (*attcopyflag == ESMF_COPY_VALUE && *atttreeflag == ESMC_ATTTREE_OFF) {
+  if (*attcopyflag == ESMF_ATTCOPY_VALUE) {
       status = (*destination)->ESMC_BaseGetRoot()->AttributeCopyIgnore(*((*source)->ESMC_BaseGetRoot()));
       ESMC_LogDefault.MsgFoundError(status, ESMCI_ERR_PASSTHRU,
         ESMC_CONTEXT, ESMC_NOT_PRESENT_FILTER(rc));
   }
-  else if (*attcopyflag == ESMF_COPY_REFERENCE) {
+  else if (*attcopyflag == ESMF_ATTCOPY_HYBRID) {
       status = (*destination)->ESMC_BaseGetRoot()->AttributeCopyHybrid(*((*source)->ESMC_BaseGetRoot()));
       ESMC_LogDefault.MsgFoundError(status, ESMCI_ERR_PASSTHRU,
         ESMC_CONTEXT, ESMC_NOT_PRESENT_FILTER(rc));
   }
-  else if (*attcopyflag == ESMF_COPY_ALIAS) {
+  else if (*attcopyflag == ESMF_ATTCOPY_REFERENCE) {
       (*destination)->ESMC_BaseSetRoot((*source)->ESMC_BaseGetRoot());
       status = ESMF_SUCCESS;
       if (rc) *rc = status;

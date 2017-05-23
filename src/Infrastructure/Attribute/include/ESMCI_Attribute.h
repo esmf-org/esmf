@@ -547,8 +547,7 @@ extern "C" {
                                   ESMCI_FortranStrLenArg olen,
                                   ESMCI_FortranStrLenArg tlen);
   void FTN_X(c_esmc_attributecopy)(ESMC_Base **source, ESMC_Base **destination,
-                                  ESMC_AttCopyFlag *attcopyflag,
-                                  ESMC_AttTreeFlag *atttreeflag, int *rc);
+                                  ESMC_AttCopyFlag *attcopyflag, int *rc);
   void FTN_X(c_esmc_attributegetcharlist)(ESMC_Base **base, char *name,
                                   ESMC_TypeKind_Flag *tk, int *count, int *lens,
                                   char *valueList, int *rc,

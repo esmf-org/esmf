@@ -638,11 +638,11 @@
         ESMF_ATTRECONCILE_ON = ESMF_AttReconcileFlag(1)
 
 !------------------------------------------------------------------------------
-!     ! ESMF_Copy_Flag
+!     ! ESMF_AttCopy_Flag
 !
 !     ! Interface flag for Attribute copy
 
-      type ESMF_Copy_Flag
+      type ESMF_AttCopy_Flag
 #ifndef ESMF_NO_SEQUENCE
       sequence
 #endif
@@ -650,10 +650,10 @@
         integer :: value
       end type
 
-      type(ESMF_Copy_Flag), parameter ::  &
-        ESMF_COPY_ALIAS = ESMF_Copy_Flag(0), &
-        ESMF_COPY_REFERENCE = ESMF_Copy_Flag(1), &
-        ESMF_COPY_VALUE = ESMF_Copy_Flag(2)
+      type(ESMF_AttCopy_Flag), parameter ::  &
+        ESMF_ATTCOPY_REFERENCE = ESMF_AttCopy_Flag(0), &
+        ESMF_ATTCOPY_VALUE = ESMF_AttCopy_Flag(1), &
+        ESMF_ATTCOPY_HYBRID = ESMF_AttCopy_Flag(2)
 
 !------------------------------------------------------------------------------
 !     ! ESMF_AttGetCountFlag
@@ -690,24 +690,6 @@
       type(ESMF_AttNest_Flag), parameter ::  &
         ESMF_ATTNEST_OFF = ESMF_AttNest_Flag(0), &
         ESMF_ATTNEST_ON = ESMF_AttNest_Flag(1)
-
-
-!------------------------------------------------------------------------------
-!     ! ESMF_AttTreeFlag
-!
-!     ! Interface flag for Attribute tree
-
-      type ESMF_AttTreeFlag
-#ifndef ESMF_NO_SEQUENCE
-      sequence
-#endif
-      !private
-        integer :: value
-      end type
-
-      type(ESMF_AttTreeFlag), parameter ::  &
-        ESMF_ATTTREE_OFF = ESMF_AttTreeFlag(0), &
-        ESMF_ATTTREE_ON = ESMF_AttTreeFlag(1)
 
 
 !------------------------------------------------------------------------------
@@ -1023,13 +1005,12 @@
       public ESMF_Context_Flag, ESMF_CONTEXT_OWN_VM, ESMF_CONTEXT_PARENT_VM
       public ESMF_End_Flag, ESMF_END_NORMAL, ESMF_END_KEEPMPI, ESMF_END_ABORT
       public ESMF_Pin_Flag, ESMF_PIN_DE_TO_PET, ESMF_PIN_DE_TO_VAS
-      public ESMF_Copy_Flag, ESMF_COPY_ALIAS, ESMF_COPY_REFERENCE, &
-                               ESMF_COPY_VALUE
+      public ESMF_AttCopy_Flag, ESMF_ATTCOPY_HYBRID, ESMF_ATTCOPY_REFERENCE, &
+                               ESMF_ATTCOPY_VALUE
       public ESMF_AttGetCountFlag, ESMF_ATTGETCOUNT_ATTRIBUTE, ESMF_ATTGETCOUNT_ATTPACK, &
                                    ESMF_ATTGETCOUNT_ATTLINK, ESMF_ATTGETCOUNT_TOTAL
       public ESMF_AttReconcileFlag, ESMF_ATTRECONCILE_OFF, ESMF_ATTRECONCILE_ON
       public ESMF_AttNest_Flag, ESMF_ATTNEST_OFF, ESMF_ATTNEST_ON
-      public ESMF_AttTreeFlag, ESMF_ATTTREE_OFF, ESMF_ATTTREE_ON
       public ESMF_AttWriteFlag, ESMF_ATTWRITE_TAB, ESMF_ATTWRITE_XML
       public ESMF_ATT_GRIDDED_DIM_LABELS, ESMF_ATT_UNGRIDDED_DIM_LABELS
 

@@ -92,9 +92,9 @@ enum ESMC_CommFlag { ESMF_COMM_BLOCKING=0,
                      ESMF_COMM_CANCEL};
 
 // Attribute reconcile type
-enum ESMC_AttCopyFlag { ESMF_COPY_ALIAS=0,
-                        ESMF_COPY_REFERENCE,
-                        ESMF_COPY_VALUE};
+enum ESMC_AttCopyFlag { ESMF_ATTCOPY_REFERENCE=0,
+                        ESMF_ATTCOPY_VALUE,
+                        ESMF_ATTCOPY_HYBRID};
 
 // attgetcount flag type
 enum ESMC_AttGetCountFlag { ESMC_ATTGETCOUNT_ATTRIBUTE=0,
@@ -109,10 +109,6 @@ enum ESMC_AttNest_Flag { ESMC_ATTNEST_OFF=0,
 // Attribute reconcile type
 enum ESMC_AttReconcileFlag { ESMC_ATTRECONCILE_OFF=0,
                              ESMC_ATTRECONCILE_ON};
-
-// Attribute reconcile type
-enum ESMC_AttTreeFlag { ESMC_ATTTREE_OFF=0,
-                        ESMC_ATTTREE_ON};
 
 // attwrite flag type
 enum ESMC_AttWriteFlag { ESMC_ATTWRITE_TAB=0,
