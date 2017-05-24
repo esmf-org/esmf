@@ -1456,9 +1456,9 @@ void PIO_Handler::attPackPut (
   int localrc;
   int piorc;
 
-  std::vector<char> *gblvardesc;
-  if (vardesc == NULL) {
-    gblvardesc = new std::vector<char>[PIO_SIZE_VAR_DESC]();
+  pio_var_desc_t vardesc_local = vardesc;
+  if (!vardesc) {
+    pio_var_desc_t gblvardesc = (pio_var_desc_t)calloc(PIO_SIZE_VAR_DESC, 1);
     if (!gblvardesc)
       if (ESMC_LogDefault.MsgAllocError(" failed to allocate pio global variable desc",
           ESMC_CONTEXT, rc)) return;
@@ -1466,12 +1466,16 @@ void PIO_Handler::attPackPut (
 #if !defined (ESMF_PNETCDF)
     // TODO: this fails with PNetCDF...
     piorc = pio_cpp_def_var_0d(pioFileDesc, "", PIO_global, gblvardesc);
-    if (piorc != PIO_noerr)
+    if (piorc != PIO_noerr) {
       std::cout << ESMC_METHOD << ": piorc = " << piorc << std::endl;
       if (!CHECKPIOERROR(piorc, "Attempting to define global PIO vardesc",
-          ESMF_RC_FILE_WRITE, (*rc))) return;
+          ESMF_RC_FILE_WRITE, (*rc))) {
+        free (gblvardesc);
+        return;
+      }
+    }
 #endif
-    vardesc = (pio_var_desc_t)&gblvardesc[0];
+    vardesc_local = gblvardesc;
   }
 
   int natts = attPack->getCountAttr();
@@ -1480,7 +1484,10 @@ void PIO_Handler::attPackPut (
     if (!att) {
       if (ESMC_LogDefault.MsgFoundError(ESMF_RC_ATTR_NOTSET,
           "Can not access Attribute in " + attPack->getName(),
-          ESMC_CONTEXT, rc)) return;
+          ESMC_CONTEXT, rc)) {
+        if (!vardesc) free (vardesc_local);
+        return;
+      }
     }
     if (att->getName().substr(0,5) == "ESMF:") {
 #if 0
@@ -1490,52 +1497,87 @@ void PIO_Handler::attPackPut (
     }
 
     ESMC_TypeKind_Flag att_type = att->getTypeKind ();
-    int nvals;
-    std::vector<std::string> stringvals;
-    std::vector<ESMC_I4> intvals;
-    std::vector<ESMC_R4> floatvals;
     switch (att_type) {
       case ESMC_TYPEKIND_CHARACTER:
+      {
+        std::vector<std::string> stringvals;
         localrc = att->get (&stringvals);
         if (ESMC_LogDefault.MsgFoundError(localrc,
             "Can not access string Attribute value for " + att->getName(),
-            ESMC_CONTEXT, rc)) return;
+            ESMC_CONTEXT, rc)) {
+          if (!vardesc) free (vardesc_local);
+          return;
+        }
         if (stringvals.size() > 1) {
           if (ESMC_LogDefault.MsgFoundError(localrc,
               "Only scalar string Attribute value for " + att->getName() + " is currently supported",
-              ESMC_CONTEXT, rc)) return;
+              ESMC_CONTEXT, rc)) {
+            if (!vardesc) free (vardesc_local);
+            return;
+          }
         }
-        piorc = pio_cpp_put_att_string (pioFileDesc, vardesc,
+        piorc = pio_cpp_put_att_string (pioFileDesc, vardesc_local,
             att->getName().c_str(), stringvals[0].c_str());
         if (!CHECKPIOERROR(piorc, "Attempting to set string Attribute: " + att->getName(),
-            ESMF_RC_FILE_WRITE, (*rc))) return;
+            ESMF_RC_FILE_WRITE, (*rc))) {
+          if (!vardesc) free (vardesc_local);
+          return;
+        }
         break;
+      }
+
       case ESMC_TYPEKIND_I4:
+      {
+        int nvals;
+        std::vector<ESMC_I4> intvals;
         localrc = att->get (&nvals, &intvals);
         if (ESMC_LogDefault.MsgFoundError(localrc,
             "Can not access int Attribute value for " + att->getName(),
-            ESMC_CONTEXT, rc)) return;
-        piorc = pio_cpp_put_att_ints (pioFileDesc, vardesc,
+            ESMC_CONTEXT, rc)) {
+          if (!vardesc) free (vardesc_local);
+          return;
+        }
+        piorc = pio_cpp_put_att_ints (pioFileDesc, vardesc_local,
             att->getName().c_str(), &intvals[0], intvals.size());
         if (!CHECKPIOERROR(piorc, "Attempting to set int Attribute: " + att->getName(),
-            ESMF_RC_FILE_WRITE, (*rc))) return;
+            ESMF_RC_FILE_WRITE, (*rc))) {
+          if (!vardesc) free (vardesc_local);
+          return;
+        }
         break;
+      }
+
       case ESMC_TYPEKIND_R4:
+      {
+        int nvals;
+        std::vector<ESMC_R4> floatvals;
         localrc = att->get (&nvals, &floatvals);
         if (ESMC_LogDefault.MsgFoundError(localrc,
             "Can not access float Attribute value for " + att->getName(),
-            ESMC_CONTEXT, rc)) return;
-        piorc = pio_cpp_put_att_floats (pioFileDesc, vardesc,
+            ESMC_CONTEXT, rc)) {
+          if (!vardesc) free (vardesc_local);
+          return;
+        }
+        piorc = pio_cpp_put_att_floats (pioFileDesc, vardesc_local,
             att->getName().c_str(), &floatvals[0], floatvals.size());
         if (!CHECKPIOERROR(piorc, "Attempting to set float Attribute: " + att->getName(),
-            ESMF_RC_FILE_WRITE, (*rc))) return;
+            ESMF_RC_FILE_WRITE, (*rc))) {
+          if (!vardesc) free (vardesc_local);
+          return;
+        }
         break;
+      }
+
       default:
         if (ESMC_LogDefault.MsgFoundError(ESMF_RC_ATTR_NOTSET,
-            "Unsupported Attribute value type for " + att->getName(),
-            ESMC_CONTEXT, rc)) return;
+            "Attribute " + att->getName() + " has unsupported value type",
+            ESMC_CONTEXT, rc)) {
+          if (!vardesc) free (vardesc_local);
+          return;
+        }
     }
-  }
+  } // natts loop
+  if (!vardesc) free (vardesc_local);
 } // PIO_Handler::attPackPut()
 //-----------------------------------------------------------------------------
 
@@ -1794,7 +1836,6 @@ bool PIO_Handler::CheckPIOError(
     std::stringstream errmsg;
 #if defined(ESMF_PNETCDF)
     // Log the error, assuming the error code was passed through PIO from PNetCDF
-std::cout << ESMC_METHOD << ": pioRetCode = " << pioRetCode << std::endl;
     if (!fmtStr.empty()) {
       errmsg << " " << fmtStr << ", (PIO/PNetCDF error = " <<  ncmpi_strerror (pioRetCode) << ")";
     } else {
