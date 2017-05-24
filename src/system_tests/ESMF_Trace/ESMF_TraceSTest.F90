@@ -21,7 +21,6 @@ program ESMF_TraceSTest
 
   ! ESMF Framework module
   use ESMF
-  use ESMF_TraceMod
   use ESMF_TestMod
   
   use user_model1, only : userm1_setvm, userm1_register
@@ -381,7 +380,7 @@ program ESMF_TraceSTest
   endif
   
   ! try to open trace files
-  write (filename, '(A,I1)') "traceout/esmf_stream_00", localPet
+  write (filename, '(A,I1)') "traceout/esmf_stream_000", localPet
   print *, "Attempt to open trace file: ", trim(filename)
   open (unit=funit, file=trim(filename), status="old", &
        action="read", iostat=ioerr)

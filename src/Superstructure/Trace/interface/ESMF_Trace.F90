@@ -118,9 +118,21 @@ contains
   
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_TraceClose()"
+!BOPI 
+! !IROUTINE: ESMF_TraceClose - Finalize tracing infrastructure
+! 
+! !INTERFACE: 
   subroutine ESMF_TraceClose(rc)
+! !ARGUMENTS:
     integer,          intent(out), optional :: rc    
-    
+!
+! !DESCRIPTION:
+!   Close the tracing infrastructure, flushing any
+!   outstanding events to disk.  Once closed, a trace
+!   cannot be re-opened.
+!
+!EOPI
+!-------------------------------------------------------------------------------
     call c_esmftrace_close(rc)
     if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
          ESMF_CONTEXT, rcToReturn=rc)) return
@@ -630,10 +642,34 @@ contains
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_TraceRegionEnter()"
+!BOP 
+! !IROUTINE: ESMF_TraceRegionEnter - Trace user-defined region entry event
+! 
+! !INTERFACE: 
   subroutine ESMF_TraceRegionEnter(name, rc)
+! !ARGUMENTS: 
     character(len=*), intent(in) :: name
     integer, intent(out), optional  :: rc
-
+!
+! !DESCRIPTION:
+!   Record an event in the trace for this PET indicating entry
+!   into a user-defined region with the given name.  This call
+!   must be paired with a call to {\tt ESMF\_TraceRegionExit()}
+!   with a matching {\tt name} parameter.  User-defined regions may be
+!   nested.
+!   If tracing is disabled on the calling PET or for the application
+!   as a whole, no event will be recorded and
+!   the call will return immediately.
+!
+! The arguments are:
+! \begin{description}
+! \item[{name}]
+!   A user-defined name for the region of code being entered
+! \item[{[rc]}]
+!   Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+! \end{description}    
+!EOP
+!-------------------------------------------------------------------------------
     rc = ESMF_SUCCESS 
     
     call c_esmftrace_region_enter(name, rc)
@@ -641,13 +677,37 @@ contains
          ESMF_CONTEXT, rcToReturn=rc)) return
 
   end subroutine ESMF_TraceRegionEnter
-
+  
+  
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_TraceRegionExit()"
+!BOP 
+! !IROUTINE: ESMF_TraceRegionExit - Trace user-defined region exit event
+! 
+! !INTERFACE: 
   subroutine ESMF_TraceRegionExit(name, rc)
+! !ARGUMENTS: 
     character(len=*), intent(in) :: name
     integer, intent(out), optional  :: rc
-
+!
+! !DESCRIPTION:
+!   Record an event in the trace for this PET indicating exit
+!   from a user-defined region with the given name.  This call
+!   must appear after a call to {\tt ESMF\_TraceRegionEnter()}
+!   with a matching {\tt name} parameter.
+!   If tracing is disabled on the calling PET or for the application
+!   as a whole, no event will be recorded and
+!   the call will return immediately.
+!
+! The arguments are:
+! \begin{description}
+! \item[{name}]
+!   A user-defined name for the region of code being exited
+! \item[{[rc]}]
+!   Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+! \end{description}    
+!EOP
+!-------------------------------------------------------------------------------
     rc = ESMF_SUCCESS 
     
     call c_esmftrace_region_exit(name, rc)

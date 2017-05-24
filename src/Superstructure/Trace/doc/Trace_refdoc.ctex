@@ -80,9 +80,9 @@
 
 \subsection{Class API}
 #ifdef STANDALONE
-%\input{ESMF_Trace_fapi}
+\input{ESMF_Trace_fapi}
 #elif defined(CONSTITUENT)
-%\input{../Superstructure/Trace/doc/ESMF_Trace_fapi}
+\input{../Superstructure/Trace/doc/ESMF_Trace_fapi}
 #endif
 
 #ifdef STANDALONE
