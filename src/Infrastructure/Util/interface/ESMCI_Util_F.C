@@ -320,10 +320,7 @@ extern "C" {
   string comnd = string (command, ESMC_F90lentrim (command, command_l));
   int err = system (comnd.c_str());
   if (rc)
-    if (err == 0)
-      *rc = ESMF_SUCCESS;
-    else
-      *rc = ESMF_FAILURE;
+    *rc = (err == 0) ? ESMF_SUCCESS : ESMF_FAILURE;
 }
 
 //-----------------------------------------------------------------------------
