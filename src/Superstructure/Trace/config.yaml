@@ -66,13 +66,13 @@ metadata:
             - initialize
             - run
             - finalize
-#    phase_event_type:
-#        class: struct
-#        fields:
-#            vmid: uint16
-#            baseid: uint16
-#            method: esmf_method_type
-#            phase: uint16
+    event_type_phase:
+        class: struct
+        fields:
+            vmid: uint16
+            baseid: uint16
+            method: enum_type_method
+            phase: uint8
     comp_type:
         class: struct
         fields:
@@ -86,17 +86,12 @@ metadata:
                 class: string
             FPM:
                 class: string
-#            my_array:
-#                class: array
-#                length: vmid
-#                element-type:
-#                    class: string
   clocks:
     sys_clock:
       description: System clock
       $return-ctype: uint64_t
   env:
-    esmf_trace_version: '0.2'
+    esmf_trace_version: '0.3'
   trace:
     byte-order: le
     uuid: auto
@@ -108,7 +103,6 @@ metadata:
           class: array
           length: 16
           element-type: uint8
-        stream_id: uint16
   streams:
     default:
       packet-context-type:
@@ -118,6 +112,8 @@ metadata:
           timestamp_end: clock-int
           packet_size: uint32
           content_size: uint32
+          nodename:
+            class: string
           pet: uint32
       event-header-type:
         class: struct
@@ -126,41 +122,25 @@ metadata:
             timestamp: clock-int
       events:
         #denotes start of prologue
-        prologue:
-            payload-type:
-                class: struct
-                fields:
-                    vmid: uint16
-                    baseid: uint16                    
-                    method: enum_type_method
-                    phase: uint8
+        prologue_enter:
+            payload-type: event_type_phase
         #denotes end of epilogue
-        epilogue:
+        epilogue_exit:
+            payload-type: event_type_phase
+        phase_enter:
+            payload-type: event_type_phase
+        phase_exit:
+            payload-type: event_type_phase
+        region_enter:
             payload-type:
                 class: struct
                 fields:
-                    vmid: uint16
-                    baseid: uint16                    
-                    method: enum_type_method
-                    phase: uint8
-        phase_start:
-            payload-type:
-        phase_end:
-            payload-type:
-        control:
+                    name:
+                        class: string
+        region_exit:
             payload-type:
                 class: struct
                 fields:
-                    vmid: uint16
-                    baseid: uint16
-                    ctrl: enum_type_control
-                    method: enum_type_method
-                    phase: uint8
-        region:
-            payload-type:
-                class: struct
-                fields:
-                    ctrl: enum_type_region
                     name:
                         class: string
         comp:

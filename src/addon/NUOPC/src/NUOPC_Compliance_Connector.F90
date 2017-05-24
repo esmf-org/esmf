@@ -28,7 +28,6 @@ module NUOPC_Compliance_Connector
     use ESMF
     use NUOPC_Base, only: NUOPC_PhaseMapStringLength  ! change this?
     use NUOPC_Compliance_Base
-    use ESMF_TraceMod
     
     implicit none
   
@@ -431,21 +430,21 @@ contains
             endif
 
             if (outputTrace) then
-               call ESMF_TraceEventPhasePrologueEnter(comp, rc=rc)
+               call ESMF_TracePhasePrologueEnter(comp, rc=rc)
                if (ESMF_LogFoundError(rc, &
                     line=__LINE__, file=FILENAME)) return               
-               call ESMF_TraceEventMemInfo(rc=rc)
+               call ESMF_TraceMemInfo(rc=rc)
                if (ESMF_LogFoundError(rc, &
                     line=__LINE__, file=FILENAME)) return                              
                if (ESMF_ClockIsCreated(clock)) then
-                  call ESMF_TraceEventClock(clock, rc=rc)
+                  call ESMF_TraceClock(clock, rc=rc)
                   if (ESMF_LogFoundError(rc, &
                        line=__LINE__, file=FILENAME)) return                              
                endif
-               call NUOPC_TraceEventComponentInfo(comp, rc=rc)
+               call NUOPC_TraceComponentInfo(comp, rc=rc)
                if (ESMF_LogFoundError(rc, &
                     line=__LINE__, file=FILENAME)) return                              
-               call ESMF_TraceEventPhaseEnter(comp, rc=rc)
+               call ESMF_TracePhaseEnter(comp, rc=rc)
                if (ESMF_LogFoundError(rc, &
                     line=__LINE__, file=FILENAME)) return                              
             endif
@@ -470,18 +469,18 @@ contains
         if (ccfDepth <= maxDepth .or. maxDepth < 0) then
 
            if (outputTrace) then
-              call ESMF_TraceEventPhaseExit(comp, rc=rc)
+              call ESMF_TracePhaseExit(comp, rc=rc)
               if (ESMF_LogFoundError(rc, &
                    line=__LINE__, file=FILENAME)) return                              
               if (ESMF_ClockIsCreated(clock)) then
-                 call ESMF_TraceEventClock(clock, rc=rc)
+                 call ESMF_TraceClock(clock, rc=rc)
                  if (ESMF_LogFoundError(rc, &
                       line=__LINE__, file=FILENAME)) return                              
               endif
-              call ESMF_TraceEventMemInfo(rc=rc)
+              call ESMF_TraceMemInfo(rc=rc)
               if (ESMF_LogFoundError(rc, &
                    line=__LINE__, file=FILENAME)) return
-              call ESMF_TraceEventPhaseEpilogueExit(comp, rc=rc)
+              call ESMF_TracePhaseEpilogueExit(comp, rc=rc)
               if (ESMF_LogFoundError(rc, &
                    line=__LINE__, file=FILENAME)) return                              
            endif
@@ -698,21 +697,21 @@ contains
              endif
 
              if (outputTrace) then
-                call ESMF_TraceEventPhasePrologueEnter(comp, rc=rc)
+                call ESMF_TracePhasePrologueEnter(comp, rc=rc)
                 if (ESMF_LogFoundError(rc, &
                     line=__LINE__, file=FILENAME)) return               
-                call ESMF_TraceEventMemInfo(rc=rc)
+                call ESMF_TraceMemInfo(rc=rc)
                 if (ESMF_LogFoundError(rc, &
                      line=__LINE__, file=FILENAME)) return                              
                 if (ESMF_ClockIsCreated(clock)) then
-                   call ESMF_TraceEventClock(clock, rc=rc)
+                   call ESMF_TraceClock(clock, rc=rc)
                    if (ESMF_LogFoundError(rc, &
                         line=__LINE__, file=FILENAME)) return                              
                 endif
-                call NUOPC_TraceEventComponentInfo(comp, rc=rc)
+                call NUOPC_TraceComponentInfo(comp, rc=rc)
                 if (ESMF_LogFoundError(rc, &
                      line=__LINE__, file=FILENAME)) return                              
-               call ESMF_TraceEventPhaseEnter(comp, rc=rc)
+               call ESMF_TracePhaseEnter(comp, rc=rc)
                if (ESMF_LogFoundError(rc, &
                     line=__LINE__, file=FILENAME)) return                              
             endif
@@ -736,18 +735,18 @@ contains
         if (ccfDepth <= maxDepth .or. maxDepth < 0) then
            
            if (outputTrace) then
-              call ESMF_TraceEventPhaseExit(comp, rc=rc)
+              call ESMF_TracePhaseExit(comp, rc=rc)
               if (ESMF_LogFoundError(rc, &
                    line=__LINE__, file=FILENAME)) return                              
               if (ESMF_ClockIsCreated(clock)) then
-                 call ESMF_TraceEventClock(clock, rc=rc)
+                 call ESMF_TraceClock(clock, rc=rc)
                  if (ESMF_LogFoundError(rc, &
                       line=__LINE__, file=FILENAME)) return                              
               endif
-              call ESMF_TraceEventMemInfo(rc=rc)
+              call ESMF_TraceMemInfo(rc=rc)
               if (ESMF_LogFoundError(rc, &
                    line=__LINE__, file=FILENAME)) return
-              call ESMF_TraceEventPhaseEpilogueExit(comp, rc=rc)
+              call ESMF_TracePhaseEpilogueExit(comp, rc=rc)
               if (ESMF_LogFoundError(rc, &
                    line=__LINE__, file=FILENAME)) return                              
            endif
@@ -949,21 +948,21 @@ contains
             endif
 
             if (outputTrace) then
-               call ESMF_TraceEventPhasePrologueEnter(comp, rc=rc)
+               call ESMF_TracePhasePrologueEnter(comp, rc=rc)
                if (ESMF_LogFoundError(rc, &
                     line=__LINE__, file=FILENAME)) return               
-               call ESMF_TraceEventMemInfo(rc=rc)
+               call ESMF_TraceMemInfo(rc=rc)
                if (ESMF_LogFoundError(rc, &
                     line=__LINE__, file=FILENAME)) return                              
                if (ESMF_ClockIsCreated(clock)) then
-                  call ESMF_TraceEventClock(clock, rc=rc)
+                  call ESMF_TraceClock(clock, rc=rc)
                   if (ESMF_LogFoundError(rc, &
                        line=__LINE__, file=FILENAME)) return                              
                endif
-               call NUOPC_TraceEventComponentInfo(comp, rc=rc)
+               call NUOPC_TraceComponentInfo(comp, rc=rc)
                if (ESMF_LogFoundError(rc, &
                     line=__LINE__, file=FILENAME)) return                              
-               call ESMF_TraceEventPhaseEnter(comp, rc=rc)
+               call ESMF_TracePhaseEnter(comp, rc=rc)
                if (ESMF_LogFoundError(rc, &
                     line=__LINE__, file=FILENAME)) return                              
             endif
@@ -987,18 +986,18 @@ contains
         if (ccfDepth <= maxDepth .or. maxDepth < 0) then
 
            if (outputTrace) then
-              call ESMF_TraceEventPhaseExit(comp, rc=rc)
+              call ESMF_TracePhaseExit(comp, rc=rc)
               if (ESMF_LogFoundError(rc, &
                    line=__LINE__, file=FILENAME)) return                              
               if (ESMF_ClockIsCreated(clock)) then
-                 call ESMF_TraceEventClock(clock, rc=rc)
+                 call ESMF_TraceClock(clock, rc=rc)
                  if (ESMF_LogFoundError(rc, &
                       line=__LINE__, file=FILENAME)) return                              
               endif
-              call ESMF_TraceEventMemInfo(rc=rc)
+              call ESMF_TraceMemInfo(rc=rc)
               if (ESMF_LogFoundError(rc, &
                    line=__LINE__, file=FILENAME)) return
-              call ESMF_TraceEventPhaseEpilogueExit(comp, rc=rc)
+              call ESMF_TracePhaseEpilogueExit(comp, rc=rc)
               if (ESMF_LogFoundError(rc, &
                    line=__LINE__, file=FILENAME)) return                              
            endif
@@ -1179,7 +1178,7 @@ contains
 
       end subroutine checkPhaseEpilogue_CplListEstablished
       
-      recursive subroutine NUOPC_TraceEventComponentInfo(comp, rc)
+      recursive subroutine NUOPC_TraceComponentInfo(comp, rc)
         
         type(ESMF_CplComp), intent(in) :: comp
         integer, intent(out)  :: rc
@@ -1203,14 +1202,14 @@ contains
         attrName(3) = "FinalizePhaseMap"
         attrKey(3) = "FPM"
         
-        call ESMF_TraceEventComponentInfo(comp, attrConv, &
+        call ESMF_TraceComponentInfo(comp, attrConv, &
              attrPurp, attrName, attrKey, rc=rc)
         if (ESMF_LogFoundError(rc, &
              line=__LINE__, &
              file=FILENAME)) &
              return  
         
-      end subroutine NUOPC_TraceEventComponentInfo
+      end subroutine NUOPC_TraceComponentInfo
 
 
 

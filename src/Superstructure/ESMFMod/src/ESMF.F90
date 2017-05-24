@@ -22,6 +22,7 @@ module ESMF
     use ESMF_LogErrMod
     use ESMF_LogPublicMod
     use ESMF_InitMacrosMod
+    use ESMF_TraceMod
     
     use ESMF_F90InterfaceMod
     use ESMF_FortranWordsizeMod

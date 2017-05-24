@@ -1,0 +1,49 @@
+% $Id$
+%
+% Earth System Modeling Framework
+% Copyright 2002-2017, University Corporation for Atmospheric Research, 
+% Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
+% Laboratory, University of Michigan, National Centers for Environmental 
+% Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
+% NASA Goddard Space Flight Center.
+% Licensed under the University of Illinois-NCSA License.
+
+%\subsection{Use and Examples}
+
+ESMF tracing is disabled by default. To enable tracing, set the
+{\tt ESMF\_RUNTIME\_TRACE} environment variable to {\tt ON}. You
+do not need to recompile your code to enable tracing.
+
+\begin{verbatim}
+# csh shell
+$ setenv ESMF_RUNTIME_TRACE ON
+
+# bash shell
+$ export ESMF_RUNTIME_TRACE=ON
+\end{verbatim}
+
+When enabled, the default behavior is to trace all PETs of the
+ESMF application. Although the ESMF tracer is designed to write 
+events in a compact form, tracing can produce an extremely
+large number of events depending on the total number of PETs and
+the length of the run. To reduce output, it is possible to restrict
+the PETs that produce trace output by setting the {\tt ESMF\_RUNTIME\_TRACE\_PETLIST}
+environment variable. For example, this setting:
+
+\begin{verbatim}
+$ setenv ESMF_RUNTIME_TRACE_PETLIST "0 101 192-196"
+\end{verbatim}
+
+will instruct the tracer to only trace PETs 0, 101, and 192 through 196
+(inclusive). The syntax of this environment variable is to list
+PET numbers separated by spaces. PET ranges are also supported using
+the ``X-Y'' syntax where X < Y. For PET counts greater than 100, it is
+recommended to set this environment variable. The one exception is that
+PET 0 is always traced, regardless of the {\tt ESMF\_RUNTIME\_TRACE\_PETLIST}
+setting.
+
+After running an ESMF application with tracing enabled, a directory
+called {\em traceout} will be created in the run directory and it will
+contain a {\em metadata} file and an event stream file {\em esmf\_stream\_XXXX}
+for each PET with tracing enabled. Together these files form a valid
+CTF trace which may be analyzed with any of the tools listed above.

@@ -20,7 +20,7 @@
 #define BT_FLUSH_STREAM_INTERVAL 100
 
 //constants used in tracing events
-#define BT_ESMF_TRACE_VERSION "0.1"
+#define BT_ESMF_TRACE_VERSION "0.2"
 
 #define BT_CNTL_START 0
 #define BT_CNTL_END 1
@@ -40,32 +40,27 @@ namespace ESMCI {
   void TraceOpen(const char *trace_dir, int *rc);
   void TraceClose(int *rc);
   void TraceSetupTypes(int *rc);  
-  void TraceCheckPetList(int *traceLocalPet, int *rc);
+  bool TraceIsEnabledForPET(int *rc);
   std::string TraceGetMetadataString();
   
   ////////////////////////////////
 
-  void TraceEventPhase(int ctrl, int *ep_vmid,
-		       int *ep_baseid, int *ep_method, int *ep_phase);
   void TraceEventPhaseEnter(int *ep_vmid, int *ep_baseid, 
 			    int *ep_method, int *ep_phase);
   void TraceEventPhaseExit(int *ep_vmid, int *ep_baseid, 
 			   int *ep_method, int *ep_phase);
   void TraceEventPhasePrologueEnter(int *ep_vmid, int *ep_baseid, 
-			    int *ep_method, int *ep_phase);
-  void TraceEventPhasePrologueExit(int *ep_vmid, int *ep_baseid, 
-                                   int *ep_method, int *ep_phase);
-  void TraceEventPhaseEpilogueEnter(int *ep_vmid, int *ep_baseid, 
                                     int *ep_method, int *ep_phase);
   void TraceEventPhaseEpilogueExit(int *ep_vmid, int *ep_baseid, 
-                                   int *ep_method, int *ep_phase);
-
+                                    int *ep_method, int *ep_phase);
+  
+  void TraceEventRegionEnter(const char*name);
+  void TraceEventRegionExit(const char*name);
+  
   void TraceEventComponentInfo(Comp *comp, int *ep_vmid, int *ep_baseid,
                                const char *ep_name,
                                std::string attributeKeys,
                                std::string attributeVals);
-
-  void TraceEventRegion(int ctrl, const char*name);
   void TraceEventMemInfo();
   void TraceEventClock(int *ep_year, int *ep_month, int *ep_day,
                        int *ep_hour, int *ep_minute, int *ep_second);

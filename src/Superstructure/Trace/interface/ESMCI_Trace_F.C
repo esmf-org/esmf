@@ -28,11 +28,6 @@ extern "C" {
   {
     ESMCI::TraceClose(rc);
   }
-
-  //  void FTN_X(c_esmftrace_checkpetlist)(int *traceLocalPet, int *rc)
-  //{
-  //  ESMCI::TraceCheckPetList(traceLocalPet, rc);
-  //}
   
   void FTN_X(c_esmftrace_phase_enter)(int *vmid, int *baseid, int *method, int *phase, int *rc)
   {
@@ -52,17 +47,17 @@ extern "C" {
     if (rc != NULL) *rc = ESMF_SUCCESS;
   }
 
-  void FTN_X(c_esmftrace_phase_prologue_exit)(int *vmid, int *baseid, int *method, int *phase, int *rc)
-  {
-    ESMCI::TraceEventPhasePrologueExit(vmid, baseid, method, phase);
-    if (rc != NULL) *rc = ESMF_SUCCESS;
-  }
+  //void FTN_X(c_esmftrace_phase_prologue_exit)(int *vmid, int *baseid, int *method, int *phase, int *rc)
+  //{
+  //  ESMCI::TraceEventPhasePrologueExit(vmid, baseid, method, phase);
+  //  if (rc != NULL) *rc = ESMF_SUCCESS;
+  //}
 
-  void FTN_X(c_esmftrace_phase_epilogue_enter)(int *vmid, int *baseid, int *method, int *phase, int *rc)
-  {
-    ESMCI::TraceEventPhaseEpilogueEnter(vmid, baseid, method, phase);
-    if (rc != NULL) *rc = ESMF_SUCCESS;
-  }
+  //void FTN_X(c_esmftrace_phase_epilogue_enter)(int *vmid, int *baseid, int *method, int *phase, int *rc)
+  //{
+  //  ESMCI::TraceEventPhaseEpilogueEnter(vmid, baseid, method, phase);
+  //  if (rc != NULL) *rc = ESMF_SUCCESS;
+  //}
 
   void FTN_X(c_esmftrace_phase_epilogue_exit)(int *vmid, int *baseid, int *method, int *phase, int *rc)
   {
@@ -86,14 +81,15 @@ extern "C" {
   }
 
   void FTN_X(c_esmftrace_region_enter)(const char *name, int *rc, ESMCI_FortranStrLenArg nlen) {
+    //TODO: optimize trim by not creating string object
     string cname = string(name, ESMC_F90lentrim(name, nlen));
-    ESMCI::TraceEventRegion(BT_REGION_ENTER, cname.c_str());
+    ESMCI::TraceEventRegionEnter(cname.c_str());
     if (rc != NULL) *rc = ESMF_SUCCESS;
   }
 
   void FTN_X(c_esmftrace_region_exit)(const char *name, int *rc, ESMCI_FortranStrLenArg nlen) {
     string cname = string(name, ESMC_F90lentrim(name, nlen));
-    ESMCI::TraceEventRegion(BT_REGION_EXIT, cname.c_str());
+    ESMCI::TraceEventRegionExit(cname.c_str());
     if (rc != NULL) *rc = ESMF_SUCCESS;
   }
 

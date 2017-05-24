@@ -5,6 +5,11 @@ Format (CTF).  See https://github.com/efficios/barectf/ for
 information about installing this tool locally.  It is not needed
 unless you change config.yaml.
 
+The generated files are:
+src/esmftrc.c
+include/esmftrc.h
+include/metadata
+
 If the config.yaml file changes, then run the following to
 generate the new interfaces.
 

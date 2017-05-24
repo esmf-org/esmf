@@ -26,6 +26,7 @@
 #include "ESMCI_VM.h"
 #include "ESMCI_Trace.h"
 #include "ESMCI_Comp.h"
+#include "ESMCI_VMKernel.h"
 
 #define BT_CHK(_value, _ctx)                                            \
   if ((_value) != 0) {							\
@@ -38,6 +39,7 @@
     return;}
 
 #define TRACE_DIR_PERMISSIONS (S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH)
+#define NODENAME_LEN 100
 
 #ifdef ESMF_BABELTRACE
 #include <babeltrace/ctf-writer/writer.h>
@@ -111,7 +113,7 @@ struct bt_ctf_stream_class {
 #ifdef ESMF_TRACE_INTERNAL 
 
 #include <esmftrc.h>
-#define EVENT_BUF_SIZE 4096
+#define EVENT_BUF_SIZE 16384
 
 #ifdef __cplusplus
 # define TO_VOID_PTR(_value)		static_cast<void *>(_value)
@@ -130,7 +132,7 @@ using std::stringstream;
 
 namespace ESMCI {
 
-  static bool traceLocalPet = true;
+  static bool traceLocalPet = false;
 
   static vector<string> split(const string& s, const string& delim, const bool keep_empty = true) {
     vector<string> result;
@@ -162,22 +164,30 @@ namespace ESMCI {
     return str.substr(first, (last - first + 1));
   }
 
-  //TODO: consider changing this to also verify
-  //  that tracing is enabled
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI::TraceCheckPetList()"  
-  void TraceCheckPetList(int *traceLocalPet, int *rc){
-	
+#define ESMC_METHOD "ESMCI::TraceIsEnabledForPET()"  
+  bool TraceIsEnabledForPET(int *rc){
+    
     int localrc;
     if (rc != NULL) *rc = ESMF_SUCCESS;
-    *traceLocalPet = 0;
     
+    //first check if tracing is enabled
+    int tracingEnabled = 0;
+    localrc = Comp::getComplianceCheckerTrace(&tracingEnabled);
+    if (ESMC_LogDefault.MsgFoundError(localrc, 
+         ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc)) 
+      return false;
+
+    if (tracingEnabled == 0) return false;
+    //printf("Tracing enabled\n");
+    
+    //then check if local PET is enabled 
     VM *globalvm = VM::getGlobal(&localrc);
     int localPet = globalvm->getMypet();
     bool invalidFormat = false;
     
-    char const *envVar = std::getenv("ESMF_RUNTIME_TRACE_PETLIST");
-    if (envVar != NULL){     
+    char const *envVar = VM::getenv("ESMF_RUNTIME_TRACE_PETLIST");
+    if (envVar != NULL && strlen(envVar) > 0) {     
       std::string envStr(envVar);
       const vector<string> listItems = split(trim(envStr), " ");
       
@@ -191,8 +201,7 @@ namespace ESMCI {
 	    if (!(lowss >> low).fail() && !(highss >> high).fail()) {
 	      //printf("low=%d, high=%d\n", low, high);
 	      if (localPet >= low && localPet <= high) {
-		*traceLocalPet = 1;
-		return;
+                return true;
 	      }
 	    }
 	    else {
@@ -210,8 +219,7 @@ namespace ESMCI {
 	  
 	  if(!(ss.fail())) {
 	    if (localPet == pet) {
-	      *traceLocalPet = 1;
-	      return;
+              return true;
 	    }
 	  }	
 	  else {
@@ -219,38 +227,36 @@ namespace ESMCI {
 	  }
 	  
 	}
-
+        
 	if (invalidFormat) {
 	  ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
 					"Invalid format in env variable ESMF_RUNTIME_TRACE_PETLIST", 
 					ESMC_CONTEXT, rc);
 	  if (rc != NULL) rc = ESMF_SUCCESS;
-	  return;
+	  return false;
 	}
 		
       }
       
-      //pet not found in list
-      *traceLocalPet = 0;
-
+      //pet not found in list      
       if (localPet == 0) {
 	//pet 0 always participates in trace
-	*traceLocalPet = 1;
+	return true;
+      }
+      else {
+        return false;
       }
    
     }
     else { //no env variable defined, so trace all pets
-      *traceLocalPet = 1;
+      return true;
     }
     
   }
 
   static uint64_t get_clock(void *data) {
     struct timespec ts;
-    
-    //clock_gettime(CLOCK_MONOTONIC, &ts);
-    clock_gettime(CLOCK_REALTIME, &ts);
-    
+    clock_gettime(CLOCK_REALTIME, &ts);  
     return ts.tv_sec * 1000000000ULL + ts.tv_nsec;
   }
 
@@ -341,23 +347,14 @@ namespace ESMCI {
     globalvm->barrier();
 
     //determine if tracing turned on for this PET
-    int localPetOn = 0;
-    TraceCheckPetList(&localPetOn, &localrc);
+    traceLocalPet = TraceIsEnabledForPET(&localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, 
-	  ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc)) {
+          ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc)) {
       traceLocalPet = false;
       return;
     }
        
-    if (localPetOn == 1) {
-      traceLocalPet = true;
-    }
-    else {
-      traceLocalPet = false;
-    }
-    if (!traceLocalPet) {
-      return;
-    }
+    if (!traceLocalPet) return;
   
 #ifndef ESMF_BT_SINGLE_TRACE
     //my specific directory
@@ -778,11 +775,16 @@ namespace ESMCI {
     struct esmftrc_default_ctx ctx;
     FILE *fh;
     int stream_id;
+    char nodename[NODENAME_LEN];
   };
   
   //global context
-  static struct esmftrc_platform_filesys_ctx *g_esmftrc_platform_filesys_ctx;
-   
+  static struct esmftrc_platform_filesys_ctx *g_esmftrc_platform_filesys_ctx = NULL;
+
+  static struct esmftrc_default_ctx *esmftrc_platform_get_default_ctx() {
+    return &g_esmftrc_platform_filesys_ctx->ctx;
+  }
+  
   static void write_packet(struct esmftrc_platform_filesys_ctx *ctx) {
     size_t nmemb = fwrite(esmftrc_packet_buf(&ctx->ctx),
 			  esmftrc_packet_buf_size(&ctx->ctx), 1, ctx->fh);
@@ -798,7 +800,7 @@ namespace ESMCI {
     struct esmftrc_platform_filesys_ctx *ctx =
       FROM_VOID_PTR(struct esmftrc_platform_filesys_ctx, data);
     
-    esmftrc_default_open_packet(&ctx->ctx, ctx->stream_id);
+    esmftrc_default_open_packet(&ctx->ctx, ctx->nodename, ctx->stream_id);
   }
 
   static void close_packet(void *data) {
@@ -909,26 +911,17 @@ namespace ESMCI {
     globalvm->barrier();
 
     //determine if tracing turned on for this PET
-    int localPetOn = 0;
-    TraceCheckPetList(&localPetOn, &localrc);
+    traceLocalPet = TraceIsEnabledForPET(&localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, 
           ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc)) {
       traceLocalPet = false;
       return;
     }
        
-    if (localPetOn == 1) {
-      traceLocalPet = true;
-    }
-    else {
-      traceLocalPet = false;
-    }
-    if (!traceLocalPet) {
-      return;
-    }
-  
+    if (!traceLocalPet) return;
+
     //my specific file
-    sprintf(stream_file, "%s/esmf_stream_%03d", stream_dir_root, stream_id);
+    sprintf(stream_file, "%s/esmf_stream_%04d", stream_dir_root, stream_id);
             
     ctx->fh = fopen(stream_file, "wb");
     if (!ctx->fh) {
@@ -939,6 +932,11 @@ namespace ESMCI {
       return;
     }
 
+    //get node name        
+    if (gethostname(ctx->nodename, NODENAME_LEN) < 0) {
+      ctx->nodename[0] = '\0';
+    }
+    
     ctx->stream_id = stream_id;
 
     //stream zero writes the metadata file
@@ -982,67 +980,49 @@ namespace ESMCI {
     }
     
   }
-
-  static struct esmftrc_default_ctx *esmftrc_platform_get_default_ctx() {
-    return &g_esmftrc_platform_filesys_ctx->ctx;
-  }
   
-#undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI::TraceEventPhase()"  
-  void TraceEventPhase(int ctrl, int *ep_vmid,
-		       int *ep_baseid, int *ep_method, int *ep_phase) {
-
-    if (!traceLocalPet) return;
-
-    //esmftrc_default_trace_control(esmftrc_platform_get_default_ctx(),
-    //                              *ep_vmid, *ep_baseid, ctrl,
-    //                              *ep_method, *ep_phase);
-    if (ctrl == BT_CNTL_START) {
-      esmftrc_default_trace_phase_start(esmftrc_platform_get_default_ctx());
-    }
-    else if (ctrl == BT_CNTL_END) {
-      esmftrc_default_trace_phase_end(esmftrc_platform_get_default_ctx());
-    }
-    
-  }
-
   void TraceEventPhaseEnter(int *ep_vmid, int *ep_baseid, int *ep_method, int *ep_phase) {
-    TraceEventPhase(BT_CNTL_START, ep_vmid, ep_baseid, ep_method, ep_phase);
+    if (!traceLocalPet) return;
+    esmftrc_default_trace_phase_enter(esmftrc_platform_get_default_ctx(),
+                                      *ep_vmid, *ep_baseid, *ep_method, *ep_phase);
   }
   
   void TraceEventPhaseExit(int *ep_vmid, int *ep_baseid, int *ep_method, int *ep_phase) {
-    TraceEventPhase(BT_CNTL_END, ep_vmid, ep_baseid, ep_method, ep_phase);
+    if (!traceLocalPet) return;
+    esmftrc_default_trace_phase_exit(esmftrc_platform_get_default_ctx(),
+                                     *ep_vmid, *ep_baseid, *ep_method, *ep_phase);
   }
 
   void TraceEventPhasePrologueEnter(int *ep_vmid, int *ep_baseid, int *ep_method, int *ep_phase) {
-    //TraceEventPhase(BT_CNTL_STARTP, ep_vmid, ep_baseid, ep_method, ep_phase);
     if (!traceLocalPet) return;
-    esmftrc_default_trace_prologue(esmftrc_platform_get_default_ctx(),
-                                   *ep_vmid, *ep_baseid, *ep_method, *ep_phase);
+    esmftrc_default_trace_prologue_enter(esmftrc_platform_get_default_ctx(),
+                                         *ep_vmid, *ep_baseid, *ep_method, *ep_phase);
   }
   
-  void TraceEventPhasePrologueExit(int *ep_vmid, int *ep_baseid, int *ep_method, int *ep_phase) {
+  //void TraceEventPhasePrologueExit(int *ep_vmid, int *ep_baseid, int *ep_method, int *ep_phase) {
     //TraceEventPhase(BT_CNTL_ENDP, ep_vmid, ep_baseid, ep_method, ep_phase);
-  }
+  //}
   
-  void TraceEventPhaseEpilogueEnter(int *ep_vmid, int *ep_baseid, int *ep_method, int *ep_phase) {
+  //void TraceEventPhaseEpilogueEnter(int *ep_vmid, int *ep_baseid, int *ep_method, int *ep_phase) {
     //TraceEventPhase(BT_CNTL_STARTE, ep_vmid, ep_baseid, ep_method, ep_phase);
-  }
+  //}
   
   void TraceEventPhaseEpilogueExit(int *ep_vmid, int *ep_baseid, int *ep_method, int *ep_phase) {
-    //TraceEventPhase(BT_CNTL_ENDE, ep_vmid, ep_baseid, ep_method, ep_phase);
     if (!traceLocalPet) return;
-    esmftrc_default_trace_epilogue(esmftrc_platform_get_default_ctx(),
-                                   *ep_vmid, *ep_baseid, *ep_method, *ep_phase);
+    esmftrc_default_trace_epilogue_exit(esmftrc_platform_get_default_ctx(),
+                                        *ep_vmid, *ep_baseid, *ep_method, *ep_phase);
   }
 
-#undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI::TraceEventRegion()"  
-  void TraceEventRegion(int ctrl, const char *name) {
+  void TraceEventRegionEnter(const char *name) {
     if (!traceLocalPet) return;
+    esmftrc_default_trace_region_enter(esmftrc_platform_get_default_ctx(),
+                                       name);
+  }
 
-    esmftrc_default_trace_region(esmftrc_platform_get_default_ctx(),
-                                 ctrl, name);
+  void TraceEventRegionExit(const char *name) {
+    if (!traceLocalPet) return;
+    esmftrc_default_trace_region_exit(esmftrc_platform_get_default_ctx(),
+                                       name);
   }
   
 #undef  ESMC_METHOD
@@ -1109,16 +1089,6 @@ namespace ESMCI {
                               *ep_hour, *ep_minute, *ep_second);
     
   }
-
-  
-  
-  /*
-  struct esmftrc_default_ctx *esmftrc_platform_linux_fs_get_esmftrc_ctx(
-		  struct esmftrc_platform_linux_fs_ctx *ctx) {
-    return &ctx->ctx;
-  }
-  */
-
   
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -1140,10 +1110,6 @@ namespace ESMCI {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::TraceSetupTypes()"    
   void TraceSetupTypes(int *rc) { LOG_NO_BT_LIB }
-
-//#undef  ESMC_METHOD
-//#define ESMC_METHOD "ESMCI::TraceCheckPetList()"  
-//  void TraceCheckPetList(int *traceLocalPet, int *rc) { LOG_NO_BT_LIB }
  
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::TraceEventPhase()"  
