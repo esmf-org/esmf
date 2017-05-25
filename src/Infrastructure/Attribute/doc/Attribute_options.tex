@@ -1,6 +1,6 @@
 % $Id$
 
-\subsection{ESMF\_ATTCOPY}
+\subsubsection{ESMF\_ATTCOPY}
 \label{const:attcopy}
 {\sf DESCRIPTION:\\}
 Indicates which type of copy behavior is used when copying ESMF Attribute objects.
@@ -12,8 +12,9 @@ The type of this flag is:
 The valid values are:
 \begin{description}
   \item[ESMF\_ATTCOPY\_REFERENCE]
-    The destination Attribute hierarchy becomes a reference
-    the Attribute hierarchy of the source object.
+    The destination Attribute hierarchy becomes a reference copy of
+    the Attribute hierarchy of the source object. Any further changes to one
+    will also be reflected in the other.
   \item[ESMF\_ATTCOPY\_VALUE]
     All of the Attributes and Attribute packages of the source object will be
     copied by value to the destination object. None of the Attribute links to
