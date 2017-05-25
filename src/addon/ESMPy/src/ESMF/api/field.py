@@ -90,6 +90,9 @@ class Field(object):
             if ndbounds is not None:
                 local_ndbounds = list(ndbounds)
 
+        # TODO: flip ndbounds
+        #     also, will have to verify that everything is switched back
+
         xd = 0
         if local_ndbounds:
             xd = len(local_ndbounds)
