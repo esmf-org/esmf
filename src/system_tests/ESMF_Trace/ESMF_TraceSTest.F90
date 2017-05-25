@@ -371,7 +371,7 @@ program ESMF_TraceSTest
      if (trim(line) /= "/* CTF 1.8 */") then
         close(funit)
         write (failMsg, *) "Corrupt metadata file."
-        call ESMF_STest((ioerr /= 0), testname, failMsg, result, ESMF_SRCLINE)
+        call ESMF_STest(.false., testname, failMsg, result, ESMF_SRCLINE)
         goto 20
      endif
      
