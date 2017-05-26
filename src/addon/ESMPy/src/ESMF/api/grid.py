@@ -894,7 +894,7 @@ class Grid(object):
         *REQUIRED:*
 
         :param int coord_dim: The dimension number of the coordinates to return
-            e.g. ``[x, y, z] = (0, 1, 2)``, or ``[lat, lon] = (0, 1)``
+            e.g. ``[x, y, z] = (0, 1, 2)``, or ``[lon, lat] = (0, 1)``
             (coordinates will not be returned if ``coord_dim`` is not specified
             and ``staggerlocs`` is a list with more than one element).
 
