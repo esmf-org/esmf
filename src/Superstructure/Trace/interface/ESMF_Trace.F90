@@ -140,10 +140,17 @@ contains
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_TraceGridCompPhaseEnter()"
+!BOPI 
+! !IROUTINE: ESMF_TraceGridCompPhaseEnter - Trace entry into a gridded component phase
+! 
+! !INTERFACE: 
   subroutine ESMF_TraceGridCompPhaseEnter(comp, rc)
+! !ARGUMENTS: 
     type(ESMF_GridComp), intent(in) :: comp
     integer, intent(out), optional  :: rc
-
+!
+!EOPI
+!-------------------------------------------------------------------------------
     ! locals
     integer :: vmid
     integer :: baseid
@@ -172,10 +179,18 @@ contains
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_TraceCplCompPhaseEnter()"
+!BOPI 
+! !IROUTINE: ESMF_TraceCplCompPhaseEnter - Trace entry into coupler component phase
+! 
+! !INTERFACE: 
   subroutine ESMF_TraceCplCompPhaseEnter(comp, rc)
+! !ARGUMENTS: 
     type(ESMF_CplComp), intent(in) :: comp
     integer, intent(out), optional  :: rc
-
+!
+!EOPI
+!-------------------------------------------------------------------------------
+    
     ! locals
     integer :: vmid
     integer :: baseid
@@ -205,10 +220,17 @@ contains
   
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_TraceGridCompPhaseExit()"
+!BOPI 
+! !IROUTINE: ESMF_TraceGridCompPhaseExit - Trace exit from gridded component phase
+! 
+! !INTERFACE: 
   subroutine ESMF_TraceGridCompPhaseExit(comp, rc)
+! !ARGUMENTS: 
     type(ESMF_GridComp), intent(in) :: comp
     integer, intent(out), optional  :: rc
-
+!
+!EOPI
+!-------------------------------------------------------------------------------
     ! locals
     integer :: vmid
     integer :: baseid
@@ -236,10 +258,17 @@ contains
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_TraceCplCompPhaseExit()"
+!BOPI 
+! !IROUTINE: ESMF_TraceCplCompPhaseExit - Trace exit from coupler component phase
+! 
+! !INTERFACE: 
   subroutine ESMF_TraceCplCompPhaseExit(comp, rc)
+! !ARGUMENTS: 
     type(ESMF_CplComp), intent(in) :: comp
     integer, intent(out), optional  :: rc
-
+!
+!EOPI
+!-------------------------------------------------------------------------------
     ! locals
     integer :: vmid
     integer :: baseid
@@ -267,10 +296,17 @@ contains
   
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_TraceGridCompPhasePrologueEnter()"
+!BOPI 
+! !IROUTINE: ESMF_TraceGridCompPhasePrologueEnter - Trace entry into gridded component phase prologue
+! 
+! !INTERFACE: 
   subroutine ESMF_TraceGridCompPhasePrologueEnter(comp, rc)
+! !ARGUMENTS: 
     type(ESMF_GridComp), intent(in) :: comp
     integer, intent(out), optional  :: rc
-
+!
+!EOPI
+!-------------------------------------------------------------------------------
     ! locals
     integer :: vmid
     integer :: baseid
@@ -299,10 +335,17 @@ contains
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_TraceCplCompPhasePrologueEnter()"
+!BOPI 
+! !IROUTINE: ESMF_TraceCplCompPhasePrologueEnter - Trace entry into coupler component phase prologue
+! 
+! !INTERFACE: 
   subroutine ESMF_TraceCplCompPhasePrologueEnter(comp, rc)
+! !ARGUMENTS: 
     type(ESMF_CplComp), intent(in) :: comp
     integer, intent(out), optional  :: rc
-    
+!
+!EOPI
+!-------------------------------------------------------------------------------
     ! locals
     integer :: vmid
     integer :: baseid
@@ -331,10 +374,17 @@ contains
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_TraceGridCompPhaseEpilogueExit()"
+!BOPI 
+! !IROUTINE: ESMF_TraceGridCompPhaseEpilogueExit - Trace exit from gridded component phase epilogue
+! 
+! !INTERFACE: 
   subroutine ESMF_TraceGridCompPhaseEpilogueExit(comp, rc)
+! !ARGUMENTS: 
     type(ESMF_GridComp), intent(in) :: comp
     integer, intent(out), optional  :: rc
-
+!
+!EOPI
+!-------------------------------------------------------------------------------
     ! locals
     integer :: vmid
     integer :: baseid
@@ -362,10 +412,17 @@ contains
   
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_TraceCplCompPhaseEpilogueExit()"
+!BOPI 
+! !IROUTINE: ESMF_TraceCplCompPhaseEpilogueExit - Trace exit from coupler component phase epilogue
+! 
+! !INTERFACE: 
   subroutine ESMF_TraceCplCompPhaseEpilogueExit(comp, rc)
+! !ARGUMENTS: 
     type(ESMF_CplComp), intent(in) :: comp
     integer, intent(out), optional  :: rc
-    
+!
+!EOPI
+!-------------------------------------------------------------------------------
     ! locals
     integer :: vmid
     integer :: baseid
@@ -394,14 +451,21 @@ contains
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_TraceGridComponentInfo()"
+!BOPI 
+! !IROUTINE: ESMF_TraceGridCompComponentInfo - Trace internal info for a gridded component
+! 
+! !INTERFACE: 
   subroutine ESMF_TraceGridComponentInfo(comp, attrConv, attrPurp, attrName, attrKey, rc)
+! !ARGUMENTS: 
     type(ESMF_GridComp), intent(in) :: comp
     character(len=*),    intent(in), optional :: attrConv(:)
     character(len=*),    intent(in), optional :: attrPurp(:)
     character(len=*),    intent(in), optional :: attrName(:)
     character(len=*),    intent(in), optional :: attrKey(:)
     integer, intent(out), optional  :: rc    
-
+!
+!EOPI
+!-------------------------------------------------------------------------------
     ! local
     integer                    :: baseid
     integer                    :: vmid
@@ -488,14 +552,21 @@ contains
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_TraceCplComponentInfo()"
+!BOPI 
+! !IROUTINE: ESMF_TraceCplCompComponentInfo - Trace internal info for a coupler component
+! 
+! !INTERFACE: 
   subroutine ESMF_TraceCplComponentInfo(comp, attrConv, attrPurp, attrName, attrKey, rc)
+! !ARGUMENTS: 
     type(ESMF_CplComp), intent(in) :: comp
     character(len=*),    intent(in) :: attrConv(:)
     character(len=*),    intent(in) :: attrPurp(:)
     character(len=*),    intent(in) :: attrName(:)
     character(len=*),    intent(in) :: attrKey(:)
     integer, intent(out), optional  :: rc    
-
+!
+!EOPI
+!-------------------------------------------------------------------------------
     ! local
     integer                    :: baseid
     integer                    :: vmid
@@ -580,12 +651,19 @@ contains
   
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_TraceGetGridCompID()"
+!BOPI 
+! !IROUTINE: ESMF_TraceGetGridCompID - Retrieve vmid and baseid of a gridded component
+! 
+! !INTERFACE: 
   subroutine ESMF_TraceGetGridCompID(comp, vmid, baseid, rc)
+! !ARGUMENTS: 
     type(ESMF_GridComp), intent(in)            :: comp
     integer,             intent(out)           :: vmid
     integer,             intent(out)           :: baseid
     integer,             intent(out), optional :: rc    
-    
+!
+!EOPI
+!-------------------------------------------------------------------------------    
     ! local
     type(ESMF_VMId), pointer   :: vmidptr(:)
     character                  :: vmkey
@@ -611,12 +689,19 @@ contains
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_TraceGetCplCompID()"
+!BOPI 
+! !IROUTINE: ESMF_TraceGetCplCompID - Retrieve vmid and baseid of a coupler component
+! 
+! !INTERFACE: 
   subroutine ESMF_TraceGetCplCompID(comp, vmid, baseid, rc)
+! !ARGUMENTS: 
     type(ESMF_CplComp),  intent(in)            :: comp
     integer,             intent(out)           :: vmid
     integer,             intent(out)           :: baseid
     integer,             intent(out), optional :: rc    
-    
+!
+!EOPI
+!-------------------------------------------------------------------------------    
     ! local
     type(ESMF_VMId), pointer   :: vmidptr(:)
     character                  :: vmkey
@@ -718,9 +803,16 @@ contains
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_TraceMemInfo()"
+!BOPI 
+! !IROUTINE: ESMF_TraceMemInfo - Trace memory usage info
+! 
+! !INTERFACE: 
   subroutine ESMF_TraceMemInfo(rc)
+! !ARGUMENTS: 
     integer, intent(out), optional  :: rc
-    
+!
+!EOPI
+!-------------------------------------------------------------------------------
     rc = ESMF_SUCCESS 
     
     call c_esmftrace_mem_info(rc)
@@ -732,10 +824,17 @@ contains
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_TraceClock()"
+!BOPI 
+! !IROUTINE: ESMF_TraceClock - Trace clock info
+! 
+! !INTERFACE: 
   subroutine ESMF_TraceClock(clock, rc)
+! !ARGUMENTS: 
     type(ESMF_Clock) :: clock
     integer, intent(out), optional  :: rc
-
+!
+!EOPI
+!-------------------------------------------------------------------------------
     ! locals
     type(ESMF_Time) :: currTime
     integer :: yy, mm, dd, h, m, s
@@ -758,10 +857,17 @@ contains
   
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_TraceMethodToEnum()"
+!BOPI 
+! !IROUTINE: ESMF_TraceMethodToEnum - Return trace enum value for ESMF_Method_Flag
+! 
+! !INTERFACE: 
   function ESMF_TraceMethodToEnum(method_flag)
+! !ARGUMENTS: 
     integer :: ESMF_TraceMethodToEnum
     type(ESMF_Method_Flag), intent(in) :: method_flag
-    
+!
+!EOPI
+!-------------------------------------------------------------------------------
     if (method_flag == ESMF_METHOD_INITIALIZE .or. &
          method_flag == ESMF_METHOD_INITIALIZEIC) then
        ESMF_TraceMethodToEnum = 0

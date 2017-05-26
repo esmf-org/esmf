@@ -29,14 +29,10 @@ CLOBBERDIRS =
 # --- TraceUTest
 
 RUN_ESMF_TraceUTest:
-#	cp -f $(ESMF_DIR)/src/Superstructure/AttributeAPI/tests/data/baseline_Array002.xml $(ESMF_TESTDIR)
-#	cp -f $(ESMF_DIR)/src/Superstructure/AttributeAPI/tests/data/baseline_Array002.stdout $(ESMF_TESTDIR)
 	rm -rf $(ESMF_TESTDIR)/traceout
 	env ESMF_RUNTIME_TRACE=ON $(MAKE) TNAME=Trace NP=4 ftest
 
 RUN_ESMF_TraceUTestUNI:
-#	cp -f $(ESMF_DIR)/src/Superstructure/AttributeAPI/tests/data/baseline_Array002.xml $(ESMF_TESTDIR)
-#	cp -f $(ESMF_DIR)/src/Superstructure/AttributeAPI/tests/data/baseline_Array002.stdout $(ESMF_TESTDIR)
 	rm -rf $(ESMF_TESTDIR)/traceout
 	env ESMF_RUNTIME_TRACE=ON $(MAKE) TNAME=Trace NP=1 ftest
 

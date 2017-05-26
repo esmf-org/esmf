@@ -24,7 +24,10 @@ program ESMF_TraceUserEx
 ! entry and exit points for user-defined regions. Note that the
 ! API calls {\tt ESMF\_TraceRegionEnter} and {\tt ESMF\_TraceRegionExit}
 ! should always appear in pairs, wrapping a particular section
-! of code.
+! of code. The environment variable {\tt ESMF\_RUNTIME\_TRACE} must
+! be set to {\tt ON} to enable tracing. If not set, the calls to
+! {\tt ESMF\_TraceRegionEnter} and {\tt ESMF\_TraceRegionExit}
+! will simply return without writing any trace events.
 !EOE
 
 
