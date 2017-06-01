@@ -18,7 +18,7 @@ execution and is often used for diagnosing problems, debugging, and
 performance analysis.
 
 ESMF has a built-in tracing capability that records events into special
-binary log files.  Unlike log files written by the {\tt ESMF\_LogErr} class,
+binary log files.  Unlike log files written by the {\tt ESMF\_Log} class,
 which are primarily for human consumption (see Section \ref{sec:Log}),
 the trace output files are
 recorded in a compact binary representation and are processed by tools
@@ -29,7 +29,7 @@ as well as a metadata file describing the events in the streams.
 
 Several tools are available for reading in the CTF traces output by ESMF.
 Of the tools listed below, the first one is designed specifically for
-anaylizing ESMF applications and the second two are general purpose tools
+analyzing ESMF applications and the second two are general purpose tools
 for working with all CTF traces.
 \begin{itemize}
 \item \htmladdnormallink{Cupid}{https://earthsystemcog.org/projects/cupid/}
