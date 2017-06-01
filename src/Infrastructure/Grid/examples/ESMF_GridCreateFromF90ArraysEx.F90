@@ -27,7 +27,7 @@ program ESMF_GridCreateEx
 !
 ! This example illustrates the creation of a simple 2D Grid from coordinate data
 !  contained in fortan arrays.  The new Grid contains just the center stagger location.
-!  Each processor contains a pair of 10x10 fortran 90 arrays named fptrX and fptrY. 
+!  Each processor contains a pair of 10x10 Fortran 90 arrays named fptrX and fptrY.
 !  These arrays contain the coordinates for the piece of the global Grid held by each
 !  processor. The final global Grid will be 20x20 and the pieces of this Grid held
 ! by each processor are as follows:

@@ -25,7 +25,7 @@
 #include "ESMF.h"
 !==============================================================================
 !BOPI
-! !MODULE: ESMF_IOGridspecMod - Grid IO utility class
+! !MODULE: ESMF_IOGridspecMod - Grid I/O utility class
 !
 ! !DESCRIPTION:
 !

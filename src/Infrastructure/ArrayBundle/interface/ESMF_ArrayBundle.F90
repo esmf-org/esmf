@@ -1333,7 +1333,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   default, i.e. without specifying {\tt startregion}, {\tt haloLDepth}
 !   and {\tt haloUDepth}, all elements in the total Array regions that lie
 !   outside the exclusive regions will be considered potential destination
-!   elements for halo. However, only those elements that have a corresponding
+!   elements for the halo operation. However, only those elements that have a corresponding
 !   halo source element, i.e. an exclusive element on one of the DEs, will be
 !   updated under the halo operation. Elements that have no associated source
 !   remain unchanged under halo.
@@ -1343,7 +1343,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   effective halo region from the inside. Setting this flag to
 !   {\tt ESMF\_STARTREGION\_COMPUTATIONAL} means that only elements outside 
 !   the computational region for each Array are considered for potential
-!   destination elements for halo. The default is
+!   destination elements for the halo operation. The default is
 !   {\tt ESMF\_STARTREGION\_EXCLUSIVE}.
 !
 !   The {\tt haloLDepth} and {\tt haloUDepth} arguments allow to reduce
@@ -1354,7 +1354,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   {\tt haloLDepth} and {\tt haloUDepth} setting. The total Array regions are
 !   local DE specific. The {\tt haloLDepth} and {\tt haloUDepth} are interpreted
 !   as the maximum desired extent, reducing the potentially larger region
-!   available for halo.
+!   available for the halo operation.
 !
 !   The routine returns an {\tt ESMF\_RouteHandle} that can be used to call 
 !   {\tt ESMF\_ArrayBundleHalo()} on any ArrayBundle that is weakly congruent
@@ -1598,7 +1598,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !    The time-slice number of the variable read from file.
 !   \item[{[iofmt]}]
 !     \begin{sloppypar}
-!    The IO format.  Please see Section~\ref{opt:iofmtflag} for the list
+!    The I/O format.  Please see Section~\ref{opt:iofmtflag} for the list
 !    of options. If not present, file names with a {\tt .bin} extension will
 !    use {\tt ESMF\_IOFMT\_BIN}, and file names with a {\tt .nc} extension
 !    will use {\tt ESMF\_IOFMT\_NETCDF}.  Other files default to
@@ -1612,7 +1612,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !------------------------------------------------------------------------------
     integer                 :: localrc              ! local return code
     type(ESMF_Logical)      :: opt_singlefileflag   ! helper variable
-    integer                 :: len_fileName         ! helper variable
     type(ESMF_IOFmt_Flag)   :: opt_iofmt            ! helper variable
     integer                 :: file_ext_p
 
@@ -1623,9 +1622,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP_SHORT(ESMF_ArrayBundleGetInit, arraybundle, rc)
-
-    ! Get filename length
-    len_fileName = len_trim(fileName)
 
     ! Set default flags
     opt_singlefileflag = ESMF_TRUE
@@ -1655,9 +1651,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     end if
 
     ! Call into the C++ interface, which will call IO object
-    call c_esmc_arraybundleread(arraybundle, fileName, len_fileName,      &
+    call c_esmc_arraybundleread(arraybundle, fileName,       &
         opt_singlefileflag, timeslice, opt_iofmt, localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU,                    &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU,       &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Return successfully
@@ -3316,12 +3312,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 ! !INTERFACE:
   subroutine ESMF_ArrayBundleWrite(arraybundle, fileName, keywordEnforcer, &
-    singleFile, overwrite, status, timeslice, iofmt, rc)
+    convention, purpose, singleFile, overwrite, status, timeslice, iofmt, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_ArrayBundle),     intent(in)              :: arraybundle
     character(*),               intent(in)              :: fileName
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    character(*),               intent(in),  optional  :: convention
+    character(*),               intent(in),  optional  :: purpose
     logical,                    intent(in),  optional  :: singleFile
     logical,                    intent(in),  optional  :: overwrite
     type(ESMF_FileStatus_Flag), intent(in),  optional  :: status
@@ -3347,6 +3345,16 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     An {\tt ESMF\_ArrayBundle} object.
 !   \item[fileName]
 !     The name of the output file to which array bundle data is written.
+!   \item[{[convention]}]
+!     Specifies an Attribute package associated with the Array, used to create NetCDF
+!     attributes for the variable in the file.  When this argument is present,
+!     the [{[purpose]}] argument must also be present.  Use this argument only with a NetCDF
+!     I/O format. If binary format is used, ESMF will return an error code.
+!   \item[{[purpose]}]
+!     Specifies an Attribute package associated with the Array, used to create NetCDF
+!     attributes for the variable in the file.  When this argument is present,
+!     the [{[convention]}] argument must also be present.  Use this argument only with a NetCDF
+!     I/O format. If binary format is used, ESMF will return an error code.
 !   \item[{[singleFile]}]
 !     A logical flag, the default is .true., i.e., all arrays in the bundle 
 !     are written in one single file. If .false., each array will be written
@@ -3377,7 +3385,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !    \end{sloppypar}
 !   \item[{[timeslice]}]
 !    \begin{sloppypar}
-!    Some IO formats (e.g. NetCDF) support the output of data in form of
+!    Some I/O formats (e.g. NetCDF) support the output of data in form of
 !    time slices. The {\tt timeslice} argument provides access to this
 !    capability. {\tt timeslice} must be positive. The behavior of this
 !    option may depend on the setting of the {\tt overwrite} flag:
@@ -3393,7 +3401,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !    \end{sloppypar}
 !   \item[{[iofmt]}]
 !     \begin{sloppypar}
-!    The IO format.  Please see Section~\ref{opt:iofmtflag} for the list
+!    The I/O format.  Please see Section~\ref{opt:iofmtflag} for the list
 !    of options. If not present, file names with a {\tt .bin} extension will
 !    use {\tt ESMF\_IOFMT\_BIN}, and file names with a {\tt .nc} extension
 !    will use {\tt ESMF\_IOFMT\_NETCDF}.  Other files default to
@@ -3406,7 +3414,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !EOP
 !------------------------------------------------------------------------------
     integer                    :: localrc             ! local return code
-    integer                    :: len_fileName        ! helper variable
     type(ESMF_Logical)         :: opt_singlefileflag  ! helper variable
     integer                    :: len_varName         ! helper variable
     type(ESMF_Logical)         :: opt_overwriteflag   ! helper variable
@@ -3422,6 +3429,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP_SHORT(ESMF_ArrayBundleGetInit, arraybundle, rc)
 
+    ! Attributes
+    if (present (convention) .neqv. present (purpose)) then
+      if (ESMF_LogFoundError (ESMF_RC_ARG_WRONG,  &
+          msg='Both convention and purpose must be specified',  &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+    end if
 
     ! Set default flags
     opt_singlefileflag = ESMF_TRUE
@@ -3452,14 +3465,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       end if
     end if
 
-    ! Get string lengths
-    len_fileName = len_trim(fileName)
-
     ! Call into the C++ interface, which will call IO object
-    call c_esmc_arraybundlewrite(arraybundle, fileName, len_fileName,        &
-        opt_singlefileflag, opt_overwriteflag, opt_status,                   &
+    call c_esmc_arraybundlewrite(arraybundle, fileName,        &
+        convention, purpose,                                   &
+        opt_singlefileflag, opt_overwriteflag, opt_status,     &
         timeslice, opt_iofmt, localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU,                       &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU,         &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Return successfully

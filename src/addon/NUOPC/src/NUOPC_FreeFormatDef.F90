@@ -81,7 +81,7 @@ module NUOPC_FreeFormatDef
     integer,                optional, intent(out)   :: rc
 ! !DESCRIPTION:
 !   Add lines to a FreeFormat object. The capacity of {\tt freeFormat} is 
-!   increased by at list the size of {\tt stringList}, but potentially more.
+!   increased by at least the size of {\tt stringList}, but potentially more.
 !   The elements in {\tt stringList} are added to the end of {\tt freeFormat}.
 !EOP
   !-----------------------------------------------------------------------------

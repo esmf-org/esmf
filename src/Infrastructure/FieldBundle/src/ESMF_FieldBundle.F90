@@ -28,7 +28,7 @@ module ESMF_FieldBundleMod
 ! !MODULE: ESMF_FieldBundleMod
 !
 
-!   F90 implemenation of fieldbundle
+!   F90 implementation of fieldbundle
 !
 !------------------------------------------------------------------------------
 
@@ -38,6 +38,7 @@ module ESMF_FieldBundleMod
   use ESMF_BaseMod          ! ESMF base class
   use ESMF_LogErrMod        ! ESMF error handling
   use ESMF_F90InterfaceMod  ! ESMF F90-C++ interface helper
+  use ESMF_ArraySpecMod
   use ESMF_ArrayMod
   use ESMF_ArrayBundleMod
   use ESMF_ContainerMod
@@ -257,6 +258,13 @@ module ESMF_FieldBundleMod
 !EOPI
 
   end interface
+
+
+!!!!! Start of TEMPORARY interface for development TODO: REMOVE---------------
+interface ESMF_FieldBundleRegridStore
+  module procedure ESMF_FieldBundleRegridStoreNEW
+end interface
+!!!!! End of TEMPORARY interface for development TODO: REMOVE-----------------
 
 
 !===============================================================================
@@ -1891,7 +1899,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   Store a FieldBundle halo operation over the data in {\tt fieldbundle}. 
 !   By definition, all elements in the total Field regions that lie
 !   outside the exclusive regions will be considered potential destination
-!   elements for halo. However, only those elements that have a corresponding
+!   elements for the halo operation. However, only those elements that have a corresponding
 !   halo source element, i.e. an exclusive element on one of the DEs, will be
 !   updated under the halo operation. Elements that have no associated source
 !   remain unchanged under halo.
@@ -2142,7 +2150,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords for t
 !    The time-slice number of the variable read from file.
 !   \item[{[iofmt]}]
 !     \begin{sloppypar}
-!    The IO format.  Please see Section~\ref{opt:iofmtflag} for the list
+!    The I/O format.  Please see Section~\ref{opt:iofmtflag} for the list
 !    of options. If not present, file names with a {\tt .bin} extension will
 !    use {\tt ESMF\_IOFMT\_BIN}, and file names with a {\tt .nc} extension
 !    will use {\tt ESMF\_IOFMT\_NETCDF}.  Other files default to
@@ -2334,7 +2342,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !   This call is {\em collective} across the current VM.
 !
-!   For examples and associated documentations using this method see Section  
+!   For examples and associated documentation regarding this method see Section
 !   \ref{sec:fieldbundle:usage:redist_1dptr}. 
 !
 !   \begin{description}
@@ -2398,21 +2406,28 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     endif
         
     ! perform FieldBundle redistribution
-    if(src_bundle .and. dst_bundle) &
+    if(src_bundle .and. dst_bundle) then
         call ESMF_ArrayBundleRedist(srcab, dstab, routehandle, &
             checkflag=l_checkflag, rc=localrc)
-    if(src_bundle .and. .not. dst_bundle) &
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+    else if(src_bundle .and. .not. dst_bundle) then
         call ESMF_ArrayBundleRedist(srcArrayBundle=srcab, routehandle=routehandle, &
             checkflag=l_checkflag, rc=localrc)
-    if(.not. src_bundle .and. dst_bundle) &
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+    else if(.not. src_bundle .and. dst_bundle) then
         call ESMF_ArrayBundleRedist(dstArrayBundle=dstab, routehandle=routehandle, &
             checkflag=l_checkflag, rc=localrc)
-    if(.not. src_bundle .and. .not. dst_bundle) &
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+    else if(.not. src_bundle .and. .not. dst_bundle) then
         call ESMF_ArrayBundleRedist(routehandle=routehandle, &
             checkflag=l_checkflag, rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
-
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+    
     ! garbage collection
     if (present(srcFieldBundle)) then
       call ESMF_ArrayBundleDestroy(srcab, noGarbage=.true., rc=localrc)
@@ -2550,7 +2565,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !  
 ! This call is collective across the current VM.  
 ! 
-! For examples and associated documentations using this method see Section  
+! For examples and associated documentation regarding this method see Section
 ! \ref{sec:fieldbundle:usage:redist_1dptr}. 
 ! 
 ! The arguments are: 
@@ -2966,7 +2981,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! This call is collective across the current VM.  
 ! 
-! For examples and associated documentations using this method see Section  
+! For examples and associated documentation regarding this method see Section
 ! \ref{sec:fieldbundle:usage:redist_1dptr}. 
 ! 
 ! The arguments are: 
@@ -3263,12 +3278,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_FieldBundleRegridStore()"
-!BOP
+#define ESMF_METHOD "ESMF_FieldBundleRegridStoreOLD()"
+!BOPI
 ! !IROUTINE: ESMF_FieldBundleRegridStore - Precompute a FieldBundle regrid operation
-! \label{api:esmf_fieldbundleregridstore}
 ! !INTERFACE:
-    subroutine ESMF_FieldBundleRegridStore(srcFieldBundle, dstFieldBundle, &
+    subroutine ESMF_FieldBundleRegridStoreOLD(srcFieldBundle, dstFieldBundle, &
                                            srcMaskValues, dstMaskValues, &
                                            regridmethod, polemethod, &
                                            regridPoleNPnts,  &
@@ -3284,10 +3298,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_RegridMethod_Flag),  intent(in),   optional :: regridmethod
     type(ESMF_PoleMethod_Flag),    intent(in),   optional :: polemethod
     integer,                       intent(in),   optional :: regridPoleNPnts
-    type(ESMF_LineType_Flag),       intent(in),  optional :: lineType
-    type(ESMF_NormType_Flag),       intent(in),  optional :: normType
+    type(ESMF_LineType_Flag),      intent(in),   optional :: lineType
+    type(ESMF_NormType_Flag),      intent(in),   optional :: normType
     type(ESMF_UnmappedAction_Flag),intent(in),   optional :: unmappedaction
-    logical,                        intent(in),  optional :: ignoreDegenerate 
+    logical,                       intent(in),   optional :: ignoreDegenerate 
     type(ESMF_RouteHandle),        intent(inout),optional :: routehandle
     integer,                       intent(out),  optional :: rc
 !
@@ -3388,7 +3402,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
-!EOP
+!EOPI
 !------------------------------------------------------------------------------
         ! internal local variables 
         integer                                       :: localrc, i, localDeCount, fieldCount
@@ -3402,7 +3416,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         type(ESMF_StaggerLoc) :: prevSrcStaggerLoc, prevDstStaggerLoc
         type(ESMF_Grid) :: currSrcGrid, currDstGrid
         type(ESMF_StaggerLoc) :: currSrcStaggerLoc, currDstStaggerLoc
-        integer(ESMF_KIND_I4), pointer :: tmp_indices(:,:)
         integer(ESMF_KIND_I4), pointer :: prev_indices(:,:)
         real(ESMF_KIND_R8), pointer :: prev_weights(:)
         type(ESMF_GeomType_Flag) :: srcGeomtype        
@@ -3448,7 +3461,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             ESMF_CONTEXT, rcToReturn=rc)) return
         endif        
 
-        ! 6) loop over all Fields in FieldBundles, call FieldRegridStore and append rh
+        ! loop over all Fields in FieldBundles, call FieldRegridStore and append rh
         rraShift = 0          ! reset
         vectorLengthShift = 0 ! reset
 
@@ -3604,8 +3617,570 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         ! return successfully
         if (present(rc)) rc = ESMF_SUCCESS
         
-    end subroutine ESMF_FieldBundleRegridStore
+    end subroutine ESMF_FieldBundleRegridStoreOLD
 !------------------------------------------------------------------------------ 
+
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_FieldBundleRegridStore()"
+!BOP
+! !IROUTINE: ESMF_FieldBundleRegridStore - Precompute a FieldBundle regrid operation
+! \label{api:esmf_fieldbundleregridstore}
+! !INTERFACE:
+  subroutine ESMF_FieldBundleRegridStoreNEW(srcFieldBundle, dstFieldBundle, &
+    srcMaskValues, dstMaskValues, regridmethod, polemethod, regridPoleNPnts, &
+    lineType, normType, unmappedaction,  ignoreDegenerate, srcTermProcessing, &
+    pipelineDepth, routehandle, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_FieldBundle),        intent(in)              :: srcFieldBundle
+    type(ESMF_FieldBundle),        intent(inout)           :: dstFieldBundle
+    integer(ESMF_KIND_I4),         intent(in),    optional :: srcMaskValues(:)
+    integer(ESMF_KIND_I4),         intent(in),    optional :: dstMaskValues(:)
+    type(ESMF_RegridMethod_Flag),  intent(in),    optional :: regridmethod
+    type(ESMF_PoleMethod_Flag),    intent(in),    optional :: polemethod
+    integer,                       intent(in),    optional :: regridPoleNPnts
+    type(ESMF_LineType_Flag),      intent(in),    optional :: lineType
+    type(ESMF_NormType_Flag),      intent(in),    optional :: normType
+    type(ESMF_UnmappedAction_Flag),intent(in),    optional :: unmappedaction
+    logical,                       intent(in),    optional :: ignoreDegenerate 
+    integer,                       intent(inout), optional :: srcTermProcessing
+    integer,                       intent(inout), optional :: pipelineDepth
+    type(ESMF_RouteHandle),        intent(inout), optional :: routehandle
+    integer,                       intent(out),   optional :: rc
+!
+! !STATUS:
+! \begin{itemize}
+! \item\apiStatusCompatibleVersion{5.2.0r}
+! \item\apiStatusModifiedSinceVersion{5.2.0r}
+! \begin{description}
+! \item[7.0.0] Added arguments {\tt ignoreDegenerate}, {\tt lineType},
+!              and {\tt normType}. The argument {\tt ignoreDegenerate} allows the user to skip degenerate
+!              cells in the regridding instead of stopping with an error. 
+!              The argument {\tt lineType} allows the user to 
+!              control the path of the line between two points on a sphere surface. 
+!              This allows the user to use their preferred line path for the calculation
+!              of distances and the shape of cells during regrid weight calculation on 
+!              a sphere. The argument {\tt normType} allows the user to 
+!              control the type of normalization done during conservative weight generation. 
+! \item[7.1.0] Added argument {\tt srcTermProcessing}.
+!              Added argument {\tt pipelineDepth}.
+!              The new arguments provide access to the tuning parameters
+!              affecting the performance and bit-for-bit behavior when applying
+!              the regridding weights.
+! \end{description}
+! \end{itemize}
+!
+! !DESCRIPTION:
+!   Store a FieldBundle regrid operation over the data in {\tt srcFieldBundle} and
+!   {\tt dstFieldBundle} pair. 
+!
+!   The routine returns an {\tt ESMF\_RouteHandle} that can be used to call 
+!   {\tt ESMF\_FieldBundleRegrid()} on any FieldBundle pairs that are weakly congruent
+!   and typekind conform to the FieldBundle pair used here.
+!   Congruency for FieldBundles is
+!   given by the congruency of its constituents.
+!   Congruent Fields possess matching DistGrids, and the shape of the local
+!   array tiles matches between the Fields for every DE. For weakly congruent
+!   Fields the sizes of the undistributed dimensions, that vary faster with
+!   memory than the first distributed dimension, are permitted to be different.
+!   This means that the same {\tt routehandle} can be applied to a large class
+!   of similar Fields that differ in the number of elements in the left most
+!   undistributed dimensions.
+!   Note {\tt ESMF\_FieldBundleRegridStore()} assumes the coordinates used in the Grids 
+!   upon which the FieldBundles are built are in degrees.  
+!  
+!   This call is {\em collective} across the current VM.  
+!
+!   \begin{description}
+!   \item [srcFieldbundle]
+!     Source {\tt ESMF\_FieldBundle} containing data to be regridded.
+!   \item [dstFieldbundle]
+!     Destination {\tt ESMF\_FieldBundle}. The data in this FieldBundle may be overwritten by this call. 
+!  \item [{[srcMaskValues]}]
+!     Mask information can be set in the Grids (see~\ref{sec:usage:items}) or Meshes (see~\ref{sec:mesh:mask}) upon which
+!     the Fields in the {\tt srcFieldbundle} are built. 
+!     The {\tt srcMaskValues} argument specifies the values in that mask information which indicate a source point should be masked out. 
+!     In other words, a location is masked if and only if the value for that location in the mask information matches
+!     one of the values listed in {\tt srcMaskValues}.  
+!     If {\tt srcMaskValues} is not specified, no masking will occur. 
+!  \item [{[dstMaskValues]}]
+!     Mask information can be set in the Grids (see~\ref{sec:usage:items}) or Meshes (see~\ref{sec:mesh:mask})
+!     upon which the Fields in the {\tt dstFieldbundle} are built. 
+!     The {\tt dstMaskValues} argument specifies the values in that mask information which indicate a destination point should be masked out. 
+!     In other words, a location is masked if and only if the value for that location in the mask information matches
+!     one of the values listed in {\tt dstMaskValues}.  
+!     If {\tt dstMaskValues} is not specified, no masking will occur. 
+!   \item [{[regridmethod]}]
+!     The type of interpolation. Please see Section~\ref{opt:regridmethod} for a list of
+!     valid options. If not specified, defaults to {\tt ESMF\_REGRIDMETHOD\_BILINEAR}.
+!   \item [{[polemethod]}]
+!    Which type of artificial pole
+!    to construct on the source Grid for regridding. Please see Section~\ref{const:polemethod} for a list of
+!    valid options. If not specified, defaults to {\tt ESMF\_POLEMETHOD\_ALLAVG}. 
+!   \item [{[regridPoleNPnts]}]
+!    If {\tt polemethod} is {\tt ESMF\_POLEMETHOD\_NPNTAVG}.
+!    This parameter indicates how many points should be averaged
+!    over. Must be specified if {\tt polemethod} is 
+!    {\tt ESMF\_POLEMETHOD\_NPNTAVG}.
+!   \item [{[lineType]}]
+!           This argument controls the path of the line which connects two points on a sphere surface. This in
+!           turn controls the path along which distances are calculated and the shape of the edges that make
+!           up a cell. Both of these quantities can influence how interpolation weights are calculated. 
+!           As would be expected, this argument is only applicable when {\tt srcField} and {\tt dstField} are
+!           built on grids which lie on the surface of a sphere. Section~\ref{opt:lineType} shows a 
+!           list of valid options for this argument. If not specified, the default depends on the 
+!           regrid method. Section~\ref{opt:lineType} has the defaults by line type. Figure~\ref{line_type_support} shows
+!           which line types are supported for each regrid method as well as showing the default line type by regrid method.  
+!  \item [{[normType]}] 
+!           This argument controls the type of normalization used when generating conservative weights. This option
+!           only applies to weights generated with {\tt regridmethod=ESMF\_REGRIDMETHOD\_CONSERVE}. Please see 
+!           Section~\ref{opt:normType} for a 
+!           list of valid options. If not specified {\tt normType} defaults to {\tt ESMF\_NORMTYPE\_DSTAREA}. 
+!  \item [{[unmappedaction]}]
+!    Specifies what should happen if there are destination points that
+!    can't be mapped to a source cell. Please see Section~\ref{const:unmappedaction} for a 
+!           list of valid options. If not specified, {\tt unmappedaction} defaults to {\tt ESMF\_UNMAPPEDACTION\_ERROR}. 
+!   \item [{[ignoreDegenerate]}]
+!           Ignore degenerate cells when checking the input Grids or Meshes for errors. If this is set to true, then the 
+!           regridding proceeds, but degenerate cells will be skipped. If set to false, a degenerate cell produces an error. 
+!           If not specified, {\tt ignoreDegenerate} defaults to false.
+!
+!   \item [{[srcTermProcessing]}]
+!     The {\tt srcTermProcessing} parameter controls how many source terms,
+!     located on the same PET and summing into the same destination element,
+!     are summed into partial sums on the source PET before being transferred
+!     to the destination PET. A value of 0 indicates that the entire arithmetic
+!     is done on the destination PET; source elements are neither multiplied 
+!     by their factors nor added into partial sums before being sent off by the
+!     source PET. A value of 1 indicates that source elements are multiplied
+!     by their factors on the source side before being sent to the destination
+!     PET. Larger values of {\tt srcTermProcessing} indicate the maximum number
+!     of terms in the partial sums on the source side.
+!
+!     Note that partial sums may lead to bit-for-bit differences in the results.
+!     See section \ref{RH:bfb} for an in-depth discussion of {\em all}
+!     bit-for-bit reproducibility aspects related to route-based communication
+!     methods.
+!
+!     \begin{sloppypar}
+!     The {\tt ESMF\_FieldRegridStore()} method implements an auto-tuning scheme
+!     for the {\tt srcTermProcessing} parameter. The intent on the 
+!     {\tt srcTermProcessing} argument is "{\tt inout}" in order to 
+!     support both overriding and accessing the auto-tuning parameter.
+!     If an argument $>= 0$ is specified, it is used for the 
+!     {\tt srcTermProcessing} parameter, and the auto-tuning phase is skipped.
+!     In this case the {\tt srcTermProcessing} argument is not modified on
+!     return. If the provided argument is $< 0$, the {\tt srcTermProcessing}
+!     parameter is determined internally using the auto-tuning scheme. In this
+!     case the {\tt srcTermProcessing} argument is re-set to the internally
+!     determined value on return. Auto-tuning is also used if the optional 
+!     {\tt srcTermProcessing} argument is omitted.
+!     \end{sloppypar}
+!     
+!   \item [{[pipelineDepth]}]
+!     The {\tt pipelineDepth} parameter controls how many messages a PET
+!     may have outstanding during a sparse matrix exchange. Larger values
+!     of {\tt pipelineDepth} typically lead to better performance. However,
+!     on some systems too large a value may lead to performance degradation,
+!     or runtime errors.
+!
+!     Note that the pipeline depth has no effect on the bit-for-bit
+!     reproducibility of the results. However, it may affect the performance
+!     reproducibility of the exchange.
+!
+!     The {\tt ESMF\_FieldRegridStore()} method implements an auto-tuning scheme
+!     for the {\tt pipelineDepth} parameter. The intent on the 
+!     {\tt pipelineDepth} argument is "{\tt inout}" in order to 
+!     support both overriding and accessing the auto-tuning parameter.
+!     If an argument $>= 0$ is specified, it is used for the 
+!     {\tt pipelineDepth} parameter, and the auto-tuning phase is skipped.
+!     In this case the {\tt pipelineDepth} argument is not modified on
+!     return. If the provided argument is $< 0$, the {\tt pipelineDepth}
+!     parameter is determined internally using the auto-tuning scheme. In this
+!     case the {\tt pipelineDepth} argument is re-set to the internally
+!     determined value on return. Auto-tuning is also used if the optional 
+!     {\tt pipelineDepth} argument is omitted.
+!     
+!   \item [{[routehandle]}]
+!     Handle to the precomputed Route.
+!   \item [{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+!------------------------------------------------------------------------------
+    integer                         :: localrc, stat
+    character(len=160)              :: msgString
+    integer                         :: i, j
+    integer                         :: count, localDeCount
+    type(ESMF_Field), allocatable   :: srcFields(:), dstFields(:)
+    integer                         :: rraShift, vectorLengthShift
+    type(ESMF_RouteHandle)          :: rhh
+    integer(ESMF_KIND_I4), pointer  :: factorIndexList(:,:)
+    real(ESMF_KIND_R8), pointer     :: factorList(:)
+    type(ESMF_Grid)                 :: srcGrid, dstGrid
+    type(ESMF_GeomType_Flag)        :: srcGeomtype, dstGeomtype
+    type(ESMF_ArraySpec)            :: srcArraySpec, dstArraySpec
+    type(ESMF_StaggerLoc)           :: srcStaggerLoc, dstStaggerLoc
+    integer, pointer                :: srcGridToFieldMap(:)
+    integer, pointer                :: dstGridToFieldMap(:)
+    integer, pointer                :: srcUngriddedLBound(:)
+    integer, pointer                :: srcUngriddedUBound(:)
+    integer, pointer                :: dstUngriddedLBound(:)
+    integer, pointer                :: dstUngriddedUBound(:)
+    integer                         :: fieldDimCount, gridDimCount
+    logical                         :: gridPair
+
+    type RHL
+      type(ESMF_Grid)                   :: srcGrid, dstGrid
+      ! field specific items, TODO: push into a FieldMatch() method
+      type(ESMF_ArraySpec)              :: srcArraySpec, dstArraySpec
+      type(ESMF_StaggerLoc)             :: srcStaggerLoc, dstStaggerLoc
+      integer, pointer                  :: srcGridToFieldMap(:)
+      integer, pointer                  :: dstGridToFieldMap(:)
+      integer, pointer                  :: srcUngriddedLBound(:)
+      integer, pointer                  :: srcUngriddedUBound(:)
+      integer, pointer                  :: dstUngriddedLBound(:)
+      integer, pointer                  :: dstUngriddedUBound(:)
+      ! remap specific items
+      type(ESMF_RouteHandle)            :: rh
+      logical                           :: factorAllocFlag
+      integer(ESMF_KIND_I4), pointer    :: factorIndexList(:,:)
+      real(ESMF_KIND_R8), pointer       :: factorList(:)
+      type(RHL), pointer                :: prev
+    end type
+    
+    type(RHL), pointer              :: rhList, rhListE, rhListG
+    logical                         :: rhListMatch
+
+    ! Initialize return code; assume routine not implemented 
+    localrc = ESMF_RC_NOT_IMPL 
+    if(present(rc)) rc = ESMF_RC_NOT_IMPL 
+
+    ! check variables
+    ESMF_INIT_CHECK_DEEP_SHORT(ESMF_FieldBundleGetInit, srcFieldBundle, rc) 
+    ESMF_INIT_CHECK_DEEP_SHORT(ESMF_FieldBundleGetInit, dstFieldBundle, rc) 
+
+    ! consistency check counts
+    call ESMF_FieldBundleGet(srcFieldBundle, fieldCount=count, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_FieldBundleGet(dstFieldBundle, fieldCount=i, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    if (i /= count) then
+      call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
+        msg="Number of Fields in srcFieldBundle/dstFieldBundle must match!", &
+        ESMF_CONTEXT, rcToReturn=rc)
+      return  ! bail out
+    endif
+
+    ! access the fields in the add order
+    allocate(srcFields(count), dstFields(count), stat=stat)
+    if (ESMF_LogFoundAllocError(statusToCheck=stat, &
+      msg="Allocation of srcFields and dstFields.", &
+      ESMF_CONTEXT, rcToReturn=rc)) &
+      return  ! bail out
+    call ESMF_FieldBundleGet(srcFieldBundle, fieldList=srcFields, &
+      itemorderflag=ESMF_ITEMORDER_ADDORDER, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_FieldBundleGet(dstFieldBundle, fieldList=dstFields, &
+      itemorderflag=ESMF_ITEMORDER_ADDORDER, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! prepare Routehandle
+    if (present(routehandle)) then
+      ! create Routehandle
+      routehandle = ESMF_RouteHandleCreate(rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+      ! set the type for bundle execution
+      call ESMF_RouteHandlePrepXXE(routehandle, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    endif        
+
+    ! prepare auxiliary variables
+    rraShift = 0              ! reset
+    vectorLengthShift = 0     ! reset
+    
+    ! prepare rhList linked list
+    nullify(rhList)
+    
+    ! loop over all fields
+    do i=1, count
+    
+      call ESMF_FieldGet(srcFields(i), geomtype=srcGeomtype, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+      call ESMF_FieldGet(dstFields(i), geomtype=dstGeomtype, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+
+      gridPair = (srcGeomtype==ESMF_GEOMTYPE_GRID)
+      gridPair = gridPair .and. (dstGeomtype==ESMF_GEOMTYPE_GRID)
+
+      rhListMatch = .false.
+      rhListG=>NULL()
+      
+      if (gridPair) then
+        ! access the src and dst grid objects
+        call ESMF_FieldGet(srcFields(i), arrayspec=srcArraySpec, grid=srcGrid, &
+          staggerLoc=srcStaggerLoc, dimCount=fieldDimCount, rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+        call ESMF_GridGet(srcGrid, dimCount=gridDimCount, rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+        allocate(srcGridToFieldMap(gridDimCount))
+        allocate(srcUngriddedLBound(fieldDimCount-gridDimCount), &
+          srcUngriddedUBound(fieldDimCount-gridDimCount))
+        call ESMF_FieldGet(srcFields(i), gridToFieldMap=srcGridToFieldMap, &
+          ungriddedLBound=srcUngriddedLBound, &
+          ungriddedUBound=srcUngriddedUBound,rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+        
+        call ESMF_FieldGet(dstFields(i), arrayspec=dstArraySpec, grid=dstGrid, &
+          staggerLoc=dstStaggerLoc, rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+        call ESMF_GridGet(dstGrid, dimCount=gridDimCount, rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+        allocate(dstGridToFieldMap(gridDimCount))
+        allocate(dstUngriddedLBound(fieldDimCount-gridDimCount), &
+          dstUngriddedUBound(fieldDimCount-gridDimCount))
+        call ESMF_FieldGet(dstFields(i), gridToFieldMap=dstGridToFieldMap, &
+          ungriddedLBound=dstUngriddedLBound, &
+          ungriddedUBound=dstUngriddedUBound,rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+
+        ! search for a match
+        rhListE=>rhList
+        do while (associated(rhListE))
+          ! test src grid match
+          rhListMatch = &
+            ESMF_GridMatch(rhListE%srcGrid, srcGrid, globalflag=.true.) &
+            >= ESMF_GRIDMATCH_EXACT
+          if (.not.rhListMatch) goto 123
+          ! test dst grid match
+          rhListMatch = &
+            ESMF_GridMatch(rhListE%dstGrid, dstGrid, globalflag=.true.) &
+            >= ESMF_GRIDMATCH_EXACT
+          if (.not.rhListMatch) goto 123
+          ! keep record of entry for which grids were matching
+          rhListG=>rhListE
+          ! test src arrayspec match
+          rhListMatch = (rhListE%srcArraySpec==srcArraySpec)
+          if (.not.rhListMatch) goto 123
+          ! test dst arrayspec match
+          rhListMatch = (rhListE%dstArraySpec==dstArraySpec)
+          if (.not.rhListMatch) goto 123
+          ! test src staggerLoc match
+          rhListMatch = (rhListE%srcStaggerLoc==srcStaggerLoc)
+          if (.not.rhListMatch) goto 123
+          ! test dst staggerLoc match
+          rhListMatch = (rhListE%dstStaggerLoc==dstStaggerLoc)
+          if (.not.rhListMatch) goto 123
+          ! test srcGridToFieldMap
+          rhListMatch = &
+            (size(rhListE%srcGridToFieldMap)==size(srcGridToFieldMap))
+          if (.not.rhListMatch) goto 123
+          do j=1, size(srcGridToFieldMap)
+            rhListMatch = (rhListE%srcGridToFieldMap(j)==srcGridToFieldMap(j))
+            if (.not.rhListMatch) goto 123
+          enddo
+          ! test dstGridToFieldMap
+          rhListMatch = &
+            (size(rhListE%dstGridToFieldMap)==size(dstGridToFieldMap))
+          if (.not.rhListMatch) goto 123
+          do j=1, size(dstGridToFieldMap)
+            rhListMatch = (rhListE%dstGridToFieldMap(j)==dstGridToFieldMap(j))
+            if (.not.rhListMatch) goto 123
+          enddo
+          ! test srcUngriddedLBound
+          rhListMatch = &
+            (size(rhListE%srcUngriddedLBound)==size(srcUngriddedLBound))
+          if (.not.rhListMatch) goto 123
+          do j=1, size(srcUngriddedLBound)
+            rhListMatch = (rhListE%srcUngriddedLBound(j)==srcUngriddedLBound(j))
+            if (.not.rhListMatch) goto 123
+          enddo
+          ! test srcUngriddedUBound
+          rhListMatch = &
+            (size(rhListE%srcUngriddedUBound)==size(srcUngriddedUBound))
+          if (.not.rhListMatch) goto 123
+          do j=1, size(srcUngriddedUBound)
+            rhListMatch = (rhListE%srcUngriddedUBound(j)==srcUngriddedUBound(j))
+            if (.not.rhListMatch) goto 123
+          enddo
+          ! test dstUngriddedLBound
+          rhListMatch = &
+            (size(rhListE%dstUngriddedLBound)==size(dstUngriddedLBound))
+          if (.not.rhListMatch) goto 123
+          do j=1, size(dstUngriddedLBound)
+            rhListMatch = (rhListE%dstUngriddedLBound(j)==dstUngriddedLBound(j))
+            if (.not.rhListMatch) goto 123
+          enddo
+          ! test dstUngriddedUBound
+          rhListMatch = &
+            (size(rhListE%dstUngriddedUBound)==size(dstUngriddedUBound))
+          if (.not.rhListMatch) goto 123
+          do j=1, size(dstUngriddedUBound)
+            rhListMatch = (rhListE%dstUngriddedUBound(j)==dstUngriddedUBound(j))
+            if (.not.rhListMatch) goto 123
+          enddo
+          ! completed search 
+          exit ! break out
+          ! continue search with previous element
+123       continue
+          rhListE=>rhListE%prev   ! previous element
+        enddo
+        
+      endif
+
+      if (.not.rhListMatch) then
+        ! No match found: precompute new RH for this field pair
+#if 1
+call ESMF_LogWrite("no rhListMatch -> pre-compute new remapping!", &
+  ESMF_LOGMSG_INFO)
+#endif
+        if (gridPair) then
+          ! add a new rhList element
+          allocate(rhListE)
+          rhListE%prev=>rhList  ! link new element to previous list head
+          rhList=>rhListE       ! list head now pointing to new element
+        endif
+
+        if (associated(rhListG)) then
+          ! able to reuse already precomputed weight matrix
+#if 1
+call ESMF_LogWrite("able to reuse already precomputed weight matrix!", &
+  ESMF_LOGMSG_INFO)
+#endif
+          factorList=>rhListG%factorList
+          factorIndexList=>rhListG%factorIndexList
+          call ESMF_FieldSMMStore(srcField=srcFields(i), &
+            dstField=dstFields(i), &
+            routehandle=rhh, &
+            factorList=factorList, factorIndexList=factorIndexList, &
+            srcTermProcessing=srcTermProcessing, pipelineDepth=pipelineDepth, &
+            rc=localrc)
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+        else
+          ! must precompute full regridding
+#if 1
+call ESMF_LogWrite("must precompute full regridding!", &
+  ESMF_LOGMSG_INFO)
+#endif
+          factorList=>NULL()
+          factorIndexList=>NULL()
+          call ESMF_FieldRegridStore(srcField=srcFields(i), &
+            dstField=dstFields(i), &
+            srcMaskValues=srcMaskValues, dstMaskValues=dstMaskValues, &
+            regridmethod=regridmethod, &
+            polemethod=polemethod, regridPoleNPnts=regridPoleNPnts, &
+            unmappedaction=unmappedaction, &
+            srcTermProcessing=srcTermProcessing, pipelineDepth=pipelineDepth, &
+            routehandle=rhh, &
+            factorList=factorList, factorIndexList=factorIndexList, &
+            rc=localrc)
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+        endif
+
+        if (gridPair) then
+          ! store info in the new rhList element
+          rhListE%srcGrid             =  srcGrid
+          rhListE%dstGrid             =  dstGrid
+          rhListE%srcArraySpec        =  srcArraySpec
+          rhListE%dstArraySpec        =  dstArraySpec
+          rhListE%srcStaggerLoc       =  srcStaggerLoc
+          rhListE%dstStaggerLoc       =  dstStaggerLoc
+          rhListE%srcGridToFieldMap   => srcGridToFieldMap
+          rhListE%dstGridToFieldMap   => dstGridToFieldMap
+          rhListE%srcUngriddedLBound  => srcUngriddedLBound
+          rhListE%srcUngriddedUBound  => srcUngriddedUBound
+          rhListE%dstUngriddedLBound  => dstUngriddedLBound
+          rhListE%dstUngriddedUBound  => dstUngriddedUBound
+          rhListE%rh                  =  rhh
+          rhListE%factorAllocFlag     =  .not.associated(rhListG)
+          rhListE%factorIndexList     => factorIndexList
+          rhListE%factorList          => factorList
+        endif
+      else
+        ! Match found: reuse previous RH for this field pair
+#if 1
+call ESMF_LogWrite("found rhListMatch -> reuse routehandle!", &
+  ESMF_LOGMSG_INFO)
+#endif
+        ! pull out the routehandle from the matching rhList element
+        rhh = rhListE%rh
+        ! deallocate temporary grid/field info
+        deallocate(srcGridToFieldMap, dstGridToFieldMap)
+        deallocate(srcUngriddedLBound, srcUngriddedUBound)
+        deallocate(dstUngriddedLBound, dstUngriddedUBound)
+      endif
+      
+      ! append rhh to rh and clear rhh
+      call ESMF_RouteHandleAppend(routehandle, appendRoutehandle=rhh, &
+        rraShift=rraShift, vectorLengthShift=vectorLengthShift, &
+        transferflag=.not.rhListMatch, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+      
+      ! adjust rraShift and vectorLengthShift
+      call ESMF_FieldGet(srcFields(i), localDeCount=localDeCount, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+      rraShift = rraShift + localDeCount
+      call ESMF_FieldGet(dstFields(i), localDeCount=localDeCount, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+      rraShift = rraShift + localDeCount
+      vectorLengthShift = vectorLengthShift + 1
+      
+      ! local garbage collection
+      if (.not.gridPair) then
+        ! grid pairs will have factorIndexList and factorList in rhList struct
+        if (associated(factorIndexList)) deallocate(factorIndexList)
+        if (associated(factorList)) deallocate(factorList)
+      endif
+
+    enddo
+    
+    ! take down rhList and destroy rh objects
+    do while (associated(rhList))
+      rhListE=>rhList
+      rhList=>rhList%prev
+      call ESMF_RouteHandleDestroy(rhListE%rh, noGarbage=.true., rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+      if (rhListE%factorAllocFlag) then
+        deallocate(rhListE%factorIndexList)
+        deallocate(rhListE%factorList)
+      endif
+      deallocate(rhListE%srcGridToFieldMap, rhListE%dstGridToFieldMap)
+      deallocate(rhListE%srcUngriddedLBound, rhListE%srcUngriddedUBound)
+      deallocate(rhListE%dstUngriddedLBound, rhListE%dstUngriddedUBound)
+      deallocate(rhListE)
+    enddo
+    
+    ! garbage collection
+    deallocate(srcFields, dstFields)
+
+    ! Return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+  
+  end subroutine ESMF_FieldBundleRegridStoreNEW
+!------------------------------------------------------------------------------
 
 
 !------------------------------------------------------------------------------
@@ -3615,8 +4190,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE: ESMF_FieldBundleRemove - Remove Fields from FieldBundle
 !
 ! !INTERFACE:
-    subroutine ESMF_FieldBundleRemove(fieldbundle, fieldNameList, &
-      keywordEnforcer, multiflag, relaxedflag, rc)
+  subroutine ESMF_FieldBundleRemove(fieldbundle, fieldNameList, &
+    keywordEnforcer, multiflag, relaxedflag, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_FieldBundle), intent(inout)         :: fieldbundle
@@ -3730,8 +4305,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE: ESMF_FieldBundleReplace - Replace Fields in FieldBundle
 !
 ! !INTERFACE:
-    subroutine ESMF_FieldBundleReplace(fieldbundle, fieldList, &
-      keywordEnforcer, multiflag, relaxedflag, rc)
+  subroutine ESMF_FieldBundleReplace(fieldbundle, fieldList, &
+    keywordEnforcer, multiflag, relaxedflag, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_FieldBundle), intent(inout)         :: fieldbundle
@@ -4204,7 +4779,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !   This call is {\em collective} across the current VM.
 !
-!   For examples and associated documentations using this method see Section  
+!   For examples and associated documentation regarding this method see Section
 !   \ref{sec:fieldbundle:usage:smm_1dptr}. 
 !
 !   \begin{description}
@@ -4298,26 +4873,33 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         endif
 
         ! perform FieldBundle SMM
-        if(src_bundle .and. dst_bundle) &
+        if(src_bundle .and. dst_bundle) then
           call ESMF_ArrayBundleSMM(srcab, dstab, routehandle, &
             zeroregion=l_zeroregion, termorderflag=termorderflag, &
             checkflag=l_checkflag, rc=localrc)
-        if(src_bundle .and. .not. dst_bundle) &
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+        else if(src_bundle .and. .not. dst_bundle) then
           call ESMF_ArrayBundleSMM(srcArrayBundle=srcab, &
             routehandle=routehandle, &
             zeroregion=l_zeroregion, termorderflag=termorderflag, &
             checkflag=l_checkflag, rc=localrc)
-        if(.not. src_bundle .and. dst_bundle) &
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+        else if(.not. src_bundle .and. dst_bundle) then
           call ESMF_ArrayBundleSMM(dstArrayBundle=dstab, &
             routehandle=routehandle, &
             zeroregion=l_zeroregion, termorderflag=termorderflag, &
             checkflag=l_checkflag, rc=localrc)
-        if(.not. src_bundle .and. .not. dst_bundle) &
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+        else if(.not. src_bundle .and. .not. dst_bundle) then
           call ESMF_ArrayBundleSMM(routehandle=routehandle, &
             zeroregion=l_zeroregion, termorderflag=termorderflag, &
             checkflag=l_checkflag, rc=localrc)
-        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-          ESMF_CONTEXT, rcToReturn=rc)) return
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+        endif
             
         ! garbage collection
         if (present(srcFieldBundle)) then
@@ -4466,7 +5048,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !  
 ! This call is collective across the current VM.  
 ! 
-! For examples and associated documentations using this method see Section  
+! For examples and associated documentation regarding this method see Section
 ! \ref{sec:fieldbundle:usage:smm_1dptr}. 
 ! 
 ! The arguments are: 
@@ -4927,7 +5509,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! This call is collective across the current VM.  
 ! 
-! For examples and associated documentations using this method see Section  
+! For examples and associated documentation regarding this method see Section
 ! \ref{sec:fieldbundle:usage:smm_1dptr}. 
 ! 
 ! The arguments are: 
@@ -5174,13 +5756,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \label{api:FieldBundleWrite}
 
 ! !INTERFACE:
-  subroutine ESMF_FieldBundleWrite(fieldbundle, fileName, &
-    keywordEnforcer, singleFile, overwrite, status, timeslice, iofmt, rc)
+  subroutine ESMF_FieldBundleWrite(fieldbundle, fileName, keywordEnforcer,  &
+      convention, purpose, singleFile, overwrite, status, timeslice, iofmt, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_FieldBundle),     intent(in)             :: fieldbundle
     character(*),               intent(in)             :: fileName
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords for the below
+    character(*),               intent(in),  optional  :: convention
+    character(*),               intent(in),  optional  :: purpose
     logical,                    intent(in),  optional  :: singleFile
     logical  ,                  intent(in),  optional  :: overwrite
     type(ESMF_FileStatus_Flag), intent(in),  optional  :: status
@@ -5206,6 +5790,16 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords for t
 !     An {\tt ESMF\_FieldBundle} object.
 !   \item[fileName]
 !     The name of the output file to which field bundle data is written.
+!   \item[{[convention]}]
+!     Specifies an Attribute package associated with the Array, used to create NetCDF
+!     attributes for the variable in the file.  When this argument is present,
+!     the [{[purpose]}] argument must also be present.  Use this argument only with a NetCDF
+!     I/O format. If binary format is used, ESMF will return an error code.
+!   \item[{[purpose]}]
+!     Specifies an Attribute package associated with the Array, used to create NetCDF
+!     attributes for the variable in the file.  When this argument is present,
+!     the [{[convention]}] argument must also be present.  Use this argument only with a NetCDF
+!     I/O format. If binary format is used, ESMF will return an error code.
 !   \item[{[singleFile]}]
 !     A logical flag, the default is .true., i.e., all fields in the bundle 
 !     are written in one single file. If .false., each field will be written
@@ -5236,7 +5830,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords for t
 !    \end{sloppypar}
 !   \item[{[timeslice]}]
 !    \begin{sloppypar}
-!    Some IO formats (e.g. NetCDF) support the output of data in form of
+!    Some I/O formats (e.g. NetCDF) support the output of data in form of
 !    time slices. The {\tt timeslice} argument provides access to this
 !    capability. {\tt timeslice} must be positive. The behavior of this
 !    option may depend on the setting of the {\tt overwrite} flag:
@@ -5252,7 +5846,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords for t
 !    \end{sloppypar}
 !   \item[{[iofmt]}]
 !     \begin{sloppypar}
-!    The IO format.  Please see Section~\ref{opt:iofmtflag} for the list
+!    The I/O format.  Please see Section~\ref{opt:iofmtflag} for the list
 !    of options. If not present, file names with a {\tt .bin} extension will
 !    use {\tt ESMF\_IOFMT\_BIN}, and file names with a {\tt .nc} extension
 !    will use {\tt ESMF\_IOFMT\_NETCDF}.  Other files default to
@@ -5272,7 +5866,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords for t
     logical                         :: singlef
     character(len=3)                :: cnum
     character(len=len (fileName) + 3) :: filename_num    ! len (file) + len (cnum)
-    type(ESMF_Array)                :: array 
+    type(ESMF_Array)                :: array
+    type(ESMF_FieldType), pointer   :: fp 
+    type(ESMF_Grid)                 :: grid
     logical                         :: opt_overwriteflag ! helper variable
     type(ESMF_FileStatus_Flag)      :: opt_status        ! helper variable
     type(ESMF_IOFmt_Flag)           :: opt_iofmt
@@ -5317,19 +5913,35 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords for t
       end if
     end if
 
+    if (present (convention) .neqv. present (purpose)) then
+      if (ESMF_LogFoundError (ESMF_RC_ARG_WRONG,  &
+          msg='Both convention and purpose must be specified',  &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+    end if
+
     call ESMF_FieldBundleGet(fieldbundle, fieldCount=fieldCount, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU,                  &
          ESMF_CONTEXT, rcToReturn=rc)) return
 
     allocate (fieldList(fieldCount))
-    call ESMF_FieldBundleGet(fieldbundle, fieldList=fieldList, rc=localrc)
+    call ESMF_FieldBundleGet(fieldbundle, fieldList=fieldList, &
+!TODO: gjt thinks this should be doine in ADDORDER below. However, currently
+!TODO: this causes an ESMF_FieldBundleIOUTest failure. Needs to be fixed.
+!      itemorderflag=ESMF_ITEMORDER_ADDORDER, &
+      rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU,                  &
          ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Create an I/O object
+#if 0
+call ESMF_LogWrite("Bef IOCreate", ESMF_LOGMSG_INFO, rc=rc)
+#endif
     io = ESMF_IOCreate(rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU,                  &
         ESMF_CONTEXT, rcToReturn=rc)) return
+#if 0
+call ESMF_LogWrite("Aft IOCreate", ESMF_LOGMSG_INFO, rc=rc)
+#endif
 
     ! From here on out, we need to clean up so no returning on error
     if (singlef) then
@@ -5339,15 +5951,30 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords for t
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU,                  &
             ESMF_CONTEXT, rcToReturn=rc)) return
 
-        call ESMF_IOAddArray(io, array, variableName=name, rc=localrc)
+        fp => fieldList(i)%ftypep
+        if (present (convention)) then
+          call ESMF_FieldGet (fieldList(i), grid=grid, rc=localrc)
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU,                &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+        end if
+
+        call c_esmc_fieldioaddarray (io, fp%base, array, grid, name,  &
+            fieldbundle%this%base, convention, purpose,  &
+            localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU,                  &
             ESMF_CONTEXT, rcToReturn=rc)) return
       enddo
 
+#if 0
+call ESMF_LogWrite("Bef ESMF_IOWrite", ESMF_LOGMSG_INFO, rc=rc)
+#endif
       call ESMF_IOWrite(io, trim(fileName), overwrite=opt_overwriteflag,    &
           status=opt_status, timeslice=timeslice, iofmt=opt_iofmt, rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU,                  &
           ESMF_CONTEXT, rcToReturn=rc)) return
+#if 0
+call ESMF_LogWrite("Aft ESMF_IOWrite", ESMF_LOGMSG_INFO, rc=rc)
+#endif
 
     else
       do i=1,fieldCount
@@ -5359,7 +5986,16 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords for t
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU,                  &
             ESMF_CONTEXT, rcToReturn=rc)) return
 
-        call ESMF_IOAddArray(io, array, variableName=name, rc=localrc)
+        fp => fieldList(i)%ftypep
+        if (present (convention)) then
+          call ESMF_FieldGet (fieldList(i), grid=grid, rc=localrc)
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU,                &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+        end if
+
+        call c_esmc_fieldioaddarray (io, fp%base, array, grid, name,  &
+            fieldbundle%this%base, convention, purpose,  &
+            localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU,                  &
             ESMF_CONTEXT, rcToReturn=rc)) return
 

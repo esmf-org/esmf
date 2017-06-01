@@ -1637,7 +1637,7 @@ call ESMF_LogWrite("eShareStatus: "//trim(eShareStatus), ESMF_LOGMSG_INFO, rc=rc
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
             call ESMF_FieldEmptySet(acceptorField, grid=grid, &
-              staggerloc=staggerloc, rc=rc)
+              staggerloc=staggerloc, vm=vm, rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
           endif
@@ -1836,7 +1836,8 @@ call ESMF_LogWrite("eShareStatus: "//trim(eShareStatus), ESMF_LOGMSG_INFO, rc=rc
             name=geomobjname, vm=vm, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-          call ESMF_FieldEmptySet(acceptorField, locstream=locstream, rc=rc)
+          call ESMF_FieldEmptySet(acceptorField, locstream=locstream, vm=vm, &
+            rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
           if (btest(verbosity,1)) then
@@ -3174,15 +3175,16 @@ print *, "found match:"// &
     character(len=480)              :: tempString
     logical                         :: redistflag
     type(ESMF_RegridMethod_Flag)    :: regridmethod
-    type(ESMF_UnmappedAction_Flag)  :: unmappedaction
     type(ESMF_PoleMethod_Flag)      :: polemethod
     integer                         :: regridPoleNPnts
+    type(ESMF_UnmappedAction_Flag)  :: unmappedaction
     integer(ESMF_KIND_I4), pointer  :: srcMaskValues(:)
     integer(ESMF_KIND_I4), pointer  :: dstMaskValues(:)
     integer                         :: srcTermProcessing, pipelineDepth
     logical                         :: dumpWeightsFlag
     type(ESMF_Grid)                 :: srcGrid, dstGrid
     type(ESMF_GeomType_Flag)        :: srcGeomtype, dstGeomtype
+    type(ESMF_ArraySpec)            :: srcArraySpec, dstArraySpec
     type(ESMF_StaggerLoc)           :: srcStaggerLoc, dstStaggerLoc
     integer, pointer                :: srcGridToFieldMap(:)
     integer, pointer                :: dstGridToFieldMap(:)
@@ -3195,7 +3197,8 @@ print *, "found match:"// &
     
     type RHL
       type(ESMF_Grid)                   :: srcGrid, dstGrid
-      ! field specific items, TODO: offer FieldMatch
+      ! field specific items, TODO: push into a FieldMatch() method
+      type(ESMF_ArraySpec)              :: srcArraySpec, dstArraySpec
       type(ESMF_StaggerLoc)             :: srcStaggerLoc, dstStaggerLoc
       integer, pointer                  :: srcGridToFieldMap(:)
       integer, pointer                  :: dstGridToFieldMap(:)
@@ -3209,6 +3212,11 @@ print *, "found match:"// &
       type(ESMF_RouteHandle)            :: rh
       integer(ESMF_KIND_I4), pointer    :: factorIndexList(:,:)
       real(ESMF_KIND_R8), pointer       :: factorList(:)
+      integer(ESMF_KIND_I4), pointer    :: srcMaskValues(:)
+      integer(ESMF_KIND_I4), pointer    :: dstMaskValues(:)
+      type(ESMF_PoleMethod_Flag)        :: polemethod
+      integer                           :: regridPoleNPnts
+      type(ESMF_UnmappedAction_Flag)    :: unmappedaction
       type(RHL), pointer                :: prev
     end type
     
@@ -3534,7 +3542,7 @@ call ESMF_VMLogCurrentGarbageInfo(trim(name)//": FieldBundleCplStore enter: ")
 
       if (gridPair) then
         ! access the src and dst grid objects
-        call ESMF_FieldGet(srcFields(i), grid=srcGrid, &
+        call ESMF_FieldGet(srcFields(i), arrayspec=srcArraySpec, grid=srcGrid, &
           staggerLoc=srcStaggerLoc, dimCount=fieldDimCount, rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
@@ -3550,7 +3558,7 @@ call ESMF_VMLogCurrentGarbageInfo(trim(name)//": FieldBundleCplStore enter: ")
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
         
-        call ESMF_FieldGet(dstFields(i), grid=dstGrid, &
+        call ESMF_FieldGet(dstFields(i), arrayspec=dstArraySpec, grid=dstGrid, &
           staggerLoc=dstStaggerLoc, rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
@@ -3588,6 +3596,12 @@ write (msgString,*) trim(name)//": dstGrid Match for i=", i, " is: ", &
   rhListMatch
 call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_INFO)
 #endif
+          if (.not.rhListMatch) goto 123
+          ! test src arrayspec match
+          rhListMatch = (rhListE%srcArraySpec==srcArraySpec)
+          if (.not.rhListMatch) goto 123
+          ! test dst arrayspec match
+          rhListMatch = (rhListE%dstArraySpec==dstArraySpec)
           if (.not.rhListMatch) goto 123
           ! test src staggerLoc match
           rhListMatch = (rhListE%srcStaggerLoc==srcStaggerLoc)
@@ -3648,7 +3662,34 @@ call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_INFO)
           if (.not.rhListMatch) goto 123
           ! test regridmethod
           rhListMatch = (rhListE%regridmethod==regridmethod)
-          if (rhListMatch) exit ! break out of search 
+          if (.not.rhListMatch) goto 123
+          ! test srcMaskValues
+          rhListMatch = &
+            (size(rhListE%srcMaskValues)==size(srcMaskValues))
+          if (.not.rhListMatch) goto 123
+          do j=1, size(srcMaskValues)
+            rhListMatch = (rhListE%srcMaskValues(j)==srcMaskValues(j))
+            if (.not.rhListMatch) goto 123
+          enddo
+          ! test dstMaskValues
+          rhListMatch = &
+            (size(rhListE%dstMaskValues)==size(dstMaskValues))
+          if (.not.rhListMatch) goto 123
+          do j=1, size(dstMaskValues)
+            rhListMatch = (rhListE%dstMaskValues(j)==dstMaskValues(j))
+            if (.not.rhListMatch) goto 123
+          enddo
+          ! test polemethod
+          rhListMatch = (rhListE%polemethod==polemethod)
+          if (.not.rhListMatch) goto 123
+          ! test regridPoleNPnts
+          rhListMatch = (rhListE%regridPoleNPnts==regridPoleNPnts)
+          if (.not.rhListMatch) goto 123
+          ! test unmappedaction
+          rhListMatch = (rhListE%unmappedaction==unmappedaction)
+          if (.not.rhListMatch) goto 123
+          ! completed search 
+          exit ! break out
 123       continue
           rhListE=>rhListE%prev   ! previous element
         enddo
@@ -3696,6 +3737,8 @@ call ESMF_LogWrite(trim(name)//&
           ! store info in the new rhList element
           rhListE%srcGrid=srcGrid
           rhListE%dstGrid=dstGrid
+          rhListE%srcArraySpec=srcArraySpec
+          rhListE%dstArraySpec=dstArraySpec
           rhListE%srcStaggerLoc=srcStaggerLoc
           rhListE%dstStaggerLoc=dstStaggerLoc
           rhListE%srcGridToFieldMap=>srcGridToFieldMap
@@ -3706,9 +3749,14 @@ call ESMF_LogWrite(trim(name)//&
           rhListE%dstUngriddedUBound=>dstUngriddedUBound
           rhListE%redistflag=redistflag
           rhListE%regridmethod=regridmethod
-          rhListE%rh = rhh
-          rhListE%factorIndexList => factorIndexList
-          rhListE%factorList => factorList
+          rhListE%rh=rhh
+          rhListE%factorIndexList=>factorIndexList
+          rhListE%factorList=>factorList
+          rhListE%srcMaskValues=>srcMaskValues
+          rhListE%dstMaskValues=>dstMaskValues
+          rhListE%polemethod=polemethod
+          rhListE%regridPoleNPnts=regridPoleNPnts
+          rhListE%unmappedaction=unmappedaction
         endif
       else
 #if 1
@@ -3724,6 +3772,7 @@ call ESMF_LogWrite(trim(name)//&
         deallocate(srcGridToFieldMap, dstGridToFieldMap)
         deallocate(srcUngriddedLBound, srcUngriddedUBound)
         deallocate(dstUngriddedLBound, dstUngriddedUBound)
+        deallocate(srcMaskValues,      dstMaskValues)
       endif
       
       ! append rhh to rh and clear rhh
@@ -3784,14 +3833,12 @@ call ESMF_LogWrite(trim(name)//&
       
       ! local garbage collection
       if (.not.gridPair) then
-        ! grid pairs will have factorIndexList and factorList in rhList struct
+        ! grid pairs transfer ownership of lists into rhList struct
         if (associated(factorIndexList)) deallocate(factorIndexList)
         if (associated(factorList)) deallocate(factorList)
       endif
       if (associated(chopStringList)) deallocate(chopStringList)
-      if (associated(srcMaskValues)) deallocate(srcMaskValues)
-      if (associated(dstMaskValues)) deallocate(dstMaskValues)
-      
+
     enddo
     
     ! take down rhList and destroy rh objects
@@ -3806,6 +3853,7 @@ call ESMF_LogWrite(trim(name)//&
       deallocate(rhListE%srcGridToFieldMap, rhListE%dstGridToFieldMap)
       deallocate(rhListE%srcUngriddedLBound, rhListE%srcUngriddedUBound)
       deallocate(rhListE%dstUngriddedLBound, rhListE%dstUngriddedUBound)
+      deallocate(rhListE%srcMaskValues, rhListE%dstMaskValues)
       deallocate(rhListE)
     enddo
 

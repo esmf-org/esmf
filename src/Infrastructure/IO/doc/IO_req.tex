@@ -5,11 +5,11 @@
 %=============================================================================
 %=============================================================================
 
-The following are requirements for IO operations and are in addition
+The following are requirements for I/O operations and are in addition
 to the applicable general ESMF requirements (see ESMF General 
 Requirements document, section 8.1.3).
 
-\req{General IO requirements}
+\req{General I/O requirements}
 
 \sreq{Establish ESMF metadata conventions}
 
@@ -69,7 +69,7 @@ metadata, shall be provided for IEEE binary and GRIB files.
 
 
 
-\req{IO requirements for supporting different data formats}
+\req{I/O requirements for supporting different data formats}
 %-----------------------------------------------------------------------------
 
 \sreq{Reading and writing netCDF files for structured gridded data}
@@ -320,9 +320,9 @@ observational data covered by ESMF metadata conventions.
 \req{Parallel I/O requirements}
 
 
-\sreq{Single-threaded IO of distributed data}
+\sreq{Single-threaded I/O of distributed data}
 
-ESMF should provide single-threaded IO of distributed data when a
+ESMF should provide single-threaded I/O of distributed data when a
 single process acquires all the data from other processors and writes
 them to the disk or read data from the disk and passes them to other 
 processes. 
@@ -336,10 +336,10 @@ processes.
 \end{reqlist}
 
 
-\sreq{Multi-threaded IO of distributed data to a multiple files}
+\sreq{Multi-threaded I/O of distributed data to multiple files}
 
 
-ESMF should provide multi-threaded IO of distributed data when each
+ESMF should provide multi-threaded I/O of distributed data when each
 process reads data from and writes data to an independent file. 
 
 This include fast reading and writing independent temporary files by 
@@ -385,9 +385,9 @@ enabled by underlying library - otherwise it should provide a status
 bit to indicate the operation is not possible i.e. it shouldn't crash!
 \end{reqlist}
 
-\sreq{Synchronous and asynchronous IO}
+\sreq{Synchronous and asynchronous I/O}
 
-ESMF shall provide an asynchronous option for all ESMF IO models.
+ESMF shall provide an asynchronous option for all ESMF I/O models.
 It shall provide async read and write operations, 
 the capability to wait on individual or groups of I/O operations,
 and query functions for the state of an operation.

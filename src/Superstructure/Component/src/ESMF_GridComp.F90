@@ -3238,7 +3238,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! The arguments are:
 ! \begin{description}
 ! \item[d]
-!   {\tt ESMF\_GridComp} from which to retreive status.
+!   {\tt ESMF\_GridComp} from which to retrieve status.
 ! \end{description}
 !
 !EOPI

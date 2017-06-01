@@ -90,12 +90,21 @@ extern "C" {
   // Initialize return code; assume routine not implemented
   if (rc) *rc = ESMC_RC_NOT_IMPL;
 
-  if (!base) {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                         "bad base", ESMC_CONTEXT, &status);
+  if (!(*base)) {
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NOTALLOC,
+                         "base pointer not allocated", ESMC_CONTEXT, &status);
     if (rc) *rc = status;    
     return;
   }
+
+  // RLO: do NOT try to verify the attpack pointer, it is a return value
+  /*
+  if (!(*attpack)) {
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NOTALLOC,
+                         "attpack pointer not allocated", ESMC_CONTEXT, &status);
+    if (rc) *rc = status;    
+    return;
+  }*/
 
   // allocate space for the array of char*'s and vector of strings
   vector<string> cvalue;
@@ -136,7 +145,7 @@ extern "C" {
 
   // loop through valueList allocating space and copying values to cvalue
   j = 0;
-  for (unsigned int i=0; i<(*count); i++) {
+  for (int i=0; i<(*count); i++) {
     if (j > slen) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
                          "bad count value", ESMC_CONTEXT, &status);
@@ -160,7 +169,7 @@ extern "C" {
   }
 
   //TODO: make this more general, for now order is object, convention, purpose, instname
-  *attpack = (**base).root.AttPackGet(cvalue[1], cvalue[2], cvalue[0],
+  *attpack = (*base)->ESMC_BaseGetRoot()->AttPackGet(cvalue[1], cvalue[2], cvalue[0],
                                       cvalue[3], *anflag);
   if (!(*attpack)) *present = ESMF_FALSE;
   else *present = ESMF_TRUE;
@@ -197,9 +206,9 @@ extern "C" {
   // Initialize return code; assume routine not implemented
   if (rc) *rc = ESMC_RC_NOT_IMPL;
 
-  if (!attpack) {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                         "bad attpack", ESMC_CONTEXT, &status);
+  if (!(*attpack)) {
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NOTALLOC,
+                        "attpack pointer not allocated", ESMC_CONTEXT, &status);
     if (rc) *rc = status;    
     return;
   }
@@ -217,7 +226,7 @@ extern "C" {
 
   if (cname.empty()) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                         "bad attribute name conversion", ESMC_CONTEXT, &status);
+                        "bad attribute name conversion", ESMC_CONTEXT, &status);
       if (rc) *rc = status;
       return;
   }
@@ -265,9 +274,9 @@ extern "C" {
   // Initialize return code; assume routine not implemented
   if (rc) *rc = ESMC_RC_NOT_IMPL;
 
-  if (!base) {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                         "bad base", ESMC_CONTEXT, &status);
+  if (!(*base)) {
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NOTALLOC,
+                         "base pointer not allocated", ESMC_CONTEXT, &status);
     if (rc) *rc = status;
     return;
   }
@@ -285,7 +294,7 @@ extern "C" {
 
   if (cname.empty()) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                         "bad attribute name conversion", ESMC_CONTEXT, &status);
+                       "bad attribute name conversion", ESMC_CONTEXT, &status);
       if (rc) *rc = status;
       return;
   }
@@ -304,7 +313,7 @@ extern "C" {
 
   // loop through valueList allocating space and copying values to cvalue
   int j = 0;
-  for (unsigned int i=0; i<(*count); i++) {
+  for (int i=0; i<(*count); i++) {
     if (j > slen) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
                          "bad specList", ESMC_CONTEXT, &status);
@@ -320,7 +329,7 @@ extern "C" {
   }
 
   // Set the attribute on the object.
-  status = (**base).root.AttPackAddAttribute(cname, cspec[1], cspec[2], cspec[0]);
+  status = (*base)->ESMC_BaseGetRoot()->AttPackAddAttribute(cname, cspec[1], cspec[2], cspec[0]);
   ESMC_LogDefault.MsgFoundError(status, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
         ESMC_NOT_PRESENT_FILTER(rc));
 
@@ -360,12 +369,21 @@ extern "C" {
   // Initialize return code; assume routine not implemented
   if (rc) *rc = ESMC_RC_NOT_IMPL;
 
-  if (!base) {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                         "bad base", ESMC_CONTEXT, &status);
+  if (!(*base)) {
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NOTALLOC,
+                         "base pointer not allocated", ESMC_CONTEXT, &status);
     if (rc) *rc = status;    
     return;
   }
+
+  // RLO: do NOT try to verify the attpack pointer, it is a return value
+  /*if (!(*attpack)) {
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NOTALLOC,
+                        "attpack pointer not allocated", ESMC_CONTEXT, &status);
+    if (rc) *rc = status;    
+    return;
+  }*/
+
 
   // allocate space for the array of char*'s and vector of strings
   vector<string> cspec;
@@ -381,7 +399,7 @@ extern "C" {
 
   // loop through valueList allocating space and copying values to cvalue
   int j = 0;
-  for (unsigned int i=0; i<(*count); i++) {
+  for (int i=0; i<(*count); i++) {
     if (j > slen) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
                          "bad specList", ESMC_CONTEXT, &status);
@@ -397,7 +415,7 @@ extern "C" {
   }
 
   // Set the attribute on the object.
-  *attpack = (**base).root.AttPackCreateCustom(cspec[1], cspec[2], cspec[0]);
+  *attpack = (*base)->ESMC_BaseGetRoot()->AttPackCreateCustom(cspec[1], cspec[2], cspec[0]);
   
   if (rc) *rc = ESMF_SUCCESS;
 
@@ -434,9 +452,9 @@ extern "C" {
   // Initialize return code; assume routine not implemented
   if (rc) *rc = ESMC_RC_NOT_IMPL;
 
-  if (!base) {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                         "bad base", ESMC_CONTEXT, &status);
+  if (!(*base)) {
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NOTALLOC,
+                         "base pointer not allocated", ESMC_CONTEXT, &status);
     if (rc) *rc = status;    
     return;
   }
@@ -455,7 +473,7 @@ extern "C" {
 
   // loop through valueList allocating space and copying values to cvalue
   int j = 0;
-  for (unsigned int i=0; i<(*count); i++) {
+  for (int i=0; i<(*count); i++) {
     if (j > slen) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
                          "bad specList", ESMC_CONTEXT, &status);
@@ -471,7 +489,7 @@ extern "C" {
   }
 
   // Set the attribute on the object.
-  status = (**base).root.AttPackCreateStandard(cspec[1], cspec[2], cspec[0]);
+  status = (*base)->ESMC_BaseGetRoot()->AttPackCreateStandard(cspec[1], cspec[2], cspec[0]);
   ESMC_LogDefault.MsgFoundError(status, ESMCI_ERR_PASSTHRU,
         ESMC_CONTEXT, ESMC_NOT_PRESENT_FILTER(rc));
 
@@ -517,9 +535,9 @@ extern "C" {
   // Initialize return code; assume routine not implemented
   if (rc) *rc = ESMC_RC_NOT_IMPL;
 
-  if (!base) {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                         "bad base", ESMC_CONTEXT, &status);
+  if (!(*base)) {
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NOTALLOC,
+                         "base pointer not allocated", ESMC_CONTEXT, &status);
     if (rc) *rc = status;    
     return;
   }
@@ -578,7 +596,7 @@ extern "C" {
 
   // loop through valueList allocating space and copying values to cvalue
   j = 0;
-  for (unsigned int i=0; i<(*count); i++) {
+  for (int i=0; i<(*count); i++) {
     if (j > slen) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
                          "bad specList", ESMC_CONTEXT, &status);
@@ -602,7 +620,7 @@ extern "C" {
   //   values to cnconv, cnpurp
   j = 0;
   k = 0;
-  for (unsigned int i=0; i<(*nestCount); i++) {
+  for (int i=0; i<(*nestCount); i++) {
     if (!(nestConvention[j])) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute nestConvention", ESMC_CONTEXT, &status);
@@ -628,7 +646,7 @@ extern "C" {
   }
 
   // Set the attribute on the object.
-  status = (**base).root.AttPackNest(cspec[1], cspec[2], cspec[0],
+  status = (*base)->ESMC_BaseGetRoot()->AttPackNest(cspec[1], cspec[2], cspec[0],
                                      *nestCount, cnconv, cnpurp);
   ESMC_LogDefault.MsgFoundError(status, ESMCI_ERR_PASSTHRU,
         ESMC_CONTEXT, ESMC_NOT_PRESENT_FILTER(rc));
@@ -689,9 +707,9 @@ extern "C" {
   // Initialize return code; assume routine not implemented
   if (rc) *rc = ESMC_RC_NOT_IMPL;
 
-  if (!base) {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                         "bad base", ESMC_CONTEXT, &status);
+  if (!(*base)) {
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NOTALLOC,
+                         "base pointer not allocated", ESMC_CONTEXT, &status);
     if (rc) *rc = status;    
     return;
   }
@@ -841,7 +859,7 @@ extern "C" {
   j = 0;
   k = 0;
   totalInstances = 0;
-  for (unsigned int i=0; i<(*nestCount); i++) {
+  for (int i=0; i<(*nestCount); i++) {
     cnapicountlist.push_back(nestAttPackInstanceCountList[i]);
     totalInstances += nestAttPackInstanceCountList[i];
 
@@ -875,7 +893,7 @@ extern "C" {
   int cnapinamecount;
 
   // Create the attribute package on the object
-  status = (**base).root.AttPackCreateStandard(cconv, cpurp, cobj,
+  status = (*base)->ESMC_BaseGetRoot()->AttPackCreateStandard(cconv, cpurp, cobj,
                                                cnconv, cnpurp, 
                                                cnapicountlist,
                                                *nestCount,
@@ -887,7 +905,7 @@ extern "C" {
   // convert attpack instance names to F90
   int namecount = std::min(cnapinamecount, *nestAttPackInstanceNameSize);
   j = 0;
-  for (unsigned int i=0; i<namecount; i++) {
+  for (int i=0; i<namecount; i++) {
     // check if F90 name buffer length is big enough
     if (cnapinamelist[i].length() > nestAttPackInstanceNameLens[i]) {
         ESMC_LogDefault.MsgFoundError(ESMC_RC_BUFFER_SHORT,
@@ -941,9 +959,9 @@ extern "C" {
   // Initialize return code; assume routine not implemented
   if (rc) *rc = ESMC_RC_NOT_IMPL;
 
-  if (!base) {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                         "bad base", ESMC_CONTEXT, &status);
+  if (!(*base)) {
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NOTALLOC,
+                         "base pointer not allocated", ESMC_CONTEXT, &status);
     if (rc) *rc = status;    
     return;
   }
@@ -951,13 +969,13 @@ extern "C" {
   // get the Attribute package
   if (!(*attpack)) {
     ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NOTALLOC,
-                         "failed getting Attribute package", ESMC_CONTEXT, &status);
+                         "attpack pointer not allocated", ESMC_CONTEXT, &status);
     if (rc) *rc = status;
     return;
   }
 
   // Remove the attribute package from the object.
-  status = (**base).root.AttPackRemove(*attpack);
+  status = (*base)->ESMC_BaseGetRoot()->AttPackRemove(*attpack);
   ESMC_LogDefault.MsgFoundError(status, ESMCI_ERR_PASSTHRU,
         ESMC_CONTEXT, ESMC_NOT_PRESENT_FILTER(rc));
 
@@ -995,9 +1013,9 @@ extern "C" {
   // Initialize return code; assume routine not implemented
   if (rc) *rc = ESMC_RC_NOT_IMPL;
 
-  if (!base) {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                         "bad base", ESMC_CONTEXT, &status);
+  if (!(*base)) {
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NOTALLOC,
+                         "base pointer not allocated", ESMC_CONTEXT, &status);
     if (rc) *rc = status;    
     return;
   }
@@ -1005,7 +1023,7 @@ extern "C" {
   // get the Attribute package
   if (!(*attpack)) {
     ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NOTALLOC,
-                         "failed getting Attribute package", ESMC_CONTEXT, &status);
+                         "attpack pointer not allocated", ESMC_CONTEXT, &status);
     if (rc) *rc = status;
     return;
   }
@@ -1029,7 +1047,7 @@ extern "C" {
   }
   
   // Set the attribute on the object.
-  status = (**base).root.AttPackRemoveAttribute(cname, *attpack, *anflag);
+  status = (*base)->ESMC_BaseGetRoot()->AttPackRemoveAttribute(cname, *attpack, *anflag);
   ESMC_LogDefault.MsgFoundError(status, ESMCI_ERR_PASSTHRU,
         ESMC_CONTEXT, ESMC_NOT_PRESENT_FILTER(rc));
 
@@ -1067,7 +1085,7 @@ extern "C" {
 //EOP
 
   int status, j;
-  unsigned int i,k;
+  int i,k;
   ESMC_TypeKind_Flag attrTypeKind;
   int* llens;
   int lcount;
@@ -1076,9 +1094,9 @@ extern "C" {
   // Initialize return code; assume routine not implemented
   if (rc) *rc = ESMC_RC_NOT_IMPL;
 
-  if (!base) {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                         "bad base", ESMC_CONTEXT, &status);
+  if (!(*base)) {
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NOTALLOC,
+                         "base pointer not allocated", ESMC_CONTEXT, &status);
     if (rc) *rc = status;    
     return;
   }
@@ -1112,7 +1130,7 @@ extern "C" {
   // verify the Attribute package
   if (!(*attpack)) {
     ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NOTALLOC,
-                         "failed getting Attribute package", ESMC_CONTEXT, &status);
+                         "attpack pointer not allocated", ESMC_CONTEXT, &status);
     if (rc) *rc = status;
     return;
   }
@@ -1243,9 +1261,9 @@ extern "C" {
   // Initialize return code; assume routine not implemented
   if (rc) *rc = ESMC_RC_NOT_IMPL;
 
-  if (!base) {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                         "bad base", ESMC_CONTEXT, &status);
+  if (!(*base)) {
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NOTALLOC,
+                         "base pointer not allocated", ESMC_CONTEXT, &status);
     if (rc) *rc = status;    
     return;
   }
@@ -1279,7 +1297,7 @@ extern "C" {
   // check the attribute package
   if (!(*attpack)) {
     ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NOTALLOC,
-                    "failed getting attribute package", ESMC_CONTEXT, &status);
+                    "attpack pointer not allocated", ESMC_CONTEXT, &status);
     if (rc) *rc = status;
     return;
   }
@@ -1316,35 +1334,35 @@ extern "C" {
         vector<ESMC_I4> temp;
         temp.reserve(attrCount);
         status = attr->get(&attrCount, &temp);
-        for (unsigned int i=0; i<attrCount; i++)
+        for (int i=0; i<attrCount; i++)
           (static_cast<ESMC_I4*> (value))[i] = temp[i];
         temp.clear();
       } else if (*tk == ESMC_TYPEKIND_I8) {
         vector<ESMC_I8> temp;
         temp.reserve(attrCount);
         status = attr->get(&attrCount, &temp);
-        for (unsigned int i=0; i<attrCount; i++)
+        for (int i=0; i<attrCount; i++)
           (static_cast<ESMC_I8*> (value))[i] = temp[i];
         temp.clear();
       } else if (*tk == ESMC_TYPEKIND_R4) {
         vector<ESMC_R4> temp;
         temp.reserve(attrCount);
         status = attr->get(&attrCount, &temp);
-        for (unsigned int i=0; i<attrCount; i++)
+        for (int i=0; i<attrCount; i++)
           (static_cast<ESMC_R4*> (value))[i] = temp[i];
         temp.clear();
       } else if (*tk == ESMC_TYPEKIND_R8) {
         vector<ESMC_R8> temp;
         temp.reserve(attrCount);
         status = attr->get(&attrCount, &temp);
-        for (unsigned int i=0; i<attrCount; i++)
+        for (int i=0; i<attrCount; i++)
           (static_cast<ESMC_R8*> (value))[i] = temp[i];
         temp.clear();
       } else if (*tk == ESMC_TYPEKIND_LOGICAL) {
         vector<ESMC_Logical> temp;
         temp.reserve(attrCount);
         status = attr->get(&attrCount, &temp);
-        for (unsigned int i=0; i<attrCount; i++)
+        for (int i=0; i<attrCount; i++)
           (static_cast<ESMC_Logical*> (value))[i] = temp[i];
         temp.clear();
       } else {
@@ -1404,9 +1422,9 @@ extern "C" {
   // Initialize return code; assume routine not implemented
   if (rc) *rc = ESMC_RC_NOT_IMPL;
 
-  if (!base) {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                         "bad base", ESMC_CONTEXT, &status);
+  if (!(*base)) {
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NOTALLOC,
+                         "base pointer not allocated", ESMC_CONTEXT, &status);
     if (rc) *rc = status;    
     return;
   }
@@ -1414,7 +1432,7 @@ extern "C" {
   // check the attribute package
   if (!(*attpack)) {
     ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NOTALLOC,
-                    "failed getting attribute package", ESMC_CONTEXT, &status);
+                    "attpack pointer not allocated", ESMC_CONTEXT, &status);
     if (rc) *rc = status;
     return;
   }
@@ -1465,7 +1483,7 @@ extern "C" {
   int capinamecount;
 
   // Create the attribute package on the object
-  status = (**base).root.AttPackGet((*attpack)->getConvention(), 
+  status = (*base)->ESMC_BaseGetRoot()->AttPackGet((*attpack)->getConvention(), 
                                     (*attpack)->getPurpose(), 
                                     (*attpack)->getObject(),
                                     capinamelist, capinamecount,
@@ -1484,7 +1502,7 @@ extern "C" {
 
   // convert attpack instance names to F90
   j = 0;
-  for (unsigned int i=0; i<capinamecount; i++) {
+  for (int i=0; i<capinamecount; i++) {
     // check if F90 name buffer length is big enough
     if (capinamelist[i].length() > attPackInstanceNameLens[i]) {
         ESMC_LogDefault.MsgFoundError(ESMC_RC_BUFFER_SHORT,
@@ -1538,19 +1556,20 @@ extern "C" {
   // Initialize return code; assume routine not implemented
   if (rc) *rc = ESMC_RC_NOT_IMPL;
 
-  if (!base) {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                         "bad base", ESMC_CONTEXT, &status);
+  if (!(*base)) {
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NOTALLOC,
+                         "base pointer not allocated", ESMC_CONTEXT, &status);
     if (rc) *rc = status;
     return;
   }
 
-  if (!attpack) {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                         "bad attpack", ESMC_CONTEXT, &status);
+  // RLO: do NOT try to verify the attpack pointer, it may not be present
+  /*if (!(*attpack)) {
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NOTALLOC,
+                         "attpack pointer not allocated", ESMC_CONTEXT, &status);
     if (rc) *rc = status;
     return;
-  }
+  }*/
 
   if (!present) {
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
@@ -1560,7 +1579,7 @@ extern "C" {
   }
 
   // Set the attribute on the object.
-  status = (**base).root.AttPackIsPresent(*attpack, present);
+  status = (*base)->ESMC_BaseGetRoot()->AttPackIsPresent(*attpack, present);
   ESMC_LogDefault.MsgFoundError(status, ESMCI_ERR_PASSTHRU,
     ESMC_CONTEXT, ESMC_NOT_PRESENT_FILTER(rc));
 
@@ -1598,9 +1617,9 @@ extern "C" {
   // Initialize return code; assume routine not implemented
   if (rc) *rc = ESMC_RC_NOT_IMPL;
 
-  if (!base) {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                         "bad base", ESMC_CONTEXT, &status);
+  if (!(*base)) {
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NOTALLOC,
+                         "base pointer not allocated", ESMC_CONTEXT, &status);
     if (rc) *rc = status;    
     return;
   }
@@ -1622,7 +1641,15 @@ extern "C" {
       if (rc) *rc = status;
       return;
   }
-  
+
+  // Find the attpack
+  // RLO: do NOT try to verify the attpack pointer, it may not be present
+  /*if(!(*attpack)) {
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NOTALLOC, 
+      "attpack pointer not allocated", ESMC_CONTEXT, &status);
+    return;
+  }*/
+
   if (!present) {
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute present flag", ESMC_CONTEXT, &status);
@@ -1631,7 +1658,7 @@ extern "C" {
   }
 
   // Set the attribute on the object.
-  status = (**base).root.AttPackIsPresent(cname, *attpack, ESMC_ATTNEST_ON, present);
+  status = (*base)->ESMC_BaseGetRoot()->AttPackIsPresent(cname, *attpack, ESMC_ATTNEST_ON, present);
   ESMC_LogDefault.MsgFoundError(status, ESMCI_ERR_PASSTHRU,
     ESMC_CONTEXT, ESMC_NOT_PRESENT_FILTER(rc));
   
@@ -1669,9 +1696,9 @@ extern "C" {
   // Initialize return code; assume routine not implemented
   if (rc) *rc = ESMC_RC_NOT_IMPL;
 
-  if (!base) {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                         "bad base", ESMC_CONTEXT, &status);
+  if (!(*base)) {
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NOTALLOC,
+                         "base pointer not allocated", ESMC_CONTEXT, &status);
     if (rc) *rc = status;
     return;
   }
@@ -1683,6 +1710,14 @@ extern "C" {
       return;
   }
 
+  // Find the attpack
+  // RLO: do NOT try to verify the attpack pointer, it is a return value
+  /*if(!(*attpack)) {
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NOTALLOC,
+      "attpack pointer not allocated", ESMC_CONTEXT, &status);
+    return;
+  }*/
+
   if (!present) {
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute present flag", ESMC_CONTEXT, &status);
@@ -1691,7 +1726,7 @@ extern "C" {
   }
 
   // Set the attribute on the object.
-  status = (**base).root.AttPackIsPresent((*num)-1, *attpack, ESMC_ATTNEST_ON, present);
+  status = (*base)->ESMC_BaseGetRoot()->AttPackIsPresent((*num)-1, *attpack, ESMC_ATTNEST_ON, present);
   ESMC_LogDefault.MsgFoundError(status, ESMCI_ERR_PASSTHRU,
     ESMC_CONTEXT, ESMC_NOT_PRESENT_FILTER(rc));
 
@@ -1739,7 +1774,7 @@ extern "C" {
     return;
   }
 
-  status = (**destination).root.AttributeMove(&((**source).root));
+  status = (*destination)->ESMC_BaseGetRoot()->AttributeMove((*source)->ESMC_BaseGetRoot());
   ESMC_LogDefault.MsgFoundError(status, ESMCI_ERR_PASSTHRU,
         ESMC_CONTEXT, ESMC_NOT_PRESENT_FILTER(rc));
 
@@ -1783,9 +1818,9 @@ extern "C" {
   // Initialize return code; assume routine not implemented
   if (rc) *rc = ESMC_RC_NOT_IMPL;
 
-  if (!base) {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                         "bad base", ESMC_CONTEXT, &status);
+  if (!(*base)) {
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NOTALLOC,
+                         "base pointer not allocated", ESMC_CONTEXT, &status);
     if (rc) *rc = status;    
     return;
   }
@@ -1814,7 +1849,7 @@ extern "C" {
 
   // loop through valueList allocating space and copying values to cvalue
   j = 0;
-  for (unsigned int i=0; i<(*count); i++) {
+  for (int i=0; i<(*count); i++) {
     if (!(valueList[j])) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute value", ESMC_CONTEXT, &status);
@@ -1831,8 +1866,8 @@ extern "C" {
   
   // Find the attpack
   if(!(*attpack)) {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_NOT_FOUND, 
-      "Cannot find the specified Attribute package", ESMC_CONTEXT, &status);
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NOTALLOC,
+      "attpack pointer not allocated", ESMC_CONTEXT, &status);
     return;
   }
   
@@ -1897,9 +1932,9 @@ extern "C" {
   // Initialize return code; assume routine not implemented
   if (rc) *rc = ESMC_RC_NOT_IMPL;
 
-  if (!base) {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                         "bad base", ESMC_CONTEXT, &status);
+  if (!(*base)) {
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NOTALLOC,
+                         "base pointer not allocated", ESMC_CONTEXT, &status);
     if (rc) *rc = status;    
     return;
   }
@@ -1917,8 +1952,8 @@ extern "C" {
 
   // Check the attpack
   if(!(*attpack)) {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_NOT_FOUND, 
-      "Cannot find the specified Attribute package", ESMC_CONTEXT, &status);
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NOTALLOC,
+      "attpack pointer not allocated", ESMC_CONTEXT, &status);
     return;
   }
   
@@ -1945,43 +1980,43 @@ extern "C" {
       if (*tk == ESMC_TYPEKIND_I4) {
         vector<ESMC_I4> temp;
         temp.reserve(*count);
-        for (unsigned int i=0; i<*count; i++)
+        for (int i=0; i<*count; i++)
           temp.push_back((static_cast<ESMC_I4*> (value))[i]);
           status = attr->AttrModifyValue(*tk, *count, &temp);
-        /*status = (**base).root.AttPackSet(cname, *tk, *count, &temp,
+        /*status = (*base)->ESMC_BaseGetRoot()->AttPackSet(cname, *tk, *count, &temp,
                         cconv, cpurp, cobj, capname);*/
         temp.clear();
       } else if (*tk == ESMC_TYPEKIND_I8) {
         vector<ESMC_I8> temp;
         temp.reserve(*count);
-        for (unsigned int i=0; i<*count; i++)
+        for (int i=0; i<*count; i++)
           temp.push_back((static_cast<ESMC_I8*> (value))[i]);
           status = attr->AttrModifyValue(*tk, *count, &temp);
-        /*status = (**base).root.AttPackSet(cname, *tk, *count, &temp,
+        /*status = (*base)->ESMC_BaseGetRoot()->AttPackSet(cname, *tk, *count, &temp,
                         cconv, cpurp, cobj, capname);*/
         temp.clear();
       } else if (*tk == ESMC_TYPEKIND_R4) {
         vector<ESMC_R4> temp;
         temp.reserve(*count);
-        for (unsigned int i=0; i<*count; i++)
+        for (int i=0; i<*count; i++)
           temp.push_back((static_cast<ESMC_R4*> (value))[i]);
           status = attr->AttrModifyValue(*tk, *count, &temp);
-        /*status = (**base).root.AttPackSet(cname, *tk, *count, &temp,
+        /*status = (*base)->ESMC_BaseGetRoot()->AttPackSet(cname, *tk, *count, &temp,
                         cconv, cpurp, cobj, capname);*/
         temp.clear();
       } else if (*tk == ESMC_TYPEKIND_R8) {
         vector<ESMC_R8> temp;
         temp.reserve(*count);
-        for (unsigned int i=0; i<*count; i++)
+        for (int i=0; i<*count; i++)
           temp.push_back((static_cast<ESMC_R8*> (value))[i]);
           status = attr->AttrModifyValue(*tk, *count, &temp);
-        /*status = (**base).root.AttPackSet(cname, *tk, *count, &temp,
+        /*status = (*base)->ESMC_BaseGetRoot()->AttPackSet(cname, *tk, *count, &temp,
                         cconv, cpurp, cobj, capname);*/
         temp.clear();
       } else if (*tk == ESMC_TYPEKIND_LOGICAL) {
         vector<ESMC_Logical> temp;
         temp.reserve(*count);
-        for (unsigned int i=0; i<*count; i++)
+        for (int i=0; i<*count; i++)
           temp.push_back((static_cast<ESMC_Logical*> (value))[i]);
           status = attr->AttrModifyValue(*tk, *count, &temp);
         temp.clear();
@@ -2027,7 +2062,6 @@ extern "C" {
       ESMC_Base **source,              // in/out - base object
       ESMC_Base **destination,         // in/out - base object
       ESMC_AttCopyFlag *attcopyflag,   // in - attcopyflag
-      ESMC_AttTreeFlag *atttreeflag,   // in - atttreeflag
       int *rc) {                       // in/out - return code
 // 
 // !DESCRIPTION:
@@ -2040,15 +2074,15 @@ extern "C" {
   // Initialize return code; assume routine not implemented
   if (rc) *rc = ESMC_RC_NOT_IMPL;
 
-  if (!source) {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+  if (!(*source)) {
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NOTALLOC,
                          "bad source base", ESMC_CONTEXT, &status);
     if (rc) *rc = status;    
     return;
   }
   
-  if (!destination) {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+  if (!(*destination)) {
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NOTALLOC,
                          "bad destination base", ESMC_CONTEXT, &status);
     if (rc) *rc = status;    
     return;
@@ -2061,34 +2095,25 @@ extern "C" {
     return;
   }
   
-  if (!atttreeflag) {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                         "bad ESMC_AttTreeFlag", ESMC_CONTEXT, &status);
-    if (rc) *rc = status;    
-    return;
-  }
-
   // set the base pointer for the root attribute before copying
-  (**destination).root.setBase(*destination);
+  (*destination)->ESMC_BaseGetRoot()->setBase(*destination);
 
   // now copy
-  if (*attcopyflag == ESMF_COPY_VALUE && *atttreeflag == ESMC_ATTTREE_OFF) {
-      status = (**destination).root.AttributeCopyIgnore((**source).root);
+  if (*attcopyflag == ESMF_ATTCOPY_VALUE) {
+      status = (*destination)->ESMC_BaseGetRoot()->AttributeCopyIgnore(*((*source)->ESMC_BaseGetRoot()));
       ESMC_LogDefault.MsgFoundError(status, ESMCI_ERR_PASSTHRU,
         ESMC_CONTEXT, ESMC_NOT_PRESENT_FILTER(rc));
   }
-  else if (*attcopyflag == ESMF_COPY_REFERENCE) {
-      status = (**destination).root.AttributeCopyHybrid((**source).root);
+  else if (*attcopyflag == ESMF_ATTCOPY_HYBRID) {
+      status = (*destination)->ESMC_BaseGetRoot()->AttributeCopyHybrid(*((*source)->ESMC_BaseGetRoot()));
       ESMC_LogDefault.MsgFoundError(status, ESMCI_ERR_PASSTHRU,
         ESMC_CONTEXT, ESMC_NOT_PRESENT_FILTER(rc));
   }
-/* RLO - had to disable this because it no longer makes sense with new copy flag
-  else if (*attcopyflag == ESMF_COPY_ALIAS) {
-      status = (**destination).root.AttributeMove(&((**source).root));
-      ESMC_LogDefault.MsgFoundError(status, ESMCI_ERR_PASSTHRU,
-        ESMC_CONTEXT, ESMC_NOT_PRESENT_FILTER(rc));
+  else if (*attcopyflag == ESMF_ATTCOPY_REFERENCE) {
+      (*destination)->ESMC_BaseSetRoot((*source)->ESMC_BaseGetRoot());
+      status = ESMF_SUCCESS;
+      if (rc) *rc = status;
   }
-*/
   else {
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
                          "invalid attribute copy flag combination", ESMC_CONTEXT, &status);
@@ -2129,7 +2154,7 @@ extern "C" {
 
   int status, j;
   ESMCI::Attribute *attr = NULL;
-  unsigned int i,k;
+  int i,k;
   ESMC_TypeKind_Flag attrTypeKind;
   int *llens;
   int lcount;
@@ -2137,9 +2162,9 @@ extern "C" {
   // Initialize return code; assume routine not implemented
   if (rc) *rc = ESMC_RC_NOT_IMPL;
 
-  if (!base) {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                         "bad base", ESMC_CONTEXT, &status);
+  if (!(*base)) {
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NOTALLOC,
+                         "base pointer not allocated", ESMC_CONTEXT, &status);
     if (rc) *rc = status;    
     return;
   }
@@ -2164,7 +2189,7 @@ extern "C" {
   }
 
   // check the typekind, do not return error (default value possible)
-  attr = (**base).root.AttributeGet(cname);
+  attr = (*base)->ESMC_BaseGetRoot()->AttributeGet(cname);
   if (!attr) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_NOT_FOUND, "attribute not found",
           ESMC_CONTEXT, &status);
@@ -2286,9 +2311,9 @@ extern "C" {
   // Initialize return code; assume routine not implemented
   if (rc) *rc = ESMC_RC_NOT_IMPL;
 
-  if (!base) {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                         "bad base", ESMC_CONTEXT, &status);
+  if (!(*base)) {
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NOTALLOC,
+                         "base pointer not allocated", ESMC_CONTEXT, &status);
     if (rc) *rc = status;    
     return;
   }
@@ -2312,7 +2337,7 @@ extern "C" {
   }
 
   // check the typekind, do not return error (default value possible)
-  attr = (**base).root.AttributeGet(cname);
+  attr = (*base)->ESMC_BaseGetRoot()->AttributeGet(cname);
   if (!attr) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_NOT_FOUND, "attribute not found",
           ESMC_CONTEXT, &status);
@@ -2348,35 +2373,35 @@ extern "C" {
         vector<ESMC_I4> temp;
         temp.reserve(attrItems);
         status = attr->get(&attrItems, &temp);
-        for (unsigned int i=0; i<attrItems; i++)
+        for (int i=0; i<attrItems; i++)
           (static_cast<ESMC_I4*> (value))[i] = temp[i];
         temp.clear();
       } else if (*tk == ESMC_TYPEKIND_I8) {
         vector<ESMC_I8> temp;
         temp.reserve(attrItems);
         status = attr->get(&attrItems, &temp);
-        for (unsigned int i=0; i<attrItems; i++)
+        for (int i=0; i<attrItems; i++)
           (static_cast<ESMC_I8*> (value))[i] = temp[i];
         temp.clear();
       } else if (*tk == ESMC_TYPEKIND_R4) {
         vector<ESMC_R4> temp;
         temp.reserve(attrItems);
         status = attr->get(&attrItems, &temp);
-        for (unsigned int i=0; i<attrItems; i++)
+        for (int i=0; i<attrItems; i++)
           (static_cast<ESMC_R4*> (value))[i] = temp[i];
         temp.clear();
       } else if (*tk == ESMC_TYPEKIND_R8) {
         vector<ESMC_R8> temp;
         temp.reserve(attrItems);
         status = attr->get(&attrItems, &temp);
-        for (unsigned int i=0; i<attrItems; i++)
+        for (int i=0; i<attrItems; i++)
           (static_cast<ESMC_R8*> (value))[i] = temp[i];
         temp.clear();
       } else if (*tk == ESMC_TYPEKIND_LOGICAL) {
         vector<ESMC_Logical> temp;
         temp.reserve(attrItems);
         status = attr->get(&attrItems, &temp);
-        for (unsigned int i=0; i<attrItems; i++)
+        for (int i=0; i<attrItems; i++)
           (static_cast<ESMC_Logical*> (value))[i] = temp[i];
         temp.clear();
       } else {
@@ -2436,9 +2461,9 @@ extern "C" {
   // Initialize return code; assume routine not implemented
   if (rc) *rc = ESMC_RC_NOT_IMPL;
 
-  if (!base) {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                         "bad base", ESMC_CONTEXT, &status);
+  if (!(*base)) {
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NOTALLOC,
+                         "base pointer not allocated", ESMC_CONTEXT, &status);
     if (rc) *rc = status;    
     return;
   }
@@ -2469,7 +2494,7 @@ extern "C" {
   cname.resize(cname.find_last_not_of(" ")+1);
   if (cname.empty()) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                         "bad attribute name conversion", ESMC_CONTEXT, &status);
+                        "bad attribute name conversion", ESMC_CONTEXT, &status);
       if (rc) *rc = status;
       return;
   }
@@ -2477,7 +2502,7 @@ extern "C" {
   // get the Attribute package
   if (!(*attpack)) {
     ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NOTALLOC,
-                         "failed getting Attribute package", ESMC_CONTEXT, &status);
+                        "attpack pointer not allocated", ESMC_CONTEXT, &status);
     if (rc) *rc = status;
     return;
   }
@@ -2546,9 +2571,9 @@ extern "C" {
   // Initialize return code; assume routine not implemented
   if (rc) *rc = ESMC_RC_NOT_IMPL;
 
-  if (!base) {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                         "bad base", ESMC_CONTEXT, &status);
+  if (!(*base)) {
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NOTALLOC,
+                         "base pointer not allocated", ESMC_CONTEXT, &status);
     if (rc) *rc = status;    
     return;
   }
@@ -2585,7 +2610,7 @@ extern "C" {
       return;
   }
 
-  attr = (**base).root.AttributeGet(cname);
+  attr = (*base)->ESMC_BaseGetRoot()->AttributeGet(cname);
   if (!attr) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_NOT_FOUND, ESMCI_ERR_PASSTHRU,
           ESMC_CONTEXT, &status);
@@ -2643,9 +2668,9 @@ extern "C" {
   // Initialize return code; assume routine not implemented
   if (rc) *rc = ESMC_RC_NOT_IMPL;
 
-  if (!base) {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                         "bad base", ESMC_CONTEXT, &status);
+  if (!(*base)) {
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NOTALLOC,
+                         "base pointer not allocated", ESMC_CONTEXT, &status);
     if (rc) *rc = status;    
     return;
   }
@@ -2678,7 +2703,7 @@ extern "C" {
   // get the Attribute package
   if (!(*attpack)) {
     ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NOTALLOC,
-                         "failed getting Attribute package", ESMC_CONTEXT, &status);
+                        "attpack pointer not allocated", ESMC_CONTEXT, &status);
     if (rc) *rc = status;
     return;
   }
@@ -2759,9 +2784,9 @@ extern "C" {
   // Initialize return code; assume routine not implemented
   if (rc) *rc = ESMC_RC_NOT_IMPL;
 
-  if (!base) {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                         "bad base", ESMC_CONTEXT, &status);
+  if (!(*base)) {
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NOTALLOC,
+                         "base pointer not allocated", ESMC_CONTEXT, &status);
     if (rc) *rc = status;    
     return;
   }
@@ -2791,7 +2816,7 @@ extern "C" {
   // declare string for name
   string cname;
 
-  attr = (**base).root.AttributeGet((*num)-1);
+  attr = (*base)->ESMC_BaseGetRoot()->AttributeGet((*num)-1);
   if (!attr) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_NOT_FOUND, ESMCI_ERR_PASSTHRU,
           ESMC_CONTEXT, &status);
@@ -2852,9 +2877,9 @@ extern "C" {
   // Initialize return code; assume routine not implemented
   if (rc) *rc = ESMC_RC_NOT_IMPL;
 
-  if (!base) {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                         "bad base", ESMC_CONTEXT, &status);
+  if (!(*base)) {
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NOTALLOC,
+                         "base pointer not allocated", ESMC_CONTEXT, &status);
     if (rc) *rc = status;
     return;
   }
@@ -2874,7 +2899,7 @@ extern "C" {
     return;
   }
 
-  status = (**base).root.getCount(*gcflag, count);
+  status = (*base)->ESMC_BaseGetRoot()->getCount(*gcflag, count);
   ESMC_LogDefault.MsgFoundError(status, ESMCI_ERR_PASSTHRU,
       ESMC_CONTEXT, ESMC_NOT_PRESENT_FILTER(rc));
 
@@ -2911,9 +2936,9 @@ extern "C" {
   // Initialize return code; assume routine not implemented
   if (rc) *rc = ESMC_RC_NOT_IMPL;
 
-  if (!attpack) {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                         "bad attpack", ESMC_CONTEXT, &status);
+  if (!(*attpack)) {
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NOTALLOC,
+                        "attpack pointer not allocated", ESMC_CONTEXT, &status);
     if (rc) *rc = status;
     return;
   }
@@ -2982,9 +3007,9 @@ extern "C" {
   // Initialize return code; assume routine not implemented
   if (rc) *rc = ESMC_RC_NOT_IMPL;
 
-  if (!base) {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                         "bad base", ESMC_CONTEXT, &status);
+  if (!(*base)) {
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NOTALLOC,
+                         "base pointer not allocated", ESMC_CONTEXT, &status);
     if (rc) *rc = status;
     return;
   }
@@ -3014,7 +3039,7 @@ extern "C" {
   }
 
   // Set the attribute on the object.
-  status = (**base).root.AttributeIsPresent(cname, present);
+  status = (*base)->ESMC_BaseGetRoot()->AttributeIsPresent(cname, present);
   ESMC_LogDefault.MsgFoundError(status, ESMCI_ERR_PASSTHRU,
     ESMC_CONTEXT, ESMC_NOT_PRESENT_FILTER(rc));
 
@@ -3049,9 +3074,9 @@ extern "C" {
   // Initialize return code; assume routine not implemented
   if (rc) *rc = ESMC_RC_NOT_IMPL;
 
-  if (!base) {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                         "bad base", ESMC_CONTEXT, &status);
+  if (!(*base)) {
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NOTALLOC,
+                         "base pointer not allocated", ESMC_CONTEXT, &status);
     if (rc) *rc = status;    
     return;
   }
@@ -3071,7 +3096,7 @@ extern "C" {
   }
   
   // Set the attribute on the object.
-  status = (**base).root.AttributeIsPresent((*num)-1, present);
+  status = (*base)->ESMC_BaseGetRoot()->AttributeIsPresent((*num)-1, present);
   ESMC_LogDefault.MsgFoundError(status, ESMCI_ERR_PASSTHRU,
     ESMC_CONTEXT, ESMC_NOT_PRESENT_FILTER(rc));
 
@@ -3106,16 +3131,16 @@ extern "C" {
   // Initialize return code; assume routine not implemented
   if (rc) *rc = ESMC_RC_NOT_IMPL;
 
-  if (!source) {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                         "bad source base", ESMC_CONTEXT, &status);
+  if (!(*source)) {
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NOTALLOC,
+                    "source base pointer not allocated", ESMC_CONTEXT, &status);
     if (rc) *rc = status;    
     return;
   }
-  
-  if (!destination) {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                         "bad destination base", ESMC_CONTEXT, &status);
+
+  if (!(*destination)) {
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NOTALLOC,
+               "destination base pointer not allocated", ESMC_CONTEXT, &status);
     if (rc) *rc = status;    
     return;
   }
@@ -3128,7 +3153,7 @@ extern "C" {
   }
 
   // Set the attribute link on the object.
-  status = (**source).root.AttributeLink(&(**destination).root, linkChange);
+  status = (*source)->ESMC_BaseGetRoot()->AttributeLink((*destination)->ESMC_BaseGetRoot(), linkChange);
   ESMC_LogDefault.MsgFoundError(status, ESMCI_ERR_PASSTHRU,
     ESMC_CONTEXT, ESMC_NOT_PRESENT_FILTER(rc));
 
@@ -3163,16 +3188,16 @@ extern "C" {
   // Initialize return code; assume routine not implemented
   if (rc) *rc = ESMC_RC_NOT_IMPL;
 
-  if (!source) {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                         "bad source base", ESMC_CONTEXT, &status);
+  if (!(*source)) {
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NOTALLOC,
+                    "source base pointer not allocated", ESMC_CONTEXT, &status);
     if (rc) *rc = status;    
     return;
   }
   
-  if (!destination) {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                         "bad destination base", ESMC_CONTEXT, &status);
+  if (!(*destination)) {
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NOTALLOC,
+               "destination base pointer not allocated", ESMC_CONTEXT, &status);
     if (rc) *rc = status;    
     return;
   }
@@ -3185,7 +3210,7 @@ extern "C" {
   }
 
   // Set the attribute link on the object.
-  status = (**source).root.AttributeLinkRemove(&(**destination).root, linkChange);
+  status = (*source)->ESMC_BaseGetRoot()->AttributeLinkRemove((*destination)->ESMC_BaseGetRoot(), linkChange);
   ESMC_LogDefault.MsgFoundError(status, ESMCI_ERR_PASSTHRU,
     ESMC_CONTEXT, ESMC_NOT_PRESENT_FILTER(rc));
 
@@ -3220,9 +3245,9 @@ extern "C" {
   // Initialize return code; assume routine not implemented
   if (rc) *rc = ESMC_RC_NOT_IMPL;
 
-  if (!base) {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                         "bad base", ESMC_CONTEXT, &status);
+  if (!(*base)) {
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NOTALLOC,
+                         "base pointer not allocated", ESMC_CONTEXT, &status);
     if (rc) *rc = status;    
     return;
   }
@@ -3246,7 +3271,7 @@ extern "C" {
   }
   
   // Set the attribute on the object.
-  status = (**base).root.AttributeRemove(cname);
+  status = (*base)->ESMC_BaseGetRoot()->AttributeRemove(cname);
   ESMC_LogDefault.MsgFoundError(status, ESMCI_ERR_PASSTHRU,
     ESMC_CONTEXT, ESMC_NOT_PRESENT_FILTER(rc));
 
@@ -3288,9 +3313,9 @@ extern "C" {
   // Initialize return code; assume routine not implemented
   if (rc) *rc = ESMC_RC_NOT_IMPL;
 
-  if (!base) {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                         "bad base", ESMC_CONTEXT, &status);
+  if (!(*base)) {
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NOTALLOC,
+                         "base pointer not allocated", ESMC_CONTEXT, &status);
     if (rc) *rc = status;    
     return;
   }
@@ -3326,7 +3351,7 @@ extern "C" {
 
   // loop through valueList allocating space and copying values to cvalue
   j = 0;
-  for (unsigned int i=0; i<(*count); i++) {
+  for (int i=0; i<(*count); i++) {
     if (j > vlen) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute value", ESMC_CONTEXT, &status);
@@ -3342,7 +3367,7 @@ extern "C" {
   }
 
   // Set the attribute on the object.
-  status = (**base).root.AttributeSet(cname, cvalue.size(), &cvalue);
+  status = (*base)->ESMC_BaseGetRoot()->AttributeSet(cname, cvalue.size(), &cvalue);
   ESMC_LogDefault.MsgFoundError(status, ESMCI_ERR_PASSTHRU,
     ESMC_CONTEXT, ESMC_NOT_PRESENT_FILTER(rc));
 
@@ -3382,9 +3407,9 @@ extern "C" {
   // Initialize return code; assume routine not implemented
   if (rc) *rc = ESMC_RC_NOT_IMPL;
 
-  if (!base) {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                         "bad base", ESMC_CONTEXT, &status);
+  if (!(*base)) {
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NOTALLOC,
+                         "base pointer not allocated", ESMC_CONTEXT, &status);
     if (rc) *rc = status;    
     return;
   }
@@ -3411,37 +3436,37 @@ extern "C" {
       if (*tk == ESMC_TYPEKIND_I4) {
         vector<ESMC_I4> temp;
         temp.reserve(*count);
-        for (unsigned int i=0; i<*count; i++)
+        for (int i=0; i<*count; i++)
           temp.push_back((static_cast<ESMC_I4*> (value))[i]);
-        status = (**base).root.AttributeSet(cname, *count, &temp);
+        status = (*base)->ESMC_BaseGetRoot()->AttributeSet(cname, *count, &temp);
         temp.clear();
       } else if (*tk == ESMC_TYPEKIND_I8) {
         vector<ESMC_I8> temp;
         temp.reserve(*count);
-        for (unsigned int i=0; i<*count; i++)
+        for (int i=0; i<*count; i++)
           temp.push_back((static_cast<ESMC_I8*> (value))[i]);
-        status = (**base).root.AttributeSet(cname, *count, &temp);
+        status = (*base)->ESMC_BaseGetRoot()->AttributeSet(cname, *count, &temp);
         temp.clear();
       } else if (*tk == ESMC_TYPEKIND_R4) {
         vector<ESMC_R4> temp;
         temp.reserve(*count);
-        for (unsigned int i=0; i<*count; i++)
+        for (int i=0; i<*count; i++)
           temp.push_back((static_cast<ESMC_R4*> (value))[i]);
-        status = (**base).root.AttributeSet(cname, *count, &temp);
+        status = (*base)->ESMC_BaseGetRoot()->AttributeSet(cname, *count, &temp);
         temp.clear();
       } else if (*tk == ESMC_TYPEKIND_R8) {
         vector<ESMC_R8> temp;
         temp.reserve(*count);
-        for (unsigned int i=0; i<*count; i++)
+        for (int i=0; i<*count; i++)
           temp.push_back((static_cast<ESMC_R8*> (value))[i]);
-        status = (**base).root.AttributeSet(cname, *count, &temp);
+        status = (*base)->ESMC_BaseGetRoot()->AttributeSet(cname, *count, &temp);
         temp.clear();
       } else if (*tk == ESMC_TYPEKIND_LOGICAL) {
         vector<ESMC_Logical> temp;
         temp.reserve(*count);
-        for (unsigned int i=0; i<*count; i++)
+        for (int i=0; i<*count; i++)
           temp.push_back((static_cast<ESMC_Logical*> (value))[i]);
-        status = (**base).root.AttributeSet(cname, *count, &temp);
+        status = (*base)->ESMC_BaseGetRoot()->AttributeSet(cname, *count, &temp);
         temp.clear();
       } else {
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ATTR_WRONGTYPE,
@@ -3500,9 +3525,9 @@ extern "C" {
   // Initialize return code; assume routine not implemented
   if (rc) *rc = ESMC_RC_NOT_IMPL;
 
-  if (!base) {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                         "bad base", ESMC_CONTEXT, &status);
+  if (!(*base)) {
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NOTALLOC,
+                         "base pointer not allocated", ESMC_CONTEXT, &status);
     if (rc) *rc = status;    
     return;
   }
@@ -3542,7 +3567,7 @@ extern "C" {
   }
 
   // Set the attribute on the object.
-  status = (**base).root.AttributeSetObjsInTree(cname,cobject,*tk,*count,value);
+  status = (*base)->ESMC_BaseGetRoot()->AttributeSetObjsInTree(cname,cobject,*tk,*count,value);
   ESMC_LogDefault.MsgFoundError(status, ESMCI_ERR_PASSTHRU,
     ESMC_CONTEXT, ESMC_NOT_PRESENT_FILTER(rc));
 
@@ -3582,6 +3607,13 @@ extern "C" {
 
   // Initialize return code; assume routine not implemented
   if (rc) *rc = ESMC_RC_NOT_IMPL;
+
+  if (!(*base)) {
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NOTALLOC,
+                         "base pointer not allocated", ESMC_CONTEXT, &status);
+    if (rc) *rc = status;    
+    return;
+  }
 
   if ((!value) || (vlen <= 0) || (value[0] == '\0')) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
@@ -3644,9 +3676,9 @@ extern "C" {
   // Initialize return code; assume routine not implemented
   if (rc) *rc = ESMC_RC_NOT_IMPL;
 
-  if (!base) {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                         "bad base", ESMC_CONTEXT, &status);
+  if (!(*base)) {
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NOTALLOC,
+                         "base pointer not allocated", ESMC_CONTEXT, &status);
     if (rc) *rc = status;    
     return;
   }
@@ -3660,7 +3692,7 @@ extern "C" {
 
   // make list into a vector
   rootListl.reserve(*count);
-  for (unsigned int i=0; i<*count; ++i)
+  for (int i=0; i<*count; ++i)
     rootListl.push_back(rootList[i]);
 
   // reconcile
@@ -3668,7 +3700,7 @@ extern "C" {
   else local_reconcile = false;
 
   // Update the Attribute
-  status = (**base).root.AttributeUpdate(*vm, rootListl, local_reconcile);
+  status = (*base)->ESMC_BaseGetRoot()->AttributeUpdate(*vm, rootListl, local_reconcile);
   ESMC_LogDefault.MsgFoundError(status, ESMCI_ERR_PASSTHRU,
     ESMC_CONTEXT, ESMC_NOT_PRESENT_FILTER(rc));
 
@@ -3701,15 +3733,15 @@ extern "C" {
   // Initialize return code; assume routine not implemented
   if (rc) *rc = ESMC_RC_NOT_IMPL;
 
-  if (!base) {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                         "bad base", ESMC_CONTEXT, &status);
+  if (!(*base)) {
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NOTALLOC,
+                         "base pointer not allocated", ESMC_CONTEXT, &status);
     if (rc) *rc = status;    
     return;
   }
   
   // Update the Attribute
-  status = (**base).root.AttributeUpdateReset();
+  status = (*base)->ESMC_BaseGetRoot()->AttributeUpdateReset();
   ESMC_LogDefault.MsgFoundError(status, ESMCI_ERR_PASSTHRU,
     ESMC_CONTEXT, ESMC_NOT_PRESENT_FILTER(rc));
 
@@ -3737,7 +3769,7 @@ void FTN_X(c_esmc_attributeread)(ESMC_Base **base,
    ESMF_CHECK_POINTER(*base, status)
 
    // Read the attributes into the object.
-   int rc = (*base)->root.AttributeRead(
+   int rc = (*base)->ESMC_BaseGetRoot()->AttributeRead(
                     *fileNameLen, // always present internal arg.
                     ESMC_NOT_PRESENT_FILTER(fileName),
                     *schemaFileNameLen, // always present internal arg.
@@ -3782,9 +3814,9 @@ void FTN_X(c_esmc_attributewrite)(
   // Initialize return code; assume routine not implemented
   if (rc) *rc = ESMC_RC_NOT_IMPL;
 
-  if (!base) {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                         "bad base", ESMC_CONTEXT, &status);
+  if (!(*base)) {
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NOTALLOC,
+                         "base pointer not allocated", ESMC_CONTEXT, &status);
     if (rc) *rc = status;    
     return;
   }
@@ -3867,7 +3899,7 @@ void FTN_X(c_esmc_attributewrite)(
   }
 
   // Write the attributes from the object.
-  status = (**base).root.AttributeWrite(cconv, cpurp, cobj, ctarobj,
+  status = (*base)->ESMC_BaseGetRoot()->AttributeWrite(cconv, cpurp, cobj, ctarobj,
     (*base)->ESMC_Base::ESMC_BaseGetName(), *attwriteflag);
   ESMC_LogDefault.MsgFoundError(status, ESMCI_ERR_PASSTHRU,
         ESMC_CONTEXT, ESMC_NOT_PRESENT_FILTER(rc));
@@ -3889,10 +3921,10 @@ void FTN_X(c_esmc_attpackstreamjson)(
 //
 // !ARGUMENTS:
         ESMCI::Attribute **attpack,    // in - attpack
-        int *flattenPackList,   // in - should nested attribute packs be flattened
-		int *includeUnset,      // in - should unset attributes be included
-		int *includeLinks,      // in - should recurse through linked attributes
-		char *output,                  // out - output string
+        int *flattenPackList,          // in - should nested attribute packs be flattened
+        int *includeUnset,             // in - should unset attributes be included
+        int *includeLinks,             // in - should recurse through linked attributes
+        char *output,                  // out - output string
         int *rc,                       // out - return code
         ESMCI_FortranStrLenArg olen) { // hidden/in - strlen count for target object
 //
@@ -3906,9 +3938,9 @@ void FTN_X(c_esmc_attpackstreamjson)(
   // Initialize return code; assume routine not implemented
   if (rc) *rc = ESMC_RC_NOT_IMPL;
 
-  if (!attpack) {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                                  "bad attpack", ESMC_CONTEXT, &status);
+  if (!(*attpack)) {
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NOTALLOC,
+                        "attpack pointer not allocated", ESMC_CONTEXT, &status);
     if (rc) *rc = status;
     return;
   }
@@ -3918,13 +3950,13 @@ void FTN_X(c_esmc_attpackstreamjson)(
   ESMC_Logical localIncludeUnset = ESMF_FALSE;
   ESMC_Logical localIncludeLinks = ESMF_FALSE;
   if (*flattenPackList) {
-	  localFlattenPackList = ESMF_TRUE;
+    localFlattenPackList = ESMF_TRUE;
   }
   if (*includeUnset) {
-	  localIncludeUnset = ESMF_TRUE;
+    localIncludeUnset = ESMF_TRUE;
   }
   if (*includeLinks) {
-	  localIncludeLinks = ESMF_TRUE;
+    localIncludeLinks = ESMF_TRUE;
   }
 
   // Write the attributes from the object.
@@ -3956,9 +3988,9 @@ void FTN_X(c_esmc_attpackstreamjsonstrlen)(
 //
 // !ARGUMENTS:
         ESMCI::Attribute **attpack,    // in - attpack
-		int *flattenPackList,   // in - should nested attribute packs be flattened
-		int *includeUnset,      // in - should unset attributes be included
-		int *includeLinks,      // in - should recurse through linked attributes
+        int *flattenPackList,          // in - should nested attribute packs be flattened
+        int *includeUnset,             // in - should unset attributes be included
+        int *includeLinks,             // in - should recurse through linked attributes
         int *jsonstrlen,               // out - output stringlength
         int *rc) {                     // out - return code
 //
@@ -3973,9 +4005,9 @@ void FTN_X(c_esmc_attpackstreamjsonstrlen)(
   // Initialize return code; assume routine not implemented
   if (rc) *rc = ESMC_RC_NOT_IMPL;
 
-  if (!attpack) {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                                  "bad attpack", ESMC_CONTEXT, &status);
+  if (!(*attpack)) {
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NOTALLOC,
+                        "attpack pointer not allocated", ESMC_CONTEXT, &status);
     if (rc) *rc = status;
     return;
   }
@@ -3991,7 +4023,7 @@ void FTN_X(c_esmc_attpackstreamjsonstrlen)(
     localIncludeUnset = ESMF_TRUE;
   }
   if (*includeLinks) {
-	  localIncludeLinks = ESMF_TRUE;
+    localIncludeLinks = ESMF_TRUE;
   }
 
   // Write the attributes from the object.

@@ -234,7 +234,7 @@
 !
 ! In order to compute the destination flux on sideB through the XGrid as an mediator, 
 ! we need to set up the factorList (weights) and factorIndexList (indices) 
-! for sparse matrix matmul in this formulation:
+! for sparse matrix multiplication in this formulation:
 ! dst\_flux = W'*W*src\_flux, where W' is the weight matrix from the XGrid to 
 ! destination; and W is the weight matrix from source to the XGrid. The weight matrix
 ! is generated using destination area weighted algorithm. Please refer to figure 
@@ -526,7 +526,7 @@
     print *, farrayPtr ! should be 1/B_area
 
 !BOE
-! In the above example, we first set up all the required paramters to create an XGrid from user
+! In the above example, we first set up all the required parameters to create an XGrid from user
 ! supplied input. Then we create Fields on the XGrid and the Grids on either side. Finally
 ! we use the {\tt ESMF\_FieldRegrid()} interface to perform a flux exchange from the source side
 ! to the destination side.
@@ -586,7 +586,7 @@
 !BOE
 !\subsubsection{Destroying the XGrid and other resources}
 !\label{sec:xgrid:usage:xgrid_destroy}
-! Clean up the resources by destroy the XGrid and other objects:
+! Clean up the resources by destroying the XGrid and other objects:
 !EOE
 !BOC
     ! After the regridding is successful. 

@@ -24,11 +24,9 @@
 #include "ESMCI_IO.h"
 
 // higher level, 3rd party or system includes here
-#include <stdio.h>
-#include <string.h>
-#include <ctype.h>
-#include <vector>
 #include <iostream>
+#include <sstream>
+#include <vector>
 
 // other ESMF include files here.
 #include "ESMC_Interface.h"
@@ -242,7 +240,7 @@ int IO::read(
 // !ARGUMENTS:
 
   const std::string &file,        // (in)    - name of file being read
-  ESMC_IOFmt_Flag iofmt,          // (in)    - IO format flag
+  ESMC_IOFmt_Flag iofmt,          // (in)    - I/O format flag
   int   *timeslice                // (in)    - timeslice option
   ) {
 // !DESCRIPTION:
@@ -435,7 +433,7 @@ int IO::write(
 //
 // !ARGUMENTS:
   const std::string &file,        // (in)    - name of file being written
-  ESMC_IOFmt_Flag iofmt,          // (in)    - IO format flag
+  ESMC_IOFmt_Flag iofmt,          // (in)    - I/O format flag
   bool overwrite,                 // (in)    - overwrite fields if true
   ESMC_FileStatus_Flag status,    // (in)    - file status flag
   int   *timeslice                // (in)    - timeslice option
@@ -525,20 +523,41 @@ int IO::write(
     if (tilecount != 1) {
       localrc = ESMF_RC_NOT_IMPL;
       if (ESMC_LogDefault.MsgFoundError(localrc, "tilecount != 1 not supported yet", ESMC_CONTEXT,
-          &rc)) {
-      // Close the file but return original error even if close fails.
+        &rc)) {
+        // Close the file but return original error even if close fails.
+        fprintf(stderr, "dg->getTileCount()=%d\n", tilecount);
         localrc = close();
         return rc;
       }
     }
 
-    Array *temp_array_undist_p;  // temp when Array has undistributed dimensions
-    ESMCI::RouteHandle *rh;
+    std::vector<std::string> dimLabels;
+    // Grid-level dimension labels
+    if ((*it)->dimAttPack) {
+      dimlabel_get ((*it)->dimAttPack, ESMC_ATT_GRIDDED_DIM_LABELS, dimLabels, &localrc);
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+          &rc)) {
+        // Close the file but return original error even if close fails.
+        localrc = close();
+        return rc;
+      }
+#if 0
+      std::cout << ESMC_METHOD << ": Grid dimension labels:" << std::endl;
+      for (unsigned i=0; i<dimLabels.size(); i++)
+        std::cout << "    " << i << ": " << dimLabels[i] << std::endl;
+#endif
+    }
+
+    Array *temp_array_undist_p;  // temp in case Array has undistributed dimensions
+    ESMCI::RouteHandle *rh = temp_array_p->getIoRH(); 
     switch((*it)->type) {
     case IO_NULL:
       localrc = ESMF_STATUS_UNALLOCATED;
       break;
     case IO_ARRAY:
+#if 0
+ESMC_LogDefault.Write("IO::write() case: IO_ARRAY", ESMC_LOGMSG_INFO);
+#endif
       need_redist = redist_check(temp_array_p, &localrc);
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
           &rc)) {
@@ -550,24 +569,42 @@ int IO::write(
       if (need_redist) {
         // Create a compatible temp Array with 1 DE per PET
         // std::cout << ESMC_METHOD << ": DE count > 1 - redist_arraycreate1de" << std::endl;
+#if 0
+ESMC_LogDefault.Write("IO::write() case: IO_ARRAY: bef redist_arraycreate1de()", ESMC_LOGMSG_INFO);
+#endif
         redist_arraycreate1de((*it)->getArray(), &temp_array_p, &localrc);
-        if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
-            &rc)) {
-        // Close the file but return original error even if close fails.
+      	if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+          &rc)) {
+          // Close the file but return original error even if close fails.
           localrc = close();
           return rc;
         }
+#if 0
+ESMC_LogDefault.Write("IO::write() case: IO_ARRAY: aft redist_arraycreate1de()", ESMC_LOGMSG_INFO);
+#endif
 
-        // Redistribute into the temp Array
-        // std::cout << ESMC_METHOD << ": DE count > 1 - redistStore" << std::endl;
-        localrc = ESMCI::Array::redistStore((*it)->getArray(), temp_array_p, &rh, NULL);
-        if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) {
-        // Close the file but return original error even if close fails.
-          localrc = close();
-          return rc;
-        }
+        if (rh==NULL){	// this is the first time in IO for this array
+          // Redistribute into the temp Array
+          // std::cout << ESMC_METHOD << ": DE count > 1 - redistStore" << std::endl;
+#if 0
+ESMC_LogDefault.Write("IO::write() case: IO_ARRAY: bef redistStore()", ESMC_LOGMSG_INFO);
+#endif
+          localrc = ESMCI::Array::redistStore((*it)->getArray(), temp_array_p, &rh, NULL);
+          if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) {
+            // Close the file but return original error even if close fails.
+            localrc = close();
+            return rc;
+          }
+#if 0
+ESMC_LogDefault.Write("IO::write() case: IO_ARRAY: aft redistStore()", ESMC_LOGMSG_INFO);
+#endif
+	  (*it)->getArray()->setIoRH(rh); // store the RouteHandle for next time this array does IO
+	}
 
         // std::cout << ESMC_METHOD << ": DE count > 1 - redistribute data" << std::endl;
+#if 0
+ESMC_LogDefault.Write("IO::write() case: IO_ARRAY: bef redist()", ESMC_LOGMSG_INFO);
+#endif
         localrc = ESMCI::Array::redist((*it)->getArray(), temp_array_p, &rh,
           ESMF_COMM_BLOCKING, NULL, NULL, ESMC_REGION_TOTAL);
         if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) {
@@ -575,6 +612,9 @@ int IO::write(
           localrc = close();
           return rc;
         }
+#if 0
+ESMC_LogDefault.Write("IO::write() case: IO_ARRAY: aft redist()", ESMC_LOGMSG_INFO);
+#endif
         // std::cout << ESMC_METHOD << ": DE count > 1 - redistribute complete!" << std::endl;
       }
 
@@ -587,26 +627,58 @@ int IO::write(
         temp_array_undist_p = temp_array_p;
         // Create an aliased Array which treats all dimensions as distributed.
         // std::cout << ESMC_METHOD << ": calling undist_arraycreate_alldist()" << std::endl;
+#if 0
+ESMC_LogDefault.Write("IO::write() case: IO_ARRAY: bef undist_arraycreate_alldist()", ESMC_LOGMSG_INFO);
+#endif
         undist_arraycreate_alldist (temp_array_undist_p, &temp_array_p, &localrc);
         if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc))
           return rc;
+#if 0
+ESMC_LogDefault.Write("IO::write() case: IO_ARRAY: aft undist_arraycreate_alldist()", ESMC_LOGMSG_INFO);
+#endif
+        // Find ungridded dimension labels
+        std::vector<std::string> ugdimLabels;
+        if ((*it)->varAttPack) {
+          dimlabel_get ((*it)->varAttPack, ESMC_ATT_UNGRIDDED_DIM_LABELS, ugdimLabels, &localrc);
+          if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+              &rc)) {
+            // Close the file but return original error even if close fails.
+            localrc = close();
+            return rc;
+          }
+        }
+
+        if (ugdimLabels.size() > 0) {
+          dimlabel_merge (dimLabels, ugdimLabels, temp_array_undist_p, &localrc);
+          if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+              &rc)) {
+            // Close the file but return original error even if close fails.
+            localrc = close();
+            return rc;
+          }
+        }
       }
 
       // Write the Array
+#if 0
+ESMC_LogDefault.Write("IO::write() case: IO_ARRAY: bef arrayWrite()", ESMC_LOGMSG_INFO);
+#endif
       ioHandler->arrayWrite(temp_array_p, (*it)->getName(),
-          (*it)->dimLabels, (*it)->varAtts, timeslice, &localrc);
+          dimLabels, timeslice, (*it)->varAttPack, (*it)->gblAttPack, &localrc);
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc))
         return rc;
-
+#if 0
+ESMC_LogDefault.Write("IO::write() case: IO_ARRAY: aft arrayWrite()", ESMC_LOGMSG_INFO);
+#endif
       // Clean ups //
       if (need_redist) {
-        localrc = temp_array_p->redistRelease(rh);
-        if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc))
-          return rc;
         localrc = ESMCI::Array::destroy(&temp_array_p);
         if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc))
           return rc;
       }
+#if 0
+ESMC_LogDefault.Write("IO::write() case: IO_ARRAY: done", ESMC_LOGMSG_INFO);
+#endif
       break;
       // These aren't handled yet
     case IO_ATTRIBUTE:
@@ -647,7 +719,7 @@ int IO::open(
 
   const std::string &file,             // (in)  - name of file being read
   ESMC_FileStatus_Flag filestatusflag, // (in)  - file status flag
-  ESMC_IOFmt_Flag iofmt,               // (in)  - IO format flag
+  ESMC_IOFmt_Flag iofmt,               // (in)  - I/O format flag
   bool overwrite,                      // (in)  - overwrite fields?
   bool readonly                        // (in)  - If false then read/write
   ) {
@@ -845,9 +917,7 @@ int IO::addArray(
 //-----------------------------------------------------------------------------
 
   std::string varname;                 // no name
-  std::vector<std::string> dimLabels;  // no labels
-  std::vector<std::pair<std::string,std::string> > varAtts; // no attributes
-  return IO::addArray(arr_p, varname, dimLabels, varAtts);
+  return IO::addArray(arr_p, varname, NULL, NULL, NULL);
 }
 
 //-------------------------------------------------------------------------
@@ -864,9 +934,9 @@ int IO::addArray(
 // !ARGUMENTS:
   Array *arr_p,                             // (in) - The array to add
   const std::string &variableName,          // (in) - Name to use for array
-  const std::vector<std::string> &dimLabels,// (in) - Optional dimension labels
-  const std::vector<std::pair<std::string,std::string> > &varAtts // (in) - Optional variable attributes
-  ) {
+  Attribute *dimAttPack,                    // (in) - Attribute for dimension names
+  Attribute *varAttPack,                    // (in) - Attribute for variable attributes
+  Attribute *gblAttPack) {                  // (in) - Attribute for global attributes
 // !DESCRIPTION:
 //      Add an array to the list of objects to read or write. The 
 //      {\tt variableName} argument will be used as the field name for
@@ -874,7 +944,9 @@ int IO::addArray(
 //      {\tt arr_p} is required
 //      {\tt variableName} is not required (may be NULL), however, this
 //         may cause an error when I/O is attempted.
-//      {\tt dimLabels} optional dimension labels
+//      {\tt dimAttPack} optional Attribute package for dimension names
+//      {\tt varAttPack} optional Attribute package for variable attributes
+//      {\tt gblAttPack} optional Attribute package for global attributes
 //
 //EOP
 //-----------------------------------------------------------------------------
@@ -891,15 +963,10 @@ int IO::addArray(
     return localrc;
   }
 
-  if (variableName.size() > ESMF_MAXSTR) {
-    ESMC_LogDefault.Write("Array name length exceeds ESMF_MAXSTR",
-                          ESMC_LOGMSG_WARN, ESMC_CONTEXT);
-    return ESMF_RC_LONG_STR;
-  }
-
 // Push Array onto the list
   try {
-    IO_ObjectContainer *newObj = new IO_ObjectContainer((Array *)arr_p, variableName, dimLabels, varAtts);
+    IO_ObjectContainer *newObj = new IO_ObjectContainer((Array *)arr_p,
+        variableName, dimAttPack, varAttPack, gblAttPack);
 
     if ((IO_ObjectContainer *)NULL == newObj) {
       localrc = ESMC_RC_MEM_ALLOCATE;
@@ -920,6 +987,122 @@ int IO::addArray(
   }
   return (rc);
 }  // end IO::addArray
+//-------------------------------------------------------------------------
+
+//-------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::IO::dimlabel_get()"
+//BOP
+// !IROUTINE:  IO::dimlabel_get
+//
+// !INTERFACE:
+void IO::dimlabel_get (Attribute *dimAttPack, // in - AttPack with potential dimLabel attributes
+    std::string labeltype,                    // in - attribute to look for (e.g., gridded or ungridded)
+    std::vector<std::string> &dimLabels,      // out - labels found
+    int *rc) {
+// !DESCRIPTION:
+//      Extract dimension labels from an AttPack.
+//
+//EOP
+//-----------------------------------------------------------------------------
+  int natts = dimAttPack->getCountAttr();
+  for (int i=0; i<natts; i++) {
+    Attribute *att = dimAttPack->AttPackGetAttribute (i);
+    if (!att) {
+      if (ESMC_LogDefault.MsgFoundError(ESMF_RC_ATTR_NOTSET,
+          "Can not access Grid/DistGrid Attribute in " + dimAttPack->getName(),
+          ESMC_CONTEXT, rc)) return;
+    }
+    std::string attname = att->getName();
+    if (attname == labeltype) {
+      ESMC_TypeKind_Flag att_type = att->getTypeKind ();
+      if (att_type != ESMC_TYPEKIND_CHARACTER) {
+        if (ESMC_LogDefault.MsgFoundError(ESMF_RC_ATTR_NOTSET,
+            "Dimension label values must be character strings",
+            ESMC_CONTEXT, rc)) return;
+      }
+      std::vector<std::string> stringvals;
+      int localrc = att->get (&stringvals);
+      if (ESMC_LogDefault.MsgFoundError(localrc,
+          "Can not access dimension label values for " + attname,
+          ESMC_CONTEXT, rc)) return;
+
+      for (unsigned j=0; j<stringvals.size(); j++)
+        dimLabels.push_back(stringvals[j]);
+    }
+  }
+}  // end IO::dimlabel_get
+//-------------------------------------------------------------------------
+
+//-------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::IO::dimlabel_merge()"
+//BOP
+// !IROUTINE:  IO::dimlabel_merge
+//
+// !INTERFACE:
+void IO::dimlabel_merge (
+    std::vector<std::string> &dimLabels,    // inout - labels associated with the Grid on input,
+                                            //         merged labels on output
+    std::vector<std::string> &ugdimLabels,  // in - labels 
+    Array *array,                           //
+    int *rc) {
+// !DESCRIPTION:
+//      Merge dimension labels from Grid with ungridded dimension labels.
+//
+//EOP
+//-----------------------------------------------------------------------------
+  unsigned rank = array->getRank ();
+  const int *arrayToDistGridMap = array->getArrayToDistGridMap();
+
+  // Sanity checks
+  unsigned ngd=0, nugd=0;
+  for (unsigned i=0; i<rank; i++) {
+    int j = arrayToDistGridMap[i];
+    if (j > 0)
+      ngd++;
+    if (j == 0)
+      nugd++;
+  }
+  if (ngd != dimLabels.size()) {
+    std::stringstream errmsg;
+    errmsg << ngd << " Grid dimension labels expected, "
+        << dimLabels.size() << " found";
+    if (ESMC_LogDefault.MsgFoundError(ESMF_RC_ATTR_NOTSET,
+        errmsg.str(),
+        ESMC_CONTEXT, rc)) return;
+  }
+  if (nugd != ugdimLabels.size()) {
+    std::stringstream errmsg;
+    errmsg << nugd << " ungridded dimension labels expected, "
+        << ugdimLabels.size() << " found";
+    if (ESMC_LogDefault.MsgFoundError(ESMF_RC_ATTR_NOTSET,
+        errmsg.str(),
+        ESMC_CONTEXT, rc)) return;
+  }
+
+  // Make a copy of dimLabels, and merge
+  std::vector<std::string> gridded_dimLabels;
+  for (unsigned i=0; i<dimLabels.size(); i++)
+    gridded_dimLabels.push_back(dimLabels[i]);
+
+  dimLabels.clear ();
+  unsigned gp=0, ugp=0;
+  for (unsigned i=0; i<rank; i++) {
+    int j = arrayToDistGridMap[i];
+    if (j > 0)
+      dimLabels.push_back(gridded_dimLabels[gp++]);
+    else
+      dimLabels.push_back(ugdimLabels[ugp++]);
+  }
+
+#if 0
+  std::cout << ESMC_METHOD << ": merged dimLabels:" << std::endl;
+  for (unsigned i=0; i<dimLabels.size(); i++)
+    std::cout << "   " << i << ": " << dimLabels[i] << std::endl;
+#endif
+
+}  // end IO::dimlabel_merge
 //-------------------------------------------------------------------------
 
 
@@ -985,6 +1168,7 @@ void IO::redist_arraycreate1de(Array *src_array_p, Array **dest_array_p, int *rc
   const int *maxIndexTile = dg_orig->getMaxIndexPDimPTile();
 
   int ndims = dg_orig->getDimCount();
+  int rank = src_array_p->getRank();
   int localTileCount = dg_orig->getTileCount();
   localrc = (localTileCount == 1) ? ESMF_SUCCESS : ESMF_RC_NOT_IMPL;
   if (ESMC_LogDefault.MsgFoundError(localrc, "Tile count != 1 is not supported", ESMC_CONTEXT, rc))
@@ -998,6 +1182,7 @@ void IO::redist_arraycreate1de(Array *src_array_p, Array **dest_array_p, int *rc
   std::cout << " )" << std::endl;
 #endif
   ESMCI::InterArray<int> maxIndexInterface((int*)maxIndexTile, ndims);
+  // create default DistGrid, which means 1DE per PET
   DistGrid *distgrid = DistGrid::create(&minIndexInterface, &maxIndexInterface, NULL,
       NULL, 0, NULL, NULL, NULL, NULL, NULL, (ESMCI::DELayout*)NULL, NULL,
       &localrc);
@@ -1007,9 +1192,15 @@ void IO::redist_arraycreate1de(Array *src_array_p, Array **dest_array_p, int *rc
   // std::cout << ESMC_METHOD << ": creating temp Array for redistribution" << std::endl;
   ESMCI::ArraySpec arrayspec;
   arrayspec.set (src_array_p->getRank(), src_array_p->getTypekind());
+  ESMCI::InterArray<int> distgridToArrayMap((int*)(src_array_p->getDistGridToArrayMap()), ndims);
+  ESMCI::InterArray<int> undistLBoundArg((int*)(src_array_p->getUndistLBound()), rank-ndims);
+  ESMCI::InterArray<int> undistUBoundArg((int*)(src_array_p->getUndistUBound()), rank-ndims);
 
   ESMCI::Array *temp_arr_p = ESMCI::Array::create(&arrayspec, distgrid,
-    NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, &localrc);
+    &distgridToArrayMap,
+    NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 
+    &undistLBoundArg, &undistUBoundArg,
+    &localrc);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc))
     return;
 
@@ -1062,22 +1253,37 @@ void IO::undist_arraycreate_alldist(Array *src_array_p, Array **dest_array_p, in
 
   int rank = src_array_p->getRank ();
   DistGrid *dg = src_array_p->getDistGrid ();
+  
+  int dimCount= dg->getDimCount();
+  int deCount = dg->getDELayout()->getDeCount();
 
   int tilecount = dg->getTileCount ();
-  //TODO: bail out if tilecount > 1, following code assumes tilecount==1
+  if (tilecount != 1) {
+    localrc = ESMF_RC_NOT_IMPL;
+    if (ESMC_LogDefault.MsgFoundError(localrc, "tilecount != 1 not supported yet", ESMC_CONTEXT,
+      rc)) {
+      // Close the file but return original error even if close fails.
+      fprintf(stderr, "dg->getTileCount()=%d\n", tilecount);
+      localrc = close();
+      return;
+    }
+  }
   
   const int *arrayToDistGridMap = src_array_p->getArrayToDistGridMap();
   const int *undistLBound = src_array_p->getUndistLBound();
   const int *undistUBound = src_array_p->getUndistUBound();
-  const int *minIndexPTile = dg->getMinIndexPDimPTile ();
-  const int *maxIndexPTile = dg->getMaxIndexPDimPTile ();
-  const int *regDecomp = dg->getRegDecomp ();
+  const int *minIndexPTile = dg->getMinIndexPDimPTile();
+  const int *maxIndexPTile = dg->getMaxIndexPDimPTile();
+  const int *minIndexPDimPDe = dg->getMinIndexPDimPDe();
+  const int *maxIndexPDimPDe = dg->getMaxIndexPDimPDe();
 
   // construct the new minIndex and maxIndex and regDecomp taking into account
   // how Array dimensions are mapped against DistGrid dimensions
   std::vector<int> minIndexNew(rank);
   std::vector<int> maxIndexNew(rank);
-  std::vector<int> regDecompNew(rank);
+  std::vector<int> deBlockList(rank*2*deCount);
+  std::vector<int> deBlockListLen(3);
+  deBlockListLen[0]=rank; deBlockListLen[1]=2; deBlockListLen[2]=deCount;
   int jj = 0;
   for (int i=0; i<rank; i++) {
     int j = arrayToDistGridMap[i];
@@ -1085,24 +1291,30 @@ void IO::undist_arraycreate_alldist(Array *src_array_p, Array **dest_array_p, in
       // valid DistGrid dimension
       minIndexNew[i] = minIndexPTile[j-1];
       maxIndexNew[i] = maxIndexPTile[j-1];
-      regDecompNew[i] = regDecomp[j-1];
+      for (int k=0; k<deCount; k++){
+        deBlockList[k*2*rank        + i] = minIndexPDimPDe[k*dimCount + (j-1)];
+        deBlockList[k*2*rank + rank + i] = maxIndexPDimPDe[k*dimCount + (j-1)];
+      }
     } else {
       // undistributed dimension
       minIndexNew[i] = undistLBound[jj];
       maxIndexNew[i] = undistUBound[jj];
-      regDecompNew[i] = 1;  // no actual decomposition in this dimension
+      for (int k=0; k<deCount; k++){
+        deBlockList[k*2*rank        + i] = undistLBound[jj];
+        deBlockList[k*2*rank + rank + i] = undistUBound[jj];
+      }
       jj++;
     }
   }
-
+  
   // create the fixed up DistGrid, making sure to use original DELayout
-  ESMCI::InterArray<int> minIndexInterface(&minIndexNew[0], rank);
-  ESMCI::InterArray<int> maxIndexInterface(&maxIndexNew[0], rank);
-  ESMCI::InterArray<int> regDecompInterface(&regDecompNew[0] , rank);
+  ESMCI::InterArray<int> minIndexInterface(minIndexNew);
+  ESMCI::InterArray<int> maxIndexInterface(maxIndexNew);
+  ESMCI::InterArray<int> deBlockListInterface(&deBlockList[0], 3, &deBlockListLen[0]);
   DELayout *delayout = dg->getDELayout();
   DistGrid *dg_temp = DistGrid::create(&minIndexInterface,
-    &maxIndexInterface, &regDecompInterface,
-    NULL, 0, NULL, NULL, NULL, NULL, NULL, delayout, NULL, &localrc);
+    &maxIndexInterface, &deBlockListInterface,
+    NULL, NULL, NULL, delayout, NULL, &localrc);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc)) {
     return;
   }

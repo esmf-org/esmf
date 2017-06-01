@@ -52,6 +52,7 @@ program ESMF_AttributeGridUTest
 
       ! macro variables
       AttributeTestVariablesMacro()
+      AttributeTestVariablesCopyMacro(grid, ESMF_Grid)
 
 !-------------------------------------------------------------------------------
 !  The unit tests are divided into Sanity and Exhaustive. The Sanity tests are
@@ -78,10 +79,12 @@ program ESMF_AttributeGridUTest
     
 AttributeTestMacro(grid, a Grid, EX_UTest, NEX_UTest)
 
+AttributeTestCopyMacro(grid, ESMF_Grid, a Grid, ESMF_GridEmpty, EX_UTest, NEX_UTest)
+
       !------------------------------------------------------------------------
       ! clean up
       call ESMF_GridDestroy(grid, rc=rc)
-      
+
       if (rc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   !-----------------------------------------------------------------------------

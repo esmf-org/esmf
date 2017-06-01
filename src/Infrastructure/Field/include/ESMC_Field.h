@@ -690,14 +690,14 @@ int ESMC_FieldPrint(
 //    The name of the file from which Field data is read.
 //  \item[{[variableName]}]
 //   Variable name in the file; default (NULL) is the "name" of Field.
-//   Use this argument only in the IO format (such as NetCDF) that
-//   supports variable name. If the IO format does not support this 
+//   Use this argument only in the I/O format (such as NetCDF) that
+//   supports variable name. If the I/O format does not support this
 //   (such as binary format), ESMF will return an error code.
 //  \item[timeslice]
 //    Number of slices to be read from file, starting from the 1st slice
 //  \item[{[iofmt]}]
 //    \begin{sloppypar}
-//    The IO format.  Please see Section~\ref{opt:iofmtflag} for the list 
+//    The I/O format.  Please see Section~\ref{opt:iofmtflag} for the list
 //    of options.  If set to NULL, defaults to {\tt ESMF\_IOFMT\_NETCDF}.
 //    \end{sloppypar}
 //  \end{description}
@@ -928,8 +928,8 @@ int ESMC_FieldRegridStore(
 //    The name of the output file to which Field data is written.
 //  \item[{[variableName]}]
 //   Variable name in the output file; default is the "name" of field.
-//   Use this argument only in the IO format (such as NetCDF) that
-//   supports variable name. If the IO format does not support this 
+//   Use this argument only in the I/O format (such as NetCDF) that
+//   supports variable name. If the I/O format does not support this
 //   (such as binary format), ESMF will return an error code.
 //  \item[{[overwrite]}]
 //   \begin{sloppypar}
@@ -955,7 +955,7 @@ int ESMC_FieldRegridStore(
 //   \end{sloppypar}
 //  \item[{[timeslice]}]
 //   \begin{sloppypar}
-//   Some IO formats (e.g. NetCDF) support the output of data in form of
+//   Some I/O formats (e.g. NetCDF) support the output of data in form of
 //   time slices. The {\tt timeslice} argument provides access to this
 //   capability. {\tt timeslice} must be positive. The behavior of this
 //   option may depend on the setting of the {\tt overwrite} flag:
@@ -971,7 +971,7 @@ int ESMC_FieldRegridStore(
 //   \end{sloppypar}
 //  \item[{[iofmt]}]
 //    \begin{sloppypar}
-//    The IO format. Please see Section~\ref{opt:iofmtflag} for the list 
+//    The I/O format. Please see Section~\ref{opt:iofmtflag} for the list
 //    of options. If not present, defaults to {\tt ESMF\_IOFMT\_NETCDF}.
 //    \end{sloppypar}
 //  \item [{[rc]}]

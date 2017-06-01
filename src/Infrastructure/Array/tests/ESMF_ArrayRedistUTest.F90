@@ -539,7 +539,7 @@ program ESMF_ArrayRedistUTest
   !   1) Sequence indices are tied to the tile order, and the canonical order
   !      of elements within the tiles. Sequence indices are unaffected by 
   !      decomposition and distribution! Therefore, on the srcArray side with
-  !      the srcDistgridWHoles, the crazy deBlockList has no affect on how
+  !      the srcDistgridWHoles, the crazy deBlockList has no effect on how
   !      the elements are labeled by sequence indices. It is still simply
   !      a DistGrid with one tile that has (142-101+1) = 42 elements. Therefore
   !      the sequence index goes from 1->42, simply labeling the elements.

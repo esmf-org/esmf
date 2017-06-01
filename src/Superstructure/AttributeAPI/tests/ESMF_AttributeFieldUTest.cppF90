@@ -54,6 +54,7 @@ program ESMF_AttributeFieldUTest
 
       ! macro variables
       AttributeTestVariablesMacro()
+      AttributeTestVariablesCopyMacro(field, ESMF_Field)
 
 !-------------------------------------------------------------------------------
 !  The unit tests are divided into Sanity and Exhaustive. The Sanity tests are
@@ -81,6 +82,8 @@ program ESMF_AttributeFieldUTest
 !-------------------------------------------------------------------------
     
 AttributeTestMacro(field, a Field, EX_UTest, NEX_UTest)
+
+AttributeTestCopyMacro(field, ESMF_Field, a Field, ESMF_FieldEmpty, EX_UTest, NEX_UTest)
 
     !-------------------------------------------------------------------------
     !  Attribute hierarchy linking
@@ -177,6 +180,7 @@ AttributeTestMacro(field, a Field, EX_UTest, NEX_UTest)
       !------------------------------------------------------------------------
       ! clean up
       call ESMF_FieldDestroy(field, rc=rc)
+
       call ESMF_GridDestroy(grid, rc=rc)
       call ESMF_LocStreamDestroy(locstream, rc=rc)
 

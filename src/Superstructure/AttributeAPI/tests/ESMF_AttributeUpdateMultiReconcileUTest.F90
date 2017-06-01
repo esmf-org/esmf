@@ -533,7 +533,7 @@ module ESMF_AttributeUpdateMultiReconcileUTestMod
     if (rc/=ESMF_SUCCESS) return
 
     call ESMF_AttributeCopy(importState, exportState, &
-      ESMF_COPY_REFERENCE, ESMF_ATTTREE_ON, rc=rc)
+      attcopy=ESMF_ATTCOPY_HYBRID, rc=rc)
     if (rc/=ESMF_SUCCESS) return
 
   end subroutine usercpl1_run
@@ -598,7 +598,7 @@ module ESMF_AttributeUpdateMultiReconcileUTestMod
     if (rc/=ESMF_SUCCESS) return
 
     call ESMF_AttributeCopy(importState, exportState, &
-      ESMF_COPY_REFERENCE, ESMF_ATTTREE_ON, rc=rc)
+      attcopy=ESMF_ATTCOPY_HYBRID, rc=rc)
     if (rc/=ESMF_SUCCESS) return
 
   end subroutine usercpl2_run

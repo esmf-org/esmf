@@ -48,13 +48,13 @@ program ESMF_AttributeCplCompUTest
       integer :: result = 0
 
       ! local variables
-      type(ESMF_CplComp)  :: cplcomp, cfc, cplcompValue, cplcompHybrid
+      type(ESMF_CplComp)  :: cplcomp, cfc
       type(ESMF_GridComp) :: gfc
       type(ESMF_State)    :: sfc
 
       ! macro variables
       AttributeTestVariablesMacro()
-
+      AttributeTestVariablesCopyMacro(cplcomp, ESMF_CplComp)
 !-------------------------------------------------------------------------------
 !  The unit tests are divided into Sanity and Exhaustive. The Sanity tests are
 !  always run. When the environment variable, EXHAUSTIVE, is set to ON then
@@ -78,9 +78,7 @@ program ESMF_AttributeCplCompUTest
       ! coupler components
       cplcomp = ESMF_CplCompCreate(name="cplcomp", petList=(/0/), rc=rc)
       cfc = ESMF_CplCompCreate(name="cplcompforcplcomp", petList=(/0/), rc=rc)
-      cplcompValue = ESMF_CplCompCreate(name="cplcompforvaluecopy", petList=(/0/), rc=rc)
-      cplcompHybrid = ESMF_CplCompCreate(name="cplcompforhybridcopy", petList=(/0/), rc=rc)
-      
+
       ! gridded components
       gfc = ESMF_GridCompCreate(name="gridcompforcplcomp", petList=(/0/), rc=rc)
       
@@ -92,31 +90,7 @@ program ESMF_AttributeCplCompUTest
 
 AttributeTestMacro(cplcomp, a CplComp, EX_UTest, NEX_UTest)
 
-^ifdef  ESMF_TESTEXHAUSTIVE
-
-    !-------------------------------------------------------------------------
-    !  AttributeCopy
-    !-------------------------------------------------------------------------
-
-      !EX_UTest
-      ! Copy a CplComp Attribute hierarchy VALUE ONE LEVEL Test
-      call ESMF_AttributeCopy(cplcomp, cplcompValue, &
-        copyflag=ESMF_COPY_VALUE, atttreeflag=ESMF_ATTTREE_OFF, rc=rc)
-      write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Copying a CplComp Attribute hierarchy VALUE ONE LEVEL Test"
-      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-      !------------------------------------------------------------------------
-
-      !EX_UTest
-      ! Copy a CplComp Attribute hierarchy HYBRID Test
-      call ESMF_AttributeCopy(cplcomp, cplcompHybrid, &
-        copyflag=ESMF_COPY_REFERENCE, atttreeflag=ESMF_ATTTREE_ON, rc=rc)
-      write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Copying a CplComp Attribute hierarchy HYBRID Test"
-      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-      !------------------------------------------------------------------------
-
-^endif
+AttributeTestCopyMacro(cplcomp, ESMF_CplComp, a CplComp, ESMF_CplComp, EX_UTest, NEX_UTest)
 
     !-------------------------------------------------------------------------
     !  Attribute hierarchy linking
@@ -254,8 +228,6 @@ AttributeTestMacro(cplcomp, a CplComp, EX_UTest, NEX_UTest)
       ! clean up
       call ESMF_CplCompDestroy(cplcomp, rc=rc)
       call ESMF_CplCompDestroy(cfc, rc=rc)
-      call ESMF_CplCompDestroy(cplcompValue, rc=rc)
-      call ESMF_CplCompDestroy(cplcompHybrid, rc=rc)
       
       call ESMF_GridCompDestroy(gfc, rc=rc)
 

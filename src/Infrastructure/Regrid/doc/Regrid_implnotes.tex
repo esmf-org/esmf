@@ -564,7 +564,7 @@ overlaps it in physical space, which may span several DEs from the source Grid.
 Corresponding source Field data is necessary later for regridding calculations
 using the regridding weights.  The DEs for each Grid are mapped to sets of PETs,
 which can be either shared or unique.  However, RegridStore and Regrid must
-be called with a VM encompassing the union of the sets of PETS, typically from
+be called with a VM encompassing the union of the sets of PETs, typically from
 a CouplerComponent.  In any case, most situations will require data transfer
 between PETs for regridding.  Once source data is available locally, the
 regridding algorithms discussed earlier can be applied.

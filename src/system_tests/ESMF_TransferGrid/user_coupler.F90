@@ -165,7 +165,7 @@ module user_coupler
     
     ! Set the new dstGrid in the dstField
     ! The dstGrid with dstDistGrid is handed to Comp2 inside the dstField.
-    call ESMF_FieldEmptySet(dstField, grid=dstGrid, rc=rc)
+    call ESMF_FieldEmptySet(dstField, grid=dstGrid, vm=dstVM, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
     print *, "User Coupler Init phase=1 returning"

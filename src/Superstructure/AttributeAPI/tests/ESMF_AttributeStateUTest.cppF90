@@ -49,11 +49,12 @@ program ESMF_AttributeStateUTest
 
       ! local variables
       type(ESMF_Field)       :: ffs
-      type(ESMF_State)       :: state, sfs, stateValue, stateHybrid
+      type(ESMF_State)       :: state, sfs
       type(ESMF_FieldBundle) :: fbfs
 
       ! macro variables
       AttributeTestVariablesMacro()
+      AttributeTestVariablesCopyMacro(state, ESMF_State)
 
 !-------------------------------------------------------------------------------
 !  The unit tests are divided into Sanity and Exhaustive. The Sanity tests are
@@ -95,31 +96,7 @@ program ESMF_AttributeStateUTest
 
 AttributeTestMacro(state, a State, EX_UTest, NEX_UTest)
 
-^ifdef ESMF_TESTEXHAUSTIVE
-
-    !-------------------------------------------------------------------------
-    !  AttributeCopy
-    !-------------------------------------------------------------------------
-
-      !EX_UTest
-      ! Copy a State Attribute hierarchy VALUE ONE LEVEL Test
-      call ESMF_AttributeCopy(state, stateValue, &
-        copyflag=ESMF_COPY_VALUE, atttreeflag=ESMF_ATTTREE_OFF, rc=rc)
-      write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Copying a State Attribute hierarchy VALUE ONE LEVEL Test"
-      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-      !------------------------------------------------------------------------
-
-      !EX_UTest
-      ! Copy a State Attribute hierarchy HYBRID Test
-      call ESMF_AttributeCopy(state, stateHybrid, &
-        copyflag=ESMF_COPY_REFERENCE, atttreeflag=ESMF_ATTTREE_ON, rc=rc)
-      write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Copying a State Attribute hierarchy HYBRID Test"
-      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-      !------------------------------------------------------------------------
-
-^endif
+AttributeTestCopyMacro(state, ESMF_State, a State, ESMF_State, EX_UTest, NEX_UTest)
 
     !-------------------------------------------------------------------------
     !  Attribute hierarchy linking
@@ -258,9 +235,7 @@ AttributeTestMacro(state, a State, EX_UTest, NEX_UTest)
       call ESMF_FieldBundleDestroy(fbfs, rc=rc)
       
       call ESMF_FieldDestroy(ffs, rc=rc)
-      
-      call ESMF_StateDestroy(stateValue, rc=rc)
-      call ESMF_StateDestroy(stateHybrid, rc=rc)
+
       call ESMF_StateDestroy(sfs, rc=rc)
       call ESMF_StateDestroy(state, rc=rc)
      

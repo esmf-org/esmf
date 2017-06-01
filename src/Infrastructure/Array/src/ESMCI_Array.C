@@ -304,9 +304,11 @@ Array::Array(
   // Auxiliary 
   localDeCountAux = localDeCount; // TODO: auxiliary for garb until ref. counting
   
+  ioRH = NULL; // invalidate
+  
   // invalidate the name for this Array object in the Base class
   ESMC_BaseSetName(NULL, "Array");
-   
+
   }catch(int localrc){
     // catch standard ESMF return code
     ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
@@ -1897,6 +1899,9 @@ Array *Array::create(
     arrayOut->localDeCountAux = 
       arrayOut->delayout->getLocalDeCount(); // TODO: auxilary for garb
                                              // TODO: until ref. counting
+					     
+    arrayOut->ioRH = NULL; // invalidate
+
   }catch(int localrc){
     // catch standard ESMF return code
     ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
@@ -2881,7 +2886,7 @@ int Array::read(
   const std::string &file,        // in    - name of file being read
   const std::string &variableName,// in    - optional variable name
   int   *timeslice,               // in    - timeslice option
-  ESMC_IOFmt_Flag *iofmt          // in    - IO format flag
+  ESMC_IOFmt_Flag *iofmt          // in    - I/O format flag
   ){
 //
 // !DESCRIPTION:
@@ -2916,9 +2921,7 @@ int Array::read(
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       &rc)) return rc;
   // For here on, we have to be sure to clean up before returning
-  vector<string> labNames;  // dummy vector for reads
-  vector<pair<string,string> > varAtts;   // dummy vector for reads
-  localrc = newIO->addArray(this, variableName, labNames, varAtts);
+  localrc = newIO->addArray(this, variableName, NULL, NULL, NULL);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       &rc)) {
     IO::destroy(&newIO);
@@ -2957,12 +2960,12 @@ int Array::write(
 //
   const std::string &file,        // in    - name of file being written
   const std::string &variableName,// in    - optional variable name
-  const std::vector<std::string> &dimLabels, // in - optional dimension labels
-  const std::vector<std::pair<std::string,std::string> > &varAtts, // in - optional variable attributes
+  const std::string &convention,  // in    - optional Attribute package
+  const std::string &purpose,     // in    - optional Attribute package
   bool  *overwrite,               // in    - OK to overwrite file data
   ESMC_FileStatus_Flag *status,   // in    - file status flag
   int   *timeslice,               // in    - timeslice option
-  ESMC_IOFmt_Flag *iofmt          // in    - IO format flag
+  ESMC_IOFmt_Flag *iofmt          // in    - I/O format flag
   ){
 //
 // !DESCRIPTION:
@@ -2974,9 +2977,10 @@ int Array::write(
 //-----------------------------------------------------------------------------
   // initialize return code; assume routine not implemented
   int rc = ESMC_RC_NOT_IMPL;              // final return code
-  ESMC_IOFmt_Flag localiofmt;              // For default handling
+  ESMC_IOFmt_Flag localiofmt;             // For default handling
   bool localoverwrite;                    // For default handling
-  ESMC_FileStatus_Flag localstatus;        // For default handling
+  ESMC_FileStatus_Flag localstatus;       // For default handling
+  int localrc;
 
   // Handle format default
   if ((ESMC_IOFmt_Flag *)NULL == iofmt) {
@@ -3007,32 +3011,73 @@ int Array::write(
     }
   }
 
-  // It is an error to supply dimension names in binary mode
+  // It is an error to supply Attribute convention in binary mode
   if (ESMF_IOFMT_NETCDF != localiofmt) {
-    if (dimLabels.size() > 0) {
+    if (convention.size() > 0) {
       ESMC_LogDefault.MsgFoundError(ESMF_RC_ARG_BAD, 
-          "NetCDF dimension names not allowed in binary mode",
+          "NetCDF Attribute convention not allowed in binary mode",
           ESMC_CONTEXT, &rc);
       return rc;
     }
   }
 
-  // It is an error to supply variable attributes in binary mode
+  // It is an error to supply Attribute purpose in binary mode
   if (ESMF_IOFMT_NETCDF != localiofmt) {
-    if (varAtts.size() > 0) {
+    if (purpose.size() > 0) {
       ESMC_LogDefault.MsgFoundError(ESMF_RC_ARG_BAD, 
-          "NetCDF variable attributes not allowed in binary mode",
+          "NetCDF Attribute convention not allowed in binary mode",
           ESMC_CONTEXT, &rc);
       return rc;
     }
   }
+
+  DistGrid *dg = getDistGrid();
+  if ((convention.length() > 0) && (purpose.length() > 0)) {
+    if ((this->ESMC_BaseGetRoot()->getCountPack() == 0) && (dg->ESMC_BaseGetRoot()->getCountPack() == 0)) {
+      localrc = ESMF_RC_ATTR_NOTSET;
+      if (ESMC_LogDefault.MsgFoundError(localrc, "No Array or DistGrid AttPacks found", ESMC_CONTEXT,
+          &rc)) return rc;
+    }
+  }
+
+  // If present, use Attributes at the DistGrid level for dimension names
+  Attribute *dimAttPack = NULL;
+  if ((convention.length() > 0) && (purpose.length() > 0)) {
+    std::vector<std::string> attPackNameList;
+    int attPackNameCount;
+    localrc = dg->ESMC_BaseGetRoot()->AttPackGet(
+        convention, purpose, "distgrid",
+        attPackNameList, attPackNameCount, ESMC_ATTNEST_ON);
+    if (localrc == ESMF_SUCCESS) {
+      dimAttPack = dg->ESMC_BaseGetRoot()->AttPackGet (
+          convention, purpose, "distgrid",
+          attPackNameList[0], ESMC_ATTNEST_ON);
+    }
+  }
+
+  // If present, use Attributes at the Array level for variable attributes
+  Attribute *varAttPack = NULL;
+  if ((convention.length() > 0) && (purpose.length() > 0)) {
+    std::vector<std::string> attPackNameList;
+    int attPackNameCount;
+    localrc = this->ESMC_BaseGetRoot()->AttPackGet(
+        convention, purpose, "array",
+        attPackNameList, attPackNameCount, ESMC_ATTNEST_ON);
+    if (localrc == ESMF_SUCCESS) {
+      varAttPack = this->ESMC_BaseGetRoot()->AttPackGet (
+          convention, purpose, "array",
+          attPackNameList[0], ESMC_ATTNEST_ON);
+    }
+  }
+
+  Attribute *gblAttPack = NULL;
 
   IO *newIO = IO::create(&rc);
   if (ESMC_LogDefault.MsgFoundError(rc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)){
     return rc;
   }
   // From now on, we have to be sure to clean up before returning
-  rc = newIO->addArray(this, variableName, dimLabels, varAtts);
+  rc = newIO->addArray(this, variableName, dimAttPack, varAttPack, gblAttPack);
   if (ESMC_LogDefault.MsgFoundError(rc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) {
     IO::destroy(&newIO);
     newIO = (IO *)NULL;
@@ -3461,6 +3506,7 @@ int Array::deserialize(
   localDeCountAux = delayout->getLocalDeCount(); // TODO: auxilary for garb
                                                  // TODO: until ref. counting
 
+  ioRH = NULL;  // invalidate
   // return successfully
   rc = ESMF_SUCCESS;
   return rc;
@@ -13807,12 +13853,12 @@ int ESMC_newArray::ESMC_newArrayScalarReduce(
     return localrc;
   }
   // pack arguments to pass into ScatterThread
-  thargRoot.array = this;
-  thargRoot.vm = vm;
-  thargRoot.rootPET = rootPET;
-  thargRoot.result = result;
-  thargRoot.dtk = dtk;
-  thargRoot.op = op;
+  thargESMC_BaseGetRoot()->array = this;
+  thargESMC_BaseGetRoot()->vm = vm;
+  thargESMC_BaseGetRoot()->rootPET = rootPET;
+  thargESMC_BaseGetRoot()->result = result;
+  thargESMC_BaseGetRoot()->dtk = dtk;
+  thargESMC_BaseGetRoot()->op = op;
   
   // create the ScalarReduceThread for rootPET
   pthread_t *pthid = &(commh->pthid[(commh->pthidCount)++]);

@@ -61,7 +61,7 @@ program ESMF_GridCreateEx
 
 
 !BOE
-! Allocate a fortran array to hold sphere coodinates, then read them in. This 
+! Allocate a Fortran array to hold sphere coodinates, then read them in. This
 ! all takes place on one processor. Later the data will be distributed across the processors. 
 !EOE
 
@@ -159,7 +159,7 @@ program ESMF_GridCreateEx
 !EOC
 
 !BOE
-!  Scatter the fortran array according to DistGrid into the esmf Array.
+!  Scatter the Fortran array according to DistGrid into the esmf Array.
 !EOE
 
 !BOC

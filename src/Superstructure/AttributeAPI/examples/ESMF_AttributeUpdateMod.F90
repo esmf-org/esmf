@@ -712,7 +712,7 @@ module ESMF_AttributeUpdateMod
     call ESMF_AttributeUpdate(importState, vm, rootList=rootList, rc=rc)
    
     call ESMF_AttributeCopy(importState, exportState, &
-      ESMF_COPY_ALIAS, ESMF_ATTTREE_ON, rc=rc)
+      attcopy=ESMF_ATTCOPY_REFERENCE, rc=rc)
 !EOC
 
 

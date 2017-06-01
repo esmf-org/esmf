@@ -173,6 +173,7 @@ namespace ESMCI {
                           // TODO: reference counting scheme is implemented
                           // TODO: and DELayout cannot be pulled from under
                           // TODO: DistGrid and Array until they are destroyed.
+    RouteHandle *ioRH;    // RouteHandle to store redist if needed during IO
     
    public:
     // native constructor and destructor
@@ -207,6 +208,7 @@ namespace ESMCI {
       rimLinIndex.resize(0);
       rimElementCount.resize(0);
       localDeCountAux = 0;  // auxiliary variable for garbage collection
+      ioRH = NULL;
     }
     Array(int baseID):ESMC_Base(baseID){  // prevent baseID counter increment
       typekind = ESMF_NOKIND;
@@ -239,6 +241,7 @@ namespace ESMCI {
       rimLinIndex.resize(0);
       rimElementCount.resize(0);
       localDeCountAux = 0;  // auxiliary variable for garbage collection
+      ioRH = NULL;
     }
    private:
     Array(ESMC_TypeKind_Flag typekind, int rank, LocalArray **larrayList,
@@ -307,6 +310,8 @@ namespace ESMCI {
       {return distgridToPackedArrayMap;}
     DistGrid *getDistGrid()                 const {return distgrid;}
     DELayout *getDELayout()                 const {return delayout;}
+    RouteHandle *getIoRH()    	      	    const {return ioRH;}
+    void setIoRH(RouteHandle *rh){ioRH = rh;}
     int getLinearIndexExclusive(int localDe, int const *index, int *rc=NULL)
       const;
     template<typename T> int getSequenceIndexExclusive(int localDe, 
@@ -334,8 +339,7 @@ namespace ESMCI {
     int read(const std::string &file, const std::string &variableName,
          int *timeslice, ESMC_IOFmt_Flag *iofmt);
     int write(const std::string &file, const std::string &variableName,
-         const std::vector<std::string> &dimLabels,
-         const std::vector<std::pair<std::string,std::string> > &varAtts,
+         const std::string &convention, const std::string &purpose,
          bool *overwrite, ESMC_FileStatus_Flag *status,
          int *timeslice, ESMC_IOFmt_Flag *iofmt);
     int print() const;

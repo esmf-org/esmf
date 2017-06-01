@@ -216,8 +216,7 @@ MeshCap *MeshCap::merge(MeshCap **srcmeshpp, MeshCap **dstmeshpp,
 
 
 
-void MeshCap::xgridregrid_create(ESMCI::VM **vmpp,
-                                 MeshCap **meshsrcpp, MeshCap **meshdstpp, 
+void MeshCap::xgridregrid_create(MeshCap **meshsrcpp, MeshCap **meshdstpp, 
                                  MeshCap **out_mesh,
                                  int *compute_midmesh,
                                  int *regridMethod, 
@@ -243,8 +242,7 @@ void MeshCap::xgridregrid_create(ESMCI::VM **vmpp,
   Mesh *mesh;
   if (is_esmf_mesh) {
     int localrc;
-    ESMCI_xgridregrid_create(vmpp,
-                             &((*meshsrcpp)->mesh), 
+    ESMCI_xgridregrid_create(&((*meshsrcpp)->mesh), 
                              &((*meshdstpp)->mesh),
                              &mesh,
                              compute_midmesh,
@@ -332,7 +330,7 @@ MeshCap *MeshCap::GridToMesh(const Grid &grid_, int staggerLoc,
 
 #endif
 
-void MeshCap::regrid_getiwts(ESMCI::VM **vmpp, Grid **gridpp,
+void MeshCap::regrid_getiwts(Grid **gridpp,
                              MeshCap **meshpp, ESMCI::Array **arraypp, int *staggerLoc,
                              int *regridScheme, int*rc) {
 #undef ESMC_METHOD
@@ -344,7 +342,7 @@ void MeshCap::regrid_getiwts(ESMCI::VM **vmpp, Grid **gridpp,
   // Call into func. depending on mesh type
   if (is_esmf_mesh) {
     int localrc;
-    ESMCI_regrid_getiwts(vmpp, gridpp,
+    ESMCI_regrid_getiwts(gridpp,
                          &((*meshpp)->mesh), arraypp, staggerLoc,
                          regridScheme, &localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
@@ -408,7 +406,7 @@ void MeshCap::regrid_getfrac(Grid **gridpp,
 }
 
 
-void MeshCap::regrid_create(ESMCI::VM **vmpp,
+void MeshCap::regrid_create(
 		    MeshCap **mcapsrcpp, ESMCI::Array **arraysrcpp, ESMCI::PointList **plsrcpp,
 		    MeshCap **mcapdstpp, ESMCI::Array **arraydstpp, ESMCI::PointList **pldstpp,
 		    int *regridMethod, 
@@ -497,8 +495,7 @@ void MeshCap::regrid_create(ESMCI::VM **vmpp,
   // Call into func. depending on mesh type
   if (is_esmf_mesh) {
     int localrc;
-    ESMCI_regrid_create(vmpp,
-                        (Mesh **)&mesh_src_p, arraysrcpp, plsrcpp,
+    ESMCI_regrid_create((Mesh **)&mesh_src_p, arraysrcpp, plsrcpp,
                         (Mesh **)&mesh_dst_p, arraydstpp, pldstpp,
                         regridMethod, 
                         map_type,
@@ -517,8 +514,7 @@ void MeshCap::regrid_create(ESMCI::VM **vmpp,
   } else {
 #ifdef ESMF_MOAB 
     int localrc;
-    MBMesh_regrid_create(vmpp,
-                         &mesh_src_p, arraysrcpp,
+    MBMesh_regrid_create(&mesh_src_p, arraysrcpp,
                          &mesh_dst_p, arraydstpp,
                          regridMethod, 
                            map_type,

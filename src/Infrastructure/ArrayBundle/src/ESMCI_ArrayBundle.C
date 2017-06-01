@@ -306,10 +306,10 @@ int ArrayBundle::read(
 //
 // !ARGUMENTS:
 //
-  const char  *file,            // in    - name of file being read
+  const std::string &file,      // in    - name of file being read
   bool *singleFile,             // in    - All arrays from single file if true
   int   *timeslice,             // in    - timeslice option
-  ESMC_IOFmt_Flag *iofmt        // in    - IO format flag
+  ESMC_IOFmt_Flag *iofmt        // in    - I/O format flag
   ){
 //
 // !DESCRIPTION:
@@ -326,7 +326,7 @@ int ArrayBundle::read(
   bool localsingleFile;                   // For default handling
 
   // Check the required parameters
-  if ((char *)NULL == file) {
+  if (file.empty()) {
     ESMC_LogDefault.Write("filename argument required",
                           ESMC_LOGMSG_ERROR, ESMC_CONTEXT);
     return ESMF_RC_ARG_BAD;
@@ -378,7 +378,7 @@ int ArrayBundle::read(
         stringstream filename;
         filename << file << std::fixed << std::setw(3) << std::setfill('0') << i;
         // Call the IO read function
-        localrc = newIO->read(filename.str().c_str(), localiofmt, timeslice);
+        localrc = newIO->read(filename.str(), localiofmt, timeslice);
         ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
           ESMC_CONTEXT, &rc);
         newIO->clear();
@@ -411,12 +411,14 @@ int ArrayBundle::write(
 //
 // !ARGUMENTS:
 //
-  const char  *file,              // in    - name of file being read
+  const std::string &file,        // in    - name of file being read
+  const std::string &convention,  // in    - Attribute convention
+  const std::string &purpose,     // in    - Attribute purpose
   bool *singleFile,               // in    - All arrays to single file if true
   bool *overwrite,                // in    - OK to overwrite fields if true
   ESMC_FileStatus_Flag *status,   // in    - file status flag
   int   *timeslice,               // in    - timeslice option
-  ESMC_IOFmt_Flag *iofmt          // in    - IO format flag
+  ESMC_IOFmt_Flag *iofmt          // in    - I/O format flag
   ){
 //
 // !DESCRIPTION:
@@ -435,7 +437,7 @@ int ArrayBundle::write(
   ESMC_FileStatus_Flag localstatus;       // For default handling
 
   // Check the required parameters
-  if ((char *)NULL == file) {
+  if (file.empty()) {
     ESMC_LogDefault.Write("filename argument required",
                           ESMC_LOGMSG_ERROR, ESMC_CONTEXT);
     return ESMF_RC_ARG_BAD;
@@ -502,7 +504,7 @@ int ArrayBundle::write(
         stringstream filename;
         filename << file << std::fixed << std::setw(3) << std::setfill('0') << i;
         // Call the IO write function
-        localrc = newIO->write(filename.str().c_str(), localiofmt, localoverwrite,
+        localrc = newIO->write(filename.str(), localiofmt, localoverwrite,
           localstatus, timeslice);
         ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
           ESMC_CONTEXT, &rc);

@@ -107,7 +107,7 @@ Thus, the top level configuration file for the \texttt{field\_1} test case will 
 
 The next section describes invoking the Test Harness from the Command Line.
 
-\subsection{Invoking a Single Test Harness Test Case fromthe Command Line}
+\subsection{Invoking a Single Test Harness Test Case from the Command Line}
 The Test Harness is built by invoking gmake from the \$ESMF\_DIR/src/test\_harness/src directory or 
 by building all the unit tests. This creates the exececutable file ESMF\_TestHarnessUTest in 
 the currently selected test directory.
@@ -802,7 +802,7 @@ This test function specification is only valid for 2D grids.
 %%%%%%%%%%%%%%%%%%%%%%
 \subsubsection{Distribution Specification}
 \label{sec:harness_distributionsspecifier}
-The purpose of the distribution specification is to characterize the distribution of the grid. It differs from the grid specification in that it is designed to specify the distribution as both absolute values such as $2 \times 3$ PETS as well as in relative terms based on fractions of the total number of PETS. This second option is intended to allow the distribution space to scale with changing machine resources without having to change the distribution specification file. 
+The purpose of the distribution specification is to characterize the distribution of the grid. It differs from the grid specification in that it is designed to specify the distribution as both absolute values such as $2 \times 3$ PETs as well as in relative terms based on fractions of the total number of PETs. This second option is intended to allow the distribution space to scale with changing machine resources without having to change the distribution specification file.
 
 Here is an example of a distribution specification file for block and block cyclic distributions.
 \begin{center}
@@ -859,9 +859,9 @@ The order of information is as follows:
 \end{center}
 The first example in the table starts with a string used by the report as a brief description of the distribution. Such as  $(1,2)-->(2,1)$ which indicates a source distribution of $ 1 \times 2$ and a destination distribution of $ 2 \times 1$. Next comes a key word, either \texttt{SRC} or \texttt{DST} to indicate the beginning of the source and destination descriptions, respectively. Following each tag is a specification of the distribution. In the first case a fixed source distribution is specified by the entries $D1==1$ and $D2=2$. This indicates that the source distribution is fixed to be $ 1 \times 2$, provided that the test is running with at least two processors. Likewise the destination distribution is fixed to $ 2 \times 1$.
 
-The second example, illustrates how to indicate a scalable distribution. Again the entry $D1==1$ indicates that the first dimension of the distribution is set to one, but the entry $D2=*1$ has a different meaning. It takes the total number of PETS NPETS and scales it by one. Therefore the source distribution becomes $ 1 \times NPETS$. It automatically scales with the number of PETS. Likewise, the destination distribution is set to $NPETS \times 1$. 
+The second example, illustrates how to indicate a scalable distribution. Again the entry $D1==1$ indicates that the first dimension of the distribution is set to one, but the entry $D2=*1$ has a different meaning. It takes the total number of PETs NPETS and scales it by one. Therefore the source distribution becomes $ 1 \times NPETS$. It automatically scales with the number of PETs. Likewise, the destination distribution is set to $NPETS \times 1$.
 
-The third example is completely dynamic. Since both $D1$ and $D2$ are scalable, each dimension starts with $N$ PETS, where $N$ is the square root of $NPETS$ rounded down to the nearest integer. Therefore $N\times N \leq NPETS$. So if $NPETS=4$, Then $N=2$. If $NPETS=6$ then $N$ still equals $4$. This base value is then modified by the indicated entries. In this case the source distribution is $2 N \times 1/2 N$, since the tag $D1=*  2$ indicates that first dimension is the result of the base value being multiplied by two, and the second dimension is the result of the base value being multiplied by one half. Likewise, the destination distribution is set to $1/2 N \times 2N$, no matter the number of $NPETS$.
+The third example is completely dynamic. Since both $D1$ and $D2$ are scalable, each dimension starts with $N$ PETs, where $N$ is the square root of $NPETS$ rounded down to the nearest integer. Therefore $N\times N \leq NPETS$. So if $NPETS=4$, Then $N=2$. If $NPETS=6$ then $N$ still equals $4$. This base value is then modified by the indicated entries. In this case the source distribution is $2 N \times 1/2 N$, since the tag $D1=*  2$ indicates that first dimension is the result of the base value being multiplied by two, and the second dimension is the result of the base value being multiplied by one half. Likewise, the destination distribution is set to $1/2 N \times 2N$, no matter the number of $NPETS$.
 
 For a rank three scalable distribution, $N$ is the cube root of NPETS rounded down to the next integer. And so on for higher rank distributions. 
 

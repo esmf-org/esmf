@@ -2,15 +2,15 @@
 
 %\subsection{Background}
 
-The ESMF IO provides an unified interface for input and output of
-high level ESMF objects such as Fields.  In the current release, the ESMF IO 
+The ESMF I/O provides an unified interface for input and output of
+high level ESMF objects such as Fields.  In the current release, the ESMF I/O
 capability is integrated with third-party software such as 
-\htmladdnormallink{Parallel IO (PIO)}{http://code.google.com/p/parallelio/}
+\htmladdnormallink{Parallel I/O (PIO)}{http://code.google.com/p/parallelio/}
 to read and write Fortran array data in MPI\_IO binary or NetCDF format, and 
 \htmladdnormallink{Xerces}{http://xerces.apache.org/xerces-c/} 
-Library to read Attribute data in XML format.  Other file IO
+Library to read Attribute data in XML format.  Other file I/O
 functionalities, such as writing of error and log messages, input of
-configuration parameters from an ASCII file, and lower-level IO utilities are 
+configuration parameters from an ASCII file, and lower-level I/O utilities are
 covered in different sections of this document.  See the Log Class 
 \ref{sec:Log}, the Config Class \ref{sec:Config}, and the Fortran 
 I/O Utilities, \ref{sec:IOUtil} respectively.
@@ -18,7 +18,7 @@ I/O Utilities, \ref{sec:IOUtil} respectively.
 
 %\subsection{I/O architecture}
 %
-%The future development of ESMF IO would include an ESMF\_IO object that
+%The future development of ESMF I/O would include an ESMF\_IO object that
 %combines other ESMF objects, such as Components, States, FieldBundles,
 %ArrayBundles, Fields, Arrays, Grids, as well as Array and Attributes to 
 %perform robust and unified input/output system.
@@ -77,7 +77,7 @@ I/O Utilities, \ref{sec:IOUtil} respectively.
 \subsection{Attribute I/O}
 \label{io:attributeio}
 
-Metadata IO is handled via the ESMF Attribute class. The third
+Metadata I/O is handled via the ESMF Attribute class. The third
 party software Xerces C++ Library is used by ESMF to provide
 the ability to read Attribute data in XML file format.
 To enable this capability, the environment variable ESMF\_XERCES must be
@@ -128,7 +128,7 @@ In the current release, the following methods support parallel data I/O using PI
 Two formats are supported, namely, NetCDF and binary (through MPI\_IO). 
 The environment variables that are enabled when ESMF is built determine the 
 format.  The environment variables ESMF\_NETCDF or/and ESMF\_PNETCDF should be 
-set as appropriate to enable NetCDF IO format.  If neither ESMF\_NETCDF nor 
+set as appropriate to enable NetCDF I/O format.  If neither ESMF\_NETCDF nor
 ESMF\_PNETCDF are set, and MPI\_IO is enabled in MPI, the format will be 
 binary.  Details about the environment variables can be found in ESMF User 
 Guide, "Building and Installing the ESMF", "Third Party Libraries".
@@ -141,7 +141,7 @@ machine-independent format for representing scientific data. Together,
 the interface, library, and format support the creation, access, and
 sharing of scientific data. The NetCDF software was developed at the
 Unidata Program Center in Boulder, Colorado. See \cite{NetCDF3_UsersGuide_C}.
-In geoscience, NetCDF can be naturally used for representation of fields 
+In geoscience, NetCDF can be naturally used to represent fields
 defined on logically rectangular grids. NetCDF use in geosciences is 
 specified by CF conventions mentioned above \cite{NetCDF_CF}.
 

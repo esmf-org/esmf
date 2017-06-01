@@ -644,8 +644,8 @@ DO_EX_RESULTS	    = $(ESMF_TESTSCRIPTS)/do_ex_results.pl -h $(ESMF_TESTSCRIPTS) 
 DO_EX_ML_RESULTS    = $(ESMF_TESTSCRIPTS)/do_ex_ml_results.pl -h $(ESMF_TESTSCRIPTS) -d $(ESMF_EXDIR) -b $(ESMF_BOPT)
 DO_ST_RESULTS	    = $(ESMF_TESTSCRIPTS)/do_st_results.pl -h $(ESMF_TESTSCRIPTS) -d $(ESMF_TESTDIR) -b $(ESMF_BOPT) -e $(ESMF_COMM)
 DO_ST_ML_RESULTS    = $(ESMF_TESTSCRIPTS)/do_st_ml_results.pl -h $(ESMF_TESTSCRIPTS) -d $(ESMF_TESTDIR) -b $(ESMF_BOPT)
-DO_SUM_RESULTS	    = $(ESMF_TESTSCRIPTS)/do_summary.pl -h $(ESMF_TESTSCRIPTS) -d $(ESMF_TESTDIR) -e $(ESMF_EXDIR) -b $(ESMF_BOPT) 
-DO_CK_SUM_RESULTS   = $(ESMF_TESTSCRIPTS)/do_ck_summary.pl -h $(ESMF_TESTSCRIPTS) -d $(ESMF_TESTDIR) -e $(ESMF_EXDIR) -b $(ESMF_BOPT) 
+DO_SUM_RESULTS	    = $(ESMF_TESTSCRIPTS)/do_summary.pl -h $(ESMF_TESTSCRIPTS) -d $(ESMF_TESTDIR) -e $(ESMF_EXDIR) -b $(ESMF_BOPT) -f $(ESMF_COMM)
+DO_CK_SUM_RESULTS   = $(ESMF_TESTSCRIPTS)/do_ck_summary.pl -h $(ESMF_TESTSCRIPTS) -d $(ESMF_TESTDIR) -e $(ESMF_EXDIR) -b $(ESMF_BOPT) -f $(ESMF_COMM) 
 DO_UTC_RESULTS	    = $(ESMF_UTCSCRIPTS)/do_utc_results.pl -h $(ESMF_UTCSCRIPTS) -d $(ESMF_TESTDIR) -b $(ESMF_BOPT) -e $(ESMF_MAX_PROCS)
 
 # C specific variables
@@ -687,8 +687,9 @@ ESMF_SEDDEFAULT             = sed
 # The gcc preprocessor is used for partially preprocessing .cppF90 files.
 # The -E option stops the gcc overcompiler after preprocessing, the -P
 # option prevents putting #line directives in the output, and -x c states
-# to use C-style preprocessing regardless of file name suffix.
-ESMF_CPPDEFAULT             = gcc -E -P -x c
+# to use C-style preprocessing regardless of file name suffix. Option -C
+# does not discard C++-style comments, preventing URL mangling.
+ESMF_CPPDEFAULT             = gcc -E -P -x c -C
 
 ESMF_RM                     = rm -rf
 ESMF_MV                     = mv -f

@@ -39,7 +39,6 @@
 ! !USES:
       use ESMF_GridMod
       use ESMF_StaggerLocMod
-      use ESMF_VMMod
       use ESMF_RHandleMod
       use ESMF_UtilTypesMod
       use ESMF_BaseMod          ! ESMF base class
@@ -229,7 +228,6 @@ end function my_xor
 !     \end{description}
 !EOPI
        integer :: localrc
-       type(ESMF_VM)        :: vm
        integer :: has_rh, has_iw, nentries
        type(ESMF_TempWeights) :: tweights
        integer :: has_udl, num_udl
@@ -265,11 +263,6 @@ end function my_xor
        ! Initialize return code; assume failure until success is certain
        localrc = ESMF_RC_NOT_IMPL
        if (present(rc)) rc = ESMF_RC_NOT_IMPL
-
-       ! global vm for now
-       call ESMF_VMGetGlobal(vm, rc=localrc)
-       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-         ESMF_CONTEXT, rcToReturn=rc)) return
 
        has_rh = 0
         has_iw = 0
@@ -338,7 +331,7 @@ end function my_xor
 
 
         ! Call through to the C++ object that does the work
-        call c_ESMC_regrid_create(vm, srcMesh%this, srcArray, srcPointList, src_pl_used_int, &
+        call c_ESMC_regrid_create(srcMesh%this, srcArray, srcPointList, src_pl_used_int, &
                    dstMesh%this, dstArray, dstPointList, dst_pl_used_int, &
                    regridmethod,  &
                    lineType, &
@@ -414,7 +407,6 @@ end function my_xor
 !     \end{description}
 !EOPI
        integer :: localrc
-       type(ESMF_VM)        :: vm
        logical :: isMemFreed
 
        ! Logic to determine if valid optional args are passed.  
@@ -422,11 +414,6 @@ end function my_xor
        ! Initialize return code; assume failure until success is certain
        localrc = ESMF_RC_NOT_IMPL
        if (present(rc)) rc = ESMF_RC_NOT_IMPL
-
-       ! global vm for now
-       call ESMF_VMGetGlobal(vm, rc=localrc)
-       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-         ESMF_CONTEXT, rcToReturn=rc)) return
 
        ! Make sure the srcMesh has its internal bits in place
        call ESMF_MeshGet(Mesh, isMemFreed=isMemFreed, rc=localrc)
@@ -441,7 +428,7 @@ end function my_xor
        endif
 
        ! Call through to the C++ object that does the work
-       call c_ESMC_regrid_getiwts(vm, Grid, Mesh, Array, staggerLoc, &
+       call c_ESMC_regrid_getiwts(Grid, Mesh, Array, staggerLoc, &
                                   regridScheme, localrc)
        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
          ESMF_CONTEXT, rcToReturn=rc)) return
@@ -484,7 +471,6 @@ end function my_xor
 !     \end{description}
 !EOPI
        integer :: localrc
-       type(ESMF_VM)        :: vm
        logical :: isMemFreed
 
        ! Logic to determine if valid optional args are passed.  
@@ -547,7 +533,6 @@ end function my_xor
 !     \end{description}
 !EOPI
        integer :: localrc
-       type(ESMF_VM)        :: vm
        logical :: isMemFreed
 
        ! Logic to determine if valid optional args are passed.  

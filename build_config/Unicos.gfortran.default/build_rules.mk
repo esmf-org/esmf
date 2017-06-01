@@ -186,3 +186,8 @@ ESMF_SO_CXXLINKOPTSEXE  = -Wl,-export-dynamic
 # TODO: WebService testing is robust enough to work on all systems.
 #
 ESMF_NOWEBSERVTESTING = TRUE
+
+############################################################
+# Override default C preprocessor on this platform
+#
+ESMF_CPPDEFAULT       = gcc -E -P -x c

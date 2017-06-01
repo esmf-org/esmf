@@ -20,7 +20,7 @@
 #include "ESMF.h"
 !==============================================================================
 !BOPI
-! !MODULE: ESMF_IOScripMod - Grid IO utility class
+! !MODULE: ESMF_IOScripMod - Grid I/O utility class
 !
 ! !DESCRIPTION:
 !

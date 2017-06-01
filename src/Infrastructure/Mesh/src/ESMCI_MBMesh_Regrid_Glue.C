@@ -23,7 +23,6 @@
 #ifdef ESMF_MOAB
 
 #include "ESMCI_Macros.h"
-#include "ESMCI_VM.h"
 #include "ESMCI_LogErr.h"
 #include "ESMCI_Grid.h"
 #include "ESMCI_GridToMesh.h"
@@ -86,7 +85,7 @@ extern "C" void FTN_X(c_esmc_arraysmmstore)(ESMCI::Array **srcArray,
 
 
 
-void MBMesh_regrid_create(ESMCI::VM **vmpp,
+void MBMesh_regrid_create(
                      void **meshsrcpp, ESMCI::Array **arraysrcpp,
                      void **meshdstpp, ESMCI::Array **arraydstpp,
                      int *regridMethod, 
@@ -102,17 +101,11 @@ void MBMesh_regrid_create(ESMCI::VM **vmpp,
                      int*rc) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_regrid_create()" 
-  Trace __trace(" FTN_X(regrid_test)(ESMCI::VM **vmpp, ESMCI::Grid **gridsrcpp, ESMCI::Grid **griddstcpp, int*rc");
+  Trace __trace(" FTN_X(regrid_test)(ESMCI::Grid **gridsrcpp, ESMCI::Grid **griddstcpp, int*rc");
 
 
-  ESMCI::VM *vm = *vmpp;
   ESMCI::Array &srcarray = **arraysrcpp;
   ESMCI::Array &dstarray = **arraydstpp;
-
-
-
-  int localPet = vm->getLocalPet();
-  int petCount = vm->getPetCount();
 
   // Get Moab Mesh wrapper
   MBMesh *mbmsrcp=*((MBMesh **)meshsrcpp);
@@ -523,9 +516,6 @@ void ESMCI_regrid_getiwts(ESMCI::VM **vmpp, Grid **gridpp,
   Trace __trace(" FTN_X(regrid_getiwts)()");
   ESMCI::VM *vm = *vmpp;
   ESMCI::Array &array = **arraypp;
-
-  int localPet = vm->getLocalPet();
-  int petCount = vm->getPetCount();
 
   Mesh &mesh = **meshpp;
   Grid &grid = **gridpp;

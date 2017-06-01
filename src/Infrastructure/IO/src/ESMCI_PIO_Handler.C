@@ -606,7 +606,7 @@ void PIO_Handler::arrayRead(
   int nVar;                               // Number of variables in file
   int nAtt;                               // Number of attributes in file
   int unlim;                              // Unlimited dimension ID
-  const char *varname;                    // Default variable name
+  std::string varname;                    // Default variable name
 
   if (rc != NULL) {
     *rc = ESMF_RC_NOT_IMPL;               // final return code
@@ -653,9 +653,9 @@ void PIO_Handler::arrayRead(
     }
   }
   if (getFormat() != ESMF_IOFMT_BIN) {
-    piorc = pio_cpp_inq_varid_vdesc(pioFileDesc, varname, vardesc);
+    piorc = pio_cpp_inq_varid_vdesc(pioFileDesc, varname.c_str(), vardesc);
     // An error here means the variable is not in the file
-    const std::string errmsg = std::string("variable ") + varname + " not found in file";
+    const std::string errmsg = "variable " + varname + " not found in file";
     if (!CHECKPIOERROR(piorc, errmsg, ESMF_RC_FILE_READ, (*rc))) {
       free (vardesc);
       vardesc = NULL;
@@ -782,8 +782,9 @@ void PIO_Handler::arrayWrite(
   Array *arr_p,                           // (in) Destination of write
   const char * const name,                // (in) Optional array name
   const std::vector<std::string> &dimLabels, // (in) Optional dimension labels
-  const std::vector<std::pair<std::string,std::string> > &varAtts,   // (in) Optional variable attributes
   int *timeslice,                         // (in) Optional timeslice
+  const Attribute *varAttPack,            // (in) Optional per-variable Attribute Package
+  const Attribute *gblAttPack,            // (in) Optional global Attribute Package
   int *rc                                 // (out) - Error return code
 //
   ) {
@@ -813,7 +814,7 @@ void PIO_Handler::arrayWrite(
   int timeFrame = -1;                     // ID of time dimension (>0 if used)
   int timesliceVal = -1;                  // Used time value (from timeslice)
   bool varExists = false;                 // true if varname is defined in file
-  const char *varname;                    // Variable name
+  std::string varname;                    // Variable name
   if (rc != NULL) {
     *rc = ESMF_RC_NOT_IMPL;               // final return code
   }
@@ -838,13 +839,16 @@ void PIO_Handler::arrayWrite(
     }
   }
 
-  if (dimLabels.size() > 0 && dimLabels.size() < (unsigned int)nioDims)
-    if (ESMC_LogDefault.MsgFoundError(ESMF_RC_ARG_SIZE, "user dimension labels extend < nioDims",
+  if (dimLabels.size() > 0 && dimLabels.size() < (unsigned int)nioDims) {
+    std::stringstream errmsg;
+    errmsg << dimLabels.size() << " user dimension label(s) supplied, " << nioDims << " expected";
+    if (ESMC_LogDefault.MsgFoundError(ESMF_RC_ARG_SIZE, errmsg,
             ESMC_CONTEXT, rc)) return;
+  }
 
   vardesc = (pio_var_desc_t)calloc(PIO_SIZE_VAR_DESC, 1);
   if (!vardesc)
-    if (ESMC_LogDefault.MsgAllocError(" failed to allocate pio variable desc",
+    if (ESMC_LogDefault.MsgAllocError("failed to allocate pio variable desc",
         ESMC_CONTEXT, rc)) return;
 
   // Get a pointer to the array data
@@ -894,7 +898,7 @@ void PIO_Handler::arrayWrite(
 
       // We have a NetCDF file, see if the variable is in there
       PRINTMSG("Looking for variable in file");
-      piorc = pio_cpp_inq_varid_vdesc(pioFileDesc, varname, vardesc);
+      piorc = pio_cpp_inq_varid_vdesc(pioFileDesc, varname.c_str(), vardesc);
       // This should succeed if the variable exists
       varExists = (PIO_noerr == piorc);
     }
@@ -1032,8 +1036,8 @@ void PIO_Handler::arrayWrite(
 
   if (varExists && !overwriteFields() && (timeFrame <= 0)) {
     // Check to see if we can overwrite an existing field or timeslice
-    if (ESMC_LogDefault.MsgFoundError(ESMF_RC_FILE_WRITE,
-        "Field exists, however, overwrite is .false.",
+    std::string errmsg = "Variable " + varname + " pre-exists, however overwrite flag is .false.";
+    if (ESMC_LogDefault.MsgFoundError(ESMF_RC_FILE_WRITE, errmsg,
         ESMC_CONTEXT, rc)) {
       free (vardesc);
       return;
@@ -1126,9 +1130,9 @@ void PIO_Handler::arrayWrite(
   }
   PRINTMSG("varExists = " << varExists);
   if ((getFormat() != ESMF_IOFMT_BIN) && !varExists) {
-    piorc = pio_cpp_def_var_md(pioFileDesc, varname, basepiotype,
+    piorc = pio_cpp_def_var_md(pioFileDesc, varname.c_str(), basepiotype,
                                ncDims, nioDims, vardesc);
-    if (!CHECKPIOERROR(piorc, std::string("Attempting to obtain info on variable: ") + varname,
+    if (!CHECKPIOERROR(piorc, "Attempting to define PIO vardesc for: " + varname,
         ESMF_RC_FILE_WRITE, (*rc))) {
       free (vardesc);
       return;
@@ -1150,34 +1154,36 @@ void PIO_Handler::arrayWrite(
     if (varExists) {
       int varid;
       int lrc;
-      lrc = pio_cpp_inq_varid_vid(pioFileDesc, varname, &varid);
+      lrc = pio_cpp_inq_varid_vid(pioFileDesc, varname.c_str(), &varid);
       PRINTMSG("varid = " << varid);
     }
   }
 #endif // ESMFIO_DEBUG
-  if (varAtts.size() > 0) {
-#if 0
-    if (varAtts.size () > 0) {
-      std::cout << ESMC_METHOD << ": putting variable attributes:" << std::endl;
-      for (unsigned i=0; i<varAtts.size (); i++)
-        std::cout << "   attribute " << i << ": " << varname << ":"
-            << varAtts[i].first << " = \"" << varAtts[i].second << "\"" << std::endl;
+
+  if (getFormat() != ESMF_IOFMT_BIN) {
+    // ESMF Attribute Package -> NetCDF variable and global attributes
+    if (varAttPack) {
+      attPackPut (vardesc, varAttPack, &localrc);
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+          ESMC_CONTEXT, rc)) {
+        free (vardesc);
+        return;
+      }
     }
-#endif
-    for (unsigned i=0; i<varAtts.size(); i++) {
-      int piorc = pio_cpp_put_att_string (pioFileDesc, vardesc,
-          varAtts[i].first.c_str(), varAtts[i].second.c_str());
-      if (!CHECKPIOERROR(piorc,  std::string ("Attempting to add variable attribute for variable: ") + varname,
-          ESMF_RC_FILE_WRITE, (*rc))) {
+    if (gblAttPack) {
+      attPackPut (NULL, gblAttPack, &localrc);
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+          ESMC_CONTEXT, rc)) {
         free (vardesc);
         return;
       }
     }
   }
+
   PRINTMSG("calling enddef, status = " << statusOK);
   if ((getFormat() != ESMF_IOFMT_BIN)) {
     piorc = pio_cpp_enddef(pioFileDesc);
-    if (!CHECKPIOERROR(piorc,  std::string ("Attempting to end definition of variable: ") + varname,
+    if (!CHECKPIOERROR(piorc,  "Attempting to end definition of variable: " + varname,
         ESMF_RC_FILE_WRITE, (*rc))) {
       free (vardesc);
       return;
@@ -1422,6 +1428,157 @@ void PIO_Handler::open(
     *rc = ESMF_SUCCESS;
   }
 } // PIO_Handler::open()
+//-----------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::PIO_Handler::attPackPut()"
+//BOPI
+// !IROUTINE:  ESMCI::PIO_Handler::attPackPut
+//
+// !INTERFACE:
+void PIO_Handler::attPackPut (
+//
+// !RETURN VALUE:
+//
+// !ARGUMENTS:
+//
+  pio_var_desc_t vardesc,                 // (in) - variable to write attributes into, NULL for global
+  const Attribute *attPack,               // (in) - AttPack containing name/value(s) pairs
+  int *rc                                 // (out) - Error return code
+  ) {
+//
+// !DESCRIPTION:
+//    Puts the Attributes and their values into the NetCDF file
+//
+//EOPI
+//-----------------------------------------------------------------------------
+  int localrc;
+  int piorc;
+
+  pio_var_desc_t vardesc_local = vardesc;
+  if (!vardesc) {
+    pio_var_desc_t gblvardesc = (pio_var_desc_t)calloc(PIO_SIZE_VAR_DESC, 1);
+    if (!gblvardesc)
+      if (ESMC_LogDefault.MsgAllocError(" failed to allocate pio global variable desc",
+          ESMC_CONTEXT, rc)) return;
+
+#if !defined (ESMF_PNETCDF)
+    // TODO: this fails with PNetCDF...
+    piorc = pio_cpp_def_var_0d(pioFileDesc, "", PIO_global, gblvardesc);
+    if (piorc != PIO_noerr) {
+      std::cout << ESMC_METHOD << ": piorc = " << piorc << std::endl;
+      if (!CHECKPIOERROR(piorc, "Attempting to define global PIO vardesc",
+          ESMF_RC_FILE_WRITE, (*rc))) {
+        free (gblvardesc);
+        return;
+      }
+    }
+#endif
+    vardesc_local = gblvardesc;
+  }
+
+  int natts = attPack->getCountAttr();
+  for (int i=0; i<natts; i++) {
+    Attribute *att = attPack->AttPackGetAttribute (i);
+    if (!att) {
+      if (ESMC_LogDefault.MsgFoundError(ESMF_RC_ATTR_NOTSET,
+          "Can not access Attribute in " + attPack->getName(),
+          ESMC_CONTEXT, rc)) {
+        if (!vardesc) free (vardesc_local);
+        return;
+      }
+    }
+    if (att->getName().substr(0,5) == "ESMF:") {
+#if 0
+      std::cout << ESMC_METHOD << ": NOTE: attribute " << att->getName() << " ignored." << std::endl;
+#endif
+      continue;
+    }
+
+    ESMC_TypeKind_Flag att_type = att->getTypeKind ();
+    switch (att_type) {
+      case ESMC_TYPEKIND_CHARACTER:
+      {
+        std::vector<std::string> stringvals;
+        localrc = att->get (&stringvals);
+        if (ESMC_LogDefault.MsgFoundError(localrc,
+            "Can not access string Attribute value for " + att->getName(),
+            ESMC_CONTEXT, rc)) {
+          if (!vardesc) free (vardesc_local);
+          return;
+        }
+        if (stringvals.size() > 1) {
+          if (ESMC_LogDefault.MsgFoundError(localrc,
+              "Only scalar string Attribute value for " + att->getName() + " is currently supported",
+              ESMC_CONTEXT, rc)) {
+            if (!vardesc) free (vardesc_local);
+            return;
+          }
+        }
+        piorc = pio_cpp_put_att_string (pioFileDesc, vardesc_local,
+            att->getName().c_str(), stringvals[0].c_str());
+        if (!CHECKPIOERROR(piorc, "Attempting to set string Attribute: " + att->getName(),
+            ESMF_RC_FILE_WRITE, (*rc))) {
+          if (!vardesc) free (vardesc_local);
+          return;
+        }
+        break;
+      }
+
+      case ESMC_TYPEKIND_I4:
+      {
+        int nvals;
+        std::vector<ESMC_I4> intvals;
+        localrc = att->get (&nvals, &intvals);
+        if (ESMC_LogDefault.MsgFoundError(localrc,
+            "Can not access int Attribute value for " + att->getName(),
+            ESMC_CONTEXT, rc)) {
+          if (!vardesc) free (vardesc_local);
+          return;
+        }
+        piorc = pio_cpp_put_att_ints (pioFileDesc, vardesc_local,
+            att->getName().c_str(), &intvals[0], intvals.size());
+        if (!CHECKPIOERROR(piorc, "Attempting to set int Attribute: " + att->getName(),
+            ESMF_RC_FILE_WRITE, (*rc))) {
+          if (!vardesc) free (vardesc_local);
+          return;
+        }
+        break;
+      }
+
+      case ESMC_TYPEKIND_R4:
+      {
+        int nvals;
+        std::vector<ESMC_R4> floatvals;
+        localrc = att->get (&nvals, &floatvals);
+        if (ESMC_LogDefault.MsgFoundError(localrc,
+            "Can not access float Attribute value for " + att->getName(),
+            ESMC_CONTEXT, rc)) {
+          if (!vardesc) free (vardesc_local);
+          return;
+        }
+        piorc = pio_cpp_put_att_floats (pioFileDesc, vardesc_local,
+            att->getName().c_str(), &floatvals[0], floatvals.size());
+        if (!CHECKPIOERROR(piorc, "Attempting to set float Attribute: " + att->getName(),
+            ESMF_RC_FILE_WRITE, (*rc))) {
+          if (!vardesc) free (vardesc_local);
+          return;
+        }
+        break;
+      }
+
+      default:
+        if (ESMC_LogDefault.MsgFoundError(ESMF_RC_ATTR_NOTSET,
+            "Attribute " + att->getName() + " has unsupported value type",
+            ESMC_CONTEXT, rc)) {
+          if (!vardesc) free (vardesc_local);
+          return;
+        }
+    }
+  } // natts loop
+  if (!vardesc) free (vardesc_local);
+} // PIO_Handler::attPackPut()
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------

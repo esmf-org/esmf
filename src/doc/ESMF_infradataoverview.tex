@@ -23,7 +23,7 @@ combinations of these without changes to user code.  This is a
 primary strategy for ensuring optimal performance and portability
 for codes using ESMF for communications.
 
-ESMF data classes are useful because they provide a standard, 
+ESMF data classes provide a standard,
 convenient way for developers to collect together information 
 related to model or observational data.  The information assembled 
 in a data class includes a data pointer, a set of attributes 
@@ -298,7 +298,7 @@ In nearest source to destination interpolation ({\tt ESMF\_REGRIDMETHOD\_NEAREST
  In 3D, ESMF supports nearest source to destination regridding between any combination of the following:
  \begin{itemize}
  \item Structured Grids ({\tt ESMF\_Grid}) composed of a single logically rectangular patch
- \item Unstructured Meshes ({\tt ESMF\_Mesh}) composed of hexahedrons (e.g. cubes) and tetrahedrals
+ \item Unstructured Meshes ({\tt ESMF\_Mesh}) composed of hexahedrons (e.g. cubes) and tetrahedrons
  \item A set of disconnected points ({\tt ESMF\_LocStream}) 
  \end{itemize}
 
@@ -331,7 +331,7 @@ In nearest destination to source interpolation ({\tt ESMF\_REGRIDMETHOD\_NEAREST
  In 3D, ESMF supports nearest destination to source regridding between any combination of the following:
  \begin{itemize}
  \item Structured Grids ({\tt ESMF\_Grid}) composed of a single logically rectangular patch
- \item Unstructured Meshes ({\tt ESMF\_Mesh}) composed of hexahedrons (e.g. cubes) and tetrahedrals
+ \item Unstructured Meshes ({\tt ESMF\_Mesh}) composed of hexahedrons (e.g. cubes) and tetrahedrons
  \item A set of disconnected points ({\tt ESMF\_LocStream}) 
  \end{itemize}
 
@@ -464,7 +464,7 @@ call,  and the destination fraction ({\tt dst\_frac}) from the {\tt ESMF\_FieldR
  In 3D, ESMF supports conservative regridding between any combination of the following:
  \begin{itemize}
  \item Structured Grids ({\tt ESMF\_Grid}) composed of a single logically rectangular patch
- \item Unstructured Meshes ({\tt ESMF\_Mesh}) composed of hexahedrons (e.g. cubes) and tetrahedrals
+ \item Unstructured Meshes ({\tt ESMF\_Mesh}) composed of hexahedrons (e.g. cubes) and tetrahedrons
  \end{itemize}
 
 \smallskip
@@ -706,7 +706,7 @@ in our regrid weight calculation. The parts of the internal FEM code that are us
 \begin{itemize}
 \item The creation of a mesh composed of triangles and quadrilaterals or hexahedrons and tetrahedrons.
 \item The object relations data base to store the connections between objects (e.g. which element contains which nodes).
-\item The fields to hold data (e.g. coordinates). (We currently only build fields on nodes and elements (2D and 3D).
+\item The fields to hold data (e.g. coordinates). We currently only build fields on nodes and elements (2D and 3D).
 \item Iteration to move through mesh entities.
 \item The parallel code to maintain information about the distribution of the mesh across processors and to communicate data between parts of the mesh on different processors (i.e. halos).
 \end{itemize}

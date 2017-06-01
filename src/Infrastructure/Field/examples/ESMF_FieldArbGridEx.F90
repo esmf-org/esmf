@@ -135,8 +135,8 @@
 !  With the introduction of Field on arbitrarily distributed Grid, Field has two kinds of dimension
 !  count: one associated geometrical (or physical) dimensionality, the other one associated with its
 !  memory index space representation. Field and Grid dimCount reflect the physical index 
-!  space of the objects. A new type of dimCount  rank should be added to both of these entities. 
-!  rank gives the number of dimensions of the memory index space of the objects.
+!  space of the objects. A new type of dimCount rank should be added to both of these entities.
+!  The rank gives the number of dimensions of the memory index space of the objects.
 !  This would be the dimension of the pointer pulled out of Field and the
 !  size of the bounds vector, for example. 
 !
@@ -157,7 +157,7 @@
 !  such a Field, this example illustrates the key concepts and use of Field on arbitrary distributed Grid.
 !  
 !  The Grid is 3 dimensional in physics index space but the first two dimension are collapsed into
-!  a single memory index space. Thus the result Field is 3D in physics index space and 2D in memory index
+!  a single memory index space. Thus the resulting Field is 3D in physics index space and 2D in memory index
 !  space. This is made obvious with the 2D arrayspec used to create this Field.
 !
 !EOE
@@ -201,7 +201,7 @@
 !\label{sec:field:usage:createArbGridRep}
 !
 !  The next example is slightly more complicated in
-!  that the Field also contains ungridded dimension and its gridded dimension
+!  that the Field also contains one ungridded dimension and its gridded dimension
 !  is replicated on the arbitrarily distributed dimension of the Grid.
 ! 
 !  The same 3D Grid and 2D arrayspec in the previous example

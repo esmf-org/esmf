@@ -244,7 +244,7 @@ module NUOPC_Auxiliary
 !     however, if the file already contains a time axis for the variable,
 !     a timeslice one greater than the maximum will be written.
 !   \item[{[iofmt]}]
-!    The IO format.  Valid options are  {\tt ESMF\_IOFMT\_BIN} and 
+!    The I/O format.  Valid options are  {\tt ESMF\_IOFMT\_BIN} and
 !    {\tt ESMF\_IOFMT\_NETCDF}. If not present, file names with a {\tt .bin} 
 !    extension will use {\tt ESMF\_IOFMT\_BIN}, and file names with a {\tt .nc}
 !    extension will use {\tt ESMF\_IOFMT\_NETCDF}.  Other files default to

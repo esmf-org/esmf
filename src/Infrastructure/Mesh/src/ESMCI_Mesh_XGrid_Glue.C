@@ -25,7 +25,6 @@ using namespace std;
 
 #include "ESMC_Macros.h"
 #include "ESMCI_LogErr.h"
-#include "ESMCI_VM.h"
 #include "ESMC_Util.h"
 #include "ESMCI_Array.h"
 #include "Mesh/include/ESMCI_Mesh.h"
@@ -34,6 +33,7 @@ using namespace std;
 #include "Mesh/include/ESMCI_MeshRegrid.h"
 #include "Mesh/include/ESMCI_MeshMerge.h"
 #include "Mesh/include/ESMCI_Regrid_Helper.h"
+#include "Mesh/include/ESMCI_Mesh_XGrid_Glue.h"
 #include "ESMCI_Grid.h"
 
 //-----------------------------------------------------------------------------
@@ -54,8 +54,7 @@ using namespace ESMCI;
 //
 
 // xgrid regrid create method tailored for XGrid
-void ESMCI_xgridregrid_create(ESMCI::VM **vmpp,
-                   Mesh **meshsrcpp, Mesh **meshdstpp, 
+void ESMCI_xgridregrid_create(Mesh **meshsrcpp, Mesh **meshdstpp, 
                    Mesh **mesh,
                    int *compute_midmesh,
                    int *regridMethod, 
@@ -65,10 +64,6 @@ void ESMCI_xgridregrid_create(ESMCI::VM **vmpp,
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_xgridregrid_create()" 
   Trace __trace(" FTN_X(c_esmc_xgridregrid_create)");
-  ESMCI::VM *vm = *vmpp;
-
-  int localPet = vm->getLocalPet();
-  int petCount = vm->getPetCount();
 
   Mesh &srcmesh = **meshsrcpp;
   Mesh &dstmesh = **meshdstpp;

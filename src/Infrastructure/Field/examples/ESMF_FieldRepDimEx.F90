@@ -97,7 +97,7 @@
 !  \end{sloppypar}
 !
 !  Normally gridToFieldMap argument in {\tt ESMF\_FieldCreate()} should not contain
-!  0 value entries. However, for Field with replicated dimension, a 0 entry in gridToFieldMap
+!  0 value entries. However, for a Field with replicated dimension, a 0 entry in gridToFieldMap
 !  indicates the corresponding Grid dimension is replicated in the Field. In such a Field,
 !  the rank of the Field is no longer necessarily greater than its Grid rank.
 !  An example will make this clear. We will start by creating Distgrid and Grid.

@@ -158,7 +158,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item The proposed CF Unstructured grid (UGRID) format~(\ref{sec:fileformat:ugrid}).  
 ! \end{itemize}
 ! \smallskip
-! The weight file is the same format as is output by SCRIP~(\ref{sec:weightfileformat}).  
+! The weight file is created in SCRIP format~(\ref{sec:weightfileformat}).
 ! The optional arguments allow users to specify various options to control the regrid operation, 
 ! such as which pole option to use,
 ! whether to use user-specified area in the conservative regridding, or whether ESMF should generate masks using a given 
@@ -1854,16 +1854,16 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 ! !DESCRIPTION:
 ! This subroutine does online regridding weight generation from files with user specified distribution.  
-! The main differences between this API with the one in \ref{api:esmf_regridweightgenfile} are as follows:
+! The main differences between this API and the one in \ref{api:esmf_regridweightgenfile} are listed below:
 ! \begin{itemize}
 ! \item The input grids are always represented as {\tt ESMF\_Mesh} whether they are logically rectangular or unstructured.
-! \item The input grids will be decomposed using user-specified distribution instead of a fixed decomposition in the 
+! \item The input grids will be decomposed using a user-specified distribution instead of a fixed decomposition in the
 ! other subroutine if {\tt srcElementDistgrid} and {\tt dstElementDistgrid} are specified.
 ! \item The source and destination grid files have to be in the SCRIP grid file format. 
 ! \item This subroutine has one additional required argument {\tt regridRouteHandle} and four additional optional
 ! arguments: {\tt srcElementDistgrid}, {\tt dstElementDistgrid}, {\tt srcNodelDistgrid} and {\tt dstNodalDistgrid}.
 ! These four arguments are of type {\tt ESMF\_DistGrid}, they are used to define the distribution of the source
-! and destination grid elements and nodes. The output {\tt regridRouteHandle} allows user to regrid the field
+! and destination grid elements and nodes. The output {\tt regridRouteHandle} allows users to regrid the field
 ! values later in the application.
 ! \item The {\tt weightFile} argument is optional. When it is given, a weightfile will be generated as well.
 ! \end{itemize}
@@ -1878,15 +1878,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   \item [regridRouteHandle]
 !     The regrid RouteHandle returned by {\tt ESMF\_FieldRegridStore()}
 !   \item [srcElementDistgrid]
-!     A optional distGrid that specifies the distribution of the source grid's elements. If not 
+!     An optional distGrid that specifies the distribution of the source grid's elements. If not
 !     specified, a system-defined block decomposition is used.
 !   \item [dstElementDistgrid]
-!     A optional distGrid that specifies the distribution of the destination grid's elements. If
+!     An optional distGrid that specifies the distribution of the destination grid's elements. If
 !     not specified, a system-defined block decomposition is used.
 !   \item [weightFile]
 !     The interpolation weight file name. If present, an output weight file will be generated.
 !   \item [srcNodalDistgrid]
-!     An optinonal distGrid that specifies the distribution of the source grid's nodes
+!     An optional distGrid that specifies the distribution of the source grid's nodes
 !   \item [dstNodalDistgrid]
 !     An optional distGrid that specifies the distribution of the destination grid's nodes
 !   \item [{[regridmethod]}]

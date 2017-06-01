@@ -17,7 +17,6 @@
 #include "Mesh/include/ESMCI_Regrid_Helper.h"
 
 #include "ESMCI_Macros.h"
-#include "ESMCI_VM.h"
 #include "ESMCI_LogErr.h"
 #include "ESMCI_Grid.h"
 #include "ESMCI_GridToMesh.h"
@@ -183,7 +182,7 @@
 
     static MeshCap *meshcreatedual(MeshCap **src_meshpp, int *rc);
 
-    static void regrid_create(ESMCI::VM **vmpp,
+    static void regrid_create(
 	      MeshCap **meshsrcpp, ESMCI::Array **arraysrcpp, ESMCI::PointList **plsrcpp,
 	      MeshCap **meshdstpp, ESMCI::Array **arraydstpp, ESMCI::PointList **pldstpp,
               int *regridMethod, 
@@ -199,7 +198,7 @@
               int *has_statusArray, ESMCI::Array **statusArray,
               int*rc);
 
-    static void regrid_getiwts(ESMCI::VM **vmpp, Grid **gridpp,
+    static void regrid_getiwts(Grid **gridpp,
                                MeshCap **meshpp, ESMCI::Array **arraypp, int *staggerLoc,
                                int *regridScheme, int*rc);
     
@@ -217,8 +216,7 @@
                         ESMCI::InterArray<int> *maskValuesArg,
                         int *regridConserve, int *rc);
 
-     static void xgridregrid_create(ESMCI::VM **vmpp,
-                                    MeshCap **meshsrcpp, MeshCap **meshdstpp, 
+     static void xgridregrid_create(MeshCap **meshsrcpp, MeshCap **meshdstpp, 
                                     MeshCap **out_mesh,
                                     int *compute_midmesh,
                                     int *regridMethod, 

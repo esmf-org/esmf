@@ -41,10 +41,10 @@ DIRS      = ESMF_CompCreate \
             ESMF_FieldMeshSMM \
             ESMF_TransferGrid \
             ESMF_TransferMesh \
-	    ESMF_SequentialEnsemble \
-	    ESMF_ConcurrentEnsemble \
-	    ESMF_ArrayRedistOpenMP \
-	    ESMF_ArrayRedistOpenACC \
+            ESMF_SequentialEnsemble \
+            ESMF_ConcurrentEnsemble \
+            ESMF_ArrayRedistOpenMP \
+            ESMF_ArrayRedistOpenACC \
             ESMF_DirectCoupling \
             ESMF_XGridConcurrent \
             ESMF_XGridSerial \

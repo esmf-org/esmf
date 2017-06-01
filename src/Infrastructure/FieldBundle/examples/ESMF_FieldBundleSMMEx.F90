@@ -84,7 +84,7 @@
 !  to a destination FieldBundle}
 ! \label{sec:fieldbundle:usage:smm_1dptr}
 !
-! A user can use {\tt ESMF\_FieldBundleSMM} interface to perform SMM from 
+! The {\tt ESMF\_FieldBundleSMM} interface can be used to perform SMM from
 ! source FieldBundle to destination FieldBundle. This interface is overloaded by type and kind;
 ! 
 ! In this example, we first create two FieldBundles, a source FieldBundle and a destination
@@ -95,7 +95,7 @@
 ! section \ref{sec:field:usage:smm_1dptr}.
 ! 
 ! Section \ref{Array:SparseMatMul} provides a detailed discussion of the 
-! sparse matrix mulitiplication operation implemented in ESMF.
+! sparse matrix multiplication operation implemented in ESMF.
 !EOE
 !BOC 
     call ESMF_VMGetCurrent(vm, rc=rc)

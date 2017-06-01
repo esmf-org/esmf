@@ -336,7 +336,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   effective halo region from the inside. Setting this flag to
 !   {\tt ESMF\_STARTREGION\_COMPUTATIONAL} means that only elements outside 
 !   the computational region of the Array are considered for potential
-!   destination elements for halo. The default is {\tt ESMF\_STARTREGION\_EXCLUSIVE}.
+!   destination elements for the halo operation. The default is {\tt ESMF\_STARTREGION\_EXCLUSIVE}.
 !
 !   The {\tt haloLDepth} and {\tt haloUDepth} arguments allow to reduce
 !   the extent of the effective halo region. Starting at the region specified
@@ -346,7 +346,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   {\tt haloLDepth} and {\tt haloUDepth} setting. The total Array region is
 !   local DE specific. The {\tt haloLDepth} and {\tt haloUDepth} are interpreted
 !   as the maximum desired extent, reducing the potentially larger region
-!   available for halo.
+!   available for the halo operation.
 !
 !   The routine returns an {\tt ESMF\_RouteHandle} that can be used to call 
 !   {\tt ESMF\_ArrayHalo()} on any Array that is weakly congruent
@@ -393,7 +393,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     on some systems too large a value may lead to performance degradation,
 !     or runtime errors.
 !
-!     Note that the pipeline depth has no affect on the bit-for-bit
+!     Note that the pipeline depth has no effect on the bit-for-bit
 !     reproducibility of the results. However, it may affect the performance
 !     reproducibility of the exchange.
 !
@@ -604,14 +604,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !    The name of the file from which Array data is read.
 !   \item[{[variableName]}]
 !    Variable name in the file; default is the "name" of Array.
-!    Use this argument only in the IO format (such as NetCDF) that
-!    supports variable name. If the IO format does not support this 
+!    Use this argument only in the I/O format (such as NetCDF) that
+!    supports variable name. If the I/O format does not support this
 !    (such as binary format), ESMF will return an error code.
 !   \item[{[timeslice]}]
 !    The time-slice number of the variable read from file.
 !   \item[{[iofmt]}]
 !    \begin{sloppypar}
-!    The IO format.  Please see Section~\ref{opt:iofmtflag} for the list
+!    The I/O format.  Please see Section~\ref{opt:iofmtflag} for the list
 !    of options. If not present, file names with a {\tt .bin} extension will
 !    use {\tt ESMF\_IOFMT\_BIN}, and file names with a {\tt .nc} extension
 !    will use {\tt ESMF\_IOFMT\_NETCDF}.  Other files default to
@@ -1050,7 +1050,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     on some systems too large a value may lead to performance degradation,
 !     or runtime errors.
 !
-!     Note that the pipeline depth has no affect on the bit-for-bit
+!     Note that the pipeline depth has no effect on the bit-for-bit
 !     reproducibility of the results. However, it may affect the performance
 !     reproducibility of the exchange.
 !
@@ -1639,7 +1639,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     on some systems too large a value may lead to performance degradation,
 !     or runtime errors.
 !
-!     Note that the pipeline depth has no affect on the bit-for-bit
+!     Note that the pipeline depth has no effect on the bit-for-bit
 !     reproducibility of the results. However, it may affect the performance
 !     reproducibility of the exchange.
 !

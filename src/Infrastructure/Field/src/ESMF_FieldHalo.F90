@@ -287,7 +287,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   effective halo region from the inside. Setting this flag to
 !   {\tt ESMF\_STARTREGION\_COMPUTATIONAL} means that only elements outside 
 !   the computational region of the Field are considered for potential
-!   destination elements for halo. The default is {\tt ESMF\_STARTREGION\_EXCLUSIVE}.
+!   destination elements for the halo operation. The default is {\tt ESMF\_STARTREGION\_EXCLUSIVE}.
 !
 !   The {\tt haloLDepth} and {\tt haloUDepth} arguments allow to reduce
 !   the extent of the effective halo region. Starting at the region specified
@@ -297,17 +297,17 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   {\tt haloLDepth} and {\tt haloUDepth} setting. The total Field region is
 !   local DE specific. The {\tt haloLDepth} and {\tt haloUDepth} are interpreted
 !   as the maximum desired extent, reducing the potentially larger region
-!   available for halo.
+!   available for the halo operation.
 !
 !   The routine returns an {\tt ESMF\_RouteHandle} that can be used to call 
 !   {\tt ESMF\_FieldHalo()} on any Field that is weakly congruent
 !   and typekind conform to {\tt field}. Congruent Fields possess matching
 !   DistGrids and the shape of the local field tiles, i.e. the memory allocation,
-!   matches between the Fieldss for every DE. For weakly congruent
-!   Fieldss the sizes of the undistributed dimensions, that vary faster with
+!   matches between the Fields for every DE. For weakly congruent
+!   Fields the sizes of the undistributed dimensions, that vary faster with
 !   memory than the first distributed dimension, are permitted to be different.
 !   This means that the same {\tt routehandle} can be applied to a large class
-!   of similar Fieldss that differ in the number of elements in the left most
+!   of similar Fields that differ in the number of elements in the left most
 !   undistributed dimensions.
 !  
 !   This call is {\em collective} across the current VM.  
