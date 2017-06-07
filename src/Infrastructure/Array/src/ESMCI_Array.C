@@ -1320,6 +1320,14 @@ Array *Array::create(
   // determine tensorCount
   int tensorCount = rank - redDimCount;
   if (tensorCount < 0) tensorCount = 0;
+#ifdef DEBUGGING
+  {
+    std::stringstream debugmsg;
+    debugmsg << "rank=" << rank << " dimCount=" << dimCount
+      << " redDimCount=" << redDimCount << " tensorCount=" << tensorCount;
+    ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_INFO);
+  }
+#endif
   // generate arrayToDistGridMap
   vector<int> arrayToDistGridMapArrayV(rank);
   int *arrayToDistGridMapArray = &arrayToDistGridMapArrayV[0];
@@ -1364,8 +1372,10 @@ Array *Array::create(
       return ESMC_NULL_POINTER;
     }
     if (undistLBoundArg->extent[0] != tensorCount){
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
-        "undistLBound, arrayspec, distgrid mismatch", ESMC_CONTEXT, rc);
+      std::stringstream msg;
+      msg << "undistLBound, arrayspec, distgrid mismatch, "
+        "undistLBoundArg->extent[0]=" << undistLBoundArg->extent[0];
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE, msg, ESMC_CONTEXT, rc);
       return ESMC_NULL_POINTER;
     }
     undistLBoundArray = undistLBoundArg->array;

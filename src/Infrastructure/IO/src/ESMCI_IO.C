@@ -343,7 +343,7 @@ int IO::read(
           return rc;
       }
 
-      // Check for redistribution (when > 1 DE per PET)
+      // Check for redistribution (when DE/PET != 1)
       need_redist = redist_check(temp_array_p, &localrc);
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
           &rc)) {
@@ -558,6 +558,7 @@ int IO::write(
 #if 0
 ESMC_LogDefault.Write("IO::write() case: IO_ARRAY", ESMC_LOGMSG_INFO);
 #endif
+      // Check for redistribution (when DE/PET != 1)
       need_redist = redist_check(temp_array_p, &localrc);
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
           &rc)) {
@@ -589,7 +590,8 @@ ESMC_LogDefault.Write("IO::write() case: IO_ARRAY: aft redist_arraycreate1de()",
 #if 0
 ESMC_LogDefault.Write("IO::write() case: IO_ARRAY: bef redistStore()", ESMC_LOGMSG_INFO);
 #endif
-          localrc = ESMCI::Array::redistStore((*it)->getArray(), temp_array_p, &rh, NULL);
+          localrc = ESMCI::Array::redistStore((*it)->getArray(), temp_array_p, &rh, NULL,
+            ESMF_NOKIND, NULL, true);
           if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) {
             // Close the file but return original error even if close fails.
             localrc = close();
@@ -1157,6 +1159,7 @@ bool IO::redist_check(Array *array_p, int *rc) {
 void IO::redist_arraycreate1de(Array *src_array_p, Array **dest_array_p, int *rc) {
 // !DESCRIPTION:
 //      Create a dest Array with DE count on each PET = 1, based on src Array.
+//      Assumes that incoming Array has tileCount==1.
 //
 //EOP
 //-----------------------------------------------------------------------------
@@ -1164,24 +1167,49 @@ void IO::redist_arraycreate1de(Array *src_array_p, Array **dest_array_p, int *rc
   int localrc;
 
   DistGrid *dg_orig = src_array_p->getDistGrid();
-  const int *minIndexTile = dg_orig->getMinIndexPDimPTile();
-  const int *maxIndexTile = dg_orig->getMaxIndexPDimPTile();
 
-  int ndims = dg_orig->getDimCount();
-  int rank = src_array_p->getRank();
-  int localTileCount = dg_orig->getTileCount();
-  localrc = (localTileCount == 1) ? ESMF_SUCCESS : ESMF_RC_NOT_IMPL;
+  localrc = (dg_orig->getTileCount() == 1) ? ESMF_SUCCESS : ESMF_RC_NOT_IMPL;
   if (ESMC_LogDefault.MsgFoundError(localrc, "Tile count != 1 is not supported", ESMC_CONTEXT, rc))
     return;
 
-  ESMCI::InterArray<int> minIndexInterface((int*)minIndexTile, ndims);
+  const int *minIndexTile = dg_orig->getMinIndexPDimPTile();
+  const int *maxIndexTile = dg_orig->getMaxIndexPDimPTile();
+  const int *distgridToArrayMap = src_array_p->getDistGridToArrayMap();
+
+  int ndims = dg_orig->getDimCount();
+  int rank = src_array_p->getRank();
+  
+  int replicatedDims=0;
+  for (int i=0; i<ndims; i++)
+    if (distgridToArrayMap[i]==0) ++replicatedDims;
+  
+  std::vector<int> minIndexTileVec;
+  std::vector<int> maxIndexTileVec;
+  std::vector<int> distgridToArrayMapVec;
+  if (replicatedDims>0){
+    // eliminate replicated dimensions from the destination
+    for (int i=0; i<ndims; i++){
+      if (distgridToArrayMap[i]!=0){
+        // not a replicated dim -> keep
+        minIndexTileVec.push_back(minIndexTile[i]);
+        maxIndexTileVec.push_back(maxIndexTile[i]);
+        distgridToArrayMapVec.push_back(distgridToArrayMap[i]);
+      }
+    }
+    // now point to the set of reduced lists
+    minIndexTile = &(minIndexTileVec[0]);
+    maxIndexTile = &(maxIndexTileVec[0]);
+    distgridToArrayMap = &(distgridToArrayMapVec[0]);
+  }
+
+  ESMCI::InterArray<int> minIndexInterface((int*)minIndexTile, ndims-replicatedDims);
+  ESMCI::InterArray<int> maxIndexInterface((int*)maxIndexTile, ndims-replicatedDims);
 #if 0
   std::cout << ESMC_METHOD << "[" << me << "]: setting maxindex to: (";
   for (int i=0; i<ndims; i++)
     std::cout << " " << maxIndexTile[i];
   std::cout << " )" << std::endl;
 #endif
-  ESMCI::InterArray<int> maxIndexInterface((int*)maxIndexTile, ndims);
   // create default DistGrid, which means 1DE per PET
   DistGrid *distgrid = DistGrid::create(&minIndexInterface, &maxIndexInterface, NULL,
       NULL, 0, NULL, NULL, NULL, NULL, NULL, (ESMCI::DELayout*)NULL, NULL,
@@ -1192,12 +1220,13 @@ void IO::redist_arraycreate1de(Array *src_array_p, Array **dest_array_p, int *rc
   // std::cout << ESMC_METHOD << ": creating temp Array for redistribution" << std::endl;
   ESMCI::ArraySpec arrayspec;
   arrayspec.set (src_array_p->getRank(), src_array_p->getTypekind());
-  ESMCI::InterArray<int> distgridToArrayMap((int*)(src_array_p->getDistGridToArrayMap()), ndims);
-  ESMCI::InterArray<int> undistLBoundArg((int*)(src_array_p->getUndistLBound()), rank-ndims);
-  ESMCI::InterArray<int> undistUBoundArg((int*)(src_array_p->getUndistUBound()), rank-ndims);
+  ESMCI::InterArray<int> distgridToArrayMapArg((int*)distgridToArrayMap, ndims-replicatedDims);
+  int undistDims = rank-(ndims-replicatedDims);
+  ESMCI::InterArray<int> undistLBoundArg((int*)(src_array_p->getUndistLBound()), undistDims);
+  ESMCI::InterArray<int> undistUBoundArg((int*)(src_array_p->getUndistUBound()), undistDims);
 
   ESMCI::Array *temp_arr_p = ESMCI::Array::create(&arrayspec, distgrid,
-    &distgridToArrayMap,
+    &distgridToArrayMapArg,
     NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 
     &undistLBoundArg, &undistUBoundArg,
     &localrc);
