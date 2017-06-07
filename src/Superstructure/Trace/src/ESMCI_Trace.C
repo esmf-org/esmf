@@ -21,6 +21,12 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
+#ifdef ESMF_OS_Darwin
+#include <mach/mach.h>
+#include <mach/clock.h>
+#include <mach/mach_time.h>
+#endif
+
 #include "ESMCI_Macros.h"
 #include "ESMCI_LogErr.h"
 #include "ESMCI_VM.h"
@@ -256,7 +262,20 @@ namespace ESMCI {
 
   static uint64_t get_clock(void *data) {
     struct timespec ts;
-    clock_gettime(CLOCK_REALTIME, &ts);  
+
+#ifdef ESMF_OS_Darwin
+    mach_timespec_t mts;
+    static clock_serv_t rt_clock_serv = 0;
+
+    if (rt_clock_serv == 0) {
+      (void) host_get_clock_service(mach_host_self(), CALENDAR_CLOCK, &rt_clock_serv);
+    }
+    (void) clock_get_time(rt_clock_serv, &mts);
+    ts.tv_sec = mts.tv_sec;
+    ts.tv_nsec = mts.tv_nsec;
+#else
+    clock_gettime(CLOCK_REALTIME, &ts);
+#endif
     return ts.tv_sec * 1000000000ULL + ts.tv_nsec;
   }
 
