@@ -19,7 +19,12 @@
 #include <time.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+
+#ifndef ESMF_OS_MinGW
 #include <unistd.h>
+#else
+#include <Winsock.h>
+#endif
 
 #ifdef ESMF_OS_Darwin
 #include <mach/mach.h>
@@ -44,7 +49,12 @@
     ESMC_LogDefault.MsgFoundError(ESMC_RC_LIB, "Internal tracing error", _ctx, rc); \
     return;}
 
+#ifndef ESMF_OS_MinGW
 #define TRACE_DIR_PERMISSIONS (S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH)
+#else
+#define TRACE_DIR_PERMISSIONS (S_IRWXU)
+#endif
+
 #define NODENAME_LEN 100
 
 #ifdef ESMF_BABELTRACE
