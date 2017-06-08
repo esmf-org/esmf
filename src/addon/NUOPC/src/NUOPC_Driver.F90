@@ -3586,7 +3586,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (associated(compList)) then
       call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
         msg="compList must enter unassociated", &
-        line=__LINE__, file=trim(name)//":"//FILENAME)
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)
       return  ! bail out
     endif
 
@@ -3675,7 +3675,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (associated(compList)) then
       call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
         msg="compList must enter unassociated", &
-        line=__LINE__, file=trim(name)//":"//FILENAME)
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)
       return  ! bail out
     endif
 
@@ -3804,10 +3804,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         ((tokenCount == 3) .or. (tokenCount == 4))) then
         ! a connector if the second element is "->"
         if (trim(tokenList(2)) /= "->") then
-          call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, &
+          call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
             msg="Configuration line incorrectly formatted.", &
             line=__LINE__, &
-            file=trim(name)//":"//FILENAME)
+            file=trim(name)//":"//FILENAME, rcToReturn=rc)
           return  ! bail out
         endif
         ! determine whether this connector component already exists
@@ -3874,10 +3874,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       
       ! process the configuration line
       if ((tokenCount < 1) .or. (tokenCount > 4)) then
-        call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, &
+        call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
           msg="Configuration line incorrectly formatted.", &
           line=__LINE__, &
-          file=trim(name)//":"//FILENAME)
+          file=trim(name)//":"//FILENAME, rcToReturn=rc)
         return  ! bail out
       elseif (tokenCount == 1) then
         ! either a model or a time step indicator
@@ -3947,10 +3947,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       elseif ((tokenCount == 3) .or. (tokenCount == 4)) then
         ! a connector if the second element is "->"
         if (trim(tokenList(2)) /= "->") then
-          call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, &
+          call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
             msg="Configuration line incorrectly formatted.", &
             line=__LINE__, &
-            file=trim(name)//":"//FILENAME)
+            file=trim(name)//":"//FILENAME, rcToReturn=rc)
           return  ! bail out
         endif
         call NUOPC_DriverAddRunElement(driver, slot=slot, &
