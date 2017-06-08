@@ -585,23 +585,44 @@ ESMC_LogDefault.Write("IO::write() case: IO_ARRAY: aft redist_arraycreate1de()",
 #endif
 
         if (rh==NULL){	// this is the first time in IO for this array
-          // Redistribute into the temp Array
-          // std::cout << ESMC_METHOD << ": DE count > 1 - redistStore" << std::endl;
+          // Determine if a previously pre-computed RH could be re-used here
+          bool reuseRH=false;
+          ESMCI::RouteHandle *rhh;
+          std::vector<IO_ObjectContainer *>::iterator itt;
+          for (itt = objects.begin(); itt != it; ++itt) {
+            rhh = (*itt)->getArray()->getIoRH();
+            if (rhh != NULL){
+              if (rhh->isCompatible((*it)->getArray(), temp_array_p)){
+                reuseRH=true;
+                break;
+              }
+            }
+          }
+          if (reuseRH){
+            // reuse the RH
+            rh=rhh;
+#if 1
+ESMC_LogDefault.Write("IO::write() case: IO_ARRAY: reuse RH", ESMC_LOGMSG_INFO);
+#endif
+          }else{
+            // Precompute new RH for redistribution into the temp Array
+            // std::cout << ESMC_METHOD << ": DE count > 1 - redistStore" << std::endl;
 #if 0
 ESMC_LogDefault.Write("IO::write() case: IO_ARRAY: bef redistStore()", ESMC_LOGMSG_INFO);
 #endif
-          localrc = ESMCI::Array::redistStore((*it)->getArray(), temp_array_p, &rh, NULL,
-            ESMF_NOKIND, NULL, true);
-          if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) {
-            // Close the file but return original error even if close fails.
-            localrc = close();
-            return rc;
+            localrc = ESMCI::Array::redistStore((*it)->getArray(), temp_array_p, &rh, NULL,
+              ESMF_NOKIND, NULL, true);
+            if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) {
+              // Close the file but return original error even if close fails.
+              localrc = close();
+              return rc;
+            }
           }
 #if 0
 ESMC_LogDefault.Write("IO::write() case: IO_ARRAY: aft redistStore()", ESMC_LOGMSG_INFO);
-#endif
-	  (*it)->getArray()->setIoRH(rh); // store the RouteHandle for next time this array does IO
-	}
+#endif  
+          (*it)->getArray()->setIoRH(rh); // store the RouteHandle for next time this array does IO
+        }
 
         // std::cout << ESMC_METHOD << ": DE count > 1 - redistribute data" << std::endl;
 #if 0

@@ -31,6 +31,10 @@
 //EOPI
 //-------------------------------------------------------------------------
 
+namespace ESMCI {
+  class Array;
+}
+  
 #include "ESMCI_Base.h"       // Base is superclass to Array
 #include "ESMCI_VM.h"
 #include "ESMCI_DELayout.h"
@@ -50,7 +54,6 @@ namespace ESMCI {
 
   // classes and structs
 
-  class Array;
   template<typename T=int> struct SeqIndex; //TODO: eventually remove T=int default
   template<typename SIT, typename DIT> class SparseMatrix;
 

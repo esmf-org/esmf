@@ -8445,7 +8445,7 @@ cout << "dstSetupFlag=" << dstSetupFlag << " tensorSeqIndex=" <<
 } // namespace DD
 
 
-#define ASMMSTORETIMING___disable
+#define ASMMSTORETIMING
 
 
 //-----------------------------------------------------------------------------
@@ -10032,32 +10032,61 @@ template<typename SIT, typename DIT>
 
 #ifdef ASMMSTORETIMING
   VMK::wtime(&t15);   //gjt - profile
-  char asmmstoretimingfile[160];
-  sprintf(asmmstoretimingfile, "asmmstoretiming.%05d", localPet);
-  FILE *asmmstoretimingfp = fopen(asmmstoretimingfile, "a");
-  fprintf(asmmstoretimingfp, "\n========================================"
-    "========================================\n");
-  fprintf(asmmstoretimingfp, "========================================"
-    "========================================\n\n");
-  fprintf(asmmstoretimingfp, "gjt - profile for PET %d:\n"
-    " t4a1=%g\n t4a2=%g\n t4a3=%g\n t4a=%g\n"
-    " t4b1=%g\n t4b2=%g\n t4b3=%g\n t4b=%g\n",
-    localPet, t4a1-t3, t4a2-t3, t4a3-t3, t4a-t3, t4b1-t3, t4b2-t3, t4b3-t3,
-    t4b-t3);
-  fprintf(asmmstoretimingfp, "gjt - profile for PET %d:\n"
-    " t5c=%g\n"
-    " t5f=%g\n",
-    localPet, 
-    t5c-t4,
-    t5f-t4);
-  fprintf(asmmstoretimingfp, "gjt - profile for PET %d:\n"
-    " t1=%g\n t2=%g\n t3=%g\n t4=%g\n t5=%g\n t6=%g\n"
-    " t7=%g\n t8=%g\n t9=%g\n t10=%g\n t11=%g\n t12=%g\n t13=%g\n t14=%g\n"
-    " t15=%g\n",
-    localPet, t1-t0, t2-t0, t3-t0, t4-t0, 
-    t5-t0, t6-t0, t7-t0, t8-t0, t9-t0, t10-t0, t11-t0, t12-t0, t13-t0, t14-t0,
-    t15-t0);
-  fclose(asmmstoretimingfp);
+  {
+    char msg[160];
+    ESMC_LogDefault.Write("ASMMSTORETIMING: --- start ---", ESMC_LOGMSG_INFO);
+    sprintf(msg, "ASMMSTORETIMING: t1   = %g", t1-t0);
+    ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
+    sprintf(msg, "ASMMSTORETIMING: t2   = %g", t2-t0);
+    ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
+    sprintf(msg, "ASMMSTORETIMING: t3   = %g", t3-t0);
+    ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
+    sprintf(msg, "ASMMSTORETIMING: t4   = %g", t4-t0);
+    ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
+    sprintf(msg, "ASMMSTORETIMING:    t4a1   = %g", t4a1-t3);
+    ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
+    sprintf(msg, "ASMMSTORETIMING:    t4a2   = %g", t4a2-t3);
+    ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
+    sprintf(msg, "ASMMSTORETIMING:    t4a3   = %g", t4a3-t3);
+    ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
+    sprintf(msg, "ASMMSTORETIMING:    t4a    = %g", t4a-t3);
+    ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
+    sprintf(msg, "ASMMSTORETIMING:    t4b1   = %g", t4b1-t3);
+    ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
+    sprintf(msg, "ASMMSTORETIMING:    t4b2   = %g", t4b2-t3);
+    ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
+    sprintf(msg, "ASMMSTORETIMING:    t4b3   = %g", t4b3-t3);
+    ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
+    sprintf(msg, "ASMMSTORETIMING:    t4b    = %g", t4b-t3);
+    ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
+    sprintf(msg, "ASMMSTORETIMING: t5   = %g", t5-t0);
+    ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
+    sprintf(msg, "ASMMSTORETIMING:    t5c    = %g", t5c-t4);
+    ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
+    sprintf(msg, "ASMMSTORETIMING:    t5f    = %g", t5f-t4);
+    ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
+    sprintf(msg, "ASMMSTORETIMING: t6   = %g", t6-t0);
+    ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
+    sprintf(msg, "ASMMSTORETIMING: t7   = %g", t7-t0);
+    ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
+    sprintf(msg, "ASMMSTORETIMING: t8   = %g", t8-t0);
+    ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
+    sprintf(msg, "ASMMSTORETIMING: t9   = %g", t9-t0);
+    ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
+    sprintf(msg, "ASMMSTORETIMING: t10  = %g", t10-t0);
+    ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
+    sprintf(msg, "ASMMSTORETIMING: t11  = %g", t11-t0);
+    ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
+    sprintf(msg, "ASMMSTORETIMING: t12  = %g", t12-t0);
+    ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
+    sprintf(msg, "ASMMSTORETIMING: t13  = %g", t13-t0);
+    ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
+    sprintf(msg, "ASMMSTORETIMING: t14  = %g", t14-t0);
+    ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
+    sprintf(msg, "ASMMSTORETIMING: t15  = %g", t15-t0);
+    ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
+    ESMC_LogDefault.Write("ASMMSTORETIMING: --- stop ----", ESMC_LOGMSG_INFO);
+  }
 #endif
   
   }catch(int localrc){

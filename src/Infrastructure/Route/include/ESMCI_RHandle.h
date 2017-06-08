@@ -32,7 +32,12 @@
 //EOPI
 //-------------------------------------------------------------------------
 
+namespace ESMCI {
+  class RouteHandle;
+}
+
 #include "ESMCI_Base.h"       // Base is superclass to RouteHandle
+#include "ESMCI_Array.h"
 
 //-------------------------------------------------------------------------
 
@@ -84,6 +89,7 @@ namespace ESMCI {
 
     // optimize for the communication pattern stored inside the RouteHandle
     int optimize() const;
+    bool isCompatible(Array *srcArray, Array *dstArray) const;
   };   // class RouteHandle
 
 } // namespace ESMCI

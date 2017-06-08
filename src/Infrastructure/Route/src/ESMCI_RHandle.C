@@ -496,4 +496,31 @@ int RouteHandle::optimize(
 //-----------------------------------------------------------------------------
 
 
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::RouteHandle::isCompatible()"
+//BOP
+// !IROUTINE:  ESMCI::RouteHandle::isCompatible - RouteHandle is compatible with the src/dst arrays
+//
+// !INTERFACE:
+bool RouteHandle::isCompatible(
+//
+// !RETURN VALUE:
+//  true if compatible, false if not compatible
+//
+// !ARGUMENTS:
+    Array *srcArray,
+    Array *dstArray
+  )const{
+//
+// !DESCRIPTION:
+//  Optimize for the communication pattern stored in the RouteHandle.
+//
+//EOP
+//-----------------------------------------------------------------------------
+  return false;
+}
+//-----------------------------------------------------------------------------
+
+
 } // namespace ESMCI
