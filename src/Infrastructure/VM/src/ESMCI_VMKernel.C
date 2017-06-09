@@ -3674,6 +3674,9 @@ int VMK::reduce(void *in, void *out, int len, vmType type, vmOp op, int root){
     case vmI4:
       mpitype = MPI_INT;
       break;
+    case vmI8:
+      mpitype = MPI_LONG_LONG_INT;
+      break;
     case vmR4:
       mpitype = MPI_FLOAT;
       break;
@@ -3691,6 +3694,9 @@ int VMK::reduce(void *in, void *out, int len, vmType type, vmOp op, int root){
     switch (type){
     case vmI4:
       templen *= 4;   // 4 bytes
+      break;
+    case vmI8:
+      templen *= 8;   // 8 bytes
       break;
     case vmR4:
       templen *= 4;   // 4 bytes
@@ -3716,6 +3722,20 @@ int VMK::reduce(void *in, void *out, int len, vmType type, vmOp op, int root){
           {
             int *tempdata = (int *)temparray;
             int *outdata = (int *)out;
+            for (int i=0; i<len; i++){
+              *outdata = 0;
+              for (int j=0; j<npets; j++){
+                *outdata += tempdata[j*len];
+              }
+              ++tempdata;
+              ++outdata;
+            }
+          }
+          break;
+        case vmI8:
+          {
+            long long int *tempdata = (long long int *)temparray;
+            long long int *outdata = (long long int *)out;
             for (int i=0; i<len; i++){
               *outdata = 0;
               for (int j=0; j<npets; j++){
@@ -3776,6 +3796,21 @@ int VMK::reduce(void *in, void *out, int len, vmType type, vmOp op, int root){
             }
           }
           break;
+        case vmI8:
+          {
+            long long int *tempdata = (long long int *)temparray;
+            long long int *outdata = (long long int *)out;
+            for (int i=0; i<len; i++){
+              *outdata = tempdata[0];
+              for (int j=1; j<npets; j++){
+                if (tempdata[j*len] < *outdata)
+                  *outdata = tempdata[j*len];
+              }
+              ++tempdata;
+              ++outdata;
+            }
+          }
+          break;
         case vmR4:
           {
             float *tempdata = (float *)temparray;
@@ -3817,6 +3852,21 @@ int VMK::reduce(void *in, void *out, int len, vmType type, vmOp op, int root){
           {
             int *tempdata = (int *)temparray;
             int *outdata = (int *)out;
+            for (int i=0; i<len; i++){
+              *outdata = tempdata[0];
+              for (int j=1; j<npets; j++){
+                if (tempdata[j*len] > *outdata)
+                  *outdata = tempdata[j*len];
+              }
+              ++tempdata;
+              ++outdata;
+            }
+          }
+          break;
+        case vmI8:
+          {
+            long long int *tempdata = (long long int *)temparray;
+            long long int *outdata = (long long int *)out;
             for (int i=0; i<len; i++){
               *outdata = tempdata[0];
               for (int j=1; j<npets; j++){
@@ -3893,6 +3943,9 @@ int VMK::allreduce(void *in, void *out, int len, vmType type, vmOp op){
     case vmI4:
       mpitype = MPI_INT;
       break;
+    case vmI8:
+      mpitype = MPI_LONG_LONG_INT;
+      break;
     case vmR4:
       mpitype = MPI_FLOAT;
       break;
@@ -3910,6 +3963,9 @@ int VMK::allreduce(void *in, void *out, int len, vmType type, vmOp op){
     switch (type){
     case vmI4:
       templen *= 4;   // 4 bytes
+      break;
+    case vmI8:
+      templen *= 8;   // 8 bytes
       break;
     case vmR4:
       templen *= 4;   // 4 bytes
@@ -3935,6 +3991,20 @@ int VMK::allreduce(void *in, void *out, int len, vmType type, vmOp op){
         {
           int *tempdata = (int *)temparray;
           int *outdata = (int *)out;
+          for (int i=0; i<len; i++){
+            *outdata = 0;
+            for (int j=0; j<npets; j++){
+              *outdata += tempdata[j*len];
+            }
+            ++tempdata;
+            ++outdata;
+          }
+        }
+        break;
+      case vmI8:
+        {
+          long long int *tempdata = (long long int *)temparray;
+          long long int *outdata = (long long int *)out;
           for (int i=0; i<len; i++){
             *outdata = 0;
             for (int j=0; j<npets; j++){
@@ -3984,6 +4054,21 @@ int VMK::allreduce(void *in, void *out, int len, vmType type, vmOp op){
         {
           int *tempdata = (int *)temparray;
           int *outdata = (int *)out;
+          for (int i=0; i<len; i++){
+            *outdata = tempdata[0];
+            for (int j=1; j<npets; j++){
+              if (tempdata[j*len] < *outdata)
+                *outdata = tempdata[j*len];
+            }
+            ++tempdata;
+            ++outdata;
+          }
+        }
+        break;
+      case vmI8:
+        {
+          long long int *tempdata = (long long int *)temparray;
+          long long int *outdata = (long long int *)out;
           for (int i=0; i<len; i++){
             *outdata = tempdata[0];
             for (int j=1; j<npets; j++){
@@ -4047,6 +4132,21 @@ int VMK::allreduce(void *in, void *out, int len, vmType type, vmOp op){
           }
         }
         break;
+      case vmI8:
+        {
+          long long int *tempdata = (long long int *)temparray;
+          long long int *outdata = (long long int *)out;
+          for (int i=0; i<len; i++){
+            *outdata = tempdata[0];
+            for (int j=1; j<npets; j++){
+              if (tempdata[j*len] > *outdata)
+                *outdata = tempdata[j*len];
+            }
+            ++tempdata;
+            ++outdata;
+          }
+        }
+        break;
       case vmR4:
         {
           float *tempdata = (float *)temparray;
@@ -4093,6 +4193,7 @@ int VMK::allfullreduce(void *in, void *out, int len, vmType type, vmOp op){
   int localrc=0;
   void *localresult;
   int local_i4;
+  long long int local_i8;
   float local_r4;
   double local_r8;
   // first reduce the vector on each PET
@@ -4106,6 +4207,16 @@ int VMK::allfullreduce(void *in, void *out, int len, vmType type, vmOp op){
         int *tempdata = (int *)in;        // type cast for pointer arithmetic
         for (int j=0; j<len; j++)
           local_i4 += tempdata[j];
+      }
+      break;
+    case vmI8:
+      {
+        localresult = (void *)&local_i8;
+        local_i8 = 0;
+        // type cast for pointer arithmetic
+        long long int *tempdata = (long long int *)in;
+        for (int j=0; j<len; j++)
+          local_i8 += tempdata[j];
       }
       break;
     case vmR4:
@@ -4142,6 +4253,16 @@ int VMK::allfullreduce(void *in, void *out, int len, vmType type, vmOp op){
           if (tempdata[j] < local_i4) local_i4 = tempdata[j];
       }
       break;
+    case vmI8:
+      {
+        localresult = (void *)&local_i8;
+        // type cast for pointer arithmetic
+        long long int *tempdata = (long long int *)in;
+        local_i8 = tempdata[0];
+        for (int j=1; j<len; j++)
+          if (tempdata[j] < local_i8) local_i8 = tempdata[j];
+      }
+      break;
     case vmR4:
       {
         localresult = (void *)&local_r4;  // type cast for pointer arithmetic
@@ -4174,6 +4295,16 @@ int VMK::allfullreduce(void *in, void *out, int len, vmType type, vmOp op){
         local_i4 = tempdata[0];
         for (int j=1; j<len; j++)
           if (tempdata[j] > local_i4) local_i4 = tempdata[j];
+      }
+      break;
+    case vmI8:
+      {
+        localresult = (void *)&local_i8;
+        // type cast for pointer arithmetic
+        long long int *tempdata = (long long int *)in;
+        local_i8 = tempdata[0];
+        for (int j=1; j<len; j++)
+          if (tempdata[j] > local_i8) local_i8 = tempdata[j];
       }
       break;
     case vmR4:
@@ -4260,6 +4391,9 @@ int VMK::reduce_scatter(void *in, void *out, int *outCounts,
     case vmI4:
       mpitype = MPI_INT;
       break;
+    case vmI8:
+      mpitype = MPI_LONG_LONG_INT;
+      break;
     case vmR4:
       mpitype = MPI_FLOAT;
       break;
@@ -4343,6 +4477,9 @@ int VMK::scatterv(void *in, int *inCounts, int *inOffsets, void *out,
     case vmI4:
       mpitype = MPI_INT;
       break;
+    case vmI8:
+      mpitype = MPI_LONG_LONG_INT;
+      break;
     case vmR4:
       mpitype = MPI_FLOAT;
       break;
@@ -4358,6 +4495,9 @@ int VMK::scatterv(void *in, int *inCounts, int *inOffsets, void *out,
     switch (type){
     case vmI4:
       size=4;
+      break;
+    case vmI8:
+      size=8;
       break;
     case vmR4:
       size=4;
@@ -4496,6 +4636,9 @@ int VMK::gatherv(void *in, int inCount, void *out, int *outCounts,
     case vmI4:
       mpitype = MPI_INT;
       break;
+    case vmI8:
+      mpitype = MPI_LONG_LONG_INT;
+      break;
     case vmR4:
       mpitype = MPI_FLOAT;
       break;
@@ -4514,6 +4657,9 @@ int VMK::gatherv(void *in, int inCount, void *out, int *outCounts,
       break;
     case vmI4:
       size=4;
+      break;
+    case vmI8:
+      size=8;
       break;
     case vmR4:
       size=4;
@@ -4629,6 +4775,9 @@ int VMK::allgatherv(void *in, int inCount, void *out, int *outCounts,
     case vmI4:
       mpitype = MPI_INT;
       break;
+    case vmI8:
+      mpitype = MPI_LONG_LONG_INT;
+      break;
     case vmR4:
       mpitype = MPI_FLOAT;
       break;
@@ -4647,6 +4796,9 @@ int VMK::allgatherv(void *in, int inCount, void *out, int *outCounts,
       break;
     case vmI4:
       size=4;
+      break;
+    case vmI8:
+      size=8;
       break;
     case vmR4:
       size=4;
@@ -4706,6 +4858,9 @@ int VMK::alltoall(void *in, int inCount, void *out, int outCount,
     case vmI4:
       mpitype = MPI_INT;
       break;
+    case vmI8:
+      mpitype = MPI_LONG_LONG_INT;
+      break;
     case vmR4:
       mpitype = MPI_FLOAT;
       break;
@@ -4723,6 +4878,9 @@ int VMK::alltoall(void *in, int inCount, void *out, int outCount,
       break;
     case vmI4:
       size=4;
+      break;
+    case vmI8:
+      size=8;
       break;
     case vmR4:
       size=4;
@@ -4773,6 +4931,9 @@ int VMK::alltoallv(void *in, int *inCounts, int *inOffsets, void *out,
     case vmI4:
       mpitype = MPI_INT;
       break;
+    case vmI8:
+      mpitype = MPI_LONG_LONG_INT;
+      break;
     case vmR4:
       mpitype = MPI_FLOAT;
       break;
@@ -4791,6 +4952,9 @@ int VMK::alltoallv(void *in, int *inCounts, int *inOffsets, void *out,
       break;
     case vmI4:
       size=4;
+      break;
+    case vmI8:
+      size=8;
       break;
     case vmR4:
       size=4;

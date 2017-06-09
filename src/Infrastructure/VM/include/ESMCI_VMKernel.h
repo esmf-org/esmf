@@ -34,7 +34,7 @@ typedef pthread_t       esmf_pthread_t;
 // reduction operations
 enum vmOp   { vmSUM=1, vmMIN, vmMAX};
 // typekind indicators
-enum vmType { vmBYTE=1, vmI4, vmR4, vmR8};
+enum vmType { vmBYTE=1, vmI4, vmI8, vmR4, vmR8};
 
 // VM_ANY_SOURCE and VM_ANY_TAG
 #define VM_ANY_SRC                    (-2)
