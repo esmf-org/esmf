@@ -283,7 +283,7 @@ namespace ESMCI {
       InterArray<int> *totalUWidthArg, ESMC_IndexFlag *indexflag,
       InterArray<int> *distLBoundArg, InterArray<int> *undistLBoundArg,
       InterArray<int> *undistUBoundArg, int *rc, VM *vm=NULL);
-    static Array *create(Array *array, int *rc=NULL);
+    static Array *create(Array *array, int rmLeadingTensors=0, int *rc=NULL);
     static int destroy(Array **array, bool noGarbage=false);
     // data copy()
     int copy(Array const *arrayIn);
@@ -325,6 +325,7 @@ namespace ESMCI {
     int getArbSequenceIndexOffset(const int *index, int *rc=NULL)const;
     int setComputationalLWidth(InterArray<int> *computationalLWidthArg);
     int setComputationalUWidth(InterArray<int> *computationalUWidthArg);
+    void setRimMembers();
     template<typename T> int setRimSeqIndex(int localDe, 
       InterArray<T> *rimSeqIndexArg);
     template<typename T>
