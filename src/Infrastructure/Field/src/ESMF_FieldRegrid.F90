@@ -1491,6 +1491,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         type(ESMF_Array)     :: dstFracArray
         type(ESMF_STAGGERLOC):: interpFieldStaggerloc, fracFieldStaggerloc
         type(ESMF_MESHLOC)   :: interpFieldMeshloc, fracFieldMeshloc
+        integer              :: srcTermProcessingVal
     
         ! Initialize return code; assume failure until success is certain
         localrc = ESMF_SUCCESS
@@ -1953,8 +1954,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           ESMF_CONTEXT, rcToReturn=rc)) return
         
         ! call FieldSMMStore
+        srcTermProcessingVal = 0
         call ESMF_FieldSMMStore(srcField, dstField, routehandle, &
             sparseMat%factorList, sparseMat%factorIndexList, &
+            srcTermProcessing=srcTermProcessingVal, &
             rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
