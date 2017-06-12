@@ -110,7 +110,8 @@ contains
 !
 !EOPI
 !-------------------------------------------------------------------------------
-
+    if (present(rc)) rc = ESMF_SUCCESS
+    
     call c_esmftrace_open(traceDir, rc)
     if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
          ESMF_CONTEXT, rcToReturn=rc)) return
@@ -133,6 +134,8 @@ contains
 !
 !EOPI
 !-------------------------------------------------------------------------------
+    if (present(rc)) rc = ESMF_SUCCESS
+
     call c_esmftrace_close(rc)
     if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
          ESMF_CONTEXT, rcToReturn=rc)) return
@@ -158,7 +161,7 @@ contains
     integer :: method_enum
     integer :: phase
 
-    rc = ESMF_SUCCESS 
+    if (present(rc)) rc = ESMF_SUCCESS
 
     call ESMF_TraceGetCompID(comp, vmid, baseid, rc=rc)
     if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
@@ -198,7 +201,7 @@ contains
     integer :: method_enum
     integer :: phase
 
-    rc = ESMF_SUCCESS 
+    if (present(rc)) rc = ESMF_SUCCESS
 
     call ESMF_TraceGetCompID(comp, vmid, baseid, rc=rc)
     if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
@@ -238,7 +241,7 @@ contains
     integer :: method_enum
     integer :: phase
 
-    rc = ESMF_SUCCESS
+    if (present(rc)) rc = ESMF_SUCCESS
 
     call ESMF_TraceGetCompID(comp, vmid, baseid, rc=rc)
     if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
@@ -276,7 +279,7 @@ contains
     integer :: method_enum
     integer :: phase
 
-    rc = ESMF_SUCCESS
+    if (present(rc)) rc = ESMF_SUCCESS
 
     call ESMF_TraceGetCompID(comp, vmid, baseid, rc=rc)
     if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
@@ -314,7 +317,7 @@ contains
     integer :: method_enum
     integer :: phase
 
-    rc = ESMF_SUCCESS 
+    if (present(rc)) rc = ESMF_SUCCESS 
 
     call ESMF_TraceGetCompID(comp, vmid, baseid, rc=rc)
     if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
@@ -353,7 +356,7 @@ contains
     integer :: method_enum
     integer :: phase
 
-    rc = ESMF_SUCCESS 
+    if (present(rc)) rc = ESMF_SUCCESS 
 
     call ESMF_TraceGetCompID(comp, vmid, baseid, rc=rc)
     if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
@@ -392,7 +395,7 @@ contains
     integer :: method_enum
     integer :: phase
 
-    rc = ESMF_SUCCESS
+    if (present(rc)) rc = ESMF_SUCCESS
 
     call ESMF_TraceGetCompID(comp, vmid, baseid, rc=rc)
     if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
@@ -430,7 +433,7 @@ contains
     integer :: method_enum
     integer :: phase
 
-    rc = ESMF_SUCCESS
+    if (present(rc)) rc = ESMF_SUCCESS
 
     call ESMF_TraceGetCompID(comp, vmid, baseid, rc=rc)
     if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
@@ -668,7 +671,7 @@ contains
     type(ESMF_VMId), pointer   :: vmidptr(:)
     character                  :: vmkey
     
-    rc = ESMF_SUCCESS
+    if (present(rc)) rc = ESMF_SUCCESS
     
     call ESMF_BaseGetID(comp%compp%base, baseid, rc=rc)
     if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
@@ -706,7 +709,7 @@ contains
     type(ESMF_VMId), pointer   :: vmidptr(:)
     character                  :: vmkey
     
-    rc = ESMF_SUCCESS
+    if (present(rc)) rc = ESMF_SUCCESS
     
     call ESMF_BaseGetID(comp%compp%base, baseid, rc=rc)
     if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
@@ -755,7 +758,7 @@ contains
 ! \end{description}    
 !EOP
 !-------------------------------------------------------------------------------
-    rc = ESMF_SUCCESS 
+    if (present(rc)) rc = ESMF_SUCCESS 
     
     call c_esmftrace_region_enter(name, rc)
     if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
@@ -793,7 +796,7 @@ contains
 ! \end{description}    
 !EOP
 !-------------------------------------------------------------------------------
-    rc = ESMF_SUCCESS 
+    if (present(rc)) rc = ESMF_SUCCESS 
     
     call c_esmftrace_region_exit(name, rc)
     if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
@@ -813,7 +816,7 @@ contains
 !
 !EOPI
 !-------------------------------------------------------------------------------
-    rc = ESMF_SUCCESS 
+    if (present(rc)) rc = ESMF_SUCCESS 
     
     call c_esmftrace_mem_info(rc)
     if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
@@ -839,7 +842,7 @@ contains
     type(ESMF_Time) :: currTime
     integer :: yy, mm, dd, h, m, s
     
-    rc = ESMF_SUCCESS 
+    if (present(rc)) rc = ESMF_SUCCESS 
 
     call ESMF_ClockGet(clock, currTime=currTime, rc=rc)
     if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
