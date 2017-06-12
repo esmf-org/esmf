@@ -8978,7 +8978,7 @@ template<typename SIT, typename DIT>
     dstTensorContigLength = 1;
   }
   }
-  
+
 #ifdef ASMMSTORETIMING
   VMK::wtime(&t1);   //gjt - profile
 #endif
@@ -10178,6 +10178,13 @@ template<typename SIT, typename DIT>
     ESMC_LogDefault.Write("ASMMSTORETIMING: --- stop ----", ESMC_LOGMSG_INFO);
   }
 #endif
+  
+  if (workWithTempArrays){
+    // clean-up the temporary arrays
+    Array::destroy(&srcArray, true);
+    if (!haloFlag)
+      Array::destroy(&dstArray, true);
+  }
   
   }catch(int localrc){
     // catch standard ESMF return code
