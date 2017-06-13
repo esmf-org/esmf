@@ -151,7 +151,7 @@ program ESMF_TraceEx
 !EOC
       if (rc /= ESMF_SUCCESS) finalrc = ESMF_FAILURE
 !BOC
-      call ESMF_GridCompSetServices(gridcomp, SetServices, rc=rc)
+      call ESMF_GridCompSetServices(gridcomp, userRoutine=SetServices, rc=rc)
 !EOC
       if (rc /= ESMF_SUCCESS) finalrc = ESMF_FAILURE
 !BOC
