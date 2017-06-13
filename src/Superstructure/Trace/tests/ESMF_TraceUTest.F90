@@ -104,7 +104,7 @@ program ESMF_TraceUTest
   
   gridcomp = ESMF_GridCompCreate(name="testcomp", rc=rc)
   
-  call ESMF_GridCompSetServices(gridcomp, SetServices, rc=rc)
+  call ESMF_GridCompSetServices(gridcomp, userRoutine=SetServices, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
   
   call ESMF_GridCompInitialize(gridcomp, rc=rc)
