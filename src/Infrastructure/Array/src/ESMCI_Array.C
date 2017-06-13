@@ -12140,43 +12140,81 @@ int Array::sparseMatMul(
   // is bogus. However, the vectorLength is irrelevant under this condition, and
   // will be ignored by the XXE execution.
 
+
+  // src-side super vectorization
+  
   // undistributed: r, s, t
-  int superVecSizeUnd[3];
+  int srcSuperVecSizeUnd[3];
   // distributed: i, j
   int srcLocalDeCount=0;
   if (srcArrayFlag)
     srcLocalDeCount = srcArray->delayout->getLocalDeCount();
-  int superVecSizeDis[2][srcLocalDeCount];   
+  int srcSuperVecSizeDis[2][srcLocalDeCount];   
 
-  superVecSizeUnd[0]=-1;  // initialize with disabled super vector support
-  superVecSizeUnd[1]=1;
-  superVecSizeUnd[2]=1;
+  srcSuperVecSizeUnd[0]=-1;  // initialize with disabled super vector support
+  srcSuperVecSizeUnd[1]=1;
+  srcSuperVecSizeUnd[2]=1;
 
   for (int j=0; j<srcLocalDeCount; j++){
-    superVecSizeDis[0][j]=1;
-    superVecSizeDis[1][j]=1;
+    srcSuperVecSizeDis[0][j]=1;
+    srcSuperVecSizeDis[1][j]=1;
   }
   
   if (srcArrayFlag && srcArray->sizeSuperUndist){
     // use srcArray to determine vectorLength
+    if (srcArray->rank-srcArray->tensorCount)
+      vectorLength = srcArray->sizeSuperUndist[0];
+    // set srcSuperVecSize variables
     int i;
     for (i=0; i<srcArray->rank-srcArray->tensorCount; i++){
-      vectorLength = srcArray->sizeSuperUndist[0];  // ok to set multiple times
-      superVecSizeUnd[i] = srcArray->sizeSuperUndist[i];
+      srcSuperVecSizeUnd[i] = srcArray->sizeSuperUndist[i];
       for (int j=0; j<srcLocalDeCount; j++)
-        superVecSizeDis[i][j] = 
+        srcSuperVecSizeDis[i][j] = 
           srcArray->sizeDist[j*(srcArray->rank-srcArray->tensorCount)+i];
     }
-    superVecSizeUnd[i] = srcArray->sizeSuperUndist[i];
+    srcSuperVecSizeUnd[i] = srcArray->sizeSuperUndist[i];
   }
-  if (superVecSizeUnd[1]==1 && superVecSizeUnd[2]==1)
-    superVecSizeUnd[0]=-1;  // turn off super vectorization, simple vector okay
+  if (srcSuperVecSizeUnd[1]==1 && srcSuperVecSizeUnd[2]==1)
+    srcSuperVecSizeUnd[0]=-1;  // turn off super vectorization, simple vector ok
+  
+
+  // dst-side super vectorization
+  
+  // undistributed: r, s, t
+  int dstSuperVecSizeUnd[3];
+  // distributed: i, j
+  int dstLocalDeCount=0;
+  if (dstArrayFlag)
+    dstLocalDeCount = dstArray->delayout->getLocalDeCount();
+  int dstSuperVecSizeDis[2][dstLocalDeCount];   
+
+  dstSuperVecSizeUnd[0]=-1;  // initialize with disabled super vector support
+  dstSuperVecSizeUnd[1]=1;
+  dstSuperVecSizeUnd[2]=1;
+
+  for (int j=0; j<dstLocalDeCount; j++){
+    dstSuperVecSizeDis[0][j]=1;
+    dstSuperVecSizeDis[1][j]=1;
+  }
   
   if (dstArrayFlag && dstArray->sizeSuperUndist){
     // use dstArray to determine vectorLength
-    vectorLength = dstArray->sizeSuperUndist[0];
+    if (dstArray->rank-dstArray->tensorCount)
+      vectorLength = dstArray->sizeSuperUndist[0];
+    // set dstSuperVecSize variables
+    int i;
+    for (i=0; i<dstArray->rank-dstArray->tensorCount; i++){
+      dstSuperVecSizeUnd[i] = dstArray->sizeSuperUndist[i];
+      for (int j=0; j<dstLocalDeCount; j++)
+        dstSuperVecSizeDis[i][j] = 
+          dstArray->sizeDist[j*(dstArray->rank-dstArray->tensorCount)+i];
+    }
+    dstSuperVecSizeUnd[i] = dstArray->sizeSuperUndist[i];
   }
+  if (dstSuperVecSizeUnd[1]==1 && dstSuperVecSizeUnd[2]==1)
+    dstSuperVecSizeUnd[0]=-1;  // turn off super vectorization, simple vector ok
   
+    
 #ifdef ASMMTIMING
   VMK::wtime(&t5);      //gjt - profile
 #endif
@@ -12187,8 +12225,10 @@ int Array::sparseMatMul(
     NULL,     // dTime                  -> disabled
     -1, -1,   // indexStart, indexStop  -> full stream
     // super vector support:
-    superVecSizeUnd[0], superVecSizeUnd[1], superVecSizeUnd[2],
-    superVecSizeDis[0], superVecSizeDis[1]);
+    srcSuperVecSizeUnd[0], srcSuperVecSizeUnd[1], srcSuperVecSizeUnd[2],
+    srcSuperVecSizeDis[0], srcSuperVecSizeDis[1],
+    dstSuperVecSizeUnd[0], dstSuperVecSizeUnd[1], dstSuperVecSizeUnd[2],
+    dstSuperVecSizeDis[0], dstSuperVecSizeDis[1]);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
     &rc)) return rc;
   
@@ -12246,8 +12286,10 @@ int Array::sparseMatMul(
       NULL,     // dTime                  -> disabled
       -1, -1,   // indexStart, indexStop  -> full stream
       // super vector support:
-      superVecSizeUnd[0], superVecSizeUnd[1], superVecSizeUnd[2],
-      superVecSizeDis[0], superVecSizeDis[1]);
+      srcSuperVecSizeUnd[0], srcSuperVecSizeUnd[1], srcSuperVecSizeUnd[2],
+      srcSuperVecSizeDis[0], srcSuperVecSizeDis[1],
+      dstSuperVecSizeUnd[0], dstSuperVecSizeUnd[1], dstSuperVecSizeUnd[2],
+      dstSuperVecSizeDis[0], dstSuperVecSizeDis[1]);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       &rc)) return rc;
   }
