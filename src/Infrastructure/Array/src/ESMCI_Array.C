@@ -9190,12 +9190,15 @@ template<typename SIT, typename DIT>
     }
   }
   
-#if 1
+#define DEBUGGING
+#ifdef DEBUGGING
   {
     std::stringstream debugmsg;
     debugmsg << "workWithTempArrays check: tensorMixFlag=" << tensorMixFlag 
       << " srcTensorLength=" << srcTensorLength
-      << " dstTensorLength=" << dstTensorLength;
+      << " dstTensorLength=" << dstTensorLength
+      << " srcDimCount=" << srcArray->getDistGrid()->getDimCount()
+      << " dstDimCount=" << dstArray->getDistGrid()->getDimCount();
     ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_INFO);
   }
 #endif
@@ -9206,15 +9209,21 @@ template<typename SIT, typename DIT>
   // Currently this optimization does not completely work for halo case
   // because it is difficult to copy the masked rim into the temporary array.
   if (!tensorMixFlag && (srcTensorLength>1) &&
-    (srcTensorLength==dstTensorLength)){
+    (srcTensorLength==dstTensorLength) && 
+    (srcArray->getDistGrid()->getDimCount() <= 2) &&
+    (dstArray->getDistGrid()->getDimCount() <= 2)){
     // Optimization of undistributed dimensions if there is no tensor mixing.
+    // This optimization requires that src and dst have the same number of 
+    // tensor elements (they can be across different number of dims). 
+    // Currently super-vectorization is only supported for dimCount<=2 on
+    // the execution side, therefore this optimization must be limited here.
     // The strategy in this case is to create temporary arrays without the
     // undistributed dimensions and precompute the routehandle for those. This
     // is typically much faster, because of the general way in which 
     // undistributed elements are currently treated.
     // The resulting routehandle can be used for arrays with or without
     // undistributed dimensions.
-#if 1
+#ifdef DEBUGGING
   {
     std::stringstream debugmsg;
     debugmsg << "workWithTempArrays active: srcTensorLength="
@@ -9222,6 +9231,7 @@ template<typename SIT, typename DIT>
     ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_INFO);
   }
 #endif
+#undef DEBUGGING
     workWithTempArrays=true;
     // create the temporary arrays
     srcArray = Array::create(srcArray, true, &localrc);
