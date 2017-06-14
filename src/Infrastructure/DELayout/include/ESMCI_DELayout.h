@@ -1003,24 +1003,33 @@ class XXE{
     template<typename T, typename V>
     static void sssDstRra(T *rraBase, TKId elementTK, int *rraOffsetList,
       V *valueBase, int *valueOffsetList, TKId valueTK, int termCount,
-      int vectorL, int resolved,
+      int vectorL, int resolved, int localDeIndex,
       int size_r, int size_s, int size_t, int *size_i, int *size_j,
       bool superVector);
     template<typename T, typename V>
     static void exec_sssDstRra(T *rraBase, int *rraOffsetList, V *valueBase,
-      int *valueOffsetList, int termCount, int vectorL,
-      int size_r, int size_s, int size_t, int *size_i, int *size_j);
+      int *valueOffsetList, int termCount, int vectorL);
+    template<typename T, typename V>
+    static void exec_sssDstRraSuper(T *rraBase, int *rraOffsetList,
+      V *valueBase, int *valueOffsetList, int termCount, int vectorL,
+      int localDeIndex, int size_r, int size_s, int size_t, int *size_i,
+      int *size_j);
     template<typename T, typename V>
     static void ssslDstRra(T **rraBaseList, int *rraIndexList, TKId elementTK,
       int *rraOffsetList, V **valueBaseList,
       int *valueOffsetList, int *baseListIndexList,
       TKId valueTK, int termCount, int vectorL, int resolved,
+      int localDeIndexOff,
       int size_r, int size_s, int size_t, int *size_i, int *size_j,
       bool superVector);
     template<typename T, typename V>
     static void exec_ssslDstRra(T **rraBaseList, int *rraIndexList,
       int *rraOffsetList, V **valueBaseList, int *valueOffsetList,
-      int *baseListIndexList, int termCount, int vectorL,
+      int *baseListIndexList, int termCount, int vectorL);
+    template<typename T, typename V>
+    static void exec_ssslDstRraSuper(T **rraBaseList, int *rraIndexList,
+      int *rraOffsetList, V **valueBaseList, int *valueOffsetList,
+      int *baseListIndexList, int termCount, int vectorL, int localDeIndexOff,
       int size_r, int size_s, int size_t, int *size_i, int *size_j);
     template<typename T, typename U, typename V>
     static void psssDstRra(T *rraBase, TKId elementTK, int *rraOffsetList,
@@ -1052,7 +1061,17 @@ class XXE{
     template<typename T, typename U, typename V>
     static void psssSrcRra(T *rraBase, TKId valueTK, int *rraOffsetList,
       U **factorList, TKId factorTK, V *elementBase, int *elementOffsetList,
-      TKId elementTK, int termCount, int vectorL, int resolved);
+      TKId elementTK, int termCount, int vectorL, int resolved, 
+      int localDeIndex, int size_r, int size_s, int size_t, int *size_i, 
+      int *size_j, bool superVector);
+    template<typename T, typename U, typename V>
+    static void exec_psssSrcRra(T *rraBase, int *rraOffsetList, U **factorList,
+      V *elementBase, int *elementOffsetList, int termCount, int vectorL);
+    template<typename T, typename U, typename V>
+    static void exec_psssSrcRraSuper(T *rraBase, int *rraOffsetList, U **factorList,
+      V *elementBase, int *elementOffsetList, int termCount, int vectorL,
+      int localDeIndex, int size_r, int size_s, int size_t,
+      int *size_i, int *size_j, bool superVector);
     template<typename T, typename U, typename V>
     static void pssscRra(T *rraBase, TKId elementTK, int *rraOffsetList,
       U **factorList, TKId factorTK, V *valueList, TKId valueTK,
