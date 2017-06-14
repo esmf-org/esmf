@@ -5576,7 +5576,7 @@ template<typename T> bool operator<(SeqIndex<T> a, SeqIndex<T> b){
 
 #define ASMMPROFILE___disable
 
-#define ASMM_STORE_LOG
+#define ASMM_STORE_LOG___disable
 
 namespace ArrayHelper{
   
@@ -6156,6 +6156,7 @@ namespace ArrayHelper{
       ESMC_LogDefault.AllocError(ESMC_CONTEXT, &rc);
       return rc;
     }
+    xxeSub->superVectorOkay = xxe->superVectorOkay; // inherit the same Okay
     localrc = xxe->storeXxeSub(xxeSub); // for XXE garbage collection
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       &rc)) return rc;
@@ -10164,9 +10165,9 @@ template<typename SIT, typename DIT>
       dstArray->totalElementCountPLocalDe[i] * dstArray->tensorElementCount;
   
   // determine if there are undistributed dims past the first distributed
-  bool undistPastFirstDistDim = false;
-  if (srcTensorLength > srcTensorContigLength) undistPastFirstDistDim = true;
-  if (dstTensorLength > dstTensorContigLength) undistPastFirstDistDim = true;
+  bool undistPastFirstDistDim = true;
+  if (srcTensorLength <= srcTensorContigLength) undistPastFirstDistDim = false;
+  if (dstTensorLength <= dstTensorContigLength) undistPastFirstDistDim = false;
   
   // encode sparseMatMul communication pattern into XXE stream
   localrc = sparseMatMulStoreEncodeXXE(vm,
@@ -10410,7 +10411,7 @@ template<typename SIT, typename DIT> int sparseMatMulStoreEncodeXXE(
   xxe->typekind[1] = typekindSrc;
   xxe->typekind[2] = typekindDst;
   // set the superVectorOkay flag
-  xxe->superVectorOkay = !undistPastFirstDistDim;
+  xxe->superVectorOkay = !undistPastFirstDistDim; //TODO: get rid of this!!!
   // prepare XXE type variables
   XXE::TKId elementTK;
   switch (typekindDst){
@@ -12257,21 +12258,49 @@ int Array::sparseMatMul(
   
   if (srcArrayFlag && srcArray->sizeSuperUndist){
     // use srcArray to determine vectorLength
-    if (srcArray->rank-srcArray->tensorCount)
-      vectorLength = srcArray->sizeSuperUndist[0];
+    vectorLength = 1; // init
     // set srcSuperVecSize variables
     int i;
     for (i=0; i<srcArray->rank-srcArray->tensorCount; i++){
       srcSuperVecSizeUnd[i] = srcArray->sizeSuperUndist[i];
+      vectorLength *= srcSuperVecSizeUnd[i];
+#define DEBUGGING
+#ifdef DEBUGGING
+  {
+    std::stringstream debugmsg;
+    debugmsg << "srcSuperVecSizeUnd[i="<<i<<"]=" << srcSuperVecSizeUnd[i]
+      << " vectorLength=" << vectorLength;
+    ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_INFO);
+  }
+#endif
       for (int j=0; j<srcLocalDeCount; j++)
         srcSuperVecSizeDis[i][j] = 
           srcArray->sizeDist[j*(srcArray->rank-srcArray->tensorCount)+i];
     }
     srcSuperVecSizeUnd[i] = srcArray->sizeSuperUndist[i];
+    if (xxe->superVectorOkay)
+      vectorLength *= srcSuperVecSizeUnd[i];
+    else
+      vectorLength = srcSuperVecSizeUnd[0];
+#ifdef DEBUGGING
+  {
+    std::stringstream debugmsg;
+    debugmsg << "srcSuperVecSizeUnd[i="<<i<<"]=" << srcSuperVecSizeUnd[i]
+      << " vectorLength=" << vectorLength;
+    ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_INFO);
+  }
+#endif
   }
   if (srcSuperVecSizeUnd[1]==1 && srcSuperVecSizeUnd[2]==1)
     srcSuperVecSizeUnd[0]=-1;  // turn off super vectorization, simple vector ok
-  
+#ifdef DEBUGGING
+  {
+    std::stringstream debugmsg;
+    debugmsg << "srcSuperVecSizeUnd[0]=" << srcSuperVecSizeUnd[0];
+    ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_INFO);
+  }
+#endif
+
 
   // dst-side super vectorization
   
@@ -12294,21 +12323,48 @@ int Array::sparseMatMul(
   
   if (dstArrayFlag && dstArray->sizeSuperUndist){
     // use dstArray to determine vectorLength
-    if (dstArray->rank-dstArray->tensorCount)
-      vectorLength = dstArray->sizeSuperUndist[0];
+    vectorLength = 1; // init
     // set dstSuperVecSize variables
     int i;
     for (i=0; i<dstArray->rank-dstArray->tensorCount; i++){
       dstSuperVecSizeUnd[i] = dstArray->sizeSuperUndist[i];
+      vectorLength *= dstSuperVecSizeUnd[i];
+#ifdef DEBUGGING
+  {
+    std::stringstream debugmsg;
+    debugmsg << "dstSuperVecSizeUnd[i="<<i<<"]=" << dstSuperVecSizeUnd[i]
+      << " vectorLength=" << vectorLength;
+    ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_INFO);
+  }
+#endif
       for (int j=0; j<dstLocalDeCount; j++)
         dstSuperVecSizeDis[i][j] = 
           dstArray->sizeDist[j*(dstArray->rank-dstArray->tensorCount)+i];
     }
     dstSuperVecSizeUnd[i] = dstArray->sizeSuperUndist[i];
+    if (xxe->superVectorOkay)
+      vectorLength *= dstSuperVecSizeUnd[i];
+    else
+      vectorLength = dstSuperVecSizeUnd[0];
+#ifdef DEBUGGING
+  {
+    std::stringstream debugmsg;
+    debugmsg << "dstSuperVecSizeUnd[i="<<i<<"]=" << dstSuperVecSizeUnd[i]
+      << " vectorLength=" << vectorLength;
+    ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_INFO);
+  }
+#endif
   }
   if (dstSuperVecSizeUnd[1]==1 && dstSuperVecSizeUnd[2]==1)
     dstSuperVecSizeUnd[0]=-1;  // turn off super vectorization, simple vector ok
-  
+#ifdef DEBUGGING
+  {
+    std::stringstream debugmsg;
+    debugmsg << "dstSuperVecSizeUnd[0]=" << dstSuperVecSizeUnd[0];
+    ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_INFO);
+  }
+#endif
+#undef DEBUGGING
     
 #ifdef ASMMTIMING
   VMK::wtime(&t5);      //gjt - profile
@@ -12320,6 +12376,7 @@ int Array::sparseMatMul(
     NULL,     // dTime                  -> disabled
     -1, -1,   // indexStart, indexStop  -> full stream
     // super vector support:
+    srcLocalDeCount,
     srcSuperVecSizeUnd[0], srcSuperVecSizeUnd[1], srcSuperVecSizeUnd[2],
     srcSuperVecSizeDis[0], srcSuperVecSizeDis[1],
     dstSuperVecSizeUnd[0], dstSuperVecSizeUnd[1], dstSuperVecSizeUnd[2],
@@ -12327,7 +12384,6 @@ int Array::sparseMatMul(
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
     &rc)) return rc;
   
-//mxxe#define ASMMXXEPRINT
 #ifdef ASMMXXEPRINT
   // print XXE stream
   VM *vm = VM::getCurrent(&localrc);
@@ -12381,6 +12437,7 @@ int Array::sparseMatMul(
       NULL,     // dTime                  -> disabled
       -1, -1,   // indexStart, indexStop  -> full stream
       // super vector support:
+      srcLocalDeCount,
       srcSuperVecSizeUnd[0], srcSuperVecSizeUnd[1], srcSuperVecSizeUnd[2],
       srcSuperVecSizeDis[0], srcSuperVecSizeDis[1],
       dstSuperVecSizeUnd[0], dstSuperVecSizeUnd[1], dstSuperVecSizeUnd[2],

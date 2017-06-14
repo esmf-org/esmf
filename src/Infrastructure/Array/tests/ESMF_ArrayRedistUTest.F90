@@ -73,7 +73,8 @@ program ESMF_ArrayRedistUTest
 #endif
   integer               :: rc, i, petCount, localPet
   integer, allocatable  :: srcIndices(:)
-  logical :: isCreated
+  logical               :: isCreated
+  character(1024)       :: msgString
 
   ! cumulative result: count failures; no failures equals "all pass"
   integer :: result = 0
@@ -213,6 +214,14 @@ program ESMF_ArrayRedistUTest
   write(failMsg, *) "Did not return ESMF_SUCCESS" 
   dstArray7 = ESMF_ArrayCreate(arrayspec=arrayspec3, distgrid=dstDistgrid, &
     distgridToArrayMap=(/2/), undistLBound=(/1/), undistUBound=(/3/), rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  
+!------------------------------------------------------------------------
+  !EX_UTest_Multi_Proc_Only
+  write(name, *) "dstArray8 Create Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS" 
+  dstArray8 = ESMF_ArrayCreate(arrayspec=arrayspec3, distgrid=dstDistgrid, &
+    distgridToArrayMap=(/1/), undistLBound=(/1/), undistUBound=(/3/), rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   
 #endif
@@ -1140,7 +1149,8 @@ program ESMF_ArrayRedistUTest
   call ESMF_ArrayGet(dstArray, farrayPtr=farrayPtr, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   
-  print *, "localPet: ",localPet," dstArray: ",farrayPtr
+  write(msgString,*) "dstArray: ", farrayPtr
+  call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
   
 !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
@@ -1210,7 +1220,8 @@ program ESMF_ArrayRedistUTest
   call ESMF_ArrayGet(dstArray2, farrayPtr=farrayPtr, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   
-  print *, "localPet: ",localPet," dstArray2: ",farrayPtr
+  write(msgString,*) "dstArray2: ", farrayPtr
+  call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
   
 !------------------------------------------------------------------------
   !EX_UTest_Multi_Proc_Only
@@ -1308,8 +1319,8 @@ program ESMF_ArrayRedistUTest
   ! results.
   call ESMF_Test(evalflag, name, failMsg, result, ESMF_SRCLINE)
   
-  print *, "localPet=",localPet, &
-    "ESMF_ROUTESYNC_NBTESTFINISH: finishedflag=", finishedflag
+  write(msgString,*) "ESMF_ROUTESYNC_NBTESTFINISH: finishedflag=", finishedflag
+  call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
   
   ! The folling barrier call releases PET 0 which was waiting on the barrier
   ! call before the first call to ArrayRedist() above. Releasing PET 0 now will
@@ -1333,8 +1344,8 @@ program ESMF_ArrayRedistUTest
   ! Now all PETs should return with finishedflag .true.
   call ESMF_Test(finishedflag, name, failMsg, result, ESMF_SRCLINE)
   
-  print *, "localPet=",localPet, &
-    "ESMF_ROUTESYNC_NBWAITFINISH: finishedflag=", finishedflag
+  write(msgString,*) "ESMF_ROUTESYNC_NBWAITFINISH: finishedflag=", finishedflag
+  call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
   
   ! The expected result of the redistribution of srcArray2 into dstArray2 is:
   !
@@ -1466,8 +1477,9 @@ write(100+localPet,*) "NBWAITFINISH: finishedflag = ", finishedflag, &
   call ESMF_ArrayGet(dstArray3, farrayPtr=farrayPtr2D, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   
-  print *, "localPet: ",localPet," dstArray3: ",farrayPtr2D
-  
+  write(msgString,*) "dstArray3: ", farrayPtr2D
+  call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+
 !------------------------------------------------------------------------
   !EX_UTest_Multi_Proc_Only
   write(name, *) "Verify results in dstArray3 (tensor dim j=1) Test"
@@ -1624,7 +1636,7 @@ write(100+localPet,*) "NBWAITFINISH: finishedflag = ", finishedflag, &
   
   ! The expected result of the redistribution of srcArray3 into dstArray6 is:
   !
-  ! PET   localDE   DE    dstArray3 contents, tensor dimension j=1
+  ! PET   localDE   DE    dstArray6 contents, tensor dimension j=1
   ! 0     0         0     61, 60, 59, 58, 57, 56, 55
   ! 1     0         1     54, 53, 52, 51, 50, 49, 48
   ! 2     0         2     47, 46, 45, 44, 43, 42, 41
@@ -1632,7 +1644,7 @@ write(100+localPet,*) "NBWAITFINISH: finishedflag = ", finishedflag, &
   ! 4     0         4     31, 30, 25, 24, 23, 22, 21
   ! 5     0         5     20, 13, 12, 11, 10, 1, 0
   !
-  ! PET   localDE   DE    dstArray3 contents, tensor dimension j=2
+  ! PET   localDE   DE    dstArray6 contents, tensor dimension j=2
   ! 0     0         0     161, 160, 159, 158, 157, 156, 155
   ! 1     0         1     154, 153, 152, 151, 150, 149, 148
   ! 2     0         2     147, 146, 145, 144, 143, 142, 141
@@ -1642,7 +1654,8 @@ write(100+localPet,*) "NBWAITFINISH: finishedflag = ", finishedflag, &
   
 !------------------------------------------------------------------------
 
-  print *, "localPet: ",localPet," dstArray6: ",farrayPtr2D
+  write(msgString,*) "dstArray6: ", farrayPtr2D
+  call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
   
 !------------------------------------------------------------------------
   !EX_UTest_Multi_Proc_Only
@@ -1762,7 +1775,7 @@ write(100+localPet,*) "NBWAITFINISH: finishedflag = ", finishedflag, &
   
   ! The expected result of the redistribution of dstArray6 into dstArray6p is:
   !
-  ! PET   localDE   DE    dstArray3 contents, tensor dimension j=1
+  ! PET   localDE   DE    dstArray6p contents, tensor dimension j=1
   ! 0     0         0     61, 60, 59, 58, 57, 56, 55
   ! 1     0         1     54, 53, 52, 51, 50, 49, 48
   ! 2     0         2     47, 46, 45, 44, 43, 42, 41
@@ -1770,7 +1783,7 @@ write(100+localPet,*) "NBWAITFINISH: finishedflag = ", finishedflag, &
   ! 4     0         4     31, 30, 25, 24, 23, 22, 21
   ! 5     0         5     20, 13, 12, 11, 10, 1, 0
   !
-  ! PET   localDE   DE    dstArray3 contents, tensor dimension j=2
+  ! PET   localDE   DE    dstArray6p contents, tensor dimension j=2
   ! 0     0         0     161, 160, 159, 158, 157, 156, 155
   ! 1     0         1     154, 153, 152, 151, 150, 149, 148
   ! 2     0         2     147, 146, 145, 144, 143, 142, 141
@@ -1779,7 +1792,8 @@ write(100+localPet,*) "NBWAITFINISH: finishedflag = ", finishedflag, &
   ! 5     0         5     120, 113, 112, 111, 110, 101, 100
 !------------------------------------------------------------------------
   
-  print *, "localPet: ",localPet," dstArray6p: ",farrayPtr2D
+  write(msgString,*) "dstArray6p: ", farrayPtr2D
+  call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
   
 !------------------------------------------------------------------------
   !EX_UTest_Multi_Proc_Only
@@ -1899,7 +1913,7 @@ write(100+localPet,*) "NBWAITFINISH: finishedflag = ", finishedflag, &
   
   ! The expected result of the redistribution of srcArray6 into dstArray6 is:
   !
-  ! PET   localDE   DE    dstArray3 contents, tensor dimension j=1
+  ! PET   localDE   DE    dstArray6 contents, tensor dimension j=1
   ! 0     0         0     61, 60, 59, 58, 57, 56, 55
   ! 1     0         1     54, 53, 52, 51, 50, 49, 48
   ! 2     0         2     47, 46, 45, 44, 43, 42, 41
@@ -1907,7 +1921,7 @@ write(100+localPet,*) "NBWAITFINISH: finishedflag = ", finishedflag, &
   ! 4     0         4     31, 30, 25, 24, 23, 22, 21
   ! 5     0         5     20, 13, 12, 11, 10, 1, 0
   !
-  ! PET   localDE   DE    dstArray3 contents, tensor dimension j=2
+  ! PET   localDE   DE    dstArray6 contents, tensor dimension j=2
   ! 0     0         0     161, 160, 159, 158, 157, 156, 155
   ! 1     0         1     154, 153, 152, 151, 150, 149, 148
   ! 2     0         2     147, 146, 145, 144, 143, 142, 141
@@ -1916,7 +1930,8 @@ write(100+localPet,*) "NBWAITFINISH: finishedflag = ", finishedflag, &
   ! 5     0         5     120, 113, 112, 111, 110, 101, 100
 !------------------------------------------------------------------------
   
-  print *, "localPet: ",localPet," dstArray6: ",farrayPtr2D
+  write(msgString,*) "dstArray6: ", farrayPtr2D
+  call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
   
 !------------------------------------------------------------------------
   !EX_UTest_Multi_Proc_Only
@@ -2021,7 +2036,7 @@ write(100+localPet,*) "NBWAITFINISH: finishedflag = ", finishedflag, &
   
   ! The expected result of the redistribution of srcArray7 into dstArray7 is:
   !
-  ! PET   localDE   DE    dstArray3 contents, tensor dimension j=1
+  ! PET   localDE   DE    dstArray7 contents, tensor dimension j=1
   ! 0     0         0     61, 60, 59, 58, 57, 56, 55
   ! 1     0         1     54, 53, 52, 51, 50, 49, 48
   ! 2     0         2     47, 46, 45, 44, 43, 42, 41
@@ -2029,7 +2044,7 @@ write(100+localPet,*) "NBWAITFINISH: finishedflag = ", finishedflag, &
   ! 4     0         4     31, 30, 25, 24, 23, 22, 21
   ! 5     0         5     20, 13, 12, 11, 10, 1, 0
   !
-  ! PET   localDE   DE    dstArray3 contents, tensor dimension j=2
+  ! PET   localDE   DE    dstArray7 contents, tensor dimension j=2
   ! 0     0         0     161, 160, 159, 158, 157, 156, 155
   ! 1     0         1     154, 153, 152, 151, 150, 149, 148
   ! 2     0         2     147, 146, 145, 144, 143, 142, 141
@@ -2037,7 +2052,7 @@ write(100+localPet,*) "NBWAITFINISH: finishedflag = ", finishedflag, &
   ! 4     0         4     131, 130, 125, 124, 123, 122, 121
   ! 5     0         5     120, 113, 112, 111, 110, 101, 100
   !
-  ! PET   localDE   DE    dstArray3 contents, tensor dimension j=3
+  ! PET   localDE   DE    dstArray7 contents, tensor dimension j=3
   ! 0     0         0     261, 260, 259, 258, 257, 256, 255
   ! 1     0         1     254, 253, 252, 251, 250, 249, 248
   ! 2     0         2     247, 246, 245, 244, 243, 242, 241
@@ -2046,7 +2061,8 @@ write(100+localPet,*) "NBWAITFINISH: finishedflag = ", finishedflag, &
   ! 5     0         5     220, 213, 212, 211, 210, 201, 200
 !------------------------------------------------------------------------
   
-  print *, "localPet: ",localPet," dstArray7: ",farrayPtr2D
+  write(msgString,*) "dstArray7: ", farrayPtr2D
+  call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
   
 !------------------------------------------------------------------------
   !EX_UTest_Multi_Proc_Only
@@ -2195,7 +2211,7 @@ write(100+localPet,*) "NBWAITFINISH: finishedflag = ", finishedflag, &
   
   ! The expected result of the redistribution of srcArray7 into dstArray7 is:
   !
-  ! PET   localDE   DE    dstArray3 contents, tensor dimension j=1
+  ! PET   localDE   DE    dstArray7 contents, tensor dimension j=1
   ! 0     0         0     61, 60, 59, 58, 57, 56, 55
   ! 1     0         1     54, 53, 52, 51, 50, 49, 48
   ! 2     0         2     47, 46, 45, 44, 43, 42, 41
@@ -2203,7 +2219,7 @@ write(100+localPet,*) "NBWAITFINISH: finishedflag = ", finishedflag, &
   ! 4     0         4     31, 30, 25, 24, 23, 22, 21
   ! 5     0         5     20, 13, 12, 11, 10, 1, 0
   !
-  ! PET   localDE   DE    dstArray3 contents, tensor dimension j=2
+  ! PET   localDE   DE    dstArray7 contents, tensor dimension j=2
   ! 0     0         0     161, 160, 159, 158, 157, 156, 155
   ! 1     0         1     154, 153, 152, 151, 150, 149, 148
   ! 2     0         2     147, 146, 145, 144, 143, 142, 141
@@ -2211,7 +2227,7 @@ write(100+localPet,*) "NBWAITFINISH: finishedflag = ", finishedflag, &
   ! 4     0         4     131, 130, 125, 124, 123, 122, 121
   ! 5     0         5     120, 113, 112, 111, 110, 101, 100
   !
-  ! PET   localDE   DE    dstArray3 contents, tensor dimension j=3
+  ! PET   localDE   DE    dstArray7 contents, tensor dimension j=3
   ! 0     0         0     261, 260, 259, 258, 257, 256, 255
   ! 1     0         1     254, 253, 252, 251, 250, 249, 248
   ! 2     0         2     247, 246, 245, 244, 243, 242, 241
@@ -2220,7 +2236,8 @@ write(100+localPet,*) "NBWAITFINISH: finishedflag = ", finishedflag, &
   ! 5     0         5     220, 213, 212, 211, 210, 201, 200
 !------------------------------------------------------------------------
   
-  print *, "localPet: ",localPet," dstArray7: ",farrayPtr2D
+  write(msgString,*) "dstArray7: ", farrayPtr2D
+  call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
   
 !------------------------------------------------------------------------
   !EX_UTest_Multi_Proc_Only
@@ -2362,7 +2379,7 @@ write(100+localPet,*) "NBWAITFINISH: finishedflag = ", finishedflag, &
   
   ! The expected result of the redistribution of srcArray8 into dstArray7 is:
   !
-  ! PET   localDE   DE    dstArray3 contents, tensor dimension j=1
+  ! PET   localDE   DE    dstArray7 contents, tensor dimension j=1
   ! 0     0         0     61, 60, 59, 58, 57, 56, 55
   ! 1     0         1     54, 53, 52, 51, 50, 49, 48
   ! 2     0         2     47, 46, 45, 44, 43, 42, 41
@@ -2370,7 +2387,7 @@ write(100+localPet,*) "NBWAITFINISH: finishedflag = ", finishedflag, &
   ! 4     0         4     31, 30, 25, 24, 23, 22, 21
   ! 5     0         5     20, 13, 12, 11, 10, 1, 0
   !
-  ! PET   localDE   DE    dstArray3 contents, tensor dimension j=2
+  ! PET   localDE   DE    dstArray7 contents, tensor dimension j=2
   ! 0     0         0     161, 160, 159, 158, 157, 156, 155
   ! 1     0         1     154, 153, 152, 151, 150, 149, 148
   ! 2     0         2     147, 146, 145, 144, 143, 142, 141
@@ -2378,7 +2395,7 @@ write(100+localPet,*) "NBWAITFINISH: finishedflag = ", finishedflag, &
   ! 4     0         4     131, 130, 125, 124, 123, 122, 121
   ! 5     0         5     120, 113, 112, 111, 110, 101, 100
   !
-  ! PET   localDE   DE    dstArray3 contents, tensor dimension j=3
+  ! PET   localDE   DE    dstArray7 contents, tensor dimension j=3
   ! 0     0         0     261, 260, 259, 258, 257, 256, 255
   ! 1     0         1     254, 253, 252, 251, 250, 249, 248
   ! 2     0         2     247, 246, 245, 244, 243, 242, 241
@@ -2387,8 +2404,13 @@ write(100+localPet,*) "NBWAITFINISH: finishedflag = ", finishedflag, &
   ! 5     0         5     220, 213, 212, 211, 210, 201, 200
 !------------------------------------------------------------------------
   
-  print *, "localPet: ",localPet," dstArray7: ",farrayPtr2D
-  
+  write(msgString,*) "dstArray7(j=1): ", farrayPtr2D(1,:)
+  call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+  write(msgString,*) "dstArray7(j=2): ", farrayPtr2D(2,:)
+  call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+  write(msgString,*) "dstArray7(j=3): ", farrayPtr2D(3,:)
+  call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+
 !------------------------------------------------------------------------
   !EX_UTest_Multi_Proc_Only
   write(name, *) "Verify results in dstArray7 (tensor dim j=1) Test"
@@ -2515,6 +2537,182 @@ write(100+localPet,*) "NBWAITFINISH: finishedflag = ", finishedflag, &
       name, failMsg, result, ESMF_SRCLINE)
   endif
 
+!------------------------------------------------------------------------
+  !EX_UTest_Multi_Proc_Only
+  write(name, *) "dstArray8 Get Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS" 
+  call ESMF_ArrayGet(dstArray8, farrayPtr=farrayPtr2D, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  
+  farrayPtr2D = -999 ! initialize to something obvious
+  
+!------------------------------------------------------------------------
+  !EX_UTest_Multi_Proc_Only
+  write(name, *) "ArrayRedist: srcArray7 -> dstArray8 re-using routehandle Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS" 
+  call ESMF_ArrayRedist(srcArray=srcArray7, dstArray=dstArray8, &
+    routehandle=routehandle, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  ! The expected result of the redistribution of srcArray7 into dstArray8 is:
+  !
+  ! PET   localDE   DE    dstArray8 contents, tensor dimension j=1
+  ! 0     0         0     61, 60, 59, 58, 57, 56, 55
+  ! 1     0         1     54, 53, 52, 51, 50, 49, 48
+  ! 2     0         2     47, 46, 45, 44, 43, 42, 41
+  ! 3     0         3     40, 37, 36, 35, 34, 33, 32
+  ! 4     0         4     31, 30, 25, 24, 23, 22, 21
+  ! 5     0         5     20, 13, 12, 11, 10, 1, 0
+  !
+  ! PET   localDE   DE    dstArray8 contents, tensor dimension j=2
+  ! 0     0         0     161, 160, 159, 158, 157, 156, 155
+  ! 1     0         1     154, 153, 152, 151, 150, 149, 148
+  ! 2     0         2     147, 146, 145, 144, 143, 142, 141
+  ! 3     0         3     140, 137, 136, 135, 134, 133, 132
+  ! 4     0         4     131, 130, 125, 124, 123, 122, 121
+  ! 5     0         5     120, 113, 112, 111, 110, 101, 100
+  !
+  ! PET   localDE   DE    dstArray8 contents, tensor dimension j=3
+  ! 0     0         0     261, 260, 259, 258, 257, 256, 255
+  ! 1     0         1     254, 253, 252, 251, 250, 249, 248
+  ! 2     0         2     247, 246, 245, 244, 243, 242, 241
+  ! 3     0         3     240, 237, 236, 235, 234, 233, 232
+  ! 4     0         4     231, 230, 225, 224, 223, 222, 221
+  ! 5     0         5     220, 213, 212, 211, 210, 201, 200
+!------------------------------------------------------------------------
+  
+  write(msgString,*) "dstArray8(j=1): ", farrayPtr2D(:,1)
+  call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+  write(msgString,*) "dstArray8(j=2): ", farrayPtr2D(:,2)
+  call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+  write(msgString,*) "dstArray8(j=3): ", farrayPtr2D(:,3)
+  call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+  
+!------------------------------------------------------------------------
+  !EX_UTest_Multi_Proc_Only
+  write(name, *) "Verify results in dstArray8 (tensor dim j=1) Test"
+  write(failMsg, *) "Wrong results" 
+  if (localPet == 0) then
+    call ESMF_Test(((farrayPtr2D(1,1).eq.61).and. &
+      (farrayPtr2D(2,1).eq.60).and.(farrayPtr2D(3,1).eq.59).and. &
+      (farrayPtr2D(4,1).eq.58).and.(farrayPtr2D(5,1).eq.57).and. &
+      (farrayPtr2D(6,1).eq.56).and.(farrayPtr2D(7,1).eq.55)), &
+      name, failMsg, result, ESMF_SRCLINE)
+  else if (localPet == 1) then
+    call ESMF_Test(((farrayPtr2D(1,1).eq.54).and. &
+      (farrayPtr2D(2,1).eq.53).and.(farrayPtr2D(3,1).eq.52).and. &
+      (farrayPtr2D(4,1).eq.51).and.(farrayPtr2D(5,1).eq.50).and. &
+      (farrayPtr2D(6,1).eq.49).and.(farrayPtr2D(7,1).eq.48)), &
+      name, failMsg, result, ESMF_SRCLINE)
+  else if (localPet == 2) then
+    call ESMF_Test(((farrayPtr2D(1,1).eq.47).and. &
+      (farrayPtr2D(2,1).eq.46).and.(farrayPtr2D(3,1).eq.45).and. &
+      (farrayPtr2D(4,1).eq.44).and.(farrayPtr2D(5,1).eq.43).and. &
+      (farrayPtr2D(6,1).eq.42).and.(farrayPtr2D(7,1).eq.41)), &
+      name, failMsg, result, ESMF_SRCLINE)
+  else if (localPet == 3) then
+    call ESMF_Test(((farrayPtr2D(1,1).eq.40).and. &
+      (farrayPtr2D(2,1).eq.37).and.(farrayPtr2D(3,1).eq.36).and. &
+      (farrayPtr2D(4,1).eq.35).and.(farrayPtr2D(5,1).eq.34).and. &
+      (farrayPtr2D(6,1).eq.33).and.(farrayPtr2D(7,1).eq.32)), &
+      name, failMsg, result, ESMF_SRCLINE)
+  else if (localPet == 4) then
+    call ESMF_Test(((farrayPtr2D(1,1).eq.31).and. &
+      (farrayPtr2D(2,1).eq.30).and.(farrayPtr2D(3,1).eq.25).and. &
+      (farrayPtr2D(4,1).eq.24).and.(farrayPtr2D(5,1).eq.23).and. &
+      (farrayPtr2D(6,1).eq.22).and.(farrayPtr2D(7,1).eq.21)), &
+      name, failMsg, result, ESMF_SRCLINE)
+  else if (localPet == 5) then
+    call ESMF_Test(((farrayPtr2D(1,1).eq.20).and. &
+      (farrayPtr2D(2,1).eq.13).and.(farrayPtr2D(3,1).eq.12).and. &
+      (farrayPtr2D(4,1).eq.11).and.(farrayPtr2D(5,1).eq.10).and. &
+      (farrayPtr2D(6,1).eq.1) .and.(farrayPtr2D(7,1).eq.0)), &
+      name, failMsg, result, ESMF_SRCLINE)
+  endif
+
+!------------------------------------------------------------------------
+  !EX_UTest_Multi_Proc_Only
+  write(name, *) "Verify results in dstArray8 (tensor dim j=2) Test"
+  write(failMsg, *) "Wrong results" 
+  if (localPet == 0) then
+    call ESMF_Test(((farrayPtr2D(1,2).eq.161).and. &
+      (farrayPtr2D(2,2).eq.160).and.(farrayPtr2D(3,2).eq.159).and. &
+      (farrayPtr2D(4,2).eq.158).and.(farrayPtr2D(5,2).eq.157).and. &
+      (farrayPtr2D(6,2).eq.156).and.(farrayPtr2D(7,2).eq.155)), &
+      name, failMsg, result, ESMF_SRCLINE)
+  else if (localPet == 1) then
+    call ESMF_Test(((farrayPtr2D(1,2).eq.154).and. &
+      (farrayPtr2D(2,2).eq.153).and.(farrayPtr2D(3,2).eq.152).and. &
+      (farrayPtr2D(4,2).eq.151).and.(farrayPtr2D(5,2).eq.150).and. &
+      (farrayPtr2D(6,2).eq.149).and.(farrayPtr2D(7,2).eq.148)), &
+      name, failMsg, result, ESMF_SRCLINE)
+  else if (localPet == 2) then
+    call ESMF_Test(((farrayPtr2D(1,2).eq.147).and. &
+      (farrayPtr2D(2,2).eq.146).and.(farrayPtr2D(3,2).eq.145).and. &
+      (farrayPtr2D(4,2).eq.144).and.(farrayPtr2D(5,2).eq.143).and. &
+      (farrayPtr2D(6,2).eq.142).and.(farrayPtr2D(7,2).eq.141)), &
+      name, failMsg, result, ESMF_SRCLINE)
+  else if (localPet == 3) then
+    call ESMF_Test(((farrayPtr2D(1,2).eq.140).and. &
+      (farrayPtr2D(2,2).eq.137).and.(farrayPtr2D(3,2).eq.136).and. &
+      (farrayPtr2D(4,2).eq.135).and.(farrayPtr2D(5,2).eq.134).and. &
+      (farrayPtr2D(6,2).eq.133).and.(farrayPtr2D(7,2).eq.132)), &
+      name, failMsg, result, ESMF_SRCLINE)
+  else if (localPet == 4) then
+    call ESMF_Test(((farrayPtr2D(1,2).eq.131).and. &
+      (farrayPtr2D(2,2).eq.130).and.(farrayPtr2D(3,2).eq.125).and. &
+      (farrayPtr2D(4,2).eq.124).and.(farrayPtr2D(5,2).eq.123).and. &
+      (farrayPtr2D(6,2).eq.122).and.(farrayPtr2D(7,2).eq.121)), &
+      name, failMsg, result, ESMF_SRCLINE)
+  else if (localPet == 5) then
+    call ESMF_Test(((farrayPtr2D(1,2).eq.120).and. &
+      (farrayPtr2D(2,2).eq.113).and.(farrayPtr2D(3,2).eq.112).and. &
+      (farrayPtr2D(4,2).eq.111).and.(farrayPtr2D(5,2).eq.110).and. &
+      (farrayPtr2D(6,2).eq.101).and.(farrayPtr2D(7,2).eq.100)), &
+      name, failMsg, result, ESMF_SRCLINE)
+  endif
+
+!------------------------------------------------------------------------
+  !EX_UTest_Multi_Proc_Only
+  write(name, *) "Verify results in dstArray8 (tensor dim j=3) Test"
+  write(failMsg, *) "Wrong results" 
+  if (localPet == 0) then
+    call ESMF_Test(((farrayPtr2D(1,3).eq.261).and. &
+      (farrayPtr2D(2,3).eq.260).and.(farrayPtr2D(3,3).eq.259).and. &
+      (farrayPtr2D(4,3).eq.258).and.(farrayPtr2D(5,3).eq.257).and. &
+      (farrayPtr2D(6,3).eq.256).and.(farrayPtr2D(7,3).eq.255)), &
+      name, failMsg, result, ESMF_SRCLINE)
+  else if (localPet == 1) then
+    call ESMF_Test(((farrayPtr2D(1,3).eq.254).and. &
+      (farrayPtr2D(2,3).eq.253).and.(farrayPtr2D(3,3).eq.252).and. &
+      (farrayPtr2D(4,3).eq.251).and.(farrayPtr2D(5,3).eq.250).and. &
+      (farrayPtr2D(6,3).eq.249).and.(farrayPtr2D(7,3).eq.248)), &
+      name, failMsg, result, ESMF_SRCLINE)
+  else if (localPet == 2) then
+    call ESMF_Test(((farrayPtr2D(1,3).eq.247).and. &
+      (farrayPtr2D(2,3).eq.246).and.(farrayPtr2D(3,3).eq.245).and. &
+      (farrayPtr2D(4,3).eq.244).and.(farrayPtr2D(5,3).eq.243).and. &
+      (farrayPtr2D(6,3).eq.242).and.(farrayPtr2D(7,3).eq.241)), &
+      name, failMsg, result, ESMF_SRCLINE)
+  else if (localPet == 3) then
+    call ESMF_Test(((farrayPtr2D(1,3).eq.240).and. &
+      (farrayPtr2D(2,3).eq.237).and.(farrayPtr2D(3,3).eq.236).and. &
+      (farrayPtr2D(4,3).eq.235).and.(farrayPtr2D(5,3).eq.234).and. &
+      (farrayPtr2D(6,3).eq.233).and.(farrayPtr2D(7,3).eq.232)), &
+      name, failMsg, result, ESMF_SRCLINE)
+  else if (localPet == 4) then
+    call ESMF_Test(((farrayPtr2D(1,3).eq.231).and. &
+      (farrayPtr2D(2,3).eq.230).and.(farrayPtr2D(3,3).eq.225).and. &
+      (farrayPtr2D(4,3).eq.224).and.(farrayPtr2D(5,3).eq.223).and. &
+      (farrayPtr2D(6,3).eq.222).and.(farrayPtr2D(7,3).eq.221)), &
+      name, failMsg, result, ESMF_SRCLINE)
+  else if (localPet == 5) then
+    call ESMF_Test(((farrayPtr2D(1,3).eq.220).and. &
+      (farrayPtr2D(2,3).eq.213).and.(farrayPtr2D(3,3).eq.212).and. &
+      (farrayPtr2D(4,3).eq.211).and.(farrayPtr2D(5,3).eq.210).and. &
+      (farrayPtr2D(6,3).eq.201).and.(farrayPtr2D(7,3).eq.200)), &
+      name, failMsg, result, ESMF_SRCLINE)
+  endif
+
 #endif
 
 !------------------------------------------------------------------------
@@ -2631,6 +2829,13 @@ write(100+localPet,*) "NBWAITFINISH: finishedflag = ", finishedflag, &
   write(name, *) "dstArray7 Destroy Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS" 
   call ESMF_ArrayDestroy(dstArray7, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+!------------------------------------------------------------------------
+  !EX_UTest_Multi_Proc_Only
+  write(name, *) "dstArray8 Destroy Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS" 
+  call ESMF_ArrayDestroy(dstArray8, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 #endif
