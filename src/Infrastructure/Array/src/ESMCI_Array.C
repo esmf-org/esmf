@@ -1922,6 +1922,201 @@ Array *Array::create(
     
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::Array::create()"
+//BOPI
+// !IROUTINE:  ESMCI::Array::create
+//
+// !INTERFACE:
+Array *Array::create(
+//
+// !RETURN VALUE:
+//    ESMC_Array * to newly allocated ESMC_Array
+//
+// !ARGUMENTS:
+//
+  Array *arrayIn,                             // (in) Array to copy
+  bool rmTensorFlag,                          // (in) if true remove all tensors
+  int *rc                                     // (out) return code
+  ){
+//
+// !DESCRIPTION:
+//    Create an {\tt ESMCI::Array} object as copy of an existing
+//    {\tt ESMCI::Array} object.
+//EOPI
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;   // final return code
+  
+  Array *arrayOut;
+  
+  try{
+    // get an allocation for the new Array object
+    try{
+      arrayOut = new Array();
+    }catch(int localrc){
+      // catch standard ESMF return code
+      ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+        rc);
+      return NULL;
+    }catch(...){
+      // allocation error
+      ESMC_LogDefault.MsgAllocError("for new ESMCI::Array.", ESMC_CONTEXT, rc);  
+      return NULL;
+    }
+    // 
+    int rmTensors = 0;  // initialize
+    if (rmTensorFlag)
+      rmTensors = arrayIn->tensorCount;
+    // copy all scalar members and reference members
+    ESMC_TypeKind_Flag typekind =
+      arrayOut->typekind = arrayIn->typekind;
+    int rank = arrayOut->rank = arrayIn->rank - rmTensors;
+    arrayOut->indexflag = arrayIn->indexflag;
+    int tensorCount = arrayOut->tensorCount = arrayIn->tensorCount - rmTensors;
+    if (rmTensorFlag)
+      arrayOut->tensorElementCount = 1;
+    else
+      arrayOut->tensorElementCount = arrayIn->tensorElementCount;
+    arrayOut->distgrid = arrayIn->distgrid; // copy reference
+    arrayOut->distgridCreator = false;      // not a locally created object
+    arrayOut->delayout = arrayIn->delayout; // copy reference
+    // deep copy of members with allocations
+    // copy the PET-local bound arrays
+    int localDeCount = arrayIn->delayout->getLocalDeCount();
+    int redDimCount = rank - tensorCount;
+    arrayOut->exclusiveLBound = new int[redDimCount*localDeCount];
+    memcpy(arrayOut->exclusiveLBound, arrayIn->exclusiveLBound,
+      redDimCount*localDeCount*sizeof(int));
+    arrayOut->exclusiveUBound = new int[redDimCount*localDeCount];
+    memcpy(arrayOut->exclusiveUBound, arrayIn->exclusiveUBound,
+      redDimCount*localDeCount*sizeof(int));
+    arrayOut->computationalLBound = new int[redDimCount*localDeCount];
+    memcpy(arrayOut->computationalLBound, arrayIn->computationalLBound,
+      redDimCount*localDeCount*sizeof(int));
+    arrayOut->computationalUBound = new int[redDimCount*localDeCount];
+    memcpy(arrayOut->computationalUBound, arrayIn->computationalUBound,
+      redDimCount*localDeCount*sizeof(int));
+    arrayOut->totalLBound = new int[redDimCount*localDeCount];
+    memcpy(arrayOut->totalLBound, arrayIn->totalLBound,
+      redDimCount*localDeCount*sizeof(int));
+    arrayOut->totalUBound = new int[redDimCount*localDeCount];
+    memcpy(arrayOut->totalUBound, arrayIn->totalUBound,
+      redDimCount*localDeCount*sizeof(int));
+    // copy the PET-local LocalArray pointers
+    arrayOut->larrayList = new LocalArray*[localDeCount];
+    if (rmTensorFlag){
+      // remove the tensor dimensions from the allocation
+      for (int i=0; i<localDeCount; i++){
+        vector<int> counts;
+        for (int k=0; k<redDimCount; k++)
+          counts.push_back(
+            arrayOut->totalUBound[i*redDimCount+k] -
+            arrayOut->totalLBound[i*redDimCount+k] + 1);
+        arrayOut->larrayList[i] =
+          LocalArray::create(typekind, rank, &(counts[0]),
+            NULL, NULL, NULL, DATA_REF, &localrc);
+        if (ESMC_LogDefault.MsgFoundError(localrc, 
+          ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc)){
+          arrayOut->ESMC_BaseSetStatus(ESMF_STATUS_INVALID);  // mark invalid
+          return ESMC_NULL_POINTER;
+        }
+      }
+    }else{
+      // use the src larrayList as a template for the new allocation
+      for (int i=0; i<localDeCount; i++){
+        arrayOut->larrayList[i] =
+          LocalArray::create(arrayIn->larrayList[i], NULL, NULL, &localrc);
+        if (ESMC_LogDefault.MsgFoundError(localrc, 
+          ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc)){
+          arrayOut->ESMC_BaseSetStatus(ESMF_STATUS_INVALID);  // mark invalid
+          return ESMC_NULL_POINTER;
+        }
+      }
+    }
+    // determine the base addresses of the local arrays:
+    arrayOut->larrayBaseAddrList = new void*[localDeCount];
+    for (int i=0; i<localDeCount; i++)
+      arrayOut->larrayBaseAddrList[i] = arrayOut->larrayList[i]->getBaseAddr();
+    // tensor dimensions
+    arrayOut->undistLBound = new int[tensorCount];
+    memcpy(arrayOut->undistLBound, arrayIn->undistLBound, 
+      tensorCount * sizeof(int));
+    arrayOut->undistUBound = new int[tensorCount];
+    memcpy(arrayOut->undistUBound, arrayIn->undistUBound,
+      tensorCount * sizeof(int));
+    // distgridToArrayMap, arrayToDistGridMap and distgridToPackedArrayMap
+    int dimCount = arrayIn->distgrid->getDimCount();
+    arrayOut->distgridToArrayMap = new int[dimCount];
+    for (int i=0; i<dimCount; i++)
+      arrayOut->distgridToArrayMap[i] = 0;  // initialize
+    arrayOut->arrayToDistGridMap = new int[rank];
+    int j=0;
+    for (int i=0; i<arrayIn->rank; i++){
+      if (arrayIn->arrayToDistGridMap[i]){
+        arrayOut->arrayToDistGridMap[j] = arrayIn->arrayToDistGridMap[i];
+        arrayOut->distgridToArrayMap[arrayIn->arrayToDistGridMap[i]-1] = j+1;
+        ++j;
+      }
+    }
+    //TODO: check if the distgridToPackedArrayMap is set up correctly.
+    arrayOut->distgridToPackedArrayMap = new int[dimCount];
+    memcpy(arrayOut->distgridToPackedArrayMap,
+      arrayOut->distgridToArrayMap, dimCount * sizeof(int));
+    // contiguous flag
+    arrayOut->contiguousFlag = new int[localDeCount];
+    memcpy(arrayOut->contiguousFlag, arrayIn->contiguousFlag,
+      localDeCount * sizeof(int));
+    // exclusiveElementCountPDe
+    int deCount = arrayIn->delayout->getDeCount();
+    arrayOut->exclusiveElementCountPDe = new int[deCount];
+    memcpy(arrayOut->exclusiveElementCountPDe,
+      arrayIn->exclusiveElementCountPDe, deCount * sizeof(int));
+    // totalElementCountPLocalDe
+    arrayOut->totalElementCountPLocalDe = new int[localDeCount];
+    memcpy(arrayOut->totalElementCountPLocalDe,
+      arrayIn->totalElementCountPLocalDe, localDeCount * sizeof(int));
+    
+    // Set up rim members and fill with canonical seqIndex values
+    arrayOut->setRimMembers();
+     
+    // invalidate the name for this Array object in the Base class
+    arrayOut->ESMC_BaseSetName(NULL, "Array");
+    
+    arrayOut->localDeCountAux = 
+      arrayOut->delayout->getLocalDeCount(); // TODO: auxilary for garb
+                                             // TODO: until ref. counting
+					     
+    arrayOut->ioRH = NULL; // invalidate
+
+  }catch(int localrc){
+    // catch standard ESMF return code
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      rc);
+    arrayOut->ESMC_BaseSetStatus(ESMF_STATUS_INVALID);  // mark invalid
+    return NULL;
+  }catch(...){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+      "Caught exception", ESMC_CONTEXT, rc);
+    arrayOut->ESMC_BaseSetStatus(ESMF_STATUS_INVALID);  // mark invalid
+    return NULL;
+  }
+  
+  // reset the distgridCreator flag in the src Array, because the newly
+  // created Array will now point to the same DistGrid by reference
+  // -> leave it up to ESMF automatic garbage collection to clean up the
+  // DistGrid when it is time
+  arrayIn->distgridCreator = false; // drop ownership of the referenced DistGrid
+
+  // return successfully
+  if (rc!=NULL) *rc = ESMF_SUCCESS;
+  return arrayOut;
+}
+//-----------------------------------------------------------------------------
+    
+    
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::Array::destroy()"
 //BOPI
 // !IROUTINE:  ESMCI::Array::destroy
@@ -8710,7 +8905,7 @@ template<typename SIT, typename DIT> int sparseMatMulStoreEncodeXXE(VM *vm,
   vector<DD::AssociationElement<DIT,SIT> > *dstLinSeqVect,
   const int *dstLocalDeTotalElementCount,
   char **rraList, int rraCount, RouteHandle **routehandle,
-  bool undistPastFirstDistDim,
+  bool undistributedDimsPresent,
 #ifdef ASMMSTORETIMING
   double *t8, double *t9, double *t10, double *t11, double *t12, double *t13,
   double *t14,
@@ -8951,10 +9146,9 @@ template<typename SIT, typename DIT>
   }
   
   // prepare tensorContigLength arguments
-  bool  contigFlag = true;
+  bool contigFlag = true;
   int srcTensorContigLength = 1;  // init
   int srcTensorLength = 1;        // init
-  int srcLeadingTensorDims = 0;   // init
   for (int j=0, jj=0; jj<srcArray->rank; jj++){
     if (srcArray->arrayToDistGridMap[jj]){
       // decomposed dimension
@@ -8964,7 +9158,6 @@ template<typename SIT, typename DIT>
       srcTensorLength *= srcArray->undistUBound[j]
         - srcArray->undistLBound[j] + 1;
       if (contigFlag){
-        ++srcLeadingTensorDims;
         srcTensorContigLength *= srcArray->undistUBound[j]
           - srcArray->undistLBound[j] + 1;
       }
@@ -8974,7 +9167,6 @@ template<typename SIT, typename DIT>
   contigFlag = true;
   int dstTensorContigLength = 1;  // init
   int dstTensorLength = 1;        // init
-  int dstLeadingTensorDims = 0;   // init
   for (int j=0, jj=0; jj<dstArray->rank; jj++){
     if (dstArray->arrayToDistGridMap[jj]){
       // decomposed dimension
@@ -8984,7 +9176,6 @@ template<typename SIT, typename DIT>
       dstTensorLength *= dstArray->undistUBound[j]
         - dstArray->undistLBound[j] + 1;
       if (contigFlag){
-        ++dstLeadingTensorDims;
         dstTensorContigLength *= dstArray->undistUBound[j]
           - dstArray->undistLBound[j] + 1;
       }
@@ -8996,8 +9187,8 @@ template<typename SIT, typename DIT>
   {
     std::stringstream debugmsg;
     debugmsg << "workWithTempArrays check: tensorMixFlag=" << tensorMixFlag 
-      << " srcTensorContigLength=" << srcTensorContigLength
-      << " dstTensorContigLength=" << dstTensorContigLength;
+      << " srcTensorLength=" << srcTensorLength
+      << " dstTensorLength=" << dstTensorLength;
     ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_INFO);
   }
 #endif
@@ -9007,26 +9198,26 @@ template<typename SIT, typename DIT>
   //TODO: Fix this!
   // Currently this optimization does not completely work for halo case
   // because it is difficult to copy the masked rim into the temporary array.
-  if (!tensorMixFlag && (srcTensorContigLength>1) &&
-    (srcTensorContigLength==dstTensorContigLength)){
-    // Optimization of leading undistributed dimensions if there is no 
-    // tensor mixing. The strategy in this case is to create temporary 
-    // arrays without the leading undistributed dimensions and precompute
-    // the routehandle for those. This is typically much faster. 
-    // The resulting routehandle can then be used for arrays with leading 
+  if (!tensorMixFlag && (srcTensorLength>1) &&
+    (srcTensorLength==dstTensorLength)){
+    // Optimization of undistributed dimensions if there is no tensor mixing.
+    // The strategy in this case is to create temporary arrays without the
+    // undistributed dimensions and precompute the routehandle for those. This
+    // is typically much faster, because of the general way in which 
+    // undistributed elements are currently treated.
+    // The resulting routehandle can be used for arrays with or without
     // undistributed dimensions.
 #if 1
   {
     std::stringstream debugmsg;
-    debugmsg << "workWithTempArrays active: srcLeadingTensorDims="
-      << srcLeadingTensorDims << " dstLeadingTensorDims=" 
-      << dstLeadingTensorDims;
+    debugmsg << "workWithTempArrays active: srcTensorLength="
+      << srcTensorLength << " dstTensorLength=" << dstTensorLength;
     ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_INFO);
   }
 #endif
     workWithTempArrays=true;
     // create the temporary arrays
-    srcArray = Array::create(srcArray, srcLeadingTensorDims, &localrc);
+    srcArray = Array::create(srcArray, true, &localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
       ESMC_CONTEXT, NULL)) throw localrc;  // bail out with exception
     if (haloFlag){
@@ -9034,14 +9225,14 @@ template<typename SIT, typename DIT>
       dstArray = srcArray;
     }else{
       // if not halo, then dstArray must independently be adjusted
-      dstArray = Array::create(dstArray, dstLeadingTensorDims, &localrc);
+      dstArray = Array::create(dstArray, true, &localrc);
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
         ESMC_CONTEXT, NULL)) throw localrc;  // bail out with exception
     }
     // adjust the precomputed values
-    srcTensorLength -= srcTensorContigLength;
+    srcTensorLength = 1;
     srcTensorContigLength = 1;
-    dstTensorLength -= dstTensorContigLength;
+    dstTensorLength = 1;
     dstTensorContigLength = 1;
   }
   }
@@ -10164,10 +10355,10 @@ template<typename SIT, typename DIT>
     dstLocalDeTotalElementCount[i] = 
       dstArray->totalElementCountPLocalDe[i] * dstArray->tensorElementCount;
   
-  // determine if there are undistributed dims past the first distributed
-  bool undistPastFirstDistDim = true;
-  if (srcTensorLength <= srcTensorContigLength) undistPastFirstDistDim = false;
-  if (dstTensorLength <= dstTensorContigLength) undistPastFirstDistDim = false;
+  // determine if there are undistributed dims present in either src or dst
+  bool undistributedDimsPresent = false;
+  if (srcArray->tensorCount) undistributedDimsPresent = true;
+  if (dstArray->tensorCount) undistributedDimsPresent = true;
   
   // encode sparseMatMul communication pattern into XXE stream
   localrc = sparseMatMulStoreEncodeXXE(vm,
@@ -10178,7 +10369,7 @@ template<typename SIT, typename DIT>
     srcLinSeqVect, dstLinSeqVect,
     dstLocalDeTotalElementCount,
     rraList, rraCount, routehandle,
-    undistPastFirstDistDim,
+    undistributedDimsPresent,
 #ifdef ASMMSTORETIMING
     &t8, &t9, &t10, &t11, &t12, &t13, &t14,
 #endif
@@ -10333,7 +10524,7 @@ template<typename SIT, typename DIT> int sparseMatMulStoreEncodeXXE(
   char **rraList,                         // in
   int rraCount,                           // in
   RouteHandle **routehandle,              // inout - handle to precomputed comm
-  bool undistPastFirstDistDim,            // in
+  bool undistributedDimsPresent,          // in
 #ifdef ASMMSTORETIMING
   double *t8, double *t9, double *t10, double *t11, double *t12, double *t13,
   double *t14,
@@ -10411,7 +10602,7 @@ template<typename SIT, typename DIT> int sparseMatMulStoreEncodeXXE(
   xxe->typekind[1] = typekindSrc;
   xxe->typekind[2] = typekindDst;
   // set the superVectorOkay flag
-  xxe->superVectorOkay = !undistPastFirstDistDim; //TODO: get rid of this!!!
+  xxe->superVectorOkay = !undistributedDimsPresent; // super-vector if no undist
   // prepare XXE type variables
   XXE::TKId elementTK;
   switch (typekindDst){
