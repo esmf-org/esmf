@@ -5576,13 +5576,7 @@ template<typename T> bool operator<(SeqIndex<T> a, SeqIndex<T> b){
 
 #define ASMMPROFILE___disable
 
-#define ASMMSTOREPRINT___disable
-
-#ifdef ASMMSTOREPRINT
-  char asmmstoreprintfile[160];
-  fstream asmmstorestream;
-#endif
-
+#define ASMM_STORE_LOG
 
 namespace ArrayHelper{
   
@@ -5738,9 +5732,13 @@ namespace ArrayHelper{
 #define ESMC_METHOD "ESMCI::ArrayHelper::RecvnbElement::appendRecvnb()"
     int localrc = ESMC_RC_NOT_IMPL;         // local return code
     int rc = ESMC_RC_NOT_IMPL;              // final return code
-#ifdef ASMMSTOREPRINT
-    asmmstorestream << "gjt: XXE::recvnb on localPet=" << localPet <<
-      " from Pet=" << srcPet << "\n";
+#ifdef ASMM_STORE_LOG
+    {
+      std::stringstream msg;
+      msg << "ASMM_STORE_LOG:" << __LINE__ << " on localPet=" << localPet <<
+        " from Pet=" << srcPet;
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+    }
 #endif
     recvnbIndex = xxe->count;  // store index for the associated wait
     int tag = 0;  // no need for special tags - messages are ordered to match
@@ -5794,9 +5792,13 @@ namespace ArrayHelper{
 #define ESMC_METHOD "ESMCI::ArrayHelper::RecvnbElement::appendRecv()"
     int localrc = ESMC_RC_NOT_IMPL;         // local return code
     int rc = ESMC_RC_NOT_IMPL;              // final return code
-#ifdef ASMMSTOREPRINT
-    asmmstorestream << "gjt: XXE::recv on localPet=" << localPet <<
-      " from Pet=" << srcPet << "\n";
+#ifdef ASMM_STORE_LOG
+    {
+      std::stringstream msg;
+      msg << "ASMM_STORE_LOG: XXE::recv on localPet=" << localPet <<
+      " from Pet=" << srcPet;
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+    }
 #endif
     recvnbIndex = xxe->count;  // store index for the associated wait
     int tag = 0;  // no need for special tags - messages are ordered to match
@@ -6398,15 +6400,27 @@ namespace ArrayHelper{
     if (srcTermProcessing==0){
       // do all the processing on the dst side
       int count = linIndexContigBlockList.size();
-#ifdef ASMMSTOREPRINT
-      asmmstorestream << "gjt: XXE::sendnb from localPet=" << localPet <<
-        " to Pet=" << dstPet << "\n";
+#ifdef ASMM_STORE_LOG
+  {
+    std::stringstream msg;
+    msg << "ASMM_STORE_LOG:" << __LINE__ << " from localPet=" << localPet <<
+      " to Pet=" << dstPet << " count=" << count;
+    ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+  }
 #endif
-      if (count == 1){
+      if (false){
+//      if (count == 1){  // gjt: had to comment out in order to support
+// super-vertorization. Even if under store-conditions there is a contiguous
+// data block in the srcArray, this may not be the case for super-vectorized
+// case at run-time. The safe way is to _always_ use a buffer: memGatherSrcRRA.
         // sendnbRRA out of single contiguous linIndex run
-#ifdef ASMMSTOREPRINT
-        asmmstorestream << "gjt: single contiguous linIndex run "
-          "on src side\n";
+#ifdef ASMM_STORE_LOG
+  {
+    std::stringstream msg;
+    msg << "ASMM_STORE_LOG:" << __LINE__ << 
+      " single contiguous linIndex run on src side";
+    ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+  }
 #endif
         sendnbIndex = xxe->count;  // store index for the associated wait
         localrc = xxe->appendSendnbRRA(predicateBitField,
@@ -6424,9 +6438,13 @@ namespace ArrayHelper{
 #endif
       }else{
         // use intermediate buffer
-#ifdef ASMMSTOREPRINT
-        asmmstorestream << "gjt: non-contiguous linIndex on "
-          "src side -> need buffer \n";
+#ifdef ASMM_STORE_LOG
+  {
+    std::stringstream msg;
+    msg << "ASMM_STORE_LOG:" << __LINE__ <<
+      " non-contiguous linIndex on src side -> need buffer";
+    ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+  }
 #endif
         // use intermediate buffer
         // memGatherSrcRRA pieces into intermediate buffer
@@ -6443,6 +6461,14 @@ namespace ArrayHelper{
             linIndexContigBlockList[kk].linIndex/vectorLength;
           xxeMemGatherSrcRRAInfo->countList[kk] =
             linIndexContigBlockList[kk].linIndexCount;
+#ifdef ASMM_STORE_LOG
+  {
+    std::stringstream msg;
+    msg << "ASMM_STORE_LOG:" << __LINE__ << " countList[]=" << 
+      xxeMemGatherSrcRRAInfo->countList[kk];
+    ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+  }
+#endif
         }
         double dt_tk;
         localrc = xxe->exec(rraCount, rraList, &vectorLength, 0x0, NULL, NULL,
@@ -6461,10 +6487,14 @@ namespace ArrayHelper{
           &dt_byte, xxeIndex, xxeIndex);
         if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
           ESMC_CONTEXT, &rc)) return rc;
-#ifdef ASMMSTOREPRINT
-        asmmstorestream << "gjt - on localPet=" << localPet <<
-          " memGatherSrcRRA took dt_tk=" << dt_tk << "s and dt_byte=" <<
-          dt_byte << " for count=" << count << "\n";
+#ifdef ASMM_STORE_LOG
+    {
+      std::stringstream msg;
+      msg << "ASMM_STORE_LOG:" << __LINE__ << " on localPet=" << localPet <<
+        " memGatherSrcRRA took dt_tk=" << dt_tk << "s and dt_byte=" <<
+        dt_byte << " for count=" << count;
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+    }
 #endif
         // decide for the fastest option
 //gjt-hack: force typekind option for now        if (dt_byte < dt_tk){
@@ -6620,14 +6650,26 @@ namespace ArrayHelper{
     if (srcTermProcessing==0){
       // do all the processing on the dst side
       int count = linIndexContigBlockList.size();
-#ifdef ASMMSTOREPRINT
-      asmmstorestream << "gjt: XXE::send from localPet=" << localPet <<
-        " to Pet=" << dstPet << "\n";
+#ifdef ASMM_STORE_LOG
+    {
+      std::stringstream msg;
+      msg << "ASMM_STORE_LOG: XXE::send from localPet=" << localPet <<
+        " to Pet=" << dstPet;
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+    }
 #endif
-      if (count == 1){
+      if (false){
+//      if (count == 1){  // gjt: had to comment out in order to support
+// super-vertorization. Even if under store-conditions there is a contiguous
+// data block in the srcArray, this may not be the case for super-vectorized
+// case at run-time. The safe way is to _always_ use a buffer: memGatherSrcRRA.
         // sendRRA out of single contiguous linIndex run
-#ifdef ASMMSTOREPRINT
-        asmmstorestream << "gjt: single contiguous linIndex run on src side\n";
+#ifdef ASMM_STORE_LOG
+    {
+      std::stringstream msg;
+      msg << "ASMM_STORE_LOG: single contiguous linIndex run on src side";
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+    }
 #endif
         sendnbIndex = xxe->count;  // store index for the associated wait
         localrc = xxe->appendSendRRA(predicateBitField,
@@ -6645,9 +6687,13 @@ namespace ArrayHelper{
 #endif
       }else{
         // use intermediate buffer
-#ifdef ASMMSTOREPRINT
-        asmmstorestream << "gjt: non-contiguous linIndex on "
-          "src side -> need buffer \n";
+#ifdef ASMM_STORE_LOG
+    {
+      std::stringstream msg;
+      msg << "ASMM_STORE_LOG: non-contiguous linIndex on "
+        "src side -> need buffer";
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+    }
 #endif
         // use intermediate buffer
         // memGatherSrcRRA pieces into intermediate buffer
@@ -6682,10 +6728,14 @@ namespace ArrayHelper{
           &dt_byte, xxeIndex, xxeIndex);
         if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
           ESMC_CONTEXT, &rc)) return rc;
-#ifdef ASMMSTOREPRINT
-        asmmstorestream << "gjt - on localPet=" << localPet <<
+#ifdef ASMM_STORE_LOG
+    {
+      std::stringstream msg;
+      msg << "ASMM_STORE_LOG:" << __LINE__ << " on localPet=" << localPet <<
           " memGatherSrcRRA took dt_tk=" << dt_tk << "s and dt_byte=" << 
-          dt_byte << " for count=" << count << "\n";
+          dt_byte << " for count=" << count;
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+    }
 #endif
         // decide for the fastest option
 //gjt-hack: force typekind option for now        if (dt_byte < dt_tk){
@@ -6861,14 +6911,26 @@ namespace ArrayHelper{
     if (srcTermProcessing==0){
       // do all the processing on the dst side
       int count = linIndexContigBlockList.size();
-#ifdef ASMMSTOREPRINT
-      asmmstorestream << "gjt: XXE::sendrecv from localPet=" << localPet <<
-        " to Pet=" << dstPet << "\n";
+#ifdef ASMM_STORE_LOG
+    {
+      std::stringstream msg;
+      msg << "ASMM_STORE_LOG: XXE::sendrecv from localPet=" << localPet <<
+        " to Pet=" << dstPet;
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+    }
 #endif
-      if (count == 1){
+      if (false){
+//      if (count == 1){  // gjt: had to comment out in order to support
+// super-vertorization. Even if under store-conditions there is a contiguous
+// data block in the srcArray, this may not be the case for super-vectorized
+// case at run-time. The safe way is to _always_ use a buffer: memGatherSrcRRA.
         // sendRRArecv out of single contiguous linIndex run
-#ifdef ASMMSTOREPRINT
-        asmmstorestream << "gjt: single contiguous linIndex run on src side\n";
+#ifdef ASMM_STORE_LOG
+    {
+      std::stringstream msg;
+      msg << "ASMM_STORE_LOG: single contiguous linIndex run on src side";
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+    }
 #endif
         sendnbIndex = xxe->count;  // store index for the associated wait
         pRecv->recvnbIndex = xxe->count;  // store index for the associated wait
@@ -6889,9 +6951,13 @@ namespace ArrayHelper{
 #endif
       }else{
         // use intermediate buffer
-#ifdef ASMMSTOREPRINT
-        asmmstorestream << "gjt: non-contiguous linIndex on "
-          "src side -> need buffer \n";
+#ifdef ASMM_STORE_LOG
+    {
+      std::stringstream msg;
+      msg << "ASMM_STORE_LOG: non-contiguous linIndex on "
+          "src side -> need buffer";
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+    }
 #endif
         // use intermediate buffer
         // memGatherSrcRRA pieces into intermediate buffer
@@ -6926,8 +6992,8 @@ namespace ArrayHelper{
           &dt_byte, xxeIndex, xxeIndex);
         if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
           ESMC_CONTEXT, &rc)) return rc;
-#ifdef ASMMSTOREPRINT_disabled
-        fprintf(asmmstoreprintfp, "gjt - on localPet %d memGatherSrcRRA took "
+#ifdef ASMM_STORE_LOG_disabled
+        fprintf(ASMM_STORE_LOGfp, "gjt - on localPet %d memGatherSrcRRA took "
           "dt_tk=%g s and dt_byte=%g s for count=%d\n", localPet, dt_tk,
           dt_byte, count);
 #endif
@@ -8443,8 +8509,8 @@ cout << "dstSetupFlag=" << dstSetupFlag << " tensorSeqIndex=" <<
     // deal with duplicate sparse matrix entries in seqIndexFactorLookup
     for (typename vector<SeqIndexFactorLookup<IT> >::iterator
       i=seqIndexFactorLookup.begin(); i!=seqIndexFactorLookup.end(); ++i){
-#ifdef ASMMSTOREPRINT_disabled
-      fprintf(asmmstoreprintfp,
+#ifdef ASMM_STORE_LOG_disabled
+      fprintf(ASMM_STORE_LOGfp,
         "befr duplicate elimination seqIndexFactorLookup[%d].factorCount=%d\n",
         i-seqIndexFactorLookup.begin(), i->factorCount);
 #endif
@@ -8469,8 +8535,8 @@ cout << "dstSetupFlag=" << dstSetupFlag << " tensorSeqIndex=" <<
         i->factorList.end()),
         i->factorList.end());
       i->factorCount = i->factorList.size();
-#ifdef ASMMSTOREPRINT_disabled
-      fprintf(asmmstoreprintfp,
+#ifdef ASMM_STORE_LOG_disabled
+      fprintf(ASMM_STORE_LOGfp,
         "aftr duplicate elimination seqIndexFactorLookup[%d].factorCount=%d\n",
         i-seqIndexFactorLookup.begin(), i->factorCount);
 #endif
@@ -8978,7 +9044,7 @@ template<typename SIT, typename DIT>
     dstTensorContigLength = 1;
   }
   }
-
+  
 #ifdef ASMMSTORETIMING
   VMK::wtime(&t1);   //gjt - profile
 #endif
@@ -9129,19 +9195,20 @@ template<typename SIT, typename DIT>
 //return rc;
 //---DEBUG-------------------
 
-#ifdef ASMMSTOREPRINT
-  sprintf(asmmstoreprintfile, "asmmstoreprint.%05d", localPet);
-  asmmstorestream.open(asmmstoreprintfile);
-  asmmstorestream << "gjt: tensorMixFlag=" << tensorMixFlag
+#ifdef ASMM_STORE_LOG
+  {
+    std::stringstream msg;
+    msg << "ASMM_STORE_LOG: tensorMixFlag=" << tensorMixFlag
     << " srcTensorElementCountEff=" << srcTensorElementCountEff
-    << " dstTensorElementCountEff=" << dstTensorElementCountEff
-    << "\n";
-  asmmstorestream << "gjt: localPet=" << localPet << 
-    " srcSeqIndexMinMax[(0/1)] = " <<
-    srcSeqIndexMinMax[0] <<"/"<< srcSeqIndexMinMax[1] << "\n";
-  for (int i=0; i<petCount; i++)
-    asmmstorestream << "gjt: srcSeqIndexMinMaxList[" << i << "(0/1)] = " <<
-      srcSeqIndexMinMaxList[i*2] <<"/"<< srcSeqIndexMinMaxList[i*2+1] << "\n";
+    << " dstTensorElementCountEff=" << dstTensorElementCountEff;
+    ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+  }
+  {
+    std::stringstream msg;
+    msg << "ASMM_STORE_LOG: srcSeqIndexMinMax[(0/1)] = " <<
+      srcSeqIndexMinMax[0] <<"/"<< srcSeqIndexMinMax[1];
+    ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+  }
 #endif
 
   // find local dstSeqIndex Min/Max
@@ -9222,10 +9289,14 @@ template<typename SIT, typename DIT>
 //return rc;
 //---DEBUG-------------------
 
-#ifdef ASMMSTOREPRINT
+#ifdef ASMM_STORE_LOG
   for (int i=0; i<petCount; i++)
-    asmmstorestream << "gjt: dstSeqIndexMinMaxList[" << i << "(0/1)] = " <<
-      dstSeqIndexMinMaxList[i*2] <<"/"<< dstSeqIndexMinMaxList[i*2+1] << "\n";
+  {
+    std::stringstream msg;
+    msg << "ASMM_STORE_LOG: dstSeqIndexMinMaxList[" << i << "(0/1)] = " <<
+      dstSeqIndexMinMaxList[i*2] <<"/"<< dstSeqIndexMinMaxList[i*2+1];
+    ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+  }
 #endif
 
 #ifdef ASMMSTORETIMING
@@ -9300,14 +9371,16 @@ template<typename SIT, typename DIT>
   VM::logMemInfo(std::string("ASMMStore2.10"));
 #endif
 
-#ifdef ASMMSTOREPRINT
-  asmmstorestream << "gjt: localPet=" << localPet << 
-    " srcElementCountList[localPet]=" << srcElementCountList[localPet] <<
+#ifdef ASMM_STORE_LOG
+  {
+    std::stringstream msg;
+    msg << "ASMM_STORE_LOG: srcElementCountList[localPet]=" << srcElementCountList[localPet] <<
     " srcSeqIndexMinMax = " << srcSeqIndexMinMax[0] <<"/"<< srcSeqIndexMinMax[1] 
     << " srcSeqIndexMinGlobal/MaxGlobal = " << srcSeqIndexMinGlobal <<"/"<<
     srcSeqIndexMaxGlobal << " srcSeqIndexInterval[localPet].min/.max = " <<
-    srcSeqIndexInterval[localPet].min <<"/"<< srcSeqIndexInterval[localPet].max
-    << "\n";
+    srcSeqIndexInterval[localPet].min <<"/"<< srcSeqIndexInterval[localPet].max;
+    ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+  }
 #endif
 
 #ifdef ASMMSTORETIMING
@@ -9425,14 +9498,16 @@ template<typename SIT, typename DIT>
   VM::logMemInfo(std::string("ASMMStore2.13"));
 #endif
 
-#ifdef ASMMSTOREPRINT
-  asmmstorestream << "gjt: localPet=" << localPet << 
-    " dstElementCountList[localPet]=" << dstElementCountList[localPet] <<
+#ifdef ASMM_STORE_LOG
+  {
+    std::stringstream msg;
+    msg << "ASMM_STORE_LOG: dstElementCountList[localPet]=" << dstElementCountList[localPet] <<
     " dstSeqIndexMinMax = " << dstSeqIndexMinMax[0] <<"/"<< dstSeqIndexMinMax[1] 
     << " dstSeqIndexMinGlobal/MaxGlobal = " << dstSeqIndexMinGlobal <<"/"<<
     dstSeqIndexMaxGlobal << " dstSeqIndexInterval[localPet].min/.max = " <<
-    dstSeqIndexInterval[localPet].min <<"/"<< dstSeqIndexInterval[localPet].max
-    << "\n";
+    dstSeqIndexInterval[localPet].min <<"/"<< dstSeqIndexInterval[localPet].max;
+    ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+  }
 #endif
 
 #ifdef ASMMSTORETIMING
@@ -9670,63 +9745,63 @@ template<typename SIT, typename DIT>
   VM::logMemInfo(std::string("ASMMStore2.20"));
 #endif
 
-#ifdef ASMMSTOREPRINT_disabled
-  fprintf(asmmstoreprintfp, "\n========================================"
+#ifdef ASMM_STORE_LOG_disabled
+  fprintf(ASMM_STORE_LOGfp, "\n========================================"
     "========================================\n");
-  fprintf(asmmstoreprintfp, "========================================"
+  fprintf(ASMM_STORE_LOGfp, "========================================"
     "========================================\n\n");
   // some serious printing for src info
   for (typename vector<DD::SeqIndexFactorLookup<SIT> >::const_iterator
     i=srcSeqIndexFactorLookup.begin(); i!=srcSeqIndexFactorLookup.end(); ++i){
-    fprintf(asmmstoreprintfp, "gjt srcDistDir: localPet %d, srcSeqIndex = %d, "
+    fprintf(ASMM_STORE_LOGfp, "gjt srcDistDir: localPet %d, srcSeqIndex = %d, "
       "srcSeqIndexFactorLookup[%d].factorCount = %d\n -> .de: ",
       localPet, (i-srcSeqIndexFactorLookup.begin())
       +srcSeqIndexInterval[localPet].min, i-srcSeqIndexFactorLookup.begin(),
       i->factorCount);
     for (int j=0; j<i->de.size(); j++)
-      fprintf(asmmstoreprintfp, "%d, ", i->de[j]);
-    fprintf(asmmstoreprintfp, "\n");
+      fprintf(ASMM_STORE_LOGfp, "%d, ", i->de[j]);
+    fprintf(ASMM_STORE_LOGfp, "\n");
     for (int j=0; j<i->factorCount; j++){
-      fprintf(asmmstoreprintfp, "\tfactorList[%d]\n"
+      fprintf(ASMM_STORE_LOGfp, "\tfactorList[%d]\n"
         "\t\t.partnerSeqIndex.decompSeqIndex = %d\n"
         "\t\t.partnerDe = ", j,
         i->factorList[j].partnerSeqIndex
         .decompSeqIndex);
       for (int jj=0;
         jj<i->factorList[j].partnerDe.size(); jj++)
-        fprintf(asmmstoreprintfp, "%d, ",
+        fprintf(ASMM_STORE_LOGfp, "%d, ",
           i->factorList[j].partnerDe[jj]);
-      fprintf(asmmstoreprintfp, "\n");
-      fprintf(asmmstoreprintfp, "\t\t.factor = %d\n",
+      fprintf(ASMM_STORE_LOGfp, "\n");
+      fprintf(ASMM_STORE_LOGfp, "\t\t.factor = %d\n",
         *((int *)i->factorList[j].factor));
     }
   }
 #endif
   
-#ifdef ASMMSTOREPRINT_disabled
+#ifdef ASMM_STORE_LOG_disabled
   // some serious printing for dst info
   for (typename vector<DD::SeqIndexFactorLookup<DIT> >::const_iterator
     i=dstSeqIndexFactorLookup.begin(); i!=dstSeqIndexFactorLookup.end(); ++i){
-    fprintf(asmmstoreprintfp, "gjt dstDistDir: localPet %d, dstSeqIndex = %d, "
+    fprintf(ASMM_STORE_LOGfp, "gjt dstDistDir: localPet %d, dstSeqIndex = %d, "
       "dstSeqIndexFactorLookup[%d].factorCount = %d\n -> .de: ",
       localPet, (i-dstSeqIndexFactorLookup.begin())
       +dstSeqIndexInterval[localPet].min, i-dstSeqIndexFactorLookup.begin(),
       i->factorCount);
     for (int j=0; j<i->de.size(); j++)
-      fprintf(asmmstoreprintfp, "%d, ", i->de[j]);
-    fprintf(asmmstoreprintfp, "\n");
+      fprintf(ASMM_STORE_LOGfp, "%d, ", i->de[j]);
+    fprintf(ASMM_STORE_LOGfp, "\n");
     for (int j=0; j<i->factorCount; j++){
-      fprintf(asmmstoreprintfp, "\tfactorList[%d]\n"
+      fprintf(ASMM_STORE_LOGfp, "\tfactorList[%d]\n"
         "\t\t.partnerSeqIndex.decompSeqIndex = %d\n"
         "\t\t.partnerDe = ", j,
         i->factorList[j].partnerSeqIndex
         .decompSeqIndex);
       for (int jj=0;
         jj<i->factorList[j].partnerDe.size(); jj++)
-        fprintf(asmmstoreprintfp, "%d, ",
+        fprintf(ASMM_STORE_LOGfp, "%d, ",
           i->factorList[j].partnerDe[jj]);
-      fprintf(asmmstoreprintfp, "\n");
-      fprintf(asmmstoreprintfp, "\t\t.factor = %d\n",
+      fprintf(ASMM_STORE_LOGfp, "\n");
+      fprintf(ASMM_STORE_LOGfp, "\t\t.factor = %d\n",
         *((int *)i->factorList[j].factor));
     }
   }
@@ -9822,15 +9897,15 @@ template<typename SIT, typename DIT>
 /////////////////////////  
 #endif
   
-#ifdef ASMMSTOREPRINT_disabled
-  fprintf(asmmstoreprintfp, "\n========================================"
+#ifdef ASMM_STORE_LOG_disabled
+  fprintf(ASMM_STORE_LOGfp, "\n========================================"
     "========================================\n");
-  fprintf(asmmstoreprintfp, "========================================"
+  fprintf(ASMM_STORE_LOGfp, "========================================"
     "========================================\n\n");
   // more serious printing
   for (int j=0; j<srcLocalDeCount; j++){
     for (int k=0; k<srcLinSeqVect[j].size(); k++){
-      fprintf(asmmstoreprintfp, "localPet: %d, "
+      fprintf(ASMM_STORE_LOGfp, "localPet: %d, "
         "srcLinSeqVect[%d][%d].linIndex = %d, "
         ".seqIndex = %d/%d, .factorCount = %d\n",
         localPet, j, k, srcLinSeqVect[j][k].linIndex,
@@ -9838,17 +9913,17 @@ template<typename SIT, typename DIT>
         srcLinSeqVect[j][k].seqIndex.tensorSeqIndex,
         srcLinSeqVect[j][k].factorCount);
       for (int kk=0; kk<srcLinSeqVect[j][k].factorCount; kk++){
-        fprintf(asmmstoreprintfp, "\tfactorList[%d]\n"
+        fprintf(ASMM_STORE_LOGfp, "\tfactorList[%d]\n"
           "\t\t.partnerSeqIndex = %d/%d\n"
           "\t\t.partnerDe = ", kk,
           srcLinSeqVect[j][k].factorList[kk].partnerSeqIndex.decompSeqIndex,
           srcLinSeqVect[j][k].factorList[kk].partnerSeqIndex.tensorSeqIndex);
         for (int jj=0;
           jj<srcLinSeqVect[j][k].factorList[kk].partnerDe.size(); jj++)
-          fprintf(asmmstoreprintfp, "%d, ",
+          fprintf(ASMM_STORE_LOGfp, "%d, ",
             srcLinSeqVect[j][k].factorList[kk].partnerDe[jj]);
-        fprintf(asmmstoreprintfp, "\n");
-        fprintf(asmmstoreprintfp, "\t\t.factor = %d\n",
+        fprintf(ASMM_STORE_LOGfp, "\n");
+        fprintf(ASMM_STORE_LOGfp, "\t\t.factor = %d\n",
           *((int *)srcLinSeqVect[j][k].factorList[kk].factor));
       }
     }
@@ -9857,7 +9932,7 @@ template<typename SIT, typename DIT>
   // more serious printing
   for (int j=0; j<dstLocalDeCount; j++){
     for (int k=0; k<dstLinSeqVect[j].size(); k++){
-      fprintf(asmmstoreprintfp, "localPet: %d, "
+      fprintf(ASMM_STORE_LOGfp, "localPet: %d, "
         "dstLinSeqVect[%d][%d].linIndex = %d, "
         ".seqIndex = %d/%d, .factorCount = %d\n",
         localPet, j, k, dstLinSeqVect[j][k].linIndex,
@@ -9865,17 +9940,17 @@ template<typename SIT, typename DIT>
         dstLinSeqVect[j][k].seqIndex.tensorSeqIndex,
         dstLinSeqVect[j][k].factorCount);
       for (int kk=0; kk<dstLinSeqVect[j][k].factorCount; kk++){
-        fprintf(asmmstoreprintfp, "\tfactorList[%d]\n"
+        fprintf(ASMM_STORE_LOGfp, "\tfactorList[%d]\n"
           "\t\t.partnerSeqIndex = %d/%d\n"
           "\t\t.partnerDe = ", kk,
           dstLinSeqVect[j][k].factorList[kk].partnerSeqIndex.decompSeqIndex,
           dstLinSeqVect[j][k].factorList[kk].partnerSeqIndex.tensorSeqIndex);
         for (int jj=0;
           jj<dstLinSeqVect[j][k].factorList[kk].partnerDe.size(); jj++)
-          fprintf(asmmstoreprintfp, "%d, ",
+          fprintf(ASMM_STORE_LOGfp, "%d, ",
             dstLinSeqVect[j][k].factorList[kk].partnerDe[jj]);
-        fprintf(asmmstoreprintfp, "\n");
-        fprintf(asmmstoreprintfp, "\t\t.factor = %d\n",
+        fprintf(ASMM_STORE_LOGfp, "\n");
+        fprintf(ASMM_STORE_LOGfp, "\t\t.factor = %d\n",
           *((int *)dstLinSeqVect[j][k].factorList[kk].factor));
       }
     }
@@ -9989,15 +10064,15 @@ template<typename SIT, typename DIT>
     }
   }
   
-#ifdef ASMMSTOREPRINT_disabled
-  fprintf(asmmstoreprintfp, "\n========================================"
+#ifdef ASMM_STORE_LOG_disabled
+  fprintf(ASMM_STORE_LOGfp, "\n========================================"
     "========================================\n");
-  fprintf(asmmstoreprintfp, "========================================"
+  fprintf(ASMM_STORE_LOGfp, "========================================"
     "========================================\n\n");
   // more serious printing
   for (int j=0; j<srcLocalDeCount; j++){
     for (int k=0; k<srcLinSeqVect[j].size(); k++){
-      fprintf(asmmstoreprintfp, "localPet: %d, "
+      fprintf(ASMM_STORE_LOGfp, "localPet: %d, "
         "srcLinSeqVect[%d][%d].linIndex = %d, "
         ".seqIndex = %d/%d, .factorCount = %d\n",
         localPet, j, k, srcLinSeqVect[j][k].linIndex,
@@ -10005,17 +10080,17 @@ template<typename SIT, typename DIT>
         srcLinSeqVect[j][k].seqIndex.tensorSeqIndex,
         srcLinSeqVect[j][k].factorCount);
       for (int kk=0; kk<srcLinSeqVect[j][k].factorCount; kk++){
-        fprintf(asmmstoreprintfp, "\tfactorList[%d]\n"
+        fprintf(ASMM_STORE_LOGfp, "\tfactorList[%d]\n"
           "\t\t.partnerSeqIndex = %d/%d\n"
           "\t\t.partnerDe = ", kk,
           srcLinSeqVect[j][k].factorList[kk].partnerSeqIndex.decompSeqIndex,
           srcLinSeqVect[j][k].factorList[kk].partnerSeqIndex.tensorSeqIndex);
         for (int jj=0;
           jj<srcLinSeqVect[j][k].factorList[kk].partnerDe.size(); jj++)
-          fprintf(asmmstoreprintfp, "%d, ",
+          fprintf(ASMM_STORE_LOGfp, "%d, ",
             srcLinSeqVect[j][k].factorList[kk].partnerDe[jj]);
-        fprintf(asmmstoreprintfp, "\n");
-        fprintf(asmmstoreprintfp, "\t\t.factor = %d\n",
+        fprintf(ASMM_STORE_LOGfp, "\n");
+        fprintf(ASMM_STORE_LOGfp, "\t\t.factor = %d\n",
           *((int *)srcLinSeqVect[j][k].factorList[kk].factor));
       }
     }
@@ -10024,7 +10099,7 @@ template<typename SIT, typename DIT>
   // more serious printing
   for (int j=0; j<dstLocalDeCount; j++){
     for (int k=0; k<dstLinSeqVect[j].size(); k++){
-      fprintf(asmmstoreprintfp, "localPet: %d, "
+      fprintf(ASMM_STORE_LOGfp, "localPet: %d, "
         "dstLinSeqVect[%d][%d].linIndex = %d, "
         ".seqIndex = %d/%d, .factorCount = %d\n",
         localPet, j, k, dstLinSeqVect[j][k].linIndex,
@@ -10032,17 +10107,17 @@ template<typename SIT, typename DIT>
         dstLinSeqVect[j][k].seqIndex.tensorSeqIndex,
         dstLinSeqVect[j][k].factorCount);
       for (int kk=0; kk<dstLinSeqVect[j][k].factorCount; kk++){
-        fprintf(asmmstoreprintfp, "\tfactorList[%d]\n"
+        fprintf(ASMM_STORE_LOGfp, "\tfactorList[%d]\n"
           "\t\t.partnerSeqIndex = %d/%d\n"
           "\t\t.partnerDe = ", kk,
           dstLinSeqVect[j][k].factorList[kk].partnerSeqIndex.decompSeqIndex,
           dstLinSeqVect[j][k].factorList[kk].partnerSeqIndex.tensorSeqIndex);
         for (int jj=0;
           jj<dstLinSeqVect[j][k].factorList[kk].partnerDe.size(); jj++)
-          fprintf(asmmstoreprintfp, "%d, ",
+          fprintf(ASMM_STORE_LOGfp, "%d, ",
             dstLinSeqVect[j][k].factorList[kk].partnerDe[jj]);
-        fprintf(asmmstoreprintfp, "\n");
-        fprintf(asmmstoreprintfp, "\t\t.factor = %d\n",
+        fprintf(ASMM_STORE_LOGfp, "\n");
+        fprintf(ASMM_STORE_LOGfp, "\t\t.factor = %d\n",
           *((int *)dstLinSeqVect[j][k].factorList[kk].factor));
       }
     }
@@ -10201,8 +10276,8 @@ template<typename SIT, typename DIT>
     return rc;
   }
   
-#ifdef ASMMSTOREPRINT_disabled
-  fclose(asmmstoreprintfp);
+#ifdef ASMM_STORE_LOG_disabled
+  fclose(ASMM_STORE_LOGfp);
 #endif
   
 #ifdef ASMMSTOREMEMLOG_on
@@ -10434,8 +10509,8 @@ template<typename SIT, typename DIT> int sparseMatMulStoreEncodeXXE(
     VMK::wtime(&t9a);   //gjt - profile
 #endif
         
-#ifdef ASMMSTOREPRINT_disabled
-fprintf(asmmstoreprintfp, "iCount: %d, localDeFactorCount: %d\n", iCount,
+#ifdef ASMM_STORE_LOG_disabled
+fprintf(ASMM_STORE_LOGfp, "iCount: %d, localDeFactorCount: %d\n", iCount,
   localDeFactorCount);
 #endif
     int *index2Ref2 = new int[localDeFactorCount];  // large enough
@@ -10547,9 +10622,9 @@ fprintf(asmmstoreprintfp, "iCount: %d, localDeFactorCount: %d\n", iCount,
       for (int i=0; i<recvnbDiffPartnerDeCount; i++){
         sort(dstInfoTable[i].begin(), dstInfoTable[i].end(),
           ArrayHelper::vectorOrderDstInfo<DIT,SIT>);
-#ifdef ASMMSTOREPRINT_disabled
+#ifdef ASMM_STORE_LOG_disabled
         for (int k=0; k<dstInfoTable[i].size(); k++)
-          fprintf(asmmstoreprintfp, "dstInfoTable[%d][%d].seqIndex = %d/%d, "
+          fprintf(ASMM_STORE_LOGfp, "dstInfoTable[%d][%d].seqIndex = %d/%d, "
             ".partnerSeqIndex = %d/%d, .factor = %p\n", i, k,
             dstInfoTable[i][k].seqIndex.decompSeqIndex, 
             dstInfoTable[i][k].seqIndex.tensorSeqIndex, 
@@ -10576,11 +10651,13 @@ fprintf(asmmstoreprintfp, "iCount: %d, localDeFactorCount: %d\n", iCount,
             ++vectorLength;
             rangeStop++;
           }
-#ifdef ASMMSTOREPRINT
-asmmstorestream << "gjt: dstTensorContigLength: " << dstTensorContigLength <<
-  " vectorLength: " << vectorLength << " decompSeqIndex: " << decompSeqIndex <<
-  "\n";
-asmmstorestream.flush();
+#ifdef ASMM_STORE_LOG
+  {
+    std::stringstream msg;
+    msg << "ASMM_STORE_LOG: dstTensorContigLength: " << dstTensorContigLength <<
+  " vectorLength: " << vectorLength << " decompSeqIndex: " << decompSeqIndex;
+    ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+  }
 #endif
           if ((rangeWrite != dstInfoTable[i].begin())
             && ((rangeWrite-1)->vectorLength != vectorLength)){
@@ -10591,9 +10668,6 @@ asmmstorestream.flush();
           if (vectorLength != dstTensorContigLength){
             ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_INCONS,
             "vectorization failed", ESMC_CONTEXT, &rc);
-#ifdef ASMMSTOREPRINT
-asmmstorestream.close();
-#endif
             return rc;
           }
           *rangeWrite = *rangeStart;  // copy table element
@@ -10609,13 +10683,13 @@ asmmstorestream.close();
   VM::logMemInfo(std::string("ASMMStoreEncodeXXE5.0"));
 #endif
 
-#ifdef ASMMSTOREPRINT_disabled
+#ifdef ASMM_STORE_LOG_disabled
     // print:
-    fprintf(asmmstoreprintfp, "dstArray: %d, %d\n", j,
+    fprintf(ASMM_STORE_LOGfp, "dstArray: %d, %d\n", j,
       recvnbDiffPartnerDeCount); 
     for (int i=0; i<recvnbDiffPartnerDeCount; i++)
       for (int k=0; k<dstInfoTable[i].size(); k++)
-        fprintf(asmmstoreprintfp, "dstInfoTable[%d][%d].seqIndex = %d/%d, "
+        fprintf(ASMM_STORE_LOGfp, "dstInfoTable[%d][%d].seqIndex = %d/%d, "
           ".partnerSeqIndex[][] = %d/%d\n", i, k,
           dstInfoTable[i][k].seqIndex.decompSeqIndex, 
           dstInfoTable[i][k].seqIndex.tensorSeqIndex, 
@@ -10703,8 +10777,8 @@ ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
       recvnbElement.localPet = localPet;
       recvnbElement.petCount = petCount;
       recvnbVector.push_back(recvnbElement);
-#ifdef ASMMSTOREPRINT_disabled
-      fprintf(asmmstoreprintfp, "gjt: recvnbElement localPet %d, srcPet %d, "
+#ifdef ASMM_STORE_LOG_disabled
+      fprintf(ASMM_STORE_LOGfp, "gjt: recvnbElement localPet %d, srcPet %d, "
         "vectorLength=%d\n", localPet, srcPet, vectorLength);
 #endif
     } // for i - recvnbDiffPartnerDeCount
@@ -10872,11 +10946,11 @@ ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
       }
     }
         
-#ifdef ASMMSTOREPRINT_disabled
+#ifdef ASMM_STORE_LOG_disabled
     // print:
     for (int i=0; i<sendnbDiffPartnerDeCount; i++)
       for (int k=0; k<srcInfoTable[i].size(); k++)
-        fprintf(asmmstoreprintfp, "srcInfoTable[%d][%d].seqIndex = %d/%d, "
+        fprintf(ASMM_STORE_LOGfp, "srcInfoTable[%d][%d].seqIndex = %d/%d, "
           ".partnerSeqIndex[][] = %d/%d\n", i, k,
           srcInfoTable[i][k].seqIndex.decompSeqIndex, 
           srcInfoTable[i][k].seqIndex.tensorSeqIndex, 
@@ -10976,11 +11050,11 @@ ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
       }
 #endif
       
-#ifdef ASMMSTOREPRINT_disabled
-      fprintf(asmmstoreprintfp, "gjt: sendnbElement localPet %d, dstPet %d, "
+#ifdef ASMM_STORE_LOG_disabled
+      fprintf(ASMM_STORE_LOGfp, "gjt: sendnbElement localPet %d, dstPet %d, "
         "vectorLength=%d\n", localPet, dstPet, vectorLength);
       for (int k=0; k<linIndexContigBlockList.size(); k++){
-        fprintf(asmmstoreprintfp, "linIndexContigBlockList[%d]: linIndex=%d, "
+        fprintf(ASMM_STORE_LOGfp, "linIndexContigBlockList[%d]: linIndex=%d, "
           "linIndexCount=%d\n", k, linIndexContigBlockList[k].linIndex,
           linIndexContigBlockList[k].linIndexCount);
       }
@@ -11522,6 +11596,13 @@ template<typename SIT, typename DIT> int sparseMatMulStoreEncodeXXEStream(
       }
       if (pSend != sendnbVector.end()){
         int k = pSend - sendnbVector.begin();
+#ifdef ASMM_STORE_LOG
+  {
+    std::stringstream msg;
+    msg << "ASMM_STORE_LOG:" << __LINE__ << " rraCount=" << rraCount;
+    ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+  }
+#endif
         localrc = pSend->appendSendnb(xxe, 0x0|XXE::filterBitNbStart,
           srcTermProcessing, elementTK, valueTK, factorTK, dataSizeSrc, rraList,
           rraCount, k);
@@ -11546,6 +11627,13 @@ template<typename SIT, typename DIT> int sparseMatMulStoreEncodeXXEStream(
     for (int i=0; i<pipelineDepth; i++){
       if (pSend != sendnbVector.end()){
         int k = pSend - sendnbVector.begin();
+#ifdef ASMM_STORE_LOG
+  {
+    std::stringstream msg;
+    msg << "ASMM_STORE_LOG:" << __LINE__ << " rraCount=" << rraCount;
+    ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+  }
+#endif
         localrc = pSend->appendSendnb(xxe, 0x0|XXE::filterBitNbStart,
           srcTermProcessing, elementTK, valueTK, factorTK, dataSizeSrc, rraList,
           rraCount, k);
@@ -11612,6 +11700,13 @@ template<typename SIT, typename DIT> int sparseMatMulStoreEncodeXXEStream(
       }
       if ((pSend != sendnbVector.end()) && sendnbOK){
         int k = pSend - sendnbVector.begin();
+#ifdef ASMM_STORE_LOG
+  {
+    std::stringstream msg;
+    msg << "ASMM_STORE_LOG:" << __LINE__ << " rraCount=" << rraCount;
+    ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+  }
+#endif
         localrc = pSend->appendSendnb(xxe, 0x0|XXE::filterBitNbStart,
           srcTermProcessing, elementTK, valueTK, factorTK, dataSizeSrc, rraList,
           rraCount, k);

@@ -3182,9 +3182,13 @@ printf("gjt - DID NOT CANCEL commhandle\n");
         ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
 #endif
         // recursively resolve the TKs of the arguments and execute operation
+        bool superVector = (xxeSumSuperScalarDstRRAInfo->vectorFlag 
+          && dstSuperVecSize_r>=1 && superVectorOkay);
         sssDstRra(rraBase, xxeSumSuperScalarDstRRAInfo->elementTK,
           rraOffsetList, valueBase, valueOffsetList, 
-          xxeSumSuperScalarDstRRAInfo->valueTK, termCount, vectorL, 0);
+          xxeSumSuperScalarDstRRAInfo->valueTK, termCount, vectorL, 0,
+          dstSuperVecSize_r, dstSuperVecSize_s, dstSuperVecSize_t,
+          dstSuperVecSize_i, dstSuperVecSize_j, superVector);
       }
       break;
     case sumSuperScalarListDstRRA:
@@ -3252,12 +3256,15 @@ printf("gjt - DID NOT CANCEL commhandle\n");
         ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
 #endif
         // recursively resolve the TKs of the arguments and execute operation
+        bool superVector = (xxeSumSuperScalarListDstRRAInfo->vectorFlag 
+          && dstSuperVecSize_r>=1 && superVectorOkay);
         ssslDstRra(rraBaseList, rraIndexList,
           xxeSumSuperScalarListDstRRAInfo->elementTK,
           rraOffsetList,
           valueBaseListResolve, valueOffsetList, baseListIndexList,
-          xxeSumSuperScalarListDstRRAInfo->valueTK, termCount, vectorL,
-          0);
+          xxeSumSuperScalarListDstRRAInfo->valueTK, termCount, vectorL, 0, 
+          dstSuperVecSize_r, dstSuperVecSize_s, dstSuperVecSize_t,
+          dstSuperVecSize_i, dstSuperVecSize_j, superVector);
       }
       break;
     case productSumSuperScalarDstRRA:
@@ -3298,11 +3305,15 @@ printf("gjt - DID NOT CANCEL commhandle\n");
         ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
 #endif
         // recursively resolve the TKs of the arguments and execute operation
+        bool superVector = (xxeProductSumSuperScalarDstRRAInfo->vectorFlag 
+          && dstSuperVecSize_r>=1 && superVectorOkay);
         psssDstRra(rraBase, xxeProductSumSuperScalarDstRRAInfo->elementTK,
           rraOffsetList, factorList, 
           xxeProductSumSuperScalarDstRRAInfo->factorTK,
           valueBase, valueOffsetList,
-          xxeProductSumSuperScalarDstRRAInfo->valueTK, termCount, vectorL, 0);
+          xxeProductSumSuperScalarDstRRAInfo->valueTK, termCount, vectorL, 0, 
+          dstSuperVecSize_r, dstSuperVecSize_s, dstSuperVecSize_t,
+          dstSuperVecSize_i, dstSuperVecSize_j, superVector);
       }
       break;
     case productSumSuperScalarListDstRRA:
@@ -3374,13 +3385,16 @@ printf("gjt - DID NOT CANCEL commhandle\n");
         ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
 #endif
         // recursively resolve the TKs of the arguments and execute operation
+        bool superVector = (xxeProductSumSuperScalarListDstRRAInfo->vectorFlag 
+          && dstSuperVecSize_r>=1 && superVectorOkay);
         pssslDstRra(rraBaseList, rraIndexList,
           xxeProductSumSuperScalarListDstRRAInfo->elementTK,
           rraOffsetList, factorList, 
           xxeProductSumSuperScalarListDstRRAInfo->factorTK,
           valueBaseListResolve, valueOffsetList, baseListIndexList,
-          xxeProductSumSuperScalarListDstRRAInfo->valueTK, termCount, vectorL,
-          0);
+          xxeProductSumSuperScalarListDstRRAInfo->valueTK, termCount, vectorL,0, 
+          dstSuperVecSize_r, dstSuperVecSize_s, dstSuperVecSize_t,
+          dstSuperVecSize_i, dstSuperVecSize_j, superVector);
       }
       break;
     case productSumSuperScalarSrcRRA:
@@ -3427,8 +3441,7 @@ printf("gjt - DID NOT CANCEL commhandle\n");
           rraOffsetList, factorList,
           xxeProductSumSuperScalarSrcRRAInfo->factorTK,
           elementBase, elementOffsetList,
-          xxeProductSumSuperScalarSrcRRAInfo->elementTK, termCount,
-          vectorL, 0);
+          xxeProductSumSuperScalarSrcRRAInfo->elementTK, termCount, vectorL, 0);
       }
       break;
     case productSumSuperScalarContigRRA:
@@ -3529,8 +3542,9 @@ printf("gjt - DID NOT CANCEL commhandle\n");
         int vectorL = 1; // initialize
         if (xxeZeroSuperScalarRRAInfo->vectorFlag)
           vectorL = *vectorLength;
-        if(xxeZeroSuperScalarRRAInfo->vectorFlag && dstSuperVecSize_r>=1
-          && superVectorOkay){
+        bool superVector = (xxeZeroSuperScalarRRAInfo->vectorFlag 
+          && dstSuperVecSize_r>=1 && superVectorOkay);
+        if(superVector){
 #ifdef XXE_EXEC_LOG
           sprintf(msg, "XXE::zeroSuperScalarRRAInfo: "
             "taking super-vector branch...");
@@ -3653,8 +3667,9 @@ printf("gjt - DID NOT CANCEL commhandle\n");
         int vectorL = 1; // initialize
         if (xxeMemGatherSrcRRAInfo->vectorFlag)
           vectorL = *vectorLength;
-        if(xxeMemGatherSrcRRAInfo->vectorFlag && srcSuperVecSize_r>=1
-          && superVectorOkay){
+        bool superVector = (xxeMemGatherSrcRRAInfo->vectorFlag 
+          && srcSuperVecSize_r>=1 && superVectorOkay);
+        if(superVector){
 #ifdef XXE_EXEC_LOG
           sprintf(msg, "XXE::memGatherSrcRRA: taking super-vector branch...");
           ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
@@ -3820,10 +3835,21 @@ inline void XXE::exec_memGatherSrcRRA(
   int *countList = xxeMemGatherSrcRRAInfo->countList;
   T *dstPointer = (T*)dstBase;
   T *srcPointer;
+#ifdef XXE_EXEC_LOG
+  char msg[1024];
+  sprintf(msg, "chunkCount=%d", xxeMemGatherSrcRRAInfo->chunkCount);
+  ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
+#endif
   for (int k=0; k<xxeMemGatherSrcRRAInfo->chunkCount; k++){
     srcPointer = ((T*)rraBase) + rraOffsetList[k] * vectorL;
-    for (int kk=0; kk<countList[k]*vectorL; kk++)
-      dstPointer[kk] = srcPointer[kk]; 
+    for (int kk=0; kk<countList[k]*vectorL; kk++){
+      dstPointer[kk] = srcPointer[kk];
+#ifdef XXE_EXEC_LOG
+      sprintf(msg, "srcPointer=%p, *=%d  (%d,%d)",
+        &(srcPointer[kk]), srcPointer[kk], k,kk);
+      ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
+#endif
+    }
     dstPointer += countList[k] * vectorL;
   }
 }
@@ -3844,6 +3870,12 @@ inline void XXE::exec_memGatherSrcRRASuper(
   T *srcPointer;
   int sz_i = size_i[xxeMemGatherSrcRRAInfo->rraIndex];
   int sz_j = size_j[xxeMemGatherSrcRRAInfo->rraIndex];
+#ifdef XXE_EXEC_LOG
+  char msg[1024];
+  sprintf(msg, "sz_i=%d, sz_j=%d, chunkCount=%d", sz_i, sz_j,
+    xxeMemGatherSrcRRAInfo->chunkCount);
+  ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
+#endif
   for (int k=0; k<xxeMemGatherSrcRRAInfo->chunkCount; k++){
     for (int kk=0; kk<countList[k]; kk++){
       int i = (rraOffsetList[k] + kk) % sz_i;
@@ -3856,10 +3888,9 @@ inline void XXE::exec_memGatherSrcRRASuper(
         for (int kkkk=0; kkkk<size_r; kkkk++){
           dstPointer[kkkk] = srcPointer[kkkk];
 #ifdef XXE_EXEC_LOG
-  char msg[1024];
-  sprintf(msg, "srcPointer=%p, *=%d  (%d,%d,%d,%d)", 
-    srcPointer, *srcPointer, k,kk,kkk,kkkk);
-  ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
+          sprintf(msg, "srcPointer=%p, *=%d  (%d,%d,%d,%d)",
+            &(srcPointer[kkkk]), srcPointer[kkkk], k,kk,kkk,kkkk);
+          ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
 #endif
         }
         dstPointer += size_r; // dst step in contiguous buffer
@@ -4180,7 +4211,9 @@ void XXE::pss(T *element, TKId elementTK, U *factor, TKId factorTK,
 template<typename T, typename V>
 void XXE::sssDstRra(T *rraBase, TKId elementTK, int *rraOffsetList,
   V *valueBase, int *valueOffsetList, TKId valueTK, int termCount,
-  int vectorLength, int resolved){
+  int vectorLength, int resolved,
+  int size_r, int size_s, int size_t, int *size_i, int *size_j,
+  bool superVector){
   // Recursively resolve the TKs and typecast the arguments appropriately
   // before executing sssDstRra operation on the data.
 #ifdef XXE_RECURSIVE_DEBUG
@@ -4194,28 +4227,32 @@ void XXE::sssDstRra(T *rraBase, TKId elementTK, int *rraOffsetList,
       {
         ESMC_I4 *rraBaseT = (ESMC_I4 *)rraBase;
         sssDstRra(rraBaseT, elementTK, rraOffsetList, valueBase,
-          valueOffsetList, valueTK, termCount, vectorLength, resolved);
+          valueOffsetList, valueTK, termCount, vectorLength, resolved,
+          size_r, size_s, size_t, size_i, size_j, superVector);
       }
       break;
     case I8:
       {
         ESMC_I8 *rraBaseT = (ESMC_I8 *)rraBase;
         sssDstRra(rraBaseT, elementTK, rraOffsetList, valueBase,
-          valueOffsetList, valueTK, termCount, vectorLength, resolved);
+          valueOffsetList, valueTK, termCount, vectorLength, resolved,
+          size_r, size_s, size_t, size_i, size_j, superVector);
       }
       break;
     case R4:
       {
         ESMC_R4 *rraBaseT = (ESMC_R4 *)rraBase;
         sssDstRra(rraBaseT, elementTK, rraOffsetList, valueBase,
-          valueOffsetList, valueTK, termCount, vectorLength, resolved);
+          valueOffsetList, valueTK, termCount, vectorLength, resolved,
+          size_r, size_s, size_t, size_i, size_j, superVector);
       }
       break;
     case R8:
       {
         ESMC_R8 *rraBaseT = (ESMC_R8 *)rraBase;
         sssDstRra(rraBaseT, elementTK, rraOffsetList, valueBase,
-          valueOffsetList, valueTK, termCount, vectorLength, resolved);
+          valueOffsetList, valueTK, termCount, vectorLength, resolved,
+          size_r, size_s, size_t, size_i, size_j, superVector);
       }
       break;
     default:
@@ -4230,28 +4267,32 @@ void XXE::sssDstRra(T *rraBase, TKId elementTK, int *rraOffsetList,
       {
         ESMC_I4 *valueBaseT = (ESMC_I4 *)valueBase;
         sssDstRra(rraBase, elementTK, rraOffsetList, valueBaseT,
-          valueOffsetList, valueTK, termCount, vectorLength, resolved);
+          valueOffsetList, valueTK, termCount, vectorLength, resolved,
+          size_r, size_s, size_t, size_i, size_j, superVector);
       }
       break;
     case I8:
       {
         ESMC_I8 *valueBaseT = (ESMC_I8 *)valueBase;
         sssDstRra(rraBase, elementTK, rraOffsetList, valueBaseT,
-          valueOffsetList, valueTK, termCount, vectorLength, resolved);
+          valueOffsetList, valueTK, termCount, vectorLength, resolved,
+          size_r, size_s, size_t, size_i, size_j, superVector);
       }
       break;
     case R4:
       {
         ESMC_R4 *valueBaseT = (ESMC_R4 *)valueBase;
         sssDstRra(rraBase, elementTK, rraOffsetList, valueBaseT,
-          valueOffsetList, valueTK, termCount, vectorLength, resolved);
+          valueOffsetList, valueTK, termCount, vectorLength, resolved,
+          size_r, size_s, size_t, size_i, size_j, superVector);
       }
       break;
     case R8:
       {
         ESMC_R8 *valueBaseT = (ESMC_R8 *)valueBase;
         sssDstRra(rraBase, elementTK, rraOffsetList, valueBaseT,
-          valueOffsetList, valueTK, termCount, vectorLength, resolved);
+          valueOffsetList, valueTK, termCount, vectorLength, resolved,
+          size_r, size_s, size_t, size_i, size_j, superVector);
       }
       break;
     default:
@@ -4264,14 +4305,15 @@ void XXE::sssDstRra(T *rraBase, TKId elementTK, int *rraOffsetList,
     typeid(V).name());
 #endif
   exec_sssDstRra(rraBase, rraOffsetList, valueBase, valueOffsetList, termCount,
-    vectorLength);
+    vectorLength, size_r, size_s, size_t, size_i, size_j);
 }
 
 //---
 
 template<typename T, typename V>
 void XXE::exec_sssDstRra(T *rraBase, int *rraOffsetList, V *valueBase, 
-  int *valueOffsetList, int termCount, int vectorLength){
+  int *valueOffsetList, int termCount, int vectorLength,
+  int size_r, int size_s, int size_t, int *size_i, int *size_j){
   T *element;
   V *value;
   if (vectorLength==1){
@@ -4298,7 +4340,9 @@ template<typename T, typename V>
 void XXE::ssslDstRra(T **rraBaseList, int *rraIndexList, TKId elementTK,
   int *rraOffsetList, V **valueBaseList,
   int *valueOffsetList, int *baseListIndexList,
-  TKId valueTK, int termCount, int vectorLength, int resolved){
+  TKId valueTK, int termCount, int vectorLength, int resolved,
+  int size_r, int size_s, int size_t, int *size_i, int *size_j, 
+  bool superVector){
   // Recursively resolve the TKs and typecast the arguments appropriately
   // before executing ssslDstRra operation on the data.
   T *element;
@@ -4311,7 +4355,8 @@ void XXE::ssslDstRra(T **rraBaseList, int *rraIndexList, TKId elementTK,
         ESMC_I4 **rraBaseTList = (ESMC_I4 **)rraBaseList;
         ssslDstRra(rraBaseTList, rraIndexList, elementTK, rraOffsetList, 
           valueBaseList, valueOffsetList,
-          baseListIndexList, valueTK, termCount, vectorLength, resolved);
+          baseListIndexList, valueTK, termCount, vectorLength, resolved,
+          size_r, size_s, size_t, size_i, size_j, superVector);
       }
       break;
     case I8:
@@ -4319,7 +4364,8 @@ void XXE::ssslDstRra(T **rraBaseList, int *rraIndexList, TKId elementTK,
         ESMC_I8 **rraBaseTList = (ESMC_I8 **)rraBaseList;
         ssslDstRra(rraBaseTList, rraIndexList, elementTK, rraOffsetList, 
           valueBaseList, valueOffsetList,
-          baseListIndexList, valueTK, termCount, vectorLength, resolved);
+          baseListIndexList, valueTK, termCount, vectorLength, resolved,
+          size_r, size_s, size_t, size_i, size_j, superVector);
       }
       break;
     case R4:
@@ -4327,7 +4373,8 @@ void XXE::ssslDstRra(T **rraBaseList, int *rraIndexList, TKId elementTK,
         ESMC_R4 **rraBaseTList = (ESMC_R4 **)rraBaseList;
         ssslDstRra(rraBaseTList, rraIndexList, elementTK, rraOffsetList, 
           valueBaseList, valueOffsetList,
-          baseListIndexList, valueTK, termCount, vectorLength, resolved);
+          baseListIndexList, valueTK, termCount, vectorLength, resolved,
+          size_r, size_s, size_t, size_i, size_j, superVector);
       }
       break;
     case R8:
@@ -4335,7 +4382,8 @@ void XXE::ssslDstRra(T **rraBaseList, int *rraIndexList, TKId elementTK,
         ESMC_R8 **rraBaseTList = (ESMC_R8 **)rraBaseList;
         ssslDstRra(rraBaseTList, rraIndexList, elementTK, rraOffsetList, 
           valueBaseList, valueOffsetList,
-          baseListIndexList, valueTK, termCount, vectorLength, resolved);
+          baseListIndexList, valueTK, termCount, vectorLength, resolved,
+          size_r, size_s, size_t, size_i, size_j, superVector);
       }
       break;
     default:
@@ -4351,7 +4399,8 @@ void XXE::ssslDstRra(T **rraBaseList, int *rraIndexList, TKId elementTK,
         ESMC_I4 **valueBaseTList = (ESMC_I4 **)valueBaseList;
         ssslDstRra(rraBaseList, rraIndexList, elementTK, rraOffsetList,
           valueBaseTList, valueOffsetList,
-          baseListIndexList, valueTK, termCount, vectorLength, resolved);
+          baseListIndexList, valueTK, termCount, vectorLength, resolved,
+          size_r, size_s, size_t, size_i, size_j, superVector);
       }
       break;
     case I8:
@@ -4359,7 +4408,8 @@ void XXE::ssslDstRra(T **rraBaseList, int *rraIndexList, TKId elementTK,
         ESMC_I8 **valueBaseTList = (ESMC_I8 **)valueBaseList;
         ssslDstRra(rraBaseList, rraIndexList, elementTK, rraOffsetList,
           valueBaseTList, valueOffsetList,
-          baseListIndexList, valueTK, termCount, vectorLength, resolved);
+          baseListIndexList, valueTK, termCount, vectorLength, resolved,
+          size_r, size_s, size_t, size_i, size_j, superVector);
       }
       break;
     case R4:
@@ -4367,7 +4417,8 @@ void XXE::ssslDstRra(T **rraBaseList, int *rraIndexList, TKId elementTK,
         ESMC_R4 **valueBaseTList = (ESMC_R4 **)valueBaseList;
         ssslDstRra(rraBaseList, rraIndexList, elementTK, rraOffsetList,
           valueBaseTList, valueOffsetList,
-          baseListIndexList, valueTK, termCount, vectorLength, resolved);
+          baseListIndexList, valueTK, termCount, vectorLength, resolved,
+          size_r, size_s, size_t, size_i, size_j, superVector);
       }
       break;
     case R8:
@@ -4375,7 +4426,8 @@ void XXE::ssslDstRra(T **rraBaseList, int *rraIndexList, TKId elementTK,
         ESMC_R8 **valueBaseTList = (ESMC_R8 **)valueBaseList;
         ssslDstRra(rraBaseList, rraIndexList, elementTK, rraOffsetList,
           valueBaseTList, valueOffsetList,
-          baseListIndexList, valueTK, termCount, vectorLength, resolved);
+          baseListIndexList, valueTK, termCount, vectorLength, resolved,
+          size_r, size_s, size_t, size_i, size_j, superVector);
       }
       break;
     default:
@@ -4388,7 +4440,8 @@ void XXE::ssslDstRra(T **rraBaseList, int *rraIndexList, TKId elementTK,
     typeid(U).name(), typeid(V).name());
 #endif
   exec_ssslDstRra(rraBaseList, rraIndexList, rraOffsetList, valueBaseList,
-    valueOffsetList, baseListIndexList, termCount, vectorLength);
+    valueOffsetList, baseListIndexList, termCount, vectorLength,
+    size_r, size_s, size_t, size_i, size_j);
 }
 
 //---
@@ -4396,7 +4449,8 @@ void XXE::ssslDstRra(T **rraBaseList, int *rraIndexList, TKId elementTK,
 template<typename T, typename V>
 void XXE::exec_ssslDstRra(T **rraBaseList, int *rraIndexList,
   int *rraOffsetList, V **valueBaseList, int *valueOffsetList,
-  int *baseListIndexList, int termCount, int vectorLength){
+  int *baseListIndexList, int termCount, int vectorLength,
+  int size_r, int size_s, int size_t, int *size_i, int *size_j){
   T *element;
   V *value;
   if (vectorLength==1){
@@ -4425,7 +4479,9 @@ void XXE::exec_ssslDstRra(T **rraBaseList, int *rraIndexList,
 template<typename T, typename U, typename V>
 void XXE::psssDstRra(T *rraBase, TKId elementTK, int *rraOffsetList,
   U **factorList, TKId factorTK, V *valueBase, int *valueOffsetList,
-  TKId valueTK, int termCount, int vectorLength, int resolved){
+  TKId valueTK, int termCount, int vectorLength, int resolved,
+  int size_r, int size_s, int size_t, int *size_i, int *size_j,
+  bool superVector){
   // Recursively resolve the TKs and typecast the arguments appropriately
   // before executing psssDstRra operation on the data.
   if (resolved==0){
@@ -4436,7 +4492,7 @@ void XXE::psssDstRra(T *rraBase, TKId elementTK, int *rraOffsetList,
         ESMC_I4 *rraBaseT = (ESMC_I4 *)rraBase;
         psssDstRra(rraBaseT, elementTK, rraOffsetList, factorList, factorTK,
           valueBase, valueOffsetList, valueTK, termCount, vectorLength,
-          resolved);
+          resolved, size_r, size_s, size_t, size_i, size_j, superVector);
       }
       break;
     case I8:
@@ -4444,7 +4500,7 @@ void XXE::psssDstRra(T *rraBase, TKId elementTK, int *rraOffsetList,
         ESMC_I8 *rraBaseT = (ESMC_I8 *)rraBase;
         psssDstRra(rraBaseT, elementTK, rraOffsetList, factorList, factorTK,
           valueBase, valueOffsetList, valueTK, termCount, vectorLength,
-          resolved);
+          resolved, size_r, size_s, size_t, size_i, size_j, superVector);
       }
       break;
     case R4:
@@ -4452,7 +4508,7 @@ void XXE::psssDstRra(T *rraBase, TKId elementTK, int *rraOffsetList,
         ESMC_R4 *rraBaseT = (ESMC_R4 *)rraBase;
         psssDstRra(rraBaseT, elementTK, rraOffsetList, factorList, factorTK,
           valueBase, valueOffsetList, valueTK, termCount, vectorLength,
-          resolved);
+          resolved, size_r, size_s, size_t, size_i, size_j, superVector);
       }
       break;
     case R8:
@@ -4460,7 +4516,7 @@ void XXE::psssDstRra(T *rraBase, TKId elementTK, int *rraOffsetList,
         ESMC_R8 *rraBaseT = (ESMC_R8 *)rraBase;
         psssDstRra(rraBaseT, elementTK, rraOffsetList, factorList, factorTK,
           valueBase, valueOffsetList, valueTK, termCount, vectorLength,
-          resolved);
+          resolved, size_r, size_s, size_t, size_i, size_j, superVector);
       }
       break;
     default:
@@ -4476,7 +4532,7 @@ void XXE::psssDstRra(T *rraBase, TKId elementTK, int *rraOffsetList,
         ESMC_I4 **factorListT = (ESMC_I4 **)factorList;
         psssDstRra(rraBase, elementTK, rraOffsetList, factorListT, factorTK,
           valueBase, valueOffsetList, valueTK, termCount, vectorLength,
-          resolved);
+          resolved, size_r, size_s, size_t, size_i, size_j, superVector);
       }
       break;
     case I8:
@@ -4484,7 +4540,7 @@ void XXE::psssDstRra(T *rraBase, TKId elementTK, int *rraOffsetList,
         ESMC_I8 **factorListT = (ESMC_I8 **)factorList;
         psssDstRra(rraBase, elementTK, rraOffsetList, factorListT, factorTK,
           valueBase, valueOffsetList, valueTK, termCount, vectorLength,
-          resolved);
+          resolved, size_r, size_s, size_t, size_i, size_j, superVector);
       }
       break;
     case R4:
@@ -4492,7 +4548,7 @@ void XXE::psssDstRra(T *rraBase, TKId elementTK, int *rraOffsetList,
         ESMC_R4 **factorListT = (ESMC_R4 **)factorList;
         psssDstRra(rraBase, elementTK, rraOffsetList, factorListT, factorTK,
           valueBase, valueOffsetList, valueTK, termCount, vectorLength,
-          resolved);
+          resolved, size_r, size_s, size_t, size_i, size_j, superVector);
       }
       break;
     case R8:
@@ -4500,7 +4556,7 @@ void XXE::psssDstRra(T *rraBase, TKId elementTK, int *rraOffsetList,
         ESMC_R8 **factorListT = (ESMC_R8 **)factorList;
         psssDstRra(rraBase, elementTK, rraOffsetList, factorListT, factorTK,
           valueBase, valueOffsetList, valueTK, termCount, vectorLength,
-          resolved);
+          resolved, size_r, size_s, size_t, size_i, size_j, superVector);
       }
       break;
     default:
@@ -4516,7 +4572,7 @@ void XXE::psssDstRra(T *rraBase, TKId elementTK, int *rraOffsetList,
         ESMC_I4 *valueBaseT = (ESMC_I4 *)valueBase;
         psssDstRra(rraBase, elementTK, rraOffsetList, factorList, factorTK,
           valueBaseT, valueOffsetList, valueTK, termCount, vectorLength,
-          resolved);
+          resolved, size_r, size_s, size_t, size_i, size_j, superVector);
       }
       break;
     case I8:
@@ -4524,7 +4580,7 @@ void XXE::psssDstRra(T *rraBase, TKId elementTK, int *rraOffsetList,
         ESMC_I8 *valueBaseT = (ESMC_I8 *)valueBase;
         psssDstRra(rraBase, elementTK, rraOffsetList, factorList, factorTK,
           valueBaseT, valueOffsetList, valueTK, termCount, vectorLength,
-          resolved);
+          resolved, size_r, size_s, size_t, size_i, size_j, superVector);
       }
       break;
     case R4:
@@ -4532,7 +4588,7 @@ void XXE::psssDstRra(T *rraBase, TKId elementTK, int *rraOffsetList,
         ESMC_R4 *valueBaseT = (ESMC_R4 *)valueBase;
         psssDstRra(rraBase, elementTK, rraOffsetList, factorList, factorTK,
           valueBaseT, valueOffsetList, valueTK, termCount, vectorLength,
-          resolved);
+          resolved, size_r, size_s, size_t, size_i, size_j, superVector);
       }
       break;
     case R8:
@@ -4540,7 +4596,7 @@ void XXE::psssDstRra(T *rraBase, TKId elementTK, int *rraOffsetList,
         ESMC_R8 *valueBaseT = (ESMC_R8 *)valueBase;
         psssDstRra(rraBase, elementTK, rraOffsetList, factorList, factorTK,
           valueBaseT, valueOffsetList, valueTK, termCount, vectorLength,
-          resolved);
+          resolved, size_r, size_s, size_t, size_i, size_j, superVector);
       }
       break;
     default:
@@ -4552,8 +4608,26 @@ void XXE::psssDstRra(T *rraBase, TKId elementTK, int *rraOffsetList,
   printf("Arrived in psssDstRra kernel with %s, %s, %s\n", typeid(T).name(), 
     typeid(U).name(), typeid(V).name());
 #endif
-  exec_psssDstRra(rraBase, rraOffsetList, factorList, valueBase,
-    valueOffsetList, termCount, vectorLength);
+  if(superVector){
+#ifdef XXE_EXEC_LOG
+    char msg[1024];
+    sprintf(msg, "XXE::productSumSuperScalarDstRRA: "
+      "taking super-vector branch...");
+    ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
+#endif
+    exec_psssDstRraSuper(rraBase, rraOffsetList, factorList, valueBase,
+      valueOffsetList, termCount, vectorLength,
+      size_r, size_s, size_t, size_i, size_j);
+  }else{
+#ifdef XXE_EXEC_LOG
+    char msg[1024];
+    sprintf(msg, "XXE::productSumSuperScalarDstRRA: "
+      "taking vector branch...");
+    ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
+#endif
+    exec_psssDstRra(rraBase, rraOffsetList, factorList, valueBase,
+      valueOffsetList, termCount, vectorLength);
+  }
 }
 
 //---
@@ -4584,13 +4658,44 @@ void XXE::exec_psssDstRra(T *rraBase, int *rraOffsetList, U **factorList,
   }
 }
 
+//---
+
+template<typename T, typename U, typename V>
+void XXE::exec_psssDstRraSuper(T *rraBase, int *rraOffsetList, U **factorList,
+  V *valueBase, int *valueOffsetList, int termCount, int vectorLength,
+  int size_r, int size_s, int size_t, int *size_i, int *size_j){
+  T *element;
+  U *factor;
+  V *value;
+  if (vectorLength==1){
+    // scalar elements
+    for (int i=0; i<termCount; i++){  // super scalar loop
+      element = rraBase + rraOffsetList[i];
+      factor = factorList[i];
+      value = valueBase + valueOffsetList[i];
+      *element += *factor * *value;
+    }
+  }else{
+    // vector elements
+    for (int i=0; i<termCount; i++){  // super scalar loop
+      element = rraBase + rraOffsetList[i] * vectorLength;
+      factor = factorList[i];
+      value = valueBase + valueOffsetList[i] * vectorLength;
+      for (int k=0; k<vectorLength; k++)  // vector loop
+        *(element+k) += *factor * *(value+k);
+    }
+  }
+}
+
 //-----------------------------------------------------------------------------
 
 template<typename T, typename U, typename V>
 void XXE::pssslDstRra(T **rraBaseList, int *rraIndexList, TKId elementTK,
   int *rraOffsetList, U **factorList, TKId factorTK, V **valueBaseList,
   int *valueOffsetList, int *baseListIndexList,
-  TKId valueTK, int termCount, int vectorLength, int resolved){
+  TKId valueTK, int termCount, int vectorLength, int resolved,
+  int size_r, int size_s, int size_t, int *size_i, int *size_j,
+  bool superVector){
   // Recursively resolve the TKs and typecast the arguments appropriately
   // before executing psssDstRra operation on the data.
   if (resolved==0){
@@ -4601,7 +4706,8 @@ void XXE::pssslDstRra(T **rraBaseList, int *rraIndexList, TKId elementTK,
         ESMC_I4 **rraBaseTList = (ESMC_I4 **)rraBaseList;
         pssslDstRra(rraBaseTList, rraIndexList, elementTK, rraOffsetList, 
           factorList, factorTK, valueBaseList, valueOffsetList,
-          baseListIndexList, valueTK, termCount, vectorLength, resolved);
+          baseListIndexList, valueTK, termCount, vectorLength, resolved, 
+          size_r, size_s, size_t, size_i, size_j, superVector);
       }
       break;
     case I8:
@@ -4609,7 +4715,8 @@ void XXE::pssslDstRra(T **rraBaseList, int *rraIndexList, TKId elementTK,
         ESMC_I8 **rraBaseTList = (ESMC_I8 **)rraBaseList;
         pssslDstRra(rraBaseTList, rraIndexList, elementTK, rraOffsetList, 
           factorList, factorTK, valueBaseList, valueOffsetList,
-          baseListIndexList, valueTK, termCount, vectorLength, resolved);
+          baseListIndexList, valueTK, termCount, vectorLength, resolved, 
+          size_r, size_s, size_t, size_i, size_j, superVector);
       }
       break;
     case R4:
@@ -4617,7 +4724,8 @@ void XXE::pssslDstRra(T **rraBaseList, int *rraIndexList, TKId elementTK,
         ESMC_R4 **rraBaseTList = (ESMC_R4 **)rraBaseList;
         pssslDstRra(rraBaseTList, rraIndexList, elementTK, rraOffsetList, 
           factorList, factorTK, valueBaseList, valueOffsetList,
-          baseListIndexList, valueTK, termCount, vectorLength, resolved);
+          baseListIndexList, valueTK, termCount, vectorLength, resolved, 
+          size_r, size_s, size_t, size_i, size_j, superVector);
       }
       break;
     case R8:
@@ -4625,7 +4733,8 @@ void XXE::pssslDstRra(T **rraBaseList, int *rraIndexList, TKId elementTK,
         ESMC_R8 **rraBaseTList = (ESMC_R8 **)rraBaseList;
         pssslDstRra(rraBaseTList, rraIndexList, elementTK, rraOffsetList, 
           factorList, factorTK, valueBaseList, valueOffsetList,
-          baseListIndexList, valueTK, termCount, vectorLength, resolved);
+          baseListIndexList, valueTK, termCount, vectorLength, resolved, 
+          size_r, size_s, size_t, size_i, size_j, superVector);
       }
       break;
     default:
@@ -4641,7 +4750,8 @@ void XXE::pssslDstRra(T **rraBaseList, int *rraIndexList, TKId elementTK,
         ESMC_I4 **factorListT = (ESMC_I4 **)factorList;
         pssslDstRra(rraBaseList, rraIndexList, elementTK, rraOffsetList,
           factorListT, factorTK, valueBaseList, valueOffsetList,
-          baseListIndexList, valueTK, termCount, vectorLength, resolved);
+          baseListIndexList, valueTK, termCount, vectorLength, resolved, 
+          size_r, size_s, size_t, size_i, size_j, superVector);
       }
       break;
     case I8:
@@ -4649,7 +4759,8 @@ void XXE::pssslDstRra(T **rraBaseList, int *rraIndexList, TKId elementTK,
         ESMC_I8 **factorListT = (ESMC_I8 **)factorList;
         pssslDstRra(rraBaseList, rraIndexList, elementTK, rraOffsetList,
           factorListT, factorTK, valueBaseList, valueOffsetList,
-          baseListIndexList, valueTK, termCount, vectorLength, resolved);
+          baseListIndexList, valueTK, termCount, vectorLength, resolved, 
+          size_r, size_s, size_t, size_i, size_j, superVector);
       }
       break;
     case R4:
@@ -4657,7 +4768,8 @@ void XXE::pssslDstRra(T **rraBaseList, int *rraIndexList, TKId elementTK,
         ESMC_R4 **factorListT = (ESMC_R4 **)factorList;
         pssslDstRra(rraBaseList, rraIndexList, elementTK, rraOffsetList,
           factorListT, factorTK, valueBaseList, valueOffsetList,
-          baseListIndexList, valueTK, termCount, vectorLength, resolved);
+          baseListIndexList, valueTK, termCount, vectorLength, resolved, 
+          size_r, size_s, size_t, size_i, size_j, superVector);
       }
       break;
     case R8:
@@ -4665,7 +4777,8 @@ void XXE::pssslDstRra(T **rraBaseList, int *rraIndexList, TKId elementTK,
         ESMC_R8 **factorListT = (ESMC_R8 **)factorList;
         pssslDstRra(rraBaseList, rraIndexList, elementTK, rraOffsetList,
           factorListT, factorTK, valueBaseList, valueOffsetList,
-          baseListIndexList, valueTK, termCount, vectorLength, resolved);
+          baseListIndexList, valueTK, termCount, vectorLength, resolved, 
+          size_r, size_s, size_t, size_i, size_j, superVector);
       }
       break;
     default:
@@ -4681,7 +4794,8 @@ void XXE::pssslDstRra(T **rraBaseList, int *rraIndexList, TKId elementTK,
         ESMC_I4 **valueBaseTList = (ESMC_I4 **)valueBaseList;
         pssslDstRra(rraBaseList, rraIndexList, elementTK, rraOffsetList,
           factorList, factorTK, valueBaseTList, valueOffsetList,
-          baseListIndexList, valueTK, termCount, vectorLength, resolved);
+          baseListIndexList, valueTK, termCount, vectorLength, resolved, 
+          size_r, size_s, size_t, size_i, size_j, superVector);
       }
       break;
     case I8:
@@ -4689,7 +4803,8 @@ void XXE::pssslDstRra(T **rraBaseList, int *rraIndexList, TKId elementTK,
         ESMC_I8 **valueBaseTList = (ESMC_I8 **)valueBaseList;
         pssslDstRra(rraBaseList, rraIndexList, elementTK, rraOffsetList,
           factorList, factorTK, valueBaseTList, valueOffsetList,
-          baseListIndexList, valueTK, termCount, vectorLength, resolved);
+          baseListIndexList, valueTK, termCount, vectorLength, resolved, 
+          size_r, size_s, size_t, size_i, size_j, superVector);
       }
       break;
     case R4:
@@ -4697,7 +4812,8 @@ void XXE::pssslDstRra(T **rraBaseList, int *rraIndexList, TKId elementTK,
         ESMC_R4 **valueBaseTList = (ESMC_R4 **)valueBaseList;
         pssslDstRra(rraBaseList, rraIndexList, elementTK, rraOffsetList,
           factorList, factorTK, valueBaseTList, valueOffsetList,
-          baseListIndexList, valueTK, termCount, vectorLength, resolved);
+          baseListIndexList, valueTK, termCount, vectorLength, resolved, 
+          size_r, size_s, size_t, size_i, size_j, superVector);
       }
       break;
     case R8:
@@ -4705,7 +4821,8 @@ void XXE::pssslDstRra(T **rraBaseList, int *rraIndexList, TKId elementTK,
         ESMC_R8 **valueBaseTList = (ESMC_R8 **)valueBaseList;
         pssslDstRra(rraBaseList, rraIndexList, elementTK, rraOffsetList,
           factorList, factorTK, valueBaseTList, valueOffsetList,
-          baseListIndexList, valueTK, termCount, vectorLength, resolved);
+          baseListIndexList, valueTK, termCount, vectorLength, resolved, 
+          size_r, size_s, size_t, size_i, size_j, superVector);
       }
       break;
     default:
@@ -4718,7 +4835,8 @@ void XXE::pssslDstRra(T **rraBaseList, int *rraIndexList, TKId elementTK,
     typeid(U).name(), typeid(V).name());
 #endif
   exec_pssslDstRra(rraBaseList, rraIndexList, rraOffsetList, factorList,
-    valueBaseList, valueOffsetList, baseListIndexList, termCount, vectorLength);
+    valueBaseList, valueOffsetList, baseListIndexList, termCount, vectorLength,
+    size_r, size_s, size_t, size_i, size_j);
 }
 
 //---
@@ -4726,8 +4844,8 @@ void XXE::pssslDstRra(T **rraBaseList, int *rraIndexList, TKId elementTK,
 template<typename T, typename U, typename V>
 void XXE::exec_pssslDstRra(T **rraBaseList, int *rraIndexList, 
   int *rraOffsetList, U **factorList, V **valueBaseList,
-  int *valueOffsetList, int *baseListIndexList,
-  int termCount, int vectorLength){
+  int *valueOffsetList, int *baseListIndexList, int termCount, int vectorLength,
+  int size_r, int size_s, int size_t, int *size_i, int *size_j){
   T *element;
   U *factor;
   V *value;
