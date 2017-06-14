@@ -2009,10 +2009,11 @@ Array *Array::create(
       // remove the tensor dimensions from the allocation
       for (int i=0; i<localDeCount; i++){
         vector<int> counts;
-        for (int k=0; k<redDimCount; k++)
-          counts.push_back(
-            arrayOut->totalUBound[i*redDimCount+k] -
-            arrayOut->totalLBound[i*redDimCount+k] + 1);
+        for (int k=0; k<redDimCount; k++){
+          int dimSize = arrayOut->totalUBound[i*redDimCount+k]
+            - arrayOut->totalLBound[i*redDimCount+k] + 1;
+          counts.push_back(dimSize);
+        }
         arrayOut->larrayList[i] =
           LocalArray::create(typekind, rank, &(counts[0]),
             NULL, NULL, NULL, DATA_REF, &localrc);
@@ -2021,6 +2022,9 @@ Array *Array::create(
           arrayOut->ESMC_BaseSetStatus(ESMF_STATUS_INVALID);  // mark invalid
           return ESMC_NULL_POINTER;
         }
+        // initialize the data in the newly created array to zero
+        memset(arrayOut->larrayList[i]->getBaseAddr(), 0, 
+          arrayOut->larrayList[i]->getByteCount());
       }
     }else{
       // use the src larrayList as a template for the new allocation
@@ -2032,6 +2036,9 @@ Array *Array::create(
           arrayOut->ESMC_BaseSetStatus(ESMF_STATUS_INVALID);  // mark invalid
           return ESMC_NULL_POINTER;
         }
+        // initialize the data in the newly created array to zero
+        memset(arrayOut->larrayList[i]->getBaseAddr(), 0, 
+          arrayOut->larrayList[i]->getByteCount());
       }
     }
     // determine the base addresses of the local arrays:
