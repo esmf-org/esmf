@@ -3121,11 +3121,6 @@ bool Array::match(
     if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
     return matchResult;
   }
-  if (array1->tensorElementCount != array2->tensorElementCount){
-    matchResult = false;
-    if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
-    return matchResult;
-  }
   int localDeCount = array1->getDistGrid()->getDELayout()->getLocalDeCount();
   int *int1 = array1->totalElementCountPLocalDe;
   int *int2 = array2->totalElementCountPLocalDe;
@@ -8894,7 +8889,12 @@ template<typename SIT, typename DIT>
     haloFlag, ignoreUnmatched, srcTermProcessingArg, pipelineDepthArg);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
     &rc)) return rc;
-  
+
+  // fingerprint the src/dst Arrays in RH  
+  localrc = (*routehandle)->fingerprint(srcArray, dstArray);
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+    &rc)) return rc;
+
   // return successfully
   rc = ESMF_SUCCESS;
   return rc;
