@@ -3580,24 +3580,28 @@ printf("gjt - DID NOT CANCEL commhandle\n");
           case I4:
             exec_zeroSuperScalarRRASuper<ESMC_I4>(xxeZeroSuperScalarRRAInfo,
               vectorL, rraList, 
+              xxeZeroSuperScalarRRAInfo->rraIndex - srcLocalDeCount,
               dstSuperVecSize_r, dstSuperVecSize_s, dstSuperVecSize_t,
               dstSuperVecSize_i, dstSuperVecSize_j);
             break;
           case I8:
             exec_zeroSuperScalarRRASuper<ESMC_I8>(xxeZeroSuperScalarRRAInfo,
               vectorL, rraList, 
+              xxeZeroSuperScalarRRAInfo->rraIndex - srcLocalDeCount,
               dstSuperVecSize_r, dstSuperVecSize_s, dstSuperVecSize_t,
               dstSuperVecSize_i, dstSuperVecSize_j);
             break;
           case R4:
             exec_zeroSuperScalarRRASuper<ESMC_R4>(xxeZeroSuperScalarRRAInfo,
               vectorL, rraList, 
+              xxeZeroSuperScalarRRAInfo->rraIndex - srcLocalDeCount,
               dstSuperVecSize_r, dstSuperVecSize_s, dstSuperVecSize_t,
               dstSuperVecSize_i, dstSuperVecSize_j);
             break;
           case R8:
             exec_zeroSuperScalarRRASuper<ESMC_R8>(xxeZeroSuperScalarRRAInfo,
               vectorL, rraList, 
+              xxeZeroSuperScalarRRAInfo->rraIndex - srcLocalDeCount,
               dstSuperVecSize_r, dstSuperVecSize_s, dstSuperVecSize_t,
               dstSuperVecSize_i, dstSuperVecSize_j);
             break;
@@ -3983,15 +3987,15 @@ inline void XXE::exec_zeroSuperScalarRRA(
 template<typename T>
 inline void XXE::exec_zeroSuperScalarRRASuper(
   ZeroSuperScalarRRAInfo *xxeZeroSuperScalarRRAInfo, int vectorL, 
-  char **rraList,
+  char **rraList, int localDeIndex,
   int size_r, int size_s, int size_t, int *size_i, int *size_j){
   int *rraOffsetList = xxeZeroSuperScalarRRAInfo->rraOffsetList;
   int rraIndex = xxeZeroSuperScalarRRAInfo->rraIndex;
   int termCount = xxeZeroSuperScalarRRAInfo->termCount;
   T *rraBase = (T*)rraList[rraIndex];
   T *dstPointer;
-  int sz_i = size_i[rraIndex];
-  int sz_j = size_j[rraIndex];
+  int sz_i = size_i[localDeIndex];
+  int sz_j = size_j[localDeIndex];
   for (int k=0; k<termCount; k++){
     int i = rraOffsetList[k] % sz_i;
     int j = rraOffsetList[k] / sz_i;

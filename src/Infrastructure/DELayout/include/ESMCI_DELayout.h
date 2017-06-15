@@ -992,7 +992,7 @@ class XXE{
     template<typename T>
     inline static void exec_zeroSuperScalarRRASuper(
       ZeroSuperScalarRRAInfo *xxeZeroSuperScalarRRAInfo, int vectorL, 
-      char **rraList,
+      char **rraList, int localDeIndex,
       int size_r, int size_s, int size_t, int *size_i, int *size_j);
     template<typename T, typename U, typename V>
     static void psv(T *element, TKId elementTK, U *factorList, TKId factorTK,
