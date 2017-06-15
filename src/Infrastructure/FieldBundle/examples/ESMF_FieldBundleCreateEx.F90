@@ -99,7 +99,7 @@ program ESMF_FieldBundleCreateEx
 
 !BOC
     bundle1 = ESMF_FieldBundleCreate(fieldList=field(1:3), &
-				name="atmosphere data", rc=rc)
+                                name="atmosphere data", rc=rc)
 
     print *, "FieldBundle example 1 returned"
 !EOC
