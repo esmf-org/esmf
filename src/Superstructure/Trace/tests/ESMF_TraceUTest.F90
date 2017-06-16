@@ -134,7 +134,11 @@ program ESMF_TraceUTest
   call ESMF_TraceClose(rc=rc)
   call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   !------------------------------------------------------------------------
-       
+
+  ! barrier to ensure all files flushed
+  call ESMF_VMBarrier(vm, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
+  
   !------------------------------------------------------------------------
   !NEX_UTest
   write(name, *) "Verify trace metadata exists"
