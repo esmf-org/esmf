@@ -208,4 +208,6 @@ void ESMCI_meshsetpoles(Mesh **meshpp, int *_pole_val, int *_min_pole_gid, int *
 
 void ESMCI_meshcreatedual(Mesh **src_meshpp, Mesh **output_meshpp, int *rc);
 
+void ESMCI_MeshFitOnVM(Mesh **meshpp, VM **new_vm,int *rc);
+
 #endif // ESMCI_Mesh_Glue_h

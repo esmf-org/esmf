@@ -2936,7 +2936,7 @@ end subroutine ESMF_DistGridGetIds
 ! !INTERFACE:
   ! Private name; call using ESMF_MeshCreate()
     function ESMF_MeshCreateRedist(mesh, keywordEnforcer, nodalDistgrid, &
-      elementDistgrid, rc)
+      elementDistgrid, vm, rc)
 !
 !
 ! !RETURN VALUE:
@@ -2947,6 +2947,7 @@ end subroutine ESMF_DistGridGetIds
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_DistGrid), intent(in),  optional :: nodalDistgrid
     type(ESMF_DistGrid), intent(in),  optional :: elementDistgrid
+    type(ESMF_VM),       intent(in),  optional :: vm 
     integer,             intent(out), optional :: rc
 ! 
 ! !DESCRIPTION:
@@ -2958,18 +2959,22 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! ({\tt ESMF\_FieldRedistStore()}, etc.). The equivalent methods
 ! can also be used for data in FieldBundles.  
 !
-!   \begin{description}
-!   \item [mesh]
-!         The source Mesh to be redistributed. 
-!   \item [{[nodalDistgrid]}]
-!         A 1D arbitrary distgrid describing the new distribution of 
-!         the nodes across the PETs. 
-!   \item [{[elementDistgrid]}]
-!         A 1D arbitrary distgrid describing the new distribution of 
-!         the elements across the PETs. 
-!   \item [{[rc]}]
-!         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
+! \begin{description}
+!  \item [mesh]
+!       The source Mesh to be redistributed. 
+!  \item [{[nodalDistgrid]}]
+!       A 1D arbitrary distgrid describing the new distribution of 
+!       the nodes across the PETs. 
+!  \item [{[elementDistgrid]}]
+!       A 1D arbitrary distgrid describing the new distribution of 
+!       the elements across the PETs. 
+!  \item[{[vm]}]
+!      If present, the Mesh object is created on the specified 
+!      {\tt ESMF\_VM} object. The default is to create on the VM of the 
+!      current context.
+!  \item [{[rc]}]
+!      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!  \end{description}
 !
 !EOP
 !------------------------------------------------------------------------------
@@ -3267,6 +3272,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                ESMF_CONTEXT, rcToReturn=rc)) return    
        endif
+    endif
+
+    ! If vm is present, change new mesh to exist just on that VM
+    if (present(vm)) then
+       call C_ESMC_MeshFitOnVM(ESMF_MeshCreateRedist, &
+            vm, localrc)
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
     endif
 
 

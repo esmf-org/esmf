@@ -458,3 +458,7 @@ extern "C" void FTN_X(c_esmc_meshcreatefromintptr)(MeshCap **meshpp,
     *meshpp=MeshCap::create_from_ptr(ptr, true, rc);
 }
 
+extern "C" void FTN_X(c_esmc_meshfitonvm)(MeshCap **meshpp, VM **vm, int *rc) {
+
+  (*meshpp)->fit_on_vm(vm,rc);
+}
