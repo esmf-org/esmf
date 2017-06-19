@@ -42,6 +42,16 @@ recommended to set this environment variable. The one exception is that
 PET 0 is always traced, regardless of the {\tt ESMF\_RUNTIME\_TRACE\_PETLIST}
 setting.
 
+When tracing is enabled, {\tt phase\_enter} and {\tt phase\_exit} events will
+automatically be recorded for all initialize, run, and finalize phases of all
+Components in the application. To trace {\em only} user-instrumented regions (via
+the {\tt ESMF\_TraceRegionEnter()} and {\tt ESMF\_TraceRegionExit()} calls),
+Component-level tracing can be turned off by setting:
+
+\begin{verbatim}
+$ setenv ESMF_RUNTIME_TRACE_COMPONENT OFF
+\end{verbatim}
+
 After running an ESMF application with tracing enabled, a directory
 called {\em traceout} will be created in the run directory and it will
 contain a {\em metadata} file and an event stream file {\em esmf\_stream\_XXXX}

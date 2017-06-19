@@ -53,6 +53,20 @@ are recorded with a high-precision timestamp to allow timing analyses.
 \item [mem] records current memory usage information
 \end{description}
 
+The following table lists important environment variables that control
+aspects of ESMF tracing.
+
+\begin{tabular} {|p{6cm}|p{8cm}|p{6cm}|p{6cm}|}
+     \hline\hline
+     {\bf Environment Variable} & {\bf Description} & {\bf Example Values} & {\bf Default}\\
+     \hline\hline
+     {\tt ESMF\_RUNTIME\_TRACE} & Enable/disables all tracing functions & {\tt ON} or {\tt OFF} & {\tt OFF} \\
+     \hline\hline
+     {\tt ESMF\_RUNTIME\_TRACE\_PETLIST} & Limits tracing to an explicit list of PETs & ``{\tt 0-9 50 99}'' & {\em trace all PETs}\\
+     \hline\hline
+     {\tt ESMF\_RUNTIME\_TRACE\_COMPONENT} & Enables/disable tracing of Component phase\_enter and phase\_exit events & {\tt ON} or {\tt OFF} & {\tt ON} \\
+     \hline\hline
+\end{tabular}
 
 
 
