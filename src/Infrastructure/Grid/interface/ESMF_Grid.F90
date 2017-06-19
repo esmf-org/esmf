@@ -5665,7 +5665,7 @@ end subroutine pack_and_send_int2D
 ! !INTERFACE:
   ! Private name; call using ESMF_GridCreate()
      function ESMF_GridCreateFrmNCFileDG(filename, fileformat, distgrid, keywordEnforcer, &
-       isSphere, addCornerStagger, addUserArea, indexflag, &
+       isSphere, polekindflag, addCornerStagger, addUserArea, indexflag, &
        addMask, varname, coordNames, rc)
 
 ! !RETURN VALUE:
@@ -5678,6 +5678,7 @@ end subroutine pack_and_send_int2D
     type(ESMF_DistGrid),    intent(in)             :: distgrid
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     logical,                intent(in),  optional  :: isSphere
+    type(ESMF_PoleKind_Flag),  intent(in),  optional :: polekindflag(2)
     logical,                intent(in),  optional  :: addCornerStagger
     logical,                intent(in),  optional  :: addUserArea
     type(ESMF_Index_Flag),  intent(in),  optional  :: indexflag
@@ -5708,6 +5709,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      A distGrid defines how the grid is distributed
 ! \item[{[isSphere]}]
 !      If .true., create a periodic Grid. If .false., create a regional Grid. Defaults to .true.
+! \item[{[polekindflag]}]                                                                                          
+!      Two item array which specifies the type of connection which occurs at the pole. polekindflag(1)             
+!      the connection that occurs at the minimum end of the index dimension. polekindflag(2)                       
+!      the connection that occurs at the maximum end of the index dimension. Please see                        
+!      Section~\ref{const:polekind} for a full list of options. If not specified,                            
+!      the default is {\tt ESMF\_POLETYPE\_MONOPOLE} for both.                                                 
 ! \item[{[addCornerStagger]}]
 !      Uses the information in the grid file to add the Corner stagger to 
 !      the Grid. The coordinates for the corner stagger is required for conservative
@@ -5841,7 +5848,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (fileformat == ESMF_FILEFORMAT_SCRIP) then
 	grid = ESMF_GridCreateFrmScrip(trim(filename), (/xpart,ypart/), &
 	        localIndexFlag, decompflag=localDEcompflag, &
-		isSphere=localIsSphere, addCornerStagger=localAddCorner, &
+		isSphere=localIsSphere, polekindflag=polekindflag, &
+                addCornerStagger=localAddCorner, &
 		addUserArea=addUserArea, rc=localrc)
     else if (fileformat == ESMF_FILEFORMAT_GRIDSPEC) then
         ! Warning about user area in GridSpec 
@@ -5859,12 +5867,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 	if (present(addMask)) then
   	  grid = ESMF_GridCreateFrmGridspec(trim(filename), (/xpart,ypart/), &
 	        localIndexFlag, decompflag=localDEcompflag, &
-		isSphere=localIsSphere, addCornerStagger=localAddCorner, &
+		isSphere=localIsSphere, polekindflag=polekindflag, &
+                addCornerStagger=localAddCorner, &
 		addMask=addMask, varname=varname, coordNames=coordNames, rc=localrc)
         else
   	  grid = ESMF_GridCreateFrmGridspec(trim(filename), (/xpart,ypart/), &
 	        localIndexFlag, decompflag=localDEcompflag, &
-		isSphere=localIsSphere, addCornerStagger=localAddCorner, &
+		isSphere=localIsSphere, polekindflag=polekindflag, &
+                addCornerStagger=localAddCorner, &
 		coordNames = coordNames, rc=localrc)
 	endif
     else
@@ -5895,7 +5905,7 @@ end function ESMF_GridCreateFrmNCFileDG
 ! !INTERFACE:
   ! Private name; call using ESMF_GridCreate()
      function ESMF_GridCreateFrmNCFile(filename, fileformat, regDecomp, keywordEnforcer, &
-       decompflag, isSphere, addCornerStagger, addUserArea, indexflag, &
+       decompflag, isSphere, polekindflag, addCornerStagger, addUserArea, indexflag, &
        addMask, varname, coordNames, rc)
 
 ! !RETURN VALUE:
@@ -5909,6 +5919,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                intent(in),  optional  :: regDecomp(:)
     type(ESMF_Decomp_Flag), intent(in),  optional  :: decompflag(:)
     logical,                intent(in),  optional  :: isSphere
+    type(ESMF_PoleKind_Flag),  intent(in),  optional :: polekindflag(2)
     logical,                intent(in),  optional  :: addCornerStagger
     logical,                intent(in),  optional  :: addUserArea
     type(ESMF_Index_Flag),  intent(in),  optional  :: indexflag
@@ -5951,6 +5962,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      {\tt ESMF\_DECOMP\_CYCLIC} isn't supported in Grid creation.  
 ! \item[{[isSphere]}]
 !      If .true., create a periodic Grid. If .false., create a regional Grid. Defaults to .true.
+! \item[{[polekindflag]}]                                                                                          
+!      Two item array which specifies the type of connection which occurs at the pole. polekindflag(1)             
+!      the connection that occurs at the minimum end of the index dimension. polekindflag(2)                       
+!      the connection that occurs at the maximum end of the index dimension. Please see                        
+!      Section~\ref{const:polekind} for a full list of options. If not specified,                            
+!      the default is {\tt ESMF\_POLETYPE\_MONOPOLE} for both.                                                 
 ! \item[{[addCornerStagger]}]
 !      Uses the information in the grid file to add the Corner stagger to 
 !      the Grid. The coordinates for the corner stagger is required for conservative
@@ -6052,7 +6069,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (fileformat == ESMF_FILEFORMAT_SCRIP) then
 	grid = ESMF_GridCreateFrmScrip(trim(filename), regDecompLocal, &
 	        localIndexFlag, decompflag=localDEcompflag, &
-	        isSphere=localIsSphere, addCornerStagger=localAddCorner, &
+	        isSphere=localIsSphere, polekindflag=polekindflag, &
+                addCornerStagger=localAddCorner, &
 		addUserArea=addUserArea, rc=localrc)
     else if (fileformat == ESMF_FILEFORMAT_GRIDSPEC) then
         ! Warning about user area in GridSpec 
@@ -6070,13 +6088,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 	if (present(addMask)) then
   	  grid = ESMF_GridCreateFrmGridspec(trim(filename), regDecompLocal, &
 	        localIndexFlag, decompflag=localDEcompflag, &
-		isSphere=localIsSphere, addCornerStagger=localAddCorner, &
+		isSphere=localIsSphere, polekindflag=polekindflag, &
+                addCornerStagger=localAddCorner, &
 		addMask=addMask, varname=varname, coordNames=coordNames, &
 		rc=localrc)
         else
   	  grid = ESMF_GridCreateFrmGridspec(trim(filename), regDecompLocal, &
 	        localIndexFlag, decompflag=localDEcompflag, &
-		isSphere=localIsSphere, addCornerStagger=localAddCorner, &
+		isSphere=localIsSphere, polekindflag=polekindflag, &
+                addCornerStagger=localAddCorner, &
 		coordNames = coordNames, rc=localrc)
 	endif
     else
@@ -6101,7 +6121,7 @@ end function ESMF_GridCreateFrmNCFile
 !BOPI
 ! !IROUTINE: ESMF_GridCreateFrmScrip - Private function that create a Grid from a SRIP Grid File 
   function ESMF_GridCreateFrmScrip(filename, regDecomp, indexflag, keywordEnforcer, &
-    decompflag, isSphere, addCornerStagger, addUserArea, rc)
+    decompflag, isSphere, polekindflag, addCornerStagger, addUserArea, rc)
 
 ! !RETURN VALUE:
       type(ESMF_Grid) :: ESMF_GridCreateFrmScrip
@@ -6114,6 +6134,7 @@ end function ESMF_GridCreateFrmNCFile
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_Decomp_Flag), intent(in),  optional  :: decompflag(:)
     logical,                intent(in),  optional  :: isSphere
+    type(ESMF_PoleKind_Flag),  intent(in),  optional :: polekindflag(2)
     logical,                intent(in),  optional  :: addCornerStagger
     logical,                intent(in),  optional  :: addUserArea
     integer,                intent(out), optional  :: rc
@@ -6146,6 +6167,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      {\tt ESMF\_DECOMP\_CYCLIC} isn't supported in Grid creation.  
 ! \item[{[isSphere]}]
 !      If .true., create a periodic Grid. If .false., create a regional Grid. Defaults to .true.
+! \item[{[polekindflag]}]                                                                                          
+!      Two item array which specifies the type of connection which occurs at the pole. polekindflag(1)             
+!      the connection that occurs at the minimum end of the index dimension. polekindflag(2)                       
+!      the connection that occurs at the maximum end of the index dimension. Please see                        
+!      Section~\ref{const:polekind} for a full list of options. If not specified,                            
+!      the default is {\tt ESMF\_POLETYPE\_MONOPOLE} for both.                                                 
 ! \item[{[addCornerStagger]}]
 !      Uses the information in the SCRIP file to add the Corner stagger to 
 !      the Grid. If not specified, defaults to false. 
@@ -6282,6 +6309,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        grid=ESMF_GridCreate1PeriDim(minIndex=(/1,1/), maxIndex=dims, &
               regDecomp=regDecomp, decompflag=decompFlagLocal, &
               coordSys=ESMF_COORDSYS_SPH_DEG, &
+              polekindflag=polekindflag, &
             gridEdgeLWidth=(/0,0/), gridEdgeUWidth=(/0,1/), &
             indexflag=indexflag, rc=localrc)
        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -6606,7 +6634,8 @@ end function ESMF_GridCreateFrmScrip
   function ESMF_GridCreateFrmGridspec(grid_filename, &
                                         regDecomp, indexflag, keywordEnforcer, decompflag, &
 					addMask, varname, coordNames, &
-                                        isSphere, addCornerStagger, rc)
+                                        isSphere, polekindflag, &
+                                        addCornerStagger, rc)
 
 ! !RETURN VALUE:
     type(ESMF_Grid) :: ESMF_GridCreateFrmGridspec
@@ -6620,6 +6649,7 @@ end function ESMF_GridCreateFrmScrip
     logical,                intent(in),  optional  :: addMask
     character(len=*),       intent(in),  optional  :: varname
     character(len=*),       intent(in),  optional  :: coordNames(:)
+    type(ESMF_PoleKind_Flag),  intent(in),  optional :: polekindflag(2)
     logical,               intent(in),  optional   :: isSphere
     logical,               intent(in),  optional   :: addCornerStagger
     integer,               intent(out), optional   :: rc
@@ -6663,6 +6693,12 @@ end function ESMF_GridCreateFrmScrip
 !      GRIDSPEC file if there are multiple coordinates defined in the file
 ! \item[{[isSphere]}]
 !      If .true., create a periodic Grid. If .false., create a regional Grid. Defaults to .true.
+! \item[{[polekindflag]}]                                                                                          
+!      Two item array which specifies the type of connection which occurs at the pole. polekindflag(1)             
+!      the connection that occurs at the minimum end of the index dimension. polekindflag(2)                       
+!      the connection that occurs at the maximum end of the index dimension. Please see                        
+!      Section~\ref{const:polekind} for a full list of options. If not specified,                            
+!      the default is {\tt ESMF\_POLETYPE\_MONOPOLE} for both.                                                 
 ! \item[{[addCornerStagger]}]
 !      Uses the information in the GridSpec file to add the Corner stagger to 
 !      the Grid. If not specified, defaults to true (since GridSpec defaults to
@@ -6801,6 +6837,7 @@ end function ESMF_GridCreateFrmScrip
 	   grid = ESMF_GridCreate1PeriDim(minIndex=(/1,1/), maxIndex=gridims, &
 		regDecomp=regDecomp, &
                 gridEdgeLWidth=gridEdgeLWidth, gridEdgeUWidth=gridEdgeUWidth, &
+                polekindflag=polekindflag, &
 	        coordDep1=(/1/), coordDep2=(/2/), &
 		coordSys=ESMF_COORDSYS_SPH_DEG, &
                 indexflag=indexflag, rc=localrc)
@@ -6897,6 +6934,7 @@ end function ESMF_GridCreateFrmScrip
               grid = ESMF_GridCreate1PeriDim(minIndex=(/1,1/), maxIndex=gridims, &
 		  regDecomp=regDecomp, &
                   gridEdgeLWidth=gridEdgeLWidth, gridEdgeUWidth=gridEdgeUWidth, &
+                  polekindflag=polekindflag, &
 		  coordSys=ESMF_COORDSYS_SPH_DEG, &
                   indexflag=indexflag, rc=localrc)
    	else

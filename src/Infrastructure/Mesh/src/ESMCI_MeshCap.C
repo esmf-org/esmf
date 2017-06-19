@@ -26,7 +26,7 @@
 #include "ESMCI_F90Interface.h"
 #include "ESMCI_LogErr.h"
 #include "ESMCI_Mesh.h"
-   #include "ESMCI_VM.h"
+#include "ESMCI_VM.h"
 #include "ESMCI_CoordSys.h"
 #include "Mesh/include/ESMCI_Mesh_Glue.h"
 #include "Mesh/include/ESMCI_Mesh_GToM_Glue.h"
@@ -53,6 +53,23 @@
 #define ESMC_METHOD "MeshCap::MeshCap()"
 
   } 
+
+
+void MeshCap::fit_on_vm(VM **vm, int *rc) {
+#undef ESMC_METHOD
+#define ESMC_METHOD "MeshCap::fit_on_vm()"
+ 
+  // Call into func. depending on mesh type
+  if (is_esmf_mesh) {
+    ESMCI_MeshFitOnVM(&mesh, vm, rc);
+  } else {
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_NOT_IMPL,
+        "- this functionality is not currently supported using MOAB",
+                                  ESMC_CONTEXT, rc);
+    return;
+  }
+}
+
 
 
 // This method converts a Mesh to a PointList

@@ -4872,3 +4872,136 @@ void ESMCI_meshcreatedual(Mesh **src_meshpp, Mesh **output_meshpp, int *rc) {
 
   if (rc!=NULL) *rc=ESMF_SUCCESS;
 }
+
+void ESMCI_MeshFitOnVM(Mesh **meshpp,
+                       VM **new_vm,
+                       int *rc)
+{
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI_MeshFitOnVM()"
+  int localrc;
+
+   try {
+
+     // Initialize the parallel environment for mesh (if not already done)
+     {
+       ESMCI::Par::Init("MESHLOG", false /* use log */,VM::getCurrent(&localrc)->getMpi_c());
+       if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
+         throw localrc;  // bail out with exception
+     }
+
+     // Get Pointer to Mesh
+     ThrowRequire(meshpp);
+     Mesh *mesh = *meshpp;
+
+     // Get current VM
+     VM *curr_vm=VM::getCurrent(&localrc);
+     if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
+       throw localrc;  // bail out with exception
+
+     // Get current VM size
+     int curr_vm_size=curr_vm->getPetCount();
+
+     // Get current VM rank
+     int curr_vm_rank=curr_vm->getLocalPet();
+
+     // Describe mapping of current PET
+     int new_vm_rank=-1; // if there is no pet, set to -1
+     if (ESMC_NOT_PRESENT_FILTER(new_vm) != ESMC_NULL_POINTER) {
+       new_vm_rank=(*new_vm)->getLocalPet();
+     }
+
+     // Allocate array
+     int *rank_map=new int[curr_vm_size];
+
+     // Create array mapping from current vm to input vm
+     localrc=curr_vm->allgather(&new_vm_rank,rank_map,sizeof(int));
+     if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
+       throw localrc;  // bail out with exception
+
+#if 0
+     // debug output
+     for (int p=0; p<curr_vm_size; p++) {
+       printf("%d# %d to %d\n",curr_vm_rank,p,rank_map[p]);
+     }
+#endif
+
+
+     // Loop through nodes changing owners to owners in new VM
+     MeshDB::iterator ni = mesh->node_begin_all(), ne = mesh->node_end_all();
+     for (; ni != ne; ++ni) {
+       MeshObj &node=*ni;
+       
+       // Get original owner
+       UInt orig_owner=node.get_owner();
+
+       // Error check owner
+       if ((orig_owner < 0) || (orig_owner > curr_vm_size-1)) {
+         if(ESMC_LogDefault.MsgFoundError(ESMC_RC_VAL_OUTOFRANGE,
+                                          " mesh node owner rank outside current vm",
+                                          ESMC_CONTEXT, &localrc)) throw localrc;
+       }
+
+       // map to new owner rank in new vm
+       int new_owner=rank_map[orig_owner];
+
+       // Make sure that the new one is ok
+       if (new_owner < 0) {
+         if(ESMC_LogDefault.MsgFoundError(ESMC_RC_VAL_OUTOFRANGE,
+                                          " mesh node owner outside of new vm",
+                                          ESMC_CONTEXT, &localrc)) throw localrc;
+       }
+
+       // Set new owner
+       node.set_owner((UInt)new_owner);
+     }
+
+
+     // Loop through elems changing owners to owners in new VM
+     MeshDB::iterator ei = mesh->elem_begin_all(), ee = mesh->elem_end_all();
+     for (; ei != ee; ++ei) {
+       MeshObj &elem=*ei;
+       
+       // Get original owner
+       UInt orig_owner=elem.get_owner();
+
+       // Error check owner
+       if ((orig_owner < 0) || (orig_owner > curr_vm_size-1)) {
+         if(ESMC_LogDefault.MsgFoundError(ESMC_RC_VAL_OUTOFRANGE,
+                                          " mesh element owner rank outside current vm",
+                                          ESMC_CONTEXT, &localrc)) throw localrc;
+       }
+
+       // map to new owner rank in new vm
+       int new_owner=rank_map[orig_owner];
+
+       // Make sure that the new one is ok
+       if (new_owner < 0) {
+         if(ESMC_LogDefault.MsgFoundError(ESMC_RC_VAL_OUTOFRANGE,
+                                          " mesh element owner outside of new vm",
+                                          ESMC_CONTEXT, &localrc)) throw localrc;
+       }
+
+       // Set new owner
+       elem.set_owner((UInt)new_owner);
+     }
+
+
+    // Free map
+    delete [] rank_map;
+
+    return;
+  }catch(int localrc){
+    // catch standard ESMF return code
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,rc);
+    return;
+  } catch(...){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+      "- Caught unknown exception", ESMC_CONTEXT, rc);
+    return;
+  }
+ 
+  // Set return code 
+  if (rc!=NULL) *rc = ESMF_SUCCESS;
+
+} // meshcreate
