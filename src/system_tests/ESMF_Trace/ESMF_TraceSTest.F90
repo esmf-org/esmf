@@ -342,6 +342,18 @@ program ESMF_TraceSTest
        ESMF_CONTEXT, rcToReturn=rc)) &
        call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
 
+  ! ensure all trace files are flushed
+  call ESMF_VMBarrier(vm, rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+       ESMF_CONTEXT, rcToReturn=rc)) &
+       call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
+
+  ! sleep to ensure files can be re-opened
+  call ESMF_VMWtimeDelay(1.0_ESMF_KIND_R8, rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+       ESMF_CONTEXT, rcToReturn=rc)) &
+       call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
+  
   if (localPet == 0) then
      call ESMF_UtilIOUnitGet(funit, rc=localrc)
      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
