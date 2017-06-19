@@ -138,6 +138,10 @@ program ESMF_TraceUTest
   ! barrier to ensure all files flushed
   call ESMF_VMBarrier(vm, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
+
+  ! sleep to ensure files can be re-opened
+  call ESMF_VMWtimeDelay(1.0_ESMF_KIND_R8, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
   
   !------------------------------------------------------------------------
   !NEX_UTest
