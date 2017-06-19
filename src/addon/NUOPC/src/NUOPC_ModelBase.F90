@@ -213,6 +213,11 @@ module NUOPC_ModelBase
     integer                   :: verbosity
     character(ESMF_MAXSTR)    :: name
 
+#define NUOPC_MODELBASE_TRACE__OFF
+#ifdef NUOPC_MODELBASE_TRACE
+    call ESMF_TraceRegionEnter("NUOPC_ModelBase:Run")
+#endif
+    
     rc = ESMF_SUCCESS
 
     ! query the Component for info
@@ -246,7 +251,10 @@ module NUOPC_ModelBase
     
     ! store the incoming clock as driverClock in internal state
     is%wrap%driverClock = clock
-    
+
+#ifdef NUOPC_MODELBASE_TRACE
+    call ESMF_TraceRegionEnter("NUOPC_ModelBase:SetRunClock")
+#endif
     ! SPECIALIZE required: label_SetRunClock
     ! -> first check for the label with phase index
     call ESMF_MethodExecute(gcomp, label=label_SetRunClock, index=phase, &
@@ -270,7 +278,10 @@ module NUOPC_ModelBase
         rcToReturn=rc)) &
         return  ! bail out
     endif
-
+#ifdef NUOPC_MODELBASE_TRACE
+    call ESMF_TraceRegionExit("NUOPC_ModelBase:SetRunClock")
+#endif
+    
     ! get the internal clock for the time stepping loop
     call ESMF_GridCompGet(gcomp, clock=internalClock, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -294,7 +305,10 @@ module NUOPC_ModelBase
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
     endif
-    
+
+#ifdef NUOPC_MODELBASE_TRACE
+    call ESMF_TraceRegionEnter("NUOPC_ModelBase:CheckImport")
+#endif
     ! SPECIALIZE optionally: label_CheckImport
     ! -> first check for the label with phase index
     call ESMF_MethodExecute(gcomp, label=label_CheckImport, index=phase, &
@@ -317,7 +331,10 @@ module NUOPC_ModelBase
         line=__LINE__, file=trim(name)//":"//FILENAME, &
         rcToReturn=rc)) &
         return  ! bail out
-    endif
+   endif
+#ifdef NUOPC_MODELBASE_TRACE
+   call ESMF_TraceRegionExit("NUOPC_ModelBase:CheckImport")
+#endif
 
     ! model time stepping loop
     do while (.not. ESMF_ClockIsStopTime(internalClock, rc=rc))
@@ -330,7 +347,10 @@ module NUOPC_ModelBase
       call NUOPC_UpdateTimestamp(exportState, internalClock, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-      
+
+#ifdef NUOPC_MODELBASE_TRACE
+      call ESMF_TraceRegionEnter("NUOPC_ModelBase:Advance")
+#endif
       ! advance the model t->t+dt
       ! SPECIALIZE required: label_Advance
       ! -> first check for the label with phase index
@@ -355,7 +375,13 @@ module NUOPC_ModelBase
           rcToReturn=rc)) &
           return  ! bail out
       endif
-        
+#ifdef NUOPC_MODELBASE_TRACE
+      call ESMF_TraceRegionExit("NUOPC_ModelBase:Advance")
+#endif
+
+#ifdef NUOPC_MODELBASE_TRACE
+      call ESMF_TraceRegionEnter("NUOPC_ModelBase:AdvanceClock")
+#endif
       ! advance the internalClock to the new current time (optionally specialz)
       call ESMF_MethodExecute(gcomp, label=label_AdvanceClock, index=phase, &
         existflag=existflag, userRc=localrc, rc=rc)
@@ -384,7 +410,10 @@ module NUOPC_ModelBase
             line=__LINE__, file=trim(name)//":"//FILENAME)) &
             return  ! bail out
         endif
-      endif
+     endif
+#ifdef NUOPC_MODELBASE_TRACE
+     call ESMF_TraceRegionExit("NUOPC_ModelBase:AdvanceClock")
+#endif
     
       ! conditionally output diagnostic to Log file
       if (btest(verbosity,0)) then
@@ -403,7 +432,10 @@ module NUOPC_ModelBase
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out
-      
+
+#ifdef NUOPC_MODELBASE_TRACE
+    call ESMF_TraceRegionEnter("NUOPC_ModelBase:TimestampExport")
+#endif
     ! SPECIALIZE optionally: label_TimestampExport
     ! -> first check for the label with phase index
     call ESMF_MethodExecute(gcomp, label=label_TimestampExport, index=phase, &
@@ -426,7 +458,10 @@ module NUOPC_ModelBase
         line=__LINE__, file=trim(name)//":"//FILENAME, &
         rcToReturn=rc)) &
         return  ! bail out
-    endif
+   endif
+#ifdef NUOPC_MODELBASE_TRACE
+   call ESMF_TraceRegionExit("NUOPC_ModelBase:TimestampExport")
+#endif
 
     ! conditionally output diagnostic to Log file
     if (btest(verbosity,0)) then
@@ -441,6 +476,10 @@ module NUOPC_ModelBase
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
     endif
+
+#ifdef NUOPC_MODELBASE_TRACE
+    call ESMF_TraceRegionExit("NUOPC_ModelBase:Run")
+#endif
     
   end subroutine
   

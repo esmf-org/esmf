@@ -229,6 +229,7 @@ module ESMF_VMMod
 ! !PRIVATE MEMBER FUNCTIONS:
 !
       module procedure ESMF_VMAllFullReduceI4
+      module procedure ESMF_VMAllFullReduceI8
       module procedure ESMF_VMAllFullReduceR4
       module procedure ESMF_VMAllFullReduceR8
 
@@ -248,6 +249,7 @@ module ESMF_VMMod
 ! !PRIVATE MEMBER FUNCTIONS:
 !
       module procedure ESMF_VMAllGatherI4
+      module procedure ESMF_VMAllGatherI8
       module procedure ESMF_VMAllGatherR4
       module procedure ESMF_VMAllGatherR8
       module procedure ESMF_VMAllGatherLogical
@@ -268,6 +270,7 @@ module ESMF_VMMod
 ! !PRIVATE MEMBER FUNCTIONS:
 !
       module procedure ESMF_VMAllGatherVI4
+      module procedure ESMF_VMAllGatherVI8
       module procedure ESMF_VMAllGatherVR4
       module procedure ESMF_VMAllGatherVR8
       module procedure ESMF_VMAllGatherVCharArray
@@ -290,6 +293,7 @@ module ESMF_VMMod
 !
       module procedure ESMF_VMAllReduceI4
       module procedure ESMF_VMAllReduceI4S
+      module procedure ESMF_VMAllReduceI8
       module procedure ESMF_VMAllReduceR4
       module procedure ESMF_VMAllReduceR8
 
@@ -309,6 +313,7 @@ module ESMF_VMMod
 ! !PRIVATE MEMBER FUNCTIONS:
 !
       module procedure ESMF_VMAllToAllI4
+      module procedure ESMF_VMAllToAllI8
       module procedure ESMF_VMAllToAllR4
       module procedure ESMF_VMAllToAllR8
 
@@ -328,6 +333,7 @@ module ESMF_VMMod
 ! !PRIVATE MEMBER FUNCTIONS:
 !
       module procedure ESMF_VMAllToAllVI4
+      module procedure ESMF_VMAllToAllVI8
       module procedure ESMF_VMAllToAllVR4
       module procedure ESMF_VMAllToAllVR8
       module procedure ESMF_VMAllToAllVCharArray
@@ -349,6 +355,7 @@ module ESMF_VMMod
 ! !PRIVATE MEMBER FUNCTIONS:
 !
       module procedure ESMF_VMBroadcastI4
+      module procedure ESMF_VMBroadcastI8
       module procedure ESMF_VMBroadcastR4
       module procedure ESMF_VMBroadcastR8
       module procedure ESMF_VMBroadcastLogical
@@ -372,6 +379,7 @@ module ESMF_VMMod
 ! !PRIVATE MEMBER FUNCTIONS:
 !
       module procedure ESMF_VMGatherI4
+      module procedure ESMF_VMGatherI8
       module procedure ESMF_VMGatherR4
       module procedure ESMF_VMGatherR8
       module procedure ESMF_VMGatherLogical
@@ -393,6 +401,7 @@ module ESMF_VMMod
 ! !PRIVATE MEMBER FUNCTIONS:
 !
       module procedure ESMF_VMGatherVI4
+      module procedure ESMF_VMGatherVI8
       module procedure ESMF_VMGatherVR4
       module procedure ESMF_VMGatherVR8
 
@@ -430,6 +439,7 @@ module ESMF_VMMod
 ! !PRIVATE MEMBER FUNCTIONS:
 !
       module procedure ESMF_VMRecvI4
+      module procedure ESMF_VMRecvI8
       module procedure ESMF_VMRecvR4
       module procedure ESMF_VMRecvR8
       module procedure ESMF_VMRecvLogical
@@ -452,6 +462,7 @@ module ESMF_VMMod
 ! !PRIVATE MEMBER FUNCTIONS:
 !
       module procedure ESMF_VMReduceI4
+      module procedure ESMF_VMReduceI8
       module procedure ESMF_VMReduceR4
       module procedure ESMF_VMReduceR8
 
@@ -471,6 +482,7 @@ module ESMF_VMMod
 ! !PRIVATE MEMBER FUNCTIONS:
 !
       module procedure ESMF_VMScatterI4
+      module procedure ESMF_VMScatterI8
       module procedure ESMF_VMScatterR4
       module procedure ESMF_VMScatterR8
       module procedure ESMF_VMScatterLogical
@@ -491,6 +503,7 @@ module ESMF_VMMod
 ! !PRIVATE MEMBER FUNCTIONS:
 !
       module procedure ESMF_VMScatterVI4
+      module procedure ESMF_VMScatterVI8
       module procedure ESMF_VMScatterVR4
       module procedure ESMF_VMScatterVR8
 
@@ -510,6 +523,7 @@ module ESMF_VMMod
 ! !PRIVATE MEMBER FUNCTIONS:
 !
       module procedure ESMF_VMSendI4
+      module procedure ESMF_VMSendI8
       module procedure ESMF_VMSendR4
       module procedure ESMF_VMSendR8
       module procedure ESMF_VMSendLogical
@@ -532,6 +546,7 @@ module ESMF_VMMod
 ! !PRIVATE MEMBER FUNCTIONS:
 !
       module procedure ESMF_VMSendRecvI4
+      module procedure ESMF_VMSendRecvI8
       module procedure ESMF_VMSendRecvR4
       module procedure ESMF_VMSendRecvR8
       module procedure ESMF_VMSendRecvLogical
@@ -824,7 +839,8 @@ contains
 !   into a single value of the same <type><kind>. The result is
 !   returned on all PETs. Different reduction operations can be specified.
 !
-!   This method is overloaded for: {\tt ESMF\_TYPEKIND\_I4},
+!   This method is overloaded for:
+!   {\tt ESMF\_TYPEKIND\_I4}, {\tt ESMF\_TYPEKIND\_I8},
 !   {\tt ESMF\_TYPEKIND\_R4}, {\tt ESMF\_TYPEKIND\_R8}.
 !
 !   {\sc Todo:} The current version of this method does not provide an 
@@ -927,6 +943,67 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(rc)) rc = ESMF_SUCCESS
 
   end subroutine ESMF_VMAllFullReduceI4
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_VMAllFullReduceI8()"
+!BOPI
+! !IROUTINE: ESMF_VMAllFullReduce - AllFullReduce 8-byte integers
+
+! !INTERFACE:
+  ! Private name; call using ESMF_VMAllFullReduce()
+  subroutine ESMF_VMAllFullReduceI8(vm, sendData, recvData, count, &
+    reduceflag, keywordEnforcer, syncflag, commhandle, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_VM),                 intent(in)            :: vm
+    integer(ESMF_KIND_I8), target, intent(in)            :: sendData(:)
+    integer(ESMF_KIND_I8),         intent(out)           :: recvData
+    integer,                       intent(in)            :: count
+    type(ESMF_Reduce_Flag),        intent(in)            :: reduceflag
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    type(ESMF_Sync_Flag),          intent(in),  optional :: syncflag
+    type(ESMF_CommHandle),         intent(out), optional :: commhandle
+    integer,                       intent(out), optional :: rc
+!         
+!EOPI
+!------------------------------------------------------------------------------
+    integer                 :: localrc      ! local return code
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
+    
+    ! Initialize commhandle to an invalid pointer
+    if (present(commhandle)) commhandle%this = ESMF_NULL_POINTER
+
+    ! Not implemented features
+    if (present(syncflag)) then
+      if (syncflag == ESMF_SYNC_NONBLOCKING) then
+        call ESMF_LogSetError(ESMF_RC_NOT_IMPL, &
+          msg="- non-blocking mode not yet implemented", &
+          ESMF_CONTEXT, rcToReturn=rc)
+        return
+      endif
+    endif
+    
+    if (count > 0) then
+      ! Call into the C++ interface.
+      call c_ESMC_VMAllFullReduce(vm, sendData(1), recvData, count, &
+        ESMF_TYPEKIND_I8, reduceflag, localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+      
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end subroutine ESMF_VMAllFullReduceI8
 !------------------------------------------------------------------------------
 
 
@@ -1079,8 +1156,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   Collective {\tt ESMF\_VM} communication call that gathers contiguous data 
 !   from all PETs of an {\tt ESMF\_VM} object into an array on all PETs.
 !
-!   This method is overloaded for: 
-!   {\tt ESMF\_TYPEKIND\_I4},
+!   This method is overloaded for:
+!   {\tt ESMF\_TYPEKIND\_I4}, {\tt ESMF\_TYPEKIND\_I8},
 !   {\tt ESMF\_TYPEKIND\_R4}, {\tt ESMF\_TYPEKIND\_R8}, 
 !   {\tt ESMF\_TYPEKIND\_LOGICAL}.
 !
@@ -1184,6 +1261,76 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(rc)) rc = ESMF_SUCCESS
 
   end subroutine ESMF_VMAllGatherI4
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_VMAllGatherI8()"
+!BOPI
+! !IROUTINE: ESMF_VMAllGather - AllGather 8-byte integers
+
+! !INTERFACE:
+  ! Private name; call using ESMF_VMAllGather()
+  subroutine ESMF_VMAllGatherI8(vm, sendData, recvData, count, &
+    keywordEnforcer, syncflag, commhandle, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_VM),                 intent(in)            :: vm
+    integer(ESMF_KIND_I8), target, intent(in)            :: sendData(:)
+    integer(ESMF_KIND_I8), target, intent(out)           :: recvData(:)
+    integer,                       intent(in)            :: count
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    type(ESMF_Sync_Flag),          intent(in),  optional :: syncflag
+    type(ESMF_CommHandle),         intent(out), optional :: commhandle
+    integer,                       intent(out), optional :: rc
+!         
+!EOPI
+!------------------------------------------------------------------------------
+    integer                 :: localrc      ! local return code
+    integer                 :: size
+    logical                 :: blocking
+    type(ESMF_CommHandle)   :: localcommhandle
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
+
+    ! Initialize commhandle to an invalid pointer
+    if (present(commhandle)) commhandle%this = ESMF_NULL_POINTER
+
+    ! Decide whether this is blocking or non-blocking
+    blocking = .true. !default is blocking
+    if (present(syncflag)) then
+      if (syncflag == ESMF_SYNC_NONBLOCKING) blocking = .false. ! non-blocking
+    endif
+    
+    size = count * 8 ! 8 bytes
+    ! Call into the C++ interface.
+    if (blocking) then
+      call c_ESMC_VMAllGather(vm, sendData(1), recvData(1), size, localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    else
+      call c_ESMC_VMAllGatherNB(vm, sendData(1), recvData(1), size, &
+        localcommhandle, localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+      ! Check if we need to pass back the commhandle
+      if (present(commhandle)) then
+        commhandle = localcommhandle  ! copy the commhandle pointer back
+        ! Set init code
+        ESMF_INIT_SET_CREATED(commhandle)
+      endif
+    endif
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end subroutine ESMF_VMAllGatherI8
 !------------------------------------------------------------------------------
 
 
@@ -1426,8 +1573,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   Collective {\tt ESMF\_VM} communication call that gathers contiguous data 
 !   from all PETs of an {\tt ESMF\_VM} object into an array on all PETs.
 !
-!   This method is overloaded for: {\tt ESMF\_TYPEKIND\_I4},
-!   {\tt ESMF\_TYPEKIND\_R4}, {\tt ESMF\_TYPEKIND\_R8}. 
+!   This method is overloaded for:
+!   {\tt ESMF\_TYPEKIND\_I4}, {\tt ESMF\_TYPEKIND\_I8},
+!   {\tt ESMF\_TYPEKIND\_R4}, {\tt ESMF\_TYPEKIND\_R8}.
 !
 !   {\sc Todo:} The current version of this method does not provide an 
 !   implementation of the {\em non-blocking} feature. When calling this 
@@ -1531,6 +1679,66 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(rc)) rc = ESMF_SUCCESS
 
   end subroutine ESMF_VMAllGatherVI4
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_VMAllGatherVI8()"
+!BOPI
+! !IROUTINE: ESMF_VMAllGatherV - AllGatherV 8-byte integers
+
+! !INTERFACE:
+  ! Private name; call using ESMF_VMAllGatherV()
+  subroutine ESMF_VMAllGatherVI8(vm, sendData, sendCount, recvData, &
+    recvCounts, recvOffsets, keywordEnforcer, syncflag, commhandle, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_VM),                 intent(in)            :: vm
+    integer(ESMF_KIND_I8), target, intent(in)            :: sendData(:)
+    integer,                       intent(in)            :: sendCount
+    integer(ESMF_KIND_I8), target, intent(out)           :: recvData(:)
+    integer,                       intent(in)            :: recvCounts(:)
+    integer,                       intent(in)            :: recvOffsets(:)
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    type(ESMF_Sync_Flag),          intent(in),  optional :: syncflag
+    type(ESMF_CommHandle),         intent(out), optional :: commhandle
+    integer,                       intent(out), optional :: rc
+!         
+!EOPI
+!------------------------------------------------------------------------------
+    integer                 :: localrc      ! local return code
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
+
+    ! Initialize commhandle to an invalid pointer
+    if (present(commhandle)) commhandle%this = ESMF_NULL_POINTER
+
+    ! Not implemented features
+    if (present(syncflag)) then
+      if (syncflag == ESMF_SYNC_NONBLOCKING) then
+        call ESMF_LogSetError(ESMF_RC_NOT_IMPL, &
+          msg="- non-blocking mode not yet implemented", &
+          ESMF_CONTEXT, rcToReturn=rc)
+        return
+      endif
+    endif
+
+    ! Call into the C++ interface.
+    call c_ESMC_VMAllGatherV(vm, sendData, sendCount, &
+      recvData, recvCounts(1), recvOffsets(1), ESMF_TYPEKIND_I8, localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end subroutine ESMF_VMAllGatherVI8
 !------------------------------------------------------------------------------
 
 
@@ -1808,8 +2016,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   same <type><kind>. The result array is returned on all PETs. 
 !   Different reduction operations can be specified.
 !
-!   This method is overloaded for: {\tt ESMF\_TYPEKIND\_I4},
-!   {\tt ESMF\_TYPEKIND\_R4}, {\tt ESMF\_TYPEKIND\_R8}. 
+!   This method is overloaded for:
+!   {\tt ESMF\_TYPEKIND\_I4}, {\tt ESMF\_TYPEKIND\_I8},
+!   {\tt ESMF\_TYPEKIND\_R4}, {\tt ESMF\_TYPEKIND\_R8}.
 !
 !   {\sc Todo:} The current version of this method does not provide an 
 !   implementation of the {\em non-blocking} feature. When calling this 
@@ -1969,6 +2178,68 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(rc)) rc = ESMF_SUCCESS
 
   end subroutine ESMF_VMAllReduceI4S
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_VMAllReduceI8()"
+!BOPI
+! !IROUTINE: ESMF_VMAllReduce - AllReduce 8-byte integers
+
+! !INTERFACE:
+  ! Private name; call using ESMF_VMAllReduce()
+  subroutine ESMF_VMAllReduceI8(vm, sendData, recvData, count, reduceflag, &
+    keywordEnforcer, syncflag, commhandle, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_VM),                 intent(in)            :: vm
+    integer(ESMF_KIND_I8), target, intent(in)            :: sendData(:)
+    integer(ESMF_KIND_I8), target, intent(out)           :: recvData(:)
+    integer,                       intent(in)            :: count
+    type(ESMF_Reduce_Flag),        intent(in)            :: reduceflag
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    type(ESMF_Sync_Flag),          intent(in),  optional :: syncflag
+    type(ESMF_CommHandle),         intent(out), optional :: commhandle
+    integer,                       intent(out), optional :: rc
+!         
+!EOPI
+!------------------------------------------------------------------------------
+    integer                 :: localrc      ! local return code
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
+
+    ! Initialize commhandle to an invalid pointer
+    if (present(commhandle)) commhandle%this = ESMF_NULL_POINTER
+
+    ! Not implemented features
+    if (present(syncflag)) then
+      if (syncflag == ESMF_SYNC_NONBLOCKING) then
+        call ESMF_LogSetError(ESMF_RC_NOT_IMPL, &
+          msg="- non-blocking mode not yet implemented", &
+          ESMF_CONTEXT, rcToReturn=rc)
+        return
+      endif
+    endif
+
+    if (count > 0) then
+      ! Call into the C++ interface.
+      call c_ESMC_VMAllReduce(vm, sendData(1), recvData(1), count, &
+        ESMF_TYPEKIND_I8, reduceflag, localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end subroutine ESMF_VMAllReduceI8
+!------------------------------------------------------------------------------
 
 
 ! -------------------------- ESMF-public method -------------------------------
@@ -2124,8 +2395,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   all other PETs while receiving data into the contiguous data buffer
 !   {\tt recvData} from all other PETs.
 !
-!   This method is overloaded for: {\tt ESMF\_TYPEKIND\_I4},
-!   {\tt ESMF\_TYPEKIND\_R4}, {\tt ESMF\_TYPEKIND\_R8}. 
+!   This method is overloaded for:
+!   {\tt ESMF\_TYPEKIND\_I4}, {\tt ESMF\_TYPEKIND\_I8},
+!   {\tt ESMF\_TYPEKIND\_R4}, {\tt ESMF\_TYPEKIND\_R8}.
 !
 !   {\sc Todo:} The current version of this method does not provide an 
 !   implementation of the {\em non-blocking} feature. When calling this 
@@ -2225,6 +2497,65 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(rc)) rc = ESMF_SUCCESS
 
   end subroutine ESMF_VMAllToAllI4
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_VMAllToAllI8()"
+!BOPI
+! !IROUTINE: ESMF_VMAllToAllV - AllToAll 8-byte integers
+
+! !INTERFACE:
+  ! Private name; call using ESMF_VMAllToAll()
+  subroutine ESMF_VMAllToAllI8(vm, sendData, sendCount, &
+    recvData, recvCount, keywordEnforcer, syncflag, commhandle, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_VM),                 intent(in)            :: vm
+    integer(ESMF_KIND_I8), target, intent(in)            :: sendData(:)
+    integer,                       intent(in)            :: sendCount
+    integer(ESMF_KIND_I8), target, intent(out)           :: recvData(:)
+    integer,                       intent(in)            :: recvCount
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    type(ESMF_Sync_Flag),          intent(in),  optional :: syncflag
+    type(ESMF_CommHandle),         intent(out), optional :: commhandle
+    integer,                       intent(out), optional :: rc
+!         
+!EOPI
+!------------------------------------------------------------------------------
+    integer                 :: localrc      ! local return code
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
+
+    ! Initialize commhandle to an invalid pointer
+    if (present(commhandle)) commhandle%this = ESMF_NULL_POINTER
+
+    ! Not implemented features
+    if (present(syncflag)) then
+      if (syncflag == ESMF_SYNC_NONBLOCKING) then
+        call ESMF_LogSetError(ESMF_RC_NOT_IMPL, &
+          msg="- non-blocking mode not yet implemented", &
+          ESMF_CONTEXT, rcToReturn=rc)
+        return
+      endif
+    endif
+
+    ! Call into the C++ interface.
+    call c_ESMC_VMAllToAll(vm, sendData, sendCount, &
+      recvData, recvCount, ESMF_TYPEKIND_I8, localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end subroutine ESMF_VMAllToAllI8
 !------------------------------------------------------------------------------
 
 
@@ -2379,9 +2710,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   all other PETs while receiving data into the contiguous data buffer
 !   {\tt recvData} from all other PETs.
 !
-!   This method is overloaded for: {\tt ESMF\_TYPEKIND\_I4},
-!   {\tt ESMF\_TYPEKIND\_R4}, {\tt ESMF\_TYPEKIND\_R8}, and logical
-!   data types. 
+!   This method is overloaded for:
+!   {\tt ESMF\_TYPEKIND\_I4}, {\tt ESMF\_TYPEKIND\_I8},
+!   {\tt ESMF\_TYPEKIND\_R4}, {\tt ESMF\_TYPEKIND\_R8}, 
+!   {\tt ESMF\_TYPEKIND\_LOGICAL}.
 !
 !   {\sc Todo:} The current version of this method does not provide an 
 !   implementation of the {\em non-blocking} feature. When calling this 
@@ -2489,6 +2821,67 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(rc)) rc = ESMF_SUCCESS
 
   end subroutine ESMF_VMAllToAllVI4
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_VMAllToAllVI8()"
+!BOPI
+! !IROUTINE: ESMF_VMAllToAllV - AllToAllV 8-byte integers
+
+! !INTERFACE:
+  ! Private name; call using ESMF_VMAllToAllV()
+  subroutine ESMF_VMAllToAllVI8(vm, sendData, sendCounts, sendOffsets, &
+    recvData, recvCounts, recvOffsets, keywordEnforcer, syncflag, commhandle, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_VM),                 intent(in)            :: vm
+    integer(ESMF_KIND_I8), target, intent(in)            :: sendData(:)
+    integer,                       intent(in)            :: sendCounts(:)
+    integer,                       intent(in)            :: sendOffsets(:)
+    integer(ESMF_KIND_I8), target, intent(out)           :: recvData(:)
+    integer,                       intent(in)            :: recvCounts(:)
+    integer,                       intent(in)            :: recvOffsets(:)
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    type(ESMF_Sync_Flag),          intent(in),  optional :: syncflag
+    type(ESMF_CommHandle),         intent(out), optional :: commhandle
+    integer,                       intent(out), optional :: rc
+!         
+!EOPI
+!------------------------------------------------------------------------------
+    integer                 :: localrc      ! local return code
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
+
+    ! Initialize commhandle to an invalid pointer
+    if (present(commhandle)) commhandle%this = ESMF_NULL_POINTER
+
+    ! Not implemented features
+    if (present(syncflag)) then
+      if (syncflag == ESMF_SYNC_NONBLOCKING) then
+        call ESMF_LogSetError(ESMF_RC_NOT_IMPL, &
+          msg="- non-blocking mode not yet implemented", &
+          ESMF_CONTEXT, rcToReturn=rc)
+        return
+      endif
+    endif
+
+    ! Call into the C++ interface.
+    call c_ESMC_VMAllToAllV(vm, sendData, sendCounts(1), sendOffsets(1), &
+      recvData, recvCounts(1), recvOffsets(1), ESMF_TYPEKIND_I8, localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end subroutine ESMF_VMAllToAllVI8
 !------------------------------------------------------------------------------
 
 
@@ -2829,8 +3222,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   data array from {\tt rootPet} to all other PETs of the {\tt ESMF\_VM}
 !   object.
 !
-!   This method is overloaded for: 
-!   {\tt ESMF\_TYPEKIND\_I4},
+!   This method is overloaded for:
+!   {\tt ESMF\_TYPEKIND\_I4}, {\tt ESMF\_TYPEKIND\_I8},
 !   {\tt ESMF\_TYPEKIND\_R4}, {\tt ESMF\_TYPEKIND\_R8}, 
 !   {\tt ESMF\_TYPEKIND\_LOGICAL}, 
 !   {\tt ESMF\_TYPEKIND\_CHARACTER}.
@@ -2937,6 +3330,78 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(rc)) rc = ESMF_SUCCESS
 
   end subroutine ESMF_VMBroadcastI4
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_VMBroadcastI8()"
+!BOPI
+! !IROUTINE: ESMF_VMBroadcast - Broadcast 8-byte integers
+
+! !INTERFACE:
+  ! Private name; call using ESMF_VMBroadcast()
+  subroutine ESMF_VMBroadcastI8(vm, bcstData, count, rootPet, &
+    keywordEnforcer, syncflag, commhandle, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_VM),                 intent(in)            :: vm
+    integer(ESMF_KIND_I8), target, intent(inout)         :: bcstData(:)
+    integer,                       intent(in)            :: count
+    integer,                       intent(in)            :: rootPet
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    type(ESMF_Sync_Flag),          intent(in),  optional :: syncflag
+    type(ESMF_CommHandle),         intent(out), optional :: commhandle
+    integer,                       intent(out), optional :: rc
+!         
+!EOPI
+!------------------------------------------------------------------------------
+    integer                 :: localrc      ! local return code
+    integer                 :: size
+    logical                 :: blocking
+    type(ESMF_CommHandle)   :: localcommhandle
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
+
+    ! Initialize commhandle to an invalid pointer
+    if (present(commhandle)) commhandle%this = ESMF_NULL_POINTER
+
+    ! Decide whether this is blocking or non-blocking
+    blocking = .true. !default is blocking
+    if (present(syncflag)) then
+      if (syncflag == ESMF_SYNC_NONBLOCKING) blocking = .false. ! non-blocking
+    endif
+    
+    if (count > 0) then
+      size = count * 8 ! 8 bytes
+      ! Call into the C++ interface.
+      if (blocking) then
+        call c_ESMC_VMBroadcast(vm, bcstData(1), size, rootPet, localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+      else
+        call c_ESMC_VMBroadcastNB(vm, bcstData(1), size, rootPet, localcommhandle, &
+          localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+        ! Check if we need to pass back the commhandle
+        if (present(commhandle)) then
+          commhandle = localcommhandle  ! copy the commhandle pointer back
+          ! Set init code
+          ESMF_INIT_SET_CREATED(commhandle)
+        endif
+      endif
+    endif
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end subroutine ESMF_VMBroadcastI8
 !------------------------------------------------------------------------------
 
 
@@ -3511,8 +3976,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   from all PETs of an {\tt ESMF\_VM} object (including {\tt rootPet}) into an
 !   array on {\tt rootPet}.
 !
-!   This method is overloaded for: 
-!   {\tt ESMF\_TYPEKIND\_I4},
+!   This method is overloaded for:
+!   {\tt ESMF\_TYPEKIND\_I4}, {\tt ESMF\_TYPEKIND\_I8},
 !   {\tt ESMF\_TYPEKIND\_R4}, {\tt ESMF\_TYPEKIND\_R8}, 
 !   {\tt ESMF\_TYPEKIND\_LOGICAL}.
 !
@@ -3619,6 +4084,77 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(rc)) rc = ESMF_SUCCESS
 
   end subroutine ESMF_VMGatherI4
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_VMGatherI8()"
+!BOPI
+! !IROUTINE: ESMF_VMGather - Gather 8-byte integers
+
+! !INTERFACE:
+  ! Private name; call using ESMF_VMGather()
+  subroutine ESMF_VMGatherI8(vm, sendData, recvData, count, rootPet, &
+    keywordEnforcer, syncflag, commhandle, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_VM),                 intent(in)            :: vm
+    integer(ESMF_KIND_I8), target, intent(in)            :: sendData(:)
+    integer(ESMF_KIND_I8), target, intent(out)           :: recvData(:)
+    integer,                       intent(in)            :: count
+    integer,                       intent(in)            :: rootPet
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    type(ESMF_Sync_Flag),          intent(in),  optional :: syncflag
+    type(ESMF_CommHandle),         intent(out), optional :: commhandle
+    integer,                       intent(out), optional :: rc
+!         
+!EOPI
+!------------------------------------------------------------------------------
+    integer                 :: localrc      ! local return code
+    integer                 :: size
+    logical                 :: blocking
+    type(ESMF_CommHandle)   :: localcommhandle
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
+
+    ! Initialize commhandle to an invalid pointer
+    if (present(commhandle)) commhandle%this = ESMF_NULL_POINTER
+
+    ! Decide whether this is blocking or non-blocking
+    blocking = .true. !default is blocking
+    if (present(syncflag)) then
+      if (syncflag == ESMF_SYNC_NONBLOCKING) blocking = .false. ! non-blocking
+    endif
+    
+    size = count * 8 ! 8 bytes
+    ! Call into the C++ interface.
+    if (blocking) then
+      call c_ESMC_VMGather(vm, sendData(1), recvData(1), size, rootPet, localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    else
+      call c_ESMC_VMGatherNB(vm, sendData(1), recvData(1), size, rootPet, &
+        localcommhandle, localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+      ! Check if we need to pass back the commhandle
+      if (present(commhandle)) then
+        commhandle = localcommhandle  ! copy the commhandle pointer back
+        ! Set init code
+        ESMF_INIT_SET_CREATED(commhandle)
+      endif
+    endif
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end subroutine ESMF_VMGatherI8
 !------------------------------------------------------------------------------
 
 
@@ -3934,7 +4470,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   Collective {\tt ESMF\_VM} communication call that gathers contiguous data 
 !   from all PETs of an {\tt ESMF\_VM} object into an array on rootPet.
 !
-!   This method is overloaded for: {\tt ESMF\_TYPEKIND\_I4},
+!   This method is overloaded for:
+!   {\tt ESMF\_TYPEKIND\_I4}, {\tt ESMF\_TYPEKIND\_I8},
 !   {\tt ESMF\_TYPEKIND\_R4}, {\tt ESMF\_TYPEKIND\_R8}.
 !
 !   {\sc Todo:} The current version of this method does not provide an 
@@ -4015,6 +4552,52 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(rc)) rc = ESMF_SUCCESS
 
   end subroutine ESMF_VMGatherVI4
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_VMGatherVI8()"
+!BOPI
+! !IROUTINE: ESMF_VMGatherV - GatherV 8-byte integers
+
+! !INTERFACE:
+  ! Private name; call using ESMF_VMGatherV()
+  subroutine ESMF_VMGatherVI8(vm, sendData, sendCount, recvData, &
+    recvCounts, recvOffsets, rootPet, keywordEnforcer, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_VM),                 intent(in)            :: vm
+    integer(ESMF_KIND_I8), target, intent(in)            :: sendData(:)
+    integer,                       intent(in)            :: sendCount
+    integer(ESMF_KIND_I8), target, intent(out)           :: recvData(:)
+    integer,                       intent(in)            :: recvCounts(:)
+    integer,                       intent(in)            :: recvOffsets(:)
+    integer,                       intent(in)            :: rootPet
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    integer,                       intent(out), optional :: rc
+!         
+!EOPI
+!------------------------------------------------------------------------------
+    integer                 :: localrc      ! local return code
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
+
+    ! Call into the C++ interface.
+    call c_ESMC_VMGatherV(vm, sendData, sendCount, recvData, &
+      recvCounts(1), recvOffsets(1), ESMF_TYPEKIND_I8, rootPet, localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end subroutine ESMF_VMGatherVI8
 !------------------------------------------------------------------------------
 
 
@@ -4803,14 +5386,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !    syncflag, commhandle, rc)
 !
 ! !ARGUMENTS:
-!    type(ESMF_VM),                 intent(in)            :: vm
-!    integer(ESMF_KIND_I4), target, intent(out)           :: recvData(:)  
-!    integer,                       intent(in)            :: count
-!    integer,                       intent(in)            :: srcPet
+!    type(ESMF_VM),                     intent(in)            :: vm
+!    integer(ESMF_KIND_<kind>), target, intent(out)           :: recvData(:)  
+!    integer,                           intent(in)            :: count
+!    integer,                           intent(in)            :: srcPet
 !type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-!    type(ESMF_Sync_Flag),          intent(in),  optional :: syncflag
-!    type(ESMF_CommHandle),         intent(out), optional :: commhandle
-!    integer,                       intent(out), optional :: rc           
+!    type(ESMF_Sync_Flag),              intent(in),  optional :: syncflag
+!    type(ESMF_CommHandle),             intent(out), optional :: commhandle
+!    integer,                           intent(out), optional :: rc           
 !
 ! !STATUS:
 ! \begin{itemize}
@@ -4821,9 +5404,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   Receive contiguous data from {\tt srcPet} within the same {\tt ESMF\_VM} 
 !   object.
 !
-!   This method is overloaded for: 
-!   {\tt ESMF\_TYPEKIND\_I4},
-!   {\tt ESMF\_TYPEKIND\_R4}, {\tt ESMF\_TYPEKIND\_R8},
+!   This method is overloaded for:
+!   {\tt ESMF\_TYPEKIND\_I4}, {\tt ESMF\_TYPEKIND\_I8},
+!   {\tt ESMF\_TYPEKIND\_R4}, {\tt ESMF\_TYPEKIND\_R8}, 
 !   {\tt ESMF\_TYPEKIND\_LOGICAL}, 
 !   {\tt ESMF\_TYPEKIND\_CHARACTER}.
 !
@@ -4860,7 +5443,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_VMRecvI4()"
-!BOP!
+!BOPI
 ! !IROUTINE: ESMF_VMRecv - Receive 4-byte integers
 
 ! !INTERFACE:
@@ -4926,6 +5509,78 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(rc)) rc = ESMF_SUCCESS
 
   end subroutine ESMF_VMRecvI4
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_VMRecvI8()"
+!BOPI
+! !IROUTINE: ESMF_VMRecv - Receive 8-byte integers
+
+! !INTERFACE:
+  ! Private name; call using ESMF_VMRecv()
+  subroutine ESMF_VMRecvI8(vm, recvData, count, srcPet, keywordEnforcer, &
+    syncflag, commhandle, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_VM),                 intent(in)            :: vm
+    integer(ESMF_KIND_I8), target, intent(out)           :: recvData(:)  
+    integer,                       intent(in)            :: count
+    integer,                       intent(in)            :: srcPet
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    type(ESMF_Sync_Flag),          intent(in),  optional :: syncflag
+    type(ESMF_CommHandle),         intent(out), optional :: commhandle
+    integer,                       intent(out), optional :: rc           
+!
+!EOPI
+!------------------------------------------------------------------------------
+    integer                 :: localrc      ! local return code
+    integer                 :: size
+    logical                 :: blocking
+    type(ESMF_CommHandle)   :: localcommhandle
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
+
+    ! Initialize commhandle to an invalid pointer
+    if (present(commhandle)) commhandle%this = ESMF_NULL_POINTER
+
+    ! Decide whether this is blocking or non-blocking
+    blocking = .true. !default is blocking
+    if (present(syncflag)) then
+      if (syncflag == ESMF_SYNC_NONBLOCKING) blocking = .false. ! non-blocking
+    endif
+    
+    if (count > 0) then
+      ! There is data to be received
+      size = count * 8 ! 8 bytes
+      ! Call into the C++ interface.
+      if (blocking) then
+        call c_ESMC_VMRecv(vm, recvData(1), size, srcPet, localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+      else
+        call c_ESMC_VMRecvNB(vm, recvData(1), size, srcPet, localcommhandle, localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+        ! Check if we need to pass back the commhandle
+        if (present(commhandle)) then
+          commhandle = localcommhandle  ! copy the commhandle pointer back
+          ! Set init code
+          ESMF_INIT_SET_CREATED(commhandle)
+        endif
+      endif
+    endif
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end subroutine ESMF_VMRecvI8
 !------------------------------------------------------------------------------
 
 
@@ -5320,7 +5975,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   the same <type><kind>. The result array is returned on {\tt rootPet}. 
 !   Different reduction operations can be specified.
 !
-!   This method is overloaded for: {\tt ESMF\_TYPEKIND\_I4},
+!   This method is overloaded for:
+!   {\tt ESMF\_TYPEKIND\_I4}, {\tt ESMF\_TYPEKIND\_I8},
 !   {\tt ESMF\_TYPEKIND\_R4}, {\tt ESMF\_TYPEKIND\_R8}.
 !
 !   {\sc Todo:} The current version of this method does not provide an 
@@ -5426,6 +6082,68 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(rc)) rc = ESMF_SUCCESS
 
   end subroutine ESMF_VMReduceI4
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_VMReduceI8()"
+!BOPI
+! !IROUTINE: ESMF_VMReduce - Reduce 8-byte integers
+
+! !INTERFACE:
+  ! Private name; call using ESMF_VMReduce()
+  subroutine ESMF_VMReduceI8(vm, sendData, recvData, count, reduceflag, &
+    rootPet, keywordEnforcer, syncflag, commhandle, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_VM),                 intent(in)            :: vm
+    integer(ESMF_KIND_I8), target, intent(in)            :: sendData(:)
+    integer(ESMF_KIND_I8), target, intent(out)           :: recvData(:)
+    integer,                       intent(in)            :: count
+    type(ESMF_Reduce_Flag),        intent(in)            :: reduceflag
+    integer,                       intent(in)            :: rootPet
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    type(ESMF_Sync_Flag),          intent(in),  optional :: syncflag
+    type(ESMF_CommHandle),         intent(out), optional :: commhandle
+    integer,                       intent(out), optional :: rc
+!         
+!EOPI
+!------------------------------------------------------------------------------
+    integer                 :: localrc      ! local return code
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
+
+    ! Initialize commhandle to an invalid pointer
+    if (present(commhandle)) commhandle%this = ESMF_NULL_POINTER
+
+    ! Not implemented features
+    if (present(syncflag)) then
+      if (syncflag == ESMF_SYNC_NONBLOCKING) then
+        call ESMF_LogSetError(ESMF_RC_NOT_IMPL, &
+          msg="- non-blocking mode not yet implemented", &
+          ESMF_CONTEXT, rcToReturn=rc)
+        return
+      endif
+    endif
+
+    if (count > 0) then
+      ! Call into the C++ interface.
+      call c_ESMC_VMReduce(vm, sendData(1), recvData(1), count, &
+        ESMF_TYPEKIND_I8, reduceflag, rootPet, localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end subroutine ESMF_VMReduceI8
 !------------------------------------------------------------------------------
 
 
@@ -5582,9 +6300,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   from the {\tt rootPet} to all PETs across the {\tt ESMF\_VM} object
 !   (including {\tt rootPet}).
 !
-!   This method is overloaded for: 
-!   {\tt ESMF\_TYPEKIND\_I4},
-!   {\tt ESMF\_TYPEKIND\_R4}, {\tt ESMF\_TYPEKIND\_R8},
+!   This method is overloaded for:
+!   {\tt ESMF\_TYPEKIND\_I4}, {\tt ESMF\_TYPEKIND\_I8},
+!   {\tt ESMF\_TYPEKIND\_R4}, {\tt ESMF\_TYPEKIND\_R8}, 
 !   {\tt ESMF\_TYPEKIND\_LOGICAL}.
 !
 !   The arguments are:
@@ -5690,6 +6408,77 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(rc)) rc = ESMF_SUCCESS
 
   end subroutine ESMF_VMScatterI4
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_VMScatterI8()"
+!BOPI
+! !IROUTINE: ESMF_VMScatter - Scatter 8-byte integers
+
+! !INTERFACE:
+  ! Private name; call using ESMF_VMScatter()
+  subroutine ESMF_VMScatterI8(vm, sendData, recvData, count, rootPet, &
+    keywordEnforcer, syncflag, commhandle, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_VM),                 intent(in)            :: vm
+    integer(ESMF_KIND_I8), target, intent(in)            :: sendData(:)
+    integer(ESMF_KIND_I8), target, intent(out)           :: recvData(:)
+    integer,                       intent(in)            :: count
+    integer,                       intent(in)            :: rootPet
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    type(ESMF_Sync_Flag),          intent(in),  optional :: syncflag
+    type(ESMF_CommHandle),         intent(out), optional :: commhandle
+    integer,                       intent(out), optional :: rc
+!         
+!EOPI
+!------------------------------------------------------------------------------
+    integer                 :: localrc      ! local return code
+    integer                 :: size
+    logical                 :: blocking
+    type(ESMF_CommHandle)   :: localcommhandle
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
+
+    ! Initialize commhandle to an invalid pointer
+    if (present(commhandle)) commhandle%this = ESMF_NULL_POINTER
+
+    ! Decide whether this is blocking or non-blocking
+    blocking = .true. !default is blocking
+    if (present(syncflag)) then
+      if (syncflag == ESMF_SYNC_NONBLOCKING) blocking = .false. ! non-blocking
+    endif
+    
+    size = count * 8 ! 8 bytes
+    ! Call into the C++ interface.
+    if (blocking) then
+      call c_ESMC_VMScatter(vm, sendData(1), recvData(1), size, rootPet, localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    else
+      call c_ESMC_VMScatterNB(vm, sendData(1), recvData(1), size, rootPet, &
+        localcommhandle, localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+      ! Check if we need to pass back the commhandle
+      if (present(commhandle)) then
+        commhandle = localcommhandle  ! copy the commhandle pointer back
+        ! Set init code
+        ESMF_INIT_SET_CREATED(commhandle)
+      endif
+    endif
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end subroutine ESMF_VMScatterI8
 !------------------------------------------------------------------------------
 
 
@@ -5935,7 +6724,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   from the {\tt rootPet} to all PETs across the {\tt ESMF\_VM} object
 !   (including {\tt rootPet}).
 !
-!   This method is overloaded for: {\tt ESMF\_TYPEKIND\_I4},
+!   This method is overloaded for:
+!   {\tt ESMF\_TYPEKIND\_I4}, {\tt ESMF\_TYPEKIND\_I8},
 !   {\tt ESMF\_TYPEKIND\_R4}, {\tt ESMF\_TYPEKIND\_R8}.
 !
 !   The arguments are:
@@ -6010,6 +6800,52 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(rc)) rc = ESMF_SUCCESS
 
   end subroutine ESMF_VMScatterVI4
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_VMScatterVI8()"
+!BOPI
+! !IROUTINE: ESMF_VMScatterV - ScatterV 8-byte integers
+
+! !INTERFACE:
+  ! Private name; call using ESMF_VMScatterV()
+  subroutine ESMF_VMScatterVI8(vm, sendData, sendCounts, sendOffsets, &
+    recvData, recvCount, rootPet, keywordEnforcer, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_VM),                 intent(in)            :: vm
+    integer(ESMF_KIND_I8), target, intent(in)            :: sendData(:)
+    integer,                       intent(in)            :: sendCounts(:)
+    integer,                       intent(in)            :: sendOffsets(:)
+    integer(ESMF_KIND_I8), target, intent(out)           :: recvData(:)
+    integer,                       intent(in)            :: recvCount
+    integer,                       intent(in)            :: rootPet
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    integer,                       intent(out), optional :: rc
+!         
+!EOPI
+!------------------------------------------------------------------------------
+    integer                 :: localrc      ! local return code
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
+
+    ! Call into the C++ interface.
+    call c_ESMC_VMScatterV(vm, sendData(1), sendCounts(1), sendOffsets(1), &
+      recvData(1), recvCount, ESMF_TYPEKIND_I8, rootPet, localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end subroutine ESMF_VMScatterVI8
 !------------------------------------------------------------------------------
 
 
@@ -6131,6 +6967,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !DESCRIPTION:
 !   Send contiguous data to {\tt dstPet} within the same {\tt ESMF\_VM} object.
 !
+!   This method is overloaded for:
+!   {\tt ESMF\_TYPEKIND\_I4}, {\tt ESMF\_TYPEKIND\_I8},
+!   {\tt ESMF\_TYPEKIND\_R4}, {\tt ESMF\_TYPEKIND\_R8}, 
+!   {\tt ESMF\_TYPEKIND\_LOGICAL}, 
+!   {\tt ESMF\_TYPEKIND\_CHARACTER}.
+!
 !   The arguments are:
 !   \begin{description}
 !   \item[vm] 
@@ -6229,6 +7071,77 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(rc)) rc = ESMF_SUCCESS
 
   end subroutine ESMF_VMSendI4
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_VMSendI8()"
+!BOPI
+! !IROUTINE: ESMF_VMSend - Send 8-byte integers
+
+! !INTERFACE:
+  ! Private name; call using ESMF_VMSend()
+  subroutine ESMF_VMSendI8(vm, sendData, count, dstPet, keywordEnforcer, &
+    syncflag, commhandle, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_VM),                 intent(in)            :: vm
+    integer(ESMF_KIND_I8), target, intent(in)            :: sendData(:)  
+    integer,                       intent(in)            :: count
+    integer,                       intent(in)            :: dstPet
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    type(ESMF_Sync_Flag),          intent(in),  optional :: syncflag
+    type(ESMF_CommHandle),         intent(out), optional :: commhandle
+    integer,                       intent(out), optional :: rc           
+!EOPI
+!------------------------------------------------------------------------------
+    integer                 :: localrc      ! local return code
+    integer                 :: size
+    logical                 :: blocking
+    type(ESMF_CommHandle)   :: localcommhandle
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
+
+    ! Initialize commhandle to an invalid pointer
+    if (present(commhandle)) commhandle%this = ESMF_NULL_POINTER
+
+    ! Decide whether this is blocking or non-blocking
+    blocking = .true. !default is blocking
+    if (present(syncflag)) then
+      if (syncflag == ESMF_SYNC_NONBLOCKING) blocking = .false. ! non-blocking
+    endif
+    
+    if (count > 0) then
+      ! There is data to be received
+      size = count * 8 ! 8 bytes
+      ! Call into the C++ interface.
+      if (blocking) then
+        call c_ESMC_VMSend(vm, sendData(1), size, dstPet, localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+      else
+        call c_ESMC_VMSendNB(vm, sendData(1), size, dstPet, localcommhandle, localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+        ! Check if we need to pass back the commhandle
+        if (present(commhandle)) then
+          commhandle = localcommhandle  ! copy the commhandle pointer back
+          ! Set init code
+          ESMF_INIT_SET_CREATED(commhandle)
+        endif
+      endif
+    endif
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end subroutine ESMF_VMSendI8
 !------------------------------------------------------------------------------
 
 
@@ -6624,8 +7537,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   {\tt ESMF\_VM} object. The {\tt sendData} and {\tt recvData} arrays must be
 !   disjoint!
 !
-!   This method is overloaded for: 
-!   {\tt ESMF\_TYPEKIND\_I4},
+!   This method is overloaded for:
+!   {\tt ESMF\_TYPEKIND\_I4}, {\tt ESMF\_TYPEKIND\_I8},
 !   {\tt ESMF\_TYPEKIND\_R4}, {\tt ESMF\_TYPEKIND\_R8},
 !   {\tt ESMF\_TYPEKIND\_LOGICAL}, 
 !   {\tt ESMF\_TYPEKIND\_CHARACTER}.
@@ -6739,6 +7652,82 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(rc)) rc = ESMF_SUCCESS
 
   end subroutine ESMF_VMSendRecvI4
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_VMSendRecvI8()"
+!BOPI
+! !IROUTINE: ESMF_VMSendRecv - SendRecv 8-byte integers
+
+! !INTERFACE:
+  ! Private name; call using ESMF_VMSendRecv()
+  subroutine ESMF_VMSendRecvI8(vm, sendData, sendCount, dstPet, &
+    recvData, recvCount, srcPet, keywordEnforcer, syncflag, commhandle, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_VM),                 intent(in)            :: vm
+    integer(ESMF_KIND_I8), target, intent(in)            :: sendData(:)  
+    integer,                       intent(in)            :: sendCount
+    integer,                       intent(in)            :: dstPet
+    integer(ESMF_KIND_I8), target, intent(out)           :: recvData(:)  
+    integer,                       intent(in)            :: recvCount
+    integer,                       intent(in)            :: srcPet
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    type(ESMF_Sync_Flag),          intent(in),  optional :: syncflag
+    type(ESMF_CommHandle),         intent(out), optional :: commhandle
+    integer,                       intent(out), optional :: rc           
+!
+!EOPI
+!------------------------------------------------------------------------------
+    integer                 :: localrc      ! local return code
+    integer                 :: sendSize
+    integer                 :: recvSize
+    logical                 :: blocking
+    type(ESMF_CommHandle)   :: localcommhandle
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
+
+    ! Initialize commhandle to an invalid pointer
+    if (present(commhandle)) commhandle%this = ESMF_NULL_POINTER
+
+    ! Decide whether this is blocking or non-blocking
+    blocking = .true. !default is blocking
+    if (present(syncflag)) then
+      if (syncflag == ESMF_SYNC_NONBLOCKING) blocking = .false. ! non-blocking
+    endif
+    
+    sendSize = sendCount * 8 ! 8 bytes
+    recvSize = recvCount * 8 ! 8 bytes
+    ! Call into the C++ interface.
+    if (blocking) then
+      call c_ESMC_VMSendRecv(vm, sendData(1), sendSize, dstPet, &
+        recvData(1), recvSize, srcPet, localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    else
+      call c_ESMC_VMSendRecvNB(vm, sendData(1), sendSize, dstPet, &
+        recvData(1), recvSize, srcPet, localcommhandle, localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+      ! Check if we need to pass back the commhandle
+      if (present(commhandle)) then
+        commhandle = localcommhandle  ! copy the commhandle pointer back
+        ! Set init code
+        ESMF_INIT_SET_CREATED(commhandle)
+      endif
+    endif
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end subroutine ESMF_VMSendRecvI8
 !------------------------------------------------------------------------------
 
 
@@ -8535,7 +9524,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 ! -------------------------- ESMF-private method -------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_VMAllToAllVI4()"
+#define ESMF_METHOD "ESMF_VMAllToAllV()"
 !BOPI
 ! !IROUTINE: ESMF_VMAllToAllV - AllToAllV VMId types
 

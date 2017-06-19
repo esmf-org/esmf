@@ -1847,6 +1847,11 @@ call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO)
     logical                         :: loopFlag
 
     rc = ESMF_SUCCESS
+
+#define NUOPC_DRIVER_TRACE__OFF
+#ifdef NUOPC_DRIVER_TRACE
+    call ESMF_TraceRegionEnter("NUOPC_Driver:Run")
+#endif
     
     ! get the name and currentPhase
     call ESMF_GridCompGet(gcomp, name=name, currentPhase=runPhase, rc=rc)
@@ -2032,10 +2037,17 @@ call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO)
               line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
               return  ! bail out
           endif
-          
+
+#ifdef NUOPC_DRIVER_TRACE
+          call ESMF_TraceRegionEnter("NUOPC_Driver:CplComp:Callthrough")
+#endif          
           call ESMF_CplCompRun(is%wrap%connectorComp(i,j), &
             importState=imState, exportState=exState, &
             clock=internalClock, phase=phase, userRc=localrc, rc=rc)
+#ifdef NUOPC_DRIVER_TRACE
+          call ESMF_TraceRegionExit("NUOPC_Driver:CplComp:Callthrough")
+#endif
+          
           if (ESMF_LogFoundError(rcToCheck=rc, &
             msg="Failed calling phase "//trim(adjustl(pLabel))// &
             " Run for connectorComp "//trim(adjustl(iString))// &
@@ -2101,10 +2113,16 @@ call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO)
               line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
               return  ! bail out
           endif
-          
+
+#ifdef NUOPC_DRIVER_TRACE
+          call ESMF_TraceRegionEnter("NUOPC_Driver:GridComp:Callthrough")
+#endif    
           call ESMF_GridCompRun(is%wrap%modelComp(i), &
             importState=is%wrap%modelIS(i), exportState=is%wrap%modelES(i), &
             clock=internalClock, phase=phase, userRc=localrc, rc=rc)
+#ifdef NUOPC_DRIVER_TRACE
+          call ESMF_TraceRegionExit("NUOPC_Driver:GridComp:Callthrough")
+#endif
           if (ESMF_LogFoundError(rcToCheck=rc, &
             msg="Failed calling phase "//trim(adjustl(pLabel))// &
             " Run for modelComp "//trim(adjustl(iString)), &
@@ -2115,7 +2133,7 @@ call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO)
             trim(adjustl(iString))//" did not return ESMF_SUCCESS", &
             line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
             return  ! bail out
-            
+          
           if (btest(profiling,0) .and. &
             ESMF_GridCompIsPetLocal(is%wrap%modelComp(i))) then
             call ESMF_VMWtime(timeStop, rc=rc)
@@ -2188,6 +2206,10 @@ call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO)
           return  ! bail out
       enddo
     endif
+
+#ifdef NUOPC_DRIVER_TRACE
+    call ESMF_TraceRegionExit("NUOPC_Driver:Run")
+#endif
     
   end subroutine
   

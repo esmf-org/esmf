@@ -59,6 +59,9 @@ extern "C" {
     case ESMC_TYPEKIND_I4:
       vmt = vmI4;
       break;
+    case ESMC_TYPEKIND_I8:
+      vmt = vmI8;
+      break;
     case ESMC_TYPEKIND_R4:
       vmt = vmR4;
       break;
@@ -142,6 +145,9 @@ extern "C" {
     case ESMC_TYPEKIND_I4:
       vmt = vmI4;
       break;
+    case ESMC_TYPEKIND_I8:
+      vmt = vmI8;
+      break;
     case ESMC_TYPEKIND_R4:
       vmt = vmR4;
       break;
@@ -187,6 +193,9 @@ extern "C" {
     case ESMC_TYPEKIND_I4:
       vmt = vmI4;
       break;
+    case ESMC_TYPEKIND_I8:
+      vmt = vmI8;
+      break;
     case ESMC_TYPEKIND_R4:
       vmt = vmR4;
       break;
@@ -226,6 +235,9 @@ extern "C" {
     switch (*dtk){
     case ESMC_TYPEKIND_I4:
       vmt = vmI4;
+      break;
+    case ESMC_TYPEKIND_I8:
+      vmt = vmI8;
       break;
     case ESMC_TYPEKIND_R4:
       vmt = vmR4;
@@ -268,6 +280,9 @@ extern "C" {
     switch (*dtk){
     case ESMC_TYPEKIND_I4:
       vmt = vmI4;
+      break;
+    case ESMC_TYPEKIND_I8:
+      vmt = vmI8;
       break;
     case ESMC_TYPEKIND_R4:
       vmt = vmR4;
@@ -417,6 +432,9 @@ extern "C" {
     switch (*dtk){
     case ESMC_TYPEKIND_I4:
       vmt = vmI4;
+      break;
+    case ESMC_TYPEKIND_I8:
+      vmt = vmI8;
       break;
     case ESMC_TYPEKIND_R4:
       vmt = vmR4;
@@ -615,6 +633,9 @@ extern "C" {
     case ESMC_TYPEKIND_I4:
       vmt = vmI4;
       break;
+    case ESMC_TYPEKIND_I8:
+      vmt = vmI8;
+      break;
     case ESMC_TYPEKIND_R4:
       vmt = vmR4;
       break;
@@ -695,6 +716,9 @@ extern "C" {
     switch (*dtk){
     case ESMC_TYPEKIND_I4:
       vmt = vmI4;
+      break;
+    case ESMC_TYPEKIND_I8:
+      vmt = vmI8;
       break;
     case ESMC_TYPEKIND_R4:
       vmt = vmR4;

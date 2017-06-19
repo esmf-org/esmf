@@ -104,7 +104,7 @@ program ESMF_TraceUTest
   
   gridcomp = ESMF_GridCompCreate(name="testcomp", rc=rc)
   
-  call ESMF_GridCompSetServices(gridcomp, SetServices, rc=rc)
+  call ESMF_GridCompSetServices(gridcomp, userRoutine=SetServices, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
   
   call ESMF_GridCompInitialize(gridcomp, rc=rc)
@@ -134,7 +134,15 @@ program ESMF_TraceUTest
   call ESMF_TraceClose(rc=rc)
   call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   !------------------------------------------------------------------------
-       
+
+  ! barrier to ensure all files flushed
+  call ESMF_VMBarrier(vm, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
+
+  ! sleep to ensure files can be re-opened
+  call ESMF_VMWtimeDelay(1.0_ESMF_KIND_R8, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
+  
   !------------------------------------------------------------------------
   !NEX_UTest
   write(name, *) "Verify trace metadata exists"
