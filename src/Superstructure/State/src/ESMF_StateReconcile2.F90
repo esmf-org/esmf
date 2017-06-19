@@ -2638,7 +2638,7 @@ contains
     end if
     do, pet=0, npets-1
       needs_count = count (needs_list(:,pet))
-      if (debug) then
+      if (debug .and. needs_count > 0) then
         print *, '    PET', mypet,  &
             ': needs_count =', needs_count, ', for PET', pet
       end if
