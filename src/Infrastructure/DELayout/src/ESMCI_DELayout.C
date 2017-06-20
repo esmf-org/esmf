@@ -2477,7 +2477,7 @@ int XXE::exec(
   double *dTime,      // out - execution time, NULL to disable
   int indexStart,     // in  - start index, < 0 for default (full stream)
   int indexStop,      // in  - stop index, < 0 for default (full stream)
-  int srcLocalDeCount,   // in  - in order to determine dst index from rraIndex
+  int *srcLocalDeCount,  // in  - in order to determine dst index from rraIndex
   int srcSuperVecSize_r, // in  - super vector support
   int srcSuperVecSize_s, // in  - super vector support
   int srcSuperVecSize_t, // in  - super vector support
@@ -2991,7 +2991,7 @@ int XXE::exec(
               rraList + waitOnIndexSubInfo->rraShift,
               vectorLength + waitOnIndexSubInfo->vectorLengthShift,
               filterBitField, &localFinished, &localCancelled, NULL, -1, -1,
-              srcLocalDeCount,
+              srcLocalDeCount + waitOnIndexSubInfo->vectorLengthShift,
               srcSuperVecSize_r, srcSuperVecSize_s, srcSuperVecSize_t,
               srcSuperVecSize_i, srcSuperVecSize_j,
               dstSuperVecSize_r, dstSuperVecSize_s, dstSuperVecSize_t,
@@ -3038,7 +3038,7 @@ int XXE::exec(
                 rraList + testOnIndexSubInfo->rraShift,
                 vectorLength + testOnIndexSubInfo->vectorLengthShift,
                 filterBitField, &localFinished, &localCancelled, NULL, -1, -1,
-                srcLocalDeCount,
+                srcLocalDeCount + testOnIndexSubInfo->vectorLengthShift,
                 srcSuperVecSize_r, srcSuperVecSize_s, srcSuperVecSize_t,
                 srcSuperVecSize_i, srcSuperVecSize_j,
                 dstSuperVecSize_r, dstSuperVecSize_s, dstSuperVecSize_t,
@@ -3199,10 +3199,12 @@ printf("gjt - DID NOT CANCEL commhandle\n");
         // recursively resolve the TKs of the arguments and execute operation
         bool superVector = (xxeSumSuperScalarDstRRAInfo->vectorFlag 
           && dstSuperVecSize_r>=1 && superVectorOkay);
+        int srcLocalDeC = 0;  // init
+        if (srcLocalDeCount) srcLocalDeC = *srcLocalDeCount;
         sssDstRra(rraBase, xxeSumSuperScalarDstRRAInfo->elementTK,
           rraOffsetList, valueBase, valueOffsetList, 
           xxeSumSuperScalarDstRRAInfo->valueTK, termCount, vectorL, 0,
-          xxeSumSuperScalarDstRRAInfo->rraIndex - srcLocalDeCount,
+          xxeSumSuperScalarDstRRAInfo->rraIndex - srcLocalDeC,
           dstSuperVecSize_r, dstSuperVecSize_s, dstSuperVecSize_t,
           dstSuperVecSize_i, dstSuperVecSize_j, superVector);
       }
@@ -3274,12 +3276,14 @@ printf("gjt - DID NOT CANCEL commhandle\n");
         // recursively resolve the TKs of the arguments and execute operation
         bool superVector = (xxeSumSuperScalarListDstRRAInfo->vectorFlag 
           && dstSuperVecSize_r>=1 && superVectorOkay);
+        int srcLocalDeC = 0;  // init
+        if (srcLocalDeCount) srcLocalDeC = *srcLocalDeCount;
         ssslDstRra(rraBaseList, rraIndexList,
           xxeSumSuperScalarListDstRRAInfo->elementTK,
           rraOffsetList,
           valueBaseListResolve, valueOffsetList, baseListIndexList,
           xxeSumSuperScalarListDstRRAInfo->valueTK, termCount, vectorL, 0,
-          srcLocalDeCount,
+          srcLocalDeC,
           dstSuperVecSize_r, dstSuperVecSize_s, dstSuperVecSize_t,
           dstSuperVecSize_i, dstSuperVecSize_j, superVector);
       }
@@ -3327,12 +3331,14 @@ printf("gjt - DID NOT CANCEL commhandle\n");
         // recursively resolve the TKs of the arguments and execute operation
         bool superVector = (xxeProductSumSuperScalarDstRRAInfo->vectorFlag 
           && dstSuperVecSize_r>=1 && superVectorOkay);
+        int srcLocalDeC = 0;  // init
+        if (srcLocalDeCount) srcLocalDeC = *srcLocalDeCount;
         psssDstRra(rraBase, xxeProductSumSuperScalarDstRRAInfo->elementTK,
           rraOffsetList, factorList, 
           xxeProductSumSuperScalarDstRRAInfo->factorTK,
           valueBase, valueOffsetList,
           xxeProductSumSuperScalarDstRRAInfo->valueTK, termCount, vectorL, 0,
-          xxeProductSumSuperScalarDstRRAInfo->rraIndex - srcLocalDeCount, 
+          xxeProductSumSuperScalarDstRRAInfo->rraIndex - srcLocalDeC, 
           dstSuperVecSize_r, dstSuperVecSize_s, dstSuperVecSize_t,
           dstSuperVecSize_i, dstSuperVecSize_j, superVector);
       }
@@ -3570,6 +3576,8 @@ printf("gjt - DID NOT CANCEL commhandle\n");
 #endif
         bool superVector = (xxeZeroSuperScalarRRAInfo->vectorFlag 
           && dstSuperVecSize_r>=1 && superVectorOkay);
+        int srcLocalDeC = 0;  // init
+        if (srcLocalDeCount) srcLocalDeC = *srcLocalDeCount;
         if(superVector){
 #ifdef XXE_EXEC_LOG
           sprintf(msg, "XXE::zeroSuperScalarRRAInfo: "
@@ -3580,28 +3588,28 @@ printf("gjt - DID NOT CANCEL commhandle\n");
           case I4:
             exec_zeroSuperScalarRRASuper<ESMC_I4>(xxeZeroSuperScalarRRAInfo,
               vectorL, rraList, 
-              xxeZeroSuperScalarRRAInfo->rraIndex - srcLocalDeCount,
+              xxeZeroSuperScalarRRAInfo->rraIndex - srcLocalDeC,
               dstSuperVecSize_r, dstSuperVecSize_s, dstSuperVecSize_t,
               dstSuperVecSize_i, dstSuperVecSize_j);
             break;
           case I8:
             exec_zeroSuperScalarRRASuper<ESMC_I8>(xxeZeroSuperScalarRRAInfo,
               vectorL, rraList, 
-              xxeZeroSuperScalarRRAInfo->rraIndex - srcLocalDeCount,
+              xxeZeroSuperScalarRRAInfo->rraIndex - srcLocalDeC,
               dstSuperVecSize_r, dstSuperVecSize_s, dstSuperVecSize_t,
               dstSuperVecSize_i, dstSuperVecSize_j);
             break;
           case R4:
             exec_zeroSuperScalarRRASuper<ESMC_R4>(xxeZeroSuperScalarRRAInfo,
               vectorL, rraList, 
-              xxeZeroSuperScalarRRAInfo->rraIndex - srcLocalDeCount,
+              xxeZeroSuperScalarRRAInfo->rraIndex - srcLocalDeC,
               dstSuperVecSize_r, dstSuperVecSize_s, dstSuperVecSize_t,
               dstSuperVecSize_i, dstSuperVecSize_j);
             break;
           case R8:
             exec_zeroSuperScalarRRASuper<ESMC_R8>(xxeZeroSuperScalarRRAInfo,
               vectorL, rraList, 
-              xxeZeroSuperScalarRRAInfo->rraIndex - srcLocalDeCount,
+              xxeZeroSuperScalarRRAInfo->rraIndex - srcLocalDeC,
               dstSuperVecSize_r, dstSuperVecSize_s, dstSuperVecSize_t,
               dstSuperVecSize_i, dstSuperVecSize_j);
             break;
@@ -3795,7 +3803,7 @@ printf("gjt - DID NOT CANCEL commhandle\n");
           xxeSubInfo->xxe->exec(rraCount, rraList + xxeSubInfo->rraShift,
             vectorLength + xxeSubInfo->vectorLengthShift, filterBitField,
             &localFinished, &localCancelled, NULL, -1, -1,
-            srcLocalDeCount,
+            srcLocalDeCount + xxeSubInfo->vectorLengthShift,
             srcSuperVecSize_r, srcSuperVecSize_s, srcSuperVecSize_t,
             srcSuperVecSize_i, srcSuperVecSize_j,
             dstSuperVecSize_r, dstSuperVecSize_s, dstSuperVecSize_t,

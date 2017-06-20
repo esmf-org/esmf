@@ -409,7 +409,7 @@ class XXE{
     int exec(int rraCount=0, char **rraList=NULL, int *vectorLength=NULL,
       int filterBitField=0x0, bool *finished=NULL, bool *cancelled=NULL, 
       double *dTime=NULL, int indexStart=-1, int indexStop=-1,
-      int srcLocalDeCount=0,
+      int *srcLocalDeCount=NULL,
       int srcSuperVecSize_r=-1, int srcSuperVecSize_s=1, int srcSuperVecSize_t=1,
       int *srcSuperVecSize_i=NULL, int *srcSuperVecSize_j=NULL,
       int dstSuperVecSize_r=-1, int dstSuperVecSize_s=1, int dstSuperVecSize_t=1,

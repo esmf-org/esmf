@@ -12481,7 +12481,7 @@ int Array::sparseMatMul(
     NULL,     // dTime                  -> disabled
     -1, -1,   // indexStart, indexStop  -> full stream
     // super vector support:
-    srcLocalDeCount,
+    &srcLocalDeCount,
     srcSuperVecSizeUnd[0], srcSuperVecSizeUnd[1], srcSuperVecSizeUnd[2],
     srcSuperVecSizeDis[0], srcSuperVecSizeDis[1],
     dstSuperVecSizeUnd[0], dstSuperVecSizeUnd[1], dstSuperVecSizeUnd[2],
@@ -12542,7 +12542,7 @@ int Array::sparseMatMul(
       NULL,     // dTime                  -> disabled
       -1, -1,   // indexStart, indexStop  -> full stream
       // super vector support:
-      srcLocalDeCount,
+      &srcLocalDeCount,
       srcSuperVecSizeUnd[0], srcSuperVecSizeUnd[1], srcSuperVecSizeUnd[2],
       srcSuperVecSizeDis[0], srcSuperVecSizeDis[1],
       dstSuperVecSizeUnd[0], dstSuperVecSizeUnd[1], dstSuperVecSizeUnd[2],

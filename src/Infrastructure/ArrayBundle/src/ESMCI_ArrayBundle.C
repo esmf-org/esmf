@@ -1458,8 +1458,16 @@ int ArrayBundle::sparseMatMul(
       // prepare for relative run-time addressing (RRA)
       vector<char *> rraList;
       vector<int> vectorLength;
+      vector<int> srcLocalDeCountList;
       rraList.reserve(100); // optimize performance
       vectorLength.reserve(100); // optimize performance
+      srcLocalDeCountList.reserve(100); // optimize performance
+      
+  int srcSuperVecSizeUnd[3];                    // undistributed: r, s, t
+  int *srcSuperVecSizeDis[2];                   // distributed: i, j
+  int dstSuperVecSizeUnd[3];                    // undistributed: r, s, t
+  int *dstSuperVecSizeDis[2];                   // distributed: i, j
+      
       if (srcArraybundle != NULL && dstArraybundle != NULL){
         if (srcArraybundle->getCount() != dstArraybundle->getCount()){
           ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
@@ -1480,6 +1488,7 @@ int ArrayBundle::sparseMatMul(
             char *rraElement = (char *)larrayBaseAddrList[j];
             rraList.push_back(rraElement);
           }
+#if 0
           int vectorL = 1;  // prime
           int rank = srcArray->getRank();
           for (int jj=0; jj<rank; jj++){
@@ -1491,7 +1500,29 @@ int ArrayBundle::sparseMatMul(
               vectorL *= srcArray->getUndistUBound()[jj]
                 - srcArray->getUndistLBound()[jj] + 1;
           }
+#else
+          int vectorL = 0;  // initialize
+          // src-side super vectorization
+          int srcLocalDeCount = 0;
+          if (srcArraybundle != NULL)
+            srcLocalDeCount = srcArray->getDELayout()->getLocalDeCount();
+          srcSuperVecSizeDis[0] = new int[srcLocalDeCount];
+          srcSuperVecSizeDis[1] = new int[srcLocalDeCount];
+          bool superVectorOkay = true;  //TODO: get this from xxe sub stream
+          srcArray->superVecParam(srcLocalDeCount, superVectorOkay,
+            srcSuperVecSizeUnd, srcSuperVecSizeDis, vectorL);
+          // dst-side super vectorization
+          int dstLocalDeCount = 0;
+          if (dstArraybundle != NULL)
+            dstLocalDeCount = dstArray->getDELayout()->getLocalDeCount();
+          dstSuperVecSizeDis[0] = new int[dstLocalDeCount];
+          dstSuperVecSizeDis[1] = new int[dstLocalDeCount];
+          superVectorOkay = true;  //TODO: get this from xxe sub stream
+          dstArray->superVecParam(dstLocalDeCount, superVectorOkay,
+            dstSuperVecSizeUnd, dstSuperVecSizeDis, vectorL);
+#endif
           vectorLength.push_back(vectorL);
+          srcLocalDeCountList.push_back(srcLocalDeCount);
         }
       }else if (srcArraybundle != NULL){
         for (int i=0; i<srcArraybundle->getCount(); i++){
@@ -1588,7 +1619,14 @@ int ArrayBundle::sparseMatMul(
       XXE *xxe = (XXE *)(*routehandle)->getStorage();
       // execute XXE stream
       localrc = xxe->exec(rraCount, &(rraList[0]), &(vectorLength[0]), 
-        filterBitField);
+        filterBitField, NULL, NULL, NULL, -1, -1,
+        // following are super-vectorization parameters
+    &(srcLocalDeCountList[0]),
+    srcSuperVecSizeUnd[0], srcSuperVecSizeUnd[1], srcSuperVecSizeUnd[2],
+    srcSuperVecSizeDis[0], srcSuperVecSizeDis[1],
+    dstSuperVecSizeUnd[0], dstSuperVecSizeUnd[1], dstSuperVecSizeUnd[2],
+    dstSuperVecSizeDis[0], dstSuperVecSizeDis[1]
+        );
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
         ESMC_CONTEXT, &rc)) return rc;
       // return successfully
