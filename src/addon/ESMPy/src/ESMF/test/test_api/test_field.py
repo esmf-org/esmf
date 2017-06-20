@@ -251,10 +251,10 @@ class TestField(TestBase):
         field2 = Field(field.grid)
         self.examine_field_attributes(field2)
         # field1 was created with ungridded dimensions, but field2 was not
-        field2.data[...] = data[0,0,...]
+        field2.data[...] = data[:,:,0,0]
 
         assert np.all(field.grid.coords == field2.grid.coords)
-        assert np.all(field.data[0,0,...] == field2.data)
+        assert np.all(field.data[:,:,0,0] == field2.data)
 
     def test_field_grid_copy(self):
         field = self.make_field(np.array([10, 10], dtype=np.int32))
