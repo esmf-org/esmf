@@ -12446,134 +12446,31 @@ int Array::sparseMatMul(
 
 
   // src-side super vectorization
-  
-  // undistributed: r, s, t
-  int srcSuperVecSizeUnd[3];
-  // distributed: i, j
-  int srcLocalDeCount=0;
+  int srcLocalDeCount = 0;
   if (srcArrayFlag)
     srcLocalDeCount = srcArray->delayout->getLocalDeCount();
-  int srcSuperVecSizeDis[2][srcLocalDeCount];   
-
-  srcSuperVecSizeUnd[0]=-1;  // initialize with disabled super vector support
-  srcSuperVecSizeUnd[1]=1;
-  srcSuperVecSizeUnd[2]=1;
-
-  for (int j=0; j<srcLocalDeCount; j++){
-    srcSuperVecSizeDis[0][j]=1;
-    srcSuperVecSizeDis[1][j]=1;
-  }
+  int srcSuperVecSizeUnd[3];                    // undistributed: r, s, t
+  int *srcSuperVecSizeDis[2];                   // distributed: i, j
+  vector<int> srcdist_i(srcLocalDeCount);
+  srcSuperVecSizeDis[0] = &srcdist_i[0];
+  vector<int> srcdist_j(srcLocalDeCount);
+  srcSuperVecSizeDis[1] = &srcdist_j[0];
+  srcArray->superVecParam(srcLocalDeCount, xxe->superVectorOkay,
+    srcSuperVecSizeUnd, srcSuperVecSizeDis, vectorLength);
   
-  if (srcArrayFlag && srcArray->sizeSuperUndist){
-    // use srcArray to determine vectorLength
-    vectorLength = 1; // init
-    // set srcSuperVecSize variables
-    int i;
-    for (i=0; i<srcArray->rank-srcArray->tensorCount; i++){
-      srcSuperVecSizeUnd[i] = srcArray->sizeSuperUndist[i];
-      vectorLength *= srcSuperVecSizeUnd[i];
-#define DEBUGGING
-#ifdef DEBUGGING
-  {
-    std::stringstream debugmsg;
-    debugmsg << "srcSuperVecSizeUnd[i="<<i<<"]=" << srcSuperVecSizeUnd[i]
-      << " vectorLength=" << vectorLength;
-    ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_INFO);
-  }
-#endif
-      for (int j=0; j<srcLocalDeCount; j++)
-        srcSuperVecSizeDis[i][j] = 
-          srcArray->sizeDist[j*(srcArray->rank-srcArray->tensorCount)+i];
-    }
-    srcSuperVecSizeUnd[i] = srcArray->sizeSuperUndist[i];
-    if (xxe->superVectorOkay)
-      vectorLength *= srcSuperVecSizeUnd[i];
-    else
-      vectorLength = srcSuperVecSizeUnd[0];
-#ifdef DEBUGGING
-  {
-    std::stringstream debugmsg;
-    debugmsg << "srcSuperVecSizeUnd[i="<<i<<"]=" << srcSuperVecSizeUnd[i]
-      << " vectorLength=" << vectorLength;
-    ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_INFO);
-  }
-#endif
-  }
-  if (srcSuperVecSizeUnd[1]==1 && srcSuperVecSizeUnd[2]==1)
-    srcSuperVecSizeUnd[0]=-1;  // turn off super vectorization, simple vector ok
-#ifdef DEBUGGING
-  {
-    std::stringstream debugmsg;
-    debugmsg << "srcSuperVecSizeUnd[0]=" << srcSuperVecSizeUnd[0];
-    ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_INFO);
-  }
-#endif
-
-
   // dst-side super vectorization
-  
-  // undistributed: r, s, t
-  int dstSuperVecSizeUnd[3];
-  // distributed: i, j
-  int dstLocalDeCount=0;
+  int dstLocalDeCount = 0;
   if (dstArrayFlag)
     dstLocalDeCount = dstArray->delayout->getLocalDeCount();
-  int dstSuperVecSizeDis[2][dstLocalDeCount];   
-
-  dstSuperVecSizeUnd[0]=-1;  // initialize with disabled super vector support
-  dstSuperVecSizeUnd[1]=1;
-  dstSuperVecSizeUnd[2]=1;
-
-  for (int j=0; j<dstLocalDeCount; j++){
-    dstSuperVecSizeDis[0][j]=1;
-    dstSuperVecSizeDis[1][j]=1;
-  }
+  int dstSuperVecSizeUnd[3];                    // undistributed: r, s, t
+  int *dstSuperVecSizeDis[2];                   // distributed: i, j
+  vector<int> dstdist_i(dstLocalDeCount);
+  dstSuperVecSizeDis[0] = &dstdist_i[0];
+  vector<int> dstdist_j(dstLocalDeCount);
+  dstSuperVecSizeDis[1] = &dstdist_j[0];
+  dstArray->superVecParam(dstLocalDeCount, xxe->superVectorOkay,
+    dstSuperVecSizeUnd, dstSuperVecSizeDis, vectorLength);
   
-  if (dstArrayFlag && dstArray->sizeSuperUndist){
-    // use dstArray to determine vectorLength
-    vectorLength = 1; // init
-    // set dstSuperVecSize variables
-    int i;
-    for (i=0; i<dstArray->rank-dstArray->tensorCount; i++){
-      dstSuperVecSizeUnd[i] = dstArray->sizeSuperUndist[i];
-      vectorLength *= dstSuperVecSizeUnd[i];
-#ifdef DEBUGGING
-  {
-    std::stringstream debugmsg;
-    debugmsg << "dstSuperVecSizeUnd[i="<<i<<"]=" << dstSuperVecSizeUnd[i]
-      << " vectorLength=" << vectorLength;
-    ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_INFO);
-  }
-#endif
-      for (int j=0; j<dstLocalDeCount; j++)
-        dstSuperVecSizeDis[i][j] = 
-          dstArray->sizeDist[j*(dstArray->rank-dstArray->tensorCount)+i];
-    }
-    dstSuperVecSizeUnd[i] = dstArray->sizeSuperUndist[i];
-    if (xxe->superVectorOkay)
-      vectorLength *= dstSuperVecSizeUnd[i];
-    else
-      vectorLength = dstSuperVecSizeUnd[0];
-#ifdef DEBUGGING
-  {
-    std::stringstream debugmsg;
-    debugmsg << "dstSuperVecSizeUnd[i="<<i<<"]=" << dstSuperVecSizeUnd[i]
-      << " vectorLength=" << vectorLength;
-    ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_INFO);
-  }
-#endif
-  }
-  if (dstSuperVecSizeUnd[1]==1 && dstSuperVecSizeUnd[2]==1)
-    dstSuperVecSizeUnd[0]=-1;  // turn off super vectorization, simple vector ok
-#ifdef DEBUGGING
-  {
-    std::stringstream debugmsg;
-    debugmsg << "dstSuperVecSizeUnd[0]=" << dstSuperVecSizeUnd[0];
-    ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_INFO);
-  }
-#endif
-#undef DEBUGGING
-    
 #ifdef ASMMTIMING
   VMK::wtime(&t5);      //gjt - profile
 #endif
@@ -12794,6 +12691,103 @@ int Array::sparseMatMulRelease(
   // return successfully
   rc = ESMF_SUCCESS;
   return rc;
+}
+//-----------------------------------------------------------------------------
+
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::Array::superVecParam()"
+//BOPI
+// !IROUTINE:  ESMCI::Array::superVecParam
+//
+// !INTERFACE:
+void Array::superVecParam(
+//
+// !RETURN VALUE:
+//
+// !ARGUMENTS:
+//
+      int localDeCount,         // in
+      bool superVectorOkay,     // in
+      int superVecSizeUnd[3],   // out
+      int *superVecSizeDis[2],  // out
+      int &vectorLength         // out
+  )const{
+//
+// !DESCRIPTION:
+//    Determine super-vectorization parameter.
+//
+//EOPI
+//-----------------------------------------------------------------------------
+  bool arrayFlag = false;
+  if (this != ESMC_NULL_POINTER) arrayFlag = true;
+
+  superVecSizeUnd[0]=-1;  // initialize with disabled super vector support
+  superVecSizeUnd[1]=1;
+  superVecSizeUnd[2]=1;
+
+  for (int j=0; j<localDeCount; j++){
+    superVecSizeDis[0][j]=1;
+    superVecSizeDis[1][j]=1;
+  }
+  
+  if (arrayFlag && sizeSuperUndist){
+    // use array to determine vectorLength
+    vectorLength = 1; // init
+    int i;
+    for (i=0; i<rank-tensorCount; i++)
+      vectorLength *= sizeSuperUndist[i];
+    if (superVectorOkay)
+      vectorLength *= sizeSuperUndist[i];
+    else
+      vectorLength = sizeSuperUndist[0];
+#define DEBUGGING
+#ifdef DEBUGGING
+  {
+    std::stringstream debugmsg;
+    debugmsg << "vectorLength=" << vectorLength;
+    ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_INFO);
+  }
+#endif
+  }
+
+  if (arrayFlag && sizeSuperUndist && (rank-tensorCount)<=2){
+    // set superVecSize variables
+    int i;
+    for (i=0; i<rank-tensorCount; i++){
+      superVecSizeUnd[i] = sizeSuperUndist[i];
+#ifdef DEBUGGING
+  {
+    std::stringstream debugmsg;
+    debugmsg << "superVecSizeUnd[i="<<i<<"]=" << superVecSizeUnd[i];
+    ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_INFO);
+  }
+#endif
+      for (int j=0; j<localDeCount; j++)
+        superVecSizeDis[i][j] = 
+          sizeDist[j*(rank - tensorCount)+i];
+    }
+    superVecSizeUnd[i] = sizeSuperUndist[i];
+#ifdef DEBUGGING
+  {
+    std::stringstream debugmsg;
+    debugmsg << "superVecSizeUnd[i="<<i<<"]=" << superVecSizeUnd[i];
+    ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_INFO);
+  }
+#endif
+  }
+  if (superVecSizeUnd[1]==1 && superVecSizeUnd[2]==1)
+    superVecSizeUnd[0]=-1;  // turn off super vectorization, simple vector ok
+#ifdef DEBUGGING
+  {
+    std::stringstream debugmsg;
+    debugmsg << "superVecSizeUnd[0]=" << superVecSizeUnd[0];
+    ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_INFO);
+  }
+#endif
+#undef DEBUGGING
 }
 //-----------------------------------------------------------------------------
 
