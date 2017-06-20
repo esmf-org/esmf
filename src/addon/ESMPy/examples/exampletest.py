@@ -17,6 +17,9 @@ class TestExamples(TestBase):
     def test_gridmeshrg(self):
         from . import grid_mesh_regrid
 
+    def test_field_read(self):
+        from . import field_read
+
     @attr('slow')
     def test_tripolerg(self):
         from . import tripole_regrid
