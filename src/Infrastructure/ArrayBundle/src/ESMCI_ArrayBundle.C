@@ -1459,14 +1459,11 @@ int ArrayBundle::sparseMatMul(
       vector<char *> rraList;
       vector<int> vectorLength;
       vector<int> srcLocalDeCountList;
-      rraList.reserve(100); // optimize performance
-      vectorLength.reserve(100); // optimize performance
+      vector<XXE::SuperVectP> superVectPList;
+      rraList.reserve(100);             // optimize performance
+      vectorLength.reserve(100);        // optimize performance
       srcLocalDeCountList.reserve(100); // optimize performance
-      
-  int srcSuperVecSizeUnd[3];                    // undistributed: r, s, t
-  int *srcSuperVecSizeDis[2];                   // distributed: i, j
-  int dstSuperVecSizeUnd[3];                    // undistributed: r, s, t
-  int *dstSuperVecSizeDis[2];                   // distributed: i, j
+      superVectPList.reserve(100);      // optimize performance
       
       if (srcArraybundle != NULL && dstArraybundle != NULL){
         if (srcArraybundle->getCount() != dstArraybundle->getCount()){
@@ -1475,37 +1472,32 @@ int ArrayBundle::sparseMatMul(
             " of Arrays", ESMC_CONTEXT, &rc);
           return rc;
         }
-        for (int i=0; i<srcArraybundle->getCount(); i++){
-          srcArray = srcArrayVector[i];
-          void **larrayBaseAddrList = srcArray->getLarrayBaseAddrList();
-          for (int j=0; j<srcArray->getDELayout()->getLocalDeCount(); j++){
-            char *rraElement = (char *)larrayBaseAddrList[j];
-            rraList.push_back(rraElement);
+      }
+      if (srcArraybundle != NULL || dstArraybundle != NULL){
+        for (int i=0; i<count; i++){
+          if (srcArraybundle != NULL){
+            srcArray = srcArrayVector[i];
+            void **larrayBaseAddrList = srcArray->getLarrayBaseAddrList();
+            for (int j=0; j<srcArray->getDELayout()->getLocalDeCount(); j++){
+              char *rraElement = (char *)larrayBaseAddrList[j];
+              rraList.push_back(rraElement);
+            }
           }
-          dstArray = dstArrayVector[i];
-          larrayBaseAddrList = dstArray->getLarrayBaseAddrList();
-          for (int j=0; j<dstArray->getDELayout()->getLocalDeCount(); j++){
-            char *rraElement = (char *)larrayBaseAddrList[j];
-            rraList.push_back(rraElement);
+          if (dstArraybundle != NULL){
+            dstArray = dstArrayVector[i];
+            void **larrayBaseAddrList = dstArray->getLarrayBaseAddrList();
+            for (int j=0; j<dstArray->getDELayout()->getLocalDeCount(); j++){
+              char *rraElement = (char *)larrayBaseAddrList[j];
+              rraList.push_back(rraElement);
+            }
           }
-#if 0
-          int vectorL = 1;  // prime
-          int rank = srcArray->getRank();
-          for (int jj=0; jj<rank; jj++){
-            if (srcArray->getArrayToDistGridMap()[jj])
-              // decomposed dimension
-              break;
-            else
-              // tensor dimension
-              vectorL *= srcArray->getUndistUBound()[jj]
-                - srcArray->getUndistLBound()[jj] + 1;
-          }
-#else
           int vectorL = 0;  // initialize
           // src-side super vectorization
           int srcLocalDeCount = 0;
           if (srcArraybundle != NULL)
             srcLocalDeCount = srcArray->getDELayout()->getLocalDeCount();
+          int *srcSuperVecSizeUnd = new int[3];   // undistributed: r, s, t
+          int **srcSuperVecSizeDis = new int*[2]; // distributed: i, j
           srcSuperVecSizeDis[0] = new int[srcLocalDeCount];
           srcSuperVecSizeDis[1] = new int[srcLocalDeCount];
           bool superVectorOkay = true;  //TODO: get this from xxe sub stream
@@ -1515,56 +1507,32 @@ int ArrayBundle::sparseMatMul(
           int dstLocalDeCount = 0;
           if (dstArraybundle != NULL)
             dstLocalDeCount = dstArray->getDELayout()->getLocalDeCount();
+          int *dstSuperVecSizeUnd = new int[3];   // undistributed: r, s, t
+          int **dstSuperVecSizeDis = new int*[2]; // distributed: i, j
           dstSuperVecSizeDis[0] = new int[dstLocalDeCount];
           dstSuperVecSizeDis[1] = new int[dstLocalDeCount];
           superVectorOkay = true;  //TODO: get this from xxe sub stream
           dstArray->superVecParam(dstLocalDeCount, superVectorOkay,
             dstSuperVecSizeUnd, dstSuperVecSizeDis, vectorL);
-#endif
+          XXE::SuperVectP superVectP;
+          superVectP.srcSuperVecSize_r = srcSuperVecSizeUnd[0];
+          superVectP.srcSuperVecSize_s = srcSuperVecSizeUnd[1];
+          superVectP.srcSuperVecSize_t = srcSuperVecSizeUnd[2];
+          superVectP.srcSuperVecSize_i = srcSuperVecSizeDis[0];
+          superVectP.srcSuperVecSize_j = srcSuperVecSizeDis[1];
+          superVectP.dstSuperVecSize_r = dstSuperVecSizeUnd[0];
+          superVectP.dstSuperVecSize_s = dstSuperVecSizeUnd[1];
+          superVectP.dstSuperVecSize_t = dstSuperVecSizeUnd[2];
+          superVectP.dstSuperVecSize_i = dstSuperVecSizeDis[0];
+          superVectP.dstSuperVecSize_j = dstSuperVecSizeDis[1];
+          delete [] srcSuperVecSizeUnd;
+          delete [] srcSuperVecSizeDis;
+          delete [] dstSuperVecSizeUnd;
+          delete [] dstSuperVecSizeDis;
+          // push info into the vectors
           vectorLength.push_back(vectorL);
           srcLocalDeCountList.push_back(srcLocalDeCount);
-        }
-      }else if (srcArraybundle != NULL){
-        for (int i=0; i<srcArraybundle->getCount(); i++){
-          srcArray = srcArrayVector[i];
-          void **larrayBaseAddrList = srcArray->getLarrayBaseAddrList();
-          for (int j=0; j<srcArray->getDELayout()->getLocalDeCount(); j++){
-            char *rraElement = (char *)larrayBaseAddrList[j];
-            rraList.push_back(rraElement);
-          }
-          int vectorL = 1;  // prime
-          int rank = srcArray->getRank();
-          for (int jj=0; jj<rank; jj++){
-            if (srcArray->getArrayToDistGridMap()[jj])
-              // decomposed dimension
-              break;
-            else
-              // tensor dimension
-              vectorL *= srcArray->getUndistUBound()[jj]
-                - srcArray->getUndistLBound()[jj] + 1;
-          }
-          vectorLength.push_back(vectorL);
-        }
-      }else if (dstArraybundle != NULL){
-        for (int i=0; i<dstArraybundle->getCount(); i++){
-          dstArray = dstArrayVector[i];
-          void **larrayBaseAddrList = dstArray->getLarrayBaseAddrList();
-          for (int j=0; j<dstArray->getDELayout()->getLocalDeCount(); j++){
-            char *rraElement = (char *)larrayBaseAddrList[j];
-            rraList.push_back(rraElement);
-          }
-          int vectorL = 1;  // prime
-          int rank = dstArray->getRank();
-          for (int jj=0; jj<rank; jj++){
-            if (dstArray->getArrayToDistGridMap()[jj])
-              // decomposed dimension
-              break;
-            else
-              // tensor dimension
-              vectorL *= srcArray->getUndistUBound()[jj]
-                - srcArray->getUndistLBound()[jj] + 1;
-          }
-          vectorLength.push_back(vectorL);
+          superVectPList.push_back(superVectP);
         }
       }
       int rraCount = rraList.size();
@@ -1621,14 +1589,16 @@ int ArrayBundle::sparseMatMul(
       localrc = xxe->exec(rraCount, &(rraList[0]), &(vectorLength[0]), 
         filterBitField, NULL, NULL, NULL, -1, -1,
         // following are super-vectorization parameters
-    &(srcLocalDeCountList[0]),
-    srcSuperVecSizeUnd[0], srcSuperVecSizeUnd[1], srcSuperVecSizeUnd[2],
-    srcSuperVecSizeDis[0], srcSuperVecSizeDis[1],
-    dstSuperVecSizeUnd[0], dstSuperVecSizeUnd[1], dstSuperVecSizeUnd[2],
-    dstSuperVecSizeDis[0], dstSuperVecSizeDis[1]
-        );
+        &(srcLocalDeCountList[0]), &(superVectPList[0]));
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
         ESMC_CONTEXT, &rc)) return rc;
+      // garbage collection
+      for (int i=0; i<superVectPList.size(); i++){
+        delete [] superVectPList[i].srcSuperVecSize_i;
+        delete [] superVectPList[i].srcSuperVecSize_j;
+        delete [] superVectPList[i].dstSuperVecSize_i;
+        delete [] superVectPList[i].dstSuperVecSize_j;
+      }
       // return successfully
       rc = ESMF_SUCCESS;
       return rc;

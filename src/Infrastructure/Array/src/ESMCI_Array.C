@@ -12471,6 +12471,19 @@ int Array::sparseMatMul(
   dstArray->superVecParam(dstLocalDeCount, xxe->superVectorOkay,
     dstSuperVecSizeUnd, dstSuperVecSizeDis, vectorLength);
   
+  // load super vectorization parameters into SuperVectP data structure
+  XXE::SuperVectP superVectP;
+  superVectP.srcSuperVecSize_r = srcSuperVecSizeUnd[0];
+  superVectP.srcSuperVecSize_s = srcSuperVecSizeUnd[1];
+  superVectP.srcSuperVecSize_t = srcSuperVecSizeUnd[2];
+  superVectP.srcSuperVecSize_i = srcSuperVecSizeDis[0];
+  superVectP.srcSuperVecSize_j = srcSuperVecSizeDis[1];
+  superVectP.dstSuperVecSize_r = dstSuperVecSizeUnd[0];
+  superVectP.dstSuperVecSize_s = dstSuperVecSizeUnd[1];
+  superVectP.dstSuperVecSize_t = dstSuperVecSizeUnd[2];
+  superVectP.dstSuperVecSize_i = dstSuperVecSizeDis[0];
+  superVectP.dstSuperVecSize_j = dstSuperVecSizeDis[1];
+  
 #ifdef ASMMTIMING
   VMK::wtime(&t5);      //gjt - profile
 #endif
@@ -12481,11 +12494,7 @@ int Array::sparseMatMul(
     NULL,     // dTime                  -> disabled
     -1, -1,   // indexStart, indexStop  -> full stream
     // super vector support:
-    &srcLocalDeCount,
-    srcSuperVecSizeUnd[0], srcSuperVecSizeUnd[1], srcSuperVecSizeUnd[2],
-    srcSuperVecSizeDis[0], srcSuperVecSizeDis[1],
-    dstSuperVecSizeUnd[0], dstSuperVecSizeUnd[1], dstSuperVecSizeUnd[2],
-    dstSuperVecSizeDis[0], dstSuperVecSizeDis[1]);
+    &srcLocalDeCount, &superVectP);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
     &rc)) return rc;
   
@@ -12542,11 +12551,7 @@ int Array::sparseMatMul(
       NULL,     // dTime                  -> disabled
       -1, -1,   // indexStart, indexStop  -> full stream
       // super vector support:
-      &srcLocalDeCount,
-      srcSuperVecSizeUnd[0], srcSuperVecSizeUnd[1], srcSuperVecSizeUnd[2],
-      srcSuperVecSizeDis[0], srcSuperVecSizeDis[1],
-      dstSuperVecSizeUnd[0], dstSuperVecSizeUnd[1], dstSuperVecSizeUnd[2],
-      dstSuperVecSizeDis[0], dstSuperVecSizeDis[1]);
+      &srcLocalDeCount, &superVectP);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       &rc)) return rc;
   }

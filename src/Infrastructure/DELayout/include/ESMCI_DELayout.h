@@ -267,6 +267,19 @@ class XXE{
       char opInfo[16*8];      // 16 x 8-byte padding to hold stream specific
                               // members
     };
+    struct SuperVectP{
+      // Super-vectorization parameter set
+      int srcSuperVecSize_r;  // src undist
+      int srcSuperVecSize_s;  // src undist
+      int srcSuperVecSize_t;  // src undist
+      int *srcSuperVecSize_i; // src dist
+      int *srcSuperVecSize_j; // src dist
+      int dstSuperVecSize_r;  // dst undist
+      int dstSuperVecSize_s;  // dst undist
+      int dstSuperVecSize_t;  // dst undist
+      int *dstSuperVecSize_i; // dst dist
+      int *dstSuperVecSize_j; // dst dist
+    };
     
     // special predefined filter bits
     static int const filterBitRegionTotalZero   = 0x1;  // total dst zero'ing
@@ -409,11 +422,7 @@ class XXE{
     int exec(int rraCount=0, char **rraList=NULL, int *vectorLength=NULL,
       int filterBitField=0x0, bool *finished=NULL, bool *cancelled=NULL, 
       double *dTime=NULL, int indexStart=-1, int indexStop=-1,
-      int *srcLocalDeCount=NULL,
-      int srcSuperVecSize_r=-1, int srcSuperVecSize_s=1, int srcSuperVecSize_t=1,
-      int *srcSuperVecSize_i=NULL, int *srcSuperVecSize_j=NULL,
-      int dstSuperVecSize_r=-1, int dstSuperVecSize_s=1, int dstSuperVecSize_t=1,
-      int *dstSuperVecSize_i=NULL, int *dstSuperVecSize_j=NULL);
+      int *srcLocalDeCount=NULL, SuperVectP *superVectP=NULL);
     int print(FILE *fp, int rraCount=0, char **rraList=NULL,
       int filterBitField=0x0, int indexStart=-1, int indexStop=-1);
     int printProfile(FILE *fp);
