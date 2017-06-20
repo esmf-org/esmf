@@ -3785,6 +3785,13 @@ printf("gjt - DID NOT CANCEL commhandle\n");
           // recursive call:
           bool localFinished;
           bool localCancelled;
+#ifdef XXE_EXEC_LOG
+        sprintf(msg, "XXE::xxeSubInfo: rraCount=%d, rraList=%p, "
+          "rraShift=%d, vectorLength=%p, vectorLengthShift=%d", 
+          rraCount, rraList, xxeSubInfo->rraShift, vectorLength,
+          xxeSubInfo->vectorLengthShift);
+        ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
+#endif
           xxeSubInfo->xxe->exec(rraCount, rraList + xxeSubInfo->rraShift,
             vectorLength + xxeSubInfo->vectorLengthShift, filterBitField,
             &localFinished, &localCancelled, NULL, -1, -1,
@@ -3803,6 +3810,10 @@ printf("gjt - DID NOT CANCEL commhandle\n");
     case xxeSubMulti:
       {
         xxeSubMultiInfo = (XxeSubMultiInfo *)xxeElement;
+#ifdef XXE_EXEC_LOG
+        sprintf(msg, "XXE::xxeSubMultiInfo: count=%d", xxeSubMultiInfo->count);
+        ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
+#endif
         for (int k=0; k<xxeSubMultiInfo->count; k++){
           if (xxeSubMultiInfo->xxe[k]){
             // recursive call:
