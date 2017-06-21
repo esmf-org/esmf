@@ -3764,6 +3764,60 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! that are no already present in the {\tt driver} will be added automatically.
 ! The default {\tt NUOPC\_Connector} implementation will be used for all
 ! automatically added connector instances.
+!
+! Time loops in the run sequence start with a line in {\tt freeFormat} that
+! begins with the $@$ symbol, followed by the timestep in seconds. A line with
+! a single $@$ symbol closes the time loop. A simple example for a loop with 
+! 1 hour timestep:
+!
+! \begin{verbatim}
+!   @3600
+!     ...
+!     ...
+!   @
+! \end{verbatim}
+! Time loops can be nested.
+!
+! The lines between the time loop markers define the sequence in which the
+! run methods of the components are called. Note that components will execute 
+! concurrently as long as this is not prevented by data-dependencies or
+! overlapping petLists.
+!
+! Each line specifies the precise
+! run method phase for a single component instance. For model, mediator, and 
+! driver components the format is this:
+!
+! \begin{verbatim}
+!   compLabel [phaseLabel]
+! \end{verbatim}
+! Here {\tt compLabel} is the label by which the component instance is known to
+! the driver. It is optionally followed a {\tt phaseLabel} identifying a
+! specific run phase. An example of calling the run phase of the ATM instance 
+! that contains the fast processes:
+!
+! \begin{verbatim}
+!   ATM fast
+! \end{verbatim}
+! By default, i.e. without {\tt phaseLabel}, the first
+! registered run method of the component is used.
+!
+! The format for connector components is different. It is defined like this:
+!
+! \begin{verbatim}
+!   srcCompLabel -> dstCompLabel [connectionOptions]
+! \end{verbatim}
+! A connector instance is uniquely known by the two components it connects, 
+! i.e. by {\tt srcCompLabel} and {\tt dstCompLabel}. The syntax requires that
+! the token {\tt ->} be specified between source and destination. Optionally
+! {\tt connectionOptions} can be supplied using the same format discussed 
+! under section \ref{connection_options}. An example of executing the connector
+! instance that transfers fields from the ATM component to the OCN component,
+! using redistribution for remapping:
+! 
+! \begin{verbatim}
+!   ATM -> OCN :remapMethod=redist
+! \end{verbatim}
+!
 !EOP
   !-----------------------------------------------------------------------------
     ! local variables

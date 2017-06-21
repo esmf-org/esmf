@@ -815,6 +815,33 @@ module NUOPC_Comp
 !   an attribute is to be ingested that was not previously added to the 
 !   {\tt comp} object. If {\tt addFlag} is {\tt .true.}, all missing attributes
 !   will be added by this method automatically as needed.
+!
+!   Each line in {\tt freeFormat} is of this format:
+!
+!   \begin{verbatim}
+!     attributeName = attributeValue
+!   \end{verbatim}
+!
+!   For example:
+!   \begin{verbatim}
+!     Verbosity = 0
+!     Profiling = 0
+!   \end{verbatim}
+!   could directly be ingested as Attributes for any instance of the four 
+!   standard NUOPC component kinds. This is because {\tt Verbosity} and 
+!   {\tt Profiling} are pre-defined Attributes of the NUOPC component kinds
+!   according to sections \ref{DriverCompMeta}, \ref{ModelCompMeta}, 
+!   \ref{MediatorCompMeta}, and \ref{ConnectorCompMeta}.
+!
+!   When Attributes are specified in {\tt freeFormat} that are not pre-defined
+!   for a specific component kind, they can still be ingested by a component
+!   instance using the {\tt addFlag=.true.} option. For instance:
+!   \begin{verbatim}
+!     ModelOutputChoice = 2
+!   \end{verbatim}
+!   specifies a user-level Attribute, which is not part of the pre-defined 
+!   Attributes of any of the standard NUOPC component kinds.
+!
 !EOP
   !-----------------------------------------------------------------------------
     character(ESMF_MAXSTR)                          :: name
@@ -918,6 +945,33 @@ module NUOPC_Comp
 !   an attribute is to be ingested that was not previously added to the 
 !   {\tt comp} object. If {\tt addFlag} is {\tt .true.}, all missing attributes
 !   will be added by this method automatically as needed.
+!
+!   Each line in {\tt freeFormat} is of this format:
+!
+!   \begin{verbatim}
+!     attributeName = attributeValue
+!   \end{verbatim}
+!
+!   For example:
+!   \begin{verbatim}
+!     Verbosity = 0
+!     Profiling = 0
+!   \end{verbatim}
+!   could directly be ingested as Attributes for any instance of the four 
+!   standard NUOPC component kinds. This is because {\tt Verbosity} and 
+!   {\tt Profiling} are pre-defined Attributes of the NUOPC component kinds
+!   according to sections \ref{DriverCompMeta}, \ref{ModelCompMeta}, 
+!   \ref{MediatorCompMeta}, and \ref{ConnectorCompMeta}.
+!
+!   When Attributes are specified in {\tt freeFormat} that are not pre-defined
+!   for a specific component kind, they can still be ingested by a component
+!   instance using the {\tt addFlag=.true.} option. For instance:
+!   \begin{verbatim}
+!     ModelOutputChoice = 2
+!   \end{verbatim}
+!   specifies a user-level Attribute, which is not part of the pre-defined 
+!   Attributes of any of the standard NUOPC component kinds.
+!
 !EOP
   !-----------------------------------------------------------------------------
     character(ESMF_MAXSTR)                          :: name
