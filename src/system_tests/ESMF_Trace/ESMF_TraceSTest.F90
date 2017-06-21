@@ -349,7 +349,7 @@ program ESMF_TraceSTest
        call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
 
   ! sleep to ensure files can be re-opened
-  call ESMF_VMWtimeDelay(1.0_ESMF_KIND_R8, rc=localrc)
+  call ESMF_VMWtimeDelay(5.0_ESMF_KIND_R8, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
        ESMF_CONTEXT, rcToReturn=rc)) &
        call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
