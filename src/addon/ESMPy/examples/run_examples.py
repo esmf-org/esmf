@@ -14,13 +14,12 @@ if len(sys.argv) > 1:
 
 # data files
 datafilelist = ["aggregAtlanticESTOFS.nc",
+                "GRIDSPEC_ACCESS1.nc",
                 "ll1deg_grid.nc",
                 "ll2.5deg_grid.nc",
-                "GRIDSPEC_ACCESS1.nc",
                 "mpas_uniform_10242_dual_counterclockwise.nc",
                 "so_Omon_GISS-E2.nc",
                 "T42_grid.nc",
-                "tx0.1v2_070911.nc"
                 ]
 
 # download the test files
