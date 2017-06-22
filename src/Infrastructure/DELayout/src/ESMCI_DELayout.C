@@ -2492,6 +2492,7 @@ int XXE::exec(
   int rc = ESMC_RC_NOT_IMPL;              // final return code
 
 #define XXE_EXEC_LOG____disable
+#define XXE_EXEC_LOG
 #ifdef XXE_EXEC_LOG
   char msg[1024];
   sprintf(msg, "ESMCI::XXE::exec(): START: stream=%p, count=%d, "
