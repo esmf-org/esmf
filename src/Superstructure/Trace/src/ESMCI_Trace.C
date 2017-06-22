@@ -33,6 +33,7 @@
 #endif
 
 #include "ESMCI_Macros.h"
+#include "ESMCI_Util.h"
 #include "ESMCI_LogErr.h"
 #include "ESMCI_VM.h"
 #include "ESMCI_Trace.h"
@@ -270,6 +271,30 @@ namespace ESMCI {
     
   }
 
+#ifdef ESMF_OS_MinGW
+  struct timespec { long tv_sec; long tv_nsec; };
+  static int unix_time(struct timespec *spec) {
+	 __int64 wintime; GetSystemTimeAsFileTime((FILETIME*)&wintime);
+     wintime      -=116444736000000000LL;       //1jan1601 to 1jan1970
+     spec->tv_sec  =wintime / 10000000LL;       //seconds
+     spec->tv_nsec =wintime % 10000000LL *100;  //nano-seconds
+     return 0;
+  }
+  static int clock_gettime(int, timespec *spec) {
+	 static  struct timespec startspec; static double ticks2nano;
+     static __int64 startticks, tps =0;    __int64 tmp, curticks;
+     QueryPerformanceFrequency((LARGE_INTEGER*)&tmp);
+     if (tps !=tmp) { tps =tmp;
+                      QueryPerformanceCounter((LARGE_INTEGER*)&startticks);
+                      unix_time(&startspec); ticks2nano =(double)1000000000LL / tps; }
+     QueryPerformanceCounter((LARGE_INTEGER*)&curticks); curticks -=startticks;
+     spec->tv_sec  =startspec.tv_sec   +         (curticks / tps);
+     spec->tv_nsec =startspec.tv_nsec  + (double)(curticks % tps) * ticks2nano;
+     if (!(spec->tv_nsec < 1000000000LL)) { spec->tv_sec++; spec->tv_nsec -=1000000000LL; }
+     return 0;
+  }
+#endif
+
   static uint64_t get_clock(void *data) {
     struct timespec ts;
 
@@ -283,6 +308,8 @@ namespace ESMCI {
     (void) clock_get_time(rt_clock_serv, &mts);
     ts.tv_sec = mts.tv_sec;
     ts.tv_nsec = mts.tv_nsec;
+#elif ESMF_OS_MinGW
+    clock_gettime(0, &ts);
 #else
     clock_gettime(CLOCK_REALTIME, &ts);
 #endif
@@ -904,14 +931,20 @@ namespace ESMCI {
     
     //make relative path absolute if needed
     if (trace_dir[0] != '/') {
-      char cwd[1024];
-      if (getcwd(cwd, sizeof(cwd)) == NULL) {
-        ESMC_LogDefault.MsgFoundError(ESMC_RC_SYS, "Error getting working directory", 
-                                      ESMC_CONTEXT, rc);
-        return; 
-      }
+      char cwd[ESMC_MAXPATHLEN];
+      FTN_X(c_esmc_getcwd)(cwd, &localrc, ESMC_MAXPATHLEN);
+      if (ESMC_LogDefault.MsgFoundError(localrc,
+    		  "Error getting working directory", ESMC_CONTEXT, rc))
+            return;
+      ESMC_F90toCstring(cwd, ESMC_MAXPATHLEN, cwd, ESMC_MAXPATHLEN);
+
+      //if (getcwd(cwd, sizeof(cwd)) == NULL) {
+      //  ESMC_LogDefault.MsgFoundError(ESMC_RC_SYS, "Error getting working directory",
+      //                                ESMC_CONTEXT, rc);
+      //  return;
+      //}
       sprintf(stream_dir_root, "%s/%s", cwd, trace_dir);
-      //printf("absolute dir = |%s|\n", stream_dir);
+      //printf("absolute dir = |%s|\n", stream_dir_root);
     }
     else {
       sprintf(stream_dir_root, "%s", trace_dir);
@@ -927,12 +960,21 @@ namespace ESMCI {
     struct stat st = {0};
     if (stream_id == 0) {
       if (stat(stream_dir_root, &st) == -1) {
-	if (mkdir(stream_dir_root, TRACE_DIR_PERMISSIONS) == -1) {
-	  //perror("mkdir()");
-	  ESMC_LogDefault.MsgFoundError(ESMC_RC_FILE_CREATE, "Error creating trace root directory", 
-					ESMC_CONTEXT, rc);
-	  return;
-	}
+
+    	  ESMC_Logical relaxedFlag = ESMF_TRUE;
+    	  int dir_perms = TRACE_DIR_PERMISSIONS;
+    	  FTN_X(c_esmc_makedirectory)(stream_dir_root, &dir_perms,
+    			  &relaxedFlag, &localrc, ESMC_MAXPATHLEN);
+
+    	  if (ESMC_LogDefault.MsgFoundError(localrc,
+    	      "Error creating trace root directory", ESMC_CONTEXT, rc))
+    	       return;
+
+    	  //if (mkdir(stream_dir_root, TRACE_DIR_PERMISSIONS) == -1) {
+    	  //	  ESMC_LogDefault.MsgFoundError(ESMC_RC_FILE_CREATE, "Error creating trace root directory",
+		  //			ESMC_CONTEXT, rc);
+    	  //    return;
+    	  //}
       }
     }
         
@@ -951,7 +993,9 @@ namespace ESMCI {
 
     //my specific file
     sprintf(stream_file, "%s/esmf_stream_%04d", stream_dir_root, stream_id);
-            
+
+   // printf("stream_file = %s\n", stream_file);
+
     ctx->fh = fopen(stream_file, "wb");
     if (!ctx->fh) {
       free(ctx);
