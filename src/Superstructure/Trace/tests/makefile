@@ -31,10 +31,12 @@ CLOBBERDIRS =
 RUN_ESMF_TraceUTest:
 	rm -rf $(ESMF_TESTDIR)/traceout
 	env ESMF_RUNTIME_TRACE=ON $(MAKE) TNAME=Trace NP=4 ftest
+	ls -la $(TESTS_BUILD) $(ESMF_TESTDIR)/traceout/*
 
 RUN_ESMF_TraceUTestUNI:
 	rm -rf $(ESMF_TESTDIR)/traceout
 	env ESMF_RUNTIME_TRACE=ON $(MAKE) TNAME=Trace NP=1 ftest
+	ls -la $(TESTS_BUILD) $(ESMF_TESTDIR)/traceout/*
 
 ESMF_TraceUTest.o: ESMF_SimpleComp.o	
 ESMF_UTEST_Trace_OBJS = ESMF_SimpleComp.o
