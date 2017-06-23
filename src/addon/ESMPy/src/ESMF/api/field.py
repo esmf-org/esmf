@@ -175,9 +175,10 @@ class Field(object):
 
         ret._data = self._data.__getitem__(slc)
 
-        # set grid to the last two dims of the slice
+        # set grid to the first two dims of the slice (this will change to last when we get dimension ordering set to python conventions)
         if self.xd > 0:
-            slc_grid = [slc[-1 * x] for x in range(self.rank - self.xd, 0, -1)]
+            # slc_grid = [slc[-1 * x] for x in range(self.rank - self.xd, 0, -1)]
+            slc_grid = [slc[x] for x in range(self.rank - self.xd)]
         else:
             slc_grid = slc
         ret._grid = self.grid.__getitem__(slc_grid)
