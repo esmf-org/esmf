@@ -46,5 +46,10 @@ if parallel:
     # setup the constants
     num_proc = 4
 
+    # attributes
+    attr = "'!slow'"
+else:
+    attr = "'!slow,!parallel'"
+
 os.system(constants._ESMF_MPIRUN + " -n " + str(
-    num_proc) + " nosetests -vs --with-id -a '!slow' examples/exampletest.py")
+    num_proc) + " nosetests -vs --with-id -a " + str(attr) + " examples/exampletest.py")
