@@ -11,6 +11,18 @@
 //==============================================================================
 #define ESMC_FILENAME "ESMCI_Array.C"
 //==============================================================================
+#define HALO_STORE_MEMLOG_off
+
+#define ASMM_STORE_LOG_off
+#define ASMM_STORE_TIMING_on
+#define ASMM_STORE_MEMLOG_off
+#define ASMM_STORE_COMMMATRIX_off
+#define ASMM_STORE_OPT_PRINT_off
+
+#define ASMM_EXEC_INFO_off
+#define ASMM_EXEC_TIMING_off
+#define ASMM_EXEC_PROFILE_off
+//==============================================================================
 //
 // Array class implementation (body) file
 //
@@ -4698,8 +4710,6 @@ template<typename IT>
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
 
-#define HALOSTOREMEMLOG_off
-  
   try{
     
     // every Pet must provide array argument
@@ -4716,7 +4726,7 @@ template<typename IT>
     int localPet = vm->getLocalPet();
     int petCount = vm->getPetCount();
     
-#ifdef HALOSTOREMEMLOG_on
+#ifdef HALO_STORE_MEMLOG_on
     VM::logMemInfo(std::string("HaloStore1"));
 #endif
     
@@ -4865,7 +4875,7 @@ template<typename IT>
       }
     }
     
-#ifdef HALOSTOREMEMLOG_on
+#ifdef HALO_STORE_MEMLOG_on
     VM::logMemInfo(std::string("HaloStore2"));
 #endif
 
@@ -4966,7 +4976,7 @@ template<typename IT>
 #else
       factorListCount, 1, 1, factorIndexListPtr));
 #endif
-#ifdef HALOSTOREMEMLOG_on
+#ifdef HALO_STORE_MEMLOG_on
     VM::logMemInfo(std::string("HaloStore3"));
 #endif
     // precompute sparse matrix multiplication
@@ -4974,7 +4984,7 @@ template<typename IT>
     localrc = sparseMatMulStore(array, array, routehandle, sparseMatrix, true,
       false, &srcTermProcessing, pipelineDepthArg);
     
-#ifdef HALOSTOREMEMLOG_on
+#ifdef HALO_STORE_MEMLOG_on
     VM::logMemInfo(std::string("HaloStore4"));
 #endif
     
@@ -4997,7 +5007,7 @@ template<typename IT>
       }
     }
     
-#ifdef HALOSTOREMEMLOG_on
+#ifdef HALO_STORE_MEMLOG_on
     VM::logMemInfo(std::string("HaloStore5"));
 #endif
     
@@ -5016,7 +5026,7 @@ template<typename IT>
       delete [] factorListT;
     }
     
-#ifdef HALOSTOREMEMLOG_on
+#ifdef HALO_STORE_MEMLOG_on
     VM::logMemInfo(std::string("HaloStore6"));
 #endif
     
@@ -5771,10 +5781,6 @@ template<typename T> bool operator<(SeqIndex<T> a, SeqIndex<T> b){
 //-----------------------------------------------------------------------------
 
 
-#define ASMMPROFILE___disable
-
-#define ASMM_STORE_LOG___disable
-
 namespace ArrayHelper{
   
   template<typename IT> struct Deflator{
@@ -5929,7 +5935,7 @@ namespace ArrayHelper{
 #define ESMC_METHOD "ESMCI::ArrayHelper::RecvnbElement::appendRecvnb()"
     int localrc = ESMC_RC_NOT_IMPL;         // local return code
     int rc = ESMC_RC_NOT_IMPL;              // final return code
-#ifdef ASMM_STORE_LOG
+#ifdef ASMM_STORE_LOG_on
     {
       std::stringstream msg;
       msg << "ASMM_STORE_LOG:" << __LINE__ << " on localPet=" << localPet <<
@@ -5960,7 +5966,7 @@ namespace ArrayHelper{
       bufferItemCount * dataSizeSrc, srcPet, tag, vectorFlag, true);
     if (ESMC_LogDefault.MsgFoundError(localrc,
       ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
-#ifdef ASMMPROFILE
+#ifdef ASMM_EXEC_PROFILE_on
     char *tempString = new char[160];
     sprintf(tempString, "Recvnb: vectorFlag=%d", vectorFlag);
     localrc = xxe->appendProfileMessage(predicateBitField, tempString);
@@ -5989,7 +5995,7 @@ namespace ArrayHelper{
 #define ESMC_METHOD "ESMCI::ArrayHelper::RecvnbElement::appendRecv()"
     int localrc = ESMC_RC_NOT_IMPL;         // local return code
     int rc = ESMC_RC_NOT_IMPL;              // final return code
-#ifdef ASMM_STORE_LOG
+#ifdef ASMM_STORE_LOG_on
     {
       std::stringstream msg;
       msg << "ASMM_STORE_LOG: XXE::recv on localPet=" << localPet <<
@@ -6020,7 +6026,7 @@ namespace ArrayHelper{
       bufferItemCount * dataSizeSrc, srcPet, tag, vectorFlag, true);
     if (ESMC_LogDefault.MsgFoundError(localrc,
       ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
-#ifdef ASMMPROFILE
+#ifdef ASMM_EXEC_PROFILE_on
     char *tempString = new char[160];
     sprintf(tempString, "Recv: vectorFlag=%d", vectorFlag);
     localrc = xxe->appendProfileMessage(predicateBitField, tempString);
@@ -6053,7 +6059,7 @@ namespace ArrayHelper{
     int j = dstLocalDe;
     int rraIndex = srcLocalDeCount + j; // localDe index into dstArray shifted 
                                         // by srcArray localDeCount
-#ifdef ASMMPROFILE
+#ifdef ASMM_EXEC_PROFILE_on
     localrc = xxe->appendWtimer(predicateBitField, "slct zero",
       xxe->count, xxe->count);
     if (ESMC_LogDefault.MsgFoundError(localrc,
@@ -6075,7 +6081,7 @@ namespace ArrayHelper{
       xxeZeroSuperScalarRRAInfo->rraOffsetList[k] = linIndex/vectorLength;
       ++k;
     }
-#ifdef ASMMPROFILE
+#ifdef ASMM_EXEC_PROFILE_on
     localrc = xxe->appendWtimer(predicateBitField, "/slct zero",
       xxe->count, xxe->count);
     if (ESMC_LogDefault.MsgFoundError(localrc,
@@ -6230,7 +6236,7 @@ namespace ArrayHelper{
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
         ESMC_CONTEXT, &rc)) return rc;
 #endif
-#ifdef ASMMPROFILE
+#ifdef ASMM_EXEC_PROFILE_on
       char *tempString = new char[160];
       vector<int> sortOffsetList(termCount);
       copy(rraOffsetList, rraOffsetList+termCount, sortOffsetList.begin());
@@ -6243,7 +6249,7 @@ namespace ArrayHelper{
       
       if (dt_sScalar < dt_sScalarC){
         // use productSumSuperScalarDstRRA
-#ifdef ASMMPROFILE
+#ifdef ASMM_EXEC_PROFILE_on
         sprintf(tempString, "use productSumSuperScalarDstRRA for %d terms"
           " (diffElements=%d), vectorFlag=%d", termCount, diffElements,
           vectorFlag);
@@ -6252,14 +6258,14 @@ namespace ArrayHelper{
         xxeProductSumSuperScalarDstRRAInfo->valueBase = bufferInfo;
       }else{
         // use productSumSuperScalarContigRRA
-#ifdef ASMMPROFILE
+#ifdef ASMM_EXEC_PROFILE_on
         sprintf(tempString, "use productSumSuperScalarContigRRA for %d terms"
           " (diffElements=%d), vectorFlag=%d", termCount, diffElements,
           vectorFlag);
 #endif
         // nothing to be done -> already set from last trial
       }
-#ifdef ASMMPROFILE
+#ifdef ASMM_EXEC_PROFILE_on
       localrc = xxe->appendProfileMessage(predicateBitField, tempString);
       if (ESMC_LogDefault.MsgFoundError(localrc,
         ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
@@ -6305,7 +6311,7 @@ namespace ArrayHelper{
         } // for srcTermProcessing
         ++bufferItem;
       }
-#ifdef ASMMPROFILE
+#ifdef ASMM_EXEC_PROFILE_on
       char *tempString = new char[160];
       vector<int> sortOffsetList(bufferItem);
       copy(rraOffsetList, rraOffsetList+bufferItem, sortOffsetList.begin());
@@ -6336,7 +6342,7 @@ namespace ArrayHelper{
 #define ESMC_METHOD "ESMCI::ArrayHelper::RecvnbElement::appendTestWaitProductSum()"
     int localrc = ESMC_RC_NOT_IMPL;         // local return code
     int rc = ESMC_RC_NOT_IMPL;              // final return code
-#ifdef ASMMPROFILE
+#ifdef ASMM_EXEC_PROFILE_on
     char *tempString = new char[160];
     sprintf(tempString, "WaitProductSum (%d/)", k);
     localrc = xxe->appendWtimer(predicateBitField|XXE::filterBitNbWaitFinish,
@@ -6377,7 +6383,7 @@ namespace ArrayHelper{
       predicateBitField|XXE::filterBitCancel, recvnbIndex);
     if (ESMC_LogDefault.MsgFoundError(localrc, 
       ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
-#ifdef ASMMPROFILE
+#ifdef ASMM_EXEC_PROFILE_on
     tempString = new char[160];
     sprintf(tempString, "/WaitProductSum (%d/)", k);
     localrc = xxe->appendWtimer(predicateBitField|XXE::filterBitNbWaitFinish,
@@ -6598,7 +6604,7 @@ namespace ArrayHelper{
     if (srcTermProcessing==0){
       // do all the processing on the dst side
       int count = linIndexContigBlockList.size();
-#ifdef ASMM_STORE_LOG
+#ifdef ASMM_STORE_LOG_on
   {
     std::stringstream msg;
     msg << "ASMM_STORE_LOG:" << __LINE__ << " from localPet=" << localPet <<
@@ -6612,7 +6618,7 @@ namespace ArrayHelper{
 // data block in the srcArray, this may not be the case for super-vectorized
 // case at run-time. The safe way is to _always_ use a buffer: memGatherSrcRRA.
         // sendnbRRA out of single contiguous linIndex run
-#ifdef ASMM_STORE_LOG
+#ifdef ASMM_STORE_LOG_on
   {
     std::stringstream msg;
     msg << "ASMM_STORE_LOG:" << __LINE__ << 
@@ -6626,7 +6632,7 @@ namespace ArrayHelper{
           partnerDeDataCount * dataSizeSrc, dstPet, j, tag, vectorFlag);
         if (ESMC_LogDefault.MsgFoundError(localrc,
           ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
-#ifdef ASMMPROFILE
+#ifdef ASMM_EXEC_PROFILE_on
         char *tempString = new char[160];
         sprintf(tempString, "Contiguous send: vectorFlag=%d", vectorFlag);
         localrc = xxe->appendProfileMessage(predicateBitField, tempString);
@@ -6636,7 +6642,7 @@ namespace ArrayHelper{
 #endif
       }else{
         // use intermediate buffer
-#ifdef ASMM_STORE_LOG
+#ifdef ASMM_STORE_LOG_on
   {
     std::stringstream msg;
     msg << "ASMM_STORE_LOG:" << __LINE__ <<
@@ -6659,7 +6665,7 @@ namespace ArrayHelper{
             linIndexContigBlockList[kk].linIndex/vectorLength;
           xxeMemGatherSrcRRAInfo->countList[kk] =
             linIndexContigBlockList[kk].linIndexCount;
-#ifdef ASMM_STORE_LOG
+#ifdef ASMM_STORE_LOG_on
   {
     std::stringstream msg;
     msg << "ASMM_STORE_LOG:" << __LINE__ << " countList[]=" << 
@@ -6685,7 +6691,7 @@ namespace ArrayHelper{
           &dt_byte, xxeIndex, xxeIndex);
         if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
           ESMC_CONTEXT, &rc)) return rc;
-#ifdef ASMM_STORE_LOG
+#ifdef ASMM_STORE_LOG_on
     {
       std::stringstream msg;
       msg << "ASMM_STORE_LOG:" << __LINE__ << " on localPet=" << localPet <<
@@ -6710,7 +6716,7 @@ namespace ArrayHelper{
               linIndexContigBlockList[k].linIndexCount;
           }
         }
-#ifdef ASMMPROFILE
+#ifdef ASMM_EXEC_PROFILE_on
         char *tempString = new char[160];
         sprintf(tempString, "MemGatherSrcRRA: vectorFlag=%d", vectorFlag);
         localrc = xxe->appendProfileMessage(predicateBitField, tempString);
@@ -6750,7 +6756,7 @@ namespace ArrayHelper{
         bufferItemCount * dataSizeSrc, vectorFlag, true);
       if (ESMC_LogDefault.MsgFoundError(localrc, 
         ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
-#ifdef ASMMPROFILE
+#ifdef ASMM_EXEC_PROFILE_on
       char *tempString = new char[160];
       sprintf(tempString, "/ZeroVector (%d/)", k);
       localrc = xxe->appendWtimer(predicateBitField, tempString, xxe->count,
@@ -6789,7 +6795,7 @@ namespace ArrayHelper{
         } // for srcTermProcessing
         ++bufferItem;
       }
-#ifdef ASMMPROFILE
+#ifdef ASMM_EXEC_PROFILE_on
       tempString = new char[160];
       sprintf(tempString, "use productSumSuperScalarSrcRRA for termCount=%d"
         " -> reducing it to %d terms", srcInfoTable.size(), bufferItem);
@@ -6815,7 +6821,7 @@ namespace ArrayHelper{
       if (ESMC_LogDefault.MsgFoundError(localrc,
         ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
     }
-#ifdef ASMMPROFILE
+#ifdef ASMM_EXEC_PROFILE_on
     char *tempString = new char[160];
     sprintf(tempString, "<(%04d/%04d)-Snb(%d/%d)-(%04d/%04d)> ",
       srcDe, localPet, k, sendnbIndex, dstDe, dstPet);
@@ -6848,7 +6854,7 @@ namespace ArrayHelper{
     if (srcTermProcessing==0){
       // do all the processing on the dst side
       int count = linIndexContigBlockList.size();
-#ifdef ASMM_STORE_LOG
+#ifdef ASMM_STORE_LOG_on
     {
       std::stringstream msg;
       msg << "ASMM_STORE_LOG: XXE::send from localPet=" << localPet <<
@@ -6862,7 +6868,7 @@ namespace ArrayHelper{
 // data block in the srcArray, this may not be the case for super-vectorized
 // case at run-time. The safe way is to _always_ use a buffer: memGatherSrcRRA.
         // sendRRA out of single contiguous linIndex run
-#ifdef ASMM_STORE_LOG
+#ifdef ASMM_STORE_LOG_on
     {
       std::stringstream msg;
       msg << "ASMM_STORE_LOG: single contiguous linIndex run on src side";
@@ -6875,7 +6881,7 @@ namespace ArrayHelper{
           partnerDeDataCount * dataSizeSrc, dstPet, j, tag, vectorFlag);
         if (ESMC_LogDefault.MsgFoundError(localrc,
           ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
-#ifdef ASMMPROFILE
+#ifdef ASMM_EXEC_PROFILE_on
         char *tempString = new char[160];
         sprintf(tempString, "Contiguous send: vectorFlag=%d", vectorFlag);
         localrc = xxe->appendProfileMessage(predicateBitField, tempString);
@@ -6885,7 +6891,7 @@ namespace ArrayHelper{
 #endif
       }else{
         // use intermediate buffer
-#ifdef ASMM_STORE_LOG
+#ifdef ASMM_STORE_LOG_on
     {
       std::stringstream msg;
       msg << "ASMM_STORE_LOG: non-contiguous linIndex on "
@@ -6926,7 +6932,7 @@ namespace ArrayHelper{
           &dt_byte, xxeIndex, xxeIndex);
         if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
           ESMC_CONTEXT, &rc)) return rc;
-#ifdef ASMM_STORE_LOG
+#ifdef ASMM_STORE_LOG_on
     {
       std::stringstream msg;
       msg << "ASMM_STORE_LOG:" << __LINE__ << " on localPet=" << localPet <<
@@ -6951,7 +6957,7 @@ namespace ArrayHelper{
               linIndexContigBlockList[k].linIndexCount;
           }
         }
-#ifdef ASMMPROFILE
+#ifdef ASMM_EXEC_PROFILE_on
         char *tempString = new char[160];
         sprintf(tempString, "MemGatherSrcRRA: vectorFlag=%d", vectorFlag);
         localrc = xxe->appendProfileMessage(predicateBitField, tempString);
@@ -6991,7 +6997,7 @@ namespace ArrayHelper{
         bufferItemCount * dataSizeSrc, vectorFlag, true);
       if (ESMC_LogDefault.MsgFoundError(localrc, 
         ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
-#ifdef ASMMPROFILE
+#ifdef ASMM_EXEC_PROFILE_on
       char *tempString = new char[160];
       sprintf(tempString, "/ZeroVector (%d/)", k);
       localrc = xxe->appendWtimer(predicateBitField, tempString, xxe->count,
@@ -7030,7 +7036,7 @@ namespace ArrayHelper{
         } // for srcTermProcessing
         ++bufferItem;
       }
-#ifdef ASMMPROFILE
+#ifdef ASMM_EXEC_PROFILE_on
       tempString = new char[160];
       sprintf(tempString, "use productSumSuperScalarSrcRRA for termCount=%d"
         " -> reducing it to %d terms", srcInfoTable.size(), bufferItem);
@@ -7056,7 +7062,7 @@ namespace ArrayHelper{
       if (ESMC_LogDefault.MsgFoundError(localrc,
         ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
     }
-#ifdef ASMMPROFILE
+#ifdef ASMM_EXEC_PROFILE_on
     char *tempString = new char[160];
     sprintf(tempString, "<(%04d/%04d)-Snb(%d/%d)-(%04d/%04d)> ",
       srcDe, localPet, k, sendnbIndex, dstDe, dstPet);
@@ -7109,7 +7115,7 @@ namespace ArrayHelper{
     if (srcTermProcessing==0){
       // do all the processing on the dst side
       int count = linIndexContigBlockList.size();
-#ifdef ASMM_STORE_LOG
+#ifdef ASMM_STORE_LOG_on
     {
       std::stringstream msg;
       msg << "ASMM_STORE_LOG: XXE::sendrecv from localPet=" << localPet <<
@@ -7123,7 +7129,7 @@ namespace ArrayHelper{
 // data block in the srcArray, this may not be the case for super-vectorized
 // case at run-time. The safe way is to _always_ use a buffer: memGatherSrcRRA.
         // sendRRArecv out of single contiguous linIndex run
-#ifdef ASMM_STORE_LOG
+#ifdef ASMM_STORE_LOG_on
     {
       std::stringstream msg;
       msg << "ASMM_STORE_LOG: single contiguous linIndex run on src side";
@@ -7139,7 +7145,7 @@ namespace ArrayHelper{
           j, tag, tag, vectorFlag, true);
         if (ESMC_LogDefault.MsgFoundError(localrc,
           ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
-#ifdef ASMMPROFILE
+#ifdef ASMM_EXEC_PROFILE_on
         char *tempString = new char[160];
         sprintf(tempString, "Contiguous sendrecv: vectorFlag=%d", vectorFlag);
         localrc = xxe->appendProfileMessage(predicateBitField, tempString);
@@ -7149,7 +7155,7 @@ namespace ArrayHelper{
 #endif
       }else{
         // use intermediate buffer
-#ifdef ASMM_STORE_LOG
+#ifdef ASMM_STORE_LOG_on
     {
       std::stringstream msg;
       msg << "ASMM_STORE_LOG: non-contiguous linIndex on "
@@ -7190,8 +7196,8 @@ namespace ArrayHelper{
           &dt_byte, xxeIndex, xxeIndex);
         if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
           ESMC_CONTEXT, &rc)) return rc;
-#ifdef ASMM_STORE_LOG_disabled
-        fprintf(ASMM_STORE_LOGfp, "gjt - on localPet %d memGatherSrcRRA took "
+#ifdef ASMM_STORE_LOG_on_disabled
+        fprintf(asmm_store_log_fp, "gjt - on localPet %d memGatherSrcRRA took "
           "dt_tk=%g s and dt_byte=%g s for count=%d\n", localPet, dt_tk,
           dt_byte, count);
 #endif
@@ -7211,7 +7217,7 @@ namespace ArrayHelper{
               linIndexContigBlockList[k].linIndexCount;
           }
         }
-#ifdef ASMMPROFILE
+#ifdef ASMM_EXEC_PROFILE_on
         char *tempString = new char[160];
         sprintf(tempString, "MemGatherSrcRRA: vectorFlag=%d", vectorFlag);
         localrc = xxe->appendProfileMessage(predicateBitField, tempString);
@@ -7254,7 +7260,7 @@ namespace ArrayHelper{
         bufferItemCount * dataSizeSrc, vectorFlag, true);
       if (ESMC_LogDefault.MsgFoundError(localrc, 
         ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
-#ifdef ASMMPROFILE
+#ifdef ASMM_EXEC_PROFILE_on
       char *tempString = new char[160];
       sprintf(tempString, "/ZeroVector (%d/)", k);
       localrc = xxe->appendWtimer(predicateBitField, tempString, xxe->count,
@@ -7293,7 +7299,7 @@ namespace ArrayHelper{
         } // for srcTermProcessing
         ++bufferItem;
       }
-#ifdef ASMMPROFILE
+#ifdef ASMM_EXEC_PROFILE_on
       tempString = new char[160];
       sprintf(tempString, "use productSumSuperScalarSrcRRA for termCount=%d"
         " -> reducing it to %d terms", srcInfoTable.size(), bufferItem);
@@ -7322,7 +7328,7 @@ namespace ArrayHelper{
       if (ESMC_LogDefault.MsgFoundError(localrc,
         ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
     }
-#ifdef ASMMPROFILE
+#ifdef ASMM_EXEC_PROFILE_on
     char *tempString = new char[160];
     sprintf(tempString, "<(%04d/%04d)-Snb(%d/%d)-(%04d/%04d)> ",
       srcDe, localPet, k, sendnbIndex, dstDe, dstPet);
@@ -8372,6 +8378,15 @@ template<typename IT1, typename IT2>
         return 0; // provoke MPI errors
     }
     virtual int messageSize(int srcPet, int dstPet)const{
+#ifdef DEBUGGING
+  {
+    std::stringstream debugmsg;
+    debugmsg << "SetupSeqIndexFactorLookupStage1().messageSize(srcPet=" 
+      << srcPet << " ,dstPet=" << dstPet << "): " <<
+      sizeof(int) * messageSizeCount(srcPet, dstPet);
+    ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_INFO);
+  }
+#endif
       return sizeof(int) * messageSizeCount(srcPet, dstPet);
     }
     virtual void messagePrepare(int srcPet, int dstPet, char *buffer)const{
@@ -8441,6 +8456,17 @@ template<typename IT1, typename IT2>
       int dataSizeFactors =
         ESMC_TypeKind_FlagSize(SetupSeqIndexFactorLookup<IT>::typekindFactors);
       //todo: reduce waste of bandwidth in case there are _not_ 4-comp ind.
+#ifdef DEBUGGING
+  {
+    std::stringstream debugmsg;
+    debugmsg << "SetupSeqIndexFactorLookupStage2().messageSize(srcPet=" 
+      << srcPet << " ,dstPet=" << dstPet << "): " <<
+      (4*sizeof(int)+dataSizeFactors) * messageSizeCount(srcPet, dstPet)
+      << " from dataSizeFactors=" << dataSizeFactors << " messageSizeCount="
+      << messageSizeCount(srcPet, dstPet);
+    ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_INFO);
+  }
+#endif
       return (4*sizeof(int)+dataSizeFactors) * messageSizeCount(srcPet, dstPet);
     }
     virtual void messagePrepare(int srcPet, int dstPet, char *buffer)const{
@@ -8590,6 +8616,10 @@ template<typename IT1, typename IT2>
     
     int localrc = ESMC_RC_NOT_IMPL;         // local return code
     
+#ifdef ASMM_STORE_MEMLOG_on
+    VM::logMemInfo(std::string("setupSeqIndexFactorLookup1"));
+#endif
+
     // set up seqIntervFactorListCountToPet and seqIntervFactorListIndexToPet
     vector<int> seqIntervFactorListCountToPet(petCount);
     for (int i=0; i<petCount; i++)
@@ -8597,6 +8627,10 @@ template<typename IT1, typename IT2>
     vector<vector<int> > seqIntervFactorListIndexToPet(petCount);
     vector<vector<int> > seqIntervFactorListLookupIndexToPet(petCount);
     
+#ifdef ASMM_STORE_MEMLOG_on
+    VM::logMemInfo(std::string("setupSeqIndexFactorLookup2"));
+#endif
+
     for (int j=0; j<factorListCount; j++){
       // loop over all factorList entries, find matching interval via bisection
       // and count factor towards those that need to be sent to that PET.
@@ -8663,10 +8697,35 @@ cout << "dstSetupFlag=" << dstSetupFlag << " tensorSeqIndex=" <<
       }
     }
 
+#ifdef ASMM_STORE_MEMLOG_on
+    VM::logMemInfo(std::string("setupSeqIndexFactorLookup3"));
+#endif
+
     // construct seqIntervFactorListCountFromPet
     vector<int> seqIntervFactorListCountFromPet(petCount);
     vm->alltoall(&(seqIntervFactorListCountToPet.front()), sizeof(int),
       &(seqIntervFactorListCountFromPet.front()), sizeof(int), vmBYTE);
+    
+#ifdef DEBUGGING
+  {
+    std::stringstream debugmsg;
+    debugmsg << "setupSeqIndexFactorLookup() seqIntervFactorListCountToPet=";
+    for (int i=0; i<seqIntervFactorListCountToPet.size(); i++)
+      debugmsg << seqIntervFactorListCountToPet[i] << ", ";
+    ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_INFO);
+  }
+  {
+    std::stringstream debugmsg;
+    debugmsg << "setupSeqIndexFactorLookup() seqIntervFactorListCountFromPet=";
+    for (int i=0; i<seqIntervFactorListCountFromPet.size(); i++)
+      debugmsg << seqIntervFactorListCountFromPet[i] << ", ";
+    ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_INFO);
+  }
+#endif
+
+#ifdef ASMM_STORE_MEMLOG_on
+    VM::logMemInfo(std::string("setupSeqIndexFactorLookup4"));
+#endif
 
     DD::SetupSeqIndexFactorLookupStage1<IT> setupSeqIndexFactorLookupStage1(
       seqIndexFactorLookup,
@@ -8697,18 +8756,30 @@ cout << "dstSetupFlag=" << dstSetupFlag << " tensorSeqIndex=" <<
       // obtain memory
       i->factorList.reserve(i->factorCount);  
     }
+#ifdef ASMM_STORE_MEMLOG_on
+    VM::logMemInfo(std::string("setupSeqIndexFactorLookup5"));
+#endif
+
 #endif
     
     DD::SetupSeqIndexFactorLookupStage2<IT>
       setupSeqIndexFactorLookupStage2(setupSeqIndexFactorLookupStage1);
 
+#ifdef ASMM_STORE_MEMLOG_on
+    VM::logMemInfo(std::string("setupSeqIndexFactorLookup6"));
+#endif
+
     setupSeqIndexFactorLookupStage2.totalExchange(vm);
     
+#ifdef ASMM_STORE_MEMLOG_on
+    VM::logMemInfo(std::string("setupSeqIndexFactorLookup7"));
+#endif
+
     // deal with duplicate sparse matrix entries in seqIndexFactorLookup
     for (typename vector<SeqIndexFactorLookup<IT> >::iterator
       i=seqIndexFactorLookup.begin(); i!=seqIndexFactorLookup.end(); ++i){
-#ifdef ASMM_STORE_LOG_disabled
-      fprintf(ASMM_STORE_LOGfp,
+#ifdef ASMM_STORE_LOG_on_disabled
+      fprintf(asmm_store_log_fp,
         "befr duplicate elimination seqIndexFactorLookup[%d].factorCount=%d\n",
         i-seqIndexFactorLookup.begin(), i->factorCount);
 #endif
@@ -8733,13 +8804,17 @@ cout << "dstSetupFlag=" << dstSetupFlag << " tensorSeqIndex=" <<
         i->factorList.end()),
         i->factorList.end());
       i->factorCount = i->factorList.size();
-#ifdef ASMM_STORE_LOG_disabled
-      fprintf(ASMM_STORE_LOGfp,
+#ifdef ASMM_STORE_LOG_on_disabled
+      fprintf(asmm_store_log_fp,
         "aftr duplicate elimination seqIndexFactorLookup[%d].factorCount=%d\n",
         i-seqIndexFactorLookup.begin(), i->factorCount);
 #endif
     }
     
+#ifdef ASMM_STORE_MEMLOG_on
+    VM::logMemInfo(std::string("setupSeqIndexFactorLookup8"));
+#endif
+
     // communicate between Pets to set up "de" member in seqIndexFactorLookup[]
     {
       DD::FillSelfDeInfo<IT> fillSelfDeInfo(
@@ -8758,6 +8833,10 @@ cout << "dstSetupFlag=" << dstSetupFlag << " tensorSeqIndex=" <<
       fillSelfDeInfo.totalExchange(vm);
     }
     
+#ifdef ASMM_STORE_MEMLOG_on
+    VM::logMemInfo(std::string("setupSeqIndexFactorLookup9"));
+#endif
+
     // eliminate duplicate de entries in seqIndexFactorLookup
     for (typename vector<SeqIndexFactorLookup<IT> >::iterator
       i=seqIndexFactorLookup.begin(); i!=seqIndexFactorLookup.end(); ++i){
@@ -8765,14 +8844,15 @@ cout << "dstSetupFlag=" << dstSetupFlag << " tensorSeqIndex=" <<
       i->de.erase(unique(i->de.begin(),i->de.end()),i->de.end());
     }
   
+#ifdef ASMM_STORE_MEMLOG_on
+    VM::logMemInfo(std::string("setupSeqIndexFactorLookup10"));
+#endif
+
     // return successfully
     return ESMF_SUCCESS;
   }
   
 } // namespace DD
-
-
-#define ASMMSTORETIMING
 
 
 //-----------------------------------------------------------------------------
@@ -8913,7 +8993,7 @@ template<typename SIT, typename DIT> int sparseMatMulStoreEncodeXXE(VM *vm,
   const int *dstLocalDeTotalElementCount,
   char **rraList, int rraCount, RouteHandle **routehandle,
   bool undistributedDimsPresent,
-#ifdef ASMMSTORETIMING
+#ifdef ASMM_STORE_TIMING_on
   double *t8, double *t9, double *t10, double *t11, double *t12, double *t13,
   double *t14,
 #endif
@@ -8978,7 +9058,6 @@ template<typename SIT, typename DIT>
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
   
-#define ASMMSTOREMEMLOG_off
   try{
   
   //---------------------------------------------------------------------------
@@ -8992,7 +9071,7 @@ template<typename SIT, typename DIT>
   int localPet = vm->getLocalPet();
   int petCount = vm->getPetCount();
   
-#ifdef ASMMSTORETIMING
+#ifdef ASMM_STORE_TIMING_on
   double t0, t1, t2, t3, t4, t5, t6, t7;  //gjt - profile
   double t8, t9, t10, t11, t12, t13, t14, t15; //gjt - profile
   double t4a, t4b;  //gjt - profile
@@ -9003,7 +9082,7 @@ template<typename SIT, typename DIT>
   VMK::wtime(&t0);    //gjt - profile
 #endif
   
-#ifdef ASMMSTOREMEMLOG_on
+#ifdef ASMM_STORE_MEMLOG_on
   VM::logMemInfo(std::string("ASMMStore1.0"));
 #endif
 
@@ -9190,7 +9269,6 @@ template<typename SIT, typename DIT>
     }
   }
   
-#define DEBUGGING
 #ifdef DEBUGGING
   {
     std::stringstream debugmsg;
@@ -9231,7 +9309,6 @@ template<typename SIT, typename DIT>
     ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_INFO);
   }
 #endif
-#undef DEBUGGING
     workWithTempArrays=true;
     // create the temporary arrays
     srcArray = Array::create(srcArray, true, &localrc);
@@ -9254,7 +9331,7 @@ template<typename SIT, typename DIT>
   }
   }
   
-#ifdef ASMMSTORETIMING
+#ifdef ASMM_STORE_TIMING_on
   VMK::wtime(&t1);   //gjt - profile
 #endif
 
@@ -9268,7 +9345,7 @@ template<typename SIT, typename DIT>
   // Phase II
   //---------------------------------------------------------------------------
 
-#ifdef ASMMSTOREMEMLOG_on
+#ifdef ASMM_STORE_MEMLOG_on
   VM::logMemInfo(std::string("ASMMStore2.0"));
 #endif
 
@@ -9288,7 +9365,7 @@ template<typename SIT, typename DIT>
   int *srcElementCountList = new int[petCount];
   vm->allgather(&srcElementCount, srcElementCountList, sizeof(int));
 
-#ifdef ASMMSTOREMEMLOG_on
+#ifdef ASMM_STORE_MEMLOG_on
   VM::logMemInfo(std::string("ASMMStore2.1"));
 #endif
 
@@ -9322,7 +9399,7 @@ template<typename SIT, typename DIT>
   int *dstElementCountList = new int[petCount];
   vm->allgather(&dstElementCount, dstElementCountList, sizeof(int));
   
-#ifdef ASMMSTOREMEMLOG_on
+#ifdef ASMM_STORE_MEMLOG_on
   VM::logMemInfo(std::string("ASMMStore2.2"));
 #endif
 
@@ -9335,11 +9412,11 @@ template<typename SIT, typename DIT>
     dstTensorElementCountEff = 1;
   }    
 
-#ifdef ASMMSTOREMEMLOG_on
+#ifdef ASMM_STORE_MEMLOG_on
   VM::logMemInfo(std::string("ASMMStore2.3"));
 #endif
 
-#ifdef ASMMSTORETIMING
+#ifdef ASMM_STORE_TIMING_on
   VMK::wtime(&t2);   //gjt - profile
 #endif
   
@@ -9380,7 +9457,7 @@ template<typename SIT, typename DIT>
     }
   }
   
-#ifdef ASMMSTOREMEMLOG_on
+#ifdef ASMM_STORE_MEMLOG_on
   VM::logMemInfo(std::string("ASMMStore2.4"));
 #endif
 
@@ -9389,7 +9466,7 @@ template<typename SIT, typename DIT>
   SIT *srcSeqIndexMinMaxList = new SIT[2*petCount];
   vm->allgather(srcSeqIndexMinMax, srcSeqIndexMinMaxList, 2*sizeof(SIT));  
   
-#ifdef ASMMSTOREMEMLOG_on
+#ifdef ASMM_STORE_MEMLOG_on
   VM::logMemInfo(std::string("ASMMStore2.5"));
 #endif
 
@@ -9404,7 +9481,7 @@ template<typename SIT, typename DIT>
 //return rc;
 //---DEBUG-------------------
 
-#ifdef ASMM_STORE_LOG
+#ifdef ASMM_STORE_LOG_on
   {
     std::stringstream msg;
     msg << "ASMM_STORE_LOG: tensorMixFlag=" << tensorMixFlag
@@ -9474,7 +9551,7 @@ template<typename SIT, typename DIT>
     }
   }
 
-#ifdef ASMMSTOREMEMLOG_on
+#ifdef ASMM_STORE_MEMLOG_on
   VM::logMemInfo(std::string("ASMMStore2.6"));
 #endif
 
@@ -9483,7 +9560,7 @@ template<typename SIT, typename DIT>
   DIT *dstSeqIndexMinMaxList = new DIT[2*petCount];
   vm->allgather(dstSeqIndexMinMax, dstSeqIndexMinMaxList, 2*sizeof(DIT));
   
-#ifdef ASMMSTOREMEMLOG_on
+#ifdef ASMM_STORE_MEMLOG_on
   VM::logMemInfo(std::string("ASMMStore2.7"));
 #endif
 
@@ -9498,7 +9575,7 @@ template<typename SIT, typename DIT>
 //return rc;
 //---DEBUG-------------------
 
-#ifdef ASMM_STORE_LOG
+#ifdef ASMM_STORE_LOG_on
   for (int i=0; i<petCount; i++)
   {
     std::stringstream msg;
@@ -9508,7 +9585,7 @@ template<typename SIT, typename DIT>
   }
 #endif
 
-#ifdef ASMMSTORETIMING
+#ifdef ASMM_STORE_TIMING_on
   VMK::wtime(&t3);   //gjt - profile
 #endif
 
@@ -9518,7 +9595,7 @@ template<typename SIT, typename DIT>
 //return rc;
 //---DEBUG-------------------
 
-#ifdef ASMMSTOREMEMLOG_on
+#ifdef ASMM_STORE_MEMLOG_on
   VM::logMemInfo(std::string("ASMMStore2.8"));
 #endif
 
@@ -9545,11 +9622,11 @@ template<typename SIT, typename DIT>
     }
   }
   
-#ifdef ASMMSTOREMEMLOG_on
+#ifdef ASMM_STORE_MEMLOG_on
   VM::logMemInfo(std::string("ASMMStore2.9"));
 #endif
   
-#ifdef ASMMSTORETIMING
+#ifdef ASMM_STORE_TIMING_on
   VMK::wtime(&t4a1);   //gjt - profile
 #endif
 
@@ -9576,11 +9653,11 @@ template<typename SIT, typename DIT>
       + 1;
   }
   
-#ifdef ASMMSTOREMEMLOG_on
+#ifdef ASMM_STORE_MEMLOG_on
   VM::logMemInfo(std::string("ASMMStore2.10"));
 #endif
 
-#ifdef ASMM_STORE_LOG
+#ifdef ASMM_STORE_LOG_on
   {
     std::stringstream msg;
     msg << "ASMM_STORE_LOG: srcElementCountList[localPet]=" << srcElementCountList[localPet] <<
@@ -9592,7 +9669,7 @@ template<typename SIT, typename DIT>
   }
 #endif
 
-#ifdef ASMMSTORETIMING
+#ifdef ASMM_STORE_TIMING_on
   VMK::wtime(&t4a2);   //gjt - profile
 #endif
   
@@ -9632,18 +9709,18 @@ template<typename SIT, typename DIT>
   
   int *srcLocalIntervalPerPetCount = new int[petCount];
   
-#ifdef ASMMSTORETIMING
+#ifdef ASMM_STORE_TIMING_on
   VMK::wtime(&t4a3);   //gjt - profile
 #endif
   
   vm->alltoall(srcLocalElementsPerIntervalCount, sizeof(int),
     srcLocalIntervalPerPetCount, sizeof(int), vmBYTE);
   
-#ifdef ASMMSTORETIMING
+#ifdef ASMM_STORE_TIMING_on
   VMK::wtime(&t4a);   //gjt - profile
 #endif
   
-#ifdef ASMMSTOREMEMLOG_on
+#ifdef ASMM_STORE_MEMLOG_on
   VM::logMemInfo(std::string("ASMMStore2.11"));
 #endif
 
@@ -9668,11 +9745,11 @@ template<typename SIT, typename DIT>
     }
   }
     
-#ifdef ASMMSTOREMEMLOG_on
+#ifdef ASMM_STORE_MEMLOG_on
   VM::logMemInfo(std::string("ASMMStore2.12"));
 #endif
     
-#ifdef ASMMSTORETIMING
+#ifdef ASMM_STORE_TIMING_on
   VMK::wtime(&t4b1);   //gjt - profile
 #endif
   
@@ -9703,11 +9780,11 @@ template<typename SIT, typename DIT>
       + 1;
   }
   
-#ifdef ASMMSTOREMEMLOG_on
+#ifdef ASMM_STORE_MEMLOG_on
   VM::logMemInfo(std::string("ASMMStore2.13"));
 #endif
 
-#ifdef ASMM_STORE_LOG
+#ifdef ASMM_STORE_LOG_on
   {
     std::stringstream msg;
     msg << "ASMM_STORE_LOG: dstElementCountList[localPet]=" << dstElementCountList[localPet] <<
@@ -9719,7 +9796,7 @@ template<typename SIT, typename DIT>
   }
 #endif
 
-#ifdef ASMMSTORETIMING
+#ifdef ASMM_STORE_TIMING_on
   VMK::wtime(&t4b2);   //gjt - profile
 #endif
 
@@ -9772,14 +9849,14 @@ template<typename SIT, typename DIT>
   
   int *dstLocalIntervalPerPetCount = new int[petCount];
   
-#ifdef ASMMSTORETIMING
+#ifdef ASMM_STORE_TIMING_on
   VMK::wtime(&t4b3);   //gjt - profile
 #endif
 
   vm->alltoall(dstLocalElementsPerIntervalCount, sizeof(int),
     dstLocalIntervalPerPetCount, sizeof(int), vmBYTE);
   
-#ifdef ASMMSTORETIMING
+#ifdef ASMM_STORE_TIMING_on
   VMK::wtime(&t4b);   //gjt - profile
 #endif
 
@@ -9789,11 +9866,11 @@ template<typename SIT, typename DIT>
   delete [] srcSeqIndexMinMaxList;
   delete [] dstSeqIndexMinMaxList;
 
-#ifdef ASMMSTOREMEMLOG_on
+#ifdef ASMM_STORE_MEMLOG_on
   VM::logMemInfo(std::string("ASMMStore2.14"));
 #endif
 
-#ifdef ASMMSTORETIMING
+#ifdef ASMM_STORE_TIMING_on
   VMK::wtime(&t4);   //gjt - profile
 #endif
   
@@ -9801,6 +9878,9 @@ template<typename SIT, typename DIT>
   vector<DD::SeqIndexFactorLookup<SIT> >
     srcSeqIndexFactorLookup(srcSeqIndexInterval[localPet].count
     * srcTensorElementCountEff);
+#ifdef ASMM_STORE_MEMLOG_on
+  VM::logMemInfo(std::string("ASMMStore2.14.1"));
+#endif
   localrc = DD::setupSeqIndexFactorLookup<SIT>(vm, 
     srcSeqIndexFactorLookup,
     petCount, localPet, factorListCount, 
@@ -9815,11 +9895,11 @@ template<typename SIT, typename DIT>
   
 //vm->barrier();  /// only for profiling tests
       
-#ifdef ASMMSTORETIMING
+#ifdef ASMM_STORE_TIMING_on
   VMK::wtime(&t5c);   //gjt - profile
 #endif
 
-#ifdef ASMMSTOREMEMLOG_on
+#ifdef ASMM_STORE_MEMLOG_on
   VM::logMemInfo(std::string("ASMMStore2.15"));
 #endif
 
@@ -9841,15 +9921,15 @@ template<typename SIT, typename DIT>
   
 //vm->barrier();  /// only for profiling tests
       
-#ifdef ASMMSTORETIMING
+#ifdef ASMM_STORE_TIMING_on
   VMK::wtime(&t5f);   //gjt - profile
 #endif
   
-#ifdef ASMMSTORETIMING
+#ifdef ASMM_STORE_TIMING_on
   VMK::wtime(&t5);   //gjt - profile
 #endif
   
-#ifdef ASMMSTOREMEMLOG_on
+#ifdef ASMM_STORE_MEMLOG_on
   VM::logMemInfo(std::string("ASMMStore2.16"));
 #endif
   
@@ -9876,7 +9956,7 @@ template<typename SIT, typename DIT>
   vm->alltoall(srcLocalPartnerElementsPerIntervalCount, sizeof(int),
     dstLocalPartnerIntervalPerPetCount, sizeof(int), vmBYTE);
   
-#ifdef ASMMSTOREMEMLOG_on
+#ifdef ASMM_STORE_MEMLOG_on
   VM::logMemInfo(std::string("ASMMStore2.17"));
 #endif
 
@@ -9900,7 +9980,7 @@ template<typename SIT, typename DIT>
   delete [] srcLocalPartnerElementsPerIntervalCount;
   delete [] dstLocalPartnerIntervalPerPetCount;
       
-#ifdef ASMMSTOREMEMLOG_on
+#ifdef ASMM_STORE_MEMLOG_on
   VM::logMemInfo(std::string("ASMMStore2.18"));
 #endif
 
@@ -9927,7 +10007,7 @@ template<typename SIT, typename DIT>
   vm->alltoall(dstLocalPartnerElementsPerIntervalCount, sizeof(int),
     srcLocalPartnerIntervalPerPetCount, sizeof(int), vmBYTE);
   
-#ifdef ASMMSTOREMEMLOG_on
+#ifdef ASMM_STORE_MEMLOG_on
   VM::logMemInfo(std::string("ASMMStore2.19"));
 #endif
 
@@ -9950,73 +10030,73 @@ template<typename SIT, typename DIT>
   delete [] dstLocalPartnerElementsPerIntervalCount;
   delete [] srcLocalPartnerIntervalPerPetCount;
 
-#ifdef ASMMSTOREMEMLOG_on
+#ifdef ASMM_STORE_MEMLOG_on
   VM::logMemInfo(std::string("ASMMStore2.20"));
 #endif
 
-#ifdef ASMM_STORE_LOG_disabled
-  fprintf(ASMM_STORE_LOGfp, "\n========================================"
+#ifdef ASMM_STORE_LOG_on_disabled
+  fprintf(asmm_store_log_fp, "\n========================================"
     "========================================\n");
-  fprintf(ASMM_STORE_LOGfp, "========================================"
+  fprintf(asmm_store_log_fp, "========================================"
     "========================================\n\n");
   // some serious printing for src info
   for (typename vector<DD::SeqIndexFactorLookup<SIT> >::const_iterator
     i=srcSeqIndexFactorLookup.begin(); i!=srcSeqIndexFactorLookup.end(); ++i){
-    fprintf(ASMM_STORE_LOGfp, "gjt srcDistDir: localPet %d, srcSeqIndex = %d, "
+    fprintf(asmm_store_log_fp, "gjt srcDistDir: localPet %d, srcSeqIndex = %d, "
       "srcSeqIndexFactorLookup[%d].factorCount = %d\n -> .de: ",
       localPet, (i-srcSeqIndexFactorLookup.begin())
       +srcSeqIndexInterval[localPet].min, i-srcSeqIndexFactorLookup.begin(),
       i->factorCount);
     for (int j=0; j<i->de.size(); j++)
-      fprintf(ASMM_STORE_LOGfp, "%d, ", i->de[j]);
-    fprintf(ASMM_STORE_LOGfp, "\n");
+      fprintf(asmm_store_log_fp, "%d, ", i->de[j]);
+    fprintf(asmm_store_log_fp, "\n");
     for (int j=0; j<i->factorCount; j++){
-      fprintf(ASMM_STORE_LOGfp, "\tfactorList[%d]\n"
+      fprintf(asmm_store_log_fp, "\tfactorList[%d]\n"
         "\t\t.partnerSeqIndex.decompSeqIndex = %d\n"
         "\t\t.partnerDe = ", j,
         i->factorList[j].partnerSeqIndex
         .decompSeqIndex);
       for (int jj=0;
         jj<i->factorList[j].partnerDe.size(); jj++)
-        fprintf(ASMM_STORE_LOGfp, "%d, ",
+        fprintf(asmm_store_log_fp, "%d, ",
           i->factorList[j].partnerDe[jj]);
-      fprintf(ASMM_STORE_LOGfp, "\n");
-      fprintf(ASMM_STORE_LOGfp, "\t\t.factor = %d\n",
+      fprintf(asmm_store_log_fp, "\n");
+      fprintf(asmm_store_log_fp, "\t\t.factor = %d\n",
         *((int *)i->factorList[j].factor));
     }
   }
 #endif
   
-#ifdef ASMM_STORE_LOG_disabled
+#ifdef ASMM_STORE_LOG_on_disabled
   // some serious printing for dst info
   for (typename vector<DD::SeqIndexFactorLookup<DIT> >::const_iterator
     i=dstSeqIndexFactorLookup.begin(); i!=dstSeqIndexFactorLookup.end(); ++i){
-    fprintf(ASMM_STORE_LOGfp, "gjt dstDistDir: localPet %d, dstSeqIndex = %d, "
+    fprintf(asmm_store_log_fp, "gjt dstDistDir: localPet %d, dstSeqIndex = %d, "
       "dstSeqIndexFactorLookup[%d].factorCount = %d\n -> .de: ",
       localPet, (i-dstSeqIndexFactorLookup.begin())
       +dstSeqIndexInterval[localPet].min, i-dstSeqIndexFactorLookup.begin(),
       i->factorCount);
     for (int j=0; j<i->de.size(); j++)
-      fprintf(ASMM_STORE_LOGfp, "%d, ", i->de[j]);
-    fprintf(ASMM_STORE_LOGfp, "\n");
+      fprintf(asmm_store_log_fp, "%d, ", i->de[j]);
+    fprintf(asmm_store_log_fp, "\n");
     for (int j=0; j<i->factorCount; j++){
-      fprintf(ASMM_STORE_LOGfp, "\tfactorList[%d]\n"
+      fprintf(asmm_store_log_fp, "\tfactorList[%d]\n"
         "\t\t.partnerSeqIndex.decompSeqIndex = %d\n"
         "\t\t.partnerDe = ", j,
         i->factorList[j].partnerSeqIndex
         .decompSeqIndex);
       for (int jj=0;
         jj<i->factorList[j].partnerDe.size(); jj++)
-        fprintf(ASMM_STORE_LOGfp, "%d, ",
+        fprintf(asmm_store_log_fp, "%d, ",
           i->factorList[j].partnerDe[jj]);
-      fprintf(ASMM_STORE_LOGfp, "\n");
-      fprintf(ASMM_STORE_LOGfp, "\t\t.factor = %d\n",
+      fprintf(asmm_store_log_fp, "\n");
+      fprintf(asmm_store_log_fp, "\t\t.factor = %d\n",
         *((int *)i->factorList[j].factor));
     }
   }
 #endif
 
-#ifdef ASMMSTORETIMING
+#ifdef ASMM_STORE_TIMING_on
   VMK::wtime(&t6);   //gjt - profile
 #endif
   
@@ -10030,7 +10110,7 @@ template<typename SIT, typename DIT>
   // Phase III -> represent sparse matrix in "run distribution"
   //---------------------------------------------------------------------------
   
-#ifdef ASMMSTOREMEMLOG_on
+#ifdef ASMM_STORE_MEMLOG_on
   VM::logMemInfo(std::string("ASMMStore3.0"));
 #endif
 
@@ -10106,15 +10186,15 @@ template<typename SIT, typename DIT>
 /////////////////////////  
 #endif
   
-#ifdef ASMM_STORE_LOG_disabled
-  fprintf(ASMM_STORE_LOGfp, "\n========================================"
+#ifdef ASMM_STORE_LOG_on_disabled
+  fprintf(asmm_store_log_fp, "\n========================================"
     "========================================\n");
-  fprintf(ASMM_STORE_LOGfp, "========================================"
+  fprintf(asmm_store_log_fp, "========================================"
     "========================================\n\n");
   // more serious printing
   for (int j=0; j<srcLocalDeCount; j++){
     for (int k=0; k<srcLinSeqVect[j].size(); k++){
-      fprintf(ASMM_STORE_LOGfp, "localPet: %d, "
+      fprintf(asmm_store_log_fp, "localPet: %d, "
         "srcLinSeqVect[%d][%d].linIndex = %d, "
         ".seqIndex = %d/%d, .factorCount = %d\n",
         localPet, j, k, srcLinSeqVect[j][k].linIndex,
@@ -10122,17 +10202,17 @@ template<typename SIT, typename DIT>
         srcLinSeqVect[j][k].seqIndex.tensorSeqIndex,
         srcLinSeqVect[j][k].factorCount);
       for (int kk=0; kk<srcLinSeqVect[j][k].factorCount; kk++){
-        fprintf(ASMM_STORE_LOGfp, "\tfactorList[%d]\n"
+        fprintf(asmm_store_log_fp, "\tfactorList[%d]\n"
           "\t\t.partnerSeqIndex = %d/%d\n"
           "\t\t.partnerDe = ", kk,
           srcLinSeqVect[j][k].factorList[kk].partnerSeqIndex.decompSeqIndex,
           srcLinSeqVect[j][k].factorList[kk].partnerSeqIndex.tensorSeqIndex);
         for (int jj=0;
           jj<srcLinSeqVect[j][k].factorList[kk].partnerDe.size(); jj++)
-          fprintf(ASMM_STORE_LOGfp, "%d, ",
+          fprintf(asmm_store_log_fp, "%d, ",
             srcLinSeqVect[j][k].factorList[kk].partnerDe[jj]);
-        fprintf(ASMM_STORE_LOGfp, "\n");
-        fprintf(ASMM_STORE_LOGfp, "\t\t.factor = %d\n",
+        fprintf(asmm_store_log_fp, "\n");
+        fprintf(asmm_store_log_fp, "\t\t.factor = %d\n",
           *((int *)srcLinSeqVect[j][k].factorList[kk].factor));
       }
     }
@@ -10141,7 +10221,7 @@ template<typename SIT, typename DIT>
   // more serious printing
   for (int j=0; j<dstLocalDeCount; j++){
     for (int k=0; k<dstLinSeqVect[j].size(); k++){
-      fprintf(ASMM_STORE_LOGfp, "localPet: %d, "
+      fprintf(asmm_store_log_fp, "localPet: %d, "
         "dstLinSeqVect[%d][%d].linIndex = %d, "
         ".seqIndex = %d/%d, .factorCount = %d\n",
         localPet, j, k, dstLinSeqVect[j][k].linIndex,
@@ -10149,17 +10229,17 @@ template<typename SIT, typename DIT>
         dstLinSeqVect[j][k].seqIndex.tensorSeqIndex,
         dstLinSeqVect[j][k].factorCount);
       for (int kk=0; kk<dstLinSeqVect[j][k].factorCount; kk++){
-        fprintf(ASMM_STORE_LOGfp, "\tfactorList[%d]\n"
+        fprintf(asmm_store_log_fp, "\tfactorList[%d]\n"
           "\t\t.partnerSeqIndex = %d/%d\n"
           "\t\t.partnerDe = ", kk,
           dstLinSeqVect[j][k].factorList[kk].partnerSeqIndex.decompSeqIndex,
           dstLinSeqVect[j][k].factorList[kk].partnerSeqIndex.tensorSeqIndex);
         for (int jj=0;
           jj<dstLinSeqVect[j][k].factorList[kk].partnerDe.size(); jj++)
-          fprintf(ASMM_STORE_LOGfp, "%d, ",
+          fprintf(asmm_store_log_fp, "%d, ",
             dstLinSeqVect[j][k].factorList[kk].partnerDe[jj]);
-        fprintf(ASMM_STORE_LOGfp, "\n");
-        fprintf(ASMM_STORE_LOGfp, "\t\t.factor = %d\n",
+        fprintf(asmm_store_log_fp, "\n");
+        fprintf(asmm_store_log_fp, "\t\t.factor = %d\n",
           *((int *)dstLinSeqVect[j][k].factorList[kk].factor));
       }
     }
@@ -10273,15 +10353,15 @@ template<typename SIT, typename DIT>
     }
   }
   
-#ifdef ASMM_STORE_LOG_disabled
-  fprintf(ASMM_STORE_LOGfp, "\n========================================"
+#ifdef ASMM_STORE_LOG_on_disabled
+  fprintf(asmm_store_log_fp, "\n========================================"
     "========================================\n");
-  fprintf(ASMM_STORE_LOGfp, "========================================"
+  fprintf(asmm_store_log_fp, "========================================"
     "========================================\n\n");
   // more serious printing
   for (int j=0; j<srcLocalDeCount; j++){
     for (int k=0; k<srcLinSeqVect[j].size(); k++){
-      fprintf(ASMM_STORE_LOGfp, "localPet: %d, "
+      fprintf(asmm_store_log_fp, "localPet: %d, "
         "srcLinSeqVect[%d][%d].linIndex = %d, "
         ".seqIndex = %d/%d, .factorCount = %d\n",
         localPet, j, k, srcLinSeqVect[j][k].linIndex,
@@ -10289,17 +10369,17 @@ template<typename SIT, typename DIT>
         srcLinSeqVect[j][k].seqIndex.tensorSeqIndex,
         srcLinSeqVect[j][k].factorCount);
       for (int kk=0; kk<srcLinSeqVect[j][k].factorCount; kk++){
-        fprintf(ASMM_STORE_LOGfp, "\tfactorList[%d]\n"
+        fprintf(asmm_store_log_fp, "\tfactorList[%d]\n"
           "\t\t.partnerSeqIndex = %d/%d\n"
           "\t\t.partnerDe = ", kk,
           srcLinSeqVect[j][k].factorList[kk].partnerSeqIndex.decompSeqIndex,
           srcLinSeqVect[j][k].factorList[kk].partnerSeqIndex.tensorSeqIndex);
         for (int jj=0;
           jj<srcLinSeqVect[j][k].factorList[kk].partnerDe.size(); jj++)
-          fprintf(ASMM_STORE_LOGfp, "%d, ",
+          fprintf(asmm_store_log_fp, "%d, ",
             srcLinSeqVect[j][k].factorList[kk].partnerDe[jj]);
-        fprintf(ASMM_STORE_LOGfp, "\n");
-        fprintf(ASMM_STORE_LOGfp, "\t\t.factor = %d\n",
+        fprintf(asmm_store_log_fp, "\n");
+        fprintf(asmm_store_log_fp, "\t\t.factor = %d\n",
           *((int *)srcLinSeqVect[j][k].factorList[kk].factor));
       }
     }
@@ -10308,7 +10388,7 @@ template<typename SIT, typename DIT>
   // more serious printing
   for (int j=0; j<dstLocalDeCount; j++){
     for (int k=0; k<dstLinSeqVect[j].size(); k++){
-      fprintf(ASMM_STORE_LOGfp, "localPet: %d, "
+      fprintf(asmm_store_log_fp, "localPet: %d, "
         "dstLinSeqVect[%d][%d].linIndex = %d, "
         ".seqIndex = %d/%d, .factorCount = %d\n",
         localPet, j, k, dstLinSeqVect[j][k].linIndex,
@@ -10316,24 +10396,24 @@ template<typename SIT, typename DIT>
         dstLinSeqVect[j][k].seqIndex.tensorSeqIndex,
         dstLinSeqVect[j][k].factorCount);
       for (int kk=0; kk<dstLinSeqVect[j][k].factorCount; kk++){
-        fprintf(ASMM_STORE_LOGfp, "\tfactorList[%d]\n"
+        fprintf(asmm_store_log_fp, "\tfactorList[%d]\n"
           "\t\t.partnerSeqIndex = %d/%d\n"
           "\t\t.partnerDe = ", kk,
           dstLinSeqVect[j][k].factorList[kk].partnerSeqIndex.decompSeqIndex,
           dstLinSeqVect[j][k].factorList[kk].partnerSeqIndex.tensorSeqIndex);
         for (int jj=0;
           jj<dstLinSeqVect[j][k].factorList[kk].partnerDe.size(); jj++)
-          fprintf(ASMM_STORE_LOGfp, "%d, ",
+          fprintf(asmm_store_log_fp, "%d, ",
             dstLinSeqVect[j][k].factorList[kk].partnerDe[jj]);
-        fprintf(ASMM_STORE_LOGfp, "\n");
-        fprintf(ASMM_STORE_LOGfp, "\t\t.factor = %d\n",
+        fprintf(asmm_store_log_fp, "\n");
+        fprintf(asmm_store_log_fp, "\t\t.factor = %d\n",
           *((int *)dstLinSeqVect[j][k].factorList[kk].factor));
       }
     }
   }
 #endif
 
-#ifdef ASMMSTORETIMING
+#ifdef ASMM_STORE_TIMING_on
   VMK::wtime(&t7);   //gjt - profile
 #endif
   
@@ -10347,7 +10427,7 @@ template<typename SIT, typename DIT>
   // Phase IV
   //---------------------------------------------------------------------------
 
-#ifdef ASMMSTOREMEMLOG_on
+#ifdef ASMM_STORE_MEMLOG_on
   VM::logMemInfo(std::string("ASMMStore4.0"));
 #endif
 
@@ -10387,7 +10467,7 @@ template<typename SIT, typename DIT>
     dstLocalDeTotalElementCount,
     rraList, rraCount, routehandle,
     undistributedDimsPresent,
-#ifdef ASMMSTORETIMING
+#ifdef ASMM_STORE_TIMING_on
     &t8, &t9, &t10, &t11, &t12, &t13, &t14,
 #endif
     srcTermProcessingArg,
@@ -10404,62 +10484,62 @@ template<typename SIT, typename DIT>
   delete [] dstLocalDeElementCount;
   delete [] dstLocalDeTotalElementCount;
 
-#ifdef ASMMSTORETIMING
+#ifdef ASMM_STORE_TIMING_on
   VMK::wtime(&t15);   //gjt - profile
   {
     char msg[160];
-    ESMC_LogDefault.Write("ASMMSTORETIMING: --- start ---", ESMC_LOGMSG_INFO);
-    sprintf(msg, "ASMMSTORETIMING: t1   = %g", t1-t0);
+    ESMC_LogDefault.Write("ASMM_STORE_TIMING: --- start ---", ESMC_LOGMSG_INFO);
+    sprintf(msg, "ASMM_STORE_TIMING: t1   = %g", t1-t0);
     ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
-    sprintf(msg, "ASMMSTORETIMING: t2   = %g", t2-t0);
+    sprintf(msg, "ASMM_STORE_TIMING: t2   = %g", t2-t0);
     ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
-    sprintf(msg, "ASMMSTORETIMING: t3   = %g", t3-t0);
+    sprintf(msg, "ASMM_STORE_TIMING: t3   = %g", t3-t0);
     ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
-    sprintf(msg, "ASMMSTORETIMING: t4   = %g", t4-t0);
+    sprintf(msg, "ASMM_STORE_TIMING: t4   = %g", t4-t0);
     ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
-    sprintf(msg, "ASMMSTORETIMING:    t4a1   = %g", t4a1-t3);
+    sprintf(msg, "ASMM_STORE_TIMING:    t4a1   = %g", t4a1-t3);
     ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
-    sprintf(msg, "ASMMSTORETIMING:    t4a2   = %g", t4a2-t3);
+    sprintf(msg, "ASMM_STORE_TIMING:    t4a2   = %g", t4a2-t3);
     ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
-    sprintf(msg, "ASMMSTORETIMING:    t4a3   = %g", t4a3-t3);
+    sprintf(msg, "ASMM_STORE_TIMING:    t4a3   = %g", t4a3-t3);
     ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
-    sprintf(msg, "ASMMSTORETIMING:    t4a    = %g", t4a-t3);
+    sprintf(msg, "ASMM_STORE_TIMING:    t4a    = %g", t4a-t3);
     ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
-    sprintf(msg, "ASMMSTORETIMING:    t4b1   = %g", t4b1-t3);
+    sprintf(msg, "ASMM_STORE_TIMING:    t4b1   = %g", t4b1-t3);
     ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
-    sprintf(msg, "ASMMSTORETIMING:    t4b2   = %g", t4b2-t3);
+    sprintf(msg, "ASMM_STORE_TIMING:    t4b2   = %g", t4b2-t3);
     ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
-    sprintf(msg, "ASMMSTORETIMING:    t4b3   = %g", t4b3-t3);
+    sprintf(msg, "ASMM_STORE_TIMING:    t4b3   = %g", t4b3-t3);
     ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
-    sprintf(msg, "ASMMSTORETIMING:    t4b    = %g", t4b-t3);
+    sprintf(msg, "ASMM_STORE_TIMING:    t4b    = %g", t4b-t3);
     ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
-    sprintf(msg, "ASMMSTORETIMING: t5   = %g", t5-t0);
+    sprintf(msg, "ASMM_STORE_TIMING: t5   = %g", t5-t0);
     ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
-    sprintf(msg, "ASMMSTORETIMING:    t5c    = %g", t5c-t4);
+    sprintf(msg, "ASMM_STORE_TIMING:    t5c    = %g", t5c-t4);
     ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
-    sprintf(msg, "ASMMSTORETIMING:    t5f    = %g", t5f-t4);
+    sprintf(msg, "ASMM_STORE_TIMING:    t5f    = %g", t5f-t4);
     ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
-    sprintf(msg, "ASMMSTORETIMING: t6   = %g", t6-t0);
+    sprintf(msg, "ASMM_STORE_TIMING: t6   = %g", t6-t0);
     ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
-    sprintf(msg, "ASMMSTORETIMING: t7   = %g", t7-t0);
+    sprintf(msg, "ASMM_STORE_TIMING: t7   = %g", t7-t0);
     ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
-    sprintf(msg, "ASMMSTORETIMING: t8   = %g", t8-t0);
+    sprintf(msg, "ASMM_STORE_TIMING: t8   = %g", t8-t0);
     ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
-    sprintf(msg, "ASMMSTORETIMING: t9   = %g", t9-t0);
+    sprintf(msg, "ASMM_STORE_TIMING: t9   = %g", t9-t0);
     ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
-    sprintf(msg, "ASMMSTORETIMING: t10  = %g", t10-t0);
+    sprintf(msg, "ASMM_STORE_TIMING: t10  = %g", t10-t0);
     ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
-    sprintf(msg, "ASMMSTORETIMING: t11  = %g", t11-t0);
+    sprintf(msg, "ASMM_STORE_TIMING: t11  = %g", t11-t0);
     ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
-    sprintf(msg, "ASMMSTORETIMING: t12  = %g", t12-t0);
+    sprintf(msg, "ASMM_STORE_TIMING: t12  = %g", t12-t0);
     ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
-    sprintf(msg, "ASMMSTORETIMING: t13  = %g", t13-t0);
+    sprintf(msg, "ASMM_STORE_TIMING: t13  = %g", t13-t0);
     ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
-    sprintf(msg, "ASMMSTORETIMING: t14  = %g", t14-t0);
+    sprintf(msg, "ASMM_STORE_TIMING: t14  = %g", t14-t0);
     ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
-    sprintf(msg, "ASMMSTORETIMING: t15  = %g", t15-t0);
+    sprintf(msg, "ASMM_STORE_TIMING: t15  = %g", t15-t0);
     ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
-    ESMC_LogDefault.Write("ASMMSTORETIMING: --- stop ----", ESMC_LOGMSG_INFO);
+    ESMC_LogDefault.Write("ASMM_STORE_TIMING: --- stop ----", ESMC_LOGMSG_INFO);
   }
 #endif
   
@@ -10485,11 +10565,11 @@ template<typename SIT, typename DIT>
     return rc;
   }
   
-#ifdef ASMM_STORE_LOG_disabled
-  fclose(ASMM_STORE_LOGfp);
+#ifdef ASMM_STORE_LOG_on_disabled
+  fclose(asmm_store_log_fp);
 #endif
   
-#ifdef ASMMSTOREMEMLOG_on
+#ifdef ASMM_STORE_MEMLOG_on
   VM::logMemInfo(std::string("ASMMStore5.0"));
 #endif
 
@@ -10542,7 +10622,7 @@ template<typename SIT, typename DIT> int sparseMatMulStoreEncodeXXE(
   int rraCount,                           // in
   RouteHandle **routehandle,              // inout - handle to precomputed comm
   bool undistributedDimsPresent,          // in
-#ifdef ASMMSTORETIMING
+#ifdef ASMM_STORE_TIMING_on
   double *t8, double *t9, double *t10, double *t11, double *t12, double *t13,
   double *t14,
 #endif
@@ -10599,7 +10679,7 @@ template<typename SIT, typename DIT> int sparseMatMulStoreEncodeXXE(
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
     &rc)) return rc;
 
-#ifdef ASMMSTOREMEMLOG_on
+#ifdef ASMM_STORE_MEMLOG_on
   VM::logMemInfo(std::string("ASMMStoreEncodeXXE1.0"));
 #endif
 
@@ -10689,13 +10769,13 @@ template<typename SIT, typename DIT> int sparseMatMulStoreEncodeXXE(
   bool vectorFlag = !(tensorMixFlag || 
     (srcTensorContigLength != dstTensorContigLength));
 
-#ifdef ASMMSTORETIMING
+#ifdef ASMM_STORE_TIMING_on
   double t9a, t9b, t9d, t9e; //gjt - profile
   double t9c1, t9c2; //gjt - profile
   VMK::wtime(t8);   //gjt - profile
 #endif
     
-#ifdef ASMMSTOREMEMLOG_on
+#ifdef ASMM_STORE_MEMLOG_on
   VM::logMemInfo(std::string("ASMMStoreEncodeXXE2.0"));
 #endif
 
@@ -10714,12 +10794,12 @@ template<typename SIT, typename DIT> int sparseMatMulStoreEncodeXXE(
       }
     }
 
-#ifdef ASMMSTORETIMING
+#ifdef ASMM_STORE_TIMING_on
     VMK::wtime(&t9a);   //gjt - profile
 #endif
         
-#ifdef ASMM_STORE_LOG_disabled
-fprintf(ASMM_STORE_LOGfp, "iCount: %d, localDeFactorCount: %d\n", iCount,
+#ifdef ASMM_STORE_LOG_on_disabled
+fprintf(asmm_store_log_fp, "iCount: %d, localDeFactorCount: %d\n", iCount,
   localDeFactorCount);
 #endif
     int *index2Ref2 = new int[localDeFactorCount];  // large enough
@@ -10751,11 +10831,11 @@ fprintf(ASMM_STORE_LOGfp, "iCount: %d, localDeFactorCount: %d\n", iCount,
       }
     }
     
-#ifdef ASMMSTORETIMING
+#ifdef ASMM_STORE_TIMING_on
     VMK::wtime(&t9b);   //gjt - profile
 #endif
         
-#ifdef ASMMSTOREMEMLOG_on
+#ifdef ASMM_STORE_MEMLOG_on
   VM::logMemInfo(std::string("ASMMStoreEncodeXXE3.0"));
 #endif
 
@@ -10771,7 +10851,7 @@ fprintf(ASMM_STORE_LOGfp, "iCount: %d, localDeFactorCount: %d\n", iCount,
     localrc = xxe->storeStorage(localDeFactorBuffer); // XXE garbage collec.
     if (ESMC_LogDefault.MsgFoundError(localrc,
       ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
-#ifdef ASMMSTORETIMING
+#ifdef ASMM_STORE_TIMING_on
     VMK::wtime(&t9c1);   //gjt - profile
 #endif
     for (int i=0; i<localDeFactorCount; i++){
@@ -10799,7 +10879,7 @@ fprintf(ASMM_STORE_LOGfp, "iCount: %d, localDeFactorCount: %d\n", iCount,
         (void *)(localDeFactorBufferEntry);
     }
     
-#ifdef ASMMSTOREMEMLOG_on
+#ifdef ASMM_STORE_MEMLOG_on
   VM::logMemInfo(std::string("ASMMStoreEncodeXXE4.0"));
 #endif
 
@@ -10809,7 +10889,7 @@ fprintf(ASMM_STORE_LOGfp, "iCount: %d, localDeFactorCount: %d\n", iCount,
     delete [] factorIndexRef;
     delete [] partnerDeRef;
     
-#ifdef ASMMSTORETIMING
+#ifdef ASMM_STORE_TIMING_on
     VMK::wtime(&t9c2);   //gjt - profile
 #endif  
        
@@ -10831,9 +10911,9 @@ fprintf(ASMM_STORE_LOGfp, "iCount: %d, localDeFactorCount: %d\n", iCount,
       for (int i=0; i<recvnbDiffPartnerDeCount; i++){
         sort(dstInfoTable[i].begin(), dstInfoTable[i].end(),
           ArrayHelper::vectorOrderDstInfo<DIT,SIT>);
-#ifdef ASMM_STORE_LOG_disabled
+#ifdef ASMM_STORE_LOG_on_disabled
         for (int k=0; k<dstInfoTable[i].size(); k++)
-          fprintf(ASMM_STORE_LOGfp, "dstInfoTable[%d][%d].seqIndex = %d/%d, "
+          fprintf(asmm_store_log_fp, "dstInfoTable[%d][%d].seqIndex = %d/%d, "
             ".partnerSeqIndex = %d/%d, .factor = %p\n", i, k,
             dstInfoTable[i][k].seqIndex.decompSeqIndex, 
             dstInfoTable[i][k].seqIndex.tensorSeqIndex, 
@@ -10860,7 +10940,7 @@ fprintf(ASMM_STORE_LOGfp, "iCount: %d, localDeFactorCount: %d\n", iCount,
             ++vectorLength;
             rangeStop++;
           }
-#ifdef ASMM_STORE_LOG
+#ifdef ASMM_STORE_LOG_on
   {
     std::stringstream msg;
     msg << "ASMM_STORE_LOG: dstTensorContigLength: " << dstTensorContigLength <<
@@ -10888,17 +10968,17 @@ fprintf(ASMM_STORE_LOGfp, "iCount: %d, localDeFactorCount: %d\n", iCount,
       }
     }
 
-#ifdef ASMMSTOREMEMLOG_on
+#ifdef ASMM_STORE_MEMLOG_on
   VM::logMemInfo(std::string("ASMMStoreEncodeXXE5.0"));
 #endif
 
-#ifdef ASMM_STORE_LOG_disabled
+#ifdef ASMM_STORE_LOG_on_disabled
     // print:
-    fprintf(ASMM_STORE_LOGfp, "dstArray: %d, %d\n", j,
+    fprintf(asmm_store_log_fp, "dstArray: %d, %d\n", j,
       recvnbDiffPartnerDeCount); 
     for (int i=0; i<recvnbDiffPartnerDeCount; i++)
       for (int k=0; k<dstInfoTable[i].size(); k++)
-        fprintf(ASMM_STORE_LOGfp, "dstInfoTable[%d][%d].seqIndex = %d/%d, "
+        fprintf(asmm_store_log_fp, "dstInfoTable[%d][%d].seqIndex = %d/%d, "
           ".partnerSeqIndex[][] = %d/%d\n", i, k,
           dstInfoTable[i][k].seqIndex.decompSeqIndex, 
           dstInfoTable[i][k].seqIndex.tensorSeqIndex, 
@@ -10906,7 +10986,7 @@ fprintf(ASMM_STORE_LOGfp, "iCount: %d, localDeFactorCount: %d\n", iCount,
           dstInfoTable[i][k].partnerSeqIndex.tensorSeqIndex);
 #endif
     
-#ifdef ASMMSTORETIMING
+#ifdef ASMM_STORE_TIMING_on
     VMK::wtime(&t9d);   //gjt - profile
 #endif
 
@@ -10986,13 +11066,13 @@ ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
       recvnbElement.localPet = localPet;
       recvnbElement.petCount = petCount;
       recvnbVector.push_back(recvnbElement);
-#ifdef ASMM_STORE_LOG_disabled
-      fprintf(ASMM_STORE_LOGfp, "gjt: recvnbElement localPet %d, srcPet %d, "
+#ifdef ASMM_STORE_LOG_on_disabled
+      fprintf(asmm_store_log_fp, "gjt: recvnbElement localPet %d, srcPet %d, "
         "vectorLength=%d\n", localPet, srcPet, vectorLength);
 #endif
     } // for i - recvnbDiffPartnerDeCount
     
-#ifdef ASMMSTORETIMING
+#ifdef ASMM_STORE_TIMING_on
     VMK::wtime(&t9e);   //gjt - profile
 //    printf("gjt - profile for PET %d, j-loop %d:\n"
 //      " t9a=%g\n t9b=%g\n t9c1=%g\n t9c2=%g\n t9d=%g\n t9e=%g\n", localPet, j,
@@ -11001,11 +11081,11 @@ ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
     
   } // for j - dstLocalDeCount
     
-#ifdef ASMMSTORETIMING
+#ifdef ASMM_STORE_TIMING_on
   VMK::wtime(t9);   //gjt - profile
 #endif
   
-#ifdef ASMMSTOREMEMLOG_on
+#ifdef ASMM_STORE_MEMLOG_on
   VM::logMemInfo(std::string("ASMMStoreEncodeXXE6.0"));
 #endif
 
@@ -11155,11 +11235,11 @@ ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
       }
     }
         
-#ifdef ASMM_STORE_LOG_disabled
+#ifdef ASMM_STORE_LOG_on_disabled
     // print:
     for (int i=0; i<sendnbDiffPartnerDeCount; i++)
       for (int k=0; k<srcInfoTable[i].size(); k++)
-        fprintf(ASMM_STORE_LOGfp, "srcInfoTable[%d][%d].seqIndex = %d/%d, "
+        fprintf(asmm_store_log_fp, "srcInfoTable[%d][%d].seqIndex = %d/%d, "
           ".partnerSeqIndex[][] = %d/%d\n", i, k,
           srcInfoTable[i][k].seqIndex.decompSeqIndex, 
           srcInfoTable[i][k].seqIndex.tensorSeqIndex, 
@@ -11259,11 +11339,11 @@ ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
       }
 #endif
       
-#ifdef ASMM_STORE_LOG_disabled
-      fprintf(ASMM_STORE_LOGfp, "gjt: sendnbElement localPet %d, dstPet %d, "
+#ifdef ASMM_STORE_LOG_on_disabled
+      fprintf(asmm_store_log_fp, "gjt: sendnbElement localPet %d, dstPet %d, "
         "vectorLength=%d\n", localPet, dstPet, vectorLength);
       for (int k=0; k<linIndexContigBlockList.size(); k++){
-        fprintf(ASMM_STORE_LOGfp, "linIndexContigBlockList[%d]: linIndex=%d, "
+        fprintf(asmm_store_log_fp, "linIndexContigBlockList[%d]: linIndex=%d, "
           "linIndexCount=%d\n", k, linIndexContigBlockList[k].linIndex,
           linIndexContigBlockList[k].linIndexCount);
       }
@@ -11274,11 +11354,11 @@ ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
     delete [] sendnbPartnerDeCount;
   } // for j - srcLocalDeCount
   
-#ifdef ASMMSTOREMEMLOG_on
+#ifdef ASMM_STORE_MEMLOG_on
   VM::logMemInfo(std::string("ASMMStoreEncodeXXE7.0"));
 #endif
 
-#ifdef ASMMSTORETIMING
+#ifdef ASMM_STORE_TIMING_on
   VMK::wtime(t10);   //gjt - profile
 #endif
   
@@ -11291,8 +11371,7 @@ ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
   sort(recvnbVector.begin(), recvnbVector.end());
   sort(sendnbVector.begin(), sendnbVector.end());
   
-#define ASMMSTORECOMMMATRIX___disable
-#ifdef ASMMSTORECOMMMATRIX
+#ifdef ASMM_STORE_COMMMATRIX_on
   // store the communication matrix in compact (sparse) distributed fashion,
   vector<int> *commMatrixDstPet        = new vector<int>(sendnbVector.size());
   vector<int> *commMatrixDstDataCount  = new vector<int>(sendnbVector.size());
@@ -11321,11 +11400,11 @@ ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
     &rc)) return rc;
 #endif
 
-#ifdef ASMMSTORETIMING
+#ifdef ASMM_STORE_TIMING_on
   VMK::wtime(t11);   //gjt - profile
 #endif
 
-#ifdef ASMMSTOREMEMLOG_on
+#ifdef ASMM_STORE_MEMLOG_on
   VM::logMemInfo(std::string("ASMMStoreEncodeXXE8.0"));
 #endif
   
@@ -11338,15 +11417,13 @@ ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
   
   double dtMin;           // to find minimum time
   
-#define ASMMSTOREOPTPRINT___disable
-  
-#ifdef ASMMSTOREOPTPRINT
-  char asmmstoreoptprintfile[160];
-  sprintf(asmmstoreoptprintfile, "asmmstoreoptprint.%05d", localPet);
-  FILE *asmmstoreoptprintfp = fopen(asmmstoreoptprintfile, "a");
-  fprintf(asmmstoreoptprintfp, "\n========================================"
+#ifdef ASMM_STORE_OPT_PRINT_on
+  char asmm_store_opt_print_file[160];
+  sprintf(asmm_store_opt_print_file, "ASMM_STORE_OPT_PRINT_on.%05d", localPet);
+  FILE *asmm_store_opt_print_fp = fopen(asmm_store_opt_print_file, "a");
+  fprintf(asmm_store_opt_print_fp, "\n========================================"
     "========================================\n");
-  fprintf(asmmstoreoptprintfp, "========================================"
+  fprintf(asmm_store_opt_print_fp, "========================================"
     "========================================\n\n");
 #endif
   
@@ -11440,8 +11517,8 @@ ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
         dtAverage += dtEnd - dtStart;
       }
       dtAverage /= dtCount;
-#ifdef ASMMSTOREOPTPRINT
-      fprintf(asmmstoreoptprintfp, "localPet: %d, srcTermProcessing=%d -> dtAverage=%gs\n", 
+#ifdef ASMM_STORE_OPT_PRINT_on
+      fprintf(asmm_store_opt_print_fp, "localPet: %d, srcTermProcessing=%d -> dtAverage=%gs\n", 
         localPet, srcTermProcessing, dtAverage);
 #endif
       // determine optimum srcTermProcessing  
@@ -11459,8 +11536,8 @@ ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
       }
     } // srcTermProc
   
-#ifdef ASMMSTOREOPTPRINT
-    fprintf(asmmstoreoptprintfp, "localPet: %d, srcTermProcessingOpt=%d -> "
+#ifdef ASMM_STORE_OPT_PRINT_on
+    fprintf(asmm_store_opt_print_fp, "localPet: %d, srcTermProcessingOpt=%d -> "
       "dtMin=%gs (local)\n", localPet, srcTermProcessingOpt, dtMin);
 #endif
     
@@ -11499,16 +11576,16 @@ ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
   
   } // finished finding srcTermProcessingOpt
 
-#ifdef ASMMSTOREMEMLOG_on
+#ifdef ASMM_STORE_MEMLOG_on
   VM::logMemInfo(std::string("ASMMStoreEncodeXXE9.0"));
 #endif
   
-#ifdef ASMMSTOREOPTPRINT
-  fprintf(asmmstoreoptprintfp, "localPet: %d, srcTermProcessingOpt=%d "
+#ifdef ASMM_STORE_OPT_PRINT_on
+  fprintf(asmm_store_opt_print_fp, "localPet: %d, srcTermProcessingOpt=%d "
     "(majority vote)\n", localPet, srcTermProcessingOpt);
 #endif
     
-#ifdef ASMMSTORETIMING
+#ifdef ASMM_STORE_TIMING_on
   VMK::wtime(t12);   //gjt - profile
 #endif
 
@@ -11586,8 +11663,8 @@ ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
         dtAverage += dtEnd - dtStart;
       }
       dtAverage /= dtCount;
-#ifdef ASMMSTOREOPTPRINT
-      fprintf(asmmstoreoptprintfp, "localPet: %d, pipelineDepth=%d -> "
+#ifdef ASMM_STORE_OPT_PRINT_on
+      fprintf(asmm_store_opt_print_fp, "localPet: %d, pipelineDepth=%d -> "
         "dtAverage=%gs\n", localPet, pipelineDepth, dtAverage);
 #endif
       // determine optimum pipelineDepth  
@@ -11605,8 +11682,8 @@ ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
       }
     } // pipelineDepth
     
-#ifdef ASMMSTOREOPTPRINT
-    fprintf(asmmstoreoptprintfp, "localPet: %d, pipelineDepthOpt=%d -> "
+#ifdef ASMM_STORE_OPT_PRINT_on
+    fprintf(asmm_store_opt_print_fp, "localPet: %d, pipelineDepthOpt=%d -> "
       "dtMin=%gs (local)\n", localPet, pipelineDepthOpt, dtMin);
 #endif
       
@@ -11644,17 +11721,17 @@ ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
   
   } // finished finding pipelineDepthOpt
 
-#ifdef ASMMSTOREMEMLOG_on
+#ifdef ASMM_STORE_MEMLOG_on
   VM::logMemInfo(std::string("ASMMStoreEncodeXXE10.0"));
 #endif
 
-#ifdef ASMMSTOREOPTPRINT
-  fprintf(asmmstoreoptprintfp, "localPet: %d, pipelineDepthOpt=%d "
+#ifdef ASMM_STORE_OPT_PRINT_on
+  fprintf(asmm_store_opt_print_fp, "localPet: %d, pipelineDepthOpt=%d "
     "(majority vote)\n", localPet, pipelineDepthOpt);
-  fclose(asmmstoreoptprintfp);
+  fclose(asmm_store_opt_print_fp);
 #endif
       
-#ifdef ASMMSTORETIMING
+#ifdef ASMM_STORE_TIMING_on
   VMK::wtime(t13);   //gjt - profile
 #endif
 
@@ -11689,11 +11766,11 @@ ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
     &rc)) return rc;
   
-#ifdef ASMMSTOREMEMLOG_on
+#ifdef ASMM_STORE_MEMLOG_on
   VM::logMemInfo(std::string("ASMMStoreEncodeXXE11.0"));
 #endif
 
-#ifdef ASMMSTORETIMING
+#ifdef ASMM_STORE_TIMING_on
   VMK::wtime(t14);   //gjt - profile
 #endif
 
@@ -11773,7 +11850,7 @@ template<typename SIT, typename DIT> int sparseMatMulStoreEncodeXXEStream(
     
   try{
 
-#ifdef ASMMPROFILE
+#ifdef ASMM_EXEC_PROFILE_on
     localrc = xxe->appendWtimer(0x0, "Wtimer 0", xxe->count, xxe->count);
     if (ESMC_LogDefault.MsgFoundError(localrc,
       ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
@@ -11805,7 +11882,7 @@ template<typename SIT, typename DIT> int sparseMatMulStoreEncodeXXEStream(
       }
       if (pSend != sendnbVector.end()){
         int k = pSend - sendnbVector.begin();
-#ifdef ASMM_STORE_LOG
+#ifdef ASMM_STORE_LOG_on
   {
     std::stringstream msg;
     msg << "ASMM_STORE_LOG:" << __LINE__ << " rraCount=" << rraCount;
@@ -11836,7 +11913,7 @@ template<typename SIT, typename DIT> int sparseMatMulStoreEncodeXXEStream(
     for (int i=0; i<pipelineDepth; i++){
       if (pSend != sendnbVector.end()){
         int k = pSend - sendnbVector.begin();
-#ifdef ASMM_STORE_LOG
+#ifdef ASMM_STORE_LOG_on
   {
     std::stringstream msg;
     msg << "ASMM_STORE_LOG:" << __LINE__ << " rraCount=" << rraCount;
@@ -11855,7 +11932,7 @@ template<typename SIT, typename DIT> int sparseMatMulStoreEncodeXXEStream(
 #endif
     
     // append predicated zero operations for the total region
-#ifdef ASMMPROFILE
+#ifdef ASMM_EXEC_PROFILE_on
     localrc = xxe->appendWtimer(
       XXE::filterBitRegionTotalZero|XXE::filterBitNbStart, "total zero",
       xxe->count, xxe->count);
@@ -11876,7 +11953,7 @@ template<typename SIT, typename DIT> int sparseMatMulStoreEncodeXXEStream(
       if (ESMC_LogDefault.MsgFoundError(localrc, 
         ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
     }
-#ifdef ASMMPROFILE
+#ifdef ASMM_EXEC_PROFILE_on
     localrc = xxe->appendWtimer(
       XXE::filterBitRegionTotalZero|XXE::filterBitNbStart,
       "/total zero", xxe->count, xxe->count);
@@ -11909,7 +11986,7 @@ template<typename SIT, typename DIT> int sparseMatMulStoreEncodeXXEStream(
       }
       if ((pSend != sendnbVector.end()) && sendnbOK){
         int k = pSend - sendnbVector.begin();
-#ifdef ASMM_STORE_LOG
+#ifdef ASMM_STORE_LOG_on
   {
     std::stringstream msg;
     msg << "ASMM_STORE_LOG:" << __LINE__ << " rraCount=" << rraCount;
@@ -11977,7 +12054,7 @@ template<typename SIT, typename DIT> int sparseMatMulStoreEncodeXXEStream(
             pSendWait->sendnbIndex);
           if (ESMC_LogDefault.MsgFoundError(localrc,
             ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
-#ifdef ASMMPROFILE
+#ifdef ASMM_EXEC_PROFILE_on
           char *tempString = new char[160];
           sprintf(tempString, "done send WaitOnIndex: %d",
             pSendWait->sendnbIndex);
@@ -12049,7 +12126,7 @@ template<typename SIT, typename DIT> int sparseMatMulStoreEncodeXXEStream(
             pSendWait->sendnbIndex);
           if (ESMC_LogDefault.MsgFoundError(localrc,
             ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
-#ifdef ASMMPROFILE
+#ifdef ASMM_EXEC_PROFILE_on
           char *tempString = new char[160];
           sprintf(tempString, "done send WaitOnIndex: %d",
             pSendWait->sendnbIndex);
@@ -12149,13 +12226,13 @@ template<typename SIT, typename DIT> int sparseMatMulStoreEncodeXXEStream(
         
 #endif
           
-#ifdef ASMMPROFILE
+#ifdef ASMM_EXEC_PROFILE_on
     localrc = xxe->appendWtimer(0x0, "Wtimer End", xxe->count, xxe->count);
     if (ESMC_LogDefault.MsgFoundError(localrc,
       ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
 #endif
       
-#ifdef ASMMPROFILE
+#ifdef ASMM_EXEC_PROFILE_on
     localrc = xxe->appendWtimer(0x0, "Wtimer End2", xxe->count, xxe->count);
     if (ESMC_LogDefault.MsgFoundError(localrc,
     ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
@@ -12221,16 +12298,13 @@ int Array::sparseMatMul(
 //
 //EOPI
 //-----------------------------------------------------------------------------
-#define SMMINFO____disable
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
   
   try{
 
-#define ASMMTIMING___disable
-    
-#ifdef ASMMTIMING
+#ifdef ASMM_EXEC_TIMING_on
     double t0, t1, t2, t3, t4, t5, t6, t7;            //gjt - profile
     VMK::wtime(&t0);      //gjt - profile
 #endif    
@@ -12250,7 +12324,7 @@ int Array::sparseMatMul(
     }
   }
   
-#ifdef ASMMTIMING
+#ifdef ASMM_EXEC_TIMING_on
   VMK::wtime(&t1);      //gjt - profile
 #endif
   
@@ -12294,7 +12368,7 @@ int Array::sparseMatMul(
   bool finishedflagLocal;
   if (!finishedflag) finishedflag = &finishedflagLocal;
   
-#ifdef ASMMTIMING
+#ifdef ASMM_EXEC_TIMING_on
   VMK::wtime(&t2);      //gjt - profile
 #endif
   
@@ -12315,7 +12389,7 @@ int Array::sparseMatMul(
     memcpy((char *)rraListPtr, dstArray->larrayBaseAddrList,
       dstArray->delayout->getLocalDeCount() * sizeof(char *));
 
-#ifdef ASMMTIMING
+#ifdef ASMM_EXEC_TIMING_on
   VMK::wtime(&t3);      //gjt - profile
 #endif
   
@@ -12328,7 +12402,7 @@ int Array::sparseMatMul(
       filterBitField |= XXE::filterBitNbWaitFinish; // set NbWaitFinish filter
       filterBitField |= XXE::filterBitNbTestFinish; // set NbTestFinish filter
       filterBitField |= XXE::filterBitCancel;       // set Cancel filter
-#ifdef SMMINFO
+#ifdef ASMM_EXEC_INFO_on
       ESMC_LogDefault.Write("SMM exec: COMM_BLOCKING, TERMORDER_SRCSEQ",
         ESMC_LOGMSG_INFO);
 #endif
@@ -12336,7 +12410,7 @@ int Array::sparseMatMul(
       filterBitField |= XXE::filterBitNbTestFinish; // set NbTestFinish filter
       filterBitField |= XXE::filterBitCancel;       // set Cancel filter
       filterBitField |= XXE::filterBitNbWaitFinishSingleSum; // SingleSum filter
-#ifdef SMMINFO
+#ifdef ASMM_EXEC_INFO_on
       ESMC_LogDefault.Write("SMM exec: COMM_BLOCKING, TERMORDER_SRCPET",
         ESMC_LOGMSG_INFO);
 #endif
@@ -12344,7 +12418,7 @@ int Array::sparseMatMul(
       filterBitField |= XXE::filterBitNbWaitFinish; // set NbWaitFinish filter
       filterBitField |= XXE::filterBitCancel;       // set Cancel filter    
       filterBitField |= XXE::filterBitNbWaitFinishSingleSum; // SingleSum filter
-#ifdef SMMINFO
+#ifdef ASMM_EXEC_INFO_on
       ESMC_LogDefault.Write("SMM exec: COMM_BLOCKING, TERMORDER_FREE",
         ESMC_LOGMSG_INFO);
 #endif
@@ -12360,7 +12434,7 @@ int Array::sparseMatMul(
     filterBitField |= XXE::filterBitNbTestFinish;     // set NbTestFinish filter
     filterBitField |= XXE::filterBitCancel;           // set Cancel filter
     filterBitField |= XXE::filterBitNbWaitFinishSingleSum; // SingleSum filter
-#ifdef SMMINFO
+#ifdef ASMM_EXEC_INFO_on
     ESMC_LogDefault.Write("SMM exec: COMM_NBSTART",
       ESMC_LOGMSG_INFO);
 #endif
@@ -12372,7 +12446,7 @@ int Array::sparseMatMul(
       filterBitField |= XXE::filterBitNbWaitFinish;     // set NbWaitFinish filter
       filterBitField |= XXE::filterBitCancel;           // set Cancel filter
       filterBitField |= XXE::filterBitNbWaitFinishSingleSum; // SingleSum filter
-#ifdef SMMINFO
+#ifdef ASMM_EXEC_INFO_on
       ESMC_LogDefault.Write("SMM exec: COMM_NBTESTFINISH, TERMORDER_FREE",
         ESMC_LOGMSG_INFO);
 #endif
@@ -12390,7 +12464,7 @@ int Array::sparseMatMul(
       filterBitField |= XXE::filterBitNbTestFinish;     // set NbTestFinish filter
       filterBitField |= XXE::filterBitCancel;           // set Cancel filter
       filterBitField |= XXE::filterBitNbWaitFinishSingleSum; // SingleSum filter
-#ifdef SMMINFO
+#ifdef ASMM_EXEC_INFO_on
       ESMC_LogDefault.Write("SMM exec: COMM_NBWAITFINISH TERMORDER_FREE",
         ESMC_LOGMSG_INFO);
 #endif
@@ -12406,7 +12480,7 @@ int Array::sparseMatMul(
     filterBitField |= XXE::filterBitNbWaitFinish;     // set NbWaitFinish filter
     filterBitField |= XXE::filterBitNbTestFinish;     // set NbTestFinish filter
     filterBitField |= XXE::filterBitNbWaitFinishSingleSum; // SingleSum filter
-#ifdef SMMINFO
+#ifdef ASMM_EXEC_INFO_on
     ESMC_LogDefault.Write("SMM exec: COMM_CANCEL",
       ESMC_LOGMSG_INFO);
 #endif
@@ -12417,7 +12491,7 @@ int Array::sparseMatMul(
   if (zeroflag!=ESMC_REGION_SELECT)
     filterBitField |= XXE::filterBitRegionSelectZero; // filter reg. select zero
   
-#ifdef ASMMTIMING
+#ifdef ASMM_EXEC_TIMING_on
   VMK::wtime(&t4);      //gjt - profile
 #endif
   
@@ -12484,7 +12558,7 @@ int Array::sparseMatMul(
   superVectP.dstSuperVecSize_i = dstSuperVecSizeDis[0];
   superVectP.dstSuperVecSize_j = dstSuperVecSizeDis[1];
   
-#ifdef ASMMTIMING
+#ifdef ASMM_EXEC_TIMING_on
   VMK::wtime(&t5);      //gjt - profile
 #endif
   
@@ -12534,7 +12608,7 @@ int Array::sparseMatMul(
 
   while (commflag==ESMF_COMM_BLOCKING && !(*finishedflag)){
     // must be a blocking call with TERMORDER_FREE -> free-order while
-#ifdef SMMINFO
+#ifdef ASMM_EXEC_INFO_on
     ESMC_LogDefault.Write("...within free-order while",
       ESMC_LOGMSG_INFO);
 #endif
@@ -12556,21 +12630,21 @@ int Array::sparseMatMul(
       &rc)) return rc;
   }
   
-#ifdef ASMMTIMING
+#ifdef ASMM_EXEC_TIMING_on
   VMK::wtime(&t6);      //gjt - profile
 #endif
   
   // garbage collection
   delete [] rraList;
   
-#ifdef ASMMTIMING
+#ifdef ASMM_EXEC_TIMING_on
   VMK::wtime(&t7);      //gjt - profile
   VM *vm = VM::getCurrent(&localrc);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
     &rc)) return rc;
   int localPet = vm->getLocalPet();
   char file[160];
-  sprintf(file, "asmmtiming.%05d", localPet);
+  sprintf(file, "ASMM_EXEC_TIMING_on.%05d", localPet);
   FILE *fp = fopen(file, "a");
   fprintf(fp, "\n=================================================="
     "==============================\n");
@@ -12647,7 +12721,7 @@ int Array::sparseMatMulRelease(
 #define XXEPROFILEPRINT___disable
     
 #ifdef XXEPROFILEPRINT
-#ifdef ASMMPROFILE
+#ifdef ASMM_EXEC_PROFILE_on
     // print XXE stream profile
     VM *vm = VM::getCurrent(&localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
@@ -12655,7 +12729,7 @@ int Array::sparseMatMulRelease(
     int localPet = vm->getLocalPet();
     int petCount = vm->getPetCount();
     char file[160];
-    sprintf(file, "asmmprofile.%05d", localPet);
+    sprintf(file, "ASMM_EXEC_PROFILE_on.%05d", localPet);
     FILE *fp = fopen(file, "a");
     fprintf(fp, "\n=================================================="
       "==============================\n");
@@ -12748,7 +12822,6 @@ void Array::superVecParam(
       vectorLength *= sizeSuperUndist[i];
     else
       vectorLength = sizeSuperUndist[0];
-#define DEBUGGING
 #ifdef DEBUGGING
   {
     std::stringstream debugmsg;
@@ -12792,7 +12865,6 @@ void Array::superVecParam(
     ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_INFO);
   }
 #endif
-#undef DEBUGGING
 }
 //-----------------------------------------------------------------------------
 
