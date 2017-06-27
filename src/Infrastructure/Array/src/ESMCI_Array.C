@@ -9289,7 +9289,8 @@ template<typename SIT, typename DIT>
   if (!tensorMixFlag && (srcTensorLength>1) &&
     (srcTensorLength==dstTensorLength) && 
     (srcArray->getDistGrid()->getDimCount() <= 2) &&
-    (dstArray->getDistGrid()->getDimCount() <= 2)){
+    (dstArray->getDistGrid()->getDimCount() <= 2) &&
+    (srcArray->rank > 1 && dstArray->rank > 1)){
     // Optimization of undistributed dimensions if there is no tensor mixing.
     // This optimization requires that src and dst have the same number of 
     // tensor elements (they can be across different number of dims). 
