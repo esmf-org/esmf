@@ -11,6 +11,8 @@
 //==============================================================================
 #define ESMC_FILENAME "ESMCI_DELayout.C"
 //==============================================================================
+#define XXE_EXEC_LOG_off
+//==============================================================================
 //
 // DELayout class implementation (body) file
 //
@@ -31,6 +33,7 @@
 #include <cstring>
 #include <typeinfo>
 #include <vector>
+#include <sstream>
 
 // include ESMF headers
 #include "ESMCI_Macros.h"
@@ -2491,9 +2494,7 @@ int XXE::exec(
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
 
-#define XXE_EXEC_LOG____disable
-#define XXE_EXEC_LOG
-#ifdef XXE_EXEC_LOG
+#ifdef XXE_EXEC_LOG_on
   char msg[1024];
   sprintf(msg, "ESMCI::XXE::exec(): START: stream=%p, count=%d, "
     "sizeof(StreamElement)=%lu, rraCount=%d, vectorLength=%d",
@@ -2611,7 +2612,7 @@ int XXE::exec(
     if (xxeElement->predicateBitField & filterBitField)
       continue; // filter out this operation
     
-#ifdef XXE_EXEC_LOG
+#ifdef XXE_EXEC_LOG_on
     sprintf(msg, "ESMCI::XXE::exec(): %d, opId=%d", i, stream[i].opId);
     ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
 #endif    
@@ -2626,7 +2627,7 @@ int XXE::exec(
         int size = xxeSendInfo->size;
         if (xxeSendInfo->vectorFlag)
           size *= *vectorLength;
-#ifdef XXE_EXEC_LOG
+#ifdef XXE_EXEC_LOG_on
         sprintf(msg, "XXE::send: buffer=%p, size=%d, dst=%d, "
           "tag=%d, vectorFlag=%d, indirectionFlag=%d",
           xxeSendInfo->buffer, xxeSendInfo->size, xxeSendInfo->dstPet,
@@ -2648,7 +2649,7 @@ int XXE::exec(
         int size = xxeRecvInfo->size;
         if (xxeRecvInfo->vectorFlag)
           size *= *vectorLength;
-#ifdef XXE_EXEC_LOG
+#ifdef XXE_EXEC_LOG_on
         sprintf(msg, "XXE::recv: buffer=%p, size=%d, src=%d, "
           "tag=%d, vectorFlag=%d, indirectionFlag=%d",
           xxeRecvInfo->buffer, xxeRecvInfo->size, xxeRecvInfo->srcPet,
@@ -2670,7 +2671,7 @@ int XXE::exec(
           size *= *vectorLength;
           rraOffset *= *vectorLength;
         }
-#ifdef XXE_EXEC_LOG
+#ifdef XXE_EXEC_LOG_on
         sprintf(msg, "XXE::sendRRA: size=%d", xxeSendRRAInfo->size);
         ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
 #endif
@@ -2689,7 +2690,7 @@ int XXE::exec(
           size *= *vectorLength;
           rraOffset *= *vectorLength;
         }
-#ifdef XXE_EXEC_LOG
+#ifdef XXE_EXEC_LOG_on
         sprintf(msg, "XXE::recvRRA: size=%d", xxeRecvRRAInfo->size);
         ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
 #endif
@@ -2714,7 +2715,7 @@ int XXE::exec(
           srcSize *= *vectorLength;
           dstSize *= *vectorLength;
         }
-#ifdef XXE_EXEC_LOG
+#ifdef XXE_EXEC_LOG_on
         sprintf(msg, "XXE::sendrecv: dst=%d, sendSize=%d, src=%d, recvSize=%d", 
           xxeSendRecvInfo->dstPet, srcSize, xxeSendRecvInfo->srcPet, dstSize);
         ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
@@ -2740,7 +2741,7 @@ int XXE::exec(
           dstSize *= *vectorLength;
           rraOffset *= *vectorLength;
         }
-#ifdef XXE_EXEC_LOG
+#ifdef XXE_EXEC_LOG_on
         sprintf(msg, "XXE::sendRRArecv: dst=%d, src=%d", 
           xxeSendRRARecvInfo->dstPet, xxeSendRRARecvInfo->srcPet);
         ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
@@ -2762,7 +2763,7 @@ int XXE::exec(
         int size = xxeSendnbInfo->size;
         if (xxeSendnbInfo->vectorFlag)
           size *= *vectorLength;
-#ifdef XXE_EXEC_LOG
+#ifdef XXE_EXEC_LOG_on
         sprintf(msg, "XXE::sendnb: dst=%d, size=%d", 
           xxeSendnbInfo->dstPet, size);
         ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
@@ -2782,7 +2783,7 @@ int XXE::exec(
         int size = xxeRecvnbInfo->size;
         if (xxeRecvnbInfo->vectorFlag)
           size *= *vectorLength;
-#ifdef XXE_EXEC_LOG
+#ifdef XXE_EXEC_LOG_on
         sprintf(msg, "XXE::recvnb: src=%d, size=%d", 
           xxeRecvnbInfo->srcPet, size);
         ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
@@ -2802,7 +2803,7 @@ int XXE::exec(
           size *= *vectorLength;
           rraOffset *= *vectorLength;
         }
-#ifdef XXE_EXEC_LOG
+#ifdef XXE_EXEC_LOG_on
         sprintf(msg, "XXE::sendnbRRA: dst=%d, size=%d", 
           xxeSendnbRRAInfo->dstPet, size);
         ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
@@ -2823,7 +2824,7 @@ int XXE::exec(
           size *= *vectorLength;
           rraOffset *= *vectorLength;
         }
-#ifdef XXE_EXEC_LOG
+#ifdef XXE_EXEC_LOG_on
         sprintf(msg, "XXE::recvnbRRA: src=%d, size=%d", 
           xxeRecvnbRRAInfo->srcPet, size);
         ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
@@ -2840,7 +2841,7 @@ int XXE::exec(
         xxeWaitOnIndexInfo = (WaitOnIndexInfo *)xxeElement;
         xxeIndexElement = &(stream[xxeWaitOnIndexInfo->index]);
         xxeCommhandleInfo = (CommhandleInfo *)xxeIndexElement;
-#ifdef XXE_EXEC_LOG
+#ifdef XXE_EXEC_LOG_on
         sprintf(msg, "XXE::waitOnIndex: index=%d", 
           xxeWaitOnIndexInfo->index);
         ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
@@ -2860,7 +2861,7 @@ int XXE::exec(
         xxeTestOnIndexInfo = (TestOnIndexInfo *)xxeElement;
         xxeIndexElement = &(stream[xxeTestOnIndexInfo->index]);
         xxeCommhandleInfo = (CommhandleInfo *)xxeIndexElement;
-#ifdef XXE_EXEC_LOG
+#ifdef XXE_EXEC_LOG_on
         sprintf(msg, "XXE::testOnIndex: index=%d", 
           xxeTestOnIndexInfo->index);
         ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
@@ -2886,7 +2887,7 @@ int XXE::exec(
         int *completeFlag = xxeWaitOnAnyIndexSubInfo->completeFlag;
         int count = xxeWaitOnAnyIndexSubInfo->count;
         int completeTotal = 0;  // reset
-#ifdef XXE_EXEC_LOG
+#ifdef XXE_EXEC_LOG_on
         sprintf(msg, "XXE::waitOnAnyIndexSub: count=%d", 
           xxeWaitOnAnyIndexSubInfo->count);
         ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
@@ -2936,7 +2937,7 @@ int XXE::exec(
     case waitOnIndexRange:
       {
         xxeWaitOnIndexRangeInfo = (WaitOnIndexRangeInfo *)xxeElement;
-#ifdef XXE_EXEC_LOG
+#ifdef XXE_EXEC_LOG_on
         sprintf(msg, "XXE::waitOnIndexRange");
         ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
 #endif
@@ -2960,7 +2961,7 @@ int XXE::exec(
         waitOnIndexSubInfo = (WaitOnIndexSubInfo *)xxeElement;
         xxeIndexElement = &(stream[waitOnIndexSubInfo->index]);
         xxeCommhandleInfo = (CommhandleInfo *)xxeIndexElement;
-#ifdef XXE_EXEC_LOG
+#ifdef XXE_EXEC_LOG_on
         sprintf(msg, "XXE::waitOnIndexSub: index=%d", 
           waitOnIndexSubInfo->index);
         ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
@@ -2995,7 +2996,7 @@ int XXE::exec(
         testOnIndexSubInfo = (TestOnIndexSubInfo *)xxeElement;
         xxeIndexElement = &(stream[testOnIndexSubInfo->index]);
         xxeCommhandleInfo = (CommhandleInfo *)xxeIndexElement;
-#ifdef XXE_EXEC_LOG
+#ifdef XXE_EXEC_LOG_on
         sprintf(msg, "XXE::testOnIndexSubInfo: activeFlag=%d", 
           xxeCommhandleInfo->activeFlag);
         ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
@@ -3034,7 +3035,7 @@ int XXE::exec(
             if (finished) *finished = false;  // comm not finished
         }
         if (cancelled && xxeCommhandleInfo->cancelledFlag) *cancelled = true;
-#ifdef XXE_EXEC_LOG
+#ifdef XXE_EXEC_LOG_on
         if (finished){
           // there is a finished flag 
           sprintf(msg, "XXE::testOnIndexSubInfo: exiting w/ finished=%d", 
@@ -3087,7 +3088,7 @@ printf("gjt - DID NOT CANCEL commhandle\n");
         int *factorList = (int *)xxeProductSumVectorInfo->factorList;
         int *valueList = (int *)xxeProductSumVectorInfo->valueList;
 #endif
-#ifdef XXE_EXEC_LOG
+#ifdef XXE_EXEC_LOG_on
         sprintf(msg, "XXE::productSumVector: factorCount=%d", 
           xxeProductSumVectorInfo->factorCount);
         ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
@@ -3113,7 +3114,7 @@ printf("gjt - DID NOT CANCEL commhandle\n");
         int *factor = (int *)xxeProductSumScalarInfo->factor;
         int *value = (int *)xxeProductSumScalarInfo->value;
 #endif
-#ifdef XXE_EXEC_LOG
+#ifdef XXE_EXEC_LOG_on
         sprintf(msg, "XXE::productSumScalar");
         ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
 #endif
@@ -3140,7 +3141,7 @@ printf("gjt - DID NOT CANCEL commhandle\n");
         int *factor = (int *)xxeProductSumScalarRRAInfo->factor;
         int *value = (int *)xxeProductSumScalarRRAInfo->value;
 #endif
-#ifdef XXE_EXEC_LOG
+#ifdef XXE_EXEC_LOG_on
         sprintf(msg, "XXE::productSumScalarRRA");
         ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
 #endif
@@ -3173,7 +3174,7 @@ printf("gjt - DID NOT CANCEL commhandle\n");
         if (xxeSumSuperScalarDstRRAInfo->indirectionFlag)
           valueBase = *(int **)xxeSumSuperScalarDstRRAInfo->valueBase;
 #endif
-#ifdef XXE_EXEC_LOG
+#ifdef XXE_EXEC_LOG_on
         sprintf(msg, "XXE::sumSuperScalarDstRRA: termCount=%d, vectorL=%d", 
           termCount, vectorL);
         ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
@@ -3268,7 +3269,7 @@ printf("gjt - DID NOT CANCEL commhandle\n");
           }
         }
 #endif
-#ifdef XXE_EXEC_LOG
+#ifdef XXE_EXEC_LOG_on
         sprintf(msg, "XXE::sumSuperScalarListDstRRA: termCount=%d, vectorL=%d", 
           termCount, vectorL);
         ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
@@ -3355,7 +3356,7 @@ printf("gjt - DID NOT CANCEL commhandle\n");
           dstSuperVecSize_i = superVectP->dstSuperVecSize_i;
           dstSuperVecSize_j = superVectP->dstSuperVecSize_j;
         }
-#ifdef XXE_EXEC_LOG
+#ifdef XXE_EXEC_LOG_on
         sprintf(msg, "XXE::productSumSuperScalarDstRRA: "
           "termCount=%d, vectorL=%d, vectorFlag=%d, dstSuperVecSize_r=%d, "
           "superVectorOkay=%d", termCount, vectorL,
@@ -3442,7 +3443,7 @@ printf("gjt - DID NOT CANCEL commhandle\n");
           }
         }
 #endif
-#ifdef XXE_EXEC_LOG
+#ifdef XXE_EXEC_LOG_on
         sprintf(msg, "XXE::productSumSuperScalarListDstRRA: "
           "termCount=%d, vectorL=%d", termCount, vectorL);
         ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
@@ -3512,7 +3513,7 @@ printf("gjt - DID NOT CANCEL commhandle\n");
           elementBase =
             *(int **)xxeProductSumSuperScalarSrcRRAInfo->elementBase;
 #endif
-#ifdef XXE_EXEC_LOG
+#ifdef XXE_EXEC_LOG_on
         sprintf(msg, "XXE::productSumSuperScalarSrcRRA: "
           "termCount=%d, vectorL=%d", termCount, vectorL);
         ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
@@ -3581,7 +3582,7 @@ printf("gjt - DID NOT CANCEL commhandle\n");
           valueList =
             *(int **)xxeProductSumSuperScalarContigRRAInfo->valueList;
 #endif
-#ifdef XXE_EXEC_LOG
+#ifdef XXE_EXEC_LOG_on
         sprintf(msg, "XXE::productSumSuperScalarContigRRA: "
           "termCount=%d, vectorL=%d", termCount, vectorL);
         ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
@@ -3640,7 +3641,7 @@ printf("gjt - DID NOT CANCEL commhandle\n");
         int vectorL = 1; // initialize
         if (xxeZeroSuperScalarRRAInfo->vectorFlag)
           vectorL = *vectorLength;
-#ifdef XXE_EXEC_LOG
+#ifdef XXE_EXEC_LOG_on
         sprintf(msg, "XXE::zeroSuperScalarRRAInfo: elementTK=%d, "
           "vectorFlag=%d, vectorL=%d", xxeZeroSuperScalarRRAInfo->elementTK, 
           xxeZeroSuperScalarRRAInfo->vectorFlag, vectorL);
@@ -3665,7 +3666,7 @@ printf("gjt - DID NOT CANCEL commhandle\n");
         int srcLocalDeC = 0;  // init
         if (srcLocalDeCount) srcLocalDeC = *srcLocalDeCount;
         if(superVector){
-#ifdef XXE_EXEC_LOG
+#ifdef XXE_EXEC_LOG_on
           sprintf(msg, "XXE::zeroSuperScalarRRAInfo: "
             "taking super-vector branch...");
           ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
@@ -3716,7 +3717,7 @@ printf("gjt - DID NOT CANCEL commhandle\n");
             return rc;  // bail out
           }
         }else{
-#ifdef XXE_EXEC_LOG
+#ifdef XXE_EXEC_LOG_on
           sprintf(msg, "XXE::zeroSuperScalarRRAInfo: "
             "taking vector branch...");
           ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
@@ -3755,7 +3756,7 @@ printf("gjt - DID NOT CANCEL commhandle\n");
         int byteCount = xxeZeroMemsetInfo->byteCount;
         if(xxeZeroMemsetInfo->vectorFlag)
           byteCount *= *vectorLength;
-#ifdef XXE_EXEC_LOG
+#ifdef XXE_EXEC_LOG_on
         sprintf(msg, "XXE::zeroMemsetInfo: indirectionFlag=%d, buffer=%p, "
           "vectorFlag=%d, byteCount=%d", xxeZeroMemsetInfo->indirectionFlag, 
           buffer, xxeZeroMemsetInfo->vectorFlag, byteCount);
@@ -3772,7 +3773,7 @@ printf("gjt - DID NOT CANCEL commhandle\n");
         int byteCount = xxeZeroMemsetRRAInfo->byteCount;
         if(xxeZeroMemsetRRAInfo->vectorFlag)
           byteCount *= *vectorLength;
-#ifdef XXE_EXEC_LOG
+#ifdef XXE_EXEC_LOG_on
         sprintf(msg, "XXE::zeroMemsetRRAInfo: rraBase=%p, "
           "vectorFlag=%d, byteCount=%d", rraBase, 
           xxeZeroMemsetRRAInfo->vectorFlag, byteCount);
@@ -3825,7 +3826,7 @@ printf("gjt - DID NOT CANCEL commhandle\n");
           srcSuperVecSize_i = superVectP->srcSuperVecSize_i;
           srcSuperVecSize_j = superVectP->srcSuperVecSize_j;
         }
-#ifdef XXE_EXEC_LOG
+#ifdef XXE_EXEC_LOG_on
         sprintf(msg, "XXE::memGatherSrcRRA: dstBaseTK=%d, vectorFlag=%d, "
           "vectorL=%d, srcSuperVecSize_r=%d, superVectorOkay=%d", 
           xxeMemGatherSrcRRAInfo->dstBaseTK, 
@@ -3835,7 +3836,7 @@ printf("gjt - DID NOT CANCEL commhandle\n");
         ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
 #endif
         if(superVector){
-#ifdef XXE_EXEC_LOG
+#ifdef XXE_EXEC_LOG_on
           sprintf(msg, "XXE::memGatherSrcRRA: taking super-vector branch...");
           ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
 #endif
@@ -3880,7 +3881,7 @@ printf("gjt - DID NOT CANCEL commhandle\n");
             break;
           }
         }else{
-#ifdef XXE_EXEC_LOG
+#ifdef XXE_EXEC_LOG_on
           sprintf(msg, "XXE::memGatherSrcRRA: taking vector branch...");
           ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
 #endif
@@ -3922,7 +3923,7 @@ printf("gjt - DID NOT CANCEL commhandle\n");
           // recursive call:
           bool localFinished;
           bool localCancelled;
-#ifdef XXE_EXEC_LOG
+#ifdef XXE_EXEC_LOG_on
         sprintf(msg, "XXE::xxeSubInfo: rraCount=%d, rraList=%p, "
           "rraShift=%d, vectorLength=%p, vectorLengthShift=%d", 
           rraCount, rraList, xxeSubInfo->rraShift, vectorLength,
@@ -3944,7 +3945,7 @@ printf("gjt - DID NOT CANCEL commhandle\n");
     case xxeSubMulti:
       {
         xxeSubMultiInfo = (XxeSubMultiInfo *)xxeElement;
-#ifdef XXE_EXEC_LOG
+#ifdef XXE_EXEC_LOG_on
         sprintf(msg, "XXE::xxeSubMultiInfo: count=%d", xxeSubMultiInfo->count);
         ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
 #endif
@@ -4003,7 +4004,7 @@ printf("gjt - DID NOT CANCEL commhandle\n");
     *dTime = t1 - t0;
   }
   
-#ifdef XXE_EXEC_LOG
+#ifdef XXE_EXEC_LOG_on
   sprintf(msg, "ESMCI::XXE::exec(): STOP");
   ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
 #endif
@@ -4030,7 +4031,7 @@ inline void XXE::exec_memGatherSrcRRA(
   int *countList = xxeMemGatherSrcRRAInfo->countList;
   T *dstPointer = (T*)dstBase;
   T *srcPointer;
-#ifdef XXE_EXEC_LOG
+#ifdef XXE_EXEC_LOG_on
   char msg[1024];
   sprintf(msg, "chunkCount=%d", xxeMemGatherSrcRRAInfo->chunkCount);
   ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
@@ -4039,10 +4040,13 @@ inline void XXE::exec_memGatherSrcRRA(
     srcPointer = ((T*)rraBase) + rraOffsetList[k] * vectorL;
     for (int kk=0; kk<countList[k]*vectorL; kk++){
       dstPointer[kk] = srcPointer[kk];
-#ifdef XXE_EXEC_LOG
-      sprintf(msg, "srcPointer=%p, *=%d  (%d,%d)",
-        &(srcPointer[kk]), srcPointer[kk], k,kk);
-      ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
+#ifdef XXE_EXEC_LOG_on
+      {
+        std::stringstream logmsg;
+        logmsg << "srcPointer=" << &(srcPointer[kk]) << " *=" << srcPointer[kk]
+          << " (" << k << "," << kk << ")";
+        ESMC_LogDefault.Write(logmsg.str(), ESMC_LOGMSG_INFO);
+      }
 #endif
     }
     dstPointer += countList[k] * vectorL;
@@ -4065,7 +4069,7 @@ inline void XXE::exec_memGatherSrcRRASuper(
   T *srcPointer;
   int sz_i = size_i[xxeMemGatherSrcRRAInfo->rraIndex];
   int sz_j = size_j[xxeMemGatherSrcRRAInfo->rraIndex];
-#ifdef XXE_EXEC_LOG
+#ifdef XXE_EXEC_LOG_on
   char msg[1024];
   sprintf(msg, "sz_i=%d, sz_j=%d, chunkCount=%d", sz_i, sz_j,
     xxeMemGatherSrcRRAInfo->chunkCount);
@@ -4082,10 +4086,14 @@ inline void XXE::exec_memGatherSrcRRASuper(
       for (int kkk=0; kkk<vectorL/size_r; kkk++){
         for (int kkkk=0; kkkk<size_r; kkkk++){
           dstPointer[kkkk] = srcPointer[kkkk];
-#ifdef XXE_EXEC_LOG
-          sprintf(msg, "srcPointer=%p, *=%d  (%d,%d,%d,%d)",
-            &(srcPointer[kkkk]), srcPointer[kkkk], k,kk,kkk,kkkk);
-          ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
+#ifdef XXE_EXEC_LOG_on
+      {
+        std::stringstream logmsg;
+        logmsg << "srcPointer=" << &(srcPointer[kkkk]) << " *=" << 
+          srcPointer[kkkk]
+          << " (" << k << "," << kk << "," << kkk << "," << kkkk << ")";
+        ESMC_LogDefault.Write(logmsg.str(), ESMC_LOGMSG_INFO);
+      }
 #endif
         }
         dstPointer += size_r; // dst step in contiguous buffer
@@ -4146,11 +4154,14 @@ inline void XXE::exec_zeroSuperScalarRRASuper(
     for (int kkk=0; kkk<vectorL/size_r; kkk++){
       for (int kkkk=0; kkkk<size_r; kkkk++){
         dstPointer[kkkk] = (T)0;
-#ifdef XXE_EXEC_LOG
-  char msg[1024];
-  sprintf(msg, "dstPointer=%p, *=%d  (%d,%d,%d)", 
-    &(dstPointer[kkkk]), dstPointer[kkkk], k,kkk,kkkk);
-  ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
+#ifdef XXE_EXEC_LOG_on
+      {
+        std::stringstream logmsg;
+        logmsg << "dstPointer=" <<  &(dstPointer[kkkk]) << " *=" << 
+          dstPointer[kkkk]
+          << " (" << k << "," << kkk << "," << kkkk << ")";
+        ESMC_LogDefault.Write(logmsg.str(), ESMC_LOGMSG_INFO);
+      }
 #endif
       }
       // determine next dst step 
@@ -4287,8 +4298,18 @@ void XXE::psv(T *element, TKId elementTK, U *factorList, TKId factorTK,
   printf("Arrived in psv kernel with %s, %s, %s\n", typeid(T).name(), 
     typeid(U).name(), typeid(V).name());
 #endif
-  for (int i=0; i<factorCount; i++)
+  for (int i=0; i<factorCount; i++){
+#ifdef XXE_EXEC_LOG_on
+    {
+      std::stringstream logmsg;
+      logmsg << "psv: element=" << element << ":" << *element
+        << " factorList[i]=" << &(factorList[i]) << ":" << factorList[i]
+        << " valueList[i]=" << &(valueList[i]) << ":" << valueList[i];
+      ESMC_LogDefault.Write(logmsg.str(), ESMC_LOGMSG_INFO);
+    }
+#endif
     *element += factorList[i] * valueList[i];
+  }
 }
 
 //-----------------------------------------------------------------------------
@@ -4398,6 +4419,15 @@ void XXE::pss(T *element, TKId elementTK, U *factor, TKId factorTK,
   printf("Arrived in pss kernel with %s, %s, %s\n", typeid(T).name(), 
     typeid(U).name(), typeid(V).name());
 #endif
+#ifdef XXE_EXEC_LOG_on
+    {
+      std::stringstream logmsg;
+      logmsg << "psv: element=" << element << ":" << *element
+        << " factor=" << factor << ":" << *factor
+        << " value=" << value << ":" << *value;
+      ESMC_LogDefault.Write(logmsg.str(), ESMC_LOGMSG_INFO);
+    }
+#endif
   *element += *factor * *value;
 }
 
@@ -4500,7 +4530,7 @@ void XXE::sssDstRra(T *rraBase, TKId elementTK, int *rraOffsetList,
     typeid(V).name());
 #endif
   if(superVector){
-#ifdef XXE_EXEC_LOG
+#ifdef XXE_EXEC_LOG_on
     char msg[1024];
     sprintf(msg, "XXE::sumSuperScalarDstRRA: "
       "taking super-vector branch...");
@@ -4509,7 +4539,7 @@ void XXE::sssDstRra(T *rraBase, TKId elementTK, int *rraOffsetList,
     exec_sssDstRraSuper(rraBase, rraOffsetList, valueBase, valueOffsetList,
       termCount, vectorL, localDeIndex, size_r, size_s, size_t, size_i, size_j);
   }else{
-#ifdef XXE_EXEC_LOG
+#ifdef XXE_EXEC_LOG_on
     char msg[1024];
     sprintf(msg, "XXE::sumSuperScalarDstRRA: "
       "taking vector branch...");
@@ -4555,7 +4585,7 @@ void XXE::exec_sssDstRraSuper(T *rraBase, int *rraOffsetList, V *valueBase,
   V *value;
   int sz_i = size_i[localDeIndex];
   int sz_j = size_j[localDeIndex];
-#ifdef XXE_EXEC_LOG
+#ifdef XXE_EXEC_LOG_on
   char msg[1024];
   sprintf(msg, "sz_i=%d, sz_j=%d, termCount=%d", sz_i, sz_j, termCount);
   ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
@@ -4571,10 +4601,13 @@ void XXE::exec_sssDstRraSuper(T *rraBase, int *rraOffsetList, V *valueBase,
     for (int kkk=0; kkk<vectorL/size_r; kkk++){
       for (int kkkk=0; kkkk<size_r; kkkk++){
         element[kkkk] += *(value+kk);
-#ifdef XXE_EXEC_LOG
-  sprintf(msg, "element=%p, *=%d  (%d,%d,%d)", 
-    &(element[kkkk]), element[kkkk], k,kkk,kkkk);
-  ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
+#ifdef XXE_EXEC_LOG_on
+      {
+        std::stringstream logmsg;
+        logmsg << "element=" <<  &(element[kkkk]) << " *=" << element[kkkk]
+          << " (" << k << "," << kk << "," << kkkk << ")";
+        ESMC_LogDefault.Write(logmsg.str(), ESMC_LOGMSG_INFO);
+      }
 #endif
         ++kk;
       }
@@ -4697,7 +4730,7 @@ void XXE::ssslDstRra(T **rraBaseList, int *rraIndexList, TKId elementTK,
     typeid(U).name(), typeid(V).name());
 #endif
   if(superVector){
-#ifdef XXE_EXEC_LOG
+#ifdef XXE_EXEC_LOG_on
     char msg[1024];
     sprintf(msg, "XXE::sumSuperScalarListDstRRA: "
       "taking super-vector branch...");
@@ -4707,7 +4740,7 @@ void XXE::ssslDstRra(T **rraBaseList, int *rraIndexList, TKId elementTK,
       valueBaseList, valueOffsetList, baseListIndexList, termCount, vectorL,
       localDeIndexOff, size_r, size_s, size_t, size_i, size_j);
   }else{
-#ifdef XXE_EXEC_LOG
+#ifdef XXE_EXEC_LOG_on
     char msg[1024];
     sprintf(msg, "XXE::sumSuperScalarListDstRRA: "
       "taking vector branch...");
@@ -4902,7 +4935,7 @@ void XXE::psssDstRra(T *rraBase, TKId elementTK, int *rraOffsetList,
     typeid(U).name(), typeid(V).name());
 #endif
   if(superVector){
-#ifdef XXE_EXEC_LOG
+#ifdef XXE_EXEC_LOG_on
     char msg[1024];
     sprintf(msg, "XXE::productSumSuperScalarDstRRA: "
       "taking super-vector branch...");
@@ -4912,7 +4945,7 @@ void XXE::psssDstRra(T *rraBase, TKId elementTK, int *rraOffsetList,
       valueOffsetList, termCount, vectorL, localDeIndex,
       size_r, size_s, size_t, size_i, size_j);
   }else{
-#ifdef XXE_EXEC_LOG
+#ifdef XXE_EXEC_LOG_on
     char msg[1024];
     sprintf(msg, "XXE::productSumSuperScalarDstRRA: "
       "taking vector branch...");
@@ -4937,6 +4970,15 @@ void XXE::exec_psssDstRra(T *rraBase, int *rraOffsetList, U **factorList,
       element = rraBase + rraOffsetList[k];
       factor = factorList[k];
       value = valueBase + valueOffsetList[k];
+#ifdef XXE_EXEC_LOG_on
+    {
+      std::stringstream logmsg;
+      logmsg << "exec_psssDstRra: element=" << element << ":" << *element
+        << " factor=" << factor << ":" << *factor
+        << " value=" << value << ":" << *value;
+      ESMC_LogDefault.Write(logmsg.str(), ESMC_LOGMSG_INFO);
+    }
+#endif
       *element += *factor * *value;
     }
   }else{
@@ -4945,8 +4987,19 @@ void XXE::exec_psssDstRra(T *rraBase, int *rraOffsetList, U **factorList,
       element = rraBase + rraOffsetList[k] * vectorL;
       factor = factorList[k];
       value = valueBase + valueOffsetList[k] * vectorL;
-      for (int kk=0; kk<vectorL; kk++)  // vector loop
+      for (int kk=0; kk<vectorL; kk++){  // vector loop
+#ifdef XXE_EXEC_LOG_on
+    {
+      std::stringstream logmsg;
+      logmsg << "exec_psssDstRra: element+kk=" << element+kk << ":" 
+        << *(element+kk)
+        << " factor=" << factor << ":" << *factor
+        << " value+kk=" << value+kk << ":" << *(value+kk);
+      ESMC_LogDefault.Write(logmsg.str(), ESMC_LOGMSG_INFO);
+    }
+#endif
         *(element+kk) += *factor * *(value+kk);
+      }
     }
   }
 }
@@ -4963,7 +5016,7 @@ void XXE::exec_psssDstRraSuper(T *rraBase, int *rraOffsetList, U **factorList,
   V *value;
   int sz_i = size_i[localDeIndex];
   int sz_j = size_j[localDeIndex];
-#ifdef XXE_EXEC_LOG
+#ifdef XXE_EXEC_LOG_on
   char msg[1024];
   sprintf(msg, "sz_i=%d, sz_j=%d, termCount=%d", sz_i, sz_j, termCount);
   ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
@@ -4980,10 +5033,13 @@ void XXE::exec_psssDstRraSuper(T *rraBase, int *rraOffsetList, U **factorList,
     for (int kkk=0; kkk<vectorL/size_r; kkk++){
       for (int kkkk=0; kkkk<size_r; kkkk++){
         element[kkkk] += *factor * *(value+kk);
-#ifdef XXE_EXEC_LOG
-  sprintf(msg, "element=%p, *=%d  (%d,%d,%d)", 
-    &(element[kkkk]), element[kkkk], k,kkk,kkkk);
-  ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
+#ifdef XXE_EXEC_LOG_on
+      {
+        std::stringstream logmsg;
+        logmsg << "element=" <<  &(element[kkkk]) << " *=" << element[kkkk]
+          << " (" << k << "," << kk << "," << kkkk << ")";
+        ESMC_LogDefault.Write(logmsg.str(), ESMC_LOGMSG_INFO);
+      }
 #endif
         ++kk;
       }
@@ -5336,7 +5392,7 @@ void XXE::psssSrcRra(T *rraBase, TKId valueTK, int *rraOffsetList,
     typeid(U).name(), typeid(V).name());
 #endif
   if(superVector){
-#ifdef XXE_EXEC_LOG
+#ifdef XXE_EXEC_LOG_on
     char msg[1024];
     sprintf(msg, "XXE::productSumSuperScalarSrcRRA: "
       "taking super-vector branch...");
@@ -5346,7 +5402,7 @@ void XXE::psssSrcRra(T *rraBase, TKId valueTK, int *rraOffsetList,
       elementBase, elementOffsetList, termCount, vectorL, 
       localDeIndex, size_r, size_s, size_t, size_i, size_j, superVector);
   }else{
-#ifdef XXE_EXEC_LOG
+#ifdef XXE_EXEC_LOG_on
     char msg[1024];
     sprintf(msg, "XXE::productSumSuperScalarSrcRRA: "
       "taking vector branch...");
@@ -5397,7 +5453,7 @@ void XXE::exec_psssSrcRraSuper(T *rraBase, int *rraOffsetList, U **factorList,
   V *element;
   int sz_i = size_i[localDeIndex];
   int sz_j = size_j[localDeIndex];
-#ifdef XXE_EXEC_LOG
+#ifdef XXE_EXEC_LOG_on
   char msg[1024];
   sprintf(msg, "sz_i=%d, sz_j=%d, termCount=%d", sz_i, sz_j, termCount);
   ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
@@ -5413,11 +5469,23 @@ void XXE::exec_psssSrcRraSuper(T *rraBase, int *rraOffsetList, U **factorList,
     int kk=0;
     for (int kkk=0; kkk<vectorL/size_r; kkk++){
       for (int kkkk=0; kkkk<size_r; kkkk++){
+#ifdef XXE_EXEC_LOG_on
+      {
+        std::stringstream logmsg;
+        logmsg << "element=" << &(element[kk]) << " *=" << element[kk]
+          << " factor=" << factor << ":" << *factor
+          << " value=" << &(value[kkkk]) << ":" << value[kkkk];
+        ESMC_LogDefault.Write(logmsg.str(), ESMC_LOGMSG_INFO);
+      }
+#endif
         element[kk] += *factor * value[kkkk];
-#ifdef XXE_EXEC_LOG
-  sprintf(msg, "element=%p, *=%d  (%d,%d,%d)", 
-    &(element[kk]), element[kk], k,kkk,kkkk);
-  ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
+#ifdef XXE_EXEC_LOG_on
+      {
+        std::stringstream logmsg;
+        logmsg << "element=" << &(element[kk]) << " *=" << element[kk]
+          << " (" << k << "," << kk << "," << kkkk << ")";
+        ESMC_LogDefault.Write(logmsg.str(), ESMC_LOGMSG_INFO);
+      }
 #endif
         ++kk;
       }
