@@ -1175,7 +1175,8 @@ subroutine ESMF_GetMesh2DFromUGrid (filename, ncid, meshid, nodeCoords, elmtConn
 	     exit
 	  endif
          enddo	
-         if (elmtNums(j)==MaxNodePerElmt) then
+         !! Change j to i in elmtNums(i) 
+         if (elmtNums(i)==MaxNodePerElmt) then
             totalConnections = totalconnections+elmtNums(i)
          endif
       enddo
