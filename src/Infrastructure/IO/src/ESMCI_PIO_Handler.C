@@ -1568,6 +1568,27 @@ void PIO_Handler::attPackPut (
         break;
       }
 
+      case ESMC_TYPEKIND_R8:
+      {
+        int nvals;
+        std::vector<ESMC_R8> floatvals;
+        localrc = att->get (&nvals, &floatvals);
+        if (ESMC_LogDefault.MsgFoundError(localrc,
+            "Can not access float Attribute value for " + att->getName(),
+            ESMC_CONTEXT, rc)) {
+          if (!vardesc) free (vardesc_local);
+          return;
+        }
+        piorc = pio_cpp_put_att_doubles (pioFileDesc, vardesc_local,
+            att->getName().c_str(), &floatvals[0], floatvals.size());
+        if (!CHECKPIOERROR(piorc, "Attempting to set float Attribute: " + att->getName(),
+            ESMF_RC_FILE_WRITE, (*rc))) {
+          if (!vardesc) free (vardesc_local);
+          return;
+        }
+        break;
+      }
+
       default:
         if (ESMC_LogDefault.MsgFoundError(ESMF_RC_ATTR_NOTSET,
             "Attribute " + att->getName() + " has unsupported value type",
