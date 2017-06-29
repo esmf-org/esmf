@@ -285,7 +285,10 @@ recursive subroutine f_esmf_compgetbase(comp, base, rc)
   ! Initialize return code; assume routine not implemented
   rc = ESMF_RC_NOT_IMPL
 
-  base = comp%compp%base
+! Only copying this pointer, not copying initializers on purpose
+! in case the passed in base pointer comes from C side and only
+! has space for a single address.
+  base%this = comp%compp%base%this
   
   ! return successfully
   rc = ESMF_SUCCESS
