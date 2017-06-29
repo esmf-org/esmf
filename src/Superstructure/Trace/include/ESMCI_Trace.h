@@ -37,7 +37,7 @@
 #define BT_REGION_EXIT 1
 
 namespace ESMCI { 
-  void TraceOpen(const char *trace_dir, int *rc);
+  void TraceOpen(std::string trace_dir, int *rc);
   void TraceClose(int *rc);
   void TraceSetupTypes(int *rc);  
   bool TraceIsEnabledForPET(int *rc);

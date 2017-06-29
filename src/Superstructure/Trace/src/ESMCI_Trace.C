@@ -11,10 +11,13 @@
  * Licensed under the University of Illinois-NCSA License.
  */
 
+#include <iomanip>
+#include <sstream>
+#include <string>
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
-#include <string.h>
 #include <assert.h>
 #include <time.h>
 #include <sys/types.h>
@@ -208,7 +211,7 @@ namespace ESMCI {
       std::string envStr(envVar);
       const vector<string> listItems = split(trim(envStr), " ");
       
-      for (int i = 0; i < listItems.size(); i++) {
+      for (unsigned i = 0; i < listItems.size(); i++) {
 	if (listItems.at(i).find("-") != string::npos) {	  
 	  vector<string> petRange = split(trim(listItems.at(i)), "-");
 	  if (petRange.size() == 2) {
@@ -894,11 +897,10 @@ namespace ESMCI {
   
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::TraceOpen()"  
-  void TraceOpen(const char *trace_dir, int *rc) {
+  void TraceOpen(std::string trace_dir, int *rc) {
 
     int localrc;
-    char stream_dir_root[ESMC_MAXPATHLEN];
-    char stream_file[ESMC_MAXPATHLEN];
+    std::string stream_dir_root;
     struct esmftrc_platform_filesys_ctx *ctx;
     struct esmftrc_platform_callbacks cbs;
     uint8_t *buf;
@@ -936,18 +938,10 @@ namespace ESMCI {
       if (ESMC_LogDefault.MsgFoundError(localrc,
     		  "Error getting working directory", ESMC_CONTEXT, rc))
             return;
-      ESMC_F90toCstring(cwd, ESMC_MAXPATHLEN, cwd, ESMC_MAXPATHLEN);
-
-      //if (getcwd(cwd, sizeof(cwd)) == NULL) {
-      //  ESMC_LogDefault.MsgFoundError(ESMC_RC_SYS, "Error getting working directory",
-      //                                ESMC_CONTEXT, rc);
-      //  return;
-      //}
-      sprintf(stream_dir_root, "%s/%s", cwd, trace_dir);
-      //printf("absolute dir = |%s|\n", stream_dir_root);
+      stream_dir_root = string (cwd, ESMC_F90lentrim(cwd, ESMC_MAXPATHLEN)) + "/" + trace_dir;
     }
     else {
-      sprintf(stream_dir_root, "%s", trace_dir);
+      stream_dir_root = trace_dir;
     }
 
     VM *globalvm = VM::getGlobal(&localrc);
@@ -957,14 +951,14 @@ namespace ESMCI {
     int stream_id = globalvm->getMypet();
 
     
-    struct stat st = {0};
+    struct stat st;
     if (stream_id == 0) {
-      if (stat(stream_dir_root, &st) == -1) {
+      if (stat(stream_dir_root.c_str(), &st) == -1) {
 
     	  ESMC_Logical relaxedFlag = ESMF_TRUE;
     	  int dir_perms = TRACE_DIR_PERMISSIONS;
-    	  FTN_X(c_esmc_makedirectory)(stream_dir_root, &dir_perms,
-    			  &relaxedFlag, &localrc, ESMC_MAXPATHLEN);
+    	  FTN_X(c_esmc_makedirectory)(stream_dir_root.c_str(), &dir_perms,
+    			  &relaxedFlag, &localrc, stream_dir_root.length());
 
     	  if (ESMC_LogDefault.MsgFoundError(localrc,
     	      "Error creating trace root directory", ESMC_CONTEXT, rc))
@@ -992,11 +986,13 @@ namespace ESMCI {
     if (!traceLocalPet) return;
 
     //my specific file
-    sprintf(stream_file, "%s/esmf_stream_%04d", stream_dir_root, stream_id);
+    std::stringstream stream_file;
+    stream_file << stream_dir_root << "/esmf_stream_" << std::setfill('0') << std::setw(4) << stream_id;
+    // sprintf(stream_file, "%s/esmf_stream_%04d", stream_dir_root, stream_id);
 
    // printf("stream_file = %s\n", stream_file);
 
-    ctx->fh = fopen(stream_file, "wb");
+    ctx->fh = fopen(stream_file.str().c_str(), "wb");
     if (!ctx->fh) {
       free(ctx);
       free(buf);
@@ -1014,7 +1010,7 @@ namespace ESMCI {
 
     //stream zero writes the metadata file
     if (stream_id == 0) {
-      write_metadata(stream_dir_root, &localrc);
+      write_metadata(stream_dir_root.c_str(), &localrc);
       if (ESMC_LogDefault.MsgFoundError(localrc, 
           ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc)) {
         return;
@@ -1112,7 +1108,7 @@ namespace ESMCI {
     string rpm("");
     string fpm("");
     
-    for (int i=0; i < attrKeys.size(); i++) {
+    for (unsigned i=0; i < attrKeys.size(); i++) {
       if (attrKeys.at(i) == "IPM") {
         ipm = attrVals.at(i);
       }
@@ -1169,7 +1165,7 @@ namespace ESMCI {
 #else /* no ESMF_BABELTRACE or ESMF_TRACE_INTERNAL - just use stubs */
 
 #define LOG_NO_BT_LIB ESMC_LogDefault.MsgFoundError(ESMF_RC_LIB_NOT_PRESENT, \
-                "The Babeltrace library is required for tracing but is not present.",\ 
+                "The Babeltrace library is required for tracing but is not present.",\
                 ESMC_CONTEXT, rc);
 
 #undef  ESMC_METHOD
