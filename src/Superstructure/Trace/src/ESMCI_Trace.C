@@ -153,7 +153,9 @@ using std::stringstream;
 namespace ESMCI {
 
   static bool traceLocalPet = false;
-
+  static int traceClock = 0;
+  static int64_t traceClockOffset = 0;
+  
   static vector<string> split(const string& s, const string& delim, const bool keep_empty = true) {
     vector<string> result;
     if (delim.empty()) {
@@ -298,7 +300,9 @@ namespace ESMCI {
   }
 #endif
 
-  static uint64_t get_clock(void *data) {
+  
+  /* get current wallclock time */
+  static uint64_t get_real_clock() {
     struct timespec ts;
 
 #ifdef ESMF_OS_Darwin
@@ -319,8 +323,9 @@ namespace ESMCI {
     return ts.tv_sec * 1000000000ULL + ts.tv_nsec;
   }
 
-  /* get local monotonic time */
-  static uint64_t get_local_clock() {
+  
+  /* get local monotonic time with no offset*/
+  static uint64_t get_monotonic_raw_clock() {
     struct timespec ts;
 
 #ifdef ESMF_OS_Darwin
@@ -340,9 +345,18 @@ namespace ESMCI {
 #endif
     return ts.tv_sec * 1000000000ULL + ts.tv_nsec;
   }
+
+  /* get local monotonic time including local offset */
+  static uint64_t get_monotonic_clock() {
+    if (traceClockOffset < 0) {
+      return get_monotonic_raw_clock() - (-1*traceClockOffset);
+    }
+    else {
+      return get_monotonic_raw_clock() + traceClockOffset;
+    }
+  }
   
-
-
+  
 #define CLOCK_SYNC_TAG 42000
 #define RTTMIN_NOTCHANGED_MAX 100
   
@@ -363,11 +377,11 @@ namespace ESMCI {
     for (;;) {
 
       if (myPet != 0) {
-        starttime = get_local_clock();
+        starttime = get_monotonic_raw_clock();
         //printf("[%d] about to send starttime: %ldd\n", myPet, starttime);
         vm->send(&starttime, sizeof(uint64_t), 0, CLOCK_SYNC_TAG);
         vm->recv(&peertime, sizeof(uint64_t), 0, CLOCK_SYNC_TAG);
-        stoptime = get_local_clock();
+        stoptime = get_monotonic_raw_clock();
         rtt = stoptime - starttime;
 
         //printf("[%d] rtt = %ldd\n", myPet, rtt);
@@ -385,7 +399,7 @@ namespace ESMCI {
       else {  /* root PET */
         vm->recv(&starttime, sizeof(uint64_t), peerPet, CLOCK_SYNC_TAG);
         //printf("[%d] received starttime: %ldd\n", peerPet, starttime);
-        peertime = get_local_clock() + root_offset;
+        peertime = get_monotonic_raw_clock() + root_offset;
         if (starttime == invalidtime) {
           break;
         }
@@ -428,6 +442,18 @@ namespace ESMCI {
     }
     return ret;
 
+  }
+
+  static uint64_t get_clock(void *data) {
+    switch(traceClock) {
+    case ESMF_CLOCK_REALTIME:
+      return get_real_clock();
+    case ESMF_CLOCK_MONOTONIC:
+      return get_monotonic_raw_clock();
+    case ESMF_CLOCK_MONOTONIC_SYNC:
+      return get_monotonic_clock();      
+    }
+    return 0;
   }
 
   
@@ -1019,8 +1045,48 @@ namespace ESMCI {
         
     if (rc != NULL) *rc = ESMF_SUCCESS;
 
-    ESMC_LogDefault.Write("Enabling ESMF Tracing", ESMC_LOGMSG_INFO);
+    VM *globalvm = VM::getGlobal(&localrc);
+    if (ESMC_LogDefault.MsgFoundError(localrc, 
+         ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc)) 
+      return;
+    int stream_id = globalvm->getLocalPet();
+        
+    //determine which clock to use
+    traceClock = ESMF_CLOCK_REALTIME;  //default
+    std::string strClk = "REALTIME";   //default
+    
+    char const *envClk = VM::getenv("ESMF_RUNTIME_TRACE_CLOCK");
+    if (envClk != NULL && strlen(envClk) > 0) {     
+      strClk = envClk;
+      if (strClk == "REALTIME") {
+        traceClock = ESMF_CLOCK_REALTIME;
+      }
+      else if (strClk == "MONOTONIC") {
+        traceClock = ESMF_CLOCK_MONOTONIC;
+      }
+      else if (strClk == "MONOTONIC_SYNC") {
+        traceClock = ESMF_CLOCK_MONOTONIC_SYNC;
+      }
+    }
 
+    //determine local offsets if requested
+    if (traceClock == ESMF_CLOCK_MONOTONIC_SYNC) {
+      traceClockOffset = clock_sync_offset(&localrc);
+      if (ESMC_LogDefault.MsgFoundError(localrc, 
+           ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc)) {
+        return;
+      }
+      printf("[%d] local offset = %lld\n", stream_id, traceClockOffset);
+    }
+
+    std::stringstream logMsg;
+    logMsg << "ESMF Tracing enabled using clock: " + strClk;
+    if (traceClock == ESMF_CLOCK_MONOTONIC_SYNC) {
+      logMsg << " (local offset = " << traceClockOffset << ")";
+    }
+    ESMC_LogDefault.Write(logMsg.str().c_str(), ESMC_LOGMSG_INFO);
+    
+    
     // set up callbacks
     cbs.sys_clock_clock_get_value = get_clock;
     cbs.is_backend_full = is_backend_full;
@@ -1055,13 +1121,6 @@ namespace ESMCI {
     else {
       stream_dir_root = trace_dir;
     }
-
-    VM *globalvm = VM::getGlobal(&localrc);
-    if (ESMC_LogDefault.MsgFoundError(localrc, 
-	  ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc)) 
-      return;
-    int stream_id = globalvm->getMypet();
-
     
     struct stat st;
     if (stream_id == 0) {
@@ -1075,27 +1134,12 @@ namespace ESMCI {
     	  if (ESMC_LogDefault.MsgFoundError(localrc,
     	      "Error creating trace root directory", ESMC_CONTEXT, rc))
     	       return;
-
-    	  //if (mkdir(stream_dir_root, TRACE_DIR_PERMISSIONS) == -1) {
-    	  //	  ESMC_LogDefault.MsgFoundError(ESMC_RC_FILE_CREATE, "Error creating trace root directory",
-		  //			ESMC_CONTEXT, rc);
-    	  //    return;
-    	  //}
       }
     }
         
     //all PETs wait for directory to be created
     globalvm->barrier();
-
-    //sync clocks
-    int64_t myOffset = clock_sync_offset(&localrc);
-    if (ESMC_LogDefault.MsgFoundError(localrc, 
-         ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc)) {
-      return;
-    }
-
-    printf("[%d] myOffset = %lld\n", stream_id, myOffset);
-    
+           
     //determine if tracing turned on for this PET
     traceLocalPet = TraceIsEnabledForPET(&localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, 
@@ -1109,10 +1153,7 @@ namespace ESMCI {
     //my specific file
     std::stringstream stream_file;
     stream_file << stream_dir_root << "/esmf_stream_" << std::setfill('0') << std::setw(4) << stream_id;
-    // sprintf(stream_file, "%s/esmf_stream_%04d", stream_dir_root, stream_id);
-
-   // printf("stream_file = %s\n", stream_file);
-
+    
     ctx->fh = fopen(stream_file.str().c_str(), "wb");
     if (!ctx->fh) {
       free(ctx);

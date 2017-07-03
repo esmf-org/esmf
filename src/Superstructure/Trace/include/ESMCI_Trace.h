@@ -16,6 +16,11 @@
 #include <string.h>
 #include "ESMCI_Comp.h"
 
+#define ESMF_CLOCK_REALTIME       1
+#define ESMF_CLOCK_MONOTONIC      2
+#define ESMF_CLOCK_MONOTONIC_SYNC 3
+
+
 //how often to flush streams to file
 #define BT_FLUSH_STREAM_INTERVAL 100
 
