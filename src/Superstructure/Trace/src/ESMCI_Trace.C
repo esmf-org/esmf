@@ -319,6 +319,118 @@ namespace ESMCI {
     return ts.tv_sec * 1000000000ULL + ts.tv_nsec;
   }
 
+  /* get local monotonic time */
+  static uint64_t get_local_clock() {
+    struct timespec ts;
+
+#ifdef ESMF_OS_Darwin
+    mach_timespec_t mts;
+    static clock_serv_t rt_clock_serv = 0;
+
+    if (rt_clock_serv == 0) {
+      (void) host_get_clock_service(mach_host_self(), CALENDAR_CLOCK, &rt_clock_serv);
+    }
+    (void) clock_get_time(rt_clock_serv, &mts);
+    ts.tv_sec = mts.tv_sec;
+    ts.tv_nsec = mts.tv_nsec;
+#elif ESMF_OS_MinGW
+    clock_gettime(0, &ts);
+#else
+    clock_gettime(CLOCK_MONOTONIC, &ts);
+#endif
+    return ts.tv_sec * 1000000000ULL + ts.tv_nsec;
+  }
+  
+
+
+#define CLOCK_SYNC_TAG 42000
+#define RTTMIN_NOTCHANGED_MAX 100
+  
+  static int64_t clock_measure_offset(VM *vm, int peerPet, int64_t root_offset) {
+
+    int myPet = vm->getLocalPet();
+    //printf("[%d] entered clock_measure_offset\n", myPet);
+
+    uint64_t starttime, stoptime, peertime;
+    uint64_t rtt, rttmin, invalidtime;
+    int rttmin_notchanged;
+    int64_t offset;
+    invalidtime = 42000000000;
+    rttmin = 1E12;
+    offset = 0;
+    rttmin_notchanged = 0;
+    
+    for (;;) {
+
+      if (myPet != 0) {
+        starttime = get_local_clock();
+        //printf("[%d] about to send starttime: %ldd\n", myPet, starttime);
+        vm->send(&starttime, sizeof(uint64_t), 0, CLOCK_SYNC_TAG);
+        vm->recv(&peertime, sizeof(uint64_t), 0, CLOCK_SYNC_TAG);
+        stoptime = get_local_clock();
+        rtt = stoptime - starttime;
+
+        //printf("[%d] rtt = %ldd\n", myPet, rtt);
+        
+        if (rtt < rttmin) {
+          rttmin = rtt;
+          rttmin_notchanged = 0;
+          offset = peertime - (rtt / 2) - starttime;
+        }
+        else if (++rttmin_notchanged == RTTMIN_NOTCHANGED_MAX) {
+          vm->send(&invalidtime, sizeof(uint64_t), 0, CLOCK_SYNC_TAG);
+          break;
+        }
+      }
+      else {  /* root PET */
+        vm->recv(&starttime, sizeof(uint64_t), peerPet, CLOCK_SYNC_TAG);
+        //printf("[%d] received starttime: %ldd\n", peerPet, starttime);
+        peertime = get_local_clock() + root_offset;
+        if (starttime == invalidtime) {
+          break;
+        }
+        vm->send(&peertime, sizeof(uint64_t), peerPet, CLOCK_SYNC_TAG);
+        //printf("[%d] sent peertime to PET %d = %ldd\n", myPet, peerPet, peertime);
+      }
+
+    }
+
+    //if( myPet != 0 ){
+    //  *min_rtt = rttmin;
+    //} else {
+    //  rtt = 0.0;
+    // }
+    return offset;    
+  }
+
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::clock_sync_offset()"  
+  static int64_t clock_sync_offset(int *rc) {
+
+    int localrc;
+    if (rc != NULL) *rc = ESMF_SUCCESS;
+    
+    VM *vm = VM::getGlobal(&localrc);
+    if (ESMC_LogDefault.MsgFoundError(localrc, 
+         ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc)) 
+      return 0;
+
+    int myPet = vm->getLocalPet();
+    int petCount = vm->getPetCount();
+    int64_t ret;
+    
+    for (int peer = 1; peer < petCount; peer++) {
+      vm->barrier();
+      if (myPet == 0 || myPet == peer) {
+        //printf("clock_measure_offset between root and peer: %d\n", peer);
+        ret = clock_measure_offset(vm, peer, 0);
+      }
+    }
+    return ret;
+
+  }
+
+  
 #ifdef ESMF_BABELTRACE
   //global trace writer
   struct bt_ctf_writer *bt_writer;
@@ -975,10 +1087,19 @@ namespace ESMCI {
     //all PETs wait for directory to be created
     globalvm->barrier();
 
+    //sync clocks
+    int64_t myOffset = clock_sync_offset(&localrc);
+    if (ESMC_LogDefault.MsgFoundError(localrc, 
+         ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc)) {
+      return;
+    }
+
+    printf("[%d] myOffset = %lld\n", stream_id, myOffset);
+    
     //determine if tracing turned on for this PET
     traceLocalPet = TraceIsEnabledForPET(&localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, 
-          ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc)) {
+         ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc)) {
       traceLocalPet = false;
       return;
     }
