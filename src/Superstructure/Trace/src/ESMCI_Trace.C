@@ -333,7 +333,7 @@ namespace ESMCI {
     static clock_serv_t rt_clock_serv = 0;
 
     if (rt_clock_serv == 0) {
-      (void) host_get_clock_service(mach_host_self(), CALENDAR_CLOCK, &rt_clock_serv);
+      (void) host_get_clock_service(mach_host_self(), SYSTEM_CLOCK, &rt_clock_serv);
     }
     (void) clock_get_time(rt_clock_serv, &mts);
     ts.tv_sec = mts.tv_sec;
