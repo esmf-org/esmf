@@ -1076,7 +1076,7 @@ namespace ESMCI {
            ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc)) {
         return;
       }
-      printf("[%d] local offset = %lld\n", stream_id, traceClockOffset);
+      //printf("[%d] local offset = %lld\n", stream_id, traceClockOffset);
     }
 
     std::stringstream logMsg;
@@ -1085,8 +1085,7 @@ namespace ESMCI {
       logMsg << " (local offset = " << traceClockOffset << ")";
     }
     ESMC_LogDefault.Write(logMsg.str().c_str(), ESMC_LOGMSG_INFO);
-    
-    
+        
     // set up callbacks
     cbs.sys_clock_clock_get_value = get_clock;
     cbs.is_backend_full = is_backend_full;
