@@ -29,6 +29,7 @@
 // include higher level, 3rd party or system headers
 #include <cstdlib>
 #include <cstdio>
+#include <sstream>
 
 // include ESMF headers
 #include "ESMCI_Macros.h"
@@ -94,7 +95,8 @@ RouteHandle *RouteHandle::create(
     return NULL;
   }catch(...){
     // allocation error
-    ESMC_LogDefault.MsgAllocError("for new ESMCI::Array.", ESMC_CONTEXT, rc);  
+    ESMC_LogDefault.MsgAllocError("for new ESMCI::RouteHandle.", ESMC_CONTEXT, 
+      rc);  
     routehandle->ESMC_BaseSetStatus(ESMF_STATUS_INVALID);  // mark invalid
     return NULL;
   }
@@ -492,6 +494,58 @@ int RouteHandle::optimize(
   // return successfully
   rc = ESMF_SUCCESS;
   return rc;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::RouteHandle::isCompatible()"
+//BOP
+// !IROUTINE:  ESMCI::RouteHandle::isCompatible - RouteHandle is compatible with the src/dst arrays
+//
+// !INTERFACE:
+bool RouteHandle::isCompatible(
+//
+// !RETURN VALUE:
+//  true if compatible, false if not compatible
+//
+// !ARGUMENTS:
+    Array *srcArrayArg,
+    Array *dstArrayArg,
+    int *rc                                       // (out) return code
+  )const{
+//
+// !DESCRIPTION:
+//  Check whether the routehandle object is compatible with the specified
+//  srcArray -> dstArray arguments.
+//
+//EOP
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;   // final return code
+  
+  //TODO: for now only check srcMatch, because of the specific application
+  //TODO: where I need this for, the dstArray is a derivative of the srcArray,
+  //TODO: so if the srcArray matches the dstArray will, too. Plus the dstArray
+  //TODO: happens to be a temporary array that will not be valid when I come 
+  //TODO: back to check anyway! All this needs to be fixed by introducing
+  //TODO: persistent Array finger prints.
+  //TODO: The other thing that needs to be considered when implementing real
+  //TODO: fingerprinting here is that RHs also function for a large class of
+  //TODO: weakly congruent Arrays, especially now that super-vectorization is
+  //TODO: implemented!
+  bool srcMatch = Array::match(srcArrayArg, srcArray, &localrc);
+  ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc);
+
+  std::stringstream debugmsg;
+  debugmsg << "RouteHandle::isCompatible(), srcMatch=" << srcMatch;
+  ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_INFO);
+  
+  // return successfully
+  if (rc!=NULL) *rc = ESMF_SUCCESS;
+  return srcMatch;
 }
 //-----------------------------------------------------------------------------
 

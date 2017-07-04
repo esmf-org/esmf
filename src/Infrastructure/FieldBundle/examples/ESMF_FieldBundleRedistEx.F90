@@ -137,7 +137,7 @@
         call ESMF_FieldGet(dstField(i), localDe=0, farrayPtr=dstfptr, rc=rc)
         if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
-        dstfptr = 0
+        dstfptr = -99
 
         call ESMF_FieldBundleAdd(dstFieldBundle, (/dstField(i)/), rc=rc)
         if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
@@ -175,7 +175,12 @@
                 enddo
             enddo
         enddo
-        if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+        if (rc /= ESMF_SUCCESS) then
+          call ESMF_LogSetError(ESMF_RC_NOT_VALID, &
+            msg="Validation check failed!", &
+            ESMF_CONTEXT)
+          call ESMF_Finalize(endflag=ESMF_END_ABORT)
+        endif
     enddo
 
     ! release route handle

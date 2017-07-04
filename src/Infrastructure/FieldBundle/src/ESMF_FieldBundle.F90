@@ -259,14 +259,6 @@ module ESMF_FieldBundleMod
 
   end interface
 
-
-!!!!! Start of TEMPORARY interface for development TODO: REMOVE---------------
-interface ESMF_FieldBundleRegridStore
-  module procedure ESMF_FieldBundleRegridStoreNEW
-end interface
-!!!!! End of TEMPORARY interface for development TODO: REMOVE-----------------
-
-
 !===============================================================================
 ! FieldBundleOperator() interfaces
 !===============================================================================
@@ -3224,6 +3216,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         if (present(rc)) rc = ESMF_SUCCESS
 
     end subroutine ESMF_FieldBundleRegrid
+!------------------------------------------------------------------------------
+
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -3275,350 +3269,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         if (present(rc)) rc = ESMF_SUCCESS
 
     end subroutine ESMF_FieldBundleRegridRelease
-
 !------------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_FieldBundleRegridStoreOLD()"
-!BOPI
-! !IROUTINE: ESMF_FieldBundleRegridStore - Precompute a FieldBundle regrid operation
-! !INTERFACE:
-    subroutine ESMF_FieldBundleRegridStoreOLD(srcFieldBundle, dstFieldBundle, &
-                                           srcMaskValues, dstMaskValues, &
-                                           regridmethod, polemethod, &
-                                           regridPoleNPnts,  &
-                                           lineType, normType, &
-                                           unmappedaction,  ignoreDegenerate, &
-                                           routehandle, rc)
-!
-! !ARGUMENTS:
-    type(ESMF_FieldBundle),        intent(in)             :: srcFieldBundle
-    type(ESMF_FieldBundle),        intent(inout)          :: dstFieldBundle
-    integer(ESMF_KIND_I4),         intent(in),   optional :: srcMaskValues(:)
-    integer(ESMF_KIND_I4),         intent(in),   optional :: dstMaskValues(:)
-    type(ESMF_RegridMethod_Flag),  intent(in),   optional :: regridmethod
-    type(ESMF_PoleMethod_Flag),    intent(in),   optional :: polemethod
-    integer,                       intent(in),   optional :: regridPoleNPnts
-    type(ESMF_LineType_Flag),      intent(in),   optional :: lineType
-    type(ESMF_NormType_Flag),      intent(in),   optional :: normType
-    type(ESMF_UnmappedAction_Flag),intent(in),   optional :: unmappedaction
-    logical,                       intent(in),   optional :: ignoreDegenerate 
-    type(ESMF_RouteHandle),        intent(inout),optional :: routehandle
-    integer,                       intent(out),  optional :: rc
-!
-! !STATUS:
-! \begin{itemize}
-! \item\apiStatusCompatibleVersion{5.2.0r}
-! \item\apiStatusModifiedSinceVersion{5.2.0r}
-! \begin{description}
-! \item[7.0.0] Added arguments {\tt ignoreDegenerate}, {\tt lineType},
-!              and {\tt normType}. The argument {\tt ignoreDegenerate} allows the user to skip degenerate
-!              cells in the regridding instead of stopping with an error. 
-!              The argument {\tt lineType} allows the user to 
-!              control the path of the line between two points on a sphere surface. 
-!              This allows the user to use their preferred line path for the calculation
-!              of distances and the shape of cells during regrid weight calculation on 
-!              a sphere. The argument {\tt normType} allows the user to 
-!              control the type of normalization done during conservative weight generation. 
-! \end{description}
-! \end{itemize}
-!
-! !DESCRIPTION:
-!   Store a FieldBundle regrid operation over the data in {\tt srcFieldBundle} and
-!   {\tt dstFieldBundle} pair. 
-!
-!   The routine returns an {\tt ESMF\_RouteHandle} that can be used to call 
-!   {\tt ESMF\_FieldBundleRegrid()} on any FieldBundle pairs that are weakly congruent
-!   and typekind conform to the FieldBundle pair used here.
-!   Congruency for FieldBundles is
-!   given by the congruency of its constituents.
-!   Congruent Fields possess matching DistGrids, and the shape of the local
-!   array tiles matches between the Fields for every DE. For weakly congruent
-!   Fields the sizes of the undistributed dimensions, that vary faster with
-!   memory than the first distributed dimension, are permitted to be different.
-!   This means that the same {\tt routehandle} can be applied to a large class
-!   of similar Fields that differ in the number of elements in the left most
-!   undistributed dimensions.
-!   Note {\tt ESMF\_FieldBundleRegridStore()} assumes the coordinates used in the Grids 
-!   upon which the FieldBundles are built are in degrees.  
-!  
-!   This call is {\em collective} across the current VM.  
-!
-!   \begin{description}
-!   \item [srcFieldbundle]
-!     Source {\tt ESMF\_FieldBundle} containing data to be regridded.
-!   \item [dstFieldbundle]
-!     Destination {\tt ESMF\_FieldBundle}. The data in this FieldBundle may be overwritten by this call. 
-!  \item [{[srcMaskValues]}]
-!     Mask information can be set in the Grids (see~\ref{sec:usage:items}) or Meshes (see~\ref{sec:mesh:mask}) upon which
-!     the Fields in the {\tt srcFieldbundle} are built. 
-!     The {\tt srcMaskValues} argument specifies the values in that mask information which indicate a source point should be masked out. 
-!     In other words, a location is masked if and only if the value for that location in the mask information matches
-!     one of the values listed in {\tt srcMaskValues}.  
-!     If {\tt srcMaskValues} is not specified, no masking will occur. 
-!  \item [{[dstMaskValues]}]
-!     Mask information can be set in the Grids (see~\ref{sec:usage:items}) or Meshes (see~\ref{sec:mesh:mask})
-!     upon which the Fields in the {\tt dstFieldbundle} are built. 
-!     The {\tt dstMaskValues} argument specifies the values in that mask information which indicate a destination point should be masked out. 
-!     In other words, a location is masked if and only if the value for that location in the mask information matches
-!     one of the values listed in {\tt dstMaskValues}.  
-!     If {\tt dstMaskValues} is not specified, no masking will occur. 
-!   \item [{[regridmethod]}]
-!     The type of interpolation. Please see Section~\ref{opt:regridmethod} for a list of
-!     valid options. If not specified, defaults to {\tt ESMF\_REGRIDMETHOD\_BILINEAR}.
-!   \item [{[polemethod]}]
-!    Which type of artificial pole
-!    to construct on the source Grid for regridding. Please see Section~\ref{const:polemethod} for a list of
-!    valid options. If not specified, defaults to {\tt ESMF\_POLEMETHOD\_ALLAVG}. 
-!   \item [{[regridPoleNPnts]}]
-!    If {\tt polemethod} is {\tt ESMF\_POLEMETHOD\_NPNTAVG}.
-!    This parameter indicates how many points should be averaged
-!    over. Must be specified if {\tt polemethod} is 
-!    {\tt ESMF\_POLEMETHOD\_NPNTAVG}.
-!   \item [{[lineType]}]
-!           This argument controls the path of the line which connects two points on a sphere surface. This in
-!           turn controls the path along which distances are calculated and the shape of the edges that make
-!           up a cell. Both of these quantities can influence how interpolation weights are calculated. 
-!           As would be expected, this argument is only applicable when {\tt srcField} and {\tt dstField} are
-!           built on grids which lie on the surface of a sphere. Section~\ref{opt:lineType} shows a 
-!           list of valid options for this argument. If not specified, the default depends on the 
-!           regrid method. Section~\ref{opt:lineType} has the defaults by line type. Figure~\ref{line_type_support} shows
-!           which line types are supported for each regrid method as well as showing the default line type by regrid method.  
-!  \item [{[normType]}] 
-!           This argument controls the type of normalization used when generating conservative weights. This option
-!           only applies to weights generated with {\tt regridmethod=ESMF\_REGRIDMETHOD\_CONSERVE}. Please see 
-!           Section~\ref{opt:normType} for a 
-!           list of valid options. If not specified {\tt normType} defaults to {\tt ESMF\_NORMTYPE\_DSTAREA}. 
-!  \item [{[unmappedaction]}]
-!    Specifies what should happen if there are destination points that
-!    can't be mapped to a source cell. Please see Section~\ref{const:unmappedaction} for a 
-!           list of valid options. If not specified, {\tt unmappedaction} defaults to {\tt ESMF\_UNMAPPEDACTION\_ERROR}. 
-!   \item [{[ignoreDegenerate]}]
-!           Ignore degenerate cells when checking the input Grids or Meshes for errors. If this is set to true, then the 
-!           regridding proceeds, but degenerate cells will be skipped. If set to false, a degenerate cell produces an error. 
-!           If not specified, {\tt ignoreDegenerate} defaults to false.
-!   \item [{[routehandle]}]
-!     Handle to the precomputed Route.
-!   \item [{[rc]}]
-!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!EOPI
-!------------------------------------------------------------------------------
-        ! internal local variables 
-        integer                                       :: localrc, i, localDeCount, fieldCount
-        integer                                       :: rraShift, vectorLengthShift 
-        integer                                       :: sfcount, dfcount
-        type(ESMF_Field)                              :: srcField, dstField
-        type(ESMF_Field), pointer                     :: srcFieldList(:), dstFieldList(:)
-        type(ESMF_RouteHandle)                        :: rh
-        logical         :: havePrev, matchesPrev, isGridPair
-        type(ESMF_Grid) :: prevSrcGrid, prevDstGrid
-        type(ESMF_StaggerLoc) :: prevSrcStaggerLoc, prevDstStaggerLoc
-        type(ESMF_Grid) :: currSrcGrid, currDstGrid
-        type(ESMF_StaggerLoc) :: currSrcStaggerLoc, currDstStaggerLoc
-        integer(ESMF_KIND_I4), pointer :: prev_indices(:,:)
-        real(ESMF_KIND_R8), pointer :: prev_weights(:)
-        type(ESMF_GeomType_Flag) :: srcGeomtype        
-        type(ESMF_GeomType_Flag) :: dstGeomtype        
-        integer :: j
-        character(64) :: sfname, dfname
-
-        ! Initialize return code; assume routine not implemented 
-        localrc = ESMF_RC_NOT_IMPL 
-        if(present(rc)) rc = ESMF_RC_NOT_IMPL 
-
-        ! check variables
-        ESMF_INIT_CHECK_DEEP_SHORT(ESMF_FieldBundleGetInit, srcFieldBundle, rc) 
-        ESMF_INIT_CHECK_DEEP_SHORT(ESMF_FieldBundleGetInit, dstFieldBundle, rc) 
-
-        call ESMF_FieldBundleGet(srcFieldBundle, fieldCount=sfcount, rc=localrc)
-        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rcToReturn=rc)) return
-        call ESMF_FieldBundleGet(dstFieldBundle, fieldCount=dfcount, rc=localrc)
-        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rcToReturn=rc)) return
-
-        if(sfcount /= dfcount) then
-            call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_VALUE, &
-               msg="src and dst FieldBundle must have same number of Fields", &
-                ESMF_CONTEXT, rcToReturn=rc)
-            return
-        endif 
-
-        ! init some variables for optimization
-        havePrev=.false.
-        matchesPrev=.false.
-
-        fieldCount = sfcount
-
-        if (present(routehandle)) then
-          routehandle = ESMF_RouteHandleCreate(rc=localrc)
-          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rcToReturn=rc)) return
-        
-          call ESMF_RouteHandlePrepXXE(routehandle, rc=localrc)
-          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rcToReturn=rc)) return
-        endif        
-
-        ! loop over all Fields in FieldBundles, call FieldRegridStore and append rh
-        rraShift = 0          ! reset
-        vectorLengthShift = 0 ! reset
-
-        allocate(srcFieldList(fieldCount), dstFieldList(fieldCount), stat=localrc)
-        if (ESMF_LogFoundAllocError(localrc, msg= "allocating srcFieldList dstFieldList", &
-          ESMF_CONTEXT, rcToReturn=rc)) return ! bail out
-
-        call ESMF_FieldBundleGet(srcFieldBundle, fieldList=srcFieldList, &
-          itemorderflag=ESMF_ITEMORDER_ADDORDER, rc=localrc)
-        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-          ESMF_CONTEXT, rcToReturn=rc)) return
-
-        call ESMF_FieldBundleGet(dstFieldBundle, fieldList=dstFieldList, &
-          itemorderflag=ESMF_ITEMORDER_ADDORDER, rc=localrc)
-        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-          ESMF_CONTEXT, rcToReturn=rc)) return
-
-        do i=1, fieldCount
-      
-          ! obtain srcField
-          srcField = srcFieldList(i)
-          
-          ! obtain dstField
-          dstField = dstFieldList(i)
-          
-          ! If these are both Grids, then check for optimization
-          call ESMF_FieldGet(srcField, geomtype=srcGeomType, name=sfname, rc=localrc)
-          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
-               ESMF_CONTEXT, rcToReturn=rc)) return
-          !print *, 'src field name = ', sfname
-
-          call ESMF_FieldGet(dstField, geomtype=dstGeomType, name=dfname, rc=localrc)
-          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
-               ESMF_CONTEXT, rcToReturn=rc)) return
-          !print *, 'dst field name = ', dfname
-
-          isGridPair=.false.
-          if ((srcGeomType==ESMF_GEOMTYPE_GRID) .and. (dstGeomType==ESMF_GEOMTYPE_GRID)) then
-             ! Mark that this is a pair of grids and therefore optimizable
-             isGridPair=.true.
-
-             ! Get Grids and staggerlocs
-             call ESMF_FieldGet(srcField, grid=currSrcGrid, staggerloc=currSrcStaggerloc, rc=localrc)
-             if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
-               ESMF_CONTEXT, rcToReturn=rc)) return
-
-             call ESMF_FieldGet(dstField, grid=currDstGrid, staggerloc=currDstStaggerloc, rc=localrc)
-             if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
-               ESMF_CONTEXT, rcToReturn=rc)) return
-
-             ! see if grids match prev grids
-             matchesPrev=.false.
-             if (havePrev) then
-                if ((currSrcStaggerLoc==prevSrcStaggerLoc) .and.  &
-                    (currDstStaggerLoc==prevDstStaggerLoc)) then 
-
-                   ! TODO: This only needs to consider matching the Field staggerlocs in the Grid
-                   !       and it only needs to match the coordinates and distribution
-                   !       Reimplement as a FieldMatch() with an EXACTMAT output????
-                   if ((ESMF_GridMatch(currSrcGrid, prevSrcGrid)==ESMF_GRIDMATCH_EXACT) .and. &
-                       (ESMF_GridMatch(currDstGrid, prevDstGrid)==ESMF_GRIDMATCH_EXACT)) then
-                      matchesPrev=.true.
-                   endif
-                endif
-             endif
-          endif
-
-          ! precompute regrid operation based on grids, etc.
-          if (isGridPair) then
-             if (matchesPrev) then
-                call ESMF_FieldSMMStore(srcField=srcField, dstField=dstField, & 
-                        routehandle=rh, &
-                        factorList=prev_weights, factorIndexList=prev_indices, &
-                        rc=localrc)
-                if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
-                     ESMF_CONTEXT, rcToReturn=rc)) return
-             else ! If it doesn't match make a new previous
-                ! if we have them, get rid of old matrix
-                if (havePrev) then
-                   deallocate(prev_indices)
-                   deallocate(prev_weights)
-                endif
-
-                ! Get routeHandle as well as matrix info
-                call ESMF_FieldRegridStore(srcField=srcField, dstField=dstField, &
-                     srcMaskValues=srcMaskValues, dstMaskValues=dstMaskValues, &
-                     regridmethod=regridmethod, &
-                     polemethod=polemethod, regridPoleNPnts=regridPoleNPnts, &
-                     unmappedaction=unmappedaction, &
-                     lineType=lineType, &
-                     normType=normType, &
-                     ignoreDegenerate=ignoreDegenerate, &
-                     routehandle=rh, &
-                     factorIndexList=prev_indices, factorList=prev_weights, &
-                     rc=localrc)
-                if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-                     ESMF_CONTEXT, rcToReturn=rc)) return
-
-                ! Mark as prev and record info about prev
-                havePrev=.true.
-                prevSrcStaggerLoc=currSrcStaggerLoc
-                prevDstStaggerLoc=currDstStaggerLoc
-                prevSrcGrid=currSrcGrid 
-                prevDstGrid=currDstGrid 
-             endif
-          else ! If not a grid pair no optimization at this point         
-             call ESMF_FieldRegridStore(srcField=srcField, dstField=dstField, &
-                  srcMaskValues=srcMaskValues, dstMaskValues=dstMaskValues, &
-                  regridmethod=regridmethod, &
-                  polemethod=polemethod, regridPoleNPnts=regridPoleNPnts, &
-                  unmappedaction=unmappedaction, &
-                  lineType=lineType, &
-                  normType=normType, &
-                  ignoreDegenerate=ignoreDegenerate, &
-                  routehandle=rh,rc=localrc)
-             if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-                  ESMF_CONTEXT, rcToReturn=rc)) return
-           endif
-
-          ! append rh to routehandle, transfer ownership, destroy rh noGarbage
-          if (present(routehandle)) then
-            call ESMF_RouteHandleAppend(routehandle, appendRoutehandle=rh, &
-              rraShift=rraShift, vectorLengthShift=vectorLengthShift, &
-              transferflag=.true., rc=localrc)
-            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-              ESMF_CONTEXT, rcToReturn=rc)) return
-            ! remove RouteHandle, just transferred from garbage collection
-            call ESMF_RouteHandleDestroy(rh, noGarbage=.true., rc=localrc)
-            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-              ESMF_CONTEXT, rcToReturn=rc)) return
-           endif
-        
-          ! adjust rraShift and vectorLengthShift
-          call ESMF_FieldGet(srcField, localDeCount=localDeCount, rc=localrc)
-          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rcToReturn=rc)) return
-          rraShift = rraShift + localDeCount
-          call ESMF_FieldGet(dstField, localDeCount=localDeCount, rc=localrc)
-          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rcToReturn=rc)) return
-          rraShift = rraShift + localDeCount
-          vectorLengthShift = vectorLengthShift + 1
-        enddo
-
-        ! if we have them, get rid of old matrix
-        if (havePrev) then
-           deallocate(prev_indices)
-           deallocate(prev_weights)
-        endif
-
-        deallocate(srcFieldList, dstFieldList)
-
-        ! return successfully
-        if (present(rc)) rc = ESMF_SUCCESS
-        
-    end subroutine ESMF_FieldBundleRegridStoreOLD
-!------------------------------------------------------------------------------ 
 
 
 !------------------------------------------------------------------------------
@@ -3628,7 +3279,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE: ESMF_FieldBundleRegridStore - Precompute a FieldBundle regrid operation
 ! \label{api:esmf_fieldbundleregridstore}
 ! !INTERFACE:
-  subroutine ESMF_FieldBundleRegridStoreNEW(srcFieldBundle, dstFieldBundle, &
+  subroutine ESMF_FieldBundleRegridStore(srcFieldBundle, dstFieldBundle, &
     srcMaskValues, dstMaskValues, regridmethod, polemethod, regridPoleNPnts, &
     lineType, normType, unmappedaction,  ignoreDegenerate, srcTermProcessing, &
     pipelineDepth, routehandle, rc)
@@ -4047,7 +3698,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
       if (.not.rhListMatch) then
         ! No match found: precompute new RH for this field pair
-#if 1
+#if 0
 call ESMF_LogWrite("no rhListMatch -> pre-compute new remapping!", &
   ESMF_LOGMSG_INFO)
 #endif
@@ -4060,7 +3711,7 @@ call ESMF_LogWrite("no rhListMatch -> pre-compute new remapping!", &
 
         if (associated(rhListG)) then
           ! able to reuse already precomputed weight matrix
-#if 1
+#if 0
 call ESMF_LogWrite("able to reuse already precomputed weight matrix!", &
   ESMF_LOGMSG_INFO)
 #endif
@@ -4076,7 +3727,7 @@ call ESMF_LogWrite("able to reuse already precomputed weight matrix!", &
             ESMF_CONTEXT, rcToReturn=rc)) return
         else
           ! must precompute full regridding
-#if 1
+#if 0
 call ESMF_LogWrite("must precompute full regridding!", &
   ESMF_LOGMSG_INFO)
 #endif
@@ -4117,7 +3768,7 @@ call ESMF_LogWrite("must precompute full regridding!", &
         endif
       else
         ! Match found: reuse previous RH for this field pair
-#if 1
+#if 0
 call ESMF_LogWrite("found rhListMatch -> reuse routehandle!", &
   ESMF_LOGMSG_INFO)
 #endif
@@ -4179,7 +3830,7 @@ call ESMF_LogWrite("found rhListMatch -> reuse routehandle!", &
     ! Return successfully
     if (present(rc)) rc = ESMF_SUCCESS
   
-  end subroutine ESMF_FieldBundleRegridStoreNEW
+  end subroutine ESMF_FieldBundleRegridStore
 !------------------------------------------------------------------------------
 
 
