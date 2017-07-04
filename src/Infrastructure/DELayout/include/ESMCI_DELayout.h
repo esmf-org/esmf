@@ -419,6 +419,25 @@ class XXE{
         bufferInfoList.erase(first, last);
       }
     }
+    bool getNextSubSuperVectorOkay(int *k){
+      // search for the next xxeSub element in the stream, starting at index k.
+      // when found return the element's superVectorOkay setting, and also 
+      // update k to point to the next stream element for continued search
+      XxeSubInfo *xxeSubInfo;
+      for (int i=*k; i<count; i++){
+        if (stream[i].opId==xxeSub){
+          *k = i+1;   // index where to start next time
+          xxeSubInfo = (XxeSubInfo *)&(stream[i]);
+          if (xxeSubInfo->xxe)
+            return xxeSubInfo->xxe->superVectorOkay;
+          else
+            return false; // default
+        }
+      }
+      // if no subXXE found then return false
+      return false;
+    }
+    
     int exec(int rraCount=0, char **rraList=NULL, int *vectorLength=NULL,
       int filterBitField=0x0, bool *finished=NULL, bool *cancelled=NULL, 
       double *dTime=NULL, int indexStart=-1, int indexStop=-1,

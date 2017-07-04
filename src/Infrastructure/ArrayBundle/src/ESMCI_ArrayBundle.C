@@ -1473,7 +1473,12 @@ int ArrayBundle::sparseMatMul(
           return rc;
         }
       }
+
+      // get a handle on the XXE stored in routehandle
+      XXE *xxe = (XXE *)(*routehandle)->getStorage();
+      
       if (srcArraybundle != NULL || dstArraybundle != NULL){
+        int k=0;  // init
         for (int i=0; i<count; i++){
           if (srcArraybundle != NULL){
             srcArray = srcArrayVector[i];
@@ -1491,6 +1496,8 @@ int ArrayBundle::sparseMatMul(
               rraList.push_back(rraElement);
             }
           }
+          // see if xxe sub element indicates okay for super-vectorization
+          bool superVectorOkay = xxe->getNextSubSuperVectorOkay(&k);
           int vectorL = 0;  // initialize
           // src-side super vectorization
           int srcLocalDeCount = 0;
@@ -1500,7 +1507,6 @@ int ArrayBundle::sparseMatMul(
           int **srcSuperVecSizeDis = new int*[2]; // distributed: i, j
           srcSuperVecSizeDis[0] = new int[srcLocalDeCount];
           srcSuperVecSizeDis[1] = new int[srcLocalDeCount];
-          bool superVectorOkay = true;  //TODO: get this from xxe sub stream
           srcArray->superVecParam(srcLocalDeCount, superVectorOkay,
             srcSuperVecSizeUnd, srcSuperVecSizeDis, vectorL);
           // dst-side super vectorization
@@ -1511,7 +1517,6 @@ int ArrayBundle::sparseMatMul(
           int **dstSuperVecSizeDis = new int*[2]; // distributed: i, j
           dstSuperVecSizeDis[0] = new int[dstLocalDeCount];
           dstSuperVecSizeDis[1] = new int[dstLocalDeCount];
-          superVectorOkay = true;  //TODO: get this from xxe sub stream
           dstArray->superVecParam(dstLocalDeCount, superVectorOkay,
             dstSuperVecSizeUnd, dstSuperVecSizeDis, vectorL);
           XXE::SuperVectP superVectP;
@@ -1583,8 +1588,6 @@ int ArrayBundle::sparseMatMul(
         filterBitField |= XXE::filterBitRegionTotalZero;  // filter reg. total zero
       if (zeroflag!=ESMC_REGION_SELECT)
         filterBitField |= XXE::filterBitRegionSelectZero; // filter reg. select zero
-      // get a handle on the XXE stored in routehandle
-      XXE *xxe = (XXE *)(*routehandle)->getStorage();
       // execute XXE stream
       localrc = xxe->exec(rraCount, &(rraList[0]), &(vectorLength[0]), 
         filterBitField, NULL, NULL, NULL, -1, -1,
@@ -1593,7 +1596,7 @@ int ArrayBundle::sparseMatMul(
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
         ESMC_CONTEXT, &rc)) return rc;
       // garbage collection
-      for (int i=0; i<superVectPList.size(); i++){
+      for (unsigned i=0; i<superVectPList.size(); i++){
         delete [] superVectPList[i].srcSuperVecSize_i;
         delete [] superVectPList[i].srcSuperVecSize_j;
         delete [] superVectPList[i].dstSuperVecSize_i;
