@@ -14,7 +14,7 @@
 #define HALO_STORE_MEMLOG_off
 
 #define ASMM_STORE_LOG_off
-#define ASMM_STORE_TIMING_on
+#define ASMM_STORE_TIMING_off
 #define ASMM_STORE_MEMLOG_off
 #define ASMM_STORE_COMMMATRIX_off
 #define ASMM_STORE_OPT_PRINT_off
@@ -9272,7 +9272,8 @@ template<typename SIT, typename DIT>
 #ifdef DEBUGGING
   {
     std::stringstream debugmsg;
-    debugmsg << "workWithTempArrays check: tensorMixFlag=" << tensorMixFlag 
+    debugmsg << "Array::tSparseMatMulStore(): workWithTempArrays check:"
+      << " tensorMixFlag=" << tensorMixFlag 
       << " srcTensorLength=" << srcTensorLength
       << " dstTensorLength=" << dstTensorLength
       << " srcDimCount=" << srcArray->getDistGrid()->getDimCount()
@@ -9305,8 +9306,9 @@ template<typename SIT, typename DIT>
 #ifdef DEBUGGING
   {
     std::stringstream debugmsg;
-    debugmsg << "workWithTempArrays active: srcTensorLength="
-      << srcTensorLength << " dstTensorLength=" << dstTensorLength;
+    debugmsg << "Array::tSparseMatMulStore(): workWithTempArrays active:"
+      << " srcTensorLength=" << srcTensorLength
+      << " dstTensorLength=" << dstTensorLength;
     ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_INFO);
   }
 #endif

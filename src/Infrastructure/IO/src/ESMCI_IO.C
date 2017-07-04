@@ -560,7 +560,7 @@ int IO::write(
       localrc = ESMF_STATUS_UNALLOCATED;
       break;
     case IO_ARRAY:
-#if 1
+#if 0
 ESMC_LogDefault.Write("IO::write() case: IO_ARRAY: begin", ESMC_LOGMSG_INFO);
 #endif
       // Check for redistribution (when DE/PET != 1)
@@ -575,7 +575,7 @@ ESMC_LogDefault.Write("IO::write() case: IO_ARRAY: begin", ESMC_LOGMSG_INFO);
       if (need_redist) {
         // Create a compatible temp Array with 1 DE per PET
         // std::cout << ESMC_METHOD << ": DE count > 1 - redist_arraycreate1de" << std::endl;
-#if 1
+#if 0
 ESMC_LogDefault.Write("IO::write() case: IO_ARRAY: bef redist_arraycreate1de()", ESMC_LOGMSG_INFO);
 #endif
         redist_arraycreate1de((*it)->getArray(), &temp_array_p, &localrc);
@@ -585,7 +585,7 @@ ESMC_LogDefault.Write("IO::write() case: IO_ARRAY: bef redist_arraycreate1de()",
           localrc = close();
           return rc;
         }
-#if 1
+#if 0
 ESMC_LogDefault.Write("IO::write() case: IO_ARRAY: aft redist_arraycreate1de()", ESMC_LOGMSG_INFO);
 #endif
 
@@ -621,13 +621,13 @@ ESMC_LogDefault.Write("IO::write() case: IO_ARRAY: aft redist_arraycreate1de()",
           if (reuseRH){
             // reuse the RH
             rh=rhh;
-#if 1
+#if 0
 ESMC_LogDefault.Write("IO::write() case: IO_ARRAY: reuse RH", ESMC_LOGMSG_INFO);
 #endif
           }else{
             // Precompute new RH for redistribution into the temp Array
             // std::cout << ESMC_METHOD << ": DE count > 1 - redistStore" << std::endl;
-#if 1
+#if 0
 ESMC_LogDefault.Write("IO::write() case: IO_ARRAY: bef redistStore()", ESMC_LOGMSG_INFO);
 #endif
             localrc = ESMCI::Array::redistStore((*it)->getArray(), temp_array_p, &rh, NULL,
@@ -637,7 +637,7 @@ ESMC_LogDefault.Write("IO::write() case: IO_ARRAY: bef redistStore()", ESMC_LOGM
               localrc = close();
               return rc;
             }
-#if 1
+#if 0
 ESMC_LogDefault.Write("IO::write() case: IO_ARRAY: aft redistStore()", ESMC_LOGMSG_INFO);
 #endif  
           }
@@ -645,7 +645,7 @@ ESMC_LogDefault.Write("IO::write() case: IO_ARRAY: aft redistStore()", ESMC_LOGM
         }
 
         // std::cout << ESMC_METHOD << ": DE count > 1 - redistribute data" << std::endl;
-#if 1
+#if 0
 ESMC_LogDefault.Write("IO::write() case: IO_ARRAY: bef redist()", ESMC_LOGMSG_INFO);
 #endif
         localrc = ESMCI::Array::redist((*it)->getArray(), temp_array_p, &rh,
@@ -655,7 +655,7 @@ ESMC_LogDefault.Write("IO::write() case: IO_ARRAY: bef redist()", ESMC_LOGMSG_IN
           localrc = close();
           return rc;
         }
-#if 1
+#if 0
 ESMC_LogDefault.Write("IO::write() case: IO_ARRAY: aft redist()", ESMC_LOGMSG_INFO);
 #endif
         // std::cout << ESMC_METHOD << ": DE count > 1 - redistribute complete!" << std::endl;
@@ -670,13 +670,13 @@ ESMC_LogDefault.Write("IO::write() case: IO_ARRAY: aft redist()", ESMC_LOGMSG_IN
         temp_array_undist_p = temp_array_p;
         // Create an aliased Array which treats all dimensions as distributed.
         // std::cout << ESMC_METHOD << ": calling undist_arraycreate_alldist()" << std::endl;
-#if 1
+#if 0
 ESMC_LogDefault.Write("IO::write() case: IO_ARRAY: bef undist_arraycreate_alldist()", ESMC_LOGMSG_INFO);
 #endif
         undist_arraycreate_alldist (temp_array_undist_p, &temp_array_p, &localrc);
         if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc))
           return rc;
-#if 1
+#if 0
 ESMC_LogDefault.Write("IO::write() case: IO_ARRAY: aft undist_arraycreate_alldist()", ESMC_LOGMSG_INFO);
 #endif
         // Find ungridded dimension labels
@@ -703,14 +703,14 @@ ESMC_LogDefault.Write("IO::write() case: IO_ARRAY: aft undist_arraycreate_alldis
       }
 
       // Write the Array
-#if 1
+#if 0
 ESMC_LogDefault.Write("IO::write() case: IO_ARRAY: bef arrayWrite()", ESMC_LOGMSG_INFO);
 #endif
       ioHandler->arrayWrite(temp_array_p, (*it)->getName(),
           dimLabels, timeslice, (*it)->varAttPack, (*it)->gblAttPack, &localrc);
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc))
         return rc;
-#if 1
+#if 0
 ESMC_LogDefault.Write("IO::write() case: IO_ARRAY: aft arrayWrite()", ESMC_LOGMSG_INFO);
 #endif
       // Clean ups //
@@ -719,7 +719,7 @@ ESMC_LogDefault.Write("IO::write() case: IO_ARRAY: aft arrayWrite()", ESMC_LOGMS
         if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc))
           return rc;
       }
-#if 1
+#if 0
 ESMC_LogDefault.Write("IO::write() case: IO_ARRAY: done", ESMC_LOGMSG_INFO);
 #endif
       break;
