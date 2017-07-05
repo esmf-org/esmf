@@ -362,6 +362,9 @@ int pio_cpp_put_att_ints (pio_file_desc_t file, pio_var_desc_t varDesc,
 int pio_cpp_put_att_floats (pio_file_desc_t file, pio_var_desc_t varDesc,
                               const char *keyword, const float *values, int nvalues);
 
+int pio_cpp_put_att_doubles (pio_file_desc_t file, pio_var_desc_t varDesc,
+                              const char *keyword, const double *values, int nvalues);
+
 ///////////////////////////////////////////
 //
 //  darray read/write interface functions

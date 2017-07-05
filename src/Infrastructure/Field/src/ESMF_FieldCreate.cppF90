@@ -514,7 +514,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_GeomType_Flag) :: geomtype
     type(ESMF_Grid) :: grid
     integer :: arbdim
-
+    character(320)  :: msgString
 
     ! Initialize
     localrc = ESMF_RC_NOT_IMPL
@@ -660,6 +660,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
  
     if (present(ungriddedLBound)) then   
        if (size(ungriddedLBound) .ne. fieldUngriddedDimCount) then  
+          write(msgString,*) "ungriddedLBound does not match: ", &
+            " fieldUngriddedDimCount=", fieldUngriddedDimCount, &
+            " fieldDimCount=", fieldDimCount, &
+            " gridDimCount=", gridDimCount, &
+            " grid_repdimcount=", grid_repdimcount
+          call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
           call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_SIZE, &   
                msg="- ungriddedLBound size must equal to array_rank-grid_rank", &  
                ESMF_CONTEXT, rcToReturn=rc)   
@@ -1638,7 +1644,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer :: localrc                          !  Local error code
     type(ESMF_ArraySpec) :: arrayspec
     integer :: rank, ungridded_dimcount, ungridded_ldimcount, ungridded_udimcount
-    integer :: memDimCount
+    integer :: memDimCount, grid_repdimcount, i
+    character(320)  :: msgString
 
     ! Initialize
     localrc = ESMF_RC_NOT_IMPL
@@ -1670,7 +1677,21 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
-    rank = ungridded_dimcount + memDimCount
+    grid_repdimcount = 0
+    if (present(gridToFieldMap)) then
+       do i = 1, size(gridToFieldMap)
+           if(gridToFieldMap(i) == 0) grid_repdimcount = grid_repdimcount + 1
+       enddo
+    endif
+
+    rank = ungridded_dimcount + memDimCount - grid_repdimcount
+    
+#ifdef DEBUGGING
+    write(msgString,*) "ESMF_FieldCreateGridTKR(): rank=", rank, &
+      "ungridded_dimcount=", ungridded_dimcount, "memDimCount=", memDimCount, &
+      "grid_repdimcount=", grid_repdimcount
+    call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+#endif
 
     ! Set ArraySpec from rank and typekind input
     call ESMF_ArraySpecSet(arrayspec, rank=rank, typekind=typekind, rc=localrc)

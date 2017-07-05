@@ -6621,6 +6621,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           call c_ESMC_AttPackGetCharList(mthisfield, name, attpack, & @\
             ESMF_TYPEKIND_CHARACTER, count, lattnestflag, lens, value, & @\
             localrc) @\
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
+            ESMF_CONTEXT, rcToReturn=rc)) return @\
         end if @\
       else @\
         call c_ESMC_AttributeIsPresent(mthisfield, name, lisPresent, localrc) @\
@@ -6629,10 +6631,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         if (lisPresent == ESMF_TRUE) then @\
           call c_ESMC_AttributeGetCharList(mthisfield, name, ESMF_TYPEKIND_CHARACTER, & @\
             count, lens, value, localrc) @\
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
+            ESMF_CONTEXT, rcToReturn=rc)) return @\
         endif @\
       endif @\
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
-        ESMF_CONTEXT, rcToReturn=rc)) return @\
  @\
       if (present(isPresent)) then @\
         isPresent = lisPresent @\
@@ -6924,6 +6926,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           call c_ESMC_AttPackGetCharList(mthisfield, name, attpack, & @\
             ESMF_TYPEKIND_CHARACTER, litemCount, lattnestflag, & @\
             lens, valueString, localrc) @\
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
+            ESMF_CONTEXT, rcToReturn=rc)) return @\
         end if @\
       else @\
         call c_ESMC_AttributeIsPresent(mthisfield, name, lisPresent, localrc) @\
@@ -6932,10 +6936,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         if (lisPresent == ESMF_TRUE) then @\
           call c_ESMC_AttributeGetCharList(mthisfield, name, ESMF_TYPEKIND_CHARACTER, & @\
             litemCount, lens, valueString, localrc) @\
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
+            ESMF_CONTEXT, rcToReturn=rc)) return @\
         endif @\
       endif @\
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
-        ESMF_CONTEXT, rcToReturn=rc)) return @\
  @\
       if (present(isPresent)) then @\
         isPresent = lisPresent @\
@@ -8343,6 +8347,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           call c_ESMC_AttPackGetCharList(mthisfield, name, attpack, & @\
             ESMF_TYPEKIND_CHARACTER, count, lattnestflag, & @\
             lens, value, localrc) @\
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
+            ESMF_CONTEXT, rcToReturn=rc)) return @\
         end if @\
       else @\
         call c_ESMC_AttributeIsPresent(mthisfield, name, lisPresent, localrc) @\
@@ -8351,10 +8357,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         if (lisPresent == ESMF_TRUE) then @\
           call c_ESMC_AttributeGetCharList(mthisfield, name, ESMF_TYPEKIND_CHARACTER, & @\
             count, lens, value, localrc) @\
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
+            ESMF_CONTEXT, rcToReturn=rc)) return @\
         endif @\
       endif @\
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
-        ESMF_CONTEXT, rcToReturn=rc)) return @\
  @\
       if (present(isPresent)) then @\
         isPresent = lisPresent @\
@@ -8646,6 +8652,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           call c_ESMC_AttPackGetCharList(mthisfield, name, attpack, & @\
             ESMF_TYPEKIND_CHARACTER, litemCount, lattnestflag, & @\
             lens, valueString, localrc) @\
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
+            ESMF_CONTEXT, rcToReturn=rc)) return @\
         end if @\
       else @\
         call c_ESMC_AttributeIsPresent(mthisfield, name, lisPresent, localrc) @\
@@ -8654,10 +8662,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         if (lisPresent == ESMF_TRUE) then @\
           call c_ESMC_AttributeGetCharList(mthisfield, name, ESMF_TYPEKIND_CHARACTER, & @\
             litemCount, lens, valueString, localrc) @\
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
+            ESMF_CONTEXT, rcToReturn=rc)) return @\
         endif @\
       endif @\
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
-        ESMF_CONTEXT, rcToReturn=rc)) return @\
  @\
       if (present(isPresent)) then @\
         isPresent = lisPresent @\

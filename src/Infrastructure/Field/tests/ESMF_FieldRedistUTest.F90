@@ -60,6 +60,8 @@ program ESMF_FieldRedistUTest
 
     if (.not. ESMF_TestMinPETs(4, ESMF_SRCLINE)) &
         call ESMF_Finalize(endflag=ESMF_END_ABORT)
+        
+    call ESMF_LogSet(flush=.true.)
 
 #ifdef ESMF_TESTEXHAUSTIVE
         !------------------------------------------------------------------------
@@ -470,7 +472,7 @@ contains
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
 
-        dstfptr = 0
+        dstfptr = -99
 
         ! perform redist
         call ESMF_FieldRedistStore(srcField, dstField, routehandle, rc=localrc)
@@ -611,7 +613,7 @@ contains
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
 
-        dstfptr = 0
+        dstfptr = -99
 
         ! perform redist
         call ESMF_FieldRedistStore(srcField, dstField, routehandle=routehandle, rc=localrc)
@@ -756,7 +758,7 @@ contains
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
 
-        dstfptr = 0
+        dstfptr = -99
 
         ! perform redist
         call ESMF_FieldRedistStore(srcField, dstField, &

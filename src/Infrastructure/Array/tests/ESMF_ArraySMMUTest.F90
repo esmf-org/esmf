@@ -121,13 +121,16 @@ module ESMF_ArraySMMUTest_comp_mod
 
   end subroutine !--------------------------------------------------------------
 
-  recursive subroutine test_smm(srcRegDecomp, dstPetList, &
-    srcTermProcessing, pipelineDepth, rc)
-    integer           :: srcRegDecomp(:)
-    integer, optional :: dstPetList(:)
-    integer, optional :: srcTermProcessing
-    integer, optional :: pipelineDepth
-    integer           :: rc
+  recursive subroutine test_smm(srcRegDecomp, dstPetList, vectorLength, &
+    srcTermProcessing, pipelineDepth, termorderflag, testUnmatched, rc)
+    integer                             :: srcRegDecomp(:)
+    integer,                   optional :: dstPetList(:)
+    integer,                   optional :: vectorLength
+    integer,                   optional :: srcTermProcessing
+    integer,                   optional :: pipelineDepth
+    type(ESMF_TermOrder_Flag), optional :: termorderflag
+    logical,                   optional :: testUnmatched
+    integer                             :: rc
 
     ! Local variables
     type(ESMF_VM)         :: vm
@@ -136,14 +139,34 @@ module ESMF_ArraySMMUTest_comp_mod
     type(ESMF_Array)      :: srcArray, dstArray
     integer               :: i, j, petCount, localPet, localDeCount
     integer, allocatable  :: localDeToDeMap(:)
-    integer, pointer      :: farrayPtr(:)
-    integer               :: seed(4,6), value, result(4,6), validation(4,6)
-    integer               :: factorList(19), factorIndexList(2,19)
+    integer, pointer      :: farrayPtr(:), farrayPtrV(:,:) 
+    integer, target       :: seedV(4,6,10), resultV(4,6,10), validationV(4,6,10)
+    integer, pointer      :: seed(:,:), result(:,:), validation(:,:)
+    integer               :: factorList(19), factorIndexList(2,19), value
     type(ESMF_RouteHandle):: rh, trh
+    integer               :: vectorLengthOpt
+    logical               :: testUnmatchedOpt
     character(len=160)    :: msg
     
     rc = ESMF_SUCCESS
-
+    
+    !---------------------------------------------------------------------------
+    ! deal with optional arguments
+    vectorLengthOpt = 0 ! default
+    if (present(vectorLength)) vectorLengthOpt = vectorLength
+    testUnmatchedOpt = .false.  ! default
+    if (present(testUnmatched)) testUnmatchedOpt = testUnmatched
+    
+    !---------------------------------------------------------------------------
+    ! checking for invalid input
+    if (vectorLengthOpt < 0 .or. vectorLengthOpt > 10) then
+      call ESMF_LogSetError(ESMF_RC_ARG_OUTOFRANGE, &
+        msg="vectorLengh out of range", &
+        line=__LINE__, &
+        file=FILENAME, rcToReturn=rc) 
+      return  ! bail out
+    endif
+    
     !---------------------------------------------------------------------------
     ! get current VM and pet info
     
@@ -169,34 +192,54 @@ module ESMF_ArraySMMUTest_comp_mod
       file=FILENAME)) &
       return  ! bail out
 
-    srcArray = ESMF_ArrayCreate(srcDistGrid, ESMF_TYPEKIND_I4, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, &
-      file=FILENAME)) &
-      return  ! bail out
+    if (vectorLengthOpt>0) then
+      srcArray = ESMF_ArrayCreate(srcDistGrid, ESMF_TYPEKIND_I4, &
+        undistLBound=(/1/), undistUBound=(/vectorLengthOpt/), rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, &
+        file=FILENAME)) &
+        return  ! bail out
+    else
+      srcArray = ESMF_ArrayCreate(srcDistGrid, ESMF_TYPEKIND_I4, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, &
+        file=FILENAME)) &
+        return  ! bail out
+    endif
 
     !---------------------------------------------------------------------------
     ! initialize seed on PET 0 and scatter into srcArray
 
+    seed => seedV(:,:,1)
     if (localPet==0) then
       value = 1 ! initialize start value
       do j=1, 6
         do i=1, 4
-          seed(i, j) = value
+          seed(i,j) = value
           value = value + 1
         enddo
       enddo
     endif
 
-    call ESMF_ArrayScatter(srcArray, seed, rootPet=0, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, &
-      file=FILENAME)) &
-      return  ! bail out
+    if (vectorLengthOpt>0) then
+      call ESMF_ArrayScatter(srcArray, seedV(:,:,1:vectorLengthOpt), &
+        rootPet=0, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, &
+        file=FILENAME)) &
+        return  ! bail out
+    else
+      call ESMF_ArrayScatter(srcArray, seed, rootPet=0, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, &
+        file=FILENAME)) &
+        return  ! bail out
+    endif
       
     !---------------------------------------------------------------------------
     ! set up array for transpose validation
 
+    validation => validationV(:,:,1)
     if (localPet==0) then
       validation(1,1) = -120
       validation(2,1) = -459
@@ -240,11 +283,20 @@ module ESMF_ArraySMMUTest_comp_mod
       file=FILENAME)) &
       return  ! bail out
 
-    dstArray = ESMF_ArrayCreate(dstDistGrid, ESMF_TYPEKIND_I4, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, &
-      file=FILENAME)) &
-      return  ! bail out
+    if (vectorLengthOpt>0) then
+      dstArray = ESMF_ArrayCreate(dstDistGrid, ESMF_TYPEKIND_I4, &
+        undistLBound=(/1/), undistUBound=(/vectorLengthOpt/), rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, &
+        file=FILENAME)) &
+        return  ! bail out
+    else
+      dstArray = ESMF_ArrayCreate(dstDistGrid, ESMF_TYPEKIND_I4, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, &
+        file=FILENAME)) &
+        return  ! bail out
+    endif
 
     !---------------------------------------------------------------------------
     ! initialize factorIndexList and factorList (but only on PET 0)
@@ -322,16 +374,15 @@ module ESMF_ArraySMMUTest_comp_mod
       factorIndexList(2,18) = 4
       factorList(18)        = 9
 
-#define TEST_UNMATCHED
-#ifdef TEST_UNMATCHED
-      factorIndexList(1,19) = 15  ! valid src sequence index
-      factorIndexList(2,19) = 40  ! invalid dst sequence index
-      factorList(19)        = 100 ! will never be used
-#else
-      factorIndexList(1,19) = 1   ! inside
-      factorIndexList(2,19) = 1   ! inside
-      factorList(19)        = 0   ! does not change anything
-#endif
+      if (testUnmatchedOpt) then
+        factorIndexList(1,19) = 15  ! valid src sequence index
+        factorIndexList(2,19) = 40  ! invalid dst sequence index
+        factorList(19)        = 100 ! will never be used
+      else
+        factorIndexList(1,19) = 1   ! inside
+        factorIndexList(2,19) = 1   ! inside
+        factorList(19)        = 0   ! does not change anything
+      endif
 
     endif
     
@@ -341,42 +392,48 @@ module ESMF_ArraySMMUTest_comp_mod
     if (localPet == 0) then
       call ESMF_ArraySMMStore(srcArray, dstArray, factorList=factorList, &
         factorIndexList=factorIndexList, routehandle=rh, &
-#ifdef TEST_UNMATCHED
-        ignoreUnmatchedIndices=.true., &
-#endif
+        ignoreUnmatchedIndices=testUnmatchedOpt, &
         srcTermProcessing=srcTermProcessing, pipelineDepth=pipelineDepth, &
         transposeRoutehandle=trh, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, &
-      file=FILENAME)) &
-      return  ! bail out
+        line=__LINE__, &
+        file=FILENAME)) &
+        return  ! bail out
     else
       call ESMF_ArraySMMStore(srcArray, dstArray, routehandle=rh, &
-#ifdef TEST_UNMATCHED
-        ignoreUnmatchedIndices=.true., &
-#endif
+        ignoreUnmatchedIndices=testUnmatchedOpt, &
         srcTermProcessing=srcTermProcessing, pipelineDepth=pipelineDepth, &
         transposeRoutehandle=trh, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, &
-      file=FILENAME)) &
-      return  ! bail out
+        line=__LINE__, &
+        file=FILENAME)) &
+        return  ! bail out
     endif
 
     !---------------------------------------------------------------------------
     ! Re-set the data in srcArray, because it will have been modified due to
     ! the transposeRoutehandle option in ESMF_ArraySMMStore()
 
-    call ESMF_ArrayScatter(srcArray, seed, rootPet=0, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, &
-      file=FILENAME)) &
-      return  ! bail out
+    if (vectorLengthOpt>0) then
+      call ESMF_ArrayScatter(srcArray, seedV(:,:,1:vectorLengthOpt), &
+        rootPet=0, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, &
+        file=FILENAME)) &
+        return  ! bail out
+    else
+      call ESMF_ArrayScatter(srcArray, seed, rootPet=0, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, &
+        file=FILENAME)) &
+        return  ! bail out
+    endif
 
     !---------------------------------------------------------------------------
     ! ASMM
     
-    call ESMF_ArraySMM(srcArray, dstArray, routehandle=rh, rc=rc)
+    call ESMF_ArraySMM(srcArray, dstArray, termorderflag=termorderflag, &
+      routehandle=rh, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=FILENAME)) &
@@ -410,15 +467,25 @@ module ESMF_ArraySMMUTest_comp_mod
     
     do i=0, localDeCount-1
     
-      call ESMF_ArrayGet(dstArray, localDe=i, farrayPtr=farrayPtr, rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, &
-        file=FILENAME)) &
-        return  ! bail out
+      if (vectorLengthOpt>0) then
+        call ESMF_ArrayGet(dstArray, localDe=i, farrayPtr=farrayPtrV, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, &
+          file=FILENAME)) &
+          return  ! bail out
+        value = farrayPtrV(1,1)
+      else
+        call ESMF_ArrayGet(dstArray, localDe=i, farrayPtr=farrayPtr, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, &
+          file=FILENAME)) &
+          return  ! bail out
+        value = farrayPtr(1)
+      endif
       
       select case (localDeToDeMap(i))
       case (0)
-        if (farrayPtr(1) == -66) then
+        if (value == -66) then
           call ESMF_LogWrite("Correct result verified in dstArray on DE 0", &
             ESMF_LOGMSG_INFO, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -434,7 +501,7 @@ module ESMF_ArraySMMUTest_comp_mod
           return  ! bail out
         endif
       case (1)
-        if (farrayPtr(1) == 153) then
+        if (value == 153) then
           call ESMF_LogWrite("Correct result verified in dstArray on DE 1", &
             ESMF_LOGMSG_INFO, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -450,7 +517,7 @@ module ESMF_ArraySMMUTest_comp_mod
           return  ! bail out
         endif
       case (2)
-        if (farrayPtr(1) == -6) then
+        if (value == -6) then
           call ESMF_LogWrite("Correct result verified in dstArray on DE 2", &
             ESMF_LOGMSG_INFO, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -466,7 +533,7 @@ module ESMF_ArraySMMUTest_comp_mod
           return  ! bail out
         endif
       case (3)
-        if (farrayPtr(1) == 192) then
+        if (value == 192) then
           call ESMF_LogWrite("Correct result verified in dstArray on DE 3", &
             ESMF_LOGMSG_INFO, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -490,7 +557,8 @@ module ESMF_ArraySMMUTest_comp_mod
     !---------------------------------------------------------------------------
     ! ASMM transpose
     
-    call ESMF_ArraySMM(dstArray, srcArray, routehandle=trh, rc=rc)
+    call ESMF_ArraySMM(dstArray, srcArray, termorderflag=termorderflag, &
+      routehandle=trh, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=FILENAME)) &
@@ -508,11 +576,21 @@ module ESMF_ArraySMMUTest_comp_mod
     !---------------------------------------------------------------------------
     ! Verification transpose
     
-    call ESMF_ArrayGather(srcArray, result, rootPet=0, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, &
-      file=FILENAME)) &
-      return  ! bail out
+    result => resultV(:,:,1)
+    if (vectorLengthOpt>0) then
+      call ESMF_ArrayGather(srcArray, resultV(:,:,1:vectorLengthOpt), &
+        rootPet=0, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, &
+        file=FILENAME)) &
+        return  ! bail out
+    else
+      call ESMF_ArrayGather(srcArray, result, rootPet=0, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, &
+        file=FILENAME)) &
+        return  ! bail out
+    endif
 
     if (localPet==0) then
       do j=1, 6
@@ -648,10 +726,74 @@ program ESMF_ArraySMMUTest
 
   !------------------------------------------------------------------------
   !NEX_UTest
+  write(name, *) "src 1 DE/PET -> dst default 4DEs, vectorLength=4 ASMM Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS" 
+  call test_smm(srcRegDecomp=(/1,petCount/), vectorLength=4, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  ! must abort to prevent possible hanging due to communications
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "src 1 DE/PET -> dst default 4DEs, ESMF_TERMORDER_SRCSEQ ASMM Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS" 
+  call test_smm(srcRegDecomp=(/1,petCount/), &
+    termorderflag=ESMF_TERMORDER_SRCSEQ, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  ! must abort to prevent possible hanging due to communications
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "src 1 DE/PET -> dst default 4DEs, vectorLength=4, ESMF_TERMORDER_SRCSEQ ASMM Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS" 
+  call test_smm(srcRegDecomp=(/1,petCount/), vectorLength=4, &
+    srcTermProcessing=1, termorderflag=ESMF_TERMORDER_SRCSEQ, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  ! must abort to prevent possible hanging due to communications
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "src 1 DE/PET -> dst default 4DEs, vectorLength=4, ESMF_TERMORDER_SRCSEQ ASMM Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS" 
+  call test_smm(srcRegDecomp=(/1,petCount/), vectorLength=4, &
+    srcTermProcessing=0, termorderflag=ESMF_TERMORDER_SRCSEQ, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  ! must abort to prevent possible hanging due to communications
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "src 1 DE/PET -> dst default 4DEs, testUnmatched ASMM Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS" 
+  call test_smm(srcRegDecomp=(/1,petCount/), testUnmatched=.true., rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  ! must abort to prevent possible hanging due to communications
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
   write(name, *) "src 1 DE/PET -> dst default 4DEs ASMM Test w/ tuning parameters"
   write(failMsg, *) "Did not return ESMF_SUCCESS" 
   call test_smm(srcRegDecomp=(/1,petCount/), srcTermProcessing=10, &
     pipelineDepth=4, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  ! must abort to prevent possible hanging due to communications
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "src 1 DE/PET -> dst default 4DEs ASMM Test w/ tuning parameters, testUnmatched"
+  write(failMsg, *) "Did not return ESMF_SUCCESS" 
+  call test_smm(srcRegDecomp=(/1,petCount/), srcTermProcessing=10, &
+    pipelineDepth=4, testUnmatched=.true., rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   ! must abort to prevent possible hanging due to communications
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
@@ -672,6 +814,16 @@ program ESMF_ArraySMMUTest
   write(name, *) "src 2 DEs/PET -> dst default 4DEs ASMM Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS" 
   call test_smm(srcRegDecomp=(/2,petCount/), rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  ! must abort to prevent possible hanging due to communications
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "src 2 DEs/PET -> dst default 4DEs, testUnmatched ASMM Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS" 
+  call test_smm(srcRegDecomp=(/2,petCount/), testUnmatched=.true., rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   ! must abort to prevent possible hanging due to communications
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
