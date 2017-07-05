@@ -369,7 +369,7 @@ namespace ESMCI {
     uint64_t rtt, rttmin, invalidtime;
     int rttmin_notchanged;
     int64_t offset;
-    invalidtime = 42000000000;
+    invalidtime = 42000000000ULL;
     rttmin = 1E12;
     offset = 0;
     rttmin_notchanged = 0;
