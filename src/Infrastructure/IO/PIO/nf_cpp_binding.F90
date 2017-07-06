@@ -1893,7 +1893,7 @@ function pio_cpp_put_att_doubles (file, vardesc, name, values, nvalues) result(i
 #else
   character(len= max_path_len)   :: attname
 #endif
-  real :: attvalues(int (nvalues))
+  real(kind (0.0d0)) :: attvalues(int (nvalues))
   integer :: clen
 
   !  text

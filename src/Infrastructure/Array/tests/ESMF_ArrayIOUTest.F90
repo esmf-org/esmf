@@ -1480,6 +1480,24 @@ program ESMF_ArrayIOUTest
 
 !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Set numeric/double range name Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_AttributeAdd (array_gxt,  &
+      convention=apConv, purpose=apPurp,  &
+      attrList=(/ 'valid_range_double' /), rc=rc)
+  call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+!------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Set numeric/double range values Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_AttributeSet (array_gxt,  &
+      'valid_range_double', valueList=(/ -330.0d0, 330.0d0 /),  &
+      convention=apConv, purpose=apPurp, rc=rc)
+  call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+!------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
 ! ! Given an ESMF array, write the netCDF file.
   write(name, *) "Array with Attributes write to NetCDF Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"

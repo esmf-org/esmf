@@ -24,10 +24,6 @@
 #include "ESMCI_PIO_Handler.h"
 
 // higher level, 3rd party or system includes here
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <ctype.h>
 #include <vector>
 #include <iomanip>
 #include <iostream>
@@ -1571,17 +1567,17 @@ void PIO_Handler::attPackPut (
       case ESMC_TYPEKIND_R8:
       {
         int nvals;
-        std::vector<ESMC_R8> floatvals;
-        localrc = att->get (&nvals, &floatvals);
+        std::vector<ESMC_R8> doublevals;
+        localrc = att->get (&nvals, &doublevals);
         if (ESMC_LogDefault.MsgFoundError(localrc,
-            "Can not access float Attribute value for " + att->getName(),
+            "Can not access double Attribute value for " + att->getName(),
             ESMC_CONTEXT, rc)) {
           if (!vardesc) free (vardesc_local);
           return;
         }
         piorc = pio_cpp_put_att_doubles (pioFileDesc, vardesc_local,
-            att->getName().c_str(), &floatvals[0], floatvals.size());
-        if (!CHECKPIOERROR(piorc, "Attempting to set float Attribute: " + att->getName(),
+            att->getName().c_str(), &doublevals[0], doublevals.size());
+        if (!CHECKPIOERROR(piorc, "Attempting to set double Attribute: " + att->getName(),
             ESMF_RC_FILE_WRITE, (*rc))) {
           if (!vardesc) free (vardesc_local);
           return;
