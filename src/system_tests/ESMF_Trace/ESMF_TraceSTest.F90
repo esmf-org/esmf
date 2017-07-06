@@ -354,12 +354,12 @@ program ESMF_TraceSTest
        ESMF_CONTEXT, rcToReturn=rc)) &
        call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
   
-  if (localPet == 0) then
-     call ESMF_UtilIOUnitGet(funit, rc=localrc)
-     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-          ESMF_CONTEXT, rcToReturn=rc)) &
-          call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
-     
+  call ESMF_UtilIOUnitGet(funit, rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+       ESMF_CONTEXT, rcToReturn=rc)) &
+       call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
+
+  if (localPet == 0) then 
      ! verify metadata file exists
      ioerr = 0
      open (unit=funit, file="traceout/metadata", status="old", &
@@ -397,7 +397,7 @@ program ESMF_TraceSTest
   open (unit=funit, file=trim(filename), status="old", &
        action="read", iostat=ioerr)
   if (ioerr /= 0) then
-     write (failMsg, *) "Failed to open trace file."
+     write (failMsg, *) "Failed to open trace file: ", trim (filename), ", ioerr =", ioerr
      call ESMF_STest((ioerr /= 0), testname, failMsg, result, ESMF_SRCLINE)
      goto 20
   endif
