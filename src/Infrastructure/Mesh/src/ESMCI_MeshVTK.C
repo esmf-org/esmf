@@ -812,7 +812,7 @@ void ReadVTKMeshBody(const std::string &filename, int *nodeId, double *nodeCoord
     // Process the data.  data_type is one of elem or node
     char vname[512];
     char vtype[15];
-    ThrowRequire(1 == fscanf(fp(), "SCALARS %s %s 1\n", vname, vtype));
+    ThrowRequire(2 == fscanf(fp(), "SCALARS %s %s 1\n", vname, vtype));
 //std::cout << "Reading var:" << vname << std::endl;
 
     fscanf(fp(), "LOOKUP_TABLE default\n");
