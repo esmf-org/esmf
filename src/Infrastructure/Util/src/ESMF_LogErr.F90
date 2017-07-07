@@ -124,7 +124,8 @@ end type
 type(ESMF_LogKind_Flag), parameter :: &
     ESMF_LOGKIND_SINGLE = ESMF_LogKind_Flag(1), &
     ESMF_LOGKIND_MULTI = ESMF_LogKind_Flag(2),  &
-    ESMF_LOGKIND_NONE = ESMF_LogKind_Flag(3)
+    ESMF_LOGKIND_MULTI_ON_ERROR = ESMF_LogKind_Flag(3),  &
+    ESMF_LOGKIND_NONE = ESMF_LogKind_Flag(4)
 
 !     ! Log Entry
 type ESMF_LogEntry
@@ -211,6 +212,7 @@ end type ESMF_LogPrivate
     public ESMF_LOGMSG_NOTRACE
     public ESMF_LOGKIND_SINGLE
     public ESMF_LOGKIND_MULTI
+    public ESMF_LOGKIND_MULTI_ON_ERROR
     public ESMF_LOGKIND_NONE
 
 !------------------------------------------------------------------------------
@@ -2100,6 +2102,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     logical :: isDefault
     type(ESMF_LogPrivate), pointer          :: alog
     type(ESMF_LogEntry), dimension(:), pointer :: localbuf
+    type(ESMF_Logical) :: traceFlag_c
 
     ESMF_INIT_CHECK_SET_SHALLOW(ESMF_LogGetInit,ESMF_LogInit,log)
 
@@ -2184,6 +2187,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
       if (present (trace)) then
         alog%traceFlag = trace
+        if (isDefault) then
+          !TODO: Should work with user logs as well.  wws...
+          traceFlag_c = trace
+          call c_ESMC_LogSetTrace (traceFlag_c, status2)
+        end if
         if (trace) then
           call ESMF_LogWrite ('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!',  &
               ESMF_LOGMSG_TRACE, method=ESMF_METHOD, log=log)
