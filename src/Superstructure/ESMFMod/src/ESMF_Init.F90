@@ -378,9 +378,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ! check logkindflag in case it is coming across from the C++ side with
       ! an incorrect value
       if (present(logkindflag)) then
-        if (logkindflag.eq.ESMF_LOGKIND_SINGLE .OR. &
-            logkindflag.eq.ESMF_LOGKIND_MULTI .OR. &
-            logkindflag.eq.ESMF_LOGKIND_NONE) then
+        if (logkindflag == ESMF_LOGKIND_SINGLE .or. &
+            logkindflag == ESMF_LOGKIND_MULTI .or. &
+            logkindflag == ESMF_LOGKIND_MULTI_ON_ERROR .or.  &
+            logkindflag == ESMF_LOGKIND_NONE) then
           logkindflagUse = logkindflag
         else
           logkindflagUse = ESMF_LOGKIND_MULTI

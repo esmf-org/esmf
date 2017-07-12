@@ -183,6 +183,8 @@ type ESMF_LogPrivate
     type(ESMF_LogMsg_Flag), pointer                 ::  logmsgAbort(:)=> null ()
     logical                                         ::  traceFlag = .false.
     logical                                         ::  highResTimestampFlag = .false.
+    logical                                         ::  appendFlag = .true.
+    logical                                         ::  deferredOpenFlag = .false.
 #else
     type(ESMF_LogEntry), dimension(:),pointer       ::  LOG_ENTRY
     type(ESMF_Logical)                              ::  FileIsOpen
@@ -192,6 +194,8 @@ type ESMF_LogPrivate
     type(ESMF_LogMsg_Flag), pointer                 ::  logmsgAbort(:)
     logical                                         ::  traceFlag
     logical                                         ::  highResTimestampFlag
+    logical                                         ::  appendflag
+    logical                                         ::  deferredOpenFlag
 #endif
     character(len=ESMF_MAXPATHLEN)                  ::  nameLogErrFile
     character(len=ESMF_MAXSTR)                      ::  petNumLabel
@@ -551,6 +555,8 @@ contains
        s%errorMaskCount=0
        s%logmsgList => null ()
        s%traceFlag = .false.
+       s%deferredOpenFlag = .false.
+       s%appendFlag = .true.
        ESMF_INIT_SET_DEFINED(s)
     end subroutine ESMF_LogPrivateInit
 
@@ -1718,9 +1724,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !DESCRIPTION:
 !      This routine opens a file named {\tt filename} and associates
 !      it with the {\tt ESMF\_Log}.  When {\tt logkindflag} is set to
-!      {\tt ESMF\_LOGKIND\_MULTI} the file name is prepended with PET
-!      number identification.  If the incoming log is already open,
-!      an error is returned.
+!      {\tt ESMF\_LOGKIND\_MULTI} or {\tt ESMF\_LOGKIND\_MULTI\_ON\_ERROR}
+!      the file name is prepended with PET number identification.  If the
+!      incoming log is already open, an error is returned.
 !
 !      The arguments are:
 !      \begin{description}
@@ -1734,7 +1740,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !            end of the file.  If not specified, defaults to {\tt .true.}.
 !      \item [{[logkindflag]}]
 !            Set the logkindflag. See section \ref{const:logkindflag} for a list of
-!            valid options.
+!            valid options.  When the {\tt ESMF\_LOGKIND\_MULTI\_ON\_ERROR} is selected,
+!            the log opening is deferred until a {\tt ESMF\_LogWrite} with log message of
+!            type {\tt ESMF\_LOGMSG\_ERROR} is written.
 !            If not specified, defaults to {\tt ESMF\_LOGKIND\_MULTI}.
 !      \item [{[rc]}]
 !            Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -1750,7 +1758,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     integer :: localrc, rc2
     integer :: iostat, memstat
-    logical                                                :: appendflag_local
     integer                                                :: i
     type(ESMF_LogEntry), dimension(:), pointer             :: localbuf
     character(len=ESMF_MAXPATHLEN)                         :: fname
@@ -1769,11 +1776,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         rc=ESMF_FAILURE
     endif
 
-    appendflag_local = .true.
-    if (present (appendflag)) then
-      appendflag_local = appendflag
-    end if
-
     if(log%logTableIndex>0) then
       alog => ESMF_LogTable(log%logTableIndex)
     else
@@ -1783,6 +1785,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     endif
 
     ESMF_INIT_CHECK_SET_SHALLOW(ESMF_LogPrivateGetInit,ESMF_LogPrivateInit,alog)
+
+    alog%appendFlag = .true.
+    if (present (appendflag)) then
+      alog%appendFlag = appendflag
+    end if
 
     ! Test if it is open or closed
     if (alog%FileIsOpen == ESMF_TRUE) then
@@ -1850,63 +1857,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         alog%nameLogErrFile=fname
     endif
 
-    ! find an available unit number
-    call ESMF_UtilIOUnitGet (alog%unitNumber, rc=localrc)
-    if (localrc /= ESMF_SUCCESS) then
-        if (present(rc)) then
-            rc=ESMF_RC_CANNOT_GET
-        endif
-        return
-    endif
-
-    position = merge ("append", "rewind", appendflag_local)
-
-    ! open the file, with retries
-    do i=1, ESMF_LOG_MAXTRYOPEN
-#if !defined (ESMF_OS_MinGW)
-        OPEN(UNIT=alog%unitNumber,File=alog%nameLogErrFile,&
-             POSITION=position, ACTION="WRITE", STATUS="UNKNOWN", IOSTAT=iostat)
-#else
-#if defined (__INTEL_COMPILER)
-        OPEN(UNIT=alog%unitNumber,File=alog%nameLogErrFile,&
-             POSITION=position, ACTION="WRITE", STATUS="UNKNOWN", &
-             SHARE="DENYNONE", IOSTAT=iostat)
-#else
-        OPEN(UNIT=alog%unitNumber,File=alog%nameLogErrFile,&
-             POSITION=position, ACTION="WRITE", STATUS="UNKNOWN", IOSTAT=iostat)
-#endif
-#endif
-        if (iostat == 0) then
-            alog%FileIsOpen = ESMF_TRUE
-            exit
-        endif
-    enddo
-
-    ! if unable to open file then error out
-    if (alog%FileIsOpen /= ESMF_TRUE) then
-        if (present(rc)) then
-            rc=ESMF_RC_FILE_UNEXPECTED
-        endif
-        write (ESMF_UtilIOStderr,*) ESMF_METHOD,  &
-            ': error opening file: ', trim (alog%nameLogErrFile),  &
-            ', iostat =', iostat
-        return
-    endif
-
-    ! BEWARE:  absoft 8.0 compiler bug - if you try to allocate directly
-    ! you get an error.  if you allocate a local buffer and then point the
-    ! derived type buffer at it, it works.  go figure.
-
-    allocate(localbuf(alog%maxElements), stat=memstat)
-    if (memstat /= 0) then
-      write (ESMF_UtilIOStderr,*) ESMF_METHOD,  &
-          ": Allocation of buffer failed."
+    ! Actually open the file
+    if(alog%logkindflag /= ESMF_LOGKIND_MULTI_ON_ERROR) then
+      call ESMF_LogOpenFile (alog, rc=localrc)
       if (present(rc)) then
-          rc = ESMF_RC_MEM_ALLOCATE
+        rc=localrc
       endif
-      return
-    endif
-    alog%LOG_ENTRY => localbuf
+    else
+      alog%deferredOpenFlag = .true.
+    end if
 
   endif
 
@@ -1983,6 +1942,98 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   end if
 
 end subroutine ESMF_LogOpenDefault
+
+!--------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_LogOpenFile()"
+!BOPI
+! !IROUTINE: ESMF_LogOpenFile - Open the log file and allocate buffer
+
+! !INTERFACE:
+  subroutine ESMF_LogOpenFile (alog, rc)
+!
+! !ARGUMENTS:
+!
+    type(ESMF_LogPrivate), intent(inout) :: alog
+    integer,               intent(out)   :: rc
+!
+! !DESCRIPTION:
+!     This subroutine opens the log file and allocates the log buffer.
+!
+!     The arguments are:
+!     \begin{description}
+!
+!     \item [alog]
+!       Internal Log object.
+!     \item [rc]
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOPI
+
+    type(ESMF_LogEntry), pointer :: localbuf(:)
+    character(8) :: position
+    integer :: i
+    integer :: memstat, iostat
+    integer :: localrc
+
+    ! Initialize return code; assume routine not implemented
+    rc=ESMF_RC_NOT_IMPL
+
+    ! find an available unit number
+    call ESMF_UtilIOUnitGet (alog%unitNumber, rc=localrc)
+    if (localrc /= ESMF_SUCCESS) then
+      rc=ESMF_RC_CANNOT_GET
+    endif
+
+    position = merge ("append", "rewind", alog%appendFlag)
+
+    ! open the file, with retries
+    do i=1, ESMF_LOG_MAXTRYOPEN
+#if !defined (ESMF_OS_MinGW)
+        OPEN(UNIT=alog%unitNumber,File=alog%nameLogErrFile,&
+             POSITION=position, ACTION="WRITE", STATUS="UNKNOWN", IOSTAT=iostat)
+#else
+#if defined (__INTEL_COMPILER)
+        OPEN(UNIT=alog%unitNumber,File=alog%nameLogErrFile,&
+             POSITION=position, ACTION="WRITE", STATUS="UNKNOWN", &
+             SHARE="DENYNONE", IOSTAT=iostat)
+#else
+        OPEN(UNIT=alog%unitNumber,File=alog%nameLogErrFile,&
+             POSITION=position, ACTION="WRITE", STATUS="UNKNOWN", IOSTAT=iostat)
+#endif
+#endif
+        if (iostat == 0) then
+            alog%FileIsOpen = ESMF_TRUE
+            exit
+        endif
+    enddo
+
+    ! if unable to open file then error out
+    if (alog%FileIsOpen /= ESMF_TRUE) then
+      rc=ESMF_RC_FILE_UNEXPECTED
+      write (ESMF_UtilIOStderr,*) ESMF_METHOD,  &
+          ': error opening file: ', trim (alog%nameLogErrFile),  &
+          ', iostat =', iostat
+      return
+    endif
+
+    ! BEWARE:  absoft 8.0 compiler bug - if you try to allocate directly
+    ! you get an error.  if you allocate a local buffer and then point the
+    ! derived type buffer at it, it works.  go figure.
+
+    allocate(localbuf(alog%maxElements), stat=memstat)
+    if (memstat /= 0) then
+      write (ESMF_UtilIOStderr,*) ESMF_METHOD,  &
+          ': Allocation of buffer failed.'
+      rc = ESMF_RC_MEM_ALLOCATE
+      return
+    endif
+    alog%LOG_ENTRY => localbuf
+
+    rc = ESMF_SUCCESS
+
+  end subroutine ESMF_LogOpenFile
 
 !--------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -2478,6 +2529,24 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (associated(alog)) then
 
       if (alog%logkindflag /= ESMF_LOGKIND_NONE) then
+
+        if (alog%deferredOpenFlag) then
+          if (logmsgFlag == ESMF_LOGMSG_ERROR) then
+            call ESMF_LogOpenFile (alog, rc=localrc)
+            if (localrc /= ESMF_SUCCESS) then
+              if (present (rc)) then
+                rc = localrc
+              end if
+              return
+            end if
+            alog%deferredOpenFlag = .false.
+          else
+            if (present (rc)) then
+              rc = ESMF_SUCCESS
+            end if
+            return
+          end if
+        end if
 
         if (alog%FileIsOpen /= ESMF_TRUE) then
           write (ESMF_UtilIOStderr,*) ESMF_METHOD,  &
