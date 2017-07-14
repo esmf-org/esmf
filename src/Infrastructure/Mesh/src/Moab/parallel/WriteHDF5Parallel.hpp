@@ -175,7 +175,7 @@ class WriteHDF5Parallel : public WriteHDF5
                               long* total_ents_out,
                               const DataSetCreator& creator = NoopDescCreator(),
                               ExportSet* groups[] = 0,
-                              id_t* first_ids_out = NULL );
+                              wid_t* first_ids_out = NULL );
   
     void print_shared_sets();
     void print_set_sharing_data( const Range& range, const char* label, Tag idt );

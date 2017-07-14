@@ -3,7 +3,7 @@
  * storing and accessing finite element mesh data.
  * 
  * Copyright 2004 Sandia Corporation.  Under the terms of Contract
- * DE-AC04-94AL85000 with Sandia Coroporation, the U.S. Government
+ * DE-AC04-94AL85000 with Sandia Corporation, the U.S. Government
  * retains certain rights in this software.
  * 
  * This library is free software; you can redistribute it and/or
@@ -22,16 +22,12 @@
 #include "moab/CN.hpp"
 #include "moab/GeomUtil.hpp"
 #include "moab/Matrix3.hpp"
+#include "moab/Util.hpp"
 #include <cmath>
 #include <algorithm>
 #include <assert.h>
 #include <iostream>
 #include <limits>
-
-#if defined(_MSC_VER) || defined(__MINGW32__)
-#  include <float.h>
-#  define finite(A) _finite(A)
-#endif
 
 namespace moab {
 
@@ -81,7 +77,7 @@ bool segment_box_intersect( CartVect box_min,
     const double t_max = box_max[i] / seg_unit_dir[i];
     
       // check if line is parallel to planes
-    if (!finite(t_min)) {
+    if (!Util::is_finite(t_min)) {
       if (box_min[i] > 0.0 || box_max[i] < 0.0)
         return false; 
       continue;
@@ -299,7 +295,7 @@ bool plucker_ray_tri_intersect( const CartVect vertices[3],
   return true;
 }
 
-/* Impelementation copied from cgmMC ray_tri_contact (overlap.C) */
+/* Implementation copied from cgmMC ray_tri_contact (overlap.C) */
 bool ray_tri_intersect( const CartVect vertices[3],
                         const CartVect& b,
                         const CartVect& v,
@@ -442,7 +438,7 @@ bool box_tri_overlap( const CartVect vertices[3],
                       const CartVect& box_center,
                       const CartVect& box_dims )
 {
-    // translate everthing such that box is centered at origin
+    // translate everything such that box is centered at origin
   const CartVect v0( vertices[0] - box_center );
   const CartVect v1( vertices[1] - box_center );
   const CartVect v2( vertices[2] - box_center );
@@ -604,7 +600,7 @@ bool box_linear_elem_overlap( const CartVect *elem_corners,
     //    (crossproduct of each edge with each principal axis)
     // 3) The normals of the faces of the element
 
-  unsigned e, f;             // loop counters
+  int e, f;             // loop counters
   int i;
   double dot, cross[2], tmp;
   CartVect norm;
@@ -643,7 +639,7 @@ bool box_linear_elem_overlap( const CartVect *elem_corners,
       return true;
   }
     // If all points less than min_x of box, then
-    // not_less[0] == 0, and therfore
+    // not_less[0] == 0, and therefore
     // the following product is zero.
   if (not_greater[0] * not_greater[1] * not_greater[2] * 
          not_less[0] *    not_less[1] *    not_less[2] == 0)
@@ -654,7 +650,7 @@ bool box_linear_elem_overlap( const CartVect *elem_corners,
     // Edge directions for box are principal axis, so 
     // for each element edge, check along the cross-product
     // of that edge with each of the tree principal axes.
-  const unsigned num_edge = CN::NumSubEntities( type, 1 );
+  const int num_edge = CN::NumSubEntities( type, 1 );
   for (e = 0; e < num_edge; ++e) { // for each element edge
       // get which element vertices bound the edge
     CN::SubEntityVertexIndices( type, 1, e, indices );
@@ -722,7 +718,7 @@ bool box_linear_elem_overlap( const CartVect *elem_corners,
   
   
     // test element face normals
-  const unsigned num_face = CN::NumSubEntities( type, 2 );
+  const int num_face = CN::NumSubEntities( type, 2 );
   for (f = 0; f < num_face; ++f) {
     CN::SubEntityVertexIndices( type, 2, f, indices );
     switch (CN::SubEntityType( type, 2, f )) {
@@ -818,7 +814,7 @@ bool box_hex_overlap( const CartVect *elem_corners,
       return true;
   }
     // If all points less than min_x of box, then
-    // not_less[0] == 0, and therfore
+    // not_less[0] == 0, and therefore
     // the following product is zero.
   if (not_greater[0] * not_greater[1] * not_greater[2] * 
          not_less[0] *    not_less[1] *    not_less[2] == 0)

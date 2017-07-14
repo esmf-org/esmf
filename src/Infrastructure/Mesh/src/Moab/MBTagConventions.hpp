@@ -3,7 +3,7 @@
  * storing and accessing finite element mesh data.
  * 
  * Copyright 2004 Sandia Corporation.  Under the terms of Contract
- * DE-AC04-94AL85000 with Sandia Coroporation, the U.S. Government
+ * DE-AC04-94AL85000 with Sandia Corporation, the U.S. Government
  * retains certain rights in this software.
  * 
  * This library is free software; you can redistribute it and/or
@@ -107,6 +107,18 @@
  */
 #define NAME_TAG_NAME "NAME"
 #define NAME_TAG_SIZE 32
+
+/* BLOCK_HEADER: tag
+ * A fixex lenght tag containg block header data
+ * BlockColor, MaterialId and BlockDimension
+ */
+#define BLOCK_HEADER "BLOCK_HEADER"
+
+/* BLOCK_ATTRIBUTES: tag
+ * A varible lenght tag of doubles
+ * Tag contains attributes set to BlockSet in cubit file
+ */
+#define BLOCK_ATTRIBUTES "BLOCK_ATTRIBUTES"
 
 #ifndef MB_PARALLEL_CONVENTIONS_H
 #define MB_PARALLEL_CONVENTIONS_H

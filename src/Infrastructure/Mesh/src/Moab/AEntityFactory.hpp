@@ -3,7 +3,7 @@
  * storing and accessing finite element mesh data.
  * 
  * Copyright 2004 Sandia Corporation.  Under the terms of Contract
- * DE-AC04-94AL85000 with Sandia Coroporation, the U.S. Government
+ * DE-AC04-94AL85000 with Sandia Corporation, the U.S. Government
  * retains certain rights in this software.
  * 
  * This library is free software; you can redistribute it and/or
@@ -163,11 +163,11 @@ public:
   ErrorCode merge_adjust_adjacencies(EntityHandle entity_to_keep,
                                        EntityHandle entity_to_remove);
   
-  void get_memory_use( unsigned long& total_entity_storage,
-                       unsigned long& total_storage );
+  void get_memory_use( unsigned long long& total_entity_storage,
+                       unsigned long long& total_storage );
   ErrorCode get_memory_use( const Range& entities,
-                              unsigned long& total_entity_storage,
-                              unsigned long& total_amortized_storage );
+                              unsigned long long& total_entity_storage,
+                              unsigned long long& total_amortized_storage );
   
 private:
 

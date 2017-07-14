@@ -40,10 +40,13 @@ CLEANDIRS   =
 CLEANFILES  = $(TESTS_BUILD)
 CLOBBERDIRS =
 
-ifeq ($(ESMF_MOAB),internal)
-ESMF_CXXCOMPILECPPFLAGS += -I../src/Moab
-endif
 
+ifeq ($(ESMF_MOAB),internal)
+ESMF_CXXCOMPILECPPFLAGS += -I$(ESMF_DIR)/$(LOCDIR)/../src/Moab \
+                           -I$(ESMF_DIR)/$(LOCDIR)/../src/Moab/parallel \
+                           -I$(ESMF_DIR)/$(LOCDIR)/../src/Moab/LocalDiscretization
+
+endif
 
 #
 # unit test targets
