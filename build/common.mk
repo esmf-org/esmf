@@ -1220,7 +1220,7 @@ ESMF_NETCDF_INCLUDE = $(ESMF_NETCDF_CPATH)/include
 ESMF_NETCDF_LIBPATH = $(ESMF_NETCDF_CPATH)/lib
 
 # Fortran API library might be in a different directory than the main C library.
-ESMF_NETCDF_FPATH = $(shell nf-config --prefix)
+ESMF_NETCDF_FPATH = $(shell nf-config --prefix 2>/dev/null)
 ifeq ($(ESMF_NETCDF_FPATH),"")
 ESMF_NETCDF_LIBS = -lnetcdf
 else
