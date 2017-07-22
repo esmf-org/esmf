@@ -595,10 +595,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             msg='pre-closing file: ' // trim (filename),  &
             ESMF_CONTEXT, rcToReturn=rc)) return
 #else
-        ncmode = merge (  &
-            NF90_64BIT_OFFSET,  &
-            NF90_HDF5,          &
-            iofmt == ESMF_IOFMT_NETCDF_64BIT_OFFSET)
+! TODO: Older NetCDFs only support 64-bit creation cmode.  So don't try
+! using NETCDF4/HDF5 yet.
+         ncmode = NF90_64BIT_OFFSET
+!        ncmode = merge (  &
+!            NF90_64BIT_OFFSET,  &
+!            NF90_HDF5,          &
+!            iofmt == ESMF_IOFMT_NETCDF_64BIT_OFFSET)
         if (localPet == 0) then
 ! print *, ESMF_METHOD, ': PET 0 pre-creating file: ', trim (filename),  &
 !     ' with mode: ', merge ('64-bit ', 'netcdf4', ncmode==NF90_64BIT_OFFSET)
