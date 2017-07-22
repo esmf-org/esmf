@@ -537,6 +537,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       len_schema = 0
     endif
 
+#if defined (ESMF_PIO)
     ! If file needs to be created, check for 64-bit or NETCDF4 for pre-create.
     inquire (file=fileName, exist=exists)
     if (.not. exists .or. opt_status==ESMF_FILESTATUS_REPLACE) then
@@ -629,6 +630,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         opt_iofmt == ESMF_IOFMT_NETCDF4) then
       opt_iofmt = ESMF_IOFMT_NETCDF
     end if
+#endif
 
 !   invoke C to C++ entry point  TODO
     call c_ESMC_IOWrite(io, fileName, len_fileName, opt_iofmt,   &
