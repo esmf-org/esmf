@@ -537,7 +537,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       len_schema = 0
     endif
 
-#if defined (ESMF_PIO)
+#if defined (ESMF_NETCDF) || defined (ESMF_PNETCDF)
     ! If file needs to be created, check for 64-bit or NETCDF4 for pre-create.
     inquire (file=fileName, exist=exists)
     if (.not. exists .or. opt_status==ESMF_FILESTATUS_REPLACE) then
