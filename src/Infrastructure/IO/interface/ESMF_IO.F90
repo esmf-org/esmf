@@ -499,7 +499,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_IOFmt_Flag)      :: opt_iofmt          ! helper variable
     integer                    :: len_schema         ! schema string len or 0
 
-#if defined (ESMF_PIO)
+#if defined (ESMF_NETCDF) || defined (ESMF_PNETCDF)
     type(ESMF_VM)              :: vm
 #if defined (ESMF_PNETCDF)
     integer                    :: comm
