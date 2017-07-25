@@ -270,9 +270,7 @@
 #endif
 
 /* define if compiler has std::isfinite */
-#ifndef MOAB_HAVE_STDISFINITE
-#define MOAB_HAVE_STDISFINITE 1
-#endif
+/*#undef MOAB_HAVE_STDISFINITE */
 
 /* MOAB qualified HAVE_STDLIB_H */
 #ifndef MOAB_HAVE_STDLIB_H
