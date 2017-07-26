@@ -270,6 +270,11 @@
 #endif
 
 /* define if compiler has std::isfinite */
+#if defined ESMF_OS_Darwin
+#ifndef MOAB_HAVE_STDISFINITE
+#define MOAB_HAVE_STDISFINITE 1
+#endif
+#endif
 /*#undef MOAB_HAVE_STDISFINITE */
 
 /* MOAB qualified HAVE_STDLIB_H */
