@@ -200,12 +200,20 @@ bool POLY_Mapping<SFUNC_TYPE,MPTRAITS,3,2>::is_in_cell(const double *mdata,
 
 
       // Intersect tri with line from point to center of sphere
-      if (!intersect_tri_with_line(pnts, point, center, p, &t)) {
+      if (!intersect_tri_with_line(pnts, center, point, p, &t)) {
+        if (dist) *dist = std::numeric_limits<double>::max();
+        pcoord[0]=0.0; pcoord[1]=0.0;
+        return false;
+      }
+
+      // Mapped to other side of sphere, so count as not found
+      if (t <= 0.0) {
         if (dist) *dist = std::numeric_limits<double>::max();
         pcoord[0]=0.0; pcoord[1]=0.0;
         return false;
       }
       
+
       // do is in
       double sdist;
       bool in_tri = tri_shape_func::is_in(p, &sdist);
@@ -224,7 +232,15 @@ bool POLY_Mapping<SFUNC_TYPE,MPTRAITS,3,2>::is_in_cell(const double *mdata,
       double p[2];
       double t;
       
-      if (!intersect_quad_with_line(pnts, point, center, p, &t)) {
+      // Intersect quad with line from point to center of sphere
+      if (!intersect_quad_with_line(pnts, center, point, p, &t)) {
+        if (dist) *dist = std::numeric_limits<double>::max();
+        pcoord[0]=0.0; pcoord[1]=0.0;
+        return false;
+      }
+
+      // Mapped to other side of sphere, so count as not found
+      if (t <= 0.0) {
         if (dist) *dist = std::numeric_limits<double>::max();
         pcoord[0]=0.0; pcoord[1]=0.0;
         return false;
@@ -265,12 +281,19 @@ bool POLY_Mapping<SFUNC_TYPE,MPTRAITS,3,2>::is_in_cell(const double *mdata,
       }      
 
       // Intersect tri with line from point to center of sphere
-      if (!intersect_tri_with_line(pnts, point, center, p, &t)) {
+      if (!intersect_tri_with_line(pnts, center, point, p, &t)) {
         if (dist) *dist = std::numeric_limits<double>::max();
         pcoord[0]=0.0; pcoord[1]=0.0;
         return false;
       }
       
+      // Mapped to other side of sphere, so count as not found
+      if (t <= 0.0) {
+        if (dist) *dist = std::numeric_limits<double>::max();
+        pcoord[0]=0.0; pcoord[1]=0.0;
+        return false;
+      }
+
       // do is in
       double sdist;
       bool in_tri = tri_shape_func::is_in(p, &sdist);

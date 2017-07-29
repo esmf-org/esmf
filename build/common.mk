@@ -1214,6 +1214,24 @@ endif
 #-------------------------------------------------------------------------------
 # NETCDF
 #-------------------------------------------------------------------------------
+ifeq ($(ESMF_NETCDF),nc-config)
+ESMF_NETCDF_CPATH = $(shell nc-config --prefix)
+ESMF_NETCDF_INCLUDE = $(ESMF_NETCDF_CPATH)/include
+ESMF_NETCDF_LIBPATH = $(ESMF_NETCDF_CPATH)/lib
+
+# Fortran API library might be in a different directory than the main C library.
+ESMF_NETCDF_FPATH = $(shell nf-config --prefix 2>/dev/null)
+ifeq ($(ESMF_NETCDF_FPATH),"")
+ESMF_NETCDF_LIBS = -lnetcdf
+else
+ESMF_NETCDF_LIBS = -lnetcdff -lnetcdf
+ifneq ($(ESMF_NETCDF_CPATH),$(ESMF_NETCDF_FPATH))
+ESMF_NETCDF_INCLUDE += -I$(ESMF_NETCDF_FPATH)/include
+ESMF_NETCDF_FLIBPATH = $(ESMF_NETCDF_FPATH)/lib
+endif
+endif
+endif
+
 ifeq ($(ESMF_NETCDF),standard)
 ifneq ($(origin ESMF_NETCDF_LIBS), environment)
 ESMF_NETCDF_LIBS = -lnetcdf
@@ -1239,6 +1257,14 @@ ESMF_F90LINKLIBS          += $(ESMF_NETCDF_LIBS)
 ESMF_F90LINKRPATHSTHIRD   += $(addprefix $(ESMF_F90RPATHPREFIX),$(subst -L,,$(filter -L%,$(ESMF_NETCDF_LIBS))))
 endif
 ifdef ESMF_NETCDF_LIBPATH
+ifdef $(ESMF_NETCDF_FPATH)
+ifneq ($(ESMF_NETCDF_CPATH),$(ESMF_NETCDF_FPATH))
+ESMF_CXXLINKPATHSTHIRD    += -L$(ESMF_NETCDF_FLIBPATH)
+ESMF_F90LINKPATHSTHIRD    += -L$(ESMF_NETCDF_FLIBPATH)
+ESMF_CXXLINKRPATHSTHIRD   += $(ESMF_CXXRPATHPREFIX)$(ESMF_NETCDF_FLIBPATH)
+ESMF_F90LINKRPATHSTHIRD   += $(ESMF_F90RPATHPREFIX)$(ESMF_NETCDF_FLIBPATH)
+endif
+endif
 ESMF_CXXLINKPATHSTHIRD    += -L$(ESMF_NETCDF_LIBPATH)
 ESMF_F90LINKPATHSTHIRD    += -L$(ESMF_NETCDF_LIBPATH)
 ESMF_CXXLINKRPATHSTHIRD   += $(ESMF_CXXRPATHPREFIX)$(ESMF_NETCDF_LIBPATH)

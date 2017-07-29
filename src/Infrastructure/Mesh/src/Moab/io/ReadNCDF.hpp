@@ -3,7 +3,7 @@
  * storing and accessing finite element mesh data.
  * 
  * Copyright 2004 Sandia Corporation.  Under the terms of Contract
- * DE-AC04-94AL85000 with Sandia Coroporation, the U.S. Government
+ * DE-AC04-94AL85000 with Sandia Corporation, the U.S. Government
  * retains certain rights in this software.
  * 
  * This library is free software; you can redistribute it and/or
@@ -54,7 +54,20 @@ struct ReadBlockData
   int numElements;
   bool reading_in;
   ExoIIElementType elemType;
+  std::vector<EntityHandle> polys; // used only if elem type is polyhedra or polygons
+   // because the order has to be maintained
 };
+
+// these are for polyhedra only
+struct ReadFaceBlockData
+{
+  int faceBlockId;
+  int startExoId;
+  int numElements;
+  bool reading_in;
+  // ExoIIElementType elemType; should be polygons
+};
+
 
 //! Output Exodus File for VERDE
 class ReadNCDF : public ReaderIface
@@ -106,10 +119,16 @@ private:
     //! read the nodes
   ErrorCode read_nodes(const Tag* file_id_tag);
   
+  // face blocks for polyhedra
+  ErrorCode read_face_blocks_headers(); // all of them?
+
     //! read block headers, containing info about element type, number, etc.
   ErrorCode read_block_headers(const int *blocks_to_load,
                                   const int num_blocks);
   
+  // these are needed only when polyhedra are present
+  ErrorCode read_polyhedra_faces();
+
     //! read the element blocks
   ErrorCode read_elements(const Tag* file_id_tag);
   
@@ -194,6 +213,9 @@ private:
     //! number of blocks in the current exoII file
   int numberElementBlocks_loading; 
 
+  //! number of face blocks in the current exoII file (used for polyhedra)
+  int numberFaceBlocks_loading;
+
     //! number of nodesets in the current exoII file
   int numberNodeSets_loading; 
 
@@ -211,6 +233,11 @@ private:
 
   //vector of blocks that are loading 
   std::vector< ReadBlockData > blocksLoading;
+
+  std::vector<EntityHandle> polyfaces; // the order is maintained with this for polyhedra
+
+  //vector of face blocks that are loading : these are for polyhedra blocks
+  std::vector< ReadFaceBlockData > faceBlocksLoading;
 
   //! Cached tags for reading.  Note that all these tags are defined when the
   //! core is initialized.

@@ -57,7 +57,14 @@ void SequenceData::increase_tag_count( unsigned amount )
 {
   void** list = arraySet - numSequenceData;
   const size_t sz = sizeof(void*) * (numSequenceData + numTagData + amount + 1);
-  list = (void**)realloc( list, sz );
+  void** new_list = (void**)realloc( list, sz );
+  if (!new_list) {
+    fprintf(stderr, "SequenceData::increase_tag_count(): reallocation of list failed\n");
+    // Note: free(list) will be called in the destructor
+    return;
+  }
+  else
+    list = new_list;
   arraySet = list + numSequenceData;
   memset( arraySet + numTagData + 1, 0, sizeof(void*) * amount );
   numTagData += amount;

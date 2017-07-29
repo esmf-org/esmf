@@ -140,7 +140,7 @@ program ESMF_TraceUTest
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
 
   ! sleep to ensure files can be re-opened
-  call ESMF_VMWtimeDelay(1.0_ESMF_KIND_R8, rc=rc)
+  call ESMF_VMWtimeDelay(5.0_ESMF_KIND_R8, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
   
   !------------------------------------------------------------------------
@@ -175,6 +175,8 @@ program ESMF_TraceUTest
      if (ioerr /= 0) then
         close(funit)
         call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
+     else
+        close(funit)
      endif
   endif
   call ESMF_Test((ioerr == 0), name, failMsg, result, ESMF_SRCLINE)
@@ -199,14 +201,16 @@ program ESMF_TraceUTest
   write(failMsg, *) "Trace stream file does not exist"
     
   write (filename, '(A,I1)') "traceout/esmf_stream_000", localPet
-  !print *, "Attempt to open trace file: ", trim(filename)
+  print *, "Attempt to open trace file: ", trim(filename)
   open (unit=funit, file=trim(filename), status="old", &
        action="read", iostat=ioerr)
+  if (ioerr /= 0) then
+     print *, "IO error = ", ioerr
+  endif
   call ESMF_Test((ioerr == 0), name, failMsg, result, ESMF_SRCLINE)
   close(funit)
   !------------------------------------------------------------------------
   
-
   
   !-----------------------------------------------------------------------------
   call ESMF_TestEnd(ESMF_SRCLINE)

@@ -68,6 +68,7 @@ program ESMF_ArrayArbIdxSMMUTest
 #endif
   integer               :: rc, i, petCount, localPet
   integer, allocatable  :: srcIndices(:)
+  character(1024)       :: msgString
 
   ! cumulative result: count failures; no failures equals "all pass"
   integer :: result = 0
@@ -421,7 +422,8 @@ program ESMF_ArrayArbIdxSMMUTest
   call ESMF_ArrayGet(dstArray, farrayPtr=farrayPtr, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   
-  print *, "localPet: ",localPet," dstArray: ",farrayPtr
+  write(msgString,*) "dstArray: ", farrayPtr
+  call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
   
 !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
@@ -555,8 +557,8 @@ program ESMF_ArrayArbIdxSMMUTest
   ! results.
   call ESMF_Test(evalflag, name, failMsg, result, ESMF_SRCLINE)
   
-  print *, "localPet=",localPet, &
-    "ESMF_ROUTESYNC_NBTESTFINISH: finishedflag=", finishedflag
+  write(msgString,*) "ESMF_ROUTESYNC_NBTESTFINISH: finishedflag=", finishedflag
+  call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
   
   ! The following barrier call releases PET 0 which was waiting on the barrier
   ! call before the first call to ArraySMM() above. Releasing PET 0 now will
@@ -580,8 +582,8 @@ program ESMF_ArrayArbIdxSMMUTest
   ! Now all PETs should return with finishedflag .true.
   call ESMF_Test(finishedflag, name, failMsg, result, ESMF_SRCLINE)
   
-  print *, "localPet=",localPet, &
-    "ESMF_ROUTESYNC_NBWAITFINISH: finishedflag=", finishedflag
+  write(msgString,*) "ESMF_ROUTESYNC_NBWAITFINISH: finishedflag=", finishedflag
+  call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
   
   ! The expected result of the sparse matrix multiplication in dstArray is:
   ! (note: by default ArraySMM() initializes _all_ destination elements
@@ -677,9 +679,9 @@ program ESMF_ArrayArbIdxSMMUTest
   ! results.
   call ESMF_Test(evalflag, name, failMsg, result, ESMF_SRCLINE)
   
-  print *, "localPet=",localPet, &
-    "ESMF_ROUTESYNC_NBTESTFINISH: finishedflag=", finishedflag
-  
+  write(msgString,*) "ESMF_ROUTESYNC_NBTESTFINISH: finishedflag=", finishedflag
+  call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+
   ! The following barrier call releases PET 0 which was waiting on the barrier
   ! call before the first call to ArraySMM() above. Releasing PET 0 now will
   ! allow the following call with ESMF_ROUTESYNC_NBWAITFINISH to finish up,
@@ -702,8 +704,8 @@ program ESMF_ArrayArbIdxSMMUTest
   ! Now all PETs should return with finishedflag .true.
   call ESMF_Test(finishedflag, name, failMsg, result, ESMF_SRCLINE)
   
-  print *, "localPet=",localPet, &
-    "ESMF_ROUTESYNC_NBWAITFINISH: finishedflag=", finishedflag
+  write(msgString,*) "ESMF_ROUTESYNC_NBWAITFINISH: finishedflag=", finishedflag
+  call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
   
   ! The expected result of the sparse matrix multiplication in dstArray is:
   ! (note: by default ArraySMM() initializes _all_ destination elements
@@ -768,7 +770,8 @@ program ESMF_ArrayArbIdxSMMUTest
   call ESMF_ArrayGet(dstArray2, farrayPtr=farrayPtr, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   
-  print *, "localPet: ",localPet," dstArray2: ",farrayPtr
+  write(msgString,*) "dstArray2: ", farrayPtr
+  call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
   
 !------------------------------------------------------------------------
   !EX_UTest_Multi_Proc_Only
@@ -838,7 +841,10 @@ program ESMF_ArrayArbIdxSMMUTest
   call ESMF_ArrayGet(dstArray3, farrayPtr=farrayPtr2D, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   
-  print *, "localPet: ",localPet," dstArray3: ",farrayPtr2D
+  write(msgString,*) "dstArray3(j=1): ", farrayPtr2D(:,1)
+  call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+  write(msgString,*) "dstArray3(j=2): ", farrayPtr2D(:,2)
+  call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
   
 !------------------------------------------------------------------------
   !EX_UTest_Multi_Proc_Only
@@ -972,7 +978,8 @@ program ESMF_ArrayArbIdxSMMUTest
   call ESMF_ArrayGet(dstArray2, farrayPtr=farrayPtr, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   
-  print *, "localPet: ",localPet," dstArray2: ",farrayPtr
+  write(msgString,*) "dstArray2: ", farrayPtr
+  call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
   
 !------------------------------------------------------------------------
   !EX_UTest_Multi_Proc_Only
@@ -1076,7 +1083,8 @@ call ESMF_ArrayPrint(dstArray3)
   call ESMF_ArrayGet(dstArray3, farrayPtr=farrayPtr2D, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   
-  print *, "localPet: ",localPet," dstArray3: ",farrayPtr2D
+  write(msgString,*) "dstArray3: ", farrayPtr2D
+  call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
   
 !------------------------------------------------------------------------
   !EX_UTest_Multi_Proc_Only

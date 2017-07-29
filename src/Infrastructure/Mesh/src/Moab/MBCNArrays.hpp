@@ -3,7 +3,7 @@
  * storing and accessing finite element mesh data.
  * 
  * Copyright 2004 Sandia Corporation.  Under the terms of Contract
- * DE-AC04-94AL85000 with Sandia Coroporation, the U.S. Government
+ * DE-AC04-94AL85000 with Sandia Corporation, the U.S. Government
  * retains certain rights in this software.
  * 
  * This library is free software; you can redistribute it and/or
@@ -87,9 +87,9 @@ const CN::ConnMap CN::mConnectivityMap[MBMAXTYPE][3] =
                                MBEDGE,MBEDGE, MBMAXTYPE, MBMAXTYPE, MBMAXTYPE, MBMAXTYPE}, 
      {{0,1}, {1,2}, {2,3}, {3,0}, {0,4}, {1,4}, {2,4}, {3,4} } },
      // pyramid-face
-   { 3, 5, {4,3,3,3,3}, {MBQUAD,MBTRI,MBTRI,MBTRI,MBTRI, MBMAXTYPE, 
+   { 3, 5, {3,3,3,3,4}, {MBTRI,MBTRI,MBTRI,MBTRI, MBQUAD, MBMAXTYPE,
                          MBMAXTYPE, MBMAXTYPE, MBMAXTYPE, MBMAXTYPE, MBMAXTYPE, MBMAXTYPE}, 
-     {{0,3,2,1}, {0,1,4},  {1,2,4}, {2,3,4}, {3,0,4} } },
+     { {0,1,4},  {1,2,4}, {2,3,4}, {3,0,4}, {0,3,2,1} } },
      // pyramid-pyramid
    { 3, 1, {5}, {MBPYRAMID, MBMAXTYPE, MBMAXTYPE, MBMAXTYPE, MBMAXTYPE, MBMAXTYPE, 
                  MBMAXTYPE, MBMAXTYPE, MBMAXTYPE, MBMAXTYPE, MBMAXTYPE, MBMAXTYPE}, {{0,1,2,3,4}} }},

@@ -5363,53 +5363,13 @@ int Grid::getStaggerDistgrid(
         InterArray<int> *staggerEdgeUWidthIntInt =
           new InterArray<int>(staggerEdgeUWidthIntIntArray,2,extent);
 
-#if 0
-        // A problem with non-center stagger multi-tile is that the padding needs to be different for 
-        // each tile (based on the connections). The distgrid create with extra padding should handle
-        // this, but it doesn't appear to. This is the start of a hack to fix this. 
-        // (but it would be really better to handle it in Distgrid... 
- 
-        /// Oh...DARN... I don't think that this will work, because all the DEs may not
-        /// be on this processor...hmmmm
 
-         // Get the DELayout
-        DELayout *delayout=distgrid->getDELayout();
-        
-        // Get the number of local DEs
-        const int localDECount=delayout->getLocalDeCount();
-
-        // Get map between local and global DEs
-        const int *localDEList=delayout->getLocalDeToDeMap();
-   
-        // Get map between DEs and tiles
-        const int *DETileList = distgrid->getTileListPDe();
-
-        // Loop through tiles
-        for (int t=0; t<tileCount; t++) {
-          
-          //// For each tile loop through DEs to see if the are in this tile, and if they are then see if they are on
-          //// the edge, if there are none on edge, then it doesnt't have a connection along that dimension, so add padding
-          for (lDE=0; lDE<localDECount; lDE++) {
-
-            ////// Get tile of lDE
-            int lDE_tile=DETileList[localDEList[lDE]];
-
-            ///// If it's not this tile then skip
-            if (lDE_tile != t) continue;
-
-            //// See if it's a boundary
-
-
-          }
-        }
-#endif
-         
-        // Map offsets into distgrid space
+        // Map offsets into distgrid space by tile and dimension
         int k=0;
-        for (int i=0; i<dimCount; i++) {
-          for (int j=0; j<tileCount; j++) {
-            staggerEdgeLWidthIntIntArray[k]=staggerEdgeLWidthList[staggerloc][distgridToGridMap[i]];
-            staggerEdgeUWidthIntIntArray[k]=staggerEdgeUWidthList[staggerloc][distgridToGridMap[i]];
+        for (int t=0; t<tileCount; t++) {
+          for (int d=0; d<dimCount; d++) {
+            staggerEdgeLWidthIntIntArray[k]=staggerEdgeLWidthList[staggerloc][distgridToGridMap[d]];
+            staggerEdgeUWidthIntIntArray[k]=staggerEdgeUWidthList[staggerloc][distgridToGridMap[d]];
 
             //printf("%d sELW=%d SEUW=%d\n",k,staggerEdgeLWidthIntIntArray[k],staggerEdgeUWidthIntIntArray[k]);
             k++;

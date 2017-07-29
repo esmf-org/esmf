@@ -27,7 +27,6 @@
 #include <stdlib.h>
 #include <stdarg.h>
 #include <string>
-#include <cstring>
 #include <time.h>
 
 #if !defined (ESMF_OS_MinGW)
@@ -71,6 +70,7 @@ extern "C" {
 namespace ESMCI{
 
 //----------------------------------------------------------------------------
+#define ESMC_METHOD "LogErr::AllocError"
 //BOP
 // !IROUTINE: AllocError
 //
@@ -84,8 +84,8 @@ bool LogErr::AllocError(
 //
 // !ARGUMENTS:
     int LINE,
-    const char FILE[],
-    const char method[],
+    const std::string &FILE,
+    const std::string &method,
     int *rcToReturn      
     )
 // !DESCRIPTION:
@@ -95,13 +95,15 @@ bool LogErr::AllocError(
     FTN_X(esmf_breakpoint)();  // no-op to assist debugging
     bool result=false;
     if (rcToReturn != ESMC_NULL_POINTER) *rcToReturn=ESMC_RC_MEM_ALLOCATE;
-    Write(ESMC_LogGetErrMsg(ESMC_RC_MEM_ALLOCATE),ESMC_LOGMSG_ERROR,LINE,FILE,
-    method);
+    Write(ESMC_LogGetErrMsg(ESMC_RC_MEM_ALLOCATE),ESMC_LOGMSG_ERROR,
+        LINE, FILE, method);
     result=true;
     return result;
 }
 
 //----------------------------------------------------------------------------
+#undef ESMC_METHOD
+#define ESMC_METHOD "LogErr::MsgAllocError"
 //BOP
 // !IROUTINE: MsgAllocError
 //
@@ -114,36 +116,10 @@ bool LogErr::MsgAllocError(
 //  none
 //
 // !ARGUMENTS:
-    const char msg[],
-    int LINE,
-    const char FILE[],
-    const char method[],
-    int *rcToReturn      
-    )
-// !DESCRIPTION:
-//    Allocation error with message.
-//EOP
-{
-    FTN_X(esmf_breakpoint)();  // no-op to assist debugging
-    bool result=false;
-    if (rcToReturn != ESMC_NULL_POINTER) *rcToReturn=ESMC_RC_MEM_ALLOCATE;
-
-    string logMsg = string(ESMC_LogGetErrMsg(ESMC_RC_MEM_ALLOCATE)) + " - " + msg;
-    Write(logMsg,ESMC_LOGMSG_ERROR,LINE,FILE,method);
-    result=true;
-    return result;
-}
-
-bool LogErr::MsgAllocError(
-
-// !RETURN VALUE:
-//  none
-//
-// !ARGUMENTS:
     const string& msg,
     int LINE,
-    const char FILE[],
-    const char method[],
+    const std::string &FILE,
+    const std::string &method,
     int *rcToReturn      
     )
 // !DESCRIPTION:
@@ -155,13 +131,16 @@ bool LogErr::MsgAllocError(
     if (rcToReturn != ESMC_NULL_POINTER) *rcToReturn=ESMC_RC_MEM_ALLOCATE;
 
     string logMsg = string(ESMC_LogGetErrMsg(ESMC_RC_MEM_ALLOCATE)) + " - " + msg;
-    Write(logMsg,ESMC_LOGMSG_ERROR,LINE,FILE,method);
+    Write(logMsg,ESMC_LOGMSG_ERROR,
+        LINE,FILE,method);
     result=true;
     return result;
 }
 
 
 //----------------------------------------------------------------------------
+#undef ESMC_METHOD
+#define ESMC_METHOD "LogErr::DeallocError"
 //BOP
 // !IROUTINE: DeallocError
 //
@@ -175,8 +154,8 @@ bool LogErr::DeallocError(
 //
 // !ARGUMENTS:
     int LINE,
-    const char FILE[],
-    const char method[],
+    const std::string &FILE,
+    const std::string &method,
     int *rcToReturn      
     )
 // !DESCRIPTION:
@@ -186,13 +165,15 @@ bool LogErr::DeallocError(
     FTN_X(esmf_breakpoint)();  // no-op to assist debugging
     bool result=false;
     if (rcToReturn != ESMC_NULL_POINTER) *rcToReturn=ESMC_RC_MEM_DEALLOCATE;
-    Write(ESMC_LogGetErrMsg(ESMC_RC_MEM_DEALLOCATE),ESMC_LOGMSG_ERROR,LINE,FILE,
-    method);
+    Write(ESMC_LogGetErrMsg(ESMC_RC_MEM_DEALLOCATE),ESMC_LOGMSG_ERROR,
+        LINE,FILE, method);
     result=true;
     return result;
 }
 
 //----------------------------------------------------------------------------
+#undef ESMC_METHOD
+#define ESMC_METHOD "LogErr::MsgDellocError"
 //BOP
 // !IROUTINE: MsgDeallocError
 //
@@ -205,10 +186,10 @@ bool LogErr::MsgDeallocError(
 //  none
 //
 // !ARGUMENTS:
-    const char msg[],
+    const std::string &msg,
     int LINE,
-    const char FILE[],
-    const char method[],
+    const std::string &FILE,
+    const std::string &method,
     int *rcToReturn      
     )
 // !DESCRIPTION:
@@ -220,39 +201,15 @@ bool LogErr::MsgDeallocError(
     if (rcToReturn != ESMC_NULL_POINTER) *rcToReturn=ESMC_RC_MEM_DEALLOCATE;
 
     string logMsg = string(ESMC_LogGetErrMsg(ESMC_RC_MEM_DEALLOCATE)) + " - " + msg;
-    Write(logMsg,ESMC_LOGMSG_ERROR,LINE,FILE,method);
+    Write(logMsg,ESMC_LOGMSG_ERROR,
+        LINE,FILE,method);
     result=true;
     return result;
 }
-
-bool LogErr::MsgDeallocError(
-
-// !RETURN VALUE:
-//  none
-//
-// !ARGUMENTS:
-    const string& msg,
-    int LINE,
-    const char FILE[],
-    const char method[],
-    int *rcToReturn      
-    )
-// !DESCRIPTION:
-//    Deallocation error with message.
-//EOP
-{
-    FTN_X(esmf_breakpoint)();  // no-op to assist debugging
-    bool result=false;
-    if (rcToReturn != ESMC_NULL_POINTER) *rcToReturn=ESMC_RC_MEM_DEALLOCATE;
-
-    string logMsg = string(ESMC_LogGetErrMsg(ESMC_RC_MEM_DEALLOCATE)) + " - " + msg;
-    Write(logMsg,ESMC_LOGMSG_ERROR,LINE,FILE,method);
-    result=true;
-    return result;
-}
-
 
 //----------------------------------------------------------------------------
+#undef ESMC_METHOD
+#define ESMC_METHOD "LogErr::Open"
 //
 //
 //BOP
@@ -267,22 +224,24 @@ void LogErr::Open(
 //
 // !ARGUMENTS:
 
-     const char filename[]     //string to form name of log file (input)
+     const std::string &filename     //string to form name of log file (input)
 
    )
 //
 // !DESCRIPTION:
-// {\tt ESMC\_LogOpen} opens a new log file and sets the deafult filename
+// {\tt ESMC\_LogOpen} opens a new log file and sets the default filename
 //
 //EOP
 // 
 {
-    strcpy(nameLogErrFile,filename);
+    nameLogErrFile = filename;
 }   
 
 } // namespace ESMCI
 
 //----------------------------------------------------------------------------
+#undef ESMC_METHOD
+#define ESMC_METHOD "LogErr::ESMC_LogSetFilename"
 //
 //
 //BOP
@@ -296,7 +255,7 @@ int ESMC_LogSetFilename(
 //
 // !ARGUMENTS:
 
-     const char filename[]     //string to form name of log file (input)
+     const std::string &filename     //string to form name of log file (input)
 
    )
 //
@@ -311,12 +270,14 @@ int ESMC_LogSetFilename(
     // Initialize return code; assume routine not implemented
     rc = ESMC_RC_NOT_IMPL;
 
-    strcpy(ESMC_LogDefault.nameLogErrFile,filename);
+    ESMC_LogDefault.nameLogErrFile = filename;
     rc = ESMF_SUCCESS;
     return rc;
 }   
 
 //----------------------------------------------------------------------------
+#undef ESMC_METHOD
+#define ESMC_METHOD "LogErr::ESMC_LogFinalize"
 //
 //
 //BOP
@@ -343,6 +304,8 @@ int ESMC_LogFinalize(
 namespace ESMCI{
 
 //----------------------------------------------------------------------------
+#undef ESMC_METHOD
+#define ESMC_METHOD "LogErr::Close"
 //BOP
 // !IROUTINE: Close - closes log file. 
 //
@@ -368,45 +331,20 @@ void LogErr::Close(
 }
 
 //----------------------------------------------------------------------------
+#undef ESMC_METHOD
+#define ESMC_METHOD "LogErr::Write"
 //BOP
 // !IROUTINE: Write - write to log file
 //
 // !INTERFACE:
-
 int LogErr::Write(
 
 // !RETURN VALUE:
 //  bool
 //
 // !ARGUMENTS:
-	const char msg[],   // Log Entry
-    	int msgtype   // Msg Type   
-      )
-// !DESCRIPTION:
-// Prints log message and returns true if successful.  It takes two arguments -
-// msg which is a user message and log type.  This method does not use cpp
-// macros
-//EOP
-{
-    int rc;
-
-    // Initialize return code; assume routine not implemented
-    rc = ESMC_RC_NOT_IMPL;
-
-    if (ESMC_LogDefault.logtype == ESMC_LOGKIND_NONE) return true;
-    FTN_X(f_esmf_logwrite0)(msg, &msgtype, &rc, strlen(msg));
-
-    return rc;
-}
-
-int LogErr::Write(
-
-// !RETURN VALUE:
-//  bool
-//
-// !ARGUMENTS:
-	const string& msg,   // Log Entry
-    	int msgtype   // Msg Type   
+       const string& msg,   // Log Entry
+       int msgtype   // Msg Type
       )
 // !DESCRIPTION:
 // Prints log message and returns true if successful.  It takes two arguments -
@@ -426,6 +364,8 @@ int LogErr::Write(
 }
 
 //----------------------------------------------------------------------------
+#undef ESMC_METHOD
+#define ESMC_METHOD "LogErr::Write"
 //BOP
 // !IROUTINE: Write - write to log file
 //
@@ -437,11 +377,11 @@ int LogErr::Write(
 //  bool
 //
 // !ARGUMENTS:
-    const char msg[],	// Log Entry
+    const std::string &msg,	// Log Entry
     int msgtype,        // Msg Type   
     int LINE,
-    const char FILE[],
-    const char method[]
+    const std::string &FILE,
+    const std::string &method
     )
 // !DESCRIPTION:
 // Prints log message and returns true if successful.  It takes two arguments -
@@ -454,42 +394,15 @@ int LogErr::Write(
     rc = ESMC_RC_NOT_IMPL;
 
     if (ESMC_LogDefault.logtype == ESMC_LOGKIND_NONE) return true;
-    FTN_X(f_esmf_logwrite1)(msg, &msgtype, &LINE, FILE, method, &rc,
-                          strlen(msg), strlen(FILE), strlen(method));
-
-    return rc;
-}
-
-int LogErr::Write(
-
-// !RETURN VALUE:
-//  bool
-//
-// !ARGUMENTS:
-    const string& msg,	// Log Entry
-    int msgtype,        // Msg Type   
-    int LINE,
-    const char FILE[],
-    const char method[]
-    )
-// !DESCRIPTION:
-// Prints log message and returns true if successful.  It takes two arguments -
-// msg which is a user message and log type.  This method uses cpp macros
-//EOP
-{
-    int rc;
-    
-    // Initialize return code; assume routine not implemented
-    rc = ESMC_RC_NOT_IMPL;
-
-    if (ESMC_LogDefault.logtype == ESMC_LOGKIND_NONE) return true;
-    FTN_X(f_esmf_logwrite1)(msg.c_str(), &msgtype, &LINE, FILE, method, &rc,
-                          msg.size(), strlen(FILE), strlen(method));
+    FTN_X(f_esmf_logwrite1)(msg.c_str(), &msgtype, &LINE, FILE.c_str(), method.c_str(), &rc,
+                          msg.length(), FILE.length(), method.length());
 
     return rc;
 }
 
 //----------------------------------------------------------------------------
+#undef ESMC_METHOD
+#define ESMC_METHOD "LogErr::Set"
 //BOP
 // !IROUTINE: Set - set Log parameters
 //
@@ -522,6 +435,39 @@ int LogErr::Set(
 }
 
 //----------------------------------------------------------------------------
+#undef ESMC_METHOD
+#define ESMC_METHOD "LogErr::SetTrace"
+//BOP
+// !IROUTINE: SetTrace - set trace flag
+//
+// !INTERFACE:
+
+int LogErr::SetTrace(
+
+// !RETURN VALUE:
+//  integer return code
+//
+// !ARGUMENTS:
+    bool traceflag
+    )
+// !DESCRIPTION:
+// Sets log parameters
+//EOP
+{
+    int rc;
+    
+    // Initialize return code; assume routine not implemented
+    rc = ESMC_RC_NOT_IMPL;
+    
+    trace = traceflag;
+
+    rc = ESMF_SUCCESS;
+    return rc;
+}
+
+//----------------------------------------------------------------------------
+#undef ESMC_METHOD
+#define ESMC_METHOD "LogErr::FoundError"
 //BOP
 // !IROUTINE: FoundError - LogFoundError
 //
@@ -536,8 +482,8 @@ bool LogErr::FoundError(
 // !ARGUMENTS:
     int rcToCheck,
     int LINE,
-    const char FILE[],
-    const char method[],
+    const std::string &FILE,
+    const std::string &method,
     int *rcToReturn
     )
 // !DESCRIPTION:
@@ -549,6 +495,10 @@ bool LogErr::FoundError(
 #ifdef ESMC_SUCCESSDEFAULT_ON
     if (rcToReturn != ESMC_NULL_POINTER) *rcToReturn=ESMF_SUCCESS;
 #endif
+    if (trace) {
+        Write(ESMC_METHOD,ESMC_LOGMSG_TRACE,
+            LINE, FILE, method);
+    }
     if (rcToCheck!=ESMF_SUCCESS){
       FTN_X(esmf_breakpoint)();  // no-op to assist debugging
       int i;
@@ -558,13 +508,16 @@ bool LogErr::FoundError(
         // this means that rcToCheck was _not_ in the errorMask -> flag error
         result=true;
         if (rcToReturn != ESMC_NULL_POINTER) *rcToReturn=rcToCheck;
-        Write(ESMC_LogGetErrMsg(rcToCheck),ESMC_LOGMSG_ERROR,LINE,FILE,method);
+        Write(ESMC_LogGetErrMsg(rcToCheck),ESMC_LOGMSG_ERROR,
+            LINE,FILE,method);
       }
     }
     return result;
 }
 
 //----------------------------------------------------------------------------
+#undef ESMC_METHOD
+#define ESMC_METHOD "LogErr::MsgFoundError"
 //BOP
 // !IROUTINE: MsgFoundError - LogMsgFoundError
 //
@@ -577,10 +530,10 @@ bool LogErr::MsgFoundError(
 //
 // !ARGUMENTS:
     int rcToCheck,
-    const char msg[],
+    const std::string &msg,
     int LINE,
-    const char FILE[],
-    const char method[],
+    const std::string &FILE,
+    const std::string &method,
     int *rcToReturn
     )
 // !DESCRIPTION:
@@ -592,47 +545,10 @@ bool LogErr::MsgFoundError(
 #ifdef ESMC_SUCCESSDEFAULT_ON
     if (rcToReturn != ESMC_NULL_POINTER) *rcToReturn=ESMF_SUCCESS;
 #endif
-    if (rcToCheck!=ESMF_SUCCESS){
-      FTN_X(esmf_breakpoint)();  // no-op to assist debugging
-      int i;
-      for (i=0; i<errorMaskCount; i++)
-        if (errorMask[i] == rcToCheck) break;
-      if (i==errorMaskCount){
-        // this means that rcToCheck was _not_ in the errorMask -> flag error
-        result=true;   // TODO: if this line moved to after Write()
-                       // below, will crash ESMF_TimeIntervalUTest.F90 on 
-                       // Linux longs 2.4.20-31.9, Lahey lf95 6.0 optimized
-        if (rcToReturn != ESMC_NULL_POINTER) *rcToReturn=rcToCheck;
-
-        string logMsg = string(ESMC_LogGetErrMsg(rcToCheck)) + " - " + msg;
-        Write(logMsg,ESMC_LOGMSG_ERROR,LINE,FILE,method);
-      }
+    if (trace) {
+        Write(ESMC_METHOD,ESMC_LOGMSG_TRACE,
+            LINE, FILE, method);
     }
-    return result;
-}
-
-bool LogErr::MsgFoundError(
-
-// !RETURN VALUE:
-//  bool
-//
-// !ARGUMENTS:
-    int rcToCheck,
-    const string &msg,
-    int LINE,
-    const char FILE[],
-    const char method[],
-    int *rcToReturn
-    )
-// !DESCRIPTION:
-// Returns true if rcToCheck does not equal ESMF\_SUCCESS and writes the error
-// to the log with a user supplied message.  This method uses cpp macros.
-//EOP
-{
-    bool result=false;
-#ifdef ESMC_SUCCESSDEFAULT_ON
-    if (rcToReturn != ESMC_NULL_POINTER) *rcToReturn=ESMF_SUCCESS;
-#endif
     if (rcToCheck!=ESMF_SUCCESS){
       FTN_X(esmf_breakpoint)();  // no-op to assist debugging
       int i;
@@ -655,6 +571,8 @@ bool LogErr::MsgFoundError(
 } // namespace ESMCI
 
 //----------------------------------------------------------------------------
+#undef ESMC_METHOD
+#define ESMC_METHOD "LogErr::ESMC_TimeStamp"
 //BOP
 // !IROUTINE: ESMC_TimeStamp - ESMC_TimeStamp
 //

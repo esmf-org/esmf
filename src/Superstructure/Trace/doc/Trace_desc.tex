@@ -61,6 +61,8 @@ aspects of ESMF tracing.
      {\bf Environment Variable} & {\bf Description} & {\bf Example Values} & {\bf Default}\\
      \hline\hline
      {\tt ESMF\_RUNTIME\_TRACE} & Enable/disables all tracing functions & {\tt ON} or {\tt OFF} & {\tt OFF} \\
+     \hline\hline                    
+     {\tt ESMF\_RUNTIME\_TRACE\_CLOCK} & Sets the type of clock for timestamping events (see Section \ref{sec:TracingClocks}). & {\tt REALTIME} or {\tt MONOTONIC} or {\tt MONOTONIC\_SYNC} & {\tt REALTIME}\\
      \hline\hline
      {\tt ESMF\_RUNTIME\_TRACE\_PETLIST} & Limits tracing to an explicit list of PETs & ``{\tt 0-9 50 99}'' & {\em trace all PETs}\\
      \hline\hline

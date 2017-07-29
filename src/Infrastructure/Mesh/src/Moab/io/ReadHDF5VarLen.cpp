@@ -51,7 +51,7 @@ ErrorCode ReadHDF5VarLen::read_data(
   try {
     data_set.set_file_ids( offsets, start_offset, buffer_size, data_type );
   }
-  catch (ReadHDF5Dataset::Exception ) {
+  catch (ReadHDF5Dataset::Exception& ) {
     return MB_FAILURE;
   }
   
@@ -62,7 +62,7 @@ ErrorCode ReadHDF5VarLen::read_data(
     try { 
       data_set.read( data_buffer, count );
     }
-    catch (ReadHDF5Dataset::Exception ) {
+    catch (ReadHDF5Dataset::Exception& ) {
       return MB_FAILURE;
     }
     
@@ -121,8 +121,10 @@ ErrorCode ReadHDF5VarLen::read_data(
   // NOTE: If the last set is empty, we will not process it here
   // assert(fileid_iter == file_ids.end());
 #ifndef NDEBUG
-  for (;fileid_iter != file_ids.end(); ++fileid_iter) 
-    assert(0 == *count_iter++);
+  for (;fileid_iter != file_ids.end(); ++fileid_iter) {
+    assert(0 == *count_iter);
+    ++count_iter;
+  }
 #endif
   return MB_SUCCESS;
 }
@@ -163,7 +165,7 @@ ErrorCode ReadHDF5VarLen::read_offsets( ReadHDF5Dataset& data_set,
     hints[i] = offsets_out[i].begin();
   }
 
-    // If we only need one colunm from a multi-column data set,
+    // If we only need one column from a multi-column data set,
     // then read only that column.
   if (num_columns == 1 && data_set.columns() > 1 && !ranged_file_ids) {
     data_set.set_column( indices[0] );
@@ -173,7 +175,7 @@ ErrorCode ReadHDF5VarLen::read_offsets( ReadHDF5Dataset& data_set,
     data_set.set_column( data_set.columns() - 1 );
   }
     // NOTE: do not move this above the previous block.  
-    //       The previous block changes the resutls of data_set.columns()!
+    //       The previous block changes the results of data_set.columns()!
   const size_t table_columns = data_set.columns();
 
     // Calculate which rows we need to read from the offsets table
@@ -211,7 +213,7 @@ ErrorCode ReadHDF5VarLen::read_offsets( ReadHDF5Dataset& data_set,
     catch (ReadHDF5Dataset::Exception e) {
       return MB_FAILURE;
     }
-    if (!count) // might have been NULL read for collectve IO
+    if (!count) // might have been NULL read for collective IO
       continue;
     
       // If the previous end values were read in the previous iteration,
@@ -235,7 +237,7 @@ ErrorCode ReadHDF5VarLen::read_offsets( ReadHDF5Dataset& data_set,
       assert(fiter != file_ids.end());
         // whenever we get to a gap between blocks we need to 
         // advance one step because we read an extra end id 
-        // preceeding teah block
+        // preceding teah block
       if (fiter == fiter.start_of_block()) {
         if (offset == count-1) 
           break;
@@ -259,7 +261,7 @@ ErrorCode ReadHDF5VarLen::read_offsets( ReadHDF5Dataset& data_set,
       // then we need to save the end indices for the final entry
       // for use in the next iteration.  Similarly, if we ended
       // with extra values that were read with the express intention
-      // of getting the previus end values for a block, we need to
+      // of getting the previous end values for a block, we need to
       // save them.  This case only arises if we hit the break in
       // the above loop.
     if (fiter != fiter.start_of_block() || offset < count) {
@@ -338,10 +340,10 @@ ErrorCode ReadHDF5VarLen::read_offsets( ReadHDF5Dataset& data_set,
     try {
       data_set.read( buffer, count );
     }
-    catch (ReadHDF5Dataset::Exception ) {
+    catch (ReadHDF5Dataset::Exception& ) {
       return MB_FAILURE;
     }
-    if (!count) // might have been NULL read for collectve IO
+    if (!count) // might have been NULL read for collective IO
       continue;
     
       // If the previous end values were read in the previous iteration,
@@ -361,7 +363,7 @@ ErrorCode ReadHDF5VarLen::read_offsets( ReadHDF5Dataset& data_set,
       assert(fiter != file_ids.end());
         // whenever we get to a gap between blocks we need to 
         // advance one step because we read an extra end id 
-        // preceeding teah block
+        // preceding teah block
       if (fiter == fiter.start_of_block()) {
         if (offset == count-1) 
           break;
@@ -381,7 +383,7 @@ ErrorCode ReadHDF5VarLen::read_offsets( ReadHDF5Dataset& data_set,
       // then we need to save the end indices for the final entry
       // for use in the next iteration.  Similarly, if we ended
       // with extra values that were read with the express intention
-      // of getting the previus end values for a block, we need to
+      // of getting the previous end values for a block, we need to
       // save them.  This case only arises if we hit the break in
       // the above loop.
     if (fiter != fiter.start_of_block() || offset < count) {

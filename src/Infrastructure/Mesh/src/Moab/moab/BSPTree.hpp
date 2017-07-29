@@ -3,7 +3,7 @@
  * storing and accessing finite element mesh data.
  * 
  * Copyright 2004 Sandia Corporation.  Under the terms of Contract
- * DE-AC04-94AL85000 with Sandia Coroporation, the U.S. Government
+ * DE-AC04-94AL85000 with Sandia Corporation, the U.S. Government
  * retains certain rights in this software.
  * 
  * This library is free software; you can redistribute it and/or
@@ -64,7 +64,7 @@ public:
   
   ~BSPTree();
 
-  //! Enumeriate split plane directions
+  //! Enumerate split plane directions
   enum Axis { X = 0, Y = 1, Z = 2 };
   
   /**\brief struct to store a plane 
@@ -73,7 +73,7 @@ public:
    * norm={A,B,C} and coeff=-D.
    */
   struct Plane {
-    Plane() {}
+    Plane() : coeff(0.0) {}
     Plane( const double n[3], double d ) : coeff(d)
       { norm[0] = n[0]; norm[1] = n[1]; norm[2] = n[2]; }
       /** a x + b y + c z + d = 0 */
@@ -207,7 +207,7 @@ public:
   //! be done.
   ErrorCode merge_leaf( BSPTreeIter& iter );
 
-  //! Get leaf contianing input position.
+  //! Get leaf containing input position.
   //!
   //! Does not take into account global bounding box of tree.
   //! - Therefore there is always one leaf containing the point.
@@ -280,13 +280,13 @@ public:
 
     //! Advance to next leaf
     //! Returns MB_ENTITY_NOT_FOUND if at end.
-    //! Note: steping past the end of the tree will invalidate
+    //! Note: stepping past the end of the tree will invalidate
     //!       the iterator. Calling back() will not work.
   ErrorCode step() { return step(RIGHT); }
 
     //! Move back to previous leaf
     //! Returns MB_ENTITY_NOT_FOUND if at beginning.
-    //! Note: steping past the start of the tree will invalidate
+    //! Note: stepping past the start of the tree will invalidate
     //!       the iterator. Calling step() will not work.
   ErrorCode back() { return step(LEFT); }
   
@@ -357,6 +357,8 @@ class BSPTreeBoxIter : public BSPTreeIter
                                     const double* point = 0 );
   public:
   
+    BSPTreeBoxIter() {}
+    virtual ~BSPTreeBoxIter() {}
 
     //! Faces of a hex : corner bitmap
   enum SideBits { B0154 = 0x33, //!< Face defined by corners {0,1,5,4}: 1st Exodus side
@@ -388,13 +390,13 @@ class BSPTreeBoxIter : public BSPTreeIter
 
     //! Advance to next leaf
     //! Returns MB_ENTITY_NOT_FOUND if at end.
-    //! Note: steping past the end of the tree will invalidate
+    //! Note: stepping past the end of the tree will invalidate
     //!       the iterator. Calling back() will not work.
   ErrorCode step() { return BSPTreeIter::step(); }
 
     //! Move back to previous leaf
     //! Returns MB_ENTITY_NOT_FOUND if at beginning.
-    //! Note: steping past the start of the tree will invalidate
+    //! Note: stepping past the start of the tree will invalidate
     //!       the iterator. Calling step() will not work.
   ErrorCode back() { return BSPTreeIter::back(); }
   

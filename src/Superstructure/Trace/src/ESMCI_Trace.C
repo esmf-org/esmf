@@ -11,10 +11,13 @@
  * Licensed under the University of Illinois-NCSA License.
  */
 
+#include <iomanip>
+#include <sstream>
+#include <string>
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
-#include <string.h>
 #include <assert.h>
 #include <time.h>
 #include <sys/types.h>
@@ -33,6 +36,7 @@
 #endif
 
 #include "ESMCI_Macros.h"
+#include "ESMCI_Util.h"
 #include "ESMCI_LogErr.h"
 #include "ESMCI_VM.h"
 #include "ESMCI_Trace.h"
@@ -149,7 +153,9 @@ using std::stringstream;
 namespace ESMCI {
 
   static bool traceLocalPet = false;
-
+  static int traceClock = 0;
+  static int64_t traceClockOffset = 0;
+  
   static vector<string> split(const string& s, const string& delim, const bool keep_empty = true) {
     vector<string> result;
     if (delim.empty()) {
@@ -207,7 +213,7 @@ namespace ESMCI {
       std::string envStr(envVar);
       const vector<string> listItems = split(trim(envStr), " ");
       
-      for (int i = 0; i < listItems.size(); i++) {
+      for (unsigned i = 0; i < listItems.size(); i++) {
 	if (listItems.at(i).find("-") != string::npos) {	  
 	  vector<string> petRange = split(trim(listItems.at(i)), "-");
 	  if (petRange.size() == 2) {
@@ -270,7 +276,33 @@ namespace ESMCI {
     
   }
 
-  static uint64_t get_clock(void *data) {
+#ifdef ESMF_OS_MinGW
+  struct timespec { long tv_sec; long tv_nsec; };
+  static int unix_time(struct timespec *spec) {
+	 __int64 wintime; GetSystemTimeAsFileTime((FILETIME*)&wintime);
+     wintime      -=116444736000000000LL;       //1jan1601 to 1jan1970
+     spec->tv_sec  =wintime / 10000000LL;       //seconds
+     spec->tv_nsec =wintime % 10000000LL *100;  //nano-seconds
+     return 0;
+  }
+  static int clock_gettime(int, timespec *spec) {
+	 static  struct timespec startspec; static double ticks2nano;
+     static __int64 startticks, tps =0;    __int64 tmp, curticks;
+     QueryPerformanceFrequency((LARGE_INTEGER*)&tmp);
+     if (tps !=tmp) { tps =tmp;
+                      QueryPerformanceCounter((LARGE_INTEGER*)&startticks);
+                      unix_time(&startspec); ticks2nano =(double)1000000000LL / tps; }
+     QueryPerformanceCounter((LARGE_INTEGER*)&curticks); curticks -=startticks;
+     spec->tv_sec  =startspec.tv_sec   +         (curticks / tps);
+     spec->tv_nsec =startspec.tv_nsec  + (double)(curticks % tps) * ticks2nano;
+     if (!(spec->tv_nsec < 1000000000LL)) { spec->tv_sec++; spec->tv_nsec -=1000000000LL; }
+     return 0;
+  }
+#endif
+
+  
+  /* get current wallclock time */
+  static uint64_t get_real_clock() {
     struct timespec ts;
 
 #ifdef ESMF_OS_Darwin
@@ -283,12 +315,148 @@ namespace ESMCI {
     (void) clock_get_time(rt_clock_serv, &mts);
     ts.tv_sec = mts.tv_sec;
     ts.tv_nsec = mts.tv_nsec;
+#elif ESMF_OS_MinGW
+    clock_gettime(0, &ts);
 #else
     clock_gettime(CLOCK_REALTIME, &ts);
 #endif
     return ts.tv_sec * 1000000000ULL + ts.tv_nsec;
   }
 
+  
+  /* get local monotonic time with no offset*/
+  static uint64_t get_monotonic_raw_clock() {
+    struct timespec ts;
+
+#ifdef ESMF_OS_Darwin
+    mach_timespec_t mts;
+    static clock_serv_t rt_clock_serv = 0;
+
+    if (rt_clock_serv == 0) {
+      (void) host_get_clock_service(mach_host_self(), SYSTEM_CLOCK, &rt_clock_serv);
+    }
+    (void) clock_get_time(rt_clock_serv, &mts);
+    ts.tv_sec = mts.tv_sec;
+    ts.tv_nsec = mts.tv_nsec;
+#elif ESMF_OS_MinGW
+    clock_gettime(0, &ts);
+#else
+    clock_gettime(CLOCK_MONOTONIC, &ts);
+#endif
+    return ts.tv_sec * 1000000000ULL + ts.tv_nsec;
+  }
+
+  /* get local monotonic time including local offset */
+  static uint64_t get_monotonic_clock() {
+    if (traceClockOffset < 0) {
+      return get_monotonic_raw_clock() - (-1*traceClockOffset);
+    }
+    else {
+      return get_monotonic_raw_clock() + traceClockOffset;
+    }
+  }
+  
+  
+#define CLOCK_SYNC_TAG 42000
+#define RTTMIN_NOTCHANGED_MAX 100
+  
+  static int64_t clock_measure_offset(VM *vm, int peerPet, int64_t root_offset) {
+
+    int myPet = vm->getLocalPet();
+    //printf("[%d] entered clock_measure_offset\n", myPet);
+
+    uint64_t starttime, stoptime, peertime;
+    uint64_t rtt, rttmin, invalidtime;
+    int rttmin_notchanged;
+    int64_t offset;
+    invalidtime = 42000000000ULL;
+    rttmin = 1E12;
+    offset = 0;
+    rttmin_notchanged = 0;
+    
+    for (;;) {
+
+      if (myPet != 0) {
+        starttime = get_monotonic_raw_clock();
+        //printf("[%d] about to send starttime: %ldd\n", myPet, starttime);
+        vm->send(&starttime, sizeof(uint64_t), 0, CLOCK_SYNC_TAG);
+        vm->recv(&peertime, sizeof(uint64_t), 0, CLOCK_SYNC_TAG);
+        stoptime = get_monotonic_raw_clock();
+        rtt = stoptime - starttime;
+
+        //printf("[%d] rtt = %ldd\n", myPet, rtt);
+        
+        if (rtt < rttmin) {
+          rttmin = rtt;
+          rttmin_notchanged = 0;
+          offset = peertime - (rtt / 2) - starttime;
+        }
+        else if (++rttmin_notchanged == RTTMIN_NOTCHANGED_MAX) {
+          vm->send(&invalidtime, sizeof(uint64_t), 0, CLOCK_SYNC_TAG);
+          break;
+        }
+      }
+      else {  /* root PET */
+        vm->recv(&starttime, sizeof(uint64_t), peerPet, CLOCK_SYNC_TAG);
+        //printf("[%d] received starttime: %ldd\n", peerPet, starttime);
+        peertime = get_monotonic_raw_clock() + root_offset;
+        if (starttime == invalidtime) {
+          break;
+        }
+        vm->send(&peertime, sizeof(uint64_t), peerPet, CLOCK_SYNC_TAG);
+        //printf("[%d] sent peertime to PET %d = %ldd\n", myPet, peerPet, peertime);
+      }
+
+    }
+
+    //if( myPet != 0 ){
+    //  *min_rtt = rttmin;
+    //} else {
+    //  rtt = 0.0;
+    // }
+    return offset;    
+  }
+
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::clock_sync_offset()"  
+  static int64_t clock_sync_offset(int *rc) {
+
+    int localrc;
+    if (rc != NULL) *rc = ESMF_SUCCESS;
+    
+    VM *vm = VM::getGlobal(&localrc);
+    if (ESMC_LogDefault.MsgFoundError(localrc, 
+         ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc)) 
+      return 0;
+
+    int myPet = vm->getLocalPet();
+    int petCount = vm->getPetCount();
+    int64_t ret;
+    
+    for (int peer = 1; peer < petCount; peer++) {
+      vm->barrier();
+      if (myPet == 0 || myPet == peer) {
+        //printf("clock_measure_offset between root and peer: %d\n", peer);
+        ret = clock_measure_offset(vm, peer, 0);
+      }
+    }
+    return ret;
+
+  }
+
+  static uint64_t get_clock(void *data) {
+    switch(traceClock) {
+    case ESMF_CLOCK_REALTIME:
+      return get_real_clock();
+    case ESMF_CLOCK_MONOTONIC:
+      return get_monotonic_raw_clock();
+    case ESMF_CLOCK_MONOTONIC_SYNC:
+      return get_monotonic_clock();      
+    }
+    return 0;
+  }
+
+  
 #ifdef ESMF_BABELTRACE
   //global trace writer
   struct bt_ctf_writer *bt_writer;
@@ -867,19 +1035,57 @@ namespace ESMCI {
   
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::TraceOpen()"  
-  void TraceOpen(const char *trace_dir, int *rc) {
+  void TraceOpen(std::string trace_dir, int *rc) {
 
     int localrc;
-    char stream_dir_root[ESMC_MAXPATHLEN];
-    char stream_file[ESMC_MAXPATHLEN];
+    std::string stream_dir_root;
     struct esmftrc_platform_filesys_ctx *ctx;
     struct esmftrc_platform_callbacks cbs;
     uint8_t *buf;
         
     if (rc != NULL) *rc = ESMF_SUCCESS;
 
-    ESMC_LogDefault.Write("Enabling ESMF Tracing", ESMC_LOGMSG_INFO);
+    VM *globalvm = VM::getGlobal(&localrc);
+    if (ESMC_LogDefault.MsgFoundError(localrc, 
+         ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc)) 
+      return;
+    int stream_id = globalvm->getLocalPet();
+        
+    //determine which clock to use
+    traceClock = ESMF_CLOCK_REALTIME;  //default
+    std::string strClk = "REALTIME";   //default
+    
+    char const *envClk = VM::getenv("ESMF_RUNTIME_TRACE_CLOCK");
+    if (envClk != NULL && strlen(envClk) > 0) {     
+      strClk = envClk;
+      if (strClk == "REALTIME") {
+        traceClock = ESMF_CLOCK_REALTIME;
+      }
+      else if (strClk == "MONOTONIC") {
+        traceClock = ESMF_CLOCK_MONOTONIC;
+      }
+      else if (strClk == "MONOTONIC_SYNC") {
+        traceClock = ESMF_CLOCK_MONOTONIC_SYNC;
+      }
+    }
 
+    //determine local offsets if requested
+    if (traceClock == ESMF_CLOCK_MONOTONIC_SYNC) {
+      traceClockOffset = clock_sync_offset(&localrc);
+      if (ESMC_LogDefault.MsgFoundError(localrc, 
+           ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc)) {
+        return;
+      }
+      //printf("[%d] local offset = %lld\n", stream_id, traceClockOffset);
+    }
+
+    std::stringstream logMsg;
+    logMsg << "ESMF Tracing enabled using clock: " + strClk;
+    if (traceClock == ESMF_CLOCK_MONOTONIC_SYNC) {
+      logMsg << " (local offset = " << traceClockOffset << ")";
+    }
+    ESMC_LogDefault.Write(logMsg.str().c_str(), ESMC_LOGMSG_INFO);
+        
     // set up callbacks
     cbs.sys_clock_clock_get_value = get_clock;
     cbs.is_backend_full = is_backend_full;
@@ -904,45 +1110,39 @@ namespace ESMCI {
     
     //make relative path absolute if needed
     if (trace_dir[0] != '/') {
-      char cwd[1024];
-      if (getcwd(cwd, sizeof(cwd)) == NULL) {
-        ESMC_LogDefault.MsgFoundError(ESMC_RC_SYS, "Error getting working directory", 
-                                      ESMC_CONTEXT, rc);
-        return; 
-      }
-      sprintf(stream_dir_root, "%s/%s", cwd, trace_dir);
-      //printf("absolute dir = |%s|\n", stream_dir);
+      char cwd[ESMC_MAXPATHLEN];
+      FTN_X(c_esmc_getcwd)(cwd, &localrc, ESMC_MAXPATHLEN);
+      if (ESMC_LogDefault.MsgFoundError(localrc,
+    		  "Error getting working directory", ESMC_CONTEXT, rc))
+            return;
+      stream_dir_root = string (cwd, ESMC_F90lentrim(cwd, ESMC_MAXPATHLEN)) + "/" + trace_dir;
     }
     else {
-      sprintf(stream_dir_root, "%s", trace_dir);
+      stream_dir_root = trace_dir;
     }
-
-    VM *globalvm = VM::getGlobal(&localrc);
-    if (ESMC_LogDefault.MsgFoundError(localrc, 
-	  ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc)) 
-      return;
-    int stream_id = globalvm->getMypet();
-
     
-    struct stat st = {0};
+    struct stat st;
     if (stream_id == 0) {
-      if (stat(stream_dir_root, &st) == -1) {
-	if (mkdir(stream_dir_root, TRACE_DIR_PERMISSIONS) == -1) {
-	  //perror("mkdir()");
-	  ESMC_LogDefault.MsgFoundError(ESMC_RC_FILE_CREATE, "Error creating trace root directory", 
-					ESMC_CONTEXT, rc);
-	  return;
-	}
+      if (stat(stream_dir_root.c_str(), &st) == -1) {
+
+    	  ESMC_Logical relaxedFlag = ESMF_TRUE;
+    	  int dir_perms = TRACE_DIR_PERMISSIONS;
+    	  FTN_X(c_esmc_makedirectory)(stream_dir_root.c_str(), &dir_perms,
+    			  &relaxedFlag, &localrc, stream_dir_root.length());
+
+    	  if (ESMC_LogDefault.MsgFoundError(localrc,
+    	      "Error creating trace root directory", ESMC_CONTEXT, rc))
+    	       return;
       }
     }
         
     //all PETs wait for directory to be created
     globalvm->barrier();
-
+           
     //determine if tracing turned on for this PET
     traceLocalPet = TraceIsEnabledForPET(&localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, 
-          ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc)) {
+         ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc)) {
       traceLocalPet = false;
       return;
     }
@@ -950,9 +1150,10 @@ namespace ESMCI {
     if (!traceLocalPet) return;
 
     //my specific file
-    sprintf(stream_file, "%s/esmf_stream_%04d", stream_dir_root, stream_id);
-            
-    ctx->fh = fopen(stream_file, "wb");
+    std::stringstream stream_file;
+    stream_file << stream_dir_root << "/esmf_stream_" << std::setfill('0') << std::setw(4) << stream_id;
+    
+    ctx->fh = fopen(stream_file.str().c_str(), "wb");
     if (!ctx->fh) {
       free(ctx);
       free(buf);
@@ -970,7 +1171,7 @@ namespace ESMCI {
 
     //stream zero writes the metadata file
     if (stream_id == 0) {
-      write_metadata(stream_dir_root, &localrc);
+      write_metadata(stream_dir_root.c_str(), &localrc);
       if (ESMC_LogDefault.MsgFoundError(localrc, 
           ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc)) {
         return;
@@ -1068,7 +1269,7 @@ namespace ESMCI {
     string rpm("");
     string fpm("");
     
-    for (int i=0; i < attrKeys.size(); i++) {
+    for (unsigned i=0; i < attrKeys.size(); i++) {
       if (attrKeys.at(i) == "IPM") {
         ipm = attrVals.at(i);
       }
@@ -1125,7 +1326,7 @@ namespace ESMCI {
 #else /* no ESMF_BABELTRACE or ESMF_TRACE_INTERNAL - just use stubs */
 
 #define LOG_NO_BT_LIB ESMC_LogDefault.MsgFoundError(ESMF_RC_LIB_NOT_PRESENT, \
-                "The Babeltrace library is required for tracing but is not present.",\ 
+                "The Babeltrace library is required for tracing but is not present.",\
                 ESMC_CONTEXT, rc);
 
 #undef  ESMC_METHOD

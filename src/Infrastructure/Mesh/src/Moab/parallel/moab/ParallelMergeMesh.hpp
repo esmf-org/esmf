@@ -26,7 +26,7 @@ namespace moab {
 		      const double epsilon);
     
     //Public Function to identify shared elements
-    ErrorCode merge();
+    ErrorCode merge(EntityHandle levelset=0, bool skip_local_merge=false);
     
   private:
     ParallelComm *myPcomm;
@@ -37,9 +37,9 @@ namespace moab {
     gs_data::crystal_data myCD;
     
     //Wrapper of merge() that performs the merge
-    ErrorCode PerformMerge();
+    ErrorCode PerformMerge(EntityHandle levelset=0, bool skip_local_merge=false);
     //Determine the local skin entities (fills mySkinEnts)
-    ErrorCode PopulateMySkinEnts(int dim);
+    ErrorCode PopulateMySkinEnts(const EntityHandle meshset,int dim, bool skip_local_merge=false);
     //Get the global bounding box
     ErrorCode GetGlobalBox(double *gbox);
     //Fill out the local myTup before the first gather-scatter

@@ -309,18 +309,20 @@ _Tree_rebalance_for_erase(TreeNode<Key>* z,
         z->parent->left = x;
       else
         z->parent->right = x;
-    if (leftmost == z) 
+    if (leftmost == z) {
       if (z->right == 0)        // z->left must be null also
         leftmost = z->parent;
     // makes leftmost == header if z == root
       else
         leftmost = TreeNode<Key>::minimum(x);
-    if (rightmost == z)  
+    }
+    if (rightmost == z) {
       if (z->left == 0)         // z->right must be null also
         rightmost = z->parent;  
     // makes rightmost == header if z == root
       else                      // x == z->left
         rightmost = TreeNode<Key>::maximum(x);
+    }
   }
   if (y->color != _Tree_red) { 
     while (x != root && (x == 0 || x->color == _Tree_black))
@@ -610,11 +612,12 @@ Tree<Key, TT, Compare>::insert_unique(value_type& v)
         x = comp ? left(x) : right(x);
     }
     iterator j = iterator(y);   
-    if (comp)
+    if (comp) {
         if (j == begin())     
             return std::pair<iterator,bool>(__insert(x, y, v), true);
         else
             --j;
+    }
     if (key_compare(key(j.node), v.KeyOfValue()))
         return std::pair<iterator,bool>(__insert(x, y, v), true);
     return std::pair<iterator,bool>(j, false);

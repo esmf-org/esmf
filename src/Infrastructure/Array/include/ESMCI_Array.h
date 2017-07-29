@@ -31,6 +31,10 @@
 //EOPI
 //-------------------------------------------------------------------------
 
+namespace ESMCI {
+  class Array;
+}
+  
 #include "ESMCI_Base.h"       // Base is superclass to Array
 #include "ESMCI_VM.h"
 #include "ESMCI_DELayout.h"
@@ -50,7 +54,6 @@ namespace ESMCI {
 
   // classes and structs
 
-  class Array;
   template<typename T=int> struct SeqIndex; //TODO: eventually remove T=int default
   template<typename SIT, typename DIT> class SparseMatrix;
 
@@ -280,7 +283,8 @@ namespace ESMCI {
       InterArray<int> *totalUWidthArg, ESMC_IndexFlag *indexflag,
       InterArray<int> *distLBoundArg, InterArray<int> *undistLBoundArg,
       InterArray<int> *undistUBoundArg, int *rc, VM *vm=NULL);
-    static Array *create(Array *array, int *rc=NULL);
+    static Array *create(Array *array, int rmLeadingTensors=0, int *rc=NULL);
+    static Array *create(Array *array, bool rmTensorFlag, int *rc=NULL);
     static int destroy(Array **array, bool noGarbage=false);
     // data copy()
     int copy(Array const *arrayIn);
@@ -322,6 +326,7 @@ namespace ESMCI {
     int getArbSequenceIndexOffset(const int *index, int *rc=NULL)const;
     int setComputationalLWidth(InterArray<int> *computationalLWidthArg);
     int setComputationalUWidth(InterArray<int> *computationalUWidthArg);
+    void setRimMembers();
     template<typename T> int setRimSeqIndex(int localDe, 
       InterArray<T> *rimSeqIndexArg);
     template<typename T>
@@ -402,6 +407,8 @@ namespace ESMCI {
       ESMC_TermOrder_Flag termorderflag=ESMC_TERMORDER_FREE, 
       bool checkflag=false, bool haloFlag=false);
     static int sparseMatMulRelease(RouteHandle *routehandle);
+    void superVecParam(int localDeCount, bool superVectorOkay,
+      int superVecSizeUnd[3], int *superVecSizeDis[2], int &vectorLength)const;
     
   };  // class Array
   //============================================================================

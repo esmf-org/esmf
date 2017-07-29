@@ -11,12 +11,14 @@ class TestExamples(TestBase):
     def test_helloworld(self):
         from . import hello_world
 
+    @attr('parallel')
     def test_crff(self):
         from . import create_read_from_file
 
     def test_gridmeshrg(self):
         from . import grid_mesh_regrid
 
+    @attr('parallel')
     def test_field_read(self):
         from . import field_read
 
