@@ -211,10 +211,9 @@
     if (present(rc)) rc=ESMF_SUCCESS
     return
 #else
-    call ESMF_LogSetError(rcToCheck=ESMF_RC_LIB_NOT_PRESENT, &
-                 msg="- ESMF_NETCDF not defined when lib was compiled", &
-                 ESMF_CONTEXT, rcToReturn=rc)
-    return
+    if (ESMF_LogFoundError(ESMF_RC_LIB_NOT_PRESENT, &
+                msg="- ESMF_NETCDF not defined when lib was compiled", &
+                ESMF_CONTEXT, rcToReturn=rc)) return
 #endif
 
 end subroutine ESMF_ScripInq
@@ -276,9 +275,9 @@ subroutine ESMF_ScripInqUnits(filename, units, rc)
     if (present(rc)) rc=ESMF_SUCCESS
     return
 #else
-    call ESMF_LogSetError(rcToCheck=ESMF_RC_LIB_NOT_PRESENT, &
-                 msg="- ESMF_NETCDF not defined when lib was compiled", &
-                 ESMF_CONTEXT, rcToReturn=rc)
+    if (ESMF_LogFoundError(ESMF_RC_LIB_NOT_PRESENT, &
+                msg="- ESMF_NETCDF not defined when lib was compiled", &
+                ESMF_CONTEXT, rcToReturn=rc)) return
 #endif
 
     return
@@ -580,10 +579,9 @@ end subroutine ESMF_ScripInqUnits
     if(present(rc)) rc = ESMF_SUCCESS
     return
 #else
-    call ESMF_LogSetError(rcToCheck=ESMF_RC_LIB_NOT_PRESENT, &
-                 msg="- ESMF_NETCDF not defined when lib was compiled", &
-                 ESMF_CONTEXT, rcToReturn=rc)
-    return
+    if (ESMF_LogFoundError(ESMF_RC_LIB_NOT_PRESENT, &
+                msg="- ESMF_NETCDF not defined when lib was compiled", &
+                ESMF_CONTEXT, rcToReturn=rc)) return
 #endif
 
 end subroutine ESMF_ScripGetVar
@@ -2616,12 +2614,11 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
     if (present(rc)) rc = ESMF_SUCCESS
     return
 #else
-    call ESMF_LogSetError(rcToCheck=ESMF_RC_LIB_NOT_PRESENT, &
-                 msg="- ESMF_NETCDF not defined when lib was compiled", &
-                 ESMF_CONTEXT, rcToReturn=rc)
+    if (ESMF_LogFoundError(ESMF_RC_LIB_NOT_PRESENT, &
+                msg="- ESMF_NETCDF not defined when lib was compiled", &
+                ESMF_CONTEXT, rcToReturn=rc)) return
 #endif
 
-    return
 end subroutine ESMF_OutputScripWeightFile
 
 #undef ESMF_METHOD
@@ -2928,12 +2925,11 @@ subroutine ESMF_OutputSimpleWeightFile (wgtFile, factorList, factorIndexList, &
      if (present(rc)) rc = ESMF_SUCCESS
      return
 #else
-     call ESMF_LogSetError(rcToCheck=ESMF_RC_LIB_NOT_PRESENT, &
+     if (ESMF_LogFoundError(ESMF_RC_LIB_NOT_PRESENT, &
                  msg="- ESMF_NETCDF not defined when lib was compiled", &
-                 ESMF_CONTEXT, rcToReturn=rc)
+                 ESMF_CONTEXT, rcToReturn=rc)) return
 #endif
 
-    return
 end subroutine ESMF_OutputSimpleWeightFile
 
 
@@ -3017,10 +3013,9 @@ subroutine ESMF_OutputScripVarFile(filename, varname, varbuffer, rc)
     rc=ESMF_SUCCESS
     return
 #else
-    call ESMF_LogSetError(rcToCheck=ESMF_RC_LIB_NOT_PRESENT, &
-                 msg="- ESMF_NETCDF not defined when lib was compiled", &
-                 ESMF_CONTEXT, rcToReturn=rc)
-    return
+    if (ESMF_LogFoundError(ESMF_RC_LIB_NOT_PRESENT, &
+                msg="- ESMF_NETCDF not defined when lib was compiled", &
+                ESMF_CONTEXT, rcToReturn=rc)) return
 #endif
 
 end subroutine ESMF_OutputScripVarFile
@@ -3157,12 +3152,11 @@ subroutine ESMF_EsmfInq(filename, nodeCount, elementCount, &
     if (present(rc)) rc=ESMF_SUCCESS
     return
 #else
-    call ESMF_LogSetError(rcToCheck=ESMF_RC_LIB_NOT_PRESENT, &
-                 msg="- ESMF_NETCDF not defined when lib was compiled", &
-                 ESMF_CONTEXT, rcToReturn=rc)
+    if (ESMF_LogFoundError(ESMF_RC_LIB_NOT_PRESENT, &
+                msg="- ESMF_NETCDF not defined when lib was compiled", &
+                ESMF_CONTEXT, rcToReturn=rc)) return
 #endif
 
-    return
 end subroutine ESMF_EsmfInq
 
 #undef  ESMF_METHOD
@@ -3244,12 +3238,11 @@ subroutine ESMF_EsmfInqUnits(filename, units, rc)
     if (present(rc)) rc=ESMF_SUCCESS
     return
 #else
-    call ESMF_LogSetError(rcToCheck=ESMF_RC_LIB_NOT_PRESENT, &
-                 msg="- ESMF_NETCDF not defined when lib was compiled", &
-                 ESMF_CONTEXT, rcToReturn=rc)
+    if (ESMF_LogFoundError(ESMF_RC_LIB_NOT_PRESENT, &
+                msg="- ESMF_NETCDF not defined when lib was compiled", &
+                ESMF_CONTEXT, rcToReturn=rc)) return
 #endif
 
-    return
 end subroutine ESMF_EsmfInqUnits
 
 #undef  ESMF_METHOD
@@ -3419,10 +3412,9 @@ subroutine ESMF_EsmfGetNode (filename, nodeCoords, nodeMask, &
        coordSys = coordSysLocal
     endif
 #else
-    call ESMF_LogSetError(rcToCheck=ESMF_RC_LIB_NOT_PRESENT, &
-                 msg="- ESMF_NETCDF not defined when lib was compiled", &
-                 ESMF_CONTEXT, rcToReturn=rc)
-    return
+    if (ESMF_LogFoundError(ESMF_RC_LIB_NOT_PRESENT, &
+                msg="- ESMF_NETCDF not defined when lib was compiled", &
+                ESMF_CONTEXT, rcToReturn=rc)) return
 #endif
 
 end subroutine ESMF_EsmfGetNode
@@ -3739,10 +3731,9 @@ subroutine ESMF_EsmfGetElement (filename, elementConn, &
       ESMF_SRCLINE, trim(filename), &
       rc)) return
 #else
-    call ESMF_LogSetError(rcToCheck=ESMF_RC_LIB_NOT_PRESENT, &
-                 msg="- ESMF_NETCDF not defined when lib was compiled", &
-                 ESMF_CONTEXT, rcToReturn=rc)
-    return
+    if (ESMF_LogFoundError(ESMF_RC_LIB_NOT_PRESENT, &
+                msg="- ESMF_NETCDF not defined when lib was compiled", &
+                ESMF_CONTEXT, rcToReturn=rc)) return
 #endif
 
 end subroutine ESMF_EsmfGetElement
@@ -3837,11 +3828,11 @@ subroutine ESMF_EsmfGetVerts(ncid, filename, numElements, numNodePElement, numNo
     if (present(rc)) rc=ESMF_SUCCESS
     return
 #else
-    call ESMF_LogSetError(rcToCheck=ESMF_RC_LIB_NOT_PRESENT, &
-                 msg="- ESMF_NETCDF not defined when lib was compiled", &
-                 ESMF_CONTEXT, rcToReturn=rc)
-    return
+    if (ESMF_LogFoundError(ESMF_RC_LIB_NOT_PRESENT, &
+                msg="- ESMF_NETCDF not defined when lib was compiled", &
+                ESMF_CONTEXT, rcToReturn=rc)) return
 #endif
+
 end subroutine ESMF_EsmfGetVerts
 
 
@@ -3926,10 +3917,9 @@ subroutine ESMF_EsmfGetCoords(filename, coordBuffer, maskBuffer, start, count, &
       rc)) return
 
 #else
-    call ESMF_LogSetError(rcToCheck=ESMF_RC_LIB_NOT_PRESENT, &
-                 msg="- ESMF_NETCDF not defined when lib was compiled", &
-                 ESMF_CONTEXT, rcToReturn=rc)
-    return
+    if (ESMF_LogFoundError(ESMF_RC_LIB_NOT_PRESENT, &
+                msg="- ESMF_NETCDF not defined when lib was compiled", &
+                ESMF_CONTEXT, rcToReturn=rc)) return
 #endif
 
 end subroutine ESMF_EsmfGetCoords
@@ -3969,10 +3959,9 @@ function CDFCheckError (ncStatus, module, fileName, lineNo, errmsg, rc)
        return
     end if
 #else
-    call ESMF_LogSetError(rcToCheck=ESMF_RC_LIB_NOT_PRESENT, &
-                 msg="- ESMF_NETCDF not defined when lib was compiled", &
-                 ESMF_CONTEXT, rcToReturn=rc)
-    return
+    if (ESMF_LogFoundError(ESMF_RC_LIB_NOT_PRESENT, &
+                msg="- ESMF_NETCDF not defined when lib was compiled", &
+                ESMF_CONTEXT, rcToReturn=rc)) return
 #endif
 
 end function CDFCheckError
