@@ -1609,12 +1609,9 @@ call ESMF_LogWrite("eShareStatus: "//trim(eShareStatus), ESMF_LOGMSG_INFO, rc=rc
             call ESMF_FieldGet(acceptorField, vm=vm, rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-#if 0   
-            call ESMF_LogWrite(trim(name)//": InitializeP3 transfer DG for Grid: "//&
-              trim(geomobjname), ESMF_LOGMSG_INFO, rc=rc)
-#endif  
             if (btest(verbosity,1)) then
-              call ESMF_LogWrite(trim(name)//": transferring underlying DistGrid", &
+              call ESMF_LogWrite(trim(name)//": transferring underlying "// &
+                "DistGrid for Grid: "//trim(geomobjname), &
                 ESMF_LOGMSG_INFO, rc=rc)
               if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
                 line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out

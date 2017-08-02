@@ -1447,9 +1447,6 @@ void PIO_Handler::open(
               std::string ("could not close pre-created file: ") + fn + " (" + nc_strerror (ncerr) + ")";
             ESMC_LogDefault.Write(errmsg, ESMC_LOGMSG_ERROR, ESMC_CONTEXT);
         }
-
-        std::string cmd = std::string ("ncdump -k ") + fn;
-        system (cmd.c_str());
       }
       vm->broadcast (&comm_rc, sizeof (int), 0);
       if (ESMC_LogDefault.MsgFoundError (comm_rc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc))
