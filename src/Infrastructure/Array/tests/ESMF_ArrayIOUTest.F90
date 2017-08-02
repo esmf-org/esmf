@@ -1503,7 +1503,7 @@ program ESMF_ArrayIOUTest
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_ArrayWrite(array_gxt, fileName="Array_attributes.nc", &
       convention=apConv, purpose=apPurp,  &
-      status=ESMF_FILESTATUS_REPLACE, iofmt=ESMF_IOFMT_NETCDF, rc=rc)
+      status=ESMF_FILESTATUS_REPLACE, iofmt=ESMF_IOFMT_NETCDF_64BIT_OFFSET, rc=rc)
 #if (defined ESMF_PIO && (defined ESMF_NETCDF || defined ESMF_PNETCDF))
   call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 #else

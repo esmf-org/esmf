@@ -51,7 +51,7 @@ class TestField(TestBase):
         mask[0, 1] = 0
 
         if ndbounds:
-            field = Field(grid, ndbounds=[2, 5])
+            field = Field(grid, ndbounds=[5, 2])
         else:
             field = Field(grid)
 
@@ -77,17 +77,17 @@ class TestField(TestBase):
 
         # TODO: np.empty_like gives a segfault, waiting for support request to implement empty_like functionality
         #       for Field that actually allocates a new ESMF Field underneath
-        # assert (type(np.empty_like(field)) == Field)
+        # assert (type(nfp.empty_like(field)) == Field)
 
         # extended slices
         for i in range(10):
-            field.data[:, :, :, i] = i
-        assert field.data[0, 0, 0, ::2].all() == np.array([0, 2, 4, 6, 8]).all()
+            field.data[i, :, :, :] = i
+        assert field.data[::2, 0, 0, 0].all() == np.array([0, 2, 4, 6, 8]).all()
 
         # extended slices
         for i in range(10):
-            field.data[:,:,:,i] = i
-        assert field.data[0,0,0,::2].all() == np.array([0, 2, 4, 6, 8]).all()
+            field.data[i,:,:,:] = i
+        assert field.data[::2, 0, 0, 0].all() == np.array([0, 2, 4, 6, 8]).all()
 
 
 
@@ -105,7 +105,7 @@ class TestField(TestBase):
             coord_sys=[None, CoordSys.CART, CoordSys.SPH_DEG, CoordSys.SPH_RAD],
             typekind_grid=[None, TypeKind.I4, TypeKind.I8, TypeKind.R4, TypeKind.R8],
             typekind_field=[None, TypeKind.I4, TypeKind.I8, TypeKind.R4, TypeKind.R8],
-            ndbounds=[None, [2], [2, 5]]
+            ndbounds=[None, [2], [5, 2]]
             )
 
         testcases = self.iter_product_keywords(keywords)
@@ -126,11 +126,11 @@ class TestField(TestBase):
                 field2 = None
                 if a.ndbounds is not None:
                     if len(a.ndbounds) == 1:
-                        field2 = field[1, 2:10, 7:9]
+                        field2 = field[7:9, 2:10, 1]
                     elif len(a.ndbounds) == 2:
-                        field2 = field[1, 2:4, 2:10, 7:9]
+                        field2 = field[7:9, 2:10, 2:4, 1]
                 else:
-                    field2 = field[2:10, 7:9]
+                    field2 = field[7:9, 2:10]
                 self.examine_field_attributes(field)
                 self.examine_field_attributes(field2)
                 field2.destroy()
@@ -158,7 +158,7 @@ class TestField(TestBase):
             mask_values=[None, [2], [2, 3, 4]],
             typekind_grid=[None, TypeKind.I4, TypeKind.I8, TypeKind.R4, TypeKind.R8],
             typekind_field=[None, TypeKind.I4, TypeKind.I8, TypeKind.R4, TypeKind.R8],
-            ndbounds=[None, [2], [2, 5]]
+            ndbounds=[None, [2], [5, 2]]
             )
 
         testcases = self.iter_product_keywords(keywords)
@@ -179,11 +179,11 @@ class TestField(TestBase):
                 field2 = None
                 if a.ndbounds is not None:
                     if len(a.ndbounds) == 1:
-                        field2 = field[1, 2:10, 7:9, 4:11]
+                        field2 = field[4:11, 7:9, 2:10, 1]
                     elif len(a.ndbounds) == 2:
-                        field2 = field[1, 2:4, 2:10, 7:9, 4:11]
+                        field2 = field[4:11, 7:9, 2:10, 2:4, 1]
                 else:
-                    field2 = field[2:10, 7:9, 4:11]
+                    field2 = field[4:11, 7:9, 2:10]
                 self.examine_field_attributes(field2)
                 field2.destroy()
                 field.destroy()
@@ -352,7 +352,7 @@ class TestField(TestBase):
         gridtofieldmap = np.array([2, 5])
         field = Field(grid, typekind=TypeKind.R8, ndbounds=gridtofieldmap)
 
-        field2 = Field(grid, ndbounds=np.array([2, 5]))
+        field2 = Field(grid, ndbounds=np.array([5, 2]))
 
         field.data[...] = 10
         self.examine_field_attributes(field)
@@ -378,7 +378,7 @@ class TestField(TestBase):
                 mesh_create_50()
 
         field = Field(mesh, typekind=TypeKind.R8, meshloc=MeshLoc.NODE)
-        field2 = Field(mesh, meshloc=MeshLoc.ELEMENT, ndbounds=np.array([2, 5]))
+        field2 = Field(mesh, meshloc=MeshLoc.ELEMENT, ndbounds=np.array([5, 2]))
 
         field.data[...] = 10
         self.examine_field_attributes(field)
@@ -476,26 +476,26 @@ class TestField(TestBase):
         grid_row[...] = row.reshape((row.size,1))
         grid_col[...] = row.reshape((1,row.size))
 
-        field = Field(grid, ndbounds=[2, 5])
+        field = Field(grid, ndbounds=[5, 2])
         self.examine_field_attributes(field)
 
-        for i in range(2):
-            for j in range(5):
-                field.data[i,j,...] = i+j
+        for i in range(5):
+            for j in range(2):
+                field.data[:, :, i, j] = i+j
 
-        field2 = field[0:1, 0:2, 0:5, 0:5]
+        field2 = field[0:5, 0:5, 0:2, 0:1]
         self.examine_field_attributes(field2)
 
-        field3 = field2[0:1, 0:1, 2:4, 2:4]
+        field3 = field2[2:4, 2:4, 0:1, 0:1]
         self.examine_field_attributes(field3)
 
-        assert field.data.shape == (2, 5, 10, 10)
-        assert field2.data.shape == (1, 2, 5, 5)
-        assert field3.data.shape == (1, 1, 2, 2)
+        assert field.data.shape == (10, 10, 5, 2)
+        assert field2.data.shape == (5, 5, 2, 1)
+        assert field3.data.shape == (2, 2, 1, 1)
 
-        assert (field.upper_bounds.tolist() == [2, 5, 10, 10])
-        assert (field2.upper_bounds.tolist() == [1, 2, 5, 5])
-        assert (field3.upper_bounds.tolist() == [1, 1, 2, 2])
+        assert (field.upper_bounds.tolist() == [10, 10, 5, 2])
+        assert (field2.upper_bounds.tolist() == [5, 5, 2 ,1])
+        assert (field3.upper_bounds.tolist() == [2, 2, 1, 1])
 
         assert (field.grid.upper_bounds[0].tolist() == [10, 10])
         assert (field2.grid.upper_bounds[0].tolist() == [5, 5])
@@ -519,22 +519,22 @@ class TestField(TestBase):
                 mesh_create_50()
 
         field = Field(mesh, typekind=TypeKind.R8,
-                      meshloc=MeshLoc.NODE, ndbounds=[2, 5])
+                      meshloc=MeshLoc.NODE, ndbounds=[5, 2])
         self.examine_field_attributes(field)
 
-        for i in range(2):
-            for j in range(5):
-                field[i, j, ...] = i + j
+        for i in range(5):
+            for j in range(2):
+                field[:, :, i, j] = i + j
 
-        field2 = field[0:1, 0:2, 0:5]
+        field2 = field[0:5, 0:2, 0:1]
         self.examine_field_attributes(field2)
 
-        field3 = field2[0:1, 1:2, 2:4]
+        field3 = field2[2:4, 1:2, 0:1]
         self.examine_field_attributes(field3)
 
-        assert field.data.shape == (2, 5, 10)
-        assert field2.data.shape == (1, 2, 5)
-        assert field3.data.shape == (1, 1, 2)
+        assert field.data.shape == (10, 5, 2)
+        assert field2.data.shape == (5, 2, 1)
+        assert field3.data.shape == (2, 1, 1)
 
     @attr('serial')
     def test_field_reshape(self):
