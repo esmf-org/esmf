@@ -1424,7 +1424,6 @@ void PIO_Handler::open(
 #elif defined (ESMF_NETCDF)
       comm_rc == ESMF_SUCCESS;
       if (localPet == 0) {
-std::cout << ESMC_METHOD << ": PET 0 calling nc_create" << std::endl;
 #if defined (NC_64BIT_DATA)
       // If NETCDF4 was desired, enable HDF5.
         int ncmode = (getFormat() == ESMF_IOFMT_NETCDF4) ? NC_64BIT_DATA : NC_64BIT_OFFSET;
@@ -1439,7 +1438,6 @@ std::cout << ESMC_METHOD << ": PET 0 calling nc_create" << std::endl;
           std::string errmsg =
               std::string("could not pre-create file: ") + fn + " (" + nc_strerror (ncerr) + ")";
             ESMC_LogDefault.Write(errmsg, ESMC_LOGMSG_ERROR, ESMC_CONTEXT);
-          }
         }
 
         ncerr = nc_close (ncid);
@@ -1448,7 +1446,6 @@ std::cout << ESMC_METHOD << ": PET 0 calling nc_create" << std::endl;
           std::string errmsg =
               std::string ("could not close pre-created file: ") + fn + " (" + nc_strerror (ncerr) + ")";
             ESMC_LogDefault.Write(errmsg, ESMC_LOGMSG_ERROR, ESMC_CONTEXT);
-          }
         }
 
         std::string cmd = std::string ("ncdump -k ") + fn;
@@ -1476,7 +1473,6 @@ std::cout << ESMC_METHOD << ": PET 0 calling nc_create" << std::endl;
     pio_cpp_setdebuglevel(3);
     ESMC_LogDefault.Write(errmsg, ESMC_LOGMSG_INFO, ESMC_CONTEXT);
 #endif // ESMFIO_DEBUG
-std::cout << ESMC_METHOD << ": calling PIO createfile.  File: " << getFilename() << std::endl;
     piorc = pio_cpp_createfile(&pioSystemDesc, pioFileDesc,
                                  iotype, getFilename(), clobberMode);
     if (!CHECKPIOWARN(piorc, std::string("Unable to create file: ") + getFilename(),
@@ -1550,7 +1546,6 @@ void PIO_Handler::attPackPut (
     // TODO: this fails with PNetCDF...
     piorc = pio_cpp_def_var_0d(pioFileDesc, "", PIO_global, gblvardesc);
     if (piorc != PIO_noerr) {
-      std::cout << ESMC_METHOD << ": piorc = " << piorc << std::endl;
       if (!CHECKPIOERROR(piorc, "Attempting to define global PIO vardesc",
           ESMF_RC_FILE_WRITE, (*rc))) {
         free (gblvardesc);
