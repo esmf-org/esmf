@@ -127,7 +127,7 @@ DistGrid *DistGrid::create(
 //    incoming DistGrid object.
 //    The actualFlag argument identifies PETs that are part of vm. If
 //    on a PET actualFlag is true, and vm is not NULL, this PET is part of a
-//    vm that is of smaller size than the currentVM. Of on a PET actualFlag is
+//    vm that is of smaller size than the currentVM. If on a PET actualFlag is
 //    false then there exists such a smaller vm (even if vm is NULL), but the
 //    PET is not part of that VM.
 //
@@ -332,29 +332,31 @@ DistGrid *DistGrid::create(
         int tileB = element[1];
         int *positionVector = element + 2;
         int *orientationVector = positionVector + dg->dimCount;
-        if (orientationVector[0]==2 && orientationVector[1]==-1){
-          int diff = lastExtra->array[dg->dimCount*(tileA-1)+0]
-            - firstExtra->array[dg->dimCount*(tileB-1)+1];
-          if (diff == (lastExtra->array[dg->dimCount*(tileB-1)+1]
-            - firstExtra->array[dg->dimCount*(tileA-1)+0])){
-            positionVector[1] += diff;
-          }else{
-            ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
-              "Inconsistent connection and padding detected.",
-            ESMC_CONTEXT, rc);
-            return ESMC_NULL_POINTER;
-          }
-        }else if (orientationVector[0]==-2 && orientationVector[1]==1){
-          int diff = lastExtra->array[dg->dimCount*(tileA-1)+1]
-            - firstExtra->array[dg->dimCount*(tileB-1)+0];
-          if (diff == (lastExtra->array[dg->dimCount*(tileB-1)+0]
-            - firstExtra->array[dg->dimCount*(tileA-1)+1])){
-            positionVector[0] += diff;
-          }else{
-            ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
-              "Inconsistent connection and padding detected.",
-            ESMC_CONTEXT, rc);
-            return ESMC_NULL_POINTER;
+        if (present(firstExtra) && present(lastExtra)){
+          if (orientationVector[0]==2 && orientationVector[1]==-1){
+            int diff = lastExtra->array[dg->dimCount*(tileA-1)+0]
+              - firstExtra->array[dg->dimCount*(tileB-1)+1];
+            if (diff == (lastExtra->array[dg->dimCount*(tileB-1)+1]
+              - firstExtra->array[dg->dimCount*(tileA-1)+0])){
+              positionVector[1] += diff;
+            }else{
+              ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
+                "Inconsistent connection and padding detected.",
+              ESMC_CONTEXT, rc);
+              return ESMC_NULL_POINTER;
+            }
+          }else if (orientationVector[0]==-2 && orientationVector[1]==1){
+            int diff = lastExtra->array[dg->dimCount*(tileA-1)+1]
+              - firstExtra->array[dg->dimCount*(tileB-1)+0];
+            if (diff == (lastExtra->array[dg->dimCount*(tileB-1)+0]
+              - firstExtra->array[dg->dimCount*(tileA-1)+1])){
+              positionVector[0] += diff;
+            }else{
+              ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
+                "Inconsistent connection and padding detected.",
+              ESMC_CONTEXT, rc);
+              return ESMC_NULL_POINTER;
+            }
           }
         }
       }
@@ -410,12 +412,16 @@ DistGrid *DistGrid::create(
       // prepare regDecomp
       InterArray<int> *regDecomp = new InterArray<int>(dg->regDecomp,
         dimInterArray, dimCountInterArray);
-    
+
       // use decompflag from inside dg to ensure identical decomposition
       Decomp_Flag *decompflag = dg->decompflag;
       
       if (dg->tileCount==1){
         // single tile
+#if 0
+      ESMC_LogDefault.Write("DGfromDG: single-tile regDecomp branch", 
+        ESMC_LOGMSG_INFO);
+#endif
         int decompflagCount = 0;  // default
         if (decompflag)
           decompflagCount = dg->dimCount;
@@ -426,6 +432,10 @@ DistGrid *DistGrid::create(
           ESMC_CONTEXT, rc)) return ESMC_NULL_POINTER;
       }else{
         // multi tile
+#if 0
+      ESMC_LogDefault.Write("DGfromDG: multi-tile regDecomp branch", 
+        ESMC_LOGMSG_INFO);
+#endif
         int decompflagCount1 = 0;  // default
         int decompflagCount2 = 0;  // default
         if (decompflag){
@@ -438,6 +448,10 @@ DistGrid *DistGrid::create(
         if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
           ESMC_CONTEXT, rc)) return ESMC_NULL_POINTER;
       }
+#if 0
+      ESMC_LogDefault.Write("DGfromDG: done with DistGrid::create()", 
+        ESMC_LOGMSG_INFO);
+#endif
       delete regDecomp;
     }else{
       // this is a deBlockList
@@ -4537,7 +4551,7 @@ int DistGrid::serialize(
     }
   }else
     ip += 4*dimCount*deCount + 2*deCount + 1 + 2*dimCount;
-  //
+  // connections
   if (inquireflag != ESMF_INQUIREONLY){
     *ip++ = connectionCount;
     for (int i=0; i<connectionCount; i++)
@@ -4545,18 +4559,18 @@ int DistGrid::serialize(
         *ip++ = connectionList[i][j];
   }else
     ip += 1 + connectionCount*(2*dimCount+2);
-    
+  // regDecomp
   if (inquireflag != ESMF_INQUIREONLY){
     if (regDecomp){
-      *ip++ = dimCount;
-      for (int i=0; i<dimCount; i++)
+      *ip++ = dimCount*tileCount; // guard variable so deserialize can know
+      for (int i=0; i<dimCount*tileCount; i++)
         *ip++ = regDecomp[i];
     }else
       *ip++ = 0;
   }else{
     ip++;
     if (regDecomp)
-      ip += dimCount;
+      ip += dimCount*tileCount;
   }
 
   cp = (char *)ip;
@@ -4655,6 +4669,7 @@ DistGrid *DistGrid::deserialize(
     a->collocationPDim[i] = *ip++;
     a->collocationTable[i] = *ip++;
   }
+  // connections
   a->connectionCount = *ip++;
   a->connectionList = new int*[a->connectionCount];
   for (int i=0; i<a->connectionCount; i++){
@@ -4672,12 +4687,11 @@ DistGrid *DistGrid::deserialize(
     a->arbSeqIndexListPCollPLocalDe[i][0] = NULL;
     a->elementCountPCollPLocalDe[i][0] = 0;
   }
-  
   //regDecomp
-  int regDecompDimCount = *ip++;
-  if (regDecompDimCount == a->dimCount){
-    a->regDecomp = new int[a->dimCount];
-    for (int i=0; i<a->dimCount; i++)
+  int regDecompCount = *ip++;
+  if (regDecompCount == a->dimCount * a->tileCount){
+    a->regDecomp = new int[regDecompCount];
+    for (int i=0; i<regDecompCount; i++)
       a->regDecomp[i] = *ip++;
   }else
     a->regDecomp = NULL;
