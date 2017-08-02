@@ -58,6 +58,8 @@ namespace ESMCI {
 
   void remove_0len_edges2D(int *num_p, double *p);
 
+  void count_0len_edges3D(int num_p, double *p, int *_num_0len);
+
   void write_3D_poly_to_vtk(const char *filename, int id, int num_p, double *p);
   void write_3D_poly_woid_to_vtk(const char *filename, int num_p, double *p);
 
