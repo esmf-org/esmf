@@ -42,7 +42,6 @@ module ESMF_IOMod
   use ESMF_UtilTypesMod
   use ESMF_BaseMod
   use ESMF_InitMacrosMod
-  use ESMF_IOUtilMod
   use ESMF_LogErrMod        ! ESMF error handling
   use ESMF_RHandleMod
   use ESMF_F90InterfaceMod  ! ESMF Fortran-C++ interface helper
@@ -50,17 +49,8 @@ module ESMF_IOMod
   use ESMF_ArrayMod
   use ESMF_VMMod
 
-#if defined (ESMF_PNETCDF)
-  use pnetcdf
-#elif defined (ESMF_NETCDF)
-  use netcdf
-#endif
-
   implicit none
 
-#if defined (ESMF_PNETCDF)
-#include "mpif.h"
-#endif
 !------------------------------------------------------------------------------
 ! !PRIVATE TYPES:
   private
@@ -499,18 +489,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_IOFmt_Flag)      :: opt_iofmt          ! helper variable
     integer                    :: len_schema         ! schema string len or 0
 
-#if defined (ESMF_NETCDF) || defined (ESMF_PNETCDF)
-    type(ESMF_VM)              :: vm
-#if defined (ESMF_PNETCDF)
-    integer                    :: comm
-    integer                    :: info
-#endif
-    integer                    :: ioerr, iounit
-    integer                    :: localPet
-    integer                    :: ncid, ncerr, ncmode
-    logical                    :: exists
-#endif
-
     ! Assume failure until success
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
     localrc = ESMF_RC_NOT_IMPL
@@ -536,101 +514,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     else
       len_schema = 0
     endif
-
-#if defined (ESMF_NETCDF) || defined (ESMF_PNETCDF)
-    ! If file needs to be created, check for 64-bit or NETCDF4 for pre-create.
-    inquire (file=fileName, exist=exists)
-    if (.not. exists .or. opt_status==ESMF_FILESTATUS_REPLACE) then
-      if (opt_iofmt == ESMF_IOFMT_NETCDF_64BIT_OFFSET .or.  &
-          opt_iofmt == ESMF_IOFMT_NETCDF4) then
-
-        if (opt_status == ESMF_FILESTATUS_OLD) then
-          if (ESMF_LogFoundError (ESMF_RC_FILE_OPEN,  &
-            msg='existing file ' // trim (filename) // ' not found.',  &
-            ESMF_CONTEXT, rcToReturn=rc)) return
-        end if
-
-        call ESMF_VMGetCurrent (vm, rc=localrc)
-        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU,                &
-            ESMF_CONTEXT, rcToReturn=rc)) return
-        call ESMF_VMGet (vm, localPET=localPet, rc=localrc)
-        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU,                &
-            ESMF_CONTEXT, rcToReturn=rc)) return
-
-        if (exists .and. opt_status == ESMF_FILESTATUS_REPLACE) then
-          if (localPet == 0) then
-            call ESMF_UtilIOUnitGet (iounit, rc=localrc)
-            if (ESMF_LogFoundError (localrc,  &
-                ESMF_ERR_PASSTHRU,  &
-                ESMF_CONTEXT, rcToReturn=rc)) return
-            open (iounit, file=fileName, status='old', iostat=ioerr)
-            localrc = merge (ESMF_SUCCESS, ESMF_RC_FILE_OPEN, ioerr == 0)
-            if (ESMF_LogFoundError (localrc,  &
-                msg='Accessing file ' // trim (fileName) // ' for replacement',  &
-                ESMF_CONTEXT, rcToReturn=rc)) return
-            close (iounit, status='delete', iostat=ioerr)
-            localrc = merge (ESMF_SUCCESS, ESMF_RC_FILE_OPEN, ioerr == 0)
-            if (ESMF_LogFoundError (localrc,  &
-                msg='Deleting file ' // trim (fileName) // ' for replacement',  &
-              ESMF_CONTEXT, rcToReturn=rc)) return
-          end if
-        end if
-
-        call ESMF_VMBarrier (vm)
-
-#if defined (ESMF_PNETCDF)
-        call ESMF_VMGet (vm, mpiCommunicator=comm, rc=localrc)
-        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU,                &
-            ESMF_CONTEXT, rcToReturn=rc)) return
-        ncmode = merge (  &
-            NF_64BIT_OFFSET,  &
-            NF_64BIT_DATA,    &
-            iofmt == ESMF_IOFMT_NETCDF_64BIT_OFFSET)
-        info = MPI_INFO_NULL
-        ncerr = nfmpi_create (comm, filename, ncmode, info, ncid=ncid)
-        if (ESMF_LogFoundNetCDFError (ncerr,  &
-            msg='pre-creating file: ' // trim (filename),  &
-            ESMF_CONTEXT, rcToReturn=rc)) return
-        ncerr = nfmpi_close (ncid=ncid)
-        if (ESMF_LogFoundNetCDFError (ncerr,  &
-            msg='pre-closing file: ' // trim (filename),  &
-            ESMF_CONTEXT, rcToReturn=rc)) return
-#else
-! TODO: Older NetCDFs only support 64-bit creation cmode.  So don't try
-! using NETCDF4/HDF5 yet.
-         ncmode = NF90_64BIT_OFFSET
-!        ncmode = merge (  &
-!            NF90_64BIT_OFFSET,  &
-!            NF90_HDF5,          &
-!            iofmt == ESMF_IOFMT_NETCDF_64BIT_OFFSET)
-        if (localPet == 0) then
-! print *, ESMF_METHOD, ': PET 0 pre-creating file: ', trim (filename),  &
-!     ' with mode: ', merge ('64-bit ', 'netcdf4', ncmode==NF90_64BIT_OFFSET)
-          ncerr = nf90_create (filename, ncmode, ncid=ncid)
-          if (ESMF_LogFoundNetCDFError (ncerr,  &
-              msg='pre-creating file: ' // trim (filename),  &
-              ESMF_CONTEXT, rcToReturn=rc)) return
-          ncerr = nf90_close (ncid=ncid)
-          if (ESMF_LogFoundNetCDFError (ncerr,  &
-              msg='pre-closing file: ' // trim (filename),  &
-              ESMF_CONTEXT, rcToReturn=rc)) return
-! call system ('ls -l *.nc; ls -1 *.nc | xargs -i -t ncdump -k {}')
-        end if
-#endif
-
-        if (opt_status == ESMF_FILESTATUS_NEW .or. opt_status == ESMF_FILESTATUS_REPLACE)  &
-            opt_status = ESMF_FILESTATUS_OLD
-
-        call ESMF_VMBarrier (vm)
-      end if
-
-    end if
-
-    if (opt_iofmt == ESMF_IOFMT_NETCDF_64BIT_OFFSET .or.  &
-        opt_iofmt == ESMF_IOFMT_NETCDF4) then
-      opt_iofmt = ESMF_IOFMT_NETCDF
-    end if
-#endif
 
 !   invoke C to C++ entry point  TODO
     call c_ESMC_IOWrite(io, fileName, len_fileName, opt_iofmt,   &

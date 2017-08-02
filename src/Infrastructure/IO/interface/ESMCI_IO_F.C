@@ -166,7 +166,7 @@ extern "C" {
     }
 
     // Call into the actual C++ method
-    localrc = (*ptr)->write(fileName.c_str(), iofmt, overwrite, status, timeslice);
+    localrc = (*ptr)->write(fileName, iofmt, overwrite, status, timeslice);
     ESMC_LogDefault.MsgFoundError(localrc,
                                   ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
                                   ESMC_NOT_PRESENT_FILTER(rc));
@@ -205,7 +205,7 @@ extern "C" {
     }
 
     // Call into the actual C++ method
-    localrc = (*ptr)->read(fileName.c_str(), iofmt, &timeslice);
+    localrc = (*ptr)->read(fileName, iofmt, &timeslice);
     ESMC_LogDefault.MsgFoundError(localrc,
                                   ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
                                   ESMC_NOT_PRESENT_FILTER(rc));
