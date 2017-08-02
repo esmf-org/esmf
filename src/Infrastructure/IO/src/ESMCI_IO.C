@@ -814,7 +814,7 @@ int IO::open(
   }
 
   // Open the file
-  ioHandler->open(file.c_str(), filestatusflag, overwrite, readonly, &localrc);
+  ioHandler->open(file, filestatusflag, overwrite, readonly, &localrc);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
     &rc)) {
     PRINTMSG("IO_Handler::open returned " << localrc);

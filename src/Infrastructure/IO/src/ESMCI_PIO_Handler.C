@@ -30,6 +30,9 @@
 #include <fstream>
 #include <sstream>
 
+#include <errno.h>
+#include <unistd.h>
+
 // other ESMF include files here.
 #include "ESMCI_Macros.h"
 #include "ESMCI_Container.h"
@@ -1262,6 +1265,27 @@ void PIO_Handler::open(
   int localrc = ESMF_RC_NOT_IMPL;         // local return code
   int piorc;                              // PIO error value
 
+  struct iofmt_map_t {
+    int esmf_iofmt;
+    int pio_fmt;
+  } iofmt_map[] = {
+     { ESMF_IOFMT_BIN,      PIO_iotype_pbinary }
+#if defined (ESMF_NETCDF) || defined (ESMF_PNETCDF)
+#if defined (ESMF_PNETCDF)
+    ,{ ESMF_IOFMT_NETCDF,   PIO_iotype_pnetcdf }
+    ,{ ESMF_IOFMT_NETCDF_64BIT_OFFSET, PIO_iotype_pnetcdf }
+    ,{ ESMF_IOFMT_NETCDF4,  PIO_iotype_pnetcdf }
+#elif defined (ESMF_NETCDF)
+    ,{ ESMF_IOFMT_NETCDF,   PIO_iotype_netcdf }
+    ,{ ESMF_IOFMT_NETCDF_64BIT_OFFSET, PIO_iotype_netcdf }
+    ,{ ESMF_IOFMT_NETCDF4,  PIO_iotype_netcdf }
+    ,{ ESMF_IOFMT_NETCDF4C, PIO_iotype_netcdf4c }
+    ,{ ESMF_IOFMT_NETCDF4P, PIO_iotype_netcdf4p }
+#endif
+#endif
+  };
+  int iofmt_map_size = sizeof (iofmt_map)/sizeof (iofmt_map_t);
+
   if (rc != NULL) {
     *rc = ESMF_RC_NOT_IMPL;               // final return code
   }
@@ -1280,63 +1304,28 @@ void PIO_Handler::open(
     pioSystemDesc = PIO_Handler::activePioInstances.back();
   }
 
-  // Allocate a file descriptor
-  pioFileDesc = (pio_file_desc_t)calloc(PIO_SIZE_FILE_DESC, 1);
-  if (!pioFileDesc)
-    if (ESMC_LogDefault.MsgAllocError(" failed to allocate pio file desc",
-        ESMC_CONTEXT, rc)) return;
-  PRINTMSG(" allocated pio file desc, addr = " << (void *)pioFileDesc);
-
   // Translate the I/O format from ESMF to PIO
-  localrc = ESMF_SUCCESS;
-  if (getFormat() == ESMF_IOFMT_BIN) {
-    iotype = PIO_iotype_pbinary;
-  } else if (getFormat() == ESMF_IOFMT_NETCDF) {
-#ifdef ESMF_PNETCDF
-    iotype = PIO_iotype_pnetcdf;
-#elif ESMF_NETCDF
-    iotype = PIO_iotype_netcdf;
-#else  // ESMF_NETCDF
-    localrc = ESMF_RC_LIB_NOT_PRESENT;
-#endif // ESMF_NETCDF
-  } else if (getFormat() == ESMF_IOFMT_NETCDF4C) {
-#ifdef ESMF_NETCDF
-    iotype = PIO_iotype_netcdf4c;
-#else  // ESMF_NETCDF
-    localrc = ESMF_RC_LIB_NOT_PRESENT;
-#endif // ESMF_NETCDF
-  } else if (getFormat() == ESMF_IOFMT_NETCDF4P) {
-#ifdef ESMF_NETCDF
-    iotype = PIO_iotype_netcdf4p;
-#else  // ESMF_NETCDF
-    localrc = ESMF_RC_LIB_NOT_PRESENT;
-#endif // ESMF_NETCDF
-  } else {
-    localrc = ESMF_RC_ARG_BAD;
+#if !defined(ESMF_NETCDF) && !defined (ESMF_PNETCDF)
+  if (getFormat() != ESMF_IOFMT_BIN) {
+    if (ESMC_LogDefault.MsgFoundError(ESMF_RC_LIB_NOT_PRESENT,
+        "Library for requested I/O format is not present", ESMC_CONTEXT, rc))
+      return;
   }
-  if (ESMF_SUCCESS != localrc) {
-    switch(localrc) {
-    case ESMF_RC_ARG_BAD:
-      ESMC_LogDefault.Write("unknown I/O format",
-                            ESMC_LOGMSG_ERROR, ESMC_CONTEXT);
-      break;
-    case ESMF_RC_LIB_NOT_PRESENT:
-      ESMC_LogDefault.Write("Library for requested I/O format is not present",
-                            ESMC_LOGMSG_ERROR, ESMC_CONTEXT);
-      break;
-    default:
-      ESMC_LogDefault.Write("Unknown I/O error",
-                            ESMC_LOGMSG_ERROR, ESMC_CONTEXT);
+#endif
+
+  int i_loop;
+  for (i_loop=0; i_loop<iofmt_map_size; i_loop++) {
+    if (getFormat() == iofmt_map[i_loop].esmf_iofmt) {
+      iotype = iofmt_map[i_loop].pio_fmt;
       break;
     }
-    if (rc != NULL) {
-      *rc = localrc;
-    }
-    free (pioFileDesc);
-    pioFileDesc = NULL;
-    return;
   }
-  
+  if (i_loop == iofmt_map_size) {
+    if (ESMC_LogDefault.MsgFoundError(ESMF_RC_ARG_BAD,
+        "unsupported/unknown I/O format", ESMC_CONTEXT, rc))
+      return;
+  }
+
   // Check to see if we are able to open file properly
   bool okToCreate = false;
   int clobberMode = PIO_NOCLOBBER;
@@ -1347,9 +1336,10 @@ void PIO_Handler::open(
   }
   // Figure out if we need to call createfile or openfile
   new_file = false;
+  bool file_exists = IO_Handler::fileExists(getFilename(), !readonly);
   switch(getFileStatusFlag()) {
   case ESMC_FILESTATUS_UNKNOWN:
-    if (IO_Handler::fileExists(getFilename(), !readonly)) {
+    if (file_exists) {
       // Treat like OLD
       okToCreate = false;
     } else {
@@ -1371,25 +1361,122 @@ void PIO_Handler::open(
     break;
   default:
     localrc = ESMF_RC_ARG_BAD;
-    ESMC_LogDefault.Write("unknown file status argument",
-                          ESMC_LOGMSG_ERROR, ESMC_CONTEXT);
-    if (rc != NULL) {
-      *rc = localrc;
-    }
-    free (pioFileDesc);
-    pioFileDesc = NULL;
-    return;
+    if (ESMC_LogDefault.MsgFoundError(localrc, "unknown file status argument", ESMC_CONTEXT, rc))
+      return;
   }
+
+  // If file needs to be created, check for 64-bit or NETCDF4 for pre-create.
+  // TODO: Revisit this as PIO, and our understanding of it, evolve...
+
+  if (okToCreate) {
+    if ((getFormat() == ESMF_IOFMT_NETCDF_64BIT_OFFSET) || (getFormat() == ESMF_IOFMT_NETCDF4)) {
+      const char *fn = getFilename();
+      VM *vm = VM::getCurrent(&localrc);
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc))
+        return;
+      int localPet = vm->getLocalPet();
+
+      vm->barrier();
+      int comm_rc = ESMF_SUCCESS;
+      if (file_exists && (getFileStatusFlag() == ESMC_FILESTATUS_REPLACE)) {
+        if (localPet == 0) {
+          if (unlink (fn)) {
+            comm_rc = ESMC_RC_FILE_OPEN;
+            std::string errmsg =
+                std::string ("could not delete file: ") + fn + " (" + strerror (errno) + ")";
+            ESMC_LogDefault.Write(errmsg, ESMC_LOGMSG_ERROR, ESMC_CONTEXT);
+          }
+        }
+        vm->broadcast (&comm_rc, sizeof (int), 0);
+        if (ESMC_LogDefault.MsgFoundError (comm_rc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc))
+          return;
+      }
+      vm->barrier();
+
+      // Pre-create file with at least 64-bit offset set.
+#if defined (ESMF_PNETCDF)
+      MPI_Comm comm=vm->getMpi_c();
+#if defined (NC_64BIT_DATA)
+      // If NETCDF4 was desired, enable HDF5.
+      int ncmode = (getFormat() == ESMF_IOFMT_NETCDF4) ? NC_64BIT_DATA : NC_64BIT_OFFSET;
+#else
+      // Some NetCDF builds do not support HDF5.  Punt with 64-bit offset.
+      int ncmode = NC_64BIT_OFFSET;
+#endif
+      int ncid;
+      MPI_Info info = MPI_INFO_NULL;
+      int ncerr = ncmpi_create (comm, fn, ncmode, info, &ncid);
+      if (ncerr != NC_NOERR) {
+        std::string errmsg =
+            std::string("could not pre-create file: ") + fn + " (" + ncmpi_strerror (ncerr) + ")";
+        localrc = ESMC_RC_FILE_OPEN;
+        if (ESMC_LogDefault.MsgFoundError(localrc, errmsg, ESMC_CONTEXT, rc))
+            return;
+      }
+      ncerr = ncmpi_close (ncid);
+      if (ncerr != NC_NOERR) {
+        std::string errmsg =
+            std::string("could not close pre-created file: ") + fn + " (" + ncmpi_strerror (ncerr) + ")";
+        localrc = ESMC_RC_FILE_OPEN;
+        if (ESMC_LogDefault.MsgFoundError(localrc, errmsg, ESMC_CONTEXT, rc))
+            return;
+      }
+#elif defined (ESMF_NETCDF)
+      comm_rc == ESMF_SUCCESS;
+      if (localPet == 0) {
+std::cout << ESMC_METHOD << ": PET 0 calling nc_create" << std::endl;
+#if defined (NC_64BIT_DATA)
+      // If NETCDF4 was desired, enable HDF5.
+        int ncmode = (getFormat() == ESMF_IOFMT_NETCDF4) ? NC_64BIT_DATA : NC_64BIT_OFFSET;
+#else
+      // Some NetCDF builds do not support HDF5.  Punt with 64-bit offset.
+        int ncmode = NC_64BIT_OFFSET;
+#endif
+        int ncid;
+        int ncerr = nc_create (fn, ncmode, &ncid);
+        if (ncerr != NC_NOERR) {
+          comm_rc = ESMC_RC_FILE_OPEN;
+          std::string errmsg =
+              std::string("could not pre-create file: ") + fn + " (" + nc_strerror (ncerr) + ")";
+            ESMC_LogDefault.Write(errmsg, ESMC_LOGMSG_ERROR, ESMC_CONTEXT);
+          }
+        }
+
+        ncerr = nc_close (ncid);
+        if (ncerr != NC_NOERR) {
+          comm_rc = ESMC_RC_FILE_OPEN;
+          std::string errmsg =
+              std::string ("could not close pre-created file: ") + fn + " (" + nc_strerror (ncerr) + ")";
+            ESMC_LogDefault.Write(errmsg, ESMC_LOGMSG_ERROR, ESMC_CONTEXT);
+          }
+        }
+
+        std::string cmd = std::string ("ncdump -k ") + fn;
+        system (cmd.c_str());
+      }
+      vm->broadcast (&comm_rc, sizeof (int), 0);
+      if (ESMC_LogDefault.MsgFoundError (comm_rc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc))
+        return;
+#endif
+      okToCreate = false;
+    }
+  }
+
+  // Allocate a file descriptor
+  pioFileDesc = (pio_file_desc_t)calloc(PIO_SIZE_FILE_DESC, 1);
+  if (!pioFileDesc)
+    if (ESMC_LogDefault.MsgAllocError(" failed to allocate pio file desc",
+        ESMC_CONTEXT, rc)) return;
+  PRINTMSG(" allocated pio file desc, addr = " << (void *)pioFileDesc);
+
   if (okToCreate) {
     // Looks like we are ready to try and create the file
 #ifdef ESMFIO_DEBUG
-    char errmsg[512];
+    std::string errmsg = "Calling pio_cpp_createfile: file = " + getFilename();
     pio_cpp_setdebuglevel(3);
-    sprintf(errmsg, " calling pio_cpp_createfile: file = \"");
-    strncpy((errmsg + strlen(errmsg)), getFilename(), 256);
-    strcpy((errmsg + strlen(errmsg)), "\"");
     ESMC_LogDefault.Write(errmsg, ESMC_LOGMSG_INFO, ESMC_CONTEXT);
 #endif // ESMFIO_DEBUG
+std::cout << ESMC_METHOD << ": calling PIO createfile.  File: " << getFilename() << std::endl;
     piorc = pio_cpp_createfile(&pioSystemDesc, pioFileDesc,
                                  iotype, getFilename(), clobberMode);
     if (!CHECKPIOWARN(piorc, std::string("Unable to create file: ") + getFilename(),
@@ -1873,9 +1960,9 @@ bool PIO_Handler::CheckPIOError(
     }
 #endif
     if (warn) {
-      ESMC_LogDefault.Write(errmsg.str(), ESMC_LOGMSG_WARN, line, file, method);
+      ESMC_LogDefault.Write(errmsg, ESMC_LOGMSG_WARN, line, file, method);
     } else {
-      ESMC_LogDefault.Write(errmsg.str(), ESMC_LOGMSG_ERROR, line, file, method);
+      ESMC_LogDefault.Write(errmsg, ESMC_LOGMSG_ERROR, line, file, method);
     }
     PRINTMSG("PIO ERROR: " << errmsg.str());
     // Attempt to find a corresponding ESMC error code
