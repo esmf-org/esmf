@@ -1507,7 +1507,7 @@ int ArrayBundle::sparseMatMul(
           int **srcSuperVecSizeDis = new int*[2]; // distributed: i, j
           srcSuperVecSizeDis[0] = new int[srcLocalDeCount];
           srcSuperVecSizeDis[1] = new int[srcLocalDeCount];
-          srcArray->superVecParam(srcLocalDeCount, superVectorOkay,
+          superVecParam(srcArray, srcLocalDeCount, superVectorOkay,
             srcSuperVecSizeUnd, srcSuperVecSizeDis, vectorL);
           // dst-side super vectorization
           int dstLocalDeCount = 0;
@@ -1517,7 +1517,7 @@ int ArrayBundle::sparseMatMul(
           int **dstSuperVecSizeDis = new int*[2]; // distributed: i, j
           dstSuperVecSizeDis[0] = new int[dstLocalDeCount];
           dstSuperVecSizeDis[1] = new int[dstLocalDeCount];
-          dstArray->superVecParam(dstLocalDeCount, superVectorOkay,
+          superVecParam(dstArray, dstLocalDeCount, superVectorOkay,
             dstSuperVecSizeUnd, dstSuperVecSizeDis, vectorL);
           XXE::SuperVectP superVectP;
           superVectP.srcSuperVecSize_r = srcSuperVecSizeUnd[0];
