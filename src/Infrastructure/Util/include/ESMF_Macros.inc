@@ -34,11 +34,11 @@ the following macro is here for the frameworks own internal use.
 unmatched quotes confuse some preprocessors with delusions of grammar.)
 #endif
 
-#define ESMF_SRCLINE ESMF_FILENAME, __LINE__
-
 #ifndef ESMF_FILENAME
 #define ESMF_FILENAME __FILE__
 #endif
+
+#define ESMF_SRCLINE ESMF_FILENAME, __LINE__
 
 #if 0
 Macros to allow structured early exits from blocks of Fortran code.

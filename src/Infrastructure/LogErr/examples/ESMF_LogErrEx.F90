@@ -23,7 +23,10 @@
 !
 ! This program shows examples of Log Error writing
 !-----------------------------------------------------------------------------
+!EOC
 #include "ESMF.h"
+#undef ESMF_FILENAME
+!BOC
 ! Macros for cpp usage
 ! File define
 #define ESMF_FILENAME "ESMF_LogErrEx.F90"
