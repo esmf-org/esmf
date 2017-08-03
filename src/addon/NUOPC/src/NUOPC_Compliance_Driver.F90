@@ -373,20 +373,20 @@ contains
             ! When do we expect the importState/exportStates to be valid?
 
             ! compliance check importState
-            !call NUOPC_CheckState(prefix, referenceName="importState", state=importState, &
-            !    rc=rc)
-            !if (ESMF_LogFoundError(rc, &
-            !    line=__LINE__, &
-            !    file=FILENAME)) &
-            !    return  ! bail out
+            call NUOPC_CheckState(prefix, referenceName="importState", state=importState, &
+                rc=rc)
+            if (ESMF_LogFoundError(rc, &
+                line=__LINE__, &
+                file=FILENAME)) &
+                return  ! bail out
 
             ! compliance check exportState
-            !call NUOPC_CheckState(prefix, referenceName="exportState", state=exportState, &
-            !    rc=rc)
-            !if (ESMF_LogFoundError(rc, &
-            !    line=__LINE__, &
-            !    file=FILENAME)) &
-            !    return  ! bail out
+            call NUOPC_CheckState(prefix, referenceName="exportState", state=exportState, &
+                rc=rc)
+            if (ESMF_LogFoundError(rc, &
+                line=__LINE__, &
+                file=FILENAME)) &
+                return  ! bail out
 
             ! When do we expect the clock to be valid?
 
