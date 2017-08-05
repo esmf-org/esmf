@@ -25,9 +25,16 @@
 #include <Mesh/include/ESMCI_MeshRegrid.h>
 #include <Mesh/include/ESMCI_MathUtil.h>
 
+#include <cassert>
 #include <cmath>
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
+#endif
+#ifndef PI
+#define PI 3.14159265358979323846
+#endif
+#ifndef CIRC
+#define CIRC 180.
 #endif
 
 #include <algorithm>
@@ -231,6 +238,7 @@ bool line_intersect_2D_3D(double *a1, double *a2, double *q1, double *q2, double
   double plane_p[2];
   double t,u;
   double epsilon = 1.e-15;
+  inbound = -1;
 
   // Load points defining plane into variable (these are supposed to be in counterclockwise order)
   plane[0]=q1[0];
@@ -287,10 +295,17 @@ bool line_intersect_2D_3D(double *a1, double *a2, double *q1, double *q2, double
   double norm = xvector(intersect[0], intersect[1], intersect[2]).metric();
   for(int i = 0; i < 3; i ++) intersect[i] /= norm;
 
-  inbound = 1;
+  inbound = 1;  // default is outbound when intersection happens
   // sense of inbound: (v1 x v2).(v1 x p1) > 0
   //if(sense > 0. && (t>0 && t<1)) inbound = 2; // v1 going into v2 in CCW sense
-  if(sense > 0) inbound = 2; // v1 going into v2 in CCW sense
+  // if(sense > 0) inbound = 2; // v1 going into v2 in CCW sense
+  xvector l1 = xvector(a2,3)-xvector(a1,3); 
+  xvector l2 = xvector(q2,3)-xvector(q1,3);
+  if(dot(cross(l1, l2), xvector(intersect, 3)) > 0) inbound = 2;
+
+  // Special case when the intersect is one of the vertices
+  if(same_point(intersect, a1) || same_point(intersect, a2) ||
+     same_point(intersect, q1) || same_point(intersect, q2) ) inbound = 3;
 
   return true;
 }
@@ -381,9 +396,12 @@ bool line_intersect_2D_3Da(double *p1, double *p2, double *q1, double *q2, doubl
   std::memcpy(intersect, bn.c, 3*sizeof(double));
 
   inbound = 1;
-  double sense = dot(cross(v2,v3), cross(v2,v1));
+  // double sense = dot(cross(v2,v3), cross(v2,v1));
   // sense of inbound: (v1 x v2).(v1 x p1) > 0
-  if(sense > 0.) inbound = 2; // v1 going into v2,v3 in CCW sense
+  // if(sense > 0.) inbound = 2; // v1 going into v2,v3 in CCW sense
+  xvector l1 = xvector(p2,3)-xvector(p1,3); 
+  xvector l2 = xvector(q2,3)-xvector(q1,3);
+  if(dot(cross(l1, l2), xvector(intersect, 3)) > 0) inbound = 2;
 
   return true;
 }
@@ -659,6 +677,22 @@ bool disjoint(int pdim, int sdim, const std::vector<xpoint> & subject, const std
   return disjoint;
 }
 
+void add_polygon_to_vector(int sdim, const polygon & nodal_poly, std::vector<polygon> & difference){
+  int num_nodes = nodal_poly.size();
+  double * coords = new double[num_nodes*sdim];
+  polygon_to_coords(nodal_poly, sdim, coords);
+  if(sdim == 2) remove_0len_edges2D(&num_nodes, coords);
+  if(sdim == 3) remove_0len_edges3D(&num_nodes, coords);
+
+  if(num_nodes >=3){
+    polygon res_poly;
+    coords_to_polygon(num_nodes, coords, sdim, res_poly);
+    if(abs(res_poly.area(sdim))  > 1.e-15 )
+      difference.push_back(res_poly);
+  }
+  delete[] coords;
+}
+
 // Assume a counter clock wise order of points in p and q
 int weiler_clip_difference(int pdim, int sdim, int num_p, double *p, int num_q, double *q, 
   std::vector<polygon> & difference){
@@ -731,8 +765,8 @@ int weiler_clip_difference(int pdim, int sdim, int num_p, double *p, int num_q, 
         insert_intersect(pdim, sdim, final_pnodes, pnodes, i, intersect, n_inter, inbound);
         insert_intersect(pdim, sdim, final_qnodes, qnodes, j, intersect, n_inter, inbound);
 
-        n_inter++;
-        if(inbound==2) num_inbinter++;
+        //n_inter++;
+        //if(inbound & 2) num_inbinter++;
       }
     }
   }
@@ -746,7 +780,7 @@ int weiler_clip_difference(int pdim, int sdim, int num_p, double *p, int num_q, 
     for(;it != eit; ++it){
       if(it->intersection){
         n_inter ++;
-        if(it->inbound == 2) num_inbinter ++;
+        if(it->inbound & 2) num_inbinter ++;
       }
     }
   }
@@ -756,18 +790,225 @@ int weiler_clip_difference(int pdim, int sdim, int num_p, double *p, int num_q, 
   // No intersection points => a) p and q are disjoint, return p 
   //                           b) q contains p, return nothing
   //                           c) p contains q, return concave polygon
+  assert(num_inbinter <= n_inter);
   if(n_inter == 0 || num_inbinter == 0 || (n_inter == num_inbinter && num_inbinter%2)) {
     xpoint p_centroid = polygon(pnodes).centroid(sdim);
     xpoint q_centroid = polygon(qnodes).centroid(sdim);
     bool s_contains_c = false, c_contains_s = false;
     if(disjoint(pdim, sdim, pnodes, qnodes, s_contains_c, c_contains_s)){
-      difference.push_back(polygon(pnodes));
+      //difference.push_back(polygon(pnodes));
+      add_polygon_to_vector(sdim, polygon(pnodes), difference);
       return 0;
     }
-    if(c_contains_s || point_in_poly(pdim, sdim, qnodes, p_centroid) ) return 0; 
-    if(s_contains_c || point_in_poly(pdim, sdim, pnodes, q_centroid) ){
-      difference.push_back(make_concave_polygon(pdim, sdim, pnodes, qnodes));
+    if(c_contains_s && n_inter == 0 && point_in_poly(pdim, sdim, qnodes, p_centroid) ) return 0; 
+    if(s_contains_c && n_inter == 0 && point_in_poly(pdim, sdim, pnodes, q_centroid) ){
+      assert(pnodes.size() == final_pnodes.size());
+      assert(qnodes.size() == final_qnodes.size());
+      // 1. Find the two points on p and q with smallest arc length distance
+      int qj = 0; int pi = 0;
+      for(int i = 0; i < num_p; i ++){
+        xpoint p0 = xpoint(pnodes[i].c, sdim);
+        double arcdistance = PI;
+        for(int j = 0; j < num_q; j ++){
+          double newdistance = gcdistance(p0.c, qnodes[j].c);
+          if( arcdistance > newdistance){
+            qj = j;
+            pi = i;
+            arcdistance  = newdistance;
+          }
+        }
+      }
+      // Rearrange the lists to start pi and qj.
+      // 3. Loop around qlist and build the list of polygons in difference
+        // 3.1 Store the points so they all start with 0 for the two nearest neighbor points
+      std::vector<xpoint> r_plist = std::vector<xpoint>();
+      std::vector<xpoint> r_qlist = std::vector<xpoint>();
+      {
+      std::back_insert_iterator<std::vector<xpoint> > bini = std::back_inserter(r_plist);
+      std::list<xpoint>::const_iterator bit = final_pnodes.begin(), eit=final_pnodes.end();
+      std::list<xpoint>::const_iterator pit = bit;
+      for(int i = 0; i < pi; i ++) ++pit;
+      std::copy(pit, eit, bini);
+      std::copy(bit, pit, bini);
+      }
+      {
+      std::back_insert_iterator<std::vector<xpoint> > bini = std::back_inserter(r_qlist);
+      std::list<xpoint>::const_iterator bit = final_qnodes.begin(), eit=final_qnodes.end();
+      std::list<xpoint>::const_iterator qit = bit;
+      for(int i = 0; i < qj; i ++) ++qit;
+      std::copy(qit, eit, bini);
+      std::copy(bit, qit, bini);
+      }
+      //dump_polygon(polygon(r_plist), true);
+      //dump_polygon(polygon(r_qlist), true);
+
+      int prev_i = 0; int next_i = r_plist.size(); bool coincident = false; double ppos; double qpos;
+      xpoint jpm1;                       // j'-1 intersection point
+      bool start = false;
+      double * intersect = new double[sdim];
+      double *q1 = (r_qlist[0].c); // This point is fixed as the common vertex
+      for(int j = 1; j < r_qlist.size(); j ++){ // loop index: j: clip; i: subject
+        double *q2 = r_qlist[j].c;
+        std::vector<xpoint> res_polygon; // This is resulting polygon       
+        res_polygon.push_back(r_qlist[j-1]);            // j-1
+        if(j > 1) res_polygon.push_back(jpm1);
+        //if(j ==1) res_polygon.push_back(r_plist[0]);    //  !! different from common vertex
+        for(int i = prev_i; i < next_i; i ++){ // by definition j0-1 cannot intersect i0-1, so start with i1-2
+          double *p1 = (r_plist[i].c);
+          double *p2 = (r_plist[(i+1)%(r_plist.size())].c); 
+          bool result = intersect_line_with_line(p1, p2, q1, q2, intersect, &coincident, &ppos, &qpos);
+          if(same_point(intersect, q1)) continue; // Not looking for the intersection point that is the common vertex
+          if(ppos > 1.e-20 ){                               // intersect withIN p line segment
+            jpm1 = xpoint(intersect, sdim);                 // Save this j'-1 point for the next polygon
+            if(i != prev_i || !start){
+              if(!start){                                    // First polygon 0,1,..,I',I
+                for(int k = 0; k < i+1; k ++)
+                  res_polygon.push_back(r_plist[k]);
+                start = true;
+              }
+              else{
+                if(i != prev_i)                               // J-1 J-1' prev_i+1, .. i, J' J
+                  for(int k = prev_i+1; k < i+1; k ++)
+                    res_polygon.push_back(r_plist[k]);
+              }
+              prev_i = i;
+            }
+            res_polygon.push_back(xpoint(intersect,sdim));  // j'
+            res_polygon.push_back(r_qlist[j]);              // j
+            //dump_polygon(polygon(res_polygon), true);       // debug
+            //difference.push_back(polygon(res_polygon));     // Append this polygon to the result
+            add_polygon_to_vector(sdim, polygon(pnodes), difference);
+            break;                                          // Go on to the next q vertex in j loop
+          } 
+        }
+      } 
+      std::vector<xpoint> res_polygon;                // This is resulting polygon       
+      res_polygon.push_back(r_qlist[0]);              // 
+      res_polygon.push_back(jpm1);                    // last intersection point 
+      for(int k = prev_i+1; k < r_plist.size(); k ++) // add all the remaining points on the plist
+        res_polygon.push_back(r_plist[k]);
+      res_polygon.push_back(r_plist[0]);              //  !! different from common vertex
+      //dump_polygon(polygon(res_polygon), true);       // debug
+      //difference.push_back(polygon(res_polygon));     // Append this polygon to the result
+      add_polygon_to_vector(sdim, polygon(pnodes), difference);
+      
+      delete[] intersect;
       return 0;
+    }
+    // This is a special case when difference polygon is ring shaped concave polygon
+    // Subject polygon contains clipping polygon with 1 common vertex
+    if(s_contains_c && n_inter == 1){
+      //// 0. subject and clip polygons only intersect at their common vertex
+      //if(pnodes.size() != final_pnodes.size() || qnodes.size() != final_qnodes.size()){
+      //  std::cout << pnodes.size() << ' ' << final_pnodes.size() << std::endl;
+      //  dump_polygon(polygon(pnodes), true);
+      //  std::cout << std::endl;
+      //  std::list<xpoint>::const_iterator pit = final_pnodes.begin();
+      //  for(; pit != final_pnodes.end(); ++ pit) dump_cart_coords(1, pit->c, true);
+
+      //  std::cout << qnodes.size() << ' ' << final_qnodes.size() << std::endl;
+      //  dump_polygon(polygon(qnodes), true);
+      //  std::cout << std::endl;
+      //  std::list<xpoint>::const_iterator qit = final_qnodes.begin();
+      //  for(; qit != final_qnodes.end(); ++ qit) dump_cart_coords(1, qit->c, true);
+      //}
+      // 1. Make sure both polygons are convex
+      bool left_turn=false, right_turn=false;
+      rot_2D_3D_sph(num_p, p, &left_turn, &right_turn);
+      if(left_turn && right_turn) return 1; // clip polygon is concave
+      rot_2D_3D_sph(num_q, q, &left_turn, &right_turn);
+      if(left_turn && right_turn) return 2; // subject polygon is concave
+
+      // 2. Find the common vertex in *qit and *pit
+      // p -> subject; q -> clip
+      std::list<xpoint>::const_iterator qit = final_qnodes.begin(), eit=final_qnodes.end();
+      std::list<xpoint>::const_iterator pit = final_pnodes.begin();
+      for(;qit != eit; ++qit){
+        if(qit->intersection){
+          pit = std::find(final_pnodes.begin(), final_pnodes.end(), *qit);
+          if(pit == final_pnodes.end()) Throw() << "The common vertex must also be on final pnodes list\n";
+          if(!pit->intersection) Throw() << "The common vertex must also be an intersection on final pnodes list\n";
+          break; // found the common vertex on both p and q lists
+        }
+      }
+      //dump_cart_coords(1, pit->c, true);
+      //dump_cart_coords(1, qit->c, true);
+
+      // 3. Loop around qlist and build the list of polygons in difference
+        // 3.1 Store the points so they all start with 0 at common vertex
+      std::vector<xpoint> r_plist = std::vector<xpoint>();
+      std::vector<xpoint> r_qlist = std::vector<xpoint>();
+      {
+      std::back_insert_iterator<std::vector<xpoint> > bini = std::back_inserter(r_plist);
+      std::list<xpoint>::const_iterator bit = final_pnodes.begin(), eit=final_pnodes.end();
+      std::copy(pit, eit, bini);
+      std::copy(bit, pit, bini);
+      }
+      {
+      std::back_insert_iterator<std::vector<xpoint> > bini = std::back_inserter(r_qlist);
+      std::list<xpoint>::const_iterator bit = final_qnodes.begin(), eit=final_qnodes.end();
+      std::copy(qit, eit, bini);
+      std::copy(bit, qit, bini);
+      }
+      //dump_polygon(polygon(r_plist), true);
+      //dump_polygon(polygon(r_qlist), true);
+
+        // 3.2 
+        // find intersection point j' between line segment 0-j on q and i-(i+1) on p
+        //      output is point j' and new i-th index on p
+        // form a polygon j-1, cur_i, cur_i + 1, ... new_i, j', j, j-1
+        // update cur_i to i+1
+        // p -> subject; q -> clip
+        int prev_i = 1; int next_i = r_plist.size(); bool coincident = false; double ppos; double qpos;
+        xpoint jpm1;                       // j'-1 intersection point
+        bool start = false;
+        double * intersect = new double[sdim];
+        double *q1 = (r_qlist[0].c); // This point is fixed as the common vertex
+        for(int j = 1; j < r_qlist.size(); j ++){ // loop index: j: clip; i: subject
+          double *q2 = r_qlist[j].c;
+          std::vector<xpoint> res_polygon; // This is resulting polygon       
+          res_polygon.push_back(r_qlist[j-1]);            // j-1
+          if(j > 1) res_polygon.push_back(jpm1);
+          for(int i = prev_i; i < next_i; i ++){ // by definition j0-1 cannot intersect i0-1, so start with i1-2
+            double *p1 = (r_plist[i].c);
+            double *p2 = (r_plist[(i+1)%(r_plist.size())].c); 
+            bool result = intersect_line_with_line(p1, p2, q1, q2, intersect, &coincident, &ppos, &qpos);
+            if(same_point(intersect, q1)) continue; // Not looking for the intersection point that is the common vertex
+            if(ppos > 1.e-20 ){                               // intersect withIN p line segment
+              jpm1 = xpoint(intersect, sdim);                 // Save this j'-1 point for the next polygon
+              if(i != prev_i || !start){
+                if(!start){                                    // First polygon 0,1,..,I',I
+                  for(int k = 1; k < i+1; k ++)
+                    res_polygon.push_back(r_plist[k]);
+                  start = true;
+                }
+                else{
+                  if(i != prev_i)                               // J-1 J-1' prev_i+1, .. i, J' J
+                    for(int k = prev_i+1; k < i+1; k ++)
+                      res_polygon.push_back(r_plist[k]);
+                }
+                prev_i = i;
+              }
+              res_polygon.push_back(xpoint(intersect,sdim));  // j'
+              res_polygon.push_back(r_qlist[j]);              // j
+              //dump_polygon(polygon(res_polygon), true);       // debug
+              //difference.push_back(polygon(res_polygon));     // Append this polygon to the result
+              add_polygon_to_vector(sdim, polygon(pnodes), difference);
+              break;                                          // Go on to the next q vertex in j loop
+            } 
+          }
+        } 
+        std::vector<xpoint> res_polygon;                // This is resulting polygon       
+        res_polygon.push_back(r_qlist[0]);              // common vertex
+        res_polygon.push_back(jpm1);                    // last intersection point 
+        for(int k = prev_i+1; k < r_plist.size(); k ++) // add all the remaining points on the plist
+          res_polygon.push_back(r_plist[k]);
+        //dump_polygon(polygon(res_polygon), true);       // debug
+        //difference.push_back(polygon(res_polygon));     // Append this polygon to the result
+        add_polygon_to_vector(sdim, polygon(pnodes), difference);
+        
+        delete[] intersect;
+        return 0;
     }
   }
 
@@ -818,7 +1059,7 @@ int weiler_clip_difference(int pdim, int sdim, int num_p, double *p, int num_q, 
         if(num_nodes >=3){
           polygon res_poly;
           coords_to_polygon(num_nodes, coords, sdim, res_poly);
-          if(res_poly.area(sdim) > 0.)
+          if(abs(res_poly.area(sdim)) > 1.e-30)
             difference.push_back(res_poly);
         }
         delete[] coords;
@@ -843,7 +1084,7 @@ int weiler_clip_difference(int pdim, int sdim, int num_p, double *p, int num_q, 
       //   if(star loop) save, mark
       //   move to the next subject polygon node;
       if(on_subject){
-        if(it->intersection && it->inbound==2){
+        if(it->intersection && it->inbound & 2){
           if(!start){ // if this inbound node has been visited in previous loop, continue on subject polygon
             std::vector<xpoint>::iterator it_tmp = std::find(visited_inbnodes.begin(), visited_inbnodes.end(), *it);
             if(it_tmp != visited_inbnodes.end()) {
@@ -1353,14 +1594,14 @@ void reverse_coord(int sdim, int num_point, double * cd){
 
   double * tmp = new double[sdim];
   for(int i = 0; i < num_point/2; i ++){
-    std::memcpy(tmp, cd+i, sdim*sizeof(double));
-    std::memcpy(cd+i, cd+(num_point-1-i)*sdim, sdim*sizeof(double));
+    std::memcpy(tmp, cd+i*sdim, sdim*sizeof(double));
+    std::memcpy(cd+i*sdim, cd+(num_point-1-i)*sdim, sdim*sizeof(double));
     std::memcpy(cd+(num_point-1-i)*sdim, tmp, sdim*sizeof(double));
   }
   delete [] tmp;
 }
 
-void cart2sph(int num_p, double *coord, double *lonlat){
+void cart2sph(int num_p, const double *coord, double *lonlat){
   const double DEG2RAD = M_PI/180.0;
   const double RAD2DEG = 180.0/M_PI;
   const double ninety = 90.0;
@@ -1387,7 +1628,7 @@ void cart2sph(const std::vector<polygon> & cart, std::vector<polygon> & sph){
     cart2sph(cart[i], sph[i]);
 }
 
-void sph2cart(int num_p, double *lonlat, double *coord){
+void sph2cart(int num_p, const double *lonlat, double *coord){
   const double DEG2RAD = M_PI/180.0;
   const double RAD2DEG = 180.0/M_PI;
   const double ninety = 90.0;
@@ -1416,4 +1657,171 @@ void sph2cart(const std::vector<polygon> & sph, std::vector<polygon> & cart){
     sph2cart(sph[i], cart[i]);
 }
 
+void dump_cart_coords(int num, const double * coord, bool only_sph){
+  int rc;
+  if(!only_sph){
+    int me = VM::getCurrent(&rc)->getLocalPet();
+    for(int i = 0; i < num; i ++)
+      std::cout << me << ": " << coord[i*3] << ' ' << coord[i*3+1] << ' ' << coord[i*3+2] << std::endl;
+  }
+  double * coord1 = new double[2*num];
+  cart2sph(num, coord, coord1);
+  dump_sph_coords(num, coord1);
+  delete [] coord1;
+}
+void dump_sph_coords(int num, const double * coord){
+  int rc;
+  int me = VM::getCurrent(&rc)->getLocalPet();
+  for(int i = 0; i < num; i ++)
+    std::cout << me << ": " << coord[i*2] << ' ' << coord[i*2+1] << std::endl;
+  //double * coord1 = new double[3*num];
+  //sph2cart(num, coord, coord1);
+  //dump_cart_coords(num, coord1);
+  //delete [] coord1;
+}
+void dump_polygon(const polygon & poly, bool only_sph){
+  for(int i = 0; i < poly.points.size(); i ++){
+    dump_cart_coords(1, poly.points[i].c, only_sph);
+  }
+}
+
+// Test the kernel of clipping algorithm
+// s: subject polygon being clipped
+// c: clipping polygon
+// coordinates are 2D (easy to visualize and debug) and 3D
+void test_clip2D(int pdim, int sdim, int num_s, double * s_coord, int num_c, double * c_coord){
+  double * s_coord1 = new double[3*num_s];
+  sph2cart(num_s, s_coord, s_coord1);
+  double * c_coord1 = new double[3*num_c];
+  sph2cart(num_c, c_coord, c_coord1);
+  dump_sph_coords(num_s, s_coord);
+  dump_sph_coords(num_c, c_coord);
+  test_clip3D(pdim, sdim, num_s, s_coord1, num_c, c_coord1);
+  delete[] s_coord1;
+  delete[] c_coord1;
+}
+void test_clip3D(int pdim, int sdim, int num_s, double * s_coord, int num_c, double * c_coord){
+  std::vector<polygon> diff;
+  bool left_turn = true;
+  bool right_turn = false;
+  rot_2D_3D_sph(num_s, s_coord, &left_turn, &right_turn);
+  if(right_turn)
+    reverse_coord(sdim, num_s, s_coord);
+  rot_2D_3D_sph(num_c, c_coord, &left_turn, &right_turn);
+  if(right_turn)
+    reverse_coord(sdim, num_c, c_coord);
+  dump_cart_coords(num_s, s_coord);
+  dump_cart_coords(num_c, c_coord);
+  weiler_clip_difference(pdim, sdim, num_s, s_coord, num_c, c_coord, diff);
+  std::vector<polygon>::iterator diff_it = diff.begin(), diff_ie = diff.end();
+  int rc;
+  int me = VM::getCurrent(&rc)->getLocalPet();
+  for(;diff_it != diff_ie; ++ diff_it){
+    int num_p = diff_it->points.size();
+    if(num_p > 3){
+      double *pts = new double[sdim*(diff_it->points.size())];
+      polygon_to_coords(*diff_it, sdim, pts);
+    
+      if(me == 0){
+        double * sph_pts = new double[diff_it->points.size()*2];
+        cart2sph(diff_it->points.size(), pts, sph_pts);
+        dump_sph_coords(diff_it->points.size(), sph_pts);
+      }
+
+      double *td = new double[num_p*sdim];
+      int *ti = new int[num_p];
+      int *tri_ind = new int[3*(num_p-2)];
+      int ret=triangulate_poly<GEOM_SPH2D3D>(num_p, pts, td, ti, tri_ind);
+
+      unsigned num_tri_edges = 3;
+      double * tri_cd = new double[sdim*num_tri_edges];
+      for(int ntri = 0; ntri < num_p-2; ntri ++){
+        // copy each point of the triangle
+        std::memcpy(tri_cd, pts+tri_ind[ntri*num_tri_edges]*sdim, sdim*sizeof(double));
+        std::memcpy(tri_cd+sdim, pts+tri_ind[ntri*num_tri_edges+1]*sdim, sdim*sizeof(double));
+        std::memcpy(tri_cd+2*sdim, pts+tri_ind[ntri*num_tri_edges+2]*sdim, sdim*sizeof(double));
+        dump_cart_coords(3, tri_cd);
+      }
+      delete [] pts;
+      delete [] td;
+      delete [] ti;
+      delete [] tri_ind;
+    }
+  }
+}
+
+bool same_point(const double * const p1, const double * const p2, const double epsilon){
+
+return ((std::abs(p1[0]-p2[0]) < epsilon) &&	
+                           (std::abs(p1[1]-p2[1]) < epsilon) &&	
+                           (std::abs(p1[2]-p2[2]) < epsilon));
+}
+
+/* expressed in radians */
+double gcdistance(double l1, double g1, double l2, double g2)
+{
+
+double lati1 = PI*l1/CIRC; /* conversion in radian ... */
+double lngi1 = PI*g1/CIRC;
+double lati2 = PI*l2/CIRC;
+double lngi2 = PI*g2/CIRC;
+double v = sin(lati1)*sin(lati2) + cos(lati1)*cos(lati2)*cos(lngi1-lngi2);
+if (v >= 1.0) return 0.0;
+if (v <= -1.0) return 2*PI;
+return acos(v); 
+}
+// arc length = arc angle * radius = arc angle * 1 = arccos(v1.v2)
+double gcdistance(double * v1, double * v2){
+  return acos(dot(xvector(v1, 3), xvector(v2, 3)));
+}
+
+bool intersect_line_with_line(const double *p1, const double *p2, const double *q1, const double *q2, double * result, bool * coincident, 
+  double * pidx, double *qidx){
+  if(same_point(p1,p2)) Throw() << "Cannot find intersect between point and line\n";
+  if(same_point(q1,q2)) Throw() << "Cannot find intersect between point and line\n";
+  if(same_point(p1, q1)){
+    memcpy(result, p1, 3*sizeof(double)); *coincident = true;
+    *pidx = 1; *qidx = 1;
+    return true;
+  }
+  if(same_point(p1, q2)){
+    memcpy(result, p1, 3*sizeof(double)); *coincident = true;
+    *pidx = 1; *qidx = 2;
+    return true;
+  }
+  if(same_point(p2, q1)){
+    memcpy(result, p2, 3*sizeof(double)); *coincident = true;
+    *pidx = 2; *qidx = 1;
+    return true;
+  }
+  if(same_point(p2, q2)){
+    memcpy(result, p2, 3*sizeof(double)); *coincident = true;
+    *pidx = 2; *qidx = 2;
+    return true;
+  }
+  // Now we have handled all the special cases, find the general intersection point
+  // n1 = p1 x p2 : normal vector perpendicular to first great circle formed by origin, p1, p2
+  // n2 = q1 x q2 : normal vector perpendicular to first great circle formed by origin, q1, q2
+  // s = n1 x n2  : vector parallel to the line intersecting the two great circle planes
+  // if (s . (p1+p2)/2 > 0) this vector points in the direction of the hemisphere containing s and (p1+p2)/2
+  xvector origin(0., 0., 0.); 
+  xvector normal1=cross(xvector(p1, 3), xvector(p2, 3));
+  xvector normal2=cross(xvector(q1, 3), xvector(q2, 3)); 
+  xvector s = cross(normal1, normal2);
+  xvector intersect = s/s.metric();
+  if(dot(intersect, (xvector(p1,3)+xvector(p2,3))/2) > 0. &&
+     dot(intersect, (xvector(q1,3)+xvector(q2,3))/2) > 0.)
+    memcpy(result, intersect.c, 3*sizeof(double));
+  else{
+    intersect = xvector(0.,0.,0.) - intersect;
+    memcpy(result, intersect.c, 3*sizeof(double));
+  }
+  // Additional information on where the intersection point is
+  // (p1 x s) . (s x p2) > 0 if s is inbetween p1 and p2
+  *pidx = dot(cross(xvector(p1,3), intersect), cross(intersect, xvector(p2, 3)));
+  *qidx = dot(cross(xvector(q1,3), intersect), cross(intersect, xvector(q2, 3)));
+  *coincident = false;
+
+  return true; // great circles will always intersect ^_^
+}
 } //namespace
