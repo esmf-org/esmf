@@ -29,7 +29,7 @@
 !
 !------------------------------------------------------------------------------
 ! !USES:
-      use ESMF_UtilTypesMod   
+      use ESMF_UtilTypesMod
       use ESMF_UtilMod
       use ESMF_InitMacrosMod    ! ESMF initializer macros
       use ESMF_LogErrMod        ! ESMF error handling
@@ -58,9 +58,9 @@
 
 ! -------------------------- ESMF-public method -------------------------------
 ! Return the file type of a given grid file:
-! It could be one of the following:  
+! It could be one of the following:
 !   ESMF_FILEFORMAT_SCRIP,  ESMF_FILEFORMAT_UGRID,
-!   ESMF_FILEFORMAT_ESMFMESH, 
+!   ESMF_FILEFORMAT_ESMFMESH,
 !   ESMF_FILEFORMAT_CFGRID (same as ESMF_FILEFORMAT_GRIDSPEC), and
 !   ESMF_FILEFORMAT_MOSAIC (GRIDSPEC Mosaic file) and ESMF_FILEFORMAT_TILE (GRIDSPEC Tile file)
 !
@@ -76,7 +76,7 @@
 #define ESMF_METHOD "ESMF_FileTypeCheck"
   subroutine ESMF_FileTypeCheck(filename, filetype, varname, rc)
 
-! ARGUMENTS:  
+! ARGUMENTS:
     character(len=*),  intent(in)           :: filename
     type(ESMF_Fileformat_Flag), intent(out) :: filetype
     character(len=*), intent(out), optional :: varname  ! for UGRID/GRIDSPEC files
@@ -133,7 +133,7 @@
           if (ncStatus == nf90_noerror) then
              ncStatus = nf90_inquire_attribute(gridid, i, 'standard_name', len=len)
           endif
-        endif 
+        endif
         if (ncStatus == nf90_noerror) then
           if (attvalue(len:len) .eq. achar(0)) len = len-1
           if (attvalue(1:len) .eq. 'mesh_topology') then
@@ -147,7 +147,7 @@
              ! It is a GRIDSPEC TILE file
              filetype = ESMF_FILEFORMAT_TILE
              foundtype = .true.
-          endif         
+          endif
           if (foundtype) then
             if (present(varname)) then
               ncStatus = nf90_inquire_variable(gridid, i, name=attvalue)
@@ -157,43 +157,43 @@
                    ESMF_SRCLINE,&
                    errmsg, &
                    rc)) return
-    	      varname = trim(attvalue)
-            endif 
-	    rc=ESMF_SUCCESS
-	    return
+              varname = trim(attvalue)
+            endif
+            rc=ESMF_SUCCESS
+            return
           endif
         endif
-        ! check if it is CFGRID 
+        ! check if it is CFGRID
         ! check if the coordinate variables exist or not
-       	ncStatus = nf90_inquire_attribute(gridid, i, "units", len=len)
-	if (ncStatus == nf90_noerror) then
-	  ncStatus=nf90_get_att(gridid, i, 'units', attvalue)
+                ncStatus = nf90_inquire_attribute(gridid, i, "units", len=len)
+        if (ncStatus == nf90_noerror) then
+          ncStatus=nf90_get_att(gridid, i, 'units', attvalue)
           if (ncStatus /= nf90_noerror) then
             print '("NetCDF error: ", A)', trim(nf90_strerror(ncStatus))
             return
           endif
           if (attvalue(len:len) .eq. achar(0)) len = len-1
           if (len >= 6 .and. (attvalue(1:6) .eq. "degree")) then
-  	    if (attvalue(1:len) .eq. "degrees_east" .or. &
-	        attvalue(1:len) .eq. "degree_east" .or. &
-	        attvalue(1:len) .eq. "degree_E" .or. &
-	        attvalue(1:len) .eq. "degrees_E" .or. &
-	        attvalue(1:len) .eq. "degreeE" .or. &
-	        attvalue(1:len) .eq. "degreesE")  then 
+            if (attvalue(1:len) .eq. "degrees_east" .or. &
+                attvalue(1:len) .eq. "degree_east" .or. &
+                attvalue(1:len) .eq. "degree_E" .or. &
+                attvalue(1:len) .eq. "degrees_E" .or. &
+                attvalue(1:len) .eq. "degreeE" .or. &
+                attvalue(1:len) .eq. "degreesE")  then
                 foundlon = .true.
-	     else if (attvalue(1:len) .eq. "degrees_north" .or. &
-	        attvalue(1:len) .eq. "degree_north" .or. &
-	        attvalue(1:len) .eq. "degree_N" .or. &
-	        attvalue(1:len) .eq. "degrees_N" .or. &
-	        attvalue(1:len) .eq. "degreeN" .or. &
-	        attvalue(1:len) .eq. "degreesN")  then 
+             else if (attvalue(1:len) .eq. "degrees_north" .or. &
+                attvalue(1:len) .eq. "degree_north" .or. &
+                attvalue(1:len) .eq. "degree_N" .or. &
+                attvalue(1:len) .eq. "degrees_N" .or. &
+                attvalue(1:len) .eq. "degreeN" .or. &
+                attvalue(1:len) .eq. "degreesN")  then
                 foundlat = .true.
              endif
-	  endif
+          endif
         endif
 
         ! Check the variable names to determin if it is SCRIP or ESMFMESH
-	ncStatus = nf90_inquire_variable(gridid, i, name=attvalue)
+        ncStatus = nf90_inquire_variable(gridid, i, name=attvalue)
         errmsg = 'nf90_inquire_variable failed '//trim(filename)
         if (CDFCheckError (ncStatus, &
                 ESMF_METHOD, &
@@ -210,7 +210,7 @@
            foundesmfconn = .true.
         endif
      enddo
-     
+
      if (foundlon .and. foundlat) then
          filetype = ESMF_FILEFORMAT_GRIDSPEC
          rc=ESMF_SUCCESS
@@ -231,9 +231,9 @@
 
      return
 #else
-    call ESMF_LogSetError(ESMF_RC_LIB_NOT_PRESENT, & 
-                 msg="- ESMF_NETCDF not defined when lib was compiled", & 
-                 ESMF_CONTEXT, rcToReturn=rc) 
+    call ESMF_LogSetError(ESMF_RC_LIB_NOT_PRESENT, &
+                 msg="- ESMF_NETCDF not defined when lib was compiled", &
+                 ESMF_CONTEXT, rcToReturn=rc)
     return
 #endif
 
@@ -261,18 +261,18 @@ function CDFCheckError (ncStatus, module, fileName, lineNo, errmsg, rc)
         call ESMF_LogWrite (msg="netCDF Status Return Error", logmsgFlag=ESMF_LOGMSG_ERROR, &
             line=lineNo, file=fileName, method=module)
         print '("NetCDF Error: ", A, " : ", A)', &
-	trim(errmsg),trim(nf90_strerror(ncStatus))
+        trim(errmsg),trim(nf90_strerror(ncStatus))
         call ESMF_LogFlush()
         if (present(rc)) rc = ESMF_FAILURE
- 	CDFCheckError = .TRUE.
+        CDFCheckError = .TRUE.
     else
        if (present(rc)) rc = ESMF_SUCCESS
        return
     end if
 #else
-    call ESMF_LogSetError(rcToCheck=ESMF_RC_LIB_NOT_PRESENT, & 
-                 msg="- ESMF_NETCDF not defined when lib was compiled", & 
-                 ESMF_CONTEXT, rcToReturn=rc) 
+    call ESMF_LogSetError(rcToCheck=ESMF_RC_LIB_NOT_PRESENT, &
+                 msg="- ESMF_NETCDF not defined when lib was compiled", &
+                 ESMF_CONTEXT, rcToReturn=rc)
     return
 #endif
 

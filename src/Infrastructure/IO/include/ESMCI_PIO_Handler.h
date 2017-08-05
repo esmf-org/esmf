@@ -39,7 +39,6 @@
 #include "ESMCI_IO_Handler.h"       // IO_Handler is superclass to PIO_Handler
 #include "mpi.h"
 
-#include <cstdio>
 #include <vector>
 
 // PIO include files

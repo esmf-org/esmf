@@ -1368,7 +1368,8 @@ contains
                 line=__LINE__, &
                 file=FILENAME)) &
                 return  ! bail out
-        endif
+            return
+         endif
         call ESMF_AttributeGet(state, name=attributeName, attpack=attpack, &
             typekind=typekind, itemCount=itemCount, isPresent=isPresent, &
             attnestflag=ESMF_ATTNEST_ON, rc=rc)

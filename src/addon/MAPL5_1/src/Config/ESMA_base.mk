@@ -282,6 +282,7 @@ endif
 
 FDEFS     = $(D)sys$(ARCH) $(D)ESMA$(BPREC) $(DEF_SDF) $(USER_FDEFS)
 FINCS     = $(foreach dir,$(INC_ESMF), $(I)$(dir)) $(USER_FINCS)
+FINCS    += -I$(ESMF_DIR)/src/include
 FMODS     = $(foreach dir,$(INC_ESMF), $(M)$(dir)) $(USER_FMODS)
 XFLAGS    = 
 

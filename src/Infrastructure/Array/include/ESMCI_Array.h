@@ -407,8 +407,9 @@ namespace ESMCI {
       ESMC_TermOrder_Flag termorderflag=ESMC_TERMORDER_FREE, 
       bool checkflag=false, bool haloFlag=false);
     static int sparseMatMulRelease(RouteHandle *routehandle);
-    void superVecParam(int localDeCount, bool superVectorOkay,
-      int superVecSizeUnd[3], int *superVecSizeDis[2], int &vectorLength)const;
+    static void superVecParam(Array *array, int localDeCount,
+      bool superVectorOkay, int superVecSizeUnd[3], int *superVecSizeDis[2],
+      int &vectorLength);
     
   };  // class Array
   //============================================================================

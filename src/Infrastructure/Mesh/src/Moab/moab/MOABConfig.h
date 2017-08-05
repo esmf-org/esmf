@@ -95,9 +95,7 @@
 /* #undef HAVE_FBIGEOM */
 
 /* define if compiler has finite */
-#ifndef MOAB_HAVE_FINITE
-#define MOAB_HAVE_FINITE 1
-#endif
+/* #undef MOAB_HAVE_FINITE */
 
 /* Configure with tool: GSETS */
 #ifndef MOAB_HAVE_GSETS
@@ -272,9 +270,12 @@
 #endif
 
 /* define if compiler has std::isfinite */
+#if defined ESMF_OS_Darwin
 #ifndef MOAB_HAVE_STDISFINITE
 #define MOAB_HAVE_STDISFINITE 1
 #endif
+#endif
+/*#undef MOAB_HAVE_STDISFINITE */
 
 /* MOAB qualified HAVE_STDLIB_H */
 #ifndef MOAB_HAVE_STDLIB_H
@@ -307,14 +308,11 @@
 #endif
 
 /* Specify if unordered map is available */
-#ifndef MOAB_HAVE_UNORDERED_MAP
-#define MOAB_HAVE_UNORDERED_MAP tr1/unordered_map
-#endif
+/* #undef MOAB_HAVE_UNORDERED_MAP tr1/unordered_map */
+
 
 /* Specify if unordered set is available */
-#ifndef MOAB_HAVE_UNORDERED_SET
-#define MOAB_HAVE_UNORDERED_SET tr1/unordered_set
-#endif
+/* #undef MOAB_HAVE_UNORDERED_SET tr1/unordered_set */
 
 /* Defined if configured with Valgrind support */
 /* #undef HAVE_VALGRIND */
@@ -419,9 +417,7 @@
 #endif
 
 /* Unordered map namespace */
-#ifndef MOAB_UNORDERED_MAP_NS
-#define MOAB_UNORDERED_MAP_NS std::tr1
-#endif
+/* #undef MOAB_UNORDERED_MAP_NS tr1 */
 
 /* MOAB Version */
 #ifndef MOAB_VERSION

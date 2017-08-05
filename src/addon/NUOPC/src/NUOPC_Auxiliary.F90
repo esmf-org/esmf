@@ -87,8 +87,7 @@ module NUOPC_Auxiliary
 
     if (present(rc)) rc = ESMF_SUCCESS
     
-    ioCapable = (ESMF_IO_PIO_PRESENT .and. &
-      (ESMF_IO_NETCDF_PRESENT .or. ESMF_IO_PNETCDF_PRESENT))
+    ioCapable = ESMF_IO_NETCDF_PRESENT
     
     doItFlag = .true. ! default
     if (present(relaxedFlag)) then

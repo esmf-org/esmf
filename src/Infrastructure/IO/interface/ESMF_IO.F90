@@ -47,7 +47,8 @@ module ESMF_IOMod
   use ESMF_F90InterfaceMod  ! ESMF Fortran-C++ interface helper
   ! We need some ESMF types
   use ESMF_ArrayMod
-  
+  use ESMF_VMMod
+
   implicit none
 
 !------------------------------------------------------------------------------

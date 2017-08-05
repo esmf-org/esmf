@@ -72,6 +72,7 @@ program ESMF_FieldIOUTest
 
   character(16), parameter :: apConv = 'Attribute_IO'
   character(16), parameter :: apPurp = 'attributes'
+#if !defined (ESMF_PNETCDF)
   character(*), parameter :: attrNames(6) = (/  &
       "long_name    ",  &
       "units        ",  &
@@ -80,6 +81,15 @@ program ESMF_FieldIOUTest
       "_FillValue   ",  &
       "cell_methods "   &
   /)
+#else
+  character(*), parameter :: attrNames(5) = (/  &
+      "long_name    ",  &
+      "units        ",  &
+      "valid_range  ",  &
+      "missing_value",  &
+      "cell_methods "   &
+  /)
+#endif
 
   ! cumulative result: count failures; no failures equals "all pass"
   integer :: result = 0
@@ -176,8 +186,10 @@ program ESMF_FieldIOUTest
 !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
   ! Write Fortran array in Field
-  call ESMF_FieldWrite(field_w, fileName="field.nc",        &
-       status=ESMF_FILESTATUS_REPLACE, rc=rc)
+  call ESMF_FieldWrite(field_w, fileName="field.nc",  &
+       iofmt=ESMF_IOFMT_NETCDF_64BIT_OFFSET,  &
+       overwrite=.true.,  &
+       status=ESMF_FILESTATUS_UNKNOWN, rc=rc)
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   write(name, *) "Write Fortran array in Field"
 #if (defined ESMF_PIO && ( defined ESMF_NETCDF || defined ESMF_PNETCDF))
@@ -186,6 +198,8 @@ program ESMF_FieldIOUTest
   write(failMsg, *) "Did not return ESMF_RC_LIB_NOT_PRESENT"
   call ESMF_Test((rc==ESMF_RC_LIB_NOT_PRESENT), name, failMsg, result, ESMF_SRCLINE)
 #endif
+!call ESMF_Finalize ()
+!stop 42
 
 !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
@@ -1104,12 +1118,14 @@ program ESMF_FieldIOUTest
           convention=apConv, purpose=apPurp,  &
           rc=rc)
       if (rc /= ESMF_SUCCESS) exit
+#if !defined (ESMF_PNETCDF)
     case ("_FillValue")
       call ESMF_AttributeSet (field_att,  &
           attrNames(i), valueList=(/ -1.e+10 /),  &
           convention=apConv, purpose=apPurp,  &
           rc=rc)
       if (rc /= ESMF_SUCCESS) exit
+#endif
     case ("cell_methods")
       call ESMF_AttributeSet (field_att,  &
           attrNames(i), valueList=(/ "time: point" /),  &
@@ -1223,12 +1239,14 @@ program ESMF_FieldIOUTest
           convention=apConv, purpose=apPurp,  &
           rc=rc)
       if (rc /= ESMF_SUCCESS) exit
+#if !defined (ESMF_PNETCDF)
     case ("_FillValue")
       call ESMF_AttributeSet (field_ugd_att,  &
           attrNames(i), valueList=(/ -1.e+10 /),  &
           convention=apConv, purpose=apPurp,  &
           rc=rc)
       if (rc /= ESMF_SUCCESS) exit
+#endif
     case ("cell_methods")
       call ESMF_AttributeSet (field_ugd_att,  &
           attrNames(i), valueList=(/ "time: point" /),  &
@@ -1247,7 +1265,8 @@ program ESMF_FieldIOUTest
 !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
   ! Write Fortran array in Field
-  call ESMF_FieldWrite(field_ugd_att, fileName="field_ugd_attributes.nc",        &
+  call ESMF_FieldWrite(field_ugd_att, fileName="field_ugd_attributes.nc",  &
+       iofmt=ESMF_IOFMT_NETCDF,  &
        convention=apConv, purpose=apPurp,  &
        status=ESMF_FILESTATUS_REPLACE, rc=rc)
   write(failMsg, *) "Did not return ESMF_SUCCESS"
