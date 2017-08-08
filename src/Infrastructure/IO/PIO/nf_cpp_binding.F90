@@ -1655,7 +1655,7 @@ function pio_cpp_put_att_string (file, vardesc, name, value) result(ierr) bind(c
   use pio_cpp_utils, only: f_chars, c_len, max_path_len
 
   !  import pio types
-  use pio_types, only: file_desc_t, Var_desc_t
+  use pio_types, only: file_desc_t, Var_desc_t, PIO_global
 
   !  import nf procedure signatures
   use pionfatt_mod, only: put_att
@@ -1708,7 +1708,11 @@ function pio_cpp_put_att_string (file, vardesc, name, value) result(ierr) bind(c
 #endif
 
   !  call the Fortran procedure
-  ierror = put_att (file_desc, var_desc%varID, attname, attvalue(:clen))
+  if (associated (var_desc)) then
+    ierror = put_att (file_desc, var_desc%varID, attname, attvalue(:clen))
+  else
+    ierror = put_att (file_desc, PIO_global, attname, attvalue(:clen))
+  end if
 
   !  convert the arguments back to C
   ierr = int(ierror, c_int)
@@ -1729,7 +1733,7 @@ function pio_cpp_put_att_ints (file, vardesc, name, values, nvalues) result(ierr
   use pio_cpp_utils, only: f_chars, c_len, max_path_len
 
   !  import pio types
-  use pio_types, only: file_desc_t, Var_desc_t
+  use pio_types, only: file_desc_t, Var_desc_t, PIO_global
 
   !  import nf procedure signatures
   use pionfatt_mod, only: put_att
@@ -1777,7 +1781,11 @@ function pio_cpp_put_att_ints (file, vardesc, name, values, nvalues) result(ierr
   attvalues = values(:int (nvalues))
 
   !  call the Fortran procedure
-  ierror = put_att (file_desc, var_desc%varID, attname, attvalues)
+  if (associated (var_desc)) then
+    ierror = put_att (file_desc, var_desc%varID, attname, attvalues)
+  else
+    ierror = put_att (file_desc, PIO_global, attname, attvalues)
+  end if
 
   !  convert the arguments back to C
   ierr = int(ierror, c_int)
@@ -1798,7 +1806,7 @@ function pio_cpp_put_att_floats (file, vardesc, name, values, nvalues) result(ie
   use pio_cpp_utils, only: f_chars, c_len, max_path_len
 
   !  import pio types
-  use pio_types, only: file_desc_t, Var_desc_t
+  use pio_types, only: file_desc_t, Var_desc_t, PIO_global
 
   !  import nf procedure signatures
   use pionfatt_mod, only: put_att
@@ -1846,7 +1854,11 @@ function pio_cpp_put_att_floats (file, vardesc, name, values, nvalues) result(ie
   attvalues = values(:int (nvalues))
 
   !  call the Fortran procedure
-  ierror = put_att (file_desc, var_desc%varID, attname, attvalues)
+  if (associated (var_desc)) then
+    ierror = put_att (file_desc, var_desc%varID, attname, attvalues)
+  else
+    ierror = put_att (file_desc, PIO_global, attname, attvalues)
+  end if
 
   !  convert the arguments back to C
   ierr = int(ierror, c_int)
@@ -1867,7 +1879,7 @@ function pio_cpp_put_att_doubles (file, vardesc, name, values, nvalues) result(i
   use pio_cpp_utils, only: f_chars, c_len, max_path_len
 
   !  import pio types
-  use pio_types, only: file_desc_t, Var_desc_t
+  use pio_types, only: file_desc_t, Var_desc_t, PIO_global
 
   !  import nf procedure signatures
   use pionfatt_mod, only: put_att
@@ -1915,7 +1927,11 @@ function pio_cpp_put_att_doubles (file, vardesc, name, values, nvalues) result(i
   attvalues = values(:int (nvalues))
 
   !  call the Fortran procedure
-  ierror = put_att (file_desc, var_desc%varID, attname, attvalues)
+  if (associated (var_desc)) then
+    ierror = put_att (file_desc, var_desc%varID, attname, attvalues)
+  else
+    ierror = put_att (file_desc, PIO_global, attname, attvalues)
+  end if
 
   !  convert the arguments back to C
   ierr = int(ierror, c_int)
