@@ -1124,7 +1124,7 @@ subroutine ESMF_GetMesh2DFromUGrid (filename, ncid, meshid, nodeCoords, elmtConn
           ! if units is radians_east or radians_north, convert to degrees
           ! get the attribute 'units'
           ncStatus = nf90_inquire_attribute(ncid, VarId, "units", len=len)
-          errmsg = "Attribute units for "//nodeCoordNames(i)//" in "//trim(filename)
+          errmsg = "Attribute units for "//faceCoordNames(i)//" in "//trim(filename)
           if (CDFCheckError (ncStatus, &
               ESMF_METHOD, &
               ESMF_SRCLINE,&
