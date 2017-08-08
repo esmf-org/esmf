@@ -1512,7 +1512,7 @@ endif
 !{\tt ESMF\_GridCreateMosaic()} first reads in the mosaic file and defines the tile connections in the 
 !{\tt ESMF\_DistGrid}  using the information
 !defined in variables {\tt contacts} and {\tt contact\_index}. Then it reads in the coordinates defined in
-!the tile files.  The coordinates defined in the tile file are a {\tt supergrid}.  A supergrid contains all the
+!the tile files if the optional argument {\tt staggerLocList} is provided.  The coordinates defined in the tile file are a {\tt supergrid}.  A supergrid contains all the
 !stagger locations in one grid.  It contains the corner, edge and center coordinates all in one 2D array.
 !In this example, there are 48 elements in each side of a tile, therefore, the size of the supergrid is 
 !48*2+1=97, i.e. 97x97.
@@ -1569,7 +1569,7 @@ endif
 !
 !The tile file not only defines the coordinates at all staggers, it also has a complete specification of
 !distances, angles, and areas.  In ESMF, we currently only use the {\tt geographic\_longitude} and {\tt geographic\_latitude}
-!variables and its subsets on the center and corner staggers.
+!variables.
 !EOE
 
 #ifdef ESMF_NETCDF
@@ -1583,9 +1583,39 @@ endif
      decomptile(:,5)=(/1,2/) ! Tile 5
      decomptile(:,6)=(/1,2/) ! Tile 6
 
-     ! Create cubed sphere grid
+     ! Create cubed sphere grid without reading in the coordinates
+
      grid2D = ESMF_GridCreateMosaic(filename='data/C48_mosaic.nc', &
+                staggerLocList=(/ESMF_STAGGERLOC_CENTER, ESMF_STAGGERLOC_CORNER/), &
                 tileFilePath='./data/', regDecompPTile=decomptile, rc=rc)
+
+!EOC
+     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+     ! Get rid of Grid
+     call ESMF_GridDestroy(grid2D, rc=rc)
+     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOC
+     ! Create cubed sphere grid and read in the center and corner stagger coordinates
+     ! from the tile files
+
+     grid2D = ESMF_GridCreateMosaic(filename='data/C48_mosaic.nc', &
+                staggerLocList=(/ESMF_STAGGERLOC_CENTER, ESMF_STAGGERLOC_CORNER/), &
+                tileFilePath='./data/', regDecompPTile=decomptile, rc=rc)
+
+!EOC
+     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+     ! Get rid of Grid
+     call ESMF_GridDestroy(grid2D, rc=rc)
+     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOC
+
+     ! Create cubed sphere grid and read in the edge staggers' coordinates
+     ! from the tile files
+
+     grid2D = ESMF_GridCreateMosaic(filename='data/C48_mosaic.nc', &
+                staggerLocList=(/ESMF_STAGGERLOC_EDGE1, ESMF_STAGGERLOC_EDGE2/), &
+                tileFilePath='./data/', regDecompPTile=decomptile, rc=rc)
+
 !EOC
      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
      ! Get rid of Grid
