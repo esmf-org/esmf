@@ -13051,13 +13051,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   call ESMF_DELayoutGet(defaultDElayout, localDeCount = decount, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) return
-  print *, PetNo, "totalDE:", totalDE, decount
   if (decount > 0) then
      allocate(demap(0:decount-1))
      call ESMF_DELayoutGet(defaultDElayout, localDeToDeMap = demap, rc=localrc)
      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
-     print *, PetNo, ' demap ', decount, demap
   endif
     centerCount=tilesize
     tileCount = 6  
@@ -13244,7 +13242,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     allocate(regDecomp(2,6))
     regDecomp(1,:)=nx
     regDecomp(2,:)=ny
-    print *, regDecomp(:,1), tilesize
     !-------------------------------------------
     ! - create DistGrid with default decomposition
     ! must create with ESMF_INDEX_GLOBAL because of how connections were defined
