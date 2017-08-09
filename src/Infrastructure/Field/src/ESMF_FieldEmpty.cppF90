@@ -4115,6 +4115,8 @@ subroutine ESMF_FieldEmptyCompGBPtr##mrank##D##mtypekind(field, geombase, farray
   ! to create the Array for the Field. @\
   call ESMF_GeomBaseGetArrayInfo(geombase, & @\
        gridToFieldMap=localGridToFieldMap, & @\
+       ungriddedLBound=localUngriddedLBound (1:fieldUngriddedDimCount), & @\
+       ungriddedUBound=localUngriddedUBound (1:fieldUngriddedDimCount), & @\
        distgridToArrayMap=distgridToArrayMap, & @\
        undistLBound=undistLBound, undistUBound=undistUBound, & @\
        rc=localrc) @\
