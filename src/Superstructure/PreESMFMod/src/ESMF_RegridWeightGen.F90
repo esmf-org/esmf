@@ -1100,7 +1100,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 	endif
     elseif (localSrcFileType == ESMF_FILEFORMAT_MOSAIC) then
         ! multi-tile Mosaic Cubed Sphere grid
-        srcGrid = ESMF_GridCreateMosaic(srcfile, tileFilePath=TileFilePath, rc=localrc)
+        srcGrid = ESMF_GridCreateMosaic(srcfile, tileFilePath=TileFilePath, &
+                staggerLocList=(/ESMF_STAGGERLOC_CENTER, ESMF_STAGGERLOC_CORNER/), &
+                rc=localrc)
         if (ESMF_LogFoundError(localrc, &
            ESMF_ERR_PASSTHRU, &
            ESMF_CONTEXT, rcToReturn=rc)) return
@@ -1237,7 +1239,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 	endif
     elseif (localDstFileType == ESMF_FILEFORMAT_MOSAIC) then
         ! multi-tile Mosaic Cubed Sphere grid
-        dstGrid = ESMF_GridCreateMosaic(dstfile, tileFilePath=TileFilePath, rc=localrc)
+        dstGrid = ESMF_GridCreateMosaic(dstfile, tileFilePath=TileFilePath, &
+                staggerLocList=(/ESMF_STAGGERLOC_CENTER, ESMF_STAGGERLOC_CORNER/), &
+                rc=localrc)
         if (ESMF_LogFoundError(localrc, &
            ESMF_ERR_PASSTHRU, &
            ESMF_CONTEXT, rcToReturn=rc)) return

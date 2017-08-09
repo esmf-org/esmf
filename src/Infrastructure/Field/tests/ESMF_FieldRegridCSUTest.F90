@@ -59,7 +59,7 @@
 
     call ESMF_TestStart(ESMF_SRCLINE, rc=rc)
     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
- 
+
 #ifdef ESMF_TESTEXHAUSTIVE
  
 ! This #if surrounds all the tests to enable turning on just one test
@@ -3640,6 +3640,7 @@ contains
   ! Create Src Grid
   srcGrid=ESMF_GridCreateMosaic(filename=trim(filename), &
        tileFilePath="./data/", regDecompPTile=decomptile, &
+       staggerLocList=(/ESMF_STAGGERLOC_CENTER, ESMF_STAGGERLOC_CORNER/), &
        indexflag=ESMF_INDEX_GLOBAL, &
        rc=localrc)
   if (ESMF_LogFoundError(localrc, &
@@ -4045,6 +4046,7 @@ contains
   ! Create Src Grid
   srcGrid=ESMF_GridCreateMosaic(filename=trim(filename), &
        tileFilePath="./data/", regDecompPTile=decomptile, &
+       staggerLocList=(/ESMF_STAGGERLOC_CENTER, ESMF_STAGGERLOC_CORNER/), &
        indexflag = ESMF_INDEX_DELOCAL, &
        rc=localrc)
   if (ESMF_LogFoundError(localrc, &

@@ -1372,14 +1372,11 @@ void PIO_Handler::open(
     if ((getFormat() == ESMF_IOFMT_NETCDF_64BIT_OFFSET) || (getFormat() == ESMF_IOFMT_NETCDF4)) {
       const char *fn = getFilename();
       VM *vm = VM::getCurrent(&localrc);
-      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc))
-        return;
-      int localPet = vm->getLocalPet();
 
       vm->barrier();
       int comm_rc = ESMF_SUCCESS;
       if (file_exists && (getFileStatusFlag() == ESMC_FILESTATUS_REPLACE)) {
-        if (localPet == 0) {
+        if (my_rank == 0) {
           if (unlink (fn)) {
             comm_rc = ESMC_RC_FILE_OPEN;
             std::string errmsg =
@@ -1423,7 +1420,7 @@ void PIO_Handler::open(
       }
 #elif defined (ESMF_NETCDF)
       comm_rc == ESMF_SUCCESS;
-      if (localPet == 0) {
+      if (my_rank == 0) {
 #if defined (NC_64BIT_DATA)
       // If NETCDF4 was desired, enable HDF5.
         int ncmode = (getFormat() == ESMF_IOFMT_NETCDF4) ? NC_64BIT_DATA : NC_64BIT_OFFSET;
@@ -1525,33 +1522,13 @@ void PIO_Handler::attPackPut (
   ) {
 //
 // !DESCRIPTION:
-//    Puts the Attributes and their values into the NetCDF file
+//    Puts the Attributes and their values into the NetCDF file.  If vardesc is NULL, the
+//    attribute will be considered a global attribute.
 //
 //EOPI
 //-----------------------------------------------------------------------------
   int localrc;
   int piorc;
-
-  pio_var_desc_t vardesc_local = vardesc;
-  if (!vardesc) {
-    pio_var_desc_t gblvardesc = (pio_var_desc_t)calloc(PIO_SIZE_VAR_DESC, 1);
-    if (!gblvardesc)
-      if (ESMC_LogDefault.MsgAllocError(" failed to allocate pio global variable desc",
-          ESMC_CONTEXT, rc)) return;
-
-#if !defined (ESMF_PNETCDF)
-    // TODO: this fails with PNetCDF...
-    piorc = pio_cpp_def_var_0d(pioFileDesc, "", PIO_global, gblvardesc);
-    if (piorc != PIO_noerr) {
-      if (!CHECKPIOERROR(piorc, "Attempting to define global PIO vardesc",
-          ESMF_RC_FILE_WRITE, (*rc))) {
-        free (gblvardesc);
-        return;
-      }
-    }
-#endif
-    vardesc_local = gblvardesc;
-  }
 
   int natts = attPack->getCountAttr();
   for (int i=0; i<natts; i++) {
@@ -1559,14 +1536,11 @@ void PIO_Handler::attPackPut (
     if (!att) {
       if (ESMC_LogDefault.MsgFoundError(ESMF_RC_ATTR_NOTSET,
           "Can not access Attribute in " + attPack->getName(),
-          ESMC_CONTEXT, rc)) {
-        if (!vardesc) free (vardesc_local);
-        return;
-      }
+          ESMC_CONTEXT, rc)) return;
     }
     if (att->getName().substr(0,5) == "ESMF:") {
 #if 0
-      std::cout << ESMC_METHOD << ": NOTE: attribute " << att->getName() << " ignored." << std::endl;
+      std::cout << ESMC_METHOD << ": NOTE: ESMF internal attribute " << att->getName() << " ignored." << std::endl;
 #endif
       continue;
     }
@@ -1579,25 +1553,16 @@ void PIO_Handler::attPackPut (
         localrc = att->get (&stringvals);
         if (ESMC_LogDefault.MsgFoundError(localrc,
             "Can not access string Attribute value for " + att->getName(),
-            ESMC_CONTEXT, rc)) {
-          if (!vardesc) free (vardesc_local);
-          return;
-        }
+            ESMC_CONTEXT, rc)) return;
         if (stringvals.size() > 1) {
           if (ESMC_LogDefault.MsgFoundError(localrc,
               "Only scalar string Attribute value for " + att->getName() + " is currently supported",
-              ESMC_CONTEXT, rc)) {
-            if (!vardesc) free (vardesc_local);
-            return;
-          }
+              ESMC_CONTEXT, rc)) return;
         }
-        piorc = pio_cpp_put_att_string (pioFileDesc, vardesc_local,
+        piorc = pio_cpp_put_att_string (pioFileDesc, vardesc,
             att->getName().c_str(), stringvals[0].c_str());
         if (!CHECKPIOERROR(piorc, "Attempting to set string Attribute: " + att->getName(),
-            ESMF_RC_FILE_WRITE, (*rc))) {
-          if (!vardesc) free (vardesc_local);
-          return;
-        }
+            ESMF_RC_FILE_WRITE, (*rc))) return;
         break;
       }
 
@@ -1608,17 +1573,11 @@ void PIO_Handler::attPackPut (
         localrc = att->get (&nvals, &intvals);
         if (ESMC_LogDefault.MsgFoundError(localrc,
             "Can not access int Attribute value for " + att->getName(),
-            ESMC_CONTEXT, rc)) {
-          if (!vardesc) free (vardesc_local);
-          return;
-        }
-        piorc = pio_cpp_put_att_ints (pioFileDesc, vardesc_local,
+            ESMC_CONTEXT, rc)) return;
+        piorc = pio_cpp_put_att_ints (pioFileDesc, vardesc,
             att->getName().c_str(), &intvals[0], intvals.size());
         if (!CHECKPIOERROR(piorc, "Attempting to set int Attribute: " + att->getName(),
-            ESMF_RC_FILE_WRITE, (*rc))) {
-          if (!vardesc) free (vardesc_local);
-          return;
-        }
+            ESMF_RC_FILE_WRITE, (*rc))) return;
         break;
       }
 
@@ -1629,17 +1588,11 @@ void PIO_Handler::attPackPut (
         localrc = att->get (&nvals, &floatvals);
         if (ESMC_LogDefault.MsgFoundError(localrc,
             "Can not access float Attribute value for " + att->getName(),
-            ESMC_CONTEXT, rc)) {
-          if (!vardesc) free (vardesc_local);
-          return;
-        }
-        piorc = pio_cpp_put_att_floats (pioFileDesc, vardesc_local,
+            ESMC_CONTEXT, rc)) return;
+        piorc = pio_cpp_put_att_floats (pioFileDesc, vardesc,
             att->getName().c_str(), &floatvals[0], floatvals.size());
         if (!CHECKPIOERROR(piorc, "Attempting to set float Attribute: " + att->getName(),
-            ESMF_RC_FILE_WRITE, (*rc))) {
-          if (!vardesc) free (vardesc_local);
-          return;
-        }
+            ESMF_RC_FILE_WRITE, (*rc))) return;
         break;
       }
 
@@ -1650,30 +1603,20 @@ void PIO_Handler::attPackPut (
         localrc = att->get (&nvals, &doublevals);
         if (ESMC_LogDefault.MsgFoundError(localrc,
             "Can not access double Attribute value for " + att->getName(),
-            ESMC_CONTEXT, rc)) {
-          if (!vardesc) free (vardesc_local);
-          return;
-        }
-        piorc = pio_cpp_put_att_doubles (pioFileDesc, vardesc_local,
+            ESMC_CONTEXT, rc)) return;
+        piorc = pio_cpp_put_att_doubles (pioFileDesc, vardesc,
             att->getName().c_str(), &doublevals[0], doublevals.size());
         if (!CHECKPIOERROR(piorc, "Attempting to set double Attribute: " + att->getName(),
-            ESMF_RC_FILE_WRITE, (*rc))) {
-          if (!vardesc) free (vardesc_local);
-          return;
-        }
+            ESMF_RC_FILE_WRITE, (*rc))) return;
         break;
       }
 
       default:
         if (ESMC_LogDefault.MsgFoundError(ESMF_RC_ATTR_NOTSET,
             "Attribute " + att->getName() + " has unsupported value type",
-            ESMC_CONTEXT, rc)) {
-          if (!vardesc) free (vardesc_local);
-          return;
-        }
+            ESMC_CONTEXT, rc)) return;
     }
   } // natts loop
-  if (!vardesc) free (vardesc_local);
 } // PIO_Handler::attPackPut()
 //-----------------------------------------------------------------------------
 
