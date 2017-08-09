@@ -1059,7 +1059,7 @@ int weiler_clip_difference(int pdim, int sdim, int num_p, double *p, int num_q, 
         if(num_nodes >=3){
           polygon res_poly;
           coords_to_polygon(num_nodes, coords, sdim, res_poly);
-          if(abs(res_poly.area(sdim)) > 1.e-30)
+          if(res_poly.area(sdim) > 0)
             difference.push_back(res_poly);
         }
         delete[] coords;
