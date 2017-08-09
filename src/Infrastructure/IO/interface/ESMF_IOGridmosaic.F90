@@ -39,7 +39,7 @@
       use ESMF_LogErrMod        ! ESMF error handling
       use ESMF_UtilStringMod
       use ESMF_VMMod
-      use ESMF_StaggerLocMod
+      use ESMF_StaggerLocTypeMod
 
 #ifdef ESMF_NETCDF
       use netcdf

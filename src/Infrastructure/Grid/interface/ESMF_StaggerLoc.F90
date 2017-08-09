@@ -33,6 +33,7 @@
 !------------------------------------------------------------------------------
 ! !USES:
       use ESMF_UtilTypesMod    ! ESMF base class
+      use ESMF_StaggerLocTypeMod
       use ESMF_LogErrMod
       use ESMF_IOUtilMod
 
@@ -43,19 +44,6 @@
       private
 
 !------------------------------------------------------------------------------
-!     ! ESMF_StaggerLoc
-!
-
-      type ESMF_StaggerLoc
-#ifndef ESMF_NO_SEQUENCE
-        sequence
-#endif
-        integer :: staggerloc
-      end type
-
-
-
-!------------------------------------------------------------------------------
 !
 ! !PUBLIC TYPES:
   public ESMF_StaggerLoc
@@ -63,9 +51,9 @@
 !------------------------------------------------------------------------------
 !
 ! !PUBLIC MEMBER FUNCTIONS:
-  public ESMF_StaggerLocString
-  public ESMF_StaggerLocSet
   public ESMF_StaggerLocGet
+  public ESMF_StaggerLocSet
+  public ESMF_StaggerLocString
   public ESMF_StaggerLocPrint
   public assignment(=)
   public operator(==), operator(/=) 
@@ -81,27 +69,21 @@
 !!!!!
 
    !! Invalid stagger locations
-   type (ESMF_StaggerLoc), parameter, public ::            &
-      ESMF_STAGGERLOC_INVALID       = ESMF_StaggerLoc(-2), &  
-      ESMF_STAGGERLOC_UNINIT        = ESMF_StaggerLoc(-1)   
+   public ESMF_STAGGERLOC_INVALID, ESMF_STAGGERLOC_UNINIT
 
    !! 2D predefined stagger locations
-   type (ESMF_StaggerLoc), parameter, public ::            &
-      ESMF_STAGGERLOC_CENTER        = ESMF_StaggerLoc( 0), &     
-      ESMF_STAGGERLOC_EDGE1         = ESMF_StaggerLoc( 1), &  
-      ESMF_STAGGERLOC_EDGE2         = ESMF_StaggerLoc( 2), &
-      ESMF_STAGGERLOC_CORNER        = ESMF_StaggerLoc( 3)
+   public ESMF_STAGGERLOC_CENTER, ESMF_STAGGERLOC_EDGE1, &
+     ESMF_STAGGERLOC_EDGE2, ESMF_STAGGERLOC_CORNER
 
    !! 3D predefined stagger locations
-   type (ESMF_StaggerLoc), parameter, public ::            &
-      ESMF_STAGGERLOC_CENTER_VCENTER  = ESMF_StaggerLoc( 0), &
-      ESMF_STAGGERLOC_EDGE1_VCENTER   = ESMF_StaggerLoc( 1), &
-      ESMF_STAGGERLOC_EDGE2_VCENTER   = ESMF_StaggerLoc( 2), &
-      ESMF_STAGGERLOC_CORNER_VCENTER  = ESMF_StaggerLoc( 3), &
-      ESMF_STAGGERLOC_CENTER_VFACE    = ESMF_StaggerLoc( 4), &
-      ESMF_STAGGERLOC_EDGE1_VFACE     = ESMF_StaggerLoc( 5), &
-      ESMF_STAGGERLOC_EDGE2_VFACE     = ESMF_StaggerLoc( 6), &
-      ESMF_STAGGERLOC_CORNER_VFACE    = ESMF_StaggerLoc( 7)
+   public ESMF_STAGGERLOC_CENTER_VCENTER, &
+     ESMF_STAGGERLOC_EDGE1_VCENTER,       &
+     ESMF_STAGGERLOC_EDGE2_VCENTER,       &
+     ESMF_STAGGERLOC_CORNER_VCENTER,      &
+     ESMF_STAGGERLOC_CENTER_VFACE,        &
+     ESMF_STAGGERLOC_EDGE1_VFACE,         &
+     ESMF_STAGGERLOC_EDGE2_VFACE,         &
+     ESMF_STAGGERLOC_CORNER_VFACE
 
 
 !EOPI
@@ -109,7 +91,6 @@
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
       '$Id$'
-
 
 !==============================================================================
 
@@ -119,111 +100,23 @@
 ! INTERFACE BLOCKS
 !
 !==============================================================================
+
+! -------------------------- ESMF-public method -------------------------------
 !BOPI
+! !IROUTINE: ESMF_StaggerLocGet -- Generic interface
+
 ! !INTERFACE:
-      interface assignment (=)
-         module procedure ESMF_StaggerLocAssignment
+interface ESMF_StaggerLocGet
 
 ! !PRIVATE MEMBER FUNCTIONS:
-
-! !DESCRIPTION:
-!     This interface assigns a string value to an ESMF_StaggerLoc
 !
-!EOPI
-      end interface
-!------------------------------------------------------------------------------
-!BOPI
-! !INTERFACE:
-      interface operator (==)
-
-! !PRIVATE MEMBER FUNCTIONS:
-         module procedure ESMF_StaggerLocEqual
-
-! !DESCRIPTION:
-!     This interface overloads the equality operator for the specific
-!     ESMF StaggerLoc.  It is provided for easy comparisons of 
-!     these types with defined values.
-!
-!EOPI
-      end interface
-!
-!------------------------------------------------------------------------------
-!BOPI
-! !INTERFACE:
-      interface operator (/=)
-
-! !PRIVATE MEMBER FUNCTIONS:
-         module procedure ESMF_StaggerLocNotEqual
-
-! !DESCRIPTION:
-!     This interface overloads the inequality operator for the specific
-!     ESMF StaggerLoc.  It is provided for easy comparisons of 
-!     these types with defined values.
-!
-!EOPI
-      end interface
-!------------------------------------------------------------------------------
-!BOPI
-! !INTERFACE:
-      interface operator (>)
-
-! !PRIVATE MEMBER FUNCTIONS:
-         module procedure ESMF_StaggerLocGreater
-
-! !DESCRIPTION:
-!     This interface overloads the inequality operator for the specific
-!     ESMF StaggerLoc.  It is provided for easy comparisons of 
-!     these types with defined values.
-!
-!EOPI
-      end interface
-!------------------------------------------------------------------------------
-!BOPI
-! !INTERFACE:
-      interface operator (<)
-
-! !PRIVATE MEMBER FUNCTIONS:
-         module procedure ESMF_StaggerLocLess
-
-! !DESCRIPTION:
-!     This interface overloads the inequality operator for the specific
-!     ESMF StaggerLoc.  It is provided for easy comparisons of 
-!     these types with defined values.
-!
-!EOPI
-      end interface
-!------------------------------------------------------------------------------
-!BOPI
-! !INTERFACE:
-      interface operator (>=)
-
-! !PRIVATE MEMBER FUNCTIONS:
-         module procedure ESMF_StaggerLocGreaterEqual
-
-! !DESCRIPTION:
-!     This interface overloads the inequality operator for the specific
-!     ESMF StaggerLoc.  It is provided for easy comparisons of 
-!     these types with defined values.
-!
-!EOPI
-      end interface
-!------------------------------------------------------------------------------
-!BOPI
-! !INTERFACE:
-      interface operator (<=)
-
-! !PRIVATE MEMBER FUNCTIONS:
-         module procedure ESMF_StaggerLocLessEqual
-
-! !DESCRIPTION:
-!     This interface overloads the inequality operator for the specific
-!     ESMF StaggerLoc.  It is provided for easy comparisons of 
-!     these types with defined values.
-!
-!EOPI
-      end interface
-
-
+      module procedure ESMF_StaggerLocGetDim
+      
+! !DESCRIPTION: 
+! This interface provides a single entry point for the various 
+!  types of {\tt ESMF\_StaggerLocGet} functions.   
+!EOPI 
+end interface
 
 ! -------------------------- ESMF-public method -------------------------------
 !BOPI
@@ -243,30 +136,9 @@ interface ESMF_StaggerLocSet
 !EOPI 
 end interface
 
-
-! -------------------------- ESMF-public method -------------------------------
-!BOPI
-! !IROUTINE: ESMF_StaggerLocGet -- Generic interface
-
-! !INTERFACE:
-interface ESMF_StaggerLocGet
-
-! !PRIVATE MEMBER FUNCTIONS:
-!
-      module procedure ESMF_StaggerLocGetDim
-      
-! !DESCRIPTION: 
-! This interface provides a single entry point for the various 
-!  types of {\tt ESMF\_StaggerLocGet} functions.   
-!EOPI 
-end interface
-
-!
 !==============================================================================
 
       contains
-
-
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -513,253 +385,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
         end subroutine ESMF_StaggerLocString
 
-!------------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_StaggerLocAssignment"
-!BOPI
-! !IROUTINE: ESMF\_StaggerLocAssignment - Assignment of an ESMF\_StaggerLoc from a string
-!
-! !INTERFACE:
-      subroutine ESMF_StaggerLocAssignment(slval, string)
-
-! !ARGUMENTS:
-      type(ESMF_StaggerLoc), intent(out) :: slval 
-      character(len=*), intent(in) :: string
-
-! !DESCRIPTION:
-!     This routine assigns an ESMF\_StaggerLoc from a string value
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[string]
-!       String value to assign to the ESMF\_StaggerLoc
-!     \end{description}
-!
-!EOPI
-
-
-      if (string == "ESMF_STAGGERLOC_INVALID") then
-        slval = ESMF_STAGGERLOC_INVALID
-      else if (string == "ESMF_STAGGERLOC_UNINIT") then
-        slval = ESMF_STAGGERLOC_UNINIT
-      else if (string == "ESMF_STAGGERLOC_CENTER") then
-        slval = ESMF_STAGGERLOC_CENTER
-      else if (string == "ESMF_STAGGERLOC_EDGE1") then
-        slval = ESMF_STAGGERLOC_EDGE1
-      else if (string == "ESMF_STAGGERLOC_EDGE2") then
-        slval = ESMF_STAGGERLOC_EDGE2
-      else if (string == "ESMF_STAGGERLOC_CORNER") then
-         slval = ESMF_STAGGERLOC_CORNER
-      endif
-
-      end subroutine ESMF_StaggerLocAssignment
-!------------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_StaggerLocEqual"
-!BOPI
-! !IROUTINE: ESMF_StaggerLocEqual - Equality of StaggerLoc statuses
-!
-! !INTERFACE:
-      function ESMF_StaggerLocEqual(StaggerLoc1, StaggerLoc2)
-
-! !RETURN VALUE:
-      logical :: ESMF_StaggerLocEqual
-
-! !ARGUMENTS:
-
-      type (ESMF_StaggerLoc), intent(in) :: &
-         StaggerLoc1,      &! Two igrid statuses to compare for
-         StaggerLoc2        ! equality
-
-! !DESCRIPTION:
-!     This routine compares two ESMF StaggerLoc statuses to see if
-!     they are equivalent.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[StaggerLoc1, StaggerLoc2]
-!          Two igrid statuses to compare for equality
-!     \end{description}
-!
-!EOPI
-
-      ESMF_StaggerLocEqual = (StaggerLoc1%staggerloc == &
-                              StaggerLoc2%staggerloc)
-
-      end function ESMF_StaggerLocEqual
-!------------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_StaggerLocNotEqual"
-!BOPI
-! !IROUTINE: ESMF_StaggerLocNotEqual - Non-equality of StaggerLoc statuses
-!
-! !INTERFACE:
-      function ESMF_StaggerLocNotEqual(StaggerLoc1, StaggerLoc2)
-
-! !RETURN VALUE:
-      logical :: ESMF_StaggerLocNotEqual
- 
-! !ARGUMENTS:
-
-      type (ESMF_StaggerLoc), intent(in) :: &
-         StaggerLoc1,      &! Two StaggerLoc Statuses to compare for
-         StaggerLoc2        ! inequality
-
-! !DESCRIPTION:
-!     This routine compares two ESMF StaggerLoc statuses to see if
-!     they are unequal.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[StaggerLoc1, StaggerLoc2]
-!          Two statuses of StaggerLocs to compare for inequality
-!     \end{description}
-!
-!EOPI
-
-      ESMF_StaggerLocNotEqual = (StaggerLoc1%staggerloc /= &
-                                 StaggerLoc2%staggerloc)
-
-      end function ESMF_StaggerLocNotEqual
-
-
-!------------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_StaggerLocGreater"
-!BOPI
-! !IROUTINE: ESMF_StaggerLocGreater - Equality of StaggerLoc statuses
-!
-! !INTERFACE:
-      function ESMF_StaggerLocGreater(StaggerLoc1, StaggerLoc2)
-
-! !RETURN VALUE:
-      logical :: ESMF_StaggerLocGreater
-
-! !ARGUMENTS:
-
-      type (ESMF_StaggerLoc), intent(in) :: &
-         StaggerLoc1,      &! Two igrid statuses to compare for
-         StaggerLoc2        ! equality
-
-! !DESCRIPTION:
-!     This routine compares two ESMF StaggerLoc statuses to see if
-!     they are equivalent.
-!
-!     The arguments are:
-!     \begin{description}
- !     \item[StaggerLoc1, StaggerLoc2]
-!          Two igrid statuses to compare for equality
-!     \end{description}
-!
-!EOPI
-
-      ESMF_StaggerLocGreater = (StaggerLoc1%staggerloc > &
-                              StaggerLoc2%staggerloc)
-
-      end function ESMF_StaggerLocGreater
-!------------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_StaggerLocLess"
-!BOPI
-! !IROUTINE: ESMF_StaggerLocLess - Non-equality of StaggerLoc statuses
-!
-! !INTERFACE:
-      function ESMF_StaggerLocLess(StaggerLoc1, StaggerLoc2)
-
-! !RETURN VALUE:
-      logical :: ESMF_StaggerLocLess
-
-! !ARGUMENTS:
-
-      type (ESMF_StaggerLoc), intent(in) :: &
-         StaggerLoc1,      &! Two StaggerLoc Statuses to compare for
-         StaggerLoc2        ! inequality
-
-! !DESCRIPTION:
-!     This routine compares two ESMF StaggerLoc statuses to see if
-!     they are unequal.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[StaggerLoc1, StaggerLoc2]
-!          Two statuses of StaggerLocs to compare for inequality
-!     \end{description}
-!
-!EOPI
-
-      ESMF_StaggerLocLess = (StaggerLoc1%staggerloc < &
-                                 StaggerLoc2%staggerloc)
-
-      end function ESMF_StaggerLocLess
-
-!------------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_StaggerLocGreaterEqual"
-!BOPI
- ! !IROUTINE: ESMF_StaggerLocGreaterEqual - Greater than or equal of StaggerLoc statuses
-!
-! !INTERFACE:
-      function ESMF_StaggerLocGreaterEqual(StaggerLoc1, StaggerLoc2)
-
-! !RETURN VALUE:
-      logical :: ESMF_StaggerLocGreaterEqual
-
-! !ARGUMENTS:
-
-      type (ESMF_StaggerLoc), intent(in) :: &
-         StaggerLoc1,      &! Two igrid statuses to compare for
-         StaggerLoc2        ! equality
-
-! !DESCRIPTION:
-!     This routine compares two ESMF StaggerLoc statuses to see if
-!     they are equivalent.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[StaggerLoc1, StaggerLoc2]
-!          Two igrid statuses to compare
-!     \end{description}
-!
-!EOPI
-
-      ESMF_StaggerLocGreaterEqual = (StaggerLoc1%staggerloc >= &
-                              StaggerLoc2%staggerloc)
-
-      end function ESMF_StaggerLocGreaterEqual
-!------------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_StaggerLocLessEqual"
-!BOPI
-! !IROUTINE: ESMF_StaggerLocLessEqual - Less than or equal of StaggerLoc statuses
-!
-! !INTERFACE:
-      function ESMF_StaggerLocLessEqual(StaggerLoc1, StaggerLoc2)
-
-! !RETURN VALUE:
-      logical :: ESMF_StaggerLocLessEqual
-
-! !ARGUMENTS:
-
-      type (ESMF_StaggerLoc), intent(in) :: &
-         StaggerLoc1,      &! Two StaggerLoc Statuses to compare for
-         StaggerLoc2        ! inequality
-
-! !DESCRIPTION:
-!     This routine compares two ESMF StaggerLoc statuses to see if
-!     they are unequal.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[StaggerLoc1, StaggerLoc2]
-!          Two statuses of StaggerLocs to compare
-!     \end{description}
-!
-!EOPI
-
-      ESMF_StaggerLocLessEqual = (StaggerLoc1%staggerloc <= &
-                                 StaggerLoc2%staggerloc)
-
-      end function ESMF_StaggerLocLessEqual
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_StaggerLocPrint"
