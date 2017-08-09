@@ -1420,7 +1420,7 @@ void PIO_Handler::open(
       }
 #elif defined (ESMF_NETCDF)
       comm_rc == ESMF_SUCCESS;
-      if (localPet == 0) {
+      if (my_rank == 0) {
 #if defined (NC_64BIT_DATA)
       // If NETCDF4 was desired, enable HDF5.
         int ncmode = (getFormat() == ESMF_IOFMT_NETCDF4) ? NC_64BIT_DATA : NC_64BIT_OFFSET;
