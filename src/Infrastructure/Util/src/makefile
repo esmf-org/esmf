@@ -13,7 +13,6 @@ SOURCEF	  = ESMF_UtilTypes.F90 \
             $(AUTOGEN) \
             ESMF_InitMacros.F90 \
             ESMF_IOUtil.F90 \
-            ESMF_StaggerLoc.F90 \
 	    ESMF_UtilCubedSphere.F90
             
 STOREH    = ESMCI_Arg.h ESMF_Macros.inc ESMF.h ESMCI_Util.h \
