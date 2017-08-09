@@ -1372,14 +1372,11 @@ void PIO_Handler::open(
     if ((getFormat() == ESMF_IOFMT_NETCDF_64BIT_OFFSET) || (getFormat() == ESMF_IOFMT_NETCDF4)) {
       const char *fn = getFilename();
       VM *vm = VM::getCurrent(&localrc);
-      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc))
-        return;
-      int localPet = vm->getLocalPet();
 
       vm->barrier();
       int comm_rc = ESMF_SUCCESS;
       if (file_exists && (getFileStatusFlag() == ESMC_FILESTATUS_REPLACE)) {
-        if (localPet == 0) {
+        if (my_rank == 0) {
           if (unlink (fn)) {
             comm_rc = ESMC_RC_FILE_OPEN;
             std::string errmsg =
@@ -1525,7 +1522,8 @@ void PIO_Handler::attPackPut (
   ) {
 //
 // !DESCRIPTION:
-//    Puts the Attributes and their values into the NetCDF file
+//    Puts the Attributes and their values into the NetCDF file.  If vardesc is NULL, the
+//    attribute will be considered a global attribute.
 //
 //EOPI
 //-----------------------------------------------------------------------------
@@ -1542,7 +1540,7 @@ void PIO_Handler::attPackPut (
     }
     if (att->getName().substr(0,5) == "ESMF:") {
 #if 0
-      std::cout << ESMC_METHOD << ": NOTE: attribute " << att->getName() << " ignored." << std::endl;
+      std::cout << ESMC_METHOD << ": NOTE: ESMF internal attribute " << att->getName() << " ignored." << std::endl;
 #endif
       continue;
     }
