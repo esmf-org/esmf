@@ -36,7 +36,6 @@
 // other ESMF include files here.
 #include "ESMCI_Macros.h"
 #include "ESMCI_Container.h"
-#include "ESMC_VM.h"
 #include "ESMCI_LogErr.h"
 #include "ESMCI_ArrayBundle.h"
 
@@ -268,25 +267,16 @@ int PIO_Handler::initializeVM (void
 
   try {  
     if (!instanceFound) {
-      ESMC_VM currentVM;            // our VM (for PET and MPI comm info)
-      int localPet;
-      int petCount;
-      int peCount;
-      currentVM = ESMC_VMGetCurrent(&rc);
-      if (ESMC_LogDefault.MsgFoundError(rc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, 
-        &rc)) {
+      int localrc;
+      VM *vm = VM::getCurrent(&localrc);
+      if (ESMC_LogDefault.MsgFoundError (localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc))
         return rc;
-      }
-      rc = ESMC_VMGet(currentVM, &localPet, &petCount, &peCount,
-                      &communicator, (int *)NULL, (int *)NULL);
-      if (ESMC_LogDefault.MsgFoundError(rc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
-        &rc)) {
-        return rc;
-      }
+      communicator = vm->getMpi_c();
+      my_rank = vm->getLocalPet();
+
       // Figure out the inputs for the initialize call
-      my_rank = localPet;
 #if defined(ESMF_NETCDF) || defined(ESMF_PNETCDF)
-      num_iotasks = petCount;
+      num_iotasks = vm->getPetCount();
       num_aggregators = 1;
       stride = 1;
       rearr = PIO_rearr_box;
@@ -1372,6 +1362,8 @@ void PIO_Handler::open(
     if ((getFormat() == ESMF_IOFMT_NETCDF_64BIT_OFFSET) || (getFormat() == ESMF_IOFMT_NETCDF4)) {
       const char *fn = getFilename();
       VM *vm = VM::getCurrent(&localrc);
+      if (ESMC_LogDefault.MsgFoundError (localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc))
+        return;
 
       vm->barrier();
       int comm_rc = ESMF_SUCCESS;
@@ -1392,17 +1384,21 @@ void PIO_Handler::open(
 
       // Pre-create file with at least 64-bit offset set.
 #if defined (ESMF_PNETCDF)
-      MPI_Comm comm=vm->getMpi_c();
 #if defined (NC_64BIT_DATA)
       // If NETCDF4 was desired, enable HDF5.
       int ncmode = (getFormat() == ESMF_IOFMT_NETCDF4) ? NC_64BIT_DATA : NC_64BIT_OFFSET;
 #else
-      // Some NetCDF builds do not support HDF5.  Punt with 64-bit offset.
+      // Some PNetCDF builds do not support HDF5.  Punt with 64-bit offset.
+      if (getFormat() == ESMF_IOFMT_NETCDF4) {
+        std::string errmsg =
+            std::string ("Creating file ") + fn + " with 64-bit offset instead of NETCDF4/HDF5 format due to PNetCDF version or build limitation.";
+        ESMC_LogDefault.Write(errmsg, ESMC_LOGMSG_WARN, ESMC_CONTEXT);
+      }
       int ncmode = NC_64BIT_OFFSET;
 #endif
       int ncid;
       MPI_Info info = MPI_INFO_NULL;
-      int ncerr = ncmpi_create (comm, fn, ncmode, info, &ncid);
+      int ncerr = ncmpi_create (communicator, fn, ncmode, info, &ncid);
       if (ncerr != NC_NOERR) {
         std::string errmsg =
             std::string("could not pre-create file: ") + fn + " (" + ncmpi_strerror (ncerr) + ")";
@@ -1426,6 +1422,11 @@ void PIO_Handler::open(
         int ncmode = (getFormat() == ESMF_IOFMT_NETCDF4) ? NC_64BIT_DATA : NC_64BIT_OFFSET;
 #else
       // Some NetCDF builds do not support HDF5.  Punt with 64-bit offset.
+        if (getFormat() == ESMF_IOFMT_NETCDF4) {
+          std::string errmsg =
+              std::string ("Creating file ") + fn + " with 64-bit offset instead of NETCDF4/HDF5 format due to NetCDF version or build limitation.";
+          ESMC_LogDefault.Write(errmsg, ESMC_LOGMSG_WARN, ESMC_CONTEXT);
+        }
         int ncmode = NC_64BIT_OFFSET;
 #endif
         int ncid;
@@ -2024,13 +2025,8 @@ int PIO_IODescHandler::constructPioDecomp(
 
   // initialize return code; assume routine not implemented
   int localrc = ESMF_RC_NOT_IMPL;   // local return code
-  ESMC_VM currentVM;                // our VM (for PET and MPI comm info)
-  MPI_Comm mpiCommunicator;         // MPI communicator to use for I/O
   int localDe;                      // The DE being processed
   int localDeCount;                 // The number of DEs on this PET
-  int localPet;                     // Number of this PET
-  int petCount;                     // Total number of PETs in VM
-  int peCount;                      // Total number of PEs in VM
   int pioDofCount;                  // Number 
   int64_t *pioDofList;              // Local to global array map
   DistGrid *distGrid;               // The Array's associated DistGrid
@@ -2051,17 +2047,7 @@ int PIO_IODescHandler::constructPioDecomp(
 
   handle = new PIO_IODescHandler(iosys, arr_p);
   pioDofList = (int64_t *)NULL;
-  currentVM = ESMC_VMGetCurrent(&localrc);
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
-    &localrc)) {
-    return localrc;
-  }
-  localrc = ESMC_VMGet(currentVM, &localPet, &petCount, &peCount,
-                       &mpiCommunicator, (int *)NULL, (int *)NULL);
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
-    &localrc)) {
-    return localrc;
-  }
+
   localDeCount = arr_p->getDELayout()->getLocalDeCount();
   PRINTMSG("localDeCount = " << localDeCount);
   //TODO: Remove this restriction (possibly with multiple IO descriptors)
@@ -2077,7 +2063,7 @@ int PIO_IODescHandler::constructPioDecomp(
   for (localDe = 0; localDe < localDeCount; ++localDe) {
     pioDofCount += arr_p->getTotalElementCountPLocalDe()[localDe];
   }
-  PRINTMSG("(" << localPet << "): pioDofCount = " << pioDofCount);
+  PRINTMSG("(" << my_rank << "): pioDofCount = " << pioDofCount);
   try {
     // Allocate space for the DOF list
     pioDofList = new int64_t[pioDofCount];
