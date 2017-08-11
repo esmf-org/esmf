@@ -34,6 +34,7 @@
 #include "Mesh/include/ESMCI_Mesh_XGrid_Glue.h"
 #include "Mesh/include/ESMCI_MBMesh_Glue.h"
 #include "Mesh/include/ESMCI_MBMesh_Regrid_Glue.h"
+#include "Mesh/include/ESMCI_MBMesh_Util.h"
 #include "Mesh/include/ESMCI_MeshCap.h"
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
@@ -82,18 +83,17 @@ void MeshCap::MeshCap_to_PointList(ESMC_MeshLoc_Flag meshLoc,
  
 
   // Call into func. depending on mesh type
+  int localrc;
   if (is_esmf_mesh) {
-    int localrc;
-    *out_pl=mesh->MeshToPointList(meshLoc, 
+    *out_pl=mesh->MeshToPointList(meshLoc,
                                   maskValuesArg, &localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
                                       ESMC_CONTEXT, rc)) return;
 
-    } else {
-     ESMC_LogDefault.MsgFoundError(ESMC_RC_NOT_IMPL,
-        "- this functionality is not currently supported using MOAB",
-                                  ESMC_CONTEXT, rc);
-    return;
+  } else {
+    *out_pl = MBMesh_to_PointList(static_cast<MBMesh *>(mbmesh), &localrc);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+                                      ESMC_CONTEXT, rc)) return;
   }
 }
 
@@ -424,20 +424,20 @@ void MeshCap::regrid_getfrac(Grid **gridpp,
 
 
 void MeshCap::regrid_create(
-		    MeshCap **mcapsrcpp, ESMCI::Array **arraysrcpp, ESMCI::PointList **plsrcpp,
-		    MeshCap **mcapdstpp, ESMCI::Array **arraydstpp, ESMCI::PointList **pldstpp,
-		    int *regridMethod, 
-                    int *map_type,
-                    int *norm_type,
-                    int *regridPoleType, int *regridPoleNPnts,  
-                    int *regridScheme, 
-                    int *unmappedaction, int *_ignoreDegenerate,
-                    int *srcTermProcessing, int *pipelineDepth, 
-                    ESMCI::RouteHandle **rh, int *has_rh, int *has_iw,
-                    int *nentries, ESMCI::TempWeights **tweights,
-                    int *has_udl, int *_num_udl, ESMCI::TempUDL **_tudl, 
-                    int *has_statusArray, ESMCI::Array **statusArray,
-                    int*rc) {
+    MeshCap **mcapsrcpp, ESMCI::Array **arraysrcpp, ESMCI::PointList **plsrcpp,
+    MeshCap **mcapdstpp, ESMCI::Array **arraydstpp, ESMCI::PointList **pldstpp,
+    int *regridMethod,
+    int *map_type,
+    int *norm_type,
+    int *regridPoleType, int *regridPoleNPnts,
+    int *regridScheme,
+    int *unmappedaction, int *_ignoreDegenerate,
+    int *srcTermProcessing, int *pipelineDepth,
+    ESMCI::RouteHandle **rh, int *has_rh, int *has_iw,
+    int *nentries, ESMCI::TempWeights **tweights,
+    int *has_udl, int *_num_udl, ESMCI::TempUDL **_tudl,
+    int *has_statusArray, ESMCI::Array **statusArray,
+    int*rc) {
 #undef ESMC_METHOD
 #define ESMC_METHOD "MeshCap::regrid_create()"                           
 
@@ -531,11 +531,11 @@ void MeshCap::regrid_create(
   } else {
 #ifdef ESMF_MOAB 
     int localrc;
-    MBMesh_regrid_create(&mesh_src_p, arraysrcpp,
-                         &mesh_dst_p, arraydstpp,
-                         regridMethod, 
-                           map_type,
-                          norm_type,
+    MBMesh_regrid_create(&mesh_src_p, arraysrcpp, plsrcpp,
+                         &mesh_dst_p, arraydstpp, pldstpp,
+                         regridMethod,
+                         map_type,
+                         norm_type,
                          regridPoleType, regridPoleNPnts,  
                          regridScheme, 
                          unmappedaction, _ignoreDegenerate,

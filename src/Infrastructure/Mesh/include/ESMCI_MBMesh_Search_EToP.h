@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2017, University Corporation for Atmospheric Research, 
+// Copyright 2002-2016, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -18,17 +18,15 @@
 // INCLUDES
 //------------------------------------------------------------------------------
 
-#ifndef ESMCI_MBMesh_Util_h
-#define ESMCI_MBMesh_Util_h
+#ifndef ESMCI_MBMesh_Search_EToP_h
+#define ESMCI_MBMesh_Search_EToP_h
 
 // Take out if MOAB isn't being used
 #ifdef ESMF_MOAB
 
 #include "Mesh/include/ESMCI_MBMesh.h"
-#include "Mesh/include/ESMCI_MeshTypes.h"
-#include "ESMCI_PointList.h"
 
-#include <vector>
+#include "ESMCI_PointList.h"
 
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
@@ -36,27 +34,36 @@
 // static const char *const version = "$Id$";
 //-----------------------------------------------------------------------------
 
-
 using namespace ESMCI;
 
-void MBMesh_get_gid(MBMesh *mbmp, EntityHandle eh, int *gid);
 
-void MBMesh_get_elem_coords_3D_ccw(MBMesh *mbmp, EntityHandle elem, 
-                                   int max_num_nodes, double *tmp_coords, 
-                                   int *num_nodes, double *coords);
-void MBMesh_get_elem_coords(MBMesh *mbmp, EntityHandle elem, int max_num_nodes, int *num_nodes, double *coords);
+struct etop_sr {
+  const point *node;
+  int dst_gid;
+  double pcoord[3];  // parametric coord of node in elem
+};
 
-void MBMesh_get_elem_centroid(MBMesh *mbmp, EntityHandle elem, double *centroid);
+struct MBMesh_Search_EToP_Result {
 
-void MBMesh_get_local_elem_gids(MBMesh *mbmp, std::vector<UInt> &egids);
+  EntityHandle src_elem;
+  std::vector<etop_sr> dst_nodes;
 
-// expects pcoords in domain [-1,1] and translates to [0,1]
-// useful for translating pcoords from MOAB to ESMF domain
-void translate(double *pcoords);
+  bool operator<(const MBMesh_Search_EToP_Result &rhs) const {
+    return src_elem < rhs.src_elem;
+  }
+  bool operator==(const MBMesh_Search_EToP_Result &rhs) const {
+    return src_elem == rhs.src_elem;
+  }
+  bool operator!=(const MBMesh_Search_EToP_Result &rhs) const {
+    return !(*this == rhs);
+   }
+};
+typedef std::vector<MBMesh_Search_EToP_Result*> MBMesh_Search_EToP_Result_List;
 
-//ESMCI::PointList *MBMesh_to_PointList(MBMesh *mesh, ESMC_MeshLoc_Flag meshLoc, ESMCI::InterfaceInt *maskValuesArg, int *rc);
-ESMCI::PointList *MBMesh_to_PointList(MBMesh *mesh, int *rc);
 
-#endif // ESMF_MOAB
+void MBMesh_Search_EToP(MBMesh *mbmAp, int unmappedactionA,
+                        PointList *mbmBp, int unmappedactionB,
+                        double stol, MBMesh_Search_EToP_Result_List &result);
 
+#endif
 #endif

@@ -51,9 +51,9 @@
 using namespace ESMCI;
 
  
-void MBMesh_regrid_create(void **meshsrcpp, ESMCI::Array **arraysrcpp,
-                          void **meshdstpp, ESMCI::Array **arraydstpp,
-                          int *regridMethod, 
+void MBMesh_regrid_create(void **meshsrcpp, ESMCI::Array **arraysrcpp, ESMCI::PointList **plsrcpp,
+                          void **meshdstpp, ESMCI::Array **arraydstpp, ESMCI::PointList **pldstpp,
+                          int *regridMethod,
                           int *map_type,
                           int *norm_type,
                           int *regridPoleType, int *regridPoleNPnts,  
