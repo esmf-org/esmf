@@ -298,12 +298,7 @@ bool line_intersect_2D_3D(double *a1, double *a2, double *q1, double *q2, double
   inbound = 1;  // default is outbound when intersection happens
   // sense of inbound: (v1 x v2).(v1 x p1) > 0
   //if(sense > 0. && (t>0 && t<1)) inbound = 2; // v1 going into v2 in CCW sense
-  // if(sense > 0) inbound = 2; // v1 going into v2 in CCW sense
-  xvector l1 = xvector(a2,3)-xvector(a1,3); 
-  xvector l2 = xvector(q2,3)-xvector(q1,3);
-  if(dot(cross(l1, l2), xvector(intersect, 3)) > 0) inbound = 2;
-
-  // Special case when the intersect is one of the vertices
+  if(sense > 0) inbound = 2; // v1 going into v2 in CCW sense
   if(same_point(intersect, a1) || same_point(intersect, a2) ||
      same_point(intersect, q1) || same_point(intersect, q2) ) inbound = 3;
 
@@ -687,8 +682,7 @@ void add_polygon_to_vector(int sdim, const polygon & nodal_poly, std::vector<pol
   if(num_nodes >=3){
     polygon res_poly;
     coords_to_polygon(num_nodes, coords, sdim, res_poly);
-    if(abs(res_poly.area(sdim))  > 1.e-15 )
-      difference.push_back(res_poly);
+    difference.push_back(res_poly);
   }
   delete[] coords;
 }
@@ -756,7 +750,6 @@ int weiler_clip_difference(int pdim, int sdim, int num_p, double *p, int num_q, 
       if(sdim == 2)
         result = line_intersect_2D_2D(p1, p2, q1, q2, intersect, inbound, on_p_seg, on_q_seg);
       else{
-        //result = line_intersect_2D_3Da(p1, p2, q1, q2, q3, intersect, inbound, on_p_seg, on_q_seg);
         result = line_intersect_2D_3D(p1, p2, q1, q2, q3, intersect, inbound, on_p_seg, on_q_seg);
       }
 
@@ -765,8 +758,8 @@ int weiler_clip_difference(int pdim, int sdim, int num_p, double *p, int num_q, 
         insert_intersect(pdim, sdim, final_pnodes, pnodes, i, intersect, n_inter, inbound);
         insert_intersect(pdim, sdim, final_qnodes, qnodes, j, intersect, n_inter, inbound);
 
-        //n_inter++;
-        //if(inbound & 2) num_inbinter++;
+        n_inter++;
+        if(inbound & 2) num_inbinter++;
       }
     }
   }
@@ -796,8 +789,7 @@ int weiler_clip_difference(int pdim, int sdim, int num_p, double *p, int num_q, 
     xpoint q_centroid = polygon(qnodes).centroid(sdim);
     bool s_contains_c = false, c_contains_s = false;
     if(disjoint(pdim, sdim, pnodes, qnodes, s_contains_c, c_contains_s)){
-      //difference.push_back(polygon(pnodes));
-      add_polygon_to_vector(sdim, polygon(pnodes), difference);
+      difference.push_back(polygon(pnodes));
       return 0;
     }
     if(c_contains_s && n_inter == 0 && point_in_poly(pdim, sdim, qnodes, p_centroid) ) return 0; 
