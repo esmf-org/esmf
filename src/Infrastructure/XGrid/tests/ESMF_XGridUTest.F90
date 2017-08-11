@@ -131,41 +131,41 @@
     write(name, *) "Creating an XGrid with area/centroid, sparseMatA2X"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
  
-!    !------------------------------------------------------------------------
-!    !N_E-X_U-Test
-!    ! Create an XGrid in 2D
-!    print *, 'Starting test4'
-!    call test4(rc)
-!    write(failMsg, *) ""
-!    write(name, *) "Creating an XGrid from 2 adjacent Grids"
-!    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-!
-!    !------------------------------------------------------------------------
-!    !N_E-X_U-Test
-!    ! Create an XGrid in 2D
-!    print *, 'Starting test5'
-!    call test5(rc)
-!    write(failMsg, *) ""
-!    write(name, *) "Creating an XGrid in 2D with Grid merging"
-!    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-!
-!    !------------------------------------------------------------------------
-!    !N_E-X_U-Test
-!    ! Create an XGrid in 2D from Meshes
-!    print *, 'Starting test6'
-!    call test6(rc)
-!    write(failMsg, *) ""
-!    write(name, *) "Creating an XGrid in 2D with Mesh merging"
-!    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-!
-!    !------------------------------------------------------------------------
-!    !N_E-X_U-Test
-!    ! Create an XGrid in 2D from Meshes with user supplied area
-!    print *, 'Starting test7'
-!    call test7(rc)
-!    write(failMsg, *) ""
-!    write(name, *) "Creating an XGrid in 2D with user supplied area"
-!    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+    !------------------------------------------------------------------------
+    !NEX_UTest
+    ! Create an XGrid in 2D
+    print *, 'Starting test4'
+    call test4(rc)
+    write(failMsg, *) ""
+    write(name, *) "Creating an XGrid from 2 adjacent Grids"
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+    !------------------------------------------------------------------------
+    !NEX_UTest
+    ! Create an XGrid in 2D
+    print *, 'Starting test5'
+    call test5(rc)
+    write(failMsg, *) ""
+    write(name, *) "Creating an XGrid in 2D with Grid merging"
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+    !------------------------------------------------------------------------
+    !NEX_UTest
+    ! Create an XGrid in 2D from Meshes
+    print *, 'Starting test6'
+    call test6(rc)
+    write(failMsg, *) ""
+    write(name, *) "Creating an XGrid in 2D with Mesh merging"
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+    !------------------------------------------------------------------------
+    !NEX_UTest
+    ! Create an XGrid in 2D from Meshes with user supplied area
+    print *, 'Starting test7'
+    call test7(rc)
+    write(failMsg, *) ""
+    write(name, *) "Creating an XGrid in 2D with user supplied area"
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
     call ESMF_TestEnd(ESMF_SRCLINE)
   
