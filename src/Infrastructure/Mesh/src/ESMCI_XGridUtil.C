@@ -299,8 +299,8 @@ bool line_intersect_2D_3D(double *a1, double *a2, double *q1, double *q2, double
   // sense of inbound: (v1 x v2).(v1 x p1) > 0
   //if(sense > 0. && (t>0 && t<1)) inbound = 2; // v1 going into v2 in CCW sense
   if(sense > 0) inbound = 2; // v1 going into v2 in CCW sense
-  if(same_point(intersect, a1) || same_point(intersect, a2) ||
-     same_point(intersect, q1) || same_point(intersect, q2) ) inbound = 3;
+  //if(same_point(intersect, a1) || same_point(intersect, a2) ||
+  //   same_point(intersect, q1) || same_point(intersect, q2) ) inbound = 3;
 
   return true;
 }
