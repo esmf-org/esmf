@@ -160,7 +160,6 @@ void MBMesh_create(void **mbmpp,
     mbmp->pdim=*pdim;
     mbmp->sdim=cart_sdim;
 
-
     // Output mesh
     *mbmpp=(void *)mbmp;
 
@@ -486,7 +485,7 @@ void MBMesh_addelements(void **mbmpp,
                                               int *_coordsPresent, double *elemCoords, 
                                               int *_num_elemConn, int *elemConn, int *regridConserve, 
                                               ESMC_CoordSys_Flag *_coordSys, int *_orig_sdim,
-                                              int *rc) 
+                                              int *rc)
 {
 
   /* XMRKX */
@@ -576,6 +575,9 @@ void MBMesh_addelements(void **mbmpp,
       }
     }
 
+#ifdef DEBUG
+printf("    PET %d - check size of elem connectivity\n", localPet);
+#endif
 
     //// Check size of connectivity list
     int expected_conn_size=0;
@@ -597,7 +599,10 @@ void MBMesh_addelements(void **mbmpp,
                                        ESMC_CONTEXT, &localrc)) throw localrc;
     }
 
- /* XMRKX */
+#ifdef DEBUG
+printf("    PET %d - register elem tags\n", localPet);
+#endif
+
     // Register element tags
     int     int_def_val=-1.0;
     double  dbl_def_val= 0.0;
@@ -615,6 +620,9 @@ void MBMesh_addelements(void **mbmpp,
       mbmp->has_elem_frac=true;
     }
 
+#ifdef DEBUG
+printf("    PET %d - elem masking\n", localPet);
+#endif
 
     // Handle element masking
     mbmp->has_elem_mask=false;
@@ -666,6 +674,9 @@ void MBMesh_addelements(void **mbmpp,
       mbmp->has_elem_area=true;   
     } 
 
+#ifdef DEBUG
+printf("    PET %d - elem coords\n", localPet);
+#endif
 
     // Handle element coords
     mbmp->has_elem_coords=false;
@@ -779,24 +790,24 @@ void MBMesh_addelements(void **mbmpp,
                                      elemType[e]);
 
       for (int n = 0; n < nnodes; ++n) {
-      
+
         // Get 0-based node index
         int node_index=elemConn[c]-1;
 
          // Check elemConn
         if (node_index < 0) {
-	  int localrc;
- 	  if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
-	   "- elemConn entries should not be less than 1 ",
-           ESMC_CONTEXT, &localrc)) throw localrc;
-	}
+          int localrc;
+          if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+           "- elemConn entries should not be less than 1 ",
+                 ESMC_CONTEXT, &localrc)) throw localrc;
+        }
 
         if (node_index > num_verts-1) {
-	  int localrc;
-	  if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
-	   "- elemConn entries should not be greater than number of nodes on processor ",
-           ESMC_CONTEXT, &localrc)) throw localrc;
-	}
+          int localrc;
+          if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+           "- elemConn entries should not be greater than number of nodes on processor ",
+                 ESMC_CONTEXT, &localrc)) throw localrc;
+        }
 
         // Mark as used
         node_used[node_index]=1;
@@ -833,6 +844,9 @@ void MBMesh_addelements(void **mbmpp,
     int *elemMaskIIArray_wsplit=NULL;
      InterArray<int> *elemMaskII_wsplit=NULL;
 
+#ifdef DEBUG
+printf("    PET %d - split elems\n", localPet);
+#endif
 
     if (mbmp->is_split) {
       // New number of elements
@@ -981,6 +995,10 @@ void MBMesh_addelements(void **mbmpp,
       }
     }   
 
+#ifdef DEBUG
+printf("    PET %d - addelems\n", localPet);
+#endif
+
     // Now loop the elements and add them to the mesh.
     int cur_conn = 0;
     for (int e = 0; e < num_elems; ++e) {
@@ -1120,7 +1138,9 @@ void MBMesh_addelements(void **mbmpp,
     // Set number of local elems
     mbmp->num_elems=num_elems;
 
-
+#ifdef DEBUG
+printf("    PET %d - parallel sharing\n", localPet);
+#endif
 
     //// Setup parallel sharing ///
 
@@ -1155,7 +1175,6 @@ void MBMesh_addelements(void **mbmpp,
 #endif
 
 #if 0
-
 
   // Perhaps commit will be a separate call, but for now commit the mesh here.
   mesh.build_sym_comm_rel(MeshObj::NODE);

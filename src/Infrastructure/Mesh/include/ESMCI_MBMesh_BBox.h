@@ -17,6 +17,8 @@
 
 #include <Mesh/include/ESMCI_MBMesh.h>
 
+#include "ESMCI_BBox.h"
+
 #include <iostream>
 
 // Class to support basic bounding box type operations such
@@ -74,6 +76,7 @@ MBMesh_BBox MBMesh_BBoxParUnion(const MBMesh_BBox &b1);
 
 // Return true if the two boxes have nontrivial intersection
 bool MBMesh_BBoxIntersect(const MBMesh_BBox &b1, const MBMesh_BBox &b2, double tol);
+bool Mixed_BBoxIntersect(const MBMesh_BBox &b1, const BBox &b2, double tol);
 
 // Return true if 
 bool MBMesh_BBoxSubset(const MBMesh_BBox &b1, const MBMesh_BBox &b2);
