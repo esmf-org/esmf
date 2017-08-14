@@ -15,6 +15,7 @@ TESTS_BUILD   = $(ESMF_TESTDIR)/ESMCI_IntegrateUTest \
                $(ESMF_TESTDIR)/ESMC_MeshVTKUTest \
                $(ESMF_TESTDIR)/ESMC_MBMesh_BilinearUTest \
                $(ESMF_TESTDIR)/ESMC_MBMesh_BilinearParUTest \
+               $(ESMF_TESTDIR)/ESMC_MBMesh_BilinearSingleElemUTest \
                $(ESMF_TESTDIR)/ESMC_MBMesh_CreateUTest \
                $(ESMF_TESTDIR)/ESMC_MBMesh_CreateParUTest \
                $(ESMF_TESTDIR)/ESMC_MBMesh_RendezvousUTest \
