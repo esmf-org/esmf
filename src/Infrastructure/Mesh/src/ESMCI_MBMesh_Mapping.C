@@ -12,7 +12,7 @@
 #include <Mesh/include/ESMCI_Exception.h>
 #include <Mesh/include/ESMCI_MathUtil.h>
 
-namespace ESMCI {
+using namespace ESMCI;
 
 bool tri_is_in(const double pcoord[], double *dist) {
   const double in_tol = 1e-10;
@@ -230,5 +230,3 @@ bool spherical_eval(const double *mdata,
   // Shouldn't be able to get here, but just in case...
   return false;
 }
-
-} //ESMCI

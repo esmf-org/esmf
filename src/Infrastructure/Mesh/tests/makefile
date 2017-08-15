@@ -16,6 +16,7 @@ TESTS_BUILD   = $(ESMF_TESTDIR)/ESMCI_IntegrateUTest \
                $(ESMF_TESTDIR)/ESMC_MBMesh_BilinearUTest \
                $(ESMF_TESTDIR)/ESMC_MBMesh_BilinearParUTest \
                $(ESMF_TESTDIR)/ESMC_MBMesh_BilinearSingleElemUTest \
+               $(ESMF_TESTDIR)/ESMC_MBMesh_BilinearEdgeCasesUTest \
                $(ESMF_TESTDIR)/ESMC_MBMesh_CreateUTest \
                $(ESMF_TESTDIR)/ESMC_MBMesh_CreateParUTest \
                $(ESMF_TESTDIR)/ESMC_MBMesh_RendezvousUTest \
@@ -26,6 +27,7 @@ TESTS_BUILD   = $(ESMF_TESTDIR)/ESMCI_IntegrateUTest \
                $(ESMF_TESTDIR)/ESMF_MeshOpUTest \
                $(ESMF_TESTDIR)/ESMF_MeshUTest
 
+
 TESTS_RUN     = RUN_ESMCI_IntegrateUTest \
                 RUN_ESMC_MeshUTest \
                 RUN_ESMC_MeshMOABUTest \
@@ -34,6 +36,7 @@ TESTS_RUN     = RUN_ESMCI_IntegrateUTest \
                 RUN_ESMC_MBMesh_BilinearUTest \
                 RUN_ESMC_MBMesh_BilinearParUTest \
                 RUN_ESMC_MBMesh_BilinearSingleElemUTest \
+                RUN_ESMC_MBMesh_BilinearEdgeCasesUTest \
                 RUN_ESMC_MBMesh_CreateUTest \
                 RUN_ESMC_MBMesh_CreateParUTest \
                 RUN_ESMC_MBMesh_RendezvousUTest \
@@ -51,6 +54,7 @@ TESTS_RUN_UNI = RUN_ESMCI_IntegrateUTestUNI \
                 RUN_ESMC_Proj4UTestUNI \
                 RUN_ESMC_MBMesh_BilinearUTestUNI \
                 RUN_ESMC_MBMesh_BilinearSingleElemUTestUNI \
+                RUN_ESMC_MBMesh_BilinearEdgeCasesUTestUNI \
                 RUN_ESMC_MBMesh_CreateUTestUNI \
                 RUN_ESMC_MBMesh_RendezvousUTestUNI \
                 RUN_ESMC_MBMesh_SearchUTestUNI \
@@ -137,6 +141,13 @@ RUN_ESMC_MBMesh_BilinearSingleElemUTestUNI:
 
 RUN_ESMC_MBMesh_BilinearSingleElemUTest:
 	$(MAKE) TNAME=MBMesh_BilinearSingleElem NP=1 ctest
+
+
+RUN_ESMC_MBMesh_BilinearEdgeCasesUTestUNI:
+	$(MAKE) TNAME=MBMesh_BilinearEdgeCases NP=1 ctest
+
+RUN_ESMC_MBMesh_BilinearEdgeCasesUTest:
+	$(MAKE) TNAME=MBMesh_BilinearEdgeCases NP=1 ctest
 
 
 RUN_ESMC_MBMesh_CreateUTestUNI:
