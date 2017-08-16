@@ -22,6 +22,8 @@
 #endif
 #endif
 
+#define ESMF_TESTEXHAUSTIVE
+
 !==============================================================================
 !BOPI
 ! !PROGRAM: ESMF_FieldRegridUTest - Unit tests for Field Regrid methods
@@ -302,6 +304,7 @@ contains
   ! Create Src Grid
   srcGrid=ESMF_GridCreateCubedSphere(tileSize=src_tile_size, &
        regDecompPTile=decomptile, &
+       staggerLocList = (/ESMF_STAGGERLOC_CORNER, ESMF_STAGGERLOC_CENTER/), &
        indexflag = ESMF_INDEX_GLOBAL, &
        rc=localrc)
   if (ESMF_LogFoundError(localrc, &
@@ -699,6 +702,7 @@ contains
   ! Create Src Grid
   srcGrid=ESMF_GridCreateCubedSphere(tileSize=src_tile_size, &
        regDecompPTile=decomptile, &
+       staggerLocList = (/ESMF_STAGGERLOC_CORNER, ESMF_STAGGERLOC_CENTER/), &
        indexflag = ESMF_INDEX_DELOCAL, &
        rc=localrc)
   if (ESMF_LogFoundError(localrc, &
@@ -1096,6 +1100,7 @@ contains
   ! Create Src Grid
   srcGrid=ESMF_GridCreateCubedSphere(tileSize=src_tile_size, &
        regDecompPTile=decomptile, &
+       staggerLocList = (/ESMF_STAGGERLOC_CORNER, ESMF_STAGGERLOC_CENTER/), &
        rc=localrc)
   if (ESMF_LogFoundError(localrc, &
        ESMF_ERR_PASSTHRU, &
@@ -1107,6 +1112,7 @@ contains
   !  but with a different distribution to make checking
   !  the accuracty of the nearest neighbor easy)
   dstGrid=ESMF_GridCreateCubedSphere(tileSize=src_tile_size, &
+       staggerLocList = (/ESMF_STAGGERLOC_CORNER, ESMF_STAGGERLOC_CENTER/), &
        rc=localrc)
   if (ESMF_LogFoundError(localrc, &
        ESMF_ERR_PASSTHRU, &
@@ -1503,6 +1509,7 @@ contains
   ! Create Src Grid
   srcGrid=ESMF_GridCreateCubedSphere(tileSize=src_tile_size, &
        regDecompPTile=decomptile, &
+       staggerLocList = (/ESMF_STAGGERLOC_CORNER, ESMF_STAGGERLOC_CENTER/), &
        rc=localrc)
   if (ESMF_LogFoundError(localrc, &
        ESMF_ERR_PASSTHRU, &
@@ -2831,6 +2838,7 @@ contains
   ! (create an identical csgrid in terms of coordinates to make checking 
   !  nearest neighbor easier)
   dstGrid=ESMF_GridCreateCubedSphere(tileSize=src_tile_size, &
+       staggerLocList = (/ESMF_STAGGERLOC_CENTER, ESMF_STAGGERLOC_CORNER/), &
        rc=localrc)
   if (ESMF_LogFoundError(localrc, &
        ESMF_ERR_PASSTHRU, &

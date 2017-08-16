@@ -223,7 +223,9 @@ being enabled.
 \item[ESMF\_PIO] Possible value: {\it not set} (default), {\tt "internal"}.
 
 \begin{description}
-\item[{\it not set}] (default) PIO-dependent features will be disabled.
+\item[{\it not set}] (default) PIO-dependent features will be enabled on platforms where
+certain Fortran-2003 C Interoperability features are available.  Most currently supported
+compilers support these features.
 
 \item[{\tt "OFF"}] Disables PIO-dependent code.
 
