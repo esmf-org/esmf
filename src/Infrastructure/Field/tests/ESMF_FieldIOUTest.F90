@@ -47,6 +47,7 @@ program ESMF_FieldIOUTest
   real(ESMF_KIND_R8), pointer :: Farray_tw(:,:) => null (), Farray_tr(:,:) => null ()
   real(ESMF_KIND_R8), pointer :: Farray_sw(:,:) => null (), Farray_sr(:,:) => null ()
   real(ESMF_KIND_R4), pointer :: fptr(:,:) => null ()
+  real(ESMF_KIND_R8), pointer :: t_ptr(:,:,:) => null ()
   ! Note: 
   ! field_w---Farray_w; field_r---Farray_r; 
   ! field_t---Farray_tw; field_tr---Farray_tr 
@@ -57,6 +58,7 @@ program ESMF_FieldIOUTest
   type(ESMF_DistGrid) :: elem_dg
   type(ESMF_Mesh) :: elem_mesh
   type(ESMF_Field) :: field_att, field_ugd_att
+  type(ESMF_Field) :: field_ug
 
   real(ESMF_KIND_R8), pointer :: Farray_DE0_w(:,:) => null (), Farray_DE0_r(:,:) => null ()
   real(ESMF_KIND_R8), pointer :: Farray_DE1_w(:,:) => null (), Farray_DE1_r(:,:) => null ()
@@ -67,6 +69,7 @@ program ESMF_FieldIOUTest
   integer, allocatable :: arbseqlist(:)
   integer      :: localPet, petCount, tlb(2), tub(2)
   integer :: elem_tlb(1), elem_tub(1), elem_tc(1)
+  integer :: tlb3(3), tub3(3)
   integer :: i,j, t, endtime, k
   real(ESMF_KIND_R8) :: Maxvalue, diff
 
@@ -198,8 +201,6 @@ program ESMF_FieldIOUTest
   write(failMsg, *) "Did not return ESMF_RC_LIB_NOT_PRESENT"
   call ESMF_Test((rc==ESMF_RC_LIB_NOT_PRESENT), name, failMsg, result, ESMF_SRCLINE)
 #endif
-!call ESMF_Finalize ()
-!stop 42
 
 !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
@@ -1160,6 +1161,49 @@ program ESMF_FieldIOUTest
 !------------------------------------------------------------------------
 ! Write with ungridded dimensions test
 !------------------------------------------------------------------------
+
+!------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  ! Create Field
+  field_ug = ESMF_FieldCreate(grid, typekind=ESMF_TYPEKIND_R8, &
+           ungriddedLBound=(/1/), ungriddedUBound=(/2/), &
+           name="t_src",  rc=rc)
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  write(name, *) "Create a field with 1 ungridded dim"
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+!------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  ! Fill Field
+  call ESMF_FieldGet (field_ug,  &
+      totalLbound=tlb3,  &
+      totalUbound=tub3,  &
+      farrayPtr=t_ptr, rc=rc)
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  write(name, *) "Get and fill a field with 1 ungridded dim"
+  if (rc == ESMF_SUCCESS) then
+    do, j=tlb3(2), tub3(2)
+      do, i=tlb3(1), tub3(1)
+        t_ptr(i,j,:) = j*100 + i
+      end do
+    end do
+  end if
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+!------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  ! Write Fortran array in Field
+  call ESMF_FieldWrite(field_ug, fileName="field_ug.nc",  &
+       iofmt=ESMF_IOFMT_NETCDF,  &
+       status=ESMF_FILESTATUS_REPLACE, rc=rc)
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  write(name, *) "Write Fortran array in Field with 1 ungridded dimension"
+#if (defined ESMF_PIO && ( defined ESMF_NETCDF || defined ESMF_PNETCDF))
+  call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+#else
+  write(failMsg, *) "Did not return ESMF_RC_LIB_NOT_PRESENT"
+  call ESMF_Test((rc==ESMF_RC_LIB_NOT_PRESENT), name, failMsg, result, ESMF_SRCLINE)
+#endif
 
 !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
