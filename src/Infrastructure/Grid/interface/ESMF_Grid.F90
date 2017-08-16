@@ -13028,6 +13028,23 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   ! If the total PET count is less than 6, some PETs will get more than one DE.
   ! Otherwise, total DEs is always less than or equal to total PETs.
 
+#if 1
+  if (PetCnt < 6) then
+     totalDE=6
+  else
+     totalDE = (PetCnt/6)*6
+  endif
+
+  nxy = totalDE/6
+  bigFac = 1
+  do i=2, int(sqrt(float(nxy)))
+    if ((nxy/i)*i == nxy) then
+        bigFac = i
+    endif
+  enddo
+  nx = bigFac
+  ny = nxy/nx
+#else
   nxy = (PetCnt + 5)/6
   totalDE = 6 * nxy
 
@@ -13036,6 +13053,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (mod(nx,i) == 0) nx = i
   end do
   ny = nxy / nx
+#endif
 
   defaultDELayout = ESMF_DELayoutCreate(deCount = totalDE, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
