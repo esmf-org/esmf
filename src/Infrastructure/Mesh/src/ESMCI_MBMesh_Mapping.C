@@ -172,15 +172,16 @@ bool MBElemMap::spherical_eval(const double *mdata,
   if (dist) *dist = std::numeric_limits<double>::max();
   pcoord[0]=0.0; pcoord[1]=0.0;
 
-  double p1,p2;
+  double p1,p2;  // Get rid of degenerate edges
 
-  // Get rid of degenerate edges
+
   int first_removed_ind=-1;
   remove_0len_edges3D(&num_pnts, pnts, &first_removed_ind);
 
 
   // Map triangles
   if (num_pnts==3) {
+
     if (calc_gc_parameters_tri(point,
                                pnts+6, pnts, pnts+3,
                                &p1, &p2)) {
@@ -232,3 +233,96 @@ bool MBElemMap::spherical_eval(const double *mdata,
   // Shouldn't be able to get here, but just in case...
   return false;
 }
+
+/*
+bool MBElemMap::cartesian_eval(const double *mdata, const double *point, double *pcoord, double *dist) const
+{
+  // Init output
+  if (dist) *dist = std::numeric_limits<double>::max();
+
+  // Newton's method
+  const double ctol = 1e-10;
+  const int max_iter = 15;
+
+  int pdim=2, sdim=2, ndof=2;
+
+  POLY_Mapping mpstd, jacobian_invert;
+
+  double s[pdim];
+  double delta_s[pdim];
+  double res[pdim];
+  double jac[sdim][sdim];
+  double jac_inv[sdim][sdim];
+  double sgrads[SFUNC_TYPE::ndofs][sdim];
+  double dnorm = 0.0, rnorm = 0.0;
+  int niters = 0;
+
+  for (unsigned int i = 0; i < pdim; i++) {
+    s[i] = delta_s[i] = res[i] = 0.0;
+  }
+
+  POLY_Mapping<SFUNC_TYPE,MPTraits<>,SPATIAL_DIM,PARAMETRIC_DIM> *mpstd =
+    trade<MPTraits<> >();
+  bool converged = false;
+  do {
+    SFUNC_TYPE::shape_grads(1, s, &sgrads[0][0]);
+    // Calculate residual.  Also use loop to start jacobian
+    mpstd->forward(1, mdata, s, res); // F($)
+    rnorm = 0.0;
+    for (unsigned int i = 0; i < sdim; i++) {
+      res[i] = point[i] - res[i];  // x - F(x) = -R(x)
+      rnorm += res[i]*res[i];
+      // Load forward jacobian
+      for (unsigned int j = 0; j < sdim; j++) {
+        jac[i][j] = 0.0;
+        for (unsigned int k = 0; k < SFUNC_TYPE::ndofs; k++) {
+          jac[i][j] += sgrads[k][j]*mdata[k*sdim+i];
+        }
+      }
+    } // for sdim
+
+    //  rnorm is small even when very bad.
+//    if (rnorm < ctol) {
+//      converged = true;
+//      break;
+//    }
+
+
+    // So now res holds -F(x) and jac has jacobian.  We must invert the jacobian
+    POLY_Mapping_jacobian_invert<sdim>(&jac[0][0], &jac_inv[0][0]);
+
+    // delta_s = jac_inv*res
+    dnorm = 0;
+    for (unsigned int i = 0; i < sdim; i++) {
+      delta_s[i] = 0.0;
+      for (unsigned int j = 0; j < sdim; j++) {
+        delta_s[i] += jac_inv[i][j]*res[j];
+      }
+
+      // snew = sold+delta
+      s[i] = s[i] + delta_s[i];
+      dnorm += delta_s[i]*delta_s[i];
+    } // i
+
+    if (dnorm <= ctol) converged = true;
+    niters++;
+
+    if (niters >= max_iter) break; // stop loop uncoverged.
+  } while(!converged);
+
+  for (unsigned int i = 0; i < sdim; i++)
+    pcoord[i] = s[i];
+
+  if (dist) *dist = 0.0;
+
+  if (!converged) {
+    if (dist) *dist = std::numeric_limits<double>::max();
+    return false;
+  }
+
+  // check parametric bounds.
+  double sdist=0.0;
+  bool resu = SFUNC_TYPE::is_in(pcoord, &sdist);
+  if(dist) *dist = sdist;
+  return resu;
+}*/

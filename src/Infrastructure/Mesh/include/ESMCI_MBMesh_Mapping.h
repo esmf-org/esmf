@@ -32,9 +32,8 @@
 // static const char *const version = "$Id$";
 //-----------------------------------------------------------------------------
 
-namespace ESMCI {
 
-class MBElemMap{
+class MBElemMap {
 private:
 
   bool tri_is_in(const double pcoord[], double *dist);
@@ -42,9 +41,9 @@ private:
 
 public:
 
+  bool cartesian_eval(const double *mdata, const double *point, int num_pnts, double *pcoord, double *dist);
   bool spherical_eval(const double *mdata, const double *point, int num_pnts, double *pcoord, double *dist);
 };
-}
 
 #endif
 #endif

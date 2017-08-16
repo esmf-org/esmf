@@ -189,15 +189,26 @@ MBMesh* create_mesh_quad_single(int &rc, bool cart) {
 
 MBMesh* create_mesh_tri_single(int &rc, bool cart) {
   //
-
-  //  1+sqrt(2)  3           1
+  //  cart y               sph y
+  //
+  //  y2         3          y4
   //            /  \
   //  0.0     /  11  \       0
   //         /        \
-  //  0.0   1 -------- 2     sqrt(1/2)
+  //  y1   1 -------- 2     y3
   //
-  //       0.0   0.0   2.0
-  //              0
+  // cartx x1    0.0  x2
+  // sph x x3     0   x4
+  //
+  // x1 = -1*cos(30*pi/180)
+  // x2 = cos(30*pi/180)
+  // x3 = pi/4*(-1*cos(30*pi/180))
+  // x4 = pi/4*(cos(30*pi/180))
+  //
+  // y1 = -1*cos(60*pi/180)
+  // y2 = 1
+  // y3 = pi/4*(-1*cos(60*pi/180))
+  // y4 = pi/4*(1)
   //
   //      Node Ids at corners
   //      Element Ids in centers
@@ -221,19 +232,6 @@ MBMesh* create_mesh_tri_single(int &rc, bool cart) {
 
   ESMC_CoordSys_Flag coordSys=ESMC_COORDSYS_CART;
   if (cart) {
-//    nodeCoord[0] = -1;
-//    nodeCoord[1] = -0.5;
-//    nodeCoord[2] = 1;
-//    nodeCoord[3] = -0.5;
-//    nodeCoord[4] = 0;
-//    nodeCoord[5] = sqrt(3)/2;
-
-//    nodeCoord[0] = -1*cos(pi/6);
-//    nodeCoord[1] = -0.5;
-//    nodeCoord[2] = cos(pi/6);
-//    nodeCoord[3] = -0.5;
-//    nodeCoord[4] = 0;
-//    nodeCoord[5] = 1;
 
     nodeCoord[0] = -1*cos(30*pi/180);
     nodeCoord[1] = -1*cos(60*pi/180);
@@ -468,14 +466,14 @@ int main(int argc, char *argv[]) {
 
 //  double * nodeCoord;
 //  nodeCoord = (double *) malloc (9 * sizeof (double));
-//  nodeCoord[0] = -0.5;
-//  nodeCoord[1] = -0.25*sqrt(3);
+//  nodeCoord[0] = pi/4*(-1*cos(30*pi/180));
+//  nodeCoord[1] = pi/4*(-1*cos(60*pi/180));
 //  nodeCoord[2] = 0;
-//  nodeCoord[3] = 0.5;
-//  nodeCoord[4] = -0.25*sqrt(3);
+//  nodeCoord[3] = pi/4*(cos(30*pi/180));
+//  nodeCoord[4] = pi/4*(-1*cos(60*pi/180));
 //  nodeCoord[5] = 0;
-//  nodeCoord[6] = 0;
-//  nodeCoord[7] = 0.25*sqrt(3);
+//  nodeCoord[6] = pi/4*(0);
+//  nodeCoord[7] = pi/4*(1);
 //  nodeCoord[8] = 0;
 //  write_3D_poly_woid_to_vtk("spherical_tri", 3, nodeCoord);
 
