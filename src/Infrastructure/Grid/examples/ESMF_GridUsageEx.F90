@@ -1376,6 +1376,7 @@ endif
 !2x2 blocks each and the remaining 4 tiles are decomposed into 1x2 block. 
 !A total of 16 DEs are used. 
 !
+!In this example, both the center and corner coordinates will be added to the grid.
 
 !BOC
      ! Set up decomposition for each tile 
@@ -1388,7 +1389,8 @@ endif
      decomptile(:,6)=(/1,2/) ! Tile 6
 
      ! Create cubed sphere grid
-     grid2D = ESMF_GridCreateCubedSphere(tileSize=45, regDecompPTile=decomptile, rc=rc)
+     grid2D = ESMF_GridCreateCubedSphere(tileSize=45, regDecompPTile=decomptile, &
+                 staggerLocList=(/ESMF_STAGGERLOC_CENTER, ESMF_STAGGERLOC_CORNER/), rc=rc)
 !EOC
      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
      ! Get rid of Grid
@@ -1512,8 +1514,9 @@ endif
 !{\tt ESMF\_GridCreateMosaic()} first reads in the mosaic file and defines the tile connections in the 
 !{\tt ESMF\_DistGrid}  using the information
 !defined in variables {\tt contacts} and {\tt contact\_index}. Then it reads in the coordinates defined in
-!the tile files if the optional argument {\tt staggerLocList} is provided.  The coordinates defined in the tile file are a {\tt supergrid}.  A supergrid contains all the
-!stagger locations in one grid.  It contains the corner, edge and center coordinates all in one 2D array.
+!the tile files if the optional argument {\tt staggerLocList} is provided.  The coordinates defined in the tile file are a 
+!{\tt supergrid}.  A supergrid contains all the stagger locations in one grid.
+!It contains the corner, edge and center coordinates all in one 2D array.
 !In this example, there are 48 elements in each side of a tile, therefore, the size of the supergrid is 
 !48*2+1=97, i.e. 97x97.
 !
