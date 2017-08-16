@@ -1872,8 +1872,8 @@ bool PIO_Handler::CheckPIOError(
     *rc = ESMF_RC_NOT_IMPL;               // final return code
   }
 
+  std::stringstream errmsg;
   if (pioRetCode != PIO_noerr) {
-    std::stringstream errmsg;
 #if defined(ESMF_PNETCDF)
     // Log the error, assuming the error code was passed through PIO from PNetCDF
     if (!fmtStr.empty()) {
@@ -1895,12 +1895,6 @@ bool PIO_Handler::CheckPIOError(
       errmsg << " (PIO error = " << pioRetCode << ")";
     }
 #endif
-    if (warn) {
-      ESMC_LogDefault.Write(errmsg, ESMC_LOGMSG_WARN, line, file, method);
-    } else {
-      ESMC_LogDefault.Write(errmsg, ESMC_LOGMSG_ERROR, line, file, method);
-    }
-    PRINTMSG("PIO ERROR: " << errmsg.str());
     // Attempt to find a corresponding ESMC error code
     switch(pioRetCode) {
 #if defined(ESMF_NETCDF) || defined(ESMF_PNETCDF)
@@ -1915,11 +1909,20 @@ bool PIO_Handler::CheckPIOError(
       localrc = rc_code;
       break;
     }
+  } else
+    localrc = ESMF_SUCCESS;
+
+  if ((localrc != ESMF_SUCCESS) && warn) {
+    ESMC_LogDefault.Write(errmsg, ESMC_LOGMSG_WARN,
+        line, file, method);
+    // run through MsgFoundError in case Log tracing is enabled
+    ESMC_LogDefault.MsgFoundError(ESMF_SUCCESS, errmsg,
+        line, file, method, rc);
+  } else {
+    ESMC_LogDefault.MsgFoundError(localrc, errmsg,
+        line, file, method, rc);
   }
-  // Set the return code
-  if (rc != NULL) {
-    *rc = localrc;
-  }
+
   return (pioRetCode == PIO_noerr);
 } // PIO_Handler::CheckPIOError()
 //-----------------------------------------------------------------------------
