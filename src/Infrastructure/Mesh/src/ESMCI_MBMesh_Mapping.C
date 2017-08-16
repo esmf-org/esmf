@@ -10,11 +10,14 @@
 //==============================================================================
 
 #include <Mesh/include/ESMCI_Exception.h>
+#include <Mesh/include/ESMCI_MBMesh_Mapping.h>
 #include <Mesh/include/ESMCI_MathUtil.h>
 
 using namespace ESMCI;
 
-bool tri_is_in(const double pcoord[], double *dist) {
+//TODO: make tolerance parameters global
+
+bool MBElemMap::tri_is_in(const double pcoord[], double *dist) {
   const double in_tol = 1e-10;
   bool in=true;
 
@@ -47,21 +50,21 @@ bool tri_is_in(const double pcoord[], double *dist) {
   return in;
 }
 
-bool quad_is_in(const double pcoord[], double *dist) {
+bool MBElemMap::quad_is_in(const double pcoord[], double *dist) {
   const double in_tol = 1e-10;
   bool in=true;
   double max_out[2]={0.0,0.0};
 
-  if (pcoord[0] < -1.0-in_tol) {
-    max_out[0]=-1.0 - pcoord[0];
+  if (pcoord[0] < -1.0*in_tol) {
+    max_out[0]=-1.0*pcoord[0];
     in= false;
   } else if (pcoord[0] > 1.0+in_tol) {
     max_out[0]=pcoord[0] - 1.0;
     in= false;
   }
 
-  if (pcoord[1] < -1.0-in_tol) {
-    max_out[1]=-1.0 - pcoord[1];
+  if (pcoord[1] < -1.0*in_tol) {
+    max_out[1]=-1.0*pcoord[1];
     in= false;
   } else if (pcoord[1] > 1.0+in_tol) {
     max_out[1]=pcoord[1] - 1.0;
@@ -74,7 +77,7 @@ bool quad_is_in(const double pcoord[], double *dist) {
 }
 
 
-bool spherical_eval(const double *mdata,
+bool MBElemMap::spherical_eval(const double *mdata,
                     const double *point,
                     int num_pnts,
                     double *pcoord,
@@ -118,14 +121,14 @@ bool spherical_eval(const double *mdata,
   } else if (num_pnts==4) {
     // Corner 0
     if ((mdata[0] == point[0]) && (mdata[1] == point[1]) && (mdata[2] == point[2])) {
-      pcoord[0]=-1.0; pcoord[1]=-1.0;
+      pcoord[0]=0.0; pcoord[1]=0.0;
       if (dist) *dist = 0.0;
       return true;
     }
 
     // Corner 1
     if ((mdata[3] == point[0]) && (mdata[4] == point[1]) && (mdata[5] == point[2])) {
-      pcoord[0]=1.0; pcoord[1]=-1.0;
+      pcoord[0]=1.0; pcoord[1]=0.0;
       if (dist) *dist = 0.0;
       return true;
     }
@@ -139,7 +142,7 @@ bool spherical_eval(const double *mdata,
 
     // Corner 3
     if ((mdata[9] == point[0]) && (mdata[10] == point[1]) && (mdata[11] == point[2])) {
-      pcoord[0]=-1.0; pcoord[1]=1.0;
+      pcoord[0]=0.0; pcoord[1]=1.0;
       if (dist) *dist = 0.0;
       return true;
     }
@@ -148,7 +151,7 @@ bool spherical_eval(const double *mdata,
   }
 
   // translate into polygon
-  // Copy into new memory, so it can be changed without altering orig. 
+  // Copy into new memory, so it can be changed without altering orig.
   double pnts[3*PM_MAX_PNTS_IN_POLY];
   if (num_pnts==3) {
     num_pnts=3;
@@ -208,9 +211,8 @@ bool spherical_eval(const double *mdata,
       return false;
     }
 
-    // Transform quad parametric coords from [0,1] to [-1,1] for consistancy
-    pcoord[0]=2*p1-1.0;
-    pcoord[1]=2*p2-1.0;
+    pcoord[0] = p1;
+    pcoord[1] = p2;
 
     // do is in
     double sdist;
