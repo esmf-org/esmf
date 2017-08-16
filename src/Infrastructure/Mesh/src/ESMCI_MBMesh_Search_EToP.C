@@ -43,13 +43,15 @@
 #include <ESMCI_VM.h>
 #include <ESMCI_LogErr.h>
 
+#include <Mesh/include/ESMCI_MBMesh_Mapping.h>
+
 #include "ESMCI_BBox.h"
 #include "moab/ElemEvaluator.hpp"
 
 #include "moab/CartVect.hpp"
+// for SphericalQuad
 //#include "ElemUtil.hpp"
 
-#include "Mesh/src/ESMCI_MBMesh_Mapping.C"
 
 using std::vector;
 
@@ -221,19 +223,28 @@ static int found_func(void *c, void *y) {
   if (nd == 2) {
     ElemEvaluator ee = ElemEvaluator(si->mesh->mesh, sr->src_elem);
     ee.reverse_eval(si->coords, 1e-8, 1e-6, pcoords, &is_inside);
+#ifdef DEBUG_PCOORDS
+    printf("Cartesian parametric coordinates via MOAB\n");
+    printf("  Node %d params = [%f,%f,%f]\n", si->snr.dst_gid, pcoords[0], pcoords[1], pcoords[2]);
+#endif
+    // translate pcoords from [-1,1] to [0,1]
+    translate(pcoords);
   } else if (nd == 3) {
-    bool inside = spherical_eval(coords, si->coords, num_nodes, pcoords, NULL);
+    MBElemMap map = MBElemMap();
+    bool inside = map.spherical_eval(coords, si->coords, num_nodes, pcoords, NULL);
     is_inside = static_cast<int> (inside);
+#ifdef DEBUG_PCOORDS
+    printf("spherical parametric coordinates via ESMF\n");
+    printf("  Node %d params = [%f,%f,%f]\n", si->snr.dst_gid, pcoords[0], pcoords[1], pcoords[2]);
+#endif
   }
 
   if (is_inside) {
-    // translate pcoords from [-1,1] to [0,1]
-    translate(pcoords);
-
     // set the search data pcoords structure
     si->snr.pcoord[0] = pcoords[0];
     si->snr.pcoord[1] = pcoords[1];
     si->snr.pcoord[2] = pcoords[2];
+
 
 #ifdef DEBUG_PCOORDS
     printf("  Node %d pcoords = [", si->snr.dst_gid);

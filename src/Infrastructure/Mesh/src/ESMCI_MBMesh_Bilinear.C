@@ -113,10 +113,17 @@ void calc_bilinear_mat(MBMesh *srcmb, PointList *dstpl,
       a.reserve(8);
 
       // weight generation
-      if (num_nodes <= 4)
+      if (num_nodes == 3) {
+        a.push_back(db->pcoord[0]);
+        a.push_back(db->pcoord[1]);
+        a.push_back(1-db->pcoord[0]-db->pcoord[1]);
+      }
+      else if (num_nodes == 4)
         pcoord_2d(p, a);
-      else
+      else if (num_nodes == 8)
         pcoord_3d(p, a);
+      else
+        Throw() << "invalid number of nodes";
 
       // build row of weight matrix
       int gid; MBMesh_get_gid(srcmb, sr.src_elem, &gid);

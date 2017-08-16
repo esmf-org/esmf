@@ -27,7 +27,6 @@ TESTS_BUILD   = $(ESMF_TESTDIR)/ESMCI_IntegrateUTest \
                $(ESMF_TESTDIR)/ESMF_MeshOpUTest \
                $(ESMF_TESTDIR)/ESMF_MeshUTest
 
-
 TESTS_RUN     = RUN_ESMCI_IntegrateUTest \
                 RUN_ESMC_MeshUTest \
                 RUN_ESMC_MeshMOABUTest \
