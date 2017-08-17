@@ -13030,6 +13030,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   else
      localIndexFlag = ESMF_INDEX_DELOCAL
   endif
+  
+  ! set defaults
+  docenter = .false.
+  docorner = .false.
+  
   !------------------------------------------------------------------------
   ! default decomposition. The number of DEs has to be multiple of 6.
   ! If the total PET count is less than 6, some PETs will get more than one DE.
@@ -13360,12 +13365,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
          ! Generate glocal edge coordinates and local center coordinates
          
          if (docenter .and. docorner) then
-            call ESMF_UtilCreateCSCoordsPar(tileSize, lonEdge=lonCornerPtr, latEdge=latCornerPtr, &
-               start=start, count=count, &
+            call ESMF_UtilCreateCSCoordsPar(tileSize, lonEdge=lonCornerPtr, &
+               latEdge=latCornerPtr, start=start, count=count, &
                tile=tile, lonCenter=lonPtr, latCenter=latPtr)
          elseif (docorner) then
-            call ESMF_UtilCreateCSCoordsPar(tileSize, lonEdge=lonCornerPtr, latEdge=latCornerPtr, &
-               start=start, count=count, tile=tile)
+            call ESMF_UtilCreateCSCoordsPar(tileSize, lonEdge=lonCornerPtr, &
+              latEdge=latCornerPtr, start=start, count=count, tile=tile)
          else
             call ESMF_UtilCreateCSCoordsPar(tileSize, &
                start=start, count=count, &
