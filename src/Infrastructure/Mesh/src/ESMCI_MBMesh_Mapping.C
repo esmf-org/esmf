@@ -9,6 +9,9 @@
 //
 //==============================================================================
 
+// Take out if MOAB isn't being used
+#ifdef ESMF_MOAB
+
 #include <Mesh/include/ESMCI_Exception.h>
 #include <Mesh/include/ESMCI_MBMesh_Mapping.h>
 #include <Mesh/include/ESMCI_MathUtil.h>
@@ -326,3 +329,5 @@ bool MBElemMap::cartesian_eval(const double *mdata, const double *point, double 
   if(dist) *dist = sdist;
   return resu;
 }*/
+
+#endif
