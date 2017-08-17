@@ -425,12 +425,6 @@ endif
 ifeq ($(ESMF_MOAB),default)
 export ESMF_MOAB = internal
 endif
-ifeq ($(ESMF_OS),MinGW)
-export ESMF_MOAB = OFF
-endif
-ifeq ($(ESMF_OS),Cygwin)
-export ESMF_MOAB = OFF
-endif
 
 #-------------------------------------------------------------------------------
 # If INSTALL environment variables are not set give them default values

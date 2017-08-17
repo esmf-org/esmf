@@ -226,7 +226,7 @@ MBMesh* create_mesh_tri_single(int &rc, bool cart) {
     nodeCoord[2] = 2.0;
     nodeCoord[3] = 0.0;
     nodeCoord[4] = 1.0;
-    nodeCoord[5] = 1.0+sqrt(2);
+    nodeCoord[5] = 1.0+sqrt(2.0);
 
   } else {
     coordSys = ESMC_COORDSYS_SPH_RAD;
@@ -237,7 +237,7 @@ MBMesh* create_mesh_tri_single(int &rc, bool cart) {
     nodeCoord[2] = pi/4;
     nodeCoord[3] = 0.0;
     nodeCoord[4] = pi/8;
-    nodeCoord[5] = pi/8+sqrt(2)*pi/8;
+    nodeCoord[5] = pi/8+sqrt(2.0)*pi/8;
 
   }
 

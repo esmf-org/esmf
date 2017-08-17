@@ -47,18 +47,18 @@ program ESMF_FieldIOUTest
   real(ESMF_KIND_R8), pointer :: Farray_tw(:,:) => null (), Farray_tr(:,:) => null ()
   real(ESMF_KIND_R8), pointer :: Farray_sw(:,:) => null (), Farray_sr(:,:) => null ()
   real(ESMF_KIND_R4), pointer :: fptr(:,:) => null ()
-  real(ESMF_KIND_R8), pointer :: t_ptr(:,:,:) => null ()
+  real(ESMF_KIND_R8), pointer :: t_ptr(:,:,:) => null (), t_ptr2(:,:,:) => null ()
   ! Note: 
   ! field_w---Farray_w; field_r---Farray_r; 
   ! field_t---Farray_tw; field_tr---Farray_tr 
   ! field_s---Farray_sw; field_sr---Farray_sr
-  type(ESMF_Grid) :: grid, grid_g, grid_2DE
+  type(ESMF_Grid) :: grid, grid_g, grid_2DE, grid_gblind
 
   type(ESMF_Field) :: elem_field
   type(ESMF_DistGrid) :: elem_dg
   type(ESMF_Mesh) :: elem_mesh
   type(ESMF_Field) :: field_att, field_ugd_att
-  type(ESMF_Field) :: field_ug
+  type(ESMF_Field) :: field_ug, field_ug2
 
   real(ESMF_KIND_R8), pointer :: Farray_DE0_w(:,:) => null (), Farray_DE0_r(:,:) => null ()
   real(ESMF_KIND_R8), pointer :: Farray_DE1_w(:,:) => null (), Farray_DE1_r(:,:) => null ()
@@ -69,8 +69,9 @@ program ESMF_FieldIOUTest
   integer, allocatable :: arbseqlist(:)
   integer      :: localPet, petCount, tlb(2), tub(2)
   integer :: elem_tlb(1), elem_tub(1), elem_tc(1)
-  integer :: tlb3(3), tub3(3)
+  integer :: tlb3(3), tub3(3), tlb4(3), tub4(3)
   integer :: i,j, t, endtime, k
+  logical :: failed
   real(ESMF_KIND_R8) :: Maxvalue, diff
 
   character(16), parameter :: apConv = 'Attribute_IO'
@@ -1164,8 +1165,20 @@ program ESMF_FieldIOUTest
 
 !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
+  ! Verifying that a Grid can be created
+  grid_gblind = ESMF_GridCreateNoPeriDim(minIndex=(/1,1/), maxIndex=(/10,20/), &
+    regDecomp=(/2,2/), gridEdgeLWidth=(/0,0/), gridEdgeUWidth=(/0,0/), &
+    indexflag=ESMF_INDEX_GLOBAL, &
+    name="landgrid", rc=rc)
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  write(name, *) "Creating a Grid with global indexing to use in Field Tests"
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+!------------------------------------------------------------------------
+
+!------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
   ! Create Field
-  field_ug = ESMF_FieldCreate(grid, typekind=ESMF_TYPEKIND_R8, &
+  field_ug = ESMF_FieldCreate(grid_gblind, typekind=ESMF_TYPEKIND_R8, &
            ungriddedLBound=(/1/), ungriddedUBound=(/2/), &
            name="t_src",  rc=rc)
   write(failMsg, *) "Did not return ESMF_SUCCESS"
@@ -1204,6 +1217,63 @@ program ESMF_FieldIOUTest
   write(failMsg, *) "Did not return ESMF_RC_LIB_NOT_PRESENT"
   call ESMF_Test((rc==ESMF_RC_LIB_NOT_PRESENT), name, failMsg, result, ESMF_SRCLINE)
 #endif
+
+!------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  ! Create Field
+  field_ug2 = ESMF_FieldCreate(grid_gblind, typekind=ESMF_TYPEKIND_R8, &
+           ungriddedLBound=(/1/), ungriddedUBound=(/2/), &
+           name="t_src",  rc=rc)
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  write(name, *) "Create a field with 1 ungridded dim for comparison test"
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+!------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  ! Write Fortran array in Field
+  call ESMF_FieldRead (field_ug2, fileName="field_ug.nc",  &
+       iofmt=ESMF_IOFMT_NETCDF, rc=rc)
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  write(name, *) "Read Fortran array in Field with 1 ungridded dimension"
+#if (defined ESMF_PIO && ( defined ESMF_NETCDF || defined ESMF_PNETCDF))
+  call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+#else
+  write(failMsg, *) "Did not return ESMF_RC_LIB_NOT_PRESENT"
+  call ESMF_Test((rc==ESMF_RC_LIB_NOT_PRESENT), name, failMsg, result, ESMF_SRCLINE)
+#endif
+!------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  ! Compare data
+  call ESMF_FieldGet (field_ug2,  &
+      totalLbound=tlb4,  &
+      totalUbound=tub4,  &
+      farrayPtr=t_ptr2, rc=rc)
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  write(name, *) "Access comparison field data with 1 ungridded dim"
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+!------------------------------------------------------------------------
+
+!------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  ! Compare data
+  write(name, *) "Comparison field data with 1 ungridded dim"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+#if (defined ESMF_PIO && ( defined ESMF_NETCDF || defined ESMF_PNETCDF))
+  failed = .false.
+  do, j=tlb4(2), tub4(2)
+    do, i=tlb4(1), tub4(1)
+      if (any (t_ptr2(i,j,:) /= j*100 + i)) then
+        failed = .true.
+        exit
+      end if
+    end do
+  end do
+  if (failed)  &
+    write(failMsg, *) "Comparison failed at (", i, j, ")"
+#else
+  failed = .false.
+#endif
+  call ESMF_Test(.not. failed, name, failMsg, result, ESMF_SRCLINE)
 
 !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
@@ -1357,6 +1427,10 @@ program ESMF_FieldIOUTest
   call ESMF_FieldDestroy(field_att, rc=rc)
   if (rc /= ESMF_SUCCESS) countfail = countfail + 1
   call ESMF_FieldDestroy(field_ugd_att, rc=rc)
+  if (rc /= ESMF_SUCCESS) countfail = countfail + 1
+  call ESMF_FieldDestroy(field_ug, rc=rc)
+  if (rc /= ESMF_SUCCESS) countfail = countfail + 1
+  call ESMF_FieldDestroy(field_ug2, rc=rc)
   if (rc /= ESMF_SUCCESS) countfail = countfail + 1
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   write(name, *) "Destroying all Fields"

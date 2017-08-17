@@ -1901,13 +1901,20 @@ bool PIO_Handler::CheckPIOError(
     case NC_EEXIST:
       localrc = ESMF_RC_FILE_CREATE;
       break;
+    case NC_ENOMEM:
+      localrc = ESMF_RC_MEM_ALLOCATE;
+      break;
     case NC_EPERM:
       localrc = ESMF_RC_FILE_OPEN;
       break;
-#endif // defined(ESMF_NETCDF) || defined(ESMF_PNETCDF)
     default:
-      localrc = rc_code;
+      localrc = ESMF_RC_NETCDF_ERROR;
       break;
+#else // defined(ESMF_NETCDF) || defined(ESMF_PNETCDF)
+    default:
+      localrc = ESMF_RC_FILE_UNEXPECTED;
+      break;
+#endif
     }
   } else
     localrc = ESMF_SUCCESS;
