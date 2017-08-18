@@ -22,8 +22,6 @@
 #endif
 #endif
 
-#define ESMF_TESTEXHAUSTIVE
-
 !==============================================================================
 !BOPI
 ! !PROGRAM: ESMF_FieldRegridUTest - Unit tests for Field Regrid methods
