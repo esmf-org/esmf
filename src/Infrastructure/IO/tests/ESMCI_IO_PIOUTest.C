@@ -57,6 +57,10 @@ int main(void){
   pio_var_desc_t pio_vardesc1[PIO_SIZE_VAR_DESC];
   pio_dof_t compdof[DIM_X];
   int amode_in;
+
+  int answer;
+  float float_att_value;
+  double fillvalue;
 #endif
 
   //----------------------------------------------------------------------------
@@ -220,7 +224,7 @@ int main(void){
   strcpy(name, "PIO NETCDF mode add int attribute");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
 #if defined (ESMF_PIO) && defined (ESMF_NETCDF)
-  int answer = 42;
+  answer = 42;
   pioerr = pio_cpp_put_att_ints (pio_file1, &pio_vardesc1,
       "answer", &answer, 1);
   rc = (pioerr == 0) ? ESMF_SUCCESS : ESMF_FAILURE;
@@ -236,7 +240,7 @@ int main(void){
   strcpy(name, "PIO NETCDF mode add float attribute");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
 #if defined (ESMF_PIO) && defined (ESMF_NETCDF)
-  float float_att_value = 0.0001f;
+  float_att_value = 0.0001f;
   pioerr = pio_cpp_put_att_floats (pio_file1, &pio_vardesc1,
       "float_att_value", &float_att_value, 1);
   rc = (pioerr == 0) ? ESMF_SUCCESS : ESMF_FAILURE;
@@ -252,7 +256,7 @@ int main(void){
   strcpy(name, "PIO NETCDF mode add scalar double attribute");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
 #if defined (ESMF_PIO) && defined (ESMF_NETCDF)
-  double fillvalue = -9999.99;
+  fillvalue = -9999.99;
   pioerr = pio_cpp_put_att_doubles (pio_file1, &pio_vardesc1,
       "_FillValue", &fillvalue, 1);
   rc = (pioerr == 0) ? ESMF_SUCCESS : ESMF_FAILURE;
@@ -525,7 +529,7 @@ int main(void){
   strcpy(name, "PIO PNETCDF mode add int attribute");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
 #if defined (ESMF_PIO) && defined (ESMF_PNETCDF)
-  int answer = 42;
+  answer = 42;
   pioerr = pio_cpp_put_att_ints (pio_file1, &pio_vardesc1,
       "answer", &answer, 1);
   rc = (pioerr == 0) ? ESMF_SUCCESS : ESMF_FAILURE;
@@ -541,7 +545,7 @@ int main(void){
   strcpy(name, "PIO PNETCDF mode add float attribute");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
 #if defined (ESMF_PIO) && defined (ESMF_PNETCDF)
-  float float_att_value = 0.0001f;
+  float_att_value = 0.0001f;
   pioerr = pio_cpp_put_att_floats (pio_file1, &pio_vardesc1,
       "float_att_value", &float_att_value, 1);
   rc = (pioerr == 0) ? ESMF_SUCCESS : ESMF_FAILURE;
@@ -557,7 +561,7 @@ int main(void){
   strcpy(name, "PIO PNETCDF mode add scalar double attribute");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
 #if defined (ESMF_PIO) && defined (ESMF_PNETCDF)
-  double fillvalue = -9999.99;
+  fillvalue = -9999.99;
   pioerr = pio_cpp_put_att_doubles (pio_file1, &pio_vardesc1,
       "_FillValue", &fillvalue, 1);
   rc = (pioerr == 0) ? ESMF_SUCCESS : ESMF_FAILURE;
