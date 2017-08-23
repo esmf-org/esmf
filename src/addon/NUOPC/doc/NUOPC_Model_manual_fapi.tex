@@ -166,7 +166,7 @@ The {\tt NUOPC\_Realize} methods (\ref{NUOPC_RealizeComplete}, \ref{NUOPC_Realiz
 
 \subsubsection{Initialize Phase Specialization - label\_SetClock}
 {\sc Optional, Implementor Provided}\\
-{\em Called from: IPDv00p3, IPDv01p4, IPDv02p4, IPDv03p6, IPDv04p6}\\
+{\em Called from: IPDv00p3, IPDv01p4, IPDv02p4, IPDv03p6, IPDv04p6, IPDv05p7}\\
 
 The specialization method can change aspects of the internal clock, which defaults to a copy of the incoming parent clock. For example, the timeStep size may be changed and/or Alarms may be set on the clock.\\
 
@@ -174,7 +174,7 @@ The method {\tt NUOPC\_CompSetClock(comp, externalClock, stabilityTimeStep)} (\r
 
 \subsubsection{Initialize Phase Specialization - label\_DataInitialize}
 {\sc Optional, Implementor Provided}\\
-{\em Called from: IPDv00p4, IPDv01p5, IPDv02p5, IPDv03p7, IPDv04p7}\\
+{\em Called from: IPDv00p4, IPDv01p5, IPDv02p5, IPDv03p7, IPDv04p7, IPDv05p8}\\
 
 The specialization method should initialize field data in the export state. Fields in the export state will be timestamped automatically by the calling phase, so there is no need to do it here.
 
