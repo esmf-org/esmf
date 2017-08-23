@@ -114,6 +114,13 @@ of the desired NetCDF library and associated header files:
 The {\tt ESMF\_NETCDF\_INCLUDE}, {\tt ESMF\_NETCDF\_LIBPATH}, and
 {\tt ESMF\_NETCDF\_LIBS} environment variables will be ignored.
 
+\item[{\tt "nc-config"}] The NetCDF {\tt nc-config} and if available, {\tt nf-config},
+tools will be used to determine the proper settings of the {\tt ESMF\_NETCDF\_LIBS},
+{\tt ESMF\_NETCDF\_INCLUDE}, and {\tt ESMF\_NETCDF\_LIBPATH}.  The shell {\tt PATH}
+environment variable must specifiy the NetCDF bin directories where nc-config
+and nf-config reside.  This option supports having the main NetCDF library and the
+Fortran API library reside in separate directories.
+
 \item[{\tt "split"}] {\tt ESMF\_NETCDF\_LIBS} will be set to 
 {\tt "-lnetcdff -lnetcdf"}.  This option is useful for systems 
 which have the Fortran and C bindings archived in seperate library files.  
