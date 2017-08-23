@@ -1269,6 +1269,12 @@ endif
 #-------------------------------------------------------------------------------
 # PNETCDF
 #-------------------------------------------------------------------------------
+ifeq ($(ESMF_PNETCDF),pnetcdf-config)
+ESMF_PNETCDF_INCLUDE = $(shell pnetcdf-config --includedir)
+ESMF_PNETCDF_LIBPATH = $(shell pnetcdf-config --libdir)
+ESMF_PNETCDF_LIBS = -lpnetcdf
+endif
+
 ifeq ($(ESMF_PNETCDF),standard)
 ifneq ($(origin ESMF_NETCDF_LIBS), environment)
 ESMF_PNETCDF_LIBS = -lpnetcdf
