@@ -176,7 +176,7 @@ The method {\tt NUOPC\_CompSetClock(comp, externalClock, stabilityTimeStep)} (\r
 {\sc Optional, Implementor Provided}\\
 {\em Called from: IPDv00p4, IPDv01p5, IPDv02p5, IPDv03p7, IPDv04p7, IPDv05p8}\\
 
-The specialization method should initialize field data in the export state. Fields in the export state will be timestamped automatically by the calling phase, so there is no need to do it here.
+The specialization method should initialize field data in the export state. Fields in the export state will be timestamped automatically by the calling phase for all fields that have the ``Updated'' attribute set to ``true''.
 
 \subsubsection{Run Phase Specialization - label\_SetRunClock}
 {\sc Required, NUOPC Provided}\\
