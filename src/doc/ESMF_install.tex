@@ -118,9 +118,9 @@ The {\tt ESMF\_NETCDF\_INCLUDE}, {\tt ESMF\_NETCDF\_LIBPATH}, and
 {\tt ESMF\_NETCDF\_LIBS} environment variables will be ignored.
 
 \item[{\tt "nc-config"}] The NetCDF {\tt nc-config} and if available, {\tt nf-config},
-tools will be used to determine the proper settings of the {\tt ESMF\_NETCDF\_LIBS},
-{\tt ESMF\_NETCDF\_INCLUDE}, and {\tt ESMF\_NETCDF\_LIBPATH}.  The shell {\tt PATH}
-environment variable must specifiy the NetCDF bin directories where {\tt nc-config}
+tools will be used to determine the proper settings of {\tt ESMF\_NETCDF\_INCLUDE},
+{\tt ESMF\_NETCDF\_LIBPATH}, and {\tt ESMF\_NETCDF\_LIBS}.  The shell {\tt PATH}
+environment variable must include the NetCDF bin directories where {\tt nc-config}
 and {\tt nf-config} reside.  This option supports having the main NetCDF library and the
 Fortran API library reside in separate directories.
 
@@ -177,7 +177,7 @@ The following environment variables enable and specify the name and
 location of the desired Parallel-NetCDF library and associated header files:
 
 \begin{description}
-\item[ESMF\_PNETCDF] Possible value: {\it not set} (default), 
+\item[ESMF\_PNETCDF] Possible value: {\it not set} (default), {\tt "pnetcdf-config"},
 {\tt "standard"}, {\it <userstring>}.  
 
 When defined, enables the use of Parallel-NetCDF.
@@ -188,6 +188,12 @@ When defined, enables the use of Parallel-NetCDF.
 The {\tt ESMF\_PNETCDF\_INCLUDE}, {\tt ESMF\_PNETCDF\_LIBPATH}, and
 {\tt ESMF\_PNETCDF\_LIBS} environment variables will be ignored.
 \end{sloppypar}
+
+\item[{\tt "pnetcdf-config"}] The PNetCDF {\tt pnetcdf-config} tool will be used
+to determine the proper settings of {\tt ESMF\_PNETCDF\_INCLUDE},
+{\tt ESMF\_PNETCDF\_LIBPATH}, and {\tt ESMF\_PNETCDF\_LIBS}.  The shell {\tt PATH}
+environment variable must include the PNetCDF bin directory where {\tt pnetcdf-config}
+resides.
 
 \item[{\tt "standard"}] {\tt ESMF\_PNETCDF\_LIBS} will be set to 
 {\tt "-lpnetcdf"}.  The {\tt ESMF\_PNETCDF\_INCLUDE} and 
