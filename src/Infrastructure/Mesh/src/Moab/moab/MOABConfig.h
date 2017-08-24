@@ -270,7 +270,7 @@
 #endif
 
 /* define if compiler has std::isfinite */
-#if defined ESMF_OS_Darwin
+#if defined (ESMF_OS_Darwin) || defined (ESMF_OS_Cygwin) || defined (ESMF_OS_MinGW)
 #ifndef MOAB_HAVE_STDISFINITE
 #define MOAB_HAVE_STDISFINITE 1
 #endif
