@@ -4308,13 +4308,13 @@ ErrorCode ParallelComm::get_remote_handles(EntityHandle *local_vec, EntityHandle
   {
     // Try to assign owners randomly so we get a good distribution,
     // (note: specifying the same seed on all procs is essential)
+#if !defined (ESMF_OS_MinGW)
     unsigned val = 0;
     for (size_t i = 0; i < proc_list.size(); i++)
       val ^= proc_list[i];
-#if !defined (ESMF_OS_MinGW)
     return rand_r(&val) % proc_list.size();
 #else
-    return rand(&val) % proc_list.size();
+    return rand() % proc_list.size();
 #endif
   }
 
