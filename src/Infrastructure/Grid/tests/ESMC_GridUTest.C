@@ -133,20 +133,20 @@ int main(void){
 
   ESMC_StaggerLoc stagger = ESMC_STAGGERLOC_CENTER;
 
-  //NEX_UTest
+  //NEX_disabled_UTest
   strcpy(name, "GridWrite(cubedsphere)");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
-  rc = ESMC_GridWrite(grid_cs, stagger, namecs);
-  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+//  rc = ESMC_GridWrite(grid_cs, stagger, namecs);
+//  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
 
   int localde = 0; int exLB[2]; int exUB[2];
 
-  //NEX_UTest
+  //NEX_disabled_UTest
   strcpy(name, "GridCreateGetCoord(cubedsphere)");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
-  void *dummy = ESMC_GridGetCoord(grid_cs, 1, ESMC_STAGGERLOC_CENTER,
-                                   &localde, exLB, exUB, &rc);
-  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+//  void *dummy = ESMC_GridGetCoord(grid_cs, 1, ESMC_STAGGERLOC_CENTER,
+//                                   &localde, exLB, exUB, &rc);
+//  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
 
   /*
   for (int i = 0; i < 6; ++i) {
@@ -168,6 +168,12 @@ int main(void){
   }
   */
 
+  //NEX_UTest
+  strcpy(name, "GridDestroy(cubedsphere)");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
+  rc = ESMC_GridDestroy(&grid_cs);
+  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+      
 //----------------------------------------------------------------------------
 
   //----------------------------------------------------------------------------
