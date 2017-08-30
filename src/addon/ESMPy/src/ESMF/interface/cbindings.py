@@ -441,12 +441,13 @@ _ESMF.ESMC_GridCreateCubedSphere.argtypes = [ct.POINTER(ct.c_int),
                                              ct.POINTER(ESMP_InterfaceInt),
                                              #ct.POINTER(ESMP_InterfaceInt),
                                              #ct.POINTER(ESMP_InterfaceInt),
+                                             ct.POINTER(ESMP_InterfaceInt),
                                              ct.c_void_p,
                                              ct.POINTER(ct.c_int)]
 
 def ESMP_GridCreateCubedSphere(tilesize, regDecompPTile=None,
                                #decompFlagPTile=None, deLabelList=None,
-                               name=None):
+                               staggerLocList=None, name=None):
     """
     Preconditions: ESMP has been initialized.\n
     Postconditions: An ESMP_Grid has been created.\n
@@ -454,6 +455,7 @@ def ESMP_GridCreateCubedSphere(tilesize, regDecompPTile=None,
         :RETURN: ESMP_Grid :: grid\n
         Integer                             :: tilesize\n
         Numpy.array(dtype=int32) (optional) :: regDecompPTile\n
+        Numpy.array(dtype=int32) (optional) :: staggerLocList\n
         String (optional)                   :: name\n
     """
         # Numpy.array(dtype=int32) (optional) :: decompFlagPTile\n
@@ -467,27 +469,35 @@ def ESMP_GridCreateCubedSphere(tilesize, regDecompPTile=None,
     regDecompPTile_i = regDecompPTile
     if (regDecompPTile is not None):
         if (regDecompPTile.dtype != np.int32):
-            raise TypeError('regDecompPTile must have dtype=int32')
+            raise TypeError('regDecompPTile must have dtype==int32')
         regDecompPTile_i = ESMP_InterfaceInt(regDecompPTile)
 
     # # InterfaceInt requires int32 type numpy arrays
     # decompFlagPTile_i = decompFlagPTile
     # if (decompFlagPTile is not None):
     #     if (decompFlagPTile.dtype != np.int32):
-    #         raise TypeError('decompFlagPTile must have dtype=int32')
+    #         raise TypeError('decompFlagPTile must have dtype==int32')
     #     decompFlagPTile_i = ESMP_InterfaceInt(decompFlagPTile)
     #
     # # InterfaceInt requires int32 type numpy arrays
     # deLabelList_i = deLabelList
     # if (deLabelList is not None):
     #     if (deLabelList.dtype != np.int32):
-    #         raise TypeError('deLabelList must have dtype=int32')
+    #         raise TypeError('deLabelList must have dtype==int32')
     #     deLabelList_i = ESMP_InterfaceInt(deLabelList)
+
+    # staggerLocList
+    staggerLocList_i = staggerLocList
+    if (staggerLocList is not None):
+        if (staggerLocList.dtype != np.int32):
+            raise TypeError('staggerLocList must have dtype==int32')
+        staggerLocList_i = ESMP_InterfaceInt(staggerLocList)
 
     # create the ESMF Grid and retrieve a ctypes pointer to it
     gridstruct = _ESMF.ESMC_GridCreateCubedSphere(lts, regDecompPTile_i,
                                                   #decompFlagPTile_i,
                                                   #deLabelList_i,
+                                                  staggerLocList_i,
                                                   name,
                                                   ct.byref(lrc))
 
