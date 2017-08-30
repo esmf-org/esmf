@@ -790,7 +790,7 @@
                       name, failMsg, result, ESMF_SRCLINE)
 
       ! ----------------------------------------------------------------------------
-
+      call ESMF_LogSet (flush=.true.)
       !EX_UTest
       ! Test fix for bug #755445
       ! ClockPrint with an unallocated clock
