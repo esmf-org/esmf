@@ -144,7 +144,7 @@
       write(failMsg, *) " Did not return ESMF_SUCCESS"
       write(name, *) "Set Start Time Initialization Test"
       call ESMF_TimeSet(startTime, yy=2003, mm=3, dd=13, &
-                             	   h=18, m=45, s=27, &
+                                   h=18, m=45, s=27, &
                                    calendar=gregorianCalendar, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
@@ -1263,7 +1263,7 @@
       write(failMsg, *) " Did not return ESMF_SUCCESS"
       write(name, *) "Non-Sticky Alarm Time Initialization Test"
       alarm =  ESMF_AlarmCreate(name="alarm1", clock=clock, &
-					ringTime=alarmTime, sticky=.FALSE., rc=rc)
+          ringTime=alarmTime, sticky=.FALSE., rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
 
