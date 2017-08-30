@@ -83,6 +83,7 @@ void FTN_X(f_esmf_gridcreatecubedsphere)(ESMCI::Grid **grid,
     int *decompFlagPTile, int *len21, int *len22, int *dfpresent,
     int *deLabelList, int *len3, int *llpresent,
     //ESMC_DELayout *delayout,
+    int *staggerLocList, int *len4,
     const char *name,
     int *rc,
     ESMCI_FortranStrLenArg len_name);
@@ -367,6 +368,7 @@ int setDefaultsLUA(int dimCount,
     ESMC_InterArrayInt *decompFlagPTile,
     ESMC_InterArrayInt *deLabelList,
     //ESMC_DELayout *delayout,
+    ESMC_InterArrayInt *staggerLocList,
     const char *name,
     int *rc) {
 //
@@ -381,8 +383,8 @@ int setDefaultsLUA(int dimCount,
     int localrc = ESMC_RC_NOT_IMPL;
     if(rc!=NULL) *rc=ESMC_RC_NOT_IMPL;
     int rdpresent = 0, dfpresent = 0, llpresent = 0;
-    int *rdarray=NULL, *dfarray=NULL, *llarray=NULL;
-    int rdlen1, rdlen2, dflen1, dflen2, lllen, nlen;
+    int *rdarray=NULL, *dfarray=NULL, *llarray=NULL, *ssarray=NULL;
+    int rdlen1, rdlen2, dflen1, dflen2, lllen, nlen, sslen;
 
     ESMCI::InterArray<int> *rd = (ESMCI::InterArray<int> *)regDecompPTile;
     if (present(rd)) {
@@ -465,6 +467,30 @@ int setDefaultsLUA(int dimCount,
       lllen=0;
     }
 
+    ESMCI::InterArray<int> *ss = (ESMCI::InterArray<int> *)staggerLocList;
+    if (present(ss)) {
+      if(ss->dimCount != 1){
+         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
+           "- staggerLocList array must be of rank 1", ESMC_CONTEXT, rc);
+         return ESMC_NULL_POINTER;
+      }
+      ssarray=ss->array;
+      sslen=ss->extent[0];
+
+      /*// this is a test to see if the data is passed in correctly
+      printf("\nstaggerLocList:\n  array = [");
+      for (int i=0; i<ss->extent[0]; ++i)
+        printf("%d,", ss->array[i]);
+      printf("]\n  extent = [");
+      for (int i=0; i<7; ++i)
+          printf("%d,", ss->extent[i]);
+      printf("]\n  dimCount = %d\n", ss->dimCount);*/
+
+    } else {
+      ssarray=NULL;
+      sslen=0;
+    }
+
     if (name) nlen = strlen(name);
     else nlen = 0;
 
@@ -474,6 +500,7 @@ int setDefaultsLUA(int dimCount,
         rdarray, &rdlen1, &rdlen2, &rdpresent,
         dfarray, &dflen1, &dflen2, &dfpresent,
         llarray, &lllen, &llpresent,
+        ssarray, &sslen,
         name,
         &localrc, nlen);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
