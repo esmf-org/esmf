@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2016, University Corporation for Atmospheric Research, 
+// Copyright 2002-2017, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -40,6 +40,7 @@
 #include <cstdio>
 #include <vector>
 #include <string>
+#include <utility>
 
 //-------------------------------------------------------------------------
 
@@ -59,37 +60,41 @@ namespace ESMCI {
   struct IO_ObjectContainer {
     enum IOListObjectType type;
     IO_ObjectType object;           // e.g., Array, Attribute
-    char name[ESMF_MAXSTR];
-    std::vector<std::string> dimLabels;
+    std::string name;
+    Attribute *dimAttPack;
+    Attribute *varAttPack;
+    Attribute *gblAttPack;
     ESMC_I8 number;
 
     IO_ObjectContainer () {
       type = IO_NULL;
       object.arr = (Array *)NULL;
       name[0] = '\0';
+      dimAttPack = NULL;
+      varAttPack = NULL;
+      gblAttPack = NULL;
       number = 0;
     }
-    IO_ObjectContainer (Array *arr_p, const char * const arrName, const std::vector<std::string> &dimLabels) {
+    IO_ObjectContainer (Array *arr_p, const std::string &arrName,
+            Attribute *dimAttPack,
+            Attribute *varAttPack,
+            Attribute *gblAttPack) {
       type = IO_ARRAY;
       object.arr = arr_p;
-      if ((const char * const)NULL != arrName) {
-        int len = strlen(arrName);
-        if (len >= ESMF_MAXSTR) {
-          strncpy(name, arrName, (ESMF_MAXSTR - 1));
-          name[ESMF_MAXSTR - 1] = '\0';
-        } else {
-          strcpy(name, arrName);
-        }
-      } else {
-        name[0] = '\0';
-      }
-      if (dimLabels.size() > 0)
-        this->dimLabels = dimLabels;
+      if (arrName.length() > 0)
+        name = arrName;
+
+      this->dimAttPack = dimAttPack;
+      this->varAttPack = varAttPack;
+      this->gblAttPack = gblAttPack;
       number = 0;
     }
     ~IO_ObjectContainer() {
-      name[0] = '\0';
+      name = "";
       object.arr = (Array *)NULL;
+      dimAttPack = NULL;
+      varAttPack = NULL;
+      gblAttPack = NULL;
       number = 0;
       type = IO_NULL;
     }
@@ -100,7 +105,7 @@ namespace ESMCI {
       return object.attr;
     }
     const char *getName(void) {
-      return name;
+      return name.c_str();
     }
 
   };
@@ -189,7 +194,9 @@ namespace ESMCI {
     int addArray(Array *arr_p);
     int addArray(Array *arr_p,
                  const std::string &variableName,
-                 const std::vector<std::string> &dimLabels);
+                 Attribute *dimAttPack,
+                 Attribute *varAttPack,
+                 Attribute *gblAttPack);
 // TBI
 #if 0
     void addAttributes(ESMC_Base *obj_p,
@@ -200,6 +207,14 @@ namespace ESMCI {
     void addGrid(ESMC_Base *grid_p, char *gridName,
                  int *rc=NULL);
 #endif // TBI
+    void dimlabel_get (Attribute *dimAttPack,
+        std::string labeltype,
+        std::vector<std::string> &dimLabels,
+        int *rc);
+    void dimlabel_merge (std::vector<std::string> &dimLabels,
+        std::vector<std::string> &ugdimLabels,
+        Array *array,
+        int *rc);
     bool redist_check(Array *array_p, int *rc);
     void redist_arraycreate1de(Array *src_array_p, Array **dst_array_p, int *rc);
     bool undist_check(Array *array_p, int *rc);

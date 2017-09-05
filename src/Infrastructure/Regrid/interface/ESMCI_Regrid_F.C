@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2016, University Corporation for Atmospheric Research, 
+// Copyright 2002-2017, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -44,8 +44,7 @@
 using namespace ESMCI;
 
 
-extern "C" void FTN_X(c_esmc_regrid_create)(ESMCI::VM **vmpp,
-                                            MeshCap **meshsrcpp, 
+extern "C" void FTN_X(c_esmc_regrid_create)(MeshCap **meshsrcpp, 
 					    ESMCI::Array **arraysrcpp,
  					    ESMCI::PointList **plsrcpp,
                                             int *src_pl_used, 
@@ -81,8 +80,7 @@ extern "C" void FTN_X(c_esmc_regrid_create)(ESMCI::VM **vmpp,
     *pldstpp=NULL;
   }
 
-MeshCap::regrid_create(vmpp,
-		       meshsrcpp, arraysrcpp, plsrcpp,
+MeshCap::regrid_create(meshsrcpp, arraysrcpp, plsrcpp,
 		       meshdstpp, arraydstpp, pldstpp, 
 		       regridMethod, 
 		       map_type,
@@ -98,12 +96,12 @@ MeshCap::regrid_create(vmpp,
 		       rc);
 }
 
-extern "C" void FTN_X(c_esmc_regrid_getiwts)(ESMCI::VM **vmpp, Grid **gridpp,
+extern "C" void FTN_X(c_esmc_regrid_getiwts)(Grid **gridpp,
                    MeshCap **meshpp, ESMCI::Array **arraypp, int *staggerLoc,
                    int *regridScheme, int*rc) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_regrid_getiwts()" 
-  MeshCap::regrid_getiwts(vmpp, gridpp,
+  MeshCap::regrid_getiwts(gridpp,
 			  meshpp, arraypp, staggerLoc,
 			  regridScheme, rc);
 }

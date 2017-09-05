@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2016, University Corporation for Atmospheric Research,
+! Copyright 2002-2017, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -23,7 +23,10 @@
 !
 ! This program shows examples of Log Error writing
 !-----------------------------------------------------------------------------
+!EOC
 #include "ESMF.h"
+#undef ESMF_FILENAME
+!BOC
 ! Macros for cpp usage
 ! File define
 #define ESMF_FILENAME "ESMF_LogErrEx.F90"

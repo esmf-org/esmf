@@ -8,7 +8,8 @@ sub examples_results($$$) {
 
 	my $EX_DIR	= $_[0];
     	my $ESMF_BOPT	= $_[1];
-    	my $SUMMARY	= $_[2];
+	my $ESMF_COMM	= $_[2];
+    	my $SUMMARY	= $_[3];
 
 
 # This subroutine reads the number of pets from the *ST.Log files.
@@ -248,7 +249,7 @@ use File::Find;
                         	# Sort the pass_ex_files
                         	@pass_ex_files = sort (@pass_ex_files);
                                 foreach $file ( @pass_ex_files ) {
-                                	print ("PASS: $file");
+                                	print ("PASS: $ESMF_COMM/$ESMF_BOPT: $file");
                                 }
                         	print "\n\n";
 			}
@@ -276,7 +277,7 @@ use File::Find;
                                 foreach $file ( @act_ex_files ) {
                                 	#Do not print empty lines
                                         if (grep (/ESM/, $file)){
-                                                print ("FAIL: $file");
+                                                print ("FAIL: $ESMF_COMM/$ESMF_BOPT: $file");
                                         }
                                 }
                			print "\n\n";

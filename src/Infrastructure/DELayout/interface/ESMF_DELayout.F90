@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2016, University Corporation for Atmospheric Research, 
+! Copyright 2002-2017, University Corporation for Atmospheric Research, 
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 ! Laboratory, University of Michigan, National Centers for Environmental 
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -488,10 +488,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !EOP
 !------------------------------------------------------------------------------
-    integer                 :: localrc      ! local return code
-    type(ESMF_DELayout)     :: delayout     ! opaque pointer to new C++ DELayout  
-    type(ESMF_InterfaceInt) :: deGroupingArg
-    type(ESMF_InterfaceInt) :: petListArg
+    integer               :: localrc      ! local return code
+    type(ESMF_DELayout)   :: delayout     ! opaque pointer to new C++ DELayout  
+    type(ESMF_InterArray) :: deGroupingArg
+    type(ESMF_InterArray) :: petListArg
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
@@ -501,10 +501,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
     
     ! Deal with optional array arguments
-    deGroupingArg = ESMF_InterfaceIntCreate(deGrouping, rc=localrc)
+    deGroupingArg = ESMF_InterArrayCreate(deGrouping, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    petListArg = ESMF_InterfaceIntCreate(petList, rc=localrc)
+    petListArg = ESMF_InterArrayCreate(petList, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     
@@ -521,10 +521,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ESMF_DELayoutCreateDefault = delayout 
     
     ! Garbage collection
-    call ESMF_InterfaceIntDestroy(deGroupingArg, rc=localrc)
+    call ESMF_InterArrayDestroy(deGroupingArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(petListArg, rc=localrc)
+    call ESMF_InterArrayDestroy(petListArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
       
@@ -716,10 +716,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !EOPI
 !------------------------------------------------------------------------------
-    integer                 :: localrc      ! local return code
-    type(ESMF_DELayout)     :: delayout     ! opaque pointer to new C++ DELayout  
-    type(ESMF_InterfaceInt) :: deGroupingArg
-    type(ESMF_InterfaceInt) :: petListArg
+    integer               :: localrc      ! local return code
+    type(ESMF_DELayout)   :: delayout     ! opaque pointer to new C++ DELayout  
+    type(ESMF_InterArray) :: deGroupingArg
+    type(ESMF_InterArray) :: petListArg
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
@@ -729,10 +729,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
     
     ! Deal with optional array arguments
-    deGroupingArg = ESMF_InterfaceIntCreate(deGrouping, rc=localrc)
+    deGroupingArg = ESMF_InterArrayCreate(deGrouping, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    petListArg = ESMF_InterfaceIntCreate(petList, rc=localrc)
+    petListArg = ESMF_InterArrayCreate(petList, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     
@@ -759,10 +759,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ESMF_DELayoutCreateHintWeights = delayout 
  
     ! Garbage collection
-    call ESMF_InterfaceIntDestroy(deGroupingArg, rc=localrc)
+    call ESMF_InterArrayDestroy(deGroupingArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(petListArg, rc=localrc)
+    call ESMF_InterArrayDestroy(petListArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
  
@@ -1134,12 +1134,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !        2D array where each dimension must at least be of size {\tt deCount}.
 !
 !------------------------------------------------------------------------------
-    integer                 :: localrc                ! local return code
-    type(ESMF_InterfaceInt) :: petMapArg              ! helper variable
-    type(ESMF_InterfaceInt) :: vasMapArg              ! helper variable
-    type(ESMF_InterfaceInt) :: localDeToDeMapArg      ! helper variable
-    type(ESMF_InterfaceInt) :: vasLocalDeToDeMapArg   ! helper variable
-    type(ESMF_Logical)      :: oneToOneFlagArg        ! helper variable
+    integer               :: localrc                ! local return code
+    type(ESMF_InterArray) :: petMapArg              ! helper variable
+    type(ESMF_InterArray) :: vasMapArg              ! helper variable
+    type(ESMF_InterArray) :: localDeToDeMapArg      ! helper variable
+    type(ESMF_InterArray) :: vasLocalDeToDeMapArg   ! helper variable
+    type(ESMF_Logical)    :: oneToOneFlagArg        ! helper variable
     
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
@@ -1163,16 +1163,16 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !    endif
     
     ! Deal with (optional) array arguments
-    petMapArg = ESMF_InterfaceIntCreate(petMap, rc=localrc)
+    petMapArg = ESMF_InterArrayCreate(petMap, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    vasMapArg = ESMF_InterfaceIntCreate(vasMap, rc=localrc)
+    vasMapArg = ESMF_InterArrayCreate(vasMap, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    localDeToDeMapArg = ESMF_InterfaceIntCreate(localDeToDeMap, rc=localrc)
+    localDeToDeMapArg = ESMF_InterArrayCreate(localDeToDeMap, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    vasLocalDeToDeMapArg = ESMF_InterfaceIntCreate(vasLocalDeToDeMap, &
+    vasLocalDeToDeMapArg = ESMF_InterArrayCreate(vasLocalDeToDeMap, &
       rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
@@ -1185,10 +1185,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
       if (.not.present(localDeToDeMap)) then
-        call ESMF_InterfaceIntDestroy(localDeToDeMapArg, rc=localrc)
+        call ESMF_InterArrayDestroy(localDeToDeMapArg, rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
-        localDeToDeMapArg = ESMF_InterfaceIntCreate(localDeList, rc=localrc)
+        localDeToDeMapArg = ESMF_InterArrayCreate(localDeList, rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
       endif
@@ -1200,10 +1200,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
       if (.not.present(vasLocalDeToDeMap)) then
-        call ESMF_InterfaceIntDestroy(vasLocalDeToDeMapArg, rc=localrc)
+        call ESMF_InterArrayDestroy(vasLocalDeToDeMapArg, rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
-        vasLocalDeToDeMapArg = ESMF_InterfaceIntCreate(vasLocalDeList, &
+        vasLocalDeToDeMapArg = ESMF_InterArrayCreate(vasLocalDeList, &
           rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
@@ -1227,16 +1227,16 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     endif
     
     ! garbage collection
-    call ESMF_InterfaceIntDestroy(petMapArg, rc=localrc)
+    call ESMF_InterArrayDestroy(petMapArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(vasMapArg, rc=localrc)
+    call ESMF_InterArrayDestroy(vasMapArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(localDeToDeMapArg, rc=localrc)
+    call ESMF_InterArrayDestroy(localDeToDeMapArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(vasLocalDeToDeMapArg, rc=localrc)
+    call ESMF_InterArrayDestroy(vasLocalDeToDeMapArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
       
@@ -1841,6 +1841,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
+    
+    ! initialize return value in case of early bail out
+    ESMF_DELayoutServiceOffer = ESMF_SERVICEREPLY_DENY
 
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_DELayoutGetInit, delayout, rc)

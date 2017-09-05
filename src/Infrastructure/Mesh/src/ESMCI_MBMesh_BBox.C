@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2016, University Corporation for Atmospheric Research, 
+// Copyright 2002-2017, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -32,7 +32,7 @@
 // into the object file for tracking purposes.
 static const char *const version = "$Id$";
 //-----------------------------------------------------------------------------
-  
+
 namespace ESMCI {
 
 /// Eventually move the following to ESMCI_MBMesh_Util.C
@@ -129,7 +129,7 @@ MBMesh_BBox &MBMesh_BBox::operator=(const MBMesh_BBox &rhs) {
 MBMesh_BBox::MBMesh_BBox(MBMesh *mbmp, EntityHandle elem, double normexp) :
   isempty(false)
 {
- 
+
  int merr;
 
  // Don't handle 3D things right now
@@ -138,7 +138,7 @@ MBMesh_BBox::MBMesh_BBox(MBMesh *mbmp, EntityHandle elem, double normexp) :
   // Set dim as spatial dim
   dim=mbmp->sdim;
 
-  // Init 
+  // Init
   for (int i =0; i < dim; i++) {
     min[i] = std::numeric_limits<double>::max();
     max[i] = -std::numeric_limits<double>::max();
@@ -146,7 +146,7 @@ MBMesh_BBox::MBMesh_BBox(MBMesh *mbmp, EntityHandle elem, double normexp) :
 
   // Is a shell? TODO expand shell in normal directions
   if (mbmp->sdim != mbmp->pdim) {
-    
+
     // Shell, expand in normal direction
     for (UInt i =0; i < dim; i++) {
       min[i] = std::numeric_limits<double>::max();
@@ -159,24 +159,24 @@ MBMesh_BBox::MBMesh_BBox(MBMesh *mbmp, EntityHandle elem, double normexp) :
 
     // Get elem corner points
 #define MAX_NUM_NODES 5
-    double p[3*MAX_NUM_NODES];   
+    double p[3*MAX_NUM_NODES];
     int num_p;
 
     // Get coords
     MBMesh_get_elem_coords(mbmp, elem, MAX_NUM_NODES, &num_p, p);
-   
+
     // Get cell diameter
     double diam = 0;
     for (UInt n = 1; n < num_p; n++) {
       double dist = std::sqrt( (p[0]-p[3*n])*(p[0]-p[3*n]) +
                                (p[1]-p[3*n+1])*(p[1]-p[3*n+1]) +
                                (p[2]-p[3*n+2])*(p[2]-p[3*n+2]));
-      
+
       if (dist > diam) diam = dist;
     }
 
     // Exapnd by twice the diameter, because that should take
-    // care of including any volume included by the sphere buldging out inside 
+    // care of including any volume included by the sphere buldging out inside
     // the cell
     double expand=2.0*diam;
     for (int n = 0; n < num_p; n++) {
@@ -211,7 +211,7 @@ MBMesh_BBox::MBMesh_BBox(MBMesh *mbmp, EntityHandle elem, double normexp) :
         Throw() <<"MOAB ERROR: "<<moab::ErrorCodeStr[merr];
       }
 
-      // Modify min-max      
+      // Modify min-max
       for (int j = 0; j < dim; j++) {
         if (coords[j] < min[j]) min[j] = coords[j];
         if (coords[j] > max[j]) max[j] = coords[j];
@@ -245,7 +245,7 @@ MBMesh_BBox::MBMesh_BBox(MBMesh *mbmp) :
         Throw() <<"MOAB ERROR: "<<moab::ErrorCodeStr[merr];
       }
 
-      // Modify min-max      
+      // Modify min-max
       for (int j = 0; j < dim; j++) {
         if (coords[j] < min[j]) min[j] = coords[j];
         if (coords[j] > max[j]) max[j] = coords[j];
@@ -281,6 +281,25 @@ bool MBMesh_BBoxIntersect(const MBMesh_BBox &b1, const MBMesh_BBox &b2, double t
   return true;
 }
 
+// mixed version of the duplicated BBoxIntersect versions for MBMesh_BBox & BBox
+bool Mixed_BBoxIntersect(const MBMesh_BBox &b1, const BBox &b2, double tol) {
+  double newmin;
+  double newmax;
+
+  ThrowAssert(b1.dimension() == b2.dimension());
+  for (int i = 0; i < b1.dimension(); i++) {
+    newmin = std::max(b1.getMin()[i], b2.getMin()[i]);
+    newmax = std::min(b1.getMax()[i], b2.getMax()[i]);
+    if (newmin > (newmax+tol)) {
+//std::cout << "fail, dim=" << i << " newmin=" << newmin << ", newmax=" << newmax << std::endl;
+      return false;
+    }
+  }
+
+  return true;
+}
+
+
 MBMesh_BBox MBMesh_BBoxIntersection(const MBMesh_BBox &b1, const MBMesh_BBox &b2) {
   MBMesh_BBox newbox(b1.dimension());
 
@@ -307,9 +326,9 @@ MBMesh_BBox MBMesh_BBoxParUnion(const MBMesh_BBox &b1) {
   if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
     throw localrc;  // bail out with exception
 
-  // TODO: change this to just be 2 mpi calls instead of a loop 
+  // TODO: change this to just be 2 mpi calls instead of a loop
   for (int i = 0; i < b1.dimension(); i++) {
-    // Find max 
+    // Find max
     val = b1.getMax()[i];
     MPI_Allreduce(&val, &valres, 1, MPI_DOUBLE, MPI_MAX, comm);
     newbox.setMax(i, valres);

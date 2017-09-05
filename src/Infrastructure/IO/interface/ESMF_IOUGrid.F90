@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2016, University Corporation for Atmospheric Research,
+! Copyright 2002-2017, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -21,7 +21,7 @@
 #include "ESMF.h"
 !==============================================================================
 !BOPI
-! !MODULE: ESMF_IOUGridMod - Grid IO utility class
+! !MODULE: ESMF_IOUGridMod - Grid I/O utility class
 !
 ! !DESCRIPTION:
 !
@@ -30,7 +30,7 @@
 !
 !------------------------------------------------------------------------------
 ! !USES:
-      use ESMF_UtilTypesMod   
+      use ESMF_UtilTypesMod
       use ESMF_UtilMod
       use ESMF_InitMacrosMod    ! ESMF initializer macros
       use ESMF_LogErrMod        ! ESMF error handling
@@ -58,7 +58,7 @@
   public ESMF_GetElemFromUGridFile
   public ESMF_GetNodeFromUGridFile
 #endif
- 
+
 !==============================================================================
 
      contains
@@ -71,8 +71,8 @@
 !
 ! !INTERFACE:
 subroutine ESMF_UGridInq(filename, meshname, nodeCount, elementCount, &
-	      		maxNodePElement, units, fillvalue, nodeCoordDim, &
-			faceCoordFlag, meshid, rc)    
+                        maxNodePElement, units, fillvalue, nodeCoordDim, &
+                        faceCoordFlag, meshid, rc)
 
 ! !ARGUMENTS:
 
@@ -116,7 +116,7 @@ subroutine ESMF_UGridInq(filename, meshname, nodeCount, elementCount, &
         ESMF_METHOD,  &
         ESMF_SRCLINE, errmsg, &
         rc)) return
-    else 
+    else
        ! find the mesh name using attribute "cf_role"
        ncStatus = nf90_inquire(ncid, nVariables=nvars)
        errmsg = "inquiry error with "//trim(filename)
@@ -125,19 +125,19 @@ subroutine ESMF_UGridInq(filename, meshname, nodeCount, elementCount, &
            ESMF_SRCLINE, errmsg, &
            rc)) return
        do i=1,nvars
-	  ncStatus=nf90_get_att(ncid, i, 'cf_role', attvalue)
-	  if (ncStatus == nf90_noerror) then
+          ncStatus=nf90_get_att(ncid, i, 'cf_role', attvalue)
+          if (ncStatus == nf90_noerror) then
                ncStatus = nf90_inquire_attribute(ncid, i, 'cf_role', len=len)
           else
                ncStatus = nf90_get_att (ncid, i, "standard_name", attvalue)
-	       if (ncStatus == nf90_noerror) then
+               if (ncStatus == nf90_noerror) then
                   ncStatus = nf90_inquire_attribute(ncid, i, 'standard_name', len=len)
                endif
-          endif 
-	  if (ncStatus == nf90_noerror) then
+          endif
+          if (ncStatus == nf90_noerror) then
                if (attvalue(len:len) .eq. achar(0)) len = len-1
-	       if (attvalue(1:len) .eq. 'mesh_topology') then
-	         dummyId=i
+               if (attvalue(1:len) .eq. 'mesh_topology') then
+                 dummyId=i
                endif
           endif
        enddo
@@ -145,19 +145,19 @@ subroutine ESMF_UGridInq(filename, meshname, nodeCount, elementCount, &
     if (dummyId == 0) then
        ! Mesh variable not found, return error
        errmsg = "- dummy mesh variable not found in "//trim(filename)
-       call ESMF_LogSetError(rcToCheck=ESMF_FAILURE, & 
-             msg=errmsg, ESMF_CONTEXT, rcToReturn=rc) 
+       call ESMF_LogSetError(rcToCheck=ESMF_FAILURE, &
+             msg=errmsg, ESMF_CONTEXT, rcToReturn=rc)
        return
     endif
-       
+
     if (present(meshId)) meshId=dummyId
     ! get dimension
-    ! Change to topology_dimension based on the update on 2/28/2013 at 
+    ! Change to topology_dimension based on the update on 2/28/2013 at
     ! http://publicwiki.deltares.nl/display/NETCDF/Deltares+CF+proposal+for+Unstructured+Grid+data+model
     ! for backward compatibility, use dimension if topology_dimension does not exist
-    
+
     ncStatus = nf90_get_att (ncid, dummyId, "topology_dimension", values=meshDim)
-    if (ncStatus /= nf90_noerror) then    
+    if (ncStatus /= nf90_noerror) then
        ncStatus = nf90_get_att (ncid, dummyId, "dimension", values=meshDim)
        errmsg = "Attribute topology_dimension or dimension in "//trim(filename)
        if (CDFCheckError (ncStatus, &
@@ -208,7 +208,7 @@ subroutine ESMF_UGridInq(filename, meshname, nodeCount, elementCount, &
         if (CDFCheckError (ncStatus, &
             ESMF_METHOD, &
             ESMF_SRCLINE,&
-	    errmsg,&
+            errmsg,&
             rc)) return
         ncStatus = nf90_get_att(ncid, VarId, "units", units)
         if (CDFCheckError (ncStatus, &
@@ -218,7 +218,7 @@ subroutine ESMF_UGridInq(filename, meshname, nodeCount, elementCount, &
           rc)) return
         units = ESMF_UtilStringLowerCase(units(1:len))
         if (units(len:len) .eq. achar(0)) len = len-1
-	units = units(1:7)
+        units = units(1:7)
       endif
     end if
 
@@ -227,7 +227,7 @@ subroutine ESMF_UGridInq(filename, meshname, nodeCount, elementCount, &
         varname = "face_node_connectivity"
       else
         varname = "volume_node_connectivity"
-      endif    
+      endif
       ncStatus = nf90_inquire_attribute(ncid, dummyId, varname, len=len)
       errmsg = "Attribute face_node_connectivity in "//trim(filename)
       if (CDFCheckError (ncStatus, &
@@ -239,20 +239,20 @@ subroutine ESMF_UGridInq(filename, meshname, nodeCount, elementCount, &
         ESMF_METHOD,  &
         ESMF_SRCLINE, errmsg, &
         rc)) return
-      ! Get element connectivity 
+      ! Get element connectivity
       errmsg = "Variable "//elmtConnName(1:len)//" in "//trim(filename)
       ncStatus = nf90_inq_varid (ncid, elmtConnName(1:len), VarId)
       if (CDFCheckError (ncStatus, &
         ESMF_METHOD,  &
         ESMF_SRCLINE, errmsg, &
         rc)) return
-      ! Get dimensions of element connectivity 
+      ! Get dimensions of element connectivity
       ncStatus = nf90_inquire_variable (ncid, VarId, dimids=DimIds)
       if (CDFCheckError (ncStatus, &
         ESMF_METHOD,  &
         ESMF_SRCLINE, errmsg, &
         rc)) return
-      if (present(elementCount)) then	
+      if (present(elementCount)) then   
         ncStatus = nf90_inquire_dimension (ncid, DimIds(2), len=elementCount)
         if (CDFCheckError (ncStatus, &
           ESMF_METHOD,  &
@@ -281,11 +281,11 @@ subroutine ESMF_UGridInq(filename, meshname, nodeCount, elementCount, &
    if (present(faceCoordFlag)) then
       ncStatus = nf90_inquire_attribute(ncid, dummyId, "face_coordinates", len=len)
       if (ncStatus /= nf90_noerror) then
-      	  faceCoordFlag = .FALSE.
+          faceCoordFlag = .FALSE.
       else
           faceCoordFlag = .TRUE.
       endif
-   endif 
+   endif
 
    ncStatus = nf90_close(ncid)
    if (CDFCheckError (ncStatus, &
@@ -293,9 +293,9 @@ subroutine ESMF_UGridInq(filename, meshname, nodeCount, elementCount, &
       ESMF_SRCLINE, errmsg, &
       rc)) return
 #else
-    call ESMF_LogSetError(rcToCheck=ESMF_RC_LIB_NOT_PRESENT, & 
-                 msg="- ESMF_NETCDF not defined when lib was compiled", & 
-                 ESMF_CONTEXT, rcToReturn=rc) 
+    call ESMF_LogSetError(rcToCheck=ESMF_RC_LIB_NOT_PRESENT, &
+                 msg="- ESMF_NETCDF not defined when lib was compiled", &
+                 ESMF_CONTEXT, rcToReturn=rc)
 #endif
 
     return
@@ -306,22 +306,22 @@ end subroutine ESMF_UGridInq
 !BOPI
 ! !ROUTINE: ESMF_UGridGetVar
 !
-subroutine ESMF_UGridGetVar (filename, meshname, &
-		nodeXcoords, nodeYcoords, &
-		faceXcoords, faceYcoords, &
-		faceNodeConnX, faceNodeConnY, rc) 
+subroutine ESMF_UGridGetVar (filename, meshId, &
+                nodeXcoords, nodeYcoords, &
+                faceXcoords, faceYcoords, &
+                faceNodeConnX, faceNodeConnY, rc)
 ! !INTERFACE:
     character(len=*), intent(in)   :: filename
-    character(len=*), intent(in)   :: meshname
+    integer                        :: meshId
     real(ESMF_KIND_R8), optional, pointer :: nodeXcoords(:), nodeYcoords(:)
     real(ESMF_KIND_R8), optional, pointer :: faceXcoords(:), faceYcoords(:)
     real(ESMF_KIND_R8), optional, pointer :: faceNodeConnX(:,:),faceNodeConnY(:,:)
     integer, intent(out), optional :: rc
-    
+
     integer :: i,j,dim1,dim2
     integer, allocatable :: elemConn(:,:)
     integer:: localrc, ncStatus
-    integer :: VarId, meshId, meshDim, pos1, pos2, len
+    integer :: VarId, meshDim, pos1, pos2, len
     integer :: ncid, local_rank
     integer :: localFillValue, indexBase, offset
     real(ESMF_KIND_R8), pointer :: nodeXcoordsLocal(:), nodeYcoordsLocal(:)
@@ -337,17 +337,9 @@ subroutine ESMF_UGridGetVar (filename, meshname, &
       ESMF_METHOD, &
       ESMF_SRCLINE, trim(filename), rc)) return
 
-    ! get the dummy variable meshname which contains the topology data as attributes
-    ncStatus = nf90_inq_varid (ncid, trim(meshname), meshId)
-    errmsg = "Dummy Variable "//trim(meshname)//" does not exist in "//trim(filename)
-    if (CDFCheckError (ncStatus, &
-      ESMF_METHOD,  &
-      ESMF_SRCLINE, trim(meshname), &
-      rc)) return
-
     ! get dimension
     ncStatus = nf90_get_att (ncid, meshId, "topology_dimension", values=meshDim)
-    if (ncStatus /= nf90_noerror) then    
+    if (ncStatus /= nf90_noerror) then
        ncStatus = nf90_get_att (ncid, meshId, "dimension", values=meshDim)
        errmsg = "Attribute topology_dimension or dimension in "//trim(filename)
        if (CDFCheckError (ncStatus, &
@@ -394,7 +386,7 @@ subroutine ESMF_UGridGetVar (filename, meshname, &
         ESMF_SRCLINE, errmsg, &
         rc)) return
       allocate(nodeXcoordsLocal(nodeDim), nodeYcoordsLocal(nodeDim))
-      ncStatus = nf90_get_var (ncid, VarId, nodeXcoordsLocal)  
+      ncStatus = nf90_get_var (ncid, VarId, nodeXcoordsLocal)
       if (CDFCheckError (ncStatus, &
         ESMF_METHOD,  &
         ESMF_SRCLINE, errmsg, &
@@ -405,7 +397,7 @@ subroutine ESMF_UGridGetVar (filename, meshname, &
         ESMF_METHOD,  &
         ESMF_SRCLINE, errmsg, &
         rc)) return
-      ncStatus = nf90_get_var (ncid, VarId, nodeYcoordsLocal)  
+      ncStatus = nf90_get_var (ncid, VarId, nodeYcoordsLocal)
       if (CDFCheckError (ncStatus, &
         ESMF_METHOD,  &
         ESMF_SRCLINE, errmsg, &
@@ -417,12 +409,12 @@ subroutine ESMF_UGridGetVar (filename, meshname, &
       ! In the UGRID standard, face_node_connectivity variable contains the indices
       ! to the nodes, rather than the actually coodinates.  This is used to write the weight
       ! file in the SCRIP format.
-      if (meshDim == 2) then 
+      if (meshDim == 2) then
         varname = "face_node_connectivity"
       else
         varname = "volume_node_connectivity"
-      endif    
-      if (present(faceNodeConnX)) then 
+      endif
+      if (present(faceNodeConnX)) then
         errmsg = "Attribute "//trim(varname)//" in "//trim(filename)
         ncStatus = nf90_inquire_attribute(ncid, meshId, trim(varname), len=len)
         if (CDFCheckError (ncStatus, &
@@ -444,7 +436,7 @@ subroutine ESMF_UGridGetVar (filename, meshname, &
         ! Get elmt conn fill value
         errmsg = "Attribute "//elmtConnName(1:len)//"_FillValue in "//trim(filename)
         ncStatus = nf90_get_att (ncid, VarId, "_FillValue", values=localFillValue)
-	if (ncStatus /= nf90_noerror) localFillValue = -1
+        if (ncStatus /= nf90_noerror) localFillValue = -1
         ! Get start_index attribute to find out the index base (0 or 1)
         ncStatus = nf90_get_att (ncid, VarId, "start_index", values=indexBase)
         ! if not defined, default to 0-based
@@ -458,20 +450,20 @@ subroutine ESMF_UGridGetVar (filename, meshname, &
           ESMF_METHOD,  &
           ESMF_SRCLINE, errmsg, &
           rc)) return
-	faceNodeConnX(:,:)=localFillValue
-	faceNodeConnY(:,:)=localFillValue
+        faceNodeConnX(:,:)=localFillValue
+        faceNodeConnY(:,:)=localFillValue
         !adjust index to 1-based of the start_index is 0
         if (indexBase == 1) then
-	   offset = 0
+           offset = 0
         else
            offset = 1
         endif
         do i=1,dim1
-	  do j=1,dim2
-		if (elemConn(i,j) /= localFillValue) then
-		   faceNodeConnX(i,j) = nodeXcoordsLocal(elemConn(i,j)+offset)
-		   faceNodeConnY(i,j) = nodeYcoordsLocal(elemConn(i,j)+offset)
-	        endif
+          do j=1,dim2
+                if (elemConn(i,j) /= localFillValue) then
+                   faceNodeConnX(i,j) = nodeXcoordsLocal(elemConn(i,j)+offset)
+                   faceNodeConnY(i,j) = nodeYcoordsLocal(elemConn(i,j)+offset)
+                endif
           enddo
         enddo
         deallocate(elemConn)
@@ -504,7 +496,7 @@ subroutine ESMF_UGridGetVar (filename, meshname, &
         ESMF_SRCLINE, errmsg, &
         rc)) return
       if (present(faceXcoords)) then
-        ncStatus = nf90_get_var (ncid, VarId, faceXcoords)  
+        ncStatus = nf90_get_var (ncid, VarId, faceXcoords)
         if (CDFCheckError (ncStatus, &
           ESMF_METHOD,  &
           ESMF_SRCLINE, errmsg, &
@@ -517,7 +509,7 @@ subroutine ESMF_UGridGetVar (filename, meshname, &
           ESMF_METHOD,  &
           ESMF_SRCLINE, errmsg, &
           rc)) return
-        ncStatus = nf90_get_var (ncid, VarId, faceYcoords)  
+        ncStatus = nf90_get_var (ncid, VarId, faceYcoords)
         if (CDFCheckError (ncStatus, &
           ESMF_METHOD,  &
           ESMF_SRCLINE, errmsg, &
@@ -526,11 +518,11 @@ subroutine ESMF_UGridGetVar (filename, meshname, &
     endif
 
     ncStatus = nf90_close(ncid)
-    
+
 #else
-    call ESMF_LogSetError(rcToCheck=ESMF_RC_LIB_NOT_PRESENT, & 
-                 msg="- ESMF_NETCDF not defined when lib was compiled", & 
-                 ESMF_CONTEXT, rcToReturn=rc) 
+    call ESMF_LogSetError(rcToCheck=ESMF_RC_LIB_NOT_PRESENT, &
+                 msg="- ESMF_NETCDF not defined when lib was compiled", &
+                 ESMF_CONTEXT, rcToReturn=rc)
 #endif
 
     return
@@ -562,14 +554,14 @@ subroutine ESMF_UGridInqVarLoc (ncid, VarId, varname,location, rc)
       ncStatus = nf90_inquire_attribute(ncid, VarId, "coordinates", len=len)
       errmsg ="No location or coordinates attributes defined for "//varname
       if (CDFCheckError (ncStatus, &
-          		 ESMF_METHOD,  &
-			 ESMF_SRCLINE, errmsg, &
-			 rc)) return
+                         ESMF_METHOD,  &
+                         ESMF_SRCLINE, errmsg, &
+                         rc)) return
       ncStatus = nf90_get_att(ncid, VarId, "coordinates", attstr)
       if (CDFCheckError (ncStatus, &
-       	  		 ESMF_METHOD,  &
-			 ESMF_SRCLINE, errmsg, &
-			 rc)) return
+                                 ESMF_METHOD,  &
+                         ESMF_SRCLINE, errmsg, &
+                         rc)) return
       ! check if it matches with the node_coordinates or face_coordinates defined
       ! on the topology variable
       ncStatus = nf90_inquire_attribute(ncid, VarId, "mesh", len=len1)
@@ -618,12 +610,12 @@ subroutine ESMF_UGridInqVarLoc (ncid, VarId, varname,location, rc)
         if (attstr1(1:len1) .eq. attstr(1:len)) then
           location = 2
         else
-	  errmsg = "- coordinates attribute does not match with face or node coordinates"
-          call ESMF_LogSetError(rcToCheck=ESMF_FAILURE, & 
-                 msg=errmsg, ESMF_CONTEXT, rcToReturn=rc) 
+          errmsg = "- coordinates attribute does not match with face or node coordinates"
+          call ESMF_LogSetError(rcToCheck=ESMF_FAILURE, &
+                 msg=errmsg, ESMF_CONTEXT, rcToReturn=rc)
           return
-       	endif
-      endif		 
+                endif
+      endif             
      else
        ncStatus = nf90_inquire_attribute(ncid, VarId, "location", len=len)
         if (locationStr(1:len) .eq. 'node') then
@@ -631,17 +623,17 @@ subroutine ESMF_UGridInqVarLoc (ncid, VarId, varname,location, rc)
        elseif (locationStr(1:len) .eq. 'face') then
           location = 2
        else
-	  errmsg = "- location attribute is not recognizable: "//locationStr(1:len)
-          call ESMF_LogSetError(rcToCheck=ESMF_FAILURE, & 
-                 msg=errmsg, ESMF_CONTEXT, rcToReturn=rc) 
+          errmsg = "- location attribute is not recognizable: "//locationStr(1:len)
+          call ESMF_LogSetError(rcToCheck=ESMF_FAILURE, &
+                 msg=errmsg, ESMF_CONTEXT, rcToReturn=rc)
           return
        endif
      endif
      rc = ESMF_SUCCESS
 #else
-    call ESMF_LogSetError(rcToCheck=ESMF_RC_LIB_NOT_PRESENT, & 
-                 msg="- ESMF_NETCDF not defined when lib was compiled", & 
-                 ESMF_CONTEXT, rcToReturn=rc) 
+    call ESMF_LogSetError(rcToCheck=ESMF_RC_LIB_NOT_PRESENT, &
+                 msg="- ESMF_NETCDF not defined when lib was compiled", &
+                 ESMF_CONTEXT, rcToReturn=rc)
 #endif
      return
 end subroutine ESMF_UGridInqVarLoc
@@ -650,7 +642,7 @@ end subroutine ESMF_UGridInqVarLoc
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_UGridGetVarByName"
 subroutine ESMF_UGridGetVarByName (filename, varname, varbuffer, &
-	                           startind, count, location, missingvalue, rc)
+                                   startind, count, location, missingvalue, rc)
 
     character(len=*), intent(in)   :: filename
     character(len=*), intent(in)   :: varname
@@ -673,14 +665,14 @@ subroutine ESMF_UGridGetVarByName (filename, varname, varbuffer, &
 #ifdef ESMF_NETCDF
 
     if (present(startind)) then
-	if (.not. present(count)) then
-           call ESMF_LogSetError(rcToCheck=ESMF_FAILURE, & 
+        if (.not. present(count)) then
+           call ESMF_LogSetError(rcToCheck=ESMF_FAILURE, &
                 msg="- optional argument count is missing", &
-		ESMF_CONTEXT, rcToReturn=rc) 
+                ESMF_CONTEXT, rcToReturn=rc)
           return
         endif
     endif
-           
+
     ncStatus = nf90_open (path=trim(filename), mode=nf90_nowrite, ncid=ncid)
     if (CDFCheckError (ncStatus, &
       ESMF_METHOD,  &
@@ -699,12 +691,12 @@ subroutine ESMF_UGridGetVarByName (filename, varname, varbuffer, &
     if (present(location)) then
         call ESMF_UGridInqVarLoc(ncid, VarId, varname, locflag, localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-			ESMF_CONTEXT, rcToReturn=rc)) return
+                        ESMF_CONTEXT, rcToReturn=rc)) return
         if (((location .eq. 'node') .and. (locflag /= 1)) .or. &
-	   ((location .eq. 'face') .and. (locflag /= 2))) then
-	  errmsg = "- variable "//varname//" is not defined on location "//location
-          call ESMF_LogSetError(rcToCheck=ESMF_FAILURE, & 
-                 msg=errmsg, ESMF_CONTEXT, rcToReturn=rc) 
+           ((location .eq. 'face') .and. (locflag /= 2))) then
+          errmsg = "- variable "//varname//" is not defined on location "//location
+          call ESMF_LogSetError(rcToCheck=ESMF_FAILURE, &
+                 msg=errmsg, ESMF_CONTEXT, rcToReturn=rc)
           return
         endif
     endif
@@ -716,7 +708,7 @@ subroutine ESMF_UGridGetVarByName (filename, varname, varbuffer, &
       ESMF_METHOD,  &
       ESMF_SRCLINE, errmsg, &
       rc)) return
-    
+
     ! get the first dimension length of the variable
     ncStatus = nf90_inquire_dimension (ncid, dimids(1), len=dimsize)
     if (CDFCheckError (ncStatus, &
@@ -727,15 +719,15 @@ subroutine ESMF_UGridGetVarByName (filename, varname, varbuffer, &
 
     if (present(startind)) then
       if (size(varbuffer) < count) then
-	call ESMF_LogSetError(rcToCheck=ESMF_FAILURE, &
-	       msg="- the varbuffer is too small", &
-	       ESMF_CONTEXT, rcToReturn=rc)
+        call ESMF_LogSetError(rcToCheck=ESMF_FAILURE, &
+               msg="- the varbuffer is too small", &
+               ESMF_CONTEXT, rcToReturn=rc)
         return
       endif
     else if (dimsize /= size(varbuffer)) then
-	call ESMF_LogSetError(rcToCheck=ESMF_FAILURE, &
-	       msg="- the variable array dimension does not match with dimension length", &
-	       ESMF_CONTEXT, rcToReturn=rc)
+        call ESMF_LogSetError(rcToCheck=ESMF_FAILURE, &
+               msg="- the variable array dimension does not match with dimension length", &
+               ESMF_CONTEXT, rcToReturn=rc)
         return
     endif
 
@@ -747,7 +739,7 @@ subroutine ESMF_UGridGetVarByName (filename, varname, varbuffer, &
         starts(1)=startind
         counts(1)=count
     endif
-    ncStatus = nf90_get_var (ncid, VarId, varbuffer, start=starts, count=counts)  
+    ncStatus = nf90_get_var (ncid, VarId, varbuffer, start=starts, count=counts)
     if (CDFCheckError (ncStatus, &
       ESMF_METHOD,  &
       ESMF_SRCLINE, errmsg, &
@@ -755,11 +747,11 @@ subroutine ESMF_UGridGetVarByName (filename, varname, varbuffer, &
 
     deallocate(starts, counts)
 
-    ! get missisng value 
+    ! get missisng value
     if (present(missingvalue)) then
       ncStatus = nf90_get_att(ncid, VarId, "_FillValue", missingvalue)
       if (ncStatus /= nf90_noerror) then
-	  ncStatus = nf90_get_att(ncid, varid, "missing_value", missingvalue)
+          ncStatus = nf90_get_att(ncid, varid, "missing_value", missingvalue)
           errmsg = "missing value attribute does not exist for "//trim(varname)
           if (CDFCheckError (ncStatus, &
             ESMF_METHOD, &
@@ -767,7 +759,7 @@ subroutine ESMF_UGridGetVarByName (filename, varname, varbuffer, &
             errmsg, &
             rc)) return
       end if
-    end if  
+    end if
 
     ncStatus = nf90_close (ncid=ncid)
     if (CDFCheckError (ncStatus, &
@@ -777,9 +769,9 @@ subroutine ESMF_UGridGetVarByName (filename, varname, varbuffer, &
     rc = ESMF_SUCCESS
     return
 #else
-    call ESMF_LogSetError(ESMF_RC_LIB_NOT_PRESENT, & 
-                 msg="- ESMF_NETCDF not defined when lib was compiled", & 
-                 ESMF_CONTEXT, rcToReturn=rc) 
+    call ESMF_LogSetError(ESMF_RC_LIB_NOT_PRESENT, &
+                 msg="- ESMF_NETCDF not defined when lib was compiled", &
+                 ESMF_CONTEXT, rcToReturn=rc)
     return
 #endif
 
@@ -788,11 +780,11 @@ end subroutine ESMF_UGridGetVarByName
 !---------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GetMeshFromUGridFile"
-subroutine ESMF_GetMeshFromUGridFile (filename, meshname, nodeCoords, elmtConn, &
-                                elmtNums, startElmt, faceCoords, convertToDeg, rc)
+subroutine ESMF_GetMeshFromUGridFile (filename, nodeCoords, elmtConn, &
+                                elmtNums, startElmt,  &
+                                faceCoords, convertToDeg, rc)
 
     character(len=*), intent(in)   :: filename
-    character(len=*), intent(in)   :: meshname
     real(ESMF_KIND_R8), pointer    :: nodeCoords (:,:)
     integer(ESMF_KIND_I4), pointer :: elmtConn (:)
     integer(ESMF_KIND_I4), pointer :: elmtNums (:)
@@ -801,7 +793,7 @@ subroutine ESMF_GetMeshFromUGridFile (filename, meshname, nodeCoords, elmtConn, 
     logical, intent(in), optional  :: convertToDeg
     integer, intent(out), optional :: rc
 
-    
+
     type(ESMF_VM) :: vm
     integer PetNo, PetCnt
 
@@ -813,8 +805,9 @@ subroutine ESMF_GetMeshFromUGridFile (filename, meshname, nodeCoords, elmtConn, 
     integer :: len
     logical :: convertToDegLocal
     logical :: faceCoordFlag
+    integer :: localrc
     integer, parameter :: nf90_noerror = 0
-    
+
 #ifdef ESMF_NETCDF
     convertToDegLocal = .false.
     if (present(convertToDeg)) convertToDegLocal = convertToDeg
@@ -826,64 +819,23 @@ subroutine ESMF_GetMeshFromUGridFile (filename, meshname, nodeCoords, elmtConn, 
     call ESMF_VMGet(vm, localPet=PetNo, petCount=PetCnt, rc=rc)
     if (rc /= ESMF_SUCCESS) return
 
+    call ESMF_UGridInq(filename, meshid=meshid, nodeCoordDim=meshDim, &
+         faceCoordFlag=faceCoordFlag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+
     ncStatus = nf90_open (path=trim(filename), mode=nf90_nowrite, ncid=ncid)
     if (CDFCheckError (ncStatus, &
       ESMF_METHOD,  &
       ESMF_SRCLINE, trim(filename), &
       rc)) return
 
-    ! get the dummy variable meshname which contains the topology data as attributes
-    ncStatus = nf90_inq_varid (ncid, trim(meshname), meshId)
-    errmsg = "Dummy Variable "//trim(meshname)//" does not exist in "//trim(filename)
-    if (CDFCheckError (ncStatus, &
-      ESMF_METHOD,  &
-      ESMF_SRCLINE, trim(meshname), &
-      rc)) return
-
-    ! Check if cf_role attribute is set
-    ncStatus = nf90_get_att (ncid, meshId, "cf_role", values=attbuf)
-    if (ncStatus /= nf90_noerror) then
-      ncStatus = nf90_get_att (ncid, meshId, "standard_name", values=attbuf)
-      errmsg = "Attribute cf_role in "//trim(filename)
-      if (CDFCheckError (ncStatus, &
-        ESMF_METHOD,  &
-        ESMF_SRCLINE, errmsg, &
-        rc)) return
-    endif 
-    if (attbuf(1:13) .ne. 'mesh_topology') then
-      call ESMF_LogSetError(rcToCheck=ESMF_FAILURE, & 
-                 msg="- cf_role attribute is not mesh_topology", & 
-                 ESMF_CONTEXT, rcToReturn=rc) 
-      return
-    endif
-
-    ! Get mesh dimension
-    ncStatus = nf90_get_att (ncid, meshId, "topology_dimension", values=meshDim)
-    if (ncStatus /= nf90_noerror) then    
-       ncStatus = nf90_get_att (ncid, meshId, "dimension", values=meshDim)
-       errmsg = "Attribute topology_dimension or dimension in "//trim(filename)
-       if (CDFCheckError (ncStatus, &
-          ESMF_METHOD,  &
-          ESMF_SRCLINE, errmsg, &
-          rc)) return
-    endif
-
-    ! check if face_coordiantes exist
-    if (present(faceCoords)) then
-      ncStatus = nf90_inquire_attribute(ncid, meshId, "face_coordinates", len=len)
-      if (ncStatus /= nf90_noerror) then
-      	  faceCoordFlag = .FALSE.
-      else
-          faceCoordFlag = .TRUE.
-      endif
-    endif
-
     if (meshDim == 2) then
        if (faceCoordFlag) then
           call ESMF_GetMesh2DFromUGrid (filename, ncid, meshId, nodeCoords, elmtConn, &
                                 elmtNums, startElmt, faceCoords=faceCoords, &
-				convertToDeg=convertToDegLocal, rc=rc)
-       else      
+                                convertToDeg=convertToDegLocal, rc=rc)
+       else
           call ESMF_GetMesh2DFromUGrid (filename, ncid, meshId, nodeCoords, elmtConn, &
                                 elmtNums, startElmt, convertToDeg=convertToDegLocal, rc=rc)
        endif
@@ -891,23 +843,23 @@ subroutine ESMF_GetMeshFromUGridFile (filename, meshname, nodeCoords, elmtConn, 
        if (faceCoordFlag) then
           call ESMF_GetMesh3DFromUGrid (filename, ncid, meshId, nodeCoords, elmtConn, &
                                 elmtNums, startElmt, faceCoords=faceCoords, &
-				rc=rc)
+                                rc=rc)
        else
           call ESMF_GetMesh3DFromUGrid (filename, ncid, meshId, nodeCoords, elmtConn, &
                                 elmtNums, startElmt, rc=rc)
-       endif			
+       endif                    
     else
-       call ESMF_LogSetError(rcToCheck=ESMF_FAILURE, & 
-                 msg="- Only 2D or 3D mesh is supported currently", & 
-                 ESMF_CONTEXT, rcToReturn=rc) 
+       call ESMF_LogSetError(rcToCheck=ESMF_FAILURE, &
+                 msg="- Only 2D or 3D mesh is supported currently", &
+                 ESMF_CONTEXT, rcToReturn=rc)
        return
     endif
 return
 
 #else
-    call ESMF_LogSetError(ESMF_RC_LIB_NOT_PRESENT, & 
-                 msg="- ESMF_NETCDF not defined when lib was compiled", & 
-                 ESMF_CONTEXT, rcToReturn=rc) 
+    call ESMF_LogSetError(ESMF_RC_LIB_NOT_PRESENT, &
+                 msg="- ESMF_NETCDF not defined when lib was compiled", &
+                 ESMF_CONTEXT, rcToReturn=rc)
     return
 #endif
 end subroutine ESMF_GetMeshFromUGridFile
@@ -919,7 +871,7 @@ subroutine ESMF_GetMesh2DFromUGrid (filename, ncid, meshid, nodeCoords, elmtConn
                                 elmtNums, startElmt, faceCoords, convertToDeg, rc)
 
     character(len=*), intent(in)   :: filename
-    integer,           intent(in)  :: ncid, meshid				
+    integer,           intent(in)  :: ncid, meshid                              
     real(ESMF_KIND_R8), pointer    :: nodeCoords (:,:)
     integer(ESMF_KIND_I4), pointer :: elmtConn (:)
     integer(ESMF_KIND_I4), pointer :: elmtNums (:)
@@ -959,6 +911,11 @@ subroutine ESMF_GetMesh2DFromUGrid (filename, ncid, meshid, nodeCoords, elmtConn
     call ESMF_VMGet(vm, localPet=PetNo, petCount=PetCnt, rc=rc)
     if (rc /= ESMF_SUCCESS) return
 
+    if (present(convertToDeg)) then
+       convertToDegLocal = convertToDeg
+    else
+       convertToDegLocal = .false.
+    endif
     ! Get node coordinates
     ncStatus = nf90_inquire_attribute(ncid, meshId, "node_coordinates", len=len)
     errmsg = "Attribute node_coordinates in "//trim(filename)
@@ -1024,14 +981,14 @@ subroutine ESMF_GetMesh2DFromUGrid (filename, ncid, meshid, nodeCoords, elmtConn
         ESMF_METHOD,  &
         ESMF_SRCLINE, errmsg, &
         rc)) return
-      ncStatus = nf90_get_var (ncid, VarId, nodeCoord1D)  
+      ncStatus = nf90_get_var (ncid, VarId, nodeCoord1D)
       if (CDFCheckError (ncStatus, &
         ESMF_METHOD,  &
         ESMF_SRCLINE, errmsg, &
         rc)) return
 
       do j=1,nodeCount
-	nodeCoords(i,j)=nodeCoord1d(j)
+        nodeCoords(i,j)=nodeCoord1d(j)
       enddo
 
       ! if units is radians_east or radians_north, convert to degrees
@@ -1041,7 +998,7 @@ subroutine ESMF_GetMesh2DFromUGrid (filename, ncid, meshid, nodeCoords, elmtConn
       if (CDFCheckError (ncStatus, &
           ESMF_METHOD, &
           ESMF_SRCLINE,&
-	  errmsg,&
+          errmsg,&
           rc)) return
       ncStatus = nf90_get_att(ncid, VarId, "units", units)
       if (CDFCheckError (ncStatus, &
@@ -1053,9 +1010,9 @@ subroutine ESMF_GetMesh2DFromUGrid (filename, ncid, meshid, nodeCoords, elmtConn
      if (units(len:len) .eq. achar(0)) len = len-1
       units = ESMF_UtilStringLowerCase(units(1:len))
       if (units(1:7) .ne. 'degrees' .and. units(1:7) .ne. 'radians') then
-          call ESMF_LogSetError(rcToCheck=ESMF_FAILURE, & 
-                 msg="- units attribute is not degrees or radians", & 
-                 ESMF_CONTEXT, rcToReturn=rc) 
+          call ESMF_LogSetError(rcToCheck=ESMF_FAILURE, &
+                 msg="- units attribute is not degrees or radians", &
+                 ESMF_CONTEXT, rcToReturn=rc)
           return
       endif
       ! if units is "radians", convert it to degrees
@@ -1064,8 +1021,8 @@ subroutine ESMF_GetMesh2DFromUGrid (filename, ncid, meshid, nodeCoords, elmtConn
             nodeCoords(i,:) = &
                  nodeCoords(i,:)*ESMF_COORDSYS_RAD2DEG
          endif
-      endif	   
-    
+      endif     
+
     enddo
 
     ! Get element connectivity, if it does not exist, bail out
@@ -1090,7 +1047,7 @@ subroutine ESMF_GetMesh2DFromUGrid (filename, ncid, meshid, nodeCoords, elmtConn
     ncStatus = nf90_get_att (ncid, VarId, "_FillValue", values=localFillValue)
     if (ncStatus /= nf90_noerror) localFillValue = -1
 
-    ! Get PolyBreak Value if it's not present, then set it to localFillValue, so 
+    ! Get PolyBreak Value if it's not present, then set it to localFillValue, so
     ! it's ignored
     ncStatus = nf90_get_att (ncid, VarId, "polygon_break_value", &
          values=localPolyBreakValue)
@@ -1099,9 +1056,9 @@ subroutine ESMF_GetMesh2DFromUGrid (filename, ncid, meshid, nodeCoords, elmtConn
     else
       ! If it's been set, then make sure that this value isn't the same as _FillValue
        if (localPolyBreakValue == localFillValue) then
-          call ESMF_LogSetError(rcToCheck=ESMF_FAILURE, & 
-            msg="- polygon_break_value can't be the same as _localFillValue", & 
-                 ESMF_CONTEXT, rcToReturn=rc) 
+          call ESMF_LogSetError(rcToCheck=ESMF_FAILURE, &
+            msg="- polygon_break_value can't be the same as _localFillValue", &
+                 ESMF_CONTEXT, rcToReturn=rc)
           return
        endif
     endif
@@ -1127,10 +1084,10 @@ subroutine ESMF_GetMesh2DFromUGrid (filename, ncid, meshid, nodeCoords, elmtConn
       ESMF_METHOD,  &
       ESMF_SRCLINE, errmsg, &
       rc)) return
- 
+
     ! Decompose the element array evenly across all PETs
      localCount = elmtCount/PetCnt
-    remain = mod (elmtCount,PetCnt) 
+    remain = mod (elmtCount,PetCnt)
     startElmt = localCount*PetNo +1
     if (PetNo==PetCnt-1) localCount=localCount+remain
     allocate(elmtConnT(MaxNodePerElmt,localCount) )
@@ -1154,24 +1111,24 @@ subroutine ESMF_GetMesh2DFromUGrid (filename, ncid, meshid, nodeCoords, elmtConn
               ESMF_SRCLINE, errmsg, &
               rc)) return
           ncStatus = nf90_get_var (ncid, VarId, faceCoord1D, start=(/startElmt/), &
-	  	     		  count=(/localCount/))  
+                                  count=(/localCount/))
           if (CDFCheckError (ncStatus, &
               ESMF_METHOD,  &
               ESMF_SRCLINE, errmsg, &
               rc)) return
 
           do j=1,localCount
-	     faceCoords(i,j)=faceCoord1d(j)
+             faceCoords(i,j)=faceCoord1d(j)
           enddo
 
           ! if units is radians_east or radians_north, convert to degrees
           ! get the attribute 'units'
           ncStatus = nf90_inquire_attribute(ncid, VarId, "units", len=len)
-          errmsg = "Attribute units for "//nodeCoordNames(i)//" in "//trim(filename)
+          errmsg = "Attribute units for "//faceCoordNames(i)//" in "//trim(filename)
           if (CDFCheckError (ncStatus, &
               ESMF_METHOD, &
               ESMF_SRCLINE,&
-	  errmsg,&
+          errmsg,&
           rc)) return
           ncStatus = nf90_get_att(ncid, VarId, "units", units)
           if (CDFCheckError (ncStatus, &
@@ -1183,9 +1140,9 @@ subroutine ESMF_GetMesh2DFromUGrid (filename, ncid, meshid, nodeCoords, elmtConn
           if (units(len:len) .eq. achar(0)) len = len-1
            units = ESMF_UtilStringLowerCase(units(1:len))
           if (units(1:7) .ne. 'degrees' .and. units(1:7) .ne. 'radians') then
-              call ESMF_LogSetError(rcToCheck=ESMF_FAILURE, & 
-                     msg="- units attribute is not degrees or radians", & 
-                    ESMF_CONTEXT, rcToReturn=rc) 
+              call ESMF_LogSetError(rcToCheck=ESMF_FAILURE, &
+                     msg="- units attribute is not degrees or radians", &
+                    ESMF_CONTEXT, rcToReturn=rc)
               return
           endif
           ! if units is "radians", convert it to degrees
@@ -1194,7 +1151,7 @@ subroutine ESMF_GetMesh2DFromUGrid (filename, ncid, meshid, nodeCoords, elmtConn
                  faceCoords(i,:) = &
                      faceCoords(i,:)*ESMF_COORDSYS_RAD2DEG
              endif
-          endif	   
+          endif         
        enddo
        deallocate(faceCoordNames, faceCoord1d)
     endif
@@ -1206,19 +1163,20 @@ subroutine ESMF_GetMesh2DFromUGrid (filename, ncid, meshid, nodeCoords, elmtConn
     if (indexBase == 0) then
       do i=1,localcount
         do j=1,MaxNodePerElmt
-	  ! change 0-base to 1-base
-          if (elmtConnT(j,i) /= localFillValue) then 
-             if (elmtConnT(j,i) /= localPolyBreakValue) then 
+          ! change 0-base to 1-base
+          if (elmtConnT(j,i) /= localFillValue) then
+             if (elmtConnT(j,i) /= localPolyBreakValue) then
                 elmtConnT(j,i)=elmtConnT(j,i)+1
              endif
-	  else
-	     ! find the first FillValue
-	     elmtNums(i) = j-1
+          else
+             ! find the first FillValue
+             elmtNums(i) = j-1
              totalConnections = totalConnections+elmtNums(i)
-	     exit
-	  endif
-         enddo	
-         if (elmtNums(j)==MaxNodePerElmt) then
+             exit
+          endif
+         enddo  
+         !! Change j to i in elmtNums(i)
+         if (elmtNums(i)==MaxNodePerElmt) then
             totalConnections = totalconnections+elmtNums(i)
          endif
       enddo
@@ -1226,7 +1184,7 @@ subroutine ESMF_GetMesh2DFromUGrid (filename, ncid, meshid, nodeCoords, elmtConn
       do i=1,localcount
         j = MaxNodePerElmt
         do while (elmtConnT(j,i) == localFillValue)
- 	  j = j - 1
+          j = j - 1
         enddo
         elmtNums(i) = j
         totalConnections = totalConnections+elmtNums(i)
@@ -1262,9 +1220,9 @@ subroutine ESMF_GetMesh2DFromUGrid (filename, ncid, meshid, nodeCoords, elmtConn
       ESMF_SRCLINE, trim(filename), &
       rc)) return
 #else
-    call ESMF_LogSetError(ESMF_RC_LIB_NOT_PRESENT, & 
-                 msg="- ESMF_NETCDF not defined when lib was compiled", & 
-                 ESMF_CONTEXT, rcToReturn=rc) 
+    call ESMF_LogSetError(ESMF_RC_LIB_NOT_PRESENT, &
+                 msg="- ESMF_NETCDF not defined when lib was compiled", &
+                 ESMF_CONTEXT, rcToReturn=rc)
     return
 #endif
 
@@ -1277,7 +1235,7 @@ subroutine ESMF_GetMesh3DFromUGrid (filename, ncid, meshid, nodeCoords, elmtConn
                                 elmtNums, startElmt, faceCoords, rc)
 
     character(len=*), intent(in)   :: filename
-    integer,           intent(in)  :: ncid, meshid				
+    integer,           intent(in)  :: ncid, meshid                              
     real(ESMF_KIND_R8), pointer    :: nodeCoords (:,:)
     integer(ESMF_KIND_I4), pointer :: elmtConn (:)
     integer(ESMF_KIND_I4), pointer :: elmtNums (:)
@@ -1387,14 +1345,14 @@ subroutine ESMF_GetMesh3DFromUGrid (filename, ncid, meshid, nodeCoords, elmtConn
         ESMF_METHOD,  &
         ESMF_SRCLINE, errmsg, &
         rc)) return
-      ncStatus = nf90_get_var (ncid, VarId, nodeCoord1D)  
+      ncStatus = nf90_get_var (ncid, VarId, nodeCoord1D)
       if (CDFCheckError (ncStatus, &
         ESMF_METHOD,  &
         ESMF_SRCLINE, errmsg, &
         rc)) return
 
       do j=1,nodeCount
-	nodeCoords(i,j)=nodeCoord1d(j)
+        nodeCoords(i,j)=nodeCoord1d(j)
       enddo
 
       ! Convert to Cartisian 3D coordinates
@@ -1404,7 +1362,7 @@ subroutine ESMF_GetMesh3DFromUGrid (filename, ncid, meshid, nodeCoords, elmtConn
       if (CDFCheckError (ncStatus, &
           ESMF_METHOD, &
           ESMF_SRCLINE,&
-	  errmsg,&
+          errmsg,&
           rc)) return
       ncStatus = nf90_get_att(ncid, VarId, "units", units)
       if (CDFCheckError (ncStatus, &
@@ -1415,39 +1373,39 @@ subroutine ESMF_GetMesh3DFromUGrid (filename, ncid, meshid, nodeCoords, elmtConn
       if (i==1 .or. i==2) then
         ! if units is not "degrees" or "radians" return errors
         units = ESMF_UtilStringLowerCase(units(1:len))
-	if (units(len:len) .eq. achar(0)) len = len-1
+        if (units(len:len) .eq. achar(0)) len = len-1
         if (units(1:7) .ne. 'degrees' .and. units(1:7) .ne. 'radians') then
-          call ESMF_LogSetError(rcToCheck=ESMF_FAILURE, & 
-                 msg="- units attribute is not degrees or radians", & 
-                 ESMF_CONTEXT, rcToReturn=rc) 
+          call ESMF_LogSetError(rcToCheck=ESMF_FAILURE, &
+                 msg="- units attribute is not degrees or radians", &
+                 ESMF_CONTEXT, rcToReturn=rc)
           return
         endif
         ! if units is "radians", convert it to degrees
         if (units(1:7) .eq. "radians") then
             nodeCoords(i,:) = nodeCoords(i,:)*ESMF_COORDSYS_RAD2DEG
         endif
-      else	   
+      else      
         ! normalize the height using the earth radius
-	if (units(len:len) .eq. achar(0)) len = len-1
+        if (units(len:len) .eq. achar(0)) len = len-1
         if (units(1:len) .eq. "meters") then
-	  earthradius = 6371000.0
+          earthradius = 6371000.0
         else if (units(1:len) .eq. "km" .or. units(1:len) .eq. "kilometers") then
-	  earthradius = 6371.0
-        else    
-          call ESMF_LogSetError(rcToCheck=ESMF_FAILURE, & 
-                 msg="- units attribute for height is not meters, km, or kilometers", & 
-                 ESMF_CONTEXT, rcToReturn=rc) 
+          earthradius = 6371.0
+        else
+          call ESMF_LogSetError(rcToCheck=ESMF_FAILURE, &
+                 msg="- units attribute for height is not meters, km, or kilometers", &
+                 ESMF_CONTEXT, rcToReturn=rc)
           return
         endif
         nodeCoords(i,:)=1+nodeCoords(i,:)/earthradius
       endif
     enddo
 
-! save coordinates as ESMF_COORDSYS_SPH_DEG, no need to convert to CART    
+! save coordinates as ESMF_COORDSYS_SPH_DEG, no need to convert to CART
 #if 0
     ! Convert the coordinates into Cartesian 3D
     do i=1,nodeCount
-      call c_esmc_sphdeg_to_cart(nodeCoords(1,i), nodeCoords(2,i), & 
+      call c_esmc_sphdeg_to_cart(nodeCoords(1,i), nodeCoords(2,i), &
                   coord(1), coord(2), coord(3), &
                   localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -1479,7 +1437,7 @@ subroutine ESMF_GetMesh3DFromUGrid (filename, ncid, meshid, nodeCoords, elmtConn
     ncStatus = nf90_get_att (ncid, VarId, "_FillValue", values=localFillValue)
     if (ncStatus .ne. nf90_noerror) localFillValue = -1
 
-    ! Get PolyBreak Value if it's not present, then set it to localFillValue, so 
+    ! Get PolyBreak Value if it's not present, then set it to localFillValue, so
     ! it's ignored
     ncStatus = nf90_get_att (ncid, VarId, "polygon_break_value", &
          values=localPolyBreakValue)
@@ -1488,9 +1446,9 @@ subroutine ESMF_GetMesh3DFromUGrid (filename, ncid, meshid, nodeCoords, elmtConn
     else
        ! If it's been set, then make sure that this value isn't the same as _FillValue
        if (localPolyBreakValue == localFillValue) then
-          call ESMF_LogSetError(rcToCheck=ESMF_FAILURE, & 
-            msg="- polygon_break_value can't be the same as _localFillValue", & 
-                 ESMF_CONTEXT, rcToReturn=rc) 
+          call ESMF_LogSetError(rcToCheck=ESMF_FAILURE, &
+            msg="- polygon_break_value can't be the same as _localFillValue", &
+                 ESMF_CONTEXT, rcToReturn=rc)
           return
        endif
     endif
@@ -1516,10 +1474,10 @@ subroutine ESMF_GetMesh3DFromUGrid (filename, ncid, meshid, nodeCoords, elmtConn
       ESMF_METHOD,  &
       ESMF_SRCLINE, errmsg, &
       rc)) return
- 
+
     ! Decompose the element array evenly across all PETs
     localCount = elmtCount/PetCnt
-    remain = mod (elmtCount,PetCnt) 
+    remain = mod (elmtCount,PetCnt)
     startElmt = localCount*PetNo +1
     if (PetNo==PetCnt-1) localCount=localCount+remain
     allocate(elmtConnT(MaxNodePerElmt,localCount) )
@@ -1543,14 +1501,14 @@ subroutine ESMF_GetMesh3DFromUGrid (filename, ncid, meshid, nodeCoords, elmtConn
               ESMF_SRCLINE, errmsg, &
               rc)) return
           ncStatus = nf90_get_var (ncid, VarId, faceCoord1D, start=(/startElmt/), &
-	  	     		  count=(/localCount/))  
+                                  count=(/localCount/))
           if (CDFCheckError (ncStatus, &
               ESMF_METHOD,  &
               ESMF_SRCLINE, errmsg, &
               rc)) return
 
           do j=1,localCount
-	     faceCoords(i,j)=faceCoord1d(j)
+             faceCoords(i,j)=faceCoord1d(j)
           enddo
 
        enddo
@@ -1564,24 +1522,24 @@ subroutine ESMF_GetMesh3DFromUGrid (filename, ncid, meshid, nodeCoords, elmtConn
     if (indexBase == 0) then
       do i=1,localcount
         do j=1,MaxNodePerElmt
-	  ! change 0-base to 1-base
-          if (elmtConnT(j,i) /= localFillValue) then 
-             if (elmtConnT(j,i) /= localPolyBreakValue) then 
+          ! change 0-base to 1-base
+          if (elmtConnT(j,i) /= localFillValue) then
+             if (elmtConnT(j,i) /= localPolyBreakValue) then
                 elmtConnT(j,i)=elmtConnT(j,i)+1
              endif
-	  else
-	     ! find the first FillValue
-	     elmtNums(i) = j-1	
+          else
+             ! find the first FillValue
+             elmtNums(i) = j-1  
              totalConnections = totalConnections+elmtNums(i)
              exit
-	  endif
-         enddo	
+          endif
+         enddo  
       enddo
     else
       do i=1,localcount
         j = MaxNodePerElmt
         do while (elmtConnT(j,i) == localFillValue)
-	  j = j - 1
+          j = j - 1
         enddo
         elmtNums(i) = j
         totalConnections = totalConnections+elmtNums(i)
@@ -1621,9 +1579,9 @@ subroutine ESMF_GetMesh3DFromUGrid (filename, ncid, meshid, nodeCoords, elmtConn
       ESMF_SRCLINE, trim(filename), &
       rc)) return
 #else
-    call ESMF_LogSetError(ESMF_RC_LIB_NOT_PRESENT, & 
-                 msg="- ESMF_NETCDF not defined when lib was compiled", & 
-                 ESMF_CONTEXT, rcToReturn=rc) 
+    call ESMF_LogSetError(ESMF_RC_LIB_NOT_PRESENT, &
+                 msg="- ESMF_NETCDF not defined when lib was compiled", &
+                 ESMF_CONTEXT, rcToReturn=rc)
     return
 #endif
 
@@ -1642,11 +1600,11 @@ subroutine ESMF_GetElemFromUGridFile (filename, meshname, elmtConn, &
     integer(ESMF_KIND_I4), pointer :: elmtNums (:)
     integer,           intent(out) :: startElmt
     integer, intent(out), optional :: rc
-    
+
     type(ESMF_VM) :: vm
     integer PetNo, PetCnt
 
-    integer :: ncid, meshid				
+    integer :: ncid, meshid                             
     integer(ESMF_KIND_I4), allocatable :: elmtConnT(:,:)
     integer :: DimIds(2), VarId
     integer :: ncStatus
@@ -1660,10 +1618,9 @@ subroutine ESMF_GetElemFromUGridFile (filename, meshname, elmtConn, &
     character(len=24) :: units
     character(len=256) :: errmsg
     character(len=24) :: attbuf
-    logical :: convertToDegLocal
     integer :: totalConnections
     integer, parameter :: nf90_noerror = 0
-    
+
 #ifdef ESMF_NETCDF
 
     ! Get VM information
@@ -1696,17 +1653,17 @@ subroutine ESMF_GetElemFromUGridFile (filename, meshname, elmtConn, &
         ESMF_METHOD,  &
         ESMF_SRCLINE, errmsg, &
         rc)) return
-    endif 
+    endif
     if (attbuf(1:13) .ne. "mesh_topology") then
-      call ESMF_LogSetError(rcToCheck=ESMF_FAILURE, & 
-                 msg="- cf_role attribute is not mesh_topology", & 
-                 ESMF_CONTEXT, rcToReturn=rc) 
+      call ESMF_LogSetError(rcToCheck=ESMF_FAILURE, &
+                 msg="- cf_role attribute is not mesh_topology", &
+                 ESMF_CONTEXT, rcToReturn=rc)
       return
     endif
 
     ! Get mesh dimension
     ncStatus = nf90_get_att (ncid, meshId, "topology_dimension", values=meshDim)
-    if (ncStatus /= nf90_noerror) then    
+    if (ncStatus /= nf90_noerror) then
        ncStatus = nf90_get_att (ncid, meshId, "dimension", values=meshDim)
        errmsg = "Attribute topology_dimension or dimension in "//trim(filename)
        if (CDFCheckError (ncStatus, &
@@ -1727,7 +1684,7 @@ subroutine ESMF_GetElemFromUGridFile (filename, meshname, elmtConn, &
        ncStatus = nf90_get_att (ncid, meshId, "volume_node_connectivity", values=elmtConnName)
     else
        ! error message -- wrong dimension
-    endif  
+    endif
     if (CDFCheckError (ncStatus, &
       ESMF_METHOD,  &
       ESMF_SRCLINE, errmsg, &
@@ -1766,10 +1723,10 @@ subroutine ESMF_GetElemFromUGridFile (filename, meshname, elmtConn, &
       ESMF_METHOD,  &
       ESMF_SRCLINE, errmsg, &
       rc)) return
- 
+
     ! Decompose the element array evenly across all PETs
     localCount = elmtCount/PetCnt
-    remain = mod (elmtCount,PetCnt) 
+    remain = mod (elmtCount,PetCnt)
     startElmt = localCount*PetNo +1
     if (PetNo==PetCnt-1) localCount=localCount+remain
     print *, PetNo, 'Before allocating elmtConn', localCount
@@ -1791,16 +1748,16 @@ subroutine ESMF_GetElemFromUGridFile (filename, meshname, elmtConn, &
     if (indexBase == 0) then
       do i=1,localcount
         do j=1,MaxNodePerElmt
-	  ! change 0-base to 1-base
-          if (elmtConnT(j,i) /= localFillValue) then 
-	     elmtConnT(j,i)=elmtConnT(j,i)+1
-	  else
-	     ! find the first FillValue
-	     elmtNums(i) = j-1
+          ! change 0-base to 1-base
+          if (elmtConnT(j,i) /= localFillValue) then
+             elmtConnT(j,i)=elmtConnT(j,i)+1
+          else
+             ! find the first FillValue
+             elmtNums(i) = j-1
              totalConnections = totalConnections+elmtNums(i)
-	     exit
-	  endif
-         enddo	
+             exit
+          endif
+         enddo  
          if (elmtNums(i)==MaxNodePerElmt) then
              totalConnections = totalConnections+elmtNums(i)
          endif
@@ -1809,7 +1766,7 @@ subroutine ESMF_GetElemFromUGridFile (filename, meshname, elmtConn, &
       do i=1,localcount
         j = MaxNodePerElmt
         do while (elmtConnT(j,i) == localFillValue)
-	  j = j - 1
+          j = j - 1
         enddo
         elmtNums(i) = j
         totalConnections = totalConnections+elmtNums(i)
@@ -1832,9 +1789,9 @@ subroutine ESMF_GetElemFromUGridFile (filename, meshname, elmtConn, &
       ESMF_SRCLINE, trim(filename), &
       rc)) return
 #else
-    call ESMF_LogSetError(ESMF_RC_LIB_NOT_PRESENT, & 
-                 msg="- ESMF_NETCDF not defined when lib was compiled", & 
-                 ESMF_CONTEXT, rcToReturn=rc) 
+    call ESMF_LogSetError(ESMF_RC_LIB_NOT_PRESENT, &
+                 msg="- ESMF_NETCDF not defined when lib was compiled", &
+                 ESMF_CONTEXT, rcToReturn=rc)
     return
 #endif
 
@@ -1857,7 +1814,7 @@ subroutine ESMF_GetNodeFromUGridFile (filename, meshname, nodeCoords,  &
     type(ESMF_VM) :: vm
     integer :: PetNo, PetCnt
 
-    integer :: ncid, meshid				
+    integer :: ncid, meshid                             
     integer :: DimIds(2), VarId
     integer :: ncStatus
 
@@ -1914,17 +1871,17 @@ subroutine ESMF_GetNodeFromUGridFile (filename, meshname, nodeCoords,  &
         ESMF_METHOD,  &
         ESMF_SRCLINE, errmsg, &
         rc)) return
-    endif 
+    endif
     if (attbuf(1:13) .ne. "mesh_topology") then
-      call ESMF_LogSetError(rcToCheck=ESMF_FAILURE, & 
-                 msg="- cf_role attribute is not mesh_topology", & 
-                 ESMF_CONTEXT, rcToReturn=rc) 
+      call ESMF_LogSetError(rcToCheck=ESMF_FAILURE, &
+                 msg="- cf_role attribute is not mesh_topology", &
+                 ESMF_CONTEXT, rcToReturn=rc)
       return
     endif
 
     ! Get mesh dimension
     ncStatus = nf90_get_att (ncid, meshId, "topology_dimension", values=meshDim)
-    if (ncStatus /= nf90_noerror) then    
+    if (ncStatus /= nf90_noerror) then
        ncStatus = nf90_get_att (ncid, meshId, "dimension", values=meshDim)
        errmsg = "Attribute topology_dimension or dimension in "//trim(filename)
        if (CDFCheckError (ncStatus, &
@@ -1954,7 +1911,7 @@ subroutine ESMF_GetNodeFromUGridFile (filename, meshname, nodeCoords,  &
        pos1 = index(nodeCoordString(1:)," ")
        nodeCoordNames(1) = nodeCoordString(1:pos1-1)
        nodeCoordNames(2)=nodeCoordString(pos1+1:len)
-    else  
+    else
        allocate( nodeCoordNames(3))
        pos1 = index(nodeCoordString(1:)," ")
        nodeCoordNames(1) = nodeCoordString(1:pos1-1)
@@ -1984,16 +1941,16 @@ subroutine ESMF_GetNodeFromUGridFile (filename, meshname, nodeCoords,  &
 
     if (present(startNode)) then
       localStart = startNode
-    else 
+    else
       localStart = 1
     endif
     if (present(nodeCount)) then
       if (localStart+nodeCount-1 > totalNodes) then
-          call ESMF_LogSetError(rcToCheck=ESMF_FAILURE, & 
-                 msg="- startNode+nodeCount > node dimension", & 
-                 ESMF_CONTEXT, rcToReturn=rc) 
+          call ESMF_LogSetError(rcToCheck=ESMF_FAILURE, &
+                 msg="- startNode+nodeCount > node dimension", &
+                 ESMF_CONTEXT, rcToReturn=rc)
           return
-      endif  
+      endif
       localCount=nodeCount
     else
       localCount=totalNodes
@@ -2007,14 +1964,14 @@ subroutine ESMF_GetNodeFromUGridFile (filename, meshname, nodeCoords,  &
         ESMF_SRCLINE, errmsg, &
         rc)) return
       ncStatus = nf90_get_var (ncid, VarId, nodeCoord1D, start=(/localStart/), &
-       	         count=(/localCount/))  
+                         count=(/localCount/))
       if (CDFCheckError (ncStatus, &
         ESMF_METHOD,  &
         ESMF_SRCLINE, errmsg, &
         rc)) return
 
       do j=1,localCount
-	nodeCoords(i,j)=nodeCoord1D(j)
+        nodeCoords(i,j)=nodeCoord1D(j)
       enddo
 
       ! Convert to Cartisian 3D coordinates
@@ -2024,7 +1981,7 @@ subroutine ESMF_GetNodeFromUGridFile (filename, meshname, nodeCoords,  &
       if (CDFCheckError (ncStatus, &
           ESMF_METHOD, &
           ESMF_SRCLINE,&
-	  errmsg,&
+          errmsg,&
           rc)) return
       ncStatus = nf90_get_att(ncid, VarId, "units", units)
       if (CDFCheckError (ncStatus, &
@@ -2037,9 +1994,9 @@ subroutine ESMF_GetNodeFromUGridFile (filename, meshname, nodeCoords,  &
         ! if units is not "degrees" or "radians" return errors
         units = ESMF_UtilStringLowerCase(units(1:len))
         if (units(1:7) .ne. 'degrees' .and. units(1:7) .ne. 'radians') then
-          call ESMF_LogSetError(rcToCheck=ESMF_FAILURE, & 
-                 msg="- units attribute is not degrees or radians", & 
-                 ESMF_CONTEXT, rcToReturn=rc) 
+          call ESMF_LogSetError(rcToCheck=ESMF_FAILURE, &
+                 msg="- units attribute is not degrees or radians", &
+                 ESMF_CONTEXT, rcToReturn=rc)
           return
         endif
         ! if units is "radians", convert it to degrees
@@ -2049,23 +2006,23 @@ subroutine ESMF_GetNodeFromUGridFile (filename, meshname, nodeCoords,  &
             !print *, 'Convert radians to degree ', rad2deg
             nodeCoords(i,:) = nodeCoords(i,:)*rad2deg
           endif
-        elseif (meshDim == 3) then	   
+        elseif (meshDim == 3) then      
           ! if units is "degrees", convert it to radians
           if (units(1:7) .eq. "degrees") then
              deg2rad = 3.141592653589793238/180.0
              nodeCoords(i,:) = nodeCoords(i,:)*deg2rad
           endif
         endif
-      else	   
+      else      
         ! normalize the height using the earth radius
         if (units(1:len) .eq. "meters") then
-	  earthradius = 6371000.0
+          earthradius = 6371000.0
         else if (units(1:len) .eq. "km" .or. units(1:len) .eq. "kilometers") then
-	  earthradius = 6371.0
-        else    
-          call ESMF_LogSetError(rcToCheck=ESMF_FAILURE, & 
-                 msg="- units attribute for height is not meters, km, or kilometers", & 
-                 ESMF_CONTEXT, rcToReturn=rc) 
+          earthradius = 6371.0
+        else
+          call ESMF_LogSetError(rcToCheck=ESMF_FAILURE, &
+                 msg="- units attribute for height is not meters, km, or kilometers", &
+                 ESMF_CONTEXT, rcToReturn=rc)
           return
         endif
         nodeCoords(i,:)=1+nodeCoords(i,:)/earthradius
@@ -2093,9 +2050,9 @@ subroutine ESMF_GetNodeFromUGridFile (filename, meshname, nodeCoords,  &
       ESMF_SRCLINE, trim(filename), &
       rc)) return
 #else
-    call ESMF_LogSetError(ESMF_RC_LIB_NOT_PRESENT, & 
-                 msg="- ESMF_NETCDF not defined when lib was compiled", & 
-                 ESMF_CONTEXT, rcToReturn=rc) 
+    call ESMF_LogSetError(ESMF_RC_LIB_NOT_PRESENT, &
+                 msg="- ESMF_NETCDF not defined when lib was compiled", &
+                 ESMF_CONTEXT, rcToReturn=rc)
     return
 #endif
 
@@ -2138,7 +2095,7 @@ subroutine ESMF_UGridGetCoords (filename, meshid, coords,  &
     if (rc /= ESMF_SUCCESS) return
 
     ! if count==0, return with success
-    if (count==0) then 
+    if (count==0) then
        rc=ESMF_SUCCESS
        return
     endif
@@ -2159,7 +2116,7 @@ subroutine ESMF_UGridGetCoords (filename, meshid, coords,  &
     if (CDFCheckError (ncStatus, &
           ESMF_METHOD, &
           ESMF_SRCLINE,&
-	  errmsg,&
+          errmsg,&
           rc)) return
     ncStatus = nf90_get_att (ncid, meshId, attname, coordString)
     if (CDFCheckError (ncStatus, &
@@ -2173,7 +2130,7 @@ subroutine ESMF_UGridGetCoords (filename, meshid, coords,  &
        pos1 = index(coordString(1:)," ")
        coordNames(1) = trim(coordString(1:pos1-1))
        coordNames(2)=trim(coordString(pos1+1:len))
-    else  
+    else
        allocate( coordNames(3))
        pos1 = index(coordString(1:)," ")
        coordNames(1) = trim(coordString(1:pos1-1))
@@ -2190,7 +2147,7 @@ subroutine ESMF_UGridGetCoords (filename, meshid, coords,  &
         ESMF_SRCLINE, errmsg, &
         rc)) return
       ncStatus = nf90_get_var (ncid, VarId, coords(:,i) , start=(/start/), &
-       	         count=(/count/))  
+                         count=(/count/))
       if (CDFCheckError (ncStatus, &
         ESMF_METHOD,  &
         ESMF_SRCLINE, errmsg, &
@@ -2203,7 +2160,7 @@ subroutine ESMF_UGridGetCoords (filename, meshid, coords,  &
       if (CDFCheckError (ncStatus, &
           ESMF_METHOD, &
           ESMF_SRCLINE,&
-	  errmsg,&
+          errmsg,&
           rc)) return
       ncStatus = nf90_get_att(ncid, VarId, "units", units)
       if (CDFCheckError (ncStatus, &
@@ -2214,28 +2171,28 @@ subroutine ESMF_UGridGetCoords (filename, meshid, coords,  &
       if (i==1 .or. i==2) then
         ! if units is not "degrees" or "radians" return errors
         units = ESMF_UtilStringLowerCase(units(1:len))
-	if (units(len:len) .eq. achar(0)) len = len-1
+        if (units(len:len) .eq. achar(0)) len = len-1
         if (units(1:7) .ne. 'degrees' .and. units(1:7) .ne. 'radians') then
-          call ESMF_LogSetError(rcToCheck=ESMF_FAILURE, & 
-                 msg="- units attribute is not degrees or radians", & 
-                 ESMF_CONTEXT, rcToReturn=rc) 
+          call ESMF_LogSetError(rcToCheck=ESMF_FAILURE, &
+                 msg="- units attribute is not degrees or radians", &
+                 ESMF_CONTEXT, rcToReturn=rc)
           return
         endif
         ! if units is "radians", convert it to degrees
         if (units(1:7) .eq. "radians") then
             coords(:,i) = coords(:,i)*ESMF_COORDSYS_RAD2DEG
         endif
-      else	   
+      else      
         ! normalize the height using the earth radius
-	if (units(len:len) .eq. achar(0)) len = len-1
+        if (units(len:len) .eq. achar(0)) len = len-1
         if (units(1:len) .eq. "meters") then
-	  earthradius = 6371000.0
+          earthradius = 6371000.0
         else if (units(1:len) .eq. "km" .or. units(1:len) .eq. "kilometers") then
-	  earthradius = 6371.0
-        else    
-          call ESMF_LogSetError(rcToCheck=ESMF_FAILURE, & 
-                 msg="- units attribute for height is not meters, km, or kilometers", & 
-                 ESMF_CONTEXT, rcToReturn=rc) 
+          earthradius = 6371.0
+        else
+          call ESMF_LogSetError(rcToCheck=ESMF_FAILURE, &
+                 msg="- units attribute for height is not meters, km, or kilometers", &
+                 ESMF_CONTEXT, rcToReturn=rc)
           return
         endif
         coords(:,i)=1+coords(:,i)/earthradius
@@ -2247,9 +2204,9 @@ subroutine ESMF_UGridGetCoords (filename, meshid, coords,  &
         ESMF_SRCLINE, trim(filename), &
         rc)) return
 #else
-    call ESMF_LogSetError(rcToCheck=ESMF_RC_LIB_NOT_PRESENT, & 
-                 msg="- ESMF_NETCDF not defined when lib was compiled", & 
-                 ESMF_CONTEXT, rcToReturn=rc) 
+    call ESMF_LogSetError(rcToCheck=ESMF_RC_LIB_NOT_PRESENT, &
+                 msg="- ESMF_NETCDF not defined when lib was compiled", &
+                 ESMF_CONTEXT, rcToReturn=rc)
     return
 #endif
 
@@ -2279,21 +2236,21 @@ function CDFCheckError (ncStatus, module, fileName, lineNo, errmsg, rc)
 #ifdef ESMF_NETCDF
     if ( ncStatus .ne. nf90_noerror) then
         call ESMF_LogWrite (msg=trim(errmsg)//':'//trim(nf90_strerror(ncStatus)), &
-	    logmsgFlag=ESMF_LOGMSG_ERROR, &
+            logmsgFlag=ESMF_LOGMSG_ERROR, &
             line=lineNo, file=fileName, method=module)
         print '("NetCDF Error: ", A, " : ", A)', &
-	trim(errmsg),trim(nf90_strerror(ncStatus))
+        trim(errmsg),trim(nf90_strerror(ncStatus))
         call ESMF_LogFlush()
         if (present(rc)) rc = ESMF_FAILURE
- 	CDFCheckError = .TRUE.
+        CDFCheckError = .TRUE.
     else
        if (present(rc)) rc = ESMF_SUCCESS
        return
     end if
 #else
-    call ESMF_LogSetError(rcToCheck=ESMF_RC_LIB_NOT_PRESENT, & 
-                 msg="- ESMF_NETCDF not defined when lib was compiled", & 
-                 ESMF_CONTEXT, rcToReturn=rc) 
+    call ESMF_LogSetError(rcToCheck=ESMF_RC_LIB_NOT_PRESENT, &
+                 msg="- ESMF_NETCDF not defined when lib was compiled", &
+                 ESMF_CONTEXT, rcToReturn=rc)
     return
 #endif
 

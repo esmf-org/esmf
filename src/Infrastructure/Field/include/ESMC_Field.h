@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2016, University Corporation for Atmospheric Research, 
+// Copyright 2002-2017, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -60,9 +60,9 @@ ESMC_Field ESMC_FieldCreateGridArraySpec(
   ESMC_Grid grid,                           // in
   ESMC_ArraySpec arrayspec,                 // in
   enum ESMC_StaggerLoc staggerloc,          // in
-  ESMC_InterfaceInt *gridToFieldMap,         // in
-  ESMC_InterfaceInt *ungriddedLBound,        // in
-  ESMC_InterfaceInt *ungriddedUBound,        // in
+  ESMC_InterArrayInt *gridToFieldMap,       // in
+  ESMC_InterArrayInt *ungriddedLBound,      // in
+  ESMC_InterArrayInt *ungriddedUBound,      // in
   const char *name,                         // in
   int *rc                                   // out
 );
@@ -131,11 +131,11 @@ ESMC_Field ESMC_FieldCreateGridArraySpec(
 // !INTERFACE:
 ESMC_Field ESMC_FieldCreateGridTypeKind(
   ESMC_Grid grid,                           // in
-  enum ESMC_TypeKind_Flag typekind,              // in
+  enum ESMC_TypeKind_Flag typekind,         // in
   enum ESMC_StaggerLoc staggerloc,          // in
-  ESMC_InterfaceInt *gridToFieldMap,         // in
-  ESMC_InterfaceInt *ungriddedLBound,        // in
-  ESMC_InterfaceInt *ungriddedUBound,        // in
+  ESMC_InterArrayInt *gridToFieldMap,       // in
+  ESMC_InterArrayInt *ungriddedLBound,      // in
+  ESMC_InterArrayInt *ungriddedUBound,      // in
   const char *name,                         // in
   int *rc                                   // out
 );
@@ -207,9 +207,9 @@ ESMC_Field ESMC_FieldCreateGridTypeKind(
 ESMC_Field ESMC_FieldCreateMeshArraySpec(
   ESMC_Mesh mesh,                           // in
   ESMC_ArraySpec arrayspec,                 // in
-  ESMC_InterfaceInt *gridToFieldMap,         // in
-  ESMC_InterfaceInt *ungriddedLBound,        // in
-  ESMC_InterfaceInt *ungriddedUBound,        // in
+  ESMC_InterArrayInt *gridToFieldMap,       // in
+  ESMC_InterArrayInt *ungriddedLBound,      // in
+  ESMC_InterArrayInt *ungriddedUBound,      // in
   const char *name,                         // in
   int *rc                                   // out
 );
@@ -275,11 +275,11 @@ ESMC_Field ESMC_FieldCreateMeshArraySpec(
 // !INTERFACE:
 ESMC_Field ESMC_FieldCreateMeshTypeKind(
   ESMC_Mesh mesh,                           // in
-  enum ESMC_TypeKind_Flag typekind,              // in
+  enum ESMC_TypeKind_Flag typekind,         // in
   enum ESMC_MeshLoc_Flag meshloc,           // in
-  ESMC_InterfaceInt *gridToFieldMap,         // in
-  ESMC_InterfaceInt *ungriddedLBound,        // in
-  ESMC_InterfaceInt *ungriddedUBound,        // in
+  ESMC_InterArrayInt *gridToFieldMap,       // in
+  ESMC_InterArrayInt *ungriddedLBound,      // in
+  ESMC_InterArrayInt *ungriddedUBound,      // in
   const char *name,                         // in
   int *rc                                   // out
 );
@@ -346,11 +346,11 @@ ESMC_Field ESMC_FieldCreateMeshTypeKind(
 //
 // !INTERFACE:
 ESMC_Field ESMC_FieldCreateLocStreamArraySpec(
-  ESMC_LocStream locstream,                           // in
+  ESMC_LocStream locstream,                 // in
   ESMC_ArraySpec arrayspec,                 // in
-  ESMC_InterfaceInt *gridToFieldMap,         // in
-  ESMC_InterfaceInt *ungriddedLBound,        // in
-  ESMC_InterfaceInt *ungriddedUBound,        // in
+  ESMC_InterArrayInt *gridToFieldMap,       // in
+  ESMC_InterArrayInt *ungriddedLBound,      // in
+  ESMC_InterArrayInt *ungriddedUBound,      // in
   const char *name,                         // in
   int *rc                                   // out
 );
@@ -415,11 +415,11 @@ ESMC_Field ESMC_FieldCreateLocStreamArraySpec(
 //
 // !INTERFACE:
 ESMC_Field ESMC_FieldCreateLocStreamTypeKind(
-  ESMC_LocStream locstream,                           // in
-  enum ESMC_TypeKind_Flag typekind,              // in
-  ESMC_InterfaceInt *gridToFieldMap,         // in
-  ESMC_InterfaceInt *ungriddedLBound,        // in
-  ESMC_InterfaceInt *ungriddedUBound,        // in
+  ESMC_LocStream locstream,                 // in
+  enum ESMC_TypeKind_Flag typekind,         // in
+  ESMC_InterArrayInt *gridToFieldMap,       // in
+  ESMC_InterArrayInt *ungriddedLBound,      // in
+  ESMC_InterArrayInt *ungriddedUBound,      // in
   const char *name,                         // in
   int *rc                                   // out
 );
@@ -690,14 +690,14 @@ int ESMC_FieldPrint(
 //    The name of the file from which Field data is read.
 //  \item[{[variableName]}]
 //   Variable name in the file; default (NULL) is the "name" of Field.
-//   Use this argument only in the IO format (such as NetCDF) that
-//   supports variable name. If the IO format does not support this 
+//   Use this argument only in the I/O format (such as NetCDF) that
+//   supports variable name. If the I/O format does not support this
 //   (such as binary format), ESMF will return an error code.
 //  \item[timeslice]
 //    Number of slices to be read from file, starting from the 1st slice
 //  \item[{[iofmt]}]
 //    \begin{sloppypar}
-//    The IO format.  Please see Section~\ref{opt:iofmtflag} for the list 
+//    The I/O format.  Please see Section~\ref{opt:iofmtflag} for the list
 //    of options.  If set to NULL, defaults to {\tt ESMF\_IOFMT\_NETCDF}.
 //    \end{sloppypar}
 //  \end{description}
@@ -742,8 +742,8 @@ int ESMC_FieldRegridGetArea(
 int ESMC_FieldRegridStore( 
     ESMC_Field srcField,                           // in
     ESMC_Field dstField,                           // in
-    ESMC_InterfaceInt *srcMaskValues,              // in
-    ESMC_InterfaceInt *dstMaskValues,              // in
+    ESMC_InterArrayInt *srcMaskValues,             // in
+    ESMC_InterArrayInt *dstMaskValues,             // in
     ESMC_RouteHandle *routehandle,                 // inout
     enum ESMC_RegridMethod_Flag *regridmethod,     // in
     enum ESMC_PoleMethod_Flag *polemethod,         // in
@@ -751,7 +751,7 @@ int ESMC_FieldRegridStore(
     enum ESMC_LineType_Flag *lineType,             // in
     enum ESMC_NormType_Flag *normType,             // in
     enum ESMC_UnmappedAction_Flag *unmappedaction, // in
-    ESMC_Logical *ignoreDegenerate,                        // in
+    ESMC_Logical *ignoreDegenerate,                // in
     ESMC_Field *srcFracField,                      // out
     ESMC_Field *dstFracField);                     // out
 
@@ -829,10 +829,10 @@ int ESMC_FieldRegridStore(
 //
 // !INTERFACE:
   int ESMC_FieldRegrid( 
-    ESMC_Field srcField,                // in
-    ESMC_Field dstField,                // inout
-    ESMC_RouteHandle routehandle,       // in
-    enum ESMC_Region_Flag *zeroregion);  // in
+    ESMC_Field srcField,                  // in
+    ESMC_Field dstField,                  // inout
+    ESMC_RouteHandle routehandle,         // in
+    enum ESMC_Region_Flag *zeroregion);   // in
 
 // !RETURN VALUE:
 //  Return code; equals ESMF_SUCCESS if there are no errors.
@@ -966,8 +966,8 @@ int ESMC_FieldSMMStore(
 //    The name of the output file to which Field data is written.
 //  \item[{[variableName]}]
 //   Variable name in the output file; default is the "name" of field.
-//   Use this argument only in the IO format (such as NetCDF) that
-//   supports variable name. If the IO format does not support this 
+//   Use this argument only in the I/O format (such as NetCDF) that
+//   supports variable name. If the I/O format does not support this
 //   (such as binary format), ESMF will return an error code.
 //  \item[{[overwrite]}]
 //   \begin{sloppypar}
@@ -993,7 +993,7 @@ int ESMC_FieldSMMStore(
 //   \end{sloppypar}
 //  \item[{[timeslice]}]
 //   \begin{sloppypar}
-//   Some IO formats (e.g. NetCDF) support the output of data in form of
+//   Some I/O formats (e.g. NetCDF) support the output of data in form of
 //   time slices. The {\tt timeslice} argument provides access to this
 //   capability. {\tt timeslice} must be positive. The behavior of this
 //   option may depend on the setting of the {\tt overwrite} flag:
@@ -1009,7 +1009,7 @@ int ESMC_FieldSMMStore(
 //   \end{sloppypar}
 //  \item[{[iofmt]}]
 //    \begin{sloppypar}
-//    The IO format. Please see Section~\ref{opt:iofmtflag} for the list 
+//    The I/O format. Please see Section~\ref{opt:iofmtflag} for the list
 //    of options. If not present, defaults to {\tt ESMF\_IOFMT\_NETCDF}.
 //    \end{sloppypar}
 //  \item [{[rc]}]

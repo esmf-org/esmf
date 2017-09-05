@@ -1,7 +1,7 @@
 //$1.10 2007/04/26 16:13:59 rosalind Exp $
 //
 // Earth System Modeling Framework
-// Copyright 2002-2016, University Corporation for Atmospheric Research, 
+// Copyright 2002-2017, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -948,7 +948,7 @@ namespace ESMCI {
 //
 // !DESCRIPTION:
 //      Read data items for the State from a file.  Currently limited to
-//      multiple Array items from a netCDF file.  Other item types and file
+//      multiple Array items from a NetCDF file.  Other item types and file
 //      types will be supported in future releases.
 //
 //EOP
@@ -1011,7 +1011,7 @@ namespace ESMCI {
 //
 // !DESCRIPTION:
 //      Write data items for the State from a file.  Currently limited to
-//      write multiple Array items to a netCDF file.  Other item types and file
+//      write multiple Array items to a NetCDF file.  Other item types and file
 //      types will be supported in future releases.
 //
 //EOP

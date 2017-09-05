@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2016, University Corporation for Atmospheric Research,
+! Copyright 2002-2017, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -22,7 +22,7 @@
 ! Alternative to the direct usage of Fortran arrays during Array creation
 ! it is also possible to first create an {\tt ESMF\_LocalArray} and create the
 ! Array from it. While this may seem more burdensome for the 1 DE per PET cases
-! discussed in the previous sections it allows a straight forward 
+! discussed in the previous sections it allows a straightforward
 ! generalization to the multiple DE per PET case. The following example first
 ! recaptures the previous example using an {\tt ESMF\_LocalArray} and then
 ! expands to the multiple DE per PET case.
@@ -175,7 +175,7 @@ program ESMF_ArrayLarrayEx
 !EOC
 !BOE
 ! While the usage of LocalArrays is unnecessarily cumbersome for 1 DE per PET
-! Arrays, it provides a straight forward path for extending the interfaces 
+! Arrays, it provides a straightforward path for extending the interfaces
 ! to multiple DEs per PET. 
 !
 ! In the following example a 8 x 8 index space will be decomposed into
@@ -294,7 +294,7 @@ program ESMF_ArrayLarrayEx
 ! pointers to the actual Fortran arrays are lost. Notice that {\tt larrayList}
 ! is used to obtain the pointers used in the deallocate statement. Pointers
 ! obtained from the {\tt larrayRefList}, while pointing to the same data, 
-! {\em cannot} be used to deallocated the array allocations!
+! {\em cannot} be used to deallocate the array allocations!
 !EOE
 !BOC
   do de=1, 2

@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2016, University Corporation for Atmospheric Research,
+! Copyright 2002-2017, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -19,7 +19,7 @@
 #include "ESMF.h"
 
 !BOE
-!\subsubsection{Read Arrays from a netCDF file and add to a State}
+!\subsubsection{Read Arrays from a NetCDF file and add to a State}
 ! \label{example:StateRdWr}
 ! This program shows an example of reading and writing Arrays from a State
 ! from/to a NetCDF file.
@@ -146,7 +146,7 @@
 
 !-------------------------------------------------------------------------
 !BOE
-!\subsubsection{Write Array data within a State to a netCDF file}
+!\subsubsection{Write Array data within a State to a NetCDF file}
 !
 !  All the Array data within the State on PET 0 can be written out to a NetCDF
 !  file as follows:

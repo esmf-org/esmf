@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2016, University Corporation for Atmospheric Research,
+// Copyright 2002-2017, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -1222,7 +1222,7 @@ const char Attribute::GRIDS_PURP[]   = "grids";
 
   // matching attribute not on *this* esmf object; look further down the
   // esmf object tree -- recurse
-  for(int i=0; i<linkList.size(); i++) {
+  for(unsigned int i=0; i<linkList.size(); i++) {
     attpack = linkList.at(i)->AttPackGet(convention, purpose, object,
                                          name, value);
     if (attpack != NULL) return attpack;
@@ -1259,12 +1259,11 @@ const char Attribute::GRIDS_PURP[]   = "grids";
 //
 //EOPI
 
-  int i;
   Attribute *ap;
 
   // look for the attpacks on this Attribute, at this level
   attPackInstanceNameCount = 0;
-  for (i=0; i<packList.size(); i++) {
+  for (unsigned int i=0; i<packList.size(); i++) {
     ap = packList.at(i);
     if (convention.compare(ap->attrConvention) == 0 && 
         purpose.compare(ap->attrPurpose) == 0 &&
@@ -1278,7 +1277,7 @@ const char Attribute::GRIDS_PURP[]   = "grids";
   // if not found at this level, recurse through the nested Attribute packages,
   // one level at a time, right-to-left, to find right-most package
   if (anflag == ESMC_ATTNEST_ON) {
-    for (i=packList.size(); i > 0; i--) {
+    for (unsigned int i=packList.size(); i > 0; i--) {
       packList.at(i-1)->AttPackGet(convention, purpose, object,
                                    attPackInstanceNameList,
                                    attPackInstanceNameCount, anflag);
@@ -1628,7 +1627,7 @@ const char Attribute::GRIDS_PURP[]   = "grids";
   if (!inObjectTree) return false;
 
   // otherwise, check all attpacks on objects in this esmf object tree
-  for(int i=0; i<linkList.size(); i++) {
+  for(unsigned int i=0; i<linkList.size(); i++) {
     if (inThisCompTreeOnly) {
       // only consider esmf objects within this component
       if (strcmp(linkList.at(i)->attrBase->ESMC_BaseGetClassName(),
@@ -1677,13 +1676,13 @@ const char Attribute::GRIDS_PURP[]   = "grids";
   Attribute *ap;
 
   // check attributes defined on this attpack
-  for(int i=0; i<attrList.size(); i++) {
+  for(unsigned int i=0; i<attrList.size(); i++) {
     string name = attrList.at(i)->attrName;
     if (AttPackGetAttribute(name)->isSet()) return true;
   }
   // otherwise check for any set attributes on nested attpacks, if requested
   if (inNestedAttPacks) {
-    for(int i=0; i<packList.size(); i++) { 
+    for(unsigned int i=0; i<packList.size(); i++) { 
       if (packList.at(i)->AttPackIsSet(inNestedAttPacks)) return true; 
     }
   }
@@ -3004,7 +3003,7 @@ if (attrRoot == ESMF_TRUE) {
   */
 
   if (anflag == ESMC_ATTNEST_ON)
-    for (int i=0; i<this->packList.size(); ++i)
+    for (unsigned int i=0; i<this->packList.size(); ++i)
       this->packList.at(i)->getCount(gcflag, anflag, count);
 
   return ESMF_SUCCESS;
@@ -4394,31 +4393,31 @@ if (attrRoot == ESMF_TRUE) {
 //
 //EOPI
 
-  attrBase = ESMC_NULL_POINTER;
-  parent = ESMC_NULL_POINTER;
+    attrBase = ESMC_NULL_POINTER;
+    parent = ESMC_NULL_POINTER;
 
-  if (tk == ESMC_TYPEKIND_I4) {vip.clear(); vector<ESMC_I4>().swap(vip); }
-  else if (tk == ESMC_TYPEKIND_I8) {vlp.clear(); vector<ESMC_I8>().swap(vlp); }
-  else if (tk == ESMC_TYPEKIND_R4) {vfp.clear(); vector<ESMC_R4>().swap(vfp); }
-  else if (tk == ESMC_TYPEKIND_R8) {vdp.clear(); vector<ESMC_R8>().swap(vdp); }
-  else if (tk == ESMC_TYPEKIND_LOGICAL) {vbp.clear(); vector<ESMC_Logical>().swap(vbp); }
-  else if (tk == ESMC_TYPEKIND_CHARACTER) {vcpp.clear(); vector<string>().swap(vcpp); }
+    if (tk == ESMC_TYPEKIND_I4) {vip.clear(); vector<ESMC_I4>().swap(vip); }
+    else if (tk == ESMC_TYPEKIND_I8) {vlp.clear(); vector<ESMC_I8>().swap(vlp); }
+    else if (tk == ESMC_TYPEKIND_R4) {vfp.clear(); vector<ESMC_R4>().swap(vfp); }
+    else if (tk == ESMC_TYPEKIND_R8) {vdp.clear(); vector<ESMC_R8>().swap(vdp); }
+    else if (tk == ESMC_TYPEKIND_LOGICAL) {vbp.clear(); vector<ESMC_Logical>().swap(vbp); }
+    else if (tk == ESMC_TYPEKIND_CHARACTER) {vcpp.clear(); vector<string>().swap(vcpp); }
 
-  while (!attrList.empty()) {
-    delete attrList.back();
-    attrList.pop_back();
-  }
-  vector<Attribute*>().swap(attrList);
+    while (!attrList.empty()) {
+      delete attrList.back();
+      attrList.pop_back();
+    }
+    vector<Attribute*>().swap(attrList);
 
-  while (!packList.empty()) {
-    delete packList.back();
-    packList.pop_back();
-  }
-  vector<Attribute*>().swap(packList);
+    while (!packList.empty()) {
+      delete packList.back();
+      packList.pop_back();
+    }
+    vector<Attribute*>().swap(packList);
 
-  for(std::vector<Attribute*>::iterator it = linkList.begin();
+    for(std::vector<Attribute*>::iterator it = linkList.begin();
       it != linkList.end(); ++it) *it = NULL;
-  vector<Attribute*>().swap(linkList);
+    vector<Attribute*>().swap(linkList);
 
  } // end clean
 //-----------------------------------------------------------------------------
@@ -4441,35 +4440,31 @@ if (attrRoot == ESMF_TRUE) {
 //
 //EOPI
 
-  attrBase = ESMC_NULL_POINTER;
-  parent = ESMC_NULL_POINTER;
+    attrBase = ESMC_NULL_POINTER;
+    parent = ESMC_NULL_POINTER;
 
-  if (tk == ESMC_TYPEKIND_I4) {vip.clear(); vector<ESMC_I4>().swap(vip); }
-  else if (tk == ESMC_TYPEKIND_I8) {vlp.clear(); vector<ESMC_I8>().swap(vlp); }
-  else if (tk == ESMC_TYPEKIND_R4) {vfp.clear(); vector<ESMC_R4>().swap(vfp); }
-  else if (tk == ESMC_TYPEKIND_R8) {vdp.clear(); vector<ESMC_R8>().swap(vdp); }
-  else if (tk == ESMC_TYPEKIND_LOGICAL) {vbp.clear(); vector<ESMC_Logical>().swap(vbp); }
-  else if (tk == ESMC_TYPEKIND_CHARACTER) {vcpp.clear(); vector<string>().swap(vcpp); }
+    if (tk == ESMC_TYPEKIND_I4) {vip.clear(); vector<ESMC_I4>().swap(vip); }
+    else if (tk == ESMC_TYPEKIND_I8) {vlp.clear(); vector<ESMC_I8>().swap(vlp); }
+    else if (tk == ESMC_TYPEKIND_R4) {vfp.clear(); vector<ESMC_R4>().swap(vfp); }
+    else if (tk == ESMC_TYPEKIND_R8) {vdp.clear(); vector<ESMC_R8>().swap(vdp); }
+    else if (tk == ESMC_TYPEKIND_LOGICAL) {vbp.clear(); vector<ESMC_Logical>().swap(vbp); }
+    else if (tk == ESMC_TYPEKIND_CHARACTER) {vcpp.clear(); vector<string>().swap(vcpp); }
 
-  while (!attrList.empty()) {
-    delete attrList.back();
-    attrList.pop_back();
-  }
-  /*printf("Attrlist size = %d, name = %s\n", attrList.size(),
-             attrList.at(0)->attrName.c_str());
-  for (unsigned int i=0; i<attrList.size(); ++i) delete attrList.at(i);
-  attrList.clear();*/
-  vector<Attribute*>().swap(attrList);
+    while (!attrList.empty()) {
+      delete attrList.back();
+      attrList.pop_back();
+    }
+    vector<Attribute*>().swap(attrList);
 
-  while (!packList.empty()) {
-    delete packList.back();
-    packList.pop_back();
-  }
-  vector<Attribute*>().swap(packList);
+    while (!packList.empty()) {
+      delete packList.back();
+      packList.pop_back();
+    }
+    vector<Attribute*>().swap(packList);
 
-  for(std::vector<Attribute*>::iterator it = linkList.begin();
-      it != linkList.end(); ++it) *it = NULL;
-  vector<Attribute*>().swap(linkList);
+    for(std::vector<Attribute*>::iterator it = linkList.begin();
+        it != linkList.end(); ++it) *it = NULL;
+    vector<Attribute*>().swap(linkList);
 
  } // end ~Attribute
 //-----------------------------------------------------------------------------
@@ -4493,7 +4488,7 @@ if (attrRoot == ESMF_TRUE) {
 //    Turn a stream of bytes into an {\tt Attribute} hierarchy.
 //
 //EOPI
-    int loffset, nbytes, chars;
+    int nbytes, chars;
     int localrc;
     int attrCount, packCount, linkCount;
     unsigned int i;
@@ -4513,7 +4508,9 @@ if (attrRoot == ESMF_TRUE) {
   loff += s; \
 
     // get localoffset
-    loffset=*offset;
+    int r=*offset%8;
+    if (r!=0) *offset += 8-r;  // alignment
+    int loffset=*offset;
     
     DESERIALIZE_VAR(buffer,loffset,chars,string::size_type);
     DESERIALIZE_VARC(buffer,loffset,attrName,temp,chars);
@@ -4663,12 +4660,16 @@ if (attrRoot == ESMF_TRUE) {
 //    Turn an {\tt Attribute} into a stream of bytes.
 //
 //EOPI
-    int loffset=*offset;
     bool cc;
     int localrc;
 
     // Initialize local return code; assume routine not implemented
     localrc = ESMC_RC_NOT_IMPL;
+
+    int r=*offset%8;
+    if (r!=0) *offset += 8-r;  // alignment
+    int loffset=*offset;
+
     cc = false;
     localrc = ESMC_SerializeCC(buffer,length,loffset,cc,inquireflag);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,

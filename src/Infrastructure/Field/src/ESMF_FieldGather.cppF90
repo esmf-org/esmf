@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2016, University Corporation for Atmospheric Research, 
+! Copyright 2002-2017, University Corporation for Atmospheric Research, 
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 ! Laboratory, University of Michigan, National Centers for Environmental 
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -38,6 +38,8 @@ module ESMF_FieldGatherMod
     use ESMF_LogErrMod
     use ESMF_VMMod
     use ESMF_GridMod
+    use ESMF_MeshMod
+    use ESMF_GeomBaseMod
     use ESMF_FieldMod
     use ESMF_FieldGetMod
     use ESMF_ArrayMod
@@ -109,8 +111,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   !-----------------------------------------------------------------------------
     ! local variables
     type(ESMF_Grid)                 :: grid
+    type(ESMF_Mesh)                 :: mesh
+    type(ESMF_GeomType_Flag)        :: geomtype
     type(ESMF_TypeKind_Flag)        :: typekind
-    integer                         :: rank, ldeCount, lde
+    integer                         :: rank, dimCount, ldeCount, lde
     integer, allocatable            :: coordDimCount(:)
     real(ESMF_KIND_R8), pointer     :: dataPtrR8D1(:)
     real(ESMF_KIND_R8), pointer     :: dataPtrR8D2(:,:)
@@ -120,19 +124,22 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     real(ESMF_KIND_R4), pointer     :: dataPtrR4D3(:,:,:)
     real(ESMF_KIND_R8), pointer     :: coord1PtrR8D1(:)
     real(ESMF_KIND_R8), pointer     :: coord2PtrR8D1(:)
+    real(ESMF_KIND_R8), pointer     :: coordPtrR8D1(:)
     real(ESMF_KIND_R8), pointer     :: coord1PtrR8D2(:,:)
     real(ESMF_KIND_R8), pointer     :: coord2PtrR8D2(:,:)
     real(ESMF_KIND_R8), pointer     :: coord1PtrR8D3(:,:,:)
     real(ESMF_KIND_R8), pointer     :: coord2PtrR8D3(:,:,:)
     real(ESMF_KIND_R8), pointer     :: coord3PtrR8D3(:,:,:)
     integer                         :: i, j, k
+    integer                         :: numOwnedElements
 
     integer                         :: l_member, l_step
     character(len=16)               :: l_dataFillScheme
     
     if (present(rc)) rc = ESMF_SUCCESS
     
-    call ESMF_FieldGet(field, typekind=typekind, rank=rank, rc=rc)
+    call ESMF_FieldGet(field, typekind=typekind, rank=rank, &
+      geomtype=geomtype, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT)) &
       return  ! bail out
@@ -146,30 +153,108 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       
     allocate(coordDimCount(rank))
 
-    ! TODO: support Meshes
-    call ESMF_FieldGet(field, grid=grid, localDeCount=ldeCount, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT)) &
-      return  ! bail out
+    if (geomtype==ESMF_GEOMTYPE_GRID) then
+      call ESMF_FieldGet(field, grid=grid, localDeCount=ldeCount, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT)) &
+        return  ! bail out
+    elseif (geomtype==ESMF_GEOMTYPE_MESH) then
+      call ESMF_FieldGet(field, mesh=mesh, localDeCount=ldeCount, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT)) &
+        return  ! bail out
+    else
+      call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
+        msg="Unsupported geomtype detected.", &
+        ESMF_CONTEXT, &
+        rcToReturn=rc)
+      return ! bail out
+    endif
 
     if (trim(l_dataFillScheme)=="sincos") then
       if (typekind==ESMF_TYPEKIND_R8 .and. rank==1) then
-        ! 1D sin pattern
-        do lde=0, ldeCount-1
-          call ESMF_GridGetCoord(grid, coordDim=1, localDe=lde, &
-            farrayPtr=coord1PtrR8D1, rc=rc)
+      
+        if (geomtype==ESMF_GEOMTYPE_GRID) then
+          call ESMF_GridGet(grid, dimCount=dimCount, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT)) &
             return  ! bail out
-          call ESMF_FieldGet(field, localDe=lde, farrayPtr=dataPtrR8D1, rc=rc)
+        elseif (geomtype==ESMF_GEOMTYPE_MESH) then
+          call ESMF_MeshGet(mesh, spatialDim=dimCount, &
+            numOwnedElements=numOwnedElements, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT)) &
             return  ! bail out
-          do i=lbound(dataPtrR8D2,1),ubound(dataPtrR8D2,1)
-            dataPtrR8D1(i) = &
-              sin(real(l_member)*3.1416*(coord1PtrR8D1(i)+real(l_step))/180.)
+        endif
+
+        if (dimCount==1) then
+          ! 1D sin pattern
+          do lde=0, ldeCount-1
+            if (geomtype==ESMF_GEOMTYPE_GRID) then
+              call ESMF_GridGetCoord(grid, coordDim=1, localDe=lde, &
+                farrayPtr=coord1PtrR8D1, rc=rc)
+              if (ESMF_LogFoundError(rcToCheck=rc, ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT)) &
+                return  ! bail out
+            elseif (geomtype==ESMF_GEOMTYPE_MESH) then
+              allocate(coord1PtrR8D1(numOwnedElements))
+              call ESMF_MeshGet(mesh, ownedElemCoords=coord1PtrR8D1, rc=rc)
+              if (ESMF_LogFoundError(rcToCheck=rc, ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT)) &
+                return  ! bail out
+            endif
+            call ESMF_FieldGet(field, localDe=lde, farrayPtr=dataPtrR8D1, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT)) &
+              return  ! bail out
+            do i=lbound(dataPtrR8D1,1),ubound(dataPtrR8D1,1)
+              dataPtrR8D1(i) = &
+                sin(real(l_member)*3.1416*(coord1PtrR8D1(i)+real(l_step))/180.)
+            enddo
+            if (geomtype==ESMF_GEOMTYPE_MESH) then
+              deallocate(coord1PtrR8D1)
+            endif
           enddo
-        enddo
+        else
+          ! must be dimCount==2 -> 2D pattern
+          do lde=0, ldeCount-1
+            if (geomtype==ESMF_GEOMTYPE_GRID) then
+              call ESMF_GridGetCoord(grid, coordDim=1, localDe=lde, &
+                farrayPtr=coord1PtrR8D1, rc=rc)
+              if (ESMF_LogFoundError(rcToCheck=rc, ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT)) &
+                return  ! bail out
+              call ESMF_GridGetCoord(grid, coordDim=2, localDe=lde, &
+                farrayPtr=coord2PtrR8D1, rc=rc)
+              if (ESMF_LogFoundError(rcToCheck=rc, ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT)) &
+                return  ! bail out
+            elseif (geomtype==ESMF_GEOMTYPE_MESH) then
+              allocate(coordPtrR8D1(2*numOwnedElements), &
+               coord1PtrR8D1(numOwnedElements), coord2PtrR8D1(numOwnedElements))
+              call ESMF_MeshGet(mesh, ownedElemCoords=coordPtrR8D1, rc=rc)
+              if (ESMF_LogFoundError(rcToCheck=rc, ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT)) &
+                return  ! bail out
+              do i=1, numOwnedElements
+                coord1PtrR8D1(i) = coordPtrR8D1((i-1)*2+1)
+                coord2PtrR8D1(i) = coordPtrR8D1((i-1)*2+2)
+              enddo
+            endif
+            call ESMF_FieldGet(field, localDe=lde, farrayPtr=dataPtrR8D1, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT)) &
+              return  ! bail out
+            do i=lbound(dataPtrR8D1,1),ubound(dataPtrR8D1,1)
+              dataPtrR8D1(i) = &
+                sin(real(l_member)*3.1416*(coord1PtrR8D1(i)+real(l_step))/180.) * &
+                cos(real(l_member)*3.1416*(coord2PtrR8D1(i)+real(l_step))/180.)
+            enddo
+            if (geomtype==ESMF_GEOMTYPE_MESH) then
+              deallocate(coordPtrR8D1, coord1PtrR8D1, coord2PtrR8D1)
+            endif
+          enddo
+        endif
       elseif (typekind==ESMF_TYPEKIND_R8 .and. rank==2) then
         ! 2D sin*cos pattern
         do lde=0, ldeCount-1
@@ -407,7 +492,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   Each PET of the VM must issue this call exactly once for {\em all} of its @\
 !   DEs. The call will block until all PET-local data objects are accessible. @\
 ! @\
-!   For examples and associated documentations using this method see Section  @\
+!   For examples and associated documentation regarding this method see Section  @\
 !   \ref{sec:field:usage:gather_2dptr}. @\
 ! @\
 !   The arguments are: @\

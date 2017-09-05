@@ -15,7 +15,7 @@
 !                 The first component has a location stream with
 !                 a Field whose data is set to constant value 1
 !                 and then transformed to the second component through
-!                 sparse matrix multiply operation. The destination field  builds upon
+!                 sparse matrix multiplication operation. The destination field builds upon
 !                 a location stream. The transformed data is then compared
 !                 to predetermined result based on the structure of SMM operation.
 !

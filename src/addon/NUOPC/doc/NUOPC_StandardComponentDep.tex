@@ -453,7 +453,7 @@ end module
 
 This puts the explicit interface of the {\tt setservices\_abc} entry point into a module named "ABC". Except for this small block of code, the C/C++ component becomes indistinguishable from a component implemented in Fortran.
 
-{\bf Hints for the provider side:} Adding a build rule for creating a compliant self-describing {\tt .mk} file into the component's makefile is straight forward. For the case that the component in "abc.h" is implemented in object files listed in variable "OBJS", a build rule that produces "abc.mk" could look like this:
+{\bf Hints for the provider side:} Adding a build rule for creating a compliant self-describing {\tt .mk} file into the component's makefile is straightforward. For the case that the component in "abc.h" is implemented in object files listed in variable "OBJS", a build rule that produces "abc.mk" could look like this:
 
 \begin{verbatim}
 .PRECIOUS: %.o

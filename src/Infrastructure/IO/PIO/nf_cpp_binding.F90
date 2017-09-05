@@ -1644,3 +1644,300 @@ function pio_cpp_copy_att(infile, invarid, name, outfile, outvarid)           &
 end function pio_cpp_copy_att
 
 ! ---------------------------------------------------------------------
+
+! extern "C" int pio_cpp_put_att_string (pio_file_desc_t file, pio_var_desc_t varDesc,
+!                              const char *name, const char *value);
+
+function pio_cpp_put_att_string (file, vardesc, name, value) result(ierr) bind(c)
+
+  !  bind to C
+  use, intrinsic :: iso_c_binding, only: c_char, c_int, c_ptr, c_f_pointer
+  use pio_cpp_utils, only: f_chars, c_len, max_path_len
+
+  !  import pio types
+  use pio_types, only: file_desc_t, Var_desc_t, PIO_global
+
+  !  import nf procedure signatures
+  use pionfatt_mod, only: put_att
+
+  !  function result
+  integer(c_int) :: ierr
+
+  !  dummy arguments
+  type(c_ptr),    value :: file
+  type(c_ptr),    value :: vardesc
+  type(c_ptr),    value :: name
+  type(c_ptr),    value :: value
+
+  !  local
+  integer :: ierror
+
+  type(file_desc_t), pointer :: file_desc
+  type(Var_desc_t),  pointer :: var_desc
+  character(kind= c_char, len= max_path_len), pointer :: c_attname, c_attvalue
+#ifdef ALLOC_CHARLEN_OK
+  character(len= :), allocatable :: attname, attvalue
+#else
+  character(len= max_path_len)   :: attname, attvalue
+#endif
+  integer :: clen
+
+  !  text
+  continue
+
+  !  convert the C pointers to a Fortran pointers
+  call c_f_pointer(file, file_desc)
+  call c_f_pointer(vardesc, var_desc)
+  call c_f_pointer(name, c_attname)
+  call c_f_pointer(value, c_attvalue)
+
+  clen = c_len(c_attname)
+#ifdef ALLOC_CHARLEN_OK
+  allocate(attname, mold= attname(1: clen))
+  call f_chars(attname, c_attname(1: clen))
+#else
+  attname = c_attname(1:clen)
+#endif
+
+  clen = c_len(c_attvalue)
+#ifdef ALLOC_CHARLEN_OK
+  allocate(attvalue, mold= attvalue(1: clen))
+  call f_chars(attvalue, c_attvalue(1: clen))
+#else
+  attvalue = c_attvalue(1:clen)
+#endif
+
+  !  call the Fortran procedure
+  if (associated (var_desc)) then
+    ierror = put_att (file_desc, var_desc%varID, attname, attvalue(:clen))
+  else
+    ierror = put_att (file_desc, PIO_global, attname, attvalue(:clen))
+  end if
+
+  !  convert the arguments back to C
+  ierr = int(ierror, c_int)
+
+  !  return to the cpp caller
+  return
+end function pio_cpp_put_att_string
+
+! ---------------------------------------------------------------------
+
+! extern "C" int pio_cpp_put_att_ints (pio_file_desc_t file, pio_var_desc_t varDesc,
+!                              const char *name, const int *values, const int nvalues);
+
+function pio_cpp_put_att_ints (file, vardesc, name, values, nvalues) result(ierr) bind(c)
+
+  !  bind to C
+  use, intrinsic :: iso_c_binding, only: c_char, c_int, c_float, c_ptr, c_f_pointer
+  use pio_cpp_utils, only: f_chars, c_len, max_path_len
+
+  !  import pio types
+  use pio_types, only: file_desc_t, Var_desc_t, PIO_global
+
+  !  import nf procedure signatures
+  use pionfatt_mod, only: put_att
+
+  !  function result
+  integer(c_int) :: ierr
+
+  !  dummy arguments
+  type(c_ptr),    value :: file
+  type(c_ptr),    value :: vardesc
+  type(c_ptr),    value :: name
+  integer(c_int)        :: values(*)
+  integer(c_int), value :: nvalues
+
+  !  local
+  integer :: ierror
+
+  type(file_desc_t), pointer :: file_desc
+  type(Var_desc_t),  pointer :: var_desc
+  character(kind= c_char, len= max_path_len), pointer :: c_attname
+#ifdef ALLOC_CHARLEN_OK
+  character(len= :), allocatable :: attname
+#else
+  character(len= max_path_len)   :: attname
+#endif
+  integer :: attvalues(int (nvalues))
+  integer :: clen
+
+  !  text
+  continue
+
+  !  convert the C pointers to a Fortran pointers
+  call c_f_pointer(file, file_desc)
+  call c_f_pointer(vardesc, var_desc)
+  call c_f_pointer(name, c_attname)
+
+  clen = c_len(c_attname)
+#ifdef ALLOC_CHARLEN_OK
+  allocate(attname, mold= attname(1: clen))
+  call f_chars(attname, c_attname(1: clen))
+#else
+  attname = c_attname(1:clen)
+#endif
+
+  attvalues = values(:int (nvalues))
+
+  !  call the Fortran procedure
+  if (associated (var_desc)) then
+    ierror = put_att (file_desc, var_desc%varID, attname, attvalues)
+  else
+    ierror = put_att (file_desc, PIO_global, attname, attvalues)
+  end if
+
+  !  convert the arguments back to C
+  ierr = int(ierror, c_int)
+
+  !  return to the cpp caller
+  return
+end function pio_cpp_put_att_ints
+
+! ---------------------------------------------------------------------
+
+! extern "C" int pio_cpp_put_att_floats (pio_file_desc_t file, pio_var_desc_t varDesc,
+!                              const char *name, const float *values, const int nvalues);
+
+function pio_cpp_put_att_floats (file, vardesc, name, values, nvalues) result(ierr) bind(c)
+
+  !  bind to C
+  use, intrinsic :: iso_c_binding, only: c_char, c_int, c_float, c_ptr, c_f_pointer
+  use pio_cpp_utils, only: f_chars, c_len, max_path_len
+
+  !  import pio types
+  use pio_types, only: file_desc_t, Var_desc_t, PIO_global
+
+  !  import nf procedure signatures
+  use pionfatt_mod, only: put_att
+
+  !  function result
+  integer(c_int) :: ierr
+
+  !  dummy arguments
+  type(c_ptr),    value :: file
+  type(c_ptr),    value :: vardesc
+  type(c_ptr),    value :: name
+  real(c_float)         :: values(*)
+  integer(c_int), value :: nvalues
+
+  !  local
+  integer :: ierror
+
+  type(file_desc_t), pointer :: file_desc
+  type(Var_desc_t),  pointer :: var_desc
+  character(kind= c_char, len= max_path_len), pointer :: c_attname
+#ifdef ALLOC_CHARLEN_OK
+  character(len= :), allocatable :: attname
+#else
+  character(len= max_path_len)   :: attname
+#endif
+  real :: attvalues(int (nvalues))
+  integer :: clen
+
+  !  text
+  continue
+
+  !  convert the C pointers to a Fortran pointers
+  call c_f_pointer(file, file_desc)
+  call c_f_pointer(vardesc, var_desc)
+  call c_f_pointer(name, c_attname)
+
+  clen = c_len(c_attname)
+#ifdef ALLOC_CHARLEN_OK
+  allocate(attname, mold= attname(1: clen))
+  call f_chars(attname, c_attname(1: clen))
+#else
+  attname = c_attname(1:clen)
+#endif
+
+  attvalues = values(:int (nvalues))
+
+  !  call the Fortran procedure
+  if (associated (var_desc)) then
+    ierror = put_att (file_desc, var_desc%varID, attname, attvalues)
+  else
+    ierror = put_att (file_desc, PIO_global, attname, attvalues)
+  end if
+
+  !  convert the arguments back to C
+  ierr = int(ierror, c_int)
+
+  !  return to the cpp caller
+  return
+end function pio_cpp_put_att_floats
+
+! ---------------------------------------------------------------------
+
+! extern "C" int pio_cpp_put_att_doubles (pio_file_desc_t file, pio_var_desc_t varDesc,
+!                              const char *name, const double *values, const int nvalues);
+
+function pio_cpp_put_att_doubles (file, vardesc, name, values, nvalues) result(ierr) bind(c)
+
+  !  bind to C
+  use, intrinsic :: iso_c_binding, only: c_char, c_int, c_double, c_ptr, c_f_pointer
+  use pio_cpp_utils, only: f_chars, c_len, max_path_len
+
+  !  import pio types
+  use pio_types, only: file_desc_t, Var_desc_t, PIO_global
+
+  !  import nf procedure signatures
+  use pionfatt_mod, only: put_att
+
+  !  function result
+  integer(c_int) :: ierr
+
+  !  dummy arguments
+  type(c_ptr),    value :: file
+  type(c_ptr),    value :: vardesc
+  type(c_ptr),    value :: name
+  real(c_double)        :: values(*)
+  integer(c_int), value :: nvalues
+
+  !  local
+  integer :: ierror
+
+  type(file_desc_t), pointer :: file_desc
+  type(Var_desc_t),  pointer :: var_desc
+  character(kind= c_char, len= max_path_len), pointer :: c_attname
+#ifdef ALLOC_CHARLEN_OK
+  character(len= :), allocatable :: attname
+#else
+  character(len= max_path_len)   :: attname
+#endif
+  real(kind (0.0d0)) :: attvalues(int (nvalues))
+  integer :: clen
+
+  !  text
+  continue
+
+  !  convert the C pointers to a Fortran pointers
+  call c_f_pointer(file, file_desc)
+  call c_f_pointer(vardesc, var_desc)
+  call c_f_pointer(name, c_attname)
+
+  clen = c_len(c_attname)
+#ifdef ALLOC_CHARLEN_OK
+  allocate(attname, mold= attname(1: clen))
+  call f_chars(attname, c_attname(1: clen))
+#else
+  attname = c_attname(1:clen)
+#endif
+
+  attvalues = values(:int (nvalues))
+
+  !  call the Fortran procedure
+  if (associated (var_desc)) then
+    ierror = put_att (file_desc, var_desc%varID, attname, attvalues)
+  else
+    ierror = put_att (file_desc, PIO_global, attname, attvalues)
+  end if
+
+  !  convert the arguments back to C
+  ierr = int(ierror, c_int)
+
+  !  return to the cpp caller
+  return
+end function pio_cpp_put_att_doubles
+
+! ---------------------------------------------------------------------

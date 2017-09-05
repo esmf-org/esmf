@@ -1,0 +1,163 @@
+version: '2.2'
+prefix: esmftrc_
+metadata:
+  type-aliases:
+#    uint4:
+#      class: int
+#      size: 4
+#      align: 4
+    uint8:
+      class: int
+      size: 8
+      align: 8
+    byte: uint8
+    int8:
+      $inherit: uint8
+      signed: true
+    uint16:
+      class: int
+      size: 16
+      align: 16
+    word: uint16
+    int16:
+      $inherit: uint8
+      signed: true
+    uint32:
+      class: int
+      size: 32
+      align: 32
+    dword: uint32
+    int32:
+      $inherit: uint8
+      signed: true
+    uint64:
+      class: int
+      size: 64
+      align: 64
+    int64:
+      $inherit: uint8
+      signed: true
+    clock-int:
+      $inherit: uint64
+      property-mappings:
+      - type: clock
+        name: sys_clock
+        property: value
+    enum_type_control:
+        class: enum
+        value-type: uint8
+        members:
+            - start_phase
+            - end_phase
+            - start_prologue
+            - end_prologue
+            - start_epilogue
+            - end_epilogue
+    enum_type_region:
+        class: enum
+        value-type: uint8
+        members:
+            - enter
+            - exit
+    enum_type_method:
+        class: enum
+        value-type: uint8
+        members:
+            - initialize
+            - run
+            - finalize
+    event_type_phase:
+        class: struct
+        fields:
+            vmid: uint16
+            baseid: uint16
+            method: enum_type_method
+            phase: uint8
+    comp_type:
+        class: struct
+        fields:
+            vmid: uint16
+            baseid: uint16
+            name:
+                class: string
+            IPM:
+                class: string
+            RPM:
+                class: string
+            FPM:
+                class: string
+  clocks:
+    sys_clock:
+      description: System clock
+      $return-ctype: uint64_t
+  env:
+    esmf_trace_version: '0.3'
+  trace:
+    byte-order: le
+    uuid: auto
+    packet-header-type:
+      class: struct
+      fields:
+        magic: uint32
+        uuid:
+          class: array
+          length: 16
+          element-type: uint8
+  streams:
+    default:
+      packet-context-type:
+        class: struct
+        fields:
+          timestamp_begin: clock-int
+          timestamp_end: clock-int
+          packet_size: uint32
+          content_size: uint32
+          nodename:
+            class: string
+          pet: uint32
+      event-header-type:
+        class: struct
+        fields:
+            id: uint32
+            timestamp: clock-int
+      events:
+        #denotes start of prologue
+        prologue_enter:
+            payload-type: event_type_phase
+        #denotes end of epilogue
+        epilogue_exit:
+            payload-type: event_type_phase
+        phase_enter:
+            payload-type: event_type_phase
+        phase_exit:
+            payload-type: event_type_phase
+        region_enter:
+            payload-type:
+                class: struct
+                fields:
+                    name:
+                        class: string
+        region_exit:
+            payload-type:
+                class: struct
+                fields:
+                    name:
+                        class: string
+        comp:
+            payload-type: comp_type
+        mem:
+            payload-type:
+                class: struct
+                fields:
+                    virtMem: uint32
+                    physMem: uint32
+        clk:
+            payload-type:
+                class: struct
+                fields:
+                    year: uint16
+                    month: uint8
+                    day: uint8
+                    hour: uint8
+                    minute: uint8
+                    second: uint8

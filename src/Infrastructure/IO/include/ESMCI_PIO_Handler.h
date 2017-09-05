@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2016, University Corporation for Atmospheric Research, 
+// Copyright 2002-2017, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -39,7 +39,6 @@
 #include "ESMCI_IO_Handler.h"       // IO_Handler is superclass to PIO_Handler
 #include "mpi.h"
 
-#include <cstdio>
 #include <vector>
 
 // PIO include files
@@ -112,7 +111,10 @@ namespace ESMCI {
     // Non-atomic writes which are only successful on an open IO stream
     void arrayWrite(Array *arr_p, const char * const name,
                     const std::vector<std::string> &dimLabels,
-                    int *timeslice = NULL, int *rc = NULL);
+                    int *timeslice = NULL,
+                    const Attribute *varAttPack = NULL,
+                    const Attribute *gblAttPack = NULL,
+                    int *rc = NULL);
 
     // get() and set()
   public:
@@ -144,6 +146,7 @@ namespace ESMCI {
                             int *narrDims = (int *)NULL,
                             int *basepiotype = (int *)NULL,
                             int *rc = (int *)NULL);
+    void attPackPut (pio_var_desc_t vardesc, const Attribute *attPack, int *rc);
     // Error recording routine
     static bool CheckPIOError(int pioRetCode,
                               int line, const char * const file,

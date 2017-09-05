@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2016, University Corporation for Atmospheric Research,
+! Copyright 2002-2017, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -112,8 +112,8 @@
 !  from {\tt ESMF\_GridGet} interface. {\em Rule 1 assumes that the Grid and the Fortran intrinsic
 !  array have same number of dimensions; and optional arguments
 !  of FieldCreate from Fortran array are left unspecified using default setup}. These assumptions 
-!  are true for most typical use of FieldCreate from Fortran data array. This is the easiest way
-!  to create a Field from a Grid and Fortran intrinsic data array.
+!  are true for most typical uses of FieldCreate from Fortran data array. This is the easiest way
+!  to create a Field from a Grid and a Fortran intrinsic data array.
 !  
 !  Fortran array dimension sizes (called shape in most Fortran language books) are equivalent
 !  to the bounds and counts used in this manual.  The following equation holds: 
@@ -129,11 +129,11 @@
 !  
 !  Rule 1 is most useful for a user working with Field creation from a Grid and a Fortran
 !  data array in most scenarios. It extends to higher dimension count, 3D, 4D, etc...
-!  Typically, as the code example demonstrates, a user first creates a Grid 
-!  , then uses {\tt ESMF\_GridGet()}
+!  Typically, as the code example demonstrates, a user first creates a Grid,
+!  then uses {\tt ESMF\_GridGet()}
 !  to retrieve the exclusive counts.  Next the user calculates the shape
 !  of each Fortran array dimension according to rule 1. The Fortran data array is allocated
-!  and initialized based on the computed shape.  A Field can either be created in one shot
+!  and initialized based on the computed shape.  A Field can either be created in one shot or
 !  created empty and finished using {\tt ESMF\_FieldEmptyComplete}.
 !
 !  \begin{sloppypar}
@@ -177,7 +177,7 @@
 !
 ! The setup of this example is similar to the previous section except 
 ! that the Field is created from a data pointer instead of a data array.
-! We highlight the ability to deallocate the internal fortran data
+! We highlight the ability to deallocate the internal Fortran data
 ! pointer queried from the Field. This gives a user more flexibility with
 ! memory management.
 !
@@ -190,7 +190,7 @@
     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
     call ESMF_FieldGet(field, farrayPtr=farrayPtr2, rc=rc)
     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-    ! deallocate the retrieved fortran array pointer
+    ! deallocate the retrieved Fortran array pointer
     deallocate(farrayPtr2)
 !EOC
     print *, "Field Create from a Grid and a Fortran data array returned"
@@ -265,12 +265,12 @@
 !  equivalent. But there are subtle differences
 !  under certain conditions. Rank is the total number of dimensions of a tensor object.
 !  Dimension count allows a finer description of the heterogeneous dimensions in that object.
-!  For example, A Field of rank 5 can have 3 gridded dimensions and 2 ungridded dimensions.
+!  For example, a Field of rank 5 can have 3 gridded dimensions and 2 ungridded dimensions.
 !  Rank is precisely the summation of dimension count of all types of dimensions. 
 ! 
 !  For example, if a 5D array is used with a 3D Grid, there are 2 ungridded dimensions:
 !  ungriddedLBound=(/1,2/) and ungriddedUBound=(/5,7/).
-!  Suppose the distribution of dimensions look like (O, X, O, X, O), O means gridded,
+!  Suppose the distribution of dimensions looks like (O, X, O, X, O), O means gridded,
 !  X means ungridded. Then the mapping from ungridded bounds to Fortran array is
 !  ugb2fa=(/2, 4/). The shape of 2nd and 4th dimension of Fortran array should equal
 !  (5, 8).
@@ -359,9 +359,9 @@
 !\subsubsection{Create a 3D Field with a 2D Grid and a 3D Fortran data array with halos}
 !\label{sec:field:usage:create_2dgrid_3dptr_map_halo}
 !
-!  This example is similar to example \ref{sec:field:usage:create_2dgrid_3dptr_map}, 
-!  in addition we will show
-!  a user can associate different halo width to a Fortran array to create
+!  This example is similar to example \ref{sec:field:usage:create_2dgrid_3dptr_map}.
+!  In addition, here we will show how
+!  a user can associate different halo widths to a Fortran array to create
 !  a Field through the totalLWidth and totalUWidth optional arguments.
 !  A diagram of the dimension configuration from Grid, halos, and Fortran data array
 !  is shown here.
@@ -589,7 +589,7 @@
 ! and typekind/rank.
 ! The mesh object is on a Euclidean surface that is partitioned to a 2x2 rectangular
 ! space with 4 elements and 9 nodes. The nodal space is represented by
-! a distgrid with 9 indices. Field is created on locally owned nodes on each PET.
+! a distgrid with 9 indices. A Field is created on locally owned nodes on each PET.
 ! Therefore, the created Field has 9 data points globally.
 ! The mesh object can be represented by the picture
 ! below. For more information on Mesh creation, please see Section~\ref{sec:mesh:usage:meshCreation}.

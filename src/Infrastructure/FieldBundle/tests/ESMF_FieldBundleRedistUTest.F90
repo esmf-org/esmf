@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2016, University Corporation for Atmospheric Research,
+! Copyright 2002-2017, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -48,6 +48,7 @@ program ESMF_RedistUTest
 
     ! individual test result code
     integer :: rc = ESMF_SUCCESS
+    character(1024)       :: msgString
 
 #ifdef ESMF_TESTEXHAUSTIVE
     ! individual test name
@@ -180,7 +181,7 @@ contains
                 ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rcToReturn=rc)) return
 
-            dstfptr = 0
+            dstfptr = -99
 
             call ESMF_FieldBundleAdd(dstFieldBundle, (/dstField(i)/), rc=localrc)
             if (ESMF_LogFoundError(localrc, &
@@ -213,6 +214,8 @@ contains
             ! MUST use exclusive bounds because Redist operates within excl. region.
             do k = exLB(3), exUB(3)
                 do j = exLB(2), exUB(2)
+  write(msgString,*) "dstField(l=",l,k,j,"): ", fptr(:,j,k)
+  call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
                     do i = exLB(1), exUB(1)
                        if(fptr(i,j,k) .ne. lpe) localrc = ESMF_FAILURE
                     enddo
@@ -373,7 +376,7 @@ contains
                 ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rcToReturn=rc)) return
 
-            dstfptr = 0
+            dstfptr = -99
 
             call ESMF_FieldBundleAdd(dstFieldBundle, (/dstField(i)/), rc=localrc)
             if (ESMF_LogFoundError(localrc, &

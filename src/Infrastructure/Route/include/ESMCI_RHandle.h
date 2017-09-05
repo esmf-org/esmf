@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2016, University Corporation for Atmospheric Research, 
+// Copyright 2002-2017, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -32,7 +32,12 @@
 //EOPI
 //-------------------------------------------------------------------------
 
+namespace ESMCI {
+  class RouteHandle;
+}
+
 #include "ESMCI_Base.h"       // Base is superclass to RouteHandle
+#include "ESMCI_Array.h"
 
 //-------------------------------------------------------------------------
 
@@ -54,6 +59,11 @@ namespace ESMCI {
    private:
     RouteHandleType htype;          // type info
     void *storage[RHSTORAGECOUNT];  // storage used by specific communication
+    //TODO: longer term do not store srcArray and dstArray, but just
+    //TODO: some form of finger print that persists without relying on
+    //TODO: Arrays to persist
+    Array *srcArray;
+    Array *dstArray;
  
    public:
     RouteHandle():ESMC_Base(-1){    // use Base constructor w/o BaseID increment
@@ -77,6 +87,13 @@ namespace ESMCI {
       storage[i] = ptr; 
       return ESMF_SUCCESS;
     }
+    
+    // fingerprinting of src/dst Arrays
+    int fingerprint(Array *srcArrayArg, Array *dstArrayArg){
+      srcArray = srcArrayArg;
+      dstArray = dstArrayArg;
+      return ESMF_SUCCESS;
+    }
         
     // required methods inherited and overridden from the ESMC_Base class
     int validate() const;
@@ -84,6 +101,8 @@ namespace ESMCI {
 
     // optimize for the communication pattern stored inside the RouteHandle
     int optimize() const;
+    bool isCompatible(Array *srcArrayArg, Array *dstArrayArg, int *rc=NULL)
+      const;
   };   // class RouteHandle
 
 } // namespace ESMCI

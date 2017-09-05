@@ -16,26 +16,25 @@ import ESMF
 # This call enables debug logging
 # ESMF.Manager(debug=True)
 
-# set up the DATADIR
+# Set up the DATADIR
 DATADIR = os.path.join(os.getcwd(), "examples/data")
 
-# Create a uniform global latlon grid from a SCRIP formatted file
+# Create a  global grid from a GRIDSPEC formatted file
 grid = ESMF.Grid(filename=os.path.join(DATADIR, "so_Omon_GISS-E2.nc"),
                  filetype=ESMF.FileFormat.GRIDSPEC)
 
-# Create a field on the centers of the grid
-field = ESMF.Field(grid, staggerloc=ESMF.StaggerLoc.CENTER)#, ndbounds=[2])
+# Create a field on the centers of the grid, with extra dimensions
+field = ESMF.Field(grid, staggerloc=ESMF.StaggerLoc.CENTER, ndbounds=[33, 2])
 
-# field.read does not work if ESMF is built with MPIUNI
-if ESMF.api.constants._ESMF_COMM is not ESMF.api.constants._ESMF_COMM_MPIUNI:
-    field.read(filename=os.path.join(DATADIR, "so_Omon_GISS-E2.nc"),
-               variable="so")
+# Read the field data from file
+field.read(filename=os.path.join(DATADIR, "so_Omon_GISS-E2.nc"),
+           variable="so", timeslice=2)
 
-# create an ESMF formatted unstructured mesh with clockwise cells removed
+# Create an ESMF formatted unstructured mesh with clockwise cells removed
 mesh = ESMF.Mesh(filename=os.path.join(DATADIR, "mpas_uniform_10242_dual_counterclockwise.nc"),
                  filetype=ESMF.FileFormat.ESMFMESH)
 
-# create a field on the nodes of the mesh
+# Create a field on the nodes of the mesh
 field = ESMF.Field(mesh, meshloc=ESMF.MeshLoc.NODE)
 
 if ESMF.local_pet() == 0:

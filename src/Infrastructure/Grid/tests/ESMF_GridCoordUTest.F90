@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2016, University Corporation for Atmospheric Research,
+! Copyright 2002-2017, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -71,6 +71,10 @@ program ESMF_GridCoordUTest
   REAL(ESMF_KIND_R8) :: cornerX(globalXcount+1)
   REAL(ESMF_KIND_R8) :: cornerY(globalYcount+1)
   REAL(ESMF_KIND_R8),pointer :: farrayPtr1D(:)
+  integer :: staggerEdgeLWidth(2)
+  integer :: staggerEdgeUWidth(2)
+  integer :: staggerAlign(2)
+  integer :: staggerLBound(2)
   logical :: isPresent
 
   !-----------------------------------------------------------------------------
@@ -146,6 +150,47 @@ program ESMF_GridCoordUTest
   call ESMF_Test(((rc .eq. ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
   !-----------------------------------------------------------------------------
 
+  !-----------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Test get staggerEdgeLWidth, staggerEdgeUWidth, staggerAlign, and staggerLBound"
+  write(failMsg, *) "Incorrect result"
+
+  ! init success flag
+  rc=ESMF_SUCCESS
+
+  ! Create grid
+  grid2D=ESMF_GridCreateNoPeriDim(maxIndex=(/20,20/), &
+       gridEdgeLWidth=(/1,2/), gridEdgeUWidth=(/3,4/), &
+       rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  ! Add Coords with stagger info
+  call ESMF_GridAddCoord(grid2D, staggerloc=ESMF_STAGGERLOC_CENTER, &
+       staggerEdgeLWidth=(/1,2/), staggerEdgeUWidth=(/3,4/), &
+       staggerAlign=(/-1,0/), staggerLBound=(/5,6/), &
+       rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  ! Get stagger info
+  call ESMF_GridGet(grid2D, staggerloc=ESMF_STAGGERLOC_CENTER, &
+       staggerEdgeLWidth=staggerEdgeLWidth, staggerEdgeUWidth=staggerEdgeUWidth, &
+       staggerAlign=staggerAlign, staggerLBound=staggerLBound, &
+       rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  ! Make sure that info matches
+  correct=.true.
+  if ((staggerEdgeLWidth(1) .ne. 1) .or. (staggerEdgeLWidth(2) .ne. 2)) correct=.false.
+  if ((staggerEdgeUWidth(1) .ne. 3) .or. (staggerEdgeUWidth(2) .ne. 4)) correct=.false.
+  if ((staggerAlign(1) .ne. -1) .or. (staggerAlign(2) .ne. 0)) correct=.false.
+  if ((staggerLBound(1) .ne. 5) .or. (staggerLBound(2) .ne. 6)) correct=.false.
+
+  ! Destroy grid
+  call ESMF_GridDestroy(grid2D, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
+  !-----------------------------------------------------------------------------
 
   !-----------------------------------------------------------------------------
   !NEX_UTest

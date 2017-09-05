@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2016, University Corporation for Atmospheric Research, 
+// Copyright 2002-2017, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -78,6 +78,8 @@ class Comp{
     int getTunnel(CompTunnel **tunnel) const;
     static int getComplianceCheckerDepth(int *depth);
     static int getComplianceCheckerJSON(int *jsonIsOn);
+    static int getComplianceCheckerText(int *textIsOn);
+    static int getComplianceCheckerTrace(int *traceIsOn);
 };
 
 class GridComp:public Comp{

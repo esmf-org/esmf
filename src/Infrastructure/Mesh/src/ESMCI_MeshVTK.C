@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2016, University Corporation for Atmospheric Research, 
+// Copyright 2002-2017, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -83,55 +83,42 @@ const MeshObjTopo *Vtk2Topo(UInt sdim, UInt vtk_type) {
 }
 
 
-// Load data into an array from the mesh, switching on the correct typeid
-template<typename iter, typename FIELD>
-static void get_data(iter ni, iter ne, const FIELD &llf, double data[], UInt d) {
-  UInt i = 0;
-  if (llf.tinfo() == typeid(double)) {
-    for (; ni != ne; ++ni) {
-      if (llf.OnObj(*ni))
-        data[i] = ((double*)llf.data(*ni))[d];
-      else data[i] = 0;
-      i++;
-    }
-  } else if (llf.tinfo() == typeid(int)) {
-    for (; ni != ne; ++ni) {
-      if (llf.OnObj(*ni))
-      data[i] = ((int*)llf.data(*ni))[d];
-      else data[i] = 0;
-      i++;
-    }
-  } else if (llf.tinfo() == typeid(float)) {
-    for (; ni != ne; ++ni) {
-      if (llf.OnObj(*ni))
-      data[i] = ((float*)llf.data(*ni))[d];
-      else data[i] = 0;
-      i++;
-    }
-  } else if (llf.tinfo() == typeid(long)) {
-    for (; ni != ne; ++ni) {
-      if (llf.OnObj(*ni))
-      data[i] = ((long*)llf.data(*ni))[d];
-      else data[i] = 0;
-      i++;
-    }
-  } else if (llf.tinfo() == typeid(char)) {
-    for (; ni != ne; ++ni) {
-      if (llf.OnObj(*ni))
-      data[i] = ((char*)llf.data(*ni))[d];
-      else data[i] = 0;
-      i++;
-    }
-  } else if (llf.tinfo() == typeid(UChar)) {
-    for (; ni != ne; ++ni) {
-      if (llf.OnObj(*ni))
-      data[i] = ((UChar*)llf.data(*ni))[d];
-      else data[i] = 0;
-      i++;
-    }
-  } else std::cout << "Unknown data type, skipping ";
+// Write mesh data to stream, taking into account the correct typeid
+template<typename T, typename iter, typename FIELD>
+static void append_data(iter ni, iter ne, const FIELD &llf, UInt d, std::ofstream &out) {
+  out << "LOOKUP_TABLE default" << std::endl;
+  for (; ni != ne; ++ni) {
+    if (llf.OnObj(*ni))
+      out << ((T*)llf.data(*ni))[d] << " ";
+  }
 }
 
+
+template<typename iter, typename FIELD>
+static void write_data(iter ni, iter ne, const FIELD &llf, const std::string &vname, UInt d, std::ofstream &out) {
+
+  if (llf.tinfo() == typeid(double)) {
+    out << "SCALARS " << vname << " double 1" << std::endl;
+    append_data<double>(ni, ne, llf, d, out);
+  } else if (llf.tinfo() == typeid(int)) {
+    out << "SCALARS " << vname << " int 1" << std::endl;
+    append_data<int>(ni, ne, llf, d, out);
+  } else if (llf.tinfo() == typeid(float)) {
+    out << "SCALARS " << vname << " float 1" << std::endl;
+    append_data<float>(ni, ne, llf, d, out);
+  } else if (llf.tinfo() == typeid(long)) {
+    out << "SCALARS " << vname << " long 1" << std::endl;
+    append_data<long>(ni, ne, llf, d, out);
+  } else if (llf.tinfo() == typeid(char)) {
+    out << "SCALARS " << vname << " char 1" << std::endl;
+    append_data<char>(ni, ne, llf, d, out);
+  } else if (llf.tinfo() == typeid(UChar)) {
+    out << "SCALARS " << vname << " unsigned char 1" << std::endl;
+    append_data<UChar>(ni, ne, llf, d, out);
+  } else {
+    std::cout << "Unknown data type, skipping ";
+  }
+}
 
 void WriteVTKMesh(const Mesh &mesh, const std::string &filename) {
   Trace __trace("WriteVTKMesh(const Mesh &mesh, const std::string &filename)");
@@ -238,20 +225,15 @@ void WriteVTKMesh(const Mesh &mesh, const std::string &filename) {
   // Therefore we must save off the node and element numbers as fields.
   {
     // Element numbers
-    std::vector<double> data(num_elem, 0);
     out << "CELL_DATA " << num_elem << std::endl;
-    out << "SCALARS " << "_ELEM_NUM" << " double 1" << std::endl;
+    out << "SCALARS " << "_ELEM_NUM" << " long 1" << std::endl;
     out << "LOOKUP_TABLE default" << std::endl;
 
     Mesh::const_iterator ei = mesh.elem_begin(), ee = mesh.elem_end();
     for (UInt i = 0; ei != ee; ++ei) {
       const MeshObj &elem = *ei;
- 
-      data[i++] = (double) elem.get_id();
+      out << elem.get_id() << " ";
     }
-
-    for (UInt e = 0; e < (UInt) num_elem; e++)
-      out << data[e] << " ";
 
     out << std::endl;
 
@@ -271,15 +253,9 @@ void WriteVTKMesh(const Mesh &mesh, const std::string &filename) {
            std::sprintf(buf, "_%d", d);
            std::string vname = mf.name() + (mf.dim() == 1? "" : std::string(buf));
 
-           out << "SCALARS " << vname << " double 1" << std::endl;
-           out << "LOOKUP_TABLE default" << std::endl;
-
            const _field &llf = mf();
-           get_data(mesh.elem_begin(), mesh.elem_end(), llf, &data[0], d);
+           write_data(mesh.elem_begin(), mesh.elem_end(), llf, vname, d, out);
            
-           for (UInt e = 0; e < (UInt) num_elem; e++)
-             out << data[e] << " ";
-
            out << std::endl;
 
          } //for d
@@ -293,20 +269,16 @@ void WriteVTKMesh(const Mesh &mesh, const std::string &filename) {
   // Save off the node numbering
   {
     // Node numbers
-    std::vector<double> data(num_nodes, 0);
     out << "POINT_DATA " << num_nodes << std::endl;
-    out << "SCALARS " << "_NODE_NUM" << " double 1" << std::endl;
+    out << "SCALARS " << "_NODE_NUM" << " long 1" << std::endl;
     out << "LOOKUP_TABLE default" << std::endl;
 
     Mesh::const_iterator ni = mesh.node_begin(), ne = mesh.node_end();
     for (UInt i = 0; ni != ne; ++ni) {
       const MeshObj &node = *ni;
  
-      data[i++] = (double) node.get_id();
+      out << node.get_id() << " ";
     }
-
-    for (UInt e = 0; e < (UInt) num_nodes; e++)
-      out << data[e] << " ";
 
     out << std::endl;
 
@@ -326,11 +298,8 @@ void WriteVTKMesh(const Mesh &mesh, const std::string &filename) {
            std::sprintf(buf, "_%d", d);
            std::string vname = mf.name() + (mf.dim() == 1? "" : std::string(buf));
 
-           out << "SCALARS " << vname << " double 1" << std::endl;
-           out << "LOOKUP_TABLE default" << std::endl;
-
            const _field &llf = mf();
-           get_data(mesh.node_begin(), mesh.node_end(), llf, &data[0], d);
+           write_data(mesh.elem_begin(), mesh.elem_end(), llf, vname, d, out);
            
            for (UInt e = 0; e < (UInt) num_nodes; e++)
              out << data[e] << " ";
@@ -592,7 +561,8 @@ void ReadVTKMesh(Mesh &mesh, const std::string &filename) {
 
     // Process the data.  data_type is one of elem or node
     char vname[512];
-    ThrowRequire(1 == fscanf(fp(), "SCALARS %s double 1\n", vname));
+    char vtype[15];
+    ThrowRequire(2 == fscanf(fp(), "SCALARS %s %s 1\n", vname, vtype));
 //std::cout << "Reading var:" << vname << std::endl;
 
     fscanf(fp(), "LOOKUP_TABLE default\n");
@@ -841,13 +811,15 @@ void ReadVTKMeshBody(const std::string &filename, int *nodeId, double *nodeCoord
 
     // Process the data.  data_type is one of elem or node
     char vname[512];
-    ThrowRequire(1 == fscanf(fp(), "SCALARS %s double 1\n", vname));
+    char vtype[15];
+    ThrowRequire(2 == fscanf(fp(), "SCALARS %s %s 1\n", vname, vtype));
 //std::cout << "Reading var:" << vname << std::endl;
 
     fscanf(fp(), "LOOKUP_TABLE default\n");
 
     // Now read the data
     UInt num_data = data_type == VTK_NODE_DATA ? num_nodes : num_elems;
+
     std::vector<double> data(num_data, 0);
  
     for (UInt i = 0; i < num_data; i++) {

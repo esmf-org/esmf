@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2016, University Corporation for Atmospheric Research,
+! Copyright 2002-2017, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -403,15 +403,15 @@ contains
             enddo
             if (present(datacopyflag)) then
               if (datacopyflag.eq.ESMF_DATACOPY_VALUE) then
-        	! only DATA_COPY is expected to work correctly
-        	if (ESMF_LogFoundError(localrc, &
+                ! only DATA_COPY is expected to work correctly
+                if (ESMF_LogFoundError(localrc, &
                       ESMF_ERR_PASSTHRU, &
                       ESMF_CONTEXT, rcToReturn=rc)) return
               else
-        	if (ESMF_LogFoundError(localrc, &
+                if (ESMF_LogFoundError(localrc, &
                       ESMF_ERR_PASSTHRU, &
                       ESMF_CONTEXT, rcToReturn=rc)) continue
-        	rc = ESMF_SUCCESS ! reset
+                rc = ESMF_SUCCESS ! reset
               end if
             else
               if (ESMF_LogFoundError(localrc, &
@@ -440,14 +440,14 @@ contains
             if (present(datacopyflag)) then
               if (datacopyflag.eq.ESMF_DATACOPY_VALUE) then
               ! only DATA_COPY is expected to work correctly
-        	if (ESMF_LogFoundError(localrc, &
+                if (ESMF_LogFoundError(localrc, &
                       ESMF_ERR_PASSTHRU, &
                       ESMF_CONTEXT, rcToReturn=rc)) return
               else
-        	if (ESMF_LogFoundError(localrc, &
+                if (ESMF_LogFoundError(localrc, &
                       ESMF_ERR_PASSTHRU, &
                       ESMF_CONTEXT, rcToReturn=rc)) continue
-        	rc = ESMF_SUCCESS ! reset
+                rc = ESMF_SUCCESS ! reset
               end if
             else
               if (ESMF_LogFoundError(localrc, &

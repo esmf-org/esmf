@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2016, University Corporation for Atmospheric Research,
+! Copyright 2002-2017, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -103,7 +103,7 @@
 !     The arguments are:
 !     \begin{description}
 !     \item [s]
-!           {\tt ESMF\_Fraction} from which to retreive status.
+!           {\tt ESMF\_Fraction} from which to retrieve status.
 !     \end{description}
 !
 !EOPI

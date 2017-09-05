@@ -1,6 +1,6 @@
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2016, University Corporation for Atmospheric Research,
+! Copyright 2002-2017, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -275,7 +275,7 @@
         finalrc = ESMF_FAILURE
         print*, "*****' call ESMF_ConfigGetAttribute' failed"
       else
-        print*, "Results from retreiving multiple values:"
+        print*, "Results from retrieving multiple values:"
         print*, "The first constant was was retrieved from the Resource File"
         print*, "Its value is: ", param_1
         print*, "The second constant was was retrieved from the Resource File"

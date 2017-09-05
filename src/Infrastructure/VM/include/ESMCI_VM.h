@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2016, University Corporation for Atmospheric Research, 
+// Copyright 2002-2017, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -114,6 +114,8 @@ class VM : public VMK {   // inherits from ESMCI::VMK class
     static void addObject(ESMC_Base *, VMId *vmID);
     static void rmObject(ESMC_Base *);
     static void addFObject(void **fobject, int objectID, VMId *vmID);
+    static void getObject(void **fobject, int objectID, VMId *vmID, int type,
+        bool *obj_found, int *rc);
     static void rmFObject(void **fobject);
     static void printMatchTable(void);
     static char const *getenv(char const *name);

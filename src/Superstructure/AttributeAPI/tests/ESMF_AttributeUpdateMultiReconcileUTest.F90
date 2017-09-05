@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2016, University Corporation for Atmospheric Research,
+! Copyright 2002-2017, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -533,7 +533,7 @@ module ESMF_AttributeUpdateMultiReconcileUTestMod
     if (rc/=ESMF_SUCCESS) return
 
     call ESMF_AttributeCopy(importState, exportState, &
-      ESMF_COPY_REFERENCE, ESMF_ATTTREE_ON, rc=rc)
+      attcopy=ESMF_ATTCOPY_HYBRID, rc=rc)
     if (rc/=ESMF_SUCCESS) return
 
   end subroutine usercpl1_run
@@ -598,7 +598,7 @@ module ESMF_AttributeUpdateMultiReconcileUTestMod
     if (rc/=ESMF_SUCCESS) return
 
     call ESMF_AttributeCopy(importState, exportState, &
-      ESMF_COPY_REFERENCE, ESMF_ATTTREE_ON, rc=rc)
+      attcopy=ESMF_ATTCOPY_HYBRID, rc=rc)
     if (rc/=ESMF_SUCCESS) return
 
   end subroutine usercpl2_run

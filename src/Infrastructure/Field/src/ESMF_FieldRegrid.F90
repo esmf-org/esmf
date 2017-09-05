@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2016, University Corporation for Atmospheric Research, 
+! Copyright 2002-2017, University Corporation for Atmospheric Research, 
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 ! Laboratory, University of Michigan, National Centers for Environmental 
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -514,7 +514,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     on some systems too large a value may lead to performance degradation,
 !     or runtime errors.
 !
-!     Note that the pipeline depth has no affect on the bit-for-bit
+!     Note that the pipeline depth has no effect on the bit-for-bit
 !     reproducibility of the results. However, it may affect the performance
 !     reproducibility of the exchange.
 !
@@ -597,7 +597,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         type(ESMF_Array)     :: srcArray
         type(ESMF_Array)     :: dstArray
         type(ESMF_Array)     :: fracArray
-        type(ESMF_VM)        :: vm
         type(ESMF_Mesh)      :: srcMesh, srcMeshDual
         type(ESMF_Mesh)      :: dstMesh, tempMesh
         type(ESMF_MeshLoc)   :: srcMeshloc,dstMeshloc,fracMeshloc
@@ -658,12 +657,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
  
            hasStatusArray=.true.
         endif
-
-
-        ! global vm for now
-        call ESMF_VMGetGlobal(vm, rc=localrc)
-        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-          ESMF_CONTEXT, rcToReturn=rc)) return
 
         ! Now we go through the painful process of extracting the data members
         ! that we need.
@@ -1498,6 +1491,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         type(ESMF_Array)     :: dstFracArray
         type(ESMF_STAGGERLOC):: interpFieldStaggerloc, fracFieldStaggerloc
         type(ESMF_MESHLOC)   :: interpFieldMeshloc, fracFieldMeshloc
+        integer              :: srcTermProcessingVal
     
         ! Initialize return code; assume failure until success is certain
         localrc = ESMF_SUCCESS
@@ -1530,8 +1524,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
             found = .false.
             do i = 1, ngrid_a
-                if(ESMF_GridMatch(srcGrid, gridA(i)%gbcp%grid, &
-                     globalflag=.true.) >=ESMF_GRIDMATCH_EXACT) then
+                !if(ESMF_GridMatch(srcGrid, gridA(i)%gbcp%grid, &
+                !     globalflag=.true.) >=ESMF_GRIDMATCH_EXACT) then
+                if(srcGrid == gridA(i)%gbcp%grid) then
                     srcIdx = i
                     srcSide = ESMF_XGRIDSIDE_A
                     found = .true.
@@ -1539,8 +1534,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                 endif
             enddo 
             do i = 1, ngrid_b
-                if(ESMF_GridMatch(srcGrid, gridB(i)%gbcp%grid, &
-                     globalflag=.true.) >=ESMF_GRIDMATCH_EXACT) then
+                !if(ESMF_GridMatch(srcGrid, gridB(i)%gbcp%grid, &
+                !     globalflag=.true.) >=ESMF_GRIDMATCH_EXACT) then
+                if(srcGrid == gridB(i)%gbcp%grid) then
                     if(found) then
                       ! TODO: maybe we should attach standard attibute
                       ! to differentiate src and dst side for regridding
@@ -1571,7 +1567,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
             found = .false.
             do i = 1, ngrid_a
-                if(ESMF_MeshMatch(srcMesh, gridA(i)%gbcp%mesh)) then
+                !if(ESMF_MeshMatch(srcMesh, gridA(i)%gbcp%mesh)) then
+                if(srcMesh == gridA(i)%gbcp%mesh) then
                     srcIdx = i
                     srcSide = ESMF_XGRIDSIDE_A
                     found = .true.
@@ -1579,7 +1576,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                 endif
             enddo 
             do i = 1, ngrid_b
-                if(ESMF_MeshMatch(srcMesh, gridB(i)%gbcp%mesh)) then
+                !if(ESMF_MeshMatch(srcMesh, gridB(i)%gbcp%mesh)) then
+                if(srcMesh == gridB(i)%gbcp%mesh) then
                     if(found) then
                       call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, & 
                         msg="- duplication of Mesh found in XGrid", &
@@ -1641,8 +1639,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
             found = .false.
             do i = 1, ngrid_a
-                if(ESMF_GridMatch(dstGrid, gridA(i)%gbcp%grid, &
-                   globalflag=.true.) >=ESMF_GRIDMATCH_EXACT) then
+                !if(ESMF_GridMatch(dstGrid, gridA(i)%gbcp%grid, &
+                !   globalflag=.true.) >=ESMF_GRIDMATCH_EXACT) then
+                if(dstGrid == gridA(i)%gbcp%grid) then
                     dstIdx = i
                     dstSide = ESMF_XGRIDSIDE_A
                     found = .true.
@@ -1650,8 +1649,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                 endif
             enddo 
             do i = 1, ngrid_b
-                if(ESMF_GridMatch(dstGrid, gridB(i)%gbcp%grid, &
-                   globalflag=.true.) >=ESMF_GRIDMATCH_EXACT) then
+                !if(ESMF_GridMatch(dstGrid, gridB(i)%gbcp%grid, &
+                !   globalflag=.true.) >=ESMF_GRIDMATCH_EXACT) then
+                if(dstGrid == gridB(i)%gbcp%grid) then
                     if(found) then
                       call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, & 
                         msg="- duplication of Grid found in XGrid", &
@@ -1680,7 +1680,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
             found = .false.
             do i = 1, ngrid_a
-                if(ESMF_MeshMatch(dstMesh, gridA(i)%gbcp%mesh)) then
+                !if(ESMF_MeshMatch(dstMesh, gridA(i)%gbcp%mesh)) then
+                if(dstMesh == gridA(i)%gbcp%mesh) then
                     dstIdx = i
                     dstSide = ESMF_XGRIDSIDE_A
                     found = .true.
@@ -1688,7 +1689,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                 endif
             enddo 
             do i = 1, ngrid_b
-                if(ESMF_MeshMatch(dstMesh, gridB(i)%gbcp%mesh)) then
+                !if(ESMF_MeshMatch(dstMesh, gridB(i)%gbcp%mesh)) then
+                if(dstMesh == gridB(i)%gbcp%mesh) then
                     if(found) then
                       call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, & 
                         msg="- duplication of Mesh found in XGrid", &
@@ -1952,8 +1954,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           ESMF_CONTEXT, rcToReturn=rc)) return
         
         ! call FieldSMMStore
+        srcTermProcessingVal = 0
         call ESMF_FieldSMMStore(srcField, dstField, routehandle, &
             sparseMat%factorList, sparseMat%factorIndexList, &
+            srcTermProcessing=srcTermProcessingVal, &
             rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return

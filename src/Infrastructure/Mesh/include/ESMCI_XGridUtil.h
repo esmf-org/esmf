@@ -1,6 +1,6 @@
 // $Id$
 // Earth System Modeling Framework
-// Copyright 2002-2016, University Corporation for Atmospheric Research, 
+// Copyright 2002-2017, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -258,14 +258,24 @@ struct polygon{
  * @param[out] difference the difference polygons stored in a vector
  */
 int weiler_clip_difference(int pdim, int sdim, int num_p, double *p, int num_q, double *q, std::vector<polygon> & difference);
+bool same_point(const double * const p1, const double * const p2, const double epsilon=1.e-15);
+bool intersect_line_with_line(const double *p1, const double *p2, const double *q1, const double *q2, double * result, bool * coincident, 
+  double * pidx, double *qidx);
+double gcdistance(double l1, double g1, double l2, double g2);
+double gcdistance(double * v1, double * v2);
 
 // Debugging apis
-void cart2sph(int num_p, double *p, double *lonlat);
+void cart2sph(int num_p, const double *p, double *lonlat);
 void cart2sph(const polygon & cart, polygon & sph);
 void cart2sph(const std::vector<polygon> & cart, std::vector<polygon> & sph);
-void sph2cart(int num_p, double *p, double *lonlat);
+void sph2cart(int num_p, const double *lonlat, double *p);
 void sph2cart(const polygon & sph, polygon & cart);
 void sph2cart(const std::vector<polygon> & sph, std::vector<polygon> & cart);
+void test_clip2D(int pdim, int sdim, int num_s, double * s_coord, int num_c, double * c_coord);
+void test_clip3D(int pdim, int sdim, int num_s, double * s_coord, int num_c, double * c_coord);
+void dump_sph_coords(int num, const double * coord);
+void dump_cart_coords(int num, const double * coord, bool only_sph=false);
+void dump_polygon(const polygon & poly, bool only_sph=false);
 
 } // namespace
 

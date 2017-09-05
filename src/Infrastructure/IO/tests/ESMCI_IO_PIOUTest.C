@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2016, University Corporation for Atmospheric Research,
+// Copyright 2002-2017, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -57,6 +57,10 @@ int main(void){
   pio_var_desc_t pio_vardesc1[PIO_SIZE_VAR_DESC];
   pio_dof_t compdof[DIM_X];
   int amode_in;
+
+  int answer;
+  float float_att_value;
+  double fillvalue;
 #endif
 
   //----------------------------------------------------------------------------
@@ -118,12 +122,12 @@ int main(void){
 #if defined (ESMF_PIO)
   iotype = PIO_iotype_netcdf;
 #endif
-  fname="pio_file1c_netcdf.dat";
+  fname="pio_file1c_netcdf.nc";
 
   //----------------------------------------------------------------------------
   //NEX_UTest
   // Create a file
-  strcpy(name, "Create PIO NETCDF file");
+  strcpy(name, "Create PIO NETCDF mode file");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
 #if defined (ESMF_PIO) && defined (ESMF_NETCDF)
   amode_in=PIO_CLOBBER;
@@ -138,8 +142,23 @@ int main(void){
 
   //----------------------------------------------------------------------------
   //NEX_UTest
+  // Add a global string attribute to the the file to be written
+  strcpy(name, "PIO NETCDF mode add global string attribute");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
+#if defined (ESMF_PIO) && defined (ESMF_NETCDF)
+  pioerr = pio_cpp_put_att_string (pio_file1, NULL,
+      "filename", fname.c_str());
+  rc = (pioerr == 0) ? ESMF_SUCCESS : ESMF_FAILURE;
+#else
+  rc = ESMF_SUCCESS;
+#endif
+  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+  //----------------------------------------------------------------------------
+
+  //----------------------------------------------------------------------------
+  //NEX_UTest
   // Create a PIO mapping
-  strcpy(name, "Create PIO NETCDF mapping");
+  strcpy(name, "Create PIO NETCDF mode mapping");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
   dims[0] = DIM_X * petCount;
 #if defined (ESMF_PIO) && defined (ESMF_NETCDF)
@@ -157,7 +176,7 @@ int main(void){
   //----------------------------------------------------------------------------
   //NEX_UTest
   // Start defining the dimensions of the variable to be written
-  strcpy(name, "PIO NETCDF define dimension");
+  strcpy(name, "PIO NETCDF mode define dimension");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
   dims[0] = DIM_X * petCount;
 #if defined (ESMF_PIO) && defined (ESMF_NETCDF)
@@ -172,7 +191,7 @@ int main(void){
   //----------------------------------------------------------------------------
   //NEX_UTest
   // Start defining the the variable to be written
-  strcpy(name, "PIO NETCDF define variable");
+  strcpy(name, "PIO NETCDF mode define variable");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
 #if defined (ESMF_PIO) && defined (ESMF_NETCDF)
   pioerr = pio_cpp_def_var_md (pio_file1, "testdata", PIO_double,
@@ -186,8 +205,71 @@ int main(void){
 
   //----------------------------------------------------------------------------
   //NEX_UTest
+  // Add a string attribute to the the variable to be written
+  strcpy(name, "PIO NETCDF mode add string attribute");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
+#if defined (ESMF_PIO) && defined (ESMF_NETCDF)
+  pioerr = pio_cpp_put_att_string (pio_file1, &pio_vardesc1,
+      "units", "ordinal");
+  rc = (pioerr == 0) ? ESMF_SUCCESS : ESMF_FAILURE;
+#else
+  rc = ESMF_SUCCESS;
+#endif
+  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+  //----------------------------------------------------------------------------
+
+  //----------------------------------------------------------------------------
+  //NEX_UTest
+  // Add a scalar integer attribute to the the variable to be written
+  strcpy(name, "PIO NETCDF mode add int attribute");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
+#if defined (ESMF_PIO) && defined (ESMF_NETCDF)
+  answer = 42;
+  pioerr = pio_cpp_put_att_ints (pio_file1, &pio_vardesc1,
+      "answer", &answer, 1);
+  rc = (pioerr == 0) ? ESMF_SUCCESS : ESMF_FAILURE;
+#else
+  rc = ESMF_SUCCESS;
+#endif
+  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+  //----------------------------------------------------------------------------
+
+  //----------------------------------------------------------------------------
+  //NEX_UTest
+  // Add a scalar float attribute to the the variable to be written
+  strcpy(name, "PIO NETCDF mode add float attribute");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
+#if defined (ESMF_PIO) && defined (ESMF_NETCDF)
+  float_att_value = 0.0001f;
+  pioerr = pio_cpp_put_att_floats (pio_file1, &pio_vardesc1,
+      "float_att_value", &float_att_value, 1);
+  rc = (pioerr == 0) ? ESMF_SUCCESS : ESMF_FAILURE;
+#else
+  rc = ESMF_SUCCESS;
+#endif
+  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+  //----------------------------------------------------------------------------
+
+  //----------------------------------------------------------------------------
+  //NEX_UTest
+  // Add a scalar double attribute to the the variable to be written
+  strcpy(name, "PIO NETCDF mode add scalar double attribute");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
+#if defined (ESMF_PIO) && defined (ESMF_NETCDF)
+  fillvalue = -9999.99;
+  pioerr = pio_cpp_put_att_doubles (pio_file1, &pio_vardesc1,
+      "_FillValue", &fillvalue, 1);
+  rc = (pioerr == 0) ? ESMF_SUCCESS : ESMF_FAILURE;
+#else
+  rc = ESMF_SUCCESS;
+#endif
+  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+  //----------------------------------------------------------------------------
+
+  //----------------------------------------------------------------------------
+  //NEX_UTest
   // End define mode
-  strcpy(name, "End PIO NETCDF define mode");
+  strcpy(name, "End PIO NETCDF mode define mode");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
 #if defined (ESMF_PIO) && defined (ESMF_NETCDF)
   pioerr = pio_cpp_enddef (&pio_file1);
@@ -201,7 +283,7 @@ int main(void){
   //----------------------------------------------------------------------------
   //NEX_UTest
   // Set variable descriptor frame number
-  strcpy(name, "PIO NETCDF setframe test");
+  strcpy(name, "PIO NETCDF mode setframe test");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
 #if defined (ESMF_PIO) && defined (ESMF_NETCDF)
   pio_cpp_setframe (pio_vardesc1, 1);
@@ -215,7 +297,7 @@ int main(void){
   //----------------------------------------------------------------------------
   //NEX_UTest
   // Write some data
-  strcpy(name, "Write data to PIO NETCDF file");
+  strcpy(name, "Write data to PIO NETCDF mode file");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
   for (int i=0; i<DIM_X; i++)
     test_data[i] = i + 1 + localPet*100;
@@ -233,7 +315,7 @@ int main(void){
   //----------------------------------------------------------------------------
   //NEX_UTest
   // Close file after write
-  strcpy(name, "PIO NETCDF closefile after write test");
+  strcpy(name, "PIO NETCDF mode closefile after write test");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
 #if defined (ESMF_PIO) && defined (ESMF_NETCDF)
   pio_cpp_closefile (&pio_file1);
@@ -247,7 +329,7 @@ int main(void){
   //----------------------------------------------------------------------------
   //NEX_UTest
   // Open PIO file for read
-  strcpy(name, "Open PIO NETCDF file for read");
+  strcpy(name, "Open PIO NETCDF mode file for read");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
 #if defined (ESMF_PIO) && defined (ESMF_NETCDF)
   pioerr = pio_cpp_openfile(&iosys_handle, &pio_file1, iotype,
@@ -262,7 +344,7 @@ int main(void){
   //----------------------------------------------------------------------------
   //NEX_UTest
   // Set variable descriptor frame number
-  strcpy(name, "PIO NETCDF setframe number for read test");
+  strcpy(name, "PIO NETCDF mode setframe number for read test");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
 #if defined (ESMF_PIO) && defined (ESMF_NETCDF)
   pio_cpp_setframe (pio_vardesc1, 1);
@@ -276,7 +358,7 @@ int main(void){
   //----------------------------------------------------------------------------
   //NEX_UTest
   // Read back data
-  strcpy(name, "Read data from PIO NETCDF file");
+  strcpy(name, "Read data from PIO NETCDF mode file");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
   dims[0] = DIM_X;
   for (int i=0; i<DIM_X; i++)
@@ -314,7 +396,7 @@ int main(void){
   //----------------------------------------------------------------------------
   //NEX_UTest
   // Free the decomposition
-  strcpy(name, "Free PIO NETCDF decomposition");
+  strcpy(name, "Free PIO NETCDF mode decomposition");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
 #if defined (ESMF_PIO) && defined (ESMF_NETCDF)
   pio_cpp_freedecomp_ios (&iosys_handle, &iodesc1);
@@ -328,7 +410,7 @@ int main(void){
   //----------------------------------------------------------------------------
   //NEX_UTest
   // Close file after read
-  strcpy(name, "PIO NETCDF closefile after read test");
+  strcpy(name, "PIO NETCDF mode closefile after read test");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
 #if defined (ESMF_PIO) && defined (ESMF_NETCDF)
   pio_cpp_closefile (&pio_file1);
@@ -345,12 +427,12 @@ int main(void){
 #if defined (ESMF_PIO)
   iotype = PIO_iotype_pnetcdf;
 #endif
-  fname="pio_file1c_pnetcdf.dat";
+  fname="pio_file1c_pnetcdf.nc";
 
   //----------------------------------------------------------------------------
   //NEX_UTest
   // Create a file
-  strcpy(name, "Create PIO PNETCDF file");
+  strcpy(name, "Create PIO PNETCDF mode file");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
 #if defined (ESMF_PIO) && defined (ESMF_PNETCDF)
   amode_in=PIO_CLOBBER;
@@ -365,8 +447,23 @@ int main(void){
 
   //----------------------------------------------------------------------------
   //NEX_UTest
+  // Add a global string attribute to the the file to be written
+  strcpy(name, "PIO PNETCDF mode add global string attribute");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
+#if defined (ESMF_PIO) && defined (ESMF_PNETCDF)
+  pioerr = pio_cpp_put_att_string (pio_file1, NULL,
+      "filename", fname.c_str());
+  rc = (pioerr == 0) ? ESMF_SUCCESS : ESMF_FAILURE;
+#else
+  rc = ESMF_SUCCESS;
+#endif
+  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+  //----------------------------------------------------------------------------
+
+  //----------------------------------------------------------------------------
+  //NEX_UTest
   // Create a PIO mapping
-  strcpy(name, "Create PIO PNETCDF mapping");
+  strcpy(name, "Create PIO PNETCDF mode mapping");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
   dims[0] = DIM_X * petCount;
 #if defined (ESMF_PIO) && defined (ESMF_PNETCDF)
@@ -384,7 +481,7 @@ int main(void){
   //----------------------------------------------------------------------------
   //NEX_UTest
   // Start defining the dimensions of the variable to be written
-  strcpy(name, "PIO PNETCDF define dimension");
+  strcpy(name, "PIO PNETCDF mode define dimension");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
   dims[0] = DIM_X * petCount;
 #if defined (ESMF_PIO) && defined (ESMF_PNETCDF)
@@ -399,7 +496,7 @@ int main(void){
   //----------------------------------------------------------------------------
   //NEX_UTest
   // Start defining the the variable to be written
-  strcpy(name, "PIO PNETCDF define variable");
+  strcpy(name, "PIO PNETCDF mode define variable");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
 #if defined (ESMF_PIO) && defined (ESMF_PNETCDF)
   pioerr = pio_cpp_def_var_md (pio_file1, "testdata", PIO_double,
@@ -413,8 +510,71 @@ int main(void){
 
   //----------------------------------------------------------------------------
   //NEX_UTest
+  // Add a string attribute to the the variable to be written
+  strcpy(name, "PIO PNETCDF mode add string attribute");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
+#if defined (ESMF_PIO) && defined (ESMF_PNETCDF)
+  pioerr = pio_cpp_put_att_string (pio_file1, &pio_vardesc1,
+      "units", "ordinal");
+  rc = (pioerr == 0) ? ESMF_SUCCESS : ESMF_FAILURE;
+#else
+  rc = ESMF_SUCCESS;
+#endif
+  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+  //----------------------------------------------------------------------------
+
+  //----------------------------------------------------------------------------
+  //NEX_UTest
+  // Add a scalar integer attribute to the the variable to be written
+  strcpy(name, "PIO PNETCDF mode add int attribute");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
+#if defined (ESMF_PIO) && defined (ESMF_PNETCDF)
+  answer = 42;
+  pioerr = pio_cpp_put_att_ints (pio_file1, &pio_vardesc1,
+      "answer", &answer, 1);
+  rc = (pioerr == 0) ? ESMF_SUCCESS : ESMF_FAILURE;
+#else
+  rc = ESMF_SUCCESS;
+#endif
+  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+  //----------------------------------------------------------------------------
+
+  //----------------------------------------------------------------------------
+  //NEX_UTest
+  // Add a scalar float attribute to the the variable to be written
+  strcpy(name, "PIO PNETCDF mode add float attribute");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
+#if defined (ESMF_PIO) && defined (ESMF_PNETCDF)
+  float_att_value = 0.0001f;
+  pioerr = pio_cpp_put_att_floats (pio_file1, &pio_vardesc1,
+      "float_att_value", &float_att_value, 1);
+  rc = (pioerr == 0) ? ESMF_SUCCESS : ESMF_FAILURE;
+#else
+  rc = ESMF_SUCCESS;
+#endif
+  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+  //----------------------------------------------------------------------------
+
+  //----------------------------------------------------------------------------
+  //NEX_UTest
+  // Add a scalar double attribute to the the variable to be written
+  strcpy(name, "PIO PNETCDF mode add scalar double attribute");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
+#if defined (ESMF_PIO) && defined (ESMF_PNETCDF)
+  fillvalue = -9999.99;
+  pioerr = pio_cpp_put_att_doubles (pio_file1, &pio_vardesc1,
+      "_FillValue", &fillvalue, 1);
+  rc = (pioerr == 0) ? ESMF_SUCCESS : ESMF_FAILURE;
+#else
+  rc = ESMF_SUCCESS;
+#endif
+  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+  //----------------------------------------------------------------------------
+
+  //----------------------------------------------------------------------------
+  //NEX_UTest
   // End define mode
-  strcpy(name, "End PIO PNETCDF define mode");
+  strcpy(name, "End PIO PNETCDF mode define mode");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
 #if defined (ESMF_PIO) && defined (ESMF_PNETCDF)
   pioerr = pio_cpp_enddef (&pio_file1);
@@ -428,7 +588,7 @@ int main(void){
   //----------------------------------------------------------------------------
   //NEX_UTest
   // Set variable descriptor frame number
-  strcpy(name, "PIO PNETCDF setframe test");
+  strcpy(name, "PIO PNETCDF mode setframe test");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
 #if defined (ESMF_PIO) && defined (ESMF_PNETCDF)
   pio_cpp_setframe (pio_vardesc1, 1);
@@ -442,7 +602,7 @@ int main(void){
   //----------------------------------------------------------------------------
   //NEX_UTest
   // Write some data
-  strcpy(name, "Write data to PIO PNETCDF file");
+  strcpy(name, "Write data to PIO PNETCDF mode file");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
   for (int i=0; i<DIM_X; i++)
     test_data[i] = i + 1 + localPet*100;
@@ -460,7 +620,7 @@ int main(void){
   //----------------------------------------------------------------------------
   //NEX_UTest
   // Close file after write
-  strcpy(name, "PIO PNETCDF closefile after write test");
+  strcpy(name, "PIO PNETCDF mode closefile after write test");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
 #if defined (ESMF_PIO) && defined (ESMF_PNETCDF)
   pio_cpp_closefile (&pio_file1);
@@ -474,7 +634,7 @@ int main(void){
   //----------------------------------------------------------------------------
   //NEX_UTest
   // Open PIO file for read
-  strcpy(name, "Open PIO PNETCDF file for read");
+  strcpy(name, "Open PIO PNETCDF mode file for read");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
 #if defined (ESMF_PIO) && defined (ESMF_PNETCDF)
   pioerr = pio_cpp_openfile(&iosys_handle, &pio_file1, iotype,
@@ -489,7 +649,7 @@ int main(void){
   //----------------------------------------------------------------------------
   //NEX_UTest
   // Set variable descriptor frame number
-  strcpy(name, "PIO PNETCDF setframe number for read test");
+  strcpy(name, "PIO PNETCDF mode setframe number for read test");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
 #if defined (ESMF_PIO) && defined (ESMF_PNETCDF)
   pio_cpp_setframe (pio_vardesc1, 1);
@@ -503,7 +663,7 @@ int main(void){
   //----------------------------------------------------------------------------
   //NEX_UTest
   // Read back data
-  strcpy(name, "Read data from PIO PNETCDF file");
+  strcpy(name, "Read data from PIO PNETCDF mode file");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
   dims[0] = DIM_X;
   for (int i=0; i<DIM_X; i++)
@@ -541,7 +701,7 @@ int main(void){
   //----------------------------------------------------------------------------
   //NEX_UTest
   // Free the decomposition
-  strcpy(name, "Free PIO PNETCDF decomposition");
+  strcpy(name, "Free PIO PNETCDF mode decomposition");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
 #if defined (ESMF_PIO) && defined (ESMF_PNETCDF)
   pio_cpp_freedecomp_ios (&iosys_handle, iodesc1);
@@ -555,7 +715,7 @@ int main(void){
   //----------------------------------------------------------------------------
   //NEX_UTest
   // Close file after read
-  strcpy(name, "PIO PNETCDF closefile after read test");
+  strcpy(name, "PIO PNETCDF mode closefile after read test");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
 #if defined (ESMF_PIO) && defined (ESMF_PNETCDF)
   pio_cpp_closefile (&pio_file1);

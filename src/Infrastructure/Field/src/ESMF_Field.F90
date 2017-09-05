@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2016, University Corporation for Atmospheric Research, 
+! Copyright 2002-2017, University Corporation for Atmospheric Research, 
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 ! Laboratory, University of Michigan, National Centers for Environmental 
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -312,7 +312,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rcToReturn=rc)) return
 
-	  ! get the grid decomp type if geombase is grid
+      ! get the grid decomp type if geombase is grid
       decompType = ESMF_GRID_NONARBITRARY
           call ESMF_GeomBaseGet(ftypep%geombase, geomtype=geomtype, rc=localrc)
           if (ESMF_LogFoundError(localrc, &  
@@ -322,12 +322,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           if (geomtype .eq. ESMF_GEOMTYPE_GRID) then
              call ESMF_GeomBaseGet(ftypep%geombase, grid=grid, rc=localrc)
              if (ESMF_LogFoundError(localrc, &  
-          	    ESMF_ERR_PASSTHRU, &  
-           	    ESMF_CONTEXT, rcToReturn=rc)) return  
+                    ESMF_ERR_PASSTHRU, &  
+                    ESMF_CONTEXT, rcToReturn=rc)) return  
              call ESMF_GridGetDecompType(grid, decompType, rc=localrc)
              if (ESMF_LogFoundError(localrc, &  
-          	    ESMF_ERR_PASSTHRU, &  
-           	    ESMF_CONTEXT, rcToReturn=rc)) return  
+                    ESMF_ERR_PASSTHRU, &  
+                    ESMF_CONTEXT, rcToReturn=rc)) return  
           endif   
           ! get grid dim and extents for the local piece
           call ESMF_GeomBaseGet(ftypep%geombase, dimCount=gridrank, &

@@ -1,7 +1,7 @@
 % $Id$
 %
 % Earth System Modeling Framework
-% Copyright 2002-2016, University Corporation for Atmospheric Research, 
+% Copyright 2002-2017, University Corporation for Atmospheric Research, 
 % Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 % Laboratory, University of Michigan, National Centers for Environmental 
 % Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -95,12 +95,12 @@ The ESMF contains two types of classes.
 
 {\bf Deep} classes require
 {\tt ESMF\_<Class>Create()} and {\tt ESMF\_<Class>Destroy()} calls.
-They involve memory allocation take significant time to set up (involving
+They involve memory allocation, take significant time to set up (due to
 memory management) and should not be created in a time-critical portion of code.
 Deep objects persist even after the method in which they were created has
 returned. Most classes in ESMF, including GridComp, CplComp, State, Fields, FieldBundles, Arrays, ArrayBundles, Grids, and Clocks, fall into this category.
 
-{\tt Shallow} classes do not possess {\tt ESMF\_<Class>Create()}
+{\bf Shallow} classes do not possess {\tt ESMF\_<Class>Create()}
 and {\tt ESMF\_<Class>Destroy()} calls.  They are simply declared
 and their values set using an {\tt ESMF\_<Class>Set()} call.  
 Examples of shallow classes are Time, TimeInterval, and ArraySpec.  Shallow classes do not take long to set up and can be declared and set within
@@ -144,7 +144,7 @@ user code.
 
 \subsection{The ESMF Data Hierarchy}
 
-The ESMF API is organized around an hierarchy of classes that 
+The ESMF API is organized around a hierarchy of classes that
 contain model data.  The operations that are performed
 on model data, such as regridding, redistribution, and halo 
 updates, are methods of these classes.  
@@ -195,7 +195,7 @@ libraries.
 \label{sec:spatialclasses}
 
 Like the hierarchy of model data classes, ranging from the 
-simple to the complex, ESMF is organized around an hierarchy of 
+simple to the complex, ESMF is organized around a hierarchy of
 classes that represent different spaces associated with a computation.
 Each of these spaces can be manipulated, in order to give
 the user control over how a computation is executed.  For Earth system
@@ -446,7 +446,7 @@ assignment in the class API documentation sections.
 \begin{sloppypar}
 Deep object copies are implemented as a special variant of the
 {\tt ESMF\_<Class>Create()} methods. It takes an existing deep object as
-on of the required arguments. At this point not all deep classes have
+one of the required arguments. At this point not all deep classes have
 {\tt ESMF\_<Class>Create()} methods that allow object copy.
 \end{sloppypar}
 

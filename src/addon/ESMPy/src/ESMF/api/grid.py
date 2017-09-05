@@ -103,7 +103,31 @@ class Grid(object):
         coordinates defined in the file. This argument is only supported with
         filetype :attr:`~ESMF.api.constants.FileFormat.GRIDSPEC`.
         Defaults to ``None``.
+
+    **Cubed sphere:**
+
+    *REQUIRED:*
+
+    :param int tilesize: The number of elements on each side of the tile of the
+        cubed sphere grid.
+
+    *OPTIONAL:*
+
+    :param list regDecompPTile: List of DE counts for each dimension. The second index steps through
+        the tiles. The total deCount is determined as the sum over
+        the products of regDecompPTile elements for each tile.
+        By default every tile is decomposed in the same way.  If the total
+        PET count is less than 6, one tile will be assigned to one DE and the DEs
+        will be assigned to PETs sequentially, therefore, some PETs may have
+        more than one DE. If the total PET count is greater than 6, the total
+        number of DEs will be a multiple of 6 and less than or equal to the total
+        PET count. For instance, if the total PET count is 16, the total DE count
+        will be 12 with each tile decomposed into 1x2 blocks. The 12 DEs are mapped
+        to the first 12 PETs and the remaining 4 PETs have no DEs locally.
+    :param str name: The name of the :class:`~ESMF.api.grid.Grid`.
     """
+    # :param list decompFlagPTile:
+    # :param list deLabelList:
 
     @initialize
     def __init__(self, max_index=None,
@@ -122,11 +146,19 @@ class Grid(object):
                  add_user_area=None,
                  add_mask=None,
                  varname=None,
-                 coord_names=None):
+                 coord_names=None,
+                 tilesize=None,
+                 regDecompPTile=None,
+                 #decompFlagPTile=None,
+                 #deLabelList=None,
+                 name=None):
  
         # initialize the from_file flag to False
         from_file = False
-        
+        cubed_sphere = False
+
+        self._decount = 1
+
         # in-memory grid
         if max_index is not None:
             # cast max_index if not already done
@@ -146,7 +178,7 @@ class Grid(object):
             if is_sphere is not None:
                 warnings.warn("is_sphere is only used for grids created from file, this argument will be ignored.")
             if add_corner_stagger is not None:
-                warnings.warn("add_corner_stagger is only used for grids created from file, this argument will be ignored.")
+                warnings.warn("add_corner_stagger is only used for grids created from file or cubed sphere grids, this argument will be ignored.")
             if add_user_area is not None:
                 warnings.warn("add_user_area is only used for grids created from file, this argument will be ignored.")
             if add_mask is not None:
@@ -155,12 +187,22 @@ class Grid(object):
                 warnings.warn("varname is only used for grids created from file, this argument will be ignored.")
             if coord_names:
                 warnings.warn("coord_names is only used for grids created from file, this argument will be ignored.")
+            # raise warnings on all cubed sphere args
+            if tilesize:
+                warnings.warn("tilesize is only used for cubed sphere grids, this argument will be ignored.")
+            if regDecompPTile:
+                warnings.warn("regDecompPTile is only used for cubed sphere grids, this argument will be ignored.")
+            # if decompFlagPTile:
+            #     warnings.warn("decompFlagPTile is only used for cubed sphere grids, this argument will be ignored.")
+            # if deLabelList:
+            #     warnings.warn("deLabelList is only used for cubed sphere grids, this argument will be ignored.")
+            if name:
+                warnings.warn("name is only used for cubed sphere grids, this argument will be ignored.")
         # filename and filetype are required for from-file grids
-        elif (filename is None) or (filetype is None):
-            # raise error, need max_index to create in memory or filename to create from file
-            raise GridArgumentError("must supply either max_index for an in-memory grid or filename and filetype for a from-file grid")
-        # from file
-        else:
+        elif (filename is not None) or (filetype is not None):
+            if (filename is None) or (filetype is None):
+                # raise error, need max_index to create in memory or filename to create from file
+                raise GridArgumentError("must supply either max_index for an in-memory grid or filename and filetype for a from-file grid")
             if (filetype != FileFormat.SCRIP) and (filetype != FileFormat.GRIDSPEC):
                 raise GridArgumentError("filetype must be SCRIP or GRIDSPEC for Grid objects")
             # set the from_file flag to True
@@ -180,6 +222,55 @@ class Grid(object):
                 warnings.warn("coord_typekind is only used for grids created in memory, this argument will be ignored.")
             if staggerloc is not None:
                 warnings.warn("staggerloc is only used for grids created in memory, this argument will be ignored.")
+            # raise warnings on all cubed sphere args
+            if tilesize:
+                warnings.warn("tilesize is only used for cubed sphere grids, this argument will be ignored.")
+            if regDecompPTile:
+                warnings.warn("regDecompPTile is only used for cubed sphere grids, this argument will be ignored.")
+            # if decompFlagPTile:
+            #     warnings.warn("decompFlagPTile is only used for cubed sphere grids, this argument will be ignored.")
+            # if deLabelList:
+            #     warnings.warn("deLabelList is only used for cubed sphere grids, this argument will be ignored.")
+            if name:
+                warnings.warn("name is only used for cubed sphere grids, this argument will be ignored.")
+        elif (tilesize is not None):
+            # set the cubed_sphere flag to True
+            cubed_sphere = True
+            self._decount = 6
+            #raise errors for all in-memory grid options
+            if max_index is not None:
+                warnings.warn("max_index is only used for grids created in memory, this argument will be ignored.")
+            if num_peri_dims is not 0:
+                warnings.warn("num_peri_dims is only used for grids created in memory, this argument will be ignored.")
+            if periodic_dim is not None:
+                warnings.warn("periodic_dim is only used for grids created in memory, this argument will be ignored.")
+            if pole_dim is not None:
+                warnings.warn("pole_dim is only used for grids created in memory, this argument will be ignored.")
+            if coord_sys is not None:
+                warnings.warn("coord_sys is only used for grids created in memory, this argument will be ignored.")
+            if coord_typekind is not None:
+                warnings.warn("coord_typekind is only used for grids created in memory, this argument will be ignored.")
+            if staggerloc is not None:
+                warnings.warn("staggerloc is only used for grids created in memory, this argument will be ignored.")
+            # raise warnings on all from file args
+            if filename is not None:
+                warnings.warn("filename is only used for grids created from file, this argument will be ignored.")
+            if filetype is not None:
+                warnings.warn("filetype is only used for grids created from file, this argument will be ignored.")
+            if reg_decomp is not None:
+                warnings.warn("reg_decomp is only used for grids created from file, this argument will be ignored.")
+            if decompflag is not None:
+                warnings.warn("decompflag is only used for grids created from file, this argument will be ignored.")
+            if is_sphere is not None:
+                warnings.warn("is_sphere is only used for grids created from file, this argument will be ignored.")
+            if add_user_area is not None:
+                warnings.warn("add_user_area is only used for grids created from file, this argument will be ignored.")
+            if add_mask is not None:
+                warnings.warn("add_mask is only used for grids created from file, this argument will be ignored.")
+            if varname is not None:
+                warnings.warn("varname is only used for grids created from file, this argument will be ignored.")
+            if coord_names:
+                warnings.warn("coord_names is only used for grids created from file, this argument will be ignored.")
 
         # ctypes stuff
         self._struct = None
@@ -263,7 +354,30 @@ class Grid(object):
                 self._periodic_dim = 0
                 # TODO: we assume that all periodic grids create from file will be periodic across the first
                 #       dimension.. is that true?
-            
+        elif cubed_sphere:
+            staggerloclist = np.array([StaggerLoc.CENTER], dtype=np.int32)
+            if add_corner_stagger is True:
+                staggerloclist.push_back(StaggerLoc.CORNER)
+            self._struct = ESMP_GridCreateCubedSphere(tilesize,
+                regDecompPTile=regDecompPTile,
+                #decompFlagPTile=decompFlagPTile,
+                #deLabelList=deLabelList,
+                staggerLocList=staggerloclist,
+                name=name)
+
+            # grid rank for cubed sphere is currently 2
+            self._rank = 2
+            self._ndims = 2
+
+            # allocate space for staggger
+            staggerloc = list(staggerloclist)
+
+            # set from_file so coordinates are not reallocated
+            from_file = True
+
+            # set name
+            self._name = name
+
         else:
             # ctypes stuff
             self._struct = ESMP_GridStruct()
@@ -297,21 +411,42 @@ class Grid(object):
         self._staggerloc = [False for a in range(2**self.rank)]
 
         # bounds
+        # lower_bounds[staggerLoc]
         self._lower_bounds = [None for a in range(2**self.rank)]
+        # upper_bounds[staggerLoc]
         self._upper_bounds = [None for a in range(2**self.rank)]
-
-        # distributed sizes
+        # size[staggerloc]
         self._size = [None for a in range(2**self.rank)]
-
-        # initialize the coordinates structures
-        # index order is [staggerLoc][coord_dim]
+        # coords[staggerLoc][coord_dim]
         self._coords = [[None for a in range(self.rank)] \
                         for b in range(2**self.rank)]
-
-        # initialize the item structures
-        # index order is [staggerLoc][itemDim]
+        # mask[staggerloc]
         self._mask = [None for a in range(2**self.rank)]
+        # area[staggerloc]
         self._area = [None for a in range(2**self.rank)]
+
+        # if self.decount == 1:
+        # elif self.decount > 1:
+        #     # lower_bounds[de][staggerLoc]
+        #     self._lower_bounds = [[None for a in range(2**self.rank)] \
+        #                            for b in range(self.decount)]
+        #     # upper_bounds[de][staggerLoc]
+        #     self._upper_bounds = [[None for a in range(2**self.rank)] \
+        #                            for b in range(self.decount)]
+        #     # size[de][staggerloc]
+        #     self._size = [[None for a in range(2**self.rank)] \
+        #                   for b in range(self.decount)]
+        #     # coords[de][staggerLoc][coord_dim]
+        #     self._coords = [[[None for a in range(self.rank)] \
+        #                      for b in range(2**self.rank)] \
+        #                     for c in range(self.decount)]
+        #     # mask[de][staggerloc]
+        #     self._mask = [[None for a in range(2**self.rank)] \
+        #                   for b in range(self.decount)]
+        #     # area[de][staggerloc]
+        #     self._area = [[None for a in range(2**self.rank)] \
+        #                   for b in range(self.decount)]
+        # else: raise IndexError
 
         # Add coordinates if a staggerloc is specified
         if staggerloc is not None:
@@ -339,6 +474,9 @@ class Grid(object):
     def __getitem__(self, slc):
         # no slicing in parallel
         if pet_count() > 1:
+            raise SerialMethod
+
+        if self.decount > 1:
             raise SerialMethod
 
         # format and copy
@@ -500,6 +638,15 @@ class Grid(object):
         return self._meta
 
     @property
+    def name(self):
+        """
+        :rtype: str
+        :return: The name of the :class:`~ESMF.api.grid.Grid`.
+        """
+
+        return self._name
+
+    @property
     def ndims(self):
         """
         :rtype: int
@@ -518,6 +665,16 @@ class Grid(object):
         """
 
         return self._num_peri_dims
+
+    @property
+    def decount(self):
+        """
+        :rtype: int
+        :return: The total number of tiles in the
+            :class:`~ESMF.api.grid.Grid`.
+        """
+
+        return self._decount
 
     @property
     def periodic_dim(self):
@@ -739,7 +896,7 @@ class Grid(object):
         *REQUIRED:*
 
         :param int coord_dim: The dimension number of the coordinates to return
-            e.g. ``[x, y, z] = (0, 1, 2)``, or ``[lat, lon] = (0, 1)``
+            e.g. ``[x, y, z] = (0, 1, 2)``, or ``[lon, lat] = (0, 1)``
             (coordinates will not be returned if ``coord_dim`` is not specified
             and ``staggerlocs`` is a list with more than one element).
 
@@ -827,10 +984,10 @@ class Grid(object):
 
     ################ Helper functions ##########################################
 
-    def _verify_grid_bounds_(self, stagger):
+    def _verify_grid_bounds_(self, stagger, localde):
         if self.lower_bounds[stagger] is None:
             try:
-                lb, ub = ESMP_GridGetCoordBounds(self, staggerloc=stagger)
+                lb, ub = ESMP_GridGetCoordBounds(self, staggerloc=stagger, localde=localde)
             except:
                 raise GridBoundsNotCreated
 
@@ -841,15 +998,15 @@ class Grid(object):
             self._size[stagger] = np.array(self.upper_bounds[stagger] -
                                        self.lower_bounds[stagger])
         else:
-            lb, ub = ESMP_GridGetCoordBounds(self, staggerloc=stagger)
+            lb, ub = ESMP_GridGetCoordBounds(self, staggerloc=stagger, localde=localde)
             assert(self.lower_bounds[stagger].all() == lb.all())
             assert(self.upper_bounds[stagger].all() == ub.all())
             assert(self.size[stagger].all() == np.array(ub-lb).all())
 
-    def _allocate_coords_(self, stagger, from_file=False):
+    def _allocate_coords_(self, stagger, localde=0, from_file=False):
         # this could be one of several entry points to the grid,
         # verify that bounds and other necessary data are available
-        self._verify_grid_bounds_(stagger)
+        self._verify_grid_bounds_(stagger, localde)
 
         # allocate space for the coordinates on the Python side
         self._coords[stagger][0] = np.zeros(shape = (self.size[stagger]),
@@ -864,13 +1021,13 @@ class Grid(object):
         # first if number of coordinate dimensions is equivalent to the grid rank
         if (self.ndims == self.rank) or (self.ndims == 0):
             for xyz in range(self.rank):
-                self._link_coord_buffer_(xyz, stagger)
+                self._link_coord_buffer_(xyz, stagger, localde)
         # and this way if we have 1d coordinates
         elif self.ndims < self.rank:
             if not (self.ndims == 1):
                 raise ValueError("Grid does not know how to handle coordinate arrays that are either 1 dimensional"
                                  "  or have dimensionality equivalent to the number coordinate dimensions of the Grid")
-            self._link_coord_buffer_1Dcoords(stagger)
+            self._link_coord_buffer_1Dcoords(stagger, localde)
 
         # initialize to zeros, because ESMF doesn't handle that
         if not from_file:
@@ -879,10 +1036,10 @@ class Grid(object):
             if self.rank == 3:
                self._coords[stagger][2][...] = 0
 
-    def _allocate_items_(self, item, stagger, from_file=False):
+    def _allocate_items_(self, item, stagger, localde=0, from_file=False):
         # this could be one of several entry points to the grid,
         # verify that bounds and other necessary data are available
-        self._verify_grid_bounds_(stagger)
+        self._verify_grid_bounds_(stagger, localde)
 
         # if the item is a mask it is of type I4
         if item == GridItem.MASK:
@@ -898,7 +1055,7 @@ class Grid(object):
             raise GridItemNotSupported
 
         # link the ESMF allocations to the grid properties
-        self._link_item_buffer_(item, stagger)
+        self._link_item_buffer_(item, stagger, localde)
 
         # initialize to zeros, because ESMF doesn't handle that
         if not from_file:
@@ -909,10 +1066,10 @@ class Grid(object):
             else:
                 raise GridItemNotSupported
 
-    def _link_coord_buffer_(self, coord_dim, stagger):
+    def _link_coord_buffer_(self, coord_dim, stagger, localde):
         # get the data pointer and bounds of the ESMF allocation
-        data = ESMP_GridGetCoordPtr(self, coord_dim, staggerloc=stagger)
-        lb, ub = ESMP_GridGetCoordBounds(self, staggerloc=stagger)
+        data = ESMP_GridGetCoordPtr(self, coord_dim, staggerloc=stagger, localde=localde)
+        lb, ub = ESMP_GridGetCoordBounds(self, staggerloc=stagger, localde=localde)
 
         gridCoordP = ndarray_from_esmf(data, self.type, ub-lb)
 
@@ -922,14 +1079,14 @@ class Grid(object):
         if stagger in (StaggerLoc.CORNER, StaggerLoc.CORNER_VFACE):
             self._has_corners = True
 
-    def _link_coord_buffer_1Dcoords(self, stagger):
+    def _link_coord_buffer_1Dcoords(self, stagger, localde):
         # get the data pointer and bounds of the ESMF allocation
-        lb, ub = ESMP_GridGetCoordBounds(self, staggerloc=stagger)
+        lb, ub = ESMP_GridGetCoordBounds(self, staggerloc=stagger, localde=localde)
 
-        gc0 = ndarray_from_esmf(ESMP_GridGetCoordPtr(self, 0, staggerloc=stagger), self.type, ((ub - lb)[0],))
-        gc1 = ndarray_from_esmf(ESMP_GridGetCoordPtr(self, 1, staggerloc=stagger), self.type, ((ub - lb)[1],))
+        gc0 = ndarray_from_esmf(ESMP_GridGetCoordPtr(self, 0, staggerloc=stagger, localde=localde), self.type, ((ub - lb)[0],))
+        gc1 = ndarray_from_esmf(ESMP_GridGetCoordPtr(self, 1, staggerloc=stagger, localde=localde), self.type, ((ub - lb)[1],))
         if self.rank == 3:
-            gc2 = ndarray_from_esmf(ESMP_GridGetCoordPtr(self, 2, staggerloc=stagger), self.type, ((ub - lb)[2],))
+            gc2 = ndarray_from_esmf(ESMP_GridGetCoordPtr(self, 2, staggerloc=stagger, localde=localde), self.type, ((ub - lb)[2],))
             gc00, gc11, gc22 = np.meshgrid(gc0, gc1, gc2, indexing="ij")
         elif self.rank == 2:
             gc00, gc11 = np.meshgrid(gc0, gc1, indexing="ij")
@@ -945,7 +1102,7 @@ class Grid(object):
         if stagger in (StaggerLoc.CORNER, StaggerLoc.CORNER_VFACE):
             self._has_corners = True
 
-    def _link_item_buffer_(self, item, stagger):
+    def _link_item_buffer_(self, item, stagger, localde):
 
         # # check to see if they are done
         # if item == GridItem.MASK:
@@ -958,8 +1115,8 @@ class Grid(object):
         #     raise GridItemNotSupported
 
         # get the data pointer and bounds of the ESMF allocation
-        data = ESMP_GridGetItem(self, item, staggerloc=stagger)
-        lb, ub = ESMP_GridGetCoordBounds(self, staggerloc=stagger)
+        data = ESMP_GridGetItem(self, item, staggerloc=stagger, localde=localde)
+        lb, ub = ESMP_GridGetCoordBounds(self, staggerloc=stagger, localde=localde)
 
         # create Array of the appropriate type the appropriate type
         if item == GridItem.MASK:

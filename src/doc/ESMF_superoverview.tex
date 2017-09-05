@@ -1,7 +1,7 @@
 % $Id$
 %
 % Earth System Modeling Framework
-% Copyright 2002-2016, University Corporation for Atmospheric Research, 
+% Copyright 2002-2017, University Corporation for Atmospheric Research, 
 % Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 % Laboratory, University of Michigan, National Centers for Environmental 
 % Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -133,8 +133,8 @@ Components are created hierarchically, with parent Components creating
 child Components and allocating some or all of their PETs to each one.
 By default ESMF creates a new VM for each child Component, which 
 allows Components to tailor their VM resources to match their needs.
-In some cases a child may want to share its parent's VM - ESMF
-supports this too.
+In some cases, a child may want to share its parent's VM - ESMF
+supports this, too.
 
 A Gridded Component may exist across all the PETs in an application. 
 A Gridded Component may also reside on a subset of PETs in an
@@ -266,7 +266,7 @@ Computations can then proceed simultaneously with the data transfer.
 \newpage
 \subsection{Object Model}
 
-The following is a simplified UML diagram showing the relationships among
+The following is a simplified Unified Modeling Language (UML) diagram showing the relationships among
 ESMF superstructure classes.  See Appendix A, {\it A Brief Introduction 
 to UML}, for a translation table that lists the symbols in the diagram 
 and their meaning.

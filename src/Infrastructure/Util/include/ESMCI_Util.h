@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2016, University Corporation for Atmospheric Research,
+// Copyright 2002-2017, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -92,9 +92,9 @@ enum ESMC_CommFlag { ESMF_COMM_BLOCKING=0,
                      ESMF_COMM_CANCEL};
 
 // Attribute reconcile type
-enum ESMC_AttCopyFlag { ESMF_COPY_ALIAS=0,
-                        ESMF_COPY_REFERENCE,
-                        ESMF_COPY_VALUE};
+enum ESMC_AttCopyFlag { ESMF_ATTCOPY_REFERENCE=0,
+                        ESMF_ATTCOPY_VALUE,
+                        ESMF_ATTCOPY_HYBRID};
 
 // attgetcount flag type
 enum ESMC_AttGetCountFlag { ESMC_ATTGETCOUNT_ATTRIBUTE=0,
@@ -109,10 +109,6 @@ enum ESMC_AttNest_Flag { ESMC_ATTNEST_OFF=0,
 // Attribute reconcile type
 enum ESMC_AttReconcileFlag { ESMC_ATTRECONCILE_OFF=0,
                              ESMC_ATTRECONCILE_ON};
-
-// Attribute reconcile type
-enum ESMC_AttTreeFlag { ESMC_ATTTREE_OFF=0,
-                        ESMC_ATTTREE_ON};
 
 // attwrite flag type
 enum ESMC_AttWriteFlag { ESMC_ATTWRITE_TAB=0,
@@ -138,6 +134,10 @@ enum ESMC_MeshOp_Flag { ESMC_MESHOP_DIFFERENCE=0 };
 #define ESMC_GRIDITEM_FRAC     3
 #define ESMC_GRIDITEM_COUNT    4
 
+// Needs to be kept in line with ESMF_ATT_GRIDDED_DIM_LABELS and
+// ESMF_ATT_UNGRIDDED_DIM_LABELS in ../src/ESMCI_UtilTypes.F90
+#define ESMC_ATT_GRIDDED_DIM_LABELS   "ESMF:gridded_dim_labels"
+#define ESMC_ATT_UNGRIDDED_DIM_LABELS "ESMF:ungridded_dim_labels"
 
 // max/min macros if they don't already exist
 #ifndef MAX
@@ -189,7 +189,9 @@ const char *ESMC_LogicalString(ESMC_Logical tf);
 extern "C" {
 void FTN_X(esmf_pointertoint)(int *n, short *s, ESMC_POINTER *len);
 void FTN_X(esmf_pointerdifference)(int *n, short *s1, short *s2, int *len);
-
+void FTN_X(c_esmc_getcwd)(char *pathname, int *rc, ESMCI_FortranStrLenArg pathname_l);
+void FTN_X(c_esmc_makedirectory)(const char *pathname, int *mode, ESMC_Logical *relaxedFlag,
+      int *rc, ESMCI_FortranStrLenArg pathname_l);
 }
 
 // generate a Globally Unique ID (GUID) in a platform independent way (e.g.

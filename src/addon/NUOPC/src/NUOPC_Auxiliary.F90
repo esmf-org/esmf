@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2016, University Corporation for Atmospheric Research, 
+! Copyright 2002-2017, University Corporation for Atmospheric Research, 
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 ! Laboratory, University of Michigan, National Centers for Environmental 
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -15,6 +15,8 @@
 module NUOPC_Auxiliary
 
   use ESMF
+  use ESMF_IOScripMod !!!! Needed for the internal NUOPC_SCRIPWrite() method
+                      !!!! TODO: Replace this once public Write() available.
 
   implicit none
   
@@ -29,6 +31,7 @@ module NUOPC_Auxiliary
 !==============================================================================
 
   interface NUOPC_Write
+    module procedure NUOPC_SCRIPWrite
     module procedure NUOPC_FactorsWrite
     module procedure NUOPC_FieldWrite
     module procedure NUOPC_StateWrite
@@ -42,6 +45,68 @@ module NUOPC_Auxiliary
   
   !-----------------------------------------------------------------------------
 !BOP
+! !IROUTINE: NUOPC_Write - Write a distributed interpolation matrix to file in SCRIP format
+! !INTERFACE:
+  ! call using generic interface: NUOPC_Write
+  subroutine NUOPC_SCRIPWrite(factorList, factorIndexList, fileName, &
+    relaxedflag, rc)
+! !ARGUMENTS:
+    real(ESMF_KIND_R8), intent(in), target    :: factorList(:)
+    integer,            intent(in), target    :: factorIndexList(:,:) 
+    character(*),       intent(in)            :: fileName
+    logical,            intent(in),  optional :: relaxedflag
+    integer,            intent(out), optional :: rc
+! !DESCRIPTION:
+!   \label{api_NUOPC_SCRIPWrite}
+!   Write the destributed interpolaton matrix provided by {\tt factorList} 
+!   and {\tt factorIndexList} to a SCRIP formatted NetCDF file. Each PET calls
+!   with its local list of factors and indices. The call then writes the 
+!   distributed factors into a single file. If the file already exists, the
+!   contents is replaced by this call.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[factorList]
+!     The distributed factor list.
+!   \item[factorIndexList]
+!     The distributed list of source and destination indices.
+!   \item[fileName]
+!     The name of the file to be written to.
+!   \item[{[relaxedflag]}]
+!     If {\tt .true.}, then no error is returned even if the call cannot write
+!     the file due to library limitations. Default is {\tt .false.}.
+!   \item[{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+  !-----------------------------------------------------------------------------
+    ! local variables
+    logical                 :: ioCapable
+    logical                 :: doItFlag
+
+    if (present(rc)) rc = ESMF_SUCCESS
+    
+    ioCapable = ESMF_IO_NETCDF_PRESENT
+    
+    doItFlag = .true. ! default
+    if (present(relaxedFlag)) then
+      doItFlag = .not.relaxedflag .or. (relaxedflag.and.ioCapable)
+    endif
+    
+    if (doItFlag) then
+      call ESMF_OutputSimpleWeightFile(fileName, factorList, &
+        factorIndexList, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=FILENAME)) return  ! bail out
+    endif
+    
+  end subroutine
+  !-----------------------------------------------------------------------------
+
+
+  !-----------------------------------------------------------------------------
+!BOP
 ! !IROUTINE: NUOPC_Write - Write a distributed factorList to file
 ! !INTERFACE:
   ! call using generic interface: NUOPC_Write
@@ -51,6 +116,9 @@ module NUOPC_Auxiliary
     character(*),       intent(in)            :: fileName
     integer,            intent(out), optional :: rc
 ! !DESCRIPTION:
+!
+!   THIS METHOD IS DEPRECATED. Use \ref{api_NUOPC_SCRIPWrite} instead.
+! 
 !   Write the destributed {\tt factorList} to file. Each PET calls with its 
 !   local list of factors. The call then writes the distributed factors into
 !   a single file. The order of the factors in the file is first by PET, and 
@@ -175,7 +243,7 @@ module NUOPC_Auxiliary
 !     however, if the file already contains a time axis for the variable,
 !     a timeslice one greater than the maximum will be written.
 !   \item[{[iofmt]}]
-!    The IO format.  Valid options are  {\tt ESMF\_IOFMT\_BIN} and 
+!    The I/O format.  Valid options are  {\tt ESMF\_IOFMT\_BIN} and
 !    {\tt ESMF\_IOFMT\_NETCDF}. If not present, file names with a {\tt .bin} 
 !    extension will use {\tt ESMF\_IOFMT\_BIN}, and file names with a {\tt .nc}
 !    extension will use {\tt ESMF\_IOFMT\_NETCDF}.  Other files default to

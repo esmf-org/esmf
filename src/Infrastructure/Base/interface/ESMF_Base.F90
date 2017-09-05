@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2016, University Corporation for Atmospheric Research,
+! Copyright 2002-2017, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -93,6 +93,7 @@ module ESMF_BaseMod
 
 !      public ESMF_BaseSetID
        public ESMF_BaseGetID
+       public ESMF_BaseSetVMId
        public ESMF_BaseGetVMId
 
 !      public ESMF_BaseSetRefCount
@@ -112,6 +113,7 @@ module ESMF_BaseMod
 
        public ESMF_BaseSerialize
        public ESMF_BaseDeserialize
+       public ESMF_BaseDeserializeIDVMId
 
 !   Virtual methods to be defined by derived classes
 !      public ESMF_Read
@@ -486,6 +488,46 @@ module ESMF_BaseMod
 
 !-------------------------------------------------------------------------
 #undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_BaseSetVMId"
+!BOPI
+! !IROUTINE:  ESMF_SetVMId - get the VM Id of this object
+!
+! !INTERFACE:
+  subroutine ESMF_BaseSetVMId (base, vmid, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Base), intent(inout)          :: base
+      type(ESMF_VMId), intent(in)             :: vmid
+      integer,         intent(out), optional  :: rc
+
+!
+! !DESCRIPTION:
+!     Set the VMId of any type in the system.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[base]
+!       Base object of any ESMF type.
+!     \item[vmid]
+!       The vmid of the Base object.
+!     \item[{[rc]}]
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOPI
+      integer :: localrc
+
+      ! Initialize return code; assume routine not implemented
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+      localrc = ESMF_RC_NOT_IMPL
+
+      call c_ESMC_SetVMID(base , vmid, localrc)
+      if (present(rc)) rc = localrc
+
+  end subroutine ESMF_BaseSetVMId
+
+!-------------------------------------------------------------------------
+#undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_BaseGetVMId"
 !BOPI
 ! !IROUTINE:  ESMF_GetVMId - get the VM Id of this object
@@ -741,7 +783,7 @@ module ESMF_BaseMod
 !EOPI
     integer                     :: localrc, ignorerc
     character(len=ESMF_MAXSTR)  :: opts
-    logical                     :: tofile
+    type(ESMF_Logical)          :: tofile
 
     ! Initialize return code; assume routine not implemented
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -756,17 +798,13 @@ module ESMF_BaseMod
         opts = ''
     endif
 
-    if (present(filename)) then
-        tofile = .true.
-    else
-        tofile = .false.
-    endif
+    tofile = present (filename)
 
     call ESMF_UtilIOUnitFlush (unit=ESMF_UtilIOstdout, rc=ignorerc)
     ! Ignore localrc, because sometimes stdout is not open at this point
     ! and some compilers FLUSH statements will complain.
 
-    call c_ESMC_BasePrint(base, 0, opts, tofile, filename, .true., localrc)
+    call c_ESMC_BasePrint(base, 0, opts, tofile, filename, ESMF_TRUE, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -1028,6 +1066,62 @@ module ESMF_BaseMod
     if (present (rc)) rc = ESMF_SUCCESS
 
   end function ESMF_BaseDeserialize
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-internal method -----------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_BaseDeserializeIDVMId"
+!BOPI
+! !IROUTINE: ESMF_BaseDeserializeIDVMId - Deserialize from a buffer
+!
+! !INTERFACE:
+  subroutine ESMF_BaseDeserializeIDVMId (buffer, offset, ID, VMId, rc)
+!
+! !ARGUMENTS:
+    character,       intent(in)    :: buffer(:)
+    integer,         intent(in)    :: offset
+    integer,         intent(out)   :: ID
+    type(ESMF_VMId), intent(inout) :: VMId
+    integer,         intent(out)   :: rc
+!
+! !DESCRIPTION:
+!      Obtains the ID and VMId from a {\tt ESMF\_Base} object in a
+!      serialized byte stream. Expected to be used by {\tt ESMF\_StateReconcile()}
+!      and friends.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [buffer]
+!           Data buffer of serialized information.
+!     \item [offset]
+!           Current read offset in the current buffer.
+!     \item[ID]
+!           Returns the ESMF object ID
+!     \item[VMId]
+!           Returns the ESMF object VMId
+!     \item [rc]
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOPI
+    integer :: localrc
+
+    ! Initialize
+    localrc = ESMF_RC_NOT_IMPL
+    rc = ESMF_RC_NOT_IMPL
+
+    call c_ESMC_BaseDeserialize_idvmid(buffer, offset, &
+        ID, VMId, localrc)
+    if (ESMF_LogFoundError(localrc, &
+        msg="Base ID/VMId inquiry", &
+        ESMF_CONTEXT,  &
+        rcToReturn=rc)) return
+
+    ! Return successfully
+    rc = ESMF_SUCCESS
+
+  end subroutine ESMF_BaseDeserializeIDVMId
 !------------------------------------------------------------------------------
 
 

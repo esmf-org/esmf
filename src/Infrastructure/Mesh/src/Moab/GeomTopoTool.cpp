@@ -3,7 +3,7 @@
  * storing and accessing finite element mesh data.
  * 
  * Copyright 2004 Sandia Corporation.  Under the terms of Contract
- * DE-AC04-94AL85000 with Sandia Coroporation, the U.S. Government
+ * DE-AC04-94AL85000 with Sandia Corporation, the U.S. Government
  * retains certain rights in this software.
  * 
  * This library is free software; you can redistribute it and/or
@@ -39,8 +39,8 @@ const char GEOM_SENSE_N_SENSES_TAG_NAME[] = "GEOM_SENSE_N_SENSES";
 
 GeomTopoTool::GeomTopoTool(Interface *impl, bool find_geoments, EntityHandle modelRootSet) :
   mdbImpl(impl), sense2Tag(0), senseNEntsTag(0), senseNSensesTag(0),
-  geomTag(0), gidTag(0), modelSet(modelRootSet), obbTree(impl, NULL, true),
-  contiguous(true), oneVolRootSet(0)
+  geomTag(0), gidTag(0), modelSet(modelRootSet), updated(false), obbTree(impl, NULL, true),
+  setOffset(0), contiguous(true), oneVolRootSet(0)
 {
 
   ErrorCode result = mdbImpl->tag_get_handle(GEOM_DIMENSION_TAG_NAME, 1,
@@ -325,7 +325,7 @@ ErrorCode GeomTopoTool::restore_topology()
     Range dp1ents;
     std::vector<EntityHandle> owners;
     for (Range::iterator rit = geomRanges[dim + 1].begin(); rit != geomRanges[dim
-        + 1].end(); rit++) {
+        + 1].end(); ++rit) {
       dp1ents.clear();
       result = mdbImpl->get_entities_by_dimension(*rit, dim + 1, dp1ents);
       if (MB_SUCCESS != result)
@@ -338,7 +338,7 @@ ErrorCode GeomTopoTool::restore_topology()
     }
 
     for (Range::iterator d_it = geomRanges[dim].begin(); d_it
-        != geomRanges[dim].end(); d_it++) {
+        != geomRanges[dim].end(); ++d_it) {
       Range dents;
       result = mdbImpl->get_entities_by_dimension(*d_it, dim, dents);
       if (MB_SUCCESS != result)
@@ -363,7 +363,7 @@ ErrorCode GeomTopoTool::restore_topology()
       // compress to a range to remove duplicates
       tmp_parents.clear();
       std::copy(parents.begin(), parents.end(), range_inserter(tmp_parents));
-      for (Range::iterator pit = tmp_parents.begin(); pit != tmp_parents.end(); pit++) {
+      for (Range::iterator pit = tmp_parents.begin(); pit != tmp_parents.end(); ++pit) {
         result = mdbImpl->add_parent_child(*pit, *d_it);
         if (MB_SUCCESS != result)
           return result;
@@ -372,8 +372,8 @@ ErrorCode GeomTopoTool::restore_topology()
       // store surface senses within regions, and edge senses within surfaces
       if (dim == 0)
         continue;
-      const EntityHandle *conn3, *conn2;
-      int len3, len2, err, num, sense, offset;
+      const EntityHandle *conn3 = NULL, *conn2 = NULL;
+      int len3 = 0, len2 = 0, err = 0, num = 0, sense = 0, offset = 0;
       for (size_t i = 0; i < parents.size(); ++i) {
         result = mdbImpl->get_connectivity(dp1ents[i], conn3, len3, true);
         if (MB_SUCCESS != result)
@@ -432,7 +432,7 @@ ErrorCode GeomTopoTool::separate_by_dimension(const Range &geom_sets)
   for (int i=0; i<5; i++)
     this->geomRanges[i].clear();
 
-  for (git = geom_sets.begin(), iit = tag_vals.begin(); git != geom_sets.end(); git++, iit++) {
+  for (git = geom_sets.begin(), iit = tag_vals.begin(); git != geom_sets.end(); ++git, ++iit) {
     if (0 <= *iit && 4 >= *iit)
       geomRanges[*iit].insert(*git);
     else {
@@ -451,7 +451,7 @@ ErrorCode GeomTopoTool::separate_by_dimension(const Range &geom_sets)
   for (int i=0; i<=4; i++)
   {
     maxGlobalId[i] = 0;
-    for (Range::iterator it =geomRanges[i].begin(); it!=geomRanges[i].end(); it++ )
+    for (Range::iterator it =geomRanges[i].begin(); it!=geomRanges[i].end(); ++it)
     {
       EntityHandle set = *it;
       int gid;
@@ -475,10 +475,7 @@ ErrorCode GeomTopoTool::construct_vertex_ranges(const Range &geom_sets,
   // construct the vertex range for each entity and put on that tag
   Range *temp_verts, temp_elems;
   ErrorCode result = MB_SUCCESS;
-  for (Range::const_iterator it = geom_sets.begin(); it != geom_sets.end(); it++) {
-    // make the new range
-    temp_verts = new Range();
-    assert(NULL != temp_verts);
+  for (Range::const_iterator it = geom_sets.begin(); it != geom_sets.end(); ++it) {
     temp_elems.clear();
 
     // get all the elements in the set, recursively
@@ -486,16 +483,27 @@ ErrorCode GeomTopoTool::construct_vertex_ranges(const Range &geom_sets,
     if (MB_SUCCESS != result)
       return result;
 
+    // make the new range
+    temp_verts = new (std::nothrow) Range();
+    assert(NULL != temp_verts);
+
     // get all the verts of those elements; use get_adjacencies 'cuz it handles ranges better
     result = mdbImpl->get_adjacencies(temp_elems, 0, false, *temp_verts,
         Interface::UNION);
-    if (MB_SUCCESS != result)
+    if (MB_SUCCESS != result) {
+      delete temp_verts;
       return result;
+    }
 
     // store this range as a tag on the entity
     result = mdbImpl->tag_set_data(verts_tag, &(*it), 1, &temp_verts);
-    if (MB_SUCCESS != result)
+    if (MB_SUCCESS != result) {
+      delete temp_verts;
       return result;
+    }
+
+    delete temp_verts;
+    temp_verts = NULL;
 
   }
 
@@ -505,7 +513,7 @@ ErrorCode GeomTopoTool::construct_vertex_ranges(const Range &geom_sets,
 //! Store sense of entity relative to wrt_entity.
 //!\return MB_MULTIPLE_ENTITIES_FOUND if surface already has a forward volume.
 //!        MB_SUCCESS if successful
-//!        otherwise whatever internal error code occured.
+//!        otherwise whatever internal error code occurred.
 ErrorCode GeomTopoTool::set_sense(EntityHandle entity, EntityHandle wrt_entity,
     int sense)
 {
@@ -901,13 +909,13 @@ ErrorCode GeomTopoTool::geometrize_surface_set(EntityHandle surface, EntityHandl
 
 
   Skinner tool(mdbImpl);
-  rval = tool.find_skin(surface_ents, 1, edge_ents);
+  rval = tool.find_skin(0, surface_ents, 1, edge_ents);
   if (MB_SUCCESS != rval)
     return rval;
   if (debugFlag)
   {
     std::cout<< "skinning edges: " << edge_ents.size() << "\n";
-    for (Range::iterator it= edge_ents.begin(); it!=edge_ents.end(); it++)
+    for (Range::iterator it= edge_ents.begin(); it!=edge_ents.end(); ++it)
     {
       EntityHandle ed=*it;
       std::cout<< "edge: " << mdbImpl->id_from_handle(ed) << " type:" << mdbImpl->type_from_handle(ed)<< "\n" ;
@@ -960,7 +968,7 @@ ErrorCode GeomTopoTool::geometrize_surface_set(EntityHandle surface, EntityHandl
         return rval;
       start_node = nn2[0]; // or conn2[0] !!! beware: conn2 is modified
       next_node = nn2[1];// or conn2[1]   !!!
-      // reset conectivity of edge
+      // reset connectivity of edge
       if (debugFlag)
         std::cout << " current edge needs reversed\n";
     }
@@ -1039,7 +1047,7 @@ ErrorCode GeomTopoTool::geometrize_surface_set(EntityHandle surface, EntityHandl
       // before reversion, conn2 was something { n1, next_node}
       // after reversion, conn2 became {next_node, n1}, so the
       // new next node will be still conn2[1]; big surprise, as
-      //  I didn' expect the conn2 to change.
+      //  I didn't expect the conn2 to change.
       // it seems that const EntityHandle * conn2 means conn2 cannot be
       // changed, but what is pointed to by it will change when we reset connectivity for edge
       next_node = conn2[1];
@@ -1180,7 +1188,7 @@ ErrorCode GeomTopoTool::duplicate_model(GeomTopoTool *& duplicate, std::vector<E
   {
     int gid = 0;
     unsigned int set_options = ( (1!=dim) ? MESHSET_SET : MESHSET_ORDERED );
-    for (Range::iterator it=geomRanges[dim].begin(); it!=geomRanges[dim].end(); it++)
+    for (Range::iterator it=geomRanges[dim].begin(); it!=geomRanges[dim].end(); ++it)
     {
       EntityHandle set=*it;
       if (pvGEnts != NULL && depSets.find(set)==depSets.end())
@@ -1230,7 +1238,7 @@ ErrorCode GeomTopoTool::duplicate_model(GeomTopoTool *& duplicate, std::vector<E
         rval = mdbImpl->get_child_meshsets(set, children); // num_hops = 1 by default
         if (MB_SUCCESS!=rval)
            return rval;
-        for (Range::iterator it2=children.begin(); it2!=children.end(); it2++)
+        for (Range::iterator it2=children.begin(); it2!=children.end(); ++it2)
         {
           EntityHandle newChildSet = relate[*it2];
           rval = mdbImpl->add_parent_child(newSet, newChildSet);
@@ -1259,7 +1267,7 @@ ErrorCode GeomTopoTool::duplicate_model(GeomTopoTool *& duplicate, std::vector<E
 
   for (int dd=1; dd<=2; dd++) // do it for surfaces and edges
   {
-    for (Range::iterator it=geomRanges[dd].begin(); it!=geomRanges[dd].end(); it++)
+    for (Range::iterator it=geomRanges[dd].begin(); it!=geomRanges[dd].end(); ++it)
     {
       EntityHandle surf=*it;
       if (pvGEnts != NULL && depSets.find(surf)==depSets.end())
@@ -1315,7 +1323,7 @@ bool GeomTopoTool::check_model()
   // vertex sets should have one node
   Range::iterator rit;
   ErrorCode rval;
-  for (rit = geomRanges[0].begin(); rit!=geomRanges[0].end(); rit++)
+  for (rit = geomRanges[0].begin(); rit!=geomRanges[0].end(); ++rit)
   {
     EntityHandle vSet = *rit;
     Range nodes;
@@ -1338,7 +1346,7 @@ bool GeomTopoTool::check_model()
   }
 
   // edges to be formed by continuous chain of mesh edges, oriented correctly
-  for (rit = geomRanges[1].begin(); rit!=geomRanges[1].end(); rit++)
+  for (rit = geomRanges[1].begin(); rit!=geomRanges[1].end(); ++rit)
   {
     EntityHandle edge = *rit;
     std::vector<EntityHandle> mesh_edges;
@@ -1384,7 +1392,7 @@ bool GeomTopoTool::check_model()
     Range notVertices = subtract(vertSets, geomRanges[0] );
     if (!notVertices.empty())
       RETFALSE(" children sets that are not vertices ", notVertices[0])
-    for (Range::iterator it=vertSets.begin(); it!=vertSets.end(); it++)
+    for (Range::iterator it=vertSets.begin(); it!=vertSets.end(); ++it)
     {
       if ( !mdbImpl->contains_entities(*it,  &firstNode,  1)&&
           !mdbImpl->contains_entities(*it,  &currentNode,  1) )
@@ -1445,7 +1453,7 @@ bool GeomTopoTool::check_model()
   // use the skinner for boundary check
   Skinner tool(mdbImpl);
 
-  for (rit = geomRanges[2].begin(); rit!=geomRanges[2].end(); rit++)
+  for (rit = geomRanges[2].begin(); rit!=geomRanges[2].end(); ++rit)
   {
     EntityHandle faceSet = *rit;
     // get all boundary edges (adjacent edges)
@@ -1472,7 +1480,7 @@ bool GeomTopoTool::check_model()
     if (MB_SUCCESS!=rval)
       RETFALSE(" can't get surface elements from the face set ", faceSet)
 
-    rval = tool.find_skin(surface_ents, 1, edge_ents);
+    rval = tool.find_skin(0, surface_ents, 1, edge_ents);
     if (MB_SUCCESS != rval)
       RETFALSE("can't skin a surface ", surface_ents[0])
 

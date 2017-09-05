@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2016, University Corporation for Atmospheric Research, 
+// Copyright 2002-2017, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -61,17 +61,12 @@ void FTN_X(c_esmc_stateserialize)(
 
     if (localrc) *localrc = ESMC_RC_NOT_IMPL;
 
-    // TODO: verify length > needed, else realloc longer
-    int fixedpart = 10 * sizeof (int *);
+    int fixedpart = 2 * sizeof (int *);
     if ((*inquireflag != ESMF_INQUIREONLY) && (*length - *offset) < fixedpart) {
          
          ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-           "Buffer too short to add a State object", ESMC_CONTEXT, localrc);
+           "Buffer too short to serialize a State object", ESMC_CONTEXT, localrc);
          return;
- 
-        //buffer = (char *)realloc((void *)buffer,
-        //                         *length + 2*fixedpart + byte_count);
-        //*length += 2 * fixedpart;
     }
 
 
@@ -145,7 +140,14 @@ void FTN_X(c_esmc_stateitemserialize)(int *otype,
 
     if (localrc) *localrc = ESMC_RC_NOT_IMPL;
 
-    // TODO: verify length > needed, else realloc longer
+
+    int fixedpart = sizeof (int *) + clen;
+    if ((*inquireflag != ESMF_INQUIREONLY) && (*length - *offset) < fixedpart) {
+         
+         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+           "Buffer too short to serialize a State item", ESMC_CONTEXT, localrc);
+         return;
+    }
 
     ip = (int *)(buffer + *offset);
     if (*inquireflag != ESMF_INQUIREONLY)

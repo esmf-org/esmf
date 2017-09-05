@@ -61,7 +61,8 @@ class Field(object):
     :param tuple ndbounds: The number of entries in an extra
         :class:`~ESMF.api.field.Field` dimension. This is represented as a
         single value, a list or a tuple containing the number of entries for
-        each desired extra dimension of the :class:`~ESMF.api.field.Field`.
+        each desired extra dimension of the :class:`~ESMF.api.field.Field`. The
+        time dimension must be last, following Fortran indexing conventions.
     """
 
     @initialize
@@ -83,14 +84,15 @@ class Field(object):
         ungridded_lower_bound = None
         ungridded_upper_bound = None
         rank = grid.rank
-        if ndbounds is None:
-            local_ndbounds = ndbounds
-        elif type(ndbounds) is list:
-            local_ndbounds = ndbounds
-        elif type(ndbounds) is tuple:
-            local_ndbounds = list(ndbounds)
-        else:
-            local_ndbounds = [ndbounds]
+        local_ndbounds = ndbounds
+        try:
+            local_ndbounds = ndbounds.tolist()
+        except AttributeError:
+            if ndbounds is not None:
+                local_ndbounds = list(ndbounds)
+
+        # TODO: flip ndbounds
+        #     also, will have to verify that everything is switched back
 
         xd = 0
         if local_ndbounds:
@@ -98,8 +100,8 @@ class Field(object):
             lb = [1 for a in range(len(local_ndbounds))]
             ungridded_lower_bound = np.array(lb, dtype=np.int32)
             ungridded_upper_bound = np.array(local_ndbounds, dtype=np.int32)
-            # set this to put gridded dimension in the last available dimensions of the field, dependent on grid rank
-            grid_to_field_map = np.array([i+xd+1 for i in range(grid.rank)], dtype=np.int32)
+            # set this to put gridded dimension in the first available dimensions of the field, dependent on grid rank
+            grid_to_field_map = np.array([i+1 for i in range(grid.rank)], dtype=np.int32)
             rank += len(local_ndbounds)
 
         if isinstance(grid, Grid):
@@ -173,9 +175,10 @@ class Field(object):
 
         ret._data = self._data.__getitem__(slc)
 
-        # set grid to the last two dims of the slice
+        # set grid to the first two dims of the slice (this will change to last when we get dimension ordering set to python conventions)
         if self.xd > 0:
-            slc_grid = [slc[-1 * x] for x in range(self.rank - self.xd, 0, -1)]
+            # slc_grid = [slc[-1 * x] for x in range(self.rank - self.xd, 0, -1)]
+            slc_grid = [slc[x] for x in range(self.rank - self.xd)]
         else:
             slc_grid = slc
         ret._grid = self.grid.__getitem__(slc_grid)
@@ -359,7 +362,7 @@ class Field(object):
         # call into the ctypes layer
         ESMP_FieldRegridGetArea(self)
 
-    def read(self, filename, variable, ndbounds=None):
+    def read(self, filename, variable, timeslice=None):
         """
         Read data into an existing :class:`~ESMF.api.field.Field` from a
         CF-compliant NetCDF file.
@@ -374,8 +377,12 @@ class Field(object):
 
         *OPTIONAL:*
 
-        :param list ndbounds: The number of ungridded dimensions to read.
+        :param list timeslice: The number of timeslices to read.
         """
+
+        import ESMF.api.constants as constants
+        if constants._ESMF_COMM is constants._ESMF_COMM_MPIUNI:
+            raise ImportError("Field.Read() does not work if ESMF has not been built with MPI support")
 
         assert (type(filename) is str)
         assert (type(variable) is str)
@@ -383,29 +390,16 @@ class Field(object):
         # format defaults to NetCDF for now
         format = 1
 
-        # if ndbounds is not passed in, set it to the first of extra field dimensions, if they exist
-        timeslice = 1
-        if ndbounds is None:
-            if self.ndbounds is not None:
-                if type(self.ndbounds) is list:
-                    timeslice = self.ndbounds[0]
-                elif type(self.ndbounds) is int:
-                    timeslice = self.ndbounds
-        # if ndbounds is passed in, make sure it is a reasonable value
+        if not isinstance(timeslice, int):
+            raise TypeError("timeslice must be a single integer value")
+
+        local_timeslice = None
+        if timeslice == None:
+          local_timeslice = 1
         else:
-            if self.ndbounds is not None:
-                if type(ndbounds) is not int:
-                    raise ValueError("ndbounds argument can only be a single integer at this time")
-                else:
-                    timeslice_local = 1
-                    if type(self.ndbounds) is list:
-                        timeslice_local = self.ndbounds[0]
-                    elif type(self.ndbounds) is int:
-                        timeslice_local = self.ndbounds
-                    assert (ndbounds <= timeslice_local)
-                    timeslice = ndbounds
+          local_timeslice = timeslice
 
         ESMP_FieldRead(self, filename=filename,
                        variablename=variable,
-                       timeslice=timeslice,
+                       timeslice=local_timeslice,
                        iofmt=format)

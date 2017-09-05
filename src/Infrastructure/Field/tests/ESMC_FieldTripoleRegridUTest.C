@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2016, University Corporation for Atmospheric Research, 
+// Copyright 2002-2017, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -43,12 +43,12 @@ void create_grid(ESMC_Grid &grid, double max_x_in, double max_y_in)
   DEG2RAD = 3.141592653589793/180.0;
 
   int *maxIndex;
-  ESMC_InterfaceInt i_maxIndex;
+  ESMC_InterArrayInt i_maxIndex;
   int dimcount = 2;
   maxIndex = (int *)malloc(dimcount*sizeof(int));
   maxIndex[0] = int(max_x);
   maxIndex[1] = int(max_y);
-  ESMC_InterfaceIntSet(&i_maxIndex, maxIndex, dimcount);
+  ESMC_InterArrayIntSet(&i_maxIndex, maxIndex, dimcount);
 
   ESMC_CoordSys_Flag coordsys = ESMC_COORDSYS_CART;
   ESMC_TypeKind_Flag typekind = ESMC_TYPEKIND_R8;
@@ -79,10 +79,10 @@ void create_grid(ESMC_Grid &grid, double max_x_in, double max_y_in)
   int *exUBound_c = (int *)malloc(dimcount*sizeof(int));
 
   double *gridXCoord_c = (double *)ESMC_GridGetCoord(grid, 1,
-                                                   ESMC_STAGGERLOC_CORNER,
+                                                   ESMC_STAGGERLOC_CORNER, NULL,
                                                    exLBound_c, exUBound_c, NULL);
   double *gridYCoord_c = (double *)ESMC_GridGetCoord(grid, 2,
-                                                   ESMC_STAGGERLOC_CORNER,
+                                                   ESMC_STAGGERLOC_CORNER, NULL,
                                                    NULL, NULL, NULL);
 
   printf("1\n");
@@ -101,10 +101,10 @@ void create_grid(ESMC_Grid &grid, double max_x_in, double max_y_in)
   int *exUBound = (int *)malloc(dimcount*sizeof(int));
 
   double *gridXCoord = (double *)ESMC_GridGetCoord(grid, 1,
-                                                   ESMC_STAGGERLOC_CENTER,
+                                                   ESMC_STAGGERLOC_CENTER, NULL,
                                                    exLBound, exUBound, NULL);
   double *gridYCoord = (double *)ESMC_GridGetCoord(grid, 2,
-                                                   ESMC_STAGGERLOC_CENTER,
+                                                   ESMC_STAGGERLOC_CENTER, NULL,
                                                    NULL, NULL, NULL);
 
   p = 0;
@@ -195,10 +195,10 @@ int main(void){
   int *exUBound_s = (int *)malloc(dimcount*sizeof(int));
 
   double *gridXCoord_s = (double *)ESMC_GridGetCoord(srcgrid, 1,
-                                                   ESMC_STAGGERLOC_CENTER,
+                                                   ESMC_STAGGERLOC_CENTER, NULL,
                                                    exLBound_s, exUBound_s, NULL);
   double *gridYCoord_s = (double *)ESMC_GridGetCoord(srcgrid, 2,
-                                                   ESMC_STAGGERLOC_CENTER,
+                                                   ESMC_STAGGERLOC_CENTER, NULL,
                                                    NULL, NULL, NULL);
 
   //----------------------------------------------------------------------------
@@ -227,10 +227,10 @@ int main(void){
   int *exUBound_d = (int *)malloc(dimcount*sizeof(int));
 
   double *gridXCoord_d = (double *)ESMC_GridGetCoord(dstgrid, 1,
-                                                   ESMC_STAGGERLOC_CENTER,
+                                                   ESMC_STAGGERLOC_CENTER, NULL,
                                                    exLBound_d, exUBound_d, &rc);
   double *gridYCoord_d = (double *)ESMC_GridGetCoord(dstgrid, 2,
-                                                   ESMC_STAGGERLOC_CENTER,
+                                                   ESMC_STAGGERLOC_CENTER, NULL,
                                                    NULL, NULL, NULL);
 
   //----------------------------------------------------------------------------
@@ -249,8 +249,8 @@ int main(void){
   //----------------------------------------------------------------------------
   int *maskValues = (int *)malloc(sizeof(int));
   maskValues[0] = 1;
-  ESMC_InterfaceInt i_maskValues;
-  rc = ESMC_InterfaceIntSet(&i_maskValues, maskValues, 1);
+  ESMC_InterArrayInt i_maskValues;
+  rc = ESMC_InterArrayIntSet(&i_maskValues, maskValues, 1);
 
   //----------------------------------------------------------------------------
   ESMC_UnmappedAction_Flag unmappedaction = ESMC_UNMAPPEDACTION_IGNORE;

@@ -1,0 +1,16 @@
+Some code in the src and include directories is generated based
+on the file config.yaml using a tool called barectf. Barectf
+generates C interfaces to write out events in the Common Trace
+Format (CTF).  See https://github.com/efficios/barectf/ for
+information about installing this tool locally.  It is not needed
+unless you change config.yaml.
+
+The generated files are:
+src/esmftrc.c
+include/esmftrc.h
+include/metadata
+
+If the config.yaml file changes, then run the following to
+generate the new interfaces.
+
+$ barectf -c src -H include -m include config.yaml

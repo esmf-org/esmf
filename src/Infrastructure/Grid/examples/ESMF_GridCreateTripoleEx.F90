@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2016, University Corporation for Atmospheric Research,
+! Copyright 2002-2017, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -61,7 +61,7 @@ program ESMF_GridCreateEx
 
 
 !BOE
-! Allocate a fortran array to hold sphere coodinates, then read them in. This 
+! Allocate a Fortran array to hold sphere coodinates, then read them in. This
 ! all takes place on one processor. Later the data will be distributed across the processors. 
 !EOE
 
@@ -159,7 +159,7 @@ program ESMF_GridCreateEx
 !EOC
 
 !BOE
-!  Scatter the fortran array according to DistGrid into the esmf Array.
+!  Scatter the Fortran array according to DistGrid into the esmf Array.
 !EOE
 
 !BOC

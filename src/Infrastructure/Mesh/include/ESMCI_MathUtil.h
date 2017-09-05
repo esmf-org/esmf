@@ -1,6 +1,6 @@
 // $Id$
 // Earth System Modeling Framework
-// Copyright 2002-2016, University Corporation for Atmospheric Research, 
+// Copyright 2002-2017, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -57,6 +57,8 @@ namespace ESMCI {
    void remove_0len_edges3D(int *num_p, double *p, int *_first_remove_ind=NULL);
 
   void remove_0len_edges2D(int *num_p, double *p);
+
+  void count_0len_edges3D(int num_p, double *p, int *_num_0len);
 
   void write_3D_poly_to_vtk(const char *filename, int id, int num_p, double *p);
   void write_3D_poly_woid_to_vtk(const char *filename, int num_p, double *p);

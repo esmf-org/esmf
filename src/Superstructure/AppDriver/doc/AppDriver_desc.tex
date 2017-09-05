@@ -1,7 +1,7 @@
 % $Id$
 %
 % Earth System Modeling Framework
-% Copyright 2002-2016, University Corporation for Atmospheric Research, 
+% Copyright 2002-2017, University Corporation for Atmospheric Research, 
 % Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 % Laboratory, University of Michigan, National Centers for Environmental 
 % Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -13,8 +13,8 @@
 Every ESMF application needs a driver code. Typically the driver layer is
 implemented as the "main" of the application, although this is not strictly an
 ESMF requirement. For most ESMF applications the task of the application driver
-will be very generic: Initialize ESMF, create a top level Component and call its
-Intialize, Run and Finalize methods, before destroying the top level Component
+will be very generic: Initialize ESMF, create a top-level Component and call its
+Initialize, Run and Finalize methods, before destroying the top-level Component
 again and calling ESMF Finalize.
 
 \begin{sloppypar}
@@ -27,18 +27,18 @@ can be chosen depending on how the application is to be structured:
 
 \item[Sequential vs. Concurrent Execution]
 
-In a sequential execution model every Component executes
+In a sequential execution model, every Component executes
 on all PETs, with each Component completing execution before
 the next Component begins.  This has the appeal of 
 simplicity of data consumption and production: when a Gridded 
-Component starts all required data is available for use, and when 
-a Gridded Component finishes all data produced is ready for consumption 
+Component starts, all required data is available for use, and when
+a Gridded Component finishes, all data produced is ready for consumption
 by the next Gridded Component.  This approach also has
 the possibility of less data movement if the grid and
 data decomposition is done such that each processor's memory contains
 the data needed by the next Component.
 
-In a concurrent execution model subgroups of PETs run
+In a concurrent execution model, subgroups of PETs run
 Gridded Components and multiple Gridded Components are active at the 
 same time.  Data exchange must be coordinated between Gridded 
 Components so that data deadlock does not occur.  This strategy 
@@ -86,7 +86,7 @@ The alternative is to start a different executable program on different
 PETs.  This is a {\bf MPMD} model, Multiple Program Multiple Data.
 There are complications with many job control systems on multiprocessor
 machines in getting the different executables started, and getting
-inter-process communcations established.  ESMF currently has some
+inter-process communications established.  ESMF currently has some
 support for MPMD: different Components can run as separate executables,
 but the Coupler that transfers data between the Components must still
 run on the union of their PETs. This means that the Coupler Component

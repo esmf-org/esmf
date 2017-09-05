@@ -1,6 +1,6 @@
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2016, University Corporation for Atmospheric Research,
+! Copyright 2002-2017, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -88,7 +88,7 @@ program ESMF_LocStreamEx
 
    !-------------------------------------------------------------------
    ! Get parallel information. Here petCount is the total number of 
-   ! running PETS, and localPet is the number of this particular PET.
+   ! running PETs, and localPet is the number of this particular PET.
    !-------------------------------------------------------------------
    call ESMF_VMGet(vm, localPet=localPet, petCount=petCount, rc=rc)
 
@@ -201,7 +201,7 @@ program ESMF_LocStreamEx
 
    !-------------------------------------------------------------------
    ! Get parallel information. Here petCount is the total number of 
-   ! running PETS, and localPet is the number of this particular PET.
+   ! running PETs, and localPet is the number of this particular PET.
    !-------------------------------------------------------------------
    call ESMF_VMGet(vm, localPet=localPet, petCount=petCount, rc=rc)
 
@@ -328,7 +328,7 @@ program ESMF_LocStreamEx
 
    !-------------------------------------------------------------------
    ! Get parallel information. Here petCount is the total number of 
-   ! running PETS, and localPet is the number of this particular PET.
+   ! running PETs, and localPet is the number of this particular PET.
    !-------------------------------------------------------------------
    call ESMF_VMGet(vm, localPet=localPet, petCount=petCount, rc=rc)
 

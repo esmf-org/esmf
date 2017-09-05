@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2016, University Corporation for Atmospheric Research, 
+! Copyright 2002-2017, University Corporation for Atmospheric Research, 
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 ! Laboratory, University of Michigan, National Centers for Environmental 
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -73,7 +73,9 @@ module NUOPC_ModelBase
     integer, intent(out) :: rc
     
     ! local variables
-    character(ESMF_MAXSTR):: name
+    character(ESMF_MAXSTR)    :: name
+    integer                   :: stat
+    type(type_InternalState)  :: is
 
     rc = ESMF_SUCCESS
     
@@ -129,7 +131,18 @@ module NUOPC_ModelBase
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out
-      
+     
+    ! Set up the internal state
+    allocate(is%wrap, stat=stat)
+    if (ESMF_LogFoundAllocError(statusToCheck=stat, &
+      msg="Allocation of internal state memory failed.", &
+      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+      return  ! bail out
+    call ESMF_UserCompSetInternalState(gcomp, label_InternalState, is, rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+      return  ! bail out
+        
   end subroutine
 
   !-----------------------------------------------------------------------------
@@ -153,7 +166,8 @@ module NUOPC_ModelBase
     integer, intent(out)  :: rc
     
     ! local variables
-    character(ESMF_MAXSTR)  :: name
+    character(ESMF_MAXSTR)    :: name
+    type(type_InternalState)  :: is
 
     rc = ESMF_SUCCESS
 
@@ -168,6 +182,16 @@ module NUOPC_ModelBase
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
+    ! query Component for the internal State
+    nullify(is%wrap)
+    call ESMF_UserCompGetInternalState(gcomp, label_InternalState, is, rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+      return  ! bail out
+    
+    ! store the incoming clock as driverClock in internal state
+    is%wrap%driverClock = clock
+    
   end subroutine
   
   !-----------------------------------------------------------------------------
@@ -179,7 +203,7 @@ module NUOPC_ModelBase
     integer, intent(out) :: rc
     
     ! local variables
-    integer                   :: localrc, stat
+    integer                   :: localrc
     type(type_InternalState)  :: is
     type(ESMF_Clock)          :: internalClock
     logical                   :: allCurrent
@@ -189,6 +213,11 @@ module NUOPC_ModelBase
     integer                   :: verbosity
     character(ESMF_MAXSTR)    :: name
 
+#define NUOPC_MODELBASE_TRACE__OFF
+#ifdef NUOPC_MODELBASE_TRACE
+    call ESMF_TraceRegionEnter("NUOPC_ModelBase:Run")
+#endif
+    
     rc = ESMF_SUCCESS
 
     ! query the Component for info
@@ -213,20 +242,19 @@ module NUOPC_ModelBase
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out
     
-    ! allocate memory for the internal state and set it in the Component
-    allocate(is%wrap, stat=stat)
-    if (ESMF_LogFoundAllocError(statusToCheck=stat, &
-      msg="Allocation of internal state memory failed.", &
-      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
-      return  ! bail out
-    call ESMF_UserCompSetInternalState(gcomp, label_InternalState, is, rc)
+    ! query Component for the internal State
+    nullify(is%wrap)
+    call ESMF_UserCompGetInternalState(gcomp, label_InternalState, is, rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
-
-    ! set the driverClock member in the internal state
-    is%wrap%driverClock = clock
     
+    ! store the incoming clock as driverClock in internal state
+    is%wrap%driverClock = clock
+
+#ifdef NUOPC_MODELBASE_TRACE
+    call ESMF_TraceRegionEnter("NUOPC_ModelBase:SetRunClock")
+#endif
     ! SPECIALIZE required: label_SetRunClock
     ! -> first check for the label with phase index
     call ESMF_MethodExecute(gcomp, label=label_SetRunClock, index=phase, &
@@ -250,7 +278,10 @@ module NUOPC_ModelBase
         rcToReturn=rc)) &
         return  ! bail out
     endif
-
+#ifdef NUOPC_MODELBASE_TRACE
+    call ESMF_TraceRegionExit("NUOPC_ModelBase:SetRunClock")
+#endif
+    
     ! get the internal clock for the time stepping loop
     call ESMF_GridCompGet(gcomp, clock=internalClock, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -274,7 +305,10 @@ module NUOPC_ModelBase
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
     endif
-    
+
+#ifdef NUOPC_MODELBASE_TRACE
+    call ESMF_TraceRegionEnter("NUOPC_ModelBase:CheckImport")
+#endif
     ! SPECIALIZE optionally: label_CheckImport
     ! -> first check for the label with phase index
     call ESMF_MethodExecute(gcomp, label=label_CheckImport, index=phase, &
@@ -297,7 +331,10 @@ module NUOPC_ModelBase
         line=__LINE__, file=trim(name)//":"//FILENAME, &
         rcToReturn=rc)) &
         return  ! bail out
-    endif
+   endif
+#ifdef NUOPC_MODELBASE_TRACE
+   call ESMF_TraceRegionExit("NUOPC_ModelBase:CheckImport")
+#endif
 
     ! model time stepping loop
     do while (.not. ESMF_ClockIsStopTime(internalClock, rc=rc))
@@ -310,7 +347,10 @@ module NUOPC_ModelBase
       call NUOPC_UpdateTimestamp(exportState, internalClock, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-      
+
+#ifdef NUOPC_MODELBASE_TRACE
+      call ESMF_TraceRegionEnter("NUOPC_ModelBase:Advance")
+#endif
       ! advance the model t->t+dt
       ! SPECIALIZE required: label_Advance
       ! -> first check for the label with phase index
@@ -335,7 +375,13 @@ module NUOPC_ModelBase
           rcToReturn=rc)) &
           return  ! bail out
       endif
-        
+#ifdef NUOPC_MODELBASE_TRACE
+      call ESMF_TraceRegionExit("NUOPC_ModelBase:Advance")
+#endif
+
+#ifdef NUOPC_MODELBASE_TRACE
+      call ESMF_TraceRegionEnter("NUOPC_ModelBase:AdvanceClock")
+#endif
       ! advance the internalClock to the new current time (optionally specialz)
       call ESMF_MethodExecute(gcomp, label=label_AdvanceClock, index=phase, &
         existflag=existflag, userRc=localrc, rc=rc)
@@ -364,7 +410,10 @@ module NUOPC_ModelBase
             line=__LINE__, file=trim(name)//":"//FILENAME)) &
             return  ! bail out
         endif
-      endif
+     endif
+#ifdef NUOPC_MODELBASE_TRACE
+     call ESMF_TraceRegionExit("NUOPC_ModelBase:AdvanceClock")
+#endif
     
       ! conditionally output diagnostic to Log file
       if (btest(verbosity,0)) then
@@ -383,7 +432,10 @@ module NUOPC_ModelBase
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out
-      
+
+#ifdef NUOPC_MODELBASE_TRACE
+    call ESMF_TraceRegionEnter("NUOPC_ModelBase:TimestampExport")
+#endif
     ! SPECIALIZE optionally: label_TimestampExport
     ! -> first check for the label with phase index
     call ESMF_MethodExecute(gcomp, label=label_TimestampExport, index=phase, &
@@ -406,7 +458,10 @@ module NUOPC_ModelBase
         line=__LINE__, file=trim(name)//":"//FILENAME, &
         rcToReturn=rc)) &
         return  ! bail out
-    endif
+   endif
+#ifdef NUOPC_MODELBASE_TRACE
+   call ESMF_TraceRegionExit("NUOPC_ModelBase:TimestampExport")
+#endif
 
     ! conditionally output diagnostic to Log file
     if (btest(verbosity,0)) then
@@ -421,14 +476,11 @@ module NUOPC_ModelBase
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
     endif
-    
-    ! deallocate internal state memory
-    deallocate(is%wrap, stat=stat)
-    if (ESMF_LogFoundDeallocError(statusToCheck=stat, &
-      msg="Deallocation of internal state memory failed.", &
-      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
-      return  ! bail out
 
+#ifdef NUOPC_MODELBASE_TRACE
+    call ESMF_TraceRegionExit("NUOPC_ModelBase:Run")
+#endif
+    
   end subroutine
   
   !-----------------------------------------------------------------------------
@@ -531,9 +583,10 @@ module NUOPC_ModelBase
     integer, intent(out) :: rc
 
     ! local variables
-    integer                   :: localrc
+    integer                   :: localrc, stat
     logical                   :: existflag
     character(ESMF_MAXSTR)    :: name
+    type(type_InternalState)  :: is
 
     rc = ESMF_SUCCESS
 
@@ -549,6 +602,20 @@ module NUOPC_ModelBase
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
     if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+      return  ! bail out
+
+    ! query Component for the internal State
+    nullify(is%wrap)
+    call ESMF_UserCompGetInternalState(gcomp, label_InternalState, is, rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+      return  ! bail out
+
+    ! deallocate internal state memory
+    deallocate(is%wrap, stat=stat)
+    if (ESMF_LogFoundDeallocError(statusToCheck=stat, &
+      msg="Deallocation of internal state memory failed.", &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
 

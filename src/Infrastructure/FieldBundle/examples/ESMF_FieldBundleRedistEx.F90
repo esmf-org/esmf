@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2016, University Corporation for Atmospheric Research,
+! Copyright 2002-2017, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -78,7 +78,7 @@
 ! \subsubsection{Redistribute data from a source FieldBundle to a destination FieldBundle}
 ! \label{sec:fieldbundle:usage:redist_1dptr}
 !
-! A user can use {\tt ESMF\_FieldBundleRedist} interface to redistribute data from 
+! The {\tt ESMF\_FieldBundleRedist} interface can be used to redistribute data from
 ! source FieldBundle to destination FieldBundle. This interface is overloaded by type and kind;
 ! In the version of {\tt ESMF\_FieldBundleRedist} without factor argument, a default value
 ! of factor 1 is used.
@@ -137,7 +137,7 @@
         call ESMF_FieldGet(dstField(i), localDe=0, farrayPtr=dstfptr, rc=rc)
         if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
-        dstfptr = 0
+        dstfptr = -99
 
         call ESMF_FieldBundleAdd(dstFieldBundle, (/dstField(i)/), rc=rc)
         if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
@@ -175,7 +175,12 @@
                 enddo
             enddo
         enddo
-        if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+        if (rc /= ESMF_SUCCESS) then
+          call ESMF_LogSetError(ESMF_RC_NOT_VALID, &
+            msg="Validation check failed!", &
+            ESMF_CONTEXT)
+          call ESMF_Finalize(endflag=ESMF_END_ABORT)
+        endif
     enddo
 
     ! release route handle

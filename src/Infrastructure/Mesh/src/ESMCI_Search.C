@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2016, University Corporation for Atmospheric Research, 
+// Copyright 2002-2017, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -838,13 +838,13 @@ BBox bbox_from_pl(PointList &dst_pl) {
         // This is actually handled at the top of regridding now, so that
         // we have all the destination results on their home processor, but leave
         // this in for now until we can take it out everywhere. 
-	if (unmappedaction == ESMCI_UNMAPPEDACTION_ERROR) {
-	  Throw() << " Some destination points cannot be mapped to source grid";
-	} else if (unmappedaction == ESMCI_UNMAPPEDACTION_IGNORE) {
-	  // don't do anything
-	} else {
-	  Throw() << " Unknown unmappedaction option";
-	}
+        if (unmappedaction == ESMCI_UNMAPPEDACTION_ERROR) {
+          Throw() << " Some destination points cannot be mapped to source grid";
+        } else if (unmappedaction == ESMCI_UNMAPPEDACTION_IGNORE) {
+          // don't do anything
+        } else {
+          Throw() << " Unknown unmappedaction option";
+        }
       } else {
         // Mark this as mapped
         if (set_dst_status) {
@@ -861,19 +861,19 @@ BBox bbox_from_pl(PointList &dst_pl) {
            dst_status.InsertRowMergeSingle(row, col);  
         }
 
-	Search_result sr; sr.elem = si.elem;
-	std::set<Search_result>::iterator sri =
-	  tmp_sr.lower_bound(sr);
-	if (sri == tmp_sr.end() || *sri != sr) {
-	  sr.nodes.push_back(si.snr);
-	  tmp_sr.insert(sri, sr);
-	} else {
-	  // std::cout << "second choice" << std::endl;
-	  std::vector<Search_node_result> &r
-	    = const_cast<std::vector<Search_node_result>&>(sri->nodes);
-	  r.push_back(si.snr);	  
-	  //std::cout << "size=" << sri->nodes.size() << std::endl;
-	}
+        Search_result sr; sr.elem = si.elem;
+        std::set<Search_result>::iterator sri =
+          tmp_sr.lower_bound(sr);
+        if (sri == tmp_sr.end() || *sri != sr) {
+          sr.nodes.push_back(si.snr);
+          tmp_sr.insert(sri, sr);
+        } else {
+          // std::cout << "second choice" << std::endl;
+          std::vector<Search_node_result> &r
+            = const_cast<std::vector<Search_node_result>&>(sri->nodes);
+          r.push_back(si.snr);
+          //std::cout << "size=" << sri->nodes.size() << std::endl;
+        }
       }
     }
     
@@ -913,12 +913,13 @@ BBox bbox_from_pl(PointList &dst_pl) {
        }
 
 
-	if (unmappedaction == ESMCI_UNMAPPEDACTION_ERROR) {
-	  Throw() << " Some destination points cannot be mapped to source grid";	} else if (unmappedaction == ESMCI_UNMAPPEDACTION_IGNORE) {
-	  // don't do anything
-	} else {
-	  Throw() << " Unknown unmappedaction option";
-	}
+       if (unmappedaction == ESMCI_UNMAPPEDACTION_ERROR) {
+         Throw() << " Some destination points cannot be mapped to source grid";
+       } else if (unmappedaction == ESMCI_UNMAPPEDACTION_IGNORE) {
+         // don't do anything
+       } else {
+         Throw() << " Unknown unmappedaction option";
+       }
      } else {
        OctSearch(src, dst_pl, mtype, dst_obj_type, unmappedaction, result, set_dst_status, dst_status, stol*1e+2, &again, box);
      }

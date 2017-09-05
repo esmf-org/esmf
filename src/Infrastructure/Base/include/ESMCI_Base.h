@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2016, University Corporation for Atmospheric Research,
+// Copyright 2002-2017, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -18,8 +18,12 @@
 #ifndef ESMCI_BASE_H
 #define ESMCI_BASE_H
 
+#include <memory>
+
 #include "ESMCI_Macros.h"
+
 class ESMC_Base;
+
 #include "ESMCI_VM.h"
 #include "ESMCI_Attribute.h"
 
@@ -53,20 +57,24 @@ class ESMC_Base
     char            baseName[ESMF_MAXSTR];    // object name, unique over class 
     char            baseNameF90[ESMF_MAXSTR]; // same name, non-null terminated
     char            className[ESMF_MAXSTR];   // object class
+    ESMCI::Attribute* root;
+    bool            rootalias;
 
   private:
-    
-  
+
     // prevent accidental copying
     //ESMC_Base& operator=(const ESMC_Base&);
     ESMC_Base(const ESMC_Base&);
   
   public:
     int           classID;      // unique ID relative to this class
-    ESMCI::Attribute root;
 
     // required & optional standard interface methods for all ESMF classes.
     // should not instantiate a ESMC_Base object directly; must sub-class first.
+
+    // accessor to root
+    ESMCI::Attribute *ESMC_BaseGetRoot(void) const {return root;}
+    void ESMC_BaseSetRoot(ESMCI::Attribute *orig) {root = orig; rootalias=true;}
 
     // accessors to unique ID
     void ESMC_BaseSetID(int id);
@@ -112,7 +120,9 @@ class ESMC_Base
                       const ESMC_AttReconcileFlag &attreconflag,
                       const ESMC_InquireFlag &inquireflag) const;
     int ESMC_Deserialize(char *buffer, int *offset,
-                        const ESMC_AttReconcileFlag &attreconflag);
+                      const ESMC_AttReconcileFlag &attreconflag);
+    static int ESMC_Deserialize(const char *buffer, const int *offset,
+                      int *ID, ESMCI::VMId *vmId);
     
     // optional Read/Write methods for any ESMF class
     virtual int ESMC_Read(void);

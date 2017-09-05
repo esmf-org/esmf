@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2016, University Corporation for Atmospheric Research, 
+// Copyright 2002-2017, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -75,7 +75,7 @@ static void copy_cnsv_rs_from_WMat_to_Array(WMat *wmat, ESMCI::Array *array);
  extern "C" void FTN_X(c_esmc_arraysmmstore)(ESMCI::Array **srcArray,
     ESMCI::Array **dstArray, ESMCI::RouteHandle **routehandle,
     ESMC_TypeKind_Flag *typekind, void *factorList, int *factorListCount,
-    ESMCI::InterfaceInt *factorIndexList, ESMC_Logical *ignoreUnmatched,
+    ESMCI::InterArray<int> *factorIndexList, ESMC_Logical *ignoreUnmatched,
     int *srcTermProcessing, int *pipelineDepth, int *rc);
 
 void CpMeshDataToArray(Grid &grid, int staggerLoc, ESMCI::Mesh &mesh, ESMCI::Array &array, MEField<> *dataToArray);
@@ -84,7 +84,7 @@ void PutElemAreaIntoArray(Grid &grid, int staggerLoc, ESMCI::Mesh &mesh, ESMCI::
 
 
 
-void ESMCI_regrid_create(ESMCI::VM **vmpp,
+void ESMCI_regrid_create(
                      Mesh **meshsrcpp, ESMCI::Array **arraysrcpp, ESMCI::PointList **plsrcpp,
                      Mesh **meshdstpp, ESMCI::Array **arraydstpp, ESMCI::PointList **pldstpp,
                      int *regridMethod, 
@@ -101,15 +101,11 @@ void ESMCI_regrid_create(ESMCI::VM **vmpp,
                      int*rc) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_regrid_create()" 
-  Trace __trace(" FTN_X(regrid_test)(ESMCI::VM **vmpp, ESMCI::Grid **gridsrcpp, ESMCI::Grid **griddstcpp, int*rc");
+  Trace __trace(" FTN_X(regrid_test)(ESMCI::Grid **gridsrcpp, ESMCI::Grid **griddstcpp, int*rc");
 
  
-  ESMCI::VM *vm = *vmpp;
   ESMCI::Array &srcarray = **arraysrcpp;
   ESMCI::Array &dstarray = **arraydstpp;
-
-  int localPet = vm->getLocalPet();
-  int petCount = vm->getPetCount();
 
   Mesh *srcmesh = *meshsrcpp;
   Mesh *dstmesh = *meshdstpp;
@@ -299,8 +295,8 @@ void ESMCI_regrid_create(ESMCI::VM **vmpp,
     int *iientries = new int[2*iisize.first]; 
     int larg[2] = {2, iisize.first};
     // Gather the list
-    ESMCI::InterfaceInt ii(iientries, 2, larg);
-    ESMCI::InterfaceInt *iiptr = &ii;
+    ESMCI::InterArray<int> ii(iientries, 2, larg);
+    ESMCI::InterArray<int> *iiptr = &ii;
 
     double *factors = new double[iisize.first];
 
@@ -323,7 +319,7 @@ void ESMCI_regrid_create(ESMCI::VM **vmpp,
           iientries[twoi+1] = w.id;  iientries[twoi] = wc.id;
           factors[i] = wc.value;
           
-
+#define ESMF_REGRID_DEBUG_OUTPUT_WTS_ALL_off
 #ifdef ESMF_REGRID_DEBUG_OUTPUT_WTS_ALL
           printf("d_id=%d  s_id=%d w=%20.17E \n",w.id,wc.id,wc.value);
 #endif          
@@ -494,17 +490,13 @@ void ESMCI_regrid_create(ESMCI::VM **vmpp,
   if (rc!=NULL) *rc = ESMF_SUCCESS;
 }
 
-void ESMCI_regrid_getiwts(ESMCI::VM **vmpp, Grid **gridpp,
+void ESMCI_regrid_getiwts(Grid **gridpp,
                    Mesh **meshpp, ESMCI::Array **arraypp, int *staggerLoc,
                    int *regridScheme, int*rc) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_regrid_getiwts()" 
   Trace __trace(" FTN_X(regrid_getiwts)()");
-  ESMCI::VM *vm = *vmpp;
   ESMCI::Array &array = **arraypp;
-
-  int localPet = vm->getLocalPet();
-  int petCount = vm->getPetCount();
 
   Mesh &mesh = **meshpp;
   Grid &grid = **gridpp;
@@ -2149,11 +2141,18 @@ void copy_rs_from_WMat_to_Array(WMat *wmat, ESMCI::Array *array) {
 
       // Get sequence index of this point
       int localrc;
-      UInt seq_ind=distgrid->getSequenceIndexLocalDe(lDE,ind_m_elbnd,&localrc);
+      int seq_ind;
+      std::vector<int> seq_indV;
+      localrc=distgrid->getSequenceIndexLocalDe(lDE,ind_m_elbnd,seq_indV);
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
         ESMC_CONTEXT, NULL)) throw localrc;  // bail out with exception
  /* XMRKX */
 
+      if (seq_indV.size() > 0)
+        seq_ind = seq_indV[0];
+      else
+        seq_ind = -1; // invalidate
+      
       // If it's not in the WMat, then it's been masked out, so init. to masked
       ESMC_I4 regrid_status=ESMC_REGRID_STATUS_DST_MASKED; 
 
@@ -2295,9 +2294,16 @@ void copy_cnsv_rs_from_WMat_to_Array(WMat *wmat, ESMCI::Array *array) {
 
       // Get sequence index of this point
       int localrc;
-      UInt seq_ind=distgrid->getSequenceIndexLocalDe(lDE,ind_m_elbnd,&localrc);
+      int seq_ind;
+      std::vector<int> seq_indV;
+      localrc=distgrid->getSequenceIndexLocalDe(lDE,ind_m_elbnd,seq_indV);
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
         ESMC_CONTEXT, NULL)) throw localrc;  // bail out with exception
+
+      if (seq_indV.size() > 0)
+        seq_ind = seq_indV[0];
+      else
+        seq_ind = -1; // invalidate
 
       // If it's not in the WMat, then it's been masked out, so init. to masked
       ESMC_I4 regrid_status=ESMC_REGRID_STATUS_OUTSIDE; 

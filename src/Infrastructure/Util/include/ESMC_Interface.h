@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2016, University Corporation for Atmospheric Research, 
+// Copyright 2002-2017, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -42,11 +42,14 @@ extern "C" {
 // Class declaration type
 typedef struct{
   char shallowMem[80];
-}ESMC_InterfaceInt;
+}ESMC_InterArrayInt;
 
 // Class API
-int ESMC_InterfaceIntSet(ESMC_InterfaceInt *interfaceIntArg,
+int ESMC_InterArrayIntSet(ESMC_InterArrayInt *interArrayIntArg,
   int *arrayArg, int lenArg);
+
+int ESMC_InterArrayIntNDSet(ESMC_InterArrayInt *interArrayIntArg,
+  int *arrayArg, int dimArg, const int *lenArg);
 
 #ifdef __cplusplus
 } // extern "C"

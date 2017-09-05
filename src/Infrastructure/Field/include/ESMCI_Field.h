@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2016, University Corporation for Atmospheric Research, 
+// Copyright 2002-2017, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -25,7 +25,7 @@
 // !DESCRIPTION:
 //
 // The code in this file defines the ESMC Field class prototypes for the
-// fortran interface routines. The companion file ESMC\_Field_C.F90  contains
+// Fortran interface routines. The companion file ESMC\_Field_C.F90  contains
 // the definitions (full code bodies) for the interface routines.
 //
 //EOP 
@@ -64,32 +64,32 @@ namespace ESMCI{
     }
     // TODO: ESMC objects should be cast to ESMCI objects in the ESMC layer
     static Field* create(ESMC_Grid *grid, ESMC_ArraySpec arrayspec,
-      ESMC_StaggerLoc staggerloc, ESMC_InterfaceInt *gridToFieldMap, 
-      ESMC_InterfaceInt *ungriddedLBound, ESMC_InterfaceInt *ungriddedUBound, 
+      ESMC_StaggerLoc staggerloc, ESMC_InterArrayInt *gridToFieldMap, 
+      ESMC_InterArrayInt *ungriddedLBound, ESMC_InterArrayInt *ungriddedUBound, 
       const char *name, int *rc); 
     static Field* create(ESMC_Grid *grid, ESMC_TypeKind_Flag typekind,
-      ESMC_StaggerLoc staggerloc, ESMC_InterfaceInt *gridToFieldMap, 
-      ESMC_InterfaceInt *ungriddedLBound, ESMC_InterfaceInt *ungriddedUBound, 
+      ESMC_StaggerLoc staggerloc, ESMC_InterArrayInt *gridToFieldMap, 
+      ESMC_InterArrayInt *ungriddedLBound, ESMC_InterArrayInt *ungriddedUBound, 
       const char *name, int *rc); 
     static Field* create(ESMC_Mesh mesh, ESMC_ArraySpec arrayspec,
-      ESMC_InterfaceInt *gridToFieldMap, ESMC_InterfaceInt *ungriddedLBound,
-      ESMC_InterfaceInt *ungriddedUBound, const char *name, int *rc); 
+      ESMC_InterArrayInt *gridToFieldMap, ESMC_InterArrayInt *ungriddedLBound,
+      ESMC_InterArrayInt *ungriddedUBound, const char *name, int *rc); 
     static Field* create(ESMC_Mesh mesh, ESMC_TypeKind_Flag typekind,
-      ESMC_MeshLoc_Flag meshloc, ESMC_InterfaceInt *gridToFieldMap, 
-      ESMC_InterfaceInt *ungriddedLBound, ESMC_InterfaceInt *ungriddedUBound, 
+      ESMC_MeshLoc_Flag meshloc, ESMC_InterArrayInt *gridToFieldMap, 
+      ESMC_InterArrayInt *ungriddedLBound, ESMC_InterArrayInt *ungriddedUBound, 
       const char *name, int *rc); 
     static Field* create(ESMC_LocStream *locstream, ESMC_ArraySpec arrayspec,
-      ESMC_InterfaceInt *gridToFieldMap, ESMC_InterfaceInt *ungriddedLBound,
-      ESMC_InterfaceInt *ungriddedUBound, const char *name, int *rc); 
+      ESMC_InterArrayInt *gridToFieldMap, ESMC_InterArrayInt *ungriddedLBound,
+      ESMC_InterArrayInt *ungriddedUBound, const char *name, int *rc); 
     static Field* create(ESMC_LocStream *locstream, ESMC_TypeKind_Flag typekind,
-      ESMC_InterfaceInt *gridToFieldMap, 
-      ESMC_InterfaceInt *ungriddedLBound, ESMC_InterfaceInt *ungriddedUBound, 
+      ESMC_InterArrayInt *gridToFieldMap, 
+      ESMC_InterArrayInt *ungriddedLBound, ESMC_InterArrayInt *ungriddedUBound, 
       const char *name, int *rc); 
     static int destroy(Field *field);
     ESMC_Mesh getMesh(int *rc);
     ESMC_Array getArray(int *rc);
     static int getbounds(Field *field, int *localDe,
-      InterfaceInt *exclusiveLBound, InterfaceInt *exclusiveUBound);
+      InterArray<int> *exclusiveLBound, InterArray<int> *exclusiveUBound);
     int print();
     int read(const char *file,
       const char* variableName,
@@ -97,8 +97,8 @@ namespace ESMCI{
     int castToFortran(F90ClassHolder *fc);
     static int regridgetarea(Field *field);
     static int regridstore(Field *fieldsrc, Field *fielddst,
-                           ESMC_InterfaceInt *srcMaskValues, 
-                           ESMC_InterfaceInt *dstMaskValues,
+                           ESMC_InterArrayInt *srcMaskValues, 
+                           ESMC_InterArrayInt *dstMaskValues,
                            RouteHandle **routehandle,
                            ESMC_RegridMethod_Flag *regridMethod,
                            ESMC_PoleMethod_Flag *polemethod,

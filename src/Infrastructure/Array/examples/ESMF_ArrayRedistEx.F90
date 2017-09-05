@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2016, University Corporation for Atmospheric Research,
+! Copyright 2002-2017, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -87,7 +87,9 @@ program ESMF_ArrayRedistEx
 !BOE
 ! The number of elements covered by {\tt srcDistgrid} is identical to the number
 ! of elements covered by {\tt dstDistgrid} -- in fact the index space regions
-! covered by both DistGrid objects are congruent.
+! covered by both DistGrid objects are congruent. However, the decomposition
+! defined by {\tt regDecomp}, and consequently the distribution of source and
+! destination, are different.
 !EOE
 !BOC
   call ESMF_ArraySpecSet(arrayspec, typekind=ESMF_TYPEKIND_R8, rank=2, rc=rc)
@@ -106,8 +108,8 @@ program ESMF_ArrayRedistEx
 ! kind. Further the number of exclusive elements matches between both Arrays.
 ! These are the prerequisites for the application of an Array redistribution
 ! in default mode. In order to increase performance of the actual 
-! redistribution the communication pattern is precomputed and stored in an
-! {\tt ESMF\_RouteHandle} object.
+! redistribution the communication pattern is precomputed once, and stored in
+! an {\tt ESMF\_RouteHandle} object.
 !EOE
 !BOC
   call ESMF_ArrayRedistStore(srcArray=srcArray, dstArray=dstArray, &
@@ -116,8 +118,8 @@ program ESMF_ArrayRedistEx
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOE
 !BOE
-! The {\tt redistHandle} can now be used repeatedly on the {\tt srcArray}, 
-! {\tt dstArray} pair to redistributed data from source to destination Array.
+! The {\tt redistHandle} can now be used repeatedly to transfer data from
+! {\tt srcArray} to {\tt dstArray}.
 !EOE
 !BOC
   call ESMF_ArrayRedist(srcArray=srcArray, dstArray=dstArray, &
@@ -194,7 +196,7 @@ program ESMF_ArrayRedistEx
 ! The destination array is the same as before with only a single leading 
 ! undistributed dimension of size 10.
 !EOE
-  !BOC
+!BOC
   call ESMF_ArraySpecSet(arrayspec4d, typekind=ESMF_TYPEKIND_R8, rank=4, rc=rc)
 !EOC  
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)

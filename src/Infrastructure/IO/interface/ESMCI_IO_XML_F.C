@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2016, University Corporation for Atmospheric Research, 
+// Copyright 2002-2017, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -50,7 +50,7 @@ extern "C" {
           ESMF_CHECK_POINTER(*base, status)
           *ptr = ESMCI_IO_XMLCreate(std::string(name, name_l),
                                     std::string(fileName, filename_l),
-                                         &((*base)->root),  // attributes
+                                         (*base)->ESMC_BaseGetRoot(),  // attributes
                     ESMC_NOT_PRESENT_FILTER(status) );
        }
 

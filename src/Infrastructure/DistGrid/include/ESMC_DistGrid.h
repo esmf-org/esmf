@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2016, University Corporation for Atmospheric Research, 
+// Copyright 2002-2017, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -51,8 +51,8 @@ typedef struct{
 //
 // !INTERFACE:
 ESMC_DistGrid ESMC_DistGridCreate(
-  ESMC_InterfaceInt minIndexInterfaceArg,   // in
-  ESMC_InterfaceInt maxIndexInterfaceArg,   // in
+  ESMC_InterArrayInt minIndexInterfaceArg,  // in
+  ESMC_InterArrayInt maxIndexInterfaceArg,  // in
   int *rc                                   // out
 );
 // !RETURN VALUE:

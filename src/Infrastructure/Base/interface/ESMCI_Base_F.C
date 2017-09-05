@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2016, University Corporation for Atmospheric Research,
+// Copyright 2002-2017, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -182,8 +182,8 @@ extern "C" {
 
   string copts = string (opts, ESMC_F90lentrim (opts, nlen));
   string cfname = string (fname, ESMC_F90lentrim (fname, flen));
-  *rc = (*base)->ESMC_Print(*level, copts.c_str(), &tofileOpt, cfname.c_str(),
-                            &appendOpt);
+  *rc = (*base)->ESMC_Print(*level, copts.c_str(), tofileOpt, cfname.c_str(),
+                            appendOpt);
   fflush (stdout);
 
   return;
@@ -285,6 +285,40 @@ extern "C" {
   return;
 
 }  // end c_ESMC_BaseDeserialize
+
+//-----------------------------------------------------------------------------
+//BOPI
+// !IROUTINE:  c_ESMC_BaseDeserialize_idvmid - Deserialize Base ID and vmId inquiry
+//
+// !INTERFACE:
+      void FTN_X(c_esmc_basedeserialize_idvmid)(
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_basedeserialize_idvmid()"
+//
+// !RETURN VALUE:
+//    none.  return code is passed thru the parameter list
+//
+// !ARGUMENTS:
+      const char *buf,          // in - really a byte stream
+      const int *offset,        // in - current offset in the stream
+      int *ID,                  // out - Object ID
+      ESMCI::VMId **vmId,       // out - vmId
+      int *rc,                  // out - return code
+      ESMCI_FortranStrLenArg buf_l) { // hidden/in - buffer length
+//
+// !DESCRIPTION:
+//     Deserialize the ID and vmId of a serialized Base.
+//
+//EOPI
+
+  // Initialize return code; assume routine not implemented
+  if (rc) *rc = ESMC_RC_NOT_IMPL;
+
+  *rc = ESMC_Base::ESMC_Deserialize(buf, offset, ID, *vmId);
+
+  return;
+
+}  // end c_ESMC_BaseDeserialize_idvmid
 
 //-----------------------------------------------------------------------------
 //BOP

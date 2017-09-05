@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2016, University Corporation for Atmospheric Research, 
+! Copyright 2002-2017, University Corporation for Atmospheric Research, 
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 ! Laboratory, University of Michigan, National Centers for Environmental 
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -815,6 +815,33 @@ module NUOPC_Comp
 !   an attribute is to be ingested that was not previously added to the 
 !   {\tt comp} object. If {\tt addFlag} is {\tt .true.}, all missing attributes
 !   will be added by this method automatically as needed.
+!
+!   Each line in {\tt freeFormat} is of this format:
+!
+!   \begin{verbatim}
+!     attributeName = attributeValue
+!   \end{verbatim}
+!
+!   For example:
+!   \begin{verbatim}
+!     Verbosity = 0
+!     Profiling = 0
+!   \end{verbatim}
+!   could directly be ingested as Attributes for any instance of the four 
+!   standard NUOPC component kinds. This is because {\tt Verbosity} and 
+!   {\tt Profiling} are pre-defined Attributes of the NUOPC component kinds
+!   according to sections \ref{DriverCompMeta}, \ref{ModelCompMeta}, 
+!   \ref{MediatorCompMeta}, and \ref{ConnectorCompMeta}.
+!
+!   When Attributes are specified in {\tt freeFormat} that are not pre-defined
+!   for a specific component kind, they can still be ingested by a component
+!   instance using the {\tt addFlag=.true.} option. For instance:
+!   \begin{verbatim}
+!     ModelOutputChoice = 2
+!   \end{verbatim}
+!   specifies a user-level Attribute, which is not part of the pre-defined 
+!   Attributes of any of the standard NUOPC component kinds.
+!
 !EOP
   !-----------------------------------------------------------------------------
     character(ESMF_MAXSTR)                          :: name
@@ -918,6 +945,33 @@ module NUOPC_Comp
 !   an attribute is to be ingested that was not previously added to the 
 !   {\tt comp} object. If {\tt addFlag} is {\tt .true.}, all missing attributes
 !   will be added by this method automatically as needed.
+!
+!   Each line in {\tt freeFormat} is of this format:
+!
+!   \begin{verbatim}
+!     attributeName = attributeValue
+!   \end{verbatim}
+!
+!   For example:
+!   \begin{verbatim}
+!     Verbosity = 0
+!     Profiling = 0
+!   \end{verbatim}
+!   could directly be ingested as Attributes for any instance of the four 
+!   standard NUOPC component kinds. This is because {\tt Verbosity} and 
+!   {\tt Profiling} are pre-defined Attributes of the NUOPC component kinds
+!   according to sections \ref{DriverCompMeta}, \ref{ModelCompMeta}, 
+!   \ref{MediatorCompMeta}, and \ref{ConnectorCompMeta}.
+!
+!   When Attributes are specified in {\tt freeFormat} that are not pre-defined
+!   for a specific component kind, they can still be ingested by a component
+!   instance using the {\tt addFlag=.true.} option. For instance:
+!   \begin{verbatim}
+!     ModelOutputChoice = 2
+!   \end{verbatim}
+!   specifies a user-level Attribute, which is not part of the pre-defined 
+!   Attributes of any of the standard NUOPC component kinds.
+!
 !EOP
   !-----------------------------------------------------------------------------
     character(ESMF_MAXSTR)                          :: name
@@ -1094,6 +1148,11 @@ module NUOPC_Comp
       line=__LINE__, file=FILENAME)) return  ! bail out
     call NUOPC_CompAttributeSet(comp, &
       name="Profiling", value="0", &
+      rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME)) return  ! bail out
+    call NUOPC_CompAttributeSet(comp, &
+      name="CompLabel", value="_uninitialized", &
       rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME)) return  ! bail out
@@ -1937,11 +1996,12 @@ module NUOPC_Comp
 ! !IROUTINE: NUOPC_CompSearchRevPhaseMap - Reverse Search the Phase Map of a GridComp
 ! !INTERFACE:
   ! Private name; call using NUOPC_CompSearchRevPhaseMap()
-  subroutine NUOPC_GridCompSearchRevPhaseMap(comp, methodflag, phaseIndex, &
-    phaseLabel, rc)
+  subroutine NUOPC_GridCompSearchRevPhaseMap(comp, methodflag, internalflag, &
+    phaseIndex, phaseLabel, rc)
 ! !ARGUMENTS:
     type(ESMF_GridComp)                           :: comp
     type(ESMF_Method_Flag), intent(in)            :: methodflag
+    logical,                intent(in),  optional :: internalflag
     integer,                intent(in),  optional :: phaseIndex
     character(len=*),       intent(out)           :: phaseLabel
     integer,                intent(out), optional :: rc 
@@ -1951,7 +2011,9 @@ module NUOPC_Comp
 ! to see if the ESMF {\tt phaseIndex} is found. Return the associated
 ! {\tt phaseLabel}, or an empty string if not found. If {\tt phaseIndex} is not
 ! specified, set {\tt phaseLabel} to the first entry in the PhaseMap, or 
-! an empty string if there are no entries.
+! an empty string if there are no entries. The {\tt internalflag} argument 
+! allows to search the internal phase maps of driver components. The default
+! is {\tt internalflag=.false.}.
 !EOP
   !-----------------------------------------------------------------------------
     ! local variables
@@ -1960,6 +2022,7 @@ module NUOPC_Comp
     character(ESMF_MAXSTR)    :: name, pString
     character(len=40)         :: attributeName
     logical                   :: phaseFlag
+    logical                   :: internalflagOpt
     character(len=NUOPC_PhaseMapStringLength), pointer  :: phases(:)
     character(len=NUOPC_PhaseMapStringLength)           :: tempString
 
@@ -1969,15 +2032,22 @@ module NUOPC_Comp
     call ESMF_GridCompGet(comp, name=name, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+      
+    ! deal with optional input argument
+    internalflagOpt=.false. ! default
+    if (present(internalflag)) internalflagOpt=internalflag
 
     ! determine which phaseMap to deal with
     attributeName = "UnknownPhaseMap" ! initialize to something obvious
     if (methodflag == ESMF_METHOD_INITIALIZE) then
       attributeName = "InitializePhaseMap"
+      if (internalflagOpt) attributeName = "InternalInitializePhaseMap"
     elseif (methodflag == ESMF_METHOD_RUN) then
       attributeName = "RunPhaseMap"
+      if (internalflagOpt) attributeName = "InternalRunPhaseMap"
     elseif (methodflag == ESMF_METHOD_FINALIZE) then
       attributeName = "FinalizePhaseMap"
+      if (internalflagOpt) attributeName = "InternalFinalizePhaseMap"
     endif
     
     phaseLabel = ""             ! initialize to empty string

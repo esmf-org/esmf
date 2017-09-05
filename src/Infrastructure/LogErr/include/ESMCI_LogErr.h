@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2016, University Corporation for Atmospheric Research, 
+// Copyright 2002-2017, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -53,6 +53,8 @@ private:
 
     ESMC_Logical flush;         // If true, all output is flushed
 
+    bool trace;                 // If true, some methods issue trace messages upon entry
+
     ESMC_Logical rootOnly;
 
     int halt;
@@ -73,48 +75,47 @@ private:
   public:
       
 // !PUBLIC MEMBER FUNCTIONS:
-    bool AllocError(int LINE, const char FILE[], const char method[],
-      int *rcToReturn);
-    bool DeallocError(int LINE, const char FILE[], const char method[],
-      int *rcToReturn);
+    bool AllocError(
+        int LINE, const std::string &FILE, const std::string &method,
+        int *rcToReturn);
+    bool DeallocError(
+        int LINE, const std::string &FILE, const std::string &method,
+        int *rcToReturn);
     void Close();
-    bool FoundError(int rcToCheck, int LINE,const char FILE[],
-      const char method[], int *rcToReturn);
-    bool MsgAllocError(const char msg[], int LINE, const char FILE[],
-      const char method[], int *rcToReturn);
-    bool MsgAllocError(const std::string& msg, int LINE, const char FILE[],
-      const char method[], int *rcToReturn);
-    bool MsgDeallocError(const char msg[], int LINE, const char FILE[],
-      const char method[], int *rcToReturn);
-    bool MsgDeallocError(const std::string& msg, int LINE, const char FILE[],
-      const char method[], int *rcToReturn);
-    bool MsgFoundError(int rcToCheck, const char msg[], int LINE,
-      const char FILE[], const char method[], int *rcToReturn);
-    bool MsgFoundError(int rcToCheck, const std::string& msg, int LINE,
-      const char FILE[], const char method[], int *rcToReturn);
-    bool MsgFoundError(int rcToCheck, const std::stringstream& msg, int LINE,
-      const char FILE[], const char method[], int *rcToReturn) {
+    bool FoundError(int rcToCheck,
+        int LINE, const std::string &FILE, const std::string &method,
+        int *rcToReturn);
+    bool MsgAllocError(const std::string& msg,
+        int LINE, const std::string &FILE, const std::string &method,
+        int *rcToReturn);
+    bool MsgDeallocError(const std::string& msg,
+        int LINE, const std::string &FILE, const std::string &method,
+        int *rcToReturn);
+    bool MsgFoundError(int rcToCheck, const std::string &msg,
+        int LINE, const std::string &FILE, const std::string &method,
+        int *rcToReturn);
+    bool MsgFoundError(int rcToCheck, const std::stringstream& msg,
+        int LINE, const std::string &FILE, const std::string &method,
+        int *rcToReturn) {
       return MsgFoundError(rcToCheck, msg.str(), LINE, FILE, method, rcToReturn);
     }
-    void Open(const char filename[]);
+    void Open(const std::string &filename);
     int Set(int flush);
-    int Write(const char msg[], int msgtype);
+    int SetTrace(bool traceflag);
     int Write(const std::string& msg, int msgtype);
     int Write(const std::stringstream& msg, int msgtype) {
       return Write(msg.str(), msgtype);
     }
-    int Write(const char msg[], int msgtype, int LINE, const char FILE[],
-      const char method[]);
-    int Write(const std::string& msg, int msgtype, int LINE, const char FILE[],
-      const char method[]);
-    int Write(const std::stringstream& msg, int msgtype, int LINE, const char FILE[],
-      const char method[]) {
+    int Write(const std::string& msg, int msgtype,
+        int LINE, const std::string &FILE, const std::string &method);
+    int Write(const std::stringstream& msg, int msgtype,
+        int LINE, const std::string &FILE, const std::string &method) {
       return Write(msg.str(), msgtype, LINE, FILE, method);
     }
     
 // !PUBLIC Variables:          
     std::FILE *ESMC_LogFile;
-    char nameLogErrFile[ESMC_MAXPATHLEN];
+    std::string nameLogErrFile;
     int *pet_num;
     ESMC_LogKind_Flag logtype;
     int *errorMask;

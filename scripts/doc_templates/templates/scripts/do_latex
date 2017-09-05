@@ -1,7 +1,7 @@
 #!/bin/csh -f
 #
 # Earth System Modeling Framework
-# Copyright 2002-2016, University Corporation for Atmospheric Research, 
+# Copyright 2002-2017, University Corporation for Atmospheric Research, 
 # Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 # Laboratory, University of Michigan, National Centers for Environmental 
 # Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -52,10 +52,10 @@ if (-e $1_$2doc.ctex) then
 
   # perform pre-processing
   if(($1 == "ESMF")||($1 == "ESMC")) then
-    gcc -E -x c -P -DCONSTITUENT $1_$2doc.ctex | grep -v "^#pragma" > $1_$2doc.tex
-    gcc -E -x c -P $1.cbib | grep -v "^#pragma" > $1.bib
+    gcc -E -x c -P -C -DCONSTITUENT $1_$2doc.ctex | grep -v "^#pragma" > $1_$2doc.tex
+    gcc -E -x c -P -C $1.cbib | grep -v "^#pragma" > $1.bib
   else
-    gcc -E -x c -P -DSTANDALONE $1_$2doc.ctex | grep -v "^#pragma" > $1_$2doc.tex
+    gcc -E -x c -P -C -DSTANDALONE $1_$2doc.ctex | grep -v "^#pragma" > $1_$2doc.tex
   endif
 
 endif

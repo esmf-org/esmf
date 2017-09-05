@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2016, University Corporation for Atmospheric Research, 
+// Copyright 2002-2017, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -25,7 +25,6 @@ using namespace std;
 
 #include "ESMC_Macros.h"
 #include "ESMCI_LogErr.h"
-#include "ESMCI_VM.h"
 #include "ESMC_Util.h"
 #include "ESMCI_Array.h"
 #include "Mesh/include/ESMCI_Mesh.h"
@@ -34,6 +33,7 @@ using namespace std;
 #include "Mesh/include/ESMCI_MeshRegrid.h"
 #include "Mesh/include/ESMCI_MeshMerge.h"
 #include "Mesh/include/ESMCI_Regrid_Helper.h"
+#include "Mesh/include/ESMCI_Mesh_XGrid_Glue.h"
 #include "ESMCI_Grid.h"
 
 //-----------------------------------------------------------------------------
@@ -54,8 +54,7 @@ using namespace ESMCI;
 //
 
 // xgrid regrid create method tailored for XGrid
-void ESMCI_xgridregrid_create(ESMCI::VM **vmpp,
-                   Mesh **meshsrcpp, Mesh **meshdstpp, 
+void ESMCI_xgridregrid_create(Mesh **meshsrcpp, Mesh **meshdstpp, 
                    Mesh **mesh,
                    int *compute_midmesh,
                    int *regridMethod, 
@@ -65,10 +64,6 @@ void ESMCI_xgridregrid_create(ESMCI::VM **vmpp,
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_xgridregrid_create()" 
   Trace __trace(" FTN_X(c_esmc_xgridregrid_create)");
-  ESMCI::VM *vm = *vmpp;
-
-  int localPet = vm->getLocalPet();
-  int petCount = vm->getPetCount();
 
   Mesh &srcmesh = **meshsrcpp;
   Mesh &dstmesh = **meshdstpp;
@@ -93,8 +88,8 @@ void ESMCI_xgridregrid_create(ESMCI::VM **vmpp,
     int *iientries = new int[2*iisize.first]; 
     int larg[2] = {2, iisize.first};
     // Gather the list
-    ESMCI::InterfaceInt ii(iientries, 2, larg);
-    ESMCI::InterfaceInt *iiptr = &ii;
+    ESMCI::InterArray<int> ii(iientries, 2, larg);
+    ESMCI::InterArray<int> *iiptr = &ii;
 
     double *factors = new double[iisize.first];
 

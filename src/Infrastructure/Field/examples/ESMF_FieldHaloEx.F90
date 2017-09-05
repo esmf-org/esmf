@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2016, University Corporation for Atmospheric Research,
+! Copyright 2002-2017, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -81,8 +81,8 @@
 ! \subsubsection{Field Halo solving a domain decomposed heat transfer problem}
 ! \label{sec:field:usage:halo}
 !
-! {\tt ESMF\_FieldHalo()} interface can be used to perform halo update of a Field. This
-! eases communication programming from a user perspective. By definition, user
+! The {\tt ESMF\_FieldHalo()} interface can be used to perform halo updates for a Field. This
+! eases communication programming from a user perspective. By definition, the user
 ! program only needs to update locally owned exclusive region in each domain, then call
 ! FieldHalo to communicate the values in the halo region from/to neighboring domain elements.
 ! In this example, we solve a 1D heat transfer problem: $u_t = \alpha^2 u_{xx}$ with the

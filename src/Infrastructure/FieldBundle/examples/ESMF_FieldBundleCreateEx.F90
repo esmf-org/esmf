@@ -99,7 +99,7 @@ program ESMF_FieldBundleCreateEx
 
 !BOC
     bundle1 = ESMF_FieldBundleCreate(fieldList=field(1:3), &
-				name="atmosphere data", rc=rc)
+                                name="atmosphere data", rc=rc)
 
     print *, "FieldBundle example 1 returned"
 !EOC
@@ -112,7 +112,7 @@ program ESMF_FieldBundleCreateEx
 ! \label{sec:fieldbundle:usage:create_empty}
 ! A user can create an empty FieldBundle then add Fields to the empty FieldBundle.
 ! In the following example, we use the previously defined {\tt ESMF\_Grid}
-! to build a {\tt ESMF\_Field}.
+! to build an {\tt ESMF\_Field}.
 ! An empty {\tt ESMF\_FieldBundle} is created, then the Field is added
 ! to the FieldBundle.
 !EOE
@@ -186,7 +186,7 @@ program ESMF_FieldBundleCreateEx
 !BOE
 ! \subsubsection{Query a Field stored in the FieldBundle by name or index}
 ! \label{sec:fieldbundle:usage:get}
-! User can query Field stored in a FieldBundle by the Field's name or index.
+! Users can query a Field stored in a FieldBundle by the Field's name or index.
 ! In the following example, the pressure Field stored in FieldBundle
 ! is queried by its name then by its index through {\tt ESMF\_FieldBundleGet()}
 ! method.
@@ -233,9 +233,9 @@ program ESMF_FieldBundleCreateEx
 !BOE
 ! \subsubsection{Query FieldBundle for Fields list either alphabetical or in order of addition}
 ! \label{sec:fieldbundle:usage:getlist}
-! User can query the list of Fields stored in a FieldBundle.
+! Users can query the list of Fields stored in a FieldBundle.
 ! By default the returned list of Fields are ordered alphabetically by
-! the Field names. User can also retrieve the list of Fields by the order
+! the Field names. Users can also retrieve the list of Fields in the order by which
 ! the Fields were added to the FieldBundle.
 !EOE
 

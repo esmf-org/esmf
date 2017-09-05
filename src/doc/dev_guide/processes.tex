@@ -208,7 +208,7 @@ as they complete them, as frequently as possible without breaking the
 existing code base.
 
 \begin{enumerate}
-\item Both core and contributors should test on at least three platforms before commit.
+\item Both core and contributors should test on at least three compilers before commit.
 \item For core team developers, a mail should go out to esmf\_core@list.woc.noaa.gov
 before check-in for very large commits and for commits that will break the
 HEAD. For contributors a mail should go out to esmf\_core@list.woc.noaa.gov before
@@ -219,6 +219,24 @@ will lead to inconsistent test results which are hard to interpret.
 \item Core team developers can be set up to receive email from SourceForge
 for every check-in, by writing esmf\_support@list.woc.noaa.gov with the request.
 \end{enumerate}
+
+To accomplish the first item on the list after a commit of source code, an email can be sent
+to esmf\_test@noaa.gov with the exact subject "Run\_ESMF\_Test\_Build". The mailbox is checked
+every quarter hour on the quarter hour. This email initiates a test on pluto that
+builds and installs ESMF with four compilers: g95, gfortran, lahey, and nag, with
+ESMF\_BOPT set to "g" and "O".
+
+When the test is started an email with the subject "ESMF\_Test\_Builds\_Pluto\_started",
+is sent to esmf\_core@list.woc.noaa.gov, with a time stamp in the body of the message.
+If a test is already running, an email, with the subject "ESMF\_Test\_Builds\_Pluto\_not\_started",
+is sent with "Test not started, a test is already running." in the body.
+The test that is running will run to completion, a new test will NOT be queued up. A new
+"Run\_ESMF\_Test\_Build" email must be sent when the running test is completed.
+
+When the test is completed an email, "ESMF\_Test\_Builds\_Pluto" with the test results is sent to 
+esmf-test@lists.sourceforge.net, esmf\_test@list.woc.noaa.gov.
+The test results will also appear in the Regression Test webpage under "ESMF\_Test\_Builds"
+link towards the top of the page.
 
 \subsubsection{Code Reviews}
 \begin{enumerate}

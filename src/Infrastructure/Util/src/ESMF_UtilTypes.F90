@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2016, University Corporation for Atmospheric Research,
+! Copyright 2002-2017, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -107,6 +107,11 @@
       logical, parameter :: ESMF_IO_PNETCDF_PRESENT = .false.
 #endif
 
+! Needs to be kept in line with ESMC_ATT_UNGRIDDED_DIM_LABELS and
+! ESMC_ATT_UNGRIDDED_DIM_LABELS in ../include/ESMCI_Util.h
+
+      character(32), parameter :: ESMF_ATT_GRIDDED_DIM_LABELS   = 'ESMF:gridded_dim_labels'
+      character(32), parameter :: ESMF_ATT_UNGRIDDED_DIM_LABELS = 'ESMF:ungridded_dim_labels'
 
 ! Needs to be kept in line with MESH_POLYBREAK_IND
 ! in ESMCI_Mesh.h
@@ -147,7 +152,7 @@
 !------------------------------------------------------------------------------
 !
 !    ! Generic pointer, large enough to hold a pointer on any architecture,
-!    ! but not useful directly in fortran.  Expected to be used where a
+!    ! but not useful directly in Fortran.  Expected to be used where a
 !    ! pointer generated in C++ needs to be stored on the Fortran side.
 
 !     ! WARNING: 
@@ -180,6 +185,13 @@
        character(1), pointer :: cptr(:) => null ()
      end type
 
+!------------------------------------------------------------------------------
+!
+!    ! Types useful to pass arrays of arrays into Fortran API
+
+     type ESMF_PtrInt1D
+       integer, pointer :: ptr(:) => null ()
+     end type
 
 !------------------------------------------------------------------------------
 !
@@ -513,10 +525,12 @@
       end type
 
       type(ESMF_IOFmt_Flag), parameter ::  &
-                           ESMF_IOFMT_BIN      = esmf_IOFmt_Flag(0), &
+                           ESMF_IOFMT_BIN      = ESMF_IOFmt_Flag(0), &
                            ESMF_IOFMT_NETCDF   = ESMF_IOFmt_Flag(1), &
-                           ESMF_IOFMT_NETCDF4P = ESMF_IOFmt_Flag(2), &
-                           ESMF_IOFMT_NETCDF4C = ESMF_IOFmt_Flag(3)
+                           ESMF_IOFMT_NETCDF_64BIT_OFFSET = ESMF_IOFmt_Flag(2), &
+                           ESMF_IOFMT_NETCDF4  = ESMF_IOFmt_Flag(3), &
+                           ESMF_IOFMT_NETCDF4P = ESMF_IOFmt_Flag(4), &
+                           ESMF_IOFMT_NETCDF4C = ESMF_IOFmt_Flag(5)
 
 !------------------------------------------------------------------------------
 !     ! ESMF_Index_Flag
@@ -626,11 +640,11 @@
         ESMF_ATTRECONCILE_ON = ESMF_AttReconcileFlag(1)
 
 !------------------------------------------------------------------------------
-!     ! ESMF_Copy_Flag
+!     ! ESMF_AttCopy_Flag
 !
 !     ! Interface flag for Attribute copy
 
-      type ESMF_Copy_Flag
+      type ESMF_AttCopy_Flag
 #ifndef ESMF_NO_SEQUENCE
       sequence
 #endif
@@ -638,10 +652,10 @@
         integer :: value
       end type
 
-      type(ESMF_Copy_Flag), parameter ::  &
-        ESMF_COPY_ALIAS = ESMF_Copy_Flag(0), &
-        ESMF_COPY_REFERENCE = ESMF_Copy_Flag(1), &
-        ESMF_COPY_VALUE = ESMF_Copy_Flag(2)
+      type(ESMF_AttCopy_Flag), parameter ::  &
+        ESMF_ATTCOPY_REFERENCE = ESMF_AttCopy_Flag(0), &
+        ESMF_ATTCOPY_VALUE = ESMF_AttCopy_Flag(1), &
+        ESMF_ATTCOPY_HYBRID = ESMF_AttCopy_Flag(2)
 
 !------------------------------------------------------------------------------
 !     ! ESMF_AttGetCountFlag
@@ -678,24 +692,6 @@
       type(ESMF_AttNest_Flag), parameter ::  &
         ESMF_ATTNEST_OFF = ESMF_AttNest_Flag(0), &
         ESMF_ATTNEST_ON = ESMF_AttNest_Flag(1)
-
-
-!------------------------------------------------------------------------------
-!     ! ESMF_AttTreeFlag
-!
-!     ! Interface flag for Attribute tree
-
-      type ESMF_AttTreeFlag
-#ifndef ESMF_NO_SEQUENCE
-      sequence
-#endif
-      !private
-        integer :: value
-      end type
-
-      type(ESMF_AttTreeFlag), parameter ::  &
-        ESMF_ATTTREE_OFF = ESMF_AttTreeFlag(0), &
-        ESMF_ATTTREE_ON = ESMF_AttTreeFlag(1)
 
 
 !------------------------------------------------------------------------------
@@ -850,12 +846,17 @@
   end type
 
   type(ESMF_FileFormat_Flag), parameter :: &
+        ESMF_FILEFORMAT_UNKNOWN = ESMF_FileFormat_Flag(0), &
         ESMF_FILEFORMAT_VTK = ESMF_FileFormat_Flag(1), &
         ESMF_FILEFORMAT_SCRIP = ESMF_FileFormat_Flag(2), &
         ESMF_FILEFORMAT_ESMFMESH = ESMF_FileFormat_Flag(3), &
         ESMF_FILEFORMAT_ESMFGRID = ESMF_FileFormat_Flag(4), &
         ESMF_FILEFORMAT_UGRID = ESMF_FileFormat_Flag(5), &
-        ESMF_FILEFORMAT_GRIDSPEC = ESMF_FileFormat_Flag(6)
+        ESMF_FILEFORMAT_CFGRID = ESMF_FileFormat_Flag(6), &
+        ESMF_FILEFORMAT_GRIDSPEC = ESMF_FileFormat_Flag(6), &
+        ESMF_FILEFORMAT_MOSAIC = ESMF_FileFormat_Flag(7), &
+        ESMF_FILEFORMAT_TILE = ESMF_FileFormat_Flag(7)
+
 
 !------------------------------------------------------------------------------
 !
@@ -988,6 +989,7 @@
       public ESMF_Direction_Flag, ESMF_DIRECTION_FORWARD, ESMF_DIRECTION_REVERSE
 
       public ESMF_IOFmt_Flag, ESMF_IOFMT_BIN, ESMF_IOFMT_NETCDF, &
+             ESMF_IOFMT_NETCDF_64BIT_OFFSET, ESMF_IOFMT_NETCDF4,  &
              ESMF_IOFMT_NETCDF4P, ESMF_IOFMT_NETCDF4C
 
       public ESMF_Index_Flag
@@ -1006,14 +1008,14 @@
       public ESMF_Context_Flag, ESMF_CONTEXT_OWN_VM, ESMF_CONTEXT_PARENT_VM
       public ESMF_End_Flag, ESMF_END_NORMAL, ESMF_END_KEEPMPI, ESMF_END_ABORT
       public ESMF_Pin_Flag, ESMF_PIN_DE_TO_PET, ESMF_PIN_DE_TO_VAS
-      public ESMF_Copy_Flag, ESMF_COPY_ALIAS, ESMF_COPY_REFERENCE, &
-                               ESMF_COPY_VALUE
+      public ESMF_AttCopy_Flag, ESMF_ATTCOPY_HYBRID, ESMF_ATTCOPY_REFERENCE, &
+                               ESMF_ATTCOPY_VALUE
       public ESMF_AttGetCountFlag, ESMF_ATTGETCOUNT_ATTRIBUTE, ESMF_ATTGETCOUNT_ATTPACK, &
                                    ESMF_ATTGETCOUNT_ATTLINK, ESMF_ATTGETCOUNT_TOTAL
       public ESMF_AttReconcileFlag, ESMF_ATTRECONCILE_OFF, ESMF_ATTRECONCILE_ON
       public ESMF_AttNest_Flag, ESMF_ATTNEST_OFF, ESMF_ATTNEST_ON
-      public ESMF_AttTreeFlag, ESMF_ATTTREE_OFF, ESMF_ATTTREE_ON
       public ESMF_AttWriteFlag, ESMF_ATTWRITE_TAB, ESMF_ATTWRITE_XML
+      public ESMF_ATT_GRIDDED_DIM_LABELS, ESMF_ATT_UNGRIDDED_DIM_LABELS
 
        public ESMF_RegridMethod_Flag,   ESMF_REGRIDMETHOD_BILINEAR, &
                                    ESMF_REGRIDMETHOD_PATCH, &
@@ -1075,8 +1077,8 @@
 
       public ESMF_KeywordEnforcer
 
-      public ESMF_Status, ESMF_Pointer, ESMF_CharPtr, ESMF_TypeKind_Flag
-      public ESMF_DataValue
+      public ESMF_Status, ESMF_Pointer, ESMF_CharPtr, ESMF_PtrInt1D
+      public ESMF_TypeKind_Flag, ESMF_DataValue
 
       public ESMF_MapPtr
 
@@ -1087,7 +1089,9 @@
 
       public ESMF_FileFormat_Flag, ESMF_FILEFORMAT_VTK, ESMF_FILEFORMAT_SCRIP, &
              ESMF_FILEFORMAT_ESMFMESH, ESMF_FILEFORMAT_ESMFGRID, &
-             ESMF_FILEFORMAT_UGRID, ESMF_FILEFORMAT_GRIDSPEC
+             ESMF_FILEFORMAT_UGRID, ESMF_FILEFORMAT_GRIDSPEC, &
+             ESMF_FILEFORMAT_CFGRID, ESMF_FILEFORMAT_MOSAIC, &
+             ESMF_FILEFORMAT_UNKNOWN, ESMF_FILEFORMAT_TILE
 
       public ESMF_FileStatus_Flag, ESMF_FILESTATUS_UNKNOWN,   &
                                   ESMF_FILESTATUS_OLD,       &
@@ -1229,7 +1233,7 @@ end interface
 !     The arguments are:
 !     \begin{description}
 !     \item [s]
-!           {\tt ESMF\_ObjectID} from which to retreive status.
+!           {\tt ESMF\_ObjectID} from which to retrieve status.
 !     \end{description}
 !
 !EOPI
@@ -2073,11 +2077,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         print *, ""
         print *, "Earth System Modeling Framework"
         print *, ""
-        print *, "Copyright (c) 2002-2016 University Corporation for Atmospheric Research,"
+        print *, "Copyright (c) 2002-2017 University Corporation for Atmospheric Research,"
         print *, "Massachusetts Institute of Technology, Geophysical Fluid Dynamics Laboratory,"
         print *, "University of Michigan, National Centers for Environmental Prediction,"
         print *, "Los Alamos National Laboratory, Argonne National Laboratory,"
-        print *, "NASA Goddard Space Flight Center.  All rights reserved."
+        print *, "NASA Goddard Space Flight Center."
+        print *, "All rights reserved."
         print *, ""
         print *, "Permission is hereby granted, free of charge, to any person obtaining a copy"
         print *, "of this software and associated documentation files (the 'Software'), to"
@@ -2091,12 +2096,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         print *, "      notice, this list of conditions and the following disclaimers in the"
         print *, "      documentation and/or other materials provided with the distribution."
         print *, "   3. Neither the names of the organizations developing this software, nor"
-        print *, "      its contributors may be used to endorse or promote products derived"
-        print *, "      from this Software without specific prior written permission."
+        print *, "      the names of its contributors may be used to endorse or promote products"
+        print *, "      derived from this Software without specific prior written permission."
         print *, ""
         print *, "THE SOFTWARE IS PROVIDED 'AS IS', WITHOUT WARRANTY OF ANY KIND, EXPRESS OR"
         print *, "IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,"
-        print *, "FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE"
+        print *, "FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE"
         print *, "CONTRIBUTORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER"
         print *, "LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING"
         print *, "FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS"

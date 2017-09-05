@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2016, University Corporation for Atmospheric Research, 
+// Copyright 2002-2017, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -52,7 +52,7 @@ int main(void){
   ESMC_Grid srcgrid, dstgrid;
   int dimcount = 2;
   int *maxIndex, *maxIndex_d;
-  ESMC_InterfaceInt i_maxIndex, i_maxIndex_d;
+  ESMC_InterArrayInt i_maxIndex, i_maxIndex_d;
 
   // computation variables
   int p;
@@ -97,7 +97,7 @@ int main(void){
   maxIndex = (int *)malloc(dimcount*sizeof(int));
   maxIndex[0] = int(ub_x);
   maxIndex[1] = int(ub_y);
-  rc = ESMC_InterfaceIntSet(&i_maxIndex, maxIndex, dimcount);
+  rc = ESMC_InterArrayIntSet(&i_maxIndex, maxIndex, dimcount);
 
   strcpy(name, "GridCreate");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
@@ -156,7 +156,7 @@ int main(void){
   strcpy(name, "GridGetCoord - X - corner");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
   double *gridXCorner = (double *)ESMC_GridGetCoord(srcgrid, 1,
-                                                    ESMC_STAGGERLOC_CORNER,
+                                                    ESMC_STAGGERLOC_CORNER, NULL,
                                                     exLBound_corner, 
                                                     exUBound_corner, &rc);
 
@@ -180,7 +180,7 @@ int main(void){
   strcpy(name, "GridGetCoord - Y - corner");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
   double *gridYCorner = (double *)ESMC_GridGetCoord(srcgrid, 2,
-                                                    ESMC_STAGGERLOC_CORNER,
+                                                    ESMC_STAGGERLOC_CORNER, NULL,
                                                     NULL, NULL, &rc);
 
   p = 0;
@@ -205,7 +205,7 @@ int main(void){
   strcpy(name, "GridGetCoord - X - center");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
   double *gridXCenter = (double *)ESMC_GridGetCoord(srcgrid, 1,
-                                                    ESMC_STAGGERLOC_CENTER,
+                                                    ESMC_STAGGERLOC_CENTER, NULL,
                                                     exLBound_center, 
                                                     exUBound_center, &rc);
 
@@ -230,7 +230,7 @@ int main(void){
   strcpy(name, "GridGetCoord - Y - center");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
   double *gridYCenter = (double *)ESMC_GridGetCoord(srcgrid, 2,
-                                                    ESMC_STAGGERLOC_CENTER,
+                                                    ESMC_STAGGERLOC_CENTER, NULL,
                                                     NULL, NULL, &rc);
 
   p = 0;
@@ -283,7 +283,7 @@ int main(void){
   maxIndex_d = (int *)malloc(dimcount*sizeof(int));
   maxIndex_d[0] = int(ub_x);
   maxIndex_d[1] = int(ub_y);
-  rc = ESMC_InterfaceIntSet(&i_maxIndex_d, maxIndex_d, dimcount);
+  rc = ESMC_InterArrayIntSet(&i_maxIndex_d, maxIndex_d, dimcount);
 
   strcpy(name, "GridCreate");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
@@ -318,7 +318,7 @@ int main(void){
   strcpy(name, "GridGetCoord - X - corner");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
   double *gridXCorner_d = (double *)ESMC_GridGetCoord(dstgrid, 1,
-                                                     ESMC_STAGGERLOC_CORNER,
+                                                     ESMC_STAGGERLOC_CORNER, NULL,
                                                      exLBound_dcorner, 
                                                      exUBound_dcorner, &rc);
 
@@ -342,7 +342,7 @@ int main(void){
   strcpy(name, "GridGetCoord - Y - corner");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
   double *gridYCorner_d = (double *)ESMC_GridGetCoord(dstgrid, 2,
-                                                     ESMC_STAGGERLOC_CORNER,
+                                                     ESMC_STAGGERLOC_CORNER, NULL,
                                                      NULL, NULL, &rc);
 
   p = 0;
@@ -367,7 +367,7 @@ int main(void){
   strcpy(name, "GridGetCoord - X - center");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
   double *gridXCenter_d = (double *)ESMC_GridGetCoord(dstgrid, 1,
-                                                     ESMC_STAGGERLOC_CENTER,
+                                                     ESMC_STAGGERLOC_CENTER, NULL,
                                                      exLBound_dcenter, 
                                                      exUBound_dcenter, &rc);
 
@@ -392,7 +392,7 @@ int main(void){
   strcpy(name, "GridGetCoord - Y - center");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
   double *gridYCenter_d = (double *)ESMC_GridGetCoord(dstgrid, 2,
-                                                      ESMC_STAGGERLOC_CENTER,
+                                                      ESMC_STAGGERLOC_CENTER, NULL,
                                                       NULL, NULL, &rc);
 
   p = 0;
@@ -525,10 +525,10 @@ int main(void){
   //EX_UTest
   int *maskValues = (int *)malloc(sizeof(int));
   maskValues[0] = 1;
-  strcpy(name, "Set an InterfaceInt for maskValues in ESMC_FieldRegridStore()");
+  strcpy(name, "Set an InterArray for maskValues in ESMC_FieldRegridStore()");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
-  ESMC_InterfaceInt i_maskValues;
-  rc = ESMC_InterfaceIntSet(&i_maskValues, maskValues, 1);
+  ESMC_InterArrayInt i_maskValues;
+  rc = ESMC_InterArrayIntSet(&i_maskValues, maskValues, 1);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
 
   //----------------------------------------------------------------------------

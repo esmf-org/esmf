@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2016, University Corporation for Atmospheric Research,
+// Copyright 2002-2017, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -40,15 +40,15 @@ extern "C" {
 // fortran interface functions to attribute objects
   void FTN_X(c_esmc_gridgetcoordbounds)(ESMCI::Grid **_grid, int *_localDE,
                                         int *_coord, int *_staggerloc,
-                                        ESMCI::InterfaceInt **_exclusiveLBound,
-                                        ESMCI::InterfaceInt **_exclusiveUBound,
-                                        ESMCI::InterfaceInt **_exclusiveCount,
-                                        ESMCI::InterfaceInt **_computationalLBound,
-                                        ESMCI::InterfaceInt **_computationalUBound,
-                                        ESMCI::InterfaceInt **_computationalCount,
-                                        ESMCI::InterfaceInt **_totalLBound,
-                                        ESMCI::InterfaceInt **_totalUBound,
-                                        ESMCI::InterfaceInt **_totalCount,
+                                        ESMCI::InterArray<int> **_exclusiveLBound,
+                                        ESMCI::InterArray<int> **_exclusiveUBound,
+                                        ESMCI::InterArray<int> **_exclusiveCount,
+                                        ESMCI::InterArray<int> **_computationalLBound,
+                                        ESMCI::InterArray<int> **_computationalUBound,
+                                        ESMCI::InterArray<int> **_computationalCount,
+                                        ESMCI::InterArray<int> **_totalLBound,
+                                        ESMCI::InterArray<int> **_totalUBound,
+                                        ESMCI::InterArray<int> **_totalCount,
                                         int *_rc);
 
 void FTN_X(c_esmc_gridio)(ESMCI::Grid **gridpp, int *staggerLoc, int *num_arrays,
@@ -62,10 +62,10 @@ void FTN_X(c_esmc_gridio)(ESMCI::Grid **gridpp, int *staggerLoc, int *num_arrays
                           int *spherical, int *islatlondeg,
                           ESMCI_FortranStrLenArg nlen);
 //-----------------------------------------------------------------------------
-//TODO: InterfaceInt should be passed by value when ticket 3613642 is resolved
+//TODO: InterArray should be passed by value when ticket 3613642 is resolved
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_GridCreateNoPeriDim()"
-ESMC_Grid ESMC_GridCreateNoPeriDim(ESMC_InterfaceInt *maxIndex,
+ESMC_Grid ESMC_GridCreateNoPeriDim(ESMC_InterArrayInt *maxIndex,
                                    enum ESMC_CoordSys_Flag *coordSys,
                                    enum ESMC_TypeKind_Flag *coordTypeKind, 
                                    enum ESMC_IndexFlag *indexflag,
@@ -90,10 +90,10 @@ ESMC_Grid ESMC_GridCreateNoPeriDim(ESMC_InterfaceInt *maxIndex,
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
-//TODO: InterfaceInt should be passed by value when ticket 3613642 is resolved
+//TODO: InterArray should be passed by value when ticket 3613642 is resolved
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_GridCreate1PeriDim()"
-ESMC_Grid ESMC_GridCreate1PeriDim(ESMC_InterfaceInt *maxIndex,
+ESMC_Grid ESMC_GridCreate1PeriDim(ESMC_InterArrayInt *maxIndex,
                                   int *periodicDim, int *poleDim,
                                   enum ESMC_CoordSys_Flag *coordSys,
                                   enum ESMC_TypeKind_Flag *coordTypeKind, 
@@ -115,6 +115,37 @@ ESMC_Grid ESMC_GridCreate1PeriDim(ESMC_InterfaceInt *maxIndex,
                                                                   poleKind, 
                                                                   indexflag,
                                                                   &localrc));
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+    rc)) return grid; // bail out
+
+  // return successfully
+  if (rc) *rc = ESMF_SUCCESS;
+  return grid;
+}
+//-----------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
+//TODO: InterArray should be passed by value when ticket 3613642 is resolved
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_GridCreateCubedSphere()"
+ESMC_Grid ESMC_GridCreateCubedSphere(int *tilesize,
+                                  ESMC_InterArrayInt *regDecompPTile,
+                                  //ESMC_InterArrayInt *decompFlagPTile,
+                                  //ESMC_InterArrayInt *deLabelList,
+                                  //ESMC_DELayout *delayout,
+                                  ESMC_InterArrayInt *staggerLocList,
+                                  const char *name,
+                                  int *rc){
+  int localrc = ESMC_RC_NOT_IMPL;
+  if(rc!=NULL) *rc=ESMC_RC_NOT_IMPL;
+
+  // Init Grid
+  ESMC_Grid grid;
+  grid.ptr = NULL;
+
+  grid.ptr = reinterpret_cast<void *>(ESMCI::Grid::createcubedsphere(
+    tilesize, regDecompPTile, NULL, NULL, //decompFlagPTile, deLabelList, //delayout,
+    staggerLocList, name, &localrc));
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
     rc)) return grid; // bail out
 
@@ -147,17 +178,17 @@ ESMC_Grid ESMC_GridCreateFromFile(const char *filename, int fileTypeFlag,
                  addMask, varname, coordNames, &localrc));
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
     rc)) return grid; // bail out
-
-  // return successfully
-  if (rc) *rc = ESMF_SUCCESS;
   
   int exLB[2]={-1,-1}, exUB[2]={-1,-1};
   double *gridXCoord;
-  gridXCoord = (double *)ESMC_GridGetCoord(grid, 1, ESMC_STAGGERLOC_CENTER, exLB, exUB, &localrc);
+  ESMC_StaggerLoc stagger = ESMC_STAGGERLOC_CENTER;
+  gridXCoord = (double *)ESMC_GridGetCoord(grid, 1, stagger, NULL, exLB, exUB, &localrc);
   
   double *gridYCoord;
-  gridYCoord = (double *)ESMC_GridGetCoord(grid, 2, ESMC_STAGGERLOC_CENTER, exLB, exUB, &localrc);
-  
+  gridYCoord = (double *)ESMC_GridGetCoord(grid, 2, stagger, NULL, exLB, exUB, &localrc);
+
+  // return successfully
+  if (rc) *rc = ESMF_SUCCESS;
   return grid;
 }
 //-----------------------------------------------------------------------------
@@ -214,7 +245,7 @@ int ESMC_GridAddCoord(ESMC_Grid grid, enum ESMC_StaggerLoc staggerloc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_GridGetCoord()"
 void * ESMC_GridGetCoord(ESMC_Grid grid, int coordDim, 
-                      enum ESMC_StaggerLoc staggerloc, 
+                      enum ESMC_StaggerLoc staggerloc, int *localDE,
                       int *exclusiveLBound,
                       int *exclusiveUBound, int *rc){
 
@@ -228,9 +259,14 @@ void * ESMC_GridGetCoord(ESMC_Grid grid, int coordDim,
   // convert the staggerloc enum to an int
   int stagger = static_cast<int>(staggerloc);
 
+  // handle optional localDE
+  int localDE_l = 0;
+  if (localDE)
+      localDE_l = *localDE;
+
   // get coord array
   ESMCI::Array *coordArray; 
-  coordArray = ((gridp)->getCoordArray(&stagger, 
+  coordArray = ((gridp)->getCoordArray(&stagger,
                                        coordDim, NULL, &localrc));
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
     rc)) return NULL; // bail out
@@ -240,17 +276,16 @@ void * ESMC_GridGetCoord(ESMC_Grid grid, int coordDim,
   arrayPtr.ptr = reinterpret_cast<void *>(coordArray);
 
   // get the Array pointer to return
-  void *coordPtr = ESMC_ArrayGetPtr(arrayPtr, 0, &localrc);
+  void *coordPtr = ESMC_ArrayGetPtr(arrayPtr, localDE_l, &localrc);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
     rc)) return NULL; // bail out
 
   // get the bounds
   if(exclusiveLBound && exclusiveUBound) {
-    int localDe = 0;
-    localrc = gridp->getExclusiveLBound(stagger, localDe, exclusiveLBound);
+    localrc = gridp->getExclusiveLBound(stagger, localDE_l, exclusiveLBound);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       rc)) return NULL; // bail out
-    localrc = gridp->getExclusiveUBound(stagger, localDe, exclusiveUBound);
+    localrc = gridp->getExclusiveUBound(stagger, localDE_l, exclusiveUBound);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       rc)) return NULL; // bail out
   }
@@ -258,8 +293,11 @@ void * ESMC_GridGetCoord(ESMC_Grid grid, int coordDim,
 #if 0
   // TODO: use this instead of the above, it is more correct because the Fortran
   //       layer does additional bounds checking.
-  ESMCI::InterfaceInt *computationalLBound;
-  ESMCI::InterfaceInt *computationalUBound;
+  // RLO: played with this for a few days and couldn't get any calls from C->
+  //      Fortran to work with the present Grid class setup, the Grid is
+  //      unrecognized on the Fortran side for some reason.
+  ESMCI::InterArray<int> *computationalLBound;
+  ESMCI::InterArray<int> *computationalUBound;
   // this code is technically more correct, but I can't find the symbol for some reason..
   int localDe = 0;
   FTN_X(c_esmc_gridgetcoordbounds)(&gridp, &localDe, &coordDim, &stagger,
@@ -279,8 +317,9 @@ void * ESMC_GridGetCoord(ESMC_Grid grid, int coordDim,
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_GridGetCoordBounds()"
-int ESMC_GridGetCoordBounds(ESMC_Grid grid, 
-                      enum ESMC_StaggerLoc staggerloc, 
+int ESMC_GridGetCoordBounds(ESMC_Grid grid,
+                      enum ESMC_StaggerLoc staggerloc,
+                      int *localDE,
                       int *exclusiveLBound,
                       int *exclusiveUBound, int *rc){
 
@@ -293,13 +332,17 @@ int ESMC_GridGetCoordBounds(ESMC_Grid grid,
   // convert the staggerloc enum to an int
   int stagger = static_cast<int>(staggerloc);
 
+  // handle optional localDE
+  int localDE_l = 0;
+  if (localDE)
+      localDE_l = *localDE;
+
   // get the bounds
   if(exclusiveLBound && exclusiveUBound) {
-    int localDe = 0;
-    localrc = gridp->getExclusiveLBound(stagger, localDe, exclusiveLBound);
+    localrc = gridp->getExclusiveLBound(stagger, localDE_l, exclusiveLBound);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       rc)) return localrc; // bail out
-    localrc = gridp->getExclusiveUBound(stagger, localDe, exclusiveUBound);
+    localrc = gridp->getExclusiveUBound(stagger, localDE_l, exclusiveUBound);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       rc)) return localrc; // bail out
   }
@@ -341,8 +384,9 @@ int ESMC_GridAddItem(ESMC_Grid grid, enum ESMC_GridItem_Flag itemflag,
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_GridGetItem()"
 void * ESMC_GridGetItem(ESMC_Grid grid,
-                      enum ESMC_GridItem_Flag itemflag, 
-                      enum ESMC_StaggerLoc staggerloc, 
+                      enum ESMC_GridItem_Flag itemflag,
+                      enum ESMC_StaggerLoc staggerloc,
+                      int *localDE,
                       int *rc){
 
   // Initialize return code. Assume routine not implemented
@@ -355,6 +399,11 @@ void * ESMC_GridGetItem(ESMC_Grid grid,
   // convert the enums to ints
   int stagger = static_cast<int>(staggerloc);
   int item = static_cast<int>(itemflag);
+
+  // handle optional localDE
+  int localDE_l = 0;
+  if (localDE)
+      localDE_l = *localDE;
 
   // get coord array
   ESMCI::Array *itemArray; 
@@ -381,7 +430,7 @@ void * ESMC_GridGetItem(ESMC_Grid grid,
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_GridWrite()"
 int ESMC_GridWrite(ESMC_Grid grid,
-                   enum ESMC_StaggerLoc staggerloc, 
+                   enum ESMC_StaggerLoc staggerloc,
                    const char* fname) {
 
   // initialize return code; assume routine not implemented

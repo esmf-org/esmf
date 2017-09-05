@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2016, University Corporation for Atmospheric Research, 
+! Copyright 2002-2017, University Corporation for Atmospheric Research, 
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 ! Laboratory, University of Michigan, National Centers for Environmental 
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -1462,10 +1462,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       endif
 
       if (actualFlag) then
-        ! only actual member PETs actually create a LocStream object
+        ! only actual member PETs worry about the DistGrid
       
         ! Make sure DistGrid is 1D
-         call ESMF_DistGridGet(distgrid, dimCount=dimCount, rc=localrc)
+        call ESMF_DistGridGet(distgrid, dimCount=dimCount, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rcToReturn=rc)) return
@@ -1475,49 +1475,53 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             ESMF_CONTEXT, rcToReturn=rc)) return
         endif
 
-        ! Set defaults
-        if (present(indexflag)) then
-          indexflagLocal=indexflag
-        else
-          indexflagLocal=ESMF_INDEX_DELOCAL
-        endif
+      endif
 
-        if (present(coordSys)) then
-          coordSysLocal=coordSys
-        else
-          coordSysLocal=ESMF_COORDSYS_SPH_DEG
-        endif
+      ! Initialize pointers
+      nullify(lstypep)
+      nullify(ESMF_LocStreamCreateFromDG%lstypep)
 
-        ! Initialize pointers
-        nullify(lstypep)
-        nullify(ESMF_LocStreamCreateFromDG%lstypep)
+      ! allocate LocStream type
+      allocate(lstypep, stat=localrc)
+      if (ESMF_LogFoundAllocError(localrc, msg="Allocating LocStream type object", &
+                                   ESMF_CONTEXT, rcToReturn=rc)) return
 
-        ! allocate LocStream type
-        allocate(lstypep, stat=localrc)
-        if (ESMF_LogFoundAllocError(localrc, msg="Allocating LocStream type object", &
-                                     ESMF_CONTEXT, rcToReturn=rc)) return
+      ! Initialize key member variables
+      nullify(lstypep%keyNames)
+      nullify(lstypep%keyUnits)
+      nullify(lstypep%keyLongNames)
+      nullify(lstypep%keys)
+      nullify(lstypep%destroyKeys)
 
+      ! Set defaults
+      if (present(indexflag)) then
+        indexflagLocal=indexflag
+      else
+        indexflagLocal=ESMF_INDEX_DELOCAL
+      endif
 
-        ! Allocate space for keys
-        nullify(lstypep%keyNames)
-        nullify(lstypep%keyUnits)
-        nullify(lstypep%keyLongNames)
-        nullify(lstypep%keys)
-        nullify(lstypep%destroyKeys)
+      if (present(coordSys)) then
+        coordSysLocal=coordSys
+      else
+        coordSysLocal=ESMF_COORDSYS_SPH_DEG
+      endif
+      
+      ! Set some remaining info into the struct      
+      lstypep%indexflag=indexflagLocal
+      lstypep%coordSys=coordSysLocal
+      lstypep%destroyDistgrid=.false.
+      lstypep%keyCount=0
 
-        ! Set some remaining info into the struct      
-        lstypep%indexflag=indexflagLocal
-        lstypep%coordSys=coordSysLocal
-        lstypep%destroyDistgrid=.false.
+      if (actualFlag) then
+        ! only actual member PETs set distgrid
         lstypep%distgrid=distgrid
-        lstypep%keyCount=0
 
-        ! set Name
+        ! create base object and set name
         call ESMF_BaseCreate(lstypep%base,"LocStream",name,0,rc=localrc)       
         if (ESMF_LogFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rcToReturn=rc)) return
-
+          ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+                              
         ! Set pointer to internal locstream type
         locstream%lstypep=>lstypep
 
@@ -1528,7 +1532,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         ! Only call this in those Create() methods that do not call other LSCreate()
         call c_ESMC_VMAddFObject(locstream, &
           ESMF_ID_LOCSTREAM%objectID)
-        
+
       endif
 
       ! set init status to created
@@ -2161,7 +2165,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE:
       ! Private name: call using ESMF_LocStreamCreate()
       function ESMF_LocStreamCreateFromFile(filename, keywordEnforcer, &
-           fileformat, meshname, varname, indexflag, centerflag, name, rc)
+           fileformat, varname, indexflag, centerflag, name, rc)
 !
 ! !RETURN VALUE:
       type(ESMF_LocStream) :: ESMF_LocStreamCreateFromFile
@@ -2171,7 +2175,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       character (len=*),          intent(in)           :: filename
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       type(ESMF_FileFormat_Flag), intent(in), optional :: fileformat
-      character (len=*),          intent(in), optional :: meshname
       character(len=*),           intent(in), optional :: varname
       type(ESMF_Index_Flag),      intent(in), optional :: indexflag
       logical,                    intent(in), optional :: centerflag
@@ -2195,9 +2198,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !          Section~\ref{const:grid:fileformat} and Section~\ref{const:mesh:fileformat} for a 
 !          list of valid options (note that the {\tt ESMF\_FILEFORMAT\_GRIDSPEC} format is not
 !          supported).  If not specified, the default is {\tt ESMF\_FILEFORMAT\_SCRIP}.
-!     \item[{[meshname]}]
-!         The dummy variable for the mesh metadata in the UGRID file if the {\tt fileformat}
-!         is {\tt ESMF\_FILEFORMAT\_UGRID}.  This argument is optional.
 !     \item[{[varname]}]
 !         An optional variable name stored in the UGRID file to be used to
 !         generate the mask using the missing value of the data value of
@@ -2281,6 +2281,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         return
     endif   
 
+#if 0
     if (localfileformat /= ESMF_FILEFORMAT_UGRID .and. &
        (present(meshname) .or. present(varname))) then
         call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
@@ -2288,6 +2289,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           ESMF_CONTEXT, rcToReturn=rc)
         return
     endif
+#endif
    
     ! Initialize return code; assume failure until success is certain
     localrc = ESMF_RC_NOT_IMPL
@@ -2352,7 +2354,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     elseif (localfileformat == ESMF_FILEFORMAT_UGRID) then
        ! totaldims is the mesh_dimension (2 for 2D and 3 for 3D)
        if (localcenterflag) then
-          call ESMF_UGridInq(filename, meshname=meshname, elementCount=totalpoints, &
+          call ESMF_UGridInq(filename, elementCount=totalpoints, &
                              meshid=meshid, nodeCoordDim=totaldims, &
                              faceCoordFlag=haveface, rc=localrc)
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -2364,7 +2366,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
              return
           endif
        else
-          call ESMF_UGridInq(filename, meshname=meshname, nodeCount=totalpoints, &
+          call ESMF_UGridInq(filename, nodeCount=totalpoints, &
                              meshid=meshid, nodeCoordDim=totaldims, rc=localrc)
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                   ESMF_CONTEXT, rcToReturn=rc)) return

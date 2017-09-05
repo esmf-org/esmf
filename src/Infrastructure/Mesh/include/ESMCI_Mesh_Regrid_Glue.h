@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2016, University Corporation for Atmospheric Research, 
+// Copyright 2002-2017, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -22,7 +22,6 @@
 #define ESMCI_Mesh_Regrid_Glue_h
 
 #include "ESMCI_Macros.h"
-#include "ESMCI_VM.h"
 #include "ESMCI_LogErr.h"
 #include "ESMCI_Grid.h"
 #include "ESMCI_GridToMesh.h"
@@ -49,8 +48,7 @@
 using namespace ESMCI;
 
  
-void ESMCI_regrid_create(ESMCI::VM **vmpp,
-			 Mesh **meshsrcpp, ESMCI::Array **arraysrcpp, ESMCI::PointList **plsrcpp,
+void ESMCI_regrid_create(Mesh **meshsrcpp, ESMCI::Array **arraysrcpp, ESMCI::PointList **plsrcpp,
 			 Mesh **meshdstpp, ESMCI::Array **arraydstpp, ESMCI::PointList **pldstpp,
 			 int *regridMethod, 
 			 int *map_type,
@@ -65,7 +63,7 @@ void ESMCI_regrid_create(ESMCI::VM **vmpp,
                          int *has_statusArray, ESMCI::Array **statusArray,
 			 int*rc);
 
-void ESMCI_regrid_getiwts(ESMCI::VM **vmpp, Grid **gridpp,
+void ESMCI_regrid_getiwts(Grid **gridpp,
                    Mesh **meshpp, ESMCI::Array **arraypp, int *staggerLoc,
                           int *regridScheme, int*rc);
 

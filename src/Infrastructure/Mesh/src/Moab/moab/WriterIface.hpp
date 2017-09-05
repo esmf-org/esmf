@@ -3,7 +3,7 @@
  * storing and accessing finite element mesh data.
  * 
  * Copyright 2004 Sandia Corporation.  Under the terms of Contract
- * DE-AC04-94AL85000 with Sandia Coroporation, the U.S. Government
+ * DE-AC04-94AL85000 with Sandia Corporation, the U.S. Government
  * retains certain rights in this software.
  * 
  * This library is free software; you can redistribute it and/or
@@ -65,9 +65,9 @@ class WriterIface
                                     const EntityHandle* meshset_list,
                                     const int num_sets,
                                     const std::vector<std::string>& qa_records,
-                                    const Tag* tag_list,
-                                    int num_tags,
-                                    int requested_output_dimension = 0 ) = 0;
+                                    const Tag* tag_list = NULL,
+                                    int num_tags = 0,
+                                    int requested_output_dimension = 3 ) = 0;
 };
 
 } // namespace moab 

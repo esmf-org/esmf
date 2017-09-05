@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2016, University Corporation for Atmospheric Research, 
+! Copyright 2002-2017, University Corporation for Atmospheric Research, 
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 ! Laboratory, University of Michigan, National Centers for Environmental 
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -16,7 +16,7 @@
 !==============================================================================
 !
 ! This file contains functions which are logically part of the base class,
-!  but because of the rules in compiling fortran, must be defined at the
+!  but because of the rules in compiling Fortran, must be defined at the
 !  very end, not at the beginning.  These include interfaces like get and
 !  set of attributes, read/write, validate, and print.
 !
@@ -31,7 +31,7 @@
 ! !DESCRIPTION:
 !
 ! This file contains functions which are logically part of the {\tt Base} class,
-!  but because of the rules in compiling fortran, must be defined at the
+!  but because of the rules in compiling Fortran, must be defined at the
 !  very end, not at the beginning.  These include interfaces like get and
 !  set of attributes, read/write, validate, and print.
 !

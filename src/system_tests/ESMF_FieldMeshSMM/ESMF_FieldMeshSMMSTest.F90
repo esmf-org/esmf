@@ -15,7 +15,7 @@
 !                 The first component has a quadruple type Mesh with
 !                 a Field whose data is set to constant value 1
 !                 and then transformed to the second component through
-!                 sparse matrix multiply operation. The destination Field  builds upon
+!                 sparse matrix multiplication operation. The destination Field builds upon
 !                 a Grid congruent with the nodal distribution of the source Mesh.
 !                 The transformed data is then compared
 !                 to predetermined result based on the structure of SMM operation.

@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2016, University Corporation for Atmospheric Research, 
+// Copyright 2002-2017, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -25,7 +25,7 @@
 // !DESCRIPTION:
 //
 // The code in this file defines the ESMC State class prototypes for the
-// fortran interface routines. The companion file ESMC\_State_C.F90  contains
+// Fortran interface routines. The companion file ESMC\_State_C.F90  contains
 // the definitions (full code bodies) for the interface routines.
 //
 // 

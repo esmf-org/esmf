@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2016, University Corporation for Atmospheric Research,
+! Copyright 2002-2017, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -102,36 +102,36 @@
   if (myPet < halfPets) then
      ind1d = myPet*2
      do i=1,localCount,2
-       y = mod(ind1d,ydim)+1
        x = ind1d/ydim+1
-       localIndices(i,1)=y
-       localIndices(i,2)=x
+       y = mod(ind1d,ydim)+1
+       localIndices(i,1)=x
+       localIndices(i,2)=y
        if (y<ydim) then
-         localIndices(i+1,1)=y+1
-         localIndices(i+1,2)=x
+         localIndices(i+1,1)=x
+         localIndices(i+1,2)=y+1
        else
-         localIndices(i+1,1)=1
-         localIndices(i+1,2)=x+1
+         localIndices(i+1,1)=x+1
+         localIndices(i+1,2)=y
        endif
        ind1d = ind1d+petCount+halfPets
      enddo 
   else
      ind1d=myPet+halfPets
      do i=1,localCount
-       y = mod(ind1d,ydim)+1
        x = ind1d/ydim+1
-       localIndices(i,1)=y
-       localIndices(i,2)=x
+       y = mod(ind1d,ydim)+1
+       localIndices(i,1)=x
+       localIndices(i,2)=y
        ind1d = ind1d+petCount+halfPets
      enddo
   endif
   if (myPet == petCount-1) then
     ind1d = total-remain
     do i=localCount-remain+1,localCount
-       y = mod(ind1d,ydim)+1
        x = ind1d/ydim+1
-       localIndices(i,1)=y
-       localIndices(i,2)=x
+       y = mod(ind1d,ydim)+1
+       localIndices(i,1)=x
+       localIndices(i,2)=y
        ind1d = ind1d+1
     enddo
   endif
@@ -230,19 +230,19 @@
 
   ind1d=myPet
   do i=1,localCount1
-    y = mod(ind1d,ydim)+1
     x = ind1d/ydim+1
-    localIndices1(i,1)=y
-    localIndices1(i,2)=x
+    y = mod(ind1d,ydim)+1
+    localIndices1(i,1)=x
+    localIndices1(i,2)=y
     ind1d = ind1d+petCount
   enddo
   if (myPet == petCount-1) then
     ind1d = total-remain
     do i=localCount1-remain+1,localCount1
-       y = mod(ind1d,ydim)+1
        x = ind1d/ydim+1
-       localIndices1(i,1)=y
-       localIndices1(i,2)=x
+       y = mod(ind1d,ydim)+1
+       localIndices1(i,1)=x
+       localIndices1(i,2)=y
        ind1d = ind1d+1
     enddo
   endif
@@ -302,12 +302,12 @@
   rc=ESMF_SUCCESS
 
   ! Do a redistStore
-  call ESMF_FieldRedistStore(srcfield2D, dstfield2D, rhandle2D, rc=localrc)
+  call ESMF_FieldRedistStore(srcfield2D, dstfield2D, routehandle=rhandle2D, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) correct = .false.
 
   ! Now a redist
-  call ESMF_FieldRedist(srcfield2D, dstfield2D, routehandle = rhandle2D, rc=localrc)
+  call ESMF_FieldRedist(srcfield2D, dstfield2D, routehandle=rhandle2D, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) correct = .false.
 
@@ -344,12 +344,12 @@
   rc=ESMF_SUCCESS
 
   ! Do a redistStore
-  call ESMF_FieldRedistStore(srcfield, dstfield, rhandle, rc=localrc)
+  call ESMF_FieldRedistStore(srcfield, dstfield, routehandle=rhandle, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) correct=.false.
 
   ! Now a redist
-  call ESMF_FieldRedist(routehandle = rhandle, rc=localrc)
+  call ESMF_FieldRedist(srcfield, dstfield, routehandle=rhandle, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) correct=.false.
 
@@ -373,6 +373,7 @@
 
   call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
 
+  call ESMF_FieldRedistRelease(rhandle, rc=localrc)
 #endif
 
   call ESMF_FieldDestroy(srcfield, rc=localrc)
@@ -384,7 +385,6 @@
   call ESMF_GridDestroy(srcgrid2D, rc=localrc)
   call ESMF_GridDestroy(dstgrid2D, rc=localrc)
 
-  call ESMF_FieldRedistRelease(rhandle, rc=localrc)
   call ESMF_FieldRedistRelease(rhandle2D, rc=localrc)
 
   deallocate(localIndices, localIndices1)

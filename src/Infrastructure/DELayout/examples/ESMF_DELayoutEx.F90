@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2016, University Corporation for Atmospheric Research,
+! Copyright 2002-2017, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -292,7 +292,7 @@ endif
 ! \subsubsection{Working with a DELayout - general DE-to-PET mapping}
 ! \label{DELayout_general_mapping}
 ! 
-! In general a DELayout may map any number (including zero) DEs against
+! In general a DELayout may map any number (including zero) of DEs against
 ! a single PET. The exact situation can be detected by querying the DELayout
 ! for the {\tt oneToOneFlag}. If this flag comes back as {\tt .true.} then the 
 ! DELayout maps exactly one DE against each PET, but if it comes back as
@@ -350,7 +350,7 @@ endif
 ! \subsubsection{Work queue dynamic load balancing}
 ! 
 ! The DELayout API includes two calls that can be used to easily implement
-! work queue dynamic load balancing. The work load is broken up into DEs 
+! work queue dynamic load balancing. The workload is broken up into DEs
 ! (more than there are PETs) and processed by the PETs. Load balancing is
 ! only possible for ESMF multi-threaded VMs and requires that DEs are pinned
 ! to VASs instead of the PETs (default). The following example will

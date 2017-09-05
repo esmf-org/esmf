@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2016, University Corporation for Atmospheric Research,
+! Copyright 2002-2017, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -88,7 +88,7 @@
 ! \subsubsection{Sparse matrix multiplication from source Field to destination Field}
 ! \label{sec:field:usage:smm_1dptr}
 !
-! A user can use {\tt ESMF\_FieldSMM()} interface to perform sparse matrix multiplication 
+! The {\tt ESMF\_FieldSMM()} interface can be used to perform sparse matrix multiplication
 ! from 
 ! source Field to destination Field. This interface is overloaded by type and kind;
 ! 
@@ -195,7 +195,7 @@
     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 !BOE
-! Field sparse matrix matmul can also be performed between weakly congruent Fields.
+! Field sparse matrix multiplication can also be performed between weakly congruent Fields.
 ! In this case, source and destination Fields can have ungridded dimensions
 ! with size different from the Field pair used to compute the routehandle. 
 !EOE
@@ -220,7 +220,7 @@
     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOE
 ! Using the previously computed routehandle, weakly congruent Fields can perform
-! sparse matrix matmul.
+! sparse matrix multiplication.
 !EOE
 !BOC
     call ESMF_FieldSMM(srcfieldA, dstFieldA, routehandle, rc=rc)

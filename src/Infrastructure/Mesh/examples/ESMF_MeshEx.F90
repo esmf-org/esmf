@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2016, University Corporation for Atmospheric Research,
+! Copyright 2002-2017, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -60,6 +60,9 @@ program ESMF_MeshEx
   character(ESMF_MAXSTR) :: testname
   character(ESMF_MAXSTR) :: failMsg
 
+  ! for cubed sphere API
+  integer :: nx, ny
+
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
@@ -89,7 +92,7 @@ program ESMF_MeshEx
 !
 ! This section describes the use of the ESMF Mesh class. It starts with an explanation and examples of 
 ! creating a Mesh and then goes through other Mesh methods. This set of sections covers the use of the 
-! Mesh class interfaces, for further detail which applies to creating a Field on a Mesh, please see 
+! Mesh class interfaces. For further detail which applies to creating a Field on a Mesh, please see
 ! Section~\ref{sec:field:usage:create_mesh_arrayspec}.
 !
 !\subsubsection{Mesh creation}
@@ -100,13 +103,13 @@ program ESMF_MeshEx
 ! Section~\ref{sec:meshrep}).
 !
 ! For the Mesh as a whole we set its parametric dimension ({\tt parametricDim}) and spatial dimension ({\tt spatialDim}). 
-! A Meshes' parametric dimension can  be thought of as the dimension of the elements which make up the Mesh. 
+! A Mesh's parametric dimension can be thought of as the dimension of the elements which make up the Mesh.
 ! A Mesh's spatial dimension, on the other hand, is the is the number of coordinate dimensions needed to describe the location of 
 ! the nodes making up the Mesh. (For a fuller definition of these terms please see Section~\ref{sec:meshrep}.)
 !
 ! The structure of the per node and element information used to create a Mesh is influenced by the Mesh distribution strategy. 
 ! The Mesh class is distributed by elements. This means that a node must be present on any PET that contains an element 
-! associated with that node, but not on any other PET (a node can't be on a PET without an element ""home"). Since a node may be used
+! associated with that node, but not on any other PET (a node can't be on a PET without an element "home"). Since a node may be used
 ! by two or more elements located on different PETs, a node may be duplicated on multiple PETs. When a node is duplicated in this manner, 
 ! one and only one of the PETs that contain the node must "own" the node. The user sets this ownership when they define the nodes during Mesh creation.
 ! When a Field is created on a Mesh (i.e. on  the Mesh nodes), on each PET the Field is only created on the nodes which are owned by that PET.
@@ -138,7 +141,7 @@ program ESMF_MeshEx
 ! node info used in the Mesh Create. In other words, the element connectivity isn't specified in terms of the global list of nodes, but instead
 ! is specified in terms of the locally described node info. One other important point about connectivities is that the order of the nodes in the 
 ! connectivity list of an element is important. Please see Section~\ref{const:meshelemtype} for diagrams illustrating the correct order of
-! nodes in an element. In general, when specifying an element with parametric dimension 2, the nodes should be given in counter-clockwise order 
+! nodes in an element. In general, when specifying an element with parametric dimension 2, the nodes should be given in counterclockwise order
 ! around the element. 
 !
 ! \begin{sloppypar}
@@ -879,6 +882,30 @@ program ESMF_MeshEx
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 #endif
 
+!BOE
+!\subsubsection{Create a Mesh representation of a cubed sphere grid}
+!\label{sec:example:MeshCubedSphere}
+!
+!This example demostrates how to create a {\tt ESMF\_Mesh} object representing a cubed sphere grid with
+!identical regular decomposition for every tile. 
+!In this example, the tile resolution is 45, so there will be a total 45x45x6=12150 elements in the mesh.
+!{\tt nx} and {\tt ny} are the regular decomposition of each tile.  
+!The total number of DEs is nx x ny x 6. If the number of PETs are less than the total
+!number of DEs, the DEs will be distributed to the PETs using the default cyclic distribution.
+!EOE
+
+!BOC
+   ! Decompose each tile into 2 x 1 blocks
+   nx=2
+   ny=1
+
+   ! Create Mesh
+   mesh = ESMF_MeshCreateCubedSphere(tileSize=45, nx=nx,ny=ny, rc=localrc)
+!EOC
+   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+   ! Get rid of Mesh
+   call ESMF_MeshDestroy(mesh, rc=localrc)
+   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
 !BOE
 !\subsubsection{Remove Mesh memory}

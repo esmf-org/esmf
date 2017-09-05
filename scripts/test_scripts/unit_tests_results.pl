@@ -4,11 +4,12 @@
 # The purpose is to give the user the results of running the unit tests.
 # The results are either complete results or a summary.
 
-sub unit_tests_results($$$) {
+sub unit_tests_results($$$$) {
 
         my $TEST_DIR    = $_[0];
         my $ESMF_BOPT   = $_[1];
-        my $SUMMARY     = $_[2];
+	my $ESMF_COMM	= $_[2];
+        my $SUMMARY     = $_[3];
 
 
 # This subroutine reads the number of pets from the *UTest.Log files.
@@ -348,27 +349,36 @@ use File::Find
 
 	# Delete ./ from all lists
         foreach ( @pass_list) {
-                s/\.\//PASS: /; # Delete all the "./"
+                s/\.\///; # Delete all the "./"
 	}
         foreach ( @crashed_list) {
-                s/\.\//CRASH: /; # Delete all the "./"
+                s/\.\///; # Delete all the "./"
 	}
         foreach ( @fail_list) {
-                s/\.\//FAIL: /; # Delete all the "./"
+                s/\.\///; # Delete all the "./"
 	}
 	if (!$SUMMARY) { # Print only if full output requested
         	# Print to the screen
 		if (@pass_list != ()){
 			print "\n\nThe unit tests in the following files all pass:\n\n";
-			print @pass_list;
+			foreach $file ( @pass_list ) {
+				chomp($file);
+				print "PASS: $ESMF_COMM/$ESMF_BOPT: $file\n";
+			}
 		}
 		if (@crashed_list != ()){
 			print "\n\nThe following unit test files failed to build, failed to execute or crashed during execution:\n\n";
-			print @crashed_list;
+                        foreach $file ( @crashed_list ) {
+                                chomp($file);
+                                print "CRASHED: $ESMF_COMM/$ESMF_BOPT: $file\n";
+                        }
 		}
 		if (@fail_list != ()){
 			print "\n\nThe following unit test files had failed unit tests:\n\n";
-			print @fail_list;
+                        foreach $file ( @fail_list ) {
+                                chomp($file);
+                                print "FAIL: $ESMF_COMM/$ESMF_BOPT: $file\n";
+                        }
 		}
 	}
 
@@ -378,7 +388,7 @@ use File::Find
 	if (@fail_test_list != ()){
 		# Delete date type and PET part of the fail message.
 		foreach (@fail_test_list) {
-			s/^.*?FAIL/   FAIL/;# Delete everything before FAIL
+			s/^.*?FAIL/   FAIL: $ESMF_COMM\/$ESMF_BOPT: /;# Delete everything before FAIL
 		}
 		# Delete repeated lines in fail_test_list
 		$sorted_fail_test_list = ();
@@ -465,10 +475,10 @@ use File::Find
 	}
 	# Prepend "PASS/FAIL" prefix to each line
 	foreach $line (@harness_pass){
-                        $line = "PASS: " . $line;
+                        $line = "PASS: $ESMF_COMM/$ESMF_BOPT: " . $line;
 	}
 	foreach $line (@harness_fail){
-                        $line = "FAIL: " . $line;
+                        $line = "FAIL: $ESMF_COMM/$ESMF_BOPT: " . $line;
 	}
 
 

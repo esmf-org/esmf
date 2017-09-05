@@ -50,7 +50,7 @@ ESMF_CXXCOMPILER_VERSION    = ${ESMF_CXXCOMPILER} -v --version
 ############################################################
 # Special debug flags
 #
-ESMF_F90OPTFLAG_G       += -Wall -Wextra -Wno-unused -Wno-unused-dummy-argument -fbacktrace
+ESMF_F90OPTFLAG_G       += -Wall -Wno-unused -Wno-unused-dummy-argument -fbacktrace
 ESMF_CXXOPTFLAG_G       += -Wall -Wextra -Wno-unused
 
 ############################################################
@@ -186,3 +186,8 @@ ESMF_SO_CXXLINKOPTSEXE  = -Wl,-export-dynamic
 # TODO: WebService testing is robust enough to work on all systems.
 #
 ESMF_NOWEBSERVTESTING = TRUE
+
+############################################################
+# Override default C preprocessor on this platform
+#
+ESMF_CPPDEFAULT       = gcc -E -P -x c

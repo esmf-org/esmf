@@ -1,7 +1,7 @@
 % $Id$
 %
 % Earth System Modeling Framework
-% Copyright 2002-2016, University Corporation for Atmospheric Research, 
+% Copyright 2002-2017, University Corporation for Atmospheric Research, 
 % Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 % Laboratory, University of Michigan, National Centers for Environmental 
 % Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -51,7 +51,7 @@ While the above sounds complicated, the rule is simple:
 a State going into a component is an import State, and a 
 State leaving a component is an export State.
 
-Objects inside States are normally created in {\tt unison} where
+Objects inside States are normally created in {\it unison} where
 each PET executing a component makes the same object create call.
 If the object contains data, like a Field, each PET may have a
 different local chunk of the entire dataset but each Field has

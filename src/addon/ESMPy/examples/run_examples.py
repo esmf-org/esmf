@@ -14,13 +14,12 @@ if len(sys.argv) > 1:
 
 # data files
 datafilelist = ["aggregAtlanticESTOFS.nc",
+                "GRIDSPEC_ACCESS1.nc",
                 "ll1deg_grid.nc",
                 "ll2.5deg_grid.nc",
-                "GRIDSPEC_ACCESS1.nc",
                 "mpas_uniform_10242_dual_counterclockwise.nc",
                 "so_Omon_GISS-E2.nc",
                 "T42_grid.nc",
-                "tx0.1v2_070911.nc"
                 ]
 
 # download the test files
@@ -47,5 +46,10 @@ if parallel:
     # setup the constants
     num_proc = 4
 
+    # attributes
+    attr = "'!slow'"
+else:
+    attr = "'!slow,!parallel'"
+
 os.system(constants._ESMF_MPIRUN + " -n " + str(
-    num_proc) + " nosetests -vs --with-id -a '!slow' examples/exampletest.py")
+    num_proc) + " nosetests -vs --with-id -a " + str(attr) + " examples/exampletest.py")

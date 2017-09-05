@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2016, University Corporation for Atmospheric Research,
+! Copyright 2002-2017, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -49,11 +49,12 @@ program ESMF_AttributeGridCompUTest
 
       ! local variables
       type(ESMF_CplComp)  :: cfg
-      type(ESMF_GridComp) :: gridcomp, gfg, gridcompValue, gridcompHybrid
+      type(ESMF_GridComp) :: gridcomp, gfg
       type(ESMF_State)    :: sfg
 
       ! macro variables
       AttributeTestVariablesMacro()
+      AttributeTestVariablesCopyMacro(gridcomp, ESMF_GridComp)
 
 !-------------------------------------------------------------------------------
 !  The unit tests are divided into Sanity and Exhaustive. The Sanity tests are
@@ -81,9 +82,7 @@ program ESMF_AttributeGridCompUTest
       ! gridded components
       gridcomp = ESMF_GridCompCreate(name="gridcomp", petList=(/0/), rc=rc)
       gfg = ESMF_GridCompCreate(name="gridcompforgridcomp", petList=(/0/), rc=rc)
-      gridcompValue = ESMF_GridCompCreate(name="gridcompforvaluecopy", petList=(/0/), rc=rc)
-      gridcompHybrid = ESMF_GridCompCreate(name="gridcompforhybridcopy", petList=(/0/), rc=rc)
-      
+
       if (rc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 !-------------------------------------------------------------------------
@@ -92,31 +91,7 @@ program ESMF_AttributeGridCompUTest
 
 AttributeTestMacro(gridcomp, a GridComp, EX_UTest, NEX_UTest)
 
-    !-------------------------------------------------------------------------
-    !  AttributeCopy
-    !-------------------------------------------------------------------------
-
-^ifdef ESMF_TESTEXHAUSTIVE
-
-      !EX_UTest
-      ! Copy a GridComp Attribute hierarchy VALUE ONE LEVEL Test
-      call ESMF_AttributeCopy(gridcomp, gridcompValue, &
-        copyflag=ESMF_COPY_VALUE, atttreeflag=ESMF_ATTTREE_OFF, rc=rc)
-      write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Copying a GridComp Attribute hierarchy VALUE ONE LEVEL Test"
-      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-      !------------------------------------------------------------------------
-
-      !EX_UTest
-      ! Copy a GridComp Attribute hierarchy HYBRID Test
-      call ESMF_AttributeCopy(gridcomp, gridcompHybrid, &
-        copyflag=ESMF_COPY_REFERENCE, atttreeflag=ESMF_ATTTREE_ON, rc=rc)
-      write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Copying a GridComp Attribute hierarchy HYBRID Test"
-      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-      !------------------------------------------------------------------------
-
-^endif
+AttributeTestCopyMacro(gridcomp, ESMF_GridComp, a GridComp, ESMF_GridComp, EX_UTest, NEX_UTest)
 
     !-------------------------------------------------------------------------
     !  Attribute hierarchy linking
@@ -254,8 +229,6 @@ AttributeTestMacro(gridcomp, a GridComp, EX_UTest, NEX_UTest)
       ! clean up      
       call ESMF_GridCompDestroy(gridcomp, rc=rc)
       call ESMF_GridCompDestroy(gfg, rc=rc)
-      call ESMF_GridCompDestroy(gridcompValue, rc=rc)
-      call ESMF_GridCompDestroy(gridcompHybrid, rc=rc)
 
       call ESMF_CplCompDestroy(cfg, rc=rc)
 

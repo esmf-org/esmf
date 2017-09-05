@@ -1,0 +1,74 @@
+% $Id$
+%
+% Earth System Modeling Framework
+% Copyright 2002-2017, University Corporation for Atmospheric Research, 
+% Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
+% Laboratory, University of Michigan, National Centers for Environmental 
+% Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
+% NASA Goddard Space Flight Center.
+% Licensed under the University of Illinois-NCSA License.
+
+%\subsection{Description}
+\label{sec:Tracing}
+
+{\em Tracing} is a special kind of logging in which information about
+a program's execution is recorded so that it can later be analyzed. Trace
+analysis can be used to understand what happened during a program's
+execution and is often used for diagnosing problems, debugging, and
+performance analysis.
+
+ESMF has a built-in tracing capability that records events into special
+binary log files.  Unlike log files written by the {\tt ESMF\_Log} class,
+which are primarily for human consumption (see Section \ref{sec:Log}),
+the trace output files are
+recorded in a compact binary representation and are processed by tools
+to produce various analyses. ESMF event streams are recorded in the
+\htmladdnormallink{Common Trace Format}{http://diamon.org/ctf/} (CTF).
+CTF traces include one or more event streams,
+as well as a metadata file describing the events in the streams.
+
+Several tools are available for reading in the CTF traces output by ESMF.
+Of the tools listed below, the first one is designed specifically for
+analyzing ESMF applications and the second two are general purpose tools
+for working with all CTF traces.
+\begin{itemize}
+\item \htmladdnormallink{Cupid}{https://earthsystemcog.org/projects/cupid/}
+  is a plugin for the Eclipse Integrated Development Environment
+  that can read and analyze ESMF traces.
+\item \htmladdnormallink{TraceCompass}{http://tracecompass.org/}
+  is a general purpose tool for reading, analyzing, and visualizing traces.
+\item \htmladdnormallink{Babeltrace}{http://www.efficios.com/babeltrace}
+  is a command-line tool and library for trace conversion
+  that can read and write CTF traces. Python bindings are available
+  to open CTF traces are iterate through events.  
+\end{itemize}
+
+Events that can be captured by the ESMF tracer include the following. Events
+are recorded with a high-precision timestamp to allow timing analyses.
+\begin{description}
+\item [phase\_enter] indicates entry into an initialize, run, or finalize ESMF component routine
+\item [phase\_exit] indicates exit from an initialize, run, or finalize ESMF component routine
+\item [region\_enter] indicates entry into a user-defined code region
+\item [region\_exit] indicates exit from a user-defined code region
+\item [mem] records current memory usage information
+\end{description}
+
+The following table lists important environment variables that control
+aspects of ESMF tracing.
+
+\begin{tabular} {|p{6cm}|p{8cm}|p{6cm}|p{6cm}|}
+     \hline\hline
+     {\bf Environment Variable} & {\bf Description} & {\bf Example Values} & {\bf Default}\\
+     \hline\hline
+     {\tt ESMF\_RUNTIME\_TRACE} & Enable/disables all tracing functions & {\tt ON} or {\tt OFF} & {\tt OFF} \\
+     \hline\hline                    
+     {\tt ESMF\_RUNTIME\_TRACE\_CLOCK} & Sets the type of clock for timestamping events (see Section \ref{sec:TracingClocks}). & {\tt REALTIME} or {\tt MONOTONIC} or {\tt MONOTONIC\_SYNC} & {\tt REALTIME}\\
+     \hline\hline
+     {\tt ESMF\_RUNTIME\_TRACE\_PETLIST} & Limits tracing to an explicit list of PETs & ``{\tt 0-9 50 99}'' & {\em trace all PETs}\\
+     \hline\hline
+     {\tt ESMF\_RUNTIME\_TRACE\_COMPONENT} & Enables/disable tracing of Component phase\_enter and phase\_exit events & {\tt ON} or {\tt OFF} & {\tt ON} \\
+     \hline\hline
+\end{tabular}
+
+
+

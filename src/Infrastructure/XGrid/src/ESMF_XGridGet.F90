@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2016, University Corporation for Atmospheric Research, 
+! Copyright 2002-2017, University Corporation for Atmospheric Research, 
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 ! Laboratory, University of Michigan, National Centers for Environmental 
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -118,6 +118,7 @@ contains
 
 subroutine ESMF_XGridGetDefault(xgrid, keywordEnforcer, &
     sideAGrid, sideBGrid, sideAMesh, sideBMesh, &
+    mesh, &
     ngridA, ngridB, area, centroid, &
     distgridA, distgridB, distgridM, &
     dimCount, localDECount, &
@@ -131,6 +132,7 @@ type(ESMF_XGrid),     intent(in)            :: xgrid
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 type(ESMF_Grid),      intent(out), optional :: sideAGrid(:), sideBGrid(:)
 type(ESMF_Mesh),      intent(out), optional :: sideAMesh(:), sideBMesh(:)
+type(ESMF_Mesh),      intent(out), optional :: mesh
 integer,              intent(out), optional :: ngridA, ngridB
 real(ESMF_KIND_R8),   intent(out), optional :: area(:)
 real(ESMF_KIND_R8),   intent(out), optional :: centroid(:,:)
@@ -161,6 +163,8 @@ integer,              intent(out), optional :: rc
 !           List of 2D Meshes on side A
 !     \item [{[sideBMesh]}]
 !           List of 2D Meshes on side B
+!     \item [{[mesh]}]
+!           Super mesh stored in XGrid when storeOverlay is set true during XGrid creation
 !     \item [{[ngridA]}]
 !           Number of Grids or Meshes on the A side
 !     \item [{[ngridB]}]
@@ -339,6 +343,16 @@ integer,              intent(out), optional :: rc
             sideBMesh(count) = xgtypep%sideB(i)%gbcp%mesh
           endif
         enddo 
+    endif
+
+    if(present(mesh)) then
+      if(.not. xgtypep%storeOverlay) then
+          call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
+             msg="- Cannot retrieve super mesh when storeOverylay is false.", &
+             ESMF_CONTEXT, rcToReturn=rc)
+          return
+      endif    
+      mesh = xgtypep%mesh
     endif
 
     if(present(area)) then

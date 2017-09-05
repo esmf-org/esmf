@@ -425,12 +425,6 @@ endif
 ifeq ($(ESMF_MOAB),default)
 export ESMF_MOAB = internal
 endif
-ifeq ($(ESMF_OS),MinGW)
-export ESMF_MOAB = OFF
-endif
-ifeq ($(ESMF_OS),Cygwin)
-export ESMF_MOAB = OFF
-endif
 
 #-------------------------------------------------------------------------------
 # If INSTALL environment variables are not set give them default values
@@ -636,16 +630,16 @@ SYS_TESTS_CONFIG    = $(ESMF_TESTDIR)/sys_tests.config
 EXAMPLES_CONFIG     = $(ESMF_EXDIR)/examples.config
 TEST_HARNESS_LIST   = $(ESMF_TESTDIR)/test_harness.list
 ESMF_TESTSCRIPTS    = $(ESMF_DIR)/scripts/test_scripts
-DO_UT_RESULTS	    = $(ESMF_TESTSCRIPTS)/do_ut_results.pl -h $(ESMF_TESTSCRIPTS) -d $(ESMF_TESTDIR) -b $(ESMF_BOPT)
+DO_UT_RESULTS	    = $(ESMF_TESTSCRIPTS)/do_ut_results.pl -h $(ESMF_TESTSCRIPTS) -d $(ESMF_TESTDIR) -b $(ESMF_BOPT) -e $(ESMF_COMM)
 DO_MT_RESULTS       = $(ESMF_TESTSCRIPTS)/do_mt_results.pl -h $(ESMF_TESTSCRIPTS) -e $(ESMF_DIR) -d $(ESMF_TESTDIR) -b $(ESMF_BOPT)
 DO_UT_ML_RESULTS    = $(ESMF_TESTSCRIPTS)/do_ut_ml_results.pl -h $(ESMF_TESTSCRIPTS) -d $(ESMF_TESTDIR) -b $(ESMF_BOPT)
 DO_UT_BM_RESULTS    = $(ESMF_TESTSCRIPTS)/do_ut_bm_results.pl -h $(ESMF_TESTSCRIPTS) -d $(ESMF_TESTDIR) -e $(ESMF_UT_BM_DIR) -f $(ESMF_BENCHMARK_TOLERANCE) -g $(ESMF_BENCHMARK_THRESHOLD_MSEC) -i $(ESMF_BOPT)
-DO_EX_RESULTS	    = $(ESMF_TESTSCRIPTS)/do_ex_results.pl -h $(ESMF_TESTSCRIPTS) -d $(ESMF_EXDIR) -b $(ESMF_BOPT)
+DO_EX_RESULTS	    = $(ESMF_TESTSCRIPTS)/do_ex_results.pl -h $(ESMF_TESTSCRIPTS) -d $(ESMF_EXDIR) -b $(ESMF_BOPT) -e $(ESMF_COMM)
 DO_EX_ML_RESULTS    = $(ESMF_TESTSCRIPTS)/do_ex_ml_results.pl -h $(ESMF_TESTSCRIPTS) -d $(ESMF_EXDIR) -b $(ESMF_BOPT)
-DO_ST_RESULTS	    = $(ESMF_TESTSCRIPTS)/do_st_results.pl -h $(ESMF_TESTSCRIPTS) -d $(ESMF_TESTDIR) -b $(ESMF_BOPT) 
+DO_ST_RESULTS	    = $(ESMF_TESTSCRIPTS)/do_st_results.pl -h $(ESMF_TESTSCRIPTS) -d $(ESMF_TESTDIR) -b $(ESMF_BOPT) -e $(ESMF_COMM)
 DO_ST_ML_RESULTS    = $(ESMF_TESTSCRIPTS)/do_st_ml_results.pl -h $(ESMF_TESTSCRIPTS) -d $(ESMF_TESTDIR) -b $(ESMF_BOPT)
-DO_SUM_RESULTS	    = $(ESMF_TESTSCRIPTS)/do_summary.pl -h $(ESMF_TESTSCRIPTS) -d $(ESMF_TESTDIR) -e $(ESMF_EXDIR) -b $(ESMF_BOPT) 
-DO_CK_SUM_RESULTS   = $(ESMF_TESTSCRIPTS)/do_ck_summary.pl -h $(ESMF_TESTSCRIPTS) -d $(ESMF_TESTDIR) -e $(ESMF_EXDIR) -b $(ESMF_BOPT) 
+DO_SUM_RESULTS	    = $(ESMF_TESTSCRIPTS)/do_summary.pl -h $(ESMF_TESTSCRIPTS) -d $(ESMF_TESTDIR) -e $(ESMF_EXDIR) -b $(ESMF_BOPT) -f $(ESMF_COMM)
+DO_CK_SUM_RESULTS   = $(ESMF_TESTSCRIPTS)/do_ck_summary.pl -h $(ESMF_TESTSCRIPTS) -d $(ESMF_TESTDIR) -e $(ESMF_EXDIR) -b $(ESMF_BOPT) -f $(ESMF_COMM) 
 DO_UTC_RESULTS	    = $(ESMF_UTCSCRIPTS)/do_utc_results.pl -h $(ESMF_UTCSCRIPTS) -d $(ESMF_TESTDIR) -b $(ESMF_BOPT) -e $(ESMF_MAX_PROCS)
 
 # C specific variables
@@ -687,8 +681,9 @@ ESMF_SEDDEFAULT             = sed
 # The gcc preprocessor is used for partially preprocessing .cppF90 files.
 # The -E option stops the gcc overcompiler after preprocessing, the -P
 # option prevents putting #line directives in the output, and -x c states
-# to use C-style preprocessing regardless of file name suffix.
-ESMF_CPPDEFAULT             = gcc -E -P -x c
+# to use C-style preprocessing regardless of file name suffix. Option -C
+# does not discard C++-style comments, preventing URL mangling.
+ESMF_CPPDEFAULT             = gcc -E -P -x c -C
 
 ESMF_RM                     = rm -rf
 ESMF_MV                     = mv -f
@@ -1213,6 +1208,24 @@ endif
 #-------------------------------------------------------------------------------
 # NETCDF
 #-------------------------------------------------------------------------------
+ifeq ($(ESMF_NETCDF),nc-config)
+ESMF_NETCDF_CPATH = $(shell nc-config --prefix)
+ESMF_NETCDF_INCLUDE = $(ESMF_NETCDF_CPATH)/include
+ESMF_NETCDF_LIBPATH = $(ESMF_NETCDF_CPATH)/lib
+
+# Fortran API library might be in a different directory than the main C library.
+ESMF_NETCDF_FPATH = $(shell nf-config --prefix 2>/dev/null)
+ifeq ($(ESMF_NETCDF_FPATH),"")
+ESMF_NETCDF_LIBS = -lnetcdf
+else
+ESMF_NETCDF_LIBS = -lnetcdff -lnetcdf
+ifneq ($(ESMF_NETCDF_CPATH),$(ESMF_NETCDF_FPATH))
+ESMF_NETCDF_INCLUDE += -I$(ESMF_NETCDF_FPATH)/include
+ESMF_NETCDF_FLIBPATH = $(ESMF_NETCDF_FPATH)/lib
+endif
+endif
+endif
+
 ifeq ($(ESMF_NETCDF),standard)
 ifneq ($(origin ESMF_NETCDF_LIBS), environment)
 ESMF_NETCDF_LIBS = -lnetcdf
@@ -1238,6 +1251,14 @@ ESMF_F90LINKLIBS          += $(ESMF_NETCDF_LIBS)
 ESMF_F90LINKRPATHSTHIRD   += $(addprefix $(ESMF_F90RPATHPREFIX),$(subst -L,,$(filter -L%,$(ESMF_NETCDF_LIBS))))
 endif
 ifdef ESMF_NETCDF_LIBPATH
+ifdef $(ESMF_NETCDF_FPATH)
+ifneq ($(ESMF_NETCDF_CPATH),$(ESMF_NETCDF_FPATH))
+ESMF_CXXLINKPATHSTHIRD    += -L$(ESMF_NETCDF_FLIBPATH)
+ESMF_F90LINKPATHSTHIRD    += -L$(ESMF_NETCDF_FLIBPATH)
+ESMF_CXXLINKRPATHSTHIRD   += $(ESMF_CXXRPATHPREFIX)$(ESMF_NETCDF_FLIBPATH)
+ESMF_F90LINKRPATHSTHIRD   += $(ESMF_F90RPATHPREFIX)$(ESMF_NETCDF_FLIBPATH)
+endif
+endif
 ESMF_CXXLINKPATHSTHIRD    += -L$(ESMF_NETCDF_LIBPATH)
 ESMF_F90LINKPATHSTHIRD    += -L$(ESMF_NETCDF_LIBPATH)
 ESMF_CXXLINKRPATHSTHIRD   += $(ESMF_CXXRPATHPREFIX)$(ESMF_NETCDF_LIBPATH)
@@ -1248,6 +1269,12 @@ endif
 #-------------------------------------------------------------------------------
 # PNETCDF
 #-------------------------------------------------------------------------------
+ifeq ($(ESMF_PNETCDF),pnetcdf-config)
+ESMF_PNETCDF_INCLUDE = $(shell pnetcdf-config --includedir)
+ESMF_PNETCDF_LIBPATH = $(shell pnetcdf-config --libdir)
+ESMF_PNETCDF_LIBS = -lpnetcdf
+endif
+
 ifeq ($(ESMF_PNETCDF),standard)
 ifneq ($(origin ESMF_NETCDF_LIBS), environment)
 ESMF_PNETCDF_LIBS = -lpnetcdf
@@ -1395,6 +1422,35 @@ ESMF_CXXLINKPATHSTHIRD    += -L$(ESMF_PROJ4_LIBPATH)
 ESMF_F90LINKPATHSTHIRD    += -L$(ESMF_PROJ4_LIBPATH)
 ESMF_CXXLINKRPATHSTHIRD   += $(ESMF_CXXRPATHPREFIX)$(ESMF_PROJ4_LIBPATH)
 ESMF_F90LINKRPATHSTHIRD   += $(ESMF_F90RPATHPREFIX)$(ESMF_PROJ4_LIBPATH)
+endif
+endif
+
+#-------------------------------------------------------------------------------
+# Babeltrace
+#-------------------------------------------------------------------------------
+ifeq ($(ESMF_BABELTRACE),standard)
+ifneq ($(origin ESMF_BABELTRACE_LIBS), environment)
+ESMF_BABELTRACE_LIBS = -lbabeltrace-ctf
+endif
+endif
+
+ifdef ESMF_BABELTRACE
+ESMF_CPPFLAGS                += -DESMF_BABELTRACE=1
+ifdef ESMF_BABELTRACE_INCLUDE
+ESMF_CXXCOMPILEPATHSTHIRD    += -I$(ESMF_BABELTRACE_INCLUDE)
+ESMF_F90COMPILEPATHSTHIRD    += -I$(ESMF_BABELTRACE_INCLUDE)
+endif
+ifdef ESMF_BABELTRACE_LIBS
+ESMF_CXXLINKLIBS          += $(ESMF_BABELTRACE_LIBS)
+ESMF_CXXLINKRPATHSTHIRD   += $(addprefix $(ESMF_CXXRPATHPREFIX),$(subst -L,,$(filter -L%,$(ESMF_BABELTRACE_LIBS))))
+ESMF_F90LINKLIBS          += $(ESMF_BABELTRACE_LIBS)
+ESMF_F90LINKRPATHSTHIRD   += $(addprefix $(ESMF_F90RPATHPREFIX),$(subst -L,,$(filter -L%,$(ESMF_BABELTRACE_LIBS))))
+endif
+ifdef ESMF_BABELTRACE_LIBPATH
+ESMF_CXXLINKPATHSTHIRD    += -L$(ESMF_BABELTRACE_LIBPATH)
+ESMF_F90LINKPATHSTHIRD    += -L$(ESMF_BABELTRACE_LIBPATH)
+ESMF_CXXLINKRPATHSTHIRD   += $(ESMF_CXXRPATHPREFIX)$(ESMF_BABELTRACE_LIBPATH)
+ESMF_F90LINKRPATHSTHIRD   += $(ESMF_F90RPATHPREFIX)$(ESMF_BABELTRACE_LIBPATH)
 endif
 endif
 
@@ -1979,11 +2035,13 @@ all_tests: info
 	  $(MAKE) $(ALLTEST_TARGETS) results_summary ;\
         fi
 
+all_tests_uni: info
+	$(MAKE) $(ALLTEST_TARGETS_UNI) results_summary
+
 dust_all_tests: dust_unit_tests dust_system_tests dust_examples
 
 build_all_tests: clean_if_exhaustive_flag_mismatch
 	$(MAKE) build_unit_tests build_system_tests build_examples
-
 
 run_all_tests:
 	@if [ $(ESMF_COMM) = "mpiuni" ] ; then \
@@ -1993,6 +2051,10 @@ run_all_tests:
 	  $(MAKE) run_unit_tests run_system_tests \
                   run_examples results_summary ;\
         fi
+
+run_all_tests_uni:
+	$(MAKE) run_unit_tests_uni run_system_tests_uni \
+          run_examples_uni results_summary
 
 clean_all_tests:
 	$(MAKE) clean_unit_tests clean_system_tests clean_examples
@@ -3063,8 +3125,8 @@ exfrun:
 	  echo $(ESMF_MPIRUN) -np $(NP) $(ESMF_TOOLRUN) ./ESMF_$(EXNAME)Ex \> ./ESMF_$(EXNAME)Ex.stdout 2\>\&1 ; \
 	  $(ESMF_MPIRUN) -np $(NP) $(ESMF_TOOLRUN) ./ESMF_$(EXNAME)Ex > ./ESMF_$(EXNAME)Ex.stdout 2>&1 ; \
 	fi ; \
-	cat ./PET*$(EXNAME)Ex.Log> ./ESMF_$(EXNAME)Ex.Log ; \
-	$(ESMF_RM) ./PET*$(EXNAME)Ex.Log
+	cat ./PET*$(EXNAME)Ex*.Log> ./ESMF_$(EXNAME)Ex.Log ; \
+	$(ESMF_RM) ./PET*$(EXNAME)Ex*.Log
 
 
 excrun:
@@ -3077,8 +3139,8 @@ excrun:
 	  echo $(ESMF_MPIRUN) -np $(NP) $(ESMF_TOOLRUN) ./ESMC_$(EXNAME)Ex \> ./ESMC_$(EXNAME)Ex.stdout 2\>\&1 ; \
 	  $(ESMF_MPIRUN) -np $(NP) $(ESMF_TOOLRUN) ./ESMC_$(EXNAME)Ex > ./ESMC_$(EXNAME)Ex.stdout 2>&1 ; \
 	fi ; \
-	cat ./PET*$(EXNAME)Ex.Log> ./ESMC_$(EXNAME)Ex.Log ; \
-	$(ESMF_RM) ./PET*$(EXNAME)Ex.Log
+	cat ./PET*$(EXNAME)Ex*.Log> ./ESMC_$(EXNAME)Ex.Log ; \
+	$(ESMF_RM) ./PET*$(EXNAME)Ex*.Log
 
 
 #
@@ -3306,6 +3368,9 @@ alldoc: doc
 # this is also the default if you call make from a doc subdir.
 
 localdoc:
+	@if [ "$(GRAPHFILES)"foo != foo ] ; then \
+          cp $(addprefix $(ESMF_BUILD)/src/doc/,$(GRAPHFILES)) .;\
+	fi;
 	$(MAKE) $(TEXFILES_TO_MAKE)
 	@if [ "$(DVIFILES)"foo != foo ] ; then \
           $(MAKE) $(DVIFILES);\

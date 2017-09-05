@@ -1,0 +1,31 @@
+% $Id$
+%
+
+\label{Timekeeping}
+
+The NUOPC Layer associates an internal clock with three of its four generic component kinds: {\tt NUOPC\_Driver}, {\tt NUOPC\_Model}, and {\tt NUOPC\_Mediator}. The {\tt NUOPC\_Connector} is the only NUOPC component kind that does not have an internal clock object that is managed by NUOPC.
+
+The component internal clocks are implemented as {\tt ESMF\_Clock} objects. The interaction beween these clock objects between a parent component (driver) and its child components (models, mediators, and drivers) is defined by the NUOPC timekeeping behavior described below.
+
+For a simple run sequence with only a single coupling time-step, the driver clock sets the {\tt startTime}, {\tt stopTime}, and {\tt timeStep} to be the beginning, the end, and the coupling period of the run, respectively. At the beginning of executing the run sequence, the driver clock {\tt currTime} is set to its {\tt startTime}. As the driver component executes the run sequence, it passes its clock to each child component that it executes. At the end of each full sweep through the run sequence the driver {\tt currTime} is incremented by {\tt timeStep} (i.e. the coupling period). This continues until the driver clock {\tt stopTime} has been reached, and the run is complete.
+
+When a child component is being called during the execution of the driver run sequence, it receives the driver/parent clock. This access is read-only, and the child component is only allowed to inspect but not modify the parent clock. The child component is expected to run forward a single coupling period, i.e. one {\tt timeStep} on the parent clock. Specifically this means that the {\tt currTime} on the child clock must match the {\tt currTime} on the parent clock. It then must take a single {\tt timeStep} of the parent clock forward, using its own clock to do so. The child component can implement this forward step by taking multiple smaller advances on its own clock. 
+
+The generic NUOPC component implementation provides the following assistance to implement the above described behavior:
+
+\begin{itemize}
+\item During initialization of a component, its clock is set as a copy of its parent clock. Specifically the settings for {\tt startTime}, {\tt stopTime}, {\tt timeStep}, and {\tt currTime} are propagated. Alarms are not propagated.
+\item A component can customize aspects of its clock during initialization by using the {\tt label\_SetClock} specialization point.
+\item During run time, the default {\tt label\_SetRunClock} specialization checks that the {\tt currTime} matches between child and parent clock. It further checks that the child clock can reach the parent's {\tt currTime}+{\tt timeStep}, i.e. the next coupling time, by an integral number of it's own time steps. If so, the {\tt stopTime} on the child clock is set to the parent's {\tt currTime}+{\tt timeStep}.
+\begin{itemize}
+\item It can be useful to customize {\tt label\_SetRunClock}, e.g. if the parent uses dynamic coupling periods, or in case of a run sequence with multiple coupling periods. In these cases the component must react to the parent {\tt timeStep} provided during execution of the run sequence. In general the {\tt currTime} match should be implemented, followed by setting the child's {\tt timeStep} according to the information provided on the parent clock. Finally the the {\tt stopTime} on the child clock should be set as to return at the next coupling time determined by the parent clock.
+\end{itemize}
+\item Once past the {\tt label\_SetRunClock} specialization, the component checks the timestamps on the fields in the import state. This is done by calling into the {\tt label\_CheckImport} specialization point. The default implementation simply checks that all import fields are at {\tt currTime} of the child clock. 
+\item Finally the component clock is stepped forward from {\tt currTime} to {\tt stopTime}, using the {\tt timeStep} interval set in the child clock. During this loop, the {\tt label\_Advance} specialization is called for each time step. The {\tt label\_Advance} specialization is responsible for any accumulating and averaging that may be necessary.
+\begin{itemize}
+\item In practice often the {\tt timeStep} on the child clock is chosen to be identical to that of the parent clock. This way the {\tt label\_Advance} specialization is only called once for every coupling period. In this approach the details about potentially smaller model time steps, and associated accumulation and averaging is handled below the NUOPC cap layer of a model.
+\end{itemize}
+\item After the {\tt stopTime} has been reached on the child clock, the {\tt label\_TimestampExport} specialization point is called before the component returns to the parent. The default implementation simply timestamps all the fields in the export state with the {\tt currTime} of of the child clock.
+\end{itemize}
+
+

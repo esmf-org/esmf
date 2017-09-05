@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2016, University Corporation for Atmospheric Research, 
+// Copyright 2002-2017, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -49,7 +49,8 @@ static const char *const version = "$Id$";
 
 namespace ESMCI {
 
-  bool sn_debug=false;
+
+ bool sn_debug=false;
 
 struct SearchData {
   int sdim;
@@ -58,10 +59,13 @@ struct SearchData {
   const MeshObj *closest_src_node;
   double closest_dist2;  // closest distance squared  
   MEField<> *src_coord;
+  double closest_coord[3];
 
   int closest_src_id;
   const PointList *srcpointlist;
 };
+
+#define SN_BAD_ID -1
 
   static int nearest_func(void *n, void *y, double *min, double *max) {
 
@@ -99,10 +103,15 @@ struct SearchData {
       max[0]=sd->dst_pnt[0]+dist;
       max[1]=sd->dst_pnt[1]+dist;
       max[2]=sd->dst_pnt[2]+dist;
+
+      sd->closest_coord[0]=src_pnt[0];
+      sd->closest_coord[1]=src_pnt[1];
+      sd->closest_coord[2]=src_pnt[2];
+
     } else if (dist2 == sd->closest_dist2) {
       // In ParSearchNearest, this can happen when sd->closest_src_node is NULL
       // so check for that first. 
-      if (sd->closest_src_id != NULL) {
+      if (sd->closest_src_id != SN_BAD_ID) {
 	// If exactly the same distance chose the point with the smallest id
 	// (To make things consistent when running on different numbers of procs)
         //mvr	if (*this_id < *(sd->closest_src_id)) {
@@ -117,6 +126,9 @@ struct SearchData {
       
       // Don't need to adjust the min-max box because at exactly the same dist 
 
+      sd->closest_coord[0]=src_pnt[0];
+      sd->closest_coord[1]=src_pnt[1];
+      sd->closest_coord[2]=src_pnt[2];
     }
 
     // Don't know if this is the closest, so search further
@@ -159,9 +171,7 @@ struct SearchData {
   tree->commit();
 
 
-  // Set initial search box to the largest possible
-  double pmin[3], pmax[3];
-
+  // Get big/small numbers
   double min,max;
   if (std::numeric_limits<double>::has_infinity) {
     min= -std::numeric_limits<double>::infinity();
@@ -171,41 +181,67 @@ struct SearchData {
     max = std::numeric_limits<double>::max();
   }
 
-  pmin[0] = min;
-  pmin[1] = min;
-  pmin[2] = min;
-  
-  pmax[0] = max;
-  pmax[1] = max;
-  pmax[2] = max;
+  // Set initial search box to the largest possible
+  double pmin[3],pmax[3];
+  pmin[0]=min;
+  pmin[1]=min;
+  pmin[2]=min;
+  pmax[0]=max;
+  pmax[1]=max;
+  pmax[2]=max;
 
-
-  int dst_size=dst_pl.get_curr_num_pts();
+  // Setup search structure
+  SearchData sd;
+  sd.sdim=sdim;
+  sd.closest_src_node=NULL;
+  sd.closest_dist2=std::numeric_limits<double>::max();
+  sd.src_coord=NULL;
+  sd.closest_src_id=SN_BAD_ID;
+  sd.srcpointlist=&src_pl;
    
   // Loop the destination points, find hosts.
+  int dst_size=dst_pl.get_curr_num_pts();
   for (UInt p = 0; p < dst_size; ++p) {
     
     const double *pnt_crd=dst_pl.get_coord_ptr(p);
     int pnt_id=dst_pl.get_id(p);
 
-    // Setup search structure
-    SearchData sd;
-    sd.sdim=sdim;
+    // Set dst point coords in search structure
     sd.dst_pnt[0] = pnt_crd[0];
     sd.dst_pnt[1] = pnt_crd[1];
     sd.dst_pnt[2] = (sdim == 3 ? pnt_crd[2] : 0.0);
-    sd.closest_src_node=NULL;
-    sd.closest_dist2=std::numeric_limits<double>::max();
-    sd.src_coord=NULL;
 
-    sd.closest_src_id=NULL;
-    sd.srcpointlist=&src_pl;
+    // Note we're not resetting the closest src info because starting with last
+    // nearest point as first quess
+
+    // If a closest point exists from the last loop then use as initial guess
+    if (sd.closest_src_id != SN_BAD_ID) {
+    // Calculate distance squared
+      double dist2=(sd.dst_pnt[0]-sd.closest_coord[0])*(sd.dst_pnt[0]-sd.closest_coord[0])+
+                   (sd.dst_pnt[1]-sd.closest_coord[1])*(sd.dst_pnt[1]-sd.closest_coord[1])+
+                   (sd.dst_pnt[2]-sd.closest_coord[2])*(sd.dst_pnt[2]-sd.closest_coord[2]);
+
+      // set closest dist squared
+      sd.closest_dist2=dist2;
+
+      // Calc new search box
+      double dist=sqrt(dist2);
+
+      pmin[0]=sd.dst_pnt[0]-dist;
+      pmin[1]=sd.dst_pnt[1]-dist;
+      pmin[2]=sd.dst_pnt[2]-dist;
+
+      pmax[0]=sd.dst_pnt[0]+dist;
+      pmax[1]=sd.dst_pnt[1]+dist;
+      pmax[2]=sd.dst_pnt[2]+dist;      
+    }
+
 
     // Find closest source node to this destination node
     tree->runon_mm_chng(pmin, pmax, nearest_func, (void *)&sd);
     
     // If we've found a nearest source point, then add to the search results list...
-    if (sd.closest_src_id != NULL) {
+    if (sd.closest_src_id != SN_BAD_ID) {
       Search_result *sr=new Search_result();       
       sr->dst_gid=pnt_id;
       sr->src_gid=sd.closest_src_id;
@@ -278,13 +314,12 @@ struct CommData {
     Throw() << "src and dst must have same spatial dim for search";
   }
 
+  // Get some useful info
   int dst_size = dst_pl.get_curr_num_pts();
-  
   int num_nodes_to_search=src_pl.get_curr_num_pts();
  
   // Create search tree
   OTree *tree=new OTree(num_nodes_to_search); 
-
 
   // Get universal min-max
    double min,max;
@@ -332,9 +367,8 @@ struct CommData {
   // Commit tree
   tree->commit();
 
-
   // Create SpaceDir
-    SpaceDir *spacedir=new SpaceDir(proc_min, proc_max, tree, false);
+  SpaceDir *spacedir=new SpaceDir(proc_min, proc_max, tree, false);
 
 
   //// Find the closest point locally ////
@@ -347,29 +381,53 @@ struct CommData {
   // Allocate space to hold closest gids, dist
   vector<int> closest_src_gid(dst_size,-1);
   vector<double> closest_dist(dst_size,std::numeric_limits<double>::max());
+
+  // Setup search structure
+  SearchData sd;
+  sd.sdim=sdim;
+  sd.closest_src_node=NULL;
+  sd.closest_dist2=std::numeric_limits<double>::max();
+  sd.src_coord=NULL;
+  sd.closest_src_id=SN_BAD_ID;
+  sd.srcpointlist=&src_pl;
+
   // Loop the destination points, find hosts.
   for (UInt p = 0; p < dst_size; ++p) {
     
     const double *pnt_crd=dst_pl.get_coord_ptr(p);
 
-    // Setup search structure
-    SearchData sd;
-    sd.sdim=sdim;
+    // Set dst point coords in search structure
     sd.dst_pnt[0] = pnt_crd[0];
     sd.dst_pnt[1] = pnt_crd[1];
     sd.dst_pnt[2] = (sdim == 3 ? pnt_crd[2] : 0.0);
-    sd.closest_src_node=NULL;
-    sd.closest_dist2=std::numeric_limits<double>::max();
-    sd.src_coord=NULL;
-    sd.closest_src_id=NULL;
-    sd.srcpointlist=&src_pl;
 
+    // If a closest point exists from the last loop then use as initial guess
+    if (sd.closest_src_id != SN_BAD_ID) {
+    // Calculate distance
+      double dist2=(sd.dst_pnt[0]-sd.closest_coord[0])*(sd.dst_pnt[0]-sd.closest_coord[0])+
+                   (sd.dst_pnt[1]-sd.closest_coord[1])*(sd.dst_pnt[1]-sd.closest_coord[1])+
+                   (sd.dst_pnt[2]-sd.closest_coord[2])*(sd.dst_pnt[2]-sd.closest_coord[2]);
+
+      // set closest dist squared
+      sd.closest_dist2=dist2;
+
+      // Calc new search box
+      double dist=sqrt(dist2);
+
+      pmin[0]=sd.dst_pnt[0]-dist;
+      pmin[1]=sd.dst_pnt[1]-dist;
+      pmin[2]=sd.dst_pnt[2]-dist;
+
+      pmax[0]=sd.dst_pnt[0]+dist;
+      pmax[1]=sd.dst_pnt[1]+dist;
+      pmax[2]=sd.dst_pnt[2]+dist;      
+    }
 
     // Find closest source node to this destination node
     tree->runon_mm_chng(pmin, pmax, nearest_func, (void *)&sd);
     
     // If we've found a nearest source point, then add to the search results list...
-    if (sd.closest_src_id != NULL) {
+    if (sd.closest_src_id != SN_BAD_ID) {
       closest_src_gid[p]=sd.closest_src_id;
       closest_dist[p]=sqrt(sd.closest_dist2);
     }
@@ -612,7 +670,7 @@ struct CommData {
       sd.closest_dist2=dist*dist;
       sd.src_coord=NULL;
 
-      sd.closest_src_id=NULL;
+      sd.closest_src_id=SN_BAD_ID;
       sd.srcpointlist=&src_pl;
 
       // Find closest source node to this destination node
@@ -620,7 +678,7 @@ struct CommData {
       
       // Fill in structure to be sent
       CommData cd;
-      if (sd.closest_src_id != NULL) {
+      if (sd.closest_src_id != SN_BAD_ID) {
         cd.closest_dist=sqrt(sd.closest_dist2);
         cd.closest_src_gid=sd.closest_src_id;
 
@@ -628,7 +686,7 @@ struct CommData {
 
       } else {
         cd.closest_dist=std::numeric_limits<double>::max();;
-        cd.closest_src_gid=-1;
+        cd.closest_src_gid=SN_BAD_ID;
       }
       cd.proc=Par::Rank();
 
@@ -794,6 +852,6 @@ struct CommData {
 
 }
 
-
+#undef SN_BAD_ID 
 
 } // namespace

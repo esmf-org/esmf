@@ -80,7 +80,7 @@ This standard is derived from the \htmladdnormallink{GFDL Flexible
   Modeling System Developers'
   Manual}{http://www.gfdl.gov/\~{}vb/FMSManual} and the
 \htmladdnormallink{coding standard for the NCAR Community Atmospheric
-  Model(CAM)}{http://www.ccsm.ucar.edu}
+  Model(CAM)}{http://www.cesm.ucar.edu}
 developed by Jim Rosinski. Other documents containing coding
 conventions include the "Report on Column Physics Standards"
 (\htmladdnormallink{http://nsipp.gsfc.nasa.gov/infra/}{http://nsipp.gsfc.nasa.gov/infra})
@@ -107,7 +107,7 @@ The conventions assume the use of embedded documentation extractor
   performance enhancement using a particular proprietary software
   system), \emph{and} an alternate formulation is provided for compiling
   environments that do not permit the extension.
-\item The standard may change in the future, e.g to Fortran 2000, or
+\item The standard may change in the future, e.g to Fortran 2003, or
   any other, after review.
 \end{enumerate}
   
@@ -259,8 +259,11 @@ call advection(UPWIND)
   module procedures that constitute it must be private.
 \item Optional arguments, if any, should \emph{follow} the required
   arguments, so that the procedure may be called without explicit
-  argument keywords.
-\item Argument lists should be as short as possible. If necessary related elements of
+  argument keywords.  Optional arguments in all new public interfaces \emph{must}
+  have a \texttt{keywordEnforcer} argument separating the required arguments from the
+  optional arguments.  This requires the caller to specify keywords for the arguments,
+  allowing for upward compatibility as new optional arguments are added over time.
+\item Argument lists should be as short as possible. If necessary, related elements of
   an argument list should be encapsulated in a public derived type.
 \end{enumerate}
 
@@ -268,7 +271,8 @@ call advection(UPWIND)
   elements include:
 
 \begin{enumerate}
-\item implicit typing;
+\item implicit typing.  Use \texttt{implicit none} in all modules and external
+  procedures.
 \item \texttt{common} blocks. Use module global variables instead;
 \item assumed size arrays: i.e declarations of the form \texttt{a(*)}
   or \texttt{a(1)} with the intention of over-indexing. This can
@@ -281,7 +285,7 @@ call advection(UPWIND)
 \end{enumerate}
 
 \item[mkmf] The
-  \htmladdnormallink{mkmf}{http://www.gfdl.gov/\~{}vb/mkmf.html} tool
+  \htmladdnormallink{mkmf}{http://www.gfdl.noaa.gov/\~{}vb/mkmf.html} tool
   may be used to generate Makefiles with correct dependencies for F90
   and hybrid-language codes. This places minor restrictions on
   \texttt{module} and \texttt{use} statements: these declarations must

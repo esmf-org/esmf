@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2016, University Corporation for Atmospheric Research,
+! Copyright 2002-2017, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -91,7 +91,7 @@
       maxnpet=4, indexflag=ESMF_INDEX_GLOBAL, rc=rc)
     write(failMsg, *) ""
     write(name, *) "Regrid then create xgrid online and regrid through xgrid, overlapping cut"
-    call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
     !------------------------------------------------------------------------
     !EX_UTest
@@ -704,6 +704,7 @@ contains
     !----------------------------------------------------
     ! compute regrid routehandle
     !----------------------------------------------------
+    !call ESMF_LogWrite(tag, ESMF_LOGMSG_INFO)
     call ESMF_FieldRegridStore(xgrid, f_atm, f_xgrid, routehandle=rh_a2x, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
@@ -939,9 +940,9 @@ contains
     type(ESMF_XGridSpec)            :: sparseMat(1)
 
     type(ESMF_Field)                :: fa_atm, fa_ocn, fa_xgrid
-    type(ESMF_Field)                :: aa_atm, aa_ocn, aa_xgrid
+    type(ESMF_Field)                :: aa_atm, aa_ocn, aa_xgrid, fieldM
     type(ESMF_Field)                :: srcFrac, dstFrac, srcArea, dstArea
-    type(ESMF_Mesh)                 :: mesh_atm, mesh_ocn, mesh_xgrid
+    type(ESMF_Mesh)                 :: mesh_atm, mesh_ocn, mesh_xgrid, meshM
     real(ESMF_KIND_R8)              :: srcsum(3), allsrcsum(3), scale
     real(ESMF_KIND_R8)              :: dstFlux_reg, dstFlux, totalXArea, totalSrcArea, error
     integer                         :: l_scheme
@@ -1232,6 +1233,19 @@ contains
         ESMF_CONTEXT, rcToReturn=rc)) return
 
     call checkProxy(xgrid, rc=localrc)
+    if (ESMF_LogFoundError(localrc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! Query the XGrid for the overlay mesh
+    call ESMF_XGridGet(xgrid, mesh=meshM, rc=localrc)
+    if (ESMF_LogFoundError(localrc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! Create a field on the overlay mesh
+    fieldM = ESMF_FieldCreate(mesh=meshM, typekind=ESMF_TYPEKIND_R8, &
+        rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return

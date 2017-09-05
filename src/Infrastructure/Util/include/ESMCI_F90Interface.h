@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2016, University Corporation for Atmospheric Research,
+// Copyright 2002-2017, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -30,12 +30,14 @@
 //EOP
 
 //-------------------------------------------------------------------------
-// Class that helps with [optinal] F90 array arguments on the interface
+// Class that helps with [optional] F90 array arguments on the interface
 //-------------------------------------------------------------------------
 
 #include <vector>
 #include <cstddef>
 #include <iostream>
+
+#include "ESMC_Util.h"
 
 namespace ESMCI {
 
@@ -56,25 +58,118 @@ namespace ESMCI {
 
   //--------------------------------------------------------------------------
 
-  class InterfaceInt{
-    public: // this thin class is public to make it's usage uncomplicated
-      int *array;
+  template<typename T> class InterArray{
+    public: // this thin class is public to make its usage uncomplicated
+      T *array;
       int dimCount;
       int extent[7];    // size 7 reflects the Fortran limit
     public:
-      InterfaceInt();                           // constructor
-      InterfaceInt(int *arrayArg, int lenArg);  // constructor
-      InterfaceInt(std::vector<int> &arrayArg); // constructor
-      InterfaceInt(int *arrayArg, int dimArg, const int *lenArg); // constructor
-      ~InterfaceInt(void);                      // destructor
+      // constructors
+      InterArray();
+      InterArray(T *arrayArg, int lenArg);
+      InterArray(std::vector<T> &arrayArg);
+      InterArray(T *arrayArg, int dimArg, const int *lenArg);
+      // destructor
+      ~InterArray(void);
+      // set methods
       void set();
-      void set(int *arrayArg, int lenArg);
-      void set(std::vector<int> &arrayArg);
-      void set(int *arrayArg, int dimArg, const int *lenArg);
+      void set(T *arrayArg, int lenArg);
+      void set(std::vector<T> &arrayArg);
+      void set(T *arrayArg, int dimArg, const int *lenArg);
   };
   
-  bool present(InterfaceInt *ptr);  // simplify checking whether object present
+  // implementation of a present() method to detect present/absent optional
+  template<typename T> bool present(InterArray<T> *ptr);
 
+  //---- must implement templated class in header in order to let compiler of -
+  //---- depending code see the template --------------------------------------
+
+  template<typename T> InterArray<T>::InterArray(void){
+    // constructor
+    array = NULL;
+    dimCount = 0;
+    for (int i=dimCount; i<7; i++)
+      extent[i]=0;
+  }
+
+  template<typename T> InterArray<T>::InterArray(T *arrayArg, int lenArg){
+    // constructor, special case 1d
+    array = arrayArg;
+    dimCount = 1;
+    extent[0]=lenArg;
+    for (int i=dimCount; i<7; i++)
+      extent[i]=0;
+  }
+
+  template<typename T> InterArray<T>::InterArray(std::vector<T> &arrayArg){
+    // constructor, special case 1d
+    array = &(arrayArg[0]);
+    dimCount = 1;
+    extent[0]=arrayArg.size();
+    for (int i=dimCount; i<7; i++)
+      extent[i]=0;
+  }
+
+  template<typename T> InterArray<T>::InterArray(T *arrayArg, 
+    int dimArg, const int *lenArg){
+    // constructor
+    array = arrayArg;
+    dimCount = dimArg;
+    for (int i=0; i<dimCount; i++)
+      extent[i]=lenArg[i];
+    for (int i=dimCount; i<7; i++)
+      extent[i]=0;
+  }
+
+  template<typename T> InterArray<T>::~InterArray<T>(void){
+    // destructor
+    array = NULL;
+    dimCount = 0;
+    for (int i=dimCount; i<7; i++)
+      extent[i]=0;
+  }
+  
+  template<typename T> void InterArray<T>::set(void){
+    // set NULL
+    array = NULL;
+    dimCount = 0;
+    for (int i=dimCount; i<7; i++)
+      extent[i]=0;
+  }
+
+  template<typename T> void InterArray<T>::set(T *arrayArg, int lenArg){
+    // set special case 1d
+    array = arrayArg;
+    dimCount = 1;
+    extent[0]=lenArg;
+    for (int i=dimCount; i<7; i++)
+      extent[i]=0;
+  }
+
+  template<typename T> void InterArray<T>::set(std::vector<T> &arrayArg){
+    // set special case 1d
+    array = &(arrayArg[0]);
+    dimCount = 1;
+    extent[0]=arrayArg.size();
+    for (int i=dimCount; i<7; i++)
+      extent[i]=0;
+  }
+
+  template<typename T> void InterArray<T>::set(T *arrayArg, int dimArg, 
+    const int *lenArg){
+    // set
+    array = arrayArg;
+    dimCount = dimArg;
+    for (int i=0; i<dimCount; i++)
+      extent[i]=lenArg[i];
+    for (int i=dimCount; i<7; i++)
+      extent[i]=0;
+  }
+  
+  template<typename T> bool present(InterArray<T> *ptr){
+    return ( (ptr != NULL) && (ptr->array != NULL) );
+  }
+  
 } // namespace ESMCI
 
 

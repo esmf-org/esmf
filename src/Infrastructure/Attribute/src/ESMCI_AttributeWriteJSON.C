@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2016, University Corporation for Atmospheric Research,
+// Copyright 2002-2017, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -80,7 +80,7 @@ namespace ESMCI {
 
       // stream the JSON, starting from root
       if (attrRoot == ESMF_FALSE) {
-    	  attr = &(attrBase->root);
+    	  attr = attrBase->ESMC_BaseGetRoot();
     	  localrc = attr->streamAttributeRootToJSON(flattenPackList, includeUnset, includeLinks, output, &totalStreamed);
 		  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
 		           		&localrc)) return localrc;

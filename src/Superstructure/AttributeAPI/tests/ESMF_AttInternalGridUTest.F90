@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2016, University Corporation for Atmospheric Research,
+! Copyright 2002-2017, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -55,6 +55,9 @@ program ESMF_AttributeGridGetUTest
   real(ESMF_KIND_R8), pointer :: farrayPtrX(:,:),farrayPtrY(:,:)
   real(ESMF_KIND_R4), pointer :: farrayPtrXR4(:,:),farrayPtrYR4(:,:)
   integer                :: i1, i2, clbnd(2), cubnd(2)
+
+  character(*), parameter :: apConv = 'Attribute_IO'
+  character(*), parameter :: apPurp = 'attributes'
 
   ! cumulative result: count failures; no failures equals "all pass"
   integer                :: result = 0
@@ -183,8 +186,8 @@ program ESMF_AttributeGridGetUTest
 
     do i1=clbnd(1),cubnd(1)
     do i2=clbnd(2),cubnd(2)
-      farrayPtrXR4(i1,i2)=REAL(i1-1)*dx
-      farrayPtrYR4(i1,i2)=-90. + (REAL(i2-1)*dy + 0.5*dy)
+      farrayPtrXR4(i1,i2)=REAL ((i1-1)*dx)
+      farrayPtrYR4(i1,i2)=REAL (-90. + (i2-1)*dy + 0.5*dy)
     enddo
     enddo
 
@@ -853,6 +856,76 @@ print *, "xcoords=", xcoords
   call ESMF_Test(rc==ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
   !------------------------------------------------------------------------
 print *, "ycoords=", ycoords
+
+
+  !------------------------------------------------------------------------
+  !---------- Attribute Add (User additions to ESMF: namespace) -----------
+  !------------------------------------------------------------------------
+
+  !NEX_UTest
+  call ESMF_AttributeAdd (grid,  &
+      convention=apConv, purpose=apPurp,  &
+      attrList=(/ ESMF_ATT_GRIDDED_DIM_LABELS /),  &
+      rc=rc)
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  write(name, *) "Adding gridded dimension labels via Attribute Test"
+  call ESMF_Test(rc==ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !NEX_UTest
+  call ESMF_AttributeSet(grid,  &
+      name=ESMF_ATT_GRIDDED_DIM_LABELS,  &
+      valueList=(/ "x_axis", "y_axis" /), &
+      convention=apConv, purpose=apPurp,  &
+      rc=rc)
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  write(name, *) "Adding gridded dimension label values via Attribute Test"
+  call ESMF_Test(rc==ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !NEX_UTest
+  ! Note: Normally ESMF_ATT_UNGRIDDED_DIM_LABELS would only be used at the
+  ! Field level.  It is included here simply for unit testing.
+  call ESMF_AttributeAdd (grid,  &
+      convention=apConv, purpose=apPurp,  &
+      attrList=(/ ESMF_ATT_UNGRIDDED_DIM_LABELS /),  &
+      rc=rc)
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  write(name, *) "Adding ungridded dimension labels via Attribute Test"
+  call ESMF_Test(rc==ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !NEX_UTest
+  call ESMF_AttributeSet(grid,  &
+      name=ESMF_ATT_UNGRIDDED_DIM_LABELS,  &
+      valueList=(/ "x_axis_ug", "y_axis_ug" /), &
+      convention=apConv, purpose=apPurp,  &
+      rc=rc)
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  write(name, *) "Adding ungridded dimension label values via Attribute Test"
+  call ESMF_Test(rc==ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !NEX_UTest
+  call ESMF_AttributeAdd (grid,  &
+      convention=apConv, purpose=apPurp,  &
+      attrList=(/ "ESMF:Something_unknown" /),  &
+      rc=rc)
+  write(failMsg, *) "Did not return failure rc"
+  write(name, *) "Adding unknown ESMF: attribute Test"
+  call ESMF_Test(rc==ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !NEX_UTest
+  call ESMF_AttributeSet(grid,  &
+      name="ESMF:Something_unknown",  &
+      valueList=(/ "some value" /), &
+      convention=apConv, purpose=apPurp,  &
+      rc=rc)
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  write(name, *) "Adding values to unknown ESMF: Attribute Test"
+  call ESMF_Test(rc/=ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
 
   !------------------------------------------------------------------------
   ! clean up

@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2016, University Corporation for Atmospheric Research, 
+// Copyright 2002-2017, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -30,8 +30,7 @@
 
 using namespace ESMCI;
 
-void ESMCI_xgridregrid_create(ESMCI::VM **vmpp,
-                              Mesh **meshsrcpp, Mesh **meshdstpp, 
+void ESMCI_xgridregrid_create(Mesh **meshsrcpp, Mesh **meshdstpp, 
                               Mesh **mesh,
                               int *compute_midmesh,
                               int *regridMethod, 

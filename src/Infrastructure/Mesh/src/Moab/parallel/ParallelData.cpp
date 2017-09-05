@@ -78,7 +78,7 @@ ErrorCode ParallelData::get_interface_sets(std::vector<EntityHandle> &iface_sets
     int k;
     Range::iterator rit;
     
-    for (k = 0, rit = proc_sets.begin(); rit != proc_sets.end(); rit++, k++) {
+    for (k = 0, rit = proc_sets.begin(); rit != proc_sets.end(); ++rit, k++) {
       for (int j = 0; j < tsize; j++) {
         if (my_rank != proc_tags[2*k+j] && proc_tags[2*k+j] >= 0)
           iface_data.insert(std::pair<int,EntityHandle>(proc_tags[2*k+j], *rit));
@@ -88,7 +88,7 @@ ErrorCode ParallelData::get_interface_sets(std::vector<EntityHandle> &iface_sets
 
     // now get the results in sorted order
   std::multimap<int,EntityHandle>::iterator mit;
-  for (mit = iface_data.begin(); mit != iface_data.end(); mit++)
+  for (mit = iface_data.begin(); mit != iface_data.end(); ++mit)
     iface_procs.push_back((*mit).first),
       iface_sets.push_back((*mit).second);
     

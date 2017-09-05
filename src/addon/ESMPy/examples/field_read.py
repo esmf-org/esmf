@@ -8,39 +8,44 @@
 # if not os.path.isdir(DD):
 #     os.makedirs(DD)
 # from ESMF.util.cache_data import cache_data_file
-# cache_data_file(os.path.join(DD, "tasmax_day_CanCM4_decadal2010_r2i1p1_20110101-20201231.nc"))
+# cache_data_file(os.path.join(DD, "so_Omon_GISS-E2.nc"))
 # cache_data_file(os.path.join(DD, "ll1deg_grid.nc"))
 
 import ESMF
 
 # This call enables debug logging
-# esmpy = ESMF.Manager(debug=True)
+esmpy = ESMF.Manager(debug=True)
 
-datafile = "examples/data/tasmax_day_CanCM4_decadal2010_r2i1p1_20110101-20201231.nc"
+datafile = "examples/data/so_Omon_GISS-E2.nc"
 gridfile = "examples/data/ll1deg_grid.nc"
 
 # Create a  grid from a GRIDSPEC formatted file
 srcgrid = ESMF.Grid(filename=datafile, filetype=ESMF.FileFormat.GRIDSPEC)
 
-# create a field on the center stagger locations of the source grid
-srcfield = ESMF.Field(srcgrid, name='srcfield', staggerloc=ESMF.StaggerLoc.CENTER)
+# Create a field on the center stagger locations of the source grid with
+# ungridded dimensions large enough to receive the data from file
+# dimensions follow Fortran index order: lon, lat, level, time
+srcfield = ESMF.Field(srcgrid, staggerloc=ESMF.StaggerLoc.CENTER, ndbounds=[33, 2])
 
-srcfield.read(filename=datafile, variable="tasmax", timeslice=1)
+# Read the field data into the data structure
+srcfield.read(filename=datafile, variable="so", timeslice=2)
 
-# create a tripole grid
+# Create a 1 degree latlon grid
 dstgrid = ESMF.Grid(filename=gridfile, filetype=ESMF.FileFormat.SCRIP)
 
-# create fields on the center stagger locations of the tripole grid
-dstfield = ESMF.Field(dstgrid, name='dstfield', meshloc=ESMF.StaggerLoc.CENTER)
+# Create a field on the center stagger locations of the latlon grid, also with
+# ungridded dimensions large enough to recieve the data from the source field
+dstfield = ESMF.Field(dstgrid, name='dstfield', meshloc=ESMF.StaggerLoc.CENTER,
+                      ndbounds=[33, 2])
 dstfield.data[...] = 1e20
 
-# create an object to regrid data from the source to the destination field
+# Create an object to regrid data from the source to the destination field
 regrid = ESMF.Regrid(srcfield, dstfield,
                      regrid_method=ESMF.RegridMethod.BILINEAR,
-                     unmapped_action=ESMF.UnmappedAction.ERROR)
+                     unmapped_action=ESMF.UnmappedAction.IGNORE)
 
-# do the regridding from source to destination field
+# Do the regridding from source to destination field
 dstfield = regrid(srcfield, dstfield)
 
-# output the results from one processor only
+# Output the results from one processor only
 if ESMF.local_pet() is 0: print ("ESMPy Field Data Regridding Example Finished Successfully")

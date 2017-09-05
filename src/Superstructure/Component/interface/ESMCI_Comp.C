@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2016, University Corporation for Atmospheric Research, 
+// Copyright 2002-2017, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -130,6 +130,26 @@ extern "C" {
   void FTN_X(c_esmc_getcompliancecheckjson)(int *jsonIsOn, int *rc){
     if (rc) *rc = ESMC_RC_NOT_IMPL;
     int localrc = ESMCI::Comp::getComplianceCheckerJSON(jsonIsOn);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      rc)) return;
+    // return successfully
+    if (rc) *rc = ESMF_SUCCESS;
+  }
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_getcompliancechecktrace"
+  void FTN_X(c_esmc_getcompliancechecktrace)(int *traceIsOn, int *rc){
+    if (rc) *rc = ESMC_RC_NOT_IMPL;
+    int localrc = ESMCI::Comp::getComplianceCheckerTrace(traceIsOn);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      rc)) return;
+    // return successfully
+    if (rc) *rc = ESMF_SUCCESS;
+  }
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_getcompliancechecktext"
+  void FTN_X(c_esmc_getcompliancechecktext)(int *textIsOn, int *rc){
+    if (rc) *rc = ESMC_RC_NOT_IMPL;
+    int localrc = ESMCI::Comp::getComplianceCheckerText(textIsOn);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       rc)) return;
     // return successfully
@@ -882,6 +902,108 @@ int Comp::getComplianceCheckerJSON(
       index = value.find("JSON=ON");
     if (index != std::string::npos){
       *jsonIsOn=1;
+    }
+  }
+
+  // return successfully
+  rc = ESMF_SUCCESS;
+  return rc;
+}
+//-----------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::Comp::getComplianceCheckerTrace()"
+//BOPI
+// !IROUTINE:  ESMCI::Comp::getComplianceCheckerTrace
+//
+// !INTERFACE:
+int Comp::getComplianceCheckerTrace(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+//
+    int *traceIsOn
+  ){
+//
+// !DESCRIPTION:
+//
+//EOPI
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
+
+  // check input
+  char const *envVar = VM::getenv("ESMF_RUNTIME_TRACE");
+  *traceIsOn = 0;
+  if (envVar != NULL && traceIsOn != NULL){
+    std::string value(envVar);
+    int index;
+    index = value.find("on");
+    if (index == std::string::npos)
+      index = value.find("ON");
+    if (index != std::string::npos){
+      *traceIsOn=1;
+    }
+  }
+
+  // return successfully
+  rc = ESMF_SUCCESS;
+  return rc;
+}
+//-----------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::Comp::getComplianceCheckerText()"
+//BOPI
+// !IROUTINE:  ESMCI::Comp::getComplianceCheckerText
+//
+// !INTERFACE:
+int Comp::getComplianceCheckerText(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+//
+    int *textIsOn
+  ){
+//
+// !DESCRIPTION:
+//
+//EOPI
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
+
+  // check input
+  if (textIsOn != NULL) {
+    char const *envVar = VM::getenv("ESMF_RUNTIME_COMPLIANCECHECK");
+    if (envVar == NULL) {
+      *textIsOn = 0;
+    }
+    else {
+      std::string value(envVar);
+      if (value.length() == 0) {
+	*textIsOn = 0;
+      }
+      else {
+	*textIsOn = 1;  //default to on if env variable present
+      }
+      
+      // see if TEXT is specified in ESMF_RUNTIME_COMPLIANCECHECK
+      int index;
+      index = value.find("text=off");
+      if (index == std::string::npos)
+	index = value.find("TEXT=OFF");
+      if (index != std::string::npos){
+	*textIsOn=0;
+      }
     }
   }
 

@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2016, University Corporation for Atmospheric Research,
+! Copyright 2002-2017, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -66,7 +66,7 @@
 
       ! instantiate a calendar
       type(ESMF_Calendar) :: no_leapCalendar, modifiedJulianDayCalendar, &
-		             julianDayCalendar, gregorianCalendar1, julianCalendar
+          julianDayCalendar, gregorianCalendar1, julianCalendar
       type(ESMF_Calendar) :: customCalendar, customCalendar2, marsCalendar, &
                              esmf_360dayCalendar, gregorianCalendar2
       type(ESMF_CalKind_Flag) :: cal_kind1, cal_kind2, cal_kind
@@ -874,8 +874,8 @@
       write(name, *) "Initialize Custom Kind Calendar Test"
       write(failMsg, *) " Did not return ESMF_SUCCESS"
       customCalendar = ESMF_CalendarCreate(daysPerMonth=days_per_month, &
-					secondsPerDay=86400, daysPerYear=360, daysPerYearDn=0, &
-					daysPerYearDd=1, name="CustomCalendar", rc=rc)
+          secondsPerDay=86400, daysPerYear=360, daysPerYearDn=0, &
+          daysPerYearDd=1, name="CustomCalendar", rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
 
@@ -908,8 +908,8 @@
       write(name, *) "Calendar equality of custom Calendars Test"
       write(failMsg, *) "Returned not equal"
       customCalendar2 = ESMF_CalendarCreate(daysPerMonth=days_per_month, &
-					secondsPerDay=86400, daysPerYear=360, daysPerYearDn=0, &
-					daysPerYearDd=1, name="CustomCalendar2", rc=rc)
+          secondsPerDay=86400, daysPerYear=360, daysPerYearDn=0, &
+          daysPerYearDd=1, name="CustomCalendar2", rc=rc)
       call ESMF_Test((customCalendar.eq.customCalendar2 .and. &
                       rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
@@ -931,8 +931,8 @@
       write(name, *) "Calendar inequality of custom Calendars Test"
       write(failMsg, *) "Returned equal"
       customCalendar2 = ESMF_CalendarCreate(daysPerMonth=days_per_month, &
-					secondsPerDay=20000, daysPerYear=360, daysPerYearDn=0, &
-					daysPerYearDd=1, name="CustomCalendar2", rc=rc)
+          secondsPerDay=20000, daysPerYear=360, daysPerYearDn=0, &
+          daysPerYearDd=1, name="CustomCalendar2", rc=rc)
       call ESMF_Test((customCalendar.ne.customCalendar2 .and. &
                       rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
@@ -990,8 +990,8 @@
       write(name, *) "Initialize Custom Type with negative number seconds Calendar Test"
       write(failMsg, *) " Should not return ESMF_SUCCESS"
       customCalendar = ESMF_CalendarCreate(daysPerMonth=dayspermonth, &
-					secondsPerDay=-400, daysPerYear=1, daysPerYearDn=1, &
-					daysPerYearDd=1, name="CustomCalendar", rc=rc)
+          secondsPerDay=-400, daysPerYear=1, daysPerYearDn=1, &
+          daysPerYearDd=1, name="CustomCalendar", rc=rc)
       call ESMF_Test((rc.ne.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
       call ESMF_CalendarDestroy(customCalendar, rc=rc)
@@ -1024,8 +1024,8 @@
       write(name, *) "Initialize Custom Type with nonsense numbers Calendar Test"
       write(failMsg, *) " Should not return ESMF_SUCCESS"
       customCalendar = ESMF_CalendarCreate(daysPerMonth=dayspermonth, &
-					secondsPerDay=86400, daysPerYear=1, daysPerYearDn=1, &
-					daysPerYearDd=0, name="CustomCalendar", rc=rc)
+          secondsPerDay=86400, daysPerYear=1, daysPerYearDn=1, &
+          daysPerYearDd=0, name="CustomCalendar", rc=rc)
       call ESMF_Test((rc.ne.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
       call ESMF_CalendarDestroy(customCalendar, rc=rc)

@@ -1,7 +1,7 @@
 //$1.10 2007/04/26 16:13:59 rosalind Exp $
 //
 // Earth System Modeling Framework
-// Copyright 2002-2016, University Corporation for Atmospheric Research, 
+// Copyright 2002-2017, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -197,9 +197,9 @@ namespace ESMCI {
     ESMC_Grid *grid, 
     ESMC_ArraySpec arrayspec,
     ESMC_StaggerLoc staggerloc,
-    ESMC_InterfaceInt *gridToFieldMap, 
-    ESMC_InterfaceInt *ungriddedLBound, 
-    ESMC_InterfaceInt *ungriddedUBound, 
+    ESMC_InterArrayInt *gridToFieldMap, 
+    ESMC_InterArrayInt *ungriddedLBound, 
+    ESMC_InterArrayInt *ungriddedUBound, 
     const char *name,  
     int *rc) {           // out - return code
 //
@@ -222,9 +222,9 @@ namespace ESMCI {
     gtfm_created = false;
     uglb_created = false;
     ugub_created = false;
-    ESMCI::InterfaceInt *gtfm, *uglb, *ugub;
+    ESMCI::InterArray<int> *gtfm, *uglb, *ugub;
 
-    gtfm = (ESMCI::InterfaceInt *)gridToFieldMap;
+    gtfm = (ESMCI::InterArray<int> *)gridToFieldMap;
     if (present(gtfm)) {
       if(gtfm->dimCount != 1){
          ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
@@ -233,11 +233,11 @@ namespace ESMCI {
       }
       gtfm_present = 1;
     } else {
-      gtfm = new ESMCI::InterfaceInt();
+      gtfm = new ESMCI::InterArray<int>();
       gtfm_created = true;
     }
 
-    uglb = (ESMCI::InterfaceInt *)ungriddedLBound;
+    uglb = (ESMCI::InterArray<int> *)ungriddedLBound;
     if (present(uglb)) {
       if(uglb->dimCount != 1){
          ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
@@ -247,11 +247,11 @@ namespace ESMCI {
       }
       uglb_present = 1;
     } else {
-      uglb = new ESMCI::InterfaceInt();
+      uglb = new ESMCI::InterArray<int>();
       uglb_created = true;
     }
 
-    ugub = (ESMCI::InterfaceInt *)ungriddedUBound;
+    ugub = (ESMCI::InterArray<int> *)ungriddedUBound;
     if (present(ugub)) {
       if(ugub->dimCount != 1){
          ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
@@ -262,7 +262,7 @@ namespace ESMCI {
       }
       ugub_present = 1;
     } else {
-      ugub = new ESMCI::InterfaceInt();
+      ugub = new ESMCI::InterArray<int>();
       ugub_created = true;
     }
 
@@ -341,9 +341,9 @@ namespace ESMCI {
     ESMC_Grid *grid, 
     ESMC_TypeKind_Flag typekind, 
     ESMC_StaggerLoc staggerloc,
-    ESMC_InterfaceInt *gridToFieldMap, 
-    ESMC_InterfaceInt *ungriddedLBound, 
-    ESMC_InterfaceInt *ungriddedUBound, 
+    ESMC_InterArrayInt *gridToFieldMap, 
+    ESMC_InterArrayInt *ungriddedLBound, 
+    ESMC_InterArrayInt *ungriddedUBound, 
     const char *name,  
     int *rc) {           // out - return code
 //
@@ -366,9 +366,9 @@ namespace ESMCI {
     gtfm_created = false;
     uglb_created = false;
     ugub_created = false;
-    ESMCI::InterfaceInt *gtfm, *uglb, *ugub;
+    ESMCI::InterArray<int> *gtfm, *uglb, *ugub;
 
-    gtfm = (ESMCI::InterfaceInt *)gridToFieldMap;
+    gtfm = (ESMCI::InterArray<int> *)gridToFieldMap;
     if (present(gtfm)) {
       if(gtfm->dimCount != 1){
          ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
@@ -377,11 +377,11 @@ namespace ESMCI {
       }
       gtfm_present = 1;
     } else {
-      gtfm = new ESMCI::InterfaceInt();
+      gtfm = new ESMCI::InterArray<int>();
       gtfm_created = true;
     }
 
-    uglb = (ESMCI::InterfaceInt *)ungriddedLBound;
+    uglb = (ESMCI::InterArray<int> *)ungriddedLBound;
     if (present(uglb)) {
       if(uglb->dimCount != 1){
          ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
@@ -391,11 +391,11 @@ namespace ESMCI {
       }
       uglb_present = 1;
     } else {
-      uglb = new ESMCI::InterfaceInt();
+      uglb = new ESMCI::InterArray<int>();
       uglb_created = true;
     }
 
-    ugub = (ESMCI::InterfaceInt *)ungriddedUBound;
+    ugub = (ESMCI::InterArray<int> *)ungriddedUBound;
     if (present(ugub)) {
       if(ugub->dimCount != 1){
          ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
@@ -406,7 +406,7 @@ namespace ESMCI {
       }
       ugub_present = 1;
     } else {
-      ugub = new ESMCI::InterfaceInt();
+      ugub = new ESMCI::InterArray<int>();
       ugub_created = true;
     }
 
@@ -484,9 +484,9 @@ namespace ESMCI {
 // !ARGUMENTS:
     ESMC_Mesh mesh, 
     ESMC_ArraySpec arrayspec, 
-    ESMC_InterfaceInt *gridToFieldMap, 
-    ESMC_InterfaceInt *ungriddedLBound, 
-    ESMC_InterfaceInt *ungriddedUBound, 
+    ESMC_InterArrayInt *gridToFieldMap, 
+    ESMC_InterArrayInt *ungriddedLBound, 
+    ESMC_InterArrayInt *ungriddedUBound, 
     const char *name,  
     int *rc) {           // out - return code
 //
@@ -509,9 +509,9 @@ namespace ESMCI {
     gtfm_created = false;
     uglb_created = false;
     ugub_created = false;
-    ESMCI::InterfaceInt *gtfm, *uglb, *ugub;
+    ESMCI::InterArray<int> *gtfm, *uglb, *ugub;
 
-    gtfm = (ESMCI::InterfaceInt *)gridToFieldMap;
+    gtfm = (ESMCI::InterArray<int> *)gridToFieldMap;
     if (present(gtfm)) {
       if(gtfm->dimCount != 1){
          ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
@@ -520,11 +520,11 @@ namespace ESMCI {
       }
       gtfm_present = 1;
     } else {
-      gtfm = new ESMCI::InterfaceInt();
+      gtfm = new ESMCI::InterArray<int>();
       gtfm_created = true;
     }
 
-    uglb = (ESMCI::InterfaceInt *)ungriddedLBound;
+    uglb = (ESMCI::InterArray<int> *)ungriddedLBound;
     if (present(uglb)) {
       if(uglb->dimCount != 1){
          ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
@@ -534,11 +534,11 @@ namespace ESMCI {
       }
       uglb_present = 1;
     } else {
-      uglb = new ESMCI::InterfaceInt();
+      uglb = new ESMCI::InterArray<int>();
       uglb_created = true;
     }
 
-    ugub = (ESMCI::InterfaceInt *)ungriddedUBound;
+    ugub = (ESMCI::InterArray<int> *)ungriddedUBound;
     if (present(ugub)) {
       if(ugub->dimCount != 1){
          ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
@@ -549,7 +549,7 @@ namespace ESMCI {
       }
       ugub_present = 1;
     } else {
-      ugub = new ESMCI::InterfaceInt();
+      ugub = new ESMCI::InterArray<int>();
       ugub_created = true;
     }
 
@@ -623,9 +623,9 @@ namespace ESMCI {
     ESMC_Mesh mesh, 
     ESMC_TypeKind_Flag typekind, 
     ESMC_MeshLoc_Flag meshloc,
-    ESMC_InterfaceInt *gridToFieldMap, 
-    ESMC_InterfaceInt *ungriddedLBound, 
-    ESMC_InterfaceInt *ungriddedUBound, 
+    ESMC_InterArrayInt *gridToFieldMap, 
+    ESMC_InterArrayInt *ungriddedLBound, 
+    ESMC_InterArrayInt *ungriddedUBound, 
     const char *name,  
     int *rc) {           // out - return code
 //
@@ -648,9 +648,9 @@ namespace ESMCI {
     gtfm_created = false;
     uglb_created = false;
     ugub_created = false;
-    ESMCI::InterfaceInt *gtfm, *uglb, *ugub;
+    ESMCI::InterArray<int> *gtfm, *uglb, *ugub;
 
-    gtfm = (ESMCI::InterfaceInt *)gridToFieldMap;
+    gtfm = (ESMCI::InterArray<int> *)gridToFieldMap;
     if (present(gtfm)) {
       if(gtfm->dimCount != 1){
          ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
@@ -659,11 +659,11 @@ namespace ESMCI {
       }
       gtfm_present = 1;
     } else {
-      gtfm = new ESMCI::InterfaceInt();
+      gtfm = new ESMCI::InterArray<int>();
       gtfm_created = true;
     }
 
-    uglb = (ESMCI::InterfaceInt *)ungriddedLBound;
+    uglb = (ESMCI::InterArray<int> *)ungriddedLBound;
     if (present(uglb)) {
       if(uglb->dimCount != 1){
          ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
@@ -673,11 +673,11 @@ namespace ESMCI {
       }
       uglb_present = 1;
     } else {
-      uglb = new ESMCI::InterfaceInt();
+      uglb = new ESMCI::InterArray<int>();
       uglb_created = true;
     }
 
-    ugub = (ESMCI::InterfaceInt *)ungriddedUBound;
+    ugub = (ESMCI::InterArray<int> *)ungriddedUBound;
     if (present(ugub)) {
       if(ugub->dimCount != 1){
          ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
@@ -688,7 +688,7 @@ namespace ESMCI {
       }
       ugub_present = 1;
     } else {
-      ugub = new ESMCI::InterfaceInt();
+      ugub = new ESMCI::InterArray<int>();
       ugub_created = true;
     }
 
@@ -761,9 +761,9 @@ namespace ESMCI {
 // !ARGUMENTS:
     ESMC_LocStream *locstream, 
     ESMC_ArraySpec arrayspec,
-    ESMC_InterfaceInt *gridToFieldMap, 
-    ESMC_InterfaceInt *ungriddedLBound, 
-    ESMC_InterfaceInt *ungriddedUBound, 
+    ESMC_InterArrayInt *gridToFieldMap, 
+    ESMC_InterArrayInt *ungriddedLBound, 
+    ESMC_InterArrayInt *ungriddedUBound, 
     const char *name,  
     int *rc) {           // out - return code
 //
@@ -786,9 +786,9 @@ namespace ESMCI {
     gtfm_created = false;
     uglb_created = false;
     ugub_created = false;
-    ESMCI::InterfaceInt *gtfm, *uglb, *ugub;
+    ESMCI::InterArray<int> *gtfm, *uglb, *ugub;
 
-    gtfm = (ESMCI::InterfaceInt *)gridToFieldMap;
+    gtfm = (ESMCI::InterArray<int> *)gridToFieldMap;
     if (present(gtfm)) {
       if(gtfm->dimCount != 1){
          ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
@@ -797,11 +797,11 @@ namespace ESMCI {
       }
       gtfm_present = 1;
     } else {
-      gtfm = new ESMCI::InterfaceInt();
+      gtfm = new ESMCI::InterArray<int>();
       gtfm_created = true;
     }
 
-    uglb = (ESMCI::InterfaceInt *)ungriddedLBound;
+    uglb = (ESMCI::InterArray<int> *)ungriddedLBound;
     if (present(uglb)) {
       if(uglb->dimCount != 1){
          ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
@@ -811,11 +811,11 @@ namespace ESMCI {
       }
       uglb_present = 1;
     } else {
-      uglb = new ESMCI::InterfaceInt();
+      uglb = new ESMCI::InterArray<int>();
       uglb_created = true;
     }
 
-    ugub = (ESMCI::InterfaceInt *)ungriddedUBound;
+    ugub = (ESMCI::InterArray<int> *)ungriddedUBound;
     if (present(ugub)) {
       if(ugub->dimCount != 1){
          ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
@@ -826,7 +826,7 @@ namespace ESMCI {
       }
       ugub_present = 1;
     } else {
-      ugub = new ESMCI::InterfaceInt();
+      ugub = new ESMCI::InterArray<int>();
       ugub_created = true;
     }
 
@@ -904,9 +904,9 @@ namespace ESMCI {
 // !ARGUMENTS:
     ESMC_LocStream *locstream, 
     ESMC_TypeKind_Flag typekind, 
-    ESMC_InterfaceInt *gridToFieldMap, 
-    ESMC_InterfaceInt *ungriddedLBound, 
-    ESMC_InterfaceInt *ungriddedUBound, 
+    ESMC_InterArrayInt *gridToFieldMap, 
+    ESMC_InterArrayInt *ungriddedLBound, 
+    ESMC_InterArrayInt *ungriddedUBound, 
     const char *name,  
     int *rc) {           // out - return code
 //
@@ -929,9 +929,9 @@ namespace ESMCI {
     gtfm_created = false;
     uglb_created = false;
     ugub_created = false;
-    ESMCI::InterfaceInt *gtfm, *uglb, *ugub;
+    ESMCI::InterArray<int> *gtfm, *uglb, *ugub;
 
-    gtfm = (ESMCI::InterfaceInt *)gridToFieldMap;
+    gtfm = (ESMCI::InterArray<int> *)gridToFieldMap;
     if (present(gtfm)) {
       if(gtfm->dimCount != 1){
          ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
@@ -940,11 +940,11 @@ namespace ESMCI {
       }
       gtfm_present = 1;
     } else {
-      gtfm = new ESMCI::InterfaceInt();
+      gtfm = new ESMCI::InterArray<int>();
       gtfm_created = true;
     }
 
-    uglb = (ESMCI::InterfaceInt *)ungriddedLBound;
+    uglb = (ESMCI::InterArray<int> *)ungriddedLBound;
     if (present(uglb)) {
       if(uglb->dimCount != 1){
          ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
@@ -954,11 +954,11 @@ namespace ESMCI {
       }
       uglb_present = 1;
     } else {
-      uglb = new ESMCI::InterfaceInt();
+      uglb = new ESMCI::InterArray<int>();
       uglb_created = true;
     }
 
-    ugub = (ESMCI::InterfaceInt *)ungriddedUBound;
+    ugub = (ESMCI::InterArray<int> *)ungriddedUBound;
     if (present(ugub)) {
       if(ugub->dimCount != 1){
          ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
@@ -969,7 +969,7 @@ namespace ESMCI {
       }
       ugub_present = 1;
     } else {
-      ugub = new ESMCI::InterfaceInt();
+      ugub = new ESMCI::InterArray<int>();
       ugub_created = true;
     }
 
@@ -1155,8 +1155,8 @@ namespace ESMCI {
 // !ARGUMENTS:
   Field *field,
   int *localDe,
-  ESMCI::InterfaceInt *exLB,
-  ESMCI::InterfaceInt *exUB){
+  ESMCI::InterArray<int> *exLB,
+  ESMCI::InterArray<int> *exUB){
 
 // !DESCRIPTION:
 //      ESMF routine to return bounds from the Field.
@@ -1336,8 +1336,8 @@ namespace ESMCI {
 // !ARGUMENTS:
     Field *fieldpsrc, 
     Field *fieldpdst, 
-    ESMC_InterfaceInt *srcMaskValues, 
-    ESMC_InterfaceInt *dstMaskValues, 
+    ESMC_InterArrayInt *srcMaskValues, 
+    ESMC_InterArrayInt *dstMaskValues, 
     RouteHandle **routehandlep, 
     ESMC_RegridMethod_Flag *regridMethod, 
     ESMC_PoleMethod_Flag *polemethod,
@@ -1360,13 +1360,13 @@ namespace ESMCI {
     bool sff_created, dff_created;
     sff_created = false;
     dff_created = false;
-    ESMCI::InterfaceInt *smv, *dmv;
+    ESMCI::InterArray<int> *smv, *dmv;
     ESMCI::Field *sff, *dff;
     int *srcMaskArray,*dstMaskArray;
     int srcMaskLen,dstMaskLen;
 
 
-    smv = (ESMCI::InterfaceInt *)srcMaskValues;
+    smv = (ESMCI::InterArray<int> *)srcMaskValues;
     if (present(smv)) {
       if(smv->dimCount != 1){
          ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
@@ -1380,7 +1380,7 @@ namespace ESMCI {
       srcMaskLen=0;
     }
  
-    dmv = (ESMCI::InterfaceInt *)dstMaskValues;
+    dmv = (ESMCI::InterArray<int> *)dstMaskValues;
     if (present(dmv)) {
       if(dmv->dimCount != 1){
          ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,

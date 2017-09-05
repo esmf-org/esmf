@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2016, University Corporation for Atmospheric Research,
+! Copyright 2002-2017, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -18,13 +18,13 @@ program ESMF_IOGridCompUTest
 !
 !==============================================================================
 !BOP
-! !PROGRAM: ESMF_IOGridCompUTest - IO GridComp Unit Tests
+! !PROGRAM: ESMF_IOGridCompUTest - I/O GridComp Unit Tests
 !
 ! !DESCRIPTION:
 !
-! The code in this file drives F90 IO GridComp unit tests.
+! The code in this file drives F90 I/O GridComp unit tests.
 ! The companion file ESMF\_IO.F90 contains the definitions for the
-! IO methods.
+! I/O methods.
 !
 !-----------------------------------------------------------------------------
 ! !USES:

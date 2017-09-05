@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2016, University Corporation for Atmospheric Research, 
+// Copyright 2002-2017, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -52,13 +52,13 @@ typedef struct{
 
 
 //------------------------------------------------------------------------------
-//TODO: InterfaceInt should be passed by value when ticket 3613642 is resolved
+//TODO: InterArray should be passed by value when ticket 3613642 is resolved
 //BOP
 // !IROUTINE: ESMC_GridCreateNoPeriDim - Create a Grid with no periodic dimensions
 //
 // !INTERFACE:
 ESMC_Grid ESMC_GridCreateNoPeriDim(
-  ESMC_InterfaceInt *maxIndex,            // in
+  ESMC_InterArrayInt *maxIndex,           // in
   enum ESMC_CoordSys_Flag *coordSys,      // in
   enum ESMC_TypeKind_Flag *coordTypeKind, // in
   enum ESMC_IndexFlag *indexflag,         // in
@@ -92,13 +92,13 @@ ESMC_Grid ESMC_GridCreateNoPeriDim(
 //-----------------------------------------------------------------------------
 
 //------------------------------------------------------------------------------
-//TODO: InterfaceInt should be passed by value when ticket 3613642 is resolved
+//TODO: InterArray should be passed by value when ticket 3613642 is resolved
 //BOP
 // !IROUTINE: ESMC_GridCreate1PeriDim - Create a Grid with 1 periodic dimension
 //
 // !INTERFACE:
 ESMC_Grid ESMC_GridCreate1PeriDim(
-  ESMC_InterfaceInt *maxIndex,            // in
+  ESMC_InterArrayInt *maxIndex,           // in
   int *periodicDim,                       // in
   int *poleDim,                           // in
   enum ESMC_CoordSys_Flag *coordSys,      // in
@@ -146,16 +146,91 @@ ESMC_Grid ESMC_GridCreate1PeriDim(
 //-----------------------------------------------------------------------------
 
 //------------------------------------------------------------------------------
+//TODO: InterArray should be passed by value when ticket 3613642 is resolved
+//BOP
+// !IROUTINE: ESMC_GridCreateCubedSphere - Create a cubed sphere Grid
+//
+// !INTERFACE:
+ESMC_Grid ESMC_GridCreateCubedSphere(
+  int *tilesize,                      // in
+  ESMC_InterArrayInt *regDecompPTile, // in
+  //ESMC_InterArrayInt *decompFlagPTile,  // in
+  //ESMC_InterArrayInt *deLabelList,    // in
+  //ESMC_DELayout *delayout,            // in
+  ESMC_InterArrayInt *staggerLocList,   // in
+  const char *name,                   // in
+  int *rc);                           // out
+// !RETURN VALUE:
+//  type(ESMC_Grid)
+//
+// !DESCRIPTION:
+//
+//  Create a six-tile {\tt ESMC\_Grid} for a cubed sphere grid using regular
+//  decomposition.  Each tile can have different decomposition. The grid
+//  coordinates are generated based on the algorithm used by GEOS-5. The tile
+//  resolution is defined by tileSize.
+//
+//  The arguments are:
+//  \begin{description}
+//  \item[tilesize]
+//      The number of elements on each side of the tile of the cubed sphere grid.
+//  \item[regDecompPTile]
+//      List of DE counts for each dimension. The second index steps through
+//      the tiles. The total {\tt deCount} is determined as the sum over
+//      the products of {\tt regDecompPTile} elements for each tile.
+//      By default every tile is decomposed in the same way.  If the total
+//      PET count is less than 6, one tile will be assigned to one DE and the DEs
+//      will be assigned to PETs sequentially, therefore, some PETs may have
+//      more than one DE. If the total PET count is greater than 6, the total
+//      number of DEs will be a multiple of 6 and less than or equal to the total
+//      PET count. For instance, if the total PET count is 16, the total DE count
+//      will be 12 with each tile decomposed into 1x2 blocks. The 12 DEs are mapped
+//      to the first 12 PETs and the remaining 4 PETs have no DEs locally, unless
+//      an optional {\tt delayout} is provided.
+//  \item[staggerLocList]
+//      The list of stagger locations to fill with coordinates. Only {\tt ESMF\_STAGGERLOC\_CENTER} and
+//      {\tt ESMF\_STAGGERLOC\_CORNER} are supported. If not present, no coordinates will be added or filled.
+//  \item[name]
+//      The name of the {\tt ESMC\_Grid}.
+//  \item[rc]
+//      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+//  \end{description}
+//
+//EOP
+//-----------------------------------------------------------------------------
+
+// these ones are not yet operations
+
+//  \item[decompFlagPTile]
+//      List of decomposition flags indicating how each dimension of each
+//      tile is to be divided between the DEs. The default setting
+//      is {\tt ESMC\_DECOMP\_BALANCED} in all dimensions for all tiles.
+//      See section \ref{const:decompflag} for a list of valid decomposition
+//      flag options. The second index indicates the tile number.
+//  \item[deLabelList]
+//      List assigning DE labels to the default sequence of DEs. The default
+//      sequence is given by the column major order of the {\tt regDecompPTile}
+//      elements in the sequence as they appear following the tile index.
+//  \item[delayout]
+//      Optional {\tt ESMC\_DELayout} object to be used. By default a new
+//      DELayout object will be created with as many DEs as there are PETs,
+//      or tiles, which ever is greater. If a DELayout object is specified,
+//      the number of DEs must match {\tt regDecompPTile}, if present. In the
+//      case that {\tt regDecompPTile} was not specified, the {\tt deCount}
+//      must be at least that of the default DELayout. The
+//      {\tt regDecompPTile} will be constructed accordingly.
+
+//------------------------------------------------------------------------------
 //BOP
 // !IROUTINE: ESMC_GridCreateFromFile - Create a Grid from a NetCDF file specification.
 //
 // !INTERFACE:
 ESMC_Grid ESMC_GridCreateFromFile(const char *filename, int fileTypeFlag, 
-				  int *regDecomp, int *decompflag,
-				  int *isSphere, int *addCornerStagger,
-				  int *addUserArea, enum ESMC_IndexFlag *indexflag,
-				  int *addMask, const char *varname,
-				  const char **coordNames, int *rc);
+                  int *regDecomp, int *decompflag,
+                  int *isSphere, int *addCornerStagger,
+                  int *addUserArea, enum ESMC_IndexFlag *indexflag,
+                  int *addMask, const char *varname,
+                  const char **coordNames, int *rc);
 // !RETURN VALUE:
 //  type(ESMC_Grid)
 //
@@ -262,8 +337,7 @@ int ESMC_GridAddItem(
 //  \item[itemflag]
 //    The grid item to add.
 //  \item[staggerloc]
-//    The stagger location to add.  If not present, defaults to 
-//    ESMC\_STAGGERLOC\_CENTER.
+//    The stagger location to add.
 //  \end{description}
 //
 //EOP
@@ -278,6 +352,7 @@ void * ESMC_GridGetItem(
   ESMC_Grid grid,                         // in
   enum ESMC_GridItem_Flag itemflag,       // in
   enum ESMC_StaggerLoc staggerloc,        // in
+  int *localDE,                           // in
   int *rc                                 // out
 );
 
@@ -294,8 +369,9 @@ void * ESMC_GridGetItem(
 //  \item[itemflag]
 //    The grid item to add.
 //  \item[staggerloc]
-//    The stagger location to add.  If not present, defaults to 
-//    ESMC\_STAGGERLOC\_CENTER.
+//    The stagger location to add.
+//  \item[localDE]
+//    The local decompositional element. If not present, defaults to 0.
 //  \item[rc]
 //  Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
 //  \end{description}
@@ -324,8 +400,7 @@ int ESMC_GridAddCoord(
 //  \item[grid]
 //    Grid object to which the coordinates will be added
 //  \item[staggerloc]
-//    The stagger location to add.  If not present, defaults to 
-//    ESMC\_STAGGERLOC\_CENTER.
+//    The stagger location to add.
 //  \end{description}
 //
 //EOP
@@ -340,6 +415,7 @@ void * ESMC_GridGetCoord(
   ESMC_Grid grid,                         // in
   int coordDim,                           // in
   enum ESMC_StaggerLoc staggerloc,        // in
+  int *localDE,
   int *exclusiveLBound,                   // out
   int *exclusiveUBound,                   // out
   int *rc                                 // out
@@ -358,8 +434,9 @@ void * ESMC_GridGetCoord(
 //  \item[coordDim]
 //    The coordinate dimension from which to get the data.
 //  \item[staggerloc]
-//    The stagger location to add.  If not present, defaults to 
-//    ESMC\_STAGGERLOC\_CENTER.
+//    The stagger location to add.
+//  \item[localDE]
+//    The local decompositional element. If not present, defaults to 0.
 //  \item[exclusiveLBound]
 //    Upon return this holds the lower bounds of the exclusive region. This bound
 //    must be allocated to be of size equal to the coord dimCount.  
@@ -381,6 +458,7 @@ void * ESMC_GridGetCoord(
 int ESMC_GridGetCoordBounds(
   ESMC_Grid grid,                         // in
   enum ESMC_StaggerLoc staggerloc,        // in
+  int *localDE,                           // in
   int *exclusiveLBound,                   // out
   int *exclusiveUBound,                   // out
   int *rc                                 // out
@@ -397,8 +475,9 @@ int ESMC_GridGetCoordBounds(
 //  \item[grid]
 //    Grid object from which to obtain the coordinates.
 //  \item[staggerloc]
-//    The stagger location to add.  If not present, defaults to 
-//    ESMC\_STAGGERLOC\_CENTER.
+//    The stagger location to add.
+//  \item[localDE]
+//    The local decompositional element. If not present, defaults to 0.
 //  \item[exclusiveLBound]
 //    Upon return this holds the lower bounds of the exclusive region. This bound
 //    must be allocated to be of size equal to the coord dimCount.  
@@ -435,8 +514,7 @@ int ESMC_GridWrite(
 //   \item [grid]
 //     The grid.
 //   \item[staggerloc]
-//     The stagger location to add.  If not present, defaults to 
-//     ESMC\_STAGGERLOC\_CENTER.
+//     The stagger location to add.
 //   \item[filename]
 //     The name of the output file.
 //   \end{description}

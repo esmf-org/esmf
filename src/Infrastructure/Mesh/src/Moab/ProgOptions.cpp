@@ -9,8 +9,9 @@
 #include <assert.h>
 #include <string.h>
 
+#include "moab/MOABConfig.h"
 #include "moab/ProgOptions.hpp"
-#ifdef USE_MPI
+#ifdef MOAB_HAVE_MPI
 # include "moab_mpi.h"
 #endif
 
@@ -68,7 +69,7 @@ public:
 };
 
 ProgOptions::ProgOptions( const std::string& helpstring, const std::string& briefhelp ) :
-    expect_optional_args(false)
+    expect_optional_args(false), optional_args_position(0), max_optional_args(0)
 {
   brief_help = briefhelp;
   if (!helpstring.empty())
@@ -427,7 +428,7 @@ bool parse_int_list( const char* string, std::vector<int>& results )
 static
 std::string do_rank_subst( const std::string& s )
 {
-#ifndef USE_MPI
+#ifndef MOAB_HAVE_MPI
   return s;
 #else
   int rank, size;
@@ -893,7 +894,7 @@ void ProgOptions::write_man_page( std::ostream& s )
     if (!it->first)
       continue;
     
-    if (!expect_optional_args || (it - arg_help_strings.begin()) != optional_args_position)
+    if (!expect_optional_args || (unsigned)(it - arg_help_strings.begin()) != optional_args_position)
       s << it->first->longname << ' ';
     else if (1 == max_optional_args)
       s << '[' << it->first->longname << "] ";

@@ -1,7 +1,7 @@
 // $Id: ESMCI_MeshRedist.C,v 1.23 2012/01/06 20:17:51 svasquez Exp $
 //
 // Earth System Modeling Framework
-// Copyright 2002-2016, University Corporation for Atmospheric Research, 
+// Copyright 2002-2017, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -1097,6 +1097,13 @@ namespace ESMCI {
                                  MeshObj::ELEMENT, scoord->GetContext(), scoord->dim());
     }
 
+    MEField<> *scoord_orig = src_mesh->GetField("orig_coordinates");
+    if (scoord_orig != NULL) {
+      output_mesh->RegisterField("orig_coordinates", scoord_orig->GetMEFamily(),
+                                 MeshObj::ELEMENT, scoord_orig->GetContext(), scoord_orig->dim());
+    }
+
+
     MEField<> *smask = src_mesh->GetField("mask");
     if (smask != NULL) {
       output_mesh->RegisterField("mask", smask->GetMEFamily(),
@@ -1139,6 +1146,17 @@ namespace ESMCI {
        MeshObj::ELEMENT, src_elem_frac->GetContext(), src_elem_frac->dim());
     }
 
+    MEField<> *scoord_elem = src_mesh->GetField("elem_coordinates");
+    if (scoord_elem != NULL) {
+      output_mesh->RegisterField("elem_coordinates", scoord_elem->GetMEFamily(),
+                                 MeshObj::ELEMENT, scoord_elem->GetContext(), scoord_elem->dim());
+    }
+
+    MEField<> *scoord_orig_elem = src_mesh->GetField("elem_orig_coordinates");
+    if (scoord_orig_elem != NULL) {
+      output_mesh->RegisterField("elem_orig_coordinates", scoord_orig_elem->GetMEFamily(),
+                                 MeshObj::ELEMENT, scoord_orig_elem->GetContext(), scoord_orig_elem->dim());
+    }
   }
 
 
@@ -1339,7 +1357,7 @@ namespace ESMCI {
   // Pack up and send fields from source to dest mesh using stod_comm
   void send_mesh_fields(Mesh *src_mesh, Mesh *dst_mesh, CommReg &stod_comm) {
     int num_snd=0;
-    MEField<> *snd[7],*rcv[7];
+    MEField<> *snd[20],*rcv[20];
 
     MEField<> *dc = src_mesh->GetCoordField();
     MEField<> *dc_r = dst_mesh->GetCoordField();
@@ -1348,6 +1366,17 @@ namespace ESMCI {
     snd[num_snd]=dc;
     rcv[num_snd]=dc_r;
     num_snd++;            
+
+    // Do original coordinates if necessary
+    MEField<> *doc = src_mesh->GetField("orig_coordinates");
+    if (doc != NULL) {
+      MEField<> *doc_r = dst_mesh->GetField("orig_coordinates");
+
+      // load coord fields
+      snd[num_snd]=doc;
+      rcv[num_snd]=doc_r;
+      num_snd++;            
+    }
 
     // Do masks if necessary
     MEField<> *dm = src_mesh->GetField("mask");
@@ -1412,6 +1441,28 @@ namespace ESMCI {
       // load mask fields
       snd[num_snd]=def;
       rcv[num_snd]=def_r;
+      num_snd++;            
+    }
+
+    // Do elem original coordinates if necessary
+    MEField<> *dec = src_mesh->GetField("elem_coordinates");
+    if (dec != NULL) {
+      MEField<> *dec_r = dst_mesh->GetField("elem_coordinates");
+
+      // load coord fields
+      snd[num_snd]=dec;
+      rcv[num_snd]=dec_r;
+      num_snd++;            
+    }
+
+    // Do elem original coordinates if necessary
+    MEField<> *doec = src_mesh->GetField("elem_orig_coordinates");
+    if (doec != NULL) {
+      MEField<> *doec_r = dst_mesh->GetField("elem_orig_coordinates");
+
+      // load coord fields
+      snd[num_snd]=doec;
+      rcv[num_snd]=doec_r;
       num_snd++;            
     }
 

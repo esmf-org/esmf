@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2016, University Corporation for Atmospheric Research, 
+! Copyright 2002-2017, University Corporation for Atmospheric Research, 
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 ! Laboratory, University of Michigan, National Centers for Environmental 
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -414,9 +414,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !EOP
 !------------------------------------------------------------------------------
-    integer                 :: localrc      ! local return code
-    type(ESMF_InterfaceInt)       :: computationalLWidthArg ! helper variable
-    type(ESMF_InterfaceInt)       :: computationalUWidthArg ! helper variable
+    integer                 :: localrc                ! local return code
+    type(ESMF_InterArray)   :: computationalLWidthArg ! helper variable
+    type(ESMF_InterArray)   :: computationalUWidthArg ! helper variable
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
@@ -434,11 +434,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! Deal with (optional) array arguments
     computationalLWidthArg = &
-      ESMF_InterfaceIntCreate(farray2D=computationalLWidth, rc=localrc)
+      ESMF_InterArrayCreate(farray2D=computationalLWidth, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     computationalUWidthArg = &
-      ESMF_InterfaceIntCreate(farray2D=computationalUWidth, rc=localrc)
+      ESMF_InterArrayCreate(farray2D=computationalUWidth, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -449,10 +449,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ESMF_CONTEXT, rcToReturn=rc)) return
     
     ! Garbage collection
-    call ESMF_InterfaceIntDestroy(computationalLWidthArg, rc=localrc)
+    call ESMF_InterArrayDestroy(computationalLWidthArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(computationalUWidthArg, rc=localrc)
+    call ESMF_InterArrayDestroy(computationalUWidthArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -959,7 +959,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     on some systems too large a value may lead to performance degradation,
 !     or runtime errors.
 !
-!     Note that the pipeline depth has no affect on the bit-for-bit
+!     Note that the pipeline depth has no effect on the bit-for-bit
 !     reproducibility of the results. However, it may affect the performance
 !     reproducibility of the exchange.
 !
@@ -1018,7 +1018,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer                         :: localrc            ! local return code
     integer(ESMF_KIND_I4), pointer  :: opt_factorList(:)  ! helper variable
     integer                         :: len_factorList     ! helper variable
-    type(ESMF_InterfaceInt)         :: factorIndexListArg ! helper variable
+    type(ESMF_InterArray)           :: factorIndexListArg ! helper variable
     integer                         :: tupleSize, i       ! helper variable
     integer, allocatable            :: transposeFIL(:,:)  ! helper variable
     type(ESMF_Logical)              :: opt_ignoreUnmatched  ! helper variable
@@ -1035,7 +1035,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     len_factorList = size(factorList)
     opt_factorList => factorList
     factorIndexListArg = &
-      ESMF_InterfaceIntCreate(farray2D=factorIndexList, rc=localrc)
+      ESMF_InterArrayCreate(farray2D=factorIndexList, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     
@@ -1051,7 +1051,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ESMF_CONTEXT, rcToReturn=rc)) return
     
     ! Garbage collection
-    call ESMF_InterfaceIntDestroy(factorIndexListArg, rc=localrc)
+    call ESMF_InterArrayDestroy(factorIndexListArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -1080,7 +1080,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       endif
       ! wrap transposeFIL
       factorIndexListArg = &
-        ESMF_InterfaceIntCreate(farray2D=transposeFIL, rc=localrc)
+        ESMF_InterArrayCreate(farray2D=transposeFIL, rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
       ! Call into the C++ interface, which will sort out optional arguments
@@ -1090,7 +1090,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
       ! Garbage collection
-      call ESMF_InterfaceIntDestroy(factorIndexListArg, rc=localrc)
+      call ESMF_InterArrayDestroy(factorIndexListArg, rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
       deallocate(transposeFIL)
@@ -1137,7 +1137,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer                         :: localrc            ! local return code
     integer(ESMF_KIND_I8), pointer  :: opt_factorList(:)  ! helper variable
     integer                         :: len_factorList     ! helper variable
-    type(ESMF_InterfaceInt)         :: factorIndexListArg ! helper variable
+    type(ESMF_InterArray)           :: factorIndexListArg ! helper variable
     integer                         :: tupleSize, i       ! helper variable
     integer, allocatable            :: transposeFIL(:,:)  ! helper variable
     type(ESMF_Logical)              :: opt_ignoreUnmatched  ! helper variable
@@ -1154,7 +1154,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     len_factorList = size(factorList)
     opt_factorList => factorList
     factorIndexListArg = &
-      ESMF_InterfaceIntCreate(farray2D=factorIndexList, rc=localrc)
+      ESMF_InterArrayCreate(farray2D=factorIndexList, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -1170,7 +1170,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ESMF_CONTEXT, rcToReturn=rc)) return
     
     ! Garbage collection
-    call ESMF_InterfaceIntDestroy(factorIndexListArg, rc=localrc)
+    call ESMF_InterArrayDestroy(factorIndexListArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -1199,7 +1199,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       endif
       ! wrap transposeFIL
       factorIndexListArg = &
-        ESMF_InterfaceIntCreate(farray2D=transposeFIL, rc=localrc)
+        ESMF_InterArrayCreate(farray2D=transposeFIL, rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
       ! Call into the C++ interface, which will sort out optional arguments
@@ -1209,7 +1209,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
       ! Garbage collection
-      call ESMF_InterfaceIntDestroy(factorIndexListArg, rc=localrc)
+      call ESMF_InterArrayDestroy(factorIndexListArg, rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
       deallocate(transposeFIL)
@@ -1253,13 +1253,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !EOPI
 !------------------------------------------------------------------------------
-    integer                         :: localrc            ! local return code
-    real(ESMF_KIND_R4), pointer     :: opt_factorList(:)  ! helper variable
-    integer                         :: len_factorList     ! helper variable
-    type(ESMF_InterfaceInt)         :: factorIndexListArg ! helper variable
-    integer                         :: tupleSize, i       ! helper variable
-    integer, allocatable            :: transposeFIL(:,:)  ! helper variable
-    type(ESMF_Logical)              :: opt_ignoreUnmatched  ! helper variable
+    integer                       :: localrc            ! local return code
+    real(ESMF_KIND_R4), pointer   :: opt_factorList(:)  ! helper variable
+    integer                       :: len_factorList     ! helper variable
+    type(ESMF_InterArray)         :: factorIndexListArg ! helper variable
+    integer                       :: tupleSize, i       ! helper variable
+    integer, allocatable          :: transposeFIL(:,:)  ! helper variable
+    type(ESMF_Logical)            :: opt_ignoreUnmatched  ! helper variable
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
@@ -1273,7 +1273,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     len_factorList = size(factorList)
     opt_factorList => factorList
     factorIndexListArg = &
-      ESMF_InterfaceIntCreate(farray2D=factorIndexList, rc=localrc)
+      ESMF_InterArrayCreate(farray2D=factorIndexList, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -1289,7 +1289,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ESMF_CONTEXT, rcToReturn=rc)) return
     
     ! Garbage collection
-    call ESMF_InterfaceIntDestroy(factorIndexListArg, rc=localrc)
+    call ESMF_InterArrayDestroy(factorIndexListArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -1318,7 +1318,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       endif
       ! wrap transposeFIL
       factorIndexListArg = &
-        ESMF_InterfaceIntCreate(farray2D=transposeFIL, rc=localrc)
+        ESMF_InterArrayCreate(farray2D=transposeFIL, rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
       ! Call into the C++ interface, which will sort out optional arguments
@@ -1328,7 +1328,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
       ! Garbage collection
-      call ESMF_InterfaceIntDestroy(factorIndexListArg, rc=localrc)
+      call ESMF_InterArrayDestroy(factorIndexListArg, rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
       deallocate(transposeFIL)
@@ -1372,13 +1372,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !EOPI
 !------------------------------------------------------------------------------
-    integer                         :: localrc            ! local return code
-    real(ESMF_KIND_R8), pointer     :: opt_factorList(:)  ! helper variable
-    integer                         :: len_factorList     ! helper variable
-    type(ESMF_InterfaceInt)         :: factorIndexListArg ! helper variable
-    integer                         :: tupleSize, i       ! helper variable
-    integer, allocatable            :: transposeFIL(:,:)  ! helper variable
-    type(ESMF_Logical)              :: opt_ignoreUnmatched  ! helper variable
+    integer                       :: localrc            ! local return code
+    real(ESMF_KIND_R8), pointer   :: opt_factorList(:)  ! helper variable
+    integer                       :: len_factorList     ! helper variable
+    type(ESMF_InterArray)         :: factorIndexListArg ! helper variable
+    integer                       :: tupleSize, i       ! helper variable
+    integer, allocatable          :: transposeFIL(:,:)  ! helper variable
+    type(ESMF_Logical)            :: opt_ignoreUnmatched  ! helper variable
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
@@ -1392,7 +1392,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     len_factorList = size(factorList)
     opt_factorList => factorList
     factorIndexListArg = &
-      ESMF_InterfaceIntCreate(farray2D=factorIndexList, rc=localrc)
+      ESMF_InterArrayCreate(farray2D=factorIndexList, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -1408,7 +1408,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ESMF_CONTEXT, rcToReturn=rc)) return
     
     ! Garbage collection
-    call ESMF_InterfaceIntDestroy(factorIndexListArg, rc=localrc)
+    call ESMF_InterArrayDestroy(factorIndexListArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -1437,7 +1437,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       endif
       ! wrap transposeFIL
       factorIndexListArg = &
-        ESMF_InterfaceIntCreate(farray2D=transposeFIL, rc=localrc)
+        ESMF_InterArrayCreate(farray2D=transposeFIL, rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
       ! Call into the C++ interface, which will sort out optional arguments
@@ -1447,7 +1447,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
       ! Garbage collection
-      call ESMF_InterfaceIntDestroy(factorIndexListArg, rc=localrc)
+      call ESMF_InterArrayDestroy(factorIndexListArg, rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
       deallocate(transposeFIL)
@@ -1464,7 +1464,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !------------------------------------------------------------------------------
 
 
-!------------------------------------------------------------------------------
+! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ArraySMMStoreNF()"
 !BOP
@@ -1613,7 +1613,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     on some systems too large a value may lead to performance degradation,
 !     or runtime errors.
 !
-!     Note that the pipeline depth has no affect on the bit-for-bit
+!     Note that the pipeline depth has no effect on the bit-for-bit
 !     reproducibility of the results. However, it may affect the performance
 !     reproducibility of the exchange.
 !
@@ -1683,11 +1683,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(rc)) rc = ESMF_SUCCESS
 
   end subroutine ESMF_ArraySMMStoreNF
-
 !------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ArraySMMStoreFromFile"
-
 !BOP
 ! !IROUTINE: ESMF_ArraySMMStore - Precompute sparse matrix multiplication using factors read from file.
 !
@@ -1702,15 +1703,16 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_Array),       intent(inout)           :: dstArray
     character(len=*),       intent(in)              :: filename
     type(ESMF_RouteHandle), intent(inout)           :: routehandle
-    type(ESMF_KeywordEnforcer),            optional :: keywordEnforcer
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     logical,                intent(in),    optional :: ignoreUnmatchedIndices
     integer,                intent(inout), optional :: srcTermProcessing
     integer,                intent(inout), optional :: pipeLineDepth
     type(ESMF_RouteHandle), intent(inout), optional :: transposeRoutehandle
     integer,                intent(out),   optional :: rc
-
-!-------------------------------------------------------------------------------
+!
 ! !DESCRIPTION:
+!
+! Compute an {\tt ESMF\_RouteHandle} using factors read from file.
 !
 ! The arguments are:
 !
@@ -1730,7 +1732,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !       must be one-dimensionsal with dimension "n\_s".
 !
 ! \item [routehandle]
-!       Handle to the precomputed {\tt ESMF\_RouteHandle}.
+!       Handle to the {\tt ESMF\_RouteHandle}.
 !
 !   \item [{[ignoreUnmatchedIndices]}]
 !     A logical flag that affects the behavior for when sequence indices
@@ -1779,7 +1781,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     on some systems too large a value may lead to performance degradation,
 !     or runtime errors.
 !
-!     Note that the pipeline depth has no affect on the bit-for-bit
+!     Note that the pipeline depth has no effect on the bit-for-bit
 !     reproducibility of the results. However, it may affect the performance
 !     reproducibility of the exchange.
 !     The {\tt ESMF\_FieldSMMStore()} method implements an auto-tuning scheme
@@ -1806,13 +1808,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !EOP
 !-------------------------------------------------------------------------------
-
-    ! LOCAL VARIABLES:
     real(ESMF_KIND_R8), dimension(:), allocatable :: factorList
     integer, dimension(:, :), allocatable :: factorIndexList
-    type(ESMF_VM) :: vm
-    integer :: localPet, petCount, localrc, lbPet, ubPet, n_s
-    integer, dimension(:, :), allocatable :: lb, ub
+    integer :: localrc
 
     ! Initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
@@ -1840,14 +1838,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
-    ! ##########################################################################
-
     deallocate(factorList)
     deallocate(factorIndexList)
 
     if (present(rc)) rc = ESMF_SUCCESS
 
   end subroutine ESMF_ArraySMMStoreFromFile
+!------------------------------------------------------------------------------
 
 
 ! -------------------------- ESMF-public method -------------------------------
@@ -1913,14 +1910,16 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !INTERFACE:
   subroutine ESMF_ArrayWrite(array, fileName, keywordEnforcer, &
-     variableName, dimLabels, overwrite, status, timeslice, iofmt, rc)
+      variableName, convention, purpose,  &
+      overwrite, status, timeslice, iofmt, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_Array),           intent(in)            :: array
     character(*),               intent(in)            :: fileName
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     character(*),               intent(in),  optional :: variableName
-    character(*),               intent(in),  optional :: dimLabels(:)
+    character(*),               intent(in),  optional :: convention
+    character(*),               intent(in),  optional :: purpose
     logical,                    intent(in),  optional :: overwrite
     type(ESMF_FileStatus_Flag), intent(in),  optional :: status
     integer,                    intent(in),  optional :: timeslice
@@ -1947,17 +1946,19 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !    The name of the output file to which Array data is written.
 !   \item[{[variableName]}]
 !    Variable name in the output file; default is the "name" of Array.
-!    Use this argument only in the IO format (such as NetCDF) that
-!    supports variable name. If the IO format does not support this 
+!    Use this argument only in the I/O format (such as NetCDF) that
+!    supports variable name. If the I/O format does not support this
 !    (such as binary format), ESMF will return an error code.
-!   \item[{[dimLabels]}]
-!     An array of dimension labels for the Field data in the output file.  Enough
-!     label names must be provided to label each axis; default is
-!     the variable name with {\tt \_dimnnn}, where nnn is the dimension number,
-!     appended.  When using the {\tt timeslice} option, the {\tt time} dimension
-!     is unaffected.  Use this argument only in the IO format (such as NetCDF) that
-!     supports variable and dimension names. If the IO format does not support it
-!     (such as binary format), ESMF will return an error code.
+!   \item[{[convention]}]
+!     Specifies an Attribute package associated with the Array, used to create NetCDF
+!     attributes for the variable in the file.  When this argument is present,
+!     the [{[purpose]}] argument must also be present.  Use this argument only with a NetCDF
+!     I/O format. If binary format is used, ESMF will return an error code.
+!   \item[{[purpose]}]
+!     Specifies an Attribute package associated with the Array, used to create NetCDF
+!     attributes for the variable in the file.  When this argument is present,
+!     the [{[convention]}] argument must also be present.  Use this argument only with a NetCDF
+!     I/O format. If binary format is used, ESMF will return an error code.
 !   \item[{[overwrite]}]
 !    \begin{sloppypar}
 !      A logical flag, the default is .false., i.e., existing Array data may
@@ -1982,7 +1983,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !    \end{sloppypar}
 !   \item[{[timeslice]}]
 !    \begin{sloppypar}
-!    Some IO formats (e.g. NetCDF) support the output of data in form of
+!    Some I/O formats (e.g. NetCDF) support the output of data in form of
 !    time slices.  An unlimited dimension called {\tt time} is defined in the
 !    file variable for this capability.
 !    The {\tt timeslice} argument provides access to the {\tt time} dimension,
@@ -2000,7 +2001,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !    \end{sloppypar}
 !   \item[{[iofmt]}]
 !    \begin{sloppypar}
-!    The IO format.  Please see Section~\ref{opt:iofmtflag} for the list
+!    The I/O format.  Please see Section~\ref{opt:iofmtflag} for the list
 !    of options. If not present, file names with a {\tt .bin} extension will
 !    use {\tt ESMF\_IOFMT\_BIN}, and file names with a {\tt .nc} extension
 !    will use {\tt ESMF\_IOFMT\_NETCDF}.  Other files default to
@@ -2012,16 +2013,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !EOP
 !------------------------------------------------------------------------------
+
     ! Local vars
     integer                    :: localrc           ! local return code
-    integer                    :: len_varName       ! helper variable
-    integer                    :: size_dimLabels    ! helper variable
     type(ESMF_Logical)         :: opt_overwriteflag ! helper variable
     type(ESMF_FileStatus_Flag) :: opt_status        ! helper variable
     type(ESMF_IOFmt_Flag)      :: opt_iofmt         ! helper variable
     integer                    :: file_ext_p
     integer                    :: ndims
-    character                  :: dimLabels_dummy(1)
 
     ! Initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
@@ -2058,42 +2057,21 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       end if
     end if
 
-    ! Get string lengths
-    if (present(variableName)) then
-      len_varName = len_trim (variableName)
-    else
-      len_varName = 0
-    endif
+    ! Attributes
 
-    if (present (dimLabels)) then
-      size_dimlabels = size (dimLabels)
-      call ESMF_ArrayGet (array, dimCount=ndims, rc=localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU,         &
+    if (present (convention) .neqv. present (purpose)) then
+      if (ESMF_LogFoundError (ESMF_RC_ARG_WRONG,  &
+          msg='Both convention and purpose must be specified',  &
           ESMF_CONTEXT, rcToReturn=rc)) return
-
-      if (size_dimlabels < ndims) then
-        if (ESMF_LogFoundError(ESMF_RC_ARG_SIZE,  &
-            msg="size (dimLabels) must be >= number of Array dimensions",  &
-            ESMF_CONTEXT, rcToReturn=rc)) return
-      end if
-    else
-      size_dimlabels = 0
     end if
 
     ! Call into the C++ interface, which will call IO object
-    if (present (dimLabels)) then
-      call c_esmc_arraywrite(array, fileName,                    &
-          variableName, len_varName, dimLabels, size_dimlabels,  &
-          opt_overwriteflag,          &
-          opt_status, timeslice, opt_iofmt, localrc)
-    else
-      call c_esmc_arraywrite(array, fileName,                    &
-          variableName, len_varName, dimLabels_dummy, 0,         &
-          opt_overwriteflag,          &
-          opt_status, timeslice, opt_iofmt, localrc)
-    end if
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU,         &
-      ESMF_CONTEXT, rcToReturn=rc)) return
+    call c_esmc_arraywrite(array, fileName,  &
+        variableName, convention, purpose,  &
+        opt_overwriteflag,          &
+        opt_status, timeslice, opt_iofmt, localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU,  &
+        ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Return successfully
     if (present(rc)) rc = ESMF_SUCCESS

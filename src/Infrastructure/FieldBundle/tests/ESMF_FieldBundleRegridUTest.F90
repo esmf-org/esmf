@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2016, University Corporation for Atmospheric Research,
+! Copyright 2002-2017, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -867,9 +867,9 @@ contains
   !!! Regrid forward from the A grid to the B grid
   ! Regrid store
   call ESMF_FieldBundleRegridStore( &
-	  fieldBundleA, srcMaskValues=(/1,2/), &
+          fieldBundleA, srcMaskValues=(/1,2/), &
           dstFieldBundle=fieldBundleB, &
-	  unmappedaction=ESMF_UNMAPPEDACTION_IGNORE, &
+          unmappedaction=ESMF_UNMAPPEDACTION_IGNORE, &
           routeHandle=routeHandle, &
           regridmethod=ESMF_REGRIDMETHOD_BILINEAR, &
           rc=localrc)

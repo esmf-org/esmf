@@ -1,6 +1,6 @@
 // $Id$
 // Earth System Modeling Framework
-// Copyright 2002-2016, University Corporation for Atmospheric Research, 
+// Copyright 2002-2017, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -16,6 +16,8 @@
 #ifdef ESMF_MOAB
 
 #include <Mesh/include/ESMCI_MBMesh.h>
+
+#include "ESMCI_BBox.h"
 
 #include <iostream>
 
@@ -74,6 +76,7 @@ MBMesh_BBox MBMesh_BBoxParUnion(const MBMesh_BBox &b1);
 
 // Return true if the two boxes have nontrivial intersection
 bool MBMesh_BBoxIntersect(const MBMesh_BBox &b1, const MBMesh_BBox &b2, double tol);
+bool Mixed_BBoxIntersect(const MBMesh_BBox &b1, const BBox &b2, double tol);
 
 // Return true if 
 bool MBMesh_BBoxSubset(const MBMesh_BBox &b1, const MBMesh_BBox &b2);

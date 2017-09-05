@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2016, University Corporation for Atmospheric Research,
+// Copyright 2002-2017, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -320,10 +320,7 @@ extern "C" {
   string comnd = string (command, ESMC_F90lentrim (command, command_l));
   int err = system (comnd.c_str());
   if (rc)
-    if (err == 0)
-      *rc = ESMF_SUCCESS;
-    else
-      *rc = ESMF_FAILURE;
+    *rc = (err == 0) ? ESMF_SUCCESS : ESMF_FAILURE;
 }
 
 //-----------------------------------------------------------------------------

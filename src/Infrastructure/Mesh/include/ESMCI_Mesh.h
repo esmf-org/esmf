@@ -1,6 +1,6 @@
 // $Id$
 // Earth System Modeling Framework
-// Copyright 2002-2016, University Corporation for Atmospheric Research, 
+// Copyright 2002-2017, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -116,7 +116,7 @@ void proxy_build_sym_comm_rel(UInt obj_type);
  */
 void resolve_cspec_delete_owners(UInt obj_type);
 
- ESMCI::PointList *MeshToPointList(ESMC_MeshLoc_Flag meshLoc, ESMCI::InterfaceInt *maskValuesArg, int *rc);
+ ESMCI::PointList *MeshToPointList(ESMC_MeshLoc_Flag meshLoc, ESMCI::InterArray<int> *maskValuesArg, int *rc);
 
   public: 
 // STUFF FOR SPLIT MESH
@@ -126,6 +126,9 @@ void resolve_cspec_delete_owners(UInt obj_type);
  IOField<NodalField> *node_coord;
  std::map<UInt,UInt> split_to_orig_id;
  std::map<UInt,double> split_id_to_frac;
+
+ // Save original dimension
+ int orig_spatial_dim;
 
   private:
 void assign_new_ids();

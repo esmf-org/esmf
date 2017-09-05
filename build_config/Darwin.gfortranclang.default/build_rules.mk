@@ -56,6 +56,7 @@ ifeq ($(ESMF_COMM),mvapich2)
 # Mvapich2 ---------------------------------------------------
 ESMF_F90DEFAULT         = mpif90
 ESMF_CXXDEFAULT         = mpicxx
+ESMF_CXXLINKLIBS       += $(shell $(ESMF_DIR)/scripts/libs.mvapich2f90)
 ESMF_MPIRUNDEFAULT      = mpirun $(ESMF_MPILAUNCHOPTIONS)
 ESMF_MPIMPMDRUNDEFAULT  = mpiexec $(ESMF_MPILAUNCHOPTIONS)
 else
@@ -104,7 +105,7 @@ ESMF_CXXCOMPILER_VERSION    = ${ESMF_CXXCOMPILER} -v --version
 ############################################################
 # Special debug flags
 #
-ESMF_F90OPTFLAG_G       += -Wall -Wextra -Wno-unused -Wno-unused-dummy-argument -fbacktrace
+ESMF_F90OPTFLAG_G       += -Wall -Wno-unused -Wno-unused-dummy-argument -fbacktrace
 ESMF_CXXOPTFLAG_G       += -Wall -Wextra -Wno-unused
 
 ############################################################
@@ -198,26 +199,28 @@ ESMF_F90COMPILEOPTS += -ffree-line-length-none
 ############################################################
 # Determine where clang's libraries are located
 #
-ESMF_LIBSTDCXX := $(shell $(ESMF_CXXCOMPILER) -print-file-name=libstdc++.dylib)
-ifeq ($(ESMF_LIBSTDCXX),libstdc++.dylib)
-ESMF_LIBSTDCXX := $(shell $(ESMF_CXXCOMPILER) -print-file-name=libstdc++.a)
-endif
-ESMF_F90LINKPATHS += -L$(dir $(ESMF_LIBSTDCXX))
+# TODO: The -print-file-name option doesn't seem to work properly yet.
+#ESMF_LIBSTDCXX := $(shell $(ESMF_CXXCOMPILER) -print-file-name=libstdc++.dylib)
+#ifeq ($(ESMF_LIBSTDCXX),libstdc++.dylib)
+#ESMF_LIBSTDCXX := $(shell $(ESMF_CXXCOMPILER) -print-file-name=libstdc++.a)
+#endif
+#ESMF_F90LINKPATHS += -L$(dir $(ESMF_LIBSTDCXX))
 
-ESMF_LIBSTDCXX := $(shell $(ESMF_CXXCOMPILER) -print-file-name=libc++.dylib)
-ifeq ($(ESMF_LIBSTDCXX),libc++.dylib)
-ESMF_LIBSTDCXX := $(shell $(ESMF_CXXCOMPILER) -print-file-name=libc++.a)
-endif
-ESMF_F90LINKPATHS += -L$(dir $(ESMF_LIBSTDCXX))
+#ESMF_LIBCXX := $(shell $(ESMF_CXXCOMPILER) -print-file-name=libc++.dylib)
+#ifeq ($(ESMF_LIBCXX),libc++.dylib)
+#ESMF_LIBCXX := $(shell $(ESMF_CXXCOMPILER) -print-file-name=libc++.a)
+#endif
+#ESMF_F90LINKPATHS += -L$(dir $(ESMF_LIBCXX))
 
 ############################################################
 # Determine where gfortran's libraries are located
 #
-ESMF_LIBGFORTRAN := $(shell $(ESMF_F90COMPILER) -print-file-name=libgfortran.dylib)
-ifeq ($(ESMF_LIBSTDCXX),libgfortran.dylib)
-ESMF_LIBGFORTRAN := $(shell $(ESMF_F90COMPILER) -print-file-name=libgfortran.a)
-endif
-ESMF_CXXLINKPATHS += -L$(dir $(ESMF_LIBGFORTRAN))
+# TODO: The -print-file-name option doesn't seem to work properly yet.
+#ESMF_LIBGFORTRAN := $(shell $(ESMF_F90COMPILER) -print-file-name=libgfortran.dylib)
+#ifeq ($(ESMF_LIBSTDCXX),libgfortran.dylib)
+#ESMF_LIBGFORTRAN := $(shell $(ESMF_F90COMPILER) -print-file-name=libgfortran.a)
+#endif
+#ESMF_CXXLINKPATHS += -L$(dir $(ESMF_LIBGFORTRAN))
 
 ############################################################
 # Blank out variables to prevent rpath encoding
@@ -228,12 +231,12 @@ ESMF_CXXLINKRPATHS      =
 ############################################################
 # Link against libesmf.a using the F90 linker front-end
 #
-ESMF_F90LINKLIBS += -lstdc++
+ESMF_F90LINKLIBS += -lstdc++ -lc++
 
 ############################################################
 # Link against libesmf.a using the C++ linker front-end
 #
-ESMF_CXXLINKLIBS += -lgfortran -lstdc++
+ESMF_CXXLINKLIBS += -lgfortran -lstdc++ -lc++
 
 ############################################################
 # Shared library options

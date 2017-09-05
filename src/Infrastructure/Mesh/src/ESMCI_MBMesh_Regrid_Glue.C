@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2016, University Corporation for Atmospheric Research, 
+// Copyright 2002-2017, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -10,7 +10,7 @@
 //
 //==============================================================================
 
-#define ESMC_FILENAME "ESMCI_Regrid_F.C"
+#define ESMC_FILENAME "ESMCI_MBMesh_Regrid_Glue.C"
 //==============================================================================
 //
 // This file contains the Fortran interface code to link F90 and C++.
@@ -23,7 +23,6 @@
 #ifdef ESMF_MOAB
 
 #include "ESMCI_Macros.h"
-#include "ESMCI_VM.h"
 #include "ESMCI_LogErr.h"
 #include "ESMCI_Grid.h"
 #include "ESMCI_GridToMesh.h"
@@ -38,6 +37,7 @@
 
 #include "Mesh/include/ESMCI_MBMesh_Regrid_Glue.h"
 #include "Mesh/include/ESMCI_MBMesh_Conserve.h"
+#include "Mesh/include/ESMCI_MBMesh_Bilinear.h"
 
 #include <iostream>
 #include <vector>
@@ -54,7 +54,7 @@
 
 using namespace ESMCI;
 
-int calc_regrid_wgts(MBMesh *srcmbmp, MBMesh *dstmbmp, IWeights &wts,
+int calc_regrid_wgts(MBMesh *srcmbmp, MBMesh *dstmbmp, PointList *dstpl, IWeights &wts,
                      int *regridConserve, int *regridMethod, 
                      int *regridPoleType, int *regridPoleNPnts, 
                      int *regridScheme, 
@@ -81,18 +81,17 @@ static void change_wts_to_be_fracarea(Mesh &mesh, int num_entries,
 extern "C" void FTN_X(c_esmc_arraysmmstore)(ESMCI::Array **srcArray,
     ESMCI::Array **dstArray, ESMCI::RouteHandle **routehandle,
     ESMC_TypeKind_Flag *typekind, void *factorList, int *factorListCount,
-    ESMCI::InterfaceInt *factorIndexList, ESMC_Logical *ignoreUnmatched,
+    ESMCI::InterArray<int> *factorIndexList, ESMC_Logical *ignoreUnmatched,
     int *srcTermProcessing, int *pipelineDepth, int *rc);
 
 
 
-void MBMesh_regrid_create(ESMCI::VM **vmpp,
-                     void **meshsrcpp, ESMCI::Array **arraysrcpp,
-                     void **meshdstpp, ESMCI::Array **arraydstpp,
-                     int *regridMethod, 
+void MBMesh_regrid_create(void **meshsrcpp, ESMCI::Array **arraysrcpp, ESMCI::PointList **plsrcpp,
+                     void **meshdstpp, ESMCI::Array **arraydstpp, ESMCI::PointList **pldstpp,
+                     int *regridMethod,
                      int *map_type,
                      int *norm_type,
-                     int *regridPoleType, int *regridPoleNPnts,  
+                     int *regridPoleType, int *regridPoleNPnts,
                      int *regridScheme, 
                      int *unmappedaction, int *_ignoreDegenerate,
                      int *srcTermProcessing, int *pipelineDepth, 
@@ -102,27 +101,24 @@ void MBMesh_regrid_create(ESMCI::VM **vmpp,
                      int*rc) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_regrid_create()" 
-  Trace __trace(" FTN_X(regrid_test)(ESMCI::VM **vmpp, ESMCI::Grid **gridsrcpp, ESMCI::Grid **griddstcpp, int*rc");
-
-
-  ESMCI::VM *vm = *vmpp;
-  ESMCI::Array &srcarray = **arraysrcpp;
-  ESMCI::Array &dstarray = **arraydstpp;
-
-
-
-  int localPet = vm->getLocalPet();
-  int petCount = vm->getPetCount();
+  Trace __trace(" FTN_X(regrid_test)(ESMCI::Grid **gridsrcpp, ESMCI::Grid **griddstcpp, int*rc");
 
   // Get Moab Mesh wrapper
   MBMesh *mbmsrcp=*((MBMesh **)meshsrcpp);
   MBMesh *mbmdstp=*((MBMesh **)meshdstpp);
 
+  // Access Arrays
+  ESMCI::Array &srcarray = **arraysrcpp;
+  ESMCI::Array &dstarray = **arraydstpp;
+
+  // Access PointLists
+  ESMCI::PointList *srcpl = *plsrcpp;
+  ESMCI::PointList *dstpl = *pldstpp;
  
   // Old Regrid conserve turned off for now
   int regridConserve=ESMC_REGRID_CONSERVE_OFF;
 
-#define PROGRESSLOG_off
+#define PROGRESSLOG_on
 #define MEMLOG_off
 
 #ifdef PROGRESSLOG_on
@@ -213,6 +209,7 @@ void MBMesh_regrid_create(ESMCI::VM **vmpp,
           "collapses to a line or point", ESMC_CONTEXT, &localrc)) throw localrc;
       }
     }
+#endif
 #ifdef PROGRESSLOG_on
     ESMC_LogDefault.Write("c_esmc_regrid_create(): Entering weight generation.", ESMC_LOGMSG_INFO);
 #endif
@@ -220,9 +217,6 @@ void MBMesh_regrid_create(ESMCI::VM **vmpp,
 #ifdef MEMLOG_on
   VM::logMemInfo(std::string("RegridCreate2.0"));
 #endif
-#endif
-
-
 
     // Compute Weights matrix
     IWeights wts;
@@ -232,13 +226,13 @@ void MBMesh_regrid_create(ESMCI::VM **vmpp,
 
     // to do NEARESTDTOS just do NEARESTSTOD and invert results
     if (*regridMethod != ESMC_REGRID_METHOD_NEAREST_DST_TO_SRC) { 
-      if(!calc_regrid_wgts(mbmsrcp, mbmdstp, wts, &regridConserve, regridMethod, 
+      if(!calc_regrid_wgts(mbmsrcp, mbmdstp, dstpl, wts, &regridConserve, regridMethod,
                         regridPoleType, regridPoleNPnts, 
                         regridScheme, map_type, &temp_unmappedaction))
         Throw() << "Online regridding error" << std::endl;
     } else {
       int tempRegridMethod=ESMC_REGRID_METHOD_NEAREST_SRC_TO_DST;
-      if(!calc_regrid_wgts(mbmdstp, mbmsrcp, wts, &regridConserve, &tempRegridMethod, 
+      if(!calc_regrid_wgts(mbmdstp, mbmsrcp, dstpl, wts, &regridConserve, &tempRegridMethod,
                         regridPoleType, regridPoleNPnts, 
                         regridScheme, map_type, &temp_unmappedaction))
         Throw() << "Online regridding error" << std::endl;
@@ -324,8 +318,8 @@ void MBMesh_regrid_create(ESMCI::VM **vmpp,
     int *iientries = new int[2*iisize.first]; 
     int larg[2] = {2, iisize.first};
     // Gather the list
-    ESMCI::InterfaceInt ii(iientries, 2, larg);
-    ESMCI::InterfaceInt *iiptr = &ii;
+    ESMCI::InterArray<int> ii(iientries, 2, larg);
+    ESMCI::InterArray<int> *iiptr = &ii;
 
     double *factors = new double[iisize.first];
 
@@ -346,7 +340,8 @@ void MBMesh_regrid_create(ESMCI::VM **vmpp,
           // Construct factor list entry
           iientries[twoi+1] = w.id;  iientries[twoi] = wc.id;
           factors[i] = wc.value;
-          
+
+#define ESMF_REGRID_DEBUG_OUTPUT_WTS_ALL_off
 #ifdef ESMF_REGRID_DEBUG_OUTPUT_WTS_ALL
           printf("d_id=%d  s_id=%d w=%20.17E \n",w.id,wc.id,wc.value);
 #endif          
@@ -383,7 +378,7 @@ void MBMesh_regrid_create(ESMCI::VM **vmpp,
           iientries[twoi+1] = wc.id;  iientries[twoi] = w.id;
           factors[i] = wc.value;
           
-          // printf("d_id=%d  s_id=%d w=%f \n",w.id,wc.id,wc.value);
+          //printf("d_id=%d  s_id=%d w=%f \n",w.id,wc.id,wc.value);
           
           i++;
         } // for j
@@ -523,9 +518,6 @@ void ESMCI_regrid_getiwts(ESMCI::VM **vmpp, Grid **gridpp,
   Trace __trace(" FTN_X(regrid_getiwts)()");
   ESMCI::VM *vm = *vmpp;
   ESMCI::Array &array = **arraypp;
-
-  int localPet = vm->getLocalPet();
-  int petCount = vm->getPetCount();
 
   Mesh &mesh = **meshpp;
   Grid &grid = **gridpp;
@@ -1462,7 +1454,7 @@ static void change_wts_to_be_fracarea(Mesh &mesh, int num_entries,
 }
 #endif
 
-int calc_regrid_wgts(MBMesh *srcmbmp, MBMesh *dstmbmp, IWeights &wts,
+int calc_regrid_wgts(MBMesh *srcmbmp, MBMesh *dstmbmp, PointList *dstpl, IWeights &wts,
                      int *regridConserve, int *regridMethod, 
                      int *regridPoleType, int *regridPoleNPnts, 
                      int *regridScheme, 
@@ -1470,7 +1462,9 @@ int calc_regrid_wgts(MBMesh *srcmbmp, MBMesh *dstmbmp, IWeights &wts,
 
   // Branch to different subroutines based on method
   if (*regridMethod == ESMC_REGRID_METHOD_CONSERVE) {
-   calc_cnsrv_regrid_wgts(srcmbmp, dstmbmp, wts);
+    calc_cnsrv_regrid_wgts(srcmbmp, dstmbmp, wts);
+  } else if (*regridMethod == ESMC_REGRID_METHOD_BILINEAR){
+    calc_bilinear_regrid_wgts(srcmbmp, dstpl, wts);
   } else {
     Throw() << "This regrid method not currently supported with MOAB";
   }

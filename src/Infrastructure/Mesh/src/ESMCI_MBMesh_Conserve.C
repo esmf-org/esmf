@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2016, University Corporation for Atmospheric Research, 
+// Copyright 2002-2017, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -29,7 +29,7 @@
 #include <Mesh/include/ESMCI_MBMesh.h>
 #include <Mesh/include/ESMCI_WMat.h>
 #include <Mesh/include/ESMCI_MBMesh_BBox.h>
-#include <Mesh/include/ESMCI_MBMesh_Search.h>
+#include <Mesh/include/ESMCI_MBMesh_Search_EToE.h>
 #include <Mesh/include/ESMCI_MBMesh_Util.h>
 #include <Mesh/include/ESMCI_MBMesh_Rendez_Elem.h>
 #include <Mesh/include/ESMCI_Interp.h>
@@ -59,7 +59,7 @@ static const char *const version = "$Id$";
            
 using namespace ESMCI;
 
- bool debug=false;
+static bool debug=false;
 
   
   // Intersects between the line a and the seqment s
@@ -1276,282 +1276,7 @@ void MBMesh_calc_1st_order_weights_2D_3D_sph(MBMesh *srcmbmp, EntityHandle src_e
   }
 
 
-  //////////////// END CALC 2D 3D WEIGHTS //////////////////
-
-
-// Search for ELEMS BEGIN --------------------------------
-// NOTE::This finds the list of meshB elements which intersect with each meshA element and returns
-//       it in sres
-
-static int num_intersecting_elems(MBMesh *mbmp, const MBMesh_BBox &meshBBBox, double btol, double nexp) {
-  
-  int ret = 0;
-
-  //Get MOAB Mesh
-  Interface *moab_mesh=mbmp->mesh;
-
-  // MOAB error
-  int merr;
-
-  // Get a range containing all elements
-  Range range_elem;
-  merr=moab_mesh->get_entities_by_dimension(0,mbmp->pdim,range_elem);
-  if (merr != MB_SUCCESS) {
-    Throw() << "MOAB ERROR:: "<<moab::ErrorCodeStr[merr];                                     
-  }     
- 
-  // Loop over elements
-  for(Range::iterator it=range_elem.begin(); it !=range_elem.end(); it++) {
-    const EntityHandle elem=*it;
-   
-     const MBMesh_BBox bounding_box(mbmp, elem, nexp);
-  
-     // First check to see if the box even intersects the meshB mesh bounding
-     // box.  
-     if (MBMesh_BBoxIntersect(meshBBBox, bounding_box, btol)) ++ret;
-  }
-
-  return ret;
-}
-
-  static void populate_box_elems(OTree *box, MBMesh_SearchResult &result, MBMesh *mbmp, const MBMesh_BBox &meshBBBox, double btol, double nexp) {
-
-  // Get spatial dim of mesh
-  int sdim = mbmp->sdim;
-
-  //Get MOAB Mesh
-  Interface *moab_mesh=mbmp->mesh;
-
-  // MOAB error
-  int merr;
-
-  // Get a range containing all elements
-  Range range_elem;
-  merr=moab_mesh->get_entities_by_dimension(0,mbmp->pdim,range_elem);
-  if (merr != MB_SUCCESS) {
-    Throw() << "MOAB ERROR:: "<<moab::ErrorCodeStr[merr];                                     
-  }     
-
-  // Loop over elements
-  for(Range::iterator it=range_elem.begin(); it !=range_elem.end(); it++) {
-    const EntityHandle elem=*it;
-   
-     MBMesh_BBox bounding_box(mbmp, elem, nexp);
-  
-     // First check to see if the box even intersects the meshB mesh bounding
-     // box.  
-     if (MBMesh_BBoxIntersect(meshBBBox, bounding_box, btol)) {
-         
-       // Create Search result
-       MBMesh_Search_result *sr=new MBMesh_Search_result();       
-       sr->src_elem=elem;
-       sr->dst_elems.clear();
-       
-       // Add it to results list
-       result.push_back(sr);
-       
-       // Add it to tree
-       double min[3], max[3];
-       
-       min[0] = bounding_box.getMin()[0] - btol;
-       min[1] = bounding_box.getMin()[1] - btol;
-       if (sdim >2) min[2] = bounding_box.getMin()[2] - btol;
-       else min[2] = - btol;
-
-       max[0] = bounding_box.getMax()[0] + btol;
-       max[1] = bounding_box.getMax()[1] + btol;
-       if (sdim >2) max[2] = bounding_box.getMax()[2] + btol;
-       else  max[2] = btol;
-    
-       /*
-       if (elem.get_id() == 2426) {
-         std::cout << "elem 2426, bbox=" << bounding_box << std::endl;
-       }*/
- 
-       // Add element to search tree
-       box->add(min, max, (void*)sr);
-     }
-  
-    }
-    
-  }
-
-
-struct OctSearchElemsData {
-  EntityHandle meshB_elem;
-  bool found;
-};
-
-static int found_func_elems(void *c, void *y) {
-  MBMesh_Search_result *sr = static_cast<MBMesh_Search_result*>(c);
-  OctSearchElemsData *si = static_cast<OctSearchElemsData*>(y);
-
-
-  // It might make sense to do something here to trim down the 
-  // number of candidates beyond just those that intersect the 
-  // minmax box of the search element. However, I'm not sure
-  // that there is anything that would be more efficient than
-  // just gathering them all and letting the clipping code
-  // handle the detection of true intersection as is what
-  // is currently being done. 
-
-  sr->dst_elems.push_back(si->meshB_elem);
-  si->found=true;
-
-  // Keep searching
-  return 0;
-}
-
-// The main routine
-// This constructs the list of meshB elements which intersects with each meshA element and returns
-// this list in result. Each search_result in result contains a meshA element in elem and a list of intersecting meshB
- // elements in elem  This function is symmertrical with regard to meshA or meshB, and when used
-// for regrid either src or dest mesh may be used for either
-
-  void MBMesh_OctSearchElems(MBMesh *mbmAp, int unmappedactionA, MBMesh *mbmBp, int unmappedactionB, 
-                      double stol, MBMesh_SearchResult &result) {
-   Trace __trace("OctSearchElems(const Mesh &meshA, const Mesh &meshB, UInt meshB_obj_type, SearchResult &result, double stol, std::vector<const MeshObj*> *to_investigate");
-
-  if (mbmAp->sdim != mbmBp->sdim) {
-    Throw() << "Meshes must have same spatial dim for search";
-  }
-
-  // MOAB error
-  int merr;
-
-  // Get a bounding box for the meshB mesh.
-  // TODO: NEED TO MAKE BOUNDING BOX ONLY DEPEND ON NON-MASKED ELEMENTS
-  MBMesh_BBox meshBBBox(mbmBp);
-  
-  // declare some variables
-  OTree *box=NULL;  
-  const double normexp = 0.15;
-  const double meshBint = 1e-8;
- 
-  // Dimension of meshB
-  UInt sdim = mbmBp->sdim;
-    
-  //Get MOAB Mesh
-  Interface *moab_meshA=mbmAp->mesh;
-  Interface *moab_meshB=mbmBp->mesh;
-
-
-  /// Consstruct list of all meshB objects
-  
-  // Get a range containing all elements
-  Range meshB_range_elem;
-  merr=mbmBp->mesh->get_entities_by_dimension(0,mbmBp->pdim,meshB_range_elem);
-  if (merr != MB_SUCCESS) {
-    Throw() << "MOAB ERROR:: "<<moab::ErrorCodeStr[merr];                                     
-  }     
-
-  // Create vector
-  std::vector<EntityHandle> meshB_elist;
-
-  // Put into list depending if they are masked
-  if (mbmBp->has_elem_mask){ 
-     for(Range::iterator it=meshB_range_elem.begin(); it !=meshB_range_elem.end(); it++) {
-      EntityHandle elem=*it;
-
-        // Get elem mask value
-        int masked;
-        merr=mbmBp->mesh->tag_get_data(mbmBp->elem_mask_tag, &elem, 1, &masked);
-        if (merr != MB_SUCCESS) {
-          Throw() <<"MOAB ERROR: "<<moab::ErrorCodeStr[merr];
-        }
-
-        // Add if not masked
-        if (!masked) {
-          meshB_elist.push_back(elem);
-        }
-    }
-  } else {
-    for(Range::iterator it=meshB_range_elem.begin(); it !=meshB_range_elem.end(); it++) {
-      EntityHandle elem=*it;
-      meshB_elist.push_back(elem);
-    }
-  }
-
-  // Leave if nothing to search
-  if (meshB_elist.size() == 0) return;
-  
-  // Count number of elements in tree
-  int num_box = num_intersecting_elems(mbmAp, meshBBBox, meshBint, normexp);
-  
-  // Construct box tree
-  box=new OTree(num_box); 
-  
-  // Construct search result list 
-  result.reserve(num_box);
-  
-  // Fill tree with search result structs to fill
-  // with intesecting elements
-  populate_box_elems(box, result, mbmAp, meshBBBox, meshBint, normexp);
-  box->commit();
-
-
-  // Loop the mesh B elements, find the corresponding mesh A elements
-  bool meshB_elem_not_found=false;  
-  for (UInt p = 0; p < meshB_elist.size(); ++p) {
-    EntityHandle elem=meshB_elist[p]; 
-
-    MBMesh_BBox meshB_bbox(mbmBp, elem, normexp);
-
-    double min[3], max[3];       
-    min[0] = meshB_bbox.getMin()[0] - stol;
-    min[1] = meshB_bbox.getMin()[1] - stol;
-    if (sdim >2) min[2] = meshB_bbox.getMin()[2] - stol;
-    else min[2] = - stol;
-
-    max[0] = meshB_bbox.getMax()[0] + stol;
-    max[1] = meshB_bbox.getMax()[1] + stol;
-    if (sdim >2) max[2] = meshB_bbox.getMax()[2] + stol;
-    else  max[2] = stol;
-
-    OctSearchElemsData si;
-    si.meshB_elem=elem;
-    si.found=false;
-
-    box->runon(min, max, found_func_elems, (void*)&si);
-
-    if (!si.found) {
-      meshB_elem_not_found=true;
-    } 
-
-  } // for mesh B elems
-  
-  // Check for meshB elements which haven't been intersected
-  if (meshB_elem_not_found) {
-    if (unmappedactionB == ESMCI_UNMAPPEDACTION_ERROR) {
-      Throw() << " Some mesh B elements do not intersect with mesh A";	
-    } else if (unmappedactionB == ESMCI_UNMAPPEDACTION_IGNORE) {
-      // don't do anything
-    } else {
-      Throw() << " Unknown unmappedaction option";
-    }
-  }
-
-#if 0
-  // Check for meshA elements which haven't been intersected
-   // MIGHT BE MORE EFFICIENT TO CHECK IF MATRIX ROW SUMS TO 1.0
-  if (unmappedactionA == ESMCI_UNMAPPEDACTION_ERROR) {
-    SearchResult::iterator sb = result.begin(), se = result.end();
-    for (; sb != se; sb++) {
-      Search_result &sr = **sb;
-
-      if (sr.elems.empty()) {
-	Throw() << " Some mesh A elements do not intersect with mesh B";	
-      }
-    }
-  }
-#endif
-
-   // Get rid of box tree
-  if (box != NULL) delete box;
-}
-
-
-void calc_conserve_mat_serial_2D_2D_cart(MBMesh *srcmbmp, MBMesh *dstmbmp, MBMesh_SearchResult &sres, IWeights &iw, IWeights &src_frac, IWeights &dst_frac) {
+void calc_conserve_mat_serial_2D_2D_cart(MBMesh *srcmbmp, MBMesh *dstmbmp, MBMesh_Search_EToE_Result_List &sres, IWeights &iw, IWeights &src_frac, IWeights &dst_frac) {
   Trace __trace("calc_conserve_mat_serial(Mesh &srcmesh, Mesh &dstmesh, SearchResult &sres, IWeights &iw)");
     
 
@@ -1580,10 +1305,10 @@ void calc_conserve_mat_serial_2D_2D_cart(MBMesh *srcmbmp, MBMesh *dstmbmp, MBMes
 
   // Find maximum number of dst elements in search results
   int max_num_dst_elems=0;
-  MBMesh_SearchResult::iterator sb = sres.begin(), se = sres.end();
+  MBMesh_Search_EToE_Result_List::iterator sb = sres.begin(), se = sres.end();
   for (; sb != se; sb++) {
     // NOTE: sr.elem is a src element and sr.elems is a list of dst elements
-    MBMesh_Search_result &sr = **sb;
+    MBMesh_Search_EToE_Result &sr = **sb;
 
     // If there are no associated dst elements then skip it
     if (sr.dst_elems.size() > max_num_dst_elems) max_num_dst_elems=sr.dst_elems.size();
@@ -1601,7 +1326,7 @@ void calc_conserve_mat_serial_2D_2D_cart(MBMesh *srcmbmp, MBMesh *dstmbmp, MBMes
   for (sb = sres.begin(); sb != se; sb++) {
     
     // NOTE: sr.elem is a dst element and sr.elems is a list of src elements
-      MBMesh_Search_result &sr = **sb;
+      MBMesh_Search_EToE_Result &sr = **sb;
 
     // If there are no associated dst elements then skip it
     if (sr.dst_elems.size() == 0) continue;
@@ -1799,7 +1524,7 @@ void calc_conserve_mat_serial_2D_2D_cart(MBMesh *srcmbmp, MBMesh *dstmbmp, MBMes
 
 
 
-void calc_conserve_mat_serial_2D_3D_sph(MBMesh *srcmbmp, MBMesh *dstmbmp, MBMesh_SearchResult &sres, IWeights &iw, IWeights &src_frac, IWeights &dst_frac) {
+void calc_conserve_mat_serial_2D_3D_sph(MBMesh *srcmbmp, MBMesh *dstmbmp, MBMesh_Search_EToE_Result_List &sres, IWeights &iw, IWeights &src_frac, IWeights &dst_frac) {
   Trace __trace("calc_conserve_mat_serial(Mesh &srcmesh, Mesh &dstmesh, SearchResult &sres, IWeights &iw)");
     
 
@@ -1828,10 +1553,10 @@ void calc_conserve_mat_serial_2D_3D_sph(MBMesh *srcmbmp, MBMesh *dstmbmp, MBMesh
 
    // Find maximum number of dst elements in search results
   int max_num_dst_elems=0;
-  MBMesh_SearchResult::iterator sb = sres.begin(), se = sres.end();
+  MBMesh_Search_EToE_Result_List::iterator sb = sres.begin(), se = sres.end();
   for (; sb != se; sb++) {
      // NOTE: sr.elem is a src element and sr.elems is a list of dst elements
-    MBMesh_Search_result &sr = **sb;
+    MBMesh_Search_EToE_Result &sr = **sb;
 
     // If there are no associated dst elements then skip it
      if (sr.dst_elems.size() > max_num_dst_elems) max_num_dst_elems=sr.dst_elems.size();
@@ -1849,7 +1574,7 @@ void calc_conserve_mat_serial_2D_3D_sph(MBMesh *srcmbmp, MBMesh *dstmbmp, MBMesh
   for (sb = sres.begin(); sb != se; sb++) {
     
     // NOTE: sr.elem is a dst element and sr.elems is a list of src elements
-    MBMesh_Search_result &sr = **sb;
+    MBMesh_Search_EToE_Result &sr = **sb;
 
     // If there are no associated dst elements then skip it
     if (sr.dst_elems.size() == 0) continue;
@@ -2038,7 +1763,7 @@ void calc_conserve_mat_serial_2D_3D_sph(MBMesh *srcmbmp, MBMesh *dstmbmp, MBMesh
 
 
 
-void calc_conserve_mat(MBMesh *srcmbmp, MBMesh *dstmbmp, MBMesh_SearchResult &sres, IWeights &iw, IWeights &src_frac, IWeights &dst_frac) {
+void calc_conserve_mat(MBMesh *srcmbmp, MBMesh *dstmbmp, MBMesh_Search_EToE_Result_List &sres, IWeights &iw, IWeights &src_frac, IWeights &dst_frac) {
   Trace __trace("calc_conserve_mat_serial(Mesh &srcmesh, Mesh &dstmesh, SearchResult &sres, IWeights &iw)");
 
   // both meshes have to have the same dimensions
@@ -2173,8 +1898,8 @@ void calc_cnsrv_regrid_wgts(MBMesh *srcmesh, MBMesh *dstmesh, IWeights &wts) {
 
 
   // Do search
-  MBMesh_SearchResult result;
-  MBMesh_OctSearchElems(srcmesh_regrid, ESMCI_UNMAPPEDACTION_IGNORE, dstmesh_regrid, ESMCI_UNMAPPEDACTION_IGNORE, 
+  MBMesh_Search_EToE_Result_List result;
+  MBMesh_Search_EToE(srcmesh_regrid, ESMCI_UNMAPPEDACTION_IGNORE, dstmesh_regrid, ESMCI_UNMAPPEDACTION_IGNORE, 
                  1.0E-8, result);
 
 

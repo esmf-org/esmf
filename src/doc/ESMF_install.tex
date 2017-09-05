@@ -7,9 +7,7 @@ Major releases of the ESMF software can be downloaded by following
 the instructions on the the {\bf Download} link on the ESMF 
 website, \htmladdnormallink{http://www.earthsystemmodeling.org}{http://www.earthsystemmodeling.org}.
 
-The ESMF is distributed as a full source code tree.  You will need
-to compile the code into the {\tt libesmf.a} library.
-On some platforms a shared library, {\tt libesmf.so}, is also created.
+The ESMF is distributed as a full source code tree.
 Follow the instructions in the following sections
 to build the library and link it with your application.
 
@@ -25,6 +23,13 @@ Some portions of the ESMF library can offer enhanced capabilities when
 certain third party libraries are available. This section describes
 these dependencies and the associated environment settings
 that allow the user to control them.
+
+On many platforms, the ESMF library is also created as a shared library.
+When third party libraries are called from ESMF, it is recommended that they are
+also available as shared libraries.  In cases where they are not, they should at
+least be compiled with the position independent code option enabled (e.g., -fPIC on
+Linux with gfortran/gcc) where necessary, so that the ESMF shared library
+build can successfully incorporate them.
 
 \subsubsection{LAPACK}
 \label{sec:lapack}
@@ -92,16 +97,19 @@ ESMF provides the ability to read Grid and Mesh data in
 \htmladdnormallink{NetCDF}{http://www.unidata.ucar.edu/software/netcdf/} format. 
 
 Beginning with NetCDF 4.2, the C and Fortran API libraries are released as separate packages.
-To compile ESMF with NetCDF 4.2 and newer releases, it is required to have the NetCDF C library, 
-and the NetCDF Fortran API library installed in the same directory. 
-The {\tt ESMF\_NETCDF} environment variable must be set to {\tt "split"}.
+To compile ESMF with NetCDF 4.2 and newer releases, the {\tt ESMF\_NETCDF} environment variable
+can be set to {\tt "split"}.  The {\tt "split"} option requires the NetCDF C library, 
+and the NetCDF Fortran API library be installed in the same directory.  As an alternative,
+the {\tt "nc-config"} option may be used to automatically determine the include and lib directory
+locations.  The {\tt "nc-config"} option supports separate C and Fortran directories.
+
 
 The following environment variables enable, and specify the name and location
 of the desired NetCDF library and associated header files:
 
 \begin{description}
 
-\item[ESMF\_NETCDF] Possible value: {\it not set} (default), {\tt "split"}, 
+\item[ESMF\_NETCDF] Possible value: {\it not set} (default), {\tt "nc-config"}, {\tt "split"}, 
 {\tt "standard"}, {\it <userstring>}.
 
 \begin{description}
@@ -109,9 +117,16 @@ of the desired NetCDF library and associated header files:
 The {\tt ESMF\_NETCDF\_INCLUDE}, {\tt ESMF\_NETCDF\_LIBPATH}, and
 {\tt ESMF\_NETCDF\_LIBS} environment variables will be ignored.
 
+\item[{\tt "nc-config"}] The NetCDF {\tt nc-config} and if available, {\tt nf-config},
+tools will be used to determine the proper settings of {\tt ESMF\_NETCDF\_INCLUDE},
+{\tt ESMF\_NETCDF\_LIBPATH}, and {\tt ESMF\_NETCDF\_LIBS}.  The shell {\tt PATH}
+environment variable must include the NetCDF bin directories where {\tt nc-config}
+and {\tt nf-config} reside.  This option supports having the main NetCDF library and the
+Fortran API library reside in separate directories.
+
 \item[{\tt "split"}] {\tt ESMF\_NETCDF\_LIBS} will be set to 
 {\tt "-lnetcdff -lnetcdf"}.  This option is useful for systems 
-which have the Fortran and C bindings archived in seperate library files.  
+which have the Fortran and C bindings archived in separate library files.  
 The {\tt ESMF\_NETCDF\_INCLUDE} and {\tt ESMF\_NETCDF\_LIBPATH}
 environment variables will also be used, if defined.
 
@@ -136,7 +151,6 @@ Specifies the path where the NetCDF header files are located.
 Specifies the path where the NetCDF library file is located.
 
 \item[ESMF\_NETCDF\_LIBS] Typical value: {\tt "-lnetcdf"} 
-(no default).
 
 Specifies the linker directives needed to link the NetCDF library to
 the application.
@@ -146,6 +160,9 @@ typical case where {\tt ESMF\_NETCDF} is set to {\tt "standard"},
 {\tt ESMF\_NETCDF\_LIBS} is set to {\tt "-lnetcdf"}.  
 When {\tt ESMF\_NETCDF} is set to {\tt "split"}, {\tt ESMF\_NETCDF\_LIBS} 
 is set to {\tt "-lnetcdff -lnetcdf"}.
+
+If the hdf5 library is required, append {\tt "-lhdf5\_hl -lhdf5"} to the
+desired setting.  E.g. {\tt "-lnetcdff -lnetcdf -lhdf5\_hl -lhdf5"}
 \end{description}
 
 \subsubsection{Parallel-NetCDF}
@@ -160,7 +177,7 @@ The following environment variables enable and specify the name and
 location of the desired Parallel-NetCDF library and associated header files:
 
 \begin{description}
-\item[ESMF\_PNETCDF] Possible value: {\it not set} (default), 
+\item[ESMF\_PNETCDF] Possible value: {\it not set} (default), {\tt "pnetcdf-config"},
 {\tt "standard"}, {\it <userstring>}.  
 
 When defined, enables the use of Parallel-NetCDF.
@@ -171,6 +188,12 @@ When defined, enables the use of Parallel-NetCDF.
 The {\tt ESMF\_PNETCDF\_INCLUDE}, {\tt ESMF\_PNETCDF\_LIBPATH}, and
 {\tt ESMF\_PNETCDF\_LIBS} environment variables will be ignored.
 \end{sloppypar}
+
+\item[{\tt "pnetcdf-config"}] The PNetCDF {\tt pnetcdf-config} tool will be used
+to determine the proper settings of {\tt ESMF\_PNETCDF\_INCLUDE},
+{\tt ESMF\_PNETCDF\_LIBPATH}, and {\tt ESMF\_PNETCDF\_LIBS}.  The shell {\tt PATH}
+environment variable must include the PNetCDF bin directory where {\tt pnetcdf-config}
+resides.
 
 \item[{\tt "standard"}] {\tt ESMF\_PNETCDF\_LIBS} will be set to 
 {\tt "-lpnetcdf"}.  The {\tt ESMF\_PNETCDF\_INCLUDE} and 
@@ -201,7 +224,7 @@ application.
 \label{sec:pio}
 ESMF provides the ability to read and write data in both binary and 
 NetCDF formats through \htmladdnormallink{ParallelIO (PIO)}
-{http://code.google.com/p/parallelio/}, a third-party IO software
+{http://code.google.com/p/parallelio/}, a third-party I/O software
 library that is integrated in the ESMF library. The following environment
 variable enables PIO functionalities inside of ESMF.
 
@@ -216,7 +239,9 @@ being enabled.
 \item[ESMF\_PIO] Possible value: {\it not set} (default), {\tt "internal"}.
 
 \begin{description}
-\item[{\it not set}] (default) PIO-dependent features will be disabled.
+\item[{\it not set}] (default) PIO-dependent features will be enabled on platforms where
+certain Fortran-2003 C Interoperability features are available.  Most currently supported
+compilers support these features.
 
 \item[{\tt "OFF"}] Disables PIO-dependent code.
 

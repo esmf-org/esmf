@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2016, University Corporation for Atmospheric Research,
+! Copyright 2002-2017, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -12,12 +12,12 @@
 #define ESMF_FILENAME "ESMF_IO.F90"
 !==============================================================================
 !
-!     ESMF IO Module
+!     ESMF I/O Module
       module ESMF_IOMod
 !     
 !==============================================================================
 !     
-! This file contains the IO class definition and all IO class methods.
+! This file contains the I/O class definition and all I/O class methods.
 !     
 !------------------------------------------------------------------------------
 ! INCLUDES
@@ -28,7 +28,7 @@
 ! !MODULE: ESMF_IOMod
 !     
 ! !DESCRIPTION:
-! Part of IO Fortran API wrapper of C++ implementation.
+! Part of I/O Fortran API wrapper of C++ implementation.
 !
 ! Defines Fortran wrapper entry points for corresponding
 ! C++ class {\tt ESMCI\_IO} implementation.
@@ -153,7 +153,7 @@
 
 !==============================================================================
 !BOPI
-! !IROUTINE: ESMF_IOCreate - Create a new ESMF IO object
+! !IROUTINE: ESMF_IOCreate - Create a new ESMF I/O object
 !
 ! !INTERFACE:
 !     function ESMF_IOCreate(name, <object>, fileFormat, fileName, &
@@ -255,7 +255,7 @@
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_IOCreate()"
 !BOPI
-! !IROUTINE: ESMF_IOCreate - Create a new ESMF IO object for an ESMF GridComp
+! !IROUTINE: ESMF_IOCreate - Create a new ESMF I/O object for an ESMF GridComp
 !
 ! !INTERFACE:
       function ESMF_IOCreate(name, gridComp, rc)
@@ -319,7 +319,7 @@
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_IODestroy()"
 !BOPI
-! !IROUTINE: ESMF_IODestroy - Release resources associated with an ESMF IO object
+! !IROUTINE: ESMF_IODestroy - Release resources associated with an ESMF I/O object
 !
 ! !INTERFACE:
       subroutine ESMF_IODestroy(io, rc)
@@ -368,7 +368,7 @@
 
 !------------------------------------------------------------------------------
 !BOPI
-! !IROUTINE: ESMF_IOGet - Get an ESMF IO object's properties
+! !IROUTINE: ESMF_IOGet - Get an ESMF I/O object's properties
 !
 ! !INTERFACE:
 !     subroutine ESMF_IOGet(io, name, <object>, fileFormat, fileName, &
@@ -466,7 +466,7 @@
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_IOPrint()"
 !BOPI
-! !IROUTINE:  ESMF_IOPrint - Print the contents of a ESMF IO object
+! !IROUTINE:  ESMF_IOPrint - Print the contents of an ESMF I/O object
 !
 ! !INTERFACE:
 !     subroutine ESMF_IOPrint(io, options, rc)
@@ -531,7 +531,7 @@
 !
 !------------------------------------------------------------------------------
 !BOPI
-! !IROUTINE: ESMF_IORead - Perform a read on an ESMF IO object
+! !IROUTINE: ESMF_IORead - Perform a read on an ESMF I/O object
 !
 ! !INTERFACE:
 !     subroutine ESMF_IORead(io, <object>, fileFormat, fileName, &
@@ -617,7 +617,7 @@
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_IORead()"
 !BOPI
-! !IROUTINE: ESMF_IORead - Perform a read on an ESMF IO object
+! !IROUTINE: ESMF_IORead - Perform a read on an ESMF I/O object
 !
 ! !INTERFACE:
       subroutine ESMF_IORead(io, fileName, schemaFileName, rc)
@@ -683,7 +683,7 @@
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_IOReadRestart()"
 !BOPI
-! !IROUTINE: ESMF_IOReadRestart - Restore the contents of a IO (not implemented)
+! !IROUTINE: ESMF_IOReadRestart - Restore the contents of a I/O (not implemented)
 ! TODO
 ! !INTERFACE:
 !     function ESMF_IOReadRestart(name, iospec, rc)
@@ -705,7 +705,7 @@
 !     \item[name]
 !          The name of the object instance to restore.
 !     \item[{[iospec]}]      
-!          The IO specification of the restart file.
+!          The I/O specification of the restart file.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}  
@@ -737,7 +737,7 @@
 !
 !------------------------------------------------------------------------------
 !BOPI
-! !IROUTINE: ESMF_IOSet - Set one or more properties of an ESMF IO object
+! !IROUTINE: ESMF_IOSet - Set one or more properties of an ESMF I/O object
 !
 ! !INTERFACE:
 !     subroutine ESMF_IOSet(io, name, <object>, fileFormat, fileName, &
@@ -828,7 +828,7 @@
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_IOValidate()"
 !BOPI
-! !IROUTINE:  ESMF_IOValidate - Validate an ESMF IO object's properties
+! !IROUTINE:  ESMF_IOValidate - Validate an ESMF I/O object's properties
 !
 ! !INTERFACE:
 !     subroutine ESMF_IOValidate(io, options, rc)
@@ -875,7 +875,7 @@
 !
 !------------------------------------------------------------------------------
 !BOPI
-! !IROUTINE: ESMF_IOWrite - Perform a write on an ESMF IO object
+! !IROUTINE: ESMF_IOWrite - Perform a write on an ESMF I/O object
 !
 ! !INTERFACE:
 !     subroutine ESMF_IOWrite(io, <object>, fileFormat, fileName, &
@@ -957,7 +957,7 @@
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_IOWriteRestart()"
 !BOPI
-! !IROUTINE: ESMF_IOWriteRestart - Save the contents of an ESMF IO object (not implemented)
+! !IROUTINE: ESMF_IOWriteRestart - Save the contents of an ESMF I/O object (not implemented)
 !
 ! !INTERFACE:
 !     subroutine ESMF_IOWriteRestart(io, iospec, rc)
@@ -976,7 +976,7 @@
 !     \item[io]
 !          The object instance to save.
 !     \item[{[iospec]}]
-!          The IO specification of the restart file.
+!          The I/O specification of the restart file.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}

@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2016, University Corporation for Atmospheric Research,
+! Copyright 2002-2017, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -150,7 +150,7 @@ program ESMF_ArraySparseMatMulEx
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOE
 ! The extra padding of 1 element in each direction around the exclusive elements on
-! each DE are "invisible" to the Array spare matrix multiplication method. These
+! each DE are "invisible" to the Array sparse matrix multiplication method. These
 ! extra elements are either updated by the computational kernel or by Array halo
 ! operations.
 !

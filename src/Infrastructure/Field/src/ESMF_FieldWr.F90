@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2016, University Corporation for Atmospheric Research, 
+! Copyright 2002-2017, University Corporation for Atmospheric Research, 
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 ! Laboratory, University of Michigan, National Centers for Environmental 
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -35,6 +35,7 @@ module ESMF_FieldWrMod
   use ESMF_ArrayMod
   use ESMF_FieldMod
   use ESMF_FieldGetMod
+  use ESMF_GridMod
   use ESMF_InitMacrosMod
   use ESMF_IOMod
 
@@ -73,7 +74,7 @@ contains
 
 ! !INTERFACE:
   subroutine ESMF_FieldWrite(field, fileName, keywordEnforcer,   &
-      variableName, dimLabels, overwrite, status, timeslice, iofmt, rc)
+      variableName, convention, purpose, overwrite, status, timeslice, iofmt, rc)
 !
 !
 ! !ARGUMENTS:
@@ -81,7 +82,8 @@ contains
     character(*),               intent(in)             :: fileName
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     character(*),               intent(in),  optional  :: variableName
-    character(*),               intent(in),  optional  :: dimLabels(:)
+    character(*),               intent(in),  optional  :: convention
+    character(*),               intent(in),  optional  :: purpose
     logical,                    intent(in),  optional  :: overwrite
     type(ESMF_FileStatus_Flag), intent(in),  optional  :: status
     integer,                    intent(in),  optional  :: timeslice
@@ -108,17 +110,19 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     The name of the output file to which Field data is written.
 !   \item[{[variableName]}]
 !    Variable name in the output file; default is the "name" of field.
-!    Use this argument only in the IO format (such as NetCDF) that
-!    supports variable name. If the IO format does not support this 
+!    Use this argument only in the I/O format (such as NetCDF) that
+!    supports variable name. If the I/O format does not support this
 !    (such as binary format), ESMF will return an error code.
-!   \item[{[dimLabels]}]
-!     An array of dimension labels for the Field data in the output file.  Enough
-!     label names must be provided to label each axis; default is
-!     the variable name with {\tt \_dimnnn}, where nnn is the dimension number,
-!     appended.  When using the {\tt timeslice} option, the {\tt time} dimension
-!     is unaffected.  Use this argument only in the IO format (such as NetCDF) that
-!     supports variable and dimension names. If the IO format does not support it
-!     (such as binary format), ESMF will return an error code.
+!   \item[{[convention]}]
+!     Specifies an Attribute package associated with the Array, used to create NetCDF
+!     attributes for the variable in the file.  When this argument is present,
+!     the [{[purpose]}] argument must also be present.  Use this argument only with a NetCDF
+!     I/O format. If binary format is used, ESMF will return an error code.
+!   \item[{[purpose]}]
+!     Specifies an Attribute package associated with the Array, used to create NetCDF
+!     attributes for the variable in the file.  When this argument is present,
+!     the [{[convention]}] argument must also be present.  Use this argument only with a NetCDF
+!     I/O format. If binary format is used, ESMF will return an error code.
 !   \item[{[overwrite]}]
 !    \begin{sloppypar}
 !      A logical flag, the default is .false., i.e., existing field data may
@@ -143,7 +147,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !    \end{sloppypar}
 !   \item[{[timeslice]}]
 !    \begin{sloppypar}
-!    Some IO formats (e.g. NetCDF) support the output of data in form of
+!    Some I/O formats (e.g. NetCDF) support the output of data in form of
 !    time slices.  An unlimited dimension called {\tt time} is defined in the
 !    file variable for this capability.
 !    The {\tt timeslice} argument provides access to the {\tt time} dimension,
@@ -161,7 +165,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !    \end{sloppypar}
 !   \item[{[iofmt]}]
 !     \begin{sloppypar}
-!    The IO format.  Please see Section~\ref{opt:iofmtflag} for the list
+!    The I/O format.  Please see Section~\ref{opt:iofmtflag} for the list
 !    of options. If not present, file names with a {\tt .bin} extension will
 !    use {\tt ESMF\_IOFMT\_BIN}, and file names with a {\tt .nc} extension
 !    will use {\tt ESMF\_IOFMT\_NETCDF}.  Other files default to
@@ -175,7 +179,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer                         :: localrc
     character(len=ESMF_MAXSTR)      :: name
     type(ESMF_FieldType), pointer   :: fp 
-    type(ESMF_Array)                :: array 
+    type(ESMF_Array)                :: array
+    type(ESMF_Grid)                 :: grid
+    type(ESMF_Base), pointer        :: base_dummy => null ()
     type(ESMF_FieldStatus_Flag)     :: fieldstatus       ! Field's status
     logical                         :: opt_overwriteflag ! helper variable
     type(ESMF_FileStatus_Flag)      :: opt_status        ! helper variable
@@ -220,11 +226,17 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       end if
     end if
 
+    ! Attributes
+    if (present (convention) .neqv. present (purpose)) then
+      if (ESMF_LogFoundError (ESMF_RC_ARG_WRONG,  &
+          msg='Both convention and purpose must be specified',  &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+    end if
+
+    fp => field%ftypep
     if (present(variableName)) then
       name = variableName
     else
-      fp => field%ftypep
-
       call ESMF_GetName(fp%base, name, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU,                &
            ESMF_CONTEXT, rcToReturn=rc)) return
@@ -240,16 +252,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       return
     endif
 
-    if (present (dimLabels)) then
-      call ESMF_ArrayGet (array, dimCount=ndims, rc=localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU,         &
+    if (present (convention)) then
+      call ESMF_FieldGet (field, grid=grid, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU,                &
           ESMF_CONTEXT, rcToReturn=rc)) return
-
-      if (size (dimlabels) < ndims) then
-        if (ESMF_LogFoundError(ESMF_RC_ARG_SIZE,  &
-            msg="size (dimLabels) must be >= number of Array dimensions",  &
-            ESMF_CONTEXT, rcToReturn=rc)) return
-      end if
     end if
 
     ! Create an I/O object
@@ -259,7 +265,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! From here on out, we need to clean up so no returning on error
     if (localrc .eq. ESMF_SUCCESS) then
-      call ESMF_IOAddArray(io, array, variableName=name, dimLabels=dimLabels, rc=localrc)
+      call c_esmc_fieldioaddarray(io, fp%base, array, grid, name,  &
+          base_dummy, convention, purpose,  &
+          localrc)
       errorFound = ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU,     &
           ESMF_CONTEXT, rcToReturn=rc)
     endif

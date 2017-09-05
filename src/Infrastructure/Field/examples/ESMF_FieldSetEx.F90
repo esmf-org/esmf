@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2016, University Corporation for Atmospheric Research,
+! Copyright 2002-2017, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -57,8 +57,8 @@
 !  Fortran data pointer contained in the internal {\tt ESMF\_Array} object
 !  of a {\tt ESMF\_Field}.
 !  {\tt ESMF\_FieldSetDataPtr} is an overloaded interface based on the type,
-!  kind, and rank of the input fortran pointer argument. In this example,
-!  a rank 3 ESMF\_KIND\_R8 fortran data pointer is used.
+!  kind, and rank of the input Fortran pointer argument. In this example,
+!  a rank 3 ESMF\_KIND\_R8 Fortran data pointer is used.
 !  This method internally creates a ESMF\_Array inside the
 !  field. The previous ESMF\_Array will be deleted if it was internally
 !  created by the field, otherwise it's simply replaced by the newly created

@@ -361,17 +361,17 @@ class RegridMethod(IntEnum):
     """
     NEAREST_STOD = 3
     """
-    Nearest neighbor interpolation where each destination point is mapped to
-    the closest source point. A given source point may go to multiple
+    In this version of nearest neighbor interpolation each destination point is
+    mapped to the closest source point. A given source point may go to multiple
     destination points, but no destination point will receive input from more
     than one source point.
     """
     NEAREST_DTOS = 4
     """
-    Nearest neighbor interpolation where each destination point is mapped to
-    the closest source point. A given source point may go to multiple
-    destination points, but no destination point will receive input from more
-    than one source point.
+    In this version of nearest neighbor interpolation each source point is
+    mapped to the closest destination point. A given destination point may
+    receive input from multiple source points, but no source point will go to
+    more than one destination point.
     """
 
 # StaggerLoc

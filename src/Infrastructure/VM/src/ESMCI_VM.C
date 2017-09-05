@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2016, University Corporation for Atmospheric Research, 
+// Copyright 2002-2017, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -123,9 +123,23 @@ static vector<string> esmfRuntimeEnvValue;
 #define ESMC_METHOD "ESMCI::VMIdKeyCompare()"
 static bool VMKeyCompare(char *vmKey1, char *vmKey2){
   int i;
+#if 0
+  std::cout << ESMC_METHOD << ": entered" << std::endl;
+#endif
   for (i=0; i<vmKeyWidth; i++)
-    if (vmKey1[i] != vmKey2[i]) break;
+    if (vmKey1[i] != vmKey2[i]){
+#if 0
+      std::cout << ESMC_METHOD << "loop broke with i = " << i 
+        << ", vmKeyWidth = " << vmKeyWidth << std::endl;
+#endif
+      break;
+    }
   if (i==vmKeyWidth) return true;
+#if 0
+  else
+    std::cout << ESMC_METHOD  << ": vmKey1[" << i << "] = " 
+      << vmKey1[i] << " != vmKey2[" << i << "] = " << vmKey2[i] << std::endl;
+#endif
   return false;
 }
 
@@ -256,12 +270,20 @@ bool VMIdCompare(
 //
 //EOPI
 //-----------------------------------------------------------------------------
+#if 0
+  std::cout << ESMC_METHOD << ": entered" << std::endl;
+#endif
   if (vmID1==NULL || vmID2==NULL){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
       "- Invalid vmIDs", ESMC_CONTEXT, NULL);
     return false;    // bail out
   }
-  if (vmID1->localID != vmID2->localID) return false;
+  if (vmID1->localID != vmID2->localID){
+#if 0
+    std::cout << ESMC_METHOD << ": localID " << vmID1->localID << " != " << vmID2->localID << std::endl;
+#endif
+    return false;
+  }
   return VMKeyCompare(vmID1->vmKey, vmID2->vmKey);
 }
 //-----------------------------------------------------------------------------
@@ -942,7 +964,7 @@ int VM::sendVMId(
 //
 // !ARGUMENTS:
 //
-  VMId *vmID,                   // in  - VMId to be send
+  VMId *vmID,                   // in  - VMId to be sent
   int dest                      // in  - destination PET
   ){
 //
@@ -1597,18 +1619,18 @@ void VM::logCurrentGarbageInfo(
   // found a match
   
   char msg[512];
-  sprintf(msg, "%s - CurrGarbInfo: Fortran objs=%d", prefix.c_str(), 
+  sprintf(msg, "%s - CurrGarbInfo: Fortran objs=%lu", prefix.c_str(), 
     matchTable_FObjects[i].size());
   ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
-  for (int j=0; j<matchTable_FObjects[i].size(); j++){
+  for (unsigned j=0; j<matchTable_FObjects[i].size(); j++){
     sprintf(msg, "%s - CurrGarbInfo: fortran objs[%d]: %d", prefix.c_str(), j,
       matchTable_FObjects[i][j].objectID);
     ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
   }
-  sprintf(msg, "%s - CurrGarbInfo: Base objs=%d", prefix.c_str(), 
+  sprintf(msg, "%s - CurrGarbInfo: Base objs=%lu", prefix.c_str(), 
     matchTable_Objects[i].size());
   ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
-  for (int j=0; j<matchTable_Objects[i].size(); j++){
+  for (unsigned j=0; j<matchTable_Objects[i].size(); j++){
     const char *proxyString;
     proxyString="actual object";
     if (matchTable_Objects[i][j]->ESMC_BaseGetProxyFlag()==ESMF_PROXYYES)
@@ -1917,6 +1939,79 @@ void VM::addFObject(
 }
 //-----------------------------------------------------------------------------
 
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::VM::getObject()"
+//BOPI
+// !IROUTINE:  ESMCI::VM::getObject - Find and return an ESMF object.
+//
+// !INTERFACE:
+void VM::getObject(
+//
+// !RETURN VALUE:
+//    none
+//
+// !ARGUMENTS:
+//
+  void **fobject,
+  int objectID,
+  VMId *vmID,   // identifying vmID
+  int type,
+  bool *object_found,
+  int *rc) {
+//
+// !DESCRIPTION:
+//    Find and return a object in matchTable_FObjects list for a
+//    given ID/vmId.
+//
+//EOPI
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  *rc = ESMC_RC_NOT_IMPL;   // final return code
+
+  // std::cout << ESMC_METHOD << ": looking for object ID: " << objectID << std::endl;
+  *fobject = NULL;          // assume not found
+  *object_found = false;
+
+
+  bool vmid_found = false;
+  int i;
+  for (i=0; i<matchTableBound; i++) {
+    // std::cout << ESMC_METHOD << ": checking VMId " << i << std::endl;
+    if (VMIdCompare(vmID, &(matchTable_vmID[i]))) {
+      vmid_found = true;
+      break;
+    }
+  }
+  if (!vmid_found){
+    // std::cout << ESMC_METHOD << ": vmid vector not found" << std::endl;
+    *rc = ESMF_SUCCESS;
+    return;
+  }
+
+  // match found
+
+  // must lock/unlock for thread-safe access to std::vector
+  VM *vm = getCurrent();
+  vm->lock();
+  for (unsigned it=0; it<matchTable_Objects[i].size(); ++it){
+
+    ESMC_Base *fobject_temp = matchTable_Objects[i][it];
+
+    int ID = (fobject_temp)->ESMC_BaseGetID();
+
+    // std::cout << ESMC_METHOD << ": comparing ID " << ID << " to object ID " << objectID << std::endl;
+    if (ID == objectID) {
+      *fobject = fobject_temp;
+      // TODO: Bump Base refCount?
+      *object_found = true;
+      break;
+    }
+  }
+  vm->unlock();
+  if (rc) *rc = ESMF_SUCCESS;
+}
+//-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
@@ -2113,6 +2208,30 @@ VM *VM::initialize(
       esmfRuntimeEnvValue.push_back(esmfRuntimeVarValue);
     }
     esmfRuntimeVarName = "ESMF_RUNTIME_COMPLIANCEICREGISTER";
+    esmfRuntimeVarValue = std::getenv(esmfRuntimeVarName);
+    if (esmfRuntimeVarValue){
+      esmfRuntimeEnv.push_back(esmfRuntimeVarName);
+      esmfRuntimeEnvValue.push_back(esmfRuntimeVarValue);
+    }
+    esmfRuntimeVarName = "ESMF_RUNTIME_TRACE";
+    esmfRuntimeVarValue = std::getenv(esmfRuntimeVarName);
+    if (esmfRuntimeVarValue){
+      esmfRuntimeEnv.push_back(esmfRuntimeVarName);
+      esmfRuntimeEnvValue.push_back(esmfRuntimeVarValue);
+    }
+    esmfRuntimeVarName = "ESMF_RUNTIME_TRACE_PETLIST";
+    esmfRuntimeVarValue = std::getenv(esmfRuntimeVarName);
+    if (esmfRuntimeVarValue){
+      esmfRuntimeEnv.push_back(esmfRuntimeVarName);
+      esmfRuntimeEnvValue.push_back(esmfRuntimeVarValue);
+    }
+    esmfRuntimeVarName = "ESMF_RUNTIME_TRACE_COMPONENT";
+    esmfRuntimeVarValue = std::getenv(esmfRuntimeVarName);
+    if (esmfRuntimeVarValue){
+      esmfRuntimeEnv.push_back(esmfRuntimeVarName);
+      esmfRuntimeEnvValue.push_back(esmfRuntimeVarValue);
+    }
+    esmfRuntimeVarName = "ESMF_RUNTIME_TRACE_CLOCK";
     esmfRuntimeVarValue = std::getenv(esmfRuntimeVarName);
     if (esmfRuntimeVarValue){
       esmfRuntimeEnv.push_back(esmfRuntimeVarName);

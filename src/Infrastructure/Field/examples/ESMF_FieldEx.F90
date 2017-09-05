@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2016, University Corporation for Atmospheric Research,
+! Copyright 2002-2017, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -514,13 +514,14 @@
 !
 !  A user can create an empty {\tt ESMF\_Field}.
 !  Then the user can finalize the empty {\tt ESMF\_Field} from a {\tt ESMF\_Grid} 
-!  and a intrinsic 
+!  and an intrinsic
 !  Fortran data array. This interface is overloaded for typekind and rank
 !  of the Fortran data array.
 !
-!  In this example, both grid and Fortran array pointer are 2 dimensional
-!  and each dimension index maps in order, i.e. 1st dimension of grid maps to
-!  1st dimension of Fortran array pointer, 2nd dimension of grid maps to 2nd dimension of
+!  In this example, both the grid and the Fortran array pointer are 2 dimensional
+!  and each dimension of the grid is mapped to the corresponding dimension of the
+!  Fortran array pointer, i.e. 1st dimension of grid maps to 1st dimension of
+!  Fortran array pointer, 2nd dimension of grid maps to 2nd dimension of
 !  Fortran array pointer, so on and so forth. 
 !
 !  In order to create or complete a Field from a Grid and a Fortran array pointer, 

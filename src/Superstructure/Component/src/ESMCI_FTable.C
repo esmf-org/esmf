@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2016, University Corporation for Atmospheric Research, 
+// Copyright 2002-2017, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -68,7 +68,7 @@ extern "C" {
   void FTN_X(f_esmf_fortranudtpointercopy)(void *dst, void *src);
   
   void FTN_X(esmf_complianceicregister)(void *comp, int *rc);
-
+  
 #ifdef ESMF_NO_DLFCN
   //for now, assume these are here in the case that dlopen is not available
   void FTN_X(nuopc_model_complianceicr)(void *comp, int *rc);
@@ -1775,6 +1775,32 @@ int FTable::callVFuncPtr(
           complianceCheckFlag |= value.find("on")!=string::npos;  // turn on
           complianceCheckFlag |= value.find("ON")!=string::npos;  // turn on
         }
+        
+	//if tracing enabled, turn on compliance checker
+	if (!complianceCheckFlag) {
+	  envVar = VM::getenv("ESMF_RUNTIME_TRACE");	  
+	  if (envVar != NULL){
+	    string value(envVar);
+
+            if (value.find("on")!=string::npos ||
+                value.find("ON")!=string::npos) {
+
+              complianceCheckFlag = true;
+              
+              //if component-level tracing is off, do not
+              //hook in compliance checker
+              envVar = VM::getenv("ESMF_RUNTIME_TRACE_COMPONENT");
+              if (envVar != NULL) {
+                string valueComponent(envVar);
+                if (valueComponent.find("off")!=string::npos ||
+                    valueComponent.find("OFF")!=string::npos) {
+                  complianceCheckFlag = false;
+                }
+              }            
+            }
+	  }
+	}
+	
         if (complianceCheckFlag){
           int registerIcUserRc;
           
@@ -1784,7 +1810,7 @@ int FTable::callVFuncPtr(
           if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
             ESMC_CONTEXT, &rc)) return rc; // bail out
           ESMC_Logical presentFlag;
-          base->root.AttributeIsPresent("ESMF_RUNTIME_COMPLIANCEICREGISTER", 
+          base->ESMC_BaseGetRoot()->AttributeIsPresent("ESMF_RUNTIME_COMPLIANCEICREGISTER",
             &presentFlag);
           
 //#ifdef ESMF_NO_DLFCN
@@ -1799,7 +1825,7 @@ int FTable::callVFuncPtr(
           if (presentFlag==ESMF_TRUE){
             
             // access the attribute object in base
-            ESMCI::Attribute *attr=base->root.AttributeGet(
+            ESMCI::Attribute *attr=base->ESMC_BaseGetRoot()->AttributeGet(
               "ESMF_RUNTIME_COMPLIANCEICREGISTER");
             
             // retrieve the string value of the attribute

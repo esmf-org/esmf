@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2016, University Corporation for Atmospheric Research, 
+// Copyright 2002-2017, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -79,8 +79,8 @@ extern "C" {
   }
 
   void FTN_X(c_esmc_delayoutcreatedefault)(ESMCI::DELayout **ptr, int *deCount,
-    ESMCI::InterfaceInt *deGrouping, ESMC_Pin_Flag *pinFlag, 
-    ESMCI::InterfaceInt *petList, ESMCI::VM **vm, int *rc){
+    ESMCI::InterArray<int> *deGrouping, ESMC_Pin_Flag *pinFlag, 
+    ESMCI::InterArray<int> *petList, ESMCI::VM **vm, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_delayoutcreatedefault()"
     // Initialize return code; assume routine not implemented
@@ -154,10 +154,11 @@ extern "C" {
   }
 
   void FTN_X(c_esmc_delayoutget)(ESMCI::DELayout **ptr, ESMCI::VM **vm,
-    int *deCount, ESMCI::InterfaceInt *petMap, ESMCI::InterfaceInt *vasMap,
-    ESMC_Logical *oneToOneFlag, ESMC_Pin_Flag *pinFlag,
-    int *localDeCount, ESMCI::InterfaceInt *localDeToDeMap,
-    int *vasLocalDeCount, ESMCI::InterfaceInt *vasLocalDeToDeMap, int *rc){
+    int *deCount, ESMCI::InterArray<int> *petMap,
+    ESMCI::InterArray<int> *vasMap, ESMC_Logical *oneToOneFlag,
+    ESMC_Pin_Flag *pinFlag, int *localDeCount, 
+    ESMCI::InterArray<int> *localDeToDeMap, int *vasLocalDeCount,
+    ESMCI::InterArray<int> *vasLocalDeToDeMap, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_delayoutget()"
     // Initialize return code; assume routine not implemented

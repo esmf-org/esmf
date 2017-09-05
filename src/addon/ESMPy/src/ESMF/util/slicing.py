@@ -36,7 +36,7 @@ def get_formatted_slice(slc, n_dims):
             assert (len(slc) == n_dims)
         except (TypeError, AssertionError):
             raise IndexError("Only {0}-d slicing allowed.".format(n_dims))
-        ret = map(_format_, slc)
+        ret = tuple(map(_format_, slc))
     else:
         raise (NotImplementedError((slc, n_dims)))
 

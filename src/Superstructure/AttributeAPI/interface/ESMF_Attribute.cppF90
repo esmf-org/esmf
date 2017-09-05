@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2016, University Corporation for Atmospheric Research,
+! Copyright 2002-2017, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -235,6 +235,9 @@ module ESMF_AttributeMod
         module procedure ESMF_GridCompAttCopy
         module procedure ESMF_SciCompAttCopy
         module procedure ESMF_StateAttCopy
+        module procedure ESMF_FieldAttCopy
+        module procedure ESMF_FieldBundleAttCopy
+        module procedure ESMF_GridAttCopy
 
 ! !DESCRIPTION:
 !     This interface provides a single entry point for methods that copy
@@ -1271,7 +1274,7 @@ contains
 !EOP
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_AttributeAdd  - Add a custom Attribute package with a single nested Atrribute package
+! !IROUTINE: ESMF_AttributeAdd  - Add a custom Attribute package with a single nested Attribute package
 !
 ! !INTERFACE:
 !     ! Private name; call using ESMF_AttributeAdd()
@@ -1341,14 +1344,12 @@ contains
 !
 ! !INTERFACE:
 !     ! Private name; call using ESMF_AttributeCopy()
-!     subroutine ESMF_AttributeCopy(<object1>, <object2>, copyflag, &
-!       atttreeflag, rc)
+!     subroutine ESMF_AttributeCopy(<object1>, <object2>, attcopy, rc)
 !
 ! !ARGUMENTS:
 !     <object1>, see below for supported values
 !     <object2>, see below for supported values
-!     type(ESMF_Copy_Flag),   intent(in)            :: copyflag
-!     type(ESMF_AttTreeFlag), intent(in)            :: atttreeflag
+!     type(ESMF_AttCopy_Flag),intent(in)   optional :: attcopy
 !     integer,                intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -1358,18 +1359,24 @@ contains
 !
 !     Supported values for <object1> are:
 !     \begin{description}
-!     \item type(ESMF\_CplComp),  intent(in) :: comp1
-!     \item type(ESMF\_GridComp), intent(in) :: comp1
-!     \item type(ESMF\_SciComp),  intent(in) :: comp1
-!     \item type(ESMF\_State),    intent(in) :: state
+!     \item type(ESMF\_CplComp),     intent(in)    :: comp1
+!     \item type(ESMF\_GridComp),    intent(in)    :: comp1
+!     \item type(ESMF\_SciComp),     intent(in)    :: comp1
+!     \item type(ESMF\_Field),       intent(inout) :: field1
+!     \item type(ESMF\_FieldBundle), intent(inout) :: fieldbundle1
+!     \item type(ESMF\_Grid),        intent(inout) :: grid1
+!     \item type(ESMF\_State),       intent(in)    :: state
 !     \end{description}
 !
 !     Supported values for <object2> are:
 !     \begin{description}
-!     \item type(ESMF\_CplComp),  intent(inout) :: comp2
-!     \item type(ESMF\_GridComp), intent(inout) :: comp2
-!     \item type(ESMF\_SciComp),  intent(inout) :: comp2
-!     \item type(ESMF\_State),    intent(inout) :: state
+!     \item type(ESMF\_CplComp),     intent(inout) :: comp2
+!     \item type(ESMF\_GridComp),    intent(inout) :: comp2
+!     \item type(ESMF\_SciComp),     intent(inout) :: comp2
+!     \item type(ESMF\_Field),       intent(inout) :: field2
+!     \item type(ESMF\_FieldBundle), intent(inout) :: fieldbundle2
+!     \item type(ESMF\_Grid),        intent(inout) :: grid2
+!     \item type(ESMF\_State),       intent(inout) :: state
 !     \end{description}
 !
 !     NOTE: Copies between different ESMF object types are not possible at this time.
@@ -1377,15 +1384,13 @@ contains
 !     The arguments are:
 !     \begin{description}
 !     \item [<object1>]
-!           An {\tt ESMF} object.
+!           An {\tt Attribute}-bearing ESMF object.
 !     \item [<object2>]
-!           An {\tt ESMF} object.
-!     \item [copyflag]
+!           An {\tt Attribute}-bearing ESMF object.
+!     \item [{[attcopy]}]
 !           A flag to determine if the copy is to be by reference, value,
-!           or both.  This flag is documented in section \ref{const:copy}.
-!     \item [atttreeflag]
-!           A flag to determine if the copy is supposed to descend the
-!           Attribute hierarchy. This flag is documented in section \ref{const:atttree}.
+!           or hybrid.  This flag is documented in section \ref{const:attcopy}.
+!           The default is to copy by value.
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -2213,8 +2218,9 @@ contains
 !           Attribute hierarchy when looking for this Attribute, the default
 !           is {\tt ESMF\_ATTNEST\_ON}.  This flag is documented in section
 !           \ref{const:attnest}.
-!     \item [{[typekind}]]
-!           The typekind of the Attribute.
+!     \item [{[typekind]}]
+!           The typekind of the Attribute. This flag is documented in section
+!           \ref{const:typekind}.
 !     \item [{[itemCount]}]
 !           The number of items in this Attribute.
 !     \item [{[isPresent]}]
@@ -2287,8 +2293,9 @@ contains
 !           Attribute hierarchy when looking for this Attribute, the default
 !           is {\tt ESMF\_ATTNEST\_ON}.  This flag is documented in section
 !           \ref{const:attnest}.
-!     \item [{[typekind}]]
-!           The typekind of the Attribute.
+!     \item [{[typekind]}]
+!           The typekind of the Attribute. This flag is documented in section
+!           \ref{const:typekind}.
 !     \item [{[itemCount]}]
 !           The number of items in this Attribute.
 !     \item [{[isPresent]}]
@@ -2350,7 +2357,8 @@ contains
 !           is {\tt ESMF\_ATTNEST\_ON}.  This flag is documented in section
 !           \ref{const:attnest}.
 !     \item [{[typekind]}]
-!           The typekind of the Attribute.
+!           The typekind of the Attribute. This flag is documented in section
+!           \ref{const:typekind}.
 !     \item [{[itemCount]}]
 !           The number of items in this Attribute.
 !     \item [{[rc]}]
@@ -2966,8 +2974,8 @@ contains
 !     validate the contents of fileName.  schemaFileName must be specified for
 !     a fileName containing custom, user-defined Attributes.
 !
-!     Requires the third party Xerces C++ XML Parser library to be installed,
-!     v3.1.0 or better.  For more details, see the "ESMF Users Guide",
+!     Requires the third-party Xerces C++ XML Parser library to be installed,
+!     v3.1.0 or newer.  For more details, see the "ESMF Users Guide",
 !     "Building and Installing the ESMF, Third Party Libraries, Xerces" and
 !     the website
 !     \newline
@@ -3299,7 +3307,8 @@ contains
 !     \end{description}
 !
 !
-!EOP!------------------------------------------------------------------------------
+!EOP
+!------------------------------------------------------------------------------
 !BOP
 ! !IROUTINE: ESMF_AttributeSet - Set an Attribute
 !
@@ -5010,13 +5019,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! @\
 ! !INTERFACE: @\
       ! Private name; call using ESMF_AttributeCopy() @\
-      subroutine mclass1##AttCopy(mthis1, mthis2, copyflag, atttreeflag, rc) @\
+      subroutine mclass1##AttCopy(mthis1, mthis2, attcopy, rc) @\
 ! @\
 ! !ARGUMENTS: @\
       type(mclass1), intent(in) :: mthis1   @\
       type(mclass2), intent(inout) :: mthis2 @\
-      type(ESMF_Copy_Flag), intent(in) :: copyflag @\
-      type(ESMF_AttTreeFlag), intent(in) :: atttreeflag @\
+      type(ESMF_AttCopy_Flag), intent(in), optional :: attcopy @\
       integer, intent(out), optional :: rc    @\
  @\
 ! @\
@@ -5029,11 +5037,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      An {\tt mclass1} object. @\
 !     \item [mthis2] @\
 !      An {\tt mclass2} object. @\
-!     \item [copyflag] @\
-!      A flag to determine if the copy is to be by reference, value, or both @\
-!     \item [atttreeflag] @\
-!      A flag to determine if the copy is supposed to descend the Attribute @\
-!      hierarchy @\
+!     \item [attcopyflag] @\
+!      A flag to determine if the copy is to be by reference, value, or hybrid @\
 !     \item [{[rc]}] @\
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
 !     \end{description} @\
@@ -5042,6 +5047,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !EOPI @\
  @\
       integer :: localrc @\
+ @\
+       character(ESMF_MAXSTR) :: value @\
+       integer, dimension(1) :: lens @\
+       type(ESMF_AttCopy_Flag) :: localattcopy @\
  @\
       ! Initialize @\
       localrc = ESMF_RC_NOT_IMPL @\
@@ -5053,8 +5062,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ! check variables @\
       ESMF_INIT_CHECK_DEEP(mclass2##GetInit,mthis2,rc) @\
  @\
+      ! set copy flag default @\
+      localattcopy = ESMF_ATTCOPY_VALUE @\
+      if (present(attcopy)) then @\
+        localattcopy = attcopy @\
+      endif @\
+ @\
       call c_ESMC_AttributeCopy(mthisfield1, mthisfield2, & @\
-                                copyflag, atttreeflag, localrc) @\
+                                localattcopy, localrc) @\
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
          ESMF_CONTEXT, rcToReturn=rc)) return @\
  @\
@@ -6606,6 +6621,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           call c_ESMC_AttPackGetCharList(mthisfield, name, attpack, & @\
             ESMF_TYPEKIND_CHARACTER, count, lattnestflag, lens, value, & @\
             localrc) @\
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
+            ESMF_CONTEXT, rcToReturn=rc)) return @\
         end if @\
       else @\
         call c_ESMC_AttributeIsPresent(mthisfield, name, lisPresent, localrc) @\
@@ -6614,10 +6631,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         if (lisPresent == ESMF_TRUE) then @\
           call c_ESMC_AttributeGetCharList(mthisfield, name, ESMF_TYPEKIND_CHARACTER, & @\
             count, lens, value, localrc) @\
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
+            ESMF_CONTEXT, rcToReturn=rc)) return @\
         endif @\
       endif @\
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
-        ESMF_CONTEXT, rcToReturn=rc)) return @\
  @\
       if (present(isPresent)) then @\
         isPresent = lisPresent @\
@@ -6909,6 +6926,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           call c_ESMC_AttPackGetCharList(mthisfield, name, attpack, & @\
             ESMF_TYPEKIND_CHARACTER, litemCount, lattnestflag, & @\
             lens, valueString, localrc) @\
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
+            ESMF_CONTEXT, rcToReturn=rc)) return @\
         end if @\
       else @\
         call c_ESMC_AttributeIsPresent(mthisfield, name, lisPresent, localrc) @\
@@ -6917,10 +6936,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         if (lisPresent == ESMF_TRUE) then @\
           call c_ESMC_AttributeGetCharList(mthisfield, name, ESMF_TYPEKIND_CHARACTER, & @\
             litemCount, lens, valueString, localrc) @\
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
+            ESMF_CONTEXT, rcToReturn=rc)) return @\
         endif @\
       endif @\
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
-        ESMF_CONTEXT, rcToReturn=rc)) return @\
  @\
       if (present(isPresent)) then @\
         isPresent = lisPresent @\
@@ -8328,6 +8347,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           call c_ESMC_AttPackGetCharList(mthisfield, name, attpack, & @\
             ESMF_TYPEKIND_CHARACTER, count, lattnestflag, & @\
             lens, value, localrc) @\
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
+            ESMF_CONTEXT, rcToReturn=rc)) return @\
         end if @\
       else @\
         call c_ESMC_AttributeIsPresent(mthisfield, name, lisPresent, localrc) @\
@@ -8336,10 +8357,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         if (lisPresent == ESMF_TRUE) then @\
           call c_ESMC_AttributeGetCharList(mthisfield, name, ESMF_TYPEKIND_CHARACTER, & @\
             count, lens, value, localrc) @\
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
+            ESMF_CONTEXT, rcToReturn=rc)) return @\
         endif @\
       endif @\
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
-        ESMF_CONTEXT, rcToReturn=rc)) return @\
  @\
       if (present(isPresent)) then @\
         isPresent = lisPresent @\
@@ -8631,6 +8652,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           call c_ESMC_AttPackGetCharList(mthisfield, name, attpack, & @\
             ESMF_TYPEKIND_CHARACTER, litemCount, lattnestflag, & @\
             lens, valueString, localrc) @\
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
+            ESMF_CONTEXT, rcToReturn=rc)) return @\
         end if @\
       else @\
         call c_ESMC_AttributeIsPresent(mthisfield, name, lisPresent, localrc) @\
@@ -8639,10 +8662,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         if (lisPresent == ESMF_TRUE) then @\
           call c_ESMC_AttributeGetCharList(mthisfield, name, ESMF_TYPEKIND_CHARACTER, & @\
             litemCount, lens, valueString, localrc) @\
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
+            ESMF_CONTEXT, rcToReturn=rc)) return @\
         endif @\
       endif @\
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
-        ESMF_CONTEXT, rcToReturn=rc)) return @\
  @\
       if (present(isPresent)) then @\
         isPresent = lisPresent @\
@@ -8942,7 +8965,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !           the default is {\tt ESMF\_ATTNEST\_ON}. This flag is documented @\
 !           in section \ref{const:attnest}. @\
 !     \item [{[typekind]}] @\
-!           The typekind of the Attribute. @\
+!           The typekind of the Attribute.  This flag is documented in section @\
+!           \ref{const:typekind}. @\
 !     \item [{[itemCount]}] @\
 !           The number of items in this Attribute.  For character types, @\
 !           the length of the character string. @\
@@ -9062,7 +9086,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !           the default is {\tt ESMF\_ATTNEST\_ON}. This flag is documented @\
 !           in section \ref{const:attnest}. @\
 !     \item [{[typekind]}] @\
-!           The typekind of the Attribute. @\
+!           The typekind of the Attribute. This flag is documented in section @\
+!           \ref{const:typekind}.@\
 !     \item [{[itemCount]}] @\
 !           The number of items in this Attribute.  For character types, @\
 !           the length of the character string. @\
@@ -9202,7 +9227,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !           the default is {\tt ESMF\_ATTNEST\_ON}. This flag is documented @\
 !           in section \ref{const:attnest}. @\
 !     \item [{[typekind]}] @\
-!           Returns the typekind of the Attribute. @\
+!           Returns the typekind of the Attribute. This flag is documented in section @\
+!           \ref{const:typekind}. @\
 !     \item [{[itemCount]}] @\
 !           Returns the number of items in this Attribute.  For character @\
 !           types, this is the length of the character string. @\
@@ -9327,7 +9353,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !           the default is {\tt ESMF\_ATTNEST\_ON}. This flag is documented @\
 !           in section \ref{const:attnest}. @\
 !     \item [{[typekind]}] @\
-!           Returns the typekind of the Attribute. @\
+!           Returns the typekind of the Attribute. This flag is documented in section @\
+!           \ref{const:typekind}. @\
 !     \item [{[itemCount]}] @\
 !           Returns the number of items in this Attribute.  For character @\
 !           types, this is the length of the character string. @\
@@ -12702,6 +12729,8 @@ AttAddPackCustomNMacro(ESMF_FieldBundle, fieldbundle, fieldbundle%this%base)
 AttAddPackCustomN1Macro(ESMF_FieldBundle, fieldbundle, fieldbundle%this%base)
 AttAddPackCustomMacroSL(ESMF_FieldBundle, fieldbundle, fieldbundle%this%base)
 
+AttCopyMacro(ESMF_FieldBundle, ESMF_FieldBundle, fieldbundle1, fieldbundle2, fieldbundle1%this%base, fieldbundle2%this%base)
+
 TypeKind3DeclarationMacro(AttGet, ESMF_FieldBundle, fieldbundle, fieldbundle%this%base)
 TypeKind3NoDocDeclarationMacro(AttGet1D, ESMF_FieldBundle, fieldbundle, fieldbundle%this%base)
 AttGetLogicalMacro(ESMF_FieldBundle, fieldbundle, fieldbundle%this%base)
@@ -12747,6 +12776,8 @@ AttAddPackCustomNMacro(ESMF_Field, field, field%ftypep%base)
 AttAddPackCustomN1Macro(ESMF_Field, field, field%ftypep%base)
 AttAddPackStandardMacroSL(ESMF_Field, field, field%ftypep%base)
 AttAddPackCustomMacroSL(ESMF_Field, field, field%ftypep%base)
+
+AttCopyMacro(ESMF_Field, ESMF_Field, field1, field2, field1%ftypep%base, field2%ftypep%base)
 
 TypeKind3DeclarationMacro(AttGet, ESMF_Field, field, field%ftypep%base)
 TypeKind3NoDocDeclarationMacro(AttGet1D, ESMF_Field, field, field%ftypep%base)
@@ -12854,6 +12885,8 @@ AttAddPackCustomNMacro(ESMF_Grid, grid, grid)
 AttAddPackCustomN1Macro(ESMF_Grid, grid, grid)
 AttAddPackStandardMacroSL(ESMF_Grid, grid, grid)
 AttAddPackCustomMacroSL(ESMF_Grid, grid, grid)
+
+AttCopyMacro(ESMF_Grid, ESMF_Grid, grid1, grid2, grid1, grid2)
 
 ^ifndef ESMF_NO_INTEGER_1_BYTE
 funcname##Macro(integer, I1, ESMF_Grid, grid, grid)

@@ -146,7 +146,9 @@ module user_model2
     real(ESMF_KIND_R8)    :: pi
     type(ESMF_Array)      :: array
     real(ESMF_KIND_R8), pointer :: farrayPtr(:,:,:)   ! matching F90 array pointer
+    real(ESMF_KIND_R8)    :: diff
     integer               :: i, j, k
+    character(1024)       :: msgString
     
     ! Initialize return code
     rc = ESMF_SUCCESS
@@ -167,11 +169,14 @@ module user_model2
     do k = lbound(farrayPtr, 3), ubound(farrayPtr, 3)
      do j = lbound(farrayPtr, 2), ubound(farrayPtr, 2)
        do i = lbound(farrayPtr, 1), ubound(farrayPtr, 1)
-         if (abs(farrayPtr(i,j,k) - (10.0d0 &
+         diff = abs(farrayPtr(i,j,k) - (10.0d0 &
            + 5.0d0 * sin(real(i,ESMF_KIND_R8)/100.d0*pi) &
            + 2.0d0 * sin(real(j,ESMF_KIND_R8)/150.d0*pi) &
-           + 3.0d0 * sin(real(k,ESMF_KIND_R8)/4.d0  *pi) )) > 1.d-8) then
-           rc=ESMF_FAILURE
+           + 3.0d0 * sin(real(k,ESMF_KIND_R8)/4.d0  *pi)))
+         if (diff > 1.d-8) then
+           write(msgString,*) "Detected difference above tolerance: ", diff
+           call ESMF_LogSetError(ESMF_RC_VAL_OUTOFRANGE, msg=trim(msgString), &
+             rcToReturn=rc)
            return ! bail out
          endif
        enddo

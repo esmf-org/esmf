@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2016, University Corporation for Atmospheric Research,
+! Copyright 2002-2017, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -12,13 +12,13 @@
 #define ESMF_FILENAME "ESMF_IO.F90"
 !==============================================================================
 !
-!     ESMF IO Module
+!     ESMF I/O Module
 module ESMF_IOMod
 
 !     
 !==============================================================================
 !     
-! This file contains the IO class definition and all IO class methods.
+! This file contains the I/O class definition and all I/O class methods.
 !     
 !------------------------------------------------------------------------------
 ! INCLUDES
@@ -29,7 +29,7 @@ module ESMF_IOMod
 ! !MODULE: ESMF_IOMod
 !     
 ! !DESCRIPTION:
-! IO Fortran API wrapper of C++ implementation.
+! I/O Fortran API wrapper of C++ implementation.
 !
 ! Defines Fortran wrapper entry points for corresponding
 ! C++ class {\tt ESMCI\_IO} implementation.
@@ -47,7 +47,8 @@ module ESMF_IOMod
   use ESMF_F90InterfaceMod  ! ESMF Fortran-C++ interface helper
   ! We need some ESMF types
   use ESMF_ArrayMod
-  
+  use ESMF_VMMod
+
   implicit none
 
 !------------------------------------------------------------------------------
@@ -145,7 +146,7 @@ contains
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_IOCreate()"
 !BOPI
-! !IROUTINE: ESMF_IOCreate - Create a new ESMF IO object
+! !IROUTINE: ESMF_IOCreate - Create a new ESMF I/O object
 !
 ! !INTERFACE:
   function ESMF_IOCreate(keywordEnforcer, rc)
@@ -154,7 +155,7 @@ contains
     type(ESMF_IO) :: ESMF_IOCreate
 
 ! !ARGUMENTS:
-    type(ESMF_KeywordEnforcer), optional:: keywordEnforcer !keywords req. below
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                 intent(out), optional :: rc
 
 ! !DESCRIPTION:
@@ -188,7 +189,7 @@ contains
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_IODestroy()"
 !BOPI
-! !IROUTINE: ESMF_IODestroy - Clean up and delete an ESMF IO object
+! !IROUTINE: ESMF_IODestroy - Clean up and delete an ESMF I/O object
 !
 ! !INTERFACE:
   subroutine ESMF_IODestroy(io, rc)
@@ -233,7 +234,7 @@ contains
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_IOClear()"
 !BOPI
-! !IROUTINE: ESMF_IOClear - Clears the I/O queue of an ESMF IO object
+! !IROUTINE: ESMF_IOClear - Clears the I/O queue of an ESMF I/O object
 !
 ! !INTERFACE:
   subroutine ESMF_IOClear(io)
@@ -258,18 +259,22 @@ contains
   end subroutine ESMF_IOClear
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_IOAddArray()"
 !BOPI
-! !IROUTINE: ESMF_IOAddArray - Add an array to an IO object's element list
+! !IROUTINE: ESMF_IOAddArray - Add an array to an I/O object's element list
 
 ! !INTERFACE:
-  subroutine ESMF_IOAddArray(io, array, keywordEnforcer, variableName, dimLabels, rc)
+  subroutine ESMF_IOAddArray(io, array, keywordEnforcer,  &
+                             variableName, convention, purpose, rc)
 
 ! !ARGUMENTS:
     type(ESMF_IO),           intent(in)            :: io
     type(ESMF_Array),        intent(in)            :: array
-    type(ESMF_KeywordEnforcer), optional:: keywordEnforcer !keywords req. below
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     character(*),            intent(in),  optional :: variableName
-    character(*),            intent(in),  optional, target :: dimLabels(:)
+    character(*),            intent(in),  optional :: convention
+    character(*),            intent(in),  optional :: purpose
     integer,                 intent(out), optional :: rc
    
 ! !DESCRIPTION:
@@ -283,12 +288,10 @@ contains
 !          The {\tt ESMF\_Array} object to add to io's element list
 !     \item[{[variableName]}]
 !          Optional variableName to attach to this array for I/O purposes
-!   \item[{[dimLabels]}]
-!    An array of dimension names for the Field data in the output file; default is
-!    the variable name with {\tt \_dimnnn}, where nnn is the dimension number,
-!    appended.  Use this argument only in the IO format (such as NetCDF) that
-!    supports variable and dimension names. If the IO format does not support t
-!    (such as binary format), ESMF will return an error code.
+!     \item[{[convention]}]
+!          Optional convention - AttPack for attribute and dimension names and values
+!     \item[{[purpose]}]
+!          Optional purpose - AttPack for attribute and dimension names and values
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -297,7 +300,6 @@ contains
 
     integer                     :: localrc     ! local return code
     integer                     :: len_varName ! name length or 0
-    character                   :: dimLabels_dummy(1)
 
     ! Assume failure until success
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -310,15 +312,10 @@ contains
       len_varName = 0
     endif
 
-    if (present (dimLabels)) then
-      call c_ESMC_IOAddArray(io, array,  &
-          variableName, len_varName, dimLabels, size (dimLabels),  &
-          localrc)
-    else
-      call c_ESMC_IOAddArray(io, array,  &
-          variableName, len_varName, dimLabels_dummy, 0,  &
-          localrc)
-    end if
+    call c_ESMC_IOAddArray(io, array,  &
+        variableName, len_varName,     &
+        convention, purpose,           &
+        localrc)
 
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
          ESMF_CONTEXT, rcToReturn=rc)) return
@@ -329,7 +326,7 @@ contains
 
 !------------------------------------------------------------------------------
 !BOPI
-! !IROUTINE: ESMF_IORead - Perform a read on an ESMF IO object
+! !IROUTINE: ESMF_IORead - Perform a read on an ESMF I/O object
 !
 ! !INTERFACE:
   subroutine ESMF_IORead(io, fileName, keywordEnforcer, timeslice,           &
@@ -338,7 +335,7 @@ contains
 ! !ARGUMENTS:
     type(ESMF_IO),            intent(in)            :: io
     character (len=*),        intent(in)            :: fileName
-    type(ESMF_KeywordEnforcer), optional:: keywordEnforcer !keywords req. below
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                  intent(in),  optional :: timeslice
     type(ESMF_IOFmt_Flag),    intent(in),  optional :: iofmt
     character (len=*),        intent(in),  optional :: schema
@@ -358,7 +355,7 @@ contains
 !      The time-slice number of the variable read from file.
 !     \item[{[iofmt]}]
 !      \begin{sloppypar}
-!      The IO format.  Please see Section~\ref{opt:iofmtflag} for the list 
+!      The I/O format.  Please see Section~\ref{opt:iofmtflag} for the list
 !      of options. If not present, defaults to {\tt ESMF\_IOFMT\_NETCDF}.
 !      \end{sloppypar}
 !     \item[{[schema]}]
@@ -407,16 +404,17 @@ contains
 
 !------------------------------------------------------------------------------
 !BOPI
-! !IROUTINE: ESMF_IOWrite - Perform a write on an ESMF IO object
+! !IROUTINE: ESMF_IOWrite - Perform a write on an ESMF I/O object
 !
 ! !INTERFACE:
-  subroutine ESMF_IOWrite(io, fileName, keywordEnforcer, overwrite, status,  &
+  subroutine ESMF_IOWrite(io, fileName, keywordEnforcer,  &
+                          overwrite, status,  &
                           timeslice, iofmt, schema, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_IO),              intent(in)            :: io
     character (len=*),          intent(in)            :: fileName
-    type(ESMF_KeywordEnforcer), optional:: keywordEnforcer !keywords req. belowz
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     logical,                    intent(in),  optional :: overwrite
     type(ESMF_FileStatus_Flag), intent(in),  optional :: status
     integer,                    intent(in),  optional :: timeslice
@@ -458,7 +456,7 @@ contains
 !    \end{sloppypar}
 !   \item[{[timeslice]}]
 !    \begin{sloppypar}
-!    Some IO formats (e.g. NetCDF) support the output of data in form of
+!    Some I/O formats (e.g. NetCDF) support the output of data in form of
 !    time slices. The {\tt timeslice} argument provides access to this
 !    capability. {\tt timeslice} must be positive. The behavior of this
 !    option may depend on the setting of the {\tt overwrite} flag:

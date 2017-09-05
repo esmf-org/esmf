@@ -353,6 +353,18 @@ int pio_cpp_inquire_variable_vdesc(pio_file_desc_t ncid, pio_var_desc_t,
 int pio_cpp_inquire_dimension(pio_file_desc_t ncid, int dimid,
                               char *name, int *len);
 
+int pio_cpp_put_att_string (pio_file_desc_t file, pio_var_desc_t varDesc,
+                              const char *keyword, const char *value);
+
+int pio_cpp_put_att_ints (pio_file_desc_t file, pio_var_desc_t varDesc,
+                              const char *keyword, const int *values, int nvalues);
+
+int pio_cpp_put_att_floats (pio_file_desc_t file, pio_var_desc_t varDesc,
+                              const char *keyword, const float *values, int nvalues);
+
+int pio_cpp_put_att_doubles (pio_file_desc_t file, pio_var_desc_t varDesc,
+                              const char *keyword, const double *values, int nvalues);
+
 ///////////////////////////////////////////
 //
 //  darray read/write interface functions

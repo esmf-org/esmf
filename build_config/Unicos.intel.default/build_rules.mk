@@ -48,6 +48,12 @@ ESMF_F90COMPILER_VERSION    = ${ESMF_F90COMPILER} -V -v
 ESMF_CXXCOMPILER_VERSION    = ${ESMF_CXXCOMPILER} -V -v
 
 ############################################################
+# Special debug flags
+#
+ESMF_F90OPTFLAG_G       += -traceback
+ESMF_CXXOPTFLAG_G       += -traceback
+
+############################################################
 # Enable TR15581/F2003 Allocatable array resizing
 #
 ESMF_F90COMPILEOPTS += -assume realloc_lhs
@@ -133,3 +139,8 @@ ESMF_SL_LIBS_TO_MAKE  =
 # TODO: WebService testing is robust enough to work on all systems.
 #
 ESMF_NOWEBSERVTESTING = TRUE
+
+############################################################
+# Override default C preprocessor on this platform
+#
+ESMF_CPPDEFAULT       = gcc -E -P -x c

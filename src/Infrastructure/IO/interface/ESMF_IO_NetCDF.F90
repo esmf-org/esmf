@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2016, University Corporation for Atmospheric Research,
+! Copyright 2002-2017, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -12,12 +12,12 @@
 #define ESMF_FILENAME "ESMF_IO_NetCDF.F90"
 !==============================================================================
 !
-!     ESMF IO NetCDF Module
+!     ESMF I/O NetCDF Module
       module ESMF_IO_NetCDFMod
 !     
 !==============================================================================
 !     
-! This file contains the IO NetCDF class definition and all class methods.
+! This file contains the I/O NetCDF class definition and all class methods.
 !     
 !------------------------------------------------------------------------------
 ! INCLUDES
@@ -28,7 +28,7 @@
 ! !MODULE: ESMF_IO_NetCDFMod
 !     
 ! !DESCRIPTION:
-! Part of IO NetCDF Fortran API wrapper of C++ implementation.
+! Part of I/O NetCDF Fortran API wrapper of C++ implementation.
 !
 ! Defines Fortran wrapper entry points for corresponding
 ! C++ class {\tt ESMCI\_IO\_NetCDF} implementation.

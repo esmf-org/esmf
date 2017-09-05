@@ -1,6 +1,6 @@
 // $Id$
 // Earth System Modeling Framework
-// Copyright 2002-2016, University Corporation for Atmospheric Research, 
+// Copyright 2002-2017, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -24,6 +24,8 @@
 #include <vector>
 
 namespace ESMCI {
+
+  /////// TODO: THIS ISN'T USED RIGHT NOW, SO GET RID OF EVENTUALLY //////////
 
 
 struct MBMesh_Search_result {

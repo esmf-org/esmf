@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2016, University Corporation for Atmospheric Research,
+! Copyright 2002-2017, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -22,7 +22,7 @@
 
 !EOP
 !
-! This file provides the fortran subroutine interfaces to be called by the
+! This file provides the Fortran subroutine interfaces to be called by the
 ! c++ software for the purpose of executing the component initialize, run and 
 ! finalize routines.
 !

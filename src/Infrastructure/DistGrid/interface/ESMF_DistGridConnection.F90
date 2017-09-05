@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2016, University Corporation for Atmospheric Research, 
+! Copyright 2002-2017, University Corporation for Atmospheric Research, 
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 ! Laboratory, University of Michigan, National Centers for Environmental 
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -64,7 +64,7 @@ module ESMF_DistGridConnectionMod
   public ESMF_DistGridConnectionSet
   public ESMF_DistGridConnectionSetIntl
   public ESMF_DistGridConnectionPrint
-  public ESMF_InterfaceIntCreateDGConn
+  public ESMF_InterArrayCreateDGConn
   
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -122,23 +122,23 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !EOPI
 !------------------------------------------------------------------------------
-    integer                 :: localrc      ! local return code
-    type(ESMF_InterfaceInt) :: connectionArg        ! helper variable
-    type(ESMF_InterfaceInt) :: positionVectorArg    ! helper variable
-    type(ESMF_InterfaceInt) :: orientationVectorArg ! helper variable
+    integer               :: localrc      ! local return code
+    type(ESMF_InterArray) :: connectionArg        ! helper variable
+    type(ESMF_InterArray) :: positionVectorArg    ! helper variable
+    type(ESMF_InterArray) :: orientationVectorArg ! helper variable
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
     
     ! Deal with (optional) array arguments
-    connectionArg = ESMF_InterfaceIntCreate(connection, rc=localrc)
+    connectionArg = ESMF_InterArrayCreate(connection, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    positionVectorArg = ESMF_InterfaceIntCreate(positionVector, rc=localrc)
+    positionVectorArg = ESMF_InterArrayCreate(positionVector, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    orientationVectorArg = ESMF_InterfaceIntCreate(orientationVector, &
+    orientationVectorArg = ESMF_InterArrayCreate(orientationVector, &
       rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
@@ -151,13 +151,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ESMF_CONTEXT, rcToReturn=rc)) return
       
     ! garbage collection
-    call ESMF_InterfaceIntDestroy(connectionArg, rc=localrc)
+    call ESMF_InterArrayDestroy(connectionArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(positionVectorArg, rc=localrc)
+    call ESMF_InterArrayDestroy(positionVectorArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(orientationVectorArg, rc=localrc)
+    call ESMF_InterArrayDestroy(orientationVectorArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     
@@ -338,12 +338,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_InterfaceIntCreateDGConn()"
+#define ESMF_METHOD "ESMF_InterArrayCreateDGConn()"
 !BOPI
-! !IROUTINE: ESMF_InterfaceIntCreateDGConn - Create InterfaceInt from DistGrid Connection List
+! !IROUTINE: ESMF_InterArrayCreateDGConn - Create InterArray from DistGrid Connection List
 
 ! !INTERFACE:
-  function ESMF_InterfaceIntCreateDGConn(connectionList, initFlag, rc)
+  function ESMF_InterArrayCreateDGConn(connectionList, initFlag, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_DistGridConnection), intent(in),  optional :: connectionList(:)
@@ -351,10 +351,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                       intent(out), optional :: rc
 !         
 ! !RETURN VALUE:
-    type(ESMF_InterfaceInt) :: ESMF_InterfaceIntCreateDGConn
+    type(ESMF_InterArray) :: ESMF_InterArrayCreateDGConn
 !
 ! !DESCRIPTION:
-!   Create a compacted 2D {\tt ESMF\_InterfaceInt} from a list of 
+!   Create a compacted 2D {\tt ESMF\_InterArray} from a list of 
 !   DistGridConnection objects. All of the DistGridConnection objects in
 !   {\tt connectionLis} must have the same elementCount.
 !
@@ -367,7 +367,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     of {\tt .true.} indicates that the {\tt connectionList} has been
 !     initialized, and the entries are valid for use. A value of {\tt .false.}
 !     inidicates that the {\tt connectionList} has not been initialized, and
-!     therefore an InterfaceInt with maximum size elementCount must be created.
+!     therefore an InterArray with maximum size elementCount must be created.
 !     This option is for passing connection lists from the C++ layer back to the
 !     Fortran layer. The default is {\tt .true.}.
 !   \item[{[rc]}]
@@ -376,11 +376,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !EOPI
 !------------------------------------------------------------------------------
-    integer                 :: localrc      ! local return code
-    integer                 :: i, elementCount, stat, connectionListSize
-    integer, pointer        :: farray(:,:)
-    type(ESMF_InterfaceInt) :: array
-    logical                 :: initAux
+    integer               :: localrc      ! local return code
+    integer               :: i, elementCount, stat, connectionListSize
+    integer, pointer      :: farray(:,:)
+    type(ESMF_InterArray) :: array
+    logical               :: initAux
     
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
@@ -422,25 +422,25 @@ ESMF_INIT_CHECK_SHALLOW_SHORT(ESMF_DistGridConnectionGetInit, connectionList(i),
           farray(:,i) = connectionList(i)%connection(1:elementCount)
         enddo
       endif
-      ! create InterfaceInt for farray and transfer ownership
-      array = ESMF_InterfaceIntCreate(farray2D=farray, &
+      ! create InterArray for farray and transfer ownership
+      array = ESMF_InterArrayCreate(farray2D=farray, &
         transferOwnership=.true., rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
     else
-      ! dummy InterfaceInt
-      array = ESMF_InterfaceIntCreate(rc=localrc)
+      ! dummy InterArray
+      array = ESMF_InterArrayCreate(rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
     endif
  
     ! set return value
-    ESMF_InterfaceIntCreateDGConn = array
+    ESMF_InterArrayCreateDGConn = array
     
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
  
-  end function ESMF_InterfaceIntCreateDGConn
+  end function ESMF_InterArrayCreateDGConn
 !------------------------------------------------------------------------------
 
 

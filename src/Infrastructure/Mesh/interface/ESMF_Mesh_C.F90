@@ -1,7 +1,7 @@
 !  $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2016, University Corporation for Atmospheric Research, 
+! Copyright 2002-2017, University Corporation for Atmospheric Research, 
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 ! Laboratory, University of Michigan, National Centers for Environmental 
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -149,24 +149,24 @@
    elseif (filetypeflag == ESMF_FILEFORMAT_UGRID) then
        if (mnpresent == 1 .and. mfpresent == 1 .and. vnpresent == 1) then
        	  mesh = ESMF_MeshCreate(filename, fileTypeFlag, &
-	       	                 meshname=meshname, maskFlag=maskFlag, &
+	       	                 maskFlag=maskFlag, &
 				 varname=varname, rc=rc)
           if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
        elseif (mnpresent == 1) then
        	  mesh = ESMF_MeshCreate(filename, fileTypeFlag, &
-	       	                 meshname=meshname, rc=rc)
+	       	                 rc=rc)
           if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
        elseif (mnpresent == 1 .and. mfpresent == 1 .and. vnpresent == 1) then
        	  mesh = ESMF_MeshCreate(filename, fileTypeFlag, &
-	       	                 meshname=meshname, maskFlag=maskFlag, &
+	       	                 maskFlag=maskFlag, &
 				 varname=varname, rc=rc)
           if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
        elseif (mnpresent == 1) then
        	  mesh = ESMF_MeshCreate(filename, fileTypeFlag, &
-	       	                 meshname=meshname, rc=rc)
+	       	                 rc=rc)
           if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
        else

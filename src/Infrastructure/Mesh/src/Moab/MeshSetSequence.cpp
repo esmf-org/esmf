@@ -3,7 +3,7 @@
  * storing and accessing finite element mesh data.
  * 
  * Copyright 2004 Sandia Corporation.  Under the terms of Contract
- * DE-AC04-94AL85000 with Sandia Coroporation, the U.S. Government
+ * DE-AC04-94AL85000 with Sandia Corporation, the U.S. Government
  * retains certain rights in this software.
  * 
  * This library is free software; you can redistribute it and/or
@@ -226,7 +226,7 @@ ErrorCode MeshSetSequence::get_type( const SequenceManager* seqman,
     Range tmp;
     ErrorCode rval = get_entities( seqman, handle, tmp, recursive );
     if (MB_SUCCESS == rval) {
-#ifdef NO_VECTOR_TEMPLATE_INSERT
+#ifdef MOAB_NO_VECTOR_TEMPLATE_INSERT
       std::copy( tmp.begin(), tmp.end(), std::back_inserter(entities) );
 #else
       entities.insert( entities.end(), tmp.begin(), tmp.end() );

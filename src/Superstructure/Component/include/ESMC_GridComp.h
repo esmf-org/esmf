@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2016, University Corporation for Atmospheric Research, 
+// Copyright 2002-2017, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -154,7 +154,7 @@ int ESMC_GridCompFinalize(
 //    Component providers must document whether each of their routines are 
 //    {\tt single-phase} or {\tt multi-phase}. Single-phase routines require 
 //    only one invocation to complete their work. Multi-phase routines provide
-//    multiple subroutines to accomplish the work, accomodating components 
+//    multiple subroutines to accomplish the work, accommodating components
 //    which must complete part of their work, return to the caller and allow 
 //    other processing to occur, and then continue the original operation. 
 //    For multiple-phase child components, this is the integer phase number to
@@ -242,7 +242,7 @@ int ESMC_GridCompInitialize(
 //    Component providers must document whether each of their routines are 
 //    {\tt single-phase} or {\tt multi-phase}. Single-phase routines require 
 //    only one invocation to complete their work. Multi-phase routines provide
-//    multiple subroutines to accomplish the work, accomodating components 
+//    multiple subroutines to accomplish the work, accommodating components
 //    which must complete part of their work, return to the caller and allow 
 //    other processing to occur, and then continue the original operation. 
 //    For multiple-phase child components, this is the integer phase number to
@@ -315,7 +315,7 @@ int ESMC_GridCompRun(
 //    Component providers must document whether each of their routines are 
 //    {\tt single-phase} or {\tt multi-phase}. Single-phase routines require 
 //    only one invocation to complete their work. Multi-phase routines provide
-//    multiple subroutines to accomplish the work, accomodating components 
+//    multiple subroutines to accomplish the work, accommodating components
 //    which must complete part of their work, return to the caller and allow 
 //    other processing to occur, and then continue the original operation. 
 //    For multiple-phase child components, this is the integer phase number to

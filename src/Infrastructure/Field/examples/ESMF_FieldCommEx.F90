@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2016, University Corporation for Atmospheric Research,
+! Copyright 2002-2017, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -84,7 +84,7 @@
 ! \label{sec:field:usage:gather_2dptr}
 !
 ! User can use {\tt ESMF\_FieldGather} interface to gather Field data from multiple
-! PETS onto a single root PET. This interface is overloaded by type, kind, and rank.
+! PETs onto a single root PET. This interface is overloaded by type, kind, and rank.
 !
 ! Note that the implementation of Scatter and Gather is not sequence index based.
 ! If the Field is built on arbitrarily distributed Grid, Mesh, LocStream or XGrid, 

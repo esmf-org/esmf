@@ -1,6 +1,6 @@
 // $Id$
 // Earth System Modeling Framework
-// Copyright 2002-2016, University Corporation for Atmospheric Research, 
+// Copyright 2002-2017, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -18,6 +18,8 @@
 
 
 #include <Mesh/include/ESMCI_MeshTypes.h>
+
+#include "ESMCI_PointList.h"
 
 #include <iostream>
 
@@ -83,6 +85,7 @@ bool BBoxSubset(const BBox &b1, const BBox &b2);
 
 std::ostream &operator<<(std::ostream &os, const BBox &cn);
 
+void build_pl_bbox(double *cmin, double *cmax, PointList *pl);
 
 } // namespace
 

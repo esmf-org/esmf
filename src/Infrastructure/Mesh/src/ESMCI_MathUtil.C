@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2016, University Corporation for Atmospheric Research, 
+// Copyright 2002-2017, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -100,11 +100,36 @@ bool intersect_quad_with_line(const double *q, const double *l1, const double *l
 
   const double *q0=q;
   const double *q1=q+3;
-   const double *q2=q+6;
+  const double *q2=q+6;
   const double *q3=q+9;
 
+  // in case we need to rotate
+  int rotate_cntr_clk = 0;
 
-  // Set some convient variables
+  // If q0 and q1 are the same then it causes a problem, so if they are then rotate
+  if (MU_EQUAL_PNT3D(q0,q1,1.0E-20)) { 
+    const double *tmp=q3;
+    q3=q2;
+    q2=q1;
+    q1=q0;
+    q0=tmp;
+    rotate_cntr_clk = 1;
+  }
+
+  // If q0 and q3 are the same then it causes a problem, so if they are then rotate
+  if (MU_EQUAL_PNT3D(q0,q3,1.0E-20)) { 
+    const double *tmp;
+    tmp=q3;
+    q3=q1;
+    q1=tmp;
+    tmp=q2;
+    q2=q0;
+    q0=tmp;
+    rotate_cntr_clk = 2;
+  }
+
+
+  // Set some convenient variables
   A[0]=q0[0]-q1[0]+q2[0]-q3[0];
   A[1]=q0[1]-q1[1]+q2[1]-q3[1];
   A[2]=q0[2]-q1[2]+q2[2]-q3[2];
@@ -134,7 +159,7 @@ bool intersect_quad_with_line(const double *q, const double *l1, const double *l
  for (int i=0; i<100; i++) {
 
     // Calculate Value of function at X
-     F[0]=X[0]*X[1]*A[0]+X[0]*B[0]+X[1]*C[0]+X[2]*D[0]+E[0];
+    F[0]=X[0]*X[1]*A[0]+X[0]*B[0]+X[1]*C[0]+X[2]*D[0]+E[0];
     F[1]=X[0]*X[1]*A[1]+X[0]*B[1]+X[1]*C[1]+X[2]*D[1]+E[1];
     F[2]=X[0]*X[1]*A[2]+X[0]*B[2]+X[1]*C[2]+X[2]*D[2]+E[2];
 
@@ -147,8 +172,10 @@ bool intersect_quad_with_line(const double *q, const double *l1, const double *l
     J[6]=A[2]*X[1]+B[2]; J[7]=A[2]*X[0]+C[2]; J[8]=D[2];
 
     // Invert Jacobian
-    if (!invert_matrix_3x3(J,inv_J)) return false;
-    
+    if (!invert_matrix_3x3(J,inv_J)) {
+      return false;
+    }    
+
     // Calculate change in X
     mult(inv_J, F, delta_X);
     
@@ -161,15 +188,27 @@ bool intersect_quad_with_line(const double *q, const double *l1, const double *l
  // If not finite then return as not mapped
  if (!MU_IS_FINITE(X[0]) ||  
      !MU_IS_FINITE(X[1]) ||  
-     !MU_IS_FINITE(X[2])) return false;
+     !MU_IS_FINITE(X[2])) {
 
+   return false;
+ }
   // Get answer out
-  p[0]=X[0];
-  p[1]=X[1];
+ if (rotate_cntr_clk==0) {
+   p[0]=X[0];
+   p[1]=X[1];
+ } else if (rotate_cntr_clk==1) {
+   p[0]=X[1];
+   p[1]=1.0-X[0];
+ } else if (rotate_cntr_clk==2) {
+   p[0]=1.0-X[0];
+   p[1]=1.0-X[1];
+ }
+
   *t=X[2];
 
-   //  if (mathutil_debug) {
-  //  printf("Q: p=[%f %f] \n",p[0],p[1]);
+
+  //  if (mathutil_debug) {
+  //  printf("Q: p=[%f %f] t=%f \n",p[0],p[1],X[2]);
   //}
 
   return true;
@@ -2179,4 +2218,38 @@ bool calc_p_hex_sph3D_xyz(const double *hex_xyz, const double *pnt_xyz, double *
     double det = a[0]*b[1]*un[2] + b[0]*un[1]*a[2] + un[0]*a[1]*b[2] - a[2]*b[1]*un[0] - b[2]*un[1]*a[0] - un[2]*a[1]*b[0];
     return atan2(det, dot);
   }
+
+  // Count the number of 0len edges
+  void count_0len_edges3D(int num_p, double *p, int *_num_0len) {
+
+#define EQUAL_TOL 1E-15
+#define PNTS_EQUAL(p1,p2) ((std::abs(p1[0]-p2[0]) < EQUAL_TOL) &&	\
+                           (std::abs(p1[1]-p2[1]) < EQUAL_TOL) &&	\
+                           (std::abs(p1[2]-p2[2]) < EQUAL_TOL))
+
+    // Init to 0
+    int num_0len=0;
+    
+    // See if there are any equal points
+    double *last_pnt=p+3*(num_p-1);
+    for (int i=0; i<num_p; i++) {
+      double *pnti=p+3*i;
+    
+      if (PNTS_EQUAL(pnti,last_pnt)) {
+        num_0len++;
+      }
+
+      // advance last point
+      last_pnt=pnti;
+    } 
+
+    // Do output
+    *_num_0len=num_0len;
+
+#undef EQUAL_TOL
+#undef PNTS_EQUAL
+}
+
+
+
 } // namespace

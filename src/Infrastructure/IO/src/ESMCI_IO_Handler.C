@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2016, University Corporation for Atmospheric Research,
+// Copyright 2002-2017, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -138,6 +138,10 @@ IO_Handler *IO_Handler::create (
 #endif // ESMF_PIO
       break;
     case ESMF_IOFMT_NETCDF:
+      // No break
+    case ESMF_IOFMT_NETCDF_64BIT_OFFSET:
+      // No break
+    case ESMF_IOFMT_NETCDF4:
       // No break
     case ESMF_IOFMT_NETCDF4P:
       // No break
@@ -489,7 +493,7 @@ bool IO_Handler::fileExists(
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::IO_Handler::open()"
 //BOP
-// !IROUTINE:  IO::open - Open a file or stream for I/O
+// !IROUTINE:  IO_Handler::open - Open a file or stream for I/O
 //
 // !INTERFACE:
 void IO_Handler::open (
@@ -499,7 +503,7 @@ void IO_Handler::open (
 //
 // !ARGUMENTS:
 
-  char const * const file,                 // (in)  - name of file being read
+  const std::string &file,                 // (in)  - name of file being read
   ESMC_FileStatus_Flag filestatusflag_arg, // (in)  - file status
   bool overwrite_arg,                      // (in)  - overwrite fields is true
   bool readonly_arg,                       // (in)  - if false then read/write
@@ -519,7 +523,7 @@ void IO_Handler::open (
   }
 
   // Make sure pointer inputs have something in them
-  if ((char *)NULL == file) {
+  if (file.empty()) {
     localrc = ESMF_RC_PTR_NULL;
     ESMC_LogDefault.MsgFoundError(localrc, "- NULL filename argument pointer",
       ESMC_CONTEXT, rc);
@@ -549,7 +553,7 @@ void IO_Handler::open (
   if (rc != (int *)NULL) {
     *rc = localrc;
   }
-}  // end IO::open
+}  // end IO_Handler::open
 //-------------------------------------------------------------------------
 
 }  // end namespace ESMCI

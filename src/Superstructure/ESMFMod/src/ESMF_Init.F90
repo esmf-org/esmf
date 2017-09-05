@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2016, University Corporation for Atmospheric Research, 
+! Copyright 2002-2017, University Corporation for Atmospheric Research, 
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 ! Laboratory, University of Michigan, National Centers for Environmental 
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -46,6 +46,7 @@
       use ESMF_VMMod
       use ESMF_DELayoutMod
       use ESMF_CalendarMod
+      use ESMF_TraceMod
 
       implicit none
       private
@@ -134,7 +135,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     {\tt ESMF\_Initialize()} it inherits all of the MPI implementation 
 !     dependent limitations of what may or may not be done before 
 !     {\tt MPI\_Init()}. For instance, it is unsafe for some MPI
-!     implementations, such as MPICH, to do IO before the MPI environment
+!     implementations, such as MPICH, to do I/O before the MPI environment
 !     is initialized. Please consult the documentation of your MPI
 !     implementation for details.
 !
@@ -320,6 +321,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       type(ESMF_LogKind_Flag) :: logkindflagUse
       logical :: openflag
       integer :: complianceCheckIsOn
+      integer :: traceIsOn
+      type(ESMF_VM) :: vm
+      integer :: localPet
 
       ! Initialize return code
       rcpresent = .FALSE.
@@ -374,9 +378,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ! check logkindflag in case it is coming across from the C++ side with
       ! an incorrect value
       if (present(logkindflag)) then
-        if (logkindflag.eq.ESMF_LOGKIND_SINGLE .OR. &
-            logkindflag.eq.ESMF_LOGKIND_MULTI .OR. &
-            logkindflag.eq.ESMF_LOGKIND_NONE) then
+        if (logkindflag == ESMF_LOGKIND_SINGLE .or. &
+            logkindflag == ESMF_LOGKIND_MULTI .or. &
+            logkindflag == ESMF_LOGKIND_MULTI_ON_ERROR .or.  &
+            logkindflag == ESMF_LOGKIND_NONE) then
           logkindflagUse = logkindflag
         else
           logkindflagUse = ESMF_LOGKIND_MULTI
@@ -409,7 +414,19 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           write (ESMF_UtilIOStderr,*) ESMF_METHOD, ": Error initializing the default log/error manager"
           return
       endif
+      
+      ! Write our version number out into the log
+      call ESMF_LogWrite(&
+           "Running with ESMF Version " // ESMF_VERSION_STRING, &
+           ESMF_LOGMSG_INFO, rc=localrc)
+      if (localrc /= ESMF_SUCCESS) then
+         write (ESMF_UtilIOStderr,*) ESMF_METHOD, ": Error writing into the default log"
+         return
+      endif
 
+      ! Ensure that at least the version number makes it into the log
+      call ESMF_LogFlush(rc=localrc)
+      
       ! if compliance checker is on, we want logs to have high prescision timestamps
       call c_esmc_getComplianceCheckJSON(complianceCheckIsOn, localrc)
       if (localrc /= ESMF_SUCCESS) then
@@ -424,17 +441,19 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         endif
       endif
 
-      ! Write our version number out into the log
-      call ESMF_LogWrite(&
-        "Running with ESMF Version " // ESMF_VERSION_STRING, &
-        ESMF_LOGMSG_INFO, rc=localrc)
+      ! check if tracing is on
+      call c_esmc_getComplianceCheckTrace(traceIsOn, localrc)
       if (localrc /= ESMF_SUCCESS) then
-          write (ESMF_UtilIOStderr,*) ESMF_METHOD, ": Error writing into the default log"
+          write (ESMF_UtilIOStderr,*) ESMF_METHOD, ": Error checking ESMF_RUNTIME_COMPLIANCECHECK env variable"
           return
       endif
-
-      ! Ensure that at least the version number makes it into the log
-      call ESMF_LogFlush(rc=localrc)
+      if (traceIsOn == 1) then
+         call ESMF_TraceOpen("./traceout", rc=localrc)
+         if (localrc /= ESMF_SUCCESS) then
+            write (ESMF_UtilIOStderr,*) ESMF_METHOD, ": Error initializing trace stream"
+            return
+         endif
+      endif
 
       ! Initialize the default time manager calendar
       call ESMF_CalendarInitialize(calkindflag=defaultCalKind, rc=localrc)
@@ -535,6 +554,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       logical, save :: already_final = .false.    ! Static, maintains state.
 
       logical, parameter :: trace = .false.
+      integer :: traceIsOn
 
       ! Initialize return code
       rcpresent = .FALSE.
@@ -554,6 +574,21 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       if (localrc /= ESMF_SUCCESS) then
           write (ESMF_UtilIOStderr,*) ESMF_METHOD, ": Error writing into the default log"
       endif
+
+      call c_esmc_getComplianceCheckTrace(traceIsOn, localrc)
+      if (localrc /= ESMF_SUCCESS) then
+          write (ESMF_UtilIOStderr,*) ESMF_METHOD, ": Error checking ESMF_RUNTIME_COMPLIANCECHECK env variable"
+          return
+      endif
+      if (traceIsOn == 1) then
+        call ESMF_TraceClose()
+        if (localrc /= ESMF_SUCCESS) then
+          write (ESMF_UtilIOStderr,*) ESMF_METHOD, ": Error closing trace stream"
+          return
+        endif
+      endif
+
+
 
       ! Close the Config file  
       ! TODO: write this routine and remove the status= line

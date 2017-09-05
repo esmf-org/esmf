@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2016, University Corporation for Atmospheric Research,
+! Copyright 2002-2017, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -97,7 +97,7 @@
 !  \end{sloppypar}
 !
 !  Normally gridToFieldMap argument in {\tt ESMF\_FieldCreate()} should not contain
-!  0 value entries. However, for Field with replicated dimension, a 0 entry in gridToFieldMap
+!  0 value entries. However, for a Field with replicated dimension, a 0 entry in gridToFieldMap
 !  indicates the corresponding Grid dimension is replicated in the Field. In such a Field,
 !  the rank of the Field is no longer necessarily greater than its Grid rank.
 !  An example will make this clear. We will start by creating Distgrid and Grid.

@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2016, University Corporation for Atmospheric Research,
+! Copyright 2002-2017, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -1295,7 +1295,7 @@ program ESMF_RHandleBitForBitEx
 !          = 0.5 + ( 0.2 + 0.1 + 0.1 ).
 !
 ! Again the final sum is performed on PET 0. The result is bfb identical to
-! the number stored in {\tt sumE}, which, for the chose numbers, works out to
+! the number stored in {\tt sumE}, which, for the chosen numbers, works out to
 ! have a bfb difference compared to {\tt sumC} and {\tt sumD}.
 !EOE
 
@@ -1390,7 +1390,7 @@ program ESMF_RHandleBitForBitEx
 ! {\tt pipelineDepth}. The first one affects the term order in the SMM sums and 
 ! has been discussed in detail above. The second parameter, {\tt pipelineDepth},
 ! determines how many in- and out-bound messages may be outstanding on each
-! PET. It has no affect on the term order and does not lead to bfb differences
+! PET. It has no effect on the term order and does not lead to bfb differences
 ! in the SMM results. However, in order to achieve good performance
 ! reproducibility, the user has the option to pass in a fixed value of the
 ! {\tt pipelineDepth} argument when precomputing RouteHandles.

@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2016, University Corporation for Atmospheric Research, 
+// Copyright 2002-2017, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -109,7 +109,7 @@ ArrayBundle::ArrayBundle(
     throw rc;  // bail out with exception
   }catch(...){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-      "- Caught exception", ESMC_CONTEXT, &rc);
+      "Caught exception", ESMC_CONTEXT, &rc);
     throw rc;  // bail out with exception
   }
   
@@ -221,7 +221,7 @@ ArrayBundle *ArrayBundle::create(
   
   }catch(...){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-      "- Caught exception", ESMC_CONTEXT, rc);
+      "Caught exception", ESMC_CONTEXT, rc);
     return ESMC_NULL_POINTER; // bail out
   }
   
@@ -260,7 +260,7 @@ int ArrayBundle::destroy(
   // return with errors for NULL pointer
   if (arraybundle == ESMC_NULL_POINTER || *arraybundle == ESMC_NULL_POINTER){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
-      "- Not a valid pointer to ArrayBundle", ESMC_CONTEXT, &rc);
+      "Not a valid pointer to ArrayBundle", ESMC_CONTEXT, &rc);
     return rc;
   }
 
@@ -306,10 +306,10 @@ int ArrayBundle::read(
 //
 // !ARGUMENTS:
 //
-  const char  *file,            // in    - name of file being read
+  const std::string &file,      // in    - name of file being read
   bool *singleFile,             // in    - All arrays from single file if true
   int   *timeslice,             // in    - timeslice option
-  ESMC_IOFmt_Flag *iofmt        // in    - IO format flag
+  ESMC_IOFmt_Flag *iofmt        // in    - I/O format flag
   ){
 //
 // !DESCRIPTION:
@@ -326,7 +326,7 @@ int ArrayBundle::read(
   bool localsingleFile;                   // For default handling
 
   // Check the required parameters
-  if ((char *)NULL == file) {
+  if (file.empty()) {
     ESMC_LogDefault.Write("filename argument required",
                           ESMC_LOGMSG_ERROR, ESMC_CONTEXT);
     return ESMF_RC_ARG_BAD;
@@ -378,7 +378,7 @@ int ArrayBundle::read(
         stringstream filename;
         filename << file << std::fixed << std::setw(3) << std::setfill('0') << i;
         // Call the IO read function
-        localrc = newIO->read(filename.str().c_str(), localiofmt, timeslice);
+        localrc = newIO->read(filename.str(), localiofmt, timeslice);
         ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
           ESMC_CONTEXT, &rc);
         newIO->clear();
@@ -411,12 +411,14 @@ int ArrayBundle::write(
 //
 // !ARGUMENTS:
 //
-  const char  *file,              // in    - name of file being read
+  const std::string &file,        // in    - name of file being read
+  const std::string &convention,  // in    - Attribute convention
+  const std::string &purpose,     // in    - Attribute purpose
   bool *singleFile,               // in    - All arrays to single file if true
   bool *overwrite,                // in    - OK to overwrite fields if true
   ESMC_FileStatus_Flag *status,   // in    - file status flag
   int   *timeslice,               // in    - timeslice option
-  ESMC_IOFmt_Flag *iofmt          // in    - IO format flag
+  ESMC_IOFmt_Flag *iofmt          // in    - I/O format flag
   ){
 //
 // !DESCRIPTION:
@@ -435,7 +437,7 @@ int ArrayBundle::write(
   ESMC_FileStatus_Flag localstatus;       // For default handling
 
   // Check the required parameters
-  if ((char *)NULL == file) {
+  if (file.empty()) {
     ESMC_LogDefault.Write("filename argument required",
                           ESMC_LOGMSG_ERROR, ESMC_CONTEXT);
     return ESMF_RC_ARG_BAD;
@@ -502,7 +504,7 @@ int ArrayBundle::write(
         stringstream filename;
         filename << file << std::fixed << std::setw(3) << std::setfill('0') << i;
         // Call the IO write function
-        localrc = newIO->write(filename.str().c_str(), localiofmt, localoverwrite,
+        localrc = newIO->write(filename.str(), localiofmt, localoverwrite,
           localstatus, timeslice);
         ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
           ESMC_CONTEXT, &rc);
@@ -552,7 +554,7 @@ int ArrayBundle::print()const{
   // return with errors for NULL pointer
   if (this == NULL){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
-      "- Not a valid pointer to ArrayBundle", ESMC_CONTEXT, &rc);
+      "Not a valid pointer to ArrayBundle", ESMC_CONTEXT, &rc);
     return rc;
   }
 
@@ -591,11 +593,11 @@ int ArrayBundle::haloStore(
 //
 // !ARGUMENTS:
 //
-  ArrayBundle *arraybundle,             // inout - ArrayBundle to be haloed
-  RouteHandle **routehandle,            // inout - handle to precomputed comm
+  ArrayBundle *arraybundle,           // inout - ArrayBundle to be haloed
+  RouteHandle **routehandle,          // inout - handle to precomputed comm
   ESMC_HaloStartRegionFlag halostartregionflag, // in - start of halo region
-  InterfaceInt *haloLDepth,             // in    - lower corner halo depth
-  InterfaceInt *haloUDepth              // in    - upper corner halo depth
+  InterArray<int> *haloLDepth,        // in    - lower corner halo depth
+  InterArray<int> *haloUDepth         // in    - upper corner halo depth
   ){    
 //
 // !DESCRIPTION:
@@ -618,7 +620,7 @@ int ArrayBundle::haloStore(
     // every Pet must provide arraybundle
     if (arraybundle == NULL){
       ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
-        "- Not a valid pointer to arraybundle", ESMC_CONTEXT, &rc);
+        "Not a valid pointer to arraybundle", ESMC_CONTEXT, &rc);
       return rc;
     }
     int arrayCount = arraybundle->getCount();
@@ -628,13 +630,13 @@ int ArrayBundle::haloStore(
     if (arrayCount != 
       *max_element(arrayCountList.begin(), arrayCountList.end())){
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
-        "- arraybundle argument contains different number"
+        "arraybundle argument contains different number"
         " of Arrays on different PETs", ESMC_CONTEXT, &rc);
       return rc;
     }
     if (arrayCount == 0){
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
-        "- arraybundle argument contains no Arrays", ESMC_CONTEXT, &rc);
+        "arraybundle argument contains no Arrays", ESMC_CONTEXT, &rc);
       return rc;
     }
     // construct local matchList
@@ -737,7 +739,7 @@ int ArrayBundle::haloStore(
     return rc;
   }catch(...){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-      "- Caught exception", ESMC_CONTEXT, &rc);
+      "Caught exception", ESMC_CONTEXT, &rc);
     return rc;
   }
 
@@ -840,12 +842,12 @@ int ArrayBundle::redistStore(
 //
 // !ARGUMENTS:
 //
-  ArrayBundle *srcArraybundle,          // in    - source ArrayBundle
-  ArrayBundle *dstArraybundle,          // in    - destination ArrayBundle
-  RouteHandle **routehandle,            // inout - handle to precomputed comm
-  InterfaceInt *srcToDstTransposeMap,   // in    - mapping src -> dst dims
-  ESMC_TypeKind_Flag typekindFactor,         // in    - typekind of factor
-  void *factor                          // in    - redist factor
+  ArrayBundle *srcArraybundle,            // in    - source ArrayBundle
+  ArrayBundle *dstArraybundle,            // in    - destination ArrayBundle
+  RouteHandle **routehandle,              // inout - handle to precomputed comm
+  InterArray<int> *srcToDstTransposeMap,  // in    - mapping src -> dst dims
+  ESMC_TypeKind_Flag typekindFactor,      // in    - typekind of factor
+  void *factor                            // in    - redist factor
   ){    
 //
 // !DESCRIPTION:
@@ -870,18 +872,18 @@ int ArrayBundle::redistStore(
     // every Pet must provide srcArraybundle and dstArraybundle
     if (srcArraybundle == NULL){
       ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
-        "- Not a valid pointer to srcArraybundle", ESMC_CONTEXT, &rc);
+        "Not a valid pointer to srcArraybundle", ESMC_CONTEXT, &rc);
       return rc;
     }
     if (dstArraybundle == NULL){
       ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
-        "- Not a valid pointer to dstArraybundle", ESMC_CONTEXT, &rc);
+        "Not a valid pointer to dstArraybundle", ESMC_CONTEXT, &rc);
       return rc;
     }
     int arrayCount = srcArraybundle->getCount();
     if (arrayCount != dstArraybundle->getCount()){
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
-        "- srcArraybundle and dstArraybundle contain different number"
+        "srcArraybundle and dstArraybundle contain different number"
         " of Arrays", ESMC_CONTEXT, &rc);
       return rc;
     }
@@ -891,13 +893,13 @@ int ArrayBundle::redistStore(
     if (arrayCount != 
       *max_element(arrayCountList.begin(), arrayCountList.end())){
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
-        "- srcArraybundle and dstArraybundle arguments contain different number"
+        "srcArraybundle and dstArraybundle arguments contain different number"
         " of Arrays on different PETs", ESMC_CONTEXT, &rc);
       return rc;
     }
     if (arrayCount == 0){
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
-        "- srcArraybundle and dstArraybundle arguments contain no Arrays",
+        "srcArraybundle and dstArraybundle arguments contain no Arrays",
         ESMC_CONTEXT, &rc);
       return rc;
     }
@@ -1009,7 +1011,7 @@ int ArrayBundle::redistStore(
     return rc;
   }catch(...){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-      "- Caught exception", ESMC_CONTEXT, &rc);
+      "Caught exception", ESMC_CONTEXT, &rc);
     return rc;
   }
 
@@ -1113,10 +1115,11 @@ int ArrayBundle::sparseMatMulStore(
 //
 // !ARGUMENTS:
 //
-  ArrayBundle *srcArraybundle,          // in    - source ArrayBundle
-  ArrayBundle *dstArraybundle,          // in    - destination ArrayBundle
-  RouteHandle **routehandle,            // inout - handle to precomputed comm
-  vector<SparseMatrix> &sparseMatrix    // in    - sparse matrix
+  ArrayBundle *srcArraybundle,        // in    - source ArrayBundle
+  ArrayBundle *dstArraybundle,        // in    - destination ArrayBundle
+  RouteHandle **routehandle,          // inout - handle to precomputed comm
+  vector<SparseMatrix<ESMC_I4,ESMC_I4> > &sparseMatrix, // in - sparse matrix
+  InterArray<int> *srcTermProcessing  // inout - srcTermProcessing parameters
   ){    
 //
 // !DESCRIPTION:
@@ -1141,18 +1144,18 @@ int ArrayBundle::sparseMatMulStore(
     // every Pet must provide srcArraybundle and dstArraybundle
     if (srcArraybundle == NULL){
       ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
-        "- Not a valid pointer to srcArraybundle", ESMC_CONTEXT, &rc);
+        "Not a valid pointer to srcArraybundle", ESMC_CONTEXT, &rc);
       return rc;
     }
     if (dstArraybundle == NULL){
       ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
-        "- Not a valid pointer to dstArraybundle", ESMC_CONTEXT, &rc);
+        "Not a valid pointer to dstArraybundle", ESMC_CONTEXT, &rc);
       return rc;
     }
     int arrayCount = srcArraybundle->getCount();
     if (arrayCount != dstArraybundle->getCount()){
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
-        "- srcArraybundle and dstArraybundle contain different number"
+        "srcArraybundle and dstArraybundle contain different number"
         " of Arrays", ESMC_CONTEXT, &rc);
       return rc;
     }
@@ -1162,15 +1165,47 @@ int ArrayBundle::sparseMatMulStore(
     if (arrayCount != 
       *max_element(arrayCountList.begin(), arrayCountList.end())){
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
-        "- srcArraybundle and dstArraybundle arguments contain different number"
+        "srcArraybundle and dstArraybundle arguments contain different number"
         " of Arrays on different PETs", ESMC_CONTEXT, &rc);
       return rc;
     }
     if (arrayCount == 0){
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
-        "- srcArraybundle and dstArraybundle arguments contain no Arrays",
+        "srcArraybundle and dstArraybundle arguments contain no Arrays",
         ESMC_CONTEXT, &rc);
       return rc;
+    }
+    // check if srcTermProcessing argument is valid
+    vector<int*> srcTermProcParameters(arrayCount);
+    if (!present(srcTermProcessing)){
+      // srcTermProcessing argument is not present
+      for (int i=0; i<arrayCount; i++)
+        srcTermProcParameters[i] = NULL;  // invalidate each parameter
+    }else{
+      // srcTermProcessing argument is present
+      if (srcTermProcessing->extent[0]==arrayCount){
+        // same number of elements as there are arrays in the bundles
+        for (int i=0; i<arrayCount; i++)
+          srcTermProcParameters[i] = &(srcTermProcessing->array[i]);
+      }else if (srcTermProcessing->extent[0]==1){
+        // single element in srcTermProcessing but more arrays in bundles
+        if (srcTermProcessing->array[0] < 0){
+          ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
+            "Single srcTermProcessing parameter must not be negative to "
+            "apply for all arrays in bundle.",
+            ESMC_CONTEXT, &rc);
+          return rc;
+        }
+        for (int i=0; i<arrayCount; i++)
+          srcTermProcParameters[i] = &(srcTermProcessing->array[0]);
+      }else{
+        // all other conditions are error conditions
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
+          "Number of elements in srcTermProcessing must match number of "
+          "arrays in bundles, or be 1.",
+          ESMC_CONTEXT, &rc);
+        return rc;
+      }
     }
     // construct local matchList
     vector<int> matchList(arrayCount);
@@ -1241,13 +1276,16 @@ int ArrayBundle::sparseMatMulStore(
           vectorLengthShift);
         if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
           ESMC_CONTEXT, &rc)) return rc;
+        // also supply the value of matching srcTermProcessing element back
+        if (srcTermProcParameters[i] && srcTermProcParameters[matchList[i]])
+          *srcTermProcParameters[i] = *srcTermProcParameters[matchList[i]];
       }else{
         // src/dst Array pair does _not_ match any previous pair in ArrayBundle
 //        printf("localPet=%d, src/dst pair #%d requires precompute\n",
 //          localPet, i);
         RouteHandle *rh;
         localrc = Array::sparseMatMulStore(srcArray, dstArray, &rh, 
-          sparseMatrix);
+          sparseMatrix, false, false, srcTermProcParameters[i]);
         if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
           ESMC_CONTEXT, &rc)) return rc;
         // get a handle on the XXE stored in rh
@@ -1280,7 +1318,7 @@ int ArrayBundle::sparseMatMulStore(
     return rc;
   }catch(...){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-      "- Caught exception", ESMC_CONTEXT, &rc);
+      "Caught exception", ESMC_CONTEXT, &rc);
     return rc;
   }
   
@@ -1369,7 +1407,7 @@ int ArrayBundle::sparseMatMul(
       }else{
         // inconsistency detected
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
-          "- incorrect number of elements provided in the termorderflag.", 
+          "incorrect number of elements provided in the termorderflag.", 
           ESMC_CONTEXT, &rc);
         return rc;  // bail out
       }
@@ -1381,7 +1419,7 @@ int ArrayBundle::sparseMatMul(
       if (srcArraybundle != NULL && dstArraybundle != NULL){
         if (srcArraybundle->getCount() != dstArraybundle->getCount()){
           ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
-            "- srcArraybundle and dstArraybundle contain different number"
+            "srcArraybundle and dstArraybundle contain different number"
             " of Arrays", ESMC_CONTEXT, &rc);
           return rc;
         }
@@ -1420,82 +1458,86 @@ int ArrayBundle::sparseMatMul(
       // prepare for relative run-time addressing (RRA)
       vector<char *> rraList;
       vector<int> vectorLength;
-      rraList.reserve(100); // optimize performance
-      vectorLength.reserve(100); // optimize performance
+      vector<int> srcLocalDeCountList;
+      vector<XXE::SuperVectP> superVectPList;
+      rraList.reserve(100);             // optimize performance
+      vectorLength.reserve(100);        // optimize performance
+      srcLocalDeCountList.reserve(100); // optimize performance
+      superVectPList.reserve(100);      // optimize performance
+      
       if (srcArraybundle != NULL && dstArraybundle != NULL){
         if (srcArraybundle->getCount() != dstArraybundle->getCount()){
           ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
-            "- srcArraybundle and dstArraybundle contain different number"
+            "srcArraybundle and dstArraybundle contain different number"
             " of Arrays", ESMC_CONTEXT, &rc);
           return rc;
         }
-        for (int i=0; i<srcArraybundle->getCount(); i++){
-          srcArray = srcArrayVector[i];
-          void **larrayBaseAddrList = srcArray->getLarrayBaseAddrList();
-          for (int j=0; j<srcArray->getDELayout()->getLocalDeCount(); j++){
-            char *rraElement = (char *)larrayBaseAddrList[j];
-            rraList.push_back(rraElement);
+      }
+
+      // get a handle on the XXE stored in routehandle
+      XXE *xxe = (XXE *)(*routehandle)->getStorage();
+      
+      if (srcArraybundle != NULL || dstArraybundle != NULL){
+        int k=0;  // init
+        for (int i=0; i<count; i++){
+          if (srcArraybundle != NULL){
+            srcArray = srcArrayVector[i];
+            void **larrayBaseAddrList = srcArray->getLarrayBaseAddrList();
+            for (int j=0; j<srcArray->getDELayout()->getLocalDeCount(); j++){
+              char *rraElement = (char *)larrayBaseAddrList[j];
+              rraList.push_back(rraElement);
+            }
           }
-          dstArray = dstArrayVector[i];
-          larrayBaseAddrList = dstArray->getLarrayBaseAddrList();
-          for (int j=0; j<dstArray->getDELayout()->getLocalDeCount(); j++){
-            char *rraElement = (char *)larrayBaseAddrList[j];
-            rraList.push_back(rraElement);
+          if (dstArraybundle != NULL){
+            dstArray = dstArrayVector[i];
+            void **larrayBaseAddrList = dstArray->getLarrayBaseAddrList();
+            for (int j=0; j<dstArray->getDELayout()->getLocalDeCount(); j++){
+              char *rraElement = (char *)larrayBaseAddrList[j];
+              rraList.push_back(rraElement);
+            }
           }
-          int vectorL = 1;  // prime
-          int rank = srcArray->getRank();
-          for (int jj=0; jj<rank; jj++){
-            if (srcArray->getArrayToDistGridMap()[jj])
-              // decomposed dimension
-              break;
-            else
-              // tensor dimension
-              vectorL *= srcArray->getUndistUBound()[jj]
-                - srcArray->getUndistLBound()[jj] + 1;
-          }
+          // see if xxe sub element indicates okay for super-vectorization
+          bool superVectorOkay = xxe->getNextSubSuperVectorOkay(&k);
+          int vectorL = 0;  // initialize
+          // src-side super vectorization
+          int srcLocalDeCount = 0;
+          if (srcArraybundle != NULL)
+            srcLocalDeCount = srcArray->getDELayout()->getLocalDeCount();
+          int *srcSuperVecSizeUnd = new int[3];   // undistributed: r, s, t
+          int **srcSuperVecSizeDis = new int*[2]; // distributed: i, j
+          srcSuperVecSizeDis[0] = new int[srcLocalDeCount];
+          srcSuperVecSizeDis[1] = new int[srcLocalDeCount];
+          Array::superVecParam(srcArray, srcLocalDeCount, superVectorOkay,
+            srcSuperVecSizeUnd, srcSuperVecSizeDis, vectorL);
+          // dst-side super vectorization
+          int dstLocalDeCount = 0;
+          if (dstArraybundle != NULL)
+            dstLocalDeCount = dstArray->getDELayout()->getLocalDeCount();
+          int *dstSuperVecSizeUnd = new int[3];   // undistributed: r, s, t
+          int **dstSuperVecSizeDis = new int*[2]; // distributed: i, j
+          dstSuperVecSizeDis[0] = new int[dstLocalDeCount];
+          dstSuperVecSizeDis[1] = new int[dstLocalDeCount];
+          Array::superVecParam(dstArray, dstLocalDeCount, superVectorOkay,
+            dstSuperVecSizeUnd, dstSuperVecSizeDis, vectorL);
+          XXE::SuperVectP superVectP;
+          superVectP.srcSuperVecSize_r = srcSuperVecSizeUnd[0];
+          superVectP.srcSuperVecSize_s = srcSuperVecSizeUnd[1];
+          superVectP.srcSuperVecSize_t = srcSuperVecSizeUnd[2];
+          superVectP.srcSuperVecSize_i = srcSuperVecSizeDis[0];
+          superVectP.srcSuperVecSize_j = srcSuperVecSizeDis[1];
+          superVectP.dstSuperVecSize_r = dstSuperVecSizeUnd[0];
+          superVectP.dstSuperVecSize_s = dstSuperVecSizeUnd[1];
+          superVectP.dstSuperVecSize_t = dstSuperVecSizeUnd[2];
+          superVectP.dstSuperVecSize_i = dstSuperVecSizeDis[0];
+          superVectP.dstSuperVecSize_j = dstSuperVecSizeDis[1];
+          delete [] srcSuperVecSizeUnd;
+          delete [] srcSuperVecSizeDis;
+          delete [] dstSuperVecSizeUnd;
+          delete [] dstSuperVecSizeDis;
+          // push info into the vectors
           vectorLength.push_back(vectorL);
-        }
-      }else if (srcArraybundle != NULL){
-        for (int i=0; i<srcArraybundle->getCount(); i++){
-          srcArray = srcArrayVector[i];
-          void **larrayBaseAddrList = srcArray->getLarrayBaseAddrList();
-          for (int j=0; j<srcArray->getDELayout()->getLocalDeCount(); j++){
-            char *rraElement = (char *)larrayBaseAddrList[j];
-            rraList.push_back(rraElement);
-          }
-          int vectorL = 1;  // prime
-          int rank = srcArray->getRank();
-          for (int jj=0; jj<rank; jj++){
-            if (srcArray->getArrayToDistGridMap()[jj])
-              // decomposed dimension
-              break;
-            else
-              // tensor dimension
-              vectorL *= srcArray->getUndistUBound()[jj]
-                - srcArray->getUndistLBound()[jj] + 1;
-          }
-          vectorLength.push_back(vectorL);
-        }
-      }else if (dstArraybundle != NULL){
-        for (int i=0; i<dstArraybundle->getCount(); i++){
-          dstArray = dstArrayVector[i];
-          void **larrayBaseAddrList = dstArray->getLarrayBaseAddrList();
-          for (int j=0; j<dstArray->getDELayout()->getLocalDeCount(); j++){
-            char *rraElement = (char *)larrayBaseAddrList[j];
-            rraList.push_back(rraElement);
-          }
-          int vectorL = 1;  // prime
-          int rank = dstArray->getRank();
-          for (int jj=0; jj<rank; jj++){
-            if (dstArray->getArrayToDistGridMap()[jj])
-              // decomposed dimension
-              break;
-            else
-              // tensor dimension
-              vectorL *= srcArray->getUndistUBound()[jj]
-                - srcArray->getUndistLBound()[jj] + 1;
-          }
-          vectorLength.push_back(vectorL);
+          srcLocalDeCountList.push_back(srcLocalDeCount);
+          superVectPList.push_back(superVectP);
         }
       }
       int rraCount = rraList.size();
@@ -1546,26 +1588,33 @@ int ArrayBundle::sparseMatMul(
         filterBitField |= XXE::filterBitRegionTotalZero;  // filter reg. total zero
       if (zeroflag!=ESMC_REGION_SELECT)
         filterBitField |= XXE::filterBitRegionSelectZero; // filter reg. select zero
-      // get a handle on the XXE stored in routehandle
-      XXE *xxe = (XXE *)(*routehandle)->getStorage();
       // execute XXE stream
       localrc = xxe->exec(rraCount, &(rraList[0]), &(vectorLength[0]), 
-        filterBitField);
+        filterBitField, NULL, NULL, NULL, -1, -1,
+        // following are super-vectorization parameters
+        &(srcLocalDeCountList[0]), &(superVectPList[0]));
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
         ESMC_CONTEXT, &rc)) return rc;
+      // garbage collection
+      for (unsigned i=0; i<superVectPList.size(); i++){
+        delete [] superVectPList[i].srcSuperVecSize_i;
+        delete [] superVectPList[i].srcSuperVecSize_j;
+        delete [] superVectPList[i].dstSuperVecSize_i;
+        delete [] superVectPList[i].dstSuperVecSize_j;
+      }
       // return successfully
       rc = ESMF_SUCCESS;
       return rc;
     }else{
       // unimplemented branch
       ESMC_LogDefault.MsgFoundError(ESMC_RC_NOT_IMPL,
-        "- only ESMC_ARRAYXXE and ESMC_ARRAYBUNDLEXXE are supported",
+        "only ESMC_ARRAYXXE and ESMC_ARRAYBUNDLEXXE are supported",
         ESMC_CONTEXT, &rc);
       return rc;
     }
   }catch(...){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-      "- Caught exception", ESMC_CONTEXT, &rc);
+      "Caught exception", ESMC_CONTEXT, &rc);
     return rc;
   }
   
@@ -1641,7 +1690,7 @@ int ArrayBundle::sparseMatMulRelease(
   
   }catch(...){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-      "- Caught exception", ESMC_CONTEXT, &rc);
+      "Caught exception", ESMC_CONTEXT, &rc);
     return rc;
   }
   
@@ -1693,7 +1742,7 @@ int ArrayBundle::serialize(
 
   // Check if buffer has enough free memory to hold object
   if ((inquireflag != ESMF_INQUIREONLY) && (*length - *offset) <
-    sizeof(ArrayBundle)){
+    (int)sizeof(ArrayBundle)){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
       "Buffer too short to add an ArrayBundle object", ESMC_CONTEXT, &rc);
     return rc;

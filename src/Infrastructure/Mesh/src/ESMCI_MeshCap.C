@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2016, University Corporation for Atmospheric Research, 
+// Copyright 2002-2017, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -26,14 +26,16 @@
 #include "ESMCI_F90Interface.h"
 #include "ESMCI_LogErr.h"
 #include "ESMCI_Mesh.h"
-   #include "ESMCI_VM.h"
+#include "ESMCI_VM.h"
 #include "ESMCI_CoordSys.h"
 #include "Mesh/include/ESMCI_Mesh_Glue.h"
 #include "Mesh/include/ESMCI_Mesh_GToM_Glue.h"
 #include "Mesh/include/ESMCI_Mesh_Regrid_Glue.h"
 #include "Mesh/include/ESMCI_Mesh_XGrid_Glue.h"
+#include "Mesh/include/ESMCI_MBMesh.h"
 #include "Mesh/include/ESMCI_MBMesh_Glue.h"
 #include "Mesh/include/ESMCI_MBMesh_Regrid_Glue.h"
+#include "Mesh/include/ESMCI_MBMesh_Util.h"
 #include "Mesh/include/ESMCI_MeshCap.h"
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
@@ -55,9 +57,26 @@
   } 
 
 
+void MeshCap::fit_on_vm(VM **vm, int *rc) {
+#undef ESMC_METHOD
+#define ESMC_METHOD "MeshCap::fit_on_vm()"
+ 
+  // Call into func. depending on mesh type
+  if (is_esmf_mesh) {
+    ESMCI_MeshFitOnVM(&mesh, vm, rc);
+  } else {
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_NOT_IMPL,
+        "- this functionality is not currently supported using MOAB",
+                                  ESMC_CONTEXT, rc);
+    return;
+  }
+}
+
+
+
 // This method converts a Mesh to a PointList
 void MeshCap::MeshCap_to_PointList(ESMC_MeshLoc_Flag meshLoc, 
-                                   ESMCI::InterfaceInt *maskValuesArg, PointList **out_pl,
+                                   ESMCI::InterArray<int> *maskValuesArg, PointList **out_pl,
                                    int *rc) {
 #undef ESMC_METHOD
 #define ESMC_METHOD "MeshCap::MeshCap_to_PointList()"
@@ -65,18 +84,17 @@ void MeshCap::MeshCap_to_PointList(ESMC_MeshLoc_Flag meshLoc,
  
 
   // Call into func. depending on mesh type
+  int localrc;
   if (is_esmf_mesh) {
-    int localrc;
-    *out_pl=mesh->MeshToPointList(meshLoc, 
+    *out_pl=mesh->MeshToPointList(meshLoc,
                                   maskValuesArg, &localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
                                       ESMC_CONTEXT, rc)) return;
 
-    } else {
-     ESMC_LogDefault.MsgFoundError(ESMC_RC_NOT_IMPL,
-        "- this functionality is not currently supported using MOAB",
-                                  ESMC_CONTEXT, rc);
-    return;
+  } else {
+    *out_pl = MBMesh_to_PointList(static_cast<MBMesh *>(mbmesh), &localrc);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+                                      ESMC_CONTEXT, rc)) return;
   }
 }
 
@@ -216,8 +234,7 @@ MeshCap *MeshCap::merge(MeshCap **srcmeshpp, MeshCap **dstmeshpp,
 
 
 
-void MeshCap::xgridregrid_create(ESMCI::VM **vmpp,
-                                 MeshCap **meshsrcpp, MeshCap **meshdstpp, 
+void MeshCap::xgridregrid_create(MeshCap **meshsrcpp, MeshCap **meshdstpp, 
                                  MeshCap **out_mesh,
                                  int *compute_midmesh,
                                  int *regridMethod, 
@@ -243,8 +260,7 @@ void MeshCap::xgridregrid_create(ESMCI::VM **vmpp,
   Mesh *mesh;
   if (is_esmf_mesh) {
     int localrc;
-    ESMCI_xgridregrid_create(vmpp,
-                             &((*meshsrcpp)->mesh), 
+    ESMCI_xgridregrid_create(&((*meshsrcpp)->mesh), 
                              &((*meshdstpp)->mesh),
                              &mesh,
                              compute_midmesh,
@@ -277,7 +293,7 @@ void MeshCap::xgridregrid_create(ESMCI::VM **vmpp,
 
 MeshCap *MeshCap::GridToMesh(const Grid &grid_, int staggerLoc, 
                              const std::vector<ESMCI::Array*> &arrays,
-                             ESMCI::InterfaceInt *maskValuesArg,
+                             ESMCI::InterArray<int> *maskValuesArg,
                              int *regridConserve, int *rc) {
 #undef ESMC_METHOD
 #define ESMC_METHOD "MeshCap::GridToMesh()"
@@ -332,7 +348,7 @@ MeshCap *MeshCap::GridToMesh(const Grid &grid_, int staggerLoc,
 
 #endif
 
-void MeshCap::regrid_getiwts(ESMCI::VM **vmpp, Grid **gridpp,
+void MeshCap::regrid_getiwts(Grid **gridpp,
                              MeshCap **meshpp, ESMCI::Array **arraypp, int *staggerLoc,
                              int *regridScheme, int*rc) {
 #undef ESMC_METHOD
@@ -344,7 +360,7 @@ void MeshCap::regrid_getiwts(ESMCI::VM **vmpp, Grid **gridpp,
   // Call into func. depending on mesh type
   if (is_esmf_mesh) {
     int localrc;
-    ESMCI_regrid_getiwts(vmpp, gridpp,
+    ESMCI_regrid_getiwts(gridpp,
                          &((*meshpp)->mesh), arraypp, staggerLoc,
                          regridScheme, &localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
@@ -408,21 +424,21 @@ void MeshCap::regrid_getfrac(Grid **gridpp,
 }
 
 
-void MeshCap::regrid_create(ESMCI::VM **vmpp,
-		    MeshCap **mcapsrcpp, ESMCI::Array **arraysrcpp, ESMCI::PointList **plsrcpp,
-		    MeshCap **mcapdstpp, ESMCI::Array **arraydstpp, ESMCI::PointList **pldstpp,
-		    int *regridMethod, 
-                    int *map_type,
-                    int *norm_type,
-                    int *regridPoleType, int *regridPoleNPnts,  
-                    int *regridScheme, 
-                    int *unmappedaction, int *_ignoreDegenerate,
-                    int *srcTermProcessing, int *pipelineDepth, 
-                    ESMCI::RouteHandle **rh, int *has_rh, int *has_iw,
-                    int *nentries, ESMCI::TempWeights **tweights,
-                    int *has_udl, int *_num_udl, ESMCI::TempUDL **_tudl, 
-                    int *has_statusArray, ESMCI::Array **statusArray,
-                    int*rc) {
+void MeshCap::regrid_create(
+    MeshCap **mcapsrcpp, ESMCI::Array **arraysrcpp, ESMCI::PointList **plsrcpp,
+    MeshCap **mcapdstpp, ESMCI::Array **arraydstpp, ESMCI::PointList **pldstpp,
+    int *regridMethod,
+    int *map_type,
+    int *norm_type,
+    int *regridPoleType, int *regridPoleNPnts,
+    int *regridScheme,
+    int *unmappedaction, int *_ignoreDegenerate,
+    int *srcTermProcessing, int *pipelineDepth,
+    ESMCI::RouteHandle **rh, int *has_rh, int *has_iw,
+    int *nentries, ESMCI::TempWeights **tweights,
+    int *has_udl, int *_num_udl, ESMCI::TempUDL **_tudl,
+    int *has_statusArray, ESMCI::Array **statusArray,
+    int*rc) {
 #undef ESMC_METHOD
 #define ESMC_METHOD "MeshCap::regrid_create()"                           
 
@@ -497,8 +513,7 @@ void MeshCap::regrid_create(ESMCI::VM **vmpp,
   // Call into func. depending on mesh type
   if (is_esmf_mesh) {
     int localrc;
-    ESMCI_regrid_create(vmpp,
-                        (Mesh **)&mesh_src_p, arraysrcpp, plsrcpp,
+    ESMCI_regrid_create((Mesh **)&mesh_src_p, arraysrcpp, plsrcpp,
                         (Mesh **)&mesh_dst_p, arraydstpp, pldstpp,
                         regridMethod, 
                         map_type,
@@ -517,12 +532,11 @@ void MeshCap::regrid_create(ESMCI::VM **vmpp,
   } else {
 #ifdef ESMF_MOAB 
     int localrc;
-    MBMesh_regrid_create(vmpp,
-                         &mesh_src_p, arraysrcpp,
-                         &mesh_dst_p, arraydstpp,
-                         regridMethod, 
-                           map_type,
-                          norm_type,
+    MBMesh_regrid_create(&mesh_src_p, arraysrcpp, plsrcpp,
+                         &mesh_dst_p, arraydstpp, pldstpp,
+                         regridMethod,
+                         map_type,
+                         norm_type,
                          regridPoleType, regridPoleNPnts,  
                          regridScheme, 
                          unmappedaction, _ignoreDegenerate,
@@ -589,7 +603,7 @@ MeshCap *MeshCap::meshcreate(int *pdim, int *sdim,
 } 
 
 void MeshCap::meshaddnodes(int *num_nodes, int *nodeId, 
-                               double *nodeCoord, int *nodeOwner, InterfaceInt *nodeMaskII,
+                               double *nodeCoord, int *nodeOwner, InterArray<int> *nodeMaskII,
                                ESMC_CoordSys_Flag *_coordSys, int *_orig_sdim,
                                int *rc) 
 {
@@ -636,7 +650,7 @@ void MeshCap::meshwrite(char *fname, int *rc,
   }
 }
 
-void MeshCap::meshaddelements(int *_num_elems, int *elemId, int *elemType, InterfaceInt *_elemMaskII ,
+void MeshCap::meshaddelements(int *_num_elems, int *elemId, int *elemType, InterArray<int> *_elemMaskII ,
                               int *_areaPresent, double *elemArea, 
                               int *_coordsPresent, double *elemCoords, 
                               int *_num_elemConn, int *elemConn, int *regridConserve, 
@@ -779,6 +793,7 @@ void MeshCap::meshcreateelemdistgrid(int *egrid, int *num_lelems, int *rc) {
 }
 
 void MeshCap::meshinfoserialize(int *intMeshFreed,
+                                int *spatialDim, int *parametricDim, 
 	        char *buffer, int *length, int *offset,
                 ESMC_InquireFlag *inquireflag, int *rc,
                 ESMCI_FortranStrLenArg buffer_l){
@@ -789,12 +804,14 @@ void MeshCap::meshinfoserialize(int *intMeshFreed,
   // Check if need, and if so
   // eventually put into something separate from both Mesh and MOAB
   ESMCI_meshinfoserialize(intMeshFreed,
+                          spatialDim, parametricDim, 
                           buffer, length, offset,
                           inquireflag, rc, buffer_l);
 } 
 
 
 void MeshCap::meshinfodeserialize(int *intMeshFreed, 
+                                 int *spatialDim, int *parametricDim, 
                                   char *buffer, int *offset, int *rc,
                                   ESMCI_FortranStrLenArg buffer_l){
 #undef ESMC_METHOD
@@ -804,6 +821,7 @@ void MeshCap::meshinfodeserialize(int *intMeshFreed,
   // Check if need, and if so
   // eventually put into something separate from both Mesh and MOAB
   ESMCI_meshinfodeserialize(intMeshFreed, 
+                            spatialDim, parametricDim, 
                             buffer, offset, rc,
                             buffer_l);
 } 
@@ -1011,7 +1029,7 @@ void MeshCap::triangulate(int *pdim, int *sdim, int *numPnts,
                      pnts, td, ti, triInd, rc);
 }
 
-void MeshCap::meshturnoncellmask(ESMCI::InterfaceInt *maskValuesArg,  int *rc) {
+void MeshCap::meshturnoncellmask(ESMCI::InterArray<int> *maskValuesArg,  int *rc) {
 #undef ESMC_METHOD
 #define ESMC_METHOD "MeshCap::meshturnoncellmask()"
  
@@ -1049,7 +1067,7 @@ void MeshCap::meshturnoffcellmask(int *rc) {
  }
 
 
-void MeshCap::meshturnonnodemask(ESMCI::InterfaceInt *maskValuesArg,  int *rc) {
+void MeshCap::meshturnonnodemask(ESMCI::InterArray<int> *maskValuesArg,  int *rc) {
 #undef ESMC_METHOD
 #define ESMC_METHOD "MeshCap::meshturnonnodemask()"
 

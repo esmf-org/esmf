@@ -100,6 +100,11 @@ ESMF_F90COMPILER_VERSION    = ${ESMF_F90COMPILER} -V
 ESMF_CXXCOMPILER_VERSION    = ${ESMF_CXXCOMPILER} -V -v
 
 ############################################################
+# Special debug flags
+#
+ESMF_CXXOPTFLAG_G       += -traceback
+
+############################################################
 # How to specify module directories
 #
 ESMF_F90IMOD        = -p

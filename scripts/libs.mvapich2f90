@@ -1,0 +1,10 @@
+#!/bin/sh
+# this scripts determines the correct MVAPICH2 Fortran bindings library to
+# use when mpicxx is used for linking.  If libmpifort, use it.
+PATHEXE=`which mpicxx`
+MVAPICH2_LIBDIR=`dirname ${PATHEXE}`/../lib*
+ls -1 ${MVAPICH2_LIBDIR} | grep mpifort > /dev/null 2>&1
+if [ $? = 0 ]; then
+  echo -lmpifort;
+fi
+

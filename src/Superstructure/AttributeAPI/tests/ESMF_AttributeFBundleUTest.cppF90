@@ -1,7 +1,7 @@
 !  $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2016, University Corporation for Atmospheric Research,
+! Copyright 2002-2017, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -54,6 +54,7 @@ program ESMF_AttributeFBundleUTest
 
       ! macro variables
       AttributeTestVariablesMacro()
+      AttributeTestVariablesCopyMacro(fieldbundle, ESMF_FieldBundle)
 
 !-------------------------------------------------------------------------------
 !  The unit tests are divided into Sanity and Exhaustive. The Sanity tests are
@@ -87,6 +88,8 @@ program ESMF_AttributeFBundleUTest
 !-------------------------------------------------------------------------
 
 AttributeTestMacro(fieldbundle, a FieldBundle, EX_UTest, NEX_UTest)
+
+AttributeTestCopyMacro(fieldbundle, ESMF_FieldBundle, a FieldBundle, ESMF_FieldBundle, EX_UTest, NEX_UTest)
 
     !-------------------------------------------------------------------------
     !  Attribute hierarchy linking
@@ -138,7 +141,7 @@ AttributeTestMacro(fieldbundle, a FieldBundle, EX_UTest, NEX_UTest)
       !------------------------------------------------------------------------
       ! clean up
       call ESMF_FieldBundleDestroy(fieldbundle, rc=rc)
-      
+
       call ESMF_FieldDestroy(ffb, rc=rc)
 
       if (rc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
