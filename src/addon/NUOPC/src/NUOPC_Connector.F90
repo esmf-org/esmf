@@ -700,11 +700,11 @@ print *, "bondLevelMax:", bondLevelMax, "bondLevel:", bondLevel
     type(ESMF_Field),       pointer       :: importFieldList(:)
     type(ESMF_Field),       pointer       :: exportFieldList(:)
     type(ESMF_Field)                      :: field
-    character(ESMF_MAXSTR)                :: connectionString
+    character(ESMF_MAXSTR)                :: connectionString, valueString
     character(ESMF_MAXSTR), pointer       :: importNamespaceList(:)
     character(ESMF_MAXSTR), pointer       :: exportNamespaceList(:)
     character(ESMF_MAXSTR), pointer       :: cplList(:)
-    character(ESMF_MAXSTR)                :: msgString, valueString
+    character(len=160)                    :: msgString
     integer                               :: verbosity
     integer                               :: profiling
     logical                               :: match
@@ -889,23 +889,17 @@ print *, "current bondLevel=", bondLevel
               read (connectionString(10:len(connectionString)), "(i10)") &
                 bondLevelMax  ! the bondLevel that was targeted
               if (bondLevel == bondLevelMax) then
-                ! ambiguity detected -> check if this may be resolved
+                ! ambiguity detected -> check if this can be resolved
                 if (importStateIntent==ESMF_STATEINTENT_IMPORT) then
                   ! importState is a component's importState, i.e. not a 
                   ! real producer, but a driver intermediary
-                  ! -> resolve this issue by removing the field in question
-                  ! -> from the importState of the driver intermediary because
-                  ! -> obviously there are local producers that are available.
-                  call ESMF_FieldGet(importFieldList(i), name=fieldName, rc=rc)
-                  if (ESMF_LogFoundError(rcToCheck=rc, &
-                    msg=ESMF_LOGERR_PASSTHRU, &
-                    line=__LINE__, file=trim(name)//":"//FILENAME)) &
-                    return  ! bail out
-                  call ESMF_StateRemove(importState, (/fieldName/), rc=rc)
-                  if (ESMF_LogFoundError(rcToCheck=rc, &
-                    msg=ESMF_LOGERR_PASSTHRU, &
-                    line=__LINE__, file=trim(name)//":"//FILENAME)) &
-                    return  ! bail out
+                  ! -> obviously there are local producers that are available
+                  ! -> not a problem, simply ignore here, i.e. nothing to be
+                  !    added to this Connectors CplList
+                  ! -> do not modify the importState though here, because other
+                  !    Connectors may still need to interact with it. The driver
+                  !    will take care of removing fields from its importState
+                  !    when it is time to do so.
                 else
                   ! importState is a model's exportState, i.e. real producer
                   ! cannot resolve that situation -> bail out
