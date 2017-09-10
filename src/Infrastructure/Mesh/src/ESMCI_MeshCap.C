@@ -91,10 +91,12 @@ void MeshCap::MeshCap_to_PointList(ESMC_MeshLoc_Flag meshLoc,
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
                                       ESMC_CONTEXT, rc)) return;
 
+#ifdef ESMF_MOAB
   } else {
     *out_pl = MBMesh_to_PointList(static_cast<MBMesh *>(mbmesh), &localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
                                       ESMC_CONTEXT, rc)) return;
+#endif
   }
 }
 
