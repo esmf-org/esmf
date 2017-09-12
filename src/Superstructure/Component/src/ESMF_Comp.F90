@@ -642,16 +642,15 @@ contains
       compp%dirPath = "."
     endif
 
-    ! sort out what happens if both a already created config object and
-    ! a config filename are given.  the current rules are:  
-    if (present(configFile) .and. present(config)) then
-      ! a config object gets priority over a name if both are specified.
-      call ESMF_LogWrite("Warning: only 1 of Config object or filename should be given.", &
-        ESMF_LOGMSG_WARNING)
-      call ESMF_LogWrite(msg="Using Config object; ignoring Config filename.", &
-        logmsgFlag=ESMF_LOGMSG_WARNING)
+    ! config handling
+    if (present(config)) then
       compp%config = config
       compp%compStatus%configIsPresent = .true.
+      if (present(configFile)) then
+        ! a config object gets priority over a name if both are specified.
+        call ESMF_LogWrite("Ignoring configFile because config object given.", &
+          ESMF_LOGMSG_WARNING)
+      endif
     else if (present(configFile)) then
       ! name of a specific config file.  open it and store the config object.
       compp%configFile = configFile
@@ -675,10 +674,6 @@ contains
           return
         endif
       endif
-    else if (present(config)) then
-      ! store already opened config object
-      compp%config = config
-      compp%compStatus%configIsPresent = .true.
     endif
 
     ! clock
@@ -1448,7 +1443,7 @@ contains
       dirPath = compp%dirPath
     endif
 
-    ! access clock
+    ! access configFile
     if (present(configFile)) then
       if (.not.compp%compStatus%configFileIsPresent) then
         call ESMF_LogSetError(ESMF_RC_OBJ_BAD, &
@@ -1780,8 +1775,10 @@ contains
 !
 !EOPI
 !------------------------------------------------------------------------------
-    integer                 :: localrc      ! local return code
-    type(ESMF_Status)       :: baseStatus
+    integer                         :: localrc      ! local return code
+    type(ESMF_Status)               :: baseStatus
+    character(len=ESMF_MAXPATHLEN)  :: fullpath     ! config file + dirPath
+    character(len=ESMF_MAXSTR)      :: msgbuf
 
     ! Initialize return code; assume not implemented until success is certain
     localrc = ESMF_RC_NOT_IMPL
@@ -1839,14 +1836,38 @@ contains
       compp%dirPath = dirPath
     endif
 
-    if (present(configFile)) then
-      compp%configFile = configFile
-      compp%compStatus%configFileIsPresent = .true.
-    endif
-
+    ! config handling
     if (present(config)) then
       compp%config = config
       compp%compStatus%configIsPresent = .true.
+      if (present(configFile)) then
+        ! a config object gets priority over a name if both are specified.
+        call ESMF_LogWrite("Ignoring configFile because config object given.", &
+          ESMF_LOGMSG_WARNING)
+      endif
+    else if (present(configFile)) then
+      ! name of a specific config file.  open it and store the config object.
+      compp%configFile = configFile
+      compp%compStatus%configFileIsPresent = .true.
+      compp%config = ESMF_ConfigCreate(rc=localrc)
+      compp%compStatus%configIsPresent = .true.
+      call ESMF_ConfigLoadFile(compp%config, configFile, rc=localrc)
+      if (localrc /= ESMF_SUCCESS) then
+        ! try again with the dirPath concatinated on front
+        fullpath = trim(compp%dirPath) // '/' // trim(configFile)
+        call ESMF_ConfigLoadFile(compp%config, fullpath, rc=localrc)
+        ! TODO: construct a msg string and then call something here.
+        ! if (ESMF_LogFoundError(status, msgstr, rc)) return
+        if (localrc /= ESMF_SUCCESS) then
+          write(msgbuf, *) &
+            "ERROR: loading config file, unable to open either", &
+            " name = ", trim(configFile), " or name = ", trim(fullpath)
+          call ESMF_LogSetError(ESMF_RC_ARG_VALUE, &
+            msg=msgbuf, &
+            ESMF_CONTEXT, rcTOReturn=rc)
+          return
+        endif
+      endif
     endif
 
     ! Return successfully
