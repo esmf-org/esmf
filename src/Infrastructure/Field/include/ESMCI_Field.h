@@ -108,7 +108,20 @@ namespace ESMCI{
                            ESMC_UnmappedAction_Flag *unmappedAction,
                            ESMC_Logical *ignoreDegenerate,
                            Field *srcFracField, Field *dstFracField);
-    static int regrid(Field *fieldsrc, Field *fielddst, 
+    static int regridstorefile(Field *fieldsrc, Field *fielddst,
+                           const char *filename,
+                           ESMC_InterArrayInt *srcMaskValues,
+                           ESMC_InterArrayInt *dstMaskValues,
+                           RouteHandle **routehandle,
+                           ESMC_RegridMethod_Flag *regridMethod,
+                           ESMC_PoleMethod_Flag *polemethod,
+                           int *regridPoleNPnts,
+                           ESMC_LineType_Flag *lineType,
+                           ESMC_NormType_Flag *normType,
+                           ESMC_UnmappedAction_Flag *unmappedAction,
+                           ESMC_Logical *ignoreDegenerate,
+                           Field *srcFracField, Field *dstFracField);
+    static int regrid(Field *fieldsrc, Field *fielddst,
                       RouteHandle *routehandle, ESMC_Region_Flag *zeroRegion);
     static int regridrelease(RouteHandle *routehandle);
     static int smmstore(Field *fieldsrc, Field *fielddst,

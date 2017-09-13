@@ -36,7 +36,10 @@
       use ESMF_VMMod
       use ESMF_IOUGridMod
       use ESMF_IOGridspecMod
+      use ESMF_DistGridMod
+      use ESMF_ArrayMod
       use ESMF_IOGridmosaicMod
+      use ESMF_AttPackTypeMod
 #ifdef ESMF_NETCDF
       use netcdf
 #endif
@@ -48,6 +51,7 @@
 ! !PRIVATE:
       private
 !------------------------------------------------------------------------------
+
 !
 ! !PUBLIC MEMBER FUNCTIONS:
 !
@@ -55,6 +59,7 @@
   public ESMF_ScripInq
   public ESMF_ScripInqUnits
   public ESMF_ScripGetVar
+  public ESMF_OutputWeightFile
   public ESMF_OutputScripWeightFile
   public ESMF_OutputSimpleWeightFile
   public ESMF_EsmfGetNode
@@ -71,6 +76,113 @@
 !==============================================================================
 
 ! -------------------------- ESMF-public method -------------------------------
+!------------------------------------------------------------------------------
+#undef ESMF_METHOD
+#define ESMF_METHOD "ESMF_OutputWeightFile"
+!BOPI
+! !ROUTINE: ESMF_OutputWeightFile
+! output the weight and indices tables only
+!
+
+! !INTERFACE:
+subroutine ESMF_OutputWeightFile (weightFile, factorList, factorIndexList, rc)
+!
+! !ARGUMENTS:
+    character(len=*), intent(in) :: weightFile
+    real(ESMF_KIND_R8), intent(in) :: factorList(:)
+    integer(ESMF_KIND_I4), intent(in) :: factorIndexList(:,:)
+    integer, intent(out), optional :: rc
+
+    integer :: localrc
+    type(ESMF_DistGrid) :: distgridFL
+    type(ESMF_Array) :: arrayFL, arrayFIL1, arrayFIL2
+
+    type(ESMF_AttPack) :: attpack
+    integer :: lens(3), lens2(1)
+    character(len=22), parameter :: specString = "distgridnetcdfmetadata"
+    character(len=23), parameter :: name = "ESMF:gridded_dim_labels"
+    character(len=3), parameter :: value = "n_s"
+    
+    ! make ESMF arrays out of factorList and factorIndexList
+    distgridFL = ESMF_DistGridCreate(minIndex=(/1/), &
+                                     maxIndex=(/size(factorList,1)/), &
+                                     rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+
+
+    !NOTE: removed distgridcreate from factorIndexList so that all
+    !      Arrays could share the same DistGrid (i.e. dimensions)
+
+    ! distgrid metadata
+    lens(1) = 8
+    lens(2) = 6
+    lens(3) = 8
+    
+    lens2(1) = 3
+    
+    ! set up the metadata on distgrid
+    call c_ESMC_AttPackCreateCustom(distgridFL, size(lens), specString, &
+                                    lens, attpack, rc)
+    !call ESMF_AttributeAdd(grid, convention="netcdf", purpose="metadata",  &
+    !  attrList=(/ ESMF_ATT_GRIDDED_DIM_LABELS /), rc=rc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    !call c_ESMC_AttPackAddAtt(grid, name, size(lens), specString, &
+    !                          lens, rc)
+    call c_ESMC_AttPackAddAtt(name, attpack, rc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    
+    call c_ESMC_AttPackSetCharList(distgridFL, name, ESMF_TYPEKIND_CHARACTER, &
+                                  1, value, lens2, attpack, 0, rc)
+    !call ESMF_AttributeSet(grid, name=ESMF_ATT_GRIDDED_DIM_LABELS, &
+    !                       convention="netcdf", purpose="metadata",  &
+    !                       valueList=(/ "n_s"/), rc=rc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! set up Arrays
+
+    arrayFL = ESMF_ArrayCreate(farray=factorList, distgrid=distgridFL, &
+                               indexflag=ESMF_INDEX_DELOCAL, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+
+    arrayFIL1 = ESMF_ArrayCreate(farray=factorIndexList(1,:), &
+                                 distgrid=distgridFL, &
+                                 indexflag=ESMF_INDEX_DELOCAL, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+
+    arrayFIL2 = ESMF_ArrayCreate(farray=factorIndexList(2,:), &
+                                 distgrid=distgridFL, &
+                                 indexflag=ESMF_INDEX_DELOCAL, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! write the Arrays using ArrayWrite
+    call ESMF_ArrayWrite(arrayFL, weightFile, variableName="S", &
+                         convention="netcdf", purpose="metadata", &
+                         overwrite=.false., rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+
+    call ESMF_ArrayWrite(arrayFIL1, weightFile, variableName="col", &
+                         convention="netcdf", purpose="metadata", &
+                         overwrite=.true., rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+
+    call ESMF_ArrayWrite(arrayFIL2, weightFile, variableName="row", &
+                         convention="netcdf", purpose="metadata", &
+                         overwrite=.true., rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+
+
+end subroutine ESMF_OutputWeightFile
+
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ScripInq"

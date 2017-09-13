@@ -10,7 +10,7 @@ from ESMF.util.field_utilities import compare_fields
 
 class TestRegrid(TestBase):
 
-    Manager(debug=True)
+    # Manager(debug=True)
 
     # this is for the documentation, do not modify
     def run_regridding(srcfield, dstfield, srcfracfield, dstfracfield):
@@ -77,6 +77,60 @@ class TestRegrid(TestBase):
         rh = Regrid(srcfield, dstfield, regrid_method=RegridMethod.BILINEAR,
                     line_type=LineType.CART)
         dstfield = rh(srcfield, dstfield)
+
+    def test_field_regrid_file(self):
+        # create grids
+        max_index = np.array([20, 20])
+        srcgrid = Grid(max_index, coord_sys=CoordSys.CART)
+        max_index = np.array([25, 25])
+        dstgrid = Grid(max_index, coord_sys=CoordSys.CART)
+
+        # Add coordinates
+        srcgrid.add_coords()
+        dstgrid.add_coords()
+
+        [x, y] = [0, 1]
+        gridXCorner = srcgrid.get_coords(x)
+        gridYCorner = srcgrid.get_coords(y)
+
+        for i in range(gridXCorner.shape[x]):
+            gridXCorner[i, :] = float(i) / 6.
+
+        for j in range(gridYCorner.shape[y]):
+            gridYCorner[:, j] = float(j) / 6.
+
+        gridXCorner = dstgrid.get_coords(x)
+        gridYCorner = dstgrid.get_coords(y)
+
+        for i in range(gridXCorner.shape[x]):
+            gridXCorner[i, :] = float(i) / 4.
+
+        for j in range(gridYCorner.shape[y]):
+            gridYCorner[:, j] = float(j) / 4.
+
+        # create a Field on the Grid
+        srcfield = Field(srcgrid)
+        srcfield.data[:, :] = 10.
+        dstfield = Field(srcgrid)
+        dstfield.data[:, :] = 10.
+
+        # regridding
+        import os
+        if os.path.isfile(
+                os.path.join(os.getcwd(), "esmpy_test_field_regrid_file.nc")):
+            os.remove(os.path.join(os.getcwd(), "esmpy_test_field_regrid_file.nc"))
+        else:
+            rh = Regrid(srcfield, dstfield, filename="esmpy_test_field_regrid_file.nc")
+            dstfield = rh(srcfield, dstfield)
+
+        try:
+            import netCDF4
+            from netCDF4 import Dataset
+        except ImportError:
+            pass
+        else:
+            Dataset("esmpy_test_field_regrid_file.nc", "r")
+
 
     def test_field_regrid_gridmesh(self):
         # create mesh

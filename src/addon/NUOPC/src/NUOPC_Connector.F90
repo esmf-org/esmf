@@ -97,64 +97,64 @@ module NUOPC_Connector
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
-    ! For backward compatibility with v6 API the sequence of the following
-    ! NUOPC_CompSetEntryPoint() calls is critical to produce the old default
-    ! InitializePhaseMap.
-
+    ! Implement different IPD versions. By convention, the actual routines
+    ! are named after the _highest_ IPD version they service. Make sure to
+    ! rename routines when a new IPD version is introduced!
     call NUOPC_CompSetEntryPoint(connector, ESMF_METHOD_INITIALIZE, &
       phaseLabelList=(/"IPDv05p1"/), &
-      userRoutine=Initialize05P1, rc=rc)
+      userRoutine=InitializeIPDv05p1, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     call NUOPC_CompSetEntryPoint(connector, ESMF_METHOD_INITIALIZE, &
       phaseLabelList=(/"IPDv00p1", "IPDv01p1", "IPDv02p1", "IPDv03p1"/), &
-      userRoutine=InitializeP1, rc=rc)
+      userRoutine=InitializeIPDv03p1, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     call NUOPC_CompSetEntryPoint(connector, ESMF_METHOD_INITIALIZE, &
-      phaseLabelList=(/"IPDv01p2", "IPDv02p2", "IPDv03p2", "IPDv04p2", "IPDv05p3"/), &
-      userRoutine=InitializeP2, rc=rc)
+      phaseLabelList=(/"IPDv01p2", "IPDv02p2", "IPDv03p2", "IPDv04p2", &
+      "IPDv05p3"/), userRoutine=InitializeIPDv05p3, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     call NUOPC_CompSetEntryPoint(connector, ESMF_METHOD_INITIALIZE, &
       phaseLabelList=(/"IPDv03p3", "IPDv04p3", "IPDv05p4"/), &
-      userRoutine=InitializeP3, rc=rc)
+      userRoutine=InitializeIPDv05p4, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     call NUOPC_CompSetEntryPoint(connector, ESMF_METHOD_INITIALIZE, &
       phaseLabelList=(/"IPDv03p4", "IPDv04p4", "IPDv05p5"/), &
-      userRoutine=InitializeP4, rc=rc)
+      userRoutine=InitializeIPDv05p5, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     call NUOPC_CompSetEntryPoint(connector, ESMF_METHOD_INITIALIZE, &
-      phaseLabelList=(/"IPDv01p3a", "IPDv02p3a", "IPDv03p5a", "IPDv04p5a", "IPDv05p6a"/), &
-      userRoutine=InitializeP5a, rc=rc)
+      phaseLabelList=(/"IPDv01p3a", "IPDv02p3a", "IPDv03p5a", "IPDv04p5a", &
+      "IPDv05p6a"/), userRoutine=InitializeIPDv05p6a, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     call NUOPC_CompSetEntryPoint(connector, ESMF_METHOD_INITIALIZE, &
-      phaseLabelList=(/"IPDv01p3b", "IPDv02p3b", "IPDv03p5b", "IPDv04p5b", "IPDv05p6b"/), &
-      userRoutine=InitializeP5b, rc=rc)
+      phaseLabelList=(/"IPDv01p3b", "IPDv02p3b", "IPDv03p5b", "IPDv04p5b", &
+      "IPDv05p6b"/), userRoutine=InitializeIPDv05p6b, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     call NUOPC_CompSetEntryPoint(connector, ESMF_METHOD_INITIALIZE, &
       phaseLabelList=(/"IPDv04p1a", "IPDv05p2a"/), &
-      userRoutine=InitializeP1a, rc=rc)
+      userRoutine=InitializeIPDv05p2a, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     call NUOPC_CompSetEntryPoint(connector, ESMF_METHOD_INITIALIZE, &
       phaseLabelList=(/"IPDv04p1b", "IPDv05p2b"/), &
-      userRoutine=InitializeP1b, rc=rc)
+      userRoutine=InitializeIPDv05p2b, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
+    ! setting IPDv00 phases here ensures backward compatibility with v6 API
     call NUOPC_CompSetEntryPoint(connector, ESMF_METHOD_INITIALIZE, &
       phaseLabelList=(/"IPDv00p2a"/), &
-      userRoutine=Initialize00P2a, rc=rc)
+      userRoutine=InitializeIPDv00p2a, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     call NUOPC_CompSetEntryPoint(connector, ESMF_METHOD_INITIALIZE, &
       phaseLabelList=(/"IPDv00p2b"/), &
-      userRoutine=Initialize00P2b, rc=rc)
+      userRoutine=InitializeIPDv00p2b, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
@@ -206,7 +206,7 @@ module NUOPC_Connector
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     ! intro
     if (btest(verbosity,0)) then
-      call ESMF_LogWrite(trim(name)//": "//rName//" intro:", ESMF_LOGMSG_INFO, &
+      call ESMF_LogWrite(trim(name)//": "//rName//" intro.", ESMF_LOGMSG_INFO, &
         rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
@@ -233,7 +233,7 @@ module NUOPC_Connector
     !--- extro start ---
     ! extro
     if (btest(verbosity,0)) then
-      call ESMF_LogWrite(trim(name)//": "//rName//" extro:", ESMF_LOGMSG_INFO, &
+      call ESMF_LogWrite(trim(name)//": "//rName//" extro.", ESMF_LOGMSG_INFO, &
         rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
@@ -254,14 +254,14 @@ module NUOPC_Connector
   
    !-----------------------------------------------------------------------------
 
-  subroutine Initialize05P1(cplcomp, importState, exportState, clock, rc)
+  subroutine InitializeIPDv05p1(cplcomp, importState, exportState, clock, rc)
     type(ESMF_CplComp)   :: cplcomp
     type(ESMF_State)     :: importState, exportState
     type(ESMF_Clock)     :: clock
     integer, intent(out) :: rc
 
     ! local variables
-    character(*), parameter               :: rName="Initialize05P1"
+    character(*), parameter               :: rName="InitializeIPDv05p1"
     character(ESMF_MAXSTR)                :: name, valueString
     character(ESMF_MAXSTR)                :: importXferPolicy, exportXferPolicy
     integer                               :: profiling
@@ -288,7 +288,7 @@ module NUOPC_Connector
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     ! intro
     if (btest(verbosity,0)) then
-      call ESMF_LogWrite(trim(name)//": "//rName//" intro:", ESMF_LOGMSG_INFO, &
+      call ESMF_LogWrite(trim(name)//": "//rName//" intro.", ESMF_LOGMSG_INFO, &
         rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
@@ -367,7 +367,7 @@ module NUOPC_Connector
     !--- extro start ---
     ! extro
     if (btest(verbosity,0)) then
-      call ESMF_LogWrite(trim(name)//": "//rName//" extro:", ESMF_LOGMSG_INFO, &
+      call ESMF_LogWrite(trim(name)//": "//rName//" extro.", ESMF_LOGMSG_INFO, &
         rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
@@ -471,14 +471,14 @@ module NUOPC_Connector
 
   !-----------------------------------------------------------------------------
   
-  subroutine InitializeP1a(cplcomp, importState, exportState, clock, rc)
+  subroutine InitializeIPDv05p2a(cplcomp, importState, exportState, clock, rc)
     type(ESMF_CplComp)   :: cplcomp
     type(ESMF_State)     :: importState, exportState
     type(ESMF_Clock)     :: clock
     integer, intent(out) :: rc
     
     ! local variables
-    character(*), parameter               :: rName="InitializeP1a"
+    character(*), parameter               :: rName="InitializeIPDv05p2a"
     integer                               :: i, j
     integer                               :: bondLevel, bondLevelMax
     character(ESMF_MAXSTR)                :: name, valueString
@@ -514,7 +514,7 @@ module NUOPC_Connector
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     ! intro
     if (btest(verbosity,0)) then
-      call ESMF_LogWrite(trim(name)//": "//rName//" intro:", ESMF_LOGMSG_INFO, &
+      call ESMF_LogWrite(trim(name)//": "//rName//" intro.", ESMF_LOGMSG_INFO, &
         rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
@@ -558,7 +558,7 @@ module NUOPC_Connector
     endif
 
 #if 0
-call ESMF_VMLogCurrentGarbageInfo(trim(name)//": InitializeP1a after reconcile: ")
+call ESMF_VMLogCurrentGarbageInfo(trim(name)//": InitializeIPDv05p2a after reconcile: ")
 #endif
 
     nullify(importStandardNameList)
@@ -663,7 +663,7 @@ print *, "bondLevelMax:", bondLevelMax, "bondLevel:", bondLevel
     !--- extro start ---
     ! extro
     if (btest(verbosity,0)) then
-      call ESMF_LogWrite(trim(name)//": "//rName//" extro:", ESMF_LOGMSG_INFO, &
+      call ESMF_LogWrite(trim(name)//": "//rName//" extro.", ESMF_LOGMSG_INFO, &
         rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
@@ -684,14 +684,14 @@ print *, "bondLevelMax:", bondLevelMax, "bondLevel:", bondLevel
   
   !-----------------------------------------------------------------------------
 
-  subroutine InitializeP1b(cplcomp, importState, exportState, clock, rc)
+  subroutine InitializeIPDv05p2b(cplcomp, importState, exportState, clock, rc)
     type(ESMF_CplComp)   :: cplcomp
     type(ESMF_State)     :: importState, exportState
     type(ESMF_Clock)     :: clock
     integer, intent(out) :: rc
     
     ! local variables
-    character(*), parameter               :: rName="InitializeP1b"
+    character(*), parameter               :: rName="InitializeIPDv05p2b"
     integer                               :: i, j, count, maxCount
     integer                               :: bondLevel, bondLevelMax
     character(ESMF_MAXSTR)                :: name
@@ -700,11 +700,11 @@ print *, "bondLevelMax:", bondLevelMax, "bondLevel:", bondLevel
     type(ESMF_Field),       pointer       :: importFieldList(:)
     type(ESMF_Field),       pointer       :: exportFieldList(:)
     type(ESMF_Field)                      :: field
-    character(ESMF_MAXSTR)                :: connectionString
+    character(ESMF_MAXSTR)                :: connectionString, valueString
     character(ESMF_MAXSTR), pointer       :: importNamespaceList(:)
     character(ESMF_MAXSTR), pointer       :: exportNamespaceList(:)
     character(ESMF_MAXSTR), pointer       :: cplList(:)
-    character(ESMF_MAXSTR)                :: msgString, valueString
+    character(len=160)                    :: msgString
     integer                               :: verbosity
     integer                               :: profiling
     logical                               :: match
@@ -731,7 +731,7 @@ print *, "bondLevelMax:", bondLevelMax, "bondLevel:", bondLevel
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     ! intro
     if (btest(verbosity,0)) then
-      call ESMF_LogWrite(trim(name)//": "//rName//" intro:", ESMF_LOGMSG_INFO, &
+      call ESMF_LogWrite(trim(name)//": "//rName//" intro.", ESMF_LOGMSG_INFO, &
         rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
@@ -842,26 +842,26 @@ print *, "current bondLevel=", bondLevel
 #endif
 
             if (btest(verbosity,9)) then
-              write (msgString,'(A, ": ", A30, I3, "): ", A30)') trim(name), &
-                "exportStandardNameList(j=", j, exportStandardNameList(j)
-              call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
-              if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-                line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
-                return  ! bail out
-              write (msgString,'(A, ": ", A30, I3, "): ", A30)') trim(name), &
-                "exportNamespaceList(j=", j, exportNamespaceList(j)
-              call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
-              if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-                line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
-                return  ! bail out
-              write (msgString,'(A, ": ", A30, I3, "): ", A30)') trim(name), &
+              write (msgString,'(A, ": ", A30, I3, "): ", A60)') trim(name), &
                 "importStandardNameList(i=", i, importStandardNameList(i)
               call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
               if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
                 line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
                 return  ! bail out
-              write (msgString,'(A, ": ", A30, I3, "): ", A30)') trim(name), &
+              write (msgString,'(A, ": ", A30, I3, "): ", A60)') trim(name), &
                 "importNamespaceList(i=", i, importNamespaceList(i)
+              call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+              if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+                return  ! bail out
+              write (msgString,'(A, ": ", A30, I3, "): ", A60)') trim(name), &
+                "exportStandardNameList(j=", j, exportStandardNameList(j)
+              call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+              if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+                return  ! bail out
+              write (msgString,'(A, ": ", A30, I3, "): ", A60)') trim(name), &
+                "exportNamespaceList(j=", j, exportNamespaceList(j)
               call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
               if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
                 line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
@@ -889,23 +889,17 @@ print *, "current bondLevel=", bondLevel
               read (connectionString(10:len(connectionString)), "(i10)") &
                 bondLevelMax  ! the bondLevel that was targeted
               if (bondLevel == bondLevelMax) then
-                ! ambiguity detected -> check if this may be resolved
+                ! ambiguity detected -> check if this can be resolved
                 if (importStateIntent==ESMF_STATEINTENT_IMPORT) then
                   ! importState is a component's importState, i.e. not a 
                   ! real producer, but a driver intermediary
-                  ! -> resolve this issue by removing the field in question
-                  ! -> from the importState of the driver intermediary because
-                  ! -> obviously there are local producers that are available.
-                  call ESMF_FieldGet(importFieldList(i), name=fieldName, rc=rc)
-                  if (ESMF_LogFoundError(rcToCheck=rc, &
-                    msg=ESMF_LOGERR_PASSTHRU, &
-                    line=__LINE__, file=trim(name)//":"//FILENAME)) &
-                    return  ! bail out
-                  call ESMF_StateRemove(importState, (/fieldName/), rc=rc)
-                  if (ESMF_LogFoundError(rcToCheck=rc, &
-                    msg=ESMF_LOGERR_PASSTHRU, &
-                    line=__LINE__, file=trim(name)//":"//FILENAME)) &
-                    return  ! bail out
+                  ! -> obviously there are local producers that are available
+                  ! -> not a problem, simply ignore here, i.e. nothing to be
+                  !    added to this Connectors CplList
+                  ! -> do not modify the importState though here, because other
+                  !    Connectors may still need to interact with it. The driver
+                  !    will take care of removing fields from its importState
+                  !    when it is time to do so.
                 else
                   ! importState is a model's exportState, i.e. real producer
                   ! cannot resolve that situation -> bail out
@@ -933,7 +927,7 @@ print *, "current bondLevel=", bondLevel
                 endif
                 cplList(count) = importStandardNameList(i)
                 if (btest(verbosity,10)) then
-                  write (msgString,'(A, ": added cplList(", I3, ")=", A30)') &
+                  write (msgString,'(A, ": added cplList(", I3, ")=", A60)') &
                     trim(name), count, cplList(count)
                   call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
                   if (ESMF_LogFoundError(rcToCheck=rc, &
@@ -977,7 +971,7 @@ print *, "current bondLevel=", bondLevel
     !--- extro start ---
     ! extro
     if (btest(verbosity,0)) then
-      call ESMF_LogWrite(trim(name)//": "//rName//" extro:", ESMF_LOGMSG_INFO, &
+      call ESMF_LogWrite(trim(name)//": "//rName//" extro.", ESMF_LOGMSG_INFO, &
         rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
@@ -998,14 +992,14 @@ print *, "current bondLevel=", bondLevel
   
   !-----------------------------------------------------------------------------
 
-  subroutine InitializeP1(cplcomp, importState, exportState, clock, rc)
+  subroutine InitializeIPDv03p1(cplcomp, importState, exportState, clock, rc)
     type(ESMF_CplComp)   :: cplcomp
     type(ESMF_State)     :: importState, exportState
     type(ESMF_Clock)     :: clock
     integer, intent(out) :: rc
     
     ! local variables
-    character(*), parameter               :: rName="InitializeP1"
+    character(*), parameter               :: rName="InitializeIPDv03p1"
     type(ESMF_Clock)                      :: internalClock
     character(ESMF_MAXSTR)                :: name
     character(ESMF_MAXSTR)                :: valueString
@@ -1031,7 +1025,7 @@ print *, "current bondLevel=", bondLevel
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     ! intro
     if (btest(verbosity,0)) then
-      call ESMF_LogWrite(trim(name)//": "//rName//" intro:", ESMF_LOGMSG_INFO, &
+      call ESMF_LogWrite(trim(name)//": "//rName//" intro.", ESMF_LOGMSG_INFO, &
         rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
@@ -1063,18 +1057,18 @@ print *, "current bondLevel=", bondLevel
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 #endif
 
-    ! Simply the combination of P1a + P1b
-    call InitializeP1a(cplcomp, importState, exportState, clock, rc)
+    ! Simply the combination of IPDv05p2a + IPDv05p2b
+    call InitializeIPDv05p2a(cplcomp, importState, exportState, clock, rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    call InitializeP1b(cplcomp, importState, exportState, clock, rc)
+    call InitializeIPDv05p2b(cplcomp, importState, exportState, clock, rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
     !--- extro start ---
     ! extro
     if (btest(verbosity,0)) then
-      call ESMF_LogWrite(trim(name)//": "//rName//" extro:", ESMF_LOGMSG_INFO, &
+      call ESMF_LogWrite(trim(name)//": "//rName//" extro.", ESMF_LOGMSG_INFO, &
         rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
@@ -1095,14 +1089,14 @@ print *, "current bondLevel=", bondLevel
   
   !-----------------------------------------------------------------------------
 
-  subroutine InitializeP2(cplcomp, importState, exportState, clock, rc)
+  subroutine InitializeIPDv05p3(cplcomp, importState, exportState, clock, rc)
     type(ESMF_CplComp)   :: cplcomp
     type(ESMF_State)     :: importState, exportState
     type(ESMF_Clock)     :: clock
     integer, intent(out) :: rc
     
     ! local variables
-    character(*), parameter         :: rName="InitializeP2"
+    character(*), parameter         :: rName="InitializeIPDv05p3"
     character(ESMF_MAXSTR), pointer :: cplList(:), chopStringList(:)
     character(ESMF_MAXSTR)          :: cplName
     integer                         :: cplListSize, i
@@ -1146,7 +1140,7 @@ print *, "current bondLevel=", bondLevel
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     ! intro
     if (btest(verbosity,0)) then
-      call ESMF_LogWrite(trim(name)//": "//rName//" intro:", ESMF_LOGMSG_INFO, &
+      call ESMF_LogWrite(trim(name)//": "//rName//" intro.", ESMF_LOGMSG_INFO, &
         rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
@@ -1268,7 +1262,7 @@ print *, "current bondLevel=", bondLevel
             ! -> determine bondLevel according to namespace matching
             bondLevel = &
               getBondLevel(importNamespaceList(iMatch), &
-              exportNamespaceList(eMatch))
+                exportNamespaceList(eMatch))
               
             if (bondLevel == -1) cycle  ! break out and look for next match
             
@@ -1606,11 +1600,6 @@ print *, "current bondLevel=", bondLevel
       endif
     enddo
 
-    ! create the State member    
-    is%wrap%state = ESMF_StateCreate(rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    
     if (associated(cplList)) deallocate(cplList)
     if (associated(importStandardNameList)) deallocate(importStandardNameList)
     if (associated(importFieldList)) deallocate(importFieldList)
@@ -1619,10 +1608,15 @@ print *, "current bondLevel=", bondLevel
     if (associated(exportFieldList)) deallocate(exportFieldList)
     if (associated(exportNamespaceList)) deallocate(exportNamespaceList)
     
+    ! create the State member    
+    is%wrap%state = ESMF_StateCreate(rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    
     !--- extro start ---
     ! extro
     if (btest(verbosity,0)) then
-      call ESMF_LogWrite(trim(name)//": "//rName//" extro:", ESMF_LOGMSG_INFO, &
+      call ESMF_LogWrite(trim(name)//": "//rName//" extro.", ESMF_LOGMSG_INFO, &
         rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
@@ -1643,14 +1637,14 @@ print *, "current bondLevel=", bondLevel
   
   !-----------------------------------------------------------------------------
 
-  subroutine InitializeP3(cplcomp, importState, exportState, clock, rc)
+  subroutine InitializeIPDv05p4(cplcomp, importState, exportState, clock, rc)
     type(ESMF_CplComp)   :: cplcomp
     type(ESMF_State)     :: importState, exportState
     type(ESMF_Clock)     :: clock
     integer, intent(out) :: rc
     
     ! local variables
-    character(*), parameter         :: rName="InitializeP3"
+    character(*), parameter         :: rName="InitializeIPDv05p4"
     character(ESMF_MAXSTR), pointer :: cplList(:), chopStringList(:)
     character(ESMF_MAXSTR)          :: cplName
     integer                         :: cplListSize, i
@@ -1713,7 +1707,7 @@ print *, "current bondLevel=", bondLevel
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     ! intro
     if (btest(verbosity,0)) then
-      call ESMF_LogWrite(trim(name)//": "//rName//" intro:", ESMF_LOGMSG_INFO, &
+      call ESMF_LogWrite(trim(name)//": "//rName//" intro.", ESMF_LOGMSG_INFO, &
         rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
@@ -2189,7 +2183,7 @@ call ESMF_LogWrite("eShareStatus: "//trim(eShareStatus), ESMF_LOGMSG_INFO, rc=rc
     !--- extro start ---
     ! extro
     if (btest(verbosity,0)) then
-      call ESMF_LogWrite(trim(name)//": "//rName//" extro:", ESMF_LOGMSG_INFO, &
+      call ESMF_LogWrite(trim(name)//": "//rName//" extro.", ESMF_LOGMSG_INFO, &
         rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
@@ -2210,14 +2204,14 @@ call ESMF_LogWrite("eShareStatus: "//trim(eShareStatus), ESMF_LOGMSG_INFO, rc=rc
 
   !-----------------------------------------------------------------------------
 
-  subroutine InitializeP4(cplcomp, importState, exportState, clock, rc)
+  subroutine InitializeIPDv05p5(cplcomp, importState, exportState, clock, rc)
     type(ESMF_CplComp)   :: cplcomp
     type(ESMF_State)     :: importState, exportState
     type(ESMF_Clock)     :: clock
     integer, intent(out) :: rc
     
     ! local variables
-    character(*), parameter         :: rName="InitializeP4"
+    character(*), parameter         :: rName="InitializeIPDv05p5"
     character(ESMF_MAXSTR), pointer :: cplList(:), chopStringList(:)
     character(ESMF_MAXSTR)          :: cplName
     integer                         :: cplListSize, i
@@ -2270,7 +2264,7 @@ call ESMF_LogWrite("eShareStatus: "//trim(eShareStatus), ESMF_LOGMSG_INFO, rc=rc
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     ! intro
     if (btest(verbosity,0)) then
-      call ESMF_LogWrite(trim(name)//": "//rName//" intro:", ESMF_LOGMSG_INFO, &
+      call ESMF_LogWrite(trim(name)//": "//rName//" intro.", ESMF_LOGMSG_INFO, &
         rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
@@ -2585,7 +2579,7 @@ call ESMF_LogWrite("eShareStatus: "//trim(eShareStatus), ESMF_LOGMSG_INFO, rc=rc
     !--- extro start ---
     ! extro
     if (btest(verbosity,0)) then
-      call ESMF_LogWrite(trim(name)//": "//rName//" extro:", ESMF_LOGMSG_INFO, &
+      call ESMF_LogWrite(trim(name)//": "//rName//" extro.", ESMF_LOGMSG_INFO, &
         rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
@@ -2606,14 +2600,14 @@ call ESMF_LogWrite("eShareStatus: "//trim(eShareStatus), ESMF_LOGMSG_INFO, rc=rc
 
   !-----------------------------------------------------------------------------
 
-  subroutine InitializeP5a(cplcomp, importState, exportState, clock, rc)
+  subroutine InitializeIPDv05p6a(cplcomp, importState, exportState, clock, rc)
     type(ESMF_CplComp)   :: cplcomp
     type(ESMF_State)     :: importState, exportState
     type(ESMF_Clock)     :: clock
     integer, intent(out) :: rc
     
     ! local variables
-    character(*), parameter         :: rName="InitializeP5a"
+    character(*), parameter         :: rName="InitializeIPDv05p6a"
     character(ESMF_MAXSTR)          :: name, valueString
     integer                         :: profiling
     integer                         :: verbosity
@@ -2638,7 +2632,7 @@ call ESMF_LogWrite("eShareStatus: "//trim(eShareStatus), ESMF_LOGMSG_INFO, rc=rc
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     ! intro
     if (btest(verbosity,0)) then
-      call ESMF_LogWrite(trim(name)//": "//rName//" intro:", ESMF_LOGMSG_INFO, &
+      call ESMF_LogWrite(trim(name)//": "//rName//" intro.", ESMF_LOGMSG_INFO, &
         rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
@@ -2685,7 +2679,7 @@ call ESMF_LogWrite("eShareStatus: "//trim(eShareStatus), ESMF_LOGMSG_INFO, rc=rc
     !--- extro start ---
     ! extro
     if (btest(verbosity,0)) then
-      call ESMF_LogWrite(trim(name)//": "//rName//" extro:", ESMF_LOGMSG_INFO, &
+      call ESMF_LogWrite(trim(name)//": "//rName//" extro.", ESMF_LOGMSG_INFO, &
         rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
@@ -2706,14 +2700,14 @@ call ESMF_LogWrite("eShareStatus: "//trim(eShareStatus), ESMF_LOGMSG_INFO, rc=rc
 
   !-----------------------------------------------------------------------------
 
-  subroutine InitializeP5b(cplcomp, importState, exportState, clock, rc)
+  subroutine InitializeIPDv05p6b(cplcomp, importState, exportState, clock, rc)
     type(ESMF_CplComp)   :: cplcomp
     type(ESMF_State)     :: importState, exportState
     type(ESMF_Clock)     :: clock
     integer, intent(out) :: rc
     
     ! local variables
-    character(*), parameter         :: rName="InitializeP5b"
+    character(*), parameter         :: rName="InitializeIPDv05p6b"
     character(ESMF_MAXSTR), pointer :: cplList(:), chopStringList(:)
     character(ESMF_MAXSTR), pointer :: cplListTemp(:)
     character(ESMF_MAXSTR)          :: cplName
@@ -2758,7 +2752,7 @@ call ESMF_LogWrite("eShareStatus: "//trim(eShareStatus), ESMF_LOGMSG_INFO, rc=rc
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     ! intro
     if (btest(verbosity,0)) then
-      call ESMF_LogWrite(trim(name)//": "//rName//" intro:", ESMF_LOGMSG_INFO, &
+      call ESMF_LogWrite(trim(name)//": "//rName//" intro.", ESMF_LOGMSG_INFO, &
         rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
@@ -3015,7 +3009,7 @@ call ESMF_LogWrite("eShareStatus: "//trim(eShareStatus), ESMF_LOGMSG_INFO, rc=rc
     !--- extro start ---
     ! extro
     if (btest(verbosity,0)) then
-      call ESMF_LogWrite(trim(name)//": "//rName//" extro:", ESMF_LOGMSG_INFO, &
+      call ESMF_LogWrite(trim(name)//": "//rName//" extro.", ESMF_LOGMSG_INFO, &
         rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
@@ -3036,14 +3030,14 @@ call ESMF_LogWrite("eShareStatus: "//trim(eShareStatus), ESMF_LOGMSG_INFO, rc=rc
     
   !-----------------------------------------------------------------------------
 
-  subroutine Initialize00P2a(cplcomp, importState, exportState, clock, rc)
+  subroutine InitializeIPDv00p2a(cplcomp, importState, exportState, clock, rc)
     type(ESMF_CplComp)   :: cplcomp
     type(ESMF_State)     :: importState, exportState
     type(ESMF_Clock)     :: clock
     integer, intent(out) :: rc
     
     ! local variables
-    character(*), parameter               :: rName="Initialize00P2a"
+    character(*), parameter               :: rName="InitializeIPDv00p2a"
     type(ESMF_Clock)                      :: internalClock
     character(ESMF_MAXSTR)                :: name
     character(ESMF_MAXSTR)                :: valueString
@@ -3069,7 +3063,7 @@ call ESMF_LogWrite("eShareStatus: "//trim(eShareStatus), ESMF_LOGMSG_INFO, rc=rc
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     ! intro
     if (btest(verbosity,0)) then
-      call ESMF_LogWrite(trim(name)//": "//rName//" intro:", ESMF_LOGMSG_INFO, &
+      call ESMF_LogWrite(trim(name)//": "//rName//" intro.", ESMF_LOGMSG_INFO, &
         rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
@@ -3087,18 +3081,18 @@ call ESMF_LogWrite("eShareStatus: "//trim(eShareStatus), ESMF_LOGMSG_INFO, rc=rc
     endif
     !--- intro done ---
 
-    ! Simply the combination of P2 + P5a
-    call InitializeP2(cplcomp, importState, exportState, clock, rc)
+    ! Simply the combination of IPDv05p3 + IPDv05p6a
+    call InitializeIPDv05p3(cplcomp, importState, exportState, clock, rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    call InitializeP5a(cplcomp, importState, exportState, clock, rc)
+    call InitializeIPDv05p6a(cplcomp, importState, exportState, clock, rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
     !--- extro start ---
     ! extro
     if (btest(verbosity,0)) then
-      call ESMF_LogWrite(trim(name)//": "//rName//" extro:", ESMF_LOGMSG_INFO, &
+      call ESMF_LogWrite(trim(name)//": "//rName//" extro.", ESMF_LOGMSG_INFO, &
         rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
@@ -3119,14 +3113,14 @@ call ESMF_LogWrite("eShareStatus: "//trim(eShareStatus), ESMF_LOGMSG_INFO, rc=rc
   
   !-----------------------------------------------------------------------------
 
-  subroutine Initialize00P2b(cplcomp, importState, exportState, clock, rc)
+  subroutine InitializeIPDv00p2b(cplcomp, importState, exportState, clock, rc)
     type(ESMF_CplComp)   :: cplcomp
     type(ESMF_State)     :: importState, exportState
     type(ESMF_Clock)     :: clock
     integer, intent(out) :: rc
     
     ! local variables
-    character(*), parameter               :: rName="Initialize00P2b"
+    character(*), parameter               :: rName="InitializeIPDv00p2b"
     type(ESMF_Clock)                      :: internalClock
     character(ESMF_MAXSTR)                :: name
     character(ESMF_MAXSTR)                :: valueString
@@ -3152,7 +3146,7 @@ call ESMF_LogWrite("eShareStatus: "//trim(eShareStatus), ESMF_LOGMSG_INFO, rc=rc
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     ! intro
     if (btest(verbosity,0)) then
-      call ESMF_LogWrite(trim(name)//": "//rName//" intro:", ESMF_LOGMSG_INFO, &
+      call ESMF_LogWrite(trim(name)//": "//rName//" intro.", ESMF_LOGMSG_INFO, &
         rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
@@ -3170,15 +3164,15 @@ call ESMF_LogWrite("eShareStatus: "//trim(eShareStatus), ESMF_LOGMSG_INFO, rc=rc
     endif
     !--- intro done ---
 
-    ! Simply same as P5b
-    call InitializeP5b(cplcomp, importState, exportState, clock, rc)
+    ! Simply same as IPDv05p6b
+    call InitializeIPDv05p6b(cplcomp, importState, exportState, clock, rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
     !--- extro start ---
     ! extro
     if (btest(verbosity,0)) then
-      call ESMF_LogWrite(trim(name)//": "//rName//" extro:", ESMF_LOGMSG_INFO, &
+      call ESMF_LogWrite(trim(name)//": "//rName//" extro.", ESMF_LOGMSG_INFO, &
         rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
@@ -3244,7 +3238,7 @@ call ESMF_LogWrite("eShareStatus: "//trim(eShareStatus), ESMF_LOGMSG_INFO, rc=rc
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     ! intro
     if (btest(verbosity,0)) then
-      call ESMF_LogWrite(trim(name)//": "//rName//" intro:", ESMF_LOGMSG_INFO, &
+      call ESMF_LogWrite(trim(name)//": "//rName//" intro.", ESMF_LOGMSG_INFO, &
         rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
@@ -3467,7 +3461,7 @@ call ESMF_LogWrite("eShareStatus: "//trim(eShareStatus), ESMF_LOGMSG_INFO, rc=rc
     !--- extro start ---
     ! extro
     if (btest(verbosity,0)) then
-      call ESMF_LogWrite(trim(name)//": "//rName//" extro:", ESMF_LOGMSG_INFO, &
+      call ESMF_LogWrite(trim(name)//": "//rName//" extro.", ESMF_LOGMSG_INFO, &
         rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
@@ -3523,7 +3517,7 @@ call ESMF_LogWrite("eShareStatus: "//trim(eShareStatus), ESMF_LOGMSG_INFO, rc=rc
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     ! intro
     if (btest(verbosity,0)) then
-      call ESMF_LogWrite(trim(name)//": "//rName//" intro:", ESMF_LOGMSG_INFO, &
+      call ESMF_LogWrite(trim(name)//": "//rName//" intro.", ESMF_LOGMSG_INFO, &
         rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
@@ -3627,7 +3621,7 @@ call ESMF_LogWrite("eShareStatus: "//trim(eShareStatus), ESMF_LOGMSG_INFO, rc=rc
     !--- extro start ---
     ! extro
     if (btest(verbosity,0)) then
-      call ESMF_LogWrite(trim(name)//": "//rName//" extro:", ESMF_LOGMSG_INFO, &
+      call ESMF_LogWrite(trim(name)//": "//rName//" extro.", ESMF_LOGMSG_INFO, &
         rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out

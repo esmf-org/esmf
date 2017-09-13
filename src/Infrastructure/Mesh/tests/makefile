@@ -8,6 +8,31 @@ LOCDIR    = src/Infrastructure/Mesh/tests
 
 .NOTPARALLEL:
 
+ifeq ($(ESMF_MOAB),OFF)
+TESTS_BUILD   = $(ESMF_TESTDIR)/ESMCI_IntegrateUTest \
+               $(ESMF_TESTDIR)/ESMC_MeshUTest \
+               $(ESMF_TESTDIR)/ESMC_MeshMOABUTest \
+               $(ESMF_TESTDIR)/ESMC_Proj4UTest \
+               $(ESMF_TESTDIR)/ESMC_MeshVTKUTest \
+               $(ESMF_TESTDIR)/ESMF_MeshOpUTest \
+               $(ESMF_TESTDIR)/ESMF_MeshUTest
+
+TESTS_RUN     = RUN_ESMCI_IntegrateUTest \
+                RUN_ESMC_MeshUTest \
+                RUN_ESMC_MeshMOABUTest \
+                RUN_ESMC_Proj4UTest \
+                RUN_ESMC_MeshVTKUTest \
+                RUN_ESMF_MeshOpUTest \
+                RUN_ESMF_MeshUTest
+
+TESTS_RUN_UNI = RUN_ESMCI_IntegrateUTestUNI \
+                RUN_ESMC_MeshUTestUNI \
+                RUN_ESMC_MeshMOABUTestUNI \
+                RUN_ESMC_Proj4UTestUNI \
+                RUN_ESMF_MeshOpUTestUNI \
+                RUN_ESMF_MeshUTestUNI
+endif
+ifneq ($(ESMF_MOAB),OFF)
 TESTS_BUILD   = $(ESMF_TESTDIR)/ESMCI_IntegrateUTest \
                $(ESMF_TESTDIR)/ESMC_MeshUTest \
                $(ESMF_TESTDIR)/ESMC_MeshMOABUTest \
@@ -46,7 +71,6 @@ TESTS_RUN     = RUN_ESMCI_IntegrateUTest \
                 RUN_ESMF_MeshOpUTest \
                 RUN_ESMF_MeshUTest
 
-
 TESTS_RUN_UNI = RUN_ESMCI_IntegrateUTestUNI \
                 RUN_ESMC_MeshUTestUNI \
                 RUN_ESMC_MeshMOABUTestUNI \
@@ -60,6 +84,7 @@ TESTS_RUN_UNI = RUN_ESMCI_IntegrateUTestUNI \
                 RUN_ESMC_MBMesh_UtilUTestUNI \
                 RUN_ESMF_MeshOpUTestUNI \
                 RUN_ESMF_MeshUTestUNI
+endif
 
 include ${ESMF_DIR}/makefile
 

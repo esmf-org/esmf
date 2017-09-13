@@ -17,8 +17,8 @@ The Field metadata is implemented as an ESMF Attribute Package:
      \hline\hline
      {\tt Connected} & Connected status.& false, true\\ \hline
      {\tt TimeStamp} & Nine integer values representing ESMF Time object.& N/A\\ \hline
-     {\tt ProducerConnection} & String value indicating connection details.& open, targeted,\newline connected\\ \hline
-     {\tt ConsumerConnection} & String value indicating connection details.& open, targeted,\newline connected\\ \hline
+     {\tt ProducerConnection} & String value indicating whether the Field has been connected with a producer. & open, targeted,\newline connected\\ \hline
+     {\tt ConsumerConnection} & String value indicating whether the Field has been connected with a consumer.& open, targeted,\newline connected\\ \hline
      {\tt Updated} & String value indicating updated status during initialization.& false, true\\ \hline
      {\tt TransferOfferField} & String value indicating a component's intention to transfer the advertised Field object.& will provide,\newline can provide,\newline cannot provide\\ \hline
      {\tt TransferActionField} & String value indicating the action a component is supposed to take with respect to transferring the Field object.& provide, accept\\ \hline

@@ -12,11 +12,11 @@
 #ifndef ESMCI_MBMesh_h
 #define ESMCI_MBMesh_h
 
-// Take out if MOAB isn't being used
-#ifdef ESMF_MOAB
 
+#ifdef ESMF_MOAB
 #include "moab/Core.hpp"
 using namespace moab;
+#endif
 
 #include <map>
 
@@ -78,5 +78,4 @@ namespace ESMCI {
 
 } // namespace 
 
-#endif // ESMF_MOAB
 #endif
