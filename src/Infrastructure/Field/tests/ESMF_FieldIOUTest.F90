@@ -1019,10 +1019,10 @@ program ESMF_FieldIOUTest
 
   deallocate(arbseqlist)
 
-#if 0
+#if 1
   call ESMF_FieldPrint (elem_field)
   !------------------------------------------------------------------------
-  !NEX_xxxUTest_Multi_Proc_Only
+  !NEX_UTest_Multi_Proc_Only
   call ESMF_FieldWrite (elem_field, fileName='elem_mesh.nc',  &
       status=ESMF_FILESTATUS_REPLACE, rc=rc)
   write(failMsg, *) ""
