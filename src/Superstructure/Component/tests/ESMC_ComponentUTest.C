@@ -264,7 +264,7 @@ int main(void){
   //NEX_UTest
   strcpy(name, "Create ESMC_GridComp object");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
-  gcomp = ESMC_GridCompCreate("gridded component in C", "grid.rc", clock, &rc);
+  gcomp = ESMC_GridCompCreate("gridded component in C", "comp.rc", clock, &rc);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
   
@@ -330,7 +330,7 @@ int main(void){
   strcpy(name, "Create ESMC_GridComp object");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
   gcomp = ESMC_GridCompCreate("gridded Component in C with Fortran registration",
-    "grid.rc", clock, &rc);
+    "comp.rc", clock, &rc);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
   
@@ -381,7 +381,7 @@ int main(void){
   //NEX_UTest
   strcpy(name, "Create ESMC_CplComp object");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
-  cplcomp = ESMC_CplCompCreate("coupler component in C", "grid.rc", clock, &rc);
+  cplcomp = ESMC_CplCompCreate("coupler component in C", "comp.rc", clock, &rc);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
   
@@ -439,7 +439,7 @@ int main(void){
   strcpy(name, "Create ESMC_CplComp object");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
   cplcomp = ESMC_CplCompCreate("coupler component in C with Fortran registration",
-    "grid.rc", clock, &rc);
+    "comp.rc", clock, &rc);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
   
