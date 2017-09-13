@@ -36,7 +36,7 @@ class ESMP_VM(ct.Structure):
 # numpy float64 arrays
 class OptionalNumpyArrayFloat64(object):
         @classmethod
-        def from_param(self, param):
+        def from_param(cls, param):
             if param is None:
                 return None
             elif param.dtype != np.float64:
@@ -48,7 +48,7 @@ class OptionalNumpyArrayFloat64(object):
 # pointers to ctypes structures
 class OptionalStructPointer(object):
         @classmethod
-        def from_param(self, param):
+        def from_param(cls, param):
             if param is None:
                 return None
             else:
@@ -60,7 +60,7 @@ class OptionalStructPointer(object):
 # a python list of strings
 class OptionalArrayOfStrings(object):
         @classmethod
-        def from_param(self, param):
+        def from_param(cls, param):
             if param:
                 lparam = (ct.c_char_p * len(param))()
                 if sys.version_info[0] >= 3:
@@ -76,7 +76,7 @@ class OptionalArrayOfStrings(object):
 # ctypes structures
 class OptionalField(object):
         @classmethod
-        def from_param(self, param):
+        def from_param(cls, param):
             if param is None:
                 return None
             else:
@@ -87,7 +87,7 @@ class OptionalField(object):
 # this class allows optional arguments to be passed in place of named constants
 class OptionalNamedConstant(object):
         @classmethod
-        def from_param(self, param):
+        def from_param(cls, param):
             if param is None:
                 return None
             else:
@@ -99,7 +99,7 @@ class OptionalNamedConstant(object):
 # numpy int32 arrays
 class OptionalNumpyArrayInt32(object):
         @classmethod
-        def from_param(self, param):
+        def from_param(cls, param):
             if param is None:
                 return None
             elif param.dtype != np.int32:
@@ -111,7 +111,7 @@ class OptionalNumpyArrayInt32(object):
 # booleans
 class OptionalBool(object):
         @classmethod
-        def from_param(self, param):
+        def from_param(cls, param):
             if param is None:
                 return None
             else:
@@ -121,7 +121,7 @@ class OptionalBool(object):
 
 class Py3Char(object):
     @classmethod
-    def from_param(self, param):
+    def from_param(cls, param):
         if param is None:
             return None
         elif isinstance(param, bytes):
@@ -1893,6 +1893,117 @@ def ESMP_FieldRegridStore(srcField, dstField,
                         '.    '+constants._errmsg)
     return routehandle
 
+_ESMF.ESMC_FieldRegridStoreFile.restype = ct.c_int
+_ESMF.ESMC_FieldRegridStoreFile.argtypes = [ct.c_void_p, ct.c_void_p,
+                                            ct.c_char_p,
+                                            OptionalStructPointer,
+                                            OptionalStructPointer,
+                                            ct.POINTER(ct.c_void_p),
+                                            OptionalNamedConstant,
+                                            OptionalNamedConstant,
+                                            ct.POINTER(ct.c_void_p),
+                                            OptionalNamedConstant,
+                                            OptionalNamedConstant,
+                                            OptionalNamedConstant,
+                                            OptionalBool,
+                                            OptionalField,
+                                            OptionalField]
+@deprecated
+def ESMP_FieldRegridStoreFile(srcField, dstField, filename,
+                          srcMaskValues=None, dstMaskValues=None,
+                          regridmethod=None,
+                          polemethod=None, regridPoleNPnts=None,
+                          lineType=None, normType=None, unmappedaction=None,
+                          ignoreDegenerate=None,
+                          srcFracField=None, dstFracField=None):
+    """
+    Preconditions: Two ESMP_Fields have been created and initialized
+                   sufficiently for a regridding operation to take
+                   place.  'srcMaskValues' and 'dstMaskValues' are
+                   Numpy arrays which hold the values of a field which
+                   represent a masked cell.\n
+    Postconditions: A handle to the regridding operation has been
+                    returned into 'routehandle' and Fields containing
+                    the fractions of the source and destination cells
+                    participating in the regridding operation are
+                    optionally returned into 'srcFracField' and
+                    'dstFracField'.\n
+    Arguments:\n
+        :RETURN: ESMP_RouteHandle           :: routehandle\n
+        ESMP_Field                          :: srcField\n
+        ESMP_Field                          :: dstField\n
+        string                              :: filename\n
+        Numpy.array(dtype=int32) (optional) :: srcMaskValues\n
+        Numpy.array(dtype=int32) (optional) :: dstMaskValues\n
+        regridMethod (optional)             :: regridmethod\n
+            Argument values:\n
+                (default) RegridMethod.BILINEAR\n
+                RegridMethod.PATCH\n
+                RegridMethod.CONSERVE\n
+        poleMethod (optional)               :: polemethod\n
+            Argument values:\n
+                (default for regridmethod == RegridMethod.CONSERVE) PoleMethod.NONE\n
+                (default for regridmethod != RegridMethod.CONSERVE) PoleMethod.ALLAVG\n
+                PoleMethod.NPNTAVG\n
+                PoleMethod.TEETH\n
+        integer (optional)                  :: regridPoleNPnts\n
+        lineType (optional)                 :: normType\n
+            Argument values:\n
+                NOTE: default is dependent on the value of regridMethod
+                LineType.CART \n
+                LineType.GREAT_CIRCLE \n
+        normType (optional)                 :: normType\n
+            Argument values:\n
+                (default) NormType.DSTAREA \n
+                NormType.DSTFRAC \n
+        unmappedAction (optional)           :: unmappedaction\n
+            Argument values:\n
+                (default) UnmappedAction.ERROR\n
+                UnmappedAction.IGNORE\n
+        boolean (option)                    :: ignoreDegenerate\n
+        ESMP_Field (optional)               :: srcFracField\n
+        ESMP_Field (optional)               :: dstFracField\n
+    """
+    routehandle = ct.c_void_p(0)
+    if regridPoleNPnts:
+        regridPoleNPnts_ct = ct.byref(ct.c_void_p(regridPoleNPnts))
+    else:
+        regridPoleNPnts_ct = None
+
+    #InterfaceInt requires int32 type numpy arrays
+    srcMaskValues_i = srcMaskValues
+    if (srcMaskValues is not None):
+        if (srcMaskValues.dtype != np.int32):
+            raise TypeError('srcMaskValues must have dtype=int32')
+        srcMaskValues_i = ESMP_InterfaceInt(srcMaskValues)
+
+    #InterfaceInt requires int32 type numpy arrays
+    dstMaskValues_i = dstMaskValues
+    if (dstMaskValues is not None):
+        if (dstMaskValues.dtype != np.int32):
+            raise TypeError('dstMaskValues must have dtype=int32')
+        dstMaskValues_i = ESMP_InterfaceInt(dstMaskValues)
+
+    rc = _ESMF.ESMC_FieldRegridStoreFile(srcField.struct.ptr,
+                                     dstField.struct.ptr,
+                                     filename,
+                                     srcMaskValues_i,
+                                     dstMaskValues_i,
+                                     ct.byref(routehandle),
+                                     regridmethod,
+                                     polemethod,
+                                     regridPoleNPnts_ct,
+                                     lineType,
+                                     normType,
+                                     unmappedaction,
+                                     ignoreDegenerate,
+                                     srcFracField,
+                                     dstFracField)
+    if rc != constants._ESMP_SUCCESS:
+        raise ValueError('ESMC_FieldRegridStoreFile() failed with rc = '+str(rc)+
+                        '.    '+constants._errmsg)
+    return routehandle
+
 _ESMF.ESMC_FieldRegrid.restype = ct.c_int
 _ESMF.ESMC_FieldRegrid.argtypes = [ct.c_void_p, ct.c_void_p, ct.c_void_p,
                                    OptionalNamedConstant]
@@ -1913,7 +2024,6 @@ def ESMP_FieldRegrid(srcField, dstField, routehandle, zeroregion=None):
     if rc != constants._ESMP_SUCCESS:
         raise ValueError('ESMC_FieldRegrid() failed with rc = '+str(rc)+
                         '.    '+constants._errmsg)
-
 
 _ESMF.ESMC_ScripInq.restype = None
 _ESMF.ESMC_ScripInq.argtypes = [Py3Char,

@@ -10,7 +10,7 @@
 !
 !==============================================================================
 !
-#define ESMF_FILENAME "ESMF_StaggerLoc.F90"
+#define ESMF_FILENAME "ESMF_StaggerLocType.F90"
 !
 !     ESMF Stagger Location
       module ESMF_StaggerLocTypeMod

@@ -390,10 +390,10 @@ int ESMC_FieldGetBounds(ESMC_Field field,
                             ESMC_InterArrayInt *dstMaskValues,
                             ESMC_RouteHandle *routehandle, 
                             enum ESMC_RegridMethod_Flag *regridmethod, 
-			                enum ESMC_PoleMethod_Flag *polemethod,
-			                int *regridPoleNPnts,
-			                enum ESMC_LineType_Flag *lineType,
-			                enum ESMC_NormType_Flag *normType,
+                            enum ESMC_PoleMethod_Flag *polemethod,
+                            int *regridPoleNPnts,
+                            enum ESMC_LineType_Flag *lineType,
+                            enum ESMC_NormType_Flag *normType,
                             enum ESMC_UnmappedAction_Flag *unmappedaction,
                             ESMC_Logical *ignoreDegenerate,
                             ESMC_Field *srcFracField,
@@ -427,7 +427,61 @@ int ESMC_FieldGetBounds(ESMC_Field field,
     // return rhPtr in routehandle argument
     routehandle->ptr = NULL;
     routehandle->ptr = (void *)rhPtr;
-    
+
+    // return successfully
+    rc = ESMF_SUCCESS;
+    return rc;
+  }
+//--------------------------------------------------------------------------
+
+
+//--------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_FieldRegridStoreFile()"
+  int ESMC_FieldRegridStoreFile(ESMC_Field srcField, ESMC_Field dstField,
+                            const char *filename,
+                            ESMC_InterArrayInt *srcMaskValues,
+                            ESMC_InterArrayInt *dstMaskValues,
+                            ESMC_RouteHandle *routehandle,
+                            enum ESMC_RegridMethod_Flag *regridmethod,
+                            enum ESMC_PoleMethod_Flag *polemethod,
+                            int *regridPoleNPnts,
+                            enum ESMC_LineType_Flag *lineType,
+                            enum ESMC_NormType_Flag *normType,
+                            enum ESMC_UnmappedAction_Flag *unmappedaction,
+                            ESMC_Logical *ignoreDegenerate,
+                            ESMC_Field *srcFracField,
+                            ESMC_Field *dstFracField){
+
+    // Initialize return code. Assume routine not implemented
+    int rc = ESMF_RC_NOT_IMPL;
+    int localrc = ESMC_RC_NOT_IMPL;
+
+    ESMCI::Field *srcfracp = NULL;
+    ESMCI::Field *dstfracp = NULL;
+    // typecase into ESMCI type
+    ESMCI::Field *fieldpsrc = reinterpret_cast<ESMCI::Field *>(srcField.ptr);
+    ESMCI::Field *fieldpdst = reinterpret_cast<ESMCI::Field *>(dstField.ptr);
+    if (srcFracField != NULL)
+      srcfracp = reinterpret_cast<ESMCI::Field *>(srcFracField->ptr);
+    if (dstFracField != NULL)
+      dstfracp = reinterpret_cast<ESMCI::Field *>(dstFracField->ptr);
+    ESMCI::RouteHandle *rhPtr;
+    rhPtr=NULL;
+
+
+    // Invoke the C++ interface
+    localrc = ESMCI::Field::regridstorefile(fieldpsrc, fieldpdst, filename,
+      srcMaskValues, dstMaskValues, &rhPtr, regridmethod,
+      polemethod, regridPoleNPnts, lineType, normType, unmappedaction, ignoreDegenerate,
+      srcfracp, dstfracp);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      &rc)) return rc;  // bail out
+
+    // return rhPtr in routehandle argument
+    routehandle->ptr = NULL;
+    routehandle->ptr = (void *)rhPtr;
+
     // return successfully
     rc = ESMF_SUCCESS;
     return rc;

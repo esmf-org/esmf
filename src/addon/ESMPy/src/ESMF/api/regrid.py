@@ -42,6 +42,7 @@ class Regrid(object):
 
     *OPTIONAL:*
 
+    :param string filename: the name of the file for writing weights.
     :param ndarray src_mask_values: a numpy array of values that should be
         considered masked value on the source Field.
     :param ndarray dst_mask_values: a numpy array of values that should be
@@ -88,7 +89,7 @@ class Regrid(object):
 
     # call RegridStore
     @initialize
-    def __init__(self, srcfield, dstfield,
+    def __init__(self, srcfield=None, dstfield=None, filename=None,
                  src_mask_values=None,
                  dst_mask_values=None,
                  regrid_method=None,
@@ -111,21 +112,34 @@ class Regrid(object):
         if dst_mask_values is not None:
             dst_mask_values = np.array(dst_mask_values, dtype=np.int32)
 
-        # else case handled by initialization to None
-
         # call into the ctypes layer
-        self._routehandle = ESMP_FieldRegridStore(srcfield, dstfield,
-                           srcMaskValues=src_mask_values,
-                           dstMaskValues=dst_mask_values,
-                           regridmethod=regrid_method,
-                           polemethod=pole_method,
-                           regridPoleNPnts=regrid_pole_npoints,
-                           lineType=line_type,
-                           normType=norm_type,
-                           unmappedaction=unmapped_action,
-                           ignoreDegenerate=ignore_degenerate,
-                           srcFracField=src_frac_field,
-                           dstFracField=dst_frac_field)
+        if (filename):
+            self._routehandle = ESMP_FieldRegridStoreFile(srcfield, dstfield,
+                               filename,
+                               srcMaskValues=src_mask_values,
+                               dstMaskValues=dst_mask_values,
+                               regridmethod=regrid_method,
+                               polemethod=pole_method,
+                               regridPoleNPnts=regrid_pole_npoints,
+                               lineType=line_type,
+                               normType=norm_type,
+                               unmappedaction=unmapped_action,
+                               ignoreDegenerate=ignore_degenerate,
+                               srcFracField=src_frac_field,
+                               dstFracField=dst_frac_field)
+        else:
+            self._routehandle = ESMP_FieldRegridStore(srcfield, dstfield,
+                               srcMaskValues=src_mask_values,
+                               dstMaskValues=dst_mask_values,
+                               regridmethod=regrid_method,
+                               polemethod=pole_method,
+                               regridPoleNPnts=regrid_pole_npoints,
+                               lineType=line_type,
+                               normType=norm_type,
+                               unmappedaction=unmapped_action,
+                               ignoreDegenerate=ignore_degenerate,
+                               srcFracField=src_frac_field,
+                               dstFracField=dst_frac_field)
         
         self._srcfield = srcfield
         self._dstfield = dstfield
@@ -147,7 +161,7 @@ class Regrid(object):
         import atexit; atexit.register(self.__del__)
         self._finalized = False
 
-    def __call__(self, srcfield, dstfield, zero_region=None):
+    def __call__(self, srcfield, dstfield, filename=None, zero_region=None):
         """
         Call a regridding operation from srcfield to dstfield.
 
@@ -165,7 +179,6 @@ class Regrid(object):
 
         :return: dstfield
         """
-
         # call into the ctypes layer
         ESMP_FieldRegrid(srcfield, dstfield,
                          self._routehandle, zeroregion=zero_region)
@@ -273,7 +286,7 @@ class Regrid(object):
             :class:`~ESMF.api.regrid.Regrid`.
         """
 
-        return self.routehandle
+        return self.struct
 
     @property
     def unmapped_action(self):

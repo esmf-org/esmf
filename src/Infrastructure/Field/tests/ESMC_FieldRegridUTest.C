@@ -10,9 +10,10 @@
 //
 //==============================================================================
 
-#include <stdlib.h>
-#include <string.h>
-#include <stdio.h>
+#include <cstdlib>
+#include <cstdio>
+#include <cstring>
+#include <string>
 
 // ESMF header
 #include "ESMC.h"
@@ -341,9 +342,10 @@ int main(void){
 
   //----------------------------------------------------------------------------
   //NEX_UTest
+  std::string filename = "meshmeshweights.nc";
   strcpy(name, "Create an ESMC_RouteHandle via ESMC_FieldRegridStore()");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
-  rc = ESMC_FieldRegridStore(srcfield, dstfield, 
+  rc = ESMC_FieldRegridStoreFile(srcfield, dstfield, filename.c_str(),
                              NULL, NULL,
                              &routehandle,
                              NULL, NULL, NULL, NULL,
