@@ -123,7 +123,7 @@ regrid = ESMF.Regrid(srcfield, dstfield, filename="esmpy_example_weight_file.nc"
 print srcfield.data
 
 # create a regrid object from file
-# regrid = ESMF.RegridFromFile(srcfield, dstfield, "esmpy_example_weight_file.nc")
+regrid = ESMF.RegridFromFile(srcfield, dstfield, "esmpy_example_weight_file.nc")
 
 
 # calculate the regridding from source to destination field
