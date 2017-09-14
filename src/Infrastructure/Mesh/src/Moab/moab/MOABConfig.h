@@ -275,6 +275,9 @@
 #define MOAB_HAVE_STDISFINITE 1
 #endif
 #endif
+#if defined (ESMF_PGIVERSION_MAJOR) && !defined (ESMF_PGI_NO_STDISFINITE)
+#define MOAB_HAVE_STDISFINITE
+#endif
 /*#undef MOAB_HAVE_STDISFINITE */
 
 /* MOAB qualified HAVE_STDLIB_H */

@@ -22,6 +22,14 @@ Licensed under the University of Illinois-NCSA License.
 #define FTNX(func) func##_
 
 #if defined (__cplusplus)
+#if 0
+PGI v16.0 - onwards supports std::isfinite and friends.  This
+is a c++-11 feature.
+#endif
+#if (ESMF_PGIVERSION_MAJOR < 16)
+#define ESMF_PGI_NO_STDISFINITE
+#endif
+
 // Typedef to match the data type of the 'hidden' string length
 // argument that Fortran uses when passing CHARACTER strings.
 #if (ESMF_PGIVERSION_MAJOR < 12)

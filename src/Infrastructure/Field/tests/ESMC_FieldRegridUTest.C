@@ -10,9 +10,9 @@
 //
 //==============================================================================
 
-#include <cstdlib>
-#include <cstdio>
-#include <cstring>
+#include "stdlib.h"
+#include "stdio.h"
+#include "string.h"
 #include <string>
 
 // ESMF header
@@ -20,6 +20,8 @@
 
  // ESMF Test header
 #include "ESMC_Test.h"
+
+using std::string;
 
 //==============================================================================
 //BOP
@@ -342,7 +344,7 @@ int main(void){
 
   //----------------------------------------------------------------------------
   //NEX_UTest
-  std::string filename = "meshmeshweights.nc";
+  string filename = "meshmeshweights.nc";
   strcpy(name, "Create an ESMC_RouteHandle via ESMC_FieldRegridStore()");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
   rc = ESMC_FieldRegridStoreFile(srcfield, dstfield, filename.c_str(),
@@ -351,7 +353,12 @@ int main(void){
                              NULL, NULL, NULL, NULL,
                              NULL, NULL, NULL,
                              NULL, NULL);
+#if (defined ESMF_PIO && ( defined ESMF_NETCDF || defined ESMF_PNETCDF))
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+#else
+  strcpy(failMsg, "Did not return ESMF_RC_LIB_NOT_PRESENT");
+  ESMC_Test((rc==ESMF_RC_LIB_NOT_PRESENT), name, failMsg, &result, __FILE__, __LINE__, 0);
+#endif
   //--------------------------------------------------------------------------- -
 
   //----------------------------------------------------------------------------
