@@ -120,7 +120,7 @@ if os.path.isfile(
 regrid = ESMF.Regrid(srcfield, dstfield, filename="esmpy_example_weight_file.nc",
         regrid_method=ESMF.RegridMethod.BILINEAR,
         unmapped_action=ESMF.UnmappedAction.IGNORE)
-print srcfield.data
+print(srcfield.data)
 # create a regrid object from file
 # regrid = ESMF.Regrid(srcfield, dstfield, "weights.nc")
 # calculate the regridding from source to destination field
