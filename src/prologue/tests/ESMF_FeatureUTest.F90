@@ -28,10 +28,16 @@
     character(8), allocatable :: strings(:)
     type(ESMF_AllocDType), allocatable :: dts(:)
 
+#if !defined (ESMF_NO_F2003_ALLOC_STRING_LENS)
+    character(:), allocatable :: alloc_string
+    character(:), allocatable :: alloc_string_array(:)
+#endif
+
     type(ESMF_Logical) :: tf_c
     logical :: tf
 
     integer :: i
+    integer :: memstat
 
     interface
       subroutine ESMC_Present_test (arg, present_val)
@@ -153,15 +159,150 @@
     print *, 'new size (c) =', size (c)
 #endif
 
-    !------------------------------------------------------------------------
-    !------------------------------------------------------------------------
-
 #ifdef ESMF_TESTEXHAUSTIVE
 
     !------------------------------------------------------------------------
     !------------------------------------------------------------------------
 
-    ! no exhaustive tests (yet)
+!------------------------------------------------------------------------
+! F2003 allocatable length character string support.
+
+    !------------------------------------------------------------------------
+    !------------------------------------------------------------------------
+    ! NEX_UTest
+    name = "Fortran allocatable length string scalar assignment test"
+    failMsg = "Did not return correct length"
+#if !defined (ESMF_NO_F2003_ALLOC_STRING_LENS)
+    alloc_string = '123456'
+    rc = merge (ESMF_SUCCESS, ESMF_FAILURE, len (alloc_string) == 6)
+#else
+    name = "Bypassed " // name
+    rc = ESMF_SUCCESS
+#endif
+    call ESMF_Test(rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
+    !------------------------------------------------------------------------
+
+    !------------------------------------------------------------------------
+    ! NEX_UTest
+    name = "Fortran allocatable length string scalar deallocate test"
+    failMsg = "Did not return success"
+#if !defined (ESMF_NO_F2003_ALLOC_STRING_LENS)
+    deallocate (alloc_string, stat=memstat)
+    rc = merge (ESMF_SUCCESS, ESMF_FAILURE, memstat == 0)
+#else
+    name = "Bypassed " // name
+    rc = ESMF_SUCCESS
+#endif
+    call ESMF_Test(rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
+    !------------------------------------------------------------------------
+
+    !------------------------------------------------------------------------
+    ! NEX_UTest
+    name = "Fortran allocatable length string scalar allocate test"
+    failMsg = "Did not return success"
+#if !defined (ESMF_NO_F2003_ALLOC_STRING_LENS)
+    allocate (character(len=42)::alloc_string, stat=memstat)
+    rc = merge (ESMF_SUCCESS, ESMF_FAILURE, memstat == 0)
+#else
+    name = "Bypassed " // name
+    rc = ESMF_SUCCESS
+#endif
+    call ESMF_Test(rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
+    !------------------------------------------------------------------------
+
+    !------------------------------------------------------------------------
+    ! NEX_UTest
+    name = "Fortran allocatable length string scalar allocate length test"
+    failMsg = "Did not return success"
+#if !defined (ESMF_NO_F2003_ALLOC_STRING_LENS)
+    rc = merge (ESMF_SUCCESS, ESMF_FAILURE, len (alloc_string) == 42)
+#else
+    name = "Bypassed " // name
+    rc = ESMF_SUCCESS
+#endif
+    call ESMF_Test(rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
+    !------------------------------------------------------------------------
+
+    !------------------------------------------------------------------------
+    ! NEX_UTest
+    name = "Fortran allocatable length string array assignment test"
+    failMsg = "Did not return correct length"
+#if !defined (ESMF_NO_F2003_ALLOC_STRING_LENS)
+    alloc_string_array = (/ '123456', '789012', '345678', '901234', '567890' /)
+    rc = merge (ESMF_SUCCESS, ESMF_FAILURE, len (alloc_string_array) == 6)
+#else
+    name = "Bypassed " // name
+    rc = ESMF_SUCCESS
+#endif
+    call ESMF_Test(rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
+    !------------------------------------------------------------------------
+
+    !------------------------------------------------------------------------
+    ! NEX_UTest
+    name = "Fortran allocatable length string array size test"
+    failMsg = "Did not return correct length"
+#if !defined (ESMF_NO_F2003_ALLOC_STRING_LENS)
+    rc = merge (ESMF_SUCCESS, ESMF_FAILURE, size (alloc_string_array) == 5)
+#else
+    name = "Bypassed " // name
+    rc = ESMF_SUCCESS
+#endif
+    call ESMF_Test(rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
+    !------------------------------------------------------------------------
+
+    !------------------------------------------------------------------------
+    ! NEX_UTest
+    name = "Fortran allocatable length string array deallocate test"
+    failMsg = "Did not return success"
+#if !defined (ESMF_NO_F2003_ALLOC_STRING_LENS)
+    deallocate (alloc_string_array, stat=memstat)
+    rc = merge (ESMF_SUCCESS, ESMF_FAILURE, memstat == 0)
+#else
+    name = "Bypassed " // name
+    rc = ESMF_SUCCESS
+#endif
+    call ESMF_Test(rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
+    !------------------------------------------------------------------------
+
+    !------------------------------------------------------------------------
+    ! NEX_UTest
+    name = "Fortran allocatable length string array allocate test"
+    failMsg = "Did not return success"
+#if !defined (ESMF_NO_F2003_ALLOC_STRING_LENS)
+    allocate (character(len=42)::alloc_string_array(24), stat=memstat)
+    rc = merge (ESMF_SUCCESS, ESMF_FAILURE, memstat == 0)
+#else
+    name = "Bypassed " // name
+    rc = ESMF_SUCCESS
+#endif
+    call ESMF_Test(rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
+    !------------------------------------------------------------------------
+
+    !------------------------------------------------------------------------
+    ! NEX_UTest
+    name = "Fortran allocatable length string array allocate length test"
+    failMsg = "Did not return success"
+#if !defined (ESMF_NO_F2003_ALLOC_STRING_LENS)
+    rc = merge (ESMF_SUCCESS, ESMF_FAILURE, len (alloc_string_array) == 42)
+#else
+    name = "Bypassed " // name
+    rc = ESMF_SUCCESS
+#endif
+    call ESMF_Test(rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
+    !------------------------------------------------------------------------
+
+    !------------------------------------------------------------------------
+    ! NEX_UTest
+    name = "Fortran allocatable length string array allocate size test"
+    failMsg = "Did not return success"
+#if !defined (ESMF_NO_F2003_ALLOC_STRING_LENS)
+    rc = merge (ESMF_SUCCESS, ESMF_FAILURE, size (alloc_string_array) == 24)
+#else
+    name = "Bypassed " // name
+    rc = ESMF_SUCCESS
+#endif
+    call ESMF_Test(rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
+    !------------------------------------------------------------------------
 
     !------------------------------------------------------------------------
     !------------------------------------------------------------------------
