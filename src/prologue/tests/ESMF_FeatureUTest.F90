@@ -169,7 +169,7 @@
 
     !------------------------------------------------------------------------
     !------------------------------------------------------------------------
-    ! NEX_UTest
+    ! EX_UTest
     name = "Fortran allocatable length string scalar assignment test"
     failMsg = "Did not return correct length"
 #if !defined (ESMF_NO_F2003_ALLOC_STRING_LENS)
@@ -183,7 +183,7 @@
     !------------------------------------------------------------------------
 
     !------------------------------------------------------------------------
-    ! NEX_UTest
+    ! EX_UTest
     name = "Fortran allocatable length string scalar deallocate test"
     failMsg = "Did not return success"
 #if !defined (ESMF_NO_F2003_ALLOC_STRING_LENS)
@@ -197,7 +197,7 @@
     !------------------------------------------------------------------------
 
     !------------------------------------------------------------------------
-    ! NEX_UTest
+    ! EX_UTest
     name = "Fortran allocatable length string scalar allocate test"
     failMsg = "Did not return success"
 #if !defined (ESMF_NO_F2003_ALLOC_STRING_LENS)
@@ -211,7 +211,7 @@
     !------------------------------------------------------------------------
 
     !------------------------------------------------------------------------
-    ! NEX_UTest
+    ! EX_UTest
     name = "Fortran allocatable length string scalar allocate length test"
     failMsg = "Did not return success"
 #if !defined (ESMF_NO_F2003_ALLOC_STRING_LENS)
@@ -224,7 +224,7 @@
     !------------------------------------------------------------------------
 
     !------------------------------------------------------------------------
-    ! NEX_UTest
+    ! EX_UTest
     name = "Fortran allocatable length string array assignment test"
     failMsg = "Did not return correct length"
 #if !defined (ESMF_NO_F2003_ALLOC_STRING_LENS)
@@ -238,7 +238,7 @@
     !------------------------------------------------------------------------
 
     !------------------------------------------------------------------------
-    ! NEX_UTest
+    ! EX_UTest
     name = "Fortran allocatable length string array size test"
     failMsg = "Did not return correct length"
 #if !defined (ESMF_NO_F2003_ALLOC_STRING_LENS)
@@ -251,7 +251,7 @@
     !------------------------------------------------------------------------
 
     !------------------------------------------------------------------------
-    ! NEX_UTest
+    ! EX_UTest
     name = "Fortran allocatable length string array deallocate test"
     failMsg = "Did not return success"
 #if !defined (ESMF_NO_F2003_ALLOC_STRING_LENS)
@@ -265,7 +265,7 @@
     !------------------------------------------------------------------------
 
     !------------------------------------------------------------------------
-    ! NEX_UTest
+    ! EX_UTest
     name = "Fortran allocatable length string array allocate test"
     failMsg = "Did not return success"
 #if !defined (ESMF_NO_F2003_ALLOC_STRING_LENS)
@@ -279,7 +279,7 @@
     !------------------------------------------------------------------------
 
     !------------------------------------------------------------------------
-    ! NEX_UTest
+    ! EX_UTest
     name = "Fortran allocatable length string array allocate length test"
     failMsg = "Did not return success"
 #if !defined (ESMF_NO_F2003_ALLOC_STRING_LENS)
@@ -292,7 +292,7 @@
     !------------------------------------------------------------------------
 
     !------------------------------------------------------------------------
-    ! NEX_UTest
+    ! EX_UTest
     name = "Fortran allocatable length string array allocate size test"
     failMsg = "Did not return success"
 #if !defined (ESMF_NO_F2003_ALLOC_STRING_LENS)
