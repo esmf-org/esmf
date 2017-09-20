@@ -78,6 +78,7 @@ class TestRegrid(TestBase):
                     line_type=LineType.CART)
         dstfield = rh(srcfield, dstfield)
 
+    @attr('parallel')
     def test_field_regrid_file(self):
         # create grids
         max_index = np.array([20, 20])

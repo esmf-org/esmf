@@ -383,7 +383,7 @@ class Field(object):
 
         import ESMF.api.constants as constants
         if constants._ESMF_COMM is constants._ESMF_COMM_MPIUNI:
-            raise ImportError("Field.Read() does not work if ESMF has not been built with MPI support")
+            raise ImportError("Field.Read() requires PIO and does not work if ESMF has not been built with MPI support")
 
         assert (type(filename) is str)
         assert (type(variable) is str)
