@@ -114,6 +114,10 @@ class Regrid(object):
 
         # call into the ctypes layer
         if (filename):
+            import ESMF.api.constants as constants
+            if constants._ESMF_COMM is constants._ESMF_COMM_MPIUNI:
+                raise ImportError("Regrid(filename) requires PIO and does not work if ESMF has not been built with MPI support")
+
             self._routehandle = ESMP_FieldRegridStoreFile(srcfield, dstfield,
                                filename,
                                srcMaskValues=src_mask_values,

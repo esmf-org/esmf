@@ -15,6 +15,7 @@ class TestExamples(TestBase):
     def test_crff(self):
         from . import create_read_from_file
 
+    @attr('parallel')
     def test_gridmeshrg(self):
         from . import grid_mesh_regrid
 
