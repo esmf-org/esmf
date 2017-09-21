@@ -557,16 +557,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Allocate a new comp class
     allocate(compclass, stat=localrc)
     if (ESMF_LogFoundAllocError(localrc, msg="compclass", &
-      ESMF_CONTEXT, rcTOReturn=rc)) return
+      ESMF_CONTEXT, rcToReturn=rc)) return
       
     ! call Comp method
     call ESMF_CompConstruct(compclass, ESMF_COMPTYPE_GRID, name, &
-      configFile=configFile, config=config, &
-      grid=grid, clock=clock, petList=petList, contextflag=contextflag, &
-      rc=localrc)
+      configFile=configFile, config=config, clock=clock, petList=petList, &
+      contextflag=contextflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcTOReturn=rc)) then
+      ESMF_CONTEXT, rcToReturn=rc)) then
       deallocate(compclass)
       return
     endif
@@ -579,6 +578,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ESMF_GridCompCreate%compp => compclass
     
     ESMF_INIT_SET_CREATED(ESMF_GridCompCreate)
+
+    ! deal with geom object arguments
+    call ESMF_GridCompSet(ESMF_GridCompCreate, grid=grid, gridList=gridList, &
+      mesh=mesh, meshList=meshList, locstream=locstream, &
+      locstreamList=locstreamList, xgrid=xgrid, xgridList=xgridList, rc=localrc)
+    if (ESMF_LogFoundError(localrc, &
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
@@ -655,7 +662,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (.not.associated(gridcomp%compp)) then
       if (ESMF_LogFoundError(ESMF_RC_OBJ_BAD, &
         msg="GridComp not initialized or already destroyed", &
-        ESMF_CONTEXT, rcTOReturn=rc)) return
+        ESMF_CONTEXT, rcToReturn=rc)) return
     endif
 
     ! check consistency between timeout argument and component argument
@@ -663,7 +670,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       .not.ESMF_CompIsDualConnected(gridcomp%compp, rc=localrc)) then
       call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, &
         msg="'timeout' argument is only allowed for connected dual components",&
-        ESMF_CONTEXT, rcTOReturn=rc)
+        ESMF_CONTEXT, rcToReturn=rc)
       return
     endif
 
@@ -672,14 +679,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       timeoutFlag=timeoutFlag, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcTOReturn=rc)) return
+      ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! mark object invalid
     call ESMF_BaseSetStatus(gridcomp%compp%base, ESMF_STATUS_INVALID, &
       rc=localrc)
     if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcTOReturn=rc)) return
+      ESMF_CONTEXT, rcToReturn=rc)) return
 
     ESMF_INIT_SET_DELETED(gridcomp)
 
@@ -800,7 +807,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       .not.ESMF_CompIsDualConnected(gridcomp%compp, rc=localrc)) then
       call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, &
         msg="'timeout' argument is only allowed for connected dual components",&
-        ESMF_CONTEXT, rcTOReturn=rc)
+        ESMF_CONTEXT, rcToReturn=rc)
       return
     endif
 
@@ -1109,7 +1116,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! call Comp method
     call ESMF_CompGet(gridcomp%compp, name=name, vm=vm, contextflag=contextflag,&
-      grid=grid, importState=importState, exportState=exportState, clock=clock,&
+      grid=grid, gridList=gridList, mesh=mesh, meshList=meshList, &
+      locstream=locstream, locstreamList=locstreamList, &
+      xgrid=xgrid, xgridList=xgridList, &
+      importState=importState, exportState=exportState, clock=clock,&
       configFile=configFile, config=config, currentMethod=currentMethod, &
       currentPhase=currentPhase, localPet=localPet, petCount=petCount, &
       comptype=comptype, compStatus=compStatus, rc=localrc)
@@ -1126,6 +1136,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       isIsPresent = importStateIsPresent, &
       esIsPresent = exportStateIsPresent, &
       gridIsPresent = gridIsPresent, &
+      meshIsPresent = meshIsPresent, &
+      locstreamIsPresent = locstreamIsPresent, &
+      xgridIsPresent = xgridIsPresent, &
       rc = localrc)
     if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
@@ -1380,7 +1393,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       .not.ESMF_CompIsDualConnected(gridcomp%compp, rc=localrc)) then
       call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, &
         msg="'timeout' argument is only allowed for connected dual components",&
-        ESMF_CONTEXT, rcTOReturn=rc)
+        ESMF_CONTEXT, rcToReturn=rc)
       return
     endif
 
@@ -1551,7 +1564,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     localresult = ESMF_CompIsPetLocal(gridcomp%compp, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcTOReturn=rc)) return
+      ESMF_CONTEXT, rcToReturn=rc)) return
 
     ESMF_GridCompIsPetLocal = localresult
 
@@ -1724,7 +1737,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       .not.ESMF_CompIsDualConnected(gridcomp%compp, rc=localrc)) then
       call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, &
         msg="'timeout' argument is only allowed for connected dual components",&
-        ESMF_CONTEXT, rcTOReturn=rc)
+        ESMF_CONTEXT, rcToReturn=rc)
       return
     endif
 
@@ -1864,7 +1877,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       .not.ESMF_CompIsDualConnected(gridcomp%compp, rc=localrc)) then
       call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, &
         msg="'timeout' argument is only allowed for connected dual components",&
-        ESMF_CONTEXT, rcTOReturn=rc)
+        ESMF_CONTEXT, rcToReturn=rc)
       return
     endif
 
@@ -2033,7 +2046,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (.not.present(port).and.(present(timeout))) then
       call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, &
         msg="Currently the 'timeout' argument requires the 'port' argument", &
-        ESMF_CONTEXT, rcTOReturn=rc)
+        ESMF_CONTEXT, rcToReturn=rc)
       return  ! bail out
     endif
     
@@ -2227,7 +2240,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !EOP
 !------------------------------------------------------------------------------
-    integer :: localrc                        ! local return code
+    integer                         :: localrc           ! local return code
 
     ! initialize return code; assume routine not implemented
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -2237,10 +2250,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,grid,rc)
     ESMF_INIT_CHECK_DEEP(ESMF_ConfigGetInit,config,rc)
     ESMF_INIT_CHECK_DEEP(ESMF_ClockGetInit,clock,rc)
-
+    
     ! call Comp method
     call ESMF_CompSet(gridcomp%compp, name=name, &
-      grid=grid, clock=clock, configFile=configFile, config=config, rc=localrc)
+      grid=grid, gridList=gridList, mesh=mesh, meshList=meshList, &
+      locstream=locstream, locstreamList=locstreamList, xgrid=xgrid, &
+      xgridList=xgridList, clock=clock, configFile=configFile, config=config, &
+      rc=localrc)
     if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
@@ -2615,7 +2631,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         ! an error condition that needs to be reported back
         call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
           msg="userRoutine was not found", &
-          ESMF_CONTEXT, rcTOReturn=rc)
+          ESMF_CONTEXT, rcToReturn=rc)
         return
       endif
     endif
@@ -3045,7 +3061,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       prefIntraProcess, prefIntraSsi, prefInterSsi, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcTOReturn=rc)) return
+      ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
@@ -3124,7 +3140,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       prefIntraProcess, prefIntraSsi, prefInterSsi, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcTOReturn=rc)) return
+      ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
@@ -3200,7 +3216,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       prefIntraProcess, prefIntraSsi, prefInterSsi, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcTOReturn=rc)) return
+      ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
@@ -3338,7 +3354,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       .not.ESMF_CompIsDualConnected(gridcomp%compp, rc=localrc)) then
       call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, &
         msg="'timeout' argument is only allowed for connected dual components",&
-        ESMF_CONTEXT, rcTOReturn=rc)
+        ESMF_CONTEXT, rcToReturn=rc)
       return
     endif
 
@@ -3355,7 +3371,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     endif
     if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcTOReturn=rc)) return
+      ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
@@ -3474,7 +3490,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       .not.ESMF_CompIsDualConnected(gridcomp%compp, rc=localrc)) then
       call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, &
         msg="'timeout' argument is only allowed for connected dual components",&
-        ESMF_CONTEXT, rcTOReturn=rc)
+        ESMF_CONTEXT, rcToReturn=rc)
       return
     endif
 
