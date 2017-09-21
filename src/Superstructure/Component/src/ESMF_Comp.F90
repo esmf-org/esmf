@@ -48,6 +48,9 @@ module ESMF_CompMod
   use ESMF_CalendarMod
   use ESMF_ClockMod
   use ESMF_GridMod
+  use ESMF_MeshMod
+  use ESMF_LocStreamMod
+  use ESMF_XGridMod
   use ESMF_StateTypesMod
   use ESMF_StateMod
   use ESMF_InitMacrosMod
@@ -187,7 +190,11 @@ module ESMF_CompMod
     
     type(ESMF_Config)   :: config           ! configuration object
     type(ESMF_Clock)    :: clock            ! private component clock
-    type(ESMF_Grid)     :: grid             ! default grid, gcomp only
+    
+    type(ESMF_Grid),      allocatable  :: gridList(:)     ! associated grids
+    type(ESMF_Mesh),      allocatable  :: meshList(:)     ! associated meshes
+    type(ESMF_LocStream), allocatable  :: locstreamList(:)! associated locstream
+    type(ESMF_XGrid),     allocatable  :: xgridList(:)    ! associated xgrids
 
     character(len=ESMF_MAXPATHLEN) :: configFile! resource filename
     character(len=ESMF_MAXPATHLEN) :: dirPath   ! relative dirname, app only
@@ -614,7 +621,6 @@ contains
     compp%compTunnel%this = ESMF_NULL_POINTER
     compp%configFile = "uninitialized"
     compp%dirPath = "uninitialized"
-    compp%grid%this = ESMF_NULL_POINTER
     compp%npetlist = 0
     nullify(compp%compw%compp)
     nullify(compp%petlist)
@@ -684,7 +690,9 @@ contains
 
     ! grid for a Gridded Component
     if (present(grid)) then
-      compp%grid = grid
+      if (allocated(compp%gridList)) deallocate(compp%gridList)
+      allocate(compp%gridList(1))
+      compp%gridList(1) = grid
       compp%compStatus%gridIsPresent = .true.
     endif
 
@@ -1341,7 +1349,7 @@ contains
           ESMF_CONTEXT, rcTOReturn=rc)
         return  ! bail out
       endif
-      grid = compp%grid
+      grid = compp%gridList(1)
     endif
     if (present(gridIsPresent)) then
       gridIsPresent = compp%compStatus%gridIsPresent
@@ -1823,7 +1831,9 @@ contains
     endif
 
     if (present(grid)) then
-      compp%grid = grid
+      if (allocated(compp%gridList)) deallocate(compp%gridList)
+      allocate(compp%gridList(1))
+      compp%gridList(1) = grid
       compp%compStatus%gridIsPresent = .true.
     endif
 
