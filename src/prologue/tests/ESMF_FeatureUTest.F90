@@ -284,6 +284,7 @@
     failMsg = "Did not return success"
 #if !defined (ESMF_NO_F2003_ALLOC_STRING_LENS)
     rc = merge (ESMF_SUCCESS, ESMF_FAILURE, len (alloc_string_array) == 42)
+    write (failMsg,*) "Expected string length of 42, returned", len (alloc_string_array)
 #else
     name = "Bypassed " // name
     rc = ESMF_SUCCESS
@@ -297,6 +298,7 @@
     failMsg = "Did not return success"
 #if !defined (ESMF_NO_F2003_ALLOC_STRING_LENS)
     rc = merge (ESMF_SUCCESS, ESMF_FAILURE, size (alloc_string_array) == 24)
+    write (failMsg,*) "Expected string array size of 24, returned", size (alloc_string_array)
 #else
     name = "Bypassed " // name
     rc = ESMF_SUCCESS
