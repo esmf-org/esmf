@@ -15,11 +15,11 @@
 
 #define ASMM_STORE_LOG_off
 #define ASMM_STORE_TIMING_off
-#define ASMM_STORE_MEMLOG_off
+#define ASMM_STORE_MEMLOG_on
 #define ASMM_STORE_COMMMATRIX_off
 #define ASMM_STORE_OPT_PRINT_off
 
-#define ASMM_EXEC_INFO_off
+#define ASMM_EXEC_INFO_on
 #define ASMM_EXEC_TIMING_off
 #define ASMM_EXEC_PROFILE_off
 //==============================================================================
@@ -9269,6 +9269,7 @@ template<typename SIT, typename DIT>
     }
   }
   
+#define DEBUGGING
 #ifdef DEBUGGING
   {
     std::stringstream debugmsg;
@@ -9312,6 +9313,7 @@ template<typename SIT, typename DIT>
     ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_INFO);
   }
 #endif
+#undef DEBUGGING
     workWithTempArrays=true;
     // create the temporary arrays
     srcArray = Array::create(srcArray, true, &localrc);
@@ -10124,6 +10126,10 @@ template<typename SIT, typename DIT>
     new vector<DD::AssociationElement<DIT,SIT> >
       [dstLocalDeCount];
 
+#ifdef ASMM_STORE_MEMLOG_on
+  VM::logMemInfo(std::string("ASMMStore3.1"));
+#endif
+
   // access srcSeqIndexFactorLookup to construct srcLinSeqVect
   {  
     DD::FillLinSeqVectInfo<SIT,DIT> *fillLinSeqVectInfo =
@@ -10138,9 +10144,15 @@ template<typename SIT, typename DIT>
     fillLinSeqVectInfo->tensorMixFlag = tensorMixFlag;
     fillLinSeqVectInfo->haloRimFlag = false;
 
+#ifdef ASMM_STORE_MEMLOG_on
+  VM::logMemInfo(std::string("ASMMStore3.2"));
+#endif
     DD::accessLookup(vm, petCount, localPet, srcLocalIntervalPerPetCount,
       srcLocalElementsPerIntervalCount, fillLinSeqVectInfo);
     delete fillLinSeqVectInfo;
+#ifdef ASMM_STORE_MEMLOG_on
+  VM::logMemInfo(std::string("ASMMStore3.3"));
+#endif
   }
   
   // access dstSeqIndexFactorLookup to construct dstLinSeqVect
@@ -10157,9 +10169,15 @@ template<typename SIT, typename DIT>
     fillLinSeqVectInfo->tensorMixFlag = tensorMixFlag;
     fillLinSeqVectInfo->haloRimFlag = haloFlag; // forward HALO
 
+#ifdef ASMM_STORE_MEMLOG_on
+  VM::logMemInfo(std::string("ASMMStore3.4"));
+#endif
     DD::accessLookup(vm, petCount, localPet, dstLocalIntervalPerPetCount,
       dstLocalElementsPerIntervalCount, fillLinSeqVectInfo);
     delete fillLinSeqVectInfo;
+#ifdef ASMM_STORE_MEMLOG_on
+  VM::logMemInfo(std::string("ASMMStore3.5"));
+#endif
   }
 
   // garbage colletion
@@ -10293,7 +10311,11 @@ template<typename SIT, typename DIT>
     }
   }
 
-  if (haloFlag||ignoreUnmatched){
+#ifdef ASMM_STORE_MEMLOG_on
+  VM::logMemInfo(std::string("ASMMStore3.6"));
+#endif
+
+    if (haloFlag||ignoreUnmatched){
     // Phase IV below expects each FactorElement inside of srcLinSeqVect and
     // dstLinSeqVect to only reference a single partnerDe (- only partnerDe[0]
     // will be looked at!). Therefore transform FactorElements that have more
@@ -10356,6 +10378,10 @@ template<typename SIT, typename DIT>
     }
   }
   
+#ifdef ASMM_STORE_MEMLOG_on
+  VM::logMemInfo(std::string("ASMMStore3.7"));
+#endif
+
 #ifdef ASMM_STORE_LOG_on_disabled
   fprintf(asmm_store_log_fp, "\n========================================"
     "========================================\n");
@@ -12418,7 +12444,8 @@ int Array::sparseMatMul(
         ESMC_LOGMSG_INFO);
 #endif
     }else if (termorderflag == ESMC_TERMORDER_FREE){
-      filterBitField |= XXE::filterBitNbWaitFinish; // set NbWaitFinish filter
+//      filterBitField |= XXE::filterBitNbWaitFinish; // set NbWaitFinish filter
+      filterBitField |= XXE::filterBitNbTestFinish; // set NbTestFinish filter
       filterBitField |= XXE::filterBitCancel;       // set Cancel filter    
       filterBitField |= XXE::filterBitNbWaitFinishSingleSum; // SingleSum filter
 #ifdef ASMM_EXEC_INFO_on
@@ -12609,10 +12636,19 @@ int Array::sparseMatMul(
   fclose(fp);
 #endif
 
+#ifdef ASMM_EXEC_INFO_on
+  {
+    std::stringstream msg;
+    msg << "SMM exec: finishedflag=" << *finishedflag;
+    ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+  }
+#endif
+
+  int finishLoopCount=0;
   while (commflag==ESMF_COMM_BLOCKING && !(*finishedflag)){
     // must be a blocking call with TERMORDER_FREE -> free-order while
-#ifdef ASMM_EXEC_INFO_on
-    ESMC_LogDefault.Write("...within free-order while",
+#ifdef ASMM_EXEC_INFO_LOOP_on
+    ESMC_LogDefault.Write("SMM exec: ...within free-order while",
       ESMC_LOGMSG_INFO);
 #endif
     filterBitField = 0x0; // init. to execute _all_ operations in XXE stream
@@ -12631,8 +12667,16 @@ int Array::sparseMatMul(
       &srcLocalDeCount, &superVectP);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       &rc)) return rc;
+    ++finishLoopCount;
   }
-  
+#ifdef ASMM_EXEC_INFO_on
+  {
+    std::stringstream msg;
+    msg << "SMM exec: finishLoopCount=" << finishLoopCount;
+    ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+  }
+#endif
+
 #ifdef ASMM_EXEC_TIMING_on
   VMK::wtime(&t6);      //gjt - profile
 #endif

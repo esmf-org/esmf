@@ -12,8 +12,9 @@
 #define ESMC_FILENAME "ESMCI_DELayout.C"
 //==============================================================================
 #define XXE_EXEC_LOG_off
-#define XXE_EXEC_BUFF_LOG_off
-#define XXE_EXEC_OPS_LOG_off
+#define XXE_EXEC_MEMLOG_on
+#define XXE_EXEC_BUFFLOG_off
+#define XXE_EXEC_OPSLOG_off
 //==============================================================================
 //
 // DELayout class implementation (body) file
@@ -2496,7 +2497,7 @@ int XXE::exec(
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
 
-#ifdef XXE_EXEC_LOG_on
+#ifdef XXE_EXEC_LOG_off
   char msg[1024];
   sprintf(msg, "ESMCI::XXE::exec(): START: stream=%p, count=%d, "
     "sizeof(StreamElement)=%lu, rraCount=%d, vectorLength=%d",
@@ -2507,6 +2508,10 @@ int XXE::exec(
   ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
 #endif
   
+#ifdef XXE_EXEC_MEMLOG_on
+  VM::logMemInfo(std::string("XXE::exec():1.0"));
+#endif
+
   // set index range
   int indexRangeStart = 0;        // default
   if (indexStart > 0) indexRangeStart = indexStart;
@@ -2577,9 +2582,18 @@ int XXE::exec(
   if (dTime != NULL)
     VMK::wtime(&t0);
   
+#ifdef XXE_EXEC_MEMLOG_on
+  VM::logMemInfo(std::string("XXE::exec():2.0"));
+#endif
+
+#ifdef XXE_EXEC_LOG_off
+  sprintf(msg, "ESMCI::XXE::exec(): bufferInfoList.size()=%d", 
+    bufferInfoList.size());
+  ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
+#endif    
   for (unsigned i=0; i<bufferInfoList.size(); i++){
     int currentSize = bufferInfoList[i]->vectorLengthMultiplier * *vectorLength;
-#ifdef XXE_EXEC_BUFF_LOG_on
+#ifdef XXE_EXEC_BUFFLOG_on
     sprintf(msg, "ESMCI::XXE::exec(): buffer #%d, (needed)currentSize=%d, "
       " existing buffer size=%d", i, currentSize, bufferInfoList[i]->size);
     ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
@@ -2587,7 +2601,7 @@ int XXE::exec(
     if (bufferInfoList[i]->size < currentSize){
       // allocate a new, larger buffer to accommodate currentSize
       char *buffer = new char[currentSize];
-#ifdef XXE_EXEC_BUFF_LOG_on
+#ifdef XXE_EXEC_BUFFLOG_on
       sprintf(msg, "ESMCI::XXE::exec(): buffer #%d, new buffer allocated: %p",
         i, buffer);
         ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
@@ -2618,6 +2632,10 @@ int XXE::exec(
 #endif
   }
   
+#ifdef XXE_EXEC_MEMLOG_on
+  VM::logMemInfo(std::string("XXE::exec():3.0"));
+#endif
+
   for (int i=indexRangeStart; i<=indexRangeStop; i++){
     xxeElement = &(stream[i]);
     
@@ -4180,6 +4198,10 @@ printf("gjt - DID NOT CANCEL commhandle\n");
     *dTime = t1 - t0;
   }
   
+#ifdef XXE_EXEC_MEMLOG_on
+  VM::logMemInfo(std::string("XXE::exec():4.0"));
+#endif
+
 #ifdef XXE_EXEC_LOG_on
   sprintf(msg, "ESMCI::XXE::exec(): STOP");
   ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
@@ -4207,7 +4229,7 @@ inline void XXE::exec_memGatherSrcRRA(
   int *countList = xxeMemGatherSrcRRAInfo->countList;
   T *dstPointer = (T*)dstBase;
   T *srcPointer;
-#ifdef XXE_EXEC_OPS_LOG_on
+#ifdef XXE_EXEC_OPSLOG_on
   char msg[1024];
   sprintf(msg, "chunkCount=%d", xxeMemGatherSrcRRAInfo->chunkCount);
   ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
@@ -4216,7 +4238,7 @@ inline void XXE::exec_memGatherSrcRRA(
     srcPointer = ((T*)rraBase) + rraOffsetList[k] * vectorL;
     for (int kk=0; kk<countList[k]*vectorL; kk++){
       dstPointer[kk] = srcPointer[kk];
-#ifdef XXE_EXEC_OPS_LOG_on
+#ifdef XXE_EXEC_OPSLOG_on
       {
         std::stringstream logmsg;
         logmsg << "srcPointer=" << &(srcPointer[kk]) << " *=" << srcPointer[kk]
@@ -4245,7 +4267,7 @@ inline void XXE::exec_memGatherSrcRRASuper(
   T *srcPointer;
   int sz_i = size_i[xxeMemGatherSrcRRAInfo->rraIndex];
   int sz_j = size_j[xxeMemGatherSrcRRAInfo->rraIndex];
-#ifdef XXE_EXEC_OPS_LOG_on
+#ifdef XXE_EXEC_OPSLOG_on
   char msg[1024];
   sprintf(msg, "sz_i=%d, sz_j=%d, chunkCount=%d", sz_i, sz_j,
     xxeMemGatherSrcRRAInfo->chunkCount);
@@ -4262,7 +4284,7 @@ inline void XXE::exec_memGatherSrcRRASuper(
       for (int kkk=0; kkk<vectorL/size_r; kkk++){
         for (int kkkk=0; kkkk<size_r; kkkk++){
           dstPointer[kkkk] = srcPointer[kkkk];
-#ifdef XXE_EXEC_OPS_LOG_on
+#ifdef XXE_EXEC_OPSLOG_on
       {
         std::stringstream logmsg;
         logmsg << "srcPointer=" << &(srcPointer[kkkk]) << " *=" << 
@@ -4330,7 +4352,7 @@ inline void XXE::exec_zeroSuperScalarRRASuper(
     for (int kkk=0; kkk<vectorL/size_r; kkk++){
       for (int kkkk=0; kkkk<size_r; kkkk++){
         dstPointer[kkkk] = (T)0;
-#ifdef XXE_EXEC_OPS_LOG_on
+#ifdef XXE_EXEC_OPSLOG_on
       {
         std::stringstream logmsg;
         logmsg << "dstPointer=" <<  &(dstPointer[kkkk]) << " *=" << 
@@ -4475,7 +4497,7 @@ void XXE::psv(T *element, TKId elementTK, U *factorList, TKId factorTK,
     typeid(U).name(), typeid(V).name());
 #endif
   for (int i=0; i<factorCount; i++){
-#ifdef XXE_EXEC_OPS_LOG_on
+#ifdef XXE_EXEC_OPSLOG_on
     {
       std::stringstream logmsg;
       logmsg << "psv: element=" << element << ":" << *element
@@ -4595,7 +4617,7 @@ void XXE::pss(T *element, TKId elementTK, U *factor, TKId factorTK,
   printf("Arrived in pss kernel with %s, %s, %s\n", typeid(T).name(), 
     typeid(U).name(), typeid(V).name());
 #endif
-#ifdef XXE_EXEC_OPS_LOG_on
+#ifdef XXE_EXEC_OPSLOG_on
     {
       std::stringstream logmsg;
       logmsg << "psv: element=" << element << ":" << *element
@@ -4706,7 +4728,7 @@ void XXE::sssDstRra(T *rraBase, TKId elementTK, int *rraOffsetList,
     typeid(V).name());
 #endif
   if(superVector){
-#ifdef XXE_EXEC_OPS_LOG_on
+#ifdef XXE_EXEC_OPSLOG_on
     char msg[1024];
     sprintf(msg, "XXE::sumSuperScalarDstRRA: "
       "taking super-vector branch...");
@@ -4716,7 +4738,7 @@ void XXE::sssDstRra(T *rraBase, TKId elementTK, int *rraOffsetList,
       termCount, vectorL, localDeIndexOff, size_r, size_s, size_t, size_i,
       size_j);
   }else{
-#ifdef XXE_EXEC_OPS_LOG_on
+#ifdef XXE_EXEC_OPSLOG_on
     char msg[1024];
     sprintf(msg, "XXE::sumSuperScalarDstRRA: "
       "taking vector branch...");
@@ -4762,7 +4784,7 @@ void XXE::exec_sssDstRraSuper(T *rraBase, int *rraOffsetList, V *valueBase,
   V *value;
   int sz_i = size_i[localDeIndexOff];
   int sz_j = size_j[localDeIndexOff];
-#ifdef XXE_EXEC_OPS_LOG_on
+#ifdef XXE_EXEC_OPSLOG_on
   char msg[1024];
   sprintf(msg, "sz_i=%d, sz_j=%d, termCount=%d", sz_i, sz_j, termCount);
   ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
@@ -4778,7 +4800,7 @@ void XXE::exec_sssDstRraSuper(T *rraBase, int *rraOffsetList, V *valueBase,
     for (int kkk=0; kkk<vectorL/size_r; kkk++){
       for (int kkkk=0; kkkk<size_r; kkkk++){
         element[kkkk] += *(value+kk);
-#ifdef XXE_EXEC_OPS_LOG_on
+#ifdef XXE_EXEC_OPSLOG_on
       {
         std::stringstream logmsg;
         logmsg << "element=" <<  &(element[kkkk]) << " *=" << element[kkkk]
@@ -4907,7 +4929,7 @@ void XXE::ssslDstRra(T **rraBaseList, int *rraIndexList, TKId elementTK,
     typeid(U).name(), typeid(V).name());
 #endif
   if(superVector){
-#ifdef XXE_EXEC_OPS_LOG_on
+#ifdef XXE_EXEC_OPSLOG_on
     char msg[1024];
     sprintf(msg, "XXE::sumSuperScalarListDstRRA: "
       "taking super-vector branch...");
@@ -4917,7 +4939,7 @@ void XXE::ssslDstRra(T **rraBaseList, int *rraIndexList, TKId elementTK,
       valueBaseList, valueOffsetList, baseListIndexList, termCount, vectorL,
       localDeIndexOff, size_r, size_s, size_t, size_i, size_j);
   }else{
-#ifdef XXE_EXEC_OPS_LOG_on
+#ifdef XXE_EXEC_OPSLOG_on
     char msg[1024];
     sprintf(msg, "XXE::sumSuperScalarListDstRRA: "
       "taking vector branch...");
@@ -4969,7 +4991,7 @@ void XXE::exec_ssslDstRraSuper(T **rraBaseList, int *rraIndexList,
   for (int k=0; k<termCount; k++){  // super scalar loop
     int sz_i = size_i[rraIndexList[baseListIndexList[k]]-localDeIndexOff];
     int sz_j = size_j[rraIndexList[baseListIndexList[k]]-localDeIndexOff];
-#ifdef XXE_EXEC_OPS_LOG_on
+#ifdef XXE_EXEC_OPSLOG_on
     char msg[1024];
     sprintf(msg, "sz_i=%d, sz_j=%d, termCount=%d", sz_i, sz_j, termCount);
     ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
@@ -4986,7 +5008,7 @@ void XXE::exec_ssslDstRraSuper(T **rraBaseList, int *rraIndexList,
     for (int kkk=0; kkk<vectorL/size_r; kkk++){
       for (int kkkk=0; kkkk<size_r; kkkk++){
         element[kkkk] += *(value+kk);
-#ifdef XXE_EXEC_OPS_LOG_on
+#ifdef XXE_EXEC_OPSLOG_on
       {
         std::stringstream logmsg;
         logmsg << "element=" <<  &(element[kkkk]) << " *=" << element[kkkk]
@@ -5144,7 +5166,7 @@ void XXE::psssDstRra(T *rraBase, TKId elementTK, int *rraOffsetList,
     typeid(U).name(), typeid(V).name());
 #endif
   if(superVector){
-#ifdef XXE_EXEC_OPS_LOG_on
+#ifdef XXE_EXEC_OPSLOG_on
     char msg[1024];
     sprintf(msg, "XXE::productSumSuperScalarDstRRA: "
       "taking super-vector branch...");
@@ -5154,7 +5176,7 @@ void XXE::psssDstRra(T *rraBase, TKId elementTK, int *rraOffsetList,
       valueOffsetList, termCount, vectorL, localDeIndexOff,
       size_r, size_s, size_t, size_i, size_j);
   }else{
-#ifdef XXE_EXEC_OPS_LOG_on
+#ifdef XXE_EXEC_OPSLOG_on
     char msg[1024];
     sprintf(msg, "XXE::productSumSuperScalarDstRRA: "
       "taking vector branch...");
@@ -5179,7 +5201,7 @@ void XXE::exec_psssDstRra(T *rraBase, int *rraOffsetList, U **factorList,
       element = rraBase + rraOffsetList[k];
       factor = factorList[k];
       value = valueBase + valueOffsetList[k];
-#ifdef XXE_EXEC_OPS_LOG_on
+#ifdef XXE_EXEC_OPSLOG_on
     {
       std::stringstream logmsg;
       logmsg << "exec_psssDstRra: element=" << element << ":" << *element
@@ -5197,7 +5219,7 @@ void XXE::exec_psssDstRra(T *rraBase, int *rraOffsetList, U **factorList,
       factor = factorList[k];
       value = valueBase + valueOffsetList[k] * vectorL;
       for (int kk=0; kk<vectorL; kk++){  // vector loop
-#ifdef XXE_EXEC_OPS_LOG_on
+#ifdef XXE_EXEC_OPSLOG_on
     {
       std::stringstream logmsg;
       logmsg << "exec_psssDstRra: element+kk=" << element+kk << ":" 
@@ -5225,7 +5247,7 @@ void XXE::exec_psssDstRraSuper(T *rraBase, int *rraOffsetList, U **factorList,
   V *value;
   int sz_i = size_i[localDeIndexOff];
   int sz_j = size_j[localDeIndexOff];
-#ifdef XXE_EXEC_OPS_LOG_on
+#ifdef XXE_EXEC_OPSLOG_on
   char msg[1024];
   sprintf(msg, "sz_i=%d, sz_j=%d, termCount=%d", sz_i, sz_j, termCount);
   ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
@@ -5242,7 +5264,7 @@ void XXE::exec_psssDstRraSuper(T *rraBase, int *rraOffsetList, U **factorList,
     for (int kkk=0; kkk<vectorL/size_r; kkk++){
       for (int kkkk=0; kkkk<size_r; kkkk++){
         element[kkkk] += *factor * *(value+kk);
-#ifdef XXE_EXEC_OPS_LOG_on
+#ifdef XXE_EXEC_OPSLOG_on
       {
         std::stringstream logmsg;
         logmsg << "element=" <<  &(element[kkkk]) << " *=" << element[kkkk]
@@ -5413,7 +5435,7 @@ void XXE::pssslDstRra(T **rraBaseList, int *rraIndexList, TKId elementTK,
     typeid(U).name(), typeid(V).name());
 #endif
   if(superVector){
-#ifdef XXE_EXEC_OPS_LOG_on
+#ifdef XXE_EXEC_OPSLOG_on
     char msg[1024];
     sprintf(msg, "XXE::productSumSuperScalarListDstRRA: "
       "taking super-vector branch...");
@@ -5423,7 +5445,7 @@ void XXE::pssslDstRra(T **rraBaseList, int *rraIndexList, TKId elementTK,
       valueBaseList, valueOffsetList, baseListIndexList, termCount, vectorL,
       localDeIndexOff, size_r, size_s, size_t, size_i, size_j);
   }else{
-#ifdef XXE_EXEC_OPS_LOG_on
+#ifdef XXE_EXEC_OPSLOG_on
     char msg[1024];
     sprintf(msg, "XXE::productSumSuperScalarListDstRRA: "
       "taking vector branch...");
@@ -5480,7 +5502,7 @@ void XXE::exec_pssslDstRraSuper(T **rraBaseList, int *rraIndexList,
   for (int k=0; k<termCount; k++){  // super scalar loop
     int sz_i = size_i[rraIndexList[baseListIndexList[k]]-localDeIndexOff];
     int sz_j = size_j[rraIndexList[baseListIndexList[k]]-localDeIndexOff];
-#ifdef XXE_EXEC_OPS_LOG_on
+#ifdef XXE_EXEC_OPSLOG_on
     char msg[1024];
     sprintf(msg, "sz_i=%d, sz_j=%d, termCount=%d", sz_i, sz_j, termCount);
     ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
@@ -5498,7 +5520,7 @@ void XXE::exec_pssslDstRraSuper(T **rraBaseList, int *rraIndexList,
     for (int kkk=0; kkk<vectorL/size_r; kkk++){
       for (int kkkk=0; kkkk<size_r; kkkk++){
         element[kkkk] += *factor * *(value+kk);
-#ifdef XXE_EXEC_OPS_LOG_on
+#ifdef XXE_EXEC_OPSLOG_on
       {
         std::stringstream logmsg;
         logmsg << "element=" <<  &(element[kkkk]) << " *=" << element[kkkk]
@@ -5672,7 +5694,7 @@ void XXE::psssSrcRra(T *rraBase, TKId valueTK, int *rraOffsetList,
     typeid(U).name(), typeid(V).name());
 #endif
   if(superVector){
-#ifdef XXE_EXEC_OPS_LOG_on
+#ifdef XXE_EXEC_OPSLOG_on
     char msg[1024];
     sprintf(msg, "XXE::productSumSuperScalarSrcRRA: "
       "taking super-vector branch...");
@@ -5682,7 +5704,7 @@ void XXE::psssSrcRra(T *rraBase, TKId valueTK, int *rraOffsetList,
       elementBase, elementOffsetList, termCount, vectorL, 
       localDeIndexOff, size_r, size_s, size_t, size_i, size_j, superVector);
   }else{
-#ifdef XXE_EXEC_OPS_LOG_on
+#ifdef XXE_EXEC_OPSLOG_on
     char msg[1024];
     sprintf(msg, "XXE::productSumSuperScalarSrcRRA: "
       "taking vector branch...");
@@ -5733,7 +5755,7 @@ void XXE::exec_psssSrcRraSuper(T *rraBase, int *rraOffsetList, U **factorList,
   V *element;
   int sz_i = size_i[localDeIndexOff];
   int sz_j = size_j[localDeIndexOff];
-#ifdef XXE_EXEC_OPS_LOG_on
+#ifdef XXE_EXEC_OPSLOG_on
   char msg[1024];
   sprintf(msg, "sz_i=%d, sz_j=%d, termCount=%d", sz_i, sz_j, termCount);
   ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
@@ -5749,7 +5771,7 @@ void XXE::exec_psssSrcRraSuper(T *rraBase, int *rraOffsetList, U **factorList,
     int kk=0;
     for (int kkk=0; kkk<vectorL/size_r; kkk++){
       for (int kkkk=0; kkkk<size_r; kkkk++){
-#ifdef XXE_EXEC_OPS_LOG_on
+#ifdef XXE_EXEC_OPSLOG_on
       {
         std::stringstream logmsg;
         logmsg << "element=" << &(element[kk]) << " *=" << element[kk]
@@ -5759,7 +5781,7 @@ void XXE::exec_psssSrcRraSuper(T *rraBase, int *rraOffsetList, U **factorList,
       }
 #endif
         element[kk] += *factor * value[kkkk];
-#ifdef XXE_EXEC_OPS_LOG_on
+#ifdef XXE_EXEC_OPSLOG_on
       {
         std::stringstream logmsg;
         logmsg << "element=" << &(element[kk]) << " *=" << element[kk]
