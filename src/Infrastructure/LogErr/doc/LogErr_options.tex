@@ -36,6 +36,9 @@ The valid values are:
          Use a single log file, combining messages from all of the PETs.  Not supported on some platforms.
    \item [ESMF\_LOGKIND\_MULTI]
          Use multiple log files --- one per PET.
+   \item [ESMF\_LOGKIND\_MULTI\_ON\_ERROR]
+         Use multiple log files --- one per PET.  A log file is only opened when a message
+         of type {\tt ESMF\_LOGMSG\_ERROR} is encountered.
    \item [ESMF\_LOGKIND\_NONE]
          Do not issue messages to a log file.
 \end{description}

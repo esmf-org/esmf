@@ -131,6 +131,9 @@ extern int MPIUNI_Memcpy(void*,const void*,int);
 #define MPI_MAX_ERROR_STRING 512
 typedef long MPI_Aint;
 
+/* for moab to build in mpiuni mode */
+#define MPI_Fint  int
+
 /* Collective operators.  Same values used in mpif.h */
 typedef int MPI_Op;
 

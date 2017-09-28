@@ -174,23 +174,23 @@ static void GetObject(void *user, int numGlobalIds, int numLids, int numObjs,
 /*-----------------------------------------------------------------------------------*/
 
   GeomRend::GeomRend(Mesh *_srcmesh, PointList *_srcplist, 
-		     Mesh *_dstmesh, PointList *_dstplist, 
-		     const DstConfig &cfg, bool freeze_src_, bool _on_sph) :
-srcmesh(_srcmesh),
-srcplist(_srcplist),
-dstmesh(_dstmesh),
-dstplist(_dstplist),
-dcfg(cfg),
-srcComm(),
-dstComm(),
-built(false),
-sdim(),     
-iter_is_obj(cfg.iter_obj_type == cfg.obj_type),
-freeze_src(freeze_src_),
-srcplist_rend(NULL),
-dstplist_rend(NULL),
-on_sph(_on_sph)
-{
+                     Mesh *_dstmesh, PointList *_dstplist,
+                     const DstConfig &cfg, bool freeze_src_, bool _on_sph) :
+                     srcmesh(_srcmesh),
+                     srcplist(_srcplist),
+                     dstmesh(_dstmesh),
+                     dstplist(_dstplist),
+                     dcfg(cfg),
+                     srcComm(),
+                     dstComm(),
+                     built(false),
+                     sdim(),
+                     iter_is_obj(cfg.iter_obj_type == cfg.obj_type),
+                     freeze_src(freeze_src_),
+                     srcplist_rend(NULL),
+                     dstplist_rend(NULL),
+                     on_sph(_on_sph)
+                     {
 
   if (_srcplist != NULL) {
     sdim = _srcplist->get_coord_dim();
@@ -208,7 +208,7 @@ on_sph(_on_sph)
 
   ThrowRequire(sdim == dst_dim);
   ThrowRequire(dcfg.iter_obj_type == MeshObj::ELEMENT ||
-	       dcfg.iter_obj_type == MeshObj::NODE);
+               dcfg.iter_obj_type == MeshObj::NODE);
 
 
   // For now only allow the 'conservative case for elements (since sides have no relations otherwise)

@@ -30,10 +30,12 @@
 #include <fstream>
 #include <sstream>
 
+#include <errno.h>
+#include <unistd.h>
+
 // other ESMF include files here.
 #include "ESMCI_Macros.h"
 #include "ESMCI_Container.h"
-#include "ESMC_VM.h"
 #include "ESMCI_LogErr.h"
 #include "ESMCI_ArrayBundle.h"
 
@@ -265,25 +267,16 @@ int PIO_Handler::initializeVM (void
 
   try {  
     if (!instanceFound) {
-      ESMC_VM currentVM;            // our VM (for PET and MPI comm info)
-      int localPet;
-      int petCount;
-      int peCount;
-      currentVM = ESMC_VMGetCurrent(&rc);
-      if (ESMC_LogDefault.MsgFoundError(rc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, 
-        &rc)) {
+      int localrc;
+      VM *vm = VM::getCurrent(&localrc);
+      if (ESMC_LogDefault.MsgFoundError (localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc))
         return rc;
-      }
-      rc = ESMC_VMGet(currentVM, &localPet, &petCount, &peCount,
-                      &communicator, (int *)NULL, (int *)NULL);
-      if (ESMC_LogDefault.MsgFoundError(rc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
-        &rc)) {
-        return rc;
-      }
+      communicator = vm->getMpi_c();
+      my_rank = vm->getLocalPet();
+
       // Figure out the inputs for the initialize call
-      my_rank = localPet;
 #if defined(ESMF_NETCDF) || defined(ESMF_PNETCDF)
-      num_iotasks = petCount;
+      num_iotasks = vm->getPetCount();
       num_aggregators = 1;
       stride = 1;
       rearr = PIO_rearr_box;
@@ -1262,6 +1255,27 @@ void PIO_Handler::open(
   int localrc = ESMF_RC_NOT_IMPL;         // local return code
   int piorc;                              // PIO error value
 
+  struct iofmt_map_t {
+    int esmf_iofmt;
+    int pio_fmt;
+  } iofmt_map[] = {
+     { ESMF_IOFMT_BIN,      PIO_iotype_pbinary }
+#if defined (ESMF_NETCDF) || defined (ESMF_PNETCDF)
+#if defined (ESMF_PNETCDF)
+    ,{ ESMF_IOFMT_NETCDF,   PIO_iotype_pnetcdf }
+    ,{ ESMF_IOFMT_NETCDF_64BIT_OFFSET, PIO_iotype_pnetcdf }
+    ,{ ESMF_IOFMT_NETCDF4,  PIO_iotype_pnetcdf }
+#elif defined (ESMF_NETCDF)
+    ,{ ESMF_IOFMT_NETCDF,   PIO_iotype_netcdf }
+    ,{ ESMF_IOFMT_NETCDF_64BIT_OFFSET, PIO_iotype_netcdf }
+    ,{ ESMF_IOFMT_NETCDF4,  PIO_iotype_netcdf }
+    ,{ ESMF_IOFMT_NETCDF4C, PIO_iotype_netcdf4c }
+    ,{ ESMF_IOFMT_NETCDF4P, PIO_iotype_netcdf4p }
+#endif
+#endif
+  };
+  int iofmt_map_size = sizeof (iofmt_map)/sizeof (iofmt_map_t);
+
   if (rc != NULL) {
     *rc = ESMF_RC_NOT_IMPL;               // final return code
   }
@@ -1280,63 +1294,28 @@ void PIO_Handler::open(
     pioSystemDesc = PIO_Handler::activePioInstances.back();
   }
 
-  // Allocate a file descriptor
-  pioFileDesc = (pio_file_desc_t)calloc(PIO_SIZE_FILE_DESC, 1);
-  if (!pioFileDesc)
-    if (ESMC_LogDefault.MsgAllocError(" failed to allocate pio file desc",
-        ESMC_CONTEXT, rc)) return;
-  PRINTMSG(" allocated pio file desc, addr = " << (void *)pioFileDesc);
-
   // Translate the I/O format from ESMF to PIO
-  localrc = ESMF_SUCCESS;
-  if (getFormat() == ESMF_IOFMT_BIN) {
-    iotype = PIO_iotype_pbinary;
-  } else if (getFormat() == ESMF_IOFMT_NETCDF) {
-#ifdef ESMF_PNETCDF
-    iotype = PIO_iotype_pnetcdf;
-#elif ESMF_NETCDF
-    iotype = PIO_iotype_netcdf;
-#else  // ESMF_NETCDF
-    localrc = ESMF_RC_LIB_NOT_PRESENT;
-#endif // ESMF_NETCDF
-  } else if (getFormat() == ESMF_IOFMT_NETCDF4C) {
-#ifdef ESMF_NETCDF
-    iotype = PIO_iotype_netcdf4c;
-#else  // ESMF_NETCDF
-    localrc = ESMF_RC_LIB_NOT_PRESENT;
-#endif // ESMF_NETCDF
-  } else if (getFormat() == ESMF_IOFMT_NETCDF4P) {
-#ifdef ESMF_NETCDF
-    iotype = PIO_iotype_netcdf4p;
-#else  // ESMF_NETCDF
-    localrc = ESMF_RC_LIB_NOT_PRESENT;
-#endif // ESMF_NETCDF
-  } else {
-    localrc = ESMF_RC_ARG_BAD;
+#if !defined(ESMF_NETCDF) && !defined (ESMF_PNETCDF)
+  if (getFormat() != ESMF_IOFMT_BIN) {
+    if (ESMC_LogDefault.MsgFoundError(ESMF_RC_LIB_NOT_PRESENT,
+        "Library for requested I/O format is not present", ESMC_CONTEXT, rc))
+      return;
   }
-  if (ESMF_SUCCESS != localrc) {
-    switch(localrc) {
-    case ESMF_RC_ARG_BAD:
-      ESMC_LogDefault.Write("unknown I/O format",
-                            ESMC_LOGMSG_ERROR, ESMC_CONTEXT);
-      break;
-    case ESMF_RC_LIB_NOT_PRESENT:
-      ESMC_LogDefault.Write("Library for requested I/O format is not present",
-                            ESMC_LOGMSG_ERROR, ESMC_CONTEXT);
-      break;
-    default:
-      ESMC_LogDefault.Write("Unknown I/O error",
-                            ESMC_LOGMSG_ERROR, ESMC_CONTEXT);
+#endif
+
+  int i_loop;
+  for (i_loop=0; i_loop<iofmt_map_size; i_loop++) {
+    if (getFormat() == iofmt_map[i_loop].esmf_iofmt) {
+      iotype = iofmt_map[i_loop].pio_fmt;
       break;
     }
-    if (rc != NULL) {
-      *rc = localrc;
-    }
-    free (pioFileDesc);
-    pioFileDesc = NULL;
-    return;
   }
-  
+  if (i_loop == iofmt_map_size) {
+    if (ESMC_LogDefault.MsgFoundError(ESMF_RC_ARG_BAD,
+        "unsupported/unknown I/O format", ESMC_CONTEXT, rc))
+      return;
+  }
+
   // Check to see if we are able to open file properly
   bool okToCreate = false;
   int clobberMode = PIO_NOCLOBBER;
@@ -1347,9 +1326,10 @@ void PIO_Handler::open(
   }
   // Figure out if we need to call createfile or openfile
   new_file = false;
+  bool file_exists = IO_Handler::fileExists(getFilename(), !readonly);
   switch(getFileStatusFlag()) {
   case ESMC_FILESTATUS_UNKNOWN:
-    if (IO_Handler::fileExists(getFilename(), !readonly)) {
+    if (file_exists) {
       // Treat like OLD
       okToCreate = false;
     } else {
@@ -1371,23 +1351,121 @@ void PIO_Handler::open(
     break;
   default:
     localrc = ESMF_RC_ARG_BAD;
-    ESMC_LogDefault.Write("unknown file status argument",
-                          ESMC_LOGMSG_ERROR, ESMC_CONTEXT);
-    if (rc != NULL) {
-      *rc = localrc;
-    }
-    free (pioFileDesc);
-    pioFileDesc = NULL;
-    return;
+    if (ESMC_LogDefault.MsgFoundError(localrc, "unknown file status argument", ESMC_CONTEXT, rc))
+      return;
   }
+
+  // If file needs to be created, check for 64-bit or NETCDF4 for pre-create.
+  // TODO: Revisit this as PIO, and our understanding of it, evolve...
+
+  if (okToCreate) {
+    if ((getFormat() == ESMF_IOFMT_NETCDF_64BIT_OFFSET) || (getFormat() == ESMF_IOFMT_NETCDF4)) {
+      const char *fn = getFilename();
+      VM *vm = VM::getCurrent(&localrc);
+      if (ESMC_LogDefault.MsgFoundError (localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc))
+        return;
+
+      vm->barrier();
+      int comm_rc = ESMF_SUCCESS;
+      if (file_exists && (getFileStatusFlag() == ESMC_FILESTATUS_REPLACE)) {
+        if (my_rank == 0) {
+          if (unlink (fn)) {
+            comm_rc = ESMC_RC_FILE_OPEN;
+            std::string errmsg =
+                std::string ("could not delete file: ") + fn + " (" + strerror (errno) + ")";
+            ESMC_LogDefault.Write(errmsg, ESMC_LOGMSG_ERROR, ESMC_CONTEXT);
+          }
+        }
+        vm->broadcast (&comm_rc, sizeof (int), 0);
+        if (ESMC_LogDefault.MsgFoundError (comm_rc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc))
+          return;
+      }
+      vm->barrier();
+
+      // Pre-create file with at least 64-bit offset set.
+#if defined (ESMF_PNETCDF)
+#if defined (NC_64BIT_DATA)
+      // If NETCDF4 was desired, enable HDF5.
+      int ncmode = (getFormat() == ESMF_IOFMT_NETCDF4) ? NC_64BIT_DATA : NC_64BIT_OFFSET;
+#else
+      // Some PNetCDF builds do not support HDF5.  Punt with 64-bit offset.
+      if (getFormat() == ESMF_IOFMT_NETCDF4) {
+        std::string errmsg =
+            std::string ("Creating file ") + fn + " with 64-bit offset instead of NETCDF4/HDF5 format due to PNetCDF version or build limitation.";
+        ESMC_LogDefault.Write(errmsg, ESMC_LOGMSG_WARN, ESMC_CONTEXT);
+      }
+      int ncmode = NC_64BIT_OFFSET;
+#endif
+      int ncid;
+      MPI_Info info = MPI_INFO_NULL;
+      int ncerr = ncmpi_create (communicator, fn, ncmode, info, &ncid);
+      if (ncerr != NC_NOERR) {
+        std::string errmsg =
+            std::string("could not pre-create file: ") + fn + " (" + ncmpi_strerror (ncerr) + ")";
+        localrc = ESMC_RC_FILE_OPEN;
+        if (ESMC_LogDefault.MsgFoundError(localrc, errmsg, ESMC_CONTEXT, rc))
+            return;
+      }
+      ncerr = ncmpi_close (ncid);
+      if (ncerr != NC_NOERR) {
+        std::string errmsg =
+            std::string("could not close pre-created file: ") + fn + " (" + ncmpi_strerror (ncerr) + ")";
+        localrc = ESMC_RC_FILE_OPEN;
+        if (ESMC_LogDefault.MsgFoundError(localrc, errmsg, ESMC_CONTEXT, rc))
+            return;
+      }
+#elif defined (ESMF_NETCDF)
+      comm_rc == ESMF_SUCCESS;
+      if (my_rank == 0) {
+#if defined (NC_64BIT_DATA)
+      // If NETCDF4 was desired, enable HDF5.
+        int ncmode = (getFormat() == ESMF_IOFMT_NETCDF4) ? NC_64BIT_DATA : NC_64BIT_OFFSET;
+#else
+      // Some NetCDF builds do not support HDF5.  Punt with 64-bit offset.
+        if (getFormat() == ESMF_IOFMT_NETCDF4) {
+          std::string errmsg =
+              std::string ("Creating file ") + fn + " with 64-bit offset instead of NETCDF4/HDF5 format due to NetCDF version or build limitation.";
+          ESMC_LogDefault.Write(errmsg, ESMC_LOGMSG_WARN, ESMC_CONTEXT);
+        }
+        int ncmode = NC_64BIT_OFFSET;
+#endif
+        int ncid;
+        int ncerr = nc_create (fn, ncmode, &ncid);
+        if (ncerr != NC_NOERR) {
+          comm_rc = ESMC_RC_FILE_OPEN;
+          std::string errmsg =
+              std::string("could not pre-create file: ") + fn + " (" + nc_strerror (ncerr) + ")";
+            ESMC_LogDefault.Write(errmsg, ESMC_LOGMSG_ERROR, ESMC_CONTEXT);
+        }
+
+        ncerr = nc_close (ncid);
+        if (ncerr != NC_NOERR) {
+          comm_rc = ESMC_RC_FILE_OPEN;
+          std::string errmsg =
+              std::string ("could not close pre-created file: ") + fn + " (" + nc_strerror (ncerr) + ")";
+            ESMC_LogDefault.Write(errmsg, ESMC_LOGMSG_ERROR, ESMC_CONTEXT);
+        }
+      }
+      vm->broadcast (&comm_rc, sizeof (int), 0);
+      if (ESMC_LogDefault.MsgFoundError (comm_rc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc))
+        return;
+#endif
+      okToCreate = false;
+    }
+  }
+
+  // Allocate a file descriptor
+  pioFileDesc = (pio_file_desc_t)calloc(PIO_SIZE_FILE_DESC, 1);
+  if (!pioFileDesc)
+    if (ESMC_LogDefault.MsgAllocError(" failed to allocate pio file desc",
+        ESMC_CONTEXT, rc)) return;
+  PRINTMSG(" allocated pio file desc, addr = " << (void *)pioFileDesc);
+
   if (okToCreate) {
     // Looks like we are ready to try and create the file
 #ifdef ESMFIO_DEBUG
-    char errmsg[512];
+    std::string errmsg = "Calling pio_cpp_createfile: file = " + getFilename();
     pio_cpp_setdebuglevel(3);
-    sprintf(errmsg, " calling pio_cpp_createfile: file = \"");
-    strncpy((errmsg + strlen(errmsg)), getFilename(), 256);
-    strcpy((errmsg + strlen(errmsg)), "\"");
     ESMC_LogDefault.Write(errmsg, ESMC_LOGMSG_INFO, ESMC_CONTEXT);
 #endif // ESMFIO_DEBUG
     piorc = pio_cpp_createfile(&pioSystemDesc, pioFileDesc,
@@ -1445,34 +1523,13 @@ void PIO_Handler::attPackPut (
   ) {
 //
 // !DESCRIPTION:
-//    Puts the Attributes and their values into the NetCDF file
+//    Puts the Attributes and their values into the NetCDF file.  If vardesc is NULL, the
+//    attribute will be considered a global attribute.
 //
 //EOPI
 //-----------------------------------------------------------------------------
   int localrc;
   int piorc;
-
-  pio_var_desc_t vardesc_local = vardesc;
-  if (!vardesc) {
-    pio_var_desc_t gblvardesc = (pio_var_desc_t)calloc(PIO_SIZE_VAR_DESC, 1);
-    if (!gblvardesc)
-      if (ESMC_LogDefault.MsgAllocError(" failed to allocate pio global variable desc",
-          ESMC_CONTEXT, rc)) return;
-
-#if !defined (ESMF_PNETCDF)
-    // TODO: this fails with PNetCDF...
-    piorc = pio_cpp_def_var_0d(pioFileDesc, "", PIO_global, gblvardesc);
-    if (piorc != PIO_noerr) {
-      std::cout << ESMC_METHOD << ": piorc = " << piorc << std::endl;
-      if (!CHECKPIOERROR(piorc, "Attempting to define global PIO vardesc",
-          ESMF_RC_FILE_WRITE, (*rc))) {
-        free (gblvardesc);
-        return;
-      }
-    }
-#endif
-    vardesc_local = gblvardesc;
-  }
 
   int natts = attPack->getCountAttr();
   for (int i=0; i<natts; i++) {
@@ -1480,14 +1537,11 @@ void PIO_Handler::attPackPut (
     if (!att) {
       if (ESMC_LogDefault.MsgFoundError(ESMF_RC_ATTR_NOTSET,
           "Can not access Attribute in " + attPack->getName(),
-          ESMC_CONTEXT, rc)) {
-        if (!vardesc) free (vardesc_local);
-        return;
-      }
+          ESMC_CONTEXT, rc)) return;
     }
     if (att->getName().substr(0,5) == "ESMF:") {
 #if 0
-      std::cout << ESMC_METHOD << ": NOTE: attribute " << att->getName() << " ignored." << std::endl;
+      std::cout << ESMC_METHOD << ": NOTE: ESMF internal attribute " << att->getName() << " ignored." << std::endl;
 #endif
       continue;
     }
@@ -1500,25 +1554,16 @@ void PIO_Handler::attPackPut (
         localrc = att->get (&stringvals);
         if (ESMC_LogDefault.MsgFoundError(localrc,
             "Can not access string Attribute value for " + att->getName(),
-            ESMC_CONTEXT, rc)) {
-          if (!vardesc) free (vardesc_local);
-          return;
-        }
+            ESMC_CONTEXT, rc)) return;
         if (stringvals.size() > 1) {
           if (ESMC_LogDefault.MsgFoundError(localrc,
               "Only scalar string Attribute value for " + att->getName() + " is currently supported",
-              ESMC_CONTEXT, rc)) {
-            if (!vardesc) free (vardesc_local);
-            return;
-          }
+              ESMC_CONTEXT, rc)) return;
         }
-        piorc = pio_cpp_put_att_string (pioFileDesc, vardesc_local,
+        piorc = pio_cpp_put_att_string (pioFileDesc, vardesc,
             att->getName().c_str(), stringvals[0].c_str());
         if (!CHECKPIOERROR(piorc, "Attempting to set string Attribute: " + att->getName(),
-            ESMF_RC_FILE_WRITE, (*rc))) {
-          if (!vardesc) free (vardesc_local);
-          return;
-        }
+            ESMF_RC_FILE_WRITE, (*rc))) return;
         break;
       }
 
@@ -1529,17 +1574,11 @@ void PIO_Handler::attPackPut (
         localrc = att->get (&nvals, &intvals);
         if (ESMC_LogDefault.MsgFoundError(localrc,
             "Can not access int Attribute value for " + att->getName(),
-            ESMC_CONTEXT, rc)) {
-          if (!vardesc) free (vardesc_local);
-          return;
-        }
-        piorc = pio_cpp_put_att_ints (pioFileDesc, vardesc_local,
+            ESMC_CONTEXT, rc)) return;
+        piorc = pio_cpp_put_att_ints (pioFileDesc, vardesc,
             att->getName().c_str(), &intvals[0], intvals.size());
         if (!CHECKPIOERROR(piorc, "Attempting to set int Attribute: " + att->getName(),
-            ESMF_RC_FILE_WRITE, (*rc))) {
-          if (!vardesc) free (vardesc_local);
-          return;
-        }
+            ESMF_RC_FILE_WRITE, (*rc))) return;
         break;
       }
 
@@ -1550,17 +1589,11 @@ void PIO_Handler::attPackPut (
         localrc = att->get (&nvals, &floatvals);
         if (ESMC_LogDefault.MsgFoundError(localrc,
             "Can not access float Attribute value for " + att->getName(),
-            ESMC_CONTEXT, rc)) {
-          if (!vardesc) free (vardesc_local);
-          return;
-        }
-        piorc = pio_cpp_put_att_floats (pioFileDesc, vardesc_local,
+            ESMC_CONTEXT, rc)) return;
+        piorc = pio_cpp_put_att_floats (pioFileDesc, vardesc,
             att->getName().c_str(), &floatvals[0], floatvals.size());
         if (!CHECKPIOERROR(piorc, "Attempting to set float Attribute: " + att->getName(),
-            ESMF_RC_FILE_WRITE, (*rc))) {
-          if (!vardesc) free (vardesc_local);
-          return;
-        }
+            ESMF_RC_FILE_WRITE, (*rc))) return;
         break;
       }
 
@@ -1571,30 +1604,20 @@ void PIO_Handler::attPackPut (
         localrc = att->get (&nvals, &doublevals);
         if (ESMC_LogDefault.MsgFoundError(localrc,
             "Can not access double Attribute value for " + att->getName(),
-            ESMC_CONTEXT, rc)) {
-          if (!vardesc) free (vardesc_local);
-          return;
-        }
-        piorc = pio_cpp_put_att_doubles (pioFileDesc, vardesc_local,
+            ESMC_CONTEXT, rc)) return;
+        piorc = pio_cpp_put_att_doubles (pioFileDesc, vardesc,
             att->getName().c_str(), &doublevals[0], doublevals.size());
         if (!CHECKPIOERROR(piorc, "Attempting to set double Attribute: " + att->getName(),
-            ESMF_RC_FILE_WRITE, (*rc))) {
-          if (!vardesc) free (vardesc_local);
-          return;
-        }
+            ESMF_RC_FILE_WRITE, (*rc))) return;
         break;
       }
 
       default:
         if (ESMC_LogDefault.MsgFoundError(ESMF_RC_ATTR_NOTSET,
             "Attribute " + att->getName() + " has unsupported value type",
-            ESMC_CONTEXT, rc)) {
-          if (!vardesc) free (vardesc_local);
-          return;
-        }
+            ESMC_CONTEXT, rc)) return;
     }
   } // natts loop
-  if (!vardesc) free (vardesc_local);
 } // PIO_Handler::attPackPut()
 //-----------------------------------------------------------------------------
 
@@ -1849,8 +1872,8 @@ bool PIO_Handler::CheckPIOError(
     *rc = ESMF_RC_NOT_IMPL;               // final return code
   }
 
+  std::stringstream errmsg;
   if (pioRetCode != PIO_noerr) {
-    std::stringstream errmsg;
 #if defined(ESMF_PNETCDF)
     // Log the error, assuming the error code was passed through PIO from PNetCDF
     if (!fmtStr.empty()) {
@@ -1872,31 +1895,41 @@ bool PIO_Handler::CheckPIOError(
       errmsg << " (PIO error = " << pioRetCode << ")";
     }
 #endif
-    if (warn) {
-      ESMC_LogDefault.Write(errmsg.str(), ESMC_LOGMSG_WARN, line, file, method);
-    } else {
-      ESMC_LogDefault.Write(errmsg.str(), ESMC_LOGMSG_ERROR, line, file, method);
-    }
-    PRINTMSG("PIO ERROR: " << errmsg.str());
     // Attempt to find a corresponding ESMC error code
     switch(pioRetCode) {
 #if defined(ESMF_NETCDF) || defined(ESMF_PNETCDF)
     case NC_EEXIST:
       localrc = ESMF_RC_FILE_CREATE;
       break;
+    case NC_ENOMEM:
+      localrc = ESMF_RC_MEM_ALLOCATE;
+      break;
     case NC_EPERM:
       localrc = ESMF_RC_FILE_OPEN;
       break;
-#endif // defined(ESMF_NETCDF) || defined(ESMF_PNETCDF)
     default:
-      localrc = rc_code;
+      localrc = ESMF_RC_NETCDF_ERROR;
       break;
+#else // defined(ESMF_NETCDF) || defined(ESMF_PNETCDF)
+    default:
+      localrc = ESMF_RC_FILE_UNEXPECTED;
+      break;
+#endif
     }
+  } else
+    localrc = ESMF_SUCCESS;
+
+  if ((localrc != ESMF_SUCCESS) && warn) {
+    ESMC_LogDefault.Write(errmsg, ESMC_LOGMSG_WARN,
+        line, file, method);
+    // run through MsgFoundError in case Log tracing is enabled
+    ESMC_LogDefault.MsgFoundError(ESMF_SUCCESS, errmsg,
+        line, file, method, rc);
+  } else {
+    ESMC_LogDefault.MsgFoundError(localrc, errmsg,
+        line, file, method, rc);
   }
-  // Set the return code
-  if (rc != NULL) {
-    *rc = localrc;
-  }
+
   return (pioRetCode == PIO_noerr);
 } // PIO_Handler::CheckPIOError()
 //-----------------------------------------------------------------------------
@@ -2002,13 +2035,8 @@ int PIO_IODescHandler::constructPioDecomp(
 
   // initialize return code; assume routine not implemented
   int localrc = ESMF_RC_NOT_IMPL;   // local return code
-  ESMC_VM currentVM;                // our VM (for PET and MPI comm info)
-  MPI_Comm mpiCommunicator;         // MPI communicator to use for I/O
   int localDe;                      // The DE being processed
   int localDeCount;                 // The number of DEs on this PET
-  int localPet;                     // Number of this PET
-  int petCount;                     // Total number of PETs in VM
-  int peCount;                      // Total number of PEs in VM
   int pioDofCount;                  // Number 
   int64_t *pioDofList;              // Local to global array map
   DistGrid *distGrid;               // The Array's associated DistGrid
@@ -2029,17 +2057,7 @@ int PIO_IODescHandler::constructPioDecomp(
 
   handle = new PIO_IODescHandler(iosys, arr_p);
   pioDofList = (int64_t *)NULL;
-  currentVM = ESMC_VMGetCurrent(&localrc);
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
-    &localrc)) {
-    return localrc;
-  }
-  localrc = ESMC_VMGet(currentVM, &localPet, &petCount, &peCount,
-                       &mpiCommunicator, (int *)NULL, (int *)NULL);
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
-    &localrc)) {
-    return localrc;
-  }
+
   localDeCount = arr_p->getDELayout()->getLocalDeCount();
   PRINTMSG("localDeCount = " << localDeCount);
   //TODO: Remove this restriction (possibly with multiple IO descriptors)
@@ -2055,7 +2073,7 @@ int PIO_IODescHandler::constructPioDecomp(
   for (localDe = 0; localDe < localDeCount; ++localDe) {
     pioDofCount += arr_p->getTotalElementCountPLocalDe()[localDe];
   }
-  PRINTMSG("(" << localPet << "): pioDofCount = " << pioDofCount);
+  PRINTMSG("(" << my_rank << "): pioDofCount = " << pioDofCount);
   try {
     // Allocate space for the DOF list
     pioDofList = new int64_t[pioDofCount];

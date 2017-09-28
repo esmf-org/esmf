@@ -141,7 +141,8 @@ class Field(object):
 
         # initialize field data
         #TODO: MaskedArray gives better interpolation values than Array
-        self._data = MaskedArray(ESMP_FieldGetPtr(struct), None, typekind, ubounds-lbounds).data
+        # self._data = MaskedArray(ESMP_FieldGetPtr(struct), None, typekind, ubounds-lbounds).data.copy()
+        self._data = ndarray_from_esmf(ESMP_FieldGetPtr(struct), typekind, ubounds-lbounds)
         self._name = name
         self._type = typekind
         self._rank = rank
@@ -175,9 +176,10 @@ class Field(object):
 
         ret._data = self._data.__getitem__(slc)
 
-        # set grid to the last two dims of the slice
+        # set grid to the first two dims of the slice (this will change to last when we get dimension ordering set to python conventions)
         if self.xd > 0:
-            slc_grid = [slc[-1 * x] for x in range(self.rank - self.xd, 0, -1)]
+            # slc_grid = [slc[-1 * x] for x in range(self.rank - self.xd, 0, -1)]
+            slc_grid = [slc[x] for x in range(self.rank - self.xd)]
         else:
             slc_grid = slc
         ret._grid = self.grid.__getitem__(slc_grid)
@@ -381,7 +383,7 @@ class Field(object):
 
         import ESMF.api.constants as constants
         if constants._ESMF_COMM is constants._ESMF_COMM_MPIUNI:
-            raise ImportError("Field.Read() does not work if ESMF has not been built with MPI support")
+            raise ImportError("Field.Read() requires PIO and does not work if ESMF has not been built with MPI support")
 
         assert (type(filename) is str)
         assert (type(variable) is str)

@@ -75,6 +75,7 @@ module ESMF_AttributeMod
   use ESMF_UtilStringMod
   use ESMF_VMMod
   use ESMF_AttributeInternalsMod
+  use ESMF_AttPackTypeMod
 
   implicit none
 
@@ -83,31 +84,9 @@ module ESMF_AttributeMod
   private
 
 !------------------------------------------------------------------------------
-! ! ESMF_Attribute
-!
-!------------------------------------------------------------------------------
-
- ! Fortran class type to hold pointer to C++ object
-  type ESMF_AttPack
-^ifndef ESMF_NO_SEQUENCE
-  sequence
-^endif
-  private
-    type(ESMF_Pointer) :: this
-    ESMF_INIT_DECLARE
-  end type
-
-!------------------------------------------------------------------------------
-!
-! !DESCRIPTION:
-!     The following routines apply to {\tt ESMF\_Array}, {\tt ESMF\_ArrayBundle},
-!     {\ESMF_DistGrid}, {\tt ESMF\_Field},{\tt ESMF\_FieldBundle}, {\tt ESMF\_Grid},
-!     and {\tt ESMF\_State}.
-!
 ! !PUBLIC MEMBER FUNCTIONS:
 !
-!   Classes
-      public ESMF_AttPack
+
 
 !  Attribute methods
       public ESMF_AttributeGetInit
@@ -125,6 +104,12 @@ module ESMF_AttributeMod
       public ESMF_AttributeRemove
       public ESMF_AttributeUpdate
       public ESMF_AttributeWrite
+
+!------------------------------------------------------------------------------
+! !PUBLIC TYPES:
+!
+
+      public ESMF_AttPack
 
 
 !EOPI
@@ -3659,18 +3644,6 @@ contains
 !
 !EOP
 !------------------------------------------------------------------------------
-
-    function ESMF_AttributeGetInit(attpack)
-      type(ESMF_AttPack), intent(in), optional :: attpack
-      ESMF_INIT_TYPE :: ESMF_AttributeGetInit
-    
-      if (present(attpack)) then
-          ESMF_AttributeGetInit=ESMF_INIT_GET(attpack)
-      else
-          ESMF_AttributeGetInit=ESMF_INIT_CREATED
-      endif
-    
-    end function ESMF_AttributeGetInit
 
 !-----------------------------------------------------------------------------
 

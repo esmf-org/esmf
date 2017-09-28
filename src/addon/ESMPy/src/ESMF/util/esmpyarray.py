@@ -34,6 +34,7 @@ def ndarray_from_esmf(data, dtype, shape):
         buffer = np.core.multiarray.int_asbuffer(
             ct.addressof(data.contents), size)
 
+
     esmfarray = np.ndarray(tuple(shape[:]), constants._ESMF2PythonType[dtype],
                            buffer, order="F")
 

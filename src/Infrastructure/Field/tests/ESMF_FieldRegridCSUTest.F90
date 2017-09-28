@@ -59,7 +59,7 @@
 
     call ESMF_TestStart(ESMF_SRCLINE, rc=rc)
     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
- 
+
 #ifdef ESMF_TESTEXHAUSTIVE
  
 ! This #if surrounds all the tests to enable turning on just one test
@@ -302,6 +302,7 @@ contains
   ! Create Src Grid
   srcGrid=ESMF_GridCreateCubedSphere(tileSize=src_tile_size, &
        regDecompPTile=decomptile, &
+       staggerLocList = (/ESMF_STAGGERLOC_CORNER, ESMF_STAGGERLOC_CENTER/), &
        indexflag = ESMF_INDEX_GLOBAL, &
        rc=localrc)
   if (ESMF_LogFoundError(localrc, &
@@ -699,6 +700,7 @@ contains
   ! Create Src Grid
   srcGrid=ESMF_GridCreateCubedSphere(tileSize=src_tile_size, &
        regDecompPTile=decomptile, &
+       staggerLocList = (/ESMF_STAGGERLOC_CORNER, ESMF_STAGGERLOC_CENTER/), &
        indexflag = ESMF_INDEX_DELOCAL, &
        rc=localrc)
   if (ESMF_LogFoundError(localrc, &
@@ -1096,6 +1098,7 @@ contains
   ! Create Src Grid
   srcGrid=ESMF_GridCreateCubedSphere(tileSize=src_tile_size, &
        regDecompPTile=decomptile, &
+       staggerLocList = (/ESMF_STAGGERLOC_CORNER, ESMF_STAGGERLOC_CENTER/), &
        rc=localrc)
   if (ESMF_LogFoundError(localrc, &
        ESMF_ERR_PASSTHRU, &
@@ -1107,6 +1110,7 @@ contains
   !  but with a different distribution to make checking
   !  the accuracty of the nearest neighbor easy)
   dstGrid=ESMF_GridCreateCubedSphere(tileSize=src_tile_size, &
+       staggerLocList = (/ESMF_STAGGERLOC_CORNER, ESMF_STAGGERLOC_CENTER/), &
        rc=localrc)
   if (ESMF_LogFoundError(localrc, &
        ESMF_ERR_PASSTHRU, &
@@ -1503,6 +1507,7 @@ contains
   ! Create Src Grid
   srcGrid=ESMF_GridCreateCubedSphere(tileSize=src_tile_size, &
        regDecompPTile=decomptile, &
+       staggerLocList = (/ESMF_STAGGERLOC_CORNER, ESMF_STAGGERLOC_CENTER/), &
        rc=localrc)
   if (ESMF_LogFoundError(localrc, &
        ESMF_ERR_PASSTHRU, &
@@ -2831,6 +2836,7 @@ contains
   ! (create an identical csgrid in terms of coordinates to make checking 
   !  nearest neighbor easier)
   dstGrid=ESMF_GridCreateCubedSphere(tileSize=src_tile_size, &
+       staggerLocList = (/ESMF_STAGGERLOC_CENTER, ESMF_STAGGERLOC_CORNER/), &
        rc=localrc)
   if (ESMF_LogFoundError(localrc, &
        ESMF_ERR_PASSTHRU, &
@@ -3640,6 +3646,7 @@ contains
   ! Create Src Grid
   srcGrid=ESMF_GridCreateMosaic(filename=trim(filename), &
        tileFilePath="./data/", regDecompPTile=decomptile, &
+       staggerLocList=(/ESMF_STAGGERLOC_CENTER, ESMF_STAGGERLOC_CORNER/), &
        indexflag=ESMF_INDEX_GLOBAL, &
        rc=localrc)
   if (ESMF_LogFoundError(localrc, &
@@ -4045,6 +4052,7 @@ contains
   ! Create Src Grid
   srcGrid=ESMF_GridCreateMosaic(filename=trim(filename), &
        tileFilePath="./data/", regDecompPTile=decomptile, &
+       staggerLocList=(/ESMF_STAGGERLOC_CENTER, ESMF_STAGGERLOC_CORNER/), &
        indexflag = ESMF_INDEX_DELOCAL, &
        rc=localrc)
   if (ESMF_LogFoundError(localrc, &

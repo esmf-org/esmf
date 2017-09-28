@@ -394,19 +394,17 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! The arguments are:
 ! \begin{description}
 ! \item[{[config]}]
-!   An already-created {\tt ESMF\_Config} configuration object 
-!   from which the new component
-!   can read in namelist-type information to set parameters for this run.
-!   If both are specified, this object takes priority over {\tt configFile}.
+!   An already-created {\tt ESMF\_Config} object to be attached to the newly
+!   created component.
+!   If both {\tt config} and {\tt configFile} arguments are specified, 
+!   {\tt config} takes priority.
 ! \item[{[configFile]}]
-!   \begin{sloppypar}
 !   The filename of an {\tt ESMF\_Config} format file.  
-!   If specified, this file is opened, an {\tt ESMF\_Config} configuration
-!   object is created for the file, and attached to the new component.  
-!   The user can call {\tt ESMF\_CplCompGet()} to get and use the object.
-!   If both are specified, the {\tt config} object takes priority 
-!   over this one.
-!   \end{sloppypar}
+!   If specified, a new {\tt ESMF\_Config} object is created and attached to the
+!   newly created component. The {\tt configFile} file is opened and associated
+!   with the new config object.
+!   If both {\tt config} and {\tt configFile} arguments are specified, 
+!   {\tt config} takes priority.
 ! \item[{[clock]}]
 !   \begin{sloppypar}
 !   Component-specific {\tt ESMF\_Clock}.  This clock is available to be
@@ -453,7 +451,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Allocate a new comp class
     allocate(compclass, stat=localrc)
     if (ESMF_LogFoundAllocError(localrc, msg="Component class", &
-      ESMF_CONTEXT, rcTOReturn=rc)) return
+      ESMF_CONTEXT, rcToReturn=rc)) return
    
     ! call Comp method
     call ESMF_CompConstruct(compclass, ESMF_COMPTYPE_CPL, name, &
@@ -461,7 +459,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       contextflag=contextflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcTOReturn=rc)) then
+      ESMF_CONTEXT, rcToReturn=rc)) then
       deallocate(compclass)
       return
     endif
@@ -550,7 +548,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (.not.associated(cplcomp%compp)) then  
       if (ESMF_LogFoundError(ESMF_RC_OBJ_BAD, &
         msg="CplComp not initialized or already destroyed", &
-        ESMF_CONTEXT, rcTOReturn=rc)) return
+        ESMF_CONTEXT, rcToReturn=rc)) return
     endif
 
     ! check consistency between timeout argument and component argument
@@ -558,7 +556,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       .not.ESMF_CompIsDualConnected(cplcomp%compp, rc=localrc)) then
       call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, &
         msg="'timeout' argument is only allowed for connected dual components",&
-        ESMF_CONTEXT, rcTOReturn=rc)
+        ESMF_CONTEXT, rcToReturn=rc)
       return
     endif
 
@@ -567,14 +565,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       timeoutFlag=timeoutFlag, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcTOReturn=rc)) return
+      ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! mark object invalid
     call ESMF_BaseSetStatus(cplcomp%compp%base, ESMF_STATUS_INVALID, &
       rc=localrc)
     if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcTOReturn=rc)) return
+      ESMF_CONTEXT, rcToReturn=rc)) return
 
     ESMF_INIT_SET_DELETED(cplcomp)
     
@@ -696,7 +694,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       .not.ESMF_CompIsDualConnected(cplcomp%compp, rc=localrc)) then
       call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, &
         msg="'timeout' argument is only allowed for connected dual components",&
-        ESMF_CONTEXT, rcTOReturn=rc)
+        ESMF_CONTEXT, rcToReturn=rc)
       return
     endif
 
@@ -1149,7 +1147,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       .not.ESMF_CompIsDualConnected(cplcomp%compp, rc=localrc)) then
       call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, &
         msg="'timeout' argument is only allowed for connected dual components",&
-        ESMF_CONTEXT, rcTOReturn=rc)
+        ESMF_CONTEXT, rcToReturn=rc)
       return
     endif
 
@@ -1319,7 +1317,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     localresult = ESMF_CompIsPetLocal(cplcomp%compp, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcTOReturn=rc)) return
+      ESMF_CONTEXT, rcToReturn=rc)) return
 
     ESMF_CplCompIsPetLocal = localresult
 
@@ -1492,7 +1490,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       .not.ESMF_CompIsDualConnected(cplcomp%compp, rc=localrc)) then
       call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, &
         msg="'timeout' argument is only allowed for connected dual components",&
-        ESMF_CONTEXT, rcTOReturn=rc)
+        ESMF_CONTEXT, rcToReturn=rc)
       return
     endif
 
@@ -1632,7 +1630,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       .not.ESMF_CompIsDualConnected(cplcomp%compp, rc=localrc)) then
       call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, &
         msg="'timeout' argument is only allowed for connected dual components",&
-        ESMF_CONTEXT, rcTOReturn=rc)
+        ESMF_CONTEXT, rcToReturn=rc)
       return
     endif
 
@@ -1801,7 +1799,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (.not.present(port).and.(present(timeout))) then
       call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, &
         msg="Currently the 'timeout' argument requires the 'port' argument", &
-        ESMF_CONTEXT, rcTOReturn=rc)
+        ESMF_CONTEXT, rcToReturn=rc)
       return  ! bail out
     endif
     
@@ -1871,14 +1869,17 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item[{[name]}]
 !   Set the name of the {\tt ESMF\_CplComp}.
 ! \item[{[config]}]
-!   Set the configuration information for the {\tt ESMF\_CplComp} from
-!   this already created {\tt ESMF\_Config} object.   
-!   If specified, takes priority over {\tt configFile}.
+!   An already-created {\tt ESMF\_Config} object to be attached to the
+!   component.
+!   If both {\tt config} and {\tt configFile} arguments are specified, 
+!   {\tt config} takes priority.
 ! \item[{[configFile]}]
-!   Set the configuration filename for this {\tt ESMF\_CplComp}.
-!   An {\tt ESMF\_Config} object will be created for this file
-!   and attached to the {\tt ESMF\_CplComp}.  Superseded by {\tt config}
-!   if both are specified.
+!   The filename of an {\tt ESMF\_Config} format file.  
+!   If specified, a new {\tt ESMF\_Config} object is created and attached to the
+!   component. The {\tt configFile} file is opened and associated
+!   with the new config object.
+!   If both {\tt config} and {\tt configFile} arguments are specified, 
+!   {\tt config} takes priority.
 ! \item[{[clock]}]
 !   Set the private clock for this {\tt ESMF\_CplComp}.
 ! \item[{[rc]}]
@@ -2274,7 +2275,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         ! an error condition that needs to be reported back
         call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
           msg="userRoutine was not found", &
-          ESMF_CONTEXT, rcTOReturn=rc)
+          ESMF_CONTEXT, rcToReturn=rc)
         return
       endif
     endif
@@ -2703,7 +2704,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       prefIntraProcess, prefIntraSsi, prefInterSsi, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcTOReturn=rc)) return
+      ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
@@ -2782,7 +2783,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       prefIntraProcess, prefIntraSsi, prefInterSsi, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcTOReturn=rc)) return
+      ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
@@ -2858,7 +2859,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       prefIntraProcess, prefIntraSsi, prefInterSsi, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcTOReturn=rc)) return
+      ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
@@ -2996,7 +2997,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       .not.ESMF_CompIsDualConnected(cplcomp%compp, rc=localrc)) then
       call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, &
         msg="'timeout' argument is only allowed for connected dual components",&
-        ESMF_CONTEXT, rcTOReturn=rc)
+        ESMF_CONTEXT, rcToReturn=rc)
       return
     endif
 
@@ -3013,7 +3014,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     endif
     if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcTOReturn=rc)) return
+      ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
@@ -3132,7 +3133,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       .not.ESMF_CompIsDualConnected(cplcomp%compp, rc=localrc)) then
       call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, &
         msg="'timeout' argument is only allowed for connected dual components",&
-        ESMF_CONTEXT, rcTOReturn=rc)
+        ESMF_CONTEXT, rcToReturn=rc)
       return
     endif
 

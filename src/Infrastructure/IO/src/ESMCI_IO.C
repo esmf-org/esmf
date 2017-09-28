@@ -339,8 +339,11 @@ int IO::read(
         // Create an aliased Array which treats all dimensions as distributed.
         // std::cout << ESMC_METHOD << ": calling undist_arraycreate_alldist" << std::endl;
         undist_arraycreate_alldist (temp_array_undist_p, &temp_array_p, &localrc);
-        if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc))
+        if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) {
+          // Close the file but return original error even if close fails.
+          localrc = close();
           return rc;
+        }
       }
 
       // Check for redistribution (when DE/PET != 1)
@@ -527,10 +530,10 @@ int IO::write(
     int tilecount = dg->getTileCount ();
     if (tilecount != 1) {
       localrc = ESMF_RC_NOT_IMPL;
-      if (ESMC_LogDefault.MsgFoundError(localrc, "tilecount != 1 not supported yet", ESMC_CONTEXT,
-        &rc)) {
+    std::stringstream errmsg;
+    errmsg << "tile count of " << tilecount << " != 1 - not supported yet";
+    if (ESMC_LogDefault.MsgFoundError(localrc, errmsg.str(), ESMC_CONTEXT, &rc)) {
         // Close the file but return original error even if close fails.
-        fprintf(stderr, "dg->getTileCount()=%d\n", tilecount);
         localrc = close();
         return rc;
       }
@@ -674,8 +677,11 @@ ESMC_LogDefault.Write("IO::write() case: IO_ARRAY: aft redist()", ESMC_LOGMSG_IN
 ESMC_LogDefault.Write("IO::write() case: IO_ARRAY: bef undist_arraycreate_alldist()", ESMC_LOGMSG_INFO);
 #endif
         undist_arraycreate_alldist (temp_array_undist_p, &temp_array_p, &localrc);
-        if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc))
+        if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) {
+          // Close the file but return original error even if close fails.
+          localrc = close();
           return rc;
+        }
 #if 0
 ESMC_LogDefault.Write("IO::write() case: IO_ARRAY: aft undist_arraycreate_alldist()", ESMC_LOGMSG_INFO);
 #endif
@@ -814,7 +820,7 @@ int IO::open(
   }
 
   // Open the file
-  ioHandler->open(file.c_str(), filestatusflag, overwrite, readonly, &localrc);
+  ioHandler->open(file, filestatusflag, overwrite, readonly, &localrc);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
     &rc)) {
     PRINTMSG("IO_Handler::open returned " << localrc);
@@ -1330,13 +1336,10 @@ void IO::undist_arraycreate_alldist(Array *src_array_p, Array **dest_array_p, in
   int tilecount = dg->getTileCount ();
   if (tilecount != 1) {
     localrc = ESMF_RC_NOT_IMPL;
-    if (ESMC_LogDefault.MsgFoundError(localrc, "tilecount != 1 not supported yet", ESMC_CONTEXT,
-      rc)) {
-      // Close the file but return original error even if close fails.
-      fprintf(stderr, "dg->getTileCount()=%d\n", tilecount);
-      localrc = close();
-      return;
-    }
+    std::stringstream errmsg;
+    errmsg << "tile count of " << tilecount << " != 1 - not supported yet";
+    if (ESMC_LogDefault.MsgFoundError(localrc, errmsg.str(), ESMC_CONTEXT,
+      rc)) return;
   }
   
   const int *arrayToDistGridMap = src_array_p->getArrayToDistGridMap();

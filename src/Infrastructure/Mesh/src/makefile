@@ -84,10 +84,14 @@ SOURCEC	  = \
            ESMCI_Mesh_Regrid_Glue.C \
            ESMCI_MBMesh_Util.C \
            ESMCI_MBMesh_BBox.C \
+           ESMCI_MBMesh_Mapping.C \
            ESMCI_MBMesh_Redist.C \
            ESMCI_MBMesh_Rendez_Elem.C \
+           ESMCI_MBMesh_Rendez_EtoP.C \
            ESMCI_MBMesh_Search_EToE.C \
+           ESMCI_MBMesh_Search_EToP.C \
            ESMCI_MBMesh_Conserve.C \
+           ESMCI_MBMesh_Bilinear.C \
            ESMCI_MBMesh_Glue.C \
            ESMCI_MBMesh_Regrid_Glue.C \
            ESMCI_Mesh_GToM_Glue.C \
@@ -116,10 +120,9 @@ CLOBBERDIRS =
 include ${ESMF_DIR}/makefile
 
 ifeq ($(ESMF_MOAB),internal)
-ESMF_CXXCOMPILECPPFLAGS += -I$(ESMF_DIR)/src/Infrastructure/Mesh/src/Moab
-ESMF_CXXCOMPILECPPFLAGS += -I$(ESMF_DIR)/src/Infrastructure/Mesh/src/Moab/moab
-ESMF_CXXCOMPILECPPFLAGS += -I$(ESMF_DIR)/src/Infrastructure/Mesh/src/Moab/parallel
-ESMF_CXXCOMPILECPPFLAGS += -I$(ESMF_DIR)/src/Infrastructure/Mesh/src/Moab/parallel/moab
+ESMF_CXXCOMPILECPPFLAGS += -I$(ESMF_DIR)/$(LOCDIR)/Moab \
+                           -I$(ESMF_DIR)/$(LOCDIR)/Moab/parallel \
+                           -I$(ESMF_DIR)/$(LOCDIR)/Moab/LocalDiscretization
 endif
 
 

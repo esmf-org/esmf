@@ -39,6 +39,7 @@
 #include <vector>
 
 #include "stdlib.h"
+#include "ESMCI_LogErr.h"
 #include <cstring>
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
@@ -538,6 +539,8 @@ void sew_meshes(const Mesh & srcmesh, const Mesh & dstmesh, Mesh & mergemesh){
 // sres_map: search result map keyed by passive mesh element (dst mesh in this case)
 void concat_meshes(const Mesh & srcmesh, const Mesh & dstmesh, Mesh & mergemesh, 
   const Mesh & mesh_src, const Mesh & mesh_dst, SearchResult &sres, interp_mapp sres_map){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI_MeshMerge.C::concat_meshes()"
 
   // Get dim info for mesh
   int sdim=srcmesh.spatial_dim();
@@ -699,7 +702,10 @@ void concat_meshes(const Mesh & srcmesh, const Mesh & dstmesh, Mesh & mergemesh,
 
           //if(elem.get_id() == 2378 && it->second->clip_elem->get_id() == 3559) 
           //  int nop = elem.get_id() - it->second->clip_elem->get_id();
-
+          //if(elem.get_id() == 5497 || elem.get_id() == 6073){
+          //  for(int i=0; i < dstpolys.size(); i ++)
+          //    dump_polygon(dstpolys[i], true);
+          //}
           // construct clip element polygon from src element
           const MeshObj & clip_elem = *(it->second->clip_elem);
           int clip_num_nodes = it->second->num_clip_nodes;
@@ -708,8 +714,15 @@ void concat_meshes(const Mesh & srcmesh, const Mesh & dstmesh, Mesh & mergemesh,
           // for each polygon in cutted dst element, compute residual diff polygons
           int num_p; int *ti, *tri_ind; double *pts, *td;
           std::vector<polygon> diff;
-          for(std::vector<polygon>::iterator dstpoly_it = dstpolys.begin();
+          for(std::vector<polygon>::const_iterator dstpoly_it = dstpolys.begin();
             dstpoly_it != dstpolys.end(); ++ dstpoly_it){
+
+            //if(elem.get_id() == 5497 || elem.get_id() == 6073){
+            //  std::cout << "polygon being clipped: " << std::endl;
+            //  dump_polygon(*dstpoly_it, true);
+            //  std::cout << "clip_cd: " << std::endl;
+            //  dump_cart_coords(clip_num_nodes, clip_cd);
+            //}
 
             diff.clear();
 
@@ -738,6 +751,14 @@ void concat_meshes(const Mesh & srcmesh, const Mesh & dstmesh, Mesh & mergemesh,
               //std::vector<polygon> diff_cart;
               //sph2cart(diff, diff_cart);
               //diff.clear(); diff.resize(diff_cart.size()); std::copy(diff_cart.begin(), diff_cart.end(), diff.begin());
+              bool left_turn = true;
+              bool right_turn = false;
+              rot_2D_3D_sph(subject_num_nodes, cd, &left_turn, &right_turn);
+              if(right_turn)
+                reverse_coord(sdim, subject_num_nodes, cd);
+              rot_2D_3D_sph(clip_num_nodes, clip_cd, &left_turn, &right_turn);
+              if(right_turn)
+                reverse_coord(sdim, clip_num_nodes, clip_cd);
 
               double subject_area = great_circle_area(subject_num_nodes, cd);
               if(subject_area <= 0.) { delete[] cd; continue; }
@@ -755,13 +776,55 @@ void concat_meshes(const Mesh & srcmesh, const Mesh & dstmesh, Mesh & mergemesh,
               if(num_p > 3){
                 pts = new double[sdim*(diff_it->points.size())];
                 polygon_to_coords(*diff_it, sdim, pts);
+                //if(sdim == 2)
+                //  remove_0len_edges2D(&num_p, pts);
+                //else
+                //  remove_0len_edges3D(&num_p, pts);
+                //if(num_p < 3) continue;
                 td = new double[num_p*sdim];
                 ti = new int[num_p];
                 tri_ind = new int[3*(num_p-2)];
+                int ret=0;
                 if(sdim == 2)
-                  triangulate_poly<GEOM_CART2D>(num_p, pts, td, ti, tri_ind);
+                  ret=triangulate_poly<GEOM_CART2D>(num_p, pts, td, ti, tri_ind);
                 if(sdim == 3)
-                  triangulate_poly<GEOM_SPH2D3D>(num_p, pts, td, ti, tri_ind);
+                  ret=triangulate_poly<GEOM_SPH2D3D>(num_p, pts, td, ti, tri_ind);
+
+                // Check return code
+                if (ret != ESMCI_TP_SUCCESS) {
+                  if (ret == ESMCI_TP_DEGENERATE_POLY) {
+                    if (ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
+                         " - can't triangulate a polygon with less than 3 sides", 
+                                                      ESMC_CONTEXT, &rc)) throw rc;
+                  } else if (ret == ESMCI_TP_CLOCKWISE_POLY) {
+                    dump_elem(elem, sdim, coord, false);
+                    //dump_elem(clip_elem, sdim, clip_coord, false);
+                    {
+                      std::cout << "dstpoly_it->subject_cd:" << std::endl;
+                      for(int npt=0; npt<subject_num_nodes; npt++) std::cout << cd[npt*3] << "," << cd[npt*3+1] << "," << cd[npt*3+2] << std::endl; 
+                      cd_sph = new double[subject_num_nodes*2];   cart2sph(subject_num_nodes, cd, cd_sph); 
+                      for(int npt=0; npt<subject_num_nodes; npt++) std::cout << cd_sph[npt*2] << "  " << cd_sph[npt*2+1] << std::endl; 
+                      std::cout << "clip_cd:" << std::endl;
+                      for(int npt=0; npt<clip_num_nodes; npt++) std::cout << clip_cd[npt*3] << "," << clip_cd[npt*3+1] << "," << clip_cd[npt*3+2] << std::endl; 
+                      clip_cd_sph = new double[clip_num_nodes*2];   cart2sph(clip_num_nodes, clip_cd, clip_cd_sph); 
+                      for(int npt=0; npt<clip_num_nodes; npt++) std::cout << clip_cd_sph[npt*2] << "  " << clip_cd_sph[npt*2+1] << std::endl; 
+                      delete[] clip_cd_sph; 
+                    }
+                    char msg[1024];
+                    sprintf(msg," - there was a problem (e.g. repeated points, clockwise poly, etc.) with the triangulation of the element:\n"); 
+                    sprintf(msg,"%selem Id: %d clip_elem Id: %d\n", msg, elem.get_id(), clip_elem.get_id());
+                    {
+                      cd_sph = new double[num_p*2];   cart2sph(num_p, pts, cd_sph); 
+                      for(int npt=0; npt<num_p*2; npt++) sprintf(msg,"%s %g", msg, cd_sph[npt]); 
+                      delete[] cd_sph; 
+                    }
+                    if (ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP, msg,
+                                                    ESMC_CONTEXT, &rc)) throw rc;
+                  } else {
+                    if (ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+                                                      " - unknown error in triangulation", ESMC_CONTEXT, &rc)) throw rc;
+                  }
+                }
 
                 // Add each of the triangles into the merged mesh
                 unsigned num_tri_edges = 3;
@@ -791,6 +854,12 @@ void concat_meshes(const Mesh & srcmesh, const Mesh & dstmesh, Mesh & mergemesh,
             //if(sdim == 3) delete[] clip_cd_sph, cd_sph;
           } // for each dst poly
           // clear dst poly vector and copy all results triangles to it to intersect with the next src element
+          //if(elem.get_id() == 5497 || elem.get_id() == 6073){
+          //  for(int i=0; i < results.size(); i ++){
+          //    std::cout << std::endl;
+          //    dump_polygon(results[i], true);
+          //  }
+          //}
           dstpolys.clear(); dstpolys.resize(results.size());
           std::copy(results.begin(), results.end(), dstpolys.begin());
           results.clear();

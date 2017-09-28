@@ -139,6 +139,10 @@ IO_Handler *IO_Handler::create (
       break;
     case ESMF_IOFMT_NETCDF:
       // No break
+    case ESMF_IOFMT_NETCDF_64BIT_OFFSET:
+      // No break
+    case ESMF_IOFMT_NETCDF4:
+      // No break
     case ESMF_IOFMT_NETCDF4P:
       // No break
     case ESMF_IOFMT_NETCDF4C:
@@ -489,7 +493,7 @@ bool IO_Handler::fileExists(
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::IO_Handler::open()"
 //BOP
-// !IROUTINE:  IO::open - Open a file or stream for I/O
+// !IROUTINE:  IO_Handler::open - Open a file or stream for I/O
 //
 // !INTERFACE:
 void IO_Handler::open (
@@ -549,7 +553,7 @@ void IO_Handler::open (
   if (rc != (int *)NULL) {
     *rc = localrc;
   }
-}  // end IO::open
+}  // end IO_Handler::open
 //-------------------------------------------------------------------------
 
 }  // end namespace ESMCI

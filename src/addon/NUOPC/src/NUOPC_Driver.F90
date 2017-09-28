@@ -894,6 +894,21 @@ module NUOPC_Driver
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out
+      
+    ! Before returning the driver must clean up its own importState, which 
+    ! may have Fields advertized that do not have a ConsumerConnection set.
+    ! These are Fields that during the negotiation between driver children
+    ! were mirrored into the driver importState, but then subsequently were
+    ! resolved among the children themselves (sibling-to-sibling). Therefore
+    ! they should not remain in the parent importState. Leaving them in the
+    ! parent State, while not connected with a child anylonger, would lead to
+    ! issues during GeomTransfer.
+    if (ESMF_StateIsCreated(importState, rc=rc)) then
+      ! call into routine that removes fields without ConsumerConnection set
+      call rmFieldsWoConsumerConnection(importState, name=name, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    endif
 
     contains !----------------------------------------------------------------
     
@@ -1578,7 +1593,7 @@ call ESMF_LogWrite(trim(name)//": Exiting InitializeIPDv02p5Data", &
             imState=is%wrap%modelES(i)
           endif
           if (j==0) then
-            ! connect to the drivers import State
+            ! connect to the drivers export State
             call ESMF_GridCompGet(gcomp, exportState=exState, rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) &
@@ -4465,6 +4480,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       character(ESMF_MAXSTR), pointer :: itemNameList(:)
       logical                         :: connected
       logical                         :: producerConnected, consumerConnected
+      character(ESMF_MAXSTR)          :: stateName
 
       rc = ESMF_SUCCESS
 
@@ -4482,11 +4498,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
           if (connected .and. .not.producerConnected) then
             ! a connected field in a Driver state must have a ProducerConnection
+            call ESMF_StateGet(state, name=stateName, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
             call ESMF_LogSetError(ESMF_RC_NOT_VALID, &
-              msg="Connected Field in Driver State must have ProducerConnection:"//&
-              trim(itemNameList(i)), &
-              line=__LINE__, file=trim(name)//":"//FILENAME, &
-              rcToReturn=rc)
+              msg="Connected Field in Driver State "//trim(stateName)//&
+              " must have ProducerConnection: "//trim(itemNameList(i)), &
+              line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)
             return ! bail out
           endif
         enddo
@@ -4533,6 +4551,54 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   
   !-----------------------------------------------------------------------------
 
+  subroutine rmFieldsWoConsumerConnection(state, name, rc)
+    type(ESMF_State)     :: state
+    character(len=*)     :: name
+    integer, intent(out) :: rc
+    
+    ! local variables    
+    integer                         :: i
+    type(ESMF_Field), pointer       :: fieldList(:)
+    character(ESMF_MAXSTR), pointer :: itemNameList(:)
+    logical                         :: consumerConnected
+    character(ESMF_MAXSTR)          :: stateName, fieldName
+    character(len=80)               :: value
+
+    rc = ESMF_SUCCESS
+
+    nullify(fieldList)
+    nullify(itemNameList)
+    call NUOPC_GetStateMemberLists(state, itemNameList=itemNameList, &
+      fieldList=fieldList, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    if (associated(fieldList)) then
+      do i=1, size(fieldList)
+        call NUOPC_GetAttribute(fieldList(i), name="ConsumerConnection", &
+          value=value, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+        consumerConnected = (value/="open")
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+        if (.not.consumerConnected) then
+          ! this field's ConsumerConnection is not set -> remove it from state
+          call ESMF_FieldGet(fieldList(i), name=fieldName, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+            call ESMF_StateRemove(state, (/fieldName/), rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+        endif
+      enddo
+    endif
+    if (associated(fieldList)) deallocate(fieldList)
+    if (associated(itemNameList)) deallocate(itemNameList)
+    
+  end subroutine
+
+  !-----------------------------------------------------------------------------
+
   subroutine IInitRealize(driver, importState, exportState, clock, rc)
     type(ESMF_GridComp)  :: driver
     type(ESMF_State)     :: importState, exportState
@@ -4575,7 +4641,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer                         :: i
       type(ESMF_Field), pointer       :: fieldList(:)
       character(ESMF_MAXSTR), pointer :: itemNameList(:)
-
+      integer                         :: itemCount, stat
+      integer                         :: ulbCount, uubCount
+      logical                         :: isPresent
+      integer(ESMF_KIND_I4), pointer  :: ungriddedLBound(:), ungriddedUBound(:)
+      integer(ESMF_KIND_I4), pointer  :: gridToFieldMap(:)
+      
       rc = ESMF_SUCCESS
 
       nullify(fieldList)
@@ -4587,13 +4658,97 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       if (associated(fieldList)) then
         do i=1, size(fieldList)
           ! the transferred Grid is already set, allocate memory for data
-          !TODO: This assumes R8, and no ungridded bounds, etc. Make this 
+          !TODO: This assumes R8, etc. Make this 
           !TODO: more general to handle all field cases.
-          call ESMF_FieldEmptyComplete(fieldList(i), &
-            typekind=ESMF_TYPEKIND_R8, rc=rc)
+
+          ! GridToFieldMap attribute
+          call ESMF_AttributeGet(fieldList(i), name="GridToFieldMap", &
+            convention="NUOPC", purpose="Instance", &
+            itemCount=itemCount, isPresent=isPresent, &
+            attnestflag=ESMF_ATTNEST_ON, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-        enddo
+          if (.not. isPresent) then
+            call ESMF_LogSetError(ESMF_RC_NOT_VALID, &
+              msg="Cannot realize field "//trim(itemNameList(i))//&
+              " because GridToFieldMap attribute is not present", &
+              line=__LINE__, file=trim(name)//":"//FILENAME, &
+              rcToReturn=rc)
+            return
+          endif
+          allocate(gridToFieldMap(itemCount), stat=stat)
+          if (ESMF_LogFoundAllocError(statusToCheck=stat, &
+            msg="Allocation of internal gridToFieldMap failed.", &
+            line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+            return  ! bail out
+          call ESMF_AttributeGet(fieldList(i), &
+            name="GridToFieldMap", valueList=gridToFieldMap, &
+            convention="NUOPC", purpose="Instance", &
+            attnestflag=ESMF_ATTNEST_ON, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, &
+            msg="Cannot realize field "//trim(itemNameList(i))// &
+            " because error obtaining GridToFieldMap attribute.", &
+            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+
+          ! UngriddedLBound, UngriddedUBound attributes
+          call ESMF_AttributeGet(fieldList(i), name="UngriddedLBound", &
+               convention="NUOPC", purpose="Instance", &
+               itemCount=ulbCount, isPresent=isPresent, &
+               attnestflag=ESMF_ATTNEST_ON, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          if (isPresent .and. ulbCount > 0) then           
+             call ESMF_AttributeGet(fieldList(i), name="UngriddedUBound", &
+               convention="NUOPC", purpose="Instance", &
+               itemCount=uubCount, isPresent=isPresent, &
+               attnestflag=ESMF_ATTNEST_ON, rc=rc)
+             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                 line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+             if (.not. isPresent .or. ulbCount /= uubCount) then
+                call ESMF_LogSetError(ESMF_RC_NOT_VALID, &
+                     msg="Field "//trim(itemNameList(i))//&
+                     " has inconsistent UngriddedLBound/UngriddedUBound attributes", &
+                     line=__LINE__, file=trim(name)//":"//FILENAME, &
+                     rcToReturn=rc)
+                return
+             endif
+             allocate(ungriddedLBound(ulbCount), &
+                  ungriddedUBound(uubCount), stat=stat)
+             if (ESMF_LogFoundAllocError(statusToCheck=stat, &
+                  msg="Allocation of internal ungriddedLBound/ungriddedUBound failed.", &
+                  line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+                  return  ! bail out
+             call ESMF_AttributeGet(fieldList(i), &
+                  name="UngriddedLBound", valueList=ungriddedLBound, &
+                  convention="NUOPC", purpose="Instance", &
+                  attnestflag=ESMF_ATTNEST_ON, rc=rc)
+             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                  line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+             call ESMF_AttributeGet(fieldList(i), &
+                  name="UngriddedUBound", valueList=ungriddedUBound, &
+                  convention="NUOPC", purpose="Instance", &
+                  attnestflag=ESMF_ATTNEST_ON, rc=rc)
+             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                  line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out                          
+             ! create field with ungridded dims
+             !print *, "Creating field with ungridded dims ", ungriddedLBound(:), ungriddedUBound(:)
+             call ESMF_FieldEmptyComplete(fieldList(i), &
+                  gridToFieldMap=gridToFieldMap, typekind=ESMF_TYPEKIND_R8, &
+                  ungriddedLBound=ungriddedLBound, &
+                  ungriddedUBound=ungriddedUBound, &
+                  rc=rc)
+             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                  line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+             deallocate(ungriddedLBound, ungriddedUBound)
+          else   
+             ! create field with no ungridded dims
+             call ESMF_FieldEmptyComplete(fieldList(i), &
+                  gridToFieldMap=gridToFieldMap, typekind=ESMF_TYPEKIND_R8, rc=rc)
+             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                  line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          endif      
+          deallocate(gridToFieldMap)
+       enddo
       endif
       if (associated(fieldList)) deallocate(fieldList)
       if (associated(itemNameList)) deallocate(itemNameList)

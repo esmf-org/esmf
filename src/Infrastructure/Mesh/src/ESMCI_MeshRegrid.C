@@ -150,6 +150,22 @@ int form_neg_wts_field(IWeights &wts, Mesh &srcmesh, MEField<> *src_neg_wts,
         Throw() << "Regridding error" << std::endl;
       }
 
+#ifdef ESMF_REGRID_DEBUG_OUTPUT_WTS_ALL
+      WMat::WeightMap::iterator wi = wts.begin_row(), we = wts.end_row();
+      for (; wi != we; ++wi) {
+        const WMat::Entry &w = wi->first;
+
+        std::vector<WMat::Entry> &wcol = wi->second;
+
+        // Construct factor index list
+        for (UInt j = 0; j < wcol.size(); ++j) {
+          const WMat::Entry &wc = wcol[j];
+
+          printf("d_id=%d  s_id=%d w=%20.17E \n",w.id,wc.id,wc.value);
+        }
+      }
+#endif
+
     } break;
 
     default:

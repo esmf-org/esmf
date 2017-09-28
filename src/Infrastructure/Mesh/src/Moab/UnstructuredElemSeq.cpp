@@ -54,7 +54,7 @@ UnstructuredElemSeq::get_const_memory_use( unsigned long& bytes_per_entity,
                                            unsigned long& size_of_sequence ) const
 {
   bytes_per_entity = nodes_per_element() * sizeof(EntityHandle);
-  size_of_sequence = sizeof(this);
+  size_of_sequence = sizeof(*this);
 }
 
 ErrorCode

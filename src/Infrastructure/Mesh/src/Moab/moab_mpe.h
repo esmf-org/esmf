@@ -1,7 +1,8 @@
 #ifndef MOAB_MPE_H
 #define MOAB_MPE_H
 
-#ifdef USE_MPE
+#include "moab/MOABConfig.h"
+#ifdef MOAB_HAVE_LIBMPE
 # include "moab_mpi.h"
 # include "mpe.h"
 #else

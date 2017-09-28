@@ -525,10 +525,12 @@
       end type
 
       type(ESMF_IOFmt_Flag), parameter ::  &
-                           ESMF_IOFMT_BIN      = esmf_IOFmt_Flag(0), &
+                           ESMF_IOFMT_BIN      = ESMF_IOFmt_Flag(0), &
                            ESMF_IOFMT_NETCDF   = ESMF_IOFmt_Flag(1), &
-                           ESMF_IOFMT_NETCDF4P = ESMF_IOFmt_Flag(2), &
-                           ESMF_IOFMT_NETCDF4C = ESMF_IOFmt_Flag(3)
+                           ESMF_IOFMT_NETCDF_64BIT_OFFSET = ESMF_IOFmt_Flag(2), &
+                           ESMF_IOFMT_NETCDF4  = ESMF_IOFmt_Flag(3), &
+                           ESMF_IOFMT_NETCDF4P = ESMF_IOFmt_Flag(4), &
+                           ESMF_IOFMT_NETCDF4C = ESMF_IOFmt_Flag(5)
 
 !------------------------------------------------------------------------------
 !     ! ESMF_Index_Flag
@@ -987,6 +989,7 @@
       public ESMF_Direction_Flag, ESMF_DIRECTION_FORWARD, ESMF_DIRECTION_REVERSE
 
       public ESMF_IOFmt_Flag, ESMF_IOFMT_BIN, ESMF_IOFMT_NETCDF, &
+             ESMF_IOFMT_NETCDF_64BIT_OFFSET, ESMF_IOFMT_NETCDF4,  &
              ESMF_IOFMT_NETCDF4P, ESMF_IOFMT_NETCDF4C
 
       public ESMF_Index_Flag

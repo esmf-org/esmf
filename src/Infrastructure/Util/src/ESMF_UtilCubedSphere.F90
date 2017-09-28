@@ -260,8 +260,8 @@ subroutine ESMF_UtilCreateCSCoordsPar(npts, LonEdge,LatEdge, start, count, tile,
 ! !ARGUMENTS:
     integer,           intent(IN)     :: npts
 !    integer,           intent(in)     :: petNo
-    real(ESMF_KIND_R8), intent(inout) :: LonEdge(:,:)
-    real(ESMF_KIND_R8), intent(inout) :: LatEdge(:,:)
+    real(ESMF_KIND_R8), optional, intent(inout) :: LonEdge(:,:)
+    real(ESMF_KIND_R8), optional, intent(inout) :: LatEdge(:,:)
     integer, optional, intent(in)     :: start(:)
     integer, optional, intent(in)     :: count(:)
     integer, optional, intent(in)     :: tile
@@ -306,8 +306,10 @@ subroutine ESMF_UtilCreateCSCoordsPar(npts, LonEdge,LatEdge, start, count, tile,
        enddo
     enddo
 
-    LonEdge=tile_local(:,:,1)
-    LatEdge=tile_local(:,:,2)
+    if (present(LonEdge) .and. present(LatEdge)) then
+       LonEdge=tile_local(:,:,1)
+       LatEdge=tile_local(:,:,2)
+    endif
 
     if (present(LonCenter) .and. present(LatCenter)) then
         do j=1, count(2)

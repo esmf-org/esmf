@@ -107,7 +107,7 @@ bool SmoothCurve::position_from_u(double u, double& x, double& y, double& z, dou
 
   // _fractions are increasing, so find the
   double * ptr = std::lower_bound(&_fractions[0],
-      &_fractions[_fractions.size()], u);
+      (&_fractions[0]) + _fractions.size(), u);
   int index = ptr - &_fractions[0];
   double nextFraction = _fractions[index];
   double prevFraction = 0;
@@ -350,8 +350,8 @@ double SmoothCurve::u_from_position(double x, double y, double z, EntityHandle &
 void SmoothCurve::start_coordinates(double& x, double& y, double& z)
 {
 
-  int nnodes;
-  const EntityHandle * conn2;
+  int nnodes = 0;
+  const EntityHandle * conn2 = NULL;
   _mb->get_connectivity(_entities[0], conn2, nnodes);
   double c[3];
   _mb->get_coords(conn2, 1, c);
@@ -371,8 +371,8 @@ void SmoothCurve::start_coordinates(double& x, double& y, double& z)
 void SmoothCurve::end_coordinates(double& x, double& y, double& z)
 {
 
-  int nnodes;
-  const EntityHandle * conn2;
+  int nnodes = 0;
+  const EntityHandle * conn2 = NULL;
   _mb->get_connectivity(_entities[_entities.size() - 1], conn2, nnodes);
   double c[3];
   // careful, the second node here
@@ -419,14 +419,20 @@ void SmoothCurve::compute_tangents_for_each_edge()
     // current edge will start after first one
     currentEdge = entities[i];
     rval = _mb->tag_get_data(tangentsTag, &currentEdge, 1, &TC[0]);//
+    if (rval != MB_SUCCESS)
+      return; // some error should be thrown
     // now compute the new tangent at common vertex; reset tangents for previous edge and current edge
     // a little bit of CPU and memory waste, but this is life
     CartVect T = 0.5 * TC[0] + 0.5 * TP[1]; //
     T.normalize();
     TP[1] = T;
     rval = _mb->tag_set_data(tangentsTag, &previousEdge, 1, &TP[0]);//
+    if (rval != MB_SUCCESS)
+      return; // some error should be thrown
     TC[0] = T;
     rval = _mb->tag_set_data(tangentsTag, &currentEdge, 1, &TC[0]);//
+    if (rval != MB_SUCCESS)
+      return; // some error should be thrown
     // now set the next edge
     previousEdge = currentEdge;
     TP[0] = TC[0];
@@ -568,8 +574,8 @@ ErrorCode SmoothCurve::evaluate_smooth_edge(EntityHandle eh, double &tt,
   if (tt >= 1.0)
     tt = 1.0;
 
-  int nnodes;
-  const EntityHandle * conn2;
+  int nnodes = 0;
+  const EntityHandle * conn2 = NULL;
   ErrorCode rval = _mb->get_connectivity(eh, conn2, nnodes);
   if (rval != MB_SUCCESS)
     return rval;

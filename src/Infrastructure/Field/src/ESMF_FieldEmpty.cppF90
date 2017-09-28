@@ -3850,11 +3850,16 @@ subroutine ESMF_FieldEmptyCompGBPtr##mrank##D##mtypekind(field, geombase, farray
   integer                        :: localGridToFieldMap (ESMF_MAXDIM) @\
   integer                        :: localMaxHaloLWidth (ESMF_MAXDIM) @\
   integer                        :: localMaxHaloUWidth (ESMF_MAXDIM) @\
+  integer                        :: localUngriddedLBound (ESMF_MAXDIM) @\
+  integer                        :: localUngriddedUBound (ESMF_MAXDIM) @\
   integer                        :: distgridToGridMap(ESMF_MAXDIM) @\
   type(ESMF_Array)               :: array @\
   type(ESMF_DistGrid)            :: distgrid @\
   integer                        :: fieldUndistDimCount                         @\
+  integer                        :: fieldUngriddedDimCount                         @\
+  integer                        :: count                         @\
   logical                        :: flipflop(ESMF_MAXDIM) @\
+  logical                        :: isGridded(ESMF_MAXDIM) @\
   type(ESMF_Index_Flag)          :: indexflag @\
   logical                        :: found @\
   type(ESMF_GridDecompType)      :: decompType @\
@@ -4015,6 +4020,7 @@ subroutine ESMF_FieldEmptyCompGBPtr##mrank##D##mtypekind(field, geombase, farray
   endif @\
 @\
   ! ungridded dimensions plus replicated dimensions @\
+  fieldUngriddedDimCount = fieldDimCount-gridDimCount + grid_repdimcount @\
   fieldUndistDimCount = fieldDimCount-gridDimCount + grid_repdimcount @\
 @\
   if (present(totalLWidth)) then  @\
@@ -4074,6 +4080,31 @@ subroutine ESMF_FieldEmptyCompGBPtr##mrank##D##mtypekind(field, geombase, farray
        localMaxHaloUWidth = 0 @\
   endif @\
 @\
+  ! Here we get the lbounds and ubounds for ungridded @\
+  ! dimensions from the native array, if it is not input @\
+  ! through the argument list.  First we need to set up @\
+  ! an index array that holds the ungridded dimensions of @\
+  ! the native array. @\
+@\
+  ! Since we are saving the ungriddedIndex calculate it even  @\
+  ! if ungridded bounds are present @\
+@\
+  ! Figure out which dims are ungridded @\
+  isGridded = .false. @\
+  do i=1, gridDimCount @\
+      if(localGridToFieldMap(i) /= 0) isGridded(localGridToFieldMap(i)) = .true. @\
+  enddo @\
+@\
+  ! Use ungridded info to figure out the map from ungridded to field dims @\
+  count=1 @\
+  do i=1,fieldDimCount @\
+    if (.not. isGridded(i)) then @\
+        localUngriddedLBound(count) = lbound(farrayPtr, i) @\
+        localUngriddedUBound(count) = ubound(farrayPtr, i) @\
+        count=count+1            @\
+    endif                        @\
+  enddo                          @\
+@\
   call ESMF_DistGridGet(distgrid, dimCount=distgridDimCount, rc=localrc) @\
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
        ESMF_CONTEXT, rcToReturn=rc)) return @\
@@ -4084,6 +4115,8 @@ subroutine ESMF_FieldEmptyCompGBPtr##mrank##D##mtypekind(field, geombase, farray
   ! to create the Array for the Field. @\
   call ESMF_GeomBaseGetArrayInfo(geombase, & @\
        gridToFieldMap=localGridToFieldMap, & @\
+       ungriddedLBound=localUngriddedLBound (1:fieldUngriddedDimCount), & @\
+       ungriddedUBound=localUngriddedUBound (1:fieldUngriddedDimCount), & @\
        distgridToArrayMap=distgridToArrayMap, & @\
        undistLBound=undistLBound, undistUBound=undistUBound, & @\
        rc=localrc) @\
@@ -4124,6 +4157,10 @@ subroutine ESMF_FieldEmptyCompGBPtr##mrank##D##mtypekind(field, geombase, farray
      localMaxHaloLWidth (1:gridDimCount_norep) @\
   field%ftypep%totalUWidth(1:gridDimCount_norep) = & @\
      localMaxHaloUWidth (1:gridDimCount_norep) @\
+  field%ftypep%ungriddedLBound(1:fieldUngriddedDimCount) = & @\
+     localUngriddedLBound(1:fieldUngriddedDimCount) @\
+  field%ftypep%ungriddedUBound(1:fieldUngriddedDimCount) = & @\
+     localUngriddedUBound(1:fieldUngriddedDimCount) @\
   field%ftypep%geombase  = geombase @\
   field%ftypep%status = ESMF_FIELDSTATUS_COMPLETE @\
   call ESMF_BaseSetStatus(field%ftypep%base, ESMF_STATUS_READY, rc=localrc) @\

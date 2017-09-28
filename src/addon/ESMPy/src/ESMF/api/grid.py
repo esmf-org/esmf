@@ -178,7 +178,7 @@ class Grid(object):
             if is_sphere is not None:
                 warnings.warn("is_sphere is only used for grids created from file, this argument will be ignored.")
             if add_corner_stagger is not None:
-                warnings.warn("add_corner_stagger is only used for grids created from file, this argument will be ignored.")
+                warnings.warn("add_corner_stagger is only used for grids created from file or cubed sphere grids, this argument will be ignored.")
             if add_user_area is not None:
                 warnings.warn("add_user_area is only used for grids created from file, this argument will be ignored.")
             if add_mask is not None:
@@ -263,8 +263,6 @@ class Grid(object):
                 warnings.warn("decompflag is only used for grids created from file, this argument will be ignored.")
             if is_sphere is not None:
                 warnings.warn("is_sphere is only used for grids created from file, this argument will be ignored.")
-            if add_corner_stagger is not None:
-                warnings.warn("add_corner_stagger is only used for grids created from file, this argument will be ignored.")
             if add_user_area is not None:
                 warnings.warn("add_user_area is only used for grids created from file, this argument will be ignored.")
             if add_mask is not None:
@@ -357,10 +355,14 @@ class Grid(object):
                 # TODO: we assume that all periodic grids create from file will be periodic across the first
                 #       dimension.. is that true?
         elif cubed_sphere:
+            staggerloclist = np.array([StaggerLoc.CENTER], dtype=np.int32)
+            if add_corner_stagger is True:
+                staggerloclist.push_back(StaggerLoc.CORNER)
             self._struct = ESMP_GridCreateCubedSphere(tilesize,
                 regDecompPTile=regDecompPTile,
                 #decompFlagPTile=decompFlagPTile,
                 #deLabelList=deLabelList,
+                staggerLocList=staggerloclist,
                 name=name)
 
             # grid rank for cubed sphere is currently 2
@@ -368,7 +370,7 @@ class Grid(object):
             self._ndims = 2
 
             # allocate space for staggger
-            staggerloc = [StaggerLoc.CENTER,StaggerLoc.CORNER]
+            staggerloc = list(staggerloclist)
 
             # set from_file so coordinates are not reallocated
             from_file = True

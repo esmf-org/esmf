@@ -45,6 +45,9 @@ module ESMF_GridCompMod
   use ESMF_StateTypesMod
   use ESMF_StateMod
   use ESMF_GridMod
+  use ESMF_MeshMod
+  use ESMF_LocStreamMod
+  use ESMF_XGridMod
   use ESMF_CompMod
   use ESMF_InitMacrosMod
   use ESMF_IOUtilMod
@@ -360,7 +363,8 @@ contains
 ! !IROUTINE: ESMF_GridCompCreate - Create a GridComp
 !
 ! !INTERFACE:
-  recursive function ESMF_GridCompCreate(keywordEnforcer, grid, &
+  recursive function ESMF_GridCompCreate(keywordEnforcer, grid, gridList, &
+    mesh, meshList, locstream, locstreamList, xgrid, xgridList, &
     config, configFile, clock, petList, contextflag, name, rc)
 !
 ! !RETURN VALUE:
@@ -369,6 +373,13 @@ contains
 ! !ARGUMENTS:
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_Grid),         intent(in),    optional :: grid
+    type(ESMF_Grid),         intent(in),    optional :: gridList(:)
+    type(ESMF_Mesh),         intent(in),    optional :: mesh
+    type(ESMF_Mesh),         intent(in),    optional :: meshList(:)
+    type(ESMF_LocStream),    intent(in),    optional :: locstream
+    type(ESMF_LocStream),    intent(in),    optional :: locstreamList(:)
+    type(ESMF_XGrid),        intent(in),    optional :: xgrid
+    type(ESMF_XGrid),        intent(in),    optional :: xgridList(:)
     type(ESMF_Config),       intent(in),    optional :: config
     character(len=*),        intent(in),    optional :: configFile
     type(ESMF_Clock),        intent(in),    optional :: clock
@@ -380,6 +391,16 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !STATUS:
 ! \begin{itemize}
 ! \item\apiStatusCompatibleVersion{5.2.0r}
+! \item\apiStatusModifiedSinceVersion{5.2.0r}
+! \begin{description}
+! \begin{sloppypar}
+! \item[7.1.0] Added arguments {\tt gridList}, {\tt mesh}, {\tt meshList}, 
+!   {\tt locstream}, {\tt locstreamList}, {\tt xgrid}, and {\tt xgridList}.
+!   These arguments add support for holding references to multiple geom objects,
+!   either of the same type, or different type, in the same 
+!   {\tt ESMF\_GridComp} object.
+! \end{sloppypar}
+! \end{description}
 ! \end{itemize}
 !
 ! !DESCRIPTION:
@@ -398,25 +419,97 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! The arguments are:
 ! \begin{description}
 ! \item[{[grid]}]
-!   Default {\tt ESMF\_Grid} associated with this {\tt gridcomp}. Note that
-!   it is perfectly ok to not pass a Grid in for this argument. This argument is 
-!   simply a convenience for the user to allow them to associate a Grid
-!   with a component for their later use. The grid isn't actually used
-!   in the component code. 
+!   Associate an {\tt ESMF\_Grid} object with the newly created component.
+!   This is simply a convenience feature for the user. The ESMF library code
+!   does not access the {\tt grid} object.
+!   The {\tt grid} argument is mutually exclusive with the {\tt gridList} 
+!   argument. If both arguments are provided, the routine will fail, and an
+!   error is returned in {\tt rc}.
+!   By default, i.e. if neither {\tt grid} nor {\tt gridList} are provided,
+!   no {\tt ESMF\_Grid} objects are associated with the component.
+! \item[{[gridList]}]
+!   Associate a list of {\tt ESMF\_Grid} objects with the newly created
+!   component.
+!   This is simply a convenience feature for the user. The ESMF library code
+!   does not access the {\tt gridList} object.
+!   The {\tt gridList} argument is mutually exclusive with the {\tt grid} 
+!   argument. If both arguments are provided, the routine will fail, and an
+!   error is returned in {\tt rc}.
+!   By default, i.e. if neither {\tt grid} nor {\tt gridList} are provided,
+!   no {\tt ESMF\_Grid} objects are associated with the component.
+! \item[{[mesh]}]
+!   Associate an {\tt ESMF\_Mesh} object with the newly created component.
+!   This is simply a convenience feature for the user. The ESMF library code
+!   does not access the {\tt mesh} object.
+!   The {\tt mesh} argument is mutually exclusive with the {\tt meshList} 
+!   argument. If both arguments are provided, the routine will fail, and an
+!   error is returned in {\tt rc}.
+!   By default, i.e. if neither {\tt mesh} nor {\tt meshList} are provided,
+!   no {\tt ESMF\_Mesh} objects are associated with the component.
+! \item[{[meshList]}]
+!   Associate a list of {\tt ESMF\_Mesh} objects with the newly created
+!   component.
+!   This is simply a convenience feature for the user. The ESMF library code
+!   does not access the {\tt meshList} object.
+!   The {\tt meshList} argument is mutually exclusive with the {\tt mesh} 
+!   argument. If both arguments are provided, the routine will fail, and an
+!   error is returned in {\tt rc}.
+!   By default, i.e. if neither {\tt mesh} nor {\tt meshList} are provided,
+!   no {\tt ESMF\_Mesh} objects are associated with the component.
+! \item[{[locstream]}]
+!   Associate an {\tt ESMF\_LocStream} object with the newly created component.
+!   This is simply a convenience feature for the user. The ESMF library code
+!   does not access the {\tt locstream} object.
+!   The {\tt locstream} argument is mutually exclusive with the 
+!   {\tt locstreamList} 
+!   argument. If both arguments are provided, the routine will fail, and an
+!   error is returned in {\tt rc}.
+!   By default, i.e. if neither {\tt locstream} nor {\tt locstreamList} are 
+!   provided, no {\tt ESMF\_LocStream} objects are associated with the
+!   component.
+! \item[{[locstreamList]}]
+!   Associate a list of {\tt ESMF\_LocStream} objects with the newly created
+!   component.
+!   This is simply a convenience feature for the user. The ESMF library code
+!   does not access the {\tt locstreamList} object.
+!   The {\tt locstreamList} argument is mutually exclusive with the 
+!   {\tt locstream} 
+!   argument. If both arguments are provided, the routine will fail, and an
+!   error is returned in {\tt rc}.
+!   By default, i.e. if neither {\tt locstream} nor {\tt locstreamList} are 
+!   provided, no {\tt ESMF\_LocStream} objects are associated with the
+!   component.
+! \item[{[xgrid]}]
+!   Associate an {\tt ESMF\_XGrid} object with the newly created component.
+!   This is simply a convenience feature for the user. The ESMF library code
+!   does not access the {\tt xgrid} object.
+!   The {\tt xgrid} argument is mutually exclusive with the {\tt xgridList} 
+!   argument. If both arguments are provided, the routine will fail, and an
+!   error is returned in {\tt rc}.
+!   By default, i.e. if neither {\tt xgrid} nor {\tt xgridList} are provided,
+!   no {\tt ESMF\_XGrid} objects are associated with the component.
+! \item[{[xgridList]}]
+!   Associate a list of {\tt ESMF\_XGrid} objects with the newly created
+!   component.
+!   This is simply a convenience feature for the user. The ESMF library code
+!   does not access the {\tt xgridList} object.
+!   The {\tt xgridList} argument is mutually exclusive with the {\tt xgrid} 
+!   argument. If both arguments are provided, the routine will fail, and an
+!   error is returned in {\tt rc}.
+!   By default, i.e. if neither {\tt xgrid} nor {\tt xgridList} are provided,
+!   no {\tt ESMF\_XGrid} objects are associated with the component.
 ! \item[{[config]}]
-!   An already-created {\tt ESMF\_Config} configuration object
-!   from which the new component
-!   can read in namelist-type information to set parameters for this run.
-!   If both are specified, this object takes priority over {\tt configFile}.
+!   An already-created {\tt ESMF\_Config} object to be attached to the newly
+!   created component.
+!   If both {\tt config} and {\tt configFile} arguments are specified, 
+!   {\tt config} takes priority.
 ! \item[{[configFile]}]
-!   \begin{sloppypar}
 !   The filename of an {\tt ESMF\_Config} format file.  
-!   If specified, this file is opened an {\tt ESMF\_Config} configuration
-!   object is created for the file, and attached to the new component.  
-!   The user can call {\tt ESMF\_GridCompGet()} to get and use the object.
-!   If both are specified, the {\tt config} object takes priority
-!   over this one.
-!   \end{sloppypar}
+!   If specified, a new {\tt ESMF\_Config} object is created and attached to the
+!   newly created component. The {\tt configFile} file is opened and associated
+!   with the new config object.
+!   If both {\tt config} and {\tt configFile} arguments are specified, 
+!   {\tt config} takes priority.
 ! \item[{[clock]}]
 !   \begin{sloppypar}
 !   Component-specific {\tt ESMF\_Clock}.  This clock is available to be
@@ -464,16 +557,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Allocate a new comp class
     allocate(compclass, stat=localrc)
     if (ESMF_LogFoundAllocError(localrc, msg="compclass", &
-      ESMF_CONTEXT, rcTOReturn=rc)) return
+      ESMF_CONTEXT, rcToReturn=rc)) return
       
     ! call Comp method
     call ESMF_CompConstruct(compclass, ESMF_COMPTYPE_GRID, name, &
-      configFile=configFile, config=config, &
-      grid=grid, clock=clock, petList=petList, contextflag=contextflag, &
-      rc=localrc)
+      configFile=configFile, config=config, clock=clock, petList=petList, &
+      contextflag=contextflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcTOReturn=rc)) then
+      ESMF_CONTEXT, rcToReturn=rc)) then
       deallocate(compclass)
       return
     endif
@@ -486,6 +578,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ESMF_GridCompCreate%compp => compclass
     
     ESMF_INIT_SET_CREATED(ESMF_GridCompCreate)
+
+    ! deal with geom object arguments
+    call ESMF_GridCompSet(ESMF_GridCompCreate, grid=grid, gridList=gridList, &
+      mesh=mesh, meshList=meshList, locstream=locstream, &
+      locstreamList=locstreamList, xgrid=xgrid, xgridList=xgridList, rc=localrc)
+    if (ESMF_LogFoundError(localrc, &
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
@@ -562,7 +662,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (.not.associated(gridcomp%compp)) then
       if (ESMF_LogFoundError(ESMF_RC_OBJ_BAD, &
         msg="GridComp not initialized or already destroyed", &
-        ESMF_CONTEXT, rcTOReturn=rc)) return
+        ESMF_CONTEXT, rcToReturn=rc)) return
     endif
 
     ! check consistency between timeout argument and component argument
@@ -570,7 +670,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       .not.ESMF_CompIsDualConnected(gridcomp%compp, rc=localrc)) then
       call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, &
         msg="'timeout' argument is only allowed for connected dual components",&
-        ESMF_CONTEXT, rcTOReturn=rc)
+        ESMF_CONTEXT, rcToReturn=rc)
       return
     endif
 
@@ -579,14 +679,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       timeoutFlag=timeoutFlag, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcTOReturn=rc)) return
+      ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! mark object invalid
     call ESMF_BaseSetStatus(gridcomp%compp%base, ESMF_STATUS_INVALID, &
       rc=localrc)
     if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcTOReturn=rc)) return
+      ESMF_CONTEXT, rcToReturn=rc)) return
 
     ESMF_INIT_SET_DELETED(gridcomp)
 
@@ -707,7 +807,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       .not.ESMF_CompIsDualConnected(gridcomp%compp, rc=localrc)) then
       call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, &
         msg="'timeout' argument is only allowed for connected dual components",&
-        ESMF_CONTEXT, rcTOReturn=rc)
+        ESMF_CONTEXT, rcToReturn=rc)
       return
     endif
 
@@ -793,40 +893,63 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !INTERFACE:
   subroutine ESMF_GridCompGet(gridcomp, keywordEnforcer, gridIsPresent, grid, &
+    gridList, meshIsPresent, mesh, meshList, locstreamIsPresent, locstream, &
+    locstreamList, xgridIsPresent, xgrid, xgridList, &
     importStateIsPresent, importState, exportStateIsPresent, exportState, &
     configIsPresent, config, configFileIsPresent, configFile, &
     clockIsPresent, clock, localPet, petCount, contextflag, &
     currentMethod, currentPhase, comptype, vmIsPresent, vm, name, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_GridComp),      intent(in)            :: gridcomp
+    type(ESMF_GridComp),           intent(in)            :: gridcomp
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    logical,                  intent(out), optional :: gridIsPresent
-    type(ESMF_Grid),          intent(out), optional :: grid
-    logical,                  intent(out), optional :: importStateIsPresent
-    type(ESMF_State),         intent(out), optional :: importState
-    logical,                  intent(out), optional :: exportStateIsPresent
-    type(ESMF_State),         intent(out), optional :: exportState    
-    logical,                  intent(out), optional :: configIsPresent
-    type(ESMF_Config),        intent(out), optional :: config
-    logical,                  intent(out), optional :: configFileIsPresent
-    character(len=*),         intent(out), optional :: configFile
-    logical,                  intent(out), optional :: clockIsPresent
-    type(ESMF_Clock),         intent(out), optional :: clock
-    integer,                  intent(out), optional :: localPet
-    integer,                  intent(out), optional :: petCount
-    type(ESMF_Context_Flag),  intent(out), optional :: contextflag
-    type(ESMF_Method_Flag),   intent(out), optional :: currentMethod
-    integer,                  intent(out), optional :: currentPhase
-    type(ESMF_CompType_Flag), intent(out), optional :: comptype
-    logical,                  intent(out), optional :: vmIsPresent
-    type(ESMF_VM),            intent(out), optional :: vm
-    character(len=*),         intent(out), optional :: name
-    integer,                  intent(out), optional :: rc
+    logical,                       intent(out), optional :: gridIsPresent
+    type(ESMF_Grid),               intent(out), optional :: grid
+    type(ESMF_Grid), allocatable,  intent(out), optional :: gridList(:)
+    logical,                       intent(out), optional :: meshIsPresent
+    type(ESMF_Mesh),               intent(out), optional :: mesh
+    type(ESMF_Mesh), allocatable,  intent(out), optional :: meshList(:)
+    logical,                       intent(out), optional :: locstreamIsPresent
+    type(ESMF_LocStream),          intent(out), optional :: locstream
+    type(ESMF_LocStream), allocatable, intent(out), optional :: locstreamList(:)
+    logical,                       intent(out), optional :: xgridIsPresent
+    type(ESMF_XGrid),              intent(out), optional :: xgrid
+    type(ESMF_XGrid), allocatable, intent(out), optional :: xgridList(:)
+    logical,                       intent(out), optional :: importStateIsPresent
+    type(ESMF_State),              intent(out), optional :: importState
+    logical,                       intent(out), optional :: exportStateIsPresent
+    type(ESMF_State),              intent(out), optional :: exportState    
+    logical,                       intent(out), optional :: configIsPresent
+    type(ESMF_Config),             intent(out), optional :: config
+    logical,                       intent(out), optional :: configFileIsPresent
+    character(len=*),              intent(out), optional :: configFile
+    logical,                       intent(out), optional :: clockIsPresent
+    type(ESMF_Clock),              intent(out), optional :: clock
+    integer,                       intent(out), optional :: localPet
+    integer,                       intent(out), optional :: petCount
+    type(ESMF_Context_Flag),       intent(out), optional :: contextflag
+    type(ESMF_Method_Flag),        intent(out), optional :: currentMethod
+    integer,                       intent(out), optional :: currentPhase
+    type(ESMF_CompType_Flag),      intent(out), optional :: comptype
+    logical,                       intent(out), optional :: vmIsPresent
+    type(ESMF_VM),                 intent(out), optional :: vm
+    character(len=*),              intent(out), optional :: name
+    integer,                       intent(out), optional :: rc
 !
 ! !STATUS:
 ! \begin{itemize}
 ! \item\apiStatusCompatibleVersion{5.2.0r}
+! \item\apiStatusModifiedSinceVersion{5.2.0r}
+! \begin{description}
+! \begin{sloppypar}
+! \item[7.1.0] Added arguments {\tt gridList}, {\tt meshIsPresent}, {\tt mesh},
+!   {\tt meshList}, {\tt locstreamIsPresent}, {\tt locstream}, 
+!   {\tt locstreamList}, {\tt xgridIsPresent}, {\tt xgrid}, and {\tt xgridList}.
+!   These arguments add support for accessing references to multiple geom objects,
+!   either of the same type, or different type, associated with the same 
+!   {\tt ESMF\_GridComp} object.
+! \end{sloppypar}
+! \end{description}
 ! \end{itemize}
 !
 ! !DESCRIPTION:
@@ -837,13 +960,79 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item[gridcomp]
 !   The {\tt ESMF\_GridComp} object being queried.
 ! \item[{[gridIsPresent]}]
-!   {\tt .true.} if {\tt grid} was set in GridComp object,
-!   {\tt .false.} otherwise.
+!   Set to {\tt .true.} if at least one {\tt ESMF\_Grid} object is
+!   associated with the {\tt gridcomp} component.
+!   Set to {\tt .false.} otherwise.
 ! \item[{[grid]}]
-!   Return the associated Grid.
-!   It is an error to query for the Grid if none is associated with
-!   the GridComp. If unsure, get {\tt gridIsPresent} first to determine
-!   the status.
+!   Return the {\tt ESMF\_Grid} object associated with the {\tt gridcomp}
+!   component. If multiple {\tt ESMF\_Grid} objects are associated, return the
+!   first in the list. 
+!   It is an error to query for {\tt grid} if no {\tt ESMF\_Grid} object is
+!   associated with the {\tt gridcomp} component.
+!   If unsure, query for {\tt gridIsPresent} first, or use the {\tt gridList}
+!   variant.
+! \item[{[gridList]}]
+!   Return a list of all {\tt ESMF\_Grid} objects associated with the
+!   {\tt gridcomp} component. The size of the returned {\tt gridList} 
+!   corresponds to the number of {\tt ESMF\_Grid} objects associated. 
+!   If no {\tt ESMF\_Grid} object is associated with the {\tt gridcomp}
+!   component, the size of the returned {\tt gridList} is zero.
+! \item[{[meshIsPresent]}]
+!   Set to {\tt .true.} if at least one {\tt ESMF\_Mesh} object is
+!   associated with the {\tt gridcomp} component.
+!   Set to {\tt .false.} otherwise.
+! \item[{[mesh]}]
+!   Return the {\tt ESMF\_Mesh} object associated with the {\tt gridcomp}
+!   component. If multiple {\tt ESMF\_Mesh} objects are associated, return the
+!   first in the list. 
+!   It is an error to query for {\tt mesh} if no {\tt ESMF\_Mesh} object is
+!   associated with the {\tt gridcomp} component.
+!   If unsure, query for {\tt meshIsPresent} first, or use the {\tt meshList}
+!   variant.
+! \item[{[meshList]}]
+!   Return a list of all {\tt ESMF\_Mesh} objects associated with the
+!   {\tt gridcomp} component. The size of the returned {\tt meshList} 
+!   corresponds to the number of {\tt ESMF\_Mesh} objects associated. 
+!   If no {\tt ESMF\_Mesh} object is associated with the {\tt gridcomp}
+!   component, the size of the returned {\tt meshList} is zero.
+! \item[{[locstreamIsPresent]}]
+!   Set to {\tt .true.} if at least one {\tt ESMF\_LocStream} object is
+!   associated with the {\tt gridcomp} component. 
+!   Set to {\tt .false.} otherwise.
+! \item[{[locstream]}]
+! \begin{sloppypar}
+!   Return the {\tt ESMF\_LocStream} object associated with the {\tt gridcomp}
+!   component. If multiple {\tt ESMF\_LocStream} objects are associated, return
+!   the first in the list. 
+!   It is an error to query for {\tt locstream} if no {\tt ESMF\_Grid} object is
+!   associated with the {\tt gridcomp} component.
+!   If unsure, query for {\tt locstreamIsPresent} first, or use the 
+!   {\tt locstreamList} variant.
+! \end{sloppypar}
+! \item[{[locstreamList]}]
+!   Return a list of all {\tt ESMF\_LocStream} objects associated with the
+!   {\tt gridcomp} component. The size of the returned {\tt locstreamList} 
+!   corresponds to the number of {\tt ESMF\_LocStream} objects associated. 
+!   If no {\tt ESMF\_LocStream} object is associated with the {\tt gridcomp}
+!   component, the size of the returned {\tt locstreamList} is zero.
+! \item[{[xgridIsPresent]}]
+!   Set to {\tt .true.} if at least one {\tt ESMF\_XGrid} object is
+!   associated with the {\tt gridcomp} component.
+!   Set to {\tt .false.} otherwise.
+! \item[{[xgrid]}]
+!   Return the {\tt ESMF\_XGrid} object associated with the {\tt gridcomp}
+!   component. If multiple {\tt ESMF\_XGrid} objects are associated, return the
+!   first in the list. 
+!   It is an error to query for {\tt xgrid} if no {\tt ESMF\_XGrid} object is
+!   associated with the {\tt gridcomp} component.
+!   If unsure, query for {\tt xgridIsPresent} first, or use the {\tt xgridList}
+!   variant.
+! \item[{[xgridList]}]
+!   Return a list of all {\tt ESMF\_XGrid} objects associated with the
+!   {\tt gridcomp} component. The size of the returned {\tt xgridList} 
+!   corresponds to the number of {\tt ESMF\_XGrid} objects associated. 
+!   If no {\tt ESMF\_XGrid} object is associated with the {\tt gridcomp}
+!   component, the size of the returned {\tt xgridList} is zero.
 ! \item[{[importStateIsPresent]}]
 !   {\tt .true.} if {\tt importState} was set in GridComp object,
 !   {\tt .false.} otherwise.
@@ -927,7 +1116,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! call Comp method
     call ESMF_CompGet(gridcomp%compp, name=name, vm=vm, contextflag=contextflag,&
-      grid=grid, importState=importState, exportState=exportState, clock=clock,&
+      grid=grid, gridList=gridList, mesh=mesh, meshList=meshList, &
+      locstream=locstream, locstreamList=locstreamList, &
+      xgrid=xgrid, xgridList=xgridList, &
+      importState=importState, exportState=exportState, clock=clock,&
       configFile=configFile, config=config, currentMethod=currentMethod, &
       currentPhase=currentPhase, localPet=localPet, petCount=petCount, &
       comptype=comptype, compStatus=compStatus, rc=localrc)
@@ -944,6 +1136,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       isIsPresent = importStateIsPresent, &
       esIsPresent = exportStateIsPresent, &
       gridIsPresent = gridIsPresent, &
+      meshIsPresent = meshIsPresent, &
+      locstreamIsPresent = locstreamIsPresent, &
+      xgridIsPresent = xgridIsPresent, &
       rc = localrc)
     if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
@@ -1198,7 +1393,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       .not.ESMF_CompIsDualConnected(gridcomp%compp, rc=localrc)) then
       call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, &
         msg="'timeout' argument is only allowed for connected dual components",&
-        ESMF_CONTEXT, rcTOReturn=rc)
+        ESMF_CONTEXT, rcToReturn=rc)
       return
     endif
 
@@ -1369,7 +1564,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     localresult = ESMF_CompIsPetLocal(gridcomp%compp, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcTOReturn=rc)) return
+      ESMF_CONTEXT, rcToReturn=rc)) return
 
     ESMF_GridCompIsPetLocal = localresult
 
@@ -1542,7 +1737,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       .not.ESMF_CompIsDualConnected(gridcomp%compp, rc=localrc)) then
       call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, &
         msg="'timeout' argument is only allowed for connected dual components",&
-        ESMF_CONTEXT, rcTOReturn=rc)
+        ESMF_CONTEXT, rcToReturn=rc)
       return
     endif
 
@@ -1682,7 +1877,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       .not.ESMF_CompIsDualConnected(gridcomp%compp, rc=localrc)) then
       call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, &
         msg="'timeout' argument is only allowed for connected dual components",&
-        ESMF_CONTEXT, rcTOReturn=rc)
+        ESMF_CONTEXT, rcToReturn=rc)
       return
     endif
 
@@ -1851,7 +2046,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (.not.present(port).and.(present(timeout))) then
       call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, &
         msg="Currently the 'timeout' argument requires the 'port' argument", &
-        ESMF_CONTEXT, rcTOReturn=rc)
+        ESMF_CONTEXT, rcToReturn=rc)
       return  ! bail out
     endif
     
@@ -1894,22 +2089,40 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE: ESMF_GridCompSet - Set or reset information about the GridComp
 !
 ! !INTERFACE:
-  subroutine ESMF_GridCompSet(gridcomp, keywordEnforcer, grid, config, &
-    configFile, clock, name, rc)
+  subroutine ESMF_GridCompSet(gridcomp, keywordEnforcer, grid, gridList, &
+    mesh, meshList, locstream, locstreamList, xgrid, xgridList, &  
+    config, configFile, clock, name, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_GridComp), intent(inout)         :: gridcomp
+    type(ESMF_GridComp),    intent(inout)         :: gridcomp
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    type(ESMF_Grid),     intent(in),  optional :: grid
-    type(ESMF_Config),   intent(in),  optional :: config
-    character(len=*),    intent(in),  optional :: configFile
-    type(ESMF_Clock),    intent(in),  optional :: clock
-    character(len=*),    intent(in),  optional :: name
-    integer,             intent(out), optional :: rc
+    type(ESMF_Grid),        intent(in),  optional :: grid
+    type(ESMF_Grid),        intent(in),  optional :: gridList(:)
+    type(ESMF_Mesh),        intent(in),  optional :: mesh
+    type(ESMF_Mesh),        intent(in),  optional :: meshList(:)
+    type(ESMF_LocStream),   intent(in),  optional :: locstream
+    type(ESMF_LocStream),   intent(in),  optional :: locstreamList(:)
+    type(ESMF_XGrid),       intent(in),  optional :: xgrid
+    type(ESMF_XGrid),       intent(in),  optional :: xgridList(:)
+    type(ESMF_Config),      intent(in),  optional :: config
+    character(len=*),       intent(in),  optional :: configFile
+    type(ESMF_Clock),       intent(in),  optional :: clock
+    character(len=*),       intent(in),  optional :: name
+    integer,                intent(out), optional :: rc
 !
 ! !STATUS:
 ! \begin{itemize}
 ! \item\apiStatusCompatibleVersion{5.2.0r}
+! \item\apiStatusModifiedSinceVersion{5.2.0r}
+! \begin{description}
+! \begin{sloppypar}
+! \item[7.1.0] Added arguments {\tt gridList}, {\tt mesh}, {\tt meshList}, 
+!   {\tt locstream}, {\tt locstreamList}, {\tt xgrid}, and {\tt xgridList}.
+!   These arguments add support for holding references to multiple geom objects,
+!   either of the same type, or different type, in the same 
+!   {\tt ESMF\_GridComp} object.
+! \end{sloppypar}
+! \end{description}
 ! \end{itemize}
 !
 ! !DESCRIPTION:
@@ -1920,16 +2133,103 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item[gridcomp]
 !   {\tt ESMF\_GridComp} to change.
 ! \item[{[grid]}]
-!   Set the {\tt ESMF\_Grid} associated with the {\tt ESMF\_GridComp}.
+!   Associate an {\tt ESMF\_Grid} object with the {\tt gridcomp} component.
+!   This is simply a convenience feature for the user. The ESMF library code
+!   does not access the {\tt grid} object.
+!   The {\tt grid} argument is mutually exclusive with the {\tt gridList} 
+!   argument. If both arguments are provided, the routine will fail, and an
+!   error is returned in {\tt rc}.
+!   By default, i.e. if neither {\tt grid} nor {\tt gridList} are provided,
+!   the {\tt ESMF\_Grid} association of the incoming {\tt gridcomp} 
+!   component remains unchanged.
+! \item[{[gridList]}]
+!   Associate a list of {\tt ESMF\_Grid} objects with the {\tt gridcomp}
+!   component.
+!   This is simply a convenience feature for the user. The ESMF library code
+!   does not access the {\tt gridList} object.
+!   The {\tt gridList} argument is mutually exclusive with the {\tt grid} 
+!   argument. If both arguments are provided, the routine will fail, and an
+!   error is returned in {\tt rc}.
+!   By default, i.e. if neither {\tt grid} nor {\tt gridList} are provided,
+!   the {\tt ESMF\_Grid} association of the incoming {\tt gridcomp} 
+!   component remains unchanged.
+! \item[{[mesh]}]
+!   Associate an {\tt ESMF\_Mesh} object with the {\tt gridcomp} component.
+!   This is simply a convenience feature for the user. The ESMF library code
+!   does not access the {\tt mesh} object.
+!   The {\tt mesh} argument is mutually exclusive with the {\tt meshList} 
+!   argument. If both arguments are provided, the routine will fail, and an
+!   error is returned in {\tt rc}.
+!   By default, i.e. if neither {\tt mesh} nor {\tt meshList} are provided,
+!   the {\tt ESMF\_Mesh} association of the incoming {\tt gridcomp} 
+!   component remains unchanged.
+! \item[{[meshList]}]
+!   Associate a list of {\tt ESMF\_Mesh} objects with the {\tt gridcomp}
+!   component.
+!   This is simply a convenience feature for the user. The ESMF library code
+!   does not access the {\tt meshList} object.
+!   The {\tt meshList} argument is mutually exclusive with the {\tt mesh} 
+!   argument. If both arguments are provided, the routine will fail, and an
+!   error is returned in {\tt rc}.
+!   By default, i.e. if neither {\tt mesh} nor {\tt meshList} are provided,
+!   the {\tt ESMF\_Mesh} association of the incoming {\tt gridcomp} 
+!   component remains unchanged.
+! \item[{[locstream]}]
+!   Associate an {\tt ESMF\_LocStream} object with the {\tt gridcomp} component.
+!   This is simply a convenience feature for the user. The ESMF library code
+!   does not access the {\tt locstream} object.
+!   The {\tt locstream} argument is mutually exclusive with the 
+!   {\tt locstreamList} 
+!   argument. If both arguments are provided, the routine will fail, and an
+!   error is returned in {\tt rc}.
+!   By default, i.e. if neither {\tt locstream} nor {\tt locstreamList} are 
+!   provided, the {\tt ESMF\_LocStream} association of the incoming 
+!   {\tt gridcomp} component remains unchanged.
+! \item[{[locstreamList]}]
+!   Associate a list of {\tt ESMF\_LocStream} objects with the {\tt gridcomp}
+!   component.
+!   This is simply a convenience feature for the user. The ESMF library code
+!   does not access the {\tt locstreamList} object.
+!   The {\tt locstreamList} argument is mutually exclusive with the 
+!   {\tt locstream} 
+!   argument. If both arguments are provided, the routine will fail, and an
+!   error is returned in {\tt rc}.
+!   By default, i.e. if neither {\tt locstream} nor {\tt locstreamList} are 
+!   provided, the {\tt ESMF\_LocStream} association of the incoming 
+!   {\tt gridcomp} component remains unchanged.
+! \item[{[xgrid]}]
+!   Associate an {\tt ESMF\_XGrid} object with the {\tt gridcomp} component.
+!   This is simply a convenience feature for the user. The ESMF library code
+!   does not access the {\tt xgrid} object.
+!   The {\tt xgrid} argument is mutually exclusive with the {\tt xgridList} 
+!   argument. If both arguments are provided, the routine will fail, and an
+!   error is returned in {\tt rc}.
+!   By default, i.e. if neither {\tt xgrid} nor {\tt xgridList} are provided,
+!   the {\tt ESMF\_XGrid} association of the incoming {\tt gridcomp} 
+!   component remains unchanged.
+! \item[{[xgridList]}]
+!   Associate a list of {\tt ESMF\_XGrid} objects with the {\tt gridcomp}
+!   component.
+!   This is simply a convenience feature for the user. The ESMF library code
+!   does not access the {\tt xgridList} object.
+!   The {\tt xgridList} argument is mutually exclusive with the {\tt xgrid} 
+!   argument. If both arguments are provided, the routine will fail, and an
+!   error is returned in {\tt rc}.
+!   By default, i.e. if neither {\tt xgrid} nor {\tt xgridList} are provided,
+!   the {\tt ESMF\_XGrid} association of the incoming {\tt gridcomp} 
+!   component remains unchanged.
 ! \item[{[config]}]
-!   Set the configuration information for the {\tt ESMF\_GridComp} from
-!   this already created {\tt ESMF\_Config} object.   
-!   If specified, takes priority over {\tt configFile}.
+!   An already-created {\tt ESMF\_Config} object to be attached to the
+!   component.
+!   If both {\tt config} and {\tt configFile} arguments are specified, 
+!   {\tt config} takes priority.
 ! \item[{[configFile]}]
-!   Set the configuration filename for this {\tt ESMF\_GridComp}.
-!   An {\tt ESMF\_Config} object will be created for this file
-!   and attached to the {\tt ESMF\_GridComp}.  Superseded by {\tt config}
-!   if both are specified.
+!   The filename of an {\tt ESMF\_Config} format file.  
+!   If specified, a new {\tt ESMF\_Config} object is created and attached to the
+!   component. The {\tt configFile} file is opened and associated
+!   with the new config object.
+!   If both {\tt config} and {\tt configFile} arguments are specified, 
+!   {\tt config} takes priority.
 ! \item[{[clock]}]
 !   Set the private clock for this {\tt ESMF\_GridComp}.
 ! \item[{[name]}]
@@ -1940,7 +2240,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !EOP
 !------------------------------------------------------------------------------
-    integer :: localrc                        ! local return code
+    integer                         :: localrc           ! local return code
 
     ! initialize return code; assume routine not implemented
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -1950,10 +2250,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,grid,rc)
     ESMF_INIT_CHECK_DEEP(ESMF_ConfigGetInit,config,rc)
     ESMF_INIT_CHECK_DEEP(ESMF_ClockGetInit,clock,rc)
-
+    
     ! call Comp method
     call ESMF_CompSet(gridcomp%compp, name=name, &
-      grid=grid, clock=clock, configFile=configFile, config=config, rc=localrc)
+      grid=grid, gridList=gridList, mesh=mesh, meshList=meshList, &
+      locstream=locstream, locstreamList=locstreamList, xgrid=xgrid, &
+      xgridList=xgridList, clock=clock, configFile=configFile, config=config, &
+      rc=localrc)
     if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
@@ -2328,7 +2631,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         ! an error condition that needs to be reported back
         call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
           msg="userRoutine was not found", &
-          ESMF_CONTEXT, rcTOReturn=rc)
+          ESMF_CONTEXT, rcToReturn=rc)
         return
       endif
     endif
@@ -2758,7 +3061,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       prefIntraProcess, prefIntraSsi, prefInterSsi, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcTOReturn=rc)) return
+      ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
@@ -2837,7 +3140,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       prefIntraProcess, prefIntraSsi, prefInterSsi, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcTOReturn=rc)) return
+      ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
@@ -2913,7 +3216,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       prefIntraProcess, prefIntraSsi, prefInterSsi, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcTOReturn=rc)) return
+      ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
@@ -3051,7 +3354,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       .not.ESMF_CompIsDualConnected(gridcomp%compp, rc=localrc)) then
       call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, &
         msg="'timeout' argument is only allowed for connected dual components",&
-        ESMF_CONTEXT, rcTOReturn=rc)
+        ESMF_CONTEXT, rcToReturn=rc)
       return
     endif
 
@@ -3068,7 +3371,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     endif
     if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcTOReturn=rc)) return
+      ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
@@ -3187,7 +3490,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       .not.ESMF_CompIsDualConnected(gridcomp%compp, rc=localrc)) then
       call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, &
         msg="'timeout' argument is only allowed for connected dual components",&
-        ESMF_CONTEXT, rcTOReturn=rc)
+        ESMF_CONTEXT, rcToReturn=rc)
       return
     endif
 

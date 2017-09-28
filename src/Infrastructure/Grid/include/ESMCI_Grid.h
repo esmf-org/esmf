@@ -272,6 +272,7 @@ template <class TYPE>
                                  ESMC_InterArrayInt *decompFlagPTile,
                                  ESMC_InterArrayInt *deLabelList,
                                  //ESMC_DELayout *delayout,
+                                 ESMC_InterArrayInt *staggerLocList,
                                  const char *name,
                                  int *rc);
   static Grid* createfromfile(const char *filename, int fileTypeFlag, 

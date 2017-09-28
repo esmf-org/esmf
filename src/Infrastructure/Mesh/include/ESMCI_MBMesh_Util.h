@@ -26,6 +26,7 @@
 
 #include "Mesh/include/ESMCI_MBMesh.h"
 #include "Mesh/include/ESMCI_MeshTypes.h"
+#include "ESMCI_PointList.h"
 
 #include <vector>
 
@@ -48,6 +49,13 @@ void MBMesh_get_elem_coords(MBMesh *mbmp, EntityHandle elem, int max_num_nodes, 
 void MBMesh_get_elem_centroid(MBMesh *mbmp, EntityHandle elem, double *centroid);
 
 void MBMesh_get_local_elem_gids(MBMesh *mbmp, std::vector<UInt> &egids);
+
+// expects pcoords in domain [-1,1] and translates to [0,1]
+// useful for translating pcoords from MOAB to ESMF domain
+void translate(double *pcoords);
+
+//ESMCI::PointList *MBMesh_to_PointList(MBMesh *mesh, ESMC_MeshLoc_Flag meshLoc, ESMCI::InterfaceInt *maskValuesArg, int *rc);
+ESMCI::PointList *MBMesh_to_PointList(MBMesh *mesh, int *rc);
 
 #endif // ESMF_MOAB
 

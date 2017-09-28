@@ -3046,7 +3046,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       endif
 
       if( present( rc )) then
-        rc = localrc
+        rc = ESMF_SUCCESS
       endif
       
       return

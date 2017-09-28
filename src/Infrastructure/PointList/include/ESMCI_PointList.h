@@ -52,6 +52,9 @@ namespace ESMCI {
     bool operator< (const point &rhs) const {
       return id < rhs.id;
     }
+    bool operator!= (const point &rhs) const {
+      return id != rhs.id;
+    }
   };
 
 // class definition

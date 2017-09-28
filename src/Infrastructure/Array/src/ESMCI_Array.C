@@ -3284,7 +3284,7 @@ int Array::write(
   }
 
   // It is an error to supply a variable name in binary mode
-  if (ESMF_IOFMT_NETCDF != localiofmt) {
+  if (ESMF_IOFMT_BIN == localiofmt) {
     if (variableName.size() > 0) {
       ESMC_LogDefault.MsgFoundError(ESMF_RC_ARG_BAD, 
           "NetCDF variable name not allowed in binary mode",
@@ -3294,7 +3294,7 @@ int Array::write(
   }
 
   // It is an error to supply Attribute convention in binary mode
-  if (ESMF_IOFMT_NETCDF != localiofmt) {
+  if (ESMF_IOFMT_BIN == localiofmt) {
     if (convention.size() > 0) {
       ESMC_LogDefault.MsgFoundError(ESMF_RC_ARG_BAD, 
           "NetCDF Attribute convention not allowed in binary mode",
@@ -3304,7 +3304,7 @@ int Array::write(
   }
 
   // It is an error to supply Attribute purpose in binary mode
-  if (ESMF_IOFMT_NETCDF != localiofmt) {
+  if (ESMF_IOFMT_BIN == localiofmt) {
     if (purpose.size() > 0) {
       ESMC_LogDefault.MsgFoundError(ESMF_RC_ARG_BAD, 
           "NetCDF Attribute convention not allowed in binary mode",
@@ -12559,7 +12559,7 @@ int Array::sparseMatMul(
   srcSuperVecSizeDis[0] = &srcdist_i[0];
   vector<int> srcdist_j(srcLocalDeCount);
   srcSuperVecSizeDis[1] = &srcdist_j[0];
-  srcArray->superVecParam(srcLocalDeCount, xxe->superVectorOkay,
+  superVecParam(srcArray, srcLocalDeCount, xxe->superVectorOkay,
     srcSuperVecSizeUnd, srcSuperVecSizeDis, vectorLength);
   
   // dst-side super vectorization
@@ -12572,7 +12572,7 @@ int Array::sparseMatMul(
   dstSuperVecSizeDis[0] = &dstdist_i[0];
   vector<int> dstdist_j(dstLocalDeCount);
   dstSuperVecSizeDis[1] = &dstdist_j[0];
-  dstArray->superVecParam(dstLocalDeCount, xxe->superVectorOkay,
+  superVecParam(dstArray, dstLocalDeCount, xxe->superVectorOkay,
     dstSuperVecSizeUnd, dstSuperVecSizeDis, vectorLength);
   
   // load super vectorization parameters into SuperVectP data structure
@@ -12835,12 +12835,13 @@ void Array::superVecParam(
 //
 // !ARGUMENTS:
 //
+      Array *array,             // in
       int localDeCount,         // in
       bool superVectorOkay,     // in
       int superVecSizeUnd[3],   // out
       int *superVecSizeDis[2],  // out
       int &vectorLength         // out
-  )const{
+  ){
 //
 // !DESCRIPTION:
 //    Determine super-vectorization parameter.
@@ -12848,7 +12849,7 @@ void Array::superVecParam(
 //EOPI
 //-----------------------------------------------------------------------------
   bool arrayFlag = false;
-  if (this != ESMC_NULL_POINTER) arrayFlag = true;
+  if (array != ESMC_NULL_POINTER) arrayFlag = true;
 
   superVecSizeUnd[0]=-1;  // initialize with disabled super vector support
   superVecSizeUnd[1]=1;
@@ -12859,16 +12860,16 @@ void Array::superVecParam(
     superVecSizeDis[1][j]=1;
   }
   
-  if (arrayFlag && sizeSuperUndist){
+  if (arrayFlag && array->sizeSuperUndist){
     // use array to determine vectorLength
     vectorLength = 1; // init
     int i;
-    for (i=0; i<rank-tensorCount; i++)
-      vectorLength *= sizeSuperUndist[i];
+    for (i=0; i<array->rank-array->tensorCount; i++)
+      vectorLength *= array->sizeSuperUndist[i];
     if (superVectorOkay)
-      vectorLength *= sizeSuperUndist[i];
+      vectorLength *= array->sizeSuperUndist[i];
     else
-      vectorLength = sizeSuperUndist[0];
+      vectorLength = array->sizeSuperUndist[0];
 #ifdef DEBUGGING
   {
     std::stringstream debugmsg;
@@ -12878,11 +12879,12 @@ void Array::superVecParam(
 #endif
   }
 
-  if (arrayFlag && sizeSuperUndist && (rank-tensorCount)<=2){
+  if (arrayFlag && array->sizeSuperUndist &&
+    (array->rank-array->tensorCount)<=2){
     // set superVecSize variables
     int i;
-    for (i=0; i<rank-tensorCount; i++){
-      superVecSizeUnd[i] = sizeSuperUndist[i];
+    for (i=0; i<array->rank-array->tensorCount; i++){
+      superVecSizeUnd[i] = array->sizeSuperUndist[i];
 #ifdef DEBUGGING
   {
     std::stringstream debugmsg;
@@ -12892,9 +12894,9 @@ void Array::superVecParam(
 #endif
       for (int j=0; j<localDeCount; j++)
         superVecSizeDis[i][j] = 
-          sizeDist[j*(rank - tensorCount)+i];
+          array->sizeDist[j*(array->rank - array->tensorCount)+i];
     }
-    superVecSizeUnd[i] = sizeSuperUndist[i];
+    superVecSizeUnd[i] = array->sizeSuperUndist[i];
 #ifdef DEBUGGING
   {
     std::stringstream debugmsg;

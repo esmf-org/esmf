@@ -87,6 +87,8 @@ enum ESMC_IndexFlag { ESMC_INDEX_DELOCAL=0,
 // io format type
 typedef enum ESMC_IOFmt_Flag { ESMF_IOFMT_BIN=0,
                        ESMF_IOFMT_NETCDF,
+                       ESMF_IOFMT_NETCDF_64BIT_OFFSET,
+                       ESMF_IOFMT_NETCDF4,
                        ESMF_IOFMT_NETCDF4P,
                        ESMF_IOFMT_NETCDF4C} ESMC_IOFmt_Flag;
 

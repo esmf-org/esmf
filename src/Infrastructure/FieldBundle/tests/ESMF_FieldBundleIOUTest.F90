@@ -347,6 +347,7 @@
   ! FieldBundle Write to a single file Test
   call ESMF_FieldBundleWrite(bundleTst, fileName="single.nc",      &
       convention=apConv, purpose=apPurp,  &
+      iofmt=ESMF_IOFMT_NETCDF_64BIT_OFFSET,  &
       status=ESMF_FILESTATUS_REPLACE, rc=rc)
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   write(name, *) "Writing a FieldBundle to a single file Test"
@@ -423,6 +424,7 @@
   write(name, *) "Writing a FieldBundle to multiple files Test"
   call ESMF_FieldBundleWrite(bundleTst, fileName="multi.nc",  &
       convention=apConv, purpose=apPurp,  &
+       iofmt=ESMF_IOFMT_NETCDF_64BIT_OFFSET,  &
       status=ESMF_FILESTATUS_REPLACE, singleFile=.false., rc=rc)
 #if (defined ESMF_PIO && ( defined ESMF_NETCDF || defined ESMF_PNETCDF))
   call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)

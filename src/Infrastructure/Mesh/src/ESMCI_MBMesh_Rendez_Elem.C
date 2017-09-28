@@ -360,10 +360,6 @@ void create_rendez_mbmesh_elem(MBMesh *srcmesh, MBMesh *dstmesh, MBMesh **_srcme
   if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
     throw localrc;  // bail out with exception
 
-  int localPet = VM::getCurrent(&localrc)->getLocalPet();
-  if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
-    throw localrc;  // bail out with exception
-
   // Compute communication pattern to build rendezvous meshes
   std::vector<EH_Comm_Pair> src_elem_to_proc_list;
   std::vector<EH_Comm_Pair> dst_elem_to_proc_list;

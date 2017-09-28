@@ -74,6 +74,10 @@ script_info:
 	  echo "NetCDF library version: `nc-config --version`" ; \
 	  echo "NetCDF Fortran version: `nf-config --version`" ; \
 	fi
+	-@if [ -n "$(ESMF_PNETCDF)" ] ; then \
+	  echo "--------------------------------------------------------------" ; \
+	  echo "PNetCDF library version: `pnetcdf_version`" ; \
+	fi
 	-@echo " "
 	-@echo "--------------------------------------------------------------"
 	-@echo " * User set ESMF environment variables *"

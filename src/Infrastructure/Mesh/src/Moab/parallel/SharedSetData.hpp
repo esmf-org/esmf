@@ -11,9 +11,9 @@
 
 #define STRINGIFY_(X) #X
 #define STRINGIFY(X) STRINGIFY_(X)
-#ifdef HAVE_UNORDERED_MAP
-# include STRINGIFY(HAVE_UNORDERED_MAP)
-# include STRINGIFY(HAVE_UNORDERED_SET)
+#ifdef MOAB_HAVE_UNORDERED_MAP
+# include STRINGIFY(MOAB_HAVE_UNORDERED_MAP)
+# include STRINGIFY(MOAB_HAVE_UNORDERED_SET)
 #else
 # include <map>
 # include <set>
@@ -84,7 +84,6 @@ public:
 private:
   
   Interface& mb;
-  unsigned myRank;
 
   /**\brief per-set tag data */
   struct SharedSetTagData 
@@ -105,19 +104,19 @@ private:
 
 
     /** Map type for lookup of ProcHandleMapType instance by rank */
-#ifdef HAVE_UNORDERED_MAP
+#ifdef MOAB_HAVE_UNORDERED_MAP
   struct hash_vect {
       // Copied (more or less) from Boost
     template <typename T> static void hash_combine( size_t& seed, T val )
-      { seed ^= UNORDERED_MAP_NS::hash<T>().operator()(val) + 0x9e3779b9 + (seed << 6) + (seed >> 2); }
+      { seed ^= MOAB_UNORDERED_MAP_NS::hash<T>().operator()(val) + 0x9e3779b9 + (seed << 6) + (seed >> 2); }
     template <typename IT> static size_t hash_range( IT it, IT last )
       { size_t seed = 0; for (; it != last; ++it) hash_combine( seed, *it ); return seed; }
     size_t operator()(const std::vector<unsigned>& v) const
       { return hash_range( v.begin(), v.end() ); }
   };
 
-  typedef UNORDERED_MAP_NS::unordered_map<unsigned,ProcHandleMapType> RHMap;
-  typedef UNORDERED_MAP_NS::unordered_set<std::vector<unsigned>,hash_vect> RProcMap;
+  typedef MOAB_UNORDERED_MAP_NS::unordered_map<unsigned,ProcHandleMapType> RHMap;
+  typedef MOAB_UNORDERED_MAP_NS::unordered_set<std::vector<unsigned>,hash_vect> RProcMap;
 #else
   struct less_vect {
     bool operator()( const std::vector<unsigned>& a, const std::vector<unsigned>& b ) const

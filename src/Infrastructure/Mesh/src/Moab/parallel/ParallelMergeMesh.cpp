@@ -1,14 +1,14 @@
 #include "moab/ParallelMergeMesh.hpp"
 #include "moab/Core.hpp"
 #include "moab/CartVect.hpp"
-#include "moab/AdaptiveKDTree.hpp"
+#include "moab/BoundBox.hpp"
 #include "moab/Skinner.hpp"
 #include "moab/MergeMesh.hpp"
 #include "moab/CN.hpp"
 #include <float.h>
 #include <algorithm>
 
-#ifdef USE_MPI
+#ifdef MOAB_HAVE_MPI
 #include "moab_mpi.h"
 #endif
 
@@ -27,25 +27,23 @@ namespace moab{
   
   //Have a wrapper function on the actual merge to avoid memory leaks
   //Merges elements within a proximity of epsilon
-  ErrorCode ParallelMergeMesh::merge() 
+  ErrorCode ParallelMergeMesh::merge(EntityHandle levelset, bool skip_local_merge)
   {
-    ErrorCode rval = PerformMerge();
+    ErrorCode rval = PerformMerge(levelset, skip_local_merge);MB_CHK_ERR(rval);
     CleanUp();
     return rval;
   }
 
   //Perform the merge
-  ErrorCode ParallelMergeMesh::PerformMerge()
+  ErrorCode ParallelMergeMesh::PerformMerge(EntityHandle levelset, bool skip_local_merge)
   {
     //Get the mesh dimension
     int dim;
-    ErrorCode rval = myMB->get_dimension(dim);
-    if(rval != MB_SUCCESS){
-      return rval;
-    }
+    ErrorCode rval = myMB->get_dimension(dim);MB_CHK_ERR(rval);
+
     
     //Get the local skin elements
-    rval = PopulateMySkinEnts(dim);
+    rval = PopulateMySkinEnts(levelset,dim, skip_local_merge);
     //If there is only 1 proc, we can return now
     if(rval != MB_SUCCESS || myPcomm->size() == 1){
       return rval;
@@ -53,18 +51,12 @@ namespace moab{
 
     //Determine the global bounding box
     double gbox[6];
-    rval = GetGlobalBox(gbox);
-    if(rval != MB_SUCCESS){
-      return rval;
-    }
+    rval = GetGlobalBox(gbox);MB_CHK_ERR(rval);
 
     /* Assemble The Destination Tuples */
     //Get a list of tuples which contain (toProc, handle, x,y,z)
     myTup.initialize(1,0,1,3,mySkinEnts[0].size());
-    rval = PopulateMyTup(gbox);
-    if(rval != MB_SUCCESS){
-      return rval;
-    }    
+    rval = PopulateMyTup(gbox);MB_CHK_ERR(rval);
 
     /* Gather-Scatter Tuple
        -tup comes out as (remoteProc,handle,x,y,z) */
@@ -74,17 +66,14 @@ namespace moab{
     myCD.gs_transfer(1, myTup, 0);
 
     /* Sort By X,Y,Z
-       -Utilizes a custom quick sort incoroporating eplison*/
+       -Utilizes a custom quick sort incorporating epsilon*/
     SortTuplesByReal(myTup,myEps);
 
-    //Initilize another tuple list for matches
+    //Initialize another tuple list for matches
     myMatches.initialize(2,0,2,0,mySkinEnts[0].size());
 
     //ID the matching tuples
-    rval = PopulateMyMatches();
-    if(rval != MB_SUCCESS){
-      return rval;
-    }
+    rval = PopulateMyMatches();MB_CHK_ERR(rval);
 
     //We can free up the tuple myTup now
     myTup.reset();
@@ -99,7 +88,7 @@ namespace moab{
     SortMyMatches();
 
     //Tag the shared elements
-    rval = TagSharedElements(dim);
+    rval = TagSharedElements(dim);MB_CHK_ERR(rval);
 
     //Free up the matches tuples
     myMatches.reset();
@@ -107,40 +96,40 @@ namespace moab{
   }
 
   //Sets mySkinEnts with all of the skin entities on the processor
-  ErrorCode ParallelMergeMesh::PopulateMySkinEnts(int dim)
+  ErrorCode ParallelMergeMesh::PopulateMySkinEnts(const EntityHandle meshset, int dim, bool skip_local_merge)
   {
     /*Merge Mesh Locally*/
     //Get all dim dimensional entities
     Range ents;
-    ErrorCode rval = myMB->get_entities_by_dimension(0,dim,ents);
-    if(rval != MB_SUCCESS){
-      return rval;
+    ErrorCode rval = myMB->get_entities_by_dimension(meshset,dim,ents);MB_CHK_ERR(rval);
+
+    if (ents.empty() && dim==3)
+    {
+      dim--;
+      rval =  myMB->get_entities_by_dimension(meshset,dim,ents);MB_CHK_ERR(rval);// maybe dimension 2
     }
 
     //Merge Mesh Locally
-    MergeMesh merger(myMB, false);
-    merger.merge_entities(ents,myEps);
-    //We can return if there is only 1 proc
-    if(rval != MB_SUCCESS || myPcomm->size() == 1){
-      return rval;
-    }
+    if (!skip_local_merge)
+      {
+        MergeMesh merger(myMB, false);
+        merger.merge_entities(ents,myEps);
+        //We can return if there is only 1 proc
+        if(rval != MB_SUCCESS || myPcomm->size() == 1){
+            return rval;
+          }
 
-    //Rebuild the ents range
-    ents.clear();
-    rval = myMB->get_entities_by_dimension(0,dim,ents);
-    if(rval != MB_SUCCESS){
-      return rval;
-    }
+        //Rebuild the ents range
+        ents.clear();
+        rval = myMB->get_entities_by_dimension(meshset,dim,ents);MB_CHK_ERR(rval);
+      }
 
     /*Get Skin
       -Get Range of all dimensional entities
       -skinEnts[i] is the skin entities of dimension i*/  
     Skinner skinner(myMB);
     for(int skin_dim = dim; skin_dim >= 0; skin_dim--){
-      rval = skinner.find_skin(ents,skin_dim,mySkinEnts[skin_dim]);
-      if(rval != MB_SUCCESS){
-	return rval;
-      }
+      rval = skinner.find_skin(meshset,ents,skin_dim,mySkinEnts[skin_dim]);MB_CHK_ERR(rval);
     }
     return MB_SUCCESS;
   }
@@ -151,33 +140,16 @@ namespace moab{
     ErrorCode rval;
 
     /*Get Bounding Box*/
-    double box[6];
+    BoundBox box;
     if(mySkinEnts[0].size() != 0){
-      AdaptiveKDTree kd(myMB);
-      rval = kd.bounding_box(mySkinEnts[0],box, box+3);
-      if(rval != MB_SUCCESS){
-	return rval;
-      }
-    }
-    //If there are no entities...
-    else{
-      for(int i=0;i<6;i++){
-	if(i < 3){
-	  box[i] = DBL_MAX;
-	}
-	else{
-	  box[i] = -DBL_MAX;
-	}
-      }
+      rval = box.update(*myMB, mySkinEnts[0]);MB_CHK_ERR(rval);
     }
 
     //Invert the max
-    for(int i=3; i<6;i++){
-      box[i] *= -1;
-    }
+    box.bMax *= -1;
 
     /*Communicate to all processors*/
-    MPI_Allreduce(box, gbox, 6, MPI_DOUBLE, MPI_MIN, MPI_COMM_WORLD);
+    MPI_Allreduce(&box, gbox, 6, MPI_DOUBLE, MPI_MIN, MPI_COMM_WORLD);
 
     /*Assemble Global Bounding Box*/
     //Flip the max back
@@ -193,10 +165,7 @@ namespace moab{
     /*Figure out how do partition the global box*/
     double lengths[3];
     int parts[3];
-    ErrorCode rval = PartitionGlobalBox(gbox, lengths, parts);
-    if(rval != MB_SUCCESS){
-      return rval;
-    }
+    ErrorCode rval = PartitionGlobalBox(gbox, lengths, parts);MB_CHK_ERR(rval);
 
     /* Get Skin Coordinates, Vertices */
     double *x = new double[mySkinEnts[0].size()]; 
@@ -213,12 +182,12 @@ namespace moab{
     std::vector<int> toProcs;
     int xPart, yPart, zPart, xEps, yEps, zEps, baseProc;
     unsigned long long tup_i=0, tup_ul=0, tup_r=0, count=0;
-    //These are boolean to determine if the vertice is on close enought to a given border
+    //These are boolean to determine if the vertex is on close enough to a given border
     bool xDup, yDup, zDup;
     bool canWrite = myTup.get_writeEnabled();
     if(!canWrite) myTup.enableWriteAccess();
-    //Go through each vertice
-    for(Range::iterator it = mySkinEnts[0].begin(); it != mySkinEnts[0].end(); it++){
+    //Go through each vertex
+    for(Range::iterator it = mySkinEnts[0].begin(); it != mySkinEnts[0].end(); ++it){
       xDup = false; yDup = false; zDup = false;
       //Figure out which x,y,z partition the element is in.
       xPart = static_cast<int>(floor((x[count]-gbox[0])/lengths[0]));
@@ -235,7 +204,7 @@ namespace moab{
       yEps = static_cast<int>(floor((y[count]-gbox[1]+myEps)/lengths[1]));
       zEps = static_cast<int>(floor((z[count]-gbox[2]+myEps)/lengths[2]));
 
-      //Figure out if the vertice needs to be sent to multiple procs
+      //Figure out if the vertex needs to be sent to multiple procs
       xDup = (xPart != xEps && xEps < parts[0]);
       yDup = (yPart != yEps && yEps < parts[1]);
       zDup = (zPart != zEps && zEps < parts[2]);
@@ -280,7 +249,7 @@ namespace moab{
       //Add each proc as a tuple
       for(std::vector<int>::iterator proc = toProcs.begin();
 	  proc != toProcs.end();
-	  proc++){
+	  ++proc){
 	myTup.vi_wr[tup_i++] = *proc;
 	myTup.vul_wr[tup_ul++] = *it;
 	myTup.vr_wr[tup_r++] = x[count];
@@ -291,6 +260,9 @@ namespace moab{
       count++;
       toProcs.clear();
     }
+    delete [] x;
+    delete [] y;
+    delete [] z;
     if(!canWrite) myTup.disableWriteAccess();
     return MB_SUCCESS;
   }
@@ -409,7 +381,7 @@ namespace moab{
 	}
       }
     }
-    //If we havent reached the goal ratio yet, check out factor = numProcs
+    //If we haven't reached the goal ratio yet, check out factor = numProcs
     if(ratio < goalRatio){
       oldRatio = ratio;
       oldFactor = factor;
@@ -523,7 +495,7 @@ namespace moab{
     ErrorCode rval;
 
     // get the entities in the partition sets
-    for (Range::iterator rit = myPcomm->partitionSets.begin(); rit != myPcomm->partitionSets.end(); rit++) {
+    for (Range::iterator rit = myPcomm->partitionSets.begin(); rit != myPcomm->partitionSets.end(); ++rit) {
       Range tmp_ents;
       rval = myMB->get_entities_by_handle(*rit, tmp_ents, true);
       if (MB_SUCCESS != rval){
@@ -539,7 +511,7 @@ namespace moab{
     }
     
 
-    //This vector doesnt appear to be used but its in resolve_shared_ents
+    //This vector doesn't appear to be used but its in resolve_shared_ents
     int maxp = -1;
     std::vector<int> sharing_procs(MAX_SHARING_PROCS);
     std::fill(sharing_procs.begin(), sharing_procs.end(), maxp);
@@ -559,7 +531,7 @@ namespace moab{
     }
     
     // get entities shared by 1 or n procs
-    rval = myPcomm->tag_shared_ents(dim,dim-1, &mySkinEnts[0],proc_nranges);
+    rval = myPcomm->get_proc_nvecs(dim,dim-1, &mySkinEnts[0],proc_nranges);
     if(rval != MB_SUCCESS){
       return rval;
     }
@@ -567,7 +539,7 @@ namespace moab{
     // create the sets for each interface; store them as tags on
     // the interface instance
     Range iface_sets;
-    rval = myPcomm->create_interface_sets(proc_nranges, dim, dim-1);
+    rval = myPcomm->create_interface_sets(proc_nranges);
     if(rval != MB_SUCCESS){
       return rval;
     }
@@ -645,7 +617,7 @@ namespace moab{
     a_val = a*mul;
     b_val = b*mul;
     for(unsigned long i=0; i< mul;i++){
-      ulong t =tup.vul_rd[a_val];
+      Ulong t =tup.vul_rd[a_val];
       tup.vul_wr[a_val] = tup.vul_rd[b_val];
       tup.vul_wr[b_val] = t; 
       a_val++;

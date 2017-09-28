@@ -3,7 +3,7 @@
  * storing and accessing finite element mesh data.
  * 
  * Copyright 2004 Sandia Corporation.  Under the terms of Contract
- * DE-AC04-94AL85000 with Sandia Coroporation, the U.S. Government
+ * DE-AC04-94AL85000 with Sandia Corporation, the U.S. Government
  * retains certain rights in this software.
  * 
  * This library is free software; you can redistribute it and/or
@@ -51,7 +51,7 @@ WriterIface* WriteAns::factory( Interface* iface )
   { return new WriteAns( iface ); }
 
 WriteAns::WriteAns(Interface *impl) 
-    : mbImpl(impl), mCurrentMeshHandle(0)
+    : mbImpl(impl), mCurrentMeshHandle(0), mGlobalIdTag(0), mMatSetIdTag(0)
 {
   assert(impl != NULL);
 
@@ -156,7 +156,7 @@ ErrorCode WriteAns::write_file(const char *file_name,
 
   // write the nodes 
   double coord[3];
-  for(Range::iterator it = node_range.begin(); it != node_range.end(); it++)
+  for(Range::iterator it = node_range.begin(); it != node_range.end(); ++it)
     {
       EntityHandle node_handle = *it;
      
@@ -182,7 +182,7 @@ ErrorCode WriteAns::write_file(const char *file_name,
   result = mbImpl->get_entities_by_type_and_tag(0,MBENTITYSET,&mDirichletSetTag,NULL,1,node_mesh_sets);
   if(result !=MB_SUCCESS)return result;
 
-  for(Range::iterator ns_it = node_mesh_sets.begin(); ns_it!=node_mesh_sets.end();ns_it++)
+  for(Range::iterator ns_it = node_mesh_sets.begin(); ns_it!=node_mesh_sets.end(); ++ns_it)
     {
       result = mbImpl->tag_get_data(mDirichletSetTag, &(*ns_it),1,&ns_id);
       if(result !=MB_SUCCESS)return result;
@@ -190,7 +190,7 @@ ErrorCode WriteAns::write_file(const char *file_name,
       result = mbImpl->get_entities_by_handle(*ns_it,node_vector, true);
       if(result !=MB_SUCCESS)return result;
       //for every nodeset found, cycle through nodes in set:
-      for(std::vector<EntityHandle>::iterator node_it = node_vector.begin(); node_it!=node_vector.end();node_it++)
+      for(std::vector<EntityHandle>::iterator node_it = node_vector.begin(); node_it!=node_vector.end(); ++node_it)
 	{
 	  int ns_node_id = mbImpl->id_from_handle(*node_it);
 	  if(node_it==node_vector.begin())
@@ -222,7 +222,7 @@ ErrorCode WriteAns::write_file(const char *file_name,
   Range tet_range;
   result = mbImpl->get_entities_by_type(output_set, MBTET, tet_range, true);
   if(result !=MB_SUCCESS) return result;
-  for(Range::iterator elem_it=tet_range.begin();elem_it!=tet_range.end();elem_it++)
+  for(Range::iterator elem_it=tet_range.begin();elem_it!=tet_range.end();++elem_it)
     {
       EntityHandle elem_handle = *elem_it;
       int elem_id = mbImpl->id_from_handle(elem_handle);
@@ -270,7 +270,7 @@ ErrorCode WriteAns::write_file(const char *file_name,
   Range hex_range;
   result = mbImpl->get_entities_by_type(output_set, MBHEX, hex_range, true);
   if(result !=MB_SUCCESS) return result;
-  for(Range::iterator elem_it=hex_range.begin();elem_it!=hex_range.end();elem_it++)
+  for(Range::iterator elem_it=hex_range.begin();elem_it!=hex_range.end();++elem_it)
     {
       EntityHandle elem_handle = *elem_it;
       int elem_id = mbImpl->id_from_handle(elem_handle);
@@ -324,7 +324,7 @@ ErrorCode WriteAns::write_file(const char *file_name,
   Range prism_range;
   result = mbImpl->get_entities_by_type(output_set, MBPRISM, prism_range, true);
   if(result !=MB_SUCCESS) return result;
-  for(Range::iterator elem_it=prism_range.begin();elem_it!=prism_range.end();elem_it++)
+  for(Range::iterator elem_it=prism_range.begin();elem_it!=prism_range.end();++elem_it)
     {
       EntityHandle elem_handle = *elem_it;
       int elem_id = mbImpl->id_from_handle(elem_handle);
@@ -369,7 +369,7 @@ ErrorCode WriteAns::write_file(const char *file_name,
   result = mbImpl->get_entities_by_type_and_tag(0,MBENTITYSET,&mNeumannSetTag,NULL,1,side_mesh_sets);
   if(result !=MB_SUCCESS)return result;
   //cycle through all sets found
-  for(Range::iterator ss_it = side_mesh_sets.begin(); ss_it!=side_mesh_sets.end();ss_it++)
+  for(Range::iterator ss_it = side_mesh_sets.begin(); ss_it!=side_mesh_sets.end(); ++ss_it)
     {
       result = mbImpl->tag_get_data(mNeumannSetTag, &(*ss_it),1,&ss_id);
       if(result !=MB_SUCCESS)return result;
@@ -378,7 +378,7 @@ ErrorCode WriteAns::write_file(const char *file_name,
       if(result !=MB_SUCCESS)return result;
       
       //cycle through elements in current side set
-      for(std::vector<EntityHandle>::iterator elem_it = elem_vector.begin(); elem_it!=elem_vector.end();elem_it++)
+      for(std::vector<EntityHandle>::iterator elem_it = elem_vector.begin(); elem_it!=elem_vector.end();++elem_it)
 	{
 	  EntityHandle elem_handle = *elem_it;
 	  	  
@@ -411,7 +411,7 @@ ErrorCode WriteAns::write_file(const char *file_name,
   result = mbImpl->get_entities_by_type_and_tag(0, MBENTITYSET, &mMaterialSetTag, NULL, 1, matset);
   if(result !=MB_SUCCESS)return result;
   //cycle through all elem blocks
-  for(Range::iterator mat_it = matset.begin(); mat_it!=matset.end();mat_it++)
+  for(Range::iterator mat_it = matset.begin(); mat_it!=matset.end(); ++mat_it)
     {
       EntityHandle matset_handle = *mat_it;
       result = mbImpl->tag_get_data(mMaterialSetTag,&matset_handle, 1,&mat_id);
@@ -420,7 +420,7 @@ ErrorCode WriteAns::write_file(const char *file_name,
       result = mbImpl->get_entities_by_handle(*mat_it,mat_vector, true);
       if(result !=MB_SUCCESS)return result;
       //cycle through elements in current mat set
-      for(std::vector<EntityHandle>::iterator elem_it = mat_vector.begin(); elem_it!=mat_vector.end();elem_it++)
+      for(std::vector<EntityHandle>::iterator elem_it = mat_vector.begin(); elem_it!=mat_vector.end(); ++elem_it)
 	{
 	  EntityHandle elem_handle = *elem_it;
 	  int elem_id = mbImpl->id_from_handle(elem_handle);

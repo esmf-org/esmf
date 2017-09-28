@@ -83,6 +83,7 @@ void FTN_X(f_esmf_gridcreatecubedsphere)(ESMCI::Grid **grid,
     int *decompFlagPTile, int *len21, int *len22, int *dfpresent,
     int *deLabelList, int *len3, int *llpresent,
     //ESMC_DELayout *delayout,
+    int *staggerLocList, int *len4,
     const char *name,
     int *rc,
     ESMCI_FortranStrLenArg len_name);
@@ -367,6 +368,7 @@ int setDefaultsLUA(int dimCount,
     ESMC_InterArrayInt *decompFlagPTile,
     ESMC_InterArrayInt *deLabelList,
     //ESMC_DELayout *delayout,
+    ESMC_InterArrayInt *staggerLocList,
     const char *name,
     int *rc) {
 //
@@ -381,8 +383,8 @@ int setDefaultsLUA(int dimCount,
     int localrc = ESMC_RC_NOT_IMPL;
     if(rc!=NULL) *rc=ESMC_RC_NOT_IMPL;
     int rdpresent = 0, dfpresent = 0, llpresent = 0;
-    int *rdarray=NULL, *dfarray=NULL, *llarray=NULL;
-    int rdlen1, rdlen2, dflen1, dflen2, lllen, nlen;
+    int *rdarray=NULL, *dfarray=NULL, *llarray=NULL, *ssarray=NULL;
+    int rdlen1, rdlen2, dflen1, dflen2, lllen, nlen, sslen;
 
     ESMCI::InterArray<int> *rd = (ESMCI::InterArray<int> *)regDecompPTile;
     if (present(rd)) {
@@ -465,6 +467,30 @@ int setDefaultsLUA(int dimCount,
       lllen=0;
     }
 
+    ESMCI::InterArray<int> *ss = (ESMCI::InterArray<int> *)staggerLocList;
+    if (present(ss)) {
+      if(ss->dimCount != 1){
+         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
+           "- staggerLocList array must be of rank 1", ESMC_CONTEXT, rc);
+         return ESMC_NULL_POINTER;
+      }
+      ssarray=ss->array;
+      sslen=ss->extent[0];
+
+      /*// this is a test to see if the data is passed in correctly
+      printf("\nstaggerLocList:\n  array = [");
+      for (int i=0; i<ss->extent[0]; ++i)
+        printf("%d,", ss->array[i]);
+      printf("]\n  extent = [");
+      for (int i=0; i<7; ++i)
+          printf("%d,", ss->extent[i]);
+      printf("]\n  dimCount = %d\n", ss->dimCount);*/
+
+    } else {
+      ssarray=NULL;
+      sslen=0;
+    }
+
     if (name) nlen = strlen(name);
     else nlen = 0;
 
@@ -474,6 +500,7 @@ int setDefaultsLUA(int dimCount,
         rdarray, &rdlen1, &rdlen2, &rdpresent,
         dfarray, &dflen1, &dflen2, &dfpresent,
         llarray, &lllen, &llpresent,
+        ssarray, &sslen,
         name,
         &localrc, nlen);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
@@ -5363,53 +5390,13 @@ int Grid::getStaggerDistgrid(
         InterArray<int> *staggerEdgeUWidthIntInt =
           new InterArray<int>(staggerEdgeUWidthIntIntArray,2,extent);
 
-#if 0
-        // A problem with non-center stagger multi-tile is that the padding needs to be different for 
-        // each tile (based on the connections). The distgrid create with extra padding should handle
-        // this, but it doesn't appear to. This is the start of a hack to fix this. 
-        // (but it would be really better to handle it in Distgrid... 
- 
-        /// Oh...DARN... I don't think that this will work, because all the DEs may not
-        /// be on this processor...hmmmm
 
-         // Get the DELayout
-        DELayout *delayout=distgrid->getDELayout();
-        
-        // Get the number of local DEs
-        const int localDECount=delayout->getLocalDeCount();
-
-        // Get map between local and global DEs
-        const int *localDEList=delayout->getLocalDeToDeMap();
-   
-        // Get map between DEs and tiles
-        const int *DETileList = distgrid->getTileListPDe();
-
-        // Loop through tiles
-        for (int t=0; t<tileCount; t++) {
-          
-          //// For each tile loop through DEs to see if the are in this tile, and if they are then see if they are on
-          //// the edge, if there are none on edge, then it doesnt't have a connection along that dimension, so add padding
-          for (lDE=0; lDE<localDECount; lDE++) {
-
-            ////// Get tile of lDE
-            int lDE_tile=DETileList[localDEList[lDE]];
-
-            ///// If it's not this tile then skip
-            if (lDE_tile != t) continue;
-
-            //// See if it's a boundary
-
-
-          }
-        }
-#endif
-         
-        // Map offsets into distgrid space
+        // Map offsets into distgrid space by tile and dimension
         int k=0;
-        for (int i=0; i<dimCount; i++) {
-          for (int j=0; j<tileCount; j++) {
-            staggerEdgeLWidthIntIntArray[k]=staggerEdgeLWidthList[staggerloc][distgridToGridMap[i]];
-            staggerEdgeUWidthIntIntArray[k]=staggerEdgeUWidthList[staggerloc][distgridToGridMap[i]];
+        for (int t=0; t<tileCount; t++) {
+          for (int d=0; d<dimCount; d++) {
+            staggerEdgeLWidthIntIntArray[k]=staggerEdgeLWidthList[staggerloc][distgridToGridMap[d]];
+            staggerEdgeUWidthIntIntArray[k]=staggerEdgeUWidthList[staggerloc][distgridToGridMap[d]];
 
             //printf("%d sELW=%d SEUW=%d\n",k,staggerEdgeLWidthIntIntArray[k],staggerEdgeUWidthIntIntArray[k]);
             k++;

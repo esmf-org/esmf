@@ -248,6 +248,7 @@
                                           decompFlagPTile, len21, len22, dfpresent, &
                                           deLabelList, len3, llpresent, &
                                           !delayout, &
+                                          staggerLocList, len4, &
                                           name, &
                                           rc)
 
@@ -255,23 +256,26 @@
     use ESMF_LogErrMod
     use ESMF_GridMod
     use ESMF_DistGridMod
+    use ESMF_StaggerLocMod
 
     implicit none
 
     ! arguments
     type(ESMF_Pointer)             :: gridp
-    integer, intent(in)            :: len11, len12, len21, len22, len3
+    integer, intent(in)            :: len11, len12, len21, len22, len3, len4
     integer                        :: tilesize
     integer                        :: regDecompPTile(len11, len12)
     integer                        :: rdpresent, dfpresent, llpresent
     integer                        :: decompFlagPTile(len21, len22)
     integer                        :: deLabelList(len3)
     !type(ESMF_DELayout)            :: delayout
+    integer                        :: staggerLocList(len4)
     character(len=*)               :: name
     integer, intent(out)           :: rc              
   
     type(ESMF_Grid) :: grid
     type(ESMF_Decomp_Flag) :: decompFlagPTile_local(len21, len22)
+    type(ESMF_StaggerLoc) :: staggerLocList_local(len4)
     integer :: i, j
 
     ! initialize return code; assume routine not implemented
@@ -294,24 +298,23 @@
       enddo
     endif
 
+    do i = 1, len4
+        if (staggerLocList(i) == 0) then
+            staggerLocList_local(i) = ESMF_STAGGERLOC_CENTER
+        else if (staggerLocList(i) == 3) then
+            staggerLocList_local(i) = ESMF_STAGGERLOC_CORNER
+        endif
+    enddo
 
-    if (rdpresent == 1) then
-        grid = ESMF_GridCreateCubedSphere(tilesize, &
-                                          regDecompPTile=regDecompPTile, &
-                                          !decompFlagPTile=decompFlagPTile_local, &
-                                          !deLabelList=deLabelList, &
-                                          !delayout=delayout, &
-                                          name=name, &
-                                          rc=rc)
-    else
-        grid = ESMF_GridCreateCubedSphere(tilesize, &
-                                          !regDecompPTile=regDecompPTile, &
-                                          !decompFlagPTile=decompFlagPTile_local, &
-                                          !deLabelList=deLabelList, &
-                                          !delayout=delayout, &
-                                          name=name, &
-                                          rc=rc)
-    endif
+
+    grid = ESMF_GridCreateCubedSphere(tilesize, &
+                                      regDecompPTile=regDecompPTile, &
+                                      !decompFlagPTile=decompFlagPTile_local, &
+                                      !deLabelList=deLabelList, &
+                                      !delayout=delayout, &
+                                      staggerLocList=staggerLocList_local, &
+                                      name=name, &
+                                      rc=rc)
 
     if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return

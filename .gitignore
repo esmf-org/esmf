@@ -104,3 +104,15 @@ src/doc/ESMF_usrdoc.tex.ORIG
 src/doc/ESMF_usrdoc.toc
 src/doc/.latex2html-init
 
+
+# special test files that cannot be cleaned after build #
+############################################################
+src/system_tests/ESMF_ArrayRedistMPMD/ESMF_ArrayRedistSTestA.o
+src/system_tests/ESMF_ArrayRedistMPMD/ESMF_ArrayRedistSTestB.o
+src/system_tests/ESMF_ArrayRedistMPMD/user_coupler.mod
+src/system_tests/ESMF_ArrayRedistMPMD/user_coupler.o
+src/system_tests/ESMF_ArrayRedistMPMD/user_model1.mod
+src/system_tests/ESMF_ArrayRedistMPMD/user_model1.o
+src/system_tests/ESMF_ArrayRedistMPMD/user_model2.mod
+src/system_tests/ESMF_ArrayRedistMPMD/user_model2.o
+

@@ -825,6 +825,99 @@ int ESMC_FieldRegridStore(
 
 //-----------------------------------------------------------------------------
 //BOP
+// !IROUTINE: ESMC_FieldRegridStoreFile - Precompute a Field regridding operation and return a RouteHandle
+//
+// !INTERFACE:
+int ESMC_FieldRegridStoreFile(
+    ESMC_Field srcField,                           // in
+    ESMC_Field dstField,                           // in
+    const char *filename,                          // in
+    ESMC_InterArrayInt *srcMaskValues,              // in
+    ESMC_InterArrayInt *dstMaskValues,              // in
+    ESMC_RouteHandle *routehandle,                 // inout
+    enum ESMC_RegridMethod_Flag *regridmethod,     // in
+    enum ESMC_PoleMethod_Flag *polemethod,         // in
+    int *regridPoleNPnts,                          // in
+    enum ESMC_LineType_Flag *lineType,             // in
+    enum ESMC_NormType_Flag *normType,             // in
+    enum ESMC_UnmappedAction_Flag *unmappedaction, // in
+    ESMC_Logical *ignoreDegenerate,                        // in
+    ESMC_Field *srcFracField,                      // out
+    ESMC_Field *dstFracField);                     // out
+
+// !RETURN VALUE:
+//   Return code; equals ESMF_SUCCESS if there are no errors.
+//
+// !DESCRIPTION:
+//
+//   Creates a sparse matrix operation (stored in routehandle) that contains
+//   the calculations and communications necessary to interpolate from srcField
+//   to dstField. The routehandle can then be used in the call ESMC\_FieldRegrid()
+//   to interpolate between the Fields. The weights will be output to the file
+//   with name {\tt filename}.
+//
+//  The arguments are:
+//  \begin{description}
+//  \item[srcField]
+//    ESMC\_Field with source data.
+//  \item[dstField]
+//    ESMC\_Field with destination data.
+//  \item[filename]
+//    The output filename for the factorList and factorIndexList.
+//  \item[srcMaskValues]
+//    List of values that indicate a source point should be masked out.
+//    If not specified, no masking will occur.
+//  \item[dstMaskValues]
+//    List of values that indicate a destination point should be masked out.
+//    If not specified, no masking will occur.
+//  \item[routehandle]
+//    The handle that implements the regrid, to be used in {\tt ESMC\_FieldRegrid()}.
+//  \item[regridmethod]
+//    The type of interpolation. If not specified, defaults to {\tt ESMF\_REGRIDMETHOD\_BILINEAR}.
+//  \item [polemethod]
+//    Which type of artificial pole
+//    to construct on the source Grid for regridding.
+//    If not specified, defaults to {\tt ESMF\_POLEMETHOD\_ALLAVG} for non-conservative regrid methods,
+//    and {\tt ESMF\_POLEMETHOD\_NONE} for conservative methods.
+//    If not specified, defaults to {\tt ESMC\_POLEMETHOD\_ALLAVG}.
+//  \item [regridPoleNPnts]
+//    If {\tt polemethod} is {\tt ESMC\_POLEMETHOD\_NPNTAVG}.
+//    This parameter indicates how many points should be averaged
+//    over. Must be specified if {\tt polemethod} is
+//    {\tt ESMC\_POLEMETHOD\_NPNTAVG}.
+//  \item [{[lineType]}]
+//    This argument controls the path of the line which connects two points on a sphere surface. This in
+//    turn controls the path along which distances are calculated and the shape of the edges that make
+//    up a cell. Both of these quantities can influence how interpolation weights are calculated.
+//    As would be expected, this argument is only applicable when {\tt srcField} and {\tt dstField} are
+//    built on grids which lie on the surface of a sphere. Section~\ref{opt:lineType} shows a
+//    list of valid options for this argument. If not specified, the default depends on the
+//    regrid method. Section~\ref{opt:lineType} has the defaults by line type.
+//  \item[normType]
+//    This argument controls the type of normalization used when generating conservative weights.
+//    This option only applies to weights generated with {\tt regridmethod=ESMF\_REGRIDMETHOD\_CONSERVE}.
+//    If not specified normType defaults to {\tt ESMF\_NORMTYPE\_DSTAREA}.
+//  \item[unmappedaction]
+//    Specifies what should happen if there are destination points that can't
+//    be mapped to a source cell. Options are {\tt ESMF\_UNMAPPEDACTION\_ERROR} or
+//    {\tt ESMF\_UNMAPPEDACTION\_IGNORE}. If not specified, defaults to {\tt ESMF\_UNMAPPEDACTION\_ERROR}.
+//  \item [{[srcFracField]}]
+//    The fraction of each source cell participating in the regridding. Only
+//    valid when regridmethod is {\tt ESMC\_REGRIDMETHOD\_CONSERVE}.
+//    This Field needs to be created on the same location (e.g staggerloc)
+//    as the srcField.
+//  \item [{[dstFracField]}]
+//    The fraction of each destination cell participating in the regridding. Only
+//    valid when regridmethod is {\tt ESMF\_REGRIDMETHOD\_CONSERVE}.
+//    This Field needs to be created on the same location (e.g staggerloc)
+//    as the dstField.
+//  \end{description}
+//
+//EOP
+//-----------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
+//BOP
 // !IROUTINE: ESMC_FieldRegrid - Compute a regridding operation
 //
 // !INTERFACE:
@@ -892,93 +985,6 @@ int ESMC_FieldRegridStore(
 //
 //EOP
 //-----------------------------------------------------------------------------
-
-
-//-----------------------------------------------------------------------------
-//BOPI
-// !IROUTINE: ESMC_FieldRead - Read Array data into a Field
-//
-// !INTERFACE:
-  int ESMC_FieldWrite(ESMC_Field field,  // inout
-      const char *file,                  // in
-      const char *variableName,          // in
-      int overwrite,                     // in
-      ESMC_FileStatus_Flag status,       // in
-      int timeslice,                     // in
-      ESMC_IOFmt_Flag iofmt              // in
-  );
-//
-// !DESCRIPTION:
-//  Write Field data into a file.  For this API to be functional, the 
-//  environment variable {\tt ESMF\_PIO} should be set to "internal" when 
-//  the ESMF library is built.  Please see the section on 
-//  Data I/O,~\ref{io:dataio}.
-//
-//  Limitations:
-//  \begin{itemize}
-//    \item Only 1 DE per PET supported.
-//    \item Not supported in {\tt ESMF\_COMM=mpiuni} mode.
-//  \end{itemize}
-//
-//  The arguments are:
-//  \begin{description}
-//  \item [field]
-//    The {\tt ESMF\_Field} object that contains data to be written.
-//  \item[file]
-//    The name of the output file to which Field data is written.
-//  \item[{[variableName]}]
-//   Variable name in the output file; default is the "name" of field.
-//   Use this argument only in the I/O format (such as NetCDF) that
-//   supports variable name. If the I/O format does not support this
-//   (such as binary format), ESMF will return an error code.
-//  \item[{[overwrite]}]
-//   \begin{sloppypar}
-//     A logical flag, the default is .false., i.e., existing field data may
-//     {\em not} be overwritten. If .true., the overwrite behavior depends
-//     on the value of {\tt iofmt} as shown below:
-//   \begin{description}
-//   \item[{\tt iofmt} = {\tt ESMF\_IOFMT\_BIN}:]\ All data in the file will
-//     be overwritten with each field's data.
-//   \item[{\tt iofmt} = {\tt ESMF\_IOFMT\_NETCDF}:]\ Only the
-//     data corresponding to each field's name will be
-//     be overwritten. If the {\tt timeslice} option is given, only data for
-//     the given timeslice may be overwritten.
-//     Note that it is always an error to attempt to overwrite a NetCDF
-//     variable with data which has a different shape.
-//   \end{description}
-//   \end{sloppypar}
-//  \item[{[status]}]
-//   \begin{sloppypar}
-//   The file status. Please see Section~\ref{const:filestatusflag} for
-//   the list of options. If not present, defaults to
-//   {\tt ESMF\_FILESTATUS\_UNKNOWN}.
-//   \end{sloppypar}
-//  \item[{[timeslice]}]
-//   \begin{sloppypar}
-//   Some I/O formats (e.g. NetCDF) support the output of data in form of
-//   time slices. The {\tt timeslice} argument provides access to this
-//   capability. {\tt timeslice} must be positive. The behavior of this
-//   option may depend on the setting of the {\tt overwrite} flag:
-//   \begin{description}
-//   \item[{\tt overwrite = .false.}:]\ If the timeslice value is
-//   less than the maximum time already in the file, the write will fail.
-//   \item[{\tt overwrite = .true.}:]\ Any positive timeslice value is valid.
-//   \end{description}
-//   By default, i.e. by omitting the {\tt timeslice} argument, no
-//   provisions for time slicing are made in the output file,
-//   however, if the file already contains a time axis for the variable,
-//   a timeslice one greater than the maximum will be written.
-//   \end{sloppypar}
-//  \item[{[iofmt]}]
-//    \begin{sloppypar}
-//    The I/O format. Please see Section~\ref{opt:iofmtflag} for the list
-//    of options. If not present, defaults to {\tt ESMF\_IOFMT\_NETCDF}.
-//    \end{sloppypar}
-//  \item [{[rc]}]
-//    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-//  \end{description}
-//
-//EOPI
 
 #if defined (__cplusplus)
 } // extern "C"
