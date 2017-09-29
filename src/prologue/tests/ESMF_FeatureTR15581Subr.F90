@@ -24,18 +24,12 @@ module ESMF_FeatureTR15581Subr_mod
 
 contains
 
-  subroutine ESMF_FeatureAllocArg (n, a, indicies, tfs, strings, dts, rc)
+  subroutine ESMF_FeatureAllocArg (n, a, indicies, tfs, dts, rc)
     integer,                   intent(in)  :: n
-    ! F2003 and F95+TR15581 allocatable dummy arguments
+    ! F2003 and F95+TR15581 allocatable dummy arguments except for strings
     real,         allocatable, intent(out) :: a(:)
     integer,      allocatable, intent(out) :: indicies(:)
     logical,      allocatable, intent(out) :: tfs(:)
-#if defined (ALLOC_STRING_TEST)
-    character(*), allocatable, intent(out) :: strings(:)
-#else
-    ! TODO: Absoft doesn't support character(*) allocatable dummy args in v11.1.
-    character(*),              intent(out) :: strings(:)
-#endif
     type(ESMF_AllocDType), allocatable, intent(out) :: dts(:)
     integer,                   intent(out) :: rc
 
@@ -48,26 +42,76 @@ contains
       return
     end if
 
-#if defined (ALLOC_STRING_TEST)
-    allocate (strings(n), stat=memstat)
-    if (memstat /= 0) then
-      rc = ESMF_RC_MEM_ALLOCATE
-      return
-    end if
-#endif
-
     do, i=1, n
       a(i) = i
       indicies(i) = i
       tfs = mod (i, 1) == 1
-#if defined (ALLOC_STRING_TEST)
-      strings(i) = achar (mod (i, 127))
-#endif
+      ! TODO: test allocatable string components
     end do
 
     rc = ESMF_SUCCESS
 
   end subroutine ESMF_FeatureAllocArg
+
+#if !defined (ESMF_NO_F2003_ALLOC_STRING_LENS)
+  subroutine ESMF_FeatureAllocArgStr (n, str_dllen, str_pilen, str_dllensize, str_pilensize, rc)
+    integer,                   intent(in)  :: n
+    ! F2003 and F95+TR15581 allocatable string dummy arguments
+    character(:), allocatable, intent(out) :: str_dllen        ! Scalar w/deferred-length
+    character(*), allocatable, intent(out) :: str_pilen        ! Scalar w/passed-in length
+    character(:), allocatable, intent(out) :: str_dllensize(:) ! Array w/deferred-length
+    character(*), allocatable, intent(out) :: str_pilensize(:) ! Array w/passed-in length
+    integer,                   intent(out) :: rc
+
+    integer :: i, j
+    integer :: memstat
+
+    allocate (character(n)::str_dllen, stat=memstat)
+    if (memstat /= 0) then
+      rc = ESMF_RC_MEM_ALLOCATE
+      return
+    end if
+
+    do, i=1, n
+      str_dllen(i:i) = achar (mod (i, 127))
+    end do
+
+    allocate (str_pilen, stat=memstat)
+    if (memstat /= 0) then
+      rc = ESMF_RC_MEM_ALLOCATE
+      return
+    end if
+
+    do, i=1, len (str_pilen)
+      str_pilen(i:i) = achar (mod (i, 127))
+    end do
+
+    allocate (str_pilensize(n), stat=memstat)
+    if (memstat /= 0) then
+      rc = ESMF_RC_MEM_ALLOCATE
+      return
+    end if
+
+    do, i=1, n
+      str_pilensize(i) = achar (mod (i, 127))
+    end do
+
+    allocate (character(n)::str_dllensize(n), stat=memstat)
+    if (memstat /= 0) then
+      rc = ESMF_RC_MEM_ALLOCATE
+      return
+    end if
+
+    do, j=1, n
+      do, i=1, len (str_dllensize)
+        str_dllensize(j)(i:i) = achar (mod (i, 127))
+      end do
+    end do
+
+    rc = ESMF_SUCCESS
+
+  end subroutine ESMF_FeatureAllocArgStr
+#endif
 
   function ESMF_FeatureAllocFRet (n, rc) result (ret)
     integer, intent(in)  :: n

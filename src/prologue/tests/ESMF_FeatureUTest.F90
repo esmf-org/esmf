@@ -30,7 +30,9 @@
 
 #if !defined (ESMF_NO_F2003_ALLOC_STRING_LENS)
     character(:), allocatable :: alloc_string
+    character(7), allocatable :: alloc_string7
     character(:), allocatable :: alloc_string_array(:)
+    character(7), allocatable :: alloc_string7_array(:)
 #endif
 
     type(ESMF_Logical) :: tf_c
@@ -92,7 +94,7 @@
     ! NEX_UTest
     name = "Fortran allocatable arguments call test"
     failMsg = "Did not return ESMF_SUCCESS"
-    call ESMF_FeatureAllocArg (42, a, indicies, tfs, strings, dts, rc=rc)
+    call ESMF_FeatureAllocArg (42, a, indicies, tfs, dts, rc=rc)
     call ESMF_Test(rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
 
     !------------------------------------------------------------------------
@@ -102,13 +104,64 @@
     failMsg = "Incorrect allocated size"
     tf = size (a) == 42 .and. size (indicies) == 42 .and. size (tfs) == 42  &
         .and. size (dts) == 42
-#if defined (ALLOC_STRING_TEST)
-    tf = tf .and. size (strings) == 42
-#endif
     rc = merge (ESMF_SUCCESS, ESMF_RC_ARG_SIZE, tf)
     call ESMF_Test(rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
 
     deallocate (a, indicies, tfs, dts)
+
+
+    ! TODO: Tests are currently disabled due to lack of deferred-length allocatable
+    ! character string support on older compilers - e.g., pre-4.6 gfortran, and with
+    ! Absoft, g95, and Lahey.  Re-enable when ESMF support for these older compilers
+    ! is no longer required.
+    !------------------------------------------------------------------------
+    !------------------------------------------------------------------------
+    ! NEX_UTest
+    name = "Fortran allocatable string arguments call test"
+    failMsg = "Did not return ESMF_SUCCESS"
+#if !defined (ESMF_NO_F2003_ALLOC_STRING_LENS)
+    call ESMF_FeatureAllocArgStr (42,  &
+        str_dllen=alloc_string, str_pilen=alloc_string7,  &
+        str_dllensize=alloc_string_array, str_pilensize=alloc_string7_array,  &
+        rc=rc)
+#else
+    name = "Bypassed " // trim (name)
+    rc = ESMF_SUCCESS
+#endif
+    call ESMF_Test(rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
+
+    !------------------------------------------------------------------------
+    !------------------------------------------------------------------------
+    ! NEX_UTest
+    name = "Fortran allocatable string arguments size test"
+    failMsg = "Incorrect allocated string array size"
+#if !defined (ESMF_NO_F2003_ALLOC_STRING_LENS)
+    tf = size (alloc_string7_array) == 42 .and. size (alloc_string_array) == 42
+    rc = merge (ESMF_SUCCESS, ESMF_RC_ARG_SIZE, tf)
+#else
+    name = "Bypassed " // trim (name)
+    rc = ESMF_SUCCESS
+#endif
+    call ESMF_Test(rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
+
+    !------------------------------------------------------------------------
+    !------------------------------------------------------------------------
+    ! NEX_UTest
+    name = "Fortran allocatable string arguments len test"
+    failMsg = "Incorrect allocated string len"
+#if !defined (ESMF_NO_F2003_ALLOC_STRING_LENS)
+    tf = len (alloc_string) == 42 .and. len (alloc_string7) == 7  &
+        .and. len (alloc_string_array) == 42 .and. len (alloc_string7_array) == 7
+    rc = merge (ESMF_SUCCESS, ESMF_RC_ARG_SIZE, tf)
+#else
+    name = "Bypassed " // trim (name)
+    rc = ESMF_SUCCESS
+#endif
+    call ESMF_Test(rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
+
+#if !defined (ESMF_NO_F2003_ALLOC_STRING_LENS)
+    deallocate (alloc_string, alloc_string7, alloc_string_array, alloc_string7_array)
+#endif
 
     ! NOTE: Some compilers may require a special command line argument for
     ! the following tests to work.  This is needed to turn on the F2003
@@ -116,9 +169,9 @@
     ! than originally allocated.  For example PGI requires -Mallocatable=03
     ! and Intel requires -assume realloc_lhs.
 
-    ! TODO: Tests are currently disabled due to failures on older versions
-    ! (pre-4.6 or so) and with g95.  Re-enable when ESMF support for these
-    ! older compilers is no longer required.
+    ! TODO: Tests are currently disabled due to failures on older compilers
+    ! e.g., pre-4.6 gfortran, and with Absoft, g95, and Lahey.  Re-enable when ESMF
+    ! support for these older compilers is no longer required.
 
 #if 0
     !------------------------------------------------------------------------
@@ -165,18 +218,18 @@
     !------------------------------------------------------------------------
 
 !------------------------------------------------------------------------
-! F2003 allocatable length character string support.
+! F2003 allocatable deferred-length character string scalar support.
 
     !------------------------------------------------------------------------
     !------------------------------------------------------------------------
     ! EX_UTest
-    name = "Fortran allocatable length string scalar assignment test"
+    name = "Fortran allocatable deferred-length string scalar assignment test"
     failMsg = "Did not return correct length"
 #if !defined (ESMF_NO_F2003_ALLOC_STRING_LENS)
     alloc_string = '123456'
     rc = merge (ESMF_SUCCESS, ESMF_FAILURE, len (alloc_string) == 6)
 #else
-    name = "Bypassed " // name
+    name = "Bypassed " // trim (name)
     rc = ESMF_SUCCESS
 #endif
     call ESMF_Test(rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
@@ -184,13 +237,13 @@
 
     !------------------------------------------------------------------------
     ! EX_UTest
-    name = "Fortran allocatable length string scalar deallocate test"
+    name = "Fortran allocatable deferred-length string scalar deallocate test"
     failMsg = "Did not return success"
 #if !defined (ESMF_NO_F2003_ALLOC_STRING_LENS)
     deallocate (alloc_string, stat=memstat)
     rc = merge (ESMF_SUCCESS, ESMF_FAILURE, memstat == 0)
 #else
-    name = "Bypassed " // name
+    name = "Bypassed " // trim (name)
     rc = ESMF_SUCCESS
 #endif
     call ESMF_Test(rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
@@ -198,13 +251,13 @@
 
     !------------------------------------------------------------------------
     ! EX_UTest
-    name = "Fortran allocatable length string scalar allocate test"
+    name = "Fortran allocatable deferred-length string scalar allocate test"
     failMsg = "Did not return success"
 #if !defined (ESMF_NO_F2003_ALLOC_STRING_LENS)
     allocate (character(len=42)::alloc_string, stat=memstat)
     rc = merge (ESMF_SUCCESS, ESMF_FAILURE, memstat == 0)
 #else
-    name = "Bypassed " // name
+    name = "Bypassed " // trim (name)
     rc = ESMF_SUCCESS
 #endif
     call ESMF_Test(rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
@@ -212,26 +265,30 @@
 
     !------------------------------------------------------------------------
     ! EX_UTest
-    name = "Fortran allocatable length string scalar allocate length test"
+    name = "Fortran allocatable deferred-length string scalar allocate length test"
     failMsg = "Did not return success"
 #if !defined (ESMF_NO_F2003_ALLOC_STRING_LENS)
     rc = merge (ESMF_SUCCESS, ESMF_FAILURE, len (alloc_string) == 42)
 #else
-    name = "Bypassed " // name
+    name = "Bypassed " // trim (name)
     rc = ESMF_SUCCESS
 #endif
     call ESMF_Test(rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
+
+#if !defined (ESMF_NO_F2003_ALLOC_STRING_LENS)
+    deallocate (alloc_string)
+#endif
     !------------------------------------------------------------------------
 
     !------------------------------------------------------------------------
     ! EX_UTest
-    name = "Fortran allocatable length string array assignment test"
+    name = "Fortran allocatable deferred-length string array assignment test"
     failMsg = "Did not return correct length"
 #if !defined (ESMF_NO_F2003_ALLOC_STRING_LENS)
     alloc_string_array = (/ '123456', '789012', '345678', '901234', '567890' /)
     rc = merge (ESMF_SUCCESS, ESMF_FAILURE, len (alloc_string_array) == 6)
 #else
-    name = "Bypassed " // name
+    name = "Bypassed " // trim (name)
     rc = ESMF_SUCCESS
 #endif
     call ESMF_Test(rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
@@ -239,12 +296,12 @@
 
     !------------------------------------------------------------------------
     ! EX_UTest
-    name = "Fortran allocatable length string array size test"
+    name = "Fortran allocatable deferred-length string array size test"
     failMsg = "Did not return correct length"
 #if !defined (ESMF_NO_F2003_ALLOC_STRING_LENS)
     rc = merge (ESMF_SUCCESS, ESMF_FAILURE, size (alloc_string_array) == 5)
 #else
-    name = "Bypassed " // name
+    name = "Bypassed " // trim (name)
     rc = ESMF_SUCCESS
 #endif
     call ESMF_Test(rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
@@ -252,13 +309,13 @@
 
     !------------------------------------------------------------------------
     ! EX_UTest
-    name = "Fortran allocatable length string array deallocate test"
+    name = "Fortran allocatable deferred-length string array deallocate test"
     failMsg = "Did not return success"
 #if !defined (ESMF_NO_F2003_ALLOC_STRING_LENS)
     deallocate (alloc_string_array, stat=memstat)
     rc = merge (ESMF_SUCCESS, ESMF_FAILURE, memstat == 0)
 #else
-    name = "Bypassed " // name
+    name = "Bypassed " // trim (name)
     rc = ESMF_SUCCESS
 #endif
     call ESMF_Test(rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
@@ -266,13 +323,13 @@
 
     !------------------------------------------------------------------------
     ! EX_UTest
-    name = "Fortran allocatable length string array allocate test"
+    name = "Fortran allocatable deferred-length string array allocate test"
     failMsg = "Did not return success"
 #if !defined (ESMF_NO_F2003_ALLOC_STRING_LENS)
     allocate (character(len=42)::alloc_string_array(24), stat=memstat)
     rc = merge (ESMF_SUCCESS, ESMF_FAILURE, memstat == 0)
 #else
-    name = "Bypassed " // name
+    name = "Bypassed " // trim (name)
     rc = ESMF_SUCCESS
 #endif
     call ESMF_Test(rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
@@ -280,13 +337,13 @@
 
     !------------------------------------------------------------------------
     ! EX_UTest
-    name = "Fortran allocatable length string array allocate length test"
+    name = "Fortran allocatable deferred-length string array allocate length test"
     failMsg = "Did not return success"
 #if !defined (ESMF_NO_F2003_ALLOC_STRING_LENS)
     rc = merge (ESMF_SUCCESS, ESMF_FAILURE, len (alloc_string_array) == 42)
     write (failMsg,*) "Expected string length of 42, returned", len (alloc_string_array)
 #else
-    name = "Bypassed " // name
+    name = "Bypassed " // trim (name)
     rc = ESMF_SUCCESS
 #endif
     call ESMF_Test(rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
@@ -294,16 +351,20 @@
 
     !------------------------------------------------------------------------
     ! EX_UTest
-    name = "Fortran allocatable length string array allocate size test"
+    name = "Fortran allocatable deferred-length string array allocate size test"
     failMsg = "Did not return success"
 #if !defined (ESMF_NO_F2003_ALLOC_STRING_LENS)
     rc = merge (ESMF_SUCCESS, ESMF_FAILURE, size (alloc_string_array) == 24)
     write (failMsg,*) "Expected string array size of 24, returned", size (alloc_string_array)
 #else
-    name = "Bypassed " // name
+    name = "Bypassed " // trim (name)
     rc = ESMF_SUCCESS
 #endif
     call ESMF_Test(rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
+
+#if !defined (ESMF_NO_F2003_ALLOC_STRING_LENS)
+    deallocate (alloc_string_array)
+#endif
     !------------------------------------------------------------------------
 
     !------------------------------------------------------------------------
