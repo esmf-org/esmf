@@ -11,6 +11,9 @@
 !==============================================================================
 
 module ESMF_FeatureTR15581Subr_mod
+    
+#include "ESMF.h"
+
   use ESMF
   implicit none
 
@@ -46,7 +49,15 @@ contains
       a(i) = i
       indicies(i) = i
       tfs = mod (i, 1) == 1
-      ! TODO: test allocatable string components
+      allocate (dts(i)%a(10), dts(i)%indicies(20), dts(i)%tfs(20), dts(i)%chars(32), stat=memstat)
+      if (memstat /= 0) then
+        rc = ESMF_RC_MEM_ALLOCATE
+        return
+      end if
+      dts(i)%a = 0.0
+      dts(i)%indicies = 0
+      dts(i)%tfs = .false.
+      dts(i)%chars = ' '
     end do
 
     rc = ESMF_SUCCESS
