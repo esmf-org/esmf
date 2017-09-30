@@ -40,6 +40,9 @@
 #include <vector>
 #include <string>
 #include <cstdlib>
+#if (defined ESMF_OS_Linux || defined ESMF_OS_Unicos)
+#include <malloc.h>
+#endif
 #include "ESMF_Pthread.h"
 #include "ESMCI_IO_Handler.h"
 
@@ -1724,6 +1727,7 @@ void VM::logMemInfo(
   // must lock/unlock for thread-safety
   VM *vm = getCurrent();
   vm->lock();
+  // access /proc/self
   FILE* file = fopen("/proc/self/status", "r");
   char line[128];
   char msg[256];
@@ -1731,11 +1735,39 @@ void VM::logMemInfo(
     if (strncmp(line, "Vm", 2) == 0){
       int len = strlen(line);
       line[len-1] = '\0'; // replace the newline with null
-      sprintf(msg, "%s - MemInfo: %s", prefix.c_str(), line);
+      sprintf(msg, "%s - MemInfo: \t%s", prefix.c_str(), line);
       ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
     }
   }
   fclose(file);
+  // access mallinfo
+  struct mallinfo m = mallinfo();
+  sprintf(line, "Non-mmapped space allocated (bytes):       \t%d", m.arena);
+  sprintf(msg, "%s - MemInfo: %s", prefix.c_str(), line);
+  ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
+  sprintf(line, "Space allocated in mmapped regions (bytes):\t%d", m.hblkhd);
+  sprintf(msg, "%s - MemInfo: %s", prefix.c_str(), line);
+  ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
+  sprintf(line, "Maximum total allocated space (bytes):     \t%d", m.usmblks);
+  sprintf(msg, "%s - MemInfo: %s", prefix.c_str(), line);
+  ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
+  sprintf(line, "Space in freed fastbin blocks (bytes):     \t%d", m.fsmblks);
+  sprintf(msg, "%s - MemInfo: %s", prefix.c_str(), line);
+  ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
+  sprintf(line, "Total allocated space (bytes):             \t%d", m.uordblks);
+  sprintf(msg, "%s - MemInfo: %s", prefix.c_str(), line);
+  ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
+  sprintf(line, "Total free space (bytes):                  \t%d", m.fordblks);
+  sprintf(msg, "%s - MemInfo: %s", prefix.c_str(), line);
+  ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
+  sprintf(line, "Top-most, releasable space (bytes):        \t%d", m.keepcost);
+  sprintf(msg, "%s - MemInfo: %s", prefix.c_str(), line);
+  ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
+  sprintf(line, "Total space in use, mmap + non-mmap (KiB): \t%d", 
+    (m.hblkhd+m.uordblks)/1024);
+  sprintf(msg, "%s - MemInfo: %s", prefix.c_str(), line);
+  ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
+  // unlock again
   vm->unlock();
 #endif
   
