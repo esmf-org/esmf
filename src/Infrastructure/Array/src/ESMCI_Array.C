@@ -34,7 +34,7 @@
 // in the companion file ESMCI_Array.h
 //
 // Macros that affect the code:
-//   * WORKAROUND_NONBLOCKPROGRESSBUG - when defined limits the outsanding 
+//   * WORKAROUND_NONBLOCKPROGRESSBUG - when defined limits the outstanding 
 //     non-blocking sends to one at a time, or in other places uses blocking
 //     send calls instead. This work-around was introduced for the 
 //     discover/pgi-14.1.0/mvapich2-2.0b combination that started hanging some
@@ -5630,6 +5630,7 @@ for (int i=0; i<factorListCount; i++)
   int srcTermProcessing = 0;  // no need to use auto-tuning to figure this out
   localrc = sparseMatMulStore(srcArray, dstArray, routehandle, sparseMatrix,
     false, ignoreUnmatched, &srcTermProcessing, pipelineDepthArg);
+  
   // garbage collection
   delete [] factorIndexList;
   if (typekindFactor == ESMC_TYPEKIND_R4){
@@ -8756,10 +8757,10 @@ cout << "dstSetupFlag=" << dstSetupFlag << " tensorSeqIndex=" <<
       // obtain memory
       i->factorList.reserve(i->factorCount);  
     }
-#ifdef ASMM_STORE_MEMLOG_on
-    VM::logMemInfo(std::string("setupSeqIndexFactorLookup5"));
 #endif
 
+#ifdef ASMM_STORE_MEMLOG_on
+    VM::logMemInfo(std::string("setupSeqIndexFactorLookup5"));
 #endif
     
     DD::SetupSeqIndexFactorLookupStage2<IT>
@@ -9634,7 +9635,7 @@ template<typename SIT, typename DIT>
 #ifdef ASMM_STORE_TIMING_on
   VMK::wtime(&t4a1);   //gjt - profile
 #endif
-
+  
   // set up a distributed directory for srcArray seqIndex look-up
   DD::Interval<SIT> *srcSeqIndexInterval = new DD::Interval<SIT>[petCount];
   {
@@ -9728,7 +9729,7 @@ template<typename SIT, typename DIT>
 #ifdef ASMM_STORE_MEMLOG_on
   VM::logMemInfo(std::string("ASMMStore2.11"));
 #endif
-
+  
   // determine the dstSeqIndexMinGlobal and MaxGlobal
   // todo: for nb-allgather(dstSeqIndexMinMaxList) here insert commwait()
   DIT dstSeqIndexMinGlobal, dstSeqIndexMaxGlobal;
@@ -9864,7 +9865,7 @@ template<typename SIT, typename DIT>
 #ifdef ASMM_STORE_TIMING_on
   VMK::wtime(&t4b);   //gjt - profile
 #endif
-
+  
   // garbage collection  
   delete [] srcElementCountList;
   delete [] dstElementCountList;
@@ -9886,6 +9887,7 @@ template<typename SIT, typename DIT>
 #ifdef ASMM_STORE_MEMLOG_on
   VM::logMemInfo(std::string("ASMMStore2.14.1"));
 #endif
+  
   localrc = DD::setupSeqIndexFactorLookup<SIT>(vm, 
     srcSeqIndexFactorLookup,
     petCount, localPet, factorListCount, 
@@ -9912,6 +9914,10 @@ template<typename SIT, typename DIT>
   vector<DD::SeqIndexFactorLookup<DIT> >
     dstSeqIndexFactorLookup(dstSeqIndexInterval[localPet].count
     * dstTensorElementCountEff);
+#ifdef ASMM_STORE_MEMLOG_on
+  VM::logMemInfo(std::string("ASMMStore2.15.1"));
+#endif
+  
   localrc = DD::setupSeqIndexFactorLookup<DIT>(vm, 
     dstSeqIndexFactorLookup,
     petCount, localPet, factorListCount, 
@@ -9937,7 +9943,7 @@ template<typename SIT, typename DIT>
 #ifdef ASMM_STORE_MEMLOG_on
   VM::logMemInfo(std::string("ASMMStore2.16"));
 #endif
-  
+
   // prepare count arrays for src partner look-up in dstSeqIndexFactorLookup
   int *srcLocalPartnerElementsPerIntervalCount = new int[petCount];
   for (int i=0; i<petCount; i++){
@@ -10459,7 +10465,7 @@ template<typename SIT, typename DIT>
 #ifdef ASMM_STORE_MEMLOG_on
   VM::logMemInfo(std::string("ASMMStore4.0"));
 #endif
-
+  
   // prepare for relative run-time addressing (RRA)
   int rraCount = srcArray->delayout->getLocalDeCount();
   rraCount += dstArray->delayout->getLocalDeCount();
@@ -11406,11 +11412,11 @@ ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
   vector<int> *commMatrixDstDataCount  = new vector<int>(sendnbVector.size());
   vector<int> *commMatrixSrcPet        = new vector<int>(recvnbVector.size());
   vector<int> *commMatrixSrcDataCount  = new vector<int>(recvnbVector.size());
-  for (int i=0; i<sendnbVector.size(); i++){
+  for (unsigned i=0; i<sendnbVector.size(); i++){
     (*commMatrixDstPet)[i]       = sendnbVector[i].dstPet;
     (*commMatrixDstDataCount)[i] = sendnbVector[i].partnerDeDataCount;
   }
-  for (int i=0; i<recvnbVector.size(); i++){
+  for (unsigned i=0; i<recvnbVector.size(); i++){
     (*commMatrixSrcPet)[i]       = recvnbVector[i].srcPet;
     (*commMatrixSrcDataCount)[i] = recvnbVector[i].partnerDeDataCount;
   }
