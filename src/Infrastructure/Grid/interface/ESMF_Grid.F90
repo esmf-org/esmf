@@ -13409,12 +13409,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
          ESMF_CONTEXT, rcToReturn=rc)) return
       ! Destroy old grid
-      call ESMF_GridDestroy(grid, rc=localrc)
+      call ESMF_GridDestroy(grid, noGarbage=.true., rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
       ! Destroy old distgrid
-      call ESMF_DistGridDestroy(distgrid, rc=localrc)
+      call ESMF_DistGridDestroy(distgrid, noGarbage=.true., rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
     
