@@ -342,13 +342,13 @@ int RouteHandle::print(
     std::vector<int> minIndexV;
     minIndexV.push_back(1);
     minIndexV.push_back(1);
-    InterArray<int> *minIndex = new InterArray<int>(minIndexV);
+    InterArray<int> minIndex(minIndexV);
     std::vector<int> maxIndexV;
     maxIndexV.push_back(petCount);
     maxIndexV.push_back(petCount);
-    InterArray<int> *maxIndex = new InterArray<int>(maxIndexV);
+    InterArray<int> maxIndex(maxIndexV);
     DELayout *delayout = NULL;
-    DistGrid *dg = DistGrid::create(minIndex, maxIndex, NULL, NULL, 0, NULL,
+    DistGrid *dg = DistGrid::create(&minIndex, &maxIndex, NULL, NULL, 0, NULL,
       NULL, NULL, NULL, NULL, delayout, NULL, &localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       &rc)) return rc;
@@ -460,6 +460,9 @@ int RouteHandle::print(
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       &rc)) return rc;
     localrc = Array::destroy(&recvDataArray, true);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      &rc)) return rc;
+    localrc = DistGrid::destroy(&dg, true);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       &rc)) return rc;
 
