@@ -10191,25 +10191,9 @@ template<typename SIT, typename DIT>
   delete [] dstLocalElementsPerIntervalCount;
   delete [] dstLocalIntervalPerPetCount;
   delete [] dstSeqIndexInterval;
-  
-#ifdef GJT_DEBUG
-/////////////////////////  
-  for (vector<DD::SeqIndexFactorLookup>::const_iterator
-    i=srcSeqIndexFactorLookup.begin(); i!=srcSeqIndexFactorLookup.end(); ++i){
-    
-    fprintf(stderr, "src: lookupIndex=%d, factorCount=%d\n",
-      i-srcSeqIndexFactorLookup.begin(), i->factorCount);
-  }
-/////////////////////////  
-/////////////////////////  
-  for (vector<DD::SeqIndexFactorLookup>::const_iterator
-    i=dstSeqIndexFactorLookup.begin(); i!=dstSeqIndexFactorLookup.end(); ++i){
-    
-    fprintf(stderr, "dst: lookupIndex=%d, factorCount=%d\n",
-      i-dstSeqIndexFactorLookup.begin(), i->factorCount);
-  }
-/////////////////////////  
-#endif
+  // force vectors out of scope by swapping with empty vector, to free memory
+  vector<DD::SeqIndexFactorLookup<SIT> >().swap(srcSeqIndexFactorLookup);
+  vector<DD::SeqIndexFactorLookup<DIT> >().swap(dstSeqIndexFactorLookup);
   
 #ifdef ASMM_STORE_LOG_on_disabled
   fprintf(asmm_store_log_fp, "\n========================================"
