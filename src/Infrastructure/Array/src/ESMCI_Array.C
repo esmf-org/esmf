@@ -7410,10 +7410,9 @@ namespace DD{
   };
   
   template<typename IT> struct FactorElement{
+    char factor[8]; // large enough for R8 and I8
     SeqIndex<IT> partnerSeqIndex;
     vector<int> partnerDe;
-    int padding;    // padding for 8-byte alignment
-    char factor[8]; // large enough for R8 and I8
   };
   template<typename IT>
     bool operator==(FactorElement<IT> a, FactorElement<IT> b){
@@ -7430,8 +7429,8 @@ namespace DD{
 
   template<typename IT> struct SeqIndexFactorLookup{
     vector<int> de;
-    int factorCount;
     vector<FactorElement<IT> > factorList;
+    int factorCount;
   public:
     SeqIndexFactorLookup(){
       factorCount = 0;
@@ -7440,19 +7439,19 @@ namespace DD{
   
   // the following structs could be moved out of this namespace
   template<typename IT1, typename IT2> struct AssociationElement{
-    int linIndex;
     SeqIndex<IT1> seqIndex;
-    int factorCount;
     vector<FactorElement<IT2> > factorList;
+    int linIndex;
+    int factorCount;
   };
   template<typename IT1, typename IT2> struct FillLinSeqVectInfo{
     Array const *array;
     vector<AssociationElement<IT1,IT2> > *linSeqVect;
+    vector<SeqIndexFactorLookup<IT1> > &seqIndexFactorLookup;
     int localPet;
     int localDeCount;
     const int *localDeElementCount;
     const Interval<IT1> *seqIndexInterval;
-    vector<SeqIndexFactorLookup<IT1> > &seqIndexFactorLookup;
     bool tensorMixFlag;
     bool haloRimFlag;   // true indicates that halo rim instead of excl reg used
   public:
@@ -7464,11 +7463,11 @@ namespace DD{
     {}
   };
   template<typename IT1, typename IT2> struct FillPartnerDeInfo{
-    int localPet;
-    const Interval<IT1> *seqIndexIntervalIn;
-    const Interval<IT2> *seqIndexIntervalOut;
     vector<SeqIndexFactorLookup<IT1> > &seqIndexFactorLookupIn;
     vector<SeqIndexFactorLookup<IT2> > &seqIndexFactorLookupOut;
+    const Interval<IT1> *seqIndexIntervalIn;
+    const Interval<IT2> *seqIndexIntervalOut;
+    int localPet;
     bool tensorMixFlag;
   public:
     FillPartnerDeInfo(
