@@ -7446,7 +7446,7 @@ namespace DD{
   };
   template<typename IT1, typename IT2> struct FillLinSeqVectInfo{
     Array const *array;
-    vector<AssociationElement<IT1,IT2> > *linSeqVect;
+    vector<vector<AssociationElement<IT1,IT2> > > &linSeqVect;
     vector<SeqIndexFactorLookup<IT1> > &seqIndexFactorLookup;
     int localPet;
     int localDeCount;
@@ -7456,9 +7456,11 @@ namespace DD{
     bool haloRimFlag;   // true indicates that halo rim instead of excl reg used
   public:
     FillLinSeqVectInfo(
+      vector<vector<AssociationElement<IT1,IT2> > > &linSeqVect_,
       vector<SeqIndexFactorLookup<IT1> > &seqIndexFactorLookup_
     ):
       // members that need to be set on this level because of reference
+      linSeqVect(linSeqVect_),
       seqIndexFactorLookup(seqIndexFactorLookup_)
     {}
   };
@@ -7809,7 +7811,7 @@ template<typename IT1, typename IT2>
   const int localPet = fillLinSeqVectInfo->localPet;
   const int localDeCount = fillLinSeqVectInfo->localDeCount;
   const int *localDeElementCount = fillLinSeqVectInfo->localDeElementCount;
-  vector<AssociationElement<IT1,IT2> > *linSeqVect =
+  vector<vector<AssociationElement<IT1,IT2> > > &linSeqVect =
     fillLinSeqVectInfo->linSeqVect;
   const Interval<IT1> *seqIndexInterval = fillLinSeqVectInfo->seqIndexInterval;
   const bool tensorMixFlag = fillLinSeqVectInfo->tensorMixFlag;
@@ -7946,7 +7948,7 @@ template<typename IT1, typename IT2>
 template<typename IT1, typename IT2> 
   void clientProcess(FillLinSeqVectInfo<IT1,IT2> *fillLinSeqVectInfo, 
     char *responseStream, int responseStreamSize){
-  vector<AssociationElement<IT1,IT2> > *linSeqVect =
+  vector<vector<AssociationElement<IT1,IT2> > > &linSeqVect =
     fillLinSeqVectInfo->linSeqVect;
   // process responseStream and fill linSeqVect[][]
   int *responseStreamInt = (int *)responseStream;
@@ -8988,8 +8990,8 @@ template<typename SIT, typename DIT> int sparseMatMulStoreEncodeXXE(VM *vm,
   ESMC_TypeKind_Flag typekindFactors, ESMC_TypeKind_Flag typekindSrc,
   ESMC_TypeKind_Flag typekindDst,
   const int *srcLocalDeElementCount, const int *dstLocalDeElementCount,
-  vector<DD::AssociationElement<SIT,DIT> > *srcLinSeqVect,
-  vector<DD::AssociationElement<DIT,SIT> > *dstLinSeqVect,
+  vector<vector<DD::AssociationElement<SIT,DIT> > >&srcLinSeqVect,
+  vector<vector<DD::AssociationElement<DIT,SIT> > >&dstLinSeqVect,
   const int *dstLocalDeTotalElementCount,
   char **rraList, int rraCount, RouteHandle **routehandle,
   bool undistributedDimsPresent,
@@ -10124,24 +10126,21 @@ template<typename SIT, typename DIT>
   VM::logMemInfo(std::string("ASMMStore3.0"));
 #endif
 
-  vector<DD::AssociationElement<SIT,DIT> > *srcLinSeqVect =
-    new vector<DD::AssociationElement<SIT,DIT> >
-      [srcLocalDeCount];
-  vector<DD::AssociationElement<DIT,SIT> > *dstLinSeqVect =
-    new vector<DD::AssociationElement<DIT,SIT> >
-      [dstLocalDeCount];
+  vector<vector<DD::AssociationElement<SIT,DIT> > >
+    srcLinSeqVect(srcLocalDeCount);
+  vector<vector<DD::AssociationElement<DIT,SIT> > >
+    dstLinSeqVect(dstLocalDeCount);
 
 #ifdef ASMM_STORE_MEMLOG_on
   VM::logMemInfo(std::string("ASMMStore3.1"));
 #endif
 
   // access srcSeqIndexFactorLookup to construct srcLinSeqVect
-  {  
+  {
     DD::FillLinSeqVectInfo<SIT,DIT> *fillLinSeqVectInfo =
       new DD::FillLinSeqVectInfo<SIT,DIT>
-        (srcSeqIndexFactorLookup);
+        (srcLinSeqVect, srcSeqIndexFactorLookup);
     fillLinSeqVectInfo->array = srcArray;
-    fillLinSeqVectInfo->linSeqVect = srcLinSeqVect;
     fillLinSeqVectInfo->localPet = localPet;
     fillLinSeqVectInfo->localDeCount = srcLocalDeCount;
     fillLinSeqVectInfo->localDeElementCount = srcLocalDeElementCount;
@@ -10159,12 +10158,12 @@ template<typename SIT, typename DIT>
   VM::logMemInfo(std::string("ASMMStore3.3"));
 #endif
   }
-  
+
   // access dstSeqIndexFactorLookup to construct dstLinSeqVect
   {
     DD::FillLinSeqVectInfo<DIT,SIT> *fillLinSeqVectInfo =
       new DD::FillLinSeqVectInfo<DIT,SIT>
-        (dstSeqIndexFactorLookup);
+        (dstLinSeqVect, dstSeqIndexFactorLookup);
     fillLinSeqVectInfo->array = dstArray;
     fillLinSeqVectInfo->linSeqVect = dstLinSeqVect;
     fillLinSeqVectInfo->localPet = localPet;
@@ -10188,9 +10187,9 @@ template<typename SIT, typename DIT>
   // garbage colletion
   delete [] srcLocalElementsPerIntervalCount;
   delete [] srcLocalIntervalPerPetCount;
+  delete [] srcSeqIndexInterval;
   delete [] dstLocalElementsPerIntervalCount;
   delete [] dstLocalIntervalPerPetCount;
-  delete [] srcSeqIndexInterval;
   delete [] dstSeqIndexInterval;
   
 #ifdef GJT_DEBUG
@@ -10512,11 +10511,9 @@ template<typename SIT, typename DIT>
 
   // garbage collection
   delete [] rraList;
-  delete [] srcLinSeqVect;
-  delete [] srcLocalDeElementCount;
-  delete [] dstLinSeqVect;
-  delete [] dstLocalDeElementCount;
   delete [] dstLocalDeTotalElementCount;
+  delete [] srcLocalDeElementCount;
+  delete [] dstLocalDeElementCount;
 
 #ifdef ASMM_STORE_TIMING_on
   VMK::wtime(&t15);   //gjt - profile
@@ -10649,8 +10646,8 @@ template<typename SIT, typename DIT> int sparseMatMulStoreEncodeXXE(
   ESMC_TypeKind_Flag typekindDst,         // in
   const int *srcLocalDeElementCount,      // in
   const int *dstLocalDeElementCount,      // in
-  vector<DD::AssociationElement<SIT,DIT> > *srcLinSeqVect, // in - sparse mat "run dist."
-  vector<DD::AssociationElement<DIT,SIT> > *dstLinSeqVect, // in - sparse mat "run dist."
+  vector<vector<DD::AssociationElement<SIT,DIT> > >&srcLinSeqVect, // in - sparse mat "run dist."
+  vector<vector<DD::AssociationElement<DIT,SIT> > >&dstLinSeqVect, // in - sparse mat "run dist."
   const int *dstLocalDeTotalElementCount, // in
   char **rraList,                         // in
   int rraCount,                           // in
