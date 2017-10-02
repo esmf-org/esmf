@@ -110,19 +110,18 @@
     deallocate (a, indicies, tfs, dts)
 
 
-    ! TODO: Tests are currently disabled due to lack of deferred-length allocatable
-    ! character string support on older compilers - e.g., pre-4.6 gfortran, and with
-    ! Absoft, g95, and Lahey.  Re-enable when ESMF support for these older compilers
+    ! TODO: Tests are currently disabled on older compilers - e.g., pre-4.6 gfortran,
+    !  and with Absoft, g95, and Lahey due to lack of deferred-length allocatable
+    ! character string support .  Re-enable when ESMF support for these older compilers
     ! is no longer required.
     !------------------------------------------------------------------------
     !------------------------------------------------------------------------
     ! NEX_UTest
-    name = "Fortran allocatable string arguments call test"
+    name = "Fortran allocatable string scalar arguments call test"
     failMsg = "Did not return ESMF_SUCCESS"
 #if !defined (ESMF_NO_F2003_ALLOC_STRING_LENS)
     call ESMF_FeatureAllocArgStr (42,  &
         str_dllen=alloc_string, str_pilen=alloc_string7,  &
-        str_dllensize=alloc_string_array, str_pilensize=alloc_string7_array,  &
         rc=rc)
 #else
     name = "Bypassed " // trim (name)
@@ -133,7 +132,45 @@
     !------------------------------------------------------------------------
     !------------------------------------------------------------------------
     ! NEX_UTest
-    name = "Fortran allocatable string arguments size test"
+    name = "Fortran allocatable string scalar arguments len test"
+    failMsg = "Incorrect allocated string len"
+#if !defined (ESMF_NO_F2003_ALLOC_STRING_LENS)
+    tf = len (alloc_string) == 42 .and. len (alloc_string7) == 7
+    rc = merge (ESMF_SUCCESS, ESMF_RC_ARG_SIZE, tf)
+#else
+    name = "Bypassed " // trim (name)
+    rc = ESMF_SUCCESS
+#endif
+    call ESMF_Test(rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
+
+#if !defined (ESMF_NO_F2003_ALLOC_STRING_LENS)
+    if (allocated (alloc_string)) deallocate (alloc_string)
+    if (allocated (alloc_string7)) deallocate (alloc_string7)
+#endif
+
+#if 0
+    ! TODO: Tests are currently disabled because gfortran prior to v5.1 has issues with
+    ! arrays of deferred-length strings.  Re-enable when ESMF support for these older compilers
+    ! is no longer required.
+
+    !------------------------------------------------------------------------
+    ! NEX_xxxUTest
+    name = "Fortran allocatable string array arguments call test"
+    failMsg = "Did not return ESMF_SUCCESS"
+#if !defined (ESMF_NO_F2003_ALLOC_STRING_LENS)
+    call ESMF_FeatureAllocArgStr (42,  &
+        str_dllensize=alloc_string_array, str_pilensize=alloc_string7_array,  &
+        rc=rc)
+#else
+    name = "Bypassed " // trim (name)
+    rc = ESMF_SUCCESS
+#endif
+    call ESMF_Test(rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
+
+    !------------------------------------------------------------------------
+    !------------------------------------------------------------------------
+    ! NEX_xxxUTest
+    name = "Fortran allocatable string array arguments size test"
     failMsg = "Incorrect allocated string array size"
 #if !defined (ESMF_NO_F2003_ALLOC_STRING_LENS)
     tf = size (alloc_string7_array) == 42 .and. size (alloc_string_array) == 42
@@ -146,12 +183,11 @@
 
     !------------------------------------------------------------------------
     !------------------------------------------------------------------------
-    ! NEX_UTest
+    ! NEX_xxxUTest
     name = "Fortran allocatable string arguments len test"
     failMsg = "Incorrect allocated string len"
 #if !defined (ESMF_NO_F2003_ALLOC_STRING_LENS)
-    tf = len (alloc_string) == 42 .and. len (alloc_string7) == 7  &
-        .and. len (alloc_string_array) == 42 .and. len (alloc_string7_array) == 7
+    tf = len (alloc_string_array) == 42 .and. len (alloc_string7_array) == 7
     rc = merge (ESMF_SUCCESS, ESMF_RC_ARG_SIZE, tf)
 #else
     name = "Bypassed " // trim (name)
@@ -160,7 +196,9 @@
     call ESMF_Test(rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
 
 #if !defined (ESMF_NO_F2003_ALLOC_STRING_LENS)
-    deallocate (alloc_string, alloc_string7, alloc_string_array, alloc_string7_array)
+    if (allocated (alloc_string_array)) deallocate (alloc_string_array)
+    if (allocated (alloc_string7_array)) deallocate (alloc_string7_array)
+#endif
 #endif
 
     ! NOTE: Some compilers may require a special command line argument for
