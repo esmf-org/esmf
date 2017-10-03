@@ -222,6 +222,12 @@ int RouteHandle::destruct(
     default:
       break;
     }
+    // remove any additional storage from routehandle
+    //TODO: specific to vector<int>* storage, will break for anything else!
+    for (int i=0; i<RHSTORAGECOUNT; i++){
+      std::vector<int> *tmp = (std::vector<int> *)getStorage(i);
+      if (tmp) delete tmp;
+    }
   }
 
   return ESMF_SUCCESS;
