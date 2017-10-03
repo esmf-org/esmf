@@ -11365,7 +11365,7 @@ ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
   sort(recvnbVector.begin(), recvnbVector.end());
   sort(sendnbVector.begin(), sendnbVector.end());
   
-#ifdef ASMM_STORE_COMMMATRIX_off
+#ifdef ASMM_STORE_COMMMATRIX_on
   // store the communication matrix in compact (sparse) distributed fashion,
   vector<int> *commMatrixDstPet        = new vector<int>(sendnbVector.size());
   vector<int> *commMatrixDstDataCount  = new vector<int>(sendnbVector.size());
