@@ -224,9 +224,12 @@ int RouteHandle::destruct(
     }
     // remove any additional storage from routehandle
     //TODO: specific to vector<int>* storage, will break for anything else!
-    for (int i=0; i<RHSTORAGECOUNT; i++){
+    for (int i=1; i<RHSTORAGECOUNT; i++){
       std::vector<int> *tmp = (std::vector<int> *)getStorage(i);
-      if (tmp) delete tmp;
+      if (tmp){
+        delete tmp;
+        setStorage(NULL, i);
+      }
     }
   }
 
