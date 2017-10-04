@@ -106,11 +106,11 @@ contains
       if (ESMF_LogFoundAllocError (memstat,  &
           ESMF_CONTEXT,  &
           rcToReturn=rc)) return
-    end if
 
-    do, i=1, n
-      str_pilensize(i) = achar (mod (i, 127))
-    end do
+      do, i=1, n
+        str_pilensize(i) = achar (mod (i, 127))
+      end do
+    end if
 
     if (present (str_dllensize)) then
       allocate (character(n)::str_dllensize(n), stat=memstat)
