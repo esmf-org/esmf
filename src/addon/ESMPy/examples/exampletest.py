@@ -3,8 +3,10 @@
 """
 examples test file
 """
+from unittest import SkipTest
 
 from ESMF.test.base import TestBase, attr
+import ESMF.api.constants as constants
 
 class TestExamples(TestBase):
 
@@ -17,7 +19,10 @@ class TestExamples(TestBase):
 
     # @attr('parallel')
     def test_gridmeshrg(self):
-        from . import grid_mesh_regrid
+        if constants._ESMF_COMM == constants._ESMF_COMM_MPIUNI:
+            raise SkipTest('ESMF must be built with MPI for test')
+        else:
+            from . import grid_mesh_regrid
 
     @attr('parallel')
     def test_field_read(self):
