@@ -41,7 +41,7 @@ dstfield.data[...] = 1e20
 
 # create an object to regrid data from the source to the destination field
 # TODO: this example seems to fail occasionally with UnmappedAction.ERROR, probably due to a tolerance issue - ask Bob
-regrid = ESMF.Regrid(srcfield, dstfield,
+regrid = ESMF.Regrid(srcfield=srcfield, dstfield=dstfield,
                      regrid_method=ESMF.RegridMethod.BILINEAR,
                      unmapped_action=ESMF.UnmappedAction.IGNORE)
 
