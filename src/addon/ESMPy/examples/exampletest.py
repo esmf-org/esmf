@@ -3,7 +3,10 @@
 """
 examples test file
 """
-from unittest import SkipTest
+try:
+    from unittest import SkipTest
+except ImportError:
+    from nose import SkipTest
 
 from ESMF.test.base import TestBase, attr
 import ESMF.api.constants as constants

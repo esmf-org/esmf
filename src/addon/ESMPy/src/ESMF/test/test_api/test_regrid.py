@@ -2,8 +2,12 @@
 regrid unit test file
 """
 
+try:
+    from unittest import SkipTest
+except ImportError:
+    from nose import SkipTest
+
 import os
-from unittest.case import SkipTest
 
 from ESMF import *
 from ESMF.test.base import TestBase, attr
