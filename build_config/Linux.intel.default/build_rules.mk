@@ -258,7 +258,7 @@ ESMF_F90LINKLIBS += -cxxlib -lrt -ldl
 ############################################################
 # Link against libesmf.a using the C++ linker front-end
 #
-ESMF_CXXLINKLIBS += -lrt -ldl
+ESMF_CXXLINKLIBS += $(shell $(ESMF_DIR)/scripts/libs.ifort "$(ESMF_F90COMPILER) $(ESMF_F90COMPILEOPTS)") -lrt -ldl
 
 ############################################################
 # Linker option that ensures that the specified libraries are 
