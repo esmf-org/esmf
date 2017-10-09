@@ -82,12 +82,12 @@
 
       integer, parameter :: ESMF_VERSION_MAJOR        = 7
       integer, parameter :: ESMF_VERSION_MINOR        = 0
-      integer, parameter :: ESMF_VERSION_REVISION     = 1
+      integer, parameter :: ESMF_VERSION_REVISION     = 2
       integer, parameter :: ESMF_VERSION_PATCHLEVEL   = 0
       logical, parameter :: ESMF_VERSION_PUBLIC       = .false.
       logical, parameter :: ESMF_VERSION_BETASNAPSHOT = .false.
 
-      character(*), parameter :: ESMF_VERSION_STRING  = "7.0.1"
+      character(*), parameter :: ESMF_VERSION_STRING  = "7.0.2"
 
 #if defined (ESMF_NETCDF)
       logical, parameter :: ESMF_IO_NETCDF_PRESENT = .true.
