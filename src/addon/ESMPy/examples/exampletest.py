@@ -20,6 +20,7 @@ class TestExamples(TestBase):
     def test_crff(self):
         from . import create_read_from_file
 
+    @attr('serial')
     # @attr('parallel')
     def test_gridmeshrg(self):
         if constants._ESMF_COMM == constants._ESMF_COMM_MPIUNI:

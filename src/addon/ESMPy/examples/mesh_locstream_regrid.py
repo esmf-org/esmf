@@ -61,7 +61,6 @@ except ValueError as e:
 
 print('tkk failed:', failed)
 print('tkk exceptions:', exceptions)
-raise ValueError('tkk: exiting')
 
 # do the regridding from source to destination field
 dstfield = regrid(srcfield, dstfield)
