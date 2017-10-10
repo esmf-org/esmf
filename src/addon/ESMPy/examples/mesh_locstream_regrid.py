@@ -41,9 +41,27 @@ dstfield.data[...] = 1e20
 
 # create an object to regrid data from the source to the destination field
 # TODO: this example seems to fail occasionally with UnmappedAction.ERROR, probably due to a tolerance issue - ask Bob
-regrid = ESMF.Regrid(srcfield=srcfield, dstfield=dstfield,
-                     regrid_method=ESMF.RegridMethod.BILINEAR,
-                     unmapped_action=ESMF.UnmappedAction.IGNORE)
+failed = []
+exceptions = []
+try:
+    regrid = ESMF.Regrid(srcfield=srcfield, dstfield=dstfield, regrid_method=ESMF.RegridMethod.BILINEAR, unmapped_action=ESMF.UnmappedAction.IGNORE)
+except ValueError as e:
+    failed.append(1)
+    exceptions.append(str(e))
+    try:
+        regrid = ESMF.Regrid(srcfield=srcfield, dstfield=dstfield, unmapped_action=ESMF.UnmappedAction.IGNORE)
+    except ValueError as e:
+        failed.append(2)
+        exceptions.append(str(e))
+    try:
+        regrid = ESMF.Regrid(srcfield=srcfield, dstfield=dstfield)
+    except ValueError as e:
+        failed.append(3)
+        exceptions.append(str(e))
+
+print('tkk failed:', failed)
+print('tkk exceptions:', exceptions)
+raise ValueError('tkk: exiting')
 
 # do the regridding from source to destination field
 dstfield = regrid(srcfield, dstfield)
