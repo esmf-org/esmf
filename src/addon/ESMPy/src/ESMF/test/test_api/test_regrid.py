@@ -2,11 +2,19 @@
 regrid unit test file
 """
 
+try:
+    from unittest import SkipTest
+except ImportError:
+    from nose import SkipTest
+
+import os
+
 from ESMF import *
 from ESMF.test.base import TestBase, attr
 from ESMF.util.mesh_utilities import *
 from ESMF.util.grid_utilities import *
 from ESMF.util.field_utilities import compare_fields
+
 
 class TestRegrid(TestBase):
 
@@ -80,6 +88,16 @@ class TestRegrid(TestBase):
 
     @attr('parallel')
     def test_field_regrid_file(self):
+
+        def _barrier_():
+            if pet_count() > 1:
+                try:
+                    from mpi4py import MPI
+                except ImportError:
+                    raise SkipTest('mpi4py must be installed for process barrier')
+                else:
+                    MPI.COMM_WORLD.Barrier()
+
         # create grids
         max_index = np.array([20, 20])
         srcgrid = Grid(max_index, coord_sys=CoordSys.CART)
@@ -115,23 +133,26 @@ class TestRegrid(TestBase):
         dstfield = Field(srcgrid)
         dstfield.data[:, :] = 10.
 
-        # regridding
-        import os
-        if os.path.isfile(
-                os.path.join(os.getcwd(), "esmpy_test_field_regrid_file.nc")):
-            os.remove(os.path.join(os.getcwd(), "esmpy_test_field_regrid_file.nc"))
-        else:
-            rh = Regrid(srcfield, dstfield, filename="esmpy_test_field_regrid_file.nc")
-            dstfield = rh(srcfield, dstfield)
+        # Check for and remove the test file if it exists.
+        manager = Manager()
+        if manager.local_pet == 0:
+            path = os.path.join(os.getcwd(), "esmpy_test_field_regrid_file.nc")
+            if os.path.isfile(path):
+                os.remove(path)
+        _barrier_()
+
+        # Execute regridding from file.
+        rh = Regrid(srcfield, dstfield, filename="esmpy_test_field_regrid_file.nc")
+        dstfield = rh(srcfield, dstfield)
+        _barrier_()
 
         try:
-            import netCDF4
             from netCDF4 import Dataset
         except ImportError:
             pass
         else:
-            Dataset("esmpy_test_field_regrid_file.nc", "r")
-
+            ds = Dataset("esmpy_test_field_regrid_file.nc", "r")
+            ds.close()
 
     def test_field_regrid_gridmesh(self):
         # create mesh
