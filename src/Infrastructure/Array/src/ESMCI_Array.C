@@ -14,12 +14,12 @@
 #define HALO_STORE_MEMLOG_off
 
 #define ASMM_STORE_LOG_off
-#define ASMM_STORE_TIMING_on
-#define ASMM_STORE_MEMLOG_on
+#define ASMM_STORE_TIMING_off
+#define ASMM_STORE_MEMLOG_off
 #define ASMM_STORE_COMMMATRIX_on
 #define ASMM_STORE_OPT_PRINT_off
 
-#define ASMM_EXEC_INFO_on
+#define ASMM_EXEC_INFO_off
 #define ASMM_EXEC_TIMING_off
 #define ASMM_EXEC_PROFILE_off
 //==============================================================================
