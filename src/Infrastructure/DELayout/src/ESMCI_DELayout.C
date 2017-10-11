@@ -12,7 +12,7 @@
 #define ESMC_FILENAME "ESMCI_DELayout.C"
 //==============================================================================
 #define XXE_EXEC_LOG_off
-#define XXE_EXEC_MEMLOG_on
+#define XXE_EXEC_MEMLOG_off
 #define XXE_EXEC_BUFFLOG_off
 #define XXE_EXEC_OPSLOG_off
 //==============================================================================
@@ -2497,11 +2497,15 @@ int XXE::exec(
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
 
-#ifdef XXE_EXEC_LOG_off
+#ifdef XXE_EXEC_LOG_on
   char msg[1024];
   sprintf(msg, "ESMCI::XXE::exec(): START: stream=%p, count=%d, "
-    "sizeof(StreamElement)=%lu, rraCount=%d, vectorLength=%d",
-    stream, count, sizeof(StreamElement), rraCount, *vectorLength);
+    "indexStart=%d, indexStop=%d",
+    stream, count, indexStart, indexStop);
+  ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
+  sprintf(msg, "ESMCI::XXE::exec(): START: sizeof(StreamElement)=%lu, "
+    "rraCount=%d, vectorLength=%d",
+    sizeof(StreamElement), rraCount, *vectorLength);
   ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
   sprintf(msg, "ESMCI::XXE::exec(): START'ed: filterBitField=0x%08x, "
     "finished=%p, cancelled=%p", filterBitField, finished, cancelled);
@@ -2586,7 +2590,7 @@ int XXE::exec(
   VM::logMemInfo(std::string("XXE::exec():2.0"));
 #endif
 
-#ifdef XXE_EXEC_LOG_off
+#ifdef XXE_EXEC_LOG_on
   sprintf(msg, "ESMCI::XXE::exec(): bufferInfoList.size()=%d", 
     bufferInfoList.size());
   ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
@@ -2786,6 +2790,9 @@ int XXE::exec(
       break;
     case sendnb:
       {
+#ifdef XXE_EXEC_MEMLOG_on
+  VM::logMemInfo(std::string("XXE::exec():sendnb1.0"));
+#endif
         xxeSendnbInfo = (SendnbInfo *)xxeElement;
         char *buffer = (char *)xxeSendnbInfo->buffer;
         if (xxeSendnbInfo->indirectionFlag)
@@ -2798,8 +2805,14 @@ int XXE::exec(
           xxeSendnbInfo->dstPet, size);
         ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
 #endif
+#ifdef XXE_EXEC_MEMLOG_on
+  VM::logMemInfo(std::string("XXE::exec():sendnb2.0"));
+#endif
         vm->send(buffer, size, xxeSendnbInfo->dstPet, xxeSendnbInfo->commhandle,
           xxeSendnbInfo->tag);
+#ifdef XXE_EXEC_MEMLOG_on
+  VM::logMemInfo(std::string("XXE::exec():sendnb3.0"));
+#endif
         xxeSendnbInfo->activeFlag = true;     // set
         xxeSendnbInfo->cancelledFlag = false; // set
       }
@@ -4191,6 +4204,9 @@ printf("gjt - DID NOT CANCEL commhandle\n");
     default:
       break;
     }
+#ifdef XXE_EXEC_MEMLOG_on
+    VM::logMemInfo(std::string("XXE::exec(): op-loop"));
+#endif
   }
   
   if (dTime != NULL){
