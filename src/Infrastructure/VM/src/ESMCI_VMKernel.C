@@ -11,6 +11,9 @@
 //-----------------------------------------------------------------------------
 
 #include "ESMCI_VMKernel.h"
+#include "ESMCI_VM.h"
+
+#define VM_MEMLOG_off
 
 // On SunOS systems there are a couple of macros that need to be set
 // in order to get POSIX compliant functions IPC, pthreads, gethostid
@@ -3061,8 +3064,14 @@ int VMK::send(const void *message, int size, int dest, commhandle **ch,
       else
         tag = 0;
     }
+#ifdef VM_MEMLOG_on
+  VM::logMemInfo(std::string("VM::send():1.0"));
+#endif
     localrc = MPI_Isend(messageC, size, MPI_BYTE, lpid[dest], tag, mpi_c, 
       (*ch)->mpireq);
+#ifdef VM_MEMLOG_on
+  VM::logMemInfo(std::string("VM::send():2.0"));
+#endif
 #ifndef ESMF_NO_PTHREADS
     if (mpi_mutex_flag) pthread_mutex_unlock(pth_mutex);
 #endif
