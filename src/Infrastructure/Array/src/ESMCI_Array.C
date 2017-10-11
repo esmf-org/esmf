@@ -10550,8 +10550,6 @@ template<typename SIT, typename DIT>
   VM::logMemInfo(std::string("ASMMStore4.4"));
 #endif
 
-#if 1
-//gjt: skip the encoder to make sure all memory free'd at this point
   // encode sparseMatMul communication pattern into XXE stream
   localrc = sparseMatMulStoreEncodeXXE(vm,
     srcArray->delayout, dstArray->delayout,
@@ -10569,7 +10567,6 @@ template<typename SIT, typename DIT>
   );
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
     &rc)) return rc;
-#endif
   
 #ifdef ASMM_STORE_MEMLOG_on
   VM::logMemInfo(std::string("ASMMStore4.5"));
@@ -11928,6 +11925,10 @@ template<typename SIT, typename DIT> int sparseMatMulStoreEncodeXXE(
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
     &rc)) return rc;
   
+#ifdef ASMM_STORE_MEMLOG_on
+  VM::logMemInfo(std::string("ASMMStoreEncodeXXE10.1"));
+#endif
+
 #if 0  
   // optimize the XXE entire stream
   localrc = xxe->optimize();
@@ -11935,11 +11936,19 @@ template<typename SIT, typename DIT> int sparseMatMulStoreEncodeXXE(
     &rc)) return rc;
 #endif 
     
+#ifdef ASMM_STORE_MEMLOG_on
+  VM::logMemInfo(std::string("ASMMStoreEncodeXXE10.2"));
+#endif
+
   // get XXE ready for execution
   localrc = xxe->execReady();
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
     &rc)) return rc;
   
+#ifdef ASMM_STORE_MEMLOG_on
+  VM::logMemInfo(std::string("ASMMStoreEncodeXXE10.3"));
+#endif
+
   // execute final XXE stream for consistent profile data
   vm->barrier();  // ensure all PETs are present before profile run
   localrc = xxe->exec(rraCount, rraList, &vectorLength, 
@@ -12030,6 +12039,10 @@ template<typename SIT, typename DIT> int sparseMatMulStoreEncodeXXEStream(
   int localPet = vm->getLocalPet();
   int petCount = vm->getPetCount();
     
+#ifdef ASMM_STORE_MEMLOG_on
+  VM::logMemInfo(std::string("ASMMStoreEncodeXXEStream1.0"));
+#endif
+
   try{
 
 #ifdef ASMM_EXEC_PROFILE_on
@@ -12048,6 +12061,10 @@ template<typename SIT, typename DIT> int sparseMatMulStoreEncodeXXEStream(
     typename vector<ArrayHelper::SendnbElement<SIT,DIT> >::iterator pSendWait =
       sendnbVector.begin();
     
+#ifdef ASMM_STORE_MEMLOG_on
+  VM::logMemInfo(std::string("ASMMStoreEncodeXXEStream2.0"));
+#endif
+
 #define SMM_NONBLOCKINGSTYLE_on
     
 #ifdef SMM_NONBLOCKINGSTYLE_on
@@ -12113,6 +12130,10 @@ template<typename SIT, typename DIT> int sparseMatMulStoreEncodeXXEStream(
 #endif
 #endif
     
+#ifdef ASMM_STORE_MEMLOG_on
+  VM::logMemInfo(std::string("ASMMStoreEncodeXXEStream3.0"));
+#endif
+    
     // append predicated zero operations for the total region
 #ifdef ASMM_EXEC_PROFILE_on
     localrc = xxe->appendWtimer(
@@ -12143,6 +12164,10 @@ template<typename SIT, typename DIT> int sparseMatMulStoreEncodeXXEStream(
       ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
 #endif
   
+#ifdef ASMM_STORE_MEMLOG_on
+  VM::logMemInfo(std::string("ASMMStoreEncodeXXEStream4.0"));
+#endif
+
     // append predicated zero operations for targeted dst elements
     for(typename vector<ArrayHelper::RecvnbElement<DIT,SIT> >::iterator pzero =
       recvnbVector.begin(); pzero != recvnbVector.end(); ++pzero){
@@ -12153,6 +12178,10 @@ template<typename SIT, typename DIT> int sparseMatMulStoreEncodeXXEStream(
         ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
     }
     
+#ifdef ASMM_STORE_MEMLOG_on
+  VM::logMemInfo(std::string("ASMMStoreEncodeXXEStream5.0"));
+#endif
+
 #ifdef SMM_NONBLOCKINGSTYLE_on
     // fill pipeline
     bool recvnbOK = true; // initialize
@@ -12256,6 +12285,10 @@ template<typename SIT, typename DIT> int sparseMatMulStoreEncodeXXEStream(
       }
     }
     
+#ifdef ASMM_STORE_MEMLOG_on
+  VM::logMemInfo(std::string("ASMMStoreEncodeXXEStream6.0"));
+#endif
+
     // drain pipeline
     while ((pRecvWait!=recvnbVector.end()) || (pSendWait!=sendnbVector.end())){
       if (pRecvWait != recvnbVector.end()){
@@ -12420,6 +12453,10 @@ template<typename SIT, typename DIT> int sparseMatMulStoreEncodeXXEStream(
     ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
 #endif
     
+#ifdef ASMM_STORE_MEMLOG_on
+  VM::logMemInfo(std::string("ASMMStoreEncodeXXEStream7.0"));
+#endif
+
   }catch(int localrc){
     // catch standard ESMF return code
     ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
@@ -12431,6 +12468,10 @@ template<typename SIT, typename DIT> int sparseMatMulStoreEncodeXXEStream(
     return rc;
   }
   
+#ifdef ASMM_STORE_MEMLOG_on
+  VM::logMemInfo(std::string("ASMMStoreEncodeXXEStream8.0"));
+#endif
+
   // return successfully
   rc = ESMF_SUCCESS;
   return rc;
@@ -12597,8 +12638,27 @@ int Array::sparseMatMul(
         ESMC_LOGMSG_INFO);
 #endif
     }else if (termorderflag == ESMC_TERMORDER_FREE){
-//      filterBitField |= XXE::filterBitNbWaitFinish; // set NbWaitFinish filter
+#ifdef ENSURE_TO_LIMIT_OUTSTANDING_NBCOMMS
+//TODO: This branch ensures that there are never more than pipelineDepth
+//TODO: outstanding non-blocking comms held by this PET. This is basically
+//TODO: makes this the same as ESMC_TERMORDER_SRCPET for now. We have had
+//TODO: issues with the original ESMC_TERMORDER_FREE, for problems where 
+//TODO: some PETs send/recv a lot of messages, and there are enough delays
+//TODO: so that first time the CommTest comes to check, the messages are not
+//TODO: yet complete. CommWait will wait for this, and then clear out from
+//TODO: MPI layer. 
+//TODO: In the long run want to implement a pipelineDepthProgressor operation
+//TODO: into the XXE stream, as to limit outstanding non-blocking comms,
+//TODO: in a dynamic fashion, without doing a blocking Wait. This is work in 
+//TODO: progress. Until then, if need be, turn on
+//TODO:       ENSURE_TO_LIMIT_OUTSTANDING_NBCOMMS
+//TODO: By default this is NOT turned on, but keep using the 
+//TODO: exsiting ESMC_TERMORDER_FREE implementations with risking too many
+//TODO: outstanding nb-comms, under just the right conditions!
       filterBitField |= XXE::filterBitNbTestFinish; // set NbTestFinish filter
+#else
+      filterBitField |= XXE::filterBitNbWaitFinish; // set NbWaitFinish filter
+#endif
       filterBitField |= XXE::filterBitCancel;       // set Cancel filter    
       filterBitField |= XXE::filterBitNbWaitFinishSingleSum; // SingleSum filter
 #ifdef ASMM_EXEC_INFO_on
