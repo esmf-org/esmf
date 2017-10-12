@@ -564,6 +564,14 @@ extern "C" {
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
 
+  void FTN_X(c_esmc_vmprintmatchtable)(ESMCI::VM **ptr){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_vmprintmatchtable()"
+    (*ptr)->printMatchTable();
+    // Flush before crossing language interface to ensure correct output order
+    fflush(stdout);
+  }
+
   void FTN_X(c_esmc_vmvalidate)(ESMCI::VM **ptr, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_vmvalidate()"
