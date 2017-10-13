@@ -327,6 +327,7 @@ int RouteHandle::print(
     fclose(fp);
 #endif
     
+#if (defined ESMF_PIO && ( defined ESMF_NETCDF || defined ESMF_PNETCDF))
     // -------------------------------------------------------------------------
 #define PRINTCOMMMATRIX
 #ifdef PRINTCOMMMATRIX
@@ -475,8 +476,9 @@ int RouteHandle::print(
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       &rc)) return rc;
 
-#endif
-  
+#endif  // PRINTCOMMMATRIX
+#endif  // PIO, etc.
+    
   }catch(int localrc){
     // catch standard ESMF return code
     ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
