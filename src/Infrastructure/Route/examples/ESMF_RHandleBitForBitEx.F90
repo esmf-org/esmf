@@ -1482,9 +1482,9 @@ do i=1,5
       print *, "result SRCPET#11 = ", farrayPtr(1), " expect: ", sumCompare
       if (farrayPtr(1) /= sumCompare) then
         finalrc = ESMF_FAILURE
-	write (msg, *) "Numerical difference detected: ", &
-	  farrayPtr(1)-sumCompare
-	call ESMF_LogWrite(msg, ESMF_LOGMSG_INFO)
+        write (msg, *) "Numerical difference detected: ", &
+          farrayPtr(1)-sumCompare
+        call ESMF_LogWrite(msg, ESMF_LOGMSG_INFO)
       endif
     endif
   endif
