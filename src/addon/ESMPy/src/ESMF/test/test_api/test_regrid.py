@@ -11,9 +11,9 @@ import os
 
 from ESMF import *
 from ESMF.test.base import TestBase, attr
-from ESMF.util.mesh_utilities import *
-from ESMF.util.grid_utilities import *
 from ESMF.util.field_utilities import compare_fields
+from ESMF.util.grid_utilities import *
+from ESMF.util.mesh_utilities import *
 
 
 class TestRegrid(TestBase):
@@ -87,7 +87,7 @@ class TestRegrid(TestBase):
         dstfield = rh(srcfield, dstfield)
 
     @attr('parallel')
-    def test_field_regrid_file(self):
+    def test_field_regrid_file1(self):
 
         def _barrier_():
             if pet_count() > 1:
@@ -153,6 +153,40 @@ class TestRegrid(TestBase):
         else:
             ds = Dataset("esmpy_test_field_regrid_file.nc", "r")
             ds.close()
+
+    @attr('serial')
+    def test_field_regrid_file2(self):
+        filename = 'esmpy_test_field_regrid_file2.nc'
+        path = os.path.join(os.getcwd(), filename)
+        if os.path.isfile(path):
+            os.remove(path)
+
+        sourcegrid = ESMF.Grid(np.array([20, 20]),
+                               staggerloc=ESMF.StaggerLoc.CENTER,
+                               coord_sys=ESMF.CoordSys.SPH_DEG)
+
+        source_lon = sourcegrid.get_coords(0)
+        source_lat = sourcegrid.get_coords(1)
+        source_lon[...], source_lat[...] = np.meshgrid(np.linspace(-120, 120, 20),
+                                                       np.linspace(-60, 60, 20))
+
+        destgrid = ESMF.Grid(np.array([10, 10]),
+                             staggerloc=ESMF.StaggerLoc.CENTER,
+                             coord_sys=ESMF.CoordSys.SPH_DEG)
+
+        dest_lon = destgrid.get_coords(0)
+        dest_lat = destgrid.get_coords(1)
+        dest_lon[...], dest_lat[...] = np.meshgrid(np.linspace(-120, 120, 10),
+                                                   np.linspace(-60, 60, 10))
+
+        sourcefield = ESMF.Field(sourcegrid)
+        destfield = ESMF.Field(destgrid)
+
+        _ = ESMF.Regrid(sourcefield, destfield, filename=filename,
+                        regrid_method=ESMF.RegridMethod.BILINEAR,
+                        unmapped_action=ESMF.UnmappedAction.IGNORE)
+
+        self.assertTrue(os.path.exists(filename))
 
     def test_field_regrid_gridmesh(self):
         # create mesh

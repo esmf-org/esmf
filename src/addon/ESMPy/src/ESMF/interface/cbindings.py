@@ -1984,9 +1984,13 @@ def ESMP_FieldRegridStoreFile(srcField, dstField, filename,
             raise TypeError('dstMaskValues must have dtype=int32')
         dstMaskValues_i = ESMP_InterfaceInt(dstMaskValues)
 
+    # Need to create a C string buffer for Python 3.
+    b_filename = filename.encode('utf-8')
+    b_filename = ct.create_string_buffer(b_filename)
+
     rc = _ESMF.ESMC_FieldRegridStoreFile(srcField.struct.ptr,
                                      dstField.struct.ptr,
-                                     filename,
+                                     b_filename,
                                      srcMaskValues_i,
                                      dstMaskValues_i,
                                      ct.byref(routehandle),
