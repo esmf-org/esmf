@@ -9291,7 +9291,6 @@ template<typename SIT, typename DIT>
     }
   }
   
-#define DEBUGGING
 #ifdef DEBUGGING
   {
     std::stringstream debugmsg;
@@ -9335,7 +9334,6 @@ template<typename SIT, typename DIT>
     ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_INFO);
   }
 #endif
-#undef DEBUGGING
     workWithTempArrays=true;
     // create the temporary arrays
     srcArray = Array::create(srcArray, true, &localrc);
