@@ -11384,8 +11384,38 @@ ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
   // sorting also ensures correct ordering of sendnb and recvnb calls w/o tags
   sort(recvnbVector.begin(), recvnbVector.end());
   sort(sendnbVector.begin(), sendnbVector.end());
-  
+
+#ifdef ASMM_STORE_MEMLOG_on
+  VM::logMemInfo(std::string("ASMMStoreNbVectors7.1"));
+#endif
+
+#define FORCE_SHRINK_AFTER_SORT_on
+#ifdef FORCE_SHRINK_AFTER_SORT_on
+  // shrink size of recvnbVector to where it was before sort
+  // may come at a performance hit
+  vector<ArrayHelper::RecvnbElement<DIT,SIT> > recvnbV = recvnbVector;
+  recvnbV.swap(recvnbVector);
+  vector<ArrayHelper::RecvnbElement<DIT,SIT> > ().swap(recvnbV);
+  // shrink size of sendnbVector to where it was before sort
+  // may come at a performance hit
+  vector<ArrayHelper::SendnbElement<SIT,DIT> > sendnbV = sendnbVector;
+  sendnbV.swap(sendnbVector);
+  vector<ArrayHelper::SendnbElement<SIT,DIT> > ().swap(sendnbV);
+#endif
+
+#ifdef ASMM_STORE_MEMLOG_on
+  VM::logMemInfo(std::string("ASMMStoreNbVectors7.2"));
+#endif
+
 #ifdef ASMM_STORE_COMMMATRIX_on
+#if 0
+  {
+    std::stringstream msg;
+    msg << "Storing CommMatrix: sendnbVector.size()=" << sendnbVector.size()
+        << " recvnbVector.size()=" << recvnbVector.size();
+    ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+  }
+#endif
   // store the communication matrix in compact (sparse) distributed fashion,
   vector<int> *commMatrixDstPet        = new vector<int>(sendnbVector.size());
   vector<int> *commMatrixDstDataCount  = new vector<int>(sendnbVector.size());
