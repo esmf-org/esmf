@@ -11,6 +11,10 @@
 //==============================================================================
 #define ESMC_FILENAME "ESMCI_Array_F.C"
 //==============================================================================
+
+#define ASMM_STORE_MEMLOG_on
+
+//==============================================================================
 //
 // This file contains the Fortran interface code to link F90 and C++.
 //
@@ -885,6 +889,10 @@ extern "C" {
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     
+#ifdef ASMM_STORE_MEMLOG_on
+    ESMCI::VM::logMemInfo(std::string(ESMC_METHOD": 1.0"));
+#endif
+
     try{
     
     // check argument consistency
@@ -914,6 +922,9 @@ extern "C" {
         return;
       }
     }
+#ifdef ASMM_STORE_MEMLOG_on
+    ESMCI::VM::logMemInfo(std::string(ESMC_METHOD": 2.0"));
+#endif
     // ignoreUnmatched flag
     bool ignoreUnmatchedOpt = false;  // default
     if (ESMC_NOT_PRESENT_FILTER(ignoreUnmatched) != ESMC_NULL_POINTER)
@@ -925,6 +936,9 @@ extern "C" {
     sparseMatrix.push_back(ESMCI::SparseMatrix<ESMC_I4,ESMC_I4>(
       *typekindFactors, factorList, *factorListCount, srcN, dstN, 
       (factorIndexList)->array));
+#ifdef ASMM_STORE_MEMLOG_on
+    ESMCI::VM::logMemInfo(std::string(ESMC_METHOD": 3.0"));
+#endif
     // Call into the actual C++ method wrapped inside LogErr handling
     if (ESMC_LogDefault.MsgFoundError(ESMCI::Array::sparseMatMulStore(
       *srcArray, *dstArray, routehandle, sparseMatrix, false, ignoreUnmatchedOpt,
@@ -932,6 +946,9 @@ extern "C" {
       ESMC_NOT_PRESENT_FILTER(pipelineDepth)),
       ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       ESMC_NOT_PRESENT_FILTER(rc))) return;
+#ifdef ASMM_STORE_MEMLOG_on
+    ESMCI::VM::logMemInfo(std::string(ESMC_METHOD": 4.0"));
+#endif
     
     }catch(int localrc){
       // catch standard ESMF return code
@@ -948,6 +965,10 @@ extern "C" {
       return;
     }
   
+#ifdef ASMM_STORE_MEMLOG_on
+    ESMCI::VM::logMemInfo(std::string(ESMC_METHOD": 5.0"));
+#endif
+
     // return successfully
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
