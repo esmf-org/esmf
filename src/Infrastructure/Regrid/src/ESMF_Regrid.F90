@@ -348,6 +348,14 @@ end function my_xor
 
        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
          ESMF_CONTEXT, rcToReturn=rc)) return
+         
+       ! Mark Meshes as CMemFreed
+       call ESMF_MeshSetIsCMeshFreed(srcMesh, rc=localrc)
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return
+       call ESMF_MeshSetIsCMeshFreed(dstMesh, rc=localrc)
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return
 
        ! Now we must allocate the F90 pointers and copy weights
        if (present(indices)) then

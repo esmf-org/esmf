@@ -12,6 +12,7 @@
 #define ESMC_FILENAME "ESMCI_MeshCap.C"
 //==============================================================================
 
+#define REGRID_STORE_MEMLOG_on
 
 //==============================================================================
 //
@@ -511,8 +512,9 @@ void MeshCap::regrid_create(
      } 
   }
 
-
-
+#ifdef REGRID_STORE_MEMLOG_on
+  VM::logMemInfo(std::string(ESMC_METHOD": 1.0"));
+#endif
 
   // Call into func. depending on mesh type
   if (is_esmf_mesh) {
