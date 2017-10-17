@@ -15,9 +15,10 @@
 
 #define ASMM_STORE_LOG_off
 #define ASMM_STORE_TIMING_off
-#define ASMM_STORE_MEMLOG_off
+#define ASMM_STORE_MEMLOG_on
 #define ASMM_STORE_COMMMATRIX_on
 #define ASMM_STORE_OPT_PRINT_off
+#define ASMM_STORE_DUMPSMM_on
 
 #define ASMM_EXEC_INFO_off
 #define ASMM_EXEC_TIMING_off
@@ -55,6 +56,14 @@
 #include "ESMCI_Macros.h"
 #include "ESMCI_LogErr.h"
 #include "ESMCI_IO.h"
+
+#ifdef ASMM_STORE_DUMPSMM_on
+extern "C" {
+  void FTN_X(f_esmf_outputsimpleweightfile)(char const *fileName, int *count,
+    double const *factorList, int const *factorIndexList,
+    int *rc, ESMCI_FortranStrLenArg len);
+}
+#endif
 
 using namespace std;
 
@@ -9304,6 +9313,22 @@ template<typename SIT, typename DIT>
   }
 #endif
 
+#ifdef ASMM_STORE_DUMPSMM_on
+  if (!tensorMixFlag && typekindFactors == ESMC_TYPEKIND_R8){
+    // SCRIP weight file output only supported w/o tensor mixing and R8 factors
+    char const *fileName="asmmDumpSMM.nc";
+    double const *factorList =
+      (double const *)sparseMatrix[0].getFactorList();
+    int const *factorIndexList =
+      (int const *)sparseMatrix[0].getFactorIndexList();
+    int count = sparseMatrix[0].getFactorListCount();
+    FTN_X(f_esmf_outputsimpleweightfile)(fileName, &count, factorList, 
+      factorIndexList, &localrc, strlen(fileName));
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+      ESMC_CONTEXT, NULL)) throw localrc;  // bail out with exception
+  }
+#endif
+    
   bool workWithTempArrays=false;
   if (!haloFlag){
   //TODO: Fix this!
