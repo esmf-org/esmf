@@ -1251,6 +1251,13 @@
 
       !------------------------------------------------------------------------
       !EX_UTest
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "VMId print test values Test"
+      call ESMF_VMIdPrint (vmid1(1), rc)
+      call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !EX_UTest
       write(failMsg, *) "Bad comparison result"
       write(name, *) "VMId Compare Test"
       tf = ESMF_VMIdCompare (vmid1(1), vmid2(1))

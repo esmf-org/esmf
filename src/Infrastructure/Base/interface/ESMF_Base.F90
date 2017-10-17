@@ -781,7 +781,8 @@ module ESMF_BaseMod
 !
 !
 !EOPI
-    integer                     :: localrc, ignorerc
+    integer                     :: localrc
+    integer                     :: ignore_iostat
     character(len=ESMF_MAXSTR)  :: opts
     type(ESMF_Logical)          :: tofile
 
@@ -800,8 +801,8 @@ module ESMF_BaseMod
 
     tofile = present (filename)
 
-    call ESMF_UtilIOUnitFlush (unit=ESMF_UtilIOstdout, rc=ignorerc)
-    ! Ignore localrc, because sometimes stdout is not open at this point
+    call ESMF_UtilIOUnitFlush (unit=ESMF_UtilIOstdout, rc=ignore_iostat)
+    ! Ignore iostat, because sometimes stdout is not open at this point
     ! and some compilers FLUSH statements will complain.
 
     call c_ESMC_BasePrint(base, 0, opts, tofile, filename, ESMF_TRUE, localrc)
