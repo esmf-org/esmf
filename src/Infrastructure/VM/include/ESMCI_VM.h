@@ -47,16 +47,19 @@
 
 namespace ESMCI {
 
-typedef struct {
+class VMId {
+  public:
   char *vmKey;    // bit-pattern that identifies VM VAS context
   int localID;    // local ID of the VM within VAS context
 
+  public:
+  VMId() { vmKey=NULL; localID=0; }
 
   int serialize(char *buffer, int *length, int *offset,
                 const ESMC_InquireFlag &inquireflag);
   int deserialize(char *buffer, int *offset);
   int print () const;
-} VMId;
+};
 
 } // namespace ESMCI
 
