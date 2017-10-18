@@ -47,10 +47,16 @@
 
 namespace ESMCI {
 
-typedef struct{
+typedef struct {
   char *vmKey;    // bit-pattern that identifies VM VAS context
   int localID;    // local ID of the VM within VAS context
-}VMId;
+
+
+  int serialize(char *buffer, int *length, int *offset,
+                const ESMC_InquireFlag &inquireflag);
+  int deserialize(char *buffer, int *offset);
+  int print () const;
+} VMId;
 
 } // namespace ESMCI
 
@@ -68,9 +74,7 @@ void VMIdDestroy(VMId *vmID, int *rc); // frees memory for vmKey memb
 bool VMIdCompare(VMId *vmID1, VMId *vmID2);
 int VMIdCopy(VMId *vmIDdst, VMId *vmIDsrc);
 void VMIdGet(VMId *vmID, int *localID, char *key, int key_len, int *rc);
-void VMIdPrint(VMId *vmID);
 void VMIdSet(VMId *vmID, int  localID, char *key, int key_len, int *rc);
-
 } // namespace ESMCI
 
 
