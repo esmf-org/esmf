@@ -120,7 +120,7 @@ void ESMCI_regrid_create(
   int regridConserve=ESMC_REGRID_CONSERVE_OFF;
 
 #define PROGRESSLOG_off
-#define MEMLOG_off
+#define MEMLOG_on
 
 #ifdef PROGRESSLOG_on
   ESMC_LogDefault.Write("c_esmc_regrid_create(): Just entered routine.", ESMC_LOGMSG_INFO);
