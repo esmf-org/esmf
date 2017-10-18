@@ -64,7 +64,7 @@
       type(ESMF_Base) :: base1, base2
       type(ESMF_AttReconcileFlag) :: attreconflag
       integer :: id, id_inq
-      type(ESMF_VMId) :: vmid, vmid_inq, vmid_new, vmid_new2
+      type(ESMF_VMId) :: vmid, vmid_new, vmid_inq
       character, allocatable   :: buffer(:)
       integer :: buff_size
       integer :: offset1, offset2, offset3
@@ -251,7 +251,7 @@
 
       !EX_UTest
       ! test getting of ESMF_Base members values,
-      call ESMF_BaseGetVMId (base, vmid_new2, rc=rc)
+      call ESMF_BaseGetVMId (base, vmid_new, rc=rc)
       write(name, *) "ESMF_BaseGetVMId new VMid"
       write(failMsg, *) "rc =", rc
       call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -324,7 +324,7 @@
       ! WARNING: This is testing an INTERNAL method.  It is NOT
       ! part of the supported ESMF user API!
       write(name, *) "Compare calculated buffer size with actual size"
-      write(failMsg, *) 'actual offset', offset2, ' > inquire offset', offset1
+      write(failMsg, *) 'offsets', offset1, ' >', offset2
       call ESMF_Test(offset1 >= offset2, &
                       name, failMsg, result, ESMF_SRCLINE)
 

@@ -380,6 +380,62 @@ void VMIdGet(
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::VMIdPrint()"
+//BOPI
+// !IROUTINE:  ESMCI::VMIdPrint
+//
+// !INTERFACE:
+void VMIdPrint(
+//
+// !RETURN VALUE:
+//    
+//
+// !ARGUMENTS:
+//
+  VMId *vmID
+  ){
+//
+// !DESCRIPTION:
+//    Print an {\tt ESMC\_VMId} object.
+//
+//EOPI
+//-----------------------------------------------------------------------------
+  printf("ESMCI::VMIdPrint:\n");
+  if (vmID==NULL){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+      "- Invalid vmID", ESMC_CONTEXT, NULL);
+    return; // bail out
+  }
+  printf("vmID located at: %p\n", vmID);
+  if (vmID->vmKey==NULL){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+      "- Invalid vmID->vmKey", ESMC_CONTEXT, NULL);
+    return; // bail out
+  }
+  printf("  vmKey=0x");
+  int bitmap=0;
+  int k=0;
+  for (int i=0; i<vmKeyWidth; i++){
+    bitmap |= vmID->vmKey[i];
+    bitmap = bitmap << 8;
+    ++k;
+    if (k==4){
+      printf("%X", bitmap);
+      bitmap=0;
+      k=0;
+    }
+  }
+  if (k!=0){
+    bitmap = bitmap << (3-k)*8;
+    printf("%X\n", bitmap);
+  }
+  printf("  localID: %d\n", vmID->localID);
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::VMIdSet()"
 //BOPI
 // !IROUTINE:  ESMCI::VMIdSet
@@ -1245,186 +1301,13 @@ int VM::print() const{
     VMId *vmid = getVMId(&localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       &rc)) return rc;
-    vmid->print();
+    VMIdPrint(vmid);
     VMK::print();
   }
   printf("--- ESMCI::VM::print() end ---\n");
 
   // return successfully
   rc = ESMF_SUCCESS;
-  return rc;
-}
-//-----------------------------------------------------------------------------
-
-
-//-----------------------------------------------------------------------------
-#undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI::VMId::print()"
-//BOPI
-// !IROUTINE:  ESMCI::VMId::print
-//
-// !INTERFACE:
-int VMId::print() const{
-//
-// !RETURN VALUE:
-//    int return code
-//
-//
-// !DESCRIPTION:
-//    Print details of VMId object
-//
-//EOPI
-//-----------------------------------------------------------------------------
-  // initialize return code; assume routine not implemented
-  int localrc = ESMC_RC_NOT_IMPL;         // local return code
-  int rc = ESMC_RC_NOT_IMPL;              // final return code
-
-  // print info about the ESMCI::VM object
-  std::cout << "--- ESMCI::VMId::print() start ---" << std::endl;
-  if (this == NULL){
-    std::cout << "VMId object on this PET is NULL, probably a proxy member." << std::endl;
-  }else{
-    std::cout << "  vmKeyWidth = " << vmKeyWidth << std::endl;
-    printf("  vmKey=0x");
-    int bitmap=0;
-    int k=0;
-    for (int i=0; i<vmKeyWidth; i++){
-      bitmap |= vmKey[i];
-      bitmap = bitmap << 8;
-      ++k;
-      if (k==4){
-        printf("%X", bitmap);
-        bitmap=0;
-        k=0;
-      }
-    }
-    if (k!=0){
-      bitmap = bitmap << (3-k)*8;
-      printf("%X\n", bitmap);
-    }
-    std::cout << "  localID = " << localID << std::endl;
-  }
-  std::cout << "--- ESMCI::VMId::print() end ---" << std::endl;
-
-  // return successfully
-  rc = ESMF_SUCCESS;
-  return rc;
-}
-//-----------------------------------------------------------------------------
-
-
-//-----------------------------------------------------------------------------
-#undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI::VMId::deserialize()"
-//BOPI
-// !IROUTINE:  ESMCI::VMId::deserialize
-//
-// !INTERFACE:
-int VMId::deserialize(char *buffer, int *offset) {
-//
-// !RETURN VALUE:
-//    int return code
-//
-//
-// !DESCRIPTION:
-//    Deserialize a buffer into a VMId object
-//
-//EOPI
-//-----------------------------------------------------------------------------
-
-  char *cp;
-  int *ip;
-
-  // initialize return code; assume routine not implemented
-  int localrc = ESMC_RC_NOT_IMPL;         // local return code
-  int rc = ESMC_RC_NOT_IMPL;              // final return code
-
-  int r=*offset%8;
-  if (r!=0) *offset += 8-r;  // alignment
-
-  ip = (int *)(buffer + *offset);
-  int keywidth = *ip++;
-  localID = *ip++;
-  cp = (char *)ip;
-  if (vmKey) {
-    memcpy (vmKey, cp, keywidth);
-    cp += keywidth;
-  } else {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-        "Null vmKey when deserializing a VMId object",
-        ESMC_CONTEXT, &localrc);
-    return localrc;
-  }
-
-  // update offset to point to past the current obj
-  *offset = (cp - buffer);
-
-  // return successfully
-  rc = localrc;  // ESMF_SUCCESS;
-  return rc;
-}
-//-----------------------------------------------------------------------------
-
-
-//-----------------------------------------------------------------------------
-#undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI::VMId::serialize()"
-//BOPI
-// !IROUTINE:  ESMCI::VMId::serialize
-//
-// !INTERFACE:
-int VMId::serialize(char *buffer, int *length, int *offset,
-                const ESMC_InquireFlag &inquireflag) {
-//
-// !RETURN VALUE:
-//    int return code
-//
-//
-// !DESCRIPTION:
-//    Turn info in a VMId object into a stream of bytes.
-//
-//EOPI
-//-----------------------------------------------------------------------------
-
-  char *cp;
-  int *ip;
-
-  // initialize return code; assume routine not implemented
-  int localrc = ESMC_RC_NOT_IMPL;         // local return code
-  int rc = ESMC_RC_NOT_IMPL;              // final return code
-
-  int r=*offset%8;
-  if (r!=0) *offset += 8-r;  // alignment
-
-  int fixedpart = 2*sizeof (int) + vmKeyWidth;
-  if (inquireflag == ESMF_INQUIREONLY) {
-    *offset += fixedpart;
-  } else {
-    if ((*length - *offset) < fixedpart) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-          "Buffer too short to serialize a VMId object",
-          ESMC_CONTEXT, &localrc);
-      return localrc;
-    }
-    ip = (int *)(buffer + *offset);
-    *ip++ = vmKeyWidth;
-    *ip++ = localID;
-    cp = (char *) ip;
-    if (vmKey == NULL) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-          "Null vmKey when serializing a VMId object",
-          ESMC_CONTEXT, &localrc);
-      return localrc;
-    }
-    memcpy (cp, vmKey, vmKeyWidth);
-    cp += vmKeyWidth;
-
-    // update offset to point to past the current obj
-    *offset = (cp - buffer);
-  }
-
-  // return successfully
-  rc = localrc;  // ESMF_SUCCESS;
   return rc;
 }
 //-----------------------------------------------------------------------------
@@ -2254,7 +2137,7 @@ void VM::printMatchTable(
   printf("matchTableBound = %d\n", matchTableBound);
   for (int i=0; i<matchTableBound; i++) {
     printf("matchTable_tid[%d] = %lu\n", i, matchTable_tid[i]);
-    (&matchTable_vmID[i])->print();
+    VMIdPrint (&matchTable_vmID[i]);
   }
   printf("--- ESMCI::VM::printMatchTable() end ---\n");
 }
