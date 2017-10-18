@@ -4080,3 +4080,35 @@ end function CDFCheckError
 
 
 end module ESMF_IOScripMod
+
+
+!!!!!! f_esmf_ interfaces to be callable from ESMCI !!!!!!!!!!!!!!!!!!!!!!!
+
+subroutine f_esmf_outputsimpleweightfile(fileName, count, factorList, &
+  factorIndexList, rc)
+  use ESMF_UtilTypesMod
+  use ESMF_IOScripMod
+  use ESMF_LogErrMod
+  
+  implicit none
+  
+  character(len=*)          :: fileName
+  integer                   :: count
+  real(ESMF_KIND_R8)        :: factorList(count)
+  integer(ESMF_KIND_I4)     :: factorIndexList(2,count)
+  integer                   :: rc
+  
+  ! Initialize return code; assume routine not implemented
+  rc = ESMF_RC_NOT_IMPL
+
+  ! call into the ESMF_ routine
+  call ESMF_OutputSimpleWeightFile(fileName, factorList, &
+    factorIndexList, rc=rc)
+  if (ESMF_LogFoundError(rc, &
+    ESMF_ERR_PASSTHRU, &
+    ESMF_CONTEXT)) return
+  
+  ! return successfully
+  rc = ESMF_SUCCESS
+  
+end subroutine f_esmf_outputsimpleweightfile

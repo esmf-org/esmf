@@ -18,6 +18,7 @@
 #define ASMM_STORE_MEMLOG_off
 #define ASMM_STORE_COMMMATRIX_on
 #define ASMM_STORE_OPT_PRINT_off
+#define ASMM_STORE_DUMPSMM_off
 
 #define ASMM_EXEC_INFO_off
 #define ASMM_EXEC_TIMING_off
@@ -55,6 +56,14 @@
 #include "ESMCI_Macros.h"
 #include "ESMCI_LogErr.h"
 #include "ESMCI_IO.h"
+
+#ifdef ASMM_STORE_DUMPSMM_on
+extern "C" {
+  void FTN_X(f_esmf_outputsimpleweightfile)(char const *fileName, int *count,
+    double const *factorList, int const *factorIndexList,
+    int *rc, ESMCI_FortranStrLenArg len);
+}
+#endif
 
 using namespace std;
 
@@ -9291,7 +9300,6 @@ template<typename SIT, typename DIT>
     }
   }
   
-#define DEBUGGING
 #ifdef DEBUGGING
   {
     std::stringstream debugmsg;
@@ -9305,6 +9313,22 @@ template<typename SIT, typename DIT>
   }
 #endif
 
+#ifdef ASMM_STORE_DUMPSMM_on
+  if (!tensorMixFlag && typekindFactors == ESMC_TYPEKIND_R8){
+    // SCRIP weight file output only supported w/o tensor mixing and R8 factors
+    char const *fileName="asmmDumpSMM.nc";
+    double const *factorList =
+      (double const *)sparseMatrix[0].getFactorList();
+    int const *factorIndexList =
+      (int const *)sparseMatrix[0].getFactorIndexList();
+    int count = sparseMatrix[0].getFactorListCount();
+    FTN_X(f_esmf_outputsimpleweightfile)(fileName, &count, factorList, 
+      factorIndexList, &localrc, strlen(fileName));
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+      ESMC_CONTEXT, NULL)) throw localrc;  // bail out with exception
+  }
+#endif
+    
   bool workWithTempArrays=false;
   if (!haloFlag){
   //TODO: Fix this!
@@ -9335,7 +9359,6 @@ template<typename SIT, typename DIT>
     ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_INFO);
   }
 #endif
-#undef DEBUGGING
     workWithTempArrays=true;
     // create the temporary arrays
     srcArray = Array::create(srcArray, true, &localrc);
@@ -11361,8 +11384,38 @@ ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
   // sorting also ensures correct ordering of sendnb and recvnb calls w/o tags
   sort(recvnbVector.begin(), recvnbVector.end());
   sort(sendnbVector.begin(), sendnbVector.end());
-  
+
+#ifdef ASMM_STORE_MEMLOG_on
+  VM::logMemInfo(std::string("ASMMStoreNbVectors7.1"));
+#endif
+
+#define FORCE_SHRINK_AFTER_SORT_on
+#ifdef FORCE_SHRINK_AFTER_SORT_on
+  // shrink size of recvnbVector to where it was before sort
+  // may come at a performance hit
+  vector<ArrayHelper::RecvnbElement<DIT,SIT> > recvnbV = recvnbVector;
+  recvnbV.swap(recvnbVector);
+  vector<ArrayHelper::RecvnbElement<DIT,SIT> > ().swap(recvnbV);
+  // shrink size of sendnbVector to where it was before sort
+  // may come at a performance hit
+  vector<ArrayHelper::SendnbElement<SIT,DIT> > sendnbV = sendnbVector;
+  sendnbV.swap(sendnbVector);
+  vector<ArrayHelper::SendnbElement<SIT,DIT> > ().swap(sendnbV);
+#endif
+
+#ifdef ASMM_STORE_MEMLOG_on
+  VM::logMemInfo(std::string("ASMMStoreNbVectors7.2"));
+#endif
+
 #ifdef ASMM_STORE_COMMMATRIX_on
+#if 0
+  {
+    std::stringstream msg;
+    msg << "Storing CommMatrix: sendnbVector.size()=" << sendnbVector.size()
+        << " recvnbVector.size()=" << recvnbVector.size();
+    ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+  }
+#endif
   // store the communication matrix in compact (sparse) distributed fashion,
   vector<int> *commMatrixDstPet        = new vector<int>(sendnbVector.size());
   vector<int> *commMatrixDstDataCount  = new vector<int>(sendnbVector.size());

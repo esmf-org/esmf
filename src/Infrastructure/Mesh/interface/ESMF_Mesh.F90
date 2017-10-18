@@ -188,6 +188,7 @@ module ESMF_MeshMod
   public ESMF_MeshTurnOffNodeMask
   public ESMF_MeshCreateDual  ! not a public interface for now
   public ESMF_MeshSetMOAB
+  public ESMF_MeshSetIsCMeshFreed
   public ESMF_MeshGetIntPtr
   public ESMF_MeshCreateFromIntPtr
   public ESMF_MeshCreateCubedSphere
@@ -4562,6 +4563,37 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     
     end subroutine ESMF_MeshSetMOAB
 
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_MeshSetIsCMeshFreed()"
+!BOP
+! !IROUTINE: ESMF_MeshSetIsCMeshFreed 
+!
+! !INTERFACE:
+   subroutine ESMF_MeshSetIsCMeshFreed(mesh, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_Mesh), intent(inout)             :: mesh
+    integer, intent(out) , optional            :: rc
+!
+! !DESCRIPTION:
+!   Set the isCMeshFreed to true
+!
+!   \begin{description}
+!   \item [mesh]
+!         The mesh.
+!   \item [{[rc]}]
+!         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+!------------------------------------------------------------------------------
+    
+    mesh%isCMeshFreed=.true.
+        
+    if (present(rc)) rc = ESMF_SUCCESS
+    
+  end subroutine ESMF_MeshSetIsCMeshFreed
 !------------------------------------------------------------------------------
 
 #undef  ESMF_METHOD

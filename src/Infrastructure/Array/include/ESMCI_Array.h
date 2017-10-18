@@ -431,6 +431,7 @@ namespace ESMCI {
       void const *factorIndexList_);
     ESMC_TypeKind_Flag getTypekind()const{return typekind;}
     void const *getFactorList()const{return factorList;}
+    void const *getFactorIndexList()const{return factorIndexList;}
     int getFactorListCount()const{return factorListCount;}
     SeqInd<SIT> getSrcSeqIndex(int i)const{
       char *fil = (char *)factorIndexList;
