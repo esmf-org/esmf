@@ -50,6 +50,21 @@ extern "C" {
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
 
+  void FTN_X(c_esmc_routehandlecreaterh)(ESMCI::RouteHandle **ptr, 
+    ESMCI::RouteHandle **rh, int *rc){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_routehandlecreaterh()"
+    // Initialize return code; assume routine not implemented
+    if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+    int localrc = ESMC_RC_NOT_IMPL;
+    // call into C++
+    *ptr = ESMCI::RouteHandle::create(*rh, &localrc);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      ESMC_NOT_PRESENT_FILTER(rc))) return;
+    // return successfully
+    if (rc!=NULL) *rc = ESMF_SUCCESS;
+  }
+
   void FTN_X(c_esmc_routehandledestroy)(ESMCI::RouteHandle **ptr, 
     ESMC_Logical *noGarbage, int *rc){
 #undef  ESMC_METHOD

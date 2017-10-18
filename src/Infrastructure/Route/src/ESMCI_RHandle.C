@@ -51,7 +51,7 @@ static const char *const version =
 
 namespace ESMCI {
 
-  //-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::RouteHandle::create()"
 //BOP
@@ -78,14 +78,86 @@ RouteHandle *RouteHandle::create(
   RouteHandle *routehandle;
   try{
 
+    // new object
     routehandle = new RouteHandle;
 
+    // construct initial internals
     localrc = routehandle->construct();
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
       ESMC_CONTEXT, rc)){
       routehandle->ESMC_BaseSetStatus(ESMF_STATUS_INVALID);  // mark invalid
       return NULL;
     }
+    
+  }catch(int localrc){
+    // catch standard ESMF return code
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      rc);
+    routehandle->ESMC_BaseSetStatus(ESMF_STATUS_INVALID);  // mark invalid
+    return NULL;
+  }catch(...){
+    // allocation error
+    ESMC_LogDefault.MsgAllocError("for new ESMCI::RouteHandle.", ESMC_CONTEXT, 
+      rc);  
+    routehandle->ESMC_BaseSetStatus(ESMF_STATUS_INVALID);  // mark invalid
+    return NULL;
+  }
+
+  // return successfully
+  if (rc!=NULL) *rc = ESMF_SUCCESS;
+  return routehandle;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::RouteHandle::create()"
+//BOP
+// !IROUTINE:  ESMCI::RouteHandle::create - Create a new RouteHandle from RH
+//
+// !INTERFACE:
+RouteHandle *RouteHandle::create(
+//
+// !RETURN VALUE:
+//  pointer to newly allocated RouteHandle
+//
+// !ARGUMENTS:
+    RouteHandle *rh,     // in  - routehandle to copy from
+    int *rc) {           // out - return code
+//
+// !DESCRIPTION:
+//  Allocate memory for a new RouteHandle object and initialize it.
+//  Then copy internals of incoming 'rh' into the newly create object.
+//
+//EOP
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;   // final return code
+  
+  RouteHandle *routehandle;
+  try{
+
+    // new object
+    routehandle = new RouteHandle;
+
+    // construct initial internals
+    localrc = routehandle->construct();
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+      ESMC_CONTEXT, rc)){
+      routehandle->ESMC_BaseSetStatus(ESMF_STATUS_INVALID);  // mark invalid
+      return NULL;
+    }
+    
+    // copy the information from the incoming RH
+    routehandle->htype = rh->htype;
+    
+    for (int i=0; i<RHSTORAGECOUNT; i++)
+      routehandle->storage[i] = rh->storage[i];
+
+    routehandle->srcArray = rh->srcArray;
+    routehandle->dstArray = rh->dstArray;
     
   }catch(int localrc){
     // catch standard ESMF return code
@@ -183,8 +255,12 @@ int RouteHandle::construct(
 //EOP
 //-----------------------------------------------------------------------------
   htype = ESMC_UNINITIALIZEDHANDLE;
+
   for (int i=0; i<RHSTORAGECOUNT; i++)
     storage[i] = NULL;
+
+  srcArray = NULL;
+  dstArray = NULL;
 
   return ESMF_SUCCESS;
 }
