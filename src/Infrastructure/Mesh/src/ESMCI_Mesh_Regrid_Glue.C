@@ -123,7 +123,7 @@ void ESMCI_regrid_create(
 #define MEMLOG_on
 
 #ifdef PROGRESSLOG_on
-   ESMC_LogDefault.Write("c_esmc_regrid_create(): Just entered routine.", ESMC_LOGMSG_INFO);
+  ESMC_LogDefault.Write("c_esmc_regrid_create(): Just entered routine.", ESMC_LOGMSG_INFO);
 #endif
 
 #ifdef MEMLOG_on
@@ -177,7 +177,7 @@ void ESMCI_regrid_create(
 #endif
 
 #ifdef MEMLOG_on
-  VM::logMemInfo(std::string("RegridCreate2.0"));
+    VM::logMemInfo(std::string("RegridCreate2.0"));
 #endif
 
     // Compute Weights matrix
@@ -219,7 +219,7 @@ void ESMCI_regrid_create(
 #endif
 
 #ifdef MEMLOG_on
-  VM::logMemInfo(std::string("RegridCreate3.0"));
+    VM::logMemInfo(std::string("RegridCreate3.0"));
 #endif
 
     // If requested get list of unmapped destination points
@@ -284,7 +284,7 @@ void ESMCI_regrid_create(
 #endif
 
 #ifdef MEMLOG_on
-  VM::logMemInfo(std::string("RegridCreate4.0"));
+    VM::logMemInfo(std::string("RegridCreate4.0"));
 #endif
 
     /////// We have the weights, now set up the sparsemm object /////
@@ -392,21 +392,24 @@ void ESMCI_regrid_create(
 #endif
 
 #ifdef MEMLOG_on
-  VM::logMemInfo(std::string("RegridCreate5.0"));
+    VM::logMemInfo(std::string("RegridCreate5.0"));
 #endif
 
     delete wts; // local garbage collection
     
 #ifdef MEMLOG_on
-  VM::logMemInfo(std::string("RegridCreate5.1"));
+    VM::logMemInfo(std::string("RegridCreate5.1"));
 #endif
   
-  // high time to remove memory from
-  delete srcmesh;
-  delete dstmesh;
-
+#ifdef C_SIDE_REGRID_FREED_MESH
+    // enabling this freature currently breaks several tests
+    delete srcmesh;
+    delete dstmesh;
+    //TODO: also drop PointList objects here if possible to reduce Store() memory footrint
+#endif
+  
 #ifdef MEMLOG_on
-  VM::logMemInfo(std::string("RegridCreate5.2"));
+    VM::logMemInfo(std::string("RegridCreate5.2"));
 #endif
 
     // Build the ArraySMM
@@ -426,7 +429,7 @@ void ESMCI_regrid_create(
 #endif
 
 #ifdef MEMLOG_on
-  VM::logMemInfo(std::string("RegridCreate6.0"));
+    VM::logMemInfo(std::string("RegridCreate6.0"));
 #endif
 
     *nentries = num_entries;

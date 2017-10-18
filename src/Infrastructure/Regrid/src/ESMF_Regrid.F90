@@ -349,6 +349,8 @@ end function my_xor
        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
          ESMF_CONTEXT, rcToReturn=rc)) return
          
+#ifdef C_SIDE_REGRID_FREE_MESH
+! enabling this freature currently breaks several tests
        ! Mark Meshes as CMemFreed
        call ESMF_MeshSetIsCMeshFreed(srcMesh, rc=localrc)
        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -356,7 +358,7 @@ end function my_xor
        call ESMF_MeshSetIsCMeshFreed(dstMesh, rc=localrc)
        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
          ESMF_CONTEXT, rcToReturn=rc)) return
-
+#endif
        ! Now we must allocate the F90 pointers and copy weights
        if (present(indices)) then
          allocate(indices(2,nentries))
