@@ -106,6 +106,7 @@ int VMK::mpi_thread_level;
 int VMK::ncores;
 int *VMK::cpuid;
 int *VMK::ssiid;
+double VMK::wtime0;
 // Static data members to support command line arguments
 int VMK::argc;
 char *VMK::argv_store[100];
@@ -312,6 +313,7 @@ void VMK::init(MPI_Comm mpiCommunicator){
 #endif
   }
   // so now MPI is for sure initialized...
+  wtime0 = MPI_Wtime();
   // TODO: now it should be safe to call obtain_args() for all MPI impl.
   // Obtain MPI variables
   int rank, size;
@@ -5076,7 +5078,7 @@ int VMK::broadcast(void *data, int len, int root, commhandle **ch){
 
 
 void VMK::wtime(double *time){
-  *time = MPI_Wtime();
+  *time = MPI_Wtime() - wtime0;
 }
 
 

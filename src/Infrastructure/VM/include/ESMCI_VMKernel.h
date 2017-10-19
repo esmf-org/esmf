@@ -212,9 +212,10 @@ class VMK{
     int nhandles;
     commhandle *firsthandle;
     // static info of physical machine
-    static int ncores; // total number of cores in the physical machine
-    static int *cpuid; // cpuid associated with certain core (multi-core cpus)
-    static int *ssiid; // single system image id to which this core belongs
+    static int ncores;  // total number of cores in the physical machine
+    static int *cpuid;  // cpuid associated with certain core (multi-core cpus)
+    static int *ssiid;    // single system image id to which this core belongs
+    static double wtime0; // the MPI WTime at the very beginning of execution
   public:
     // Declaration of static data members - Definitions are in the header of
     // source file ESMF_VMKernel.C

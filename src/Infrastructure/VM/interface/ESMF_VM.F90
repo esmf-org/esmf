@@ -8159,8 +8159,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \end{itemize}
 !
 ! !DESCRIPTION:
-!   Get floating-point number of seconds of elapsed wall-clock time since some
-!   time in the past.
+!   Get floating-point number of seconds of elapsed wall-clock time since the
+!   beginning of execution of the application.
 !
 !   The arguments are:
 !   \begin{description}

@@ -11,6 +11,8 @@
 //==============================================================================
 #define ESMC_FILENAME "ESMCI_VM.C"
 //==============================================================================
+#define GARBAGE_COLLECTION_LOG_off
+//==============================================================================
 //
 // VM class implementation (body) file
 //
@@ -641,7 +643,7 @@ void VM::shutdown(
   int *rc){                       // return code
 //
 // !DESCRIPTION:
-//    Startup a new child VM according to plan.
+//    Shut down a child VM according to plan.
 //
 //EOPI
 //-----------------------------------------------------------------------------
@@ -750,7 +752,13 @@ void VM::shutdown(
           // The following loop deletes deep C++ ESMF objects derived from
           // Base class. For deep Fortran classes it deletes the Base member.
           for (int k=matchTable_Objects[i].size()-1; k>=0; k--){
-//fprintf(stderr, "about to delete i=%d k=%d %p\n", i, k, matchTable_Objects[i][k]);
+#ifdef GARBAGE_COLLECTION_LOG_on
+            std::stringstream debugmsg;
+            debugmsg << "ESMF Automatic Garbage Collection: delete: "
+              << matchTable_Objects[i][k]->ESMC_BaseGetClassName() << " : "
+              << matchTable_Objects[i][k]->ESMC_BaseGetName();
+            ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_INFO);
+#endif
             delete matchTable_Objects[i][k];  // delete ESMF object, incl. Base
             matchTable_Objects[i].pop_back();
           }
@@ -1767,6 +1775,12 @@ void VM::logMemInfo(
     (m.hblkhd+m.uordblks)/1024);
   sprintf(msg, "%s - MemInfo: %s", prefix.c_str(), line);
   ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
+  // output the wtime since execution start
+  double wt;
+  ESMCI::VMK::wtime(&wt);
+  sprintf(line, "Wall-clock time since execution start (s): \t%g", wt);
+  sprintf(msg, "%s - MemInfo: %s", prefix.c_str(), line);
+  ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
   // unlock again
   vm->unlock();
 #endif
@@ -2457,6 +2471,13 @@ void VM::finalize(
     // The following loop deletes deep C++ ESMF objects derived from
     // Base class. For deep Fortran classes it deletes the Base member.
     for (int k=matchTable_Objects[0].size()-1; k>=0; k--){
+#ifdef GARBAGE_COLLECTION_LOG_on
+      std::stringstream debugmsg;
+      debugmsg << "ESMF Automatic Garbage Collection: delete: "
+        << matchTable_Objects[0][k]->ESMC_BaseGetClassName() << " : "
+        << matchTable_Objects[0][k]->ESMC_BaseGetName();
+      ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_INFO);
+#endif
       delete matchTable_Objects[0][k];  // delete ESMF object, incl. Base
       matchTable_Objects[0].pop_back();
     }
