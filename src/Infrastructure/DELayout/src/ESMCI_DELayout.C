@@ -36,6 +36,7 @@
 #include <cstring>
 #include <typeinfo>
 #include <vector>
+#include <map>
 #include <sstream>
 
 // include ESMF headers
@@ -2792,6 +2793,79 @@ XXE::XXE(XXE *xxe, map<void *, void *> *bufferMap){
     delete bufferMap;
   }
   
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::XXE::~XXE()"
+// destructor
+XXE::~XXE(){
+  // -> clean-up all allocations for which this XXE object is responsible:
+  // stream of XXE elements
+  delete [] stream;
+  // memory allocations held in storage
+  std::map<void *, int>::iterator it;
+  for (it=storageMap.begin(); it!=storageMap.end(); it++){
+cout << "delete from storageMap: " << it->first << "\n";
+    delete [] (char *)it->first;  // free the associated memory
+  }
+  delete [] storage;
+  // CommHandles held in commhandle
+  for (int i=0; i<commhandleCount; i++){
+    delete *commhandle[i];
+    delete commhandle[i];
+  }
+  delete [] commhandle;
+  // XXE sub objects held in xxeSubList
+  for (int i=0; i<xxeSubCount; i++)
+    delete xxeSubList[i];
+  delete [] xxeSubList;
+  // BufferInfo objects held in bufferInfoList
+  for (unsigned int i=0; i<bufferInfoList.size(); i++)
+    delete bufferInfoList[i];
+  bufferInfoList.clear();
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::XXE::clearReset()"
+void XXE::clearReset(int countArg, int storageCountArg, int commhandleCountArg,
+  int xxeSubCountArg, int bufferInfoListArg){
+  // reset the stream back to a specified position, and clear all
+  // bookkeeping elements above specified positions
+  count = countArg; // reset
+  // cannot use storageMap to reset, because need something linear
+  if (storageCountArg>-1){
+    for (int i=storageCountArg; i<storageCount; i++){
+      storageMap.erase(storage[i]); // remove entry from storageMap
+      delete [] storage[i];       // free the referenced memory
+    }
+    storageCount = storageCountArg; // reset
+  }
+  if (commhandleCountArg>-1){
+    for (int i=commhandleCountArg; i<commhandleCount; i++){
+      delete *commhandle[i];
+      delete commhandle[i];
+    }
+    commhandleCount = commhandleCountArg; // reset
+  }
+  if (xxeSubCountArg>-1){
+    for (int i=xxeSubCountArg; i<xxeSubCount; i++)
+      delete xxeSubList[i];
+    xxeSubCount = xxeSubCountArg; // reset
+  }
+  if (bufferInfoListArg>-1){
+    std::vector<BufferInfo *>::iterator first =
+      bufferInfoList.begin() + bufferInfoListArg;
+    std::vector<BufferInfo *>::iterator last = bufferInfoList.end();
+    for (std::vector<BufferInfo *>::iterator bi=first; bi!=last; ++bi)
+      delete *bi;
+    bufferInfoList.erase(first, last);
+  }
 }
 //-----------------------------------------------------------------------------
 
@@ -8141,6 +8215,8 @@ int XXE::storeStorage(
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
+  
+  storageMap[storageArg] = 0; // zero size for now
   
   storage[storageCount] = storageArg;
   localrc = incStorageCount();

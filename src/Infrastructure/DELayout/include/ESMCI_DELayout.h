@@ -32,6 +32,7 @@
 //-------------------------------------------------------------------------
 
 #include <vector>
+#include <map>
 
 #include "ESMCI_Base.h"       // Base is superclass to DELayout
 #include "ESMCI_VM.h"
@@ -314,6 +315,7 @@ class XXE{
     VM *vm;
     StreamElement *stream;          // actual stream containing XXE elements
     int count;                      // number of elements in the stream
+    std::map<void *, int> storageMap; // map object to hold (pointer,size) pairs
     char **storage;                 // list of (char *) entries to allocations
                                     // for which this XXE object is responsible
     int storageCount;               // number of elements in storage
@@ -364,62 +366,10 @@ class XXE{
       superVectorOkay = true;
     }
     XXE(XXE *xxe, std::map<void *, void *> *bufferMap=NULL);  // constructor
-    ~XXE(){
-      // destructor
-      // -> clean-up all allocations for which this XXE object is responsible:
-      // stream of XXE elements
-      delete [] stream;
-      // memory allocations held in storage
-      for (int i=0; i<storageCount; i++)
-        delete [] storage[i];
-      delete [] storage;
-      // CommHandles held in commhandle
-      for (int i=0; i<commhandleCount; i++){
-        delete *commhandle[i];
-        delete commhandle[i];
-      }
-      delete [] commhandle;
-      // XXE sub objects held in xxeSubList
-      for (int i=0; i<xxeSubCount; i++)
-        delete xxeSubList[i];
-      delete [] xxeSubList;
-      // BufferInfo objects held in bufferInfoList
-      for (unsigned int i=0; i<bufferInfoList.size(); i++)
-        delete bufferInfoList[i];
-      bufferInfoList.clear();
-    }
+    ~XXE();      // destructor
     void clearReset(int countArg, int storageCountArg=-1, 
       int commhandleCountArg=-1, int xxeSubCountArg=-1, 
-      int bufferInfoListArg=-1){
-      // reset the stream back to a specified position, and clear all
-      // bookkeeping elements above specified positions
-      count = countArg; // reset
-      if (storageCountArg>-1){
-        for (int i=storageCountArg; i<storageCount; i++)
-          delete [] storage[i];
-        storageCount = storageCountArg; // reset
-      }
-      if (commhandleCountArg>-1){
-        for (int i=commhandleCountArg; i<commhandleCount; i++){
-          delete *commhandle[i];
-          delete commhandle[i];
-        }
-        commhandleCount = commhandleCountArg; // reset
-      }
-      if (xxeSubCountArg>-1){
-        for (int i=xxeSubCountArg; i<xxeSubCount; i++)
-          delete xxeSubList[i];
-        xxeSubCount = xxeSubCountArg; // reset
-      }
-      if (bufferInfoListArg>-1){
-        std::vector<BufferInfo *>::iterator first =
-          bufferInfoList.begin() + bufferInfoListArg;
-        std::vector<BufferInfo *>::iterator last = bufferInfoList.end();
-        for (std::vector<BufferInfo *>::iterator bi=first; bi!=last; ++bi)
-          delete *bi;
-        bufferInfoList.erase(first, last);
-      }
-    }
+      int bufferInfoListArg=-1);
     bool getNextSubSuperVectorOkay(int *k){
       // search for the next xxeSub element in the stream, starting at index k.
       // when found return the element's superVectorOkay setting, and also 
