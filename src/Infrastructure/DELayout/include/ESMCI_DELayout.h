@@ -346,7 +346,7 @@ class XXE{
   public:
     XXE(VM *vmArg, int maxArg=1000, int storageMaxCountArg=1000,
       int commhandleMaxCountArg=1000, int xxeSubMaxCountArg=1000){
-      // constructor
+      // constructor...
       vm = vmArg;
       // -> set up internal stream and bookkeeping members
       stream = new StreamElement[maxArg]; count = 0; max = maxArg;
@@ -363,6 +363,7 @@ class XXE{
       lastFilterBitField = 0x0;
       superVectorOkay = true;
     }
+    XXE(XXE *xxe, std::map<void *, void *> *bufferMap=NULL);  // constructor
     ~XXE(){
       // destructor
       // -> clean-up all allocations for which this XXE object is responsible:
@@ -558,12 +559,12 @@ class XXE{
       int predicateBitField;
       bool activeFlag;
       bool cancelledFlag;
+      bool vectorFlag;
+      bool indirectionFlag;
       void *buffer;
       int size;
       int dstPet;
       int tag;
-      bool vectorFlag;
-      bool indirectionFlag;
     }SendInfo;
 
     typedef struct{
@@ -571,12 +572,12 @@ class XXE{
       int predicateBitField;
       bool activeFlag;
       bool cancelledFlag;
+      bool vectorFlag;
+      bool indirectionFlag;
       void *buffer;
       int size;
       int srcPet;
       int tag;
-      bool vectorFlag;
-      bool indirectionFlag;
     }RecvInfo;
 
     typedef struct{
@@ -584,12 +585,12 @@ class XXE{
       int predicateBitField;
       bool activeFlag;
       bool cancelledFlag;
+      bool vectorFlag;
       int rraOffset;
       int size;
       int dstPet;
       int rraIndex;
       int tag;
-      bool vectorFlag;
     }SendRRAInfo;
 
     typedef struct{
@@ -597,12 +598,12 @@ class XXE{
       int predicateBitField;
       bool activeFlag;
       bool cancelledFlag;
+      bool vectorFlag;
       int rraOffset;
       int size;
       int srcPet;
       int rraIndex;
       int tag;
-      bool vectorFlag;
     }RecvRRAInfo;
 
     typedef struct{
@@ -610,6 +611,9 @@ class XXE{
       int predicateBitField;
       bool activeFlag;
       bool cancelledFlag;
+      bool vectorFlag;
+      bool srcIndirectionFlag;
+      bool dstIndirectionFlag;
       void *srcBuffer;
       void *dstBuffer;
       int srcSize;
@@ -618,9 +622,6 @@ class XXE{
       int dstPet;
       int srcTag;
       int dstTag;
-      bool vectorFlag;
-      bool srcIndirectionFlag;
-      bool dstIndirectionFlag;
     }SendRecvInfo;
 
     typedef struct{
@@ -628,6 +629,8 @@ class XXE{
       int predicateBitField;
       bool activeFlag;
       bool cancelledFlag;
+      bool vectorFlag;
+      bool dstIndirectionFlag;
       int rraOffset;
       void *dstBuffer;
       int srcSize;
@@ -637,8 +640,6 @@ class XXE{
       int rraIndex;
       int srcTag;
       int dstTag;
-      bool vectorFlag;
-      bool dstIndirectionFlag;
     }SendRRARecvInfo;
 
     typedef struct{
@@ -647,12 +648,12 @@ class XXE{
       VMK::commhandle **commhandle;
       bool activeFlag;
       bool cancelledFlag;
+      bool vectorFlag;
+      bool indirectionFlag;
       void *buffer;
       int size;
       int dstPet;
       int tag;
-      bool vectorFlag;
-      bool indirectionFlag;
     }SendnbInfo;
 
     typedef struct{
@@ -661,12 +662,12 @@ class XXE{
       VMK::commhandle **commhandle;
       bool activeFlag;
       bool cancelledFlag;
+      bool vectorFlag;
+      bool indirectionFlag;
       void *buffer;
       int size;
       int srcPet;
       int tag;
-      bool vectorFlag;
-      bool indirectionFlag;
     }RecvnbInfo;
 
     typedef struct{
@@ -675,12 +676,12 @@ class XXE{
       VMK::commhandle **commhandle;
       bool activeFlag;
       bool cancelledFlag;
+      bool vectorFlag;
       int rraOffset;
       int size;
       int dstPet;
       int rraIndex;
       int tag;
-      bool vectorFlag;
     }SendnbRRAInfo;
 
     typedef struct{
@@ -689,12 +690,12 @@ class XXE{
       VMK::commhandle **commhandle;
       bool activeFlag;
       bool cancelledFlag;
+      bool vectorFlag;
       int rraOffset;
       int size;
       int srcPet;
       int rraIndex;
       int tag;
-      bool vectorFlag;
     }RecvnbRRAInfo;
 
     typedef struct{
@@ -902,10 +903,10 @@ class XXE{
     typedef struct{
       OpId opId;
       int predicateBitField;
-      void *buffer;
-      int byteCount;
       bool vectorFlag;
       bool indirectionFlag;
+      void *buffer;
+      int byteCount;
     }ZeroMemsetInfo;
 
     typedef struct{
@@ -995,7 +996,7 @@ class XXE{
       char *messageString;
     }ProfileMessageInfo;
     
-    // --- meta Info structs (i.e. don't correspond to OpIds)
+    // --- meta Info structs (i.e. don't correspond to specific OpIds)
 
     typedef struct{
       OpId opId;
@@ -1004,7 +1005,43 @@ class XXE{
       bool activeFlag;
       bool cancelledFlag;
     }CommhandleInfo;
+    
+    typedef struct{
+      OpId opId;
+      int predicateBitField;
+      bool activeFlag;
+      bool cancelledFlag;
+      bool vectorFlag;
+      bool indirectionFlag;
+      void *buffer;
+      int size;
+    }BuffInfo;
+    
+    typedef struct{
+      OpId opId;
+      int predicateBitField;
+      VMK::commhandle **commhandle;
+      bool activeFlag;
+      bool cancelledFlag;
+      bool vectorFlag;
+      bool indirectionFlag;
+      void *buffer;
+      int size;
+    }BuffnbInfo;
 
+    typedef struct{
+      OpId opId;
+      int predicateBitField;
+      XXE *xxe;
+    }SingleSubInfo;
+    
+    typedef struct{
+      OpId opId;
+      int predicateBitField;
+      int count;
+      XXE **xxe;
+    }MultiSubInfo;
+    
   private:
     template<typename T>
     inline static void exec_memGatherSrcRRA(

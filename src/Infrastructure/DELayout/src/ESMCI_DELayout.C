@@ -2461,6 +2461,343 @@ int DELayout::ESMC_DELayoutFindDEtoPET(int npets){
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::XXE::XXE()"
+// constructor
+XXE::XXE(XXE *xxe, map<void *, void *> *bufferMap){
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
+  vm = xxe->vm; // TODO: long run this must be changable
+  
+  // simple settings:
+  for (int i=0; i<10; i++)
+    typekind[i] = xxe->typekind[i];
+  lastFilterBitField = xxe->lastFilterBitField;
+  superVectorOkay = xxe->superVectorOkay;
+  
+  //TODO: set up storage, commhandle, bufferInfoList as with regular constructor
+  // then work through the stream list, element by element, and see if it is
+  // pointing to a buffer or commhandle. If buffer, then create such a buffer.
+  // swap the buffer reference, and stick allocation into storage. if comm
+  // handle then create a new one, keep track of it and insert into the element
+  // Also point to the right xxeSub
+  
+  storageCount = 0; 
+  storageMaxCount = xxe->storageCount;  // appropriate size from incoming xxe
+  storage = new char*[storageMaxCount];
+  
+  // need a map object in order to track association between old->new buffer
+  bool bufferMapCreatorFlag = false;
+  if (bufferMap==NULL){
+    bufferMapCreatorFlag = true;
+    bufferMap = new map<void *, void *>;
+  }
+  
+  // replicate the bufferInfoList, allocating own local buffers
+  bufferInfoList.reserve((xxe->bufferInfoList).size());  // initial preparation
+  for (unsigned i=0; i<(xxe->bufferInfoList).size(); i++){
+    int size = (xxe->bufferInfoList)[i]->size; // size of the buffer
+    // ensure alignment
+    int qwords = size / 8;
+    if (size % 8) ++qwords;
+    char *buffer = (char *)(new double[qwords]);
+    // duplicate the bufferInfo, but with local buffer reference
+    BufferInfo *bufferInfo = new BufferInfo(buffer, size, 
+      (xxe->bufferInfoList)[i]->vectorLengthMultiplier);
+    bufferInfoList.push_back(bufferInfo);
+    // track newly allocated buffer in XXE garbage collection
+    if (ESMC_LogDefault.MsgFoundError(storeStorage(buffer),
+      ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) throw rc;
+    // track association between old->new bufferInfoList element
+    (*bufferMap)[(xxe->bufferInfoList)[i]] = bufferInfoList[i];
+  }
+
+  // replicate the xxeSubList
+  // must do this _after_ the bufferInfoList, because must pass bufferMap down
+  map<void *, void *> xxeSubMap;  // need a map to keep track of association
+  xxeSubCount = xxeSubMaxCount = xxe->xxeSubCount;
+  xxeSubList = new XXE*[xxeSubMaxCount];
+  for (int i=0; i<xxeSubCount; i++){
+    // recursive constructor call into XXE()
+    xxeSubList[i] = new XXE(xxe->xxeSubList[i], bufferMap);
+    // track association between old->new xxeSubList element
+    xxeSubMap[(xxe->xxeSubList)[i]] = xxeSubList[i];
+  }
+
+  // replicate the commhandle member
+  map<void *, void *> commhandleMap;  // need a map to keep track of association
+  commhandleCount = 0;
+  commhandleMaxCount = xxe->commhandleCount + 1; // see note below for +1
+  // +1 prevents storeCommhandle() below from incrementing commhandleMaxCount
+  commhandle = new VMK::commhandle**[commhandleMaxCount];
+  for (int i=0; i<xxe->commhandleCount; i++){
+    // duplicate the commhandle, but locally
+    VMK::commhandle** commh = new VMK::commhandle*;
+    *commh = new VMK::commhandle;
+    // track newly commh in XXE
+    if (ESMC_LogDefault.MsgFoundError(storeCommhandle(commh),
+      ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) throw rc;
+    // track association between old->new commhandle
+    commhandleMap[(xxe->commhandle)[i]] = commhandle[i];
+  }
+  
+  // introduce some utility variables
+  StreamElement                         *xxeElement;
+  BuffInfo                              *buffInfo;
+  BuffnbInfo                            *buffnbInfo;
+  SumSuperScalarDstRRAInfo              *sumSuperScalarDstRRAInfo;
+  SumSuperScalarListDstRRAInfo          *sumSuperScalarListDstRRAInfo;
+  ProductSumSuperScalarDstRRAInfo       *productSumSuperScalarDstRRAInfo;
+  ProductSumSuperScalarListDstRRAInfo   *productSumSuperScalarListDstRRAInfo;
+  ProductSumSuperScalarSrcRRAInfo       *productSumSuperScalarSrcRRAInfo;
+  ProductSumSuperScalarContigRRAInfo    *productSumSuperScalarContigRRAInfo;
+  ZeroMemsetInfo                        *zeroMemsetInfo;
+  MemGatherSrcRRAInfo                   *memGatherSrcRRAInfo;
+  SingleSubInfo                         *singleSubInfo;
+  MultiSubInfo                          *multiSubInfo;
+  WtimerInfo                            *wtimerInfo;
+  CommhandleInfo                        *commhandleInfo;
+  
+  // now deal with the actual instruction stream
+  max = count = xxe->count;
+  stream = new StreamElement[count];
+  for (int index=0; index<count; index++){
+    // first copy the stream element as is
+    stream[index] = xxe->stream[index];
+    // now modify the copied stream element:
+    xxeElement = &(stream[index]);
+    
+    switch(stream[index].opId){
+    case send:
+    case recv:
+      {
+        buffInfo = (BuffInfo *)xxeElement;
+        if (buffInfo->indirectionFlag){
+          cout << "buffInfo: "
+            << "old BufferInfo: " << buffInfo->buffer
+            << " new BufferInfo: " << (*bufferMap)[buffInfo->buffer] 
+            << "\n";
+          // replace old buffer reference with new
+          buffInfo->buffer = (*bufferMap)[buffInfo->buffer];
+        }
+      }
+      break;
+    case sendnb:
+    case recvnb:
+      {
+        buffnbInfo = (BuffnbInfo *)xxeElement;
+        if (buffnbInfo->indirectionFlag){
+          cout << "buffnbInfo: "
+            << "old BufferInfo: " << buffnbInfo->buffer
+            << " new BufferInfo: " << (*bufferMap)[buffnbInfo->buffer] 
+            << "\n";
+          // replace old buffer reference with new
+          buffnbInfo->buffer = (*bufferMap)[buffnbInfo->buffer];
+        }
+      }
+      // no break on purpose .... need to also swap commhandle as below
+    case sendnbRRA:
+    case recvnbRRA:
+      {
+        commhandleInfo = (CommhandleInfo *)xxeElement;
+        cout << "commhandleInfo: "
+          << "old Commhandle: " << commhandleInfo->commhandle
+          << " new Commhandle: " << commhandleMap[commhandleInfo->commhandle]
+          << "\n";
+        // replace old commhandle reference with new
+        commhandleInfo->commhandle =
+          (VMK::commhandle **)commhandleMap[commhandleInfo->commhandle];
+      }
+      break;
+    case sumSuperScalarDstRRA:
+      {
+        sumSuperScalarDstRRAInfo = (SumSuperScalarDstRRAInfo *)xxeElement;
+        if (sumSuperScalarDstRRAInfo->indirectionFlag){
+          cout << "sumSuperScalarDstRRA: "
+            << "old BufferInfo: " << sumSuperScalarDstRRAInfo->valueBase
+            << " new BufferInfo: " 
+            << (*bufferMap)[sumSuperScalarDstRRAInfo->valueBase] 
+            << "\n";
+          // replace old buffer reference with new
+          sumSuperScalarDstRRAInfo->valueBase = 
+            (*bufferMap)[sumSuperScalarDstRRAInfo->valueBase];
+        }
+      }
+      break;
+    case sumSuperScalarListDstRRA:
+      {
+        sumSuperScalarListDstRRAInfo =
+          (SumSuperScalarListDstRRAInfo *)xxeElement;
+        if (sumSuperScalarListDstRRAInfo->indirectionFlag){
+          int valueBaseListSize =
+            sumSuperScalarListDstRRAInfo->valueBaseListSize;
+          for (int i=0; i<valueBaseListSize; i++){
+            cout << "sumSuperScalarListDstRRA: "
+              << "old BufferInfo: " 
+              << sumSuperScalarListDstRRAInfo->valueBaseList[i]
+              << " new BufferInfo: " 
+              << (*bufferMap)[sumSuperScalarListDstRRAInfo->valueBaseList[i]] 
+              << "\n";
+            // replace old buffer reference with new
+            sumSuperScalarListDstRRAInfo->valueBaseList[i] = 
+              (*bufferMap)[sumSuperScalarListDstRRAInfo->valueBaseList[i]];
+          }
+        }
+      }
+      break;
+    case productSumSuperScalarDstRRA:
+      {
+        productSumSuperScalarDstRRAInfo =
+          (ProductSumSuperScalarDstRRAInfo *)xxeElement;
+        if (productSumSuperScalarDstRRAInfo->indirectionFlag){
+          cout << "productSumSuperScalarDstRRA: "
+            << "old BufferInfo: " 
+            << productSumSuperScalarDstRRAInfo->valueBase
+            << " new BufferInfo: " 
+            << (*bufferMap)[productSumSuperScalarDstRRAInfo->valueBase] 
+            << "\n";
+          // replace old buffer reference with new
+          productSumSuperScalarDstRRAInfo->valueBase = 
+            (*bufferMap)[productSumSuperScalarDstRRAInfo->valueBase];
+        }
+      }
+      break;
+    case productSumSuperScalarListDstRRA:
+      {
+        productSumSuperScalarListDstRRAInfo =
+          (ProductSumSuperScalarListDstRRAInfo *)xxeElement;
+        if (productSumSuperScalarListDstRRAInfo->indirectionFlag){
+          int valueBaseListSize =
+            productSumSuperScalarListDstRRAInfo->valueBaseListSize;
+          for (int i=0; i<valueBaseListSize; i++){
+            cout << "productSumSuperScalarListDstRRA: "
+              << "old BufferInfo: " 
+              << productSumSuperScalarListDstRRAInfo->valueBaseList[i]
+              << " new BufferInfo: " 
+              << (*bufferMap)[productSumSuperScalarListDstRRAInfo->valueBaseList[i]] 
+              << "\n";
+            // replace old buffer reference with new
+            productSumSuperScalarListDstRRAInfo->valueBaseList[i] = 
+              (*bufferMap)[productSumSuperScalarListDstRRAInfo->valueBaseList[i]];
+          }
+        }
+      }
+      break;
+    case productSumSuperScalarSrcRRA:
+      {
+        productSumSuperScalarSrcRRAInfo =
+          (ProductSumSuperScalarSrcRRAInfo *)xxeElement;
+        if (productSumSuperScalarSrcRRAInfo->indirectionFlag){
+          cout << "productSumSuperScalarSrcRRA: "
+            << "old BufferInfo: " 
+            << productSumSuperScalarSrcRRAInfo->elementBase
+            << " new BufferInfo: " 
+            << (*bufferMap)[productSumSuperScalarSrcRRAInfo->elementBase] 
+            << "\n";
+          // replace old buffer reference with new
+          productSumSuperScalarSrcRRAInfo->elementBase = 
+            (*bufferMap)[productSumSuperScalarSrcRRAInfo->elementBase];
+        }
+      }
+      break;
+    case productSumSuperScalarContigRRA:
+      {
+        productSumSuperScalarContigRRAInfo =
+          (ProductSumSuperScalarContigRRAInfo *)xxeElement;
+        if (productSumSuperScalarContigRRAInfo->indirectionFlag){
+          cout << "productSumSuperScalarContigRRA: "
+            << "old BufferInfo: " 
+            << productSumSuperScalarContigRRAInfo->valueList
+            << " new BufferInfo: " 
+            << (*bufferMap)[productSumSuperScalarContigRRAInfo->valueList] 
+            << "\n";
+          // replace old buffer reference with new
+          productSumSuperScalarContigRRAInfo->valueList = 
+            (*bufferMap)[productSumSuperScalarContigRRAInfo->valueList];
+        }
+      }
+      break;
+    case zeroMemset:
+      {
+        zeroMemsetInfo = (ZeroMemsetInfo *)xxeElement;
+        if (zeroMemsetInfo->indirectionFlag){
+          cout << "zeroMemset: "
+            << "old BufferInfo: " << zeroMemsetInfo->buffer
+            << " new BufferInfo: " << (*bufferMap)[zeroMemsetInfo->buffer] 
+            << "\n";
+          // replace old buffer reference with new
+          zeroMemsetInfo->buffer = (*bufferMap)[zeroMemsetInfo->buffer];
+        }
+      }
+      break;
+    case memGatherSrcRRA:
+      {
+        memGatherSrcRRAInfo = (MemGatherSrcRRAInfo *)xxeElement;
+        if (memGatherSrcRRAInfo->indirectionFlag){
+          cout << "memGatherSrcRRA: "
+            << "old BufferInfo: " << memGatherSrcRRAInfo->dstBase
+            << " new BufferInfo: " << (*bufferMap)[memGatherSrcRRAInfo->dstBase] 
+            << "\n";
+          // replace old buffer reference with new
+          memGatherSrcRRAInfo->dstBase =
+            (*bufferMap)[memGatherSrcRRAInfo->dstBase];
+        }
+      }
+      break;
+    case waitOnIndexSub:
+    case testOnIndexSub:
+    case xxeSub:
+      {
+        singleSubInfo = (SingleSubInfo *)xxeElement;
+        cout << "singleSubInfo: "
+          << "old Sub: " << singleSubInfo->xxe
+          << " new Sub: " << xxeSubMap[singleSubInfo->xxe] 
+          << "\n";
+        // replace old buffer reference with new
+        singleSubInfo->xxe = (XXE *) xxeSubMap[singleSubInfo->xxe];
+      }
+      break;
+    case waitOnAnyIndexSub:
+    case xxeSubMulti:
+      {
+        multiSubInfo = (MultiSubInfo *)xxeElement;
+        for (int i=0; i<multiSubInfo->count; i++){
+          cout << "multiSubInfo: "
+            << "old Sub: " << multiSubInfo->xxe[i]
+            << " new Sub: " << xxeSubMap[multiSubInfo->xxe[i]]
+            << "\n";
+          // replace old buffer reference with new
+          multiSubInfo->xxe[i] = (XXE *) xxeSubMap[multiSubInfo->xxe[i]];
+        }
+      }
+      break;
+    case wtimer:
+      {
+        wtimerInfo = (WtimerInfo *)xxeElement;
+        cout << "wtimerInfo: "
+          << "old Sub: " << wtimerInfo->relativeWtimerXXE
+          << " new Sub: " << xxeSubMap[wtimerInfo->relativeWtimerXXE] 
+          << "\n";
+        // replace old buffer reference with new
+        wtimerInfo->relativeWtimerXXE = 
+          (XXE *)xxeSubMap[wtimerInfo->relativeWtimerXXE];
+      }
+      break;
+    default:
+      break;
+    }
+    
+  } // index
+  
+  // local garbage collection
+  if (bufferMapCreatorFlag){
+    delete bufferMap;
+  }
+  
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::XXE::exec()"
 //BOPI
 // !IROUTINE:  ESMCI::XXE::exec
