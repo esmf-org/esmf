@@ -10865,9 +10865,12 @@ fprintf(asmm_store_log_fp, "iCount: %d, localDeFactorCount: %d\n", iCount,
       dstInfoTable[i].resize(recvnbPartnerDeCount[i]);
       dstInfoTableInit[i] = 0;   // reset
     }
-    char *localDeFactorBuffer = new char[localDeFactorCount * dataSizeFactors];
-    localrc = xxe->storeStorage(localDeFactorBuffer,
-      localDeFactorCount * dataSizeFactors); // XXE garbage collec.
+    // alignment char *localDeFactorBuffer = new char[localDeFactorCount * dataSizeFactors];
+    int qwords = (localDeFactorCount * dataSizeFactors) / 8;
+    if ((localDeFactorCount * dataSizeFactors) % 8)
+      ++qwords;
+    char *localDeFactorBuffer = (char *)(new double[qwords]);
+    localrc = xxe->storeData(localDeFactorBuffer, qwords*8); // XXE garbage
     if (ESMC_LogDefault.MsgFoundError(localrc,
       ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
 #ifdef ASMM_STORE_TIMING_on
@@ -11052,14 +11055,10 @@ ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
       int kk = dstInfoTable[i].size();
 #endif
       // large contiguous 1st level receive buffer
-//alignment      char *buffer = new char[recvnbPartnerDeCount[i] * dataSizeSrc];
       int qwords = (recvnbPartnerDeCount[i] * dataSizeSrc) / 8;
       if ((recvnbPartnerDeCount[i] * dataSizeSrc) % 8)
         ++qwords;
       char *buffer = (char *)(new double[qwords]);
-      localrc = xxe->storeStorage(buffer, qwords*8); // XXE garbage collec.
-      if (ESMC_LogDefault.MsgFoundError(localrc,
-        ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
       // store buffer information in BufferInfo for XXE buffer control
       localrc = xxe->storeBufferInfo(buffer,
         recvnbPartnerDeCount[i] * dataSizeSrc,
@@ -11162,7 +11161,7 @@ ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
     if ((localDeFactorCount * dataSizeFactors) % 8)
       ++qwords;
     char *localDeFactorBuffer = (char *)(new double[qwords]);
-    localrc = xxe->storeStorage(localDeFactorBuffer, qwords*8); // XXE garbage
+    localrc = xxe->storeData(localDeFactorBuffer, qwords*8); // XXE garbage
     if (ESMC_LogDefault.MsgFoundError(localrc,
       ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
     for (int i=0; i<localDeFactorCount; i++){
@@ -11311,14 +11310,10 @@ ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
         }
       }
       // intermediate buffer (in case it is needed)
-//alignment      char *buffer = new char[sendnbPartnerDeCount[i] * dataSizeSrc];
       int qwords = (sendnbPartnerDeCount[i] * dataSizeSrc) / 8;
       if ((sendnbPartnerDeCount[i] * dataSizeSrc) % 8)
         ++qwords;
       char *buffer = (char *)(new double[qwords]);
-      localrc = xxe->storeStorage(buffer, qwords*8); // XXE garbage collec.
-      if (ESMC_LogDefault.MsgFoundError(localrc,
-        ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
       // store buffer information in BufferInfo for XXE buffer control
       localrc = xxe->storeBufferInfo(buffer,
         sendnbPartnerDeCount[i] * dataSizeSrc,
@@ -11646,7 +11641,7 @@ template<typename SIT, typename DIT> int sparseMatMulStoreEncodeXXE(
 
   // store current XXE parameter in order to efficiently rewrite multiple times
   const int startCount = xxe->count;
-  const int startStorageCount = xxe->storageCount;
+  const int startDataCount = xxe->dataCount;
   const int startCommhandleCount = xxe->commhandleCount;
   const int startXxeSubCount = xxe->xxeSubCount;
   const int startBufferInfoListSize = xxe->bufferInfoList.size();
@@ -11717,7 +11712,7 @@ template<typename SIT, typename DIT> int sparseMatMulStoreEncodeXXE(
     for (int srcTermProc=0; srcTermProc<srcTermProcMax; srcTermProc++){
       int srcTermProcessing=srcTermProcList[srcTermProc];
       // start writing a fresh XXE stream
-      xxe->clearReset(startCount, startStorageCount, startCommhandleCount,
+      xxe->clearReset(startCount, startDataCount, startCommhandleCount,
         startXxeSubCount, startBufferInfoListSize);
       localrc = sparseMatMulStoreEncodeXXEStream(vm, sendnbVector, recvnbVector,
         srcTermProcessing, pipelineDepth, elementTK, valueTK, factorTK,
@@ -11863,7 +11858,7 @@ template<typename SIT, typename DIT> int sparseMatMulStoreEncodeXXE(
 #endif
     for (int pipelineDepth=1; pipelineDepth<=petCount; pipelineDepth*=2){
       // start writing a fresh XXE stream
-      xxe->clearReset(startCount, startStorageCount, startCommhandleCount,
+      xxe->clearReset(startCount, startDataCount, startCommhandleCount,
         startXxeSubCount, startBufferInfoListSize);
       localrc = sparseMatMulStoreEncodeXXEStream(vm, sendnbVector, recvnbVector,
         srcTermProcessingOpt, pipelineDepth, elementTK, valueTK, factorTK,
@@ -11972,7 +11967,7 @@ template<typename SIT, typename DIT> int sparseMatMulStoreEncodeXXE(
 #endif
 
   // encode with the majority voted pipelineDepthOpt
-  xxe->clearReset(startCount, startStorageCount, startCommhandleCount,
+  xxe->clearReset(startCount, startDataCount, startCommhandleCount,
     startXxeSubCount, startBufferInfoListSize);
   localrc = sparseMatMulStoreEncodeXXEStream(vm, sendnbVector, recvnbVector,
     srcTermProcessingOpt, pipelineDepthOpt, elementTK, valueTK, factorTK,

@@ -316,12 +316,12 @@ class XXE{
     // STREAM
     StreamElement *stream;          // actual stream containing XXE elements
     int count;                      // number of elements in the stream
-    // STORAGE
+    // DATA
     std::map<void *, unsigned long>
-      storageMap;                   // map object to hold (pointer,size) pairs
-    char **storage;                 // list of (char *) entries to allocations
+      dataMap;                      // map object to hold (pointer,size) pairs
+    char **dataList;                // list of (char *) entries to allocations
                                     // for which this XXE object is responsible
-    int storageCount;               // number of elements in storage
+    int dataCount;                  // number of elements in dataList
     // COMMHANDLES
     VMK::commhandle ***commhandle;  // list of (commhandle **) entries for 
                                     // which this XXE object is responsible
@@ -349,20 +349,20 @@ class XXE{
     bool superVectorOkay;           // flag to indicate that super-vector okay
   private:
     int max;                        // maximum number of elements in stream
-    int storageMaxCount;            // maximum number of elements in storage
+    int dataMaxCount;               // maximum number of elements in data
     int commhandleMaxCount;         // maximum number of elements in commhandle
     int xxeSubMaxCount;             // maximum number of elements in xxeSubList
     
   public:
-    XXE(VM *vmArg, int maxArg=1000, int storageMaxCountArg=1000,
+    XXE(VM *vmArg, int maxArg=1000, int dataMaxCountArg=1000,
       int commhandleMaxCountArg=1000, int xxeSubMaxCountArg=1000){
       // constructor...
       vm = vmArg;
       // -> set up internal stream and bookkeeping members
       stream = new StreamElement[maxArg]; count = 0; max = maxArg;
-      storage = new char*[storageMaxCountArg];
-      storageCount  = 0;
-      storageMaxCount = storageMaxCountArg;
+      dataList = new char*[dataMaxCountArg];
+      dataCount  = 0;
+      dataMaxCount = dataMaxCountArg;
       commhandle = new VMK::commhandle**[commhandleMaxCountArg];
       commhandleCount  = 0;
       commhandleMaxCount = commhandleMaxCountArg;
@@ -375,7 +375,7 @@ class XXE{
     }
     XXE(XXE *xxe, std::map<void *, void *> *bufferMap=NULL);  // constructor
     ~XXE();      // destructor
-    void clearReset(int countArg, int storageCountArg=-1, 
+    void clearReset(int countArg, int dataCountArg=-1, 
       int commhandleCountArg=-1, int xxeSubCountArg=-1, 
       int bufferInfoListArg=-1);
     bool getNextSubSuperVectorOkay(int *k){
@@ -409,16 +409,16 @@ class XXE{
     int optimizeElement(int index);
     
     int growStream(int increase);
-    int growStorage(int increase);
+    int growDataList(int increase);
     int growCommhandle(int increase);
     int growXxeSub(int increase);
     
     int incCount();
-    int incStorageCount();
+    int incDataCount();
     int incCommhandleCount();
     int incXxeSubCount();
     
-    int storeStorage(char *storage, unsigned long size);
+    int storeData(char *data, unsigned long size);
     int storeCommhandle(VMK::commhandle **commhandle);
     int storeXxeSub(XXE *xxeSub);
     int storeBufferInfo(char *buffer, int size, int vectorLengthMultiplier);
