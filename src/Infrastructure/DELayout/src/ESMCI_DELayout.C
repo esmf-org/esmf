@@ -11,6 +11,7 @@
 //==============================================================================
 #define ESMC_FILENAME "ESMCI_DELayout.C"
 //==============================================================================
+#define XXE_STORAGEDELETE_LOG_on
 #define XXE_EXEC_LOG_off
 #define XXE_EXEC_MEMLOG_off
 #define XXE_EXEC_BUFFLOG_off
@@ -2468,7 +2469,7 @@ XXE::XXE(XXE *xxe, map<void *, void *> *bufferMap){
   int rc = ESMC_RC_NOT_IMPL;              // final return code
   vm = xxe->vm; // TODO: long run this must be changable
   
-  // simple settings:
+  // simple settings, just copy:
   for (int i=0; i<10; i++)
     typekind[i] = xxe->typekind[i];
   lastFilterBitField = xxe->lastFilterBitField;
@@ -2505,7 +2506,7 @@ XXE::XXE(XXE *xxe, map<void *, void *> *bufferMap){
       (xxe->bufferInfoList)[i]->vectorLengthMultiplier);
     bufferInfoList.push_back(bufferInfo);
     // track newly allocated buffer in XXE garbage collection
-    if (ESMC_LogDefault.MsgFoundError(storeStorage(buffer),
+    if (ESMC_LogDefault.MsgFoundError(storeStorage(buffer, qwords*8),
       ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) throw rc;
     // track association between old->new bufferInfoList element
     (*bufferMap)[(xxe->bufferInfoList)[i]] = bufferInfoList[i];
@@ -2650,7 +2651,10 @@ XXE::XXE(XXE *xxe, map<void *, void *> *bufferMap){
           (ProductSumSuperScalarDstRRAInfo *)xxeElement;
         if (productSumSuperScalarDstRRAInfo->indirectionFlag){
           cout << "productSumSuperScalarDstRRA: "
-            << "old BufferInfo: " 
+            << "termCount: " << productSumSuperScalarDstRRAInfo->termCount
+            << " XXE storageMap size(int_rraOffsetList): "
+            << xxe->storageMap[productSumSuperScalarDstRRAInfo->rraOffsetList]
+            << " old BufferInfo: " 
             << productSumSuperScalarDstRRAInfo->valueBase
             << " new BufferInfo: " 
             << (*bufferMap)[productSumSuperScalarDstRRAInfo->valueBase] 
@@ -2659,6 +2663,14 @@ XXE::XXE(XXE *xxe, map<void *, void *> *bufferMap){
           productSumSuperScalarDstRRAInfo->valueBase = 
             (*bufferMap)[productSumSuperScalarDstRRAInfo->valueBase];
         }
+        // replace storage elements
+        int size =
+          xxe->storageMap[productSumSuperScalarDstRRAInfo->rraOffsetList];
+        char *oldC = (char *)productSumSuperScalarDstRRAInfo->rraOffsetList;
+        char *newC = new char[size];
+        memcpy(newC, oldC, size);
+        storeStorage(newC, size);
+        productSumSuperScalarDstRRAInfo->rraOffsetList = (int *)newC;
       }
       break;
     case productSumSuperScalarListDstRRA:
@@ -2762,7 +2774,10 @@ XXE::XXE(XXE *xxe, map<void *, void *> *bufferMap){
         multiSubInfo = (MultiSubInfo *)xxeElement;
         for (int i=0; i<multiSubInfo->count; i++){
           cout << "multiSubInfo: "
-            << "old Sub: " << multiSubInfo->xxe[i]
+            << "count: " << multiSubInfo->count
+            << " size of original xxe storage: " 
+            << xxe->storageMap[multiSubInfo->xxe]
+            << " old Sub: " << multiSubInfo->xxe[i]
             << " new Sub: " << xxeSubMap[multiSubInfo->xxe[i]]
             << "\n";
           // replace old buffer reference with new
@@ -2806,9 +2821,14 @@ XXE::~XXE(){
   // stream of XXE elements
   delete [] stream;
   // memory allocations held in storage
-  std::map<void *, int>::iterator it;
+  std::map<void *, unsigned long>::iterator it;
   for (it=storageMap.begin(); it!=storageMap.end(); it++){
-cout << "delete from storageMap: " << it->first << "\n";
+#ifdef XXE_STORAGEDELETE_LOG_on
+    std::stringstream debugmsg;
+    debugmsg << ESMC_METHOD": delete from storageMap: "
+      << it->first << " size (byte): " << it->second;
+    ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_INFO);
+#endif
     delete [] (char *)it->first;  // free the associated memory
   }
   delete [] storage;
@@ -2841,6 +2861,12 @@ void XXE::clearReset(int countArg, int storageCountArg, int commhandleCountArg,
   // cannot use storageMap to reset, because need something linear
   if (storageCountArg>-1){
     for (int i=storageCountArg; i<storageCount; i++){
+#ifdef XXE_STORAGEDELETE_LOG_on
+      std::stringstream debugmsg;
+      debugmsg << ESMC_METHOD": delete from storageMap: "
+        << (void *)storage[i] << " size (byte): " << storageMap[storage[i]];
+      ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_INFO);
+#endif
       storageMap.erase(storage[i]); // remove entry from storageMap
       delete [] storage[i];       // free the referenced memory
     }
@@ -3021,7 +3047,7 @@ int XXE::exec(
         i, buffer);
         ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
 #endif
-      localrc = storeStorage(buffer); // XXE garbage collec.
+      localrc = storeStorage(buffer, currentSize); // XXE garbage collec.
       if (ESMC_LogDefault.MsgFoundError(localrc,
         ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
       //TODO: It may make sense here to do a linear search for the old buffer
@@ -8203,7 +8229,8 @@ int XXE::storeStorage(
 //
 // !ARGUMENTS:
 //
-  char *storageArg
+  char *storageArg,
+  unsigned long size
   ){
 //
 // !DESCRIPTION:
@@ -8216,7 +8243,7 @@ int XXE::storeStorage(
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
   
-  storageMap[storageArg] = 0; // zero size for now
+  storageMap[storageArg] = size;  // store the size of the allocation
   
   storage[storageCount] = storageArg;
   localrc = incStorageCount();
@@ -8433,7 +8460,7 @@ int XXE::appendWtimer(
   xxeWtimerInfo->relativeWtimerXXE = relativeXXE;
 
   // keep track of strings for xxe garbage collection
-  localrc = storeStorage(xxeWtimerInfo->timerString);
+  localrc = storeStorage(xxeWtimerInfo->timerString, stringLen+1);
   if (ESMC_LogDefault.MsgFoundError(localrc,
     ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
   
@@ -9026,10 +9053,10 @@ int XXE::appendMemGatherSrcRRA(
   xxeMemGatherSrcRRAInfo->countList = (int *)countListChar;
 
   // keep track of allocations for xxe garbage collection
-  localrc = storeStorage(rraOffsetListChar);  // for xxe garb. coll.
+  localrc = storeStorage(rraOffsetListChar, chunkCount*sizeof(int));
   if (ESMC_LogDefault.MsgFoundError(localrc,
     ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
-  localrc = storeStorage(countListChar);  // for xxe garb. coll.
+  localrc = storeStorage(countListChar, chunkCount*sizeof(int));
   if (ESMC_LogDefault.MsgFoundError(localrc,
     ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
   
@@ -9134,7 +9161,7 @@ int XXE::appendZeroSuperScalarRRA(
   xxeZeroSuperScalarRRAInfo->vectorFlag = vectorFlag;
 
   // keep track of allocations for xxe garbage collection
-  localrc = storeStorage(rraOffsetListChar);  // for xxe garb. coll.
+  localrc = storeStorage(rraOffsetListChar, termCount*sizeof(int));
   if (ESMC_LogDefault.MsgFoundError(localrc,
     ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
   
@@ -9353,10 +9380,10 @@ int XXE::appendSumSuperScalarDstRRA(
   xxeSumSuperScalarDstRRAInfo->valueOffsetList = (int *)valueOffsetListChar;
   
   // keep track of allocations for xxe garbage collection
-  localrc = storeStorage(rraOffsetListChar);// for xxe garb. coll.
+  localrc = storeStorage(rraOffsetListChar, termCount*sizeof(int));
   if (ESMC_LogDefault.MsgFoundError(localrc,
     ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
-  localrc = storeStorage(valueOffsetListChar);// for xxe garb. coll.
+  localrc = storeStorage(valueOffsetListChar, termCount*sizeof(int));
   if (ESMC_LogDefault.MsgFoundError(localrc,
     ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
   
@@ -9444,22 +9471,24 @@ int XXE::appendSumSuperScalarListDstRRA(
     (int *)baseListIndexListChar;
 
   // keep track of allocations for xxe garbage collection
-  localrc = storeStorage(rraIndexListChar);// for xxe garb. coll.
+  localrc = storeStorage(rraIndexListChar, rraIndexList.size()*sizeof(int));
   if (ESMC_LogDefault.MsgFoundError(localrc,
     ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
-  localrc = storeStorage(valueBaseListChar);// for xxe garb. coll.
+  localrc = storeStorage(valueBaseListChar, 
+    valueBaseList.size()*sizeof(void *));
   if (ESMC_LogDefault.MsgFoundError(localrc,
     ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
-  localrc = storeStorage(valueBaseListResolveChar);// for xxe garb. coll.
+  localrc = storeStorage(valueBaseListResolveChar,
+    valueBaseList.size()*sizeof(void *));
   if (ESMC_LogDefault.MsgFoundError(localrc,
     ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
-  localrc = storeStorage(rraOffsetListChar);// for xxe garb. coll.
+  localrc = storeStorage(rraOffsetListChar, termCount*sizeof(int));
   if (ESMC_LogDefault.MsgFoundError(localrc,
     ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
-  localrc = storeStorage(valueOffsetListChar);// for xxe garb. coll.
+  localrc = storeStorage(valueOffsetListChar, termCount*sizeof(int));
   if (ESMC_LogDefault.MsgFoundError(localrc,
     ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
-  localrc = storeStorage(baseListIndexListChar);// for xxe garb. coll.
+  localrc = storeStorage(baseListIndexListChar, termCount*sizeof(int));
   if (ESMC_LogDefault.MsgFoundError(localrc,
     ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
   
@@ -9529,13 +9558,13 @@ int XXE::appendProductSumSuperScalarDstRRA(
     (int *)valueOffsetListChar;
 
   // keep track of allocations for xxe garbage collection
-  localrc = storeStorage(rraOffsetListChar);// for xxe garb. coll.
+  localrc = storeStorage(rraOffsetListChar, termCount*sizeof(int));
   if (ESMC_LogDefault.MsgFoundError(localrc,
     ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
-  localrc = storeStorage(factorListChar);// for xxe garb. coll.
+  localrc = storeStorage(factorListChar, termCount*sizeof(int));
   if (ESMC_LogDefault.MsgFoundError(localrc,
     ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
-  localrc = storeStorage(valueOffsetListChar);// for xxe garb. coll.
+  localrc = storeStorage(valueOffsetListChar, termCount*sizeof(int));
   if (ESMC_LogDefault.MsgFoundError(localrc,
     ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
   
@@ -9627,25 +9656,27 @@ int XXE::appendProductSumSuperScalarListDstRRA(
     (int *)baseListIndexListChar;
 
   // keep track of allocations for xxe garbage collection
-  localrc = storeStorage(rraIndexListChar);// for xxe garb. coll.
+  localrc = storeStorage(rraIndexListChar, rraIndexList.size()*sizeof(int));
   if (ESMC_LogDefault.MsgFoundError(localrc,
     ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
-  localrc = storeStorage(valueBaseListChar);// for xxe garb. coll.
+  localrc = storeStorage(valueBaseListChar,
+    valueBaseList.size()*sizeof(void *));
   if (ESMC_LogDefault.MsgFoundError(localrc,
     ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
-  localrc = storeStorage(valueBaseListResolveChar);// for xxe garb. coll.
+  localrc = storeStorage(valueBaseListResolveChar,
+    valueBaseList.size()*sizeof(void *));
   if (ESMC_LogDefault.MsgFoundError(localrc,
     ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
-  localrc = storeStorage(rraOffsetListChar);// for xxe garb. coll.
+  localrc = storeStorage(rraOffsetListChar, termCount*sizeof(int));
   if (ESMC_LogDefault.MsgFoundError(localrc,
     ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
-  localrc = storeStorage(factorListChar);// for xxe garb. coll.
+  localrc = storeStorage(factorListChar, termCount*sizeof(int));
   if (ESMC_LogDefault.MsgFoundError(localrc,
     ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
-  localrc = storeStorage(valueOffsetListChar);// for xxe garb. coll.
+  localrc = storeStorage(valueOffsetListChar, termCount*sizeof(int));
   if (ESMC_LogDefault.MsgFoundError(localrc,
     ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
-  localrc = storeStorage(baseListIndexListChar);// for xxe garb. coll.
+  localrc = storeStorage(baseListIndexListChar, termCount*sizeof(int));
   if (ESMC_LogDefault.MsgFoundError(localrc,
     ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
   
@@ -9715,13 +9746,13 @@ int XXE::appendProductSumSuperScalarSrcRRA(
     (int *)elementOffsetListChar;
 
   // keep track of allocations for xxe garbage collection
-  localrc = storeStorage(rraOffsetListChar);// for xxe garb. coll.
+  localrc = storeStorage(rraOffsetListChar, termCount*sizeof(int));
   if (ESMC_LogDefault.MsgFoundError(localrc,
     ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
-  localrc = storeStorage(factorListChar);// for xxe garb. coll.
+  localrc = storeStorage(factorListChar, termCount*sizeof(int));
   if (ESMC_LogDefault.MsgFoundError(localrc,
     ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
-  localrc = storeStorage(elementOffsetListChar);// for xxe garb. coll.
+  localrc = storeStorage(elementOffsetListChar, termCount*sizeof(int));
   if (ESMC_LogDefault.MsgFoundError(localrc,
     ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
   
@@ -9864,13 +9895,13 @@ int XXE::appendWaitOnAnyIndexSub(
   xxeWaitOnAnyIndexSubInfo->completeFlag = (int *)completeFlagChar;
 
   // keep track of allocations for xxe garbage collection
-  localrc = storeStorage(xxeChar);  // for xxe garb. coll.
+  localrc = storeStorage(xxeChar, countArg*sizeof(XXE *));
   if (ESMC_LogDefault.MsgFoundError(localrc,
     ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
-  localrc = storeStorage(indexChar);  // for xxe garb. coll.
+  localrc = storeStorage(indexChar, countArg*sizeof(int));
   if (ESMC_LogDefault.MsgFoundError(localrc,
     ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
-  localrc = storeStorage(completeFlagChar);  // for xxe garb. coll.
+  localrc = storeStorage(completeFlagChar, countArg*sizeof(int));
   if (ESMC_LogDefault.MsgFoundError(localrc,
     ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
   
@@ -10107,7 +10138,7 @@ int XXE::appendProfileMessage(
   strcpy(xxeProfileMessageInfo->messageString, messageString);
   
   // keep track of strings for xxe garbage collection
-  localrc = storeStorage(xxeProfileMessageInfo->messageString);
+  localrc = storeStorage(xxeProfileMessageInfo->messageString, stringLen+1);
   if (ESMC_LogDefault.MsgFoundError(localrc,
     ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
   
@@ -10158,7 +10189,7 @@ int XXE::appendMessage(
   strcpy(xxeMessageInfo->messageString, messageString);
 
   // keep track of strings for xxe garbage collection
-  localrc = storeStorage(xxeMessageInfo->messageString);
+  localrc = storeStorage(xxeMessageInfo->messageString, stringLen+1);
   if (ESMC_LogDefault.MsgFoundError(localrc,
     ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
   

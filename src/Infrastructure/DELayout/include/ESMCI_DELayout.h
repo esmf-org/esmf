@@ -313,19 +313,26 @@ class XXE{
         
   public:
     VM *vm;
+    // STREAM
     StreamElement *stream;          // actual stream containing XXE elements
     int count;                      // number of elements in the stream
-    std::map<void *, int> storageMap; // map object to hold (pointer,size) pairs
+    // STORAGE
+    std::map<void *, unsigned long>
+      storageMap;                   // map object to hold (pointer,size) pairs
     char **storage;                 // list of (char *) entries to allocations
                                     // for which this XXE object is responsible
     int storageCount;               // number of elements in storage
+    // COMMHANDLES
     VMK::commhandle ***commhandle;  // list of (commhandle **) entries for 
                                     // which this XXE object is responsible
     int commhandleCount;            // number of elements in commhandle
+    // SUBXXES
     XXE **xxeSubList;               // list of (XXE *) entries for which this
                                     // XXE object is responsible
     int xxeSubCount;                // number of elements in xxeSubList
+    // TYPEKINDS
     ESMC_TypeKind_Flag typekind[10];     // place the XXE can store TypeKind info
+    // BUFFERS
     std::vector<BufferInfo *>bufferInfoList; // vector of (BufferInfo *) entries
       // The bufferInfoList provides an extra level of indirection to XXE
       // managed communication buffers, and associated size information.
@@ -337,6 +344,7 @@ class XXE{
       // updates during exec() through the bufferInfoList indirection, without
       // the need for XXE stream rewrite (which would be far too expensive to
       // do during exec())!
+    // MISC
     int lastFilterBitField;         // filterBitField during last exec() call
     bool superVectorOkay;           // flag to indicate that super-vector okay
   private:
@@ -410,7 +418,7 @@ class XXE{
     int incCommhandleCount();
     int incXxeSubCount();
     
-    int storeStorage(char *storage);
+    int storeStorage(char *storage, unsigned long size);
     int storeCommhandle(VMK::commhandle **commhandle);
     int storeXxeSub(XXE *xxeSub);
     int storeBufferInfo(char *buffer, int size, int vectorLengthMultiplier);

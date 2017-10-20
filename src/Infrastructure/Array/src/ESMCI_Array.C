@@ -9317,11 +9317,14 @@ template<typename SIT, typename DIT>
   if (!tensorMixFlag && typekindFactors == ESMC_TYPEKIND_R8){
     // SCRIP weight file output only supported w/o tensor mixing and R8 factors
     char const *fileName="asmmDumpSMM.nc";
-    double const *factorList =
-      (double const *)sparseMatrix[0].getFactorList();
-    int const *factorIndexList =
-      (int const *)sparseMatrix[0].getFactorIndexList();
-    int count = sparseMatrix[0].getFactorListCount();
+    double const *factorList = NULL;
+    int const *factorIndexList = NULL;
+    int count = 0;
+    if (sparseMatrix.size()>0){
+      factorList = (double const *)sparseMatrix[0].getFactorList();
+      factorIndexList = (int const *)sparseMatrix[0].getFactorIndexList();
+      count = sparseMatrix[0].getFactorListCount();
+    }
     FTN_X(f_esmf_outputsimpleweightfile)(fileName, &count, factorList, 
       factorIndexList, &localrc, strlen(fileName));
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
@@ -10863,7 +10866,8 @@ fprintf(asmm_store_log_fp, "iCount: %d, localDeFactorCount: %d\n", iCount,
       dstInfoTableInit[i] = 0;   // reset
     }
     char *localDeFactorBuffer = new char[localDeFactorCount * dataSizeFactors];
-    localrc = xxe->storeStorage(localDeFactorBuffer); // XXE garbage collec.
+    localrc = xxe->storeStorage(localDeFactorBuffer,
+      localDeFactorCount * dataSizeFactors); // XXE garbage collec.
     if (ESMC_LogDefault.MsgFoundError(localrc,
       ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
 #ifdef ASMM_STORE_TIMING_on
@@ -11053,7 +11057,7 @@ ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
       if ((recvnbPartnerDeCount[i] * dataSizeSrc) % 8)
         ++qwords;
       char *buffer = (char *)(new double[qwords]);
-      localrc = xxe->storeStorage(buffer); // XXE garbage collec.
+      localrc = xxe->storeStorage(buffer, qwords*8); // XXE garbage collec.
       if (ESMC_LogDefault.MsgFoundError(localrc,
         ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
       // store buffer information in BufferInfo for XXE buffer control
@@ -11158,7 +11162,7 @@ ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
     if ((localDeFactorCount * dataSizeFactors) % 8)
       ++qwords;
     char *localDeFactorBuffer = (char *)(new double[qwords]);
-    localrc = xxe->storeStorage(localDeFactorBuffer); // XXE garbage collec.
+    localrc = xxe->storeStorage(localDeFactorBuffer, qwords*8); // XXE garbage
     if (ESMC_LogDefault.MsgFoundError(localrc,
       ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
     for (int i=0; i<localDeFactorCount; i++){
@@ -11312,7 +11316,7 @@ ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
       if ((sendnbPartnerDeCount[i] * dataSizeSrc) % 8)
         ++qwords;
       char *buffer = (char *)(new double[qwords]);
-      localrc = xxe->storeStorage(buffer); // XXE garbage collec.
+      localrc = xxe->storeStorage(buffer, qwords*8); // XXE garbage collec.
       if (ESMC_LogDefault.MsgFoundError(localrc,
         ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
       // store buffer information in BufferInfo for XXE buffer control
@@ -13061,6 +13065,16 @@ int Array::sparseMatMulRelease(
 #endif
 #endif
   
+#define DEBUGGING
+#ifdef DEBUGGING
+    {
+      std::stringstream debugmsg;
+      debugmsg << ESMC_METHOD": delete xxe: " << xxe;
+      ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_INFO);
+    }
+#endif
+#undef DEBUGGING
+    
     // delete xxe
     delete xxe;
 

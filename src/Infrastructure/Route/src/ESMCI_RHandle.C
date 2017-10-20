@@ -151,13 +151,13 @@ RouteHandle *RouteHandle::create(
     }
     
     // copy the information from the incoming RH
+    // keep htype the same
     routehandle->htype = rh->htype;
-    
-    for (int i=0; i<RHSTORAGECOUNT; i++)
-      routehandle->storage[i] = rh->storage[i];
-
-    routehandle->srcArray = rh->srcArray;
-    routehandle->dstArray = rh->dstArray;
+    // must do a deep copy of the XXE
+    XXE *xxe = (XXE *)rh->getStorage();
+    XXE *xxeNew = new XXE(xxe);
+    routehandle->setStorage(xxeNew);
+    // do NOT copy any of the other members!
     
   }catch(int localrc){
     // catch standard ESMF return code
