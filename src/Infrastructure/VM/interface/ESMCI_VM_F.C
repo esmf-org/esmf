@@ -1287,7 +1287,8 @@ extern "C" {
 #define ESMC_METHOD "c_esmc_vmidprint()"
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
-    ESMCI::VMIdPrint(*vmid);
+    // ESMCI::VMIdPrint(*vmid);
+    int localrc = (*vmid)->ESMCI::VMId::print();
     // Flush before crossing language interface to ensure correct output order
     fflush(stdout);
     // return successfully

@@ -18,10 +18,31 @@ from ESMF.util.mesh_utilities import *
 
 class TestRegrid(TestBase):
 
-    # Manager(debug=True)
+    def assertWeightFileIsRational(self, filename, src_size, dst_size):
+        try:
+            from netCDF4 import Dataset
+        except ImportError:
+            pass
+        else:
+            ds = Dataset(filename)
+            try:
+                S = ds.variables['S'][:]
+                row = ds.variables['row'][:]
+                col = ds.variables['col'][:]
+                actual_col_max = col.max()
+                actual_row_max = row.max()
 
-    # this is for the documentation, do not modify
+                self.assertEqual(actual_col_max, src_size)
+                self.assertEqual(actual_row_max, dst_size)
+
+                for urow in np.unique(row):
+                    select = row == urow
+                    self.assertAlmostEqual(S[select].sum(), 1.0)
+            finally:
+                ds.close()
+
     def run_regridding(srcfield, dstfield, srcfracfield, dstfracfield):
+        # This is for documentation. Do not modify.
         '''
         PRECONDITIONS: Two Fields have been created and a regridding
                        operation is desired from 'srcfield' to 'dstfield'.
@@ -84,9 +105,8 @@ class TestRegrid(TestBase):
         # regridding
         rh = Regrid(srcfield, dstfield, regrid_method=RegridMethod.BILINEAR,
                     line_type=LineType.CART)
-        dstfield = rh(srcfield, dstfield)
+        _ = rh(srcfield, dstfield)
 
-    @attr('parallel')
     def test_field_regrid_file1(self):
 
         def _barrier_():
@@ -98,61 +118,51 @@ class TestRegrid(TestBase):
                 else:
                     MPI.COMM_WORLD.Barrier()
 
-        # create grids
-        max_index = np.array([20, 20])
+        # Create grids.
+        nx = 20
+        ny = 24
+        max_index = np.array([nx, ny])
         srcgrid = Grid(max_index, coord_sys=CoordSys.CART)
-        max_index = np.array([25, 25])
         dstgrid = Grid(max_index, coord_sys=CoordSys.CART)
 
-        # Add coordinates
-        srcgrid.add_coords()
-        dstgrid.add_coords()
+        grids = [srcgrid, dstgrid]
+        # Allocate coordinate arrays.
+        for grid in grids:
+            grid.add_coords()
 
-        [x, y] = [0, 1]
-        gridXCorner = srcgrid.get_coords(x)
-        gridYCorner = srcgrid.get_coords(y)
+        # Adjust x-coordinates by a rank offset.
+        x_coords = np.arange(1, srcgrid.size[0][0] + 1) + 10 * (local_pet() + 1)
+        # Adjust y-coordinates by a constant offset.
+        y_coords = np.arange(1, ny + 1) + 100
+        y_coords, x_coords = np.meshgrid(y_coords, x_coords)
 
-        for i in range(gridXCorner.shape[x]):
-            gridXCorner[i, :] = float(i) / 6.
+        # Fill each grid's coordinate arrays.
+        for grid in [srcgrid, dstgrid]:
+            grid.get_coords(0)[:] = x_coords
+            grid.get_coords(1)[:] = y_coords
 
-        for j in range(gridYCorner.shape[y]):
-            gridYCorner[:, j] = float(j) / 6.
-
-        gridXCorner = dstgrid.get_coords(x)
-        gridYCorner = dstgrid.get_coords(y)
-
-        for i in range(gridXCorner.shape[x]):
-            gridXCorner[i, :] = float(i) / 4.
-
-        for j in range(gridYCorner.shape[y]):
-            gridYCorner[:, j] = float(j) / 4.
-
-        # create a Field on the Grid
+        # Create the fields on the grids and fill the data values.
         srcfield = Field(srcgrid)
         srcfield.data[:, :] = 10.
-        dstfield = Field(srcgrid)
-        dstfield.data[:, :] = 10.
+        dstfield = Field(dstgrid)
+        dstfield.data[:, :] = 20.
 
         # Check for and remove the test file if it exists.
-        manager = Manager()
-        if manager.local_pet == 0:
-            path = os.path.join(os.getcwd(), "esmpy_test_field_regrid_file.nc")
+        filename = "esmpy_test_field_regrid_file.nc"
+        if local_pet() == 0:
+            path = os.path.join(os.getcwd(), filename)
             if os.path.isfile(path):
                 os.remove(path)
         _barrier_()
 
         # Execute regridding from file.
-        rh = Regrid(srcfield, dstfield, filename="esmpy_test_field_regrid_file.nc")
-        dstfield = rh(srcfield, dstfield)
+        _ = Regrid(srcfield, dstfield, filename=filename)
         _barrier_()
 
-        try:
-            from netCDF4 import Dataset
-        except ImportError:
-            pass
-        else:
-            ds = Dataset("esmpy_test_field_regrid_file.nc", "r")
-            ds.close()
+        # Test weight file contents are rational.
+        if local_pet() == 0:
+            self.assertWeightFileIsRational(filename, 480, 480)
+        _barrier_()
 
     @attr('serial')
     def test_field_regrid_file2(self):
@@ -187,6 +197,10 @@ class TestRegrid(TestBase):
                         unmapped_action=ESMF.UnmappedAction.IGNORE)
 
         self.assertTrue(os.path.exists(filename))
+
+        src_size = 400
+        dst_size = 100
+        self.assertWeightFileIsRational(filename, src_size, dst_size)
 
     def test_field_regrid_gridmesh(self):
         # create mesh

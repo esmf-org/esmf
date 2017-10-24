@@ -155,8 +155,8 @@
 
 #if 0
     ! TODO: Tests are currently disabled because gfortran prior to v5.1 has issues with
-    ! arrays of deferred-length strings.  Re-enable when ESMF support for these older compilers
-    ! is no longer required.
+    ! arrays of deferred-length strings.  Re-enable when ESMF support for these older
+    ! compilers is no longer required.
 
     !------------------------------------------------------------------------
     ! NEX_xxxUTest
@@ -347,9 +347,9 @@
     !------------------------------------------------------------------------
 
 #if 0
-    ! TODO: Tests are currently disabled because gfortran prior to v5.1 has issues with
-    ! arrays of deferred-length strings.  Re-enable when ESMF support for these older compilers
-    ! is no longer required.
+    ! TODO: Test is currently disabled because gfortran prior to v5.1 has issues with
+    ! arrays of deferred-length strings.  Re-enable when ESMF support for these older
+    ! compilers is no longer required.
 
     !------------------------------------------------------------------------
     ! EX_xxxUTest
@@ -381,8 +381,12 @@
     call ESMF_Test(rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
     !------------------------------------------------------------------------
 
+#if 0
+    ! TODO: Test is currently disabled because gfortran prior to v5.1 has issues with
+    ! arrays of deferred-length strings.  Re-enable when ESMF support for these older
+    ! compilers is no longer required.
     !------------------------------------------------------------------------
-    ! EX_UTest
+    ! EX_xxxUTest
     name = "Fortran allocatable deferred-length string array allocate length test"
     failMsg = "Did not return success"
 #if !defined (ESMF_NO_F2003_ALLOC_STRING_LENS)
@@ -394,6 +398,7 @@
 #endif
     call ESMF_Test(rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
     !------------------------------------------------------------------------
+#endif
 
     !------------------------------------------------------------------------
     ! EX_UTest
