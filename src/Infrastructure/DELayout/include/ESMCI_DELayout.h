@@ -374,8 +374,6 @@ class XXE{
       lastFilterBitField = 0x0;
       superVectorOkay = true;
     }
-    XXE(XXE *xxe, std::map<void *, void *> *bufferOldNewMap=NULL,
-      std::map<void *, void *> *dataOldNewMap=NULL);  // constructor
     XXE(std::stringstream &streami,
       std::map<void *, void *> *bufferOldNewMap=NULL,
       std::map<void *, void *> *dataOldNewMap=NULL);

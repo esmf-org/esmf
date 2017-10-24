@@ -155,21 +155,25 @@ RouteHandle *RouteHandle::create(
     // copy the information from the incoming RH
     // keep htype the same
     routehandle->htype = rh->htype;
-    // must do a deep copy of the XXE
+    
+    // get to the XXE object
     XXE *xxe = (XXE *)rh->getStorage();
     
+    // streamify the XXE object
     stringstream xxeStreami;
-    xxe->streamify(xxeStreami); // convert xxe into a streami
+    xxe->streamify(xxeStreami);
     
 cout << ESMC_METHOD": size of xxeStreami=" << xxeStreami.str().size() << "\n";
     
 #ifdef RH_CREATE_MEMLOG_on
   VM::logMemInfo(std::string(ESMC_METHOD": right after creating xxeStreami"));
 #endif
-
-//    XXE *xxeNew = new XXE(xxe); // create new XXE object from old XXE object
-    XXE *xxeNew = new XXE(xxeStreami);  // create new XXE object from streami
-    routehandle->setStorage(xxeNew);    // store the new XXE object in RH
+    
+    // construct a new XXE object from streamified form
+    XXE *xxeNew = new XXE(xxeStreami);
+    
+    // store the new XXE object in RH
+    routehandle->setStorage(xxeNew);
     // do NOT copy any of the other members!
     
 #ifdef RH_CREATE_MEMLOG_on
