@@ -2988,293 +2988,678 @@ XXE::XXE(stringstream &streami, map<void *, void *> *bufferOldNewMap,
   opstream = new StreamElement[count];
   streami.read((char*)opstream, count*sizeof(StreamElement));  // read opstream
   
+  //TODO:
   // this works right now because the old opstream is actually still referencing
   // a bunch of oldAddrs, but we are in the same address space, and the old RH
   // still exists!
+  //  Most addresses are translated now. Only second level deep factorList
+  //  members are trouble because there is not translation available for pointers
+  ///////////////////////////////////////////////////////////////////////
   
-#if 1
-  
-  // introduce some utility variables
-  StreamElement                         *xxeElement;
-  BuffInfo                              *buffInfo;
-  BuffnbInfo                            *buffnbInfo;
-  SumSuperScalarDstRRAInfo              *sumSuperScalarDstRRAInfo;
-  SumSuperScalarListDstRRAInfo          *sumSuperScalarListDstRRAInfo;
-  ProductSumSuperScalarDstRRAInfo       *productSumSuperScalarDstRRAInfo;
-  ProductSumSuperScalarListDstRRAInfo   *productSumSuperScalarListDstRRAInfo;
-  ProductSumSuperScalarSrcRRAInfo       *productSumSuperScalarSrcRRAInfo;
-  ProductSumSuperScalarContigRRAInfo    *productSumSuperScalarContigRRAInfo;
-  ZeroMemsetInfo                        *zeroMemsetInfo;
-  MemGatherSrcRRAInfo                   *memGatherSrcRRAInfo;
-  SingleSubInfo                         *singleSubInfo;
-  MultiSubInfo                          *multiSubInfo;
-  WtimerInfo                            *wtimerInfo;
-  CommhandleInfo                        *commhandleInfo;
   
   // translate old->new addresses in the entire opstream
   for (int index=0; index<count; index++){
-    xxeElement = &(opstream[index]);
+    StreamElement *xxeElement = &(opstream[index]);
     
     switch(opstream[index].opId){
     case send:
     case recv:
       {
-        buffInfo = (BuffInfo *)xxeElement;
-        if (buffInfo->indirectionFlag){
-          cout << "buffInfo: "
-            << "old BufferInfo: " << buffInfo->buffer
-            << " new BufferInfo: " << (*bufferOldNewMap)[buffInfo->buffer] 
-            << "\n";
-          // replace old buffer reference with new
-          buffInfo->buffer = (*bufferOldNewMap)[buffInfo->buffer];
-        }
+        BuffInfo *element = (BuffInfo *)xxeElement;
+        void *oldAddr = element->buffer;
+        void *newAddr = NULL;
+        if (element->indirectionFlag)
+          newAddr = (*bufferOldNewMap)[oldAddr];
+        else
+          newAddr = (*dataOldNewMap)[oldAddr];
+        element->buffer = newAddr;
+        cout << "send/recv:"
+          << " oldAddr: " << oldAddr
+          << " newAddr: " << newAddr << "\n";
+        if (newAddr==NULL) cout << "ERROR in old->new translation!!\n";
+      }
+      break;
+    case sendrecv:
+      {
+        SendRecvInfo *element = (SendRecvInfo *)xxeElement;
+        void *oldAddr = element->srcBuffer;
+        void *newAddr = NULL;
+        if (element->srcIndirectionFlag)
+          newAddr = (*bufferOldNewMap)[oldAddr];
+        else
+          newAddr = (*dataOldNewMap)[oldAddr];
+        element->srcBuffer = newAddr;
+        cout << "sendrecv:"
+          << " oldAddr: " << oldAddr
+          << " newAddr: " << newAddr << "\n";
+        if (newAddr==NULL) cout << "ERROR in old->new translation!!\n";
+        oldAddr = element->dstBuffer;
+        newAddr = NULL;
+        if (element->dstIndirectionFlag)
+          newAddr = (*bufferOldNewMap)[oldAddr];
+        else
+          newAddr = (*dataOldNewMap)[oldAddr];
+        element->dstBuffer = newAddr;
+        cout << "sendrecv:"
+          << " oldAddr: " << oldAddr
+          << " newAddr: " << newAddr << "\n";
+        if (newAddr==NULL) cout << "ERROR in old->new translation!!\n";
+      }
+      break;
+    case sendRRArecv:
+      {
+        SendRRARecvInfo *element = (SendRRARecvInfo *)xxeElement;
+        void *oldAddr = element->dstBuffer;
+        void *newAddr = NULL;
+        if (element->dstIndirectionFlag)
+          newAddr = (*bufferOldNewMap)[oldAddr];
+        else
+          newAddr = (*dataOldNewMap)[oldAddr];
+        element->dstBuffer = newAddr;
+        cout << "sendRRArecv:"
+          << " oldAddr: " << oldAddr
+          << " newAddr: " << newAddr << "\n";
+        if (newAddr==NULL) cout << "ERROR in old->new translation!!\n";
       }
       break;
     case sendnb:
     case recvnb:
       {
-        buffnbInfo = (BuffnbInfo *)xxeElement;
-        if (buffnbInfo->indirectionFlag){
-          cout << "buffnbInfo: "
-            << "old BufferInfo: " << buffnbInfo->buffer
-            << " new BufferInfo: " << (*bufferOldNewMap)[buffnbInfo->buffer] 
-            << "\n";
-          // replace old buffer reference with new
-          buffnbInfo->buffer = (*bufferOldNewMap)[buffnbInfo->buffer];
-        }
+        BuffnbInfo *element = (BuffnbInfo *)xxeElement;
+        void *oldAddr = element->buffer;
+        void *newAddr = NULL;
+        if (element->indirectionFlag)
+          newAddr = (*bufferOldNewMap)[oldAddr];
+        else
+          newAddr = (*dataOldNewMap)[oldAddr];
+        element->buffer = newAddr;
+        cout << "sendnb/recvnb:"
+          << " oldAddr: " << oldAddr
+          << " newAddr: " << newAddr << "\n";
+        if (newAddr==NULL) cout << "ERROR in old->new translation!!\n";
       }
       // no break on purpose .... need to also swap commhandle as below
     case sendnbRRA:
     case recvnbRRA:
       {
-        commhandleInfo = (CommhandleInfo *)xxeElement;
-        cout << "commhandleInfo: "
-          << "old Commhandle: " << commhandleInfo->commhandle
-          << " new Commhandle: " << commhOldNewMap[commhandleInfo->commhandle]
-          << "\n";
-        // replace old commhandle reference with new
-        commhandleInfo->commhandle =
-          (VMK::commhandle **)commhOldNewMap[commhandleInfo->commhandle];
+        CommhandleInfo *commhandleInfo = (CommhandleInfo *)xxeElement;
+        void *oldAddr = commhandleInfo->commhandle;
+        void *newAddr = commhOldNewMap[oldAddr];
+        cout << "commhandle:"
+          << " old Commhandle: " << oldAddr
+          << " new Commhandle: " << newAddr << "\n";
+        commhandleInfo->commhandle = (VMK::commhandle **)newAddr;
+        if (newAddr==NULL) cout << "ERROR in old->new translation!!\n";
+      }
+      break;
+    case productSumVector:
+      {
+        ProductSumVectorInfo *element
+          = (ProductSumVectorInfo *)xxeElement;
+        void *oldAddr = element->element;
+        void *newAddr = (*dataOldNewMap)[oldAddr];
+        cout << "ProductSumVector:"
+          << " oldAddr: " << oldAddr
+          << " newAddr: " << newAddr << "\n";
+        element->element = (void *)newAddr;
+        if (newAddr==NULL) cout << "ERROR in old->new translation!!\n";
+        oldAddr = element->factorList;
+        newAddr = (*dataOldNewMap)[oldAddr];
+        cout << "ProductSumVector:"
+          << " oldAddr: " << oldAddr
+          << " newAddr: " << newAddr << "\n";
+        element->factorList = (void *)newAddr;
+        if (newAddr==NULL) cout << "ERROR in old->new translation!!\n";
+        oldAddr = element->valueList;
+        newAddr = (*dataOldNewMap)[oldAddr];
+        cout << "ProductSumVector:"
+          << " oldAddr: " << oldAddr
+          << " newAddr: " << newAddr << "\n";
+        element->valueList = (void *)newAddr;
+        if (newAddr==NULL) cout << "ERROR in old->new translation!!\n";
+      }
+      break;
+    case productSumScalar:
+      {
+        ProductSumScalarInfo *element
+          = (ProductSumScalarInfo *)xxeElement;
+        void *oldAddr = element->element;
+        void *newAddr = (*dataOldNewMap)[oldAddr];
+        cout << "productSumScalar:"
+          << " oldAddr: " << oldAddr
+          << " newAddr: " << newAddr << "\n";
+        element->element = (void *)newAddr;
+        if (newAddr==NULL) cout << "ERROR in old->new translation!!\n";
+        oldAddr = element->factor;
+        newAddr = (*dataOldNewMap)[oldAddr];
+        cout << "productSumScalar:"
+          << " oldAddr: " << oldAddr
+          << " newAddr: " << newAddr << "\n";
+        element->factor = (void *)newAddr;
+        if (newAddr==NULL) cout << "ERROR in old->new translation!!\n";
+        oldAddr = element->value;
+        newAddr = (*dataOldNewMap)[oldAddr];
+        cout << "productSumScalar:"
+          << " oldAddr: " << oldAddr
+          << " newAddr: " << newAddr << "\n";
+        element->value = (void *)newAddr;
+        if (newAddr==NULL) cout << "ERROR in old->new translation!!\n";
+      }
+      break;
+    case productSumScalarRRA:
+      {
+        ProductSumScalarRRAInfo *element
+          = (ProductSumScalarRRAInfo *)xxeElement;
+        void *oldAddr = element->factor;
+        void *newAddr = (*dataOldNewMap)[oldAddr];
+        cout << "productSumScalarRRA:"
+          << " oldAddr: " << oldAddr
+          << " newAddr: " << newAddr << "\n";
+        element->factor = (void *)newAddr;
+        if (newAddr==NULL) cout << "ERROR in old->new translation!!\n";
+        oldAddr = element->value;
+        newAddr = (*dataOldNewMap)[oldAddr];
+        cout << "productSumScalarRRA:"
+          << " oldAddr: " << oldAddr
+          << " newAddr: " << newAddr << "\n";
+        element->value = (void *)newAddr;
+        if (newAddr==NULL) cout << "ERROR in old->new translation!!\n";
       }
       break;
     case sumSuperScalarDstRRA:
       {
-        sumSuperScalarDstRRAInfo = (SumSuperScalarDstRRAInfo *)xxeElement;
-        if (sumSuperScalarDstRRAInfo->indirectionFlag){
-          cout << "sumSuperScalarDstRRA: "
-            << "old BufferInfo: " << sumSuperScalarDstRRAInfo->valueBase
-            << " new BufferInfo: " 
-            << (*bufferOldNewMap)[sumSuperScalarDstRRAInfo->valueBase] 
-            << "\n";
-          // replace old buffer reference with new
-          sumSuperScalarDstRRAInfo->valueBase = 
-            (*bufferOldNewMap)[sumSuperScalarDstRRAInfo->valueBase];
-        }
+        SumSuperScalarDstRRAInfo *element
+          = (SumSuperScalarDstRRAInfo *)xxeElement;
+        void *oldAddr = element->rraOffsetList;
+        void *newAddr = (*dataOldNewMap)[oldAddr];
+        cout << "SumSuperScalarDstRRA:"
+          << " oldAddr: " << oldAddr
+          << " newAddr: " << newAddr << "\n";
+        element->rraOffsetList = (int *)newAddr;
+        if (newAddr==NULL) cout << "ERROR in old->new translation!!\n";
+        oldAddr = element->valueOffsetList;
+        newAddr = (*dataOldNewMap)[oldAddr];
+        cout << "SumSuperScalarDstRRA:"
+          << " oldAddr: " << oldAddr
+          << " newAddr: " << newAddr << "\n";
+        element->valueOffsetList = (int *)newAddr;
+        if (newAddr==NULL) cout << "ERROR in old->new translation!!\n";
+        oldAddr = element->valueBase;
+        newAddr = NULL;
+        if (element->indirectionFlag)
+          newAddr = (*bufferOldNewMap)[oldAddr];
+        else
+          newAddr = (*dataOldNewMap)[oldAddr];
+        element->valueBase = newAddr;
+        cout << "SumSuperScalarDstRRA:"
+          << " oldAddr: " << oldAddr
+          << " newAddr: " << newAddr << "\n";
+        if (newAddr==NULL) cout << "ERROR in old->new translation!!\n";
       }
       break;
     case sumSuperScalarListDstRRA:
       {
-        sumSuperScalarListDstRRAInfo =
-          (SumSuperScalarListDstRRAInfo *)xxeElement;
-        if (sumSuperScalarListDstRRAInfo->indirectionFlag){
-          int valueBaseListSize =
-            sumSuperScalarListDstRRAInfo->valueBaseListSize;
-          for (int i=0; i<valueBaseListSize; i++){
-            cout << "sumSuperScalarListDstRRA: "
-              << "old BufferInfo: " 
-              << sumSuperScalarListDstRRAInfo->valueBaseList[i]
-              << " new BufferInfo: " 
-              << (*bufferOldNewMap)[sumSuperScalarListDstRRAInfo->valueBaseList[i]] 
-              << "\n";
-            // replace old buffer reference with new
-            sumSuperScalarListDstRRAInfo->valueBaseList[i] = 
-              (*bufferOldNewMap)[sumSuperScalarListDstRRAInfo->valueBaseList[i]];
-          }
+        SumSuperScalarListDstRRAInfo *element
+          = (SumSuperScalarListDstRRAInfo *)xxeElement;
+        void *oldAddr = element->rraOffsetList;
+        void *newAddr = (*dataOldNewMap)[oldAddr];
+        cout << "SumSuperScalarListDstRRA:"
+          << " oldAddr: " << oldAddr
+          << " newAddr: " << newAddr << "\n";
+        element->rraOffsetList = (int *)newAddr;
+        if (newAddr==NULL) cout << "ERROR in old->new translation!!\n";
+        oldAddr = element->valueBaseList;
+        newAddr = (*dataOldNewMap)[oldAddr];
+        cout << "SumSuperScalarListDstRRA:"
+          << " oldAddr: " << oldAddr
+          << " newAddr: " << newAddr << "\n";
+        element->valueBaseList = (void **)newAddr;
+        if (newAddr==NULL) cout << "ERROR in old->new translation!!\n";
+        oldAddr = element->valueBaseListResolve;
+        newAddr = (*dataOldNewMap)[oldAddr];
+        cout << "SumSuperScalarListDstRRA:"
+          << " oldAddr: " << oldAddr
+          << " newAddr: " << newAddr << "\n";
+        element->valueBaseListResolve = (void **)newAddr;
+        if (newAddr==NULL) cout << "ERROR in old->new translation!!\n";
+        oldAddr = element->rraIndexList;
+        newAddr = (*dataOldNewMap)[oldAddr];
+        cout << "SumSuperScalarListDstRRA:"
+          << " oldAddr: " << oldAddr
+          << " newAddr: " << newAddr << "\n";
+        element->rraIndexList = (int *)newAddr;
+        if (newAddr==NULL) cout << "ERROR in old->new translation!!\n";
+        oldAddr = element->valueOffsetList;
+        newAddr = (*dataOldNewMap)[oldAddr];
+        cout << "SumSuperScalarListDstRRA:"
+          << " oldAddr: " << oldAddr
+          << " newAddr: " << newAddr << "\n";
+        element->valueOffsetList = (int *)newAddr;
+        if (newAddr==NULL) cout << "ERROR in old->new translation!!\n";
+        oldAddr = element->baseListIndexList;
+        newAddr = (*dataOldNewMap)[oldAddr];
+        cout << "SumSuperScalarListDstRRA:"
+          << " oldAddr: " << oldAddr
+          << " newAddr: " << newAddr << "\n";
+        element->baseListIndexList = (int *)newAddr;
+        if (newAddr==NULL) cout << "ERROR in old->new translation!!\n";
+        // replace the pointers old->new one level deep
+        for (int i=0; i<element->valueBaseListSize; i++){
+          oldAddr = element->valueBaseList[i];
+          newAddr = NULL;
+          if (element->indirectionFlag)
+            newAddr = (*bufferOldNewMap)[oldAddr];
+          else
+            newAddr = (*dataOldNewMap)[oldAddr];
+          cout << "SumSuperScalarListDstRRA:"
+            << " oldAddr: " << oldAddr
+            << " newAddr: " << newAddr << "\n";
+          element->valueBaseList[i] = (void *)newAddr;
+          if (newAddr==NULL) cout << "ERROR in old->new translation!!\n";
         }
       }
       break;
     case productSumSuperScalarDstRRA:
       {
-        productSumSuperScalarDstRRAInfo =
-          (ProductSumSuperScalarDstRRAInfo *)xxeElement;
-        if (productSumSuperScalarDstRRAInfo->indirectionFlag){
-          cout << "productSumSuperScalarDstRRA: "
-            << "termCount: " << productSumSuperScalarDstRRAInfo->termCount
-            << " XXE dataMap size(int_rraOffsetList): "
-            << dataMap[(*dataOldNewMap)[productSumSuperScalarDstRRAInfo->rraOffsetList]]
-            << " old BufferInfo: " 
-            << productSumSuperScalarDstRRAInfo->valueBase
-            << " new BufferInfo: " 
-            << (*bufferOldNewMap)[productSumSuperScalarDstRRAInfo->valueBase] 
-            << "\n";
-          // replace old buffer reference with new
-          productSumSuperScalarDstRRAInfo->valueBase = 
-            (*bufferOldNewMap)[productSumSuperScalarDstRRAInfo->valueBase];
-        }else{
-          cout << "productSumSuperScalarDstRRA: "
-            << "termCount: " << productSumSuperScalarDstRRAInfo->termCount
-            << " XXE dataMap size(int_rraOffsetList): "
-            << dataMap[(*dataOldNewMap)[productSumSuperScalarDstRRAInfo->rraOffsetList]]
-            << " old BufferInfo: " 
-            << productSumSuperScalarDstRRAInfo->valueBase
-            << " new BufferInfo: " 
-            << (*dataOldNewMap)[productSumSuperScalarDstRRAInfo->valueBase] 
-            << "\n";
-          // replace old buffer reference with new, but its data based
-          productSumSuperScalarDstRRAInfo->valueBase = 
-            (*dataOldNewMap)[productSumSuperScalarDstRRAInfo->valueBase];
+        ProductSumSuperScalarDstRRAInfo *element
+          = (ProductSumSuperScalarDstRRAInfo *)xxeElement;
+        void *oldAddr = element->rraOffsetList;
+        void *newAddr = (*dataOldNewMap)[oldAddr];
+        cout << "ProductSumSuperScalarDstRRA:"
+          << " oldAddr: " << oldAddr
+          << " newAddr: " << newAddr << "\n";
+        element->rraOffsetList = (int *)newAddr;
+        if (newAddr==NULL) cout << "ERROR in old->new translation!!\n";
+        oldAddr = element->factorList;
+        newAddr = (*dataOldNewMap)[oldAddr];
+        cout << "ProductSumSuperScalarDstRRA:"
+          << " oldAddr: " << oldAddr
+          << " newAddr: " << newAddr << "\n";
+        element->factorList = (void **)newAddr;
+        if (newAddr==NULL) cout << "ERROR in old->new translation!!\n";
+        oldAddr = element->valueOffsetList;
+        newAddr = (*dataOldNewMap)[oldAddr];
+        cout << "ProductSumSuperScalarDstRRA:"
+          << " oldAddr: " << oldAddr
+          << " newAddr: " << newAddr << "\n";
+        element->valueOffsetList = (int *)newAddr;
+        if (newAddr==NULL) cout << "ERROR in old->new translation!!\n";
+        oldAddr = element->valueBase;
+        newAddr = NULL;
+        if (element->indirectionFlag)
+          newAddr = (*bufferOldNewMap)[oldAddr];
+        else
+          newAddr = (*dataOldNewMap)[oldAddr];
+        element->valueBase = newAddr;
+        cout << "ProductSumSuperScalarDstRRA:"
+          << " oldAddr: " << oldAddr
+          << " newAddr: " << newAddr << "\n";
+        if (newAddr==NULL) cout << "ERROR in old->new translation!!\n";
+        // replace the pointers old->new one level deep
+        for (int i=0; i<element->termCount; i++){
+          oldAddr = element->factorList[i];
+          newAddr = (*dataOldNewMap)[oldAddr];
+          cout << "ProductSumSuperScalarDstRRA:"
+            << " oldAddr: " << oldAddr
+            << " newAddr: " << newAddr << "\n";
+//TODO:          element->factorList[i] = (void *)newAddr;
+//          if (newAddr==NULL) cout << "ERROR in old->new translation!!\n";
         }
-        // replace data elements
-        productSumSuperScalarDstRRAInfo->rraOffsetList = (int *)
-          (*dataOldNewMap)[productSumSuperScalarDstRRAInfo->rraOffsetList];
-        productSumSuperScalarDstRRAInfo->valueOffsetList = (int *)
-          (*dataOldNewMap)[productSumSuperScalarDstRRAInfo->valueOffsetList];
-        productSumSuperScalarDstRRAInfo->factorList = (void **)
-          (*dataOldNewMap)[productSumSuperScalarDstRRAInfo->factorList];
-#if 0
-        for (int i=0; i<productSumSuperScalarDstRRAInfo->termCount; i++){
-          // replace the pointers old->new one level deep
-          productSumSuperScalarDstRRAInfo->factorList[i] =
-            (*dataOldNewMap)[productSumSuperScalarDstRRAInfo->factorList[i]];
-        }
-#endif
       }
       break;
     case productSumSuperScalarListDstRRA:
       {
-        productSumSuperScalarListDstRRAInfo =
-          (ProductSumSuperScalarListDstRRAInfo *)xxeElement;
-        if (productSumSuperScalarListDstRRAInfo->indirectionFlag){
-          int valueBaseListSize =
-            productSumSuperScalarListDstRRAInfo->valueBaseListSize;
-          // replace old data reference with new
-          productSumSuperScalarListDstRRAInfo->rraOffsetList = (int *)
-            (*dataOldNewMap)[productSumSuperScalarListDstRRAInfo->rraOffsetList];
-          productSumSuperScalarListDstRRAInfo->rraOffsetList = (int *)
-            (*dataOldNewMap)[productSumSuperScalarListDstRRAInfo->rraOffsetList];
-          productSumSuperScalarListDstRRAInfo->valueBaseListResolve = (void **)
-            (*dataOldNewMap)[productSumSuperScalarListDstRRAInfo->valueBaseListResolve];
-          productSumSuperScalarListDstRRAInfo->rraIndexList = (int *)
-            (*dataOldNewMap)[productSumSuperScalarListDstRRAInfo->rraIndexList];
-          productSumSuperScalarListDstRRAInfo->valueOffsetList = (int *)
-            (*dataOldNewMap)[productSumSuperScalarListDstRRAInfo->valueOffsetList];
-          productSumSuperScalarListDstRRAInfo->baseListIndexList = (int *)
-            (*dataOldNewMap)[productSumSuperScalarListDstRRAInfo->baseListIndexList];
-          for (int i=0; i<valueBaseListSize; i++){
-            cout << "productSumSuperScalarListDstRRA: "
-              << "old BufferInfo: " 
-              << productSumSuperScalarListDstRRAInfo->valueBaseList[i]
-              << " new BufferInfo: " 
-              << (*bufferOldNewMap)[productSumSuperScalarListDstRRAInfo->valueBaseList[i]] 
-              << "\n";
-            // replace old buffer reference with new
-            productSumSuperScalarListDstRRAInfo->valueBaseList[i] = 
-              (*bufferOldNewMap)[productSumSuperScalarListDstRRAInfo->valueBaseList[i]];
-          }
+        ProductSumSuperScalarListDstRRAInfo *element
+          = (ProductSumSuperScalarListDstRRAInfo *)xxeElement;
+        void *oldAddr = element->rraOffsetList;
+        void *newAddr = (*dataOldNewMap)[oldAddr];
+        cout << "ProductSumSuperScalarListDstRRA:"
+          << " oldAddr: " << oldAddr
+          << " newAddr: " << newAddr << "\n";
+        element->rraOffsetList = (int *)newAddr;
+        if (newAddr==NULL) cout << "ERROR in old->new translation!!\n";
+        oldAddr = element->factorList;
+        newAddr = (*dataOldNewMap)[oldAddr];
+        cout << "ProductSumSuperScalarListDstRRA:"
+          << " oldAddr: " << oldAddr
+          << " newAddr: " << newAddr << "\n";
+        element->factorList = (void **)newAddr;
+        if (newAddr==NULL) cout << "ERROR in old->new translation!!\n";
+        oldAddr = element->valueBaseList;
+        newAddr = (*dataOldNewMap)[oldAddr];
+        cout << "ProductSumSuperScalarListDstRRA:"
+          << " oldAddr: " << oldAddr
+          << " newAddr: " << newAddr << "\n";
+        element->valueBaseList = (void **)newAddr;
+        if (newAddr==NULL) cout << "ERROR in old->new translation!!\n";
+        oldAddr = element->valueBaseListResolve;
+        newAddr = (*dataOldNewMap)[oldAddr];
+        cout << "ProductSumSuperScalarListDstRRA:"
+          << " oldAddr: " << oldAddr
+          << " newAddr: " << newAddr << "\n";
+        element->valueBaseListResolve = (void **)newAddr;
+        if (newAddr==NULL) cout << "ERROR in old->new translation!!\n";
+        oldAddr = element->rraIndexList;
+        newAddr = (*dataOldNewMap)[oldAddr];
+        cout << "ProductSumSuperScalarListDstRRA:"
+          << " oldAddr: " << oldAddr
+          << " newAddr: " << newAddr << "\n";
+        element->rraIndexList = (int *)newAddr;
+        if (newAddr==NULL) cout << "ERROR in old->new translation!!\n";
+        oldAddr = element->valueOffsetList;
+        newAddr = (*dataOldNewMap)[oldAddr];
+        cout << "ProductSumSuperScalarListDstRRA:"
+          << " oldAddr: " << oldAddr
+          << " newAddr: " << newAddr << "\n";
+        element->valueOffsetList = (int *)newAddr;
+        if (newAddr==NULL) cout << "ERROR in old->new translation!!\n";
+        oldAddr = element->baseListIndexList;
+        newAddr = (*dataOldNewMap)[oldAddr];
+        cout << "ProductSumSuperScalarListDstRRA:"
+          << " oldAddr: " << oldAddr
+          << " newAddr: " << newAddr << "\n";
+        element->baseListIndexList = (int *)newAddr;
+        if (newAddr==NULL) cout << "ERROR in old->new translation!!\n";
+        // replace the pointers old->new one level deep
+        for (int i=0; i<element->valueBaseListSize; i++){
+          oldAddr = element->valueBaseList[i];
+          newAddr = NULL;
+          if (element->indirectionFlag)
+            newAddr = (*bufferOldNewMap)[oldAddr];
+          else
+            newAddr = (*dataOldNewMap)[oldAddr];
+          cout << "ProductSumSuperScalarListDstRRA:"
+            << " oldAddr: " << oldAddr
+            << " newAddr: " << newAddr << "\n";
+          element->valueBaseList[i] = (void *)newAddr;
+          if (newAddr==NULL) cout << "ERROR in old->new translation!!\n";
+        }
+        // replace the pointers old->new one level deep
+        for (int i=0; i<element->termCount; i++){
+          oldAddr = element->factorList[i];
+          newAddr = (*dataOldNewMap)[oldAddr];
+          cout << "ProductSumSuperScalarListDstRRA:"
+            << " oldAddr: " << oldAddr
+            << " newAddr: " << newAddr << "\n";
+//TODO:          element->factorList[i] = (void *)newAddr;
+//          if (newAddr==NULL) cout << "ERROR in old->new translation!!\n";
         }
       }
       break;
     case productSumSuperScalarSrcRRA:
       {
-        productSumSuperScalarSrcRRAInfo =
-          (ProductSumSuperScalarSrcRRAInfo *)xxeElement;
-        if (productSumSuperScalarSrcRRAInfo->indirectionFlag){
-          cout << "productSumSuperScalarSrcRRA: "
-            << "old BufferInfo: " 
-            << productSumSuperScalarSrcRRAInfo->elementBase
-            << " new BufferInfo: " 
-            << (*bufferOldNewMap)[productSumSuperScalarSrcRRAInfo->elementBase] 
-            << "\n";
-          // replace old buffer reference with new
-          productSumSuperScalarSrcRRAInfo->elementBase = 
-            (*bufferOldNewMap)[productSumSuperScalarSrcRRAInfo->elementBase];
+        ProductSumSuperScalarSrcRRAInfo *element
+          = (ProductSumSuperScalarSrcRRAInfo *)xxeElement;
+        void *oldAddr = element->rraOffsetList;
+        void *newAddr = (*dataOldNewMap)[oldAddr];
+        cout << "ProductSumSuperScalarSrcRRA:"
+          << " oldAddr: " << oldAddr
+          << " newAddr: " << newAddr << "\n";
+        element->rraOffsetList = (int *)newAddr;
+        if (newAddr==NULL) cout << "ERROR in old->new translation!!\n";
+        oldAddr = element->factorList;
+        newAddr = (*dataOldNewMap)[oldAddr];
+        cout << "ProductSumSuperScalarSrcRRA:"
+          << " oldAddr: " << oldAddr
+          << " newAddr: " << newAddr << "\n";
+        element->factorList = (void **)newAddr;
+        if (newAddr==NULL) cout << "ERROR in old->new translation!!\n";
+        oldAddr = element->elementOffsetList;
+        newAddr = (*dataOldNewMap)[oldAddr];
+        cout << "ProductSumSuperScalarSrcRRA:"
+          << " oldAddr: " << oldAddr
+          << " newAddr: " << newAddr << "\n";
+        element->elementOffsetList = (int *)newAddr;
+        if (newAddr==NULL) cout << "ERROR in old->new translation!!\n";
+        oldAddr = element->elementBase;
+        newAddr = NULL;
+        if (element->indirectionFlag)
+          newAddr = (*bufferOldNewMap)[oldAddr];
+        else
+          newAddr = (*dataOldNewMap)[oldAddr];
+        element->elementBase = newAddr;
+        cout << "ProductSumSuperScalarSrcRRA:"
+          << " oldAddr: " << oldAddr
+          << " newAddr: " << newAddr << "\n";
+        if (newAddr==NULL) cout << "ERROR in old->new translation!!\n";
+        // replace the pointers old->new one level deep
+        for (int i=0; i<element->termCount; i++){
+          oldAddr = element->factorList[i];
+          newAddr = (*dataOldNewMap)[oldAddr];
+          cout << "ProductSumSuperScalarSrcRRA:"
+            << " oldAddr: " << oldAddr
+            << " newAddr: " << newAddr << "\n";
+//TODO:          element->factorList[i] = (void *)newAddr;
+//          if (newAddr==NULL) cout << "ERROR in old->new translation!!\n";
         }
       }
       break;
     case productSumSuperScalarContigRRA:
       {
-        productSumSuperScalarContigRRAInfo =
-          (ProductSumSuperScalarContigRRAInfo *)xxeElement;
-        if (productSumSuperScalarContigRRAInfo->indirectionFlag){
-          cout << "productSumSuperScalarContigRRA: "
-            << "old BufferInfo: " 
-            << productSumSuperScalarContigRRAInfo->valueList
-            << " new BufferInfo: " 
-            << (*bufferOldNewMap)[productSumSuperScalarContigRRAInfo->valueList] 
-            << "\n";
-          // replace old buffer reference with new
-          productSumSuperScalarContigRRAInfo->valueList = 
-            (*bufferOldNewMap)[productSumSuperScalarContigRRAInfo->valueList];
+        ProductSumSuperScalarContigRRAInfo *element
+          = (ProductSumSuperScalarContigRRAInfo *)xxeElement;
+        void *oldAddr = element->rraOffsetList;
+        void *newAddr = (*dataOldNewMap)[oldAddr];
+        cout << "ProductSumSuperScalarContigRRA:"
+          << " oldAddr: " << oldAddr
+          << " newAddr: " << newAddr << "\n";
+        element->rraOffsetList = (int *)newAddr;
+        if (newAddr==NULL) cout << "ERROR in old->new translation!!\n";
+        oldAddr = element->factorList;
+        newAddr = (*dataOldNewMap)[oldAddr];
+        cout << "ProductSumSuperScalarContigRRA:"
+          << " oldAddr: " << oldAddr
+          << " newAddr: " << newAddr << "\n";
+        element->factorList = (void **)newAddr;
+        if (newAddr==NULL) cout << "ERROR in old->new translation!!\n";
+        oldAddr = element->valueList;
+        newAddr = NULL;
+        if (element->indirectionFlag)
+          newAddr = (*bufferOldNewMap)[oldAddr];
+        else
+          newAddr = (*dataOldNewMap)[oldAddr];
+        element->valueList = newAddr;
+        cout << "ProductSumSuperScalarContigRRA:"
+          << " oldAddr: " << oldAddr
+          << " newAddr: " << newAddr << "\n";
+        if (newAddr==NULL) cout << "ERROR in old->new translation!!\n";
+        // replace the pointers old->new one level deep
+        for (int i=0; i<element->termCount; i++){
+          oldAddr = element->factorList[i];
+          newAddr = (*dataOldNewMap)[oldAddr];
+          cout << "ProductSumSuperScalarContigRRA:"
+            << " oldAddr: " << oldAddr
+            << " newAddr: " << newAddr << "\n";
+//TODO:          element->factorList[i] = (void *)newAddr;
+//          if (newAddr==NULL) cout << "ERROR in old->new translation!!\n";
         }
+      }
+      break;
+    case zeroSuperScalarRRA:
+      {
+        ZeroSuperScalarRRAInfo *element
+          = (ZeroSuperScalarRRAInfo *)xxeElement;
+        void *oldAddr = element->rraOffsetList;
+        void *newAddr = (*dataOldNewMap)[oldAddr];
+        cout << "ZeroSuperScalarRRA:"
+          << " oldAddr: " << oldAddr
+          << " newAddr: " << newAddr << "\n";
+        element->rraOffsetList = (int *)newAddr;
+        if (newAddr==NULL) cout << "ERROR in old->new translation!!\n";
       }
       break;
     case zeroMemset:
       {
-        zeroMemsetInfo = (ZeroMemsetInfo *)xxeElement;
-        if (zeroMemsetInfo->indirectionFlag){
-          cout << "zeroMemset: "
-            << "old BufferInfo: " << zeroMemsetInfo->buffer
-            << " new BufferInfo: " << (*bufferOldNewMap)[zeroMemsetInfo->buffer] 
-            << "\n";
-          // replace old buffer reference with new
-          zeroMemsetInfo->buffer = (*bufferOldNewMap)[zeroMemsetInfo->buffer];
-        }
+        ZeroMemsetInfo *element = (ZeroMemsetInfo *)xxeElement;
+        void *oldAddr = element->buffer;
+        void *newAddr = NULL;
+        if (element->indirectionFlag)
+          newAddr = (*bufferOldNewMap)[oldAddr];
+        else
+          newAddr = (*dataOldNewMap)[oldAddr];
+        element->buffer = newAddr;
+        cout << "ZeroMemset:"
+          << " oldAddr: " << oldAddr
+          << " newAddr: " << newAddr << "\n";
+        if (newAddr==NULL) cout << "ERROR in old->new translation!!\n";
+      }
+      break;
+    case memCpy:
+      {
+        MemCpyInfo *element
+          = (MemCpyInfo *)xxeElement;
+        void *oldAddr = element->dstMem;
+        void *newAddr = (*dataOldNewMap)[oldAddr];
+        cout << "MemCpy:"
+          << " oldAddr: " << oldAddr
+          << " newAddr: " << newAddr << "\n";
+        element->dstMem = (void *)newAddr;
+        if (newAddr==NULL) cout << "ERROR in old->new translation!!\n";
+        oldAddr = element->srcMem;
+        newAddr = (*dataOldNewMap)[oldAddr];
+        cout << "MemCpy:"
+          << " oldAddr: " << oldAddr
+          << " newAddr: " << newAddr << "\n";
+        element->srcMem = (void *)newAddr;
+        if (newAddr==NULL) cout << "ERROR in old->new translation!!\n";
+      }
+      break;
+    case memCpySrcRRA:
+      {
+        MemCpySrcRRAInfo *element
+          = (MemCpySrcRRAInfo *)xxeElement;
+        void *oldAddr = element->dstMem;
+        void *newAddr = (*dataOldNewMap)[oldAddr];
+        cout << "MemCpySrcRRA:"
+          << " oldAddr: " << oldAddr
+          << " newAddr: " << newAddr << "\n";
+        element->dstMem = (void *)newAddr;
+        if (newAddr==NULL) cout << "ERROR in old->new translation!!\n";
       }
       break;
     case memGatherSrcRRA:
       {
-        memGatherSrcRRAInfo = (MemGatherSrcRRAInfo *)xxeElement;
-        if (memGatherSrcRRAInfo->indirectionFlag){
-          cout << "memGatherSrcRRA: "
-            << "old BufferInfo: " << memGatherSrcRRAInfo->dstBase
-            << " new BufferInfo: " << (*bufferOldNewMap)[memGatherSrcRRAInfo->dstBase] 
-            << "\n";
-          // replace old buffer reference with new
-          memGatherSrcRRAInfo->dstBase =
-            (*bufferOldNewMap)[memGatherSrcRRAInfo->dstBase];
-        }
+        MemGatherSrcRRAInfo *element
+          = (MemGatherSrcRRAInfo *)xxeElement;
+        void *oldAddr = element->dstBase;
+        void *newAddr = NULL;
+        if (element->indirectionFlag)
+          newAddr = (*bufferOldNewMap)[oldAddr];
+        else
+          newAddr = (*dataOldNewMap)[oldAddr];
+        cout << "MemGatherSrcRRA:"
+          << " oldAddr: " << oldAddr
+          << " newAddr: " << newAddr << "\n";
+        element->dstBase = (void *)newAddr;
+        if (newAddr==NULL) cout << "ERROR in old->new translation!!\n";
+        oldAddr = element->rraOffsetList;
+        newAddr = (*dataOldNewMap)[oldAddr];
+        cout << "MemGatherSrcRRA:"
+          << " oldAddr: " << oldAddr
+          << " newAddr: " << newAddr << "\n";
+        element->rraOffsetList = (int *)newAddr;
+        if (newAddr==NULL) cout << "ERROR in old->new translation!!\n";
+        oldAddr = element->countList;
+        newAddr = (*dataOldNewMap)[oldAddr];
+        cout << "MemGatherSrcRRA:"
+          << " oldAddr: " << oldAddr
+          << " newAddr: " << newAddr << "\n";
+        element->countList = (int *)newAddr;
+        if (newAddr==NULL) cout << "ERROR in old->new translation!!\n";
       }
       break;
     case waitOnIndexSub:
     case testOnIndexSub:
     case xxeSub:
       {
-        singleSubInfo = (SingleSubInfo *)xxeElement;
-        cout << "singleSubInfo: "
-          << "old Sub: " << singleSubInfo->xxe
-          << " new Sub: " << xxeSubOldNewMap[singleSubInfo->xxe] 
-          << "\n";
-        // replace old buffer reference with new
-        singleSubInfo->xxe = (XXE *) xxeSubOldNewMap[singleSubInfo->xxe];
+        SingleSubInfo *singleSubInfo = (SingleSubInfo *)xxeElement;
+        void *oldAddr = singleSubInfo->xxe;
+        void *newAddr = xxeSubOldNewMap[oldAddr];
+        cout << "singleSub:"
+          << " old Sub: " << oldAddr
+          << " new Sub: " << newAddr << "\n";
+        singleSubInfo->xxe = (XXE *)newAddr;
+        if (newAddr==NULL) cout << "ERROR in old->new translation!!\n";
       }
       break;
     case waitOnAnyIndexSub:
+      {
+        WaitOnAnyIndexSubInfo *element = (WaitOnAnyIndexSubInfo *)xxeElement;
+        void *oldAddr = element->index;
+        void *newAddr = (*dataOldNewMap)[oldAddr];
+        cout << "waitOnAnyIndexSub:"
+          << " oldAddr: " << oldAddr
+          << " newAddr: " << newAddr << "\n";
+        element->index = (int *)newAddr;
+        if (newAddr==NULL) cout << "ERROR in old->new translation!!\n";
+        oldAddr = element->completeFlag;
+        newAddr = (*dataOldNewMap)[oldAddr];
+        cout << "waitOnAnyIndexSub:"
+          << " oldAddr: " << oldAddr
+          << " newAddr: " << newAddr << "\n";
+        element->completeFlag = (int *)newAddr;
+        if (newAddr==NULL) cout << "ERROR in old->new translation!!\n";
+      }
+      // no break on purpose .... need to also swap sub as below
     case xxeSubMulti:
       {
-        multiSubInfo = (MultiSubInfo *)xxeElement;
+        MultiSubInfo *multiSubInfo = (MultiSubInfo *)xxeElement;
+        void *oldAddr = multiSubInfo->xxe;
+        void *newAddr = (*dataOldNewMap)[oldAddr];
+        cout << "multiSub:"
+          << " old Sub: " << oldAddr
+          << " new Sub: " << newAddr << "\n";
+        multiSubInfo->xxe = (XXE **)newAddr;
+        if (newAddr==NULL) cout << "ERROR in old->new translation!!\n";
         for (int i=0; i<multiSubInfo->count; i++){
-          cout << "multiSubInfo: "
-            << "count: " << multiSubInfo->count
-            << " size of original xxe data: " 
-            << dataMap[multiSubInfo->xxe]
-            << " old Sub: " << multiSubInfo->xxe[i]
-            << " new Sub: " << xxeSubOldNewMap[multiSubInfo->xxe[i]]
-            << "\n";
-          // replace old buffer reference with new
-          multiSubInfo->xxe[i] = (XXE *) xxeSubOldNewMap[multiSubInfo->xxe[i]];
+          oldAddr = multiSubInfo->xxe[i];
+          newAddr = xxeSubOldNewMap[oldAddr];
+          cout << "multiSub:"
+            << " count: " << multiSubInfo->count
+            << " old Sub[i]: " << oldAddr
+            << " new Sub[i]: " << newAddr << "\n";
+          multiSubInfo->xxe[i] = (XXE *)newAddr;
+          if (newAddr==NULL) cout << "ERROR in old->new translation!!\n";
         }
       }
       break;
     case wtimer:
       {
-        wtimerInfo = (WtimerInfo *)xxeElement;
-        cout << "wtimerInfo: "
-          << "old Sub: " << wtimerInfo->relativeWtimerXXE
-          << " new Sub: " << xxeSubOldNewMap[wtimerInfo->relativeWtimerXXE] 
-          << "\n";
-        // replace old buffer reference with new
-        wtimerInfo->relativeWtimerXXE = 
-          (XXE *)xxeSubOldNewMap[wtimerInfo->relativeWtimerXXE];
+        WtimerInfo *element = (WtimerInfo *)xxeElement;
+        void *oldAddr = element->timerString;
+        void *newAddr = (*dataOldNewMap)[oldAddr];
+        cout << "wtimer:"
+          << " oldAddr: " << oldAddr
+          << " newAddr: " << newAddr << "\n";
+        element->timerString = (char *)newAddr;
+        if (newAddr==NULL) cout << "ERROR in old->new translation!!\n";
+        oldAddr = element->relativeWtime;
+        newAddr = (*dataOldNewMap)[oldAddr];
+        cout << "wtimer:"
+          << " oldAddr: " << oldAddr
+          << " newAddr: " << newAddr << "\n";
+        element->relativeWtime = (double *)newAddr;
+        if (newAddr==NULL) cout << "ERROR in old->new translation!!\n";
+        oldAddr = element->relativeWtimerXXE;
+        newAddr = xxeSubOldNewMap[oldAddr];
+        cout << "wtimer:"
+          << " old Sub: " << oldAddr
+          << " new Sub: " << newAddr << "\n";
+        element->relativeWtimerXXE = (XXE *)newAddr;
+        if (newAddr==NULL) cout << "ERROR in old->new translation!!\n";
+      }
+      break;
+    case message:
+    case profileMessage:
+      {
+        MessageInfo *element = (MessageInfo *)xxeElement;
+        void *oldAddr = element->messageString;
+        void *newAddr = (*dataOldNewMap)[oldAddr];
+        cout << "Message:"
+          << " oldAddr: " << oldAddr
+          << " newAddr: " << newAddr << "\n";
+        element->messageString = (char *)newAddr;
+        if (newAddr==NULL) cout << "ERROR in old->new translation!!\n";
       }
       break;
     default:
@@ -3283,8 +3668,6 @@ XXE::XXE(stringstream &streami, map<void *, void *> *bufferOldNewMap,
     
   } // index
   
-#endif
-
   // local garbage collection
   if (dataOldNewMapCreatorFlag){
     delete dataOldNewMap;
