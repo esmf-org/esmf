@@ -11,7 +11,7 @@
 //==============================================================================
 #define ESMC_FILENAME "ESMCI_VM.C"
 //==============================================================================
-#define GARBAGE_COLLECTION_LOG_off
+#define GARBAGE_COLLECTION_LOG_on
 //==============================================================================
 //
 // VM class implementation (body) file
@@ -1866,37 +1866,46 @@ void VM::logMemInfo(
   }
   fclose(file);
   // access mallinfo
+  std::stringstream info;
   struct mallinfo m = mallinfo();
-  sprintf(line, "Non-mmapped space allocated (bytes):       \t%d", m.arena);
-  sprintf(msg, "%s - MemInfo: %s", prefix.c_str(), line);
+  info << "Non-mmapped space allocated (bytes):       \t" << m.arena;
+  sprintf(msg, "%s - MemInfo: %s", prefix.c_str(), info.str().c_str());
   ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
-  sprintf(line, "Space allocated in mmapped regions (bytes):\t%d", m.hblkhd);
-  sprintf(msg, "%s - MemInfo: %s", prefix.c_str(), line);
+  info.str(""); // clear info
+  info << "Space allocated in mmapped regions (bytes):\t" << m.hblkhd;
+  sprintf(msg, "%s - MemInfo: %s", prefix.c_str(), info.str().c_str());
   ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
-  sprintf(line, "Maximum total allocated space (bytes):     \t%d", m.usmblks);
-  sprintf(msg, "%s - MemInfo: %s", prefix.c_str(), line);
+  info.str(""); // clear info
+  info << "Maximum total allocated space (bytes):     \t" << m.usmblks;
+  sprintf(msg, "%s - MemInfo: %s", prefix.c_str(), info.str().c_str());
   ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
-  sprintf(line, "Space in freed fastbin blocks (bytes):     \t%d", m.fsmblks);
-  sprintf(msg, "%s - MemInfo: %s", prefix.c_str(), line);
+  info.str(""); // clear info
+  info << "Space in freed fastbin blocks (bytes):     \t" << m.fsmblks;
+  sprintf(msg, "%s - MemInfo: %s", prefix.c_str(), info.str().c_str());
   ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
-  sprintf(line, "Total allocated space (bytes):             \t%d", m.uordblks);
-  sprintf(msg, "%s - MemInfo: %s", prefix.c_str(), line);
+  info.str(""); // clear info
+  info << "Total allocated space (bytes):             \t" << m.uordblks;
+  sprintf(msg, "%s - MemInfo: %s", prefix.c_str(), info.str().c_str());
   ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
-  sprintf(line, "Total free space (bytes):                  \t%d", m.fordblks);
-  sprintf(msg, "%s - MemInfo: %s", prefix.c_str(), line);
+  info.str(""); // clear info
+  info << "Total free space (bytes):                  \t" << m.fordblks;
+  sprintf(msg, "%s - MemInfo: %s", prefix.c_str(), info.str().c_str());
   ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
-  sprintf(line, "Top-most, releasable space (bytes):        \t%d", m.keepcost);
-  sprintf(msg, "%s - MemInfo: %s", prefix.c_str(), line);
+  info.str(""); // clear info
+  info << "Top-most, releasable space (bytes):        \t" << m.keepcost;
+  sprintf(msg, "%s - MemInfo: %s", prefix.c_str(), info.str().c_str());
   ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
-  sprintf(line, "Total space in use, mmap + non-mmap (KiB): \t%d", 
-    (m.hblkhd+m.uordblks)/1024);
-  sprintf(msg, "%s - MemInfo: %s", prefix.c_str(), line);
+  info.str(""); // clear info
+  info << "Total space in use, mmap + non-mmap (KiB): \t" <<
+    (m.hblkhd+m.uordblks)/1024;
+  sprintf(msg, "%s - MemInfo: %s", prefix.c_str(), info.str().c_str());
   ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
   // output the wtime since execution start
   double wt;
   ESMCI::VMK::wtime(&wt);
-  sprintf(line, "Wall-clock time since execution start (s): \t%g", wt);
-  sprintf(msg, "%s - MemInfo: %s", prefix.c_str(), line);
+  info.str(""); // clear info
+  info << "Wall-clock time since execution start (s): \t" << wt;
+  sprintf(msg, "%s - MemInfo: %s", prefix.c_str(), info.str().c_str());
   ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
   // unlock again
   vm->unlock();
