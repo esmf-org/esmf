@@ -11,6 +11,8 @@
 //==============================================================================
 #define ESMC_FILENAME "ESMCI_RHandle.C"
 //==============================================================================
+#define RH_CREATE_MEMLOG_on
+//==============================================================================
 //
 // RouteHandle class implementation (body) file
 //
@@ -155,10 +157,25 @@ RouteHandle *RouteHandle::create(
     routehandle->htype = rh->htype;
     // must do a deep copy of the XXE
     XXE *xxe = (XXE *)rh->getStorage();
-    XXE *xxeNew = new XXE(xxe);
-    routehandle->setStorage(xxeNew);
+    
+    stringstream xxeStreami;
+    xxe->streamify(xxeStreami); // convert xxe into a streami
+    
+cout << ESMC_METHOD": size of xxeStreami=" << xxeStreami.str().size() << "\n";
+    
+#ifdef RH_CREATE_MEMLOG_on
+  VM::logMemInfo(std::string(ESMC_METHOD": right after creating xxeStreami"));
+#endif
+
+//    XXE *xxeNew = new XXE(xxe); // create new XXE object from old XXE object
+    XXE *xxeNew = new XXE(xxeStreami);  // create new XXE object from streami
+    routehandle->setStorage(xxeNew);    // store the new XXE object in RH
     // do NOT copy any of the other members!
     
+#ifdef RH_CREATE_MEMLOG_on
+  VM::logMemInfo(std::string(ESMC_METHOD": right after creating xxeNew"));
+#endif
+
   }catch(int localrc){
     // catch standard ESMF return code
     ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,

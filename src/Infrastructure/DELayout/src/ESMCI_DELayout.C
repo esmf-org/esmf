@@ -2465,7 +2465,8 @@ int DELayout::ESMC_DELayoutFindDEtoPET(int npets){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::XXE::XXE()"
 // constructor
-XXE::XXE(XXE *xxe, map<void *, void *> *bufferMap){
+XXE::XXE(XXE *xxe, map<void *, void *> *bufferMap,
+  map<void *, void *> *dataOldNewMap){
   int rc = ESMC_RC_NOT_IMPL;              // final return code
   vm = xxe->vm; // TODO: long run this must be changable
   
@@ -2522,7 +2523,7 @@ XXE::XXE(XXE *xxe, map<void *, void *> *bufferMap){
   }
 
   // replicate the commhandle member
-  map<void *, void *> commhandleMap;  // need a map to keep track of association
+  map<void *, void *> commhOldNewMap;  // keep track of old->new association
   commhandleCount = 0;
   commhandleMaxCount = xxe->commhandleCount + 1; // see note below for +1
   // +1 prevents storeCommhandle() below from incrementing commhandleMaxCount
@@ -2535,7 +2536,7 @@ XXE::XXE(XXE *xxe, map<void *, void *> *bufferMap){
     if (ESMC_LogDefault.MsgFoundError(storeCommhandle(commh),
       ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) throw rc;
     // track association between old->new commhandle
-    commhandleMap[(xxe->commhandle)[i]] = commhandle[i];
+    commhOldNewMap[(xxe->commhandle)[i]] = commhandle[i];
   }
   
   // introduce some utility variables
@@ -2599,11 +2600,11 @@ XXE::XXE(XXE *xxe, map<void *, void *> *bufferMap){
         commhandleInfo = (CommhandleInfo *)xxeElement;
         cout << "commhandleInfo: "
           << "old Commhandle: " << commhandleInfo->commhandle
-          << " new Commhandle: " << commhandleMap[commhandleInfo->commhandle]
+          << " new Commhandle: " << commhOldNewMap[commhandleInfo->commhandle]
           << "\n";
         // replace old commhandle reference with new
         commhandleInfo->commhandle =
-          (VMK::commhandle **)commhandleMap[commhandleInfo->commhandle];
+          (VMK::commhandle **)commhOldNewMap[commhandleInfo->commhandle];
       }
       break;
     case sumSuperScalarDstRRA:
@@ -2810,6 +2811,493 @@ XXE::XXE(XXE *xxe, map<void *, void *> *bufferMap){
 
 
 //-----------------------------------------------------------------------------
+// utility function used by streamify
+template<typename T> void readin(stringstream &streami, T *value){
+  streami.read((char*)value, sizeof(T));
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::XXE::XXE()"
+// constructor
+XXE::XXE(stringstream &streami, map<void *, void *> *bufferOldNewMap, 
+  map<void *, void *> *dataOldNewMap){
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
+  
+  vm = VM::getCurrent(&localrc);
+  if (ESMC_LogDefault.MsgFoundError(localrc,
+    ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) throw rc;
+  
+  // HEADER
+  readin(streami, &count);                // number of elements in op-stream
+  map<void *, unsigned long>::size_type dataMapSize;    // aux. variable
+  readin(streami, &dataMapSize);          // number of data elements
+  vector<BufferInfo *>::size_type bufferInfoListSize;   // aux. variable
+  readin(streami, &bufferInfoListSize);   // number of buffer elements
+  readin(streami, &commhandleCount);      // number of commhandles
+  readin(streami, &xxeSubCount);          // number of subs
+  for (int i=0; i<10; i++)
+    readin(streami, &typekind[i]);        // typekinds
+  readin(streami, &lastFilterBitField);   // 
+  readin(streami, &superVectorOkay);      // 
+  readin(streami, &max);                  // 
+  readin(streami, &dataMaxCount);         // 
+  readin(streami, &commhandleMaxCount);   // 
+  readin(streami, &xxeSubMaxCount);       // 
+
+  streampos positionOpstream;
+  readin(streami, &positionOpstream);
+  streampos positionDataMap;
+  readin(streami, &positionDataMap);
+  streampos positionBufferMap;
+  readin(streami, &positionBufferMap);
+  streampos positionCommhMap;
+  readin(streami, &positionCommhMap);
+  streampos positionSubsMap;
+  readin(streami, &positionSubsMap);
+
+  dataCount = 0;              // reset, because building up here
+  dataMaxCount = dataMapSize; // appropriate size from incoming streami
+  dataList = new char*[dataMapSize];
+  
+  // need a map object in order to track association between old->new data
+  bool dataOldNewMapCreatorFlag = false;
+  if (dataOldNewMap==NULL){
+    // incoming dataOldNewMap is not created, created it here, 
+    // i.e. top level of recursion
+    dataOldNewMapCreatorFlag = true;
+    dataOldNewMap = new map<void *, void *>;
+  }
+
+  // associate new data allocation address with position of data in streami
+  map<void *, streampos> dataPos; 
+  // position to read in dataMap
+  streami.seekg(positionDataMap);
+  // replicate the dataMap, allocating own local data
+  for (unsigned i=0; i<dataMapSize; i++){
+    void *oldAddr;
+    unsigned long size;
+    streampos pos;
+    readin(streami, &oldAddr);          // old address
+    readin(streami, &size);             // size
+    readin(streami, &pos);              // pos
+    // ensure alignment
+    int qwords = size / 8;
+    if (size % 8) ++qwords;
+    void *data = (void *)(new double[qwords]);
+    // duplicate the dataMap, but with local data reference
+    dataMap[data] = size;
+    dataList[dataCount] = (char *)data; // also set old dataList member for now
+    ++dataCount;
+    dataPos[data] = pos;
+    // track association between old->new dataMap element
+    (*dataOldNewMap)[oldAddr] = data;
+  }
+  // now read the actual data from streami and fill into new allocations
+  map<void *, streampos>::iterator it;  
+  for (it=dataPos.begin(); it!=dataPos.end(); ++it){
+    void *data = it->first;
+    streampos pos = it->second;
+    unsigned long size = dataMap[data];
+    streami.seekg(pos);
+    streami.read((char *)data, size);
+  }
+
+  // need a map object in order to track association between old->new buffer
+  bool bufferOldNewMapCreatorFlag = false;
+  if (bufferOldNewMap==NULL){
+    // incoming bufferOldNewMap is not created, created it here, 
+    // i.e. top level of recursion
+    bufferOldNewMapCreatorFlag = true;
+    bufferOldNewMap = new map<void *, void *>;
+  }
+  
+  // position to read in bufferMap
+  streami.seekg(positionBufferMap);
+  // replicate the bufferInfoList, allocating own local buffers
+  bufferInfoList.reserve(bufferInfoListSize);  // initial preparation
+  for (unsigned i=0; i<bufferInfoListSize; i++){
+    void *oldAddr;
+    int size;
+    int multiplier;
+    readin(streami, &oldAddr);          // old address
+    readin(streami, &size);             // size
+    readin(streami, &multiplier);       // multiplier
+    // ensure alignment
+    int qwords = size / 8;
+    if (size % 8) ++qwords;
+    char *buffer = (char *)(new double[qwords]);
+    // duplicate the bufferInfo, but with local buffer reference
+    BufferInfo *bufferInfo = new BufferInfo(buffer, size, multiplier);
+    bufferInfoList.push_back(bufferInfo);
+    // track association between old->new bufferInfoList element
+    (*bufferOldNewMap)[oldAddr] = bufferInfoList[i];
+  }
+
+  // position to read in commhMap
+  streami.seekg(positionCommhMap);
+  // replicate the commhandle member
+  map<void *, void *> commhOldNewMap;  // keep track of old->new association
+  // know how many commhandles are needed
+  commhandleMaxCount = commhandleCount + 1; // see note below for +1
+  // +1 prevents storeCommhandle() below from incrementing commhandleMaxCount
+  commhandleCount = 0;  // go through the regular process to increment this
+  commhandle = new VMK::commhandle**[commhandleMaxCount-1];
+  for (int i=0; i<commhandleMaxCount-1; i++){
+    void *oldAddr;
+    readin(streami, &oldAddr);          // old address
+    // duplicate the commhandle, but locally
+    VMK::commhandle** commh = new VMK::commhandle*;
+    *commh = new VMK::commhandle;
+    // track newly commh in XXE
+    if (ESMC_LogDefault.MsgFoundError(storeCommhandle(commh),
+      ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) throw rc;
+    // track association between old->new commhandle
+    commhOldNewMap[oldAddr] = commhandle[i];
+  }
+
+  // position to read in subsMap
+  streami.seekg(positionSubsMap);
+  // replicate the xxeSubList
+  // _after_ dataOldNewMap, and bufferOldNewMap  have been filled on this level
+  map<void *, void *> xxeSubOldNewMap;  // keep track of association
+  xxeSubMaxCount = xxeSubCount; // know the exact number, don't need extra
+  xxeSubList = new XXE*[xxeSubMaxCount];
+  for (int i=0; i<xxeSubCount; i++){
+    void *oldAddr;
+    streampos pos;
+    readin(streami, &oldAddr);          // old address
+    readin(streami, &pos);              // pos
+    // hang on to current position in streami for next iteration
+    streampos currPos = streami.tellg();
+    // recursive constructor call into XXE()
+    streami.seekg(pos); // position streami for this sub
+    xxeSubList[i] = new XXE(streami, bufferOldNewMap, dataOldNewMap);
+    // track association between old->new xxeSubList element
+    xxeSubOldNewMap[oldAddr] = xxeSubList[i];
+    // reposition streami for next iteration
+    streami.seekg(currPos);
+  }
+  
+  // position to read in opstream
+  streami.seekg(positionOpstream);
+  max = count;        // know exactly how many elements there are
+  stream = new StreamElement[count];
+  streami.read((char*)stream, count*sizeof(StreamElement));  // entire opstream
+  
+  // this works right now because the old opstream is actually still referencing
+  // a bunch of oldAddrs, but we are in the same address space, and the old RH
+  // still exists!
+  
+#if 1
+  
+  // introduce some utility variables
+  StreamElement                         *xxeElement;
+  BuffInfo                              *buffInfo;
+  BuffnbInfo                            *buffnbInfo;
+  SumSuperScalarDstRRAInfo              *sumSuperScalarDstRRAInfo;
+  SumSuperScalarListDstRRAInfo          *sumSuperScalarListDstRRAInfo;
+  ProductSumSuperScalarDstRRAInfo       *productSumSuperScalarDstRRAInfo;
+  ProductSumSuperScalarListDstRRAInfo   *productSumSuperScalarListDstRRAInfo;
+  ProductSumSuperScalarSrcRRAInfo       *productSumSuperScalarSrcRRAInfo;
+  ProductSumSuperScalarContigRRAInfo    *productSumSuperScalarContigRRAInfo;
+  ZeroMemsetInfo                        *zeroMemsetInfo;
+  MemGatherSrcRRAInfo                   *memGatherSrcRRAInfo;
+  SingleSubInfo                         *singleSubInfo;
+  MultiSubInfo                          *multiSubInfo;
+  WtimerInfo                            *wtimerInfo;
+  CommhandleInfo                        *commhandleInfo;
+  
+  // translate old->new addresses in the entire opstream
+  for (int index=0; index<count; index++){
+    xxeElement = &(stream[index]);
+    
+    switch(stream[index].opId){
+    case send:
+    case recv:
+      {
+        buffInfo = (BuffInfo *)xxeElement;
+        if (buffInfo->indirectionFlag){
+          cout << "buffInfo: "
+            << "old BufferInfo: " << buffInfo->buffer
+            << " new BufferInfo: " << (*bufferOldNewMap)[buffInfo->buffer] 
+            << "\n";
+          // replace old buffer reference with new
+          buffInfo->buffer = (*bufferOldNewMap)[buffInfo->buffer];
+        }
+      }
+      break;
+    case sendnb:
+    case recvnb:
+      {
+        buffnbInfo = (BuffnbInfo *)xxeElement;
+        if (buffnbInfo->indirectionFlag){
+          cout << "buffnbInfo: "
+            << "old BufferInfo: " << buffnbInfo->buffer
+            << " new BufferInfo: " << (*bufferOldNewMap)[buffnbInfo->buffer] 
+            << "\n";
+          // replace old buffer reference with new
+          buffnbInfo->buffer = (*bufferOldNewMap)[buffnbInfo->buffer];
+        }
+      }
+      // no break on purpose .... need to also swap commhandle as below
+    case sendnbRRA:
+    case recvnbRRA:
+      {
+        commhandleInfo = (CommhandleInfo *)xxeElement;
+        cout << "commhandleInfo: "
+          << "old Commhandle: " << commhandleInfo->commhandle
+          << " new Commhandle: " << commhOldNewMap[commhandleInfo->commhandle]
+          << "\n";
+        // replace old commhandle reference with new
+        commhandleInfo->commhandle =
+          (VMK::commhandle **)commhOldNewMap[commhandleInfo->commhandle];
+      }
+      break;
+    case sumSuperScalarDstRRA:
+      {
+        sumSuperScalarDstRRAInfo = (SumSuperScalarDstRRAInfo *)xxeElement;
+        if (sumSuperScalarDstRRAInfo->indirectionFlag){
+          cout << "sumSuperScalarDstRRA: "
+            << "old BufferInfo: " << sumSuperScalarDstRRAInfo->valueBase
+            << " new BufferInfo: " 
+            << (*bufferOldNewMap)[sumSuperScalarDstRRAInfo->valueBase] 
+            << "\n";
+          // replace old buffer reference with new
+          sumSuperScalarDstRRAInfo->valueBase = 
+            (*bufferOldNewMap)[sumSuperScalarDstRRAInfo->valueBase];
+        }
+      }
+      break;
+    case sumSuperScalarListDstRRA:
+      {
+        sumSuperScalarListDstRRAInfo =
+          (SumSuperScalarListDstRRAInfo *)xxeElement;
+        if (sumSuperScalarListDstRRAInfo->indirectionFlag){
+          int valueBaseListSize =
+            sumSuperScalarListDstRRAInfo->valueBaseListSize;
+          for (int i=0; i<valueBaseListSize; i++){
+            cout << "sumSuperScalarListDstRRA: "
+              << "old BufferInfo: " 
+              << sumSuperScalarListDstRRAInfo->valueBaseList[i]
+              << " new BufferInfo: " 
+              << (*bufferOldNewMap)[sumSuperScalarListDstRRAInfo->valueBaseList[i]] 
+              << "\n";
+            // replace old buffer reference with new
+            sumSuperScalarListDstRRAInfo->valueBaseList[i] = 
+              (*bufferOldNewMap)[sumSuperScalarListDstRRAInfo->valueBaseList[i]];
+          }
+        }
+      }
+      break;
+    case productSumSuperScalarDstRRA:
+      {
+        productSumSuperScalarDstRRAInfo =
+          (ProductSumSuperScalarDstRRAInfo *)xxeElement;
+        if (productSumSuperScalarDstRRAInfo->indirectionFlag){
+          cout << "productSumSuperScalarDstRRA: "
+            << "termCount: " << productSumSuperScalarDstRRAInfo->termCount
+            << " XXE dataMap size(int_rraOffsetList): "
+            << dataMap[(*dataOldNewMap)[productSumSuperScalarDstRRAInfo->rraOffsetList]]
+            << " old BufferInfo: " 
+            << productSumSuperScalarDstRRAInfo->valueBase
+            << " new BufferInfo: " 
+            << (*bufferOldNewMap)[productSumSuperScalarDstRRAInfo->valueBase] 
+            << "\n";
+          // replace old buffer reference with new
+          productSumSuperScalarDstRRAInfo->valueBase = 
+            (*bufferOldNewMap)[productSumSuperScalarDstRRAInfo->valueBase];
+        }else{
+          cout << "productSumSuperScalarDstRRA: "
+            << "termCount: " << productSumSuperScalarDstRRAInfo->termCount
+            << " XXE dataMap size(int_rraOffsetList): "
+            << dataMap[(*dataOldNewMap)[productSumSuperScalarDstRRAInfo->rraOffsetList]]
+            << " old BufferInfo: " 
+            << productSumSuperScalarDstRRAInfo->valueBase
+            << " new BufferInfo: " 
+            << (*dataOldNewMap)[productSumSuperScalarDstRRAInfo->valueBase] 
+            << "\n";
+          // replace old buffer reference with new, but its data based
+          productSumSuperScalarDstRRAInfo->valueBase = 
+            (*dataOldNewMap)[productSumSuperScalarDstRRAInfo->valueBase];
+        }
+        // replace data elements
+        productSumSuperScalarDstRRAInfo->rraOffsetList = (int *)
+          (*dataOldNewMap)[productSumSuperScalarDstRRAInfo->rraOffsetList];
+        productSumSuperScalarDstRRAInfo->valueOffsetList = (int *)
+          (*dataOldNewMap)[productSumSuperScalarDstRRAInfo->valueOffsetList];
+        productSumSuperScalarDstRRAInfo->factorList = (void **)
+          (*dataOldNewMap)[productSumSuperScalarDstRRAInfo->factorList];
+#if 0
+        for (int i=0; i<productSumSuperScalarDstRRAInfo->termCount; i++){
+          // replace the pointers old->new one level deep
+          productSumSuperScalarDstRRAInfo->factorList[i] =
+            (*dataOldNewMap)[productSumSuperScalarDstRRAInfo->factorList[i]];
+        }
+#endif
+      }
+      break;
+    case productSumSuperScalarListDstRRA:
+      {
+        productSumSuperScalarListDstRRAInfo =
+          (ProductSumSuperScalarListDstRRAInfo *)xxeElement;
+        if (productSumSuperScalarListDstRRAInfo->indirectionFlag){
+          int valueBaseListSize =
+            productSumSuperScalarListDstRRAInfo->valueBaseListSize;
+          // replace old data reference with new
+          productSumSuperScalarListDstRRAInfo->rraOffsetList = (int *)
+            (*dataOldNewMap)[productSumSuperScalarListDstRRAInfo->rraOffsetList];
+          productSumSuperScalarListDstRRAInfo->rraOffsetList = (int *)
+            (*dataOldNewMap)[productSumSuperScalarListDstRRAInfo->rraOffsetList];
+          productSumSuperScalarListDstRRAInfo->valueBaseListResolve = (void **)
+            (*dataOldNewMap)[productSumSuperScalarListDstRRAInfo->valueBaseListResolve];
+          productSumSuperScalarListDstRRAInfo->rraIndexList = (int *)
+            (*dataOldNewMap)[productSumSuperScalarListDstRRAInfo->rraIndexList];
+          productSumSuperScalarListDstRRAInfo->valueOffsetList = (int *)
+            (*dataOldNewMap)[productSumSuperScalarListDstRRAInfo->valueOffsetList];
+          productSumSuperScalarListDstRRAInfo->baseListIndexList = (int *)
+            (*dataOldNewMap)[productSumSuperScalarListDstRRAInfo->baseListIndexList];
+          for (int i=0; i<valueBaseListSize; i++){
+            cout << "productSumSuperScalarListDstRRA: "
+              << "old BufferInfo: " 
+              << productSumSuperScalarListDstRRAInfo->valueBaseList[i]
+              << " new BufferInfo: " 
+              << (*bufferOldNewMap)[productSumSuperScalarListDstRRAInfo->valueBaseList[i]] 
+              << "\n";
+            // replace old buffer reference with new
+            productSumSuperScalarListDstRRAInfo->valueBaseList[i] = 
+              (*bufferOldNewMap)[productSumSuperScalarListDstRRAInfo->valueBaseList[i]];
+          }
+        }
+      }
+      break;
+    case productSumSuperScalarSrcRRA:
+      {
+        productSumSuperScalarSrcRRAInfo =
+          (ProductSumSuperScalarSrcRRAInfo *)xxeElement;
+        if (productSumSuperScalarSrcRRAInfo->indirectionFlag){
+          cout << "productSumSuperScalarSrcRRA: "
+            << "old BufferInfo: " 
+            << productSumSuperScalarSrcRRAInfo->elementBase
+            << " new BufferInfo: " 
+            << (*bufferOldNewMap)[productSumSuperScalarSrcRRAInfo->elementBase] 
+            << "\n";
+          // replace old buffer reference with new
+          productSumSuperScalarSrcRRAInfo->elementBase = 
+            (*bufferOldNewMap)[productSumSuperScalarSrcRRAInfo->elementBase];
+        }
+      }
+      break;
+    case productSumSuperScalarContigRRA:
+      {
+        productSumSuperScalarContigRRAInfo =
+          (ProductSumSuperScalarContigRRAInfo *)xxeElement;
+        if (productSumSuperScalarContigRRAInfo->indirectionFlag){
+          cout << "productSumSuperScalarContigRRA: "
+            << "old BufferInfo: " 
+            << productSumSuperScalarContigRRAInfo->valueList
+            << " new BufferInfo: " 
+            << (*bufferOldNewMap)[productSumSuperScalarContigRRAInfo->valueList] 
+            << "\n";
+          // replace old buffer reference with new
+          productSumSuperScalarContigRRAInfo->valueList = 
+            (*bufferOldNewMap)[productSumSuperScalarContigRRAInfo->valueList];
+        }
+      }
+      break;
+    case zeroMemset:
+      {
+        zeroMemsetInfo = (ZeroMemsetInfo *)xxeElement;
+        if (zeroMemsetInfo->indirectionFlag){
+          cout << "zeroMemset: "
+            << "old BufferInfo: " << zeroMemsetInfo->buffer
+            << " new BufferInfo: " << (*bufferOldNewMap)[zeroMemsetInfo->buffer] 
+            << "\n";
+          // replace old buffer reference with new
+          zeroMemsetInfo->buffer = (*bufferOldNewMap)[zeroMemsetInfo->buffer];
+        }
+      }
+      break;
+    case memGatherSrcRRA:
+      {
+        memGatherSrcRRAInfo = (MemGatherSrcRRAInfo *)xxeElement;
+        if (memGatherSrcRRAInfo->indirectionFlag){
+          cout << "memGatherSrcRRA: "
+            << "old BufferInfo: " << memGatherSrcRRAInfo->dstBase
+            << " new BufferInfo: " << (*bufferOldNewMap)[memGatherSrcRRAInfo->dstBase] 
+            << "\n";
+          // replace old buffer reference with new
+          memGatherSrcRRAInfo->dstBase =
+            (*bufferOldNewMap)[memGatherSrcRRAInfo->dstBase];
+        }
+      }
+      break;
+    case waitOnIndexSub:
+    case testOnIndexSub:
+    case xxeSub:
+      {
+        singleSubInfo = (SingleSubInfo *)xxeElement;
+        cout << "singleSubInfo: "
+          << "old Sub: " << singleSubInfo->xxe
+          << " new Sub: " << xxeSubOldNewMap[singleSubInfo->xxe] 
+          << "\n";
+        // replace old buffer reference with new
+        singleSubInfo->xxe = (XXE *) xxeSubOldNewMap[singleSubInfo->xxe];
+      }
+      break;
+    case waitOnAnyIndexSub:
+    case xxeSubMulti:
+      {
+        multiSubInfo = (MultiSubInfo *)xxeElement;
+        for (int i=0; i<multiSubInfo->count; i++){
+          cout << "multiSubInfo: "
+            << "count: " << multiSubInfo->count
+            << " size of original xxe data: " 
+            << dataMap[multiSubInfo->xxe]
+            << " old Sub: " << multiSubInfo->xxe[i]
+            << " new Sub: " << xxeSubOldNewMap[multiSubInfo->xxe[i]]
+            << "\n";
+          // replace old buffer reference with new
+          multiSubInfo->xxe[i] = (XXE *) xxeSubOldNewMap[multiSubInfo->xxe[i]];
+        }
+      }
+      break;
+    case wtimer:
+      {
+        wtimerInfo = (WtimerInfo *)xxeElement;
+        cout << "wtimerInfo: "
+          << "old Sub: " << wtimerInfo->relativeWtimerXXE
+          << " new Sub: " << xxeSubOldNewMap[wtimerInfo->relativeWtimerXXE] 
+          << "\n";
+        // replace old buffer reference with new
+        wtimerInfo->relativeWtimerXXE = 
+          (XXE *)xxeSubOldNewMap[wtimerInfo->relativeWtimerXXE];
+      }
+      break;
+    default:
+      break;
+    }
+    
+  } // index
+  
+#endif
+
+  // local garbage collection
+  if (dataOldNewMapCreatorFlag){
+    delete dataOldNewMap;
+  }
+  if (bufferOldNewMapCreatorFlag){
+    delete bufferOldNewMap;
+  }
+  
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::XXE::~XXE()"
 // destructor
@@ -2819,7 +3307,7 @@ XXE::~XXE(){
   delete [] stream;
   // memory allocations held in data
   std::map<void *, unsigned long>::iterator it;
-  for (it=dataMap.begin(); it!=dataMap.end(); it++){
+  for (it=dataMap.begin(); it!=dataMap.end(); ++it){
 #ifdef XXE_STORAGEDELETE_LOG_on
     {
       std::stringstream debugmsg;
@@ -2856,6 +3344,114 @@ XXE::~XXE(){
     delete bufferInfoList[i];
   }
   bufferInfoList.clear();
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+// utility function used by streamify
+template<typename T> void append(stringstream &streami, T value){
+  streami.write((char*)&value, sizeof(T));
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::XXE::streamify()"
+void XXE::streamify(stringstream &streami){
+  
+  // HEADER
+  append(streami, count);                 // number of elements in op-stream
+  append(streami, dataMap.size());        // number of data elements
+  append(streami, bufferInfoList.size()); // number of buffer elements
+  append(streami, commhandleCount);       // number of commhandles
+  append(streami, xxeSubCount);           // number of subs
+  for (int i=0; i<10; i++)
+    append(streami, typekind[i]);         // typekinds
+  append(streami, lastFilterBitField);    // 
+  append(streami, superVectorOkay);       // 
+  append(streami, max);                   // 
+  append(streami, dataMaxCount);          // 
+  append(streami, commhandleMaxCount);    // 
+  append(streami, xxeSubMaxCount);        // 
+  
+  streampos posZero = 0;  // dummy position variable
+  
+  streampos posPositionOpstream = streami.tellp(); // store this position
+  append(streami, posZero);               // placeholder for actual position
+
+  streampos posPositionDataMap = streami.tellp(); // store this position
+  append(streami, posZero);               // placeholder for actual position
+  
+  streampos posPositionBufferMap = streami.tellp(); // store this position
+  append(streami, posZero);               // placeholder for actual position
+
+  streampos posPositionCommhMap = streami.tellp(); // store this position
+  append(streami, posZero);               // placeholder for actual position
+
+  streampos posPositionSubsMap = streami.tellp(); // store this position
+  append(streami, posZero);               // placeholder for actual position
+    
+  // SUBS
+  vector<streampos> subPos;
+  for (int i=0; i<xxeSubCount; ++i){
+    subPos.push_back(streami.tellp()); // hang on to position in stream
+    xxeSubList[i]->streamify(streami); // recursively streamify
+  }
+
+  // needed below for iterations  
+  map<void *, unsigned long>::iterator it;
+  int ii;
+
+  // DATA
+  vector<streampos> dataPos;
+  for (it=dataMap.begin(); it!=dataMap.end(); ++it){
+    dataPos.push_back(streami.tellp()); // hang on to position in stream
+    streami.write((char*)it->first, it->second);  // data block
+  }
+  
+  // MAPS
+  // dataMap
+  streampos positionDataMap = streami.tellp();
+  for (it=dataMap.begin(), ii=0; it!=dataMap.end(); ++it, ++ii){
+    append(streami, it->first);   // old address
+    append(streami, it->second);  // size
+    append(streami, dataPos[ii]); // position in stream
+  }
+  // bufferMap
+  streampos positionBufferMap = streami.tellp();
+  for (unsigned i=0; i<bufferInfoList.size(); ++i){
+    append(streami, (void *)bufferInfoList[i]);                 // old address
+    append(streami, bufferInfoList[i]->size);                   // size
+    append(streami, bufferInfoList[i]->vectorLengthMultiplier); // multiplier
+  }
+  // commhMap
+  streampos positionCommhMap = streami.tellp();
+  for (int i=0; i<commhandleCount; ++i){
+    append(streami, (void *)(commhandle[i]));   // old address
+  }
+  // subsMap
+  streampos positionSubsMap = streami.tellp();
+  for (int i=0; i<xxeSubCount; ++i){
+    append(streami, (void *)(xxeSubList[i]));   // old address
+    append(streami, subPos[i]);                 // position in stream
+  }
+  
+  // OPSTREAM
+  streampos positionOpstream = streami.tellp();
+  streami.write((char*)stream, count*sizeof(StreamElement));  // entire opstream
+
+  // finish up by jumping through the streami and write some positions
+  streami.seekp(posPositionOpstream);
+  append(streami, positionOpstream);
+  append(streami, positionDataMap);
+  append(streami, positionBufferMap);
+  append(streami, positionCommhMap);
+  append(streami, positionSubsMap);
+  
+  // reset to end of stream again -> very important for recusion!
+  streami.seekp(0, ios::end);
 }
 //-----------------------------------------------------------------------------
 
@@ -9482,8 +10078,7 @@ int XXE::appendSumSuperScalarListDstRRA(
   localrc = storeData(rraIndexListChar, rraIndexList.size()*sizeof(int));
   if (ESMC_LogDefault.MsgFoundError(localrc,
     ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
-  localrc = storeData(valueBaseListChar, 
-    valueBaseList.size()*sizeof(void *));
+  localrc = storeData(valueBaseListChar, valueBaseList.size()*sizeof(void *));
   if (ESMC_LogDefault.MsgFoundError(localrc,
     ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
   localrc = storeData(valueBaseListResolveChar,
@@ -9569,7 +10164,7 @@ int XXE::appendProductSumSuperScalarDstRRA(
   localrc = storeData(rraOffsetListChar, termCount*sizeof(int));
   if (ESMC_LogDefault.MsgFoundError(localrc,
     ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
-  localrc = storeData(factorListChar, termCount*sizeof(int));
+  localrc = storeData(factorListChar, termCount*sizeof(void *));
   if (ESMC_LogDefault.MsgFoundError(localrc,
     ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
   localrc = storeData(valueOffsetListChar, termCount*sizeof(int));
@@ -9667,8 +10262,7 @@ int XXE::appendProductSumSuperScalarListDstRRA(
   localrc = storeData(rraIndexListChar, rraIndexList.size()*sizeof(int));
   if (ESMC_LogDefault.MsgFoundError(localrc,
     ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
-  localrc = storeData(valueBaseListChar,
-    valueBaseList.size()*sizeof(void *));
+  localrc = storeData(valueBaseListChar, valueBaseList.size()*sizeof(void *));
   if (ESMC_LogDefault.MsgFoundError(localrc,
     ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
   localrc = storeData(valueBaseListResolveChar,
@@ -9678,7 +10272,7 @@ int XXE::appendProductSumSuperScalarListDstRRA(
   localrc = storeData(rraOffsetListChar, termCount*sizeof(int));
   if (ESMC_LogDefault.MsgFoundError(localrc,
     ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
-  localrc = storeData(factorListChar, termCount*sizeof(int));
+  localrc = storeData(factorListChar, termCount*sizeof(void *));
   if (ESMC_LogDefault.MsgFoundError(localrc,
     ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
   localrc = storeData(valueOffsetListChar, termCount*sizeof(int));
@@ -9757,7 +10351,7 @@ int XXE::appendProductSumSuperScalarSrcRRA(
   localrc = storeData(rraOffsetListChar, termCount*sizeof(int));
   if (ESMC_LogDefault.MsgFoundError(localrc,
     ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
-  localrc = storeData(factorListChar, termCount*sizeof(int));
+  localrc = storeData(factorListChar, termCount*sizeof(void *));
   if (ESMC_LogDefault.MsgFoundError(localrc,
     ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
   localrc = storeData(elementOffsetListChar, termCount*sizeof(int));

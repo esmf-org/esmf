@@ -313,7 +313,7 @@ class XXE{
         
   public:
     VM *vm;
-    // STREAM
+    // OPSTREAM
     StreamElement *stream;          // actual stream containing XXE elements
     int count;                      // number of elements in the stream
     // DATA
@@ -373,11 +373,16 @@ class XXE{
       lastFilterBitField = 0x0;
       superVectorOkay = true;
     }
-    XXE(XXE *xxe, std::map<void *, void *> *bufferMap=NULL);  // constructor
+    XXE(XXE *xxe, std::map<void *, void *> *bufferOldNewMap=NULL,
+      std::map<void *, void *> *dataOldNewMap=NULL);  // constructor
+    XXE(std::stringstream &streami,
+      std::map<void *, void *> *bufferOldNewMap=NULL,
+      std::map<void *, void *> *dataOldNewMap=NULL);
     ~XXE();      // destructor
     void clearReset(int countArg, int dataCountArg=-1, 
       int commhandleCountArg=-1, int xxeSubCountArg=-1, 
       int bufferInfoListArg=-1);
+    void streamify(std::stringstream &streami);
     bool getNextSubSuperVectorOkay(int *k){
       // search for the next xxeSub element in the stream, starting at index k.
       // when found return the element's superVectorOkay setting, and also 
