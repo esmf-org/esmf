@@ -428,7 +428,8 @@ class XXE{
     int storeData(char *data, unsigned long size);
     int storeCommhandle(VMK::commhandle **commhandle);
     int storeXxeSub(XXE *xxeSub);
-    int storeBufferInfo(char *buffer, int size, int vectorLengthMultiplier);
+    int storeBufferInfo(char *buffer, unsigned long size,
+      int vectorLengthMultiplier);
     char *getBufferInfoPtr(){
       size_t i=bufferInfoList.size();
       if (i>0)

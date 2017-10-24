@@ -8958,7 +8958,7 @@ int XXE::storeBufferInfo(
 // !ARGUMENTS:
 //
   char *buffer, 
-  int size, 
+  unsigned long size, 
   int vectorLengthMultiplier
   ){
 //
