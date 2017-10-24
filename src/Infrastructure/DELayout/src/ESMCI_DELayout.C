@@ -2497,9 +2497,9 @@ XXE::XXE(XXE *xxe, map<void *, void *> *bufferMap,
   // replicate the bufferInfoList, allocating own local buffers
   bufferInfoList.reserve((xxe->bufferInfoList).size());  // initial preparation
   for (unsigned i=0; i<(xxe->bufferInfoList).size(); i++){
-    int size = (xxe->bufferInfoList)[i]->size; // size of the buffer
+    unsigned long size = (xxe->bufferInfoList)[i]->size; // size of the buffer
     // ensure alignment
-    int qwords = size / 8;
+    unsigned long qwords = size / 8;
     if (size % 8) ++qwords;
     char *buffer = (char *)(new double[qwords]);
     // duplicate the bufferInfo, but with local buffer reference
@@ -2556,16 +2556,16 @@ XXE::XXE(XXE *xxe, map<void *, void *> *bufferMap,
   WtimerInfo                            *wtimerInfo;
   CommhandleInfo                        *commhandleInfo;
   
-  // now deal with the actual instruction stream
+  // now deal with the actual instruction opstream
   max = count = xxe->count;
-  stream = new StreamElement[count];
+  opstream = new StreamElement[count];
   for (int index=0; index<count; index++){
-    // first copy the stream element as is
-    stream[index] = xxe->stream[index];
-    // now modify the copied stream element:
-    xxeElement = &(stream[index]);
+    // first copy the opstream element as is
+    opstream[index] = xxe->opstream[index];
+    // now modify the copied opstream element:
+    xxeElement = &(opstream[index]);
     
-    switch(stream[index].opId){
+    switch(opstream[index].opId){
     case send:
     case recv:
       {
@@ -2921,13 +2921,13 @@ XXE::XXE(stringstream &streami, map<void *, void *> *bufferOldNewMap,
   bufferInfoList.reserve(bufferInfoListSize);  // initial preparation
   for (unsigned i=0; i<bufferInfoListSize; i++){
     void *oldAddr;
-    int size;
+    unsigned long size;
     int multiplier;
     readin(streami, &oldAddr);          // old address
     readin(streami, &size);             // size
     readin(streami, &multiplier);       // multiplier
     // ensure alignment
-    int qwords = size / 8;
+    unsigned long qwords = size / 8;
     if (size % 8) ++qwords;
     char *buffer = (char *)(new double[qwords]);
     // duplicate the bufferInfo, but with local buffer reference
@@ -2985,8 +2985,8 @@ XXE::XXE(stringstream &streami, map<void *, void *> *bufferOldNewMap,
   // position to read in opstream
   streami.seekg(positionOpstream);
   max = count;        // know exactly how many elements there are
-  stream = new StreamElement[count];
-  streami.read((char*)stream, count*sizeof(StreamElement));  // entire opstream
+  opstream = new StreamElement[count];
+  streami.read((char*)opstream, count*sizeof(StreamElement));  // read opstream
   
   // this works right now because the old opstream is actually still referencing
   // a bunch of oldAddrs, but we are in the same address space, and the old RH
@@ -3013,9 +3013,9 @@ XXE::XXE(stringstream &streami, map<void *, void *> *bufferOldNewMap,
   
   // translate old->new addresses in the entire opstream
   for (int index=0; index<count; index++){
-    xxeElement = &(stream[index]);
+    xxeElement = &(opstream[index]);
     
-    switch(stream[index].opId){
+    switch(opstream[index].opId){
     case send:
     case recv:
       {
@@ -3303,8 +3303,8 @@ XXE::XXE(stringstream &streami, map<void *, void *> *bufferOldNewMap,
 // destructor
 XXE::~XXE(){
   // -> clean-up all allocations for which this XXE object is responsible:
-  // stream of XXE elements
-  delete [] stream;
+  // opstream of XXE elements
+  delete [] opstream;
   // memory allocations held in data
   std::map<void *, unsigned long>::iterator it;
   for (it=dataMap.begin(); it!=dataMap.end(); ++it){
@@ -3440,7 +3440,7 @@ void XXE::streamify(stringstream &streami){
   
   // OPSTREAM
   streampos positionOpstream = streami.tellp();
-  streami.write((char*)stream, count*sizeof(StreamElement));  // entire opstream
+  streami.write((char*)opstream, count*sizeof(StreamElement));// write opstream
 
   // finish up by jumping through the streami and write some positions
   streami.seekp(posPositionOpstream);
@@ -3652,7 +3652,8 @@ int XXE::exec(
   ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
 #endif    
   for (unsigned i=0; i<bufferInfoList.size(); i++){
-    int currentSize = bufferInfoList[i]->vectorLengthMultiplier * *vectorLength;
+    unsigned long currentSize = bufferInfoList[i]->vectorLengthMultiplier
+      * *vectorLength;
 #ifdef XXE_EXEC_BUFFLOG_on
     sprintf(msg, "ESMCI::XXE::exec(): buffer #%d, (needed)currentSize=%d, "
       " existing buffer size=%d", i, currentSize, bufferInfoList[i]->size);
@@ -3682,17 +3683,17 @@ int XXE::exec(
 #endif
 
   for (int i=indexRangeStart; i<=indexRangeStop; i++){
-    xxeElement = &(stream[i]);
+    xxeElement = &(opstream[i]);
     
     if (xxeElement->predicateBitField & filterBitField)
       continue; // filter out this operation
     
 #ifdef XXE_EXEC_LOG_on
-    sprintf(msg, "ESMCI::XXE::exec(): %d, opId=%d", i, stream[i].opId);
+    sprintf(msg, "ESMCI::XXE::exec(): %d, opId=%d", i, opstream[i].opId);
     ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
 #endif    
     
-    switch(stream[i].opId){
+    switch(opstream[i].opId){
     case send:
       {
         xxeSendInfo = (SendInfo *)xxeElement;
@@ -3923,7 +3924,7 @@ int XXE::exec(
     case waitOnIndex:
       {
         xxeWaitOnIndexInfo = (WaitOnIndexInfo *)xxeElement;
-        xxeIndexElement = &(stream[xxeWaitOnIndexInfo->index]);
+        xxeIndexElement = &(opstream[xxeWaitOnIndexInfo->index]);
         xxeCommhandleInfo = (CommhandleInfo *)xxeIndexElement;
 #ifdef XXE_EXEC_LOG_on
         sprintf(msg, "XXE::waitOnIndex: index=%d, activeFlag=%d", 
@@ -3979,7 +3980,7 @@ int XXE::exec(
     case testOnIndex:
       {
         xxeTestOnIndexInfo = (TestOnIndexInfo *)xxeElement;
-        xxeIndexElement = &(stream[xxeTestOnIndexInfo->index]);
+        xxeIndexElement = &(opstream[xxeTestOnIndexInfo->index]);
         xxeCommhandleInfo = (CommhandleInfo *)xxeIndexElement;
 #ifdef XXE_EXEC_LOG_on
         sprintf(msg, "XXE::testOnIndex: index=%d, activeFlag=%d", 
@@ -4064,7 +4065,7 @@ int XXE::exec(
         while (completeTotal < count){
           for (int k=0; k<count; k++){
             if (!completeFlag[k]){
-              xxeIndexElement = &(stream[xxeWaitOnAnyIndexSubInfo->index[k]]);
+              xxeIndexElement = &(opstream[xxeWaitOnAnyIndexSubInfo->index[k]]);
               xxeCommhandleInfo = (CommhandleInfo *)xxeIndexElement;
               if (xxeCommhandleInfo->activeFlag){
                 // there is an outstanding active communication
@@ -4110,7 +4111,7 @@ int XXE::exec(
 #endif
         for (int j=xxeWaitOnIndexRangeInfo->indexStart;
           j<xxeWaitOnIndexRangeInfo->indexEnd; j++){
-          xxeIndexElement = &(stream[j]);
+          xxeIndexElement = &(opstream[j]);
           xxeCommhandleInfo = (CommhandleInfo *)xxeIndexElement;
           if (xxeCommhandleInfo->activeFlag){
             // there is an outstanding active communication
@@ -4126,7 +4127,7 @@ int XXE::exec(
     case waitOnIndexSub:
       {
         waitOnIndexSubInfo = (WaitOnIndexSubInfo *)xxeElement;
-        xxeIndexElement = &(stream[waitOnIndexSubInfo->index]);
+        xxeIndexElement = &(opstream[waitOnIndexSubInfo->index]);
         xxeCommhandleInfo = (CommhandleInfo *)xxeIndexElement;
 #ifdef XXE_EXEC_LOG_on
         sprintf(msg, "XXE::waitOnIndexSub: index=%d, activeFlag=%d", 
@@ -4197,7 +4198,7 @@ int XXE::exec(
     case testOnIndexSub:
       {
         testOnIndexSubInfo = (TestOnIndexSubInfo *)xxeElement;
-        xxeIndexElement = &(stream[testOnIndexSubInfo->index]);
+        xxeIndexElement = &(opstream[testOnIndexSubInfo->index]);
         xxeCommhandleInfo = (CommhandleInfo *)xxeIndexElement;
 #ifdef XXE_EXEC_LOG_on
         sprintf(msg, "XXE::testOnIndexSub: index=%d, activeFlag=%d", 
@@ -4293,7 +4294,7 @@ int XXE::exec(
     case cancelIndex:
       {
         xxeCancelIndexInfo = (CancelIndexInfo *)xxeElement;
-        xxeIndexElement = &(stream[xxeCancelIndexInfo->index]);
+        xxeIndexElement = &(opstream[xxeCancelIndexInfo->index]);
         xxeCommhandleInfo = (CommhandleInfo *)xxeIndexElement;
         if (xxeCommhandleInfo->activeFlag){
           // there is an outstanding active communication
@@ -5221,15 +5222,15 @@ printf("gjt - DID NOT CANCEL commhandle\n");
         *wtime = 0.;                      // initialize
         xxeWtimerInfo->wtimeSum = 0.;     // initialize
         xxeWtimerInfo->sumTermCount = -1;  // initialize
-        xxeWtimerInfoActual = (WtimerInfo *)(&(stream[index]));
+        xxeWtimerInfoActual = (WtimerInfo *)(&(opstream[index]));
         double *wtimeActual = &(xxeWtimerInfoActual->wtime);
         double *wtimeSumActual = &(xxeWtimerInfoActual->wtimeSum);
         int *sumTermCountActual = &(xxeWtimerInfoActual->sumTermCount);
         double wtimeRelative = *(xxeWtimerInfo->relativeWtime);
-        // this xxe wtimer stream element
+        // this xxe wtimer opstream element
         VMK::wtime(wtime);
         *wtime -= wtimeRelative;
-        // actual xxe wtimer stream element
+        // actual xxe wtimer opstream element
         *wtimeSumActual += *wtime - *wtimeActual; // add time interval
         ++(*sumTermCountActual);  // count this sum term
         *wtimeActual = *wtime;
@@ -7089,16 +7090,16 @@ int XXE::print(
   ProfileMessageInfo *xxeProfileMessageInfo;
   
   for (int i=indexRangeStart; i<=indexRangeStop; i++){
-    xxeElement = &(stream[i]);
+    xxeElement = &(opstream[i]);
     
     if (xxeElement->predicateBitField & filterBitField)
       continue; // filter out this operation
     
     fprintf(fp, "XXE::print(): <xxe=%p> <localPet=%d> i=%d, xxeElement=%p, "
       "opId=%d, predicateBitField=0x%08x\n", this, 
-      vm->getLocalPet(), i, xxeElement, stream[i].opId,
-      stream[i].predicateBitField);
-    switch(stream[i].opId){
+      vm->getLocalPet(), i, xxeElement, opstream[i].opId,
+      opstream[i].predicateBitField);
+    switch(opstream[i].opId){
     case send:
       {
         xxeSendInfo = (SendInfo *)xxeElement;
@@ -7184,7 +7185,7 @@ int XXE::print(
     case waitOnIndex:
       {
         xxeWaitOnIndexInfo = (WaitOnIndexInfo *)xxeElement;
-        xxeIndexElement = &(stream[xxeWaitOnIndexInfo->index]);
+        xxeIndexElement = &(opstream[xxeWaitOnIndexInfo->index]);
         xxeCommhandleInfo = (CommhandleInfo *)xxeIndexElement;
         fprintf(fp, "  XXE::waitOnIndex: index=%d, "
           " commhandle=%p\n", xxeWaitOnIndexInfo->index,
@@ -7194,7 +7195,7 @@ int XXE::print(
     case testOnIndex:
       {
         xxeTestOnIndexInfo = (TestOnIndexInfo *)xxeElement;
-        xxeIndexElement = &(stream[xxeTestOnIndexInfo->index]);
+        xxeIndexElement = &(opstream[xxeTestOnIndexInfo->index]);
         xxeCommhandleInfo = (CommhandleInfo *)xxeIndexElement;
         fprintf(fp, "  XXE::testOnIndex: index=%d, "
           " commhandle=%p\n", xxeTestOnIndexInfo->index,
@@ -7224,7 +7225,7 @@ int XXE::print(
     case waitOnIndexSub:
       {
         waitOnIndexSubInfo = (WaitOnIndexSubInfo *)xxeElement;
-        xxeIndexElement = &(stream[waitOnIndexSubInfo->index]);
+        xxeIndexElement = &(opstream[waitOnIndexSubInfo->index]);
         xxeCommhandleInfo = (CommhandleInfo *)xxeIndexElement;
         fprintf(fp, "  XXE::waitOnIndexSub index=%d, "
           " commhandle=%p\n", waitOnIndexSubInfo->index,
@@ -7237,7 +7238,7 @@ int XXE::print(
     case testOnIndexSub:
       {
         testOnIndexSubInfo = (TestOnIndexSubInfo *)xxeElement;
-        xxeIndexElement = &(stream[testOnIndexSubInfo->index]);
+        xxeIndexElement = &(opstream[testOnIndexSubInfo->index]);
         xxeCommhandleInfo = (CommhandleInfo *)xxeIndexElement;
         fprintf(fp, "  XXE::testOnIndexSub index=%d, "
           " commhandle=%p\n", testOnIndexSubInfo->index,
@@ -7250,7 +7251,7 @@ int XXE::print(
     case cancelIndex:
       {
         xxeCancelIndexInfo = (CancelIndexInfo *)xxeElement;
-        xxeIndexElement = &(stream[xxeCancelIndexInfo->index]);
+        xxeIndexElement = &(opstream[xxeCancelIndexInfo->index]);
         xxeCommhandleInfo = (CommhandleInfo *)xxeIndexElement;
         fprintf(fp, "  XXE::CancelIndex: index=%d, "
           " commhandle=%p\n", xxeCancelIndexInfo->index,
@@ -7409,7 +7410,7 @@ int XXE::print(
         *wtime = 0.;                      // initialize
         xxeWtimerInfo->wtimeSum = 0.;     // initialize
         xxeWtimerInfo->sumTermCount = -1;  // initialize
-        xxeWtimerInfoActual = (WtimerInfo *)(&(stream[index]));
+        xxeWtimerInfoActual = (WtimerInfo *)(&(opstream[index]));
         double *wtimeActual = &(xxeWtimerInfoActual->wtime);
         double *wtimeSumActual = &(xxeWtimerInfoActual->wtimeSum);
         int *sumTermCountActual = &(xxeWtimerInfoActual->sumTermCount);
@@ -7463,7 +7464,7 @@ int XXE::printProfile(
   FILE *fp){
 //
 // !DESCRIPTION:
-//  Print profile data collected during the XXE stream execution.
+//  Print profile data collected during the XXE opstream execution.
 //EOPI
 //-----------------------------------------------------------------------------
   // initialize return code; assume routine not implemented
@@ -7471,7 +7472,7 @@ int XXE::printProfile(
   int rc = ESMC_RC_NOT_IMPL;              // final return code
   
 #if 0
-  printf("gjt in ESMCI::XXE::printProfile(), stream=%p, %d, %d\n", stream,
+  printf("gjt in ESMCI::XXE::printProfile(), opstream=%p, %d, %d\n", opstream,
     count, sizeof(StreamElement));
 #endif
   
@@ -7487,13 +7488,13 @@ int XXE::printProfile(
   ProfileMessageInfo *xxeProfileMessageInfo;
   
   for (int i=0; i<count; i++){
-    xxeElement = &(stream[i]);
+    xxeElement = &(opstream[i]);
     
     if (xxeElement->predicateBitField & lastFilterBitField)
       continue; // filter out this operation
     
-//    printf("gjt: %d, opId=%d\n", i, stream[i].opId);
-    switch(stream[i].opId){
+//    printf("gjt: %d, opId=%d\n", i, opstream[i].opId);
+    switch(opstream[i].opId){
     case xxeSub:
       xxeSubInfo = (XxeSubInfo *)xxeElement;
       if (xxeSubInfo->xxe)
@@ -7577,7 +7578,7 @@ int XXE::optimizeElement(
   int rc = ESMC_RC_NOT_IMPL;              // final return code
   
 #if 0
-  printf("gjt in ESMCI::XXE::optimizeElement(), stream=%p, %d, %d\n", stream,
+  printf("gjt in ESMCI::XXE::optimizeElement(), opstream=%p, %d, %d\n", opstream,
     count, sizeof(StreamElement));
 #endif
   
@@ -7587,8 +7588,8 @@ int XXE::optimizeElement(
     return rc;
   }
     
-  StreamElement *xxeElement = &(stream[index]);
-  switch(stream[index].opId){
+  StreamElement *xxeElement = &(opstream[index]);
+  switch(opstream[index].opId){
   case productSumSuperScalarDstRRA:
     ProductSumSuperScalarDstRRAInfo *xxeProductSumSuperScalarDstRRAInfo;
     struct ListSort{
@@ -7688,8 +7689,8 @@ int XXE::execReady(
   int rc = ESMC_RC_NOT_IMPL;              // final return code
 
 #if 0
-  printf("gjt in ESMCI::XXE::execReady(), stream=%p, %d, %d\n", stream, count, 
-    sizeof(StreamElement));
+  printf("gjt in ESMCI::XXE::execReady(), opstream=%p, %d, %d\n", opstream,
+    count, sizeof(StreamElement));
 #endif
   
   const int sendnbMax = 20000;
@@ -7716,16 +7717,17 @@ int XXE::execReady(
   
   int i = 0;  // prime index counter
   while(i!=count){
-    // repeat going through the entire stream until no more StreamElements need 
-    // to be replaced, i.e. the i-loop will finally make it all the way through.
+    // repeat going through the entire opstream until no more StreamElements
+    // need to be replaced, i.e. the i-loop will finally make it all the way
+    // through.
     sendnbCount = 0;
     recvnbCount = 0;
     
     for (i=0; i<count; i++){
-      xxeElement = &(stream[i]);
-//    printf("gjt: %d, opId=%d\n", i, stream[i].opId);
+      xxeElement = &(opstream[i]);
+//    printf("gjt: %d, opId=%d\n", i, opstream[i].opId);
       int breakFlag = 0;  // reset
-      switch(stream[i].opId){
+      switch(opstream[i].opId){
       case xxeSub:
         xxeSubInfo = (XxeSubInfo *)xxeElement;
         if (xxeSubInfo->xxe){
@@ -7822,19 +7824,20 @@ int XXE::execReady(
           printf("case: waitOnAllSendnb: %d outstanding sendnb\n",
             sendnbCount);
 #endif
-          // replace stream
+          // replace opstream
           int oldCount = count;               // hold on to old count
-          StreamElement *oldStream = stream;  // hold on to old stream
-          stream = new StreamElement[max];    // prepare new stream
+          StreamElement *oldStream = opstream;  // hold on to old opstream
+          opstream = new StreamElement[max];    // prepare new opstream
           // fill in StreamElements from before this StreamElement
-          memcpy(stream, oldStream, i*sizeof(StreamElement));
+          memcpy(opstream, oldStream, i*sizeof(StreamElement));
           // insert explicit waitOnIndex StreamElements
           count = i;
           for (int j=0; j<sendnbCount; j++){
             int index = sendnbIndexList[j];
-            stream[count].opId = waitOnIndex;
-            stream[count].predicateBitField = stream[index].predicateBitField;
-            xxeElement = &(stream[count]);
+            opstream[count].opId = waitOnIndex;
+            opstream[count].predicateBitField =
+              opstream[index].predicateBitField;
+            xxeElement = &(opstream[count]);
             xxeWaitOnIndexInfo = (WaitOnIndexInfo *)xxeElement;
             xxeWaitOnIndexInfo->index = index;
             ++count;
@@ -7851,10 +7854,10 @@ int XXE::execReady(
             if (ESMC_LogDefault.MsgFoundError(localrc, 
               ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
           }
-          memcpy(stream+count, oldStream+i+1, (oldCount-i-1)
+          memcpy(opstream+count, oldStream+i+1, (oldCount-i-1)
             * sizeof(StreamElement));
           count = sendnbCount + oldCount -1;  // account for modification
-          delete [] oldStream;                // delete original stream
+          delete [] oldStream;                // delete original opstream
         }
         breakFlag = 1;  // set
         break;
@@ -7865,19 +7868,20 @@ int XXE::execReady(
           printf("case: waitOnAllRecvnb: %d outstanding recvnb\n",
             recvnbCount);
 #endif
-          // replace stream
+          // replace opstream
           int oldCount = count;               // hold on to old count
-          StreamElement *oldStream = stream;  // hold on to old stream
-          stream = new StreamElement[max];    // prepare new stream
+          StreamElement *oldStream = opstream;  // hold on to old opstream
+          opstream = new StreamElement[max];    // prepare new opstream
           // fill in StreamElements from before this StreamElement
-          memcpy(stream, oldStream, i*sizeof(StreamElement));
+          memcpy(opstream, oldStream, i*sizeof(StreamElement));
           // insert explicit waitOnIndex StreamElements
           count = i;
           for (int j=0; j<recvnbCount; j++){
             int index = recvnbIndexList[j];
-            stream[count].opId = waitOnIndex;
-            stream[count].predicateBitField = stream[index].predicateBitField;
-            xxeElement = &(stream[count]);
+            opstream[count].opId = waitOnIndex;
+            opstream[count].predicateBitField =
+              opstream[index].predicateBitField;
+            xxeElement = &(opstream[count]);
             xxeWaitOnIndexInfo = (WaitOnIndexInfo *)xxeElement;
             xxeWaitOnIndexInfo->index = index;
             ++count;
@@ -7894,10 +7898,10 @@ int XXE::execReady(
             if (ESMC_LogDefault.MsgFoundError(localrc, 
               ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
           }
-          memcpy(stream+count, oldStream+i+1, (oldCount-i-1)
+          memcpy(opstream+count, oldStream+i+1, (oldCount-i-1)
             * sizeof(StreamElement));
           count = recvnbCount + oldCount -1;  // account for modification
-          delete [] oldStream;                // delete original stream
+          delete [] oldStream;                // delete original opstream
         }
         breakFlag = 1;  // set
         break;
@@ -7912,14 +7916,14 @@ int XXE::execReady(
   delete [] sendnbIndexList;
   delete [] recvnbIndexList;
 
-  // translate profiling Wtimer Ids into XXE stream indices
+  // translate profiling Wtimer Ids into XXE opstream indices
   int *idList = new int[count];
   int *indexList = new int[count];
   int iCount = 0; // reset
   for (i=0; i<count; i++){
     // set up id-to-index look-up
-    if (stream[i].opId == wtimer){
-      xxeElement = &(stream[i]);
+    if (opstream[i].opId == wtimer){
+      xxeElement = &(opstream[i]);
       xxeWtimerInfo = (XXE::WtimerInfo *)xxeElement;
       idList[iCount] = xxeWtimerInfo->timerId;
       indexList[iCount] = i;
@@ -7928,8 +7932,8 @@ int XXE::execReady(
   }
   for (i=0; i<count; i++){
     // use id-to-index look-up to translate Wtimer Ids
-    if (stream[i].opId == wtimer){
-      xxeElement = &(stream[i]);
+    if (opstream[i].opId == wtimer){
+      xxeElement = &(opstream[i]);
       xxeWtimerInfo = (XXE::WtimerInfo *)xxeElement;
       xxeWtimerInfo->wtime = 0.;  // reset
       int actualWtimerId = xxeWtimerInfo->actualWtimerId;
@@ -7940,8 +7944,8 @@ int XXE::execReady(
       if (xxe != NULL){
         // look through the referenced XXE
         for (int ii=0; ii<xxe->count; ii++){
-          if (xxe->stream[ii].opId == wtimer){
-            xxeElement2 = &(xxe->stream[ii]);
+          if (xxe->opstream[ii].opId == wtimer){
+            xxeElement2 = &(xxe->opstream[ii]);
             xxeWtimerInfo2 = (XXE::WtimerInfo *)xxeElement2;
             if (xxeWtimerInfo2->timerId == relativeWtimerId){
               xxeWtimerInfo->relativeWtime = &(xxeWtimerInfo2->wtime);
@@ -7959,7 +7963,7 @@ int XXE::execReady(
         if (xxe == NULL){
           if (idList[j] == relativeWtimerId){
             xxeWtimerInfo->relativeWtime =
-              &(((WtimerInfo *)(&(stream[indexList[j]])))->wtime);
+              &(((WtimerInfo *)(&(opstream[indexList[j]])))->wtime);
             ++resolveCounter;
           }
         }
@@ -8009,8 +8013,8 @@ int XXE::optimize(
   int rc = ESMC_RC_NOT_IMPL;              // final return code
   
 #if 0
-  printf("gjt in ESMCI::XXE::optimize(), stream=%p, %d, %d\n", stream, count, 
-    sizeof(StreamElement));
+  printf("gjt in ESMCI::XXE::optimize(), opstream=%p, %d, %d\n", opstream,
+    count, sizeof(StreamElement));
 #endif
 
   StreamElement *xxeElement, *xxeIndexElement;
@@ -8155,17 +8159,18 @@ int XXE::optimize(
 
   int i = 0;  // prime index counter
   while(i!=count){
-    // repeat going through the entire stream until no more StreamElements need 
-    // to be replaced, i.e. the i-loop will finally make it all the way through.
+    // repeat going through the entire opstream until no more StreamElements
+    // need to be replaced, i.e. the i-loop will finally make it all the way
+    // through.
 
     if (aq != NULL) delete aq;  // delete from previous analysis loop
     aq = NULL;  // indicate empty queue
     
     int breakFlag = 0;  // reset
     for (i=0; i<count; i++){
-      xxeElement = &(stream[i]);
-//    printf("gjt: %d, opId=%d\n", i, stream[i].opId);
-      switch(stream[i].opId){
+      xxeElement = &(opstream[i]);
+//    printf("gjt: %d, opId=%d\n", i, opstream[i].opId);
+      switch(opstream[i].opId){
       case send:
         break;
       case recv:
@@ -8218,14 +8223,14 @@ int XXE::optimize(
               char *buffer = aeList[0]->bufferStart;
               int bufferSize = aeList[0]->bufferSize;
               // replace the very first sendnb StreamElement using the buffer
-              xxeElement = &(stream[aeList[0]->indexList[0]]);
+              xxeElement = &(opstream[aeList[0]->indexList[0]]);
               xxeSendnbInfo = (SendnbInfo *)xxeElement;
               xxeSendnbInfo->buffer = buffer;
               xxeSendnbInfo->size = bufferSize;
               // invalidate all other sendnb StreamElements to nop
               for (int k=1; k<aeList[0]->indexCount; k++){
-                stream[aeList[0]->indexList[k]].opId = nop;
-                stream[aeList[0]->indexList[k]].predicateBitField = 0x0;
+                opstream[aeList[0]->indexList[k]].opId = nop;
+                opstream[aeList[0]->indexList[k]].predicateBitField = 0x0;
               }
             }else{
               // need to introduce a contiguous intermediate buffer
@@ -8233,9 +8238,9 @@ int XXE::optimize(
               for (int kk=0; kk<aeCountList[j]; kk++)
                 bufferSize += aeList[kk]->bufferSize;
       //printf("allocate itermediate buffer of size: %d bytes, filling in"
-      //  " for stream index: %d\n", bufferSize, aeList[0]->indexList[0]);
+      //  " for opstream index: %d\n", bufferSize, aeList[0]->indexList[0]);
               char *buffer = new char[bufferSize]; //TODO: leave leak
-              // prepare extra stream element with memCpy StreamElements
+              // prepare extra opstream element with memCpy StreamElements
               StreamElement *extrastream = new StreamElement[aeCountList[j]];
               int xxeCount = 0;
               int bufferOffset = 0;
@@ -8251,18 +8256,18 @@ int XXE::optimize(
                 xxeMemCpyInfo->size = aeList[kk]->bufferSize;
                 ++xxeCount;
                 bufferOffset += aeList[kk]->bufferSize;
-                // invalidate all StreamElements in stream assoc. w. aeList[kk]
+                // invalidate all StreamElements in opstream assoc. w. aeList[kk]
                 for (int k=0; k<aeList[kk]->indexCount; k++){
-                  stream[aeList[kk]->indexList[k]].opId = nop;
-                  stream[aeList[kk]->indexList[k]].predicateBitField = 0x0;
+                  opstream[aeList[kk]->indexList[k]].opId = nop;
+                  opstream[aeList[kk]->indexList[k]].predicateBitField = 0x0;
                 }
               }
               // determine first Sendnb index
               int firstIndex = aeList[0]->indexList[0];
               // replace the first sendnb StreamElement using the interm. buffer
-              stream[firstIndex].opId = sendnb;
-              stream[firstIndex].predicateBitField = 0x0;  //TODO: match!
-              xxeElement = &(stream[firstIndex]);
+              opstream[firstIndex].opId = sendnb;
+              opstream[firstIndex].predicateBitField = 0x0;  //TODO: match!
+              xxeElement = &(opstream[firstIndex]);
               xxeSendnbInfo = (SendnbInfo *)xxeElement;
               xxeSendnbInfo->buffer = buffer;
               xxeSendnbInfo->size = bufferSize;
@@ -8272,24 +8277,24 @@ int XXE::optimize(
                   "- count out of range", ESMC_CONTEXT, &rc);
                 return rc;
               }
-              // start a new stream
-              StreamElement *newstream = new StreamElement[max]; // prep. stream
+              // start a new opstream
+              StreamElement *newstream = new StreamElement[max]; // prep. opstream
               // fill in StreamElements from before firstIndex 
               // (excluding firstIndex)
-              memcpy(newstream, stream, firstIndex*sizeof(StreamElement));
+              memcpy(newstream, opstream, firstIndex*sizeof(StreamElement));
               // insert extrastream
               memcpy(newstream+firstIndex, extrastream, xxeCount 
                 * sizeof(StreamElement));
               delete [] extrastream;  // done using
               // fill in StreamElements from after firstIndex
               // (including firstIndex)
-              memcpy(newstream+firstIndex+xxeCount, stream+firstIndex,
+              memcpy(newstream+firstIndex+xxeCount, opstream+firstIndex,
                 (count-firstIndex)*sizeof(StreamElement));
-              // replace stream
-              delete [] stream; // delete original stream
-              stream = newstream; // replace by new stream
+              // replace opstream
+              delete [] opstream; // delete original opstream
+              opstream = newstream; // replace by new opstream
               count = count + xxeCount;        // account for modification
-              // need to indicate that stream was modified _before_ current
+              // need to indicate that opstream was modified _before_ current
               // StreamElement
               breakFlag = 1;  // set
             }
@@ -8324,14 +8329,14 @@ int XXE::optimize(
               char *buffer = aeList[0]->bufferStart;
               int bufferSize = aeList[0]->bufferSize;
               // replace the very first recvnb StreamElement using the buffer
-              xxeElement = &(stream[aeList[0]->indexList[0]]);
+              xxeElement = &(opstream[aeList[0]->indexList[0]]);
               xxeRecvnbInfo = (RecvnbInfo *)xxeElement;
               xxeRecvnbInfo->buffer = buffer;
               xxeRecvnbInfo->size = bufferSize;
               // invalidate all other recvnb StreamElements to nop
               for (int k=1; k<aeList[0]->indexCount; k++){
-                stream[aeList[0]->indexList[k]].opId = nop;
-                stream[aeList[0]->indexList[k]].predicateBitField = 0x0;
+                opstream[aeList[0]->indexList[k]].opId = nop;
+                opstream[aeList[0]->indexList[k]].predicateBitField = 0x0;
               }
             }else{
               // need to introduce a contiguous intermediate buffer
@@ -8339,9 +8344,9 @@ int XXE::optimize(
               for (int kk=0; kk<aeCountList[j]; kk++)
                 bufferSize += aeList[kk]->bufferSize;
            //printf("allocate itermediate buffer of size: %d bytes, filling in"
-           //  " for stream index: %d\n", bufferSize, aeList[0]->indexList[0]);
+           //  " for opstream index: %d\n", bufferSize, aeList[0]->indexList[0]);
               char *buffer = new char[bufferSize]; //TODO: leave leak
-              // prepare extra stream segment with memCpy StreamElements
+              // prepare extra opstream segment with memCpy StreamElements
               StreamElement *extrastream = new StreamElement[aeCountList[j]];
               int xxeCount = 0;
               int bufferOffset = 0;
@@ -8357,17 +8362,17 @@ int XXE::optimize(
                 xxeMemCpyInfo->size = aeList[kk]->bufferSize;
                 ++xxeCount;
                 bufferOffset += aeList[kk]->bufferSize;
-                // invalidate all StreamElements in stream asso. with aeList[kk]
+                // invalidate all StreamElements in opstream asso. with aeList[kk]
                 for (int k=0; k<aeList[kk]->indexCount; k++){
-                  stream[aeList[kk]->indexList[k]].opId = nop;
-                  stream[aeList[kk]->indexList[k]].predicateBitField = 0x0;
+                  opstream[aeList[kk]->indexList[k]].opId = nop;
+                  opstream[aeList[kk]->indexList[k]].predicateBitField = 0x0;
                 }
               }
               // replace the very first recvnb StreamElement using the
               // intermediate buffer
-              stream[aeList[0]->indexList[0]].opId = recvnb;
-              stream[aeList[0]->indexList[0]].predicateBitField = 0x0;//TODO:mat
-              xxeElement = &(stream[aeList[0]->indexList[0]]);
+              opstream[aeList[0]->indexList[0]].opId = recvnb;
+              opstream[aeList[0]->indexList[0]].predicateBitField = 0x0;//TODO:mat
+              xxeElement = &(opstream[aeList[0]->indexList[0]]);
               xxeRecvnbInfo = (RecvnbInfo *)xxeElement;
               xxeRecvnbInfo->buffer = buffer;
               xxeRecvnbInfo->size = bufferSize;
@@ -8377,22 +8382,22 @@ int XXE::optimize(
                   "- count out of range", ESMC_CONTEXT, &rc);
                 return rc;
               }
-              // start a new stream
-              StreamElement *newstream = new StreamElement[max];  // prep stream
+              // start a new opstream
+              StreamElement *newstream = new StreamElement[max];  // prep opstream
               // fill in StreamElements from before this StreamElement
               // (including this StreamElement)
-              memcpy(newstream, stream, (i+1)*sizeof(StreamElement));
+              memcpy(newstream, opstream, (i+1)*sizeof(StreamElement));
               // insert extrastream
               memcpy(newstream+i+1, extrastream, xxeCount
                 * sizeof(StreamElement));
               delete [] extrastream;  // done using
               // fill in StreamElements from after this StreamElement
               // (excluding this StreamElement)
-              memcpy(newstream+i+1+xxeCount, stream+i+1, (count-i-1)
+              memcpy(newstream+i+1+xxeCount, opstream+i+1, (count-i-1)
                 * sizeof(StreamElement));
-              // replace stream
-              delete [] stream; // delete original stream
-              stream = newstream; // replace by new stream
+              // replace opstream
+              delete [] opstream; // delete original opstream
+              opstream = newstream; // replace by new opstream
               count = count + xxeCount;        // account for modification
             }
             delete [] aeList;
@@ -8408,22 +8413,22 @@ int XXE::optimize(
     } // for i
   } // while
 
-  // remove all the nop StreamElements from stream
-  // start a new stream
-  StreamElement *newstream = new StreamElement[max];  // prepare a new stream
+  // remove all the nop StreamElements from opstream
+  // start a new opstream
+  StreamElement *newstream = new StreamElement[max];  // prepare a new opstream
   int xxeCount = 0;
   for (int i=0; i<count; i++){
-    xxeElement = &(stream[i]);
-    if (stream[i].opId != nop){
-      memcpy(newstream+xxeCount, stream+i, sizeof(StreamElement));
+    xxeElement = &(opstream[i]);
+    if (opstream[i].opId != nop){
+      memcpy(newstream+xxeCount, opstream+i, sizeof(StreamElement));
       ++xxeCount;
     }
   }
-  // replace stream
-  delete [] stream; // delete original stream
-  stream = newstream; // replace by new stream
+  // replace opstream
+  delete [] opstream; // delete original opstream
+  opstream = newstream; // replace by new opstream
   count = xxeCount;
-  // done replacing the nop StreamElements from stream
+  // done replacing the nop StreamElements from opstream
   
   // garbage collection
   if (aq != NULL) delete aq;  // delete from previous analysis loop
@@ -8452,9 +8457,9 @@ int XXE::growStream(
   int increase){    // in - number of additional elements
 //
 // !DESCRIPTION:
-//  Increase the length of the XXE stream.
-//  CAUTION: This method changes the location (in memory) of the entire stream!
-//    Previously written stream elements will be moved to a new location.
+//  Increase the length of the XXE opstream.
+//  CAUTION: This method changes the location (in memory) of the entire opstream!
+//    Previously written opstream elements will be moved to a new location.
 //EOPI
 //-----------------------------------------------------------------------------
   // initialize return code; assume routine not implemented
@@ -8481,9 +8486,9 @@ int XXE::growStream(
     ESMC_LogDefault.AllocError(ESMC_CONTEXT, &rc);
     return rc;
   }
-  memcpy(streamNew, stream, count*sizeof(StreamElement)); // copy prev. elements
-  delete [] stream;     // delete previous stream
-  stream = streamNew;   // plug in newly allocated stream
+  memcpy(streamNew, opstream, count*sizeof(StreamElement)); // copy prev. elements
+  delete [] opstream;   // delete previous opstream
+  opstream = streamNew; // plug in newly allocated opstream
   max = maxNew;         // adjust max value
 
   // return successfully
@@ -8689,7 +8694,7 @@ int XXE::incCount(
 //
 // !DESCRIPTION:
 //  Increment the count by one.
-//  CAUTION: The location (in memory) of the entire stream may be changed by
+//  CAUTION: The location (in memory) of the entire opstream may be changed by
 //           this call!
 //EOPI
 //-----------------------------------------------------------------------------
@@ -8996,21 +9001,21 @@ int XXE::appendXxeSub(
   ){
 //
 // !DESCRIPTION:
-//  Append an xxeSub at the end of the XXE stream.
+//  Append an xxeSub at the end of the XXE opstream.
 //EOPI
 //-----------------------------------------------------------------------------
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
   
-  stream[count].opId = xxeSub;
-  stream[count].predicateBitField = predicateBitField;
-  XxeSubInfo *xxeSubInfo = (XxeSubInfo *)&(stream[count]);
+  opstream[count].opId = xxeSub;
+  opstream[count].predicateBitField = predicateBitField;
+  XxeSubInfo *xxeSubInfo = (XxeSubInfo *)&(opstream[count]);
   xxeSubInfo->xxe = xxe;
   xxeSubInfo->rraShift = rraShift;
   xxeSubInfo->vectorLengthShift = vectorLengthShift;
   
-  // bump up element count, this may move entire stream to new memory location
+  // bump up element count, this may move entire opstream to new memory location
   localrc = incCount();
   if (ESMC_LogDefault.MsgFoundError(localrc,
     ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
@@ -9045,16 +9050,16 @@ int XXE::appendWtimer(
   ){
 //
 // !DESCRIPTION:
-//  Append a wtimer element at the end of the XXE stream.
+//  Append a wtimer element at the end of the XXE opstream.
 //EOPI
 //-----------------------------------------------------------------------------
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
   
-  stream[count].opId = wtimer;
-  stream[count].predicateBitField = predicateBitField;
-  WtimerInfo *xxeWtimerInfo = (WtimerInfo *)&(stream[count]);
+  opstream[count].opId = wtimer;
+  opstream[count].predicateBitField = predicateBitField;
+  WtimerInfo *xxeWtimerInfo = (WtimerInfo *)&(opstream[count]);
   xxeWtimerInfo->timerId = id;
   int stringLen = strlen(string);
   xxeWtimerInfo->timerString = new char[stringLen+1];
@@ -9068,7 +9073,7 @@ int XXE::appendWtimer(
   if (ESMC_LogDefault.MsgFoundError(localrc,
     ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
   
-  // bump up element count, this may move entire stream to new memory location
+  // bump up element count, this may move entire opstream to new memory location
   localrc = incCount();
   if (ESMC_LogDefault.MsgFoundError(localrc,
     ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
@@ -9104,16 +9109,16 @@ int XXE::appendRecv(
   ){
 //
 // !DESCRIPTION:
-//  Append a recv element at the end of the XXE stream.
+//  Append a recv element at the end of the XXE opstream.
 //EOPI
 //-----------------------------------------------------------------------------
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
   
-  stream[count].opId = recv;
-  stream[count].predicateBitField = predicateBitField;
-  RecvInfo *xxeRecvInfo = (RecvInfo *)&(stream[count]);
+  opstream[count].opId = recv;
+  opstream[count].predicateBitField = predicateBitField;
+  RecvInfo *xxeRecvInfo = (RecvInfo *)&(opstream[count]);
   xxeRecvInfo->buffer = buffer;
   xxeRecvInfo->size = size;
   xxeRecvInfo->srcPet = srcPet;
@@ -9123,7 +9128,7 @@ int XXE::appendRecv(
   xxeRecvInfo->activeFlag = false;
   xxeRecvInfo->cancelledFlag = false;
   
-  // bump up element count, this may move entire stream to new memory location
+  // bump up element count, this may move entire opstream to new memory location
   localrc = incCount();
   if (ESMC_LogDefault.MsgFoundError(localrc,
     ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
@@ -9159,16 +9164,16 @@ int XXE::appendSend(
   ){
 //
 // !DESCRIPTION:
-//  Append a send element at the end of the XXE stream.
+//  Append a send element at the end of the XXE opstream.
 //EOPI
 //-----------------------------------------------------------------------------
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
   
-  stream[count].opId = send;
-  stream[count].predicateBitField = predicateBitField;
-  SendInfo *xxeSendInfo = (SendInfo *)&(stream[count]);
+  opstream[count].opId = send;
+  opstream[count].predicateBitField = predicateBitField;
+  SendInfo *xxeSendInfo = (SendInfo *)&(opstream[count]);
   xxeSendInfo->buffer = buffer;
   xxeSendInfo->size = size;
   xxeSendInfo->dstPet = dstPet;
@@ -9178,7 +9183,7 @@ int XXE::appendSend(
   xxeSendInfo->activeFlag = false;
   xxeSendInfo->cancelledFlag = false;
   
-  // bump up element count, this may move entire stream to new memory location
+  // bump up element count, this may move entire opstream to new memory location
   localrc = incCount();
   if (ESMC_LogDefault.MsgFoundError(localrc,
     ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
@@ -9214,16 +9219,16 @@ int XXE::appendSendRRA(
   ){
 //
 // !DESCRIPTION:
-//  Append a sendRRA element at the end of the XXE stream.
+//  Append a sendRRA element at the end of the XXE opstream.
 //EOPI
 //-----------------------------------------------------------------------------
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
 
-  stream[count].opId = sendRRA;
-  stream[count].predicateBitField = predicateBitField;
-  SendRRAInfo *xxeSendRRAInfo = (SendRRAInfo *)&(stream[count]);
+  opstream[count].opId = sendRRA;
+  opstream[count].predicateBitField = predicateBitField;
+  SendRRAInfo *xxeSendRRAInfo = (SendRRAInfo *)&(opstream[count]);
   xxeSendRRAInfo->rraOffset = rraOffset;
   xxeSendRRAInfo->size = size;
   xxeSendRRAInfo->dstPet = dstPet;
@@ -9233,7 +9238,7 @@ int XXE::appendSendRRA(
   xxeSendRRAInfo->activeFlag = false;
   xxeSendRRAInfo->cancelledFlag = false;
   
-  // bump up element count, this may move entire stream to new memory location
+  // bump up element count, this may move entire opstream to new memory location
   localrc = incCount();
   if (ESMC_LogDefault.MsgFoundError(localrc,
     ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
@@ -9274,16 +9279,16 @@ int XXE::appendSendRecv(
   ){
 //
 // !DESCRIPTION:
-//  Append a sendrecv element at the end of the XXE stream.
+//  Append a sendrecv element at the end of the XXE opstream.
 //EOPI
 //-----------------------------------------------------------------------------
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
   
-  stream[count].opId = sendrecv;
-  stream[count].predicateBitField = predicateBitField;
-  SendRecvInfo *xxeSendRecvInfo = (SendRecvInfo *)&(stream[count]);
+  opstream[count].opId = sendrecv;
+  opstream[count].predicateBitField = predicateBitField;
+  SendRecvInfo *xxeSendRecvInfo = (SendRecvInfo *)&(opstream[count]);
   xxeSendRecvInfo->srcBuffer = srcBuffer;
   xxeSendRecvInfo->dstBuffer = dstBuffer;
   xxeSendRecvInfo->srcSize = srcSize;
@@ -9298,7 +9303,7 @@ int XXE::appendSendRecv(
   xxeSendRecvInfo->activeFlag = false;
   xxeSendRecvInfo->cancelledFlag = false;
   
-  // bump up element count, this may move entire stream to new memory location
+  // bump up element count, this may move entire opstream to new memory location
   localrc = incCount();
   if (ESMC_LogDefault.MsgFoundError(localrc,
     ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
@@ -9339,16 +9344,16 @@ int XXE::appendSendRRARecv(
   ){
 //
 // !DESCRIPTION:
-//  Append a sendRRArecv element at the end of the XXE stream.
+//  Append a sendRRArecv element at the end of the XXE opstream.
 //EOPI
 //-----------------------------------------------------------------------------
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
 
-  stream[count].opId = sendRRArecv;
-  stream[count].predicateBitField = predicateBitField;
-  SendRRARecvInfo *xxeSendRRARecvInfo = (SendRRARecvInfo *)&(stream[count]);
+  opstream[count].opId = sendRRArecv;
+  opstream[count].predicateBitField = predicateBitField;
+  SendRRARecvInfo *xxeSendRRARecvInfo = (SendRRARecvInfo *)&(opstream[count]);
   xxeSendRRARecvInfo->rraOffset = rraOffset;
   xxeSendRRARecvInfo->dstBuffer = dstBuffer;
   xxeSendRRARecvInfo->srcSize = srcSize;
@@ -9363,7 +9368,7 @@ int XXE::appendSendRRARecv(
   xxeSendRRARecvInfo->activeFlag = false;
   xxeSendRRARecvInfo->cancelledFlag = false;
   
-  // bump up element count, this may move entire stream to new memory location
+  // bump up element count, this may move entire opstream to new memory location
   localrc = incCount();
   if (ESMC_LogDefault.MsgFoundError(localrc,
     ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
@@ -9399,16 +9404,16 @@ int XXE::appendRecvnb(
   ){
 //
 // !DESCRIPTION:
-//  Append a recvnb element at the end of the XXE stream.
+//  Append a recvnb element at the end of the XXE opstream.
 //EOPI
 //-----------------------------------------------------------------------------
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
   
-  stream[count].opId = recvnb;
-  stream[count].predicateBitField = predicateBitField;
-  RecvnbInfo *xxeRecvnbInfo = (RecvnbInfo *)&(stream[count]);
+  opstream[count].opId = recvnb;
+  opstream[count].predicateBitField = predicateBitField;
+  RecvnbInfo *xxeRecvnbInfo = (RecvnbInfo *)&(opstream[count]);
   xxeRecvnbInfo->buffer = buffer;
   xxeRecvnbInfo->size = size;
   xxeRecvnbInfo->srcPet = srcPet;
@@ -9425,7 +9430,7 @@ int XXE::appendRecvnb(
   if (ESMC_LogDefault.MsgFoundError(localrc, 
     ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
   
-  // bump up element count, this may move entire stream to new memory location
+  // bump up element count, this may move entire opstream to new memory location
   localrc = incCount();
   if (ESMC_LogDefault.MsgFoundError(localrc,
     ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
@@ -9461,16 +9466,16 @@ int XXE::appendSendnb(
   ){
 //
 // !DESCRIPTION:
-//  Append a sendnb element at the end of the XXE stream.
+//  Append a sendnb element at the end of the XXE opstream.
 //EOPI
 //-----------------------------------------------------------------------------
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
   
-  stream[count].opId = sendnb;
-  stream[count].predicateBitField = predicateBitField;
-  SendnbInfo *xxeSendnbInfo = (SendnbInfo *)&(stream[count]);
+  opstream[count].opId = sendnb;
+  opstream[count].predicateBitField = predicateBitField;
+  SendnbInfo *xxeSendnbInfo = (SendnbInfo *)&(opstream[count]);
   xxeSendnbInfo->buffer = buffer;
   xxeSendnbInfo->size = size;
   xxeSendnbInfo->dstPet = dstPet;
@@ -9487,7 +9492,7 @@ int XXE::appendSendnb(
   if (ESMC_LogDefault.MsgFoundError(localrc, 
     ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
   
-  // bump up element count, this may move entire stream to new memory location
+  // bump up element count, this may move entire opstream to new memory location
   localrc = incCount();
   if (ESMC_LogDefault.MsgFoundError(localrc,
     ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
@@ -9523,16 +9528,16 @@ int XXE::appendSendnbRRA(
   ){
 //
 // !DESCRIPTION:
-//  Append a sendnbRRA element at the end of the XXE stream.
+//  Append a sendnbRRA element at the end of the XXE opstream.
 //EOPI
 //-----------------------------------------------------------------------------
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
 
-  stream[count].opId = sendnbRRA;
-  stream[count].predicateBitField = predicateBitField;
-  SendnbRRAInfo *xxeSendnbRRAInfo = (SendnbRRAInfo *)&(stream[count]);
+  opstream[count].opId = sendnbRRA;
+  opstream[count].predicateBitField = predicateBitField;
+  SendnbRRAInfo *xxeSendnbRRAInfo = (SendnbRRAInfo *)&(opstream[count]);
   xxeSendnbRRAInfo->rraOffset = rraOffset;
   xxeSendnbRRAInfo->size = size;
   xxeSendnbRRAInfo->dstPet = dstPet;
@@ -9549,7 +9554,7 @@ int XXE::appendSendnbRRA(
   if (ESMC_LogDefault.MsgFoundError(localrc, 
     ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
   
-  // bump up element count, this may move entire stream to new memory location
+  // bump up element count, this may move entire opstream to new memory location
   localrc = incCount();
   if (ESMC_LogDefault.MsgFoundError(localrc,
     ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
@@ -9583,22 +9588,22 @@ int XXE::appendMemCpySrcRRA(
   ){
 //
 // !DESCRIPTION:
-//  Append a memCpySrcRRA element at the end of the XXE stream.
+//  Append a memCpySrcRRA element at the end of the XXE opstream.
 //EOPI
 //-----------------------------------------------------------------------------
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
 
-  stream[count].opId = memCpySrcRRA;
-  stream[count].predicateBitField = predicateBitField;
-  MemCpySrcRRAInfo *xxeMemCpySrcRRAInfo = (MemCpySrcRRAInfo *)&(stream[count]);
+  opstream[count].opId = memCpySrcRRA;
+  opstream[count].predicateBitField = predicateBitField;
+  MemCpySrcRRAInfo *xxeMemCpySrcRRAInfo = (MemCpySrcRRAInfo *)&(opstream[count]);
   xxeMemCpySrcRRAInfo->rraOffset = rraOffset;
   xxeMemCpySrcRRAInfo->size = size;
   xxeMemCpySrcRRAInfo->dstMem = dstMem;
   xxeMemCpySrcRRAInfo->rraIndex = rraIndex;
   
-  // bump up element count, this may move entire stream to new memory location
+  // bump up element count, this may move entire opstream to new memory location
   localrc = incCount();
   if (ESMC_LogDefault.MsgFoundError(localrc,
     ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
@@ -9634,17 +9639,17 @@ int XXE::appendMemGatherSrcRRA(
   ){
 //
 // !DESCRIPTION:
-//  Append a memGatherSrcRRA element at the end of the XXE stream.
+//  Append a memGatherSrcRRA element at the end of the XXE opstream.
 //EOPI
 //-----------------------------------------------------------------------------
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
   
-  stream[count].opId = memGatherSrcRRA;
-  stream[count].predicateBitField = predicateBitField;
+  opstream[count].opId = memGatherSrcRRA;
+  opstream[count].predicateBitField = predicateBitField;
   MemGatherSrcRRAInfo *xxeMemGatherSrcRRAInfo =
-    (MemGatherSrcRRAInfo *)&(stream[count]);
+    (MemGatherSrcRRAInfo *)&(opstream[count]);
   xxeMemGatherSrcRRAInfo->dstBase = dstBase;
   xxeMemGatherSrcRRAInfo->dstBaseTK = dstBaseTK;
   xxeMemGatherSrcRRAInfo->rraIndex = rraIndex;
@@ -9664,7 +9669,7 @@ int XXE::appendMemGatherSrcRRA(
   if (ESMC_LogDefault.MsgFoundError(localrc,
     ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
   
-  // bump up element count, this may move entire stream to new memory location
+  // bump up element count, this may move entire opstream to new memory location
   localrc = incCount();
   if (ESMC_LogDefault.MsgFoundError(localrc,
     ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
@@ -9697,22 +9702,22 @@ int XXE::appendZeroScalarRRA(
   ){
 //
 // !DESCRIPTION:
-//  Append a zeroScalarRRA element at the end of the XXE stream.
+//  Append a zeroScalarRRA element at the end of the XXE opstream.
 //EOPI
 //-----------------------------------------------------------------------------
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
 
-  stream[count].opId = zeroScalarRRA;
-  stream[count].predicateBitField = predicateBitField;
+  opstream[count].opId = zeroScalarRRA;
+  opstream[count].predicateBitField = predicateBitField;
   ZeroScalarRRAInfo *xxeZeroScalarRRAInfo =
-    (ZeroScalarRRAInfo *)&(stream[count]);
+    (ZeroScalarRRAInfo *)&(opstream[count]);
   xxeZeroScalarRRAInfo->elementTK = elementTK;
   xxeZeroScalarRRAInfo->rraOffset = rraOffset;
   xxeZeroScalarRRAInfo->rraIndex = rraIndex;
   
-  // bump up element count, this may move entire stream to new memory location
+  // bump up element count, this may move entire opstream to new memory location
   localrc = incCount();
   if (ESMC_LogDefault.MsgFoundError(localrc,
     ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
@@ -9746,17 +9751,17 @@ int XXE::appendZeroSuperScalarRRA(
   ){
 //
 // !DESCRIPTION:
-//  Append a zeroSuperScalarRRA element at the end of the XXE stream.
+//  Append a zeroSuperScalarRRA element at the end of the XXE opstream.
 //EOPI
 //-----------------------------------------------------------------------------
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
 
-  stream[count].opId = zeroSuperScalarRRA;
-  stream[count].predicateBitField = predicateBitField;
+  opstream[count].opId = zeroSuperScalarRRA;
+  opstream[count].predicateBitField = predicateBitField;
   ZeroSuperScalarRRAInfo *xxeZeroSuperScalarRRAInfo =
-    (ZeroSuperScalarRRAInfo *)&(stream[count]);
+    (ZeroSuperScalarRRAInfo *)&(opstream[count]);
   xxeZeroSuperScalarRRAInfo->elementTK = elementTK;
   char *rraOffsetListChar = new char[termCount*sizeof(int)];
   xxeZeroSuperScalarRRAInfo->rraOffsetList = (int *)rraOffsetListChar;
@@ -9769,7 +9774,7 @@ int XXE::appendZeroSuperScalarRRA(
   if (ESMC_LogDefault.MsgFoundError(localrc,
     ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
   
-  // bump up element count, this may move entire stream to new memory location
+  // bump up element count, this may move entire opstream to new memory location
   localrc = incCount();
   if (ESMC_LogDefault.MsgFoundError(localrc,
     ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
@@ -9803,23 +9808,23 @@ int XXE::appendZeroMemset(
   ){
 //
 // !DESCRIPTION:
-//  Append a zeroMemset element at the end of the XXE stream.
+//  Append a zeroMemset element at the end of the XXE opstream.
 //EOPI
 //-----------------------------------------------------------------------------
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
 
-  stream[count].opId = zeroMemset;
-  stream[count].predicateBitField = predicateBitField;
+  opstream[count].opId = zeroMemset;
+  opstream[count].predicateBitField = predicateBitField;
   ZeroMemsetInfo *xxeZeroMemsetInfo =
-    (ZeroMemsetInfo *)&(stream[count]);
+    (ZeroMemsetInfo *)&(opstream[count]);
   xxeZeroMemsetInfo->buffer = buffer;
   xxeZeroMemsetInfo->byteCount = byteCount;
   xxeZeroMemsetInfo->vectorFlag = vectorFlag;
   xxeZeroMemsetInfo->indirectionFlag = indirectionFlag;
   
-  // bump up element count, this may move entire stream to new memory location
+  // bump up element count, this may move entire opstream to new memory location
   localrc = incCount();
   if (ESMC_LogDefault.MsgFoundError(localrc,
     ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
@@ -9852,22 +9857,22 @@ int XXE::appendZeroMemsetRRA(
   ){
 //
 // !DESCRIPTION:
-//  Append a zeroMemsetRRA element at the end of the XXE stream.
+//  Append a zeroMemsetRRA element at the end of the XXE opstream.
 //EOPI
 //-----------------------------------------------------------------------------
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
 
-  stream[count].opId = zeroMemsetRRA;
-  stream[count].predicateBitField = predicateBitField;
+  opstream[count].opId = zeroMemsetRRA;
+  opstream[count].predicateBitField = predicateBitField;
   ZeroMemsetRRAInfo *xxeZeroMemsetRRAInfo =
-    (ZeroMemsetRRAInfo *)&(stream[count]);
+    (ZeroMemsetRRAInfo *)&(opstream[count]);
   xxeZeroMemsetRRAInfo->byteCount = byteCount;
   xxeZeroMemsetRRAInfo->rraIndex = rraIndex;
   xxeZeroMemsetRRAInfo->vectorFlag = vectorFlag;
   
-  // bump up element count, this may move entire stream to new memory location
+  // bump up element count, this may move entire opstream to new memory location
   localrc = incCount();
   if (ESMC_LogDefault.MsgFoundError(localrc,
     ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
@@ -9904,17 +9909,17 @@ int XXE::appendProductSumScalarRRA(
   ){
 //
 // !DESCRIPTION:
-//  Append a productSumScalarRRA element at the end of the XXE stream.
+//  Append a productSumScalarRRA element at the end of the XXE opstream.
 //EOPI
 //-----------------------------------------------------------------------------
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
   
-  stream[count].opId = productSumScalarRRA;
-  stream[count].predicateBitField = predicateBitField;
+  opstream[count].opId = productSumScalarRRA;
+  opstream[count].predicateBitField = predicateBitField;
   ProductSumScalarRRAInfo *xxeProductSumScalarRRAInfo =
-    (ProductSumScalarRRAInfo *)&(stream[count]);
+    (ProductSumScalarRRAInfo *)&(opstream[count]);
   xxeProductSumScalarRRAInfo->elementTK = elementTK;
   xxeProductSumScalarRRAInfo->valueTK = valueTK;
   xxeProductSumScalarRRAInfo->factorTK = factorTK;
@@ -9923,7 +9928,7 @@ int XXE::appendProductSumScalarRRA(
   xxeProductSumScalarRRAInfo->value = value;
   xxeProductSumScalarRRAInfo->rraIndex = rraIndex;
 
-  // bump up element count, this may move entire stream to new memory location
+  // bump up element count, this may move entire opstream to new memory location
   localrc = incCount();
   if (ESMC_LogDefault.MsgFoundError(localrc, 
     ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
@@ -9960,17 +9965,17 @@ int XXE::appendSumSuperScalarDstRRA(
   ){
 //
 // !DESCRIPTION:
-//  Append a SumSuperScalarDstRRA element at the end of the XXE stream.
+//  Append a SumSuperScalarDstRRA element at the end of the XXE opstream.
 //EOPI
 //-----------------------------------------------------------------------------
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
   
-  stream[count].opId = sumSuperScalarDstRRA;
-  stream[count].predicateBitField = predicateBitField;
+  opstream[count].opId = sumSuperScalarDstRRA;
+  opstream[count].predicateBitField = predicateBitField;
   SumSuperScalarDstRRAInfo *xxeSumSuperScalarDstRRAInfo =
-    (SumSuperScalarDstRRAInfo *)&(stream[count]);
+    (SumSuperScalarDstRRAInfo *)&(opstream[count]);
   xxeSumSuperScalarDstRRAInfo->elementTK = elementTK;
   xxeSumSuperScalarDstRRAInfo->valueTK = valueTK;
   xxeSumSuperScalarDstRRAInfo->rraIndex = rraIndex;
@@ -9991,7 +9996,7 @@ int XXE::appendSumSuperScalarDstRRA(
   if (ESMC_LogDefault.MsgFoundError(localrc,
     ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
   
-  // bump up element count, this may move entire stream to new memory location
+  // bump up element count, this may move entire opstream to new memory location
   localrc = incCount();
   if (ESMC_LogDefault.MsgFoundError(localrc,
     ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
@@ -10028,17 +10033,17 @@ int XXE::appendSumSuperScalarListDstRRA(
   ){
 //
 // !DESCRIPTION:
-//  Append a sumSuperScalarListDstRRA element at the end of the XXE stream.
+//  Append a sumSuperScalarListDstRRA element at the end of the XXE opstream.
 //EOPI
 //-----------------------------------------------------------------------------
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
   
-  stream[count].opId = sumSuperScalarListDstRRA;
-  stream[count].predicateBitField = predicateBitField;
+  opstream[count].opId = sumSuperScalarListDstRRA;
+  opstream[count].predicateBitField = predicateBitField;
   SumSuperScalarListDstRRAInfo *xxeSumSuperScalarListDstRRAInfo =
-    (SumSuperScalarListDstRRAInfo *)&(stream[count]);
+    (SumSuperScalarListDstRRAInfo *)&(opstream[count]);
   xxeSumSuperScalarListDstRRAInfo->elementTK = elementTK;
   xxeSumSuperScalarListDstRRAInfo->valueTK = valueTK;
   char *rraIndexListChar = new char[rraIndexList.size()*sizeof(int)];
@@ -10095,7 +10100,7 @@ int XXE::appendSumSuperScalarListDstRRA(
   if (ESMC_LogDefault.MsgFoundError(localrc,
     ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
   
-  // bump up element count, this may move entire stream to new memory location
+  // bump up element count, this may move entire opstream to new memory location
   localrc = incCount();
   if (ESMC_LogDefault.MsgFoundError(localrc,
     ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
@@ -10133,17 +10138,17 @@ int XXE::appendProductSumSuperScalarDstRRA(
   ){
 //
 // !DESCRIPTION:
-//  Append a productSumSuperScalarDstRRA element at the end of the XXE stream.
+//  Append a productSumSuperScalarDstRRA element at the end of the XXE opstream.
 //EOPI
 //-----------------------------------------------------------------------------
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
   
-  stream[count].opId = productSumSuperScalarDstRRA;
-  stream[count].predicateBitField = predicateBitField;
+  opstream[count].opId = productSumSuperScalarDstRRA;
+  opstream[count].predicateBitField = predicateBitField;
   ProductSumSuperScalarDstRRAInfo *xxeProductSumSuperScalarDstRRAInfo =
-    (ProductSumSuperScalarDstRRAInfo *)&(stream[count]);
+    (ProductSumSuperScalarDstRRAInfo *)&(opstream[count]);
   xxeProductSumSuperScalarDstRRAInfo->elementTK = elementTK;
   xxeProductSumSuperScalarDstRRAInfo->valueTK = valueTK;
   xxeProductSumSuperScalarDstRRAInfo->factorTK = factorTK;
@@ -10171,7 +10176,7 @@ int XXE::appendProductSumSuperScalarDstRRA(
   if (ESMC_LogDefault.MsgFoundError(localrc,
     ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
   
-  // bump up element count, this may move entire stream to new memory location
+  // bump up element count, this may move entire opstream to new memory location
   localrc = incCount();
   if (ESMC_LogDefault.MsgFoundError(localrc,
     ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
@@ -10209,17 +10214,17 @@ int XXE::appendProductSumSuperScalarListDstRRA(
   ){
 //
 // !DESCRIPTION:
-//  Append a productSumSuperScalarListDstRRA element at the end of the XXE stream.
+//  Append a productSumSuperScalarListDstRRA element at the end of the XXE opstream.
 //EOPI
 //-----------------------------------------------------------------------------
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
   
-  stream[count].opId = productSumSuperScalarListDstRRA;
-  stream[count].predicateBitField = predicateBitField;
+  opstream[count].opId = productSumSuperScalarListDstRRA;
+  opstream[count].predicateBitField = predicateBitField;
   ProductSumSuperScalarListDstRRAInfo *xxeProductSumSuperScalarListDstRRAInfo =
-    (ProductSumSuperScalarListDstRRAInfo *)&(stream[count]);
+    (ProductSumSuperScalarListDstRRAInfo *)&(opstream[count]);
   xxeProductSumSuperScalarListDstRRAInfo->elementTK = elementTK;
   xxeProductSumSuperScalarListDstRRAInfo->valueTK = valueTK;
   xxeProductSumSuperScalarListDstRRAInfo->factorTK = factorTK;
@@ -10282,7 +10287,7 @@ int XXE::appendProductSumSuperScalarListDstRRA(
   if (ESMC_LogDefault.MsgFoundError(localrc,
     ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
   
-  // bump up element count, this may move entire stream to new memory location
+  // bump up element count, this may move entire opstream to new memory location
   localrc = incCount();
   if (ESMC_LogDefault.MsgFoundError(localrc,
     ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
@@ -10320,17 +10325,17 @@ int XXE::appendProductSumSuperScalarSrcRRA(
   ){
 //
 // !DESCRIPTION:
-//  Append a productSumSuperScalarSrcRRA element at the end of the XXE stream.
+//  Append a productSumSuperScalarSrcRRA element at the end of the XXE opstream.
 //EOPI
 //-----------------------------------------------------------------------------
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
   
-  stream[count].opId = productSumSuperScalarSrcRRA;
-  stream[count].predicateBitField = predicateBitField;
+  opstream[count].opId = productSumSuperScalarSrcRRA;
+  opstream[count].predicateBitField = predicateBitField;
   ProductSumSuperScalarSrcRRAInfo *xxeProductSumSuperScalarSrcRRAInfo =
-    (ProductSumSuperScalarSrcRRAInfo *)&(stream[count]);
+    (ProductSumSuperScalarSrcRRAInfo *)&(opstream[count]);
   xxeProductSumSuperScalarSrcRRAInfo->elementTK = elementTK;
   xxeProductSumSuperScalarSrcRRAInfo->valueTK = valueTK;
   xxeProductSumSuperScalarSrcRRAInfo->factorTK = factorTK;
@@ -10358,7 +10363,7 @@ int XXE::appendProductSumSuperScalarSrcRRA(
   if (ESMC_LogDefault.MsgFoundError(localrc,
     ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
   
-  // bump up element count, this may move entire stream to new memory location
+  // bump up element count, this may move entire opstream to new memory location
   localrc = incCount();
   if (ESMC_LogDefault.MsgFoundError(localrc,
     ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
@@ -10389,20 +10394,20 @@ int XXE::appendWaitOnIndex(
   ){
 //
 // !DESCRIPTION:
-//  Append a waitOnIndex element at the end of the XXE stream.
+//  Append a waitOnIndex element at the end of the XXE opstream.
 //EOPI
 //-----------------------------------------------------------------------------
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
 
-  stream[count].opId = waitOnIndex;
-  stream[count].predicateBitField = predicateBitField;
+  opstream[count].opId = waitOnIndex;
+  opstream[count].predicateBitField = predicateBitField;
   WaitOnIndexInfo *xxeWaitOnIndexInfo =
-    (WaitOnIndexInfo *)&(stream[count]);
+    (WaitOnIndexInfo *)&(opstream[count]);
   xxeWaitOnIndexInfo->index = index;
 
-  // bump up element count, this may move entire stream to new memory location
+  // bump up element count, this may move entire opstream to new memory location
   localrc = incCount();
   if (ESMC_LogDefault.MsgFoundError(localrc, 
     ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
@@ -10433,20 +10438,20 @@ int XXE::appendTestOnIndex(
   ){
 //
 // !DESCRIPTION:
-//  Append a testOnIndex element at the end of the XXE stream.
+//  Append a testOnIndex element at the end of the XXE opstream.
 //EOPI
 //-----------------------------------------------------------------------------
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
 
-  stream[count].opId = testOnIndex;
-  stream[count].predicateBitField = predicateBitField;
+  opstream[count].opId = testOnIndex;
+  opstream[count].predicateBitField = predicateBitField;
   TestOnIndexInfo *xxeTestOnIndexInfo =
-    (TestOnIndexInfo *)&(stream[count]);
+    (TestOnIndexInfo *)&(opstream[count]);
   xxeTestOnIndexInfo->index = index;
   
-  // bump up element count, this may move entire stream to new memory location
+  // bump up element count, this may move entire opstream to new memory location
   localrc = incCount();
   if (ESMC_LogDefault.MsgFoundError(localrc, 
     ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
@@ -10477,17 +10482,17 @@ int XXE::appendWaitOnAnyIndexSub(
   ){
 //
 // !DESCRIPTION:
-//  Append a waitOnAnyIndexSub element at the end of the XXE stream.
+//  Append a waitOnAnyIndexSub element at the end of the XXE opstream.
 //EOPI
 //-----------------------------------------------------------------------------
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
 
-  stream[count].opId = waitOnAnyIndexSub;
-  stream[count].predicateBitField = predicateBitField;
+  opstream[count].opId = waitOnAnyIndexSub;
+  opstream[count].predicateBitField = predicateBitField;
   WaitOnAnyIndexSubInfo *xxeWaitOnAnyIndexSubInfo =
-    (WaitOnAnyIndexSubInfo *)&(stream[count]);
+    (WaitOnAnyIndexSubInfo *)&(opstream[count]);
   xxeWaitOnAnyIndexSubInfo->count = countArg;
   char *xxeChar = new char[countArg*sizeof(XXE *)];
   xxeWaitOnAnyIndexSubInfo->xxe = (XXE **)xxeChar;
@@ -10507,7 +10512,7 @@ int XXE::appendWaitOnAnyIndexSub(
   if (ESMC_LogDefault.MsgFoundError(localrc,
     ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
   
-  // bump up element count, this may move entire stream to new memory location
+  // bump up element count, this may move entire opstream to new memory location
   localrc = incCount();
   if (ESMC_LogDefault.MsgFoundError(localrc,
     ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
@@ -10537,17 +10542,17 @@ int XXE::appendWaitOnAllSendnb(
   ){
 //
 // !DESCRIPTION:
-//  Append a waitOnAllSendnb element at the end of the XXE stream.
+//  Append a waitOnAllSendnb element at the end of the XXE opstream.
 //EOPI
 //-----------------------------------------------------------------------------
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
 
-  stream[count].opId = waitOnAllSendnb;
-  stream[count].predicateBitField = predicateBitField;
+  opstream[count].opId = waitOnAllSendnb;
+  opstream[count].predicateBitField = predicateBitField;
   
-  // bump up element count, this may move entire stream to new memory location
+  // bump up element count, this may move entire opstream to new memory location
   localrc = incCount();
   if (ESMC_LogDefault.MsgFoundError(localrc, 
     ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
@@ -10581,7 +10586,7 @@ int XXE::appendWaitOnIndexSub(
   ){
 //
 // !DESCRIPTION:
-//  Append an xxeSub at the end of the XXE stream that is executed depending
+//  Append an xxeSub at the end of the XXE opstream that is executed depending
 //  on test conditional
 //EOPI
 //-----------------------------------------------------------------------------
@@ -10589,16 +10594,16 @@ int XXE::appendWaitOnIndexSub(
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
   
-  stream[count].opId = waitOnIndexSub;
-  stream[count].predicateBitField = predicateBitField;
+  opstream[count].opId = waitOnIndexSub;
+  opstream[count].predicateBitField = predicateBitField;
   WaitOnIndexSubInfo *waitOnIndexSubInfo =
-    (WaitOnIndexSubInfo *)&(stream[count]);
+    (WaitOnIndexSubInfo *)&(opstream[count]);
   waitOnIndexSubInfo->xxe = xxe;
   waitOnIndexSubInfo->rraShift = rraShift;
   waitOnIndexSubInfo->vectorLengthShift = vectorLengthShift;
   waitOnIndexSubInfo->index = index;
   
-  // bump up element count, this may move entire stream to new memory location
+  // bump up element count, this may move entire opstream to new memory location
   localrc = incCount();
   if (ESMC_LogDefault.MsgFoundError(localrc,
     ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
@@ -10632,7 +10637,7 @@ int XXE::appendTestOnIndexSub(
   ){
 //
 // !DESCRIPTION:
-//  Append an xxeSub at the end of the XXE stream that is executed depending
+//  Append an xxeSub at the end of the XXE opstream that is executed depending
 //  on test conditional
 //EOPI
 //-----------------------------------------------------------------------------
@@ -10640,16 +10645,16 @@ int XXE::appendTestOnIndexSub(
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
   
-  stream[count].opId = testOnIndexSub;
-  stream[count].predicateBitField = predicateBitField;
+  opstream[count].opId = testOnIndexSub;
+  opstream[count].predicateBitField = predicateBitField;
   TestOnIndexSubInfo *testOnIndexSubInfo =
-    (TestOnIndexSubInfo *)&(stream[count]);
+    (TestOnIndexSubInfo *)&(opstream[count]);
   testOnIndexSubInfo->xxe = xxe;
   testOnIndexSubInfo->rraShift = rraShift;
   testOnIndexSubInfo->vectorLengthShift = vectorLengthShift;
   testOnIndexSubInfo->index = index;
   
-  // bump up element count, this may move entire stream to new memory location
+  // bump up element count, this may move entire opstream to new memory location
   localrc = incCount();
   if (ESMC_LogDefault.MsgFoundError(localrc,
     ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
@@ -10680,20 +10685,20 @@ int XXE::appendCancelIndex(
   ){
 //
 // !DESCRIPTION:
-//  Append a cancelIndex element at the end of the XXE stream.
+//  Append a cancelIndex element at the end of the XXE opstream.
 //EOPI
 //-----------------------------------------------------------------------------
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
 
-  stream[count].opId = cancelIndex;
-  stream[count].predicateBitField = predicateBitField;
+  opstream[count].opId = cancelIndex;
+  opstream[count].predicateBitField = predicateBitField;
   CancelIndexInfo *xxeCancelIndexInfo =
-    (CancelIndexInfo *)&(stream[count]);
+    (CancelIndexInfo *)&(opstream[count]);
   xxeCancelIndexInfo->index = index;
   
-  // bump up element count, this may move entire stream to new memory location 
+  // bump up element count, this may move entire opstream to new memory location 
   localrc = incCount();
   if (ESMC_LogDefault.MsgFoundError(localrc, 
     ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
@@ -10724,17 +10729,17 @@ int XXE::appendProfileMessage(
   ){
 //
 // !DESCRIPTION:
-//  Append a profileMessage element at the end of the XXE stream.
+//  Append a profileMessage element at the end of the XXE opstream.
 //EOPI
 //-----------------------------------------------------------------------------
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
 
-  stream[count].opId = profileMessage;
-  stream[count].predicateBitField = predicateBitField;
+  opstream[count].opId = profileMessage;
+  opstream[count].predicateBitField = predicateBitField;
   ProfileMessageInfo *xxeProfileMessageInfo =
-    (ProfileMessageInfo *)&(stream[count]);
+    (ProfileMessageInfo *)&(opstream[count]);
   int stringLen = strlen(messageString);
   xxeProfileMessageInfo->messageString = new char[stringLen+1];
   strcpy(xxeProfileMessageInfo->messageString, messageString);
@@ -10744,7 +10749,7 @@ int XXE::appendProfileMessage(
   if (ESMC_LogDefault.MsgFoundError(localrc,
     ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
   
-  // bump up element count, this may move entire stream to new memory location
+  // bump up element count, this may move entire opstream to new memory location
   localrc = incCount();
   if (ESMC_LogDefault.MsgFoundError(localrc,
     ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
@@ -10775,17 +10780,17 @@ int XXE::appendMessage(
   ){
 //
 // !DESCRIPTION:
-//  Append a Message element at the end of the XXE stream.
+//  Append a Message element at the end of the XXE opstream.
 //EOPI
 //-----------------------------------------------------------------------------
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
 
-  stream[count].opId = message;
-  stream[count].predicateBitField = predicateBitField;
+  opstream[count].opId = message;
+  opstream[count].predicateBitField = predicateBitField;
   MessageInfo *xxeMessageInfo =
-    (MessageInfo *)&(stream[count]);
+    (MessageInfo *)&(opstream[count]);
   int stringLen = strlen(messageString);
   xxeMessageInfo->messageString = new char[stringLen+1];
   strcpy(xxeMessageInfo->messageString, messageString);
@@ -10795,7 +10800,7 @@ int XXE::appendMessage(
   if (ESMC_LogDefault.MsgFoundError(localrc,
     ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
   
-  // bump up element count, this may move entire stream to new memory location
+  // bump up element count, this may move entire opstream to new memory location
   localrc = incCount();
   if (ESMC_LogDefault.MsgFoundError(localrc,
     ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;

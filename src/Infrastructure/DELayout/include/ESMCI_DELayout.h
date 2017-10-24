@@ -298,12 +298,13 @@ class XXE{
       // information is also provided to support buffer resizing during exec(),
       // when the actual execution time vectorLength is known.
       char *buffer;                 // buffer
-      int size;                     // size of buffer in byte
+      unsigned long size;           // size of buffer in byte
       int vectorLengthMultiplier;   // multiplier that allows to determine size
                                     // requirement depending on vectorLength
                                     // during exec()
       
-      BufferInfo(char *buffer_, int size_, int vectorLengthMultiplier_){
+      BufferInfo(char *buffer_, unsigned long size_, 
+        int vectorLengthMultiplier_){
         // constructor
         buffer = buffer_;
         size = size_;
@@ -314,7 +315,7 @@ class XXE{
   public:
     VM *vm;
     // OPSTREAM
-    StreamElement *stream;          // actual stream containing XXE elements
+    StreamElement *opstream;        // actual stream containing XXE operations
     int count;                      // number of elements in the stream
     // DATA
     std::map<void *, unsigned long>
@@ -358,8 +359,8 @@ class XXE{
       int commhandleMaxCountArg=1000, int xxeSubMaxCountArg=1000){
       // constructor...
       vm = vmArg;
-      // -> set up internal stream and bookkeeping members
-      stream = new StreamElement[maxArg]; count = 0; max = maxArg;
+      // -> set up internal opstream and bookkeeping members
+      opstream = new StreamElement[maxArg]; count = 0; max = maxArg;
       dataList = new char*[dataMaxCountArg];
       dataCount  = 0;
       dataMaxCount = dataMaxCountArg;
@@ -384,14 +385,15 @@ class XXE{
       int bufferInfoListArg=-1);
     void streamify(std::stringstream &streami);
     bool getNextSubSuperVectorOkay(int *k){
-      // search for the next xxeSub element in the stream, starting at index k.
-      // when found return the element's superVectorOkay setting, and also 
-      // update k to point to the next stream element for continued search
+      // search for the next xxeSub element in the opstream, starting at 
+      // index k. when found return the element's superVectorOkay setting,
+      // and also update k to point to the next stream element for continued
+      // search
       XxeSubInfo *xxeSubInfo;
       for (int i=*k; i<count; i++){
-        if (stream[i].opId==xxeSub){
+        if (opstream[i].opId==xxeSub){
           *k = i+1;   // index where to start next time
-          xxeSubInfo = (XxeSubInfo *)&(stream[i]);
+          xxeSubInfo = (XxeSubInfo *)&(opstream[i]);
           if (xxeSubInfo->xxe)
             return xxeSubInfo->xxe->superVectorOkay;
           else
@@ -507,9 +509,9 @@ class XXE{
     
   public:
       
-    // specific stream element types, used to interpret the elements in stream
+    // opstream element types, used to interpret the elements in opstream
     
-    // Common stream element members and their meaning:
+    // Common opstream element members and their meaning:
     //  opId                - operation id according to "enum OpId"
     //  predicateBitField   - predicate bit field to control conditional exec
     //  vectorFlag          - true:  scale with vectorLength during exec()
@@ -910,7 +912,7 @@ class XXE{
       bool indirectionFlag;
     }MemGatherSrcRRAInfo;
     
-    // --- sub-streams
+    // --- sub-opstreams
     
     typedef struct{
       OpId opId;

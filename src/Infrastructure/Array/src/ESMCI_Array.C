@@ -6081,7 +6081,7 @@ namespace ArrayHelper{
     if (ESMC_LogDefault.MsgFoundError(localrc,
       ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
     XXE::ZeroSuperScalarRRAInfo *xxeZeroSuperScalarRRAInfo =
-      (XXE::ZeroSuperScalarRRAInfo *)&(xxe->stream[xxeIndex]);
+      (XXE::ZeroSuperScalarRRAInfo *)&(xxe->opstream[xxeIndex]);
     // fill rraOffsetList[]
     int vectorLength = dstInfoTable.begin()->vectorLength;  // store time vLen
     int k=0;  // reset
@@ -6126,7 +6126,7 @@ namespace ArrayHelper{
       if (ESMC_LogDefault.MsgFoundError(localrc, 
         ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
       XXE::ProductSumSuperScalarDstRRAInfo *xxeProductSumSuperScalarDstRRAInfo =
-        (XXE::ProductSumSuperScalarDstRRAInfo *)&(xxe->stream[xxeIndex]);
+        (XXE::ProductSumSuperScalarDstRRAInfo *)&(xxe->opstream[xxeIndex]);
       int *rraOffsetList = xxeProductSumSuperScalarDstRRAInfo->rraOffsetList;
       void **factorList = xxeProductSumSuperScalarDstRRAInfo->factorList;
       int *valueOffsetList =
@@ -6232,11 +6232,11 @@ namespace ArrayHelper{
         &dt_sScalar, xxeIndex, xxeIndex);
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
         ESMC_CONTEXT, &rc)) return rc;
-      // try super-scalar contig "+=*" operation in XXE stream
-      xxe->stream[xxeIndex].opId = XXE::productSumSuperScalarContigRRA;
+      // try super-scalar contig "+=*" operation in XXE opstream
+      xxe->opstream[xxeIndex].opId = XXE::productSumSuperScalarContigRRA;
       XXE::ProductSumSuperScalarContigRRAInfo
         *xxeProductSumSuperScalarContigRRAInfo =
-        (XXE::ProductSumSuperScalarContigRRAInfo *)&(xxe->stream[xxeIndex]);
+        (XXE::ProductSumSuperScalarContigRRAInfo *)&(xxe->opstream[xxeIndex]);
       // only change members that are different wrt super-scalar operation
       xxeProductSumSuperScalarContigRRAInfo->valueList = bufferInfo;
       xxe->optimizeElement(xxeIndex);
@@ -6264,7 +6264,7 @@ namespace ArrayHelper{
           " (diffElements=%d), vectorFlag=%d", termCount, diffElements,
           vectorFlag);
 #endif
-        xxe->stream[xxeIndex].opId = XXE::productSumSuperScalarDstRRA;
+        xxe->opstream[xxeIndex].opId = XXE::productSumSuperScalarDstRRA;
         xxeProductSumSuperScalarDstRRAInfo->valueBase = bufferInfo;
       }else{
         // use productSumSuperScalarContigRRA
@@ -6304,7 +6304,7 @@ namespace ArrayHelper{
       if (ESMC_LogDefault.MsgFoundError(localrc, 
         ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
       XXE::SumSuperScalarDstRRAInfo *xxeSumSuperScalarDstRRAInfo =
-        (XXE::SumSuperScalarDstRRAInfo *)&(xxe->stream[xxeIndex]);
+        (XXE::SumSuperScalarDstRRAInfo *)&(xxe->opstream[xxeIndex]);
       int *rraOffsetList = xxeSumSuperScalarDstRRAInfo->rraOffsetList;
       int *valueOffsetList = xxeSumSuperScalarDstRRAInfo->valueOffsetList;
       // fill in rraOffsetList, valueList
@@ -6361,7 +6361,7 @@ namespace ArrayHelper{
       ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
     delete [] tempString;
 #endif
-    // use substream for doing the productSum
+    // use subopstream for doing the productSum
     XXE *xxeSub;
     try{
       xxeSub = new XXE(xxe->vm, 10, 10, 10);
@@ -6449,7 +6449,7 @@ namespace ArrayHelper{
       
       XXE::ProductSumSuperScalarListDstRRAInfo
         *xxeProductSumSuperScalarListDstRRAInfo =
-        (XXE::ProductSumSuperScalarListDstRRAInfo *)&(xxe->stream[xxeIndex]);
+        (XXE::ProductSumSuperScalarListDstRRAInfo *)&(xxe->opstream[xxeIndex]);
       int *rraOffsetList =
         xxeProductSumSuperScalarListDstRRAInfo->rraOffsetList;
       void **factorList = xxeProductSumSuperScalarListDstRRAInfo->factorList;
@@ -6511,7 +6511,7 @@ namespace ArrayHelper{
       
       XXE::SumSuperScalarListDstRRAInfo
         *xxeSumSuperScalarListDstRRAInfo =
-        (XXE::SumSuperScalarListDstRRAInfo *)&(xxe->stream[xxeIndex]);
+        (XXE::SumSuperScalarListDstRRAInfo *)&(xxe->opstream[xxeIndex]);
       int *rraOffsetList =
         xxeSumSuperScalarListDstRRAInfo->rraOffsetList;
       int *valueOffsetList =
@@ -6668,7 +6668,7 @@ namespace ArrayHelper{
         if (ESMC_LogDefault.MsgFoundError(localrc,
           ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
         XXE::MemGatherSrcRRAInfo *xxeMemGatherSrcRRAInfo =
-          (XXE::MemGatherSrcRRAInfo *) &(xxe->stream[xxeIndex]);
+          (XXE::MemGatherSrcRRAInfo *) &(xxe->opstream[xxeIndex]);
         // try typekind specific memGatherSrcRRA
         for (int kk=0; kk<count; kk++){
           xxeMemGatherSrcRRAInfo->rraOffsetList[kk] =
@@ -6783,7 +6783,7 @@ namespace ArrayHelper{
       if (ESMC_LogDefault.MsgFoundError(localrc, 
         ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
       XXE::ProductSumSuperScalarSrcRRAInfo *xxeProductSumSuperScalarSrcRRAInfo =
-        (XXE::ProductSumSuperScalarSrcRRAInfo *)&(xxe->stream[xxeIndex]);
+        (XXE::ProductSumSuperScalarSrcRRAInfo *)&(xxe->opstream[xxeIndex]);
       int *rraOffsetList = xxeProductSumSuperScalarSrcRRAInfo->rraOffsetList;
       void **factorList = xxeProductSumSuperScalarSrcRRAInfo->factorList;
       int *elementOffsetList =
@@ -6917,7 +6917,7 @@ namespace ArrayHelper{
         if (ESMC_LogDefault.MsgFoundError(localrc,
           ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
         XXE::MemGatherSrcRRAInfo *xxeMemGatherSrcRRAInfo =
-          (XXE::MemGatherSrcRRAInfo *) &(xxe->stream[xxeIndex]);
+          (XXE::MemGatherSrcRRAInfo *) &(xxe->opstream[xxeIndex]);
         // try typekind specific memGatherSrcRRA
         for (int kk=0; kk<count; kk++){
           xxeMemGatherSrcRRAInfo->rraOffsetList[kk] =
@@ -7024,7 +7024,7 @@ namespace ArrayHelper{
       if (ESMC_LogDefault.MsgFoundError(localrc, 
         ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
       XXE::ProductSumSuperScalarSrcRRAInfo *xxeProductSumSuperScalarSrcRRAInfo =
-        (XXE::ProductSumSuperScalarSrcRRAInfo *)&(xxe->stream[xxeIndex]);
+        (XXE::ProductSumSuperScalarSrcRRAInfo *)&(xxe->opstream[xxeIndex]);
       int *rraOffsetList = xxeProductSumSuperScalarSrcRRAInfo->rraOffsetList;
       void **factorList = xxeProductSumSuperScalarSrcRRAInfo->factorList;
       int *elementOffsetList =
@@ -7181,7 +7181,7 @@ namespace ArrayHelper{
         if (ESMC_LogDefault.MsgFoundError(localrc,
           ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
         XXE::MemGatherSrcRRAInfo *xxeMemGatherSrcRRAInfo =
-          (XXE::MemGatherSrcRRAInfo *) &(xxe->stream[xxeIndex]);
+          (XXE::MemGatherSrcRRAInfo *) &(xxe->opstream[xxeIndex]);
         // try typekind specific memGatherSrcRRA
         for (int kk=0; kk<count; kk++){
           xxeMemGatherSrcRRAInfo->rraOffsetList[kk] =
@@ -7287,7 +7287,7 @@ namespace ArrayHelper{
       if (ESMC_LogDefault.MsgFoundError(localrc, 
         ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
       XXE::ProductSumSuperScalarSrcRRAInfo *xxeProductSumSuperScalarSrcRRAInfo =
-        (XXE::ProductSumSuperScalarSrcRRAInfo *)&(xxe->stream[xxeIndex]);
+        (XXE::ProductSumSuperScalarSrcRRAInfo *)&(xxe->opstream[xxeIndex]);
       int *rraOffsetList = xxeProductSumSuperScalarSrcRRAInfo->rraOffsetList;
       void **factorList = xxeProductSumSuperScalarSrcRRAInfo->factorList;
       int *elementOffsetList =
