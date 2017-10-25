@@ -6128,18 +6128,59 @@ namespace ArrayHelper{
       XXE::ProductSumSuperScalarDstRRAInfo *xxeProductSumSuperScalarDstRRAInfo =
         (XXE::ProductSumSuperScalarDstRRAInfo *)&(xxe->opstream[xxeIndex]);
       int *rraOffsetList = xxeProductSumSuperScalarDstRRAInfo->rraOffsetList;
-      void **factorList = xxeProductSumSuperScalarDstRRAInfo->factorList;
+      void *factorList = xxeProductSumSuperScalarDstRRAInfo->factorList;
       int *valueOffsetList =
         xxeProductSumSuperScalarDstRRAInfo->valueOffsetList;
-      // fill in rraOffsetList, factorList, valueOffsetList
+      // fill in rraOffsetList, valueOffsetList
       typename vector<ArrayHelper::DstInfo<IT1,IT2> >::iterator pp =
         dstInfoTable.begin();
       for (int kk=0; kk<termCount; kk++){
         rraOffsetList[kk] = pp->linIndex/vectorLength;
-        factorList[kk] = (void *)(pp->factor);
         valueOffsetList[kk] = pp->bufferIndex;
         ++pp;
       } // for kk - termCount
+      // fill in factorList according to factorTK
+      pp = dstInfoTable.begin();
+      switch (factorTK){
+      case XXE::R4:
+        {
+          ESMC_R4 *factorListT = (ESMC_R4 *)factorList;
+          for (int kk=0; kk<termCount; kk++){
+            factorListT[kk] = *(ESMC_R4 *)(pp->factor);
+            ++pp;
+          } // for kk - termCount
+        }
+        break;
+      case XXE::R8:
+        {
+          ESMC_R8 *factorListT = (ESMC_R8 *)factorList;
+          for (int kk=0; kk<termCount; kk++){
+            factorListT[kk] = *(ESMC_R8 *)(pp->factor);
+            ++pp;
+          } // for kk - termCount
+        }
+        break;
+      case XXE::I4:
+        {
+          ESMC_I4 *factorListT = (ESMC_I4 *)factorList;
+          for (int kk=0; kk<termCount; kk++){
+            factorListT[kk] = *(ESMC_I4 *)(pp->factor);
+            ++pp;
+          } // for kk - termCount
+        }
+        break;
+      case XXE::I8:
+        {
+          ESMC_I8 *factorListT = (ESMC_I8 *)factorList;
+          for (int kk=0; kk<termCount; kk++){
+            factorListT[kk] = *(ESMC_I8 *)(pp->factor);
+            ++pp;
+          } // for kk - termCount
+        }
+        break;
+      default:
+        break;
+      }
       // need to fill in sensible elements and values or timing will be bogus
       switch (elementTK){ // elements in dstArray
       case XXE::R4:
@@ -6452,7 +6493,7 @@ namespace ArrayHelper{
         (XXE::ProductSumSuperScalarListDstRRAInfo *)&(xxe->opstream[xxeIndex]);
       int *rraOffsetList =
         xxeProductSumSuperScalarListDstRRAInfo->rraOffsetList;
-      void **factorList = xxeProductSumSuperScalarListDstRRAInfo->factorList;
+      void *factorList = xxeProductSumSuperScalarListDstRRAInfo->factorList;
       int *valueOffsetList =
         xxeProductSumSuperScalarListDstRRAInfo->valueOffsetList;
       int *baseListIndexList =
@@ -6469,12 +6510,44 @@ namespace ArrayHelper{
       }
       // do the actual sort
       sort(dstInfoSort.begin(), dstInfoSort.end());
-      // fill in rraOffsetList, factorList, valueOffsetList, baseListIndexList
+      // fill in rraOffsetList, valueOffsetList, baseListIndexList
       for (unsigned i=0; i<dstInfoSort.size(); i++){
         rraOffsetList[i] = dstInfoSort[i].pp->linIndex/vectorLength;
-        factorList[i] = (void *)(dstInfoSort[i].pp->factor);
         valueOffsetList[i] = dstInfoSort[i].pp->bufferIndex;
         baseListIndexList[i] = dstInfoSort[i].recvnbVectorIndex;
+      }
+      // fill in factorList according to factorTK
+      switch (factorTK){
+      case XXE::R4:
+        {
+          ESMC_R4 *factorListT = (ESMC_R4 *)factorList;
+          for (unsigned i=0; i<dstInfoSort.size(); i++)
+            factorListT[i] = *(ESMC_R4 *)(dstInfoSort[i].pp->factor);
+        }
+        break;
+      case XXE::R8:
+        {
+          ESMC_R8 *factorListT = (ESMC_R8 *)factorList;
+          for (unsigned i=0; i<dstInfoSort.size(); i++)
+            factorListT[i] = *(ESMC_R8 *)(dstInfoSort[i].pp->factor);
+        }
+        break;
+      case XXE::I4:
+        {
+          ESMC_I4 *factorListT = (ESMC_I4 *)factorList;
+          for (unsigned i=0; i<dstInfoSort.size(); i++)
+            factorListT[i] = *(ESMC_I4 *)(dstInfoSort[i].pp->factor);
+        }
+        break;
+      case XXE::I8:
+        {
+          ESMC_I8 *factorListT = (ESMC_I8 *)factorList;
+          for (unsigned i=0; i<dstInfoSort.size(); i++)
+            factorListT[i] = *(ESMC_I8 *)(dstInfoSort[i].pp->factor);
+        }
+        break;
+      default:
+        break;
       }
     }else{
       // do some processing on the src side
@@ -6785,25 +6858,88 @@ namespace ArrayHelper{
       XXE::ProductSumSuperScalarSrcRRAInfo *xxeProductSumSuperScalarSrcRRAInfo =
         (XXE::ProductSumSuperScalarSrcRRAInfo *)&(xxe->opstream[xxeIndex]);
       int *rraOffsetList = xxeProductSumSuperScalarSrcRRAInfo->rraOffsetList;
-      void **factorList = xxeProductSumSuperScalarSrcRRAInfo->factorList;
+      void *factorList = xxeProductSumSuperScalarSrcRRAInfo->factorList;
       int *elementOffsetList =
         xxeProductSumSuperScalarSrcRRAInfo->elementOffsetList;
       // fill in rraOffsetList, factorList, elementOffsetList
       int bufferItem = 0; // reset
       int kk = 0; // reset
       pp = srcInfoTable.begin();  // reset
-      while (pp != srcInfoTable.end()){
-        SeqIndex<IT2> partnerSeqIndex = pp->partnerSeqIndex;
-        for (int term=0; term<srcTermProcessing; term++){
-          rraOffsetList[kk] = pp->linIndex/vectorLength;
-          factorList[kk] = (void *)(pp->factor);
-          elementOffsetList[kk] = bufferItem;
-          ++pp;
-          ++kk;
-          if ((pp == srcInfoTable.end()) ||
-            !(partnerSeqIndex == pp->partnerSeqIndex)) break;
-        } // for srcTermProcessing
-        ++bufferItem;
+      switch (factorTK){
+      case XXE::R4:
+        {
+          ESMC_R4 *factorListT = (ESMC_R4 *)factorList;
+          while (pp != srcInfoTable.end()){
+            SeqIndex<IT2> partnerSeqIndex = pp->partnerSeqIndex;
+            for (int term=0; term<srcTermProcessing; term++){
+              rraOffsetList[kk] = pp->linIndex/vectorLength;
+              factorListT[kk] = *(ESMC_R4 *)(pp->factor);
+              elementOffsetList[kk] = bufferItem;
+              ++pp;
+              ++kk;
+              if ((pp == srcInfoTable.end()) ||
+                !(partnerSeqIndex == pp->partnerSeqIndex)) break;
+            } // for srcTermProcessing
+            ++bufferItem;
+          }
+        }
+        break;
+      case XXE::R8:
+        {
+          ESMC_R8 *factorListT = (ESMC_R8 *)factorList;
+          while (pp != srcInfoTable.end()){
+            SeqIndex<IT2> partnerSeqIndex = pp->partnerSeqIndex;
+            for (int term=0; term<srcTermProcessing; term++){
+              rraOffsetList[kk] = pp->linIndex/vectorLength;
+              factorListT[kk] = *(ESMC_R8 *)(pp->factor);
+              elementOffsetList[kk] = bufferItem;
+              ++pp;
+              ++kk;
+              if ((pp == srcInfoTable.end()) ||
+                !(partnerSeqIndex == pp->partnerSeqIndex)) break;
+            } // for srcTermProcessing
+            ++bufferItem;
+          }
+        }
+        break;
+      case XXE::I4:
+        {
+          ESMC_I4 *factorListT = (ESMC_I4 *)factorList;
+          while (pp != srcInfoTable.end()){
+            SeqIndex<IT2> partnerSeqIndex = pp->partnerSeqIndex;
+            for (int term=0; term<srcTermProcessing; term++){
+              rraOffsetList[kk] = pp->linIndex/vectorLength;
+              factorListT[kk] = *(ESMC_I4 *)(pp->factor);
+              elementOffsetList[kk] = bufferItem;
+              ++pp;
+              ++kk;
+              if ((pp == srcInfoTable.end()) ||
+                !(partnerSeqIndex == pp->partnerSeqIndex)) break;
+            } // for srcTermProcessing
+            ++bufferItem;
+          }
+        }
+        break;
+      case XXE::I8:
+        {
+          ESMC_I8 *factorListT = (ESMC_I8 *)factorList;
+          while (pp != srcInfoTable.end()){
+            SeqIndex<IT2> partnerSeqIndex = pp->partnerSeqIndex;
+            for (int term=0; term<srcTermProcessing; term++){
+              rraOffsetList[kk] = pp->linIndex/vectorLength;
+              factorListT[kk] = *(ESMC_I8 *)(pp->factor);
+              elementOffsetList[kk] = bufferItem;
+              ++pp;
+              ++kk;
+              if ((pp == srcInfoTable.end()) ||
+                !(partnerSeqIndex == pp->partnerSeqIndex)) break;
+            } // for srcTermProcessing
+            ++bufferItem;
+          }
+        }
+        break;
+      default:
+        break;
       }
 #ifdef ASMM_EXEC_PROFILE_on
       tempString = new char[160];
