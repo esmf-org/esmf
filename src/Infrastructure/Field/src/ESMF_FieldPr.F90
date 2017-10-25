@@ -167,7 +167,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     !jw  call ESMF_LogWrite(msgbuf, ESMF_LOGMSG_INFO)
     write(ESMF_UtilIOStdout,*)  "  Name = '",  trim(name), "'"
 
-    call ESMF_BasePrint(fp%base, defaultopts, localrc)
+    call ESMF_BasePrint(fp%base, options=defaultopts, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
