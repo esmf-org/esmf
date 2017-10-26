@@ -72,7 +72,8 @@ namespace ESMCI {
     }
     ~RouteHandle(){destruct();}
     static RouteHandle *create(int *rc);
-    static RouteHandle *create(RouteHandle *rh, int *rc);
+    static RouteHandle *create(RouteHandle *rh, InterArray<int> *originPetList,
+      InterArray<int> *targetPetList, int *rc);
     static int destroy(RouteHandle *routehandle, bool noGarbage=false);
     int construct(void);
     int destruct(void);    

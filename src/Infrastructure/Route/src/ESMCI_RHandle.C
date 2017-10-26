@@ -125,8 +125,10 @@ RouteHandle *RouteHandle::create(
 //  pointer to newly allocated RouteHandle
 //
 // !ARGUMENTS:
-    RouteHandle *rh,     // in  - routehandle to copy from
-    int *rc) {           // out - return code
+    RouteHandle *rh,                // in  - routehandle to copy from
+    InterArray<int> *originPetList, // in  - petList of ncoming RH
+    InterArray<int> *targetPetList, // in  - petList of newly created RH
+    int *rc) {                      // out - return code
 //
 // !DESCRIPTION:
 //  Allocate memory for a new RouteHandle object and initialize it.
@@ -140,16 +142,78 @@ RouteHandle *RouteHandle::create(
   
   RouteHandle *routehandle;
   try{
-
-    // new object
+    
+    // sanity check the incoming petList arguments
+    int sizePetList = 0;  // default
+    if (present(originPetList))
+      sizePetList = originPetList->extent[0];
+    int sizeTargetPetList = 0;  // default
+    if (present(targetPetList))
+      sizeTargetPetList = targetPetList->extent[0];
+    if (sizePetList != sizeTargetPetList){
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
+        "Both petList arguments must specify the same number of PETs",
+        ESMC_CONTEXT, rc);
+      throw *rc;  // bail out with exception
+    }
+    bool petMapping = false;  // default
+    if (sizePetList>0)
+      petMapping = true;
+    
+    // construct mapping vectors
+    VM *vm = VM::getCurrent(&localrc);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      rc)) throw *rc;
+    int petCount = vm->getPetCount();
+    vector<int> originToTargetMap(petCount,-1);  // initialize to -1
+    vector<int> targetToOriginMap(petCount,-1);  // initialize to -1
+    if (petMapping){
+      for (int i=0; i<sizePetList; i++){
+        int originPet=originPetList->array[i];
+        int targetPet=targetPetList->array[i];
+        if (originPet<0 || originPet>=petCount){
+          // this PET is out of bounds
+          ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+            "PETs in originPetList must be between 0 and petCount-1",
+            ESMC_CONTEXT, rc);
+          throw *rc;  // bail out with exception
+        }
+        if (targetPet<0 || targetPet>=petCount){
+          // this PET is out of bounds
+          ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+            "PETs in targetPetList must be between 0 and petCount-1",
+            ESMC_CONTEXT, rc);
+          throw *rc;  // bail out with exception
+        }
+        // set up originToTargetMap
+        if (originToTargetMap[originPet] != -1){
+          // this same PET was already in the petList
+          ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+            "There must be no duplicate PETs in the originPetList",
+            ESMC_CONTEXT, rc);
+          throw *rc;  // bail out with exception
+        }
+        originToTargetMap[originPet] = targetPet;
+        // set up targetToOriginMap
+        if (targetToOriginMap[targetPet] != -1){
+          // this same PET was already in the petList
+          ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+            "There must be no duplicate PETs in the targetPetList",
+            ESMC_CONTEXT, rc);
+          throw *rc;  // bail out with exception
+        }
+        targetToOriginMap[targetPet] = originPet;
+      }
+    }
+    
+    // new RH object
     routehandle = new RouteHandle;
 
     // construct initial internals
     localrc = routehandle->construct();
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
       ESMC_CONTEXT, rc)){
-      routehandle->ESMC_BaseSetStatus(ESMF_STATUS_INVALID);  // mark invalid
-      return NULL;
+      throw *rc;
     }
     
     // copy the information from the incoming RH
@@ -160,17 +224,120 @@ RouteHandle *RouteHandle::create(
     XXE *xxe = (XXE *)rh->getStorage();
     
     // streamify the XXE object
-    stringstream xxeStreami;
-    xxe->streamify(xxeStreami);
-    
-cout << ESMC_METHOD": size of xxeStreami=" << xxeStreami.str().size() << "\n";
+    stringstream *xxeStreami = new stringstream;  // explicit mem management
+    xxe->streamify(*xxeStreami);
     
 #ifdef RH_CREATE_MEMLOG_on
   VM::logMemInfo(std::string(ESMC_METHOD": right after creating xxeStreami"));
 #endif
+  
+    if (petMapping){
+  
+      // copy the contents of xxeStreami into a contiguous string
+      string sendStreamiStr = xxeStreami->str();
+      string::size_type sendStreamiSize = sendStreamiStr.size();
+      // delete xxeStreami
+      delete xxeStreami;
     
+#ifdef RH_CREATE_MEMLOG_on
+  VM::logMemInfo(std::string(ESMC_METHOD": right after creating sendStreamiStr"));
+#endif
+
+cout << ESMC_METHOD": size of xxeStreami=" << sendStreamiSize << "\n";
+  
+      // exchange the streami between PETs
+      int localPet = vm->getLocalPet();
+      bool iAmOrigin = false;
+      if (originToTargetMap[localPet]>-1)
+        iAmOrigin = true;
+      bool iAmTarget = false;
+      if (targetToOriginMap[localPet]>-1)
+        iAmTarget = true;
+      // prepare to receive size of streami from origin
+      string::size_type recvStreamiSize = 0;  // initialize
+      VMK::commhandle *recvCommH = new VMK::commhandle;
+      if (iAmTarget){
+        // post non-blocking receive of size of streami from origin PET
+        localrc = vm->recv(&recvStreamiSize, sizeof(recvStreamiSize),
+          targetToOriginMap[localPet], &recvCommH);
+        if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+          ESMC_CONTEXT, rc)){
+          throw *rc;
+        }
+      }
+      // prepare to send size of streami to target
+      if (iAmOrigin){
+        // send size of the local streami to the target PET
+        localrc = vm->send(&sendStreamiSize, sizeof(sendStreamiSize),
+          originToTargetMap[localPet]);
+        if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+          ESMC_CONTEXT, rc)){
+          throw *rc;
+        }
+      }
+      // wait for receive
+      if (iAmTarget){
+        // wait for the non-blocking receive to finish
+        localrc = vm->commwait(&recvCommH);
+        if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+          ESMC_CONTEXT, rc)){
+          throw *rc;
+        }
+      }
+    
+cout << ESMC_METHOD": localPet=" << localPet << " receive from PET=" <<
+  targetToOriginMap[localPet] << " size of xxeStreami=" << recvStreamiSize 
+  << "\n";
+
+      // prepare to receive streami from origin
+      char *recvMsg = new char[recvStreamiSize];
+      if (iAmTarget){
+        // post non-blocking receive of streami from origin PET
+        localrc = vm->recv(recvMsg, recvStreamiSize,
+          targetToOriginMap[localPet], &recvCommH);
+        if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+          ESMC_CONTEXT, rc)){
+          throw *rc;
+        }
+      }
+      // prepare to send streami to target
+      char const *sendMsg = sendStreamiStr.data();
+      if (iAmOrigin){
+        // send size of the local streami to the target PET
+        localrc = vm->send(sendMsg, sendStreamiSize,
+          originToTargetMap[localPet]);
+        if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+          ESMC_CONTEXT, rc)){
+          throw *rc;
+        }
+      }
+      // wait for receive
+      if (iAmTarget){
+        // wait for the non-blocking receive to finish
+        localrc = vm->commwait(&recvCommH);
+        if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+          ESMC_CONTEXT, rc)){
+          throw *rc;
+        }
+      }
+      delete recvCommH;
+    
+#ifdef RH_CREATE_MEMLOG_on
+  VM::logMemInfo(std::string(ESMC_METHOD": right after receiving recvMsg"));
+#endif
+
+      // recreate xxeStreami and fill with recvMsg
+      xxeStreami = new stringstream;
+      xxeStreami->str(string(recvMsg, recvStreamiSize));
+      // delete recvMsg
+      delete [] recvMsg;
+    }
+
     // construct a new XXE object from streamified form
-    XXE *xxeNew = new XXE(xxeStreami);
+    XXE *xxeNew = new XXE(*xxeStreami);
+    
+    // delete xxeStreami
+    delete xxeStreami;
     
     // store the new XXE object in RH
     routehandle->setStorage(xxeNew);
