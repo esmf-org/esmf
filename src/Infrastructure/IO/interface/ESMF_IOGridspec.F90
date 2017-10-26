@@ -348,6 +348,8 @@
     if (present(rc)) rc=ESMF_SUCCESS
     return
 #else
+    ndims = 0
+    grid_dims = 0
     call ESMF_LogSetError(ESMF_RC_LIB_NOT_PRESENT, &
                  msg="- ESMF_NETCDF not defined when lib was compiled", &
                  ESMF_CONTEXT, rcToReturn=rc)

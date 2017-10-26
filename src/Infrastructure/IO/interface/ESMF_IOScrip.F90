@@ -118,11 +118,11 @@ subroutine ESMF_OutputWeightFile (weightFile, factorList, factorIndexList, rc)
     
     call ESMF_VMGetGlobal(vm, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=localrc)) return
+        ESMF_CONTEXT, rcToReturn=rc)) return
 
     call ESMF_VMGet(vm, localPet=localPet, petCount=petCount, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=localrc)) return
+        ESMF_CONTEXT, rcToReturn=rc)) return
     
     ! ==============================================================================
     ! Create the DistGrid. The factors may be ragged (factor count differs between
@@ -142,7 +142,7 @@ subroutine ESMF_OutputWeightFile (weightFile, factorList, factorIndexList, rc)
     if ((localPet .ne. petCount-1) .and. (petCount > 1)) then
       call ESMF_VMSend(vm, (/stopIndex+1/), 1, localPet+1, rc=localrc)
       if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
-          ESMF_CONTEXT, rcToReturn=localrc)) return
+          ESMF_CONTEXT, rcToReturn=rc)) return
     endif
     
     ! Remember ragged factor counts may require a non-regular decomposition. This
@@ -156,7 +156,7 @@ subroutine ESMF_OutputWeightFile (weightFile, factorList, factorIndexList, rc)
       endif
       call ESMF_VMBroadcast(vm, bcstData, 2, ii-1, rc=localrc)
       if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
-          ESMF_CONTEXT, rcToReturn=localrc)) return
+          ESMF_CONTEXT, rcToReturn=rc)) return
       deBlockList(1, :, ii) = bcstData
     enddo
     
@@ -165,7 +165,7 @@ subroutine ESMF_OutputWeightFile (weightFile, factorList, factorIndexList, rc)
                                      deBlockList=deBlockList, &
                                      rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=localrc)) return
+        ESMF_CONTEXT, rcToReturn=rc)) return
         
     ! ==============================================================================
     ! Set up attributes to allow variables to share a common dimension name in the
@@ -187,12 +187,12 @@ subroutine ESMF_OutputWeightFile (weightFile, factorList, factorIndexList, rc)
     !call ESMF_AttributeAdd(grid, convention="netcdf", purpose="metadata",  &
     !  attrList=(/ ESMF_ATT_GRIDDED_DIM_LABELS /), rc=rc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=localrc)) return
+        ESMF_CONTEXT, rcToReturn=rc)) return
     !call c_ESMC_AttPackAddAtt(grid, name, size(lens), specString, &
     !                          lens, rc)
     call c_ESMC_AttPackAddAtt(name, attpack, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=localrc)) return
+        ESMF_CONTEXT, rcToReturn=rc)) return
     
     call c_ESMC_AttPackSetCharList(distgridFL, name, ESMF_TYPEKIND_CHARACTER, &
                                   1, value, lens2, attpack, 0, localrc)
@@ -200,7 +200,7 @@ subroutine ESMF_OutputWeightFile (weightFile, factorList, factorIndexList, rc)
     !                       convention="netcdf", purpose="metadata",  &
     !                       valueList=(/ "n_s"/), rc=rc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=localrc)) return
+        ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! ==============================================================================
     ! Create arrays.
@@ -208,7 +208,7 @@ subroutine ESMF_OutputWeightFile (weightFile, factorList, factorIndexList, rc)
     arrayFL = ESMF_ArrayCreate(farray=factorList, distgrid=distgridFL, &
                                indexflag=ESMF_INDEX_DELOCAL, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=localrc)) return
+        ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Copy factor indexing before passing to array create. Passing an array section 
     ! here causes undefined behavior in the array buffer access. "datacopyflag" does 
@@ -222,12 +222,12 @@ subroutine ESMF_OutputWeightFile (weightFile, factorList, factorIndexList, rc)
     arrayFIL1 = ESMF_ArrayCreate(farray=col, distgrid=distgridFL, &
                                  indexflag=ESMF_INDEX_DELOCAL, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=localrc)) return
+        ESMF_CONTEXT, rcToReturn=rc)) return
 
     arrayFIL2 = ESMF_ArrayCreate(farray=row, distgrid=distgridFL, &
                                  indexflag=ESMF_INDEX_DELOCAL, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=localrc)) return
+        ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! ==============================================================================
     ! Write arrays to file.
@@ -237,7 +237,7 @@ subroutine ESMF_OutputWeightFile (weightFile, factorList, factorIndexList, rc)
                          convention="netcdf", purpose="metadata", &
                          overwrite=.false., rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=localrc)) return
+        ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Set overwrite to true for consecutive writes. The file is created on the first
     ! write.
@@ -245,13 +245,13 @@ subroutine ESMF_OutputWeightFile (weightFile, factorList, factorIndexList, rc)
                          convention="netcdf", purpose="metadata", &
                          overwrite=.true., rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=localrc)) return
+        ESMF_CONTEXT, rcToReturn=rc)) return
 
     call ESMF_ArrayWrite(arrayFIL2, weightFile, variableName="row", &
                          convention="netcdf", purpose="metadata", &
                          overwrite=.true., rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=localrc)) return
+        ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! ==============================================================================
 
@@ -261,7 +261,7 @@ subroutine ESMF_OutputWeightFile (weightFile, factorList, factorIndexList, rc)
     call ESMF_ArrayDestroy(arrayFIL2, rc=localrc)
     call ESMF_DistGridDestroy(distgridFL, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=localrc)) return
+        ESMF_CONTEXT, rcToReturn=rc)) return
         
     rc = localrc
 
