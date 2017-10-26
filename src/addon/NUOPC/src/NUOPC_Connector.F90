@@ -1193,7 +1193,7 @@ print *, "current bondLevel=", bondLevel
     logical                         :: foundFlag
     character(ESMF_MAXSTR)          :: connectionString
     character(ESMF_MAXSTR)          :: name, valueString
-    character(ESMF_MAXSTR)          :: msgString
+    character(len=160)              :: msgString
     character(ESMF_MAXSTR)          :: iTransferOffer, eTransferOffer
     character(ESMF_MAXSTR)          :: iSharePolicy, eSharePolicy
     integer                         :: profiling
@@ -1810,7 +1810,7 @@ print *, "current bondLevel=", bondLevel
     logical                         :: foundFlag
     character(ESMF_MAXSTR)          :: connectionString
     character(ESMF_MAXSTR)          :: name, valueString
-    character(ESMF_MAXSTR)          :: msgString
+    character(len=160)              :: msgString
     character(ESMF_MAXSTR)          :: geomobjname, fieldName
     character(ESMF_MAXSTR)          :: iTransferAction, eTransferAction
     character(ESMF_MAXSTR)          :: iShareStatus, eShareStatus
@@ -2414,7 +2414,7 @@ call ESMF_LogWrite("eShareStatus: "//trim(eShareStatus), ESMF_LOGMSG_INFO, rc=rc
     logical                         :: foundFlag
     character(ESMF_MAXSTR)          :: connectionString
     character(ESMF_MAXSTR)          :: name, valueString
-    character(ESMF_MAXSTR)          :: msgString
+    character(len=160)              :: msgString
     character(ESMF_MAXSTR)          :: geomobjname
     character(ESMF_MAXSTR)          :: iTransferAction, eTransferAction
     integer                         :: verbosity
@@ -2949,7 +2949,8 @@ call ESMF_LogWrite("eShareStatus: "//trim(eShareStatus), ESMF_LOGMSG_INFO, rc=rc
     integer                         :: localrc
     logical                         :: existflag
     character(ESMF_MAXSTR)          :: connectionString
-    character(ESMF_MAXSTR)          :: name, valueString, msgString, iString
+    character(ESMF_MAXSTR)          :: name, valueString, iString
+    character(len=160)              :: msgString
     integer                         :: verbosity
     logical                         :: matchE, matchI
     integer                         :: count
@@ -3541,7 +3542,8 @@ call ESMF_LogWrite("eShareStatus: "//trim(eShareStatus), ESMF_LOGMSG_INFO, rc=rc
     integer                   :: localrc
     logical                   :: existflag
     integer                   :: rootPet, rootVas, vas, petCount
-    character(ESMF_MAXSTR)    :: compName, msgString, valueString, pLabel
+    character(ESMF_MAXSTR)    :: compName, valueString, pLabel
+    character(len=160)        :: msgString
     integer                   :: phase
     integer                   :: verbosity
     integer                   :: profiling
