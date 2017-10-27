@@ -238,8 +238,9 @@ RouteHandle *RouteHandle::create(
       // copy the contents of xxeStreami into a contiguous string
       string sendStreamiStr = xxeStreami->str();
       string::size_type sendStreamiSize = sendStreamiStr.size();
-      // delete xxeStreami
+      // delete xxeStreami since it is going to be replaced
       delete xxeStreami;
+      xxeStreami=NULL;  // make invalid streami identifiable
     
 #ifdef RH_CREATE_MEMLOG_on
   VM::logMemInfo(std::string(ESMC_METHOD": right after creating sendStreamiStr"));
@@ -322,27 +323,35 @@ cout << ESMC_METHOD": localPet=" << localPet << " receive from PET=" <<
           throw *rc;
         }
       }
-      delete recvCommH;
     
 #ifdef RH_CREATE_MEMLOG_on
   VM::logMemInfo(std::string(ESMC_METHOD": right after receiving recvMsg"));
 #endif
-
-      // recreate xxeStreami and fill with recvMsg
-      xxeStreami = new stringstream;
-      xxeStreami->str(string(recvMsg, recvStreamiSize));
-      // delete recvMsg
+      
+      if (iAmTarget){
+        // recreate xxeStreami and fill with recvMsg
+        xxeStreami = new stringstream;
+        xxeStreami->str(string(recvMsg, recvStreamiSize));
+      }
+      // collect garbage
+      delete recvCommH;
       delete [] recvMsg;
     }
     
     // construct a new XXE object from streamified form
     XXE *xxeNew;
-    if (petMapping)
-      xxeNew = new XXE(*xxeStreami, &originToTargetMap);
-    else
-      xxeNew = new XXE(*xxeStreami);
+    if (xxeStreami){
+      // a valid streami is present on this PET
+      if (petMapping)
+        xxeNew = new XXE(*xxeStreami, &originToTargetMap);
+      else
+        xxeNew = new XXE(*xxeStreami);
+    }else{
+      // a valid streami is NOT present on this PET
+      xxeNew = new XXE(vm, 0, 0, 0); // noop on this PET
+    }
     
-    // delete xxeStreami
+    // collect garbage
     delete xxeStreami;
     
     // store the new XXE object in RH
