@@ -8997,12 +8997,21 @@ int XXE::storeBufferInfo(
 //  Append an element at the end of the buffer info vector.
 //EOPI
 //-----------------------------------------------------------------------------
-  // initialize return code; assume routine not implemented
+ // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
   
   BufferInfo *bufferInfo = new BufferInfo(buffer, size, vectorLengthMultiplier);
+  
+  unsigned capacity = bufferInfoList.capacity();  // old capacity
+  
   bufferInfoList.push_back(bufferInfo);
+  
+  if (bufferInfoList.capacity() != capacity){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+      "bufferInfoList overflow!!!", ESMC_CONTEXT, &rc);
+    return rc;  // bail out
+  }
   
   // return successfully
   rc = ESMF_SUCCESS;
