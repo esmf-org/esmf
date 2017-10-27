@@ -246,8 +246,6 @@ RouteHandle *RouteHandle::create(
   VM::logMemInfo(std::string(ESMC_METHOD": right after creating sendStreamiStr"));
 #endif
 
-cout << ESMC_METHOD": size of xxeStreami=" << sendStreamiSize << "\n";
-  
       // exchange the streami between PETs
       int localPet = vm->getLocalPet();
       bool iAmOrigin = false;
@@ -288,10 +286,6 @@ cout << ESMC_METHOD": size of xxeStreami=" << sendStreamiSize << "\n";
         }
       }
     
-cout << ESMC_METHOD": localPet=" << localPet << " receive from PET=" <<
-  targetToOriginMap[localPet] << " size of xxeStreami=" << recvStreamiSize 
-  << "\n";
-
       // prepare to receive streami from origin
       char *recvMsg = new char[recvStreamiSize];
       if (iAmTarget){
