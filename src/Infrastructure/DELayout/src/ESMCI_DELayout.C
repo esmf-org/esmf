@@ -11,6 +11,7 @@
 //==============================================================================
 #define ESMC_FILENAME "ESMCI_DELayout.C"
 //==============================================================================
+#define XXE_CONSTRUCTOR_LOG_on
 #define XXE_STORAGEDELETE_LOG_on
 #define XXE_EXEC_LOG_off
 #define XXE_EXEC_MEMLOG_off
@@ -2658,9 +2659,11 @@ XXE::XXE(stringstream &streami, vector<int> *originToTargetMap,
         else
           newAddr = (*dataOldNewMap)[oldAddr];
         element->buffer = newAddr;
+#ifdef XXE_CONSTRUCTOR_LOG_on
         cout << "send/recv:"
           << " oldAddr: " << oldAddr
           << " newAddr: " << newAddr << "\n";
+#endif
         if (newAddr==NULL) cout << "ERROR in old->new translation!!\n";
       }
       break;
@@ -2671,9 +2674,11 @@ XXE::XXE(stringstream &streami, vector<int> *originToTargetMap,
         BuffInfo *element = (BuffInfo *)xxeElement;
         if (originToTargetMap){
           // shuffle PETs
+#ifdef XXE_CONSTRUCTOR_LOG_on
           cout << "originToTargetMap:"
             << " old PET: " << element->pet
             << " new PET: " << (*originToTargetMap)[element->pet] << "\n";
+#endif
           element->pet = (*originToTargetMap)[element->pet];
         }
       }
@@ -2688,9 +2693,11 @@ XXE::XXE(stringstream &streami, vector<int> *originToTargetMap,
         else
           newAddr = (*dataOldNewMap)[oldAddr];
         element->srcBuffer = newAddr;
+#ifdef XXE_CONSTRUCTOR_LOG_on
         cout << "sendrecv:"
           << " oldAddr: " << oldAddr
           << " newAddr: " << newAddr << "\n";
+#endif
         if (newAddr==NULL) cout << "ERROR in old->new translation!!\n";
         oldAddr = element->dstBuffer;
         newAddr = NULL;
@@ -2699,19 +2706,25 @@ XXE::XXE(stringstream &streami, vector<int> *originToTargetMap,
         else
           newAddr = (*dataOldNewMap)[oldAddr];
         element->dstBuffer = newAddr;
+#ifdef XXE_CONSTRUCTOR_LOG_on
         cout << "sendrecv:"
           << " oldAddr: " << oldAddr
           << " newAddr: " << newAddr << "\n";
+#endif
         if (newAddr==NULL) cout << "ERROR in old->new translation!!\n";
         if (originToTargetMap){
           // shuffle PETs
+#ifdef XXE_CONSTRUCTOR_LOG_on
           cout << "originToTargetMap:"
             << " old PET: " << element->srcPet
             << " new PET: " << (*originToTargetMap)[element->srcPet] << "\n";
+#endif
           element->srcPet = (*originToTargetMap)[element->srcPet];
+#ifdef XXE_CONSTRUCTOR_LOG_on
           cout << "originToTargetMap:"
             << " old PET: " << element->dstPet
             << " new PET: " << (*originToTargetMap)[element->dstPet] << "\n";
+#endif
           element->dstPet = (*originToTargetMap)[element->dstPet];
         }
       }
@@ -2726,12 +2739,15 @@ XXE::XXE(stringstream &streami, vector<int> *originToTargetMap,
         else
           newAddr = (*dataOldNewMap)[oldAddr];
         element->dstBuffer = newAddr;
+#ifdef XXE_CONSTRUCTOR_LOG_on
         cout << "sendRRArecv:"
           << " oldAddr: " << oldAddr
           << " newAddr: " << newAddr << "\n";
+#endif
         if (newAddr==NULL) cout << "ERROR in old->new translation!!\n";
         if (originToTargetMap){
           // shuffle PETs
+#ifdef XXE_CONSTRUCTOR_LOG_on
           cout << "originToTargetMap:"
             << " old PET: " << element->srcPet
             << " new PET: " << (*originToTargetMap)[element->srcPet] << "\n";
@@ -2739,6 +2755,7 @@ XXE::XXE(stringstream &streami, vector<int> *originToTargetMap,
           cout << "originToTargetMap:"
             << " old PET: " << element->dstPet
             << " new PET: " << (*originToTargetMap)[element->dstPet] << "\n";
+#endif
           element->dstPet = (*originToTargetMap)[element->dstPet];
         }
       }
@@ -2754,9 +2771,11 @@ XXE::XXE(stringstream &streami, vector<int> *originToTargetMap,
         else
           newAddr = (*dataOldNewMap)[oldAddr];
         element->buffer = newAddr;
+#ifdef XXE_CONSTRUCTOR_LOG_on
         cout << "sendnb/recvnb:"
           << " oldAddr: " << oldAddr
           << " newAddr: " << newAddr << "\n";
+#endif
         if (newAddr==NULL) cout << "ERROR in old->new translation!!\n";
       }
       // no break on purpose .... need to also swap commhandle as below
@@ -2766,16 +2785,20 @@ XXE::XXE(stringstream &streami, vector<int> *originToTargetMap,
         CommhandleInfo *commhandleInfo = (CommhandleInfo *)xxeElement;
         void *oldAddr = commhandleInfo->commhandle;
         void *newAddr = commhOldNewMap[oldAddr];
+#ifdef XXE_CONSTRUCTOR_LOG_on
         cout << "commhandle:"
           << " old Commhandle: " << oldAddr
           << " new Commhandle: " << newAddr << "\n";
+#endif
         commhandleInfo->commhandle = (VMK::commhandle **)newAddr;
         if (newAddr==NULL) cout << "ERROR in old->new translation!!\n";
         if (originToTargetMap){
           // shuffle PETs
+#ifdef XXE_CONSTRUCTOR_LOG_on
           cout << "originToTargetMap:"
             << " old PET: " << commhandleInfo->pet
             << " new PET: " << (*originToTargetMap)[commhandleInfo->pet] << "\n";
+#endif
           commhandleInfo->pet = (*originToTargetMap)[commhandleInfo->pet];
         }
       }
@@ -2786,23 +2809,29 @@ XXE::XXE(stringstream &streami, vector<int> *originToTargetMap,
           = (ProductSumVectorInfo *)xxeElement;
         void *oldAddr = element->element;
         void *newAddr = (*dataOldNewMap)[oldAddr];
+#ifdef XXE_CONSTRUCTOR_LOG_on
         cout << "ProductSumVector:"
           << " oldAddr: " << oldAddr
           << " newAddr: " << newAddr << "\n";
+#endif
         element->element = (void *)newAddr;
         if (newAddr==NULL) cout << "ERROR in old->new translation!!\n";
         oldAddr = element->factorList;
         newAddr = (*dataOldNewMap)[oldAddr];
+#ifdef XXE_CONSTRUCTOR_LOG_on
         cout << "ProductSumVector:"
           << " oldAddr: " << oldAddr
           << " newAddr: " << newAddr << "\n";
+#endif
         element->factorList = (void *)newAddr;
         if (newAddr==NULL) cout << "ERROR in old->new translation!!\n";
         oldAddr = element->valueList;
         newAddr = (*dataOldNewMap)[oldAddr];
+#ifdef XXE_CONSTRUCTOR_LOG_on
         cout << "ProductSumVector:"
           << " oldAddr: " << oldAddr
           << " newAddr: " << newAddr << "\n";
+#endif
         element->valueList = (void *)newAddr;
         if (newAddr==NULL) cout << "ERROR in old->new translation!!\n";
       }
@@ -2813,23 +2842,29 @@ XXE::XXE(stringstream &streami, vector<int> *originToTargetMap,
           = (ProductSumScalarInfo *)xxeElement;
         void *oldAddr = element->element;
         void *newAddr = (*dataOldNewMap)[oldAddr];
+#ifdef XXE_CONSTRUCTOR_LOG_on
         cout << "productSumScalar:"
           << " oldAddr: " << oldAddr
           << " newAddr: " << newAddr << "\n";
+#endif
         element->element = (void *)newAddr;
         if (newAddr==NULL) cout << "ERROR in old->new translation!!\n";
         oldAddr = element->factor;
         newAddr = (*dataOldNewMap)[oldAddr];
+#ifdef XXE_CONSTRUCTOR_LOG_on
         cout << "productSumScalar:"
           << " oldAddr: " << oldAddr
           << " newAddr: " << newAddr << "\n";
+#endif
         element->factor = (void *)newAddr;
         if (newAddr==NULL) cout << "ERROR in old->new translation!!\n";
         oldAddr = element->value;
         newAddr = (*dataOldNewMap)[oldAddr];
+#ifdef XXE_CONSTRUCTOR_LOG_on
         cout << "productSumScalar:"
           << " oldAddr: " << oldAddr
           << " newAddr: " << newAddr << "\n";
+#endif
         element->value = (void *)newAddr;
         if (newAddr==NULL) cout << "ERROR in old->new translation!!\n";
       }
@@ -2840,16 +2875,20 @@ XXE::XXE(stringstream &streami, vector<int> *originToTargetMap,
           = (ProductSumScalarRRAInfo *)xxeElement;
         void *oldAddr = element->factor;
         void *newAddr = (*dataOldNewMap)[oldAddr];
+#ifdef XXE_CONSTRUCTOR_LOG_on
         cout << "productSumScalarRRA:"
           << " oldAddr: " << oldAddr
           << " newAddr: " << newAddr << "\n";
+#endif
         element->factor = (void *)newAddr;
         if (newAddr==NULL) cout << "ERROR in old->new translation!!\n";
         oldAddr = element->value;
         newAddr = (*dataOldNewMap)[oldAddr];
+#ifdef XXE_CONSTRUCTOR_LOG_on
         cout << "productSumScalarRRA:"
           << " oldAddr: " << oldAddr
           << " newAddr: " << newAddr << "\n";
+#endif
         element->value = (void *)newAddr;
         if (newAddr==NULL) cout << "ERROR in old->new translation!!\n";
       }
@@ -2860,16 +2899,20 @@ XXE::XXE(stringstream &streami, vector<int> *originToTargetMap,
           = (SumSuperScalarDstRRAInfo *)xxeElement;
         void *oldAddr = element->rraOffsetList;
         void *newAddr = (*dataOldNewMap)[oldAddr];
+#ifdef XXE_CONSTRUCTOR_LOG_on
         cout << "SumSuperScalarDstRRA:"
           << " oldAddr: " << oldAddr
           << " newAddr: " << newAddr << "\n";
+#endif
         element->rraOffsetList = (int *)newAddr;
         if (newAddr==NULL) cout << "ERROR in old->new translation!!\n";
         oldAddr = element->valueOffsetList;
         newAddr = (*dataOldNewMap)[oldAddr];
+#ifdef XXE_CONSTRUCTOR_LOG_on
         cout << "SumSuperScalarDstRRA:"
           << " oldAddr: " << oldAddr
           << " newAddr: " << newAddr << "\n";
+#endif
         element->valueOffsetList = (int *)newAddr;
         if (newAddr==NULL) cout << "ERROR in old->new translation!!\n";
         oldAddr = element->valueBase;
@@ -2879,9 +2922,11 @@ XXE::XXE(stringstream &streami, vector<int> *originToTargetMap,
         else
           newAddr = (*dataOldNewMap)[oldAddr];
         element->valueBase = newAddr;
+#ifdef XXE_CONSTRUCTOR_LOG_on
         cout << "SumSuperScalarDstRRA:"
           << " oldAddr: " << oldAddr
           << " newAddr: " << newAddr << "\n";
+#endif
         if (newAddr==NULL) cout << "ERROR in old->new translation!!\n";
       }
       break;
@@ -2891,44 +2936,56 @@ XXE::XXE(stringstream &streami, vector<int> *originToTargetMap,
           = (SumSuperScalarListDstRRAInfo *)xxeElement;
         void *oldAddr = element->rraOffsetList;
         void *newAddr = (*dataOldNewMap)[oldAddr];
+#ifdef XXE_CONSTRUCTOR_LOG_on
         cout << "SumSuperScalarListDstRRA:"
           << " oldAddr: " << oldAddr
           << " newAddr: " << newAddr << "\n";
+#endif
         element->rraOffsetList = (int *)newAddr;
         if (newAddr==NULL) cout << "ERROR in old->new translation!!\n";
         oldAddr = element->valueBaseList;
         newAddr = (*dataOldNewMap)[oldAddr];
+#ifdef XXE_CONSTRUCTOR_LOG_on
         cout << "SumSuperScalarListDstRRA:"
           << " oldAddr: " << oldAddr
           << " newAddr: " << newAddr << "\n";
+#endif
         element->valueBaseList = (void **)newAddr;
         if (newAddr==NULL) cout << "ERROR in old->new translation!!\n";
         oldAddr = element->valueBaseListResolve;
         newAddr = (*dataOldNewMap)[oldAddr];
+#ifdef XXE_CONSTRUCTOR_LOG_on
         cout << "SumSuperScalarListDstRRA:"
           << " oldAddr: " << oldAddr
           << " newAddr: " << newAddr << "\n";
+#endif
         element->valueBaseListResolve = (void **)newAddr;
         if (newAddr==NULL) cout << "ERROR in old->new translation!!\n";
         oldAddr = element->rraIndexList;
         newAddr = (*dataOldNewMap)[oldAddr];
+#ifdef XXE_CONSTRUCTOR_LOG_on
         cout << "SumSuperScalarListDstRRA:"
           << " oldAddr: " << oldAddr
           << " newAddr: " << newAddr << "\n";
+#endif
         element->rraIndexList = (int *)newAddr;
         if (newAddr==NULL) cout << "ERROR in old->new translation!!\n";
         oldAddr = element->valueOffsetList;
         newAddr = (*dataOldNewMap)[oldAddr];
+#ifdef XXE_CONSTRUCTOR_LOG_on
         cout << "SumSuperScalarListDstRRA:"
           << " oldAddr: " << oldAddr
           << " newAddr: " << newAddr << "\n";
+#endif
         element->valueOffsetList = (int *)newAddr;
         if (newAddr==NULL) cout << "ERROR in old->new translation!!\n";
         oldAddr = element->baseListIndexList;
         newAddr = (*dataOldNewMap)[oldAddr];
+#ifdef XXE_CONSTRUCTOR_LOG_on
         cout << "SumSuperScalarListDstRRA:"
           << " oldAddr: " << oldAddr
           << " newAddr: " << newAddr << "\n";
+#endif
         element->baseListIndexList = (int *)newAddr;
         if (newAddr==NULL) cout << "ERROR in old->new translation!!\n";
         // replace the pointers old->new one level deep
@@ -2939,9 +2996,11 @@ XXE::XXE(stringstream &streami, vector<int> *originToTargetMap,
             newAddr = (*bufferOldNewMap)[oldAddr];
           else
             newAddr = (*dataOldNewMap)[oldAddr];
+#ifdef XXE_CONSTRUCTOR_LOG_on
           cout << "SumSuperScalarListDstRRA:"
             << " oldAddr: " << oldAddr
             << " newAddr: " << newAddr << "\n";
+#endif
           element->valueBaseList[i] = (void *)newAddr;
           if (newAddr==NULL) cout << "ERROR in old->new translation!!\n";
         }
@@ -2953,23 +3012,29 @@ XXE::XXE(stringstream &streami, vector<int> *originToTargetMap,
           = (ProductSumSuperScalarDstRRAInfo *)xxeElement;
         void *oldAddr = element->rraOffsetList;
         void *newAddr = (*dataOldNewMap)[oldAddr];
+#ifdef XXE_CONSTRUCTOR_LOG_on
         cout << "ProductSumSuperScalarDstRRA:"
           << " oldAddr: " << oldAddr
           << " newAddr: " << newAddr << "\n";
+#endif
         element->rraOffsetList = (int *)newAddr;
         if (newAddr==NULL) cout << "ERROR in old->new translation!!\n";
         oldAddr = element->factorList;
         newAddr = (*dataOldNewMap)[oldAddr];
+#ifdef XXE_CONSTRUCTOR_LOG_on
         cout << "ProductSumSuperScalarDstRRA:"
           << " oldAddr: " << oldAddr
           << " newAddr: " << newAddr << "\n";
+#endif
         element->factorList = (void *)newAddr;
         if (newAddr==NULL) cout << "ERROR in old->new translation!!\n";
         oldAddr = element->valueOffsetList;
         newAddr = (*dataOldNewMap)[oldAddr];
+#ifdef XXE_CONSTRUCTOR_LOG_on
         cout << "ProductSumSuperScalarDstRRA:"
           << " oldAddr: " << oldAddr
           << " newAddr: " << newAddr << "\n";
+#endif
         element->valueOffsetList = (int *)newAddr;
         if (newAddr==NULL) cout << "ERROR in old->new translation!!\n";
         oldAddr = element->valueBase;
@@ -2979,9 +3044,11 @@ XXE::XXE(stringstream &streami, vector<int> *originToTargetMap,
         else
           newAddr = (*dataOldNewMap)[oldAddr];
         element->valueBase = newAddr;
+#ifdef XXE_CONSTRUCTOR_LOG_on
         cout << "ProductSumSuperScalarDstRRA:"
           << " oldAddr: " << oldAddr
           << " newAddr: " << newAddr << "\n";
+#endif
         if (newAddr==NULL) cout << "ERROR in old->new translation!!\n";
       }
       break;
@@ -2991,51 +3058,65 @@ XXE::XXE(stringstream &streami, vector<int> *originToTargetMap,
           = (ProductSumSuperScalarListDstRRAInfo *)xxeElement;
         void *oldAddr = element->rraOffsetList;
         void *newAddr = (*dataOldNewMap)[oldAddr];
+#ifdef XXE_CONSTRUCTOR_LOG_on
         cout << "ProductSumSuperScalarListDstRRA:"
           << " oldAddr: " << oldAddr
           << " newAddr: " << newAddr << "\n";
+#endif
         element->rraOffsetList = (int *)newAddr;
         if (newAddr==NULL) cout << "ERROR in old->new translation!!\n";
         oldAddr = element->factorList;
         newAddr = (*dataOldNewMap)[oldAddr];
+#ifdef XXE_CONSTRUCTOR_LOG_on
         cout << "ProductSumSuperScalarListDstRRA:"
           << " oldAddr: " << oldAddr
           << " newAddr: " << newAddr << "\n";
+#endif
         element->factorList = (void *)newAddr;
         if (newAddr==NULL) cout << "ERROR in old->new translation!!\n";
         oldAddr = element->valueBaseList;
         newAddr = (*dataOldNewMap)[oldAddr];
+#ifdef XXE_CONSTRUCTOR_LOG_on
         cout << "ProductSumSuperScalarListDstRRA:"
           << " oldAddr: " << oldAddr
           << " newAddr: " << newAddr << "\n";
+#endif
         element->valueBaseList = (void **)newAddr;
         if (newAddr==NULL) cout << "ERROR in old->new translation!!\n";
         oldAddr = element->valueBaseListResolve;
         newAddr = (*dataOldNewMap)[oldAddr];
+#ifdef XXE_CONSTRUCTOR_LOG_on
         cout << "ProductSumSuperScalarListDstRRA:"
           << " oldAddr: " << oldAddr
           << " newAddr: " << newAddr << "\n";
+#endif
         element->valueBaseListResolve = (void **)newAddr;
         if (newAddr==NULL) cout << "ERROR in old->new translation!!\n";
         oldAddr = element->rraIndexList;
         newAddr = (*dataOldNewMap)[oldAddr];
+#ifdef XXE_CONSTRUCTOR_LOG_on
         cout << "ProductSumSuperScalarListDstRRA:"
           << " oldAddr: " << oldAddr
           << " newAddr: " << newAddr << "\n";
+#endif
         element->rraIndexList = (int *)newAddr;
         if (newAddr==NULL) cout << "ERROR in old->new translation!!\n";
         oldAddr = element->valueOffsetList;
         newAddr = (*dataOldNewMap)[oldAddr];
+#ifdef XXE_CONSTRUCTOR_LOG_on
         cout << "ProductSumSuperScalarListDstRRA:"
           << " oldAddr: " << oldAddr
           << " newAddr: " << newAddr << "\n";
+#endif
         element->valueOffsetList = (int *)newAddr;
         if (newAddr==NULL) cout << "ERROR in old->new translation!!\n";
         oldAddr = element->baseListIndexList;
         newAddr = (*dataOldNewMap)[oldAddr];
+#ifdef XXE_CONSTRUCTOR_LOG_on
         cout << "ProductSumSuperScalarListDstRRA:"
           << " oldAddr: " << oldAddr
           << " newAddr: " << newAddr << "\n";
+#endif
         element->baseListIndexList = (int *)newAddr;
         if (newAddr==NULL) cout << "ERROR in old->new translation!!\n";
         // replace the pointers old->new one level deep
@@ -3046,9 +3127,11 @@ XXE::XXE(stringstream &streami, vector<int> *originToTargetMap,
             newAddr = (*bufferOldNewMap)[oldAddr];
           else
             newAddr = (*dataOldNewMap)[oldAddr];
+#ifdef XXE_CONSTRUCTOR_LOG_on
           cout << "ProductSumSuperScalarListDstRRA:"
             << " oldAddr: " << oldAddr
             << " newAddr: " << newAddr << "\n";
+#endif
           element->valueBaseList[i] = (void *)newAddr;
           if (newAddr==NULL) cout << "ERROR in old->new translation!!\n";
         }
@@ -3060,23 +3143,29 @@ XXE::XXE(stringstream &streami, vector<int> *originToTargetMap,
           = (ProductSumSuperScalarSrcRRAInfo *)xxeElement;
         void *oldAddr = element->rraOffsetList;
         void *newAddr = (*dataOldNewMap)[oldAddr];
+#ifdef XXE_CONSTRUCTOR_LOG_on
         cout << "ProductSumSuperScalarSrcRRA:"
           << " oldAddr: " << oldAddr
           << " newAddr: " << newAddr << "\n";
+#endif
         element->rraOffsetList = (int *)newAddr;
         if (newAddr==NULL) cout << "ERROR in old->new translation!!\n";
         oldAddr = element->factorList;
         newAddr = (*dataOldNewMap)[oldAddr];
+#ifdef XXE_CONSTRUCTOR_LOG_on
         cout << "ProductSumSuperScalarSrcRRA:"
           << " oldAddr: " << oldAddr
           << " newAddr: " << newAddr << "\n";
+#endif
         element->factorList = (void *)newAddr;
         if (newAddr==NULL) cout << "ERROR in old->new translation!!\n";
         oldAddr = element->elementOffsetList;
         newAddr = (*dataOldNewMap)[oldAddr];
+#ifdef XXE_CONSTRUCTOR_LOG_on
         cout << "ProductSumSuperScalarSrcRRA:"
           << " oldAddr: " << oldAddr
           << " newAddr: " << newAddr << "\n";
+#endif
         element->elementOffsetList = (int *)newAddr;
         if (newAddr==NULL) cout << "ERROR in old->new translation!!\n";
         oldAddr = element->elementBase;
@@ -3086,9 +3175,11 @@ XXE::XXE(stringstream &streami, vector<int> *originToTargetMap,
         else
           newAddr = (*dataOldNewMap)[oldAddr];
         element->elementBase = newAddr;
+#ifdef XXE_CONSTRUCTOR_LOG_on
         cout << "ProductSumSuperScalarSrcRRA:"
           << " oldAddr: " << oldAddr
           << " newAddr: " << newAddr << "\n";
+#endif
         if (newAddr==NULL) cout << "ERROR in old->new translation!!\n";
       }
       break;
@@ -3098,16 +3189,20 @@ XXE::XXE(stringstream &streami, vector<int> *originToTargetMap,
           = (ProductSumSuperScalarContigRRAInfo *)xxeElement;
         void *oldAddr = element->rraOffsetList;
         void *newAddr = (*dataOldNewMap)[oldAddr];
+#ifdef XXE_CONSTRUCTOR_LOG_on
         cout << "ProductSumSuperScalarContigRRA:"
           << " oldAddr: " << oldAddr
           << " newAddr: " << newAddr << "\n";
+#endif
         element->rraOffsetList = (int *)newAddr;
         if (newAddr==NULL) cout << "ERROR in old->new translation!!\n";
         oldAddr = element->factorList;
         newAddr = (*dataOldNewMap)[oldAddr];
+#ifdef XXE_CONSTRUCTOR_LOG_on
         cout << "ProductSumSuperScalarContigRRA:"
           << " oldAddr: " << oldAddr
           << " newAddr: " << newAddr << "\n";
+#endif
         element->factorList = (void *)newAddr;
         if (newAddr==NULL) cout << "ERROR in old->new translation!!\n";
         oldAddr = element->valueList;
@@ -3117,9 +3212,11 @@ XXE::XXE(stringstream &streami, vector<int> *originToTargetMap,
         else
           newAddr = (*dataOldNewMap)[oldAddr];
         element->valueList = newAddr;
+#ifdef XXE_CONSTRUCTOR_LOG_on
         cout << "ProductSumSuperScalarContigRRA:"
           << " oldAddr: " << oldAddr
           << " newAddr: " << newAddr << "\n";
+#endif
         if (newAddr==NULL) cout << "ERROR in old->new translation!!\n";
       }
       break;
@@ -3129,9 +3226,11 @@ XXE::XXE(stringstream &streami, vector<int> *originToTargetMap,
           = (ZeroSuperScalarRRAInfo *)xxeElement;
         void *oldAddr = element->rraOffsetList;
         void *newAddr = (*dataOldNewMap)[oldAddr];
+#ifdef XXE_CONSTRUCTOR_LOG_on
         cout << "ZeroSuperScalarRRA:"
           << " oldAddr: " << oldAddr
           << " newAddr: " << newAddr << "\n";
+#endif
         element->rraOffsetList = (int *)newAddr;
         if (newAddr==NULL) cout << "ERROR in old->new translation!!\n";
       }
@@ -3146,9 +3245,11 @@ XXE::XXE(stringstream &streami, vector<int> *originToTargetMap,
         else
           newAddr = (*dataOldNewMap)[oldAddr];
         element->buffer = newAddr;
+#ifdef XXE_CONSTRUCTOR_LOG_on
         cout << "ZeroMemset:"
           << " oldAddr: " << oldAddr
           << " newAddr: " << newAddr << "\n";
+#endif
         if (newAddr==NULL) cout << "ERROR in old->new translation!!\n";
       }
       break;
@@ -3158,16 +3259,20 @@ XXE::XXE(stringstream &streami, vector<int> *originToTargetMap,
           = (MemCpyInfo *)xxeElement;
         void *oldAddr = element->dstMem;
         void *newAddr = (*dataOldNewMap)[oldAddr];
+#ifdef XXE_CONSTRUCTOR_LOG_on
         cout << "MemCpy:"
           << " oldAddr: " << oldAddr
           << " newAddr: " << newAddr << "\n";
+#endif
         element->dstMem = (void *)newAddr;
         if (newAddr==NULL) cout << "ERROR in old->new translation!!\n";
         oldAddr = element->srcMem;
         newAddr = (*dataOldNewMap)[oldAddr];
+#ifdef XXE_CONSTRUCTOR_LOG_on
         cout << "MemCpy:"
           << " oldAddr: " << oldAddr
           << " newAddr: " << newAddr << "\n";
+#endif
         element->srcMem = (void *)newAddr;
         if (newAddr==NULL) cout << "ERROR in old->new translation!!\n";
       }
@@ -3178,9 +3283,11 @@ XXE::XXE(stringstream &streami, vector<int> *originToTargetMap,
           = (MemCpySrcRRAInfo *)xxeElement;
         void *oldAddr = element->dstMem;
         void *newAddr = (*dataOldNewMap)[oldAddr];
+#ifdef XXE_CONSTRUCTOR_LOG_on
         cout << "MemCpySrcRRA:"
           << " oldAddr: " << oldAddr
           << " newAddr: " << newAddr << "\n";
+#endif
         element->dstMem = (void *)newAddr;
         if (newAddr==NULL) cout << "ERROR in old->new translation!!\n";
       }
@@ -3195,23 +3302,29 @@ XXE::XXE(stringstream &streami, vector<int> *originToTargetMap,
           newAddr = (*bufferOldNewMap)[oldAddr];
         else
           newAddr = (*dataOldNewMap)[oldAddr];
+#ifdef XXE_CONSTRUCTOR_LOG_on
         cout << "MemGatherSrcRRA:"
           << " oldAddr: " << oldAddr
           << " newAddr: " << newAddr << "\n";
+#endif
         element->dstBase = (void *)newAddr;
         if (newAddr==NULL) cout << "ERROR in old->new translation!!\n";
         oldAddr = element->rraOffsetList;
         newAddr = (*dataOldNewMap)[oldAddr];
+#ifdef XXE_CONSTRUCTOR_LOG_on
         cout << "MemGatherSrcRRA:"
           << " oldAddr: " << oldAddr
           << " newAddr: " << newAddr << "\n";
+#endif
         element->rraOffsetList = (int *)newAddr;
         if (newAddr==NULL) cout << "ERROR in old->new translation!!\n";
         oldAddr = element->countList;
         newAddr = (*dataOldNewMap)[oldAddr];
+#ifdef XXE_CONSTRUCTOR_LOG_on
         cout << "MemGatherSrcRRA:"
           << " oldAddr: " << oldAddr
           << " newAddr: " << newAddr << "\n";
+#endif
         element->countList = (int *)newAddr;
         if (newAddr==NULL) cout << "ERROR in old->new translation!!\n";
       }
@@ -3223,9 +3336,11 @@ XXE::XXE(stringstream &streami, vector<int> *originToTargetMap,
         SingleSubInfo *singleSubInfo = (SingleSubInfo *)xxeElement;
         void *oldAddr = singleSubInfo->xxe;
         void *newAddr = xxeSubOldNewMap[oldAddr];
+#ifdef XXE_CONSTRUCTOR_LOG_on
         cout << "singleSub:"
           << " old Sub: " << oldAddr
           << " new Sub: " << newAddr << "\n";
+#endif
         singleSubInfo->xxe = (XXE *)newAddr;
         if (newAddr==NULL) cout << "ERROR in old->new translation!!\n";
       }
@@ -3235,16 +3350,20 @@ XXE::XXE(stringstream &streami, vector<int> *originToTargetMap,
         WaitOnAnyIndexSubInfo *element = (WaitOnAnyIndexSubInfo *)xxeElement;
         void *oldAddr = element->index;
         void *newAddr = (*dataOldNewMap)[oldAddr];
+#ifdef XXE_CONSTRUCTOR_LOG_on
         cout << "waitOnAnyIndexSub:"
           << " oldAddr: " << oldAddr
           << " newAddr: " << newAddr << "\n";
+#endif
         element->index = (int *)newAddr;
         if (newAddr==NULL) cout << "ERROR in old->new translation!!\n";
         oldAddr = element->completeFlag;
         newAddr = (*dataOldNewMap)[oldAddr];
+#ifdef XXE_CONSTRUCTOR_LOG_on
         cout << "waitOnAnyIndexSub:"
           << " oldAddr: " << oldAddr
           << " newAddr: " << newAddr << "\n";
+#endif
         element->completeFlag = (int *)newAddr;
         if (newAddr==NULL) cout << "ERROR in old->new translation!!\n";
       }
@@ -3254,18 +3373,22 @@ XXE::XXE(stringstream &streami, vector<int> *originToTargetMap,
         MultiSubInfo *multiSubInfo = (MultiSubInfo *)xxeElement;
         void *oldAddr = multiSubInfo->xxe;
         void *newAddr = (*dataOldNewMap)[oldAddr];
+#ifdef XXE_CONSTRUCTOR_LOG_on
         cout << "multiSub:"
           << " old Sub: " << oldAddr
           << " new Sub: " << newAddr << "\n";
+#endif
         multiSubInfo->xxe = (XXE **)newAddr;
         if (newAddr==NULL) cout << "ERROR in old->new translation!!\n";
         for (int i=0; i<multiSubInfo->count; i++){
           oldAddr = multiSubInfo->xxe[i];
           newAddr = xxeSubOldNewMap[oldAddr];
+#ifdef XXE_CONSTRUCTOR_LOG_on
           cout << "multiSub:"
             << " count: " << multiSubInfo->count
             << " old Sub[i]: " << oldAddr
             << " new Sub[i]: " << newAddr << "\n";
+#endif
           multiSubInfo->xxe[i] = (XXE *)newAddr;
           if (newAddr==NULL) cout << "ERROR in old->new translation!!\n";
         }
@@ -3276,23 +3399,29 @@ XXE::XXE(stringstream &streami, vector<int> *originToTargetMap,
         WtimerInfo *element = (WtimerInfo *)xxeElement;
         void *oldAddr = element->timerString;
         void *newAddr = (*dataOldNewMap)[oldAddr];
+#ifdef XXE_CONSTRUCTOR_LOG_on
         cout << "wtimer:"
           << " oldAddr: " << oldAddr
           << " newAddr: " << newAddr << "\n";
+#endif
         element->timerString = (char *)newAddr;
         if (newAddr==NULL) cout << "ERROR in old->new translation!!\n";
         oldAddr = element->relativeWtime;
         newAddr = (*dataOldNewMap)[oldAddr];
+#ifdef XXE_CONSTRUCTOR_LOG_on
         cout << "wtimer:"
           << " oldAddr: " << oldAddr
           << " newAddr: " << newAddr << "\n";
+#endif
         element->relativeWtime = (double *)newAddr;
         if (newAddr==NULL) cout << "ERROR in old->new translation!!\n";
         oldAddr = element->relativeWtimerXXE;
         newAddr = xxeSubOldNewMap[oldAddr];
+#ifdef XXE_CONSTRUCTOR_LOG_on
         cout << "wtimer:"
           << " old Sub: " << oldAddr
           << " new Sub: " << newAddr << "\n";
+#endif
         element->relativeWtimerXXE = (XXE *)newAddr;
         if (newAddr==NULL) cout << "ERROR in old->new translation!!\n";
       }
@@ -3303,9 +3432,11 @@ XXE::XXE(stringstream &streami, vector<int> *originToTargetMap,
         MessageInfo *element = (MessageInfo *)xxeElement;
         void *oldAddr = element->messageString;
         void *newAddr = (*dataOldNewMap)[oldAddr];
+#ifdef XXE_CONSTRUCTOR_LOG_on
         cout << "Message:"
           << " oldAddr: " << oldAddr
           << " newAddr: " << newAddr << "\n";
+#endif
         element->messageString = (char *)newAddr;
         if (newAddr==NULL) cout << "ERROR in old->new translation!!\n";
       }
