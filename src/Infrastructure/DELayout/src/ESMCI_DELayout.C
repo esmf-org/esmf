@@ -11,8 +11,8 @@
 //==============================================================================
 #define ESMC_FILENAME "ESMCI_DELayout.C"
 //==============================================================================
-#define XXE_CONSTRUCTOR_LOG_on
-#define XXE_STORAGEDELETE_LOG_on
+#define XXE_CONSTRUCTOR_LOG_off
+#define XXE_STORAGEDELETE_LOG_off
 #define XXE_EXEC_LOG_off
 #define XXE_EXEC_MEMLOG_off
 #define XXE_EXEC_BUFFLOG_off

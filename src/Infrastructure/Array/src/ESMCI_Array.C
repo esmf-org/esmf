@@ -15,7 +15,7 @@
 
 #define ASMM_STORE_LOG_off
 #define ASMM_STORE_TIMING_off
-#define ASMM_STORE_MEMLOG_on
+#define ASMM_STORE_MEMLOG_off
 #define ASMM_STORE_COMMMATRIX_on
 #define ASMM_STORE_OPT_PRINT_off
 #define ASMM_STORE_DUMPSMM_on
@@ -13196,7 +13196,6 @@ int Array::sparseMatMulRelease(
 #endif
 #endif
   
-#define DEBUGGING
 #ifdef DEBUGGING
     {
       std::stringstream debugmsg;
@@ -13204,7 +13203,6 @@ int Array::sparseMatMulRelease(
       ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_INFO);
     }
 #endif
-#undef DEBUGGING
     
     // delete xxe
     delete xxe;
