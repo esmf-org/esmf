@@ -375,6 +375,7 @@ class XXE{
       superVectorOkay = true;
     }
     XXE(std::stringstream &streami,
+      std::vector<int> *originToTargetMap=NULL,
       std::map<void *, void *> *bufferOldNewMap=NULL,
       std::map<void *, void *> *dataOldNewMap=NULL);
     ~XXE();      // destructor
@@ -523,11 +524,11 @@ class XXE{
       int predicateBitField;
       bool activeFlag;
       bool cancelledFlag;
+      int dstPet;
       bool vectorFlag;
       bool indirectionFlag;
       void *buffer;
       int size;
-      int dstPet;
       int tag;
     }SendInfo;
 
@@ -536,11 +537,11 @@ class XXE{
       int predicateBitField;
       bool activeFlag;
       bool cancelledFlag;
+      int srcPet;
       bool vectorFlag;
       bool indirectionFlag;
       void *buffer;
       int size;
-      int srcPet;
       int tag;
     }RecvInfo;
 
@@ -549,10 +550,10 @@ class XXE{
       int predicateBitField;
       bool activeFlag;
       bool cancelledFlag;
+      int dstPet;
       bool vectorFlag;
       int rraOffset;
       int size;
-      int dstPet;
       int rraIndex;
       int tag;
     }SendRRAInfo;
@@ -562,10 +563,10 @@ class XXE{
       int predicateBitField;
       bool activeFlag;
       bool cancelledFlag;
+      int srcPet;
       bool vectorFlag;
       int rraOffset;
       int size;
-      int srcPet;
       int rraIndex;
       int tag;
     }RecvRRAInfo;
@@ -575,6 +576,8 @@ class XXE{
       int predicateBitField;
       bool activeFlag;
       bool cancelledFlag;
+      int srcPet;
+      int dstPet;
       bool vectorFlag;
       bool srcIndirectionFlag;
       bool dstIndirectionFlag;
@@ -582,8 +585,6 @@ class XXE{
       void *dstBuffer;
       int srcSize;
       int dstSize;
-      int srcPet;
-      int dstPet;
       int srcTag;
       int dstTag;
     }SendRecvInfo;
@@ -593,14 +594,14 @@ class XXE{
       int predicateBitField;
       bool activeFlag;
       bool cancelledFlag;
+      int srcPet;
+      int dstPet;
       bool vectorFlag;
       bool dstIndirectionFlag;
       int rraOffset;
       void *dstBuffer;
       int srcSize;
       int dstSize;
-      int srcPet;
-      int dstPet;
       int rraIndex;
       int srcTag;
       int dstTag;
@@ -612,11 +613,11 @@ class XXE{
       VMK::commhandle **commhandle;
       bool activeFlag;
       bool cancelledFlag;
+      int dstPet;
       bool vectorFlag;
       bool indirectionFlag;
       void *buffer;
       int size;
-      int dstPet;
       int tag;
     }SendnbInfo;
 
@@ -626,11 +627,11 @@ class XXE{
       VMK::commhandle **commhandle;
       bool activeFlag;
       bool cancelledFlag;
+      int srcPet;
       bool vectorFlag;
       bool indirectionFlag;
       void *buffer;
       int size;
-      int srcPet;
       int tag;
     }RecvnbInfo;
 
@@ -640,10 +641,10 @@ class XXE{
       VMK::commhandle **commhandle;
       bool activeFlag;
       bool cancelledFlag;
+      int dstPet;
       bool vectorFlag;
       int rraOffset;
       int size;
-      int dstPet;
       int rraIndex;
       int tag;
     }SendnbRRAInfo;
@@ -654,10 +655,10 @@ class XXE{
       VMK::commhandle **commhandle;
       bool activeFlag;
       bool cancelledFlag;
+      int srcPet;
       bool vectorFlag;
       int rraOffset;
       int size;
-      int srcPet;
       int rraIndex;
       int tag;
     }RecvnbRRAInfo;
@@ -968,6 +969,7 @@ class XXE{
       VMK::commhandle **commhandle;
       bool activeFlag;
       bool cancelledFlag;
+      int pet;
     }CommhandleInfo;
     
     typedef struct{
@@ -975,6 +977,7 @@ class XXE{
       int predicateBitField;
       bool activeFlag;
       bool cancelledFlag;
+      int pet;
       bool vectorFlag;
       bool indirectionFlag;
       void *buffer;
@@ -987,6 +990,7 @@ class XXE{
       VMK::commhandle **commhandle;
       bool activeFlag;
       bool cancelledFlag;
+      int pet;
       bool vectorFlag;
       bool indirectionFlag;
       void *buffer;

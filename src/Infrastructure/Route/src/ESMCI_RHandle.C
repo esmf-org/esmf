@@ -232,6 +232,8 @@ RouteHandle *RouteHandle::create(
 #endif
   
     if (petMapping){
+      
+      // Need to do the streami shuffle from origin -> target PETs
   
       // copy the contents of xxeStreami into a contiguous string
       string sendStreamiStr = xxeStreami->str();
@@ -332,9 +334,13 @@ cout << ESMC_METHOD": localPet=" << localPet << " receive from PET=" <<
       // delete recvMsg
       delete [] recvMsg;
     }
-
+    
     // construct a new XXE object from streamified form
-    XXE *xxeNew = new XXE(*xxeStreami);
+    XXE *xxeNew;
+    if (petMapping)
+      xxeNew = new XXE(*xxeStreami, &originToTargetMap);
+    else
+      xxeNew = new XXE(*xxeStreami);
     
     // delete xxeStreami
     delete xxeStreami;

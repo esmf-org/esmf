@@ -2473,7 +2473,8 @@ template<typename T> void readin(stringstream &streami, T *value){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::XXE::XXE()"
 // constructor
-XXE::XXE(stringstream &streami, map<void *, void *> *bufferOldNewMap, 
+XXE::XXE(stringstream &streami, vector<int> *originToTargetMap,
+  map<void *, void *> *bufferOldNewMap,
   map<void *, void *> *dataOldNewMap){
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
@@ -2626,7 +2627,8 @@ XXE::XXE(stringstream &streami, map<void *, void *> *bufferOldNewMap,
     streampos currPos = streami.tellg();
     // recursive constructor call into XXE()
     streami.seekg(pos); // position streami for this sub
-    xxeSubList[i] = new XXE(streami, bufferOldNewMap, dataOldNewMap);
+    xxeSubList[i] = new XXE(streami, originToTargetMap,
+      bufferOldNewMap, dataOldNewMap);
     // track association between old->new xxeSubList element
     xxeSubOldNewMap[oldAddr] = xxeSubList[i];
     // reposition streami for next iteration
@@ -2637,16 +2639,8 @@ XXE::XXE(stringstream &streami, map<void *, void *> *bufferOldNewMap,
   streami.seekg(positionOpstream);
   max = count;        // know exactly how many elements there are
   opstream = new StreamElement[count];
-  streami.read((char*)opstream, count*sizeof(StreamElement));  // read opstream
-  
-  //TODO:
-  // this works right now because the old opstream is actually still referencing
-  // a bunch of oldAddrs, but we are in the same address space, and the old RH
-  // still exists!
-  //  Most addresses are translated now. Only second level deep factorList
-  //  members are trouble because there is not translation available for pointers
-  ///////////////////////////////////////////////////////////////////////
-  
+  // read the full opstream
+  streami.read((char*)opstream, count*sizeof(StreamElement));
   
   // translate old->new addresses in the entire opstream
   for (int index=0; index<count; index++){
@@ -2668,6 +2662,20 @@ XXE::XXE(stringstream &streami, map<void *, void *> *bufferOldNewMap,
           << " oldAddr: " << oldAddr
           << " newAddr: " << newAddr << "\n";
         if (newAddr==NULL) cout << "ERROR in old->new translation!!\n";
+      }
+      break;
+      // no break on purpose .... need to also shuffle PETs
+    case sendRRA:
+    case recvRRA:
+      {
+        BuffInfo *element = (BuffInfo *)xxeElement;
+        if (originToTargetMap){
+          // shuffle PETs
+          cout << "originToTargetMap:"
+            << " old PET: " << element->pet
+            << " new PET: " << (*originToTargetMap)[element->pet] << "\n";
+          element->pet = (*originToTargetMap)[element->pet];
+        }
       }
       break;
     case sendrecv:
@@ -2695,6 +2703,17 @@ XXE::XXE(stringstream &streami, map<void *, void *> *bufferOldNewMap,
           << " oldAddr: " << oldAddr
           << " newAddr: " << newAddr << "\n";
         if (newAddr==NULL) cout << "ERROR in old->new translation!!\n";
+        if (originToTargetMap){
+          // shuffle PETs
+          cout << "originToTargetMap:"
+            << " old PET: " << element->srcPet
+            << " new PET: " << (*originToTargetMap)[element->srcPet] << "\n";
+          element->srcPet = (*originToTargetMap)[element->srcPet];
+          cout << "originToTargetMap:"
+            << " old PET: " << element->dstPet
+            << " new PET: " << (*originToTargetMap)[element->dstPet] << "\n";
+          element->dstPet = (*originToTargetMap)[element->dstPet];
+        }
       }
       break;
     case sendRRArecv:
@@ -2711,6 +2730,17 @@ XXE::XXE(stringstream &streami, map<void *, void *> *bufferOldNewMap,
           << " oldAddr: " << oldAddr
           << " newAddr: " << newAddr << "\n";
         if (newAddr==NULL) cout << "ERROR in old->new translation!!\n";
+        if (originToTargetMap){
+          // shuffle PETs
+          cout << "originToTargetMap:"
+            << " old PET: " << element->srcPet
+            << " new PET: " << (*originToTargetMap)[element->srcPet] << "\n";
+          element->srcPet = (*originToTargetMap)[element->srcPet];
+          cout << "originToTargetMap:"
+            << " old PET: " << element->dstPet
+            << " new PET: " << (*originToTargetMap)[element->dstPet] << "\n";
+          element->dstPet = (*originToTargetMap)[element->dstPet];
+        }
       }
       break;
     case sendnb:
@@ -2741,6 +2771,13 @@ XXE::XXE(stringstream &streami, map<void *, void *> *bufferOldNewMap,
           << " new Commhandle: " << newAddr << "\n";
         commhandleInfo->commhandle = (VMK::commhandle **)newAddr;
         if (newAddr==NULL) cout << "ERROR in old->new translation!!\n";
+        if (originToTargetMap){
+          // shuffle PETs
+          cout << "originToTargetMap:"
+            << " old PET: " << commhandleInfo->pet
+            << " new PET: " << (*originToTargetMap)[commhandleInfo->pet] << "\n";
+          commhandleInfo->pet = (*originToTargetMap)[commhandleInfo->pet];
+        }
       }
       break;
     case productSumVector:
