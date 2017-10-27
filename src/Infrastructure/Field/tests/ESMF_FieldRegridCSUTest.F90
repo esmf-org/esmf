@@ -1807,6 +1807,7 @@ contains
         ! Compute total integral
         ! NOTE: DO need to include dstFrac here, because the frac has been included in the weights 
         dstIntegral = dstIntegral + dstFracptr(i1,i2)*dstAreaptr(i1,i2)*farrayPtr(i1,i2)
+       ! dstIntegral = dstIntegral + dstAreaptr(i1,i2)
 
         ! Compute relative error
         if (xfarrayPtr(i1,i2) .ne. 0.0) then
@@ -1859,6 +1860,7 @@ contains
      do i1=clbnd(1),cubnd(1)
      do i2=clbnd(2),cubnd(2)
         srcIntegral = srcIntegral + srcFracptr(i1,i2)*srcAreaptr(i1,i2)*farrayPtr(i1,i2)
+   !     srcIntegral = srcIntegral + srcAreaptr(i1,i2)
      enddo
      enddo
   enddo    ! lDE

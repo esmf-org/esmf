@@ -23,6 +23,7 @@
 #include <Mesh/include/ESMCI_MeshObj.h>
 #include <Mesh/include/ESMCI_MeshUtils.h>
 #include <Mesh/include/ESMCI_ConserveInterp.h>
+#include <Mesh/include/ESMCI_Conserve2ndInterp.h>
 #include <Mesh/include/ESMCI_Sintdnode.h>
 #include <Mesh/include/ESMCI_XGridUtil.h>
 #include "PointList/include/ESMCI_PointList.h"
@@ -280,7 +281,7 @@ void patch_serial_transfer(MEField<> &src_coord_field, UInt _nfields, MEField<>*
    UInt nrhs = 0;
   
   for (UInt i = 0; i < _nfields; i++) {
-  
+   
     // Only process interp_patch  
     if (imethod != Interp::INTERP_PATCH) continue;
    
@@ -308,7 +309,7 @@ void patch_serial_transfer(MEField<> &src_coord_field, UInt _nfields, MEField<>*
 //std::cout << "Transfer: elem:" << elem.get_id() << std::endl;
 
     {
-      std::set<int>::iterator pi = pdeg_set.begin(), pe = pdeg_set.end();
+       std::set<int>::iterator pi = pdeg_set.begin(), pe = pdeg_set.end();
       
       for (; pi != pe; ++pi) {
         
@@ -337,7 +338,7 @@ void patch_serial_transfer(MEField<> &src_coord_field, UInt _nfields, MEField<>*
     
       for (UInt pd = 0; pd < pdim; pd++) {
     
-        pc[np*pdim+pd] = sres.nodes[np].pcoord[pd];
+         pc[np*pdim+pd] = sres.nodes[np].pcoord[pd];
     
       }
     
@@ -345,7 +346,7 @@ void patch_serial_transfer(MEField<> &src_coord_field, UInt _nfields, MEField<>*
 
     std::map<int, std::vector<double> > result;
     
-    {
+     {
       std::set<int>::iterator pi = pdeg_set.begin(), pe = pdeg_set.end();
       
       for (; pi != pe; ++pi) {
@@ -366,13 +367,13 @@ void patch_serial_transfer(MEField<> &src_coord_field, UInt _nfields, MEField<>*
     }
     
     std::vector<std::vector<double>* > field_results;
-    
+     
     for (UInt i = 0; i < dfields.size(); i++)
       field_results.push_back(&result[orders[i]]);
     
     // Now copy data into fields
     for (UInt np = 0; np < npts; np++) {
-    
+     
       const MeshObj &snode = *sres.nodes[np].node;
       UInt cur_field = 0;
     
@@ -395,12 +396,12 @@ void patch_serial_transfer(MEField<> &src_coord_field, UInt _nfields, MEField<>*
         cur_field += dfield.dim();
 
       } // for fi
-
+ 
     } // for np
  
    std::map<int, ElemPatch<>*>::iterator pi = patch_map.begin(), pe = patch_map.end();
    for (; pi != pe; ++pi) delete pi->second;
-    
+     
       
   } // for searchresult
   
@@ -424,11 +425,11 @@ void operator()(MeshObj *obj, UInt nvalset, UInt n) {
 
 /*
     Par::Out() << "Adding id:" << obj->get_id() <<", val:" << sens[idx*fdim+n] << std::endl;
-    std::cout << "Adding id:" << obj->get_id() <<", val:" << sens[idx*fdim+n] << std::endl;
+     std::cout << "Adding id:" << obj->get_id() <<", val:" << sens[idx*fdim+n] << std::endl;
 */
     ++idx;
   }
- 
+  
  
 }
 
@@ -451,10 +452,10 @@ void mat_patch_serial_transfer(MEField<> &src_coord_field, MEField<> &_sfield, S
     
   MEField<>* field = &_sfield;
   MEField<> &sfield = _sfield;
-  UInt nrhs = field->dim();
+   UInt nrhs = field->dim();
   
   
-  // Create the sensitivity field
+   // Create the sensitivity field
   MEField<SField> sF(sfield);
   MEField<SField> *sFp = &sF;
   
@@ -480,9 +481,9 @@ void mat_patch_serial_transfer(MEField<> &src_coord_field, MEField<> &_sfield, S
     
     std::vector<fad_type> fads(nlocal_dof, 0);
     
-    sF.ReInit(&fads[0]);
+     sF.ReInit(&fads[0]);
     
-    // Set up the fad degrees of freedom.
+     // Set up the fad degrees of freedom.
     for (UInt i = 0; i < nlocal_dof; i++) {
       fads[i].diff(i, nlocal_dof);
     }
@@ -509,8 +510,8 @@ void mat_patch_serial_transfer(MEField<> &src_coord_field, MEField<> &_sfield, S
     
         pc[np*pdim+pd] = sres.nodes[np].pcoord[pd];
     
-      }
-    
+       }
+     
     }
 
     std::vector<fad_type> result(nrhs*npts);
@@ -538,7 +539,7 @@ void mat_patch_serial_transfer(MEField<> &src_coord_field, MEField<> &_sfield, S
 	Par::Out() << "sens=" << result[n*nrhs+d] << std::endl;
 	double sval = 0;
 #endif
-
+  
         double *sens = &(result[n*nrhs+d].fastAccessDx(0));
             
 	dof_add_col addc(col, dstpointlist_dim, sens);
@@ -550,7 +551,7 @@ void mat_patch_serial_transfer(MEField<> &src_coord_field, MEField<> &_sfield, S
 #ifdef CHECK_SENS
 	int dof_div_dim = nlocal_dof/dstpointlist_dim;
 	for (UInt s = 0; s < dof_div_dim; s++) {
-	  sval += fads[s*nrhs+d].val()*sens[s*nrhs+d];
+ 	  sval += fads[s*nrhs+d].val()*sens[s*nrhs+d];
 	} // for s
         
 	double diff = sval - result[n*nrhs+d].val();
@@ -566,9 +567,405 @@ void mat_patch_serial_transfer(MEField<> &src_coord_field, MEField<> &_sfield, S
 
       } // for d
 
-    } // for np
-
+     } // for np
+ 
   } // for searchresult
+}
+
+
+void calc_2nd_order_conserve_mat_serial_2D_3D_sph(Mesh &srcmesh, Mesh &dstmesh, Mesh *midmesh, SearchResult &sres, 
+                                        IWeights &iw, IWeights &src_frac, IWeights &dst_frac, 
+                                        struct Zoltan_Struct * zz, bool set_dst_status, WMat &dst_status) {
+  Trace __trace("calc_conserve_mat_serial(Mesh &srcmesh, Mesh &dstmesh, SearchResult &sres, IWeights &iw)");
+
+  // Get src coord field
+  MEField<> *src_cfield = srcmesh.GetCoordField();
+
+  // Get dst coord field
+  MEField<> *dst_cfield = dstmesh.GetCoordField();
+
+   // Get src and dst mask field
+  MEField<> *dst_mask_field = dstmesh.GetField("elem_mask");
+  MEField<> *src_mask_field = srcmesh.GetField("elem_mask");
+
+  // Get src and dst area field
+  MEField<> *dst_area_field = dstmesh.GetField("elem_area");
+  MEField<> *src_area_field = srcmesh.GetField("elem_area");
+
+
+  // src and dst frac2 fields
+  MEField<> * src_frac2_field = srcmesh.GetField("elem_frac2");
+  MEField<> * dst_frac2_field = dstmesh.GetField("elem_frac2");
+
+  // Declare vectors to hold weight and auxilary information
+  std::vector<int> valid;
+  std::vector<HC_WGHT> wgts;
+  std::vector<double> areas;
+  std::vector<double> dst_areas;
+
+  // Declare variable that will hold just unmasked elements 
+
+  // Declare some variables that are used inside the weight calc
+  // here so that we don't keep reallocating them
+  std::vector<SM_CELL> sm_cells;
+  std::vector<NBR_ELEM> nbrs;
+
+  // Temporary buffers for concave case, 
+  // so there isn't lots of reallocation
+  std::vector<int> tmp_valid;
+  std::vector<double> tmp_areas;
+  std::vector<double> tmp_dst_areas;
+
+  // Find maximum number of dst elements in search results
+  int max_num_dst_elems=0;
+  SearchResult::iterator sb = sres.begin(), se = sres.end();
+  for (; sb != se; sb++) {
+    // NOTE: sr.elem is a src element and sr.elems is a list of dst elements
+    Search_result &sr = **sb;
+
+    // If there are no associated dst elements then skip it
+    if (sr.elems.size() > max_num_dst_elems) max_num_dst_elems=sr.elems.size();
+  }
+
+  // Allocate space for weight calc output arrays
+  valid.resize(max_num_dst_elems,0);
+  areas.resize(max_num_dst_elems,0.0);
+  dst_areas.resize(max_num_dst_elems,0.0);
+
+
+  // reserve these variables
+  wgts.reserve(max_num_dst_elems);
+  sm_cells.reserve(max_num_dst_elems);
+  nbrs.reserve(20); // Reserve a reasonable amount of nbrs, 
+                    // this will grow to fit, so we don't need 
+                    // to worry too much about the exact size.
+
+  // Loop through search results
+  for (sb = sres.begin(); sb != se; sb++) {
+
+    // NOTE: sr.elem is a dst element and sr.elems is a list of src elements
+    Search_result &sr = **sb;
+
+
+    // If there are no associated dst elements then skip it
+    if (sr.elems.size() == 0) continue;
+
+    //  Only use it if it's locally owned
+    //   if (!GetAttr(*(sr.elem)).is_locally_owned()) continue;
+
+     // If this source element is masked then skip it
+    bool src_elem_masked=false;
+    if (src_mask_field) {
+        const MeshObj &src_elem = *sr.elem;
+        double *msk=src_mask_field->data(src_elem);
+        if (*msk>0.5) {
+          src_elem_masked=true;
+          if (!set_dst_status) continue; // if this is masked and we aren't 
+                                         // setting dst status, then go to next search result
+                                         // TODO: put code in ESMCI_Search.C, so the masked 
+                                         // source elements, don't get here
+        }
+    }
+
+
+
+    // THIS HAS SOMETHING TO DO WITH XGrid, turn off for now
+    // ASK FEI ABOUT IT. 
+    // IF YOU DO TURN IT BACK ON, THEN NEED TO ADD frac2 field to ghosting in ESMCI_MeshRegrid.C
+    // If this source element is creeped out during merging then skip it
+    double src_frac2=1.0;
+#if 0
+    if(src_frac2_field){
+      const MeshObj &src_elem = *sr.elem;
+      src_frac2=*(double *)(src_frac2_field->data(src_elem));
+      if (src_frac2 == 0.0) continue; 
+    }
+#endif
+
+
+    // Declare src_elem_area
+    double src_elem_area;
+
+    // Clear vectors so that it can be refilled
+    wgts.clear();
+    sm_cells.clear();
+    nbrs.clear();
+
+
+    // Calculate weights
+    calc_2nd_order_weights_2D_3D_sph(sr.elem,src_cfield,src_mask_field,
+                                      sr.elems,dst_cfield,dst_mask_field, dst_frac2_field,
+                                        &src_elem_area, &valid, &wgts, &areas, &dst_areas,
+                                        &tmp_valid, &tmp_areas, &tmp_dst_areas, &sm_cells, &nbrs);
+
+
+    // Invalidate masked destination elements
+    if (dst_mask_field) {
+      for (int i=0; i<sr.elems.size(); i++) {
+        const MeshObj &dst_elem = *sr.elems[i];
+        double *msk=dst_mask_field->data(dst_elem);
+        if (*msk>0.5) {
+          valid[i]=0;
+        }
+      }
+    }
+
+    // Invalidate creeped out dst element
+    // THIS HAS SOMETHING TO DO WITH XGrid, turn off for now
+    // ASK FEI ABOUT IT
+#if 0
+    if(dst_frac2_field){
+      for (int i=0; i<sr.elems.size(); i++) {
+        const MeshObj &dst_elem = *sr.elems[i];
+        double *dst_frac2=dst_frac2_field->data(dst_elem);
+        if (*dst_frac2 == 0.0){
+          valid[i] = 0;
+          continue;
+        }
+      }
+    }
+#endif
+
+
+     // Set status for src masked cells, and then leave
+    if (src_elem_masked) {
+        for (int i=0; i<sr.elems.size(); i++) {
+          if (valid[i]==1) {
+
+            // Calculate fraction
+            double frac=0.0;
+            if (dst_areas[i] != 0.0) {
+              frac=areas[i]/dst_areas[i];
+            }
+
+            // Set col info
+            IWeights::Entry col(sr.elem->get_id(), ESMC_REGRID_STATUS_SRC_MASKED, 
+                                frac, 0); 
+            
+            // Set row info
+            IWeights::Entry row(sr.elems[i]->get_id(), 0, 0.0, 0);
+
+            // Put status entry into matrix
+            dst_status.InsertRowMergeSingle(row, col);  
+          }
+        }
+
+      // src is masked, so don't add weights (i.e. continue to next)
+      continue;
+    }
+
+
+    // Set status for other cells
+    for (int i=0; i<sr.elems.size(); i++) {
+      if (valid[i]==1) {
+        
+        // Calculate fraction
+        double frac=0.0;
+        if (dst_areas[i] != 0.0) {
+          frac=areas[i]/dst_areas[i];
+        }
+
+        // Set col info
+        IWeights::Entry col(sr.elem->get_id(), ESMC_REGRID_STATUS_MAPPED, 
+                            frac, 0);
+         
+         // Set row info
+        IWeights::Entry row(sr.elems[i]->get_id(), 0, 0.0, 0);
+        
+        // Put status entry into matrix
+        dst_status.InsertRowMergeSingle(row, col);  
+      }
+    }
+
+
+    // If no weights then go on to next src elem
+    if (wgts.size() < 1) continue;
+
+
+    // Adjust weights for user area
+    if (src_area_field || dst_area_field) {
+
+      // Calculate source user area adjustment
+      double src_user_area_adj=1.0;
+      if (src_area_field) {
+        const MeshObj &src_elem = *sr.elem;
+        double *area=src_area_field->data(src_elem);
+        src_user_area_adj=*area/src_elem_area;
+      }
+
+      // Add weights to weight matrix
+      for (int i=0; i<wgts.size(); i++) {
+
+        // Calculate dest user area adjustment
+        double dst_user_area_adj=1.0;
+        if (dst_area_field) {
+          const MeshObj &dst_elem = *(sr.elems[wgts[i].dst_index]);
+          double *area=dst_area_field->data(dst_elem);
+          if (*area==0.0) Throw() << "0.0 user area in destination grid";
+          dst_user_area_adj=dst_areas[wgts[i].dst_index]/(*area);
+        }
+
+        // Calculate weight with adjustment
+        wgts[i].wgt=wgts[i].wgt*src_user_area_adj*dst_user_area_adj;
+      }
+    }
+
+    // Add weights to weight matrix
+    for (int i=0; i<wgts.size(); i++) {
+
+      // Set col info
+      IWeights::Entry col(wgts[i].src_id, 0,
+                          wgts[i].wgt, sr.elem->get_id());
+
+      // Set row info
+      IWeights::Entry row(wgts[i].dst_id, 0, 0.0, 0);
+
+      // Put weights into weight matrix
+      iw.InsertRowSumSingle(row, col);  
+
+#if 0
+      if (wgts[i].dst_id==162) {
+        printf("%d# dst_id=%d src_id=%d s=%d w=%f\n",Par::Rank(),wgts[i].dst_id,wgts[i].src_id,sr.elem->get_id(),wgts[i].wgt);
+      }
+#endif
+    }
+
+    // Count number of valid weights
+    int num_valid=0;
+    for (int i=0; i<sr.elems.size(); i++) {
+      if (valid[i]==1) num_valid++;
+    }
+
+    // If none valid, then don't need to do the rest
+    if (num_valid < 1) continue;
+
+    // Temporary empty col with negatives so unset values
+    // can be detected if they sneak through
+    IWeights::Entry col_empty(-1, 0, -1.0, 0);
+
+    // Compute src fractions and insert into src_frac
+    {
+      // Allocate column of empty entries
+      std::vector<IWeights::Entry> col;
+      col.resize(num_valid,col_empty);
+        
+      // Put weights into column
+      int j=0;
+      for (int i=0; i<sr.elems.size(); i++) {
+        if (valid[i]==1) {
+          col[j].id=sr.elems[i]->get_id();
+          col[j].value=areas[i]/src_elem_area;
+          j++;
+        }
+      }
+      
+      // Set row info
+      IWeights::Entry row(sr.elem->get_id(), 0, 0.0, 0);
+      
+      // Put weights into weight matrix
+      src_frac.InsertRowMerge(row, col);       
+    }
+
+    // Calc and set dst_frac
+    // (Can't just sum weights, so need to have a separate dst_frac)
+    for (int i=0; i<sr.elems.size(); i++) {
+      if (valid[i]==1) {
+
+        // Calculate fraction
+        double frac=0.0;
+        if (dst_areas[i] != 0.0) {
+          frac=areas[i]/dst_areas[i];
+        }
+
+        // Set col info
+        IWeights::Entry col(sr.elem->get_id(), 0, 
+                            src_frac2*frac, 0);
+        
+        // Set row info
+        IWeights::Entry row(sr.elems[i]->get_id(), 0, 0.0, 0);
+        
+        // Put weights into weight matrix
+        dst_frac.InsertRowMergeSingle(row, col);  
+      }
+    }
+  } // for searchresult
+
+}
+
+
+
+void calc_2nd_order_conserve_mat_serial(Mesh &srcmesh, Mesh &dstmesh, Mesh *midmesh, SearchResult &sres, IWeights &iw, IWeights &src_frac, IWeights &dst_frac, struct Zoltan_Struct * zz, bool set_dst_status, WMat &dst_status)  {
+  Trace __trace("calc_conserve_mat_serial(Mesh &srcmesh, Mesh &dstmesh, SearchResult &sres, IWeights &iw)");
+
+  // both meshes have to have the same dimensions
+  if (srcmesh.parametric_dim() != dstmesh.parametric_dim()) {
+    Throw() << "src and dst mesh must have the same parametric dimension for conservative regridding";
+  }
+
+  if (srcmesh.spatial_dim() != dstmesh.spatial_dim()) {
+    Throw() << "src and dst mesh must have the same spatial dimension for conservative regridding";
+  }
+
+   // If necessary, set status for masked dst cells
+  if (set_dst_status) {
+    // Get elem mask pointer
+    MEField<> *dmptr = dstmesh.GetField("elem_mask");
+
+    // If mask field exists, then mark masked dst elems
+    if (dmptr != NULL) {
+      MeshDB::const_iterator ei = dstmesh.elem_begin(), ee = dstmesh.elem_end();
+      for (; ei != ee; ++ei) {
+        const MeshObj &elem=*ei;
+ 
+         // Get mask value
+        double *m=dmptr->data(*ei);
+	  
+        // If masked, then mark
+        if (*m > 0.5) {
+          // Set col info
+           IWeights::Entry col(0,ESMC_REGRID_STATUS_DST_MASKED, 
+                              1.0, 0);
+        
+          // Set row info
+          IWeights::Entry row(elem.get_id(), 0, 0.0, 0);
+          
+          // Put status entry into matrix
+          dst_status.InsertRowMergeSingle(row, col);  
+        }
+      }
+    }
+
+   }
+
+  // Get dimension, because they're the same can just get one
+  int sdim=srcmesh.spatial_dim();
+  int pdim=srcmesh.parametric_dim();
+
+  // Get weights depending on dimension
+  if (pdim==2) {
+    if (sdim==2) {
+#if 0
+       calc_conserve_mat_serial_2D_2D_cart(srcmesh, dstmesh, midmesh, sres, iw, 
+                                          src_frac, dst_frac, zz, 
+                                           set_dst_status, dst_status);
+#endif
+    } else if (sdim==3) {
+      
+      calc_2nd_order_conserve_mat_serial_2D_3D_sph(srcmesh, dstmesh, midmesh, sres, iw, 
+                                                src_frac, dst_frac, zz,
+                                                set_dst_status, dst_status);
+    }
+   } else if (pdim==3) {
+    if (sdim==3) {
+      Throw() << "Meshes with parametric dim == 3 and spatial dim == 3 not supported for 2nd order conservative regridding";
+
+     } else {
+      Throw() << "Meshes with parametric dim == 3, but spatial dim !=3 not supported for conservative regridding";
+    }
+  } else {
+     Throw() << "Meshes with parametric dimension != 2 or 3 not supported for conservative regridding";
+  }
+
 }
 
 
@@ -855,7 +1252,7 @@ void calc_conserve_mat_serial_2D_3D_sph(Mesh &srcmesh, Mesh &dstmesh, Mesh *midm
   // Get dst coord field
   MEField<> *dst_cfield = dstmesh.GetCoordField();
 
-  // Get src and dst mask field
+   // Get src and dst mask field
   MEField<> *dst_mask_field = dstmesh.GetField("elem_mask");
   MEField<> *src_mask_field = srcmesh.GetField("elem_mask");
 
@@ -884,7 +1281,7 @@ void calc_conserve_mat_serial_2D_3D_sph(Mesh &srcmesh, Mesh &dstmesh, Mesh *midm
 
   // Temporary buffers for concave case, 
   // so there isn't lots of reallocation
-  std::vector<int> tmp_valid;
+   std::vector<int> tmp_valid;
   std::vector<double> tmp_areas;
   std::vector<double> tmp_dst_areas;
 
@@ -913,7 +1310,7 @@ void calc_conserve_mat_serial_2D_3D_sph(Mesh &srcmesh, Mesh &dstmesh, Mesh *midm
     Search_result &sr = **sb;
 
     // If there are no associated dst elements then skip it
-    if (sr.elems.size() == 0) continue;
+     if (sr.elems.size() == 0) continue;
 
     // If this source element is masked then skip it
     bool src_elem_masked=false;
@@ -942,7 +1339,7 @@ void calc_conserve_mat_serial_2D_3D_sph(Mesh &srcmesh, Mesh &dstmesh, Mesh *midm
 
     // Calculate weights
     std::vector<sintd_node *> tmp_nodes;  
-    std::vector<sintd_cell *> tmp_cells;  
+     std::vector<sintd_cell *> tmp_cells;  
     calc_1st_order_weights_2D_3D_sph(sr.elem,src_cfield,
                                      sr.elems,dst_cfield,dst_mask_field, dst_frac2_field,
                                      &src_elem_area, &valid, &wgts, &areas, &dst_areas,
@@ -971,7 +1368,7 @@ void calc_conserve_mat_serial_2D_3D_sph(Mesh &srcmesh, Mesh &dstmesh, Mesh *midm
       }
     }
 
-
+ 
     // Set status for src masked cells, and then leave
     if (src_elem_masked) {
         for (int i=0; i<sr.elems.size(); i++) {
@@ -1000,7 +1397,7 @@ void calc_conserve_mat_serial_2D_3D_sph(Mesh &srcmesh, Mesh &dstmesh, Mesh *midm
         // Set col info
         IWeights::Entry col(sr.elem->get_id(), ESMC_REGRID_STATUS_MAPPED, 
                             wgts[i], 0);
-        
+         
         // Set row info
         IWeights::Entry row(sr.elems[i]->get_id(), 0, 0.0, 0);
         
@@ -1029,7 +1426,7 @@ void calc_conserve_mat_serial_2D_3D_sph(Mesh &srcmesh, Mesh &dstmesh, Mesh *midm
       IWeights::Entry col_empty(-1, 0, -1.0, 0);
 
       // Insert fracs into src_frac
-      {
+       {
         // Allocate column of empty entries
         std::vector<IWeights::Entry> col;
         col.resize(num_valid,col_empty);
@@ -1058,7 +1455,7 @@ void calc_conserve_mat_serial_2D_3D_sph(Mesh &srcmesh, Mesh &dstmesh, Mesh *midm
         for (int i=0; i<sr.elems.size(); i++) {
           if (valid[i]==1) {
             // Set col info
-            IWeights::Entry col(sr.elem->get_id(), 0, 
+             IWeights::Entry col(sr.elem->get_id(), 0, 
                                 src_frac2*wgts[i], 0);
 
             // Set row info
@@ -1087,7 +1484,7 @@ void calc_conserve_mat_serial_2D_3D_sph(Mesh &srcmesh, Mesh &dstmesh, Mesh *midm
           // Calculate dest user area adjustment
           double dst_user_area_adj=1.0;
           if (dst_area_field) {
-            const MeshObj &dst_elem = *(sr.elems[i]);
+             const MeshObj &dst_elem = *(sr.elems[i]);
             double *area=dst_area_field->data(dst_elem);
             if (*area==0.0) Throw() << "0.0 user area in destination grid";
             dst_user_area_adj=dst_areas[i]/(*area);
@@ -1436,7 +1833,7 @@ void calc_conserve_mat_serial(Mesh &srcmesh, Mesh &dstmesh, Mesh *midmesh, Searc
       Throw() << "Meshes with parametric dim == 3, but spatial dim !=3 not supported for conservative regridding";
     }
   } else {
-    Throw() << "Meshes with parametric dimension != 2 or 3 not supported for conservative regridding";
+     Throw() << "Meshes with parametric dimension != 2 or 3 not supported for conservative regridding";
   }
 }
 
@@ -1587,16 +1984,22 @@ static GeomRend::DstConfig get_dst_config(int imethod) {
   // Loop fieldpairs.  If any have INTERP_PATCH, collect nieghbors
   bool nbor = false;
   bool cnsrv = false;
+  bool all_overlap_dst = false;
 
   if (imethod == Interp::INTERP_PATCH) nbor = true;
   else if (imethod == Interp::INTERP_CONSERVE) cnsrv = true;
+  else if (imethod == Interp::INTERP_CONSERVE_2ND) {
+    nbor = true;
+    cnsrv = true;
+    all_overlap_dst = true;
+  }
 
   Context default_context;
   default_context.flip();
   
   // TODO: make this more general
   if (cnsrv) {
-    return GeomRend::DstConfig(MeshObj::ELEMENT,MeshObj::ELEMENT, default_context, nbor);
+    return GeomRend::DstConfig(MeshObj::ELEMENT,MeshObj::ELEMENT, default_context, nbor, all_overlap_dst);
   } else {
     return GeomRend::DstConfig(MeshObj::ELEMENT, MeshObj::NODE, default_context, nbor);
   }
@@ -1638,6 +2041,7 @@ interp_method(imethod)
   if (interp_method == Interp::INTERP_STD) has_std = true;
   else if (interp_method == Interp::INTERP_PATCH) has_patch = true;
   else if (interp_method == Interp::INTERP_CONSERVE) has_cnsrv = true;
+  else if (interp_method == Interp::INTERP_CONSERVE_2ND) has_cnsrv = true;
   else if (interp_method == Interp::INTERP_NEAREST_SRC_TO_DST) has_nearest_src_to_dst = true;
   else if (interp_method == Interp::INTERP_NEAREST_DST_TO_SRC) has_nearest_dst_to_src = true;
 
@@ -1786,12 +2190,15 @@ void Interp::operator()(int fpair_num, IWeights &iw, bool set_dst_status, WMat &
   if (has_cnsrv) {
     // Dectect if we should use explicit dst_frac or just sum weights
     bool use_dst_frac=false;
-    {
+    if (interp_method == Interp::INTERP_CONSERVE) {
       MEField<> *dst_area_field = dstmesh->GetField("elem_area");
       MEField<> *src_area_field = srcmesh->GetField("elem_area");
 
       // if users have set their own areas then need to use dst_frac variable
       if (dst_area_field || src_area_field) use_dst_frac=true;
+
+    } else if (interp_method == Interp::INTERP_CONSERVE_2ND) {
+      use_dst_frac=true; // Always use dst_frac for higher order conservative
     }
 
      // get frac pointer for destination mesh
@@ -1918,6 +2325,7 @@ void Interp::mat_transfer_serial(int fpair_num, IWeights &iw, IWeights &src_frac
   else if (interp_method == INTERP_CONSERVE) calc_conserve_mat_serial(*srcmesh, *dstmesh, midmesh, sres, iw, src_frac, dst_frac, zz, set_dst_status, dst_status);
   else if (interp_method == INTERP_NEAREST_SRC_TO_DST) calc_nearest_mat_serial(srcpointlist, dstpointlist, sres, iw);
   else if (interp_method == INTERP_NEAREST_DST_TO_SRC) calc_nearest_mat_serial(srcpointlist, dstpointlist, sres, iw);
+  else if (interp_method == INTERP_CONSERVE_2ND) calc_2nd_order_conserve_mat_serial(*srcmesh, *dstmesh, midmesh, sres, iw, src_frac, dst_frac, zz, set_dst_status, dst_status);
 
 }
 
@@ -1929,6 +2337,9 @@ void Interp::mat_transfer_parallel(int fpair_num, IWeights &iw, IWeights &src_fr
 
   if (interp_method == INTERP_CONSERVE) {
     calc_conserve_mat_serial(grend.GetSrcRend(),grend.GetDstRend(),
+                             midmesh, sres, iw, src_frac, dst_frac, zz, set_dst_status, dst_status);
+  } else if (interp_method == INTERP_CONSERVE_2ND) {
+    calc_2nd_order_conserve_mat_serial(grend.GetSrcRend(),grend.GetDstRend(),
                              midmesh, sres, iw, src_frac, dst_frac, zz, set_dst_status, dst_status);
   } else if (interp_method == INTERP_NEAREST_SRC_TO_DST) {
     calc_nearest_mat_serial(srcpointlist, dstpointlist, sres, iw);

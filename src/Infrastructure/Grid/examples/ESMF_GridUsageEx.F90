@@ -1587,7 +1587,6 @@ endif
      decomptile(:,6)=(/1,2/) ! Tile 6
 
      ! Create cubed sphere grid without reading in the coordinates
-
      grid2D = ESMF_GridCreateMosaic(filename='data/C48_mosaic.nc', &
                 staggerLocList=(/ESMF_STAGGERLOC_CENTER, ESMF_STAGGERLOC_CORNER/), &
                 tileFilePath='./data/', regDecompPTile=decomptile, rc=rc)

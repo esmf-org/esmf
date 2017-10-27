@@ -1228,6 +1228,951 @@ Par::Out() << "\tnot in mesh!!" << std::endl;
     }
 #undef  ESMC_METHOD
 
+  //================== GTOMCELL ========================
+
+#undef  ESMC_METHOD
+#define ESMC_METHOD "GridToMeshCell()" 
+ /* XMRKX */
+
+
+  // Get global id
+  // if there is one returns true, if there isn't returns false
+#define BAD_ID -1
+
+  static bool _get_global_id(DistGrid *distgrid, int localDE, int *index, 
+                             int *_gid, bool *_is_local) {
+    
+    // determine sequence index
+    std::vector<int> seqIndex;
+    int localrc=distgrid->getSequenceIndexLocalDe(localDE,index,seqIndex);
+    if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
+      throw localrc;  // bail out with exception    
+
+    // If there's just 1, then use that as the id, otherwise use the min id
+    int gid=BAD_ID;
+    bool is_local=false;
+    if (seqIndex.size()==1) {
+      gid = seqIndex[0];
+      is_local=true;
+    } else if (seqIndex.size() > 0) {
+      // If there's a degenarcy then chose the min id
+      gid= std::numeric_limits<int>::max();
+      for (int i=0; i<seqIndex.size(); i++) {
+        if (seqIndex[i]<gid) gid=seqIndex[i];
+      }
+      if (gid==seqIndex[0]) is_local=true;
+    } else {
+      // if it's 0 then return false
+      return false;
+    }
+
+    // Do output
+    *_gid=gid;  
+    *_is_local=is_local;
+    return true;
+  }
+
+
+  //// DON'T NEED NODE FIELDS RIGHT NOW, SO SAVE UNTIL YOU HAVE MORE TIME ///
+#if 0
+#define GTOM_NFIELD_MASK 0
+#define GTOM_NFIELD_MASK_VAL 1
+#define GTOM_NFIELD_ORIG_COORD 2
+#define GTOM_NFIELD_NUM 3
+
+  static void create_nfields(Grid *grid, Mesh *mesh,  
+                             IOField<NodalField> *nfields[GTOM_NFIELD_NUM]) {
+
+    // Init field array to null
+    for (int i=0; i<GTOM_NFIELD_NUM; i++) {
+      nfields[i]=NULL;
+    }
+
+    // Masks
+   if (grid->hasItemStaggerLoc(ESMCI_STAGGERLOC_CORNER, ESMC_GRIDITEM_MASK)) {
+     nfields[GTOM_NFIELD_MASK] = mesh->RegisterNodalField(*mesh, "mask", 1);
+     nfields[GTOM_NFIELD_MASK_VAL] = mesh->RegisterNodalField(*mesh, "node_mask_val", 1);
+   }
+
+   // Original coords
+   // How do I tell if I need these? Maybe leave them for now
+
+  }
+#endif
+
+
+  /// Element fields
+#define GTOM_EFIELD_MASK 0
+#define GTOM_EFIELD_MASK_VAL 1
+#define GTOM_EFIELD_AREA     2
+#define GTOM_EFIELD_COORD 3
+#define GTOM_EFIELD_ORIG_COORD 4
+#define GTOM_EFIELD_FRAC 5
+#define GTOM_EFIELD_FRAC2 6
+#define GTOM_EFIELD_NUM 7
+
+  // Create element fields on mesh
+  static void create_efields(Grid *grid, Mesh *mesh,  
+                             MEField<> *efields[GTOM_EFIELD_NUM]) {
+
+    // Init field array to null
+    for (int i=0; i<GTOM_EFIELD_NUM; i++) {
+      efields[i]=NULL;
+    }
+
+    // Set context
+    Context ctxt; ctxt.flip();
+
+
+    // Mask
+    if (grid->hasItemStaggerLoc(ESMCI_STAGGERLOC_CENTER, ESMC_GRIDITEM_MASK)) {
+      efields[GTOM_EFIELD_MASK] = mesh->RegisterField("elem_mask",
+                          MEFamilyDG0::instance(), MeshObj::ELEMENT, ctxt, 1, true); 
+
+      efields[GTOM_EFIELD_MASK_VAL] = mesh->RegisterField("elem_mask_val",
+                          MEFamilyDG0::instance(), MeshObj::ELEMENT, ctxt, 1, true); 
+    }
+
+    // Area
+    if (grid->hasItemStaggerLoc(ESMCI_STAGGERLOC_CENTER, ESMC_GRIDITEM_AREA)) {
+      efields[GTOM_EFIELD_AREA] = mesh->RegisterField("elem_area",
+                          MEFamilyDG0::instance(), MeshObj::ELEMENT, ctxt, 1, true); 
+    }
+
+
+    // DO LATER
+#if 0
+    // COORDS
+    if (grid->hasCoordStaggerLoc(ESMCI_STAGGERLOC_CENTER)) {
+
+    }
+#endif
+
+    // Fracs are always there
+    efields[GTOM_EFIELD_FRAC] = mesh->RegisterField("elem_frac",
+                                             MEFamilyDG0::instance(), MeshObj::ELEMENT, ctxt, 1, true);
+
+    efields[GTOM_EFIELD_FRAC2] = mesh->RegisterField("elem_frac2",
+                                             MEFamilyDG0::instance(), MeshObj::ELEMENT, ctxt, 1, true);
+  }
+
+  // Set element fields in mesh
+  static void set_efields(Grid *grid, Mesh *mesh,  
+                          MEField<> *efields[GTOM_EFIELD_NUM]) {
+    int localrc;
+    
+    // Get distgrid for the center staggerloc 
+    DistGrid *centerDistgrid;
+    grid->getStaggerDistgrid(ESMCI_STAGGERLOC_CENTER, &centerDistgrid);
+
+    // Get localDECount
+    int localDECount=centerDistgrid->getDELayout()->getLocalDeCount();
+
+    // Loop setting fields on each element
+    for (int lDE=0; lDE < localDECount; lDE++) {
+
+      // Get Center DE bounds
+      int ubnd[ESMF_MAXDIM];
+      int lbnd[ESMF_MAXDIM];
+      grid->getDistExclusiveUBound(centerDistgrid, lDE, ubnd);  
+      grid->getDistExclusiveLBound(centerDistgrid, lDE, lbnd);  
+      
+      // Loop over bounds
+      int index[2];
+      int de_index[2];
+      for (int i0=lbnd[0]; i0<=ubnd[0]; i0++){
+        for (int i1=lbnd[1]; i1<=ubnd[1]; i1++){
+          
+          // Set index
+          index[0]=i0;
+          index[1]=i1;
+          
+          // De based index
+          de_index[0]=i0-lbnd[0];
+          de_index[1]=i1-lbnd[1];
+          
+          // Get elem global id
+          int elem_gid;
+          bool is_local;
+          if (!_get_global_id(centerDistgrid, lDE, de_index, 
+                              &elem_gid, &is_local)) {
+            continue; // If we can't find a global id, then just skip
+          }
+          
+          // Only set elem information if this is the owner
+          if (!is_local) continue;
+          
+          // Get associated elem
+          Mesh::MeshObjIDMap::iterator mi =  mesh->map_find(MeshObj::ELEMENT, elem_gid);
+          
+          // If it doesn't exist then go to next
+          if (mi == mesh->map_end(MeshObj::ELEMENT)) {
+            continue;
+          }
+          
+          // Get elem 
+          MeshObj &elem=*mi; 
+          
+
+          // Mask
+          // Init to 0 (set later in ESMF_FieldRegridStore()
+          if (efields[GTOM_EFIELD_MASK]) {
+            double *d=efields[GTOM_EFIELD_MASK]->data(elem);
+            *d=0.0;
+          }
+          
+          // Mask Val
+          // Get data from grid
+          if (efields[GTOM_EFIELD_MASK_VAL]) {
+            double *d=efields[GTOM_EFIELD_MASK_VAL]->data(elem);
+            localrc=grid->getItemInternalConvert(ESMCI_STAGGERLOC_CENTER,
+                                                 ESMC_GRIDITEM_MASK, 
+                                                 lDE, index, d);
+            if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
+              throw localrc;  // bail out with exception
+          }
+
+
+          // Area
+          // Get data from grid
+          if (efields[GTOM_EFIELD_AREA]) {
+            double *d=efields[GTOM_EFIELD_AREA]->data(elem);
+            localrc=grid->getItemInternalConvert(ESMCI_STAGGERLOC_CENTER,
+                                                 ESMC_GRIDITEM_AREA, 
+                                                 lDE, index, d);
+            if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
+              throw localrc;  // bail out with exception
+          }
+
+#if 0
+          // COORDS
+          if (grid->hasCoordStaggerLoc(ESMCI_STAGGERLOC_CENTER)) {
+            
+          }
+#endif
+          
+          // Init fracs
+          if (efields[GTOM_EFIELD_FRAC]) {
+            double *d=efields[GTOM_EFIELD_FRAC]->data(elem);
+            *d=1.0;
+          } 
+          
+          if (efields[GTOM_EFIELD_FRAC2]) {
+            double *d=efields[GTOM_EFIELD_FRAC2]->data(elem);
+            *d=1.0;
+          } 
+        }
+        
+      }
+    }
+  }
+
+
+
+  static void _calc_corner_offset(Grid *grid, int corner_offset[NUM_QUAD_CORNERS][2]) {
+    int default_offset[NUM_QUAD_CORNERS][2]={{0,0},{1,0},{1,1},{0,1}};
+
+    // Get Alignment for staggerloc
+    const int *staggerAlign= grid->getStaggerAlign(ESMCI_STAGGERLOC_CORNER);
+
+    // Get off set due to alignment
+    int align_off[2];
+    for (int i=0; i<2; i++) {
+      if (staggerAlign[i] < 1) align_off[i]=0;
+      else align_off[i]=-1;
+    }
+
+    // Change default offset to correspond with alignment
+    for (int i=0; i<NUM_QUAD_CORNERS; i++) {
+      for (int j=0; j<2; j++) {
+        corner_offset[i][j]=default_offset[i][j]+align_off[j];
+      }
+    }
+  }
+
+#define BAD_PROC (std::numeric_limits<UInt>::max())
+
+  static void _get_quad_corner_nodes(Mesh *mesh, DistGrid *cnrDistgrid, int localDE, int index[2], int cnr_offset[NUM_QUAD_CORNERS][2], 
+                                     int *local_node_index, std::vector<MeshObj*> *cnr_nodes, bool *_all_nodes_ok) {
+  // Init output
+  *_all_nodes_ok=true;
+
+
+  // Loop getting global ids
+  int cnr_gids[NUM_QUAD_CORNERS];
+  for (int i=0; i<NUM_QUAD_CORNERS; i++) {
+
+    // calc index of corner
+    int cnr_index[2];
+    cnr_index[0]=index[0]+cnr_offset[i][0];
+    cnr_index[1]=index[1]+cnr_offset[i][1];
+    
+    // Get global id, if we can't then leave
+    bool is_local;
+    if (!_get_global_id(cnrDistgrid, localDE, cnr_index, 
+                        cnr_gids+i, &is_local)) {
+      *_all_nodes_ok=false;
+      return;
+    }
+  }
+
+  // Convert gids to nodes
+  for (int i=0; i<NUM_QUAD_CORNERS; i++) {
+
+    // get gid of this corner
+    int gid=cnr_gids[i];
+
+    // declare node that we're looking for
+    MeshObj *node; 
+
+    // If a node with this gid already exists, then put into list
+    Mesh::MeshObjIDMap::iterator mi =  mesh->map_find(MeshObj::NODE, gid);
+    if (mi != mesh->map_end(MeshObj::NODE)) {
+      
+      // Get node pointer
+      node=&*mi; 
+
+      // Put into list
+      (*cnr_nodes)[i]=node;
+
+      // Go to next iteration
+      continue;
+    }
+
+    // If we didn't find it then we need to make a new one
+
+    // Create new node in mesh object       
+    node = new MeshObj(MeshObj::NODE,     // node...
+                                   gid,               // unique global id
+                                   *local_node_index
+                                   );
+    // Advance to next node index
+    (*local_node_index)++;       
+
+    // Set owner to bad proc value and change later
+    node->set_owner(BAD_PROC);  
+       
+    // Eventually need to figure out pole id stuff
+    UInt nodeset=0; // UInt nodeset = gni->getPoleID();   // Do we need to partition the nodes in any sets?
+    mesh->add_node(node, nodeset);
+
+
+    // Put into list
+    (*cnr_nodes)[i]=node;
+  }
+}
+
+  void _gid_to_proc(int gid, DistGrid *distgrid, int *_proc) {
+    
+    // Init to bad value
+    int proc=BAD_PROC;
+
+    // Calc tile and index from gid
+    int tile=0;
+    std::vector<int> index(2,-1); 
+    int localrc=distgrid->getIndexTupleFromSeqIndex(gid, index, tile);
+    if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
+      throw localrc;  // bail out with exception
+
+    // Get DeLayout
+    DELayout *delayout=distgrid->getDELayout();
+
+    // Get number of DE's
+   int deCount=delayout->getDeCount();
+
+   // Get de Index lists
+   int const *minIndexPDimPDE=distgrid->getMinIndexPDimPDe();
+   int const *maxIndexPDimPDE=distgrid->getMaxIndexPDimPDe();
+
+
+    // Get tile
+    const int *DETileList = distgrid->getTileListPDe();
+
+    // Loop through DEs
+    for (int de=0; de<deCount; de++) {
+
+      // If de isn't on the correct tile, then go on to next
+      if (tile != DETileList[de]) continue;
+
+      // Get De minIndex
+      int const *minIndex=minIndexPDimPDE+2*de;
+
+      // check if we're smaller than min
+      if ((index[0] < minIndex[0]) ||
+          (index[1] < minIndex[1])) continue;
+
+
+      // Get De maxIndex
+      int const *maxIndex=maxIndexPDimPDE+2*de;
+
+      // check if we're bigger than max
+      if ((index[0] > maxIndex[0]) ||
+          (index[1] > maxIndex[1])) continue;
+
+      // This point is on this de, so tranlate to proc and exit
+      proc=delayout->getPet(de);
+      break;
+    }
+
+    //    if (proc == BAD_PROC) {
+    //  printf("gid=%d index=%d %d tile=%d proc=%d\n",gid,index[0],index[1],tile,proc);
+    //}
+
+    // Do output
+    *_proc=proc;
+  }
+
+ /* XMRKX */
+
+void ESMCI_GridToMeshCell(const Grid &grid_, 
+                          const std::vector<ESMCI::Array*> &arrays, 
+                          Mesh **out_meshpp, int *rc) {
+#undef  ESMC_METHOD
+#define ESMC_METHOD "GridToMeshCell()" 
+  Trace __trace("GridToMeshCell(const Grid &grid_, ESMCI::Mesh &mesh)");
+
+  try {
+  // local error code
+  int localrc;
+
+  // Initialize the parallel environment for mesh (if not already done)
+  ESMCI::Par::Init("MESHLOG", false /* use log */,VM::getCurrent(&localrc)->getMpi_c());
+ if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
+   throw localrc;  // bail out with exception
+
+ // Get grid pointer
+ Grid *grid = &(const_cast<Grid&>(grid_));
+
+ // The Grid needs to have corner coordinates
+ if (!grid->hasCoordStaggerLoc(ESMCI_STAGGERLOC_CORNER)) {
+   ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+	    "- Grid being used in Regrid call does not contain coordinates at corner staggerloc ", ESMC_CONTEXT, &localrc);
+   throw localrc;
+ }
+
+ // Create Mesh
+ Mesh *mesh = new Mesh();
+ 
+ // Set output mesh
+ *out_meshpp=mesh;
+
+ // Get dimCount
+ int dimCount=grid->getDimCount();
+
+ // Only supporting 2D right now
+ if (dimCount != 2) {
+   Throw() << "Currently only supports 2D Grids";
+ }
+
+ // *** Set some meta-data ***
+ // We set the topological dimension of the mesh (quad = 2, hex = 3, etc...)
+ int pdim=dimCount;
+ mesh->set_parametric_dimension(pdim);
+ 
+ // In what dimension is the grid embedded?? (sphere = 3, simple rectangle = 2, etc...)
+ UInt sdim = grid->getCartCoordDimCount();
+ mesh->set_spatial_dimension(sdim);
+
+ // Get distgrid for the center staggerloc 
+ DistGrid *centerDistgrid;
+ grid->getStaggerDistgrid(ESMCI_STAGGERLOC_CENTER, &centerDistgrid);
+
+ // Get distgrid for the corner staggerloc 
+ DistGrid *cnrDistgrid;
+ grid->getStaggerDistgrid(ESMCI_STAGGERLOC_CORNER, &cnrDistgrid);
+
+ // Setup topology
+ const MeshObjTopo *elem_topo = 0;
+ elem_topo = sdim == 2 ? GetTopo("QUAD") : GetTopo("QUAD_3D");
+ if (!elem_topo) Throw() << "Could not get topology for sdim=" << sdim;
+
+
+ // Get index offsets for corners
+ int cnr_offset[NUM_QUAD_CORNERS][2];
+ _calc_corner_offset(grid, cnr_offset);
+
+ // Space for corner nodes
+ std::vector<MeshObj*> cnr_nodes(NUM_QUAD_CORNERS);
+
+ 
+ // printf("offset=[%d %d] [%d %d]  [%d %d]  [%d %d]\n",cnr_offset[0][0],
+ //cnr_offset[0][1],cnr_offset[1][0],cnr_offset[1][1],cnr_offset[2][0],cnr_offset[2][1],
+ //cnr_offset[3][0], cnr_offset[3][1]);
+
+ // Get localDECount
+ int localDECount=centerDistgrid->getDELayout()->getLocalDeCount();
+
+ // Loop over DEs
+ int local_node_index=0;
+ int local_elem_index=0;
+ for (int lDE=0; lDE < localDECount; lDE++) {
+ 
+   // Get Center DE bounds
+   int ubnd[ESMF_MAXDIM];
+   int lbnd[ESMF_MAXDIM];
+   grid->getDistExclusiveUBound(centerDistgrid, lDE, ubnd);  
+   grid->getDistExclusiveLBound(centerDistgrid, lDE, lbnd);  
+
+   // Get Corner DE bounds
+   int cnr_ubnd[ESMF_MAXDIM];
+   int cnr_lbnd[ESMF_MAXDIM];
+   grid->getDistExclusiveUBound(cnrDistgrid, lDE, cnr_ubnd);  
+   grid->getDistExclusiveLBound(cnrDistgrid, lDE, cnr_lbnd);  
+
+   //printf("lDE=%d CENTER lbnd=%d %d ubnd=%d %d\n",lDE,lbnd[0],lbnd[1],ubnd[0],ubnd[1]);
+   //printf("lDE=%d CORNER lbnd=%d %d ubnd=%d %d\n",lDE,cnr_lbnd[0],cnr_lbnd[1],cnr_ubnd[0],cnr_ubnd[1]);
+
+   // Loop over bounds
+   for (int i0=lbnd[0]; i0<=ubnd[0]; i0++){
+     for (int i1=lbnd[1]; i1<=ubnd[1]; i1++){
+     
+       // Set index
+       int index[2];
+       index[0]=i0;
+       index[1]=i1;
+
+       // De based index
+       int de_index[2];
+       de_index[0]=i0-lbnd[0];
+       de_index[1]=i1-lbnd[1];
+
+
+       // Get Element corner nodes
+       bool all_nodes_ok=true;
+       _get_quad_corner_nodes(mesh, cnrDistgrid, lDE, de_index, cnr_offset, &local_node_index, 
+                              &cnr_nodes, &all_nodes_ok);
+
+       // If we didn't get all the nodes, then go to next element
+       if (!all_nodes_ok) continue;
+
+       // Get element id
+       int elem_gid;
+       bool is_local;
+       if (!_get_global_id(centerDistgrid, lDE, de_index, 
+                           &elem_gid, &is_local)) {
+         continue; // If we can't find a global id, then just skip
+       }
+
+
+       // Create Element
+       MeshObj *elem = new MeshObj(MeshObj::ELEMENT,    // Mesh equivalent of Cell
+                                   elem_gid,            // unique global id
+                                   local_elem_index++
+                                   );
+
+       // Set owner to the current processor
+       elem->set_owner(Par::Rank());
+
+       // Add element
+       UInt block_id = 1;  // Any reason to use different sets for cells?
+       mesh->add_element(elem, cnr_nodes, block_id, elem_topo);
+
+       // DEBUG
+       //if (elem_gid==1) {
+       //  printf("gid=%d i=%d %d lDE=%d nodes=%d %d %d %d \n",elem_gid,i0,i1,lDE,cnr_nodes[0]->get_id(),cnr_nodes[1]->get_id(),cnr_nodes[2]->get_id(),cnr_nodes[3]->get_id());
+       //}
+     }
+   }
+ }
+
+
+ // Set up the node coordinate field
+ IOField<NodalField> *node_coord = mesh->RegisterNodalField(*mesh, "coordinates", sdim);
+
+ // Loop again adding information to nodes
+ for (int lDE=0; lDE < localDECount; lDE++) {
+ 
+   // Get Corner DE bounds
+   int cnr_ubnd[ESMF_MAXDIM];
+   int cnr_lbnd[ESMF_MAXDIM];
+   grid->getDistExclusiveUBound(cnrDistgrid, lDE, cnr_ubnd);  
+   grid->getDistExclusiveLBound(cnrDistgrid, lDE, cnr_lbnd);  
+
+
+   // Loop over bounds
+   int index[2];
+   int nonde_index[2];
+   for (int i0=cnr_lbnd[0]; i0<=cnr_ubnd[0]; i0++){
+     for (int i1=cnr_lbnd[1]; i1<=cnr_ubnd[1]; i1++){
+     
+       // Set index
+       index[0]=i0;
+       index[1]=i1;
+
+       // De based index
+       int de_index[2];
+       de_index[0]=i0-cnr_lbnd[0];
+       de_index[1]=i1-cnr_lbnd[1];
+
+       // Get node global id
+       int node_gid;
+       bool is_local;
+       if (!_get_global_id(cnrDistgrid, lDE, de_index, 
+                           &node_gid, &is_local)) {
+         continue; // If we can't find a global id, then just skip
+       }
+
+       // Only set node information if this is the owner
+       if (!is_local) continue;
+
+       // Get associated node
+       Mesh::MeshObjIDMap::iterator mi =  mesh->map_find(MeshObj::NODE, node_gid);
+
+       // If it doesn't exist then go to next
+       if (mi == mesh->map_end(MeshObj::NODE)) {
+         continue;
+       }
+
+       // Get node pointer
+       MeshObj *node=&*mi; 
+
+       // Set owner to the current processor
+       node->set_owner(Par::Rank());
+
+       // Put in coordinates
+       double *coord = node_coord->data(*node);
+
+       // get orig coordinates
+       double orig_coord[ESMF_MAXDIM];
+       localrc=grid->getCoordInternalConvert(ESMCI_STAGGERLOC_CORNER, lDE, 
+                                             index, orig_coord);
+       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+                                         NULL)) throw localrc;
+
+       // Call into coordsys method to convert to Cart
+       localrc=ESMCI_CoordSys_ConvertToCart(grid->getCoordSys(),
+                                            grid->getDimCount(),
+                                            orig_coord,  // Input coordinates 
+                                            coord);
+       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+                                         NULL)) throw localrc;
+#if 0
+       // DEBUG
+       if ((node->get_id()==1) ||
+           (node->get_id()==2) ||
+           (node->get_id()==13) ||
+           (node->get_id()==12)) {
+         printf("node gid=%d i=%d %d lDE=%d %20.17f %20.17f %20.17f oc=%20.17f %20.17f\n",node->get_id(),i0,i1,lDE,coord[0],coord[1],coord[2],orig_coord[0],orig_coord[1]);
+       }
+#endif
+
+     }
+   }
+ }
+ 
+ // Loop through Mesh nodes setting the remaining owners
+ MeshDB::iterator ni = mesh->node_begin(), ne = mesh->node_end();
+ for (; ni != ne; ++ni) {
+   MeshObj *node=&*ni;
+
+   // Get node global id
+   int gid=node->get_id();
+
+   // get node owner
+   int owner=node->get_owner();
+
+   // If the owner is already set then skip
+   if (owner != BAD_PROC) continue;
+
+   // Get proc based on gid
+   int proc;
+   _gid_to_proc(gid, cnrDistgrid, &proc);
+
+   // Set owner
+   node->set_owner(proc);
+ }
+
+ // Add element Fields
+ MEField<> *efields[GTOM_EFIELD_NUM];
+ create_efields(grid, mesh, efields); 
+                             
+ // Finalize the Mesh
+ mesh->build_sym_comm_rel(MeshObj::NODE);
+ mesh->Commit();
+
+ // set element fields
+ set_efields(grid, mesh, efields);
+
+ // Halo fields, so entities with an owner on another processor
+ // will have the correct value
+ {
+   std::vector<MEField<>*> fds;
+   
+   Mesh::FieldReg::MEField_iterator fi = mesh->Field_begin(), fe = mesh->Field_end();
+   
+   for (; fi != fe; ++fi) fds.push_back(&*fi);
+   
+   mesh->HaloFields(fds.size(), &fds[0]);
+ }
+
+
+  } catch(std::exception &x) {
+    // catch Mesh exception return code 
+    if (x.what()) {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+   					  x.what(), ESMC_CONTEXT,rc);
+    } else {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+   					  "UNKNOWN", ESMC_CONTEXT,rc);
+    }
+
+    return;
+  }catch(int localrc){
+    // catch standard ESMF return code
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,rc);
+    return;
+  } catch(...){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+                                  "- Caught unknown exception", ESMC_CONTEXT, rc);
+    return;
+  }
+
+  
+// Set successful return code 
+ if (rc!=NULL) *rc = ESMF_SUCCESS; 
+}
+
+  // Assumes array is on center staggerloc of grid and was used to create the mesh
+  void CpMeshElemDataToArrayCell(Grid *grid, ESMCI::Mesh *mesh, ESMCI::Array *array, MEField<> *dataToArray) {
+#undef  ESMC_METHOD
+#define ESMC_METHOD "CpMeshElemDataToArrayCell()" 
+  Trace __trace("CpMeshElemDataToArray()Cell");
+
+  int localrc;
+  int rc;
+
+
+  // Initialize the parallel environment for mesh (if not already done)
+  ESMCI::Par::Init("MESHLOG", false /* use log */,VM::getCurrent(&localrc)->getMpi_c());
+ if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
+   throw localrc;  // bail out with exception
+
+ // Get dimCount
+ int dimCount=grid->getDimCount();
+
+ // Only supporting 2D right now
+ if (dimCount != 2) {
+   Throw() << "Currently only supports 2D Grids";
+ }
+
+ // Check typekind
+ if (array->getTypekind() != ESMC_TYPEKIND_R8) {
+   int rc;
+   ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_WRONG,
+       "- currently only ESMC_TYPEKIND_R8 Arrays supported.", ESMC_CONTEXT, &rc);
+   throw rc;
+ }
+
+ // Get distgrid for the center staggerloc 
+ DistGrid *centerDistgrid;
+ grid->getStaggerDistgrid(ESMCI_STAGGERLOC_CENTER, &centerDistgrid);
+
+ // Get localDECount
+ int localDECount=centerDistgrid->getDELayout()->getLocalDeCount();
+
+ // Loop over DEs
+ for (int lDE=0; lDE < localDECount; lDE++) {
+ 
+   // Get Center DE bounds
+   int ubnd[ESMF_MAXDIM];
+   int lbnd[ESMF_MAXDIM];
+   grid->getDistExclusiveUBound(centerDistgrid, lDE, ubnd);  
+   grid->getDistExclusiveLBound(centerDistgrid, lDE, lbnd);  
+
+   // Get LocalArray cooresponding to localDE
+   LocalArray *localArray=array->getLocalarrayList()[lDE];
+
+   // Loop over bounds
+   for (int i0=lbnd[0]; i0<=ubnd[0]; i0++){
+     for (int i1=lbnd[1]; i1<=ubnd[1]; i1++){
+     
+       // Set index
+       int index[2];
+       index[0]=i0;
+       index[1]=i1;
+
+       // De based index
+       int de_index[2];
+       de_index[0]=i0-lbnd[0];
+       de_index[1]=i1-lbnd[1];
+
+       // Get element id
+       int elem_gid;
+       bool is_local;
+       if (!_get_global_id(centerDistgrid, lDE, de_index, 
+                           &elem_gid, &is_local)) {
+         continue; // If we can't find a global id, then just skip
+       }
+
+      //  Find the corresponding Mesh element
+      Mesh::MeshObjIDMap::iterator mi =  mesh->map_find(MeshObj::ELEMENT, elem_gid);
+      if (mi == mesh->map_end(MeshObj::ELEMENT)) {
+	Throw() << "Grid entry not in mesh";
+      }
+      
+      // Get the element
+      const MeshObj &elem = *mi; 
+      
+      // Only put it in if it's locally owned
+      if (!GetAttr(elem).is_locally_owned()) continue;
+
+       // Get the data from mesh 
+      double *data = dataToArray->data(elem);
+
+      //// Put data into the Array
+      localArray->setData(index, *data);
+     }
+   }
+ }
+}
+
+
+  void PutElemAreaIntoArrayCell(Grid *grid, ESMCI::Mesh *mesh, ESMCI::Array *array) {
+#undef  ESMC_METHOD
+#define ESMC_METHOD "PutElemAreaIntoArrayCell()" 
+    Trace __trace("PutElemAreaIntoArrayCell()");
+    
+    int localrc;
+    int rc;
+
+#define  MAX_NUM_POLY_COORDS  60
+#define  MAX_NUM_POLY_NODES_2D  30  // MAX_NUM_POLY_COORDS/2
+#define  MAX_NUM_POLY_NODES_3D  20  // MAX_NUM_POLY_COORDS/3
+    
+    int num_poly_nodes;
+    double poly_coords[MAX_NUM_POLY_COORDS];
+    double tmp_coords[MAX_NUM_POLY_COORDS];
+
+
+    // Initialize the parallel environment for mesh (if not already done)
+    ESMCI::Par::Init("MESHLOG", false /* use log */,VM::getCurrent(&localrc)->getMpi_c());
+    if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
+      throw localrc;  // bail out with exception
+
+
+    // Get dimCount
+    int dimCount=grid->getDimCount();
+
+    // Only supporting 2D right now
+    if (dimCount != 2) {
+      Throw() << "Currently only supports 2D Grids";
+    }
+
+    // Check typekind
+    if (array->getTypekind() != ESMC_TYPEKIND_R8) {
+      int rc;
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_WRONG,
+            "- currently only ESMC_TYPEKIND_R8 Arrays supported.", ESMC_CONTEXT, &rc);
+      throw rc;
+    }
+
+    // If an area field exists use that instead
+    // TODO: replace this with something that doesn't require building a mesh first
+    MEField<> *area_field = mesh->GetField("elem_area");
+    if (area_field) {
+      CpMeshElemDataToArrayCell(grid, mesh, array, area_field);
+      return;
+    }
+
+
+    ////// Otherwise calculate areas..... 
+    
+    // Get coord field
+    MEField<> *cfield = mesh->GetCoordField();
+
+    // Get dimensions
+    int sdim=mesh->spatial_dim();
+    int pdim=mesh->parametric_dim();
+    
+    // Get distgrid for the center staggerloc 
+    DistGrid *centerDistgrid;
+    grid->getStaggerDistgrid(ESMCI_STAGGERLOC_CENTER, &centerDistgrid);
+
+    // Get localDECount
+    int localDECount=centerDistgrid->getDELayout()->getLocalDeCount();
+
+    // Loop over DEs
+    for (int lDE=0; lDE < localDECount; lDE++) {
+ 
+      // Get Center DE bounds
+      int ubnd[ESMF_MAXDIM];
+      int lbnd[ESMF_MAXDIM];
+      grid->getDistExclusiveUBound(centerDistgrid, lDE, ubnd);  
+      grid->getDistExclusiveLBound(centerDistgrid, lDE, lbnd);  
+      
+      // Get LocalArray cooresponding to localDE
+      LocalArray *localArray=array->getLocalarrayList()[lDE];
+      
+      // Loop over bounds
+      for (int i0=lbnd[0]; i0<=ubnd[0]; i0++){
+        for (int i1=lbnd[1]; i1<=ubnd[1]; i1++){
+          
+          // Set index
+          int index[2];
+          index[0]=i0;
+          index[1]=i1;
+          
+          // De based index
+          int de_index[2];
+          de_index[0]=i0-lbnd[0];
+          de_index[1]=i1-lbnd[1];
+          
+          // Get element id
+          int elem_gid;
+          bool is_local;
+          if (!_get_global_id(centerDistgrid, lDE, de_index, 
+                              &elem_gid, &is_local)) {
+            continue; // If we can't find a global id, then just skip
+          }
+          
+          //  Find the corresponding Mesh element
+          Mesh::MeshObjIDMap::iterator mi =  mesh->map_find(MeshObj::ELEMENT, elem_gid);
+          if (mi == mesh->map_end(MeshObj::ELEMENT)) {
+            Throw() << "Grid entry not in mesh";
+          }
+          
+          // Get the element
+          const MeshObj &elem = *mi; 
+          
+          // Only put it in if it's locally owned
+          if (!GetAttr(elem).is_locally_owned()) continue;
+          
+          // Get area depending on dimensions
+          double area;
+          
+          if (pdim==2) {
+            if (sdim==2) {
+              get_elem_coords_2D_ccw(&elem, cfield, MAX_NUM_POLY_NODES_2D, tmp_coords, &num_poly_nodes, poly_coords);
+              remove_0len_edges2D(&num_poly_nodes, poly_coords);
+              area=area_of_flat_2D_polygon(num_poly_nodes, poly_coords);
+            } else if (sdim==3) {
+              get_elem_coords_3D_ccw(&elem, cfield, MAX_NUM_POLY_NODES_3D, tmp_coords, &num_poly_nodes, poly_coords);
+              remove_0len_edges3D(&num_poly_nodes, poly_coords);
+              area=great_circle_area(num_poly_nodes, poly_coords);
+#if 0
+              // DEBUG
+              if (elem_gid==1) {
+                printf("gid=%d num_poly_nodes=%d area=%20.17f\n",elem_gid,num_poly_nodes, area);
+                printf("1 %20.17f %20.17f %20.17f\n",poly_coords[0],poly_coords[1],poly_coords[2]);
+                printf("2 %20.17f %20.17f %20.17f\n",poly_coords[3],poly_coords[4],poly_coords[5]);
+                printf("3 %20.17f %20.17f %20.17f\n",poly_coords[6],poly_coords[7],poly_coords[8]);
+                printf("4 %20.17f %20.17f %20.17f\n",poly_coords[9],poly_coords[10],poly_coords[11]);
+              }
+#endif
+
+            }
+          } else {
+            Throw() << "Meshes with parametric dimension != 2 not supported for computing areas for multi-tile grids";
+          }
+      
+          //// Put data into the Array
+          localArray->setData(index, area);
+        }
+      }
+    }
+    
+  }
+
 
 
 } // namespace

@@ -133,7 +133,7 @@ void IWeights::GatherTangentVectors(const Mesh &mesh, TVECT tv, bool transpose) 
 class Interp {
 public:
 
-  enum {INTERP_STD = 0, INTERP_PATCH, INTERP_CONSERVE, INTERP_NEAREST_SRC_TO_DST, INTERP_NEAREST_DST_TO_SRC};
+  enum {INTERP_STD = 0, INTERP_PATCH, INTERP_CONSERVE, INTERP_NEAREST_SRC_TO_DST, INTERP_NEAREST_DST_TO_SRC, INTERP_CONSERVE_2ND};
   
   struct FieldPair {
   FieldPair(MEField<> *_sF, MEField<> *_dF, UChar _idata=INTERP_STD, UChar _patch_order=2) :

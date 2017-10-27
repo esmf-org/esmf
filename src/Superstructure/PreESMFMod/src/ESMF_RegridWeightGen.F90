@@ -405,7 +405,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     
     if (present(poleMethod)) then
      	 localPoleMethod = poleMethod
-    else if (localRegridMethod == ESMF_REGRIDMETHOD_CONSERVE) then
+    else if ((localRegridMethod == ESMF_REGRIDMETHOD_CONSERVE) .or. &
+             (localRegridMethod == ESMF_REGRIDMETHOD_CONSERVE_2ND)) then
        localPoleMethod = ESMF_POLEMETHOD_NONE
     else
        localPoleMethod = ESMF_POLEMETHOD_ALLAVG
@@ -423,6 +424,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     endif
 
     if ((localRegridMethod == ESMF_REGRIDMETHOD_CONSERVE) .and. &
+	     (localPoleMethod /= ESMF_POLEMETHOD_NONE)) then
+        call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
+	  msg ="Conserve method only works with no pole", &
+          ESMF_CONTEXT, rcToReturn=rc)
+        return
+    endif
+
+    if ((localRegridMethod == ESMF_REGRIDMETHOD_CONSERVE_2ND) .and. &
 	     (localPoleMethod /= ESMF_POLEMETHOD_NONE)) then
         call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
 	  msg ="Conserve method only works with no pole", &
@@ -463,7 +472,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     else     
        if (localRegridMethod == ESMF_REGRIDMETHOD_CONSERVE) then
           localLineType=ESMF_LINETYPE_GREAT_CIRCLE
-       else 
+       else if (localRegridMethod == ESMF_REGRIDMETHOD_CONSERVE_2ND) then
+          localLineType=ESMF_LINETYPE_GREAT_CIRCLE
+       else
           localLineType=ESMF_LINETYPE_CART
        endif
     endif
@@ -630,11 +641,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 #endif
 
     ! user area only needed for conservative regridding
-    if (localUserAreaFlag .and. (localRegridMethod /= ESMF_REGRIDMETHOD_CONSERVE)) then
-      call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
-	      msg = " user defined area is only used for the conservative regridding", &
-        ESMF_CONTEXT, rcToReturn=rc)
-      return
+    if (localUserAreaFlag .and. .not. ((localRegridMethod == ESMF_REGRIDMETHOD_CONSERVE) .or. &
+         (localRegridMethod == ESMF_REGRIDMETHOD_CONSERVE_2ND))) then
+       call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
+            msg = " user defined area is only used for the conservative regridding", &
+            ESMF_CONTEXT, rcToReturn=rc)
+       return
     endif
 
     if (localUserAreaFlag .and. (localSrcFileType /= ESMF_FILEFORMAT_SCRIP .and. &
@@ -691,7 +703,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Use LocStream if the dest file format is SCRIP and the regridmethod is non-conservative
     if ((localDstFileType /= ESMF_FILEFORMAT_GRIDSPEC .and. &
          localDstFileType /= ESMF_FILEFORMAT_MOSAIC) .and. &
-        (localRegridMethod /= ESMF_REGRIDMETHOD_CONSERVE)) then
+        (localRegridMethod /= ESMF_REGRIDMETHOD_CONSERVE) .and. &
+        (localRegridMethod /= ESMF_REGRIDMETHOD_CONSERVE_2ND)) then
 	dstUseLocStream = .TRUE.
     endif
  
@@ -899,6 +912,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         print *, "  Regrid Method: bilinear"
       elseif (localRegridMethod == ESMF_REGRIDMETHOD_CONSERVE) then
         print *, "  Regrid Method: conserve"
+      elseif (localRegridMethod == ESMF_REGRIDMETHOD_CONSERVE_2ND) then
+        print *, "  Regrid Method: conserve2nd"
       elseif (localRegridMethod == ESMF_REGRIDMETHOD_PATCH) then
         print *, "  Regrid Method: patch"
       elseif (localRegridMethod == ESMF_REGRIDMETHOD_NEAREST_STOD) then
@@ -949,7 +964,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Set flags according to the regrid method
     convertSrcToDual=.false.
     convertDstToDual=.false.
-    if (localRegridMethod == ESMF_REGRIDMETHOD_CONSERVE) then
+    if ((localRegridMethod == ESMF_REGRIDMETHOD_CONSERVE) .or. &
+        (localRegridMethod == ESMF_REGRIDMETHOD_CONSERVE_2ND)) then
       isConserve=.true.
       addCorners=.true.
       meshloc=ESMF_MESHLOC_ELEMENT
@@ -1323,6 +1339,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       methodStr = "Bilinear remapping" ! SCRIP doesn't recognize Nearest neighbor
     else if (localRegridMethod == ESMF_REGRIDMETHOD_CONSERVE) then
       methodStr = "Conservative remapping"
+    else if (localRegridMethod == ESMF_REGRIDMETHOD_CONSERVE_2ND) then
+      methodStr = "Conservative remapping" ! SCRIP doesn't recognize second-order conservative
     else ! nothing recognizable so report error
       call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
         msg="unrecognized RegridMethod", &
@@ -1473,7 +1491,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! src fraction is always 0
     ! destination fraction depends on the src mask, dst mask, and the weight
     if (.not. localWeightOnlyFlag) then
-      if (localRegridMethod /= ESMF_REGRIDMETHOD_CONSERVE) then
+       if ((localRegridMethod /= ESMF_REGRIDMETHOD_CONSERVE) .and. &
+           (localRegridMethod /= ESMF_REGRIDMETHOD_CONSERVE_2ND)) then
         if (dstUseLocStream) then
 	  call computeFracLocStream(dstLocStream, vm, factorIndexList, dstFrac, localrc)
           if (ESMF_LogFoundError(localrc, &
@@ -2046,17 +2065,20 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     else     
        if (localRegridMethod == ESMF_REGRIDMETHOD_CONSERVE) then
           localLineType=ESMF_LINETYPE_GREAT_CIRCLE
+       else if (localRegridMethod == ESMF_REGRIDMETHOD_CONSERVE_2ND) then
+          localLineType=ESMF_LINETYPE_GREAT_CIRCLE
        else 
           localLineType=ESMF_LINETYPE_CART
        endif
     endif
 
     ! user area only needed for conservative regridding
-    if (localUserAreaFlag .and. (localRegridMethod /= ESMF_REGRIDMETHOD_CONSERVE)) then
-      call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
-	      msg = " user defined area is only used for the conservative regridding", &
-        ESMF_CONTEXT, rcToReturn=rc)
-      return
+    if (localUserAreaFlag .and. .not. ((localRegridMethod == ESMF_REGRIDMETHOD_CONSERVE) .or. &
+         (localRegridMethod == ESMF_REGRIDMETHOD_CONSERVE_2ND))) then
+       call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
+            msg = " user defined area is only used for the conservative regridding", &
+            ESMF_CONTEXT, rcToReturn=rc)
+       return
     endif
 
     ! Print the regrid options
@@ -2074,6 +2096,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         print *, "  Regrid Method: bilinear"
       elseif (localRegridMethod == ESMF_REGRIDMETHOD_CONSERVE) then
         print *, "  Regrid Method: conserve"
+      elseif (localRegridMethod == ESMF_REGRIDMETHOD_CONSERVE_2ND) then
+        print *, "  Regrid Method: conserve2nd"
       elseif (localRegridMethod == ESMF_REGRIDMETHOD_PATCH) then
         print *, "  Regrid Method: patch"
       elseif (localRegridMethod == ESMF_REGRIDMETHOD_NEAREST_STOD) then
@@ -2107,7 +2131,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     endif 
 
     ! Set flags according to the regrid method
-    if (localRegridMethod == ESMF_REGRIDMETHOD_CONSERVE) then
+    if ((localRegridMethod == ESMF_REGRIDMETHOD_CONSERVE) .or. &
+        (localRegridMethod == ESMF_REGRIDMETHOD_CONSERVE_2ND)) then
       isConserve=.true.
       convertToDual=.false.
       meshloc=ESMF_MESHLOC_ELEMENT
@@ -2217,6 +2242,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       methodStr = "Bilinear remapping" ! SCRIP doesn't recognize Nearest neighbor
     else if (localRegridMethod == ESMF_REGRIDMETHOD_CONSERVE) then
       methodStr = "Conservative remapping"
+    else if (localRegridMethod == ESMF_REGRIDMETHOD_CONSERVE_2ND) then
+      methodStr = "Conservative remapping" ! SCRIP doesn't recognize 2nd order
     else ! nothing recognizable so report error
       call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
         msg="unrecognized RegridMethod", &
@@ -2298,9 +2325,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ! Computer fraction if bilinear
       ! src fraction is always 0
       ! destination fraction depends on the src mask, dst mask, and the weight
-      if (localRegridMethod /= ESMF_REGRIDMETHOD_CONSERVE) then
-	      call computeFracMesh(dstMesh, vm, factorIndexList, dstFrac, localrc)
-        if (ESMF_LogFoundError(localrc, &
+      if ((localRegridMethod /= ESMF_REGRIDMETHOD_CONSERVE) .and. &
+           (localRegridMethod /= ESMF_REGRIDMETHOD_CONSERVE_2ND)) then
+         call computeFracMesh(dstMesh, vm, factorIndexList, dstFrac, localrc)
+         if (ESMF_LogFoundError(localrc, &
               ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
       else

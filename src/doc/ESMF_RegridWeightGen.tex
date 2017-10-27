@@ -124,7 +124,8 @@ are great circle paths between their corner points.
 
 
 \subsection{Regridding Methods}\label{sec:rwg_regridmethods}
- This regridding application can be used to generate bilinear, patch, nearest neighbor, or first-order conservative interpolation weights. The following is a description of these interpolation methods as relevant to the offline weight generation application. For a more in-depth description see Section~\ref{sec:regrid}.
+ This regridding application can be used to generate bilinear, patch, nearest neighbor, first-order conservative, or second-order conservative 
+interpolation weights. The following is a description of these interpolation methods as relevant to the offline weight generation application. For a more in-depth description see Section~\ref{sec:regrid}.
 
 \subsubsection{Bilinear}\label{sec:rwg_bilinear}
  The default interpolation method for the weight generation application is bilinear. The algorithm used by this application to 
@@ -172,32 +173,39 @@ that with this method the unmapped destination point detection doesn't work, so 
 which don't map to any source point.
 
 \subsubsection{First-order conservative}\label{sec:rwg_conserve}
-First-order conservative interpolation~\cite{ConservativeOrder1} is also available as a regridding method. This method will typically have
-a larger local interpolation error than the previous two methods, but will do a much better job of preserving the value of the
-integral of data between the source and destination grid. In this method the value across each source cell
-is treated as a constant.
+ The main purpose of this method is to preserve the integral of the field across the interpolation from source to destination.  
+ (For a more in-depth description of what this preservation of the integral (i.e. conservation) means please see section~\ref{sec:rwg:conservation}.)  In this method the value across each source cell is treated as a constant, so it will typically have a larger 
+ interpolation error than the bilinear or patch methods.  The first-order method used here is similar to that described in the following paper~\cite{ConservativeOrder1}.
 
  By default (or if "\verb+--+norm\_type dstarea"), the weight $w_{ij}$ for a particular source cell $i$ and destination cell $j$ are calculated as $w_{ij}=f_{ij} * A_{si}/A_{dj}$. 
 In this equation $f_{ij}$ is the fraction of the source cell $i$ contributing to destination cell $j$, and $A_{si}$ and $A_{dj}$ are the areas of the source and 
-destination cells. If "\verb+--+norm\_type fracarea", then the weights are further divided by the destination fraction. In other words, in that case $w_{ij}=f_{ij} * A_{si}/(A_{dj}*D_j)$ where 
-$D_j$ is fraction of the destination cell that intersects the unmasked source grid. 
+destination cells. If "\verb+--+norm\_type fracarea", then the weights are further divided by the destination fraction. In other words, in that case $w_{ij}=f_{ij} * A_{si}/(A_{dj}*D_j)$ where $D_j$ is fraction of the destination cell that intersects the unmasked source grid. 
 
-Areas in this case are calculated by connecting the corner coordinates of each grid cell (obtained from the grid file) with great circles. If the user doesn't specify
-the user area's option ("\verb+--+user\_areas"), then the conservation will hold for the great circle areas calculated by
-ESMF (and these are output to the weight file). This means the following equation will hold:  $\sum^{all-source-cells}(V_{si}*A'_{si}) = \sum^{all-destination-cells}(V_{dj}*A'_{dj})$, where
-V is the variable being regridded and A' is the area of a cell as calculated by ESMF.  The subscripts s and d refer to source and destination values, and the i and j are the source
-and destination grid cell indices (flattening the arrays to 1 dimension). If the user does specify the user area's option, then the conservation will be adjusted to work for the areas
- provided by the user in the grid files (and these areas are output to the weight file). This means the following equation will hold: $\sum^{all-source-cells}(V_{si}*A_{si}) = \sum^{all-destination-cells}(V_{dj}*A_{dj}) $, where A  is the area of a cell as provided by the user.
+To see a description of how the different normalization options affect the values and integrals produced by the conservative methods see section~\ref{sec:rwg:conservative_norm_opts}. For a grid on a sphere this method uses great circle cells, for a description of potential problems with these see~\ref{sec:interpolation:great_circle_cells}.
 
-Note that since the conservative assumes great circle edges to cells, the edges of a cell won't necessarily be
-the same as a straight line in latitude longitude. For small edges, this difference will be small, but for long edges it could be significant. This means if
-the user expects cell edges as straight lines in latitude longitude space, they should avoid using one large cell with long edges to compute an average over a region (e.g. over an ocean basin). The
-user should also avoid using cells which contain one edge that runs half way or more around the Earth, because the regrid weight calculation assumes the
-edge follows the shorter great circle path. Also, there isn't a unique great circle edge defined between points on the exact opposite side of the Earth (antipodal points).
-However, the user can work around both of these problems by inserting an extra node to break up the long edge into two smaller ones, or by breaking the large target grid cells into two or more smaller grid cells.
-This allows the application to resolve the ambiguity in edge direction. Another restriction is that ESMF doesn't support self-intersecting cells (e.g. a cell twisted into a 
-bow tie). 
+\subsubsection{Second-order conservative}\label{sec:rwg_conserve2d}
+ Like the first-order conservative method, this method's main purpose is to preserve the integral of the field across the interpolation from source to destination.  
+ (For a more in-depth description of what this preservation of the integral (i.e. conservation) means please see section~\ref{sec:rwg:conservation}.)  The difference between the first and second-order conservative methods is that the second-order takes the source gradient into account, so
+ it yields a smoother destination field that typically better matches the source field. This difference between the first and second-order methods 
+ is particularly apparent when going from a coarse source grid to a finer destination grid. The implementation of this method is based on the one described in this paper~\cite{ConservativeOrder2}.
 
+  The weights for second-order are calculated in a similar manner to first-order~\ref{sec:rwg_conserve} with additional weights that take into account the gradient across the source cell. 
+
+To see a description of how the different normalization options affect the values and integrals produced by the conservative methods see section~\ref{sec:rwg:conservative_norm_opts}. For a grid on a sphere this method uses great circle cells, for a description of potential problems with these see~\ref{sec:interpolation:great_circle_cells}.
+
+\subsection{Conservation}\label{sec:rwg:conservation}
+ Conservation means that the following equation will hold:
+  $\sum^{all-source-cells}(V_{si}*A'_{si}) = \sum^{all-destination-cells}(V_{dj}*A'_{dj})$, where
+ V is the variable being regridded and A is the area of a cell.  
+ The subscripts s and d refer to source and destination values, and the i and j are the source
+ and destination grid cell indices (flattening the arrays to 1 dimension). 
+
+ There are a couple of options for how the areas (A) in the proceding equation can be calculated. By default, ESMF calculates the areas. For a grid on a sphere, 
+areas are calculated by connecting the corner coordinates of each grid cell (obtained from the grid file) with great circles. For a Cartesian grid, areas are calculated
+in the typcial manner for 2D polygons. If the user specifies the user area's option ("\verb+--+user\_areas"), then weights will be adjusted so that the equation above 
+will hold for the areas provided in the grid files. In either case, the areas output to the weight file are the ones for which the weights have been adjusted to conserve.
+
+\subsection{The effect of normalization options on integrals and values produced by conservative methods}\label{sec:rwg:conservative_norm_opts}
  It is important to note that by default (i.e. using destination area normalization) conservative regridding doesn't normalize the interpolation weights by the destination fraction. This means that for a destination grid which only partially overlaps the source grid the destination field which is output from the regrid operation should be divided by the corresponding destination fraction to yield the true interpolated values for cells which are only partially covered by the source grid.
 The fraction also needs to be included when computing the total source and destination integrals. To include the fraction in the conservative weights, the user can specify the fraction area normalization type. This can be done by specifying "\verb+--+norm\_type fracarea'' on the command line. 
 
@@ -263,7 +271,7 @@ ESMF_RegridWeightGen
         --source|-s src_grid_filename
         --destination|-d dst_grid_filename
         --weight|-w out_weight_file
-        [--method|-m bilinear|patch|nearestdtos|neareststod|conserve]
+        [--method|-m bilinear|patch|nearestdtos|neareststod|conserve|conserve2nd]
         [--pole|-p none|all|teeth|1|2|..]
         [--line_type|-l cartesian|greatcircle]
         [--norm_type dstarea|fracarea]
@@ -302,10 +310,13 @@ where:
   --method or -m      - an optional argument specifying which interpolation
                         method is used. The value can be one of the following:
 
-                        bilinear  - for bilinear interpolation, also the
-                                    default method if not specified.
-                        patch     - for patch recovery interpolation
-                        conserve  - for first-order conservative interpolation
+                        bilinear     - for bilinear interpolation, also the
+                                       default method if not specified.
+                        patch        - for patch recovery interpolation
+                        neareststod  - for nearest source to destination interpolation
+                        nearestdtos  - for nearest destination to source interpolation
+                        conserve     - for first-order conservative interpolation
+                        conserve2nd  - for second-order conservative interpolation
 
   --pole or -p        - an optional argument indicating how to extrapolate 
                         in the pole region. 

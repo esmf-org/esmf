@@ -909,6 +909,9 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
            elseif (methodlocal%regridmethod == ESMF_REGRIDMETHOD_CONSERVE%regridmethod) then
               map_method = "Conservative remapping"
               esmf_regrid_method = "First-order Conservative"
+           elseif (methodlocal%regridmethod == ESMF_REGRIDMETHOD_CONSERVE_2ND%regridmethod) then
+              map_method = "Conservative remapping"
+              esmf_regrid_method = "Second-order Conservative"
            elseif (methodlocal%regridmethod == ESMF_REGRIDMETHOD_NEAREST_STOD%regridmethod) then
               map_method = "Bilinear remapping"
               esmf_regrid_method = "Nearest source to destination"
@@ -1807,7 +1810,9 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
            endif
 
            ! only write out xv_a and yv_a when the regrid method is conserve
-           if (.not. useSrcCornerlocal .or. methodlocal%regridmethod ==ESMF_REGRIDMETHOD_CONSERVE%regridmethod) then
+           if (.not. useSrcCornerlocal .or. &
+                methodlocal%regridmethod == ESMF_REGRIDMETHOD_CONSERVE%regridmethod .or. &
+                methodlocal%regridmethod ==ESMF_REGRIDMETHOD_CONSERVE_2ND%regridmethod) then
            ! output xv_a and yv_a is harder, we have to read in the nodeCoords and
            ! elementConn and construct the the latitudes and longitudes for
            ! all the corner vertices
@@ -1838,7 +1843,8 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
            endif
            allocate(mask(srcDim))
            if (.not. useSrcCornerlocal .and. &
-               methodlocal%regridmethod ==ESMF_REGRIDMETHOD_CONSERVE%regridmethod) then
+               (methodlocal%regridmethod ==ESMF_REGRIDMETHOD_CONSERVE%regridmethod .or. &
+                methodlocal%regridmethod ==ESMF_REGRIDMETHOD_CONSERVE_2ND%regridmethod)) then
              ncStatus=nf90_inq_varid(ncid1,"elementMask",VarId)
              if (ncStatus /= nf90_noerror) then
                write(*,*) "Warning: elementMask"// &
@@ -1897,7 +1903,9 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
            call ESMF_UGridInq(srcfile, srcmeshname, meshId=meshId, faceCoordFlag=faceCoordFlag)
            if (ESMF_LogFoundError(status, ESMF_ERR_PASSTHRU, &
                ESMF_CONTEXT, rcToReturn=rc)) return
-           if (.not. useSrcCornerlocal .or. methodlocal%regridmethod ==ESMF_REGRIDMETHOD_CONSERVE%regridmethod) then
+           if (.not. useSrcCornerlocal .or. &
+                methodlocal%regridmethod ==ESMF_REGRIDMETHOD_CONSERVE%regridmethod .or. &
+                methodlocal%regridmethod ==ESMF_REGRIDMETHOD_CONSERVE_2ND%regridmethod) then
              ! check if faceCoords exit
               allocate(latBuffer2(src_grid_corner,srcDim),&
                        lonBuffer2(src_grid_corner,srcDim))
@@ -2303,7 +2311,8 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
            ! elementConn and construct the the latitudes and longitudes for
            ! all the corner vertices
            if (.not. useDstCornerlocal .or. &
-              methodlocal%regridmethod ==ESMF_REGRIDMETHOD_CONSERVE%regridmethod) then
+                methodlocal%regridmethod ==ESMF_REGRIDMETHOD_CONSERVE%regridmethod .or. &
+                methodlocal%regridmethod ==ESMF_REGRIDMETHOD_CONSERVE_2ND%regridmethod) then
            if (dst_grid_corner > 0) then
            allocate(latBuffer2(dst_grid_corner,dstDim),lonBuffer2(dst_grid_corner,dstDim))
            call ESMF_EsmfGetVerts(ncid1, dstFile, dstDim, dst_grid_corner, dstNodeDim, &
@@ -2332,7 +2341,8 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
            ! Write mask_b
            allocate(mask(dstDim))
            if (.not. useDstCornerlocal .or. &
-              methodlocal%regridmethod ==ESMF_REGRIDMETHOD_CONSERVE%regridmethod) then
+                methodlocal%regridmethod ==ESMF_REGRIDMETHOD_CONSERVE%regridmethod .or. &
+                methodlocal%regridmethod ==ESMF_REGRIDMETHOD_CONSERVE_2ND%regridmethod) then
              ncStatus=nf90_inq_varid(ncid1,"elementMask",VarId)
              if (ncStatus /= nf90_noerror) then
                write(*,*) "Warning: elementMask"// &
@@ -2392,7 +2402,8 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
            if (ESMF_LogFoundError(status, ESMF_ERR_PASSTHRU, &
                ESMF_CONTEXT, rcToReturn=rc)) return
            if (.not. useDstCornerlocal .or. &
-             methodlocal%regridmethod ==ESMF_REGRIDMETHOD_CONSERVE%regridmethod) then
+                methodlocal%regridmethod ==ESMF_REGRIDMETHOD_CONSERVE%regridmethod .or. &
+                methodlocal%regridmethod ==ESMF_REGRIDMETHOD_CONSERVE_2ND%regridmethod) then
              ! check if faceCoords exit
                 allocate(latBuffer2(dst_grid_corner,dstDim),&
                         lonBuffer2(dst_grid_corner,dstDim))
@@ -2835,6 +2846,9 @@ subroutine ESMF_OutputSimpleWeightFile (wgtFile, factorList, factorIndexList, &
            elseif (methodlocal%regridmethod == ESMF_REGRIDMETHOD_CONSERVE%regridmethod) then
               map_method = "Conservative remapping"
               esmf_regrid_method = "First-order Conservative"
+           elseif (methodlocal%regridmethod == ESMF_REGRIDMETHOD_CONSERVE_2ND%regridmethod) then
+              map_method = "Conservative remapping"
+              esmf_regrid_method = "Second-order Conservative"
            elseif (methodlocal%regridmethod == ESMF_REGRIDMETHOD_NEAREST_STOD%regridmethod) then
               map_method = "Bilinear remapping"
               esmf_regrid_method = "Nearest source to destination"

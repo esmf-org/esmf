@@ -87,11 +87,23 @@ int calc_gc_parameters_quad(const double *pnt, double *pnt1, double *pnt2, doubl
 int calc_gc_parameters_tri(const double *pnt, double *t1, double *t2, double *t3,
                             double *p1, double *p2);
 
+ bool line_with_gc_seg3D(double *a1, double *a2, double *sin, double *sout,
+                          double *p);
+
+ void intersect_convex_2D_3D_sph_gc_poly(int num_p, double *p,
+                                         int num_q, double *q,
+                                         double *tmp,
+                                         int *num_out, double *out);
+
 //// Handy macros ////
 
 // Do it this way because some compilers don't support isfinite (e.g. pgi)
 #define MU_IS_FINITE(n) ((n) <= std::numeric_limits<double>::max() && (n) >= -std::numeric_limits<double>::max())
   
+#define MU_ASSIGN_VEC3D(out,a) \
+  out[0]=a[0]; \
+  out[1]=a[1]; \
+  out[2]=a[2];
 
 #define MU_SET_MIN_VEC3D(min,vec)       \
   if (vec[0]<min[0]) min[0]=vec[0];\
@@ -119,6 +131,15 @@ int calc_gc_parameters_tri(const double *pnt, double *t1, double *t2, double *t3
   out_v[1]=m[3]*v[0]+m[4]*v[1]+m[5]*v[2]; \
   out_v[2]=m[6]*v[0]+m[7]*v[1]+m[8]*v[2];
 
+#define MU_SET_TO_SCALAR_VEC3D(out,s) \
+  out[0]=(s);                      \
+  out[1]=(s);                      \
+  out[2]=(s);
+
+#define MU_MULT_BY_SCALAR_VEC3D(out,a,s) \
+  out[0]=a[0]*(s);                      \
+  out[1]=a[1]*(s);                      \
+  out[2]=a[2]*(s);
 
 #define MU_DIV_BY_SCALAR_VEC3D(out,a,s) \
   out[0]=a[0]/(s);                      \

@@ -35,13 +35,14 @@ public:
  * to the geometric rendezvous.
  */
   struct DstConfig {
-         DstConfig(UInt _iter_otype, UInt _otype, const Context &_ctxt, bool _neighbors = false, double _gtol = 1e-6) :
-           iter_obj_type(_iter_otype), obj_type(_otype), ctxt(_ctxt), neighbors(_neighbors), geom_tol(_gtol) {}
-         UInt iter_obj_type; // Object to iterate when building intersection 
-         UInt obj_type; // One of node, node + interp, interp
-         Context ctxt; // Context to match when iterating 
-         bool neighbors; // true = send neigbors with elements (for patch methods)
-         double geom_tol;
+  DstConfig(UInt _iter_otype, UInt _otype, const Context &_ctxt, bool _neighbors = false, bool _all_overlap_dst=false,  double _gtol = 1e-6) :
+    iter_obj_type(_iter_otype), obj_type(_otype), ctxt(_ctxt), neighbors(_neighbors), all_overlap_dst(_all_overlap_dst), geom_tol(_gtol) {}
+    UInt iter_obj_type; // Object to iterate when building intersection 
+    UInt obj_type; // One of node, node + interp, interp
+    Context ctxt; // Context to match when iterating 
+    bool neighbors; // true = send neigbors with elements (for patch methods)
+    bool all_overlap_dst; // construct the destination, so that every destination cell that overlaps a source cell ends up on the same proc
+    double geom_tol;
   };
 
   GeomRend(Mesh *srcmesh, PointList *_srcplist, 
@@ -113,6 +114,8 @@ private:
 
   void build_src_mig(Zoltan_Struct *zz, ZoltanUD &zud);
 
+  void build_dst_mig_all_overlap(ZoltanUD &zud);
+
   void build_src_mig_plist(ZoltanUD &zud, int numExport,
 			   ZOLTAN_ID_PTR exportGids, 
 			   int *exportProcs, int numImport, ZOLTAN_ID_PTR importGids);
@@ -128,6 +131,10 @@ private:
   void prep_meshes();
   
   void migrate_meshes();
+
+  void dst_migrate_meshes();
+
+  void src_migrate_meshes();
 
   // Data
   Mesh *srcmesh;
@@ -145,6 +152,7 @@ private:
   
   // The communication Registers from mesh to rendezvous mesh.
   CommReg srcComm;
+  CommReg srcNbrComm;
   CommReg dstComm;
   bool built;
   UInt sdim;
