@@ -230,7 +230,7 @@ void ESMCI_regrid_create(
     if (*has_udl) {
       if ((*regridMethod==ESMC_REGRID_METHOD_CONSERVE) ||
           (*regridMethod==ESMC_REGRID_METHOD_CONSERVE_2ND)) {
-        get_mesh_elem_ids_not_in_wmat(dstmesh, wts, &unmappedDstList);
+        get_mesh_elem_ids_not_in_wmat(dstmesh, *wts, &unmappedDstList);
       } else if (*regridMethod == ESMC_REGRID_METHOD_NEAREST_DST_TO_SRC) { 
         // CURRENTLY DOESN'T WORK!!!
 #if 0
