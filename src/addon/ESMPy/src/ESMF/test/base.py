@@ -69,8 +69,10 @@ class TestBase(unittest.TestCase):
                 self.assertEqual(v, d2[k])
             self.assertEqual(set(d1.keys()), set(d2.keys()))
 
-    def iter_product_keywords(self, keywords, as_namedtuple=True):
+    @staticmethod
+    def iter_product_keywords(keywords, as_namedtuple=True):
         return iter_product_keywords(keywords, as_namedtuple=as_namedtuple)
+
 
 def attr(*args, **kwargs):
     """

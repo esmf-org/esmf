@@ -14,4 +14,12 @@ Licensed under the University of Illinois-NCSA License.
 #if (__GNUC__ == 4) && (__GNUC_MINOR__ < 3)
 #error "The gfortran compiler must be version 4.3 or newer."
 #endif
+
+#if (__GNUC__ == 4) && (__GNUC_MINOR__ < 6)
+#if 0
+Gfortran prior to 4.6 does not support Fortran 2003 allocatable character string lengths.
+#endif
+#define ESMF_NO_F2003_ALLOC_STRING_LENS
+#endif
+
 #endif

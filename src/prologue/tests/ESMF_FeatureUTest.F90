@@ -111,8 +111,8 @@
 
 
     ! TODO: Tests are currently disabled on older compilers - e.g., pre-4.6 gfortran,
-    !  and with Absoft, g95, and Lahey due to lack of deferred-length allocatable
-    ! character string support .  Re-enable when ESMF support for these older compilers
+    ! and with Absoft, g95, and Lahey/Fujitsu due to lack of deferred-length allocatable
+    ! character string support.  Re-enable when ESMF support for these older compilers
     ! is no longer required.
     !------------------------------------------------------------------------
     !------------------------------------------------------------------------
@@ -148,10 +148,15 @@
     if (allocated (alloc_string7)) deallocate (alloc_string7)
 #endif
 
+#ifdef ESMF_TESTEXHAUSTIVE
+
+    !------------------------------------------------------------------------
+    !------------------------------------------------------------------------
+
 #if 0
     ! TODO: Tests are currently disabled because gfortran prior to v5.1 has issues with
-    ! arrays of deferred-length strings.  Re-enable when ESMF support for these older compilers
-    ! is no longer required.
+    ! arrays of deferred-length strings.  Re-enable when ESMF support for these older
+    ! compilers is no longer required.
 
     !------------------------------------------------------------------------
     ! NEX_xxxUTest
@@ -207,9 +212,10 @@
     ! than originally allocated.  For example PGI requires -Mallocatable=03
     ! and Intel requires -assume realloc_lhs.
 
-    ! TODO: Tests are currently disabled due to failures on older compilers
-    ! e.g., pre-4.6 gfortran, and with Absoft, g95, and Lahey.  Re-enable when ESMF
-    ! support for these older compilers is no longer required.
+    ! TODO: Tests are currently disabled on older compilers - e.g., pre-4.6 gfortran,
+    ! and with Absoft, g95, and Lahey/Fujitsu due to lack of re-allocate on
+    ! assignment support.  Re-enable when ESMF support for these older compilers
+    ! is no longer required.
 
 #if 0
     !------------------------------------------------------------------------
@@ -232,7 +238,7 @@
     !------------------------------------------------------------------------
     !------------------------------------------------------------------------
     ! NEX_xxxUTest
-    name = "Fortran resize existing allocatable array via assignment test"
+    name = "Fortran re-allocate existing allocatable array via assignment test"
     failMsg = "Incorrect allocated size"
     a = b
     rc = merge (ESMF_SUCCESS, ESMF_RC_ARG_SIZE, size (a) == 420)
@@ -242,18 +248,13 @@
     !------------------------------------------------------------------------
     !------------------------------------------------------------------------
     ! NEX_xxxUTest
-    name = "Fortran resize unallocated allocatable array via assignment test"
+    name = "Fortran allocate unallocated allocatable array via assignment test"
     failMsg = "Incorrect allocated size"
     c = b
     rc = merge (ESMF_SUCCESS, ESMF_RC_ARG_SIZE, size (c) == 420)
     call ESMF_Test(rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
     print *, 'new size (c) =', size (c)
 #endif
-
-#ifdef ESMF_TESTEXHAUSTIVE
-
-    !------------------------------------------------------------------------
-    !------------------------------------------------------------------------
 
 !------------------------------------------------------------------------
 ! F2003 allocatable deferred-length character string scalar support.
@@ -345,8 +346,13 @@
     call ESMF_Test(rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
     !------------------------------------------------------------------------
 
+#if 0
+    ! TODO: Test is currently disabled because gfortran prior to v5.1 has issues with
+    ! arrays of deferred-length strings.  Re-enable when ESMF support for these older
+    ! compilers is no longer required.
+
     !------------------------------------------------------------------------
-    ! EX_UTest
+    ! EX_xxxUTest
     name = "Fortran allocatable deferred-length string array deallocate test"
     failMsg = "Did not return success"
 #if !defined (ESMF_NO_F2003_ALLOC_STRING_LENS)
@@ -358,12 +364,14 @@
 #endif
     call ESMF_Test(rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
     !------------------------------------------------------------------------
+#endif
 
     !------------------------------------------------------------------------
     ! EX_UTest
     name = "Fortran allocatable deferred-length string array allocate test"
     failMsg = "Did not return success"
 #if !defined (ESMF_NO_F2003_ALLOC_STRING_LENS)
+    if (allocated (alloc_string_array)) deallocate (alloc_string_array)
     allocate (character(len=42)::alloc_string_array(24), stat=memstat)
     rc = merge (ESMF_SUCCESS, ESMF_FAILURE, memstat == 0)
 #else
@@ -373,8 +381,12 @@
     call ESMF_Test(rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
     !------------------------------------------------------------------------
 
+#if 0
+    ! TODO: Test is currently disabled because gfortran prior to v5.1 has issues with
+    ! arrays of deferred-length strings.  Re-enable when ESMF support for these older
+    ! compilers is no longer required.
     !------------------------------------------------------------------------
-    ! EX_UTest
+    ! EX_xxxUTest
     name = "Fortran allocatable deferred-length string array allocate length test"
     failMsg = "Did not return success"
 #if !defined (ESMF_NO_F2003_ALLOC_STRING_LENS)
@@ -386,6 +398,7 @@
 #endif
     call ESMF_Test(rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
     !------------------------------------------------------------------------
+#endif
 
     !------------------------------------------------------------------------
     ! EX_UTest
@@ -401,7 +414,7 @@
     call ESMF_Test(rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
 
 #if !defined (ESMF_NO_F2003_ALLOC_STRING_LENS)
-    deallocate (alloc_string_array)
+    if (allocated (alloc_string_array)) deallocate (alloc_string_array)
 #endif
     !------------------------------------------------------------------------
 

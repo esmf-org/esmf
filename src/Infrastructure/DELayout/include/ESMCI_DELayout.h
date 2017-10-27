@@ -393,24 +393,24 @@ class XXE{
       // reset the stream back to a specified position, and clear all
       // bookkeeping elements above specified positions
       count = countArg; // reset
-      if (storageCountArg>0){
+      if (storageCountArg>-1){
         for (int i=storageCountArg; i<storageCount; i++)
           delete [] storage[i];
         storageCount = storageCountArg; // reset
       }
-      if (commhandleCountArg>0){
+      if (commhandleCountArg>-1){
         for (int i=commhandleCountArg; i<commhandleCount; i++){
           delete *commhandle[i];
           delete commhandle[i];
         }
         commhandleCount = commhandleCountArg; // reset
       }
-      if (xxeSubCountArg>0){
+      if (xxeSubCountArg>-1){
         for (int i=xxeSubCountArg; i<xxeSubCount; i++)
           delete xxeSubList[i];
         xxeSubCount = xxeSubCountArg; // reset
       }
-      if (bufferInfoListArg>0){
+      if (bufferInfoListArg>-1){
         std::vector<BufferInfo *>::iterator first =
           bufferInfoList.begin() + bufferInfoListArg;
         std::vector<BufferInfo *>::iterator last = bufferInfoList.end();

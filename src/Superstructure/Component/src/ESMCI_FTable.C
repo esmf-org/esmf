@@ -73,6 +73,7 @@ extern "C" {
   //for now, assume these are here in the case that dlopen is not available
   void FTN_X(nuopc_model_complianceicr)(void *comp, int *rc);
   void FTN_X(nuopc_driver_complianceicr)(void *comp, int *rc);
+  void FTN_X(nuopc_connector_complianceicr)(void *comp, int *rc);
 #endif
 }
 //==============================================================================
@@ -1893,6 +1894,11 @@ std::cout << "ESMF_RUNTIME_COMPLIANCEICREGISTER attribute:" << value[0] <<"\n";
             }
             else if (value[0].find("nuopc_driver") != std::string::npos) {
             	FTN_X(nuopc_driver_complianceicr)((void *)comp, &registerIcUserRc);
+            	if (ESMC_LogDefault.MsgFoundError(registerIcUserRc,
+            	              ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc; // bail out
+            }
+            else if (value[0].find("nuopc_connector") != std::string::npos) {
+            	FTN_X(nuopc_connector_complianceicr)((void *)comp, &registerIcUserRc);
             	if (ESMC_LogDefault.MsgFoundError(registerIcUserRc,
             	              ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc; // bail out
             }

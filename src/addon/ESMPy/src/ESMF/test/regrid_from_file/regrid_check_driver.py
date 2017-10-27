@@ -33,15 +33,18 @@ if ESMF.pet_count() > 1:
     parallel = True
 
 # Read the test case parameters from the control file.
-test_cases = read_control_file()
 
+print('Reading control file...')
+test_cases = read_control_file()
 if (ESMF.local_pet() == 0):
     # Retrieve the data files needed for the test cases from the remote server.
+    print('Retrieving regrid_from_file data...')
     status_ok = cache_data_files_for_test_cases(test_cases)
 
 # For each test case line from the control file parse the line and call
 # the test subroutine.
-for test_case in test_cases:
+for ctr, test_case in enumerate(test_cases, start=1):
+    print('Running {} of {} regrid_from_file test cases...'.format(ctr, len(test_cases)))
     (src_fname, dst_fname, regrid_method, options, 
      itrp_mean_err, itrp_max_err, csrv_err) = test_case
     test_str = 'Regrid %s to %s as %s with %s itrp_mean_err=%f, itrp_max_err=%f, and csrv_err=%f' % (src_fname, dst_fname, regrid_method, options, itrp_mean_err, itrp_max_err, csrv_err)

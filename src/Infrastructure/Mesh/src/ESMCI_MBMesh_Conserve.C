@@ -1512,6 +1512,7 @@ void calc_conserve_mat(MBMesh *srcmbmp, MBMesh *dstmbmp, MBMesh_Search_EToE_Resu
 
 // Copy fractions to mesh
 void set_frac_in_mesh(MBMesh *mesh, IWeights &frac) {
+#undef  ESMC_METHOD
 #define ESMC_METHOD "set_frac()"
 
   // Error return codes
@@ -1581,6 +1582,7 @@ void set_frac_in_mesh(MBMesh *mesh, IWeights &frac) {
 
  /* XMRKX */
 void calc_cnsrv_regrid_wgts(MBMesh *srcmesh, MBMesh *dstmesh, IWeights &wts) {
+#undef  ESMC_METHOD
 #define ESMC_METHOD "calc_cnsrc_regrid_wgts()"
 
   // Get Parallel Information

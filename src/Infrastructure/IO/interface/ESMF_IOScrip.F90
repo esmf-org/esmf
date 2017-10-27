@@ -93,23 +93,83 @@ subroutine ESMF_OutputWeightFile (weightFile, factorList, factorIndexList, rc)
     integer(ESMF_KIND_I4), intent(in) :: factorIndexList(:,:)
     integer, intent(out), optional :: rc
 
-    integer :: localrc
     type(ESMF_DistGrid) :: distgridFL
     type(ESMF_Array) :: arrayFL, arrayFIL1, arrayFIL2
 
     type(ESMF_AttPack) :: attpack
-    integer :: lens(3), lens2(1)
+    integer :: lens(3), lens2(1), nfactors, ii, localPet, petCount, startIndex, &
+               stopIndex, localrc
     character(len=22), parameter :: specString = "distgridnetcdfmetadata"
     character(len=23), parameter :: name = "ESMF:gridded_dim_labels"
     character(len=3), parameter :: value = "n_s"
+    integer(ESMF_KIND_I4), allocatable, dimension(:) :: col, row
+    type(ESMF_VM) :: vm
+    integer(ESMF_KIND_I4), dimension(1) :: sendData, recvData
+    integer(ESMF_KIND_I4), dimension(2) :: bcstData
+    integer(ESMF_KIND_I4), allocatable, dimension(:,:,:) :: deBlockList
     
-    ! make ESMF arrays out of factorList and factorIndexList
-    distgridFL = ESMF_DistGridCreate(minIndex=(/1/), &
-                                     maxIndex=(/size(factorList,1)/), &
-                                     rc=localrc)
+    ! ==============================================================================
+    
+    if (present(rc)) then
+      localrc = rc
+    else
+      localrc = ESMF_RC_NOT_IMPL
+    endif
+    
+    call ESMF_VMGetGlobal(vm, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
+    call ESMF_VMGet(vm, localPet=localPet, petCount=petCount, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    
+    ! ==============================================================================
+    ! Create the DistGrid. The factors may be ragged (factor count differs between
+    ! PETs). Synchronize min and max indices across PETs.
+    
+    ! Number of local factors.
+    nfactors = size(factorList, 1)
+    
+    ! Chain start and stop index calculation.
+    if (localPet .ne. 0) then
+      call ESMF_VMRecv(vm, recvData, 1, localPet-1, rc=localrc)
+      startIndex = recvData(1)
+    else
+      startIndex = 1
+    endif
+    stopIndex = startIndex + nfactors - 1
+    if ((localPet .ne. petCount-1) .and. (petCount > 1)) then
+      call ESMF_VMSend(vm, (/stopIndex+1/), 1, localPet+1, rc=localrc)
+      if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+    
+    ! Remember ragged factor counts may require a non-regular decomposition. This
+    ! requires a custom block definition per DE.
+    allocate(deBlockList(1, 2, petCount))
+    do ii=1,petCount
+      if (localPet .eq. ii-1) then
+        bcstData = (/startIndex, stopIndex/)
+      else
+        bcstData = (/0, 0/)
+      endif
+      call ESMF_VMBroadcast(vm, bcstData, 2, ii-1, rc=localrc)
+      if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+      deBlockList(1, :, ii) = bcstData
+    enddo
+    
+    distgridFL = ESMF_DistGridCreate(minIndex=(/1/), &
+                                     maxIndex=(/deBlockList(1, 2, petCount)/), &
+                                     deBlockList=deBlockList, &
+                                     rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+        
+    ! ==============================================================================
+    ! Set up attributes to allow variables to share a common dimension name in the
+    ! output file.
 
     !NOTE: removed distgridcreate from factorIndexList so that all
     !      Arrays could share the same DistGrid (i.e. dimensions)
@@ -123,51 +183,64 @@ subroutine ESMF_OutputWeightFile (weightFile, factorList, factorIndexList, rc)
     
     ! set up the metadata on distgrid
     call c_ESMC_AttPackCreateCustom(distgridFL, size(lens), specString, &
-                                    lens, attpack, rc)
+                                    lens, attpack, localrc)
     !call ESMF_AttributeAdd(grid, convention="netcdf", purpose="metadata",  &
     !  attrList=(/ ESMF_ATT_GRIDDED_DIM_LABELS /), rc=rc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
     !call c_ESMC_AttPackAddAtt(grid, name, size(lens), specString, &
     !                          lens, rc)
-    call c_ESMC_AttPackAddAtt(name, attpack, rc)
+    call c_ESMC_AttPackAddAtt(name, attpack, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
     
     call c_ESMC_AttPackSetCharList(distgridFL, name, ESMF_TYPEKIND_CHARACTER, &
-                                  1, value, lens2, attpack, 0, rc)
+                                  1, value, lens2, attpack, 0, localrc)
     !call ESMF_AttributeSet(grid, name=ESMF_ATT_GRIDDED_DIM_LABELS, &
     !                       convention="netcdf", purpose="metadata",  &
     !                       valueList=(/ "n_s"/), rc=rc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
-    ! set up Arrays
+    ! ==============================================================================
+    ! Create arrays.
 
     arrayFL = ESMF_ArrayCreate(farray=factorList, distgrid=distgridFL, &
                                indexflag=ESMF_INDEX_DELOCAL, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
-    arrayFIL1 = ESMF_ArrayCreate(farray=factorIndexList(1,:), &
-                                 distgrid=distgridFL, &
+    ! Copy factor indexing before passing to array create. Passing an array section 
+    ! here causes undefined behavior in the array buffer access. "datacopyflag" does 
+    ! not work with this interface??
+    allocate(col(nfactors), row(nfactors))
+    do ii=1,nfactors
+      col(ii) = factorIndexList(1, ii)
+      row(ii) = factorIndexList(2, ii)
+    enddo
+    
+    arrayFIL1 = ESMF_ArrayCreate(farray=col, distgrid=distgridFL, &
                                  indexflag=ESMF_INDEX_DELOCAL, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
-    arrayFIL2 = ESMF_ArrayCreate(farray=factorIndexList(2,:), &
-                                 distgrid=distgridFL, &
+    arrayFIL2 = ESMF_ArrayCreate(farray=row, distgrid=distgridFL, &
                                  indexflag=ESMF_INDEX_DELOCAL, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
-    ! write the Arrays using ArrayWrite
+    ! ==============================================================================
+    ! Write arrays to file.
+
+    ! Do not overwrite the output file by default.
     call ESMF_ArrayWrite(arrayFL, weightFile, variableName="S", &
                          convention="netcdf", purpose="metadata", &
                          overwrite=.false., rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
+    ! Set overwrite to true for consecutive writes. The file is created on the first
+    ! write.
     call ESMF_ArrayWrite(arrayFIL1, weightFile, variableName="col", &
                          convention="netcdf", purpose="metadata", &
                          overwrite=.true., rc=localrc)
@@ -180,6 +253,17 @@ subroutine ESMF_OutputWeightFile (weightFile, factorList, factorIndexList, rc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
+    ! ==============================================================================
+
+    deallocate(col, row, deBlockList)
+    call ESMF_ArrayDestroy(arrayFL, rc=localrc)
+    call ESMF_ArrayDestroy(arrayFIL1, rc=localrc)
+    call ESMF_ArrayDestroy(arrayFIL2, rc=localrc)
+    call ESMF_DistGridDestroy(distgridFL, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+        
+    rc = localrc
 
 end subroutine ESMF_OutputWeightFile
 
@@ -4094,3 +4178,35 @@ end function CDFCheckError
 
 
 end module ESMF_IOScripMod
+
+
+!!!!!! f_esmf_ interfaces to be callable from ESMCI !!!!!!!!!!!!!!!!!!!!!!!
+
+subroutine f_esmf_outputsimpleweightfile(fileName, count, factorList, &
+  factorIndexList, rc)
+  use ESMF_UtilTypesMod
+  use ESMF_IOScripMod
+  use ESMF_LogErrMod
+  
+  implicit none
+  
+  character(len=*)          :: fileName
+  integer                   :: count
+  real(ESMF_KIND_R8)        :: factorList(count)
+  integer(ESMF_KIND_I4)     :: factorIndexList(2,count)
+  integer                   :: rc
+  
+  ! Initialize return code; assume routine not implemented
+  rc = ESMF_RC_NOT_IMPL
+
+  ! call into the ESMF_ routine
+  call ESMF_OutputSimpleWeightFile(fileName, factorList, &
+    factorIndexList, rc=rc)
+  if (ESMF_LogFoundError(rc, &
+    ESMF_ERR_PASSTHRU, &
+    ESMF_CONTEXT)) return
+  
+  ! return successfully
+  rc = ESMF_SUCCESS
+  
+end subroutine f_esmf_outputsimpleweightfile
