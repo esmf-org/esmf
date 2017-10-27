@@ -8997,7 +8997,7 @@ int XXE::storeBufferInfo(
 //  Append an element at the end of the buffer info vector.
 //EOPI
 //-----------------------------------------------------------------------------
- // initialize return code; assume routine not implemented
+  // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
   
