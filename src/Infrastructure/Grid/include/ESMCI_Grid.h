@@ -43,6 +43,11 @@
 #define ESMC_GRIDCOORDGEOM_CART 0
 #define ESMC_GRIDCOORDGEOM_SPH_DEG 1
 
+// Internal staggerloc numbers
+#define ESMCI_STAGGERLOC_CENTER 0
+#define ESMCI_STAGGERLOC_CORNER 3
+
+
 enum ESMC_GridDecompType {ESMC_GRID_INVALID=1, 
             ESMC_GRID_NONARBITRARY,
             ESMC_GRID_ARBITRARY

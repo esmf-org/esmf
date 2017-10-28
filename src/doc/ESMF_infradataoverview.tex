@@ -213,7 +213,7 @@ ESMF\_RegridWeightGen & Application & Grid files & yes  & no & Sec.~\ref{sec:ESM
 
  In 2D, ESMF supports bilinear regridding between any combination of the following:
  \begin{itemize}
- \item Structured grids ({\tt ESMF\_Grid}) composed of a single logically rectangular patch
+ \item Structured grids ({\tt ESMF\_Grid}) composed of any number of logically rectangular tiles
  \item Unstructured meshes ({\tt ESMF\_Mesh}) composed of polygons with any number of sides
  \item A set of disconnected points ({\tt ESMF\_LocStream}) may be the destination of the regridding
  \end{itemize}
@@ -222,7 +222,7 @@ ESMF\_RegridWeightGen & Application & Grid files & yes  & no & Sec.~\ref{sec:ESM
 
  In 3D, ESMF supports bilinear regridding between any combination of the following:
  \begin{itemize}
- \item Structured grids ({\tt ESMF\_Grid}) composed of a single logically rectangular patch
+ \item Structured grids ({\tt ESMF\_Grid}) composed of a single logically rectangular tile
  \item Unstructured meshes ({\tt ESMF\_Mesh}) composed of hexahedrons 
  \item A set of disconnected points ({\tt ESMF\_LocStream}) may be the destination of the regridding
  \end{itemize}
@@ -259,14 +259,17 @@ ESMF\_RegridWeightGen & Application & Grid files & yes  & no & Sec.~\ref{sec:ESM
 
  In 2D, ESMF supports patch regridding between any combination of the following:
  \begin{itemize}
- \item Structured Grids ({\tt ESMF\_Grid}) composed of a single logically rectangular patch
+ \item Structured Grids ({\tt ESMF\_Grid}) composed of a single logically rectangular tile
  \item Unstructured meshes ({\tt ESMF\_Mesh}) composed of polygons with any number of sides
  \item A set of disconnected points ({\tt ESMF\_LocStream}) may be the destination of the regridding
  \end{itemize}
 
 \smallskip
 
- Patch regridding is currently not supported in 3D.
+ In 3D, ESMF supports second-order conservative regridding between any combination of the following:
+ \begin{itemize}
+ \item NONE
+ \end{itemize}
 
 \smallskip
 
@@ -288,7 +291,7 @@ In nearest source to destination interpolation ({\tt ESMF\_REGRIDMETHOD\_NEAREST
 
  In 2D, ESMF supports nearest source to destination regridding between any combination of the following:
  \begin{itemize}
- \item Structured Grids ({\tt ESMF\_Grid}) composed of a single logically rectangular patch
+ \item Structured Grids ({\tt ESMF\_Grid}) composed of any number of logically rectangular tiles
  \item Unstructured meshes ({\tt ESMF\_Mesh}) composed of polygons with any number of sides
  \item A set of disconnected points ({\tt ESMF\_LocStream}) 
  \end{itemize}
@@ -297,7 +300,7 @@ In nearest source to destination interpolation ({\tt ESMF\_REGRIDMETHOD\_NEAREST
 
  In 3D, ESMF supports nearest source to destination regridding between any combination of the following:
  \begin{itemize}
- \item Structured Grids ({\tt ESMF\_Grid}) composed of a single logically rectangular patch
+ \item Structured Grids ({\tt ESMF\_Grid}) composed of any number of logically rectangular tiles
  \item Unstructured Meshes ({\tt ESMF\_Mesh}) composed of hexahedrons (e.g. cubes) and tetrahedrons
  \item A set of disconnected points ({\tt ESMF\_LocStream}) 
  \end{itemize}
@@ -321,7 +324,7 @@ In nearest destination to source interpolation ({\tt ESMF\_REGRIDMETHOD\_NEAREST
 
  In 2D, ESMF supports nearest destination to source regridding between any combination of the following:
  \begin{itemize}
- \item Structured Grids ({\tt ESMF\_Grid}) composed of a single logically rectangular patch
+ \item Structured Grids ({\tt ESMF\_Grid}) composed of any number of logically rectangular tiles
  \item Unstructured meshes ({\tt ESMF\_Mesh}) composed of polygons with any number of sides
  \item A set of disconnected points ({\tt ESMF\_LocStream}) 
  \end{itemize}
@@ -330,7 +333,7 @@ In nearest destination to source interpolation ({\tt ESMF\_REGRIDMETHOD\_NEAREST
 
  In 3D, ESMF supports nearest destination to source regridding between any combination of the following:
  \begin{itemize}
- \item Structured Grids ({\tt ESMF\_Grid}) composed of a single logically rectangular patch
+ \item Structured Grids ({\tt ESMF\_Grid}) composed of any number of logically rectangular tiles
  \item Unstructured Meshes ({\tt ESMF\_Mesh}) composed of hexahedrons (e.g. cubes) and tetrahedrons
  \item A set of disconnected points ({\tt ESMF\_LocStream}) 
  \end{itemize}
@@ -347,38 +350,126 @@ In nearest destination to source interpolation ({\tt ESMF\_REGRIDMETHOD\_NEAREST
  must contain coordinates. 
 
 \subsubsection{Interpolation methods: first-order conservative}\label{sec:interpolation:conserve}
- First-order conservative interpolation~\cite{ConservativeOrder1} is also available as a regridding method. This method 
- will typically have  
- a larger local interpolation error than the previous two methods, but will do a much better job of preserving the value
- of the  integral of data between the source and destination grid. In this method the value across each source cell
- is treated as a constant. The weights for a particular destination cell are the area of intersection of each 
- source cell with the destination cell divided by the area of the destination cell. For Cartesian grids, the area of a grid cell is the typical Cartesian area. 
- For grids on a sphere, cell areas are calculated by connecting the corner coordinates of each grid cell with great circles. If the user doesn't specify
- cell areas in the involved Grids or Meshes, then the conservation will hold for the areas as calculated by 
- ESMF. This means the following equation will hold:  sum-over-all-source-cells(Vsi*Asi) = sum-over-all-destination-cells(Vdj*A'dj), where
- V is the variable being regridded and A' is the area of a cell as calculated by ESMF.  The subscripts s and d refer to source and destination values, and the i and j are the source 
- and destination grid cell indices (flattening the arrays to 1 dimension). If the user does specify the areas in the Grid or Mesh, then the conservation will be adjusted to work for the areas 
- provided by the user. This means the following equation will hold:  sum-over-all-source-cells(Vsi*Asi) = sum-over-all-destination-cells(Vdj*Adj),
- where A is the area of a cell as provided by the user. 
+ The main purpose of this method is to preserve the integral of the field across the interpolation from source to destination.  
+ (For a more in-depth description of what this preservation of the integral (i.e. conservation) means please see section~\ref{sec:interpolation:conservation}.)  In this method the value across each source cell is treated as a constant, so it will typically have a larger 
+ interpolation error than the bilinear or patch methods.  The first-order method used here is similar to that described in the following paper~\cite{ConservativeOrder1}.
+
+ In the first-order method, the values for a particular destination cell are a calculated as a combination of the values of the intersecting 
+ source cells. The weight of a given source cell's contribution 
+ to the total being the amount that that source cell overlaps with the destination cell. 
+ In particular, the weight is the ratio of the area of intersection of the source and destination cells to the area of the whole destination cell. 
+
+ To see a description of how the different normalization options affect the values and integrals produced by the conservative methods see section~\ref{sec:interpolation:conservative_norm_opts}. For Grids or Meshes on a sphere this method uses great circle cells, for a description of potential problems with these see~\ref{sec:interpolation:great_circle_cells}.
+
+\smallskip
+
+ In 2D, ESMF supports conservative regridding between any combination of the following:
+ \begin{itemize}
+ \item Structured Grids ({\tt ESMF\_Grid}) composed of any number of logically rectangular tiles
+ \item Unstructured meshes ({\tt ESMF\_Mesh}) composed of polygons with any number of sides
+ \end{itemize}
+
+\smallskip
+
+ In 3D, ESMF supports conservative regridding between any combination of the following:
+ \begin{itemize}
+ \item Structured Grids ({\tt ESMF\_Grid}) composed of a single logically rectangular tile
+ \item Unstructured Meshes ({\tt ESMF\_Mesh}) composed of hexahedrons (e.g. cubes) and tetrahedrons
+ \end{itemize}
+
+\smallskip
+
+{\bf Restrictions:}
+ \begin{itemize}
+ \item Cells which contain enough identical corners to collapse to a line or point are optionally (via a flag) either ignored or return an error
+ \item Self-intersecting cells (e.g. a cell twisted into a bow tie) are not supported
+ \item On a spherical grid, cells which contain an edge which extends more than half way around the sphere are not supported 
+ \end{itemize}
+
+\smallskip
+
+ To use the conservative method the user should create their Fields on the center 
+ stagger location ({\tt ESMF\_STAGGERLOC\_CENTER} in 2D or {\tt ESMF\_STAGGERLOC\_CENTER\_VCENTER} in 3D) for Grids  or the element location ({\tt ESMF\_MESHLOC\_ELEMENT}) for Meshes.
+ For Grids, the corner stagger location ({\tt ESMF\_STAGGERLOC\_CORNER} in 2D or {\tt ESMF\_STAGGERLOC\_CORNER\_VFACE} in 3D) must contain coordinates describing the outer perimeter of the Grid cells. 
+
+\subsubsection{Interpolation methods: second-order conservative}\label{sec:interpolation:conserve_2ndorder}
+ Like the first-order conservative method, this method's main purpose is to preserve the integral of the field across the interpolation from source to destination.  
+ (For a more in-depth description of what this preservation of the integral (i.e. conservation) means please see section~\ref{sec:interpolation:conservation}.)  The difference between the first and second-order conservative methods is that the second-order takes the source gradient into account, so
+ it yields a smoother destination field that typically better matches the source field. This difference between the first and second-order methods 
+ is particularly apparent when going from a coarse source grid to a finer destination grid. The implementation of this method is based on the one 
+ described in this paper~\cite{ConservativeOrder2}.
+
+ Like the first-order method, the values for a particular destination cell with the second-order method
+ are a combination of the values of the intersecting source cells. With the weight of a given source cell's contribution to the total 
+ being the amount that that source cell overlaps with the destination cell. 
+ However, with the second-order conservative interpolation there are additional terms that take into account the gradient of the field 
+ across the source cell. In particular, the value $d$ for a given destination cell is calculated as:
+ 
+ $d=\sum^{intersecting-source-cells}_{i}(s_{i}+\nabla s_{i} \cdot (c_{si}-c_{d}))$
+
+\smallskip
+
+Where:
+\vspace{-1em}
+\begin{description}
+  \itemsep0em
+  \item[$s_{i}$] is the intersecting source cell value. 
+  \item[$\nabla s_{i}$] is the intersecting source cell gradient. 
+  \item[$c_{si}$] is the intersecting source cell centroid. 
+  \item[$c_{d}$] is the destination cell centroid. 
+\end{description}
+
+\smallskip
+
+ To see a description of how the different normalization options affect the values and integrals produced by the conservative methods see section~\ref{sec:interpolation:conservative_norm_opts}. For Grids or Meshes on a sphere this method uses great circle cells, for a description of potential problems with these see~\ref{sec:interpolation:great_circle_cells}.
+
+\smallskip
+
+ In 2D, ESMF supports second-order conservative regridding between any combination of the following:
+ \begin{itemize}
+ \item Structured Grids ({\tt ESMF\_Grid}) composed of any number of logically rectangular tiles
+ \item Unstructured meshes ({\tt ESMF\_Mesh}) composed of polygons with any number of sides
+ \end{itemize}
+
+\smallskip
+
+ In 3D, ESMF supports second-order conservative regridding between any combination of the following:
+ \begin{itemize}
+ \item NONE
+ \end{itemize}
+
+\smallskip
+
+{\bf Restrictions:}
+ \begin{itemize}
+ \item Cells which contain enough identical corners to collapse to a line or point are optionally (via a flag) either ignored or return an error
+ \item Self-intersecting cells (e.g. a cell twisted into a bow tie) are not supported
+ \item On a spherical grid, cells which contain an edge which extends more than half way around the sphere are not supported 
+ \end{itemize}
+ 
+\smallskip
+
+ To use the second-order conservative method the user should create their Fields on the center 
+ stagger location ({\tt ESMF\_STAGGERLOC\_CENTER} for Grids  or the element location ({\tt ESMF\_MESHLOC\_ELEMENT}) for Meshes.
+ For Grids, the corner stagger location ({\tt ESMF\_STAGGERLOC\_CORNER} in 2D must contain coordinates describing the outer perimeter of the Grid cells. 
+
+\subsubsection{Conservation}\label{sec:interpolation:conservation}
+ Conservation means that the following equation will hold:  $\sum^{all-source-cells}(V_{si}*A_{si}) = \sum^{all-destination-cells}(V_{dj}*A_{dj})$, where
+ V is the variable being regridded and A is the area of a cell.  The subscripts s and d refer to source and destination values, and the i and j are the source  and destination grid cell indices (flattening the arrays to 1 dimension). 
+
+ If the user doesn't specify a cell areas in the involved Grids or Meshes, then the areas (A) in the above equation are calculated by ESMF. 
+ For Cartesian grids, the area of a grid cell calculated by ESMF is the typical Cartesian area. 
+ For grids on a sphere, cell areas are calculated by connecting the corner coordinates of each grid cell with great circles. If the user 
+ does specify the areas in the Grid or Mesh, then the conservation will be adjusted to work for the areas 
+ provided by the user. This means that the above equation will hold, but with the areas (A) being the ones specified by the user.
 
  The user should be aware that because of the conservation relationship between the source and destination fields, the more the total source area
- differs from the total destination area the more the values of the source field will differ from the corresponding values of the destination field, likely giving a higher 
- interpolation error. It is best to have the total source and destination areas the same (this will automatically be true if no user areas are specified). For source and destination grids 
+ differs from the total destination area the more the values of the source field will differ from the corresponding values of the destination field, 
+ likely giving a higher interpolation error. It is best to have the total source and destination areas the same 
+ (this will automatically be true if no user areas are specified). For source and destination grids 
  that only partially overlap, the overlapping regions of the source and destination should be the same.
 
- Note that for grids on a sphere the conservative interpolation assumes great circle edges to cells. This means that the
- edges of a cell won't necessarily be
- the same as a straight line in latitude longitude. For small edges, this difference will be small, but for long edges it
- could be significant. This means if
- the user expects cell edges as straight lines in latitude longitude space, they should avoid using one large cell with 
- long edges to compute an average over a region (e.g. over an ocean basin). The 
- user should also avoid using cells that contain one edge that runs half way or more around the Earth, because the 
- regrid weight calculation assumes the 
- edge follows the shorter great circle path. Also, there isn't a unique great circle edge defined between points on the 
- exact opposite side of the Earth (antipodal points). 
- However, the user can work around both of these problems by inserting an extra node to break up the long edge into two smaller ones, or by breaking the large target grid cells 
- into two or more smaller grid cells. This allows the application to resolve the ambiguity in edge direction. 
-
+\subsubsection{The effect of normalization options on integrals and values produced by conservative methods}\label{sec:interpolation:conservative_norm_opts}
  It is important to note that by default (i.e. using destination area normalization) 
 conservative regridding doesn't normalize the interpolation weights by the destination fraction. 
 This means that for a destination grid which only partially overlaps the source grid
@@ -451,36 +542,24 @@ call,  and the destination fraction ({\tt dst\_frac}) from the {\tt ESMF\_FieldR
  end for
 \end{verbatim}
 
-\smallskip
+\subsubsection{Great circle cells}\label{sec:interpolation:great_circle_cells}
+ For Grids and Meshes on a sphere some combinations of interpolation options 
+ (e.g. first and second-order conservative methods) use cells whose edges are great circles. This section describes some behavior 
+ that the user may not expect from these cells and some potential solutions. 
+ 
+ A great circle edge isn't necessarily the same as a straight line in latitude longitude space. 
+ For small edges, this difference will be small, but for long edges it
+ could be significant. This means if the user expects cell edges as straight lines in latitude longitude 
+ space, they should avoid using one large cell with 
+ long edges to compute an average over a region (e.g. over an ocean basin).
 
- In 2D, ESMF supports conservative regridding between any combination of the following:
- \begin{itemize}
- \item Structured Grids ({\tt ESMF\_Grid}) composed of a single logically rectangular patch
- \item Unstructured meshes ({\tt ESMF\_Mesh}) composed of polygons with any number of sides
- \end{itemize}
-
-\smallskip
-
- In 3D, ESMF supports conservative regridding between any combination of the following:
- \begin{itemize}
- \item Structured Grids ({\tt ESMF\_Grid}) composed of a single logically rectangular patch
- \item Unstructured Meshes ({\tt ESMF\_Mesh}) composed of hexahedrons (e.g. cubes) and tetrahedrons
- \end{itemize}
-
-\smallskip
-
-{\bf Restrictions:}
- \begin{itemize}
- \item Cells which contain enough identical corners to collapse to a line or point are optionally (via a flag) either ignored or return an error
- \item Self-intersecting cells (e.g. a cell twisted into a bow tie) are not supported
- \item On a spherical grid, cells which contain an edge which extends more than half way around the sphere are not supported 
- \end{itemize}
-
-\smallskip
-
- To use the conservative method the user should create their Fields on the center 
- stagger location ({\tt ESMF\_STAGGERLOC\_CENTER} in 2D or {\tt ESMF\_STAGGERLOC\_CENTER\_VCENTER} in 3D) for Grids  or the element location ({\tt ESMF\_MESHLOC\_ELEMENT}) for Meshes.
- For Grids, the corner stagger location ({\tt ESMF\_STAGGERLOC\_CORNER} in 2D or {\tt ESMF\_STAGGERLOC\_CORNER\_VFACE} in 3D) must contain coordinates describing the outer perimeter of the Grid cells. 
+ Also, the  user should also avoid using cells that contain one edge that runs half way or more around the earth, because the 
+ regrid weight calculation assumes the edge follows the shorter great circle path. 
+ There isn't a unique great circle edge defined between points on the 
+ exact opposite side of the earth from one another (antipodal points). 
+ However, the user can work around both of these problem by breaking the long edge into two smaller edges by inserting 
+ an extra node, or by breaking the large target grid cells 
+ into two or more smaller grid cells. This allows the application to resolve the ambiguity in edge direction. 
 
 \subsubsection{Masking}
 \label {regrid:masking}

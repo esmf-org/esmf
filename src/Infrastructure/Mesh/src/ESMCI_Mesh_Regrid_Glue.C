@@ -33,9 +33,10 @@
 #include "Mesh/include/ESMCI_Extrapolation.h"
 #include "Mesh/include/ESMCI_MathUtil.h"
 #include "Mesh/include/ESMCI_MathUtil.h"
- #include "Mesh/include/ESMCI_Phedra.h"
+#include "Mesh/include/ESMCI_Phedra.h"
 #include "Mesh/include/ESMCI_Mesh_Regrid_Glue.h"
 #include "Mesh/include/ESMCI_MeshMerge.h"
+#include "Mesh/include/ESMCI_Mesh_GToM_Glue.h"
 
 #include <iostream>
 #include <vector>
@@ -143,6 +144,7 @@ void ESMCI_regrid_create(
     if (!ignoreDegenerate) {
       // Check source mesh elements 
       if ((*regridMethod==ESMC_REGRID_METHOD_CONSERVE) ||
+          (*regridMethod==ESMC_REGRID_METHOD_CONSERVE_2ND) ||
           (*regridMethod==ESMC_REGRID_METHOD_BILINEAR) ||
           (*regridMethod==ESMC_REGRID_METHOD_PATCH)) {
         degenerate=any_cells_in_mesh_degenerate(srcmesh);
@@ -158,7 +160,8 @@ void ESMCI_regrid_create(
 
       // Only check dst mesh elements for conservative because for others just nodes are used and it doesn't 
       // matter what the cell looks like
-      if (*regridMethod==ESMC_REGRID_METHOD_CONSERVE) {
+      if ((*regridMethod==ESMC_REGRID_METHOD_CONSERVE) ||
+          (*regridMethod==ESMC_REGRID_METHOD_CONSERVE_2ND)) {
         // Check mesh elements 
         degenerate=any_cells_in_mesh_degenerate(dstmesh);
 
@@ -225,7 +228,8 @@ void ESMCI_regrid_create(
     // If requested get list of unmapped destination points
     std::vector<int> unmappedDstList;
     if (*has_udl) {
-      if (*regridMethod==ESMC_REGRID_METHOD_CONSERVE) {
+      if ((*regridMethod==ESMC_REGRID_METHOD_CONSERVE) ||
+          (*regridMethod==ESMC_REGRID_METHOD_CONSERVE_2ND)) {
         get_mesh_elem_ids_not_in_wmat(dstmesh, *wts, &unmappedDstList);
       } else if (*regridMethod == ESMC_REGRID_METHOD_NEAREST_DST_TO_SRC) { 
         // CURRENTLY DOESN'T WORK!!!
@@ -245,7 +249,8 @@ void ESMCI_regrid_create(
     // here, because we have all the dest objects and weights
     // gathered onto the same proc.
     if (*unmappedaction==ESMCI_UNMAPPEDACTION_ERROR) {
-      if (*regridMethod==ESMC_REGRID_METHOD_CONSERVE) {
+      if ((*regridMethod==ESMC_REGRID_METHOD_CONSERVE) ||
+          (*regridMethod==ESMC_REGRID_METHOD_CONSERVE_2ND)) {
         int missing_id;
         if (!all_mesh_elem_ids_in_wmat(dstmesh, *wts, &missing_id)) {
           int localrc;
@@ -319,9 +324,8 @@ void ESMCI_regrid_create(
           iientries[twoi+1] = w.id;  iientries[twoi] = wc.id;
           factors[i] = wc.value;
           
-#define ESMF_REGRID_DEBUG_OUTPUT_WTS_ALL_off
 #ifdef ESMF_REGRID_DEBUG_OUTPUT_WTS_ALL
-          printf("d_id=%d  s_id=%d w=%20.17E \n",w.id,wc.id,wc.value);
+          printf("d_id=%d  s_id=%d s=%d w=%20.17E \n",w.id,wc.id,wc.src_id,wc.value);
 #endif          
 #ifdef ESMF_REGRID_DEBUG_OUTPUT_WTS_SID
           if (wc.id==ESMF_REGRID_DEBUG_OUTPUT_WTS_SID) {
@@ -330,7 +334,7 @@ void ESMCI_regrid_create(
 #endif
 #ifdef ESMF_REGRID_DEBUG_OUTPUT_WTS_DID
           if (w.id==ESMF_REGRID_DEBUG_OUTPUT_WTS_DID) {
-             printf("d_id=%d  s_id=%d w=%20.17E \n",w.id,wc.id,wc.value);
+            printf("d_id=%d  s_id=%d s=%d w=%20.17E \n",w.id,wc.id,wc.src_id,wc.value);
           }
 #endif
 
@@ -364,20 +368,23 @@ void ESMCI_regrid_create(
     }
 
     ///// If conservative, translate split element weights to non-split //////
-    if (*regridMethod==ESMC_REGRID_METHOD_CONSERVE) {
+    if ((*regridMethod==ESMC_REGRID_METHOD_CONSERVE) ||
+        (*regridMethod==ESMC_REGRID_METHOD_CONSERVE_2ND)) {
       if (srcmesh->is_split) translate_split_src_elems_in_wts(srcmesh, num_entries, iientries);
       if (dstmesh->is_split) translate_split_dst_elems_in_wts(dstmesh, num_entries, iientries, factors);
     }
 
 
     ///// If conservative then modify weights according to norm type //////
-    if (*regridMethod==ESMC_REGRID_METHOD_CONSERVE) {
+    if ((*regridMethod==ESMC_REGRID_METHOD_CONSERVE) ||
+        (*regridMethod==ESMC_REGRID_METHOD_CONSERVE_2ND)) {
       if (*norm_type==ESMC_NORM_TYPE_FRACAREA) change_wts_to_be_fracarea(dstmesh, num_entries, iientries, factors);
     }
 
     // Copy status info from WMat to Array
     if (has_statusArray) {
-      if (*regridMethod==ESMC_REGRID_METHOD_CONSERVE) {
+      if ((*regridMethod==ESMC_REGRID_METHOD_CONSERVE) ||
+          (*regridMethod==ESMC_REGRID_METHOD_CONSERVE_2ND)) {
         copy_cnsv_rs_from_WMat_to_Array(&dst_status, statusArray);
       } else {
         copy_rs_from_WMat_to_Array(&dst_status, statusArray);
@@ -1764,6 +1771,11 @@ void CpMeshDataToArray(Grid &grid, int staggerLoc, ESMCI::Mesh &mesh, ESMCI::Arr
  int localrc;
  int rc;
 
+ // If multi-tile jump to other way of doing things
+ if (grid.getTileCount() > 1) {
+   CpMeshElemDataToArrayCell(&grid, &mesh, &array, dataToArray);
+   return;
+ }
 
   // Initialize the parallel environment for mesh (if not already done)
   ESMCI::Par::Init("MESHLOG", false /* use log */,VM::getCurrent(&localrc)->getMpi_c());
@@ -1809,8 +1821,8 @@ void CpMeshDataToArray(Grid &grid, int staggerLoc, ESMCI::Mesh &mesh, ESMCI::Arr
 
   void PutElemAreaIntoArray(Grid &grid, int staggerLoc, ESMCI::Mesh &mesh, ESMCI::Array &array) {
 #undef  ESMC_METHOD
-#define ESMC_METHOD "CpMeshElemDataToArray()" 
-    Trace __trace("CpMeshElemDataToArray()");
+#define ESMC_METHOD "PutElemAreaIntoArray()" 
+    Trace __trace("PutElemAreaIntoArray()");
     
     int localrc;
     int rc;
@@ -1828,6 +1840,13 @@ void CpMeshDataToArray(Grid &grid, int staggerLoc, ESMCI::Mesh &mesh, ESMCI::Arr
     ESMCI::Par::Init("MESHLOG", false /* use log */,VM::getCurrent(&localrc)->getMpi_c());
     if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
       throw localrc;  // bail out with exception
+
+
+    // If multi-tile jump to other way of doing things
+    if (grid.getTileCount() > 1) {
+      PutElemAreaIntoArrayCell(&grid, &mesh, &array);
+      return;
+    }
 
 
     // Setup interator to Loop elemets of the grid.  Here we loop all elements, both owned and not.

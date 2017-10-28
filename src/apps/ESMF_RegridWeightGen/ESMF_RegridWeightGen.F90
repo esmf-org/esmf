@@ -181,12 +181,14 @@ program ESMF_RegridWeightGenApp
       call ESMF_UtilGetArg(ind+1, argvalue=method)
           if ((trim(method) .ne. 'bilinear') .and. &
           (trim(method) .ne. 'conserve') .and. &
+          (trim(method) .ne. 'conserve2nd') .and. &
               (trim(method) .ne. 'patch')    .and. &
           (trim(method) .ne. 'nearestdtos')   .and. &
           (trim(method) .ne. 'neareststod')) then
         write(*,*)
         print *, 'ERROR: The interpolation method "', trim(method), '" is not supported'
-        print *, '  The supported methods are "bilinear", "patch", and "conserve"'
+        print *, '  The supported methods are "bilinear", "patch", "conserve"'
+        print *, '  "conserve2nd", "nearestdtos", and "neareststod"'
         print *, "Use the --help argument to see an explanation of usage."
         call ESMF_Finalize(endflag=ESMF_END_ABORT)
       endif    
@@ -197,7 +199,8 @@ program ESMF_RegridWeightGenApp
     if (ind == -1) call ESMF_UtilGetArgIndex('--line_type', argindex=ind, rc=rc)
     if (ind == -1) then
       !  Use default lineType based on method
-      if (trim(method) .eq. 'conserve') then
+      if ((trim(method) .eq. 'conserve') .or. &
+          (trim(method) .eq. 'conserve2nd'))then
          lineTypeStr = 'greatcircle'
       else
          lineTypeStr = 'cartesian'
@@ -218,7 +221,8 @@ program ESMF_RegridWeightGenApp
     call ESMF_UtilGetArgIndex('-p', argindex=ind, rc=rc)
     if (ind == -1) call ESMF_UtilGetArgIndex('--pole', argindex=ind, rc=rc)
     if (ind == -1) then
-      if ((trim(method) .eq. 'conserve') .or.    & 
+      if ((trim(method) .eq. 'conserve') .or.    &
+          (trim(method) .eq. 'conserve2nd') .or. & 
           (trim(method) .eq. 'nearestdtos') .or. &
           (trim(method) .eq. 'neareststod')) then
         ! print *, 'Use default pole: None'
@@ -246,6 +250,13 @@ program ESMF_RegridWeightGenApp
           (pole .ne. ESMF_POLEMETHOD_NONE)) then
         write(*,*)
         print *, 'ERROR: Conserve method only works with no pole.'
+        print *, "Use the --help argument to see an explanation of usage."
+        call ESMF_Finalize(endflag=ESMF_END_ABORT)
+      endif
+      if ((method .eq. 'conserve2nd') .and. &
+          (pole .ne. ESMF_POLEMETHOD_NONE)) then
+        write(*,*)
+        print *, 'ERROR: Conserve2nd method only works with no pole.'
         print *, "Use the --help argument to see an explanation of usage."
         call ESMF_Finalize(endflag=ESMF_END_ABORT)
       endif
@@ -410,11 +421,12 @@ program ESMF_RegridWeightGenApp
     endif
    
     ! user area only needed for conservative regridding
-    if (userAreaFlag .and. (method .ne. 'conserve')) then
-      write(*,*)
-      print *, 'WARNING: --user_areas is only needed in conservative remapping'
-      print *, '       The flag is ignored'
-      userAreaFlag = .false.
+    if (userAreaFlag .and. .not. ((method .eq. 'conserve') .or. &
+         (method .eq. 'conserve2nd'))) then
+       write(*,*)
+       print *, 'WARNING: --user_areas is only needed in conservative remapping'
+       print *, '       The flag is ignored'
+       userAreaFlag = .false.
     endif
 
     if (userAreaFlag .and. (srcFileType /= ESMF_FILEFORMAT_SCRIP .and. &
@@ -620,6 +632,7 @@ program ESMF_RegridWeightGenApp
       if (method .eq. 'conserve') commandbuf2(3)=2
       if (method .eq. 'neareststod') commandbuf2(3)=3
       if (method .eq. 'nearestdtos') commandbuf2(3)=4
+      if (method .eq. 'conserve2nd') commandbuf2(3)=5
       commandbuf2(4)=poleptrs
       if (ignoreUnmapped) commandbuf2(5) = 1
       if (userAreaFlag)   commandbuf2(6) = 1
@@ -686,8 +699,12 @@ program ESMF_RegridWeightGenApp
       method = 'conserve'
     else if (commandbuf2(3)==3) then
       method = 'neareststod'
-    else
+    else if (commandbuf2(3)==4) then
       method = 'nearestdtos'
+    else if (commandbuf2(3)==5) then
+      method = 'conserve2nd'
+    else
+      method = 'bilinear'
     endif
     poleptrs = commandbuf2(4)
     if (poleptrs == -1) then 
@@ -808,6 +825,8 @@ program ESMF_RegridWeightGenApp
     methodflag = ESMF_REGRIDMETHOD_BILINEAR
   else if (trim(method) .eq. 'conserve') then
     methodflag = ESMF_REGRIDMETHOD_CONSERVE
+  else if (trim(method) .eq. 'conserve2nd') then
+    methodflag = ESMF_REGRIDMETHOD_CONSERVE_2ND
   else if (trim(method) .eq. 'patch') then
     methodflag = ESMF_REGRIDMETHOD_PATCH
   else if (trim(method) .eq. 'neareststod') then
@@ -910,7 +929,7 @@ contains
     print *, "Usage: ESMF_RegridWeightGen --source|-s src_grid_filename" 
     print *, "                           --destination|-d dst_grid_filename"
     print *, "                      --weight|-w out_weight_file "
-    print *, "                      [--method|-m bilinear|patch|neareststod|nearestdtos|conserve]"
+    print *, "                      [--method|-m bilinear|patch|neareststod|nearestdtos|conserve|conserve2nd]"
     print *, "                      [--pole|-p all|none|teeth|<N>]"
     print *, "                      [--line_type|-l cartesian|greatcircle]"
     print *, "                      [--norm_type dstarea|fracarea]"

@@ -5409,15 +5409,9 @@ int Grid::getStaggerDistgrid(
         //       grid with a pole and you are getting bowtie shaped elements, this is probably why. Ask Bob how to fix. 
          //       (If you take out the poles, then you need to add them back in here. See _add_poles_to_conn(), etc. in the if part above)
 
-//gjt: The updated DistGrid::create() now will automatically adjust the center connections
-//gjt: inside of a DistGrid to corner connections when stagger edge paddings are supplied.
-//gjt: So just call into DistGrid::create() here without any higher level logic needed!
-//gjt: Activate this option by renaming REMOVE_CONNECTIONS_on to REMOVE_CONNECTIONS_off
-#define REMOVE_CONNECTIONS_on
-#ifdef REMOVE_CONNECTIONS_on
-        // For non-center staggers, take out connections, so conservative works
-        // For center stagger, leave connections, so bilinear, etc works
-        if (staggerloc > 0) {
+        // Remove connections for everything but centers and corners for multi-tile grids, since those are the only ones that seem to work with connections
+        // TODO: talk to Gerhard about fixing for EDGE1 and EDGE2
+        if ((staggerloc != ESMCI_STAGGERLOC_CENTER) && (staggerloc != ESMCI_STAGGERLOC_CORNER))  {
 
           // Create 0 sized connection list to indicate that there should be no connections
            // Allocate list without poles
@@ -5444,7 +5438,6 @@ int Grid::getStaggerDistgrid(
           delete emptyConnListII;
 
         } else {
-#endif
           // Leave connections, so bilinear, etc. works
           staggerDistgridList[staggerloc]=DistGrid::create(distgrid,
                                                            staggerEdgeLWidthIntInt, 
@@ -5454,10 +5447,9 @@ int Grid::getStaggerDistgrid(
                                                            &localrc);
           if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
                                             &rc)) return rc;
-#ifdef REMOVE_CONNECTIONS_on
-        }
-#endif
  
+        }
+
         // Get rid of Interface ints
         delete staggerEdgeLWidthIntInt;
         delete [] staggerEdgeLWidthIntIntArray;
@@ -7992,7 +7984,7 @@ int GridIter::getGlobalID(
   std::vector<int> seqIndex;
   localrc=staggerDistgrid->getSequenceIndexLocalDe(curDE,deBasedInd,seqIndex);
   
-#define REPORT_DEGENERACY
+  //#define REPORT_DEGENERACY
 #ifdef REPORT_DEGENERACY
   {
     std::stringstream debugmsg;
@@ -8476,9 +8468,6 @@ void GridIter::getArrayData(
   
   //// Get pointer to LocalArray data
   localArray->getDataInternal(curInd, data);
- 
-
- 
  }
 
 // Add more types here if necessary

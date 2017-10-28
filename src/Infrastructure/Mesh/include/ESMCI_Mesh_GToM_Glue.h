@@ -44,6 +44,14 @@ namespace ESMCI {
                       ESMCI::InterArray<int> *maskValuesArg,
                       int *regridConserve, Mesh **out_meshpp, int *rc);
 
+  void ESMCI_GridToMeshCell(const Grid &grid_, 
+                            const std::vector<ESMCI::Array*> &arrays, 
+                            Mesh **out_meshpp, int *rc);
+
+  void CpMeshElemDataToArrayCell(Grid *grid, ESMCI::Mesh *mesh, ESMCI::Array *array, MEField<> *dataToArray);
+
+  void PutElemAreaIntoArrayCell(Grid *grid, ESMCI::Mesh *mesh, ESMCI::Array *array);
+
 #if 0
   void ESMCI_GridToMesh(const Grid &grid_, int staggerLoc, ESMCI::Mesh &mesh, 
                         const std::vector<ESMCI::Array*> &arrays, ESMCI::InterArray<int> *maskValuesArg,

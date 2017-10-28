@@ -342,6 +342,51 @@ MeshCap *MeshCap::GridToMesh(const Grid &grid_, int staggerLoc,
    return mc;
 } 
 
+MeshCap *MeshCap::GridToMeshCell(const Grid &grid_,
+                             const std::vector<ESMCI::Array*> &arrays,
+                             int *rc) {
+#undef ESMC_METHOD
+#define ESMC_METHOD "MeshCap::GridToMeshCell()"
+
+
+  // Eventually should be argument
+  bool _is_esmf_mesh=true;
+  
+  // Local error code
+  int localrc;
+  
+  // Create mesh depending on the type
+  Mesh *mesh;
+  void *mbmesh;
+  if (_is_esmf_mesh) {
+    ESMCI_GridToMeshCell(grid_,
+                         arrays, 
+                         &mesh, &localrc);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+                                      ESMC_CONTEXT, rc)) return NULL;
+  } else {
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_NOT_IMPL,
+      "- this functionality is not currently supported using MOAB",
+                                  ESMC_CONTEXT, rc);
+    return NULL;
+  }
+
+  // Create MeshCap
+  MeshCap *mc=new MeshCap();
+
+  // Set member variables
+  mc->is_esmf_mesh=_is_esmf_mesh;
+  if (_is_esmf_mesh) {
+    mc->mesh=mesh;
+  } else {
+    mc->mbmesh=mbmesh;
+  }
+
+  // Output new MeshCap
+   return mc;
+} 
+
+
 #if 0
   // Only works for scalar data right now, but would be pretty easy to add more dimensions 
   void ESMCI_CpMeshDataToArray(Grid &grid, int staggerLoc, ESMCI::Mesh &mesh, ESMCI::Array &array, MEField<> *dataToArray);
