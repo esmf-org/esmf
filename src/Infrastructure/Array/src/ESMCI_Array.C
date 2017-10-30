@@ -18,7 +18,7 @@
 #define ASMM_STORE_MEMLOG_off
 #define ASMM_STORE_COMMMATRIX_on
 #define ASMM_STORE_OPT_PRINT_off
-#define ASMM_STORE_DUMPSMM_on
+#define ASMM_STORE_DUMPSMM_off
 
 #define ASMM_EXEC_INFO_off
 #define ASMM_EXEC_TIMING_off
@@ -7162,25 +7162,88 @@ namespace ArrayHelper{
       XXE::ProductSumSuperScalarSrcRRAInfo *xxeProductSumSuperScalarSrcRRAInfo =
         (XXE::ProductSumSuperScalarSrcRRAInfo *)&(xxe->opstream[xxeIndex]);
       int *rraOffsetList = xxeProductSumSuperScalarSrcRRAInfo->rraOffsetList;
-      void **factorList = xxeProductSumSuperScalarSrcRRAInfo->factorList;
+      void *factorList = xxeProductSumSuperScalarSrcRRAInfo->factorList;
       int *elementOffsetList =
         xxeProductSumSuperScalarSrcRRAInfo->elementOffsetList;
       // fill in rraOffsetList, factorList, elementOffsetList
       int bufferItem = 0; // reset
       int kk = 0; // reset
       pp = srcInfoTable.begin();  // reset
-      while (pp != srcInfoTable.end()){
-        SeqIndex<> partnerSeqIndex = pp->partnerSeqIndex;
-        for (int term=0; term<srcTermProcessing; term++){
-          rraOffsetList[kk] = pp->linIndex/vectorLength;
-          factorList[kk] = (void *)(pp->factor);
-          elementOffsetList[kk] = bufferItem;
-          ++pp;
-          ++kk;
-          if ((pp == srcInfoTable.end()) ||
-            !(partnerSeqIndex == pp->partnerSeqIndex)) break;
-        } // for srcTermProcessing
-        ++bufferItem;
+      switch (factorTK){
+      case XXE::R4:
+        {
+          ESMC_R4 *factorListT = (ESMC_R4 *)factorList;
+          while (pp != srcInfoTable.end()){
+            SeqIndex<> partnerSeqIndex = pp->partnerSeqIndex;
+            for (int term=0; term<srcTermProcessing; term++){
+              rraOffsetList[kk] = pp->linIndex/vectorLength;
+              factorListT[kk] = *(ESMC_R4 *)(pp->factor);
+              elementOffsetList[kk] = bufferItem;
+              ++pp;
+              ++kk;
+              if ((pp == srcInfoTable.end()) ||
+                !(partnerSeqIndex == pp->partnerSeqIndex)) break;
+            } // for srcTermProcessing
+            ++bufferItem;
+          }
+        }
+        break;
+      case XXE::R8:
+        {
+          ESMC_R8 *factorListT = (ESMC_R8 *)factorList;
+          while (pp != srcInfoTable.end()){
+            SeqIndex<> partnerSeqIndex = pp->partnerSeqIndex;
+            for (int term=0; term<srcTermProcessing; term++){
+              rraOffsetList[kk] = pp->linIndex/vectorLength;
+              factorListT[kk] = *(ESMC_R8 *)(pp->factor);
+              elementOffsetList[kk] = bufferItem;
+              ++pp;
+              ++kk;
+              if ((pp == srcInfoTable.end()) ||
+                !(partnerSeqIndex == pp->partnerSeqIndex)) break;
+            } // for srcTermProcessing
+            ++bufferItem;
+          }
+        }
+        break;
+      case XXE::I4:
+        {
+          ESMC_I4 *factorListT = (ESMC_I4 *)factorList;
+          while (pp != srcInfoTable.end()){
+            SeqIndex<> partnerSeqIndex = pp->partnerSeqIndex;
+            for (int term=0; term<srcTermProcessing; term++){
+              rraOffsetList[kk] = pp->linIndex/vectorLength;
+              factorListT[kk] = *(ESMC_I4 *)(pp->factor);
+              elementOffsetList[kk] = bufferItem;
+              ++pp;
+              ++kk;
+              if ((pp == srcInfoTable.end()) ||
+                !(partnerSeqIndex == pp->partnerSeqIndex)) break;
+            } // for srcTermProcessing
+            ++bufferItem;
+          }
+        }
+        break;
+      case XXE::I8:
+        {
+          ESMC_I8 *factorListT = (ESMC_I8 *)factorList;
+          while (pp != srcInfoTable.end()){
+            SeqIndex<> partnerSeqIndex = pp->partnerSeqIndex;
+            for (int term=0; term<srcTermProcessing; term++){
+              rraOffsetList[kk] = pp->linIndex/vectorLength;
+              factorListT[kk] = *(ESMC_I8 *)(pp->factor);
+              elementOffsetList[kk] = bufferItem;
+              ++pp;
+              ++kk;
+              if ((pp == srcInfoTable.end()) ||
+                !(partnerSeqIndex == pp->partnerSeqIndex)) break;
+            } // for srcTermProcessing
+            ++bufferItem;
+          }
+        }
+        break;
+      default:
+        break;
       }
 #ifdef ASMM_EXEC_PROFILE_on
       tempString = new char[160];
@@ -7425,25 +7488,88 @@ namespace ArrayHelper{
       XXE::ProductSumSuperScalarSrcRRAInfo *xxeProductSumSuperScalarSrcRRAInfo =
         (XXE::ProductSumSuperScalarSrcRRAInfo *)&(xxe->opstream[xxeIndex]);
       int *rraOffsetList = xxeProductSumSuperScalarSrcRRAInfo->rraOffsetList;
-      void **factorList = xxeProductSumSuperScalarSrcRRAInfo->factorList;
+      void *factorList = xxeProductSumSuperScalarSrcRRAInfo->factorList;
       int *elementOffsetList =
         xxeProductSumSuperScalarSrcRRAInfo->elementOffsetList;
       // fill in rraOffsetList, factorList, elementOffsetList
       int bufferItem = 0; // reset
       int kk = 0; // reset
       pp = srcInfoTable.begin();  // reset
-      while (pp != srcInfoTable.end()){
-        SeqIndex<> partnerSeqIndex = pp->partnerSeqIndex;
-        for (int term=0; term<srcTermProcessing; term++){
-          rraOffsetList[kk] = pp->linIndex/vectorLength;
-          factorList[kk] = (void *)(pp->factor);
-          elementOffsetList[kk] = bufferItem;
-          ++pp;
-          ++kk;
-          if ((pp == srcInfoTable.end()) ||
-            !(partnerSeqIndex == pp->partnerSeqIndex)) break;
-        } // for srcTermProcessing
-        ++bufferItem;
+      switch (factorTK){
+      case XXE::R4:
+        {
+          ESMC_R4 *factorListT = (ESMC_R4 *)factorList;
+          while (pp != srcInfoTable.end()){
+            SeqIndex<> partnerSeqIndex = pp->partnerSeqIndex;
+            for (int term=0; term<srcTermProcessing; term++){
+              rraOffsetList[kk] = pp->linIndex/vectorLength;
+              factorListT[kk] = *(ESMC_R4 *)(pp->factor);
+              elementOffsetList[kk] = bufferItem;
+              ++pp;
+              ++kk;
+              if ((pp == srcInfoTable.end()) ||
+                !(partnerSeqIndex == pp->partnerSeqIndex)) break;
+            } // for srcTermProcessing
+            ++bufferItem;
+          }
+        }
+        break;
+      case XXE::R8:
+        {
+          ESMC_R8 *factorListT = (ESMC_R8 *)factorList;
+          while (pp != srcInfoTable.end()){
+            SeqIndex<> partnerSeqIndex = pp->partnerSeqIndex;
+            for (int term=0; term<srcTermProcessing; term++){
+              rraOffsetList[kk] = pp->linIndex/vectorLength;
+              factorListT[kk] = *(ESMC_R8 *)(pp->factor);
+              elementOffsetList[kk] = bufferItem;
+              ++pp;
+              ++kk;
+              if ((pp == srcInfoTable.end()) ||
+                !(partnerSeqIndex == pp->partnerSeqIndex)) break;
+            } // for srcTermProcessing
+            ++bufferItem;
+          }
+        }
+        break;
+      case XXE::I4:
+        {
+          ESMC_I4 *factorListT = (ESMC_I4 *)factorList;
+          while (pp != srcInfoTable.end()){
+            SeqIndex<> partnerSeqIndex = pp->partnerSeqIndex;
+            for (int term=0; term<srcTermProcessing; term++){
+              rraOffsetList[kk] = pp->linIndex/vectorLength;
+              factorListT[kk] = *(ESMC_I4 *)(pp->factor);
+              elementOffsetList[kk] = bufferItem;
+              ++pp;
+              ++kk;
+              if ((pp == srcInfoTable.end()) ||
+                !(partnerSeqIndex == pp->partnerSeqIndex)) break;
+            } // for srcTermProcessing
+            ++bufferItem;
+          }
+        }
+        break;
+      case XXE::I8:
+        {
+          ESMC_I8 *factorListT = (ESMC_I8 *)factorList;
+          while (pp != srcInfoTable.end()){
+            SeqIndex<> partnerSeqIndex = pp->partnerSeqIndex;
+            for (int term=0; term<srcTermProcessing; term++){
+              rraOffsetList[kk] = pp->linIndex/vectorLength;
+              factorListT[kk] = *(ESMC_I8 *)(pp->factor);
+              elementOffsetList[kk] = bufferItem;
+              ++pp;
+              ++kk;
+              if ((pp == srcInfoTable.end()) ||
+                !(partnerSeqIndex == pp->partnerSeqIndex)) break;
+            } // for srcTermProcessing
+            ++bufferItem;
+          }
+        }
+        break;
+      default:
+        break;
       }
 #ifdef ASMM_EXEC_PROFILE_on
       tempString = new char[160];
