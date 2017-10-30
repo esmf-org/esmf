@@ -79,9 +79,11 @@
 % -> transferability to weakly congruent objects
 % -> non-blocking options
 \input{ESMF_RHandleBitForBitEx_fapi}
+\input{ESMF_RHandleFromRHandleEx_fapi}
 #elif defined(CONSTITUENT)
 \input{../Infrastructure/Route/doc/RHandle_usage}
 \input{../Infrastructure/Route/doc/ESMF_RHandleBitForBitEx_fapi}
+\input{../Infrastructure/Route/doc/ESMF_RHandleFromRHandleEx_fapi}
 #endif
 
 \subsection{Restrictions and Future Work}
