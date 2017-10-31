@@ -74,6 +74,7 @@ namespace ESMCI {
 
       // Project to sphere surface
       double len=MU_LEN_VEC3D(cntr);
+      if (len == 0.0) Throw() << "Distance from center to point on sphere unexpectedly 0.0";
       for (int i=0; i<sdim; i++) {
         cntr[i]=cntr[i]/len;
       }      
@@ -153,7 +154,9 @@ namespace ESMCI {
 
     // Make unit vector to src centroid
     double u_src_cntr[3];
-    double div_len=1.0/MU_LEN_VEC3D(src_cntr);
+    double len=MU_LEN_VEC3D(src_cntr);
+    if (len == 0.0) Throw() << "Distance from center to point on sphere unexpectedly 0.0";
+    double div_len=1.0/len;
     MU_MULT_BY_SCALAR_VEC3D(u_src_cntr,src_cntr,div_len);
 
 
@@ -242,7 +245,9 @@ namespace ESMCI {
     MU_DIV_BY_SCALAR_VEC3D(cntr,cntr,((double)num_p));
     
     // Project to sphere surface
-    double div_len=1.0/MU_LEN_VEC3D(cntr);
+    double len=MU_LEN_VEC3D(cntr);
+    if (len == 0.0) Throw() << "Distance from center to point on sphere unexpectedly 0.0";
+    double div_len=1.0/len;
     MU_MULT_BY_SCALAR_VEC3D(cntr,cntr,div_len);
   }
 
@@ -264,7 +269,9 @@ namespace ESMCI {
     }
 
     // Project to sphere surface
-    double div_len=1.0/MU_LEN_VEC3D(cntr);
+    double len=MU_LEN_VEC3D(cntr);
+    if (len == 0.0) Throw() << "Distance from center to point on sphere unexpectedly 0.0";
+    double div_len=1.0/len;
     MU_MULT_BY_SCALAR_VEC3D(cntr,cntr,div_len);
   }
 
@@ -274,7 +281,7 @@ namespace ESMCI {
   void _set_gradient_info_in_neighbors(double *src_cntr, double *src_grad, std::vector<NBR_ELEM> *nbrs) {
 
     // Compute area of polygon
-#define MAX_NUM_NBRS 20
+#define MAX_NUM_NBRS 40
     double nbr_coords[3*MAX_NUM_NBRS];
     
     // Error check
@@ -295,6 +302,7 @@ namespace ESMCI {
 
     // Compute area
     double nbr_poly_area=great_circle_area(nbrs->size(), nbr_coords); 
+    if (nbr_poly_area == 0.0) Throw() << "Neighbor poly area 0.0";
     double div_nbr_poly_area=1.0/nbr_poly_area;
 
     // Set gradients to 0.0
@@ -322,7 +330,9 @@ namespace ESMCI {
       MU_CROSS_PRODUCT_VEC3D(outward_norm,nbr->cntr,prev_nbr->cntr);
 
       // Make a unit vector
-      double div_len=1.0/MU_LEN_VEC3D(outward_norm);
+      double len=MU_LEN_VEC3D(outward_norm);
+      if (len == 0.0) Throw() << "Length of outward vector unexpectedly 0.0.";
+      double div_len=1.0/len;
       MU_MULT_BY_SCALAR_VEC3D(outward_norm,outward_norm,div_len);
 
       // compute arc length
@@ -345,7 +355,9 @@ namespace ESMCI {
 
     // Make unit vector to src centroid
     double u_src_cntr[3];
-    double div_len=1.0/MU_LEN_VEC3D(src_cntr);
+    double len=MU_LEN_VEC3D(src_cntr);
+    if (len == 0.0) Throw() << "Length of vector to point on sphere unexpectedly 0.0";
+    double div_len=1.0/len;
     MU_MULT_BY_SCALAR_VEC3D(u_src_cntr,src_cntr,div_len);
     
 
@@ -598,14 +610,14 @@ namespace ESMCI {
       sm_cells->push_back(tmp_smc);
     }
 
+    // If there are no sm cells then leave
+    if (sm_cells->empty()) return;
 
     // Get list of source elements surrounding this one
     _get_neighbor_elems(src_elem, src_cfield, src_mask_field, nbrs);
 
-
     // Compute src centroid
     double src_cntr[3];
-    //_calc_elem_centroid(src_elem,src_cfield,3,src_cntr);
     _calc_centroid_from_sm_cells(sm_cells, src_cntr);
 
     // Put the nbrs into counter clockwise order
@@ -644,6 +656,7 @@ namespace ESMCI {
 
     // Loop over supermesh cells calculating weights
     for (int i=0; i<sm_cells->size(); i++) {
+
       // get info for one supermesh cell
       SM_CELL *sm_cell=&((*sm_cells)[i]);
 

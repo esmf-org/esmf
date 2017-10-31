@@ -779,7 +779,7 @@ void calc_2nd_order_conserve_mat_serial_2D_3D_sph(Mesh &srcmesh, Mesh &dstmesh, 
 
 
     // If no weights then go on to next src elem
-    if (wgts.size() < 1) continue;
+    if (wgts.empty()) continue;
 
 
     // Adjust weights for user area
@@ -790,6 +790,7 @@ void calc_2nd_order_conserve_mat_serial_2D_3D_sph(Mesh &srcmesh, Mesh &dstmesh, 
       if (src_area_field) {
         const MeshObj &src_elem = *sr.elem;
         double *area=src_area_field->data(src_elem);
+        if (src_elem_area == 0.0) Throw() << "src_elem_area unexpectedly 0.0";
         src_user_area_adj=*area/src_elem_area;
       }
 
@@ -854,6 +855,7 @@ void calc_2nd_order_conserve_mat_serial_2D_3D_sph(Mesh &srcmesh, Mesh &dstmesh, 
       for (int i=0; i<sr.elems.size(); i++) {
         if (valid[i]==1) {
           col[j].id=sr.elems[i]->get_id();
+          if (src_elem_area == 0.0) Throw() << "src_elem_area unexpectedly 0.0";
           col[j].value=areas[i]/src_elem_area;
           j++;
         }
