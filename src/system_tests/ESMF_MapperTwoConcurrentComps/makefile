@@ -13,7 +13,7 @@ SYSTEM_TESTS_BUILD    = $(ESMC_TESTDIR)/ESMF_MapperTwoConcurrentCompsSTest
 # system tests executable will depend on.
 # List objects files in the order that they
 # are to be compiled/created.
-SYSTEM_TESTS_OBJ      = user_model1.o user_model2.o user_coupler.o
+SYSTEM_TESTS_OBJ      = clock_utils.o user_model1.o user_model2.o user_coupler.o
 
 SYSTEM_TESTS_RUN      = RUN_MapperTwoConcurrentComps
 

@@ -54,6 +54,8 @@
     use user_model2, only : userm2_setvm, userm2_register
     use user_coupler, only : usercpl_setvm, usercpl_register
 
+    use clock_utils
+
     implicit none
 
     ! Local variables
@@ -298,6 +300,11 @@
         call ESMF_Finalize(rc=localrc, endflag=ESMF_END_ABORT)
 
     clocks(GCOMP_SIDX+1) = ESMF_ClockCreate(clocks(CPL_IDX), rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) &
+        call ESMF_Finalize(rc=localrc, endflag=ESMF_END_ABORT)
+
+    call get_sync_alarms(clocks, alarms, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) &
         call ESMF_Finalize(rc=localrc, endflag=ESMF_END_ABORT)
