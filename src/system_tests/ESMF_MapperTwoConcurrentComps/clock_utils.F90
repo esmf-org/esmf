@@ -20,7 +20,7 @@
     type(ESMF_Clock), dimension(:), allocatable :: tmp_clocks
     integer, dimension(:), allocatable :: sync_rel_tsteps
     type(ESMF_TimeInterval) :: alarm_interval, tstep
-    type(ESMF_Time) :: stop_time
+    type(ESMF_Time) :: time1, time2, stop_time
 
     logical :: found_syncstep = .false., done = .false.
 
@@ -53,7 +53,17 @@
     i = 2
     do while( (.not. ESMF_ClockIsStopTime(tmp_clocks(1), rc=rc))&
               .and. (i <= nclocks)  )
-      if(tmp_clocks(i-1) == tmp_clocks(i)) then
+      call ESMF_ClockGet(tmp_clocks(i-1), currTime=time1, rc=rc)
+      if(rc /= ESMF_SUCCESS) then
+        print *, "Unable to get current time from clock :", i-1
+        return
+      end if
+      call ESMF_ClockGet(tmp_clocks(i), currTime=time2, rc=rc)
+      if(rc /= ESMF_SUCCESS) then
+        print *, "Unable to get current time from clock :", i
+        return
+      end if
+      if(time1 == time2) then
         if(i == nclocks) then
           ! Last clock matched with the (last -1) clock
           done = .true.
@@ -85,7 +95,7 @@
       end if
     end do
 
-    if(.not. done) then
+    if((nclocks > 1) .and. (.not. done)) then
       print *, "Could not find a sync time between the clocks, no alarms set"
       rc = ESMF_FAILURE
       return
