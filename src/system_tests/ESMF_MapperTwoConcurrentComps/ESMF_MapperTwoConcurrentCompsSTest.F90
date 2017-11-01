@@ -451,17 +451,44 @@
         ESMF_CONTEXT, rcToReturn=rc)) &
         call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
 
+      ! Check if we have comp1 sync alarm ringing
+      if(ESMF_AlarmIsRinging(alarms(GCOMP_SIDX), rc=localrc)) then
+        !print *, "Comp1 alarm is ringing !"
+        call ESMF_AlarmRingerOff(alarms(GCOMP_SIDX), rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=localrc)) &
+          call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
+      end if
+
       call ESMF_ClockAdvance(clocks(GCOMP_SIDX), rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) &
         call ESMF_Finalize(rc=localrc, endflag=ESMF_END_ABORT)
       !call ESMF_ClockPrint(clock_comp1, rc=localrc)
 
+      ! Check if we have comp2 sync alarm ringing
+      if(ESMF_AlarmIsRinging(alarms(GCOMP_SIDX+1), rc=localrc)) then
+        !print *, "Comp2 alarm is ringing !"
+        call ESMF_AlarmRingerOff(alarms(GCOMP_SIDX+1), rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=localrc)) &
+          call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
+      end if
+
       call ESMF_ClockAdvance(clocks(GCOMP_SIDX+1), rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) &
         call ESMF_Finalize(rc=localrc, endflag=ESMF_END_ABORT)
       !call ESMF_ClockPrint(clock_comp2, rc=localrc)
+
+      ! Check if coupler sync alarm is ringing
+      if(ESMF_AlarmIsRinging(alarms(CPL_IDX), rc=localrc)) then
+        !print *, "Coupler alarm is ringing !"
+        call ESMF_AlarmRingerOff(alarms(CPL_IDX), rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=localrc)) &
+          call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
+      end if
 
       call ESMF_ClockAdvance(clocks(CPL_IDX), rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
