@@ -6581,13 +6581,7 @@ namespace ArrayHelper{
         vectorFlag, true);
       if (ESMC_LogDefault.MsgFoundError(localrc, 
         ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
-
-      printf("\nbufferInfoList.size = %d: ", bufferInfoList.size());
-      std::vector<void*>::iterator it = bufferInfoList.begin(), et = bufferInfoList.end();
-      for (it; it!= et; ++it)
-        printf("%d, ");
-      printf("\n\n");
-
+      
       XXE::SumSuperScalarListDstRRAInfo
         *xxeSumSuperScalarListDstRRAInfo =
         (XXE::SumSuperScalarListDstRRAInfo *)&(xxe->opstream[xxeIndex]);
