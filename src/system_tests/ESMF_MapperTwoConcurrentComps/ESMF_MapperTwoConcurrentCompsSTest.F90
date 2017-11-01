@@ -57,6 +57,8 @@
     implicit none
 
     ! Local variables
+    integer, parameter :: NUM_COMPS = 2
+    integer, parameter :: NUM_COMPS_PLUS_CPL = NUM_COMPS+1
     integer :: pet_id, npets, rc, localrc, userrc
     integer :: npets_comp1, npets_comp2, npets_cpl
     integer :: petlist_start_comp1, petlist_start_comp2, petlist_start_cpl
@@ -69,7 +71,11 @@
     type(ESMF_CplComp) :: cpl
 
     ! instantiate a clock, a calendar, and timesteps
-    type(ESMF_Clock) :: clock_comp1, clock_comp2, clock_cpl
+    !type(ESMF_Clock) :: clock_comp1, clock_comp2, clock_cpl
+    integer, parameter :: CPL_IDX = 1
+    integer, parameter :: GCOMP_SIDX = 2
+    type(ESMF_Clock) :: clocks(NUM_COMPS_PLUS_CPL)
+    type(ESMF_Alarm) :: alarms(NUM_COMPS_PLUS_CPL)
     type(ESMF_Calendar) :: gregorianCalendar
     type(ESMF_TimeInterval) :: timeStep
     type(ESMF_Time) :: startTime
@@ -280,18 +286,18 @@
         call ESMF_Finalize(rc=localrc, endflag=ESMF_END_ABORT)
 
     ! initialize the clock for comp1 with the above values
-    clock_comp1 = ESMF_ClockCreate(timeStep, startTime, stopTime=stopTime, &
+    clocks(CPL_IDX) = ESMF_ClockCreate(timeStep, startTime, stopTime=stopTime, &
                              name="Clock 1", rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) &
         call ESMF_Finalize(rc=localrc, endflag=ESMF_END_ABORT)
 
-    clock_comp2 = ESMF_ClockCreate(clock_comp1, rc=localrc)
+    clocks(GCOMP_SIDX) = ESMF_ClockCreate(clocks(CPL_IDX), rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) &
         call ESMF_Finalize(rc=localrc, endflag=ESMF_END_ABORT)
 
-    clock_cpl = ESMF_ClockCreate(clock_comp1, rc=localrc)
+    clocks(GCOMP_SIDX+1) = ESMF_ClockCreate(clocks(CPL_IDX), rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) &
         call ESMF_Finalize(rc=localrc, endflag=ESMF_END_ABORT)
@@ -307,7 +313,7 @@
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) &
         call ESMF_Finalize(rc=localrc, endflag=ESMF_END_ABORT)
-    call ESMF_GridCompInitialize(comp1, exportState=c1exp, clock=clock_comp1, &
+    call ESMF_GridCompInitialize(comp1, exportState=c1exp, clock=clocks(GCOMP_SIDX), &
        userRC=userrc, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) &
@@ -322,7 +328,7 @@
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) &
         call ESMF_Finalize(rc=localrc, endflag=ESMF_END_ABORT)
-    call ESMF_GridCompInitialize(comp2, importState=c2imp, clock=clock_comp2, &
+    call ESMF_GridCompInitialize(comp2, importState=c2imp, clock=clocks(GCOMP_SIDX+1), &
        userRC=userrc, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) &
@@ -334,7 +340,7 @@
 
     ! note that the coupler's import is comp1's export
     call ESMF_CplCompInitialize(cpl, importState=c1exp, &
-      exportState=c2imp, clock=clock_cpl, userRC=userrc, rc=localrc)
+      exportState=c2imp, clock=clocks(CPL_IDX), userRC=userrc, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) &
         call ESMF_Finalize(rc=localrc, endflag=ESMF_END_ABORT)
@@ -349,7 +355,7 @@
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
-    do while (.not. ESMF_ClockIsStopTime(clock_cpl, rc=localrc))
+    do while (.not. ESMF_ClockIsStopTime(clocks(CPL_IDX), rc=localrc))
 
       !print *, "PET ", pet_id, " starting time step..."
 
@@ -368,7 +374,7 @@
       ! with the second component since comp1 and comp2 are defined on
       ! exclusive sets of PETs
       !print *, "I am calling into GridCompRun(comp1)"
-      call ESMF_GridCompRun(comp1, exportState=c1exp, clock=clock_comp1, &
+      call ESMF_GridCompRun(comp1, exportState=c1exp, clock=clocks(GCOMP_SIDX), &
         userRc=userrc, rc=localrc)
       !print *, "Comp 1 Run returned, rc =", localrc
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -404,7 +410,7 @@
       ! lead to inter PET synchronization of the coupler component.
       !print *, "I am calling into CplCompRun(cpl)"
       call ESMF_CplCompRun(cpl, importState=c1exp, &
-        exportState=c2imp, clock=clock_cpl, userRc=userrc, rc=localrc)
+        exportState=c2imp, clock=clocks(CPL_IDX), userRc=userrc, rc=localrc)
       !print *, "Coupler Run returned, rc =", localrc
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) &
@@ -428,7 +434,7 @@
       ! that are part of comp1 will not block in the following call but proceed
       ! to the next loop increment, executing comp1 concurrently with comp2.
       !print *, "I am calling into GridCompRun(comp2)"
-      call ESMF_GridCompRun(comp2, importState=c2imp, clock=clock_comp2, &
+      call ESMF_GridCompRun(comp2, importState=c2imp, clock=clocks(GCOMP_SIDX+1), &
         userRc=userrc, rc=localrc)
       !print *, "Comp 2 Run returned, rc =", localrc
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -438,19 +444,19 @@
         ESMF_CONTEXT, rcToReturn=rc)) &
         call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
 
-      call ESMF_ClockAdvance(clock_comp1, rc=localrc)
+      call ESMF_ClockAdvance(clocks(GCOMP_SIDX), rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) &
         call ESMF_Finalize(rc=localrc, endflag=ESMF_END_ABORT)
       !call ESMF_ClockPrint(clock_comp1, rc=localrc)
 
-      call ESMF_ClockAdvance(clock_comp2, rc=localrc)
+      call ESMF_ClockAdvance(clocks(GCOMP_SIDX+1), rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) &
         call ESMF_Finalize(rc=localrc, endflag=ESMF_END_ABORT)
       !call ESMF_ClockPrint(clock_comp2, rc=localrc)
 
-      call ESMF_ClockAdvance(clock_cpl, rc=localrc)
+      call ESMF_ClockAdvance(clocks(CPL_IDX), rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) &
         call ESMF_Finalize(rc=localrc, endflag=ESMF_END_ABORT)
@@ -467,7 +473,7 @@
 !-------------------------------------------------------------------------
 !     Print result
 
-    call ESMF_GridCompFinalize(comp1, exportState=c1exp, clock=clock_comp1, &
+    call ESMF_GridCompFinalize(comp1, exportState=c1exp, clock=clocks(GCOMP_SIDX), &
        userRc=userrc, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) &
@@ -477,7 +483,7 @@
         call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
     !print *, "Comp 1 Finalize finished, rc =", rc
 
-    call ESMF_GridCompFinalize(comp2, importState=c2imp, clock=clock_comp2, &
+    call ESMF_GridCompFinalize(comp2, importState=c2imp, clock=clocks(GCOMP_SIDX+1), &
        userRc=userrc, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) &
@@ -488,7 +494,7 @@
     !print *, "Comp 2 Finalize finished, rc =", rc
 
     call ESMF_CplCompFinalize(cpl, importState=c1exp, &
-      exportState=c2imp, clock=clock_cpl, userRc=userrc, rc=localrc)
+      exportState=c2imp, clock=clocks(CPL_IDX), userRc=userrc, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) &
         call ESMF_Finalize(rc=localrc, endflag=ESMF_END_ABORT)
@@ -517,15 +523,15 @@
         ESMF_CONTEXT, rcToReturn=rc)) &
         call ESMF_Finalize(rc=localrc, endflag=ESMF_END_ABORT)
 
-    call ESMF_ClockDestroy(clock_comp1, rc=localrc)
+    call ESMF_ClockDestroy(clocks(GCOMP_SIDX), rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) &
         call ESMF_Finalize(rc=localrc, endflag=ESMF_END_ABORT)
-    call ESMF_ClockDestroy(clock_comp2, rc=localrc)
+    call ESMF_ClockDestroy(clocks(GCOMP_SIDX+1), rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) &
         call ESMF_Finalize(rc=localrc, endflag=ESMF_END_ABORT)
-    call ESMF_ClockDestroy(clock_cpl, rc=localrc)
+    call ESMF_ClockDestroy(clocks(CPL_IDX), rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) &
         call ESMF_Finalize(rc=localrc, endflag=ESMF_END_ABORT)
