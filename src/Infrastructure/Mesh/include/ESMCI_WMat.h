@@ -14,7 +14,10 @@
 
 #include <Mesh/include/ESMCI_Migrator.h>
 #include "PointList/include/ESMCI_PointList.h"
+
+#if defined ESMF_MOAB && ESMF_MOAB != 1
 #include <Mesh/include/ESMCI_MBMesh.h>
+#endif
 
 #include <ostream>
 
@@ -113,8 +116,8 @@ public:
   void MigrateToElem(Mesh &mesh);
 
 // Take out if MOAB isn't being used
-#ifdef ESMF_MOAB
-  void MigrateToElem(MBMesh &mesh);  
+#if defined ESMF_MOAB && ESMF_MOAB != 1
+  void MigrateToElem(MBMesh &mesh);
 #endif // ESMF_MOAB
 
   // Return the number of rows that use this id

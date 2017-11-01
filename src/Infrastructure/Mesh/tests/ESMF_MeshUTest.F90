@@ -2132,7 +2132,7 @@ endif
   correct=.true.
 
   ! Don't test if MOAB isn't available
-#ifdef ESMF_MOAB
+#if defined ESMF_MOAB && ESMF_MOAB != 1
 
   call ESMF_MeshSetMOAB(.true., rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE

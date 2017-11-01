@@ -19,7 +19,7 @@
 //------------------------------------------------------------------------------
 
 // Take out if MOAB isn't being used
-#ifdef ESMF_MOAB
+#if defined ESMF_MOAB && ESMF_MOAB != 1
 
 #include <string>
 #include <ostream>

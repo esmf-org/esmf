@@ -236,6 +236,11 @@ ifndef ESMF_MOAB
 export ESMF_MOAB = default
 endif
 
+ifeq ($(ESMF_MOAB),OFF)
+export ESMF_MOAB = 1
+endif
+
+
 ifndef ESMF_ACC_SOFTWARE_STACK
 export ESMF_ACC_SOFTWARE_STACK = none
 endif

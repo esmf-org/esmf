@@ -21,6 +21,8 @@
 // ESMF Test header
 #include "ESMC_Test.h"
 
+#if defined ESMF_MOAB && ESMF_MOAB != 1
+
 #include "ESMC_MBMeshTestUtilMBMesh.C"
 
 // other headers
@@ -32,11 +34,12 @@
 #include "MBTagConventions.hpp"
 #include "moab/Core.hpp"
 #include "moab/ElemEvaluator.hpp"
+#endif
 
-
-#include<iostream>
+#include <iostream>
 #include <iterator>
 #include <vector>
+#include <cstring>
 
 
 #if !defined (M_PI)
@@ -46,9 +49,10 @@
 
 using namespace std;
 
+#if defined ESMF_MOAB && ESMF_MOAB != 1
+
 bool is_inside (const MBMesh *mesh, const double *coords) {
   int rc;
-#if defined (ESMF_MOAB)
   rc = ESMF_RC_NOT_IMPL;
   //Get MOAB Mesh
   Interface *moab_mesh=mesh->mesh;
@@ -83,10 +87,6 @@ bool is_inside (const MBMesh *mesh, const double *coords) {
 
   if (num_inside > 1) rc = ESMF_FAILURE;
   else rc = ESMF_SUCCESS;
-
-#else
-  rc = ESMF_SUCCESS;
-#endif
 
   if (rc != ESMF_SUCCESS) return false;
   else return true;
@@ -169,6 +169,7 @@ MBMesh* create_mesh_simple_triangles(int &rc) {
   rc = ESMF_SUCCESS;
   return static_cast<MBMesh *>(meshp);
 }
+#endif
 
 int main(int argc, char *argv[]) {
 
@@ -185,8 +186,10 @@ int main(int argc, char *argv[]) {
   //----------------------------------------------------------------------------
   rc=ESMC_LogSet(true);
 
+#if defined ESMF_MOAB && ESMF_MOAB != 1
   //----------------------------------------------------------------------------
   //ESMC_MoabSet(true);
+#endif
 
   // Get parallel information
   vm=ESMC_VMGetGlobal(&rc);
@@ -201,6 +204,7 @@ int main(int argc, char *argv[]) {
   // --------------------------------------------------------------------------
 
 #if 0
+#if defined ESMF_MOAB && ESMF_MOAB != 1
   // this test demonstrates behavior where point appears in multiple triangular
   // elements if the elements are created with a specific node connectivity
   //----------------------------------------------------------------------------
@@ -208,10 +212,12 @@ int main(int argc, char *argv[]) {
   MBMesh *mesh_tri_simple;
   mesh_tri_simple = create_mesh_simple_triangles(rc);
   if (!mesh_tri_simple) rc = ESMC_RC_PTR_NULL;
+#endif
   strcpy(name, "Triangles mesh creation");
   strcpy(failMsg, "Mesh creation failed");
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
 
+#if defined ESMF_MOAB && ESMF_MOAB != 1
   //----------------------------------------------------------------------------
   //NEX_disable_UTest
   double coords[2];
@@ -222,18 +228,28 @@ int main(int argc, char *argv[]) {
 
   // clean up
   delete mesh_tri_simple;
+#else
+  rc = ESMF_SUCCESS;
+#endif
+  strcpy(name, "is_inside");
+  strcpy(failMsg, "A node was found in two different cells");
+  ESMC_Test(ESMF_SUCCESS, name, failMsg, &result, __FILE__, __LINE__, 0);
 #endif
   // --------------------------------------------------------------------------
 
   // --------------------------------------------------------------------------
   // get entities from meshes created with quadrilaterals
   // --------------------------------------------------------------------------
+#if defined ESMF_MOAB && ESMF_MOAB != 1
 
   //----------------------------------------------------------------------------
   //NEX_UTest
   MBMesh *mesh_quad;
   mesh_quad = create_mesh_quad(rc);
   if (!mesh_quad) rc = ESMC_RC_PTR_NULL;
+#else
+  rc = ESMF_SUCCESS;
+#endif
   strcpy(name, "Quadrilaterals mesh creation");
   strcpy(failMsg, "Mesh creation failed");
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
@@ -241,11 +257,14 @@ int main(int argc, char *argv[]) {
   //----------------------------------------------------------------------------
   //NEX_UTest
 
-#if defined (ESMF_MOAB)
+#if defined ESMF_MOAB && ESMF_MOAB != 1
   Range range_quad;
   Interface *mb_mesh_quad=mesh_quad->mesh;
   int merr_quad=mb_mesh_quad->get_entities_by_dimension(0,mesh_quad->pdim,range_quad);
   if (merr_quad != MB_SUCCESS) rc = ESMF_FAILURE;
+
+  // clean up
+  delete mesh_quad;
 #else
   rc = ESMF_SUCCESS;
 #endif
@@ -254,18 +273,19 @@ int main(int argc, char *argv[]) {
   strcpy(failMsg, "Cannot get entities");
   ESMC_Test(rc==ESMF_SUCCESS, name, failMsg, &result, __FILE__, __LINE__, 0);
 
-  // clean up
-  delete mesh_quad;
-
   // --------------------------------------------------------------------------
   // get entities from meshes created with spherical quadrilaterals
   // --------------------------------------------------------------------------
+#if defined ESMF_MOAB && ESMF_MOAB != 1
 
   //----------------------------------------------------------------------------
   //NEX_UTest
   MBMesh *mesh_quad_sph;
   mesh_quad_sph = create_mesh_quad_sph(rc);
   if (!mesh_quad_sph) rc = ESMC_RC_PTR_NULL;
+#else
+  rc = ESMF_SUCCESS;
+#endif
   strcpy(name, "Spherical quadrilaterals mesh creation");
   strcpy(failMsg, "Mesh creation failed");
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
@@ -273,11 +293,14 @@ int main(int argc, char *argv[]) {
   //----------------------------------------------------------------------------
   //NEX_UTest
 
-#if defined (ESMF_MOAB)
+#if defined ESMF_MOAB && ESMF_MOAB != 1
   Range range_quad_sph;
   Interface *mb_mesh_quad_sph=mesh_quad_sph->mesh;
   int merr_quad_sph=mb_mesh_quad_sph->get_entities_by_dimension(0,mesh_quad_sph->pdim,range_quad_sph);
   if (merr_quad_sph != MB_SUCCESS) rc = ESMF_FAILURE;
+
+  // clean up
+  delete mesh_quad_sph;
 #else
   rc = ESMF_SUCCESS;
 #endif
@@ -286,18 +309,19 @@ int main(int argc, char *argv[]) {
   strcpy(failMsg, "Cannot get entities");
   ESMC_Test(rc==ESMF_SUCCESS, name, failMsg, &result, __FILE__, __LINE__, 0);
 
-  // clean up
-  delete mesh_quad_sph;
-
   // --------------------------------------------------------------------------
   // get entities from meshes created with triangles
   // --------------------------------------------------------------------------
+#if defined ESMF_MOAB && ESMF_MOAB != 1
 
   //----------------------------------------------------------------------------
   //NEX_UTest
   MBMesh *mesh_tri;
   mesh_tri = create_mesh_tri(rc);
   if (!mesh_tri) rc = ESMC_RC_PTR_NULL;
+#else
+  rc = ESMF_SUCCESS;
+#endif
   strcpy(name, "Triangles mesh creation");
   strcpy(failMsg, "Mesh creation failed");
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
@@ -305,11 +329,14 @@ int main(int argc, char *argv[]) {
   //----------------------------------------------------------------------------
   //NEX_UTest
 
-#if defined (ESMF_MOAB)
+#if defined ESMF_MOAB && ESMF_MOAB != 1
   Range range_tri;
   Interface *mb_mesh_tri=mesh_tri->mesh;
   int merr_tri=mb_mesh_tri->get_entities_by_dimension(0,mesh_tri->pdim,range_tri);
   if (merr_tri != MB_SUCCESS) rc = ESMF_FAILURE;
+
+  // clean up
+  delete mesh_tri;
 #else
   rc = ESMF_SUCCESS;
 #endif
@@ -318,18 +345,20 @@ int main(int argc, char *argv[]) {
   strcpy(failMsg, "Cannot get entities");
   ESMC_Test(rc==ESMF_SUCCESS, name, failMsg, &result, __FILE__, __LINE__, 0);
 
-  // clean up
-  delete mesh_tri;
 
   // --------------------------------------------------------------------------
   // get entities from meshes created with spherical triangles
   // --------------------------------------------------------------------------
+#if defined ESMF_MOAB && ESMF_MOAB != 1
 
   //----------------------------------------------------------------------------
   //NEX_UTest
   MBMesh *mesh_tri_sph;
   mesh_tri_sph = create_mesh_tri_sph(rc);
   if (!mesh_tri_sph) rc = ESMC_RC_PTR_NULL;
+#else
+  rc = ESMF_SUCCESS;
+#endif
   strcpy(name, "Spherical triangles mesh creation");
   strcpy(failMsg, "Mesh creation failed");
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
@@ -337,11 +366,14 @@ int main(int argc, char *argv[]) {
   //----------------------------------------------------------------------------
   //NEX_UTest
 
-#if defined (ESMF_MOAB)
+#if defined ESMF_MOAB && ESMF_MOAB != 1
   Range range_tri_sph;
   Interface *mb_mesh_tri_sph=mesh_tri_sph->mesh;
   int merr_tri_sph=mb_mesh_tri_sph->get_entities_by_dimension(0,mesh_tri_sph->pdim,range_tri_sph);
   if (merr_tri_sph != MB_SUCCESS) rc = ESMF_FAILURE;
+
+  // clean up
+  delete mesh_tri_sph;
 #else
   rc = ESMF_SUCCESS;
 #endif
@@ -350,29 +382,33 @@ int main(int argc, char *argv[]) {
   strcpy(failMsg, "Cannot get entities");
   ESMC_Test(rc==ESMF_SUCCESS, name, failMsg, &result, __FILE__, __LINE__, 0);
 
-  // clean up
-  delete mesh_tri_sph;
-
   // --------------------------------------------------------------------------
   // get entities from meshes created with tetrahedrons
   // --------------------------------------------------------------------------
+#if defined ESMF_MOAB && ESMF_MOAB != 1
 
   //----------------------------------------------------------------------------
   //NEX_UTest
   MBMesh *mesh_tet;
   mesh_tet = create_mesh_tet(rc);
   if (!mesh_tet) rc = ESMC_RC_PTR_NULL;
+#else
+  rc = ESMF_SUCCESS;
+#endif
   strcpy(name, "Tetrahedrons mesh creation");
   strcpy(failMsg, "Mesh creation failed");
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
 
   //----------------------------------------------------------------------------
   //NEX_UTest
-#if defined (ESMF_MOAB)
+#if defined ESMF_MOAB && ESMF_MOAB != 1
   Range range_tet;
   Interface *mb_mesh_tet=mesh_tet->mesh;
   int merr_tet=mb_mesh_tet->get_entities_by_dimension(0,mesh_tet->pdim,range_tet);
   if (merr_tet != MB_SUCCESS) rc = ESMF_FAILURE;
+
+  // clean up
+  delete mesh_tet;
 #else
   rc = ESMF_SUCCESS;
 #endif
@@ -381,17 +417,19 @@ int main(int argc, char *argv[]) {
   strcpy(failMsg, "Cannot get entities");
   ESMC_Test(rc==ESMF_SUCCESS, name, failMsg, &result, __FILE__, __LINE__, 0);
 
-  // clean up
-  delete mesh_tet;
   // --------------------------------------------------------------------------
   // get entities from meshes created with hexahedrons
   // --------------------------------------------------------------------------
+#if defined ESMF_MOAB && ESMF_MOAB != 1
 
   //----------------------------------------------------------------------------
   //NEX_UTest
   MBMesh *mesh_hex;
   mesh_hex = create_mesh_hex(rc);
   if (!mesh_hex) rc = ESMC_RC_PTR_NULL;
+#else
+  rc = ESMF_SUCCESS;
+#endif
   strcpy(name, "Hexahedrons mesh creation");
   strcpy(failMsg, "Mesh creation failed");
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
@@ -399,11 +437,14 @@ int main(int argc, char *argv[]) {
   //----------------------------------------------------------------------------
   //NEX_UTest
 
-#if defined (ESMF_MOAB)
+#if defined ESMF_MOAB && ESMF_MOAB != 1
   Range range_hex;
   Interface *mb_mesh_hex=mesh_hex->mesh;
   int merr_hex=mb_mesh_hex->get_entities_by_dimension(0,mesh_hex->pdim,range_hex);
   if (merr_hex != MB_SUCCESS) rc = ESMF_FAILURE;
+
+  // clean up
+  delete mesh_hex;
 #else
   rc = ESMF_SUCCESS;
 #endif
@@ -411,10 +452,6 @@ int main(int argc, char *argv[]) {
   strcpy(name, "get_entities");
   strcpy(failMsg, "Cannot get entities");
   ESMC_Test(rc==ESMF_SUCCESS, name, failMsg, &result, __FILE__, __LINE__, 0);
-
-  // clean up
-  delete mesh_hex;
-
 
   //----------------------------------------------------------------------------
   ESMC_TestEnd(__FILE__, __LINE__, 0);

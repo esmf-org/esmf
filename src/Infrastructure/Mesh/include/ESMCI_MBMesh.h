@@ -13,7 +13,7 @@
 #define ESMCI_MBMesh_h
 
 
-#ifdef ESMF_MOAB
+#if defined ESMF_MOAB && ESMF_MOAB != 1
 #include "moab/Core.hpp"
 using namespace moab;
 #endif
@@ -23,7 +23,7 @@ using namespace moab;
 namespace ESMCI {
 
   class MBMesh {
-#ifdef ESMF_MOAB
+#if defined ESMF_MOAB && ESMF_MOAB != 1
 
   public:
     int sdim, pdim; // dimensions MAYBE I SHOULD NAME THESE MORE SIMILAR TO WHAT IN OTHER MESH

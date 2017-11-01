@@ -11,7 +11,7 @@
 //==============================================================================
 
 // Take out if MOAB isn't being used
-#ifdef ESMF_MOAB
+#if defined ESMF_MOAB && ESMF_MOAB != 1
 
 #include "ESMCI_Macros.h"
 #include "ESMCI_F90Interface.h"

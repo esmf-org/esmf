@@ -21,6 +21,8 @@
 // ESMF Test header
 #include "ESMC_Test.h"
 
+#if defined ESMF_MOAB && ESMF_MOAB != 1
+
 #include "ESMC_MBMeshTestUtilMBMesh.C"
 #include "ESMC_MBMeshTestUtilPL.C"
 
@@ -33,11 +35,12 @@
 #include "MBTagConventions.hpp"
 #include "moab/Core.hpp"
 #include "moab/ElemEvaluator.hpp"
+#endif
 
-
-#include<iostream>
+#include <iostream>
 #include <iterator>
 #include <vector>
+#include <cstring>
 
 
 #if !defined (M_PI)
@@ -46,6 +49,8 @@
 #endif
 
 using namespace std;
+
+#if defined ESMF_MOAB && ESMF_MOAB != 1
 
 bool compare(const double *c1, double *c2) {
   bool pass = false;
@@ -62,7 +67,6 @@ bool pcoords(MBMesh *mesh) {
   char failMsg[80];
   int result = 0;
 
-#if defined (ESMF_MOAB)
   rc = ESMF_RC_NOT_IMPL;
   //Get MOAB Mesh
   Interface *moab_mesh=mesh->mesh;
@@ -115,9 +119,6 @@ bool pcoords(MBMesh *mesh) {
     printf("\n");
 */
   }
-#else
-  rc = ESMF_SUCCESS;
-#endif
   strcpy(name, "Return parametric coordinates of a point in a cell");
   strcpy(failMsg, "Could not return parametric coordinates of a point in a cell");
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
@@ -198,6 +199,7 @@ bool search_gen(MBMesh *mesh, PointList *pl, vector<double*> &cv) {
   if (rc == ESMF_SUCCESS) return true;
   else return false;
 }
+#endif
 
 int main(int argc, char *argv[]) {
 
@@ -214,8 +216,10 @@ int main(int argc, char *argv[]) {
   //----------------------------------------------------------------------------
   rc=ESMC_LogSet(true);
 
+#if defined ESMF_MOAB && ESMF_MOAB != 1
   //----------------------------------------------------------------------------
   //ESMC_MoabSet(true);
+#endif
 
   // Get parallel information
   vm=ESMC_VMGetGlobal(&rc);
@@ -223,11 +227,13 @@ int main(int argc, char *argv[]) {
 
   rc=ESMC_VMGet(vm, &localPet, &petCount, (int *)NULL, (MPI_Comm *)NULL,
                 (int *)NULL, (int *)NULL);
+
   if (rc != ESMF_SUCCESS) return 0;
 
   // common vector for pointlist verification
   vector<double*> cv;
 
+#if defined ESMF_MOAB && ESMF_MOAB != 1
   // build a mesh
   MBMesh *mesh_quad;
   mesh_quad = create_mesh_quad(rc);
@@ -239,7 +245,13 @@ int main(int argc, char *argv[]) {
   strcpy(name, "Simple mesh search");
   strcpy(failMsg, "Search results did not validate");
   ESMC_Test((search_gen(mesh_quad, pl_quad, cv)), name, failMsg, &result, __FILE__, __LINE__, 0);
+#else
+  strcpy(name, "Simple mesh search");
+  strcpy(failMsg, "Search results did not validate");
+  ESMC_Test(ESMF_SUCCESS, name, failMsg, &result, __FILE__, __LINE__, 0);
+#endif
 
+#if defined ESMF_MOAB && ESMF_MOAB != 1
   // build a mesh
   MBMesh *mesh_tri;
   mesh_tri = create_mesh_tri(rc);
@@ -251,12 +263,19 @@ int main(int argc, char *argv[]) {
   strcpy(name, "Triangles mesh search");
   strcpy(failMsg, "Search results did not validate");
   ESMC_Test((search_gen(mesh_tri, pl_tri, cv)), name, failMsg, &result, __FILE__, __LINE__, 0);
+#else
+  strcpy(name, "Triangles mesh search");
+  strcpy(failMsg, "Search results did not validate");
+  ESMC_Test(ESMF_SUCCESS, name, failMsg, &result, __FILE__, __LINE__, 0);
+#endif
 
+#if defined ESMF_MOAB && ESMF_MOAB != 1
   // clean up
   delete pl_quad;
   delete mesh_quad;
   delete pl_tri;
   delete mesh_tri;
+#endif
 
   //----------------------------------------------------------------------------
   ESMC_TestEnd(__FILE__, __LINE__, 0);

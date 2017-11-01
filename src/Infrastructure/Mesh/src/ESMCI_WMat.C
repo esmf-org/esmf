@@ -479,7 +479,7 @@ for (; wi != we; ++wi) {
 }
 
   // take out if MOAB isn't defined
-#ifdef ESMF_MOAB
+#if defined ESMF_MOAB && ESMF_MOAB != 1
 
 // Migrate WMat based on mesh's element ids
 //void WMat::Migrate(CommRel &crel) {
