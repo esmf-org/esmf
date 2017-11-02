@@ -51,6 +51,7 @@ module ESMF_MapperMod
 !  use ESMF_ArrayGetMod
   use ESMF_TimeMod
   use ESMF_InitMacrosMod
+  use ESMF_GridCompMod
 
   implicit none
 
@@ -65,11 +66,15 @@ module ESMF_MapperMod
   end type
 
   type ESMF_MapperModelInfo
+    integer, dimension(:), allocatable :: petlist
+  end type
+
+  type ESMF_MapperExecutionBlock
   end type
 
 !------------------------------------------------------------------------------
 ! !PUBLIC TYPES:
-  public ESMF_Mapper, ESMF_MapperModelInfo
+  public ESMF_Mapper, ESMF_MapperModelInfo, ESMF_MapperExecutionBlock
 
 !------------------------------------------------------------------------------
 !
@@ -168,11 +173,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE: ESMF_MapperSetConstraints - Set constraints for the mapper
 
 ! !INTERFACE:
-  subroutine ESMF_MapperSetConstraints(mapper, keywordEnforcer, rc)
+  subroutine ESMF_MapperSetConstraints(mapper, keywordEnforcer, &
+    execBlock, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_Mapper), intent(inout) :: mapper
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    integer, dimension(:), intent(in), optional :: execBlock
     integer,             intent(out), optional :: rc
 
 ! !DESCRIPTION:

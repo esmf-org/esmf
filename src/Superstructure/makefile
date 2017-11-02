@@ -6,7 +6,7 @@ LOCDIR   = src/Superstructure
 
 include $(ESMF_DIR)/makefile
 
-DIRS     =  State Component AttachMethods AttributeAPI Trace WebServices PreESMFMod ESMFMod AppDriver
+DIRS     =  State Component Mapper AttachMethods AttributeAPI Trace WebServices PreESMFMod ESMFMod AppDriver
 
 CLEANDIRS   =
 CLEANFILES  =

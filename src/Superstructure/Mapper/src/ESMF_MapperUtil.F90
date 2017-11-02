@@ -36,20 +36,11 @@ module ESMF_MapperUtilMod
 !------------------------------------------------------------------------------
 ! !USES:
   use ESMF_UtilTypesMod
-  use ESMF_UtilMod
-  use ESMF_BaseMod
   use ESMF_LogErrMod
-!  use ESMF_ArraySpecMod
-!  use ESMF_LocalArrayMod
-!  use ESMF_DELayoutMod
-!  use ESMF_StaggerLocMod
-!  use ESMF_DistGridMod
-  use ESMF_GridMod
-!  use ESMF_GeomBaseMod
-!  use ESMF_ArrayMod
-!  use ESMF_ArrayCreateMod
-!  use ESMF_ArrayGetMod
-  use ESMF_TimeMod
+  use ESMF_StateTypesMod
+  use ESMF_CompMod
+  use ESMF_GridCompMod
+  use ESMF_CplCompMod
   use ESMF_InitMacrosMod
   use ESMF_MapperMod
 
@@ -60,14 +51,10 @@ module ESMF_MapperUtilMod
   private
 
 !------------------------------------------------------------------------------
-! ! ESMF_Mapper class
-
-  type ESMF_MapperExecutionBlock
-  end type
+! ! ESMF_MapperUtil class
 
 !------------------------------------------------------------------------------
 ! !PUBLIC TYPES:
-  public ESMF_MapperExecutionBlock
 
 !------------------------------------------------------------------------------
 !

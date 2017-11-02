@@ -11,7 +11,7 @@ OBJSF     = $(addsuffix .o, $(basename $(SOURCEF)))
 TEXFILES  = $(addsuffix _fapi.tex, $(basename $(AUTOGEN)))
 
 LIBBASE	  = libesmf
-LOCDIR	  = src/Infrastructure/Mapper/src
+LOCDIR	  = src/Superstructure/Mapper/src
 
 CLEANDIRS   =
 CLEANFILES  = $(AUTOGEN) $(addprefix ../doc/, $(TEXFILES) )
