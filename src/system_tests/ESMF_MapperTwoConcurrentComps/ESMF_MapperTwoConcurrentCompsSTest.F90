@@ -79,9 +79,12 @@
     type(ESMF_Clock) :: clocks(NUM_COMPS_PLUS_CPL)
     type(ESMF_Alarm) :: alarms(NUM_COMPS_PLUS_CPL)
     type(ESMF_Calendar) :: gregorianCalendar
-    type(ESMF_TimeInterval) :: timeStep
+    type(ESMF_TimeInterval) :: timeSteps(NUM_COMPS_PLUS_CPL)
     type(ESMF_Time) :: startTime
     type(ESMF_Time) :: stopTime
+
+    type(ESMF_Time) :: dbg_time
+    integer(ESMF_KIND_I8) :: dbg_stime
 
     ! cumulative result: count failures; no failures equals "all pass"
     integer :: testresult = 0
@@ -268,7 +271,17 @@
         call ESMF_Finalize(rc=localrc, endflag=ESMF_END_ABORT)
 
     ! initialize time interval to 4 hours
-    call ESMF_TimeIntervalSet(timeStep, h=4, rc=localrc)
+    call ESMF_TimeIntervalSet(timeSteps(CPL_IDX), h=2, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) &
+        call ESMF_Finalize(rc=localrc, endflag=ESMF_END_ABORT)
+
+    call ESMF_TimeIntervalSet(timeSteps(GCOMP_SIDX), h=8, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) &
+        call ESMF_Finalize(rc=localrc, endflag=ESMF_END_ABORT)
+
+    call ESMF_TimeIntervalSet(timeSteps(GCOMP_SIDX+1), h=4, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) &
         call ESMF_Finalize(rc=localrc, endflag=ESMF_END_ABORT)
@@ -288,18 +301,20 @@
         call ESMF_Finalize(rc=localrc, endflag=ESMF_END_ABORT)
 
     ! initialize the clock for comp1 with the above values
-    clocks(CPL_IDX) = ESMF_ClockCreate(timeStep, startTime, stopTime=stopTime, &
-                             name="Clock 1", rc=localrc)
+    clocks(CPL_IDX) = ESMF_ClockCreate(timeSteps(CPL_IDX), startTime, stopTime=stopTime, &
+                             name="Cpl Clock 1", rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) &
         call ESMF_Finalize(rc=localrc, endflag=ESMF_END_ABORT)
 
-    clocks(GCOMP_SIDX) = ESMF_ClockCreate(clocks(CPL_IDX), rc=localrc)
+    clocks(GCOMP_SIDX) = ESMF_ClockCreate(timeSteps(GCOMP_SIDX), startTime, stopTime=stopTime, &
+                             name="Gcomp Clock 1", rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) &
         call ESMF_Finalize(rc=localrc, endflag=ESMF_END_ABORT)
 
-    clocks(GCOMP_SIDX+1) = ESMF_ClockCreate(clocks(CPL_IDX), rc=localrc)
+    clocks(GCOMP_SIDX+1) = ESMF_ClockCreate(timeSteps(GCOMP_SIDX+1), startTime, stopTime=stopTime, &
+                             name="Gcomp Clock 2", rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) &
         call ESMF_Finalize(rc=localrc, endflag=ESMF_END_ABORT)
@@ -453,7 +468,9 @@
 
       ! Check if we have comp1 sync alarm ringing
       if(ESMF_AlarmIsRinging(alarms(GCOMP_SIDX), rc=localrc)) then
-        !print *, "Comp1 alarm is ringing !"
+        call ESMF_ClockGet(clocks(GCOMP_SIDX), currTime=dbg_time, rc=rc)
+        call ESMF_TimeGet(dbg_time, s_i8=dbg_stime, rc=rc)
+        print *, "Comp1 alarm is ringing !, time = ", dbg_stime
         call ESMF_AlarmRingerOff(alarms(GCOMP_SIDX), rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=localrc)) &
@@ -468,7 +485,9 @@
 
       ! Check if we have comp2 sync alarm ringing
       if(ESMF_AlarmIsRinging(alarms(GCOMP_SIDX+1), rc=localrc)) then
-        !print *, "Comp2 alarm is ringing !"
+        call ESMF_ClockGet(clocks(GCOMP_SIDX+1), currTime=dbg_time, rc=rc)
+        call ESMF_TimeGet(dbg_time, s_i8=dbg_stime, rc=rc)
+        print *, "Comp2 alarm is ringing !, time = ", dbg_stime
         call ESMF_AlarmRingerOff(alarms(GCOMP_SIDX+1), rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=localrc)) &
@@ -483,7 +502,9 @@
 
       ! Check if coupler sync alarm is ringing
       if(ESMF_AlarmIsRinging(alarms(CPL_IDX), rc=localrc)) then
-        !print *, "Coupler alarm is ringing !"
+        call ESMF_ClockGet(clocks(CPL_IDX), currTime=dbg_time, rc=rc)
+        call ESMF_TimeGet(dbg_time, s_i8=dbg_stime, rc=rc)
+        print *, "Coupler alarm is ringing !, time = ", dbg_stime
         call ESMF_AlarmRingerOff(alarms(CPL_IDX), rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=localrc)) &
