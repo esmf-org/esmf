@@ -54,6 +54,7 @@
     use user_model2, only : userm2_setvm, userm2_register
     use user_coupler, only : usercpl_setvm, usercpl_register
 
+    use comp_utils
     use clock_utils
 
     implicit none
@@ -84,6 +85,8 @@
     type(ESMF_Time) :: stopTime
 
     type(ESMF_Mapper) :: mapper
+    logical :: is_sync_time(NUM_COMPS_PLUS_CPL)
+    type(ESMF_MapperModelInfo) :: model_info(NUM_COMPS)
 
     type(ESMF_Time) :: dbg_time
     integer(ESMF_KIND_I8) :: dbg_stime
@@ -265,6 +268,25 @@
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
 
+  ! Set mapper constraints
+  call ESMF_MapperSetConstraints(mapper, execBlock=(/comp1/), rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    ESMF_CONTEXT, rcToReturn=rc)) &
+    call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
+  if (ESMF_LogFoundError(userrc, ESMF_ERR_PASSTHRU, &
+    ESMF_CONTEXT, rcToReturn=rc)) &
+    call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
+
+  ! Set mapper constraints
+  call ESMF_MapperSetConstraints(mapper, execBlock=(/comp2/), rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    ESMF_CONTEXT, rcToReturn=rc)) &
+    call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
+  if (ESMF_LogFoundError(userrc, ESMF_ERR_PASSTHRU, &
+    ESMF_CONTEXT, rcToReturn=rc)) &
+    call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
+
+
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 !  Create and initialize clocks for comp1 and comp2.
@@ -384,6 +406,7 @@
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
+    is_sync_time = .false.
     do while (.not. ESMF_ClockIsStopTime(clocks(CPL_IDX), rc=localrc))
 
       !print *, "PET ", pet_id, " starting time step..."
@@ -403,15 +426,17 @@
       ! with the second component since comp1 and comp2 are defined on
       ! exclusive sets of PETs
       !print *, "I am calling into GridCompRun(comp1)"
-      call ESMF_GridCompRun(comp1, exportState=c1exp, clock=clocks(GCOMP_SIDX), &
-        userRc=userrc, rc=localrc)
-      !print *, "Comp 1 Run returned, rc =", localrc
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) &
-        call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
-      if (ESMF_LogFoundError(userrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) &
-        call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
+      if(.not. ESMF_AlarmIsRinging(alarms(GCOMP_SIDX), rc=localrc)) then
+        call ESMF_GridCompRun(comp1, exportState=c1exp, clock=clocks(GCOMP_SIDX), &
+          userRc=userrc, rc=localrc)
+        !print *, "Comp 1 Run returned, rc =", localrc
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) &
+          call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
+        if (ESMF_LogFoundError(userrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) &
+          call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
+      end if
 
       ! Uncomment the following calls to ESMF_GridCompWait() to sequentialize
       ! comp1, comp2 and the coupler. The following ESMF_GridCompWait() calls
@@ -438,15 +463,17 @@
       ! calls contained in the user written coupler methods will indirectly
       ! lead to inter PET synchronization of the coupler component.
       !print *, "I am calling into CplCompRun(cpl)"
-      call ESMF_CplCompRun(cpl, importState=c1exp, &
-        exportState=c2imp, clock=clocks(CPL_IDX), userRc=userrc, rc=localrc)
-      !print *, "Coupler Run returned, rc =", localrc
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) &
-        call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
-      if (ESMF_LogFoundError(userrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) &
-        call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
+      if(.not. ESMF_AlarmIsRinging(alarms(CPL_IDX), rc=localrc)) then
+        call ESMF_CplCompRun(cpl, importState=c1exp, &
+          exportState=c2imp, clock=clocks(CPL_IDX), userRc=userrc, rc=localrc)
+        !print *, "Coupler Run returned, rc =", localrc
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) &
+          call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
+        if (ESMF_LogFoundError(userrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) &
+          call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
+      end if
 
       ! Uncomment the following call to ESMF_GridCompWait() to sequentialize
       ! comp1 and comp2. The following ESMF_GridCompWait() call will block
@@ -463,66 +490,146 @@
       ! that are part of comp1 will not block in the following call but proceed
       ! to the next loop increment, executing comp1 concurrently with comp2.
       !print *, "I am calling into GridCompRun(comp2)"
-      call ESMF_GridCompRun(comp2, importState=c2imp, clock=clocks(GCOMP_SIDX+1), &
-        userRc=userrc, rc=localrc)
-      !print *, "Comp 2 Run returned, rc =", localrc
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) &
-        call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
-      if (ESMF_LogFoundError(userrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) &
-        call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
+      if(.not. ESMF_AlarmIsRinging(alarms(GCOMP_SIDX+1), rc=localrc)) then
+        call ESMF_GridCompRun(comp2, importState=c2imp, clock=clocks(GCOMP_SIDX+1), &
+          userRc=userrc, rc=localrc)
+        !print *, "Comp 2 Run returned, rc =", localrc
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) &
+          call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
+        if (ESMF_LogFoundError(userrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) &
+          call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
+      end if
 
       ! Check if we have comp1 sync alarm ringing
       if(ESMF_AlarmIsRinging(alarms(GCOMP_SIDX), rc=localrc)) then
         call ESMF_ClockGet(clocks(GCOMP_SIDX), currTime=dbg_time, rc=rc)
         call ESMF_TimeGet(dbg_time, s_i8=dbg_stime, rc=rc)
         print *, "Comp1 alarm is ringing !, time = ", dbg_stime
-        call ESMF_AlarmRingerOff(alarms(GCOMP_SIDX), rc=localrc)
-        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-          ESMF_CONTEXT, rcToReturn=localrc)) &
-          call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
+        is_sync_time(GCOMP_SIDX) = .true.
       end if
-
-      call ESMF_ClockAdvance(clocks(GCOMP_SIDX), rc=localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) &
-        call ESMF_Finalize(rc=localrc, endflag=ESMF_END_ABORT)
-      !call ESMF_ClockPrint(clock_comp1, rc=localrc)
 
       ! Check if we have comp2 sync alarm ringing
       if(ESMF_AlarmIsRinging(alarms(GCOMP_SIDX+1), rc=localrc)) then
         call ESMF_ClockGet(clocks(GCOMP_SIDX+1), currTime=dbg_time, rc=rc)
         call ESMF_TimeGet(dbg_time, s_i8=dbg_stime, rc=rc)
         print *, "Comp2 alarm is ringing !, time = ", dbg_stime
-        call ESMF_AlarmRingerOff(alarms(GCOMP_SIDX+1), rc=localrc)
-        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-          ESMF_CONTEXT, rcToReturn=localrc)) &
-          call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
+        is_sync_time(GCOMP_SIDX+1) = .true.
       end if
-
-      call ESMF_ClockAdvance(clocks(GCOMP_SIDX+1), rc=localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) &
-        call ESMF_Finalize(rc=localrc, endflag=ESMF_END_ABORT)
-      !call ESMF_ClockPrint(clock_comp2, rc=localrc)
 
       ! Check if coupler sync alarm is ringing
       if(ESMF_AlarmIsRinging(alarms(CPL_IDX), rc=localrc)) then
         call ESMF_ClockGet(clocks(CPL_IDX), currTime=dbg_time, rc=rc)
         call ESMF_TimeGet(dbg_time, s_i8=dbg_stime, rc=rc)
         print *, "Coupler alarm is ringing !, time = ", dbg_stime
+        is_sync_time(CPL_IDX) = .true.
+      end if
+      if(all(is_sync_time)) then
+        is_sync_time = .false.
+        ! Wait for both components and cpl
+        call ESMF_GridCompWait(comp1, syncflag=ESMF_SYNC_BLOCKING, rc=localrc)
+        print *, "Comp 1 Wait returned, rc =", localrc
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) &
+          call ESMF_Finalize(rc=localrc, endflag=ESMF_END_ABORT)
+        call ESMF_GridCompWait(comp2, syncflag=ESMF_SYNC_BLOCKING, rc=localrc)
+        print *, "Comp 2 Wait returned, rc =", localrc
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) &
+          call ESMF_Finalize(rc=localrc, endflag=ESMF_END_ABORT)
+        call ESMF_CplCompWait(cpl, syncflag=ESMF_SYNC_BLOCKING, rc=localrc)
+        print *, "Comp 2 Wait returned, rc =", localrc
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) &
+          call ESMF_Finalize(rc=localrc, endflag=ESMF_END_ABORT)
+        
+        ! Turn the alarms off
+        call ESMF_AlarmRingerOff(alarms(GCOMP_SIDX), rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=localrc)) &
+          call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
+        call ESMF_AlarmRingerOff(alarms(GCOMP_SIDX+1), rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=localrc)) &
+          call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
+        call ESMF_AlarmRingerOff(alarms(CPL_IDX), rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=localrc)) &
+          call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
+
+        ! Contact mapper
+        model_info(1) = ESMF_MapperCollect(mapper, comp1, rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=localrc)) &
+          call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
+        call ESMF_AlarmRingerOff(alarms(CPL_IDX), rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=localrc)) &
+          call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
+        
+        model_info(2) = ESMF_MapperCollect(mapper, comp2, rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=localrc)) &
+          call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
+        call ESMF_AlarmRingerOff(alarms(CPL_IDX), rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=localrc)) &
+          call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
+
+        ! Optimize using the mapper
+        call ESMF_MapperOptimize(mapper, model_info, rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=localrc)) &
+          call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
+        call ESMF_AlarmRingerOff(alarms(CPL_IDX), rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=localrc)) &
+          call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
+
+        ! Recreate the components using info from mapper
+        !call user_comp_recreate(comp1, model_info(1), mapper, localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=localrc)) &
+          call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
+        call ESMF_AlarmRingerOff(alarms(CPL_IDX), rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=localrc)) &
+          call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
+
+        !call user_comp_recreate(comp2, model_info(2), mapper, localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=localrc)) &
+          call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
         call ESMF_AlarmRingerOff(alarms(CPL_IDX), rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=localrc)) &
           call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
       end if
 
-      call ESMF_ClockAdvance(clocks(CPL_IDX), rc=localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) &
-        call ESMF_Finalize(rc=localrc, endflag=ESMF_END_ABORT)
-      !call ESMF_ClockPrint(clock_cpl, rc=localrc)
+      if(.not. ESMF_AlarmIsRinging(alarms(GCOMP_SIDX), rc=localrc)) then
+        call ESMF_ClockAdvance(clocks(GCOMP_SIDX), rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) &
+          call ESMF_Finalize(rc=localrc, endflag=ESMF_END_ABORT)
+        !call ESMF_ClockPrint(clock_comp1, rc=localrc)
+      end if
+
+      if(.not. ESMF_AlarmIsRinging(alarms(GCOMP_SIDX+1), rc=localrc)) then
+        call ESMF_ClockAdvance(clocks(GCOMP_SIDX+1), rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) &
+          call ESMF_Finalize(rc=localrc, endflag=ESMF_END_ABORT)
+        !call ESMF_ClockPrint(clock_comp2, rc=localrc)
+      end if
+
+      if(.not. ESMF_AlarmIsRinging(alarms(CPL_IDX), rc=localrc)) then
+        call ESMF_ClockAdvance(clocks(CPL_IDX), rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) &
+          call ESMF_Finalize(rc=localrc, endflag=ESMF_END_ABORT)
+        !call ESMF_ClockPrint(clock_cpl, rc=localrc)
+      end if
 
       !print *, "... time step finished on PET ", pet_id, "."
 
