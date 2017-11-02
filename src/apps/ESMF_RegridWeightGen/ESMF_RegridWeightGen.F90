@@ -271,19 +271,19 @@ program ESMF_RegridWeightGenApp
     call ESMF_UtilGetArgIndex('-t', argindex=ind, rc=rc)
     if (ind /= -1) then
      write(*,*)
-     print *, "WARNING: deprecated switch -t will be ingored.  The file type will be detacted automatically"
+     print *, "WARNING: deprecated switch -t will be ignored.  The file type will be detacted automatically"
     endif
 
     call ESMF_UtilGetArgIndex('--src_type', argindex=ind, rc=rc)
     if (ind /= -1) then
      write(*,*)
-     print *, "WARNING: deprecated switch -src_type will be ingored.  The file type will be detacted automationally"
+     print *, "WARNING: deprecated switch -src_type will be ignored.  The file type will be detacted automationally"
     endif
 
     call ESMF_UtilGetArgIndex('--dst_type', argindex=ind, rc=rc)
     if (ind /= -1) then
      write(*,*)
-     print *, "WARNING: deprecated switch -dst_type will be ingored.  The file type will be detacted automatically"
+     print *, "WARNING: deprecated switch -dst_type will be ignored.  The file type will be detacted automatically"
     endif
 
     ! Check the srcfile type and dstfile type
