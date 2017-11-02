@@ -21,7 +21,7 @@
 // ESMF Test header
 #include "ESMC_Test.h"
 
-#if defined ESMF_MOAB && ESMF_MOAB != 1
+#if defined ESMF_MOAB
 
 #include "ESMC_MBMeshTestUtilMBMesh.C"
 
@@ -65,7 +65,7 @@ int main(int argc, char *argv[]) {
   //----------------------------------------------------------------------------
   rc=ESMC_LogSet(true);
 
-#if defined ESMF_MOAB && ESMF_MOAB != 1
+#if defined ESMF_MOAB
   //----------------------------------------------------------------------------
   //ESMC_MoabSet(true);
 #endif
@@ -81,7 +81,7 @@ int main(int argc, char *argv[]) {
   // --------------------------------------------------------------------------
   // get entities from meshes created with quadrilaterals
   // --------------------------------------------------------------------------
-#if defined ESMF_MOAB && ESMF_MOAB != 1
+#if defined ESMF_MOAB
 
   //----------------------------------------------------------------------------
   //NEX_UTest_Multi_Proc_Only
@@ -97,7 +97,7 @@ int main(int argc, char *argv[]) {
 
   //----------------------------------------------------------------------------
   //NEX_UTest_Multi_Proc_Only
-#if defined ESMF_MOAB && ESMF_MOAB != 1
+#if defined ESMF_MOAB
   Range range_quad_10;
   Interface *mb_mesh_quad_10=mesh_quad_10->mesh;
   int merr_quad_10=mb_mesh_quad_10->get_entities_by_dimension(0,mesh_quad_10->pdim,range_quad_10);
@@ -115,7 +115,7 @@ int main(int argc, char *argv[]) {
 
   //----------------------------------------------------------------------------
   //NEX_UTest_Multi_Proc_Only
-#if defined ESMF_MOAB && ESMF_MOAB != 1
+#if defined ESMF_MOAB
   MBMesh *mesh_quad_9;
   mesh_quad_9 = create_mesh_quad_9_parallel(ESMC_COORDSYS_CART, rc);
   if (!mesh_quad_9) rc = ESMC_RC_PTR_NULL;
@@ -128,7 +128,7 @@ int main(int argc, char *argv[]) {
 
   //----------------------------------------------------------------------------
   //NEX_UTest_Multi_Proc_Only
-#if defined ESMF_MOAB && ESMF_MOAB != 1
+#if defined ESMF_MOAB
   Range range_quad_9;
   Interface *mb_mesh_quad_9=mesh_quad_9->mesh;
   int merr_quad_9=mb_mesh_quad_9->get_entities_by_dimension(0,mesh_quad_9->pdim,range_quad_9);

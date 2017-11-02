@@ -21,7 +21,7 @@
 // ESMF Test header
 #include "ESMC_Test.h"
 
-#if defined ESMF_MOAB && ESMF_MOAB != 1
+#if defined ESMF_MOAB
 
 #include "ESMC_MBMeshTestUtilMBMesh.C"
 
@@ -49,7 +49,7 @@
 
 using namespace std;
 
-#if defined ESMF_MOAB && ESMF_MOAB != 1
+#if defined ESMF_MOAB
 
 bool is_inside (const MBMesh *mesh, const double *coords) {
   int rc;
@@ -186,7 +186,7 @@ int main(int argc, char *argv[]) {
   //----------------------------------------------------------------------------
   rc=ESMC_LogSet(true);
 
-#if defined ESMF_MOAB && ESMF_MOAB != 1
+#if defined ESMF_MOAB
   //----------------------------------------------------------------------------
   //ESMC_MoabSet(true);
 #endif
@@ -204,7 +204,7 @@ int main(int argc, char *argv[]) {
   // --------------------------------------------------------------------------
 
 #if 0
-#if defined ESMF_MOAB && ESMF_MOAB != 1
+#if defined ESMF_MOAB
   // this test demonstrates behavior where point appears in multiple triangular
   // elements if the elements are created with a specific node connectivity
   //----------------------------------------------------------------------------
@@ -217,7 +217,7 @@ int main(int argc, char *argv[]) {
   strcpy(failMsg, "Mesh creation failed");
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
 
-#if defined ESMF_MOAB && ESMF_MOAB != 1
+#if defined ESMF_MOAB
   //----------------------------------------------------------------------------
   //NEX_disable_UTest
   double coords[2];
@@ -240,7 +240,7 @@ int main(int argc, char *argv[]) {
   // --------------------------------------------------------------------------
   // get entities from meshes created with quadrilaterals
   // --------------------------------------------------------------------------
-#if defined ESMF_MOAB && ESMF_MOAB != 1
+#if defined ESMF_MOAB
 
   //----------------------------------------------------------------------------
   //NEX_UTest
@@ -257,7 +257,7 @@ int main(int argc, char *argv[]) {
   //----------------------------------------------------------------------------
   //NEX_UTest
 
-#if defined ESMF_MOAB && ESMF_MOAB != 1
+#if defined ESMF_MOAB
   Range range_quad;
   Interface *mb_mesh_quad=mesh_quad->mesh;
   int merr_quad=mb_mesh_quad->get_entities_by_dimension(0,mesh_quad->pdim,range_quad);
@@ -276,7 +276,7 @@ int main(int argc, char *argv[]) {
   // --------------------------------------------------------------------------
   // get entities from meshes created with spherical quadrilaterals
   // --------------------------------------------------------------------------
-#if defined ESMF_MOAB && ESMF_MOAB != 1
+#if defined ESMF_MOAB
 
   //----------------------------------------------------------------------------
   //NEX_UTest
@@ -293,7 +293,7 @@ int main(int argc, char *argv[]) {
   //----------------------------------------------------------------------------
   //NEX_UTest
 
-#if defined ESMF_MOAB && ESMF_MOAB != 1
+#if defined ESMF_MOAB
   Range range_quad_sph;
   Interface *mb_mesh_quad_sph=mesh_quad_sph->mesh;
   int merr_quad_sph=mb_mesh_quad_sph->get_entities_by_dimension(0,mesh_quad_sph->pdim,range_quad_sph);
@@ -312,7 +312,7 @@ int main(int argc, char *argv[]) {
   // --------------------------------------------------------------------------
   // get entities from meshes created with triangles
   // --------------------------------------------------------------------------
-#if defined ESMF_MOAB && ESMF_MOAB != 1
+#if defined ESMF_MOAB
 
   //----------------------------------------------------------------------------
   //NEX_UTest
@@ -329,7 +329,7 @@ int main(int argc, char *argv[]) {
   //----------------------------------------------------------------------------
   //NEX_UTest
 
-#if defined ESMF_MOAB && ESMF_MOAB != 1
+#if defined ESMF_MOAB
   Range range_tri;
   Interface *mb_mesh_tri=mesh_tri->mesh;
   int merr_tri=mb_mesh_tri->get_entities_by_dimension(0,mesh_tri->pdim,range_tri);
@@ -349,7 +349,7 @@ int main(int argc, char *argv[]) {
   // --------------------------------------------------------------------------
   // get entities from meshes created with spherical triangles
   // --------------------------------------------------------------------------
-#if defined ESMF_MOAB && ESMF_MOAB != 1
+#if defined ESMF_MOAB
 
   //----------------------------------------------------------------------------
   //NEX_UTest
@@ -366,7 +366,7 @@ int main(int argc, char *argv[]) {
   //----------------------------------------------------------------------------
   //NEX_UTest
 
-#if defined ESMF_MOAB && ESMF_MOAB != 1
+#if defined ESMF_MOAB
   Range range_tri_sph;
   Interface *mb_mesh_tri_sph=mesh_tri_sph->mesh;
   int merr_tri_sph=mb_mesh_tri_sph->get_entities_by_dimension(0,mesh_tri_sph->pdim,range_tri_sph);
@@ -385,7 +385,7 @@ int main(int argc, char *argv[]) {
   // --------------------------------------------------------------------------
   // get entities from meshes created with tetrahedrons
   // --------------------------------------------------------------------------
-#if defined ESMF_MOAB && ESMF_MOAB != 1
+#if defined ESMF_MOAB
 
   //----------------------------------------------------------------------------
   //NEX_UTest
@@ -401,7 +401,7 @@ int main(int argc, char *argv[]) {
 
   //----------------------------------------------------------------------------
   //NEX_UTest
-#if defined ESMF_MOAB && ESMF_MOAB != 1
+#if defined ESMF_MOAB
   Range range_tet;
   Interface *mb_mesh_tet=mesh_tet->mesh;
   int merr_tet=mb_mesh_tet->get_entities_by_dimension(0,mesh_tet->pdim,range_tet);
@@ -420,7 +420,7 @@ int main(int argc, char *argv[]) {
   // --------------------------------------------------------------------------
   // get entities from meshes created with hexahedrons
   // --------------------------------------------------------------------------
-#if defined ESMF_MOAB && ESMF_MOAB != 1
+#if defined ESMF_MOAB
 
   //----------------------------------------------------------------------------
   //NEX_UTest
@@ -437,7 +437,7 @@ int main(int argc, char *argv[]) {
   //----------------------------------------------------------------------------
   //NEX_UTest
 
-#if defined ESMF_MOAB && ESMF_MOAB != 1
+#if defined ESMF_MOAB
   Range range_hex;
   Interface *mb_mesh_hex=mesh_hex->mesh;
   int merr_hex=mb_mesh_hex->get_entities_by_dimension(0,mesh_hex->pdim,range_hex);

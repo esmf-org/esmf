@@ -21,7 +21,7 @@
 // ESMF Test header
 #include "ESMC_Test.h"
 
-#if defined ESMF_MOAB && ESMF_MOAB != 1
+#if defined ESMF_MOAB
 #include "ESMC_MBMeshTestUtilMBMesh.C"
 #include "ESMC_MBMeshTestUtilPL.C"
 
@@ -48,7 +48,7 @@
 
 using namespace std;
 
-#if defined ESMF_MOAB && ESMF_MOAB != 1
+#if defined ESMF_MOAB
 
 int mesh_print(MBMesh *mesh) {
   int rc;
@@ -132,7 +132,7 @@ int main(int argc, char *argv[]) {
   //----------------------------------------------------------------------------
   rc=ESMC_LogSet(true);
 
-#if defined ESMF_MOAB && ESMF_MOAB != 1
+#if defined ESMF_MOAB
   //----------------------------------------------------------------------------
   //ESMC_MoabSet(true);
 #endif
@@ -145,7 +145,7 @@ int main(int argc, char *argv[]) {
                 (int *)NULL, (int *)NULL);
   if (rc != ESMF_SUCCESS) return 0;
 
-#if defined ESMF_MOAB && ESMF_MOAB != 1
+#if defined ESMF_MOAB
   // build a mesh
   MBMesh *mesh;
   mesh = create_mesh_quad_10_parallel(ESMC_COORDSYS_CART, rc);
@@ -179,7 +179,7 @@ int main(int argc, char *argv[]) {
   strcpy(failMsg, "pointlist rendezvous incorrect");
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
 
-#if defined ESMF_MOAB && ESMF_MOAB != 1
+#if defined ESMF_MOAB
   // clean up
   delete pl;
   delete mesh;
@@ -187,7 +187,7 @@ int main(int argc, char *argv[]) {
   delete mesh_rend;
 #endif
 
-#if defined ESMF_MOAB && ESMF_MOAB != 1
+#if defined ESMF_MOAB
   // mesh 2 and 3
   MBMesh *mesh2;
   MBMesh *mesh3;
@@ -216,7 +216,7 @@ int main(int argc, char *argv[]) {
   strcpy(failMsg, "mesh rendezvous incorrect");
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
 
-#if defined ESMF_MOAB && ESMF_MOAB != 1
+#if defined ESMF_MOAB
   // clean up
   delete mesh2;
   delete mesh3;

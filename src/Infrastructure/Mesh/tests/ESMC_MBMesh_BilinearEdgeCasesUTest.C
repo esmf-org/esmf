@@ -21,7 +21,7 @@
 // ESMF Test header
 #include "ESMC_Test.h"
 
-#if defined ESMF_MOAB && ESMF_MOAB != 1
+#if defined ESMF_MOAB
 // other headers
 #include "ESMCI_MBMesh.h"
 #include "ESMCI_MBMesh_Glue.h"
@@ -46,7 +46,7 @@
 
 using namespace std;
 
-#if defined ESMF_MOAB && ESMF_MOAB != 1
+#if defined ESMF_MOAB
 
 typedef std::map<WMat::Entry, std::vector<WMat::Entry> > WeightMap;
 WeightMap weights;
@@ -459,7 +459,7 @@ int main(int argc, char *argv[]) {
   //----------------------------------------------------------------------------
   rc=ESMC_LogSet(true);
 
-#if defined ESMF_MOAB && ESMF_MOAB != 1
+#if defined ESMF_MOAB
   //----------------------------------------------------------------------------
   //ESMC_MoabSet(true);
 #endif
@@ -474,7 +474,7 @@ int main(int argc, char *argv[]) {
 
 // RLO: disable for now, segfault in PointList destructor on some platforms
 #if 0
-#if defined ESMF_MOAB && ESMF_MOAB != 1
+#if defined ESMF_MOAB
   MBMesh *mesh_quad_single;
   MBMesh *mesh_tri_single;
   PointList *pl_on_edge;
@@ -514,7 +514,7 @@ int main(int argc, char *argv[]) {
   // quad mesh bilinear spherical with pointlist point on edge
   // --------------------------------------------------------------------------
 
-#if defined ESMF_MOAB && ESMF_MOAB != 1
+#if defined ESMF_MOAB
 
   cart = false;
 
@@ -543,7 +543,7 @@ int main(int argc, char *argv[]) {
   // quad mesh bilinear cartesian with pointlist point on node
   // --------------------------------------------------------------------------
 
-#if defined ESMF_MOAB && ESMF_MOAB != 1
+#if defined ESMF_MOAB
 
   cart = true;
 
@@ -572,7 +572,7 @@ int main(int argc, char *argv[]) {
   // quad mesh bilinear spherical with pointlist point on node
   // --------------------------------------------------------------------------
 
-#if defined ESMF_MOAB && ESMF_MOAB != 1
+#if defined ESMF_MOAB
 
   cart = false;
 
@@ -601,7 +601,7 @@ int main(int argc, char *argv[]) {
   // tri mesh bilinear cartesian with pointlist point on edge
   // --------------------------------------------------------------------------
 
-#if defined ESMF_MOAB && ESMF_MOAB != 1
+#if defined ESMF_MOAB
 
   cart = true;
 
@@ -630,7 +630,7 @@ int main(int argc, char *argv[]) {
   // tri mesh bilinear spherical with pointlist point on edge
   // --------------------------------------------------------------------------
 
-#if defined ESMF_MOAB && ESMF_MOAB != 1
+#if defined ESMF_MOAB
 
   cart = false;
 
@@ -659,7 +659,7 @@ int main(int argc, char *argv[]) {
   // tri mesh bilinear cartesian with pointlist point on node
   // --------------------------------------------------------------------------
 
-#if defined ESMF_MOAB && ESMF_MOAB != 1
+#if defined ESMF_MOAB
 
   cart = true;
 
@@ -688,7 +688,7 @@ int main(int argc, char *argv[]) {
   // tri mesh bilinear spherical with pointlist point on node
   // --------------------------------------------------------------------------
 
-#if defined ESMF_MOAB && ESMF_MOAB != 1
+#if defined ESMF_MOAB
 
   cart = false;
 
@@ -717,7 +717,7 @@ int main(int argc, char *argv[]) {
   // collapsed quad to tri bilinear cartesian
   // --------------------------------------------------------------------------
 
-#if defined ESMF_MOAB && ESMF_MOAB != 1
+#if defined ESMF_MOAB
 
   cart = true;
   collapsed = true;
@@ -747,7 +747,7 @@ int main(int argc, char *argv[]) {
   // collapsed quad to tri bilinear cartesian
   // --------------------------------------------------------------------------
 
-#if defined ESMF_MOAB && ESMF_MOAB != 1
+#if defined ESMF_MOAB
 
   cart = false;
   collapsed = true;

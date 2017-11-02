@@ -22,7 +22,7 @@
 #define ESMCI_MBMesh_Conserve_h
 
 // Take out if MOAB isn't being used
-#if defined ESMF_MOAB && ESMF_MOAB != 1
+#if defined ESMF_MOAB
 
 #include "Mesh/include/ESMCI_MBMesh.h"
 #include "Mesh/include/ESMCI_WMat.h"

@@ -21,7 +21,7 @@
 // ESMF Test header
 #include "ESMC_Test.h"
 
-#if defined ESMF_MOAB && ESMF_MOAB != 1
+#if defined ESMF_MOAB
 
 #include "ESMC_MBMeshTestUtilMBMesh.C"
 #include "ESMC_MBMeshTestUtilPL.C"
@@ -50,7 +50,7 @@
 
 using namespace std;
 
-#if defined ESMF_MOAB && ESMF_MOAB != 1
+#if defined ESMF_MOAB
 
 bool compare(const double *c1, double *c2) {
   bool pass = false;
@@ -216,7 +216,7 @@ int main(int argc, char *argv[]) {
   //----------------------------------------------------------------------------
   rc=ESMC_LogSet(true);
 
-#if defined ESMF_MOAB && ESMF_MOAB != 1
+#if defined ESMF_MOAB
   //----------------------------------------------------------------------------
   //ESMC_MoabSet(true);
 #endif
@@ -233,7 +233,7 @@ int main(int argc, char *argv[]) {
   // common vector for pointlist verification
   vector<double*> cv;
 
-#if defined ESMF_MOAB && ESMF_MOAB != 1
+#if defined ESMF_MOAB
   // build a mesh
   MBMesh *mesh_quad;
   mesh_quad = create_mesh_quad(rc);
@@ -251,7 +251,7 @@ int main(int argc, char *argv[]) {
   ESMC_Test(ESMF_SUCCESS, name, failMsg, &result, __FILE__, __LINE__, 0);
 #endif
 
-#if defined ESMF_MOAB && ESMF_MOAB != 1
+#if defined ESMF_MOAB
   // build a mesh
   MBMesh *mesh_tri;
   mesh_tri = create_mesh_tri(rc);
@@ -269,7 +269,7 @@ int main(int argc, char *argv[]) {
   ESMC_Test(ESMF_SUCCESS, name, failMsg, &result, __FILE__, __LINE__, 0);
 #endif
 
-#if defined ESMF_MOAB && ESMF_MOAB != 1
+#if defined ESMF_MOAB
   // clean up
   delete pl_quad;
   delete mesh_quad;

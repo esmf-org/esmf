@@ -21,7 +21,7 @@
 // ESMF Test header
 #include "ESMC_Test.h"
 
-#if defined ESMF_MOAB && ESMF_MOAB != 1
+#if defined ESMF_MOAB
 
 #include "ESMC_MBMeshTestUtilMBMesh.C"
 #include "ESMC_MBMeshTestUtilPL.C"
@@ -49,7 +49,7 @@
 
 using namespace std;
 
-#if defined ESMF_MOAB && ESMF_MOAB != 1
+#if defined ESMF_MOAB
 
 int mesh_print(MBMesh *mesh) {
   int rc;
@@ -133,7 +133,7 @@ int main(int argc, char *argv[]) {
   //----------------------------------------------------------------------------
   rc=ESMC_LogSet(true);
 
-#if defined ESMF_MOAB && ESMF_MOAB != 1
+#if defined ESMF_MOAB
   //----------------------------------------------------------------------------
   //ESMC_MoabSet(true);
 #endif
@@ -149,7 +149,7 @@ int main(int argc, char *argv[]) {
   // common vector for pointlist verification
   vector<double*> cv;
 
-#if defined ESMF_MOAB && ESMF_MOAB != 1
+#if defined ESMF_MOAB
 
   // build a mesh
   MBMesh *mesh;
@@ -184,7 +184,7 @@ int main(int argc, char *argv[]) {
   strcpy(failMsg, "pointlist rendezvous incorrect");
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
 
-#if defined ESMF_MOAB && ESMF_MOAB != 1
+#if defined ESMF_MOAB
   // clean up
   delete pl;
   delete mesh;

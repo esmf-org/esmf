@@ -15,7 +15,7 @@
 #include <Mesh/include/ESMCI_Migrator.h>
 #include "PointList/include/ESMCI_PointList.h"
 
-#if defined ESMF_MOAB && ESMF_MOAB != 1
+#if defined ESMF_MOAB
 #include <Mesh/include/ESMCI_MBMesh.h>
 #endif
 
@@ -116,7 +116,7 @@ public:
   void MigrateToElem(Mesh &mesh);
 
 // Take out if MOAB isn't being used
-#if defined ESMF_MOAB && ESMF_MOAB != 1
+#if defined ESMF_MOAB
   void MigrateToElem(MBMesh &mesh);
 #endif // ESMF_MOAB
 

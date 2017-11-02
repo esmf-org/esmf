@@ -542,7 +542,7 @@
       !============== MOAB Mesh to Mesh =======================================
       ! initialize 
       rc=ESMF_SUCCESS
-#if defined ESMF_MOAB && ESMF_MOAB != 1
+#if defined ESMF_MOAB
       call test_MOABMeshToMesh(itrp, csrv, rc)
 #else
       itrp = .true.

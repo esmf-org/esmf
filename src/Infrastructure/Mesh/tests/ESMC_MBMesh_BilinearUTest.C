@@ -21,7 +21,7 @@
 // ESMF Test header
 #include "ESMC_Test.h"
 
-#if defined ESMF_MOAB && ESMF_MOAB != 1
+#if defined ESMF_MOAB
 #include "ESMC_MBMeshTestUtilMesh.C"
 #include "ESMC_MBMeshTestUtilMBMesh.C"
 #include "ESMC_MBMeshTestUtilPL.C"
@@ -51,7 +51,7 @@
 
 using namespace std;
 
-#if defined ESMF_MOAB && ESMF_MOAB != 1
+#if defined ESMF_MOAB
 typedef std::map<WMat::Entry, std::vector<WMat::Entry> > WeightMap;
 WeightMap weights;
 WeightMap::iterator begin_row() { return weights.begin(); }
@@ -129,7 +129,7 @@ int main(int argc, char *argv[]) {
   // quad mesh bilinear
   // --------------------------------------------------------------------------
 
-  #if defined ESMF_MOAB && ESMF_MOAB != 1
+  #if defined ESMF_MOAB
   // build a mesh
   MBMesh *mesh_quad;
   mesh_quad = create_mesh_quad(rc);
@@ -158,7 +158,7 @@ int main(int argc, char *argv[]) {
   // quad sph mesh bilinear
   // --------------------------------------------------------------------------
 
-#if defined ESMF_MOAB && ESMF_MOAB != 1
+#if defined ESMF_MOAB
   // build a mesh
   MBMesh *mesh_quad_sph;
   mesh_quad_sph = create_mesh_quad_sph(rc);
@@ -187,7 +187,7 @@ int main(int argc, char *argv[]) {
   // tri mesh bilinear
   // --------------------------------------------------------------------------
 
-#if defined ESMF_MOAB && ESMF_MOAB != 1
+#if defined ESMF_MOAB
   // build a mesh
   MBMesh *mesh_tri;
   mesh_tri = create_mesh_tri(rc);
@@ -216,7 +216,7 @@ int main(int argc, char *argv[]) {
   // tri sph mesh bilinear
   // --------------------------------------------------------------------------
 
-#if defined ESMF_MOAB && ESMF_MOAB != 1
+#if defined ESMF_MOAB
   // build a mesh
   MBMesh *mesh_tri_sph;
   mesh_tri_sph = create_mesh_tri_sph(rc);

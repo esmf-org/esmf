@@ -21,7 +21,7 @@
 // ESMF Test header
 #include "ESMC_Test.h"
 
-#if defined ESMF_MOAB && ESMF_MOAB != 1
+#if defined ESMF_MOAB
 // other headers
 #include "ESMCI_MBMesh.h"
 #include "ESMCI_MBMesh_Glue.h"
@@ -49,7 +49,7 @@
 
 using namespace std;
 
-#if defined ESMF_MOAB && ESMF_MOAB != 1
+#if defined ESMF_MOAB
 typedef std::map<WMat::Entry, std::vector<WMat::Entry> > WeightMap;
 WeightMap weights;
 WeightMap::iterator begin_row() { return weights.begin(); }
@@ -367,7 +367,7 @@ int main(int argc, char *argv[]) {
   //----------------------------------------------------------------------------
   rc=ESMC_LogSet(true);
 
-#if defined ESMF_MOAB && ESMF_MOAB != 1
+#if defined ESMF_MOAB
   //----------------------------------------------------------------------------
   //ESMC_MoabSet(true);
 #endif
@@ -380,7 +380,7 @@ int main(int argc, char *argv[]) {
                 (int *)NULL, (int *)NULL);
   if (rc != ESMF_SUCCESS) return 0;
 
-#if defined ESMF_MOAB && ESMF_MOAB != 1
+#if defined ESMF_MOAB
   MBMesh *mesh_quad_single;
   MBMesh *mesh_tri_single;
   PointList *pl_quad_single;
@@ -418,7 +418,7 @@ int main(int argc, char *argv[]) {
   // quad mesh bilinear spherical
   // --------------------------------------------------------------------------
 
-#if defined ESMF_MOAB && ESMF_MOAB != 1
+#if defined ESMF_MOAB
   cart = false;
 
   // build a mesh
@@ -447,7 +447,7 @@ int main(int argc, char *argv[]) {
   // tri mesh bilinear cartesian
   // --------------------------------------------------------------------------
 
-#if defined ESMF_MOAB && ESMF_MOAB != 1
+#if defined ESMF_MOAB
   cart = true;
 
   // build a mesh
@@ -476,7 +476,7 @@ int main(int argc, char *argv[]) {
   // tri mesh bilinear spherical
   // --------------------------------------------------------------------------
 
-#if defined ESMF_MOAB && ESMF_MOAB != 1
+#if defined ESMF_MOAB
   cart = false;
 
   // build a mesh
