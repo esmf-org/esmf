@@ -83,6 +83,8 @@
     type(ESMF_Time) :: startTime
     type(ESMF_Time) :: stopTime
 
+    type(ESMF_Mapper) :: mapper
+
     type(ESMF_Time) :: dbg_time
     integer(ESMF_KIND_I8) :: dbg_stime
 
@@ -191,6 +193,11 @@
     deallocate(petlist_comp2)
     deallocate(petlist_cpl)
     !print *, "Comp Creates finished"
+
+  mapper = ESMF_MapperCreate(rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    ESMF_CONTEXT, rcToReturn=rc)) &
+    call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
 
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
@@ -608,6 +615,10 @@
         ESMF_CONTEXT, rcToReturn=rc)) &
         call ESMF_Finalize(rc=localrc, endflag=ESMF_END_ABORT)
 
+    call ESMF_MapperDestroy(mapper, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) &
+        call ESMF_Finalize(rc=localrc, endflag=ESMF_END_ABORT)
     !print *, "All Destroy routines done"
 
 !-------------------------------------------------------------------------
