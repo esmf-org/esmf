@@ -12,17 +12,20 @@
 
   subroutine get_sync_alarms(clocks, alarms, rc)
     type(ESMF_Clock), dimension(:), intent(in) :: clocks
-    type(ESMF_Alarm), dimension(:), intent(out) :: alarms
+    type(ESMF_Alarm), dimension(:), intent(inout) :: alarms
     integer, intent(inout) :: rc
 
     integer :: nclocks
-    integer :: i
+    integer :: i, j
     type(ESMF_Clock), dimension(:), allocatable :: tmp_clocks
     integer, dimension(:), allocatable :: sync_rel_tsteps
     type(ESMF_TimeInterval) :: alarm_interval, tstep
-    type(ESMF_Time) :: time1, time2, stop_time
+    type(ESMF_Time) :: time1, time2, start_time, stop_time
 
     logical :: found_syncstep = .false., done = .false.
+
+    integer(ESMF_KIND_I8) :: dbg_stime1, dbg_stime2
+    character(len=ESMF_MAXSTR) :: name
 
     rc = ESMF_SUCCESS
 
@@ -48,7 +51,21 @@
     end do
 
     allocate(sync_rel_tsteps(nclocks))
+
+    !call ESMF_ClockGet(tmp_clocks(1), currTime=time1, rc=rc)
+    !call ESMF_TimeGet(time1, s_i8=dbg_stime1, rc=rc)
+    !print *, "Start time = ", dbg_stime1
+
+    ! Manually advance all the clocks once
+    do i=1,nclocks
+      call ESMF_ClockAdvance(tmp_clocks(i), rc=rc) 
+      if(rc /= ESMF_SUCCESS) then
+        print *, "Advancing the tmp clocks failed" 
+        return
+      end if
+    end do
     sync_rel_tsteps = 1
+
     done = .false.
     i = 2
     do while( (.not. ESMF_ClockIsStopTime(tmp_clocks(1), rc=rc))&
@@ -63,6 +80,13 @@
         print *, "Unable to get current time from clock :", i
         return
       end if
+      !call ESMF_TimeGet(time1, s_i8=dbg_stime1, rc=rc)
+      !call ESMF_TimeGet(time2, s_i8=dbg_stime2, rc=rc)
+      !if(time1 >= time2) then
+      !  print *, i, dbg_stime1, ">=", dbg_stime2
+      !else
+      !  print *, i, dbg_stime1, "<", dbg_stime2
+      !end if
       if(time1 == time2) then
         if(i == nclocks) then
           ! Last clock matched with the (last -1) clock
@@ -71,7 +95,7 @@
         ! proceed to the next clock
         i = i+1
       else
-        if(.not. ESMF_ClockIsStopTime(tmp_clocks(i))) then
+        if( (time1 > time2) .and. (.not. ESMF_ClockIsStopTime(tmp_clocks(i))) ) then
           ! Advance the clock
           call ESMF_ClockAdvance(tmp_clocks(i), rc=rc)
           if(rc /= ESMF_SUCCESS) then
@@ -90,10 +114,32 @@
           end if
           sync_rel_tsteps(1) = sync_rel_tsteps(1) + 1
           i = 2
-          sync_rel_tsteps(2:nclocks) = 1
+          ! Reset all clocks, except the first one
+          do j=i,2,-1
+            !print *, "Resetting clock : ", j
+            sync_rel_tsteps(j) = 1
+            ! Reset to original clock
+            call ESMF_ClockDestroy(tmp_clocks(j), rc=rc)
+            if(rc /= ESMF_SUCCESS) then
+              print *, "Error while destroying tmp clock"
+            end if
+            tmp_clocks(j) = ESMF_ClockCreate(clocks(j), rc=rc)
+            if(rc /= ESMF_SUCCESS) then
+              print *, "Re-creating a tmp clock failed" 
+              return
+            end if
+            ! Advance once
+            call ESMF_ClockAdvance(tmp_clocks(j), rc=rc) 
+            if(rc /= ESMF_SUCCESS) then
+              print *, "Advancing the tmp clocks failed" 
+              return
+            end if
+          end do 
         end if
       end if
     end do
+
+    !print *, "The relative sync tsteps are :", sync_rel_tsteps
 
     if((nclocks > 1) .and. (.not. done)) then
       print *, "Could not find a sync time between the clocks, no alarms set"
@@ -110,9 +156,10 @@
       end if
 
       alarm_interval = tstep * sync_rel_tsteps(i)
+      !call ESMF_TimeIntervalPrint(alarm_interval, rc=rc)
 
       alarms(i) = ESMF_AlarmCreate(clocks(i), ringInterval=alarm_interval,&
-                    stopTime=stop_time, rc=rc)
+                    stopTime=stop_time, ringTimeStepCount=1, rc=rc)
       if(rc /= ESMF_SUCCESS) then
         print *, "Unable to create alarm, ", i
         return
