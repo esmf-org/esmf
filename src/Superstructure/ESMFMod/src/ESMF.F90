@@ -107,5 +107,6 @@ module ESMF
     use ESMF_InitMod
 
     use ESMF_MapperMod
+    use ESMF_MapperUtilMod
 
 end module ESMF

@@ -74,6 +74,10 @@ module ESMF_MapperMod
 !
 ! - ESMF-public methods:
    public ESMF_MapperCreate          ! Create a mapper
+   public ESMF_MapperSetConstraints  ! Set constraints for the mapper
+   public ESMF_MapperOptimize  ! Optimize based on set constraints
+   public ESMF_MapperGet  ! Get info about components from the mapper
+   public ESMF_MapperPrint  ! Print Mapper details
    public ESMF_MapperDestroy          ! Destroy a mapper
 
 !------------------------------------------------------------------------------
@@ -139,6 +143,130 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 ! !DESCRIPTION:
 !   Destroys the ESMF\_Mapper
+!
+! The arguments are:
+!   \begin{description}
+!   \item[{[mapper]}]
+!     Mapper class; 
+!   \item[{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+  !-----------------------------------------------------------------------------    
+    if (present(rc)) rc = ESMF_SUCCESS
+  end subroutine
+!------------------------------------------------------------------------------
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_MapperSetConstraints()"
+!BOP
+! !IROUTINE: ESMF_MapperSetConstraints - Set constraints for the mapper
+
+! !INTERFACE:
+  subroutine ESMF_MapperSetConstraints(mapper, keywordEnforcer, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_Mapper), intent(inout) :: mapper
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    integer,             intent(out), optional :: rc
+
+! !DESCRIPTION:
+!   Set constraints on the ESMF\_Mapper
+!
+! The arguments are:
+!   \begin{description}
+!   \item[{[mapper]}]
+!     Mapper class; 
+!   \item[{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+  !-----------------------------------------------------------------------------    
+    if (present(rc)) rc = ESMF_SUCCESS
+  end subroutine
+!------------------------------------------------------------------------------
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_MapperOptimize()"
+!BOP
+! !IROUTINE: ESMF_MapperOptimize - Optimize using the mapper
+
+! !INTERFACE:
+  subroutine ESMF_MapperOptimize(mapper, keywordEnforcer, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_Mapper), intent(inout) :: mapper
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    integer,             intent(out), optional :: rc
+
+! !DESCRIPTION:
+!   Optimize using the mapper based on the set constraints
+!
+! The arguments are:
+!   \begin{description}
+!   \item[{[mapper]}]
+!     Mapper class; 
+!   \item[{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+  !-----------------------------------------------------------------------------    
+    if (present(rc)) rc = ESMF_SUCCESS
+  end subroutine
+!------------------------------------------------------------------------------
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_MapperGet()"
+!BOP
+! !IROUTINE: ESMF_MapperGet - Get info from the mapper
+
+! !INTERFACE:
+  subroutine ESMF_MapperGet(mapper, keywordEnforcer, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_Mapper), intent(inout) :: mapper
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    integer,             intent(out), optional :: rc
+
+! !DESCRIPTION:
+!   Get info from the mapper
+!
+! The arguments are:
+!   \begin{description}
+!   \item[{[mapper]}]
+!     Mapper class; 
+!   \item[{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+  !-----------------------------------------------------------------------------    
+    if (present(rc)) rc = ESMF_SUCCESS
+  end subroutine
+!------------------------------------------------------------------------------
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_MapperPrint()"
+!BOP
+! !IROUTINE: ESMF_MapperPrint - Print mapper details
+
+! !INTERFACE:
+  subroutine ESMF_MapperPrint(mapper, keywordEnforcer, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_Mapper), intent(inout) :: mapper
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    integer,             intent(out), optional :: rc
+
+! !DESCRIPTION:
+!   Print mapper details
 !
 ! The arguments are:
 !   \begin{description}
