@@ -64,9 +64,12 @@ module ESMF_MapperMod
   type ESMF_Mapper
   end type
 
+  type ESMF_MapperModelInfo
+  end type
+
 !------------------------------------------------------------------------------
 ! !PUBLIC TYPES:
-  public ESMF_Mapper
+  public ESMF_Mapper, ESMF_MapperModelInfo
 
 !------------------------------------------------------------------------------
 !
@@ -133,7 +136,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !BOP
 ! !IROUTINE: ESMF_MapperDestroy - Destroy a mapper, release resources
 
-! !INTERFACE:
+!!INTERFACE:
   subroutine ESMF_MapperDestroy(mapper, keywordEnforcer, rc)
 !
 ! !ARGUMENTS:
@@ -196,10 +199,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE: ESMF_MapperOptimize - Optimize using the mapper
 
 ! !INTERFACE:
-  subroutine ESMF_MapperOptimize(mapper, keywordEnforcer, rc)
+  subroutine ESMF_MapperOptimize(mapper, modelInfo, keywordEnforcer, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_Mapper), intent(inout) :: mapper
+    type(ESMF_MapperModelInfo), intent(inout), dimension(:) :: modelInfo
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,             intent(out), optional :: rc
 
@@ -227,11 +231,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE: ESMF_MapperGet - Get info from the mapper
 
 ! !INTERFACE:
-  subroutine ESMF_MapperGet(mapper, keywordEnforcer, rc)
+  subroutine ESMF_MapperGet(mapper, modelInfo, keywordEnforcer, npets, petList, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_Mapper), intent(inout) :: mapper
+    type(ESMF_Mapper), intent(in) :: mapper
+    type(ESMF_MapperModelInfo), intent(in) :: modelInfo
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    integer,              intent(out), optional :: npets
+    integer, dimension(:),   intent(out), optional :: petList
     integer,             intent(out), optional :: rc
 
 ! !DESCRIPTION:

@@ -97,12 +97,17 @@ contains
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_MapperCollect()"
 !BOP
-! !IROUTINE: ESMF_MapperCreate - Create a mapper
+! !IROUTINE: ESMF_MapperCollect - Collect all info from the component
 
 ! !INTERFACE:
-  subroutine ESMF_MapperCollect(keywordEnforcer, rc)
+  function ESMF_MapperCollect(mapper, gComp, keywordEnforcer, rc)
+! !RETURN VALUE:
+    type(ESMF_MapperModelInfo) :: ESMF_MapperCollect
+!
 !
 ! !ARGUMENTS:
+    type(ESMF_Mapper) :: mapper
+    type(ESMF_GridComp) :: gComp
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,             intent(out), optional :: rc
 
@@ -118,7 +123,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !EOP
   !-----------------------------------------------------------------------------    
     if (present(rc)) rc = ESMF_SUCCESS
-  end subroutine
+  end function
 !------------------------------------------------------------------------------
 
 end module ESMF_MapperUtilMod
