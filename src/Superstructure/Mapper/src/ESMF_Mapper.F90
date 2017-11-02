@@ -36,22 +36,13 @@ module ESMF_MapperMod
 !------------------------------------------------------------------------------
 ! !USES:
   use ESMF_UtilTypesMod
-  use ESMF_UtilMod
-  use ESMF_BaseMod
   use ESMF_LogErrMod
-!  use ESMF_ArraySpecMod
-!  use ESMF_LocalArrayMod
-!  use ESMF_DELayoutMod
-!  use ESMF_StaggerLocMod
-!  use ESMF_DistGridMod
-  use ESMF_GridMod
-!  use ESMF_GeomBaseMod
-!  use ESMF_ArrayMod
-!  use ESMF_ArrayCreateMod
-!  use ESMF_ArrayGetMod
-  use ESMF_TimeMod
-  use ESMF_InitMacrosMod
+  use ESMF_StateTypesMod
+  use ESMF_CompMod
   use ESMF_GridCompMod
+  use ESMF_CplCompMod
+  use ESMF_InitMacrosMod
+
 
   implicit none
 
@@ -179,7 +170,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !ARGUMENTS:
     type(ESMF_Mapper), intent(inout) :: mapper
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    integer, dimension(:), intent(in), optional :: execBlock
+    type(ESMF_GridComp), dimension(:), intent(in), optional :: execBlock
     integer,             intent(out), optional :: rc
 
 ! !DESCRIPTION:
