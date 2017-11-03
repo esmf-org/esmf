@@ -3638,6 +3638,7 @@ subroutine ESMF_EsmfGetElement (filename, elementConn, &
     character(len=*), intent(in)   :: filename
     integer(ESMF_KIND_I4), pointer :: elementConn (:)
     integer(ESMF_KIND_I4), pointer :: elmtNums (:)
+    integer(selected_int_kind(1)), allocatable :: elmtNums_i1(:)
     integer,           intent(out) :: startElmt
     integer(ESMF_KIND_I4), pointer, optional :: elementMask (:)
     real(ESMF_KIND_R8), pointer, optional :: elementArea (:)
@@ -3656,7 +3657,7 @@ subroutine ESMF_EsmfGetElement (filename, elementConn, &
     integer :: nodeCnt, ElmtCount, MaxNodePerElmt, coordDim
     integer :: localCount, remain
 
-    integer :: VarNo
+    integer :: VarNo, VarType
     character(len=256)::errmsg
     character(len=80) :: units
     integer :: len
@@ -3669,6 +3670,7 @@ subroutine ESMF_EsmfGetElement (filename, elementConn, &
     integer :: totalConn, startConn
     integer :: senddata(1)
     integer, allocatable :: recvdata(:)
+    integer :: memstat
 
 #ifdef ESMF_NETCDF
      convertToDegLocal = .false.
@@ -3738,11 +3740,44 @@ subroutine ESMF_EsmfGetElement (filename, elementConn, &
       ESMF_SRCLINE, errmsg, &
       rc)) return
 
-    ncStatus = nf90_get_var (ncid, VarNo, elmtNums, start=(/startElmt/), count=(/localcount/))
+    ncStatus = nf90_inquire_variable (ncid, VarNo, xtype=VarType)
+    errmsg = "Variable numElementConn type inquiry in "//trim(filename)
     if (CDFCheckError (ncStatus, &
       ESMF_METHOD,  &
       ESMF_SRCLINE, errmsg, &
       rc)) return
+
+    select case (VarType)
+    case (NF90_INT)
+      ncStatus = nf90_get_var (ncid, VarNo, elmtNums, start=(/startElmt/), count=(/localcount/))
+      errmsg = "Reading numElementConn from int variable in " // trim (filename)
+      if (CDFCheckError (ncStatus, &
+          ESMF_METHOD,  &
+          ESMF_SRCLINE, errmsg, &
+          rc)) return
+
+    case (NF90_BYTE)
+      allocate (elmtNums_i1(localcount), stat=memstat)
+      if (ESMF_LogFoundAllocError(memstat,  &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+
+      ncStatus = nf90_get_var (ncid, VarNo, elmtNums_i1, start=(/startElmt/), count=(/localcount/))
+      errmsg = "Reading numElementConn from byte variable in " // trim (filename)
+      if (CDFCheckError (ncStatus, &
+          ESMF_METHOD,  &
+          ESMF_SRCLINE, errmsg, &
+          rc)) return
+
+      elmtNums = elmtNums_i1
+      deallocate (elmtNums_i1, stat=memstat)
+      if (ESMF_LogFoundDeallocError(memstat,  &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+
+    case default
+      if (ESMF_LogFoundError(ESMF_RC_FILE_UNEXPECTED,  &
+          msg='unsupport numElementConn variable type', &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+    end select
 
     ! calculate the RaggedArray size
     totalConn = 0
