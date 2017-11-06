@@ -94,7 +94,7 @@ void MeshCap::MeshCap_to_PointList(ESMC_MeshLoc_Flag meshLoc,
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
                                       ESMC_CONTEXT, rc)) return;
 
-#ifdef ESMF_MOAB
+#if defined ESMF_MOAB
   } else {
     *out_pl = MBMesh_to_PointList(static_cast<MBMesh *>(mbmesh), &localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
@@ -120,7 +120,7 @@ MeshCap *MeshCap::create_from_ptr(void **_mesh,
   if (_is_esmf_mesh) {
     mc->mesh=(Mesh *)(*_mesh);
   } else {
-#ifdef ESMF_MOAB 
+#if defined ESMF_MOAB
    mc->mbmesh=(*_mesh);
 #else
    if(ESMC_LogDefault.MsgFoundError(ESMC_RC_LIB_NOT_PRESENT,
@@ -581,7 +581,7 @@ void MeshCap::regrid_create(
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
                                       ESMC_CONTEXT, rc)) return;
   } else {
-#ifdef ESMF_MOAB 
+#if defined ESMF_MOAB
     int localrc;
     MBMesh_regrid_create(&mesh_src_p, arraysrcpp, plsrcpp,
                          &mesh_dst_p, arraydstpp, pldstpp,
@@ -626,7 +626,7 @@ MeshCap *MeshCap::meshcreate(int *pdim, int *sdim,
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
                                        ESMC_CONTEXT, rc)) return NULL;
   } else {
-#ifdef ESMF_MOAB 
+#if defined ESMF_MOAB
     MBMesh_create(&mbmesh,
                   pdim, sdim, 
                   coordSys, &localrc);    
@@ -668,7 +668,7 @@ void MeshCap::meshaddnodes(int *num_nodes, int *nodeId,
                        _coordSys, _orig_sdim,
                        rc);
   } else {
-#ifdef ESMF_MOAB 
+#if defined ESMF_MOAB
     MBMesh_addnodes(&mbmesh, num_nodes, nodeId, 
                      nodeCoord, nodeOwner, nodeMaskII,
                      _coordSys, _orig_sdim,
@@ -691,7 +691,7 @@ void MeshCap::meshwrite(char *fname, int *rc,
     ESMCI_meshwrite(&mesh, fname, rc, nlen);
 
   } else {
-#ifdef ESMF_MOAB 
+#if defined ESMF_MOAB
     MBMesh_write(&mbmesh, fname, rc,
                  nlen);
 #else
@@ -721,7 +721,7 @@ void MeshCap::meshaddelements(int *_num_elems, int *elemId, int *elemType, Inter
                           _coordSys, _orig_sdim,
                           rc);
   } else {
- #ifdef ESMF_MOAB 
+ #if defined ESMF_MOAB
     MBMesh_addelements(&mbmesh, 
                        _num_elems, elemId, elemType, _elemMaskII,
                        _areaPresent, elemArea, 
@@ -816,7 +816,7 @@ void MeshCap::meshcreatenodedistgrid(int *ngrid, int *num_lnodes, int *rc) {
   if (is_esmf_mesh) {
     ESMCI_meshcreatenodedistgrid(&mesh, ngrid, num_lnodes, rc);
   } else {
-#ifdef ESMF_MOAB 
+#if defined ESMF_MOAB
     MBMesh_createnodedistgrid(&mbmesh, ngrid, num_lnodes, rc);
 #else
    if(ESMC_LogDefault.MsgFoundError(ESMC_RC_LIB_NOT_PRESENT,
@@ -834,7 +834,7 @@ void MeshCap::meshcreateelemdistgrid(int *egrid, int *num_lelems, int *rc) {
   if (is_esmf_mesh) {
     ESMCI_meshcreateelemdistgrid(&mesh, egrid, num_lelems, rc);
   } else {
-#ifdef ESMF_MOAB 
+#if defined ESMF_MOAB
     MBMesh_createelemdistgrid(&mbmesh, egrid, num_lelems, rc);
 #else
    if(ESMC_LogDefault.MsgFoundError(ESMC_RC_LIB_NOT_PRESENT,
@@ -977,7 +977,7 @@ void MeshCap::getlocalelemcoords(double *elemCoord, int *_orig_sdim, int *rc)
   if (is_esmf_mesh) {
     ESMCI_getlocalelemcoords(&mesh, elemCoord, _orig_sdim, rc);
   } else {
-#ifdef ESMF_MOAB 
+#if defined ESMF_MOAB
     MBMesh_getlocalelemcoords(&mbmesh, elemCoord, _orig_sdim, rc);
 #else
    if(ESMC_LogDefault.MsgFoundError(ESMC_RC_LIB_NOT_PRESENT,
@@ -994,7 +994,7 @@ void MeshCap::meshgetarea(int *num_elem, double *elem_areas, int *rc) {
   if (is_esmf_mesh) {
     ESMCI_meshgetarea(&mesh, num_elem, elem_areas, rc);
   } else {
-#ifdef ESMF_MOAB 
+#if defined ESMF_MOAB
     MBMesh_getarea(&mbmesh, num_elem, elem_areas, rc);
 #else
    if(ESMC_LogDefault.MsgFoundError(ESMC_RC_LIB_NOT_PRESENT,
@@ -1088,7 +1088,7 @@ void MeshCap::meshturnoncellmask(ESMCI::InterArray<int> *maskValuesArg,  int *rc
   if (is_esmf_mesh) {
     ESMCI_meshturnoncellmask(&mesh, maskValuesArg, rc);
   } else {
-#ifdef ESMF_MOAB 
+#if defined ESMF_MOAB
     MBMesh_meshturnoncellmask(&mbmesh, maskValuesArg, rc);
 #else
    if(ESMC_LogDefault.MsgFoundError(ESMC_RC_LIB_NOT_PRESENT,
@@ -1107,7 +1107,7 @@ void MeshCap::meshturnoffcellmask(int *rc) {
   if (is_esmf_mesh) {
     ESMCI_meshturnoffcellmask(&mesh, rc);
   } else {
-#ifdef ESMF_MOAB 
+#if defined ESMF_MOAB
     MBMesh_meshturnoffcellmask(&mbmesh, rc);
 #else
    if(ESMC_LogDefault.MsgFoundError(ESMC_RC_LIB_NOT_PRESENT,
@@ -1459,7 +1459,7 @@ void MeshCap::destroy(MeshCap **mcpp,int *rc) {
                                         ESMC_CONTEXT, rc)) return;
     }
   } else {
-#ifdef ESMF_MOAB 
+#if defined ESMF_MOAB
     // Only do if mesh is present
     if (mcp->mesh != NULL) {
       int localrc;

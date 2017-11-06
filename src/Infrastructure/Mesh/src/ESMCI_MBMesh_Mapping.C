@@ -10,7 +10,7 @@
 //==============================================================================
 
 // Take out if MOAB isn't being used
-#ifdef ESMF_MOAB
+#if defined ESMF_MOAB
 
 #include <Mesh/include/ESMCI_Exception.h>
 #include <Mesh/include/ESMCI_MBMesh_Mapping.h>

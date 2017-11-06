@@ -542,9 +542,12 @@
       !============== MOAB Mesh to Mesh =======================================
       ! initialize 
       rc=ESMF_SUCCESS
-      
+#if defined ESMF_MOAB
       call test_MOABMeshToMesh(itrp, csrv, rc)
-
+#else
+      itrp = .true.
+      csrv = .true.
+#endif
       !------------------------------------------------------------------------
       !EX_UTest
       ! Test conservative regridding interpolation

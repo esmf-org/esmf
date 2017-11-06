@@ -22,7 +22,7 @@
 #define ESMCI_MBMesh_Search_EToE_h
 
 // Take out if MOAB isn't being used
-#ifdef ESMF_MOAB
+#if defined ESMF_MOAB
 
 #include "Mesh/include/ESMCI_MBMesh.h"
 

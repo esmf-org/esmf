@@ -15,7 +15,8 @@
 #include <vector>
 using namespace std;
 
-#if defined (ESMF_MOAB)
+#if defined ESMF_MOAB
+
 #include "moab/Core.hpp"
 #include "moab/ScdInterface.hpp"
 using namespace moab;
@@ -71,7 +72,7 @@ int main(void){
   //NEX_UTest
   strcpy(name, "Moab scdInterface access test");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
-#if defined (ESMF_MOAB)
+#if defined ESMF_MOAB
   Interface *mb = new Core();
   ScdInterface *scdiface;
   ErrorCode rval = mb->query_interface(scdiface); // get a ScdInterface through
@@ -98,7 +99,8 @@ int main(void){
   //NEX_UTest
   strcpy(name, "Create structured mesh");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
-#if defined (ESMF_MOAB)
+#if defined ESMF_MOAB
+
   ScdBox *box;
   rval = scdiface->construct_box(HomCoord(0, 0, 0), HomCoord(I-1, J-1, K-1),
                                  NULL, 0,
@@ -114,7 +116,8 @@ int main(void){
   //NEX_UTest
   strcpy(name, "Access vertices test");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
-#if defined (ESMF_MOAB)
+#if defined ESMF_MOAB
+
   Range verts;
   rval = mb->get_entities_by_dimension(0, 0, verts);
   rc = (rval == MB_SUCCESS)?ESMF_SUCCESS:ESMF_FAILURE;
@@ -128,7 +131,8 @@ int main(void){
   //NEX_UTest
   strcpy(name, "Check vertices test");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
-#if defined (ESMF_MOAB)
+#if defined ESMF_MOAB
+
   rc = ((int)verts.size() == I*J*K)?ESMF_SUCCESS:ESMF_FAILURE;
 #else
   rc = ESMF_SUCCESS;
@@ -140,7 +144,8 @@ int main(void){
   //NEX_UTest
   strcpy(name, "Access hexes test");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
-#if defined (ESMF_MOAB)
+#if defined ESMF_MOAB
+
   Range hexes;
   rval = mb->get_entities_by_dimension(0, 3, hexes);
   rc = (rval == MB_SUCCESS)?ESMF_SUCCESS:ESMF_FAILURE;
@@ -154,7 +159,8 @@ int main(void){
   //NEX_UTest
   strcpy(name, "Check hexes test");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
-#if defined (ESMF_MOAB)
+#if defined ESMF_MOAB
+
   rc = ((int)hexes.size() == (I-1)*(J-1)*(K-1))?ESMF_SUCCESS:ESMF_FAILURE;
 #else
   rc = ESMF_SUCCESS;
@@ -166,7 +172,8 @@ int main(void){
   //NEX_UTest
   strcpy(name, "Check verts test");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
-#if defined (ESMF_MOAB)
+#if defined ESMF_MOAB
+
   rc = ((int)verts.size() == I*J*K)?ESMF_SUCCESS:ESMF_FAILURE;
 #else
   rc = ESMF_SUCCESS;
@@ -185,7 +192,8 @@ int main(void){
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
 
   rc = ESMF_SUCCESS;
-#if defined (ESMF_MOAB)
+#if defined ESMF_MOAB
+
   std::vector<double> coords(8*3);
   std::vector<EntityHandle> connect;
   for (int k = 0; k < K-1; k++) {
@@ -224,7 +232,8 @@ int main(void){
   //NEX_UTest
   strcpy(name, "Release interface test");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
-#if defined (ESMF_MOAB)
+#if defined ESMF_MOAB
+
   rval = mb->release_interface(scdiface);
   rc = (rval == MB_SUCCESS)?ESMF_SUCCESS:ESMF_FAILURE;
 #else
@@ -237,7 +246,8 @@ int main(void){
   strcpy(name, "Destroy MOAB instance test");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
   rc = ESMF_SUCCESS;
-#if defined (ESMF_MOAB)
+#if defined ESMF_MOAB
+
   try {
     delete mb;
   }

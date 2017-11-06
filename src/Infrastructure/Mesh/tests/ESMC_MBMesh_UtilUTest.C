@@ -21,6 +21,8 @@
 // ESMF Test header
 #include "ESMC_Test.h"
 
+#if defined ESMF_MOAB
+
 #include "ESMC_MBMeshTestUtilMBMesh.C"
 
 // other headers
@@ -29,11 +31,12 @@
 
 #include "MBTagConventions.hpp"
 #include "moab/Core.hpp"
+#endif
 
 #include <iostream>
 #include <iterator>
 #include <vector>
-
+#include <cstring>
 
 #if !defined (M_PI)
 // for Windows...
@@ -57,8 +60,10 @@ int main(int argc, char *argv[]) {
   //----------------------------------------------------------------------------
   rc=ESMC_LogSet(true);
 
+#if defined ESMF_MOAB
   //----------------------------------------------------------------------------
   //ESMC_MoabSet(true);
+#endif
 
   // Get parallel information
   vm=ESMC_VMGetGlobal(&rc);
@@ -74,6 +79,7 @@ int main(int argc, char *argv[]) {
   // --------------------------------------------------------------------------
   // quad mesh bilinear
   // --------------------------------------------------------------------------
+#if defined ESMF_MOAB
 
   // build a mesh
   MBMesh *mesh_quad;
@@ -85,17 +91,22 @@ int main(int argc, char *argv[]) {
 
   //----------------------------------------------------------------------------
   //NEX_UTest
+#else
+  rc = ESMF_SUCCESS;
+#endif
   strcpy(name, "Quadrilateral mesh pointlist generation");
   strcpy(failMsg, "Mesh to Pointlist did not work correctly");
   ESMC_Test(rc==ESMF_SUCCESS, name, failMsg, &result, __FILE__, __LINE__, 0);
 
+#if defined ESMF_MOAB
   // clean up
   delete pl_quad;
   delete mesh_quad;
-
+#endif
   // --------------------------------------------------------------------------
   // spherical quad mesh bilinear
   // --------------------------------------------------------------------------
+#if defined ESMF_MOAB
 
   // build a mesh
   MBMesh *mesh_quad_sph;
@@ -107,13 +118,18 @@ int main(int argc, char *argv[]) {
 
   //----------------------------------------------------------------------------
   //NEX_UTest
+#else
+  rc = ESMF_SUCCESS;
+#endif
   strcpy(name, "Spherical quadrilateral mesh pointlist generation");
   strcpy(failMsg, "Mesh to Pointlist to not work correctly");
   ESMC_Test(rc==ESMF_SUCCESS, name, failMsg, &result, __FILE__, __LINE__, 0);
 
+#if defined ESMF_MOAB
   // clean up
   delete pl_quad_sph;
   delete mesh_quad_sph;
+#endif
 
   //----------------------------------------------------------------------------
   ESMC_TestEnd(__FILE__, __LINE__, 0);

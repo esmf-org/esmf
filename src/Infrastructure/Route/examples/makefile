@@ -6,7 +6,7 @@ run_uni: run_examples_uni
 
 LOCDIR	  = src/Infrastructure/Route/examples
 
-
+.NOTPARALLEL:
 EXAMPLES_BUILD    = $(ESMF_EXDIR)/ESMF_RHandleBitForBitEx \
                     $(ESMF_EXDIR)/ESMF_RHandleFromRHandleEx
                     

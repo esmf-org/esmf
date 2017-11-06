@@ -21,6 +21,7 @@
 // ESMF Test header
 #include "ESMC_Test.h"
 
+#if defined ESMF_MOAB
 #include "ESMC_MBMeshTestUtilMesh.C"
 #include "ESMC_MBMeshTestUtilMBMesh.C"
 #include "ESMC_MBMeshTestUtilPL.C"
@@ -35,11 +36,12 @@
 #include "moab/Core.hpp"
 
 #include "ESMCI_WMat.h"
-
+#endif
 
 #include <iostream>
 #include <iterator>
 #include <vector>
+#include <cstring>
 
 
 #if !defined (M_PI)
@@ -49,6 +51,7 @@
 
 using namespace std;
 
+#if defined ESMF_MOAB
 typedef std::map<WMat::Entry, std::vector<WMat::Entry> > WeightMap;
 WeightMap weights;
 WeightMap::iterator begin_row() { return weights.begin(); }
@@ -91,6 +94,7 @@ bool weight_gen(MBMesh *mesh, PointList *pl) {
   else return false;
 
 }
+#endif
 
 int main(int argc, char *argv[]) {
 
@@ -124,7 +128,8 @@ int main(int argc, char *argv[]) {
   // --------------------------------------------------------------------------
   // quad mesh bilinear
   // --------------------------------------------------------------------------
-  
+
+  #if defined ESMF_MOAB
   // build a mesh
   MBMesh *mesh_quad;
   mesh_quad = create_mesh_quad(rc);
@@ -142,11 +147,18 @@ int main(int argc, char *argv[]) {
   // clean up
   delete pl_quad;
   delete mesh_quad;
+#else
+  rc = ESMF_SUCCESS;
+  strcpy(name, "Quadrilateral bilinear weight generation");
+  strcpy(failMsg, "Weights were not generated correctly");
+  ESMC_Test(rc==ESMF_SUCCESS, name, failMsg, &result, __FILE__, __LINE__, 0);
+#endif
 
   // --------------------------------------------------------------------------
   // quad sph mesh bilinear
   // --------------------------------------------------------------------------
-  
+
+#if defined ESMF_MOAB
   // build a mesh
   MBMesh *mesh_quad_sph;
   mesh_quad_sph = create_mesh_quad_sph(rc);
@@ -164,11 +176,18 @@ int main(int argc, char *argv[]) {
   // clean up
   delete pl_quad_sph;
   delete mesh_quad_sph;
+#else
+  rc = ESMF_SUCCESS;
+  strcpy(name, "Spherical quadrilateral bilinear weight generation");
+  strcpy(failMsg, "Weights were not generated correctly");
+  ESMC_Test(rc==ESMF_SUCCESS, name, failMsg, &result, __FILE__, __LINE__, 0);
+#endif
 
   // --------------------------------------------------------------------------
   // tri mesh bilinear
   // --------------------------------------------------------------------------
 
+#if defined ESMF_MOAB
   // build a mesh
   MBMesh *mesh_tri;
   mesh_tri = create_mesh_tri(rc);
@@ -186,11 +205,18 @@ int main(int argc, char *argv[]) {
   // clean up
   delete pl_tri;
   delete mesh_tri;
+#else
+  rc = ESMF_SUCCESS;
+  strcpy(name, "Triangle mesh bilinear weight generation");
+  strcpy(failMsg, "Weights were not generated correctly");
+  ESMC_Test(rc==ESMF_SUCCESS, name, failMsg, &result, __FILE__, __LINE__, 0);
+#endif
 
   // --------------------------------------------------------------------------
   // tri sph mesh bilinear
   // --------------------------------------------------------------------------
-  
+
+#if defined ESMF_MOAB
   // build a mesh
   MBMesh *mesh_tri_sph;
   mesh_tri_sph = create_mesh_tri_sph(rc);
@@ -208,7 +234,12 @@ int main(int argc, char *argv[]) {
   // clean up
   delete pl_tri_sph;
   delete mesh_tri_sph;
-
+#else
+  rc = ESMF_SUCCESS;
+  strcpy(name, "Spherical triangle mesh bilinear weight generation");
+  strcpy(failMsg, "Weights were not generated correctly");
+  ESMC_Test(rc==ESMF_SUCCESS, name, failMsg, &result, __FILE__, __LINE__, 0);
+#endif
 
   //----------------------------------------------------------------------------
   ESMC_TestEnd(__FILE__, __LINE__, 0);
