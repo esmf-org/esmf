@@ -533,7 +533,7 @@ program ESMF_RegridWeightGenApp
       endif
     else  ! the argument does not exist
       if ((srcFileType == ESMF_FILEFORMAT_UGRID .or. srcFileType == ESMF_FILEFORMAT_ESMFMESH) &
-          .and. method /= 'conserve') then
+          .and. (method /= 'conserve') .and. (method /= 'conserve2nd')) then
           write(*,*)
           print *, 'ERROR: --src_loc is required for this source file type and regridding'
         print *, '       method.'
@@ -571,17 +571,17 @@ program ESMF_RegridWeightGenApp
       endif
     else  ! the argument does not exist
       if ((dstFileType == ESMF_FILEFORMAT_UGRID .or. dstFileType == ESMF_FILEFORMAT_ESMFMESH) &
-          .and. method /= 'conserve') then
+          .and. (method /= 'conserve') .and. (method /= 'conserve2nd')) then
           write(*,*)
           print *, 'ERROR: --dst_loc is required for this source file type and regridding'
-        print *, '       method.'
+          print *, '       method.'
           print *, '       Please specifiy either "center" or "corner"'
           print *, "Use the --help argument to see an explanation of usage."
           call ESMF_Finalize(endflag=ESMF_END_ABORT)
       endif
     endif
 
-    ! deoes not support corner coordinates for SCRIP and GRIDSPEC files
+    ! does not support corner coordinates for SCRIP and GRIDSPEC files
     if ((dstFileType == ESMF_FILEFORMAT_SCRIP .or. dstFileType == ESMF_FILEFORMAT_GRIDSPEC) &
         .and. useDstCorner) then
           write(*,*)
@@ -592,7 +592,8 @@ program ESMF_RegridWeightGenApp
     endif
 
     ! does not support corner coordinates for conservative regridding for any file types
-    if (method == 'conserve' .and. (useSrcCorner .or. useDstCorner)) then
+    if ((method == 'conserve' .or. method == 'conserve2nd') .and. &
+         (useSrcCorner .or. useDstCorner)) then
           write(*,*)
           print *, 'ERROR: using corner coordinates for conservative regridding is not supported.'
           call ESMF_Finalize(endflag=ESMF_END_ABORT)
