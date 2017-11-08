@@ -1328,14 +1328,15 @@ int VMId::print() const{
 // !IROUTINE:  ESMCI::VMId::deserialize
 //
 // !INTERFACE:
-int VMId::deserialize(char *buffer, int *offset) {
+int VMId::deserialize(const char *buffer, int *offset, bool offsetonly) {
 //
 // !RETURN VALUE:
 //    int return code
 //
 //
 // !DESCRIPTION:
-//    Deserialize a buffer into a VMId object
+//    Deserialize a buffer into a VMId object.  Assumes vmKey has been
+//    been pre-allocated.
 //
 //EOPI
 //-----------------------------------------------------------------------------
@@ -1352,17 +1353,21 @@ int VMId::deserialize(char *buffer, int *offset) {
 
   ip = (int *)(buffer + *offset);
   int keywidth = *ip++;
-  localID = *ip++;
+  if (!offsetonly)
+    localID = *ip;
+  ip++;
   cp = (char *)ip;
-  if (vmKey) {
-    memcpy (vmKey, cp, keywidth);
-    cp += keywidth;
-  } else {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-        "Null vmKey when deserializing a VMId object",
-        ESMC_CONTEXT, &localrc);
-    return localrc;
+  if (!offsetonly) {
+    if (vmKey) {
+      memcpy (vmKey, cp, keywidth);
+    } else {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+          "Null vmKey encountered when deserializing a VMId object",
+          ESMC_CONTEXT, &localrc);
+      return localrc;
+    }
   }
+  cp += keywidth;
 
   // update offset to point to past the current obj
   *offset = (cp - buffer);
@@ -1381,7 +1386,7 @@ int VMId::deserialize(char *buffer, int *offset) {
 // !IROUTINE:  ESMCI::VMId::serialize
 //
 // !INTERFACE:
-int VMId::serialize(char *buffer, int *length, int *offset,
+int VMId::serialize(const char *buffer, int *length, int *offset,
                 const ESMC_InquireFlag &inquireflag) {
 //
 // !RETURN VALUE:
