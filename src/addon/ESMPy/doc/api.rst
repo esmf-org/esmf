@@ -52,6 +52,144 @@ Named constants                                             Description
 :class:`UnmappedAction<ESMF.api.constants.UnmappedAction>`  Specify which action to take with respect to unmapped destination points
 =========================================================== ==============================
 
+--------------------------------
+Grids, Meshes, and LocStreams
+--------------------------------
+
+There are three different objects used for spatial coordinate representation:
+Grid, Mesh, and LocStream. Grids are used to represent logically rectangular
+grids, Meshes are used for unstructured collections of polygons, and
+LocStreams are used for unstructured collections of individual points. These
+objects are nearly identical counterparts to the objects of the same name in
+ESMF, which some simplifications for ease of use in the Python environment.
+
+~~~~
+Grid
+~~~~
+
+The Grid is used to represent the geometry and discretization of logically
+rectangular physical grids. The Grid can also hold information that can used in
+calculations involving the Grid, like a mask or the cell areas.
+
+ESMF Grids are based on the concepts described in A Standard Description of
+Grids Used in Earth System Models [Balaji 2006]. In this document Balaji
+introduces the mosaic concept as a means of describing a wide variety of Earth
+system model grids. A mosaic is composed of grid tiles connected at their edges.
+Mosaic grids includes simple, single tile grids as a special case.
+
+The ESMF Grid class is a representation of a mosaic grid. Each ESMF Grid is
+constructed of one or more logically rectangular Tiles. A Tile will usually have
+some physical significance (e.g. the region of the world covered by one face of
+a cubed sphere grid).
+
+.. Note:: The underlying ESMF library is built with a mix of Fortran and C++ and
+          follows Fortran conventions with respect to array indexing and dimension
+          ordering. Some effort has been made to make ESMPy feel more natural to the
+          Python user where possible. This means that ESMPy uses 0-based indexing, which
+          is translated to the 1-based indexing used by the ESMF backend. However, the
+          dimension ordering still follows Fortran conventions. Namely, longitude comes
+          before latitude, which also comes before temporal dimensions when in use.
+
++++++++++++++++++++++
+Spherical coordinates
++++++++++++++++++++++
+
+In the case that the Grid is on a sphere (coord_sys=CoordSys.SPH_DEG or
+CoordSys.SPH_RAD) then the coordinates given in the Grid are interpreted
+as latitude and longitude values. The coordinates can either be in degrees or
+radians as indicated by the 'coord_sys' flag set during Grid creation. As is
+true with many global models, this application currently assumes the latitude
+and longitude refer to positions on a perfect sphere, as opposed to a more
+complex and accurate representation of the earth's true shape such as would be
+used in a GIS system.
+
+The Grid coordinate system is represented using :class:`CoordSys<ESMF.api.constants.CoordSys>`.
+
++++++++++++
+Periodicity
++++++++++++
+
+A periodic connection can be specified when building Grids in spherical
+coordinates. The *num_peri_dims* parameter indicates the total number of
+periodic dimensions and *periodic_dim* is used to identify which dimensions
+should be considered periodic. There must always be at least one non-periodic
+dimension. For example, to create a global latitude-longitude Grid there would
+be one periodic dimension, dimension 0 (longitude).
+
++++++++++++++++
+Pole Generation
++++++++++++++++
+
+The Grid can generate an artifical pole by using the *pole_dim* parameter. This
+can be helpful for regridding operations to smooth out the interpolated values
+in the polar region. For the example of creating a global latitude-longitude
+Grid, the pole dimension would be 1 (latitude).
+
+++++++++++
+Staggering
+++++++++++
+
+Staggering is a finite difference technique in which the values of different
+physical quantities are placed at different locations within a grid cell.
+
+The ESMF Grid class supports a variety of stagger locations, including cell
+centers, corners, and edge centers. The default stagger location in ESMF is the
+cell center, and cell counts in Grid are based on this assumption. Combinations
+of the 2D ESMF stagger locations are sufficient to specify any of the Arakawa
+staggers. ESMF also supports staggering in 3D and higher dimensions. There are
+shortcuts for standard staggers, and interfaces through which users can create
+custom staggers.
+
+As a default the ESMF Grid class provides symmetric staggering, so that cell
+centers are enclosed by cell perimeter (e.g. corner) stagger locations. This
+means the coordinate arrays for stagger locations other than the center will
+have an additional element of padding in order to enclose the cell center
+locations. However, to achieve other types of staggering, the user may alter or
+eliminate this padding by using the appropriate options when adding coordinates
+to a Grid.
+
+Grid staggers are indicated using :class:`StaggerLoc<ESMF.api.constants.StaggerLoc>`.
+
++++++++
+Masking
++++++++
+
+Masking is the process used to mark parts of a Grid to be ignored during an
+operation. Marking Grid cells as masked can affect the Field values that are
+represented by those cells. Masking is specified by assigning an integer value
+to a Grid cell. This allows many different masks to be defined on the same Grid,
+any combination of which may be also activated on the Field by specifying the
+corresponding integer values. The activation of Field masks with respect to the
+underlying Grid mask is handled by :class:`~ESMF.api.regrid.Regrid`, and a more
+general discussion of masking is covered in the :ref:`masking <masking>` section.
+
+++++++++++
+Cell Areas
+++++++++++
+
+Grid cell areas can be calculated by ESMP. Space must first be allocated for
+this calculation by adding a :class:`GridItem<ESMF.api.constants.GridItem>`.AREA.
+Then a :class:`~ESMF.api.field.Field` must be created, and the
+get_area() function called.
+
+.. Note:: This process will be streamlined in a future release using the
+          Grid.area property.
+
+.. Note:: The Grid area calculation assumes the Grid is a unit sphere.
+
+Grid cell areas may also be set to user-defined values after the AREA item has
+been allocated and retrieved using Grid.get_item().
+
+
+~~~~
+Mesh
+~~~~
+
+~~~~~~~~~
+LocStream
+~~~~~~~~~
+
+
 
 
 -------------------------------
@@ -439,9 +577,11 @@ the source area (src_area), and the source fraction (src_frac)::
        src_total=src_total+src_field(i)*src_area(i)*src_frac(i)
     end for
 
+
 -------
 Masking
 -------
+.. _masking:
 
 Masking is the process whereby parts of a Grid, Mesh or LocStream can be marked to be ignored
 during an operation, such as when they are used in regridding. Masking can be used on a Field
@@ -471,19 +611,6 @@ interpolated to). Similarly, masking a source cell means that the cell won't par
 the masking is set on the location upon which the Fields passed into the regridding call are built.
 For example, if Fields built on StaggerLoc.CENTER are passed into the ESMF_FieldRegridStore()
 call then the masking should also be set on StaggerLoc.CENTER.
-
----------------------
-Spherical coordinates
----------------------
-
-In the case that the Grid is on a sphere (coord_sys=CoordSys.SPH_DEG or
-CoordSys.SPH_RAD) then the coordinates given in the Grid are interpreted
-as latitude and longitude values. The coordinates can either be in degrees or
-radians as indicated by the 'coord_sys' flag set during Grid creation. As is
-true with many global models, this application currently assumes the latitude
-and longitude refer to positions on a perfect sphere, as opposed to a more
-complex and accurate representation of the earth's true shape such as would be
-used in a GIS system.
 
 ---------------
 Unmapped points
