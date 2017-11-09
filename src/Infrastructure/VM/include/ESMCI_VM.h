@@ -55,9 +55,9 @@ class VMId {
   public:
   VMId() { vmKey=NULL; localID=0; }
 
-  int serialize(char *buffer, int *length, int *offset,
+  int serialize(const char *buffer, int *length, int *offset,
                 const ESMC_InquireFlag &inquireflag);
-  int deserialize(char *buffer, int *offset);
+  int deserialize(const char *buffer, int *offset, bool offsetonly);
   int print () const;
 };
 

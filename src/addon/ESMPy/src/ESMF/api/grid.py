@@ -770,7 +770,7 @@ class Grid(object):
             in 2D and :attr:`~ESMF.api.constants.StaggerLoc.CENTER_VCENTER` in
             3D.
         :param int coord_dim: The dimension number of the coordinates to return
-            e.g. ``[x, y, z] = (0, 1, 2)``, or ``[lat, lon] = (0, 1)``
+            e.g. ``[x, y, z] = (0, 1, 2)``, or ``[lon, lat] = (0, 1)``
             (coordinates will not be returned if coord_dim is not specified and
             staggerlocs is a list with more than one element).
         :param bool from_file: Boolean for internal use to determine whether the
