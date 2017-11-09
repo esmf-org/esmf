@@ -530,6 +530,59 @@ bool LogErr::MsgFoundError(
 //
 // !ARGUMENTS:
     int rcToCheck,
+    const char msg[],
+    int LINE,
+    const char FILE[],
+    const char method[],
+    int *rcToReturn
+    )
+// !DESCRIPTION:
+// Returns true if rcToCheck does not equal ESMF\_SUCCESS and writes the error
+// to the log with a user supplied message.  This method uses cpp macros.
+//EOP
+{
+    bool result=false;
+#ifdef ESMC_SUCCESSDEFAULT_ON
+    if (rcToReturn != ESMC_NULL_POINTER) *rcToReturn=ESMF_SUCCESS;
+#endif
+    if (trace) {
+        Write(ESMC_METHOD,ESMC_LOGMSG_TRACE,
+            LINE, FILE, method);
+    }
+    if (rcToCheck!=ESMF_SUCCESS){
+      FTN_X(esmf_breakpoint)();  // no-op to assist debugging
+      int i;
+      for (i=0; i<errorMaskCount; i++)
+        if (errorMask[i] == rcToCheck) break;
+      if (i==errorMaskCount){
+        // this means that rcToCheck was _not_ in the errorMask -> flag error
+        result=true;   // TODO: if this line moved to after Write()
+                       // below, will crash ESMF_TimeIntervalUTest.F90 on 
+                       // Linux longs 2.4.20-31.9, Lahey lf95 6.0 optimized
+        if (rcToReturn != ESMC_NULL_POINTER) *rcToReturn=rcToCheck;
+
+        string logMsg = string(ESMC_LogGetErrMsg(rcToCheck)) + " - " + msg;
+        Write(logMsg,ESMC_LOGMSG_ERROR,LINE,FILE,method);
+      }
+    }
+    return result;
+}
+
+//----------------------------------------------------------------------------
+#undef ESMC_METHOD
+#define ESMC_METHOD "LogErr::MsgFoundError"
+//BOP
+// !IROUTINE: MsgFoundError - LogMsgFoundError
+//
+// !INTERFACE:
+
+bool LogErr::MsgFoundError(
+
+// !RETURN VALUE:
+//  bool
+//
+// !ARGUMENTS:
+    int rcToCheck,
     const std::string &msg,
     int LINE,
     const std::string &FILE,

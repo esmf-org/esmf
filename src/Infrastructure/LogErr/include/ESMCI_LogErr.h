@@ -91,6 +91,9 @@ private:
     bool MsgDeallocError(const std::string& msg,
         int LINE, const std::string &FILE, const std::string &method,
         int *rcToReturn);
+    bool MsgFoundError(int rcToCheck, const char msg[],
+        int LINE, const char FILE[], const char method[],
+        int *rcToReturn);
     bool MsgFoundError(int rcToCheck, const std::string &msg,
         int LINE, const std::string &FILE, const std::string &method,
         int *rcToReturn);
