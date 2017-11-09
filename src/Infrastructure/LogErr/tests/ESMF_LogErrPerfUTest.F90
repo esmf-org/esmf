@@ -50,7 +50,7 @@ program ESMF_LogErrPerfUTest
   character(ESMF_MAXSTR) :: msg
   
   ! other variables
-  real(ESMF_KIND_R8)     :: dt
+  real(ESMF_KIND_R8)     :: dt, dtTest
 
   !------------------------------------------------------------------------
   call ESMF_TestStart(ESMF_SRCLINE, rc=rc)  ! calls ESMF_Initialize() internally
@@ -91,7 +91,8 @@ program ESMF_LogErrPerfUTest
   !NEX_UTest
   write(name, *) "Threshold check for ESMF_LogFoundError() 1000000x Test"
   write(failMsg, *) "ESMF_LogFoundError() performance problem"
-  call ESMF_Test((dt<5.D-8), name, failMsg, result, ESMF_SRCLINE)
+  dtTest = 5.D-8  ! this is expected to pass even in debug mode
+  call ESMF_Test((dt<dtTest), name, failMsg, result, ESMF_SRCLINE)
   !------------------------------------------------------------------------
 
   !------------------------------------------------------------------------

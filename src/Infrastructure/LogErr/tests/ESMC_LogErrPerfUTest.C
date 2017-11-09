@@ -31,31 +31,58 @@
 //EOP
 //-----------------------------------------------------------------------------
 
-#define ESMC_METHOD "perfMsgFoundErrorC"
-int perfMsgFoundErrorC(int n, double &dt){
+//-----------------------------------------------------------------------------
+#undef ESMC_METHOD
+#define ESMC_METHOD "perfFoundError()"
+int perfFoundError(int n, double &dt){
   double t0, t1;
   int rc;
   ESMCI::VMK::wtime(&t0);
   for (int i=0; i<n; i++){
-    ESMC_LogDefault.MsgFoundError(ESMF_SUCCESS,
-      ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc);
+    ESMC_LogDefault.FoundError(ESMF_SUCCESS,
+      ESMC_CONTEXT, &rc);
   }
   ESMCI::VMK::wtime(&t1);
   dt = (t1-t0)/double(n);
   std::stringstream msg;
-  msg << "perfMsgFoundErrorC: " << n << "\t iterations took " << t1-t0 <<
+  msg << "perfFoundError: " << n << "\t iterations took " << t1-t0 <<
     "\t seconds. => " << dt << "\t per iteration.";
   ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
   return ESMF_SUCCESS;
 }
+//-----------------------------------------------------------------------------
 
+//-----------------------------------------------------------------------------
+#undef ESMC_METHOD
+#define ESMC_METHOD "perfMsgFoundError()"
+int perfMsgFoundError(int n, double &dt){
+  double t0, t1;
+  int rc;
+  ESMCI::VMK::wtime(&t0);
+  for (int i=0; i<n; i++){
+    ESMC_LogDefault.MsgFoundError(ESMF_SUCCESS, ESMCI_ERR_PASSTHRU,
+      ESMC_CONTEXT, &rc);
+  }
+  ESMCI::VMK::wtime(&t1);
+  dt = (t1-t0)/double(n);
+  std::stringstream msg;
+  msg << "perfMsgFoundError: " << n << "\t iterations took " << t1-t0 <<
+    "\t seconds. => " << dt << "\t per iteration.";
+  ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+  return ESMF_SUCCESS;
+}
+//-----------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
+#undef ESMC_METHOD
+#define ESMC_METHOD "main()"
 int main(void){
 
   char name[80];
   char failMsg[80];
   int result = 0;
   int rc;
-  double dt;
+  double dt, dtTest;
   
   //----------------------------------------------------------------------------
   ESMC_TestStart(__FILE__, __LINE__, 0);
@@ -63,39 +90,78 @@ int main(void){
   
   //----------------------------------------------------------------------------
   //NEX_UTest
-  strcpy(name, "Performance of MsgFoundError() 1000x Test");
+  strcpy(name, "Performance of ESMCI::LogErr::FoundError() 1000x Test");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
-  rc = perfMsgFoundErrorC(1000, dt);
+  rc = perfFoundError(1000, dt);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
     
   //----------------------------------------------------------------------------
   //NEX_UTest
-  strcpy(name, "Performance of MsgFoundError() 10000x Test");
+  strcpy(name, "Performance of ESMCI::LogErr::FoundError() 10000x Test");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
-  rc = perfMsgFoundErrorC(10000, dt);
+  rc = perfFoundError(10000, dt);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
     
   //----------------------------------------------------------------------------
   //NEX_UTest
-  strcpy(name, "Performance of MsgFoundError() 100000x Test");
+  strcpy(name, "Performance of ESMCI::LogErr::FoundError() 100000x Test");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
-  rc = perfMsgFoundErrorC(100000, dt);
+  rc = perfFoundError(100000, dt);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
     
   //----------------------------------------------------------------------------
   //NEX_UTest
-  strcpy(name, "Performance of MsgFoundError() 1000000x Test");
+  strcpy(name, "Performance of ESMCI::LogErr::FoundError() 1000000x Test");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
-  rc = perfMsgFoundErrorC(1000000, dt);
+  rc = perfFoundError(1000000, dt);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
   //NEX_UTest
-  strcpy(name, "Threshold check for MsgFoundError() 1000000x Test");
+  strcpy(name, "Threshold check for ESMCI::LogErr::FoundError() 1000000x Test");
+  strcpy(failMsg, "FoundError() performance problem");
+  dtTest = 5.e-8; // this is expected to pass even in debug mode
+  ESMC_Test((dt<dtTest), name, failMsg, &result, __FILE__, __LINE__, 0);
+  //----------------------------------------------------------------------------
+    
+  //----------------------------------------------------------------------------
+  //NEX_UTest
+  strcpy(name, "Performance of ESMCI::LogErr::MsgFoundError() 1000x Test");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
+  rc = perfMsgFoundError(1000, dt);
+  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+  //----------------------------------------------------------------------------
+    
+  //----------------------------------------------------------------------------
+  //NEX_UTest
+  strcpy(name, "Performance of ESMCI::LogErr::MsgFoundError() 10000x Test");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
+  rc = perfMsgFoundError(10000, dt);
+  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+  //----------------------------------------------------------------------------
+    
+  //----------------------------------------------------------------------------
+  //NEX_UTest
+  strcpy(name, "Performance of ESMCI::LogErr::MsgFoundError() 100000x Test");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
+  rc = perfMsgFoundError(100000, dt);
+  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+  //----------------------------------------------------------------------------
+    
+  //----------------------------------------------------------------------------
+  //NEX_UTest
+  strcpy(name, "Performance of ESMCI::LogErr::MsgFoundError() 1000000x Test");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
+  rc = perfMsgFoundError(1000000, dt);
+  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+  //----------------------------------------------------------------------------
+  //NEX_UTest
+  strcpy(name, "Threshold check for ESMCI::LogErr::MsgFoundError() 1000000x Test");
   strcpy(failMsg, "MsgFoundError() performance problem");
-  ESMC_Test((dt<5.e-8), name, failMsg, &result, __FILE__, __LINE__, 0);
+  dtTest = 5.e-8; // this is expected to pass even in debug mode
+  ESMC_Test((dt<dtTest), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
     
   //----------------------------------------------------------------------------

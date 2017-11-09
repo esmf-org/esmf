@@ -75,20 +75,23 @@ private:
   public:
       
 // !PUBLIC MEMBER FUNCTIONS:
-    bool AllocError(
+    void AllocError(
         int LINE, const std::string &FILE, const std::string &method,
         int *rcToReturn);
-    bool DeallocError(
+    void DeallocError(
         int LINE, const std::string &FILE, const std::string &method,
         int *rcToReturn);
     void Close();
     bool FoundError(int rcToCheck,
+        int LINE, const char FILE[], const char method[],
+        int *rcToReturn);
+    bool FoundError(int rcToCheck,
         int LINE, const std::string &FILE, const std::string &method,
         int *rcToReturn);
-    bool MsgAllocError(const std::string& msg,
+    void MsgAllocError(const std::string& msg,
         int LINE, const std::string &FILE, const std::string &method,
         int *rcToReturn);
-    bool MsgDeallocError(const std::string& msg,
+    void MsgDeallocError(const std::string& msg,
         int LINE, const std::string &FILE, const std::string &method,
         int *rcToReturn);
     bool MsgFoundError(int rcToCheck, const char msg[],

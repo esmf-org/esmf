@@ -77,7 +77,7 @@ namespace ESMCI{
 // !INTERFACE:
 
 
-bool LogErr::AllocError(
+void LogErr::AllocError(
 
 // !RETURN VALUE:
 //  none
@@ -93,12 +93,9 @@ bool LogErr::AllocError(
 //EOP
 {
     FTN_X(esmf_breakpoint)();  // no-op to assist debugging
-    bool result=false;
     if (rcToReturn != ESMC_NULL_POINTER) *rcToReturn=ESMC_RC_MEM_ALLOCATE;
     Write(ESMC_LogGetErrMsg(ESMC_RC_MEM_ALLOCATE),ESMC_LOGMSG_ERROR,
         LINE, FILE, method);
-    result=true;
-    return result;
 }
 
 //----------------------------------------------------------------------------
@@ -110,7 +107,7 @@ bool LogErr::AllocError(
 // !INTERFACE:
 
 
-bool LogErr::MsgAllocError(
+void LogErr::MsgAllocError(
 
 // !RETURN VALUE:
 //  none
@@ -127,14 +124,11 @@ bool LogErr::MsgAllocError(
 //EOP
 {
     FTN_X(esmf_breakpoint)();  // no-op to assist debugging
-    bool result=false;
     if (rcToReturn != ESMC_NULL_POINTER) *rcToReturn=ESMC_RC_MEM_ALLOCATE;
 
     string logMsg = string(ESMC_LogGetErrMsg(ESMC_RC_MEM_ALLOCATE)) + " - " + msg;
     Write(logMsg,ESMC_LOGMSG_ERROR,
         LINE,FILE,method);
-    result=true;
-    return result;
 }
 
 
@@ -147,7 +141,7 @@ bool LogErr::MsgAllocError(
 // !INTERFACE:
 
 
-bool LogErr::DeallocError(
+void LogErr::DeallocError(
 
 // !RETURN VALUE:
 //  none
@@ -163,12 +157,9 @@ bool LogErr::DeallocError(
 //EOP
 {
     FTN_X(esmf_breakpoint)();  // no-op to assist debugging
-    bool result=false;
     if (rcToReturn != ESMC_NULL_POINTER) *rcToReturn=ESMC_RC_MEM_DEALLOCATE;
     Write(ESMC_LogGetErrMsg(ESMC_RC_MEM_DEALLOCATE),ESMC_LOGMSG_ERROR,
         LINE,FILE, method);
-    result=true;
-    return result;
 }
 
 //----------------------------------------------------------------------------
@@ -180,7 +171,7 @@ bool LogErr::DeallocError(
 // !INTERFACE:
 
 
-bool LogErr::MsgDeallocError(
+void LogErr::MsgDeallocError(
 
 // !RETURN VALUE:
 //  none
@@ -197,14 +188,11 @@ bool LogErr::MsgDeallocError(
 //EOP
 {
     FTN_X(esmf_breakpoint)();  // no-op to assist debugging
-    bool result=false;
     if (rcToReturn != ESMC_NULL_POINTER) *rcToReturn=ESMC_RC_MEM_DEALLOCATE;
 
     string logMsg = string(ESMC_LogGetErrMsg(ESMC_RC_MEM_DEALLOCATE)) + " - " + msg;
     Write(logMsg,ESMC_LOGMSG_ERROR,
         LINE,FILE,method);
-    result=true;
-    return result;
 }
 
 //----------------------------------------------------------------------------
@@ -463,6 +451,56 @@ int LogErr::SetTrace(
 
     rc = ESMF_SUCCESS;
     return rc;
+}
+
+//----------------------------------------------------------------------------
+#undef ESMC_METHOD
+#define ESMC_METHOD "LogErr::FoundError"
+//BOP
+// !IROUTINE: FoundError - LogFoundError
+//
+// !INTERFACE:
+
+
+bool LogErr::FoundError(
+
+// !RETURN VALUE:
+//  bool
+//
+// !ARGUMENTS:
+    int rcToCheck,
+    int LINE,
+    const char FILE[],
+    const char method[],
+    int *rcToReturn
+    )
+// !DESCRIPTION:
+// Returns true if rcToCheck does not equal ESMF\_SUCCESS and writes the error
+// to the log.  This method uses cpp macros.
+//EOP
+{
+    bool result=false;
+#ifdef ESMC_SUCCESSDEFAULT_ON
+    if (rcToReturn != ESMC_NULL_POINTER) *rcToReturn=ESMF_SUCCESS;
+#endif
+    if (trace) {
+        Write(ESMC_METHOD,ESMC_LOGMSG_TRACE,
+            LINE, FILE, method);
+    }
+    if (rcToCheck!=ESMF_SUCCESS){
+      FTN_X(esmf_breakpoint)();  // no-op to assist debugging
+      int i;
+      for (i=0; i<errorMaskCount; i++)
+        if (errorMask[i] == rcToCheck) break;
+      if (i==errorMaskCount){
+        // this means that rcToCheck was _not_ in the errorMask -> flag error
+        result=true;
+        if (rcToReturn != ESMC_NULL_POINTER) *rcToReturn=rcToCheck;
+        Write(ESMC_LogGetErrMsg(rcToCheck),ESMC_LOGMSG_ERROR,
+            LINE,FILE,method);
+      }
+    }
+    return result;
 }
 
 //----------------------------------------------------------------------------
