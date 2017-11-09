@@ -83,12 +83,13 @@ some physical significance (e.g. the region of the world covered by one face of
 a cubed sphere grid).
 
 .. Note:: The underlying ESMF library is built with a mix of Fortran and C++ and
-          follows Fortran conventions with respect to array indexing and dimension
-          ordering. Some effort has been made to make ESMPy feel more natural to the
-          Python user where possible. This means that ESMPy uses 0-based indexing, which
-          is translated to the 1-based indexing used by the ESMF backend. However, the
-          dimension ordering still follows Fortran conventions. Namely, longitude comes
-          before latitude, which also comes before temporal dimensions when in use.
+          follows Fortran conventions with respect to array indexing and
+          dimension ordering. Some effort has been made to make ESMPy feel more
+          natural to the Python user where possible. This means that ESMPy uses
+          0-based indexing, which is translated to the 1-based indexing used by
+          the ESMPy backend. However, the dimension ordering still follows
+          Fortran conventions. Namely, longitude comes before latitude, which
+          also comes before temporal dimensions when in use.
 
 +++++++++++++++++++++
 Spherical coordinates
@@ -103,7 +104,8 @@ and longitude refer to positions on a perfect sphere, as opposed to a more
 complex and accurate representation of the earth's true shape such as would be
 used in a GIS system.
 
-The Grid coordinate system is represented using :class:`CoordSys<ESMF.api.constants.CoordSys>`.
+The Grid coordinate system is represented using
+:class:`CoordSys<ESMF.api.constants.CoordSys>`.
 
 +++++++++++
 Periodicity
@@ -148,7 +150,8 @@ locations. However, to achieve other types of staggering, the user may alter or
 eliminate this padding by using the appropriate options when adding coordinates
 to a Grid.
 
-Grid staggers are indicated using :class:`StaggerLoc<ESMF.api.constants.StaggerLoc>`.
+Grid staggers are indicated using
+:class:`StaggerLoc<ESMF.api.constants.StaggerLoc>`.
 
 +++++++
 Masking
@@ -161,16 +164,18 @@ to a Grid cell. This allows many different masks to be defined on the same Grid,
 any combination of which may be also activated on the Field by specifying the
 corresponding integer values. The activation of Field masks with respect to the
 underlying Grid mask is handled by :class:`~ESMF.api.regrid.Regrid`, and a more
-general discussion of masking is covered in the :ref:`masking <masking>` section.
+general discussion of masking is covered in the :ref:`masking <masking>`
+section.
 
 ++++++++++
 Cell Areas
 ++++++++++
 
 Grid cell areas can be calculated by ESMP. Space must first be allocated for
-this calculation by adding a :class:`GridItem<ESMF.api.constants.GridItem>`.AREA.
+this calculation by adding an
+:class:`~ESMF.api.constants.GridItem.AREA` item to the Grid.
 Then a :class:`~ESMF.api.field.Field` must be created, and the
-get_area() function called.
+:class:`~ESMF.api.field.Field.get_area()` function called.
 
 .. Note:: This process will be streamlined in a future release using the
           Grid.area property.
@@ -178,7 +183,7 @@ get_area() function called.
 .. Note:: The Grid area calculation assumes the Grid is a unit sphere.
 
 Grid cell areas may also be set to user-defined values after the AREA item has
-been allocated and retrieved using Grid.get_item().
+been allocated and retrieved using :class:`~ESMF.api.grid.Grid.get_item()`.
 
 
 ~~~~
