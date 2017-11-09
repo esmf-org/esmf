@@ -86,7 +86,6 @@
 
     type(ESMF_Mapper) :: mapper
     logical :: is_sync_time(NUM_COMPS_PLUS_CPL)
-    type(ESMF_MapperModelInfo) :: model_info(NUM_COMPS)
 
     type(ESMF_Time) :: dbg_time
     integer(ESMF_KIND_I8) :: dbg_stime
@@ -197,7 +196,7 @@
     deallocate(petlist_cpl)
     !print *, "Comp Creates finished"
 
-  mapper = ESMF_MapperCreate(rc=localrc)
+  mapper = ESMF_MapperCreate(vm, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
@@ -559,7 +558,7 @@
           call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
 
         ! Contact mapper
-        model_info(1) = ESMF_MapperCollect(mapper, comp1, rc=localrc)
+        call ESMF_MapperCollect(mapper, comp1, rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=localrc)) &
           call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
@@ -568,7 +567,7 @@
           ESMF_CONTEXT, rcToReturn=localrc)) &
           call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
         
-        model_info(2) = ESMF_MapperCollect(mapper, comp2, rc=localrc)
+        call ESMF_MapperCollect(mapper, comp2, rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=localrc)) &
           call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
@@ -578,7 +577,7 @@
           call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
 
         ! Optimize using the mapper
-        call ESMF_MapperOptimize(mapper, model_info, rc=localrc)
+        call ESMF_MapperOptimize(mapper, rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=localrc)) &
           call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)

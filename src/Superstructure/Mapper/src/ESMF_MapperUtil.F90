@@ -87,9 +87,7 @@ contains
 ! !IROUTINE: ESMF_MapperCollect - Collect all info from the component
 
 ! !INTERFACE:
-  function ESMF_MapperCollect(mapper, gComp, keywordEnforcer, rc)
-! !RETURN VALUE:
-    type(ESMF_MapperModelInfo) :: ESMF_MapperCollect
+  subroutine ESMF_MapperCollect(mapper, gComp, keywordEnforcer, rc)
 !
 !
 ! !ARGUMENTS:
@@ -110,7 +108,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !EOP
   !-----------------------------------------------------------------------------    
     if (present(rc)) rc = ESMF_SUCCESS
-  end function
+  end subroutine
 !------------------------------------------------------------------------------
 
 end module ESMF_MapperUtilMod

@@ -10,10 +10,9 @@
 
   contains
 
-  subroutine user_comp_recreate(gridcomp, model_info, mapper, rc)
+  subroutine user_comp_recreate(gridcomp, mapper, rc)
 ! !ARGUMENTS:
     type(ESMF_GridComp), intent(inout)        :: gridcomp
-    type(ESMF_MapperModelInfo), intent(in)    :: model_info
     type(ESMF_Mapper), intent(in)    :: mapper
     integer,             intent(out)          :: rc
 
@@ -36,7 +35,7 @@
       return
     end if
 
-    call ESMF_MapperGet(mapper, model_info, npets=npets, rc=rc)
+    call ESMF_MapperGet(mapper, gridcomp, npets=npets, rc=rc)
     if(rc  /= ESMF_SUCCESS) then
       print *, "Getting comp info from mapper failed"
       return
@@ -44,7 +43,7 @@
 
     allocate(petlist(npets))
 
-    call ESMF_MapperGet(mapper, model_info, petList=petlist, rc=rc)
+    call ESMF_MapperGet(mapper, gridcomp, petList=petlist, rc=rc)
     if(rc  /= ESMF_SUCCESS) then
       print *, "Getting comp petlist from mapper failed"
       return
