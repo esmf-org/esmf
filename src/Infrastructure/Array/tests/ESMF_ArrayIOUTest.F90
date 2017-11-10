@@ -111,7 +111,7 @@ program ESMF_ArrayIOUTest
     goto 10
   endif
 
-  call ESMF_LogSet (flush = .true.)
+!  call ESMF_LogSet (flush = .true.)
 
 !-------------------------------------------------------------------------------
 !
