@@ -2686,4 +2686,34 @@ void VM::abort(
 }
 //-----------------------------------------------------------------------------
 
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::VM::timerLog()"
+//BOPI
+// !IROUTINE:  ESMCI::VM::timerLog
+//
+// !INTERFACE:
+void VM::timerLog(
+//
+// !RETURN VALUE:
+//    void
+//
+// !ARGUMENTS:
+//
+  std::string timer){
+//
+// !DESCRIPTION:
+//    Log the timer information to the default log
+//
+//EOPI
+//-----------------------------------------------------------------------------
+  std::stringstream timerMsg;
+  std::map<std::string, VMTimer>::iterator t = timers.find(timer);
+  timerMsg << "Timer '" << timer << "' accumulated time: " 
+    << t->second.taccu << " seconds in " << t->second.iters << " iterations.";
+  ESMC_LogDefault.Write(timerMsg.str(), ESMC_LOGMSG_INFO);
+}
+//-----------------------------------------------------------------------------
+
 } // namespace ESMCI
