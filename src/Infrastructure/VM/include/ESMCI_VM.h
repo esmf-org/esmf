@@ -42,6 +42,7 @@
 #include "ESMCI_Util.h"
 
 #include <string>
+#include <map>
 
 //-------------------------------------------------------------------------
 
@@ -91,10 +92,18 @@ namespace ESMCI {
 class VM;
 class VMPlan;
 
+class VMTimer {
+  double t0;
+  double taccu;
+  unsigned long iters;
+  friend class VM;
+};
+
 // class definition
 class VM : public VMK {   // inherits from ESMCI::VMK class
   // This is the ESMF derived virtual machine class.
-
+    // performance timers
+    std::map<std::string, VMTimer> timers;
   public:
     // initialize(), finalize() and abort() of global VM
     static VM *initialize(MPI_Comm mpiCommunicator, int *rc);
@@ -136,6 +145,31 @@ class VM : public VMK {   // inherits from ESMCI::VMK class
                        VMId **recvvmid, int *recvcounts, int *recvoffsets);
     int alltoallvVMId(VMId **sendvmid, int *sendcounts, int *sendoffsets,
                       VMId **recvvmid, int *recvcounts, int *recvoffsets);
+    // performance timers API
+    void timerReset(std::string timer){
+      std::map<std::string, VMTimer>::iterator t = timers.find(timer);
+      if (t==timers.end()){
+        // create the new timer
+        timers[timer].taccu = 0.;   // set to zero
+        timers[timer].iters = 0;    // set to zero
+      }else{
+        // reset the timer
+        t->second.taccu = 0.; // reset to zero
+        t->second.iters = 0;  // reset to zero
+      }
+    }
+    void timerStart(std::string timer){
+      std::map<std::string, VMTimer>::iterator t = timers.find(timer);
+      wtime(&(t->second.t0));   // start time
+    }
+    void timerStop(std::string timer){
+      double t1;
+      wtime(&t1);   // stop time
+      std::map<std::string, VMTimer>::iterator t = timers.find(timer);
+      t->second.taccu += t1 - t->second.t0;
+      ++(t->second.iters);
+    }
+    void timerLog(std::string timer);
 };  // class VM
 
 

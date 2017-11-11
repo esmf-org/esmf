@@ -613,9 +613,11 @@ void PIO_Handler::arrayRead(
       ESMC_CONTEXT, rc)) return;
 
   vardesc = (pio_var_desc_t)calloc(PIO_SIZE_VAR_DESC, 1);
-  if (!vardesc)
-    if (ESMC_LogDefault.MsgAllocError(" failed to allocate pio variable desc",
-        ESMC_CONTEXT, rc)) return;
+  if (!vardesc){
+    ESMC_LogDefault.MsgAllocError(" failed to allocate pio variable desc",
+      ESMC_CONTEXT, rc);
+    return;
+  }
 
   // Get a pointer to the array data
   // Still have the one DE restriction so use localDE = 0
@@ -836,9 +838,11 @@ void PIO_Handler::arrayWrite(
   }
 
   vardesc = (pio_var_desc_t)calloc(PIO_SIZE_VAR_DESC, 1);
-  if (!vardesc)
-    if (ESMC_LogDefault.MsgAllocError("failed to allocate pio variable desc",
-        ESMC_CONTEXT, rc)) return;
+  if (!vardesc){
+    ESMC_LogDefault.MsgAllocError("failed to allocate pio variable desc",
+      ESMC_CONTEXT, rc);
+    return;
+  }
 
   // Get a pointer to the array data
   // Still have the one DE restriction so use localDE = 0
@@ -1456,9 +1460,11 @@ void PIO_Handler::open(
 
   // Allocate a file descriptor
   pioFileDesc = (pio_file_desc_t)calloc(PIO_SIZE_FILE_DESC, 1);
-  if (!pioFileDesc)
-    if (ESMC_LogDefault.MsgAllocError(" failed to allocate pio file desc",
-        ESMC_CONTEXT, rc)) return;
+  if (!pioFileDesc){
+    ESMC_LogDefault.MsgAllocError(" failed to allocate pio file desc",
+      ESMC_CONTEXT, rc);
+    return;
+  }
   PRINTMSG(" allocated pio file desc, addr = " << (void *)pioFileDesc);
 
   if (okToCreate) {

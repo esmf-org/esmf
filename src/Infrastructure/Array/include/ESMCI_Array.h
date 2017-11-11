@@ -319,7 +319,7 @@ namespace ESMCI {
     int getLinearIndexExclusive(int localDe, int const *index, int *rc=NULL)
       const;
     template<typename T> int getSequenceIndexExclusive(int localDe, 
-      int const *index, SeqIndex<T> *seqIndex) const;
+      int const *index, SeqIndex<T> *seqIndex, bool recursive=true) const;
     SeqIndex<> getSequenceIndexTile(int tile, const int *index, int *rc=NULL)
       const;
     int getTensorSequenceIndex(const int *index, int *rc=NULL)const;
@@ -462,8 +462,8 @@ namespace ESMCI {
       // construct iterator through total Array region with block excl. option
     bool hasValidSeqIndex()const;
     int getLinearIndexExclusive()const;
-    template<typename T> int getSequenceIndexExclusive(SeqIndex<T> *seqIndex)
-      const;
+    template<typename T> int getSequenceIndexExclusive(SeqIndex<T> *seqIndex,
+      bool recursive=true) const;
     int getTensorSequenceIndex()const;
     int getArbSequenceIndexOffset()const;
     void print()const;
