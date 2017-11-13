@@ -52,9 +52,9 @@ Named constants                                             Description
 :class:`UnmappedAction<ESMF.api.constants.UnmappedAction>`  Specify which action to take with respect to unmapped destination points
 =========================================================== ==============================
 
---------------------------------
+-----------------------------
 Grids, Meshes, and LocStreams
---------------------------------
+-----------------------------
 
 There are three different objects used for spatial coordinate representation:
 Grid, Mesh, and LocStream. Grids are used to represent logically rectangular
@@ -82,51 +82,6 @@ constructed of one or more logically rectangular Tiles. A Tile will usually have
 some physical significance (e.g. the region of the world covered by one face of
 a cubed sphere grid).
 
-.. Note:: The underlying ESMF library is built with a mix of Fortran and C++ and
-          follows Fortran conventions with respect to array indexing and
-          dimension ordering. Some effort has been made to make ESMPy feel more
-          natural to the Python user where possible. This means that ESMPy uses
-          0-based indexing, which is translated to the 1-based indexing used by
-          the ESMPy backend. However, the dimension ordering still follows
-          Fortran conventions. Namely, longitude comes before latitude, which
-          also comes before temporal dimensions when in use.
-
-+++++++++++++++++++++
-Spherical coordinates
-+++++++++++++++++++++
-
-In the case that the Grid is on a sphere (coord_sys=CoordSys.SPH_DEG or
-CoordSys.SPH_RAD) then the coordinates given in the Grid are interpreted
-as latitude and longitude values. The coordinates can either be in degrees or
-radians as indicated by the 'coord_sys' flag set during Grid creation. As is
-true with many global models, this application currently assumes the latitude
-and longitude refer to positions on a perfect sphere, as opposed to a more
-complex and accurate representation of the earth's true shape such as would be
-used in a GIS system.
-
-The Grid coordinate system is represented using
-:class:`CoordSys<ESMF.api.constants.CoordSys>`.
-
-+++++++++++
-Periodicity
-+++++++++++
-
-A periodic connection can be specified when building Grids in spherical
-coordinates. The *num_peri_dims* parameter indicates the total number of
-periodic dimensions and *periodic_dim* is used to identify which dimensions
-should be considered periodic. There must always be at least one non-periodic
-dimension. For example, to create a global latitude-longitude Grid there would
-be one periodic dimension, dimension 0 (longitude).
-
-+++++++++++++++
-Pole Generation
-+++++++++++++++
-
-The Grid can generate an artifical pole by using the *pole_dim* parameter. This
-can be helpful for regridding operations to smooth out the interpolated values
-in the polar region. For the example of creating a global latitude-longitude
-Grid, the pole dimension would be 1 (latitude).
-
 ++++++++++
 Staggering
 ++++++++++
@@ -153,6 +108,63 @@ to a Grid.
 Grid staggers are indicated using
 :class:`StaggerLoc<ESMF.api.constants.StaggerLoc>`.
 
+.. code::
+
+    grid = ESMF.Grid(np.array([3,4]), staggerloc=ESMF.StaggerLoc.CENTER)
+
++++++++++++++++++++++
+Spherical coordinates
++++++++++++++++++++++
+
+In the case that the Grid is on a sphere (coord_sys = :class:`ESMF.api.constants.CoordSys.SPH_DEG` or
+:class:`ESMF.api.constants.CoordSys.SPH_RAD`) then the coordinates given in the Grid are interpreted
+as latitude and longitude values. The coordinates can either be in degrees or
+radians as indicated by the *coord_sys* flag set during Grid creation. As is
+true with many global models, this application currently assumes the latitude
+and longitude refer to positions on a perfect sphere, as opposed to a more
+complex and accurate representation of the earth's true shape such as would be
+used in a GIS system.
+
+The Grid coordinate system is represented using
+:class:`CoordSys<ESMF.api.constants.CoordSys>`.
+
+.. code::
+
+    grid = ESMF.Grid(np.array([3,4]), staggerloc=ESMF.StaggerLoc.CENTER,
+                        coord_sys=ESMF.CoordSys.SPH_DEG)
+
++++++++++++
+Periodicity
++++++++++++
+
+A periodic connection can be specified when building Grids in spherical
+coordinates. The *num_peri_dims* parameter indicates the total number of
+periodic dimensions and *periodic_dim* is used to identify which dimensions
+should be considered periodic. There must always be at least one non-periodic
+dimension. For example, to create a global latitude-longitude Grid there would
+be one periodic dimension, dimension 0 (longitude).
+
+.. code::
+
+    grid = ESMF.Grid(np.array([3,4]), staggerloc=ESMF.StaggerLoc.CENTER,
+                        coord_sys=ESMF.CoordSys.SPH_DEG,
+                        num_peri_dims = 1, periodic_dim = 0)
+
++++++++++++++++
+Pole Generation
++++++++++++++++
+
+The Grid can generate an artifical pole by using the *pole_dim* parameter. This
+can be helpful for regridding operations to smooth out the interpolated values
+in the polar region. For the example of creating a global latitude-longitude
+Grid, the pole dimension would be 1 (latitude).
+
+.. code::
+
+    grid = ESMF.Grid(np.array([3,4]), staggerloc=ESMF.StaggerLoc.CENTER,
+                        coord_sys=ESMF.CoordSys.SPH_DEG,
+                        num_peri_dims = 1, periodic_dim = 0, pole_dim = 1)
+
 +++++++
 Masking
 +++++++
@@ -166,6 +178,22 @@ corresponding integer values. The activation of Field masks with respect to the
 underlying Grid mask is handled by :class:`~ESMF.api.regrid.Regrid`, and a more
 general discussion of masking is covered in the :ref:`masking <masking>`
 section.
+
+.. code::
+
+    In [1]: import numpy as np
+       ...: import ESMF
+       ...: grid = ESMF.Grid(np.array([3,4]), staggerloc=ESMF.StaggerLoc.CENTER,
+       ...:                                coord_sys=ESMF.CoordSys.SPH_DEG,
+       ...:                                num_peri_dims = 1, periodic_dim = 0, pole_dim = 1)
+       ...:
+       ...: mask = grid.add_item(ESMF.GridItem.MASK, staggerloc=ESMF.StaggerLoc.CENTER)
+       ...: mask
+       ...:
+    Out[1]:
+    array([[1, 1, 1, 1],
+           [1, 1, 1, 1],
+           [1, 1, 1, 1]], dtype=int32)
 
 ++++++++++
 Cell Areas
@@ -185,6 +213,39 @@ Then a :class:`~ESMF.api.field.Field` must be created, and the
 Grid cell areas may also be set to user-defined values after the AREA item has
 been allocated and retrieved using :class:`~ESMF.api.grid.Grid.get_item()`.
 
+.. code::
+
+    In [1]: grid = ESMF.Grid(np.array([3,4]), staggerloc=[ESMF.StaggerLoc.CENTER, ESMF.StaggerLoc.CORNER],
+       ...:                  coord_sys=ESMF.CoordSys.SPH_DEG,
+       ...:                  num_peri_dims = 1, periodic_dim = 0, pole_dim = 1)
+       ...:
+       ...:
+       ...: gridLon = grid.get_coords(0)
+       ...: gridLat = grid.get_coords(1)
+       ...: gridLonCorner = grid.get_coords(0, staggerloc = ESMF.StaggerLoc.CORNER)
+       ...: gridLatCorner = grid.get_coords(1, staggerloc = ESMF.StaggerLoc.CORNER)
+       ...:
+       ...: lon = np.linspace(-120,120,3)
+       ...: lat = np.linspace(-67.5, 67.5,4)
+       ...: lon_corner = np.arange(-180,180,120)
+       ...: lat_corner = np.linspace(-90, 90, 5)
+       ...:
+       ...: lonm, latm = np.meshgrid(lon, lat, indexing='ij')
+       ...: lonm_corner, latm_corner = np.meshgrid(lon_corner, lat_corner, indexing = 'ij')
+       ...:
+       ...: gridLon[:] = lonm
+       ...: gridLat[:] = latm
+       ...: gridLonCorner[:] = lonm_corner
+       ...: gridLatCorner[:] = latm_corner
+       ...:
+       ...: field = ESMF.Field(grid)
+       ...: field.get_area()
+       ...: field.data
+       ...:
+    Out[1]:
+    array([[ 0.32224085,  1.02707409,  1.02707409,  0.32224085],
+           [ 0.32224085,  1.02707409,  1.02707409,  0.32224085],
+           [ 0.32224085,  1.02707409,  1.02707409,  0.32224085]])
 
 ~~~~
 Mesh
@@ -648,6 +709,65 @@ of the ESMF objects.  One example of where this could come up is when passing
 a Field slice into regridding.  The entire original Field will still be run
 through the ESMF regridding engine, and only the appropriate portion of
 the Field slice will be updated with the regridded values.
+
+~~~~~~~~~~~~~~~~~~
+Dimension Ordering
+~~~~~~~~~~~~~~~~~~
+
+.. Warning:: The underlying ESMF library is built with a mix of Fortran and C++
+    and follows Fortran conventions with respect to array indexing and
+    dimension ordering. Some effort has been made to make ESMPy feel more
+    natural to the Python user where possible. This means that ESMPy uses
+    0-based indexing, which is translated to the 1-based indexing used by
+    the ESMPy backend. However, the dimension ordering still follows
+    Fortran conventions. Namely, longitude comes before latitude, which
+    also comes before temporal dimensions when in use.
+
+    .. code::
+
+        In [1]: import numpy as np
+           ...: import ESMF
+           ...:
+           ...: grid = ESMF.Grid(np.array([3,4]), staggerloc=ESMF.StaggerLoc.CENTER)
+           ...:
+           ...: gridLon = grid.get_coords(0)
+           ...: gridLat = grid.get_coords(1)
+           ...:
+           ...: lon = np.linspace(-120,120,3)
+           ...: lat = np.linspace(-67.5, 67.5,4)
+           ...:
+           ...: lonm, latm = np.meshgrid(lon, lat, indexing='ij')
+           ...:
+           ...: gridLon[:] = lonm
+           ...: gridLat[:] = latm
+           ...:
+
+        In [2]: grid.coords[ESMF.StaggerLoc.CENTER][0].shape
+        Out[2]: (3, 4)
+
+        In [3]: lon.shape
+        Out[3]: (3,)
+
+        In [4]: lat.shape
+        Out[4]: (4,)
+
+        In [5]: grid.coords[ESMF.StaggerLoc.CENTER][0]
+        Out[5]:
+        array([[-120., -120., -120., -120.],
+               [   0.,    0.,    0.,    0.],
+               [ 120.,  120.,  120.,  120.]])
+
+        In [6]: grid.coords[ESMF.StaggerLoc.CENTER][1]
+        Out[6]:
+        array([[-67.5, -22.5,  22.5,  67.5],
+               [-67.5, -22.5,  22.5,  67.5],
+               [-67.5, -22.5,  22.5,  67.5]])
+
+        In [7]: field = ESMF.Field(grid, ndbounds=[10]) # create a Field with a time dimension
+
+        In [8]: field.data.shape
+        Out[8]: (3, 4, 10)
+
 
 ------------------
 Parallel execution

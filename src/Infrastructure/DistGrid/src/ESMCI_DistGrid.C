@@ -65,10 +65,10 @@ template int DistGrid::setArbSeqIndex<ESMC_I8>(InterArray<ESMC_I8> *arbSeqIndex,
   int localDe, int collocation);
 
 template int DistGrid::getSequenceIndexLocalDe<ESMC_I4>(int localDe, 
-    int const *index, vector<ESMC_I4> &seqIndex, bool recursive=true) const;
+    int const *index, vector<ESMC_I4> &seqIndex, bool recursive) const;
 
 template int DistGrid::getSequenceIndexLocalDe<ESMC_I8>(int localDe, 
-    int const *index, vector<ESMC_I8> &seqIndex, bool recursive=true) const;
+    int const *index, vector<ESMC_I8> &seqIndex, bool recursive) const;
 
 template int DistGrid::getSequenceIndexTileRelative<ESMC_I4>(int tile,
     int const *index, ESMC_I4 *seqIndex)const;
