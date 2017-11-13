@@ -467,7 +467,7 @@ contains
 !            line=__LINE__, &
 !            file=FILENAME)) &
 !            return  ! bail out
-!        attributeName = "CplListDomain"
+!        attributeName = "CplSetList"
 !        call NUOPC_CheckComponentAttribute(prefix, comp=comp, &
 !            attributeName=attributeName, convention=convention,
 !            purpose=purpose, &

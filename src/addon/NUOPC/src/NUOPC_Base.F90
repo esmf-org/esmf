@@ -44,6 +44,7 @@ module NUOPC_Base
   public NUOPC_FieldDictionarySetAutoAdd  ! defined in NUOPC_FieldDictionaryApi
 
   ! public Utility API
+  public NUOPC_AddNestedState             ! method
   public NUOPC_AddNamespace               ! method
   public NUOPC_AdjustClock                ! method
   public NUOPC_Advertise                  ! method
@@ -125,34 +126,37 @@ module NUOPC_Base
   
   !-----------------------------------------------------------------------------
 !BOP
-! !IROUTINE: NUOPC_AddNamespace - Add a namespace to a State
+! !IROUTINE: NUOPC_AddNestedState - Add a nested state to a state with NUOPC attributes
 ! !INTERFACE:
-  subroutine NUOPC_AddNamespace(state, namespace, domain, nestedStateName, &
+  subroutine NUOPC_AddNestedState(state, Namespace, CplSet, nestedStateName, &
     nestedState, rc)
 ! !ARGUMENTS:
     type(ESMF_State), intent(inout)         :: state
-    character(len=*), intent(in),  optional :: namespace
-    character(len=*), intent(in),  optional :: domain
+    character(len=*), intent(in),  optional :: Namespace
+    character(len=*), intent(in),  optional :: CplSet
     character(len=*), intent(in),  optional :: nestedStateName
     type(ESMF_State), intent(out), optional :: nestedState
     integer,          intent(out), optional :: rc
 ! !DESCRIPTION:
-!   Add a namespace to {\tt state}. Namespaces are implemented via nested 
-!   states. This creates a nested state inside of {\tt state}. The nested state
-!   is returned as {\tt nestedState}. If provided, {\tt nestedStateName} will 
-!   be used to name the newly created nested state. The default name of the 
-!   nested state is equal to {\tt namespace}.
+!   Create a nested state inside of {\tt state}. The arguments {\tt Namespace}
+!   and {tt\ CplSet} are used to set NUOPC attributes on the newly created
+!   state. The nested state is returned as {\tt nestedState}. If provided,
+!   {\tt nestedStateName} will be used to name the newly created nested state.
+!   The default name of the nested state is equal to
+!   {\tt Namespace}_{\tt CplSet}, {\tt Namespace}, or {\tt CplSet} if the
+!   arguments are provided.
 !
 !   The arguments are:
 !   \begin{description}
 !   \item[state]
 !     The {\tt ESMF\_State} object to which the namespace is added.
-!   \item[namespace]
-!     Optional The namespace string. Defaults to "__UNSPECIFIED__".
-!   \item[domain]
-!     Optional The domain string. Defaults to "__UNSPECIFIED__".
+!   \item[Namespace]
+!     Optional The Namespace string. Defaults to "__UNSPECIFIED__".
+!   \item[CplSet]
+!     Optional The CplSet string. Defaults to "__UNSPECIFIED__".
 !   \item[{[nestedStateName]}]
-!     Name of the nested state. Defaults to {\tt namespace} or {\tt domain}.
+!     Name of the nested state. Defaults to {\tt Namespace}_{\tt CplSet},
+!     {\tt Namespace}, or {\tt CplSet} if arguments are provided.
 !   \item[{[nestedState]}]
 !     Optional return of the newly created nested state.
 !   \item[{[rc]}]
@@ -170,12 +174,19 @@ module NUOPC_Base
       nestedS = ESMF_StateCreate(name=trim(nestedStateName), rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=FILENAME)) return  ! bail out
-    elseif (present(namespace)) then
-      nestedS = ESMF_StateCreate(name=trim(namespace), rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=FILENAME)) return  ! bail out
-    elseif (present(domain)) then
-      nestedS = ESMF_StateCreate(name=trim(domain), rc=rc)
+    elseif (present(Namespace)) then
+      if (present(CplSet)) then
+        nestedS = ESMF_StateCreate(name=trim(Namespace)//"_"//trim(CplSet), &
+          rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=FILENAME)) return  ! bail out
+      else
+        nestedS = ESMF_StateCreate(name=trim(Namespace), rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=FILENAME)) return  ! bail out
+      endif
+    elseif (present(CplSet)) then
+      nestedS = ESMF_StateCreate(name=trim(CplSet), rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=FILENAME)) return  ! bail out
     else
@@ -188,9 +199,9 @@ module NUOPC_Base
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME)) return  ! bail out
 
-    if (present(namespace)) then
+    if (present(Namespace)) then
       call NUOPC_SetAttribute(nestedS, name="Namespace", &
-        value=trim(namespace), rc=rc)
+        value=trim(Namespace), rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=FILENAME)) return  ! bail out
     else
@@ -200,13 +211,13 @@ module NUOPC_Base
         line=__LINE__, file=FILENAME)) return  ! bail out
     endif
 
-    if (present(domain)) then
-      call NUOPC_SetAttribute(nestedS, name="Domain", &
-        value=trim(domain), rc=rc)
+    if (present(CplSet)) then
+      call NUOPC_SetAttribute(nestedS, name="CplSet", &
+        value=trim(CplSet), rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=FILENAME)) return  ! bail out
     else
-      call NUOPC_SetAttribute(nestedS, name="Domain", &
+      call NUOPC_SetAttribute(nestedS, name="CplSet", &
         value="__UNSPECIFIED__", rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=FILENAME)) return  ! bail out
@@ -221,6 +232,76 @@ module NUOPC_Base
     
   end subroutine
   !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+!BOP
+! !IROUTINE: NUOPC_AddNamespace - Add a nested state with Namespace to a State
+! !INTERFACE:
+  subroutine NUOPC_AddNamespace(state, Namespace, nestedStateName, &
+    nestedState, rc)
+! !ARGUMENTS:
+    type(ESMF_State), intent(inout)         :: state
+    character(len=*), intent(in)            :: Namespace
+    character(len=*), intent(in),  optional :: nestedStateName
+    type(ESMF_State), intent(out), optional :: nestedState
+    integer,          intent(out), optional :: rc
+! !DESCRIPTION:
+!   Add a Namespace to {\tt state}. Namespaces are implemented via nested 
+!   states. This creates a nested state inside of {\tt state}. The nested state
+!   is returned as {\tt nestedState}. If provided, {\tt nestedStateName} will 
+!   be used to name the newly created nested state. The default name of the 
+!   nested state is equal to {\tt Namespace}.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[state]
+!     The {\tt ESMF\_State} object to which the Namespace is added.
+!   \item[Namespace]
+!     The Namespace string.
+!   \item[{[nestedStateName]}]
+!     Name of the nested state. Defaults to {\tt Namespace}.
+!   \item[{[nestedState]}]
+!     Optional return of the newly created nested state.
+!   \item[{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+  !-----------------------------------------------------------------------------
+    ! local variables
+    type(ESMF_State)        :: nestedS
+    character(len=80)       :: nestedSName
+    
+    if (present(rc)) rc = ESMF_SUCCESS
+    
+    if (present(nestedStateName)) then
+      nestedSName = trim(nestedStateName)
+    else
+      nestedSName = trim(Namespace)
+    endif
+    
+    nestedS = ESMF_StateCreate(name=nestedSName, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME)) return  ! bail out
+      
+    call NUOPC_InitAttributes(nestedS, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME)) return  ! bail out
+
+    call NUOPC_SetAttribute(nestedS, name="Namespace", &
+      value=trim(Namespace), rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME)) return  ! bail out
+    
+    call ESMF_StateAdd(state, (/nestedS/), rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME)) return  ! bail out
+
+    if (present(nestedState)) &
+      nestedState = nestedS
+    
+  end subroutine
+  !---------------------------------------------------------------------
   
   !-----------------------------------------------------------------------------
 !BOP
@@ -904,13 +985,13 @@ module NUOPC_Base
 ! !IROUTINE: NUOPC_GetStateMemberLists - Build lists of information of State members
 ! !INTERFACE:
   recursive subroutine NUOPC_GetStateMemberLists(state, StandardNameList, &
-    ConnectedList, NamespaceList, DomainList, itemNameList, fieldList, rc)
+    ConnectedList, NamespaceList, CplSetList, itemNameList, fieldList, rc)
 ! !ARGUMENTS:
     type(ESMF_State),       intent(in)            :: state
     character(ESMF_MAXSTR), pointer, optional     :: StandardNameList(:)
     character(ESMF_MAXSTR), pointer, optional     :: ConnectedList(:)
     character(ESMF_MAXSTR), pointer, optional     :: NamespaceList(:)
-    character(ESMF_MAXSTR), pointer, optional     :: DomainList(:)
+    character(ESMF_MAXSTR), pointer, optional     :: CplSetList(:)
     character(ESMF_MAXSTR), pointer, optional     :: itemNameList(:)
     type(ESMF_Field),       pointer, optional     :: fieldList(:)
     integer,                intent(out), optional :: rc
@@ -932,9 +1013,9 @@ module NUOPC_Base
 !   \item[{[ConnectedList]}]
 !     If present, return a list of the "Connected" attribute of each member.
 !   \item[{[NamespaceList]}]
-!     If present, return a list of the namespace of each member.
-!   \item[{[DomainList]}]
-!     If present, return a list of the domain identifier of each member.
+!     If present, return a list of the "Namespace" attribute of each member.
+!   \item[{[CplSetList]}]
+!     If present, return a list of the "CplSet" attribute of each member.
 !   \item[{[itemNameList]}]
 !     If present, return a list of each member name.
 !   \item[{[fieldList]}]
@@ -955,10 +1036,10 @@ module NUOPC_Base
     character(ESMF_MAXSTR), pointer         :: l_itemNameList(:)
     character(ESMF_MAXSTR), pointer         :: l_ConnectedList(:)
     character(ESMF_MAXSTR), pointer         :: l_NamespaceList(:)
-    character(ESMF_MAXSTR), pointer         :: l_DomainList(:)
+    character(ESMF_MAXSTR), pointer         :: l_CplSetList(:)
     type(ESMF_Field),       pointer         :: l_fieldList(:)
     character(ESMF_MAXSTR)                  :: namespace
-    character(ESMF_MAXSTR)                  :: domain
+    character(ESMF_MAXSTR)                  :: cplSet
 
     if (present(rc)) rc = ESMF_SUCCESS
     
@@ -1071,17 +1152,17 @@ module NUOPC_Base
         endif
       endif
 
-      if (present(DomainList)) then
-        if (associated(DomainList)) then
+      if (present(CplSetList)) then
+        if (associated(CplSetList)) then
           call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
-            msg="DomainList must enter unassociated", &
+            msg="CplSetList must enter unassociated", &
             line=__LINE__, &
             file=FILENAME, &
             rcToReturn=rc)
           return  ! bail out
         else
-          allocate(DomainList(fieldCount), stat=stat)
-          if (ESMF_LogFoundAllocError(stat, msg="allocating DomainList", &
+          allocate(CplSetList(fieldCount), stat=stat)
+          if (ESMF_LogFoundAllocError(stat, msg="allocating CplSetList", &
             line=__LINE__, &
             file=FILENAME)) &
             return  ! bail out
@@ -1114,7 +1195,7 @@ module NUOPC_Base
           line=__LINE__, &
           file=FILENAME)) &
           return  ! bail out
-        call NUOPC_GetAttribute(state, name="Domain", value=domain, &
+        call NUOPC_GetAttribute(state, name="CplSet", value=cplSet, &
           rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, &
@@ -1149,8 +1230,8 @@ module NUOPC_Base
           if (present(NamespaceList)) then
             NamespaceList(fieldCount)=trim(namespace)
           endif
-          if (present(DomainList)) then
-            DomainList(fieldCount)=trim(domain)
+          if (present(CplSetList)) then
+            CplSetList(fieldCount)=trim(cplSet)
           endif
           if (present(fieldList)) then
             fieldList(fieldCount)=field
@@ -1162,7 +1243,7 @@ module NUOPC_Base
           nullify(l_itemNameList)
           nullify(l_ConnectedList)
           nullify(l_NamespaceList)
-          nullify(l_DomainList)
+          nullify(l_CplSetList)
           nullify(l_fieldList)
           call ESMF_StateGet(state, itemName=ll_itemNameList(item), &
             nestedState=nestedState, rc=rc)
@@ -1175,7 +1256,7 @@ module NUOPC_Base
             itemNameList=l_itemNameList, &
             ConnectedList=l_ConnectedList, &
             NamespaceList=l_NamespaceList, &
-            DomainList=l_DomainList, &
+            CplSetList=l_CplSetList, &
             fieldList=l_fieldList, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, &
@@ -1200,8 +1281,8 @@ module NUOPC_Base
                     trim(l_NamespaceList(i))
                 endif
               endif
-              if (present(DomainList)) then
-                DomainList(fieldCount) = l_DomainList(i)
+              if (present(CplSetList)) then
+                CplSetList(fieldCount) = l_CplSetList(i)
               endif
               if (present(fieldList)) then
                 fieldList(fieldCount) = l_fieldList(i)
@@ -1212,7 +1293,7 @@ module NUOPC_Base
             deallocate(l_itemNameList)
             deallocate(l_ConnectedList)
             deallocate(l_NamespaceList)
-            deallocate(l_DomainList)
+            deallocate(l_CplSetList)
             deallocate(l_fieldList)
           endif
         endif
@@ -1562,7 +1643,7 @@ module NUOPC_Base
     attrList(1) = "Namespace"           ! namespace of this State
     attrList(2) = "FieldTransferPolicy" ! indicates to connectors to transfer/mirror fields:
                                         !    one of transferNone, transferAll
-    attrList(3) = "Domain"              ! domain identifier
+    attrList(3) = "CplSet"              ! coupling set identifier of this state
     
     ! add Attribute packages
     call ESMF_AttributeAdd(state, convention="NUOPC", purpose="Instance", &

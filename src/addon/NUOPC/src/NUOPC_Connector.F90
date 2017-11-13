@@ -40,7 +40,7 @@ module NUOPC_Connector
   character(*), parameter :: &
     label_Finalize = "Connector_Finalize"
 
-  type type_DomainConn
+  type type_CplSet
     integer                             :: count
     type(ESMF_FieldBundle)              :: srcFields
     type(ESMF_FieldBundle)              :: dstFields
@@ -63,9 +63,9 @@ module NUOPC_Connector
     type(ESMF_RouteHandle)              :: rh
     type(ESMF_State)                    :: state
     type(ESMF_TermOrder_Flag), pointer  :: termOrders(:)
-    integer                             :: domCount
-    character(ESMF_MAXSTR), pointer     :: domList(:)
-    type(type_DomainConn), allocatable  :: domConn(:)
+    integer                             :: cplSetCount
+    character(ESMF_MAXSTR), pointer     :: cplSetList(:)
+    type(type_CplSet), allocatable      :: cplSet(:)
   end type
 
   type type_InternalState
@@ -416,29 +416,29 @@ module NUOPC_Connector
       character(ESMF_MAXSTR), pointer       :: dstNamespaceList(:)
       type(ESMF_Field),       pointer       :: srcFieldList(:)
       type(ESMF_Field),       pointer       :: dstFieldList(:)
-      character(ESMF_MAXSTR), pointer       :: srcDomainList(:)
-      character(ESMF_MAXSTR), pointer       :: dstDomainList(:)
+      character(ESMF_MAXSTR), pointer       :: srcCplSetList(:)
+      character(ESMF_MAXSTR), pointer       :: dstCplSetList(:)
       
       rc = ESMF_SUCCESS
 
       nullify(srcStandardNameList)
       nullify(srcNamespaceList)
       nullify(srcFieldList)
-      nullify(srcDomainList)
+      nullify(srcCplSetList)
       nullify(dstStandardNameList)
       nullify(dstNamespaceList)
       nullify(dstFieldList)
-      nullify(dstDomainList)
+      nullify(dstCplSetList)
     
       call NUOPC_GetStateMemberLists(srcState, srcStandardNameList, &
         fieldList=srcFieldList, namespaceList=srcNamespaceList, &
-        domainList=srcDomainList, rc=rc)
+        cplSetList=srcCplSetList, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
         
       call NUOPC_GetStateMemberLists(dstState, dstStandardNameList, &
         fieldList=dstFieldList, namespaceList=dstNamespaceList, &
-        domainList=dstDomainList, rc=rc)
+        cplSetList=dstCplSetList, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
       ! WARNING: does not currently deal with nested states or field bundles
@@ -486,11 +486,11 @@ module NUOPC_Connector
       if (associated(srcStandardNameList)) deallocate(srcStandardNameList)
       if (associated(srcNamespaceList)) deallocate(srcNamespaceList)
       if (associated(srcFieldList)) deallocate(srcFieldList)
-      if (associated(srcDomainList)) deallocate(srcDomainList)
+      if (associated(srcCplSetList)) deallocate(srcCplSetList)
       if (associated(dstStandardNameList)) deallocate(dstStandardNameList)
       if (associated(dstNamespaceList)) deallocate(dstNamespaceList)
       if (associated(dstFieldList)) deallocate(dstFieldList)
-      if (associated(dstDomainList)) deallocate(dstDomainList)
+      if (associated(dstCplSetList)) deallocate(dstCplSetList)
     end subroutine
 
   end subroutine
@@ -516,8 +516,8 @@ module NUOPC_Connector
     character(ESMF_MAXSTR)                :: connectionString
     character(ESMF_MAXSTR), pointer       :: importNamespaceList(:)
     character(ESMF_MAXSTR), pointer       :: exportNamespaceList(:)
-    character(ESMF_MAXSTR), pointer       :: importDomainList(:)
-    character(ESMF_MAXSTR), pointer       :: exportDomainList(:)
+    character(ESMF_MAXSTR), pointer       :: importCplSetList(:)
+    character(ESMF_MAXSTR), pointer       :: exportCplSetList(:)
     integer                               :: profiling
     logical                               :: match
     integer                               :: verbosity
@@ -592,34 +592,34 @@ call ESMF_VMLogCurrentGarbageInfo(trim(name)//": InitializeIPDv05p2a after recon
     nullify(importStandardNameList)
     nullify(importFieldList)
     nullify(importNamespaceList)
-    nullify(importDomainList)
+    nullify(importCplSetList)
     nullify(exportStandardNameList)
     nullify(exportFieldList)
     nullify(exportNamespaceList)
-    nullify(exportDomainList)
+    nullify(exportCplSetList)
     
     call NUOPC_GetStateMemberLists(importState, importStandardNameList, &
       fieldList=importFieldList, namespaceList=importNamespaceList, &
-      domainList=importDomainList, rc=rc)
+      cplSetList=importCplSetList, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
 #if 0
 call printStringList("importStandardNameList", importStandardNameList)
 call printStringList("importNamespaceList", importNamespaceList)
-call printStringList("importDomainList", importDomainList)
+call printStringList("importCplSetList", importCplSetList)
 #endif
       
     call NUOPC_GetStateMemberLists(exportState, exportStandardNameList, &
       fieldList=exportFieldList, namespaceList=exportNamespaceList, &
-      domainList=exportDomainList, rc=rc)
+      cplSetList=exportCplSetList, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
 #if 0
 call printStringList("exportStandardNameList", exportStandardNameList)
 call printStringList("exportNamespaceList", exportNamespaceList)
-call printStringList("exportDomainList", exportDomainList)
+call printStringList("exportCplSetList", exportCplSetList)
 #endif
       
     ! associated pointers means that there are name lists
@@ -638,7 +638,7 @@ call printStringList("exportDomainList", exportDomainList)
             ! -> determine bondLevel according to namespace matching
             bondLevel = &
               getBondLevel(importNamespaceList(i), exportNamespaceList(j), &
-                importDomainList(i), exportDomainList(j))
+                importCplSetList(i), exportCplSetList(j))
             if (bondLevel == -1) cycle  ! break out and look for next match
 
 #if 0
@@ -691,11 +691,11 @@ print *, "bondLevelMax:", bondLevelMax, "bondLevel:", bondLevel
     if (associated(importStandardNameList)) deallocate(importStandardNameList)
     if (associated(importFieldList)) deallocate(importFieldList)
     if (associated(importNamespaceList)) deallocate(importNamespaceList)
-    if (associated(importDomainList)) deallocate(importDomainList)
+    if (associated(importCplSetList)) deallocate(importCplSetList)
     if (associated(exportStandardNameList)) deallocate(exportStandardNameList)
     if (associated(exportFieldList)) deallocate(exportFieldList)
     if (associated(exportNamespaceList)) deallocate(exportNamespaceList)
-    if (associated(exportDomainList)) deallocate(exportDomainList)
+    if (associated(exportCplSetList)) deallocate(exportCplSetList)
     
     !--- extro start ---
     ! extro
@@ -740,10 +740,10 @@ print *, "bondLevelMax:", bondLevelMax, "bondLevel:", bondLevel
     character(ESMF_MAXSTR)                :: connectionString, valueString
     character(ESMF_MAXSTR), pointer       :: importNamespaceList(:)
     character(ESMF_MAXSTR), pointer       :: exportNamespaceList(:)
-    character(ESMF_MAXSTR), pointer       :: importDomainList(:)
-    character(ESMF_MAXSTR), pointer       :: exportDomainList(:)
+    character(ESMF_MAXSTR), pointer       :: importCplSetList(:)
+    character(ESMF_MAXSTR), pointer       :: exportCplSetList(:)
     character(ESMF_MAXSTR), pointer       :: cplList(:)
-    character(ESMF_MAXSTR), pointer       :: cplListDomain(:)
+    character(ESMF_MAXSTR), pointer       :: cplSetList(:)
     character(len=160)                    :: msgString
     integer                               :: verbosity
     integer                               :: profiling
@@ -830,34 +830,34 @@ print *, "bondLevelMax:", bondLevelMax, "bondLevel:", bondLevel
     nullify(importStandardNameList)
     nullify(importFieldList)
     nullify(importNamespaceList)
-    nullify(importDomainList)
+    nullify(importCplSetList)
     nullify(exportStandardNameList)
     nullify(exportFieldList)
     nullify(exportNamespaceList)
-    nullify(exportDomainList)
+    nullify(exportCplSetList)
     
     call NUOPC_GetStateMemberLists(importState, importStandardNameList, &
       fieldList=importFieldList, namespaceList=importNamespaceList, &
-      domainList=importDomainList, rc=rc)
+      cplSetList=importCplSetList, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
       
 #if 0
 call printStringList("importStandardNameList", importStandardNameList)
 call printStringList("importNamespaceList", importNamespaceList)
-call printStringList("importDomainList", importDomainList)
+call printStringList("importCplSetList", importCplSetList)
 #endif
       
     call NUOPC_GetStateMemberLists(exportState, exportStandardNameList, &
       fieldList=exportFieldList, namespaceList=exportNamespaceList, &
-      domainList=exportDomainList, rc=rc)
+      cplSetList=exportCplSetList, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
 #if 0
 call printStringList("exportStandardNameList", exportStandardNameList)
 call printStringList("exportNamespaceList", exportNamespaceList)
-call printStringList("exportDomainList", exportDomainList)
+call printStringList("exportCplSetList", exportCplSetList)
 #endif
       
     ! associated pointers means that there are name lists
@@ -868,7 +868,7 @@ call printStringList("exportDomainList", exportDomainList)
       ! the same producer can be matched to multiple consumers
       maxCount = max(size(importStandardNameList), size(exportStandardNameList))
       allocate(cplList(maxCount)) ! temporary list
-      allocate(cplListDomain(maxCount)) ! temporary list
+      allocate(cplSetList(maxCount)) ! temporary list
 
       count = 0
       ! simple linear search of items that match between both lists
@@ -883,7 +883,7 @@ call printStringList("exportDomainList", exportDomainList)
             ! -> determine bondLevel according to namespace matching
             bondLevel = &
               getBondLevel(importNamespaceList(i), exportNamespaceList(j), &
-                importDomainList(i), exportDomainList(j))
+                importCplSetList(i), exportCplSetList(j))
               
 #if 0
 print *, "current bondLevel=", bondLevel
@@ -903,7 +903,7 @@ print *, "current bondLevel=", bondLevel
                 line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
                 return  ! bail out
               write (msgString,'(A, ": ", A30, I3, "): ", A60)') trim(name), &
-                "importDomainList(i=", i, importDomainList(i)
+                "importCplSetList(i=", i, importCplSetList(i)
               call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
               if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
                 line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
@@ -921,7 +921,7 @@ print *, "current bondLevel=", bondLevel
                 line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
                 return  ! bail out
               write (msgString,'(A, ": ", A30, I3, "): ", A60)') trim(name), &
-                "exportDomainList(j=", j, exportDomainList(j)
+                "exportCplSetList(j=", j, exportCplSetList(j)
               call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
               if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
                 line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
@@ -986,7 +986,7 @@ print *, "current bondLevel=", bondLevel
                   return  ! bail out
                 endif
                 cplList(count) = importStandardNameList(i)
-                cplListDomain(count) = importDomainList(i)
+                cplSetList(count) = importCplSetList(i)
                 if (btest(verbosity,10)) then
                   write (msgString,'(A, ": added cplList(", I3, ")=", A60)') &
                     trim(name), count, cplList(count)
@@ -995,8 +995,8 @@ print *, "current bondLevel=", bondLevel
                     msg=ESMF_LOGERR_PASSTHRU, &
                     line=__LINE__, file=trim(name)//":"//FILENAME, &
                     rcToReturn=rc)) return  ! bail out
-                  write (msgString,'(A, ": added listDom(", I3, ")=", A60)') &
-                    trim(name), count, cplListDomain(count)
+                  write (msgString,'(A, ": added cplSet(", I3, ")=", A60)') &
+                    trim(name), count, cplSetList(count)
                   call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
                   if (ESMF_LogFoundError(rcToCheck=rc, &
                     msg=ESMF_LOGERR_PASSTHRU, &
@@ -1024,12 +1024,12 @@ print *, "current bondLevel=", bondLevel
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
           call NUOPC_CompAttributeSet(cplcomp, &
-            name="CplListDomain", valueList=cplListDomain(1:count), rc=rc)
+            name="CplSetList", valueList=cplSetList(1:count), rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
         endif
         deallocate(cplList)
-        deallocate(cplListDomain)
+        deallocate(cplSetList)
       endif
 
     endif
@@ -1037,11 +1037,11 @@ print *, "current bondLevel=", bondLevel
     if (associated(importStandardNameList)) deallocate(importStandardNameList)
     if (associated(importFieldList)) deallocate(importFieldList)
     if (associated(importNamespaceList)) deallocate(importNamespaceList)
-    if (associated(importDomainList)) deallocate(importDomainList)
+    if (associated(importCplSetList)) deallocate(importCplSetList)
     if (associated(exportStandardNameList)) deallocate(exportStandardNameList)
     if (associated(exportFieldList)) deallocate(exportFieldList)
     if (associated(exportNamespaceList)) deallocate(exportNamespaceList)
-    if (associated(exportDomainList)) deallocate(exportDomainList)
+    if (associated(exportCplSetList)) deallocate(exportCplSetList)
     
     !--- extro start ---
     ! extro
@@ -1173,15 +1173,15 @@ print *, "current bondLevel=", bondLevel
     ! local variables
     character(*), parameter         :: rName="InitializeIPDv05p3"
     character(ESMF_MAXSTR), pointer :: cplList(:), chopStringList(:)
-    character(ESMF_MAXSTR), pointer :: cplListDomain(:)
+    character(ESMF_MAXSTR), pointer :: cplSetList(:)
     character(ESMF_MAXSTR)          :: cplName
     integer                         :: cplListSize, i
-    integer                         :: cplListDomainSize
+    integer                         :: cplSetListSize
     integer                         :: bondLevel, bondLevelMax
     character(ESMF_MAXSTR), pointer :: importNamespaceList(:)
     character(ESMF_MAXSTR), pointer :: exportNamespaceList(:)
-    character(ESMF_MAXSTR), pointer :: importDomainList(:)
-    character(ESMF_MAXSTR), pointer :: exportDomainList(:)
+    character(ESMF_MAXSTR), pointer :: importCplSetList(:)
+    character(ESMF_MAXSTR), pointer :: exportCplSetList(:)
     character(ESMF_MAXSTR), pointer :: importStandardNameList(:)
     character(ESMF_MAXSTR), pointer :: exportStandardNameList(:)
     type(ESMF_Field),       pointer :: importFieldList(:)
@@ -1251,15 +1251,15 @@ print *, "current bondLevel=", bondLevel
 
     ! prepare local pointer variables
     nullify(cplList)
-    nullify(cplListDomain)
+    nullify(cplSetList)
     nullify(importStandardNameList)
     nullify(importFieldList)
     nullify(importNamespaceList)
-    nullify(importDomainList)
+    nullify(importCplSetList)
     nullify(exportStandardNameList)
     nullify(exportFieldList)
     nullify(exportNamespaceList)
-    nullify(exportDomainList)
+    nullify(exportCplSetList)
     
     ! allocate memory for the internal state and set it in the Component
     allocate(is%wrap, stat=stat)
@@ -1294,15 +1294,15 @@ print *, "current bondLevel=", bondLevel
       itemCount=cplListSize, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    ! get the cplListDomain Attribute
-    call NUOPC_CompAttributeGet(cplcomp, name="CplListDomain", &
-      itemCount=cplListDomainSize, rc=rc)
+    ! get the cplSetList Attribute
+    call NUOPC_CompAttributeGet(cplcomp, name="CplSetList", &
+      itemCount=cplSetListSize, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    ! check the cplListDomain size
-    if (cplListSize /= cplListDomainSize) then
+    ! check the cplSetList size
+    if (cplListSize /= cplSetListSize) then
       call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
-        msg="Bad internal error - CplListDomain size must equal CplList!",&
+        msg="Bad internal error - CplSetList size must match CplList size!",&
         line=__LINE__, file=trim(name)//":"//FILENAME, &
         rcToReturn=rc)
       return  ! bail out
@@ -1317,45 +1317,45 @@ print *, "current bondLevel=", bondLevel
         rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-      allocate(cplListDomain(cplListDomainSize), stat=stat)
+      allocate(cplSetList(cplSetListSize), stat=stat)
       if (ESMF_LogFoundAllocError(statusToCheck=stat, &
-        msg="Allocation of internal cplListDomain() failed.", &
+        msg="Allocation of internal cplSetList() failed.", &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
-      call NUOPC_CompAttributeGet(cplcomp, name="CplListDomain", &
-        valueList=cplListDomain, rc=rc)
+      call NUOPC_CompAttributeGet(cplcomp, name="CplSetList", &
+        valueList=cplSetList, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     endif
     ! get the importState and exportState std lists
     call NUOPC_GetStateMemberLists(importState, importStandardNameList, &
       fieldList=importFieldList, namespaceList=importNamespaceList, &
-      domainList=importDomainList, rc=rc)
+      cplSetList=importCplSetList, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     call NUOPC_GetStateMemberLists(exportState, exportStandardNameList, &
       fieldList=exportFieldList, namespaceList=exportNamespaceList, &
-      domainList=exportDomainList, rc=rc)
+      cplSetList=exportCplSetList, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
-    ! calculate domain list for domain to domain connections
-    nullify(is%wrap%domList)
-    call getUniqueList(list=cplListDomain, uniqueList=is%wrap%domList, &
-      UniqueCount=is%wrap%domCount, rc=rc)
+    ! calculate coupling set for set specific connections
+    nullify(is%wrap%cplSetList)
+    call getUniqueList(list=cplSetList, uniqueList=is%wrap%cplSetList, &
+      uniqueCount=is%wrap%cplSetCount, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
-    ! allocate memory for domain to domain connections
-    allocate(is%wrap%domConn(is%wrap%domCount), stat=stat)
+    ! allocate memory for set specific connections
+    allocate(is%wrap%cplSet(is%wrap%cplSetCount), stat=stat)
     if (ESMF_LogFoundAllocError(statusToCheck=stat, &
-      msg="Allocation of internal state domConn member failed.", &
+      msg="Allocation of internal state cplSet member failed.", &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
 
     ! clean starting condition for pointer member inside internal state   
-    do i=1, is%wrap%domCount
-      nullify(is%wrap%domConn(i)%termOrders) 
+    do i=1, is%wrap%cplSetCount
+      nullify(is%wrap%cplSet(i)%termOrders) 
     enddo
     
     ! prepare chopStringList
@@ -1374,9 +1374,9 @@ print *, "current bondLevel=", bondLevel
       ! find import and export side match
       foundFlag = .false. ! reset
       do eMatch=1, size(exportStandardNameList)  ! consumer side
-        if (.NOT.(cplListDomain(i).EQ.exportDomainList(eMatch))) cycle
+        if (.NOT.(cplSetList(i).EQ.exportCplSetList(eMatch))) cycle
         do iMatch=1, size(importStandardNameList)  ! producer side
-          if (.NOT.(cplListDomain(i).EQ.importDomainList(iMatch))) cycle
+          if (.NOT.(cplSetList(i).EQ.importCplSetList(iMatch))) cycle
           matchE = NUOPC_FieldDictionaryMatchSyno( &
             exportStandardNameList(eMatch), cplName, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -1391,8 +1391,8 @@ print *, "current bondLevel=", bondLevel
             bondLevel = &
               getBondLevel(importNamespaceList(iMatch), &
                 exportNamespaceList(eMatch), &
-                importDomainList(iMatch), &
-                exportDomainList(eMatch))
+                importCplSetList(iMatch), &
+                exportCplSetList(eMatch))
               
             if (bondLevel == -1) cycle  ! break out and look for next match
             
@@ -1731,15 +1731,15 @@ print *, "current bondLevel=", bondLevel
     enddo
 
     if (associated(cplList)) deallocate(cplList)
-    if (associated(cplListDomain)) deallocate(cplListDomain)
+    if (associated(cplSetList)) deallocate(cplSetList)
     if (associated(importStandardNameList)) deallocate(importStandardNameList)
     if (associated(importFieldList)) deallocate(importFieldList)
     if (associated(importNamespaceList)) deallocate(importNamespaceList)
-    if (associated(importDomainList)) deallocate(importDomainList)
+    if (associated(importCplSetList)) deallocate(importCplSetList)
     if (associated(exportStandardNameList)) deallocate(exportStandardNameList)
     if (associated(exportFieldList)) deallocate(exportFieldList)
     if (associated(exportNamespaceList)) deallocate(exportNamespaceList)
-    if (associated(exportDomainList)) deallocate(exportDomainList)
+    if (associated(exportCplSetList)) deallocate(exportCplSetList)
     
     ! create the State member    
     is%wrap%state = ESMF_StateCreate(rc=rc)
@@ -1779,15 +1779,15 @@ print *, "current bondLevel=", bondLevel
     ! local variables
     character(*), parameter         :: rName="InitializeIPDv05p4"
     character(ESMF_MAXSTR), pointer :: cplList(:), chopStringList(:)
-    character(ESMF_MAXSTR), pointer :: cplListDomain(:)
+    character(ESMF_MAXSTR), pointer :: cplSetList(:)
     character(ESMF_MAXSTR)          :: cplName
     integer                         :: cplListSize, i
-    integer                         :: cplListDomainSize
+    integer                         :: cplSetListSize
     integer                         :: bondLevel, bondLevelMax
     character(ESMF_MAXSTR), pointer :: importNamespaceList(:)
     character(ESMF_MAXSTR), pointer :: exportNamespaceList(:)
-    character(ESMF_MAXSTR), pointer :: importDomainList(:)
-    character(ESMF_MAXSTR), pointer :: exportDomainList(:)
+    character(ESMF_MAXSTR), pointer :: importCplSetList(:)
+    character(ESMF_MAXSTR), pointer :: exportCplSetList(:)
     character(ESMF_MAXSTR), pointer :: importStandardNameList(:)
     character(ESMF_MAXSTR), pointer :: exportStandardNameList(:)
     type(ESMF_Field),       pointer :: importFieldList(:)
@@ -1876,15 +1876,15 @@ print *, "current bondLevel=", bondLevel
 
     ! prepare local pointer variables
     nullify(cplList)
-    nullify(cplListDomain)
+    nullify(cplSetList)
     nullify(importStandardNameList)
     nullify(importFieldList)
     nullify(importNamespaceList)
-    nullify(importDomainList)
+    nullify(importCplSetList)
     nullify(exportStandardNameList)
     nullify(exportFieldList)
     nullify(exportNamespaceList)
-    nullify(exportDomainList)
+    nullify(exportCplSetList)
     
     ! query Component for its internal State
     nullify(is%wrap)
@@ -1912,15 +1912,15 @@ print *, "current bondLevel=", bondLevel
       itemCount=cplListSize, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    ! get the cplListDomain Attribute
-    call NUOPC_CompAttributeGet(cplcomp, name="CplListDomain", &
-      itemCount=cplListDomainSize, rc=rc)
+    ! get the cplSetList Attribute
+    call NUOPC_CompAttributeGet(cplcomp, name="CplSetList", &
+      itemCount=cplSetListSize, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    ! check the cplListDomain size
-    if (cplListSize /= cplListDomainSize) then
+    ! check the cplSetList size
+    if (cplListSize /= cplSetListSize) then
       call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
-        msg="Bad internal error - CplListDomain size must equal CplList!",&
+        msg="Bad internal error - CplSetList size must match CplList size!",&
         line=__LINE__, file=trim(name)//":"//FILENAME, &
         rcToReturn=rc)
       return  ! bail out
@@ -1935,25 +1935,25 @@ print *, "current bondLevel=", bondLevel
         rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-      allocate(cplListDomain(cplListDomainSize), stat=stat)
+      allocate(cplSetList(cplSetListSize), stat=stat)
       if (ESMF_LogFoundAllocError(statusToCheck=stat, &
-        msg="Allocation of internal cplListDomain() failed.", &
+        msg="Allocation of internal cplSetList() failed.", &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
-      call NUOPC_CompAttributeGet(cplcomp, name="CplListDomain", &
-        valueList=cplListDomain, rc=rc)
+      call NUOPC_CompAttributeGet(cplcomp, name="CplSetList", &
+        valueList=cplSetList, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     endif
     ! get the importState and exportState std lists
     call NUOPC_GetStateMemberLists(importState, importStandardNameList, &
       fieldList=importFieldList, namespaceList=importNamespaceList, &
-      domainList=importDomainList, rc=rc)
+      cplSetList=importCplSetList, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     call NUOPC_GetStateMemberLists(exportState, exportStandardNameList, &
       fieldList=exportFieldList, namespaceList=exportNamespaceList, &
-      domainList=exportDomainList, rc=rc)
+      cplSetList=exportCplSetList, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
@@ -1973,9 +1973,9 @@ print *, "current bondLevel=", bondLevel
       ! find import and export side match
       foundFlag = .false. ! reset
       do eMatch=1, size(exportStandardNameList)  ! consumer side
-        if (.NOT.(cplListDomain(i).EQ.exportDomainList(eMatch))) cycle
+        if (.NOT.(cplSetList(i).EQ.exportCplSetList(eMatch))) cycle
         do iMatch=1, size(importStandardNameList)  ! producer side
-          if (.NOT.(cplListDomain(i).EQ.importDomainList(iMatch))) cycle
+          if (.NOT.(cplSetList(i).EQ.importCplSetList(iMatch))) cycle
           matchE = NUOPC_FieldDictionaryMatchSyno( &
             exportStandardNameList(eMatch), cplName, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -1990,8 +1990,8 @@ print *, "current bondLevel=", bondLevel
             bondLevel = &
               getBondLevel(importNamespaceList(iMatch), &
               exportNamespaceList(eMatch), &
-              importDomainList(iMatch), &
-              exportDomainList(eMatch))
+              importCplSetList(iMatch), &
+              exportCplSetList(eMatch))
               
             if (bondLevel == -1) cycle  ! break out and look for next match
             
@@ -2342,15 +2342,15 @@ call ESMF_LogWrite("eShareStatus: "//trim(eShareStatus), ESMF_LOGMSG_INFO, rc=rc
     enddo
 
     if (associated(cplList)) deallocate(cplList)
-    if (associated(cplListDomain)) deallocate(cplListDomain)
+    if (associated(cplSetList)) deallocate(cplSetList)
     if (associated(importStandardNameList)) deallocate(importStandardNameList)
     if (associated(importFieldList)) deallocate(importFieldList)
     if (associated(importNamespaceList)) deallocate(importNamespaceList)
-    if (associated(importDomainList)) deallocate(importDomainList)
+    if (associated(importCplSetList)) deallocate(importCplSetList)
     if (associated(exportStandardNameList)) deallocate(exportStandardNameList)
     if (associated(exportFieldList)) deallocate(exportFieldList)
     if (associated(exportNamespaceList)) deallocate(exportNamespaceList)
-    if (associated(exportDomainList)) deallocate(exportDomainList)
+    if (associated(exportCplSetList)) deallocate(exportCplSetList)
     
     !--- extro start ---
     ! extro
@@ -2385,15 +2385,15 @@ call ESMF_LogWrite("eShareStatus: "//trim(eShareStatus), ESMF_LOGMSG_INFO, rc=rc
     ! local variables
     character(*), parameter         :: rName="InitializeIPDv05p5"
     character(ESMF_MAXSTR), pointer :: cplList(:), chopStringList(:)
-    character(ESMF_MAXSTR), pointer :: cplListDomain(:)
+    character(ESMF_MAXSTR), pointer :: cplSetList(:)
     character(ESMF_MAXSTR)          :: cplName
     integer                         :: cplListSize, i
-    integer                         :: cplListDomainSize
+    integer                         :: cplSetListSize
     integer                         :: bondLevel, bondLevelMax
     character(ESMF_MAXSTR), pointer :: importNamespaceList(:)
     character(ESMF_MAXSTR), pointer :: exportNamespaceList(:)
-    character(ESMF_MAXSTR), pointer :: importDomainList(:)
-    character(ESMF_MAXSTR), pointer :: exportDomainList(:)
+    character(ESMF_MAXSTR), pointer :: importCplSetList(:)
+    character(ESMF_MAXSTR), pointer :: exportCplSetList(:)
     character(ESMF_MAXSTR), pointer :: importStandardNameList(:)
     character(ESMF_MAXSTR), pointer :: exportStandardNameList(:)
     type(ESMF_Field),       pointer :: importFieldList(:)
@@ -2472,15 +2472,15 @@ call ESMF_LogWrite("eShareStatus: "//trim(eShareStatus), ESMF_LOGMSG_INFO, rc=rc
 
     ! prepare local pointer variables
     nullify(cplList)
-    nullify(cplListDomain)
+    nullify(cplSetList)
     nullify(importStandardNameList)
     nullify(importFieldList)
     nullify(importNamespaceList)
-    nullify(importDomainList)
+    nullify(importCplSetList)
     nullify(exportStandardNameList)
     nullify(exportFieldList)
     nullify(exportNamespaceList)
-    nullify(exportDomainList)
+    nullify(exportCplSetList)
 
     ! query Component for its internal State
     nullify(is%wrap)
@@ -2508,15 +2508,15 @@ call ESMF_LogWrite("eShareStatus: "//trim(eShareStatus), ESMF_LOGMSG_INFO, rc=rc
       itemCount=cplListSize, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    ! get the cplListDomain Attribute
-    call NUOPC_CompAttributeGet(cplcomp, name="CplListDomain", &
-      itemCount=cplListDomainSize, rc=rc)
+    ! get the cplSetList Attribute
+    call NUOPC_CompAttributeGet(cplcomp, name="CplSetList", &
+      itemCount=cplSetListSize, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    ! check the cplListDomain size
-    if (cplListSize /= cplListDomainSize) then
+    ! check the cplSetList size
+    if (cplListSize /= cplSetListSize) then
       call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
-        msg="Bad internal error - CplListDomain size must equal CplList!",&
+        msg="Bad internal error - CplSetList size must match CplList size!",&
         line=__LINE__, file=trim(name)//":"//FILENAME, &
         rcToReturn=rc)
       return  ! bail out
@@ -2531,25 +2531,25 @@ call ESMF_LogWrite("eShareStatus: "//trim(eShareStatus), ESMF_LOGMSG_INFO, rc=rc
         rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-      allocate(cplListDomain(cplListDomainSize), stat=stat)
+      allocate(cplSetList(cplSetListSize), stat=stat)
       if (ESMF_LogFoundAllocError(statusToCheck=stat, &
-        msg="Allocation of internal cplListDomain() failed.", &
+        msg="Allocation of internal cplSetList() failed.", &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
-      call NUOPC_CompAttributeGet(cplcomp, name="CplListDomain", &
-        valueList=cplListDomain, rc=rc)
+      call NUOPC_CompAttributeGet(cplcomp, name="CplSetList", &
+        valueList=cplSetList, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     endif
     ! get the importState and exportState std lists
     call NUOPC_GetStateMemberLists(importState, importStandardNameList, &
       fieldList=importFieldList, namespaceList=importNamespaceList, &
-      domainList=importDomainList, rc=rc)
+      cplSetList=importCplSetList, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     call NUOPC_GetStateMemberLists(exportState, exportStandardNameList, &
       fieldList=exportFieldList, namespaceList=exportNamespaceList, &
-      domainList=exportDomainList, rc=rc)
+      cplSetList=exportCplSetList, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
@@ -2569,9 +2569,9 @@ call ESMF_LogWrite("eShareStatus: "//trim(eShareStatus), ESMF_LOGMSG_INFO, rc=rc
       ! find import and export side match
       foundFlag = .false. ! reset
       do eMatch=1, size(exportStandardNameList)  ! consumer side
-        if (.NOT.(cplListDomain(i).EQ.exportDomainList(eMatch))) cycle
+        if (.NOT.(cplSetList(i).EQ.exportCplSetList(eMatch))) cycle
         do iMatch=1, size(importStandardNameList)  ! producer side
-          if (.NOT.(cplListDomain(i).EQ.importDomainList(iMatch))) cycle
+          if (.NOT.(cplSetList(i).EQ.importCplSetList(iMatch))) cycle
           matchE = NUOPC_FieldDictionaryMatchSyno( &
             exportStandardNameList(eMatch), cplName, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -2586,8 +2586,8 @@ call ESMF_LogWrite("eShareStatus: "//trim(eShareStatus), ESMF_LOGMSG_INFO, rc=rc
             bondLevel = &
               getBondLevel(importNamespaceList(iMatch), &
               exportNamespaceList(eMatch), &
-              importDomainList(iMatch), &
-              exportDomainList(eMatch))
+              importCplSetList(iMatch), &
+              exportCplSetList(eMatch))
               
             if (bondLevel == -1) cycle  ! break out and look for next match
             
@@ -2777,15 +2777,15 @@ call ESMF_LogWrite("eShareStatus: "//trim(eShareStatus), ESMF_LOGMSG_INFO, rc=rc
     enddo
 
     if (associated(cplList)) deallocate(cplList)
-    if (associated(cplListDomain)) deallocate(cplListDomain)
+    if (associated(cplSetList)) deallocate(cplSetList)
     if (associated(importStandardNameList)) deallocate(importStandardNameList)
     if (associated(importFieldList)) deallocate(importFieldList)
     if (associated(importNamespaceList)) deallocate(importNamespaceList)
-    if (associated(importDomainList)) deallocate(importDomainList)
+    if (associated(importCplSetList)) deallocate(importCplSetList)
     if (associated(exportStandardNameList)) deallocate(exportStandardNameList)
     if (associated(exportFieldList)) deallocate(exportFieldList)
     if (associated(exportNamespaceList)) deallocate(exportNamespaceList)
-    if (associated(exportDomainList)) deallocate(exportDomainList)
+    if (associated(exportCplSetList)) deallocate(exportCplSetList)
 
     !--- extro start ---
     ! extro
@@ -2925,17 +2925,17 @@ call ESMF_LogWrite("eShareStatus: "//trim(eShareStatus), ESMF_LOGMSG_INFO, rc=rc
     ! local variables
     character(*), parameter         :: rName="InitializeIPDv05p6b"
     character(ESMF_MAXSTR), pointer :: cplList(:), chopStringList(:)
-    character(ESMF_MAXSTR), pointer :: cplListDomain(:)
+    character(ESMF_MAXSTR), pointer :: cplSetList(:)
     character(ESMF_MAXSTR), pointer :: cplListTemp(:)
-    type(type_CplList),     pointer :: cplListDomTemp(:)
+    type(type_CplList),     pointer :: cplSetListTemp(:)
     character(ESMF_MAXSTR)          :: cplName
     integer                         :: cplListSize, i, j
-    integer                         :: cplListDomainSize
+    integer                         :: cplSetListSize
     integer                         :: bondLevel, bondLevelMax
     character(ESMF_MAXSTR), pointer :: importNamespaceList(:)
     character(ESMF_MAXSTR), pointer :: exportNamespaceList(:)
-    character(ESMF_MAXSTR), pointer :: importDomainList(:)
-    character(ESMF_MAXSTR), pointer :: exportDomainList(:)
+    character(ESMF_MAXSTR), pointer :: importCplSetList(:)
+    character(ESMF_MAXSTR), pointer :: exportCplSetList(:)
     character(ESMF_MAXSTR), pointer :: importStandardNameList(:)
     character(ESMF_MAXSTR), pointer :: exportStandardNameList(:)
     type(ESMF_Field),       pointer :: importFieldList(:)
@@ -2954,7 +2954,7 @@ call ESMF_LogWrite("eShareStatus: "//trim(eShareStatus), ESMF_LOGMSG_INFO, rc=rc
     integer                         :: verbosity
     logical                         :: matchE, matchI
     integer                         :: count
-    integer                         :: dIndex
+    integer                         :: sIndex
 
     rc = ESMF_SUCCESS
 
@@ -2996,15 +2996,15 @@ call ESMF_LogWrite("eShareStatus: "//trim(eShareStatus), ESMF_LOGMSG_INFO, rc=rc
 
     ! prepare local pointer variables
     nullify(cplList)
-    nullify(cplListDomain)
+    nullify(cplSetList)
     nullify(importStandardNameList)
     nullify(importFieldList)
     nullify(importNamespaceList)
-    nullify(importDomainList)
+    nullify(importCplSetList)
     nullify(exportStandardNameList)
     nullify(exportFieldList)
     nullify(exportNamespaceList)
-    nullify(exportDomainList)
+    nullify(exportCplSetList)
     
     ! query Component for its internal State
     nullify(is%wrap)
@@ -3017,15 +3017,15 @@ call ESMF_LogWrite("eShareStatus: "//trim(eShareStatus), ESMF_LOGMSG_INFO, rc=rc
       itemCount=cplListSize, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    ! get the cplListDomain Attribute
-    call NUOPC_CompAttributeGet(cplcomp, name="CplListDomain", &
-      itemCount=cplListDomainSize, rc=rc)
+    ! get the cplSetList Attribute
+    call NUOPC_CompAttributeGet(cplcomp, name="CplSetList", &
+      itemCount=cplSetListSize, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    ! check the cplListDomain size
-    if (cplListSize /= cplListDomainSize) then
+    ! check the cplSetList size
+    if (cplListSize /= cplSetListSize) then
       call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
-        msg="Bad internal error - CplListDomain size must equal CplList!",&
+        msg="Bad internal error - CplSetList size must match CplList size!",&
         line=__LINE__, file=trim(name)//":"//FILENAME, &
         rcToReturn=rc)
       return  ! bail out
@@ -3040,25 +3040,25 @@ call ESMF_LogWrite("eShareStatus: "//trim(eShareStatus), ESMF_LOGMSG_INFO, rc=rc
         rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-      allocate(cplListDomain(cplListDomainSize), stat=stat)
+      allocate(cplSetList(cplSetListSize), stat=stat)
       if (ESMF_LogFoundAllocError(statusToCheck=stat, &
-        msg="Allocation of internal cplListDomain() failed.", &
+        msg="Allocation of internal cplSetList() failed.", &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
-      call NUOPC_CompAttributeGet(cplcomp, name="CplListDomain", &
-        valueList=cplListDomain, rc=rc)
+      call NUOPC_CompAttributeGet(cplcomp, name="CplSetList", &
+        valueList=cplSetList, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     endif
     ! get the importState and exportState std lists
     call NUOPC_GetStateMemberLists(importState, importStandardNameList, &
       fieldList=importFieldList, namespaceList=importNamespaceList, &
-      domainList=importDomainList, rc=rc)
+      cplSetList=importCplSetList, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     call NUOPC_GetStateMemberLists(exportState, exportStandardNameList, &
       fieldList=exportFieldList, namespaceList=exportNamespaceList, &
-      domainList=exportDomainList, rc=rc)
+      cplSetList=exportCplSetList, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
@@ -3078,21 +3078,21 @@ call ESMF_LogWrite("eShareStatus: "//trim(eShareStatus), ESMF_LOGMSG_INFO, rc=rc
     allocate(is%wrap%srcFieldList(cplListSize))
     allocate(is%wrap%dstFieldList(cplListSize))
 
-    ! prepare domain connection cpl list and field list and FieldBundles
-    allocate(cplListDomTemp(is%wrap%domCount))
-    do i=1, is%wrap%domCount
-      is%wrap%domConn(i)%srcFields = ESMF_FieldBundleCreate(rc=rc)
+    ! prepare set specific connection cpl list and field list and FieldBundles
+    allocate(cplSetListTemp(is%wrap%cplSetCount))
+    do i=1, is%wrap%cplSetCount
+      is%wrap%cplSet(i)%srcFields = ESMF_FieldBundleCreate(rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-      is%wrap%domConn(i)%dstFields = ESMF_FieldBundleCreate(rc=rc)
+      is%wrap%cplSet(i)%dstFields = ESMF_FieldBundleCreate(rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-      count = getCount(is%wrap%domList(i), cplListDomain)
-      is%wrap%domConn(i)%count = 0 ! reset count
-      allocate(is%wrap%domConn(i)%srcFieldList(count))
-      allocate(is%wrap%domConn(i)%dstFieldList(count))
-      allocate(cplListDomTemp(i)%cplList(count))
-      cplListDomTemp(i)%j = 1 ! initialize
+      count = getCount(is%wrap%cplSetList(i), cplSetList)
+      is%wrap%cplSet(i)%count = 0 ! reset count
+      allocate(is%wrap%cplSet(i)%srcFieldList(count))
+      allocate(is%wrap%cplSet(i)%dstFieldList(count))
+      allocate(cplSetListTemp(i)%cplList(count))
+      cplSetListTemp(i)%j = 1 ! initialize
     enddo
 
     ! prepare chopStringList
@@ -3120,9 +3120,9 @@ call ESMF_LogWrite("eShareStatus: "//trim(eShareStatus), ESMF_LOGMSG_INFO, rc=rc
       ! find import and export side match
       foundFlag = .false. ! reset
       do eMatch=1, size(exportStandardNameList)  ! consumer side
-        if (.NOT.(cplListDomain(i).EQ.exportDomainList(eMatch))) cycle
+        if (.NOT.(cplSetList(i).EQ.exportCplSetList(eMatch))) cycle
         do iMatch=1, size(importStandardNameList)  ! producer side
-          if (.NOT.(cplListDomain(i).EQ.importDomainList(iMatch))) cycle
+          if (.NOT.(cplSetList(i).EQ.importCplSetList(iMatch))) cycle
           matchE = NUOPC_FieldDictionaryMatchSyno( &
             exportStandardNameList(eMatch), cplName, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -3137,8 +3137,8 @@ call ESMF_LogWrite("eShareStatus: "//trim(eShareStatus), ESMF_LOGMSG_INFO, rc=rc
             bondLevel = &
               getBondLevel(importNamespaceList(iMatch), &
               exportNamespaceList(eMatch), &
-              importDomainList(iMatch), &
-              exportDomainList(eMatch))
+              importCplSetList(iMatch), &
+              exportCplSetList(eMatch))
               
             if (bondLevel == -1) cycle  ! break out and look for next match
             
@@ -3185,14 +3185,14 @@ call ESMF_LogWrite("eShareStatus: "//trim(eShareStatus), ESMF_LOGMSG_INFO, rc=rc
         ! there are matching Fields in the import and export States
         iField=importFieldList(iMatch)
         eField=exportFieldList(eMatch)
-        dIndex=getIndex(importDomainList(iMatch),is%wrap%domList)
+        sIndex=getIndex(importCplSetList(iMatch),is%wrap%cplSetList)
         ! add the fields to the field lists
         is%wrap%srcFieldList(i)=iField
         is%wrap%dstFieldList(i)=eField
-        count=is%wrap%domConn(dIndex)%count + 1
-        is%wrap%domConn(dIndex)%count=count
-        is%wrap%domConn(dIndex)%srcFieldList(count) = iField
-        is%wrap%domConn(dIndex)%dstFieldList(count) = eField
+        count=is%wrap%cplSet(sIndex)%count + 1
+        is%wrap%cplSet(sIndex)%count=count
+        is%wrap%cplSet(sIndex)%srcFieldList(count) = iField
+        is%wrap%cplSet(sIndex)%dstFieldList(count) = eField
         ! check if the field pair may share the array, i.e. data allocation
         call ESMF_FieldGet(iField, array=iArray, rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -3213,16 +3213,16 @@ call ESMF_LogWrite("eShareStatus: "//trim(eShareStatus), ESMF_LOGMSG_INFO, rc=rc
           ! also add to cplListTemp
           cplListTemp(j)=cplList(i)
           j=j+1
-          call ESMF_FieldBundleAdd(is%wrap%domConn(dIndex)%srcFields, &
+          call ESMF_FieldBundleAdd(is%wrap%cplSet(sIndex)%srcFields, &
             (/iField/), multiflag=.true., rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-          call ESMF_FieldBundleAdd(is%wrap%domConn(dIndex)%dstFields, &
+          call ESMF_FieldBundleAdd(is%wrap%cplSet(sIndex)%dstFields, &
             (/eField/), multiflag=.true., rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-          cplListDomTemp(dIndex)%cplList(cplListDomTemp(dIndex)%j)=cplList(i)
-          cplListDomTemp(dIndex)%j=cplListDomTemp(dIndex)%j+1
+          cplSetListTemp(sIndex)%cplList(cplSetListTemp(sIndex)%j)=cplList(i)
+          cplSetListTemp(sIndex)%j=cplSetListTemp(sIndex)%j+1
         endif
           
         ! set the connected Attribute on import Field
@@ -3261,13 +3261,13 @@ call ESMF_LogWrite("eShareStatus: "//trim(eShareStatus), ESMF_LOGMSG_INFO, rc=rc
     if (.not.existflag) then
       ! if not specialized -> use default method to:
       ! precompute the regrid for all src to dst Fields
-      if (is%wrap%domCount > 1) then
-        do i=1, is%wrap%domCount
-          call FieldBundleCplStore(is%wrap%domConn(i)%srcFields, &
-            is%wrap%domConn(i)%dstFields, &
-            cplList=cplListDomTemp(i)%cplList(1:cplListDomTemp(i)%j-1), &
-            rh=is%wrap%domConn(i)%rh, &
-            termOrders=is%wrap%domConn(i)%termOrders, name=name, rc=rc)
+      if (is%wrap%cplSetCount > 1) then
+        do i=1, is%wrap%cplSetCount
+          call FieldBundleCplStore(is%wrap%cplSet(i)%srcFields, &
+            is%wrap%cplSet(i)%dstFields, &
+            cplList=cplSetListTemp(i)%cplList(1:cplSetListTemp(i)%j-1), &
+            rh=is%wrap%cplSet(i)%rh, &
+            termOrders=is%wrap%cplSet(i)%termOrders, name=name, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
         enddo
@@ -3296,25 +3296,25 @@ call ESMF_LogWrite("eShareStatus: "//trim(eShareStatus), ESMF_LOGMSG_INFO, rc=rc
     endif
 
     if (btest(verbosity,4)) then
-      write (msgString, '(A, ": Domain List: ")') trim(name)
+      write (msgString, '(A, ": CplSet List: ")') trim(name)
       call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, &
         msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME, &
         rcToReturn=rc)) return  ! bail out
-      do i=1, is%wrap%domCount
+      do i=1, is%wrap%cplSetCount
         write (msgString, &
-          '(A, ": ->Domain(", I3, "): ", A60)') &
-          trim(name), i, is%wrap%domList(i)
+          '(A, ": ->CplSet(", I3, "): ", A60)') &
+          trim(name), i, is%wrap%cplSetList(i)
         call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, &
           msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=trim(name)//":"//FILENAME, &
           rcToReturn=rc)) return  ! bail out
-        do j=1, cplListDomTemp(i)%j-1
+        do j=1, cplSetListTemp(i)%j-1
           write (msgString, &
           '(A, ": -->Field(", I3, "): ", A60)') &
-          trim(name), j, cplListDomTemp(i)%cplList(j)
+          trim(name), j, cplSetListTemp(i)%cplList(j)
           call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, &
             msg=ESMF_LOGERR_PASSTHRU, &
@@ -3325,22 +3325,22 @@ call ESMF_LogWrite("eShareStatus: "//trim(eShareStatus), ESMF_LOGMSG_INFO, rc=rc
     endif
     
     ! clean-up
-    do i=1, is%wrap%domCount
-      if (associated(cplListDomTemp(i)%cplList)) &
-        deallocate(cplListDomTemp(i)%cplList)
+    do i=1, is%wrap%cplSetCount
+      if (associated(cplSetListTemp(i)%cplList)) &
+        deallocate(cplSetListTemp(i)%cplList)
     enddo
     if (associated(cplList)) deallocate(cplList)
-    if (associated(cplListDomain)) deallocate(cplListDomain)
+    if (associated(cplSetList)) deallocate(cplSetList)
     if (associated(cplListTemp)) deallocate(cplListTemp)
-    if (associated(cplListDomTemp)) deallocate(cplListDomTemp)
+    if (associated(cplSetListTemp)) deallocate(cplSetListTemp)
     if (associated(importStandardNameList)) deallocate(importStandardNameList)
     if (associated(importFieldList)) deallocate(importFieldList)
     if (associated(importNamespaceList)) deallocate(importNamespaceList)
-    if (associated(importDomainList)) deallocate(importDomainList)
+    if (associated(importCplSetList)) deallocate(importCplSetList)
     if (associated(exportStandardNameList)) deallocate(exportStandardNameList)
     if (associated(exportFieldList)) deallocate(exportFieldList)
     if (associated(exportNamespaceList)) deallocate(exportNamespaceList)
-    if (associated(exportDomainList)) deallocate(exportDomainList)
+    if (associated(exportCplSetList)) deallocate(exportCplSetList)
     
     !--- extro start ---
     ! extro
@@ -3680,12 +3680,12 @@ call ESMF_LogWrite("eShareStatus: "//trim(eShareStatus), ESMF_LOGMSG_INFO, rc=rc
     if (.not.existflag) then
       ! if not specialized -> use default method to:
       ! execute the regrid operation
-      if (is%wrap%domCount > 1) then
-        do i=1, is%wrap%domCount
-          call ESMF_FieldBundleRegrid(is%wrap%domConn(i)%srcFields, &
-            is%wrap%domConn(i)%dstFields, &
-            routehandle=is%wrap%domConn(i)%rh, &
-            termorderflag=is%wrap%domConn(i)%termOrders, rc=rc)
+      if (is%wrap%cplSetCount > 1) then
+        do i=1, is%wrap%cplSetCount
+          call ESMF_FieldBundleRegrid(is%wrap%cplSet(i)%srcFields, &
+            is%wrap%cplSet(i)%dstFields, &
+            routehandle=is%wrap%cplSet(i)%rh, &
+            termorderflag=is%wrap%cplSet(i)%termOrders, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
         enddo
@@ -3903,9 +3903,9 @@ call ESMF_LogWrite("eShareStatus: "//trim(eShareStatus), ESMF_LOGMSG_INFO, rc=rc
     if (.not.existflag) then
       ! if not specialized -> use default method to:
       ! release the regrid operation
-      if (is%wrap%domCount > 1) then
-        do i=1, is%wrap%domCount
-          call ESMF_FieldBundleRegridRelease(is%wrap%domConn(i)%rh, rc=rc)
+      if (is%wrap%cplSetCount > 1) then
+        do i=1, is%wrap%cplSetCount
+          call ESMF_FieldBundleRegridRelease(is%wrap%cplSet(i)%rh, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
         enddo
@@ -3942,36 +3942,36 @@ call ESMF_LogWrite("eShareStatus: "//trim(eShareStatus), ESMF_LOGMSG_INFO, rc=rc
       return  ! bail out
 
     ! deallocate and destroy remaining internal state members
-    do i=1, is%wrap%domCount
-      deallocate(is%wrap%domConn(i)%srcFieldList, stat=stat)
+    do i=1, is%wrap%cplSetCount
+      deallocate(is%wrap%cplSet(i)%srcFieldList, stat=stat)
       if (ESMF_LogFoundAllocError(statusToCheck=stat, &
         msg="Deallocation of internal state srcFieldList member failed.", &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
-      deallocate(is%wrap%domConn(i)%dstFieldList, stat=stat)
+      deallocate(is%wrap%cplSet(i)%dstFieldList, stat=stat)
       if (ESMF_LogFoundDeallocError(statusToCheck=stat, &
         msg="Deallocation of internal state dstFieldList member failed.", &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
-      call ESMF_FieldBundleDestroy(is%wrap%domConn(i)%srcFields, &
+      call ESMF_FieldBundleDestroy(is%wrap%cplSet(i)%srcFields, &
         noGarbage=.true., rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-      call ESMF_FieldBundleDestroy(is%wrap%domConn(i)%dstFields, &
+      call ESMF_FieldBundleDestroy(is%wrap%cplSet(i)%dstFields, &
         noGarbage=.true., rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-      if (associated(is%wrap%domConn(i)%termOrders)) then
-        deallocate(is%wrap%domConn(i)%termOrders, stat=stat)
+      if (associated(is%wrap%cplSet(i)%termOrders)) then
+        deallocate(is%wrap%cplSet(i)%termOrders, stat=stat)
         if (ESMF_LogFoundAllocError(statusToCheck=stat, &
           msg="Deallocation of termOrders list.", &
           line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
           return  ! bail out
       endif
     enddo
-    deallocate(is%wrap%domConn, stat=stat)
+    deallocate(is%wrap%cplSet, stat=stat)
     if (ESMF_LogFoundAllocError(statusToCheck=stat, &
-      msg="Deallocation of internal state domConn member failed.", &
+      msg="Deallocation of internal state cplSet member failed.", &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
     deallocate(is%wrap%srcFieldList, stat=stat)
@@ -4034,10 +4034,10 @@ call ESMF_LogWrite("eShareStatus: "//trim(eShareStatus), ESMF_LOGMSG_INFO, rc=rc
   !----- Helper routines below ...
   !-----------------------------------------------------------------------------
 
-  function getBondLevel(imNamespace, exNamespace, imDomain, exDomain)
+  function getBondLevel(imNamespace, exNamespace, imCplSet, exCplSet)
     integer           :: getBondLevel
     character(len=*)  :: imNamespace, exNamespace
-    character(len=*)  :: imDomain, exDomain
+    character(len=*)  :: imCplSet, exCplSet
     character(len=80) :: imKey1, imKey2, imKey
     character(len=80) :: exKey1, exKey2, exKey
     integer           :: imMark1, imMark2
@@ -4045,8 +4045,8 @@ call ESMF_LogWrite("eShareStatus: "//trim(eShareStatus), ESMF_LOGMSG_INFO, rc=rc
     
     getBondLevel = 1 ! reset
 
-    ! check for domain match
-    if (imDomain /= exDomain) then
+    ! check for coupling set match
+    if (imCplSet /= exCplSet) then
       getBondLevel = -1  ! mark abort
       return          ! break out
     endif
@@ -5020,15 +5020,15 @@ call ESMF_VMLogCurrentGarbageInfo(trim(name)//": FieldBundleCplStore leaving: ")
 !
 ! !INTERFACE:
   subroutine NUOPC_ConnectorGet(connector, srcFields, dstFields, rh, state, &
-    domain, domList, rc)
+    CplSet, cplSetList, rc)
 ! !ARGUMENTS:
     type(ESMF_CplComp)                            :: connector
     type(ESMF_FieldBundle), intent(out), optional :: srcFields
     type(ESMF_FieldBundle), intent(out), optional :: dstFields
     type(ESMF_RouteHandle), intent(out), optional :: rh
     type(ESMF_State),       intent(out), optional :: state
-    character(*),           intent(in),  optional :: domain
-    character(ESMF_MAXSTR), pointer, optional     :: domList(:)
+    character(*),           intent(in),  optional :: CplSet
+    character(ESMF_MAXSTR), pointer, optional     :: cplSetList(:)
     integer,                intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -5038,7 +5038,7 @@ call ESMF_VMLogCurrentGarbageInfo(trim(name)//": FieldBundleCplStore leaving: ")
     ! local variables
     character(ESMF_MAXSTR)          :: name
     type(type_InternalState)        :: is
-    integer                         :: dIndex
+    integer                         :: sIndex
     integer                         :: stat
 
     if (present(rc)) rc = ESMF_SUCCESS
@@ -5050,7 +5050,7 @@ call ESMF_VMLogCurrentGarbageInfo(trim(name)//": FieldBundleCplStore leaving: ")
     
     ! early exit if nothing to be done -> this allows calling the method even
     ! if the internal state does not (yet) exist - done for testing
-    if (.not.present(domList) .and. &
+    if (.not.present(cplSetList) .and. &
         .not.present(srcFields) .and. &
         .not.present(dstFields) .and. &
         .not.present(rh) .and. &
@@ -5064,19 +5064,19 @@ call ESMF_VMLogCurrentGarbageInfo(trim(name)//": FieldBundleCplStore leaving: ")
       return  ! bail out
     
     ! Get the requested members
-    if (present(domain)) then
-      dIndex=getIndex(value=domain, list=is%wrap%domList)
-      if (dIndex < 1 .OR. dIndex > is%wrap%domCount) then
+    if (present(CplSet)) then
+      sIndex=getIndex(value=CplSet, list=is%wrap%cplSetList)
+      if (sIndex < 1 .OR. sIndex > is%wrap%cplSetCount) then
         call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
-          msg="domain is not connected!", &
+          msg="CplSet does not exist!", &
           line=__LINE__, &
           file=FILENAME, &
           rcToReturn=rc)
         return  ! bail out
       endif
-      if (present(srcFields)) srcFields = is%wrap%domConn(dIndex)%srcFields
-      if (present(dstFields)) dstFields = is%wrap%domConn(dIndex)%dstFields
-      if (present(rh))        rh = is%wrap%domConn(dIndex)%rh
+      if (present(srcFields)) srcFields = is%wrap%cplSet(sIndex)%srcFields
+      if (present(dstFields)) dstFields = is%wrap%cplSet(sIndex)%dstFields
+      if (present(rh))        rh = is%wrap%cplSet(sIndex)%rh
     else
       if (present(srcFields)) srcFields = is%wrap%srcFields
       if (present(dstFields)) dstFields = is%wrap%dstFields
@@ -5084,21 +5084,21 @@ call ESMF_VMLogCurrentGarbageInfo(trim(name)//": FieldBundleCplStore leaving: ")
     endif
     if (present(state))     state = is%wrap%state
 
-    if (present(domList)) then
-      if (associated(domList)) then
+    if (present(cplSetList)) then
+      if (associated(cplSetList)) then
         call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
-          msg="domList must enter unassociated", &
+          msg="cplSetList must enter unassociated", &
           line=__LINE__, &
           file=FILENAME, &
           rcToReturn=rc)
         return  ! bail out
       else
-        allocate(domList(is%wrap%domCount), stat=stat)
-        if (ESMF_LogFoundAllocError(stat, msg="allocating domList", &
+        allocate(cplSetList(is%wrap%cplSetCount), stat=stat)
+        if (ESMF_LogFoundAllocError(stat, msg="allocating cplSetList", &
           line=__LINE__, &
           file=FILENAME)) &
           return  ! bail out
-        domList=is%wrap%domList
+        cplSetList=is%wrap%cplSetList
       endif
     endif
     
@@ -5111,14 +5111,14 @@ call ESMF_VMLogCurrentGarbageInfo(trim(name)//": FieldBundleCplStore leaving: ")
 !
 ! !INTERFACE:
   subroutine NUOPC_ConnectorSet(connector, srcFields, dstFields, rh, state, &
-    domain, rc)
+    CplSet, rc)
 ! !ARGUMENTS:
     type(ESMF_CplComp)                            :: connector
     type(ESMF_FieldBundle), intent(in),  optional :: srcFields
     type(ESMF_FieldBundle), intent(in),  optional :: dstFields
     type(ESMF_RouteHandle), intent(in),  optional :: rh
     type(ESMF_State),       intent(in),  optional :: state
-    character(*),           intent(in),  optional :: domain
+    character(*),           intent(in),  optional :: CplSet
     integer,                intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -5128,7 +5128,7 @@ call ESMF_VMLogCurrentGarbageInfo(trim(name)//": FieldBundleCplStore leaving: ")
     ! local variables
     character(ESMF_MAXSTR)          :: name
     type(type_InternalState)        :: is
-    integer                         :: dIndex
+    integer                         :: sIndex
 
     if (present(rc)) rc = ESMF_SUCCESS
 
@@ -5152,19 +5152,19 @@ call ESMF_VMLogCurrentGarbageInfo(trim(name)//": FieldBundleCplStore leaving: ")
       return  ! bail out
     
     ! Set the requested members
-    if (present(domain)) then
-      dIndex=getIndex(value=domain, list=is%wrap%domList)
-      if (dIndex < 1 .OR. dIndex > is%wrap%domCount) then
+    if (present(CplSet)) then
+      sIndex=getIndex(value=CplSet, list=is%wrap%cplSetList)
+      if (sIndex < 1 .OR. sIndex > is%wrap%cplSetCount) then
         call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
-          msg="domain is not connected!", &
+          msg="CplSet does not exist!", &
           line=__LINE__, &
           file=FILENAME, &
           rcToReturn=rc)
         return  ! bail out
       endif 
-      if (present(srcFields)) is%wrap%domConn(dIndex)%srcFields = srcFields
-      if (present(dstFields)) is%wrap%domConn(dIndex)%dstFields = dstFields
-      if (present(rh))        is%wrap%domConn(dIndex)%rh = rh
+      if (present(srcFields)) is%wrap%cplSet(sIndex)%srcFields = srcFields
+      if (present(dstFields)) is%wrap%cplSet(sIndex)%dstFields = dstFields
+      if (present(rh))        is%wrap%cplSet(sIndex)%rh = rh
     else
       if (present(srcFields)) is%wrap%srcFields = srcFields
       if (present(dstFields)) is%wrap%dstFields = dstFields

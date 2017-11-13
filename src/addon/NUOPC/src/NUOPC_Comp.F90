@@ -1227,7 +1227,7 @@ module NUOPC_Comp
     ! Add more Attributes -> NUOPC/Connector AttPack
     allocate(attrList(2))
     attrList(1) = "CplList"
-    attrList(2) = "CplListDomain"
+    attrList(2) = "CplSetList"
     ! add Attribute packages
     call ESMF_AttributeAdd(comp, convention="NUOPC", purpose="Connector", &
       attrList=attrList, nestConvention="NUOPC", nestPurpose="Component", rc=rc)

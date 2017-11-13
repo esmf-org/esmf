@@ -1177,7 +1177,7 @@ contains
             return  ! bail out
 
         call NUOPC_CheckComponentAttribute(prefix, comp=comp, &
-            attributeName="CplListDomain", convention="NUOPC", &
+            attributeName="CplSetList", convention="NUOPC", &
             purpose="Instance", rc=rc)
         if (ESMF_LogFoundError(rc, &
             line=__LINE__, &
