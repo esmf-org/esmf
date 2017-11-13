@@ -535,9 +535,16 @@ program ESMF_ArrayDataUTest
   call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
   deallocate (buffer)
-
+  call ESMF_ArraySetInitCreated(array_new, rc=rc) ! set init code for Fortran
+  
   !-----------------------------------------------------------------------------
- 
+  !NEX_UTest
+  write(name, *) "Destroying Array created by deserialize."
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_ArrayDestroy(array_new, noGarbage=.true., rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !-----------------------------------------------------------------------------
+
   !-----------------------------------------------------------------------------
   !NEX_UTest
   ! compare serialize/deserialize offsets
