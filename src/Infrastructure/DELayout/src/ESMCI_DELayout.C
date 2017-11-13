@@ -3822,6 +3822,8 @@ int XXE::exec(
     ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
 #endif
     if (bufferInfoList[i]->size < currentSize){
+      // deallocate the old buffer
+      delete [] (char *)(bufferInfoList[i]->buffer);  // free associated memory
       // allocate a new, larger buffer to accommodate currentSize
       char *buffer = new char[currentSize];
 #ifdef XXE_EXEC_BUFFLOG_on
