@@ -4126,14 +4126,20 @@ print *, "found match:"// &
 
   function getIndex(value, list)
     integer           :: getIndex
-    character(len=*)  :: value
-    character(len=*)  :: list(:)
+    character(len=*), intent(in)           :: value
+    character(len=*), pointer, intent(in)  :: list(:)
+    integer           :: i
 
-    do getIndex = lbound(list,1), ubound(list,1)
-      if (value.EQ.list(getIndex)) return
-    enddo
+    if (associated(list)) then
+      do i=0, size(list)-1
+        if (value.EQ.list(i+lbound(list,1))) then 
+          getIndex = i+lbound(list,1)
+          return
+        endif
+      enddo
+    endif
 
-    getIndex = lbound(list,1) - 1
+    getIndex = 0
 
   end function
 
@@ -4141,41 +4147,58 @@ print *, "found match:"// &
 
   function getCount(value, list)
     integer           :: getCount
-    character(len=*)  :: value
-    character(len=*)  :: list(:)
+    character(len=*), intent(in)           :: value
+    character(len=*), pointer, intent(in)  :: list(:)
     integer           :: i
 
     getCount = 0
 
-    do i = lbound(list,1), ubound(list,1)
-      if (value.EQ.list(i)) getCount = getCount + 1
-    enddo
+    if (associated(list)) then
+      do i=0, size(list)-1
+        if (value.EQ.list(i+lbound(list,1))) getCount = getCount + 1
+      enddo
+    endif
 
   end function
 
   !-----------------------------------------------------------------------------
 
   subroutine getUniqueList(list, uniqueList, uniqueCount, rc)
-    character(len=*)                      :: list(:)
-    character(ESMF_MAXSTR), pointer       :: uniqueList(:)
-    integer               , optional      :: uniqueCount
-    integer               , optional      :: rc
+    character(len=*)      , pointer , intent(in)  :: list(:)
+    character(ESMF_MAXSTR), pointer , intent(out) :: uniqueList(:)
+    integer               , optional, intent(out) :: uniqueCount
+    integer               , optional, intent(out) :: rc
     integer                               :: l_count
     character(ESMF_MAXSTR), pointer       :: l_uniqueList(:)
     integer                               :: i,stat
 
-    if (len(list) > len(uniqueList)) then
+    if (present(rc)) rc = ESMF_SUCCESS
+
+    if (associated(uniqueList)) then
       call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
-        msg="list length greater than uniqueList length!", &
+        msg="uniqueList must enter unassociated", &
         line=__LINE__, &
         file=FILENAME, &
         rcToReturn=rc)
       return  ! bail out
     endif
 
-    if (associated(uniqueList)) then
+    if (.NOT.associated(list)) then
+      if (present(uniqueCount)) then
+        uniqueCount = 0
+      endif
+
+      allocate(uniqueList(0), stat=stat)
+      if (ESMF_LogFoundAllocError(stat, msg="allocating uniqueList", &
+        line=__LINE__, &
+        file=FILENAME)) &
+        return  ! bail out
+      return
+    endif
+
+    if (len(list) > len(uniqueList)) then
       call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
-        msg="uniqueList must enter unassociated", &
+        msg="list string length greater than uniqueList string length!", &
         line=__LINE__, &
         file=FILENAME, &
         rcToReturn=rc)
@@ -4189,12 +4212,12 @@ print *, "found match:"// &
       return  ! bail out
 
     l_count = 0
-    do i=lbound(list,1), ubound(list,1)
+    do i=0, size(list)-1
       if (l_count > 0) then
-        if (ANY(list(i).EQ.l_uniqueList(1:l_count))) cycle
+        if (ANY(list(i+lbound(list,1)).EQ.l_uniqueList(1:l_count))) cycle
       endif
       l_count = l_count + 1
-      l_uniqueList(l_count) = list(i)
+      l_uniqueList(l_count) = list(i+lbound(list,1))
     enddo
 
     if (present(uniqueCount)) then
