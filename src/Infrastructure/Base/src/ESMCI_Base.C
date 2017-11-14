@@ -663,6 +663,7 @@ static const char *const version = "$Id$";
     // setup the root Attribute, passing the address of this
     root = new ESMCI::Attribute(ESMF_TRUE);
     root->setBase(this);
+    rootalias = false;
 
     // Deserialize the Attribute hierarchy
     if (attreconflag == ESMC_ATTRECONCILE_ON) {
@@ -1117,9 +1118,13 @@ std::cout << ESMC_METHOD << ": entered" << std::endl;
   ESMCI::VM::addObject(this, vmID);
 
   // setup the root Attribute, passing the address of this
-  root = new ESMCI::Attribute(ESMF_TRUE);
-  root->setBase(this);
-  rootalias = false;
+  if (id==-1){
+    rootalias = true; // protect root Attribute from being used in delete
+  }else{
+    root = new ESMCI::Attribute(ESMF_TRUE);
+    root->setBase(this);
+    rootalias = false;
+  }
 
   baseStatus  = ESMF_STATUS_READY;
   status      = ESMF_STATUS_READY;
@@ -1226,7 +1231,13 @@ std::cout << ESMC_METHOD << ": entered" << std::endl;
 
   baseStatus  = ESMF_STATUS_INVALID;
   status      = ESMF_STATUS_INVALID;
-  
+
+#if 0
+  std::stringstream debugmsg;
+  debugmsg << "From ~ESMC_Base(): rootalias=" << rootalias;
+  ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_INFO);
+#endif
+
   // delete the root Attribute
   if (!rootalias)
     delete root;
