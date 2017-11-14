@@ -2132,12 +2132,12 @@ call ESMF_LogWrite("eShareStatus: "//trim(eShareStatus), ESMF_LOGMSG_INFO, rc=rc
             arbDimCount=arbDimCount, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-          allocate(minIndex(dimCount), maxIndex(dimCount), stat=rc)
+          allocate(minIndex(gridDimCount), maxIndex(gridDimCount), stat=rc)
           if (ESMF_LogFoundAllocError(rc, msg="Allocating minIndex, maxIndex", &
             line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
           call ESMF_GridGetIndex(grid, tileNo=1, &
             minIndex=minIndex, maxIndex=maxIndex, rc=rc)
-          if (ESMF_LogFoundAllocError(rc, msg="Allocating minIndex, maxIndex", &
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
           allocate(gridToFieldMap(gridDimCount),stat=stat)
           if (ESMF_LogFoundAllocError(statusToCheck=stat, &
@@ -3944,7 +3944,7 @@ call ESMF_LogWrite("eShareStatus: "//trim(eShareStatus), ESMF_LOGMSG_INFO, rc=rc
     ! deallocate and destroy remaining internal state members
     do i=1, is%wrap%cplSetCount
       deallocate(is%wrap%cplSet(i)%srcFieldList, stat=stat)
-      if (ESMF_LogFoundAllocError(statusToCheck=stat, &
+      if (ESMF_LogFoundDeallocError(statusToCheck=stat, &
         msg="Deallocation of internal state srcFieldList member failed.", &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
@@ -3963,24 +3963,24 @@ call ESMF_LogWrite("eShareStatus: "//trim(eShareStatus), ESMF_LOGMSG_INFO, rc=rc
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
       if (associated(is%wrap%cplSet(i)%termOrders)) then
         deallocate(is%wrap%cplSet(i)%termOrders, stat=stat)
-        if (ESMF_LogFoundAllocError(statusToCheck=stat, &
+        if (ESMF_LogFoundDeallocError(statusToCheck=stat, &
           msg="Deallocation of termOrders list.", &
           line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
           return  ! bail out
       endif
     enddo
     deallocate(is%wrap%cplSet, stat=stat)
-    if (ESMF_LogFoundAllocError(statusToCheck=stat, &
+    if (ESMF_LogFoundDeallocError(statusToCheck=stat, &
       msg="Deallocation of internal state cplSet member failed.", &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
     deallocate(is%wrap%srcFieldList, stat=stat)
-    if (ESMF_LogFoundAllocError(statusToCheck=stat, &
+    if (ESMF_LogFoundDeallocError(statusToCheck=stat, &
       msg="Deallocation of internal state srcFieldList member failed.", &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
     deallocate(is%wrap%dstFieldList, stat=stat)
-    if (ESMF_LogFoundAllocError(statusToCheck=stat, &
+    if (ESMF_LogFoundDeallocError(statusToCheck=stat, &
       msg="Deallocation of internal state dstFieldList member failed.", &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
@@ -3995,7 +3995,7 @@ call ESMF_LogWrite("eShareStatus: "//trim(eShareStatus), ESMF_LOGMSG_INFO, rc=rc
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     if (associated(is%wrap%termOrders)) then
       deallocate(is%wrap%termOrders, stat=stat)
-      if (ESMF_LogFoundAllocError(statusToCheck=stat, &
+      if (ESMF_LogFoundDeallocError(statusToCheck=stat, &
         msg="Deallocation of termOrders list.", &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
