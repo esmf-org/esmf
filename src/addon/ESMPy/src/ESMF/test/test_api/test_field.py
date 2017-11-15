@@ -308,6 +308,41 @@ class TestField(TestBase):
 
         assert (field.struct.ptr != field2.struct.ptr)
 
+    def test_field_area(self):
+        grid = Grid(np.array([3, 4]), staggerloc=[StaggerLoc.CENTER, StaggerLoc.CORNER],
+                    coord_sys=CoordSys.SPH_DEG, num_peri_dims=1,
+                    periodic_dim=0, pole_dim=1)
+
+        gridLon = grid.get_coords(0)
+        gridLat = grid.get_coords(1)
+        gridLonCorner = grid.get_coords(0, staggerloc=StaggerLoc.CORNER)
+        gridLatCorner = grid.get_coords(1, staggerloc=StaggerLoc.CORNER)
+
+        lon = np.linspace(-120, 120, 3)
+        lat = np.linspace(-67.5, 67.5, 4)
+        lon_corner = np.arange(-180, 180, 120)
+        lat_corner = np.linspace(-90, 90, 5)
+
+        lonm, latm = np.meshgrid(lon, lat, indexing='ij')
+        lonm_corner, latm_corner = np.meshgrid(lon_corner, lat_corner,
+                                               indexing='ij')
+
+        gridLon[:] = lonm
+        gridLat[:] = latm
+        gridLonCorner[:] = lonm_corner
+        gridLatCorner[:] = latm_corner
+
+        field = Field(grid)
+        field.get_area()
+
+        grid.add_item(GridItem.AREA)
+
+        field2 = Field(grid)
+        field2.get_area()
+
+        # assert(np.all(field.data == field2.data))
+
+
     def test_field_locstream_mask(self):
         # LocStream creation and simple validation
         locstream = LocStream(5, name="Test LocStream")
