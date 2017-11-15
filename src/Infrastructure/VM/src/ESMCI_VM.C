@@ -1901,8 +1901,12 @@ void VM::logMemInfo(
   sprintf(msg, "%s - MemInfo: %s", prefix.c_str(), info.str().c_str());
   ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
   info.str(""); // clear info
-  info << "Total space in use, mmap + non-mmap (KiB): \t" <<
-    (m.hblkhd+m.uordblks)/1024;
+  long total = 0; // init
+  if (m.hblkhd>=0 && m.uordblks>=0){
+    total = (long)m.hblkhd+(long)m.uordblks;
+    total /= (long)1024;  // scale to KiB
+  }
+  info << "Total space in use, mmap + non-mmap (KiB): \t" << total;
   sprintf(msg, "%s - MemInfo: %s", prefix.c_str(), info.str().c_str());
   ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
   // output the wtime since execution start
