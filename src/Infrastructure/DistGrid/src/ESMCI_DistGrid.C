@@ -3350,25 +3350,54 @@ bool DistGrid::isLocalDeOnEdgeL(
       sizes.push_back(indexCountPDimPDe[de*dimCount+i]);
     MultiDimIndexLoop multiDimIndexLoop(sizes);
     multiDimIndexLoop.setSkipDim(dim-1);  // next() to skip dim
-    while(multiDimIndexLoop.isWithin()){
-      // look at the entire interface spanned by all dimensions except dim
-      int const *indexTuple = multiDimIndexLoop.getIndexTuple();
-      for (int i=0; i<dimCount; i++)
-        localDeIndexTuple[i] = indexTuple[i];
-      // look just across interface along dim
-      localDeIndexTuple[dim-1] = -1;
-      // get sequence index providing localDe relative index tuple
-      vector<int> seqIndex; 
-      localrc = getSequenceIndexLocalDe(localDe, localDeIndexTuple, seqIndex);
-      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
-        ESMC_CONTEXT, rc)) return false;
-      // determine if seqindex indicates edge or not
-      if (seqIndex.size() > 0){
-        // valid seqindex indicates that there is a neighbor
-        onEdge = false;
-        break;
+    // deal with different seqIndex types
+    ESMC_TypeKind_Flag indexTK = getIndexTK();
+    if (indexTK==ESMC_TYPEKIND_I4){
+      while(multiDimIndexLoop.isWithin()){
+        // look at the entire interface spanned by all dimensions except dim
+        int const *indexTuple = multiDimIndexLoop.getIndexTuple();
+        for (int i=0; i<dimCount; i++)
+          localDeIndexTuple[i] = indexTuple[i];
+        // look just across interface along dim
+        localDeIndexTuple[dim-1] = -1;
+        // get sequence index providing localDe relative index tuple
+        vector<ESMC_I4> seqIndex; 
+        localrc = getSequenceIndexLocalDe(localDe, localDeIndexTuple, seqIndex);
+        if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+          ESMC_CONTEXT, rc)) return false;
+        // determine if seqindex indicates edge or not
+        if (seqIndex.size() > 0){
+          // valid seqindex indicates that there is a neighbor
+          onEdge = false;
+          break;
+        }
+        multiDimIndexLoop.next(); // increment tuple, but skip dim
       }
-      multiDimIndexLoop.next(); // increment tuple, but skip dim
+    }else if (indexTK==ESMC_TYPEKIND_I8){
+      while(multiDimIndexLoop.isWithin()){
+        // look at the entire interface spanned by all dimensions except dim
+        int const *indexTuple = multiDimIndexLoop.getIndexTuple();
+        for (int i=0; i<dimCount; i++)
+          localDeIndexTuple[i] = indexTuple[i];
+        // look just across interface along dim
+        localDeIndexTuple[dim-1] = -1;
+        // get sequence index providing localDe relative index tuple
+        vector<ESMC_I8> seqIndex; 
+        localrc = getSequenceIndexLocalDe(localDe, localDeIndexTuple, seqIndex);
+        if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+          ESMC_CONTEXT, rc)) return false;
+        // determine if seqindex indicates edge or not
+        if (seqIndex.size() > 0){
+          // valid seqindex indicates that there is a neighbor
+          onEdge = false;
+          break;
+        }
+        multiDimIndexLoop.next(); // increment tuple, but skip dim
+      }
+    }else{
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+        "Type option not supported", ESMC_CONTEXT, rc);
+      return false;
     }
   }
     
@@ -3441,25 +3470,54 @@ bool DistGrid::isLocalDeOnEdgeU(
       sizes.push_back(indexCountPDimPDe[de*dimCount+i]);
     MultiDimIndexLoop multiDimIndexLoop(sizes);
     multiDimIndexLoop.setSkipDim(dim-1);  // next() to skip dim
-    while(multiDimIndexLoop.isWithin()){
-      // look at the entire interface spanned by all dimensions except dim
-      int const *indexTuple = multiDimIndexLoop.getIndexTuple();
-      for (int i=0; i<dimCount; i++)
-        localDeIndexTuple[i] = indexTuple[i];
-      // look just across interface along dim
-      localDeIndexTuple[dim-1] = indexCountPDimPDe[de*dimCount+(dim-1)];
-      // get sequence index providing localDe relative index tuple
-      vector<int> seqIndex; 
-      localrc = getSequenceIndexLocalDe(localDe, localDeIndexTuple, seqIndex);
-      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
-        ESMC_CONTEXT, rc)) return false;
-      // determine if seqindex indicates edge or not
-      if (seqIndex.size() > 0){
-        // valid seqindex indicates that there is a neighbor
-        onEdge = false;
-        break;
+    // deal with different seqIndex types
+    ESMC_TypeKind_Flag indexTK = getIndexTK();
+    if (indexTK==ESMC_TYPEKIND_I4){
+      while(multiDimIndexLoop.isWithin()){
+        // look at the entire interface spanned by all dimensions except dim
+        int const *indexTuple = multiDimIndexLoop.getIndexTuple();
+        for (int i=0; i<dimCount; i++)
+          localDeIndexTuple[i] = indexTuple[i];
+        // look just across interface along dim
+        localDeIndexTuple[dim-1] = indexCountPDimPDe[de*dimCount+(dim-1)];
+        // get sequence index providing localDe relative index tuple
+        vector<ESMC_I4> seqIndex; 
+        localrc = getSequenceIndexLocalDe(localDe, localDeIndexTuple, seqIndex);
+        if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+          ESMC_CONTEXT, rc)) return false;
+        // determine if seqindex indicates edge or not
+        if (seqIndex.size() > 0){
+          // valid seqindex indicates that there is a neighbor
+          onEdge = false;
+          break;
+        }
+        multiDimIndexLoop.next(); // increment tuple, but skip dim
       }
-      multiDimIndexLoop.next(); // increment tuple, but skip dim
+    }else if (indexTK==ESMC_TYPEKIND_I8){
+      while(multiDimIndexLoop.isWithin()){
+        // look at the entire interface spanned by all dimensions except dim
+        int const *indexTuple = multiDimIndexLoop.getIndexTuple();
+        for (int i=0; i<dimCount; i++)
+          localDeIndexTuple[i] = indexTuple[i];
+        // look just across interface along dim
+        localDeIndexTuple[dim-1] = indexCountPDimPDe[de*dimCount+(dim-1)];
+        // get sequence index providing localDe relative index tuple
+        vector<ESMC_I8> seqIndex; 
+        localrc = getSequenceIndexLocalDe(localDe, localDeIndexTuple, seqIndex);
+        if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+          ESMC_CONTEXT, rc)) return false;
+        // determine if seqindex indicates edge or not
+        if (seqIndex.size() > 0){
+          // valid seqindex indicates that there is a neighbor
+          onEdge = false;
+          break;
+        }
+        multiDimIndexLoop.next(); // increment tuple, but skip dim
+      }
+    }else{
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+        "Type option not supported", ESMC_CONTEXT, rc);
+      return false;
     }
   }
     

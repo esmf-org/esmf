@@ -151,10 +151,14 @@ module ESMF_ArrayMod
 
 ! !PRIVATE MEMBER FUNCTIONS:
 !
-    module procedure ESMF_ArraySMMStoreI4
-    module procedure ESMF_ArraySMMStoreI8
-    module procedure ESMF_ArraySMMStoreR4
-    module procedure ESMF_ArraySMMStoreR8
+    module procedure ESMF_ArraySMMStoreInd4I4
+    module procedure ESMF_ArraySMMStoreInd4I8
+    module procedure ESMF_ArraySMMStoreInd4R4
+    module procedure ESMF_ArraySMMStoreInd4R8
+    module procedure ESMF_ArraySMMStoreInd8I4
+    module procedure ESMF_ArraySMMStoreInd8I8
+    module procedure ESMF_ArraySMMStoreInd8R4
+    module procedure ESMF_ArraySMMStoreInd8R8
     module procedure ESMF_ArraySMMStoreNF
     module procedure ESMF_ArraySMMStoreFromFile
 !EOPI
@@ -787,7 +791,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   type(ESMF_Array),          intent(inout)           :: dstArray
 !   type(ESMF_RouteHandle),    intent(inout)           :: routehandle
 !   <type>(ESMF_KIND_<kind>), target, intent(in)       :: factorList(:)
-!   integer,                   intent(in)              :: factorIndexList(:,:)
+!   integer(ESMF_KIND_<kind>), intent(in)              :: factorIndexList(:,:)
 !type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   logical,                   intent(in),    optional :: ignoreUnmatchedIndices
 !   integer,                   intent(inout), optional :: srcTermProcessing
@@ -990,13 +994,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_ArraySMMStoreI4()"
+#define ESMF_METHOD "ESMF_ArraySMMStoreInd4I4()"
 !BOPI
 ! !IROUTINE: ESMF_ArraySMMStore - Precompute and store an Array sparse matrix multiplication 
 !
 ! !INTERFACE:
   ! Private name; call using ESMF_ArraySMMStore()
-  subroutine ESMF_ArraySMMStoreI4(srcArray, dstArray, routehandle, factorList, &
+  subroutine ESMF_ArraySMMStoreInd4I4(srcArray, dstArray, routehandle, factorList, &
     factorIndexList, keywordEnforcer, ignoreUnmatchedIndices, srcTermProcessing, &
     pipelineDepth, transposeRoutehandle, rc)
 !
@@ -1044,7 +1048,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(ignoreUnmatchedIndices)) opt_ignoreUnmatched = ignoreUnmatchedIndices
 
     ! Call into the C++ interface, which will sort out optional arguments
-    call c_ESMC_ArraySMMStore(srcArray, dstArray, routehandle, &
+    call c_ESMC_ArraySMMStoreInd4(srcArray, dstArray, routehandle, &
       ESMF_TYPEKIND_I4, opt_factorList, len_factorList, factorIndexListArg, &
       opt_ignoreUnmatched, srcTermProcessing, pipelineDepth, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -1084,7 +1088,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
       ! Call into the C++ interface, which will sort out optional arguments
-      call c_ESMC_ArraySMMStore(dstArray, srcArray, transposeRoutehandle, &
+      call c_ESMC_ArraySMMStoreInd4(dstArray, srcArray, transposeRoutehandle, &
         ESMF_TYPEKIND_I4, opt_factorList, len_factorList, factorIndexListArg, &
         opt_ignoreUnmatched, srcTermProcessing, pipelineDepth, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -1103,19 +1107,19 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
 
-  end subroutine ESMF_ArraySMMStoreI4
+  end subroutine ESMF_ArraySMMStoreInd4I4
 !------------------------------------------------------------------------------
 
 
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_ArraySMMStoreI8()"
+#define ESMF_METHOD "ESMF_ArraySMMStoreInd4I8()"
 !BOPI
 ! !IROUTINE: ESMF_ArraySMMStore - Precompute and store an Array sparse matrix multiplication
 !
 ! !INTERFACE:
   ! Private name; call using ESMF_ArraySMMStore()
-  subroutine ESMF_ArraySMMStoreI8(srcArray, dstArray, routehandle, factorList, &
+  subroutine ESMF_ArraySMMStoreInd4I8(srcArray, dstArray, routehandle, factorList, &
     factorIndexList, keywordEnforcer, ignoreUnmatchedIndices, srcTermProcessing, &
     pipelineDepth, transposeRoutehandle, rc)
 !
@@ -1163,7 +1167,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(ignoreUnmatchedIndices)) opt_ignoreUnmatched = ignoreUnmatchedIndices
 
     ! Call into the C++ interface, which will sort out optional arguments
-    call c_ESMC_ArraySMMStore(srcArray, dstArray, routehandle, &
+    call c_ESMC_ArraySMMStoreInd4(srcArray, dstArray, routehandle, &
       ESMF_TYPEKIND_I8, opt_factorList, len_factorList, factorIndexListArg, &
       opt_ignoreUnmatched, srcTermProcessing, pipelineDepth, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -1203,7 +1207,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
       ! Call into the C++ interface, which will sort out optional arguments
-      call c_ESMC_ArraySMMStore(dstArray, srcArray, transposeRoutehandle, &
+      call c_ESMC_ArraySMMStoreInd4(dstArray, srcArray, transposeRoutehandle, &
         ESMF_TYPEKIND_I8, opt_factorList, len_factorList, factorIndexListArg, &
         opt_ignoreUnmatched, srcTermProcessing, pipelineDepth, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -1222,19 +1226,19 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
 
-  end subroutine ESMF_ArraySMMStoreI8
+  end subroutine ESMF_ArraySMMStoreInd4I8
 !------------------------------------------------------------------------------
 
 
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_ArraySMMStoreR4()"
+#define ESMF_METHOD "ESMF_ArraySMMStoreInd4R4()"
 !BOPI
 ! !IROUTINE: ESMF_ArraySMMStore - Precompute and store an Array sparse matrix multiplication
 !
 ! !INTERFACE:
   ! Private name; call using ESMF_ArraySMMStore()
-  subroutine ESMF_ArraySMMStoreR4(srcArray, dstArray, routehandle, factorList, &
+  subroutine ESMF_ArraySMMStoreInd4R4(srcArray, dstArray, routehandle, factorList, &
     factorIndexList, keywordEnforcer, ignoreUnmatchedIndices, srcTermProcessing, &
     pipelineDepth, transposeRoutehandle, rc)
 !
@@ -1282,7 +1286,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(ignoreUnmatchedIndices)) opt_ignoreUnmatched = ignoreUnmatchedIndices
 
     ! Call into the C++ interface, which will sort out optional arguments
-    call c_ESMC_ArraySMMStore(srcArray, dstArray, routehandle, &
+    call c_ESMC_ArraySMMStoreInd4(srcArray, dstArray, routehandle, &
       ESMF_TYPEKIND_R4, opt_factorList, len_factorList, factorIndexListArg, &
       opt_ignoreUnmatched, srcTermProcessing, pipelineDepth, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -1322,7 +1326,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
       ! Call into the C++ interface, which will sort out optional arguments
-      call c_ESMC_ArraySMMStore(dstArray, srcArray, transposeRoutehandle, &
+      call c_ESMC_ArraySMMStoreInd4(dstArray, srcArray, transposeRoutehandle, &
         ESMF_TYPEKIND_R4, opt_factorList, len_factorList, factorIndexListArg, &
         opt_ignoreUnmatched, srcTermProcessing, pipelineDepth, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -1341,19 +1345,19 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
 
-  end subroutine ESMF_ArraySMMStoreR4
+  end subroutine ESMF_ArraySMMStoreInd4R4
 !------------------------------------------------------------------------------
 
 
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_ArraySMMStoreR8()"
+#define ESMF_METHOD "ESMF_ArraySMMStoreInd4R8()"
 !BOPI
 ! !IROUTINE: ESMF_ArraySMMStore - Precompute and store an Array sparse matrix multiplication
 !
 ! !INTERFACE:
   ! Private name; call using ESMF_ArraySMMStore()
-  subroutine ESMF_ArraySMMStoreR8(srcArray, dstArray, routehandle, factorList, &
+  subroutine ESMF_ArraySMMStoreInd4R8(srcArray, dstArray, routehandle, factorList, &
     factorIndexList, keywordEnforcer, ignoreUnmatchedIndices, srcTermProcessing, &
     pipelineDepth, transposeRoutehandle, rc)
 !
@@ -1401,7 +1405,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(ignoreUnmatchedIndices)) opt_ignoreUnmatched = ignoreUnmatchedIndices
 
     ! Call into the C++ interface, which will sort out optional arguments
-    call c_ESMC_ArraySMMStore(srcArray, dstArray, routehandle, &
+    call c_ESMC_ArraySMMStoreInd4(srcArray, dstArray, routehandle, &
       ESMF_TYPEKIND_R8, opt_factorList, len_factorList, factorIndexListArg, &
       opt_ignoreUnmatched, srcTermProcessing, pipelineDepth, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -1441,7 +1445,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
       ! Call into the C++ interface, which will sort out optional arguments
-      call c_ESMC_ArraySMMStore(dstArray, srcArray, transposeRoutehandle, &
+      call c_ESMC_ArraySMMStoreInd4(dstArray, srcArray, transposeRoutehandle, &
         ESMF_TYPEKIND_R8, opt_factorList, len_factorList, factorIndexListArg, &
         opt_ignoreUnmatched, srcTermProcessing, pipelineDepth, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -1460,7 +1464,483 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
 
-  end subroutine ESMF_ArraySMMStoreR8
+  end subroutine ESMF_ArraySMMStoreInd4R8
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ArraySMMStoreInd8I4()"
+!BOPI
+! !IROUTINE: ESMF_ArraySMMStore - Precompute and store an Array sparse matrix multiplication 
+!
+! !INTERFACE:
+  ! Private name; call using ESMF_ArraySMMStore()
+  subroutine ESMF_ArraySMMStoreInd8I4(srcArray, dstArray, routehandle, factorList, &
+    factorIndexList, keywordEnforcer, ignoreUnmatchedIndices, srcTermProcessing, &
+    pipelineDepth, transposeRoutehandle, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_Array),              intent(in)              :: srcArray
+    type(ESMF_Array),              intent(inout)           :: dstArray
+    type(ESMF_RouteHandle),        intent(inout)           :: routehandle
+    integer(ESMF_KIND_I4), target, intent(in)              :: factorList(:)
+    integer(ESMF_KIND_I8),         intent(in)              :: factorIndexList(:,:)
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    logical,                       intent(in),    optional :: ignoreUnmatchedIndices
+    integer,                       intent(inout), optional :: srcTermProcessing
+    integer,                       intent(inout), optional :: pipelineDepth
+    type(ESMF_RouteHandle),        intent(inout), optional :: transposeRoutehandle
+    integer,                       intent(out),   optional :: rc
+!
+!EOPI
+!------------------------------------------------------------------------------
+    integer                         :: localrc            ! local return code
+    integer(ESMF_KIND_I4), pointer  :: opt_factorList(:)  ! helper variable
+    integer                         :: len_factorList     ! helper variable
+    type(ESMF_InterArray)           :: factorIndexListArg ! helper variable
+    integer                         :: tupleSize, i       ! helper variable
+    integer(ESMF_KIND_I8), allocatable :: transposeFIL(:,:)  ! helper variable
+    type(ESMF_Logical)              :: opt_ignoreUnmatched  ! helper variable
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit, srcArray, rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit, dstArray, rc)
+    
+    ! Wrap factor arguments
+    len_factorList = size(factorList)
+    opt_factorList => factorList
+    factorIndexListArg = &
+      ESMF_InterArrayCreate(farray2DI8=factorIndexList, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    
+    ! Set default flags
+    opt_ignoreUnmatched = ESMF_FALSE
+    if (present(ignoreUnmatchedIndices)) opt_ignoreUnmatched = ignoreUnmatchedIndices
+
+    ! Call into the C++ interface, which will sort out optional arguments
+    call c_ESMC_ArraySMMStoreInd8(srcArray, dstArray, routehandle, &
+      ESMF_TYPEKIND_I4, opt_factorList, len_factorList, factorIndexListArg, &
+      opt_ignoreUnmatched, srcTermProcessing, pipelineDepth, localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    
+    ! Garbage collection
+    call ESMF_InterArrayDestroy(factorIndexListArg, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! Mark routehandle object as being created
+    call ESMF_RouteHandleSetInitCreated(routehandle, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    
+    ! Optionally compute the transposeRoutehandle
+    if (present(transposeRoutehandle)) then
+      ! Construct the transpose of the factorIndexList
+      tupleSize = size(factorIndexList,1)
+      allocate(transposeFIL(tupleSize, len_factorList))
+      if (tupleSize==2) then
+        do i=1, len_factorList
+          transposeFIL(1,i)=factorIndexList(2,i)
+          transposeFIL(2,i)=factorIndexList(1,i)
+        enddo
+      else if (tupleSize==4) then
+        do i=1, len_factorList
+          transposeFIL(1,i)=factorIndexList(3,i)
+          transposeFIL(2,i)=factorIndexList(4,i)
+          transposeFIL(3,i)=factorIndexList(1,i)
+          transposeFIL(4,i)=factorIndexList(2,i)
+        enddo
+      endif
+      ! wrap transposeFIL
+      factorIndexListArg = &
+        ESMF_InterArrayCreate(farray2DI8=transposeFIL, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+      ! Call into the C++ interface, which will sort out optional arguments
+      call c_ESMC_ArraySMMStoreInd8(dstArray, srcArray, transposeRoutehandle, &
+        ESMF_TYPEKIND_I4, opt_factorList, len_factorList, factorIndexListArg, &
+        opt_ignoreUnmatched, srcTermProcessing, pipelineDepth, localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+      ! Garbage collection
+      call ESMF_InterArrayDestroy(factorIndexListArg, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+      deallocate(transposeFIL)
+      ! Mark transposeRoutehandle object as being created
+      call ESMF_RouteHandleSetInitCreated(transposeRoutehandle, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end subroutine ESMF_ArraySMMStoreInd8I4
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ArraySMMStoreInd8I8()"
+!BOPI
+! !IROUTINE: ESMF_ArraySMMStore - Precompute and store an Array sparse matrix multiplication
+!
+! !INTERFACE:
+  ! Private name; call using ESMF_ArraySMMStore()
+  subroutine ESMF_ArraySMMStoreInd8I8(srcArray, dstArray, routehandle, factorList, &
+    factorIndexList, keywordEnforcer, ignoreUnmatchedIndices, srcTermProcessing, &
+    pipelineDepth, transposeRoutehandle, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_Array),              intent(in)              :: srcArray
+    type(ESMF_Array),              intent(inout)           :: dstArray
+    type(ESMF_RouteHandle),        intent(inout)           :: routehandle
+    integer(ESMF_KIND_I8), target, intent(in)              :: factorList(:)
+    integer(ESMF_KIND_I8),         intent(in)              :: factorIndexList(:,:)
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    logical,                       intent(in),    optional :: ignoreUnmatchedIndices
+    integer,                       intent(inout), optional :: srcTermProcessing
+    integer,                       intent(inout), optional :: pipelineDepth
+    type(ESMF_RouteHandle),        intent(inout), optional :: transposeRoutehandle
+    integer,                       intent(out),   optional :: rc
+!
+!EOPI
+!------------------------------------------------------------------------------
+    integer                         :: localrc            ! local return code
+    integer(ESMF_KIND_I8), pointer  :: opt_factorList(:)  ! helper variable
+    integer                         :: len_factorList     ! helper variable
+    type(ESMF_InterArray)           :: factorIndexListArg ! helper variable
+    integer                         :: tupleSize, i       ! helper variable
+    integer(ESMF_KIND_I8), allocatable :: transposeFIL(:,:)  ! helper variable
+    type(ESMF_Logical)              :: opt_ignoreUnmatched  ! helper variable
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+    
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit, srcArray, rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit, dstArray, rc)
+    
+    ! Wrap factor arguments
+    len_factorList = size(factorList)
+    opt_factorList => factorList
+    factorIndexListArg = &
+      ESMF_InterArrayCreate(farray2DI8=factorIndexList, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! Set default flags
+    opt_ignoreUnmatched = ESMF_FALSE
+    if (present(ignoreUnmatchedIndices)) opt_ignoreUnmatched = ignoreUnmatchedIndices
+
+    ! Call into the C++ interface, which will sort out optional arguments
+    call c_ESMC_ArraySMMStoreInd8(srcArray, dstArray, routehandle, &
+      ESMF_TYPEKIND_I8, opt_factorList, len_factorList, factorIndexListArg, &
+      opt_ignoreUnmatched, srcTermProcessing, pipelineDepth, localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    
+    ! Garbage collection
+    call ESMF_InterArrayDestroy(factorIndexListArg, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! Mark routehandle object as being created
+    call ESMF_RouteHandleSetInitCreated(routehandle, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    
+    ! Optionally compute the transposeRoutehandle
+    if (present(transposeRoutehandle)) then
+      ! Construct the transpose of the factorIndexList
+      tupleSize = size(factorIndexList,1)
+      allocate(transposeFIL(tupleSize, len_factorList))
+      if (tupleSize==2) then
+        do i=1, len_factorList
+          transposeFIL(1,i)=factorIndexList(2,i)
+          transposeFIL(2,i)=factorIndexList(1,i)
+        enddo
+      else if (tupleSize==4) then
+        do i=1, len_factorList
+          transposeFIL(1,i)=factorIndexList(3,i)
+          transposeFIL(2,i)=factorIndexList(4,i)
+          transposeFIL(3,i)=factorIndexList(1,i)
+          transposeFIL(4,i)=factorIndexList(2,i)
+        enddo
+      endif
+      ! wrap transposeFIL
+      factorIndexListArg = &
+        ESMF_InterArrayCreate(farray2DI8=transposeFIL, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+      ! Call into the C++ interface, which will sort out optional arguments
+      call c_ESMC_ArraySMMStoreInd8(dstArray, srcArray, transposeRoutehandle, &
+        ESMF_TYPEKIND_I8, opt_factorList, len_factorList, factorIndexListArg, &
+        opt_ignoreUnmatched, srcTermProcessing, pipelineDepth, localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+      ! Garbage collection
+      call ESMF_InterArrayDestroy(factorIndexListArg, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+      deallocate(transposeFIL)
+      ! Mark transposeRoutehandle object as being created
+      call ESMF_RouteHandleSetInitCreated(transposeRoutehandle, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end subroutine ESMF_ArraySMMStoreInd8I8
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ArraySMMStoreInd8R4()"
+!BOPI
+! !IROUTINE: ESMF_ArraySMMStore - Precompute and store an Array sparse matrix multiplication
+!
+! !INTERFACE:
+  ! Private name; call using ESMF_ArraySMMStore()
+  subroutine ESMF_ArraySMMStoreInd8R4(srcArray, dstArray, routehandle, factorList, &
+    factorIndexList, keywordEnforcer, ignoreUnmatchedIndices, srcTermProcessing, &
+    pipelineDepth, transposeRoutehandle, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_Array),           intent(in)              :: srcArray
+    type(ESMF_Array),           intent(inout)           :: dstArray
+    type(ESMF_RouteHandle),     intent(inout)           :: routehandle
+    real(ESMF_KIND_R4), target, intent(in)              :: factorList(:)
+    integer(ESMF_KIND_I8),      intent(in)              :: factorIndexList(:,:)
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    logical,                    intent(in),    optional :: ignoreUnmatchedIndices
+    integer,                    intent(inout), optional :: srcTermProcessing
+    integer,                    intent(inout), optional :: pipelineDepth
+    type(ESMF_RouteHandle),     intent(inout), optional :: transposeRoutehandle
+    integer,                    intent(out),   optional :: rc
+!
+!EOPI
+!------------------------------------------------------------------------------
+    integer                       :: localrc            ! local return code
+    real(ESMF_KIND_R4), pointer   :: opt_factorList(:)  ! helper variable
+    integer                       :: len_factorList     ! helper variable
+    type(ESMF_InterArray)         :: factorIndexListArg ! helper variable
+    integer                       :: tupleSize, i       ! helper variable
+    integer(ESMF_KIND_I8), allocatable :: transposeFIL(:,:)  ! helper variable
+    type(ESMF_Logical)            :: opt_ignoreUnmatched  ! helper variable
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+    
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit, srcArray, rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit, dstArray, rc)
+    
+    ! Wrap factor arguments
+    len_factorList = size(factorList)
+    opt_factorList => factorList
+    factorIndexListArg = &
+      ESMF_InterArrayCreate(farray2DI8=factorIndexList, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! Set default flags
+    opt_ignoreUnmatched = ESMF_FALSE
+    if (present(ignoreUnmatchedIndices)) opt_ignoreUnmatched = ignoreUnmatchedIndices
+
+    ! Call into the C++ interface, which will sort out optional arguments
+    call c_ESMC_ArraySMMStoreInd8(srcArray, dstArray, routehandle, &
+      ESMF_TYPEKIND_R4, opt_factorList, len_factorList, factorIndexListArg, &
+      opt_ignoreUnmatched, srcTermProcessing, pipelineDepth, localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    
+    ! Garbage collection
+    call ESMF_InterArrayDestroy(factorIndexListArg, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! Mark routehandle object as being created
+    call ESMF_RouteHandleSetInitCreated(routehandle, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    
+    ! Optionally compute the transposeRoutehandle
+    if (present(transposeRoutehandle)) then
+      ! Construct the transpose of the factorIndexList
+      tupleSize = size(factorIndexList,1)
+      allocate(transposeFIL(tupleSize, len_factorList))
+      if (tupleSize==2) then
+        do i=1, len_factorList
+          transposeFIL(1,i)=factorIndexList(2,i)
+          transposeFIL(2,i)=factorIndexList(1,i)
+        enddo
+      else if (tupleSize==4) then
+        do i=1, len_factorList
+          transposeFIL(1,i)=factorIndexList(3,i)
+          transposeFIL(2,i)=factorIndexList(4,i)
+          transposeFIL(3,i)=factorIndexList(1,i)
+          transposeFIL(4,i)=factorIndexList(2,i)
+        enddo
+      endif
+      ! wrap transposeFIL
+      factorIndexListArg = &
+        ESMF_InterArrayCreate(farray2DI8=transposeFIL, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+      ! Call into the C++ interface, which will sort out optional arguments
+      call c_ESMC_ArraySMMStoreInd8(dstArray, srcArray, transposeRoutehandle, &
+        ESMF_TYPEKIND_R4, opt_factorList, len_factorList, factorIndexListArg, &
+        opt_ignoreUnmatched, srcTermProcessing, pipelineDepth, localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+      ! Garbage collection
+      call ESMF_InterArrayDestroy(factorIndexListArg, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+      deallocate(transposeFIL)
+      ! Mark transposeRoutehandle object as being created
+      call ESMF_RouteHandleSetInitCreated(transposeRoutehandle, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end subroutine ESMF_ArraySMMStoreInd8R4
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ArraySMMStoreInd8R8()"
+!BOPI
+! !IROUTINE: ESMF_ArraySMMStore - Precompute and store an Array sparse matrix multiplication
+!
+! !INTERFACE:
+  ! Private name; call using ESMF_ArraySMMStore()
+  subroutine ESMF_ArraySMMStoreInd8R8(srcArray, dstArray, routehandle, factorList, &
+    factorIndexList, keywordEnforcer, ignoreUnmatchedIndices, srcTermProcessing, &
+    pipelineDepth, transposeRoutehandle, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_Array),           intent(in)              :: srcArray
+    type(ESMF_Array),           intent(inout)           :: dstArray
+    type(ESMF_RouteHandle),     intent(inout)           :: routehandle
+    real(ESMF_KIND_R8), target, intent(in)              :: factorList(:)
+    integer(ESMF_KIND_I8),      intent(in)              :: factorIndexList(:,:)
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    logical,                    intent(in),    optional :: ignoreUnmatchedIndices
+    integer,                    intent(inout), optional :: srcTermProcessing
+    integer,                    intent(inout), optional :: pipelineDepth
+    type(ESMF_RouteHandle),     intent(inout), optional :: transposeRoutehandle
+    integer,                    intent(out),   optional :: rc
+!
+!EOPI
+!------------------------------------------------------------------------------
+    integer                       :: localrc            ! local return code
+    real(ESMF_KIND_R8), pointer   :: opt_factorList(:)  ! helper variable
+    integer                       :: len_factorList     ! helper variable
+    type(ESMF_InterArray)         :: factorIndexListArg ! helper variable
+    integer                       :: tupleSize, i       ! helper variable
+    integer(ESMF_KIND_I8), allocatable :: transposeFIL(:,:)  ! helper variable
+    type(ESMF_Logical)            :: opt_ignoreUnmatched  ! helper variable
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+    
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit, srcArray, rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit, dstArray, rc)
+    
+    ! Wrap factor arguments
+    len_factorList = size(factorList)
+    opt_factorList => factorList
+    factorIndexListArg = &
+      ESMF_InterArrayCreate(farray2DI8=factorIndexList, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! Set default flags
+    opt_ignoreUnmatched = ESMF_FALSE
+    if (present(ignoreUnmatchedIndices)) opt_ignoreUnmatched = ignoreUnmatchedIndices
+
+    ! Call into the C++ interface, which will sort out optional arguments
+    call c_ESMC_ArraySMMStoreInd8(srcArray, dstArray, routehandle, &
+      ESMF_TYPEKIND_R8, opt_factorList, len_factorList, factorIndexListArg, &
+      opt_ignoreUnmatched, srcTermProcessing, pipelineDepth, localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    
+    ! Garbage collection
+    call ESMF_InterArrayDestroy(factorIndexListArg, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! Mark routehandle object as being created
+    call ESMF_RouteHandleSetInitCreated(routehandle, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    
+    ! Optionally compute the transposeRoutehandle
+    if (present(transposeRoutehandle)) then
+      ! Construct the transpose of the factorIndexList
+      tupleSize = size(factorIndexList,1)
+      allocate(transposeFIL(tupleSize, len_factorList))
+      if (tupleSize==2) then
+        do i=1, len_factorList
+          transposeFIL(1,i)=factorIndexList(2,i)
+          transposeFIL(2,i)=factorIndexList(1,i)
+        enddo
+      else if (tupleSize==4) then
+        do i=1, len_factorList
+          transposeFIL(1,i)=factorIndexList(3,i)
+          transposeFIL(2,i)=factorIndexList(4,i)
+          transposeFIL(3,i)=factorIndexList(1,i)
+          transposeFIL(4,i)=factorIndexList(2,i)
+        enddo
+      endif
+      ! wrap transposeFIL
+      factorIndexListArg = &
+        ESMF_InterArrayCreate(farray2DI8=transposeFIL, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+      ! Call into the C++ interface, which will sort out optional arguments
+      call c_ESMC_ArraySMMStoreInd8(dstArray, srcArray, transposeRoutehandle, &
+        ESMF_TYPEKIND_R8, opt_factorList, len_factorList, factorIndexListArg, &
+        opt_ignoreUnmatched, srcTermProcessing, pipelineDepth, localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+      ! Garbage collection
+      call ESMF_InterArrayDestroy(factorIndexListArg, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+      deallocate(transposeFIL)
+      ! Mark transposeRoutehandle object as being created
+      call ESMF_RouteHandleSetInitCreated(transposeRoutehandle, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end subroutine ESMF_ArraySMMStoreInd8R8
 !------------------------------------------------------------------------------
 
 

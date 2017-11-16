@@ -2418,7 +2418,7 @@ template<typename IT> int Array::getSequenceIndexExclusive(
 // !IROUTINE:  ESMCI::Array::getSequenceIndexTile
 //
 // !INTERFACE:
-SeqIndex<> Array::getSequenceIndexTile(
+template<typename IT> SeqIndex<IT> Array::getSequenceIndexTile(
 //
 // !RETURN VALUE:
 //    SeqIndex sequence index
@@ -2441,7 +2441,7 @@ SeqIndex<> Array::getSequenceIndexTile(
   if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;   // final return code
   
   // initialize seqIndex
-  SeqIndex<> seqIndex;
+  SeqIndex<IT> seqIndex;
   seqIndex.decompSeqIndex = seqIndex.tensorSeqIndex = -1;
 
   // prepare decompIndex for decomposed dimensions in the DistGrid order
@@ -2458,7 +2458,7 @@ SeqIndex<> Array::getSequenceIndexTile(
     }
   }
   // determine the sequentialized index for decomposed dimensions
-  int decompSeqIndex;
+  IT decompSeqIndex;
   localrc = distgrid->getSequenceIndexTileRelative(tile, decompIndex,
     &decompSeqIndex);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
@@ -3560,20 +3560,39 @@ int Array::constructFileMap(
       //TODO: from DistGrid for all the exclusive elements once, and then copy
       //TODO: from that list into fileMapList for each exclusive element.
       int element = 0;
-      while(arrayElement.isWithin()){
-        if (arrayElement.isWithinWatch()){
-          // within exclusive Array region -> obtain seqIndex value
-          SeqIndex<> seqIndex;
-          localrc = arrayElement.getSequenceIndexExclusive(&seqIndex, false);
-          if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
-            ESMC_CONTEXT, NULL)) throw localrc;  // bail out with exception
-          fileMapList[element] = seqIndex.decompSeqIndex;
-        }else{
-          // outside exclusive Array region -> mark this as unmapped element
-          fileMapList[element] = unmap_val;
+      ESMC_TypeKind_Flag indexTK = distgrid->getIndexTK();
+      if (indexTK==ESMC_TYPEKIND_I4){
+        SeqIndex<ESMC_I4> seqIndex;
+        while(arrayElement.isWithin()){
+          if (arrayElement.isWithinWatch()){
+            // within exclusive Array region -> obtain seqIndex value
+            localrc = arrayElement.getSequenceIndexExclusive(&seqIndex, false);
+            if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+              ESMC_CONTEXT, NULL)) throw localrc;  // bail out with exception
+            fileMapList[element] = seqIndex.decompSeqIndex;
+          }else{
+            // outside exclusive Array region -> mark this as unmapped element
+            fileMapList[element] = unmap_val;
+          }
+          arrayElement.next();
+          ++element;
         }
-        arrayElement.next();
-        ++element;
+      }else if (indexTK==ESMC_TYPEKIND_I8){
+        SeqIndex<ESMC_I8> seqIndex;
+        while(arrayElement.isWithin()){
+          if (arrayElement.isWithinWatch()){
+            // within exclusive Array region -> obtain seqIndex value
+            localrc = arrayElement.getSequenceIndexExclusive(&seqIndex, false);
+            if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+              ESMC_CONTEXT, NULL)) throw localrc;  // bail out with exception
+            fileMapList[element] = seqIndex.decompSeqIndex;
+          }else{
+            // outside exclusive Array region -> mark this as unmapped element
+            fileMapList[element] = unmap_val;
+          }
+          arrayElement.next();
+          ++element;
+        }
       }
     }
   
@@ -5183,6 +5202,84 @@ int Array::redistStore(
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
 
+  // every Pet must provide srcArray and dstArray
+  if (srcArray == NULL){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
+      "Not a valid pointer to srcArray", ESMC_CONTEXT, &rc);
+    return rc;
+  }
+  if (dstArray == NULL){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
+      "Not a valid pointer to dstArray", ESMC_CONTEXT, &rc);
+    return rc;
+  }
+
+  // determine indexTK for src and dst
+  ESMC_TypeKind_Flag srcIndexTK = srcArray->getDistGrid()->getIndexTK();
+  ESMC_TypeKind_Flag dstIndexTK = dstArray->getDistGrid()->getIndexTK();
+  
+  if (srcIndexTK==ESMC_TYPEKIND_I4 && dstIndexTK==ESMC_TYPEKIND_I4){
+    // call into the actual store method
+    localrc = tRedistStore<ESMC_I4,ESMC_I4>(
+      srcArray, dstArray, routehandle, srcToDstTransposeMap,
+      typekindFactor, factor, ignoreUnmatched, pipelineDepthArg);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      &rc)) return rc;
+  }else if (srcIndexTK==ESMC_TYPEKIND_I8 && dstIndexTK==ESMC_TYPEKIND_I8){
+    // call into the actual store method
+    localrc = tRedistStore<ESMC_I8,ESMC_I8>(
+      srcArray, dstArray, routehandle, srcToDstTransposeMap,
+      typekindFactor, factor, ignoreUnmatched, pipelineDepthArg);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      &rc)) return rc;
+  }else{
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+      "Type option not supported", ESMC_CONTEXT, &rc);
+    return rc;
+  }
+  
+  // return successfully
+  rc = ESMF_SUCCESS;
+  return rc;
+}
+//-----------------------------------------------------------------------------
+
+  
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::Array::tRedistStore()"
+//BOPI
+// !IROUTINE:  ESMCI::Array::tRedistStore
+//
+// !INTERFACE:
+template<typename SIT, typename DIT>
+  int Array::tRedistStore(
+//
+// !RETURN VALUE:
+//    int return code
+//
+// !ARGUMENTS:
+//
+  Array *srcArray,                        // in    - source Array
+  Array *dstArray,                        // in    - destination Array
+  RouteHandle **routehandle,              // inout - handle to precomputed comm
+  InterArray<int> *srcToDstTransposeMap,  // in    - mapping src -> dst dims
+  ESMC_TypeKind_Flag typekindFactor,      // in    - typekind of factor
+  void *factor,                           // in    - redist factor
+  bool ignoreUnmatched,                   // in    - support unmatched indices
+  int *pipelineDepthArg                   // in (optional)
+  ){
+//
+// !DESCRIPTION:
+//  Precompute and store communication pattern for redistribution
+//  from srcArray to dstArray.
+//
+//EOPI
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
+
   try{
     
   // every Pet must provide srcArray and dstArray
@@ -5325,7 +5422,7 @@ int Array::redistStore(
   int factorListCount;
   int srcN;
   int dstN;
-  int *factorIndexList;
+  SIT *factorIndexList;
   
   if (!present(srcToDstTransposeMap)){
     // srcToDstTransposeMap not specified -> default mode
@@ -5360,13 +5457,13 @@ int Array::redistStore(
     // set up factorIndexList
     srcN = 1; // 1 component seqIndex
     dstN = 1; // 1 component seqIndex
-    factorIndexList = new int[(srcN+dstN)*factorListCount];
+    factorIndexList = new SIT[(srcN+dstN)*factorListCount];
     int jj = 0; // reset
     for (int i=0; i<srcLocalDeCount; i++){
       //TODO: this is hardcoded for first collocation only
       int arbSeqIndexCount = srcArbSeqIndexCountPCollPLocalDe[0][i];
-      const int *srcArbSeqIndexListPLocalDe =
-        (const int *)srcArray->distgrid->getArbSeqIndexList(i,1);
+      const SIT *srcArbSeqIndexListPLocalDe =
+        (const SIT *)srcArray->distgrid->getArbSeqIndexList(i,1);
       if (srcArbSeqIndexListPLocalDe){
         for (int j=0; j<arbSeqIndexCount; j++){
           factorIndexList[2*jj] = factorIndexList[2*jj+1] =
@@ -5382,7 +5479,7 @@ int Array::redistStore(
           if (srcArrayToDistGridMap[j]==0) arrayElement.setSkipDim(j);
         // fill in the factorIndexList
         while(arrayElement.isWithin()){
-          SeqIndex<> seqIndex;
+          SeqIndex<SIT> seqIndex;
           localrc = arrayElement.getSequenceIndexExclusive(&seqIndex, false);
           if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
             ESMC_CONTEXT, NULL)) throw localrc;  // bail out with exception
@@ -5539,7 +5636,7 @@ fprintf(stderr, "factorListCount = %d\n", factorListCount);
     // set up factorIndexList
     srcN = 2; // 2 component seqIndex
     dstN = 2; // 2 component seqIndex
-    factorIndexList = new int[(srcN+dstN)*factorListCount];
+    factorIndexList = new SIT[(srcN+dstN)*factorListCount];
     // prepare to fill in factorIndexList elements
     int factorIndexListIndex = 0; // reset
     int *dstTuple = new int[rank];
@@ -5579,8 +5676,10 @@ fprintf(stderr, "factorListCount = %d\n", factorListCount);
         for (int j=0; j<rank; j++)
           dstTuple[srcToDstTMap[j]] = srcTuple[j];
         // determine seq indices
-        SeqIndex<> srcSeqIndex = srcArray->getSequenceIndexTile(i+1, srcTuple);
-        SeqIndex<> dstSeqIndex = dstArray->getSequenceIndexTile(i+1, dstTuple);
+        SeqIndex<SIT> srcSeqIndex =
+          srcArray->getSequenceIndexTile<SIT>(i+1, srcTuple);
+        SeqIndex<DIT> dstSeqIndex =
+          dstArray->getSequenceIndexTile<DIT>(i+1, dstTuple);
         // fill this info into factorIndexList
         int fili = 4*factorIndexListIndex;
         factorIndexList[fili]   = srcSeqIndex.decompSeqIndex;
@@ -5632,16 +5731,15 @@ for (int i=0; i<factorListCount; i++)
   }
   
   // prepare SparseMatrix vector
-  vector<SparseMatrix<int,int> > sparseMatrix;  //TODO: needs correct types
-  sparseMatrix.push_back(SparseMatrix<int,int> (typekindFactor, factorList,
+  vector<SparseMatrix<SIT,DIT> > sparseMatrix;  //TODO: needs correct types
+  sparseMatrix.push_back(SparseMatrix<SIT,DIT> (typekindFactor, factorList,
     factorListCount, srcN, dstN, factorIndexList));
   
   // precompute sparse matrix multiplication
   int srcTermProcessing = 0;  // no need to use auto-tuning to figure this out
   localrc = sparseMatMulStore(srcArray, dstArray, routehandle, sparseMatrix,
     false, ignoreUnmatched, &srcTermProcessing, pipelineDepthArg);
-  
-  // garbage collection
+  // garbage collection here, to not cause memory leak when bail on failure
   delete [] factorIndexList;
   if (typekindFactor == ESMC_TYPEKIND_R4){
     ESMC_R4 *factorListT = (ESMC_R4 *)factorList;
@@ -5681,7 +5779,8 @@ for (int i=0; i<factorListCount; i++)
 }
 //-----------------------------------------------------------------------------
 
-  //-----------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::Array::redist()"
 //BOPI
@@ -6024,7 +6123,7 @@ namespace ArrayHelper{
       typename vector<ArrayHelper::DstInfo<IT1,IT2> >::iterator pp =
         dstInfoTable.begin();
       while (pp != dstInfoTable.end()){
-        SeqIndex<> seqIndex = pp->seqIndex;
+        SeqIndex<IT1> seqIndex = pp->seqIndex;
         for (int term=0; term<srcTermProcessing; term++){
           ++pp;
           if ((pp == dstInfoTable.end()) || !(seqIndex == pp->seqIndex)) break;
@@ -7131,7 +7230,7 @@ namespace ArrayHelper{
       typename vector<ArrayHelper::SrcInfo<IT1,IT2> >::iterator pp =
         srcInfoTable.begin();
       while (pp != srcInfoTable.end()){
-        SeqIndex<> partnerSeqIndex = pp->partnerSeqIndex;
+        SeqIndex<IT2> partnerSeqIndex = pp->partnerSeqIndex;
         for (int term=0; term<srcTermProcessing; term++){
           ++pp;
           if ((pp == srcInfoTable.end()) ||
@@ -7175,7 +7274,7 @@ namespace ArrayHelper{
         {
           ESMC_R4 *factorListT = (ESMC_R4 *)factorList;
           while (pp != srcInfoTable.end()){
-            SeqIndex<> partnerSeqIndex = pp->partnerSeqIndex;
+            SeqIndex<IT2> partnerSeqIndex = pp->partnerSeqIndex;
             for (int term=0; term<srcTermProcessing; term++){
               rraOffsetList[kk] = pp->linIndex/vectorLength;
               factorListT[kk] = *(ESMC_R4 *)(pp->factor);
@@ -7193,7 +7292,7 @@ namespace ArrayHelper{
         {
           ESMC_R8 *factorListT = (ESMC_R8 *)factorList;
           while (pp != srcInfoTable.end()){
-            SeqIndex<> partnerSeqIndex = pp->partnerSeqIndex;
+            SeqIndex<IT2> partnerSeqIndex = pp->partnerSeqIndex;
             for (int term=0; term<srcTermProcessing; term++){
               rraOffsetList[kk] = pp->linIndex/vectorLength;
               factorListT[kk] = *(ESMC_R8 *)(pp->factor);
@@ -7211,7 +7310,7 @@ namespace ArrayHelper{
         {
           ESMC_I4 *factorListT = (ESMC_I4 *)factorList;
           while (pp != srcInfoTable.end()){
-            SeqIndex<> partnerSeqIndex = pp->partnerSeqIndex;
+            SeqIndex<IT2> partnerSeqIndex = pp->partnerSeqIndex;
             for (int term=0; term<srcTermProcessing; term++){
               rraOffsetList[kk] = pp->linIndex/vectorLength;
               factorListT[kk] = *(ESMC_I4 *)(pp->factor);
@@ -7229,7 +7328,7 @@ namespace ArrayHelper{
         {
           ESMC_I8 *factorListT = (ESMC_I8 *)factorList;
           while (pp != srcInfoTable.end()){
-            SeqIndex<> partnerSeqIndex = pp->partnerSeqIndex;
+            SeqIndex<IT2> partnerSeqIndex = pp->partnerSeqIndex;
             for (int term=0; term<srcTermProcessing; term++){
               rraOffsetList[kk] = pp->linIndex/vectorLength;
               factorListT[kk] = *(ESMC_I8 *)(pp->factor);
@@ -7313,7 +7412,7 @@ namespace ArrayHelper{
       typename vector<ArrayHelper::DstInfo<IT2,IT1> >::iterator pp = 
         pRecv->dstInfoTable.begin();
       while (pp != pRecv->dstInfoTable.end()){
-        SeqIndex<> seqIndex = pp->seqIndex;
+        SeqIndex<IT1> seqIndex = pp->seqIndex;
         for (int term=0; term<srcTermProcessing; term++){
           ++pp;
           if ((pp == pRecv->dstInfoTable.end()) || 
@@ -7457,7 +7556,7 @@ namespace ArrayHelper{
       typename vector<ArrayHelper::SrcInfo<IT1,IT2> >::iterator pp =
         srcInfoTable.begin();
       while (pp != srcInfoTable.end()){
-        SeqIndex<> partnerSeqIndex = pp->partnerSeqIndex;
+        SeqIndex<IT2> partnerSeqIndex = pp->partnerSeqIndex;
         for (int term=0; term<srcTermProcessing; term++){
           ++pp;
           if ((pp == srcInfoTable.end()) ||
@@ -7501,7 +7600,7 @@ namespace ArrayHelper{
         {
           ESMC_R4 *factorListT = (ESMC_R4 *)factorList;
           while (pp != srcInfoTable.end()){
-            SeqIndex<> partnerSeqIndex = pp->partnerSeqIndex;
+            SeqIndex<IT2> partnerSeqIndex = pp->partnerSeqIndex;
             for (int term=0; term<srcTermProcessing; term++){
               rraOffsetList[kk] = pp->linIndex/vectorLength;
               factorListT[kk] = *(ESMC_R4 *)(pp->factor);
@@ -7519,7 +7618,7 @@ namespace ArrayHelper{
         {
           ESMC_R8 *factorListT = (ESMC_R8 *)factorList;
           while (pp != srcInfoTable.end()){
-            SeqIndex<> partnerSeqIndex = pp->partnerSeqIndex;
+            SeqIndex<IT2> partnerSeqIndex = pp->partnerSeqIndex;
             for (int term=0; term<srcTermProcessing; term++){
               rraOffsetList[kk] = pp->linIndex/vectorLength;
               factorListT[kk] = *(ESMC_R8 *)(pp->factor);
@@ -7537,7 +7636,7 @@ namespace ArrayHelper{
         {
           ESMC_I4 *factorListT = (ESMC_I4 *)factorList;
           while (pp != srcInfoTable.end()){
-            SeqIndex<> partnerSeqIndex = pp->partnerSeqIndex;
+            SeqIndex<IT2> partnerSeqIndex = pp->partnerSeqIndex;
             for (int term=0; term<srcTermProcessing; term++){
               rraOffsetList[kk] = pp->linIndex/vectorLength;
               factorListT[kk] = *(ESMC_I4 *)(pp->factor);
@@ -7555,7 +7654,7 @@ namespace ArrayHelper{
         {
           ESMC_I8 *factorListT = (ESMC_I8 *)factorList;
           while (pp != srcInfoTable.end()){
-            SeqIndex<> partnerSeqIndex = pp->partnerSeqIndex;
+            SeqIndex<IT2> partnerSeqIndex = pp->partnerSeqIndex;
             for (int term=0; term<srcTermProcessing; term++){
               rraOffsetList[kk] = pp->linIndex/vectorLength;
               factorListT[kk] = *(ESMC_I8 *)(pp->factor);
@@ -9236,6 +9335,14 @@ template<typename SIT, typename DIT>
   }else{
     ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
       "Type option not supported", ESMC_CONTEXT, &rc);
+    return rc;
+  }
+  
+  //TODO: remove the SIT==DIT restriction in the future, but for now
+  //TODO: must bail, because sparseMatrix object does not support mixing types
+  if (srcIndexTK != dstIndexTK){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+      "Mixed type option not supported", ESMC_CONTEXT, &rc);
     return rc;
   }
   
