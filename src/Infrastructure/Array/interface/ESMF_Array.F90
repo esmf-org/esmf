@@ -791,7 +791,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   type(ESMF_Array),          intent(inout)           :: dstArray
 !   type(ESMF_RouteHandle),    intent(inout)           :: routehandle
 !   <type>(ESMF_KIND_<kind>), target, intent(in)       :: factorList(:)
-!   integer,                   intent(in)              :: factorIndexList(:,:)
+!   integer(ESMF_KIND_<kind>), intent(in)              :: factorIndexList(:,:)
 !type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   logical,                   intent(in),    optional :: ignoreUnmatchedIndices
 !   integer,                   intent(inout), optional :: srcTermProcessing
