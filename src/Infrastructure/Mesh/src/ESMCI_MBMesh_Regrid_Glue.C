@@ -78,7 +78,7 @@ static void change_wts_to_be_fracarea(Mesh &mesh, int num_entries,
 #endif
 
 // external C functions
-extern "C" void FTN_X(c_esmc_arraysmmstore)(ESMCI::Array **srcArray,
+extern "C" void FTN_X(c_esmc_arraysmmstoreind4)(ESMCI::Array **srcArray,
     ESMCI::Array **dstArray, ESMCI::RouteHandle **routehandle,
     ESMC_TypeKind_Flag *typekind, void *factorList, int *factorListCount,
     ESMCI::InterArray<int> *factorIndexList, ESMC_Logical *ignoreUnmatched,
@@ -416,7 +416,7 @@ void MBMesh_regrid_create(void **meshsrcpp, ESMCI::Array **arraysrcpp, ESMCI::Po
       int localrc;
       enum ESMC_TypeKind_Flag tk = ESMC_TYPEKIND_R8;
       ESMC_Logical ignoreUnmatched = ESMF_FALSE;
-       FTN_X(c_esmc_arraysmmstore)(arraysrcpp, arraydstpp, rh, &tk, factors,
+       FTN_X(c_esmc_arraysmmstoreind4)(arraysrcpp, arraydstpp, rh, &tk, factors,
             &num_entries, iiptr, &ignoreUnmatched, srcTermProcessing, 
             pipelineDepth, &localrc);
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
