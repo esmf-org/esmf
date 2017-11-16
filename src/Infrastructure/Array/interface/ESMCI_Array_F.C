@@ -1086,24 +1086,25 @@ extern "C" {
     if (srcIndexTK==ESMC_TYPEKIND_I4 && dstIndexTK==ESMC_TYPEKIND_I4){
       vector<ESMCI::SparseMatrix<ESMC_I4,ESMC_I4> > sparseMatrix;
       // Call into the actual C++ method wrapped inside LogErr handling
-      ESMC_LogDefault.MsgFoundError(ESMCI::Array::sparseMatMulStore(
+      if (ESMC_LogDefault.MsgFoundError(ESMCI::Array::sparseMatMulStore(
         *srcArray, *dstArray, routehandle, sparseMatrix, false, 
         ignoreUnmatchedOpt, ESMC_NOT_PRESENT_FILTER(srcTermProcessing),
         ESMC_NOT_PRESENT_FILTER(pipelineDepth)),
         ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
-        ESMC_NOT_PRESENT_FILTER(rc));
+        ESMC_NOT_PRESENT_FILTER(rc))) return;
     }else if (srcIndexTK==ESMC_TYPEKIND_I8 && dstIndexTK==ESMC_TYPEKIND_I8){
       vector<ESMCI::SparseMatrix<ESMC_I8,ESMC_I8> > sparseMatrix;
       // Call into the actual C++ method wrapped inside LogErr handling
-      ESMC_LogDefault.MsgFoundError(ESMCI::Array::sparseMatMulStore(
+      if (ESMC_LogDefault.MsgFoundError(ESMCI::Array::sparseMatMulStore(
         *srcArray, *dstArray, routehandle, sparseMatrix, false, 
         ignoreUnmatchedOpt, ESMC_NOT_PRESENT_FILTER(srcTermProcessing),
         ESMC_NOT_PRESENT_FILTER(pipelineDepth)),
         ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
-        ESMC_NOT_PRESENT_FILTER(rc));
+        ESMC_NOT_PRESENT_FILTER(rc))) return;
     }else{
       ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
         "Type option not supported", ESMC_CONTEXT, rc);
+      return;
     }
     // return successfully
     if (rc!=NULL) *rc = ESMF_SUCCESS;

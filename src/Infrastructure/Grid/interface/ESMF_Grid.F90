@@ -9792,6 +9792,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             petMap=petMap, &
             name=name, &
             rc=localrc) 
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
     else 
         grid=ESMF_GridCreate1PeriDim(regDecomp=regDecomp, &
              decompFlag=decompFlag, &
@@ -9807,10 +9809,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
              petMap=petMap, &
             name=name, &
             rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
     endif
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-       ESMF_CONTEXT, rcToReturn=rc)) return
-
 
      ! Get CoordSys of Grid
      call ESMF_GridGet(grid, coordSys=localCoordSys, rc=localrc)
