@@ -11,6 +11,8 @@
 //==============================================================================
 #define ESMC_FILENAME "ESMCI_VM.C"
 //==============================================================================
+#define GARBAGE_COLLECTION_LOG_off
+//==============================================================================
 //
 // VM class implementation (body) file
 //
@@ -40,6 +42,9 @@
 #include <vector>
 #include <string>
 #include <cstdlib>
+#if (defined ESMF_OS_Linux || defined ESMF_OS_Unicos)
+#include <malloc.h>
+#endif
 #include "ESMF_Pthread.h"
 #include "ESMCI_IO_Handler.h"
 
@@ -377,62 +382,6 @@ void VMIdGet(
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI::VMIdPrint()"
-//BOPI
-// !IROUTINE:  ESMCI::VMIdPrint
-//
-// !INTERFACE:
-void VMIdPrint(
-//
-// !RETURN VALUE:
-//    
-//
-// !ARGUMENTS:
-//
-  VMId *vmID
-  ){
-//
-// !DESCRIPTION:
-//    Print an {\tt ESMC\_VMId} object.
-//
-//EOPI
-//-----------------------------------------------------------------------------
-  printf("ESMCI::VMIdPrint:\n");
-  if (vmID==NULL){
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-      "- Invalid vmID", ESMC_CONTEXT, NULL);
-    return; // bail out
-  }
-  printf("vmID located at: %p\n", vmID);
-  if (vmID->vmKey==NULL){
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-      "- Invalid vmID->vmKey", ESMC_CONTEXT, NULL);
-    return; // bail out
-  }
-  printf("  vmKey=0x");
-  int bitmap=0;
-  int k=0;
-  for (int i=0; i<vmKeyWidth; i++){
-    bitmap |= vmID->vmKey[i];
-    bitmap = bitmap << 8;
-    ++k;
-    if (k==4){
-      printf("%X", bitmap);
-      bitmap=0;
-      k=0;
-    }
-  }
-  if (k!=0){
-    bitmap = bitmap << (3-k)*8;
-    printf("%X\n", bitmap);
-  }
-  printf("  localID: %d\n", vmID->localID);
-}
-//-----------------------------------------------------------------------------
-
-
-//-----------------------------------------------------------------------------
-#undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::VMIdSet()"
 //BOPI
 // !IROUTINE:  ESMCI::VMIdSet
@@ -638,7 +587,7 @@ void VM::shutdown(
   int *rc){                       // return code
 //
 // !DESCRIPTION:
-//    Startup a new child VM according to plan.
+//    Shut down a child VM according to plan.
 //
 //EOPI
 //-----------------------------------------------------------------------------
@@ -747,7 +696,13 @@ void VM::shutdown(
           // The following loop deletes deep C++ ESMF objects derived from
           // Base class. For deep Fortran classes it deletes the Base member.
           for (int k=matchTable_Objects[i].size()-1; k>=0; k--){
-//fprintf(stderr, "about to delete i=%d k=%d %p\n", i, k, matchTable_Objects[i][k]);
+#ifdef GARBAGE_COLLECTION_LOG_on
+            std::stringstream debugmsg;
+            debugmsg << "ESMF Automatic Garbage Collection: delete: "
+              << matchTable_Objects[i][k]->ESMC_BaseGetClassName() << " : "
+              << matchTable_Objects[i][k]->ESMC_BaseGetName();
+            ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_INFO);
+#endif
             delete matchTable_Objects[i][k];  // delete ESMF object, incl. Base
             matchTable_Objects[i].pop_back();
           }
@@ -1298,13 +1253,191 @@ int VM::print() const{
     VMId *vmid = getVMId(&localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       &rc)) return rc;
-    VMIdPrint(vmid);
+    vmid->print();
     VMK::print();
   }
   printf("--- ESMCI::VM::print() end ---\n");
 
   // return successfully
   rc = ESMF_SUCCESS;
+  return rc;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::VMId::print()"
+//BOPI
+// !IROUTINE:  ESMCI::VMId::print
+//
+// !INTERFACE:
+int VMId::print() const{
+//
+// !RETURN VALUE:
+//    int return code
+//
+//
+// !DESCRIPTION:
+//    Print details of VMId object
+//
+//EOPI
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
+
+  // print info about the ESMCI::VM object
+  std::cout << "--- ESMCI::VMId::print() start ---" << std::endl;
+  if (this == NULL){
+    std::cout << "VMId object on this PET is NULL, probably a proxy member." << std::endl;
+  }else{
+    std::cout << "  vmKeyWidth = " << vmKeyWidth << std::endl;
+    printf("  vmKey=0x");
+    int bitmap=0;
+    int k=0;
+    for (int i=0; i<vmKeyWidth; i++){
+      bitmap |= vmKey[i];
+      bitmap = bitmap << 8;
+      ++k;
+      if (k==4){
+        printf("%X", bitmap);
+        bitmap=0;
+        k=0;
+      }
+    }
+    if (k!=0){
+      bitmap = bitmap << (3-k)*8;
+      printf("%X\n", bitmap);
+    }
+    std::cout << "  localID = " << localID << std::endl;
+  }
+  std::cout << "--- ESMCI::VMId::print() end ---" << std::endl;
+
+  // return successfully
+  rc = ESMF_SUCCESS;
+  return rc;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::VMId::deserialize()"
+//BOPI
+// !IROUTINE:  ESMCI::VMId::deserialize
+//
+// !INTERFACE:
+int VMId::deserialize(const char *buffer, int *offset, bool offsetonly) {
+//
+// !RETURN VALUE:
+//    int return code
+//
+//
+// !DESCRIPTION:
+//    Deserialize a buffer into a VMId object.  Assumes vmKey has been
+//    been pre-allocated.
+//
+//EOPI
+//-----------------------------------------------------------------------------
+
+  char *cp;
+  int *ip;
+
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
+
+  int r=*offset%8;
+  if (r!=0) *offset += 8-r;  // alignment
+
+  ip = (int *)(buffer + *offset);
+  int keywidth = *ip++;
+  if (!offsetonly)
+    localID = *ip;
+  ip++;
+  cp = (char *)ip;
+  if (!offsetonly) {
+    if (vmKey) {
+      memcpy (vmKey, cp, keywidth);
+    } else {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+          "Null vmKey encountered when deserializing a VMId object",
+          ESMC_CONTEXT, &localrc);
+      return localrc;
+    }
+  }
+  cp += keywidth;
+
+  // update offset to point to past the current obj
+  *offset = (cp - buffer);
+
+  // return successfully
+  rc = localrc;  // ESMF_SUCCESS;
+  return rc;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::VMId::serialize()"
+//BOPI
+// !IROUTINE:  ESMCI::VMId::serialize
+//
+// !INTERFACE:
+int VMId::serialize(const char *buffer, int *length, int *offset,
+                const ESMC_InquireFlag &inquireflag) {
+//
+// !RETURN VALUE:
+//    int return code
+//
+//
+// !DESCRIPTION:
+//    Turn info in a VMId object into a stream of bytes.
+//
+//EOPI
+//-----------------------------------------------------------------------------
+
+  char *cp;
+  int *ip;
+
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
+
+  int r=*offset%8;
+  if (r!=0) *offset += 8-r;  // alignment
+
+  int fixedpart = 2*sizeof (int) + vmKeyWidth;
+  if (inquireflag == ESMF_INQUIREONLY) {
+    *offset += fixedpart;
+  } else {
+    if ((*length - *offset) < fixedpart) {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+          "Buffer too short to serialize a VMId object",
+          ESMC_CONTEXT, &localrc);
+      return localrc;
+    }
+    ip = (int *)(buffer + *offset);
+    *ip++ = vmKeyWidth;
+    *ip++ = localID;
+    cp = (char *) ip;
+    if (vmKey == NULL) {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+          "Null vmKey when serializing a VMId object",
+          ESMC_CONTEXT, &localrc);
+      return localrc;
+    }
+    memcpy (cp, vmKey, vmKeyWidth);
+    cp += vmKeyWidth;
+
+    // update offset to point to past the current obj
+    *offset = (cp - buffer);
+  }
+
+  // return successfully
+  rc = localrc;  // ESMF_SUCCESS;
   return rc;
 }
 //-----------------------------------------------------------------------------
@@ -1724,6 +1857,7 @@ void VM::logMemInfo(
   // must lock/unlock for thread-safety
   VM *vm = getCurrent();
   vm->lock();
+  // access /proc/self
   FILE* file = fopen("/proc/self/status", "r");
   char line[128];
   char msg[256];
@@ -1731,11 +1865,54 @@ void VM::logMemInfo(
     if (strncmp(line, "Vm", 2) == 0){
       int len = strlen(line);
       line[len-1] = '\0'; // replace the newline with null
-      sprintf(msg, "%s - MemInfo: %s", prefix.c_str(), line);
+      sprintf(msg, "%s - MemInfo: \t%s", prefix.c_str(), line);
       ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
     }
   }
   fclose(file);
+  // access mallinfo
+  std::stringstream info;
+  struct mallinfo m = mallinfo();
+  info << "Non-mmapped space allocated (bytes):       \t" << m.arena;
+  sprintf(msg, "%s - MemInfo: %s", prefix.c_str(), info.str().c_str());
+  ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
+  info.str(""); // clear info
+  info << "Space allocated in mmapped regions (bytes):\t" << m.hblkhd;
+  sprintf(msg, "%s - MemInfo: %s", prefix.c_str(), info.str().c_str());
+  ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
+  info.str(""); // clear info
+  info << "Maximum total allocated space (bytes):     \t" << m.usmblks;
+  sprintf(msg, "%s - MemInfo: %s", prefix.c_str(), info.str().c_str());
+  ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
+  info.str(""); // clear info
+  info << "Space in freed fastbin blocks (bytes):     \t" << m.fsmblks;
+  sprintf(msg, "%s - MemInfo: %s", prefix.c_str(), info.str().c_str());
+  ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
+  info.str(""); // clear info
+  info << "Total allocated space (bytes):             \t" << m.uordblks;
+  sprintf(msg, "%s - MemInfo: %s", prefix.c_str(), info.str().c_str());
+  ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
+  info.str(""); // clear info
+  info << "Total free space (bytes):                  \t" << m.fordblks;
+  sprintf(msg, "%s - MemInfo: %s", prefix.c_str(), info.str().c_str());
+  ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
+  info.str(""); // clear info
+  info << "Top-most, releasable space (bytes):        \t" << m.keepcost;
+  sprintf(msg, "%s - MemInfo: %s", prefix.c_str(), info.str().c_str());
+  ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
+  info.str(""); // clear info
+  info << "Total space in use, mmap + non-mmap (KiB): \t" <<
+    (m.hblkhd+m.uordblks)/1024;
+  sprintf(msg, "%s - MemInfo: %s", prefix.c_str(), info.str().c_str());
+  ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
+  // output the wtime since execution start
+  double wt;
+  ESMCI::VMK::wtime(&wt);
+  info.str(""); // clear info
+  info << "Wall-clock time since execution start (s): \t" << wt;
+  sprintf(msg, "%s - MemInfo: %s", prefix.c_str(), info.str().c_str());
+  ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
+  // unlock again
   vm->unlock();
 #endif
   
@@ -2103,8 +2280,10 @@ void VM::printMatchTable(
 //-----------------------------------------------------------------------------
   printf("--- ESMCI::VM::printMatchTable() start ---\n");
   printf("matchTableBound = %d\n", matchTableBound);
-  for (int i=0; i<matchTableBound; i++)
+  for (int i=0; i<matchTableBound; i++) {
     printf("matchTable_tid[%d] = %lu\n", i, matchTable_tid[i]);
+    (&matchTable_vmID[i])->print();
+  }
   printf("--- ESMCI::VM::printMatchTable() end ---\n");
 }
 //-----------------------------------------------------------------------------
@@ -2423,6 +2602,13 @@ void VM::finalize(
     // The following loop deletes deep C++ ESMF objects derived from
     // Base class. For deep Fortran classes it deletes the Base member.
     for (int k=matchTable_Objects[0].size()-1; k>=0; k--){
+#ifdef GARBAGE_COLLECTION_LOG_on
+      std::stringstream debugmsg;
+      debugmsg << "ESMF Automatic Garbage Collection: delete: "
+        << matchTable_Objects[0][k]->ESMC_BaseGetClassName() << " : "
+        << matchTable_Objects[0][k]->ESMC_BaseGetName();
+      ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_INFO);
+#endif
       delete matchTable_Objects[0][k];  // delete ESMF object, incl. Base
       matchTable_Objects[0].pop_back();
     }
@@ -2497,6 +2683,36 @@ void VM::abort(
 
   // return successfully
   if (rc!=NULL) *rc = ESMF_SUCCESS;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::VM::timerLog()"
+//BOPI
+// !IROUTINE:  ESMCI::VM::timerLog
+//
+// !INTERFACE:
+void VM::timerLog(
+//
+// !RETURN VALUE:
+//    void
+//
+// !ARGUMENTS:
+//
+  std::string timer){
+//
+// !DESCRIPTION:
+//    Log the timer information to the default log
+//
+//EOPI
+//-----------------------------------------------------------------------------
+  std::stringstream timerMsg;
+  std::map<std::string, VMTimer>::iterator t = timers.find(timer);
+  timerMsg << "Timer '" << timer << "' accumulated time: " 
+    << t->second.taccu << " seconds in " << t->second.iters << " iterations.";
+  ESMC_LogDefault.Write(timerMsg.str(), ESMC_LOGMSG_INFO);
 }
 //-----------------------------------------------------------------------------
 

@@ -13409,12 +13409,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
          ESMF_CONTEXT, rcToReturn=rc)) return
       ! Destroy old grid
-      call ESMF_GridDestroy(grid, rc=localrc)
+      call ESMF_GridDestroy(grid, noGarbage=.true., rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
       ! Destroy old distgrid
-      call ESMF_DistGridDestroy(distgrid, rc=localrc)
+      call ESMF_DistGridDestroy(distgrid, noGarbage=.true., rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
     
@@ -13723,7 +13723,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                 staggerloc=staggerLocList(s), farrayPtr=lonPtr, rc=localrc)
             if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rcToReturn=rc)) return
-            count=ubound(lonPtr)
+            count=ubound(lonPtr)-lbound(lonPtr)+1
             call ESMF_GridGetCoord(grid, coordDim=2, localDe=localDe, &
                 staggerloc=staggerLocList(s), farrayPtr=latPtr, rc=localrc)
             if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -13731,7 +13731,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             !call ESMF_VMWtime(starttime, rc=localrc)
             ! Generate glocal edge coordinates and local center coordinates
             ! need to adjust the count???
-            ! Generate glocal edge coordinates and local center coordinates
             totallen = len_trim(mosaic%filenames(tile))+len_trim(mosaic%tileDirectory)
             tempname = trim(mosaic%tileDirectory)//trim(mosaic%filenames(tile))
             call ESMF_GridSpecReadStagger(trim(tempname),sizex, sizey, lonPtr, latPtr, &

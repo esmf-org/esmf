@@ -35,11 +35,12 @@ module ESMF_RHandleMod
 !------------------------------------------------------------------------------
 
 ! !USES:
-  use ESMF_UtilTypesMod     ! ESMF utility types
-  use ESMF_InitMacrosMod    ! ESMF initializer macros
-  use ESMF_BaseMod          ! ESMF base class
-  use ESMF_LogErrMod        ! ESMF error handling
-  use ESMF_IOUtilMod
+  use ESMF_UtilTypesMod           ! ESMF utility types
+  use ESMF_InitMacrosMod          ! ESMF initializer macros
+  use ESMF_BaseMod                ! ESMF base class
+  use ESMF_LogErrMod              ! ESMF error handling
+  use ESMF_F90InterfaceMod        ! ESMF F90-C++ interface helper
+  use ESMF_IOUtilMod              ! ESMF I/O utility layer
   
   implicit none
 
@@ -112,6 +113,11 @@ module ESMF_RHandleMod
 !
 !==============================================================================
 
+  interface ESMF_RouteHandleCreate
+    module procedure ESMF_RouteHandleCreateDef
+    module procedure ESMF_RouteHandleCreateRH
+  end interface
+
   interface ESMF_RouteHandleGet
     module procedure ESMF_RouteHandleGetP
     module procedure ESMF_RouteHandleGetI
@@ -177,7 +183,7 @@ contains
 !
 ! !ARGUMENTS:
     type(ESMF_RouteHandle), intent(inout)           :: rh
-    integer,                intent(out),  optional  :: rc  
+    integer,                intent(out),  optional  :: rc
 !         
 !
 ! !DESCRIPTION:
@@ -208,18 +214,19 @@ contains
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_RouteHandleCreate"
+#define ESMF_METHOD "ESMF_RouteHandleCreateDef"
 !BOPI
 ! !IROUTINE: ESMF_RouteHandleCreate - Create a new RouteHandle
 
 ! !INTERFACE:
-  function ESMF_RouteHandleCreate(rc)
+  ! Private name; call using ESMF_RouteHandleCreate()
+  function ESMF_RouteHandleCreateDef(rc)
 !
 ! !RETURN VALUE:
-    type(ESMF_RouteHandle) :: ESMF_RouteHandleCreate
+    type(ESMF_RouteHandle) :: ESMF_RouteHandleCreateDef
 !
 ! !ARGUMENTS:
-    integer, intent(out), optional :: rc               
+    integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !   Allocates memory for a new {\tt ESMF\_RouteHandle} object and 
@@ -248,28 +255,130 @@ contains
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Set return values
-    ESMF_RouteHandleCreate = rhandle
+    ESMF_RouteHandleCreateDef = rhandle
 
-    ESMF_INIT_SET_CREATED(ESMF_RouteHandleCreate)
+    ESMF_INIT_SET_CREATED(ESMF_RouteHandleCreateDef)
 
     ! Return successfully
     if (present(rc)) rc = ESMF_SUCCESS
 
-  end function ESMF_RouteHandleCreate
+  end function ESMF_RouteHandleCreateDef
+!------------------------------------------------------------------------------
+
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_RouteHandleCreateRH"
+!BOP
+! !IROUTINE: ESMF_RouteHandleCreate - Create a new RouteHandle from RouteHandle
+
+! !INTERFACE:
+  ! Private name; call using ESMF_RouteHandleCreate()
+  function ESMF_RouteHandleCreateRH(routehandle, keywordEnforcer, &
+    originPetList, targetPetList, rc)
+!
+! !RETURN VALUE:
+    type(ESMF_RouteHandle) :: ESMF_RouteHandleCreateRH
+!
+! !ARGUMENTS:
+    type(ESMF_RouteHandle), intent(in)            :: routehandle
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    integer,                intent(in),  optional :: originPetList(:)
+    integer,                intent(in),  optional :: targetPetList(:)
+    integer,                intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!   Create a new {\tt ESMF\_RouteHandle} object from and existing RouteHandle.
+!   The new RouteHandle can be created to function on a different petList than
+!   the incoming RouteHandle.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[routehandle]
+!     The RouteHandle object to be duplicated.
+!   \item[{[originPetList]}]
+!     \begin{sloppypar}
+!     The petList on which the incoming {\tt routehandle} is defined to operate.
+!     If present, then {\tt targetPetList} must also be present and of the same
+!     size. The petLists are used to map origin PETs to target PETs. By 
+!     convention the petLists are constructed to first list the PETs of the
+!     source component, followed by the PETs of the destination component.
+!     Defaults, to the petList of the current component context, meaning that 
+!     the PETs in the RouteHandle are not modified.
+!     \end{sloppypar}
+!   \item[{[targetPetList]}]
+!     \begin{sloppypar}
+!     The petList on which the newly created RouteHandle is defined to operate.
+!     If present, then {\tt originPetList} must also be present and of the same
+!     size. The petLists are used to map origin PETs to target PETs. By 
+!     convention the petLists are constructed to first list the PETs of the
+!     source component, followed by the PETs of the destination component.
+!     Defaults, to the petList of the current component context, meaning that 
+!     the PETs in the RouteHandle are not modified.
+!     \end{sloppypar}
+!   \item[{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+!------------------------------------------------------------------------------
+    integer                 :: localrc      ! local return code
+    type(ESMF_RouteHandle)  :: rhandle
+    type(ESMF_InterArray)   :: originPetListArg
+    type(ESMF_InterArray)   :: targetPetListArg
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+    rhandle%this = ESMF_NULL_POINTER
+
+    ! Deal with (optional) array arguments
+    originPetListArg = ESMF_InterArrayCreate(originPetList, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    targetPetListArg = ESMF_InterArrayCreate(targetPetList, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! Call C++ create code
+    call c_ESMC_RouteHandleCreateRH(rhandle, routehandle, originPetListArg, &
+      targetPetListArg, localrc)
+    if (ESMF_LogFoundError(localrc, &
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! Set return values
+    ESMF_RouteHandleCreateRH = rhandle
+
+    ! Garbage collection
+    call ESMF_InterArrayDestroy(originPetListArg, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_InterArrayDestroy(targetPetListArg, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! Set init code
+    ESMF_INIT_SET_CREATED(ESMF_RouteHandleCreateRH)
+
+    ! Return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end function ESMF_RouteHandleCreateRH
 !------------------------------------------------------------------------------
 
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_RouteHandleDestroy"
-!BOPI
+!BOP
 ! !IROUTINE: ESMF_RouteHandleDestroy - Release resources associated with a RouteHandle
 
 ! !INTERFACE:
-  subroutine ESMF_RouteHandleDestroy(rhandle, noGarbage, rc)
+  subroutine ESMF_RouteHandleDestroy(routehandle, noGarbage, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_RouteHandle), intent(inout)          :: rhandle   
+    type(ESMF_RouteHandle), intent(inout)          :: routehandle   
     logical,                intent(in),   optional :: noGarbage
     integer,                intent(out),  optional :: rc
 !
@@ -279,7 +388,7 @@ contains
 !
 !   The arguments are:
 !   \begin{description}
-!   \item[rhandle] 
+!   \item[routehandle] 
 !     The {\tt ESMF\_RouteHandle} to be destroyed.
 ! \item[{[noGarbage]}]
 !      If set to {\tt .TRUE.} the object will be fully destroyed and removed
@@ -303,7 +412,7 @@ contains
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
-!EOPI
+!EOP
 !------------------------------------------------------------------------------
     integer                 :: localrc      ! local return code
     type(ESMF_Logical)      :: opt_noGarbage  ! helper variable
@@ -313,27 +422,27 @@ contains
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
     ! check input variable
-    ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit,rhandle,rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit,routehandle,rc)
 
     ! Set default flags
     opt_noGarbage = ESMF_FALSE
     if (present(noGarbage)) opt_noGarbage = noGarbage
 
     ! was handle already destroyed?
-    if (rhandle%this .eq. ESMF_NULL_POINTER) then
+    if (routehandle%this .eq. ESMF_NULL_POINTER) then
       if (present(rc)) rc = ESMF_SUCCESS
       return
     endif 
 
     ! Call C++ destroy code
-    call c_ESMC_RouteHandleDestroy(rhandle, opt_noGarbage, localrc)
+    call c_ESMC_RouteHandleDestroy(routehandle, opt_noGarbage, localrc)
     if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! nullify pointer
-    rhandle%this = ESMF_NULL_POINTER
-    ESMF_INIT_SET_DELETED(rhandle)
+    routehandle%this = ESMF_NULL_POINTER
+    ESMF_INIT_SET_DELETED(routehandle)
     
     ! Return successfully
     if (present(rc)) rc = ESMF_SUCCESS
@@ -356,7 +465,7 @@ contains
     type(ESMF_RouteHandle), intent(in)            :: routehandle
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     character(len=*),       intent(out), optional :: name
-    integer,                intent(out), optional :: rc             
+    integer,                intent(out), optional :: rc
 
 !
 ! !DESCRIPTION:
@@ -409,7 +518,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !ARGUMENTS:
     type(ESMF_RouteHandle), intent(in)  :: routehandle
     integer,                intent(out) :: htype
-    integer,                intent(out) :: rc             
+    integer,                intent(out) :: rc
 
 !
 ! !DESCRIPTION:
@@ -497,7 +606,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !ARGUMENTS:
     type(ESMF_RouteHandle), intent(inout) :: routehandle   
-    integer, intent(out), optional :: rc        
+    integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !   Same as {\tt ESMF\_RouteHandleDestroy}.
@@ -540,11 +649,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE: ESMF_RouteHandlePrepXXE - Prepare RouteHandle for XXE based comms
 
 ! !INTERFACE:
-  subroutine ESMF_RouteHandlePrepXXE(rhandle, rc)
+  subroutine ESMF_RouteHandlePrepXXE(routehandle, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_RouteHandle), intent(inout) :: rhandle
-    integer, intent(out), optional :: rc            
+    type(ESMF_RouteHandle), intent(inout) :: routehandle
+    integer, intent(out), optional :: rc
 
 !
 ! !DESCRIPTION:
@@ -553,7 +662,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !   The arguments are:
 !   \begin{description}
-!   \item[rhandle] 
+!   \item[routehandle] 
 !     {\tt ESMF\_RouteHandle} to be prepared.
 !   \item[{[rc]}] 
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -567,9 +676,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
-    ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit,rhandle,rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit,routehandle,rc)
     
-    call c_ESMC_RouteHandlePrepXXE(rhandle, localrc)
+    call c_ESMC_RouteHandlePrepXXE(routehandle, localrc)
     if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
@@ -588,33 +697,33 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE: ESMF_RouteHandleAppend - Append XXE based RouteHandle
 
 ! !INTERFACE:
-  subroutine ESMF_RouteHandleAppend(rhandle, appendRoutehandle, rraShift, &
+  subroutine ESMF_RouteHandleAppend(routehandle, appendRoutehandle, rraShift, &
     vectorLengthShift, transferflag, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_RouteHandle), intent(inout) :: rhandle
+    type(ESMF_RouteHandle), intent(inout) :: routehandle
     type(ESMF_RouteHandle), intent(inout) :: appendRoutehandle
     integer, intent(in)                   :: rraShift
     integer, intent(in)                   :: vectorLengthShift
     logical, intent(in),  optional        :: transferflag
-    integer, intent(out), optional        :: rc            
+    integer, intent(out), optional        :: rc
 
 !
 ! !DESCRIPTION:
 !   Append the exchanged stored in {\tt appendRoutehandle} to the 
-!   {\tt rhandle}. Optionally transfer ownership of the exchange pattern
-!   stored in the incoming {\tt appendRoutehandle} to the {\tt rhandle}.
+!   {\tt routehandle}. Optionally transfer ownership of the exchange pattern
+!   stored in the incoming {\tt appendRoutehandle} to the {\tt routehandle}.
 !
 !   The arguments are:
 !   \begin{description}
-!   \item[rhandle] 
+!   \item[routehandle] 
 !     {\tt ESMF\_RouteHandle} to be appended to.
 !   \item[appendRoutehandle] 
 !     {\tt ESMF\_RouteHandle} to be appended and cleared.
 !   \item[{[transferflag]}] 
 !     If set to {\tt .true.}, the ownership of the appended exchange will be
-!     transferred to {\tt rhandle}. This means that the exchange will be 
-!     released when {\tt rhandle} is released. Even when ownership of the
+!     transferred to {\tt routehandle}. This means that the exchange will be 
+!     released when {\tt routehandle} is released. Even when ownership of the
 !     exchanged is transferred, {\tt appendRoutehandle} still can be used
 !     as a container to reference the exchange, e.g. to append the same
 !     exchange multiple times. The default is {\tt .false.}.
@@ -631,7 +740,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
-    ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit,rhandle,rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit,routehandle,rc)
     
     if (present(transferflag)) then
       transferflagArg = transferflag
@@ -639,7 +748,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       transferflagArg = ESMF_FALSE ! default
     endif
 
-    call c_ESMC_RouteHandleAppend(rhandle, appendRoutehandle, &
+    call c_ESMC_RouteHandleAppend(routehandle, appendRoutehandle, &
       rraShift, vectorLengthShift, transferflagArg, localrc)
     if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
@@ -664,7 +773,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !ARGUMENTS:
     type(ESMF_RouteHandle), intent(in)            :: routehandle      
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    integer,                intent(out), optional :: rc           
+    integer,                intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !   Print information about an {\tt ESMF\_RouteHandle}.
@@ -717,7 +826,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_RouteHandle), intent(inout)         :: routehandle
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     character(len = *),     intent(in),  optional :: name    
-    integer,                intent(out), optional :: rc            
+    integer,                intent(out), optional :: rc
 
 !
 ! !DESCRIPTION:
@@ -770,7 +879,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !ARGUMENTS:
     type(ESMF_RouteHandle), intent(in)  :: routehandle
     integer,                intent(in)  :: htype
-    integer,                intent(out) :: rc            
+    integer,                intent(out) :: rc
 
 !
 ! !DESCRIPTION:
@@ -815,18 +924,18 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE: ESMF_RouteHandleValidate - Check internal consistency of a RouteHandle
 
 ! !INTERFACE:
-  subroutine ESMF_RouteHandleValidate(rhandle, rc)
+  subroutine ESMF_RouteHandleValidate(routehandle, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_RouteHandle), intent(in)            :: rhandle       
-    integer,                intent(out), optional :: rc            
+    type(ESMF_RouteHandle), intent(in)            :: routehandle       
+    integer,                intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !   Validates that an {\tt ESMF\_RouteHandle} is internally consistent.
 !
 !   The arguments are:
 !   \begin{description}
-!   \item[rhandle] 
+!   \item[routehandle] 
 !     {\tt ESMF\_RouteHandle} to be queried.
 !   \item[{[rc]}] 
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -840,9 +949,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
-    ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit,rhandle,rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit,routehandle,rc)
 
-    call c_ESMC_RouteHandleValidate(rhandle, localrc)   
+    call c_ESMC_RouteHandleValidate(routehandle, localrc)   
     if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
@@ -861,11 +970,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE: ESMF_RouteHandleOptimize - Optimization based on a RouteHandle
 
 ! !INTERFACE:
-  subroutine ESMF_RouteHandleOptimize(rhandle, rc)
+  subroutine ESMF_RouteHandleOptimize(routehandle, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_RouteHandle), intent(in)            :: rhandle      
-    integer,                intent(out), optional :: rc           
+    type(ESMF_RouteHandle), intent(in)            :: routehandle      
+    integer,                intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !   Optimize communications based on the information available in the
@@ -873,7 +982,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !   The arguments are:
 !   \begin{description}
-!   \item[rhandle] 
+!   \item[routehandle] 
 !     {\tt ESMF\_RouteHandle} holding the communication patter for which the
 !     optimization is carried out.
 !   \item[{[rc]}] 
@@ -888,9 +997,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
-    ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit,rhandle,rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit,routehandle,rc)
 
-    call c_ESMC_RouteHandleOptimize(rhandle, localrc)   
+    call c_ESMC_RouteHandleOptimize(routehandle, localrc)   
     if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
@@ -914,7 +1023,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !ARGUMENTS:
     type(ESMF_RouteHandle), intent(in)              :: rhandleIn
     type(ESMF_RouteHandle), intent(inout)           :: rhandleOut
-    integer,                intent(out),  optional  :: rc  
+    integer,                intent(out),  optional  :: rc
 !         
 !
 ! !DESCRIPTION:

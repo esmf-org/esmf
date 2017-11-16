@@ -725,7 +725,8 @@
            ESMF_REGRIDMETHOD_PATCH       = ESMF_RegridMethod_Flag(1), &
            ESMF_REGRIDMETHOD_CONSERVE    = ESMF_RegridMethod_Flag(2), &
            ESMF_REGRIDMETHOD_NEAREST_STOD  = ESMF_RegridMethod_Flag(3), &
-           ESMF_REGRIDMETHOD_NEAREST_DTOS  = ESMF_RegridMethod_Flag(4)
+           ESMF_REGRIDMETHOD_NEAREST_DTOS  = ESMF_RegridMethod_Flag(4), &
+           ESMF_REGRIDMETHOD_CONSERVE_2ND  = ESMF_RegridMethod_Flag(5)
 
 
 
@@ -1021,7 +1022,8 @@
                                    ESMF_REGRIDMETHOD_PATCH, &
                                    ESMF_REGRIDMETHOD_CONSERVE, &
                                    ESMF_REGRIDMETHOD_NEAREST_STOD, &
-                                   ESMF_REGRIDMETHOD_NEAREST_DTOS
+                                   ESMF_REGRIDMETHOD_NEAREST_DTOS, &
+                                   ESMF_REGRIDMETHOD_CONSERVE_2ND
 
        public ESMF_LineType_Flag,   ESMF_LINETYPE_CART, &
                                    ESMF_LINETYPE_GREAT_CIRCLE

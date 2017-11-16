@@ -248,12 +248,12 @@ ESMF_CXXLINKRPATHS += \
 ############################################################
 # Determine where icpc's libraries are located
 #
-ESMF_F90LINKPATHS += $(addprefix -L,$(shell $(ESMF_DIR)/scripts/libpath.icpc "$(ESMF_CXXCOMPILER) $(ESMF_CXXCOMPILEOPTS)"))
+ESMF_F90LINKPATHS += 
 
 ############################################################
 # Link against libesmf.a using the F90 linker front-end
 #
-ESMF_F90LINKLIBS += $(shell $(ESMF_DIR)/scripts/libs.icpc "$(ESMF_CXXCOMPILER) $(ESMF_CXXCOMPILEOPTS)") -lrt -ldl
+ESMF_F90LINKLIBS += -cxxlib -lrt -ldl
 
 ############################################################
 # Link against libesmf.a using the C++ linker front-end

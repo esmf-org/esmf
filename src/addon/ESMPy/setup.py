@@ -1,55 +1,119 @@
 # $Id$
 
-import sys
 import os
-
-# distutils
+import sys
 from distutils.core import setup, Command
 from distutils.util import get_platform
+import subprocess
 
-class BuildCommand(Command):
+
+def download_test_data(func):
+    def wrapper(self):
+        update_system_path()
+        from ESMF.util.cache_data import cache_data_files
+        cache_data_files()
+        return func(self)
+    return wrapper
+
+
+def update_system_path():
+    if 'src' not in sys.path:
+        sys.path.insert(0, 'src')
+
+
+class AbstractESMFCommand(Command):
+    user_options = []
+
+    def initialize_options(self):
+        self.cwd = None
+
+    def finalize_options(self):
+        self.cwd = os.getcwd()
+
+    def _validate_(self):
+        if os.getcwd() != self.cwd:
+            raise RuntimeError('Must be in package root: %s' % self.cwd)
+
+
+class AbstractESMFNoseCommand(AbstractESMFCommand):
+    _nose_attrs = None
+    _nose_base_attrs = ['!slow']
+    _nose_parallel = False
+    _nose_flags = None
+    _default_target = os.path.join('src', 'ESMF')
+    _needs_data = False
+
+    def run(self):
+        self._validate_()
+        cmd = self.nosetests_command()
+        subprocess.check_call(cmd)
+
+    @classmethod
+    def nosetests_command(cls):
+        ret = ['nosetests', '-vs']
+        if cls._nose_attrs is not None:
+            nose_attrs = cls._nose_base_attrs + cls._nose_attrs
+            nose_attrs = ','.join(nose_attrs)
+            cmd_nose_attrs = ['-a', nose_attrs]
+            ret = ret + cmd_nose_attrs
+
+        if cls._nose_parallel:
+            # Needed for ESMF contants import
+            sys.path.append('src')
+
+            from ESMF.api import constants
+            try:
+                import mpi4py
+            except ImportError:
+                raise ImportError("'mpi4py' is required for parallel testing")
+            mpirun_prefix = [constants._ESMF_MPIRUN, '-np', str(constants._ESMF_MPIRUN_NP)]
+            ret = mpirun_prefix + ret
+
+        if cls._nose_flags is not None:
+            ret.append(cls._nose_flags)
+        ret.append(cls._default_target)
+        return ret
+
+
+class BuildCommand(AbstractESMFCommand):
     description = "build: will build the ESMF package"
     user_options = [('ESMFMKFILE=', 'e',
-                      "Location of esmf.mk for the ESMF installation")]
+                     "Location of esmf.mk for the ESMF installation")]
+
     def initialize_options(self):
         self.cwd = None
         self.ESMFMKFILE = None
         SITEDIR = os.system('%s -m site --user-site' % sys.executable)
         self.build_base = 'build'
-        self.build_lib=None
-        self.plat_name=None
+        self.build_lib = None
+        self.plat_name = None
+
     def finalize_options(self):
         self.cwd = os.getcwd()
         if self.ESMFMKFILE is None:
-          self.ESMFMKFILE = os.getenv('ESMFMKFILE')
+            self.ESMFMKFILE = os.getenv('ESMFMKFILE')
         if self.build_lib is None:
-          self.build_lib = os.path.join(self.build_base, 'lib')
+            self.build_lib = os.path.join(self.build_base, 'lib')
         if self.plat_name is None:
-          self.plat_name = get_platform()
+            self.plat_name = get_platform()
 
     def run(self):
         assert os.getcwd() == self.cwd, 'Must be in package root: %s' % self.cwd
 
-        # create the esmfmkfile.py file holding the value of ESMFMKFILE
+        # Create "esmfmkfile.py" file holding the path to the ESMF "esmf.mk" file
         if self.ESMFMKFILE is not None:
-            f = open('src/ESMF/interface/esmfmkfile.py', 'w')
+            f = open(os.path.join('src', 'ESMF', 'interface', 'esmfmkfile.py'), 'w')
             f.write('ESMFMKFILE = "%s"' % self.ESMFMKFILE)
             f.close()
 
-        # load ESMF
-        try:
-            sys.path.append('src')
-            import ESMF.interface.loadESMF
-        except Exception as e: raise
-            #raise ImportError("ESMF library did not load!")
+        # Attempt to load ESMF.
+        update_system_path()
+        import ESMF.interface.loadESMF
 
-class CleanCommand(Command):
+
+class CleanCommand(AbstractESMFCommand):
     description = "clean: will remove all libraries, log and output files"
-    user_options = []
-    def initialize_options(self):
-        self.cwd = None
-    def finalize_options(self):
-        self.cwd = os.getcwd()
+
     def run(self):
         assert os.getcwd() == self.cwd, 'Must be in package root: %s' % self.cwd
         os.system('find . -name "*.pyc" -exec rm -f {} \;')
@@ -63,13 +127,9 @@ class CleanCommand(Command):
         os.system('rm -rf examples/data')
 
 
-class DustCommand(Command):
+class DustCommand(AbstractESMFCommand):
     description = "dust: will remove log and output files"
-    user_options = []
-    def initialize_options(self):
-        self.cwd = None
-    def finalize_options(self):
-        self.cwd = os.getcwd()
+
     def run(self):
         assert os.getcwd() == self.cwd, 'Must be in package root: %s' % self.cwd
         os.system('find . -name "*ESMF_LogFile*" -exec rm -f {} \;')
@@ -77,168 +137,123 @@ class DustCommand(Command):
         os.system('find . -name "*.vtk" -exec rm -f {} \;')
         os.system('find . -name "*.pyc" -exec rm -f {} \;')
 
-class TestCommand(Command):
-    description = "test"
-    user_options = []
-    def initialize_options(self):
-        self.cwd = None
-    def finalize_options(self):
-        self.cwd = os.getcwd()
-    def run(self):
-        assert os.getcwd() == self.cwd, 'Must be in package root: %s' % self.cwd
-        os.system('%s src/ESMF/test/run_alltest.py' % sys.executable)
 
-class TestRegridCommand(Command):
-    description = "test regrid"
-    user_options = []
-    def initialize_options(self):
-        self.cwd = None
-    def finalize_options(self):
-        self.cwd = os.getcwd()
-    def run(self):
-        assert os.getcwd() == self.cwd, 'Must be in package root: %s' % self.cwd
-        os.system('%s -m nose -vs src/ESMF/test/test_api/test_regrid.py'
-                  % sys.executable)
+class TestCommand(AbstractESMFNoseCommand):
+    description = "run serial tests"
+    _nose_attrs = ['!parallel']
 
-class TestExamplesCommand(Command):
-    description = "run examples"
-    user_options = []
-    def initialize_options(self):
-        self.cwd = None
-    def finalize_options(self):
-        self.cwd = os.getcwd()
-    def run(self):
-        assert os.getcwd() == self.cwd, 'Must be in package root: %s' % self.cwd
-        os.system('%s examples/run_examples.py' % sys.executable)
 
-class TestExamplesDryrunCommand(Command):
-    description = "run examples"
-    user_options = []
-    def initialize_options(self):
-        self.cwd = None
-    def finalize_options(self):
-        self.cwd = os.getcwd()
-    def run(self):
-        assert os.getcwd() == self.cwd, 'Must be in package root: %s' % self.cwd
-        os.system('%s examples/run_examples_dryrun.py' % sys.executable)
+class TestParallelCommand(AbstractESMFNoseCommand):
+    description = "run parallel tests"
+    _nose_attrs = ['!serial']
+    _nose_parallel = True
 
-class TestRegridFromFileCommand(Command):
-    description = "test regrid from file"
-    user_options = []
-    def initialize_options(self):
-        self.cwd = None
-    def finalize_options(self):
-        self.cwd = os.getcwd()
-    def run(self):
-        assert os.getcwd() == self.cwd, 'Must be in package root: %s' % self.cwd
-        os.system('%s src/ESMF/test/regrid_from_file/run_regrid_from_file.py'
-                  % sys.executable)
 
-class TestRegridFromFileDryrunCommand(Command):
-    description = "test regrid from file dryrun"
-    user_options = []
-    def initialize_options(self):
-        self.cwd = None
-    def finalize_options(self):
-        self.cwd = os.getcwd()
-    def run(self):
-        assert os.getcwd() == self.cwd, 'Must be in package root: %s' % self.cwd
-        os.system('%s src/ESMF/test/regrid_from_file/run_regrid_from_file_dryrun.py'
-                  % sys.executable)
+class TestAllCommand(AbstractESMFCommand):
+    description = "run serial, parallel, and example tests"
 
-# unit test in parallel
-class TestParallelCommand(Command):
-    description = "test parallel"
-    user_options = []
-    def initialize_options(self):
-        self.cwd = None
-    def finalize_options(self):
-        self.cwd = os.getcwd()
+    @download_test_data
     def run(self):
-        assert os.getcwd() == self.cwd, 'Must be in package root: %s' % self.cwd
-        try:
-            import mpi4py
-        except:
-            raise ImportError("mpi4py is required for parallel regrid testing!")
-        os.system('%s src/ESMF/test/run_alltest.py --parallel'
-                  % sys.executable)
+        self._validate_()
+        to_run = [TestCommand, TestParallelCommand, TestExamplesCommand, TestExamplesParallelCommand]
+        for t in to_run:
+            cmd = t.nosetests_command()
+            subprocess.check_call(cmd)
 
-# test regridding in parallel
-class TestRegridParallelCommand(Command):
+
+class TestRegridCommand(AbstractESMFNoseCommand):
+    description = "run test_regrid.py"
+    _default_target = os.path.join('src', 'ESMF', 'test', 'test_api', 'test_regrid.py')
+
+
+class TestRegridParallelCommand(TestRegridCommand):
     description = "test regrid parallel"
-    user_options = []
-    def initialize_options(self):
-        self.cwd = None
-    def finalize_options(self):
-        self.cwd = os.getcwd()
-    def run(self):
-        assert os.getcwd() == self.cwd, 'Must be in package root: %s' % self.cwd
-        try:
-            import mpi4py
-        except:
-            raise ImportError("mpi4py is required for parallel regrid testing!")
-        os.system('%s -m nose -vs  src/ESMF/test/test_api/test_regrid.py'
-                  % sys.executable)
+    _nose_attrs = ['!serial']
+    _nose_parallel = True
 
-# run examples in parallel
-class TestExamplesParallelCommand(Command):
-    description = "run examples parallel"
-    user_options = []
-    def initialize_options(self):
-        self.cwd = None
-    def finalize_options(self):
-        self.cwd = os.getcwd()
-    def run(self):
-        assert os.getcwd() == self.cwd, 'Must be in package root: %s' % self.cwd
-        try:
-            import mpi4py
-        except:
-            raise ImportError("mpi4py is required for parallel regrid testing!")
-        os.system('%s examples/run_examples.py --parallel'
-                  % sys.executable)
 
-# test regridding from file in parallel
-class TestRegridFromFileParallelCommand(Command):
+class TestExamplesCommand(AbstractESMFNoseCommand):
+    description = "run examples in serial"
+    _nose_attrs = ['!parallel']
+    _default_target = os.path.join('examples', 'exampletest.py')
+
+    @download_test_data
+    def run(self):
+        update_system_path()
+        AbstractESMFNoseCommand.run(self)
+
+
+class TestExamplesParallelCommand(TestExamplesCommand):
+    description = "run examples in parallel"
+    _nose_attrs = ['!serial']
+    _nose_parallel = True
+
+
+class TestExamplesDryrunCommand(TestExamplesCommand):
+    description = "collect example tests only and download data"
+    _nose_flags = '--collect-only'
+
+
+class TestRegridFromFileCommand(AbstractESMFCommand):
+    description = "test regrid from file"
+    _filename = 'run_regrid_from_file.py'
+    _flags = None
+
+    def run(self):
+        original_pp = os.environ.get('PYTHONPATH', '')
+        path = os.path.join(os.getcwd(), 'src')
+        os.environ['PYTHONPATH'] = '{}:{}'.format(path, original_pp)
+        self._validate_()
+        target = os.path.join('src', 'ESMF', 'test', 'regrid_from_file', self._filename)
+        cmd = [sys.executable, target]
+        if self._flags is not None:
+            cmd.append(self._flags)
+        subprocess.check_call(cmd)
+
+
+class TestRegridFromFileDryrunCommand(TestRegridFromFileCommand):
+    description = "test regrid from file dryrun"
+    _filename = 'run_regrid_from_file_dryrun.py'
+
+
+class TestRegridFromFileParallelCommand(TestRegridFromFileCommand):
     description = "test regrid from file parallel"
-    user_options = []
-    def initialize_options(self):
-        self.cwd = None
-    def finalize_options(self):
-        self.cwd = os.getcwd()
+    _filename = 'run_regrid_from_file.py'
+    _flags = '--parallel'
+
     def run(self):
-        assert os.getcwd() == self.cwd, 'Must be in package root: %s' % self.cwd
         try:
             import mpi4py
-        except:
+        except ImportError:
             raise ImportError("mpi4py is required for parallel regrid from file testing!")
-        os.system('%s src/ESMF/test/regrid_from_file/run_regrid_from_file.py --parallel'
-                  % sys.executable)
+        TestRegridFromFileCommand.run(self)
 
-## get package structure
-def _get_dot_(path,root='src'):
+
+# Get package structure
+def _get_dot_(path, root='src'):
     ret = []
     path_parse = path
     while True:
-        path_parse,tail = os.path.split(path_parse)
+        path_parse, tail = os.path.split(path_parse)
         if tail == root:
             break
         else:
             ret.append(tail)
     ret.reverse()
-    return('.'.join(ret))
+    return '.'.join(ret)
 
-src_path = os.path.join('src','ESMF')
+
+src_path = os.path.join('src', 'ESMF')
 packages = []
-for dirpath,dirnames,filenames in os.walk(src_path):
+for dirpath, dirnames, filenames in os.walk(src_path):
     if '__init__.py' in filenames:
         package = _get_dot_(dirpath)
         packages.append(package)
 
 # TODO: build doc command
 # TODO: remove duplicated metadata: here and src/ESMF/__init__.py
-setup(\
-      name="ESMPy",
-      version="700",
+setup(name="ESMPy",
+      version="7.1.0.dev",
       description="ESMF Python interface",
       author="University Corporation for Atmospheric Research, \
               Massachusetts Institute of Technology, \
@@ -248,22 +263,22 @@ setup(\
               Los Alamos National Laboratory, \
               Argonne National Laboratory, \
               NASA Goddard Space Flight Center",
-      license = "University of Illinois-NCSA",
+      license="University of Illinois-NCSA",
       author_email="esmf_support@list.woc.noaa.gov",
       url="http://earthsystemcog.org/projects/esmpy/",
       packages=packages,
-      package_dir = {'':'src'},
+      package_dir={'': 'src'},
       cmdclass={'build': BuildCommand,
                 'clean': CleanCommand,
                 'dust': DustCommand,
                 'test': TestCommand,
-                'test_regrid': TestRegridCommand,
+                'test_all': TestAllCommand,
+                'test_parallel': TestParallelCommand,
                 'test_examples': TestExamplesCommand,
                 'test_examples_dryrun': TestExamplesDryrunCommand,
+                'test_examples_parallel': TestExamplesParallelCommand,
+                'test_regrid': TestRegridCommand,
                 'test_regrid_from_file': TestRegridFromFileCommand,
                 'test_regrid_from_file_dryrun': TestRegridFromFileDryrunCommand,
-                'test_parallel': TestParallelCommand,
                 'test_regrid_parallel': TestRegridParallelCommand,
-                'test_examples_parallel': TestExamplesParallelCommand,
-                'test_regrid_from_file_parallel': TestRegridFromFileParallelCommand}
-     )
+                'test_regrid_from_file_parallel': TestRegridFromFileParallelCommand})

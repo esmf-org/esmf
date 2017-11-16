@@ -11,6 +11,8 @@
 //==============================================================================
 #define ESMC_FILENAME "ESMCI_RHandle.C"
 //==============================================================================
+#define RH_CREATE_MEMLOG_off
+//==============================================================================
 //
 // RouteHandle class implementation (body) file
 //
@@ -51,7 +53,7 @@ static const char *const version =
 
 namespace ESMCI {
 
-  //-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::RouteHandle::create()"
 //BOP
@@ -78,8 +80,10 @@ RouteHandle *RouteHandle::create(
   RouteHandle *routehandle;
   try{
 
+    // new object
     routehandle = new RouteHandle;
 
+    // construct initial internals
     localrc = routehandle->construct();
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
       ESMC_CONTEXT, rc)){
@@ -87,6 +91,271 @@ RouteHandle *RouteHandle::create(
       return NULL;
     }
     
+  }catch(int localrc){
+    // catch standard ESMF return code
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      rc);
+    routehandle->ESMC_BaseSetStatus(ESMF_STATUS_INVALID);  // mark invalid
+    return NULL;
+  }catch(...){
+    // allocation error
+    ESMC_LogDefault.MsgAllocError("for new ESMCI::RouteHandle.", ESMC_CONTEXT, 
+      rc);  
+    routehandle->ESMC_BaseSetStatus(ESMF_STATUS_INVALID);  // mark invalid
+    return NULL;
+  }
+
+  // return successfully
+  if (rc!=NULL) *rc = ESMF_SUCCESS;
+  return routehandle;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::RouteHandle::create()"
+//BOP
+// !IROUTINE:  ESMCI::RouteHandle::create - Create a new RouteHandle from RH
+//
+// !INTERFACE:
+RouteHandle *RouteHandle::create(
+//
+// !RETURN VALUE:
+//  pointer to newly allocated RouteHandle
+//
+// !ARGUMENTS:
+    RouteHandle *rh,                // in  - routehandle to copy from
+    InterArray<int> *originPetList, // in  - petList of ncoming RH
+    InterArray<int> *targetPetList, // in  - petList of newly created RH
+    int *rc) {                      // out - return code
+//
+// !DESCRIPTION:
+//  Allocate memory for a new RouteHandle object and initialize it.
+//  Then copy internals of incoming 'rh' into the newly create object.
+//
+//EOP
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;   // final return code
+  
+  RouteHandle *routehandle;
+  try{
+    
+    // sanity check the incoming petList arguments
+    int sizePetList = 0;  // default
+    if (present(originPetList))
+      sizePetList = originPetList->extent[0];
+    int sizeTargetPetList = 0;  // default
+    if (present(targetPetList))
+      sizeTargetPetList = targetPetList->extent[0];
+    if (sizePetList != sizeTargetPetList){
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
+        "Both petList arguments must specify the same number of PETs",
+        ESMC_CONTEXT, rc);
+      throw *rc;  // bail out with exception
+    }
+    bool petMapping = false;  // default
+    if (sizePetList>0)
+      petMapping = true;
+    
+    // construct mapping vectors
+    VM *vm = VM::getCurrent(&localrc);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      rc)) throw *rc;
+    int petCount = vm->getPetCount();
+    vector<int> originToTargetMap(petCount,-1);  // initialize to -1
+    vector<int> targetToOriginMap(petCount,-1);  // initialize to -1
+    if (petMapping){
+      for (int i=0; i<sizePetList; i++){
+        int originPet=originPetList->array[i];
+        int targetPet=targetPetList->array[i];
+        if (originPet<0 || originPet>=petCount){
+          // this PET is out of bounds
+          ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+            "PETs in originPetList must be between 0 and petCount-1",
+            ESMC_CONTEXT, rc);
+          throw *rc;  // bail out with exception
+        }
+        if (targetPet<0 || targetPet>=petCount){
+          // this PET is out of bounds
+          ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+            "PETs in targetPetList must be between 0 and petCount-1",
+            ESMC_CONTEXT, rc);
+          throw *rc;  // bail out with exception
+        }
+        // set up originToTargetMap
+        if (originToTargetMap[originPet] != -1){
+          // this same PET was already in the petList
+          ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+            "There must be no duplicate PETs in the originPetList",
+            ESMC_CONTEXT, rc);
+          throw *rc;  // bail out with exception
+        }
+        originToTargetMap[originPet] = targetPet;
+        // set up targetToOriginMap
+        if (targetToOriginMap[targetPet] != -1){
+          // this same PET was already in the petList
+          ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+            "There must be no duplicate PETs in the targetPetList",
+            ESMC_CONTEXT, rc);
+          throw *rc;  // bail out with exception
+        }
+        targetToOriginMap[targetPet] = originPet;
+      }
+    }
+    
+    // new RH object
+    routehandle = new RouteHandle;
+
+    // construct initial internals
+    localrc = routehandle->construct();
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+      ESMC_CONTEXT, rc)){
+      throw *rc;
+    }
+    
+    // copy the information from the incoming RH
+    // keep htype the same
+    routehandle->htype = rh->htype;
+    
+    // get to the XXE object
+    XXE *xxe = (XXE *)rh->getStorage();
+    
+    // streamify the XXE object
+    stringstream *xxeStreami = new stringstream;  // explicit mem management
+    xxe->streamify(*xxeStreami);
+    
+#ifdef RH_CREATE_MEMLOG_on
+  VM::logMemInfo(std::string(ESMC_METHOD": right after creating xxeStreami"));
+#endif
+  
+    if (petMapping){
+      
+      // Need to do the streami shuffle from origin -> target PETs
+  
+      // copy the contents of xxeStreami into a contiguous string
+      string sendStreamiStr = xxeStreami->str();
+      string::size_type sendStreamiSize = sendStreamiStr.size();
+      // delete xxeStreami since it is going to be replaced
+      delete xxeStreami;
+      xxeStreami=NULL;  // make invalid streami identifiable
+    
+#ifdef RH_CREATE_MEMLOG_on
+  VM::logMemInfo(std::string(ESMC_METHOD": right after creating sendStreamiStr"));
+#endif
+
+      // exchange the streami between PETs
+      int localPet = vm->getLocalPet();
+      bool iAmOrigin = false;
+      if (originToTargetMap[localPet]>-1)
+        iAmOrigin = true;
+      bool iAmTarget = false;
+      if (targetToOriginMap[localPet]>-1)
+        iAmTarget = true;
+      // prepare to receive size of streami from origin
+      string::size_type recvStreamiSize = 0;  // initialize
+      VMK::commhandle *recvCommH = new VMK::commhandle;
+      if (iAmTarget){
+        // post non-blocking receive of size of streami from origin PET
+        localrc = vm->recv(&recvStreamiSize, sizeof(recvStreamiSize),
+          targetToOriginMap[localPet], &recvCommH);
+        if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+          ESMC_CONTEXT, rc)){
+          throw *rc;
+        }
+      }
+      // prepare to send size of streami to target
+      if (iAmOrigin){
+        // send size of the local streami to the target PET
+        localrc = vm->send(&sendStreamiSize, sizeof(sendStreamiSize),
+          originToTargetMap[localPet]);
+        if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+          ESMC_CONTEXT, rc)){
+          throw *rc;
+        }
+      }
+      // wait for receive
+      if (iAmTarget){
+        // wait for the non-blocking receive to finish
+        localrc = vm->commwait(&recvCommH);
+        if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+          ESMC_CONTEXT, rc)){
+          throw *rc;
+        }
+      }
+    
+      // prepare to receive streami from origin
+      char *recvMsg = new char[recvStreamiSize];
+      if (iAmTarget){
+        // post non-blocking receive of streami from origin PET
+        localrc = vm->recv(recvMsg, recvStreamiSize,
+          targetToOriginMap[localPet], &recvCommH);
+        if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+          ESMC_CONTEXT, rc)){
+          throw *rc;
+        }
+      }
+      // prepare to send streami to target
+      char const *sendMsg = sendStreamiStr.data();
+      if (iAmOrigin){
+        // send size of the local streami to the target PET
+        localrc = vm->send(sendMsg, sendStreamiSize,
+          originToTargetMap[localPet]);
+        if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+          ESMC_CONTEXT, rc)){
+          throw *rc;
+        }
+      }
+      // wait for receive
+      if (iAmTarget){
+        // wait for the non-blocking receive to finish
+        localrc = vm->commwait(&recvCommH);
+        if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+          ESMC_CONTEXT, rc)){
+          throw *rc;
+        }
+      }
+    
+#ifdef RH_CREATE_MEMLOG_on
+  VM::logMemInfo(std::string(ESMC_METHOD": right after receiving recvMsg"));
+#endif
+      
+      if (iAmTarget){
+        // recreate xxeStreami and fill with recvMsg
+        xxeStreami = new stringstream;
+        xxeStreami->str(string(recvMsg, recvStreamiSize));
+      }
+      // collect garbage
+      delete recvCommH;
+      delete [] recvMsg;
+    }
+    
+    // construct a new XXE object from streamified form
+    XXE *xxeNew;
+    if (xxeStreami){
+      // a valid streami is present on this PET
+      if (petMapping)
+        xxeNew = new XXE(*xxeStreami, &originToTargetMap);
+      else
+        xxeNew = new XXE(*xxeStreami);
+    }else{
+      // a valid streami is NOT present on this PET
+      xxeNew = new XXE(vm, 0, 0, 0); // noop on this PET
+    }
+    
+    // collect garbage
+    delete xxeStreami;
+    
+    // store the new XXE object in RH
+    routehandle->setStorage(xxeNew);
+    // do NOT copy any of the other members!
+    
+#ifdef RH_CREATE_MEMLOG_on
+  VM::logMemInfo(std::string(ESMC_METHOD": right after creating xxeNew"));
+#endif
+
   }catch(int localrc){
     // catch standard ESMF return code
     ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
@@ -183,8 +452,12 @@ int RouteHandle::construct(
 //EOP
 //-----------------------------------------------------------------------------
   htype = ESMC_UNINITIALIZEDHANDLE;
+
   for (int i=0; i<RHSTORAGECOUNT; i++)
     storage[i] = NULL;
+
+  srcArray = NULL;
+  dstArray = NULL;
 
   return ESMF_SUCCESS;
 }
@@ -221,6 +494,15 @@ int RouteHandle::destruct(
       break;
     default:
       break;
+    }
+    // remove any additional storage from routehandle
+    //TODO: specific to vector<int>* storage, will break for anything else!
+    for (int i=1; i<RHSTORAGECOUNT; i++){
+      std::vector<int> *tmp = (std::vector<int> *)getStorage(i);
+      if (tmp){
+        delete tmp;
+        setStorage(NULL, i);
+      }
     }
   }
 
@@ -298,6 +580,8 @@ int RouteHandle::print(
       &rc)) return rc;
     int localPet = vm->getLocalPet();
     int petCount = vm->getPetCount();
+
+#if 0
     char file[160];
     sprintf(file, "xxeprofile.%05d", localPet);
     FILE *fp = fopen(file, "a");
@@ -314,9 +598,11 @@ int RouteHandle::print(
       vm->barrier();
     }
     fclose(fp);
+#endif
     
+#if (defined ESMF_PIO && ( defined ESMF_NETCDF || defined ESMF_PNETCDF))
     // -------------------------------------------------------------------------
-#define PRINTCOMMMATRIX_disable
+#define PRINTCOMMMATRIX
 #ifdef PRINTCOMMMATRIX
     // get the communication matrix from routehandle
     std::vector<int> *commMatrixDstPet       =(std::vector<int> *)getStorage(1);
@@ -339,22 +625,32 @@ int RouteHandle::print(
     std::vector<int> minIndexV;
     minIndexV.push_back(1);
     minIndexV.push_back(1);
-    InterArray *minIndex = new InterArray(minIndexV);
+    InterArray<int> minIndex(minIndexV);
     std::vector<int> maxIndexV;
     maxIndexV.push_back(petCount);
     maxIndexV.push_back(petCount);
-    InterArray *maxIndex = new InterArray(maxIndexV);
+    InterArray<int> maxIndex(maxIndexV);
     DELayout *delayout = NULL;
-    DistGrid *dg = DistGrid::create(minIndex, maxIndex, NULL, NULL, 0, NULL,
+    DistGrid *dg = DistGrid::create(&minIndex, &maxIndex, NULL, NULL, 0, NULL,
       NULL, NULL, NULL, NULL, delayout, NULL, &localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       &rc)) return rc;
-    Array *commArrayPETMap = Array::create(&as, dg,
+    Array *sendMsgArray = Array::create(&as, dg,
       NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
       &localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       &rc)) return rc;
-    Array *commArrayDataCount = Array::create(&as, dg,
+    Array *sendDataArray = Array::create(&as, dg,
+      NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+      &localrc);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      &rc)) return rc;
+    Array *recvMsgArray = Array::create(&as, dg,
+      NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+      &localrc);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      &rc)) return rc;
+    Array *recvDataArray = Array::create(&as, dg,
       NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
       &localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
@@ -364,58 +660,98 @@ int RouteHandle::print(
     int *entry;
 
     // fill the Array with comm matrix values
-    localarrayList = commArrayPETMap->getLocalarrayList();
+    localarrayList = sendMsgArray->getLocalarrayList();
     entry = (int *)localarrayList[0]->getBaseAddr();
     for (int i=0; i<petCount; i++)
       entry[i] = 0; // reset
-    for (int i=0; i<(*commMatrixDstPet).size(); i++){
+    for (unsigned i=0; i<(*commMatrixDstPet).size(); i++){
       int pet = (*commMatrixDstPet)[i];
       ++entry[pet];
     }
-    localrc = commArrayPETMap->setName("src-to-dst-PET-mapping");
+    localrc = sendMsgArray->setName("sendMsgCount_src-dst");
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       &rc)) return rc;
 
     // fill the Array with comm matrix values
-    localarrayList = commArrayDataCount->getLocalarrayList();
+    localarrayList = sendDataArray->getLocalarrayList();
     entry = (int *)localarrayList[0]->getBaseAddr();
     for (int i=0; i<petCount; i++)
       entry[i] = 0; // reset
-    for (int i=0; i<(*commMatrixDstPet).size(); i++){
+    for (unsigned i=0; i<(*commMatrixDstPet).size(); i++){
       int pet = (*commMatrixDstPet)[i];
       entry[pet] += (*commMatrixDstDataCount)[i];
     }
-    localrc = commArrayDataCount->setName("dataCount");
+    localrc = sendDataArray->setName("sendTotalSize_src-dst");
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       &rc)) return rc;
     
-#if 1
-    // finally write the Arrays to file -- using Array::write()
-    bool overwrite = true;
-    localrc = commArrayPETMap->write("commMatrix.nc",
-      NULL, &overwrite, NULL, NULL, NULL);
+    // fill the Array with comm matrix values
+    localarrayList = recvMsgArray->getLocalarrayList();
+    entry = (int *)localarrayList[0]->getBaseAddr();
+    for (int i=0; i<petCount; i++)
+      entry[i] = 0; // reset
+    for (unsigned i=0; i<(*commMatrixSrcPet).size(); i++){
+      int pet = (*commMatrixSrcPet)[i];
+      ++entry[pet];
+    }
+    localrc = recvMsgArray->setName("recvMsgCount_dst-src");
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       &rc)) return rc;
-    localrc = commArrayDataCount->write("commMatrix.nc",
-      NULL, &overwrite, NULL, NULL, NULL);
+
+    // fill the Array with comm matrix values
+    localarrayList = recvDataArray->getLocalarrayList();
+    entry = (int *)localarrayList[0]->getBaseAddr();
+    for (int i=0; i<petCount; i++)
+      entry[i] = 0; // reset
+    for (unsigned i=0; i<(*commMatrixSrcPet).size(); i++){
+      int pet = (*commMatrixSrcPet)[i];
+      entry[pet] += (*commMatrixSrcDataCount)[i];
+    }
+    localrc = recvDataArray->setName("recvTotalSize_dst-src");
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       &rc)) return rc;
     
-#else
-    // finally write the Arrays to file -- using ArrayBundle::write()
-    Array *arrayList[2];
-    arrayList[0] = commArrayPETMap;
-    arrayList[1] = commArrayDataCount;
-    ArrayBundle *ab = ArrayBundle::create(arrayList, 2);
-    bool singleFile = true;
-    bool overwrite = true;
-    localrc = ab->write("commMatrix.nc", &singleFile, &overwrite, NULL, NULL,
-      NULL);
+    // write the Arrays to file -- using Array::write()
+    bool overwrite = false;
+    ESMC_FileStatus_Flag status = ESMC_FILESTATUS_REPLACE;
+    localrc = sendMsgArray->write("commMatrix.nc", "", "", "",
+      &overwrite, &status, NULL, NULL);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       &rc)) return rc;
-#endif
-#endif
-  
+    status = ESMC_FILESTATUS_OLD;
+    localrc = sendDataArray->write("commMatrix.nc", "", "", "",
+      &overwrite, &status, NULL, NULL);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      &rc)) return rc;
+    localrc = recvMsgArray->write("commMatrix.nc", "", "", "",
+      &overwrite, &status, NULL, NULL);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      &rc)) return rc;
+    localrc = recvDataArray->write("commMatrix.nc", "", "", "",
+      &overwrite, &status, NULL, NULL);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      &rc)) return rc;
+    
+    // destroy the Arrays
+    localrc = Array::destroy(&sendMsgArray, true);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      &rc)) return rc;
+    localrc = Array::destroy(&sendDataArray, true);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      &rc)) return rc;
+    localrc = Array::destroy(&recvMsgArray, true);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      &rc)) return rc;
+    localrc = Array::destroy(&recvDataArray, true);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      &rc)) return rc;
+    localrc = DistGrid::destroy(&dg, true);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      &rc)) return rc;
+
+#endif  // PRINTCOMMMATRIX
+#endif  // PIO, etc.
+    
   }catch(int localrc){
     // catch standard ESMF return code
     ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
@@ -423,7 +759,7 @@ int RouteHandle::print(
     return rc;
   }catch(...){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-      "- Caught exception", ESMC_CONTEXT, &rc);
+      "Caught exception", ESMC_CONTEXT, &rc);
     return rc;
   }
   

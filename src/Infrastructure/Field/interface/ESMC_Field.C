@@ -614,6 +614,7 @@ int ESMC_FieldGetBounds(ESMC_Field field,
   double * srcfieldptr = (double *)ESMC_FieldGetPtr(srcField, 0, &rc);
   if (rc != ESMF_SUCCESS) return 0;
 
+#if DEBUG
   printf("fieldpsrc mem address = %p\n", fieldpsrc);
 
   printf("srcfield = [\n");
@@ -626,7 +627,7 @@ int ESMC_FieldGetBounds(ESMC_Field field,
   }
   printf("]\n");
   printf("srcfield mem address = %p\n", srcField.ptr);
-
+#endif
 
     // return rhPtr in routehandle argument
     routehandle->ptr = NULL;

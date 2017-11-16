@@ -33,9 +33,10 @@
 #include "Mesh/include/ESMCI_Extrapolation.h"
 #include "Mesh/include/ESMCI_MathUtil.h"
 #include "Mesh/include/ESMCI_MathUtil.h"
- #include "Mesh/include/ESMCI_Phedra.h"
+#include "Mesh/include/ESMCI_Phedra.h"
 #include "Mesh/include/ESMCI_Mesh_Regrid_Glue.h"
 #include "Mesh/include/ESMCI_MeshMerge.h"
+#include "Mesh/include/ESMCI_Mesh_GToM_Glue.h"
 
 #include <iostream>
 #include <vector>
@@ -123,7 +124,7 @@ void ESMCI_regrid_create(
 #define MEMLOG_off
 
 #ifdef PROGRESSLOG_on
-   ESMC_LogDefault.Write("c_esmc_regrid_create(): Just entered routine.", ESMC_LOGMSG_INFO);
+  ESMC_LogDefault.Write("c_esmc_regrid_create(): Just entered routine.", ESMC_LOGMSG_INFO);
 #endif
 
 #ifdef MEMLOG_on
@@ -143,6 +144,7 @@ void ESMCI_regrid_create(
     if (!ignoreDegenerate) {
       // Check source mesh elements 
       if ((*regridMethod==ESMC_REGRID_METHOD_CONSERVE) ||
+          (*regridMethod==ESMC_REGRID_METHOD_CONSERVE_2ND) ||
           (*regridMethod==ESMC_REGRID_METHOD_BILINEAR) ||
           (*regridMethod==ESMC_REGRID_METHOD_PATCH)) {
         degenerate=any_cells_in_mesh_degenerate(srcmesh);
@@ -158,7 +160,8 @@ void ESMCI_regrid_create(
 
       // Only check dst mesh elements for conservative because for others just nodes are used and it doesn't 
       // matter what the cell looks like
-      if (*regridMethod==ESMC_REGRID_METHOD_CONSERVE) {
+      if ((*regridMethod==ESMC_REGRID_METHOD_CONSERVE) ||
+          (*regridMethod==ESMC_REGRID_METHOD_CONSERVE_2ND)) {
         // Check mesh elements 
         degenerate=any_cells_in_mesh_degenerate(dstmesh);
 
@@ -177,11 +180,11 @@ void ESMCI_regrid_create(
 #endif
 
 #ifdef MEMLOG_on
-  VM::logMemInfo(std::string("RegridCreate2.0"));
+    VM::logMemInfo(std::string("RegridCreate2.0"));
 #endif
 
     // Compute Weights matrix
-    IWeights wts;
+    IWeights *wts = new IWeights;
 
     // Turn off unmapped action checking in regrid because it's local to a proc, and can therefore
     // return false positives for multiproc cases, instead check below after gathering weights to a proc. 
@@ -198,7 +201,7 @@ void ESMCI_regrid_create(
     // to do NEARESTDTOS just do NEARESTSTOD and invert results
     if (*regridMethod != ESMC_REGRID_METHOD_NEAREST_DST_TO_SRC) { 
 
-      if(!online_regrid(srcmesh, srcpointlist, dstmesh, dstpointlist, wts, &regridConserve, 
+      if(!online_regrid(srcmesh, srcpointlist, dstmesh, dstpointlist, *wts, &regridConserve, 
 			regridMethod, regridPoleType, regridPoleNPnts, 
                         regridScheme, map_type, &temp_unmappedaction, 
                         set_dst_status, dst_status)) {
@@ -207,7 +210,7 @@ void ESMCI_regrid_create(
     } else {
       int tempRegridMethod=ESMC_REGRID_METHOD_NEAREST_SRC_TO_DST;
 
-      if(!online_regrid(dstmesh, dstpointlist, srcmesh, srcpointlist, wts, &regridConserve, 
+      if(!online_regrid(dstmesh, dstpointlist, srcmesh, srcpointlist, *wts, &regridConserve, 
 			&tempRegridMethod, regridPoleType, regridPoleNPnts, 
                         regridScheme, map_type, &temp_unmappedaction,
                         set_dst_status, dst_status)) {
@@ -219,22 +222,23 @@ void ESMCI_regrid_create(
 #endif
 
 #ifdef MEMLOG_on
-  VM::logMemInfo(std::string("RegridCreate3.0"));
+    VM::logMemInfo(std::string("RegridCreate3.0"));
 #endif
 
     // If requested get list of unmapped destination points
     std::vector<int> unmappedDstList;
     if (*has_udl) {
-      if (*regridMethod==ESMC_REGRID_METHOD_CONSERVE) {
-        get_mesh_elem_ids_not_in_wmat(dstmesh, wts, &unmappedDstList);
+      if ((*regridMethod==ESMC_REGRID_METHOD_CONSERVE) ||
+          (*regridMethod==ESMC_REGRID_METHOD_CONSERVE_2ND)) {
+        get_mesh_elem_ids_not_in_wmat(dstmesh, *wts, &unmappedDstList);
       } else if (*regridMethod == ESMC_REGRID_METHOD_NEAREST_DST_TO_SRC) { 
         // CURRENTLY DOESN'T WORK!!!
 #if 0
-        get_mesh_node_ids_not_in_wmat(srcmesh, wts, &unmappedDstList);
+        get_mesh_node_ids_not_in_wmat(srcmesh, *wts, &unmappedDstList);
 #endif
 
       } else { // Non-conservative
-        get_mesh_node_ids_not_in_wmat(dstpointlist, wts, &unmappedDstList);
+        get_mesh_node_ids_not_in_wmat(dstpointlist, *wts, &unmappedDstList);
       }
     }
 #ifdef PROGRESSLOG_on
@@ -245,9 +249,10 @@ void ESMCI_regrid_create(
     // here, because we have all the dest objects and weights
     // gathered onto the same proc.
     if (*unmappedaction==ESMCI_UNMAPPEDACTION_ERROR) {
-      if (*regridMethod==ESMC_REGRID_METHOD_CONSERVE) {
+      if ((*regridMethod==ESMC_REGRID_METHOD_CONSERVE) ||
+          (*regridMethod==ESMC_REGRID_METHOD_CONSERVE_2ND)) {
         int missing_id;
-        if (!all_mesh_elem_ids_in_wmat(dstmesh, wts, &missing_id)) {
+        if (!all_mesh_elem_ids_in_wmat(dstmesh, *wts, &missing_id)) {
           int localrc;
           char msg[1024];
           sprintf(msg,"- There exist destination cells (e.g. id=%d) which don't overlap with any "
@@ -258,7 +263,7 @@ void ESMCI_regrid_create(
       } else if (*regridMethod == ESMC_REGRID_METHOD_NEAREST_DST_TO_SRC) { 
         // CURRENTLY DOESN'T WORK!!!
 #if 0
-        if (!all_mesh_node_ids_in_wmat(srcmesh, wts)) {
+        if (!all_mesh_node_ids_in_wmat(srcmesh, *wts)) {
           int localrc;
           if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
             "- There exist source points which can't be mapped to any "
@@ -269,7 +274,7 @@ void ESMCI_regrid_create(
       } else { // bilinear, patch, ...
         int missing_id;
 
-	if (!all_mesh_node_ids_in_wmat(dstpointlist, wts, &missing_id)) {
+	if (!all_mesh_node_ids_in_wmat(dstpointlist, *wts, &missing_id)) {
           int localrc;
           char msg[1024];
           sprintf(msg,"- There exist destination points (e.g. id=%d) which can't be mapped to any "
@@ -284,13 +289,13 @@ void ESMCI_regrid_create(
 #endif
 
 #ifdef MEMLOG_on
-  VM::logMemInfo(std::string("RegridCreate4.0"));
+    VM::logMemInfo(std::string("RegridCreate4.0"));
 #endif
 
     /////// We have the weights, now set up the sparsemm object /////
 
     // Firstly, the index list
-    std::pair<UInt,UInt> iisize = wts.count_matrix_entries();
+    std::pair<UInt,UInt> iisize = wts->count_matrix_entries();
     int num_entries = iisize.first;
     int *iientries = new int[2*iisize.first]; 
     int larg[2] = {2, iisize.first};
@@ -304,7 +309,7 @@ void ESMCI_regrid_create(
     // Translate weights to sparse matrix representation
     if (*regridMethod != ESMC_REGRID_METHOD_NEAREST_DST_TO_SRC) { 
       UInt i = 0;
-      WMat::WeightMap::iterator wi = wts.begin_row(), we = wts.end_row();
+      WMat::WeightMap::iterator wi = wts->begin_row(), we = wts->end_row();
       for (; wi != we; ++wi) {
         const WMat::Entry &w = wi->first;
         
@@ -319,9 +324,8 @@ void ESMCI_regrid_create(
           iientries[twoi+1] = w.id;  iientries[twoi] = wc.id;
           factors[i] = wc.value;
           
-#define ESMF_REGRID_DEBUG_OUTPUT_WTS_ALL_off
 #ifdef ESMF_REGRID_DEBUG_OUTPUT_WTS_ALL
-          printf("d_id=%d  s_id=%d w=%20.17E \n",w.id,wc.id,wc.value);
+          printf("d_id=%d  s_id=%d s=%d w=%20.17E \n",w.id,wc.id,wc.src_id,wc.value);
 #endif          
 #ifdef ESMF_REGRID_DEBUG_OUTPUT_WTS_SID
           if (wc.id==ESMF_REGRID_DEBUG_OUTPUT_WTS_SID) {
@@ -330,7 +334,7 @@ void ESMCI_regrid_create(
 #endif
 #ifdef ESMF_REGRID_DEBUG_OUTPUT_WTS_DID
           if (w.id==ESMF_REGRID_DEBUG_OUTPUT_WTS_DID) {
-             printf("d_id=%d  s_id=%d w=%20.17E \n",w.id,wc.id,wc.value);
+            printf("d_id=%d  s_id=%d s=%d w=%20.17E \n",w.id,wc.id,wc.src_id,wc.value);
           }
 #endif
 
@@ -340,7 +344,7 @@ void ESMCI_regrid_create(
       
     } else {
       UInt i = 0;
-      WMat::WeightMap::iterator wi = wts.begin_row(), we = wts.end_row();
+      WMat::WeightMap::iterator wi = wts->begin_row(), we = wts->end_row();
       for (; wi != we; ++wi) {
         const WMat::Entry &w = wi->first;
         
@@ -364,20 +368,23 @@ void ESMCI_regrid_create(
     }
 
     ///// If conservative, translate split element weights to non-split //////
-    if (*regridMethod==ESMC_REGRID_METHOD_CONSERVE) {
+    if ((*regridMethod==ESMC_REGRID_METHOD_CONSERVE) ||
+        (*regridMethod==ESMC_REGRID_METHOD_CONSERVE_2ND)) {
       if (srcmesh->is_split) translate_split_src_elems_in_wts(srcmesh, num_entries, iientries);
       if (dstmesh->is_split) translate_split_dst_elems_in_wts(dstmesh, num_entries, iientries, factors);
     }
 
 
     ///// If conservative then modify weights according to norm type //////
-    if (*regridMethod==ESMC_REGRID_METHOD_CONSERVE) {
+    if ((*regridMethod==ESMC_REGRID_METHOD_CONSERVE) ||
+        (*regridMethod==ESMC_REGRID_METHOD_CONSERVE_2ND)) {
       if (*norm_type==ESMC_NORM_TYPE_FRACAREA) change_wts_to_be_fracarea(dstmesh, num_entries, iientries, factors);
     }
 
     // Copy status info from WMat to Array
     if (has_statusArray) {
-      if (*regridMethod==ESMC_REGRID_METHOD_CONSERVE) {
+      if ((*regridMethod==ESMC_REGRID_METHOD_CONSERVE) ||
+          (*regridMethod==ESMC_REGRID_METHOD_CONSERVE_2ND)) {
         copy_cnsv_rs_from_WMat_to_Array(&dst_status, statusArray);
       } else {
         copy_rs_from_WMat_to_Array(&dst_status, statusArray);
@@ -392,7 +399,24 @@ void ESMCI_regrid_create(
 #endif
 
 #ifdef MEMLOG_on
-  VM::logMemInfo(std::string("RegridCreate5.0"));
+    VM::logMemInfo(std::string("RegridCreate5.0"));
+#endif
+
+    delete wts; // local garbage collection
+    
+#ifdef MEMLOG_on
+    VM::logMemInfo(std::string("RegridCreate5.1"));
+#endif
+  
+#ifdef C_SIDE_REGRID_FREED_MESH
+    // enabling this freature currently breaks several tests
+    delete srcmesh;
+    delete dstmesh;
+    //TODO: also drop PointList objects here if possible to reduce Store() memory footrint
+#endif
+  
+#ifdef MEMLOG_on
+    VM::logMemInfo(std::string("RegridCreate5.2"));
 #endif
 
     // Build the ArraySMM
@@ -412,7 +436,7 @@ void ESMCI_regrid_create(
 #endif
 
 #ifdef MEMLOG_on
-  VM::logMemInfo(std::string("RegridCreate6.0"));
+    VM::logMemInfo(std::string("RegridCreate6.0"));
 #endif
 
     *nentries = num_entries;
@@ -1747,6 +1771,11 @@ void CpMeshDataToArray(Grid &grid, int staggerLoc, ESMCI::Mesh &mesh, ESMCI::Arr
  int localrc;
  int rc;
 
+ // If multi-tile jump to other way of doing things
+ if (grid.getTileCount() > 1) {
+   CpMeshElemDataToArrayCell(&grid, &mesh, &array, dataToArray);
+   return;
+ }
 
   // Initialize the parallel environment for mesh (if not already done)
   ESMCI::Par::Init("MESHLOG", false /* use log */,VM::getCurrent(&localrc)->getMpi_c());
@@ -1792,8 +1821,8 @@ void CpMeshDataToArray(Grid &grid, int staggerLoc, ESMCI::Mesh &mesh, ESMCI::Arr
 
   void PutElemAreaIntoArray(Grid &grid, int staggerLoc, ESMCI::Mesh &mesh, ESMCI::Array &array) {
 #undef  ESMC_METHOD
-#define ESMC_METHOD "CpMeshElemDataToArray()" 
-    Trace __trace("CpMeshElemDataToArray()");
+#define ESMC_METHOD "PutElemAreaIntoArray()" 
+    Trace __trace("PutElemAreaIntoArray()");
     
     int localrc;
     int rc;
@@ -1811,6 +1840,13 @@ void CpMeshDataToArray(Grid &grid, int staggerLoc, ESMCI::Mesh &mesh, ESMCI::Arr
     ESMCI::Par::Init("MESHLOG", false /* use log */,VM::getCurrent(&localrc)->getMpi_c());
     if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
       throw localrc;  // bail out with exception
+
+
+    // If multi-tile jump to other way of doing things
+    if (grid.getTileCount() > 1) {
+      PutElemAreaIntoArrayCell(&grid, &mesh, &array);
+      return;
+    }
 
 
     // Setup interator to Loop elemets of the grid.  Here we loop all elements, both owned and not.

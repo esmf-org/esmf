@@ -6,11 +6,13 @@ run_uni: run_examples_uni
 
 LOCDIR	  = src/Infrastructure/Route/examples
 
-
-EXAMPLES_BUILD    = $(ESMF_EXDIR)/ESMF_RHandleBitForBitEx
-
-EXAMPLES_RUN      = run_ESMF_RHandleBitForBitEx
-
+.NOTPARALLEL:
+EXAMPLES_BUILD    = $(ESMF_EXDIR)/ESMF_RHandleBitForBitEx \
+                    $(ESMF_EXDIR)/ESMF_RHandleFromRHandleEx
+                    
+EXAMPLES_RUN      = run_ESMF_RHandleBitForBitEx \
+                    run_ESMF_RHandleFromRHandleEx
+                    
 EXAMPLES_RUN_UNI  = 
 
 
@@ -28,3 +30,5 @@ CLOBBERDIRS =
 run_ESMF_RHandleBitForBitEx:
 	$(MAKE) EXNAME=RHandleBitForBit NP=4 exfrun
 
+run_ESMF_RHandleFromRHandleEx:
+	$(MAKE) EXNAME=RHandleFromRHandle NP=4 exfrun

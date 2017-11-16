@@ -20,7 +20,7 @@
 //------------------------------------------------------------------------------
 
 // Take out if MOAB isn't being used
-#ifdef ESMF_MOAB
+#if defined ESMF_MOAB
 
 #include "ESMCI_Macros.h"
 #include "ESMCI_LogErr.h"

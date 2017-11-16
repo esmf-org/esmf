@@ -218,6 +218,10 @@
                         ESMCI::InterArray<int> *maskValuesArg,
                         int *regridConserve, int *rc);
 
+    static MeshCap *GridToMeshCell(const Grid &grid_,
+                                   const std::vector<ESMCI::Array*> &arrays,
+                                   int *rc);
+
      static void xgridregrid_create(MeshCap **meshsrcpp, MeshCap **meshdstpp, 
                                     MeshCap **out_mesh,
                                     int *compute_midmesh,

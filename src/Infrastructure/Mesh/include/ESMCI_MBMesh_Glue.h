@@ -22,7 +22,7 @@
 #define ESMCI_MBMesh_Glue_h
 
 // Take out if MOAB isn't being used
-#ifdef ESMF_MOAB
+#if defined ESMF_MOAB
 
 #include <string>
 #include <ostream>

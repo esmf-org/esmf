@@ -11,6 +11,13 @@ Licensed under the University of Illinois-NCSA License.
 #endif
 
 #if 0
+The Lahey compiler does not support Fortran 2003 allocatable deferred-length
+string variables.
+#endif
+
+#define ESMF_NO_F2003_ALLOC_STRING_LENS
+
+#if 0
 Define the proper way to flush Fortran units.  Typically this will
 be one of the following:
 

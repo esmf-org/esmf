@@ -21,6 +21,7 @@
 // ESMF Test header
 #include "ESMC_Test.h"
 
+#if defined ESMF_MOAB
 #include "ESMC_MBMeshTestUtilMesh.C"
 #include "ESMC_MBMeshTestUtilMBMesh.C"
 #include "ESMC_MBMeshTestUtilPL.C"
@@ -35,11 +36,12 @@
 #include "moab/Core.hpp"
 
 #include "ESMCI_WMat.h"
-
+#endif
 
 #include <iostream>
 #include <iterator>
 #include <vector>
+#include <cstring>
 
 
 #if !defined (M_PI)
@@ -49,6 +51,7 @@
 
 using namespace std;
 
+#if defined ESMF_MOAB
 typedef std::map<WMat::Entry, std::vector<WMat::Entry> > WeightMap;
 WeightMap weights;
 WeightMap::iterator begin_row() { return weights.begin(); }
@@ -91,6 +94,7 @@ bool weight_gen(MBMesh *mesh, PointList *pl) {
   else return false;
 
 }
+#endif
 
 int main(int argc, char *argv[]) {
 
@@ -107,8 +111,10 @@ int main(int argc, char *argv[]) {
   //----------------------------------------------------------------------------
   rc=ESMC_LogSet(true);
 
+#if defined ESMF_MOAB
   //----------------------------------------------------------------------------
   //ESMC_MoabSet(true);
+#endif
 
   // Get parallel information
   vm=ESMC_VMGetGlobal(&rc);
@@ -122,6 +128,7 @@ int main(int argc, char *argv[]) {
   // quad mesh bilinear
   // --------------------------------------------------------------------------
 
+#if defined ESMF_MOAB
   // build a mesh
   MBMesh *mesh_quad_par;
   mesh_quad_par = create_mesh_quad_10_parallel(ESMC_COORDSYS_CART, rc);
@@ -139,11 +146,18 @@ int main(int argc, char *argv[]) {
   // clean up
   delete pl_quad_par;
   delete mesh_quad_par;
+#else
+  rc = ESMF_SUCCESS;
+  strcpy(name, "Quadrilateral bilinear weight generation");
+  strcpy(failMsg, "Weights were not generated correctly");
+  ESMC_Test(rc==ESMF_SUCCESS, name, failMsg, &result, __FILE__, __LINE__, 0);
+#endif
 
   // --------------------------------------------------------------------------
   // spherical quad mesh bilinear
   // --------------------------------------------------------------------------
 
+#if defined ESMF_MOAB
   // build a mesh
   MBMesh *mesh_quad_sph_par;
   mesh_quad_sph_par = create_mesh_quad_sph_10_parallel(ESMC_COORDSYS_SPH_RAD, rc);
@@ -161,6 +175,12 @@ int main(int argc, char *argv[]) {
   // clean up
   delete pl_quad_sph_par;
   delete mesh_quad_sph_par;
+#else
+  rc = ESMF_SUCCESS;
+  strcpy(name, "Spherical quadrilateral bilinear weight generation");
+  strcpy(failMsg, "Weights were not generated correctly");
+  ESMC_Test(rc==ESMF_SUCCESS, name, failMsg, &result, __FILE__, __LINE__, 0);
+#endif
 
   //----------------------------------------------------------------------------
   ESMC_TestEnd(__FILE__, __LINE__, 0);

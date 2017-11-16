@@ -375,6 +375,56 @@ int offline_regrid(Mesh &srcmesh, Mesh &dstmesh, Mesh &dstmeshcpy,
       srcmesh->GhostComm().SendFields(num_snd, snd, rcv);
     }
 
+    // Create a layer of ghost elements since the higher order conservative needs a
+    // a larger stencil.
+    if (*regridMethod == ESMC_REGRID_METHOD_CONSERVE_2ND) {
+      // Get coordinate fields
+      MEField<> &scoord = *srcmesh->GetCoordField();
+
+      int num_snd=0;
+      MEField<> *snd[3],*rcv[3];
+
+      // Load coord field
+      MEField<> *psc = &scoord;
+      snd[num_snd]=psc;
+      rcv[num_snd]=psc;
+      num_snd++;
+ 
+      // Load mask field
+      MEField<> *psm = srcmesh->GetField("elem_mask");
+      if (psm != NULL) {
+        snd[num_snd]=psm;
+        rcv[num_snd]=psm;
+        num_snd++;
+      }
+
+      // Load area field
+      MEField<> *psa = srcmesh->GetField("elem_area");
+      if (psa != NULL) {
+        snd[num_snd]=psa;
+        rcv[num_snd]=psa;
+        num_snd++;
+      }
+
+      srcmesh->CreateGhost();
+      srcmesh->GhostComm().SendFields(num_snd, snd, rcv);
+
+#if 0
+      // DEBUG
+      {
+        MeshDB::const_iterator ei = srcmesh->elem_begin_all(), ee = srcmesh->elem_end_all();
+        for (; ei != ee; ++ei) {
+          const MeshObj &elem=*ei;
+          
+          if (!GetAttr(elem).GetContext().is_set(Attr::ACTIVE_ID)) {
+            printf("AFTER GHOST id=%d not active\n",elem.get_id());
+          }
+        }
+      }
+#endif
+
+    }
+
     // Convert to map type
     MAP_TYPE mtype;
     if (*map_type==0) mtype=MAP_TYPE_CART_APPROX;

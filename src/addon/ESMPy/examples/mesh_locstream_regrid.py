@@ -41,16 +41,13 @@ dstfield.data[...] = 1e20
 
 # create an object to regrid data from the source to the destination field
 # TODO: this example seems to fail occasionally with UnmappedAction.ERROR, probably due to a tolerance issue - ask Bob
-regrid = ESMF.Regrid(srcfield, dstfield,
-                     regrid_method=ESMF.RegridMethod.BILINEAR,
+regrid = ESMF.Regrid(srcfield=srcfield, dstfield=dstfield, regrid_method=ESMF.RegridMethod.BILINEAR,
                      unmapped_action=ESMF.UnmappedAction.IGNORE)
 
 # do the regridding from source to destination field
 dstfield = regrid(srcfield, dstfield)
 
-
 # compute the mean relative error
-from operator import mul
 num_nodes = numpy.prod(xctfield.data.shape[:])
 relerr = 0
 meanrelerr = 0

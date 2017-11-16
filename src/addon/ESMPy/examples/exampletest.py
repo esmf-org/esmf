@@ -3,8 +3,13 @@
 """
 examples test file
 """
+try:
+    from unittest import SkipTest
+except ImportError:
+    from nose import SkipTest
 
 from ESMF.test.base import TestBase, attr
+import ESMF.api.constants as constants
 
 class TestExamples(TestBase):
 
@@ -15,8 +20,13 @@ class TestExamples(TestBase):
     def test_crff(self):
         from . import create_read_from_file
 
+    @attr('serial')
+    # @attr('parallel')
     def test_gridmeshrg(self):
-        from . import grid_mesh_regrid
+        if constants._ESMF_COMM == constants._ESMF_COMM_MPIUNI:
+            raise SkipTest('ESMF must be built with MPI for test')
+        else:
+            from . import grid_mesh_regrid
 
     @attr('parallel')
     def test_field_read(self):

@@ -751,7 +751,7 @@ int ESMC_FieldRegridStore(
     enum ESMC_LineType_Flag *lineType,             // in
     enum ESMC_NormType_Flag *normType,             // in
     enum ESMC_UnmappedAction_Flag *unmappedaction, // in
-    ESMC_Logical *ignoreDegenerate,                // in
+    enum ESMC_Logical *ignoreDegenerate,           // in
     ESMC_Field *srcFracField,                      // out
     ESMC_Field *dstFracField);                     // out
 
@@ -841,7 +841,7 @@ int ESMC_FieldRegridStoreFile(
     enum ESMC_LineType_Flag *lineType,             // in
     enum ESMC_NormType_Flag *normType,             // in
     enum ESMC_UnmappedAction_Flag *unmappedaction, // in
-    ESMC_Logical *ignoreDegenerate,                        // in
+    enum ESMC_Logical *ignoreDegenerate,           // in
     ESMC_Field *srcFracField,                      // out
     ESMC_Field *dstFracField);                     // out
 

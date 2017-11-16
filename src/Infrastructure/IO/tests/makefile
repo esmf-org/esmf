@@ -24,7 +24,7 @@ TESTS_RUN_UNI = RUN_ESMCI_IO_NetCDFUTestUNI \
                 RUN_ESMF_IO_PIOUTestUNI \
                 RUN_ESMCI_IO_PIOUTestUNI \
                 RUN_ESMC_IO_InqUTestUNI \
-                RUN_ESMF_IOUTest
+                RUN_ESMF_IOUTestUNI
 
 include ${ESMF_DIR}/makefile
 

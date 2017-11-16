@@ -65,10 +65,10 @@ template int DistGrid::setArbSeqIndex<ESMC_I8>(InterArray<ESMC_I8> *arbSeqIndex,
   int localDe, int collocation);
 
 template int DistGrid::getSequenceIndexLocalDe<ESMC_I4>(int localDe, 
-    int const *index, vector<ESMC_I4> &seqIndex) const;
+    int const *index, vector<ESMC_I4> &seqIndex, bool recursive) const;
 
 template int DistGrid::getSequenceIndexLocalDe<ESMC_I8>(int localDe, 
-    int const *index, vector<ESMC_I8> &seqIndex) const;
+    int const *index, vector<ESMC_I8> &seqIndex, bool recursive) const;
 
 template int DistGrid::getSequenceIndexTileRelative<ESMC_I4>(int tile,
     int const *index, ESMC_I4 *seqIndex)const;
@@ -3583,7 +3583,8 @@ template<typename T> int DistGrid::getSequenceIndexLocalDe(
   const int *index,                 // in  - DE-local index tuple in or 
                                     //       relative to exclusive region
                                     //       basis 0
-  vector<T> &seqIndex               // out - sequence index
+  vector<T> &seqIndex,              // out - sequence index
+  bool recursive                    // in  - recursive mode or not
   )const{
 //
 // !DESCRIPTION:
@@ -3661,7 +3662,8 @@ template<typename T> int DistGrid::getSequenceIndexLocalDe(
   
   // make the actual call with consistently typed arguments
   localrc = tGetSequenceIndexLocalDe(
-    (T ***)arbSeqIndexListPCollPLocalDe, de, localDe, index, seqIndex);
+    (T ***)arbSeqIndexListPCollPLocalDe, de, localDe, index, seqIndex, 
+    recursive);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
     ESMC_CONTEXT, &rc)) return rc;  //  bail out with invalid seqindex
 
@@ -3676,7 +3678,8 @@ template<typename T> int DistGrid::getSequenceIndexLocalDe(
 #define ESMC_METHOD "ESMCI::tGetSequenceIndexLocalDe()"
 template<typename T> int DistGrid::tGetSequenceIndexLocalDe(
   T ***tArbSeqIndexListPCollPLocalDe,
-  int de, int localDe, const int *index, vector<T> &seqIndex)const{
+  int de, int localDe, const int *index, vector<T> &seqIndex, 
+  bool recursive)const{
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
@@ -3709,7 +3712,7 @@ template<typename T> int DistGrid::tGetSequenceIndexLocalDe(
             indexListPDimPLocalDe[localDe*dimCount+i][index[i]];
       }
       // get sequence index providing tile relative index tuple
-      localrc = getSequenceIndexTile(tile, tileIndexTuple, seqIndex);
+      localrc = getSequenceIndexTile(tile, tileIndexTuple, seqIndex, recursive);
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
         ESMC_CONTEXT, &rc)) return rc;  //  bail out with invalid seqindex
       delete [] tileIndexTuple;
@@ -3810,7 +3813,8 @@ template<typename T> int DistGrid::getSequenceIndexTile(
 //
   int tile,                         // in  - tile = {1, ..., tileCount}
   const int *index,                 // in  - tile-specific absolute index tuple
-  vector<T> &seqIndex               // out - sequence index
+  vector<T> &seqIndex,              // out - sequence index
+  bool recursive                    // in  - recursive mode or not
   )const{
 //
 // !DESCRIPTION:
@@ -3834,49 +3838,89 @@ template<typename T> int DistGrid::getSequenceIndexTile(
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
 
-  // prepare for recursive call entry
-  vector<T> seqIndexV;
-  const int depthMax=2; // allow up to two-connection hops
+  if (!recursive){
+    // only check on the local tile -> this is more optimal in many cases
+    
+    // check input
+    if (tile < 1 || tile > tileCount){
+      char message[80];
+      sprintf(message, "Specified tile %d is out of bounds", tile);
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD, message, ESMC_CONTEXT, &rc);
+      return rc;
+    }
+    
+    bool onTile = true;  // start assuming that index tuple can be found on tile
+    // add up elements from tile
+    int seqIndexAux = 0; // initialize
+    for (int i=dimCount-1; i>=0; i--){
+      // first time multiply with zero intentionally:
+      seqIndexAux *= maxIndexPDimPTile[(tile-1)*dimCount+i] 
+        - minIndexPDimPTile[(tile-1)*dimCount+i] + 1;
+      if ((index[i] < minIndexPDimPTile[(tile-1)*dimCount+i])
+        || (index[i] > maxIndexPDimPTile[(tile-1)*dimCount+i])){
+        // index is outside of tile bounds -> break out of onTile code
+        onTile = false;
+        break;
+      }
+      seqIndexAux += index[i] - minIndexPDimPTile[(tile-1)*dimCount+i];
+    }
+    if (onTile){
+      // add all the elements of previous tiles
+      for (int i=0; i<tile-1; i++)
+        seqIndexAux += elementCountPTile[i];
+      ++seqIndexAux;  // shift sequentialized index to basis 1 !!!!
+      // found valid sequence index
+      seqIndex.push_back(seqIndexAux);
+    }
+  
+  }else{
+    // search for all seqIndices recursively
+  
+    // prepare for recursive call entry
+    vector<T> seqIndexV;
+    const int depthMax=2; // allow up to two-connection hops
 #if 1
-  // ensure a width-first search by slowly incrementing the depth
-  for (int depth=0; depth<=depthMax; depth++){
+    // ensure a width-first search by slowly incrementing the depth
+    for (int depth=0; depth<=depthMax; depth++){
+      int hops=0;
+      localrc = getSequenceIndexTileRecursive(tile, index, depth, hops, seqIndexV);
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+        ESMC_CONTEXT, &rc)) return rc;  // bail out
+    }
+#else
+    // this deep recursive search is will not deliver good results in general
+    // because it can place very deep search results very early in the
+    // returned vector. Avoid this option!!!! Only here for testing during
+    // development. Probably should be removed once all is working as it should.
     int hops=0;
-    localrc = getSequenceIndexTileRecursive(tile, index, depth, hops, seqIndexV);
+    localrc = getSequenceIndexTileRecursive(tile, index, depthMax, hops, seqIndexV);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
       ESMC_CONTEXT, &rc)) return rc;  // bail out
-  }
-#else
-  // this deep recursive search is will not deliver good results in general
-  // because it can place very deep search results very early in the
-  // returned vector. Avoid this option!!!! Only here for testing during
-  // development. Probably should be removed once all is working as it should.
-  int hops=0;
-  localrc = getSequenceIndexTileRecursive(tile, index, depthMax, hops, seqIndexV);
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
-    ESMC_CONTEXT, &rc)) return rc;  // bail out
 #endif
   
-  // construct seqIndex from the unique elements of seqIndexV vector,
-  // preserving order of elements!
-  typename vector<T>::iterator itV;
-  typename vector<T>::iterator it;
-  for (itV=seqIndexV.begin(); itV!=seqIndexV.end(); ++itV){
-    for (it=seqIndex.begin(); it!=seqIndex.end(); ++it)
-      if (*it==*itV) break;
-    if (it==seqIndex.end())
-      seqIndex.push_back(*itV);
-  }
+    // construct seqIndex from the unique elements of seqIndexV vector,
+    // preserving order of elements!
+    typename vector<T>::iterator itV;
+    typename vector<T>::iterator it;
+    for (itV=seqIndexV.begin(); itV!=seqIndexV.end(); ++itV){
+      for (it=seqIndex.begin(); it!=seqIndex.end(); ++it)
+        if (*it==*itV) break;
+      if (it==seqIndex.end())
+        seqIndex.push_back(*itV);
+    }
 
 #define DEBUGGINGoff
 #ifdef DEBUGGING
-  {
-    stringstream debugmsg;
-    debugmsg << "seqIndex.size()=" << seqIndex.size();
-    for (unsigned int i=0; i<seqIndex.size(); i++)
-      debugmsg << " ["<<i<<"]=" << seqIndex[i];
-    ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_INFO);
-  }
+    {
+      stringstream debugmsg;
+      debugmsg << "seqIndex.size()=" << seqIndex.size();
+      for (unsigned int i=0; i<seqIndex.size(); i++)
+        debugmsg << " ["<<i<<"]=" << seqIndex[i];
+      ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_INFO);
+    }
 #endif
+    
+  }
     
   // return successfully
   return ESMF_SUCCESS;

@@ -3,7 +3,6 @@
 import os
 import sys
 
-import ESMF
 import ESMF.api.constants as constants
 from ESMF.test.regrid_from_file.regrid_from_file_consts import TEST_REGRID_DIR
 
@@ -51,11 +50,11 @@ rtpass = rtpass/num_proc
 rtfail = rtfail/num_proc
 rtskip = rtskip/num_proc
 
-print ("Regrid from file test results: "+rtestoutfile)
-print ("PASS  = "+str(int(rtpass)))
-print ("FAIL  = "+str(int(rtfail)))
-print ("SKIP  = "+str(int(rtskip)))
+print("Regrid from file test results: "+rtestoutfile)
+print("PASS  = "+str(int(rtpass)))
+print("FAIL  = "+str(int(rtfail)))
+print("SKIP  = "+str(int(rtskip)))
 
 if rtpass == 0 and rtfail == 0 and rtskip == 0: 
-    print (rtestoutfile+":")
+    print(rtestoutfile+":")
     os.system("tail "+rtestoutfile)

@@ -67,6 +67,7 @@ module ESMF_GridUtilMod
   public ESMF_MeshIO
   public ESMF_GridWriteVTK
   public ESMF_GridToMesh
+  public ESMF_GridToMeshCell
 
 !EOPI
 !------------------------------------------------------------------------------
@@ -412,6 +413,72 @@ module ESMF_GridUtilMod
     if (present(rc)) rc = ESMF_SUCCESS
 
     end function ESMF_GridToMesh
+
+
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridToMeshCell()"
+!BOPI
+! !IROUTINE: ESMF_GridToMeshCell -- return a mesh with same topo as mesh
+!
+! !INTERFACE:
+   function ESMF_GridToMeshCell(grid, rc)
+!
+!
+! !RETURN VALUE:
+    type(ESMF_Mesh)                               :: ESMF_GridToMeshCell
+!
+! !ARGUMENTS:
+    type(ESMF_Grid), intent(in)                :: grid
+    integer, intent(out) , optional               :: rc
+!
+! !DESCRIPTION:
+!   Create a mesh object with the same topology as the grid.
+!
+!   \begin{description}
+!   \item [grid]
+!         The grid to copy.
+!   \item [{[rc]}]
+!         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOPI
+!------------------------------------------------------------------------------
+    integer :: localrc 
+    type(ESMF_Pointer) :: theMesh
+    type(ESMF_Index_Flag) :: indexflag
+    type(ESMF_CoordSys_Flag) :: coordSys
+    integer :: dimCount
+
+    localrc = ESMF_SUCCESS
+
+    ! Error check Grid
+    call ESMF_GridGet(grid, indexflag=indexflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      	  ESMF_CONTEXT, rcToReturn=rc)) return
+
+    call c_esmc_gridtomeshcell(grid, theMesh, localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      	    ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ESMF_GridToMeshCell = ESMF_MeshCreate(theMesh)
+
+    ! Set these here, eventually this will happen automatically internally inside ESMF_MeshCreate()
+    call ESMF_GridGet(grid,              &
+                      coordSys=coordSys, &
+                      dimCount=dimCount, &
+                      rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      	    ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ESMF_GridToMeshCell%coordSys=coordSys
+    ESMF_GridToMeshCell%parametricDim=dimCount
+    ESMF_GridToMeshCell%spatialDim=dimCount
+
+    if (present(rc)) rc = ESMF_SUCCESS
+
+    end function ESMF_GridToMeshCell
 
 end module ESMF_GridUtilMod
 

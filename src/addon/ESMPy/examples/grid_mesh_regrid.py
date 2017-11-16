@@ -16,127 +16,102 @@ import numpy
 # This call enables debug logging
 # esmpy = ESMF.Manager(debug=True)
 
-# # Create the source grid from memory with periodic dimension specified.
-# lats  = numpy.arange(  0, 360, 360./2.)
-# lons = numpy.arange(-90., 90.1, 180./2.)
-# max_index = numpy.array([lons.size, lats.size])
-# srcgrid = ESMF.Grid(max_index, coord_sys=ESMF.CoordSys.SPH_DEG, coord_typekind=ESMF.TypeKind.R4,
-#                     num_peri_dims=1, periodic_dim=1, pole_dim=0)
+# ESMPy uses Fortran style dimension ordering (as of November 2017)
+[lat,lon] = [1,0]
 
-# # Add coordinates to the source grid.
-# srcgrid.add_coords(staggerloc=[ESMF.StaggerLoc.CENTER])
-#
-# # Get and set the source grid coordinates.
-# gridCoordLat = srcgrid.get_coords(lat)
-# gridCoordLon = srcgrid.get_coords(lon)
-#
-# lons_par = lons[srcgrid.lower_bounds[ESMF.StaggerLoc.CENTER][0]:srcgrid.upper_bounds[ESMF.StaggerLoc.CENTER][0]]
-# lats_par = lats[srcgrid.lower_bounds[ESMF.StaggerLoc.CENTER][1]:srcgrid.upper_bounds[ESMF.StaggerLoc.CENTER][1]]
-#
-# gridCoordLat[...] = lats_par.reshape(1, lats_par.size)
-# gridCoordLon[...] = lons_par.reshape(lons_par.size, 1)
+# Create the source grid from memory with periodic dimension specified.
+lons = numpy.arange(5, 350.1, 10)
+lats  = numpy.arange(-85, 85.1, 10)
+srcgrid = ESMF.Grid(numpy.array([lons.size, lats.size]),
+                    coord_sys=ESMF.CoordSys.SPH_DEG,
+                    staggerloc=ESMF.StaggerLoc.CENTER,
+                    num_peri_dims=1, periodic_dim=0, pole_dim=1)
 
-pi = 3.14159
+# Get and set the source grid coordinates.
+gridCoordLon = srcgrid.get_coords(lon)
+gridCoordLat = srcgrid.get_coords(lat)
 
-row = [-pi, -pi/2, pi/2, pi]; col = [0, pi/2, 3*pi/2, 2*pi]
-rowm, colm = numpy.meshgrid(row, col)
+slons_par = lons[srcgrid.lower_bounds[ESMF.StaggerLoc.CENTER][0]:srcgrid.upper_bounds[ESMF.StaggerLoc.CENTER][0]]
+slats_par = lats[srcgrid.lower_bounds[ESMF.StaggerLoc.CENTER][1]:srcgrid.upper_bounds[ESMF.StaggerLoc.CENTER][1]]
 
-srcgrid = ESMF.Grid(numpy.array([len(col), len(row)]), num_peri_dims=0, coord_sys=ESMF.CoordSys.CART,
-                    coord_typekind=ESMF.TypeKind.R4, staggerloc=[ESMF.StaggerLoc.CENTER])
+# make sure to use indexing='ij' as ESMPy backend uses matrix indexing (not Cartesian)
+lonm, latm = numpy.meshgrid(slons_par, slats_par, indexing='ij')
 
-grid_row = srcgrid.get_coords(0, staggerloc=ESMF.StaggerLoc.CENTER)
-grid_col = srcgrid.get_coords(1, staggerloc=ESMF.StaggerLoc.CENTER)
+gridCoordLon[:] = lonm
+gridCoordLat[:] = latm
 
-grid_row[:] = rowm; grid_col[:] = colm
+# Create the dest grid from memory with periodic dimension specified.
+lons = numpy.arange(2.5, 357.6, 5)
+lats = numpy.arange(-87.5, 87.6, 5)
+dstgrid = ESMF.Grid(numpy.array([lons.size, lats.size]),
+                    coord_sys=ESMF.CoordSys.SPH_DEG,
+                    staggerloc=ESMF.StaggerLoc.CENTER,
+                    num_peri_dims=1, periodic_dim=1, pole_dim=0)
 
-# # Create the dest grid from memory with periodic dimension specified.
-# # switch lats and lons to correspond to swapping the periodic and pole dimensions (below)
-# lats  = numpy.arange(  0, 360, 360./2.)
-# lons = numpy.arange(-90., 90.1, 180./2.)
-# max_index = numpy.array([lons.size, lats.size])
-# dstgrid = ESMF.Grid(max_index, coord_sys=ESMF.CoordSys.SPH_DEG, coord_typekind=ESMF.TypeKind.R4,
-#                     num_peri_dims=1, periodic_dim=1, pole_dim=0)
-#
-# # Add coordinates to the source grid.
-# dstgrid.add_coords(staggerloc=[ESMF.StaggerLoc.CENTER])
-#
-# # Get and set the source grid coordinates.
-# gridCoordLat = dstgrid.get_coords(lat)
-# gridCoordLon = dstgrid.get_coords(lon)
-#
-# lons_par = lons[dstgrid.lower_bounds[ESMF.StaggerLoc.CENTER][0]:dstgrid.upper_bounds[ESMF.StaggerLoc.CENTER][0]]
-# lats_par = lats[dstgrid.lower_bounds[ESMF.StaggerLoc.CENTER][1]:dstgrid.upper_bounds[ESMF.StaggerLoc.CENTER][1]]
-#
-# gridCoordLat[...] = lats_par.reshape(1, lats_par.size)
-# gridCoordLon[...] = lons_par.reshape(lons_par.size, 1)
+# Get and set the source grid coordinates.
+gridCoordLat = dstgrid.get_coords(lat)
+gridCoordLon = dstgrid.get_coords(lon)
 
-row = [-pi, 0, pi]; col = [0, pi, 2*pi]
-rowm, colm = numpy.meshgrid(row, col)
+dlons_par = lons[dstgrid.lower_bounds[ESMF.StaggerLoc.CENTER][0]:dstgrid.upper_bounds[ESMF.StaggerLoc.CENTER][0]]
+dlats_par = lats[dstgrid.lower_bounds[ESMF.StaggerLoc.CENTER][1]:dstgrid.upper_bounds[ESMF.StaggerLoc.CENTER][1]]
 
-dstgrid = ESMF.Grid(numpy.array([len(col), len(row)]), num_peri_dims=0, coord_sys=ESMF.CoordSys.CART,
-                    coord_typekind=ESMF.TypeKind.R4, staggerloc=[ESMF.StaggerLoc.CENTER])
+# make sure to use indexing='ij' as ESMPy backend uses matrix indexing (not Cartesian)
+lonm, latm = numpy.meshgrid(dlons_par, dlats_par, indexing='ij')
 
-grid_row = dstgrid.get_coords(0, staggerloc=ESMF.StaggerLoc.CENTER)
-grid_col = dstgrid.get_coords(1, staggerloc=ESMF.StaggerLoc.CENTER)
-
-grid_row[:] = rowm; grid_col[:] = colm
-
-
+gridCoordLon[:] = lonm
+gridCoordLat[:] = latm
 
 # Create a field on the centers of the source grid with the mask applied.
 srcfield = ESMF.Field(srcgrid, name="srcfield", staggerloc=ESMF.StaggerLoc.CENTER)
-
-srcfield.data[:] = 0
 
 # Create a field on the centers of the source grid with the mask applied.
 dstfield = ESMF.Field(dstgrid, name="dstfield", staggerloc=ESMF.StaggerLoc.CENTER)
 xctfield = ESMF.Field(dstgrid, name="xctfield", staggerloc=ESMF.StaggerLoc.CENTER)
 
-[lat,lon] = [1,0]
-
 gridLon = srcfield.grid.get_coords(lon, ESMF.StaggerLoc.CENTER)
 gridLat = srcfield.grid.get_coords(lat, ESMF.StaggerLoc.CENTER)
-# srcfield.data[:] = 2.0 + numpy.cos(numpy.radians(gridLat[...]))**2 * \
-#                            numpy.cos(2.0*numpy.radians(gridLon[...]))
-srcfield.data[:] = numpy.arange(16).reshape(4,4)+10
-srcfield.data[:] = 1
 
+wave = lambda x,k:  numpy.sin(x*k*numpy.pi/180.0)
+srcfield.data[...] = numpy.outer(wave(slons_par,3), wave(slats_par,3)) + 2
 
-gridLon = xctfield.grid.get_coords(lon, ESMF.StaggerLoc.CENTER)
-gridLat = xctfield.grid.get_coords(lat, ESMF.StaggerLoc.CENTER)
-# xctfield.data[:] = 2.0 + numpy.cos(numpy.radians(gridLat[...]))**2 * \
-#                            numpy.cos(2.0*numpy.radians(gridLon[...]))
-xctfield.data[:] = 42.0
+wave = lambda x,k:  numpy.sin(x*k*numpy.pi/180.0)
+xctfield.data[...] = numpy.outer(wave(dlons_par,3), wave(dlats_par,3)) + 2
 
 dstfield.data[:] = 1e20
 
 # write regridding weights to file
-import os
+if ESMF.pet_count() > 1:
+    regrid = ESMF.Regrid(srcfield, dstfield,
+                         regrid_method=ESMF.RegridMethod.BILINEAR,
+                         unmapped_action=ESMF.UnmappedAction.IGNORE)
+else:
+    import os
+    if os.path.isfile(
+            os.path.join(os.getcwd(), "esmpy_example_weight_file.nc")):
+        os.remove(os.path.join(os.getcwd(), "esmpy_example_weight_file.nc"))
 
-if os.path.isfile(
-        os.path.join(os.getcwd(), "esmpy_example_weight_file.nc")):
-    os.remove(os.path.join(os.getcwd(), "esmpy_example_weight_file.nc"))
+    regrid = ESMF.Regrid(srcfield, dstfield, filename="esmpy_example_weight_file.nc",
+            regrid_method=ESMF.RegridMethod.BILINEAR,
+            unmapped_action=ESMF.UnmappedAction.IGNORE)
 
-regrid = ESMF.Regrid(srcfield, dstfield, filename="esmpy_example_weight_file.nc",
-        regrid_method=ESMF.RegridMethod.BILINEAR,
-        unmapped_action=ESMF.UnmappedAction.IGNORE)
-print srcfield.data
-
-# create a regrid object from file
+# regrid = ESMF.Regrid(srcfield, dstfield, filename="esmpy_example_weight_file.nc",
+#         regrid_method=ESMF.RegridMethod.BILINEAR,
+#         unmapped_action=ESMF.UnmappedAction.IGNORE)
+# print srcfield.data
+#
+# # create a regrid object from file
 regrid = ESMF.RegridFromFile(srcfield, dstfield, "esmpy_example_weight_file.nc")
 
-
 # calculate the regridding from source to destination field
-srcfield.data[:] = 42.
-dstfield = regrid(srcfield, dstfield)
+# dstfield = regrid(srcfield, dstfield)
 
 # compute the mean relative error
-from operator import mul
 num_nodes = numpy.prod(xctfield.data.shape[:])
 relerr = 0
 meanrelerr = 0
 if num_nodes is not 0:
-    relerr = numpy.sum(numpy.abs(dstfield.data - xctfield.data) / numpy.abs(xctfield.data))
+    relerr = numpy.sum(numpy.abs(dstfield.data - xctfield.data) /
+                       numpy.abs(xctfield.data))
     meanrelerr = relerr / num_nodes
 
 # handle the parallel case
@@ -154,3 +129,31 @@ if ESMF.local_pet() is 0:
     meanrelerr = relerr / num_nodes
     print ("ESMPy Grid Mesh Regridding Example")
     print ("  interpolation mean relative error = {0}".format(meanrelerr))
+
+# set to 1 to output results
+if ESMF.pet_count() == 0:
+    import matplotlib.pyplot as plt
+    fig = plt.figure(1, (15, 6))
+    fig.suptitle('ESMPy Periodic Grids', fontsize=14, fontweight='bold')
+
+    ax = fig.add_subplot(1, 2, 1)
+    im = ax.imshow(srcfield.data, vmin=1, vmax=3, cmap='gist_ncar', aspect='auto',
+                   extent=[min(slons_par), max(slons_par), min(slats_par), max(slats_par)])
+    ax.set_xbound(lower=min(slons_par), upper=max(slons_par))
+    ax.set_ybound(lower=min(slats_par), upper=max(slats_par))
+    ax.set_xlabel("Longitude")
+    ax.set_ylabel("Latitude")
+    ax.set_title("Source Data")
+
+    ax = fig.add_subplot(1, 2, 2)
+    im = ax.imshow(dstfield.data, vmin=1, vmax=3, cmap='gist_ncar', aspect='auto',
+                   extent=[min(dlons_par), max(dlons_par), min(dlats_par), max(dlats_par)])
+    ax.set_xlabel("Longitude")
+    ax.set_ylabel("Latitude")
+    ax.set_title("Regrid Solution")
+
+    fig.subplots_adjust(right=0.8)
+    cbar_ax = fig.add_axes([0.9, 0.1, 0.01, 0.8])
+    fig.colorbar(im, cax=cbar_ax)
+
+    plt.show()

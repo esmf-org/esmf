@@ -11,6 +11,9 @@
 //-----------------------------------------------------------------------------
 
 #include "ESMCI_VMKernel.h"
+#include "ESMCI_VM.h"
+
+#define VM_MEMLOG_off
 
 // On SunOS systems there are a couple of macros that need to be set
 // in order to get POSIX compliant functions IPC, pthreads, gethostid
@@ -103,6 +106,7 @@ int VMK::mpi_thread_level;
 int VMK::ncores;
 int *VMK::cpuid;
 int *VMK::ssiid;
+double VMK::wtime0;
 // Static data members to support command line arguments
 int VMK::argc;
 char *VMK::argv_store[100];
@@ -309,6 +313,7 @@ void VMK::init(MPI_Comm mpiCommunicator){
 #endif
   }
   // so now MPI is for sure initialized...
+  wtime0 = MPI_Wtime();
   // TODO: now it should be safe to call obtain_args() for all MPI impl.
   // Obtain MPI variables
   int rank, size;
@@ -2592,7 +2597,7 @@ int VMK::commtest(commhandle **ch, int *completeFlag, status *status){
 //fprintf(stderr, "(%d)VMK::commtest: *ch=%p\n", mypet, *ch);
   int localrc=0;
   if (status) {
-    memset (status, 0, sizeof (status));      // quiet valgrind
+    memset (status, 0, sizeof (*status));     // quiet valgrind
     status->comm_type = VM_COMM_TYPE_MPIUNI;  // safe initialization
   }
   if ((ch!=NULL) && ((*ch)!=NULL)){
@@ -3061,8 +3066,14 @@ int VMK::send(const void *message, int size, int dest, commhandle **ch,
       else
         tag = 0;
     }
+#ifdef VM_MEMLOG_on
+  VM::logMemInfo(std::string("VM::send():1.0"));
+#endif
     localrc = MPI_Isend(messageC, size, MPI_BYTE, lpid[dest], tag, mpi_c, 
       (*ch)->mpireq);
+#ifdef VM_MEMLOG_on
+  VM::logMemInfo(std::string("VM::send():2.0"));
+#endif
 #ifndef ESMF_NO_PTHREADS
     if (mpi_mutex_flag) pthread_mutex_unlock(pth_mutex);
 #endif
@@ -5067,7 +5078,7 @@ int VMK::broadcast(void *data, int len, int root, commhandle **ch){
 
 
 void VMK::wtime(double *time){
-  *time = MPI_Wtime();
+  *time = MPI_Wtime() - wtime0;
 }
 
 

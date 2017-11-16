@@ -34,8 +34,6 @@
 
 // include higher level, 3rd party or system headers
 #include <iostream>
-#include <string.h>
-#include <stdlib.h>
 #include <vector>
 
 // include ESMF headers
@@ -180,8 +178,6 @@ static const char *const version = "$Id$";
 //    Returns the unique object ID.
 //  
 //EOPI
-
-  ESMC_Print();
 
   return ID;
 
@@ -353,15 +349,15 @@ static const char *const version = "$Id$";
 //
 //EOPI
 
-  int rc, len;
-  char msgbuf[ESMF_MAXSTR];
+  int rc;
  
     // Initialize local return code; assume routine not implemented
     rc = ESMC_RC_NOT_IMPL;
 
   if (classname) {
-     len = strlen(classname);
+     int len = strlen(classname);
      if (len >= ESMF_MAXSTR) {
+       char msgbuf[ESMF_MAXSTR];
        sprintf(msgbuf, "Error: object type %d bytes longer than limit of %d",
                           len, ESMF_MAXSTR-1);
        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, ESMC_CONTEXT, 
@@ -397,12 +393,12 @@ static const char *const version = "$Id$";
 //
 //EOPI
   int rc;
-  char msgbuf[ESMF_MAXSTR];
 
     // Initialize local return code; assume routine not implemented
     rc = ESMC_RC_NOT_IMPL;
 
   if (nlen > ESMF_MAXSTR) {
+       char msgbuf[ESMF_MAXSTR];
        sprintf(msgbuf, "string name %d bytes longer than limit of %d bytes",
                        nlen, ESMF_MAXSTR);
        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, ESMC_CONTEXT, 
@@ -461,7 +457,6 @@ static const char *const version = "$Id$";
 
   int len, rc;
   int defname, defclass;
-  char msgbuf[ESMF_MAXSTR];
  
     // Initialize local return code; assume routine not implemented
     rc = ESMC_RC_NOT_IMPL;
@@ -476,6 +471,7 @@ static const char *const version = "$Id$";
   if (name && (name[0]!='\0')) { 
      len = strlen(name);
      if (len >= ESMF_MAXSTR) {
+       char msgbuf[ESMF_MAXSTR];
        sprintf(msgbuf, "object name %d bytes longer than limit of %d bytes",
                        len, ESMF_MAXSTR-1);
        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, ESMC_CONTEXT, 
@@ -485,6 +481,7 @@ static const char *const version = "$Id$";
      // look for slash in name.  Conflicts with syntax used in StateGet for items in
      // nested States.
      if (strchr (name, '/') != NULL) {
+       char msgbuf[ESMF_MAXSTR];
        sprintf(msgbuf, "%s must not have a slash (/) in its name", name);
        ESMC_LogDefault.MsgFoundError (ESMC_RC_ARG_VALUE, msgbuf, ESMC_CONTEXT,
            &rc);
@@ -496,6 +493,7 @@ static const char *const version = "$Id$";
   if (classname && (classname[0]!='\0')) {
      len = strlen(classname);
      if (len >= ESMF_MAXSTR) {
+       char msgbuf[ESMF_MAXSTR];
        sprintf(msgbuf, "object type %d bytes longer than limit of %d bytes",
                        len, ESMF_MAXSTR-1);
        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, ESMC_CONTEXT, 
@@ -541,12 +539,12 @@ static const char *const version = "$Id$";
 //
 //EOPI
   int rc;
-  std::string msgbuf;
 
     // Initialize local return code; assume routine not implemented
     rc = ESMC_RC_NOT_IMPL;
 
   if (nlen > ESMF_MAXSTR) {
+       std::string msgbuf;
        msgbuf = "Base name " + std::string(name, nlen) + " is longer than ESMF_MAXSTR";
        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, ESMC_CONTEXT, 
            &rc);
@@ -555,6 +553,7 @@ static const char *const version = "$Id$";
   // look for slash in name.  Conflicts with syntax used in StateGet for items in
   // nested States.
   if (memchr (name, '/', nlen) != NULL) {
+    std::string msgbuf;
     msgbuf = "Base name " + std::string (name, nlen) + " must not have a slash (/) in its name";
     ESMC_LogDefault.MsgFoundError (ESMC_RC_ARG_VALUE, msgbuf, ESMC_CONTEXT,
         &rc);
@@ -664,6 +663,7 @@ static const char *const version = "$Id$";
     // setup the root Attribute, passing the address of this
     root = new ESMCI::Attribute(ESMF_TRUE);
     root->setBase(this);
+    rootalias = false;
 
     // Deserialize the Attribute hierarchy
     if (attreconflag == ESMC_ATTRECONCILE_ON) {
@@ -713,6 +713,7 @@ static const char *const version = "$Id$";
     // Initialize local return code; assume routine not implemented
     localrc = ESMC_RC_NOT_IMPL;
 
+std::cout << ESMC_METHOD << ": entered" << std::endl;
     int r=offset_local%8;
     if (r!=0) offset_local += 8-r;  // alignment
 
@@ -760,7 +761,6 @@ static const char *const version = "$Id$";
 //
 //EOPI
 
-  char msgbuf[ESMF_MAXSTR];
   int localrc;
   int lpet = 0;
 
@@ -779,18 +779,18 @@ static const char *const version = "$Id$";
     
   // root Attribute
   if (level > 0) {
-    printf (" ");
+    std::cout << " ";
     for (int i=0; i<level; i++)
-      printf ("->");
+      std::cout << "->";
   }
   if (options) {
     if (strcmp (options, "debug") == 0) {
-      printf ("ID = %i, ", ID);
+      std::cout << "Base ID = " << ID << std::endl;
+      vmID->print ();
     }
   }
   if ((root->getCountAttr() > 0 || root->getCountPack() > 0) && tofile) {
-    sprintf(msgbuf, "Root Attributes:\n");
-    printf("%s", msgbuf);
+    std::cout << "Root Attributes:" << std::endl;
     // ESMC_LogDefault.Write(msgbuf, ESMC_LOGMSG_INFO);
 
     // traverse the Attribute hierarchy, printing as we go
@@ -799,6 +799,7 @@ static const char *const version = "$Id$";
     else
       root->ESMC_Print(tofile, filename, false);
   }
+  fflush (NULL);
 
   return ESMF_SUCCESS;
 
@@ -1117,9 +1118,13 @@ static const char *const version = "$Id$";
   ESMCI::VM::addObject(this, vmID);
 
   // setup the root Attribute, passing the address of this
-  root = new ESMCI::Attribute(ESMF_TRUE);
-  root->setBase(this);
-  rootalias = false;
+  if (id==-1){
+    rootalias = true; // protect root Attribute from being used in delete
+  }else{
+    root = new ESMCI::Attribute(ESMF_TRUE);
+    root->setBase(this);
+    rootalias = false;
+  }
 
   baseStatus  = ESMF_STATUS_READY;
   status      = ESMF_STATUS_READY;
@@ -1226,7 +1231,13 @@ static const char *const version = "$Id$";
 
   baseStatus  = ESMF_STATUS_INVALID;
   status      = ESMF_STATUS_INVALID;
-  
+
+#if 0
+  std::stringstream debugmsg;
+  debugmsg << "From ~ESMC_Base(): rootalias=" << rootalias;
+  ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_INFO);
+#endif
+
   // delete the root Attribute
   if (!rootalias)
     delete root;

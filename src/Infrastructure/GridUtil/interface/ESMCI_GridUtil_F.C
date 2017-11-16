@@ -216,5 +216,25 @@ void FTN_X(c_esmc_gridio)(ESMCI::Grid **gridpp, int *staggerLoc,
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
   
+
+  void FTN_X(c_esmc_gridtomeshcell)(ESMCI::Grid **gridpp, MeshCap **meshpp, int *rc) {
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_gridtomeshcell()" 
+    
+    ESMCI::Grid &grid = **gridpp;
+    
+    // Temp vector
+    std::vector<ESMCI::Array*> arrays;
+    
+    // Convert Grid to Mesh
+    int localrc;
+    *meshpp=MeshCap::GridToMeshCell(grid, arrays, &localrc);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc)) return;
+
+    
+    // Set return code 
+    if (rc!=NULL) *rc = ESMF_SUCCESS;
+  }
+  
 #undef  ESMC_METHOD
 }

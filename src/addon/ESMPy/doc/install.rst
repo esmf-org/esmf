@@ -78,6 +78,19 @@ with the following command issued from the top level ESMPy directory:
 Please contact esmf_support@list.woc.noaa.gov with any questions or problems.
 
 
+~~~~~~~~~~~~~~~~~
+Anaconda packages
+~~~~~~~~~~~~~~~~~
+
+ESMPy conda packages are available through the NESII channel:
+
+conda install -c nesii esmpy
+
+There are Python3 compatible development versions available through the
+conda-forge channel:
+
+conda install -c nesii/label/dev-esmf -c conda-forge esmpy
+
 ---------------
 Importing ESMPy
 ---------------

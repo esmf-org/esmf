@@ -128,6 +128,45 @@ void WMat::InsertRowMergeSingle(const Entry &row, const Entry &col) {
 
 
 
+// Insert row and associated columns into matrix complain if column doesn't 
+// exist then add it, if it exists with a different value then sum values
+// ASSUMES cols is in sorted order
+void WMat::InsertRowSumSingle(const Entry &row, const Entry &col) {
+
+  // Create vector for col
+  std::vector<Entry> col_vec;
+  col_vec.resize(1,col);
+  
+  std::pair<WeightMap::iterator, bool> wi =
+    weights.insert(std::make_pair(row, col_vec));
+    
+  if (wi.second == false) {
+    // Get old columns associated with original row 
+    std::vector<Entry> &old_cols = wi.first->second;
+
+    // Get location where col should be
+    std::vector<Entry>::iterator lb = 
+      std::lower_bound(old_cols.begin(), old_cols.end(), col);
+        
+#if 1
+      // If we found an entry, see if it's the same
+    if (lb != old_cols.end()) {
+
+      // If we found an entry, see if it's the same (considering everything, but value)
+      // If it does match, then sum values and leave
+      if (*lb == col) {
+        (*lb).value += col.value;
+        return;
+      }
+    }
+#endif
+
+    // If it didn't match, then insert col
+    old_cols.insert(lb, col);
+  }
+}
+
+
 #if 0
 // Insert row and associated columns into matrix complain if column doesn't 
 // exist then add it, if it exists with a different value then complain
@@ -235,20 +274,23 @@ void WMat::InsertRowMerge(const Entry &row, const std::vector<Entry> &cols) {
     int j=0;
     old_cols[0]=tmp_cols[0];
     for (int i=1; i<tmp_cols.size(); i++) {
-      if (tmp_cols[i].id != old_cols[j].id) {
+      //      if (tmp_cols[i].id != old_cols[j].id) {
+      if ((tmp_cols[i].id != old_cols[j].id) || 
+          (tmp_cols[i].src_id != old_cols[j].src_id)) {
 	j++;
 	old_cols[j]=tmp_cols[i];
       } else {
-	// If we look like the same entry, but have different values then complain
-	// NOTE: equality for entries considers more than just the .id, but doesn't
-	//       consider .value
+        // If we look like the same entry, but have different values then complain
+        // NOTE: equality for entries considers more than just the .id, but doesn't
+        //       consider .value
 	if ((tmp_cols[i]       == old_cols[j]) &&
-	    (std::abs(tmp_cols[i].value-old_cols[j].value) > 1e-5))
+            (std::abs(tmp_cols[i].value-old_cols[j].value) > 1e-5))
+
+
 	  printf("ERROR dst_id=%d tmp_cols: id=%d idx=%d src_id=%d value=%f old_cols: id=%d idx=%d src_id=%d value=%f \n", row.id,
-	   tmp_cols[i].id,tmp_cols[i].idx,tmp_cols[i].src_id,tmp_cols[i].value,old_cols[j].id,old_cols[j].idx,old_cols[j].src_id,old_cols[j].value);
-
+                 tmp_cols[i].id,tmp_cols[i].idx,tmp_cols[i].src_id,tmp_cols[i].value,old_cols[j].id,old_cols[j].idx,old_cols[j].src_id,old_cols[j].value);
+        
         //	Throw() << "Shouldn't have same entries with different value!";
-
       }
     }
 
@@ -437,7 +479,7 @@ for (; wi != we; ++wi) {
 }
 
   // take out if MOAB isn't defined
-#ifdef ESMF_MOAB
+#if defined ESMF_MOAB
 
 // Migrate WMat based on mesh's element ids
 //void WMat::Migrate(CommRel &crel) {
@@ -808,6 +850,9 @@ SparsePack<WMat::WeightMap::value_type>::SparsePack(SparseMsg::buffer &b, WMat::
     
     // Matrix value
     SparsePack<WMat::Entry::value_type>(b, cent.value);
+
+    // src gid
+    SparsePack<WMat::Entry::id_type>(b, cent.src_id);
       
     } // i
 }
@@ -844,6 +889,8 @@ UInt SparsePack<WMat::WeightMap::value_type>::size(WMat::WeightMap::value_type &
     // Matrix value
     res += SparsePack<WMat::Entry::value_type>::size();
       
+    // src gid
+    res += SparsePack<WMat::Entry::id_type>::size();
     } // i
     
     return res;
@@ -885,6 +932,9 @@ SparseUnpack<WMat::WeightMap::value_type>::SparseUnpack(SparseMsg::buffer &b, WM
     // value
     SparseUnpack<WMat::Entry::value_type>(b, cent.value);
     
+    // Src GID
+    SparseUnpack<WMat::Entry::id_type>(b, cent.src_id);
+
     col.push_back(cent);
     
   } // i
