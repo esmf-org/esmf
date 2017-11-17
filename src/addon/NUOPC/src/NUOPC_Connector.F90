@@ -4125,10 +4125,10 @@ print *, "found match:"// &
   !-----------------------------------------------------------------------------
 
   function getIndex(value, list)
-    integer           :: getIndex
-    character(len=*), intent(in)           :: value
-    character(len=*), pointer, intent(in)  :: list(:)
-    integer           :: i
+    integer                    :: getIndex
+    character(len=*)           :: value
+    character(len=*), pointer  :: list(:)
+    integer                    :: i
 
     if (associated(list)) then
       do i=0, size(list)-1
@@ -4146,10 +4146,10 @@ print *, "found match:"// &
   !-----------------------------------------------------------------------------
 
   function getCount(value, list)
-    integer           :: getCount
-    character(len=*), intent(in)           :: value
-    character(len=*), pointer, intent(in)  :: list(:)
-    integer           :: i
+    integer                   :: getCount
+    character(len=*)          :: value
+    character(len=*), pointer :: list(:)
+    integer                   :: i
 
     getCount = 0
 
@@ -4164,13 +4164,13 @@ print *, "found match:"// &
   !-----------------------------------------------------------------------------
 
   subroutine getUniqueList(list, uniqueList, uniqueCount, rc)
-    character(len=*)      , pointer , intent(in)  :: list(:)
-    character(ESMF_MAXSTR), pointer , intent(out) :: uniqueList(:)
-    integer               , optional, intent(out) :: uniqueCount
-    integer               , optional, intent(out) :: rc
-    integer                               :: l_count
-    character(ESMF_MAXSTR), pointer       :: l_uniqueList(:)
-    integer                               :: i,stat
+    character(len=*)      , pointer   :: list(:)
+    character(len=*)      , pointer   :: uniqueList(:)
+    integer               , optional  :: uniqueCount
+    integer               , optional  :: rc
+    integer                           :: l_count
+    character(ESMF_MAXSTR), pointer   :: l_uniqueList(:)
+    integer                           :: i,stat
 
     if (present(rc)) rc = ESMF_SUCCESS
 
