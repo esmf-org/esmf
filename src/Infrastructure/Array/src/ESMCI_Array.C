@@ -5731,7 +5731,7 @@ for (int i=0; i<factorListCount; i++)
   }
   
   // prepare SparseMatrix vector
-  vector<SparseMatrix<SIT,DIT> > sparseMatrix;  //TODO: needs correct types
+  vector<SparseMatrix<SIT,DIT> > sparseMatrix;
   sparseMatrix.push_back(SparseMatrix<SIT,DIT> (typekindFactor, factorList,
     factorListCount, srcN, dstN, factorIndexList));
   
@@ -7777,7 +7777,7 @@ namespace DD{
   template<typename IT> struct Interval{
     IT min;
     IT max;
-    int count;
+    IT count;
   };
   
   template<typename IT> struct FactorElement{
@@ -8109,8 +8109,8 @@ void accessLookup(
 
 template<typename IT1, typename IT2> 
   int requestSizeFactor(FillLinSeqVectInfo<IT1,IT2> *fillLinSeqVectInfo){
-  return 5*sizeof(int); // lookupIndex, j, decompSeqIndex, tensorSeqIndex,
-                        // linIndex
+  return 4*sizeof(int) + sizeof(IT1);
+  // lookupIndex, j, decompSeqIndex, tensorSeqIndex, linIndex
 }
 
 template<typename IT1, typename IT2> 
@@ -8122,10 +8122,9 @@ template<typename IT1, typename IT2>
   const bool tensorMixFlag = fillLinSeqVectInfo->tensorMixFlag;
   // fill the requestStreamClient[dstPet] element
   int *requestStreamClientInt = (int *)requestStreamClient[dstPet];
-  int seqIndMin = seqIndexInterval[dstPet].min;
-  int seqIndMax = seqIndexInterval[dstPet].max;
-  int seqIndCount = seqIndexInterval[dstPet].count;
-  int jj = 0; // reset
+  IT1 seqIndMin = seqIndexInterval[dstPet].min;
+  IT1 seqIndMax = seqIndexInterval[dstPet].max;
+  IT1 seqIndCount = seqIndexInterval[dstPet].count;
   for (int j=0; j<localDeCount; j++){
     if (fillLinSeqVectInfo->haloRimFlag){
       // loop over the halo rim elements for localDe j
@@ -8134,18 +8133,19 @@ template<typename IT1, typename IT2>
         fillLinSeqVectInfo->array->getRimSeqIndex(&rimSeqIndex);
         SeqIndex<IT1> seqIndex = (*rimSeqIndex)[j][k];
         if (seqIndex.valid()){
-          int seqInd = seqIndex.decompSeqIndex; //TODO: beware of typecast!!
+          IT1 seqInd = seqIndex.decompSeqIndex;
           if (seqInd >= seqIndMin && seqInd <= seqIndMax){
-            int lookupIndex = seqInd - seqIndMin;
+            int lookupIndex = (int)(seqInd - seqIndMin);
             if (tensorMixFlag)
-              lookupIndex += (seqIndex.tensorSeqIndex - 1) * seqIndCount;
-            requestStreamClientInt[5*jj]   = lookupIndex;
-            requestStreamClientInt[5*jj+1] = j;
-            requestStreamClientInt[5*jj+2] = seqIndex.decompSeqIndex;
-            requestStreamClientInt[5*jj+3] = seqIndex.tensorSeqIndex;
-            requestStreamClientInt[5*jj+4] =
+              lookupIndex += (seqIndex.tensorSeqIndex - 1) * (int)seqIndCount;
+            *requestStreamClientInt++   = lookupIndex;
+            *requestStreamClientInt++   = j;
+            IT1 *requestStreamClientIT1 = (IT1 *)requestStreamClientInt;
+            *requestStreamClientIT1++   = seqIndex.decompSeqIndex;
+            requestStreamClientInt      = (int *)requestStreamClientIT1;
+            *requestStreamClientInt++   = seqIndex.tensorSeqIndex;
+            *requestStreamClientInt++   =
               fillLinSeqVectInfo->array->getRimLinIndex()[j][k];
-            ++jj; // increment counter
           }
         }
       }
@@ -8157,18 +8157,19 @@ template<typename IT1, typename IT2>
         int localrc = arrayElement.getSequenceIndexExclusive(&seqIndex, false);
         if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
           ESMC_CONTEXT, NULL)) throw localrc;  // bail out with exception
-        int seqInd = seqIndex.decompSeqIndex; //TODO: beware of typecast!!
+        IT1 seqInd = seqIndex.decompSeqIndex;
         if (seqInd >= seqIndMin && seqInd <= seqIndMax){
-          int lookupIndex = seqInd - seqIndMin;
+          int lookupIndex = (int)(seqInd - seqIndMin);
           if (tensorMixFlag)
-            lookupIndex += (seqIndex.tensorSeqIndex - 1) * seqIndCount;
-          requestStreamClientInt[5*jj]   = lookupIndex;
-          requestStreamClientInt[5*jj+1] = j;
-          requestStreamClientInt[5*jj+2] = seqIndex.decompSeqIndex;
-          requestStreamClientInt[5*jj+3] = seqIndex.tensorSeqIndex;
-          requestStreamClientInt[5*jj+4] =
+            lookupIndex += (seqIndex.tensorSeqIndex - 1) * (int)seqIndCount;
+          *requestStreamClientInt++   = lookupIndex;
+          *requestStreamClientInt++   = j;
+          IT1 *requestStreamClientIT1 = (IT1 *)requestStreamClientInt;
+          *requestStreamClientIT1++   = seqIndex.decompSeqIndex;
+          requestStreamClientInt      = (int *)requestStreamClientIT1;
+          *requestStreamClientInt++   = seqIndex.tensorSeqIndex;
+          *requestStreamClientInt++   =
             arrayElement.getLinearIndexExclusive();
-          ++jj; // increment counter
         }
         arrayElement.next();
       } // end while over all exclusive elements
@@ -8189,9 +8190,9 @@ template<typename IT1, typename IT2>
   vector<SeqIndexFactorLookup<IT1> > const &seqIndexFactorLookup =
     fillLinSeqVectInfo->seqIndexFactorLookup;
   // localPet locally acts as server and client
-  int seqIndMin = seqIndexInterval[localPet].min;
-  int seqIndMax = seqIndexInterval[localPet].max;
-  int seqIndCount = seqIndexInterval[localPet].count;
+  IT1 seqIndMin = seqIndexInterval[localPet].min;
+  IT1 seqIndMax = seqIndexInterval[localPet].max;
+  IT1 seqIndCount = seqIndexInterval[localPet].count;
   for (int j=0; j<localDeCount; j++){
     if (fillLinSeqVectInfo->haloRimFlag){
       // loop over the halo rim elements for localDe j
@@ -8200,11 +8201,11 @@ template<typename IT1, typename IT2>
         fillLinSeqVectInfo->array->getRimSeqIndex(&rimSeqIndex);
         SeqIndex<IT1> seqIndex = (*rimSeqIndex)[j][k];
         if (seqIndex.valid()){
-          int seqInd = seqIndex.decompSeqIndex;
+          IT1 seqInd = seqIndex.decompSeqIndex;
           if (seqInd >= seqIndMin && seqInd <= seqIndMax){
-            int lookupIndex = seqInd - seqIndMin;
+            int lookupIndex = (int)(seqInd - seqIndMin);
             if (tensorMixFlag)
-              lookupIndex += (seqIndex.tensorSeqIndex - 1) * seqIndCount;
+              lookupIndex += (seqIndex.tensorSeqIndex - 1) * (int)seqIndCount;
             int factorCount = seqIndexFactorLookup[lookupIndex].factorCount;
             if (factorCount > 0){
               AssociationElement<IT1,IT2> element;
@@ -8227,11 +8228,11 @@ template<typename IT1, typename IT2>
         int localrc = arrayElement.getSequenceIndexExclusive(&seqIndex, false);
         if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
           ESMC_CONTEXT, NULL)) throw localrc;  // bail out with exception
-        int seqInd = seqIndex.decompSeqIndex; //TODO: beware of typecast!!
+        IT1 seqInd = seqIndex.decompSeqIndex;
         if (seqInd >= seqIndMin && seqInd <= seqIndMax){
-          int lookupIndex = seqInd - seqIndMin;
+          int lookupIndex = (int)(seqInd - seqIndMin);
           if (tensorMixFlag)
-            lookupIndex += (seqIndex.tensorSeqIndex - 1) * seqIndCount;
+            lookupIndex += (seqIndex.tensorSeqIndex - 1) * (int)seqIndCount;
           int factorCount = seqIndexFactorLookup[lookupIndex].factorCount;
           if (factorCount > 0){
             AssociationElement<IT1,IT2> element;
@@ -8257,9 +8258,11 @@ template<typename IT1, typename IT2>
   int indexCounter = 0; // reset
   int factorElementCounter = 0; // reset
   int partnerDeCounter = 0; // reset
-  int *requestStreamServerInt = (int *)requestStreamServer[srcPet];
+  char *requestStreamServerChar = (char *)requestStreamServer[srcPet];
   for (int j=0; j<count; j++){
-    int lookupIndex = requestStreamServerInt[5*j];
+    int *requestStreamServerInt = (int *)(requestStreamServerChar 
+      + j * (4*sizeof(int) + sizeof(IT1)));
+    int lookupIndex = *requestStreamServerInt;
     int factorCount = seqIndexFactorLookup[lookupIndex].factorCount;
     if (factorCount > 0){
       ++indexCounter;
@@ -8270,8 +8273,10 @@ template<typename IT1, typename IT2>
     }
   }
   int responseStreamSize = 
-    5*indexCounter*sizeof(int) +            // AssociationElement members
-    3*factorElementCounter*sizeof(int) +    // FactorElement members
+    4*indexCounter*sizeof(int) +            // AssociationElement members
+    indexCounter*sizeof(IT1) +              // decompSeqIndex
+    factorElementCounter*sizeof(IT2) +      // partnerSeqIndex.decompSeqIndex
+    2*factorElementCounter*sizeof(int) +    // FactorElement members
     partnerDeCounter*sizeof(int) +          // partnerDe elements
     8*factorElementCounter;                 // FactorElement factor
   return responseStreamSize;
@@ -8285,19 +8290,27 @@ template<typename IT1, typename IT2>
     fillLinSeqVectInfo->seqIndexFactorLookup;
   // construct response stream
   int *responseStreamInt = (int *)responseStreamServer[srcPet];
-  int *requestStreamServerInt = (int *)requestStreamServer[srcPet];
+  char *requestStreamServerChar = (char *)requestStreamServer[srcPet];
   for (int jj=0; jj<count; jj++){
-    int lookupIndex = requestStreamServerInt[5*jj];
+    int *requestStreamServerInt = (int *)(requestStreamServerChar 
+      + jj * (4*sizeof(int) + sizeof(IT1)));
+    int lookupIndex = *requestStreamServerInt++;
     int factorCount = seqIndexFactorLookup[lookupIndex].factorCount;
     if (factorCount > 0){
-      *responseStreamInt++ = requestStreamServerInt[5*jj+1];  // j
-      *responseStreamInt++ = requestStreamServerInt[5*jj+2];  // decompSeqIndex
-      *responseStreamInt++ = requestStreamServerInt[5*jj+3];  // tensorSeqIndex
-      *responseStreamInt++ = requestStreamServerInt[5*jj+4];  // linIndex
+      *responseStreamInt++ = *requestStreamServerInt++;     // j
+      IT1 *responseStreamIntIT1 = (IT1 *)responseStreamInt;
+      IT1 *requestStreamServerIT1 = (IT1 *)requestStreamServerInt;
+      *responseStreamIntIT1++ = *requestStreamServerIT1++;  // decompSeqIndex
+      responseStreamInt = (int *)responseStreamIntIT1;
+      requestStreamServerInt = (int *)requestStreamServerIT1;
+      *responseStreamInt++ = *requestStreamServerInt++;     // tensorSeqIndex
+      *responseStreamInt++ = *requestStreamServerInt++;     // linIndex
       *responseStreamInt++ = factorCount;
       for (int k=0; k<factorCount; k++){
-        *responseStreamInt++ = seqIndexFactorLookup[lookupIndex].factorList[k]
+        IT2 *responseStreamIT2 = (IT2 *)responseStreamInt;
+        *responseStreamIT2++ = seqIndexFactorLookup[lookupIndex].factorList[k]
           .partnerSeqIndex.decompSeqIndex;
+        responseStreamInt = (int *)responseStreamIT2;
         *responseStreamInt++ = seqIndexFactorLookup[lookupIndex].factorList[k]
           .partnerSeqIndex.tensorSeqIndex;
         int size = seqIndexFactorLookup[lookupIndex]
@@ -8325,16 +8338,20 @@ template<typename IT1, typename IT2>
   int *responseStreamInt = (int *)responseStream;
   while ((char *)responseStreamInt != responseStream+responseStreamSize){
     int j = *responseStreamInt++;
-    IT1 decompSeqIndex = *responseStreamInt++;
-    IT1 tensorSeqIndex = *responseStreamInt++;
+    IT1 *responseStreamIT1 = (IT1 *)responseStreamInt;
+    IT1 decompSeqIndex = *responseStreamIT1++;
+    responseStreamInt = (int *)responseStreamIT1;
+    int tensorSeqIndex = *responseStreamInt++;
     int linIndex = *responseStreamInt++;
     int factorCount = *responseStreamInt++;
     AssociationElement<IT1,IT2> element;
     element.factorCount = factorCount;
     element.factorList.resize(factorCount);
     for (int jj=0; jj<factorCount; jj++){
+      IT2 *responseStreamIT2 = (IT2 *)responseStreamInt;
       element.factorList[jj].partnerSeqIndex.decompSeqIndex =
-        *responseStreamInt++;
+        *responseStreamIT2++;
+      responseStreamInt = (int *)responseStreamIT2;
       element.factorList[jj].partnerSeqIndex.tensorSeqIndex =
         *responseStreamInt++;
       int size = *responseStreamInt++;
@@ -8373,21 +8390,21 @@ template<typename IT1, typename IT2>
     fillPartnerDeInfo->seqIndexFactorLookupOut;
   const bool tensorMixFlag = fillPartnerDeInfo->tensorMixFlag;
   // fill the requestStreamClient[dstPet] element
-  int seqIndMin = seqIndexIntervalIn[dstPet].min;
-  int seqIndMax = seqIndexIntervalIn[dstPet].max;
-  int seqIndCount = seqIndexIntervalIn[dstPet].count;
+  IT1 seqIndMin = seqIndexIntervalIn[dstPet].min;
+  IT1 seqIndMax = seqIndexIntervalIn[dstPet].max;
+  IT1 seqIndCount = seqIndexIntervalIn[dstPet].count;
   int jj = 0; // reset
   int localLookupIndex = 0; // reset
   for (typename vector<DD::SeqIndexFactorLookup<IT2> >::const_iterator
     j=seqIndexFactorLookupOut.begin(); j!=seqIndexFactorLookupOut.end(); ++j){
     for (int k=0; k<j->factorCount; k++){
-      int partnerSeqInd = j->factorList[k]
+      IT2 partnerSeqInd = j->factorList[k]
         .partnerSeqIndex.decompSeqIndex;
       if (partnerSeqInd >= seqIndMin && partnerSeqInd <= seqIndMax){
-        int lookupIndex = partnerSeqInd - seqIndMin;
+        int lookupIndex = (int)(partnerSeqInd - seqIndMin);
         if (tensorMixFlag){
           lookupIndex += (j->factorList[k]
-            .partnerSeqIndex.tensorSeqIndex - 1) * seqIndCount;
+            .partnerSeqIndex.tensorSeqIndex - 1) * (int)seqIndCount;
         }
         int *requestStreamClientInt = (int *)requestStreamClient[dstPet];
         requestStreamClientInt[3*jj] = lookupIndex;
@@ -8413,19 +8430,19 @@ template<typename IT1, typename IT2>
     fillPartnerDeInfo->seqIndexFactorLookupOut;
   const bool tensorMixFlag = fillPartnerDeInfo->tensorMixFlag;
   // localPet locally acts as server and client
-  int seqIndMin = seqIndexIntervalIn[localPet].min;
-  int seqIndMax = seqIndexIntervalIn[localPet].max;
-  int seqIndCount = seqIndexIntervalIn[localPet].count;
+  IT1 seqIndMin = seqIndexIntervalIn[localPet].min;
+  IT1 seqIndMax = seqIndexIntervalIn[localPet].max;
+  IT1 seqIndCount = seqIndexIntervalIn[localPet].count;
   for (typename vector<DD::SeqIndexFactorLookup<IT2> >::iterator
     j=seqIndexFactorLookupOut.begin(); j!=seqIndexFactorLookupOut.end(); ++j){
     for (int k=0; k<j->factorCount; k++){
-      int partnerSeqInd = j->factorList[k]
+      IT2 partnerSeqInd = j->factorList[k]
         .partnerSeqIndex.decompSeqIndex;
       if (partnerSeqInd >= seqIndMin && partnerSeqInd <= seqIndMax){
-        int lookupIndex = partnerSeqInd - seqIndMin;
+        int lookupIndex = (int)(partnerSeqInd - seqIndMin);
         if (tensorMixFlag){
           lookupIndex += (j->factorList[k]
-            .partnerSeqIndex.tensorSeqIndex - 1) * seqIndCount;
+            .partnerSeqIndex.tensorSeqIndex - 1) * (int)seqIndCount;
         }
         j->factorList[k].partnerDe.insert(
           j->factorList[k].partnerDe.end(),
@@ -8547,9 +8564,9 @@ template<typename IT1, typename IT2>
     }
     virtual void messagePrepare(int srcPet, 
       int dstPet, char *buffer)const{
-      int seqIndMin = seqIndexInterval[dstPet].min;
-      int seqIndMax = seqIndexInterval[dstPet].max;
-      int seqIndCount = seqIndexInterval[dstPet].count;
+      IT seqIndMin = seqIndexInterval[dstPet].min;
+      IT seqIndMax = seqIndexInterval[dstPet].max;
+      IT seqIndCount = seqIndexInterval[dstPet].count;
       int *bufferInt = (int *)buffer;
       int jj = 0; // reset
       for (int j=0; j<localDeCount; j++){
@@ -8561,11 +8578,12 @@ template<typename IT1, typename IT2>
             array->getRimSeqIndex(&rimSeqIndex);
             SeqIndex<IT> seqIndex = (*rimSeqIndex)[j][k];
             if (seqIndex.valid()){
-              int seqInd = seqIndex.decompSeqIndex; //TODO: beware of typecast!!
+              IT seqInd = seqIndex.decompSeqIndex;
               if (seqInd >= seqIndMin && seqInd <= seqIndMax){
-                int lookupIndex = seqInd - seqIndMin;
+                int lookupIndex = (int)(seqInd - seqIndMin);
                 if (tensorMixFlag)
-                  lookupIndex += (seqIndex.tensorSeqIndex - 1) * seqIndCount;
+                  lookupIndex += (seqIndex.tensorSeqIndex - 1)
+                  * (int)seqIndCount;
                 bufferInt[2*jj] = lookupIndex;
                 bufferInt[2*jj+1] = de;
                 ++jj; // increment counter
@@ -8581,11 +8599,11 @@ template<typename IT1, typename IT2>
               false);
             if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
               ESMC_CONTEXT, NULL)) throw localrc;  // bail out with exception
-            int seqInd = seqIndex.decompSeqIndex; //TODO: beware of typecast!!
+            IT seqInd = seqIndex.decompSeqIndex;
             if (seqInd >= seqIndMin && seqInd <= seqIndMax){
-              int lookupIndex = seqInd - seqIndMin;
+              int lookupIndex = (int)(seqInd - seqIndMin);
               if (tensorMixFlag)
-                lookupIndex += (seqIndex.tensorSeqIndex - 1) * seqIndCount;
+                lookupIndex += (seqIndex.tensorSeqIndex - 1) * (int)seqIndCount;
               bufferInt[2*jj] = lookupIndex;
               bufferInt[2*jj+1] = de;
               ++jj; // increment counter
@@ -8610,9 +8628,9 @@ template<typename IT1, typename IT2>
       }
     }
     virtual void localPrepareAndProcess(int localPet){
-      int seqIndMin = seqIndexInterval[localPet].min;
-      int seqIndMax = seqIndexInterval[localPet].max;
-      int seqIndCount = seqIndexInterval[localPet].count;
+      IT seqIndMin = seqIndexInterval[localPet].min;
+      IT seqIndMax = seqIndexInterval[localPet].max;
+      IT seqIndCount = seqIndexInterval[localPet].count;
       for (int j=0; j<localDeCount; j++){
         int de = localDeToDeMap[j];  // global DE number
         if (haloRimFlag){
@@ -8622,11 +8640,12 @@ template<typename IT1, typename IT2>
             array->getRimSeqIndex(&rimSeqIndex);
             SeqIndex<IT> seqIndex = (*rimSeqIndex)[j][k];
             if (seqIndex.valid()){
-              int seqInd = seqIndex.decompSeqIndex;//TODO: beware of typecast!!
+              IT seqInd = seqIndex.decompSeqIndex;
               if (seqInd >= seqIndMin && seqInd <= seqIndMax){
-                int lookupIndex = seqInd - seqIndMin;
+                int lookupIndex = (int)(seqInd - seqIndMin);
                 if (tensorMixFlag)
-                  lookupIndex += (seqIndex.tensorSeqIndex - 1) * seqIndCount;
+                  lookupIndex += (seqIndex.tensorSeqIndex - 1)
+                  * (int)seqIndCount;
                 if (seqIndexFactorLookup[lookupIndex].factorCount > 0){
                   // element with factors -> fill in the DE
                   seqIndexFactorLookup[lookupIndex].de.push_back(de);
@@ -8646,11 +8665,11 @@ template<typename IT1, typename IT2>
               false);
             if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
               ESMC_CONTEXT, NULL)) throw localrc;  // bail out with exception
-            int seqInd = seqIndex.decompSeqIndex;//TODO: beware of typecast!!
+            IT seqInd = seqIndex.decompSeqIndex;
             if (seqInd >= seqIndMin && seqInd <= seqIndMax){
-              int lookupIndex = seqInd - seqIndMin;
+              int lookupIndex = (int)(seqInd - seqIndMin);
               if (tensorMixFlag)
-                lookupIndex += (seqIndex.tensorSeqIndex - 1) * seqIndCount;
+                lookupIndex += (seqIndex.tensorSeqIndex - 1) * (int)seqIndCount;
               if (seqIndexFactorLookup[lookupIndex].factorCount > 0){
                 // element with factors -> fill in the DE
                 seqIndexFactorLookup[lookupIndex].de.push_back(de);
@@ -8836,13 +8855,15 @@ template<typename IT1, typename IT2>
     std::stringstream debugmsg;
     debugmsg << "SetupSeqIndexFactorLookupStage2().messageSize(srcPet=" 
       << srcPet << " ,dstPet=" << dstPet << "): " <<
-      (4*sizeof(int)+dataSizeFactors) * messageSizeCount(srcPet, dstPet)
+      (2*sizeof(int)+sizeof(IT)+dataSizeFactors) 
+      * messageSizeCount(srcPet, dstPet)
       << " from dataSizeFactors=" << dataSizeFactors << " messageSizeCount="
       << messageSizeCount(srcPet, dstPet);
     ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_INFO);
   }
 #endif
-      return (4*sizeof(int)+dataSizeFactors) * messageSizeCount(srcPet, dstPet);
+      return (2*sizeof(int)+sizeof(IT)+dataSizeFactors)
+        * messageSizeCount(srcPet, dstPet);
     }
     virtual void messagePrepare(int srcPet, int dstPet, char *buffer)const{
       ESMC_TypeKind_Flag typekindFactors =
@@ -8900,15 +8921,15 @@ template<typename IT1, typename IT2>
           seqInd = SetupSeqIndexFactorLookup<IT>::
             sparseMatrix->getDstSeqIndex(j);
           // reverse to lookupIndex construction b/c src side picks dst and rev.
-        int seqIndex = seqInd.getIndex(0);
+        IT seqIndex = seqInd.getIndex(0);
         int tensorSeqIndex = -1;  // dummy tensorSeqIndex
         if (SetupSeqIndexFactorLookup<IT>::tensorMixFlag)
-          tensorSeqIndex = seqInd.getIndex(1);  // set actual tensor seqIndex
+          tensorSeqIndex = (int)seqInd.getIndex(1);  // set actual tensor seqIndex
         *intStream++ = lookupIndex;     // index into distr. dir lookup table
-        *intStream++ = seqIndex;        // seqIndex
         *intStream++ = tensorSeqIndex;  // dummy tensorSeqIndex
-        *intStream++ = 0;               // padding for 8-byte alignment
-        factorStream = (T *)intStream;
+        IT *itStream = (IT *)intStream;
+        *itStream++ = seqIndex;         // seqIndex
+        factorStream = (T *)itStream;
         *factorStream++ = ((T *)SetupSeqIndexFactorLookup<IT>::
           sparseMatrix->getFactorList())[j];  // factor
       }
@@ -8921,10 +8942,10 @@ template<typename IT1, typename IT2>
         intStream = (int *)factorStream;
         int lookupIndex = *intStream++;   // index into lookup table
         FactorElement<IT> factorElement;
-        factorElement.partnerSeqIndex.decompSeqIndex = *intStream++;
         factorElement.partnerSeqIndex.tensorSeqIndex = *intStream++;
-        intStream++;  // skip padding
-        factorStream = (T *)intStream;
+        IT *itStream = (IT *)intStream;
+        factorElement.partnerSeqIndex.decompSeqIndex = *itStream++;
+        factorStream = (T *)itStream;
         *((T *)factorElement.factor) = *factorStream++;
         SetupSeqIndexFactorLookup<IT>::
           seqIndexFactorLookup[lookupIndex].factorList.push_back(factorElement);
@@ -8944,10 +8965,10 @@ template<typename IT1, typename IT2>
           seqInd = SetupSeqIndexFactorLookup<IT>::
             sparseMatrix->getDstSeqIndex(j);
           // reverse b/c src side picks dst and rev.
-        int seqIndex = seqInd.getIndex(0);
+        IT seqIndex = seqInd.getIndex(0);
         int tensorSeqIndex = -1;  // dummy tensorSeqIndex
         if (SetupSeqIndexFactorLookup<IT>::tensorMixFlag)
-          tensorSeqIndex = seqInd.getIndex(1);  // set actual tensor seqIndex
+          tensorSeqIndex = (int)seqInd.getIndex(1);  // set actual tensor seqIndex
         int lookupIndex = SetupSeqIndexFactorLookup<IT>::
           seqIntervFactorListLookupIndexToPet[localPet][i];
         FactorElement<IT> factorElement;
@@ -9057,9 +9078,9 @@ cout << "dstSetupFlag=" << dstSetupFlag << " tensorSeqIndex=" <<
         ++seqIntervFactorListCountToPet[i]; // count this factor for this Pet
         seqIntervFactorListIndexToPet[i].push_back(j); // store factorList ind.
         // determine lookupIndex and store
-        int lookupIndex = seqIndex - seqIndexInterval[i].min;
+        int lookupIndex = (int)(seqIndex - seqIndexInterval[i].min);
         if (tensorMixFlag)
-          lookupIndex += (tensorSeqIndex - 1) * seqIndexInterval[i].count;
+          lookupIndex += (int)((tensorSeqIndex - 1) * seqIndexInterval[i].count);
         seqIntervFactorListLookupIndexToPet[i].push_back(lookupIndex); // store
         break;
       }while (iMin != iMax);
@@ -10104,7 +10125,7 @@ template<typename SIT, typename DIT>
   {
     // prepare temporary seqIndexList for sorting
     //TODO: this scales in memory as the srcArray size, does not consider sparse
-    vector<int> seqIndexList(srcElementCount);
+    vector<SIT> seqIndexList(srcElementCount);
     int jj=0;
     for (int j=0; j<srcLocalDeCount; j++){
       // loop over all elements in the exclusive region for localDe j
@@ -10122,7 +10143,7 @@ template<typename SIT, typename DIT>
     sort(seqIndexList.begin(), seqIndexList.end());
     jj=0;
     for (int i=0; i<petCount; i++){
-      int seqIndexMax = srcSeqIndexInterval[i].max;
+      SIT seqIndexMax = srcSeqIndexInterval[i].max;
       int count = 0; // reset
       while (jj<srcElementCount && seqIndexList[jj]<=seqIndexMax){
         ++count;  // increment counter
@@ -10231,7 +10252,7 @@ template<typename SIT, typename DIT>
   {
     // prepare temporary seqIndexList for sorting
     //TODO: this scales in memory as the dstArray size, does not consider sparse
-    vector<int> seqIndexList(dstElementCount);
+    vector<DIT> seqIndexList(dstElementCount);
     int jj=0;
     for (int j=0; j<dstLocalDeCount; j++){
       if (haloFlag){
@@ -10262,7 +10283,7 @@ template<typename SIT, typename DIT>
     sort(seqIndexList.begin(), seqIndexList.end());
     jj=0;
     for (int i=0; i<petCount; i++){
-      int seqIndexMax = dstSeqIndexInterval[i].max;
+      DIT seqIndexMax = dstSeqIndexInterval[i].max;
       int count = 0; // reset
       while (jj<dstElementCount && seqIndexList[jj]<=seqIndexMax){
         ++count;  // increment counter
@@ -10367,14 +10388,14 @@ template<typename SIT, typename DIT>
   int *srcLocalPartnerElementsPerIntervalCount = new int[petCount];
   for (int i=0; i<petCount; i++){
     // Pet "i" is the active srcSeqIndex interval
-    int seqIndexMin = dstSeqIndexInterval[i].min;
-    int seqIndexMax = dstSeqIndexInterval[i].max;
+    DIT seqIndexMin = dstSeqIndexInterval[i].min;
+    DIT seqIndexMax = dstSeqIndexInterval[i].max;
     int count = 0; // reset
     for (typename vector<DD::SeqIndexFactorLookup<SIT> >
       ::const_iterator j=srcSeqIndexFactorLookup.begin(); 
       j!=srcSeqIndexFactorLookup.end(); ++j){
       for (int k=0; k<j->factorCount; k++){
-        int partnerSeqIndex = j->factorList[k]
+        SIT partnerSeqIndex = j->factorList[k]
           .partnerSeqIndex.decompSeqIndex;
         if (partnerSeqIndex >= seqIndexMin && partnerSeqIndex <= seqIndexMax)
           ++count; // increment counter
@@ -10418,14 +10439,14 @@ template<typename SIT, typename DIT>
   int *dstLocalPartnerElementsPerIntervalCount = new int[petCount];
   for (int i=0; i<petCount; i++){
     // Pet "i" is the active dstSeqIndex interval
-    int seqIndexMin = srcSeqIndexInterval[i].min;
-    int seqIndexMax = srcSeqIndexInterval[i].max;
+    SIT seqIndexMin = srcSeqIndexInterval[i].min;
+    SIT seqIndexMax = srcSeqIndexInterval[i].max;
     int count = 0; // reset
     for (typename vector<DD::SeqIndexFactorLookup<DIT> >
       ::const_iterator j=dstSeqIndexFactorLookup.begin(); 
       j!=dstSeqIndexFactorLookup.end(); ++j){
       for (int k=0; k<j->factorCount; k++){
-        int partnerSeqIndex = j->factorList[k]
+        DIT partnerSeqIndex = j->factorList[k]
           .partnerSeqIndex.decompSeqIndex;
         if (partnerSeqIndex >= seqIndexMin && partnerSeqIndex <= seqIndexMax)
           ++count; // increment counter
