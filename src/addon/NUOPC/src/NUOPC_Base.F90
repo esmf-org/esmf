@@ -126,6 +126,76 @@ module NUOPC_Base
   
   !-----------------------------------------------------------------------------
 !BOP
+! !IROUTINE: NUOPC_AddNamespace - Add a nested state with Namespace to a State
+! !INTERFACE:
+  subroutine NUOPC_AddNamespace(state, Namespace, nestedStateName, &
+    nestedState, rc)
+! !ARGUMENTS:
+    type(ESMF_State), intent(inout)         :: state
+    character(len=*), intent(in)            :: Namespace
+    character(len=*), intent(in),  optional :: nestedStateName
+    type(ESMF_State), intent(out), optional :: nestedState
+    integer,          intent(out), optional :: rc
+! !DESCRIPTION:
+!   Add a Namespace to {\tt state}. Namespaces are implemented via nested 
+!   states. This creates a nested state inside of {\tt state}. The nested state
+!   is returned as {\tt nestedState}. If provided, {\tt nestedStateName} will 
+!   be used to name the newly created nested state. The default name of the 
+!   nested state is equal to {\tt Namespace}.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[state]
+!     The {\tt ESMF\_State} object to which the Namespace is added.
+!   \item[Namespace]
+!     The Namespace string.
+!   \item[{[nestedStateName]}]
+!     Name of the nested state. Defaults to {\tt Namespace}.
+!   \item[{[nestedState]}]
+!     Optional return of the newly created nested state.
+!   \item[{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+  !-----------------------------------------------------------------------------
+    ! local variables
+    type(ESMF_State)        :: nestedS
+    character(len=80)       :: nestedSName
+    
+    if (present(rc)) rc = ESMF_SUCCESS
+    
+    if (present(nestedStateName)) then
+      nestedSName = trim(nestedStateName)
+    else
+      nestedSName = trim(Namespace)
+    endif
+    
+    nestedS = ESMF_StateCreate(name=nestedSName, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME)) return  ! bail out
+      
+    call NUOPC_InitAttributes(nestedS, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME)) return  ! bail out
+
+    call NUOPC_SetAttribute(nestedS, name="Namespace", &
+      value=trim(Namespace), rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME)) return  ! bail out
+    
+    call ESMF_StateAdd(state, (/nestedS/), rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME)) return  ! bail out
+
+    if (present(nestedState)) &
+      nestedState = nestedS
+    
+  end subroutine
+  !---------------------------------------------------------------------
+  
+  !-----------------------------------------------------------------------------
+!BOP
 ! !IROUTINE: NUOPC_AddNestedState - Add a nested state to a state with NUOPC attributes
 ! !INTERFACE:
   subroutine NUOPC_AddNestedState(state, Namespace, CplSet, nestedStateName, &
@@ -143,7 +213,7 @@ module NUOPC_Base
 !   state. The nested state is returned as {\tt nestedState}. If provided,
 !   {\tt nestedStateName} will be used to name the newly created nested state.
 !   The default name of the nested state is equal to
-!   {\tt Namespace}_{\tt CplSet}, {\tt Namespace}, or {\tt CplSet} if the
+!   {\tt Namespace}\_{\tt CplSet}, {\tt Namespace}, or {\tt CplSet} if the
 !   arguments are provided.
 !
 !   The arguments are:
@@ -151,11 +221,11 @@ module NUOPC_Base
 !   \item[state]
 !     The {\tt ESMF\_State} object to which the namespace is added.
 !   \item[Namespace]
-!     Optional The Namespace string. Defaults to "__UNSPECIFIED__".
+!     Optional The Namespace string. Defaults to "\_\_UNSPECIFIED\_\_".
 !   \item[CplSet]
-!     Optional The CplSet string. Defaults to "__UNSPECIFIED__".
+!     Optional The CplSet string. Defaults to "\_\_UNSPECIFIED\_\_".
 !   \item[{[nestedStateName]}]
-!     Name of the nested state. Defaults to {\tt Namespace}_{\tt CplSet},
+!     Name of the nested state. Defaults to {\tt Namespace}\_{\tt CplSet},
 !     {\tt Namespace}, or {\tt CplSet} if arguments are provided.
 !   \item[{[nestedState]}]
 !     Optional return of the newly created nested state.
@@ -233,76 +303,6 @@ module NUOPC_Base
   end subroutine
   !-----------------------------------------------------------------------------
 
-  !-----------------------------------------------------------------------------
-!BOP
-! !IROUTINE: NUOPC_AddNamespace - Add a nested state with Namespace to a State
-! !INTERFACE:
-  subroutine NUOPC_AddNamespace(state, Namespace, nestedStateName, &
-    nestedState, rc)
-! !ARGUMENTS:
-    type(ESMF_State), intent(inout)         :: state
-    character(len=*), intent(in)            :: Namespace
-    character(len=*), intent(in),  optional :: nestedStateName
-    type(ESMF_State), intent(out), optional :: nestedState
-    integer,          intent(out), optional :: rc
-! !DESCRIPTION:
-!   Add a Namespace to {\tt state}. Namespaces are implemented via nested 
-!   states. This creates a nested state inside of {\tt state}. The nested state
-!   is returned as {\tt nestedState}. If provided, {\tt nestedStateName} will 
-!   be used to name the newly created nested state. The default name of the 
-!   nested state is equal to {\tt Namespace}.
-!
-!   The arguments are:
-!   \begin{description}
-!   \item[state]
-!     The {\tt ESMF\_State} object to which the Namespace is added.
-!   \item[Namespace]
-!     The Namespace string.
-!   \item[{[nestedStateName]}]
-!     Name of the nested state. Defaults to {\tt Namespace}.
-!   \item[{[nestedState]}]
-!     Optional return of the newly created nested state.
-!   \item[{[rc]}]
-!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!EOP
-  !-----------------------------------------------------------------------------
-    ! local variables
-    type(ESMF_State)        :: nestedS
-    character(len=80)       :: nestedSName
-    
-    if (present(rc)) rc = ESMF_SUCCESS
-    
-    if (present(nestedStateName)) then
-      nestedSName = trim(nestedStateName)
-    else
-      nestedSName = trim(Namespace)
-    endif
-    
-    nestedS = ESMF_StateCreate(name=nestedSName, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=FILENAME)) return  ! bail out
-      
-    call NUOPC_InitAttributes(nestedS, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=FILENAME)) return  ! bail out
-
-    call NUOPC_SetAttribute(nestedS, name="Namespace", &
-      value=trim(Namespace), rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=FILENAME)) return  ! bail out
-    
-    call ESMF_StateAdd(state, (/nestedS/), rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=FILENAME)) return  ! bail out
-
-    if (present(nestedState)) &
-      nestedState = nestedS
-    
-  end subroutine
-  !---------------------------------------------------------------------
-  
   !-----------------------------------------------------------------------------
 !BOP
 ! !IROUTINE: NUOPC_Advertise - Advertise a single Field in a State
