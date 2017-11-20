@@ -73,6 +73,7 @@ module NUOPC
   public NUOPC_CompSpecialize             ! method
 
   ! public Utility API
+  public NUOPC_AddNestedState             ! method
   public NUOPC_AddNamespace               ! method
   public NUOPC_AdjustClock                ! method
   public NUOPC_Advertise                  ! method
