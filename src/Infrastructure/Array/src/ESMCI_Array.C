@@ -10081,9 +10081,9 @@ template<typename SIT, typename DIT>
   {
     srcSeqIndexInterval[0].min = srcSeqIndexMinGlobal;  // start
     SIT indicesPerPet = (srcSeqIndexMaxGlobal - srcSeqIndexMinGlobal + 1)
-      / petCount;
+      / (SIT) petCount;
     SIT extraIndices = (srcSeqIndexMaxGlobal - srcSeqIndexMinGlobal + 1)
-      % petCount;
+      % (SIT)petCount;
     for (int i=0; i<petCount-1; i++){
       srcSeqIndexInterval[i].max = srcSeqIndexInterval[i].min + indicesPerPet
         - 1;
@@ -10208,9 +10208,9 @@ template<typename SIT, typename DIT>
   {
     dstSeqIndexInterval[0].min = dstSeqIndexMinGlobal;  // start
     DIT indicesPerPet = (dstSeqIndexMaxGlobal - dstSeqIndexMinGlobal + 1)
-      / petCount;
+      / (DIT)petCount;
     DIT extraIndices = (dstSeqIndexMaxGlobal - dstSeqIndexMinGlobal + 1)
-      % petCount;
+      % (DIT)petCount;
     for (int i=0; i<petCount-1; i++){
       dstSeqIndexInterval[i].max = dstSeqIndexInterval[i].min + indicesPerPet
         - 1;
@@ -10320,6 +10320,16 @@ template<typename SIT, typename DIT>
   VMK::wtime(&t4);   //gjt - profile
 #endif
   
+#ifdef ASMM_STORE_LOG_on
+  {
+    std::stringstream msg;
+    msg << "srcSeqIndexInterval[localPet].count=" <<
+      srcSeqIndexInterval[localPet].count <<
+      " srcTensorElementCountEff=" << srcTensorElementCountEff;
+    ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+  }
+#endif
+   
   // allocate local look-up map indexed by srcSeqIndex, i.e. distributed dir.
   vector<DD::SeqIndexFactorLookup<SIT> >
     srcSeqIndexFactorLookup(srcSeqIndexInterval[localPet].count
@@ -10350,6 +10360,16 @@ template<typename SIT, typename DIT>
   VM::logMemInfo(std::string("ASMMStore2.15"));
 #endif
 
+#ifdef ASMM_STORE_LOG_on
+  {
+    std::stringstream msg;
+    msg << "dstSeqIndexInterval[localPet].count=" <<
+      dstSeqIndexInterval[localPet].count <<
+      " dstTensorElementCountEff=" << srcTensorElementCountEff;
+    ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+  }
+#endif
+   
   // allocate local look-up map indexed by dstSeqIndex, i.e. distributed dir.
   vector<DD::SeqIndexFactorLookup<DIT> >
     dstSeqIndexFactorLookup(dstSeqIndexInterval[localPet].count
