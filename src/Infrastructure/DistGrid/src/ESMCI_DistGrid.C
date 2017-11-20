@@ -3909,7 +3909,7 @@ template<typename T> int DistGrid::getSequenceIndexTile(
     
     bool onTile = true;  // start assuming that index tuple can be found on tile
     // add up elements from tile
-    int seqIndexAux = 0; // initialize
+    T seqIndexAux = 0; // initialize
     for (int i=dimCount-1; i>=0; i--){
       // first time multiply with zero intentionally:
       seqIndexAux *= maxIndexPDimPTile[(tile-1)*dimCount+i] 
@@ -4058,7 +4058,7 @@ template<typename T> int DistGrid::getSequenceIndexTileRecursive(
 
   bool onTile = true;  // start assuming that index tuple can be found on tile
   // add up elements from tile
-  int seqIndex = 0; // initialize
+  T seqIndex = 0; // initialize
   for (int i=dimCount-1; i>=0; i--){
     // first time multiply with zero intentionally:
     seqIndex *= maxIndexPDimPTile[(tile-1)*dimCount+i] 
