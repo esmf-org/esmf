@@ -2512,7 +2512,7 @@ int DistGrid::construct(
     ESMC_I8 totalElementCount = 0;  // reset
     for (int i=0; i<tileCount; i++)
       totalElementCount += elementCountPTile[i];
-    if (totalElementCount > 2147483648L){
+    if (totalElementCount > 2147483647L){
       // above the I4 limit -> go to I8
       indexTK = ESMC_TYPEKIND_I8;
     }
