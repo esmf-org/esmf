@@ -109,8 +109,7 @@ DistGrid *DistGrid::create(
   InterArray<int> *connectionList,      // (in)
   VM *vm,                               // (in)
   bool actualFlag,                      // (in)
-  int *rc,                              // (out) return code
-  ESMC_TypeKind_Flag indexTK            // (in) - default ESMC_TYPEKIND_I4
+  int *rc                               // (out) return code
   ){
 //
 // !DESCRIPTION:
@@ -427,7 +426,7 @@ DistGrid *DistGrid::create(
           decompflagCount = dg->dimCount;
         distgrid = DistGrid::create(minIndex, maxIndex, regDecomp, decompflag,
           decompflagCount, firstExtra, lastExtra, NULL,
-          indexflagOpt, connectionList, delayout, vm, &localrc, indexTK);
+          indexflagOpt, connectionList, delayout, vm, &localrc, dg->indexTK);
         if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
           ESMC_CONTEXT, rc)) return ESMC_NULL_POINTER;
       }else{
@@ -444,7 +443,7 @@ DistGrid *DistGrid::create(
         }
         distgrid = DistGrid::create(minIndex, maxIndex, regDecomp, decompflag,
           decompflagCount1, decompflagCount2, firstExtra, lastExtra, NULL,
-          indexflagOpt, connectionList, delayout, vm, &localrc, indexTK);
+          indexflagOpt, connectionList, delayout, vm, &localrc, dg->indexTK);
         if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
           ESMC_CONTEXT, rc)) return ESMC_NULL_POINTER;
       }
@@ -773,18 +772,18 @@ DistGrid *DistGrid::create(
     distgrid->maxIndexPDimPTile = new int[dimCount*tileCount];
     memcpy(distgrid->maxIndexPDimPTile, dg->maxIndexPDimPTile,
       sizeof(int)*dimCount*tileCount);
-    distgrid->elementCountPTile = new int[tileCount];
+    distgrid->elementCountPTile = new ESMC_I8[tileCount];
     memcpy(distgrid->elementCountPTile, dg->elementCountPTile,
-      sizeof(int)*tileCount);
+      sizeof(ESMC_I8)*tileCount);
     distgrid->minIndexPDimPDe = new int[dimCount*deCount];
     memcpy(distgrid->minIndexPDimPDe, dg->minIndexPDimPDe,
       sizeof(int)*dimCount*deCount);
     distgrid->maxIndexPDimPDe = new int[dimCount*deCount];
     memcpy(distgrid->maxIndexPDimPDe, dg->maxIndexPDimPDe,
       sizeof(int)*dimCount*deCount);
-    distgrid->elementCountPDe = new int[deCount];
+    distgrid->elementCountPDe = new ESMC_I8[deCount];
     memcpy(distgrid->elementCountPDe, dg->elementCountPDe,
-      sizeof(int)*deCount);
+      sizeof(ESMC_I8)*deCount);
     distgrid->tileListPDe = new int[deCount];
     memcpy(distgrid->tileListPDe, dg->tileListPDe,
       sizeof(int)*deCount);
@@ -948,7 +947,7 @@ DistGrid *DistGrid::create(
   DELayout *delayout,                   // (in)
   VM *vm,                               // (in)
   int *rc,                              // (out) return code
-  ESMC_TypeKind_Flag indexTK            // (in) - default ESMC_TYPEKIND_I4
+  ESMC_TypeKind_Flag indexTK            // (in) - default auto selection
   ){
 //
 // !DESCRIPTION:
@@ -1420,7 +1419,7 @@ DistGrid *DistGrid::create(
   DELayout *delayout,                   // (in)
   VM *vm,                               // (in)
   int *rc,                              // (out) return code
-  ESMC_TypeKind_Flag indexTK            // (in) - default ESMC_TYPEKIND_I4
+  ESMC_TypeKind_Flag indexTK            // (in) - default auto selection
   ){
 //
 // !DESCRIPTION:
@@ -1687,7 +1686,7 @@ DistGrid *DistGrid::create(
   int fastAxis,                         // (in)
   VM *vm,                               // (in)
   int *rc,                              // (out) return code
-  ESMC_TypeKind_Flag indexTK            // (in) - default ESMC_TYPEKIND_I4
+  ESMC_TypeKind_Flag indexTK            // (in) - default auto selection
   ){
 //
 // !DESCRIPTION:
@@ -1708,7 +1707,7 @@ DistGrid *DistGrid::create(
   DistGrid *distgrid = 
     create(minIndex, maxIndex, regDecomp, decompflag,
       decompflagCount, regDecompFirstExtra, regDecompLastExtra, deLabelList,
-      indexflag, connectionList, delayout, vm, &localrc);
+      indexflag, connectionList, delayout, vm, &localrc, indexTK);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
     rc)) return distgrid;
   
@@ -1748,7 +1747,7 @@ DistGrid *DistGrid::create(
   DELayout *delayout,                   // (in)
   VM *vm,                               // (in)
   int *rc,                              // (out) return code
-  ESMC_TypeKind_Flag indexTK            // (in) - default ESMC_TYPEKIND_I4
+  ESMC_TypeKind_Flag indexTK            // (in) - default auto selection
   ){
 //
 // !DESCRIPTION:
@@ -2413,7 +2412,7 @@ int DistGrid::construct(
     *indexflag = *indexflagArg;     // copy the value
   }else
     indexflag = NULL;
-
+  
   // fill in the DistGrid object
   indexTK = indexTKArg;
   dimCount = dimCountArg;
@@ -2488,7 +2487,7 @@ int DistGrid::construct(
     }
   }
   // determine the elementCountPTile
-  elementCountPTile = new int[tileCount];
+  elementCountPTile = new ESMC_I8[tileCount];
   for (int i=0; i<tileCount; i++){
     elementCountPTile[i] = 1;  // reset
     for (int j=0; j<dimCount; j++)
@@ -2497,13 +2496,26 @@ int DistGrid::construct(
   }
   tileListPDe = new int[deCount];
   memcpy(tileListPDe, tileListPDeArg, sizeof(int)*deCount);
-  elementCountPDe = new int[deCount];
+  // determine the elementCountPDe
+  elementCountPDe = new ESMC_I8[deCount];
   for (int i=0; i<deCount; i++){
     elementCountPDe[i] = 1;  // reset
     for (int j=0; j<dimCount; j++)
       elementCountPDe[i] *= indexCountPDimPDe[i*dimCount+j];
     // mark in tileListPDe DEs that have no elements as not being on any tile
     if (elementCountPDe[i]==0) tileListPDe[i]=0;
+  }
+  // see if indexTK requires auto selection of typekind
+  if (indexTK == ESMF_NOKIND){
+    // auto selection of the correct typekind
+    indexTK = ESMC_TYPEKIND_I4;  // default to 32-bit (signed i.e. 31-bit)
+    ESMC_I8 totalElementCount = 0;  // reset
+    for (int i=0; i<tileCount; i++)
+      totalElementCount += elementCountPTile[i];
+    if (totalElementCount > 2147483648L){
+      // above the I4 limit -> go to I8
+      indexTK = ESMC_TYPEKIND_I8;
+    }
   }
   // complete sequence index collocation by default
   diffCollocationCount = 1; // collocate all dimensions
@@ -3041,10 +3053,10 @@ DistGridMatch_Flag DistGrid::match(
       return matchResult;
     }
   }
-  int1 = distgrid1->elementCountPTile;
-  int2 = distgrid2->elementCountPTile;
+  ESMC_I8 *long1 = distgrid1->elementCountPTile;
+  ESMC_I8 *long2 = distgrid2->elementCountPTile;
   for (int i=0; i<tileCount1; i++){
-    if (int1[i] != int2[i]){
+    if (long1[i] != long2[i]){
       matchResult = DISTGRIDMATCH_NONE;
       if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
       return matchResult;
@@ -3068,10 +3080,10 @@ DistGridMatch_Flag DistGrid::match(
       return matchResult;
     }
   }
-  int1 = distgrid1->elementCountPDe;
-  int2 = distgrid2->elementCountPDe;
+  long1 = distgrid1->elementCountPDe;
+  long2 = distgrid2->elementCountPDe;
   for (int i=0; i<deCount1; i++){
-    if (int1[i] != int2[i]){
+    if (long1[i] != long2[i]){
       matchResult = DISTGRIDMATCH_NONE;
       if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
       return matchResult;
@@ -3135,11 +3147,12 @@ int DistGrid::print()const{
 
   // print info about the DistGrid object
   printf("--- ESMCI::DistGrid::print start ---\n");
+  printf("indexTK: %s\n", ESMC_TypeKind_FlagString(indexTK));
   printf("dimCount = %d\n", dimCount);
   printf("tileCount = %d\n", tileCount);
   printf("elementCountPTile: ");
   for (int i=0; i<tileCount; i++)
-    printf("%d ", elementCountPTile[i]);
+    printf("%Ld ", elementCountPTile[i]);
   printf("\n");
   printf("regDecomp = %s\n", (regDecomp)?"YES":"NO");
   printf("tileListPDe: ");
@@ -3149,7 +3162,7 @@ int DistGrid::print()const{
   printf("\n");
   printf("elementCountPDe: ");
   for (int i=0; i<deCount; i++)
-    printf("%d ", elementCountPDe[i]);
+    printf("%Ld ", elementCountPDe[i]);
   printf("\n");
   printf("contigFlagPDimPDe (dims separated by / ):\n");
   for (int i=0; i<deCount; i++){
@@ -3589,7 +3602,7 @@ int DistGrid::getContigFlagPDimPDe(
 // !IROUTINE:  ESMCI::DistGrid::getElementCountPDe
 //
 // !INTERFACE:
-int DistGrid::getElementCountPDe(
+ESMC_I8 DistGrid::getElementCountPDe(
 //
 // !RETURN VALUE:
 //    int elementCount for DE
@@ -4589,6 +4602,7 @@ int DistGrid::serialize(
   int i;
   char *cp;
   int *ip;
+  ESMC_I8 *lp;
   ESMC_TypeKind_Flag *tkp;
   int r;
 
@@ -4629,10 +4643,17 @@ int DistGrid::serialize(
       *ip++ = minIndexPDimPTile[i];
       *ip++ = maxIndexPDimPTile[i];
     }
-    for (int i=0; i<tileCount; i++)
-      *ip++ = elementCountPTile[i];
   }else
-    ip += 2 + 2*dimCount*tileCount + tileCount;
+    ip += 2 + 2*dimCount*tileCount;
+  //
+  lp = (ESMC_I8 *)ip; 
+  if (inquireflag != ESMF_INQUIREONLY){
+    for (int i=0; i<tileCount; i++)
+      *lp++ = elementCountPTile[i];
+  }else
+    lp += tileCount;
+  //
+  ip = (int *)lp;
   //
   int deCount = delayout->getDeCount();
   if (inquireflag != ESMF_INQUIREONLY){
@@ -4643,7 +4664,6 @@ int DistGrid::serialize(
       *ip++ = indexCountPDimPDe[i];
     }
     for (int i=0; i<deCount; i++){
-      *ip++ = elementCountPDe[i];
       *ip++ = tileListPDe[i];
     }
     *ip++ = diffCollocationCount;
@@ -4652,7 +4672,17 @@ int DistGrid::serialize(
       *ip++ = collocationTable[i];
     }
   }else
-    ip += 4*dimCount*deCount + 2*deCount + 1 + 2*dimCount;
+    ip += 4*dimCount*deCount + deCount + 1 + 2*dimCount;
+  
+  lp = (ESMC_I8 *)ip; 
+  if (inquireflag != ESMF_INQUIREONLY){
+    for (int i=0; i<deCount; i++)
+      *lp++ = elementCountPDe[i];
+  }else
+    lp += deCount;
+  //
+  ip = (int *)lp;
+  //
   // connections
   if (inquireflag != ESMF_INQUIREONLY){
     *ip++ = connectionCount;
@@ -4715,6 +4745,7 @@ DistGrid *DistGrid::deserialize(
   int i;
   char *cp;
   int *ip;
+  ESMC_I8 *lp;
   ESMC_TypeKind_Flag *tkp;
   int r;
   
@@ -4744,9 +4775,11 @@ DistGrid *DistGrid::deserialize(
     a->minIndexPDimPTile[i] = *ip++;
     a->maxIndexPDimPTile[i] = *ip++;
   }
-  a->elementCountPTile = new int[a->tileCount];
+  a->elementCountPTile = new ESMC_I8[a->tileCount];
+  lp = (ESMC_I8 *)ip;
   for (int i=0; i<a->tileCount; i++)
-    a->elementCountPTile[i] = *ip++;
+    a->elementCountPTile[i] = *lp++;
+  ip = (int *)lp;
   int deCount = a->delayout->getDeCount();
   a->minIndexPDimPDe = new int[a->dimCount*deCount];
   a->maxIndexPDimPDe = new int[a->dimCount*deCount];
@@ -4758,12 +4791,9 @@ DistGrid *DistGrid::deserialize(
     a->contigFlagPDimPDe[i] = *ip++;
     a->indexCountPDimPDe[i] = *ip++;
   }
-  a->elementCountPDe = new int[deCount];
   a->tileListPDe = new int[deCount];
-  for (int i=0; i<deCount; i++){
-    a->elementCountPDe[i] = *ip++;
+  for (int i=0; i<deCount; i++)
     a->tileListPDe[i] = *ip++;
-  }
   a->diffCollocationCount = *ip++;
   a->collocationPDim = new int[a->dimCount];
   a->collocationTable = new int[a->dimCount];
@@ -4771,6 +4801,11 @@ DistGrid *DistGrid::deserialize(
     a->collocationPDim[i] = *ip++;
     a->collocationTable[i] = *ip++;
   }
+  a->elementCountPDe = new ESMC_I8[deCount];
+  lp = (ESMC_I8 *)ip;
+  for (int i=0; i<deCount; i++)
+    a->elementCountPDe[i] = *lp++;
+  ip = (int *)lp;
   // connections
   a->connectionCount = *ip++;
   a->connectionList = new int*[a->connectionCount];

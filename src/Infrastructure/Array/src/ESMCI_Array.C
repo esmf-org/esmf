@@ -5428,13 +5428,13 @@ template<typename SIT, typename DIT>
     // srcToDstTransposeMap not specified -> default mode
     
     // src and dst Arrays must have identical number of exclusive elements
-    int srcElementCount = 0; // init
-    const int *srcElementCountPTile =
+    ESMC_I8 srcElementCount = 0; // init
+    const ESMC_I8 *srcElementCountPTile =
       srcArray->distgrid->getElementCountPTile();
     for (int i=0; i<srcArray->distgrid->getTileCount(); i++)
       srcElementCount += srcElementCountPTile[i];
-    int dstElementCount = 0; // init
-    const int *dstElementCountPTile =
+    ESMC_I8 dstElementCount = 0; // init
+    const ESMC_I8 *dstElementCountPTile =
       dstArray->distgrid->getElementCountPTile();
     for (int i=0; i<dstArray->distgrid->getTileCount(); i++)
       dstElementCount += dstElementCountPTile[i];
@@ -5446,7 +5446,8 @@ template<typename SIT, typename DIT>
     }
   
     // implemented via sparseMatMul using identity matrix
-    const int *srcElementCountPDe = srcArray->distgrid->getElementCountPDe();
+    const ESMC_I8 *srcElementCountPDe =
+      srcArray->distgrid->getElementCountPDe();
     int *const*srcArbSeqIndexCountPCollPLocalDe =
       srcArray->distgrid->getElementCountPCollPLocalDe();
     const int *srcLocalDeToDeMap = srcArray->delayout->getLocalDeToDeMap();
