@@ -9428,6 +9428,27 @@ template<typename SIT, typename DIT> int sparseMatMulStoreEncodeXXE(VM *vm,
   );
 
 
+template<typename SIT, typename DIT> int sparseMatMulStoreLinSeqVect_new(
+  VM *vm,                                 // in
+  Array *srcArray, Array *dstArray,       // in
+  vector<SparseMatrix<SIT,DIT> >const &sparseMatrix,// in - sparse matrix vector
+  bool haloFlag,                          // in
+  bool ignoreUnmatched,                   // in
+  bool tensorMixFlag,                     // in
+  int const factorListCount,              // in
+  vector<bool> &factorPetFlag,            // in
+  ESMC_TypeKind_Flag typekindFactors,     // in
+  int const srcLocalDeCount,              // in
+  int const dstLocalDeCount,              // in
+  int srcElementCount,                    // in
+  int dstElementCount,                    // in
+  const int *srcLocalDeElementCount,      // in
+  const int *dstLocalDeElementCount,      // in
+  vector<vector<DD::AssociationElement<SIT,DIT> > >&srcLinSeqVect, // inout
+  vector<vector<DD::AssociationElement<DIT,SIT> > >&dstLinSeqVect  // inout
+  );
+
+
 template<typename SIT, typename DIT> int sparseMatMulStoreLinSeqVect(
   VM *vm,                                 // in
   Array *srcArray, Array *dstArray,       // in
@@ -9856,6 +9877,44 @@ template<typename SIT, typename DIT>
     srcLinSeqVect(srcLocalDeCount);
   vector<vector<DD::AssociationElement<DIT,SIT> > >
     dstLinSeqVect(dstLocalDeCount);
+  
+#if 1
+  localrc = sparseMatMulStoreLinSeqVect_new(vm,
+    srcArray, dstArray,
+    sparseMatrix,
+    haloFlag, ignoreUnmatched, tensorMixFlag,
+    factorListCount, factorPetFlag, typekindFactors,
+    srcLocalDeCount, dstLocalDeCount, srcElementCount, dstElementCount,
+    srcLocalDeElementCount, dstLocalDeElementCount,
+    srcLinSeqVect, dstLinSeqVect
+  );
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+    &rc)) return rc;
+
+  // force vectors out of scope by swapping with empty vector, to free memory
+  vector<vector<DD::AssociationElement<SIT,DIT> > >().swap(srcLinSeqVect);
+  vector<vector<DD::AssociationElement<DIT,SIT> > >().swap(dstLinSeqVect);
+  srcLinSeqVect.resize(srcLocalDeCount);  // reset size to where it should be
+  dstLinSeqVect.resize(dstLocalDeCount);  // reset size to where it should be
+  
+#ifdef ASMM_STORE_MEMLOG_on
+  VM::logMemInfo(std::string("ASMMStoreWorkOnNewLinSeqVect1.0"));
+#endif
+  
+  char *marker = new char[10240000]; // 10,000KiB marker in the memory profile
+  
+#ifdef ASMM_STORE_MEMLOG_on
+  VM::logMemInfo(std::string("ASMMStoreWorkOnNewLinSeqVect2.0"));
+#endif
+  
+  delete [] marker;
+  
+#ifdef ASMM_STORE_MEMLOG_on
+  VM::logMemInfo(std::string("ASMMStoreWorkOnNewLinSeqVect3.0"));
+#endif
+
+#endif
+  
   localrc = sparseMatMulStoreLinSeqVect(vm,
     srcArray, dstArray,
     sparseMatrix,
@@ -10091,6 +10150,86 @@ template<typename SIT, typename DIT>
 //-----------------------------------------------------------------------------
 
 
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::sparseMatMulStoreLinSeqVect_new()"
+//BOPI
+// !IROUTINE:  ESMCI::sparseMatMulStoreLinSeqVect_new
+//
+// !INTERFACE:
+template<typename SIT, typename DIT> int sparseMatMulStoreLinSeqVect_new(
+//
+// !RETURN VALUE:
+//    int return code
+//
+// !ARGUMENTS:
+//
+  VM *vm,                                 // in
+  Array *srcArray, Array *dstArray,       // in
+  vector<SparseMatrix<SIT,DIT> >const &sparseMatrix,// in - sparse matrix vector
+  bool haloFlag,                          // in
+  bool ignoreUnmatched,                   // in
+  bool tensorMixFlag,                     // in
+  int const factorListCount,              // in
+  vector<bool> &factorPetFlag,            // in
+  ESMC_TypeKind_Flag typekindFactors,     // in
+  int const srcLocalDeCount,              // in
+  int const dstLocalDeCount,              // in
+  int srcElementCount,                    // in
+  int dstElementCount,                    // in
+  const int *srcLocalDeElementCount,      // in
+  const int *dstLocalDeElementCount,      // in
+  vector<vector<DD::AssociationElement<SIT,DIT> > >&srcLinSeqVect, // inout
+  vector<vector<DD::AssociationElement<DIT,SIT> > >&dstLinSeqVect  // inout
+  ){
+//
+// !DESCRIPTION:
+//    Take the incoming sparse matrix information from "input distribution" and
+//    transform it into "run distribution":
+//
+//      -> srcLinSeqVect
+//      -> dstLinSeqVect
+//
+//EOPI
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
+  
+  try{
+
+#ifdef ASMM_STORE_MEMLOG_on
+  VM::logMemInfo(std::string("ASMMStoreLinSeqVect_new1.0"));
+#endif
+  
+  // prepare
+  int localPet = vm->getLocalPet();
+  int petCount = vm->getPetCount();
+  const int *srcLocalDeToDeMap = srcArray->getDELayout()->getLocalDeToDeMap();
+  const int *dstLocalDeToDeMap = dstArray->getDELayout()->getLocalDeToDeMap();
+
+#ifdef ASMM_STORE_MEMLOG_on
+  VM::logMemInfo(std::string("ASMMStoreLinSeqVect_newXX.0"));
+#endif
+
+  }catch(int localrc){
+    // catch standard ESMF return code
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      &rc);
+    return rc;
+  }catch(...){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+      "Caught exception", ESMC_CONTEXT, &rc);
+    return rc;
+  }
+  
+  // return successfully
+  rc = ESMF_SUCCESS;
+  return rc;
+}
+//-----------------------------------------------------------------------------
+
+  
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::sparseMatMulStoreLinSeqVect()"
