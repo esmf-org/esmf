@@ -1481,4 +1481,63 @@ void MeshCap::destroy(MeshCap **mcpp,int *rc) {
 
   // Set error code to success
   if (rc) *rc=ESMF_SUCCESS;
- }
+}
+
+// returns NULL if unsuccessful
+MeshCap *MeshCap::meshcreate_easy_elems(int *pdim, 
+                                        int *sdim, 
+                                        int *num_elems, 
+                                        InterArray<int> *elemIdsII,
+                                        int *elemTypes, 
+                                        InterArray<int> *elemMaskII,
+                                        int *size_elemCornerCoords, 
+                                        double *elemCornerCoords, 
+                                        int *has_elemArea, 
+                                        double *elemArea, 
+                                        int *has_elemCoords, 
+                                        double *elemCoords, 
+                                        ESMC_CoordSys_Flag *coordSys,
+                                        bool _is_esmf_mesh, int *rc) {
+#undef ESMC_METHOD
+#define ESMC_METHOD "MeshCap::meshcreate_easy_elems()"
+
+  int localrc;
+
+
+  // Create mesh depending on the type
+  Mesh *mesh;
+  void *mbmesh;
+  if (_is_esmf_mesh) {
+    ESMCI_meshcreate_easy_elems(&mesh,
+                                pdim, sdim, 
+                                num_elems, elemIdsII, elemTypes, elemMaskII, 
+                                size_elemCornerCoords, elemCornerCoords, 
+                                has_elemArea, elemArea, 
+                                has_elemCoords, elemCoords, 
+                                coordSys, &localrc);    
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+                                       ESMC_CONTEXT, rc)) return NULL;
+  } else {
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_NOT_IMPL,
+       "- this functionality is not currently supported using MOAB",
+                                  ESMC_CONTEXT, rc);
+    return NULL;
+  }
+
+  // Create MeshCap
+  MeshCap *mc=new MeshCap();
+
+  // Set member variables
+  mc->is_esmf_mesh=_is_esmf_mesh;
+  if (_is_esmf_mesh) {
+    mc->mesh=mesh;
+  } else {
+    mc->mbmesh=mbmesh;
+  }
+
+  // Output new MeshCap
+  return mc;
+} 
+
+
+

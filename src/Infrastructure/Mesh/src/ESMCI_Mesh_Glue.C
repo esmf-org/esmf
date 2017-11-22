@@ -5005,3 +5005,210 @@ void ESMCI_MeshFitOnVM(Mesh **meshpp,
   if (rc!=NULL) *rc = ESMF_SUCCESS;
 
 } // meshcreate
+
+
+void ESMCI_meshcreate_easy_elems(Mesh **meshpp,
+                                 int *pdim_ptr, int *sdim_ptr, 
+                                 int *num_elems_ptr, 
+                                 InterArray<int> *elemIdsII,
+                                 int *elemTypes, 
+                                 InterArray<int> *elemMaskII,
+                                 int *size_elemCornerCoords_ptr, 
+                                 double *elemCornerCoords, 
+                                 int *has_elemArea, 
+                                 double *elemArea, 
+                                 int *has_elemCoords, 
+                                 double *elemCoords, 
+                                 ESMC_CoordSys_Flag *coordSys, int *rc)
+{
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI_meshcreate_easy_elems()"
+  
+  int localrc;
+
+   try {
+     // Initialize the parallel environment for mesh (if not already done)
+     ESMCI::Par::Init("MESHLOG", false /* use log */,VM::getCurrent(&localrc)->getMpi_c());
+     if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
+       throw localrc;  // bail out with exception
+     
+     // Setup some useful variables
+     int pdim=*pdim_ptr;
+     int sdim=*sdim_ptr;
+     int num_elems=*num_elems_ptr;
+     int size_elemCornerCoords=*size_elemCornerCoords_ptr;
+
+
+     // Create Mesh using internal mesh create method
+     ESMCI_meshcreate(meshpp,
+                      pdim_ptr, sdim_ptr, 
+                      coordSys, &localrc);
+     if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
+       throw localrc;  // bail out with exception
+
+
+     ////// Create nodes //////
+
+     // Compute number of nodes
+     int num_nodes=size_elemCornerCoords/sdim; // one node per corner
+
+     // Allocate node id array
+     int *node_ids=NULL; 
+     if (num_nodes > 0) {
+       node_ids=new int[num_nodes];
+     }
+
+     // Allocate node owners array
+     int *node_owners=NULL;
+     if (num_nodes > 0) {
+       node_owners=new int[num_nodes];
+     }
+
+     // For now the node coord array is the same as the corner coord array
+     double *node_coords=NULL;
+     node_coords=elemCornerCoords;
+
+     // Calc our range of node ids
+     int beg_node_ids=0;
+     MPI_Scan(&num_nodes,&beg_node_ids,1,MPI_INT,MPI_SUM,Par::Comm());
+
+     // Remove this processors number from the sum to get the beginning on
+     // this processor
+     beg_node_ids=beg_node_ids-num_nodes;
+
+     // start at 1
+     beg_node_ids=beg_node_ids+1;
+
+     // Fill node arrays
+     for (int i=0; i<num_nodes; i++) {
+
+       // Start ids at 1, then number sequentially
+       node_ids[i]=beg_node_ids+i; 
+
+       // Set all owners to the current processor
+       node_owners[i]=Par::Rank(); 
+     }
+
+     // Create nodes using internal mesh add nodes method
+     ESMCI_meshaddnodes(meshpp, &num_nodes, node_ids, 
+                        node_coords, node_owners, NULL,
+                        coordSys, &sdim, &localrc);
+     if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
+       throw localrc;  // bail out with exception 
+
+     // Deallocate node info
+     if (node_ids != NULL) delete [] node_ids;
+     if (node_owners != NULL) delete [] node_owners;
+
+     
+     ////// Create elements //////
+
+     // Allocate element id array
+     int *elem_ids=NULL; 
+     if (num_elems > 0) {
+       elem_ids=new int[num_elems];
+     }
+
+     // printf("%d# num_nodes=%d num_elems=%d \n",Par::Rank(),num_nodes,num_elems);
+
+     // Fill element id array depending on presence of input array
+     if (present(elemIdsII)) {
+       // Use user provided elem ids
+
+       // Error checking
+       if (elemIdsII->dimCount !=1) {
+         if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
+              " elemIds array must be 1D ", ESMC_CONTEXT,  &localrc)) throw localrc;
+       }       
+       if (elemIdsII->extent[0] != num_elems) {
+         if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
+         "- elementIds array must be the same size as the elementTypes array ", ESMC_CONTEXT, &localrc)) throw localrc;
+       }
+
+       // fill from array from passed in values
+       for (int i=0; i<num_elems; i++) {
+         elem_ids[i]=elemIdsII->array[i];
+       }      
+     } else {
+       // Set elems ids internally //
+
+       // Calc our range of elem ids
+       int beg_elem_ids=0;
+       MPI_Scan(&num_elems,&beg_elem_ids,1,MPI_INT,MPI_SUM,Par::Comm());
+
+       // Remove this processors number from the sum to get the beginning on
+       // this processor
+       beg_elem_ids=beg_elem_ids-num_elems;
+
+       // start at 1
+       beg_elem_ids=beg_elem_ids+1;
+
+       // Set local elem ids based on beginning
+       for (int i=0; i<num_elems; i++) {
+         // Start ids at 1, then number sequentially
+         elem_ids[i]=beg_elem_ids+i;
+       }
+     }
+
+     // The number of element connections is the same as the number of nodes right now
+     int num_elem_conns=num_nodes;
+
+     // Allocate element connection array
+     int *elem_conns=NULL; 
+     if (num_elem_conns > 0) {
+       elem_conns=new int[num_elem_conns];
+     }
+
+     // Fill element connection array
+     for (int i=0; i<num_elem_conns; i++) {
+       // Since each corner has it's own node, the connection array is just 
+       // in sequence starting with 1 (connection array is 1-based)
+       elem_conns[i]=i+1;
+     }
+
+     // Set regrid conserve flag
+     int regridConserve = ESMC_REGRID_CONSERVE_ON;
+
+     // Create elements using internal mesh add elements method
+     ESMCI_meshaddelements(meshpp, 
+                           &num_elems, elem_ids, elemTypes, elemMaskII ,
+                           has_elemArea, elemArea, 
+                           has_elemCoords, elemCoords, 
+                           &num_elem_conns, elem_conns, &regridConserve, 
+                           coordSys, &sdim,
+                           &localrc);
+     if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
+       throw localrc;  // bail out with exception 
+
+     // Deallocate element info
+     if (elem_ids != NULL) delete [] elem_ids;
+     if (elem_conns != NULL) delete [] elem_conns;
+
+  } catch(std::exception &x) {
+    // catch Mesh exception return code 
+    if (x.what()) {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+   					  x.what(), ESMC_CONTEXT,rc);
+    } else {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+   					  "UNKNOWN", ESMC_CONTEXT,rc);
+    }
+
+    return;
+  }catch(int localrc){
+    // catch standard ESMF return code
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,rc);
+    return;
+  } catch(...){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+      "- Caught unknown exception", ESMC_CONTEXT, rc);
+    return;
+  }
+ 
+  // Set return code 
+  if (rc!=NULL) *rc = ESMF_SUCCESS;
+
+} // meshcreate_easy_elems
+
+
+

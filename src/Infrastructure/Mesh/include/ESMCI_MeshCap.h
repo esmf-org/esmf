@@ -64,7 +64,20 @@
                                  ESMC_CoordSys_Flag *coordSys,
                                  bool _is_esmf_mesh, int *rc);
   
-
+    static MeshCap *meshcreate_easy_elems(int *pdim, 
+                                        int *sdim, 
+                                        int *num_elems, 
+                                        InterArray<int> *elemIdsII,
+                                        int *elemTypes, 
+                                        InterArray<int> *elemMaskII,
+                                        int *size_elemCornerCoords, 
+                                        double *elemCornerCoords, 
+                                        int *has_elemArea, 
+                                        double *elemArea, 
+                                        int *has_elemCoords, 
+                                        double *elemCoords, 
+                                        ESMC_CoordSys_Flag *coordSys,
+                                          bool _is_esmf_mesh, int *rc);
 
     void meshaddnodes(int *num_nodes, int *nodeId, 
                       double *nodeCoord, int *nodeOwner, InterArray<int> *nodeMaskII,

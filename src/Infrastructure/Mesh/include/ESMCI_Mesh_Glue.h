@@ -210,4 +210,18 @@ void ESMCI_meshcreatedual(Mesh **src_meshpp, Mesh **output_meshpp, int *rc);
 
 void ESMCI_MeshFitOnVM(Mesh **meshpp, VM **new_vm,int *rc);
 
+void ESMCI_meshcreate_easy_elems(Mesh **meshpp,
+                                 int *pdim, int *sdim, 
+                                 int *num_elems, 
+                                 InterArray<int> *elemIdsII,
+                                 int *elemTypes, 
+                                 InterArray<int> *elemMaskII,
+                                 int *size_elemCornerCoords, 
+                                 double *elemCornerCoords, 
+                                 int *has_elemArea, 
+                                 double *elemArea, 
+                                 int *has_elemCoords, 
+                                 double *elemCoords, 
+                                 ESMC_CoordSys_Flag *coordSys, int *rc);
+
 #endif // ESMCI_Mesh_Glue_h

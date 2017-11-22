@@ -192,6 +192,8 @@ module ESMF_MeshMod
   public ESMF_MeshGetIntPtr
   public ESMF_MeshCreateFromIntPtr
   public ESMF_MeshCreateCubedSphere
+  public ESMF_MeshCreateEasyElems
+
 !EOPI
 !------------------------------------------------------------------------------
 
@@ -564,7 +566,11 @@ contains
 !          etc.). 
 !   \item [{[elementDistgrid]}]
 !          If present, use this as the element Distgrid for the Mesh. 
-!          If not present, a Distgrid will be created internally. 
+!          The passed in Distgrid 
+!          needs to contain a local set of sequence indices matching the set of local element ids (i.e. those in {\tt elementIds}). 
+!          However, specifying an externally created Distgrid gives the user more control over aspects of 
+!          the Distgrid containing those sequence indices (e.g. how they are broken into DEs). 
+!          If not present, a 1D Distgrid will be created internally consisting of one DE per PET.
 !   \item [{[rc]}]
 !         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -807,7 +813,13 @@ contains
 !          {\tt ESMF\_FieldRegridStore()} call. This input consists of a 1D array the
 !          size of the number of nodes on this PET.
 !   \item [{[nodalDistgrid]}]
-!          If present, use this as the node Distgrid for the Mesh. If not present, a Distgrid will be created internally. 
+!          If present, use this as the node Distgrid for the Mesh. 
+!          The passed in Distgrid 
+!          needs to contain a local set of sequence indices matching the set of local node ids (i.e. the ids in 
+!          {\tt nodeIds} with {\tt nodeOwners} equal to the current PET). 
+!          However, specifying an externally created Distgrid gives the user more control over aspects of 
+!          the Distgrid containing those sequence indices (e.g. how they are broken into DEs). 
+!          If not present, a 1D Distgrid will be created internally consisting of one DE per PET.
 !   \item [{[rc]}]
 !         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -1079,7 +1091,12 @@ contains
 !          size of the number of nodes on this PET.
 !   \item [{[nodalDistgrid]}]
 !          If present, use this as the node Distgrid for the Mesh. 
-!          If not present, a Distgrid will be created internally. 
+!          The passed in Distgrid 
+!          needs to contain a local set of sequence indices matching the set of local node ids (i.e. the ids in 
+!          {\tt nodeIds} with {\tt nodeOwners} equal to the current PET). 
+!          However, specifying an externally created Distgrid gives the user more control over aspects of 
+!          the Distgrid containing those sequence indices (e.g. how they are broken into DEs). 
+!          If not present, a 1D Distgrid will be created internally consisting of one DE per PET.
 !   \item [elementIds]
 !          An array containing the global ids of the elements to be created on this PET. 
 !          This input consists of a 1D array the size of the number of elements on this PET.
@@ -1125,7 +1142,12 @@ contains
 !          elementCoords(2), the coordinates for element 2 are in elementCoords(3) and elementCoords(4), 
 !          etc.). 
 !   \item [{[elementDistgrid]}]
-!          If present, use this as the element Distgrid for the Mesh. If not present, a Distgrid will be created internally. 
+!          If present, use this as the element Distgrid for the Mesh. 
+!          The passed in Distgrid 
+!          needs to contain a local set of sequence indices matching the set of local element ids (i.e. those in {\tt elementIds}). 
+!          However, specifying an externally created Distgrid gives the user more control over aspects of 
+!          the Distgrid containing those sequence indices (e.g. how they are broken into DEs). 
+!          If not present, a 1D Distgrid will be created internally consisting of one DE per PET.
 !   \item[{[coordSys]}] 
 !         The coordinate system of the grid coordinate data. 
 !         For a full list of options, please see Section~\ref{const:coordsys}. 
@@ -1747,10 +1769,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !         first 2D values of this variable even if this data is 3D, or 4D array. If not 
 !         specified, defaults to empty string.
 !   \item [{[nodalDistgrid]}]
-!         A 1D arbitrary distgrid describing the user-specified distribution of 
+!         A Distgrid describing the user-specified distribution of 
 !         the nodes across the PETs. 
 !   \item [{[elementDistgrid]}]
-!         A 1D arbitrary distgrid describing the user-specified distribution of 
+!         A Distgrid describing the user-specified distribution of 
 !         the elements across the PETs. 
 !   \item [{[rc]}]
 !         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -2964,10 +2986,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !  \item [mesh]
 !       The source Mesh to be redistributed. 
 !  \item [{[nodalDistgrid]}]
-!       A 1D arbitrary distgrid describing the new distribution of 
+!       A Distgrid describing the new distribution of 
 !       the nodes across the PETs. 
 !  \item [{[elementDistgrid]}]
-!       A 1D arbitrary distgrid describing the new distribution of 
+!       A Distgrid describing the new distribution of 
 !       the elements across the PETs. 
 !  \item[{[vm]}]
 !      If present, the Mesh object is created on the specified 
@@ -3949,12 +3971,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! making up the Mesh. For a manifold, the spatial dimension can be larger than the 
 ! parametric dim (e.g. the 2D surface of a sphere in 3D space), but it can't be smaller. 
 ! \item [{[nodalDistgrid]}]
-! A 1D arbitrary distgrid describing the distribution of the nodes across the PETs. Note that
+! A Distgrid describing the distribution of the nodes across the PETs. Note that
 ! on each PET the distgrid will only contain entries for nodes owned by that PET.
 ! This is the DistGrid that would be used to construct the Array in a Field that is constructed
 ! on {\tt mesh}.
 ! \item [{[elementDistgrid]}]
-! A 1D arbitrary distgrid describing the distribution of elements across the PETs. Note that
+! A Distgrid describing the distribution of elements across the PETs. Note that
 ! on each PET the distgrid will only contain entries for elements owned by that PET.
 ! \item [{[numOwnedNodes]}]
 ! The number of local nodes which are owned by this PET. This is the number of PET local entries in
@@ -6917,5 +6939,301 @@ offset = 0
 end function ESMF_MeshCreateFromUnstruct
 !------------------------------------------------------------------------------
 #endif
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_MeshCreateEasyElems()"
+!BOP
+! !IROUTINE: ESMF_MeshCreate - Create a Mesh all at once
+!
+! !INTERFACE:
+  ! Private name; call using ESMF_MeshCreate()
+    function  ESMF_MeshCreateEasyElems(parametricDim, spatialDim, &
+                   elementIds, elementTypes, elementCornerCoords, &
+                   elementMask, elementArea, elementCoords, &
+                   elementDistgrid, coordSys, rc)
+!
+!
+! !RETURN VALUE:
+    type(ESMF_Mesh)                           :: ESMF_MeshCreateEasyElems
+! !ARGUMENTS:
+    integer,            intent(in)            :: parametricDim
+    integer,            intent(in)            :: spatialDim
+    integer,            intent(in), optional  :: elementIds(:)
+    integer,            intent(in)            :: elementTypes(:)
+    real(ESMF_KIND_R8), intent(in)            :: elementCornerCoords(:)
+    integer,            intent(in),  optional :: elementMask(:)
+    real(ESMF_KIND_R8), intent(in),  optional :: elementArea(:)  
+    real(ESMF_KIND_R8), intent(in),  optional :: elementCoords(:)
+    type(ESMF_DistGrid), intent(in),  optional :: elementDistgrid
+    type(ESMF_CoordSys_Flag), intent(in),  optional :: coordSys
+    integer,            intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!   Create a Mesh object in one step by just specifying the corner coordinates of each element. 
+!   Internally these corners are turned into nodes forming the outside edges of the elements.
+!   After this call the Mesh is usable, for
+!   example, a Field may be built on the created Mesh object and 
+!   this Field may be used in a {\tt ESMF\_FieldRegridStore()} call.
+!
+!   This call sets the dimension of the elements in the mesh
+!   ({\tt parametricDim}) and the number of coordinate dimensions in the mesh
+!   ({\tt spatialDim}). 
+!
+!   The parameters to this call {\tt elementIds}, {\tt elementTypes}, and
+!   {\tt elementCornerCoords} describe the elements to be created. The description 
+!   for a particular element lies at the same index location in {\tt elementIds} 
+!   and {\tt elementTypes}. Each entry in {\tt elementCornerCoords} consists of the list of
+!   corners used to create that element, so the corners for element $e$ in the 
+!   {\tt elementTypes} array will start at $number\_of\_corners\_in\_element(1) 
+!    + number\_of\_corners\_in\_element(2) +
+!   \cdots + number\_of\_corners\_in\_element(e-1) + 1$ in {\tt elementCornerCoords}.
+!
+!   This call is {\em collective} across the current VM.
+!
+!   \begin{description}
+!   \item [parametricDim]
+!         Dimension of the topology of the Mesh. (E.g. a mesh constructed of squares would
+!         have a parametric dimension of 2, whereas a Mesh constructed of cubes would have one
+!         of 3.)
+!   \item[spatialDim] 
+!         The number of coordinate dimensions needed to describe the locations of the nodes 
+!         making up the Mesh. For a manifold, the spatial dimension can be larger than the 
+!         parametric dim (e.g. the 2D surface of a sphere in 3D space), but it can't be smaller. 
+!   \item [{[elementIds]}]
+!          An array containing the global ids of the elements to be created on this PET. 
+!          This input consists of a 1D array the size of the number of elements on this PET.
+!          Each element id must be a number equal to or greater than 1. An id should be
+!          unique in the sense that different elements must have different ids (the same element
+!          that appears on different processors must have the same id). There may be gaps in the sequence
+!          of ids, but if these gaps are the same scale as the length of the sequence it can lead to 
+!          inefficiencies when the Mesh is used (e.g. in {\tt ESMF\_FieldRegridStore()}).  
+!          If not specified, then elements are numbered in sequence starting with the first element
+!          on PET 0. 
+!   \item[elementTypes] 
+!          An array containing the types of the elements to be created on this PET. The types used
+!          must be appropriate for the parametric dimension of the Mesh. Please see
+!          Section~\ref{const:meshelemtype} for the list of options. This input consists of 
+!          a 1D array the size of the number of elements on this PET.  
+!   \item[elementCornerCoords] 
+!         An array containing the indexes of the sets of nodes to be connected together to form the
+!         elements to be created on this PET. The entries in this list are NOT node global ids, 
+!         but rather each entry is a local index (1 based) into the list of nodes to be 
+!         created on this PET by this call.
+!         In other words, an entry of 1 indicates that this element contains the node
+!         described by {\tt nodeIds(1)}, {\tt nodeCoords(1)}, etc. on this PET. It is also
+!         important to note that the order of the nodes in an element connectivity list
+!         matters. Please see Section~\ref{const:meshelemtype} for diagrams illustrating
+!         the correct order of nodes in a element. This input consists of a 1D array with 
+!         a total size equal to the sum of the number of nodes contained in each element on
+!         this PET. The number of nodes in each element is implied by its element type in 
+!         {\tt elementTypes}. The nodes for each element 
+!         are in sequence in this array (e.g. the nodes for element 1 are elementConn(1),
+!         elementConn(2), etc.). 
+!   \item [{[elementMask]}]
+!          An array containing values which can be used for element masking. Which values indicate
+!          masking are chosen via the {\tt srcMaskValues} or {\tt dstMaskValues} arguments to 
+!          {\tt ESMF\_FieldRegridStore()} call. This input consists of a 1D array the
+!          size of the number of elements on this PET.
+!   \item [{[elementArea]}]
+!          An array containing element areas. If not specified, the element areas are internally calculated. 
+!          This input consists of a 1D array the size of the number of elements on this PET.
+!   \item[{[elementCoords]}] 
+!          An array containing the physical coordinates of the elements to be created on this
+!          PET. This input consists of a 1D array the size of the number of elements on this PET times the Mesh's 
+!          spatial dimension ({\tt spatialDim}). The coordinates in this array are ordered
+!          so that the coordinates for an element lie in sequence in memory. (e.g. for a 
+!          Mesh with spatial dimension 2, the coordinates for element 1 are in elementCoords(1) and
+!          elementCoords(2), the coordinates for element 2 are in elementCoords(3) and elementCoords(4), 
+!          etc.). 
+!   \item [{[elementDistgrid]}]
+!          If present, use this as the element Distgrid for the Mesh. 
+!          The passed in Distgrid 
+!          needs to contain a local set of sequence indices matching the set of local element ids (i.e. those in {\tt elementIds}). 
+!          However, specifying an externally created Distgrid gives the user more control over aspects of 
+!          the Distgrid containing those sequence indices (e.g. how they are broken into DEs). 
+!          If not present, a 1D Distgrid will be created internally consisting of one DE per PET.
+!   \item[{[coordSys]}] 
+!         The coordinate system of the grid coordinate data. 
+!         For a full list of options, please see Section~\ref{const:coordsys}. 
+!         If not specified then defaults to ESMF\_COORDSYS\_SPH\_DEG.  
+!   \item [{[rc]}]
+!         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+!------------------------------------------------------------------------------
+    integer                 :: localrc      ! local return code
+    integer                 :: num_nodes
+    integer                 :: num_elems, size_elemCornerCoords
+    type(ESMF_InterArray) :: elementMaskII
+    type(ESMF_InterArray) :: elementIdsII
+    real(ESMF_KIND_R8) :: tmpArea(2)
+    integer :: areaPresent
+    real(ESMF_KIND_R8) :: tmpCoords(2)
+    integer :: coordsPresent
+    type(ESMF_CoordSys_Flag) :: coordSysLocal
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ESMF_MeshCreateEasyElems%this = ESMF_NULL_POINTER
+
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_DistgridGetInit, elementDistgrid, rc)
+
+   ! Set Default coordSys
+   if (present(coordSys)) then
+      coordSysLocal=coordSys
+   else 
+      coordSysLocal=ESMF_COORDSYS_SPH_DEG
+   endif
+
+    ! get sizes of lists
+    num_elems = size(elementTypes)
+    size_elemCornerCoords = size(elementCornerCoords)
+
+    ! If present make sure that elementCoords has the correct size
+    if (present(elementCoords)) then
+       if (size(elementCoords) .ne. &
+            spatialDim*num_elems) then
+          call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
+               msg="- elementCoords input array is the wrong size.", &
+               ESMF_CONTEXT, rcToReturn=rc)
+          return
+       endif
+    endif    
+
+   ! Create interface int to wrap optional element mask
+   elementMaskII = ESMF_InterArrayCreate(elementMask, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return
+
+   ! Create interface int to wrap optional element ids
+   elementIdsII = ESMF_InterArrayCreate(elementIds, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return
+    
+    ! set element area if it's present.
+    if (present(elementCoords)) then
+       if (present(elementArea)) then
+          areaPresent=1
+          coordsPresent=1
+          call C_ESMC_MeshCreateEasyElems(ESMF_MeshCreateEasyElems%this, &
+               parametricDim, spatialDim, &
+               num_elems, &
+               elementIdsII, elementTypes, elementMaskII, &
+               size_elemCornerCoords,elementCornerCoords, &
+               areaPresent, elementArea, &
+               coordsPresent, elementCoords, &
+               coordSysLocal, localrc)
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+               ESMF_CONTEXT, rcToReturn=rc)) return
+       else
+          areaPresent=0
+          coordsPresent=1
+          call C_ESMC_MeshCreateEasyElems(ESMF_MeshCreateEasyElems%this, &
+               parametricDim, spatialDim, &
+               num_elems, &
+               elementIdsII, elementTypes, elementMaskII, &
+               size_elemCornerCoords,elementCornerCoords, &
+               areaPresent, tmpArea, &
+               coordsPresent, elementCoords, &
+               coordSysLocal, localrc)
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+               ESMF_CONTEXT, rcToReturn=rc)) return
+       endif
+    else
+       if (present(elementArea)) then
+          areaPresent=1
+          coordsPresent=0
+          call C_ESMC_MeshCreateEasyElems(ESMF_MeshCreateEasyElems%this, &
+               parametricDim, spatialDim, &
+               num_elems, &
+               elementIdsII, elementTypes, elementMaskII, &
+               size_elemCornerCoords,elementCornerCoords, &
+               areaPresent, elementArea, &
+               coordsPresent, tmpCoords, &
+               coordSysLocal, localrc)
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+               ESMF_CONTEXT, rcToReturn=rc)) return
+       else
+          areaPresent=0
+          coordsPresent=0
+          call C_ESMC_MeshCreateEasyElems(ESMF_MeshCreateEasyElems%this, &
+               parametricDim, spatialDim, &
+               num_elems, &
+               elementIdsII, elementTypes, elementMaskII, &
+               size_elemCornerCoords,elementCornerCoords, &
+               areaPresent, tmpArea, &
+               coordsPresent, tmpCoords, &
+               coordSysLocal, localrc)
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+               ESMF_CONTEXT, rcToReturn=rc)) return
+       endif
+    endif
+
+    ! Create nodal distgrid
+    call C_ESMC_MeshCreateNodeDistGrid( &
+         ESMF_MeshCreateEasyElems%this, &
+         ESMF_MeshCreateEasyElems%nodal_distgrid, &
+         ESMF_MeshCreateEasyElems%numOwnedNodes, &
+         localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return    
+
+
+    ! Create a distgrid if it isn't passed in
+    if (present(elementDistgrid)) then 
+       ESMF_MeshCreateEasyElems%element_distgrid=elementDistgrid
+       call ESMF_DistGridGetNumIds(elementDistgrid, &
+            ESMF_MeshCreateEasyElems%numOwnedElements, rc=localrc)
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+    else 
+       call C_ESMC_MeshCreateElemDistGrid( &
+            ESMF_MeshCreateEasyElems%this, &
+            ESMF_MeshCreateEasyElems%element_distgrid, &
+            ESMF_MeshCreateEasyElems%numOwnedElements, &
+            localrc)
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return    
+    endif
+
+    ! Get rid of interface Int wrappers
+    call ESMF_InterArrayDestroy(elementMaskII, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return
+
+    call ESMF_InterArrayDestroy(elementIdsII, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! The C side has been created
+    ESMF_MeshCreateEasyElems%isCMeshFreed=.false.
+
+    ! Can't happen here
+    ESMF_MeshCreateEasyElems%hasSplitElem=.false.
+
+    ! Set as fully created 
+    ESMF_MeshCreateEasyElems%isFullyCreated=.true.
+
+    ! Set dimension information
+    ESMF_MeshCreateEasyElems%spatialDim=spatialDim
+    ESMF_MeshCreateEasyElems%parametricDim=parametricDim
+
+    ! Set coord sys information
+    ESMF_MeshCreateEasyElems%coordSys=coordSysLocal
+
+    ! Set init status of mesh
+    ESMF_INIT_SET_CREATED(ESMF_MeshCreateEasyElems)
+
+    ! Set return code
+    if (present (rc)) rc = localrc
+    
+  end function ESMF_MeshCreateEasyElems
+!------------------------------------------------------------------------------
+
 
 end module ESMF_MeshMod

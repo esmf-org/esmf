@@ -2119,6 +2119,22 @@ endif
   call ESMF_Test(((rc .eq. ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
   !-----------------------------------------------------------------------------
 
+  !-----------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Mesh create easy elems"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+
+  ! initialize check variables
+  correct=.true.
+  rc=ESMF_SUCCESS
+
+  ! do test
+  call test_mesh_create_easy_elems(correct, rc)
+
+  call ESMF_Test(((rc .eq. ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
+  !-----------------------------------------------------------------------------
+
+
 #if 1
   ! OFF UNTIL I SEE IF THE OLD STUFF WORKS
 
@@ -5296,6 +5312,281 @@ subroutine test_mesh_create_gt_1localde(correct, rc)
    rc=ESMF_SUCCESS
 
 end subroutine test_mesh_create_gt_1localde
+
+
+
+  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  ! 
+  ! Creates the following mesh on 
+  ! 1 or 4 PETs. Returns an error 
+  ! if run on other than 1 or 4 PETs
+  ! 
+  !                     Mesh Ids
+  !
+  !   3.0   * ------- *          * -------  *
+  !         |         |          |  10    / |
+  !   2.5   |    7    |          |     /    |
+  !         |         |          |  /    9  |
+  !   2.0   * ------- *          * -------  *
+  !         
+  !   1.5   
+  !         
+  !   1.0   * ------- *          * -------- *
+  !         |         |          |          |
+  !   0.5   |    1    |          |    3     |
+  !         |         |          |          |
+  !   0.0   * ------- *          * -------- 4
+  !            
+  !        0.0  0.5  1.0  1.5   2.0  2.5   3.0
+  !
+  !               Node Ids at corners
+  !              Element Ids in centers
+  ! 
+   !!!!! 
+  ! 
+  ! The owners for 1 PET are all Pet 0.
+  ! The owners for 4 PETs are as follows:
+  !
+  !                   Mesh Owners
+  !
+  !   3.0   * ------- *          * -------  *
+  !         |         |          |  2     / |
+  !   2.5   |    2    |          |     /    |
+  !         |         |          |  /    2  |
+  !   2.0   * ------- *          * -------  *
+  !         
+  !   1.5   
+  !         
+  !   1.0   * ------- *          * -------- *
+  !         |         |          |          |
+  !   0.5   |    0    |          |    1     |
+  !         |         |          |          |
+  !   0.0   * ------- *          * -------- 4
+  !            
+  !        0.0  0.5  1.0  1.5   2.0  2.5   3.0
+  !
+  !               Node Owners at corners
+  !              Element Owners in centers
+  ! 
+
+subroutine test_mesh_create_easy_elems(correct, rc)
+  type(ESMF_Mesh) :: mesh
+  logical :: correct
+  integer :: rc
+  integer :: numElems,numOwnedElemsTst
+  integer :: numElemCorners, numTriElems, numQuadElems
+  real(ESMF_KIND_R8), pointer :: elemCoords(:)
+  real(ESMF_KIND_R8), pointer :: elemCornerCoords(:)
+  integer, pointer :: elemIds(:),elemTypes(:)
+  integer :: petCount, localPet
+  type(ESMF_VM) :: vm
+
+  ! get global VM
+  call ESMF_VMGetGlobal(vm, rc=rc)
+  if (rc /= ESMF_SUCCESS) return
+  call ESMF_VMGet(vm, localPet=localPet, petCount=petCount, rc=rc)
+  if (rc /= ESMF_SUCCESS) return
+
+  ! return with an error if not 1 or 4 PETs
+  if ((petCount /= 1) .and. (petCount /=4)) then
+     rc=ESMF_FAILURE
+     return
+  endif
+  
+
+  ! Setup mesh info depending on the 
+  ! number of PETs
+  if (petCount .eq. 1) then
+
+      ! Fill in elem data
+      numTriElems=2
+      numQuadElems=3
+      numElems=numTriElems+numQuadElems
+      numElemCorners=3*numTriElems+4*numQuadElems
+
+      !! elem ids
+      allocate(elemIds(numElems))
+      elemIds=(/1,3,7,9,10/) 
+
+      !! elem types
+      allocate(elemTypes(numElems))
+      elemTypes=(/ESMF_MESHELEMTYPE_QUAD, & ! 1
+                  ESMF_MESHELEMTYPE_QUAD, & ! 3
+                  ESMF_MESHELEMTYPE_QUAD, & ! 7
+                  ESMF_MESHELEMTYPE_TRI,  & ! 9
+                  ESMF_MESHELEMTYPE_TRI/)   ! 10
+
+      !! elem coords
+      allocate(elemCoords(2*numElems))
+      elemCoords=(/0.5,0.5, & ! 1
+                   2.5,0.5, & ! 3
+                   0.5,2.5, & ! 7
+                   2.75,2.25,& ! 9
+                   2.25,2.75/)  ! 10
+
+     !! elem corner Coords
+     allocate(elemCornerCoords(2*numElemCorners))
+     elemCornerCoords=(/0.0,0.0, &  ! 1
+                        1.0,0.0, &  ! 1
+                        1.0,1.0, &  ! 1
+                        0.0,1.0, &  ! 1
+                        2.0,0.0, &  ! 3
+                        3.0,0.0, &  ! 3
+                        3.0,1.0, &  ! 3
+                        2.0,1.0, &  ! 3
+                        0.0,2.0, &  ! 7
+                        1.0,2.0, &  ! 7
+                        1.0,3.0, &  ! 7
+                        0.0,3.0, &  ! 7
+                        2.0,2.0, &  ! 9
+                        3.0,2.0, &  ! 9
+                        3.0,3.0, &  ! 9
+                        2.0,2.0, &  ! 10
+                        3.0,3.0, &  ! 10
+                        2.0,3.0 /)  ! 10
+ 
+   else if (petCount .eq. 4) then
+     ! Setup mesh data depending on PET
+     if (localPet .eq. 0) then
+
+      ! Fill in elem data
+      numTriElems=0
+      numQuadElems=1
+      numElems=numTriElems+numQuadElems
+      numElemCorners=3*numTriElems+4*numQuadElems
+
+      !! elem ids
+      allocate(elemIds(numElems))
+      elemIds=(/1/) 
+
+      !! elem types
+      allocate(elemTypes(numElems))
+      elemTypes=(/ESMF_MESHELEMTYPE_QUAD/) ! 1
+
+      !! elem coords
+      allocate(elemCoords(2*numElems))
+      elemCoords=(/0.5,0.5/) ! 1
+
+
+     !! elem corner Coords
+     allocate(elemCornerCoords(2*numElemCorners))
+     elemCornerCoords=(/0.0,0.0, &  ! 1
+                        1.0,0.0, &  ! 1
+                        1.0,1.0, &  ! 1
+                        0.0,1.0/)   ! 1
+
+     else if (localPet .eq. 1) then
+
+      ! Fill in elem data
+      numTriElems=0
+      numQuadElems=1
+      numElems=numTriElems+numQuadElems
+      numElemCorners=3*numTriElems+4*numQuadElems
+
+      !! elem ids
+      allocate(elemIds(numElems))
+      elemIds=(/3/) 
+
+      !! elem types
+      allocate(elemTypes(numElems))
+      elemTypes=(/ESMF_MESHELEMTYPE_QUAD/)  ! 3
+
+      !! elem coords
+      allocate(elemCoords(2*numElems))
+      elemCoords=(/2.5,0.5/) ! 3
+
+     !! elem corner Coords
+     allocate(elemCornerCoords(2*numElemCorners))
+     elemCornerCoords=(/2.0,0.0, &  ! 3
+                        3.0,0.0, &  ! 3
+                        3.0,1.0, &  ! 3
+                        2.0,1.0/)   ! 3
+
+     else if (localPet .eq. 2) then
+
+      ! Fill in elem data
+      numTriElems=2
+      numQuadElems=1
+      numElems=numTriElems+numQuadElems
+      numElemCorners=3*numTriElems+4*numQuadElems
+
+      !! elem ids
+      allocate(elemIds(numElems))
+      elemIds=(/7,9,10/) 
+
+      !! elem types
+      allocate(elemTypes(numElems))
+      elemTypes=(/ESMF_MESHELEMTYPE_QUAD, & ! 7
+                  ESMF_MESHELEMTYPE_TRI,  & ! 9
+                  ESMF_MESHELEMTYPE_TRI/)   ! 10
+
+      !! elem coords
+      allocate(elemCoords(2*numElems))
+      elemCoords=(/0.5,2.5,  & ! 7
+                   2.75,2.25,& ! 9
+                   2.25,2.75/) ! 10
+
+     !! elem corner Coords
+     allocate(elemCornerCoords(2*numElemCorners))
+     elemCornerCoords=(/0.0,2.0, &  ! 7
+                        1.0,2.0, &  ! 7
+                        1.0,3.0, &  ! 7
+                        0.0,3.0, &  ! 7
+                        2.0,2.0, &  ! 9
+                        3.0,2.0, &  ! 9
+                        3.0,3.0, &  ! 9
+                        2.0,2.0, &  ! 10
+                        3.0,3.0, &  ! 10
+                        2.0,3.0 /)  ! 10
+
+     else if (localPet .eq. 3) then
+
+      ! Fill in elem data
+      numTriElems=0
+      numQuadElems=0
+      numElems=numTriElems+numQuadElems
+      numElemCorners=3*numTriElems+4*numQuadElems
+
+      !! elem ids
+      allocate(elemIds(numElems))
+
+      !! elem types
+      allocate(elemTypes(numElems))
+
+      !! elem coords
+      allocate(elemCoords(2*numElems))
+
+     !! elem corner Coords
+     allocate(elemCornerCoords(2*numElemCorners))
+
+     endif
+   endif
+
+   ! Create Mesh structure in 1 step
+   mesh=ESMF_MeshCreateEasyElems(parametricDim=2,spatialDim=2, &
+        coordSys=ESMF_COORDSYS_CART, &
+        elementIds=elemIds,&
+        elementTypes=elemTypes,&
+        elementCoords=elemCoords,&
+        elementCornerCoords=elemCornerCoords, &
+        rc=rc)
+   if (rc /= ESMF_SUCCESS) return
+   
+   ! deallocate elem data
+   deallocate(elemIds)
+   deallocate(elemTypes)
+   deallocate(elemCoords)
+   deallocate(elemCornerCoords)
+
+   ! Output Mesh for debugging
+!   call ESMF_MeshWrite(mesh,"meshee",rc=localrc)
+!   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+   ! Return success
+   rc=ESMF_SUCCESS
+
+end subroutine test_mesh_create_easy_elems
+
 
 
 
