@@ -9428,6 +9428,27 @@ template<typename SIT, typename DIT> int sparseMatMulStoreEncodeXXE(VM *vm,
   );
 
 
+template<typename SIT, typename DIT> int sparseMatMulStoreLinSeqVect(
+  VM *vm,                                 // in
+  Array *srcArray, Array *dstArray,       // in
+  vector<SparseMatrix<SIT,DIT> >const &sparseMatrix,// in - sparse matrix vector
+  bool haloFlag,                          // in
+  bool ignoreUnmatched,                   // in
+  bool tensorMixFlag,                     // in
+  int const factorListCount,              // in
+  vector<bool> &factorPetFlag,            // in
+  ESMC_TypeKind_Flag typekindFactors,     // in
+  int const srcLocalDeCount,              // in
+  int const dstLocalDeCount,              // in
+  int srcElementCount,                    // in
+  int dstElementCount,                    // in
+  const int *srcLocalDeElementCount,      // in
+  const int *dstLocalDeElementCount,      // in
+  vector<vector<DD::AssociationElement<SIT,DIT> > >&srcLinSeqVect, // inout
+  vector<vector<DD::AssociationElement<DIT,SIT> > >&dstLinSeqVect  // inout
+  );
+
+
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::Array::tSparseMatMulStore()"
@@ -9788,15 +9809,11 @@ template<typename SIT, typename DIT>
 //rc = ESMF_SUCCESS;
 //return rc;
 //---DEBUG-------------------
-    
-  //---------------------------------------------------------------------------
-  // Phase II
-  //---------------------------------------------------------------------------
 
-#ifdef ASMM_STORE_MEMLOG_on
-  VM::logMemInfo(std::string("ASMMStore2.0"));
-#endif
-
+  //---------------------------------------------------------------------------
+  // Phase II + III
+  //---------------------------------------------------------------------------
+  
   // determine local srcElementCount
   const int srcLocalDeCount = srcArray->delayout->getLocalDeCount();
   const int *srcLocalDeToDeMap = srcArray->delayout->getLocalDeToDeMap();
@@ -9808,15 +9825,6 @@ template<typename SIT, typename DIT>
       * srcArray->tensorElementCount;
     srcElementCount += srcLocalDeElementCount[i];
   }
-  // communicate srcElementCount across all Pets
-  // todo: use nb-allgather and wait right before needed below
-  int *srcElementCountList = new int[petCount];
-  vm->allgather(&srcElementCount, srcElementCountList, sizeof(int));
-
-#ifdef ASMM_STORE_MEMLOG_on
-  VM::logMemInfo(std::string("ASMMStore2.1"));
-#endif
-
   // determine local dstElementCount
   const int dstLocalDeCount = dstArray->delayout->getLocalDeCount();
   const int *dstLocalDeToDeMap = dstArray->delayout->getLocalDeToDeMap();
@@ -9842,6 +9850,322 @@ template<typename SIT, typename DIT>
     }
     dstElementCount += dstLocalDeElementCount[i];
   }
+  
+  // tansform into "run distribution"
+  vector<vector<DD::AssociationElement<SIT,DIT> > >
+    srcLinSeqVect(srcLocalDeCount);
+  vector<vector<DD::AssociationElement<DIT,SIT> > >
+    dstLinSeqVect(dstLocalDeCount);
+  localrc = sparseMatMulStoreLinSeqVect(vm,
+    srcArray, dstArray,
+    sparseMatrix,
+    haloFlag, ignoreUnmatched, tensorMixFlag,
+    factorListCount, factorPetFlag, typekindFactors,
+    srcLocalDeCount, dstLocalDeCount, srcElementCount, dstElementCount,
+    srcLocalDeElementCount, dstLocalDeElementCount,
+    srcLinSeqVect, dstLinSeqVect
+  );
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+    &rc)) return rc;
+    
+  //---------------------------------------------------------------------------
+  // Phase IV
+  //---------------------------------------------------------------------------
+
+#ifdef ASMM_STORE_MEMLOG_on
+  VM::logMemInfo(std::string("ASMMStore4.0"));
+#endif
+  
+  // prepare for relative run-time addressing (RRA)
+  int rraCount = srcArray->delayout->getLocalDeCount();
+  rraCount += dstArray->delayout->getLocalDeCount();
+  char **rraList = new char*[rraCount];
+  memcpy((char *)rraList, srcArray->larrayBaseAddrList,
+    srcArray->delayout->getLocalDeCount() * sizeof(char *));
+  memcpy((char *)rraList
+    + srcArray->delayout->getLocalDeCount() * sizeof(char *),
+    dstArray->larrayBaseAddrList,
+    dstArray->delayout->getLocalDeCount() * sizeof(char *));
+  // obtain typekindSrc
+  ESMC_TypeKind_Flag typekindSrc = srcArray->getTypekind();
+  // obtain typekindDst
+  ESMC_TypeKind_Flag typekindDst = dstArray->getTypekind();
+  
+  // prepare dstLocalDeTotalElementCount
+  int *dstLocalDeTotalElementCount = new int[dstLocalDeCount];
+  for (int i=0; i<dstLocalDeCount; i++)
+    dstLocalDeTotalElementCount[i] = 
+      dstArray->totalElementCountPLocalDe[i] * dstArray->tensorElementCount;
+  
+  // determine if there are undistributed dims present in either src or dst
+  bool undistributedDimsPresent = false;
+  if (srcArray->tensorCount) undistributedDimsPresent = true;
+  if (dstArray->tensorCount) undistributedDimsPresent = true;
+  
+#ifdef ASMM_STORE_MEMLOG_on
+  VM::logMemInfo(std::string("ASMMStore4.1"));
+#endif
+
+  // create and initialize the RouteHandle
+  *routehandle = RouteHandle::create(&localrc);
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+    &rc)) return rc;
+  localrc = (*routehandle)->setType(ESMC_ARRAYXXE);
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+    &rc)) return rc;
+  // allocate XXE and attach to RouteHandle
+  XXE *xxe;
+  try{
+    xxe = new XXE(vm, 1000, 10000, 1000);
+  }catch (...){
+    ESMC_LogDefault.AllocError(ESMC_CONTEXT, &rc);
+    return rc;
+  }
+  localrc = (*routehandle)->setStorage(xxe);
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+    &rc)) return rc;
+
+#ifdef ASMM_STORE_MEMLOG_on
+  VM::logMemInfo(std::string("ASMMStore4.2"));
+#endif
+
+  // tansform "run distribution" into nb-vectors
+  vector<ArrayHelper::SendnbElement<SIT,DIT> > sendnbVector;
+  vector<ArrayHelper::RecvnbElement<DIT,SIT> > recvnbVector;
+  localrc = sparseMatMulStoreNbVectors(vm,
+    srcArray->delayout, dstArray->delayout,
+    tensorMixFlag, srcTensorContigLength, dstTensorContigLength,
+    typekindFactors, typekindSrc, typekindDst,
+    srcLocalDeElementCount, dstLocalDeElementCount,
+    srcLinSeqVect, dstLinSeqVect, routehandle,
+#ifdef ASMM_STORE_TIMING_on
+    &t8, &t9, &t10, &t11,
+#endif
+    sendnbVector, recvnbVector
+  );
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+    &rc)) return rc;
+
+#ifdef ASMM_STORE_MEMLOG_on
+  VM::logMemInfo(std::string("ASMMStore4.3"));
+#endif
+
+  // force vectors out of scope by swapping with empty vector, to free memory
+  vector<vector<DD::AssociationElement<SIT,DIT> > >().swap(srcLinSeqVect);
+  vector<vector<DD::AssociationElement<DIT,SIT> > >().swap(dstLinSeqVect);
+
+#ifdef ASMM_STORE_MEMLOG_on
+  VM::logMemInfo(std::string("ASMMStore4.4"));
+#endif
+
+  // encode sparseMatMul communication pattern into XXE stream
+  localrc = sparseMatMulStoreEncodeXXE(vm,
+    srcArray->delayout, dstArray->delayout,
+    tensorMixFlag, srcTensorContigLength, dstTensorContigLength,
+    typekindFactors, typekindSrc, typekindDst,
+    sendnbVector, recvnbVector,
+    dstLocalDeTotalElementCount,
+    rraList, rraCount, routehandle,
+    undistributedDimsPresent,
+#ifdef ASMM_STORE_TIMING_on
+    &t12pre, &t12, &t13, &t14,
+#endif
+    srcTermProcessingArg,
+    pipelineDepthArg
+  );
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+    &rc)) return rc;
+  
+#ifdef ASMM_STORE_MEMLOG_on
+  VM::logMemInfo(std::string("ASMMStore4.5"));
+#endif
+
+  // garbage collection
+  delete [] rraList;
+  delete [] dstLocalDeTotalElementCount;
+  delete [] srcLocalDeElementCount;
+  delete [] dstLocalDeElementCount;
+  // force vectors out of scope by swapping with empty vector, to free memory
+  vector<ArrayHelper::SendnbElement<SIT,DIT> >().swap(sendnbVector);
+  vector<ArrayHelper::RecvnbElement<DIT,SIT> >().swap(recvnbVector);
+
+#ifdef ASMM_STORE_MEMLOG_on
+  VM::logMemInfo(std::string("ASMMStore4.6"));
+#endif
+
+#ifdef ASMM_STORE_TIMING_on
+  VMK::wtime(&t15);   //gjt - profile
+  {
+    char msg[160];
+    ESMC_LogDefault.Write("ASMM_STORE_TIMING: --- start ---", ESMC_LOGMSG_INFO);
+    sprintf(msg, "ASMM_STORE_TIMING: t1   = %g", t1-t0);
+    ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
+    sprintf(msg, "ASMM_STORE_TIMING: t2   = %g", t2-t0);
+    ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
+    sprintf(msg, "ASMM_STORE_TIMING: t3   = %g", t3-t0);
+    ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
+    sprintf(msg, "ASMM_STORE_TIMING: t4   = %g", t4-t0);
+    ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
+    sprintf(msg, "ASMM_STORE_TIMING:    t4a1   = %g", t4a1-t3);
+    ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
+    sprintf(msg, "ASMM_STORE_TIMING:    t4a2   = %g", t4a2-t3);
+    ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
+    sprintf(msg, "ASMM_STORE_TIMING:    t4a3   = %g", t4a3-t3);
+    ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
+    sprintf(msg, "ASMM_STORE_TIMING:    t4a    = %g", t4a-t3);
+    ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
+    sprintf(msg, "ASMM_STORE_TIMING:    t4b1   = %g", t4b1-t3);
+    ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
+    sprintf(msg, "ASMM_STORE_TIMING:    t4b2   = %g", t4b2-t3);
+    ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
+    sprintf(msg, "ASMM_STORE_TIMING:    t4b3   = %g", t4b3-t3);
+    ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
+    sprintf(msg, "ASMM_STORE_TIMING:    t4b    = %g", t4b-t3);
+    ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
+    sprintf(msg, "ASMM_STORE_TIMING: t5   = %g", t5-t0);
+    ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
+    sprintf(msg, "ASMM_STORE_TIMING:    t5c    = %g", t5c-t4);
+    ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
+    sprintf(msg, "ASMM_STORE_TIMING:    t5f    = %g", t5f-t4);
+    ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
+    sprintf(msg, "ASMM_STORE_TIMING: t6   = %g", t6-t0);
+    ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
+    sprintf(msg, "ASMM_STORE_TIMING: t7   = %g", t7-t0);
+    ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
+    sprintf(msg, "ASMM_STORE_TIMING: t8   = %g", t8-t0);
+    ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
+    sprintf(msg, "ASMM_STORE_TIMING: t9   = %g", t9-t0);
+    ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
+    sprintf(msg, "ASMM_STORE_TIMING: t10  = %g", t10-t0);
+    ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
+    sprintf(msg, "ASMM_STORE_TIMING: t11  = %g", t11-t0);
+    ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
+    sprintf(msg, "ASMM_STORE_TIMING: t12pre  = %g", t12pre-t0);
+    ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
+    sprintf(msg, "ASMM_STORE_TIMING: t12  = %g", t12-t0);
+    ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
+    sprintf(msg, "ASMM_STORE_TIMING: t13  = %g", t13-t0);
+    ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
+    sprintf(msg, "ASMM_STORE_TIMING: t14  = %g", t14-t0);
+    ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
+    sprintf(msg, "ASMM_STORE_TIMING: t15  = %g", t15-t0);
+    ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
+    ESMC_LogDefault.Write("ASMM_STORE_TIMING: --- stop ----", ESMC_LOGMSG_INFO);
+  }
+#endif
+  
+  if (workWithTempArrays){
+    // clean-up the temporary arrays
+    Array::destroy(&srcArray, true);
+    if (!haloFlag)
+      Array::destroy(&dstArray, true);
+  }
+  
+  }catch(int localrc){
+    // catch standard ESMF return code
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      &rc);
+    return rc;
+  }catch(exception &x){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+      x.what(), ESMC_CONTEXT, &rc);
+    return rc;
+  }catch(...){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+      "Caught exception", ESMC_CONTEXT, &rc);
+    return rc;
+  }
+  
+#ifdef ASMM_STORE_LOG_on_disabled
+  fclose(asmm_store_log_fp);
+#endif
+  
+#ifdef ASMM_STORE_MEMLOG_on
+  VM::logMemInfo(std::string("ASMMStore5.0"));
+#endif
+
+  // return successfully
+  rc = ESMF_SUCCESS;
+  return rc;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::sparseMatMulStoreLinSeqVect()"
+//BOPI
+// !IROUTINE:  ESMCI::sparseMatMulStoreLinSeqVect
+//
+// !INTERFACE:
+template<typename SIT, typename DIT> int sparseMatMulStoreLinSeqVect(
+//
+// !RETURN VALUE:
+//    int return code
+//
+// !ARGUMENTS:
+//
+  VM *vm,                                 // in
+  Array *srcArray, Array *dstArray,       // in
+  vector<SparseMatrix<SIT,DIT> >const &sparseMatrix,// in - sparse matrix vector
+  bool haloFlag,                          // in
+  bool ignoreUnmatched,                   // in
+  bool tensorMixFlag,                     // in
+  int const factorListCount,              // in
+  vector<bool> &factorPetFlag,            // in
+  ESMC_TypeKind_Flag typekindFactors,     // in
+  int const srcLocalDeCount,              // in
+  int const dstLocalDeCount,              // in
+  int srcElementCount,                    // in
+  int dstElementCount,                    // in
+  const int *srcLocalDeElementCount,      // in
+  const int *dstLocalDeElementCount,      // in
+  vector<vector<DD::AssociationElement<SIT,DIT> > >&srcLinSeqVect, // inout
+  vector<vector<DD::AssociationElement<DIT,SIT> > >&dstLinSeqVect  // inout
+  ){
+//
+// !DESCRIPTION:
+//    Take the incoming sparse matrix information from "input distribution" and
+//    transform it into "run distribution":
+//
+//      -> srcLinSeqVect
+//      -> dstLinSeqVect
+//
+//EOPI
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
+  
+  try{
+
+#ifdef ASMM_STORE_MEMLOG_on
+  VM::logMemInfo(std::string("ASMMStoreLinSeqVect1.0"));
+#endif
+  
+  // prepare
+  int localPet = vm->getLocalPet();
+  int petCount = vm->getPetCount();
+  const int *srcLocalDeToDeMap = srcArray->getDELayout()->getLocalDeToDeMap();
+  const int *dstLocalDeToDeMap = dstArray->getDELayout()->getLocalDeToDeMap();
+
+  //---------------------------------------------------------------------------
+  // Phase II
+  //---------------------------------------------------------------------------
+
+#ifdef ASMM_STORE_MEMLOG_on
+  VM::logMemInfo(std::string("ASMMStore2.0"));
+#endif
+
+  // communicate srcElementCount across all Pets
+  // todo: use nb-allgather and wait right before needed below
+  int *srcElementCountList = new int[petCount];
+  vm->allgather(&srcElementCount, srcElementCountList, sizeof(int));
+
+#ifdef ASMM_STORE_MEMLOG_on
+  VM::logMemInfo(std::string("ASMMStore2.1"));
+#endif
+
   // communicate dstElementCount across all Pets
   // todo: use nb-allgather and wait right before needed below
   int *dstElementCountList = new int[petCount];
@@ -9852,8 +10176,8 @@ template<typename SIT, typename DIT>
 #endif
 
     // set the effective tensorElementCount for src and dst Arrays
-  int srcTensorElementCountEff = srcArray->tensorElementCount;  // default
-  int dstTensorElementCountEff = dstArray->tensorElementCount;  // default
+  int srcTensorElementCountEff = srcArray->getTensorElementCount();  // default
+  int dstTensorElementCountEff = dstArray->getTensorElementCount();  // default
   if (!tensorMixFlag){
     // if there is not tensor mixing then default into tensor for tensor mode
     srcTensorElementCountEff = 1;
@@ -9956,7 +10280,7 @@ template<typename SIT, typename DIT>
         // for halo the dst elements are in the rim of dstArray
         const std::vector<std::vector<SeqIndex<DIT> > > *rimSeqIndex;
         dstArray->getRimSeqIndex(&rimSeqIndex);
-        for (int k=0; k<dstArray->rimElementCount[i]; k++){
+        for (int k=0; k<dstArray->getRimElementCount()[i]; k++){
           SeqIndex<DIT> seqIndex = (*rimSeqIndex)[i][k];
           if (seqIndex.valid()){
             // this rim element holds a valid seqIndex
@@ -10261,7 +10585,7 @@ template<typename SIT, typename DIT>
         // loop over the halo rim elements for localDe j
         const std::vector<std::vector<SeqIndex<DIT> > > *rimSeqIndex;
         dstArray->getRimSeqIndex(&rimSeqIndex);
-        for (int k=0; k<dstArray->rimElementCount[j]; k++){
+        for (int k=0; k<dstArray->getRimElementCount()[j]; k++){
           SeqIndex<DIT> seqIndex = (*rimSeqIndex)[j][k];
           if (seqIndex.valid()){
             seqIndexList[jj] = seqIndex.decompSeqIndex;
@@ -10587,11 +10911,6 @@ template<typename SIT, typename DIT>
   VM::logMemInfo(std::string("ASMMStore3.0"));
 #endif
 
-  vector<vector<DD::AssociationElement<SIT,DIT> > >
-    srcLinSeqVect(srcLocalDeCount);
-  vector<vector<DD::AssociationElement<DIT,SIT> > >
-    dstLinSeqVect(dstLocalDeCount);
-
 #ifdef ASMM_STORE_MEMLOG_on
   VM::logMemInfo(std::string("ASMMStore3.1"));
 #endif
@@ -10901,207 +11220,15 @@ template<typename SIT, typename DIT>
 //return rc;
 //---DEBUG-------------------
   
-  //---------------------------------------------------------------------------
-  // Phase IV
-  //---------------------------------------------------------------------------
-
-#ifdef ASMM_STORE_MEMLOG_on
-  VM::logMemInfo(std::string("ASMMStore4.0"));
-#endif
-  
-  // prepare for relative run-time addressing (RRA)
-  int rraCount = srcArray->delayout->getLocalDeCount();
-  rraCount += dstArray->delayout->getLocalDeCount();
-  char **rraList = new char*[rraCount];
-  memcpy((char *)rraList, srcArray->larrayBaseAddrList,
-    srcArray->delayout->getLocalDeCount() * sizeof(char *));
-  memcpy((char *)rraList
-    + srcArray->delayout->getLocalDeCount() * sizeof(char *),
-    dstArray->larrayBaseAddrList,
-    dstArray->delayout->getLocalDeCount() * sizeof(char *));
-  // obtain typekindSrc
-  ESMC_TypeKind_Flag typekindSrc = srcArray->getTypekind();
-  // obtain typekindDst
-  ESMC_TypeKind_Flag typekindDst = dstArray->getTypekind();
-  
-  // prepare dstLocalDeTotalElementCount
-  int *dstLocalDeTotalElementCount = new int[dstLocalDeCount];
-  for (int i=0; i<dstLocalDeCount; i++)
-    dstLocalDeTotalElementCount[i] = 
-      dstArray->totalElementCountPLocalDe[i] * dstArray->tensorElementCount;
-  
-  // determine if there are undistributed dims present in either src or dst
-  bool undistributedDimsPresent = false;
-  if (srcArray->tensorCount) undistributedDimsPresent = true;
-  if (dstArray->tensorCount) undistributedDimsPresent = true;
   
 #ifdef ASMM_STORE_MEMLOG_on
-  VM::logMemInfo(std::string("ASMMStore4.1"));
+  VM::logMemInfo(std::string("ASMMStoreLinSeqVectXX.0"));
 #endif
 
-  // create and initialize the RouteHandle
-  *routehandle = RouteHandle::create(&localrc);
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
-    &rc)) return rc;
-  localrc = (*routehandle)->setType(ESMC_ARRAYXXE);
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
-    &rc)) return rc;
-  // allocate XXE and attach to RouteHandle
-  XXE *xxe;
-  try{
-    xxe = new XXE(vm, 1000, 10000, 1000);
-  }catch (...){
-    ESMC_LogDefault.AllocError(ESMC_CONTEXT, &rc);
-    return rc;
-  }
-  localrc = (*routehandle)->setStorage(xxe);
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
-    &rc)) return rc;
-
-#ifdef ASMM_STORE_MEMLOG_on
-  VM::logMemInfo(std::string("ASMMStore4.2"));
-#endif
-
-  // tansform "run distribution" into nb-vectors
-  vector<ArrayHelper::SendnbElement<SIT,DIT> > sendnbVector;
-  vector<ArrayHelper::RecvnbElement<DIT,SIT> > recvnbVector;
-  localrc = sparseMatMulStoreNbVectors(vm,
-    srcArray->delayout, dstArray->delayout,
-    tensorMixFlag, srcTensorContigLength, dstTensorContigLength,
-    typekindFactors, typekindSrc, typekindDst,
-    srcLocalDeElementCount, dstLocalDeElementCount,
-    srcLinSeqVect, dstLinSeqVect, routehandle,
-#ifdef ASMM_STORE_TIMING_on
-    &t8, &t9, &t10, &t11,
-#endif
-    sendnbVector, recvnbVector
-  );
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
-    &rc)) return rc;
-
-#ifdef ASMM_STORE_MEMLOG_on
-  VM::logMemInfo(std::string("ASMMStore4.3"));
-#endif
-
-  // force vectors out of scope by swapping with empty vector, to free memory
-  vector<vector<DD::AssociationElement<SIT,DIT> > >().swap(srcLinSeqVect);
-  vector<vector<DD::AssociationElement<DIT,SIT> > >().swap(dstLinSeqVect);
-
-#ifdef ASMM_STORE_MEMLOG_on
-  VM::logMemInfo(std::string("ASMMStore4.4"));
-#endif
-
-  // encode sparseMatMul communication pattern into XXE stream
-  localrc = sparseMatMulStoreEncodeXXE(vm,
-    srcArray->delayout, dstArray->delayout,
-    tensorMixFlag, srcTensorContigLength, dstTensorContigLength,
-    typekindFactors, typekindSrc, typekindDst,
-    sendnbVector, recvnbVector,
-    dstLocalDeTotalElementCount,
-    rraList, rraCount, routehandle,
-    undistributedDimsPresent,
-#ifdef ASMM_STORE_TIMING_on
-    &t12pre, &t12, &t13, &t14,
-#endif
-    srcTermProcessingArg,
-    pipelineDepthArg
-  );
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
-    &rc)) return rc;
-  
-#ifdef ASMM_STORE_MEMLOG_on
-  VM::logMemInfo(std::string("ASMMStore4.5"));
-#endif
-
-  // garbage collection
-  delete [] rraList;
-  delete [] dstLocalDeTotalElementCount;
-  delete [] srcLocalDeElementCount;
-  delete [] dstLocalDeElementCount;
-  // force vectors out of scope by swapping with empty vector, to free memory
-  vector<ArrayHelper::SendnbElement<SIT,DIT> >().swap(sendnbVector);
-  vector<ArrayHelper::RecvnbElement<DIT,SIT> >().swap(recvnbVector);
-
-#ifdef ASMM_STORE_MEMLOG_on
-  VM::logMemInfo(std::string("ASMMStore4.6"));
-#endif
-
-#ifdef ASMM_STORE_TIMING_on
-  VMK::wtime(&t15);   //gjt - profile
-  {
-    char msg[160];
-    ESMC_LogDefault.Write("ASMM_STORE_TIMING: --- start ---", ESMC_LOGMSG_INFO);
-    sprintf(msg, "ASMM_STORE_TIMING: t1   = %g", t1-t0);
-    ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
-    sprintf(msg, "ASMM_STORE_TIMING: t2   = %g", t2-t0);
-    ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
-    sprintf(msg, "ASMM_STORE_TIMING: t3   = %g", t3-t0);
-    ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
-    sprintf(msg, "ASMM_STORE_TIMING: t4   = %g", t4-t0);
-    ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
-    sprintf(msg, "ASMM_STORE_TIMING:    t4a1   = %g", t4a1-t3);
-    ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
-    sprintf(msg, "ASMM_STORE_TIMING:    t4a2   = %g", t4a2-t3);
-    ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
-    sprintf(msg, "ASMM_STORE_TIMING:    t4a3   = %g", t4a3-t3);
-    ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
-    sprintf(msg, "ASMM_STORE_TIMING:    t4a    = %g", t4a-t3);
-    ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
-    sprintf(msg, "ASMM_STORE_TIMING:    t4b1   = %g", t4b1-t3);
-    ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
-    sprintf(msg, "ASMM_STORE_TIMING:    t4b2   = %g", t4b2-t3);
-    ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
-    sprintf(msg, "ASMM_STORE_TIMING:    t4b3   = %g", t4b3-t3);
-    ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
-    sprintf(msg, "ASMM_STORE_TIMING:    t4b    = %g", t4b-t3);
-    ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
-    sprintf(msg, "ASMM_STORE_TIMING: t5   = %g", t5-t0);
-    ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
-    sprintf(msg, "ASMM_STORE_TIMING:    t5c    = %g", t5c-t4);
-    ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
-    sprintf(msg, "ASMM_STORE_TIMING:    t5f    = %g", t5f-t4);
-    ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
-    sprintf(msg, "ASMM_STORE_TIMING: t6   = %g", t6-t0);
-    ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
-    sprintf(msg, "ASMM_STORE_TIMING: t7   = %g", t7-t0);
-    ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
-    sprintf(msg, "ASMM_STORE_TIMING: t8   = %g", t8-t0);
-    ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
-    sprintf(msg, "ASMM_STORE_TIMING: t9   = %g", t9-t0);
-    ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
-    sprintf(msg, "ASMM_STORE_TIMING: t10  = %g", t10-t0);
-    ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
-    sprintf(msg, "ASMM_STORE_TIMING: t11  = %g", t11-t0);
-    ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
-    sprintf(msg, "ASMM_STORE_TIMING: t12pre  = %g", t12pre-t0);
-    ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
-    sprintf(msg, "ASMM_STORE_TIMING: t12  = %g", t12-t0);
-    ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
-    sprintf(msg, "ASMM_STORE_TIMING: t13  = %g", t13-t0);
-    ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
-    sprintf(msg, "ASMM_STORE_TIMING: t14  = %g", t14-t0);
-    ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
-    sprintf(msg, "ASMM_STORE_TIMING: t15  = %g", t15-t0);
-    ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
-    ESMC_LogDefault.Write("ASMM_STORE_TIMING: --- stop ----", ESMC_LOGMSG_INFO);
-  }
-#endif
-  
-  if (workWithTempArrays){
-    // clean-up the temporary arrays
-    Array::destroy(&srcArray, true);
-    if (!haloFlag)
-      Array::destroy(&dstArray, true);
-  }
-  
   }catch(int localrc){
     // catch standard ESMF return code
     ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       &rc);
-    return rc;
-  }catch(exception &x){
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-      x.what(), ESMC_CONTEXT, &rc);
     return rc;
   }catch(...){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
@@ -11109,14 +11236,6 @@ template<typename SIT, typename DIT>
     return rc;
   }
   
-#ifdef ASMM_STORE_LOG_on_disabled
-  fclose(asmm_store_log_fp);
-#endif
-  
-#ifdef ASMM_STORE_MEMLOG_on
-  VM::logMemInfo(std::string("ASMMStore5.0"));
-#endif
-
   // return successfully
   rc = ESMF_SUCCESS;
   return rc;
