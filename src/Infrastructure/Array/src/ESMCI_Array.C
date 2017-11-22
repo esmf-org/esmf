@@ -9409,13 +9409,14 @@ template<typename SIT, typename DIT> int sparseMatMulStoreNbVectors(
   vector<ArrayHelper::RecvnbElement<DIT,SIT> > &recvnbVector  // inout
   );
 
+
 template<typename SIT, typename DIT> int sparseMatMulStoreEncodeXXE(VM *vm, 
   DELayout *srcDelayout, DELayout *dstDelayout, bool tensorMixFlag, 
   int srcTensorContigLength, int dstTensorContigLength,
   ESMC_TypeKind_Flag typekindFactors, ESMC_TypeKind_Flag typekindSrc,
   ESMC_TypeKind_Flag typekindDst,
-  vector<vector<DD::AssociationElement<SIT,DIT> > >&srcLinSeqVect,
-  vector<vector<DD::AssociationElement<DIT,SIT> > >&dstLinSeqVect,
+  vector<ArrayHelper::SendnbElement<SIT,DIT> > &sendnbVector,
+  vector<ArrayHelper::RecvnbElement<DIT,SIT> > &recvnbVector,
   const int *dstLocalDeTotalElementCount,
   char **rraList, int rraCount, RouteHandle **routehandle,
   bool undistributedDimsPresent,
@@ -11121,7 +11122,6 @@ template<typename SIT, typename DIT>
   return rc;
 }
 //-----------------------------------------------------------------------------
-
 
 
 //-----------------------------------------------------------------------------
