@@ -467,6 +467,15 @@ contains
 !            line=__LINE__, &
 !            file=FILENAME)) &
 !            return  ! bail out
+!        attributeName = "CplSetList"
+!        call NUOPC_CheckComponentAttribute(prefix, comp=comp, &
+!            attributeName=attributeName, convention=convention,
+!            purpose=purpose, &
+!            rc=rc)
+!        if (ESMF_LogFoundError(rc, &
+!            line=__LINE__, &
+!            file=FILENAME)) &
+!            return  ! bail out
 
         if (outputJSON) then
 

@@ -1176,6 +1176,14 @@ contains
             file=FILENAME)) &
             return  ! bail out
 
+        call NUOPC_CheckComponentAttribute(prefix, comp=comp, &
+            attributeName="CplSetList", convention="NUOPC", &
+            purpose="Instance", rc=rc)
+        if (ESMF_LogFoundError(rc, &
+            line=__LINE__, &
+            file=FILENAME)) &
+            return  ! bail out
+
       end subroutine checkPhaseEpilogue_CplListEstablished
       
       recursive subroutine NUOPC_TraceComponentInfo(comp, rc)

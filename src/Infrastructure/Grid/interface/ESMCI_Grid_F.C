@@ -88,8 +88,8 @@ extern "C" {
     if (actualFlag){
       // on PETs with actual members call into C++
       *ptr = ESMCI::Grid::create(&localrc);
-      ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
-        ESMC_NOT_PRESENT_FILTER(rc));
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+        ESMC_NOT_PRESENT_FILTER(rc))) return;
     }
 
     // return success
@@ -165,8 +165,8 @@ extern "C" {
                                gridMemLBoundArg, ESMC_NOT_PRESENT_FILTER(indexflag),
                                destroyDistgridPtr, destroyDELayoutPtr, &localrc,
                                opt_vm);
-      ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
-        ESMC_NOT_PRESENT_FILTER(rc));
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+        ESMC_NOT_PRESENT_FILTER(rc))) return;
     }
 
     // return success
@@ -251,7 +251,7 @@ void c_esmc_grid_get_from_proto(ESMCI::Grid **_grid,
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_grid_get_from_proto()"
 
-     int localrc;
+    int localrc;
     int localArbIndexCount;
     int dimCount, distDimCount, dimCount1;
     ESMCI::Grid *grid;

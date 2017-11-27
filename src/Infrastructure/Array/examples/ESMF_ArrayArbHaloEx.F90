@@ -113,6 +113,8 @@ program ESMF_ArrayArbHaloEx
   distgrid = ESMF_DistGridCreate(arbSeqIndexList=seqIndexList, rc=rc)
 !EOC  
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  call ESMF_DistGridPrint(distgrid, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOE
 ! The resulting DistGrid is one-dimensional, although the user code may
 ! interpret the sequence indices as a 1D map into a problem of higher

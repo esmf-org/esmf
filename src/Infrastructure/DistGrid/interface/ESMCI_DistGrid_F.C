@@ -345,8 +345,15 @@ extern "C" {
         return;
       }
       // fill in values
+#ifdef TYPESMATCH
       memcpy((elementCountPTile)->array, (*ptr)->getElementCountPTile(),
         sizeof(int)*(*ptr)->getTileCount());
+#else
+      int tileCount = (*ptr)->getTileCount();
+      const ESMC_I8 *access = (*ptr)->getElementCountPTile();
+      for (int i=0; i<tileCount; i++)
+        (elementCountPTile)->array[i] = (int)(access[i]); // explicit type cast
+#endif
     }
     // fill minIndexPDimPDe
     if (present(minIndexPDimPDe)){
@@ -425,8 +432,15 @@ extern "C" {
         return;
       }
       // fill in values
+#ifdef TYPESMATCH
       memcpy((elementCountPDe)->array, (*ptr)->getElementCountPDe(),
         sizeof(int)*(*ptr)->getDELayout()->getDeCount());
+#else
+      int deCount = (*ptr)->getDELayout()->getDeCount();
+      const ESMC_I8 *access = (*ptr)->getElementCountPDe();
+      for (int i=0; i<deCount; i++)
+        (elementCountPDe)->array[i] = (int)(access[i]); // explicit type cast
+#endif
     }
     // fill tileListPDe
     if (present(tileListPDe)){

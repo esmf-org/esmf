@@ -5710,9 +5710,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item[{[isSphere]}]
 !      If .true., create a periodic Grid. If .false., create a regional Grid. Defaults to .true.
 ! \item[{[polekindflag]}]                                                                                          
-!      Two item array which specifies the type of connection which occurs at the pole. polekindflag(1)             
-!      the connection that occurs at the minimum end of the index dimension. polekindflag(2)                       
-!      the connection that occurs at the maximum end of the index dimension. Please see                        
+!      Two item array which specifies the type of connection which occurs at the pole. The value in polekindflag(1)             
+!      specifies the connection that occurs at the minimum end of the pole dimension. The value in polekindflag(2)                       
+!      specifies the connection that occurs at the maximum end of the pole dimension. Please see                        
 !      Section~\ref{const:polekind} for a full list of options. If not specified,                            
 !      the default is {\tt ESMF\_POLETYPE\_MONOPOLE} for both.                                                 
 ! \item[{[addCornerStagger]}]
@@ -5963,9 +5963,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item[{[isSphere]}]
 !      If .true., create a periodic Grid. If .false., create a regional Grid. Defaults to .true.
 ! \item[{[polekindflag]}]                                                                                          
-!      Two item array which specifies the type of connection which occurs at the pole. polekindflag(1)             
-!      the connection that occurs at the minimum end of the index dimension. polekindflag(2)                       
-!      the connection that occurs at the maximum end of the index dimension. Please see                        
+!      Two item array which specifies the type of connection which occurs at the pole. The value in polekindflag(1)             
+!      specifies the connection that occurs at the minimum end of the pole dimension. The value in polekindflag(2)                       
+!      specifies the connection that occurs at the maximum end of the pole dimension. Please see                        
 !      Section~\ref{const:polekind} for a full list of options. If not specified,                            
 !      the default is {\tt ESMF\_POLETYPE\_MONOPOLE} for both.                                                 
 ! \item[{[addCornerStagger]}]
@@ -6168,9 +6168,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item[{[isSphere]}]
 !      If .true., create a periodic Grid. If .false., create a regional Grid. Defaults to .true.
 ! \item[{[polekindflag]}]                                                                                          
-!      Two item array which specifies the type of connection which occurs at the pole. polekindflag(1)             
-!      the connection that occurs at the minimum end of the index dimension. polekindflag(2)                       
-!      the connection that occurs at the maximum end of the index dimension. Please see                        
+!      Two item array which specifies the type of connection which occurs at the pole. The value in polekindflag(1)             
+!      specifies the connection that occurs at the minimum end of the pole dimension. The value in polekindflag(2)                       
+!      specifies the connection that occurs at the maximum end of the pole dimension. Please see                        
 !      Section~\ref{const:polekind} for a full list of options. If not specified,                            
 !      the default is {\tt ESMF\_POLETYPE\_MONOPOLE} for both.                                                 
 ! \item[{[addCornerStagger]}]
@@ -6694,9 +6694,9 @@ end function ESMF_GridCreateFrmScrip
 ! \item[{[isSphere]}]
 !      If .true., create a periodic Grid. If .false., create a regional Grid. Defaults to .true.
 ! \item[{[polekindflag]}]                                                                                          
-!      Two item array which specifies the type of connection which occurs at the pole. polekindflag(1)             
-!      the connection that occurs at the minimum end of the index dimension. polekindflag(2)                       
-!      the connection that occurs at the maximum end of the index dimension. Please see                        
+!      Two item array which specifies the type of connection which occurs at the pole. The value in polekindflag(1)             
+!      specifies the connection that occurs at the minimum end of the pole dimension. The value in polekindflag(2)                       
+!      specifies the connection that occurs at the maximum end of the pole dimension. Please see                        
 !      Section~\ref{const:polekind} for a full list of options. If not specified,                            
 !      the default is {\tt ESMF\_POLETYPE\_MONOPOLE} for both.                                                 
 ! \item[{[addCornerStagger]}]
@@ -7324,9 +7324,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     for the exclusive region (center stagger location).  
 !     If not specified  then grid is 2D. 
 ! \item[{[polekindflag]}]                                                                                          
-!      Two item array which specifies the type of connection which occurs at the pole. polekindflag(1)             
-!      the connection that occurs at the minimum end of the index dimension. polekindflag(2)                       
-!      the connection that occurs at the maximum end of the index dimension. Please see                        
+!      Two item array which specifies the type of connection which occurs at the pole. The value in polekindflag(1)             
+!      specifies the connection that occurs at the minimum end of the pole dimension. The value in polekindflag(2)                       
+!      specifies the connection that occurs at the maximum end of the pole dimension. Please see                        
 !      Section~\ref{const:polekind} for a full list of options. If not specified,                            
 !      the default is {\tt ESMF\_POLETYPE\_MONOPOLE} for both.                                                 
 ! \item[{[periodicDim]}]                                                                                       
@@ -7604,9 +7604,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item[maxIndex] 
 !      The upper extent of the grid array.
 ! \item[{[polekindflag]}]                                                                                          
-!      Two item array which specifies the type of connection which occurs at the pole. polekindflag(1)             
-!      the connection that occurs at the minimum end of the index dimension. polekindflag(2)                       
-!      the connection that occurs at the maximum end of the index dimension. Please see                        
+!      Two item array which specifies the type of connection which occurs at the pole. The value in polekindflag(1)             
+!      specifies the connection that occurs at the minimum end of the pole dimension. The value in polekindflag(2)                       
+!      specifies the connection that occurs at the maximum end of the pole dimension. Please see                        
 !      Section~\ref{const:polekind} for a full list of options. If not specified,                            
 !      the default is {\tt ESMF\_POLETYPE\_MONOPOLE} for both.                                                 
 ! \item[{[periodicDim]}]                                                                                       
@@ -7870,12 +7870,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      grid cell in a local DE.  
 ! \item[arbIndexList] 
 !      This 2D array specifies the indices of the PET LOCAL grid cells.  The 
- !      dimensions should be arbIndexCount * number of Distributed grid dimensions
+!      dimensions should be arbIndexCount * number of Distributed grid dimensions
 !      where arbIndexCount is the input argument specified below
 ! \item[{[polekindflag]}]                                                                                          
-!      Two item array which specifies the type of connection which occurs at the pole. polekindflag(1)             
-!      the connection that occurs at the minimum end of the index dimension. polekindflag(2)                       
-!      the connection that occurs at the maximum end of the index dimension. Please see                        
+!      Two item array which specifies the type of connection which occurs at the pole. The value in polekindflag(1)             
+!      specifies the connection that occurs at the minimum end of the pole dimension. The value in polekindflag(2)                       
+!      specifies the connection that occurs at the maximum end of the pole dimension. Please see                        
 !      Section~\ref{const:polekind} for a full list of options. If not specified,                            
 !      the default is {\tt ESMF\_POLETYPE\_MONOPOLE} for both.                                                 
 ! \item[{[periodicDim]}]                                                                                       
@@ -9688,8 +9688,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! This method creates a single tile, regularly distributed grid 
 ! (see Figure \ref{fig:GridDecomps}) with one periodic dimension.
+! The periodic dimension in the resulting grid will be dimension 1. 
+! The dimension with the poles at either end (i.e. the pole dimension)
+! will be dimension 2. 
 ! 
-! The resulting grid has it's coordinates uniformly spread between the 
+! The grid will have its coordinates uniformly spread between the 
 ! ranges specified by the user. The coordinates are ESMF\_TYPEKIND\_R8. 
 ! Currently, this method only fills the center stagger with coordinates, and
 ! the {\tt minCornerCoord} and {\tt maxCornerCoord} arguments give the boundaries of 
@@ -9705,7 +9708,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !  there is a reasonable possibility that they may change in the future
 !  to be inconsistent with other Grid create interfaces:
 !
-!  The arguements coordDep1, coordDep2, and coordDep3 have internally 
+!  The arguments coordDep1, coordDep2, and coordDep3 have internally 
 !  been set to 1, 2, and 3 respectively. 
 !  This was done because this call creates a uniform grid and so only 1D arrays
 !  are needed to hold the coordinates. This means the coordinate arrays
@@ -9737,11 +9740,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      Section~\ref{const:decompflag} for a full description of the 
 !      possible options. Note that currently the option
 !      {\tt ESMF\_DECOMP\_CYCLIC} isn't supported in Grid creation.  
-! \item[{[polekindflag]}] 
-!      the connection that occurs at the minimum end of the index dimension. polekindflag(2) 
-!      the connection that occurs at the maximum end of the index dimension. Please see 
-!      Section~\ref{const:polekind} for a full list of options. If not specified, the default
-!      is {\tt ESMF\_POLETYPE\_MONOPOLE} for both.
+! \item[{[polekindflag]}]                                                                                          
+!      Two item array which specifies the type of connection which occurs at the pole. The value in polekindflag(1)             
+!      specifies the connection that occurs at the minimum end of the pole dimension. The value in polekindflag(2)                       
+!      specifies the connection that occurs at the maximum end of the pole dimension. Please see                        
+!      Section~\ref{const:polekind} for a full list of options. If not specified,                            
+!      the default is {\tt ESMF\_POLETYPE\_MONOPOLE} for both.                                                 
 ! \item[{[coordSys]}] 
 !     The coordinate system of the grid coordinate data. 
 !     For a full list of options, please see Section~\ref{const:coordsys}. 
@@ -9792,6 +9796,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             petMap=petMap, &
             name=name, &
             rc=localrc) 
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
     else 
         grid=ESMF_GridCreate1PeriDim(regDecomp=regDecomp, &
              decompFlag=decompFlag, &
@@ -9807,10 +9813,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
              petMap=petMap, &
             name=name, &
             rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
     endif
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-       ESMF_CONTEXT, rcToReturn=rc)) return
-
 
      ! Get CoordSys of Grid
      call ESMF_GridGet(grid, coordSys=localCoordSys, rc=localrc)
@@ -9929,9 +9934,12 @@ msg=" coords in periodic dim (i.e. 1) are not periodic "// &
 ! !DESCRIPTION:
 !
 ! This method creates a single tile, regularly distributed grid 
-! (see Figure \ref{fig:GridDecomps}) with one periodic dimension.
+! (see Figure \ref{fig:GridDecomps}) with one periodic dimension. 
+! The periodic dimension in the resulting grid will be dimension 1. 
+! The dimension with the poles at either end (i.e. the pole dimension)
+! will be dimension 2. 
 ! 
-! The resulting grid has it's coordinates uniformly spread between the 
+! The grid will have its coordinates uniformly spread between the 
 ! ranges specified by the user. The coordinates are ESMF\_TYPEKIND\_R8. 
 ! Currently, this method only fills the center stagger with coordinates, and
 ! the {\tt minCornerCoord} and {\tt maxCornerCoord} arguments give the boundaries of 
@@ -9988,11 +9996,12 @@ msg=" coords in periodic dim (i.e. 1) are not periodic "// &
 !      List assigning DE labels to the default sequence of DEs. The default
 !      sequence is given by the order of DEs in the {\tt deBlockList} 
 !      argument.
-! \item[{[polekindflag]}] 
-!      the connection that occurs at the minimum end of the index dimension. polekindflag(2) 
-!      the connection that occurs at the maximum end of the index dimension. Please see 
-!      Section~\ref{const:polekind} for a full list of options. If not specified, the default
-!      is {\tt ESMF\_POLETYPE\_MONOPOLE} for both.
+! \item[{[polekindflag]}]                                                                                          
+!      Two item array which specifies the type of connection which occurs at the pole. The value in polekindflag(1)             
+!      specifies the connection that occurs at the minimum end of the pole dimension. The value in polekindflag(2)                       
+!      specifies the connection that occurs at the maximum end of the pole dimension. Please see                        
+!      Section~\ref{const:polekind} for a full list of options. If not specified,                            
+!      the default is {\tt ESMF\_POLETYPE\_MONOPOLE} for both.                                                 
 ! \item[{[coordSys]}] 
 !     The coordinate system of the grid coordinate data. 
 !     For a full list of options, please see Section~\ref{const:coordsys}. 
@@ -10184,7 +10193,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! This method creates a single tile, regularly distributed grid 
 ! (see Figure \ref{fig:GridDecomps}) with no periodic dimension.
 !
-! The resulting grid has it's coordinates uniformly spread between the 
+! The resulting grid will have its coordinates uniformly spread between the 
 ! ranges specified by the user. The coordinates are ESMF\_TYPEKIND\_R8. 
 ! Currently, this method only fills the center stagger with coordinates, and
 ! the {\tt minCornerCoord} and {\tt maxCornerCoord} arguments give the boundaries of 
