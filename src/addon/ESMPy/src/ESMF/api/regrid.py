@@ -351,6 +351,8 @@ class RegridFromFile(object):
     # call RegridStore
     @initialize
     def __init__(self, srcfield, dstfield, filename):
+        # SMMStore will change the values of the source field if not copied..
+        # srcfield._data = srcfield.data.copy()
 
         self._routehandle = ESMP_FieldSMMStore(srcfield, dstfield, filename)
 
@@ -383,6 +385,9 @@ class RegridFromFile(object):
 
         :return: dstfield
         """
+        # SMMStore will change the values of the source field if not copied..
+        # srcfield._data = srcfield.data.copy()
+
         # call into the ctypes layer
         ESMP_FieldRegrid(srcfield, dstfield,
                          self._routehandle, zeroregion=zero_region)

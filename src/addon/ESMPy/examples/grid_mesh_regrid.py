@@ -37,6 +37,10 @@ slats_par = lats[srcgrid.lower_bounds[ESMF.StaggerLoc.CENTER][1]:srcgrid.upper_b
 # make sure to use indexing='ij' as ESMPy backend uses matrix indexing (not Cartesian)
 lonm, latm = numpy.meshgrid(slons_par, slats_par, indexing='ij')
 
+print lonm.shape
+print lonm[:,1]
+print latm[:,1]
+
 gridCoordLon[:] = lonm
 gridCoordLat[:] = latm
 
@@ -58,6 +62,8 @@ dlats_par = lats[dstgrid.lower_bounds[ESMF.StaggerLoc.CENTER][1]:dstgrid.upper_b
 # make sure to use indexing='ij' as ESMPy backend uses matrix indexing (not Cartesian)
 lonm, latm = numpy.meshgrid(dlons_par, dlats_par, indexing='ij')
 
+print lonm.shape
+
 gridCoordLon[:] = lonm
 gridCoordLat[:] = latm
 
@@ -73,9 +79,12 @@ gridLat = srcfield.grid.get_coords(lat, ESMF.StaggerLoc.CENTER)
 
 wave = lambda x,k:  numpy.sin(x*k*numpy.pi/180.0)
 srcfield.data[...] = numpy.outer(wave(slons_par,3), wave(slats_par,3)) + 2
+srcfield.data[:,:] = 42
 
 wave = lambda x,k:  numpy.sin(x*k*numpy.pi/180.0)
 xctfield.data[...] = numpy.outer(wave(dlons_par,3), wave(dlats_par,3)) + 2
+xctfield.data[:,:] = 42
+
 
 dstfield.data[:] = 1e20
 
@@ -104,6 +113,8 @@ regrid = ESMF.RegridFromFile(srcfield, dstfield, "esmpy_example_weight_file.nc")
 
 # calculate the regridding from source to destination field
 # dstfield = regrid(srcfield, dstfield)
+
+print srcfield.data
 
 # compute the mean relative error
 num_nodes = numpy.prod(xctfield.data.shape[:])

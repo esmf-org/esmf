@@ -202,6 +202,46 @@ class TestRegrid(TestBase):
         dst_size = 100
         self.assertWeightFileIsRational(filename, src_size, dst_size)
 
+    def test_field_regrid_from_file(self):
+        filename = 'esmpy_test_field_from_file.nc'
+
+        sourcegrid = ESMF.Grid(np.array([20, 20]),
+                               staggerloc=ESMF.StaggerLoc.CENTER,
+                               coord_sys=ESMF.CoordSys.SPH_DEG)
+
+        source_lon = sourcegrid.get_coords(0)
+        source_lat = sourcegrid.get_coords(1)
+        source_lon[...], source_lat[...] = np.meshgrid(np.linspace(-120, 120, 20),
+                                                       np.linspace(-60, 60, 20))
+
+        destgrid = ESMF.Grid(np.array([10, 10]),
+                             staggerloc=ESMF.StaggerLoc.CENTER,
+                             coord_sys=ESMF.CoordSys.SPH_DEG)
+
+        dest_lon = destgrid.get_coords(0)
+        dest_lat = destgrid.get_coords(1)
+        dest_lon[...], dest_lat[...] = np.meshgrid(np.linspace(-120, 120, 10),
+                                                   np.linspace(-60, 60, 10))
+
+        sourcefield = ESMF.Field(sourcegrid)
+        destfield = ESMF.Field(destgrid)
+
+        sourcefield.data[:,:] = 24
+        destfield.data[:,:] = 0
+
+        _ = ESMF.Regrid(sourcefield, destfield, filename=filename,
+                        regrid_method=ESMF.RegridMethod.BILINEAR,
+                        unmapped_action=ESMF.UnmappedAction.IGNORE)
+
+        self.assertTrue(os.path.exists(filename))
+
+        regridS2D = ESMF.RegridFromFile(sourcefield, destfield, filename)
+        import ipdb; ipdb.set_trace()
+
+        sourcefield = regridS2D(sourcefield, destfield)
+
+        self.assertTrue(np.all(sourcefield.data[:,:] == 24))
+
     def test_field_regrid_gridmesh(self):
         # create mesh
         parallel = False
