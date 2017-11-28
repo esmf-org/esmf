@@ -351,13 +351,11 @@ class RegridFromFile(object):
     # call RegridStore
     @initialize
     def __init__(self, srcfield, dstfield, filename):
-        # SMMStore will change the values of the source field if not copied..
-        # srcfield._data = srcfield.data.copy()
 
         self._routehandle = ESMP_FieldSMMStore(srcfield, dstfield, filename)
 
-        self._srcfield = srcfield
-        self._dstfield = dstfield
+        # self._srcfield = srcfield
+        # self._dstfield = dstfield
 
         # for arbitrary metadata
         self._meta = {}
@@ -366,7 +364,7 @@ class RegridFromFile(object):
         import atexit; atexit.register(self.__del__)
         self._finalized = False
 
-    def __call__(self, srcfield, dstfield, filename=None, zero_region=None):
+    def __call__(self, srcfield, dstfield, zero_region=None):
         """
         Call a regridding operation from srcfield to dstfield.
 
@@ -374,7 +372,6 @@ class RegridFromFile(object):
 
         :param Field srcfield: the Field of source data to regrid.
         :param Field dstfield: the Field to hold the regridded data.
-        :param string filename: the name of the file containing the weights.
 
         *OPTIONAL:*
 
@@ -385,8 +382,6 @@ class RegridFromFile(object):
 
         :return: dstfield
         """
-        # SMMStore will change the values of the source field if not copied..
-        # srcfield._data = srcfield.data.copy()
 
         # call into the ctypes layer
         ESMP_FieldRegrid(srcfield, dstfield,

@@ -77,12 +77,12 @@ xctfield = ESMF.Field(dstgrid, name="xctfield", staggerloc=ESMF.StaggerLoc.CENTE
 gridLon = srcfield.grid.get_coords(lon, ESMF.StaggerLoc.CENTER)
 gridLat = srcfield.grid.get_coords(lat, ESMF.StaggerLoc.CENTER)
 
-wave = lambda x,k:  numpy.sin(x*k*numpy.pi/180.0)
-srcfield.data[...] = numpy.outer(wave(slons_par,3), wave(slats_par,3)) + 2
+# wave = lambda x,k:  numpy.sin(x*k*numpy.pi/180.0)
+# srcfield.data[...] = numpy.outer(wave(slons_par,3), wave(slats_par,3)) + 2
 srcfield.data[:,:] = 42
 
-wave = lambda x,k:  numpy.sin(x*k*numpy.pi/180.0)
-xctfield.data[...] = numpy.outer(wave(dlons_par,3), wave(dlats_par,3)) + 2
+# wave = lambda x,k:  numpy.sin(x*k*numpy.pi/180.0)
+# xctfield.data[...] = numpy.outer(wave(dlons_par,3), wave(dlats_par,3)) + 2
 xctfield.data[:,:] = 42
 
 

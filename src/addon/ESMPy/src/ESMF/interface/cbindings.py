@@ -2063,7 +2063,7 @@ def ESMP_FieldSMMStore(srcField, dstField, filename,
     # print id(dstField.struct)
     # 
     # SMMStore will change the values of the source field if not copied..
-    srcField._data = srcField.data.copy()
+    # srcField._data = srcField.data.copy()
 
     rc = _ESMF.ESMC_FieldSMMStore(srcField.struct.ptr,
                                   dstField.struct.ptr,
@@ -2076,12 +2076,14 @@ def ESMP_FieldSMMStore(srcField, dstField, filename,
         raise ValueError('ESMC_FieldSMMStore() failed with rc = '+str(rc)+
                         '.    '+constants._errmsg)
 
-    # print "After ESMC_FieldSMMStore"
+    print "After ESMC_FieldSMMStore"
     # print id(srcField.data.data)
     # print id(srcField.struct.ptr)
     # print id(srcField.struct)
     # print id(dstField.struct.ptr)
     # print id(dstField.struct)
+
+    print srcField.data
 
     return routehandle
 
