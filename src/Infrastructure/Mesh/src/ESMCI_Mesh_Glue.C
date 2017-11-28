@@ -5013,7 +5013,7 @@ void ESMCI_meshcreate_easy_elems(Mesh **meshpp,
                                  InterArray<int> *elemIdsII,
                                  int *elemTypes, 
                                  InterArray<int> *elemMaskII,
-                                 int *size_elemCornerCoords_ptr, 
+                                 int *num_elemCorners_ptr, 
                                  double *elemCornerCoords, 
                                  int *has_elemArea, 
                                  double *elemArea, 
@@ -5036,7 +5036,7 @@ void ESMCI_meshcreate_easy_elems(Mesh **meshpp,
      int pdim=*pdim_ptr;
      int sdim=*sdim_ptr;
      int num_elems=*num_elems_ptr;
-     int size_elemCornerCoords=*size_elemCornerCoords_ptr;
+     int num_elemCorners=*num_elemCorners_ptr;
 
 
      // Create Mesh using internal mesh create method
@@ -5050,7 +5050,7 @@ void ESMCI_meshcreate_easy_elems(Mesh **meshpp,
      ////// Create nodes //////
 
      // Compute number of nodes
-     int num_nodes=size_elemCornerCoords/sdim; // one node per corner
+     int num_nodes=num_elemCorners; // one node per corner
 
      // Allocate node id array
      int *node_ids=NULL; 
@@ -5150,8 +5150,8 @@ void ESMCI_meshcreate_easy_elems(Mesh **meshpp,
        }
      }
 
-     // The number of element connections is the same as the number of nodes right now
-     int num_elem_conns=num_nodes;
+     // The number of element connections is the same as the number of corners
+     int num_elem_conns=num_elemCorners;
 
      // Allocate element connection array
      int *elem_conns=NULL; 

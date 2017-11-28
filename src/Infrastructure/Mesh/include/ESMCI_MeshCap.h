@@ -70,7 +70,7 @@
                                         InterArray<int> *elemIdsII,
                                         int *elemTypes, 
                                         InterArray<int> *elemMaskII,
-                                        int *size_elemCornerCoords, 
+                                        int *num_elemCorners, 
                                         double *elemCornerCoords, 
                                         int *has_elemArea, 
                                         double *elemArea, 
