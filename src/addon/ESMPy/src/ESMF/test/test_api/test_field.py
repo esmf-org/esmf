@@ -308,6 +308,7 @@ class TestField(TestBase):
 
         assert (field.struct.ptr != field2.struct.ptr)
 
+    @attr('serial')
     def test_field_area(self):
         grid = Grid(np.array([3, 4]), staggerloc=[StaggerLoc.CENTER, StaggerLoc.CORNER],
                     coord_sys=CoordSys.SPH_DEG, num_peri_dims=1,
@@ -335,12 +336,13 @@ class TestField(TestBase):
         field = Field(grid)
         field.get_area()
 
-        grid.add_item(GridItem.AREA)
+        # this will allocate space for user areas, reinitializing esmf areas
+        # grid.add_item(GridItem.AREA)
 
         field2 = Field(grid)
         field2.get_area()
 
-        # assert(np.all(field.data == field2.data))
+        assert(np.all(field.data == field2.data))
 
 
     def test_field_locstream_mask(self):

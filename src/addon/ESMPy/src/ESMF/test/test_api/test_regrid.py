@@ -202,6 +202,7 @@ class TestRegrid(TestBase):
         dst_size = 100
         self.assertWeightFileIsRational(filename, src_size, dst_size)
 
+    @attr('parallel')
     def test_field_regrid_gridmesh(self):
         # create mesh
         parallel = False
@@ -245,6 +246,7 @@ class TestRegrid(TestBase):
         rh = Regrid(srcfield, dstfield, regrid_method=RegridMethod.CONSERVE)
         dstfield = rh(srcfield, dstfield)
 
+    @attr('parallel')
     def test_field_regrid_zeroregion(self):
         # create mesh
         parallel = False
@@ -290,6 +292,7 @@ class TestRegrid(TestBase):
                 if dstfield.grid.mask[StaggerLoc.CENTER][i, j] == 0:
                     assert(dstfield[i, j] == 0)
 
+    @attr('parallel')
     def test_field_regrid_area(self):
         # create mesh
         parallel = False
@@ -330,6 +333,7 @@ class TestRegrid(TestBase):
             if (dstarea.data[i] != 0.25):
                 assert (dstarea.data[i] == 0.125)
 
+    @attr('parallel')
     def test_field_regrid_periodic(self):
         parallel = False
         if ESMF.pet_count() > 1:
@@ -377,6 +381,7 @@ class TestRegrid(TestBase):
         self.assertAlmostEqual(meanrel, 0.0016447124122954575)
         self.assertAlmostEqual(csrvrel, 0.0)
 
+    @attr('parallel')
     def test_grid_grid_3d_bilinear_cartesian(self):
         if ESMF.pet_count() > 1:
             if ESMF.pet_count() != 4:
@@ -408,6 +413,7 @@ class TestRegrid(TestBase):
         self.assertAlmostEqual(meanrel, 0.00215601743167)
         self.assertAlmostEqual(csrvrel, 0.0)
 
+    @attr('parallel')
     def test_grid_grid_3d_bilinear_spherical(self):
         if ESMF.pet_count() > 1:
             if ESMF.pet_count() != 4:
@@ -440,6 +446,7 @@ class TestRegrid(TestBase):
         self.assertAlmostEqual(csrvrel, 0.0)
 
 
+    @attr('parallel')
     def test_grid_grid_regrid_csrv_mask_3D(self):
         if ESMF.pet_count() > 1:
             if ESMF.pet_count() != 4:
@@ -482,6 +489,7 @@ class TestRegrid(TestBase):
         self.assertAlmostEqual(meanrel, 0.0021560174316746865)
         self.assertAlmostEqual(csrvrel, 0.0)
 
+    @attr('parallel')
     def test_grid_grid_regrid_csrv_mask(self):
         if ESMF.pet_count() > 1:
             if ESMF.pet_count() != 4:
@@ -525,6 +533,7 @@ class TestRegrid(TestBase):
         self.assertAlmostEqual(meanrel, 0.0024803189848013785)
         self.assertAlmostEqual(csrvrel, 0.0)
 
+    @attr('parallel')
     def test_grid_grid_regrid_srcmask_types(self):
         # NOTE: this tests an old issue where the items of a grid were not properly set when
         # the grid coord_typekind differed from the field typekind.
@@ -571,6 +580,7 @@ class TestRegrid(TestBase):
         self.assertAlmostEqual(meanrel, 0.0024803189848013785)
         self.assertAlmostEqual(csrvrel, 0.0)
 
+    @attr('parallel')
     def test_grid_mesh_regrid_csrv_mask(self):
         parallel = False
         if ESMF.pet_count() > 1:
@@ -626,6 +636,7 @@ class TestRegrid(TestBase):
         self.assertAlmostEqual(meanrel, 0.038806630051265847)
         self.assertAlmostEqual(csrvrel, 0.0)
 
+    @attr('parallel')
     def test_grid_mesh_regrid_csrv(self):
         parallel = False
         if ESMF.pet_count() > 1:
@@ -679,6 +690,7 @@ class TestRegrid(TestBase):
         self.assertAlmostEqual(meanrel, 0.037733241800767432)
         self.assertAlmostEqual(csrvrel, 0.0)
 
+    @attr('parallel')
     def test_grid_mesh_regrid_mask(self):
         parallel = False
         if ESMF.pet_count() > 1:
@@ -721,6 +733,7 @@ class TestRegrid(TestBase):
         self.assertAlmostEqual(meanrel, 0.0)
         self.assertAlmostEqual(csrvrel, 0.0)
 
+    @attr('parallel')
     def test_grid_mesh_regrid(self):
         parallel = False
         if ESMF.pet_count() > 1:
@@ -762,6 +775,7 @@ class TestRegrid(TestBase):
         self.assertAlmostEqual(meanrel, 0.0)
         self.assertAlmostEqual(csrvrel, 0.0)
 
+    @attr('parallel')
     def test_mesh_mesh_regrid(self):
         parallel = False
         if ESMF.pet_count() > 1:
@@ -819,6 +833,7 @@ class TestRegrid(TestBase):
         self.assertAlmostEqual(meanrel, 0.037109375)
         self.assertAlmostEqual(csrvrel, 0.0)
 
+    @attr('parallel')
     def est_grid_mesh_pentatri_regrid_csrv(self):
         parallel = False
         if ESMF.pet_count() > 1:
@@ -925,6 +940,7 @@ class TestRegrid(TestBase):
         assert (meanrel < 10E-2)
         assert (csrvrel < 10E-14)
 
+    @attr('parallel')
     def test_grid_mesh_pentatri_regrid_bilinear(self):
         parallel = False
         if ESMF.pet_count() > 1:
