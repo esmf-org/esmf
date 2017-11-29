@@ -28,4 +28,4 @@ RUN_ESMF_FramworkUTest:
 	$(MAKE) TNAME=Framework NP=4 ftest
 
 RUN_ESMF_FramworkUTestUNI:
-	$(MAKE) TNAME=Framework
+	$(MAKE) TNAME=Framework NP=1 ftest
