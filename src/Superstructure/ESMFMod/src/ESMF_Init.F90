@@ -12,7 +12,7 @@
 #define ESMF_FILENAME "ESMF_Init.F90"
 !
 !     ESMF Init module
-      module ESMF_InitMod
+module ESMF_InitMod
 !
 !==============================================================================
 ! A blank line to keep protex happy.
@@ -57,12 +57,6 @@
       integer, parameter :: ESMF_MAIN_C=1, ESMF_MAIN_F90=2
 
 !------------------------------------------------------------------------------
-!     ! Private global variables
-
-      ! Has framework init routine been run?
-      logical, save :: frameworknotinit = .true.
-
-!------------------------------------------------------------------------------
 ! !PUBLIC SYMBOLS
       public ESMF_MAIN_C, ESMF_MAIN_F90
 
@@ -70,7 +64,8 @@
 ! !PUBLIC MEMBER FUNCTIONS:
 
       public ESMF_Initialize, ESMF_Finalize
-      
+      public ESMF_IsInitialized, ESMF_IsFinalized
+                  
       ! should be private to framework - needed by other modules
       public ESMF_FrameworkInternalInit   
 
@@ -248,6 +243,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
       if (present(rc)) rc = ESMF_SUCCESS
       end subroutine ESMF_Initialize
+!------------------------------------------------------------------------------
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -500,6 +496,103 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       if (rcpresent) rc = ESMF_SUCCESS
 
       end subroutine ESMF_FrameworkInternalInit
+!------------------------------------------------------------------------------
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_IsInitialized"
+!BOP
+! !IROUTINE:  ESMF_IsInitialized - Query Initialized status of ESMF
+!
+! !INTERFACE:
+    function ESMF_IsInitialized(keywordEnforcer, rc)
+!
+! !RETURN VALUE:
+      logical :: ESMF_IsInitialized
+!
+! !ARGUMENTS:
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+      integer,                 intent(out), optional :: rc
+
+!
+! !DESCRIPTION:
+!     Returns {\tt .true.} if the framework has been initialized. This means 
+!     that {\tt ESMF\_Initialize()} has been called. Otherwise returns
+!     {\tt .false.}. If an error occurs, i.e. {\tt rc /= ESMF\_SUCCESS} is 
+!     returned, the return value of the function will also be {\tt .false.}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!
+!     \end{description}
+!EOP
+!------------------------------------------------------------------------------
+      integer             :: localrc                        ! local return code
+      type(ESMF_Logical)  :: flag
+      
+      ESMF_IsInitialized = .false.   ! default
+
+      call c_ESMC_IsInitialized(flag, localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+        
+      ESMF_IsInitialized = flag
+      
+      ! return successfully
+      if (present(rc)) rc = ESMF_SUCCESS
+      
+    end function ESMF_IsInitialized
+!------------------------------------------------------------------------------
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_IsFinalized"
+!BOP
+! !IROUTINE:  ESMF_IsFinalized - Query Finalized status of ESMF
+!
+! !INTERFACE:
+    function ESMF_IsFinalized(keywordEnforcer, rc)
+!
+! !RETURN VALUE:
+      logical :: ESMF_IsFinalized
+!
+! !ARGUMENTS:
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+      integer,                 intent(out), optional :: rc
+
+!
+! !DESCRIPTION:
+!     Returns {\tt .true.} if the framework has been finalized. This means 
+!     that {\tt ESMF\_Finalize()} has been called. Otherwise returns
+!     {\tt .false.}. If an error occurs, i.e. {\tt rc /= ESMF\_SUCCESS} is 
+!     returned, the return value of the function will also be {\tt .false.}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!
+!     \end{description}
+!EOP
+!------------------------------------------------------------------------------
+      integer             :: localrc                        ! local return code
+      type(ESMF_Logical)  :: flag
+      
+      ESMF_IsFinalized = .false.   ! default
+
+      call c_ESMC_IsFinalized(flag, localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+        
+      ESMF_IsFinalized = flag
+      
+      ! return successfully
+      if (present(rc)) rc = ESMF_SUCCESS
+      
+    end function ESMF_IsFinalized
+!------------------------------------------------------------------------------
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -667,6 +760,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       if (rcpresent) rc = ESMF_SUCCESS
 
       end subroutine ESMF_Finalize
+!------------------------------------------------------------------------------
 
-
-      end module ESMF_InitMod
+end module ESMF_InitMod

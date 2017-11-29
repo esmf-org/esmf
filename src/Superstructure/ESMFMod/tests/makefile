@@ -6,11 +6,11 @@ run_uni: run_unit_tests_uni
 
 LOCDIR	  = src/Superstructure/ESMFMod/tests
 
-# TESTS_BUILD   =	$(ESMF_TESTDIR)/ESMF_ModUTest
+TESTS_BUILD   =	$(ESMF_TESTDIR)/ESMF_FrameworkUTest
 
-# TESTS_RUN     =	RUN_ESMF_ModUTest
+TESTS_RUN     =	RUN_ESMF_FramworkUTest
 
-# TESTS_RUN_UNI =	RUN_ESMF_ModUTest
+TESTS_RUN_UNI =	RUN_ESMF_FramworkUTestUNI
 
 include $(ESMF_DIR)/makefile
 
@@ -20,12 +20,12 @@ CLOBBERDIRS =
 
 DIRS        = 
 
-#       
-# Module test
+#
+# unit test targets
 #
 
-# RUN_ESMF_ModUTest:
-#	$(MAKE) TNAME=Mod NP=4 ftest
+RUN_ESMF_FramworkUTest:
+	$(MAKE) TNAME=Framework NP=4 ftest
 
-# RUN_ESMF_ModUTestUNI:
-#	$(MAKE) TNAME=Mod
+RUN_ESMF_FramworkUTestUNI:
+	$(MAKE) TNAME=Framework
