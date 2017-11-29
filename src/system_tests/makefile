@@ -24,6 +24,7 @@ DIRS      = ESMF_CompCreate \
             ESMF_FieldSparseMatMul \
             ESMF_ConcurrentComponent \
             ESMF_MapperTwoConcurrentComps \
+            ESMF_MapperSimpleTwoConcurrentComps \
             ESMF_FieldConcurrentComp \
             ESMF_FieldBundleSMM \
             ESMF_FieldRedist \
