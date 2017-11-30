@@ -15492,9 +15492,8 @@ subroutine CreateTestMesh2x2EE(mesh, rc)
    endif
 
    ! Create Mesh structure in 1 step
-   mesh=ESMF_MeshCreateEasyElems(parametricDim=2, &
+   mesh=ESMF_MeshCreate(parametricDim=2, &
         coordSys=ESMF_COORDSYS_SPH_DEG, &
-!        coordSys=ESMF_COORDSYS_CART, &
         elementIds=elemIds,&
         elementTypes=elemTypes,&
         elementCoords=elemCoords,&
@@ -15516,7 +15515,6 @@ subroutine CreateTestMesh2x2EE(mesh, rc)
    rc=ESMF_SUCCESS
 
 end subroutine CreateTestMesh2x2EE
-
 
 
 

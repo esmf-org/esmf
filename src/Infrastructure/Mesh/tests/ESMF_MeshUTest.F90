@@ -5578,7 +5578,7 @@ subroutine test_mesh_create_easy_elems(correct, rc)
    endif
 
    ! Create Mesh structure in 1 step
-   mesh=ESMF_MeshCreateEasyElems(parametricDim=2, &
+   mesh=ESMF_MeshCreate(parametricDim=2, &
         coordSys=ESMF_COORDSYS_CART, &
         elementIds=elemIds,&
         elementTypes=elemTypes,&
@@ -5807,7 +5807,7 @@ subroutine test_mesh_create_ee_1type(correct, rc)
    endif
 
    ! Create Mesh structure in 1 step
-   mesh=ESMF_MeshCreateEasyElems(parametricDim=2, &
+   mesh=ESMF_MeshCreate(parametricDim=2, &
         coordSys=ESMF_COORDSYS_CART, &
         elementIds=elemIds,&
         elementType=ESMF_MESHELEMTYPE_QUAD,&
