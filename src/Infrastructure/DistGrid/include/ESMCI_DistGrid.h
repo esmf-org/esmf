@@ -62,10 +62,10 @@ namespace ESMCI {
     int tileCount;                // number of tiles in DistGrid
     int *minIndexPDimPTile;       // lower corner indices [dimCount*tileCount]
     int *maxIndexPDimPTile;       // upper corner indices [dimCount*tileCount]
-    int *elementCountPTile;       // number of elements [tileCount]
+    ESMC_I8 *elementCountPTile;   // number of elements [tileCount]
     int *minIndexPDimPDe;         // lower corner indices [dimCount*deCount]
     int *maxIndexPDimPDe;         // upper corner indices [dimCount*deCount]
-    int *elementCountPDe;         // number of elements [deCount]
+    ESMC_I8 *elementCountPDe;     // number of elements [deCount]
     int *tileListPDe;             // tile indices [deCount]
     int *contigFlagPDimPDe;       // flag contiguous indices [dimCount*deCount]
     int *indexCountPDimPDe;       // number of indices [dimCount*deCount]
@@ -127,8 +127,7 @@ namespace ESMCI {
     static DistGrid *create(DistGrid *dg,
       InterArray<int> *firstExtra, InterArray<int> *lastExtra, 
       ESMC_IndexFlag *indexflag, InterArray<int> *connectionList, 
-      VM *vm=NULL, bool actualFlag=true, int *rc=NULL,
-      ESMC_TypeKind_Flag indexTK=ESMC_TYPEKIND_I4);
+      VM *vm=NULL, bool actualFlag=true, int *rc=NULL);
     static DistGrid *create(InterArray<int> *minIndex,
       InterArray<int> *maxIndex, InterArray<int> *regDecomp, 
       Decomp_Flag *decompflag, int decompflagCount,
@@ -137,13 +136,13 @@ namespace ESMCI {
       InterArray<int> *deLabelList, ESMC_IndexFlag *indexflag, 
       InterArray<int> *connectionList,
       DELayout *delayout=NULL, VM *vm=NULL, int *rc=NULL,
-      ESMC_TypeKind_Flag indexTK=ESMC_TYPEKIND_I4);
+      ESMC_TypeKind_Flag indexTK=ESMF_NOKIND);
     static DistGrid *create(InterArray<int> *minIndex,
       InterArray<int> *maxIndex, InterArray<int> *deBlockList, 
       InterArray<int> *deLabelList, ESMC_IndexFlag *indexflag, 
       InterArray<int> *connectionList,
       DELayout *delayout=NULL, VM *vm=NULL, int *rc=NULL,
-      ESMC_TypeKind_Flag indexTK=ESMC_TYPEKIND_I4);
+      ESMC_TypeKind_Flag indexTK=ESMF_NOKIND);
     static DistGrid *create(InterArray<int> *minIndex,
       InterArray<int> *maxIndex, InterArray<int> *regDecomp, 
       Decomp_Flag *decompflag, int decompflagCount,
@@ -152,7 +151,7 @@ namespace ESMCI {
       InterArray<int> *deLabelList, ESMC_IndexFlag *indexflag, 
       InterArray<int> *connectionList,
       int fastAxis, VM *vm=NULL, int *rc=NULL,
-      ESMC_TypeKind_Flag indexTK=ESMC_TYPEKIND_I4);
+      ESMC_TypeKind_Flag indexTK=ESMF_NOKIND);
     static DistGrid *create(InterArray<int> *minIndex,
       InterArray<int> *maxIndex, InterArray<int> *regDecomp, 
       Decomp_Flag *decompflag, int decompflagCount1, int decompflagCount2,
@@ -161,7 +160,7 @@ namespace ESMCI {
       InterArray<int> *deLabelList, ESMC_IndexFlag *indexflag, 
       InterArray<int> *connectionList,
       DELayout *delayout=NULL, VM *vm=NULL, int *rc=NULL,
-      ESMC_TypeKind_Flag indexTK=ESMC_TYPEKIND_I4);
+      ESMC_TypeKind_Flag indexTK=ESMF_NOKIND);
     static int destroy(DistGrid **distgrid, bool noGarbage=false);
     // is()
     bool isLocalDeOnEdgeL(int localDe, int dim, int *rc) const;
@@ -175,14 +174,14 @@ namespace ESMCI {
     int const *getMinIndexPDimPTile(int tile, int *rc) const;
     int const *getMaxIndexPDimPTile() const {return maxIndexPDimPTile;}
     int const *getMaxIndexPDimPTile(int tile, int *rc) const;
-    int const *getElementCountPTile() const {return elementCountPTile;}
+    ESMC_I8 const *getElementCountPTile() const {return elementCountPTile;}
     int const *getMinIndexPDimPDe() const {return minIndexPDimPDe;}
     int const *getMinIndexPDimPDe(int de, int *rc) const;
     int const *getMaxIndexPDimPDe() const {return maxIndexPDimPDe;}
     int const *getMaxIndexPDimPDe(int de, int *rc) const;
-    int const *getElementCountPDe() const {return elementCountPDe;}
+    ESMC_I8 const *getElementCountPDe() const {return elementCountPDe;}
     // misc. get
-    int getElementCountPDe(int de, int *rc) const;
+    ESMC_I8 getElementCountPDe(int de, int *rc) const;
     int const *getTileListPDe() const {return tileListPDe;}
     int const *getContigFlagPDimPDe() const {return contigFlagPDimPDe;}
     int getContigFlagPDimPDe(int de, int dim, int *rc) const;

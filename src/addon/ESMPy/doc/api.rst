@@ -251,11 +251,263 @@ been allocated and retrieved using :class:`~ESMF.api.grid.Grid.get_item()`.
 Mesh
 ~~~~
 
+Mesh is an object for representing unstructured grids. Fields can be created on
+a Mesh to hold data. Fields created on a Mesh can also be used as either the
+source or destination or both of a regridding operation.
+
+A Mesh is constructed of *nodes* and *elements*.
+
+A node, also known as a vertex or corner, is a part of a Mesh which represents a
+single point. Coordinate information is set in a node.
+
+An element, also known as a cell, is a part of a mesh which represents a small
+region of space. Elements are described in terms of a connected set of nodes
+which represent locations along their boundaries.
+
+Field data may be located on either the nodes or elements of a Mesh.
+
+
+The dimension of a Mesh in ESMF is specified with two parameters: the
+*parametric* dimension and the *spatial* dimension.
+
+The parametric dimension of a Mesh is the dimension of the topology of the Mesh.
+This can be thought of as the dimension of the elements which make up the Mesh.
+For example, a Mesh composed of triangles would have a parametric dimension of
+2, and a Mesh composed of tetrahedra would have a parametric dimension of 3.
+
+The spatial dimension of a Mesh is the dimension of the space in which the Mesh
+is embedded. In other words, it is the number of coordinate dimensions needed to
+describe the location of the nodes making up the Mesh.
+
+For example, a Mesh constructed of squares on a plane would have a parametric
+dimension of 2 and a spatial dimension of 2. If that same Mesh were used to
+represent the 2D surface of a sphere, then the Mesh would still have a
+parametric dimension of 2, but now its spatial dimension would be 3.
+
+Only Meshes whose number of coordinate dimensions (spatial dimension) is 2 or 3
+are supported. The dimension of the elements in a Mesh (parametric dimension) must
+be less than or equal to the spatial dimension, but also must be either 2 or 3.
+This means that a Mesh may be either 2D elements in 2D space, 3D elements in 3D
+space, or a manifold constructed of 2D elements embedded in 3D space.
+
+For a parametric dimension of 2, the native supported element types are
+triangles and quadrilaterals. In addition to these, ESMF supports 2D polygons
+with any number of sides. Internally these are represented as sets of triangles,
+but to the user should behave like any other element. For a parametric dimension
+of 3, the supported element types are tetrahedrons and hexahedrons. The Mesh
+supports any combination of element types within a particular dimension, but
+types from different dimensions may not be mixed. For example, a Mesh cannot be
+constructed of both quadrilaterals and tetrahedra.
+
+ESMF currently only supports distributions where every node on a PET must be a
+part of an element on that PET. In other words, there must not be nodes without
+a corresponding element on any PET.
+
++++++++++++++
+Mesh Creation
++++++++++++++
+
+To create a Mesh we need to set some properties of the Mesh as a whole, some
+properties of each node in the mesh and then some properties of each element
+which connects the nodes.
+
+For the Mesh as a whole we set its parametric dimension and spatial dimension.
+A Mesh's parametric dimension can be thought of as the dimension of the elements
+which make up the Mesh. A Mesh's spatial dimension, on the other hand, is the
+number of coordinate dimensions needed to describe the location of the nodes
+making up the Mesh.
+
+The structure of the per node and element information used to create a Mesh is
+influenced by the Mesh distribution strategy. The Mesh class is distributed by
+elements. This means that a node must be present on any processor that contains
+an element associated with that node, but not on any other processor (a node
+can't be on a processor without an element "home"). Since a node may be used by
+two or more elements located on different processors, a node may be duplicated
+on multiple processors. When a node is duplicated in this manner, one and only
+one of the processors that contain the node must "own" the node. The user sets
+this ownership when they define the nodes during Mesh creation. When a Field is
+created on a Mesh (i.e. on the Mesh nodes), on each processor the Field is only
+created on the nodes which are owned by that processor. This means that the size
+of the Field memory on the processor can be smaller than the number of nodes
+used to create the Mesh on that processor.
+
+Three properties need to be defined for each Mesh node: the global id of the node
+(*node_ids*), node coordinates (node_coords), and which processor owns the node
+(*node_owners*). The node id is a unique (across all processors) integer attached
+to the particular node. It is used to indicate which nodes are the same when
+connecting together pieces of the Mesh on different processors. The node
+coordinates indicate the location of a node in space and are used in the Regrid
+functionality when interpolating. The node owner indicates which processor is in
+charge of the node. This is used when creating a Field on the Mesh to indicate
+which processor should contain a Field location for the data.
+
+Three properties need to be defined for each Mesh element: the global id of the
+element (*element_ids*), the topology type of the element (*element_types*), and
+which nodes are connected together to form the element (*element_conn*). The
+element id is a unique (across all processors) integer attached to the
+particular element. The element type describes the topology of the element
+(e.g. a triangle vs. a quadrilateral). The range of choices for the topology of
+the elements in a Mesh are restricted by the Mesh's parametric dimension (e.g. a
+Mesh can't contain a 2D element like a triangle, when its parametric dimension
+is 3D), but it can contain any combination of elements appropriate to its
+dimension. In particular, in 2D ESMF supports two native element types triangle
+and quadrilateral, but also provides support for polygons with any number of
+sides. These polygons are represented internally as sets of triangles, but to
+the user should behave like other elements. To specify a polygon with more than
+four sides, the element type should be set to the number of corners of the
+polygon (e.g. element type=6 for a hexagon). The element connectivity indicates
+which nodes are to be connected together to form the element. The number of
+nodes connected together for each element is implied by the elements topology
+type (element_types). It is IMPORTANT to note, that the entries in this list are
+NOT the global ids of the nodes, but are indices into the processor local lists
+of node info used in the Mesh creation. In other words, the element connectivity
+isn't specified in terms of the global list of nodes, but instead is specified
+in terms of the locally described node info. One other important point about
+connectivities is that the order of the nodes in the connectivity list of an
+element is important. In general, when specifying an element with parametric
+dimension 2, the nodes should be given in counterclockwise order around the
+element.
+
+The three step Mesh creation process starts with a call to the Mesh constructor.
+It is then followed by the :class:`~ESMF.api.mesh.Mesh.add_nodes()` call to
+specify nodes, and then the :class:`~ESMF.api.mesh.Mesh.add_elements()` call to
+specify elements. This three step sequence is useful to conserve memory because
+the node arrays can be deallocated before creating the arrays to be used to add
+the elements.
+
+.. code::
+
+    #  2.5        8        10 --------11
+    #          /     \   /            |
+    #  2.1   7         9              12
+    #        |         |      5       /
+    #        |    4    |            /
+    #        |         |          /
+    #  1.0   4 ------- 5 ------- 6
+    #        |         |  \   3  |
+    #        |    1    |    \    |
+    #        |         |  2   \  |
+    # -0.1   1 ------- 2 ------- 3
+    #
+    #      -0.1       1.0       2.1   2.5
+    #
+    #          Node Ids at corners
+    #          Element Ids in centers
+
+    # Two parametric dimensions, and two spatial dimensions
+    mesh = ESMF.Mesh(parametric_dim=2, spatial_dim=2, coord_sys=coord_sys)
+
+    num_node = 12
+    num_elem = 5
+    nodeId = np.array([1,2,3,4,5,6,7,8,9,10,11,12])
+    nodeCoord = np.array([-0.1,-0.1,  #node id 1
+                          1.0,-0.1,  #node id 2
+                          2.1,-0.1,  #node id 3
+                          0.1, 1.0,  #node id 4
+                          1.0, 1.0,  #node id 5
+                          2.1, 1.0,  #node id 6
+                          0.1, 2.1,  #node id 7
+                          0.5, 2.5,  #node id 8
+                          1.0, 2.1,  #node id 9
+                          1.5, 2.5,  #node id 10
+                          2.5, 2.5,  #node id 11
+                          2.5, 2.1]) #node id 12
+
+
+    nodeOwner = np.zeros(num_node)
+
+    elemId = np.array([1,2,3,4,5])
+    elemType=np.array([ESMF.MeshElemType.QUAD,
+                       ESMF.MeshElemType.TRI,
+                       ESMF.MeshElemType.TRI, 5, 6])
+
+    elemConn=np.array([0,1,4,3,         # elem id 1
+                       1,2,4,           # elem id 2
+                       2,5,4,           # elem id 3
+                       3,4,8,7,6,       # elem id 4
+                       4,5,11,10,9,8])  # elem id 5
+
+    mesh.add_nodes(num_node,nodeId,nodeCoord,nodeOwner)
+
+    mesh.add_elements(num_elem,elemId,elemType,elemConn)
+
++++++++
+Masking
++++++++
+
+There are two types of masking available in Mesh: node masking and element
+masking. These both work in a similar manner, but vary slightly in the details
+of setting the mask information during mesh creation.
+
+For node masking, the mask information is set using the *node_mask* parameter.
+When a Regrid object is created the mask values arguments *src_mask_values* and
+*dst_mask_values* can then be used to indicate which particular values set in
+the *node_mask* array indicate that the node should be masked. For example, if
+*dst_mask_values* has been set to 1, then any node in the destination Mesh whose
+corresponding *node_mask* value is 1 will be masked out (a node with any other
+value than 1 will not be masked).
+
+For element masking, the mask information is set using the *element_mask*
+parameter when adding elements to the Mesh. In a similar manner to node masking,
+the mask values parameters to Regrid(), *src_mask_values* and *dst_mask_values*
+can then be used to indicate which particular values set in the *element_mask*
+array indicate that the element should be masked. For example, if
+*dst_mask_values* has been set to 1, then any element in the destination Mesh
+whose corresponding *element_mask* value is 1 will be masked out (an element
+with any other value than 1 will not be masked).
+
++++++
+Areas
++++++
+
+Mesh cell areas can be specified using the *element_areas* parameter to
+:class:`~ESMF.api.mesh.Mesh.add_elements()`.
+
+If cell areas are not specified by the user they can be calculated by ESMPy
+using :class:`~ESMF.api.field.Field.get_area()`.
+
+
 ~~~~~~~~~
 LocStream
 ~~~~~~~~~
 
+A location stream (LocStream) can be used to represent the locations of a set of
+data points. For example, in the data assimilation world, LocStreams can be used
+to represent a set of observations. The values of the data points are stored
+within a Field created using the LocStream.
 
+The locations are generally described using Cartesian (x, y, z), or
+(lat, lon, radius) coordinates. The coordinates are stored using constructs
+called keys. A key is essentially a list of point descriptors, one for each data
+point. They may hold other information besides the coordinates - a mask, for
+example. They may also hold a second set of coordinates. Keys are referenced by
+name. Each key must contain the same number of elements as there are data points
+in the LocStream. While there is no assumption in the ordering of the points,
+the order chosen must be maintained in each of the keys.
+
+LocStreams can be very large. Data assimilation systems might use LocStreams
+with up to :math:`10^8` observations, so efficiency is critical. LocStreams can be
+created from file.
+
+A LocStream is similar to a Mesh in that both are collections of irregularly
+positioned points. However, the two structures differ because a Mesh also has
+connectivity: each data point represents either a center or corner of a cell.
+There is no requirement that the points in a LocStream have connectivity, in
+fact there is no requirement that any two points have any particular spatial
+relationship at all.
+
+.. code::
+
+    locstream = ESMF.LocStream(16, coord_sys=coord_sys)
+
+    deg_rad = pi
+    if coord_sys == ESMF.CoordSys.SPH_DEG:
+        deg_rad = 180
+
+    locstream["ESMF:Lon"] = [0.0, 0.5*deg_rad, 1.5*deg_rad, 2*deg_rad, 0.0, 0.5*deg_rad, 1.5*deg_rad, 2*deg_rad, 0.0, 0.5*deg_rad, 1.5*deg_rad, 2*deg_rad, 0.0, 0.5*deg_rad, 1.5*deg_rad, 2*deg_rad]
+    locstream["ESMF:Lat"] = [deg_rad/-2.0, deg_rad/-2.0, deg_rad/-2.0, deg_rad/-2.0, -0.25*deg_rad, -0.25*deg_rad, -0.25*deg_rad, -0.25*deg_rad, 0.25*deg_rad, 0.25*deg_rad, 0.25*deg_rad, 0.25*deg_rad, deg_rad/2.0, deg_rad/2.0, deg_rad/2.0, deg_rad/2.0]
+    if domask:
+        locstream["ESMF:Mask"] = np.array([1, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1], dtype=np.int32)
 
 
 -------------------------------

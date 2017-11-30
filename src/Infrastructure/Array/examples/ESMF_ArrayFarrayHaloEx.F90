@@ -44,7 +44,7 @@ program ESMF_ArrayFarrayHaloEx
   type(ESMF_DistGrid)         :: distgrid         ! DistGrid object
   type(ESMF_Array)            :: array            ! Array object
   integer                     :: rc, i, j
-  real                        :: localSum
+  real(ESMF_KIND_R8)          :: localSum
   
 !EOC
   type(ESMF_VM):: vm

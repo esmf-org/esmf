@@ -638,6 +638,7 @@
   deallocate(Farray_2w)
   deallocate(Farray_1r)
   deallocate(Farray_2r)
+  deallocate(attrNameVals)
 
 !------------------------------------------------------------------------
 

@@ -54,7 +54,7 @@ namespace ESMCI {
 
   // classes and structs
 
-  template<typename T=int> struct SeqIndex; //TODO: eventually remove T=int default
+  template<typename T> struct SeqIndex;
   template<typename SIT, typename DIT> class SparseMatrix;
 
   // class definitions
@@ -320,8 +320,8 @@ namespace ESMCI {
       const;
     template<typename T> int getSequenceIndexExclusive(int localDe, 
       int const *index, SeqIndex<T> *seqIndex, bool recursive=true) const;
-    SeqIndex<> getSequenceIndexTile(int tile, const int *index, int *rc=NULL)
-      const;
+    template<typename T> SeqIndex<T> getSequenceIndexTile(int tile,
+      const int *index, int *rc=NULL) const;
     int getTensorSequenceIndex(const int *index, int *rc=NULL)const;
     int getArbSequenceIndexOffset(const int *index, int *rc=NULL)const;
     int setComputationalLWidth(InterArray<int> *computationalLWidthArg);
@@ -366,12 +366,12 @@ namespace ESMCI {
       int *counts, int *tile, int rootPet, VM *vm);
     int scatter(void *array, ESMC_TypeKind_Flag typekind, int rank,
       int *counts, int *tile, int rootPet, VM *vm);
-    template<typename IT>
-      static int tHaloStore(Array *array, RouteHandle **routehandle,
+    static int haloStore(Array *array, RouteHandle **routehandle,
       ESMC_HaloStartRegionFlag halostartregionflag=ESMF_REGION_EXCLUSIVE,
       InterArray<int> *haloLDepth=NULL, InterArray<int> *haloUDepth=NULL,
       int *pipelineDepthArg=NULL);
-    static int haloStore(Array *array, RouteHandle **routehandle,
+    template<typename IT>
+      static int tHaloStore(Array *array, RouteHandle **routehandle,
       ESMC_HaloStartRegionFlag halostartregionflag=ESMF_REGION_EXCLUSIVE,
       InterArray<int> *haloLDepth=NULL, InterArray<int> *haloUDepth=NULL,
       int *pipelineDepthArg=NULL);
@@ -380,6 +380,11 @@ namespace ESMCI {
       bool *finishedflag=NULL, bool *cancelledflag=NULL, bool checkflag=false);
     static int haloRelease(RouteHandle *routehandle);
     static int redistStore(Array *srcArray, Array *dstArray,
+      RouteHandle **routehandle, InterArray<int> *srcToDstTransposeMap,
+      ESMC_TypeKind_Flag typekindFactor = ESMF_NOKIND, void *factor = NULL,
+      bool ignoreUnmatched=false, int *pipelineDepthArg = NULL);
+    template<typename SIT, typename DIT>
+      static int tRedistStore(Array *srcArray, Array *dstArray,
       RouteHandle **routehandle, InterArray<int> *srcToDstTransposeMap,
       ESMC_TypeKind_Flag typekindFactor = ESMF_NOKIND, void *factor = NULL,
       bool ignoreUnmatched=false, int *pipelineDepthArg = NULL);
