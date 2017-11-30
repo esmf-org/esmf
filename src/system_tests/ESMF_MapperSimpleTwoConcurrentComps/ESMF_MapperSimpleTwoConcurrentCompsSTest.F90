@@ -55,6 +55,7 @@
     use user_coupler, only : usercpl_setvm, usercpl_register
 
     use comp_utils
+    use mpi
 
     implicit none
 
@@ -70,6 +71,12 @@
     type(ESMF_VM):: vm
     type(ESMF_State) :: c1exp, c2imp
     type(ESMF_GridComp) :: comp1, comp2
+    type(ESMF_MapperCompInfo) :: comp1Info, comp2Info
+    type(ESMF_MapperExecutionBlock), target :: execBlock
+    type(ESMF_MapperExecutionBlock), pointer :: pExecBlock
+    type(ESMF_MapperExecutionBlock), dimension(:), allocatable :: tmpExecBlocks
+    double precision :: comp1_start, comp1_end, comp2_start, comp2_end;
+    double precision :: comp1_wtime, comp2_wtime
     type(ESMF_CplComp) :: cpl
 
     ! instantiate a clock, a calendar, and timesteps
@@ -264,21 +271,28 @@
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
 
-  ! Set mapper constraints
-  call ESMF_MapperSetConstraints(mapper, execBlock=(/comp1/), rc=localrc)
+  call ESMF_MapperCompInfoCreate(mapper, (/comp1/), comp1Info, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-    ESMF_CONTEXT, rcToReturn=rc)) &
-    call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
-  if (ESMF_LogFoundError(userrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
 
-  ! Set mapper constraints
-  call ESMF_MapperSetConstraints(mapper, execBlock=(/comp2/), rc=localrc)
+  call ESMF_MapperCompInfoCreate(mapper, (/comp2/), comp2Info, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
-  if (ESMF_LogFoundError(userrc, ESMF_ERR_PASSTHRU, &
+
+  allocate(tmpExecBlocks(0))
+  call ESMF_MapperExecutionBlockCreate(mapper, (/comp1Info, comp2Info/),&
+    tmpExecBlocks, execBlock, rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    ESMF_CONTEXT, rcToReturn=rc)) &
+    call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
+
+  pExecBlock => execBlock
+  ! Set mapper constraints
+  call ESMF_MapperSetConstraints(mapper, rootExecBlock=pExecBlock,&
+    rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
 
@@ -416,6 +430,7 @@
       ! with the second component since comp1 and comp2 are defined on
       ! exclusive sets of PETs
       !print *, "I am calling into GridCompRun(comp1)"
+      comp1_start = MPI_Wtime()
       call ESMF_GridCompRun(comp1, exportState=c1exp, clock=clocks(GCOMP_SIDX), &
         userRc=userrc, rc=localrc)
       !print *, "Comp 1 Run returned, rc =", localrc
@@ -425,6 +440,7 @@
       if (ESMF_LogFoundError(userrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) &
         call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
+      comp1_end = MPI_Wtime() - comp1_start
 
       ! Uncomment the following calls to ESMF_GridCompWait() to sequentialize
       ! comp1, comp2 and the coupler. The following ESMF_GridCompWait() calls
@@ -476,6 +492,7 @@
       ! that are part of comp1 will not block in the following call but proceed
       ! to the next loop increment, executing comp1 concurrently with comp2.
       !print *, "I am calling into GridCompRun(comp2)"
+      comp2_start = MPI_Wtime()
       call ESMF_GridCompRun(comp2, importState=c2imp, clock=clocks(GCOMP_SIDX+1), &
         userRc=userrc, rc=localrc)
       !print *, "Comp 2 Run returned, rc =", localrc
@@ -485,14 +502,24 @@
       if (ESMF_LogFoundError(userrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) &
         call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
+      comp2_end = MPI_Wtime() - comp2_start
+
+      call MPI_Allreduce(comp1_end, comp1_wtime, 1, MPI_DOUBLE_PRECISION,&
+            MPI_MAX, MPI_COMM_WORLD, rc)
+
+      call MPI_Allreduce(comp2_end, comp2_wtime, 1, MPI_DOUBLE_PRECISION,&
+            MPI_MAX, MPI_COMM_WORLD, rc)
+
+      print *, "comp1 = ", comp1_wtime, "s"
+      print *, "comp2 = ", comp2_wtime, "s"
 
       ! Contact mapper
-      call ESMF_MapperCollect(mapper, comp1, rc=localrc)
+      call ESMF_MapperCollect(mapper, comp1, comp1Info, rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=localrc)) &
         call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
       
-      call ESMF_MapperCollect(mapper, comp2, rc=localrc)
+      call ESMF_MapperCollect(mapper, comp2, comp2Info, rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=localrc)) &
         call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
@@ -504,12 +531,12 @@
         call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
 
       ! Recreate the components using info from mapper
-      !call user_comp_recreate(comp1, model_info(1), mapper, localrc)
+      !call user_comp_recreate(comp1, comp1Info, mapper, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=localrc)) &
         call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
 
-      !call user_comp_recreate(comp2, model_info(2), mapper, localrc)
+      !call user_comp_recreate(comp2, comp2Info, mapper, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=localrc)) &
         call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
@@ -619,6 +646,24 @@
         ESMF_CONTEXT, rcToReturn=rc)) &
         call ESMF_Finalize(rc=localrc, endflag=ESMF_END_ABORT)
     call ESMF_CplCompDestroy(cpl, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) &
+        call ESMF_Finalize(rc=localrc, endflag=ESMF_END_ABORT)
+
+    call ESMF_MapperExecutionBlockDestroy(mapper, execBlock,&
+      rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) &
+        call ESMF_Finalize(rc=localrc, endflag=ESMF_END_ABORT)
+
+    call ESMF_MapperCompInfoDestroy(mapper, comp1Info,&
+      rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) &
+        call ESMF_Finalize(rc=localrc, endflag=ESMF_END_ABORT)
+
+    call ESMF_MapperCompInfoDestroy(mapper, comp2Info,&
+      rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) &
         call ESMF_Finalize(rc=localrc, endflag=ESMF_END_ABORT)

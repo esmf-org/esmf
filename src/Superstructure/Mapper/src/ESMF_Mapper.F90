@@ -65,13 +65,17 @@ module ESMF_MapperMod
     ! The predicted wallclock time for the next run of this component
     real(ESMF_KIND_R8) :: optElapsedWallClockTime
     ! Saved wallclock times for previous predictions
-    real(ESMF_KIND_R8), dimension(:), pointer :: savedOptElapsedWallClockTimes
+    real(ESMF_KIND_R8), dimension(:), pointer :: savedOptElapsedWallClockTimes => null()
   end type
 
   ! Information specific to a component optimized by the mapper
+  ! The component info could also represent a super component,
+  ! consisting of components that run sequentially
   type ESMF_MapperCompInfo
     ! Name of the component - used as key to match to a component (since
     ! component object references can be transient)
+    ! In the case of a super component, concatenation of the names of 
+    ! all components
     character(len=ESMF_MAXSTR) :: name
     ! Component constraints provided to the mapper
     ! Min/Max number of PETs for the component
@@ -79,6 +83,8 @@ module ESMF_MapperMod
     integer :: maxNumPet
     ! Optimization info for this component
     type(ESMF_MapperCompOptimizeInfo) :: optInfo
+    ! A list of sequential components
+    type(ESMF_MapperCompInfo), dimension(:), pointer :: seqCompInfos => null()
   end type
 
   ! Mapper optimization info for an execution block
@@ -89,9 +95,8 @@ module ESMF_MapperMod
     real(ESMF_KIND_R8) :: optElapsedWallClockTime
   end type
 
-  ! A Mapper execution block - consists of multiple components that
-  ! need to run sequentially
-  ! A component can only be part of a single execution block
+  ! A Mapper execution block - consists of multiple components and
+  ! execution blocks that need to run concurrently
   type ESMF_MapperExecutionBlock
     ! Min and Max number of PETs for the Execution block
     ! - derived from Min/Max PETs for each comp in the execution block
@@ -100,7 +105,9 @@ module ESMF_MapperMod
     ! Optimize information (non component specific) for the execution block
     type(ESMF_MapperExecutionBlockOptimizeInfo) :: optInfo
     ! Info on components in the execution block
-    type(ESMF_MapperCompInfo), dimension(:), pointer :: compInfo => null()
+    type(ESMF_MapperCompInfo), dimension(:), pointer :: compInfos => null()
+    ! Execution blocks that are part of this execution block
+    type(ESMF_MapperExecutionBlock), dimension(:), pointer :: execBlocks => null()
   end type
 
   ! Mapper global (not component specific) optimization info
@@ -116,7 +123,7 @@ module ESMF_MapperMod
     ! The predicted wallclock time for the next run of the application
     real(ESMF_KIND_R8) :: optElapsedWallClockTime
     ! Saved wallclock times for previous predictions
-    real(ESMF_KIND_R8), dimension(:), pointer :: savedOptElapsedWallClockTimes
+    real(ESMF_KIND_R8), dimension(:), pointer :: savedOptElapsedWallClockTimes => null()
   end type
 
   ! The ESMF Mapper
@@ -130,9 +137,8 @@ module ESMF_MapperMod
     integer :: numComponents
     ! Global optimization information for the application
     type(ESMF_MapperOptimizeInfo) :: optInfo
-    ! The execution blocks in the application, provided as constraints to 
-    ! the mapper
-    type(ESMF_MapperExecutionBlock), dimension(:), pointer :: execBlocks => null()
+    ! The root execution block
+    type(ESMF_MapperExecutionBlock), pointer :: rootExecBlock => null()
   end type
 
 !------------------------------------------------------------------------------
@@ -151,6 +157,11 @@ module ESMF_MapperMod
    public ESMF_MapperGet  ! Get info about components from the mapper
    public ESMF_MapperPrint  ! Print Mapper details
    public ESMF_MapperDestroy          ! Destroy a mapper
+
+  public ESMF_MapperCompInfoCreate  ! Create a comp info associated with a comp
+  public ESMF_MapperCompInfoDestroy ! Destroy a comp info
+  public ESMF_MapperExecutionBlockCreate ! Create an execution block
+  public ESMF_MapperExecutionBlockDestroy ! Destroy an execution block
 
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
@@ -186,6 +197,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     character(len=*), intent(in), optional :: configFile
     integer,             intent(out), optional :: rc
 
+    integer :: localrc
+    integer :: npets, i
+
 ! !DESCRIPTION:
 !   Returns the ESMF\_Mapper that  has been created.
 !
@@ -200,6 +214,17 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !EOP
   !-----------------------------------------------------------------------------    
     ESMF_MapperCreate%vm = vm
+
+    call ESMF_VMGet(vm, petCount=npets, rc=localrc)
+    if (ESMF_LogFoundError(localrc, &
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    allocate(ESMF_MapperCreate%petList(npets))
+    do i=1, npets
+      ESMF_MapperCreate%petList(i) = i-1
+    end do
+
     ! Read config file, if present, and initialize the mapper
     if (present(rc)) rc = ESMF_SUCCESS
   end function
@@ -232,7 +257,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !EOP
   !-----------------------------------------------------------------------------    
-    integer :: nblocks, ncomps, i, j
 
     if(associated(mapper%petList)) then
       deallocate(mapper%petList)
@@ -241,32 +265,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if(associated(mapper%optInfo%savedOptElapsedWallClockTimes)) then
       deallocate(mapper%optInfo%savedOptElapsedWallClockTimes)
       nullify(mapper%optInfo%savedOptElapsedWallClockTimes)
-    end if
-    if(associated(mapper%execBlocks)) then
-      nblocks = size(mapper%execBlocks)
-      do i=1,nblocks
-        if(associated(mapper%execBlocks(i)%compInfo)) then
-          ncomps = size(mapper%execBlocks(i)%compInfo)
-          do j=1, ncomps
-            if(associated(mapper%execBlocks(i)%compInfo(j)%optInfo%curPetList)) then
-              deallocate(mapper%execBlocks(i)%compInfo(j)%optInfo%curPetList)
-              nullify(mapper%execBlocks(i)%compInfo(j)%optInfo%curPetList)
-            end if
-            if(associated(mapper%execBlocks(i)%compInfo(j)%optInfo%optPetList)) then
-              deallocate(mapper%execBlocks(i)%compInfo(j)%optInfo%optPetList)
-              nullify(mapper%execBlocks(i)%compInfo(j)%optInfo%optPetList)
-            end if
-            if(associated(mapper%execBlocks(i)%compInfo(j)%optInfo%savedOptElapsedWallClockTimes)) then
-              deallocate(mapper%execBlocks(i)%compInfo(j)%optInfo%savedOptElapsedWallClockTimes)
-              nullify(mapper%execBlocks(i)%compInfo(j)%optInfo%savedOptElapsedWallClockTimes)
-            end if
-          end do
-          deallocate(mapper%execBlocks(i)%compInfo)
-          nullify(mapper%execBlocks(i)%compInfo)
-        end if
-      end do
-      deallocate(mapper%execBlocks)
-      nullify(mapper%execBlocks)
     end if
     if (present(rc)) rc = ESMF_SUCCESS
   end subroutine
@@ -280,12 +278,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 ! !INTERFACE:
   subroutine ESMF_MapperSetConstraints(mapper, keywordEnforcer, &
-    execBlock, rc)
+    rootExecBlock, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_Mapper), intent(inout) :: mapper
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    type(ESMF_GridComp), dimension(:), intent(in), optional :: execBlock
+    type(ESMF_MapperExecutionBlock), pointer, intent(in), optional :: rootExecBlock
     integer,             intent(out), optional :: rc
 
 ! !DESCRIPTION:
@@ -295,12 +293,17 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   \begin{description}
 !   \item[{[mapper]}]
 !     Mapper class; 
+!   \item[{[rootExecBlock]}]
+!     Root execution block for this mapper;
 !   \item[{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
 !EOP
   !-----------------------------------------------------------------------------    
+    if(present(rootExecBlock)) then
+      mapper%rootExecBlock = rootExecBlock
+    end if
     if (present(rc)) rc = ESMF_SUCCESS
   end subroutine
 !------------------------------------------------------------------------------
@@ -312,12 +315,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE: ESMF_MapperSetCompConstraints - Set constraints for each component
 
 ! !INTERFACE:
-  subroutine ESMF_MapperSetCompConstraints(mapper, gComp, keywordEnforcer, &
+  subroutine ESMF_MapperSetCompConstraints(mapper, gComp, gCompInfo, keywordEnforcer, &
     minNumPet, maxNumPet, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_Mapper), intent(inout) :: mapper
     type(ESMF_GridComp), intent(in) :: gComp
+    type(ESMF_MapperCompInfo), intent(inout) :: gCompInfo
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,             intent(in), optional :: minNumPet
     integer,             intent(in), optional :: maxNumPet
@@ -332,14 +336,24 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     Mapper class; 
 !   \item[{[gComp]}]
 !     Grid Component
+!   \item[{[gCompInfo]}]
+!     Mapper Component Info associated with this component
 !   \item[{[minNumPet]}]
-!     Grid Component
+!     Min number of PETs
+!   \item[{[maxNumPet]}]
+!     Max number of PETs
 !   \item[{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
 !EOP
   !-----------------------------------------------------------------------------    
+    if(present(minNumPet)) then
+      gCompInfo%minNumPet = minNumPet
+    end if
+    if(present(maxNumPet)) then
+      gCompInfo%maxNumPet = maxNumPet
+    end if
     if (present(rc)) rc = ESMF_SUCCESS
   end subroutine
 !------------------------------------------------------------------------------
@@ -379,14 +393,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_MapperGet()"
 !BOP
-! !IROUTINE: ESMF_MapperGet - Get info from the mapper
+! !IROUTINE: ESMF_MapperGet - Get info from the mapper regarding a component
 
 ! !INTERFACE:
-  subroutine ESMF_MapperGet(mapper, gComp, keywordEnforcer, npets, petList, rc)
+  subroutine ESMF_MapperGet(mapper, gCompInfo, keywordEnforcer, npets, petList, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_Mapper), intent(in) :: mapper
-    type(ESMF_GridComp), intent(in) :: gComp
+    type(ESMF_MapperCompInfo), intent(in) :: gCompInfo
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,              intent(out), optional :: npets
     integer, dimension(:),   intent(out), optional :: petList
@@ -399,12 +413,30 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   \begin{description}
 !   \item[{[mapper]}]
 !     Mapper class; 
+!   \item[{[gCompInfo]}]
+!     Mapper component info associated with the ESMF component being queried; 
+!   \item[{[npets]}]
+!     Number of PETs (optimized by the mapper) to use for the component
+!   \item[{[petList]}]
+!     PET list (optimized by the mapper) to use for the component
 !   \item[{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
 !EOP
   !-----------------------------------------------------------------------------    
+
+    if(present(npets)) then
+      npets = size(gCompInfo%optInfo%optPetList)
+    end if
+    if(present(petList)) then
+      if(size(petList) /= size(gCompInfo%optInfo%optPetList)) then
+        call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
+          msg="The size of petlist is not equal to number of pets", &
+          ESMF_CONTEXT, rcToReturn=rc)
+      end if
+      petList = gCompInfo%optInfo%optPetList
+    end if
     if (present(rc)) rc = ESMF_SUCCESS
   end subroutine
 !------------------------------------------------------------------------------
@@ -436,6 +468,241 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !EOP
   !-----------------------------------------------------------------------------    
+    if (present(rc)) rc = ESMF_SUCCESS
+  end subroutine
+!------------------------------------------------------------------------------
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_MapperCompInfoCreate()"
+!BOP
+! !IROUTINE: ESMF_MapperCompInfoCreate - Create a mapper component info object
+! associated with an ESMF component or multiple sequential components
+
+! !INTERFACE:
+  subroutine ESMF_MapperCompInfoCreate(mapper, gComps, gCompInfo, keywordEnforcer, minNumPet, maxNumPet, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_Mapper), intent(inout) :: mapper
+    type(ESMF_GridComp), dimension(:), intent(in) :: gComps
+    type(ESMF_MapperCompInfo), intent(out) :: gCompInfo
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    integer,              intent(in), optional :: minNumPet
+    integer,              intent(in), optional :: maxNumPet
+    integer,             intent(out), optional :: rc
+
+    integer :: localrc
+    integer :: ncomps, i
+    character(len=ESMF_MAXSTR) :: cname, compInfoName
+! !DESCRIPTION:
+!   Create an ESMF Mapper Comp Info object associated with an ESMF component
+!   or multiple sequential components
+!
+! The arguments are:
+!   \begin{description}
+!   \item[{[mapper]}]
+!     Mapper class; 
+!   \item[{[gComps]}]
+!     Array of sequential ESMF components;
+!   \item[{[gCompInfo]}]
+!     Mapper component info associated with the sequential ESMF components
+!   \item[{[minNumPet]}]
+!     Minimum number of PETs that can be used for this component
+!   \item[{[maxNumPet]}]
+!     Maximum number of PETs that can be used for this component
+!   \item[{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+  !-----------------------------------------------------------------------------    
+    ncomps = size(gComps)
+  
+    compInfoName = ""
+    do i=1,ncomps  
+      call ESMF_GridCompGet(gComps(i), name=cname, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+      compInfoName = trim(compInfoName) // "_" // trim(cname)
+    end do
+
+    gCompInfo%name = trim(compInfoName)
+
+    ! FIXME: Decide on how to store seqCompInfos
+
+    if(present(minNumPet)) then
+      gCompInfo%minNumPet = minNumPet
+    end if
+    if(present(maxNumPet)) then
+      gCompInfo%maxNumPet = maxNumPet
+    end if
+    if (present(rc)) rc = ESMF_SUCCESS
+  end subroutine
+!------------------------------------------------------------------------------
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_MapperCompInfoDestroy()"
+!BOP
+! !IROUTINE: ESMF_MapperCompInfoDestroy - Destroy a mapper component info object
+
+! !INTERFACE:
+  subroutine ESMF_MapperCompInfoDestroy(mapper, gCompInfo, keywordEnforcer, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_Mapper), intent(inout) :: mapper
+    type(ESMF_MapperCompInfo), intent(inout) :: gCompInfo
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    integer,             intent(out), optional :: rc
+
+! !DESCRIPTION:
+!   Destroy an ESMF Mapper Comp Info object
+!
+! The arguments are:
+!   \begin{description}
+!   \item[{[mapper]}]
+!     Mapper class; 
+!   \item[{[gCompInfo]}]
+!     Mapper component info object that needs to be destroyed; 
+!   \item[{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+  !-----------------------------------------------------------------------------    
+    if(associated(gCompInfo%seqCompInfos)) then
+      deallocate(gCompInfo%seqCompInfos)
+      nullify(gCompInfo%seqCompInfos)
+    end if
+
+    if(associated(gCompInfo%optInfo%savedOptElapsedWallClockTimes)) then
+      deallocate(gCompInfo%optInfo%savedOptElapsedWallClockTimes)
+      nullify(gCompInfo%optInfo%savedOptElapsedWallClockTimes)
+    end if
+    if (present(rc)) rc = ESMF_SUCCESS
+  end subroutine
+!------------------------------------------------------------------------------
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_MapperExecutionBlockCreate()"
+!BOP
+! !IROUTINE: ESMF_MapperExecutionBlockCreate - Create a mapper execution block
+! An execution block consists of components or other execution blocks that
+! run concurrently
+
+! !INTERFACE:
+  subroutine ESMF_MapperExecutionBlockCreate(mapper, gCompInfos, execBlocks, parentExecBlock, keywordEnforcer, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_Mapper), intent(inout) :: mapper
+    type(ESMF_MapperCompInfo), dimension(:), intent(in) :: gCompInfos
+    type(ESMF_MapperExecutionBlock), dimension(:), intent(in) :: execBlocks
+    type(ESMF_MapperExecutionBlock), intent(out) :: parentExecBlock
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    integer,             intent(out), optional :: rc
+
+    integer :: minNumPet, maxNumPet
+    integer :: i, nCompInfos, nExecBlocks
+! !DESCRIPTION:
+!   Create a mapper execution block
+!
+! The arguments are:
+!   \begin{description}
+!   \item[{[mapper]}]
+!     Mapper class; 
+!   \item[{[gCompInfos]}]
+!     Mapper component info objects that are part of this execution block
+!   \item[{[execBlocks]}]
+!     Mapper execution blocks that are part of this execution block
+!   \item[{[parentExecBlock]}]
+!     Mapper execution block that is created
+!   \item[{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+  !-----------------------------------------------------------------------------    
+    nCompInfos = size(gCompInfos)
+    nExecBlocks = size(execBlocks)
+    minNumPet = 0
+    maxNumPet = size(mapper%petList)
+    do i=1, nCompInfos
+      if(minNumPet < gCompInfos(i)%minNumPet) then
+        minNumPet = gCompInfos(i)%minNumPet
+      end if
+      if(maxNumPet > gCompInfos(i)%maxNumPet) then
+        maxNumPet = gCompInfos(i)%maxNumPet
+      end if
+    end do
+    do i=1, nExecBlocks
+      if(minNumPet < execBlocks(i)%minNumPet) then
+        minNumPet = execBlocks(i)%minNumPet
+      end if
+      if(maxNumPet > execBlocks(i)%maxNumPet) then
+        maxNumPet = execBlocks(i)%maxNumPet
+      end if
+    end do
+
+    parentExecBlock%minNumPet = minNumPet
+    parentExecBlock%maxNumPet = maxNumPet
+
+    allocate(parentExecBlock%compInfos(nCompInfos))
+    parentExecBlock%compInfos = gCompInfos
+    parentExecBlock%execBlocks = execBlocks
+    if (present(rc)) rc = ESMF_SUCCESS
+  end subroutine
+!------------------------------------------------------------------------------
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_MapperExecutionBlockDestroy()"
+!BOP
+! !IROUTINE: ESMF_MapperExecutionBlockDestroy - destroy a mapper execution block
+! The execution block is recursively destroyed
+
+! !INTERFACE:
+  subroutine ESMF_MapperExecutionBlockDestroy(mapper, execBlock, keywordEnforcer, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_Mapper), intent(inout) :: mapper
+    type(ESMF_MapperExecutionBlock), intent(inout) :: execBlock
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    integer,             intent(out), optional :: rc
+
+    integer :: localrc
+    integer :: i, sz
+! !DESCRIPTION:
+!   Destroy a mapper execution block
+!
+! The arguments are:
+!   \begin{description}
+!   \item[{[mapper]}]
+!     Mapper class; 
+!   \item[{[execBlock]}]
+!     Mapper execution block that needs to be destroyed;
+!   \item[{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+  !-----------------------------------------------------------------------------    
+    if(associated(execBlock%compInfos)) then
+      sz = size(execBlock%compInfos)
+      do i=1,sz
+        call ESMF_MapperCompInfoDestroy(mapper, execBlock%compInfos(i), rc=localrc)
+        ! FIXME: Should we ignore errors while destroying ?
+      end do
+      deallocate(execBlock%compInfos)
+    end if
+    if(associated(execBlock%execBlocks)) then
+      sz = size(execBlock%execBlocks)
+      do i=1,sz
+        call ESMF_MapperExecutionBlockDestroy(mapper, execBlock%execBlocks(i), rc=localrc)
+        ! FIXME: Should we ignore errors while destroying ?
+      end do
+      deallocate(execBlock%execBlocks)
+    end if
     if (present(rc)) rc = ESMF_SUCCESS
   end subroutine
 !------------------------------------------------------------------------------

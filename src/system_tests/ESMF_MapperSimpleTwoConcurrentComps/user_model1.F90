@@ -168,11 +168,13 @@
         ! local variables
         integer                             :: status = ESMF_SUCCESS
 
+        integer, parameter :: NUM_TIMES = 1000
         type(ESMF_Array)                    :: rawdata, sorted_data
         integer, dimension(9), target       :: d = (/3,7,8,5,2,1,9,5,4/)
         integer, dimension(:), pointer      :: pd        ! raw data ptr
         integer, dimension(:), pointer      :: rdptr     ! raw data ptr
         integer, dimension(:), pointer      :: sdptr     ! sorted data ptr
+        integer :: i
   
         print *, "In user 1 run routine"
         call ESMF_StateGet(exportState, "rawdata", rawdata, rc=status)
@@ -191,7 +193,10 @@
 
         ! sort the input data locally
         pd => d
-        call quicksortI4(pd, 1, 9)
+        ! dummy loop to create load imbalance btw comp1 and comp2
+        do i=1,NUM_TIMES    
+          call quicksortI4(pd, 1, 9)
+        end do
 
         ! assign sorting result to output that will be delivered to component 2
         ! through coupler component

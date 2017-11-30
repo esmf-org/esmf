@@ -87,13 +87,15 @@ contains
 ! !IROUTINE: ESMF_MapperCollect - Collect all info from the component
 
 ! !INTERFACE:
-  subroutine ESMF_MapperCollect(mapper, gComp, keywordEnforcer, rc)
+  subroutine ESMF_MapperCollect(mapper, gComp, gCompInfo, keywordEnforcer, wtime, rc)
 !
 !
 ! !ARGUMENTS:
     type(ESMF_Mapper) :: mapper
     type(ESMF_GridComp) :: gComp
+    type(ESMF_MapperCompInfo) :: gCompInfo
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    double precision, intent(in), optional :: wtime
     integer,             intent(out), optional :: rc
 
 ! !DESCRIPTION:
@@ -101,12 +103,24 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! The arguments are:
 !   \begin{description}
+!   \item[{[mapper]}]
+!     The mapper class;
+!   \item[{[gComp]}]
+!     The ESMF grid component being queried
+!   \item[{[gCompInfo]}]
+!     Mapper component info object associated with the ESMF grid component 
+!     being queried
+!   \item[{[wtime]}]
+!     Wallclock time elapsed for this component;
 !   \item[{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
 !EOP
   !-----------------------------------------------------------------------------    
+    if(present(wtime)) then
+      gCompInfo%optInfo%curElapsedWallClockTime = wtime
+    end if
     if (present(rc)) rc = ESMF_SUCCESS
   end subroutine
 !------------------------------------------------------------------------------
