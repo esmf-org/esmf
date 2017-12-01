@@ -546,6 +546,104 @@ int ESMC_FieldGetBounds(ESMC_Field field,
 //--------------------------------------------------------------------------
   
 
+//--------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_FieldSMMStore()"
+  int ESMC_FieldSMMStore(ESMC_Field srcField, ESMC_Field dstField,
+                            const char *filename, ESMC_RouteHandle *routehandle,
+                            ESMC_Logical *ignoreUnmatchedIndices,
+                            int *srcTermProcessing, int *pipeLineDepth,
+                            ESMC_RouteHandle *transposeRoutehandle){
+
+    // Initialize return code. Assume routine not implemented
+    int rc = ESMF_RC_NOT_IMPL;
+    int localrc = ESMC_RC_NOT_IMPL;
+
+    ESMCI::RouteHandle *rhPtr, *trhPtr;
+    rhPtr=NULL; trhPtr=NULL;
+
+    // typecast Fields into ESMCI type
+    ESMCI::Field *fieldpsrc = reinterpret_cast<ESMCI::Field *>(srcField.ptr);
+    ESMCI::Field *fieldpdst = reinterpret_cast<ESMCI::Field *>(dstField.ptr);
+
+/*
+    printf("srcField mem address = %p\n", srcField.ptr);
+    printf("fieldpsrc mem address = %p\n", fieldpsrc);
+
+
+  // get and fill first coord array and computational bounds
+  int *exLBound = (int *)malloc(2*sizeof(int));
+  int *exUBound = (int *)malloc(2*sizeof(int));
+
+  rc = ESMC_FieldGetBounds(srcField, 0, exLBound, exUBound, 2);
+  if (rc != ESMF_SUCCESS) return 0;
+
+  double * srcfieldptr = (double *)ESMC_FieldGetPtr(srcField, 0, &rc);
+  if (rc != ESMF_SUCCESS) return 0;
+
+  printf("srcfield = [\n");
+  int p = 0;
+  for (int i1=exLBound[1]; i1<=exUBound[1]; ++i1) {
+    for (int i0=exLBound[0]; i0<=exUBound[0]; ++i0) {
+      printf("%f, ", srcfieldptr[p]);
+      p++;
+    }
+  }
+  printf("]\n");
+
+
+  ESMC_Array srcarray = ESMC_FieldGetArray(srcField, &rc);
+  ESMC_Array dstarray = ESMC_FieldGetArray(dstField, &rc);
+*/
+
+
+    // Invoke the C++ interface
+    localrc = ESMCI::Field::smmstore(fieldpsrc, fieldpdst, filename, &rhPtr,
+        ignoreUnmatchedIndices, srcTermProcessing, pipeLineDepth, &trhPtr);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      &rc)) return rc;  // bail out
+
+#define DEBUG 0
+#if DEBUG
+  // get and fill first coord array and computational bounds
+  int *exLBound = (int *)malloc(2*sizeof(int));
+  int *exUBound = (int *)malloc(2*sizeof(int));
+
+  rc = ESMC_FieldGetBounds(srcField, 0, exLBound, exUBound, 2);
+  if (rc != ESMF_SUCCESS) return 0;
+
+  double * srcfieldptr = (double *)ESMC_FieldGetPtr(srcField, 0, &rc);
+  if (rc != ESMF_SUCCESS) return 0;
+
+  printf("ESMC:fieldpsrc mem address = %p\n", fieldpsrc);
+
+  printf("ESMC:srcfield = [\n");
+  int p = 0;
+  for (int i1=exLBound[1]; i1<=exUBound[1]; ++i1) {
+    for (int i0=exLBound[0]; i0<=exUBound[0]; ++i0) {
+      printf("%f, ", srcfieldptr[p]);
+      p++;
+    }
+  }
+  printf("]\n");
+  printf("ESMC:srcfield mem address = %p\n", srcField.ptr);
+#endif
+
+    // return rhPtr in routehandle argument
+    routehandle->ptr = NULL;
+    routehandle->ptr = (void *)rhPtr;
+    if (transposeRoutehandle) {
+      transposeRoutehandle->ptr = NULL;
+      transposeRoutehandle->ptr = (void *)trhPtr;
+    }
+
+    // return successfully
+    rc = ESMF_SUCCESS;
+    return rc;
+  }
+//--------------------------------------------------------------------------
+
+
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_FieldWrite()"

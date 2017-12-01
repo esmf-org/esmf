@@ -986,6 +986,131 @@ int ESMC_FieldRegridStoreFile(
 //EOP
 //-----------------------------------------------------------------------------
 
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE: ESMC_FieldSMMStore - Precompute a Field regridding operation and return a RouteHandle
+//
+// !INTERFACE:
+int ESMC_FieldSMMStore(
+    ESMC_Field srcField,                           // in
+    ESMC_Field dstField,                           // in
+    const char *filename,                          // in
+    ESMC_RouteHandle *routehandle,                 // out
+    ESMC_Logical *ignoreUnmatchedIndices,          // in
+    int *srcTermProcessing,                        // in
+    int *pipeLineDepth,                            // in
+    ESMC_RouteHandle *transposeRoutehandle);       // out
+
+// !RETURN VALUE:
+//   Return code; equals ESMF_SUCCESS if there are no errors.
+//
+// !DESCRIPTION:
+//
+//   Creates a sparse matrix operation (stored in routehandle) that contains
+//   the calculations and communications necessary to interpolate from srcField
+//   to dstField. The routehandle can then be used in the call ESMC\_FieldRegrid()
+//   to interpolate between the Fields.
+//
+//  The arguments are:
+//  \begin{description}
+//  \item[srcField]
+//    ESMC\_Field with source data.
+//  \item[dstField]
+//    ESMC\_Field with destination data.
+//  \item[routehandle]
+//    The handle that implements the regrid, to be used in {\tt ESMC\_FieldRegrid()}.
+//  \end{description}
+//
+//EOP
+//-----------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
+//BOPI
+// !IROUTINE: ESMC_FieldWrite - Write Field
+//
+// !INTERFACE:
+  int ESMC_FieldWrite(ESMC_Field field,  // inout
+      const char *file,                  // in
+      const char *variableName,          // in
+      int overwrite,                     // in
+      ESMC_FileStatus_Flag status,       // in
+      int timeslice,                     // in
+      ESMC_IOFmt_Flag iofmt              // in
+  );
+//
+// !DESCRIPTION:
+//  Write Field data into a file.  For this API to be functional, the 
+//  environment variable {\tt ESMF\_PIO} should be set to "internal" when 
+//  the ESMF library is built.  Please see the section on 
+//  Data I/O,~\ref{io:dataio}.
+//
+//  Limitations:
+//  \begin{itemize}
+//    \item Only 1 DE per PET supported.
+//    \item Not supported in {\tt ESMF\_COMM=mpiuni} mode.
+//  \end{itemize}
+//
+//  The arguments are:
+//  \begin{description}
+//  \item [field]
+//    The {\tt ESMF\_Field} object that contains data to be written.
+//  \item[file]
+//    The name of the output file to which Field data is written.
+//  \item[{[variableName]}]
+//   Variable name in the output file; default is the "name" of field.
+//   Use this argument only in the I/O format (such as NetCDF) that
+//   supports variable name. If the I/O format does not support this
+//   (such as binary format), ESMF will return an error code.
+//  \item[{[overwrite]}]
+//   \begin{sloppypar}
+//     A logical flag, the default is .false., i.e., existing field data may
+//     {\em not} be overwritten. If .true., the overwrite behavior depends
+//     on the value of {\tt iofmt} as shown below:
+//   \begin{description}
+//   \item[{\tt iofmt} = {\tt ESMF\_IOFMT\_BIN}:]\ All data in the file will
+//     be overwritten with each field's data.
+//   \item[{\tt iofmt} = {\tt ESMF\_IOFMT\_NETCDF}:]\ Only the
+//     data corresponding to each field's name will be
+//     be overwritten. If the {\tt timeslice} option is given, only data for
+//     the given timeslice may be overwritten.
+//     Note that it is always an error to attempt to overwrite a NetCDF
+//     variable with data which has a different shape.
+//   \end{description}
+//   \end{sloppypar}
+//  \item[{[status]}]
+//   \begin{sloppypar}
+//   The file status. Please see Section~\ref{const:filestatusflag} for
+//   the list of options. If not present, defaults to
+//   {\tt ESMF\_FILESTATUS\_UNKNOWN}.
+//   \end{sloppypar}
+//  \item[{[timeslice]}]
+//   \begin{sloppypar}
+//   Some I/O formats (e.g. NetCDF) support the output of data in form of
+//   time slices. The {\tt timeslice} argument provides access to this
+//   capability. {\tt timeslice} must be positive. The behavior of this
+//   option may depend on the setting of the {\tt overwrite} flag:
+//   \begin{description}
+//   \item[{\tt overwrite = .false.}:]\ If the timeslice value is
+//   less than the maximum time already in the file, the write will fail.
+//   \item[{\tt overwrite = .true.}:]\ Any positive timeslice value is valid.
+//   \end{description}
+//   By default, i.e. by omitting the {\tt timeslice} argument, no
+//   provisions for time slicing are made in the output file,
+//   however, if the file already contains a time axis for the variable,
+//   a timeslice one greater than the maximum will be written.
+//   \end{sloppypar}
+//  \item[{[iofmt]}]
+//    \begin{sloppypar}
+//    The I/O format. Please see Section~\ref{opt:iofmtflag} for the list
+//    of options. If not present, defaults to {\tt ESMF\_IOFMT\_NETCDF}.
+//    \end{sloppypar}
+//  \item [{[rc]}]
+//    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+//  \end{description}
+//
+//EOPI
+
 #if defined (__cplusplus)
 } // extern "C"
 #endif

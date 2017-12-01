@@ -173,6 +173,13 @@ void FTN_X(f_esmf_regrid)(ESMCI::Field *fieldpsrc, ESMCI::Field *fieldpdst,
 
 void FTN_X(f_esmf_regridrelease)(ESMCI::RouteHandle **routehandlep, int *rc);
 
+void FTN_X(f_esmf_smmstore)(ESMCI::Field *fieldpsrc, ESMCI::Field *fieldpdst,
+  const char *filename, ESMCI::RouteHandle **routehandlep,
+  ESMC_Logical *ignoreUnmatchedIndices,
+  int *srcTermProcessing, int *pipeLineDepth,
+  ESMCI::RouteHandle **transposeRoutehandlep,
+  int *rc, ESMCI_FortranStrLenArg nlen);
+
 void FTN_X(f_esmf_fieldwrite)(ESMCI::Field *fieldp, const char *file,
   const char *variablename,
   ESMC_Logical *overwrite, ESMC_FileStatus_Flag *status,
@@ -1631,6 +1638,101 @@ namespace ESMCI {
     return rc;
   }
 //-----------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::Field::smmstore()"
+//BOP
+// !IROUTINE:  ESMCI::Field::smmstore - precompute a regriddding operation
+//
+// !INTERFACE:
+  int Field::smmstore(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+    Field *fieldpsrc,
+    Field *fieldpdst,
+    const char *filename,
+    RouteHandle **routehandlep,
+    ESMC_Logical *ignoreUnmatchedIndices,
+    int *srcTermProcessing,
+    int *pipeLineDepth,
+    RouteHandle **transposeRoutehandlep) {
+//
+// !DESCRIPTION:
+//
+//
+//EOP
+    // Initialize return code. Assume routine not implemented
+    int rc = ESMC_RC_NOT_IMPL;
+    int localrc = ESMC_RC_NOT_IMPL;
+
+    char * fName = NULL;
+    int slen = 0;
+    if(filename != NULL){
+      slen = strlen(filename);
+      fName = new char[slen];
+      localrc = ESMC_CtoF90string(filename, fName, slen);
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+        &rc)) {
+        delete[] fName;
+        return ESMC_NULL_POINTER;
+      }
+    }
+
+    FTN_X(f_esmf_smmstore)(fieldpsrc, fieldpdst,
+                              fName, routehandlep,
+                              ignoreUnmatchedIndices,
+                              srcTermProcessing, pipeLineDepth,
+                              transposeRoutehandlep,
+                              &localrc, slen);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      &rc)) {
+      return rc;
+    }
+
+#define DEBUG 0
+#if DEBUG
+  // get and fill first coord array and computational bounds
+  int *exLBound = (int *)malloc(2*sizeof(int));
+  int *exUBound = (int *)malloc(2*sizeof(int));
+  ESMCI::InterArray<int> *exLB = new ESMCI::InterArray<int>(exLBound, 2);
+  ESMCI::InterArray<int> *exUB = new ESMCI::InterArray<int>(exUBound, 2);
+
+  int localde = 0;
+  rc = ESMCI::Field::getbounds(fieldpsrc, &localde, exLB, exUB);
+  if (rc != ESMF_SUCCESS) return 0;
+
+  // double * srcfieldptr = (double *)ESMC_FieldGetPtr(fieldpsrc, 0, &rc);
+  if (rc != ESMF_SUCCESS) return 0;
+
+  ESMC_Array array = fieldpsrc->getArray(&localrc);
+  void *ptr = ESMC_ArrayGetPtr(array, 0, &localrc);
+  double *srcfieldptr = static_cast<double *> (ptr);
+
+
+  printf("ESMCI:fieldpsrc mem address = %p\n", fieldpsrc);
+
+  printf("ESMCI:srcfield = [\n");
+  int p = 0;
+  for (int i1=exLBound[1]; i1<=exUBound[1]; ++i1) {
+    for (int i0=exLBound[0]; i0<=exUBound[0]; ++i0) {
+      printf("%f, ", srcfieldptr[p]);
+      p++;
+    }
+  }
+  printf("]\n");
+  printf("ESMCI:srcfield mem address = %p\n", fieldpsrc);
+#endif
+
+
+    rc = ESMF_SUCCESS;
+    return rc;
+  }
+//-----------------------------------------------------------------------------
+
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
