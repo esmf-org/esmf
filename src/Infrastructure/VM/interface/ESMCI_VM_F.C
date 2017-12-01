@@ -961,6 +961,34 @@ extern "C" {
     if (rc!=NULL) *rc = localrc;
   }
 
+  void FTN_X(c_esmc_isinitialized)(ESMC_Logical *isInitialized, int *rc){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_isinitialized()"
+    // Initialize return code; assume routine not implemented
+    if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+    int localrc = ESMC_RC_NOT_IMPL;
+    bool flag = ESMCI::VM::isInitialized(&localrc);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      rc)) return;
+    *isInitialized = flag ? ESMF_TRUE : ESMF_FALSE;
+    // return successfully
+    if (rc!=NULL) *rc = ESMF_SUCCESS;
+  }
+
+  void FTN_X(c_esmc_isfinalized)(ESMC_Logical *isFinalized, int *rc){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_isfinalized()"
+    // Initialize return code; assume routine not implemented
+    if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+    int localrc = ESMC_RC_NOT_IMPL;
+    bool flag = ESMCI::VM::isFinalized(&localrc);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      rc)) return;
+    *isFinalized = flag ? ESMF_TRUE : ESMF_FALSE;
+    // return successfully
+    if (rc!=NULL) *rc = ESMF_SUCCESS;
+  }
+
   void FTN_X(c_esmc_vmshutdown)(ESMCI::VM **ptr_vmparent,
     ESMCI::VMPlan **ptr_vmplan,
     void **vm_info, int *rc){

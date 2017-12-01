@@ -46,6 +46,7 @@ program ESMF_MeshEx
 
 ! The following arrays are used to declare the mesh to the ESMF framework.
   integer :: numNodes, numTotElems, numTriElems, numQuadElems
+  integer :: numElemCorners
   integer, allocatable :: nodeIds(:)
   real(ESMF_KIND_R8), allocatable :: nodeCoords(:)
   integer, allocatable :: nodeOwners(:)
@@ -53,6 +54,9 @@ program ESMF_MeshEx
   integer, allocatable :: elemIds(:)
   integer, allocatable :: elemTypes(:)
   integer, allocatable :: elemConn(:)
+
+  real(ESMF_KIND_R8), allocatable :: elemCornerCoords2(:,:)
+  real(ESMF_KIND_R8), allocatable :: elemCornerCoords3(:,:,:)
 
   type(ESMF_ArraySpec) :: arrayspec
   type(ESMF_Field)  ::  field
@@ -688,8 +692,6 @@ program ESMF_MeshEx
   !if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
 
-
-
 !BOE
 !\subsubsection{Create a copy of a Mesh with a new distribution}
 !
@@ -819,8 +821,312 @@ program ESMF_MeshEx
   call ESMF_DistgridDestroy(elemdistgrid, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
-   ! endif for skip for != 4 proc (extends all the way to previous subsection)
+
+!BOE
+!\subsubsection{Create a small Mesh of all one element type on 4 PETs using easy element method}
+!\label{sec:mesh:4pet1stepee1type}
+!
+!\begin{verbatim}
+!
+!  2.0   * ------- *         * ------- *          
+!        |         |         |         |
+!        |    3    |         |    4    |
+!        |         |         |         |
+!  1.0   * ------- *         * ------- *
+!        
+!       0.0       1.0       1.0       2.0
+!
+!           PET 2               PET 3
+!
+!
+!  1.0   * ------- *         * ------- *
+!        |         |         |         |
+!        |    1    |         |    2    |
+!        |         |         |         |
+!  0.0   * ------- *         * ------- *
+!
+!       0.0       1.0       1.0      2.0 
+! 
+!           PET 0               PET 1
+!
+!           Element Id labels in centers
+!
+!\end{verbatim}
+! 
+! This example is intended to illustrate the creation of a small Mesh on multiple PETs using the easy element creation interface. 
+! Here the Mesh consists of only one type of element, so we can use a slightly more convenient interface. In this interface the user
+! only needs to specify the element type once and the elementCornerCoords argument has three dimensions. This means that the corners for all
+! elements are not collapsed into a 1D list as happens with the next example. 
+! 
+! The figure above shows the Mesh to be created and it's distribution across the PETs. As in the previous diagrams, the element ids are in the centers. 
+! Note that in the example code below the user doesn't specify the element ids. In this case, they are assigned sequentially
+! through the local elements on each PET starting with 1 for the first element on PET 0. (It isn't shown in the example below, but there is
+! an optional argument that enables the user to set the element ids if they wish.) 
+! Unlike some of the previous examples of Mesh creation, here the user doesn't specify node ids or ownership, so that information is shown by a "*" in 
+! the diagram. 
+!
+!EOE
+
+!BOC
+
+ ! Break up what's being set by PET
+ if (localPET .eq. 0) then !!! This part only for PET 0
+
+    ! Set the number of elements on this PET
+    numTotElems=1
+
+    ! Allocate and fill element corner coordinate array.
+    allocate(elemCornerCoords3(2,4,numTotElems))
+    elemCornerCoords3(:,1,1)=(/0.0,0.0/) ! elem id 1 corner 1 
+    elemCornerCoords3(:,2,1)=(/1.0,0.0/) ! elem id 1 corner 2
+    elemCornerCoords3(:,3,1)=(/1.0,1.0/) ! elem id 1 corner 3
+    elemCornerCoords3(:,4,1)=(/0.0,1.0/) ! elem id 1 corner 4
+
+  else if (localPET .eq. 1) then !!! This part only for PET 1
+
+    ! Set the number of elements on this PET
+    numTotElems=1
+
+    ! Allocate and fill element corner coordinate array.
+    allocate(elemCornerCoords3(2,4,numTotElems))
+    elemCornerCoords3(:,1,1)=(/1.0,0.0/) ! elem id 2 corner 1 
+    elemCornerCoords3(:,2,1)=(/2.0,0.0/) ! elem id 2 corner 2
+    elemCornerCoords3(:,3,1)=(/2.0,1.0/) ! elem id 2 corner 3
+    elemCornerCoords3(:,4,1)=(/1.0,1.0/) ! elem id 2 corner 4 
+
+
+  else if (localPET .eq. 2) then !!! This part only for PET 2
+
+    ! Set the number of elements on this PET
+    numTotElems=1
+
+    ! Allocate and fill element corner coordinate array.
+    allocate(elemCornerCoords3(2,4,numTotElems))
+    elemCornerCoords3(:,1,1)=(/0.0,1.0/) ! elem id 3 corner 1 
+    elemCornerCoords3(:,2,1)=(/1.0,1.0/) ! elem id 3 corner 2
+    elemCornerCoords3(:,3,1)=(/1.0,2.0/) ! elem id 3 corner 3
+    elemCornerCoords3(:,4,1)=(/0.0,2.0/) ! elem id 3 corner 4
+
+
+  else if (localPET .eq. 3) then !!! This part only for PET 3
+
+    ! Set the number of elements on this PET
+    numTotElems=1
+
+    ! Allocate and fill element corner coordinate array.
+    allocate(elemCornerCoords3(2,4,numTotElems))
+    elemCornerCoords3(:,1,1)=(/1.0,1.0/) ! elem id 4 corner 1 
+    elemCornerCoords3(:,2,1)=(/2.0,1.0/) ! elem id 4 corner 2
+    elemCornerCoords3(:,3,1)=(/2.0,2.0/) ! elem id 4 corner 3
+    elemCornerCoords3(:,4,1)=(/1.0,2.0/) ! elem id 4 corner 4
+
+  endif
+  
+  ! Create Mesh structure in 1 step
+  mesh=ESMF_MeshCreate(parametricDim=2, &
+         coordSys=ESMF_COORDSYS_CART,   &
+         elementType=ESMF_MESHELEMTYPE_QUAD, &
+         elementCornerCoords=elemCornerCoords3, &
+         rc=localrc)
+
+
+  ! After the creation we are through with the arrays, so they may be
+  ! deallocated.
+  deallocate(elemCornerCoords3)
+
+  ! At this point the mesh is ready to use. For example, as is 
+  ! illustrated here, to have a field created on it. Note that 
+  ! the Field only contains data for elements owned by the current PET.
+  ! Please see Section "Create a Field from a Mesh" under Field
+  ! for more information on creating a Field on a Mesh. 
+  field = ESMF_FieldCreate(mesh, ESMF_TYPEKIND_R8, &
+       meshloc=ESMF_MESHLOC_ELEMENT, rc=localrc)
+
+!EOC
+
+  ! DEBUG - write mesh to file
+  !call ESMF_MeshWrite(mesh,"meshee1t",rc=localrc)
+  !if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  ! Get rid of Field
+  call ESMF_FieldDestroy(field, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  ! Get rid of Mesh
+  call ESMF_MeshDestroy(mesh, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+!BOE
+!\subsubsection{Create a small Mesh of multiple element types on 4 PETs using easy element method}
+!\label{sec:mesh:4pet1stepee}
+!
+!\begin{verbatim}
+!
+!  2.0   * ------- *         * ------- *          
+!        |         |         |         |
+!        |    4    |         |    5    |
+!        |         |         |         |
+!  1.0   * ------- *         * ------- *
+!        
+!       0.0       1.0       1.0       2.0
+!
+!           PET 2               PET 3
+!
+!
+!  1.0   * ------- *         * ------- *
+!        |         |         |  \   3  |
+!        |    1    |         |    \    |
+!        |         |         | 2    \  |
+!  0.0   * ------- *         * ------- *
+!
+!       0.0       1.0       1.0      2.0 
+! 
+!           PET 0               PET 1
+!
+!           Element Id labels in centers
+!
+!\end{verbatim}
+! 
+! This example is intended to illustrate the creation of a small Mesh on multiple PETs using the easy element creation interface. 
+! In this example, the Mesh being created contains elements of multiple types.
+! To support the specification of a set of elements containing different types and thus different 
+! numbers of corners, the elementCornerCoords argument has the 
+! corner and element dimensions collapsed together into one dimension.
+!
+! The figure above shows the Mesh to be created and it's distribution across the PETs. As in the previous diagrams, the element ids are in the centers. 
+! Note that in the example code below the user doesn't specify the element ids. In this case, they are assigned sequentially
+! through the local elements on each PET starting with 1 for the first element on PET 0. (It isn't shown in the example below, but there is
+! an optional argument that enables the user to set the element ids if they wish.) 
+! Unlike some of the previous examples of Mesh creation, here the user doesn't specify node ids or ownership, so that information is shown by a "*" in 
+! the diagram. 
+
+!
+!EOE
+
+!BOC
+
+ ! Break up what's being set by PET
+ if (localPET .eq. 0) then !!! This part only for PET 0
+
+    ! Set the number of each type of element, plus the total number.
+    numQuadElems=1
+    numTriElems=0
+    numTotElems=numQuadElems+numTriElems
+    numElemCorners=4*numQuadElems+3*numTriElems
+
+    ! Allocate and fill the element type array.
+    allocate(elemTypes(numTotElems))
+    elemTypes=(/ESMF_MESHELEMTYPE_QUAD/) ! elem id 1
+
+    ! Allocate and fill element corner coordinate array.
+    allocate(elemCornerCoords2(2,numElemCorners))
+    elemCornerCoords2(:,1)=(/0.0,0.0/) ! elem id 1 corner 1 
+    elemCornerCoords2(:,2)=(/1.0,0.0/) ! elem id 1 corner 2
+    elemCornerCoords2(:,3)=(/1.0,1.0/) ! elem id 1 corner 3
+    elemCornerCoords2(:,4)=(/0.0,1.0/) ! elem id 1 corner 4
+
+  else if (localPET .eq. 1) then !!! This part only for PET 1
+
+    ! Set the number of each type of element, plus the total number.
+    numQuadElems=0
+    numTriElems=2
+    numTotElems=numQuadElems+numTriElems
+    numElemCorners=4*numQuadElems+3*numTriElems
+
+    ! Allocate and fill the element type array.
+    allocate(elemTypes(numTotElems))
+    elemTypes=(/ESMF_MESHELEMTYPE_TRI, & ! elem id 2
+                ESMF_MESHELEMTYPE_TRI/)  ! elem id 3
+
+    ! Allocate and fill element corner coordinate array.
+    allocate(elemCornerCoords2(2,numElemCorners))
+    elemCornerCoords2(:,1)=(/1.0,0.0/) ! elem id 2 corner 1 
+    elemCornerCoords2(:,2)=(/2.0,0.0/) ! elem id 2 corner 2
+    elemCornerCoords2(:,3)=(/1.0,1.0/) ! elem id 2 corner 3
+    elemCornerCoords2(:,4)=(/2.0,0.0/) ! elem id 3 corner 1 
+    elemCornerCoords2(:,5)=(/2.0,1.0/) ! elem id 3 corner 2
+    elemCornerCoords2(:,6)=(/1.0,1.0/) ! elem id 3 corner 3
+
+  else if (localPET .eq. 2) then !!! This part only for PET 2
+
+    ! Set the number of each type of element, plus the total number.
+    numQuadElems=1
+    numTriElems=0
+    numTotElems=numQuadElems+numTriElems
+    numElemCorners=4*numQuadElems+3*numTriElems
+
+
+    ! Allocate and fill the element type array.
+    allocate(elemTypes(numTotElems))
+    elemTypes=(/ESMF_MESHELEMTYPE_QUAD/) ! elem id 4
+
+    ! Allocate and fill element corner coordinate array.
+    allocate(elemCornerCoords2(2,numElemCorners))
+    elemCornerCoords2(:,1)=(/0.0,1.0/) ! elem id 4 corner 1 
+    elemCornerCoords2(:,2)=(/1.0,1.0/) ! elem id 4 corner 2
+    elemCornerCoords2(:,3)=(/1.0,2.0/) ! elem id 4 corner 3
+    elemCornerCoords2(:,4)=(/0.0,2.0/) ! elem id 4 corner 4
+
+
+  else if (localPET .eq. 3) then !!! This part only for PET 3
+
+    ! Set the number of each type of element, plus the total number.
+    numQuadElems=1
+    numTriElems=0
+    numTotElems=numQuadElems+numTriElems
+    numElemCorners=4*numQuadElems+3*numTriElems
+
+    ! Allocate and fill the element type array.
+    allocate(elemTypes(numTotElems))
+    elemTypes=(/ESMF_MESHELEMTYPE_QUAD/) ! elem id 5
+
+    ! Allocate and fill element corner coordinate array.
+    allocate(elemCornerCoords2(2,numElemCorners))
+    elemCornerCoords2(:,1)=(/1.0,1.0/) ! elem id 5 corner 1 
+    elemCornerCoords2(:,2)=(/2.0,1.0/) ! elem id 5 corner 2
+    elemCornerCoords2(:,3)=(/2.0,2.0/) ! elem id 5 corner 3
+    elemCornerCoords2(:,4)=(/1.0,2.0/) ! elem id 5 corner 4
+
+  endif
+  
+  ! Create Mesh structure in 1 step
+  mesh=ESMF_MeshCreateEasyElems(parametricDim=2, &
+         coordSys=ESMF_COORDSYS_CART,   &
+         elementTypes=elemTypes, &
+         elementCornerCoords=elemCornerCoords2, &
+         rc=localrc)
+
+
+  ! After the creation we are through with the arrays, so they may be
+  ! deallocated.
+  deallocate(elemTypes)
+  deallocate(elemCornerCoords2)
+
+  ! At this point the mesh is ready to use. For example, as is 
+  ! illustrated here, to have a field created on it. Note that 
+  ! the Field only contains data for elements owned by the current PET.
+  ! Please see Section "Create a Field from a Mesh" under Field
+  ! for more information on creating a Field on a Mesh. 
+  field = ESMF_FieldCreate(mesh, ESMF_TYPEKIND_R8, &
+       meshloc=ESMF_MESHLOC_ELEMENT, rc=localrc)
+
+!EOC
+
+  ! DEBUG - write mesh to file
+  !call ESMF_MeshWrite(mesh,"meshee",rc=localrc)
+  !!if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  ! Get rid of Field
+  call ESMF_FieldDestroy(field, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  ! Get rid of Mesh
+  call ESMF_MeshDestroy(mesh, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  ! endif for skip for != 4 proc (extends all the way back multiple subsections)
   endif 
+
 
 !BOE
 !\subsubsection{Create a Mesh from an unstructured grid file}
@@ -848,7 +1154,7 @@ program ESMF_MeshEx
 #ifdef ESMF_NETCDF
 !BOC
    mesh = ESMF_MeshCreate(filename="data/ne4np4-pentagons.nc", &
-	   fileformat=ESMF_FILEFORMAT_SCRIP, rc=localrc)
+        fileformat=ESMF_FILEFORMAT_SCRIP, rc=localrc)
 !EOC
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 

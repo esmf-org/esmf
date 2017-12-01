@@ -319,8 +319,14 @@
 #endif
     !------------------------------------------------------------------------
 
+#if 0
+    ! TODO: Tests are currently disabled because gfortran prior to v5.1 has issues with
+    ! arrays of deferred-length strings.  Re-enable when ESMF support for these older
+    ! compilers is no longer required.
+
+
     !------------------------------------------------------------------------
-    ! EX_UTest
+    ! EX_xxxUTest
     name = "Fortran allocatable deferred-length string array assignment test"
     failMsg = "Did not return correct length"
 #if !defined (ESMF_NO_F2003_ALLOC_STRING_LENS)
@@ -334,7 +340,7 @@
     !------------------------------------------------------------------------
 
     !------------------------------------------------------------------------
-    ! EX_UTest
+    ! EX_xxxUTest
     name = "Fortran allocatable deferred-length string array size test"
     failMsg = "Did not return correct length"
 #if !defined (ESMF_NO_F2003_ALLOC_STRING_LENS)
@@ -345,11 +351,6 @@
 #endif
     call ESMF_Test(rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
     !------------------------------------------------------------------------
-
-#if 0
-    ! TODO: Test is currently disabled because gfortran prior to v5.1 has issues with
-    ! arrays of deferred-length strings.  Re-enable when ESMF support for these older
-    ! compilers is no longer required.
 
     !------------------------------------------------------------------------
     ! EX_xxxUTest
@@ -364,10 +365,9 @@
 #endif
     call ESMF_Test(rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
     !------------------------------------------------------------------------
-#endif
 
     !------------------------------------------------------------------------
-    ! EX_UTest
+    ! EX_xxxUTest
     name = "Fortran allocatable deferred-length string array allocate test"
     failMsg = "Did not return success"
 #if !defined (ESMF_NO_F2003_ALLOC_STRING_LENS)
@@ -381,10 +381,6 @@
     call ESMF_Test(rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
     !------------------------------------------------------------------------
 
-#if 0
-    ! TODO: Test is currently disabled because gfortran prior to v5.1 has issues with
-    ! arrays of deferred-length strings.  Re-enable when ESMF support for these older
-    ! compilers is no longer required.
     !------------------------------------------------------------------------
     ! EX_xxxUTest
     name = "Fortran allocatable deferred-length string array allocate length test"
@@ -398,10 +394,9 @@
 #endif
     call ESMF_Test(rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
     !------------------------------------------------------------------------
-#endif
 
     !------------------------------------------------------------------------
-    ! EX_UTest
+    ! EX_xxxUTest
     name = "Fortran allocatable deferred-length string array allocate size test"
     failMsg = "Did not return success"
 #if !defined (ESMF_NO_F2003_ALLOC_STRING_LENS)
@@ -417,6 +412,7 @@
     if (allocated (alloc_string_array)) deallocate (alloc_string_array)
 #endif
     !------------------------------------------------------------------------
+#endif
 
     !------------------------------------------------------------------------
     !------------------------------------------------------------------------

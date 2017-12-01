@@ -115,6 +115,9 @@ static int matchTableIndex = 0; // process wide index for non-thread based VMs
 // ESMF runtime environment variables
 static vector<string> esmfRuntimeEnv;
 static vector<string> esmfRuntimeEnvValue;
+// ESMF Initialized/Finalized status
+static bool esmfInitialized = false;
+static bool esmfFinalized = false;
 //-----------------------------------------------------------------------------
 
 
@@ -2475,7 +2478,10 @@ VM *VM::initialize(
                         // totalview cannot handle events during the init
                         // call - it freezes or crashes or ignores input.
   GlobalVM->barrier();  // so for now, wait for everyone to init.
-
+  
+  // set the global initialized state
+  esmfInitialized = true;
+  
   // return successfully
   if (rc!=NULL) *rc = ESMF_SUCCESS;
   return GlobalVM;
@@ -2647,6 +2653,9 @@ void VM::finalize(
   delete GlobalVM;
   GlobalVM=NULL;
 
+  // set the global finalized state
+  esmfFinalized = true;
+  
   // return successfully
   if (rc!=NULL) *rc = ESMF_SUCCESS;
 }
@@ -2687,6 +2696,62 @@ void VM::abort(
 
   // return successfully
   if (rc!=NULL) *rc = ESMF_SUCCESS;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::VM::isInitialized()"
+//BOPI
+// !IROUTINE:  ESMCI::VM::isInitialized
+//
+// !INTERFACE:
+bool VM::isInitialized(
+//
+// !RETURN VALUE:
+//    true/false indicating initialized status
+//
+// !ARGUMENTS:
+//
+  int *rc){   // return code
+//
+// !DESCRIPTION:
+//    Query ESMF initialized status.
+//
+//EOPI
+//-----------------------------------------------------------------------------
+  // return successfully
+  if (rc!=NULL) *rc = ESMF_SUCCESS;
+  return esmfInitialized;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::VM::isFinalized()"
+//BOPI
+// !IROUTINE:  ESMCI::VM::isFinalized
+//
+// !INTERFACE:
+bool VM::isFinalized(
+//
+// !RETURN VALUE:
+//    true/false indicating finalized status
+//
+// !ARGUMENTS:
+//
+  int *rc){   // return code
+//
+// !DESCRIPTION:
+//    Query ESMF finalized status.
+//
+//EOPI
+//-----------------------------------------------------------------------------
+  // return successfully
+  if (rc!=NULL) *rc = ESMF_SUCCESS;
+  return esmfFinalized;
 }
 //-----------------------------------------------------------------------------
 

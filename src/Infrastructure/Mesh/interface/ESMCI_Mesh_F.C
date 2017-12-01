@@ -462,3 +462,59 @@ extern "C" void FTN_X(c_esmc_meshfitonvm)(MeshCap **meshpp, VM **vm, int *rc) {
 
   (*meshpp)->fit_on_vm(vm,rc);
 }
+
+extern "C" void FTN_X(c_esmc_meshcreateeasyelems)(MeshCap **meshpp,
+                                                  int *pdim, 
+                                                  int *sdim, 
+                                                  int *num_elems, 
+                                                  InterArray<int> *elemIdsII,
+                                                  int *elemTypes, 
+                                                  InterArray<int> *elemMaskII,
+                                                  int *num_elemCorners, 
+                                                  double *elemCornerCoords, 
+                                                  int *has_elemArea, 
+                                                  double *elemArea, 
+                                                  int *has_elemCoords, 
+                                                  double *elemCoords, 
+                                                  ESMC_CoordSys_Flag *coordSys, int *rc)
+{
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_meshcreateeasyelems()"
+
+  // Create Mesh depending on whether MOAB or not
+  if (Moab_on) {
+    *meshpp=MeshCap::meshcreate_easy_elems(pdim, sdim,
+                                num_elems, elemIdsII, elemTypes, elemMaskII, 
+                                num_elemCorners, elemCornerCoords, 
+                                has_elemArea, elemArea, 
+                                has_elemCoords, elemCoords, 
+                                coordSys,false,rc);
+  } else {
+    *meshpp=MeshCap::meshcreate_easy_elems(pdim, sdim,
+                                num_elems, elemIdsII, elemTypes, elemMaskII, 
+                                num_elemCorners, elemCornerCoords, 
+                                has_elemArea, elemArea, 
+                                has_elemCoords, elemCoords, 
+                                coordSys,true,rc);
+  }
+  
+} // meshcreate
+
+#if 0
+extern "C" void FTN_X(c_esmc_meshaddelements)(MeshCap **meshpp, 
+                                              int *_num_elems, int *elemId, int *elemType, InterArray<int> *_elemMaskII ,
+                                              int *_areaPresent, double *elemArea, 
+                                              int *_coordsPresent, double *elemCoords, 
+                                              int *_num_elemConn, int *elemConn, int *regridConserve, 
+                                              ESMC_CoordSys_Flag *_coordSys, int *_orig_sdim,
+                                              int *rc) 
+{
+  // Call into implementation
+  (*meshpp)->meshaddelements(_num_elems, elemId, elemType, _elemMaskII ,
+                         _areaPresent, elemArea, 
+                         _coordsPresent, elemCoords, 
+                         _num_elemConn, elemConn, regridConserve, 
+                         _coordSys, _orig_sdim,
+                         rc);
+} 
+#endif

@@ -167,6 +167,15 @@
     write(name, *) "Creating an XGrid in 2D with user supplied area"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
+    !------------------------------------------------------------------------
+    !NEX_UTest
+    ! Create an XGrid in 2D from Meshes with user supplied area
+    print *, 'Starting test8'
+    call test8(rc)
+    write(failMsg, *) ""
+    write(name, *) "Creating an XGrid with Mesh easy element create interface"
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
     call ESMF_TestEnd(ESMF_SRCLINE)
   
 contains 
@@ -1259,6 +1268,520 @@ contains
       ESMF_CONTEXT, rcToReturn=rc)) return
 
   end subroutine test7
+
+
+ 
+  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  ! 
+  ! Creates the following mesh on 
+  ! 1 or 2 PETs. Returns an error 
+  ! if run on other than 1 or 2 PETs
+  ! 
+  !                     Mesh Ids
+  !
+  !   3.0   * ------------ * -------------  *
+  !         |              |              / |
+  !   2.5   |              |   10       /   |
+  !         |      7       |         /      |
+  !   2.0   |              |      /     9   |
+  !         |              |  /             |
+  !   1.5   * ------------ * -------------  *
+  !         |              |                |
+  !   1.0   |              |                |
+  !         |      1       |       3        |
+  !   0.5   |              |                |
+  !         |              |                |
+  !   0.0   * ------------ * -------------- *
+  !            
+  !        0.0  0.5  1.0  1.5   2.0  2.5   3.0
+  !
+  !               Node Ids at corners
+  !              Element Ids in centers
+  ! 
+   !!!!! 
+  ! 
+  ! The owners for 1 PET are all Pet 0.
+  ! The owners for 2 PETs are as follows:
+  !
+  !                   Mesh Owners
+  !
+  !   3.0   * ------------ * -------------  *
+  !         |              |              / |
+  !   2.5   |              |   1       /    |
+  !         |      1       |         /      |
+  !   2.0   |              |      /     1   |
+  !         |              |  /             |
+  !   1.5   * ------------ * -------------  *
+  !         |              |                |
+  !   1.0   |              |                |
+  !         |      0       |       0        |
+  !   0.5   |              |                |
+  !         |              |                |
+  !   0.0   * ------------ * -------------- *
+  !            
+  !        0.0  0.5  1.0  1.5   2.0  2.5   3.0
+  !
+  !              Element Owners in centers
+  ! 
+
+subroutine CreateTestMesh2x2EE_1(mesh, rc)
+  type(ESMF_Mesh), intent(out) :: mesh
+  integer :: rc
+  integer :: numElems,numOwnedElemsTst
+  integer :: numElemCorners, numTriElems, numQuadElems
+  real(ESMF_KIND_R8), pointer :: elemCoords(:,:)
+  real(ESMF_KIND_R8), pointer :: elemCornerCoords(:,:)
+  integer, pointer :: elemIds(:),elemTypes(:)
+  integer :: petCount, localPet
+  type(ESMF_VM) :: vm
+
+  ! get global VM
+  call ESMF_VMGetGlobal(vm, rc=rc)
+  if (rc /= ESMF_SUCCESS) return
+  call ESMF_VMGet(vm, localPet=localPet, petCount=petCount, rc=rc)
+  if (rc /= ESMF_SUCCESS) return
+
+  ! return with an error if not 1 or 2 PETs
+  if ((petCount /= 1) .and. (petCount /=2)) then
+     rc=ESMF_FAILURE
+     return
+  endif
+
+  ! Setup mesh info depending on the 
+  ! number of PETs
+  if (petCount .eq. 1) then
+
+      ! Fill in elem data
+      numTriElems=2
+      numQuadElems=3
+      numElems=numTriElems+numQuadElems
+      numElemCorners=3*numTriElems+4*numQuadElems
+
+      !! elem ids
+      allocate(elemIds(numElems))
+      elemIds=(/1,3,7,9,10/) 
+
+      !! elem types
+      allocate(elemTypes(numElems))
+      elemTypes=(/ESMF_MESHELEMTYPE_QUAD, & ! 1
+                  ESMF_MESHELEMTYPE_QUAD, & ! 3
+                  ESMF_MESHELEMTYPE_QUAD, & ! 7
+                  ESMF_MESHELEMTYPE_TRI,  & ! 9
+                  ESMF_MESHELEMTYPE_TRI/)   ! 10
+
+      !! elem coords
+      allocate(elemCoords(2,numElems))
+      elemCoords(:,1)=(/0.75,0.75/)   ! 1
+      elemCoords(:,2)=(/2.25,0.75/)   ! 3
+      elemCoords(:,3)=(/0.75,2.25/)   ! 7
+      elemCoords(:,4)=(/2.50,2.00/) ! 9
+      elemCoords(:,5)=(/2.00,2.50/) ! 10
+     
+     !! elem corner Coords
+     allocate(elemCornerCoords(2,numElemCorners))
+     elemCornerCoords(:,1)=(/0.0,0.0/) ! 1
+     elemCornerCoords(:,2)=(/1.5,0.0/) ! 1
+     elemCornerCoords(:,3)=(/1.5,1.5/)  ! 1
+     elemCornerCoords(:,4)=(/0.0,1.5/)  ! 1
+     elemCornerCoords(:,5)=(/1.5,0.0/)  ! 3
+     elemCornerCoords(:,6)=(/3.0,0.0/)  ! 3
+     elemCornerCoords(:,7)=(/3.0,1.5/)  ! 3
+     elemCornerCoords(:,8)=(/1.5,1.5/)  ! 3
+     elemCornerCoords(:,9)=(/0.0,1.5/)  ! 7
+     elemCornerCoords(:,10)=(/1.5,1.5/)  ! 7
+     elemCornerCoords(:,11)=(/1.5,3.0/)  ! 7
+     elemCornerCoords(:,12)=(/0.0,3.0/)  ! 7
+     elemCornerCoords(:,13)=(/1.5,1.5/)  ! 9
+     elemCornerCoords(:,14)=(/3.0,1.5/)  ! 9
+     elemCornerCoords(:,15)=(/3.0,3.0/)  ! 9
+     elemCornerCoords(:,16)=(/1.5,1.5/)  ! 10
+     elemCornerCoords(:,17)=(/3.0,3.0/)  ! 10
+     elemCornerCoords(:,18)=(/1.5,3.0 /)  ! 10
+ 
+   else if (petCount .eq. 2) then
+     ! Setup mesh data depending on PET
+     if (localPet .eq. 0) then
+
+      ! Fill in elem data
+      numTriElems=0
+      numQuadElems=2
+      numElems=numTriElems+numQuadElems
+      numElemCorners=3*numTriElems+4*numQuadElems
+
+      !! elem ids
+      allocate(elemIds(numElems))
+      elemIds=(/1,3/) 
+
+      !! elem types
+      allocate(elemTypes(numElems))
+      elemTypes=(/ESMF_MESHELEMTYPE_QUAD, &! 1
+                  ESMF_MESHELEMTYPE_QUAD/) ! 3
+ 
+      !! elem coords
+      allocate(elemCoords(2,numElems))
+      elemCoords(:,1)=(/0.75,0.75/) ! 1
+      elemCoords(:,2)=(/2.25,0.75/) ! 3
+
+     
+     !! elem corner Coords
+     allocate(elemCornerCoords(2,numElemCorners))
+     elemCornerCoords(:,1)=(/0.0,0.0/)  ! 1
+     elemCornerCoords(:,2)=(/1.5,0.0/)  ! 1
+     elemCornerCoords(:,3)=(/1.5,1.5/)  ! 1
+     elemCornerCoords(:,4)=(/0.0,1.5/)  ! 1
+     elemCornerCoords(:,5)=(/1.5,0.0/)  ! 3
+     elemCornerCoords(:,6)=(/3.0,0.0/)  ! 3
+     elemCornerCoords(:,7)=(/3.0,1.5/)  ! 3
+     elemCornerCoords(:,8)=(/1.5,1.5/)  ! 3
+
+     else if (localPet .eq. 1) then
+
+      ! Fill in elem data
+      numTriElems=2
+      numQuadElems=1
+      numElems=numTriElems+numQuadElems
+      numElemCorners=3*numTriElems+4*numQuadElems
+
+      !! elem ids
+      allocate(elemIds(numElems))
+      elemIds=(/7,9,10/) 
+
+      !! elem types
+      allocate(elemTypes(numElems))
+      elemTypes=(/ESMF_MESHELEMTYPE_QUAD, & ! 7
+                  ESMF_MESHELEMTYPE_TRI,  & ! 9
+                  ESMF_MESHELEMTYPE_TRI/)   ! 10
+
+      !! elem coords
+      allocate(elemCoords(2,numElems))
+      elemCoords(:,1)=(/0.75,2.25/) ! 7
+      elemCoords(:,2)=(/2.50,2.00/) ! 9
+      elemCoords(:,3)=(/2.00,2.50/) ! 10
+
+     !! elem corner Coords
+     allocate(elemCornerCoords(2,numElemCorners))
+     elemCornerCoords(:,1)=(/0.0,1.5/)  ! 7
+     elemCornerCoords(:,2)=(/1.5,1.5/)  ! 7
+     elemCornerCoords(:,3)=(/1.5,3.0/)  ! 7
+     elemCornerCoords(:,4)=(/0.0,3.0/)  ! 7
+     elemCornerCoords(:,5)=(/1.5,1.5/)  ! 9
+     elemCornerCoords(:,6)=(/3.0,1.5/)  ! 9
+     elemCornerCoords(:,7)=(/3.0,3.0/)  ! 9
+     elemCornerCoords(:,8)=(/1.5,1.5/)  ! 10
+     elemCornerCoords(:,9)=(/3.0,3.0/)  ! 10
+     elemCornerCoords(:,10)=(/1.5,3.0 /) ! 10
+   endif
+  endif
+
+   ! Create Mesh structure in 1 step
+   mesh=ESMF_MeshCreate(parametricDim=2, &
+        coordSys=ESMF_COORDSYS_CART, &
+        elementIds=elemIds,&
+        elementTypes=elemTypes,&
+        elementCoords=elemCoords,&
+        elementCornerCoords=elemCornerCoords, &
+        rc=rc)
+   if (rc /= ESMF_SUCCESS) return
+   
+   ! deallocate elem data
+   deallocate(elemIds)
+   deallocate(elemTypes)
+   deallocate(elemCoords)
+   deallocate(elemCornerCoords)
+
+   ! Output Mesh for debugging
+   !call ESMF_MeshWrite(mesh,"meshee1",rc=rc)
+   !if (rc /= ESMF_SUCCESS) return
+
+   ! Return success
+   rc=ESMF_SUCCESS
+
+end subroutine CreateTestMesh2x2EE_1
+
+
+ 
+  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  ! 
+  ! Creates the following mesh on 
+  ! 1 or 2 PETs. Returns an error 
+  ! if run on other than 1 or 2 PETs
+  ! 
+  !                     Mesh Ids
+  !
+  !   3.0   * ------------ * -------------  *
+  !         |              |              / |
+  !   2.5   |              |   10       /   |
+  !         |      7       |         /      |
+  !   2.0   |              |      /     9   |
+  !         |              |  /             |
+  !   1.0   * ------------ * -------------  *
+  !         |              |                |
+  !         |              |                |
+  !         |      1       |       3        |
+  !   0.5   |              |                |
+  !         |              |                |
+  !   0.0   * ------------ * -------------- *
+  !            
+  !        0.0  0.5       1.0   2.0  2.5   3.0
+  !
+  !               Node Ids at corners
+  !              Element Ids in centers
+  ! 
+   !!!!! 
+  ! 
+  ! The owners for 1 PET are all Pet 0.
+  ! The owners for 2 PETs are as follows:
+  !
+  !                   Mesh Owners
+  !
+  !   3.0   * ------------ * -------------  *
+  !         |              |              / |
+  !   2.5   |              |   1       /    |
+  !         |      1       |         /      |
+  !   2.0   |              |      /     1   |
+  !         |              |  /             |
+  !   1.0   * ------------ * -------------  *
+  !         |              |                |
+  !         |              |                |
+  !         |      0       |       0        |
+  !   0.5   |              |                |
+  !         |              |                |
+  !   0.0   * ------------ * -------------- *
+  !            
+  !        0.0  0.5       1.0   2.0  2.5   3.0
+  !
+  !              Element Owners in centers
+  ! 
+
+subroutine CreateTestMesh2x2EE_2(mesh, rc)
+  type(ESMF_Mesh), intent(out) :: mesh
+  integer :: rc
+  integer :: numElems,numOwnedElemsTst
+  integer :: numElemCorners, numTriElems, numQuadElems
+  real(ESMF_KIND_R8), pointer :: elemCoords(:,:)
+  real(ESMF_KIND_R8), pointer :: elemCornerCoords(:,:)
+  integer, pointer :: elemIds(:),elemTypes(:)
+  integer :: petCount, localPet
+  type(ESMF_VM) :: vm
+
+  ! get global VM
+  call ESMF_VMGetGlobal(vm, rc=rc)
+  if (rc /= ESMF_SUCCESS) return
+  call ESMF_VMGet(vm, localPet=localPet, petCount=petCount, rc=rc)
+  if (rc /= ESMF_SUCCESS) return
+
+  ! return with an error if not 1 or 2 PETs
+  if ((petCount /= 1) .and. (petCount /=2)) then
+     rc=ESMF_FAILURE
+     return
+  endif
+  
+
+  ! Setup mesh info depending on the 
+  ! number of PETs
+  if (petCount .eq. 1) then
+
+      ! Fill in elem data
+      numTriElems=2
+      numQuadElems=3
+      numElems=numTriElems+numQuadElems
+      numElemCorners=3*numTriElems+4*numQuadElems
+
+      !! elem ids
+      allocate(elemIds(numElems))
+      elemIds=(/1,3,7,9,10/) 
+
+      !! elem types
+      allocate(elemTypes(numElems))
+      elemTypes=(/ESMF_MESHELEMTYPE_QUAD, & ! 1
+                  ESMF_MESHELEMTYPE_QUAD, & ! 3
+                  ESMF_MESHELEMTYPE_QUAD, & ! 7
+                  ESMF_MESHELEMTYPE_TRI,  & ! 9
+                  ESMF_MESHELEMTYPE_TRI/)   ! 10
+
+     !! elem corner Coords
+     allocate(elemCornerCoords(2,numElemCorners))
+     elemCornerCoords(:,1)=(/0.0,0.0/) ! 1
+     elemCornerCoords(:,2)=(/1.0,0.0/) ! 1
+     elemCornerCoords(:,3)=(/1.0,1.0/)  ! 1
+     elemCornerCoords(:,4)=(/0.0,1.0/)  ! 1
+     elemCornerCoords(:,5)=(/1.0,0.0/)  ! 3
+     elemCornerCoords(:,6)=(/3.0,0.0/)  ! 3
+     elemCornerCoords(:,7)=(/3.0,1.0/)  ! 3
+     elemCornerCoords(:,8)=(/1.0,1.0/)  ! 3
+     elemCornerCoords(:,9)=(/0.0,1.0/)  ! 7
+     elemCornerCoords(:,10)=(/1.0,1.0/)  ! 7
+     elemCornerCoords(:,11)=(/1.0,3.0/)  ! 7
+     elemCornerCoords(:,12)=(/0.0,3.0/)  ! 7
+     elemCornerCoords(:,13)=(/1.0,1.0/)  ! 9
+     elemCornerCoords(:,14)=(/3.0,1.0/)  ! 9
+     elemCornerCoords(:,15)=(/3.0,3.0/)  ! 9
+     elemCornerCoords(:,16)=(/1.0,1.0/)  ! 10
+     elemCornerCoords(:,17)=(/3.0,3.0/)  ! 10
+     elemCornerCoords(:,18)=(/1.0,3.0 /)  ! 10
+ 
+   else if (petCount .eq. 2) then
+     ! Setup mesh data depending on PET
+     if (localPet .eq. 0) then
+
+      ! Fill in elem data
+      numTriElems=0
+      numQuadElems=2
+      numElems=numTriElems+numQuadElems
+      numElemCorners=3*numTriElems+4*numQuadElems
+
+      !! elem ids
+      allocate(elemIds(numElems))
+      elemIds=(/1,3/) 
+
+      !! elem types
+      allocate(elemTypes(numElems))
+      elemTypes=(/ESMF_MESHELEMTYPE_QUAD, &! 1
+                  ESMF_MESHELEMTYPE_QUAD/) ! 3
+ 
+     !! elem corner Coords
+     allocate(elemCornerCoords(2,numElemCorners))
+     elemCornerCoords(:,1)=(/0.0,0.0/)  ! 1
+     elemCornerCoords(:,2)=(/1.0,0.0/)  ! 1
+     elemCornerCoords(:,3)=(/1.0,1.0/)  ! 1
+     elemCornerCoords(:,4)=(/0.0,1.0/)  ! 1
+     elemCornerCoords(:,5)=(/1.0,0.0/)  ! 3
+     elemCornerCoords(:,6)=(/3.0,0.0/)  ! 3
+     elemCornerCoords(:,7)=(/3.0,1.0/)  ! 3
+     elemCornerCoords(:,8)=(/1.0,1.0/)  ! 3
+
+     else if (localPet .eq. 1) then
+
+      ! Fill in elem data
+      numTriElems=2
+      numQuadElems=1
+      numElems=numTriElems+numQuadElems
+      numElemCorners=3*numTriElems+4*numQuadElems
+
+      !! elem ids
+      allocate(elemIds(numElems))
+      elemIds=(/7,9,10/) 
+
+      !! elem types
+      allocate(elemTypes(numElems))
+      elemTypes=(/ESMF_MESHELEMTYPE_QUAD, & ! 7
+                  ESMF_MESHELEMTYPE_TRI,  & ! 9
+                  ESMF_MESHELEMTYPE_TRI/)   ! 10
+
+     !! elem corner Coords
+     allocate(elemCornerCoords(2,numElemCorners))
+     elemCornerCoords(:,1)=(/0.0,1.0/)  ! 7
+     elemCornerCoords(:,2)=(/1.0,1.0/)  ! 7
+     elemCornerCoords(:,3)=(/1.0,3.0/)  ! 7
+     elemCornerCoords(:,4)=(/0.0,3.0/)  ! 7
+     elemCornerCoords(:,5)=(/1.0,1.0/)  ! 9
+     elemCornerCoords(:,6)=(/3.0,1.0/)  ! 9
+     elemCornerCoords(:,7)=(/3.0,3.0/)  ! 9
+     elemCornerCoords(:,8)=(/1.0,1.0/)  ! 10
+     elemCornerCoords(:,9)=(/3.0,3.0/)  ! 10
+     elemCornerCoords(:,10)=(/1.0,3.0 /) ! 10
+   endif
+  endif
+
+   ! Create Mesh structure in 1 step
+   mesh=ESMF_MeshCreate(parametricDim=2, &
+        coordSys=ESMF_COORDSYS_CART, &
+        elementIds=elemIds,&
+        elementTypes=elemTypes,&
+        elementCornerCoords=elemCornerCoords, &
+        rc=rc)
+   if (rc /= ESMF_SUCCESS) return
+   
+   ! deallocate elem data
+   deallocate(elemIds)
+   deallocate(elemTypes)
+   deallocate(elemCornerCoords)
+
+   ! Output Mesh for debugging
+   !call ESMF_MeshWrite(mesh,"meshee2",rc=rc)
+   !if (rc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+   ! Return success
+   rc=ESMF_SUCCESS
+
+end subroutine CreateTestMesh2x2EE_2
+
+
+  ! Test creating an XGrid using easy mesh create
+  subroutine test8(rc)
+    integer, intent(out)                :: rc
+    integer                             :: localrc, i, npet
+    type(ESMF_XGrid)                    :: xgrid
+    type(ESMF_Mesh)                     :: mesh1, mesh2, smesh
+    type(ESMF_VM)                       :: vm
+    real(ESMF_KIND_R8)                  :: xgrid_area(12), B_area(2,2)
+
+    rc = ESMF_SUCCESS
+    localrc = ESMF_SUCCESS
+
+    call ESMF_VMGetCurrent(vm=vm, rc=localrc)
+    if (ESMF_LogFoundError(localrc, &
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    call ESMF_VMGet(vm, petcount=npet, rc=localrc)
+    if (ESMF_LogFoundError(localrc, &
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! Create Mesh using easy mesh create
+    call CreateTestMesh2x2EE_1(mesh1, rc=localrc)
+    if (ESMF_LogFoundError(localrc, &
+         ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return   
+
+    ! Create Mesh using normal mesh create
+    call CreateTestMesh2x2EE_2(mesh2, rc=localrc)
+    if (ESMF_LogFoundError(localrc, &
+         ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! Create XGrid
+    xgrid = ESMF_XGridCreate(sideAMesh=(/mesh1/), &
+         sideBMesh=(/mesh2/), &
+      storeOverlay = .true., &
+      rc=localrc)
+    if (ESMF_LogFoundError(localrc, &
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! Get super mesh
+    call ESMF_XGridGet(xgrid, mesh=smesh, rc=localrc)
+    if (ESMF_LogFoundError(localrc, &
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! Write super mesh for debugging
+    !call ESMF_MeshWrite(smesh,"smesh",rc=localrc)
+    !if (ESMF_LogFoundError(localrc, &
+    !  ESMF_ERR_PASSTHRU, &
+    !  ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! Free the XGrid
+    call ESMF_XGridDestroy(xgrid,rc=localrc)
+    if (ESMF_LogFoundError(localrc, &
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! Free the meshes
+    call ESMF_MeshDestroy(mesh1, rc=localrc)
+    if (ESMF_LogFoundError(localrc, &
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! Free the meshes
+    call ESMF_MeshDestroy(mesh2, rc=localrc)
+    if (ESMF_LogFoundError(localrc, &
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+  end subroutine test8
+
 
   !------------------------------------------------------------------------
   ! Utility methods
