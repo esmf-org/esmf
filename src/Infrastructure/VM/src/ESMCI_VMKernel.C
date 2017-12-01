@@ -5457,6 +5457,8 @@ namespace ESMCI{
       }else{
         // localPet interacts with requestPet and responsePet as their
         // responder and requester, respectively.
+        int recvResponseSize=0; // reset
+        int sendResponseSize=0; // reset
         // localPet acts as responder
         int recvRequestSize;
         vmk->recv(&recvRequestSize, sizeof(int), requestPet, &recvCommh1);
@@ -5467,41 +5469,66 @@ namespace ESMCI{
         // localPet acts as responder
         vmk->commwait(&recvCommh1);
 #if 1
-        std::cout << localPet << " recvRequestSize=" << recvRequestSize << "\n";
+        std::cout << localPet 
+          << " sendRequestSize=" << sendRequestSize
+          << " recvRequestSize=" << recvRequestSize << "\n";
 #endif
-        recvBuffer1 = new char[recvRequestSize];
-        vmk->recv(recvBuffer1, recvRequestSize, requestPet, &recvCommh1);
+        if (recvRequestSize>0){
+          recvBuffer1 = new char[recvRequestSize];
+          vmk->recv(recvBuffer1, recvRequestSize, requestPet, &recvCommh1);
+        }
         // localPet acts as requester
-        vmk->send(sendRequestBuffer, sendRequestSize, responsePet, &sendCommh2);
-        int recvResponseSize;
-        vmk->recv(&recvResponseSize, sizeof(int), responsePet, &recvCommh2);
+        if (sendRequestSize>0){
+          vmk->send(sendRequestBuffer, sendRequestSize, responsePet,
+            &sendCommh2);
+          vmk->recv(&recvResponseSize, sizeof(int), responsePet, &recvCommh2);
+        }
         // localPet acts as responder
-        vmk->commwait(&recvCommh1);
-        int sendResponseSize;
-        handleRequest(requestPet, recvBuffer1, recvRequestSize,
-          sendResponseBuffer, sendResponseSize);
-        vmk->send(&sendResponseSize, sizeof(int), requestPet, &sendCommh3);
+        if (recvRequestSize>0){
+          vmk->commwait(&recvCommh1);
+          handleRequest(requestPet, recvBuffer1, recvRequestSize,
+            sendResponseBuffer, sendResponseSize);
+          vmk->send(&sendResponseSize, sizeof(int), requestPet, &sendCommh3);
+        }
         // localPet acts as requester
-        vmk->commwait(&recvCommh2);
+        if (sendRequestSize>0){
+          vmk->commwait(&recvCommh2);
+        }
 #if 1
-        std::cout << localPet << " recvResponseSize=" <<recvResponseSize<< "\n";
+        std::cout << localPet
+          << " sendResponseSize=" << sendResponseSize
+          << " recvResponseSize=" << recvResponseSize << "\n";
 #endif
-        recvBuffer2 = new char[recvResponseSize];
-        vmk->recv(recvBuffer2, recvResponseSize, responsePet, &recvCommh2);
+        if (recvResponseSize>0){
+          recvBuffer2 = new char[recvResponseSize];
+          vmk->recv(recvBuffer2, recvResponseSize, responsePet, &recvCommh2);
+        }
         // localPet acts as responder
-        vmk->send(sendResponseBuffer, sendResponseSize, requestPet,
-          &sendCommh4);
+        if (sendResponseSize>0){
+          vmk->send(sendResponseBuffer, sendResponseSize, requestPet,
+            &sendCommh4);
+        }
         // localPet acts as requester
-        vmk->commwait(&recvCommh2);
-        handleResponse(responsePet, recvBuffer2, recvResponseSize);
+        if (recvResponseSize>0){        
+          vmk->commwait(&recvCommh2);
+          handleResponse(responsePet, recvBuffer2, recvResponseSize);
+        }
         // localPet acts as requester
         vmk->commwait(&sendCommh1);
-        vmk->commwait(&sendCommh2);
+        if (sendRequestSize>0){
+          vmk->commwait(&sendCommh2);
+        }
+        if (recvResponseSize>0){
+          delete [] recvBuffer2;
+        }
         // localPet acts as responder
-        vmk->commwait(&sendCommh3);
-        vmk->commwait(&sendCommh4);
-        delete [] recvBuffer1;
-        delete [] recvBuffer2;
+        if (recvRequestSize>0){
+          vmk->commwait(&sendCommh3);
+          delete [] recvBuffer1;
+        }
+        if (sendResponseSize>0){
+          vmk->commwait(&sendCommh4);
+        }
       }
       
     }
