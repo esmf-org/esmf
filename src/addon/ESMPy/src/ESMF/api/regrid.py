@@ -320,3 +320,151 @@ class Regrid(object):
             if not self._finalized:
                 ESMP_FieldRegridRelease(self.routehandle)
                 self._finalized = True
+
+class RegridFromFile(object):
+    """
+    The RegridFromFile object represents a regridding operator between two
+    Fields that is read from a file. The creation of this object is analogous to
+    ESMF_FieldSMMStore(), and calling this object corresponds to
+    ESMF_FieldRegrid(). ESMF_FieldRegridRelease() is called when the
+    RegridFromFile object goes out of scope (this only happens when the Manager
+    goes out of scope, there is a destroy() call for explicit deallocation of
+    the RegridFromFile).
+
+    For more information about the ESMF Regridding functionality, please see
+    the `ESMF Regrid documentation
+    <http://www.earthsystemmodeling.org/esmf_releases/public/last/ESMF_refdoc/node5.html#SECTION05012000000000000000>`_.
+
+    The following arguments are used to create a handle to a regridding
+    operation between two Fields.
+
+    *REQUIRED:*
+
+    :param Field srcfield: source Field associated with an underlying Grid,
+        Mesh or LocStream.
+    :param Field dstfield: destination Field associated with an underlying
+        Grid, Mesh or LocStream.  The data in this Field may be overwritten
+        by this call.
+    :param string filename: the name of the file from which to retrieve the
+        weights.
+    """
+    # call RegridStore
+    @initialize
+    def __init__(self, srcfield, dstfield, filename):
+
+        self._routehandle = ESMP_FieldSMMStore(srcfield, dstfield, filename)
+
+        # self._srcfield = srcfield
+        # self._dstfield = dstfield
+
+        # for arbitrary metadata
+        self._meta = {}
+
+        # regist with atexit
+        import atexit; atexit.register(self.__del__)
+        self._finalized = False
+
+    def __call__(self, srcfield, dstfield, zero_region=None):
+        """
+        Call a regridding operation from srcfield to dstfield.
+
+        *REQUIRED:*
+
+        :param Field srcfield: the Field of source data to regrid.
+        :param Field dstfield: the Field to hold the regridded data.
+
+        *OPTIONAL:*
+
+        :param Region zero_region: specify which region of the field indices
+            will be zeroed out before adding the values resulting from the
+            interpolation.  If ``None``, defaults to
+            :attr:`~ESMF.api.constants.Region.TOTAL`.
+
+        :return: dstfield
+        """
+
+        # call into the ctypes layer
+        ESMP_FieldRegrid(srcfield, dstfield,
+                         self._routehandle, zeroregion=zero_region)
+        return dstfield
+
+    def __del__(self):
+        self.destroy()
+
+    def __repr__(self):
+        string = ("RegridFromFile:\n"
+                  "    routehandle = %r\n"
+                  "    srcfield = %r\n"
+                  "    dstfield = %r\n"
+                  %
+                  (self._routehandle,
+                   self.srcfield,
+                   self.dstfield))
+
+        return string
+
+    @property
+    def dstfield(self):
+        return self._dstfield
+
+    @property
+    def finalized(self):
+        """
+        :rtype: bool
+        :return: Indicate if the underlying ESMF memory for this object has
+            been deallocated.
+        """
+
+        return self._finalized
+
+    @property
+    def meta(self):
+        """
+        :rtype: tdk
+        :return: tdk
+        """
+
+        return self._meta
+
+    @property
+    def routehandle(self):
+        return self._routehandle
+
+    @property
+    def srcfield(self):
+        return self._srcfield
+
+    @property
+    def struct(self):
+        """
+        :rtype: pointer
+        :return: A pointer to the underlying ESMF allocation for this
+            :class:`~ESMF.api.regrid.Regrid`.
+        """
+
+        return self.struct
+
+    def copy(self):
+        """
+        Copy a :class:`~ESMF.api.regrid.Regrid` in an ESMF-safe manner.
+
+        :return: A :class:`~ESMF.api.regrid.Regrid` shallow copy.
+        """
+
+        # shallow copy
+        ret = copy(self)
+        # don't call ESMF destructor twice on the same shallow Python object
+        ret._finalized = True
+
+        return ret
+
+    def destroy(self):
+        """
+        Release the memory associated with a :class:`~ESMF.api.regrid.Regrid`.
+        """
+
+        if hasattr(self, '_finalized'):
+            if not self._finalized:
+                ESMP_FieldRegridRelease(self.routehandle)
+                self._finalized = True
+

@@ -1384,6 +1384,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer, allocatable          :: transposeFIL(:,:)  ! helper variable
     type(ESMF_Logical)            :: opt_ignoreUnmatched  ! helper variable
 
+#define DEBUG 0
+#if DEBUG
+    real(ESMF_KIND_R8), pointer :: src(:,:)
+#endif
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -1460,6 +1464,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
     endif
+
+#if DEBUG
+      call ESMF_ArrayGet(srcArray, farrayPtr=src, rc=localrc)
+
+      print *, "ESMF_ArraySMM: source field"
+      print *, src
+#endif
 
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS

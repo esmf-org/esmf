@@ -2029,6 +2029,64 @@ def ESMP_FieldRegrid(srcField, dstField, routehandle, zeroregion=None):
         raise ValueError('ESMC_FieldRegrid() failed with rc = '+str(rc)+
                         '.    '+constants._errmsg)
 
+_ESMF.ESMC_FieldSMMStore.restype = ct.c_int
+_ESMF.ESMC_FieldSMMStore.argtypes = [ct.c_void_p, ct.c_void_p, ct.c_char_p,
+                                     ct.c_void_p, ct.c_bool,
+                                     ct.POINTER(ct.c_int), ct.POINTER(ct.c_int),
+                                     ct.c_void_p]
+@deprecated
+def ESMP_FieldSMMStore(srcField, dstField, filename,
+                       ignoreUnmatchedIndices=None):
+    """
+    Preconditions: Two ESMP_Fields have been created and initialized
+                   sufficiently for a regridding operation to take
+                   place.
+    Postconditions: A handle to the regridding operation has been
+                    returned into 'routehandle' and Fields containing
+                    the fractions of the source and destination cells
+                    participating in the regridding operation are
+                    optionally returned into 'srcFracField' and
+                    'dstFracField'.\n
+    Arguments:\n
+        :RETURN: ESMP_RouteHandle           :: routehandle\n
+        ESMP_Field                          :: srcField\n
+        ESMP_Field                          :: dstField\n
+    """
+    routehandle = ct.c_void_p(0)
+    routehandle_T = ct.c_void_p(0)
+
+    # print "Before ESMC_FieldSMMStore"
+    # print id(srcField.data.data)
+    # print id(srcField.struct.ptr)
+    # print id(srcField.struct)
+    # print id(dstField.struct.ptr)
+    # print id(dstField.struct)
+    # 
+    # SMMStore will change the values of the source field if not copied..
+    # srcField._data = srcField.data.copy()
+
+    rc = _ESMF.ESMC_FieldSMMStore(srcField.struct.ptr,
+                                  dstField.struct.ptr,
+                                  filename,
+                                  ct.byref(routehandle),
+                                  ignoreUnmatchedIndices,
+                                  None, None,
+                                  ct.byref(routehandle_T))
+    if rc != constants._ESMP_SUCCESS:
+        raise ValueError('ESMC_FieldSMMStore() failed with rc = '+str(rc)+
+                        '.    '+constants._errmsg)
+
+    # print "After ESMC_FieldSMMStore"
+    # print id(srcField.data.data)
+    # print id(srcField.struct.ptr)
+    # print id(srcField.struct)
+    # print id(dstField.struct.ptr)
+    # print id(dstField.struct)
+
+    # print srcField.data
+
+    return routehandle
+
 _ESMF.ESMC_ScripInq.restype = None
 _ESMF.ESMC_ScripInq.argtypes = [Py3Char,
                                 np.ctypeslib.ndpointer(dtype=np.int32),

@@ -18,29 +18,6 @@ from ESMF.util.mesh_utilities import *
 
 class TestRegrid(TestBase):
 
-    def assertWeightFileIsRational(self, filename, src_size, dst_size):
-        try:
-            from netCDF4 import Dataset
-        except ImportError:
-            pass
-        else:
-            ds = Dataset(filename)
-            try:
-                S = ds.variables['S'][:]
-                row = ds.variables['row'][:]
-                col = ds.variables['col'][:]
-                actual_col_max = col.max()
-                actual_row_max = row.max()
-
-                self.assertEqual(actual_col_max, src_size)
-                self.assertEqual(actual_row_max, dst_size)
-
-                for urow in np.unique(row):
-                    select = row == urow
-                    self.assertAlmostEqual(S[select].sum(), 1.0)
-            finally:
-                ds.close()
-
     def run_regridding(srcfield, dstfield, srcfracfield, dstfracfield):
         # This is for documentation. Do not modify.
         '''
@@ -203,6 +180,66 @@ class TestRegrid(TestBase):
         self.assertWeightFileIsRational(filename, src_size, dst_size)
 
     @attr('parallel')
+    def test_field_regrid_from_file(self):
+        filename = 'esmpy_test_field_from_file.nc'
+        path = os.path.join(os.getcwd(), filename)
+        if os.path.isfile(path):
+            os.remove(path)
+
+        sourcegrid = ESMF.Grid(np.array([20, 20]),
+                               staggerloc=ESMF.StaggerLoc.CENTER,
+                               coord_sys=ESMF.CoordSys.CART)
+
+        source_lon = sourcegrid.get_coords(0)
+        source_lat = sourcegrid.get_coords(1)
+        source_lon[...], source_lat[...] = np.meshgrid(np.linspace(-120, 120, 20),
+                                                       np.linspace(-60, 60, 20), indexing='ij')
+
+        destgrid = ESMF.Grid(np.array([10, 10]),
+                             staggerloc=ESMF.StaggerLoc.CENTER,
+                             coord_sys=ESMF.CoordSys.CART)
+
+        dest_lon = destgrid.get_coords(0)
+        dest_lat = destgrid.get_coords(1)
+        dest_lon[...], dest_lat[...] = np.meshgrid(np.linspace(-120, 120, 10),
+                                                   np.linspace(-60, 60, 10), indexing='ij')
+
+        sourcefield = ESMF.Field(sourcegrid)
+        destfield = ESMF.Field(destgrid)
+        xctfield = ESMF.Field(destgrid)
+
+        sourcefield.data[:,:] = 24
+        xctfield.data[:,:] = 24
+        destfield.data[:,:] = 0
+
+        self.assertTrue(np.all(sourcefield.data[:,:] == 24))
+        self.assertTrue(np.all(destfield.data[:,:] == 0))
+
+        regridS2D = ESMF.Regrid(sourcefield, destfield, filename=filename,
+                        regrid_method=ESMF.RegridMethod.BILINEAR,
+                        unmapped_action=ESMF.UnmappedAction.ERROR)
+
+        self.assertTrue(os.path.exists(filename))
+
+        self.assertTrue(np.all(sourcefield.data[:,:] == 24))
+        # import ipdb; ipdb.set_trace()
+        # self.assertNumpyAllClose(xctfield.data, destfield.data)
+
+        regridS2D = ESMF.RegridFromFile(sourcefield, destfield, filename)
+
+        # print sourcefield.data
+
+        self.assertTrue(np.all(sourcefield.data[:,:] == 24))
+        # self.assertNumpyAllClose(xctfield.data, destfield.data)
+
+        destfield = regridS2D(sourcefield, destfield)
+
+        self.assertWeightFileIsRational(filename, 20*20, 10*10)
+        self.assertTrue(np.all(sourcefield.data[:,:] == 24))
+        # print destfield.data
+        self.assertNumpyAllClose(xctfield.data, destfield.data)
+
+
     def test_field_regrid_gridmesh(self):
         # create mesh
         parallel = False

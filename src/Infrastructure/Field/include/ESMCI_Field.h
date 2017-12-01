@@ -124,6 +124,11 @@ namespace ESMCI{
     static int regrid(Field *fieldsrc, Field *fielddst,
                       RouteHandle *routehandle, ESMC_Region_Flag *zeroRegion);
     static int regridrelease(RouteHandle *routehandle);
+    static int smmstore(Field *fieldsrc, Field *fielddst,
+                        const char *filename, RouteHandle **routehandle,
+                        ESMC_Logical *ignoreUnmatchedIndices,
+                        int *srcTermProcessing, int *pipeLineDepth,
+                        RouteHandle **transposeRoutehandle);
     int write(const char *file,
       const char* variableName,
       int overwrite,
