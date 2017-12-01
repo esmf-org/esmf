@@ -140,8 +140,8 @@ class Field(object):
         lbounds, ubounds = ESMP_FieldGetBounds(struct, rank)
 
         # initialize field data
-        #TODO: MaskedArray gives better interpolation values than Array
-        # self._data = MaskedArray(ESMP_FieldGetPtr(struct), None, typekind, ubounds-lbounds).data.copy()
+        # TODO: MaskedArray gives better interpolation values than Array (171128 removed .copy from .data below
+        # self._data = MaskedArray(ESMP_FieldGetPtr(struct), None, typekind, ubounds-lbounds).data
         self._data = ndarray_from_esmf(ESMP_FieldGetPtr(struct), typekind, ubounds-lbounds)
         self._name = name
         self._type = typekind

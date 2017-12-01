@@ -2076,14 +2076,14 @@ def ESMP_FieldSMMStore(srcField, dstField, filename,
         raise ValueError('ESMC_FieldSMMStore() failed with rc = '+str(rc)+
                         '.    '+constants._errmsg)
 
-    print "After ESMC_FieldSMMStore"
+    # print "After ESMC_FieldSMMStore"
     # print id(srcField.data.data)
     # print id(srcField.struct.ptr)
     # print id(srcField.struct)
     # print id(dstField.struct.ptr)
     # print id(dstField.struct)
 
-    print srcField.data
+    # print srcField.data
 
     return routehandle
 

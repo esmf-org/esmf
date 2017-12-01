@@ -743,6 +743,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         integer                                     :: localrc 
         type(ESMF_Array)                            :: srcArray, dstArray   
 
+#define DEBUG 0
+#if DEBUG
+        real(ESMF_KIND_R8), pointer :: src(:,:)
+#endif
+
         ! Initialize return code; assume routine not implemented 
         localrc = ESMF_RC_NOT_IMPL 
         if(present(rc)) rc = ESMF_RC_NOT_IMPL 
@@ -774,6 +779,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         if (ESMF_LogFoundError(localrc, & 
             ESMF_ERR_PASSTHRU, & 
             ESMF_CONTEXT, rcToReturn=rc)) return 
+
+#if DEBUG
+      call ESMF_FieldGet(srcField, farrayPtr=src, rc=localrc)
+
+      print *, "ESMF SMM: source field"
+      print *, src
+#endif
 
         if (present(rc)) rc = ESMF_SUCCESS 
     end subroutine ESMF_FieldSMMStoreR8
@@ -1133,6 +1145,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer, dimension(:, :), allocatable :: factorIndexList
       integer :: localrc
 
+      real(ESMF_KIND_R8), pointer :: src(:,:)
+
       ! Initialize return code; assume routine not implemented
       localrc = ESMF_RC_NOT_IMPL
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -1158,6 +1172,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                               rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
+
+#define DEBUG 0
+#if DEBUG
+      call ESMF_FieldGet(srcField, farrayPtr=src, rc=localrc)
+
+      print *, "ESMF: source field"
+      print *, src
+#endif
 
       deallocate(factorList)
       deallocate(factorIndexList)

@@ -114,6 +114,7 @@ regrid = ESMF.RegridFromFile(srcfield, dstfield, "esmpy_example_weight_file.nc")
 # calculate the regridding from source to destination field
 # dstfield = regrid(srcfield, dstfield)
 
+import ipdb; ipdb.set_trace()
 print srcfield.data
 
 # compute the mean relative error

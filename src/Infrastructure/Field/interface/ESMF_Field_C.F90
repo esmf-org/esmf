@@ -1140,6 +1140,8 @@ subroutine f_esmf_fieldcollectgarbage(field, rc)
     use ESMF_FieldSMMMod
     use ESMF_FieldMod
 
+    use ESMF_FieldGetMod
+
     implicit none
 
     type(ESMF_Field)                                :: srcField
@@ -1156,6 +1158,11 @@ subroutine f_esmf_fieldcollectgarbage(field, rc)
     type(ESMF_RouteHandle) :: l_routehandle
     type(ESMF_RouteHandle) :: l_transposeRoutehandle
 
+#define DEBUG 0
+#if DEBUG
+    real(ESMF_KIND_R8), pointer :: src(:,:)
+#endif
+
     ! initialize return code; assume routine not implemented
     rc = ESMF_RC_NOT_IMPL
     localrc = ESMF_RC_NOT_IMPL
@@ -1167,6 +1174,13 @@ subroutine f_esmf_fieldcollectgarbage(field, rc)
                             pipeLineDepth=pipeLineDepth, &
                             transposeRoutehandle=l_transposeRoutehandle, &
                             rc=localrc)
+
+#if DEBUG
+    call ESMF_FieldGet(srcField, farrayPtr=src, rc=localrc)
+
+    print *, "ESMF_C: source field"
+    print *, src
+#endif
 
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return

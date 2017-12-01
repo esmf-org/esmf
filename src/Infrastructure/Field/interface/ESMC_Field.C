@@ -603,7 +603,8 @@ int ESMC_FieldGetBounds(ESMC_Field field,
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       &rc)) return rc;  // bail out
 
-
+#define DEBUG 0
+#if DEBUG
   // get and fill first coord array and computational bounds
   int *exLBound = (int *)malloc(2*sizeof(int));
   int *exUBound = (int *)malloc(2*sizeof(int));
@@ -614,10 +615,9 @@ int ESMC_FieldGetBounds(ESMC_Field field,
   double * srcfieldptr = (double *)ESMC_FieldGetPtr(srcField, 0, &rc);
   if (rc != ESMF_SUCCESS) return 0;
 
-#if DEBUG
-  printf("fieldpsrc mem address = %p\n", fieldpsrc);
+  printf("ESMC:fieldpsrc mem address = %p\n", fieldpsrc);
 
-  printf("srcfield = [\n");
+  printf("ESMC:srcfield = [\n");
   int p = 0;
   for (int i1=exLBound[1]; i1<=exUBound[1]; ++i1) {
     for (int i0=exLBound[0]; i0<=exUBound[0]; ++i0) {
@@ -626,7 +626,7 @@ int ESMC_FieldGetBounds(ESMC_Field field,
     }
   }
   printf("]\n");
-  printf("srcfield mem address = %p\n", srcField.ptr);
+  printf("ESMC:srcfield mem address = %p\n", srcField.ptr);
 #endif
 
     // return rhPtr in routehandle argument
