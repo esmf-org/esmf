@@ -1090,7 +1090,7 @@ program ESMF_MeshEx
   endif
   
   ! Create Mesh structure in 1 step
-  mesh=ESMF_MeshCreateEasyElems(parametricDim=2, &
+  mesh=ESMF_MeshCreate(parametricDim=2, &
          coordSys=ESMF_COORDSYS_CART,   &
          elementTypes=elemTypes, &
          elementCornerCoords=elemCornerCoords2, &
