@@ -5421,7 +5421,93 @@ namespace ESMCI{
 } // namespace ESMCI
 
 
+//==============================================================================
+//==============================================================================
+//==============================================================================
+// ComPat2: abstract class providing basic communication patters
+//==============================================================================
+//==============================================================================
+//==============================================================================
 
+namespace ESMCI{
+  void ComPat2::totalExchange(VMK *vmk){
+    int petCount = vmk->getNpets();
+    int localPet = vmk->getMypet();
+    // prepare commhandles and message buffers
+    VMK::commhandle *sendCommh1 = NULL;
+    VMK::commhandle *sendCommh2 = NULL;
+    VMK::commhandle *sendCommh3 = NULL;
+    VMK::commhandle *sendCommh4 = NULL;
+    VMK::commhandle *recvCommh1 = NULL;
+    VMK::commhandle *recvCommh2 = NULL;
+    char *sendRequestBuffer;
+    char *sendResponseBuffer;
+    char *recvBuffer1;
+    char *recvBuffer2;
+    for (int i=0; i<petCount; i++){
+      int requestPet = (petCount + localPet-i) % petCount;
+      int responsePet = (localPet+i) % petCount;
+#if 1
+      std::cout << localPet << " requestPet=" << requestPet 
+        << " responsePet=" << responsePet << "\n";
+#endif 
+      if (i==0){
+        // the localPet handles its own local operations
+        handleLocal();
+      }else{
+        // localPet interacts with requestPet and responsePet as their
+        // responder and requester, respectively.
+        // localPet acts as responder
+        int recvRequestSize;
+        vmk->recv(&recvRequestSize, sizeof(int), requestPet, &recvCommh1);
+        // localPet acts as requester
+        int sendRequestSize;
+        generateRequest(responsePet, sendRequestBuffer, sendRequestSize);
+        vmk->send(&sendRequestSize, sizeof(int), responsePet, &sendCommh1);
+        // localPet acts as responder
+        vmk->commwait(&recvCommh1);
+#if 1
+        std::cout << localPet << " recvRequestSize=" << recvRequestSize << "\n";
+#endif
+        recvBuffer1 = new char[recvRequestSize];
+        vmk->recv(recvBuffer1, recvRequestSize, requestPet, &recvCommh1);
+        // localPet acts as requester
+        vmk->send(sendRequestBuffer, sendRequestSize, responsePet, &sendCommh2);
+        int recvResponseSize;
+        vmk->recv(&recvResponseSize, sizeof(int), responsePet, &recvCommh2);
+        // localPet acts as responder
+        vmk->commwait(&recvCommh1);
+        int sendResponseSize;
+        handleRequest(requestPet, recvBuffer1, recvRequestSize,
+          sendResponseBuffer, sendResponseSize);
+        vmk->send(&sendResponseSize, sizeof(int), requestPet, &sendCommh3);
+        // localPet acts as requester
+        vmk->commwait(&recvCommh2);
+#if 1
+        std::cout << localPet << " recvResponseSize=" <<recvResponseSize<< "\n";
+#endif
+        recvBuffer2 = new char[recvResponseSize];
+        vmk->recv(recvBuffer2, recvResponseSize, responsePet, &recvCommh2);
+        // localPet acts as responder
+        vmk->send(sendResponseBuffer, sendResponseSize, requestPet,
+          &sendCommh4);
+        // localPet acts as requester
+        vmk->commwait(&recvCommh2);
+        handleResponse(responsePet, recvBuffer2, recvResponseSize);
+        // localPet acts as requester
+        vmk->commwait(&sendCommh1);
+        vmk->commwait(&sendCommh2);
+        // localPet acts as responder
+        vmk->commwait(&sendCommh3);
+        vmk->commwait(&sendCommh4);
+        delete [] recvBuffer1;
+        delete [] recvBuffer2;
+      }
+      
+    }
+  }
+  
+} // namespace ESMCI
 
 //==============================================================================
 //==============================================================================
