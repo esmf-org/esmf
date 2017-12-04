@@ -5447,7 +5447,7 @@ namespace ESMCI{
     for (int i=0; i<petCount; i++){
       int requestPet = (petCount + localPet-i) % petCount;
       int responsePet = (localPet+i) % petCount;
-#if 1
+#if 0
       std::cout << localPet << " requestPet=" << requestPet 
         << " responsePet=" << responsePet << "\n";
 #endif 
@@ -5468,7 +5468,7 @@ namespace ESMCI{
         vmk->send(&sendRequestSize, sizeof(int), responsePet, &sendCommh1);
         // localPet acts as responder
         vmk->commwait(&recvCommh1);
-#if 1
+#if 0
         std::cout << localPet 
           << " sendRequestSize=" << sendRequestSize
           << " recvRequestSize=" << recvRequestSize << "\n";
@@ -5493,14 +5493,15 @@ namespace ESMCI{
         // localPet acts as requester
         if (sendRequestSize>0){
           vmk->commwait(&recvCommh2);
+          vmk->commwait(&sendCommh2);
         }
-#if 1
+#if 0
         std::cout << localPet
           << " sendResponseSize=" << sendResponseSize
           << " recvResponseSize=" << recvResponseSize << "\n";
 #endif
         if (recvResponseSize>0){
-          recvBuffer2 = new char[recvResponseSize];
+          recvBuffer2 = sendRequestBuffer;
           vmk->recv(recvBuffer2, recvResponseSize, responsePet, &recvCommh2);
         }
         // localPet acts as responder
@@ -5516,10 +5517,7 @@ namespace ESMCI{
         // localPet acts as requester
         vmk->commwait(&sendCommh1);
         if (sendRequestSize>0){
-          vmk->commwait(&sendCommh2);
-        }
-        if (recvResponseSize>0){
-          delete [] recvBuffer2;
+          delete [] sendRequestBuffer;
         }
         // localPet acts as responder
         if (recvRequestSize>0){
