@@ -77,10 +77,17 @@ int main(void){
   srcgrid = ESMC_GridCreateNoPeriDim(&i_maxIndex, NULL, NULL, NULL, &rc);
   if (rc != ESMF_SUCCESS) return 0;
 
+  dstgrid = ESMC_GridCreateNoPeriDim(&i_maxIndex, NULL, NULL, NULL, &rc);
+  if (rc != ESMF_SUCCESS) return 0;
+
+  int *exLBound = NULL;
+  int *exUBound = NULL;
+  int p = 0;
+
   ESMC_GridAddCoord(srcgrid, ESMC_STAGGERLOC_CENTER);
 
-  int *exLBound = (int *)malloc(dimcount*sizeof(int));
-  int *exUBound = (int *)malloc(dimcount*sizeof(int));
+  exLBound = (int *)malloc(dimcount*sizeof(int));
+  exUBound = (int *)malloc(dimcount*sizeof(int));
 
   double *gridXCoord = (double *)ESMC_GridGetCoord(srcgrid, 1,
                                                    ESMC_STAGGERLOC_CENTER, NULL,
@@ -93,7 +100,7 @@ int main(void){
   // printf("exLBounds = [%d,%d]\n", exLBound[0], exLBound[1]);
   // printf("exUBounds = [%d,%d]\n", exUBound[0], exUBound[1]);
 
-  int p = 0;
+  p = 0;
   for (int i1=exLBound[1]; i1<=exUBound[1]; ++i1) {
     for (int i0=exLBound[0]; i0<=exUBound[0]; ++i0) {
       gridXCoord[p]=i0;
@@ -101,9 +108,6 @@ int main(void){
       ++p;
     }
   }
-
-  dstgrid = ESMC_GridCreateNoPeriDim(&i_maxIndex, NULL, NULL, NULL, &rc);
-  if (rc != ESMF_SUCCESS) return 0;
 
   ESMC_GridAddCoord(dstgrid, ESMC_STAGGERLOC_CENTER);
 
@@ -183,11 +187,9 @@ int main(void){
   //-------------------------- REGRIDDING --------------------------------------
   //----------------------------------------------------------------------------
 
-#if 1
-  rc = ESMC_FieldRegridStoreFile(srcfield, dstfield, "data/weights.nc", NULL, NULL,
+  rc = ESMC_FieldRegridStoreFile(srcfield, dstfield, "data/weights_smmff.nc", NULL, NULL,
                                  &routehandle, NULL, NULL, NULL, NULL, NULL,
                                  NULL, NULL, NULL, NULL);
-#endif
   //----------------------------------------------------------------------------
   //NEX_disable_UTest
   strcpy(name, "ESMC_FieldRegridStoreFile test");
@@ -207,7 +209,7 @@ int main(void){
   printf("]\n");
 #endif
 
-  rc = ESMC_FieldSMMStore(srcfield, dstfield, "data/weights", &routehandle,
+  rc = ESMC_FieldSMMStore(srcfield, dstfield, "data/weights_generic.nc", &routehandle,
                           NULL, NULL, NULL, NULL);
   //----------------------------------------------------------------------------
   //NEX_disable_UTest
