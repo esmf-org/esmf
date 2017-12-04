@@ -61,7 +61,7 @@
         dstElementSort.begin();
       typename list<ElementSort<SIT> >::iterator itS =
         srcElementSort.begin();
-#if 1
+#if 0
     {
       std::stringstream msg;
       msg << "ASMM_STORE_LOG:" << __LINE__ << " dstElementSort.size() = "
@@ -71,7 +71,7 @@
 #endif 
   
       while ((itD != dstElementSort.end()) && (itS != srcElementSort.end())){
-#if 1
+#if 0
     {
       std::stringstream msg;
       msg << "ASMM_STORE_LOG:" << __LINE__ << " itD->fep->partnerSeqIndex = "
@@ -114,7 +114,7 @@
           ++itS;
         }
       }
-#if 1
+#if 0
     {
       std::stringstream msg;
       msg << "ASMM_STORE_LOG:" << __LINE__ << " dstElementSort.size() = "
@@ -156,7 +156,7 @@
       typename list<ElementSort<SIT> >::iterator itS =
         srcElementSort.begin();
       while ((iReq < size) && (itS != srcElementSort.end())){
-#if 1
+#if 0
     {
       std::stringstream msg;
       msg << "ASMM_STORE_LOG:" << __LINE__ << " requestPet=" << requestPet
@@ -335,7 +335,6 @@ template<typename SIT, typename DIT> int sparseMatMulStoreLinSeqVect_new(
         dstArray->getRimSeqIndex(&rimSeqIndex);
         for (int k=0; k<dstArray->getRimElementCount()[i]; k++){
           SeqIndex<DIT> seqIndex = (*rimSeqIndex)[i][k];
-if (i==1) std::cout << "seqIndex=" << seqIndex.decompSeqIndex << "\n";
           if (seqIndex.valid()){
             // this rim element holds a valid seqIndex
             // add the element to dstLinSeqVect[i]
