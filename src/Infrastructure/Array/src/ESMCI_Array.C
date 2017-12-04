@@ -48,6 +48,7 @@
 #include <cstdio>
 #include <cstring>
 #include <vector>
+#include <list>
 #include <map>
 #include <algorithm>
 #include <sstream>
@@ -6109,8 +6110,8 @@ namespace ArrayHelper{
 #ifdef ASMM_STORE_LOG_on
     {
       std::stringstream msg;
-      msg << "ASMM_STORE_LOG: XXE::recv on localPet=" << localPet <<
-      " from Pet=" << srcPet;
+      msg << "ASMM_STORE_LOG:" << __LINE__ << " XXE::recv on localPet=" 
+        << localPet << " from Pet=" << srcPet;
       ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
     }
 #endif
@@ -7104,8 +7105,8 @@ namespace ArrayHelper{
 #ifdef ASMM_STORE_LOG_on
     {
       std::stringstream msg;
-      msg << "ASMM_STORE_LOG: XXE::send from localPet=" << localPet <<
-        " to Pet=" << dstPet;
+      msg << "ASMM_STORE_LOG:" << __LINE__ << " XXE::send from localPet="
+        << localPet << " to Pet=" << dstPet;
       ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
     }
 #endif
@@ -7118,7 +7119,8 @@ namespace ArrayHelper{
 #ifdef ASMM_STORE_LOG_on
     {
       std::stringstream msg;
-      msg << "ASMM_STORE_LOG: single contiguous linIndex run on src side";
+      msg << "ASMM_STORE_LOG:" << __LINE__ << " single contiguous linIndex "
+        "run on src side";
       ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
     }
 #endif
@@ -7141,7 +7143,7 @@ namespace ArrayHelper{
 #ifdef ASMM_STORE_LOG_on
     {
       std::stringstream msg;
-      msg << "ASMM_STORE_LOG: non-contiguous linIndex on "
+      msg << "ASMM_STORE_LOG:" << __LINE__ << " non-contiguous linIndex on "
         "src side -> need buffer";
       ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
     }
@@ -7428,8 +7430,8 @@ namespace ArrayHelper{
 #ifdef ASMM_STORE_LOG_on
     {
       std::stringstream msg;
-      msg << "ASMM_STORE_LOG: XXE::sendrecv from localPet=" << localPet <<
-        " to Pet=" << dstPet;
+      msg << "ASMM_STORE_LOG:" << __LINE__ << " XXE::sendrecv from localPet="
+        << localPet << " to Pet=" << dstPet;
       ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
     }
 #endif
@@ -7442,7 +7444,8 @@ namespace ArrayHelper{
 #ifdef ASMM_STORE_LOG_on
     {
       std::stringstream msg;
-      msg << "ASMM_STORE_LOG: single contiguous linIndex run on src side";
+      msg << "ASMM_STORE_LOG:" << __LINE__ << " single contiguous linIndex "
+        "run on src side";
       ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
     }
 #endif
@@ -7468,7 +7471,7 @@ namespace ArrayHelper{
 #ifdef ASMM_STORE_LOG_on
     {
       std::stringstream msg;
-      msg << "ASMM_STORE_LOG: non-contiguous linIndex on "
+      msg << "ASMM_STORE_LOG:" << __LINE__ << " non-contiguous linIndex on "
           "src side -> need buffer";
       ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
     }
@@ -7506,10 +7509,14 @@ namespace ArrayHelper{
           &dt_byte, xxeIndex, xxeIndex);
         if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
           ESMC_CONTEXT, &rc)) return rc;
-#ifdef ASMM_STORE_LOG_on_disabled
-        fprintf(asmm_store_log_fp, "gjt - on localPet %d memGatherSrcRRA took "
-          "dt_tk=%g s and dt_byte=%g s for count=%d\n", localPet, dt_tk,
-          dt_byte, count);
+#ifdef ASMM_STORE_LOG_on
+    {
+      std::stringstream msg;
+      msg << "ASMM_STORE_LOG:" << __LINE__ << " on localPet " << localPet <<
+        " memGatherSrcRRA took dt_tk=" << dt_tk << "s and dt_byte=" <<
+        dt_byte << "byte for count=" << count;
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+    }
 #endif
         // decide for the fastest option
 //gjt-hack: force typekind option for now        if (dt_byte < dt_tk){
@@ -7802,7 +7809,7 @@ namespace DD{
   template<typename IT> struct SeqIndexFactorLookup{
     vector<int> de;
     vector<FactorElement<IT> > factorList;
-    int factorCount;
+    int factorCount;  //TODO: get rid of this and use factorList.size()
   public:
     SeqIndexFactorLookup(){
       factorCount = 0;
@@ -7814,7 +7821,7 @@ namespace DD{
     SeqIndex<IT1> seqIndex;
     vector<FactorElement<IT2> > factorList;
     int linIndex;
-    int factorCount;
+    int factorCount;  //TODO: get rid of this and use factorList.size()
   };
   template<typename IT1, typename IT2> struct FillLinSeqVectInfo{
     Array const *array;
@@ -9878,7 +9885,9 @@ template<typename SIT, typename DIT>
   vector<vector<DD::AssociationElement<DIT,SIT> > >
     dstLinSeqVect(dstLocalDeCount);
   
-#if 1
+if (haloFlag){
+  
+#if 1 // start testing new implementation
   localrc = sparseMatMulStoreLinSeqVect_new(vm,
     srcArray, dstArray,
     sparseMatrix,
@@ -9890,6 +9899,8 @@ template<typename SIT, typename DIT>
   );
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
     &rc)) return rc;
+
+#if 0 // start removal of data of testing new implementation
 
   // force vectors out of scope by swapping with empty vector, to free memory
   vector<vector<DD::AssociationElement<SIT,DIT> > >().swap(srcLinSeqVect);
@@ -9913,8 +9924,14 @@ template<typename SIT, typename DIT>
   VM::logMemInfo(std::string("ASMMStoreWorkOnNewLinSeqVect3.0"));
 #endif
 
-#endif
+#endif  // end removal of data of testing new implementation
   
+#endif  // end testing new implementation
+  
+}else{
+  
+  
+#if 1
   localrc = sparseMatMulStoreLinSeqVect(vm,
     srcArray, dstArray,
     sparseMatrix,
@@ -9926,7 +9943,9 @@ template<typename SIT, typename DIT>
   );
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
     &rc)) return rc;
-    
+#endif
+  
+}
   //---------------------------------------------------------------------------
   // Phase IV
   //---------------------------------------------------------------------------
@@ -10135,10 +10154,6 @@ template<typename SIT, typename DIT>
     return rc;
   }
   
-#ifdef ASMM_STORE_LOG_on_disabled
-  fclose(asmm_store_log_fp);
-#endif
-  
 #ifdef ASMM_STORE_MEMLOG_on
   VM::logMemInfo(std::string("ASMMStore5.0"));
 #endif
@@ -10150,86 +10165,9 @@ template<typename SIT, typename DIT>
 //-----------------------------------------------------------------------------
 
 
-//-----------------------------------------------------------------------------
-#undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI::sparseMatMulStoreLinSeqVect_new()"
-//BOPI
-// !IROUTINE:  ESMCI::sparseMatMulStoreLinSeqVect_new
-//
-// !INTERFACE:
-template<typename SIT, typename DIT> int sparseMatMulStoreLinSeqVect_new(
-//
-// !RETURN VALUE:
-//    int return code
-//
-// !ARGUMENTS:
-//
-  VM *vm,                                 // in
-  Array *srcArray, Array *dstArray,       // in
-  vector<SparseMatrix<SIT,DIT> >const &sparseMatrix,// in - sparse matrix vector
-  bool haloFlag,                          // in
-  bool ignoreUnmatched,                   // in
-  bool tensorMixFlag,                     // in
-  int const factorListCount,              // in
-  vector<bool> &factorPetFlag,            // in
-  ESMC_TypeKind_Flag typekindFactors,     // in
-  int const srcLocalDeCount,              // in
-  int const dstLocalDeCount,              // in
-  int srcElementCount,                    // in
-  int dstElementCount,                    // in
-  const int *srcLocalDeElementCount,      // in
-  const int *dstLocalDeElementCount,      // in
-  vector<vector<DD::AssociationElement<SIT,DIT> > >&srcLinSeqVect, // inout
-  vector<vector<DD::AssociationElement<DIT,SIT> > >&dstLinSeqVect  // inout
-  ){
-//
-// !DESCRIPTION:
-//    Take the incoming sparse matrix information from "input distribution" and
-//    transform it into "run distribution":
-//
-//      -> srcLinSeqVect
-//      -> dstLinSeqVect
-//
-//EOPI
-//-----------------------------------------------------------------------------
-  // initialize return code; assume routine not implemented
-  int localrc = ESMC_RC_NOT_IMPL;         // local return code
-  int rc = ESMC_RC_NOT_IMPL;              // final return code
-  
-  try{
+#include "sparseMatMulStoreLinSeqVect_new.h"
 
-#ifdef ASMM_STORE_MEMLOG_on
-  VM::logMemInfo(std::string("ASMMStoreLinSeqVect_new1.0"));
-#endif
-  
-  // prepare
-  int localPet = vm->getLocalPet();
-  int petCount = vm->getPetCount();
-  const int *srcLocalDeToDeMap = srcArray->getDELayout()->getLocalDeToDeMap();
-  const int *dstLocalDeToDeMap = dstArray->getDELayout()->getLocalDeToDeMap();
 
-#ifdef ASMM_STORE_MEMLOG_on
-  VM::logMemInfo(std::string("ASMMStoreLinSeqVect_newXX.0"));
-#endif
-
-  }catch(int localrc){
-    // catch standard ESMF return code
-    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
-      &rc);
-    return rc;
-  }catch(...){
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-      "Caught exception", ESMC_CONTEXT, &rc);
-    return rc;
-  }
-  
-  // return successfully
-  rc = ESMF_SUCCESS;
-  return rc;
-}
-//-----------------------------------------------------------------------------
-
-  
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::sparseMatMulStoreLinSeqVect()"
@@ -11289,61 +11227,111 @@ template<typename SIT, typename DIT> int sparseMatMulStoreLinSeqVect(
   VM::logMemInfo(std::string("ASMMStore3.7"));
 #endif
 
-#ifdef ASMM_STORE_LOG_on_disabled
-  fprintf(asmm_store_log_fp, "\n========================================"
-    "========================================\n");
-  fprintf(asmm_store_log_fp, "========================================"
-    "========================================\n\n");
-  // more serious printing
-  for (int j=0; j<srcLocalDeCount; j++){
-    for (int k=0; k<srcLinSeqVect[j].size(); k++){
-      fprintf(asmm_store_log_fp, "localPet: %d, "
-        "srcLinSeqVect[%d][%d].linIndex = %d, "
-        ".seqIndex = %d/%d, .factorCount = %d\n",
-        localPet, j, k, srcLinSeqVect[j][k].linIndex,
-        srcLinSeqVect[j][k].seqIndex.decompSeqIndex,
-        srcLinSeqVect[j][k].seqIndex.tensorSeqIndex,
-        srcLinSeqVect[j][k].factorCount);
-      for (int kk=0; kk<srcLinSeqVect[j][k].factorCount; kk++){
-        fprintf(asmm_store_log_fp, "\tfactorList[%d]\n"
-          "\t\t.partnerSeqIndex = %d/%d\n"
-          "\t\t.partnerDe = ", kk,
-          srcLinSeqVect[j][k].factorList[kk].partnerSeqIndex.decompSeqIndex,
-          srcLinSeqVect[j][k].factorList[kk].partnerSeqIndex.tensorSeqIndex);
-        for (int jj=0;
-          jj<srcLinSeqVect[j][k].factorList[kk].partnerDe.size(); jj++)
-          fprintf(asmm_store_log_fp, "%d, ",
-            srcLinSeqVect[j][k].factorList[kk].partnerDe[jj]);
-        fprintf(asmm_store_log_fp, "\n");
-        fprintf(asmm_store_log_fp, "\t\t.factor = %d\n",
-          *((int *)srcLinSeqVect[j][k].factorList[kk].factor));
+#ifdef ASMM_STORE_LOG_on
+  {
+    std::stringstream msg;
+    // srcLinSeqVect
+    for (int j=0; j<srcLocalDeCount; j++){
+      for (unsigned k=0; k<srcLinSeqVect[j].size(); k++){
+        msg << "ASMM_STORE_LOG:" << __LINE__ << " localPet: " << localPet <<
+          " srcLinSeqVect["<< j <<"]["<< k <<"].linIndex = "
+          << srcLinSeqVect[j][k].linIndex <<", "
+          ".seqIndex = "<< srcLinSeqVect[j][k].seqIndex.decompSeqIndex
+          <<"/"<< srcLinSeqVect[j][k].seqIndex.tensorSeqIndex <<
+          ", .factorCount = "<< srcLinSeqVect[j][k].factorCount;
+        ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+        msg.str("");  // clear
+        for (int kk=0; kk<srcLinSeqVect[j][k].factorCount; kk++){
+          msg << "ASMM_STORE_LOG:" << __LINE__ << " \tfactorList["<< kk <<"]";
+          ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+          msg.str("");  // clear
+          msg << "ASMM_STORE_LOG:" << __LINE__ << " \t\t.partnerSeqIndex ="
+            << srcLinSeqVect[j][k].factorList[kk].partnerSeqIndex.decompSeqIndex
+            <<"/"
+            << srcLinSeqVect[j][k].factorList[kk].partnerSeqIndex.tensorSeqIndex;
+          ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+          msg.str("");  // clear
+          msg << "ASMM_STORE_LOG:" << __LINE__ << " \t\t.partnerDe =";
+          for (unsigned jj=0;
+            jj<srcLinSeqVect[j][k].factorList[kk].partnerDe.size(); jj++)
+            msg << srcLinSeqVect[j][k].factorList[kk].partnerDe[jj] <<", ";
+          ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+          msg.str("");  // clear
+          switch (typekindFactors){
+          case ESMC_TYPEKIND_R4:
+            msg << "ASMM_STORE_LOG:" << __LINE__ << " \t\t.factor =" <<
+              *((ESMC_R4 *)srcLinSeqVect[j][k].factorList[kk].factor);
+            break;
+          case ESMC_TYPEKIND_R8:
+            msg << "ASMM_STORE_LOG:" << __LINE__ << " \t\t.factor =" <<
+              *((ESMC_R8 *)srcLinSeqVect[j][k].factorList[kk].factor);
+            break;
+          case ESMC_TYPEKIND_I4:
+            msg << "ASMM_STORE_LOG:" << __LINE__ << " \t\t.factor =" <<
+              *((ESMC_I4 *)srcLinSeqVect[j][k].factorList[kk].factor);
+            break;
+          case ESMC_TYPEKIND_I8:
+            msg << "ASMM_STORE_LOG:" << __LINE__ << " \t\t.factor =" <<
+              *((ESMC_I8 *)srcLinSeqVect[j][k].factorList[kk].factor);
+            break;
+          default:
+            break;
+          }
+          ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+          msg.str("");  // clear
+        }
       }
     }
-  }
-    
-  // more serious printing
-  for (int j=0; j<dstLocalDeCount; j++){
-    for (int k=0; k<dstLinSeqVect[j].size(); k++){
-      fprintf(asmm_store_log_fp, "localPet: %d, "
-        "dstLinSeqVect[%d][%d].linIndex = %d, "
-        ".seqIndex = %d/%d, .factorCount = %d\n",
-        localPet, j, k, dstLinSeqVect[j][k].linIndex,
-        dstLinSeqVect[j][k].seqIndex.decompSeqIndex,
-        dstLinSeqVect[j][k].seqIndex.tensorSeqIndex,
-        dstLinSeqVect[j][k].factorCount);
-      for (int kk=0; kk<dstLinSeqVect[j][k].factorCount; kk++){
-        fprintf(asmm_store_log_fp, "\tfactorList[%d]\n"
-          "\t\t.partnerSeqIndex = %d/%d\n"
-          "\t\t.partnerDe = ", kk,
-          dstLinSeqVect[j][k].factorList[kk].partnerSeqIndex.decompSeqIndex,
-          dstLinSeqVect[j][k].factorList[kk].partnerSeqIndex.tensorSeqIndex);
-        for (int jj=0;
-          jj<dstLinSeqVect[j][k].factorList[kk].partnerDe.size(); jj++)
-          fprintf(asmm_store_log_fp, "%d, ",
-            dstLinSeqVect[j][k].factorList[kk].partnerDe[jj]);
-        fprintf(asmm_store_log_fp, "\n");
-        fprintf(asmm_store_log_fp, "\t\t.factor = %d\n",
-          *((int *)dstLinSeqVect[j][k].factorList[kk].factor));
+    // dstLinSeqVect
+    for (int j=0; j<dstLocalDeCount; j++){
+      for (unsigned k=0; k<dstLinSeqVect[j].size(); k++){
+        msg << "ASMM_STORE_LOG:" << __LINE__ << " localPet: " << localPet <<
+          " dstLinSeqVect["<< j <<"]["<< k <<"].linIndex = "
+          << dstLinSeqVect[j][k].linIndex <<", "
+          ".seqIndex = "<< dstLinSeqVect[j][k].seqIndex.decompSeqIndex
+          <<"/"<< dstLinSeqVect[j][k].seqIndex.tensorSeqIndex <<
+          ", .factorCount = "<< dstLinSeqVect[j][k].factorCount;
+        ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+        msg.str("");  // clear
+        for (int kk=0; kk<dstLinSeqVect[j][k].factorCount; kk++){
+          msg << "ASMM_STORE_LOG:" << __LINE__ << " \tfactorList["<< kk <<"]";
+          ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+          msg.str("");  // clear
+          msg << "ASMM_STORE_LOG:" << __LINE__ << " \t\t.partnerSeqIndex ="
+            << dstLinSeqVect[j][k].factorList[kk].partnerSeqIndex.decompSeqIndex
+            <<"/"
+            << dstLinSeqVect[j][k].factorList[kk].partnerSeqIndex.tensorSeqIndex;
+          ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+          msg.str("");  // clear
+          msg << "ASMM_STORE_LOG:" << __LINE__ << " \t\t.partnerDe =";
+          for (unsigned jj=0;
+            jj<dstLinSeqVect[j][k].factorList[kk].partnerDe.size(); jj++)
+            msg << dstLinSeqVect[j][k].factorList[kk].partnerDe[jj] <<", ";
+          ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+          msg.str("");  // clear
+          switch (typekindFactors){
+          case ESMC_TYPEKIND_R4:
+            msg << "ASMM_STORE_LOG:" << __LINE__ << " \t\t.factor =" <<
+              *((ESMC_R4 *)dstLinSeqVect[j][k].factorList[kk].factor);
+            break;
+          case ESMC_TYPEKIND_R8:
+            msg << "ASMM_STORE_LOG:" << __LINE__ << " \t\t.factor =" <<
+              *((ESMC_R8 *)dstLinSeqVect[j][k].factorList[kk].factor);
+            break;
+          case ESMC_TYPEKIND_I4:
+            msg << "ASMM_STORE_LOG:" << __LINE__ << " \t\t.factor =" <<
+              *((ESMC_I4 *)dstLinSeqVect[j][k].factorList[kk].factor);
+            break;
+          case ESMC_TYPEKIND_I8:
+            msg << "ASMM_STORE_LOG:" << __LINE__ << " \t\t.factor =" <<
+              *((ESMC_I8 *)dstLinSeqVect[j][k].factorList[kk].factor);
+            break;
+          default:
+            break;
+          }
+          ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+          msg.str("");  // clear
+        }
       }
     }
   }
@@ -11637,8 +11625,9 @@ fprintf(asmm_store_log_fp, "iCount: %d, localDeFactorCount: %d\n", iCount,
 #ifdef ASMM_STORE_LOG_on
   {
     std::stringstream msg;
-    msg << "ASMM_STORE_LOG: dstTensorContigLength: " << dstTensorContigLength <<
-  " vectorLength: " << vectorLength << " decompSeqIndex: " << decompSeqIndex;
+    msg << "ASMM_STORE_LOG:" << __LINE__ << " dstTensorContigLength: "
+      << dstTensorContigLength << " vectorLength: " << vectorLength << 
+      " decompSeqIndex: " << decompSeqIndex;
     ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
   }
 #endif
