@@ -13,15 +13,12 @@
 #include "stdlib.h"
 #include "stdio.h"
 #include "string.h"
-#include <string>
 
 // ESMF header
 #include "ESMC.h"
 
  // ESMF Test header
 #include "ESMC_Test.h"
-
-using std::string;
 
 //==============================================================================
 //BOP

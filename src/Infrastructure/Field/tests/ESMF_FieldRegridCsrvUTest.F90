@@ -4655,7 +4655,7 @@ contains
   !!! Regrid forward from the A grid to the B grid
   ! Regrid store
   call ESMF_FieldRegridStore( &
-	  srcField, &
+          srcField, &
           srcMaskValues=(/1/), &
           dstField=dstField, &
           routeHandle=routeHandle, &
@@ -6389,9 +6389,9 @@ contains
   !!! Regrid forward from the A grid to the B grid
   ! Regrid store
   call ESMF_FieldRegridStore( &
-	  srcField, &
+          srcField, &
           dstField=dstField, &
-	  unmappedaction=ESMF_UNMAPPEDACTION_IGNORE, &
+          unmappedaction=ESMF_UNMAPPEDACTION_IGNORE, &
           ignoreDegenerate=.true., &
           routeHandle=routeHandle, &
           regridmethod=ESMF_REGRIDMETHOD_CONSERVE, &
@@ -7321,7 +7321,7 @@ contains
   !!! Regrid forward from the A grid to the B grid
   ! Regrid store
   call ESMF_FieldRegridStore( &
-	  srcField, &
+          srcField, &
           srcMaskValues=(/1/), &
           dstField=dstField, &
           routeHandle=routeHandle, &
@@ -9223,7 +9223,7 @@ subroutine test_sph_csrv_w_frac_norm(itrp, csrv, rc)
   !!! Regrid forward from the A grid to the B grid
   ! Regrid store
   call ESMF_FieldRegridStore( &
-	  srcField, &
+          srcField, &
           srcMaskValues=(/1/), &
           dstField=dstField, &
           routeHandle=routeHandle, &
@@ -10217,7 +10217,7 @@ subroutine test_sph_csrv_w_frac_norm(itrp, csrv, rc)
   !!! Regrid forward from the A grid to the B grid
   ! Regrid store
   call ESMF_FieldRegridStore( &
-	  srcField, &
+          srcField, &
           srcMaskValues=(/1/), &
           dstField=dstField, &
           routeHandle=routeHandle, &
@@ -11211,7 +11211,7 @@ subroutine test_sph_csrv_w_frac_norm(itrp, csrv, rc)
   !!! Regrid forward from the A grid to the B grid
   ! Regrid store
   call ESMF_FieldRegridStore( &
-	  srcField, &
+          srcField, &
           srcMaskValues=(/1/), &
           dstField=dstField, &
           routeHandle=routeHandle, &
@@ -12225,7 +12225,7 @@ subroutine test_sph_csrv_w_frac_norm(itrp, csrv, rc)
   !!! Regrid forward from the A grid to the B grid
   ! Regrid store
   call ESMF_FieldRegridStore( &
-	  srcField, &
+          srcField, &
           dstField=dstField, &
           routeHandle=routeHandle, &
           regridmethod=ESMF_REGRIDMETHOD_CONSERVE, &
@@ -12561,8 +12561,8 @@ subroutine test_sph_csrv_w_frac_norm(itrp, csrv, rc)
 !          /     \         \      |
 !  2.1   7         9           \  12
 !        |         | \    5       
-!        |    4    |   \         
-!        |         |      \    
+!        |    4    |   \
+!        |         |      \
 !  1.0   4 ------- 5 ------- 6
 !        |         |  \   3  |
 !        |    1    |    \    |
@@ -12936,8 +12936,8 @@ subroutine test_sph_csrv_w_frac_norm(itrp, csrv, rc)
 !          /     \         \      |
 !  2.1   7         9           \  12
 !        |         | \    5       
-!        |    4    |   \         
-!        |         |      \    
+!        |    4    |   \
+!        |         |      \
 !  1.0   4 ------- 5 ------- 6
 !        |         |  \   3  |
 !        |    1    |    \    |
@@ -13331,7 +13331,7 @@ subroutine test_sph_csrv_w_frac_norm(itrp, csrv, rc)
   !!! Regrid forward from the A grid to the B grid
   ! Regrid store
   call ESMF_FieldRegridStore( &
-	  srcField, &
+          srcField, &
           srcMaskValues=(/1/), &
           dstField=dstField, &
           routeHandle=routeHandle, &
@@ -14270,7 +14270,7 @@ subroutine test_sph_csrv_w_frac_norm(itrp, csrv, rc)
 
   ! Regrid store
   call ESMF_FieldRegridStore( &
-	  srcField, &
+          srcField, &
           srcMaskValues=(/1/), &
           dstField=dstField, &
           dstMaskValues=(/2/), &
