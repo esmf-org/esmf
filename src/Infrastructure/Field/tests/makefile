@@ -7,7 +7,7 @@ run_uni:  run_unit_tests_uni
 LOCDIR	  = src/Infrastructure/Field/tests
 
 .NOTPARALLEL:
-ESTS_BUILD   = \
+TESTS_BUILD   = \
 		$(ESMF_TESTDIR)/ESMC_FieldUTest \
 		$(ESMF_TESTDIR)/ESMC_FieldRegridUTest \
 		$(ESMF_TESTDIR)/ESMC_FieldRegridCsrvUTest \
@@ -40,8 +40,6 @@ ESTS_BUILD   = \
 		$(ESMF_TESTDIR)/ESMF_FieldHaloUTest \
 		$(ESMF_TESTDIR)/ESMF_FieldSMMFromFileUTest
           
-TESTS_BUILD = $(ESMF_TESTDIR)/ESMC_FieldSMMFromFileUTest
-     
 TESTS_RUN     = \
 		RUN_ESMC_FieldUTest \
 		RUN_ESMC_FieldRegridUTest \
