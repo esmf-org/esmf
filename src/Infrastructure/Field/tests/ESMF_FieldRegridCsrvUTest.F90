@@ -15517,6 +15517,377 @@ subroutine CreateTestMesh2x2EE(mesh, rc)
 end subroutine CreateTestMesh2x2EE
 
 
+  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  ! 
+  ! Creates the following mesh on 
+  ! 1 or 2 PETs. Returns an error 
+  ! if run on other than 1 or 2 PETs
+  ! 
+  !                     Mesh Ids
+  !
+  !   3.0   7 ------------ 8 -------------  9
+  !         |              |              / |
+  !   2.5   |              |   10       /   |
+  !         |      7       |         /      |
+  !   2.0   |              |      /     9   |
+  !         |              |  /             |
+  !   1.5   4 ------------ 5 -------------  6
+  !         |              |                |
+  !   1.0   |              |                |
+  !         |      1       |       3        |
+  !   0.5   |              |                |
+  !         |              |                |
+  !   0.0   1 ------------ 2 -------------- 3
+  !            
+  !        0.0  0.5  1.0  1.5   2.0  2.5   3.0
+  !
+  !               Node Ids at corners
+  !              Element Ids in centers
+  ! 
+   !!!!! 
+  ! 
+  ! The owners for 1 PET are all Pet 0.
+  ! The owners for 2 PETs are as follows:
+  !
+  !                   Mesh Owners
+  !
+  !   3.0   2 ------------ 2 -------------  2
+  !         |              |              / |
+  !   2.5   |              |   2       /    |
+  !         |      2       |         /      |
+  !   2.0   |              |      /     2   |
+  !         |              |  /             |
+  !   1.5   0 ------------ 0 -------------  1
+  !         |              |                |
+  !   1.0   |              |                |
+  !         |      0       |       1        |
+  !   0.5   |              |                |
+  !         |              |                |
+  !   0.0   0 ------------ 0 -------------- 1
+  !            
+  !        0.0  0.5  1.0  1.5   2.0  2.5   3.0
+  !
+  !              Element Owners in centers
+  ! 
+
+subroutine CreateTestMesh2x2(mesh, rc)
+  type(ESMF_Mesh), intent(out) :: mesh
+  integer :: rc
+  integer :: petCount, localPet
+  type(ESMF_VM) :: vm
+  integer :: numNodes, numElems, numTriElems, numQuadElems
+  integer :: numElemCorners
+  integer, allocatable :: nodeIds(:)
+  real(ESMF_KIND_R8), allocatable :: nodeCoords(:)
+  integer, allocatable :: nodeOwners(:)
+  integer, allocatable :: elemIds(:)
+  integer, allocatable :: elemTypes(:)
+  integer, allocatable :: elemConn(:)
+  real(ESMF_KIND_R8), pointer :: elemCoords(:)
+
+
+  ! get global VM
+  call ESMF_VMGetGlobal(vm, rc=rc)
+  if (rc /= ESMF_SUCCESS) return
+  call ESMF_VMGet(vm, localPet=localPet, petCount=petCount, rc=rc)
+  if (rc /= ESMF_SUCCESS) return
+
+  ! return with an error if not 1 or 4 PETs
+  if ((petCount /= 1) .and. (petCount /=4)) then
+     rc=ESMF_FAILURE
+     return
+  endif
+
+  ! Setup mesh info depending on the 
+  ! number of PETs
+  if (petCount .eq. 1) then
+
+     ! Set number of nodes
+     numNodes=9
+
+     ! Allocate and fill the node id array.
+     allocate(nodeIds(numNodes))
+     nodeIds=(/1,2,3,4,5,6,7,8,9/) 
+     
+     ! Allocate and fill node coordinate array.
+     ! Since this is a 2D Mesh the size is 2x the
+     ! number of nodes.
+     allocate(nodeCoords(2*numNodes))
+     nodeCoords=(/0.0,0.0, & ! node id 1
+               1.5,0.0, & ! node id 2
+               3.0,0.0, & ! node id 3
+               0.0,1.5, & ! node id 4
+               1.5,1.5, & ! node id 5
+               3.0,1.5, & ! node id 6
+               0.0,3.0, & ! node id 7
+               1.5,3.0, & ! node id 8
+               3.0,3.0 /) ! node id 9
+
+     ! Allocate and fill the node owner array.
+     ! Since this Mesh is all on PET 0, it's just set to all 0.
+     allocate(nodeOwners(numNodes))
+     nodeOwners=0 ! everything on PET 0
+
+      ! Fill in elem data
+      numTriElems=2
+      numQuadElems=3
+      numElems=numTriElems+numQuadElems
+      numElemCorners=3*numTriElems+4*numQuadElems
+
+      !! elem ids
+      allocate(elemIds(numElems))
+      elemIds=(/1,3,7,9,10/) 
+
+      !! elem types
+      allocate(elemTypes(numElems))
+      elemTypes=(/ESMF_MESHELEMTYPE_QUAD, & ! 1
+                  ESMF_MESHELEMTYPE_QUAD, & ! 3
+                  ESMF_MESHELEMTYPE_QUAD, & ! 7
+                  ESMF_MESHELEMTYPE_TRI,  & ! 9
+                  ESMF_MESHELEMTYPE_TRI/)   ! 10
+
+      !! elem coords
+      allocate(elemCoords(2*numElems))
+      elemCoords=(/0.75,0.75, & ! 1
+                   2.25,0.75, & ! 3
+                   0.75,2.25, & ! 7
+                   2.50,2.00, & ! 9
+                   2.00,2.50/) ! 10
+
+     
+     !! elem corner Coords
+     allocate(elemConn(numElemCorners))
+     elemConn=(/1,2,5,4, & ! 1
+                2,3,6,5, & ! 3
+                4,5,8,7, & ! 7
+                5,6,9,   & ! 9
+                5,9,8/)    ! 10
+
+   else if (petCount .eq. 4) then
+     ! Setup mesh data depending on PET
+     if (localPet .eq. 0) then
+
+        ! Set number of nodes
+        numNodes=4
+
+        ! Allocate and fill the node id array.
+        allocate(nodeIds(numNodes))
+        nodeIds=(/1,2,4,5/) 
+     
+        ! Allocate and fill node coordinate array.
+        ! Since this is a 2D Mesh the size is 2x the
+        ! number of nodes.
+        allocate(nodeCoords(2*numNodes))
+        nodeCoords=(/0.0,0.0, & ! node id 1
+             1.5,0.0, & ! node id 2
+             0.0,1.5, & ! node id 4
+             1.5,1.5/) ! node id 5
+        
+        ! Allocate and fill the node owner array.
+        ! Since this Mesh is all on PET 0, it's just set to all 0.
+        allocate(nodeOwners(numNodes))
+        nodeOwners=0 ! everything on PET 0
+        
+
+      ! Fill in elem data
+      numTriElems=0
+      numQuadElems=1
+      numElems=numTriElems+numQuadElems
+      numElemCorners=3*numTriElems+4*numQuadElems
+
+      !! elem ids
+      allocate(elemIds(numElems))
+      elemIds=(/1/) 
+
+      !! elem coords
+      allocate(elemCoords(2*numElems))
+      elemCoords=(/0.75,0.75/) ! 1
+
+      !! elem types
+      allocate(elemTypes(numElems))
+      elemTypes=(/ESMF_MESHELEMTYPE_QUAD/) ! 1
+
+     !! elem corner Coords
+     allocate(elemConn(numElemCorners))
+     elemConn=(/1,2,4,3/)  ! 1
+
+     else if (localPet .eq. 1) then
+
+        ! Set number of nodes
+        numNodes=4
+
+        ! Allocate and fill the node id array.
+        allocate(nodeIds(numNodes))
+        nodeIds=(/2,3,5,6/) 
+     
+        ! Allocate and fill node coordinate array.
+        ! Since this is a 2D Mesh the size is 2x the
+        ! number of nodes.
+        allocate(nodeCoords(2*numNodes))
+        nodeCoords=(/1.5,0.0, & ! node id 2
+                     3.0,0.0, & ! node id 3
+                     1.5,1.5, & ! node id 5
+                     3.0,1.5/) ! node id 6
+        
+        ! Allocate and fill the node owner array.
+        ! Since this Mesh is all on PET 0, it's just set to all 0.
+        allocate(nodeOwners(numNodes))
+        nodeOwners=(/0, & ! 2
+                     1, & ! 3
+                     0, & ! 5
+                     1/) ! 6
+        
+
+      ! Fill in elem data
+      numTriElems=0
+      numQuadElems=1
+      numElems=numTriElems+numQuadElems
+      numElemCorners=3*numTriElems+4*numQuadElems
+
+      !! elem ids
+      allocate(elemIds(numElems))
+      elemIds=(/3/) 
+
+      !! elem coords
+      allocate(elemCoords(2*numElems))
+      elemCoords=(/2.25,0.75/) ! 3
+
+      !! elem types
+      allocate(elemTypes(numElems))
+      elemTypes=(/ESMF_MESHELEMTYPE_QUAD/) ! 3
+
+     !! elem corner Coords
+     allocate(elemConn(numElemCorners))
+     elemConn=(/1,2,4,3/)  ! 3
+
+
+     else if (localPet .eq. 2) then
+
+     ! Set number of nodes
+     numNodes=6
+
+     ! Allocate and fill the node id array.
+     allocate(nodeIds(numNodes))
+     nodeIds=(/4,5,6,7,8,9/) 
+     
+     ! Allocate and fill node coordinate array.
+     ! Since this is a 2D Mesh the size is 2x the
+     ! number of nodes.
+     allocate(nodeCoords(2*numNodes))
+     nodeCoords=(/ &
+               0.0,1.5, & ! node id 4
+               1.5,1.5, & ! node id 5
+               3.0,1.5, & ! node id 6
+               0.0,3.0, & ! node id 7
+               1.5,3.0, & ! node id 8
+               3.0,3.0 /) ! node id 9
+
+     ! Allocate and fill the node owner array.
+     ! Since this Mesh is all on PET 0, it's just set to all 0.
+     allocate(nodeOwners(numNodes))
+     nodeOwners=(/ 0, &  ! 4
+                   0, &  ! 5
+                   1, &  ! 6
+                   2, &  ! 7
+                   2, &  ! 8
+                   2/)   ! 9
+
+      ! Fill in elem data
+      numTriElems=2
+      numQuadElems=1
+      numElems=numTriElems+numQuadElems
+      numElemCorners=3*numTriElems+4*numQuadElems
+
+      !! elem ids
+      allocate(elemIds(numElems))
+      elemIds=(/7,9,10/) 
+
+      !! elem coords
+      allocate(elemCoords(2*numElems))
+      elemCoords=(/0.75,2.25, & ! 7
+                   2.50,2.00, & ! 9
+                   2.00,2.50/) ! 10
+
+      !! elem types
+      allocate(elemTypes(numElems))
+      elemTypes=(/ESMF_MESHELEMTYPE_QUAD, & ! 7
+                  ESMF_MESHELEMTYPE_TRI,  & ! 9
+                  ESMF_MESHELEMTYPE_TRI/)   ! 10
+     !! elem corner Coords
+     allocate(elemConn(numElemCorners))
+     elemConn=(/1,2,5,4, & ! 7
+                2,3,6, &   ! 9
+                2,6,5/)    ! 10
+
+     else if (localPet .eq. 3) then
+
+     ! Set number of nodes
+     numNodes=0
+
+     ! Allocate and fill the node id array.
+     allocate(nodeIds(numNodes))
+     
+     ! Allocate and fill node coordinate array.
+     ! Since this is a 2D Mesh the size is 2x the
+     ! number of nodes.
+     allocate(nodeCoords(2*numNodes))
+
+     ! Allocate and fill the node owner array.
+     ! Since this Mesh is all on PET 0, it's just set to all 0.
+     allocate(nodeOwners(numNodes))
+
+      ! Fill in elem data
+      numTriElems=0
+      numQuadElems=0
+      numElems=numTriElems+numQuadElems
+      numElemCorners=3*numTriElems+4*numQuadElems
+
+      !! elem ids
+      allocate(elemIds(numElems))
+
+      !! elem coords
+      allocate(elemCoords(2*numElems))
+
+      !! elem types
+      allocate(elemTypes(numElems))
+
+     !! elem corner Coords
+     allocate(elemConn(numElemCorners))
+   endif
+  endif
+
+
+  ! Create Mesh structure in 1 step
+  mesh=ESMF_MeshCreate(parametricDim=2, spatialDim=2, &
+         coordSys=ESMF_COORDSYS_SPH_DEG, &
+         nodeIds=nodeIds, nodeCoords=nodeCoords, &
+         nodeOwners=nodeOwners, elementIds=elemIds,&
+         elementTypes=elemTypes, elementConn=elemConn, &
+         elementCoords=elemCoords, &
+         rc=rc)
+  if (rc /= ESMF_SUCCESS) return
+
+  ! After the creation we are through with the arrays, so they may be
+  ! deallocated.
+  deallocate(nodeIds)
+  deallocate(nodeCoords)
+  deallocate(nodeOwners)
+  deallocate(elemIds)
+  deallocate(elemTypes)
+  deallocate(elemConn)
+  deallocate(elemCoords)
+
+  ! Output Mesh for debugging
+  !call ESMF_MeshWrite(mesh,"mesh1",rc=rc)
+  !if (rc /= ESMF_SUCCESS) return
+
+  ! Return success
+  rc=ESMF_SUCCESS
+
+end subroutine CreateTestMesh2x2
+
+
+
 
   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   ! 
@@ -16002,8 +16373,6 @@ end subroutine createTestMesh3x3
   real(ESMF_KIND_R8), pointer :: ownedElemCoords(:)
 
 
- ! XMRKX
-
   ! result code
   integer :: finalrc
 
@@ -16036,8 +16405,8 @@ end subroutine createTestMesh3x3
   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
  
   ! Create Source Mesh
-  !call createTestMesh3x3(srcMesh, rc=localrc)
-  call CreateTestMesh2x2EE(srcMesh, rc=localrc)
+   call CreateTestMesh2x2EE(srcMesh, rc=localrc) ! Easy Elems Create
+!  call CreateTestMesh2x2(srcMesh, rc=localrc)  ! Non-easy elems create
   if (ESMF_LogFoundError(localrc, &
        ESMF_ERR_PASSTHRU, &
        ESMF_CONTEXT, rcToReturn=rc)) return
@@ -16230,7 +16599,7 @@ end subroutine createTestMesh3x3
    deallocate(ownedElemCoords)
 
 
-#if 1
+#if 0
    call ESMF_MeshWrite(srcMesh,"srcMesh")
    call ESMF_MeshWrite(dstMesh,"dstMesh")
 #endif
