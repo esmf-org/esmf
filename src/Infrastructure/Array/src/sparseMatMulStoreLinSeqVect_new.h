@@ -1,3 +1,7 @@
+#define SRC_ELEMENT_SORT_VECTOR
+
+  //----------------------------------------------------------------------------
+
   template<typename IT> struct FactorElementSort{
     DD::FactorElement<IT> *fep;
     int de;
@@ -35,13 +39,21 @@
 
   template<typename SIT, typename DIT> class FillLinSeqVect:public ComPat2{
     list<FactorElementSort<DIT> > &dstElementSort;
+#ifdef SRC_ELEMENT_SORT_VECTOR
+    vector<ElementSort<SIT> > &srcElementSort;
+#else
     list<ElementSort<SIT> > &srcElementSort;
+#endif
     vector<vector<DD::AssociationElement<SIT,DIT> > >&srcLinSeqVect;
     ESMC_TypeKind_Flag typekindFactor;
    public:
     FillLinSeqVect(
       list<FactorElementSort<DIT> > &dstElementSort_,
+#ifdef SRC_ELEMENT_SORT_VECTOR
+      vector<ElementSort<SIT> > &srcElementSort_,
+#else
       list<ElementSort<SIT> > &srcElementSort_,
+#endif
       vector<vector<DD::AssociationElement<SIT,DIT> > >&srcLinSeqVect_,
       ESMC_TypeKind_Flag typekindFactor_
     ):
@@ -59,7 +71,11 @@
       // called on every localPet exactly once, before any other method
       typename list<FactorElementSort<DIT> >::iterator itD =
         dstElementSort.begin();
+#ifdef SRC_ELEMENT_SORT_VECTOR
+      typename vector<ElementSort<SIT> >::iterator itS =
+#else
       typename list<ElementSort<SIT> >::iterator itS =
+#endif
         srcElementSort.begin();
 #if 0
     {
@@ -153,7 +169,11 @@
       // process the request and fill the response into the same buffer
       int iReq = 0; // request index
       int iRes = 0; // response index
+#ifdef SRC_ELEMENT_SORT_VECTOR
+      typename vector<ElementSort<SIT> >::iterator itS =
+#else
       typename list<ElementSort<SIT> >::iterator itS =
+#endif
         srcElementSort.begin();
       while ((iReq < size) && (itS != srcElementSort.end())){
 #if 0
@@ -366,10 +386,29 @@ template<typename SIT, typename DIT> int sparseMatMulStoreLinSeqVect_new(
         dstLocalDeToDeMap[i]));
     }
   }
+#ifdef ASMM_STORE_MEMLOG_on
+  VM::logMemInfo(std::string("ASMMStoreLinSeqVect_new2.1"));
+#endif
   dstElementSort.sort();
   
+#ifdef ASMM_STORE_MEMLOG_on
+  VM::logMemInfo(std::string("ASMMStoreLinSeqVect_new2.2a"));
+#endif
+
+  vm->timerReset("linIndex");
+  vm->timerReset("seqIndex");
+  
+#ifdef ASMM_STORE_MEMLOG_on
+  VM::logMemInfo(std::string("ASMMStoreLinSeqVect_new2.2"));
+#endif
+
   // setup the src side information, sorted by seqIndex
+#ifdef SRC_ELEMENT_SORT_VECTOR
+  vector<ElementSort<SIT> > srcElementSort;
+  srcElementSort.reserve(srcElementCount);
+#else
   list<ElementSort<SIT> > srcElementSort;
+#endif
   for (int i=0; i<srcLocalDeCount; i++){
     if (srcLocalDeElementCount[i]){
       // there are elements for local DE i
@@ -378,24 +417,46 @@ template<typename SIT, typename DIT> int sparseMatMulStoreLinSeqVect_new(
       while(arrayElement.isWithin()){
         // determine the sequentialized index for the current Array element
         SeqIndex<SIT> seqIndex;
-        localrc = arrayElement.getSequenceIndexExclusive(&seqIndex, false);
-        if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
-          ESMC_CONTEXT, NULL)) throw localrc;  // bail out with exception
+  vm->timerStart("seqIndex");
+        arrayElement.getSequenceIndexExclusive(&seqIndex, false);
+  vm->timerStop("seqIndex");
         // add element to srcElementSort
         ElementSort<SIT> element;
         element.seqIndex = seqIndex;
-        element.linIndex = arrayElement.getLinearIndexExclusive();
+  vm->timerStart("linIndex");
+        element.linIndex = arrayElement.getLinearIndex();
+  vm->timerStop("linIndex");
         element.localDe = i;
         element.de = srcLocalDeToDeMap[i];
         srcElementSort.push_back(element);
+#if 0
+    {
+      std::stringstream msg;
+      msg << "ASMM_STORE_LOG:" << __LINE__ << " linIndex=" << element.linIndex
+        << " seqIndex = "
+        << seqIndex.decompSeqIndex <<"/"<< seqIndex.tensorSeqIndex;
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+    }
+#endif
         arrayElement.next();
       } // end while over all exclusive elements
     }
   }
-#ifdef VECT
+#ifdef ASMM_STORE_MEMLOG_on
+  VM::logMemInfo(std::string("ASMMStoreLinSeqVect_new2.3a"));
+#endif
+  vm->timerLog("linIndex");
+  vm->timerLog("seqIndex");
+#ifdef ASMM_STORE_MEMLOG_on
+  VM::logMemInfo(std::string("ASMMStoreLinSeqVect_new2.3"));
+#endif
+#ifdef SRC_ELEMENT_SORT_VECTOR
   sort(srcElementSort.begin(), srcElementSort.end());
 #else
   srcElementSort.sort();
+#endif
+#ifdef ASMM_STORE_MEMLOG_on
+  VM::logMemInfo(std::string("ASMMStoreLinSeqVect_new2.4"));
 #endif
   
 #ifdef ASMM_STORE_MEMLOG_on

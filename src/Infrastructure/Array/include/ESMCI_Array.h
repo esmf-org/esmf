@@ -316,8 +316,7 @@ namespace ESMCI {
     DELayout *getDELayout()                 const {return delayout;}
     RouteHandle *getIoRH()    	      	    const {return ioRH;}
     void setIoRH(RouteHandle *rh){ioRH = rh;}
-    int getLinearIndexExclusive(int localDe, int const *index, int *rc=NULL)
-      const;
+    int getLinearIndexExclusive(int localDe, int const *index)const;
     template<typename T> int getSequenceIndexExclusive(int localDe, 
       int const *index, SeqIndex<T> *seqIndex, bool recursive=true) const;
     template<typename T> SeqIndex<T> getSequenceIndexTile(int tile,
@@ -459,6 +458,9 @@ namespace ESMCI {
     // Iterator type through Array elements.
     Array const *array;               // associated Array object
     int localDe;                      // localDe index
+    //
+    int linIndex;
+    bool seqIndexRecursiveFlag;       // flag to be used when computing seqIndex
    public:
     ArrayElement(Array const *arrayArg, int localDeArg);
       // construct iterator through exclusive Array region
@@ -466,12 +468,26 @@ namespace ESMCI {
       bool blockExclusiveFlag);
       // construct iterator through total Array region with block excl. option
     bool hasValidSeqIndex()const;
-    int getLinearIndexExclusive()const;
-    template<typename T> int getSequenceIndexExclusive(SeqIndex<T> *seqIndex,
+    int getLinearIndex()const{
+      // return the linear index of ArrayElement into the Array
+      return linIndex;
+    }
+    template<typename T> void getSequenceIndexExclusive(SeqIndex<T> *seqIndex,
       bool recursive=true) const;
     int getTensorSequenceIndex()const;
     int getArbSequenceIndexOffset()const;
     void print()const;
+    void next(){
+      if (MultiDimIndexLoop::next()){
+        // must compute linIndex from index tuple
+        linIndex = array->getLinearIndexExclusive(localDe, &indexTuple[0]);
+//std::cout << "compute from indexTuple\n";
+      }else{
+        // simply increment linIndex
+        linIndex++;
+//std::cout << "simple increment\n";
+      }
+    }
   };  // class ArrayElement 
   //============================================================================
   

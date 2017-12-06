@@ -264,8 +264,8 @@ namespace ESMCI {
     void setWatchEnd(std::vector<int> const &watchEnd);
     void first();
     void last();
-    void adjust();
-    void next();
+    bool adjust();
+    bool next();
     bool isFirst()const;
     bool isLast()const;
     bool isWithin()const;
