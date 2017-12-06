@@ -81,6 +81,7 @@ int main(void){
   int *exUBound = NULL;
   int p = 0;
 
+#if 0
   ESMC_GridAddCoord(srcgrid, ESMC_STAGGERLOC_CENTER);
 
   exLBound = (int *)malloc(dimcount*sizeof(int));
@@ -130,6 +131,7 @@ int main(void){
       ++p;
     }
   }
+#endif
 
   //----------------------------------------------------------------------------
   //---------------------- FIELD CREATION --------------------------------------
@@ -184,9 +186,11 @@ int main(void){
   //-------------------------- REGRIDDING --------------------------------------
   //----------------------------------------------------------------------------
 
+#if 0
   rc = ESMC_FieldRegridStoreFile(srcfield, dstfield, "data/weights_smmff.nc", NULL, NULL,
                                  &routehandle, NULL, NULL, NULL, NULL, NULL,
                                  NULL, NULL, NULL, NULL);
+#endif
   //----------------------------------------------------------------------------
   //NEX_disable_UTest
   strcpy(name, "ESMC_FieldRegridStoreFile test");
