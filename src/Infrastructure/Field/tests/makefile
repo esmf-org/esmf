@@ -39,7 +39,7 @@ TESTS_BUILD   = \
 		$(ESMF_TESTDIR)/ESMF_FieldMeshSMMUTest \
 		$(ESMF_TESTDIR)/ESMF_FieldHaloUTest \
 		$(ESMF_TESTDIR)/ESMF_FieldSMMFromFileUTest
-               
+          
 TESTS_RUN     = \
 		RUN_ESMC_FieldUTest \
 		RUN_ESMC_FieldRegridUTest \
@@ -290,12 +290,14 @@ RUN_ESMF_TestHarnessFieldUNI_1:
 
 RUN_ESMC_FieldSMMFromFileUTest:
 	mkdir -p $(ESMF_TESTDIR)/data
+	rm -f $(ESMF_TESTDIR)/data/weights_smmff.nc
 	cp -f ./data/weights_generic.nc $(ESMF_TESTDIR)/data
 	chmod u+rw $(ESMF_TESTDIR)/data/*
 	$(MAKE) TNAME=FieldSMMFromFile NP=4 ctest
 
 RUN_ESMC_FieldSMMFromFileUTestUNI:
 	mkdir -p $(ESMF_TESTDIR)/data
+	rm -f $(ESMF_TESTDIR)/data/weights_smmff.nc
 	cp -f ./data/weights_generic.nc $(ESMF_TESTDIR)/data
 	chmod u+rw $(ESMF_TESTDIR)/data/*
 	$(MAKE) TNAME=FieldSMMFromFile NP=1 ctest
