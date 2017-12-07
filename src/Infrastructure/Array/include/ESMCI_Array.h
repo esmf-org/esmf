@@ -467,6 +467,7 @@ namespace ESMCI {
     bool arbSeqIndexFlag;             // arbitrary sequence indices present
     bool lastSeqIndexInvalid;         // internally used flag between next()
     bool blockActiveFlag;             // active block requires hasValid checks
+    bool cannotOptimizeLookup;        // must do lookup from tuple each time
     ESMC_TypeKind_Flag indexTK;       // sequence index typekind
    public:
     ArrayElement(Array const *arrayArg, int localDeArg,
@@ -510,8 +511,7 @@ namespace ESMCI {
         linIndex++;
       }
       if (seqIndex){
-        if (adjusted || !firstDimFirstDecomp || arbSeqIndexFlag ||
-          seqIndexRecursiveFlag || lastSeqIndexInvalid){
+        if (cannotOptimizeLookup || adjusted || lastSeqIndexInvalid){
           // must re-compute seqIndex from index tuple
           if (!blockActiveFlag || hasValidSeqIndex()){
             // a valid sequence index can be queried

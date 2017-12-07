@@ -13978,7 +13978,11 @@ ArrayElement::ArrayElement(
   arbSeqIndexFlag = false;  // init
   if (array->getDistGrid()->getArbSeqIndexList(localDe,1))
     arbSeqIndexFlag = true; // set
-
+  seqIndexRecursiveFlag = seqIndexRecursive;
+  // flag condition that will prevent optimization of seqIndex lookup
+  cannotOptimizeLookup = !firstDimFirstDecomp | arbSeqIndexFlag |
+    seqIndexRecursiveFlag;
+  
   // early return if not within range
   if (!isWithin()) return;
   
@@ -13986,9 +13990,8 @@ ArrayElement::ArrayElement(
   linIndex = array->getLinearIndexExclusive(localDe, &indexTuple[0]);
   
   // deal with seqIndex support
-  seqIndexRecursiveFlag = seqIndexRecursive;
   if (seqIndexEnabled){
-    // there is a chance to optimize seqIndex generation during iteration
+    // prepare seqIndex member for iteration
     if (indexTK==ESMC_TYPEKIND_I4){
       seqIndex = (void *) new SeqIndex<ESMC_I4>;
       localrc = array->getSequenceIndexExclusive(localDe, &indexTuple[0], 
@@ -14112,6 +14115,10 @@ ArrayElement::ArrayElement(
   arbSeqIndexFlag = false;  // init
   if (array->getDistGrid()->getArbSeqIndexList(localDe,1))
     arbSeqIndexFlag = true; // set
+  seqIndexRecursiveFlag = seqIndexRecursive;
+  // flag condition that will prevent optimization of seqIndex lookup
+  cannotOptimizeLookup = !firstDimFirstDecomp | arbSeqIndexFlag |
+    seqIndexRecursiveFlag;
   
   // early return if not within range
   if (!isWithin()) return;
@@ -14120,9 +14127,8 @@ ArrayElement::ArrayElement(
   linIndex = array->getLinearIndexExclusive(localDe, &indexTuple[0]);
   
   // deal with seqIndex support
-  seqIndexRecursiveFlag = seqIndexRecursive;
   if (seqIndexEnabled){
-    // there is a chance to optimize seqIndex generation during iteration
+    // prepare seqIndex member for iteration
     if (indexTK==ESMC_TYPEKIND_I4){
       seqIndex = (void *) new SeqIndex<ESMC_I4>;
       if (hasValidSeqIndex()){
