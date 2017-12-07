@@ -391,12 +391,16 @@ template<typename SIT, typename DIT> int sparseMatMulStoreLinSeqVect_new(
 #endif
   dstElementSort.sort();
   
+#ifdef TIMERS
+  
 #ifdef ASMM_STORE_MEMLOG_on
   VM::logMemInfo(std::string("ASMMStoreLinSeqVect_new2.2a"));
 #endif
 
   vm->timerReset("linIndex");
   vm->timerReset("seqIndex");
+  
+#endif  // TIMERS
   
 #ifdef ASMM_STORE_MEMLOG_on
   VM::logMemInfo(std::string("ASMMStoreLinSeqVect_new2.2"));
@@ -412,29 +416,36 @@ template<typename SIT, typename DIT> int sparseMatMulStoreLinSeqVect_new(
   for (int i=0; i<srcLocalDeCount; i++){
     if (srcLocalDeElementCount[i]){
       // there are elements for local DE i
-      ArrayElement arrayElement(srcArray, i);
+      ArrayElement arrayElement(srcArray, i, true, false);
       // loop over all elements in exclusive region for local DE i
       while(arrayElement.isWithin()){
         // determine the sequentialized index for the current Array element
         SeqIndex<SIT> seqIndex;
-  vm->timerStart("seqIndex");
+//  vm->timerStart("seqIndex");
+#if 0
         arrayElement.getSequenceIndexExclusive(&seqIndex, false);
-  vm->timerStop("seqIndex");
+#else
+        seqIndex = arrayElement.getSequenceIndex<SIT>();
+#endif
+//  vm->timerStop("seqIndex");
         // add element to srcElementSort
         ElementSort<SIT> element;
         element.seqIndex = seqIndex;
-  vm->timerStart("linIndex");
+//  vm->timerStart("linIndex");
         element.linIndex = arrayElement.getLinearIndex();
-  vm->timerStop("linIndex");
+//  vm->timerStop("linIndex");
         element.localDe = i;
         element.de = srcLocalDeToDeMap[i];
         srcElementSort.push_back(element);
 #if 0
     {
+      SeqIndex<SIT> seqIndexTest = arrayElement.getSequenceIndex<SIT>();
       std::stringstream msg;
       msg << "ASMM_STORE_LOG:" << __LINE__ << " linIndex=" << element.linIndex
         << " seqIndex = "
-        << seqIndex.decompSeqIndex <<"/"<< seqIndex.tensorSeqIndex;
+        << seqIndex.decompSeqIndex <<"/"<< seqIndex.tensorSeqIndex
+        << " arrayElement.getSequenceIndex() = "
+        << seqIndexTest.decompSeqIndex <<"/"<< seqIndexTest.tensorSeqIndex;
       ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
     }
 #endif
@@ -442,11 +453,13 @@ template<typename SIT, typename DIT> int sparseMatMulStoreLinSeqVect_new(
       } // end while over all exclusive elements
     }
   }
+#ifdef TIMERS
 #ifdef ASMM_STORE_MEMLOG_on
   VM::logMemInfo(std::string("ASMMStoreLinSeqVect_new2.3a"));
 #endif
   vm->timerLog("linIndex");
   vm->timerLog("seqIndex");
+#endif  // TIMERS
 #ifdef ASMM_STORE_MEMLOG_on
   VM::logMemInfo(std::string("ASMMStoreLinSeqVect_new2.3"));
 #endif
