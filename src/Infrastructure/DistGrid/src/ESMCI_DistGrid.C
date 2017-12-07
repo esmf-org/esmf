@@ -29,6 +29,7 @@
 #include <cstdio>
 #include <cstring>
 #include <algorithm>
+#include <sstream>
 
 // include ESMF headers
 #include "ESMCI_Macros.h"
@@ -5234,6 +5235,7 @@ template<typename T> int DistGrid::setArbSeqIndex(
     indexTupleBlockEnd.resize(0);
     indexTupleWatchStart.resize(0);
     indexTupleWatchEnd.resize(0);
+    skipBlockedRegionFlag = false; // initialize
   }
   MultiDimIndexLoop::MultiDimIndexLoop(vector<int> const &sizes){
     indexTupleEnd = sizes;
@@ -5252,6 +5254,7 @@ template<typename T> int DistGrid::setArbSeqIndex(
       indexTupleBlockStart[i] = indexTupleBlockEnd[i] = 0;  // reset
       indexTupleWatchStart[i] = indexTupleWatchEnd[i] = 0;  // reset
     }
+    skipBlockedRegionFlag = false; // initialize
     adjust();
   }
   MultiDimIndexLoop::MultiDimIndexLoop(vector<int> const &offsets,
@@ -5274,6 +5277,7 @@ template<typename T> int DistGrid::setArbSeqIndex(
       indexTupleBlockStart[i] = indexTupleBlockEnd[i] = 0;  // reset
       indexTupleWatchStart[i] = indexTupleWatchEnd[i] = 0;  // reset
     }
+    skipBlockedRegionFlag = false; // initialize
     adjust();
   }
   void MultiDimIndexLoop::setSkipDim(int dim){
@@ -5283,11 +5287,29 @@ template<typename T> int DistGrid::setArbSeqIndex(
   void MultiDimIndexLoop::setBlockStart(vector<int> const &blockStart){
     // todo: check that size of incoming blockStart vector is equal to rank
     indexTupleBlockStart = blockStart;
+    skipBlockedRegionFlag = true; // initialize
+    for (unsigned i=0; i<indexTuple.size(); i++){
+      if ((indexTupleBlockStart[i] > indexTupleStart[i]) ||
+        (indexTupleBlockEnd[i] < indexTupleEnd[i])){
+        // found a dimension that does not have a fully blocked range
+        skipBlockedRegionFlag = false;
+        break;
+      }
+    }
     adjust();
   }
   void MultiDimIndexLoop::setBlockEnd(vector<int> const &blockEnd){
     // todo: check that size of incoming blockStart vector is equal to rank
     indexTupleBlockEnd = blockEnd;
+    skipBlockedRegionFlag = true; // initialize
+    for (unsigned i=0; i<indexTuple.size(); i++){
+      if ((indexTupleBlockStart[i] > indexTupleStart[i]) ||
+        (indexTupleBlockEnd[i] < indexTupleEnd[i])){
+        // found a dimension that does not have a fully blocked range
+        skipBlockedRegionFlag = false;
+        break;
+      }
+    }
     adjust();
   }
   void MultiDimIndexLoop::setWatchStart(vector<int> const &watchStart){
@@ -5337,15 +5359,6 @@ template<typename T> int DistGrid::setArbSeqIndex(
     bool adjusted = false;
     // -> consider the blocked out region
     // to improve performance for the fully blocked case check for it first
-    bool skipBlockedRegionFlag = true;
-    for (unsigned i=0; i<indexTuple.size(); i++){
-      if ((indexTupleBlockStart[i] > indexTupleStart[i]) ||
-        (indexTupleBlockEnd[i] < indexTupleEnd[i])){
-        // found a dimension that does not have a fully blocked range
-        skipBlockedRegionFlag = false;
-        break;
-      }
-    }
     if (skipBlockedRegionFlag){
       // fully blocked range in all dimensions -> shift indexTuple to end
       for (unsigned i=0; i<indexTuple.size(); i++)
@@ -5354,9 +5367,10 @@ template<typename T> int DistGrid::setArbSeqIndex(
     }else{
       // there are dimensions that do NOT have fully blocked ranges
       // -> must carefully adjust
+      bool skipBlockedFlag;
       do{
         // adjust all tuples, if necessary skip blocked region
-        skipBlockedRegionFlag = true;  // init
+        skipBlockedFlag = true;  // init
         unsigned i;
         for (i=0; i+1<indexTuple.size(); i++){
           if (indexTuple[i] == indexTupleEnd[i]){
@@ -5369,20 +5383,30 @@ template<typename T> int DistGrid::setArbSeqIndex(
           }
           if ((indexTuple[i] < indexTupleBlockStart[i]) ||
             (indexTuple[i] >= indexTupleBlockEnd[i])){
-            skipBlockedRegionFlag = false;  // not within blocked region
+            skipBlockedFlag = false;  // not within blocked region
           }
         }
         if ((indexTuple[i] < indexTupleBlockStart[i]) ||
           (indexTuple[i] >= indexTupleBlockEnd[i])){
-          skipBlockedRegionFlag = false;  // not within blocked region
+          skipBlockedFlag = false;  // not within blocked region
         }
-        if (skipBlockedRegionFlag){
+        if (skipBlockedFlag){
           adjusted = true;
           indexTuple[0] = indexTupleBlockEnd[0];
 //          printf("gjt skip the blocked region\n");     
         }
-      }while(skipBlockedRegionFlag && (indexTuple[0] >= indexTupleEnd[0]));
+      }while(skipBlockedFlag && (indexTuple[0] >= indexTupleEnd[0]));
     }
+#if 0
+    {
+      std::stringstream msg;
+      msg << "adjust()#" << __LINE__ << "index= ";
+      for (unsigned i=0; i<indexTuple.size(); i++)
+        msg << indexTuple[i] << ", ";
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+    }
+#endif
+    
     return adjusted;
   }
   bool MultiDimIndexLoop::next(){

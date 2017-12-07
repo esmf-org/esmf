@@ -252,6 +252,7 @@ namespace ESMCI {
     std::vector<int> indexTupleBlockEnd;   // blocked region
     std::vector<int> indexTupleWatchStart; // watched region
     std::vector<int> indexTupleWatchEnd;   // watched region
+    bool skipBlockedRegionFlag;
    public:
     MultiDimIndexLoop();
     MultiDimIndexLoop(std::vector<int> const &sizes);
