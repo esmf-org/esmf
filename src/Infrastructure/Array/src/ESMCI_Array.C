@@ -2765,20 +2765,7 @@ void Array::setRimMembers(
         SeqIndex<ESMC_I4> seqIndex;  // invalidated by default constructor
         if (arrayElement.hasValidSeqIndex()){
           // seqIndex is well defined for this arrayElement
-          //arrayElement.getSequenceIndexExclusive(&seqIndex);
           seqIndex = arrayElement.getSequenceIndex<ESMC_I4>();
-#if 0
-    {
-      SeqIndex<ESMC_I4> seqIndexTest = arrayElement.getSequenceIndex<ESMC_I4>();
-      std::stringstream msg;
-      msg << ESMC_METHOD << "#" << __LINE__ 
-        << " seqIndex = "
-        << seqIndex.decompSeqIndex <<"/"<< seqIndex.tensorSeqIndex
-        << " arrayElement.getSequenceIndex() = "
-        << seqIndexTest.decompSeqIndex <<"/"<< seqIndexTest.tensorSeqIndex;
-      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
-    }
-#endif
         }
         rimSeqIndexI4[i].push_back(seqIndex); // store seqIndex for this rim element
         rimLinIndex[i].push_back(linIndex); // store linIndex for this rim element
@@ -2800,7 +2787,6 @@ void Array::setRimMembers(
         SeqIndex<ESMC_I8> seqIndex;  // invalidated by default constructor
         if (arrayElement.hasValidSeqIndex()){
           // seqIndex is well defined for this arrayElement
-          //arrayElement.getSequenceIndexExclusive(&seqIndex);
           seqIndex = arrayElement.getSequenceIndex<ESMC_I8>();
         }
         rimSeqIndexI8[i].push_back(seqIndex); // store seqIndex for this rim element
@@ -3588,20 +3574,7 @@ int Array::constructFileMap(
         while(arrayElement.isWithin()){
           if (arrayElement.isWithinWatch()){
             // within exclusive Array region -> obtain seqIndex value
-            //arrayElement.getSequenceIndexExclusive(&seqIndex, false);
             seqIndex = arrayElement.getSequenceIndex<ESMC_I4>();
-#if 0
-    {
-      SeqIndex<ESMC_I4> seqIndexTest = arrayElement.getSequenceIndex<ESMC_I4>();
-      std::stringstream msg;
-      msg << ESMC_METHOD << "#" << __LINE__ 
-        << " seqIndex = "
-        << seqIndex.decompSeqIndex <<"/"<< seqIndex.tensorSeqIndex
-        << " arrayElement.getSequenceIndex() = "
-        << seqIndexTest.decompSeqIndex <<"/"<< seqIndexTest.tensorSeqIndex;
-      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
-    }
-#endif
             fileMapList[element] = seqIndex.decompSeqIndex;
           }else{
             // outside exclusive Array region -> mark this as unmapped element
@@ -3615,7 +3588,6 @@ int Array::constructFileMap(
         while(arrayElement.isWithin()){
           if (arrayElement.isWithinWatch()){
             // within exclusive Array region -> obtain seqIndex value
-            //arrayElement.getSequenceIndexExclusive(&seqIndex, false);
             seqIndex = arrayElement.getSequenceIndex<ESMC_I8>();
             fileMapList[element] = seqIndex.decompSeqIndex;
           }else{
@@ -5513,7 +5485,6 @@ template<typename SIT, typename DIT>
         // fill in the factorIndexList
         while(arrayElement.isWithin()){
           SeqIndex<SIT> seqIndex = arrayElement.getSequenceIndex<SIT>();
-          //arrayElement.getSequenceIndexExclusive(&seqIndex, false);
           factorIndexList[2*jj] = factorIndexList[2*jj+1] =
             seqIndex.decompSeqIndex;
           ++jj; // increment counter
@@ -8191,7 +8162,6 @@ template<typename IT1, typename IT2>
       ArrayElement arrayElement(fillLinSeqVectInfo->array, j, true, false);
       while(arrayElement.isWithin()){
         SeqIndex<IT1> seqIndex = arrayElement.getSequenceIndex<IT1>();
-        //arrayElement.getSequenceIndexExclusive(&seqIndex, false);
         IT1 seqInd = seqIndex.decompSeqIndex;
         if (seqInd >= seqIndMin && seqInd <= seqIndMax){
           int lookupIndex = (int)(seqInd - seqIndMin);
@@ -8260,7 +8230,6 @@ template<typename IT1, typename IT2>
       ArrayElement arrayElement(fillLinSeqVectInfo->array, j, true, false);
       while(arrayElement.isWithin()){
         SeqIndex<IT1> seqIndex = arrayElement.getSequenceIndex<IT1>();
-        //arrayElement.getSequenceIndexExclusive(&seqIndex, false);
         IT1 seqInd = seqIndex.decompSeqIndex;
         if (seqInd >= seqIndMin && seqInd <= seqIndMax){
           int lookupIndex = (int)(seqInd - seqIndMin);
@@ -8628,7 +8597,6 @@ template<typename IT1, typename IT2>
           ArrayElement arrayElement(array, j, true, false);
           while(arrayElement.isWithin()){
             SeqIndex<IT> seqIndex = arrayElement.getSequenceIndex<IT>();
-            //arrayElement.getSequenceIndexExclusive(&seqIndex, false);
             IT seqInd = seqIndex.decompSeqIndex;
             if (seqInd >= seqIndMin && seqInd <= seqIndMax){
               int lookupIndex = (int)(seqInd - seqIndMin);
@@ -8691,7 +8659,6 @@ template<typename IT1, typename IT2>
           ArrayElement arrayElement(array, j, true, false);
           while(arrayElement.isWithin()){
             SeqIndex<IT> seqIndex = arrayElement.getSequenceIndex<IT>();
-            //arrayElement.getSequenceIndexExclusive(&seqIndex, false);
             IT seqInd = seqIndex.decompSeqIndex;
             if (seqInd >= seqIndMin && seqInd <= seqIndMax){
               int lookupIndex = (int)(seqInd - seqIndMin);
@@ -10306,7 +10273,6 @@ template<typename SIT, typename DIT> int sparseMatMulStoreLinSeqVect(
       while(arrayElement.isWithin()){
         // determine the sequentialized index for the current Array element
         SeqIndex<SIT> seqIndex = arrayElement.getSequenceIndex<SIT>();
-        //arrayElement.getSequenceIndexExclusive(&seqIndex, false);
         // record seqIndex min and max
         if (firstMinMax){
           srcSeqIndexMinMax[0] = srcSeqIndexMinMax[1]
@@ -10397,19 +10363,6 @@ template<typename SIT, typename DIT> int sparseMatMulStoreLinSeqVect(
         while(arrayElement.isWithin()){
           // determine the sequentialized index for the current Array element
           SeqIndex<DIT> seqIndex = arrayElement.getSequenceIndex<DIT>();
-          //arrayElement.getSequenceIndexExclusive(&seqIndex, false);
-#if 0
-    {
-      SeqIndex<DIT> seqIndexTest = arrayElement.getSequenceIndex<DIT>();
-      std::stringstream msg;
-      msg << ESMC_METHOD << "#" << __LINE__ 
-        << " seqIndex = "
-        << seqIndex.decompSeqIndex <<"/"<< seqIndex.tensorSeqIndex
-        << " arrayElement.getSequenceIndex() = "
-        << seqIndexTest.decompSeqIndex <<"/"<< seqIndexTest.tensorSeqIndex;
-      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
-    }
-#endif
           // record seqIndex min and max
           if (firstMinMax){
             dstSeqIndexMinMax[0] = dstSeqIndexMinMax[1]
@@ -10562,19 +10515,6 @@ template<typename SIT, typename DIT> int sparseMatMulStoreLinSeqVect(
       ArrayElement arrayElement(srcArray, j, true, false);
       while(arrayElement.isWithin()){
         SeqIndex<SIT> seqIndex = arrayElement.getSequenceIndex<SIT>();
-        //arrayElement.getSequenceIndexExclusive(&seqIndex, false);
-#if 0
-    {
-      SeqIndex<SIT> seqIndexTest = arrayElement.getSequenceIndex<SIT>();
-      std::stringstream msg;
-      msg << ESMC_METHOD << "#" << __LINE__ 
-        << " seqIndex = "
-        << seqIndex.decompSeqIndex <<"/"<< seqIndex.tensorSeqIndex
-        << " arrayElement.getSequenceIndex() = "
-        << seqIndexTest.decompSeqIndex <<"/"<< seqIndexTest.tensorSeqIndex;
-      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
-    }
-#endif
         seqIndexList[jj] = seqIndex.decompSeqIndex;
         ++jj;
         arrayElement.next();
@@ -10711,7 +10651,6 @@ template<typename SIT, typename DIT> int sparseMatMulStoreLinSeqVect(
         ArrayElement arrayElement(dstArray, j, true, false);
         while(arrayElement.isWithin()){
           SeqIndex<DIT> seqIndex = arrayElement.getSequenceIndex<DIT>();
-          //arrayElement.getSequenceIndexExclusive(&seqIndex, false);
           seqIndexList[jj] = seqIndex.decompSeqIndex;
           ++jj;
           arrayElement.next();
@@ -14198,46 +14137,6 @@ bool ArrayElement::hasValidSeqIndex(
 }
 //-----------------------------------------------------------------------------
     
-#if 0
-//TODO: remove this for good:
-//-----------------------------------------------------------------------------
-#undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI::ArrayElement::getSequenceIndexExclusive()"
-//BOPI
-// !IROUTINE:  ESMCI::ArrayElement::getSequenceIndexExclusive
-//
-// !INTERFACE:
-template<typename T> void ArrayElement::getSequenceIndexExclusive(
-//
-// !ARGUMENTS:
-//
-    SeqIndex<T> *seqIndex,            // out - sequence index
-    bool recursive                    // in  - recursive mode or not
-  )const{
-//
-// !DESCRIPTION:
-//    Obtain sequence index for ArrayElement
-//
-//EOPI
-//-----------------------------------------------------------------------------
-  // initialize return code; assume routine not implemented
-  int localrc = ESMC_RC_NOT_IMPL;         // local return code
-  int rc = ESMC_RC_NOT_IMPL;              // final return code
-  
-  // check seqIndex argument
-  if (seqIndex==NULL){
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-      "The seqIndex argument must not be a NULL pointer", ESMC_CONTEXT, &rc);
-    throw rc;  // bail out with exception
-  }
-
-  localrc = array->getSequenceIndexExclusive(localDe, &indexTuple[0], seqIndex,
-    recursive);
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
-    NULL)) throw localrc;  // bail out with exception
-}
-//-----------------------------------------------------------------------------
-#endif
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD

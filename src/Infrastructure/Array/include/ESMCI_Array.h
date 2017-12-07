@@ -489,9 +489,6 @@ namespace ESMCI {
       return linIndex;
     }
     bool hasValidSeqIndex()const;
-//TODO: remove this for good:
-//    template<typename T> void getSequenceIndexExclusive(SeqIndex<T> *seqIndex,
-//      bool recursive=true) const;
     template<typename T> SeqIndex<T> getSequenceIndex()const{
       if (seqIndex)
         return *(SeqIndex<T>*)seqIndex;
