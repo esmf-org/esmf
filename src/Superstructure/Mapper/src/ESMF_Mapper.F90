@@ -71,7 +71,7 @@ module ESMF_MapperMod
   ! Information specific to a component optimized by the mapper
   ! The component info could also represent a super component,
   ! consisting of components that run sequentially
-  type ESMF_MapperCompInfo
+  type ESMF_MapperCompInfoClass
     ! Name of the component - used as key to match to a component (since
     ! component object references can be transient)
     ! In the case of a super component, concatenation of the names of 
@@ -87,6 +87,10 @@ module ESMF_MapperMod
     type(ESMF_MapperCompInfo), dimension(:), pointer :: seqCompInfos => null()
   end type
 
+  type ESMF_MapperCompInfo
+    type(ESMF_MapperCompInfoClass), pointer :: compInfop => null()
+  end type
+
   ! Mapper optimization info for an execution block
   type ESMF_MapperExecutionBlockOptimizeInfo
     ! The elapsed wallclock time for the latest run of this execution block
@@ -97,7 +101,7 @@ module ESMF_MapperMod
 
   ! A Mapper execution block - consists of multiple components and
   ! execution blocks that need to run concurrently
-  type ESMF_MapperExecutionBlock
+  type ESMF_MapperExecutionBlockClass
     ! Min and Max number of PETs for the Execution block
     ! - derived from Min/Max PETs for each comp in the execution block
     integer :: minNumPet
@@ -108,6 +112,10 @@ module ESMF_MapperMod
     type(ESMF_MapperCompInfo), dimension(:), pointer :: compInfos => null()
     ! Execution blocks that are part of this execution block
     type(ESMF_MapperExecutionBlock), dimension(:), pointer :: execBlocks => null()
+  end type
+
+  type ESMF_MapperExecutionBlock
+    type(ESMF_MapperExecutionBlockClass), pointer :: execBlockp => null()
   end type
 
   ! Mapper global (not component specific) optimization info
@@ -127,7 +135,7 @@ module ESMF_MapperMod
   end type
 
   ! The ESMF Mapper
-  type ESMF_Mapper
+  type ESMF_MapperClass
     ! The VM on which the mapper optimizes
     type(ESMF_VM) :: vm
     ! The global PET list that the mapper works on - from mapper VM
@@ -138,7 +146,11 @@ module ESMF_MapperMod
     ! Global optimization information for the application
     type(ESMF_MapperOptimizeInfo) :: optInfo
     ! The root execution block
-    type(ESMF_MapperExecutionBlock), pointer :: rootExecBlock => null()
+    type(ESMF_MapperExecutionBlock) :: rootExecBlock
+  end type
+
+  type ESMF_Mapper
+    type(ESMF_MapperClass), pointer :: mapperp => null()
   end type
 
 !------------------------------------------------------------------------------
@@ -197,6 +209,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     character(len=*), intent(in), optional :: configFile
     integer,             intent(out), optional :: rc
 
+    type(ESMF_MapperClass), pointer :: mapperp
     integer :: localrc
     integer :: npets, i
 
@@ -213,19 +226,30 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !EOP
   !-----------------------------------------------------------------------------    
-    ESMF_MapperCreate%vm = vm
+    nullify(ESMF_MapperCreate%mapperp)
+
+    allocate(mapperp, stat=localrc)
+    if (ESMF_LogFoundAllocError(localrc, msg="MapperClass", &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    mapperp%vm = vm
 
     call ESMF_VMGet(vm, petCount=npets, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
-    allocate(ESMF_MapperCreate%petList(npets))
+    allocate(mapperp%petList(npets), stat=localrc)
+    if (ESMF_LogFoundAllocError(localrc, msg="MapperClassPetList", &
+      ESMF_CONTEXT, rcToReturn=rc)) return
     do i=1, npets
-      ESMF_MapperCreate%petList(i) = i-1
+      mapperp%petList(i) = i-1
     end do
 
-    ! Read config file, if present, and initialize the mapper
+    ! FIXME: Read config file, if present, and initialize the mapper
+
+    ESMF_MapperCreate%mapperp => mapperp
+
     if (present(rc)) rc = ESMF_SUCCESS
   end function
 !------------------------------------------------------------------------------
@@ -258,13 +282,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !EOP
   !-----------------------------------------------------------------------------    
 
-    if(associated(mapper%petList)) then
-      deallocate(mapper%petList)
-      nullify(mapper%petList)
-    end if
-    if(associated(mapper%optInfo%savedOptElapsedWallClockTimes)) then
-      deallocate(mapper%optInfo%savedOptElapsedWallClockTimes)
-      nullify(mapper%optInfo%savedOptElapsedWallClockTimes)
+    if(associated(mapper%mapperp)) then
+      if(associated(mapper%mapperp%petList)) then
+        deallocate(mapper%mapperp%petList)
+        nullify(mapper%mapperp%petList)
+      end if
+      if(associated(mapper%mapperp%optInfo%savedOptElapsedWallClockTimes)) then
+        deallocate(mapper%mapperp%optInfo%savedOptElapsedWallClockTimes)
+        nullify(mapper%mapperp%optInfo%savedOptElapsedWallClockTimes)
+      end if
     end if
     if (present(rc)) rc = ESMF_SUCCESS
   end subroutine
@@ -283,7 +309,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !ARGUMENTS:
     type(ESMF_Mapper), intent(inout) :: mapper
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    type(ESMF_MapperExecutionBlock), pointer, intent(in), optional :: rootExecBlock
+    type(ESMF_MapperExecutionBlock), intent(in), optional :: rootExecBlock
     integer,             intent(out), optional :: rc
 
 ! !DESCRIPTION:
@@ -302,7 +328,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !EOP
   !-----------------------------------------------------------------------------    
     if(present(rootExecBlock)) then
-      mapper%rootExecBlock = rootExecBlock
+      mapper%mapperp%rootExecBlock = rootExecBlock
     end if
     if (present(rc)) rc = ESMF_SUCCESS
   end subroutine
@@ -349,10 +375,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !EOP
   !-----------------------------------------------------------------------------    
     if(present(minNumPet)) then
-      gCompInfo%minNumPet = minNumPet
+      gCompInfo%compInfop%minNumPet = minNumPet
     end if
     if(present(maxNumPet)) then
-      gCompInfo%maxNumPet = maxNumPet
+      gCompInfo%compInfop%maxNumPet = maxNumPet
     end if
     if (present(rc)) rc = ESMF_SUCCESS
   end subroutine
@@ -427,15 +453,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   !-----------------------------------------------------------------------------    
 
     if(present(npets)) then
-      npets = size(gCompInfo%optInfo%optPetList)
+      npets = size(gCompInfo%compInfop%optInfo%optPetList)
     end if
     if(present(petList)) then
-      if(size(petList) /= size(gCompInfo%optInfo%optPetList)) then
+      if(size(petList) /= size(gCompInfo%compInfop%optInfo%optPetList)) then
         call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
           msg="The size of petlist is not equal to number of pets", &
           ESMF_CONTEXT, rcToReturn=rc)
       end if
-      petList = gCompInfo%optInfo%optPetList
+      petList = gCompInfo%compInfop%optInfo%optPetList
     end if
     if (present(rc)) rc = ESMF_SUCCESS
   end subroutine
@@ -480,17 +506,19 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! associated with an ESMF component or multiple sequential components
 
 ! !INTERFACE:
-  subroutine ESMF_MapperCompInfoCreate(mapper, gComps, gCompInfo, keywordEnforcer, minNumPet, maxNumPet, rc)
+  function ESMF_MapperCompInfoCreate(mapper, gComps, keywordEnforcer, minNumPet, maxNumPet, rc)
+! !RETURN VALUE:
+    type(ESMF_MapperCompInfo) :: ESMF_MapperCompInfoCreate
 !
 ! !ARGUMENTS:
     type(ESMF_Mapper), intent(inout) :: mapper
     type(ESMF_GridComp), dimension(:), intent(in) :: gComps
-    type(ESMF_MapperCompInfo), intent(out) :: gCompInfo
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,              intent(in), optional :: minNumPet
     integer,              intent(in), optional :: maxNumPet
     integer,             intent(out), optional :: rc
 
+    type(ESMF_MapperCompInfoClass), pointer :: compInfop
     integer :: localrc
     integer :: ncomps, i
     character(len=ESMF_MAXSTR) :: cname, compInfoName
@@ -516,6 +544,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !EOP
   !-----------------------------------------------------------------------------    
+    nullify(ESMF_MapperCompInfoCreate%compInfop)
+
     ncomps = size(gComps)
   
     compInfoName = ""
@@ -526,18 +556,25 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       compInfoName = trim(compInfoName) // "_" // trim(cname)
     end do
 
-    gCompInfo%name = trim(compInfoName)
+    allocate(compInfop, stat=localrc)
+    if (ESMF_LogFoundAllocError(localrc, msg="CompInfoClass", &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    compInfop%name = trim(compInfoName)
 
     ! FIXME: Decide on how to store seqCompInfos
 
     if(present(minNumPet)) then
-      gCompInfo%minNumPet = minNumPet
+      compInfop%minNumPet = minNumPet
     end if
     if(present(maxNumPet)) then
-      gCompInfo%maxNumPet = maxNumPet
+      compInfop%maxNumPet = maxNumPet
     end if
+
+    ESMF_MapperCompInfoCreate%compInfop => compInfop
+
     if (present(rc)) rc = ESMF_SUCCESS
-  end subroutine
+  end function
 !------------------------------------------------------------------------------
 
 !------------------------------------------------------------------------------
@@ -570,14 +607,16 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !EOP
   !-----------------------------------------------------------------------------    
-    if(associated(gCompInfo%seqCompInfos)) then
-      deallocate(gCompInfo%seqCompInfos)
-      nullify(gCompInfo%seqCompInfos)
-    end if
+    if(associated(gCompInfo%compInfop)) then
+      if(associated(gCompInfo%compInfop%seqCompInfos)) then
+        deallocate(gCompInfo%compInfop%seqCompInfos)
+        nullify(gCompInfo%compInfop%seqCompInfos)
+      end if
 
-    if(associated(gCompInfo%optInfo%savedOptElapsedWallClockTimes)) then
-      deallocate(gCompInfo%optInfo%savedOptElapsedWallClockTimes)
-      nullify(gCompInfo%optInfo%savedOptElapsedWallClockTimes)
+      if(associated(gCompInfo%compInfop%optInfo%savedOptElapsedWallClockTimes)) then
+        deallocate(gCompInfo%compInfop%optInfo%savedOptElapsedWallClockTimes)
+        nullify(gCompInfo%compInfop%optInfo%savedOptElapsedWallClockTimes)
+      end if
     end if
     if (present(rc)) rc = ESMF_SUCCESS
   end subroutine
@@ -592,18 +631,21 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! run concurrently
 
 ! !INTERFACE:
-  subroutine ESMF_MapperExecutionBlockCreate(mapper, gCompInfos, execBlocks, parentExecBlock, keywordEnforcer, rc)
+  function ESMF_MapperExecutionBlockCreate(mapper, gCompInfos, execBlocks, keywordEnforcer, rc)
+! !RETURN VALUE:
+    type(ESMF_MapperExecutionBlock) :: ESMF_MapperExecutionBlockCreate
 !
 ! !ARGUMENTS:
     type(ESMF_Mapper), intent(inout) :: mapper
     type(ESMF_MapperCompInfo), dimension(:), intent(in) :: gCompInfos
     type(ESMF_MapperExecutionBlock), dimension(:), intent(in) :: execBlocks
-    type(ESMF_MapperExecutionBlock), intent(out) :: parentExecBlock
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,             intent(out), optional :: rc
 
+    type(ESMF_MapperExecutionBlockClass), pointer :: parentExecBlockp
     integer :: minNumPet, maxNumPet
     integer :: i, nCompInfos, nExecBlocks
+    integer :: localrc
 ! !DESCRIPTION:
 !   Create a mapper execution block
 !
@@ -623,35 +665,47 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !EOP
   !-----------------------------------------------------------------------------    
+
+    nullify(ESMF_MapperExecutionBlockCreate%execBlockp)
+
     nCompInfos = size(gCompInfos)
     nExecBlocks = size(execBlocks)
     minNumPet = 0
-    maxNumPet = size(mapper%petList)
+    maxNumPet = size(mapper%mapperp%petList)
     do i=1, nCompInfos
-      if(minNumPet < gCompInfos(i)%minNumPet) then
-        minNumPet = gCompInfos(i)%minNumPet
+      if(minNumPet < gCompInfos(i)%compInfop%minNumPet) then
+        minNumPet = gCompInfos(i)%compInfop%minNumPet
       end if
-      if(maxNumPet > gCompInfos(i)%maxNumPet) then
-        maxNumPet = gCompInfos(i)%maxNumPet
+      if(maxNumPet > gCompInfos(i)%compInfop%maxNumPet) then
+        maxNumPet = gCompInfos(i)%compInfop%maxNumPet
       end if
     end do
     do i=1, nExecBlocks
-      if(minNumPet < execBlocks(i)%minNumPet) then
-        minNumPet = execBlocks(i)%minNumPet
+      if(minNumPet < execBlocks(i)%execBlockp%minNumPet) then
+        minNumPet = execBlocks(i)%execBlockp%minNumPet
       end if
-      if(maxNumPet > execBlocks(i)%maxNumPet) then
-        maxNumPet = execBlocks(i)%maxNumPet
+      if(maxNumPet > execBlocks(i)%execBlockp%maxNumPet) then
+        maxNumPet = execBlocks(i)%execBlockp%maxNumPet
       end if
     end do
 
-    parentExecBlock%minNumPet = minNumPet
-    parentExecBlock%maxNumPet = maxNumPet
+    allocate(parentExecBlockp, stat=localrc)
+    if (ESMF_LogFoundAllocError(localrc, msg="ExecBlock", &
+      ESMF_CONTEXT, rcToReturn=rc)) return
 
-    allocate(parentExecBlock%compInfos(nCompInfos))
-    parentExecBlock%compInfos = gCompInfos
-    parentExecBlock%execBlocks = execBlocks
+    parentExecBlockp%minNumPet = minNumPet
+    parentExecBlockp%maxNumPet = maxNumPet
+
+    allocate(parentExecBlockp%compInfos(nCompInfos))
+    if (ESMF_LogFoundAllocError(localrc, msg="ExecBlockCompInfos", &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    parentExecBlockp%compInfos = gCompInfos
+    parentExecBlockp%execBlocks = execBlocks
+
+    ESMF_MapperExecutionBlockCreate%execBlockp => parentExecBlockp
     if (present(rc)) rc = ESMF_SUCCESS
-  end subroutine
+  end function
 !------------------------------------------------------------------------------
 
 !------------------------------------------------------------------------------
@@ -687,21 +741,25 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !EOP
   !-----------------------------------------------------------------------------    
-    if(associated(execBlock%compInfos)) then
-      sz = size(execBlock%compInfos)
-      do i=1,sz
-        call ESMF_MapperCompInfoDestroy(mapper, execBlock%compInfos(i), rc=localrc)
-        ! FIXME: Should we ignore errors while destroying ?
-      end do
-      deallocate(execBlock%compInfos)
-    end if
-    if(associated(execBlock%execBlocks)) then
-      sz = size(execBlock%execBlocks)
-      do i=1,sz
-        call ESMF_MapperExecutionBlockDestroy(mapper, execBlock%execBlocks(i), rc=localrc)
-        ! FIXME: Should we ignore errors while destroying ?
-      end do
-      deallocate(execBlock%execBlocks)
+    if(associated(execBlock%execBlockp)) then
+      if(associated(execBlock%execBlockp%compInfos)) then
+        sz = size(execBlock%execBlockp%compInfos)
+        do i=1,sz
+          call ESMF_MapperCompInfoDestroy(mapper, &
+                execBlock%execBlockp%compInfos(i), rc=localrc)
+          ! FIXME: Should we ignore errors while destroying ?
+        end do
+        deallocate(execBlock%execBlockp%compInfos)
+      end if
+      if(associated(execBlock%execBlockp%execBlocks)) then
+        sz = size(execBlock%execBlockp%execBlocks)
+        do i=1,sz
+          call ESMF_MapperExecutionBlockDestroy(mapper, &
+                execBlock%execBlockp%execBlocks(i), rc=localrc)
+          ! FIXME: Should we ignore errors while destroying ?
+        end do
+        deallocate(execBlock%execBlockp%execBlocks)
+      end if
     end if
     if (present(rc)) rc = ESMF_SUCCESS
   end subroutine

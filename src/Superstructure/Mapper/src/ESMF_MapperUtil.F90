@@ -119,7 +119,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !EOP
   !-----------------------------------------------------------------------------    
     if(present(wtime)) then
-      gCompInfo%optInfo%curElapsedWallClockTime = wtime
+      gCompInfo%compInfop%optInfo%curElapsedWallClockTime = wtime
     end if
     if (present(rc)) rc = ESMF_SUCCESS
   end subroutine
