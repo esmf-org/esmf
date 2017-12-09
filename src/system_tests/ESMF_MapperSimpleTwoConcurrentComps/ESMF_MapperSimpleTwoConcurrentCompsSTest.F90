@@ -514,12 +514,14 @@
       print *, "comp2 = ", comp2_wtime, "s"
 
       ! Contact mapper
-      call ESMF_MapperCollect(mapper, comp1, comp1Info, rc=localrc)
+      call ESMF_MapperCollect(mapper, comp1, comp1Info, wtime=comp1_wtime,&
+        rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=localrc)) &
         call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
       
-      call ESMF_MapperCollect(mapper, comp2, comp2Info, rc=localrc)
+      call ESMF_MapperCollect(mapper, comp2, comp2Info, wtime=comp2_wtime,&
+        rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=localrc)) &
         call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
