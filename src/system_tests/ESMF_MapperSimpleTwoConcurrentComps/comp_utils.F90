@@ -7,8 +7,36 @@
 
   implicit none
   public user_comp_recreate
+  public printCompInfo
 
   contains
+
+  subroutine printCompInfo(mapper, compInfo, rc)
+    type(ESMF_Mapper), intent(in)    :: mapper
+    type(ESMF_MapperCompInfo), intent(in)     :: compInfo
+    integer,             intent(out)          :: rc
+
+    integer, dimension(:), allocatable      :: petList
+    integer :: npets
+
+    call ESMF_MapperGet(mapper, compInfo, npets=npets, rc=rc)
+    if(rc  /= ESMF_SUCCESS) then
+      print *, "Getting comp info from mapper failed"
+      return
+    end if
+
+    allocate(petlist(npets))
+
+    call ESMF_MapperGet(mapper, compInfo, petList=petList, rc=rc)
+    if(rc  /= ESMF_SUCCESS) then
+      print *, "Getting comp petlist from mapper failed"
+      return
+    end if
+
+    print *, "Optimized pet list : ", petList
+
+    rc = ESMF_SUCCESS
+  end subroutine
 
   subroutine user_comp_recreate(gComp, gCompInfo, mapper, rc)
 ! !ARGUMENTS:
@@ -56,6 +84,8 @@
       print *, "Recreating gComp failed"
       return
     end if
+
+    print *, "Successfully recreated gComp :", trim(cname)
 
     ! return successfully
     rc = ESMF_SUCCESS
