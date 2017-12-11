@@ -538,13 +538,15 @@
         call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
 
       ! Recreate the components using info from mapper
-      !call user_comp_recreate(comp1, comp1Info, mapper, localrc)
+      call user_comp_recreate(comp1, userm1_setvm, userm1_register,&
+        comp1Info, mapper, localrc)
       call printCompInfo(mapper, comp1Info, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=localrc)) &
         call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
 
-      !call user_comp_recreate(comp2, comp2Info, mapper, localrc)
+      call user_comp_recreate(comp2, userm2_setvm, userm2_register,&
+        comp2Info, mapper, localrc)
       call printCompInfo(mapper, comp2Info, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=localrc)) &
