@@ -75,7 +75,8 @@
     type(ESMF_MapperExecutionBlock) :: execBlock
     type(ESMF_MapperExecutionBlock), dimension(:), allocatable :: tmpExecBlocks
     double precision :: comp1_start, comp1_end, comp2_start, comp2_end;
-    double precision :: comp1_wtime, comp2_wtime
+    double precision :: run_loop_start, run_loop_end
+    double precision :: comp1_wtime, comp2_wtime, run_loop_wtime
     type(ESMF_CplComp) :: cpl
 
     ! instantiate a clock, a calendar, and timesteps
@@ -414,6 +415,7 @@
 
       print *, "PET ", pet_id, " starting time step..."
 
+      run_loop_start = MPI_Wtime()
       ! Uncomment the following call to ESMF_GridCompWait() to sequentialize
       ! comp1 and comp2. The following ESMF_GridCompWait() call will block
       ! all PETs until comp2 has returned. Consequently comp1 will not be
@@ -509,14 +511,19 @@
         call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
       comp2_end = MPI_Wtime() - comp2_start
 
+      run_loop_end = MPI_Wtime() - run_loop_start
       call MPI_Allreduce(comp1_end, comp1_wtime, 1, MPI_DOUBLE_PRECISION,&
             MPI_MAX, MPI_COMM_WORLD, rc)
 
       call MPI_Allreduce(comp2_end, comp2_wtime, 1, MPI_DOUBLE_PRECISION,&
             MPI_MAX, MPI_COMM_WORLD, rc)
 
+      call MPI_Allreduce(run_loop_end, run_loop_wtime, 1, MPI_DOUBLE_PRECISION,&
+            MPI_MAX, MPI_COMM_WORLD, rc)
+
       print *, "comp1 = ", comp1_wtime, "s"
       print *, "comp2 = ", comp2_wtime, "s"
+      print *, "run loop = ", run_loop_wtime, "s"
 
       ! Contact mapper
       call ESMF_MapperCollect(mapper, comp1, comp1Info, wtime=comp1_wtime,&
