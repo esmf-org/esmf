@@ -412,7 +412,7 @@
 
     do while (.not. ESMF_ClockIsStopTime(clocks(CPL_IDX), rc=localrc))
 
-      !print *, "PET ", pet_id, " starting time step..."
+      print *, "PET ", pet_id, " starting time step..."
 
       ! Uncomment the following call to ESMF_GridCompWait() to sequentialize
       ! comp1 and comp2. The following ESMF_GridCompWait() call will block
@@ -430,9 +430,11 @@
       ! exclusive sets of PETs
       !print *, "I am calling into GridCompRun(comp1)"
       comp1_start = MPI_Wtime()
-      call ESMF_GridCompRun(comp1, exportState=c1exp, clock=clocks(GCOMP_SIDX), &
+      !call ESMF_GridCompRun(comp1, exportState=c1exp, clock=clocks(GCOMP_SIDX), &
+      !  userRc=userrc, rc=localrc)
+      call ESMF_GridCompRun(comp1, clock=clocks(GCOMP_SIDX), &
         userRc=userrc, rc=localrc)
-      !print *, "Comp 1 Run returned, rc =", localrc
+      print *, "Comp 1 Run returned, rc =", localrc
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) &
         call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
@@ -466,8 +468,10 @@
       ! calls contained in the user written coupler methods will indirectly
       ! lead to inter PET synchronization of the coupler component.
       !print *, "I am calling into CplCompRun(cpl)"
-      call ESMF_CplCompRun(cpl, importState=c1exp, &
-        exportState=c2imp, clock=clocks(CPL_IDX), userRc=userrc, rc=localrc)
+      !call ESMF_CplCompRun(cpl, importState=c1exp, &
+      !  exportState=c2imp, clock=clocks(CPL_IDX), userRc=userrc, rc=localrc)
+      call ESMF_CplCompRun(cpl,&
+        clock=clocks(CPL_IDX), userRc=userrc, rc=localrc)
       !print *, "Coupler Run returned, rc =", localrc
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) &
@@ -492,9 +496,11 @@
       ! to the next loop increment, executing comp1 concurrently with comp2.
       !print *, "I am calling into GridCompRun(comp2)"
       comp2_start = MPI_Wtime()
-      call ESMF_GridCompRun(comp2, importState=c2imp, clock=clocks(GCOMP_SIDX+1), &
+      !call ESMF_GridCompRun(comp2, importState=c2imp, clock=clocks(GCOMP_SIDX+1), &
+      !  userRc=userrc, rc=localrc)
+      call ESMF_GridCompRun(comp2, clock=clocks(GCOMP_SIDX+1), &
         userRc=userrc, rc=localrc)
-      !print *, "Comp 2 Run returned, rc =", localrc
+      print *, "Comp 2 Run returned, rc =", localrc
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) &
         call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
@@ -533,11 +539,13 @@
 
       ! Recreate the components using info from mapper
       !call user_comp_recreate(comp1, comp1Info, mapper, localrc)
+      call printCompInfo(mapper, comp1Info, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=localrc)) &
         call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
 
       !call user_comp_recreate(comp2, comp2Info, mapper, localrc)
+      call printCompInfo(mapper, comp2Info, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=localrc)) &
         call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
@@ -560,7 +568,7 @@
         call ESMF_Finalize(rc=localrc, endflag=ESMF_END_ABORT)
       !call ESMF_ClockPrint(clock_cpl, rc=localrc)
 
-      !print *, "... time step finished on PET ", pet_id, "."
+      print *, "... time step finished on PET ", pet_id, "."
 
     enddo
 

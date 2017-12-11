@@ -123,30 +123,30 @@
         if (ESMF_LogFoundError(status, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
 
-        distgrid = ESMF_DistGridCreate(minIndex=(/1/), maxIndex=(/9/), &
-            regDecomp=(/petCount/), rc=status)
-        if (ESMF_LogFoundError(status, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rcToReturn=rc)) return
+        !distgrid = ESMF_DistGridCreate(minIndex=(/1/), maxIndex=(/9/), &
+       !     regDecomp=(/petCount/), rc=status)
+        !if (ESMF_LogFoundError(status, ESMF_ERR_PASSTHRU, &
+        !    ESMF_CONTEXT, rcToReturn=rc)) return
 
-        call ESMF_ArraySpecSet(arrayspec, 1, ESMF_TYPEKIND_I4, rc=status)
-        if (ESMF_LogFoundError(status, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rcToReturn=rc)) return
+        !call ESMF_ArraySpecSet(arrayspec, 1, ESMF_TYPEKIND_I4, rc=status)
+        !if (ESMF_LogFoundError(status, ESMF_ERR_PASSTHRU, &
+        !    ESMF_CONTEXT, rcToReturn=rc)) return
 
-        rawdata = ESMF_ArrayCreate(distgrid, arrayspec, &
-          indexflag=ESMF_INDEX_GLOBAL, name="rawdata", rc=status)
-        if (ESMF_LogFoundError(status, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rcToReturn=rc)) return
-        call ESMF_StateAdd(exportState, (/rawdata/), rc=status)
-        if (ESMF_LogFoundError(status, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rcToReturn=rc)) return
+        !rawdata = ESMF_ArrayCreate(distgrid, arrayspec, &
+        !  indexflag=ESMF_INDEX_GLOBAL, name="rawdata", rc=status)
+        !if (ESMF_LogFoundError(status, ESMF_ERR_PASSTHRU, &
+        !    ESMF_CONTEXT, rcToReturn=rc)) return
+        !call ESMF_StateAdd(exportState, (/rawdata/), rc=status)
+        !if (ESMF_LogFoundError(status, ESMF_ERR_PASSTHRU, &
+        !    ESMF_CONTEXT, rcToReturn=rc)) return
   
-        sorted_data = ESMF_ArrayCreate(distgrid, arrayspec, &
-          indexflag=ESMF_INDEX_GLOBAL, name="sorted_data1", rc=status)
-        if (ESMF_LogFoundError(status, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rcToReturn=rc)) return
-        call ESMF_StateAdd(exportState, (/sorted_data/), rc=status)
-        if (ESMF_LogFoundError(status, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rcToReturn=rc)) return
+        !sorted_data = ESMF_ArrayCreate(distgrid, arrayspec, &
+        !  indexflag=ESMF_INDEX_GLOBAL, name="sorted_data1", rc=status)
+        !if (ESMF_LogFoundError(status, ESMF_ERR_PASSTHRU, &
+        !    ESMF_CONTEXT, rcToReturn=rc)) return
+        !call ESMF_StateAdd(exportState, (/sorted_data/), rc=status)
+        !if (ESMF_LogFoundError(status, ESMF_ERR_PASSTHRU, &
+        !    ESMF_CONTEXT, rcToReturn=rc)) return
 
         rc = status
 
@@ -177,19 +177,19 @@
         integer :: i
   
         print *, "In user 1 run routine"
-        call ESMF_StateGet(exportState, "rawdata", rawdata, rc=status)
-        if (ESMF_LogFoundError(status, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rcToReturn=rc)) return
-        call ESMF_ArrayGet(rawdata, localDe=0, farrayPtr=rdptr, rc=status)
-        if (ESMF_LogFoundError(status, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rcToReturn=rc)) return
+        !call ESMF_StateGet(exportState, "rawdata", rawdata, rc=status)
+        !if (ESMF_LogFoundError(status, ESMF_ERR_PASSTHRU, &
+        !    ESMF_CONTEXT, rcToReturn=rc)) return
+        !call ESMF_ArrayGet(rawdata, localDe=0, farrayPtr=rdptr, rc=status)
+        !if (ESMF_LogFoundError(status, ESMF_ERR_PASSTHRU, &
+        !    ESMF_CONTEXT, rcToReturn=rc)) return
   
-        call ESMF_StateGet(exportState, "sorted_data1", sorted_data, rc=status)
-        if (ESMF_LogFoundError(status, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rcToReturn=rc)) return
-        call ESMF_ArrayGet(sorted_data, localDe=0, farrayPtr=sdptr, rc=status)
-        if (ESMF_LogFoundError(status, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rcToReturn=rc)) return
+        !call ESMF_StateGet(exportState, "sorted_data1", sorted_data, rc=status)
+        !if (ESMF_LogFoundError(status, ESMF_ERR_PASSTHRU, &
+        !    ESMF_CONTEXT, rcToReturn=rc)) return
+        !call ESMF_ArrayGet(sorted_data, localDe=0, farrayPtr=sdptr, rc=status)
+        !if (ESMF_LogFoundError(status, ESMF_ERR_PASSTHRU, &
+        !    ESMF_CONTEXT, rcToReturn=rc)) return
 
         ! sort the input data locally
         pd => d
@@ -200,7 +200,7 @@
 
         ! assign sorting result to output that will be delivered to component 2
         ! through coupler component
-        sdptr(:) = d(lbound(sdptr, 1):ubound(sdptr, 1))
+        !sdptr(:) = d(lbound(sdptr, 1):ubound(sdptr, 1))
 
         rc = status
 
@@ -225,27 +225,27 @@
 
         print *, "In user 1 final routine"
 
-        call ESMF_StateGet(exportState, "rawdata", rawdata, rc=status)
-        if (ESMF_LogFoundError(status, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rcToReturn=rc)) return
+        !call ESMF_StateGet(exportState, "rawdata", rawdata, rc=status)
+        !if (ESMF_LogFoundError(status, ESMF_ERR_PASSTHRU, &
+        !    ESMF_CONTEXT, rcToReturn=rc)) return
 
-        call ESMF_ArrayGet(rawdata, distgrid=distgrid, rc=status)
-        if (ESMF_LogFoundError(status, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rcToReturn=rc)) return
+        !call ESMF_ArrayGet(rawdata, distgrid=distgrid, rc=status)
+        !if (ESMF_LogFoundError(status, ESMF_ERR_PASSTHRU, &
+        !    ESMF_CONTEXT, rcToReturn=rc)) return
   
-        call ESMF_StateGet(exportState, "sorted_data1", sorted_data, rc=status)
-        if (ESMF_LogFoundError(status, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rcToReturn=rc)) return
+        !call ESMF_StateGet(exportState, "sorted_data1", sorted_data, rc=status)
+        !if (ESMF_LogFoundError(status, ESMF_ERR_PASSTHRU, &
+        !    ESMF_CONTEXT, rcToReturn=rc)) return
 
-        call ESMF_ArrayDestroy(rawdata, rc=status)
-        if (ESMF_LogFoundError(status, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rcToReturn=rc)) return
-        call ESMF_ArrayDestroy(sorted_data, rc=status)
-        if (ESMF_LogFoundError(status, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rcToReturn=rc)) return
-        call ESMF_DistGridDestroy(distgrid, rc=status)
-        if (ESMF_LogFoundError(status, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rcToReturn=rc)) return
+        !call ESMF_ArrayDestroy(rawdata, rc=status)
+        !if (ESMF_LogFoundError(status, ESMF_ERR_PASSTHRU, &
+        !    ESMF_CONTEXT, rcToReturn=rc)) return
+        !call ESMF_ArrayDestroy(sorted_data, rc=status)
+        !if (ESMF_LogFoundError(status, ESMF_ERR_PASSTHRU, &
+        !    ESMF_CONTEXT, rcToReturn=rc)) return
+        !call ESMF_DistGridDestroy(distgrid, rc=status)
+        !if (ESMF_LogFoundError(status, ESMF_ERR_PASSTHRU, &
+        !    ESMF_CONTEXT, rcToReturn=rc)) return
 
         rc = status
 
