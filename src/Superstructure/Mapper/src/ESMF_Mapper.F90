@@ -121,8 +121,16 @@ module ESMF_MapperMod
     type(ESMF_MapperExecutionBlockClass), pointer :: execBlockp => null()
   end type
 
+  ! ESMF_MAPPER_WGT_EXEC_TIME_OPT_METHOD => Uses the execution time of a
+  ! component to partition pets
+  integer, parameter ::&
+    ESMF_MAPPER_WGT_EXEC_TIME_OPT_METHOD=1
+
+
   ! Mapper global (not component specific) optimization info
   type ESMF_MapperOptimizeInfo
+    ! Optimize method used by the mapper
+    integer :: optMethod
     ! True if we reached an optimal layout
     logical :: hasOptimalLayout
     ! Threshold that indicates that the mapper has reached optimal layout
@@ -159,6 +167,8 @@ module ESMF_MapperMod
 !------------------------------------------------------------------------------
 ! !PUBLIC TYPES:
   public ESMF_Mapper, ESMF_MapperCompInfo, ESMF_MapperExecutionBlock
+
+  public ESMF_MAPPER_WGT_EXEC_TIME_OPT_METHOD
 
 !------------------------------------------------------------------------------
 !
@@ -236,6 +246,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     mapperp%vm = vm
+    mapperp%optInfo%optMethod = ESMF_MAPPER_WGT_EXEC_TIME_OPT_METHOD
 
     call ESMF_VMGet(vm, petCount=npets, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
@@ -307,12 +318,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 ! !INTERFACE:
   subroutine ESMF_MapperSetConstraints(mapper, keywordEnforcer, &
-    rootExecBlock, rc)
+    rootExecBlock, optMethod, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_Mapper), intent(inout) :: mapper
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_MapperExecutionBlock), intent(in), optional :: rootExecBlock
+    integer,  intent(in), optional :: optMethod
     integer,             intent(out), optional :: rc
 
 ! !DESCRIPTION:
@@ -333,6 +345,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if(present(rootExecBlock)) then
       mapper%mapperp%rootExecBlock = rootExecBlock
     end if
+
+    if(present(optMethod)) then
+      mapper%mapperp%optInfo%optMethod = optMethod
+    end if
+
     if (present(rc)) rc = ESMF_SUCCESS
   end subroutine
 !------------------------------------------------------------------------------
@@ -617,11 +634,19 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
-    call ESMF_MapperPartitionPets(mapper, mapper%mapperp%rootExecBlock,&
-          mapper%mapperp%petList, rc=localrc)
-    if (ESMF_LogFoundError(localrc, &
-      ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
+    if(mapper%mapperp%optInfo%optMethod == ESMF_MAPPER_WGT_EXEC_TIME_OPT_METHOD) then
+      call ESMF_MapperPartitionPets(mapper, mapper%mapperp%rootExecBlock,&
+            mapper%mapperp%petList, rc=localrc)
+      if (ESMF_LogFoundError(localrc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    else
+      ! Unknown optimization method
+      localrc = ESMF_FAILURE
+      if (ESMF_LogFoundError(localrc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    end if
   
     if (present(rc)) rc = ESMF_SUCCESS
   end subroutine
