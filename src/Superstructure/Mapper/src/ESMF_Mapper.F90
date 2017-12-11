@@ -57,9 +57,11 @@ module ESMF_MapperMod
   ! Mapper optimization info for a component
   type ESMF_MapperCompOptimizeInfo
     ! The PET list used by the component
-    integer, dimension(:), pointer :: curPetList => null()
+    !integer, dimension(:), pointer :: curPetList => null()
+    integer, dimension(:), allocatable :: curPetList
     ! The predicted optimal PET list for the component
-    integer, dimension(:), pointer :: optPetList => null()
+    !integer, dimension(:), pointer :: optPetList => null()
+    integer, dimension(:), allocatable :: optPetList
     ! The elapsed wallclock time for the latest run of this component
     real(ESMF_KIND_R8) :: curElapsedWallClockTime
     ! The predicted wallclock time for the next run of this component
@@ -93,6 +95,7 @@ module ESMF_MapperMod
 
   ! Mapper optimization info for an execution block
   type ESMF_MapperExecutionBlockOptimizeInfo
+    integer :: npets
     ! The elapsed wallclock time for the latest run of this execution block
     real(ESMF_KIND_R8) :: curElapsedWallClockTime
     ! The predicted wallclock time for the next run of this execution block
@@ -384,6 +387,200 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   end subroutine
 !------------------------------------------------------------------------------
 
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_MapperExecutionBlockCollect()"
+!BOP
+! !IROUTINE: ESMF_MapperExecutionBlockCollect - Collect all info about the execution
+! block by recursively querying child execution blocks and component infos
+
+! !INTERFACE:
+  subroutine ESMF_MapperExecutionBlockCollect(mapper, execBlock, keywordEnforcer, rc)
+!
+!
+! !ARGUMENTS:
+    type(ESMF_Mapper), intent(inout) :: mapper
+    type(ESMF_MapperExecutionBlock), intent(inout) :: execBlock
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    integer,             intent(out), optional :: rc
+
+    integer :: nChildExecBlocks, nChildCompInfos, npets
+    integer :: i, localrc
+    real(ESMF_KIND_R8) :: childMaxElapsedWallClockTime
+! !DESCRIPTION:
+!   Collects all info required by the ESMF\_Mapper from an execution block
+!
+! The arguments are:
+!   \begin{description}
+!   \item[{[mapper]}]
+!     The mapper class;
+!   \item[{[execBlock]}]
+!     The Execution block
+!   \item[{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+  !-----------------------------------------------------------------------------    
+    ! Collect info on all child execution blocks
+    nChildExecBlocks = 0
+    nChildCompInfos = 0
+    if(associated(execBlock%execBlockp%execBlocks)) then
+      nChildExecBlocks = size(execBlock%execBlockp%execBlocks)
+    end if
+    if(associated(execBlock%execBlockp%compInfos)) then
+      nChildCompInfos = size(execBlock%execBLockp%compInfos)
+    end if
+
+    do i=1,nChildExecBlocks
+      call ESMF_MapperExecutionBlockCollect(mapper,&
+            execBlock%execBlockp%execBlocks(i), rc=localrc)
+      if (ESMF_LogFoundError(localrc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    end do
+
+    ! Collect info from the immediate child execution blocks and comp infos
+    childMaxElapsedWallClockTime = 0.0
+    npets = 0
+    do i=1,nChildExecBlocks
+      childMaxElapsedWallClockTime =&
+        max(childMaxElapsedWallClockTime,&
+            execBlock%execBlockp%execBlocks(i)%execBlockp%optInfo%curElapsedWallClockTime)
+      npets = npets + execBlock%execBlockp%execBlocks(i)%execBlockp%optInfo%npets
+    end do
+    do i=1,nChildCompInfos
+      childMaxElapsedWallClockTime =&
+        max(childMaxElapsedWallClockTime,&
+            execBlock%execBlockp%compInfos(i)%compInfop%optInfo%curElapsedWallClockTime)
+      npets = npets + size(execBlock%execBlockp%compInfos(i)%compInfop%optInfo%curPetList)
+    end do
+   
+    ! FIXME: Save old elapsed time 
+    execBlock%execBlockp%optInfo%curElapsedWallClockTime =&
+      childMaxElapsedWallClockTime
+    execBlock%execBlockp%optInfo%npets = npets
+
+    if (present(rc)) rc = ESMF_SUCCESS
+  end subroutine
+!------------------------------------------------------------------------------
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_MapperExecutionBlockCollect()"
+!BOP
+! !IROUTINE: ESMF_MapperParitionPets - Partition PETs among components
+
+! !INTERFACE:
+  subroutine ESMF_MapperPartitionPets(mapper, execBlock, petList, keywordEnforcer, rc)
+!
+!
+! !ARGUMENTS:
+    type(ESMF_Mapper), intent(inout) :: mapper
+    type(ESMF_MapperExecutionBlock), intent(inout) :: execBlock
+    integer, dimension(:), intent(in) :: petList
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    integer,             intent(out), optional :: rc
+
+    integer :: nChildExecBlocks, nChildCompInfos, nTotalPets, nChildPets
+    integer :: curPartitionStart
+    integer, dimension(:), allocatable :: childPetList
+    integer :: i, j, localrc
+    real(ESMF_KIND_R8), dimension(:), allocatable :: childElapsedWallClockTimes
+    real(ESMF_KIND_R8) :: totalChildElapsedWallClockTime
+! !DESCRIPTION:
+!   Partition pets among components (execution blocks and component infos)
+!
+! The arguments are:
+!   \begin{description}
+!   \item[{[mapper]}]
+!     The mapper class;
+!   \item[{[execBlock]}]
+!     The Execution block
+!   \item[{[petList]}]
+!     The PET list to partition (within execBlock)
+!   \item[{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+  !-----------------------------------------------------------------------------    
+    nChildExecBlocks = 0
+    nChildCompInfos = 0
+    if(associated(execBlock%execBlockp%execBlocks)) then
+      nChildExecBlocks = size(execBlock%execBlockp%execBlocks)
+    end if
+    if(associated(execBlock%execBlockp%compInfos)) then
+      nChildCompInfos = size(execBlock%execBLockp%compInfos)
+    end if
+
+    allocate(childElapsedWallClockTimes(nChildExecBlocks + nChildCompInfos),&
+              stat=localrc)
+    if (ESMF_LogFoundAllocError(localrc, msg="childElapsedWallClockTimes", &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    childElapsedWallClockTimes = 0.0
+    j = 1
+    do i=1,nChildExecBlocks
+      childElapsedWallClockTimes(j) =&
+            execBlock%execBlockp%execBlocks(i)%execBlockp%optInfo%curElapsedWallClockTime
+      j = j+1
+    end do
+    do i=1,nChildCompInfos
+      childElapsedWallClockTimes(j) =&
+            execBlock%execBlockp%compInfos(i)%compInfop%optInfo%curElapsedWallClockTime
+      j = j+1
+    end do
+
+    totalChildElapsedWallClockTime = sum(childElapsedWallClockTimes)
+
+    nTotalPets = size(petList)
+   
+    j = 1
+    curPartitionStart = 1
+    do i=1,nChildExecBlocks
+      ! FIXME: Instead of using floor here, also try assigning the last
+      ! component/execBlock the rest of the available pets
+      nChildPets = max(1, floor(nTotalPets *&
+            (childElapsedWallClockTimes(j)/totalChildElapsedWallClockTime)))
+      j = j+1
+      call ESMF_MapperPartitionPets(mapper,&
+            execBlock%execBlockp%execBlocks(i),&
+            petList(curPartitionStart:curPartitionStart+nChildPets-1),&
+            rc=localrc)
+      if (ESMF_LogFoundError(localrc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+      curPartitionStart = curPartitionStart + nChildPets
+    end do
+
+    do i=1,nChildCompInfos
+      ! FIXME: Instead of using floor here, also try assigning the last
+      ! component/execBlock the rest of the available pets
+      nChildPets = max(1, floor(nTotalPets *&
+            (childElapsedWallClockTimes(j)/totalChildElapsedWallClockTime)))
+      j = j+1
+      if(allocated(execBlock%execBlockp%compInfos(i)%compInfop%optInfo%optPetList)) then
+        deallocate(execBlock%execBlockp%compInfos(i)%compInfop%optInfo%optPetList)
+      end if
+      allocate(execBlock%execBlockp%compInfos(i)%compInfop%optInfo%optPetList(nChildPets))
+      execBlock%execBlockp%compInfos(i)%compInfop%optInfo%optPetList =&
+            petList(curPartitionStart:curPartitionStart+nChildPets-1)
+      ! FIXME : Save current petlist
+      if(allocated(execBlock%execBlockp%compInfos(i)%compInfop%optInfo%curPetList)) then
+        deallocate(execBlock%execBlockp%compInfos(i)%compInfop%optInfo%curPetList)
+      end if
+      allocate(execBlock%execBlockp%compInfos(i)%compInfop%optInfo%curPetList(nChildPets))
+      execBlock%execBlockp%compInfos(i)%compInfop%optInfo%curPetList =&
+            petList(curPartitionStart:curPartitionStart+nChildPets-1)
+      curPartitionStart = curPartitionStart + nChildPets
+    end do
+    if (present(rc)) rc = ESMF_SUCCESS
+  end subroutine
+!------------------------------------------------------------------------------
+
+
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_MapperOptimize()"
@@ -398,6 +595,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,             intent(out), optional :: rc
 
+    integer :: localrc
 ! !DESCRIPTION:
 !   Optimize using the mapper based on the set constraints
 !
@@ -411,6 +609,20 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !EOP
   !-----------------------------------------------------------------------------    
+
+    ! First collect info on all execution blocks
+    call ESMF_MapperExecutionBlockCollect(mapper, mapper%mapperp%rootExecBlock,&
+          rc=localrc)
+    if (ESMF_LogFoundError(localrc, &
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    call ESMF_MapperPartitionPets(mapper, mapper%mapperp%rootExecBlock,&
+          mapper%mapperp%petList, rc=localrc)
+    if (ESMF_LogFoundError(localrc, &
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+  
     if (present(rc)) rc = ESMF_SUCCESS
   end subroutine
 !------------------------------------------------------------------------------
@@ -745,8 +957,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       if(associated(execBlock%execBlockp%compInfos)) then
         sz = size(execBlock%execBlockp%compInfos)
         do i=1,sz
-          call ESMF_MapperCompInfoDestroy(mapper, &
-                execBlock%execBlockp%compInfos(i), rc=localrc)
+          ! Users should destroy compInfos
+          !call ESMF_MapperCompInfoDestroy(mapper, &
+          !      execBlock%execBlockp%compInfos(i), rc=localrc)
           ! FIXME: Should we ignore errors while destroying ?
         end do
         deallocate(execBlock%execBlockp%compInfos)
