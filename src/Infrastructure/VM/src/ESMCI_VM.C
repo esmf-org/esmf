@@ -145,8 +145,8 @@ static bool VMKeyCompare(char *vmKey1, char *vmKey2){
   if (i==vmKeyWidth) return true;
 #if 0
   else
-    std::cout << ESMC_METHOD  << ": vmKey1[" << i << "] = " 
-      << vmKey1[i] << " != vmKey2[" << i << "] = " << vmKey2[i] << std::endl;
+    std::cout << ESMC_METHOD  << ": vmKey1[" << i << "] = " << vmKey1[i]
+        << " != vmKey2[" << i << "] = " << vmKey2[i] << std::endl;
 #endif
   return false;
 }
@@ -292,7 +292,11 @@ bool VMIdCompare(
 #endif
     return false;
   }
-  return VMKeyCompare(vmID1->vmKey, vmID2->vmKey);
+  bool match = VMKeyCompare(vmID1->vmKey, vmID2->vmKey);
+#if 0
+  if (!match) std::cout << ESMC_METHOD << ": keys don't compare" << std::endl;
+#endif
+  return match;
 }
 //-----------------------------------------------------------------------------
 
@@ -1376,7 +1380,7 @@ int VMId::deserialize(const char *buffer, int *offset, bool offsetonly) {
   *offset = (cp - buffer);
 
   // return successfully
-  rc = localrc;  // ESMF_SUCCESS;
+  rc = ESMF_SUCCESS;
   return rc;
 }
 //-----------------------------------------------------------------------------
@@ -1440,7 +1444,7 @@ int VMId::serialize(const char *buffer, int *length, int *offset,
   }
 
   // return successfully
-  rc = localrc;  // ESMF_SUCCESS;
+  rc = ESMF_SUCCESS;
   return rc;
 }
 //-----------------------------------------------------------------------------
