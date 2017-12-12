@@ -152,6 +152,9 @@ namespace ESMCI {
   // Sort nbr elements to be counter clockwise
   void _make_nbr_elems_cntrclk(double *src_cntr, std::vector<NBR_ELEM> *nbrs) {
 
+    // If there are no neighbors return
+    if (nbrs->empty()) return;
+
     // Make unit vector to src centroid
     double u_src_cntr[3];
     double len=MU_LEN_VEC3D(src_cntr);
@@ -276,9 +279,9 @@ namespace ESMCI {
   }
 
 
-  // Compute gradient using Green's theorem
+  // Compute gradient across the source cell using Green's theorem
   // Assumes nbrs are in counter-clockwise order
-  void _set_gradient_info_in_neighbors(double *src_cntr, double *src_grad, std::vector<NBR_ELEM> *nbrs) {
+  void _set_grad_info_using_greens(double *src_cntr, double *src_grad, std::vector<NBR_ELEM> *nbrs) {
 
     // Compute area of polygon
 #define MAX_NUM_NBRS 40
@@ -314,8 +317,6 @@ namespace ESMCI {
 
     // Set src gradient term to 0.0
     MU_SET_TO_SCALAR_VEC3D(src_grad,0.0);
-
- /* XMRKX */
 
     // Get previous nbr index
     int prev_ind=nbrs->size()-1;
@@ -360,7 +361,6 @@ namespace ESMCI {
     double div_len=1.0/len;
     MU_MULT_BY_SCALAR_VEC3D(u_src_cntr,src_cntr,div_len);
     
-
     // Make sure gradient is orthogonal to src_cntr
     // (because src_cntr is a constant we can use the distributive property to do each part of the sum
     //  separately)
@@ -388,6 +388,97 @@ namespace ESMCI {
     MU_MULT_BY_SCALAR_VEC3D(src_grad,src_grad,div_nbr_poly_area);
 
   }
+
+#if 0
+  // This doesn't seem to be a very good approximation. It's possible that
+  // there's a bug, but I think that it's correct. It may just be that this way doesn't work 
+  // very well. In particular it fails if there isn't a change in one of the coordinates. 
+  // Go with constant grad for 1 and 2 for now. When time think if there's a better way to 
+  // approximate a gradient for a small number of neighbors
+
+  // Only have 1 or 2 neighbors so approximate gradient by just taking differences and dividing by length
+  void _set_grad_info_using_approx(double *src_cntr, double *src_grad, std::vector<NBR_ELEM> *nbrs) {
+
+    // Set src gradient term to 0.0
+    MU_SET_TO_SCALAR_VEC3D(src_grad,0.0);
+
+    // Only works if we have at least one neighbor
+    if (nbrs->size() == 0) {
+      Throw() << "method requires at least one neighbor";
+    }
+
+    // divide by number of points to give average
+    double div_num=1.0/(double)(nbrs->size());
+
+    // Loop through neighbors computing gradient
+    for (int i=0; i<nbrs->size(); i++) {
+      NBR_ELEM *nbr=&((*nbrs)[i]);
+
+      // Difference from here to center
+      double diff[3];
+      MU_SUB_VEC3D(diff,nbr->cntr,src_cntr);
+
+      if (diff[0]!=0.0) nbr->grad[0]=1.0/diff[0];
+      else nbr->grad[0]=0.0;
+
+      if (diff[1]!=0.0) nbr->grad[1]=1.0/diff[1];
+      else nbr->grad[1]=0.0;
+
+      if (diff[2]!=0.0) nbr->grad[2]=1.0/diff[2];
+      else nbr->grad[2]=0.0;
+
+      // Add to source grad term
+      MU_ADD_VEC3D(src_grad,src_grad,nbr->grad);
+    }
+
+
+    // Make unit vector to src centroid
+    double u_src_cntr[3];
+    double len=MU_LEN_VEC3D(src_cntr);
+    if (len == 0.0) Throw() << "Length of vector to point on sphere unexpectedly 0.0";
+    double div_len=1.0/len;
+    MU_MULT_BY_SCALAR_VEC3D(u_src_cntr,src_cntr,div_len);
+    
+    // Make sure gradient is orthogonal to src_cntr
+    // (because src_cntr is a constant we can use the distributive property to do each part of the sum
+    //  separately)
+    for (int i=0; i<nbrs->size(); i++) {
+      NBR_ELEM *nbr=&((*nbrs)[i]);
+
+      // AXBXA gives a vector orthogonal to A
+      double tmp[3];
+      MU_CROSS_PRODUCT_VEC3D(tmp,u_src_cntr,nbr->grad);
+      MU_CROSS_PRODUCT_VEC3D(nbr->grad,tmp,u_src_cntr);
+
+      // Divide to give average (when all weights are summed)
+      MU_MULT_BY_SCALAR_VEC3D(nbr->grad,nbr->grad,div_num);
+    }
+
+    // Make sure src_grad is orthogonal 
+    double tmp[3];
+    MU_CROSS_PRODUCT_VEC3D(tmp,u_src_cntr,src_grad);
+    MU_CROSS_PRODUCT_VEC3D(src_grad,tmp,u_src_cntr);
+
+    // Divide to give average (when all weights are summed)
+    MU_MULT_BY_SCALAR_VEC3D(src_grad,src_grad,div_num);
+  }
+#endif
+
+  // Set gradient info to indicate a 0 gradient across the source cell
+  // This means that the value across the source cell will be treated as a constant
+  void _set_grad_info_to_0(double *src_cntr, double *src_grad, std::vector<NBR_ELEM> *nbrs) {
+
+    // Set src gradient term to 0.0
+    MU_SET_TO_SCALAR_VEC3D(src_grad,0.0);
+
+    // Set gradients to 0.0
+    for (int i=0; i<nbrs->size(); i++) {
+      NBR_ELEM *nbr=&((*nbrs)[i]);
+
+      MU_SET_TO_SCALAR_VEC3D(nbr->grad,0.0);
+    }
+  }
+
 
   double const_func(double *coords) {
     return 1.0;
@@ -639,9 +730,15 @@ namespace ESMCI {
    }
 #endif
 
-    // Set gradient info
-    double src_grad[3];
-    _set_gradient_info_in_neighbors(src_cntr, src_grad, nbrs);
+    // Set gradient info based on number of neighbors
+   double src_grad[3];
+   if (nbrs->size() < 3) { 
+     // Too few neighbors to use Green's, so assume constant grad 
+     _set_grad_info_to_0(src_cntr, src_grad, nbrs);      
+   } else { 
+     // 3 or more neighbors so use Green's theorem
+     _set_grad_info_using_greens(src_cntr, src_grad, nbrs);
+   }
 
 #if 0
     // Check output

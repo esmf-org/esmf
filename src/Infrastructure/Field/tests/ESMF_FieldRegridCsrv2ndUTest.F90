@@ -140,7 +140,7 @@
       call ESMF_Test((csrv.eqv..true. .and. rc.eq.ESMF_SUCCESS), name, &
                       failMsg, result, ESMF_SRCLINE)
 
-#if 0
+#if 1
       !============== 2nd Order  Mesh to Mesh w/ small number of neighbors =======
       ! initialize 
       rc=ESMF_SUCCESS
@@ -6567,6 +6567,450 @@ end subroutine createTestMesh3x3_2
 
  end subroutine test_PerLocStatus 
 
+
+  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  ! 
+  ! Creates the following mesh on 
+  ! 1 or 4 PETs. Returns an error 
+  ! if run on other than 1 or 4 PETs
+  ! 
+  !                     Mesh Ids
+  !
+  !   2.8   13 ------ 14 ------- 15 ------- 16
+  !         |         |          |  10    / |
+  !   2.3   |    7    |    8M    |     /    |
+  !         |         |          |  /    9  |
+  !   1.8   9 ------- 10 ------- 11 ------- 12
+  !         |         |          |          |
+  !   1.5   |    4M   |    5M    |    6     |
+  !         |         |          |          |
+  !   1.2   5 ------- 6 -------- 7 -------- 8
+  !         |         |          |          |
+  !   0.7   |    1    |    2     |    3     |
+  !         |         |          |          |
+  !   0.2   1 ------- 2 -------- 3 -------- 4
+  !            
+  !        0.2  0.7  1.2  1.5   1.8  2.3   2.8
+  !
+  !               Node Ids at corners
+  !              Element Ids in centers
+  ! 
+  !!!!! 
+  ! 
+  ! The owners for 1 PET are all Pet 0.
+  ! The owners for 4 PETs are as follows:
+  !
+  !                   Mesh Owners
+  !
+  !   2.8   2 ------- 2 -------- 3 -------- 3
+  !         |         |          |  3    /  |
+  !         |    2    |    2     |     /    |
+  !         |         |          |  /    3  |
+  !   1.8   2 ------- 2 -------- 3 -------- 3
+  !         |         |          |          |
+  !         |    2    |    2     |    3     |
+  !         |         |          |          |
+  !   1.2   0 ------- 0 -------- 1 -------- 1
+  !         |         |          |          |
+  !         |    0    |    1     |    1     |
+  !         |         |          |          |
+  !   0.2   0 ------- 0 -------- 1 -------- 1
+  !
+  !        0.2       1.2        1.8        2.8
+  !
+  !               Node Owners at corners
+  !              Element Owners in centers
+  ! 
+
+subroutine createTestMesh3x3_snn_1(mesh, rc)
+  type(ESMF_Mesh), intent(out) :: mesh
+  integer :: rc
+
+  integer, pointer :: nodeIds(:),nodeOwners(:)
+  real(ESMF_KIND_R8), pointer :: nodeCoords(:)
+  real(ESMF_KIND_R8), pointer :: ownedNodeCoords(:)
+  integer :: numNodes, numOwnedNodes, numOwnedNodesTst
+   integer :: numElems,numOwnedElemsTst
+  integer :: numElemConns, numTriElems, numQuadElems
+  real(ESMF_KIND_R8), pointer :: elemCoords(:)
+  integer, pointer :: elemIds(:),elemTypes(:),elemConn(:)
+  integer, pointer :: elemMask(:)
+  integer :: petCount, localPet
+  type(ESMF_VM) :: vm
+
+
+  ! get global VM
+  call ESMF_VMGetGlobal(vm, rc=rc)
+  if (rc /= ESMF_SUCCESS) return
+  call ESMF_VMGet(vm, localPet=localPet, petCount=petCount, rc=rc)
+  if (rc /= ESMF_SUCCESS) return
+
+   ! return with an error if not 1 or 4 PETs
+  if ((petCount /= 1) .and. (petCount /=4)) then
+     rc=ESMF_FAILURE
+     return
+   endif
+
+
+  ! Setup mesh info depending on the 
+  ! number of PETs
+  if (petCount .eq. 1) then
+
+     ! Fill in node data
+     numNodes=16
+
+     !! node ids
+     allocate(nodeIds(numNodes))
+     nodeIds=(/1,2,3,4,5,6,7,8, &
+                9,10,11,12,13,14,&
+               15,16/) 
+     
+     !! node Coords
+     allocate(nodeCoords(numNodes*2))
+     nodeCoords=(/0.2,0.2, & ! 1
+                 1.2,0.2, &  ! 2
+                 1.8,0.2, &  ! 3
+                 2.8,0.2, &  ! 4
+                 0.2,1.2, &  ! 5
+                 1.2,1.2, &  ! 6
+                 1.8,1.2, &  ! 7
+                 2.8,1.2, &  ! 8
+                  0.2,1.8, &  ! 9
+                 1.2,1.8, &  ! 10
+                 1.8,1.8, &  ! 11
+                 2.8,1.8, &  ! 12
+                 0.2,2.8, &  ! 13
+                  1.2,2.8, &  ! 14
+                 1.8,2.8, &  ! 15
+                 2.8,2.8 /)  ! 16
+ 
+
+      !! node owners
+      allocate(nodeOwners(numNodes))
+      nodeOwners=0 ! everything on proc 0
+
+
+      ! Fill in elem data
+      numTriElems=2
+      numQuadElems=8
+       numElems=numTriElems+numQuadElems
+      numElemConns=3*numTriElems+4*numQuadElems
+
+      !! elem ids
+      allocate(elemIds(numElems))
+      elemIds=(/1,2,3,4,5,6,7,8,9,10/) 
+
+      !! elem mask
+      allocate(elemMask(numElems))
+      elemMask=(/0,0,0,1,1,0,0,1,0,0/) 
+
+      !! elem types
+      allocate(elemTypes(numElems))
+      elemTypes=(/ESMF_MESHELEMTYPE_QUAD, & ! 1
+                  ESMF_MESHELEMTYPE_QUAD, & ! 2
+                  ESMF_MESHELEMTYPE_QUAD, & ! 3
+                  ESMF_MESHELEMTYPE_QUAD, & ! 4
+                   ESMF_MESHELEMTYPE_QUAD, & ! 5
+                  ESMF_MESHELEMTYPE_QUAD, & ! 6
+                  ESMF_MESHELEMTYPE_QUAD, & ! 7
+                  ESMF_MESHELEMTYPE_QUAD, & ! 8
+                  ESMF_MESHELEMTYPE_TRI,  & ! 9
+                   ESMF_MESHELEMTYPE_TRI/)   ! 10
+
+      !! elem coords
+      allocate(elemCoords(2*numElems))
+      elemCoords=(/0.7,0.7, & ! 1
+                   1.5,0.7, & ! 2
+                   2.3,0.7, & ! 3
+                   0.7,1.5, & ! 4
+                   1.5,1.5, & ! 5
+                   2.3,1.5, & ! 6
+                   0.7,2.3, & ! 7
+                   1.5,2.3, & ! 8
+                   2.75,2.25,& ! 9
+                    2.25,2.75/)  ! 10
+
+      !! elem conn
+      allocate(elemConn(numElemConns))
+      elemConn=(/1,2,6,5,   & ! 1
+                 2,3,7,6,   & ! 2
+                 3,4,8,7,   & ! 3
+                 5,6,10,9,  & ! 4
+                 6,7,11,10, & ! 5
+                 7,8,12,11, & ! 6
+                 9,10,14,13, & ! 7
+                 10,11,15,14, & ! 8
+                 11,12,16, & ! 9
+                  11,16,15/) ! 10
+
+   else if (petCount .eq. 4) then
+     ! Setup mesh data depending on PET
+     if (localPet .eq. 0) then
+ 
+     ! Fill in node data
+     numNodes=4
+
+     !! node ids
+     allocate(nodeIds(numNodes))
+     nodeIds=(/1,2,5,6/)
+     
+     !! node Coords
+     allocate(nodeCoords(numNodes*2))
+     nodeCoords=(/0.2,0.2, & ! 1
+                 1.2,0.2, &  ! 2
+                 0.2,1.2, &  ! 5
+                  1.2,1.2 /)  ! 6 
+
+      !! node owners
+      allocate(nodeOwners(numNodes))
+      nodeOwners=0 ! everything on proc 0
+
+      ! Fill in elem data
+      numTriElems=0
+      numQuadElems=1
+      numElems=numTriElems+numQuadElems
+      numElemConns=3*numTriElems+4*numQuadElems
+
+      !! elem ids
+       allocate(elemIds(numElems))
+      elemIds=(/1/) 
+
+      !! elem mask
+      allocate(elemMask(numElems))
+      elemMask=(/0/) 
+
+
+      !! elem types
+      allocate(elemTypes(numElems))
+       elemTypes=(/ESMF_MESHELEMTYPE_QUAD/) ! 1
+
+      !! elem coords
+      allocate(elemCoords(2*numElems))
+      elemCoords=(/0.7,0.7/)  ! 1
+
+      !! elem conn
+      allocate(elemConn(numElemConns))
+      elemConn=(/1,2,4,3/) ! 1
+
+     else if (localPet .eq. 1) then
+
+     ! Fill in node data
+      numNodes=6
+
+     !! node ids
+     allocate(nodeIds(numNodes))
+     nodeIds=(/2,3,4,6,7,8/)
+     
+     !! node Coords
+     allocate(nodeCoords(numNodes*2))
+     nodeCoords=(/1.2,0.2, &  ! 2
+                  1.8,0.2, &  ! 3
+                  2.8,0.2, &  ! 4
+                  1.2,1.2, &  ! 6
+                  1.8,1.2, &  ! 7
+                   2.8,1.2 /)  ! 8
+
+ 
+
+      !! node owners
+       allocate(nodeOwners(numNodes))
+      nodeOwners=(/0, & ! 2
+                   1, & ! 3
+                   1, & ! 4
+                   0, & ! 6
+                   1, & ! 7
+                   1/)  ! 8
+
+      ! Fill in elem data
+      numTriElems=0
+      numQuadElems=2
+      numElems=numTriElems+numQuadElems
+      numElemConns=3*numTriElems+4*numQuadElems
+ 
+      !! elem ids
+      allocate(elemIds(numElems))
+      elemIds=(/2,3/)
+
+      !! elem mask
+      allocate(elemMask(numElems))
+      elemMask=(/0,0/) 
+
+      !! elem types
+      allocate(elemTypes(numElems))
+      elemTypes=(/ESMF_MESHELEMTYPE_QUAD, & ! 2
+                  ESMF_MESHELEMTYPE_QUAD/)  ! 3
+
+      !! elem coords
+      allocate(elemCoords(2*numElems))
+      elemCoords=(/1.5,0.7, & ! 2
+                    2.3,0.7/)  ! 3
+
+
+      !! elem conn
+      allocate(elemConn(numElemConns))
+       elemConn=(/1,2,5,4,   & ! 2
+                 2,3,6,5/)    ! 3
+
+     else if (localPet .eq. 2) then
+
+     ! Fill in node data
+     numNodes=9
+
+     !! node ids
+     allocate(nodeIds(numNodes))
+     nodeIds=(/5,6,7,   &
+               9,10,11, &
+               13,14,15/)
+ 
+     
+     !! node Coords
+     allocate(nodeCoords(numNodes*2))
+     nodeCoords=(/0.2,1.2, &  ! 5
+                  1.2,1.2, &  ! 6
+                  1.8,1.2, &  ! 7
+                  0.2,1.8, &  ! 9 
+                  1.2,1.8, &  ! 10
+                  1.8,1.8, &  ! 11
+                  0.2,2.8, &  ! 13
+                  1.2,2.8, &  ! 14
+                  1.8,2.8/)  ! 15
+  
+
+      !! node owners
+      allocate(nodeOwners(numNodes))
+      nodeOwners=(/0, & ! 5
+                    0, & ! 6
+                   1, & ! 7
+                   2, & ! 9
+                   2, & ! 10
+                   3, & ! 11
+                   2, & ! 13
+                   2, & ! 14
+                   3/)  ! 15
+
+
+      ! Fill in elem data
+      numTriElems=0
+      numQuadElems=4
+       numElems=numTriElems+numQuadElems
+      numElemConns=3*numTriElems+4*numQuadElems
+
+      !! elem ids
+      allocate(elemIds(numElems))
+      elemIds=(/4,5,7,8/)
+
+      !! elem mask
+      allocate(elemMask(numElems))
+      elemMask=(/1,1,0,1/) 
+
+      !! elem types
+      allocate(elemTypes(numElems))
+      elemTypes=(/ESMF_MESHELEMTYPE_QUAD, & ! 4
+                  ESMF_MESHELEMTYPE_QUAD, & ! 5
+                  ESMF_MESHELEMTYPE_QUAD, & ! 7
+                  ESMF_MESHELEMTYPE_QUAD/)  ! 8
+ 
+
+      !! elem coords
+      allocate(elemCoords(2*numElems))
+      elemCoords=(/0.7,1.5, & ! 4
+                    1.5,1.5, & ! 5
+                   0.7,2.3, & ! 7
+                   1.5,2.3/)  ! 8
+
+      !! elem conn
+      allocate(elemConn(numElemConns))
+      elemConn=(/1,2,5,4,  & ! 4
+                 2,3,6,5,  & ! 5
+                 4,5,8,7,  & ! 7
+                 5,6,9,8/)   ! 8
+     else if (localPet .eq. 3) then
+
+     ! Fill in node data
+      numNodes=6
+
+     !! node ids
+     allocate(nodeIds(numNodes))
+     nodeIds=(/7,8,11,12,15,16/)
+     
+     !! node Coords
+     allocate(nodeCoords(numNodes*2))
+     nodeCoords=(/1.8,1.2, &  ! 7
+                  2.8,1.2, &  ! 8
+                  1.8,1.8, &  ! 11
+                  2.8,1.8, &  ! 12
+                  1.8,2.8, &  ! 15
+                   2.8,2.8 /)  ! 16
+ 
+
+      !! node owners
+      allocate(nodeOwners(numNodes))
+       nodeOwners=(/1, & ! 7
+                   1, & ! 8
+                   3, & ! 11
+                   3, & ! 12
+                   3, & ! 15
+                   3/)  ! 16
+
+      ! Fill in elem data
+      numTriElems=2
+      numQuadElems=1
+      numElems=numTriElems+numQuadElems
+      numElemConns=3*numTriElems+4*numQuadElems
+
+       !! elem ids
+      allocate(elemIds(numElems))
+      elemIds=(/6,9,10/) 
+
+      !! elem mask
+      allocate(elemMask(numElems))
+      elemMask=(/0,0,0/) 
+
+      !! elem types
+      allocate(elemTypes(numElems))
+      elemTypes=(/ESMF_MESHELEMTYPE_QUAD, & ! 6
+                  ESMF_MESHELEMTYPE_TRI,  & ! 9
+                  ESMF_MESHELEMTYPE_TRI/)   ! 10
+
+      !! elem coords
+      allocate(elemCoords(2*numElems))
+      elemCoords=(/2.3,1.5, & ! 6
+                    2.75,2.25,& ! 9
+                   2.25,2.75/)  ! 10
+
+      !! elem conn
+      allocate(elemConn(numElemConns))
+       elemConn=(/1,2,4,3, & ! 6
+                 3,4,6, & ! 9
+                 3,6,5/) ! 10
+     endif
+   endif
+
+   
+   ! Create Mesh structure in 1 step
+   mesh=ESMF_MeshCreate(parametricDim=2,spatialDim=2, &
+        coordSys=ESMF_COORDSYS_SPH_DEG, &
+        nodeIds=nodeIds, nodeCoords=nodeCoords, &
+        nodeOwners=nodeOwners, elementIds=elemIds,&
+        elementTypes=elemTypes, elementConn=elemConn, &
+         elementCoords=elemCoords,  elementMask=elemMask,&
+        rc=rc)
+   if (rc /= ESMF_SUCCESS) return
+
+   ! deallocate node data
+   deallocate(nodeIds)
+   deallocate(nodeCoords)
+   deallocate(nodeOwners)
+   
+   ! deallocate elem data
+   deallocate(elemIds)
+   deallocate(elemTypes)
+   deallocate(elemCoords)
+   deallocate(elemConn)
+   deallocate(elemMask)
+
+end subroutine createTestMesh3x3_snn_1
+
   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   ! 
   ! Creates the following mesh on 
@@ -6621,7 +7065,7 @@ end subroutine createTestMesh3x3_2
   !              Element Owners in centers
   ! 
 
-subroutine createTestMesh3x3_smallnumnbrs(mesh, rc)
+subroutine createTestMesh3x3_snn_2(mesh, rc)
            
   type(ESMF_Mesh), intent(out) :: mesh
   integer :: rc
@@ -7006,8 +7450,9 @@ subroutine createTestMesh3x3_smallnumnbrs(mesh, rc)
    deallocate(elemTypes)
    deallocate(elemCoords)
    deallocate(elemConn)
+   deallocate(elemMask)
 
-end subroutine createTestMesh3x3_smallnumnbrs
+end subroutine createTestMesh3x3_snn_2
 
  subroutine test_SmallNumNbrs(itrp, csrv, rc)
 #undef ESMF_METHOD 
@@ -7041,6 +7486,10 @@ end subroutine createTestMesh3x3_smallnumnbrs
   real(ESMF_KIND_R8) :: maxerrorg(1), minerrorg(1), errorg
  
   real(ESMF_KIND_R8) :: errorTot, errorTotG, dstVal
+
+  integer :: num_errorTot
+  real(ESMF_KIND_R8) :: l_errorTot(1),g_errorTot(1)
+  integer :: l_num_errorTot(1), g_num_errorTot(1)
    
   integer, pointer :: nodeIds(:),nodeOwners(:)
   real(ESMF_KIND_R8), pointer :: nodeCoords(:)
@@ -7088,8 +7537,7 @@ end subroutine createTestMesh3x3_smallnumnbrs
   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
  
   ! Create Source Mesh
-  call createTestMesh3x3_smallnumnbrs(srcMesh, rc=localrc)
-!  call createTestMesh3x3
+  call createTestMesh3x3_snn_1(srcMesh, rc=localrc)
   if (ESMF_LogFoundError(localrc, &
        ESMF_ERR_PASSTHRU, &
        ESMF_CONTEXT, rcToReturn=rc)) return
@@ -7169,9 +7617,9 @@ end subroutine createTestMesh3x3_smallnumnbrs
 
      ! Set src to bad value to test masking
      ! (elem 3, is the only one with lon >2 and lat <1.0)
-     if ((lon > 2.0) .and. (lat < 1.0)) then
-        srcFarrayPtr(i1) = 1000.0
-     endif
+!     if ((lon > 2.0) .and. (lat < 1.0)) then
+!        srcFarrayPtr(i1) = 1000.0
+!     endif
   enddo
 
 
@@ -7184,7 +7632,7 @@ end subroutine createTestMesh3x3_smallnumnbrs
   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
   ! Create Destination Mesh
-  call createTestMesh3x3_1(dstMesh, rc=localrc)
+  call createTestMesh3x3_snn_2(dstMesh, rc=localrc)
   if (ESMF_LogFoundError(localrc, &
        ESMF_ERR_PASSTHRU, &
        ESMF_CONTEXT, rcToReturn=rc)) return
@@ -7284,10 +7732,10 @@ end subroutine createTestMesh3x3_smallnumnbrs
      ! Set dst and exact to bad value to test masking
      ! If masking works, they won't change, so they'll still match
      ! (elem 1, is the only one with both < 1.0)
-     if ((lon < 1.0) .and. (lat < 1.0)) then
-        xdstFarrayPtr(i1) = -1000.00
-        dstFarrayPtr(i1) = -1000.00
-     endif
+ !    if ((lon < 1.0) .and. (lat < 1.0)) then
+ !       xdstFarrayPtr(i1) = -1000.00
+ !       dstFarrayPtr(i1) = -1000.00
+ !    endif
    enddo
 
    ! Deallocate space for coordinates
@@ -7305,7 +7753,7 @@ end subroutine createTestMesh3x3_smallnumnbrs
           srcField, &
           srcMaskValues=(/1/), &
           dstField=dstField, &
-!          dstMaskValues=(/1/), &
+          dstMaskValues=(/1/), &
           routeHandle=routeHandle, &
           regridmethod=ESMF_REGRIDMETHOD_CONSERVE_2ND, &
           dstFracField=dstFracField, &
@@ -7320,7 +7768,6 @@ end subroutine createTestMesh3x3_smallnumnbrs
 
   ! Do regrid
   call ESMF_FieldRegrid(srcField, dstField, routeHandle, &
-       zeroregion=ESMF_REGION_SELECT, & ! So bad masked dest doesn't get overwritten
        rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
       rc=ESMF_FAILURE
@@ -7354,6 +7801,7 @@ end subroutine createTestMesh3x3_smallnumnbrs
   maxerror(1) = 0.
   error = 0.
   errorTot=0.0
+  num_errorTot=0
   dstmass = 0.
 
   ! get dst Field
@@ -7379,35 +7827,26 @@ end subroutine createTestMesh3x3_smallnumnbrs
      return
   endif
 
-#if 1
   ! get frac Field
   call ESMF_FieldGet(dstFracField, 0, dstFracptr,  rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
      rc=ESMF_FAILURE
      return
   endif
-#endif
 
   ! destination grid
   !! check relative error
   do i1=clbnd(1),cubnd(1)
 
-     ! Only include in sum, if not masked 
-     if (xdstFarrayPtr(i1) .gt. -999.0) then
 
-        ! This is WRONG, shouldn't include Frac
-        ! dstmass = dstmass + dstFracptr(i1,i2)*dstAreaptr(i1)*fptr(i1)
+     ! This is WRONG, shouldn't include Frac
+     ! dstmass = dstmass + dstFracptr(i1,i2)*dstAreaptr(i1)*fptr(i1)
      
-        ! Instead do this
-        dstmass = dstmass + dstAreaptr(i1)*dstFarrayPtr(i1)
-        !      dstmass = dstmass + dstFarrayPtr(i1)
-        !write(*,*) i1,"::", dstFarrayPtr(i1), dstAreaPtr(i1)
-     endif
+     ! Instead do this
+     dstmass = dstmass + dstAreaptr(i1)*dstFarrayPtr(i1)
 
-
-     ! If this destination cell isn't covered by a sig. amount of source, then compute error on it.
-     ! (Note that this is what SCRIP does)
-     !if (dstFracptr(i1) .lt. 0.999) cycle
+     ! If this destination cell isn't covered by a sig. amount of source, then don't compute error on it.
+     if (dstFracPtr(i1) .lt. 0.1) cycle
 
      ! write(*,*) i1,"::",dstFarrayPtr(i1),xdstFarrayPtr(i1)
 
@@ -7420,25 +7859,24 @@ end subroutine createTestMesh3x3_smallnumnbrs
      endif
 
      if (xdstFarrayPtr(i1) .ne. 0.0) then
-           error=ABS(dstVal - xdstFarrayPtr(i1))/ABS(xdstFarrayPtr(i1))
-           errorTot=errorTot+error
-           if (error > maxerror(1)) then
-             maxerror(1) = error
-           endif
-           if (error < minerror(1)) then
-             minerror(1) = error
-           endif
-        else
-           error=ABS(dstVal - xdstFarrayPtr(i1))
-           errorTot=errorTot+error
-           if (error > maxerror(1)) then
-             maxerror(1) = error
-           endif
-           if (error < minerror(1)) then
-             minerror(1) = error
-           endif
-        endif
-     enddo
+        error=ABS(dstVal - xdstFarrayPtr(i1))/ABS(xdstFarrayPtr(i1))
+     else
+        error=ABS(dstVal - xdstFarrayPtr(i1))
+     endif
+
+     ! total error 
+     errorTot=errorTot+error
+     num_errorTot=num_errorTot+1           
+
+     ! min max error
+     if (error > maxerror(1)) then
+        maxerror(1) = error
+     endif
+     if (error < minerror(1)) then
+        minerror(1) = error
+     endif
+
+  enddo
 
 
   srcmass(1) = 0.
@@ -7466,11 +7904,7 @@ end subroutine createTestMesh3x3_smallnumnbrs
   endif
 
   do i1=clbnd(1),cubnd(1)
-     ! Only include in sum, if not masked 
-     ! (src masked values are set to 1000.0)
-     if (srcFarrayPtr(i1) .lt. 999.0) then
         srcmass(1) = srcmass(1) + srcFracptr(i1)*srcAreaptr(i1)*srcFarrayPtr(i1)
-     endif
   enddo
 
 
@@ -7500,6 +7934,20 @@ end subroutine createTestMesh3x3_smallnumnbrs
     rc=ESMF_FAILURE
     return
   endif
+  
+  l_errorTot(1)=errorTot
+  call ESMF_VMAllReduce(vm, l_errorTot, g_errorTot, 1, ESMF_REDUCE_SUM, rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+    rc=ESMF_FAILURE
+    return
+  endif
+
+  l_num_errorTot(1)=num_errorTot
+  call ESMF_VMAllReduce(vm, l_num_errorTot, g_num_errorTot, 1, ESMF_REDUCE_SUM, rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+    rc=ESMF_FAILURE
+    return
+  endif
 
   ! return answer based on correct flags
   csrv = .false.
@@ -7520,6 +7968,7 @@ end subroutine createTestMesh3x3_smallnumnbrs
     write(*,*) "Interpolation:"
     write(*,*) "Max Error = ", maxerrorg(1)
     write(*,*) "Min Error = ", minerrorg(1)
+    write(*,*) "Avg Error = ", g_errorTot(1)/g_num_errorTot(1)
     write(*,*) " "
   endif
 
@@ -7586,7 +8035,6 @@ end subroutine createTestMesh3x3_smallnumnbrs
    ! rc, itrp, csrv init to success above
 
  end subroutine test_SmallNumNbrs
-
 
 
 end program ESMF_FieldRegridCsrv2ndUTest
