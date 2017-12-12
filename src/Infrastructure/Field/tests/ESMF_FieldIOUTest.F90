@@ -986,14 +986,14 @@ program ESMF_FieldIOUTest
       !print *, lpet, arbseqlist
 
   elem_dg = ESMF_DistGridCreate(arbseqindexlist=arbseqlist, rc=rc)
-  write(failMsg, *) ""
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
   write(name, *) "Create a 1D arbitrarily distributed distgrid"
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
   !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
   elem_mesh = ESMF_MeshCreate(elem_dg, rc=rc)
-  write(failMsg, *) ""
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
   write(name, *) "Create a mesh on the 1D elemental distgrid"
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
@@ -1002,7 +1002,7 @@ program ESMF_FieldIOUTest
   call ESMF_MeshGetFieldBounds(elem_mesh, &
       totalLBound=elem_tlb, totalUBound=elem_tub, &
       totalCount=elem_tc, rc=rc)
-  write(failMsg, *) ""
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
   write(name, *) "Get Field Bounds based on elem_mesh"
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
@@ -1431,6 +1431,10 @@ program ESMF_FieldIOUTest
   call ESMF_FieldDestroy(field_ug, rc=rc)
   if (rc /= ESMF_SUCCESS) countfail = countfail + 1
   call ESMF_FieldDestroy(field_ug2, rc=rc)
+  if (rc /= ESMF_SUCCESS) countfail = countfail + 1
+  call ESMF_FieldDestroy(elem_field, rc=rc)
+  if (rc /= ESMF_SUCCESS) countfail = countfail + 1
+  call ESMF_DistGridDestroy(elem_dg, rc=rc)
   if (rc /= ESMF_SUCCESS) countfail = countfail + 1
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   write(name, *) "Destroying all Fields"
