@@ -526,7 +526,7 @@ class ComPat2{
  private:
   // pure virtual methods to be implemented by user
      
-  virtual void handleLocal()const =0;
+  virtual void handleLocal() =0;
     // called on every localPet exactly once, before any other method
 
   virtual void generateRequest(int responsePet,

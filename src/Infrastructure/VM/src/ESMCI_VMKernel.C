@@ -5525,6 +5525,7 @@ namespace ESMCI{
       ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
     }
 #endif
+          sendResponseBuffer = NULL; // detectable reset
           handleRequest(requestPet, recvBuffer1, recvRequestSize,
             sendResponseBuffer, sendResponseSize);
           vmk->send(&sendResponseSize, sizeof(int), requestPet, &sendCommh3);
@@ -5543,8 +5544,15 @@ namespace ESMCI{
       ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
     }
 #endif
+        recvBuffer2 = NULL; // detectable reset
         if (recvResponseSize>0){
-          recvBuffer2 = sendRequestBuffer;  // okay to reuse sendRequestBuffer
+          if (recvResponseSize <= sendRequestSize){
+            // okay to reuse sendRequestBuffer
+            recvBuffer2 = sendRequestBuffer;
+          }else{
+            // need a larger allocation
+            recvBuffer2 = new char[recvResponseSize];
+          }
           vmk->recv(recvBuffer2, recvResponseSize, responsePet, &recvCommh2);
 #ifdef DEBUG_COMPAT2
     {
@@ -5587,6 +5595,8 @@ namespace ESMCI{
         // localPet acts as requester
         vmk->commwait(&sendCommh1);
         if (sendRequestSize>0){
+          if ((recvBuffer2 != NULL) && (recvBuffer2 != sendRequestBuffer))
+            delete [] recvBuffer2;
           delete [] sendRequestBuffer;
         }
         // localPet acts as responder
@@ -5595,6 +5605,8 @@ namespace ESMCI{
         }
         if (recvRequestSize>0){
           vmk->commwait(&sendCommh3);
+          if ((sendResponseBuffer != NULL) && (sendResponseBuffer!=recvBuffer1))
+            delete [] sendResponseBuffer;
           delete [] recvBuffer1;
         }
       }
