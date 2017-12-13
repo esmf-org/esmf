@@ -1,6 +1,6 @@
 #define SRC_ELEMENT_SORT_VECTOR
 
-  //----------------------------------------------------------------------------
+  //---------------------------------------------------------------------------
 
   template<typename IT> struct FactorElementSort{
     DD::FactorElement<IT> *fep;
@@ -15,7 +15,7 @@
     return (*(a.fep) < *(b.fep));
   }
 
-  //----------------------------------------------------------------------------
+  //---------------------------------------------------------------------------
 
   template<typename IT> struct ElementSort{
     SeqIndex<IT> seqIndex;
@@ -28,14 +28,14 @@
     return (a.seqIndex < b.seqIndex);
   }
   
-  //----------------------------------------------------------------------------
+  //---------------------------------------------------------------------------
   
   template<typename IT> struct MsgElement{
     SeqIndex<IT> seqIndex;
     int de;
   };
 
-  //----------------------------------------------------------------------------
+  //---------------------------------------------------------------------------
 
   template<typename SIT, typename DIT> class FillLinSeqVect:public ComPat2{
     list<FactorElementSort<DIT> > &dstElementSort;
@@ -45,7 +45,6 @@
     list<ElementSort<SIT> > &srcElementSort;
 #endif
     vector<vector<DD::AssociationElement<SIT,DIT> > >&srcLinSeqVect;
-    ESMC_TypeKind_Flag typekindFactor;
    public:
     FillLinSeqVect(
       list<FactorElementSort<DIT> > &dstElementSort_,
@@ -54,20 +53,18 @@
 #else
       list<ElementSort<SIT> > &srcElementSort_,
 #endif
-      vector<vector<DD::AssociationElement<SIT,DIT> > >&srcLinSeqVect_,
-      ESMC_TypeKind_Flag typekindFactor_
+      vector<vector<DD::AssociationElement<SIT,DIT> > >&srcLinSeqVect_
     ):
       // members that need to be set on this level because of reference
       dstElementSort(dstElementSort_),
       srcElementSort(srcElementSort_),
       srcLinSeqVect(srcLinSeqVect_)
     {
-      typekindFactor = typekindFactor_;
     }
     
    private:
        
-    virtual void handleLocal()const{
+    virtual void handleLocal(){
       // called on every localPet exactly once, before any other method
       typename list<FactorElementSort<DIT> >::iterator itD =
         dstElementSort.begin();
@@ -141,10 +138,17 @@
     }
     
     virtual void generateRequest(int responsePet,
-      char* &requestBuffer, int &requestSize)const{
+      char* &requestBuffer, int &requestSize){
       // called on every localPet for every responsePet != localPet
+      //TODO: There is an opportunity to optimize this repeated generation of
+      //TODO: the request. It may make sense to keep track of the previous
+      //TODO: request and see if the size changes between calls into 
+      //TODO: generateRequest(). If not, then previously constructed request
+      //TODO: can be used. If size changes, then here is the place to delete
+      //TODO: the buffer, and not in ComPat2. Need to figure out how to delete
+      //TODO: the very last buffer then.
       int size = dstElementSort.size();
-      MsgElement<DIT> *request = NULL;  // must initialize with NULL
+      MsgElement<DIT> *request = NULL;  // initialize with NULL
       if (size>0){
         // the request buffer is deleted by ComPat2::totalExchange()
         request = new MsgElement<DIT>[size];
@@ -258,8 +262,6 @@
           ++iRes;
         }
       }
-      
-      //TODO: how to delete the local 'request' allocation??????
 #ifdef ASMM_STORE_MEMLOG_on
   VM::logMemInfo(std::string("FillLinSeqVect.handleResponse()"));
 #endif
@@ -267,7 +269,243 @@
     
   };
 
-  //----------------------------------------------------------------------------
+  //---------------------------------------------------------------------------
+
+  template<typename IT> struct SparseMatrixIndex{
+    SeqIndex<IT> seqIndex;
+    int index;  // index into the SparseMatrix
+  };
+  template<typename IT> bool operator <
+    (SparseMatrixIndex<IT> a, SparseMatrixIndex<IT> b){
+    return (a.seqIndex < b.seqIndex);
+  }
+  
+  template<typename IT> struct MsgRequElement{
+    SeqIndex<IT> seqIndex;
+  };
+
+  template<typename SIT, typename DIT, typename T> struct MsgRespElement{
+    SeqIndex<SIT> srcSeqIndex;
+    SeqIndex<DIT> dstSeqIndex;
+    T factor;
+  };
+
+  //---------------------------------------------------------------------------
+  
+  template<typename SIT, typename DIT, typename T>
+    class QuerySparseMatrix:public ComPat2{
+    SparseMatrix<SIT,DIT> const &sparseMatrix;
+    vector<vector<DD::AssociationElement<DIT,SIT> > >&dstLinSeqVect;
+    // members that are initialized internally:
+    vector<SparseMatrixIndex<DIT> > sparseMatrixDind;
+   public:
+    QuerySparseMatrix(
+      SparseMatrix<SIT,DIT> const &sparseMatrix_,
+      vector<vector<DD::AssociationElement<DIT,SIT> > >&dstLinSeqVect_
+    ):
+      // members that need to be set on this level because of reference
+      sparseMatrix(sparseMatrix_),
+      dstLinSeqVect(dstLinSeqVect_)
+    {
+    }
+    
+   private:
+       
+    virtual void handleLocal(){
+      // called on every localPet exactly once, before any other method
+      // set up an index mapper into sparseMatrix, that can be sorted
+      int factorCount = sparseMatrix.getFactorListCount();
+      sparseMatrixDind.resize(factorCount);
+      for (int i=0; i<factorCount; i++){
+        sparseMatrixDind[i].index = i;  // keep track of index
+        // cast SeqInd -> SeqIndex representation
+        SeqInd<DIT> seqInd = sparseMatrix.getDstSeqIndex(i);
+        sparseMatrixDind[i].seqIndex.decompSeqIndex = seqInd.getIndex(0);
+        if (seqInd.getN()>1)
+          sparseMatrixDind[i].seqIndex.tensorSeqIndex = seqInd.getIndex(1);
+        else
+          sparseMatrixDind[i].seqIndex.tensorSeqIndex = 1;
+      }
+      // sort the sparse matrix elements by dst seqIndex
+      sort(sparseMatrixDind.begin(), sparseMatrixDind.end());
+      // work through dstLinSeqVect and find matches with sparseMatrixDind
+      for (unsigned i=0; i<dstLinSeqVect.size(); i++){
+        typename vector<DD::AssociationElement<DIT,SIT> >::iterator itD
+          = dstLinSeqVect[i].begin();
+        typename vector<SparseMatrixIndex<DIT> >::iterator itSM
+          = sparseMatrixDind.begin();
+        T *factorList = (T *)(sparseMatrix.getFactorList());
+#if 0
+    {
+      std::stringstream msg;
+      msg << "ASMM_STORE_LOG:" << __LINE__ << " localDe = " << i;
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+    }
+#endif
+        while ((itD != dstLinSeqVect[i].end())
+          && (itSM != sparseMatrixDind.end())){
+#if 0
+    {
+      std::stringstream msg;
+      msg << "ASMM_STORE_LOG:" << __LINE__ << " itD->seqIndex = "
+        << itD->seqIndex.decompSeqIndex <<"/"<< itD->seqIndex.tensorSeqIndex
+        << " itSM->seqIndex = "
+        << itSM->seqIndex.decompSeqIndex <<"/"<< itSM->seqIndex.tensorSeqIndex;
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+    }
+#endif
+          if (itD->seqIndex == itSM->seqIndex){
+            // found a sparse matrix entry with matching dst seqIndex
+            // add the factor to the factorList of the dstLinSeqVect element
+            DD::FactorElement<SIT> element;
+            // cast SeqInd -> SeqIndex representation
+            SeqInd<SIT> seqInd = sparseMatrix.getSrcSeqIndex(itSM->index);
+            element.partnerSeqIndex.decompSeqIndex = seqInd.getIndex(0);
+            if (seqInd.getN()>1)
+              element.partnerSeqIndex.tensorSeqIndex = seqInd.getIndex(1);
+            else
+              element.partnerSeqIndex.tensorSeqIndex = 1;
+            *(T *)(element.factor) = factorList[itSM->index];
+            itD->factorList.push_back(element);
+            ++(itD->factorCount);
+            // move to the next sparse matrix element
+            ++itSM;
+            if (itSM == sparseMatrixDind.end()) break;
+          }
+          // catch up itD with itSM
+          while ((itD != dstLinSeqVect[i].end()) && 
+            (itD->seqIndex < itSM->seqIndex)){
+            ++itD;
+          }
+          if (itD == dstLinSeqVect[i].end()) break;
+          // catch up itSM with itD
+          while ((itSM != sparseMatrixDind.end()) &&
+            (itSM->seqIndex < itD->seqIndex)){
+            ++itSM;
+          }
+        }
+      }
+    }
+    
+    virtual void generateRequest(int responsePet,
+      char* &requestBuffer, int &requestSize){
+      // called on every localPet for every responsePet != localPet
+      int size = 0;
+      for (unsigned i=0; i<dstLinSeqVect.size(); i++)
+        size += dstLinSeqVect[i].size();
+      MsgRequElement<DIT> *request = NULL;  // initialize with NULL
+      if (size>0){
+        // the request buffer is deleted by ComPat2::totalExchange()
+        request = new MsgRequElement<DIT>[size];
+        int j=0;
+        for (unsigned i=0; i<dstLinSeqVect.size(); i++){
+          typename vector<DD::AssociationElement<DIT,SIT> >::iterator itD;
+          for (itD = dstLinSeqVect[i].begin(); itD != dstLinSeqVect[i].end();
+            ++itD){
+            request[j].seqIndex = itD->seqIndex;
+            ++j;
+          }
+        }
+      }
+      requestBuffer = (char *)request;
+      requestSize = size * sizeof(MsgRequElement<DIT>);
+    }
+    
+    virtual void handleRequest(int requestPet,
+      char *requestBuffer, int requestSize,
+      char* &responseBuffer, int  &responseSize)const{
+      // called on every localPet for every requestPet != localPet
+      
+      MsgRequElement<DIT> *request = (MsgRequElement<DIT> *)requestBuffer;
+      int size = requestSize / sizeof(MsgRequElement<DIT>);
+      vector<MsgRespElement<SIT,DIT,T> >response;
+      
+      // process the request and generate the response
+      int iReq = 0; // request index
+      typename vector<SparseMatrixIndex<DIT> >::const_iterator itSM
+        = sparseMatrixDind.begin();
+      T *factorList = (T *)(sparseMatrix.getFactorList());
+      while ((iReq < size) && (itSM != sparseMatrixDind.end())){
+        if (request[iReq].seqIndex == itSM->seqIndex){
+          // found a sparse matrix entry with matching dst seqIndex
+          // send the factor to the requester to be recorded in dstLinSeqVect
+          MsgRespElement<SIT,DIT,T> element;
+          // cast SeqInd -> SeqIndex representation
+          SeqInd<SIT> seqInd = sparseMatrix.getSrcSeqIndex(itSM->index);
+          element.srcSeqIndex.decompSeqIndex = seqInd.getIndex(0);
+          if (seqInd.getN()>1)
+            element.srcSeqIndex.tensorSeqIndex = seqInd.getIndex(1);
+          else
+            element.srcSeqIndex.tensorSeqIndex = 1;
+          // record other members
+          element.dstSeqIndex = itSM->seqIndex;
+          element.factor = factorList[itSM->index];
+          response.push_back(element);
+          // move to the next sparse matrix element
+          ++itSM;
+          if (itSM == sparseMatrixDind.end()) break;
+        }
+        // catch up request with itSM
+        while ((iReq < size) && 
+          (request[iReq].seqIndex < itSM->seqIndex)){
+          ++iReq;
+        }
+        if (iReq == size) break;
+        // catch up itSM with request
+        while ((itSM != sparseMatrixDind.end()) &&
+          (itSM->seqIndex < request[iReq].seqIndex)){
+          ++itSM;
+        }
+      }
+      responseSize = response.size() * sizeof(MsgRespElement<SIT,DIT,T>);
+      if (responseSize > requestSize)
+        responseBuffer = new char[responseSize];
+      else
+        responseBuffer = requestBuffer;
+      memcpy(responseBuffer, (char *)&(response[0]), responseSize);
+    }
+    
+    virtual void handleResponse(int responsePet,
+      char const *responseBuffer, int responseSize)const{
+      // called on every localPet for every responsePet != localPet
+      MsgRespElement<SIT,DIT,T> *response =
+        (MsgRespElement<SIT,DIT,T> *)responseBuffer;
+      int size = responseSize / sizeof(MsgRespElement<SIT,DIT,T>);
+      int iRes = 0; // response index
+      for (unsigned i=0; i<dstLinSeqVect.size(); i++){
+        typename vector<DD::AssociationElement<DIT,SIT> >::iterator itD
+          = dstLinSeqVect[i].begin();
+        while ((iRes < size) && (itD != dstLinSeqVect[i].end())){
+          if (response[iRes].dstSeqIndex == itD->seqIndex){
+            // found a response with matching dst seqIndex
+            // add the factor to the factorList of the dstLinSeqVect element
+            DD::FactorElement<SIT> element;
+            element.partnerSeqIndex = response[iRes].srcSeqIndex;
+            *(T *)(element.factor) = response[iRes].factor;
+            itD->factorList.push_back(element);
+            ++(itD->factorCount);
+            // move to the next response element
+            ++iRes;
+            if (iRes == size) break;
+          }
+          // catch up itD with response
+          while ((itD != dstLinSeqVect[i].end()) && 
+            (itD->seqIndex < response[iRes].dstSeqIndex)){
+            ++itD;
+          }
+          if (itD == dstLinSeqVect[i].end()) break;
+          // catch up response with itD
+          while ((iRes < size) &&
+            (response[iRes].dstSeqIndex < itD->seqIndex)){
+            ++iRes;
+          }
+        }
+      }
+    }
+    
+  };
+
+  //---------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
@@ -285,7 +523,7 @@ template<typename SIT, typename DIT> int sparseMatMulStoreLinSeqVect_new(
 //
   VM *vm,                                 // in
   Array *srcArray, Array *dstArray,       // in
-  vector<SparseMatrix<SIT,DIT> >const &sparseMatrix,// in - sparse matrix vector
+  vector<SparseMatrix<SIT,DIT> >const &sparseMatrix,// in - sparse matrix vect
   bool haloFlag,                          // in
   bool ignoreUnmatched,                   // in
   bool tensorMixFlag,                     // in
@@ -327,11 +565,13 @@ template<typename SIT, typename DIT> int sparseMatMulStoreLinSeqVect_new(
   const int *srcLocalDeToDeMap = srcArray->getDELayout()->getLocalDeToDeMap();
   const int *dstLocalDeToDeMap = dstArray->getDELayout()->getLocalDeToDeMap();
   
-  // fill dstLinSeqVect with local information
-  for (int i=0; i<dstLocalDeCount; i++){
-    if (dstLocalDeElementCount[i]){
-      // there are elements for local DE i
-      if (haloFlag){
+  // Step1: construct dstLinSeqVect
+  
+  if (haloFlag){
+    // for halo, straight forward construction of dstLinSeqVect from rim
+    for (int i=0; i<dstLocalDeCount; i++){
+      if (dstLocalDeElementCount[i]){
+        // there are elements for local DE i
         // for halo all the factors are 1
         char factor[8];
         switch (typekindFactors){
@@ -370,7 +610,110 @@ template<typename SIT, typename DIT> int sparseMatMulStoreLinSeqVect_new(
         }
       }
     }
-  }
+    
+  }else{  // haloFlag
+    // for not-halo, construction of dstLinSeqVect is more complex
+    
+    // first construct full dstLinSeqVect of all exclusive dstArray elements
+    for (int i=0; i<dstLocalDeCount; i++){
+      if (dstLocalDeElementCount[i]){
+        // there are elements for local DE i
+        dstLinSeqVect[i].reserve(dstLocalDeElementCount[i]);
+        ArrayElement arrayElement(dstArray, i, true, false);
+        // loop over all elements in exclusive region for local DE i
+        while(arrayElement.isWithin()){
+          // add the element to dstLinSeqVect[i]
+          DD::AssociationElement<DIT,SIT> element;
+          element.linIndex = arrayElement.getLinearIndex();
+          element.seqIndex = arrayElement.getSequenceIndex<DIT>();
+          element.factorCount = 0;
+          element.factorList.resize(0);
+          dstLinSeqVect[i].push_back(element);
+          arrayElement.next();
+        } // end while over all exclusive elements
+      }
+    }
+    
+#ifdef ASMM_STORE_MEMLOG_on
+    VM::logMemInfo(std::string("ASMMStoreLinSeqVect_new1.1"));
+#endif
+    
+    // sort dstLinSeqVect
+    for (int i=0; i<dstLocalDeCount; i++)
+      sort(dstLinSeqVect[i].begin(), dstLinSeqVect[i].end());
+    
+#ifdef ASMM_STORE_MEMLOG_on
+    VM::logMemInfo(std::string("ASMMStoreLinSeqVect_new1.2"));
+#endif
+    
+    switch (typekindFactors){
+    case ESMC_TYPEKIND_R4:
+      {
+        QuerySparseMatrix<SIT,DIT,ESMC_R4>
+          querySparseMatrix(sparseMatrix[0], dstLinSeqVect);
+        querySparseMatrix.totalExchange(vm);
+#ifdef ASMM_STORE_MEMLOG_on
+    VM::logMemInfo(std::string("ASMMStoreLinSeqVect_new1.3"));
+#endif
+      }
+      break;
+    case ESMC_TYPEKIND_R8:
+      {
+        QuerySparseMatrix<SIT,DIT,ESMC_R8>
+          querySparseMatrix(sparseMatrix[0], dstLinSeqVect);
+        querySparseMatrix.totalExchange(vm);
+#ifdef ASMM_STORE_MEMLOG_on
+    VM::logMemInfo(std::string("ASMMStoreLinSeqVect_new1.3"));
+#endif
+      }
+      break;
+    case ESMC_TYPEKIND_I4:
+      {
+        QuerySparseMatrix<SIT,DIT,ESMC_I4>
+          querySparseMatrix(sparseMatrix[0], dstLinSeqVect);
+        querySparseMatrix.totalExchange(vm);
+#ifdef ASMM_STORE_MEMLOG_on
+    VM::logMemInfo(std::string("ASMMStoreLinSeqVect_new1.3"));
+#endif
+      }
+      break;
+    case ESMC_TYPEKIND_I8:
+      {
+        QuerySparseMatrix<SIT,DIT,ESMC_I8>
+          querySparseMatrix(sparseMatrix[0], dstLinSeqVect);
+        querySparseMatrix.totalExchange(vm);
+#ifdef ASMM_STORE_MEMLOG_on
+    VM::logMemInfo(std::string("ASMMStoreLinSeqVect_new1.3"));
+#endif
+      }
+      break;
+    default:
+      break;
+    }
+    
+#ifdef ASMM_STORE_MEMLOG_on
+    VM::logMemInfo(std::string("ASMMStoreLinSeqVect_new1.4"));
+#endif
+
+#if 1
+    // optimization for very sparse cases, where large sections of the dst
+    // array are not connected to by the sparse matrix
+    // for other cases this extra loop here is a waste of time
+    // clear out dstLinSeqVect elements without factor elements
+    for (int i=0; i<dstLocalDeCount; i++){
+      typename vector<DD::AssociationElement<DIT,SIT> >::iterator itD
+        = dstLinSeqVect[i].begin();
+      while (itD != dstLinSeqVect[i].end()){
+        // remove dstLinSeqVect elements without factorList elements
+        if ((itD->factorList).size()==0)
+          itD = dstLinSeqVect[i].erase(itD);
+        else
+          ++itD;
+      }
+    }
+#endif
+    
+  } // haloFlag
   
 #ifdef ASMM_STORE_MEMLOG_on
   VM::logMemInfo(std::string("ASMMStoreLinSeqVect_new2.0"));
@@ -381,9 +724,11 @@ template<typename SIT, typename DIT> int sparseMatMulStoreLinSeqVect_new(
   list<FactorElementSort<DIT> > dstElementSort;
   for (int i=0; i<dstLocalDeCount; i++){
     for (unsigned j=0; j<dstLinSeqVect[i].size(); j++){
-      dstElementSort.push_back(
-        FactorElementSort<DIT>(&(dstLinSeqVect[i][j].factorList[0]),
-        dstLocalDeToDeMap[i]));
+      for (unsigned k=0; k<dstLinSeqVect[i][j].factorList.size(); k++){
+        dstElementSort.push_back(
+          FactorElementSort<DIT>(&(dstLinSeqVect[i][j].factorList[k]),
+          dstLocalDeToDeMap[i]));
+      }
     }
   }
 #ifdef ASMM_STORE_MEMLOG_on
@@ -392,14 +737,11 @@ template<typename SIT, typename DIT> int sparseMatMulStoreLinSeqVect_new(
   dstElementSort.sort();
   
 #ifdef TIMERS
-  
 #ifdef ASMM_STORE_MEMLOG_on
   VM::logMemInfo(std::string("ASMMStoreLinSeqVect_new2.2a"));
 #endif
-
   vm->timerReset("linIndex");
   vm->timerReset("seqIndex");
-  
 #endif  // TIMERS
   
 #ifdef ASMM_STORE_MEMLOG_on
@@ -420,13 +762,8 @@ template<typename SIT, typename DIT> int sparseMatMulStoreLinSeqVect_new(
       // loop over all elements in exclusive region for local DE i
       while(arrayElement.isWithin()){
         // determine the sequentialized index for the current Array element
-        SeqIndex<SIT> seqIndex;
 //  vm->timerStart("seqIndex");
-#if 0
-        arrayElement.getSequenceIndexExclusive(&seqIndex, false);
-#else
-        seqIndex = arrayElement.getSequenceIndex<SIT>();
-#endif
+        SeqIndex<SIT> seqIndex = arrayElement.getSequenceIndex<SIT>();
 //  vm->timerStop("seqIndex");
         // add element to srcElementSort
         ElementSort<SIT> element;
@@ -453,6 +790,7 @@ template<typename SIT, typename DIT> int sparseMatMulStoreLinSeqVect_new(
       } // end while over all exclusive elements
     }
   }
+  
 #ifdef TIMERS
 #ifdef ASMM_STORE_MEMLOG_on
   VM::logMemInfo(std::string("ASMMStoreLinSeqVect_new2.3a"));
@@ -460,6 +798,7 @@ template<typename SIT, typename DIT> int sparseMatMulStoreLinSeqVect_new(
   vm->timerLog("linIndex");
   vm->timerLog("seqIndex");
 #endif  // TIMERS
+  
 #ifdef ASMM_STORE_MEMLOG_on
   VM::logMemInfo(std::string("ASMMStoreLinSeqVect_new2.3"));
 #endif
@@ -468,6 +807,7 @@ template<typename SIT, typename DIT> int sparseMatMulStoreLinSeqVect_new(
 #else
   srcElementSort.sort();
 #endif
+  
 #ifdef ASMM_STORE_MEMLOG_on
   VM::logMemInfo(std::string("ASMMStoreLinSeqVect_new2.4"));
 #endif
@@ -477,7 +817,7 @@ template<typename SIT, typename DIT> int sparseMatMulStoreLinSeqVect_new(
 #endif
   
   FillLinSeqVect<SIT,DIT> fillLinSeqVect(dstElementSort, srcElementSort,
-    srcLinSeqVect, dstArray->getTypekind());
+    srcLinSeqVect);
   fillLinSeqVect.totalExchange(vm);
   
 #ifdef ASMM_STORE_MEMLOG_on
@@ -504,20 +844,20 @@ template<typename SIT, typename DIT> int sparseMatMulStoreLinSeqVect_new(
     default:
       break;
     }
-    for (int j=0; j<srcLocalDeCount; j++){
-      for (unsigned k=0; k<srcLinSeqVect[j].size(); k++){
-        for (int kk=0; kk<srcLinSeqVect[j][k].factorCount; kk++){
-          memcpy(srcLinSeqVect[j][k].factorList[kk].factor, factor, 8);
+    for (int i=0; i<srcLocalDeCount; i++){
+      for (unsigned j=0; j<srcLinSeqVect[i].size(); j++){
+        for (int k=0; k<srcLinSeqVect[i][j].factorCount; k++){
+          memcpy(srcLinSeqVect[i][j].factorList[k].factor, factor, 8);
         }
       }
     }
   }
   
   // clear out dstLinSeqVect elements that did not find src partners
-  for (int j=0; j<dstLocalDeCount; j++){
+  for (int i=0; i<dstLocalDeCount; i++){
     typename vector<DD::AssociationElement<DIT,SIT> >::iterator itD
-      = dstLinSeqVect[j].begin();
-    while (itD != dstLinSeqVect[j].end()){
+      = dstLinSeqVect[i].begin();
+    while (itD != dstLinSeqVect[i].end()){
       // remove factorList elements without partnerDe
       typename vector<DD::FactorElement<DIT> >::iterator it
         = itD->factorList.begin(); 
@@ -529,7 +869,7 @@ template<typename SIT, typename DIT> int sparseMatMulStoreLinSeqVect_new(
       }
       // remove dstLinSeqVect elements without factorList elements
       if ((itD->factorList).size()==0)
-        itD = dstLinSeqVect[j].erase(itD);
+        itD = dstLinSeqVect[i].erase(itD);
       else
         ++itD;
     }

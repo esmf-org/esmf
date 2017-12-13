@@ -91,6 +91,9 @@ namespace ESMCI {
       n = n_;
       index = index_;
     }
+    int getN(){
+      return n;
+    }
     T getIndex(int i)const{return index[i];}
     void print(){
       std::cout << "SeqInd:" << n <<" (";
@@ -100,6 +103,12 @@ namespace ESMCI {
       std::cout << index[i] << ")\n";
     }
   };
+  template<typename T> bool operator<(SeqInd<T> a, SeqInd<T> b){
+    if (a.getN() != b.getN()) throw ESMC_RC_INTNRL_INCONS;
+    for (int i=0; i<a.getN(); i++)
+      if (a.getIndex(i) >= b.getIndex(i)) return false;
+    return true;
+  }
   
   //todo: try to unify SeqIndex and SeqInd structs!
   //============================================================================

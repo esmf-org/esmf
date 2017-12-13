@@ -7823,6 +7823,10 @@ namespace DD{
     int linIndex;
     int factorCount;  //TODO: get rid of this and use factorList.size()
   };
+  template<typename IT1, typename IT2>
+    bool operator<(AssociationElement<IT1,IT2> a,AssociationElement<IT1,IT2> b){
+    return (a.seqIndex < b.seqIndex);
+  }
   template<typename IT1, typename IT2> struct FillLinSeqVectInfo{
     Array const *array;
     vector<vector<AssociationElement<IT1,IT2> > > &linSeqVect;
@@ -9870,11 +9874,9 @@ template<typename SIT, typename DIT>
     srcLinSeqVect(srcLocalDeCount);
   vector<vector<DD::AssociationElement<DIT,SIT> > >
     dstLinSeqVect(dstLocalDeCount);
-  
-if (haloFlag){
-  
-#if 1 // start testing new implementation
+
   localrc = sparseMatMulStoreLinSeqVect_new(vm,
+//  localrc = sparseMatMulStoreLinSeqVect(vm,
     srcArray, dstArray,
     sparseMatrix,
     haloFlag, ignoreUnmatched, tensorMixFlag,
@@ -9886,7 +9888,12 @@ if (haloFlag){
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
     &rc)) return rc;
 
-#if 0 // start removal of data of testing new implementation
+#if 0 // still need old sparseMatMulStoreLinSeqVect() for non-halo cases
+  
+if (!haloFlag){
+  // not halo -> for now need the old way of doing it
+
+#if 1 // start removal of data of testing new implementation
 
   // force vectors out of scope by swapping with empty vector, to free memory
   vector<vector<DD::AssociationElement<SIT,DIT> > >().swap(srcLinSeqVect);
@@ -9898,7 +9905,7 @@ if (haloFlag){
   VM::logMemInfo(std::string("ASMMStoreWorkOnNewLinSeqVect1.0"));
 #endif
   
-  char *marker = new char[10240000]; // 10,000KiB marker in the memory profile
+  char *marker = new char[4*10240000]; // 40,000KiB marker in the memory profile
   
 #ifdef ASMM_STORE_MEMLOG_on
   VM::logMemInfo(std::string("ASMMStoreWorkOnNewLinSeqVect2.0"));
@@ -9912,12 +9919,6 @@ if (haloFlag){
 
 #endif  // end removal of data of testing new implementation
   
-#endif  // end testing new implementation
-  
-}else{
-  
-  
-#if 1
   localrc = sparseMatMulStoreLinSeqVect(vm,
     srcArray, dstArray,
     sparseMatrix,
@@ -9929,9 +9930,12 @@ if (haloFlag){
   );
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
     &rc)) return rc;
-#endif
   
-}
+} // halo switch
+
+#endif  // still need old sparseMatMulStoreLinSeqVect() for non-halo cases
+
+  
   //---------------------------------------------------------------------------
   // Phase IV
   //---------------------------------------------------------------------------
