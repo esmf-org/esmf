@@ -33,15 +33,17 @@
   
   //---------------------------------------------------------------------------
   
-  template<typename IT1, typename IT2> struct MsgElement{
+  template<typename IT1, typename IT2, typename T> struct MsgElement{
     SeqIndex<IT1> seqIndex;
     int de;
     SeqIndex<IT2> partnerSeqIndex;
+    T factor;
   };
 
   //---------------------------------------------------------------------------
 
-  template<typename SIT, typename DIT> class FillLinSeqVect:public ComPat2{
+  template<typename SIT, typename DIT, typename T> 
+    class FillLinSeqVect:public ComPat2{
     list<FactorElementSort<DIT,SIT> > &dstElementSort;
 #ifdef SRC_ELEMENT_SORT_VECTOR
     vector<ElementSort<SIT> > &srcElementSort;
@@ -50,7 +52,7 @@
 #endif
     vector<vector<DD::AssociationElement<SIT,DIT> > >&srcLinSeqVect;
     // members that are initialized internally:
-    vector<MsgElement<DIT,SIT> > request;
+    vector<MsgElement<DIT,SIT,T> > request;
    public:
     FillLinSeqVect(
       list<FactorElementSort<DIT,SIT> > &dstElementSort_,
@@ -115,6 +117,7 @@
           element.factorList.resize(1);
           element.factorList[0].partnerSeqIndex = itD->seqIndex;
           element.factorList[0].partnerDe.push_back(itD->de);
+          *(T*)(element.factorList[0].factor) = *(T*)(itD->fep->factor);
           srcLinSeqVect[itS->localDe].push_back(element);
           // dst side now knows partnerDe for a FactorElement
           itD->fep->partnerDe.push_back(itS->de);
@@ -157,10 +160,11 @@
           request[i].seqIndex = itD->seqIndex;
           request[i].de = itD->de;
           request[i].partnerSeqIndex = itD->fep->partnerSeqIndex;
+          request[i].factor = *(T*)(itD->fep->factor);
           ++i;
         }
       }
-      requestSize = size * sizeof(MsgElement<DIT,SIT>);
+      requestSize = size * sizeof(MsgElement<DIT,SIT,T>);
       requestBuffer = NULL;
       if (requestSize) requestBuffer = (char *)&(request[0]);
     }
@@ -169,8 +173,8 @@
       char *requestBuffer, int requestSize,
       char* &responseBuffer, int  &responseSize)const{
       // called on every localPet for every requestPet != localPet
-      MsgElement<DIT,SIT> *request = (MsgElement<DIT,SIT> *)requestBuffer;
-      int size = requestSize / sizeof(MsgElement<DIT,SIT>);
+      MsgElement<DIT,SIT,T> *request = (MsgElement<DIT,SIT,T> *)requestBuffer;
+      int size = requestSize / sizeof(MsgElement<DIT,SIT,T>);
       // process the request and fill the response into the same buffer
       int iReq = 0; // request index
       int iRes = 0; // response index
@@ -206,6 +210,7 @@
           element.factorList.resize(1);
           element.factorList[0].partnerSeqIndex = request[iReq].seqIndex;
           element.factorList[0].partnerDe.push_back(request[iReq].de);
+          *(T*)(element.factorList[0].factor) = request[iReq].factor;
           srcLinSeqVect[itS->localDe].push_back(element);
           // dst side now knows partnerDe for a FactorElement
           // ... this means an element is added to the response
@@ -228,15 +233,16 @@
           ++itS;
         }
       }
-      responseSize = iRes * sizeof(MsgElement<DIT,SIT>);
+      responseSize = iRes * sizeof(MsgElement<DIT,SIT,T>);
       responseBuffer = requestBuffer;
     }
     
     virtual void handleResponse(int responsePet,
       char const *responseBuffer, int responseSize)const{
       // called on every localPet for every responsePet != localPet
-      MsgElement<DIT,SIT> *response = (MsgElement<DIT,SIT> *)responseBuffer;
-      int size = responseSize / sizeof(MsgElement<DIT,SIT>);
+      MsgElement<DIT,SIT,T> *response =
+        (MsgElement<DIT,SIT,T> *)responseBuffer;
+      int size = responseSize / sizeof(MsgElement<DIT,SIT,T>);
       int iRes = 0; // response index
       typename list<FactorElementSort<DIT,SIT> >::iterator itD =
         dstElementSort.begin();
@@ -682,9 +688,6 @@ template<typename SIT, typename DIT> int sparseMatMulStoreLinSeqVect_new(
         QuerySparseMatrix<SIT,DIT,ESMC_R4>
           querySparseMatrix(sparseMatrix[0], dstLinSeqVect);
         querySparseMatrix.totalExchange(vm);
-#ifdef ASMM_STORE_MEMLOG_on
-    VM::logMemInfo(std::string("ASMMStoreLinSeqVect_new1.3"));
-#endif
       }
       break;
     case ESMC_TYPEKIND_R8:
@@ -692,9 +695,6 @@ template<typename SIT, typename DIT> int sparseMatMulStoreLinSeqVect_new(
         QuerySparseMatrix<SIT,DIT,ESMC_R8>
           querySparseMatrix(sparseMatrix[0], dstLinSeqVect);
         querySparseMatrix.totalExchange(vm);
-#ifdef ASMM_STORE_MEMLOG_on
-    VM::logMemInfo(std::string("ASMMStoreLinSeqVect_new1.3"));
-#endif
       }
       break;
     case ESMC_TYPEKIND_I4:
@@ -702,9 +702,6 @@ template<typename SIT, typename DIT> int sparseMatMulStoreLinSeqVect_new(
         QuerySparseMatrix<SIT,DIT,ESMC_I4>
           querySparseMatrix(sparseMatrix[0], dstLinSeqVect);
         querySparseMatrix.totalExchange(vm);
-#ifdef ASMM_STORE_MEMLOG_on
-    VM::logMemInfo(std::string("ASMMStoreLinSeqVect_new1.3"));
-#endif
       }
       break;
     case ESMC_TYPEKIND_I8:
@@ -712,9 +709,6 @@ template<typename SIT, typename DIT> int sparseMatMulStoreLinSeqVect_new(
         QuerySparseMatrix<SIT,DIT,ESMC_I8>
           querySparseMatrix(sparseMatrix[0], dstLinSeqVect);
         querySparseMatrix.totalExchange(vm);
-#ifdef ASMM_STORE_MEMLOG_on
-    VM::logMemInfo(std::string("ASMMStoreLinSeqVect_new1.3"));
-#endif
       }
       break;
     default:
@@ -722,7 +716,7 @@ template<typename SIT, typename DIT> int sparseMatMulStoreLinSeqVect_new(
     }
     
 #ifdef ASMM_STORE_MEMLOG_on
-    VM::logMemInfo(std::string("ASMMStoreLinSeqVect_new1.4"));
+    VM::logMemInfo(std::string("ASMMStoreLinSeqVect_new1.3"));
 #endif
 
 #if 1
@@ -846,9 +840,38 @@ template<typename SIT, typename DIT> int sparseMatMulStoreLinSeqVect_new(
   VM::logMemInfo(std::string("ASMMStoreLinSeqVect_new3.0"));
 #endif
   
-  FillLinSeqVect<SIT,DIT> fillLinSeqVect(dstElementSort, srcElementSort,
-    srcLinSeqVect);
-  fillLinSeqVect.totalExchange(vm);
+  switch (typekindFactors){
+  case ESMC_TYPEKIND_R4:
+    {
+      FillLinSeqVect<SIT,DIT,ESMC_R4> 
+        fillLinSeqVect(dstElementSort, srcElementSort, srcLinSeqVect);
+      fillLinSeqVect.totalExchange(vm);
+    }
+    break;
+  case ESMC_TYPEKIND_R8:
+    {
+      FillLinSeqVect<SIT,DIT,ESMC_R8> 
+        fillLinSeqVect(dstElementSort, srcElementSort, srcLinSeqVect);
+      fillLinSeqVect.totalExchange(vm);
+    }
+    break;
+  case ESMC_TYPEKIND_I4:
+    {
+      FillLinSeqVect<SIT,DIT,ESMC_I4> 
+        fillLinSeqVect(dstElementSort, srcElementSort, srcLinSeqVect);
+      fillLinSeqVect.totalExchange(vm);
+    }
+    break;
+  case ESMC_TYPEKIND_I8:
+    {
+      FillLinSeqVect<SIT,DIT,ESMC_I8> 
+        fillLinSeqVect(dstElementSort, srcElementSort, srcLinSeqVect);
+      fillLinSeqVect.totalExchange(vm);
+    }
+    break;
+  default:
+    break;
+  }
   
 #ifdef ASMM_STORE_MEMLOG_on
   VM::logMemInfo(std::string("ASMMStoreLinSeqVect_new4.0"));
