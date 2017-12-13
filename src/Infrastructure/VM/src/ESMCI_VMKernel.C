@@ -5430,7 +5430,7 @@ namespace ESMCI{
 //==============================================================================
 //==============================================================================
 
-#define DEBUG_COMPAT2_off
+#define DEBUG_COMPAT2
 
 namespace ESMCI{
   void ComPat2::totalExchange(VMK *vmk){
@@ -5546,13 +5546,7 @@ namespace ESMCI{
 #endif
         recvBuffer2 = NULL; // detectable reset
         if (recvResponseSize>0){
-          if (recvResponseSize <= sendRequestSize){
-            // okay to reuse sendRequestBuffer
-            recvBuffer2 = sendRequestBuffer;
-          }else{
-            // need a larger allocation
-            recvBuffer2 = new char[recvResponseSize];
-          }
+          recvBuffer2 = new char[recvResponseSize];
           vmk->recv(recvBuffer2, recvResponseSize, responsePet, &recvCommh2);
 #ifdef DEBUG_COMPAT2
     {
@@ -5594,10 +5588,8 @@ namespace ESMCI{
         }
         // localPet acts as requester
         vmk->commwait(&sendCommh1);
-        if (sendRequestSize>0){
-          if ((recvBuffer2 != NULL) && (recvBuffer2 != sendRequestBuffer))
-            delete [] recvBuffer2;
-          delete [] sendRequestBuffer;
+        if (recvResponseSize>0){
+          delete [] recvBuffer2;
         }
         // localPet acts as responder
         if (sendResponseSize>0){

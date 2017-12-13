@@ -45,6 +45,8 @@
     list<ElementSort<SIT> > &srcElementSort;
 #endif
     vector<vector<DD::AssociationElement<SIT,DIT> > >&srcLinSeqVect;
+    // members that are initialized internally:
+    vector<MsgElement<DIT> > request;
    public:
     FillLinSeqVect(
       list<FactorElementSort<DIT> > &dstElementSort_,
@@ -140,18 +142,10 @@
     virtual void generateRequest(int responsePet,
       char* &requestBuffer, int &requestSize){
       // called on every localPet for every responsePet != localPet
-      //TODO: There is an opportunity to optimize this repeated generation of
-      //TODO: the request. It may make sense to keep track of the previous
-      //TODO: request and see if the size changes between calls into 
-      //TODO: generateRequest(). If not, then previously constructed request
-      //TODO: can be used. If size changes, then here is the place to delete
-      //TODO: the buffer, and not in ComPat2. Need to figure out how to delete
-      //TODO: the very last buffer then.
-      int size = dstElementSort.size();
-      MsgElement<DIT> *request = NULL;  // initialize with NULL
-      if (size>0){
-        // the request buffer is deleted by ComPat2::totalExchange()
-        request = new MsgElement<DIT>[size];
+      unsigned size = dstElementSort.size();
+      if (size != request.size()){
+        // a new request must be constructed
+        request.resize(size);
         typename list<FactorElementSort<DIT> >::iterator itD;
         int i=0;
         for (itD = dstElementSort.begin(); itD != dstElementSort.end(); ++itD){
@@ -160,8 +154,9 @@
           ++i;
         }
       }
-      requestBuffer = (char *)request;
       requestSize = size * sizeof(MsgElement<DIT>);
+      requestBuffer = NULL;
+      if (requestSize) requestBuffer = (char *)&(request[0]);
     }
     
     virtual void handleRequest(int requestPet,
@@ -283,6 +278,10 @@
   template<typename IT> struct MsgRequElement{
     SeqIndex<IT> seqIndex;
   };
+  template<typename IT> bool operator <
+    (MsgRequElement<IT> a, MsgRequElement<IT> b){
+    return (a.seqIndex < b.seqIndex);
+  }
 
   template<typename SIT, typename DIT, typename T> struct MsgRespElement{
     SeqIndex<SIT> srcSeqIndex;
@@ -298,6 +297,7 @@
     vector<vector<DD::AssociationElement<DIT,SIT> > >&dstLinSeqVect;
     // members that are initialized internally:
     vector<SparseMatrixIndex<DIT> > sparseMatrixDind;
+    vector<MsgRequElement<DIT> > request;
    public:
     QuerySparseMatrix(
       SparseMatrix<SIT,DIT> const &sparseMatrix_,
@@ -329,7 +329,9 @@
       // sort the sparse matrix elements by dst seqIndex
       sort(sparseMatrixDind.begin(), sparseMatrixDind.end());
       // work through dstLinSeqVect and find matches with sparseMatrixDind
+      int size = 0;
       for (unsigned i=0; i<dstLinSeqVect.size(); i++){
+        size += dstLinSeqVect[i].size();
         typename vector<DD::AssociationElement<DIT,SIT> >::iterator itD
           = dstLinSeqVect[i].begin();
         typename vector<SparseMatrixIndex<DIT> >::iterator itSM
@@ -385,18 +387,9 @@
           }
         }
       }
-    }
-    
-    virtual void generateRequest(int responsePet,
-      char* &requestBuffer, int &requestSize){
-      // called on every localPet for every responsePet != localPet
-      int size = 0;
-      for (unsigned i=0; i<dstLinSeqVect.size(); i++)
-        size += dstLinSeqVect[i].size();
-      MsgRequElement<DIT> *request = NULL;  // initialize with NULL
+      // prepare request
       if (size>0){
-        // the request buffer is deleted by ComPat2::totalExchange()
-        request = new MsgRequElement<DIT>[size];
+        request.resize(size);
         int j=0;
         for (unsigned i=0; i<dstLinSeqVect.size(); i++){
           typename vector<DD::AssociationElement<DIT,SIT> >::iterator itD;
@@ -407,8 +400,17 @@
           }
         }
       }
-      requestBuffer = (char *)request;
-      requestSize = size * sizeof(MsgRequElement<DIT>);
+      // sort all the request elements by dst seqIndex
+      sort(request.begin(), request.end());
+    }
+    
+    virtual void generateRequest(int responsePet,
+      char* &requestBuffer, int &requestSize){
+      // called on every localPet for every responsePet != localPet
+      // point the requestBuffer to the already precomputed request
+      requestSize = request.size() * sizeof(MsgRequElement<DIT>);
+      requestBuffer = NULL;
+      if (requestSize) requestBuffer = (char *)&(request[0]);
     }
     
     virtual void handleRequest(int requestPet,
@@ -471,10 +473,10 @@
       MsgRespElement<SIT,DIT,T> *response =
         (MsgRespElement<SIT,DIT,T> *)responseBuffer;
       int size = responseSize / sizeof(MsgRespElement<SIT,DIT,T>);
-      int iRes = 0; // response index
       for (unsigned i=0; i<dstLinSeqVect.size(); i++){
         typename vector<DD::AssociationElement<DIT,SIT> >::iterator itD
           = dstLinSeqVect[i].begin();
+        int iRes = 0; // response index
         while ((iRes < size) && (itD != dstLinSeqVect[i].end())){
           if (response[iRes].dstSeqIndex == itD->seqIndex){
             // found a response with matching dst seqIndex

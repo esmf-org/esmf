@@ -530,7 +530,7 @@ class ComPat2{
     // called on every localPet exactly once, before any other method
 
   virtual void generateRequest(int responsePet,
-    char* &requestBuffer, int &requestSize)const =0;
+    char* &requestBuffer, int &requestSize) =0;
     // called on every localPet for every responsePet != localPet
  
   virtual void handleRequest(int requestPet,
