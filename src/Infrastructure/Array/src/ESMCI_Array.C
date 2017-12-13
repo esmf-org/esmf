@@ -11400,6 +11400,119 @@ template<typename SIT, typename DIT> int sparseMatMulStoreNbVectors(
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
   
+#ifdef ASMM_STORE_LOG_on
+  {
+    std::stringstream msg;
+    // srcLinSeqVect
+    for (unsigned j=0; j<srcLinSeqVect.size(); j++){
+      for (unsigned k=0; k<srcLinSeqVect[j].size(); k++){
+        msg << "ASMM_STORE_LOG:" << __LINE__ << 
+          " srcLinSeqVect["<< j <<"]["<< k <<"].linIndex = "
+          << srcLinSeqVect[j][k].linIndex <<", "
+          ".seqIndex = "<< srcLinSeqVect[j][k].seqIndex.decompSeqIndex
+          <<"/"<< srcLinSeqVect[j][k].seqIndex.tensorSeqIndex <<
+          ", .factorCount = "<< srcLinSeqVect[j][k].factorCount;
+        ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+        msg.str("");  // clear
+        for (int kk=0; kk<srcLinSeqVect[j][k].factorCount; kk++){
+          msg << "ASMM_STORE_LOG:" << __LINE__ << " \tfactorList["<< kk <<"]";
+          ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+          msg.str("");  // clear
+          msg << "ASMM_STORE_LOG:" << __LINE__ << " \t\t.partnerSeqIndex ="
+            << srcLinSeqVect[j][k].factorList[kk].partnerSeqIndex.decompSeqIndex
+            <<"/"
+            << srcLinSeqVect[j][k].factorList[kk].partnerSeqIndex.tensorSeqIndex;
+          ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+          msg.str("");  // clear
+          msg << "ASMM_STORE_LOG:" << __LINE__ << " \t\t.partnerDe =";
+          for (unsigned jj=0;
+            jj<srcLinSeqVect[j][k].factorList[kk].partnerDe.size(); jj++)
+            msg << srcLinSeqVect[j][k].factorList[kk].partnerDe[jj] <<", ";
+          ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+          msg.str("");  // clear
+          switch (typekindFactors){
+          case ESMC_TYPEKIND_R4:
+            msg << "ASMM_STORE_LOG:" << __LINE__ << " \t\t.factor =" <<
+              *((ESMC_R4 *)srcLinSeqVect[j][k].factorList[kk].factor);
+            break;
+          case ESMC_TYPEKIND_R8:
+            msg << "ASMM_STORE_LOG:" << __LINE__ << " \t\t.factor =" <<
+              *((ESMC_R8 *)srcLinSeqVect[j][k].factorList[kk].factor);
+            break;
+          case ESMC_TYPEKIND_I4:
+            msg << "ASMM_STORE_LOG:" << __LINE__ << " \t\t.factor =" <<
+              *((ESMC_I4 *)srcLinSeqVect[j][k].factorList[kk].factor);
+            break;
+          case ESMC_TYPEKIND_I8:
+            msg << "ASMM_STORE_LOG:" << __LINE__ << " \t\t.factor =" <<
+              *((ESMC_I8 *)srcLinSeqVect[j][k].factorList[kk].factor);
+            break;
+          default:
+            break;
+          }
+          ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+          msg.str("");  // clear
+        }
+      }
+    }
+    // dstLinSeqVect
+    for (unsigned j=0; j<dstLinSeqVect.size(); j++){
+      for (unsigned k=0; k<dstLinSeqVect[j].size(); k++){
+        msg << "ASMM_STORE_LOG:" << __LINE__ << 
+          " dstLinSeqVect["<< j <<"]["<< k <<"].linIndex = "
+          << dstLinSeqVect[j][k].linIndex <<", "
+          ".seqIndex = "<< dstLinSeqVect[j][k].seqIndex.decompSeqIndex
+          <<"/"<< dstLinSeqVect[j][k].seqIndex.tensorSeqIndex <<
+          ", .factorCount = "<< dstLinSeqVect[j][k].factorCount;
+        ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+        msg.str("");  // clear
+        for (int kk=0; kk<dstLinSeqVect[j][k].factorCount; kk++){
+          msg << "ASMM_STORE_LOG:" << __LINE__ << " \tfactorList["<< kk <<"]";
+          ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+          msg.str("");  // clear
+          msg << "ASMM_STORE_LOG:" << __LINE__ << " \t\t.partnerSeqIndex ="
+            << dstLinSeqVect[j][k].factorList[kk].partnerSeqIndex.decompSeqIndex
+            <<"/"
+            << dstLinSeqVect[j][k].factorList[kk].partnerSeqIndex.tensorSeqIndex;
+          ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+          msg.str("");  // clear
+          msg << "ASMM_STORE_LOG:" << __LINE__ << " \t\t.partnerDe =";
+          for (unsigned jj=0;
+            jj<dstLinSeqVect[j][k].factorList[kk].partnerDe.size(); jj++)
+            msg << dstLinSeqVect[j][k].factorList[kk].partnerDe[jj] <<", ";
+          ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+          msg.str("");  // clear
+          switch (typekindFactors){
+          case ESMC_TYPEKIND_R4:
+            msg << "ASMM_STORE_LOG:" << __LINE__ << " \t\t.factor =" <<
+              *((ESMC_R4 *)dstLinSeqVect[j][k].factorList[kk].factor);
+            break;
+          case ESMC_TYPEKIND_R8:
+            msg << "ASMM_STORE_LOG:" << __LINE__ << " \t\t.factor =" <<
+              *((ESMC_R8 *)dstLinSeqVect[j][k].factorList[kk].factor);
+            break;
+          case ESMC_TYPEKIND_I4:
+            msg << "ASMM_STORE_LOG:" << __LINE__ << " \t\t.factor =" <<
+              *((ESMC_I4 *)dstLinSeqVect[j][k].factorList[kk].factor);
+            break;
+          case ESMC_TYPEKIND_I8:
+            msg << "ASMM_STORE_LOG:" << __LINE__ << " \t\t.factor =" <<
+              *((ESMC_I8 *)dstLinSeqVect[j][k].factorList[kk].factor);
+            break;
+          default:
+            break;
+          }
+          ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+          msg.str("");  // clear
+        }
+      }
+    }
+  }
+#endif
+  
+  
+  
+  
   try{
 
 #ifdef ASMM_STORE_MEMLOG_on
@@ -11438,13 +11551,14 @@ template<typename SIT, typename DIT> int sparseMatMulStoreNbVectors(
 
   // determine recv pattern for all localDEs on dst side
   for (int j=0; j<dstLocalDeCount; j++){
-    int *index2Ref = new int[dstLocalDeElementCount[j]];  // large enough
+    vector<int> index2Ref;
+    index2Ref.reserve(dstLocalDeElementCount[j]); // good guess for better perf
     int localDeFactorCount = 0; // reset
     int iCount = 0; // reset
     for (unsigned k=0; k<dstLinSeqVect[j].size(); k++){
       int factorCount = dstLinSeqVect[j][k].factorCount;
       if (factorCount){
-        index2Ref[iCount] = k;   // store element index
+        index2Ref.push_back(k);   // store element index
         localDeFactorCount += factorCount;
         ++iCount; // increment counter
       }
@@ -11544,7 +11658,6 @@ fprintf(asmm_store_log_fp, "iCount: %d, localDeFactorCount: %d\n", iCount,
 #endif
 
       // garbage collection
-    delete [] index2Ref;
     delete [] index2Ref2;
     delete [] factorIndexRef;
     delete [] partnerDeRef;
@@ -11748,13 +11861,14 @@ ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
 
   // determine send pattern for all localDEs on src side
   for (int j=0; j<srcLocalDeCount; j++){
-    int *index2Ref = new int[srcLocalDeElementCount[j]];  // large enough
+    vector<int> index2Ref;
+    index2Ref.reserve(srcLocalDeElementCount[j]); // good guess for better perf
     int localDeFactorCount = 0; // reset
     int iCount = 0; // reset
     for (unsigned k=0; k<srcLinSeqVect[j].size(); k++){
       int factorCount = srcLinSeqVect[j][k].factorCount;
       if (factorCount){
-        index2Ref[iCount] = k;   // store element index
+        index2Ref.push_back(k);   // store element index
         localDeFactorCount += factorCount;
         ++iCount; // increment counter
       }
@@ -11829,7 +11943,6 @@ ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
     }
     
     // garbage collection
-    delete [] index2Ref;
     delete [] index2Ref2;
     delete [] factorIndexRef;
     delete [] partnerDeRef;
