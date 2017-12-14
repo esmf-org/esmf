@@ -113,7 +113,6 @@
           DD::AssociationElement<SIT,DIT> element;
           element.linIndex = itS->linIndex;
           element.seqIndex = itS->seqIndex;
-          element.factorCount = 1;
           element.factorList.resize(1);
           element.factorList[0].partnerSeqIndex = itD->seqIndex;
           element.factorList[0].partnerDe.push_back(itD->de);
@@ -206,7 +205,6 @@
           DD::AssociationElement<SIT,DIT> element;
           element.linIndex = itS->linIndex;
           element.seqIndex = itS->seqIndex;
-          element.factorCount = 1;
           element.factorList.resize(1);
           element.factorList[0].partnerSeqIndex = request[iReq].seqIndex;
           element.factorList[0].partnerDe.push_back(request[iReq].de);
@@ -403,7 +401,6 @@
               element.partnerSeqIndex.tensorSeqIndex = 1;
             *(T *)(element.factor) = factorList[itSM->index];
             itD->factorList.push_back(element);
-            ++(itD->factorCount);
             // move to the next sparse matrix element
             ++itSM;
             if (itSM == sparseMatrixDind.end()) break;
@@ -519,7 +516,6 @@
             element.partnerSeqIndex = response[iRes].srcSeqIndex;
             *(T *)(element.factor) = response[iRes].factor;
             itD->factorList.push_back(element);
-            ++(itD->factorCount);
             // move to the next response element
             ++iRes;
             if (iRes == size) break;
@@ -637,7 +633,6 @@ template<typename SIT, typename DIT> int sparseMatMulStoreLinSeqVect_new(
             DD::AssociationElement<DIT,SIT> element;
             element.linIndex = dstArray->getRimLinIndex()[i][k];
             element.seqIndex = seqIndex;
-            element.factorCount = 1;
             element.factorList.resize(1);
             element.factorList[0].partnerSeqIndex = seqIndex;
             memcpy(element.factorList[0].factor, factor, 8);
@@ -662,7 +657,6 @@ template<typename SIT, typename DIT> int sparseMatMulStoreLinSeqVect_new(
           DD::AssociationElement<DIT,SIT> element;
           element.linIndex = arrayElement.getLinearIndex();
           element.seqIndex = arrayElement.getSequenceIndex<DIT>();
-          element.factorCount = 0;
           element.factorList.resize(0);
           dstLinSeqVect[i].push_back(element);
           arrayElement.next();
@@ -902,7 +896,7 @@ template<typename SIT, typename DIT> int sparseMatMulStoreLinSeqVect_new(
     }
     for (int i=0; i<srcLocalDeCount; i++){
       for (unsigned j=0; j<srcLinSeqVect[i].size(); j++){
-        for (int k=0; k<srcLinSeqVect[i][j].factorCount; k++){
+        for (unsigned k=0; k<srcLinSeqVect[i][j].factorList.size(); k++){
           memcpy(srcLinSeqVect[i][j].factorList[k].factor, factor, 8);
         }
       }
@@ -923,8 +917,6 @@ template<typename SIT, typename DIT> int sparseMatMulStoreLinSeqVect_new(
         else
           ++it;
       }
-      // adjust the factorCount
-      itD->factorCount = itD->factorList.size();
       // remove dstLinSeqVect elements without factorList elements
       if ((itD->factorList).size()==0)
         itD = dstLinSeqVect[i].erase(itD);
@@ -953,7 +945,6 @@ template<typename SIT, typename DIT> int sparseMatMulStoreLinSeqVect_new(
         if (itSS->seqIndex == itS->seqIndex){
           // combine itS into itSS
           itSS->factorList.push_back(itS->factorList[0]);
-          ++(itSS->factorCount);
           itS = srcLinSeqVect[i].erase(itS);
         }else{
           itSS = itS;
@@ -980,10 +971,10 @@ template<typename SIT, typename DIT> int sparseMatMulStoreLinSeqVect_new(
           << srcLinSeqVect[j][k].linIndex <<", "
           ".seqIndex = "<< srcLinSeqVect[j][k].seqIndex.decompSeqIndex
           <<"/"<< srcLinSeqVect[j][k].seqIndex.tensorSeqIndex <<
-          ", .factorCount = "<< srcLinSeqVect[j][k].factorCount;
+          ", .factorList.size() = "<< srcLinSeqVect[j][k].factorList.size();
         ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
         msg.str("");  // clear
-        for (int kk=0; kk<srcLinSeqVect[j][k].factorCount; kk++){
+        for (unsigned kk=0; kk<srcLinSeqVect[j][k].factorList.size(); kk++){
           msg << "ASMM_STORE_LOG:" << __LINE__ << " \tfactorList["<< kk <<"]";
           ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
           msg.str("");  // clear
@@ -1032,10 +1023,10 @@ template<typename SIT, typename DIT> int sparseMatMulStoreLinSeqVect_new(
           << dstLinSeqVect[j][k].linIndex <<", "
           ".seqIndex = "<< dstLinSeqVect[j][k].seqIndex.decompSeqIndex
           <<"/"<< dstLinSeqVect[j][k].seqIndex.tensorSeqIndex <<
-          ", .factorCount = "<< dstLinSeqVect[j][k].factorCount;
+          ", .factorList.size() = "<< dstLinSeqVect[j][k].factorList.size();
         ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
         msg.str("");  // clear
-        for (int kk=0; kk<dstLinSeqVect[j][k].factorCount; kk++){
+        for (unsigned kk=0; kk<dstLinSeqVect[j][k].factorList.size(); kk++){
           msg << "ASMM_STORE_LOG:" << __LINE__ << " \tfactorList["<< kk <<"]";
           ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
           msg.str("");  // clear
