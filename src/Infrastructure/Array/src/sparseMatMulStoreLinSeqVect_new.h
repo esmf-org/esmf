@@ -682,32 +682,35 @@ template<typename SIT, typename DIT> int sparseMatMulStoreLinSeqVect_new(
     VM::logMemInfo(std::string("ASMMStoreLinSeqVect_new1.2"));
 #endif
     
+    SparseMatrix<SIT,DIT> sparseMat(typekindFactors, NULL, 0, 0, 0, NULL);
+    if (sparseMatrix.size()==1) sparseMat = sparseMatrix[0];
+    
     switch (typekindFactors){
     case ESMC_TYPEKIND_R4:
       {
         QuerySparseMatrix<SIT,DIT,ESMC_R4>
-          querySparseMatrix(sparseMatrix[0], dstLinSeqVect);
+          querySparseMatrix(sparseMat, dstLinSeqVect);
         querySparseMatrix.totalExchange(vm);
       }
       break;
     case ESMC_TYPEKIND_R8:
       {
         QuerySparseMatrix<SIT,DIT,ESMC_R8>
-          querySparseMatrix(sparseMatrix[0], dstLinSeqVect);
+          querySparseMatrix(sparseMat, dstLinSeqVect);
         querySparseMatrix.totalExchange(vm);
       }
       break;
     case ESMC_TYPEKIND_I4:
       {
         QuerySparseMatrix<SIT,DIT,ESMC_I4>
-          querySparseMatrix(sparseMatrix[0], dstLinSeqVect);
+          querySparseMatrix(sparseMat, dstLinSeqVect);
         querySparseMatrix.totalExchange(vm);
       }
       break;
     case ESMC_TYPEKIND_I8:
       {
         QuerySparseMatrix<SIT,DIT,ESMC_I8>
-          querySparseMatrix(sparseMatrix[0], dstLinSeqVect);
+          querySparseMatrix(sparseMat, dstLinSeqVect);
         querySparseMatrix.totalExchange(vm);
       }
       break;
@@ -912,7 +915,7 @@ template<typename SIT, typename DIT> int sparseMatMulStoreLinSeqVect_new(
       = dstLinSeqVect[i].begin();
     while (itD != dstLinSeqVect[i].end()){
       // remove factorList elements without partnerDe
-      typename vector<DD::FactorElement<DIT> >::iterator it
+      typename vector<DD::FactorElement<SIT> >::iterator it
         = itD->factorList.begin(); 
       while (it != itD->factorList.end()){
         if ((it->partnerDe).size()==0)
@@ -920,6 +923,8 @@ template<typename SIT, typename DIT> int sparseMatMulStoreLinSeqVect_new(
         else
           ++it;
       }
+      // adjust the factorCount
+      itD->factorCount = itD->factorList.size();
       // remove dstLinSeqVect elements without factorList elements
       if ((itD->factorList).size()==0)
         itD = dstLinSeqVect[i].erase(itD);
