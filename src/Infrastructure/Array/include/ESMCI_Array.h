@@ -91,6 +91,9 @@ namespace ESMCI {
       n = n_;
       index = index_;
     }
+    int getN(){
+      return n;
+    }
     T getIndex(int i)const{return index[i];}
     void print(){
       std::cout << "SeqInd:" << n <<" (";
@@ -100,6 +103,12 @@ namespace ESMCI {
       std::cout << index[i] << ")\n";
     }
   };
+  template<typename T> bool operator<(SeqInd<T> a, SeqInd<T> b){
+    if (a.getN() != b.getN()) throw ESMC_RC_INTNRL_INCONS;
+    for (int i=0; i<a.getN(); i++)
+      if (a.getIndex(i) >= b.getIndex(i)) return false;
+    return true;
+  }
   
   //todo: try to unify SeqIndex and SeqInd structs!
   //============================================================================
@@ -316,8 +325,7 @@ namespace ESMCI {
     DELayout *getDELayout()                 const {return delayout;}
     RouteHandle *getIoRH()    	      	    const {return ioRH;}
     void setIoRH(RouteHandle *rh){ioRH = rh;}
-    int getLinearIndexExclusive(int localDe, int const *index, int *rc=NULL)
-      const;
+    int getLinearIndexExclusive(int localDe, int const *index)const;
     template<typename T> int getSequenceIndexExclusive(int localDe, 
       int const *index, SeqIndex<T> *seqIndex, bool recursive=true) const;
     template<typename T> SeqIndex<T> getSequenceIndexTile(int tile,
@@ -459,19 +467,95 @@ namespace ESMCI {
     // Iterator type through Array elements.
     Array const *array;               // associated Array object
     int localDe;                      // localDe index
+    //
+    int linIndex;                     // linear index of array element in array
+    void *seqIndex;                   // sequence index of array element
+    bool seqIndexRecursiveFlag;       // flag to be used when computing seqIndex
+    bool firstDimDecompFlag;          // indicate lowest array dim is decomp
+    bool firstDimFirstDecomp;         // first array dim corres. to first decomp
+    bool arbSeqIndexFlag;             // arbitrary sequence indices present
+    bool lastSeqIndexInvalid;         // internally used flag between next()
+    bool blockActiveFlag;             // active block requires hasValid checks
+    bool cannotOptimizeLookup;        // must do lookup from tuple each time
+    ESMC_TypeKind_Flag indexTK;       // sequence index typekind
    public:
-    ArrayElement(Array const *arrayArg, int localDeArg);
-      // construct iterator through exclusive Array region
     ArrayElement(Array const *arrayArg, int localDeArg,
-      bool blockExclusiveFlag);
+      bool seqIndexEnabled, bool seqIndexRecursive);
+      // construct iterator through exclusive Array region
+    ArrayElement(Array const *arrayArg, int localDeArg, bool blockExclusiveFlag,
+      bool seqIndexEnabled, bool seqIndexRecursive);
       // construct iterator through total Array region with block excl. option
+    ~ArrayElement(){
+      if (seqIndex){
+        if (indexTK==ESMC_TYPEKIND_I4)
+          delete (SeqIndex<ESMC_I4>*) seqIndex;
+        else if (indexTK==ESMC_TYPEKIND_I8)
+          delete (SeqIndex<ESMC_I8>*) seqIndex;
+      }
+    }
+    int getLinearIndex()const{
+      // return the linear index of ArrayElement into the Array
+      return linIndex;
+    }
     bool hasValidSeqIndex()const;
-    int getLinearIndexExclusive()const;
-    template<typename T> int getSequenceIndexExclusive(SeqIndex<T> *seqIndex,
-      bool recursive=true) const;
+    template<typename T> SeqIndex<T> getSequenceIndex()const{
+      if (seqIndex)
+        return *(SeqIndex<T>*)seqIndex;
+      else throw ESMC_RC_ARG_BAD;
+    }
     int getTensorSequenceIndex()const;
     int getArbSequenceIndexOffset()const;
     void print()const;
+    void next(){
+      bool adjusted = MultiDimIndexLoop::next();
+      if (!isWithin()) return;  // reached the end of iteration
+      if (adjusted){
+        // must re-compute linIndex from index tuple
+        linIndex = array->getLinearIndexExclusive(localDe, &indexTuple[0]);
+      }else{
+        // simply increment linIndex
+        linIndex++;
+      }
+      if (seqIndex){
+        if (cannotOptimizeLookup || adjusted || lastSeqIndexInvalid){
+          // must re-compute seqIndex from index tuple
+          if (!blockActiveFlag || hasValidSeqIndex()){
+            // a valid sequence index can be queried
+            lastSeqIndexInvalid = false; // reset by default
+            if (indexTK==ESMC_TYPEKIND_I4){
+              int localrc = array->getSequenceIndexExclusive(localDe,
+                &indexTuple[0], 
+                (SeqIndex<ESMC_I4>*)seqIndex, seqIndexRecursiveFlag);
+              if (localrc != ESMF_SUCCESS) throw localrc;
+              if (((SeqIndex<ESMC_I4>*)seqIndex)->decompSeqIndex == -1)
+                lastSeqIndexInvalid = true;
+            }else if (indexTK==ESMC_TYPEKIND_I8){
+              int localrc = array->getSequenceIndexExclusive(localDe,
+                &indexTuple[0], 
+                (SeqIndex<ESMC_I8>*)seqIndex, seqIndexRecursiveFlag);
+              if (localrc != ESMF_SUCCESS) throw localrc;
+              if (((SeqIndex<ESMC_I8>*)seqIndex)->decompSeqIndex == -1)
+                lastSeqIndexInvalid = true;
+            }
+          }
+        }else{
+          // opimize by simple index seqIndex increment
+          if (firstDimDecompFlag){
+            // increment the decompSeqIndex
+            if (indexTK==ESMC_TYPEKIND_I4)
+              ((SeqIndex<ESMC_I4>*)seqIndex)->decompSeqIndex++;
+            else if (indexTK==ESMC_TYPEKIND_I8)
+              ((SeqIndex<ESMC_I8>*)seqIndex)->decompSeqIndex++;
+          }else{
+            // increment the tensorSeqIndex
+            if (indexTK==ESMC_TYPEKIND_I4)
+              ((SeqIndex<ESMC_I4>*)seqIndex)->tensorSeqIndex++;
+            else if (indexTK==ESMC_TYPEKIND_I8)
+              ((SeqIndex<ESMC_I8>*)seqIndex)->tensorSeqIndex++;
+          }
+        }
+      }
+    }
   };  // class ArrayElement 
   //============================================================================
   

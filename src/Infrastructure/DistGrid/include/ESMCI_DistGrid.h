@@ -252,6 +252,7 @@ namespace ESMCI {
     std::vector<int> indexTupleBlockEnd;   // blocked region
     std::vector<int> indexTupleWatchStart; // watched region
     std::vector<int> indexTupleWatchEnd;   // watched region
+    bool skipBlockedRegionFlag;
    public:
     MultiDimIndexLoop();
     MultiDimIndexLoop(std::vector<int> const &sizes);
@@ -264,8 +265,8 @@ namespace ESMCI {
     void setWatchEnd(std::vector<int> const &watchEnd);
     void first();
     void last();
-    void adjust();
-    void next();
+    bool adjust();
+    bool next();
     bool isFirst()const;
     bool isLast()const;
     bool isWithin()const;

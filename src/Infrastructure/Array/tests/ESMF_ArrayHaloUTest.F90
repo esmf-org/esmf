@@ -726,10 +726,10 @@ program ESMF_ArrayHaloUTest
   call ESMF_ArrayGet(array, localDeCount=localDeCount, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   
-  allocate(eLBde(2,localDeCount))
-  allocate(eUBde(2,localDeCount))
-  allocate(tLBde(2,localDeCount))
-  allocate(tUBde(2,localDeCount))
+  allocate(eLBde(2,0:localDeCount-1))
+  allocate(eUBde(2,0:localDeCount-1))
+  allocate(tLBde(2,0:localDeCount-1))
+  allocate(tUBde(2,0:localDeCount-1))
   
   allocate(localDeToDeMap(0:localDeCount-1))
 
@@ -740,8 +740,6 @@ program ESMF_ArrayHaloUTest
   call ESMF_ArrayGet(array, exclusiveLBound=eLBde, exclusiveUBound=eUBde, &
     totalLBound=tLBde, totalUBound=tUBde, localDeToDeMap=localDeToDeMap, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-
-  deallocate (eLBde, eUBde, tLBde, tUBde)
 
 !------------------------------------------------------------------------
 ! The Array object is defined on a 10 x 20 index space which is regularily
@@ -820,8 +818,8 @@ program ESMF_ArrayHaloUTest
     call ESMF_ArrayGet(array, localDe=lde, farrayPtr=farrayPtr, rc=rc)
 
     ! verify elements within exclusive region
-    do j=eLB(2,1), eUB(2,1)
-      do i=eLB(1,1), eUB(1,1)
+    do j=eLBde(2,lde), eUBde(2,lde)
+      do i=eLBde(1,lde), eUBde(1,lde)
         if (farrayPtr(i,j) /= localDeToDeMap(lde)) then
           verifyFlag = .false.
           print *, "Found wrong exclusive element"
@@ -843,12 +841,12 @@ program ESMF_ArrayHaloUTest
     else if (localDeToDeMap(lde) == 3) then
       verifyValue = 0
     endif
-    do j=tLB(2,1), eLB(2,1)-1
-      do i=tLB(1,1), eLB(1,1)-1
+    do j=tLBde(2,lde), eLBde(2,lde)-1
+      do i=tLBde(1,lde), eLBde(1,lde)-1
         if (farrayPtr(i,j) /= verifyValue) then
           verifyFlag = .false.
           print *, "Found wrong value in section 1 for DE", localDeToDeMap(lde), &
-            " on PET", localPet
+            " on PET", localPet, farrayPtr(i,j), verifyValue
           exit
         endif
       enddo
@@ -864,12 +862,12 @@ program ESMF_ArrayHaloUTest
     else if (localDeToDeMap(lde) == 3) then
       verifyValue = 1
     endif
-    do j=tLB(2,1), eLB(2,1)-1
-      do i=eLB(1,1), eUB(1,1)
+    do j=tLBde(2,lde), eLBde(2,lde)-1
+      do i=eLBde(1,lde), eUBde(1,lde)
         if (farrayPtr(i,j) /= verifyValue) then
           verifyFlag = .false.
           print *, "Found wrong value in section 2 for DE", localDeToDeMap(lde), &
-            " on PET", localPet
+            " on PET", localPet, i, j, farrayPtr(i,j), verifyValue
           exit
         endif
       enddo
@@ -885,12 +883,12 @@ program ESMF_ArrayHaloUTest
     else if (localDeToDeMap(lde) == 3) then
       verifyValue = localDeToDeMap(lde)
     endif
-    do j=tLB(2,1), eLB(2,1)-1
-      do i=eUB(1,1)+1, tUB(1,1)
+    do j=tLBde(2,lde), eLBde(2,lde)-1
+      do i=eUBde(1,lde)+1, tUBde(1,lde)
         if (farrayPtr(i,j) /= verifyValue) then
           verifyFlag = .false.
           print *, "Found wrong value in section 3 for DE", localDeToDeMap(lde), &
-            " on PET", localPet
+            " on PET", localPet, i, j, farrayPtr(i,j), verifyValue
           exit
         endif
       enddo
@@ -906,12 +904,12 @@ program ESMF_ArrayHaloUTest
     else if (localDeToDeMap(lde) == 3) then
       verifyValue = localDeToDeMap(lde)
     endif
-    do j=eLB(2,1), eUB(2,1)
-      do i=eUB(1,1)+1, tUB(1,1)
+    do j=eLBde(2,lde), eUBde(2,lde)
+      do i=eUBde(1,lde)+1, tUBde(1,lde)
         if (farrayPtr(i,j) /= verifyValue) then
           verifyFlag = .false.
           print *, "Found wrong value in section 4 for DE", localDeToDeMap(lde), &
-            " on PET", localPet
+            " on PET", localPet, i, j, farrayPtr(i,j), verifyValue
           exit
         endif
       enddo
@@ -927,12 +925,12 @@ program ESMF_ArrayHaloUTest
     else if (localDeToDeMap(lde) == 3) then
       verifyValue = localDeToDeMap(lde)
     endif
-    do j=eUB(2,1)+1, tUB(2,1)
-      do i=eUB(1,1)+1, tUB(1,1)
+    do j=eUBde(2,lde)+1, tUBde(2,lde)
+      do i=eUBde(1,lde)+1, tUBde(1,lde)
         if (farrayPtr(i,j) /= verifyValue) then
           verifyFlag = .false.
           print *, "Found wrong value in section 5 for DE", localDeToDeMap(lde), &
-            " on PET", localPet
+            " on PET", localPet, i, j, farrayPtr(i,j), verifyValue
           exit
         endif
       enddo
@@ -948,12 +946,12 @@ program ESMF_ArrayHaloUTest
     else if (localDeToDeMap(lde) == 3) then
       verifyValue = localDeToDeMap(lde)
     endif
-    do j=eUB(2,1)+1, tUB(2,1)
-      do i=eLB(1,1), eUB(1,1)
+    do j=eUBde(2,lde)+1, tUBde(2,lde)
+      do i=eLBde(1,lde), eUBde(1,lde)
         if (farrayPtr(i,j) /= verifyValue) then
           verifyFlag = .false.
           print *, "Found wrong value in section 6 for DE", localDeToDeMap(lde), &
-            " on PET", localPet
+            " on PET", localPet, i, j, farrayPtr(i,j), verifyValue
           exit
         endif
       enddo
@@ -969,12 +967,12 @@ program ESMF_ArrayHaloUTest
     else if (localDeToDeMap(lde) == 3) then
       verifyValue = localDeToDeMap(lde)
     endif
-    do j=eUB(2,1)+1, tUB(2,1)
-      do i=tLB(1,1), eLB(1,1)-1
+    do j=eUBde(2,lde)+1, tUBde(2,lde)
+      do i=tLBde(1,lde), eLBde(1,lde)-1
         if (farrayPtr(i,j) /= verifyValue) then
           verifyFlag = .false.
           print *, "Found wrong value in section 7 for DE", localDeToDeMap(lde), &
-            " on PET", localPet
+            " on PET", localPet, i, j, farrayPtr(i,j), verifyValue
           exit
         endif
       enddo
@@ -990,12 +988,12 @@ program ESMF_ArrayHaloUTest
     else if (localDeToDeMap(lde) == 3) then
       verifyValue = 2
     endif
-    do j=eLB(2,1), eUB(2,1)
-      do i=tLB(1,1), eLB(1,1)-1
+    do j=eLBde(2,lde), eUBde(2,lde)
+      do i=tLBde(1,lde), eLBde(1,lde)-1
         if (farrayPtr(i,j) /= verifyValue) then
           verifyFlag = .false.
           print *, "Found wrong value in section 8 for DE", localDeToDeMap(lde), &
-            " on PET", localPet
+            " on PET", localPet, i, j, farrayPtr(i,j), verifyValue
           exit
         endif
       enddo
@@ -1007,6 +1005,7 @@ program ESMF_ArrayHaloUTest
   call ESMF_Test(verifyFlag, name, failMsg, result, ESMF_SRCLINE)
 
   deallocate (localDeToDeMap)
+  deallocate (eLBde, eUBde, tLBde, tUBde)
   
 !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
