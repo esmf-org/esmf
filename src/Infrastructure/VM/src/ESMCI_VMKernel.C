@@ -5430,7 +5430,7 @@ namespace ESMCI{
 //==============================================================================
 //==============================================================================
 
-#define DEBUG_COMPAT2
+#define DEBUG_COMPAT2_off
 
 namespace ESMCI{
   void ComPat2::totalExchange(VMK *vmk){
