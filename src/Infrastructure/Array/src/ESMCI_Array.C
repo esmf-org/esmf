@@ -11570,7 +11570,7 @@ ArrayElement::ArrayElement(
     // prepare seqIndex member for iteration
     if (indexTK==ESMC_TYPEKIND_I4){
       seqIndex = (void *) new SeqIndex<ESMC_I4>;
-      if (hasValidSeqIndex()){
+      if (!blockExclusiveFlag || hasValidSeqIndex()){
         localrc = array->getSequenceIndexExclusive(localDe, &indexTuple[0], 
           (SeqIndex<ESMC_I4>*)seqIndex, seqIndexRecursiveFlag);
         if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
@@ -11578,7 +11578,7 @@ ArrayElement::ArrayElement(
       }
     }else if (indexTK==ESMC_TYPEKIND_I8){
       seqIndex = (void *) new SeqIndex<ESMC_I8>;
-      if (hasValidSeqIndex()){
+      if (!blockExclusiveFlag || hasValidSeqIndex()){
         localrc = array->getSequenceIndexExclusive(localDe, &indexTuple[0], 
           (SeqIndex<ESMC_I8>*)seqIndex, seqIndexRecursiveFlag);
         if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
