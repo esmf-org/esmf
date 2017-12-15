@@ -84,13 +84,13 @@ extern "C" {
   void FTN_X(c_esmftrace_region_enter)(const char *name, int *rc, ESMCI_FortranStrLenArg nlen) {
     //TODO: optimize trim by not creating string object
     string cname = string(name, ESMC_F90lentrim(name, nlen));
-    ESMCI::TraceEventRegionEnter(cname.c_str());
+    ESMCI::TraceEventRegionEnter(cname);
     if (rc != NULL) *rc = ESMF_SUCCESS;
   }
 
   void FTN_X(c_esmftrace_region_exit)(const char *name, int *rc, ESMCI_FortranStrLenArg nlen) {
     string cname = string(name, ESMC_F90lentrim(name, nlen));
-    ESMCI::TraceEventRegionExit(cname.c_str());
+    ESMCI::TraceEventRegionExit(cname);
     if (rc != NULL) *rc = ESMF_SUCCESS;
   }
 

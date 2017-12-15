@@ -42,6 +42,7 @@
 #include "ESMCI_Trace.h"
 #include "ESMCI_Comp.h"
 #include "ESMCI_VMKernel.h"
+#include "ESMCI_HashMap.h"
 
 #define BT_CHK(_value, _ctx)                                            \
   if ((_value) != 0) {							\
@@ -150,11 +151,28 @@ using std::string;
 using std::vector;
 using std::stringstream;
 
+#define REGION_HASHTABLE_SIZE 100
+
 namespace ESMCI {
 
+  struct StringHashF {
+    unsigned long operator()(const string& s) const
+    {
+      unsigned long hash = 5381;
+      int c;
+      const char *str = s.c_str();     
+      while (c = *str++)
+        hash = ((hash << 5) + hash) + c; /* hash * 33 + c */
+      //printf("hash for %s = %d\n", s.c_str(), hash % REGION_HASHTABLE_SIZE);
+      return hash % REGION_HASHTABLE_SIZE;
+    }
+  };
+  
   static bool traceLocalPet = false;
   static int traceClock = 0;
   static int64_t traceClockOffset = 0;
+  static HashMap<string, int, REGION_HASHTABLE_SIZE, StringHashF> regionMap;
+  static int nextRegionId = 1;
   
   static vector<string> split(const string& s, const string& delim, const bool keep_empty = true) {
     vector<string> result;
@@ -1243,16 +1261,53 @@ namespace ESMCI {
                                         *ep_vmid, *ep_baseid, *ep_method, *ep_phase);
   }
 
-  void TraceEventRegionEnter(const char *name) {
+  void TraceEventRegionEnter(std::string name) {
     if (!traceLocalPet) return;
-    esmftrc_default_trace_region_enter(esmftrc_platform_get_default_ctx(),
-                                       name);
+
+    int region_id = 0;
+    bool present = regionMap.get(name, region_id);
+    if (!present) {
+      region_id = nextRegionId;
+      nextRegionId++;
+      regionMap.put(name, region_id);
+      //printf("added new region: %s = %d\n", name.c_str(), region_id);
+      //add definition to trace
+      esmftrc_default_trace_define_region(esmftrc_platform_get_default_ctx(),
+                                          region_id,
+                                          name.c_str());
+    }
+    
+    esmftrc_default_trace_regionid_enter(esmftrc_platform_get_default_ctx(),
+                                         region_id);
+    
+    //esmftrc_default_trace_region_enter(esmftrc_platform_get_default_ctx(),
+    //                                   name.c_str());
   }
 
-  void TraceEventRegionExit(const char *name) {
+  void TraceEventRegionExit(std::string name) {
     if (!traceLocalPet) return;
-    esmftrc_default_trace_region_exit(esmftrc_platform_get_default_ctx(),
-                                       name);
+
+    int region_id = 0;
+    bool present = regionMap.get(name, region_id);
+    if (!present) {
+      //if timing regions are well-formed, then this should
+      //never happen since the region would have already been
+      //added - but we'll allow for poorly formed regions
+      region_id = nextRegionId;
+      nextRegionId++;
+      regionMap.put(name, region_id);
+      //add definition to trace
+      esmftrc_default_trace_define_region(esmftrc_platform_get_default_ctx(),
+                                          region_id,
+                                          name.c_str());
+    }
+    
+    
+    esmftrc_default_trace_regionid_exit(esmftrc_platform_get_default_ctx(),
+                                         region_id);
+
+    //esmftrc_default_trace_region_exit(esmftrc_platform_get_default_ctx(),
+    //                                   name);
   }
   
 #undef  ESMC_METHOD
