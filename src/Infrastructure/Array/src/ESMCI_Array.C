@@ -15,7 +15,7 @@
 
 #define ASMM_STORE_LOG_off
 #define ASMM_STORE_TIMING_off
-#define ASMM_STORE_MEMLOG_off
+#define ASMM_STORE_MEMLOG_on
 #define ASMM_STORE_COMMMATRIX_on
 #define ASMM_STORE_OPT_PRINT_off
 #define ASMM_STORE_DUMPSMM_off
