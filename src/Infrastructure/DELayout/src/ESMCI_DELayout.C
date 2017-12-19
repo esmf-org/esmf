@@ -6673,7 +6673,9 @@ void XXE::pssslDstRra(T **rraBaseList, int *rraIndexList, TKId elementTK,
       "taking vector branch...");
     ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
 #endif
-    exec_pssslDstRra(rraBaseList, rraIndexList, rraOffsetList, factorList,
+//    exec_pssslDstRra(rraBaseList, rraIndexList, rraOffsetList, factorList,
+//      valueBaseList, valueOffsetList, baseListIndexList, termCount, vectorL);
+    exec_pssslDstRraDynMsk(rraBaseList, rraIndexList, rraOffsetList, factorList,
       valueBaseList, valueOffsetList, baseListIndexList, termCount, vectorL);
   }
 }
@@ -6687,6 +6689,45 @@ void XXE::exec_pssslDstRra(T **rraBaseList, int *rraIndexList,
   T *element;
   U factor;
   V *value;
+  if (vectorL==1){
+    // scalar elements
+    for (int i=0; i<termCount; i++){  // super scalar loop
+      element = rraBaseList[rraIndexList[baseListIndexList[i]]]
+        + rraOffsetList[i];
+      factor = factorList[i];
+      value = valueBaseList[baseListIndexList[i]] + valueOffsetList[i];
+      *element += factor * *value;
+    }
+  }else{
+    // vector elements
+    for (int i=0; i<termCount; i++){  // super scalar loop
+      element = rraBaseList[rraIndexList[baseListIndexList[i]]]
+        + rraOffsetList[i] * vectorL;
+      factor = factorList[i];
+      value = valueBaseList[baseListIndexList[i]]
+        + valueOffsetList[i] * vectorL;
+      for (int k=0; k<vectorL; k++)  // vector loop
+        *(element+k) += factor * *(value+k);
+    }
+  }
+}
+
+//---
+
+template<typename T, typename U, typename V>
+void XXE::exec_pssslDstRraDynMsk(T **rraBaseList, int *rraIndexList, 
+  int *rraOffsetList, U *factorList, V **valueBaseList,
+  int *valueOffsetList, int *baseListIndexList, int termCount, int vectorL){
+  T *element;
+  U factor;
+  V *value;
+#if 1
+  {
+    std::stringstream logmsg;
+    logmsg << "exec_pssslDstRraDynMsk()";
+    ESMC_LogDefault.Write(logmsg.str(), ESMC_LOGMSG_INFO);
+  }
+#endif
   if (vectorL==1){
     // scalar elements
     for (int i=0; i<termCount; i++){  // super scalar loop
