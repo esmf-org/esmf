@@ -16,8 +16,8 @@
 #define ASMM_STORE_LOG_off
 #define ASMM_STORE_TIMING_off
 #define ASMM_STORE_MEMLOG_on
+#define ASMM_STORE_TUNELOG_on
 #define ASMM_STORE_COMMMATRIX_on
-#define ASMM_STORE_OPT_PRINT_off
 #define ASMM_STORE_DUMPSMM_off
 
 #define ASMM_EXEC_INFO_off
@@ -9783,16 +9783,6 @@ template<typename SIT, typename DIT> int sparseMatMulStoreEncodeXXE(
   
   double dtMin;           // to find minimum time
   
-#ifdef ASMM_STORE_OPT_PRINT_on
-  char asmm_store_opt_print_file[160];
-  sprintf(asmm_store_opt_print_file, "ASMM_STORE_OPT_PRINT_on.%05d", localPet);
-  FILE *asmm_store_opt_print_fp = fopen(asmm_store_opt_print_file, "a");
-  fprintf(asmm_store_opt_print_fp, "\n========================================"
-    "========================================\n");
-  fprintf(asmm_store_opt_print_fp, "========================================"
-    "========================================\n\n");
-#endif
-  
   // Need correct setting of vectorLength for the XXE exec() calls.
   int vectorLength = 0; // initialize
   
@@ -9883,9 +9873,14 @@ template<typename SIT, typename DIT> int sparseMatMulStoreEncodeXXE(
         dtAverage += dtEnd - dtStart;
       }
       dtAverage /= dtCount;
-#ifdef ASMM_STORE_OPT_PRINT_on
-      fprintf(asmm_store_opt_print_fp, "localPet: %d, srcTermProcessing=%d -> dtAverage=%gs\n", 
-        localPet, srcTermProcessing, dtAverage);
+#ifdef ASMM_STORE_TUNELOG_on
+    {
+      std::stringstream msg;
+      msg << "ASMM_STORE_TUNELOG:" << __LINE__ 
+        << " srcTermProcessing=" << srcTermProcessing
+        << " dtAverage=" << dtAverage;
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+    }
 #endif
       // determine optimum srcTermProcessing  
       if (srcTermProcessing==0){
@@ -9902,9 +9897,14 @@ template<typename SIT, typename DIT> int sparseMatMulStoreEncodeXXE(
       }
     } // srcTermProc
   
-#ifdef ASMM_STORE_OPT_PRINT_on
-    fprintf(asmm_store_opt_print_fp, "localPet: %d, srcTermProcessingOpt=%d -> "
-      "dtMin=%gs (local)\n", localPet, srcTermProcessingOpt, dtMin);
+#ifdef ASMM_STORE_TUNELOG_on
+    {
+      std::stringstream msg;
+      msg << "ASMM_STORE_TUNELOG:" << __LINE__ 
+        << " srcTermProcessingOpt=" << srcTermProcessingOpt
+        << " dtMin(local)=" << dtMin;
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+    }
 #endif
     
     // all PETs vote on srcTermProcessingOpt
@@ -9946,9 +9946,14 @@ template<typename SIT, typename DIT> int sparseMatMulStoreEncodeXXE(
   VM::logMemInfo(std::string("ASMMStoreEncodeXXE9.0"));
 #endif
   
-#ifdef ASMM_STORE_OPT_PRINT_on
-  fprintf(asmm_store_opt_print_fp, "localPet: %d, srcTermProcessingOpt=%d "
-    "(majority vote)\n", localPet, srcTermProcessingOpt);
+#ifdef ASMM_STORE_TUNELOG_on
+    {
+      std::stringstream msg;
+      msg << "ASMM_STORE_TUNELOG:" << __LINE__ 
+        << " srcTermProcessingOpt=" << srcTermProcessingOpt
+        << " (majority vote)";
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+    }
 #endif
     
 #ifdef ASMM_STORE_TIMING_on
@@ -10029,9 +10034,14 @@ template<typename SIT, typename DIT> int sparseMatMulStoreEncodeXXE(
         dtAverage += dtEnd - dtStart;
       }
       dtAverage /= dtCount;
-#ifdef ASMM_STORE_OPT_PRINT_on
-      fprintf(asmm_store_opt_print_fp, "localPet: %d, pipelineDepth=%d -> "
-        "dtAverage=%gs\n", localPet, pipelineDepth, dtAverage);
+#ifdef ASMM_STORE_TUNELOG_on
+    {
+      std::stringstream msg;
+      msg << "ASMM_STORE_TUNELOG:" << __LINE__ 
+        << " pipelineDepth=" << pipelineDepth
+        << " dtAverage=" << dtAverage;
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+    }
 #endif
       // determine optimum pipelineDepth  
       if (pipelineDepth==1){
@@ -10048,9 +10058,14 @@ template<typename SIT, typename DIT> int sparseMatMulStoreEncodeXXE(
       }
     } // pipelineDepth
     
-#ifdef ASMM_STORE_OPT_PRINT_on
-    fprintf(asmm_store_opt_print_fp, "localPet: %d, pipelineDepthOpt=%d -> "
-      "dtMin=%gs (local)\n", localPet, pipelineDepthOpt, dtMin);
+#ifdef ASMM_STORE_TUNELOG_on
+    {
+      std::stringstream msg;
+      msg << "ASMM_STORE_TUNELOG:" << __LINE__ 
+        << " pipelineDepthOpt=" << pipelineDepthOpt
+        << " dtMin(local)=" << dtMin;
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+    }
 #endif
       
     // all PETs vote on pipelineDepthOpt
@@ -10091,10 +10106,14 @@ template<typename SIT, typename DIT> int sparseMatMulStoreEncodeXXE(
   VM::logMemInfo(std::string("ASMMStoreEncodeXXE10.0"));
 #endif
 
-#ifdef ASMM_STORE_OPT_PRINT_on
-  fprintf(asmm_store_opt_print_fp, "localPet: %d, pipelineDepthOpt=%d "
-    "(majority vote)\n", localPet, pipelineDepthOpt);
-  fclose(asmm_store_opt_print_fp);
+#ifdef ASMM_STORE_TUNELOG_on
+    {
+      std::stringstream msg;
+      msg << "ASMM_STORE_TUNELOG:" << __LINE__ 
+        << " pipelineDepthOpt=" << pipelineDepthOpt
+        << " (majority vote)";
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+    }
 #endif
       
 #ifdef ASMM_STORE_TIMING_on
