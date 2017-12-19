@@ -10825,25 +10825,31 @@ int Array::sparseMatMul(
   // set filterBitField  
   int filterBitField = 0x0; // init. to execute _all_ operations in XXE stream
   
+  // set filters according to commflag and termorderflag
   if (commflag==ESMF_COMM_BLOCKING){
     // blocking mode
     if (termorderflag == ESMC_TERMORDER_SRCSEQ){
-      filterBitField |= XXE::filterBitNbWaitFinish; // set NbWaitFinish filter
-      filterBitField |= XXE::filterBitNbTestFinish; // set NbTestFinish filter
-      filterBitField |= XXE::filterBitCancel;       // set Cancel filter
+      // strict order of terms in single sum, not partial sums
+      filterBitField |= XXE::filterBitNbWaitFinish; // no NbWaitFinish ops
+      filterBitField |= XXE::filterBitNbTestFinish; // no NbTestFinish ops
+      filterBitField |= XXE::filterBitCancel;       // no Cancel ops
+      // -> this leaves SingleSum ops enabled
 #ifdef ASMM_EXEC_INFO_on
       ESMC_LogDefault.Write("SMM exec: COMM_BLOCKING, TERMORDER_SRCSEQ",
         ESMC_LOGMSG_INFO);
 #endif
     }else if (termorderflag == ESMC_TERMORDER_SRCPET){
-      filterBitField |= XXE::filterBitNbTestFinish; // set NbTestFinish filter
-      filterBitField |= XXE::filterBitCancel;       // set Cancel filter
-      filterBitField |= XXE::filterBitNbWaitFinishSingleSum; // SingleSum filter
+      // order of terms by src PET, allow partial sums of terms from same PET
+      filterBitField |= XXE::filterBitNbTestFinish; // no NbTestFinish ops
+      filterBitField |= XXE::filterBitCancel;       // no Cancel ops
+      filterBitField |= XXE::filterBitNbWaitFinishSingleSum; // no SingleSum ops
+      // -> this leaves NbWaitFinish ops enabled      
 #ifdef ASMM_EXEC_INFO_on
       ESMC_LogDefault.Write("SMM exec: COMM_BLOCKING, TERMORDER_SRCPET",
         ESMC_LOGMSG_INFO);
 #endif
     }else if (termorderflag == ESMC_TERMORDER_FREE){
+      // completely free order of terms, allow any partial sums
 #ifdef ENSURE_TO_LIMIT_OUTSTANDING_NBCOMMS
 //TODO: This branch ensures that there are never more than pipelineDepth
 //TODO: outstanding non-blocking comms held by this PET. This is basically
@@ -10861,12 +10867,12 @@ int Array::sparseMatMul(
 //TODO: By default this is NOT turned on, but keep using the 
 //TODO: exsiting ESMC_TERMORDER_FREE implementations with risking too many
 //TODO: outstanding nb-comms, under just the right conditions!
-      filterBitField |= XXE::filterBitNbTestFinish; // set NbTestFinish filter
+      filterBitField |= XXE::filterBitNbTestFinish; // no NbTestFinish ops
 #else
-      filterBitField |= XXE::filterBitNbWaitFinish; // set NbWaitFinish filter
+      filterBitField |= XXE::filterBitNbWaitFinish; // no NbWaitFinish ops
 #endif
-      filterBitField |= XXE::filterBitCancel;       // set Cancel filter    
-      filterBitField |= XXE::filterBitNbWaitFinishSingleSum; // SingleSum filter
+      filterBitField |= XXE::filterBitCancel;       // no Cancel ops
+      filterBitField |= XXE::filterBitNbWaitFinishSingleSum; // no SingleSum ops
 #ifdef ASMM_EXEC_INFO_on
       ESMC_LogDefault.Write("SMM exec: COMM_BLOCKING, TERMORDER_FREE",
         ESMC_LOGMSG_INFO);
@@ -10934,7 +10940,8 @@ int Array::sparseMatMul(
       ESMC_LOGMSG_INFO);
 #endif
   }
-  
+
+  // set filters according to zeroflag
   if (zeroflag!=ESMC_REGION_TOTAL)
     filterBitField |= XXE::filterBitRegionTotalZero;  // filter reg. total zero
   if (zeroflag!=ESMC_REGION_SELECT)
