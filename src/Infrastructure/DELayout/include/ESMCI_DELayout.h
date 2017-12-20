@@ -1093,7 +1093,7 @@ class XXE{
       int *valueOffsetList, int *baseListIndexList,
       int termCount, int vectorL);
     template<typename T, typename U, typename V>
-    static void exec_pssslDstRraDynMsk(T **rraBaseList, int *rraIndexList, 
+    static void exec_pssslDstRraDynMask(T **rraBaseList, int *rraIndexList, 
       int *rraOffsetList, U *factorList, V **valueBaseList,
       int *valueOffsetList, int *baseListIndexList,
       int termCount, int vectorL);

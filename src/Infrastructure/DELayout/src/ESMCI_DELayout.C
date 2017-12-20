@@ -6675,7 +6675,7 @@ void XXE::pssslDstRra(T **rraBaseList, int *rraIndexList, TKId elementTK,
 #endif
 //    exec_pssslDstRra(rraBaseList, rraIndexList, rraOffsetList, factorList,
 //      valueBaseList, valueOffsetList, baseListIndexList, termCount, vectorL);
-    exec_pssslDstRraDynMsk(rraBaseList, rraIndexList, rraOffsetList, factorList,
+    exec_pssslDstRraDynMask(rraBaseList, rraIndexList, rraOffsetList, factorList,
       valueBaseList, valueOffsetList, baseListIndexList, termCount, vectorL);
   }
 }
@@ -6714,28 +6714,101 @@ void XXE::exec_pssslDstRra(T **rraBaseList, int *rraIndexList,
 
 //---
 
-template<typename T, typename U, typename V>
-void XXE::exec_pssslDstRraDynMsk(T **rraBaseList, int *rraIndexList, 
-  int *rraOffsetList, U *factorList, V **valueBaseList,
-  int *valueOffsetList, int *baseListIndexList, int termCount, int vectorL){
+template<typename T, typename U, typename V> struct DynMaskElement{
   T *element;
-  U factor;
-  V *value;
+  vector<U*> factors;
+  vector<V*> values;
+};
+
+template<typename T, typename U, typename V>
+  void dynMaskHandler(vector<DynMaskElement<T,U,V> > &dynMaskList){
 #if 1
   {
     std::stringstream logmsg;
-    logmsg << "exec_pssslDstRraDynMsk()";
+    logmsg << "dynMaskHandler(): with dynMaskList.size()=" 
+      << dynMaskList.size();
+    ESMC_LogDefault.Write(logmsg.str(), ESMC_LOGMSG_INFO);
+  }
+#endif
+  for (unsigned i=0; i<dynMaskList.size(); i++){
+    *(dynMaskList[i].element) = 50.;
+  }
+}
+
+//---
+
+template<typename T, typename U, typename V>
+void XXE::exec_pssslDstRraDynMask(T **rraBaseList, int *rraIndexList, 
+  int *rraOffsetList, U *factorList, V **valueBaseList,
+  int *valueOffsetList, int *baseListIndexList, int termCount, int vectorL){
+  T *element;
+  T *prevElement=NULL;
+  T tmpElement;
+  T dstMaskValue = -999;
+  U factor;
+  V *value;
+  V srcMaskValue = -999;
+#if 1
+  {
+    std::stringstream logmsg;
+    logmsg << "exec_pssslDstRraDynMask():";
     ESMC_LogDefault.Write(logmsg.str(), ESMC_LOGMSG_INFO);
   }
 #endif
   if (vectorL==1){
     // scalar elements
+    vector<DynMaskElement<T,U,V> > dynMaskList;
+    bool dstMask = false; 
+    bool srcMask = false;
     for (int i=0; i<termCount; i++){  // super scalar loop
+      DynMaskElement<T,U,V> dynMaskElement;
       element = rraBaseList[rraIndexList[baseListIndexList[i]]]
         + rraOffsetList[i];
+      if (prevElement != element){
+        // this is a new element
+        if (prevElement != NULL && !(dstMask || srcMask)){
+          // finally write the previous sum into the actual element b/c unmasked
+          *prevElement = tmpElement;
+        }else if (dstMask || srcMask){
+          // finally store dynMaskElement in dynMaskList b/c masking detected
+          dynMaskElement.element = prevElement;   // finish the entry
+          dynMaskList.push_back(dynMaskElement);  // push into dynMaskList
+        }
+        prevElement = element;
+        srcMask = false;  // reset
+        dstMask = false;  // reset
+        if (*element == dstMaskValue)
+          dstMask = true;
+        else
+          tmpElement = *element;  // load tmpElement with current element
+      }
       factor = factorList[i];
       value = valueBaseList[baseListIndexList[i]] + valueOffsetList[i];
-      *element += factor * *value;
+      if (*value == srcMaskValue) srcMask = true;
+      if (!(dstMask || srcMask)){
+        tmpElement += factor * *value;  // perform calculation
+        dynMaskElement.factors.push_back(&(factorList[i])); // dynMaskElement
+        dynMaskElement.values.push_back(value); // dynMaskElement
+      }
+#if 1
+  {
+    std::stringstream logmsg;
+    logmsg << "element=" << element
+      << "  factor=" << &(factorList[i])
+      << "  value=" << value;
+    ESMC_LogDefault.Write(logmsg.str(), ESMC_LOGMSG_INFO);
+  }
+#endif
+    }
+    // must also write-back the last element of the loop
+    if (prevElement != NULL && !(dstMask || srcMask)){
+      // finally write the previous sum into the actual element
+      *prevElement = tmpElement;
+    }
+    // see if any dynamic masking was detected
+    if (dynMaskList.size() > 0){
+      // call into dynMaskHandler to handle the masked elements
+      dynMaskHandler(dynMaskList);
     }
   }else{
     // vector elements
