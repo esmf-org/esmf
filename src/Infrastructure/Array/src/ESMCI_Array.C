@@ -5948,14 +5948,24 @@ namespace ArrayHelper{
   template<typename IT1, typename IT2> struct DstInfoSrcSeqSort{
     typename vector<DstInfo<IT1,IT2> >::iterator pp;
     int recvnbVectorIndex;
+    int rraIndexListIndex;
     DstInfoSrcSeqSort(typename vector<DstInfo<IT1,IT2> >::iterator pp_, 
-      int recvnbVectorIndex_){
+      int recvnbVectorIndex_, int rraIndexListIndex_){
       pp=pp_;
       recvnbVectorIndex=recvnbVectorIndex_;
+      rraIndexListIndex=rraIndexListIndex_;
     }
   };
   template<typename IT1, typename IT2> bool operator<
     (DstInfoSrcSeqSort<IT1,IT2> a, DstInfoSrcSeqSort<IT1,IT2> b){
+    // sorting hierarchy: 1) rraIndexListIndex, 2) linIndex, 3) partnerSeqIndex
+    // 1) rraIndexListIndex
+    if (a.rraIndexListIndex != b.rraIndexListIndex)
+      return (a.rraIndexListIndex < b.rraIndexListIndex);
+    // 2) linIndex
+    if (a.pp->linIndex != b.pp->linIndex)
+      return (a.pp->linIndex < b.pp->linIndex);
+    // 3) partnerSeqIndex
     return (a.pp->partnerSeqIndex < b.pp->partnerSeqIndex);
   }
   
@@ -6607,7 +6617,8 @@ namespace ArrayHelper{
         // append terms from buffer "i"
         for (pp=recvnbVector[i].dstInfoTable.begin();
           pp!=recvnbVector[i].dstInfoTable.end(); ++pp){
-          dstInfoSort.push_back(DstInfoSrcSeqSort<IT1,IT2>(pp, i));
+          dstInfoSort.push_back(DstInfoSrcSeqSort<IT1,IT2>(pp, i,
+            rraIndexList[i]));
         }
       }
       // do the actual sort
@@ -6700,7 +6711,8 @@ namespace ArrayHelper{
         int bufferItem = 0; // reset
         pp = recvnbVector[i].dstInfoTable.begin();
         while (pp != recvnbVector[i].dstInfoTable.end()){
-          dstInfoSort.push_back(DstInfoSrcSeqSort<IT1,IT2>(pp, i));
+          dstInfoSort.push_back(DstInfoSrcSeqSort<IT1,IT2>(pp, i,
+            rraIndexList[i]));
           pp->bufferIndex = bufferItem; // adjust to modified buffer structure
           SeqIndex<IT1> seqIndex = pp->seqIndex;
           for (int term=0; term<srcTermProcessing; term++){
