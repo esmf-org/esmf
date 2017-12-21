@@ -110,7 +110,8 @@ contains
 ! !INTERFACE:
       subroutine ESMF_FieldRegrid(srcField, dstField, &
                    routehandle, keywordEnforcer, zeroregion, &
-                   termorderflag, checkflag, dynamicMaskRoutine, rc)
+                   termorderflag, checkflag, dynamicSrcMaskValue, &
+                   dynamicDstMaskValue, dynamicMaskRoutine, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Field),          intent(in),    optional :: srcField
@@ -120,6 +121,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       type(ESMF_Region_Flag),    intent(in),    optional :: zeroregion
       type(ESMF_TermOrder_Flag), intent(in),    optional :: termorderflag
       logical,                   intent(in),    optional :: checkflag
+      real(ESMF_KIND_R8),        intent(in),    optional :: dynamicSrcMaskValue
+      real(ESMF_KIND_R8),        intent(in),    optional :: dynamicDstMaskValue
       procedure(ESMF_DynamicMaskRoutine),       optional :: dynamicMaskRoutine
       integer,                   intent(out),   optional :: rc 
 !
@@ -236,20 +239,28 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           call ESMF_ArraySMM(srcArray=srcArray, dstArray=dstArray, &
                  routehandle=routehandle, zeroregion=zeroregion, &
                  termorderflag=termorderflag, checkflag=checkflag, &
+                 dynamicSrcMaskValue=dynamicSrcMaskValue, &
+                 dynamicDstMaskValue=dynamicDstMaskValue, &
                  dynamicMaskRoutine=dynamicMaskRoutine, rc=localrc)
                 else if (present(srcField) .and. .not. present(dstField)) then
           call ESMF_ArraySMM(srcArray=srcArray, &
                  routehandle=routehandle, zeroregion=zeroregion, &
                  termorderflag=termorderflag, checkflag=checkflag, &
+                 dynamicSrcMaskValue=dynamicSrcMaskValue, &
+                 dynamicDstMaskValue=dynamicDstMaskValue, &
                  dynamicMaskRoutine=dynamicMaskRoutine, rc=localrc)
                 else if (.not. present(srcField) .and. present(dstField)) then
           call ESMF_ArraySMM(dstArray=dstArray, &
                  routehandle=routehandle, zeroregion=zeroregion, &
                  termorderflag=termorderflag, checkflag=checkflag, &
+                 dynamicSrcMaskValue=dynamicSrcMaskValue, &
+                 dynamicDstMaskValue=dynamicDstMaskValue, &
                  dynamicMaskRoutine=dynamicMaskRoutine, rc=localrc)
         else if (.not. present(srcField) .and. .not. present(dstField)) then
           call ESMF_ArraySMM(routehandle=routehandle, zeroregion=zeroregion, &
                  termorderflag=termorderflag, checkflag=checkflag, &
+                 dynamicSrcMaskValue=dynamicSrcMaskValue, &
+                 dynamicDstMaskValue=dynamicDstMaskValue, &
                  dynamicMaskRoutine=dynamicMaskRoutine, rc=localrc)
         else
           call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &

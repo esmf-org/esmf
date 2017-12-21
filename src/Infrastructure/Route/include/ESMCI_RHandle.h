@@ -73,6 +73,8 @@ namespace ESMCI {
     Array *srcArray;
     Array *dstArray;
     char *asPtr;    // attached state pointer, used to carry Fortran info around
+    void *srcMaskValue;
+    void *dstMaskValue;
 
    public:
     RouteHandle():ESMC_Base(-1){    // use Base constructor w/o BaseID increment
@@ -110,10 +112,33 @@ namespace ESMCI {
       FTN_X(f_esmf_fortranudtpointercopy)(asPtr, (void *)datap);
       return ESMF_SUCCESS;
     }
+    int resetASPtr(){
+      asPtr = NULL;
+      return ESMF_SUCCESS;
+    }
     int getASPtr(void **datap){
       if (asPtr==NULL) return ESMC_RC_PTR_NULL;
       FTN_X(f_esmf_fortranudtpointercopy)((void *)datap, asPtr);
       return ESMF_SUCCESS;
+    }
+    bool validAsPtr(){
+      if (asPtr) return true;
+      return false;
+    }
+    
+    // dyn mask
+    int setDynMaskValues(void *srcMaskValue_, void *dstMaskValue_){
+      srcMaskValue = srcMaskValue_;
+      dstMaskValue = dstMaskValue_;
+      return ESMF_SUCCESS;
+    }
+    template<typename T> bool getSrcMaskValue(T* &value){
+      value=(T*)srcMaskValue;
+      return (srcMaskValue != NULL);
+    }
+    template<typename T> bool getDstMaskValue(T* &value){
+      value=(T*)dstMaskValue;
+      return (dstMaskValue != NULL);
     }
     
     // fingerprinting of src/dst Arrays

@@ -535,7 +535,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE:
   subroutine ESMF_ArraySMM(srcArray, dstArray, routehandle, keywordEnforcer, &
     routesyncflag, finishedflag, cancelledflag, zeroregion, termorderflag, &
-    checkflag, dynamicMaskRoutine, rc)
+    checkflag, dynamicSrcMaskValue, dynamicDstMaskValue, dynamicMaskRoutine, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_Array),          intent(in),    optional :: srcArray
@@ -548,6 +548,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_Region_Flag),    intent(in),    optional :: zeroregion
     type(ESMF_TermOrder_Flag), intent(in),    optional :: termorderflag
     logical,                   intent(in),    optional :: checkflag
+    real(ESMF_KIND_R8),        intent(in),    optional :: dynamicSrcMaskValue
+    real(ESMF_KIND_R8),        intent(in),    optional :: dynamicDstMaskValue
     procedure(ESMF_DynamicMaskRoutine),       optional :: dynamicMaskRoutine
     integer,                   intent(out),   optional :: rc
 !
@@ -665,7 +667,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_Region_Flag)      :: opt_zeroregion     ! helper variable
     type(ESMF_TermOrder_Flag)   :: opt_termorderflag  ! helper variable
     type(ESMF_Logical)          :: opt_checkflag      ! helper variable
-    type(ESMF_DynamicMaskState) :: dynmaskstate
+    type(ESMF_DynamicMaskStateWrap) :: dynMaskState
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
@@ -690,12 +692,33 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         ESMF_CONTEXT, rcToReturn=rc)) return
     endif
     
-    ! If present, pass the dynamicMaskRoutine through the RouteHandle
-    if (present(dynamicMaskRoutine)) then
-      dynmaskstate%routine => dynamicMaskRoutine
-      call c_ESMC_RouteHandleSetAS(routehandle, dynmaskstate, localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
+    ! prepare for passing of dynamic masking
+    if (present(dynamicSrcMaskValue) .or. present(dynamicDstMaskValue)) then
+      if (present(dynamicMaskRoutine)) then
+        ! set up the dynMaskState and insert into RouteHandle for Fortran layer
+        allocate(dynMaskState%wrap)
+        dynMaskState%wrap%routine => dynamicMaskRoutine
+        dynMaskState%wrap%dynamicSrcMaskIsPresent = present(dynamicSrcMaskValue)
+        if (present(dynamicSrcMaskValue)) &
+          dynMaskState%wrap%dynamicSrcMaskValue = dynamicSrcMaskValue
+        dynMaskState%wrap%dynamicDstMaskIsPresent = present(dynamicDstMaskValue)
+        if (present(dynamicDstMaskValue)) &
+          dynMaskState%wrap%dynamicDstMaskValue = dynamicDstMaskValue
+        call c_ESMC_RouteHandleSetAS(routehandle, dynMaskState, localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+print *, "ArraySMM():", dynMaskState%wrap%dynamicSrcMaskIsPresent, dynMaskState%wrap%dynamicDstMaskIsPresent
+        ! set some dynamic masking info for C++ layer
+        call c_ESMC_RouteHandleSetDynMask(routehandle, dynamicSrcMaskValue, &
+          dynamicDstMaskValue, localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+      else
+        call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_INCOMP, &
+          msg="Dynamic masking requires the 'dynamicMaskRoutine' argument.", &
+          ESMF_CONTEXT, rcToReturn=rc)
+        return
+      endif
     endif
     
     ! Set default flags
@@ -715,6 +738,16 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
       
+    ! clean-up after passing of dynamic masking
+    if (present(dynamicSrcMaskValue) .or. present(dynamicDstMaskValue)) then
+      if (present(dynamicMaskRoutine)) then
+        deallocate(dynMaskState%wrap)
+        call c_ESMC_RouteHandleReSetAS(routehandle, localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return        
+      endif
+    endif
+
     ! translate back finishedflag
     if (present(finishedflag)) then
       finishedflag = opt_finishedflag

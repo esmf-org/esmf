@@ -71,23 +71,35 @@ module ESMF_RHandleMod
 ! !  ESMF_DynamicMaskRoutine
 !
   interface
-    subroutine ESMF_DynamicMaskRoutine(dynMaskList,rc)
+    subroutine ESMF_DynamicMaskRoutine(dynMaskList, dynamicSrcMaskValue, &
+      dynamicDstMaskValue, rc)
       use ESMF_UtilTypesMod
       implicit none
-      type(ESMF_DynamicMaskElement), pointer  :: dynMaskList(:)
-      integer, intent(out)                    :: rc
+      type(ESMF_DynamicMaskElement), pointer      :: dynMaskList(:)
+      real(ESMF_KIND_R8),            intent(in), optional :: dynamicSrcMaskValue
+      real(ESMF_KIND_R8),            intent(in), optional :: dynamicDstMaskValue
+      integer,                       intent(out)  :: rc
     end subroutine
   end interface
 
   type ESMF_DynamicMaskState
     procedure(ESMF_DynamicMaskRoutine), pointer, nopass :: routine
+    logical             :: dynamicSrcMaskIsPresent
+    real(ESMF_KIND_R8)  :: dynamicSrcMaskValue
+    logical             :: dynamicDstMaskIsPresent
+    real(ESMF_KIND_R8)  :: dynamicDstMaskValue
+  end type
+  
+  type ESMF_DynamicMaskStateWrap
+    type(ESMF_DynamicMaskState), pointer :: wrap
   end type
 
 !------------------------------------------------------------------------------
 ! !PUBLIC TYPES:
   public ESMF_RouteHandle
   public ESMF_UNINITIALIZEDHANDLE, ESMF_ARRAYSPARSEMATMULHANDLE
-  public ESMF_DynamicMaskRoutine, ESMF_DynamicMaskState
+  public ESMF_DynamicMaskRoutine
+  public ESMF_DynamicMaskState, ESMF_DynamicMaskStateWrap
   
 !------------------------------------------------------------------------------
 !
@@ -1097,7 +1109,7 @@ recursive subroutine f_esmf_dynamicmaskcallback(routehandle, count, &
   real(ESMF_KIND_R8)            :: valuesVector(totalCount)
   integer                       :: rc
   ! local variables
-  type(ESMF_DynamicMaskState)   :: dynamicMaskState
+  type(ESMF_DynamicMaskStateWrap) :: dynamicMaskState
   integer                       :: localrc, i, j, k
   type(ESMF_DynamicMaskElement), pointer :: dynamicMaskList(:)
 
@@ -1109,6 +1121,7 @@ recursive subroutine f_esmf_dynamicmaskcallback(routehandle, count, &
 #endif
 
   ! access the dynamicMaskState that is stored inside the Routehandle
+  nullify(dynamicMaskState%wrap)
   call c_ESMC_RouteHandleGetAS(routehandle, dynamicMaskState, localrc)
   if (ESMF_LogFoundError(localrc, msg="Must provide dynamicMaskRoutine!", &
     ESMF_CONTEXT, rcToReturn=rc)) return
@@ -1128,7 +1141,24 @@ recursive subroutine f_esmf_dynamicmaskcallback(routehandle, count, &
   enddo
 
   ! call back into user provided routine to handle dynamically masked elements
-  call dynamicMaskState%routine(dynamicMaskList, localrc)
+  if (dynamicMaskState%wrap%dynamicSrcMaskIsPresent &
+    .and. dynamicMaskState%wrap%dynamicDstMaskIsPresent) then
+print *, "call branch 1"
+    call dynamicMaskState%wrap%routine(dynMaskList=dynamicMaskList, &
+      dynamicSrcMaskValue=dynamicMaskState%wrap%dynamicSrcMaskValue, &
+      dynamicDstMaskValue=dynamicMaskState%wrap%dynamicDstMaskValue, rc=localrc)
+  else if (dynamicMaskState%wrap%dynamicSrcMaskIsPresent) then
+print *, "call branch 2"
+    call dynamicMaskState%wrap%routine(dynMaskList=dynamicMaskList, &
+      dynamicSrcMaskValue=dynamicMaskState%wrap%dynamicSrcMaskValue, rc=localrc)
+  else if (dynamicMaskState%wrap%dynamicDstMaskIsPresent) then
+print *, "call branch 3"
+    call dynamicMaskState%wrap%routine(dynMaskList=dynamicMaskList, &
+      dynamicDstMaskValue=dynamicMaskState%wrap%dynamicDstMaskValue, rc=localrc)
+  else
+print *, "call branch 4"
+    call dynamicMaskState%wrap%routine(dynMaskList=dynamicMaskList, rc=localrc)
+  endif
   ! local garbage collection
   do i=1, count
     deallocate(dynamicMaskList(i)%factor)
