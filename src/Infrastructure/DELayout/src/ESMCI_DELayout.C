@@ -55,6 +55,13 @@ using namespace std;
 static const char *const version = "$Id$";
 //-----------------------------------------------------------------------------
 
+//-------------------------------------------------------------------------
+// prototypes for Fortran interface routines called by C++ code below
+extern "C" {
+  void FTN_X(f_esmf_dynamicmaskcallback)(ESMCI::RouteHandle **ptr, int *rc);
+}
+//-------------------------------------------------------------------------
+
 namespace ESMCI {
 
 //-----------------------------------------------------------------------------
@@ -2483,6 +2490,7 @@ XXE::XXE(stringstream &streami, vector<int> *originToTargetMap,
   vm = VM::getCurrent(&localrc);
   if (ESMC_LogDefault.MsgFoundError(localrc,
     ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) throw rc;
+  rh = NULL;  // guard
   
   // HEADER
   readin(streami, &count);                // number of elements in op-stream
@@ -4889,7 +4897,7 @@ printf("gjt - DID NOT CANCEL commhandle\n");
           dstSuperVecSize_t,
           dstSuperVecSize_i,
           dstSuperVecSize_j,
-          superVector);
+          superVector, rh);
       }
       break;
     case productSumSuperScalarSrcRRA:
@@ -6517,7 +6525,7 @@ void XXE::pssslDstRra(T **rraBaseList, int *rraIndexList, TKId elementTK,
   int *valueOffsetList, int *baseListIndexList,
   TKId valueTK, int termCount, int vectorL, int resolved, int localDeIndexOff,
   int size_r, int size_s, int size_t, int *size_i, int *size_j,
-  bool superVector){
+  bool superVector, RouteHandle *rh){
   // Recursively resolve the TKs and typecast the arguments appropriately
   // before executing psssDstRra operation on the data.
   if (resolved==0){
@@ -6529,7 +6537,8 @@ void XXE::pssslDstRra(T **rraBaseList, int *rraIndexList, TKId elementTK,
         pssslDstRra(rraBaseTList, rraIndexList, elementTK, rraOffsetList, 
           factorList, factorTK, valueBaseList, valueOffsetList,
           baseListIndexList, valueTK, termCount, vectorL, resolved, 
-          localDeIndexOff, size_r, size_s, size_t, size_i, size_j, superVector);
+          localDeIndexOff, size_r, size_s, size_t, size_i, size_j, superVector,
+          rh);
       }
       break;
     case I8:
@@ -6538,7 +6547,8 @@ void XXE::pssslDstRra(T **rraBaseList, int *rraIndexList, TKId elementTK,
         pssslDstRra(rraBaseTList, rraIndexList, elementTK, rraOffsetList, 
           factorList, factorTK, valueBaseList, valueOffsetList,
           baseListIndexList, valueTK, termCount, vectorL, resolved, 
-          localDeIndexOff, size_r, size_s, size_t, size_i, size_j, superVector);
+          localDeIndexOff, size_r, size_s, size_t, size_i, size_j, superVector,
+          rh);
       }
       break;
     case R4:
@@ -6547,7 +6557,8 @@ void XXE::pssslDstRra(T **rraBaseList, int *rraIndexList, TKId elementTK,
         pssslDstRra(rraBaseTList, rraIndexList, elementTK, rraOffsetList, 
           factorList, factorTK, valueBaseList, valueOffsetList,
           baseListIndexList, valueTK, termCount, vectorL, resolved, 
-          localDeIndexOff, size_r, size_s, size_t, size_i, size_j, superVector);
+          localDeIndexOff, size_r, size_s, size_t, size_i, size_j, superVector,
+          rh);
       }
       break;
     case R8:
@@ -6556,7 +6567,8 @@ void XXE::pssslDstRra(T **rraBaseList, int *rraIndexList, TKId elementTK,
         pssslDstRra(rraBaseTList, rraIndexList, elementTK, rraOffsetList, 
           factorList, factorTK, valueBaseList, valueOffsetList,
           baseListIndexList, valueTK, termCount, vectorL, resolved, 
-          localDeIndexOff, size_r, size_s, size_t, size_i, size_j, superVector);
+          localDeIndexOff, size_r, size_s, size_t, size_i, size_j, superVector,
+          rh);
       }
       break;
     default:
@@ -6573,7 +6585,8 @@ void XXE::pssslDstRra(T **rraBaseList, int *rraIndexList, TKId elementTK,
         pssslDstRra(rraBaseList, rraIndexList, elementTK, rraOffsetList,
           factorListT, factorTK, valueBaseList, valueOffsetList,
           baseListIndexList, valueTK, termCount, vectorL, resolved, 
-          localDeIndexOff, size_r, size_s, size_t, size_i, size_j, superVector);
+          localDeIndexOff, size_r, size_s, size_t, size_i, size_j, superVector,
+          rh);
       }
       break;
     case I8:
@@ -6582,7 +6595,8 @@ void XXE::pssslDstRra(T **rraBaseList, int *rraIndexList, TKId elementTK,
         pssslDstRra(rraBaseList, rraIndexList, elementTK, rraOffsetList,
           factorListT, factorTK, valueBaseList, valueOffsetList,
           baseListIndexList, valueTK, termCount, vectorL, resolved, 
-          localDeIndexOff, size_r, size_s, size_t, size_i, size_j, superVector);
+          localDeIndexOff, size_r, size_s, size_t, size_i, size_j, superVector,
+          rh);
       }
       break;
     case R4:
@@ -6591,7 +6605,8 @@ void XXE::pssslDstRra(T **rraBaseList, int *rraIndexList, TKId elementTK,
         pssslDstRra(rraBaseList, rraIndexList, elementTK, rraOffsetList,
           factorListT, factorTK, valueBaseList, valueOffsetList,
           baseListIndexList, valueTK, termCount, vectorL, resolved, 
-          localDeIndexOff, size_r, size_s, size_t, size_i, size_j, superVector);
+          localDeIndexOff, size_r, size_s, size_t, size_i, size_j, superVector,
+          rh);
       }
       break;
     case R8:
@@ -6600,7 +6615,8 @@ void XXE::pssslDstRra(T **rraBaseList, int *rraIndexList, TKId elementTK,
         pssslDstRra(rraBaseList, rraIndexList, elementTK, rraOffsetList,
           factorListT, factorTK, valueBaseList, valueOffsetList,
           baseListIndexList, valueTK, termCount, vectorL, resolved, 
-          localDeIndexOff, size_r, size_s, size_t, size_i, size_j, superVector);
+          localDeIndexOff, size_r, size_s, size_t, size_i, size_j, superVector,
+          rh);
       }
       break;
     default:
@@ -6617,7 +6633,8 @@ void XXE::pssslDstRra(T **rraBaseList, int *rraIndexList, TKId elementTK,
         pssslDstRra(rraBaseList, rraIndexList, elementTK, rraOffsetList,
           factorList, factorTK, valueBaseTList, valueOffsetList,
           baseListIndexList, valueTK, termCount, vectorL, resolved, 
-          localDeIndexOff, size_r, size_s, size_t, size_i, size_j, superVector);
+          localDeIndexOff, size_r, size_s, size_t, size_i, size_j, superVector,
+          rh);
       }
       break;
     case I8:
@@ -6626,7 +6643,8 @@ void XXE::pssslDstRra(T **rraBaseList, int *rraIndexList, TKId elementTK,
         pssslDstRra(rraBaseList, rraIndexList, elementTK, rraOffsetList,
           factorList, factorTK, valueBaseTList, valueOffsetList,
           baseListIndexList, valueTK, termCount, vectorL, resolved, 
-          localDeIndexOff, size_r, size_s, size_t, size_i, size_j, superVector);
+          localDeIndexOff, size_r, size_s, size_t, size_i, size_j, superVector,
+          rh);
       }
       break;
     case R4:
@@ -6635,7 +6653,8 @@ void XXE::pssslDstRra(T **rraBaseList, int *rraIndexList, TKId elementTK,
         pssslDstRra(rraBaseList, rraIndexList, elementTK, rraOffsetList,
           factorList, factorTK, valueBaseTList, valueOffsetList,
           baseListIndexList, valueTK, termCount, vectorL, resolved, 
-          localDeIndexOff, size_r, size_s, size_t, size_i, size_j, superVector);
+          localDeIndexOff, size_r, size_s, size_t, size_i, size_j, superVector,
+          rh);
       }
       break;
     case R8:
@@ -6644,7 +6663,8 @@ void XXE::pssslDstRra(T **rraBaseList, int *rraIndexList, TKId elementTK,
         pssslDstRra(rraBaseList, rraIndexList, elementTK, rraOffsetList,
           factorList, factorTK, valueBaseTList, valueOffsetList,
           baseListIndexList, valueTK, termCount, vectorL, resolved, 
-          localDeIndexOff, size_r, size_s, size_t, size_i, size_j, superVector);
+          localDeIndexOff, size_r, size_s, size_t, size_i, size_j, superVector,
+          rh);
       }
       break;
     default:
@@ -6676,7 +6696,8 @@ void XXE::pssslDstRra(T **rraBaseList, int *rraIndexList, TKId elementTK,
 //    exec_pssslDstRra(rraBaseList, rraIndexList, rraOffsetList, factorList,
 //      valueBaseList, valueOffsetList, baseListIndexList, termCount, vectorL);
     exec_pssslDstRraDynMask(rraBaseList, rraIndexList, rraOffsetList, factorList,
-      valueBaseList, valueOffsetList, baseListIndexList, termCount, vectorL);
+      valueBaseList, valueOffsetList, baseListIndexList, termCount, vectorL, 
+      rh);
   }
 }
 
@@ -6714,14 +6735,9 @@ void XXE::exec_pssslDstRra(T **rraBaseList, int *rraIndexList,
 
 //---
 
-template<typename T, typename U, typename V> struct DynMaskElement{
-  T *element;
-  vector<U*> factors;
-  vector<V*> values;
-};
-
 template<typename T, typename U, typename V>
-  void dynMaskHandler(vector<DynMaskElement<T,U,V> > &dynMaskList){
+  void XXE::dynMaskHandler(vector<XXE::DynMaskElement<T,U,V> > &dynMaskList,
+  RouteHandle *rh){
 #if 1
   {
     std::stringstream logmsg;
@@ -6730,9 +6746,22 @@ template<typename T, typename U, typename V>
     ESMC_LogDefault.Write(logmsg.str(), ESMC_LOGMSG_INFO);
   }
 #endif
+  
+#if 0
   for (unsigned i=0; i<dynMaskList.size(); i++){
     *(dynMaskList[i].element) = 50.;
   }
+#else
+  int localrc;
+  if (rh==NULL){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
+      "Not a valid RouteHandle pointer!", ESMC_CONTEXT, &localrc);
+    throw localrc;  // bail out with exception
+  }
+  FTN_X(f_esmf_dynamicmaskcallback)(&rh, &localrc);
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+    ESMC_CONTEXT, NULL)) throw localrc;  // bail out with exception
+#endif
 }
 
 //---
@@ -6740,7 +6769,8 @@ template<typename T, typename U, typename V>
 template<typename T, typename U, typename V>
 void XXE::exec_pssslDstRraDynMask(T **rraBaseList, int *rraIndexList, 
   int *rraOffsetList, U *factorList, V **valueBaseList,
-  int *valueOffsetList, int *baseListIndexList, int termCount, int vectorL){
+  int *valueOffsetList, int *baseListIndexList, int termCount, int vectorL,
+  RouteHandle *rh){
   T *element;
   T *prevElement=NULL;
   T tmpElement;
@@ -6808,7 +6838,7 @@ void XXE::exec_pssslDstRraDynMask(T **rraBaseList, int *rraIndexList,
     // see if any dynamic masking was detected
     if (dynMaskList.size() > 0){
       // call into dynMaskHandler to handle the masked elements
-      dynMaskHandler(dynMaskList);
+      dynMaskHandler(dynMaskList, rh);
     }
   }else{
     // vector elements

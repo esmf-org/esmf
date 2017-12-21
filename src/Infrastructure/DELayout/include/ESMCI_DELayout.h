@@ -34,9 +34,14 @@
 #include <vector>
 #include <map>
 
+namespace ESMCI {
+  class DELayout;
+}
+
 #include "ESMCI_Base.h"       // Base is superclass to DELayout
 #include "ESMCI_VM.h"
 #include "ESMCI_F90Interface.h"
+#include "ESMCI_RHandle.h"
 
 //-------------------------------------------------------------------------
 
@@ -311,7 +316,7 @@ class XXE{
         vectorLengthMultiplier = vectorLengthMultiplier_;
       }
     };
-        
+    
   public:
     VM *vm;
     // OPSTREAM
@@ -353,6 +358,7 @@ class XXE{
     int dataMaxCount;               // maximum number of elements in data
     int commhandleMaxCount;         // maximum number of elements in commhandle
     int xxeSubMaxCount;             // maximum number of elements in xxeSubList
+    RouteHandle *rh;                // associated RouteHandle
     
   public:
     XXE(VM *vmArg, int maxArg=1000, int dataMaxCountArg=1000,
@@ -373,6 +379,7 @@ class XXE{
       bufferInfoList.reserve(1000);  // initial preparation
       lastFilterBitField = 0x0;
       superVectorOkay = true;
+      rh = NULL;
     }
     XXE(std::stringstream &streami,
       std::vector<int> *originToTargetMap=NULL,
@@ -507,6 +514,11 @@ class XXE{
     int appendProfileMessage(int predicateBitField, char *messageString);
     int appendMessage(int predicateBitField, char *messageString);
     
+    void setRouteHandle(RouteHandle *routehandle){
+      rh = routehandle;
+    }
+    RouteHandle *getRouteHandle(){return rh;}
+        
   public:
       
     // opstream element types, used to interpret the elements in opstream
@@ -1086,7 +1098,7 @@ class XXE{
       TKId valueTK, int termCount, int vectorL, int resolved, 
       int localDeIndexOff,
       int size_r, int size_s, int size_t, int *size_i, int *size_j, 
-      bool superVector);
+      bool superVector, RouteHandle *rh);
     template<typename T, typename U, typename V>
     static void exec_pssslDstRra(T **rraBaseList, int *rraIndexList, 
       int *rraOffsetList, U *factorList, V **valueBaseList,
@@ -1096,7 +1108,7 @@ class XXE{
     static void exec_pssslDstRraDynMask(T **rraBaseList, int *rraIndexList, 
       int *rraOffsetList, U *factorList, V **valueBaseList,
       int *valueOffsetList, int *baseListIndexList,
-      int termCount, int vectorL);
+      int termCount, int vectorL, RouteHandle *rh);
     template<typename T, typename U, typename V>
     static void exec_pssslDstRraSuper(T **rraBaseList, int *rraIndexList, 
       int *rraOffsetList, U *factorList, V **valueBaseList,
@@ -1121,6 +1133,15 @@ class XXE{
     static void pssscRra(T *rraBase, TKId elementTK, int *rraOffsetList,
       U *factorList, TKId factorTK, V *valueList, TKId valueTK,
       int termCount, int vectorL, int resolved);
+
+    template<typename T, typename U, typename V> struct DynMaskElement{
+      T *element;
+      std::vector<U*> factors;
+      std::vector<V*> values;
+    };
+    template<typename T, typename U, typename V>
+    static void dynMaskHandler(std::vector<DynMaskElement<T,U,V> > &dynMaskList,
+      RouteHandle *rh);
 
 };  // class XXE
 
