@@ -10771,6 +10771,9 @@ int Array::sparseMatMul(
   
   // get a handle on the XXE stored in routehandle
   XXE *xxe = (XXE *)(*routehandle)->getStorage();
+  
+  // point back to the routehandle inside of xxe
+  xxe->setRouteHandle(*routehandle);
 
   if (xxe == NULL){
     // NOP

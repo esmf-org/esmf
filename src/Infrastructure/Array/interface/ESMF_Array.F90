@@ -63,7 +63,7 @@ module ESMF_ArrayMod
 !------------------------------------------------------------------------------
 ! !PUBLIC TYPES:
   public ESMF_Array                 ! implemented in ESMF_ArrayCreateMod 
-      
+  
 !------------------------------------------------------------------------------
 
 !------------------------------------------------------------------------------
@@ -535,7 +535,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE:
   subroutine ESMF_ArraySMM(srcArray, dstArray, routehandle, keywordEnforcer, &
     routesyncflag, finishedflag, cancelledflag, zeroregion, termorderflag, &
-    checkflag, rc)
+    checkflag, dynamicMaskRoutine, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_Array),          intent(in),    optional :: srcArray
@@ -548,6 +548,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_Region_Flag),    intent(in),    optional :: zeroregion
     type(ESMF_TermOrder_Flag), intent(in),    optional :: termorderflag
     logical,                   intent(in),    optional :: checkflag
+    procedure(ESMF_DynamicMaskRoutine),       optional :: dynamicMaskRoutine
     integer,                   intent(out),   optional :: rc
 !
 ! !STATUS:
@@ -655,15 +656,16 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !EOP
 !------------------------------------------------------------------------------
-    integer                   :: localrc            ! local return code
-    type(ESMF_Array)          :: opt_srcArray       ! helper variable
-    type(ESMF_Array)          :: opt_dstArray       ! helper variable
-    type(ESMF_RouteSync_Flag) :: opt_routesyncflag  ! helper variable
-    type(ESMF_Logical)        :: opt_finishedflag   ! helper variable
-    type(ESMF_Logical)        :: opt_cancelledflag  ! helper variable
-    type(ESMF_Region_Flag)    :: opt_zeroregion     ! helper variable
-    type(ESMF_TermOrder_Flag) :: opt_termorderflag  ! helper variable
-    type(ESMF_Logical)        :: opt_checkflag      ! helper variable
+    integer                     :: localrc            ! local return code
+    type(ESMF_Array)            :: opt_srcArray       ! helper variable
+    type(ESMF_Array)            :: opt_dstArray       ! helper variable
+    type(ESMF_RouteSync_Flag)   :: opt_routesyncflag  ! helper variable
+    type(ESMF_Logical)          :: opt_finishedflag   ! helper variable
+    type(ESMF_Logical)          :: opt_cancelledflag  ! helper variable
+    type(ESMF_Region_Flag)      :: opt_zeroregion     ! helper variable
+    type(ESMF_TermOrder_Flag)   :: opt_termorderflag  ! helper variable
+    type(ESMF_Logical)          :: opt_checkflag      ! helper variable
+    type(ESMF_DynamicMaskState) :: dynmaskstate
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
@@ -684,6 +686,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       opt_dstArray = dstArray
     else
       call ESMF_ArraySetThisNull(opt_dstArray, localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+    
+    ! If present, pass the dynamicMaskRoutine through the RouteHandle
+    if (present(dynamicMaskRoutine)) then
+      dynmaskstate%routine => dynamicMaskRoutine
+      call c_ESMC_RouteHandleSetAS(routehandle, dynmaskstate, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
     endif
