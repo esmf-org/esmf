@@ -59,7 +59,9 @@ static const char *const version = "$Id$";
 //-------------------------------------------------------------------------
 // prototypes for Fortran interface routines called by C++ code below
 extern "C" {
-  void FTN_X(f_esmf_dynamicmaskcallback)(ESMCI::RouteHandle **ptr, int *rc);
+  void FTN_X(f_esmf_dynamicmaskcallback)(ESMCI::RouteHandle **ptr, 
+    int *count, void **elementVector, int *countVector, int *totalCount,
+    void *factorsVector, void *valuesVector, int *rc);
 }
 //-------------------------------------------------------------------------
 
@@ -6759,7 +6761,30 @@ template<typename T, typename U, typename V>
       "Not a valid RouteHandle pointer!", ESMC_CONTEXT, &localrc);
     throw localrc;  // bail out with exception
   }
-  FTN_X(f_esmf_dynamicmaskcallback)(&rh, &localrc);
+  // prepare element vector
+  int count=dynMaskList.size();
+  vector<void *> elementVector(count);
+  vector<int> countVector(count);
+  int totalCount=0;
+  for (int i=0; i<count; i++){
+    elementVector[i] = dynMaskList[i].element;
+    countVector[i] = dynMaskList[i].factors.size();
+    totalCount += countVector[i];
+  }
+  vector<T> factorsVector(totalCount);
+  vector<T> valuesVector(totalCount);
+  int k=0;
+  for (int i=0; i<count; i++){
+    for (int j=0; j<countVector[i]; j++){
+      factorsVector[k] = *(dynMaskList[i].factors[j]);
+      valuesVector[k] = *(dynMaskList[i].values[j]);
+      ++k;
+    }
+  }
+  // hand control back to Fortran layer
+  FTN_X(f_esmf_dynamicmaskcallback)(&rh, &count, &(elementVector[0]), 
+    &(countVector[0]), &totalCount, &(factorsVector[0]), &(valuesVector[0]),
+    &localrc);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
     ESMC_CONTEXT, NULL)) throw localrc;  // bail out with exception
 #endif
@@ -6791,8 +6816,8 @@ void XXE::exec_pssslDstRraDynMask(T **rraBaseList, int *rraIndexList,
     vector<DynMaskElement<T,U,V> > dynMaskList;
     bool dstMask = false; 
     bool srcMask = false;
+    DynMaskElement<T,U,V> dynMaskElement;
     for (int i=0; i<termCount; i++){  // super scalar loop
-      DynMaskElement<T,U,V> dynMaskElement;
       element = rraBaseList[rraIndexList[baseListIndexList[i]]]
         + rraOffsetList[i];
       if (prevElement != element){
@@ -6805,6 +6830,8 @@ void XXE::exec_pssslDstRraDynMask(T **rraBaseList, int *rraIndexList,
           dynMaskElement.element = prevElement;   // finish the entry
           dynMaskList.push_back(dynMaskElement);  // push into dynMaskList
         }
+        dynMaskElement.factors.clear(); // reset
+        dynMaskElement.values.clear();  // reset
         prevElement = element;
         srcMask = false;  // reset
         dstMask = false;  // reset
@@ -6815,11 +6842,11 @@ void XXE::exec_pssslDstRraDynMask(T **rraBaseList, int *rraIndexList,
       }
       factor = factorList[i];
       value = valueBaseList[baseListIndexList[i]] + valueOffsetList[i];
+      dynMaskElement.factors.push_back(&(factorList[i])); // dynMaskElement
+      dynMaskElement.values.push_back(value); // dynMaskElement
       if (*value == srcMaskValue) srcMask = true;
       if (!(dstMask || srcMask)){
         tmpElement += factor * *value;  // perform calculation
-        dynMaskElement.factors.push_back(&(factorList[i])); // dynMaskElement
-        dynMaskElement.values.push_back(value); // dynMaskElement
       }
 #if 1
   {
