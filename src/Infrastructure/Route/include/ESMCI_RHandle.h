@@ -41,6 +41,14 @@ namespace ESMCI {
 
 //-------------------------------------------------------------------------
 
+//-------------------------------------------------------------------------
+// prototypes for Fortran interface routines called by C++ code below
+extern "C" {
+  void FTN_X(f_esmf_fortranudtpointersize)(int *size);
+  void FTN_X(f_esmf_fortranudtpointercopy)(void *dst, void *src);
+}
+//-------------------------------------------------------------------------
+  
 namespace ESMCI {
 
   // classes and structs
@@ -64,7 +72,8 @@ namespace ESMCI {
     //TODO: Arrays to persist
     Array *srcArray;
     Array *dstArray;
- 
+    char *asPtr;    // attached state pointer, used to carry Fortran info around
+
    public:
     RouteHandle():ESMC_Base(-1){    // use Base constructor w/o BaseID increment
       // initialize the name for this RouteHandle object in the Base class
@@ -76,7 +85,7 @@ namespace ESMCI {
       InterArray<int> *targetPetList, int *rc);
     static int destroy(RouteHandle *routehandle, bool noGarbage=false);
     int construct(void);
-    int destruct(void);    
+    int destruct(void);
     RouteHandleType getType(void) const { return htype; }
     int setType(RouteHandleType h){ htype = h; return ESMF_SUCCESS; }
     void *getStorage(int i=0) const{
@@ -88,6 +97,22 @@ namespace ESMCI {
       if (i<0 || i>=RHSTORAGECOUNT)
         return ESMC_RC_ARG_BAD;
       storage[i] = ptr; 
+      return ESMF_SUCCESS;
+    }
+    
+    // attached state handling
+    int setASPtr(void **datap){
+      if (asPtr==NULL){
+        int datumSize;  // upper limit of (UDT, pointer) size
+        FTN_X(f_esmf_fortranudtpointersize)(&datumSize);
+        asPtr = new char[datumSize];
+      }
+      FTN_X(f_esmf_fortranudtpointercopy)(asPtr, (void *)datap);
+      return ESMF_SUCCESS;
+    }
+    int getASPtr(void **datap){
+      if (asPtr==NULL) return ESMC_RC_PTR_NULL;
+      FTN_X(f_esmf_fortranudtpointercopy)((void *)datap, asPtr);
       return ESMF_SUCCESS;
     }
     

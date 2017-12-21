@@ -68,10 +68,25 @@ module ESMF_RHandleMod
   end type
 
 !------------------------------------------------------------------------------
+! !  ESMF_DynamicMaskRoutine
+!
+  interface
+    subroutine ESMF_DynamicMaskRoutine()
+      implicit none
+    end subroutine
+  end interface
+
+  type ESMF_DynamicMaskState
+    procedure(ESMF_DynamicMaskRoutine), pointer, nopass :: routine
+    integer :: testInteger
+  end type
+
+!------------------------------------------------------------------------------
 ! !PUBLIC TYPES:
   public ESMF_RouteHandle
   public ESMF_UNINITIALIZEDHANDLE, ESMF_ARRAYSPARSEMATMULHANDLE
-
+  public ESMF_DynamicMaskRoutine, ESMF_DynamicMaskState
+  
 !------------------------------------------------------------------------------
 !
 ! !PUBLIC MEMBER FUNCTIONS:
@@ -1057,3 +1072,40 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !------------------------------------------------------------------------------
 
 end module ESMF_RHandleMod
+
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "f_esmf_dynamicmaskcallback"
+recursive subroutine f_esmf_dynamicmaskcallback(routehandle, rc)
+  use ESMF_UtilTypesMod      ! ESMF utility types
+  use ESMF_BaseMod           ! ESMF base class
+  use ESMF_LogErrMod
+  use ESMF_RHandleMod
+  implicit none
+  ! dummy arguments
+  type(ESMF_RouteHandle)      :: routehandle
+  integer                     :: rc
+  ! local variables
+  type(ESMF_DynamicMaskState) :: dynamicMaskState
+  integer                     :: localrc
+
+  ! Initialize return code; assume routine not implemented
+  rc = ESMF_RC_NOT_IMPL
+
+  print *, "*** made it into f_esmf_dynamicmaskcallback() **"
+
+  ! access the dynamicMaskState that is stored inside the Routehandle
+  call c_ESMC_RouteHandleGetAS(routehandle, dynamicMaskState, localrc)
+  if (ESMF_LogFoundError(localrc, msg="Must provide dynamicMaskRoutine!", &
+    ESMF_CONTEXT, rcToReturn=rc)) return
+
+  ! call back into user provided routine to handle dynamically masked elements
+  call dynamicMaskState%routine()
+
+  ! return successfully
+  rc = ESMF_SUCCESS
+
+end subroutine f_esmf_dynamicmaskcallback
+!------------------------------------------------------------------------------
+ 
