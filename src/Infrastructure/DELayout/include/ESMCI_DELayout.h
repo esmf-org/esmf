@@ -34,14 +34,13 @@
 #include <vector>
 #include <map>
 
-namespace ESMCI {
-  class DELayout;
-}
-
 #include "ESMCI_Base.h"       // Base is superclass to DELayout
 #include "ESMCI_VM.h"
 #include "ESMCI_F90Interface.h"
-#include "ESMCI_RHandle.h"
+
+namespace ESMCI {
+  class RouteHandle;
+}
 
 //-------------------------------------------------------------------------
 

@@ -46,6 +46,7 @@
 #include "ESMCI_VM.h"
 #include "ESMCI_F90Interface.h"
 #include "ESMCI_LogErr.h"
+#include "ESMCI_RHandle.h"
 
 using namespace std;
 
