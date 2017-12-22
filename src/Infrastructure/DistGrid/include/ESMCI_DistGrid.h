@@ -196,10 +196,11 @@ namespace ESMCI {
     int const *getRegDecomp() const {return regDecomp;}
     // topology discovery
     template<typename T> int getSequenceIndexLocalDe(int localDe, 
-      int const *index, std::vector<T> &seqIndex, bool recursive=true) const;
+      int const *index, std::vector<T> &seqIndex, bool recursive=true,
+      bool canonical=false) const;
     template<typename T> int tGetSequenceIndexLocalDe(T ***t, int de,
       int localDe, int const *index, std::vector<T> &seqIndex, 
-      bool recursive=true) const;
+      bool recursive=true, bool canonical=false) const;
     template<typename T> int getSequenceIndexTileRelative(int tile,
       int const *index, T *seqIndex)const;
     template<typename T> int getSequenceIndexTile(int tile, int const *index,

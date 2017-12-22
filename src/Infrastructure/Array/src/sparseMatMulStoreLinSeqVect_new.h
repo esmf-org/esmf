@@ -569,7 +569,7 @@ template<typename SIT, typename DIT> int sparseMatMulStoreLinSeqVect_new(
       if (dstLocalDeElementCount[i]){
         // there are elements for local DE i
         dstLinSeqVect[i].reserve(dstLocalDeElementCount[i]);
-        ArrayElement arrayElement(dstArray, i, true, false);
+        ArrayElement arrayElement(dstArray, i, true, false, false);
         // loop over all elements in exclusive region for local DE i
         while(arrayElement.isWithin()){
           // add the element to dstLinSeqVect[i]
@@ -698,7 +698,7 @@ template<typename SIT, typename DIT> int sparseMatMulStoreLinSeqVect_new(
   for (int i=0; i<srcLocalDeCount; i++){
     if (srcLocalDeElementCount[i]){
       // there are elements for local DE i
-      ArrayElement arrayElement(srcArray, i, true, false);
+      ArrayElement arrayElement(srcArray, i, true, false, false);
       // loop over all elements in exclusive region for local DE i
       while(arrayElement.isWithin()){
         // determine the sequentialized index for the current Array element
