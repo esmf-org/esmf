@@ -78,11 +78,12 @@ contains
 ! !IROUTINE: ESMF_FieldFill - Fill data into a Field
 ! !INTERFACE:
   subroutine ESMF_FieldFill(field, keywordEnforcer, &
-    dataFillScheme, member, step, rc)
+    dataFillScheme, const1, member, step, rc)
 ! !ARGUMENTS:
     type(ESMF_Field), intent(inout)           :: field
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     character(len=*), intent(in), optional    :: dataFillScheme
+    real(ESMF_KIND_R8), optional              :: const1
     integer, intent(in), optional             :: member
     integer, intent(in), optional             :: step
     integer, intent(out), optional            :: rc
@@ -97,8 +98,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   \item[field]
 !     The {\tt ESMF\_Field} object to fill with data.
 !   \item[{[dataFillScheme]}]
-!     The fill scheme. The available options are "sincos", and "one". 
+!     The fill scheme. The available options are "sincos", "one", and "const".
 !     Defaults to "sincos".
+!   \item[{[const1]}]
+!     Constant of real type. Defaults to 0.
 !   \item[{[member]}]
 !     Member incrementor. Defaults to 1.
 !   \item[{[step]}]
@@ -116,6 +119,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_TypeKind_Flag)        :: typekind
     integer                         :: rank, dimCount, ldeCount, lde
     integer, allocatable            :: coordDimCount(:)
+    real(ESMF_KIND_R8)              :: l_const1
     real(ESMF_KIND_R8), pointer     :: dataPtrR8D1(:)
     real(ESMF_KIND_R8), pointer     :: dataPtrR8D2(:,:)
     real(ESMF_KIND_R8), pointer     :: dataPtrR8D3(:,:,:)
@@ -143,6 +147,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (ESMF_LogFoundError(rcToCheck=rc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT)) &
       return  ! bail out
+    
+    l_const1 = 0.d0;
+    if (present(const1)) l_const1 = const1
 
     l_member = 1
     if(present(member)) l_member = member
@@ -619,6 +626,59 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             return  ! bail out
           ! initialize the entire array
           dataPtrR4D3 = 1._ESMF_KIND_R4
+        endif
+      enddo
+    else if (trim(dataFillScheme)=="const") then
+      
+      do lde=0, ldeCount-1
+        if (typekind==ESMF_TYPEKIND_R8 .and. rank==1) then
+          ! 1D all 1.
+          call ESMF_FieldGet(field, localDe=lde, farrayPtr=dataPtrR8D1, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT)) &
+            return  ! bail out
+          ! initialize the entire array
+          dataPtrR8D1 = real(l_const1,ESMF_KIND_R8);
+        elseif (typekind==ESMF_TYPEKIND_R4 .and. rank==1) then
+          ! 1D all 1.
+          call ESMF_FieldGet(field, localDe=lde, farrayPtr=dataPtrR4D1, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT)) &
+            return  ! bail out
+          ! initialize the entire array
+          dataPtrR4D1 = real(l_const1,ESMF_KIND_R4);
+        elseif (typekind==ESMF_TYPEKIND_R8 .and. rank==2) then
+          ! 2D all 1.
+          call ESMF_FieldGet(field, localDe=lde, farrayPtr=dataPtrR8D2, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT)) &
+            return  ! bail out
+          ! initialize the entire array
+          dataPtrR8D2 = real(l_const1,ESMF_KIND_R8);
+        elseif (typekind==ESMF_TYPEKIND_R4 .and. rank==2) then
+          ! 2D all 1.
+          call ESMF_FieldGet(field, localDe=lde, farrayPtr=dataPtrR4D2, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT)) &
+            return  ! bail out
+          ! initialize the entire array
+          dataPtrR4D2 = real(l_const1,ESMF_KIND_R4);
+        elseif (typekind==ESMF_TYPEKIND_R8 .and. rank==3) then
+          ! 3D all 1.
+          call ESMF_FieldGet(field, localDe=lde, farrayPtr=dataPtrR8D3, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT)) &
+            return  ! bail out
+          ! initialize the entire array
+          dataPtrR8D3 = real(l_const1,ESMF_KIND_R8);
+        elseif (typekind==ESMF_TYPEKIND_R4 .and. rank==3) then
+          ! 3D all 1.
+          call ESMF_FieldGet(field, localDe=lde, farrayPtr=dataPtrR4D3, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT)) &
+            return  ! bail out
+          ! initialize the entire array
+          dataPtrR4D3 = real(l_const1,ESMF_KIND_R4);
         endif
       enddo
     else

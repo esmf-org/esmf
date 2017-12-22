@@ -15,9 +15,9 @@
 
 #define ASMM_STORE_LOG_off
 #define ASMM_STORE_TIMING_off
-#define ASMM_STORE_MEMLOG_off
+#define ASMM_STORE_MEMLOG_on
+#define ASMM_STORE_TUNELOG_on
 #define ASMM_STORE_COMMMATRIX_on
-#define ASMM_STORE_OPT_PRINT_off
 #define ASMM_STORE_DUMPSMM_off
 
 #define ASMM_EXEC_INFO_off
@@ -5948,14 +5948,24 @@ namespace ArrayHelper{
   template<typename IT1, typename IT2> struct DstInfoSrcSeqSort{
     typename vector<DstInfo<IT1,IT2> >::iterator pp;
     int recvnbVectorIndex;
+    int rraIndexListIndex;
     DstInfoSrcSeqSort(typename vector<DstInfo<IT1,IT2> >::iterator pp_, 
-      int recvnbVectorIndex_){
+      int recvnbVectorIndex_, int rraIndexListIndex_){
       pp=pp_;
       recvnbVectorIndex=recvnbVectorIndex_;
+      rraIndexListIndex=rraIndexListIndex_;
     }
   };
   template<typename IT1, typename IT2> bool operator<
     (DstInfoSrcSeqSort<IT1,IT2> a, DstInfoSrcSeqSort<IT1,IT2> b){
+    // sorting hierarchy: 1) rraIndexListIndex, 2) linIndex, 3) partnerSeqIndex
+    // 1) rraIndexListIndex
+    if (a.rraIndexListIndex != b.rraIndexListIndex)
+      return (a.rraIndexListIndex < b.rraIndexListIndex);
+    // 2) linIndex
+    if (a.pp->linIndex != b.pp->linIndex)
+      return (a.pp->linIndex < b.pp->linIndex);
+    // 3) partnerSeqIndex
     return (a.pp->partnerSeqIndex < b.pp->partnerSeqIndex);
   }
   
@@ -6607,7 +6617,8 @@ namespace ArrayHelper{
         // append terms from buffer "i"
         for (pp=recvnbVector[i].dstInfoTable.begin();
           pp!=recvnbVector[i].dstInfoTable.end(); ++pp){
-          dstInfoSort.push_back(DstInfoSrcSeqSort<IT1,IT2>(pp, i));
+          dstInfoSort.push_back(DstInfoSrcSeqSort<IT1,IT2>(pp, i,
+            rraIndexList[i]));
         }
       }
       // do the actual sort
@@ -6700,7 +6711,8 @@ namespace ArrayHelper{
         int bufferItem = 0; // reset
         pp = recvnbVector[i].dstInfoTable.begin();
         while (pp != recvnbVector[i].dstInfoTable.end()){
-          dstInfoSort.push_back(DstInfoSrcSeqSort<IT1,IT2>(pp, i));
+          dstInfoSort.push_back(DstInfoSrcSeqSort<IT1,IT2>(pp, i,
+            rraIndexList[i]));
           pp->bufferIndex = bufferItem; // adjust to modified buffer structure
           SeqIndex<IT1> seqIndex = pp->seqIndex;
           for (int term=0; term<srcTermProcessing; term++){
@@ -9783,16 +9795,6 @@ template<typename SIT, typename DIT> int sparseMatMulStoreEncodeXXE(
   
   double dtMin;           // to find minimum time
   
-#ifdef ASMM_STORE_OPT_PRINT_on
-  char asmm_store_opt_print_file[160];
-  sprintf(asmm_store_opt_print_file, "ASMM_STORE_OPT_PRINT_on.%05d", localPet);
-  FILE *asmm_store_opt_print_fp = fopen(asmm_store_opt_print_file, "a");
-  fprintf(asmm_store_opt_print_fp, "\n========================================"
-    "========================================\n");
-  fprintf(asmm_store_opt_print_fp, "========================================"
-    "========================================\n\n");
-#endif
-  
   // Need correct setting of vectorLength for the XXE exec() calls.
   int vectorLength = 0; // initialize
   
@@ -9883,9 +9885,14 @@ template<typename SIT, typename DIT> int sparseMatMulStoreEncodeXXE(
         dtAverage += dtEnd - dtStart;
       }
       dtAverage /= dtCount;
-#ifdef ASMM_STORE_OPT_PRINT_on
-      fprintf(asmm_store_opt_print_fp, "localPet: %d, srcTermProcessing=%d -> dtAverage=%gs\n", 
-        localPet, srcTermProcessing, dtAverage);
+#ifdef ASMM_STORE_TUNELOG_on
+    {
+      std::stringstream msg;
+      msg << "ASMM_STORE_TUNELOG:" << __LINE__ 
+        << " srcTermProcessing=" << srcTermProcessing
+        << " dtAverage=" << dtAverage;
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+    }
 #endif
       // determine optimum srcTermProcessing  
       if (srcTermProcessing==0){
@@ -9902,9 +9909,14 @@ template<typename SIT, typename DIT> int sparseMatMulStoreEncodeXXE(
       }
     } // srcTermProc
   
-#ifdef ASMM_STORE_OPT_PRINT_on
-    fprintf(asmm_store_opt_print_fp, "localPet: %d, srcTermProcessingOpt=%d -> "
-      "dtMin=%gs (local)\n", localPet, srcTermProcessingOpt, dtMin);
+#ifdef ASMM_STORE_TUNELOG_on
+    {
+      std::stringstream msg;
+      msg << "ASMM_STORE_TUNELOG:" << __LINE__ 
+        << " srcTermProcessingOpt=" << srcTermProcessingOpt
+        << " dtMin(local)=" << dtMin;
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+    }
 #endif
     
     // all PETs vote on srcTermProcessingOpt
@@ -9946,9 +9958,14 @@ template<typename SIT, typename DIT> int sparseMatMulStoreEncodeXXE(
   VM::logMemInfo(std::string("ASMMStoreEncodeXXE9.0"));
 #endif
   
-#ifdef ASMM_STORE_OPT_PRINT_on
-  fprintf(asmm_store_opt_print_fp, "localPet: %d, srcTermProcessingOpt=%d "
-    "(majority vote)\n", localPet, srcTermProcessingOpt);
+#ifdef ASMM_STORE_TUNELOG_on
+    {
+      std::stringstream msg;
+      msg << "ASMM_STORE_TUNELOG:" << __LINE__ 
+        << " srcTermProcessingOpt=" << srcTermProcessingOpt
+        << " (majority vote)";
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+    }
 #endif
     
 #ifdef ASMM_STORE_TIMING_on
@@ -10029,9 +10046,14 @@ template<typename SIT, typename DIT> int sparseMatMulStoreEncodeXXE(
         dtAverage += dtEnd - dtStart;
       }
       dtAverage /= dtCount;
-#ifdef ASMM_STORE_OPT_PRINT_on
-      fprintf(asmm_store_opt_print_fp, "localPet: %d, pipelineDepth=%d -> "
-        "dtAverage=%gs\n", localPet, pipelineDepth, dtAverage);
+#ifdef ASMM_STORE_TUNELOG_on
+    {
+      std::stringstream msg;
+      msg << "ASMM_STORE_TUNELOG:" << __LINE__ 
+        << " pipelineDepth=" << pipelineDepth
+        << " dtAverage=" << dtAverage;
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+    }
 #endif
       // determine optimum pipelineDepth  
       if (pipelineDepth==1){
@@ -10048,9 +10070,14 @@ template<typename SIT, typename DIT> int sparseMatMulStoreEncodeXXE(
       }
     } // pipelineDepth
     
-#ifdef ASMM_STORE_OPT_PRINT_on
-    fprintf(asmm_store_opt_print_fp, "localPet: %d, pipelineDepthOpt=%d -> "
-      "dtMin=%gs (local)\n", localPet, pipelineDepthOpt, dtMin);
+#ifdef ASMM_STORE_TUNELOG_on
+    {
+      std::stringstream msg;
+      msg << "ASMM_STORE_TUNELOG:" << __LINE__ 
+        << " pipelineDepthOpt=" << pipelineDepthOpt
+        << " dtMin(local)=" << dtMin;
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+    }
 #endif
       
     // all PETs vote on pipelineDepthOpt
@@ -10091,10 +10118,14 @@ template<typename SIT, typename DIT> int sparseMatMulStoreEncodeXXE(
   VM::logMemInfo(std::string("ASMMStoreEncodeXXE10.0"));
 #endif
 
-#ifdef ASMM_STORE_OPT_PRINT_on
-  fprintf(asmm_store_opt_print_fp, "localPet: %d, pipelineDepthOpt=%d "
-    "(majority vote)\n", localPet, pipelineDepthOpt);
-  fclose(asmm_store_opt_print_fp);
+#ifdef ASMM_STORE_TUNELOG_on
+    {
+      std::stringstream msg;
+      msg << "ASMM_STORE_TUNELOG:" << __LINE__ 
+        << " pipelineDepthOpt=" << pipelineDepthOpt
+        << " (majority vote)";
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+    }
 #endif
       
 #ifdef ASMM_STORE_TIMING_on
@@ -10740,13 +10771,16 @@ int Array::sparseMatMul(
   
   // get a handle on the XXE stored in routehandle
   XXE *xxe = (XXE *)(*routehandle)->getStorage();
-
+  
   if (xxe == NULL){
     // NOP
     // return successfully
     rc = ESMF_SUCCESS;
     return rc;
   }
+
+  // point back to the routehandle inside of xxe
+  xxe->setRouteHandle(*routehandle);
 
   // conditionally perform full input checks
   if (checkflag){
@@ -10806,25 +10840,31 @@ int Array::sparseMatMul(
   // set filterBitField  
   int filterBitField = 0x0; // init. to execute _all_ operations in XXE stream
   
+  // set filters according to commflag and termorderflag
   if (commflag==ESMF_COMM_BLOCKING){
     // blocking mode
     if (termorderflag == ESMC_TERMORDER_SRCSEQ){
-      filterBitField |= XXE::filterBitNbWaitFinish; // set NbWaitFinish filter
-      filterBitField |= XXE::filterBitNbTestFinish; // set NbTestFinish filter
-      filterBitField |= XXE::filterBitCancel;       // set Cancel filter
+      // strict order of terms in single sum, not partial sums
+      filterBitField |= XXE::filterBitNbWaitFinish; // no NbWaitFinish ops
+      filterBitField |= XXE::filterBitNbTestFinish; // no NbTestFinish ops
+      filterBitField |= XXE::filterBitCancel;       // no Cancel ops
+      // -> this leaves SingleSum ops enabled
 #ifdef ASMM_EXEC_INFO_on
       ESMC_LogDefault.Write("SMM exec: COMM_BLOCKING, TERMORDER_SRCSEQ",
         ESMC_LOGMSG_INFO);
 #endif
     }else if (termorderflag == ESMC_TERMORDER_SRCPET){
-      filterBitField |= XXE::filterBitNbTestFinish; // set NbTestFinish filter
-      filterBitField |= XXE::filterBitCancel;       // set Cancel filter
-      filterBitField |= XXE::filterBitNbWaitFinishSingleSum; // SingleSum filter
+      // order of terms by src PET, allow partial sums of terms from same PET
+      filterBitField |= XXE::filterBitNbTestFinish; // no NbTestFinish ops
+      filterBitField |= XXE::filterBitCancel;       // no Cancel ops
+      filterBitField |= XXE::filterBitNbWaitFinishSingleSum; // no SingleSum ops
+      // -> this leaves NbWaitFinish ops enabled      
 #ifdef ASMM_EXEC_INFO_on
       ESMC_LogDefault.Write("SMM exec: COMM_BLOCKING, TERMORDER_SRCPET",
         ESMC_LOGMSG_INFO);
 #endif
     }else if (termorderflag == ESMC_TERMORDER_FREE){
+      // completely free order of terms, allow any partial sums
 #ifdef ENSURE_TO_LIMIT_OUTSTANDING_NBCOMMS
 //TODO: This branch ensures that there are never more than pipelineDepth
 //TODO: outstanding non-blocking comms held by this PET. This is basically
@@ -10842,12 +10882,12 @@ int Array::sparseMatMul(
 //TODO: By default this is NOT turned on, but keep using the 
 //TODO: exsiting ESMC_TERMORDER_FREE implementations with risking too many
 //TODO: outstanding nb-comms, under just the right conditions!
-      filterBitField |= XXE::filterBitNbTestFinish; // set NbTestFinish filter
+      filterBitField |= XXE::filterBitNbTestFinish; // no NbTestFinish ops
 #else
-      filterBitField |= XXE::filterBitNbWaitFinish; // set NbWaitFinish filter
+      filterBitField |= XXE::filterBitNbWaitFinish; // no NbWaitFinish ops
 #endif
-      filterBitField |= XXE::filterBitCancel;       // set Cancel filter    
-      filterBitField |= XXE::filterBitNbWaitFinishSingleSum; // SingleSum filter
+      filterBitField |= XXE::filterBitCancel;       // no Cancel ops
+      filterBitField |= XXE::filterBitNbWaitFinishSingleSum; // no SingleSum ops
 #ifdef ASMM_EXEC_INFO_on
       ESMC_LogDefault.Write("SMM exec: COMM_BLOCKING, TERMORDER_FREE",
         ESMC_LOGMSG_INFO);
@@ -10915,7 +10955,8 @@ int Array::sparseMatMul(
       ESMC_LOGMSG_INFO);
 #endif
   }
-  
+
+  // set filters according to zeroflag
   if (zeroflag!=ESMC_REGION_TOTAL)
     filterBitField |= XXE::filterBitRegionTotalZero;  // filter reg. total zero
   if (zeroflag!=ESMC_REGION_SELECT)
