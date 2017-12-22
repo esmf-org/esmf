@@ -793,6 +793,9 @@ template<typename SIT, typename DIT> int sparseMatMulStoreLinSeqVect_new(
   VM::logMemInfo(std::string("ASMMStoreLinSeqVect_new4.0"));
 #endif
   
+#if 0 
+  // DO NOT NEED THIS unless for halo reduce the communication during
+  // fillLinSeqVect.totalExchange(vm) to not cover factor.
   // fill in factors into srcLinSeqVect
   if (haloFlag){
     // for halo all the factors are 1
@@ -821,6 +824,7 @@ template<typename SIT, typename DIT> int sparseMatMulStoreLinSeqVect_new(
       }
     }
   }
+#endif
   
   // clear out dstLinSeqVect elements that did not find src partners
   for (int i=0; i<dstLocalDeCount; i++){

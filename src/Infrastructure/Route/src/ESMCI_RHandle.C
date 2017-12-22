@@ -458,6 +458,7 @@ int RouteHandle::construct(
 
   srcArray = NULL;
   dstArray = NULL;
+  asPtr = NULL;
 
   return ESMF_SUCCESS;
 }
@@ -503,6 +504,11 @@ int RouteHandle::destruct(
         delete tmp;
         setStorage(NULL, i);
       }
+    }
+    // handle attached state pointer
+    if (asPtr){
+      delete [] asPtr;
+      asPtr = NULL;
     }
   }
 

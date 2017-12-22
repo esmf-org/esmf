@@ -172,12 +172,12 @@ extern "C" {
       // petMap was provided -> do some error checking
       if ((petMap)->dimCount != 1){
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
-          "- petMap array must be of rank 1", ESMC_CONTEXT, rc);
+          "petMap array must be of rank 1", ESMC_CONTEXT, rc);
         return; // bail out
       }
       if ((petMap)->extent[0] < (*ptr)->getDeCount()){
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
-          "- 1st dim of petMap array must be of size 'deCount'",
+          "1st dim of petMap array must be of size 'deCount'",
           ESMC_CONTEXT, rc);
         return; // bail out
       }
@@ -189,12 +189,12 @@ extern "C" {
       // vasMap was provided -> do some error checking
       if ((vasMap)->dimCount != 1){
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
-          "- vasMap array must be of rank 1", ESMC_CONTEXT, rc);
+          "vasMap array must be of rank 1", ESMC_CONTEXT, rc);
         return; // bail out
       }
       if ((vasMap)->extent[0] < (*ptr)->getDeCount()){
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
-          "- 1st dim of vasMap array must be of size 'deCount'", ESMC_CONTEXT,
+          "1st dim of vasMap array must be of size 'deCount'", ESMC_CONTEXT,
           rc);
         return; // bail out
       }
@@ -212,12 +212,12 @@ extern "C" {
       // localDeToDeMap was provided -> do some error checking
       if ((localDeToDeMap)->dimCount != 1){
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
-          "- localDeToDeMap array must be of rank 1", ESMC_CONTEXT, rc);
+          "localDeToDeMap array must be of rank 1", ESMC_CONTEXT, rc);
         return; // bail out
       }
       if ((localDeToDeMap)->extent[0] < (*ptr)->getLocalDeCount()){
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
-          "- 1st dim of localDeToDeMap array must be of size 'localDeCount'",
+          "1st dim of localDeToDeMap array must be of size 'localDeCount'",
           ESMC_CONTEXT, rc);
         return; // bail out
       }
@@ -231,12 +231,12 @@ extern "C" {
       // vasLocalDeToDeMap was provided -> do some error checking
       if ((vasLocalDeToDeMap)->dimCount != 1){
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
-          "- vasLocalDeToDeMap array must be of rank 1", ESMC_CONTEXT, rc);
+          "vasLocalDeToDeMap array must be of rank 1", ESMC_CONTEXT, rc);
         return; // bail out
       }
       if ((vasLocalDeToDeMap)->extent[0] < (*ptr)->getVasLocalDeCount()){
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
-          "- 1st dim of vasLocalDeToDeMap array must be of size "
+          "1st dim of vasLocalDeToDeMap array must be of size "
           "'vasLocalDeCount'", ESMC_CONTEXT, rc);
         return; // bail out
       }

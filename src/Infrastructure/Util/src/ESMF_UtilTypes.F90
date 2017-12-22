@@ -1212,6 +1212,17 @@ end interface
 
 
 !------------------------------------------------------------------------------
+! ! ESMF_DynamicMaskElement
+
+  type ESMF_DynamicMaskElement
+    real(ESMF_KIND_R8), pointer       :: dstElement
+    real(ESMF_KIND_R8), allocatable   :: factor(:)
+    real(ESMF_KIND_R8), allocatable   :: srcElement(:)
+  end type
+
+  public ESMF_DynamicMaskElement
+
+!------------------------------------------------------------------------------
 
       contains
 
