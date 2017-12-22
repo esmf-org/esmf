@@ -80,10 +80,12 @@
 % -> non-blocking options
 \input{ESMF_RHandleBitForBitEx_fapi}
 \input{ESMF_RHandleFromRHandleEx_fapi}
+\input{ESMF_RHandleDynamicMaskingEx_fapi}
 #elif defined(CONSTITUENT)
 \input{../Infrastructure/Route/doc/RHandle_usage}
 \input{../Infrastructure/Route/doc/ESMF_RHandleBitForBitEx_fapi}
 \input{../Infrastructure/Route/doc/ESMF_RHandleFromRHandleEx_fapi}
+\input{../Infrastructure/Route/doc/ESMF_RHandleDynamicMaskingEx_fapi}
 #endif
 
 \subsection{Restrictions and Future Work}

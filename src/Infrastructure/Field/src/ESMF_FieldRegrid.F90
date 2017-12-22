@@ -134,6 +134,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item[6.1.0] Added argument {\tt termorderflag}.
 !              The new argument gives the user control over the order in which
 !              the src terms are summed up.
+! \item[7.1.0] Added arguments {\tt dynamicSrcMaskValue}, 
+!              {\tt dynamicDstMaskValue}, and {\tt dynamicMaskRoutine}.
+!              The new arguments support the dynamic masking feature.
 ! \end{description}
 ! \end{itemize}
 !
@@ -209,6 +212,26 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     If set to {\tt .FALSE.} {\em (default)} only a very basic input check
 !     will be performed, leaving many inconsistencies undetected. Set
 !     {\tt checkflag} to {\tt .FALSE.} to achieve highest performance.
+!   \item [{[dynamicSrcMaskValue]}]
+!     If provided, turns on the dynamic masking feature. Any element in the
+!     {\tt srcField} with a value equal to {\tt dynamicSrcMaskValue} is counted
+!     as a dynamically masked source element. Elements affected will be passed
+!     to the routine specified in {\tt dynamicMaskRoutine} for handling.
+!     The default is to not assume any source elements as dynamically masked.
+!   \item [{[dynamicDstMaskValue]}]
+!     If provided, turns on the dynamic masking feature. Any element in the
+!     {\tt dstField} with a value equal to {\tt dynamicDstMaskValue} is counted
+!     as a dynamically masked destination element. Elements affected will be
+!     passed to the routine specified in {\tt dynamicMaskRoutine} for handling.
+!     The default is to not assume any destination elements as dynamically
+!     masked.
+!   \item [{[dynamicMaskRoutine]}]
+!     The routine responsible for handling dynamically masked source and 
+!     destination elements. Must be provided if {\tt dynamicSrcMaskValue} or
+!     {\tt dynamicDstMaskValue} are provided.
+!     See section \ref{RH:DynMask} for a discussion of dynamic masking, and for
+!     the precise definition of the {\tt dynamicMaskRoutine} procedure 
+!     interface.
 !   \item [{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
