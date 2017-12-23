@@ -2351,7 +2351,9 @@ template<typename IT> int Array::getSequenceIndexExclusive(
   int const *index,                 // in  - DE-local index tuple in exclusive
                                     //       region basis 0
   SeqIndex<IT> *seqIndex,           // out - sequence index
-  bool recursive                    // in  - recursive mode or not
+  bool recursive,                   // in  - recursive mode or not
+  bool canonical                    // in  - return canonical seqIndex even if
+                                    //       arbitrary seqIndices available
   )const{
 //
 // !DESCRIPTION:
@@ -2387,7 +2389,7 @@ template<typename IT> int Array::getSequenceIndexExclusive(
   // determine the sequentialized index for decomposed dimensions
   vector<IT> decompSeqIndex;
   localrc = distgrid->getSequenceIndexLocalDe(localDe, &(decompIndex[0]),
-    decompSeqIndex, recursive);  
+    decompSeqIndex, recursive, canonical);  
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
     &rc)) return rc;
   if (decompSeqIndex.size() > 0)
@@ -2756,7 +2758,7 @@ void Array::setRimMembers(
     rimSeqIndexI4.resize(localDeCount);
     for (int i=0; i<localDeCount; i++){
       // iterator through total region, skipping over exclusive region
-      ArrayElement arrayElement(this, i, true, true, true);
+      ArrayElement arrayElement(this, i, true, true, true, false);
       int element = 0;
       while(arrayElement.isWithin()){
         // obtain linear index for this element
@@ -2778,7 +2780,7 @@ void Array::setRimMembers(
     rimSeqIndexI8.resize(localDeCount);
     for (int i=0; i<localDeCount; i++){
       // iterator through total region, skipping over exclusive region
-      ArrayElement arrayElement(this, i, true, true, true);
+      ArrayElement arrayElement(this, i, true, true, true, false);
       int element = 0;
       while(arrayElement.isWithin()){
         // obtain linear index for this element
@@ -2873,7 +2875,7 @@ template<>
     }
 
     // fill Array rim elements with sequence indices provided in rimSeqIndexArg
-    ArrayElement arrayElement(this, localDe, true, false, false);
+    ArrayElement arrayElement(this, localDe, true, false, false, false);
     int i=0;
     int offStart = arrayElement.getArbSequenceIndexOffset();    
     while(arrayElement.isWithin()){
@@ -2959,7 +2961,7 @@ template<>
       }
 
       // fill Array rim elements with seq indices provided in rimSeqIndexArg
-      ArrayElement arrayElement(this, localDe, true, false, false);
+      ArrayElement arrayElement(this, localDe, true, false, false, false);
       int i=0;
       int offStart = arrayElement.getArbSequenceIndexOffset();    
       while(arrayElement.isWithin()){
@@ -3553,7 +3555,9 @@ int Array::constructFileMap(
         ESMC_CONTEXT, &rc);
       return rc;
     }
-    ArrayElement arrayElement(this, localDe, false, true, false);
+    // force the seqIndex lookup to use canonical mode because PIO expects
+    // canonical sequence indices for its global ids---------------v
+    ArrayElement arrayElement(this, localDe, false, true, false, true);
     int elementCount = totalElementCountPLocalDe[localDe];
   
     if (fileMapList != NULL){
@@ -4001,7 +4005,7 @@ int Array::gather(
       char *larrayBaseAddr = (char *)larrayBaseAddrList[i];
       int contigLength = exclusiveUBound[i*redDimCount]
         - exclusiveLBound[i*redDimCount] + 1;
-      ArrayElement arrayElement(this, i, false, false);
+      ArrayElement arrayElement(this, i, false, false, false);
       arrayElement.setSkipDim(0); // next() will skip ahead to next contig. line
       // loop over all elements in exclusive region for this DE and memcpy data
       int sendBufferIndex = 0;  // reset
@@ -4627,7 +4631,7 @@ int Array::scatter(
       char *larrayBaseAddr = (char *)larrayBaseAddrList[i];
       int contigLength = exclusiveUBound[i*redDimCount]
         - exclusiveLBound[i*redDimCount] + 1;
-      ArrayElement arrayElement(this, i, false, false);
+      ArrayElement arrayElement(this, i, false, false, false);
       arrayElement.setSkipDim(0); // next() will skip ahead to next contig. line
       // loop over all elements in exclusive region for this DE and memcpy data
       int recvBufferIndex = 0;  // reset
@@ -4923,7 +4927,7 @@ template<typename IT>
     const std::vector<std::vector<SeqIndex<IT> > > *rimSeqIndex;
     array->getRimSeqIndex(&rimSeqIndex);
     for (int i=0; i<localDeCount; i++){
-      ArrayElement arrayElement(array, i, true, false, false);
+      ArrayElement arrayElement(array, i, true, false, false, false);
       int element = 0;
       while(arrayElement.isWithin()){
         SeqIndex<IT> seqIndex = (*rimSeqIndex)[i][element];
@@ -5477,7 +5481,7 @@ template<typename SIT, typename DIT>
         }
       }else{
         // multi-dim loop object
-        ArrayElement arrayElement(srcArray, i, true, false);
+        ArrayElement arrayElement(srcArray, i, true, false, false);
         // set up to skip over undistributed, i.e. tensor dimensions
         const int *srcArrayToDistGridMap = srcArray->getArrayToDistGridMap();
         for (int j=0; j<srcArray->getRank(); j++)
@@ -11384,7 +11388,8 @@ ArrayElement::ArrayElement(
   Array const *arrayArg,      // in - the Array in which ArrayElement iterates
   int localDeArg,             // in - localDe index, starting with 0
   bool seqIndexEnabled,       // in - enable seqIndex lookup during iteration
-  bool seqIndexRecursive      // in - recursive or not seqIndex lookup
+  bool seqIndexRecursive,     // in - recursive or not seqIndex lookup
+  bool seqIndexCanonical      // in - canonical or not seqIndex lookup
   ){
 //
 // !DESCRIPTION:
@@ -11459,6 +11464,7 @@ ArrayElement::ArrayElement(
   if (array->getDistGrid()->getArbSeqIndexList(localDe,1))
     arbSeqIndexFlag = true; // set
   seqIndexRecursiveFlag = seqIndexRecursive;
+  seqIndexCanonicalFlag = seqIndexCanonical;
   // flag condition that will prevent optimization of seqIndex lookup
   cannotOptimizeLookup = !firstDimFirstDecomp | arbSeqIndexFlag |
     seqIndexRecursiveFlag;
@@ -11475,13 +11481,15 @@ ArrayElement::ArrayElement(
     if (indexTK==ESMC_TYPEKIND_I4){
       seqIndex = (void *) new SeqIndex<ESMC_I4>;
       localrc = array->getSequenceIndexExclusive(localDe, &indexTuple[0], 
-        (SeqIndex<ESMC_I4>*)seqIndex, seqIndexRecursiveFlag);
+        (SeqIndex<ESMC_I4>*)seqIndex, seqIndexRecursiveFlag,
+        seqIndexCanonicalFlag);
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
         ESMC_CONTEXT, NULL)) throw localrc;  // bail out with exception
     }else if (indexTK==ESMC_TYPEKIND_I8){
       seqIndex = (void *) new SeqIndex<ESMC_I8>;
       localrc = array->getSequenceIndexExclusive(localDe, &indexTuple[0], 
-        (SeqIndex<ESMC_I8>*)seqIndex, seqIndexRecursiveFlag);
+        (SeqIndex<ESMC_I8>*)seqIndex, seqIndexRecursiveFlag,
+        seqIndexCanonicalFlag);
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
         ESMC_CONTEXT, NULL)) throw localrc;  // bail out with exception
     }
@@ -11508,7 +11516,8 @@ ArrayElement::ArrayElement(
   int localDeArg,             // in - localDe index, starting with 0
   bool blockExclusiveFlag,    // in - block the exclusive region if set to true
   bool seqIndexEnabled,       // in - enable seqIndex lookup during iteration
-  bool seqIndexRecursive      // in - recursive or not seqIndex lookup
+  bool seqIndexRecursive,     // in - recursive or not seqIndex lookup
+  bool seqIndexCanonical      // in - canonical or not seqIndex lookup
   ){
 //
 // !DESCRIPTION:
@@ -11596,6 +11605,7 @@ ArrayElement::ArrayElement(
   if (array->getDistGrid()->getArbSeqIndexList(localDe,1))
     arbSeqIndexFlag = true; // set
   seqIndexRecursiveFlag = seqIndexRecursive;
+  seqIndexCanonicalFlag = seqIndexCanonical;
   // flag condition that will prevent optimization of seqIndex lookup
   cannotOptimizeLookup = !firstDimFirstDecomp | arbSeqIndexFlag |
     seqIndexRecursiveFlag;
@@ -11613,7 +11623,8 @@ ArrayElement::ArrayElement(
       seqIndex = (void *) new SeqIndex<ESMC_I4>;
       if (!blockExclusiveFlag || hasValidSeqIndex()){
         localrc = array->getSequenceIndexExclusive(localDe, &indexTuple[0], 
-          (SeqIndex<ESMC_I4>*)seqIndex, seqIndexRecursiveFlag);
+          (SeqIndex<ESMC_I4>*)seqIndex, seqIndexRecursiveFlag,
+          seqIndexCanonicalFlag);
         if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
           ESMC_CONTEXT, NULL)) throw localrc;  // bail out with exception
       }
@@ -11621,7 +11632,8 @@ ArrayElement::ArrayElement(
       seqIndex = (void *) new SeqIndex<ESMC_I8>;
       if (!blockExclusiveFlag || hasValidSeqIndex()){
         localrc = array->getSequenceIndexExclusive(localDe, &indexTuple[0], 
-          (SeqIndex<ESMC_I8>*)seqIndex, seqIndexRecursiveFlag);
+          (SeqIndex<ESMC_I8>*)seqIndex, seqIndexRecursiveFlag,
+          seqIndexCanonicalFlag);
         if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
           ESMC_CONTEXT, NULL)) throw localrc;  // bail out with exception
       }
