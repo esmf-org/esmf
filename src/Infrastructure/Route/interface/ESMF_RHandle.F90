@@ -1116,7 +1116,7 @@ recursive subroutine f_esmf_dynamicmaskcallback(routehandle, count, &
   ! Initialize return code; assume routine not implemented
   rc = ESMF_RC_NOT_IMPL
 
-#if 1
+#if 0
   print *, "*** made it into f_esmf_dynamicmaskcallback(), with count=", count
 #endif
 
@@ -1143,20 +1143,16 @@ recursive subroutine f_esmf_dynamicmaskcallback(routehandle, count, &
   ! call back into user provided routine to handle dynamically masked elements
   if (dynamicMaskState%wrap%dynamicSrcMaskIsPresent &
     .and. dynamicMaskState%wrap%dynamicDstMaskIsPresent) then
-print *, "call branch 1"
     call dynamicMaskState%wrap%routine(dynMaskList=dynamicMaskList, &
       dynamicSrcMaskValue=dynamicMaskState%wrap%dynamicSrcMaskValue, &
       dynamicDstMaskValue=dynamicMaskState%wrap%dynamicDstMaskValue, rc=localrc)
   else if (dynamicMaskState%wrap%dynamicSrcMaskIsPresent) then
-print *, "call branch 2"
     call dynamicMaskState%wrap%routine(dynMaskList=dynamicMaskList, &
       dynamicSrcMaskValue=dynamicMaskState%wrap%dynamicSrcMaskValue, rc=localrc)
   else if (dynamicMaskState%wrap%dynamicDstMaskIsPresent) then
-print *, "call branch 3"
     call dynamicMaskState%wrap%routine(dynMaskList=dynamicMaskList, &
       dynamicDstMaskValue=dynamicMaskState%wrap%dynamicDstMaskValue, rc=localrc)
   else
-print *, "call branch 4"
     call dynamicMaskState%wrap%routine(dynMaskList=dynamicMaskList, rc=localrc)
   endif
   ! local garbage collection

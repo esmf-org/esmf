@@ -6753,7 +6753,7 @@ void XXE::exec_pssslDstRra(T **rraBaseList, int *rraIndexList,
 template<typename T, typename U, typename V>
   void XXE::dynMaskHandler(vector<XXE::DynMaskElement<T,U,V> > &dynMaskList,
   RouteHandle *rh){
-#if 1
+#if 0
   {
     std::stringstream logmsg;
     logmsg << "dynMaskHandler(): with dynMaskList.size()=" 
@@ -6816,7 +6816,7 @@ void XXE::exec_pssslDstRraDynMask(T **rraBaseList, int *rraIndexList,
   U factor;
   V *value;
   V *srcMaskValue;
-#if 1
+#if 0
   {
     std::stringstream logmsg;
     logmsg << "exec_pssslDstRraDynMask():";
@@ -6868,7 +6868,7 @@ void XXE::exec_pssslDstRraDynMask(T **rraBaseList, int *rraIndexList,
       if (!(dstMask || srcMask)){
         tmpElement += factor * *value;  // perform calculation
       }
-#if 1
+#if 0
   {
     std::stringstream logmsg;
     logmsg << "element=" << element
