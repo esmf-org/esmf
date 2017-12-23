@@ -1128,7 +1128,7 @@ recursive subroutine f_esmf_dynamicmaskcallback(routehandle, count, &
     
   ! prepare the dynamicMaskList
   allocate(dynamicMaskList(count))
-  k=0
+  k=1
   do i=1, count
     call C_F_POINTER(elementVector(i), dynamicMaskList(i)%dstElement)
     allocate(dynamicMaskList(i)%factor(countVector(i)))
