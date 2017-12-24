@@ -103,14 +103,14 @@ program ESMF_RHandleDynamicMaskingEx
   if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
     line=__LINE__, &
     file=__FILE__)) &
-    return  ! bail out
+    call ESMF_Finalize(endflag=ESMF_END_ABORT)
   
   ! fill srcField with some data
   call ESMF_FieldFill(srcField, dataFillScheme="sincos", rc=rc)
   if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
     line=__LINE__, &
     file=__FILE__)) &
-    return  ! bail out
+    call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   ! create dstGrid
   dstGrid = ESMF_GridCreate1PeriDimUfrm(maxIndex=(/36, 16/), &
