@@ -14,11 +14,74 @@
 !ESMF_MULTI_PROC_EXAMPLE        String used by test script to count examples.
 !==============================================================================
 
+module ESMF_RHandleDynamicMaskingMod
+  
+  use ESMF
+
+  implicit none
+
+  public simpleDynMaskProc
+
+ contains !-------------------------------------
+ 
+  subroutine simpleDynMaskProc(dynamicMaskList, dynamicSrcMaskValue, &
+    dynamicDstMaskValue, rc)
+    type(ESMF_DynamicMaskElement), pointer              :: dynamicMaskList(:)
+    real(ESMF_KIND_R8),            intent(in), optional :: dynamicSrcMaskValue
+    real(ESMF_KIND_R8),            intent(in), optional :: dynamicDstMaskValue
+    integer,                       intent(out)          :: rc
+    integer :: i, j
+    real(ESMF_KIND_R8)  :: renorm
+    if (associated(dynamicMaskList)) then
+      do i=1, size(dynamicMaskList)
+        if (match(dynamicDstMaskValue,dynamicMaskList(i)%dstElement)) then
+          ! dstElement was masked -> just set to a specific value
+          dynamicMaskList(i)%dstElement = 50.d0
+        else
+          ! there must be srcElements masked 
+          ! -> don't use masked srcElements, but renormalize all other factors
+          dynamicMaskList(i)%dstElement = 0.d0 ! set to zero
+          renorm = 0.d0 ! reset
+          do j=1, size(dynamicMaskList(i)%factor)
+            if (.not. &
+              match(dynamicSrcMaskValue,dynamicMaskList(i)%srcElement(j))) then
+              dynamicMaskList(i)%dstElement = dynamicMaskList(i)%dstElement &
+                + dynamicMaskList(i)%factor(j) &
+                * dynamicMaskList(i)%srcElement(j)
+              renorm = renorm + dynamicMaskList(i)%factor(j)
+            endif
+          enddo
+          dynamicMaskList(i)%dstElement = dynamicMaskList(i)%dstElement / renorm
+        endif
+      enddo
+    endif
+    ! return successfully
+    rc = ESMF_SUCCESS
+  end subroutine  
+  
+  !-----------
+  
+  function match(val1, val2)
+    ! ability to safely compare optional arguments
+    logical :: match
+    real(ESMF_KIND_R8), optional  :: val1
+    real(ESMF_KIND_R8), optional  :: val2
+    match = .false.
+    if (.not.present(val1)) return
+    if (.not.present(val2)) return
+    match = (val1 .eq. val2)
+  end function
+    
+end module ESMF_RHandleDynamicMaskingMod
+
+
 program ESMF_RHandleDynamicMaskingEx
 #include "ESMF.h"
 
   use ESMF
   use ESMF_TestMod
+  
+  use ESMF_RHandleDynamicMaskingMod
   
   implicit none
   
@@ -406,54 +469,4 @@ program ESMF_RHandleDynamicMaskingEx
     print *, "FAIL: ESMF_RHandleDynamicMaskingEx.F90"
   endif
 
- contains !-------------------------------------
- 
-  subroutine simpleDynMaskProc(dynamicMaskList, dynamicSrcMaskValue, &
-    dynamicDstMaskValue, rc)
-    type(ESMF_DynamicMaskElement), pointer              :: dynamicMaskList(:)
-    real(ESMF_KIND_R8),            intent(in), optional :: dynamicSrcMaskValue
-    real(ESMF_KIND_R8),            intent(in), optional :: dynamicDstMaskValue
-    integer,                       intent(out)          :: rc
-    integer :: i, j
-    real(ESMF_KIND_R8)  :: renorm
-    if (associated(dynamicMaskList)) then
-      do i=1, size(dynamicMaskList)
-        if (match(dynamicDstMaskValue,dynamicMaskList(i)%dstElement)) then
-          ! dstElement was masked -> just set to a specific value
-          dynamicMaskList(i)%dstElement = 50.d0
-        else
-          ! there must be srcElements masked 
-          ! -> don't use masked srcElements, but renormalize all other factors
-          dynamicMaskList(i)%dstElement = 0.d0 ! set to zero
-          renorm = 0.d0 ! reset
-          do j=1, size(dynamicMaskList(i)%factor)
-            if (.not. &
-              match(dynamicSrcMaskValue,dynamicMaskList(i)%srcElement(j))) then
-              dynamicMaskList(i)%dstElement = dynamicMaskList(i)%dstElement &
-                + dynamicMaskList(i)%factor(j) &
-                * dynamicMaskList(i)%srcElement(j)
-              renorm = renorm + dynamicMaskList(i)%factor(j)
-            endif
-          enddo
-          dynamicMaskList(i)%dstElement = dynamicMaskList(i)%dstElement / renorm
-        endif
-      enddo
-    endif
-    ! return successfully
-    rc = ESMF_SUCCESS
-  end subroutine  
-  
-  !-----------
-  
-  function match(val1, val2)
-    ! ability to safely compare optional arguments
-    logical :: match
-    real(ESMF_KIND_R8), optional  :: val1
-    real(ESMF_KIND_R8), optional  :: val2
-    match = .false.
-    if (.not.present(val1)) return
-    if (.not.present(val2)) return
-    match = (val1 .eq. val2)
-  end function
-    
 end program
