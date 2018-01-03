@@ -81,7 +81,7 @@ int main(void){
   int *exUBound = NULL;
   int p = 0;
 
-#if 0
+#if 1
   ESMC_GridAddCoord(srcgrid, ESMC_STAGGERLOC_CENTER);
 
   exLBound = (int *)malloc(dimcount*sizeof(int));
@@ -186,8 +186,8 @@ int main(void){
   //-------------------------- REGRIDDING --------------------------------------
   //----------------------------------------------------------------------------
 
-#if 0
-  rc = ESMC_FieldRegridStoreFile(srcfield, dstfield, "data/weights_smmff.nc", NULL, NULL,
+#if 1
+  rc = ESMC_FieldRegridStoreFile(srcfield, dstfield, "data/weights_smmsff.nc", NULL, NULL,
                                  &routehandle, NULL, NULL, NULL, NULL, NULL,
                                  NULL, NULL, NULL, NULL);
 #endif
@@ -210,7 +210,7 @@ int main(void){
   printf("]\n");
 #endif
 
-  rc = ESMC_FieldSMMStore(srcfield, dstfield, "data/weights_generic.nc", &routehandle,
+  rc = ESMC_FieldSMMStore(srcfield, dstfield, "data/weights_smmsff.nc", &routehandle,
                           NULL, NULL, NULL, NULL);
   //----------------------------------------------------------------------------
   //NEX_disable_UTest
@@ -222,7 +222,10 @@ int main(void){
   p = 0;
   for (int i1=exLBound[1]; i1<=exUBound[1]; ++i1) {
     for (int i0=exLBound[0]; i0<=exUBound[0]; ++i0) {
-      if ((srcfieldptr[p] - 42.) > .01) correct = false;
+      if ((srcfieldptr[p] - 42.) > .01) {
+        correct = false;
+        // printf("source value = %f\n", srcfieldptr[p]);
+      }
       p++;
     }
   }
