@@ -230,6 +230,22 @@ def ESMP_InterfaceIntNDSet(iiptr, arrayArg, dimArg, lenArg):
 
 #### VM #######################################################################
 
+_ESMF.ESMC_VMBarrier.restype = ct.c_int
+_ESMF.ESMC_VMBarrier.argtypes = [ct.c_void_p]
+
+def ESMP_VMBarrier(vm):
+    """
+    Preconditions: An ESMP_VM object has been retrieved.\n
+    Postconditions: Blocks calling processor until all processors have reached 
+                    this call.\n
+    Arguments:\n
+        ESMP_VM :: vm\n
+    """
+    rc = _ESMF.ESMC_VMBarrier(vm)
+    if rc != constants._ESMP_SUCCESS:
+        raise ValueError('ESMC_VMBarrier() failed with rc = '+str(rc)+'.    '+
+                        constants._errmsg)
+
 _ESMF.ESMC_VMGet.restype = ct.c_int
 _ESMF.ESMC_VMGet.argtypes = [ct.c_void_p, ct.POINTER(ct.c_int),
                              ct.POINTER(ct.c_int), ct.POINTER(ct.c_int),

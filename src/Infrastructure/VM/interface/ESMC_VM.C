@@ -39,7 +39,7 @@ static const char *const version = "$Id$";
 
 extern "C" {
 
-int ESMC_VMPrint(ESMC_VM vm){
+int ESMC_VMBarrier(ESMC_VM vm){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_VMPrint()"
 
@@ -51,7 +51,7 @@ int ESMC_VMPrint(ESMC_VM vm){
   ESMCI::VM *vmp = (ESMCI::VM *)(vm.ptr);
 
   // call into ESMCI method  
-  localrc = vmp->print();
+  localrc = vmp->barrier();
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
     &rc))
     return rc;  // bail out
@@ -60,54 +60,6 @@ int ESMC_VMPrint(ESMC_VM vm){
   rc = ESMF_SUCCESS;
   return rc;
 }  
-
-
-ESMC_VM ESMC_VMGetGlobal(int *rc){
-#undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_VMGetGlobal()"
-
-  // initialize return code; assume routine not implemented
-  int localrc = ESMC_RC_NOT_IMPL;         // local return code
-  if (rc) *rc = ESMC_RC_NOT_IMPL;         // final return code
-
-  ESMC_VM vm;
-  vm.ptr = (void *)NULL; // initialize
-
-  ESMCI::VM *vmp = ESMCI::VM::getGlobal(&localrc);
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
-    rc))
-    return vm;  // bail out
-
-  vm.ptr = (void*)vmp;
-
-  // return successfully
-  if (rc) *rc = ESMF_SUCCESS;
-  return vm;
-}
-
-
-ESMC_VM ESMC_VMGetCurrent(int *rc){
-#undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_VMGetCurrent()"
-
-  // initialize return code; assume routine not implemented
-  int localrc = ESMC_RC_NOT_IMPL;         // local return code
-  if (rc) *rc = ESMC_RC_NOT_IMPL;         // final return code
-
-  ESMC_VM vm;
-  vm.ptr = (void *)NULL; // initialize
-
-  ESMCI::VM *vmp = ESMCI::VM::getCurrent(&localrc);
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
-    rc))
-    return vm;  // bail out
-
-  vm.ptr = (void*)vmp;
-
-  // return successfully
-  if (rc) *rc = ESMF_SUCCESS;
-  return vm;
-}
 
 
 int ESMC_VMGet(ESMC_VM vm, int *localPet, int *petCount, int *peCount,
@@ -139,6 +91,77 @@ int ESMC_VMGet(ESMC_VM vm, int *localPet, int *petCount, int *peCount,
   rc = ESMF_SUCCESS;
   return rc;
 }
+
+
+ESMC_VM ESMC_VMGetCurrent(int *rc){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_VMGetCurrent()"
+
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  if (rc) *rc = ESMC_RC_NOT_IMPL;         // final return code
+
+  ESMC_VM vm;
+  vm.ptr = (void *)NULL; // initialize
+
+  ESMCI::VM *vmp = ESMCI::VM::getCurrent(&localrc);
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+    rc))
+    return vm;  // bail out
+
+  vm.ptr = (void*)vmp;
+
+  // return successfully
+  if (rc) *rc = ESMF_SUCCESS;
+  return vm;
+}
+
+
+ESMC_VM ESMC_VMGetGlobal(int *rc){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_VMGetGlobal()"
+
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  if (rc) *rc = ESMC_RC_NOT_IMPL;         // final return code
+
+  ESMC_VM vm;
+  vm.ptr = (void *)NULL; // initialize
+
+  ESMCI::VM *vmp = ESMCI::VM::getGlobal(&localrc);
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+    rc))
+    return vm;  // bail out
+
+  vm.ptr = (void*)vmp;
+
+  // return successfully
+  if (rc) *rc = ESMF_SUCCESS;
+  return vm;
+}
+
+
+int ESMC_VMPrint(ESMC_VM vm){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_VMPrint()"
+
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
+  
+  // typecast into ESMCI type
+  ESMCI::VM *vmp = (ESMCI::VM *)(vm.ptr);
+
+  // call into ESMCI method  
+  localrc = vmp->print();
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+    &rc))
+    return rc;  // bail out
+    
+  // return successfully
+  rc = ESMF_SUCCESS;
+  return rc;
+}  
 
 
 }; // extern "C"
