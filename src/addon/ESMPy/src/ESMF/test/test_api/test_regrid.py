@@ -179,7 +179,7 @@ class TestRegrid(TestBase):
         dst_size = 100
         self.assertWeightFileIsRational(filename, src_size, dst_size)
 
-    @attr('parallel')
+    @attr('serial')
     def test_field_regrid_from_file(self):
         filename = 'esmpy_test_field_from_file.nc'
         path = os.path.join(os.getcwd(), filename)
