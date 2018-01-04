@@ -81,7 +81,6 @@ int main(void){
   int *exUBound = NULL;
   int p = 0;
 
-#if 1
   ESMC_GridAddCoord(srcgrid, ESMC_STAGGERLOC_CENTER);
 
   exLBound = (int *)malloc(dimcount*sizeof(int));
@@ -131,7 +130,6 @@ int main(void){
       ++p;
     }
   }
-#endif
 
   //----------------------------------------------------------------------------
   //---------------------- FIELD CREATION --------------------------------------
@@ -186,13 +184,11 @@ int main(void){
   //-------------------------- REGRIDDING --------------------------------------
   //----------------------------------------------------------------------------
 
-#if 1
   rc = ESMC_FieldRegridStoreFile(srcfield, dstfield, "data/weights_smmsff.nc", NULL, NULL,
                                  &routehandle, NULL, NULL, NULL, NULL, NULL,
                                  NULL, NULL, NULL, NULL);
-#endif
   //----------------------------------------------------------------------------
-  //NEX_disable_UTest
+  //NEX_UTest
   strcpy(name, "ESMC_FieldRegridStoreFile test");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
@@ -213,7 +209,7 @@ int main(void){
   rc = ESMC_FieldSMMStore(srcfield, dstfield, "data/weights_smmsff.nc", &routehandle,
                           NULL, NULL, NULL, NULL);
   //----------------------------------------------------------------------------
-  //NEX_disable_UTest
+  //NEX_UTest
   strcpy(name, "ESMC_FieldSMMStore from File test");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
@@ -231,7 +227,7 @@ int main(void){
   }
 
   //----------------------------------------------------------------------------
-  //NEX_disable_UTest
+  //NEX_UTest
   strcpy(name, "ESMC_FieldSMMStore From File validation");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
   ESMC_Test((correct==true), name, failMsg, &result, __FILE__, __LINE__, 0);
@@ -239,7 +235,7 @@ int main(void){
 
   rc = ESMC_FieldRegridRelease(&routehandle);
   //----------------------------------------------------------------------------
-  //NEX_disable_UTest
+  //NEX_UTest
   strcpy(name, "ESMC_FieldRegridRelease");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);

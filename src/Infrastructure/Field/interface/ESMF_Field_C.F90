@@ -1155,50 +1155,21 @@ subroutine f_esmf_fieldcollectgarbage(field, rc)
     integer,                               optional :: rc
 
     integer :: localrc
-    type(ESMF_RouteHandle) :: l_routehandle
-    type(ESMF_RouteHandle) :: l_transposeRoutehandle
-
-#define DEBUG 0
-#if DEBUG
-    real(ESMF_KIND_R8), pointer :: src(:,:)
-#endif
 
     ! initialize return code; assume routine not implemented
     rc = ESMF_RC_NOT_IMPL
     localrc = ESMF_RC_NOT_IMPL
-
+    
     call ESMF_FieldSMMStore(srcField, dstField, &
-                            filename, l_routehandle, &
+                            filename, routehandle, &
                             ignoreUnmatchedIndices=ignoreUnmatchedIndices, &
                             srcTermProcessing=srcTermProcessing, &
                             pipeLineDepth=pipeLineDepth, &
-                            transposeRoutehandle=l_transposeRoutehandle, &
+                            transposeRoutehandle=transposeRoutehandle, &
                             rc=localrc)
 
-#if DEBUG
-    call ESMF_FieldGet(srcField, farrayPtr=src, rc=localrc)
-
-    print *, "ESMF_C: source field"
-    print *, src
-#endif
-
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-
-    ! because ESMF_RouteHandle.this is private, it cannot be accessed directly
-    ! we use the public interface to do the ptr copy;
-    ! the array object returned to the C interface must consist only of the
-    ! this pointer. It must not contain the isInit member.
-    call ESMF_RoutehandleCopyThis(l_routehandle, routehandle, localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
-
-    if (present (transposeRoutehandle)) then
-      call ESMF_RoutehandleCopyThis(l_transposeRoutehandle, &
-                                    transposeRoutehandle, localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
-    endif
 
     rc = ESMF_SUCCESS
 

@@ -1693,41 +1693,6 @@ namespace ESMCI {
       return rc;
     }
 
-#define DEBUG 0
-#if DEBUG
-  // get and fill first coord array and computational bounds
-  int *exLBound = (int *)malloc(2*sizeof(int));
-  int *exUBound = (int *)malloc(2*sizeof(int));
-  ESMCI::InterArray<int> *exLB = new ESMCI::InterArray<int>(exLBound, 2);
-  ESMCI::InterArray<int> *exUB = new ESMCI::InterArray<int>(exUBound, 2);
-
-  int localde = 0;
-  rc = ESMCI::Field::getbounds(fieldpsrc, &localde, exLB, exUB);
-  if (rc != ESMF_SUCCESS) return 0;
-
-  // double * srcfieldptr = (double *)ESMC_FieldGetPtr(fieldpsrc, 0, &rc);
-  if (rc != ESMF_SUCCESS) return 0;
-
-  ESMC_Array array = fieldpsrc->getArray(&localrc);
-  void *ptr = ESMC_ArrayGetPtr(array, 0, &localrc);
-  double *srcfieldptr = static_cast<double *> (ptr);
-
-
-  printf("ESMCI:fieldpsrc mem address = %p\n", fieldpsrc);
-
-  printf("ESMCI:srcfield = [\n");
-  int p = 0;
-  for (int i1=exLBound[1]; i1<=exUBound[1]; ++i1) {
-    for (int i0=exLBound[0]; i0<=exUBound[0]; ++i0) {
-      printf("%f, ", srcfieldptr[p]);
-      p++;
-    }
-  }
-  printf("]\n");
-  printf("ESMCI:srcfield mem address = %p\n", fieldpsrc);
-#endif
-
-
     rc = ESMF_SUCCESS;
     return rc;
   }
