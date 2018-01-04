@@ -852,7 +852,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   transposeRoutehandle, rc)
 !
 ! !ARGUMENTS:
-!   type(ESMF_Array),          intent(in)              :: srcArray
+!   type(ESMF_Array),          intent(inout)           :: srcArray
 !   type(ESMF_Array),          intent(inout)           :: dstArray
 !   type(ESMF_RouteHandle),    intent(inout)           :: routehandle
 !   <type>(ESMF_KIND_<kind>), target, intent(in)       :: factorList(:)
@@ -938,7 +938,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   \begin{description}
 !
 !   \item [srcArray]
-!     {\tt ESMF\_Array} with source data.
+!     {\tt ESMF\_Array} with source data. The data in this Array may be
+!     destroyed by this call, {\em if and only if} the 
+!     {\tt transposeRoutehandle} argument was specified.
 !
 !   \item [dstArray]
 !     {\tt ESMF\_Array} with destination data. The data in this Array may be
@@ -1070,7 +1072,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     pipelineDepth, transposeRoutehandle, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_Array),              intent(in)              :: srcArray
+    type(ESMF_Array),              intent(inout)           :: srcArray
     type(ESMF_Array),              intent(inout)           :: dstArray
     type(ESMF_RouteHandle),        intent(inout)           :: routehandle
     integer(ESMF_KIND_I4), target, intent(in)              :: factorList(:)
@@ -1189,7 +1191,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     pipelineDepth, transposeRoutehandle, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_Array),              intent(in)              :: srcArray
+    type(ESMF_Array),              intent(inout)           :: srcArray
     type(ESMF_Array),              intent(inout)           :: dstArray
     type(ESMF_RouteHandle),        intent(inout)           :: routehandle
     integer(ESMF_KIND_I8), target, intent(in)              :: factorList(:)
@@ -1308,7 +1310,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     pipelineDepth, transposeRoutehandle, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_Array),           intent(in)              :: srcArray
+    type(ESMF_Array),           intent(inout)           :: srcArray
     type(ESMF_Array),           intent(inout)           :: dstArray
     type(ESMF_RouteHandle),     intent(inout)           :: routehandle
     real(ESMF_KIND_R4), target, intent(in)              :: factorList(:)
@@ -1427,7 +1429,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     pipelineDepth, transposeRoutehandle, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_Array),           intent(in)              :: srcArray
+    type(ESMF_Array),           intent(inout)           :: srcArray
     type(ESMF_Array),           intent(inout)           :: dstArray
     type(ESMF_RouteHandle),     intent(inout)           :: routehandle
     real(ESMF_KIND_R8), target, intent(in)              :: factorList(:)
@@ -1557,7 +1559,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     pipelineDepth, transposeRoutehandle, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_Array),              intent(in)              :: srcArray
+    type(ESMF_Array),              intent(inout)           :: srcArray
     type(ESMF_Array),              intent(inout)           :: dstArray
     type(ESMF_RouteHandle),        intent(inout)           :: routehandle
     integer(ESMF_KIND_I4), target, intent(in)              :: factorList(:)
@@ -1676,7 +1678,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     pipelineDepth, transposeRoutehandle, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_Array),              intent(in)              :: srcArray
+    type(ESMF_Array),              intent(inout)           :: srcArray
     type(ESMF_Array),              intent(inout)           :: dstArray
     type(ESMF_RouteHandle),        intent(inout)           :: routehandle
     integer(ESMF_KIND_I8), target, intent(in)              :: factorList(:)
@@ -1795,7 +1797,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     pipelineDepth, transposeRoutehandle, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_Array),           intent(in)              :: srcArray
+    type(ESMF_Array),           intent(inout)           :: srcArray
     type(ESMF_Array),           intent(inout)           :: dstArray
     type(ESMF_RouteHandle),     intent(inout)           :: routehandle
     real(ESMF_KIND_R4), target, intent(in)              :: factorList(:)
@@ -1914,7 +1916,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     pipelineDepth, transposeRoutehandle, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_Array),           intent(in)              :: srcArray
+    type(ESMF_Array),           intent(inout)           :: srcArray
     type(ESMF_Array),           intent(inout)           :: dstArray
     type(ESMF_RouteHandle),     intent(inout)           :: routehandle
     real(ESMF_KIND_R8), target, intent(in)              :: factorList(:)
@@ -2033,7 +2035,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     transposeRoutehandle, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_Array),       intent(in)              :: srcArray
+    type(ESMF_Array),       intent(inout)           :: srcArray
     type(ESMF_Array),       intent(inout)           :: dstArray
     type(ESMF_RouteHandle), intent(inout)           :: routehandle
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
@@ -2113,7 +2115,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   \begin{description}
 !
 !   \item [srcArray]
-!     {\tt ESMF\_Array} with source data.
+!     {\tt ESMF\_Array} with source data. The data in this Array may be
+!     destroyed by this call, {\em if and only if} the 
+!     {\tt transposeRoutehandle} argument was specified.
 !
 !   \item [dstArray]
 !     {\tt ESMF\_Array} with destination data. The data in this Array may be
@@ -2255,7 +2259,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     srcTermProcessing, pipelineDepth, transposeRoutehandle, rc)
 
 ! ! ARGUMENTS:
-    type(ESMF_Array),       intent(in)              :: srcArray
+    type(ESMF_Array),       intent(inout)           :: srcArray
     type(ESMF_Array),       intent(inout)           :: dstArray
     character(len=*),       intent(in)              :: filename
     type(ESMF_RouteHandle), intent(inout)           :: routehandle
@@ -2275,7 +2279,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \begin{description}
 !
 ! \item [srcArray]
-!       {\tt ESMF\_Array} with source data.
+!     {\tt ESMF\_Array} with source data. The data in this Array may be
+!     destroyed by this call, {\em if and only if} the 
+!     {\tt transposeRoutehandle} argument was specified.
 !
 ! \item [dstArray]
 !       {\tt ESMF\_Array} with destination data. The data in this Array may be
