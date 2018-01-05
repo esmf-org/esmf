@@ -1160,6 +1160,10 @@ subroutine f_esmf_fieldcollectgarbage(field, rc)
     rc = ESMF_RC_NOT_IMPL
     localrc = ESMF_RC_NOT_IMPL
     
+    ! It is okay to pass routehandle, and transposeRoutehandle directly down into
+    ! ESMF_FieldSMMStore() interface, because that routine does NOT look at the
+    ! initializers of the RouteHandle objects. It basically hands the C pointer 
+    ! straight down to the C++ layer where it is then actually used.
     call ESMF_FieldSMMStore(srcField, dstField, &
                             filename, routehandle, &
                             ignoreUnmatchedIndices=ignoreUnmatchedIndices, &
@@ -1167,7 +1171,6 @@ subroutine f_esmf_fieldcollectgarbage(field, rc)
                             pipeLineDepth=pipeLineDepth, &
                             transposeRoutehandle=transposeRoutehandle, &
                             rc=localrc)
-
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 

@@ -530,7 +530,7 @@ int ESMC_FieldGetBounds(ESMC_Field field,
 
     // typecase into ESMCI type
     ESMCI::RouteHandle *routehandlep = reinterpret_cast<ESMCI::RouteHandle *>(routehandle->ptr);
-
+    
     // Invoke the C++ interface
     localrc = ESMCI::Field::regridrelease(routehandlep);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
@@ -550,38 +550,37 @@ int ESMC_FieldGetBounds(ESMC_Field field,
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_FieldSMMStore()"
   int ESMC_FieldSMMStore(ESMC_Field srcField, ESMC_Field dstField,
-                            const char *filename, ESMC_RouteHandle *routehandle,
-                            ESMC_Logical *ignoreUnmatchedIndices,
-                            int *srcTermProcessing, int *pipeLineDepth,
-                            ESMC_RouteHandle *transposeRoutehandle){
+                         const char *filename, ESMC_RouteHandle *routehandle,
+                         ESMC_Logical *ignoreUnmatchedIndices,
+                         int *srcTermProcessing, int *pipeLineDepth,
+                         ESMC_RouteHandle *transposeRoutehandle){
 
     // Initialize return code. Assume routine not implemented
     int rc = ESMF_RC_NOT_IMPL;
     int localrc = ESMC_RC_NOT_IMPL;
 
-    /*ESMCI::RouteHandle *rhPtr, *trhPtr;
-    rhPtr=NULL; trhPtr=NULL;*/
-
     // typecast Fields into ESMCI type
     ESMCI::Field *fieldpsrc = reinterpret_cast<ESMCI::Field *>(srcField.ptr);
     ESMCI::Field *fieldpdst = reinterpret_cast<ESMCI::Field *>(dstField.ptr);
 
-    ESMCI::RouteHandle *routehandlep = reinterpret_cast<ESMCI::RouteHandle *>(routehandle->ptr);
-    ESMCI::RouteHandle *troutehandlep = reinterpret_cast<ESMCI::RouteHandle *>(transposeRoutehandle->ptr);
+    // ensure routehandle object is present    
+    if (routehandle==NULL){
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
+        "Not a valid pointer to routehandle argument", ESMC_CONTEXT, &rc);
+      return rc;  // bail out
+    }
+    ESMCI::RouteHandle **routehandlep = (ESMCI::RouteHandle **) &(routehandle->ptr);
+
+    // deal with fact that transposeRoutehandle may be absent
+    ESMCI::RouteHandle **troutehandlep = NULL;   // default: not present 
+    if (transposeRoutehandle != NULL)
+      troutehandlep = (ESMCI::RouteHandle **) &(transposeRoutehandle->ptr);
 
     // Invoke the C++ interface
-    localrc = ESMCI::Field::smmstore(fieldpsrc, fieldpdst, filename, &routehandlep,
-        ignoreUnmatchedIndices, srcTermProcessing, pipeLineDepth, &troutehandlep);
+    localrc = ESMCI::Field::smmstore(fieldpsrc, fieldpdst, filename, routehandlep,
+        ignoreUnmatchedIndices, srcTermProcessing, pipeLineDepth, troutehandlep);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       &rc)) return rc;  // bail out
-
-    // return rhPtr in routehandle argument
-    /*routehandle->ptr = NULL;
-    routehandle->ptr = (void *)rhPtr;
-    if (transposeRoutehandle) {
-      transposeRoutehandle->ptr = NULL;
-      transposeRoutehandle->ptr = (void *)trhPtr;
-    }*/
 
     // return successfully
     rc = ESMF_SUCCESS;
