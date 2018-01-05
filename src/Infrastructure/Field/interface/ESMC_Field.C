@@ -559,26 +559,29 @@ int ESMC_FieldGetBounds(ESMC_Field field,
     int rc = ESMF_RC_NOT_IMPL;
     int localrc = ESMC_RC_NOT_IMPL;
 
-    ESMCI::RouteHandle *rhPtr, *trhPtr;
-    rhPtr=NULL; trhPtr=NULL;
+    /*ESMCI::RouteHandle *rhPtr, *trhPtr;
+    rhPtr=NULL; trhPtr=NULL;*/
 
     // typecast Fields into ESMCI type
     ESMCI::Field *fieldpsrc = reinterpret_cast<ESMCI::Field *>(srcField.ptr);
     ESMCI::Field *fieldpdst = reinterpret_cast<ESMCI::Field *>(dstField.ptr);
 
+    ESMCI::RouteHandle *routehandlep = reinterpret_cast<ESMCI::RouteHandle *>(routehandle->ptr);
+    ESMCI::RouteHandle *troutehandlep = reinterpret_cast<ESMCI::RouteHandle *>(transposeRoutehandle->ptr);
+
     // Invoke the C++ interface
-    localrc = ESMCI::Field::smmstore(fieldpsrc, fieldpdst, filename, &rhPtr,
-        ignoreUnmatchedIndices, srcTermProcessing, pipeLineDepth, &trhPtr);
+    localrc = ESMCI::Field::smmstore(fieldpsrc, fieldpdst, filename, &routehandlep,
+        ignoreUnmatchedIndices, srcTermProcessing, pipeLineDepth, &troutehandlep);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       &rc)) return rc;  // bail out
 
     // return rhPtr in routehandle argument
-    routehandle->ptr = NULL;
+    /*routehandle->ptr = NULL;
     routehandle->ptr = (void *)rhPtr;
     if (transposeRoutehandle) {
       transposeRoutehandle->ptr = NULL;
       transposeRoutehandle->ptr = (void *)trhPtr;
-    }
+    }*/
 
     // return successfully
     rc = ESMF_SUCCESS;
