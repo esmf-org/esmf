@@ -296,7 +296,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !        transposeRoutehandle, rc)
 ! 
 ! !ARGUMENTS: 
-!   type(ESMF_Field),         intent(in)              :: srcField  
+!   type(ESMF_Field),         intent(inout)           :: srcField  
 !   type(ESMF_Field),         intent(inout)           :: dstField  
 !   type(ESMF_RouteHandle),   intent(inout)           :: routehandle
 !   <type>(ESMF_KIND_<kind>), intent(in)              :: factorList(:) 
@@ -387,7 +387,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \begin{description}
 !
 ! \item [srcField]
-!       {\tt ESMF\_Field} with source data.
+!       {\tt ESMF\_Field} with source data. The data in this Array may be
+!     destroyed by this call, {\em if and only if} the 
+!     {\tt transposeRoutehandle} argument was specified.
 !
 ! \item [dstField]
 !       {\tt ESMF\_Field} with destination data. The data in this Field may be
@@ -520,7 +522,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         transposeRoutehandle, pipeLineDepth, rc) 
 
         ! input arguments 
-        type(ESMF_Field),       intent(in)              :: srcField  
+        type(ESMF_Field),       intent(inout)           :: srcField  
         type(ESMF_Field),       intent(inout)           :: dstField  
         type(ESMF_RouteHandle), intent(inout)           :: routehandle
         integer(ESMF_KIND_I4),  intent(in)              :: factorList(:)
@@ -588,7 +590,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         transposeRoutehandle, pipeLineDepth, rc)
 
         ! input arguments 
-        type(ESMF_Field),       intent(in)              :: srcField  
+        type(ESMF_Field),       intent(inout)           :: srcField  
         type(ESMF_Field),       intent(inout)           :: dstField  
         type(ESMF_RouteHandle), intent(inout)           :: routehandle
         integer(ESMF_KIND_I8),  intent(in)              :: factorList(:)
@@ -656,7 +658,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         transposeRoutehandle, pipeLineDepth, rc)
 
         ! input arguments 
-        type(ESMF_Field),       intent(in)              :: srcField  
+        type(ESMF_Field),       intent(inout)           :: srcField  
         type(ESMF_Field),       intent(inout)           :: dstField  
         type(ESMF_RouteHandle), intent(inout)           :: routehandle
         real(ESMF_KIND_R4),     intent(in)              :: factorList(:)
@@ -724,7 +726,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         transposeRoutehandle, pipeLineDepth, rc)
 
         ! input arguments 
-        type(ESMF_Field),       intent(in)              :: srcField  
+        type(ESMF_Field),       intent(inout)           :: srcField  
         type(ESMF_Field),       intent(inout)           :: dstField  
         type(ESMF_RouteHandle), intent(inout)           :: routehandle
         real(ESMF_KIND_R8),     intent(in)              :: factorList(:)
@@ -792,7 +794,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         srcTermProcessing, pipelineDepth, transposeRoutehandle, rc)
 !
 ! !ARGUMENTS:
-        type(ESMF_Field),       intent(in)              :: srcField  
+        type(ESMF_Field),       intent(inout)           :: srcField  
         type(ESMF_Field),       intent(inout)           :: dstField  
         type(ESMF_RouteHandle), intent(inout)           :: routehandle
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
@@ -1018,7 +1020,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       srcTermProcessing, pipelineDepth, transposeRoutehandle, rc)
 
 ! ! ARGUMENTS:
-      type(ESMF_Field),       intent(in)              :: srcField
+      type(ESMF_Field),       intent(inout)           :: srcField  
       type(ESMF_Field),       intent(inout)           :: dstField
       character(len=*),       intent(in)              :: filename
       type(ESMF_RouteHandle), intent(inout)           :: routehandle
@@ -1038,7 +1040,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \begin{description}
 !
 ! \item [srcField]
-!       {\tt ESMF\_Field} with source data.
+!       {\tt ESMF\_Field} with source data. The data in this Array may be
+!       destroyed by this call, {\em if and only if} the 
+!       {\tt transposeRoutehandle} argument was specified.
 !
 ! \item [dstField]
 !       {\tt ESMF\_Field} with destination data. The data in this Field may be
