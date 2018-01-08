@@ -74,7 +74,11 @@ program ESMF_DistGridCreateGetUTest
   logical:: distgridBool
   integer:: connectionCount
   type(ESMF_DistGridConnection), allocatable:: connectionList(:)
-
+#ifdef ESMF_TESTEXHAUSTIVE
+  character(ESMF_MAXSTR) :: msgString
+  integer(ESMF_KIND_I8), allocatable:: arbSeqIndexListI8(:)
+  integer(ESMF_KIND_I8) :: totalArbIndices, perPetArbIndices, localStartI8, ii
+#endif
 
   character, allocatable :: buffer(:)
   integer :: buff_len, offset
@@ -891,6 +895,39 @@ program ESMF_DistGridCreateGetUTest
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_DistGridDestroy(distgrid, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  
+#ifdef ESMF_TESTEXHAUSTIVE
+  
+  !------------------------------------------------------------------------
+  !EX_UTest_Multi_Proc_Only
+  write(name, *) "DistGridCreate() - 1D arbitrary I8 seq indices 1DE/PET case"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+#ifdef ABOVE_32BIT_LIMIT
+  totalArbIndices = 2_ESMF_KIND_I8**32  ! well over the (2^31-1) 32-bit limit
+#else
+  totalArbIndices = 2_ESMF_KIND_I8**20  ! well below the (2^31-1) 32-bit limit
+#endif
+  perPetArbIndices = totalArbIndices / petCount
+  write(msgString,*) "totalArbIndices=", totalArbIndices, &
+    "  perPetArbIndices=", perPetArbIndices
+  call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+  localStartI8 = localPet*perPetArbIndices
+  allocate(arbSeqIndexListI8(perPetArbIndices))
+  do ii=1,perPetArbIndices
+    arbSeqIndexListI8(ii)=localStartI8+ii
+  enddo
+  distgrid = ESMF_DistGridCreate(arbSeqIndexList=arbSeqIndexListI8, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  deallocate(arbSeqIndexListI8)
+
+  !------------------------------------------------------------------------
+  !EX_UTest_Multi_Proc_Only
+  write(name, *) "DistGridDestroy()"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_DistGridDestroy(distgrid, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  
+#endif
   
   !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
