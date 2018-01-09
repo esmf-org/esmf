@@ -57,18 +57,23 @@ namespace ESMCI {
   class DistGrid : public ESMC_Base {    // inherits from ESMC_Base class
 
    private:
-    ESMC_TypeKind_Flag indexTK;   // integer kind for indexing, default I4
+    ESMC_TypeKind_Flag indexTK;   // integer kind for sequence index
+    ESMC_TypeKind_Flag indexSpaceTK; // integer kind for index space
     int dimCount;                 // rank of DistGrid
     int tileCount;                // number of tiles in DistGrid
+    void *minIndexPDimPTileTK;       // lower corner indices [dimCount*tileCount]
+    void *maxIndexPDimPTileTK;       // upper corner indices [dimCount*tileCount]
     int *minIndexPDimPTile;       // lower corner indices [dimCount*tileCount]
     int *maxIndexPDimPTile;       // upper corner indices [dimCount*tileCount]
     ESMC_I8 *elementCountPTile;   // number of elements [tileCount]
+    void *minIndexPDimPDeTK;         // lower corner indices [dimCount*deCount]
+    void *maxIndexPDimPDeTK;         // upper corner indices [dimCount*deCount]
     int *minIndexPDimPDe;         // lower corner indices [dimCount*deCount]
     int *maxIndexPDimPDe;         // upper corner indices [dimCount*deCount]
     ESMC_I8 *elementCountPDe;     // number of elements [deCount]
     int *tileListPDe;             // tile indices [deCount]
     int *contigFlagPDimPDe;       // flag contiguous indices [dimCount*deCount]
-    int *indexCountPDimPDe;       // number of indices [dimCount*deCount]
+    ESMC_I8 *indexCountPDimPDe;   // number of indices [dimCount*deCount]
     int **indexListPDimPLocalDe;  // local DEs' indices [dimCount*localDeCount]
                                   // [indexCountPDimPDe(localDe,dim)]
     int connectionCount;          // number of elements in connection list
@@ -114,9 +119,10 @@ namespace ESMCI {
     
    private:
     // construct() and destruct()
-    int construct(int dimCount, int tileCount, int *deTileList,
-      int *minIndex, int *maxIndex, int *minIndexPDimPDe, int *maxIndexPDimPDe,
-      int *contigFlagPDimPDe, int *indexCountPDimPDe, int **indexList,
+    template <typename T> int construct(int dimCount, int tileCount, 
+      int *deTileList,
+      T *minIndex, T *maxIndex, T *minIndexPDimPDe, T *maxIndexPDimPDe,
+      int *contigFlagPDimPDe, ESMC_I8 *indexCountPDimPDe, int **indexList,
       int *regDecompArg, InterArray<int> *connectionList,
       Decomp_Flag const *decompflagArg, ESMC_IndexFlag *indexflagArg,
       DELayout *delayout, bool delayoutCreator, VM *vm, 
@@ -137,8 +143,8 @@ namespace ESMCI {
       InterArray<int> *connectionList,
       DELayout *delayout=NULL, VM *vm=NULL, int *rc=NULL,
       ESMC_TypeKind_Flag indexTK=ESMF_NOKIND);
-    static DistGrid *create(InterArray<int> *minIndex,
-      InterArray<int> *maxIndex, InterArray<int> *deBlockList, 
+    template<typename T> static DistGrid *create(InterArray<T> *minIndex,
+      InterArray<T> *maxIndex, InterArray<T> *deBlockList, 
       InterArray<int> *deLabelList, ESMC_IndexFlag *indexflag, 
       InterArray<int> *connectionList,
       DELayout *delayout=NULL, VM *vm=NULL, int *rc=NULL,
@@ -185,7 +191,7 @@ namespace ESMCI {
     int const *getTileListPDe() const {return tileListPDe;}
     int const *getContigFlagPDimPDe() const {return contigFlagPDimPDe;}
     int getContigFlagPDimPDe(int de, int dim, int *rc) const;
-    int const *getIndexCountPDimPDe() const {return indexCountPDimPDe;}
+    ESMC_I8 const *getIndexCountPDimPDe() const {return indexCountPDimPDe;}
     int const *getIndexListPDimPLocalDe(int localDe, int dim, int *rc=NULL)
       const;
     int getConnectionCount() const {return connectionCount;}

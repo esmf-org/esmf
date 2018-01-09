@@ -173,6 +173,7 @@ module ESMF_DistGridMod
     module procedure ESMF_DistGridCreateRDF
     module procedure ESMF_DistGridCreateRDTF
     module procedure ESMF_DistGridCreateDB
+    module procedure ESMF_DistGridCreateDBI8
     module procedure ESMF_DistGridCreateDBT
     module procedure ESMF_DistGridCreateDBF
     module procedure ESMF_DistGridCreateDBTF
@@ -1414,7 +1415,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                        intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!     Create an {\tt ESMF\_DistGrid} from a single logically rectangular (LR) 
+!     Create an {\tt ESMF\_DistGrid} from a single logically rectangular 
 !     tile with regular decomposition. A regular
 !     decomposition is of the same rank as the tile and decomposes
 !     each dimension into a fixed number of DEs. A regular decomposition of a
@@ -1621,7 +1622,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !DESCRIPTION:
 !     Create an {\tt ESMF\_DistGrid} on multiple logically 
-!     rectangular (LR) tiles with regular decomposition. A regular
+!     rectangular tiles with regular decomposition. A regular
 !     decomposition is of the same rank as the tile and decomposes
 !     each dimension into a fixed number of DEs. A regular decomposition of a
 !     multi-tile DistGrid is expressed by a list of DE count vectors, one
@@ -1781,7 +1782,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !DESCRIPTION:
 !     \begin{sloppypar}
-!     Create an {\tt ESMF\_DistGrid} from a single logically rectangular (LR) 
+!     Create an {\tt ESMF\_DistGrid} from a single logically rectangular 
 !     tile with decomposition specified by {\tt deBlockList}.
 !     \end{sloppypar}
 !
@@ -1922,6 +1923,175 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_DistGridCreateDBI8()"
+!BOP
+! !IROUTINE: ESMF_DistGridCreate - Create DistGrid object with DE block
+
+! !INTERFACE:
+  ! Private name; call using ESMF_DistGridCreate()
+  function ESMF_DistGridCreateDBI8(minIndex, maxIndex, deBlockList, &
+    keywordEnforcer, deLabelList, indexflag, connectionList, delayout, vm, &
+    indexTK, rc)
+!         
+! !RETURN VALUE:
+    type(ESMF_DistGrid) :: ESMF_DistGridCreateDBI8
+!
+! !ARGUMENTS:
+    integer(ESMF_KIND_I8),         intent(in)            :: minIndex(:)
+    integer(ESMF_KIND_I8),         intent(in)            :: maxIndex(:)
+    integer(ESMF_KIND_I8),         intent(in)            :: deBlockList(:,:,:)
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    integer,                       intent(in),  optional :: deLabelList(:)
+    type(ESMF_Index_Flag),         intent(in),  optional :: indexflag
+    type(ESMF_DistGridConnection), intent(in),  optional :: connectionList(:)
+    type(ESMF_DELayout),           intent(in),  optional :: delayout
+    type(ESMF_VM),                 intent(in),  optional :: vm
+    type(ESMF_TypeKind_Flag),      intent(in),  optional :: indexTK
+    integer,                       intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!     \begin{sloppypar}
+!     Create an {\tt ESMF\_DistGrid} from a single logically rectangular 
+!     tile with decomposition specified by {\tt deBlockList}.
+!     \end{sloppypar}
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[minIndex]
+!          Global coordinate tuple of the lower corner of the tile.
+!     \item[maxIndex]
+!          Global coordinate tuple of the upper corner of the tile.
+!     \item[deBlockList]
+!          List of DE-local LR blocks. The third index of {\tt deBlockList}
+!          steps through the deBlock elements, which are defined by the first
+!          two indices. The first index must be of size {\tt dimCount} and the 
+!          second index must be of size 2. Each 2D element of {\tt deBlockList}
+!          defined by the first two indices hold the following information.
+!          \begin{verbatim}
+!                   +---------------------------------------> 2nd index
+!                   |    1               2           
+!                   | 1  minIndex(1)    maxIndex(1)
+!                   | 2  minIndex(2)    maxIndex(2)
+!                   | .  minIndex(.)    maxIndex(.)
+!                   | .
+!                   v
+!                  1st index
+!          \end{verbatim}
+!          It is required that there be no overlap between the LR segments
+!          defined by deBlockList.
+!     \item[{[deLabelList]}]
+!          List assigning DE labels to the default sequence of DEs. The default
+!          sequence is given by the order of DEs in the {\tt deBlockList} 
+!          argument.
+!     \item[{[indexflag]}]
+!          Indicates whether the indices provided by the {\tt minIndex} and
+!          {\tt maxIndex} arguments are forming a global
+!          index space or not. This does {\em not} affect the indices held
+!          by the DistGrid object, which are always identical to what was
+!          specified by {\tt minIndex} and {\tt maxIndex}, regardless of the
+!          {\tt indexflag} setting. However, it does affect whether an
+!          {\tt ESMF\_Array} object created on the DistGrid can choose global
+!          indexing or not. The default is {\tt ESMF\_INDEX\_DELOCAL}.
+!          See section \ref{const:indexflag} for a complete list of options.
+!     \item[{[connectionList]}]
+!          List of {\tt ESMF\_DistGridConnection} objects, defining connections
+!          between DistGrid tiles in index space.
+!          See section \ref{api:DistGridConnectionSet} for the associated Set()
+!          method.
+!     \item[{[delayout]}]
+!          Optional {\tt ESMF\_DELayout} object to be used. By default a new
+!          DELayout object will be created with the correct number of DEs. If
+!          a DELayout object is specified its number of DEs must match the 
+!          number indicated by {\tt regDecomp}.
+!     \item[{[vm]}]
+!          Optional {\tt ESMF\_VM} object of the current context. Providing the
+!          VM of the current context will lower the method's overhead.
+!     \item[{[indexTK]}]
+!          Typekind used for indexing. See section \ref{const:typekind} for a
+!          list of typekind options. Only integer types are supported. The 
+!          default is {\tt ESMF\_TYPEKIND\_I4}, i.e. 32-bit indexing.
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+!------------------------------------------------------------------------------
+    integer               :: localrc      ! local return code
+    type(ESMF_DistGrid)   :: distgrid     ! opaque pointer to new C++ DistGrid
+    type(ESMF_InterArray) :: minIndexAux  ! helper variable
+    type(ESMF_InterArray) :: maxIndexAux  ! helper variable
+    type(ESMF_InterArray) :: deBlockListAux ! helper variable
+    type(ESMF_InterArray) :: deLabelListAux ! helper variable
+    type(ESMF_InterArray) :: connectionListAux ! helper variable
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+    
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_DELayoutGetInit, delayout, rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
+    
+    ! Deal with (optional) array arguments
+    minIndexAux = ESMF_InterArrayCreate(farray1DI8=minIndex, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    maxIndexAux = ESMF_InterArrayCreate(farray1DI8=maxIndex, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    deBlockListAux = ESMF_InterArrayCreate(farray3DI8=deBlockList, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    deLabelListAux = ESMF_InterArrayCreate(deLabelList, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    connectionListAux = ESMF_InterArrayCreateDGConn(connectionList, &
+      rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! Mark this DistGrid as invalid
+    distgrid%this = ESMF_NULL_POINTER
+
+    ! call into the C++ interface, which will sort out optional arguments
+    call c_ESMC_DistGridCreateDBI8(distgrid, minIndexAux, maxIndexAux, &
+      deBlockListAux, deLabelListAux, indexflag, &
+      connectionListAux, delayout, vm, indexTK, localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+      
+    ! garbage collection
+    call ESMF_InterArrayDestroy(minIndexAux, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_InterArrayDestroy(maxIndexAux, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_InterArrayDestroy(deBlockListAux, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_InterArrayDestroy(deLabelListAux, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_InterArrayDestroy(connectionListAux, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    
+    ! Set return value
+    ESMF_DistGridCreateDBI8 = distgrid 
+ 
+    ! Set init code
+    ESMF_INIT_SET_CREATED(ESMF_DistGridCreateDBI8)
+ 
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+ 
+  end function ESMF_DistGridCreateDBI8
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_DistGridCreateDBT()"
 !BOPI
 ! !IROUTINE: ESMF_DistGridCreate - Create DistGrid object on multiple tiles with regular decomposition
@@ -1947,7 +2117,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !DESCRIPTION:
 !     Create an {\tt ESMF\_DistGrid} on multiple logically 
-!     rectangular (LR) tiles with regular decomposition. A regular
+!     rectangular tiles with regular decomposition. A regular
 !     decomposition is of the same rank as the tile and decomposes
 !     each dimension into a fixed number of DEs. A regular decomposition of a
 !     multi-tile DistGrid is expressed by a list of DE count vectors, one
@@ -2099,7 +2269,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                       intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!     Create an {\tt ESMF\_DistGrid} from a single logically rectangular (LR) 
+!     Create an {\tt ESMF\_DistGrid} from a single logically rectangular 
 !     tile with decomposition specified by {\tt deBlockList}.
 !
 !     The arguments are:
@@ -2245,7 +2415,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !DESCRIPTION:
 !     Create an {\tt ESMF\_DistGrid} on multiple logically 
-!     rectangular (LR) tiles with decomposition specified by {\tt deBlockList}.
+!     rectangular tiles with decomposition specified by {\tt deBlockList}.
 !
 !     The arguments are:
 !     \begin{description}
@@ -2524,19 +2694,21 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !EOP
 !------------------------------------------------------------------------------
 
-!TODO: deBlockList setup must also use I8!!!!
-
     integer                 :: localrc      ! local return code
     type(ESMF_DistGrid)     :: distgrid     ! opaque pointer to new C++ DistGrid
     type(ESMF_VM)           :: vm           ! opaque pointer to VM object
     type(ESMF_InterArray)   :: indicesAux   ! index helper
-    integer                 :: localSize(1) ! number of local indices
-    integer, allocatable    :: globalSizes(:)  ! array of all sizes
-    integer                 :: petCount        ! num pets
+    integer(ESMF_KIND_I8)   :: localSize(1) ! number of local indices
+    integer(ESMF_KIND_I8), allocatable  :: globalSizes(:)  ! array of all sizes
+    integer                 :: petCount, i
+    integer(ESMF_KIND_I8)   :: csum
     integer, allocatable    :: deblock(:,:,:)  ! Array of sizes
-    integer                 :: i, csum         ! loop variable
     integer                 :: minC(1), maxC(1)! min/max corner
-
+    integer(ESMF_KIND_I8), allocatable  :: deblockI8(:,:,:)  ! Array of sizes
+    integer(ESMF_KIND_I8)   :: minCI8(1), maxCI8(1)! min/max corner
+    logical                 :: needI8
+    integer(ESMF_KIND_I8)   :: limit = 2**31-1  ! 32-bit limit
+    
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -2559,24 +2731,42 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! set up the deblocks
-    allocate(deblock(1,2,petCount))
+    allocate(deblockI8(1,2,petCount))
     csum = 0
+    needI8 = .false.
     do i=1,petCount
-      deblock(1,1,i) = csum + 1 ! min
+      deblockI8(1,1,i) = csum + 1 ! min
       csum = csum + globalSizes(i)
-      deblock(1,2,i) = csum     ! max
+      deblockI8(1,2,i) = csum     ! max
+      if (deblockI8(1,1,i) > limit) needI8 = .true.
+      if (deblockI8(1,2,i) > limit) needI8 = .true.
     enddo
-
+    
     ! create fitting DistGrid
-    minC(1) = deblock(1,1,1)
-    maxC(1) = deblock(1,2,petCount)
-    distgrid = ESMF_DistGridCreate(minC, maxC, deBlockList=deblock, &
-      indexTK=ESMF_TYPEKIND_I8, rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
+    if (needI8) then
+      minCI8(1) = deblockI8(1,1,1)
+      maxCI8(1) = deblockI8(1,2,petCount)
+      distgrid = ESMF_DistGridCreate(minCI8, maxCI8, deBlockList=deblockI8, &
+        indexTK=ESMF_TYPEKIND_I8, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    else
+      allocate(deblock(1,2,petCount))
+      do i=1,petCount
+        deblock(1,1,i) = deblockI8(1,1,i)
+        deblock(1,2,i) = deblockI8(1,2,i)
+      enddo
+      minC(1) = deblock(1,1,1)
+      maxC(1) = deblock(1,2,petCount)
+      distgrid = ESMF_DistGridCreate(minC, maxC, deBlockList=deblock, &
+        indexTK=ESMF_TYPEKIND_I8, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+      deallocate(deblock)
+    endif
 
     ! garbage collection
-    deallocate(deblock)
+    deallocate(deblockI8)
     deallocate(globalSizes)
     
     ! set return value

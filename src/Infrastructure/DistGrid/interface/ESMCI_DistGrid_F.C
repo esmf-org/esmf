@@ -205,7 +205,39 @@ extern "C" {
     if (ESMC_NOT_PRESENT_FILTER(vm) == ESMC_NULL_POINTER) opt_vm = NULL;
     else opt_vm = *vm;
     if (ESMC_NOT_PRESENT_FILTER(indexTK) == ESMC_NULL_POINTER) 
-      opt_indexTK = ESMC_TYPEKIND_I4;
+      opt_indexTK = ESMF_NOKIND;
+    else opt_indexTK = *indexTK;
+    // call into C++
+    *ptr = ESMCI::DistGrid::create(minIndex, maxIndex, deBlockList,
+      deLabelList, ESMC_NOT_PRESENT_FILTER(indexflag),
+      connectionList, opt_delayout, opt_vm, &localrc, opt_indexTK);
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+      ESMC_CONTEXT, ESMC_NOT_PRESENT_FILTER(rc));
+  }
+  
+  void FTN_X(c_esmc_distgridcreatedbi8)(ESMCI::DistGrid **ptr, 
+    ESMCI::InterArray<ESMC_I8> *minIndex, ESMCI::InterArray<ESMC_I8> *maxIndex,
+    ESMCI::InterArray<ESMC_I8> *deBlockList,
+    ESMCI::InterArray<int> *deLabelList, ESMC_IndexFlag *indexflag, 
+    ESMCI::InterArray<int> *connectionList,
+    ESMCI::DELayout **delayout, ESMCI::VM **vm, ESMC_TypeKind_Flag *indexTK, 
+    int *rc){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_distgridcreatedbi8()"
+    // Initialize return code; assume routine not implemented
+    if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+    int localrc = ESMC_RC_NOT_IMPL;
+    ESMCI::DELayout *opt_delayout;
+    ESMCI::VM *opt_vm;
+    ESMC_TypeKind_Flag opt_indexTK;
+    // deal with optional arguments
+    if (ESMC_NOT_PRESENT_FILTER(delayout) == ESMC_NULL_POINTER) 
+      opt_delayout = NULL;
+    else opt_delayout = *delayout;
+    if (ESMC_NOT_PRESENT_FILTER(vm) == ESMC_NULL_POINTER) opt_vm = NULL;
+    else opt_vm = *vm;
+    if (ESMC_NOT_PRESENT_FILTER(indexTK) == ESMC_NULL_POINTER) 
+      opt_indexTK = ESMF_NOKIND;
     else opt_indexTK = *indexTK;
     // call into C++
     *ptr = ESMCI::DistGrid::create(minIndex, maxIndex, deBlockList,

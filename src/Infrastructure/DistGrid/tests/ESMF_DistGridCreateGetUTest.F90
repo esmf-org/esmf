@@ -902,6 +902,7 @@ program ESMF_DistGridCreateGetUTest
   !EX_UTest_Multi_Proc_Only
   write(name, *) "DistGridCreate() - 1D arbitrary I8 seq indices 1DE/PET case"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
+#define ABOVE_32BIT_LIMIT
 #ifdef ABOVE_32BIT_LIMIT
   totalArbIndices = 2_ESMF_KIND_I8**32  ! well over the (2^31-1) 32-bit limit
 #else
