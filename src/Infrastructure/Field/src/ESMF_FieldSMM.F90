@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2017, University Corporation for Atmospheric Research, 
+! Copyright 2002-2018, University Corporation for Atmospheric Research, 
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 ! Laboratory, University of Michigan, National Centers for Environmental 
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -296,7 +296,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !        transposeRoutehandle, rc)
 ! 
 ! !ARGUMENTS: 
-!   type(ESMF_Field),         intent(in)              :: srcField  
+!   type(ESMF_Field),         intent(inout)           :: srcField  
 !   type(ESMF_Field),         intent(inout)           :: dstField  
 !   type(ESMF_RouteHandle),   intent(inout)           :: routehandle
 !   <type>(ESMF_KIND_<kind>), intent(in)              :: factorList(:) 
@@ -387,7 +387,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \begin{description}
 !
 ! \item [srcField]
-!       {\tt ESMF\_Field} with source data.
+!       {\tt ESMF\_Field} with source data. The data in this Array may be
+!     destroyed by this call, {\em if and only if} the 
+!     {\tt transposeRoutehandle} argument was specified.
 !
 ! \item [dstField]
 !       {\tt ESMF\_Field} with destination data. The data in this Field may be
@@ -520,7 +522,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         transposeRoutehandle, pipeLineDepth, rc) 
 
         ! input arguments 
-        type(ESMF_Field),       intent(in)              :: srcField  
+        type(ESMF_Field),       intent(inout)           :: srcField  
         type(ESMF_Field),       intent(inout)           :: dstField  
         type(ESMF_RouteHandle), intent(inout)           :: routehandle
         integer(ESMF_KIND_I4),  intent(in)              :: factorList(:)
@@ -588,7 +590,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         transposeRoutehandle, pipeLineDepth, rc)
 
         ! input arguments 
-        type(ESMF_Field),       intent(in)              :: srcField  
+        type(ESMF_Field),       intent(inout)           :: srcField  
         type(ESMF_Field),       intent(inout)           :: dstField  
         type(ESMF_RouteHandle), intent(inout)           :: routehandle
         integer(ESMF_KIND_I8),  intent(in)              :: factorList(:)
@@ -656,7 +658,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         transposeRoutehandle, pipeLineDepth, rc)
 
         ! input arguments 
-        type(ESMF_Field),       intent(in)              :: srcField  
+        type(ESMF_Field),       intent(inout)           :: srcField  
         type(ESMF_Field),       intent(inout)           :: dstField  
         type(ESMF_RouteHandle), intent(inout)           :: routehandle
         real(ESMF_KIND_R4),     intent(in)              :: factorList(:)
@@ -724,7 +726,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         transposeRoutehandle, pipeLineDepth, rc)
 
         ! input arguments 
-        type(ESMF_Field),       intent(in)              :: srcField  
+        type(ESMF_Field),       intent(inout)           :: srcField  
         type(ESMF_Field),       intent(inout)           :: dstField  
         type(ESMF_RouteHandle), intent(inout)           :: routehandle
         real(ESMF_KIND_R8),     intent(in)              :: factorList(:)
@@ -742,11 +744,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         ! internal local variables 
         integer                                     :: localrc 
         type(ESMF_Array)                            :: srcArray, dstArray   
-
-#define DEBUG 0
-#if DEBUG
-        real(ESMF_KIND_R8), pointer :: src(:,:)
-#endif
 
         ! Initialize return code; assume routine not implemented 
         localrc = ESMF_RC_NOT_IMPL 
@@ -780,13 +777,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             ESMF_ERR_PASSTHRU, & 
             ESMF_CONTEXT, rcToReturn=rc)) return 
 
-#if DEBUG
-      call ESMF_FieldGet(srcField, farrayPtr=src, rc=localrc)
-
-      print *, "ESMF SMM: source field"
-      print *, src
-#endif
-
         if (present(rc)) rc = ESMF_SUCCESS 
     end subroutine ESMF_FieldSMMStoreR8
 !------------------------------------------------------------------------------ 
@@ -804,7 +794,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         srcTermProcessing, pipelineDepth, transposeRoutehandle, rc)
 !
 ! !ARGUMENTS:
-        type(ESMF_Field),       intent(in)              :: srcField  
+        type(ESMF_Field),       intent(inout)           :: srcField  
         type(ESMF_Field),       intent(inout)           :: dstField  
         type(ESMF_RouteHandle), intent(inout)           :: routehandle
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
@@ -1030,7 +1020,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       srcTermProcessing, pipelineDepth, transposeRoutehandle, rc)
 
 ! ! ARGUMENTS:
-      type(ESMF_Field),       intent(in)              :: srcField
+      type(ESMF_Field),       intent(inout)           :: srcField  
       type(ESMF_Field),       intent(inout)           :: dstField
       character(len=*),       intent(in)              :: filename
       type(ESMF_RouteHandle), intent(inout)           :: routehandle
@@ -1050,7 +1040,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \begin{description}
 !
 ! \item [srcField]
-!       {\tt ESMF\_Field} with source data.
+!       {\tt ESMF\_Field} with source data. The data in this Array may be
+!       destroyed by this call, {\em if and only if} the 
+!       {\tt transposeRoutehandle} argument was specified.
 !
 ! \item [dstField]
 !       {\tt ESMF\_Field} with destination data. The data in this Field may be
@@ -1172,14 +1164,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                               rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
-
-#define DEBUG 0
-#if DEBUG
-      call ESMF_FieldGet(srcField, farrayPtr=src, rc=localrc)
-
-      print *, "ESMF: source field"
-      print *, src
-#endif
 
       deallocate(factorList)
       deallocate(factorIndexList)

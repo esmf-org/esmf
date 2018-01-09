@@ -354,7 +354,8 @@ template<typename IT1, typename IT2>
       }
     }else{
       // loop over all elements in the exclusive region for localDe j
-      ArrayElement arrayElement(fillLinSeqVectInfo->array, j, true, false);
+      ArrayElement arrayElement(fillLinSeqVectInfo->array, j, true, false,
+        false);
       while(arrayElement.isWithin()){
         SeqIndex<IT1> seqIndex = arrayElement.getSequenceIndex<IT1>();
         IT1 seqInd = seqIndex.decompSeqIndex;
@@ -421,7 +422,8 @@ template<typename IT1, typename IT2>
       }
     }else{
       // loop over all elements in the exclusive region for localDe j
-      ArrayElement arrayElement(fillLinSeqVectInfo->array, j, true, false);
+      ArrayElement arrayElement(fillLinSeqVectInfo->array, j, true, false,
+        false);
       while(arrayElement.isWithin()){
         SeqIndex<IT1> seqIndex = arrayElement.getSequenceIndex<IT1>();
         IT1 seqInd = seqIndex.decompSeqIndex;
@@ -786,7 +788,7 @@ template<typename IT1, typename IT2>
           }
         }else{
           // loop over all elements in the exclusive region for localDe j
-          ArrayElement arrayElement(array, j, true, false);
+          ArrayElement arrayElement(array, j, true, false, false);
           while(arrayElement.isWithin()){
             SeqIndex<IT> seqIndex = arrayElement.getSequenceIndex<IT>();
             IT seqInd = seqIndex.decompSeqIndex;
@@ -848,7 +850,7 @@ template<typename IT1, typename IT2>
           }
         }else{
           // loop over all elements in the exclusive region for localDe j
-          ArrayElement arrayElement(array, j, true, false);
+          ArrayElement arrayElement(array, j, true, false, false);
           while(arrayElement.isWithin()){
             SeqIndex<IT> seqIndex = arrayElement.getSequenceIndex<IT>();
             IT seqInd = seqIndex.decompSeqIndex;
@@ -1552,7 +1554,7 @@ template<typename SIT, typename DIT> int sparseMatMulStoreLinSeqVect(
   for (int i=0; i<srcLocalDeCount; i++){
     if (srcLocalDeElementCount[i]){
       // there are elements for local DE i
-      ArrayElement arrayElement(srcArray, i, true, false);
+      ArrayElement arrayElement(srcArray, i, true, false, false);
       // loop over all elements in exclusive region for local DE i
       while(arrayElement.isWithin()){
         // determine the sequentialized index for the current Array element
@@ -1642,7 +1644,7 @@ template<typename SIT, typename DIT> int sparseMatMulStoreLinSeqVect(
           }
         }
       }else{
-        ArrayElement arrayElement(dstArray, i, true, false);
+        ArrayElement arrayElement(dstArray, i, true, false, false);
         // loop over all elements in exclusive region for local DE i
         while(arrayElement.isWithin()){
           // determine the sequentialized index for the current Array element
@@ -1796,7 +1798,7 @@ template<typename SIT, typename DIT> int sparseMatMulStoreLinSeqVect(
     int jj=0;
     for (int j=0; j<srcLocalDeCount; j++){
       // loop over all elements in the exclusive region for localDe j
-      ArrayElement arrayElement(srcArray, j, true, false);
+      ArrayElement arrayElement(srcArray, j, true, false, false);
       while(arrayElement.isWithin()){
         SeqIndex<SIT> seqIndex = arrayElement.getSequenceIndex<SIT>();
         seqIndexList[jj] = seqIndex.decompSeqIndex;
@@ -1932,7 +1934,7 @@ template<typename SIT, typename DIT> int sparseMatMulStoreLinSeqVect(
         }
       }else{
         // loop over all elements in the exclusive region for localDe j
-        ArrayElement arrayElement(dstArray, j, true, false);
+        ArrayElement arrayElement(dstArray, j, true, false, false);
         while(arrayElement.isWithin()){
           SeqIndex<DIT> seqIndex = arrayElement.getSequenceIndex<DIT>();
           seqIndexList[jj] = seqIndex.decompSeqIndex;

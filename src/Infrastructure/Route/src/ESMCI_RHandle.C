@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2017, University Corporation for Atmospheric Research, 
+// Copyright 2002-2018, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -458,6 +458,7 @@ int RouteHandle::construct(
 
   srcArray = NULL;
   dstArray = NULL;
+  asPtr = NULL;
 
   return ESMF_SUCCESS;
 }
@@ -503,6 +504,11 @@ int RouteHandle::destruct(
         delete tmp;
         setStorage(NULL, i);
       }
+    }
+    // handle attached state pointer
+    if (asPtr){
+      delete [] asPtr;
+      asPtr = NULL;
     }
   }
 

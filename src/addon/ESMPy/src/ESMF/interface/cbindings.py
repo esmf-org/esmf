@@ -230,6 +230,22 @@ def ESMP_InterfaceIntNDSet(iiptr, arrayArg, dimArg, lenArg):
 
 #### VM #######################################################################
 
+_ESMF.ESMC_VMBarrier.restype = ct.c_int
+_ESMF.ESMC_VMBarrier.argtypes = [ct.c_void_p]
+
+def ESMP_VMBarrier(vm):
+    """
+    Preconditions: An ESMP_VM object has been retrieved.\n
+    Postconditions: Blocks calling processor until all processors have reached 
+                    this call.\n
+    Arguments:\n
+        ESMP_VM :: vm\n
+    """
+    rc = _ESMF.ESMC_VMBarrier(vm)
+    if rc != constants._ESMP_SUCCESS:
+        raise ValueError('ESMC_VMBarrier() failed with rc = '+str(rc)+'.    '+
+                        constants._errmsg)
+
 _ESMF.ESMC_VMGet.restype = ct.c_int
 _ESMF.ESMC_VMGet.argtypes = [ct.c_void_p, ct.POINTER(ct.c_int),
                              ct.POINTER(ct.c_int), ct.POINTER(ct.c_int),
@@ -2055,16 +2071,6 @@ def ESMP_FieldSMMStore(srcField, dstField, filename,
     routehandle = ct.c_void_p(0)
     routehandle_T = ct.c_void_p(0)
 
-    # print "Before ESMC_FieldSMMStore"
-    # print id(srcField.data.data)
-    # print id(srcField.struct.ptr)
-    # print id(srcField.struct)
-    # print id(dstField.struct.ptr)
-    # print id(dstField.struct)
-    # 
-    # SMMStore will change the values of the source field if not copied..
-    # srcField._data = srcField.data.copy()
-
     rc = _ESMF.ESMC_FieldSMMStore(srcField.struct.ptr,
                                   dstField.struct.ptr,
                                   filename,
@@ -2075,15 +2081,6 @@ def ESMP_FieldSMMStore(srcField, dstField, filename,
     if rc != constants._ESMP_SUCCESS:
         raise ValueError('ESMC_FieldSMMStore() failed with rc = '+str(rc)+
                         '.    '+constants._errmsg)
-
-    # print "After ESMC_FieldSMMStore"
-    # print id(srcField.data.data)
-    # print id(srcField.struct.ptr)
-    # print id(srcField.struct)
-    # print id(dstField.struct.ptr)
-    # print id(dstField.struct)
-
-    # print srcField.data
 
     return routehandle
 

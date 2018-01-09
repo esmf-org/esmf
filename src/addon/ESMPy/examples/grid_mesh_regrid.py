@@ -14,7 +14,7 @@ import ESMF
 import numpy
 
 # This call enables debug logging
-# esmpy = ESMF.Manager(debug=True)
+mg = ESMF.Manager(debug=True)
 
 # ESMPy uses Fortran style dimension ordering (as of November 2017)
 [lat,lon] = [1,0]
@@ -37,9 +37,9 @@ slats_par = lats[srcgrid.lower_bounds[ESMF.StaggerLoc.CENTER][1]:srcgrid.upper_b
 # make sure to use indexing='ij' as ESMPy backend uses matrix indexing (not Cartesian)
 lonm, latm = numpy.meshgrid(slons_par, slats_par, indexing='ij')
 
-print lonm.shape
-print lonm[:,1]
-print latm[:,1]
+# print lonm.shape
+# print lonm[:,1]
+# print latm[:,1]
 
 gridCoordLon[:] = lonm
 gridCoordLat[:] = latm
@@ -62,7 +62,7 @@ dlats_par = lats[dstgrid.lower_bounds[ESMF.StaggerLoc.CENTER][1]:dstgrid.upper_b
 # make sure to use indexing='ij' as ESMPy backend uses matrix indexing (not Cartesian)
 lonm, latm = numpy.meshgrid(dlons_par, dlats_par, indexing='ij')
 
-print lonm.shape
+# print lonm.shape
 
 gridCoordLon[:] = lonm
 gridCoordLat[:] = latm
@@ -99,6 +99,7 @@ else:
             os.path.join(os.getcwd(), "esmpy_example_weight_file.nc")):
         os.remove(os.path.join(os.getcwd(), "esmpy_example_weight_file.nc"))
 
+    mg.barrier()
     regrid = ESMF.Regrid(srcfield, dstfield, filename="esmpy_example_weight_file.nc",
             regrid_method=ESMF.RegridMethod.BILINEAR,
             unmapped_action=ESMF.UnmappedAction.IGNORE)
@@ -114,8 +115,7 @@ regrid = ESMF.RegridFromFile(srcfield, dstfield, "esmpy_example_weight_file.nc")
 # calculate the regridding from source to destination field
 # dstfield = regrid(srcfield, dstfield)
 
-import ipdb; ipdb.set_trace()
-print srcfield.data
+# print srcfield.data
 
 # compute the mean relative error
 num_nodes = numpy.prod(xctfield.data.shape[:])

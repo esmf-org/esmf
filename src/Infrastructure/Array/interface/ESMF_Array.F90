@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2017, University Corporation for Atmospheric Research, 
+! Copyright 2002-2018, University Corporation for Atmospheric Research, 
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 ! Laboratory, University of Michigan, National Centers for Environmental 
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -63,7 +63,7 @@ module ESMF_ArrayMod
 !------------------------------------------------------------------------------
 ! !PUBLIC TYPES:
   public ESMF_Array                 ! implemented in ESMF_ArrayCreateMod 
-      
+  
 !------------------------------------------------------------------------------
 
 !------------------------------------------------------------------------------
@@ -535,7 +535,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE:
   subroutine ESMF_ArraySMM(srcArray, dstArray, routehandle, keywordEnforcer, &
     routesyncflag, finishedflag, cancelledflag, zeroregion, termorderflag, &
-    checkflag, rc)
+    checkflag, dynamicSrcMaskValue, dynamicDstMaskValue, dynamicMaskRoutine, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_Array),          intent(in),    optional :: srcArray
@@ -548,6 +548,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_Region_Flag),    intent(in),    optional :: zeroregion
     type(ESMF_TermOrder_Flag), intent(in),    optional :: termorderflag
     logical,                   intent(in),    optional :: checkflag
+    real(ESMF_KIND_R8),        intent(in),    optional :: dynamicSrcMaskValue
+    real(ESMF_KIND_R8),        intent(in),    optional :: dynamicDstMaskValue
+    procedure(ESMF_DynamicMaskRoutine),       optional :: dynamicMaskRoutine
     integer,                   intent(out),   optional :: rc
 !
 ! !STATUS:
@@ -558,6 +561,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item[6.1.0] Added argument {\tt termorderflag}.
 !              The new argument gives the user control over the order in which
 !              the src terms are summed up.
+! \item[7.1.0] Added arguments {\tt dynamicSrcMaskValue}, 
+!              {\tt dynamicDstMaskValue}, and {\tt dynamicMaskRoutine}.
+!              The new arguments support the dynamic masking feature.
 ! \end{description}
 ! \end{itemize}
 !
@@ -649,21 +655,42 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     If set to {\tt .FALSE.} {\em (default)} only a very basic input check
 !     will be performed, leaving many inconsistencies undetected. Set
 !     {\tt checkflag} to {\tt .FALSE.} to achieve highest performance.
+!   \item [{[dynamicSrcMaskValue]}]
+!     If provided, turns on the dynamic masking feature. Any element in the
+!     {\tt srcArray} with a value equal to {\tt dynamicSrcMaskValue} is counted
+!     as a dynamically masked source element. Elements affected will be passed
+!     to the routine specified in {\tt dynamicMaskRoutine} for handling.
+!     The default is to not assume any source elements as dynamically masked.
+!   \item [{[dynamicDstMaskValue]}]
+!     If provided, turns on the dynamic masking feature. Any element in the
+!     {\tt dstArray} with a value equal to {\tt dynamicDstMaskValue} is counted
+!     as a dynamically masked destination element. Elements affected will be
+!     passed to the routine specified in {\tt dynamicMaskRoutine} for handling.
+!     The default is to not assume any destination elements as dynamically
+!     masked.
+!   \item [{[dynamicMaskRoutine]}]
+!     The routine responsible for handling dynamically masked source and 
+!     destination elements. Must be provided if {\tt dynamicSrcMaskValue} or
+!     {\tt dynamicDstMaskValue} are provided.
+!     See section \ref{RH:DynMask} for a discussion of dynamic masking, and for
+!     the precise definition of the {\tt dynamicMaskRoutine} procedure 
+!     interface.
 !   \item [{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
 !EOP
 !------------------------------------------------------------------------------
-    integer                   :: localrc            ! local return code
-    type(ESMF_Array)          :: opt_srcArray       ! helper variable
-    type(ESMF_Array)          :: opt_dstArray       ! helper variable
-    type(ESMF_RouteSync_Flag) :: opt_routesyncflag  ! helper variable
-    type(ESMF_Logical)        :: opt_finishedflag   ! helper variable
-    type(ESMF_Logical)        :: opt_cancelledflag  ! helper variable
-    type(ESMF_Region_Flag)    :: opt_zeroregion     ! helper variable
-    type(ESMF_TermOrder_Flag) :: opt_termorderflag  ! helper variable
-    type(ESMF_Logical)        :: opt_checkflag      ! helper variable
+    integer                     :: localrc            ! local return code
+    type(ESMF_Array)            :: opt_srcArray       ! helper variable
+    type(ESMF_Array)            :: opt_dstArray       ! helper variable
+    type(ESMF_RouteSync_Flag)   :: opt_routesyncflag  ! helper variable
+    type(ESMF_Logical)          :: opt_finishedflag   ! helper variable
+    type(ESMF_Logical)          :: opt_cancelledflag  ! helper variable
+    type(ESMF_Region_Flag)      :: opt_zeroregion     ! helper variable
+    type(ESMF_TermOrder_Flag)   :: opt_termorderflag  ! helper variable
+    type(ESMF_Logical)          :: opt_checkflag      ! helper variable
+    type(ESMF_DynamicMaskStateWrap) :: dynMaskState
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
@@ -688,6 +715,34 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         ESMF_CONTEXT, rcToReturn=rc)) return
     endif
     
+    ! prepare for passing of dynamic masking
+    if (present(dynamicSrcMaskValue) .or. present(dynamicDstMaskValue)) then
+      if (present(dynamicMaskRoutine)) then
+        ! set up the dynMaskState and insert into RouteHandle for Fortran layer
+        allocate(dynMaskState%wrap)
+        dynMaskState%wrap%routine => dynamicMaskRoutine
+        dynMaskState%wrap%dynamicSrcMaskIsPresent = present(dynamicSrcMaskValue)
+        if (present(dynamicSrcMaskValue)) &
+          dynMaskState%wrap%dynamicSrcMaskValue = dynamicSrcMaskValue
+        dynMaskState%wrap%dynamicDstMaskIsPresent = present(dynamicDstMaskValue)
+        if (present(dynamicDstMaskValue)) &
+          dynMaskState%wrap%dynamicDstMaskValue = dynamicDstMaskValue
+        call c_ESMC_RouteHandleSetAS(routehandle, dynMaskState, localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+        ! set some dynamic masking info for C++ layer
+        call c_ESMC_RouteHandleSetDynMask(routehandle, dynamicSrcMaskValue, &
+          dynamicDstMaskValue, localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+      else
+        call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_INCOMP, &
+          msg="Dynamic masking requires the 'dynamicMaskRoutine' argument.", &
+          ESMF_CONTEXT, rcToReturn=rc)
+        return
+      endif
+    endif
+    
     ! Set default flags
     opt_routesyncflag = ESMF_ROUTESYNC_BLOCKING
     if (present(routesyncflag)) opt_routesyncflag = routesyncflag
@@ -705,6 +760,16 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
       
+    ! clean-up after passing of dynamic masking
+    if (present(dynamicSrcMaskValue) .or. present(dynamicDstMaskValue)) then
+      if (present(dynamicMaskRoutine)) then
+        deallocate(dynMaskState%wrap)
+        call c_ESMC_RouteHandleReSetAS(routehandle, localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return        
+      endif
+    endif
+
     ! translate back finishedflag
     if (present(finishedflag)) then
       finishedflag = opt_finishedflag
@@ -787,7 +852,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   transposeRoutehandle, rc)
 !
 ! !ARGUMENTS:
-!   type(ESMF_Array),          intent(in)              :: srcArray
+!   type(ESMF_Array),          intent(inout)           :: srcArray
 !   type(ESMF_Array),          intent(inout)           :: dstArray
 !   type(ESMF_RouteHandle),    intent(inout)           :: routehandle
 !   <type>(ESMF_KIND_<kind>), target, intent(in)       :: factorList(:)
@@ -873,7 +938,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   \begin{description}
 !
 !   \item [srcArray]
-!     {\tt ESMF\_Array} with source data.
+!     {\tt ESMF\_Array} with source data. The data in this Array may be
+!     destroyed by this call, {\em if and only if} the 
+!     {\tt transposeRoutehandle} argument was specified.
 !
 !   \item [dstArray]
 !     {\tt ESMF\_Array} with destination data. The data in this Array may be
@@ -1005,7 +1072,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     pipelineDepth, transposeRoutehandle, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_Array),              intent(in)              :: srcArray
+    type(ESMF_Array),              intent(inout)           :: srcArray
     type(ESMF_Array),              intent(inout)           :: dstArray
     type(ESMF_RouteHandle),        intent(inout)           :: routehandle
     integer(ESMF_KIND_I4), target, intent(in)              :: factorList(:)
@@ -1124,7 +1191,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     pipelineDepth, transposeRoutehandle, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_Array),              intent(in)              :: srcArray
+    type(ESMF_Array),              intent(inout)           :: srcArray
     type(ESMF_Array),              intent(inout)           :: dstArray
     type(ESMF_RouteHandle),        intent(inout)           :: routehandle
     integer(ESMF_KIND_I8), target, intent(in)              :: factorList(:)
@@ -1243,7 +1310,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     pipelineDepth, transposeRoutehandle, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_Array),           intent(in)              :: srcArray
+    type(ESMF_Array),           intent(inout)           :: srcArray
     type(ESMF_Array),           intent(inout)           :: dstArray
     type(ESMF_RouteHandle),     intent(inout)           :: routehandle
     real(ESMF_KIND_R4), target, intent(in)              :: factorList(:)
@@ -1362,7 +1429,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     pipelineDepth, transposeRoutehandle, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_Array),           intent(in)              :: srcArray
+    type(ESMF_Array),           intent(inout)           :: srcArray
     type(ESMF_Array),           intent(inout)           :: dstArray
     type(ESMF_RouteHandle),     intent(inout)           :: routehandle
     real(ESMF_KIND_R8), target, intent(in)              :: factorList(:)
@@ -1384,10 +1451,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer, allocatable          :: transposeFIL(:,:)  ! helper variable
     type(ESMF_Logical)            :: opt_ignoreUnmatched  ! helper variable
 
-#define DEBUG 0
-#if DEBUG
-    real(ESMF_KIND_R8), pointer :: src(:,:)
-#endif
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -1465,13 +1528,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         ESMF_CONTEXT, rcToReturn=rc)) return
     endif
 
-#if DEBUG
-      call ESMF_ArrayGet(srcArray, farrayPtr=src, rc=localrc)
-
-      print *, "ESMF_ArraySMM: source field"
-      print *, src
-#endif
-
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
 
@@ -1492,7 +1548,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     pipelineDepth, transposeRoutehandle, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_Array),              intent(in)              :: srcArray
+    type(ESMF_Array),              intent(inout)           :: srcArray
     type(ESMF_Array),              intent(inout)           :: dstArray
     type(ESMF_RouteHandle),        intent(inout)           :: routehandle
     integer(ESMF_KIND_I4), target, intent(in)              :: factorList(:)
@@ -1611,7 +1667,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     pipelineDepth, transposeRoutehandle, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_Array),              intent(in)              :: srcArray
+    type(ESMF_Array),              intent(inout)           :: srcArray
     type(ESMF_Array),              intent(inout)           :: dstArray
     type(ESMF_RouteHandle),        intent(inout)           :: routehandle
     integer(ESMF_KIND_I8), target, intent(in)              :: factorList(:)
@@ -1730,7 +1786,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     pipelineDepth, transposeRoutehandle, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_Array),           intent(in)              :: srcArray
+    type(ESMF_Array),           intent(inout)           :: srcArray
     type(ESMF_Array),           intent(inout)           :: dstArray
     type(ESMF_RouteHandle),     intent(inout)           :: routehandle
     real(ESMF_KIND_R4), target, intent(in)              :: factorList(:)
@@ -1849,7 +1905,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     pipelineDepth, transposeRoutehandle, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_Array),           intent(in)              :: srcArray
+    type(ESMF_Array),           intent(inout)           :: srcArray
     type(ESMF_Array),           intent(inout)           :: dstArray
     type(ESMF_RouteHandle),     intent(inout)           :: routehandle
     real(ESMF_KIND_R8), target, intent(in)              :: factorList(:)
@@ -1968,7 +2024,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     transposeRoutehandle, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_Array),       intent(in)              :: srcArray
+    type(ESMF_Array),       intent(inout)           :: srcArray
     type(ESMF_Array),       intent(inout)           :: dstArray
     type(ESMF_RouteHandle), intent(inout)           :: routehandle
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
@@ -2048,7 +2104,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   \begin{description}
 !
 !   \item [srcArray]
-!     {\tt ESMF\_Array} with source data.
+!     {\tt ESMF\_Array} with source data. The data in this Array may be
+!     destroyed by this call, {\em if and only if} the 
+!     {\tt transposeRoutehandle} argument was specified.
 !
 !   \item [dstArray]
 !     {\tt ESMF\_Array} with destination data. The data in this Array may be
@@ -2190,7 +2248,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     srcTermProcessing, pipelineDepth, transposeRoutehandle, rc)
 
 ! ! ARGUMENTS:
-    type(ESMF_Array),       intent(in)              :: srcArray
+    type(ESMF_Array),       intent(inout)           :: srcArray
     type(ESMF_Array),       intent(inout)           :: dstArray
     character(len=*),       intent(in)              :: filename
     type(ESMF_RouteHandle), intent(inout)           :: routehandle
@@ -2210,7 +2268,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \begin{description}
 !
 ! \item [srcArray]
-!       {\tt ESMF\_Array} with source data.
+!     {\tt ESMF\_Array} with source data. The data in this Array may be
+!     destroyed by this call, {\em if and only if} the 
+!     {\tt transposeRoutehandle} argument was specified.
 !
 ! \item [dstArray]
 !       {\tt ESMF\_Array} with destination data. The data in this Array may be

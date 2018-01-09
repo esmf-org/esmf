@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2017, University Corporation for Atmospheric Research,
+! Copyright 2002-2018, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -13881,7 +13881,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
              start(1)=minIndexPDe(1,demap(localDe)+1)
              start(2)=minIndexPDe(2,demap(localDe)+1)
-             count=ubound(lonPtr)
+             count=ubound(lonPtr)-lbound(lonPtr)+1
              call ESMF_GridGetCoord(grid, coordDim=2, localDe=localDe, &
                 staggerloc=staggerLocList(s), farrayPtr=latPtr, rc=localrc)
              if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &

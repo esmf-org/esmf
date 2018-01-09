@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2017, University Corporation for Atmospheric Research, 
+! Copyright 2002-2018, University Corporation for Atmospheric Research, 
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 ! Laboratory, University of Michigan, National Centers for Environmental 
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -110,7 +110,8 @@ contains
 ! !INTERFACE:
       subroutine ESMF_FieldRegrid(srcField, dstField, &
                    routehandle, keywordEnforcer, zeroregion, &
-                   termorderflag, checkflag, rc)
+                   termorderflag, checkflag, dynamicSrcMaskValue, &
+                   dynamicDstMaskValue, dynamicMaskRoutine, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Field),          intent(in),    optional :: srcField
@@ -120,6 +121,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       type(ESMF_Region_Flag),    intent(in),    optional :: zeroregion
       type(ESMF_TermOrder_Flag), intent(in),    optional :: termorderflag
       logical,                   intent(in),    optional :: checkflag
+      real(ESMF_KIND_R8),        intent(in),    optional :: dynamicSrcMaskValue
+      real(ESMF_KIND_R8),        intent(in),    optional :: dynamicDstMaskValue
+      procedure(ESMF_DynamicMaskRoutine),       optional :: dynamicMaskRoutine
       integer,                   intent(out),   optional :: rc 
 !
 ! !STATUS:
@@ -130,6 +134,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item[6.1.0] Added argument {\tt termorderflag}.
 !              The new argument gives the user control over the order in which
 !              the src terms are summed up.
+! \item[7.1.0] Added arguments {\tt dynamicSrcMaskValue}, 
+!              {\tt dynamicDstMaskValue}, and {\tt dynamicMaskRoutine}.
+!              The new arguments support the dynamic masking feature.
 ! \end{description}
 ! \end{itemize}
 !
@@ -205,6 +212,26 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     If set to {\tt .FALSE.} {\em (default)} only a very basic input check
 !     will be performed, leaving many inconsistencies undetected. Set
 !     {\tt checkflag} to {\tt .FALSE.} to achieve highest performance.
+!   \item [{[dynamicSrcMaskValue]}]
+!     If provided, turns on the dynamic masking feature. Any element in the
+!     {\tt srcField} with a value equal to {\tt dynamicSrcMaskValue} is counted
+!     as a dynamically masked source element. Elements affected will be passed
+!     to the routine specified in {\tt dynamicMaskRoutine} for handling.
+!     The default is to not assume any source elements as dynamically masked.
+!   \item [{[dynamicDstMaskValue]}]
+!     If provided, turns on the dynamic masking feature. Any element in the
+!     {\tt dstField} with a value equal to {\tt dynamicDstMaskValue} is counted
+!     as a dynamically masked destination element. Elements affected will be
+!     passed to the routine specified in {\tt dynamicMaskRoutine} for handling.
+!     The default is to not assume any destination elements as dynamically
+!     masked.
+!   \item [{[dynamicMaskRoutine]}]
+!     The routine responsible for handling dynamically masked source and 
+!     destination elements. Must be provided if {\tt dynamicSrcMaskValue} or
+!     {\tt dynamicDstMaskValue} are provided.
+!     See section \ref{RH:DynMask} for a discussion of dynamic masking, and for
+!     the precise definition of the {\tt dynamicMaskRoutine} procedure 
+!     interface.
 !   \item [{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -234,18 +261,30 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         if (present(srcField) .and. present(dstField)) then
           call ESMF_ArraySMM(srcArray=srcArray, dstArray=dstArray, &
                  routehandle=routehandle, zeroregion=zeroregion, &
-                 termorderflag=termorderflag, checkflag=checkflag, rc=localrc)
-		else if (present(srcField) .and. .not. present(dstField)) then
+                 termorderflag=termorderflag, checkflag=checkflag, &
+                 dynamicSrcMaskValue=dynamicSrcMaskValue, &
+                 dynamicDstMaskValue=dynamicDstMaskValue, &
+                 dynamicMaskRoutine=dynamicMaskRoutine, rc=localrc)
+                else if (present(srcField) .and. .not. present(dstField)) then
           call ESMF_ArraySMM(srcArray=srcArray, &
                  routehandle=routehandle, zeroregion=zeroregion, &
-                 termorderflag=termorderflag, checkflag=checkflag, rc=localrc)
-		else if (.not. present(srcField) .and. present(dstField)) then
+                 termorderflag=termorderflag, checkflag=checkflag, &
+                 dynamicSrcMaskValue=dynamicSrcMaskValue, &
+                 dynamicDstMaskValue=dynamicDstMaskValue, &
+                 dynamicMaskRoutine=dynamicMaskRoutine, rc=localrc)
+                else if (.not. present(srcField) .and. present(dstField)) then
           call ESMF_ArraySMM(dstArray=dstArray, &
                  routehandle=routehandle, zeroregion=zeroregion, &
-                 termorderflag=termorderflag, checkflag=checkflag, rc=localrc)
+                 termorderflag=termorderflag, checkflag=checkflag, &
+                 dynamicSrcMaskValue=dynamicSrcMaskValue, &
+                 dynamicDstMaskValue=dynamicDstMaskValue, &
+                 dynamicMaskRoutine=dynamicMaskRoutine, rc=localrc)
         else if (.not. present(srcField) .and. .not. present(dstField)) then
           call ESMF_ArraySMM(routehandle=routehandle, zeroregion=zeroregion, &
-                 termorderflag=termorderflag, checkflag=checkflag, rc=localrc)
+                 termorderflag=termorderflag, checkflag=checkflag, &
+                 dynamicSrcMaskValue=dynamicSrcMaskValue, &
+                 dynamicDstMaskValue=dynamicDstMaskValue, &
+                 dynamicMaskRoutine=dynamicMaskRoutine, rc=localrc)
         else
           call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
             msg="Supplied combination of optional Fields not supported", &
@@ -998,7 +1037,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         ! Init variables
          srcDual=.false.
         src_pl_used=.false.
-	dst_pl_used=.false.
+        dst_pl_used=.false.
 
         ! Set this for now just to not have to remove it everywhere
         ! TODO get rid of it. 
@@ -1038,8 +1077,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                    msg="- Only ESMF_POLEMETHOD_NONE polemethod supported for conservative regrid methods", & 
                    ESMF_CONTEXT, rcToReturn=rc) 
                  return
-	      else
-  	         localpolemethod = polemethod
+              else
+                 localpolemethod = polemethod
               endif
            else    
               localpolemethod=ESMF_POLEMETHOD_NONE
@@ -1136,13 +1175,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
 
-	  ! if we're doing conservative then do some checking and
+          ! if we're doing conservative then do some checking and
           ! change staggerloc
         if ((lregridmethod .eq. ESMF_REGRIDMETHOD_CONSERVE) .or. &
              (lregridmethod .eq. ESMF_REGRIDMETHOD_CONSERVE_2ND)) then
             ! Only Center stagger is supported right now until we figure out what the
             ! control volume for the others should be
-	    if (srcStaggerloc .ne. ESMF_STAGGERLOC_CENTER) then
+            if (srcStaggerloc .ne. ESMF_STAGGERLOC_CENTER) then
                  call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, & 
               msg="- can't currently do conservative regrid on a stagger other then center", & 
               ESMF_CONTEXT, rcToReturn=rc) 
@@ -1167,7 +1206,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             endif
           else 
             ! If we're not conservative, then use the staggerloc that the field is built upon
-	    srcStaggerlocG2M=srcStaggerloc
+            srcStaggerlocG2M=srcStaggerloc
           endif
 
 
@@ -1184,7 +1223,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                                               rc=localrc)
             if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
-	    src_pl_used=.true.
+            src_pl_used=.true.
 
   else if ((lregridmethod .eq. ESMF_REGRIDMETHOD_CONSERVE) .or. &
        (lregridmethod .eq. ESMF_REGRIDMETHOD_CONSERVE_2ND)) then
@@ -1239,7 +1278,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                 call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, & 
                   msg="- can currently only do conservative regridding on a mesh built on elements", & 
                   ESMF_CONTEXT, rcToReturn=rc) 
-                return	  
+                return  
              endif
 
              ! Turn on masking
@@ -1270,7 +1309,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                    call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, & 
                     msg="- S can currently only do non-conservative  on a mesh built on nodes or elements", & 
                     ESMF_CONTEXT, rcToReturn=rc) 
-                   return	  
+                   return  
                 endif
              endif
 
@@ -1284,7 +1323,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           else
 
              if (srcMeshloc .ne. ESMF_MESHLOC_NODE) then
-	       if (srcMeshloc .ne. ESMF_MESHLOC_ELEMENT) then
+               if (srcMeshloc .ne. ESMF_MESHLOC_ELEMENT) then
                  call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, &
                  msg="- D can currently only do non-conservative  on a mesh built on nodes or elements", &
                  ESMF_CONTEXT, rcToReturn=rc)
@@ -1310,7 +1349,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, & 
                msg="- only nearest neighbor regridding allowed when using location stream as source", & 
                ESMF_CONTEXT, rcToReturn=rc) 
-            return	  
+            return  
           endif
 
           !extract locstream from srcField, then pass into pointlistcreate
@@ -1342,13 +1381,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
 
-	  ! if we're doing conservative then do some checking and
+          ! if we're doing conservative then do some checking and
           ! change staggerloc
           if ((lregridmethod .eq. ESMF_REGRIDMETHOD_CONSERVE) .or. &
                (lregridmethod .eq. ESMF_REGRIDMETHOD_CONSERVE_2ND)) then
             ! Only Center stagger is supported right now until we figure out what the
             ! control volume for the others should be
-	    if (dstStaggerloc .ne. ESMF_STAGGERLOC_CENTER) then
+            if (dstStaggerloc .ne. ESMF_STAGGERLOC_CENTER) then
                  call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, & 
               msg="- can't currently do conservative regrid on a stagger other then center", & 
               ESMF_CONTEXT, rcToReturn=rc) 
@@ -1399,14 +1438,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             endif
           else 
             ! If we're not conservative, then use the staggerloc that the field is built upon
-	    dstStaggerlocG2M=dstStaggerloc
+            dstStaggerlocG2M=dstStaggerloc
 
             ! check grid
             call checkGridLite(dstGrid,dstStaggerlocG2M,rc=localrc)
             if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
 
-	    dstPointList=ESMF_PointListCreate(dstGrid,dstStaggerlocG2M, &
+            dstPointList=ESMF_PointListCreate(dstGrid,dstStaggerlocG2M, &
                                               maskValues=dstMaskValues, &
                                               rc=localrc)
             if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -1429,7 +1468,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                  call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, & 
                  msg="- can currently only do conservative regridding on a mesh built on elements", & 
                  ESMF_CONTEXT, rcToReturn=rc) 
-                return	  
+                return 
               endif
 
               ! Turn on masking
@@ -1446,7 +1485,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                    call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, & 
                    msg="- D can currently only do non-conservative  on a mesh built on nodes or elements", & 
                    ESMF_CONTEXT, rcToReturn=rc) 
-                   return	  
+                   return  
                 endif
              endif
 
@@ -1455,7 +1494,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                                                rc=localrc)
              if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                ESMF_CONTEXT, rcToReturn=rc)) return
-	     dst_pl_used=.true.
+             dst_pl_used=.true.
 
           endif
           
@@ -1466,7 +1505,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
               call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, & 
                    msg="- conservative regridding not allowed with location stream as destination", & 
                    ESMF_CONTEXT, rcToReturn=rc) 
-              return	  
+              return  
            endif
 
           !extract locstream from dstField, then pass into pointlistcreate
@@ -1553,7 +1592,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           call ESMF_PointListDestroy(dstPointList,rc=localrc)
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
-	endif
+        endif
         if (src_pl_used) then
           call ESMF_PointListDestroy(srcPointList,rc=localrc)
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -1744,7 +1783,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      
 ! !ARGUMENTS:
       type(ESMF_XGrid),       intent(in)              :: xgrid
-      type(ESMF_Field),       intent(in)              :: srcField
+      type(ESMF_Field),       intent(inout)           :: srcField
       type(ESMF_Field),       intent(inout)           :: dstField
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       type(ESMF_RouteHandle), intent(inout), optional :: routehandle
@@ -2358,10 +2397,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         type(ESMF_Array)     :: Array
         type(ESMF_Mesh)      :: Mesh
         type(ESMF_StaggerLoc) :: staggerLoc, staggerLocG2M
-	type(ESMF_MeshLoc)   :: meshloc
+        type(ESMF_MeshLoc)   :: meshloc
         real(ESMF_KIND_R8), pointer :: areaFptr(:)
         integer :: gridDimCount, localDECount, tileCount
-	type(ESMF_TypeKind_Flag) :: typekind
+        type(ESMF_TypeKind_Flag) :: typekind
         logical              :: isLatLonDeg
         integer              :: isSphere
 
@@ -2378,7 +2417,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
 
-	! Check typekind
+        ! Check typekind
         if (typekind .ne. ESMF_TYPEKIND_R8) then
            call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, & 
               msg="- Area calculation is only supported for Fields of typekind=ESMF_TYPEKIND_R8", & 
@@ -2412,7 +2451,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
           ! Only Center stagger is supported right now until we figure out what the
           ! control volume for the others should be
-	  if (staggerloc .ne. ESMF_STAGGERLOC_CENTER) then
+          if (staggerloc .ne. ESMF_STAGGERLOC_CENTER) then
                  call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, & 
               msg="- can't currently calculate area on a stagger other then center", & 
                  ESMF_CONTEXT, rcToReturn=rc) 
@@ -2455,7 +2494,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                   ESMF_CONTEXT, rcToReturn=rc)) return
           endif
 
-	  ! call into the Regrid GetareaField interface
+          ! call into the Regrid GetareaField interface
           call ESMF_RegridGetArea(Grid, Mesh, Array, staggerlocG2M, lregridScheme, rc=localrc)
           if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
@@ -2466,27 +2505,27 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
 
-	  if (meshloc .ne. ESMF_MESHLOC_ELEMENT) then
+          if (meshloc .ne. ESMF_MESHLOC_ELEMENT) then
                  call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, & 
               msg="- can't currently calculate area on a mesh location other than elements", & 
                  ESMF_CONTEXT, rcToReturn=rc) 
               return
           endif
 
-	  ! Don't need to do anything if there are no DEs
-	  if (localDECount < 1) then
+          ! Don't need to do anything if there are no DEs
+          if (localDECount < 1) then
               if(present(rc)) rc = ESMF_SUCCESS
               return
           endif
 
           ! Get pointer to field data
-	  ! Right now Mesh will only have one DE per PET
+          ! Right now Mesh will only have one DE per PET
           call ESMF_FieldGet(areaField, localDE=0,  farrayPtr=areaFptr, rc=localrc)
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
 
           ! Get Area
-	  call ESMF_MeshGetElemArea(mesh, areaList=areaFptr, rc=localrc)
+          call ESMF_MeshGetElemArea(mesh, areaList=areaFptr, rc=localrc)
           if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return

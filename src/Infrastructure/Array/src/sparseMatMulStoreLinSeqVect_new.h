@@ -569,7 +569,7 @@ template<typename SIT, typename DIT> int sparseMatMulStoreLinSeqVect_new(
       if (dstLocalDeElementCount[i]){
         // there are elements for local DE i
         dstLinSeqVect[i].reserve(dstLocalDeElementCount[i]);
-        ArrayElement arrayElement(dstArray, i, true, false);
+        ArrayElement arrayElement(dstArray, i, true, false, false);
         // loop over all elements in exclusive region for local DE i
         while(arrayElement.isWithin()){
           // add the element to dstLinSeqVect[i]
@@ -698,7 +698,7 @@ template<typename SIT, typename DIT> int sparseMatMulStoreLinSeqVect_new(
   for (int i=0; i<srcLocalDeCount; i++){
     if (srcLocalDeElementCount[i]){
       // there are elements for local DE i
-      ArrayElement arrayElement(srcArray, i, true, false);
+      ArrayElement arrayElement(srcArray, i, true, false, false);
       // loop over all elements in exclusive region for local DE i
       while(arrayElement.isWithin()){
         // determine the sequentialized index for the current Array element
@@ -793,6 +793,9 @@ template<typename SIT, typename DIT> int sparseMatMulStoreLinSeqVect_new(
   VM::logMemInfo(std::string("ASMMStoreLinSeqVect_new4.0"));
 #endif
   
+#if 0 
+  // DO NOT NEED THIS unless for halo reduce the communication during
+  // fillLinSeqVect.totalExchange(vm) to not cover factor.
   // fill in factors into srcLinSeqVect
   if (haloFlag){
     // for halo all the factors are 1
@@ -821,6 +824,7 @@ template<typename SIT, typename DIT> int sparseMatMulStoreLinSeqVect_new(
       }
     }
   }
+#endif
   
   // clear out dstLinSeqVect elements that did not find src partners
   for (int i=0; i<dstLocalDeCount; i++){
