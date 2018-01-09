@@ -1414,7 +1414,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                        intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!     Create an {\tt ESMF\_DistGrid} from a single logically rectangular (LR) 
+!     Create an {\tt ESMF\_DistGrid} from a single logically rectangular 
 !     tile with regular decomposition. A regular
 !     decomposition is of the same rank as the tile and decomposes
 !     each dimension into a fixed number of DEs. A regular decomposition of a
@@ -1621,7 +1621,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !DESCRIPTION:
 !     Create an {\tt ESMF\_DistGrid} on multiple logically 
-!     rectangular (LR) tiles with regular decomposition. A regular
+!     rectangular tiles with regular decomposition. A regular
 !     decomposition is of the same rank as the tile and decomposes
 !     each dimension into a fixed number of DEs. A regular decomposition of a
 !     multi-tile DistGrid is expressed by a list of DE count vectors, one
@@ -1781,7 +1781,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !DESCRIPTION:
 !     \begin{sloppypar}
-!     Create an {\tt ESMF\_DistGrid} from a single logically rectangular (LR) 
+!     Create an {\tt ESMF\_DistGrid} from a single logically rectangular 
 !     tile with decomposition specified by {\tt deBlockList}.
 !     \end{sloppypar}
 !
@@ -1837,9 +1837,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !          Optional {\tt ESMF\_VM} object of the current context. Providing the
 !          VM of the current context will lower the method's overhead.
 !     \item[{[indexTK]}]
-!          Typekind used for indexing. See section \ref{const:typekind} for a
-!          list of typekind options. Only integer types are supported. The 
-!          default is {\tt ESMF\_TYPEKIND\_I4}, i.e. 32-bit indexing.
+!          Typekind used for global sequence indexing. See section 
+!          \ref{const:typekind} for a list of typekind options. Only integer
+!          types are supported. The default is to have ESMF automatically choose
+!          between {\tt ESMF\_TYPEKIND\_I4} and {\tt ESMF\_TYPEKIND\_I8},
+!          depending on whether the global number of elements held by the
+!          DistGrid is below or above the 32-bit limit, respectively.
+!          Because of the use of signed integers for sequence indices, 
+!          element counts of $ > 2^{31}-1 = 2,147,483,647$ will switch to 64-bit 
+!          indexing.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -1947,7 +1953,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !DESCRIPTION:
 !     Create an {\tt ESMF\_DistGrid} on multiple logically 
-!     rectangular (LR) tiles with regular decomposition. A regular
+!     rectangular tiles with regular decomposition. A regular
 !     decomposition is of the same rank as the tile and decomposes
 !     each dimension into a fixed number of DEs. A regular decomposition of a
 !     multi-tile DistGrid is expressed by a list of DE count vectors, one
@@ -2099,7 +2105,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                       intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!     Create an {\tt ESMF\_DistGrid} from a single logically rectangular (LR) 
+!     Create an {\tt ESMF\_DistGrid} from a single logically rectangular
 !     tile with decomposition specified by {\tt deBlockList}.
 !
 !     The arguments are:
@@ -2245,7 +2251,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !DESCRIPTION:
 !     Create an {\tt ESMF\_DistGrid} on multiple logically 
-!     rectangular (LR) tiles with decomposition specified by {\tt deBlockList}.
+!     rectangular tiles with decomposition specified by {\tt deBlockList}.
 !
 !     The arguments are:
 !     \begin{description}
