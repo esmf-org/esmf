@@ -725,8 +725,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !EOP
 !------------------------------------------------------------------------------
-    integer                 :: localrc            ! local return code
-    type(ESMF_DistGrid)     :: dg                 ! opaque pointer to new C++ DistGrid
+    integer               :: localrc            ! local return code
+    type(ESMF_DistGrid)   :: dg                 ! opaque pointer to new C++ DistGrid
     type(ESMF_InterArray) :: firstExtraAux      ! helper variable
     type(ESMF_InterArray) :: lastExtraAux       ! helper variable
     type(ESMF_InterArray) :: connectionListAux  ! helper variable
@@ -866,8 +866,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !EOP
 !------------------------------------------------------------------------------
-    integer                 :: localrc      ! local return code
-    type(ESMF_DistGrid)     :: dg           ! opaque pointer to new C++ DistGrid
+    integer               :: localrc      ! local return code
+    type(ESMF_DistGrid)   :: dg           ! opaque pointer to new C++ DistGrid
     type(ESMF_InterArray) :: firstExtraAux ! helper variable
     type(ESMF_InterArray) :: lastExtraAux ! helper variable
     type(ESMF_InterArray) :: connectionListAux ! helper variable
@@ -1046,8 +1046,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !EOP
 !------------------------------------------------------------------------------
-    integer                 :: localrc      ! local return code
-    type(ESMF_DistGrid)     :: distgrid     ! opaque pointer to new C++ DistGrid
+    integer               :: localrc      ! local return code
+    type(ESMF_DistGrid)   :: distgrid     ! opaque pointer to new C++ DistGrid
     type(ESMF_InterArray) :: minIndexAux  ! helper variable
     type(ESMF_InterArray) :: maxIndexAux  ! helper variable
     type(ESMF_InterArray) :: regDecompAux ! helper variable
@@ -1280,15 +1280,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !EOP
 !------------------------------------------------------------------------------
-    integer                 :: localrc      ! local return code
-    type(ESMF_DistGrid)     :: distgrid     ! opaque pointer to new C++ DistGrid
+    integer               :: localrc      ! local return code
+    type(ESMF_DistGrid)   :: distgrid     ! opaque pointer to new C++ DistGrid
     type(ESMF_InterArray) :: minIndexAux  ! helper variable
     type(ESMF_InterArray) :: maxIndexAux  ! helper variable
     type(ESMF_InterArray) :: regDecompAux ! helper variable
     type(ESMF_Decomp_Flag), target :: dummyDf(0,0)  ! satisfy C interface
     type(ESMF_Decomp_Flag), pointer::  opt_decompflag(:,:) ! optional arg helper
-    integer                 :: len1_decompflag ! helper variable
-    integer                 :: len2_decompflag ! helper variable
+    integer               :: len1_decompflag ! helper variable
+    integer               :: len2_decompflag ! helper variable
     type(ESMF_InterArray) :: regDecompFirstExtraAux ! helper variable
     type(ESMF_InterArray) :: regDecompLastExtraAux ! helper variable
     type(ESMF_InterArray) :: deLabelListAux ! helper variable
@@ -1495,14 +1495,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !EOPI
 !------------------------------------------------------------------------------
-    integer                 :: localrc      ! local return code
-    type(ESMF_DistGrid)     :: distgrid     ! opaque pointer to new C++ DistGrid
+    integer               :: localrc      ! local return code
+    type(ESMF_DistGrid)   :: distgrid     ! opaque pointer to new C++ DistGrid
     type(ESMF_InterArray) :: minIndexAux  ! helper variable
     type(ESMF_InterArray) :: maxIndexAux  ! helper variable
     type(ESMF_InterArray) :: regDecompAux ! helper variable
     type(ESMF_Decomp_Flag), target   :: dummyDf(0)  ! satisfy C interface
     type(ESMF_Decomp_Flag), pointer  ::  opt_decompflag(:) ! optional arg helper
-    integer                 :: len_decompflag ! helper variable
+    integer               :: len_decompflag ! helper variable
     type(ESMF_InterArray) :: regDecompFirstExtraAux ! helper variable
     type(ESMF_InterArray) :: regDecompLastExtraAux ! helper variable
     type(ESMF_InterArray) :: deLabelListAux ! helper variable
@@ -1792,7 +1792,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     \item[maxIndex]
 !          Global coordinate tuple of the upper corner of the tile.
 !     \item[deBlockList]
-!          List of DE-local LR blocks. The third index of {\tt deBlockList}
+!          List of DE-local blocks. The third index of {\tt deBlockList}
 !          steps through the deBlock elements, which are defined by the first
 !          two indices. The first index must be of size {\tt dimCount} and the 
 !          second index must be of size 2. Each 2D element of {\tt deBlockList}
@@ -1807,8 +1807,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !                   v
 !                  1st index
 !          \end{verbatim}
-!          It is required that there be no overlap between the LR segments
-!          defined by deBlockList.
+!          It is required that there be no overlap between the DE blocks.
 !     \item[{[deLabelList]}]
 !          List assigning DE labels to the default sequence of DEs. The default
 !          sequence is given by the order of DEs in the {\tt deBlockList} 
@@ -1852,8 +1851,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !EOP
 !------------------------------------------------------------------------------
-    integer                 :: localrc      ! local return code
-    type(ESMF_DistGrid)     :: distgrid     ! opaque pointer to new C++ DistGrid
+    integer               :: localrc      ! local return code
+    type(ESMF_DistGrid)   :: distgrid     ! opaque pointer to new C++ DistGrid
     type(ESMF_InterArray) :: minIndexAux  ! helper variable
     type(ESMF_InterArray) :: maxIndexAux  ! helper variable
     type(ESMF_InterArray) :: deBlockListAux ! helper variable
@@ -1970,7 +1969,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !          The first index provides the global coordinate tuple of the upper
 !          corner of a tile. The second index indicates the tile number.
 !     \item[deBlockList]
-!          List of DE-local LR blocks. The third index of {\tt deBlockList}
+!          List of DE-local blocks. The third index of {\tt deBlockList}
 !          steps through the deBlock elements, which are defined by the first
 !          two indices. The first index must be of size {\tt dimCount} and the 
 !          second index must be of size 3. Each 2D element of {\tt deBlockList}
@@ -1985,8 +1984,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !                   v
 !                  1st index
 !          \end{verbatim}
-!          It is required that there be no overlap between the LR segments
-!          defined by deBlockList.
+!          It is required that there be no overlap between the DE blocks.
 !     \item[{[deLabelList]}]
 !          List assigning DE labels to the default sequence of DEs. The default
 !          sequence is given by the order of DEs in the {\tt deBlockList} 
@@ -2115,7 +2113,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     \item[maxIndex]
 !          Global coordinate tuple of the upper corner of the tile.
 !     \item[deBlockList]
-!          List of DE-local LR blocks. The third index of {\tt deBlockList}
+!          List of DE-local blocks. The third index of {\tt deBlockList}
 !          steps through the deBlock elements, which are defined by the first
 !          two indices. The first index must be of size {\tt dimCount} and the 
 !          second index must be of size 3. Each 2D element of {\tt deBlockList}
@@ -2130,8 +2128,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !                   v
 !                  1st index
 !          \end{verbatim}
-!          It is required that there be no overlap between the LR segments
-!          defined by deBlockList.
+!          It is required that there be no overlap between the DE blocks.
 !     \item[{[deLabelList]}]
 !          List assigning DE labels to the default sequence of DEs. The default
 !          sequence is given by the order of DEs in the {\tt deBlockList} 
@@ -2262,7 +2259,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !          The first index provides the global coordinate tuple of the upper
 !          corner of a tile. The second index indicates the tile number.
 !     \item[deBlockList]
-!          List of DE-local LR blocks. The third index of {\tt deBlockList}
+!          List of DE-local blocks. The third index of {\tt deBlockList}
 !          steps through the deBlock elements, which are defined by the first
 !          two indices. The first index must be of size {\tt dimCount} and the 
 !          second index must be of size 3. Each 2D element of {\tt deBlockList}
@@ -2277,8 +2274,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !                   v
 !                  1st index
 !          \end{verbatim}
-!          It is required that there be no overlap between the LR segments
-!          defined by deBlockList.
+!          It is required that there be no overlap between the DE blocks.
 !     \item[{[deLabelList]}]
 !          List assigning DE labels to the default sequence of DEs. The default
 !          sequence is given by the order of DEs in the {\tt deBlockList} 
@@ -2415,7 +2411,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer                 :: localrc      ! local return code
     type(ESMF_DistGrid)     :: distgrid     ! opaque pointer to new C++ DistGrid
     type(ESMF_VM)           :: vm           ! opaque pointer to VM object
-    type(ESMF_InterArray) :: indicesAux   ! index helper
+    type(ESMF_InterArray)   :: indicesAux   ! index helper
     integer                 :: localSize(1) ! number of local indices
     integer, allocatable    :: globalSizes(:)  ! array of all sizes
     integer                 :: petCount        ! num pets
@@ -2497,7 +2493,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_DistGridCreateDBAI1D1DEI8()"
 !BOP
-! !IROUTINE: ESMF_DistGridCreate - Create 1D DistGrid object from user's arbitrary index list 1 DE per PET
+! !IROUTINE: ESMF_DistGridCreate - Create 1D DistGrid object from user's arbitrary 64-bit index list 1 DE per PET
 
 ! !INTERFACE:
   ! Private name; call using ESMF_DistGridCreate()
@@ -2655,7 +2651,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_DistGrid)     :: distgrid     ! opaque pointer to new C++ DistGrid
     type(ESMF_DELayout)     :: delayout     ! opaque pointer to DELayout object
     type(ESMF_VM)           :: vm           ! opaque pointer to VM object
-    type(ESMF_InterArray) :: indicesAux   ! index helper
+    type(ESMF_InterArray)   :: indicesAux   ! index helper
     integer                 :: localDeCount(1)  ! number of local DEs
     integer, allocatable    :: localDeCounts(:) ! array of all local DE counts
     integer, allocatable    :: localSizes(:)    ! number of local indices
@@ -2850,7 +2846,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer                 :: localrc      ! local return code
     type(ESMF_DistGrid)     :: distgrid     ! opaque pointer to new C++ DistGrid
     type(ESMF_VM)           :: vm           ! opaque pointer to VM object
-    type(ESMF_InterArray) :: indicesAux   ! index helper
+    type(ESMF_InterArray)   :: indicesAux   ! index helper
     integer                 :: localSize(1) ! number of local indices
     integer, allocatable    :: globalSizes(:)  ! array of all sizes
     integer                 :: petCount        ! num pets
@@ -3172,9 +3168,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !EOP
 !------------------------------------------------------------------------------
-    integer                 :: localrc                ! local return code
-    integer                 :: i                      ! helper variable
-    integer                 :: dimCountAux            ! helper variable
+    integer               :: localrc                ! local return code
+    integer               :: i                      ! helper variable
+    integer               :: dimCountAux            ! helper variable
     type(ESMF_InterArray) :: minIndexPTileAux       ! helper variable
     type(ESMF_InterArray) :: maxIndexPTileAux       ! helper variable
     type(ESMF_InterArray) :: elementCountPTileAux   ! helper variable
@@ -3429,8 +3425,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !EOP
 !------------------------------------------------------------------------------
-    integer                 :: localrc            ! local return code
-    type(ESMF_Logical)      :: arbSeqIndexFlagAux ! helper variable
+    integer               :: localrc            ! local return code
+    type(ESMF_Logical)    :: arbSeqIndexFlagAux ! helper variable
     type(ESMF_InterArray) :: seqIndexListAux    ! helper variable
 
     ! initialize return code; assume routine not implemented
@@ -3746,7 +3742,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !EOPI
 !------------------------------------------------------------------------------
-    integer                 :: localrc      ! local return code
+    integer               :: localrc      ! local return code
     type(ESMF_InterArray) :: collocationPDimAux  ! helper variable
 
     ! initialize return code; assume routine not implemented
