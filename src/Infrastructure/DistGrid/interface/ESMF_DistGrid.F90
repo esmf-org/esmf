@@ -2371,7 +2371,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_DistGridCreateDBAI1D1DE()"
 !BOP
-! !IROUTINE: ESMF_DistGridCreate - Create 1D DistGrid object from user's arbitrary index list 1 DE per PET
+! !IROUTINE: ESMF_DistGridCreate - Create 1D DistGrid object from user's arbitrary sequence index list 1 DE per PET
 
 ! !INTERFACE:
   ! Private name; call using ESMF_DistGridCreate()
@@ -2493,7 +2493,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_DistGridCreateDBAI1D1DEI8()"
 !BOP
-! !IROUTINE: ESMF_DistGridCreate - Create 1D DistGrid object from user's arbitrary 64-bit index list 1 DE per PET
+! !IROUTINE: ESMF_DistGridCreate - Create 1D DistGrid object from user's arbitrary 64-bit sequence index list 1 DE per PET
 
 ! !INTERFACE:
   ! Private name; call using ESMF_DistGridCreate()
@@ -2526,7 +2526,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !EOP
 !------------------------------------------------------------------------------
 
-!TODO: deBlockList setup must also use I8!!!!
+!TODO: deBlockList setup must also use I8!!!! 
+!TODO: All of DistGrid indexing must support I8 fully support I8 seqIndex option
 
     integer                 :: localrc      ! local return code
     type(ESMF_DistGrid)     :: distgrid     ! opaque pointer to new C++ DistGrid
@@ -2614,7 +2615,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_DistGridCreateDBAI1D()"
 !BOP
-! !IROUTINE: ESMF_DistGridCreate - Create 1D DistGrid object from user's arbitrary index list multiple DE/PET
+! !IROUTINE: ESMF_DistGridCreate - Create 1D DistGrid object from user's arbitrary sequence index list multiple DE/PET
 
 ! !INTERFACE:
   ! Private name; call using ESMF_DistGridCreate()
@@ -2782,7 +2783,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_DistGridCreateDBAI()"
 !BOP
-! !IROUTINE: ESMF_DistGridCreate - Create (1+n)D DistGrid object from user's arbitrary index list and minIndexPTile/maxIndexPTile
+! !IROUTINE: ESMF_DistGridCreate - Create (1+n)D DistGrid object from user's arbitrary sequence index list and minIndexPTile/maxIndexPTile
 
 ! !INTERFACE:
   ! Private name; call using ESMF_DistGridCreate()
