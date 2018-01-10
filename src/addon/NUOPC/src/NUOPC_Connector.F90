@@ -2678,7 +2678,7 @@ call ESMF_LogWrite("eShareStatus: "//trim(eShareStatus), ESMF_LOGMSG_INFO, rc=rc
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
           acceptorGrid = ESMF_GridCreate(providerGrid, distgrid, &
-            name=geomobjname, rc=rc)
+            name=geomobjname, copyAttributes=.TRUE.,rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
           call ESMF_FieldEmptySet(acceptorField, grid=acceptorGrid, &
