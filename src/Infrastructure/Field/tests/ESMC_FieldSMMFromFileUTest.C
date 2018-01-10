@@ -184,13 +184,17 @@ int main(void){
   //-------------------------- REGRIDDING --------------------------------------
   //----------------------------------------------------------------------------
 
-  rc = ESMC_FieldRegridStoreFile(srcfield, dstfield, "data/weights_smmsff.nc", NULL, NULL,
-                                 &routehandle, NULL, NULL, NULL, NULL, NULL,
-                                 NULL, NULL, NULL, NULL);
   //----------------------------------------------------------------------------
   //NEX_UTest
   strcpy(name, "ESMC_FieldRegridStoreFile test");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
+#if defined (ESMF_PIO)
+  rc = ESMC_FieldRegridStoreFile(srcfield, dstfield, "data/weights_smmsff.nc", NULL, NULL,
+                                 &routehandle, NULL, NULL, NULL, NULL, NULL,
+                                 NULL, NULL, NULL, NULL);
+#else
+  rc = ESMF_SUCCESS;
+#endif
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
 
@@ -206,15 +210,25 @@ int main(void){
   printf("]\n");
 #endif
 
-  rc = ESMC_FieldSMMStore(srcfield, dstfield, "data/weights_smmsff.nc", &routehandle,
-                          NULL, NULL, NULL, NULL);
   //----------------------------------------------------------------------------
   //NEX_UTest
   strcpy(name, "ESMC_FieldSMMStore from File test");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
+#if defined (ESMF_PIO)
+  rc = ESMC_FieldSMMStore(srcfield, dstfield, "data/weights_smmsff.nc", &routehandle,
+                          NULL, NULL, NULL, NULL);
+#else
+  rc = ESMF_SUCCESS;
+#endif
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
 
+
+  //----------------------------------------------------------------------------
+  //NEX_UTest
+  strcpy(name, "ESMC_FieldSMMStore From File validation");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
+#if defined (ESMF_PIO)
   p = 0;
   for (int i1=exLBound[1]; i1<=exUBound[1]; ++i1) {
     for (int i0=exLBound[0]; i0<=exUBound[0]; ++i0) {
@@ -225,19 +239,21 @@ int main(void){
       p++;
     }
   }
-
-  //----------------------------------------------------------------------------
-  //NEX_UTest
-  strcpy(name, "ESMC_FieldSMMStore From File validation");
-  strcpy(failMsg, "Did not return ESMF_SUCCESS");
+#else
+  rc = ESMF_SUCCESS;
+#endif
   ESMC_Test((correct==true), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
 
-  rc = ESMC_FieldRegridRelease(&routehandle);
   //----------------------------------------------------------------------------
   //NEX_UTest
   strcpy(name, "ESMC_FieldRegridRelease");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
+#if defined (ESMF_PIO)
+  rc = ESMC_FieldRegridRelease(&routehandle);
+#else
+  rc = ESMF_SUCCESS;
+#endif
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
 
