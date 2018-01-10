@@ -62,10 +62,6 @@ class AbstractESMFNoseCommand(AbstractESMFCommand):
             sys.path.append('src')
 
             from ESMF.api import constants
-            try:
-                import mpi4py
-            except ImportError:
-                raise ImportError("'mpi4py' is required for parallel testing")
             mpirun_prefix = [constants._ESMF_MPIRUN, '-np', str(constants._ESMF_MPIRUN_NP)]
             ret = mpirun_prefix + ret
 
@@ -148,6 +144,11 @@ class TestParallelCommand(AbstractESMFNoseCommand):
     _nose_attrs = ['!serial']
     _nose_parallel = True
 
+class TestParallelAllCommand(AbstractESMFNoseCommand):
+    description = "run all parallel tests"
+    _nose_attrs = ['!serial,!mpi4py']
+    _nose_parallel = True
+
 
 class TestAllCommand(AbstractESMFCommand):
     description = "run serial, parallel, and example tests"
@@ -155,7 +156,7 @@ class TestAllCommand(AbstractESMFCommand):
     @download_test_data
     def run(self):
         self._validate_()
-        to_run = [TestCommand, TestParallelCommand, TestExamplesCommand, TestExamplesParallelCommand]
+        to_run = [TestCommand, TestParallelAllCommand, TestExamplesCommand, TestExamplesParallelAllCommand]
         for t in to_run:
             cmd = t.nosetests_command()
             subprocess.check_call(cmd)
@@ -171,6 +172,10 @@ class TestRegridParallelCommand(TestRegridCommand):
     _nose_attrs = ['!serial']
     _nose_parallel = True
 
+class TestRegridParallelAllCommand(TestRegridCommand):
+    description = "test regrid parallel"
+    _nose_attrs = ['!serial,!mpi4py']
+    _nose_parallel = True
 
 class TestExamplesCommand(AbstractESMFNoseCommand):
     description = "run examples in serial"
@@ -182,12 +187,15 @@ class TestExamplesCommand(AbstractESMFNoseCommand):
         update_system_path()
         AbstractESMFNoseCommand.run(self)
 
-
 class TestExamplesParallelCommand(TestExamplesCommand):
     description = "run examples in parallel"
     _nose_attrs = ['!serial']
     _nose_parallel = True
 
+class TestExamplesParallelAllCommand(TestExamplesCommand):
+    description = "run all examples in parallel"
+    _nose_attrs = ['!serial,!mpi4py']
+    _nose_parallel = True
 
 class TestExamplesDryrunCommand(TestExamplesCommand):
     description = "collect example tests only and download data"
@@ -274,11 +282,15 @@ setup(name="ESMPy",
                 'test': TestCommand,
                 'test_all': TestAllCommand,
                 'test_parallel': TestParallelCommand,
+                'test_parallel_all': TestParallelAllCommand,
                 'test_examples': TestExamplesCommand,
                 'test_examples_dryrun': TestExamplesDryrunCommand,
                 'test_examples_parallel': TestExamplesParallelCommand,
+                'test_examples_parallel_all': TestExamplesParallelAllCommand,
+                'test_regrid': TestRegridCommand,
                 'test_regrid': TestRegridCommand,
                 'test_regrid_from_file': TestRegridFromFileCommand,
                 'test_regrid_from_file_dryrun': TestRegridFromFileDryrunCommand,
                 'test_regrid_parallel': TestRegridParallelCommand,
+                'test_regrid_parallel_all': TestRegridParallelAllCommand,
                 'test_regrid_from_file_parallel': TestRegridFromFileParallelCommand})
