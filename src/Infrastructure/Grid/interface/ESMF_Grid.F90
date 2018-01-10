@@ -2704,7 +2704,7 @@ end subroutine ESMF_GridConvertIndex
 ! !INTERFACE:
   ! Private name; call using ESMF_GridCreate()
       function ESMF_GridCreateCopyFromNewDG(grid, distgrid, keywordEnforcer, &
-        name, rc)
+        name, copyAttributes, rc)
 !
 ! !RETURN VALUE:
       type(ESMF_Grid) :: ESMF_GridCreateCopyFromNewDG
@@ -2714,6 +2714,7 @@ end subroutine ESMF_GridConvertIndex
        type(ESMF_DistGrid),   intent(in)              :: distgrid
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        character (len=*),     intent(in),   optional  :: name
+       logical,               intent(in),   optional  :: copyAttributes
        integer,               intent(out),  optional  :: rc
 !
 ! !STATUS:
@@ -2734,6 +2735,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      distributed over DEs. 
 ! \item[{[name]}]
 !      Name of the new Grid. If not specified, a new unique name will be created 
+!      for the Grid.
+! \item[{[copyAttributes]}]
+!      A flag to indicate whether to copy the attributes of the existing grid
+!      to the new grid.  The default value is FALSE
 !      for the Grid.
 ! \item[{[rc]}]
 !      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -3243,8 +3248,16 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        enddo
 #endif
 
+       ! Copy Attributes
+       if (present(copyAttributes)) then
+         if (copyAttributes) then 
+             call c_esmc_attributecopy(grid, newGrid, ESMF_ATTCOPY_VALUE, localrc)
+             if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rcToReturn=rc)) return
+         endif
+       endif
 
-          ! deallocate stagger list
+       ! deallocate stagger list
        deallocate(srcStaggers)
 
 
@@ -3265,7 +3278,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE:
   ! Private name; call using ESMF_GridCreate()
       function ESMF_GridCreateCopyFromReg(grid, keywordEnforcer, &
-        regDecomp, decompFlag, name, rc)
+        regDecomp, decompFlag, name, copyAttributes, rc)
 
 !
 ! !RETURN VALUE:
@@ -3277,6 +3290,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        integer,                intent(in),   optional  :: regDecomp(:)
        type(ESMF_Decomp_Flag), intent(in),   optional  :: decompflag(:)
        character (len=*),      intent(in),   optional  :: name
+       logical,                intent(in),   optional  :: copyAttributes
        integer,                intent(out),  optional  :: rc
 !
 ! !STATUS:
@@ -3311,6 +3325,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item[{[name]}]
 !      Name of the new Grid. If not specified, a new unique name will be 
 !      created for the Grid.
+! \item[{[copyAttributes]}]
+!      A flag to indicate whether to copy the attributes of the existing grid
+!      to the new grid.  The default value is FALSE
+!      for the Grid.
 ! \item[{[rc]}]
 !      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
@@ -3539,10 +3557,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
-
-  
     ESMF_GridCreateCopyFromReg=ESMF_GridCreate(grid, distgrid, &
-                                    name=name, rc=localrc)
+            name=name, copyAttributes=copyAttributes, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -3555,14 +3571,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
-
     ! Clean up memory
     deallocate(regDecompLocal)
     deallocate(decompFlagLocal)
     deallocate(minIndexLocal)
     deallocate(maxIndexLocal)
 
- 
     ! Return successfully
     if (present(rc)) rc = ESMF_SUCCESS
     end function ESMF_GridCreateCopyFromReg
