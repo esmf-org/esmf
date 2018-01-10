@@ -2251,49 +2251,165 @@ call ESMF_LogWrite("eShareStatus: "//trim(eShareStatus), ESMF_LOGMSG_INFO, rc=rc
             msg="Deallocating gridToFieldMap", &
             line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
           if (fieldDimCount - gridDimCount > 0) then
-            deallocate(ungriddedLBound)
-            deallocate(ungriddedUBound)
+            deallocate(ungriddedLBound, stat=rc)
+            if (ESMF_LogFoundDeallocError(rc, &
+              msg="Deallocating ungriddedLBound", &
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+            deallocate(ungriddedUBound, stat=rc)
+            if (ESMF_LogFoundDeallocError(rc, &
+              msg="Deallocating ungriddedUBound", &
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
           endif
           
         elseif (geomtype==ESMF_GEOMTYPE_MESH) then
           call ESMF_FieldGet(providerField, mesh=mesh, meshloc=meshloc, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-          call ESMF_MeshGet(mesh, elementDistgrid=providerDG, &
-            nodalDistgrid=providerDG_nodal, rc=rc)
-          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-          call ESMF_FieldGet(acceptorField, vm=vm, rc=rc)
-          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-          if (btest(verbosity,11)) then
-            call ESMF_LogWrite(trim(name)//": transferring underlying DistGrid", &
-              ESMF_LOGMSG_INFO, rc=rc)
+          if (.not.sharedFlag) then
+            ! not shared -> must transfer
+            call ESMF_MeshGet(mesh, elementDistgrid=providerDG, &
+              nodalDistgrid=providerDG_nodal, rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+            call ESMF_FieldGet(acceptorField, vm=vm, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+            if (btest(verbosity,11)) then
+              call ESMF_LogWrite(trim(name)//": transferring underlying DistGrid", &
+                ESMF_LOGMSG_INFO, rc=rc)
+              if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+            endif
+            acceptorDG = ESMF_DistGridCreate(providerDG, vm=vm, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+            acceptorDG_nodal = ESMF_DistGridCreate(providerDG_nodal, vm=vm, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+            !TODO: When Mesh implements a name, make sure to transfer it here!
+            mesh = ESMF_MeshCreate(acceptorDG, nodalDistgrid=acceptorDG_nodal, &
+              rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+            call ESMF_FieldEmptySet(acceptorField, mesh=mesh, meshloc=meshloc, &
+              rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+            if (btest(verbosity,11)) then
+              call ESMF_LogWrite(trim(name)//&
+                ": done transferring underlying DistGrid", &
+                ESMF_LOGMSG_INFO, rc=rc)
+              if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+            endif
           endif
-          acceptorDG = ESMF_DistGridCreate(providerDG, vm=vm, rc=rc)
+          ! query additional provider information
+          call ESMF_FieldGet(providerField, mesh=mesh, &
+            dimCount=fieldDimCount, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-          acceptorDG_nodal = ESMF_DistGridCreate(providerDG_nodal, vm=vm, rc=rc)
+          call ESMF_DistGridGet(providerDG, dimCount=gridDimCount, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-          !TODO: When Mesh implements a name, make sure to transfer it here!
-          mesh = ESMF_MeshCreate(acceptorDG, nodalDistgrid=acceptorDG_nodal, &
+          allocate(gridToFieldMap(gridDimCount),stat=stat)
+          if (ESMF_LogFoundAllocError(statusToCheck=stat, &
+            msg="Allocation of internal ungriddedLBound failed.", &
+            line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+            return  ! bail out
+          call ESMF_FieldGet(providerField, gridToFieldMap=gridToFieldMap, &
             rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-          call ESMF_FieldEmptySet(acceptorField, mesh=mesh, meshloc=meshloc, &
-            rc=rc)
-          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-          if (btest(verbosity,11)) then
-            call ESMF_LogWrite(trim(name)//&
-              ": done transferring underlying DistGrid", &
-              ESMF_LOGMSG_INFO, rc=rc)
+          if (fieldDimCount - gridDimCount > 0) then
+            ! query ungridded dim bounds
+            allocate(ungriddedLBound(fieldDimCount-gridDimCount),stat=stat)
+            if (ESMF_LogFoundAllocError(statusToCheck=stat, &
+              msg="Allocation of internal ungriddedLBound failed.", &
+              line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+              return  ! bail out
+            allocate(ungriddedUBound(fieldDimCount-gridDimCount),stat=stat)
+            if (ESMF_LogFoundAllocError(statusToCheck=stat, &
+              msg="Allocation of internal ungriddedUBound failed.", &
+              line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+              return  ! bail out
+            call ESMF_FieldGet(providerField, ungriddedLBound=ungriddedLBound, &
+              ungriddedUBound=ungriddedUBound, rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
           endif
+          if (.not.sharedFlag) then
+            ! transfer additional provider info in form of attributes
+            ! bring over gridToFieldMap as attributes
+            call ESMF_AttributeSet(acceptorField, &
+              name="GridToFieldMap", valueList=gridToFieldMap, &
+              convention="NUOPC", purpose="Instance", &
+              attnestflag=ESMF_ATTNEST_ON, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, &
+              file=FILENAME)) &
+              return  ! bail out
+            if (fieldDimCount - gridDimCount > 0) then
+              ! bring over ungridded dim bounds as attributes
+              call ESMF_AttributeSet(acceptorField, &
+                name="UngriddedLBound", valueList=ungriddedLBound, &
+                convention="NUOPC", purpose="Instance", &
+                attnestflag=ESMF_ATTNEST_ON, rc=rc)
+              if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                line=__LINE__, &
+                file=FILENAME)) &
+                return  ! bail out
+              call ESMF_AttributeSet(acceptorField, &
+                name="UngriddedUBound", valueList=ungriddedUBound, &
+                convention="NUOPC", purpose="Instance", &
+                attnestflag=ESMF_ATTNEST_ON, rc=rc)
+              if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                line=__LINE__, &
+                file=FILENAME)) &
+                return  ! bail out
+            endif
+          else
+            ! shared: query additional info from provider to share with acceptor
+            call ESMF_FieldGet(providerField, name=fieldName, array=array, &
+              rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+            !TODO: make sure that this FieldCreate() sets ungridded bounds and
+            !TODO: total widths correctly
+            acceptorField=ESMF_FieldCreate(mesh=mesh, array=array, &
+              datacopyflag=ESMF_DATACOPY_REFERENCE, meshloc=meshloc, &
+              gridToFieldMap=gridToFieldMap, name=fieldName, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+            call NUOPC_Realize(acceptorState, acceptorField, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+            ! reset the TransferAction for this completed field
+            call NUOPC_SetAttribute(acceptorField, &
+              name="TransferActionField", value="complete", rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+            call NUOPC_SetAttribute(acceptorField, &
+              name="TransferActionGeomObject", value="complete", rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          endif
+
+          ! clean-up
+          deallocate(gridToFieldMap, stat=rc)
+          if (ESMF_LogFoundDeallocError(rc, &
+            msg="Deallocating gridToFieldMap", &
+            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          if (fieldDimCount - gridDimCount > 0) then
+            deallocate(ungriddedLBound, stat=rc)
+            if (ESMF_LogFoundDeallocError(rc, &
+              msg="Deallocating ungriddedLBound", &
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+            deallocate(ungriddedUBound, stat=rc)
+            if (ESMF_LogFoundDeallocError(rc, &
+              msg="Deallocating ungriddedUBound", &
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          endif
+
         elseif (geomtype==ESMF_GEOMTYPE_LOCSTREAM) then
           call ESMF_FieldGet(providerField, locstream=locstream, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
