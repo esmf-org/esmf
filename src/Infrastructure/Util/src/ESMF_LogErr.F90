@@ -178,7 +178,7 @@ type ESMF_LogPrivate
     type(ESMF_LogEntry), dimension(:),pointer       ::  LOG_ENTRY   => null ()
     type(ESMF_Logical)                              ::  FileIsOpen  = ESMF_FALSE
     integer                                         ::  errorMaskCount= 0
-    integer, dimension(:), pointer                  ::  errorMask(:)  => null ()
+    integer, pointer                                ::  errorMask(:)  => null ()
     type(ESMF_LogMsg_Flag), pointer                 ::  logmsgList(:) => null ()
     type(ESMF_LogMsg_Flag), pointer                 ::  logmsgAbort(:)=> null ()
     logical                                         ::  traceFlag = .false.
