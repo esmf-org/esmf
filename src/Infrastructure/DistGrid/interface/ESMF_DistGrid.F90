@@ -135,6 +135,7 @@ module ESMF_DistGridMod
   public ESMF_DistGridSet
   public ESMF_DistGridValidate
   
+  public ESMF_DistGridConnectionGet ! implemented in ESMF_DistGridConnectionMod
   public ESMF_DistGridConnectionSet ! implemented in ESMF_DistGridConnectionMod
   public ESMF_DistGridConnectionPrint ! impl. in ESMF_DistGridConnectionMod
 
