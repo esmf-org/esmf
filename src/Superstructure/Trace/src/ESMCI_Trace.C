@@ -173,6 +173,50 @@ namespace ESMCI {
   static int64_t traceClockOffset = 0;
   static HashMap<string, int, REGION_HASHTABLE_SIZE, StringHashF> regionMap;
   static int nextRegionId = 1;
+
+  //this data structure used to map VMIds(vmKey,localid) to an integer id
+  #define VMID_MAP_SIZE 10000
+  static VMId vmIdMap[VMID_MAP_SIZE];
+  static int nextVmId = 0;
+
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::TraceMapVmId()"  
+  int TraceMapVmId(VMId *vmid, int *rc) {
+
+    int localrc = ESMC_RC_NOT_IMPL;
+    if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+    
+    int foundIdx;
+    //search backward - vm more likely to be at the end
+    for (foundIdx=nextVmId-1; foundIdx >= 0; foundIdx--) {
+      if (VMIdCompare(vmid, &(vmIdMap[foundIdx]))) {
+        break;
+      }
+    }
+    if (foundIdx >= 0) {
+      if (rc!=NULL) *rc = ESMF_SUCCESS;
+      return foundIdx;
+    }
+    else {
+      if (nextVmId >= VMID_MAP_SIZE) {
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+                                      "Out of VmIdMap space inside tracing", ESMC_CONTEXT, rc);
+        return -1;
+      }
+      else {
+        vmIdMap[nextVmId] = VMIdCreate(&localrc); 
+        if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+                                          ESMC_CONTEXT, rc))
+          return -1;
+        VMIdCopy(&(vmIdMap[nextVmId]), vmid);
+        foundIdx = nextVmId;
+        nextVmId++;
+
+        if (rc!=NULL) *rc=ESMF_SUCCESS;
+        return foundIdx;
+      }
+    }        
+  }
   
   static vector<string> split(const string& s, const string& delim, const bool keep_empty = true) {
     vector<string> result;

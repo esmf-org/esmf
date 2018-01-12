@@ -47,6 +47,7 @@ namespace ESMCI {
   void TraceSetupTypes(int *rc);  
   bool TraceIsEnabledForPET(int *rc);
   std::string TraceGetMetadataString();
+  int TraceMapVmId(VMId *vmid, int *rc);
   
   ////////////////////////////////
 

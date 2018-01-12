@@ -6,6 +6,7 @@
 #include "ESMCI_Util.h"
 #include "ESMCI_Trace.h"
 #include "ESMCI_Comp.h"
+#include "ESMCI_LogErr.h"
 
 using std::string;
 
@@ -30,6 +31,19 @@ extern "C" {
     ESMCI::TraceClose(rc);
   }
   
+  void FTN_X(c_esmftrace_mapvmid)(ESMCI::VMId **vmid, int *mappedId, int *rc)
+  {
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmftrace_mapvmpid()"
+    if (mappedId!=NULL) {
+      *mappedId = ESMCI::TraceMapVmId(*vmid, rc);
+    }
+    else {
+      ESMC_LogDefault.MsgFoundError(
+        ESMF_RC_ARG_BAD, "Null pointer for mappedId", ESMC_CONTEXT, rc);      
+    }
+  }
+
   void FTN_X(c_esmftrace_phase_enter)(int *vmid, int *baseid, int *method, int *phase, int *rc)
   {
     ESMCI::TraceEventPhaseEnter(vmid, baseid, method, phase);
