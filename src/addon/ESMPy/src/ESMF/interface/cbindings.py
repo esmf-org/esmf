@@ -2069,7 +2069,6 @@ def ESMP_FieldSMMStore(srcField, dstField, filename,
         ESMP_Field                          :: dstField\n
     """
     routehandle = ct.c_void_p(0)
-    routehandle_T = ct.c_void_p(0)
 
     rc = _ESMF.ESMC_FieldSMMStore(srcField.struct.ptr,
                                   dstField.struct.ptr,
@@ -2077,7 +2076,7 @@ def ESMP_FieldSMMStore(srcField, dstField, filename,
                                   ct.byref(routehandle),
                                   ignoreUnmatchedIndices,
                                   None, None,
-                                  ct.byref(routehandle_T))
+                                  None)
     if rc != constants._ESMP_SUCCESS:
         raise ValueError('ESMC_FieldSMMStore() failed with rc = '+str(rc)+
                         '.    '+constants._errmsg)

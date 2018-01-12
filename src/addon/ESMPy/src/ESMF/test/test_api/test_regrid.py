@@ -85,7 +85,6 @@ class TestRegrid(TestBase):
         _ = rh(srcfield, dstfield)
 
     def test_field_regrid_file1(self):
-
         mgr = Manager()
 
         # Create grids.
@@ -136,10 +135,12 @@ class TestRegrid(TestBase):
 
     @attr('serial')
     def test_field_regrid_file2(self):
+        mgr = Manager()
         filename = 'esmpy_test_field_regrid_file2.nc'
         path = os.path.join(os.getcwd(), filename)
         if os.path.isfile(path):
             os.remove(path)
+        mgr.barrier()
 
         sourcegrid = ESMF.Grid(np.array([20, 20]),
                                staggerloc=ESMF.StaggerLoc.CENTER,
@@ -165,19 +166,23 @@ class TestRegrid(TestBase):
         _ = ESMF.Regrid(sourcefield, destfield, filename=filename,
                         regrid_method=ESMF.RegridMethod.BILINEAR,
                         unmapped_action=ESMF.UnmappedAction.IGNORE)
+        mgr.barrier()
 
         self.assertTrue(os.path.exists(filename))
 
         src_size = 400
         dst_size = 100
         self.assertWeightFileIsRational(filename, src_size, dst_size)
+        mgr.barrier()
 
     @attr('serial')
     def test_field_regrid_from_file(self):
+        mgr = Manager()
         filename = 'esmpy_test_field_from_file.nc'
         path = os.path.join(os.getcwd(), filename)
         if os.path.isfile(path):
             os.remove(path)
+        mgr.barrier()
 
         sourcegrid = ESMF.Grid(np.array([20, 20]),
                                staggerloc=ESMF.StaggerLoc.CENTER,
@@ -211,28 +216,25 @@ class TestRegrid(TestBase):
         regridS2D = ESMF.Regrid(sourcefield, destfield, filename=filename,
                         regrid_method=ESMF.RegridMethod.BILINEAR,
                         unmapped_action=ESMF.UnmappedAction.ERROR)
+        mgr.barrier()
 
         self.assertTrue(os.path.exists(filename))
 
         self.assertTrue(np.all(sourcefield.data[:,:] == 24))
-        # import ipdb; ipdb.set_trace()
-        # self.assertNumpyAllClose(xctfield.data, destfield.data)
+        self.assertNumpyAllClose(xctfield.data, destfield.data)
 
         regridS2D = ESMF.RegridFromFile(sourcefield, destfield, filename)
+        mgr.barrier()
 
-        # print sourcefield.data
-
-        # TODO: disabled these checks until the issue with smmsff is resolved
-        # self.assertTrue(np.all(sourcefield.data[:,:] == 24))
-        # self.assertNumpyAllClose(xctfield.data, destfield.data)
+        self.assertTrue(np.all(sourcefield.data[:,:] == 24))
+        self.assertNumpyAllClose(xctfield.data, destfield.data)
 
         destfield = regridS2D(sourcefield, destfield)
 
         self.assertWeightFileIsRational(filename, 20*20, 10*10)
-        # TODO: disabled these checks until the issue with smmsff is resolved
-        # self.assertTrue(np.all(sourcefield.data[:,:] == 24))
-        # print destfield.data
-        # self.assertNumpyAllClose(xctfield.data, destfield.data)
+        self.assertTrue(np.all(sourcefield.data[:,:] == 24))
+        self.assertNumpyAllClose(xctfield.data, destfield.data)
+        mgr.barrier()
 
 
     def test_field_regrid_gridmesh(self):
@@ -365,6 +367,7 @@ class TestRegrid(TestBase):
             if (dstarea.data[i] != 0.25):
                 assert (dstarea.data[i] == 0.125)
 
+    @attr('mpi4py')
     @attr('parallel')
     def test_field_regrid_periodic(self):
         parallel = False
@@ -413,6 +416,7 @@ class TestRegrid(TestBase):
         self.assertAlmostEqual(meanrel, 0.0016447124122954575)
         self.assertAlmostEqual(csrvrel, 0.0)
 
+    @attr('mpi4py')
     @attr('parallel')
     def test_grid_grid_3d_bilinear_cartesian(self):
         if ESMF.pet_count() > 1:
@@ -445,6 +449,7 @@ class TestRegrid(TestBase):
         self.assertAlmostEqual(meanrel, 0.00215601743167)
         self.assertAlmostEqual(csrvrel, 0.0)
 
+    @attr('mpi4py')
     @attr('parallel')
     def test_grid_grid_3d_bilinear_spherical(self):
         if ESMF.pet_count() > 1:
@@ -478,6 +483,7 @@ class TestRegrid(TestBase):
         self.assertAlmostEqual(csrvrel, 0.0)
 
 
+    @attr('mpi4py')
     @attr('parallel')
     def test_grid_grid_regrid_csrv_mask_3D(self):
         if ESMF.pet_count() > 1:
@@ -521,6 +527,7 @@ class TestRegrid(TestBase):
         self.assertAlmostEqual(meanrel, 0.0021560174316746865)
         self.assertAlmostEqual(csrvrel, 0.0)
 
+    @attr('mpi4py')
     @attr('parallel')
     def test_grid_grid_regrid_csrv_mask(self):
         if ESMF.pet_count() > 1:
@@ -565,6 +572,7 @@ class TestRegrid(TestBase):
         self.assertAlmostEqual(meanrel, 0.0024803189848013785)
         self.assertAlmostEqual(csrvrel, 0.0)
 
+    @attr('mpi4py')
     @attr('parallel')
     def test_grid_grid_regrid_srcmask_types(self):
         # NOTE: this tests an old issue where the items of a grid were not properly set when
@@ -612,6 +620,7 @@ class TestRegrid(TestBase):
         self.assertAlmostEqual(meanrel, 0.0024803189848013785)
         self.assertAlmostEqual(csrvrel, 0.0)
 
+    @attr('mpi4py')
     @attr('parallel')
     def test_grid_mesh_regrid_csrv_mask(self):
         parallel = False
@@ -668,6 +677,7 @@ class TestRegrid(TestBase):
         self.assertAlmostEqual(meanrel, 0.038806630051265847)
         self.assertAlmostEqual(csrvrel, 0.0)
 
+    @attr('mpi4py')
     @attr('parallel')
     def test_grid_mesh_regrid_csrv(self):
         parallel = False
@@ -722,6 +732,7 @@ class TestRegrid(TestBase):
         self.assertAlmostEqual(meanrel, 0.037733241800767432)
         self.assertAlmostEqual(csrvrel, 0.0)
 
+    @attr('mpi4py')
     @attr('parallel')
     def test_grid_mesh_regrid_mask(self):
         parallel = False
@@ -765,6 +776,7 @@ class TestRegrid(TestBase):
         self.assertAlmostEqual(meanrel, 0.0)
         self.assertAlmostEqual(csrvrel, 0.0)
 
+    @attr('mpi4py')
     @attr('parallel')
     def test_grid_mesh_regrid(self):
         parallel = False
@@ -808,6 +820,7 @@ class TestRegrid(TestBase):
         self.assertAlmostEqual(csrvrel, 0.0)
 
     @attr('parallel')
+    @attr('mpi4py')
     def test_mesh_mesh_regrid(self):
         parallel = False
         if ESMF.pet_count() > 1:
@@ -865,6 +878,7 @@ class TestRegrid(TestBase):
         self.assertAlmostEqual(meanrel, 0.037109375)
         self.assertAlmostEqual(csrvrel, 0.0)
 
+    @attr('mpi4py')
     @attr('parallel')
     def est_grid_mesh_pentatri_regrid_csrv(self):
         parallel = False
@@ -922,7 +936,8 @@ class TestRegrid(TestBase):
         assert (meanrel < 10E-2)
         assert (csrvrel < 10E-14)
 
-    @attr('serial')
+    # TODO: this test is disable, I don't remember why
+    @attr('mpi4py')
     def est_grid_mesh_pentatri_regrid_csrv_simple(self):
         if ESMF.pet_count() > 1:
             raise NameError('This test can only be run in serial!')
@@ -972,6 +987,7 @@ class TestRegrid(TestBase):
         assert (meanrel < 10E-2)
         assert (csrvrel < 10E-14)
 
+    @attr('mpi4py')
     @attr('parallel')
     def test_grid_mesh_pentatri_regrid_bilinear(self):
         parallel = False

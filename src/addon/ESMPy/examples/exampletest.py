@@ -36,18 +36,22 @@ class TestExamples(TestBase):
     def test_tripolerg(self):
         from . import tripole_regrid
 
+    @attr('mpi4py')
     def test_ungriddedrg(self):
         from . import ungridded_dimension_regrid
 
     def test_gridcreateperimask(self):
         from . import grid_create_peridim_mask
 
+    @attr('mpi4py')
     def test_meshlocstreamregrid(self):
         from . import mesh_locstream_regrid
 
+    @attr('mpi4py')
     def test_gridlocstreamregrid(self):
         from . import grid_locstream_regrid
 
+    @attr('mpi4py')
     def test_locstreamgridregrid(self):
         from . import locstream_grid_regrid
 
