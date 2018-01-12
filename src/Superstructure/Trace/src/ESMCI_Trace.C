@@ -134,7 +134,7 @@ struct bt_ctf_stream_class {
 #ifdef ESMF_TRACE_INTERNAL 
 
 #include <esmftrc.h>
-#define EVENT_BUF_SIZE 16384
+#define EVENT_BUF_SIZE 4096
 
 #ifdef __cplusplus
 # define TO_VOID_PTR(_value)		static_cast<void *>(_value)
@@ -175,7 +175,7 @@ namespace ESMCI {
   static int nextRegionId = 1;
 
   //this data structure used to map VMIds(vmKey,localid) to an integer id
-  #define VMID_MAP_SIZE 10000
+#define VMID_MAP_SIZE 10000
   static VMId vmIdMap[VMID_MAP_SIZE];
   static int nextVmId = 0;
 
