@@ -7702,7 +7702,7 @@ end function ESMF_GridCreateFrmGridCoord
 ! \end{equation}
 ! This is the most general method to create a 3D grid from an existing 2D grid,
 ! since each horizontal location can be assigned a given set of values for the
-! vertical coordinate, which is specified by the values of the {\tt ESMF_Field}
+! vertical coordinate, which is specified by the values of the {\tt ESMF\_Field}
 ! object.
 !
 ! The arguments are:
