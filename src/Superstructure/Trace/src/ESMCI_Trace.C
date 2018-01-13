@@ -316,7 +316,7 @@ namespace ESMCI {
 	  ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
 					"Invalid format in env variable ESMF_RUNTIME_TRACE_PETLIST", 
 					ESMC_CONTEXT, rc);
-	  if (rc != NULL) rc = ESMF_SUCCESS;
+	  if (rc != NULL) *rc = ESMF_SUCCESS;
 	  return false;
 	}
 		
@@ -1253,7 +1253,7 @@ namespace ESMCI {
   void TraceClose(int *rc) {
     struct esmftrc_platform_filesys_ctx *ctx = g_esmftrc_platform_filesys_ctx;
     
-    if(rc != NULL) rc = ESMF_SUCCESS;
+    if(rc != NULL) *rc = ESMF_SUCCESS;
 
     // allow multiple calls to TraceClose for system test
     // ignore any call after the first one
