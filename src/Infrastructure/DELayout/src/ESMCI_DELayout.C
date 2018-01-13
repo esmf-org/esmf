@@ -6676,16 +6676,22 @@ void XXE::pssslDstRra(T **rraBaseList, int *rraIndexList, TKId elementTK,
     return;
   }
 #ifdef XXE_RECURSIVE_DEBUG
-  printf("Arrived in psssDstRra kernel with %s, %s, %s\n", typeid(T).name(), 
+  printf("Arrived in pssslDstRra kernel with %s, %s, %s\n", typeid(T).name(), 
     typeid(U).name(), typeid(V).name());
 #endif
   int localrc;
+#if 0
+//TODO: strictly check for RH here once it is expected valid from all comms
   if (rh==NULL){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
       "Not a valid RouteHandle pointer!", ESMC_CONTEXT, &localrc);
     throw localrc;  // bail out with exception
   }
   bool dynMask = rh->validAsPtr();
+#else
+  bool dynMask = false; // default
+  if (rh) dynMask = rh->validAsPtr();
+#endif
   if(superVector){
 #ifdef XXE_EXEC_OPSLOG_on
     char msg[1024];
