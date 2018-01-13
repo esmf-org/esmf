@@ -175,14 +175,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !BOP
 ! !IROUTINE: ESMF_DistGridConnectionGet - Get DistGridConnection
 ! !INTERFACE:
-  subroutine ESMF_DistGridConnectionGet(connection, tileIndexA, tileIndexB, &
-    dimCount, positionVector, keywordEnforcer, orientationVector, rc)
+  subroutine ESMF_DistGridConnectionGet(connection, keywordEnforcer, &
+    tileIndexA, tileIndexB, dimCount, positionVector, orientationVector, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_DistGridConnection), intent(in)            :: connection
-    integer,                       intent(out)           :: tileIndexA
-    integer,                       intent(out)           :: tileIndexB
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    integer,                       intent(out), optional :: tileIndexA
+    integer,                       intent(out), optional :: tileIndexB
     integer,                       intent(out), optional :: dimCount
     integer,                       intent(out), optional :: positionVector(:)
     integer,                       intent(out), optional :: orientationVector(:)
@@ -198,9 +198,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   \begin{description}
 !   \item[connection]
 !     DistGridConnection object.
-!   \item[tileIndexA]
+!   \item[{[tileIndexA]}]
 !     Index of one of the two connected tiles.
-!   \item[tileIndexB]
+!   \item[{[tileIndexB]}]
 !     Index of the other connected tile.
 !   \item[{[dimCount]}]
 !     Number of dimensions of {\tt positionVector}.
@@ -235,8 +235,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     end if
 
     ! get conected tiles
-    tileIndexA = connection % connection(1)
-    tileIndexB = connection % connection(2)
+    if (present(tileIndexA)) tileIndexA = connection % connection(1)
+    if (present(tileIndexB)) tileIndexB = connection % connection(2)
 
     if (present(dimCount)) dimCount = localdimCount
 
@@ -248,7 +248,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         return
       end if
       positionVector = 0
-      positionVector(1:localdimCount) = connection % connection(3:localdimCount+2)
+      positionVector(1:localdimCount) = &
+        connection % connection(3:2+localdimCount)
     end if
 
     if (present(orientationVector)) then
@@ -259,7 +260,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         return
       end if
       orientationVector = 0
-      orientationVector(1:localdimCount) = connection % connection(localdimCount+3:)
+      orientationVector(1:localdimCount) = &
+        connection % connection(3+localdimCount:2+2*localdimCount)
     end if
 
     ! return successfully
