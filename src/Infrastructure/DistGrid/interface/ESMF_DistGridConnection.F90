@@ -243,7 +243,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(positionVector)) then
       if (size(positionVector) < localdimCount) then
         call ESMF_LogSetError(rcToCheck=ESMC_RC_ARG_SIZE, &
-          msg="Size of positionVector array smaller then number of dimensions.", &
+          msg="Size of positionVector array smaller than number of dimensions.", &
           ESMF_CONTEXT, rcToReturn=rc)
         return
       end if
@@ -255,7 +255,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(orientationVector)) then
       if (size(orientationVector) < localdimCount) then
         call ESMF_LogSetError(rcToCheck=ESMC_RC_ARG_SIZE, &
-          msg="Size of orientationVector array smaller then number of dimensions.", &
+          msg="Size of orientationVector array smaller than number of dimensions.", &
           ESMF_CONTEXT, rcToReturn=rc)
         return
       end if
