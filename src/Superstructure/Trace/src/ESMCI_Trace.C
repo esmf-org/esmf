@@ -134,7 +134,8 @@ struct bt_ctf_stream_class {
 #ifdef ESMF_TRACE_INTERNAL 
 
 #include <esmftrc.h>
-#define EVENT_BUF_SIZE 4096
+#define EVENT_BUF_SIZE_DEFAULT 4096
+#define EVENT_BUF_SIZE_EAGER 1024
 
 #ifdef __cplusplus
 # define TO_VOID_PTR(_value)		static_cast<void *>(_value)
@@ -173,7 +174,7 @@ namespace ESMCI {
   static int64_t traceClockOffset = 0;
   static HashMap<string, int, REGION_HASHTABLE_SIZE, StringHashF> regionMap;
   static int nextRegionId = 1;
-
+  
   //this data structure used to map VMIds(vmKey,localid) to an integer id
 #define VMID_MAP_SIZE 10000
   static VMId vmIdMap[VMID_MAP_SIZE];
@@ -1159,8 +1160,22 @@ namespace ESMCI {
                                     ESMC_CONTEXT, rc);
       return;
     }
-  
-    buf = FROM_VOID_PTR(uint8_t, malloc(EVENT_BUF_SIZE));
+
+    //allocate event buffer
+    char const *envFlush = VM::getenv("ESMF_RUNTIME_TRACE_FLUSH");
+    std::string strFlush = "DEFAULT";
+    int eventBufSize = EVENT_BUF_SIZE_DEFAULT;
+    
+    if (envFlush != NULL && strlen(envFlush) > 0) {     
+      strFlush = envFlush;
+      if (trim(strFlush) == "EAGER" || trim(strFlush) == "eager" || trim(strFlush) == "Eager") {
+        eventBufSize = EVENT_BUF_SIZE_EAGER;
+        logMsg.str("ESMF Tracing set to EAGER flushing.");
+        ESMC_LogDefault.Write(logMsg.str().c_str(), ESMC_LOGMSG_INFO);
+      }
+    }
+    
+    buf = FROM_VOID_PTR(uint8_t, malloc(eventBufSize));
     if (!buf) {
       free(ctx);
       ESMC_LogDefault.MsgFoundError(ESMC_RC_MEM_ALLOCATE, "Cannot allocate trace event buffer", 
@@ -1168,7 +1183,7 @@ namespace ESMCI {
       return;
     }
     
-    memset(buf, 0, EVENT_BUF_SIZE); 
+    memset(buf, 0, eventBufSize); 
     
     //make relative path absolute if needed
     if (trace_dir[0] != '/') {
@@ -1240,7 +1255,7 @@ namespace ESMCI {
       }
     }
     
-    esmftrc_init(&ctx->ctx, buf, EVENT_BUF_SIZE, cbs, ctx);
+    esmftrc_init(&ctx->ctx, buf, eventBufSize, cbs, ctx);
     open_packet(ctx);
 
     //store as global context
