@@ -1448,12 +1448,14 @@ extern "C" {
     ESMCI::VM::addFObject(fobject, *objectID, vmID);
   }
 
-  void FTN_X(c_esmc_vmgetobject)(void **fobject, int *objectID, ESMCI::VMId *vmid,
+  void FTN_X(c_esmc_vmgetobject)(void **fobject, int *objectID, ESMCI::VMId **vmid,
       int *type, ESMC_Logical *obj_found, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_vmgetobject()"
     bool found;
-    ESMCI::VM::getObject(fobject, *objectID, vmid, *type, &found, rc);
+// std::cout << ESMC_METHOD << ": looking for vmid:" << std::endl;
+// (*vmid)->print();
+    ESMCI::VM::getObject(fobject, *objectID, *vmid, *type, &found, rc);
     *obj_found = (found)?ESMF_TRUE:ESMF_FALSE;
   }
     

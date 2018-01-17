@@ -2294,11 +2294,11 @@ void VM::getObject(
 //
 // !ARGUMENTS:
 //
-  void **fobject,
-  int objectID,
-  VMId *vmID,   // identifying vmID
-  int type,
-  bool *object_found,
+  void **fobject, // out - alias to object
+  int objectID,   // in - identifying ID
+  VMId *vmID,     // in - identifying vmID
+  int type,       // in - identifying object type
+  bool *object_found, // out - true if found, false if not
   int *rc) {
 //
 // !DESCRIPTION:
@@ -2307,10 +2307,14 @@ void VM::getObject(
 //
 //EOPI
 //-----------------------------------------------------------------------------
+
+  const bool debug = false;
+
   // initialize return code; assume routine not implemented
   *rc = ESMC_RC_NOT_IMPL;   // final return code
 
-  // std::cout << ESMC_METHOD << ": looking for object ID: " << objectID << std::endl;
+  if (debug)
+    std::cout << ESMC_METHOD << ": looking for object ID: " << objectID << std::endl;
   *fobject = NULL;          // assume not found
   *object_found = false;
 
@@ -2318,14 +2322,20 @@ void VM::getObject(
   bool vmid_found = false;
   int i;
   for (i=0; i<matchTableBound; i++) {
-    // std::cout << ESMC_METHOD << ": checking VMId " << i << std::endl;
-    if (VMIdCompare(vmID, &(matchTable_vmID[i]))) {
+    if (debug) {
+      std::cout << ESMC_METHOD << ": checking VMId " << i << ".  Comparing:" << std::endl;
+      vmID->print ();
+      std::cout << ESMC_METHOD << ": to:" << std::endl;
+      matchTable_vmID[i].print ();
+    }
+    if (VMIdCompare(vmID, &matchTable_vmID[i])) {
       vmid_found = true;
       break;
     }
   }
   if (!vmid_found){
-    // std::cout << ESMC_METHOD << ": vmid vector not found" << std::endl;
+    if (debug)
+      std::cout << ESMC_METHOD << ": vmid vector not found" << std::endl;
     *rc = ESMF_SUCCESS;
     return;
   }
@@ -2341,7 +2351,8 @@ void VM::getObject(
 
     int ID = (fobject_temp)->ESMC_BaseGetID();
 
-    // std::cout << ESMC_METHOD << ": comparing ID " << ID << " to object ID " << objectID << std::endl;
+    if (debug)
+     std::cout << ESMC_METHOD << ": comparing ID " << ID << " to object ID " << objectID << std::endl;
     if (ID == objectID) {
       *fobject = fobject_temp;
       // TODO: Bump Base refCount?  Gerhard says not yet.
