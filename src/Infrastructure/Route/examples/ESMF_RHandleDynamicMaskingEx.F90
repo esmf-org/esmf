@@ -20,13 +20,13 @@ module ESMF_RHandleDynamicMaskingMod
 
   implicit none
 
-  public simpleDynMaskProc
+  public simpleDynMaskProc, simpleDynMaskProcR4R8R4
 
  contains !-------------------------------------
  
   subroutine simpleDynMaskProc(dynamicMaskList, dynamicSrcMaskValue, &
     dynamicDstMaskValue, rc)
-    type(ESMF_DynamicMaskElement), pointer              :: dynamicMaskList(:)
+    type(ESMF_DynamicMaskElementR8R8R8), pointer        :: dynamicMaskList(:)
     real(ESMF_KIND_R8),            intent(in), optional :: dynamicSrcMaskValue
     real(ESMF_KIND_R8),            intent(in), optional :: dynamicDstMaskValue
     integer,                       intent(out)          :: rc
@@ -34,7 +34,7 @@ module ESMF_RHandleDynamicMaskingMod
     real(ESMF_KIND_R8)  :: renorm
     if (associated(dynamicMaskList)) then
       do i=1, size(dynamicMaskList)
-        if (match(dynamicDstMaskValue,dynamicMaskList(i)%dstElement)) then
+        if (matchR8(dynamicDstMaskValue,dynamicMaskList(i)%dstElement)) then
           ! dstElement was masked -> just set to a specific value
           dynamicMaskList(i)%dstElement = 50.d0
         else
@@ -44,7 +44,7 @@ module ESMF_RHandleDynamicMaskingMod
           renorm = 0.d0 ! reset
           do j=1, size(dynamicMaskList(i)%factor)
             if (.not. &
-              match(dynamicSrcMaskValue,dynamicMaskList(i)%srcElement(j))) then
+              matchR8(dynamicSrcMaskValue,dynamicMaskList(i)%srcElement(j))) then
               dynamicMaskList(i)%dstElement = dynamicMaskList(i)%dstElement &
                 + dynamicMaskList(i)%factor(j) &
                 * dynamicMaskList(i)%srcElement(j)
@@ -61,15 +61,63 @@ module ESMF_RHandleDynamicMaskingMod
   
   !-----------
   
-  function match(val1, val2)
+  subroutine simpleDynMaskProcR4R8R4(dynamicMaskList, dynamicSrcMaskValue, &
+    dynamicDstMaskValue, rc)
+    type(ESMF_DynamicMaskElementR4R8R4), pointer        :: dynamicMaskList(:)
+    real(ESMF_KIND_R4),            intent(in), optional :: dynamicSrcMaskValue
+    real(ESMF_KIND_R4),            intent(in), optional :: dynamicDstMaskValue
+    integer,                       intent(out)          :: rc
+    integer :: i, j
+    real(ESMF_KIND_R8)  :: renorm
+    if (associated(dynamicMaskList)) then
+      do i=1, size(dynamicMaskList)
+        if (matchR4(dynamicDstMaskValue,dynamicMaskList(i)%dstElement)) then
+          ! dstElement was masked -> just set to a specific value
+          dynamicMaskList(i)%dstElement = 50.d0
+        else
+          ! there must be srcElements masked 
+          ! -> don't use masked srcElements, but renormalize all other factors
+          dynamicMaskList(i)%dstElement = 0. ! set to zero
+          renorm = 0.d0 ! reset
+          do j=1, size(dynamicMaskList(i)%factor)
+            if (.not. &
+              matchR4(dynamicSrcMaskValue,dynamicMaskList(i)%srcElement(j))) then
+              dynamicMaskList(i)%dstElement = dynamicMaskList(i)%dstElement &
+                + dynamicMaskList(i)%factor(j) &
+                * dynamicMaskList(i)%srcElement(j)
+              renorm = renorm + dynamicMaskList(i)%factor(j)
+            endif
+          enddo
+          dynamicMaskList(i)%dstElement = dynamicMaskList(i)%dstElement / renorm
+        endif
+      enddo
+    endif
+    ! return successfully
+    rc = ESMF_SUCCESS
+  end subroutine  
+  
+  !-----------
+  
+  function matchR8(val1, val2)
     ! ability to safely compare optional arguments
-    logical :: match
+    logical :: matchR8
     real(ESMF_KIND_R8), optional  :: val1
     real(ESMF_KIND_R8), optional  :: val2
-    match = .false.
+    matchR8 = .false.
     if (.not.present(val1)) return
     if (.not.present(val2)) return
-    match = (val1 .eq. val2)
+    matchR8 = (val1 .eq. val2)
+  end function
+    
+  function matchR4(val1, val2)
+    ! ability to safely compare optional arguments
+    logical :: matchR4
+    real(ESMF_KIND_R4), optional  :: val1
+    real(ESMF_KIND_R4), optional  :: val2
+    matchR4 = .false.
+    if (.not.present(val1)) return
+    if (.not.present(val2)) return
+    matchR4 = (val1 .eq. val2)
   end function
     
 end module ESMF_RHandleDynamicMaskingMod
@@ -96,6 +144,9 @@ program ESMF_RHandleDynamicMaskingEx
   real(ESMF_KIND_R8), pointer :: farrayPtr(:,:)
   real(ESMF_KIND_R8)          :: srcMaskValue=-777.d0
   real(ESMF_KIND_R8)          :: dstMaskValue=-888.d0
+  real(ESMF_KIND_R4), pointer :: farrayPtrR4(:,:)
+  real(ESMF_KIND_R4)          :: srcMaskValueR4=-777.d0
+  real(ESMF_KIND_R4)          :: dstMaskValueR4=-888.d0
 
   ! result code
   integer :: finalrc, result
@@ -277,7 +328,7 @@ program ESMF_RHandleDynamicMaskingEx
 !      dynamicDstMaskValue, rc)
 !      use ESMF_UtilTypesMod
 !      implicit none
-!      type(ESMF_DynamicMaskElement), pointer      :: dynMaskList(:)
+!      type(ESMF_DynamicMaskElementR8R8R8), pointer        :: dynMaskList(:)
 !      real(ESMF_KIND_R8),            intent(in), optional :: dynamicSrcMaskValue
 !      real(ESMF_KIND_R8),            intent(in), optional :: dynamicDstMaskValue
 !      integer,                       intent(out)  :: rc
@@ -292,7 +343,7 @@ program ESMF_RHandleDynamicMaskingEx
 ! provided by the {\tt ESMF\_DynamicMaskElement} derived type:
 !
 ! \begin{verbatim}
-!  type ESMF_DynamicMaskElement
+!  type ESMF_DynamicMaskElementR8R8R8
 !    real(ESMF_KIND_R8), pointer       :: dstElement
 !    real(ESMF_KIND_R8), allocatable   :: factor(:)
 !    real(ESMF_KIND_R8), allocatable   :: srcElement(:)
@@ -319,7 +370,7 @@ program ESMF_RHandleDynamicMaskingEx
 ! \begin{verbatim}
 !  subroutine simpleDynMaskProc(dynamicMaskList, dynamicSrcMaskValue, &
 !    dynamicDstMaskValue, rc)
-!    type(ESMF_DynamicMaskElement), pointer              :: dynamicMaskList(:)
+!    type(ESMF_DynamicMaskElementR8R8R8), pointer        :: dynamicMaskList(:)
 !    real(ESMF_KIND_R8),            intent(in), optional :: dynamicSrcMaskValue
 !    real(ESMF_KIND_R8),            intent(in), optional :: dynamicDstMaskValue
 !    integer,                       intent(out)          :: rc
@@ -364,8 +415,8 @@ program ESMF_RHandleDynamicMaskingEx
 ! source and destination objects.
 !
 ! So far in the example, only the {\tt srcField} had been dynamically masked.
-! However, elements in the {\tt dstField} can be masked following exactly the same
-! manner.
+! However, elements in the {\tt dstField} can be masked following exactly the
+! same manner.
 !
 ! In order to ensure that the {\tt dstField} is in a well defined condition, it
 ! is advisable to first reset it, e.g. to zero.
@@ -412,6 +463,15 @@ program ESMF_RHandleDynamicMaskingEx
     line=__LINE__, &
     file=__FILE__)) &
     call ESMF_Finalize(endflag=ESMF_END_ABORT)
+    
+#if 1
+  call ESMF_FieldWrite(dstField, fileName="dstFieldR8.nc", &
+    status=ESMF_FILESTATUS_REPLACE, rc=rc)
+  if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+    line=__LINE__, &
+    file=__FILE__)) &
+    call ESMF_Finalize(endflag=ESMF_END_ABORT)
+#endif
 
 !BOE
 ! Again an adequate procedure is supplied through 
@@ -437,7 +497,129 @@ program ESMF_RHandleDynamicMaskingEx
     file=__FILE__)) &
     call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
-  call ESMF_GridDestroy(srcGrid, rc=rc)
+  call ESMF_FieldDestroy(dstField, rc=rc)
+  if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+    line=__LINE__, &
+    file=__FILE__)) &
+    call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+! ----------------------------------------------------------------------
+
+!BOE
+! The above code demonstrated dynamic masking for source and destination Fields
+! that contain double precision, i.e. {\tt real(ESMF\_KIND\_R8)} data. Switching
+! to single precision, {\tt real(ESMF\_KIND\_R4)} data is straight forward.
+!EOE
+
+  ! create srcField
+!BOC
+  srcField = ESMF_FieldCreate(srcGrid, ESMF_TYPEKIND_R4, rc=rc)
+!EOC
+  if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+    line=__LINE__, &
+    file=__FILE__)) &
+    call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+  ! fill srcField with some data
+  call ESMF_FieldFill(srcField, dataFillScheme="sincos", rc=rc)
+  if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+    line=__LINE__, &
+    file=__FILE__)) &
+    call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+  ! create srcField
+!BOC
+  dstField = ESMF_FieldCreate(dstGrid, ESMF_TYPEKIND_R4, rc=rc)
+!EOC
+  if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+    line=__LINE__, &
+    file=__FILE__)) &
+    call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+!BOC
+  srcTermProcessing=0
+
+  call ESMF_FieldRegridStore(srcField=srcField, dstField=dstField, &
+    srcTermProcessing=srcTermProcessing, routehandle=routehandle, rc=rc)
+!EOC
+  if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+    line=__LINE__, &
+    file=__FILE__)) &
+    call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+!BOC
+  call ESMF_FieldGet(srcField, farrayPtr=farrayPtrR4, rc=rc)
+!EOC
+  if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+    line=__LINE__, &
+    file=__FILE__)) &
+    call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOC
+  farrayPtrR4(lbound(farrayPtrR4,1)+3,lbound(farrayPtrR4,2)+3) = srcMaskValueR4
+!EOC
+
+!BOC
+  call ESMF_FieldFill(dstField, dataFillScheme="const", const1=0.d0, rc=rc)
+!EOC
+  if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+    line=__LINE__, &
+    file=__FILE__)) &
+    call ESMF_Finalize(endflag=ESMF_END_ABORT)
+    
+!BOC
+  call ESMF_FieldGet(dstField, farrayPtr=farrayPtrR4, rc=rc)
+!EOC
+  if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+    line=__LINE__, &
+    file=__FILE__)) &
+    call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOC
+  farrayPtrR4(lbound(farrayPtrR4,1)+1,lbound(farrayPtrR4,2)+1) = dstMaskValueR4
+!EOC
+
+!BOE
+! The dynamic mask values, as well as the dynamic mask routine is passed into
+! the Field Regrid method as before. However, because of overload restrictions
+! of most current compilers, we are not currently able to offer dynamic masking
+! of different typekinds through a simple overloaded {\tt ESMF\_FieldRegrid()} 
+! interface. Instead, the current prototype introduces typekind specific calls like
+! {\tt ESMF\_FieldRegridR4R8R4()}. Here the three-part typekind signature at the end of the 
+! method name indicates that the {\tt dynamicMaskRoutine} argument is expected
+! to deal with {\tt real(ESMF\_KIND\_R4)} destination data (first typekind), 
+! {\tt real(ESMF\_KIND\_R8)} factors (second typekind), and 
+! {\tt real(ESMF\_KIND\_R4)} source data (third typekind).
+!EOE
+
+!BOC
+  call ESMF_FieldRegridR4R8R4(srcField=srcField, dstField=dstField, &
+    routehandle=routehandle, termorderflag=ESMF_TERMORDER_SRCSEQ, &
+    zeroregion=ESMF_REGION_EMPTY, &
+    dynamicSrcMaskValue=srcMaskValueR4, &
+    dynamicDstMaskValue=dstMaskValueR4, &
+    dynamicMaskRoutine=simpleDynMaskProcR4R8R4, &
+    rc=rc)
+!EOC
+  if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+    line=__LINE__, &
+    file=__FILE__)) &
+    call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+#if 1
+  call ESMF_FieldWrite(dstField, fileName="dstFieldR4.nc", &
+    status=ESMF_FILESTATUS_REPLACE, rc=rc)
+  if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+    line=__LINE__, &
+    file=__FILE__)) &
+    call ESMF_Finalize(endflag=ESMF_END_ABORT)
+#endif
+
+  call ESMF_FieldRegridRelease(routehandle, rc=rc)
+  if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+    line=__LINE__, &
+    file=__FILE__)) &
+    call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+  call ESMF_FieldDestroy(srcField, rc=rc)
   if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
     line=__LINE__, &
     file=__FILE__)) &
@@ -449,11 +631,20 @@ program ESMF_RHandleDynamicMaskingEx
     file=__FILE__)) &
     call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
+  call ESMF_GridDestroy(srcGrid, rc=rc)
+  if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+    line=__LINE__, &
+    file=__FILE__)) &
+    call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
   call ESMF_GridDestroy(dstGrid, rc=rc)
   if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
     line=__LINE__, &
     file=__FILE__)) &
     call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+
+! ----------------------------------------------------------------------
 
 10 continue
 

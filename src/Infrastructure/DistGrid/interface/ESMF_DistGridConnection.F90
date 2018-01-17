@@ -61,6 +61,7 @@ module ESMF_DistGridConnectionMod
 ! - ESMF-public methods:
 
   public ESMF_DistGridConnection
+  public ESMF_DistGridConnectionGet
   public ESMF_DistGridConnectionSet
   public ESMF_DistGridConnectionSetIntl
   public ESMF_DistGridConnectionPrint
@@ -165,6 +166,108 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(rc)) rc = ESMF_SUCCESS
  
   end subroutine ESMF_DistGridConnectionInt
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_DistGridConnectionGet()"
+!BOP
+! !IROUTINE: ESMF_DistGridConnectionGet - Get DistGridConnection
+! !INTERFACE:
+  subroutine ESMF_DistGridConnectionGet(connection, keywordEnforcer, &
+    tileIndexA, tileIndexB, dimCount, positionVector, orientationVector, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_DistGridConnection), intent(in)            :: connection
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    integer,                       intent(out), optional :: tileIndexA
+    integer,                       intent(out), optional :: tileIndexB
+    integer,                       intent(out), optional :: dimCount
+    integer,                       intent(out), optional :: positionVector(:)
+    integer,                       intent(out), optional :: orientationVector(:)
+    integer,                       intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!   \label{api:DistGridConnectionGet}
+!   Get connection parameters from an {\tt ESMF\_DistGridConnection} object.
+!   This interface provides access to all variables required to create a new
+!   connection using the {\tt ESMF\_DistGridConnectionSet()} method.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[connection]
+!     DistGridConnection object.
+!   \item[{[tileIndexA]}]
+!     Index of one of the two connected tiles.
+!   \item[{[tileIndexB]}]
+!     Index of the other connected tile.
+!   \item[{[dimCount]}]
+!     Number of dimensions of {\tt positionVector}.
+!   \item[{[positionVector]}]
+!     Position of tile B's minIndex with respect to tile A's minIndex.
+!     This array's size should be at least equal to {\tt dimCount}.
+!   \item[{[orientationVector]}]
+!     Lists which dimension of tile A is associated to which dimension of
+!     tile B. Negative index values may be used to indicate a reversal
+!     in index orientation. Should be at least of size {\tt dimCount}.
+!   \item[{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+!------------------------------------------------------------------------------
+    integer :: localrc      ! local return code
+    integer :: localdimCount
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! check if connection contains any elements
+    localdimCount = (connection % elementCount - 2)/2
+
+    if (localdimCount <= 0) then
+      call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_BAD, &
+        msg="Insufficient number of elements found.", &
+        ESMF_CONTEXT, rcToReturn=rc)
+      return
+    end if
+
+    ! get conected tiles
+    if (present(tileIndexA)) tileIndexA = connection % connection(1)
+    if (present(tileIndexB)) tileIndexB = connection % connection(2)
+
+    if (present(dimCount)) dimCount = localdimCount
+
+    if (present(positionVector)) then
+      if (size(positionVector) < localdimCount) then
+        call ESMF_LogSetError(rcToCheck=ESMC_RC_ARG_SIZE, &
+          msg="Size of positionVector array smaller than number of dimensions.", &
+          ESMF_CONTEXT, rcToReturn=rc)
+        return
+      end if
+      positionVector = 0
+      positionVector(1:localdimCount) = &
+        connection % connection(3:2+localdimCount)
+    end if
+
+    if (present(orientationVector)) then
+      if (size(orientationVector) < localdimCount) then
+        call ESMF_LogSetError(rcToCheck=ESMC_RC_ARG_SIZE, &
+          msg="Size of orientationVector array smaller than number of dimensions.", &
+          ESMF_CONTEXT, rcToReturn=rc)
+        return
+      end if
+      orientationVector = 0
+      orientationVector(1:localdimCount) = &
+        connection % connection(3+localdimCount:2+2*localdimCount)
+    end if
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end subroutine ESMF_DistGridConnectionGet
 !------------------------------------------------------------------------------
 
 
@@ -336,7 +439,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !------------------------------------------------------------------------------
 
 
-! -------------------------- ESMF-public method -------------------------------
+! -------------------------- ESMF-private method -------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_InterArrayCreateDGConn()"
 !BOPI

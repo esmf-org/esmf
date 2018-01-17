@@ -2,10 +2,6 @@ version: '2.2'
 prefix: esmftrc_
 metadata:
   type-aliases:
-#    uint4:
-#      class: int
-#      size: 4
-#      align: 4
     uint8:
       class: int
       size: 8
@@ -43,22 +39,6 @@ metadata:
       - type: clock
         name: sys_clock
         property: value
-    enum_type_control:
-        class: enum
-        value-type: uint8
-        members:
-            - start_phase
-            - end_phase
-            - start_prologue
-            - end_prologue
-            - start_epilogue
-            - end_epilogue
-    enum_type_region:
-        class: enum
-        value-type: uint8
-        members:
-            - enter
-            - exit
     enum_type_method:
         class: enum
         value-type: uint8
@@ -91,7 +71,7 @@ metadata:
       description: System clock
       $return-ctype: uint64_t
   env:
-    esmf_trace_version: '0.3'
+    esmf_trace_version: '0.4'
   trace:
     byte-order: le
     uuid: auto
@@ -118,7 +98,7 @@ metadata:
       event-header-type:
         class: struct
         fields:
-            id: uint32
+            id: uint8
             timestamp: clock-int
       events:
         #denotes start of prologue
@@ -143,6 +123,23 @@ metadata:
                 fields:
                     name:
                         class: string
+        define_region:
+            payload-type:
+                class: struct
+                fields:
+                    id: uint16
+                    name:
+                        class: string
+        regionid_enter:
+            payload-type:
+                class: struct
+                fields:
+                    regionid: uint16
+        regionid_exit:
+            payload-type:
+                class: struct
+                fields:
+                    regionid: uint16
         comp:
             payload-type: comp_type
         mem:

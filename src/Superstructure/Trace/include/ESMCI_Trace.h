@@ -47,6 +47,7 @@ namespace ESMCI {
   void TraceSetupTypes(int *rc);  
   bool TraceIsEnabledForPET(int *rc);
   std::string TraceGetMetadataString();
+  int TraceMapVmId(VMId *vmid, int *rc);
   
   ////////////////////////////////
 
@@ -59,8 +60,8 @@ namespace ESMCI {
   void TraceEventPhaseEpilogueExit(int *ep_vmid, int *ep_baseid, 
                                     int *ep_method, int *ep_phase);
   
-  void TraceEventRegionEnter(const char*name);
-  void TraceEventRegionExit(const char*name);
+  void TraceEventRegionEnter(std::string name);
+  void TraceEventRegionExit(std::string name);
   
   void TraceEventComponentInfo(Comp *comp, int *ep_vmid, int *ep_baseid,
                                const char *ep_name,
