@@ -1332,6 +1332,7 @@
             regDecomp=(/2,2/), name="Grid", rc=rc)
       call ESMF_Test((rc == ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
+      call c_esmc_baseprint (grid, 0, 'debug', ESMF_FALSE, '', ESMF_TRUE, rc)
 
       !------------------------------------------------------------------------
       !EX_UTest
@@ -1381,9 +1382,9 @@
       call ESMF_Test((rc == ESMF_SUCCESS), &
           name, failMsg, result, ESMF_SRCLINE)
 
-#if 0
+#if 1
       !------------------------------------------------------------------------
-      !EXxxx_UTest
+      !EX_UTest
       ! Test for object found.
       ! WARNING: This is testing an INTERNAL method.  It is NOT
       ! part of the supported ESMF user API!
