@@ -413,12 +413,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! block by recursively querying child execution blocks and component infos
 
 ! !INTERFACE:
-  subroutine ESMF_MapperExecutionBlockCollect(mapper, execBlock, keywordEnforcer, rc)
+  subroutine ESMF_MapperExecutionBlockCollect(mapper, execBlock, optThresholdReached, keywordEnforcer, rc)
 !
 !
 ! !ARGUMENTS:
     type(ESMF_Mapper), intent(inout) :: mapper
     type(ESMF_MapperExecutionBlock), intent(inout) :: execBlock
+    logical,  intent(out) :: optThresholdReached
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,             intent(out), optional :: rc
 
@@ -440,6 +441,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !EOP
   !-----------------------------------------------------------------------------    
+    optThresholdReached = .false.
     ! Collect info on all child execution blocks
     nChildExecBlocks = 0
     nChildCompInfos = 0
@@ -452,7 +454,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     do i=1,nChildExecBlocks
       call ESMF_MapperExecutionBlockCollect(mapper,&
-            execBlock%execBlockp%execBlocks(i), rc=localrc)
+            execBlock%execBlockp%execBlocks(i), optThresholdReached, rc=localrc)
       if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
@@ -605,14 +607,16 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE: ESMF_MapperOptimize - Optimize using the mapper
 
 ! !INTERFACE:
-  subroutine ESMF_MapperOptimize(mapper, keywordEnforcer, rc)
+  subroutine ESMF_MapperOptimize(mapper, keywordEnforcer, optThresholdReached, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_Mapper), intent(inout) :: mapper
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    logical,              intent(out), optional :: optThresholdReached
     integer,             intent(out), optional :: rc
 
     integer :: localrc
+    logical :: loptThresholdReached
 ! !DESCRIPTION:
 !   Optimize using the mapper based on the set constraints
 !
@@ -628,26 +632,32 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   !-----------------------------------------------------------------------------    
 
     ! First collect info on all execution blocks
+    loptThresholdReached = .false.
     call ESMF_MapperExecutionBlockCollect(mapper, mapper%mapperp%rootExecBlock,&
-          rc=localrc)
+          optThresholdReached=loptThresholdReached, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
-    if(mapper%mapperp%optInfo%optMethod == ESMF_MAPPER_WGT_EXEC_TIME_OPT_METHOD) then
-      call ESMF_MapperPartitionPets(mapper, mapper%mapperp%rootExecBlock,&
-            mapper%mapperp%petList, rc=localrc)
-      if (ESMF_LogFoundError(localrc, &
-        ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
-    else
-      ! Unknown optimization method
-      localrc = ESMF_FAILURE
-      if (ESMF_LogFoundError(localrc, &
-        ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
+    if(.not. loptThresholdReached) then
+      if(mapper%mapperp%optInfo%optMethod == ESMF_MAPPER_WGT_EXEC_TIME_OPT_METHOD) then
+        call ESMF_MapperPartitionPets(mapper, mapper%mapperp%rootExecBlock,&
+              mapper%mapperp%petList, rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
+          ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+      else
+        ! Unknown optimization method
+        localrc = ESMF_FAILURE
+        if (ESMF_LogFoundError(localrc, &
+          ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+      end if
     end if
   
+    if(present(optThresholdReached)) then
+      optThresholdReached = loptThresholdReached
+    end if
     if (present(rc)) rc = ESMF_SUCCESS
   end subroutine
 !------------------------------------------------------------------------------
