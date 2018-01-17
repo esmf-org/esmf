@@ -42,6 +42,7 @@
 #include "ESMCI_Trace.h"
 #include "ESMCI_Comp.h"
 #include "ESMCI_VMKernel.h"
+#include "ESMCI_HashMap.h"
 
 #define BT_CHK(_value, _ctx)                                            \
   if ((_value) != 0) {							\
@@ -133,7 +134,8 @@ struct bt_ctf_stream_class {
 #ifdef ESMF_TRACE_INTERNAL 
 
 #include <esmftrc.h>
-#define EVENT_BUF_SIZE 16384
+#define EVENT_BUF_SIZE_DEFAULT 4096
+#define EVENT_BUF_SIZE_EAGER 1024
 
 #ifdef __cplusplus
 # define TO_VOID_PTR(_value)		static_cast<void *>(_value)
@@ -150,11 +152,72 @@ using std::string;
 using std::vector;
 using std::stringstream;
 
+#define REGION_HASHTABLE_SIZE 100
+
 namespace ESMCI {
 
+  struct StringHashF {
+    unsigned long operator()(const string& s) const
+    {
+      unsigned long hash = 5381;
+      int c;
+      const char *str = s.c_str();     
+      while (c = *str++)
+        hash = ((hash << 5) + hash) + c; /* hash * 33 + c */
+      //printf("hash for %s = %d\n", s.c_str(), hash % REGION_HASHTABLE_SIZE);
+      return hash % REGION_HASHTABLE_SIZE;
+    }
+  };
+  
   static bool traceLocalPet = false;
   static int traceClock = 0;
   static int64_t traceClockOffset = 0;
+  static HashMap<string, int, REGION_HASHTABLE_SIZE, StringHashF> regionMap;
+  static int nextRegionId = 1;
+  
+  //this data structure used to map VMIds(vmKey,localid) to an integer id
+#define VMID_MAP_SIZE 10000
+  static VMId vmIdMap[VMID_MAP_SIZE];
+  static int nextVmId = 0;
+
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::TraceMapVmId()"  
+  int TraceMapVmId(VMId *vmid, int *rc) {
+
+    int localrc = ESMC_RC_NOT_IMPL;
+    if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+    
+    int foundIdx;
+    //search backward - vm more likely to be at the end
+    for (foundIdx=nextVmId-1; foundIdx >= 0; foundIdx--) {
+      if (VMIdCompare(vmid, &(vmIdMap[foundIdx]))) {
+        break;
+      }
+    }
+    if (foundIdx >= 0) {
+      if (rc!=NULL) *rc = ESMF_SUCCESS;
+      return foundIdx;
+    }
+    else {
+      if (nextVmId >= VMID_MAP_SIZE) {
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+                                      "Out of VmIdMap space inside tracing", ESMC_CONTEXT, rc);
+        return -1;
+      }
+      else {
+        vmIdMap[nextVmId] = VMIdCreate(&localrc); 
+        if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+                                          ESMC_CONTEXT, rc))
+          return -1;
+        VMIdCopy(&(vmIdMap[nextVmId]), vmid);
+        foundIdx = nextVmId;
+        nextVmId++;
+
+        if (rc!=NULL) *rc=ESMF_SUCCESS;
+        return foundIdx;
+      }
+    }        
+  }
   
   static vector<string> split(const string& s, const string& delim, const bool keep_empty = true) {
     vector<string> result;
@@ -254,7 +317,7 @@ namespace ESMCI {
 	  ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
 					"Invalid format in env variable ESMF_RUNTIME_TRACE_PETLIST", 
 					ESMC_CONTEXT, rc);
-	  if (rc != NULL) rc = ESMF_SUCCESS;
+	  if (rc != NULL) *rc = ESMF_SUCCESS;
 	  return false;
 	}
 		
@@ -1097,8 +1160,22 @@ namespace ESMCI {
                                     ESMC_CONTEXT, rc);
       return;
     }
-  
-    buf = FROM_VOID_PTR(uint8_t, malloc(EVENT_BUF_SIZE));
+
+    //allocate event buffer
+    char const *envFlush = VM::getenv("ESMF_RUNTIME_TRACE_FLUSH");
+    std::string strFlush = "DEFAULT";
+    int eventBufSize = EVENT_BUF_SIZE_DEFAULT;
+    
+    if (envFlush != NULL && strlen(envFlush) > 0) {     
+      strFlush = envFlush;
+      if (trim(strFlush) == "EAGER" || trim(strFlush) == "eager" || trim(strFlush) == "Eager") {
+        eventBufSize = EVENT_BUF_SIZE_EAGER;
+        logMsg.str("ESMF Tracing set to EAGER flushing.");
+        ESMC_LogDefault.Write(logMsg.str().c_str(), ESMC_LOGMSG_INFO);
+      }
+    }
+    
+    buf = FROM_VOID_PTR(uint8_t, malloc(eventBufSize));
     if (!buf) {
       free(ctx);
       ESMC_LogDefault.MsgFoundError(ESMC_RC_MEM_ALLOCATE, "Cannot allocate trace event buffer", 
@@ -1106,7 +1183,7 @@ namespace ESMCI {
       return;
     }
     
-    memset(buf, 0, EVENT_BUF_SIZE); 
+    memset(buf, 0, eventBufSize); 
     
     //make relative path absolute if needed
     if (trace_dir[0] != '/') {
@@ -1178,7 +1255,7 @@ namespace ESMCI {
       }
     }
     
-    esmftrc_init(&ctx->ctx, buf, EVENT_BUF_SIZE, cbs, ctx);
+    esmftrc_init(&ctx->ctx, buf, eventBufSize, cbs, ctx);
     open_packet(ctx);
 
     //store as global context
@@ -1191,7 +1268,7 @@ namespace ESMCI {
   void TraceClose(int *rc) {
     struct esmftrc_platform_filesys_ctx *ctx = g_esmftrc_platform_filesys_ctx;
     
-    if(rc != NULL) rc = ESMF_SUCCESS;
+    if(rc != NULL) *rc = ESMF_SUCCESS;
 
     // allow multiple calls to TraceClose for system test
     // ignore any call after the first one
@@ -1243,16 +1320,53 @@ namespace ESMCI {
                                         *ep_vmid, *ep_baseid, *ep_method, *ep_phase);
   }
 
-  void TraceEventRegionEnter(const char *name) {
+  void TraceEventRegionEnter(std::string name) {
     if (!traceLocalPet) return;
-    esmftrc_default_trace_region_enter(esmftrc_platform_get_default_ctx(),
-                                       name);
+
+    int region_id = 0;
+    bool present = regionMap.get(name, region_id);
+    if (!present) {
+      region_id = nextRegionId;
+      nextRegionId++;
+      regionMap.put(name, region_id);
+      //printf("added new region: %s = %d\n", name.c_str(), region_id);
+      //add definition to trace
+      esmftrc_default_trace_define_region(esmftrc_platform_get_default_ctx(),
+                                          region_id,
+                                          name.c_str());
+    }
+    
+    esmftrc_default_trace_regionid_enter(esmftrc_platform_get_default_ctx(),
+                                         region_id);
+    
+    //esmftrc_default_trace_region_enter(esmftrc_platform_get_default_ctx(),
+    //                                   name.c_str());
   }
 
-  void TraceEventRegionExit(const char *name) {
+  void TraceEventRegionExit(std::string name) {
     if (!traceLocalPet) return;
-    esmftrc_default_trace_region_exit(esmftrc_platform_get_default_ctx(),
-                                       name);
+
+    int region_id = 0;
+    bool present = regionMap.get(name, region_id);
+    if (!present) {
+      //if timing regions are well-formed, then this should
+      //never happen since the region would have already been
+      //added - but we'll allow for poorly formed regions
+      region_id = nextRegionId;
+      nextRegionId++;
+      regionMap.put(name, region_id);
+      //add definition to trace
+      esmftrc_default_trace_define_region(esmftrc_platform_get_default_ctx(),
+                                          region_id,
+                                          name.c_str());
+    }
+    
+    
+    esmftrc_default_trace_regionid_exit(esmftrc_platform_get_default_ctx(),
+                                         region_id);
+
+    //esmftrc_default_trace_region_exit(esmftrc_platform_get_default_ctx(),
+    //                                   name);
   }
   
 #undef  ESMC_METHOD

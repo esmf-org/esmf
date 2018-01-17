@@ -531,7 +531,7 @@ LocalArray *LocalArray::create(
 //
 // !DESCRIPTION:
 //  Copy from {\tt larrayIn} with the option to adjust lbounds and ubounds in
-//  the Fortran dope vector. Depending on {\tt copyflag" a deep copy of the
+//  the Fortran dope vector. Depending on {\tt copyflag} a deep copy of the
 //  data is made, in which case memory for the data will be allocated, or
 //  the existing data in {\tt larrayIn} will be referenced by the returned
 //  LocalArray object.

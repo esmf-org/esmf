@@ -2427,6 +2427,12 @@ VM *VM::initialize(
       esmfRuntimeEnv.push_back(esmfRuntimeVarName);
       esmfRuntimeEnvValue.push_back(esmfRuntimeVarValue);
     }
+    esmfRuntimeVarName = "ESMF_RUNTIME_TRACE_FLUSH";
+    esmfRuntimeVarValue = std::getenv(esmfRuntimeVarName);
+    if (esmfRuntimeVarValue){
+      esmfRuntimeEnv.push_back(esmfRuntimeVarName);
+      esmfRuntimeEnvValue.push_back(esmfRuntimeVarValue);
+    }
       
     int count = esmfRuntimeEnv.size();
     GlobalVM->broadcast(&count, sizeof(int), 0);

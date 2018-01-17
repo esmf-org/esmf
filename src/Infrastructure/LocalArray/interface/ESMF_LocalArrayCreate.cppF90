@@ -537,7 +537,7 @@ end function
     ! Check rank argument
     if (rank<1 .or. rank>ESMF_MAXDIM) then
       call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, &
-        msg="- Unsupported rank", &
+        msg="Unsupported rank", &
         ESMF_CONTEXT, rcToReturn=rc)
       return
     endif
@@ -546,7 +546,7 @@ end function
     if (.not.present(totalCount)) then
       if (.not.present(totalLBound).or..not.present(totalUBound)) then
         call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_OPT, &
-          msg="- totalLBound and totalUBound must be present when totalCount argument is not present", &
+          msg="totalLBound and totalUBound must be present when totalCount argument is not present", &
           ESMF_CONTEXT, rcToReturn=rc)
         return
       endif
@@ -556,7 +556,7 @@ end function
     if (present(totalLBound)) then
       if (size(totalLBound)<rank) then
         call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_SIZE, &
-          msg="- totalLBound argument must be of size rank", &
+          msg="totalLBound argument must be of size rank", &
           ESMF_CONTEXT, rcToReturn=rc)
         return
       endif
@@ -565,7 +565,7 @@ end function
     if (present(totalUBound)) then
       if (size(totalUBound)<rank) then
         call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_SIZE, &
-          msg="- totalUBound argument must be of size rank", &
+          msg="totalUBound argument must be of size rank", &
           ESMF_CONTEXT, rcToReturn=rc)
         return
       endif
@@ -574,7 +574,7 @@ end function
     if (present(totalCount)) then
       if (size(totalCount)<rank) then
         call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_SIZE, &
-          msg="- totalCount argument must be of size rank", &
+          msg="totalCount argument must be of size rank", &
           ESMF_CONTEXT, rcToReturn=rc)
         return
       endif
@@ -595,7 +595,7 @@ end function
     do i=1, rank
       if (cnts(i).ne.(ub(i)-lb(i)+1)) then
         call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_VALUE, &
-          msg="- totalCount and bounds mismatch detected", &
+          msg="totalCount and bounds mismatch detected", &
           ESMF_CONTEXT, rcToReturn=rc)
         return
       endif
@@ -895,7 +895,7 @@ end function
     else @\
       if (present(datacopyflag)) then @\
         call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_OPT, & @\
-          msg="- datacopyflag argument is only allowed with associated farrayPtr argument", & @\
+          msg="datacopyflag argument is only allowed with associated farrayPtr argument", & @\
           ESMF_CONTEXT, rcToReturn=rc) @\
         return @\
       endif @\
@@ -906,7 +906,7 @@ end function
     if (.not.associated(farrayPtr) .and. .not.present(totalCount)) then @\
       if (.not.present(totalLBound) .or. .not.present(totalUBound)) then @\
         call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_OPT, & @\
-          msg="- totalLBound and totalUBound must be present when totalCount argument is not present", & @\
+          msg="totalLBound and totalUBound must be present when totalCount argument is not present", & @\
           ESMF_CONTEXT, rcToReturn=rc) @\
         return @\
       endif @\
@@ -916,7 +916,7 @@ end function
     if (present(totalLBound)) then @\
       if (size(totalLBound)<mrank) then @\
         call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_SIZE, & @\
-          msg="- totalLBound argument must be of size rank", & @\
+          msg="totalLBound argument must be of size rank", & @\
           ESMF_CONTEXT, rcToReturn=rc) @\
         return @\
       endif @\
@@ -924,7 +924,7 @@ end function
         do i=1, mrank @\
           if (lb(i) .ne. totalLBound(i)) then @\
             call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_INCOMP, & @\
-              msg="- provided totalLBound are incompatible with associated farrayPtr", & @\
+              msg="provided totalLBound are incompatible with associated farrayPtr", & @\
               ESMF_CONTEXT, rcToReturn=rc) @\
             return @\
           endif @\
@@ -936,7 +936,7 @@ end function
     if (present(totalUBound)) then @\
       if (size(totalUBound)<mrank) then @\
         call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_SIZE, & @\
-          msg="- totalUBound argument must be of size rank", & @\
+          msg="totalUBound argument must be of size rank", & @\
           ESMF_CONTEXT, rcToReturn=rc) @\
         return @\
       endif @\
@@ -944,7 +944,7 @@ end function
         do i=1, mrank @\
           if (ub(i) .ne. totalUBound(i)) then @\
             call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_INCOMP, & @\
-              msg="- provided totalUBound are incompatible with associated farrayPtr", & @\
+              msg="provided totalUBound are incompatible with associated farrayPtr", & @\
               ESMF_CONTEXT, rcToReturn=rc) @\
             return @\
           endif @\
@@ -956,7 +956,7 @@ end function
     if (present(totalCount)) then @\
       if (size(totalCount)<mrank) then @\
         call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_SIZE, & @\
-          msg="- totalCount argument must be of size rank", & @\
+          msg="totalCount argument must be of size rank", & @\
           ESMF_CONTEXT, rcToReturn=rc) @\
         return @\
       endif @\
@@ -964,7 +964,7 @@ end function
         do i=1, mrank @\
           if (cnts(i) .ne. totalCount(i)) then @\
             call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_INCOMP, & @\
-              msg="- provided totalCount are incompatible with associated farrayPtr", & @\
+              msg="provided totalCount are incompatible with associated farrayPtr", & @\
               ESMF_CONTEXT, rcToReturn=rc) @\
             return @\
           endif @\
@@ -990,7 +990,7 @@ end function
     do i=1, mrank @\
       if (cnts(i) .ne. (ub(i)-lb(i)+1)) then @\
         call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_VALUE, & @\
-          msg="- totalCount and bounds mismatch detected", & @\
+          msg="totalCount and bounds mismatch detected", & @\
           ESMF_CONTEXT, rcToReturn=rc) @\
         return @\
       endif @\
@@ -2164,7 +2164,7 @@ TypeKindRankDeclarationMacro(LocalArrayCopy)
 !------------------------------------------------------------------------------
     ! Local vars
     integer :: localrc                   ! local return code
-    integer :: localtk
+    integer :: localtk, i
 
     localrc = ESMF_RC_NOT_IMPL
 
@@ -2172,6 +2172,16 @@ TypeKindRankDeclarationMacro(LocalArrayCopy)
     ! the array object is only partially created at this point
             
     localtk = typekind%dkind
+    
+    ! Sanity check the bounds
+    do i=1, rank
+      if (totalUBound(i) < totalLBound(i)) then
+        call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, &
+          msg="Upper bound must not be below lower bound!", &
+          ESMF_CONTEXT, rcToReturn=rc)
+        return
+      endif
+    enddo
         
     ! Call a T/K/R specific interface
 

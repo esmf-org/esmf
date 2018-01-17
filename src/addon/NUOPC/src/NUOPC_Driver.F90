@@ -2845,14 +2845,16 @@ call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO)
         return  ! bail out
       if (associated(srcPetList).and.associated(dstPetList)) then
         ! must construct the union petList
-        allocate(connectorPetListTemp(size(srcPetList)+size(dstPetList)), stat=stat)
+        allocate(connectorPetListTemp(size(srcPetList)+size(dstPetList)), &
+          stat=stat)
         if (ESMF_LogFoundAllocError(statusToCheck=stat, &
           msg="Allocation #1 of connector petList failed.", &
           line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
           return  ! bail out
-        connectorPetListTemp = srcPetList ! copy contents
+        cIndex = size(srcPetList)
+        connectorPetListTemp(1:cIndex) = srcPetList(:) ! copy all src PETs
         ! there is no guarantee of order, no way to optimize construction
-        cIndex = size(srcPetList) + 1
+        cIndex = cIndex+1
         do k=1, size(dstPetList)
           ! append element k in dstPetList to connectorPetList if not yet in
           do l=1, size(srcPetList)
