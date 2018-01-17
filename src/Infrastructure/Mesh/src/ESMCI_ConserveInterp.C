@@ -1008,10 +1008,26 @@ namespace ESMCI {
       //loop through merging other things
       for (int i=0; i<dst_elems.size(); i++) {
 
-        if (((*valid)[i]==1) || ((*tmp_valid)[i]==1)) (*valid)[i]=1;
-        else (*valid)[i]=0;
-        
-        (*sintd_areas_out)[i]=(*sintd_areas_out)[i]+(*tmp_sintd_areas_out)[i];
+        if ((*valid)[i]==1) {
+          if ((*tmp_valid)[i]==1) {
+            (*valid)[i]=1;
+            (*sintd_areas_out)[i]=(*sintd_areas_out)[i]+(*tmp_sintd_areas_out)[i];
+            // (*dst_areas_out)[i] already set
+          } else {
+            (*valid)[i]=1; 
+            // (*sintd_areas_out)[i] already set
+            // (*dst_areas_out)[i] already set
+          }
+        } else {
+          if ((*tmp_valid)[i]==1) {
+            (*valid)[i]=1;
+            (*sintd_areas_out)[i]=(*tmp_sintd_areas_out)[i];
+            (*dst_areas_out)[i]=(*tmp_dst_areas_out)[i];
+          } else {
+            (*valid)[i]=0;
+          }
+        }
+
       }
     }
 
@@ -1390,17 +1406,6 @@ void norm_poly3D(int num_p, double *p) {
                                        &num_sintd_nodes, sintd_coords); 
  
 
-#if 0
-      if (((dst_elem->get_id()==173) && (src_elem->get_id()==409)) ||
-	  ((dst_elem->get_id()==171) && (src_elem->get_id()==406))) {
-	printf("%d %d dst: ",dst_elem->get_id(),src_elem->get_id());
-	for (int j=0; j<num_dst_nodes; j++) {
-	  printf(" [%f,%f,%f] ",dst_coords[3*j],dst_coords[3*j+1],dst_coords[3*j+2]);
-	}
-	printf("\n");
-      }
-#endif
-
 
       // Get rid of degenerate edges
       remove_0len_edges3D(&num_sintd_nodes, sintd_coords);
@@ -1508,7 +1513,7 @@ void norm_poly3D(int num_p, double *p) {
 
       // Init everything to 0s
       (*valid_list)[i]=0;
-       (*sintd_area_list)[i]=0.0;
+      (*sintd_area_list)[i]=0.0;
       (*dst_area_list)[i]=0.0;
 
       
@@ -1764,6 +1769,7 @@ void norm_poly3D(int num_p, double *p) {
       if (left_turn && right_turn) is_concave=true;
     }
 
+
     // If not concave then just call into the lower level
     if (!is_concave) {
       calc_1st_order_weights_2D_3D_sph_src_pnts(num_src_nodes, src_coords,  
@@ -1842,6 +1848,7 @@ void norm_poly3D(int num_p, double *p) {
       tri[7]=src_coords[3*tri_ind[5]+1];
       tri[8]=src_coords[3*tri_ind[5]+2];
 
+
       // printf("tri 2=%d %d %d\n",tri_ind[3],tri_ind[4],tri_ind[5]);
       // printf("tri 2=(%f %f) (%f %f) (%f %f)\n",tri[0],tri[1],tri[2],tri[3],tri[4],tri[5]);
 
@@ -1867,19 +1874,36 @@ void norm_poly3D(int num_p, double *p) {
       // Merge together src area
       *src_elem_area=*src_elem_area+src_elem_area2;
 
-      //loop through merging other things
+      //loop through merging valid, sintd area and dst area
       for (int i=0; i<dst_elems.size(); i++) {
 
-        if (((*valid)[i]==1) || ((*tmp_valid)[i]==1)) (*valid)[i]=1;
-        else (*valid)[i]=0;
-        
-        (*sintd_areas_out)[i]=(*sintd_areas_out)[i]+(*tmp_sintd_areas_out)[i];
+        if ((*valid)[i]==1) {
+          if ((*tmp_valid)[i]==1) {
+            (*valid)[i]=1;
+            (*sintd_areas_out)[i]=(*sintd_areas_out)[i]+(*tmp_sintd_areas_out)[i];
+            // (*dst_areas_out)[i] already set
+          } else {
+            (*valid)[i]=1; 
+            // (*sintd_areas_out)[i] already set
+            // (*dst_areas_out)[i] already set
+          }
+        } else {
+          if ((*tmp_valid)[i]==1) {
+            (*valid)[i]=1;
+            (*sintd_areas_out)[i]=(*tmp_sintd_areas_out)[i];
+            (*dst_areas_out)[i]=(*tmp_dst_areas_out)[i];
+          } else {
+            (*valid)[i]=0;
+          }
+        }
+
       }
     }
 
     // Loop calculating weights
     for (int i=0; i<dst_elems.size(); i++) {
       if ((*valid)[i]==1) {
+
         // calc weight
         double weight=(*sintd_areas_out)[i]/(*dst_areas_out)[i];
         
