@@ -308,6 +308,7 @@
       ! part of the supported ESMF user API!
       buff_size = offset1 ! from previous inquiry
       allocate (buffer(buff_size))
+      buffer = char (z'42')
       offset2 = 0
       call ESMF_BaseSerialize (base, buffer, offset2, &
           attreconflag, ESMF_NOINQUIRE, rc=rc)
@@ -327,6 +328,8 @@
       write(failMsg, *) 'actual offset', offset2, ' > inquire offset', offset1
       call ESMF_Test(offset1 >= offset2, &
                       name, failMsg, result, ESMF_SRCLINE)
+
+      ! print '(25z3)', iachar (buffer)
 
       !EX_UTest
       ! test doing a deserialize for real.
@@ -386,6 +389,12 @@
       ! part of the supported ESMF user API!
       write(name, *) "Compare original vs inquired VMId inquiry"
       write(failMsg, *) 'VMIds do not compare'
+#if 0
+      print *, 'original vmid:'
+      call ESMF_VMIdPrint (vmid)
+      print *, 'deserialized/inquiry vmid:'
+      call ESMF_VMIdPrint (vmid_inq)
+#endif
       tf = ESMF_VMIdCompare (vmid, vmid_inq, rc=rc)
       call ESMF_Test((rc == ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)

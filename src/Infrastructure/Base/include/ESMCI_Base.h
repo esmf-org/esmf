@@ -48,6 +48,8 @@ class ESMC_Base
   protected:
     int             ID;           // unique ID for any object in this VM context
     ESMCI::VMId     *vmID;        // unique vmID for any VM in the system
+    int             ID_remote;    // remote ID from proxies origin
+    ESMCI::VMId     *vmID_remote; // remote VMId from proxies origin
     bool            vmIDCreator;  // responsible for deleting vmID allocation
     ESMCI::VM       *vm;          // VM on which this Base was created
     int             refCount;     // number of references to this instance

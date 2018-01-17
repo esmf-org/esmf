@@ -205,7 +205,7 @@ namespace ESMCI {
         return -1;
       }
       else {
-        vmIdMap[nextVmId] = VMIdCreate(&localrc); 
+        localrc = (&vmIdMap[nextVmId])->create ();
         if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
                                           ESMC_CONTEXT, rc))
           return -1;

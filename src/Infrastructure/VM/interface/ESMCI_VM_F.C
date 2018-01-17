@@ -1273,7 +1273,7 @@ extern "C" {
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     int localrc = ESMC_RC_NOT_IMPL;
     *vmid = new ESMCI::VMId;              // allocate memory off the heap
-    **vmid = ESMCI::VMIdCreate(&localrc); // allocate VMId internal members
+    localrc = (*vmid)->create (); // allocate VMId internal members
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       rc))
       return;
@@ -1287,7 +1287,7 @@ extern "C" {
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     int localrc = ESMC_RC_NOT_IMPL;
-    ESMCI::VMIdDestroy(*vmid, &localrc);  // free memory for internal members
+    localrc = (*vmid)->destroy ();      // free memory for internal members
     delete *vmid;                       // free memory for this VMId
     *vmid=NULL;
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
@@ -1305,7 +1305,9 @@ extern "C" {
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     int localrc = ESMC_RC_NOT_IMPL;
-    ESMCI::VMIdGet(*vmid, localID, key, key_len, rc);
+    localrc = (*vmid)->get(localID, key, key_len);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      rc))
     // return successfully
     if (rc!=NULL) *rc = ESMF_SUCCESS; // TODO: finish error handling
   }
@@ -1332,7 +1334,9 @@ extern "C" {
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     int localrc = ESMC_RC_NOT_IMPL;
     ESMCI::VMId *localvmid = *vmid;
-    ESMCI::VMIdSet(*vmid, *localID, key, key_len, rc);
+    localrc = (*vmid)->set(*localID, key, key_len);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      rc))
     // return successfully
     if (rc!=NULL) *rc = ESMF_SUCCESS; // TODO: finish error handling
   }
