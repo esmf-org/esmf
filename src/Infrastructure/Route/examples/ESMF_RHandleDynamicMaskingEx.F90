@@ -464,7 +464,7 @@ program ESMF_RHandleDynamicMaskingEx
     file=__FILE__)) &
     call ESMF_Finalize(endflag=ESMF_END_ABORT)
     
-#if 1
+#if 0
   call ESMF_FieldWrite(dstField, fileName="dstFieldR8.nc", &
     status=ESMF_FILESTATUS_REPLACE, rc=rc)
   if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -604,7 +604,7 @@ program ESMF_RHandleDynamicMaskingEx
     file=__FILE__)) &
     call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
-#if 1
+#if 0
   call ESMF_FieldWrite(dstField, fileName="dstFieldR4.nc", &
     status=ESMF_FILESTATUS_REPLACE, rc=rc)
   if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
