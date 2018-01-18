@@ -580,9 +580,9 @@ contains
 
         call ESMF_BaseGetVMId (fieldp%base, vmid, rc=localrc)
         if (present(filename)) then
-          call c_ESMC_BasePrint(fieldp, 1, "debug", .true., filename, localrc)
+          call c_ESMC_BasePrint(fieldp, 1, "debug", ESMF_TRUE, filename, ESMF_TRUE, localrc)
         else
-          call c_ESMC_BasePrint(fieldp, 1, "debug", .false., 0, localrc)
+          call c_ESMC_BasePrint(fieldp, 1, "debug", ESMF_FALSE, "", ESMF_FALSE, localrc)
         endif
 
       case (ESMF_STATEITEM_ARRAY%ot)

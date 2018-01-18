@@ -2025,8 +2025,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        if (ESMF_LogFoundError(localrc1, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc1)) return
-       call c_ESMC_BasePrint(sp1%base, level, "brief", .false., "", &
-                             .false., localrc1)
+       call c_ESMC_BasePrint(sp1%base, level, "brief", ESMF_FALSE, "", &
+                             ESMF_FALSE, localrc1)
        if (ESMF_LogFoundError(localrc1, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc1)) return
@@ -2037,8 +2037,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
          if (ESMF_LogFoundError(localrc1, &
            ESMF_ERR_PASSTHRU, &
            ESMF_CONTEXT, rcToReturn=rc1)) return
-         call c_ESMC_BasePrint(sp1%base, level, "debug", .true., filename, &
-                               .false., localrc1)
+         call c_ESMC_BasePrint(sp1%base, level, "debug", ESMF_TRUE, filename, &
+                               ESMF_FALSE, localrc1)
          if (ESMF_LogFoundError(localrc1, &
            ESMF_ERR_PASSTHRU, &
            ESMF_CONTEXT, rcToReturn=rc1)) return
