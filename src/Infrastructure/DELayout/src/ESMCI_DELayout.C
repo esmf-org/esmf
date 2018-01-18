@@ -17,7 +17,7 @@
 #define XXE_EXEC_MEMLOG_off
 #define XXE_EXEC_BUFFLOG_off
 #define XXE_EXEC_OPSLOG_off
-#define XXE_EXEC_RECURSLOG_on
+#define XXE_EXEC_RECURSLOG_off
 //==============================================================================
 //
 // DELayout class implementation (body) file
