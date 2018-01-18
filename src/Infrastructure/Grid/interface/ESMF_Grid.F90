@@ -22269,8 +22269,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             ESMF_CONTEXT, rcToReturn=rc)) return
 
        ! Just print its base for now
-       call c_ESMC_BasePrint(grid, 0, "debug", .false., "", &
-                             .false., localrc)
+       call c_ESMC_BasePrint(grid, 0, "debug", ESMF_FALSE, "", &
+                             ESMF_FALSE, localrc)
        if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
