@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2017, University Corporation for Atmospheric Research, 
+// Copyright 2002-2018, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -531,7 +531,7 @@ LocalArray *LocalArray::create(
 //
 // !DESCRIPTION:
 //  Copy from {\tt larrayIn} with the option to adjust lbounds and ubounds in
-//  the Fortran dope vector. Depending on {\tt copyflag" a deep copy of the
+//  the Fortran dope vector. Depending on {\tt copyflag} a deep copy of the
 //  data is made, in which case memory for the data will be allocated, or
 //  the existing data in {\tt larrayIn} will be referenced by the returned
 //  LocalArray object.

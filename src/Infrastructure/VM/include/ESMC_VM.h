@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2017, University Corporation for Atmospheric Research, 
+// Copyright 2002-2018, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -47,6 +47,33 @@ typedef struct{
 }ESMC_VM;
 
 // Class API
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE: ESMC_VMBarrier - block calling PETs until all PETS called
+//
+// !INTERFACE:
+int ESMC_VMBarrier(
+  ESMC_VM vm                   // in
+);
+// !RETURN VALUE:
+//  Return code; equals ESMF_SUCCESS if there are no errors.
+//
+// !DESCRIPTION:
+//
+//  Collective {\tt ESMC\_VM} communication call that blocks calling PET until 
+//  all PETs of the VM context have issued the call.
+//
+//  The arguments are:
+//  \begin{description}
+//  \item[vm] 
+//    Queried {\tt ESMC\_VM} object.
+//  \item[{[rc]}]
+//    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+//  \end{description}
+//
+//EOP
+//-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
 //BOP

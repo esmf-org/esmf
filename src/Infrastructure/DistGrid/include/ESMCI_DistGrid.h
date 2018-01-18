@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2017, University Corporation for Atmospheric Research, 
+// Copyright 2002-2018, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -196,10 +196,11 @@ namespace ESMCI {
     int const *getRegDecomp() const {return regDecomp;}
     // topology discovery
     template<typename T> int getSequenceIndexLocalDe(int localDe, 
-      int const *index, std::vector<T> &seqIndex, bool recursive=true) const;
+      int const *index, std::vector<T> &seqIndex, bool recursive=true,
+      bool canonical=false) const;
     template<typename T> int tGetSequenceIndexLocalDe(T ***t, int de,
       int localDe, int const *index, std::vector<T> &seqIndex, 
-      bool recursive=true) const;
+      bool recursive=true, bool canonical=false) const;
     template<typename T> int getSequenceIndexTileRelative(int tile,
       int const *index, T *seqIndex)const;
     template<typename T> int getSequenceIndexTile(int tile, int const *index,

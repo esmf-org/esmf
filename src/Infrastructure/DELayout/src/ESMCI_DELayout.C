@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2017, University Corporation for Atmospheric Research, 
+// Copyright 2002-2018, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -60,7 +60,13 @@ static const char *const version = "$Id$";
 //-------------------------------------------------------------------------
 // prototypes for Fortran interface routines called by C++ code below
 extern "C" {
-  void FTN_X(f_esmf_dynamicmaskcallback)(ESMCI::RouteHandle **ptr, 
+  void FTN_X(f_esmf_dynmaskcallbackr8r8r8)(ESMCI::RouteHandle **ptr, 
+    int *count, void **elementVector, int *countVector, int *totalCount,
+    void *factorsVector, void *valuesVector, int *rc);
+  void FTN_X(f_esmf_dynmaskcallbackr4r8r4)(ESMCI::RouteHandle **ptr, 
+    int *count, void **elementVector, int *countVector, int *totalCount,
+    void *factorsVector, void *valuesVector, int *rc);
+  void FTN_X(f_esmf_dynmaskcallbackr4r4r4)(ESMCI::RouteHandle **ptr, 
     int *count, void **elementVector, int *countVector, int *totalCount,
     void *factorsVector, void *valuesVector, int *rc);
 }
@@ -6722,12 +6728,18 @@ void XXE::pssslDstRra(T **rraBaseList, int *rraIndexList, TKId elementTK,
   }
 #endif
   int localrc;
+#if 0
+//TODO: strictly check for RH here once it is expected valid from all comms
   if (rh==NULL){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
       "Not a valid RouteHandle pointer!", ESMC_CONTEXT, &localrc);
     throw localrc;  // bail out with exception
   }
   bool dynMask = rh->validAsPtr();
+#else
+  bool dynMask = false; // default
+  if (rh) dynMask = rh->validAsPtr();
+#endif
   if(superVector){
 #ifdef XXE_EXEC_OPSLOG_on
     char msg[1024];
@@ -6795,7 +6807,7 @@ void XXE::exec_pssslDstRra(T **rraBaseList, int *rraIndexList,
 template<typename T, typename U, typename V>
   void XXE::dynMaskHandler(vector<XXE::DynMaskElement<T,U,V> > &dynMaskList,
   RouteHandle *rh){
-#if 1
+#if 0
   {
     std::stringstream logmsg;
     logmsg << "dynMaskHandler(): with dynMaskList.size()=" 
@@ -6804,18 +6816,13 @@ template<typename T, typename U, typename V>
   }
 #endif
   
-#if 0
-  for (unsigned i=0; i<dynMaskList.size(); i++){
-    *(dynMaskList[i].element) = 50.;
-  }
-#else
   int localrc;
   if (rh==NULL){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
       "Not a valid RouteHandle pointer!", ESMC_CONTEXT, &localrc);
     throw localrc;  // bail out with exception
   }
-  // prepare element vector
+  // prepare vectors to be passed to the fortran call back
   int count=dynMaskList.size();
   vector<void *> elementVector(count);
   vector<int> countVector(count);
@@ -6825,8 +6832,8 @@ template<typename T, typename U, typename V>
     countVector[i] = dynMaskList[i].factors.size();
     totalCount += countVector[i];
   }
-  vector<T> factorsVector(totalCount);
-  vector<T> valuesVector(totalCount);
+  vector<U> factorsVector(totalCount);
+  vector<V> valuesVector(totalCount);
   int k=0;
   for (int i=0; i<count; i++){
     for (int j=0; j<countVector[i]; j++){
@@ -6835,13 +6842,38 @@ template<typename T, typename U, typename V>
       ++k;
     }
   }
-  // hand control back to Fortran layer
-  FTN_X(f_esmf_dynamicmaskcallback)(&rh, &count, &(elementVector[0]), 
-    &(countVector[0]), &totalCount, &(factorsVector[0]), &(valuesVector[0]),
-    &localrc);
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
-    ESMC_CONTEXT, NULL)) throw localrc;  // bail out with exception
-#endif
+  // hand control back to Fortran layer - but must be type specific
+  if (typeid(T)==typeid(ESMC_R8) && typeid(U)==typeid(ESMC_R8) &&
+    typeid(V)==typeid(ESMC_R8)){
+    FTN_X(f_esmf_dynmaskcallbackr8r8r8)(&rh, &count, &(elementVector[0]), 
+      &(countVector[0]), &totalCount, &(factorsVector[0]), &(valuesVector[0]),
+      &localrc);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+      ESMC_CONTEXT, NULL)) throw localrc;  // bail out with exception
+  }else if (typeid(T)==typeid(ESMC_R4) && typeid(U)==typeid(ESMC_R8) &&
+    typeid(V)==typeid(ESMC_R4)){
+    FTN_X(f_esmf_dynmaskcallbackr4r8r4)(&rh, &count, &(elementVector[0]), 
+      &(countVector[0]), &totalCount, &(factorsVector[0]), &(valuesVector[0]),
+      &localrc);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+      ESMC_CONTEXT, NULL)) throw localrc;  // bail out with exception
+  }else if (typeid(T)==typeid(ESMC_R4) && typeid(U)==typeid(ESMC_R4) &&
+    typeid(V)==typeid(ESMC_R4)){
+    FTN_X(f_esmf_dynmaskcallbackr4r4r4)(&rh, &count, &(elementVector[0]), 
+      &(countVector[0]), &totalCount, &(factorsVector[0]), &(valuesVector[0]),
+      &localrc);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+      ESMC_CONTEXT, NULL)) throw localrc;  // bail out with exception
+  }else{
+    // not a supported type combination
+    char msg[1024];
+    sprintf(msg, "Dynamic masking is not currently available for the "
+      "requested combination of types: %s, %s, %s", typeid(T).name(), 
+      typeid(U).name(), typeid(V).name());
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD, msg,
+      ESMC_CONTEXT, &localrc);
+    throw localrc;  // bail out with exception
+  }
 }
 
 //---
@@ -6858,7 +6890,7 @@ void XXE::exec_pssslDstRraDynMask(T **rraBaseList, int *rraIndexList,
   U factor;
   V *value;
   V *srcMaskValue;
-#if 1
+#if 0
   {
     std::stringstream logmsg;
     logmsg << "exec_pssslDstRraDynMask():";
@@ -6910,7 +6942,7 @@ void XXE::exec_pssslDstRraDynMask(T **rraBaseList, int *rraIndexList,
       if (!(dstMask || srcMask)){
         tmpElement += factor * *value;  // perform calculation
       }
-#if 1
+#if 0
   {
     std::stringstream logmsg;
     logmsg << "element=" << element

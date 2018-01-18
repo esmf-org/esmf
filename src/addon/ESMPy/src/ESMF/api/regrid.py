@@ -354,9 +354,6 @@ class RegridFromFile(object):
 
         self._routehandle = ESMP_FieldSMMStore(srcfield, dstfield, filename)
 
-        # self._srcfield = srcfield
-        # self._dstfield = dstfield
-
         # for arbitrary metadata
         self._meta = {}
 

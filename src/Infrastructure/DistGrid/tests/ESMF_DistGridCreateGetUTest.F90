@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2017, University Corporation for Atmospheric Research,
+! Copyright 2002-2018, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -67,6 +67,7 @@ program ESMF_DistGridCreateGetUTest
   integer, allocatable:: deBlockList(:,:,:)
   integer, allocatable:: arbSeqIndexList(:)
   integer, allocatable:: collocation(:)
+  integer, allocatable:: positionVector(:), orientationVector(:)
   type(ESMF_PtrInt1D), allocatable :: arbSeqIndexL(:)
   logical:: loopResult
   type(ESMF_DistGridMatch_Flag):: matchResult
@@ -650,6 +651,56 @@ program ESMF_DistGridCreateGetUTest
   call ESMF_DistGridConnectionSet(connectionList(1), &
     tileIndexA=1, tileIndexB=1, positionVector=(/1000/), rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+  !------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "ESMF_DistGridConnectionGet() - Get tileA, tileB, dimCount"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_DistGridConnectionGet(connectionList(1), &
+    tileIndexA=i, tileIndexB=j, dimCount=dimCount, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+  !------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "ESMF_DistGridConnectionGet() - Validate tileA"
+  write(failMsg, *) "Wrong result"
+  call ESMF_Test((i.eq.1), name, failMsg, result, ESMF_SRCLINE)
+
+  !------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "ESMF_DistGridConnectionGet() - Validate tileB"
+  write(failMsg, *) "Wrong result"
+  call ESMF_Test((j.eq.1), name, failMsg, result, ESMF_SRCLINE)
+
+  !------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "ESMF_DistGridConnectionGet() - Validate dimCount"
+  write(failMsg, *) "Wrong result"
+  call ESMF_Test((dimCount.eq.1), name, failMsg, result, ESMF_SRCLINE)
+
+  !------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "ESMF_DistGridConnectionGet() - Get position, orientation vectors"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  allocate(positionVector(1), orientationVector(1))
+  call ESMF_DistGridConnectionGet(connectionList(1), &
+    tileIndexA=i, tileIndexB=j, positionVector=positionVector, &
+    orientationVector=orientationVector, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+  !------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "ESMF_DistGridConnectionGet() - Validate position vector"
+  write(failMsg, *) "Wrong result"
+  call ESMF_Test((positionVector(1).eq.1000), name, failMsg, result, ESMF_SRCLINE)
+  deallocate(positionVector)
+
+  !------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "ESMF_DistGridConnectionGet() - Validate orientation vector"
+  write(failMsg, *) "Wrong result"
+  call ESMF_Test((orientationVector(1).eq.1), name, failMsg, result, ESMF_SRCLINE)
+  deallocate(orientationVector)
 
   !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only

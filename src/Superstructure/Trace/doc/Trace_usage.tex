@@ -1,7 +1,7 @@
 % $Id$
 %
 % Earth System Modeling Framework
-% Copyright 2002-2017, University Corporation for Atmospheric Research, 
+% Copyright 2002-2018, University Corporation for Atmospheric Research, 
 % Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 % Laboratory, University of Michigan, National Centers for Environmental 
 % Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -57,6 +57,17 @@ called {\em traceout} will be created in the run directory and it will
 contain a {\em metadata} file and an event stream file {\em esmf\_stream\_XXXX}
 for each PET with tracing enabled. Together these files form a valid
 CTF trace which may be analyzed with any of the tools listed above.
+
+Trace events are flushed to file at a regular interval. If the application
+crashes, some of the most recent events may not be flushed to file. To
+maximize the number of events appearing in the trace, an option is available
+to flush events to file more frequently. Because this option may have
+negative performance implications due to increased file I/O, it is not
+recommended unless needed. To turn on eager flushing use:
+
+\begin{verbatim}
+$ setenv ESMF_RUNTIME_TRACE_FLUSH EAGER
+\end{verbatim}
 
 \subsubsection{Clocks}
 \label{sec:TracingClocks}

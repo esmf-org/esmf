@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2017, University Corporation for Atmospheric Research, 
+// Copyright 2002-2018, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -71,17 +71,17 @@ int main(void){
   maxIndex[1] = 8;
   rc = ESMC_InterArrayIntSet(&i_maxIndex, maxIndex, dimcount);
 
-  srcgrid = ESMC_GridCreateNoPeriDim(&i_maxIndex, NULL, NULL, NULL, &rc);
+  ESMC_IndexFlag indexflag = ESMC_INDEX_GLOBAL;
+  srcgrid = ESMC_GridCreateNoPeriDim(&i_maxIndex, NULL, NULL, &indexflag, &rc);
   if (rc != ESMF_SUCCESS) return 0;
 
-  dstgrid = ESMC_GridCreateNoPeriDim(&i_maxIndex, NULL, NULL, NULL, &rc);
+  dstgrid = ESMC_GridCreateNoPeriDim(&i_maxIndex, NULL, NULL, &indexflag, &rc);
   if (rc != ESMF_SUCCESS) return 0;
 
   int *exLBound = NULL;
   int *exUBound = NULL;
   int p = 0;
 
-#if 0
   ESMC_GridAddCoord(srcgrid, ESMC_STAGGERLOC_CENTER);
 
   exLBound = (int *)malloc(dimcount*sizeof(int));
@@ -95,8 +95,8 @@ int main(void){
                                                    ESMC_STAGGERLOC_CENTER, NULL,
                                                    NULL, NULL, &rc);
 
-  // printf("exLBounds = [%d,%d]\n", exLBound[0], exLBound[1]);
-  // printf("exUBounds = [%d,%d]\n", exUBound[0], exUBound[1]);
+  //printf("exLBounds = [%d,%d]\n", exLBound[0], exLBound[1]);
+  //printf("exUBounds = [%d,%d]\n", exUBound[0], exUBound[1]);
 
   p = 0;
   for (int i1=exLBound[1]; i1<=exUBound[1]; ++i1) {
@@ -131,7 +131,6 @@ int main(void){
       ++p;
     }
   }
-#endif
 
   //----------------------------------------------------------------------------
   //---------------------- FIELD CREATION --------------------------------------
@@ -186,16 +185,19 @@ int main(void){
   //-------------------------- REGRIDDING --------------------------------------
   //----------------------------------------------------------------------------
 
-#if 0
-  rc = ESMC_FieldRegridStoreFile(srcfield, dstfield, "data/weights_smmff.nc", NULL, NULL,
-                                 &routehandle, NULL, NULL, NULL, NULL, NULL,
-                                 NULL, NULL, NULL, NULL);
-#endif
   //----------------------------------------------------------------------------
-  //NEX_disable_UTest
+  //NEX_UTest
   strcpy(name, "ESMC_FieldRegridStoreFile test");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
+  rc = ESMC_FieldRegridStoreFile(srcfield, dstfield, "data/weights_smmsff.nc", NULL, NULL,
+                                 &routehandle, NULL, NULL, NULL, NULL, NULL,
+                                 NULL, NULL, NULL, NULL);
+#if (defined ESMF_PIO && ( defined ESMF_NETCDF || defined ESMF_PNETCDF))
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+#else
+  strcpy(failMsg, "Did not return ESMF_RC_LIB_NOT_PRESENT");
+  ESMC_Test((rc==ESMF_RC_LIB_NOT_PRESENT), name, failMsg, &result, __FILE__, __LINE__, 0);
+#endif
   //----------------------------------------------------------------------------
 
 #if 0
@@ -210,36 +212,54 @@ int main(void){
   printf("]\n");
 #endif
 
-  rc = ESMC_FieldSMMStore(srcfield, dstfield, "data/weights_generic.nc", &routehandle,
-                          NULL, NULL, NULL, NULL);
   //----------------------------------------------------------------------------
-  //NEX_disable_UTest
+  //NEX_UTest
   strcpy(name, "ESMC_FieldSMMStore from File test");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
+  rc = ESMC_FieldSMMStore(srcfield, dstfield, "data/weights_smmsff.nc", &routehandle,
+                          NULL, NULL, NULL, NULL);
+#if (defined ESMF_PIO && ( defined ESMF_NETCDF || defined ESMF_PNETCDF))
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+#else
+  strcpy(failMsg, "Did not return ESMF_RC_LIB_NOT_PRESENT");
+  ESMC_Test((rc==ESMF_RC_LIB_NOT_PRESENT), name, failMsg, &result, __FILE__, __LINE__, 0);
+#endif
   //----------------------------------------------------------------------------
 
+
+  //----------------------------------------------------------------------------
+  //NEX_UTest
+  strcpy(name, "ESMC_FieldSMMStore From File validation");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
   p = 0;
   for (int i1=exLBound[1]; i1<=exUBound[1]; ++i1) {
     for (int i0=exLBound[0]; i0<=exUBound[0]; ++i0) {
-      if ((srcfieldptr[p] - 42.) > .01) correct = false;
+      if ((srcfieldptr[p] - 42.) > .01) {
+        correct = false;
+        // printf("source value = %f\n", srcfieldptr[p]);
+      }
       p++;
     }
   }
+#if (defined ESMF_PIO && ( defined ESMF_NETCDF || defined ESMF_PNETCDF))
+  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+#else
+  strcpy(failMsg, "Did not return ESMF_RC_LIB_NOT_PRESENT");
+  ESMC_Test((rc==ESMF_RC_LIB_NOT_PRESENT), name, failMsg, &result, __FILE__, __LINE__, 0);
+#endif
+  //----------------------------------------------------------------------------
 
   //----------------------------------------------------------------------------
-  //NEX_disable_UTest
-  strcpy(name, "ESMC_FieldSMMStore From File validation");
-  strcpy(failMsg, "Did not return ESMF_SUCCESS");
-  ESMC_Test((correct==true), name, failMsg, &result, __FILE__, __LINE__, 0);
-  //----------------------------------------------------------------------------
-
-  rc = ESMC_FieldRegridRelease(&routehandle);
-  //----------------------------------------------------------------------------
-  //NEX_disable_UTest
+  //NEX_UTest
   strcpy(name, "ESMC_FieldRegridRelease");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
+#if (defined ESMF_PIO && ( defined ESMF_NETCDF || defined ESMF_PNETCDF))
+  rc = ESMC_FieldRegridRelease(&routehandle);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+#else
+  // dummy test
+  ESMC_Test((true), name, failMsg, &result, __FILE__, __LINE__, 0);
+#endif
   //----------------------------------------------------------------------------
 
   free(exLBound);
