@@ -11,7 +11,7 @@
 !==============================================================================
 
 !==============================================================================
-!ESMF_MULTI_PROC_EXAMPLE        String used by test script to count examples.
+!ESMF_EXAMPLE        String used by test script to count examples.
 !==============================================================================
 
 module ESMF_RHandleDynamicMaskingMod
@@ -136,7 +136,7 @@ program ESMF_RHandleDynamicMaskingEx
   ! local variables
   integer                     :: rc
   type(ESMF_VM)               :: vm
-  integer                     :: i, petCount
+  integer                     :: i, petCount, localPet
   type(ESMF_Grid)             :: srcGrid, dstGrid
   type(ESMF_Field)            :: srcField, dstField
   type(ESMF_RouteHandle)      :: routehandle
@@ -168,13 +168,8 @@ program ESMF_RHandleDynamicMaskingEx
   call ESMF_Initialize(vm=vm, defaultlogfilename="RHandleDynamicMaskingEx.Log", &
     logkindflag=ESMF_LOGKIND_MULTI, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-  call ESMF_VMGet(vm, petCount=petCount, rc=rc)
+  call ESMF_VMGet(vm, petCount=petCount, localPet=localPet, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-  
-  if (petCount < 4) then
-    finalrc = ESMF_FAILURE
-    goto 10
-  endif
   
 !BOE
 ! \subsubsection{Dynamic Masking}
@@ -317,6 +312,15 @@ program ESMF_RHandleDynamicMaskingEx
     line=__LINE__, &
     file=__FILE__)) &
     call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+#if 0
+  call ESMF_FieldWrite(dstField, fileName="dstFieldR8_onlySrcMask.nc", &
+    status=ESMF_FILESTATUS_REPLACE, rc=rc)
+  if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+    line=__LINE__, &
+    file=__FILE__)) &
+    call ESMF_Finalize(endflag=ESMF_END_ABORT)
+#endif
 
 !BOE
 ! The procedure passed through the {\tt dynamicMaskRoutine} argument must 

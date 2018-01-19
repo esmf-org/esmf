@@ -6831,6 +6831,14 @@ template<typename T, typename U, typename V>
     elementVector[i] = dynMaskList[i].element;
     countVector[i] = dynMaskList[i].factors.size();
     totalCount += countVector[i];
+#if 0
+  {
+    std::stringstream logmsg;
+    logmsg << "dynMaskHandler(): i=" << i << " element=" << elementVector[i];
+    ESMC_LogDefault.Write(logmsg.str(), ESMC_LOGMSG_INFO);
+  }
+#endif
+    
   }
   vector<U> factorsVector(totalCount);
   vector<V> valuesVector(totalCount);
@@ -6893,7 +6901,7 @@ void XXE::exec_pssslDstRraDynMask(T **rraBaseList, int *rraIndexList,
 #if 0
   {
     std::stringstream logmsg;
-    logmsg << "exec_pssslDstRraDynMask():";
+    logmsg << "exec_pssslDstRraDynMask(): termCount=" << termCount;
     ESMC_LogDefault.Write(logmsg.str(), ESMC_LOGMSG_INFO);
   }
 #endif
@@ -6914,6 +6922,13 @@ void XXE::exec_pssslDstRraDynMask(T **rraBaseList, int *rraIndexList,
     for (int i=0; i<termCount; i++){  // super scalar loop
       element = rraBaseList[rraIndexList[baseListIndexList[i]]]
         + rraOffsetList[i];
+#if 0
+  {
+    std::stringstream logmsg;
+    logmsg << "exec_pssslDstRraDynMask(): i=" << i << " element=" << element;
+    ESMC_LogDefault.Write(logmsg.str(), ESMC_LOGMSG_INFO);
+  }
+#endif
       if (prevElement != element){
         // this is a new element
         if (prevElement != NULL && !(dstMask || srcMask)){
@@ -6952,10 +6967,14 @@ void XXE::exec_pssslDstRraDynMask(T **rraBaseList, int *rraIndexList,
   }
 #endif
     }
-    // must also write-back the last element of the loop
+    // must process the last element of the loop
     if (prevElement != NULL && !(dstMask || srcMask)){
       // finally write the previous sum into the actual element
       *prevElement = tmpElement;
+    }else if (dstMask || srcMask){
+      // finally store dynMaskElement in dynMaskList b/c masking detected
+      dynMaskElement.element = prevElement;   // finish the entry
+      dynMaskList.push_back(dynMaskElement);  // push into dynMaskList
     }
     // see if any dynamic masking was detected
     if (dynMaskList.size() > 0){
