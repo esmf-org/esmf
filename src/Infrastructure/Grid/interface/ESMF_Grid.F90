@@ -22260,22 +22260,22 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       localrc = ESMF_RC_NOT_IMPL
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
-       ! check input variables
-       ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit, grid, rc)
+      ! check input variables
+      call ESMF_InitPrint (ESMF_INIT_GET(grid))
+      ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit, grid, rc)
 
-       call ESMF_UtilIOUnitFlush (unit=ESMF_UtilIOstdout, rc=localrc)
-       if (ESMF_LogFoundError(localrc, &
-            ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rcToReturn=rc)) return
+      call ESMF_UtilIOUnitFlush (unit=ESMF_UtilIOstdout, rc=localrc)
+      if (ESMF_LogFoundError(localrc, &
+          ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
 
-       ! Just print its base for now
-       call c_ESMC_BasePrint(grid, 0, "debug", ESMF_FALSE, "", &
-                             ESMF_FALSE, localrc)
-       if (ESMF_LogFoundError(localrc, &
-            ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rcToReturn=rc)) return
+      ! Just print its base for now
+      call c_ESMC_BasePrint(grid, 0, "debug", ESMF_FALSE, "", ESMF_FALSE, localrc)
+      if (ESMF_LogFoundError(localrc, &
+          ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
 
-       if (present (rc)) rc = ESMF_SUCCESS
+      if (present (rc)) rc = ESMF_SUCCESS
 
     end subroutine ESMF_GridPrint
 !------------------------------------------------------------------------------

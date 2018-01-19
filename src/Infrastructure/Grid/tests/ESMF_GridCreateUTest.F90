@@ -143,6 +143,14 @@ program ESMF_GridCreateUTest
 
   !------------------------------------------------------------------------
   !NEX_UTest
+  write(name, *) "Print Grid info"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_GridPrint(grid, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
   write(name, *) "Destroy test Grid for IsCreated"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_GridDestroy(grid, rc=rc)
