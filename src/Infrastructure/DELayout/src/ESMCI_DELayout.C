@@ -17,6 +17,7 @@
 #define XXE_EXEC_MEMLOG_off
 #define XXE_EXEC_BUFFLOG_off
 #define XXE_EXEC_OPSLOG_off
+#define XXE_EXEC_RECURSLOG_off
 //==============================================================================
 //
 // DELayout class implementation (body) file
@@ -5616,8 +5617,6 @@ inline void XXE::exec_zeroSuperScalarRRASuper(
 
 //-----------------------------------------------------------------------------
 
-#define XXE_RECURSIVE_DEBUG___disable
-
 template<typename T, typename U, typename V>
 void XXE::psv(T *element, TKId elementTK, U *factorList, TKId factorTK,
   V *valueList, TKId valueTK, int factorCount, int resolved){
@@ -5731,9 +5730,14 @@ void XXE::psv(T *element, TKId elementTK, U *factorList, TKId factorTK,
     }
     return;
   }
-#ifdef XXE_RECURSIVE_DEBUG
-  printf("Arrived in psv kernel with %s, %s, %s\n", typeid(T).name(), 
-    typeid(U).name(), typeid(V).name());
+#ifdef XXE_EXEC_RECURSLOG_on
+  {
+    std::stringstream logmsg;
+    logmsg << "Arrived in psv kernel with T=" << typeid(T).name() 
+      << " U=" << typeid(U).name()
+      << " V=" << typeid(V).name();
+    ESMC_LogDefault.Write(logmsg.str(), ESMC_LOGMSG_INFO);
+  }
 #endif
   for (int i=0; i<factorCount; i++){
 #ifdef XXE_EXEC_OPSLOG_on
@@ -5852,9 +5856,14 @@ void XXE::pss(T *element, TKId elementTK, U *factor, TKId factorTK,
     }
     return;
   }
-#ifdef XXE_RECURSIVE_DEBUG
-  printf("Arrived in pss kernel with %s, %s, %s\n", typeid(T).name(), 
-    typeid(U).name(), typeid(V).name());
+#ifdef XXE_EXEC_RECURSLOG_on
+  {
+    std::stringstream logmsg;
+    logmsg << "Arrived in pss kernel with T=" << typeid(T).name() 
+      << " U=" << typeid(U).name() 
+      << " V=" << typeid(V).name();
+    ESMC_LogDefault.Write(logmsg.str(), ESMC_LOGMSG_INFO);
+  }
 #endif
 #ifdef XXE_EXEC_OPSLOG_on
     {
@@ -5878,9 +5887,14 @@ void XXE::sssDstRra(T *rraBase, TKId elementTK, int *rraOffsetList,
   bool superVector){
   // Recursively resolve the TKs and typecast the arguments appropriately
   // before executing sssDstRra operation on the data.
-#ifdef XXE_RECURSIVE_DEBUG
-  printf("Entering sssDstRra with %s, %s, resolved=%d\n", typeid(T).name(), 
-    typeid(V).name(), resolved);
+#ifdef XXE_EXEC_RECURSLOG_on
+  {
+    std::stringstream logmsg;
+    logmsg << "Entering sssDstRra with T=" << typeid(T).name() 
+      << " V=" << typeid(V).name()
+      << " resolved=" << resolved;
+    ESMC_LogDefault.Write(logmsg.str(), ESMC_LOGMSG_INFO);
+  }
 #endif
   if (resolved==0){
     ++resolved;
@@ -5962,9 +5976,13 @@ void XXE::sssDstRra(T *rraBase, TKId elementTK, int *rraOffsetList,
     }
     return;
   }
-#ifdef XXE_RECURSIVE_DEBUG
-  printf("Arrived in sssDstRra kernel with %s, %s\n", typeid(T).name(), 
-    typeid(V).name());
+#ifdef XXE_EXEC_RECURSLOG_on
+  {
+    std::stringstream logmsg;
+    logmsg << "Arrived in sssDstRra kernel with T=" << typeid(T).name() 
+      << " V=" << typeid(V).name();
+    ESMC_LogDefault.Write(logmsg.str(), ESMC_LOGMSG_INFO);
+  }
 #endif
   if(superVector){
 #ifdef XXE_EXEC_OPSLOG_on
@@ -6163,9 +6181,13 @@ void XXE::ssslDstRra(T **rraBaseList, int *rraIndexList, TKId elementTK,
     }
     return;
   }
-#ifdef XXE_RECURSIVE_DEBUG
-  printf("Arrived in ssslDstRra kernel with %s, %s, %s\n", typeid(T).name(), 
-    typeid(U).name(), typeid(V).name());
+#ifdef XXE_EXEC_RECURSLOG_on
+  {
+    std::stringstream logmsg;
+    logmsg << "Arrived in ssslDstRra kernel with T=" << typeid(T).name() 
+      << " V=" << typeid(V).name();
+    ESMC_LogDefault.Write(logmsg.str(), ESMC_LOGMSG_INFO);
+  }
 #endif
   if(superVector){
 #ifdef XXE_EXEC_OPSLOG_on
@@ -6280,6 +6302,16 @@ void XXE::psssDstRra(T *rraBase, TKId elementTK, int *rraOffsetList,
   bool superVector){
   // Recursively resolve the TKs and typecast the arguments appropriately
   // before executing psssDstRra operation on the data.
+#ifdef XXE_EXEC_RECURSLOG_on
+  {
+    std::stringstream logmsg;
+    logmsg << "Entering psssDstRra with T=" << typeid(T).name() 
+      << " U=" << typeid(U).name()
+      << " V=" << typeid(V).name()
+      << " resolved=" << resolved;
+    ESMC_LogDefault.Write(logmsg.str(), ESMC_LOGMSG_INFO);
+  }
+#endif
   if (resolved==0){
     ++resolved;
     switch (elementTK){
@@ -6400,9 +6432,14 @@ void XXE::psssDstRra(T *rraBase, TKId elementTK, int *rraOffsetList,
     }
     return;
   }
-#ifdef XXE_RECURSIVE_DEBUG
-  printf("Arrived in psssDstRra kernel with %s, %s, %s\n", typeid(T).name(), 
-    typeid(U).name(), typeid(V).name());
+#ifdef XXE_EXEC_RECURSLOG_on
+  {
+    std::stringstream logmsg;
+    logmsg << "Arrived in psssDstRra kernel with T=" << typeid(T).name() 
+      << " U=" << typeid(U).name() 
+      << " V=" << typeid(V).name();
+    ESMC_LogDefault.Write(logmsg.str(), ESMC_LOGMSG_INFO);
+  }
 #endif
   if(superVector){
 #ifdef XXE_EXEC_OPSLOG_on
@@ -6681,9 +6718,14 @@ void XXE::pssslDstRra(T **rraBaseList, int *rraIndexList, TKId elementTK,
     }
     return;
   }
-#ifdef XXE_RECURSIVE_DEBUG
-  printf("Arrived in pssslDstRra kernel with %s, %s, %s\n", typeid(T).name(), 
-    typeid(U).name(), typeid(V).name());
+#ifdef XXE_EXEC_RECURSLOG_on
+  {
+    std::stringstream logmsg;
+    logmsg << "Arrived in pssslDstRra kernel with T=" << typeid(T).name() 
+      << " U=" << typeid(U).name() 
+      << " V=" << typeid(V).name();
+    ESMC_LogDefault.Write(logmsg.str(), ESMC_LOGMSG_INFO);
+  }
 #endif
   int localrc;
 #if 0
@@ -7018,9 +7060,15 @@ void XXE::psssSrcRra(T *rraBase, TKId valueTK, int *rraOffsetList,
   bool superVector){
   // Recursively resolve the TKs and typecast the arguments appropriately
   // before executing psssSrcRra operation on the data.
-#ifdef XXE_RECURSIVE_DEBUG
-  printf("Entering psssSrcRra kernel with %s, %s, %s, resolved=%d\n",
-    typeid(T).name(), typeid(U).name(), typeid(V).name(), resolved);
+#ifdef XXE_EXEC_RECURSLOG_on
+  {
+    std::stringstream logmsg;
+    logmsg << "Entering psssSrcRra with T=" << typeid(T).name() 
+      << " U=" << typeid(U).name()
+      << " V=" << typeid(V).name()
+      << " resolved=" << resolved;
+    ESMC_LogDefault.Write(logmsg.str(), ESMC_LOGMSG_INFO);
+  }
 #endif
   if (resolved==0){
     ++resolved;
@@ -7154,9 +7202,14 @@ void XXE::psssSrcRra(T *rraBase, TKId valueTK, int *rraOffsetList,
     }
     return;
   }
-#ifdef XXE_RECURSIVE_DEBUG
-  printf("Arrived in psssSrcRra kernel with %s, %s, %s\n", typeid(T).name(), 
-    typeid(U).name(), typeid(V).name());
+#ifdef XXE_EXEC_RECURSLOG_on
+  {
+    std::stringstream logmsg;
+    logmsg << "Arrived in psssSrcRra kernel with T=" << typeid(T).name() 
+      << " U=" << typeid(U).name() 
+      << " V=" << typeid(V).name();
+    ESMC_LogDefault.Write(logmsg.str(), ESMC_LOGMSG_INFO);
+  }
 #endif
   if(superVector){
 #ifdef XXE_EXEC_OPSLOG_on
@@ -7387,9 +7440,14 @@ void XXE::pssscRra(T *rraBase, TKId elementTK, int *rraOffsetList,
     }
     return;
   }
-#ifdef XXE_RECURSIVE_DEBUG
-  printf("Arrived in pssscRra kernel with %s, %s, %s\n", typeid(T).name(), 
-    typeid(U).name(), typeid(V).name());
+#ifdef XXE_EXEC_RECURSLOG_on
+  {
+    std::stringstream logmsg;
+    logmsg << "Arrived in pssscRra kernel with T=" << typeid(T).name() 
+      << " U=" << typeid(U).name() 
+      << " V=" << typeid(V).name();
+    ESMC_LogDefault.Write(logmsg.str(), ESMC_LOGMSG_INFO);
+  }
 #endif
   if (vectorL==1){
     // scalar elements

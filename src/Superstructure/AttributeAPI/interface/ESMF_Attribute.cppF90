@@ -882,7 +882,7 @@ contains
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_AttributeAdd  - Add an ESMF standard Attribute package using a specification list
 !
 ! !INTERFACE:
@@ -926,9 +926,9 @@ contains
 !     \end{description}
 !
 !
-!EOP
+!EOPI
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_AttributeAdd  - Add a custom Attribute package or modify an existing Attribute package using a specification list
 !
 ! !INTERFACE:
@@ -994,7 +994,7 @@ contains
 !     \end{description}
 !
 !
-!EOP
+!EOPI
 !------------------------------------------------------------------------------
 !BOP
 ! !IROUTINE: ESMF_AttributeAdd  - Add an ESMF standard Attribute package
@@ -2461,7 +2461,7 @@ contains
 !
 !EOP
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_AttributeGetAttPack  - Get an ESMF Attribute package object and/or query for presence using a specification list
 !
 ! !INTERFACE:
@@ -2519,7 +2519,7 @@ contains
 !     \end{description}
 !
 !
-!EOP
+!EOPI
 !------------------------------------------------------------------------------
 !BOP
 ! !IROUTINE: ESMF_AttributeGetAttPack  - Get an ESMF Attribute package object and/or query for presence
