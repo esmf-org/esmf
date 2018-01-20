@@ -11,6 +11,8 @@
 //==============================================================================
 #define ESMC_FILENAME "ESMCI_ArrayBundle.C"
 //==============================================================================
+#define AB_REDISTSTORE_LOG_off
+//==============================================================================
 //
 // ArrayBundle class implementation (body) file
 //
@@ -965,8 +967,14 @@ int ArrayBundle::redistStore(
       Array *dstArray = dstArrayVector[i];
       if (matchList[i] < i){
         // src/dst Array pair matches previous pair in ArrayBundle
-//        printf("localPet=%d, src/dst pair #%d does not require precompute\n",
-//          localPet, i);
+#ifdef AB_REDISTSTORE_LOG_on
+    {
+      std::stringstream msg;
+      msg << "AB_REDISTSTORE_LOG:" << __LINE__ << " pair #" << i <<
+        " does NOT require precompute!";
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+    }
+#endif
         // append the xxeSub to the xxe object with RRA offset info
         localrc = xxe->appendXxeSub(0x0, xxeSub[matchList[i]], rraShift,
           vectorLengthShift);
@@ -974,8 +982,14 @@ int ArrayBundle::redistStore(
           ESMC_CONTEXT, &rc)) return rc;
       }else{
         // src/dst Array pair does _not_ match any previous pair in ArrayBundle
-//        printf("localPet=%d, src/dst pair #%d requires precompute\n",
-//          localPet, i);
+#ifdef AB_REDISTSTORE_LOG_on
+    {
+      std::stringstream msg;
+      msg << "AB_REDISTSTORE_LOG:" << __LINE__ << " pair #" << i <<
+        " DOES require precompute!";
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+    }
+#endif
         RouteHandle *rh;
         localrc = Array::redistStore(srcArray, dstArray, &rh,
           srcToDstTransposeMap, typekindFactor, factor);
