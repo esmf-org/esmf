@@ -1130,7 +1130,6 @@ subroutine f_esmf_fieldcollectgarbage(field, rc)
                              ignoreUnmatchedIndices, &
                              srcTermProcessing, &
                              pipeLineDepth, &
-                             transposeRoutehandle, &
                              rc)
 
     use ESMF_UtilTypesMod
@@ -1151,7 +1150,6 @@ subroutine f_esmf_fieldcollectgarbage(field, rc)
     logical,                               optional :: ignoreUnmatchedIndices
     integer,                               optional :: srcTermProcessing
     integer,                               optional :: pipeLineDepth
-    type(ESMF_RouteHandle),                optional :: transposeRoutehandle
     integer,                               optional :: rc
 
     integer :: localrc
@@ -1169,7 +1167,6 @@ subroutine f_esmf_fieldcollectgarbage(field, rc)
                             ignoreUnmatchedIndices=ignoreUnmatchedIndices, &
                             srcTermProcessing=srcTermProcessing, &
                             pipeLineDepth=pipeLineDepth, &
-                            transposeRoutehandle=transposeRoutehandle, &
                             rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return

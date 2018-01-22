@@ -2076,8 +2076,7 @@ def ESMP_FieldSMMStore(srcField, dstField, filename,
                                   b_filename,
                                   ct.byref(routehandle),
                                   ignoreUnmatchedIndices,
-                                  None, None,
-                                  None)
+                                  None, None)
     if rc != constants._ESMP_SUCCESS:
         raise ValueError('ESMC_FieldSMMStore() failed with rc = '+str(rc)+
                         '.    '+constants._errmsg)

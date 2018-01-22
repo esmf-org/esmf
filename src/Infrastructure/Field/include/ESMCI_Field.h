@@ -127,8 +127,7 @@ namespace ESMCI{
     static int smmstore(Field *fieldsrc, Field *fielddst,
                         const char *filename, RouteHandle **routehandle,
                         ESMC_Logical *ignoreUnmatchedIndices,
-                        int *srcTermProcessing, int *pipeLineDepth,
-                        RouteHandle **transposeRoutehandle);
+                        int *srcTermProcessing, int *pipeLineDepth);
     int write(const char *file,
       const char* variableName,
       int overwrite,

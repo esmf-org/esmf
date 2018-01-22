@@ -999,8 +999,7 @@ int ESMC_FieldSMMStore(
     ESMC_RouteHandle *routehandle,                 // out
     ESMC_Logical *ignoreUnmatchedIndices,          // in
     int *srcTermProcessing,                        // in
-    int *pipeLineDepth,                            // in
-    ESMC_RouteHandle *transposeRoutehandle);       // out
+    int *pipeLineDepth);                           // in
 
 // !RETURN VALUE:
 //   Return code; equals ESMF_SUCCESS if there are no errors.
@@ -1018,8 +1017,67 @@ int ESMC_FieldSMMStore(
 //    ESMC\_Field with source data.
 //  \item[dstField]
 //    ESMC\_Field with destination data.
+//  \item [filename]
+//    Path to the file containing weights for creating an {\tt ESMC\_RouteHandle}.
+//    Only "row", "col", and "S" variables are required. They
+//    must be one-dimensionsal with dimension "n\_s".
 //  \item[routehandle]
 //    The handle that implements the regrid, to be used in {\tt ESMC\_FieldRegrid()}.
+//  \item [{[ignoreUnmatchedIndices]}]
+//    A logical flag that affects the behavior for when sequence indices
+//    in the sparse matrix are encountered that do not have a match on the
+//    {\tt srcField} or {\tt dstField} side. The default setting is
+//    {\tt .false.}, indicating that it is an error when such a situation is
+//    encountered. Setting {\tt ignoreUnmatchedIndices} to {\tt .true.} ignores
+//    entries with unmatched indices.
+//  \item [{[srcTermProcessing]}]
+//    The {\tt srcTermProcessing} parameter controls how many source terms,
+//    located on the same PET and summing into the same destination element,
+//    are summed into partial sums on the source PET before being transferred
+//    to the destination PET. A value of 0 indicates that the entire arithmetic
+//    is done on the destination PET; source elements are neither multiplied
+//    by their factors nor added into partial sums before being sent off by the
+//    source PET. A value of 1 indicates that source elements are multiplied
+//    by their factors on the source side before being sent to the destination
+//    PET. Larger values of {\tt srcTermProcessing} indicate the maximum number
+//    of terms in the partial sums on the source side.
+//    Note that partial sums may lead to bit-for-bit differences in the results.
+//    See section \ref{RH:bfb} for an in-depth discussion of {\em all}
+//    bit-for-bit reproducibility aspects related to route-based communication
+//    methods.
+//    The {\tt ESMC\_FieldSMMStore()} method implements an auto-tuning scheme
+//    for the {\tt srcTermProcessing} parameter. The intent on the
+//    {\tt srcTermProcessing} argument is "{\tt inout}" in order to
+//    support both overriding and accessing the auto-tuning parameter.
+//    If an argument $>= 0$ is specified, it is used for the
+//    {\tt srcTermProcessing} parameter, and the auto-tuning phase is skipped.
+//    In this case the {\tt srcTermProcessing} argument is not modified on
+//    return. If the provided argument is $< 0$, the {\tt srcTermProcessing}
+//    parameter is determined internally using the auto-tuning scheme. In this
+//    case the {\tt srcTermProcessing} argument is re-set to the internally
+//    determined value on return. Auto-tuning is also used if the optional
+//    {\tt srcTermProcessing} argument is omitted.
+//  \item [{[pipelineDepth]}]
+//    The {\tt pipelineDepth} parameter controls how many messages a PET
+//    may have outstanding during a sparse matrix exchange. Larger values
+//    of {\tt pipelineDepth} typically lead to better performance. However,
+//    on some systems too large a value may lead to performance degradation,
+//    or runtime errors.
+//    Note that the pipeline depth has no effect on the bit-for-bit
+//    reproducibility of the results. However, it may affect the performance
+//    reproducibility of the exchange.
+//    The {\tt ESMC\_FieldSMMStore()} method implements an auto-tuning scheme
+//    for the {\tt pipelineDepth} parameter. The intent on the
+//    {\tt pipelineDepth} argument is "{\tt inout}" in order to
+//    support both overriding and accessing the auto-tuning parameter.
+//    If an argument $>= 0$ is specified, it is used for the
+//    {\tt pipelineDepth} parameter, and the auto-tuning phase is skipped.
+//    In this case the {\tt pipelineDepth} argument is not modified on
+//    return. If the provided argument is $< 0$, the {\tt pipelineDepth}
+//    parameter is determined internally using the auto-tuning scheme. In this
+//    case the {\tt pipelineDepth} argument is re-set to the internally
+//    determined value on return. Auto-tuning is also used if the optional
+//    {\tt pipelineDepth} argument is omitted.
 //  \end{description}
 //
 //EOP

@@ -552,8 +552,7 @@ int ESMC_FieldGetBounds(ESMC_Field field,
   int ESMC_FieldSMMStore(ESMC_Field srcField, ESMC_Field dstField,
                          const char *filename, ESMC_RouteHandle *routehandle,
                          ESMC_Logical *ignoreUnmatchedIndices,
-                         int *srcTermProcessing, int *pipeLineDepth,
-                         ESMC_RouteHandle *transposeRoutehandle){
+                         int *srcTermProcessing, int *pipeLineDepth){
 
     // Initialize return code. Assume routine not implemented
     int rc = ESMF_RC_NOT_IMPL;
@@ -571,14 +570,15 @@ int ESMC_FieldGetBounds(ESMC_Field field,
     }
     ESMCI::RouteHandle **routehandlep = (ESMCI::RouteHandle **) &(routehandle->ptr);
 
-    // deal with fact that transposeRoutehandle may be absent
+    //RLO: removed transposeRoutehandle until user request
+    /*// deal with fact that transposeRoutehandle may be absent
     ESMCI::RouteHandle **troutehandlep = NULL;   // default: not present 
     if (transposeRoutehandle != NULL)
-      troutehandlep = (ESMCI::RouteHandle **) &(transposeRoutehandle->ptr);
+      troutehandlep = (ESMCI::RouteHandle **) &(transposeRoutehandle->ptr);*/
 
     // Invoke the C++ interface
     localrc = ESMCI::Field::smmstore(fieldpsrc, fieldpdst, filename, routehandlep,
-        ignoreUnmatchedIndices, srcTermProcessing, pipeLineDepth, troutehandlep);
+        ignoreUnmatchedIndices, srcTermProcessing, pipeLineDepth);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       &rc)) return rc;  // bail out
 

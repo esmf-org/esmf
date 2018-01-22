@@ -177,7 +177,6 @@ void FTN_X(f_esmf_smmstore)(ESMCI::Field *fieldpsrc, ESMCI::Field *fieldpdst,
   const char *filename, ESMCI::RouteHandle **routehandlep,
   ESMC_Logical *ignoreUnmatchedIndices,
   int *srcTermProcessing, int *pipeLineDepth,
-  ESMCI::RouteHandle **transposeRoutehandlep,
   int *rc, ESMCI_FortranStrLenArg nlen);
 
 void FTN_X(f_esmf_fieldwrite)(ESMCI::Field *fieldp, const char *file,
@@ -1658,8 +1657,7 @@ namespace ESMCI {
     RouteHandle **routehandlep,
     ESMC_Logical *ignoreUnmatchedIndices,
     int *srcTermProcessing,
-    int *pipeLineDepth,
-    RouteHandle **transposeRoutehandlep) {
+    int *pipeLineDepth) {
 //
 // !DESCRIPTION:
 //
@@ -1686,7 +1684,6 @@ namespace ESMCI {
                               fName, routehandlep,
                               ignoreUnmatchedIndices,
                               srcTermProcessing, pipeLineDepth,
-                              transposeRoutehandlep,
                               &localrc, slen);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       &rc)) {
