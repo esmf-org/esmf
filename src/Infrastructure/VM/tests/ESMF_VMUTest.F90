@@ -1075,6 +1075,7 @@
       character :: key_value
 
       type(ESMF_Grid) :: grid, grid_temp
+      type(ESMF_Pointer) :: grid_tempp
       type(ESMF_Base) :: base
       integer :: id_temp
       type(ESMF_VMId) :: vmid_temp
@@ -1332,7 +1333,7 @@
             regDecomp=(/2,2/), name="Grid", rc=rc)
       call ESMF_Test((rc == ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
-      call c_esmc_baseprint (grid, 0, 'debug', ESMF_FALSE, '', ESMF_TRUE, rc)
+      call ESMF_GridPrint (grid, rc=rc)
 
       !------------------------------------------------------------------------
       !EX_UTest
@@ -1371,18 +1372,18 @@
 
       !------------------------------------------------------------------------
       !EX_UTest
-      ! Test accessing an object, given its id and vmid.
+      ! Test obtaining a pointer to an object, given its id and vmid.
       ! WARNING: This is testing an INTERNAL method.  It is NOT
       ! part of the supported ESMF user API!
-      write(name, *) "Access alias of object via id/vmid lookup"
+      write(name, *) "Obtain pointer to object via id/vmid lookup"
       write(failMsg, *) 'Can not access object'
       call c_esmc_vmgetobject (grid_temp,  &
           id_temp, vmid_temp,  ESMF_GEOMTYPE_GRID%type,  &
           object_found, rc)
+      grid_temp%isInit = ESMF_INIT_CREATED
       call ESMF_Test((rc == ESMF_SUCCESS), &
           name, failMsg, result, ESMF_SRCLINE)
 
-#if 1
       !------------------------------------------------------------------------
       !EX_UTest
       ! Test for object found.
@@ -1393,7 +1394,19 @@
       rc = merge (ESMF_SUCCESS, ESMF_FAILURE, object_found == ESMF_TRUE)
       call ESMF_Test((rc == ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
-#endif
+
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! Print aliased Grid object.
+      ! WARNING: This is testing an INTERNAL method.  It is NOT
+      ! part of the supported ESMF user API!
+      write(name, *) "Print aliased Grid object"
+      write(failMsg, *) 'Could not print object'
+      print *, 'calling ESMF_GridPrint(grid_temp):'
+      call ESMF_GridPrint (grid_temp, rc=rc)
+      call ESMF_Test((rc == ESMF_SUCCESS), &
+          name, failMsg, result, ESMF_SRCLINE)
 
 #endif
       call ESMF_TestEnd(ESMF_SRCLINE)

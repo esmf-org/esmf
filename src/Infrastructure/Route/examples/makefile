@@ -15,7 +15,7 @@ EXAMPLES_RUN      = run_ESMF_RHandleBitForBitEx \
                     run_ESMF_RHandleFromRHandleEx \
                     run_ESMF_RHandleDynamicMaskingEx
                     
-EXAMPLES_RUN_UNI  = 
+EXAMPLES_RUN_UNI  = run_ESMF_RHandleDynamicMaskingEx_uni
 
 
 include $(ESMF_DIR)/makefile
@@ -37,3 +37,6 @@ run_ESMF_RHandleFromRHandleEx:
 
 run_ESMF_RHandleDynamicMaskingEx:
 	$(MAKE) EXNAME=RHandleDynamicMasking NP=4 exfrun
+
+run_ESMF_RHandleDynamicMaskingEx_uni:
+	$(MAKE) EXNAME=RHandleDynamicMasking NP=1 exfrun

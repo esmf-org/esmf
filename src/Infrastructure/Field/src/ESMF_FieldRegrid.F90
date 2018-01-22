@@ -260,28 +260,28 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         endif
 
         if (present(srcField) .and. present(dstField)) then
-          call ESMF_ArraySMM(srcArray=srcArray, dstArray=dstArray, &
+          call ESMF_ArraySMMR8R8R8(srcArray=srcArray, dstArray=dstArray, &
                  routehandle=routehandle, zeroregion=zeroregion, &
                  termorderflag=termorderflag, checkflag=checkflag, &
                  dynamicSrcMaskValue=dynamicSrcMaskValue, &
                  dynamicDstMaskValue=dynamicDstMaskValue, &
                  dynamicMaskRoutine=dynamicMaskRoutine, rc=localrc)
-                else if (present(srcField) .and. .not. present(dstField)) then
-          call ESMF_ArraySMM(srcArray=srcArray, &
+        else if (present(srcField) .and. .not. present(dstField)) then
+          call ESMF_ArraySMMR8R8R8(srcArray=srcArray, &
                  routehandle=routehandle, zeroregion=zeroregion, &
                  termorderflag=termorderflag, checkflag=checkflag, &
                  dynamicSrcMaskValue=dynamicSrcMaskValue, &
                  dynamicDstMaskValue=dynamicDstMaskValue, &
                  dynamicMaskRoutine=dynamicMaskRoutine, rc=localrc)
-                else if (.not. present(srcField) .and. present(dstField)) then
-          call ESMF_ArraySMM(dstArray=dstArray, &
+        else if (.not. present(srcField) .and. present(dstField)) then
+          call ESMF_ArraySMMR8R8R8(dstArray=dstArray, &
                  routehandle=routehandle, zeroregion=zeroregion, &
                  termorderflag=termorderflag, checkflag=checkflag, &
                  dynamicSrcMaskValue=dynamicSrcMaskValue, &
                  dynamicDstMaskValue=dynamicDstMaskValue, &
                  dynamicMaskRoutine=dynamicMaskRoutine, rc=localrc)
         else if (.not. present(srcField) .and. .not. present(dstField)) then
-          call ESMF_ArraySMM(routehandle=routehandle, zeroregion=zeroregion, &
+          call ESMF_ArraySMMR8R8R8(routehandle=routehandle, zeroregion=zeroregion, &
                  termorderflag=termorderflag, checkflag=checkflag, &
                  dynamicSrcMaskValue=dynamicSrcMaskValue, &
                  dynamicDstMaskValue=dynamicDstMaskValue, &
