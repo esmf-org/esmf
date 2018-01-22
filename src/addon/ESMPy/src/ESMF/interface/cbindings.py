@@ -2069,10 +2069,11 @@ def ESMP_FieldSMMStore(srcField, dstField, filename,
         ESMP_Field                          :: dstField\n
     """
     routehandle = ct.c_void_p(0)
+    b_filename = filename.encode('utf-8')
 
     rc = _ESMF.ESMC_FieldSMMStore(srcField.struct.ptr,
                                   dstField.struct.ptr,
-                                  filename,
+                                  b_filename,
                                   ct.byref(routehandle),
                                   ignoreUnmatchedIndices,
                                   None, None,
