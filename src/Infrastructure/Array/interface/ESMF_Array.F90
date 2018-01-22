@@ -90,7 +90,7 @@ module ESMF_ArrayMod
   public ESMF_ArrayReduce
   public ESMF_ArrayScatter          ! implemented in ESMF_ArrayScatterMod 
   public ESMF_ArraySet
-  public ESMF_ArraySMM, ESMF_ArraySMMR4R8R4
+  public ESMF_ArraySMM, ESMF_ArraySMMR4R8R4, ESMF_ArraySMMR8R8R8
   public ESMF_ArraySMMRelease
   public ESMF_ArraySMMStore
   public ESMF_ArrayValidate
@@ -175,7 +175,7 @@ module ESMF_ArrayMod
 
 ! !PRIVATE MEMBER FUNCTIONS:
 !
-!    module procedure ESMF_ArraySMMR4R4 ! currently not possible to overload
+!    module procedure ESMF_ArraySMMR4R8R4 ! currently not possible to overload
     module procedure ESMF_ArraySMMR8R8R8
 !EOPI
 
@@ -701,7 +701,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ArraySMMR4R8R4()"
 !BOPI
-! !IROUTINE: ESMF_ArraySMMR4R4R4 - Execute an Array sparse matrix multiplication
+! !IROUTINE: ESMF_ArraySMMR4R8R4 - Execute an Array sparse matrix multiplication
 !
 ! !INTERFACE:
   subroutine ESMF_ArraySMMR4R8R4(srcArray, dstArray, routehandle, keywordEnforcer, &
