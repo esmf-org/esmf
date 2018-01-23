@@ -327,6 +327,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !              Added argument {\tt ignoreUnmatchedIndices} to support sparse 
 !              matrices that contain elements with indices that do not have a
 !              match within the source or destination Array.
+! \item[7.1.0] Removed argument {\tt transposeRoutehandle} and provide it
+!              via interface overloading instead. This allows argument 
+!              {\tt srcField} to stay strictly intent(in) for this entry point.
 ! \end{description}
 ! \end{itemize}
 !
@@ -587,7 +590,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         pipeLineDepth, rc)
 
         ! input arguments 
-        type(ESMF_Field),       intent(inout)           :: srcField  
+        type(ESMF_Field),       intent(in)              :: srcField  
         type(ESMF_Field),       intent(inout)           :: dstField  
         type(ESMF_RouteHandle), intent(inout)           :: routehandle
         integer(ESMF_KIND_I8),  intent(in)              :: factorList(:)
@@ -654,7 +657,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         pipeLineDepth, rc)
 
         ! input arguments 
-        type(ESMF_Field),       intent(inout)           :: srcField  
+        type(ESMF_Field),       intent(in)              :: srcField  
         type(ESMF_Field),       intent(inout)           :: dstField  
         type(ESMF_RouteHandle), intent(inout)           :: routehandle
         real(ESMF_KIND_R4),     intent(in)              :: factorList(:)
@@ -799,24 +802,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   integer,                  intent(inout), optional :: pipeLineDepth
 !   integer,                  intent(out),   optional :: rc
 ! 
-!
-! !STATUS:
-! \begin{itemize}
-! \item\apiStatusCompatibleVersion{5.2.0r}
-! \item\apiStatusModifiedSinceVersion{5.2.0r}
-! \begin{description}
-! \item[6.1.0] Added arguments {\tt srcTermProcessing}, {\tt pipelineDepth}
-!              The two arguments {\tt srcTermProcessing} and {\tt pipelineDepth}
-!              provide access to the tuning parameters affecting the sparse matrix
-!              execution. 
-! \item[7.0.0] Added argument {\tt transposeRoutehandle} to allow a handle to
-!              the transposed matrix operation to be returned.\newline
-!              Added argument {\tt ignoreUnmatchedIndices} to support sparse 
-!              matrices that contain elements with indices that do not have a
-!              match within the source or destination Array.
-! \end{description}
-! \end{itemize}
-!
 ! !DESCRIPTION: 
 ! 
 ! \begin{sloppypar}
@@ -1308,6 +1293,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !              Added argument {\tt ignoreUnmatchedIndices} to support sparse 
 !              matrices that contain elements with indices that do not have a
 !              match within the source or destination Array.
+! \item[7.1.0] Removed argument {\tt transposeRoutehandle} and provide it
+!              via interface overloading instead. This allows argument 
+!              {\tt srcField} to stay strictly intent(in) for this entry point.
 ! \end{description}
 ! \end{itemize}
 !
@@ -1515,23 +1503,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         integer,                intent(inout), optional :: srcTermProcessing
         integer,                intent(inout), optional :: pipeLineDepth
         integer,                intent(out),   optional :: rc 
-!
-! !STATUS:
-! \begin{itemize}
-! \item\apiStatusCompatibleVersion{5.2.0r}
-! \item\apiStatusModifiedSinceVersion{5.2.0r}
-! \begin{description}
-! \item[6.1.0] Added arguments {\tt srcTermProcessing}, {\tt pipelineDepth}
-!              The two arguments {\tt srcTermProcessing} and {\tt pipelineDepth}
-!              provide access to the tuning parameters affecting the sparse matrix
-!              execution. 
-! \item[7.0.0] Added argument {\tt transposeRoutehandle} to allow a handle to
-!              the transposed matrix operation to be returned.\newline
-!              Added argument {\tt ignoreUnmatchedIndices} to support sparse 
-!              matrices that contain elements with indices that do not have a
-!              match within the source or destination Array.
-! \end{description}
-! \end{itemize}
 !
 ! !DESCRIPTION: 
 !
