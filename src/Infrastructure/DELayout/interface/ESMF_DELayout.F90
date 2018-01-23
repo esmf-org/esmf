@@ -497,6 +497,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
+    ! Mark this DELayout as invalid
+    delayout%this = ESMF_NULL_POINTER
+    ESMF_DELayoutCreateDefault = delayout 
+
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
     
@@ -508,9 +512,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     
-    ! Mark this DELayout as invalid
-    delayout%this = ESMF_NULL_POINTER
-
     ! Call into the C++ interface, which will sort out optional arguments
     call c_ESMC_DELayoutCreateDefault(delayout, deCount, deGroupingArg, &
       pinflag, petListArg, vm, localrc)
@@ -605,14 +606,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
+    ! Mark this DELayout as invalid
+    delayout%this = ESMF_NULL_POINTER
+    ESMF_DELayoutCreateFromPetMap = delayout 
+
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
     
     ! Set arguments
     len_petMap = size(petMap)
-
-    ! Mark this DELayout as invalid
-    delayout%this = ESMF_NULL_POINTER
 
     ! Call into the C++ interface, which will sort out optional arguments
     call c_ESMC_DELayoutCreateFromPetMap(delayout, petMap(1), len_petMap, &
@@ -725,6 +727,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
+    ! Mark this DELayout as invalid
+    delayout%this = ESMF_NULL_POINTER
+    ESMF_DELayoutCreateHintWeights = delayout 
+    
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
     
@@ -735,9 +741,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     petListArg = ESMF_InterArrayCreate(petList, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    
-    ! Mark this DELayout as invalid
-    delayout%this = ESMF_NULL_POINTER
     
     !DUMMY TEST TO QUIET DOWN COMPILER WARNINGS
     !TODO: Remove the following dummy test when dummy argument actually used
@@ -877,12 +880,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
+    ! Mark this DELayout as invalid
+    delayout%this = ESMF_NULL_POINTER
+    ESMF_DELayoutCreateDeprecated = delayout 
+
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vmObject, rc)
     
-    ! Mark this DELayout as invalid
-    delayout%this = ESMF_NULL_POINTER
-
     ! Deal with optional array arguments
     if (present(deCountList)) then
       len_deCountList = size(deCountList)
