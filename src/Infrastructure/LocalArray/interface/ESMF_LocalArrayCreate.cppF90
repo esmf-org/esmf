@@ -529,6 +529,7 @@ end function
     integer:: i
 
     array%this = ESMF_NULL_POINTER
+    ESMF_LocalArrayCreateByTKR = array
 
     ! Initialize return code; assume routine not implemented
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -683,6 +684,7 @@ end function
     type(ESMF_TypeKind_Flag) :: typekind
 
     array%this = ESMF_NULL_POINTER
+    ESMF_LocalArrayCreateBySpec = array
 
     ! Initialize return code; assume routine not implemented
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -759,6 +761,7 @@ end function
     
     ! Mark this LocalArray object as invalid
     localarrayOut%this = ESMF_NULL_POINTER
+    ESMF_LocalArrayCreateCopy = localarrayOut
 
     ! Call into the C++ interface
     call c_ESMC_LocalArrayCreateCopy(localarray, localarrayOut, localrc)
@@ -879,6 +882,7 @@ end function
     if (present(rc)) rc = ESMF_RC_NOT_IMPL @\
  @\
     array%this = ESMF_NULL_POINTER @\
+    ESMF_LocalArrCreateByPtr##mrank##D##mtypekind = array @\
  @\
     ! Test to see if farrayPtr is associated and check consistency of arguments @\
     if (associated(farrayPtr)) then @\

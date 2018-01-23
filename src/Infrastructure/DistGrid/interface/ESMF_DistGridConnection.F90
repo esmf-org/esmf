@@ -493,6 +493,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     initAux = .true.  ! default
     if (present(initFlag)) initAux = initFlag
     
+    ! mark this InterArray as invalid
+    call c_ESMC_InterArraySetInvalid(array, localrc)
+    ESMF_InterArrayCreateDGConn = array
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    
     ! construction
     connectionListSize = 0
     if (present(connectionList)) connectionListSize = size(connectionList)

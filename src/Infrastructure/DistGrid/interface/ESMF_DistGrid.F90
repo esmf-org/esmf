@@ -736,6 +736,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
     
+    ! invalidate return value    
+    dg%this = ESMF_NULL_POINTER
+    ESMF_DistGridCreateDG = dg 
+
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_DistGridGetInit, distgrid, rc)
     
@@ -877,6 +881,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
     
+    ! invalidate return value    
+    dg%this = ESMF_NULL_POINTER
+    ESMF_DistGridCreateDGT = dg 
+
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_DistGridGetInit, distgrid, rc)
     
@@ -1063,6 +1071,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
+    
+    ! invalidate return value    
+    distgrid%this = ESMF_NULL_POINTER
+    ESMF_DistGridCreateRD = distgrid 
     
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_DELayoutGetInit, delayout, rc)
@@ -1299,6 +1311,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
     
+    ! invalidate return value    
+    distgrid%this = ESMF_NULL_POINTER
+    ESMF_DistGridCreateRDT = distgrid 
+    
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_DELayoutGetInit, delayout, rc)
     ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
@@ -1513,6 +1529,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
     
+    ! invalidate return value    
+    distgrid%this = ESMF_NULL_POINTER
+    ESMF_DistGridCreateRDF = distgrid 
+    
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
     
@@ -1689,12 +1709,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
     
+    ! Initialize the pointer to NULL
+    distgrid%this = ESMF_NULL_POINTER
+    ESMF_DistGridCreateRDTF = distgrid
+
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
     
-    ! Initialize the pointer to NULL
-    distgrid%this = ESMF_NULL_POINTER
-
     !DUMMY TEST TO QUIET DOWN COMPILER WARNINGS
     !TODO: Remove the following dummy test when dummy argument actually used
     if (size(minIndex) == size(minIndex)) continue
@@ -1864,6 +1885,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
     
+    ! invalidate return value    
+    distgrid%this = ESMF_NULL_POINTER
+    ESMF_DistGridCreateDB = distgrid 
+    
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_DELayoutGetInit, delayout, rc)
     ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
@@ -2026,13 +2051,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
     
+    ! Initialize the pointer to NULL
+    distgrid%this = ESMF_NULL_POINTER
+    ESMF_DistGridCreateDBT = distgrid
+    
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_DELayoutGetInit, delayout, rc)
     ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
     
-    ! Initialize the pointer to NULL
-    distgrid%this = ESMF_NULL_POINTER
-
     !DUMMY TEST TO QUIET DOWN COMPILER WARNINGS
     !TODO: Remove the following dummy test when dummy argument actually used
     if (size(minIndex) == size(minIndex)) continue
@@ -2168,12 +2194,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
     
+    ! Initialize the pointer to NULL
+    distgrid%this = ESMF_NULL_POINTER
+    ESMF_DistGridCreateDBF = distgrid
+
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
     
-    ! Initialize the pointer to NULL
-    distgrid%this = ESMF_NULL_POINTER
-
     !DUMMY TEST TO QUIET DOWN COMPILER WARNINGS
     !TODO: Remove the following dummy test when dummy argument actually used
     if (size(minIndex) == size(minIndex)) continue
@@ -2314,12 +2341,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
     
+    ! Initialize the pointer to NULL
+    distgrid%this = ESMF_NULL_POINTER
+    ESMF_DistGridCreateDBTF = distgrid
+
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
     
-    ! Initialize the pointer to NULL
-    distgrid%this = ESMF_NULL_POINTER
-
     !DUMMY TEST TO QUIET DOWN COMPILER WARNINGS
     !TODO: Remove the following dummy test when dummy argument actually used
     if (size(minIndex) == size(minIndex)) continue
@@ -2423,6 +2451,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
+    
+    ! invalidate return value    
+    distgrid%this = ESMF_NULL_POINTER
+    ESMF_DistGridCreateDBAI1D1DE = distgrid 
     
     call ESMF_VMGetCurrent(vm, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -2544,6 +2576,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
+    
+    ! invalidate return value    
+    distgrid%this = ESMF_NULL_POINTER
+    ESMF_DistGridCreateDBAI1D1DEI8 = distgrid 
     
     call ESMF_VMGetCurrent(vm, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -2669,6 +2705,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
+    
+    ! invalidate return value    
+    distgrid%this = ESMF_NULL_POINTER
+    ESMF_DistGridCreateDBAI1D = distgrid 
     
     call ESMF_VMGetCurrent(vm, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -2861,6 +2901,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! invalidate return value    
+    distgrid%this = ESMF_NULL_POINTER
+    ESMF_DistGridCreateDBAI = distgrid 
     
     ! check input
     dimCount = size(minIndexPTile)

@@ -613,11 +613,12 @@ contains
     localrc = ESMF_RC_NOT_IMPL @\
     if (present(rc)) rc = ESMF_RC_NOT_IMPL @\
 @\
-    ! Check init status of arguments @\
-    ESMF_INIT_CHECK_DEEP_SHORT(ESMF_DistGridGetInit, distgrid, rc) @\
-@\
     ! Mark this Array object as invalid @\
     array%this = ESMF_NULL_POINTER @\
+    ESMF_ArrayCreateFrmPtr##mrank##D##mtypekind = array @\
+@\
+    ! Check init status of arguments @\
+    ESMF_INIT_CHECK_DEEP_SHORT(ESMF_DistGridGetInit, distgrid, rc) @\
 @\
     ! Set copy/ref behavior @\
     datacopyflag_opt = ESMF_DATACOPY_REFERENCE  ! default @\
@@ -802,6 +803,9 @@ TypeKindRankDeclarationMacro(ArrayCreateFrmPtr)
     localrc = ESMF_RC_NOT_IMPL @\
     if (present(rc)) rc = ESMF_RC_NOT_IMPL @\
 @\
+    ! invalidate return value @\
+    ESMF_ArrayCreateFrmPtrArb##mrank##D##mtypekind%this = ESMF_NULL_POINTER @\
+@\
     ! Check init status of arguments used directly @\
     ESMF_INIT_CHECK_DEEP_SHORT(ESMF_DistGridGetInit, distgrid, rc) @\
 @\
@@ -885,6 +889,9 @@ TypeKindRankDeclarationMacro(ArrayCreateFrmPtrArb)
     ! Initialize return code; assume failure until success is certain @\
     localrc = ESMF_RC_NOT_IMPL @\
     if (present(rc)) rc = ESMF_RC_NOT_IMPL @\
+@\
+    ! invalidate return value @\
+    ESMF_ArrayCreateFrmPtrArbI8##mrank##D##mtypekind%this = ESMF_NULL_POINTER @\
 @\
     ! Check init status of arguments used directly @\
     ESMF_INIT_CHECK_DEEP_SHORT(ESMF_DistGridGetInit, distgrid, rc) @\
@@ -1134,11 +1141,12 @@ TypeKindRankDeclarationMacro(ArrayCreateFrmPtrArbI8)
     localrc = ESMF_RC_NOT_IMPL @\
     if (present(rc)) rc = ESMF_RC_NOT_IMPL @\
 @\
-    ! Check init status of arguments @\
-    ESMF_INIT_CHECK_DEEP_SHORT(ESMF_DistGridGetInit, distgrid, rc) @\
-@\
     ! Mark this Array object as invalid @\
     array%this = ESMF_NULL_POINTER @\
+    ESMF_ArrayCreateAsmdSp##mrank##D##mtypekind = array @\
+@\
+    ! Check init status of arguments @\
+    ESMF_INIT_CHECK_DEEP_SHORT(ESMF_DistGridGetInit, distgrid, rc) @\
 @\
     ! Set copy/ref behavior @\
     datacopyflag_opt = ESMF_DATACOPY_REFERENCE  ! default @\
@@ -1401,11 +1409,12 @@ TypeKindRankDeclarationMacro(ArrayCreateAsmdSp)
     localrc = ESMF_RC_NOT_IMPL @\
     if (present(rc)) rc = ESMF_RC_NOT_IMPL @\
 @\
-    ! Check init status of arguments @\
-    ESMF_INIT_CHECK_DEEP_SHORT(ESMF_DistGridGetInit, distgrid, rc) @\
-@\
     ! Mark this Array object as invalid @\
     array%this = ESMF_NULL_POINTER @\
+    ESMF_ArrayCreateAsmdSpArb##mrank##D##mtypekind = array @\
+@\
+    ! Check init status of arguments @\
+    ESMF_INIT_CHECK_DEEP_SHORT(ESMF_DistGridGetInit, distgrid, rc) @\
 @\
     ! Set copy/ref behavior @\
     datacopyflag_opt = ESMF_DATACOPY_REFERENCE  ! default @\
@@ -1508,11 +1517,12 @@ TypeKindRankDeclarationMacro(ArrayCreateAsmdSpArb)
     localrc = ESMF_RC_NOT_IMPL @\
     if (present(rc)) rc = ESMF_RC_NOT_IMPL @\
 @\
-    ! Check init status of arguments @\
-    ESMF_INIT_CHECK_DEEP_SHORT(ESMF_DistGridGetInit, distgrid, rc) @\
-@\
     ! Mark this Array object as invalid @\
     array%this = ESMF_NULL_POINTER @\
+    ESMF_ArrayCreateAsmdSpArbI8##mrank##D##mtypekind = array @\
+@\
+    ! Check init status of arguments @\
+    ESMF_INIT_CHECK_DEEP_SHORT(ESMF_DistGridGetInit, distgrid, rc) @\
 @\
     ! Set copy/ref behavior @\
     datacopyflag_opt = ESMF_DATACOPY_REFERENCE  ! default @\
@@ -1754,6 +1764,10 @@ TypeKindRankDeclarationMacro(ArrayCreateAsmdSpArbI8)
     ! Determine the number of LocalArray elements in list
     localarrayCount = size(localarrayList)
     
+    ! invalidate return value
+    array%this = ESMF_NULL_POINTER
+    ESMF_ArrayCreateLocalArray = array 
+
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP_SHORT(ESMF_DistGridGetInit, distgrid, rc)
     do i=1, localarrayCount
@@ -1818,9 +1832,6 @@ TypeKindRankDeclarationMacro(ArrayCreateAsmdSpArbI8)
     undistUBoundArg = ESMF_InterArrayCreate(undistUBound, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-
-    ! Mark this Array object as invalid
-    array%this = ESMF_NULL_POINTER
 
     ! Call into the C++ interface, which will sort out optional arguments
     ! Optional name argument requires separate calls into C++
@@ -2212,6 +2223,9 @@ TypeKindRankDeclarationMacro(ArrayCreateAsmdSpArbI8)
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
     
+    ! invalidate return value
+    ESMF_ArrayCreateLocalArrayArb%this = ESMF_NULL_POINTER
+
     ! Check init status of arguments used directly
     ESMF_INIT_CHECK_DEEP_SHORT(ESMF_DistGridGetInit, distgrid, rc)
     
@@ -2452,6 +2466,9 @@ TypeKindRankDeclarationMacro(ArrayCreateAsmdSpArbI8)
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
     
+    ! invalidate return value
+    ESMF_ArrayCreateLocalArrayArbI8%this = ESMF_NULL_POINTER
+
     ! Check init status of arguments used directly
     ESMF_INIT_CHECK_DEEP_SHORT(ESMF_DistGridGetInit, distgrid, rc)
     
@@ -2674,6 +2691,9 @@ TypeKindRankDeclarationMacro(ArrayCreateAsmdSpArbI8)
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
     
+    ! invalidate return value
+    ESMF_ArrayCreateAllocate%this = ESMF_NULL_POINTER
+
     ! Check init status of arguments used directly
     ESMF_INIT_CHECK_DEEP_SHORT(ESMF_DistGridGetInit, distgrid, rc)
     
@@ -2917,6 +2937,9 @@ TypeKindRankDeclarationMacro(ArrayCreateAsmdSpArbI8)
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
     
+    ! invalidate return value
+    ESMF_ArrayCreateAllocateArb%this = ESMF_NULL_POINTER
+    
     ! Check init status of arguments used directly
     ESMF_INIT_CHECK_DEEP_SHORT(ESMF_DistGridGetInit, distgrid, rc)
     
@@ -3053,6 +3076,9 @@ TypeKindRankDeclarationMacro(ArrayCreateAsmdSpArbI8)
     ! Initialize return code; assume failure until success is certain
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
+    
+    ! invalidate return value
+    ESMF_ArrayCreateAllocateArbI8%this = ESMF_NULL_POINTER
     
     ! Check init status of arguments used directly
     ESMF_INIT_CHECK_DEEP_SHORT(ESMF_DistGridGetInit, distgrid, rc)
@@ -3250,6 +3276,10 @@ TypeKindRankDeclarationMacro(ArrayCreateAsmdSpArbI8)
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
     
+    ! invalidate return value
+    array%this = ESMF_NULL_POINTER
+    ESMF_ArrayCreateAllocateAS = array 
+
     ! Check init status of arguments
     ESMF_INIT_CHECK_SHALLOW(ESMF_ArraySpecGetInit, arrayspec, rc)
     ESMF_INIT_CHECK_DEEP_SHORT(ESMF_DistGridGetInit, distgrid, rc)
@@ -3298,9 +3328,6 @@ TypeKindRankDeclarationMacro(ArrayCreateAsmdSpArbI8)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
       
-    ! Mark this Array object as invalid
-    array%this = ESMF_NULL_POINTER
-
     ! Call into the C++ interface, which will sort out optional arguments
     ! Optional name argument requires separate calls into C++
     if (present(name)) then
@@ -3544,6 +3571,9 @@ TypeKindRankDeclarationMacro(ArrayCreateAsmdSpArbI8)
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
     
+    ! invalidate return value
+    ESMF_ArrayCreateAllocateASArb%this = ESMF_NULL_POINTER
+    
     ! Check init status of arguments used directly
     ESMF_INIT_CHECK_DEEP_SHORT(ESMF_DistGridGetInit, distgrid, rc)
     
@@ -3688,6 +3718,9 @@ TypeKindRankDeclarationMacro(ArrayCreateAsmdSpArbI8)
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
     
+    ! invalidate return value
+    ESMF_ArrayCreateAllocateASArbI8%this = ESMF_NULL_POINTER
+
     ! Check init status of arguments used directly
     ESMF_INIT_CHECK_DEEP_SHORT(ESMF_DistGridGetInit, distgrid, rc)
     
@@ -3787,6 +3820,7 @@ TypeKindRankDeclarationMacro(ArrayCreateAsmdSpArbI8)
     
     ! Mark this Array object as invalid
     arrayOut%this = ESMF_NULL_POINTER
+    ESMF_ArrayCreateCopy = arrayOut
 
     ESMF_INIT_CHECK_DEEP_SHORT(ESMF_ArrayGetInit, array, rc)
 
@@ -4366,12 +4400,13 @@ TypeKindRankDeclarationMacro(ArrayCreateAsmdSpArbI8)
     ! Assume failure until success
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
     localrc = ESMF_RC_NOT_IMPL
+    
+    ! invalidate return value
+    array%this = ESMF_NULL_POINTER
+    ESMF_ArrayCreateFromLA = array
 
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP_SHORT(ESMF_LocalArrayGetInit, localarray, rc)
-    
-    ! Initialize the pointer to NULL
-    array%this = ESMF_NULL_POINTER
     
     if (present(haloWidth)) then
       opt_haloWidth => haloWidth
@@ -4395,8 +4430,6 @@ TypeKindRankDeclarationMacro(ArrayCreateAsmdSpArbI8)
     !DUMMY TEST TO QUIET DOWN COMPILER WARNINGS
     !TODO: Remove the following dummy test when dummy argument actually used
     if (size(opt_haloWidth) == size(opt_haloWidth)) continue
-
-
 
     ! Call into the C++ interface, which will sort out optional arguments.
 !    call c_ESMC_ArrayCreate(array, localarray, opt_haloWidth, len_haloWidth, &

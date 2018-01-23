@@ -612,6 +612,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
  
 ! Initialization
       allocate(config_local, stat=memstat)
+      ESMF_ConfigCreate%cptr => config_local
       if (ESMF_LogFoundAllocError(memstat, msg="Allocating config class", &
                                         ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -631,7 +632,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
       config_local%attr_used => attr_used_local
 
-      ESMF_ConfigCreate%cptr => config_local
       if (present( rc ))  rc = ESMF_SUCCESS
 
       ESMF_INIT_SET_CREATED(ESMF_ConfigCreate)

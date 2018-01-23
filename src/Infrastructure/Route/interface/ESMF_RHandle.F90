@@ -337,7 +337,9 @@ contains
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
+    
     rhandle%this = ESMF_NULL_POINTER
+    ESMF_RouteHandleCreateDef = rhandle
 
     ! Call C++ create code
     call c_ESMC_RouteHandleCreate(rhandle, localrc)
@@ -422,6 +424,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
     rhandle%this = ESMF_NULL_POINTER
+    ESMF_RouteHandleCreateRH = rhandle
 
     ! Deal with (optional) array arguments
     originPetListArg = ESMF_InterArrayCreate(originPetList, rc=localrc)

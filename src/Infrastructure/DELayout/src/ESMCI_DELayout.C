@@ -2686,6 +2686,7 @@ XXE::XXE(stringstream &streami, vector<int> *originToTargetMap,
       }
       break;
       // no break on purpose .... need to also shuffle PETs
+      /* FALLTHRU */
     case sendRRA:
     case recvRRA:
       {
@@ -2797,6 +2798,7 @@ XXE::XXE(stringstream &streami, vector<int> *originToTargetMap,
         if (newAddr==NULL) cout << "ERROR in old->new translation!!\n";
       }
       // no break on purpose .... need to also swap commhandle as below
+      /* FALLTHRU */
     case sendnbRRA:
     case recvnbRRA:
       {
@@ -3386,6 +3388,7 @@ XXE::XXE(stringstream &streami, vector<int> *originToTargetMap,
         if (newAddr==NULL) cout << "ERROR in old->new translation!!\n";
       }
       // no break on purpose .... need to also swap sub as below
+      /* FALLTHRU */
     case xxeSubMulti:
       {
         MultiSubInfo *multiSubInfo = (MultiSubInfo *)xxeElement;
