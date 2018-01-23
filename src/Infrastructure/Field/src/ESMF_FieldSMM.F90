@@ -780,7 +780,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 !---------------------------------------------------------------------------- 
 !BOP 
-! !IROUTINE: ESMF_FieldSMMStoreTR - Precompute Field sparse matrix multiplication with local factors
+! !IROUTINE: ESMF_FieldSMMStore - Precompute Field sparse matrix multiplication and transpose with local factors
 ! 
 ! !INTERFACE: 
 ! ! Private name; call using ESMF_FieldSMMStore() 
@@ -1485,7 +1485,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 #define ESMF_METHOD "ESMF_FieldSMMStoreNFTR" 
 !---------------------------------------------------------------------------- 
 !BOP 
-! !IROUTINE: ESMF_FieldSMMStore - Precompute Field sparse matrix multiplication without local factors
+! !IROUTINE: ESMF_FieldSMMStore - Precompute Field sparse matrix multiplication and transpose without local factors
 ! 
 ! !INTERFACE: 
 ! ! Private name; call using ESMF_FieldSMMStore() 
@@ -1695,7 +1695,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 #define ESMF_METHOD "ESMF_FieldSMMStoreFromFile"
 
 !BOP
-! !IROUTINE: ESMF_FieldSMMStore - Precompute sparse matrix multiplication using factors read from file.
+! !IROUTINE: ESMF_FieldSMMStore - Precompute sparse matrix multiplication using factors read from file
 !
 ! !INTERFACE:
 ! ! Private name; call using ESMF_FieldSMMStore()
@@ -1853,7 +1853,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 #define ESMF_METHOD "ESMF_FieldSMMStoreFromFileTR"
 
 !BOP
-! !IROUTINE: ESMF_FieldSMMStore - Precompute sparse matrix multiplication using factors read from file.
+! !IROUTINE: ESMF_FieldSMMStore - Precompute sparse matrix multiplication and transpose using factors read from file
 !
 ! !INTERFACE:
 ! ! Private name; call using ESMF_FieldSMMStore()
